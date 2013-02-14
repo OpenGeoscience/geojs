@@ -87,6 +87,7 @@ geoModule.map = function(node, options) {
   var m_camera = m_renderer.camera();
 
   /**
+   * Initialize the scene
    *
    */
   function initScene() {
@@ -105,6 +106,7 @@ geoModule.map = function(node, options) {
   }
 
   /**
+   * Initialize the scene (if not initialized) and then render the map
    *
    * @param event
    */
@@ -302,43 +304,12 @@ geoModule.map = function(node, options) {
    *
    */
   var m_baseLayer = (function() {
-    // TODO Move it somewhere else
-    var geom = new ogs.vgl.geometryData();
-    var source = new ogs.vgl.sourceDataP3T3f();
-
-    var triIndices = [ 0,1,2,3 ];
-
-    var v1 = new ogs.vgl.vertexDataP3T3f();
-    v1.m_position = new Array(180.0,  90.0,  0.0);
-    v1.m_texCoordinate = new Array(1.0, 1.0, 0.0);
-
-    var v2 = new ogs.vgl.vertexDataP3T3f();
-    v2.m_position = new Array(-180.0, 90.0,  0.0);
-    v2.m_texCoordinate = new Array(0.0, 1.0, 0.0);
-
-    var v3 = new ogs.vgl.vertexDataP3T3f();
-    v3.m_position = new Array(180.0,  -90.0, 0.0);
-    v3.m_texCoordinate = new Array(1.0, 0.0, 0.0);
-
-    var v4 = new ogs.vgl.vertexDataP3T3f();
-    v4.m_position = new Array(-180.0, -90.0, 0.0);
-    v4.m_texCoordinate = new Array(0.0, 0.0, 0.0);
-
-    source.pushBack(v1);
-    source.pushBack(v2);
-    source.pushBack(v3);
-    source.pushBack(v4);
-
-    // Create primitives
-    var triangleStrip = new ogs.vgl.triangleStrip();
-    triangleStrip.setIndices(triIndices);
-
-    geom.setName("WorldMap");
-    geom.addSource(source);
-    geom.addPrimitive(triangleStrip);
-
     var mapper = new ogs.vgl.mapper();
-    mapper.setGeometryData(geom);
+    var planeSource = new ogs.vgl.planeSource();
+    planeSource.setOrigin(-180.0, -90.0, 0.0);
+    planeSource.setPoint1(180.0, -90.0, 0.0);
+    planeSource.setPoint2(-180.0, 90.0, 0.0);
+    mapper.setGeometryData(planeSource.create());
 
     var mat = new ogs.vgl.material();
     var prog = new ogs.vgl.shaderProgram();

@@ -450,13 +450,79 @@ vglModule.sourceDataP3N3f = function() {
    */
   this.pushBack = function(value) {
     this.insert(value.m_position);
-    this.insert(value.m_texCoordinate);
+    this.insert(value.m_normal);
   };
 
   return this;
 };
 
-inherit(vglModule.sourceDataP3N3f, vglModule.sourceData);
+//////////////////////////////////////////////////////////////////////////////
+//
+// sourceDataP3fv
+//
+//////////////////////////////////////////////////////////////////////////////
+
+vglModule.sourceDataP3fv = function() {
+  /**
+   * Check
+   *
+   */
+  if (!(this instanceof vglModule.sourceDataP3fv)) {
+    return new vglModule.sourceDataP3fv();
+  }
+
+  vglModule.sourceData.call(this);
+
+  this.addAttribute(vertexAttributeKeys.Position,
+                    gl.FLOAT, 4,  0, 3 * 4, 3, false);
+
+
+  /**
+   *
+   *
+   */
+  this.pushBack = function(value) {
+    this.insert(value);
+  };
+
+  return this;
+};
+
+inherit(vglModule.sourceDataP3fv, vglModule.sourceData);
+
+//////////////////////////////////////////////////////////////////////////////
+//
+// sourceDataT2fv
+//
+//////////////////////////////////////////////////////////////////////////////
+
+vglModule.sourceDataT2fv = function() {
+  /**
+   * Check
+   *
+   */
+  if (!(this instanceof vglModule.sourceDataT2fv)) {
+    return new vglModule.sourceDataT2fv();
+  }
+
+  vglModule.sourceData.call(this);
+
+  this.addAttribute(vertexAttributeKeys.TextureCoordinate,
+                    gl.FLOAT, 4,  0, 2 * 4, 2, false);
+
+
+  /**
+   *
+   *
+   */
+  this.pushBack = function(value) {
+    this.insert(value);
+  };
+
+  return this;
+};
+
+inherit(vglModule.sourceDataT2fv, vglModule.sourceData);
 
 //////////////////////////////////////////////////////////////////////////////
 //
