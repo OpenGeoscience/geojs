@@ -42,7 +42,7 @@ geoModule.latlng = function(lat, lng) {
 
 ///////////////////////////////////////////////////////////////////////////////
 /**
- * Map object specification
+ * Map options object specification
  *
  */
 geoModule.mapOptions = function() {
