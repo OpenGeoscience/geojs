@@ -87,15 +87,12 @@ vglModule.texture.prototype.bind = function(renderState) {
     this.setup(renderState);
   }
 
-//  gl.activeTexture(gl.TEXTURE0);
-//  gl.bindTexture(gl.TEXTURE_2D, worldTexture);
-
   gl.activeTexture(gl.TEXTURE0);
   gl.bindTexture(gl.TEXTURE_2D, this.m_textureHandle);
 };
 ///---------------------------------------------------------------------------
 vglModule.texture.prototype.undoBind = function(renderState) {
-  gl.bindTexture(gl.TEXTURE_2D, 0);
+  gl.bindTexture(gl.TEXTURE_2D, null);
 };
 
 ///---------------------------------------------------------------------------

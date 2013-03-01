@@ -27,20 +27,21 @@ geoModule.latlng = function(lat, lng) {
     return new geoModule.latlng(lat, lng);
   }
 
+  /// Initialize member varibles
   var m_lat = lat;
   var m_lng = lng;
 
-  return {
-    lat : function() {
+  this.lat = function() {
       return m_lat;
-    },
-    lng : function() {
-      return m_lng;
-    }
   };
+
+  this.lng = function() {
+    return m_lng;
+  };
+
+  return this;
 };
 
-///////////////////////////////////////////////////////////////////////////////
 /**
  * Map options object specification
  *
@@ -55,19 +56,17 @@ geoModule.mapOptions = function() {
   this.center = geoModule.latlng(0.0, 0.0);
 };
 
-///////////////////////////////////////////////////////////////////////////////
 /**
  * Creates a new map inside of the given HTML container (Typically DIV)
  *
  */
 geoModule.map = function(node, options) {
 
-  // Check against no use of new()
   if (!(this instanceof geoModule.map)) {
     return new geoModule.map(node, options);
   }
 
-  /// Private member variables
+  /// Initialize member variables
   var m_that = this;
   var m_node = node;
   var m_leftMouseButtonDown = false;
@@ -92,7 +91,6 @@ geoModule.map = function(node, options) {
   var m_renderer = new ogs.vgl.renderer();
   var m_camera = m_renderer.camera();
 
-  /////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize the scene
    *
@@ -112,7 +110,6 @@ geoModule.map = function(node, options) {
     m_initialized = true;
   }
 
-  /////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize the scene (if not initialized) and then render the map
    *
@@ -125,7 +122,6 @@ geoModule.map = function(node, options) {
     m_renderer.render();
   }
 
-  /////////////////////////////////////////////////////////////////////////////
   /**
    * Handle mouse events
    *
@@ -149,8 +145,8 @@ geoModule.map = function(node, options) {
     return {x:canvasX, y:canvasY};
   }
 
-  /////////////////////////////////////////////////////////////////////////////
   /**
+   * Handle mouse event
    *
    */
   function handleMouseMove(event) {
@@ -215,7 +211,6 @@ geoModule.map = function(node, options) {
     m_mouseLastPos.y = currentMousePos.y;
   }
 
-  /////////////////////////////////////////////////////////////////////////////
   /**
    *
    */
@@ -249,8 +244,8 @@ geoModule.map = function(node, options) {
     return false;
   }
 
-  /////////////////////////////////////////////////////////////////////////////
   /**
+   * Handle mouse up event
    *
    */
   function handleMouseUp(event) {
@@ -299,9 +294,6 @@ geoModule.map = function(node, options) {
     return mapActor;
   })();
 
-  /// Public member functions
-
-  /////////////////////////////////////////////////////////////////////////////
   /**
    * Add layer to the map
    *
@@ -310,10 +302,14 @@ geoModule.map = function(node, options) {
    * @return {Boolean}
    */
   this.addLayer = function(layer) {
-    if (!layer) {
+
+    console.log('layer is ' + layer);
+
+    if (layer != null) {
       // TODO Check if the layer already exists
       // TODO Set the rendering order correctly
-      m_renderer.addActor(layer);
+      m_renderer.addActor(layer.actor());
+      m_renderer.render();
 
       return true;
     }
@@ -321,7 +317,6 @@ geoModule.map = function(node, options) {
     return false;
   };
 
-  /////////////////////////////////////////////////////////////////////////////
   /**
    * Remove layer from the map
    *

@@ -22,7 +22,6 @@
 //
 //////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////
 /**
  * Layer options object specification
  *
@@ -41,9 +40,11 @@ geoModule.layerOptions = function() {
   return this;
 };
 
-//////////////////////////////////////////////////////////////////////////////
 /**
- * Create a later provided layer options
+ * Base class for all layer types
+ *
+ * ogs.geo.layer represents any object that be rendered on top of the map base.
+ * This could include image, points, line, and polygons.
  *
  */
 geoModule.layer = function(options) {
@@ -52,13 +53,11 @@ geoModule.layer = function(options) {
     return new geoModule.layer(options);
   }
 
-  // Register with base class
-  vgl.actor.call(this);
+  /// Register with base class
+  ogs.vgl.object.call(this);
 
   /// Members initialization
   var m_opacity = options.opacity || 1.0;
-
-  // Check
   if (m_opacity > 1.0) {
     m_opacity = 1.0;
     console.log("[warning] Opacity cannot be greater than 1.0");
@@ -70,7 +69,64 @@ geoModule.layer = function(options) {
   var m_showAttribution = options.showAttribution || true;
   var m_visible = options.visible || true;
 
+  /**
+   * Return the underlying renderable entity
+   *
+   * This function should be implemented by the derived classes
+   */
+  this.actor = function() {
+    return null;
+  }
+
   return this;
 };
 
-inherit(geoModule.layer, vglModule.object);
+inherit(geoModule.layer, ogs.vgl.object);
+
+//////////////////////////////////////////////////////////////////////////////
+//
+// featureLayer class
+//
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Layer to draw points, lines, and polygons on the map
+ *
+ * The polydata layer provide mechanisms to create and draw geometrical
+ * shapes such as points, lines, and polygons.
+ *
+ */
+geoModule.featureLayer = function(options, feature) {
+
+  if (!(this instanceof geoModule.featureLayer)) {
+    return new geoModule.featureLayer(options, feature);
+  }
+
+  /// Register with base class
+  geoModule.layer.call(this, options);
+
+  /// Initialize member variables
+  var m_opacity = options.opacity || 1.0;
+  var m_actor = feature;
+
+  /**
+   * Return the underlying renderable entity
+   *
+   * This function should be implemented by the derived classes
+   */
+  this.actor = function() {
+    return m_actor;
+  }
+
+  /**
+   * Set feature (points, lines, or polygons)
+   *
+   */
+  this.setFeature = function(feature) {
+    this.m_actor = feature;
+  }
+
+  return this;
+};
+
+inherit(geoModule.featureLayer, geoModule.layer);

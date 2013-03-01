@@ -94,6 +94,11 @@ vglModule.material.prototype.render = function(renderState) {
 };
 
 ///---------------------------------------------------------------------------
+vglModule.material.prototype.remove = function(renderState) {
+  this.undoBind(renderState);
+};
+
+///---------------------------------------------------------------------------
 vglModule.material.prototype.bind = function(renderState) {
 
   for (var key in this.m_attributes) {
@@ -102,9 +107,9 @@ vglModule.material.prototype.bind = function(renderState) {
     }
   }
 
-  for (var index in this.m_textureAttributes) {
-    if (this.m_textureAttributes.hasOwnProperty(index)) {
-      this.m_textureAttributes[index].bind(renderState);
+  for (var key in this.m_textureAttributes) {
+    if (this.m_textureAttributes.hasOwnProperty(key)) {
+      this.m_textureAttributes[key].bind(renderState);
     }
   }
 };
@@ -113,13 +118,13 @@ vglModule.material.prototype.undoBind = function(renderState) {
   var key = null;
   for (key in this.m_attributes) {
     if (this.m_attributes.hasOwnProperty(key)) {
-      this.m_attributes.undoBind(renderState);
+      this.m_attributes[key].undoBind(renderState);
     }
   }
 
   for (key in this.m_textureAttributes) {
     if (this.m_textureAttributes.hasOwnProperty(key)) {
-      this.m_textureAttributes.undoBind(renderState);
+      this.m_textureAttributes[key].undoBind(renderState);
     }
   }
 };

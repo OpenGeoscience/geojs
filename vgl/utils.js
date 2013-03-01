@@ -16,8 +16,9 @@
   limitations under the License.
  ========================================================================*/
 
+///////////////////////////////////////////////////////////////////////////////
 /**
- *
+ * Utility class provides helper functions to create geometry objects
  *
  */
 vglModule.utils = function() {
@@ -32,11 +33,13 @@ vglModule.utils = function() {
 
 inherit(vglModule.utils, vglModule.object);
 
+///////////////////////////////////////////////////////////////////////////////
 /**
-*
-* @param context
-* @returns {vglModule.shader}
-*/
+ * Helper function to create default fragment shader
+ *
+ * @param context
+ * @returns {vglModule.shader}
+ */
 vglModule.utils.createDefaultFragmentShader = function(context) {
  var fragmentShaderSource = [
    'varying highp vec3 vTextureCoord;',
@@ -51,11 +54,13 @@ vglModule.utils.createDefaultFragmentShader = function(context) {
  return shader;
 };
 
+///////////////////////////////////////////////////////////////////////////////
 /**
-*
-* @param context
-* @returns {vglModule.shader}
-*/
+ * Helper function to create default vertex shader
+ *
+ * @param context
+ * @returns {vglModule.shader}
+ */
 vglModule.utils.createDefaultVertexShader = function(context) {
  var vertexShaderSource = [
    'attribute vec3 aVertexPosition;',
@@ -75,8 +80,9 @@ vglModule.utils.createDefaultVertexShader = function(context) {
  return shader;
 };
 
+///////////////////////////////////////////////////////////////////////////////
 /**
- * Create a plane actor
+ * Helper function to create a plane node
  *
  * This method will create a plane actor with texture coordinates,
  * eventually normal, and plane material.
@@ -117,6 +123,7 @@ vglModule.utils.createPlane = function(originX, originY, originZ,
   mat.addAttribute(prog);
 
   var actor = new vglModule.actor();
+  console.log(actor);
   actor.setMapper(mapper);
   actor.setMaterial(mat);
 

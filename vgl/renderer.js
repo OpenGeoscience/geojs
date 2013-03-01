@@ -91,7 +91,6 @@ vglModule.renderer.prototype.render = function() {
 
   var renSt = new vglModule.renderState();
   renSt.m_projectionMatrix = perspectiveMatrix;
-
   var children = this.m_sceneRoot.children();
   for (var i = 0; i < children.length; ++i) {
     var actor = children[i];
@@ -99,9 +98,10 @@ vglModule.renderer.prototype.render = function() {
     renSt.m_material = actor.material();
     renSt.m_mapper = actor.mapper();
 
-    // NOTE For now we are taking a shortcut because of lack of time
+    // TODO Fix this shortcut
     renSt.m_material.render(renSt);
     renSt.m_mapper.render(renSt);
+    renSt.m_material.remove(renSt);
   }
 };
 

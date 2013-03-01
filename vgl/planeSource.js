@@ -41,6 +41,7 @@ vglModule.planeSource = function() {
     m_origin[2] = z;
   }
 
+  /////////////////////////////////////////////////////////////////////////////
   /**
    * Set point that defines the first axis of the plane
    *
@@ -51,6 +52,7 @@ vglModule.planeSource = function() {
     m_point1[2] = z;
   }
 
+  /////////////////////////////////////////////////////////////////////////////
   /**
    * Set point that defines the first axis of the plane
    *
@@ -61,11 +63,13 @@ vglModule.planeSource = function() {
     m_point2[2] = z;
   }
 
+  /////////////////////////////////////////////////////////////////////////////
   /**
    * Create a plane geometry given input parameters
    *
    */
   this.create = function() {
+    m_geom = new vglModule.geometryData();
 
     var x = [], tc = [], v1 = [], v2 = [];
     x.length = 3, tc.length = 2, v1.length = 3, v2.length = 3;
@@ -88,7 +92,6 @@ vglModule.planeSource = function() {
     }
 
     // TODO Compute center and normal
-    m_geom = new vglModule.geometryData();
 
     // Set things up; allocate memory
     numPts = (m_xresolution + 1) * (m_yresolution + 1);
