@@ -497,10 +497,7 @@ inherit(vglModule.sourceDataP3fv, vglModule.sourceData);
 //////////////////////////////////////////////////////////////////////////////
 
 vglModule.sourceDataT2fv = function() {
-  /**
-   * Check
-   *
-   */
+
   if (!(this instanceof vglModule.sourceDataT2fv)) {
     return new vglModule.sourceDataT2fv();
   }
@@ -511,10 +508,6 @@ vglModule.sourceDataT2fv = function() {
                     gl.FLOAT, 4,  0, 2 * 4, 2, false);
 
 
-  /**
-   *
-   *
-   */
   this.pushBack = function(value) {
     this.insert(value);
   };
@@ -523,6 +516,32 @@ vglModule.sourceDataT2fv = function() {
 };
 
 inherit(vglModule.sourceDataT2fv, vglModule.sourceData);
+
+//////////////////////////////////////////////////////////////////////////////
+//
+// sourceDataC3fv
+//
+//////////////////////////////////////////////////////////////////////////////
+
+vglModule.sourceDataC3fv = function() {
+
+  if (!(this instanceof vglModule.sourceDataC3fv)) {
+    return new vglModule.sourceDataC3fv();
+  }
+
+  vglModule.sourceData.call(this);
+
+  this.addAttribute(vertexAttributeKeys.Color,
+                    gl.FLOAT, 4,  0, 3 * 4, 3, false);
+
+  this.pushBack = function(value) {
+    this.insert(value);
+  };
+
+  return this;
+};
+
+inherit(vglModule.sourceDataC3fv, vglModule.sourceData);
 
 //////////////////////////////////////////////////////////////////////////////
 //

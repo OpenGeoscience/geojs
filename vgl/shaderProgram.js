@@ -214,6 +214,9 @@ vglModule.shaderProgram.prototype.bindUniforms = function() {
   for (var i = 0; i < this.m_uniforms.length; ++i) {
     this.m_uniformNameToLocation[this.m_uniforms[i].name()] =
       this.queryUniformLocation(this.m_uniforms[i].name());
+
+    console.log(this.m_uniforms[i].name());
+    console.log(this.queryUniformLocation(this.m_uniforms[i].name()));
   }
 };
 ///---------------------------------------------------------------------------

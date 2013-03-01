@@ -78,10 +78,11 @@ vglModule.planeSource = function() {
     var i, j, k, ii;
     var numPts;
     var numPolys;
-    var posIndex = 0, normIndex = 0, texCoordIndex = 0;
+    var posIndex = 0, normIndex = 0, colorIndex = 0, texCoordIndex = 0;
 
     var positions = [];
     var normals = [];
+    var colors = [];
     var texCoords = [];
     var indices = [];
 
@@ -115,6 +116,10 @@ vglModule.planeSource = function() {
         positions[posIndex++] = x[1];
         positions[posIndex++] = x[2];
 
+        colors[colorIndex++] = 1.0;
+        colors[colorIndex++] = 1.0;
+        colors[colorIndex++] = 1.0;
+
         normals[normIndex++] = m_normal[0];
         normals[normIndex++] = m_normal[1];
         normals[normIndex++] = m_normal[2];
@@ -144,10 +149,14 @@ vglModule.planeSource = function() {
     var sourcePositions = vglModule.sourceDataP3fv();
     sourcePositions.pushBack(positions);
 
+    var sourceColors = vglModule.sourceDataC3fv();
+    sourceColors.pushBack(colors);
+
     var sourceTexCoords = vglModule.sourceDataT2fv();
     sourceTexCoords.pushBack(texCoords);
 
     m_geom.addSource(sourcePositions);
+    m_geom.addSource(sourceColors);
     m_geom.addSource(sourceTexCoords);
     m_geom.addPrimitive(tristrip);
 

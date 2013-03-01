@@ -266,11 +266,10 @@ geoModule.map = function(node, options) {
   // TODO use zoom and center options
 
   var m_baseLayer = (function() {
-    var mapActor = ogs.vgl.utils.createPlane(
+    var mapActor = ogs.vgl.utils.createTexturePlane(
                       -180.0, -90.0, 0.0,
                        180.0, -90.0, 0.0,
-                      -180.0, 90.0, 0.0
-                    );
+                      -180.0, 90.0, 0.0);
 
     // Setup texture
     worldImage = new Image();

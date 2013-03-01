@@ -62,21 +62,18 @@ vglModule.uniform = function(type, name) {
   this.m_numberOfElements = 1;
 };
 
-///---------------------------------------------------------------------------
 vglModule.uniform.prototype.name = function() {
   return this.m_name;
 };
 
-///---------------------------------------------------------------------------
 vglModule.uniform.prototype.type = function() {
   return this.m_type;
 };
 
-///---------------------------------------------------------------------------
 vglModule.uniform.prototype.get = function() {
   // TODO
 };
-///---------------------------------------------------------------------------
+
 vglModule.uniform.prototype.set = function(value) {
   var i = 0;
   if (value instanceof mat4.constructor) {
@@ -109,7 +106,6 @@ vglModule.uniform.prototype.set = function(value) {
   }
 };
 
-///---------------------------------------------------------------------------
 vglModule.uniform.prototype.callGL = function(location) {
   if (this.m_numberElements < 1)
     return;
@@ -142,18 +138,16 @@ vglModule.uniform.prototype.callGL = function(location) {
   }
 };
 
-///---------------------------------------------------------------------------
 vglModule.uniform.prototype.update = function(renderState, program) {
   // Should be implemented by the derived class
 };
 
 //////////////////////////////////////////////////////////////////////////////
 //
-// vglModelViewUniform class
+// modelViewUniform class
 //
 //////////////////////////////////////////////////////////////////////////////
 
-///---------------------------------------------------------------------------
 vglModule.modelViewUniform = function(name) {
 
   if (name.length === 0) {
@@ -166,14 +160,13 @@ vglModule.modelViewUniform = function(name) {
 
 inherit(vglModule.modelViewUniform, vglModule.uniform);
 
-///---------------------------------------------------------------------------
 vglModule.modelViewUniform.prototype.update = function(renderState, program) {
   this.set(renderState.m_modelViewMatrix);
 };
 
 //////////////////////////////////////////////////////////////////////////////
 //
-// vesProjectionUniform class
+// projectionUniform class
 //
 //////////////////////////////////////////////////////////////////////////////
 
@@ -188,7 +181,23 @@ vglModule.projectionUniform  = function(name) {
 
 inherit(vglModule.projectionUniform, vglModule.uniform);
 
-///---------------------------------------------------------------------------
 vglModule.projectionUniform.prototype.update = function(renderState, program) {
   this.set(renderState.m_projectionMatrix);
 };
+
+//////////////////////////////////////////////////////////////////////////////
+//
+//  floatUniform class
+//
+//////////////////////////////////////////////////////////////////////////////
+
+vglModule.floatUniform  = function(name) {
+  if (name.length === 0) {
+    name = "floatUniform";
+  }
+
+  vglModule.uniform.call(this, gl.FLOAT, name);
+  this.set(1.0);
+};
+
+inherit(vglModule.floatUniform, vglModule.uniform);
