@@ -38,35 +38,35 @@ vglModule.materialAttribute = function() {
 
 inherit(vglModule.materialAttribute, vglModule.object);
 
-///---------------------------------------------------------------------------
+
 vglModule.materialAttribute.prototype.type = function() {
   return this.m_type;
 };
 
-///---------------------------------------------------------------------------
+
 vglModule.materialAttribute.prototype.setup = function(renderState) {
   return false;
 };
 
-///---------------------------------------------------------------------------
+
 vglModule.materialAttribute.prototype.bind  = function(renderState) {
   return false;
 };
-///---------------------------------------------------------------------------
+
 vglModule.materialAttribute.prototype.undoBind = function(renderState) {
   return false;
 };
 
-///---------------------------------------------------------------------------
+
 vglModule.materialAttribute.prototype.setupVertexData = function(renderState, key) {
   return false;
 };
 
-///---------------------------------------------------------------------------
+
 vglModule.materialAttribute.prototype.bindVertexData = function(renderState, key) {
   return false;
 };
-///---------------------------------------------------------------------------
+
 vglModule.materialAttribute.prototype.undoBindVertexData = function(renderState, key) {
   return false;
 };
