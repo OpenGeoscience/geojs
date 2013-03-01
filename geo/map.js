@@ -22,7 +22,7 @@
  *
  */
 geoModule.latlng = function(lat, lng) {
-  // Check against no use of new()
+
   if (!(this instanceof geoModule.latlng)) {
     return new geoModule.latlng(lat, lng);
   }
