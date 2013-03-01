@@ -18,7 +18,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 //
-// vglRenderStage class
+// renderState class
 //
 //////////////////////////////////////////////////////////////////////////////
 
@@ -48,8 +48,7 @@ vglModule.renderer = function() {
 
   vglModule.object.call(this);
 
-  /// Private member variables
-
+  /// Member variables
   this.m_width = 1280;
   this.m_height = 1024;
   this.m_clippingRange = [0.1, 1000.0];
@@ -58,8 +57,7 @@ vglModule.renderer = function() {
 
   this.m_camera.addChild(this.m_sceneRoot);
 
-  /// Public member variables
-
+  /// Member methods
   /**
    * Get scene root
    *

@@ -53,10 +53,9 @@ geoModule.layer = function(options) {
     return new geoModule.layer(options);
   }
 
-  /// Register with base class
   ogs.vgl.object.call(this);
 
-  /// Members initialization
+  /// Member variables
   var m_opacity = options.opacity || 1.0;
   if (m_opacity > 1.0) {
     m_opacity = 1.0;

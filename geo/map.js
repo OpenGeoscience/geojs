@@ -27,10 +27,11 @@ geoModule.latlng = function(lat, lng) {
     return new geoModule.latlng(lat, lng);
   }
 
-  /// Initialize member varibles
+  /// Member variables
   var m_lat = lat;
   var m_lng = lng;
 
+  /// Member methods
   this.lat = function() {
       return m_lat;
   };
@@ -47,11 +48,11 @@ geoModule.latlng = function(lat, lng) {
  *
  */
 geoModule.mapOptions = function() {
-  // Check against no use of new()
   if (!(this instanceof geoModule.mapOptions)) {
     return new geoModule.mapOptions();
   }
 
+  /// Member variables
   this.zoom  = 10;
   this.center = geoModule.latlng(0.0, 0.0);
 };
@@ -66,7 +67,7 @@ geoModule.map = function(node, options) {
     return new geoModule.map(node, options);
   }
 
-  /// Initialize member variables
+  /// Member variables
   var m_that = this;
   var m_node = node;
   var m_leftMouseButtonDown = false;
