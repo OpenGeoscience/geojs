@@ -41,7 +41,7 @@ vglModule.boundingObject.prototype.boundsDirty = function() {
 vglModule.boundingObject.prototype.setBoundsDirty = function(flag) {
   if (this.m_boundsDirty !== flag) {
     this.m_boundsDirty = flag;
-    this.setModified();
+    this.modifiedOn();
     return true;
   }
 
@@ -64,7 +64,7 @@ vglModule.boundingObject.prototype.setBounds = function(minX, maxX, minY, maxY,
   this.m_bounds[4] = minZ;
   this.m_bounds[5] = maxZ;
 
-  this.setModified();
+  this.modifiedOn();
 
   return true;
 };

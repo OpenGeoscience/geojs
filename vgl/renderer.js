@@ -48,22 +48,23 @@ vglModule.renderer = function() {
 
   vglModule.object.call(this);
 
-  /// Member variables
-  this.m_width = 1280;
-  this.m_height = 1024;
-  this.m_clippingRange = [0.1, 1000.0];
-  this.m_sceneRoot = new vglModule.groupNode();
-  this.m_camera = new vglModule.camera();
+  /// Private member variables
+  var m_width = 1280;
+  var m_height = 1024;
+  var m_clippingRange = [0.1, 1000.0];
+  var m_sceneRoot = new vglModule.groupNode();
+  var m_camera = new vglModule.camera();
 
-  this.m_camera.addChild(this.m_sceneRoot);
+  m_camera.addChild(m_sceneRoot);
 
-  /// Member methods
+  /// Public member methods
+
   /**
    * Get scene root
    *
    */
   this.sceneRoot = function() {
-    return this.m_sceneRoot;
+    return m_sceneRoot;
   };
 
   /**
@@ -71,7 +72,7 @@ vglModule.renderer = function() {
    *
    */
   this.camera = function() {
-    return this.m_camera;
+    return m_camera;
   };
 
   /**
@@ -79,7 +80,7 @@ vglModule.renderer = function() {
    *
    */
   this.width = function() {
-    return this.m_width;
+    return m_width;
   };
 
   /**
@@ -87,7 +88,7 @@ vglModule.renderer = function() {
    *
    */
   this.height = function() {
-    return this.m_height;
+    return m_height;
   };
 
   /**
@@ -103,15 +104,16 @@ vglModule.renderer = function() {
     // TODO Call it only once
     this.resize();
 
-    perspectiveMatrix = this.m_camera.projectionMatrix(
-      (this.m_width / this.m_height), 0.1, 10000.0);
+    perspectiveMatrix = m_camera.computeProjectionMatrix(
+      (m_width / m_height), 0.1, 10000.0);
 
     var renSt = new vglModule.renderState();
     renSt.m_projectionMatrix = perspectiveMatrix;
-    var children = this.m_sceneRoot.children();
+    var children = m_sceneRoot.children();
     for (var i = 0; i < children.length; ++i) {
+      console.log('actor index ' + i);
       var actor = children[i];
-      mat4.multiply(this.m_camera.viewMatrix(), actor.matrix(), renSt.m_modelViewMatrix);
+      mat4.multiply(m_camera.computeViewMatrix(), actor.matrix(), renSt.m_modelViewMatrix);
       renSt.m_material = actor.material();
       renSt.m_mapper = actor.mapper();
 
@@ -135,7 +137,7 @@ vglModule.renderer = function() {
    *
    */
   this.resize = function() {
-    gl.viewport(0, 0, this.m_width, this.m_height);
+    gl.viewport(0, 0, m_width, m_height);
   };
 
   /**
@@ -144,7 +146,7 @@ vglModule.renderer = function() {
    */
   this.addActor = function(actor) {
     if (actor instanceof vglModule.actor) {
-      this.m_sceneRoot.addChild(actor);
+      m_sceneRoot.addChild(actor);
       return true;
     }
 
@@ -156,8 +158,8 @@ vglModule.renderer = function() {
    *
    */
   this.removeActor = function(actor) {
-    if (actor in this.m_sceneRoot.children()) {
-      this.m_sceneRoot.removeChild(actor);
+    if (actor in m_sceneRoot.children()) {
+      m_sceneRoot.removeChild(actor);
       return true;
     }
 

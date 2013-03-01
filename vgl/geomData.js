@@ -550,19 +550,19 @@ inherit(vglModule.sourceDataC3fv, vglModule.sourceData);
 //////////////////////////////////////////////////////////////////////////////
 
 vglModule.geometryData = function() {
-    this.m_name = "";
-    this.m_primitives = [];
-    this.m_sources = [];
-    this.m_bounds = [];
-    this.m_computeBounds = true;
+    var m_name = "";
+    var m_primitives = [];
+    var m_sources = [];
+    var m_bounds = [];
+    var m_computeBounds = true;
 
     /// Return ID of the geometry data
     this.name = function()     {
-      return this.m_name;
+      return m_name;
     };
     /// Set name of the geometry data
     this.setName = function(name) {
-      this.m_name = name;
+      m_name = name;
     };
 
     /// Add new source
@@ -570,8 +570,8 @@ vglModule.geometryData = function() {
       // TODO Check if the incoming source has duplicate keys
 
       // NOTE This might not work on IE8 or lower
-      if (this.m_sources.indexOf(source) == -1) {
-        this.m_sources.push(source);
+      if (m_sources.indexOf(source) == -1) {
+        m_sources.push(source);
         return true;
       }
 
@@ -579,21 +579,21 @@ vglModule.geometryData = function() {
     };
     /// Return source for a given index. Returns 0 if not found.
     this.source = function(index) {
-      if (index < this.m_sources.length) {
-        return this.m_sources[index];
+      if (index < m_sources.length) {
+        return m_sources[index];
       }
 
       return 0;
     };
     /// Return number of sources
     this.numberOfSources = function() {
-      return this.m_sources.length;
+      return m_sources.length;
     };
     /// Return source data given a key
     this.sourceData = function(key) {
-      for (var i = 0; i < this.m_sources.length; ++i) {
-        if (this.m_sources[i].hasKey(key)) {
-          return this.m_sources[i];
+      for (var i = 0; i < m_sources.length; ++i) {
+        if (m_sources[i].hasKey(key)) {
+          return m_sources[i];
         }
       }
 
@@ -602,8 +602,8 @@ vglModule.geometryData = function() {
 
     /// Add new primitive
     this.addPrimitive = function(primitive) {
-      if (this.m_primitives.indexOf(primitive) == -1) {
-        this.m_primitives.push(primitive);
+      if (m_primitives.indexOf(primitive) == -1) {
+        m_primitives.push(primitive);
         return true;
       }
 
@@ -611,28 +611,28 @@ vglModule.geometryData = function() {
     };
     /// Return primitive for a given index. Returns 0 if not found.
     this.primitive = function(index) {
-      if (index < this.m_primitives.length) {
-        return this.m_primitives[index];
+      if (index < m_primitives.length) {
+        return m_primitives[index];
       }
 
       return null;
     };
     /// Return number of primitives
     this.numberOfPrimitives = function() {
-      return this.m_primitives.length;
+      return m_primitives.length;
     };
 
     /// Return bounds [minX, maxX, minY, maxY, minZ, maxZ]
     this.bounds = function() {
-      return this.m_bounds;
+      return m_bounds;
     };
     /// Set bounds
     this.setBounds = function(minX, maxX, minY, maxY, minZ, maxZ) {
-      this.m_bounds[0] = minX;
-      this.m_bounds[1] = maxX;
-      this.m_bounds[2] = minY;
-      this.m_bounds[3] = maxY;
-      this.m_bounds[4] = minZ;
-      this.m_bounds[5] = maxZ;
+      m_bounds[0] = minX;
+      m_bounds[1] = maxX;
+      m_bounds[2] = minY;
+      m_bounds[3] = maxY;
+      m_bounds[4] = minZ;
+      m_bounds[5] = maxZ;
     };
 };

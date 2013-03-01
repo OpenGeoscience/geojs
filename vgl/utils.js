@@ -111,25 +111,25 @@ vglModule.utils.createTextureVertexShader = function(context) {
  * @returns {vglModule.shader}
  */
 vglModule.utils.createVertexShader = function(context) {
- var vertexShaderSource = [
-   'attribute vec3 vertexPosition;',
-   'attribute vec3 textureCoord;',
-   'attribute vec3 vertexColor;',
-   'uniform mat4 modelViewMatrix;',
-   'uniform mat4 projectionMatrix;',
-   'varying mediump vec3 iVertexColor;',
-   'varying highp vec3 iTextureCoord;',
-   'void main(void)',
-   '{',
-   'gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
-   ' iTextureCoord = textureCoord;',
-   ' iVertexColor = vertexColor;',
-   '}'
- ].join('\n');
+   var vertexShaderSource = [
+     'attribute vec3 vertexPosition;',
+     'attribute vec3 textureCoord;',
+     'attribute vec3 vertexColor;',
+     'uniform mat4 modelViewMatrix;',
+     'uniform mat4 projectionMatrix;',
+     'varying mediump vec3 iVertexColor;',
+     'varying highp vec3 iTextureCoord;',
+     'void main(void)',
+     '{',
+     'gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
+     ' iTextureCoord = textureCoord;',
+     ' iVertexColor = vertexColor;',
+     '}'
+   ].join('\n');
 
- var shader = new vglModule.shader(gl.VERTEX_SHADER);
- shader.setShaderSource(vertexShaderSource);
- return shader;
+   var shader = new vglModule.shader(gl.VERTEX_SHADER);
+   shader.setShaderSource(vertexShaderSource);
+   return shader;
 };
 
 /**

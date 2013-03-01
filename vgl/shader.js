@@ -59,7 +59,7 @@ vglModule.shader.prototype.shaderSource = function() {
 vglModule.shader.prototype.setShaderSource = function(source) {
   this.m_shaderSource = source;
 
-  this.setModified(true);
+  this.modifiedOn(true);
 };
 
 ///---------------------------------------------------------------------------

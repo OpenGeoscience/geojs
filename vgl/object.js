@@ -23,16 +23,27 @@
 //////////////////////////////////////////////////////////////////////////////
 
 vglModule.object = function() {
-  this.m_modified = false;
-};
+  /// TODO Switch to time based modifications
 
-///
-///---------------------------------------------------------------------------
-vglModule.object.prototype.modified = function() {
-  return this.m_modified;
-};
-/// Set dirty
-///---------------------------------------------------------------------------
-vglModule.object.prototype.setModified = function(flag) {
-  this.m_modified = flag;
+  if (!(this instanceof vglModule.object)) {
+    return new vglModule.object();
+  }
+
+  /// Private variables
+  var m_modified = false;
+
+  /// Public member methods
+  this.modified = function() {
+    return m_modified;
+  };
+
+  this.modifiedOn = function() {
+    m_modified = true;
+  }
+
+  this.modifiedOff = function() {
+    m_modified = false;
+  }
+
+  return this;
 };

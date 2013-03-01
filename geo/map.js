@@ -175,12 +175,13 @@ geoModule.map = function(node, options) {
     }
 
     if (m_leftMouseButtonDown) {
+
       var focalPoint = m_camera.focalPoint();
       var focusWorldPt = vec4.createFrom(
         focalPoint[0], focalPoint[1], focalPoint[2], 1);
 
       var focusDisplayPt = ogs.vgl.renderer.worldToDisplay(focusWorldPt,
-        m_camera.m_viewMatrix, m_camera.m_projectionMatrix, 1680, 1050);
+        m_camera.viewMatrix(), m_camera.projectionMatrix(), 1680, 1050);
 
       var displayPt1 = vec4.createFrom(
         currentMousePos.x, currentMousePos.y, focusDisplayPt[2], 1.0);
@@ -188,11 +189,11 @@ geoModule.map = function(node, options) {
         m_mouseLastPos.x, m_mouseLastPos.y, focusDisplayPt[2], 1.0);
 
       var worldPt1 = ogs.vgl.renderer.displayToWorld(
-        displayPt1, m_camera.m_viewMatrix,
-        m_camera.m_projectionMatrix, 1680, 1050);
+        displayPt1, m_camera.viewMatrix(),
+        m_camera.projectionMatrix(), 1680, 1050);
       var worldPt2 = ogs.vgl.renderer.displayToWorld(
-        displayPt2, m_camera.m_viewMatrix,
-        m_camera.m_projectionMatrix, 1680, 1050);
+        displayPt2, m_camera.viewMatrix(),
+        m_camera.projectionMatrix(), 1680, 1050);
 
       dx = worldPt1[0] - worldPt2[0];
       dy = worldPt1[1] - worldPt2[1];
@@ -302,8 +303,6 @@ geoModule.map = function(node, options) {
    * @return {Boolean}
    */
   this.addLayer = function(layer) {
-
-    console.log('layer is ' + layer);
 
     if (layer != null) {
       // TODO Check if the layer already exists

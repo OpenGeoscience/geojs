@@ -30,7 +30,7 @@ function main() {
   var myMap = ogs.geo.map(document.getElementById("glcanvas"), mapOptions);
   var planeLayer = ogs.geo.featureLayer(
     {"opacity":1, "showAttribution":1, "visible":1},
-     ogs.geo.planeFeature(ogs.geo.latlng(-90.0, 0.0), ogs.geo.latlng(90.0, 180.0)));
+      ogs.geo.planeFeature(ogs.geo.latlng(-90.0, 0.0), ogs.geo.latlng(90.0, 180.0)));
 
   myMap.addLayer(planeLayer);
 

@@ -44,43 +44,45 @@ vglModule.texture = function() {
 
   this.m_image = null;
 
+  this.modifiedOn();
+
   /// Public member methods
   this.setup = function(renderState) {
-    if (this.modified()) {
-      gl.deleteTexture(this.m_textureHandle);
-      this.m_textureHandle = gl.createTexture();
-      gl.bindTexture(gl.TEXTURE_2D, this.m_textureHandle);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-      gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
-      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 
-      if (this.m_image !== null) {
-        this.updateDimensions();
-        this.computeInternalFormatUsingImage();
+    gl.deleteTexture(this.m_textureHandle);
+    this.m_textureHandle = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, this.m_textureHandle);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 
-        //console.log("m_internalFormat " + this.m_internalFormat);
-        //console.log("m_pixelFormat " + this.m_pixelFormat);
-        //console.log("m_pixelDataType " + this.m_pixelDataType);
+    if (this.m_image !== null) {
+      this.updateDimensions();
+      this.computeInternalFormatUsingImage();
 
-        // FOR now support only 2D textures
-        gl.texImage2D(gl.TEXTURE_2D, 0, this.m_internalFormat,
-                      this.m_pixelFormat, this.m_pixelDataType, this.m_image);
-      }
-      else {
-        gl.texImage2D(gl.TEXTURE_2D, 0, this.m_internalFormat,
-                      this.m_pixelFormat, this.m_pixelDataType, null);
-      }
+      //console.log("m_internalFormat " + this.m_internalFormat);
+      //console.log("m_pixelFormat " + this.m_pixelFormat);
+      //console.log("m_pixelDataType " + this.m_pixelDataType);
 
-      gl.bindTexture(gl.TEXTURE_2D, null);
-      this.setModified(false);
+      // FOR now support only 2D textures
+      gl.texImage2D(gl.TEXTURE_2D, 0, this.m_internalFormat,
+                    this.m_pixelFormat, this.m_pixelDataType, this.m_image);
     }
+    else {
+      gl.texImage2D(gl.TEXTURE_2D, 0, this.m_internalFormat,
+                    this.m_pixelFormat, this.m_pixelDataType, null);
+    }
+
+    gl.bindTexture(gl.TEXTURE_2D, null);
+    this.modifiedOff();
   };
 
 
   this.bind = function(renderState) {
+
     // TODO Call setup via material setup
     if (this.modified()) {
       this.setup(renderState);
@@ -98,7 +100,7 @@ vglModule.texture = function() {
   this.handleTextureLoaded = function(image) {
     this.m_image = image;
     this.updateDimensions();
-    this.setModified(true);
+    this.modifiedOn(true);
   };
 
 
@@ -126,7 +128,7 @@ vglModule.texture = function() {
     }
 
     this.m_textureUnit = unit;
-    this.setModified(true);
+    this.modifiedOn(true);
     return true;
   };
 
@@ -141,7 +143,7 @@ vglModule.texture = function() {
     }
 
     this.m_width = width;
-    this.setModified(true);
+    this.modifiedOn(true);
 
     return true;
   };
@@ -157,7 +159,7 @@ vglModule.texture = function() {
     }
 
     this.m_depth = depth;
-    this.setModified(true);
+    this.modifiedOn(true);
 
     return true;
   };
@@ -175,7 +177,7 @@ vglModule.texture = function() {
   this.setInternalFormat = function(internalFormat) {
     if (this.m_internalFormat !== internalFormat) {
       this.m_internalFormat = internalFormat;
-      this.setModified(true);
+      this.modifiedOn(true);
 
       return true;
     }
@@ -194,7 +196,7 @@ vglModule.texture = function() {
     }
 
     this.m_pixelFormat = pixelFormat;
-    this.setModified(true);
+    this.modifiedOn(true);
     return true;
   };
 
@@ -210,7 +212,7 @@ vglModule.texture = function() {
 
     this.m_pixelDataTYpe = pixelDataType;
 
-    this.setModified(true);
+    this.modifiedOn(true);
 
     return true;
   };
@@ -253,7 +255,7 @@ vglModule.texture = function() {
     }
   };
 
-  return;
+  return this;
 };
 
 inherit(vglModule.texture, vglModule.materialAttribute);

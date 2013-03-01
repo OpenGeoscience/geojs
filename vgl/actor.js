@@ -31,12 +31,12 @@ vglModule.actor = function() {
   vglModule.node.call(this);
 
   /// Initialize member variables
-  this.m_center = new Array(3);
-  this.m_rotation = new Array(4);
-  this.m_scale = new Array(3);
-  this.m_translation = new Array(3);
-  this.m_referenceFrame = 0;
-  this.m_mapper = 0;
+  var m_center = new Array(3);
+  var m_rotation = new Array(4);
+  var m_scale = new Array(3);
+  var m_translation = new Array(3);
+  var m_referenceFrame = 0;
+  var m_mapper = 0;
 
   /**
    * Get center of transformations
@@ -51,9 +51,9 @@ vglModule.actor = function() {
    *
    */
   this.setCenter = function(x, y, z) {
-    this.m_center[0] = x;
-    this.m_center[1] = y;
-    this.m_center[2] = z;
+    m_center[0] = x;
+    m_center[1] = y;
+    m_center[2] = z;
   };
 
   /**
@@ -139,7 +139,7 @@ vglModule.actor = function() {
    *
    */
   this.mapper = function() {
-    return this.m_mapper;
+    return m_mapper;
   };
 
   /**
@@ -147,7 +147,7 @@ vglModule.actor = function() {
    *
    */
   this.setMapper = function(mapper) {
-    this.m_mapper = mapper;
+    m_mapper = mapper;
   };
 
   /**

@@ -34,138 +34,161 @@
 //////////////////////////////////////////////////////////////////////////////
 
 vglModule.mapper = function() {
+
+  if (!(this instanceof vglModule.mapper)) {
+    return new mapper();
+  }
   vglModule.boundingObject.call(this);
 
-  this.m_dirty = true;
-  this.m_geomData = 0;
-  this.m_buffers = [];
-  this.m_bufferVertexAttributeMap = {};
+  var m_dirty = true;
+  var m_geomData = 0;
+  var m_buffers = [];
+  var m_bufferVertexAttributeMap = {};
+
+  /// Compute bounds of the data
+  this.computeBounds = function() {
+  };
+
+  /// Return stored geometry data if any
+
+  this.geometryData = function() {
+    return m_geomData;
+  };
+
+  /// Set geometry data for the mapper
+  this.setGeometryData = function(geom) {
+    if (m_geomData !== geom )   {
+      m_geomData = geom;
+
+      // TODO we need
+      m_dirty = true;
+    }
+  };
+
+  /// Render
+
+  this.render = function(renderState) {
+    // Bind material
+
+    console.log('render 0');
+
+    if (m_dirty) {
+
+      this.setupDrawObjects(renderState);
+    }
+
+    console.log('render 1');
+
+    // TODO Use renderState
+    var bufferIndex = 0;
+    var i = null;
+    var j = 0;
+    for (i in m_bufferVertexAttributeMap) {
+      console.log('render 2');
+      if (m_bufferVertexAttributeMap.hasOwnProperty(i)) {
+        console.log("foo1");
+        gl.bindBuffer(gl.ARRAY_BUFFER, m_buffers[bufferIndex]);
+        for (j = 0; j < m_bufferVertexAttributeMap[i].length; ++j) {
+          renderState.m_material.bindVertexData(
+            renderState, m_bufferVertexAttributeMap[i][j]);
+        }
+        ++bufferIndex;
+      }
+    }
+
+    console.log('render 3');
+    var noOfPrimitives = m_geomData.numberOfPrimitives();
+    for (j = 0; j < noOfPrimitives; ++j) {
+      console.log('render 4');
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, m_buffers[bufferIndex++]);
+      console.log('render 5');
+      var primitive = m_geomData.primitive(j);//
+      gl.drawElements(primitive.primitiveType(), primitive.numberOfIndices(),
+                      primitive.indicesValueType(),  0);
+    }
+
+    // Unbind material
+  };
+
+  ///
+  /// Internal methods
+  //
+  ///////////////////////////////////////////////////////////////////////////////
+
+  /// Delete previously created buffers
+
+  this.deleteVertexBufferObjects = function() {
+    for (var i = 0 ; i < m_buffers.length; ++i)   {
+      gl.deleteBuffer(m_buffers[i]);
+    }
+  };
+
+  /// Create new buffers
+
+  this.createVertexBufferObjects = function() {
+    if (m_geomData) {
+      console.log("creting buffer objects");
+      var numberOfSources = m_geomData.numberOfSources();
+      var i = 0;
+      var bufferId = null;
+      for (; i < numberOfSources; ++i) {
+        bufferId = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, bufferId);
+        gl.bufferData(gl.ARRAY_BUFFER, m_geomData.source(i).data(),
+                      gl.STATIC_DRAW);
+
+        console.log("creting buffer objects 2");
+
+        keys = m_geomData.source(i).keys();
+        ks = [];
+        for (var j = 0; j < keys.length; ++j) {
+          ks.push(keys[j]);
+        }
+
+      m_bufferVertexAttributeMap[i] = ks;
+        m_buffers[i] = bufferId;
+      }
+
+      var numberOfPrimitives = m_geomData.numberOfPrimitives();
+      for (var k = 0; k < numberOfPrimitives; ++k) {
+        console.log("creting buffer objects 3");
+
+        bufferId = gl.createBuffer();
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, bufferId);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, m_geomData.primitive(k).indices(),
+                     gl.STATIC_DRAW);
+
+        console.log("creting buffer objects 4");
+        m_buffers[i++] = bufferId;
+      }
+    }
+
+    console.log("creting buffer objects 5");
+  };
+
+  /// Clear cache related to buffers
+
+  this.cleanUpDrawObjects = function() {
+  m_bufferVertexAttributeMap = {};
+    m_buffers = [];
+  };
+
+  /// Setup draw objects; Delete old ones and create new ones
+
+  this.setupDrawObjects = function(renderState) {
+    // Delete buffer objects from past if any.
+    this.deleteVertexBufferObjects();
+
+    // Clear any cache related to buffers
+    this.cleanUpDrawObjects();
+
+    // Now construct the new ones.
+    this.createVertexBufferObjects();
+
+    m_dirty = false;
+  };
+
+  return this;
 };
 
 inherit(vglModule.mapper, vglModule.boundingObject);
-
-/// Compute bounds of the data
-//----------------------------------------------------------------------------
-vglModule.mapper.prototype.computeBounds = function() {
-};
-
-/// Return stored geometry data if any
-//----------------------------------------------------------------------------
-vglModule.mapper.prototype.geometryData = function() {
-  return this.m_geomData;
-};
-/// Set geometry data for the mapper
-//----------------------------------------------------------------------------
-vglModule.mapper.prototype.setGeometryData = function(geom) {
-  if (this.m_geomData !== geom )   {
-    this.m_geomData = geom;
-
-    // TODO we need
-    this.m_dirty = true;
-  }
-};
-
-/// Render
-//----------------------------------------------------------------------------
-vglModule.mapper.prototype.render = function(renderState) {
-  // Bind material
-
-  if (this.m_dirty) {
-    this.setupDrawObjects(renderState);
-  }
-
-  // TODO Use renderState
-  var bufferIndex = 0;
-  var i = null;
-  var j = 0;
-  for (i in this.m_bufferVertexAttributeMap) {
-    if (this.m_bufferVertexAttributeMap.hasOwnProperty(i)) {
-      gl.bindBuffer(gl.ARRAY_BUFFER, this.m_buffers[bufferIndex]);
-      for (j = 0; j < this.m_bufferVertexAttributeMap[i].length; ++j) {
-        renderState.m_material.bindVertexData(
-          renderState, this.m_bufferVertexAttributeMap[i][j]);
-      }
-      ++bufferIndex;
-    }
-  }
-
-  var noOfPrimitives = this.m_geomData.numberOfPrimitives();
-  for (j = 0; j < noOfPrimitives; ++j) {
-
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.m_buffers[bufferIndex++]);
-    var primitive = this.m_geomData.primitive(j);//
-    gl.drawElements(primitive.primitiveType(), primitive.numberOfIndices(),
-                    primitive.indicesValueType(),  0);
-  }
-
-  // Unbind material
-};
-
-///
-/// Internal methods
-//
-///////////////////////////////////////////////////////////////////////////////
-
-/// Delete previously created buffers
-//----------------------------------------------------------------------------
-vglModule.mapper.prototype.deleteVertexBufferObjects = function() {
-  for (var i = 0 ; i < this.m_buffers.length; ++i)   {
-    gl.deleteBuffer(this.m_buffers[i]);
-  }
-};
-
-/// Create new buffers
-//----------------------------------------------------------------------------
-vglModule.mapper.prototype.createVertexBufferObjects = function() {
-  if (this.m_geomData) {
-    var numberOfSources = this.m_geomData.numberOfSources();
-    var i = 0;
-    var bufferId = null;
-    for (; i < numberOfSources; ++i) {
-      bufferId = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, bufferId);
-      gl.bufferData(gl.ARRAY_BUFFER, this.m_geomData.source(i).data(),
-                    gl.STATIC_DRAW);
-
-      keys = this.m_geomData.source(i).keys();
-      ks = [];
-      for (var j = 0; j < keys.length; ++j) {
-        ks.push(keys[j]);
-      }
-
-      this.m_bufferVertexAttributeMap[i] = ks;
-      this.m_buffers[i] = bufferId;
-    }
-
-    var numberOfPrimitives = this.m_geomData.numberOfPrimitives();
-    for (var k = 0; k < numberOfPrimitives; ++k) {
-      bufferId = gl.createBuffer();
-      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, bufferId);
-      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.m_geomData.primitive(k).indices(),
-                   gl.STATIC_DRAW);
-      this.m_buffers[i++] = bufferId;
-    }
-  }
-};
-
-/// Clear cache related to buffers
-//----------------------------------------------------------------------------
-vglModule.mapper.prototype.cleanUpDrawObjects = function() {
-  this.m_bufferVertexAttributeMap = {};
-  this.m_buffers = [];
-};
-
-/// Setup draw objects; Delete old ones and create new ones
-//----------------------------------------------------------------------------
-vglModule.mapper.prototype.setupDrawObjects = function(renderState) {
-  // Delete buffer objects from past if any.
-  this.deleteVertexBufferObjects();
-
-  // Clear any cache related to buffers
-  this.cleanUpDrawObjects();
-
-  // Now construct the new ones.
-  this.createVertexBufferObjects();
-
-  this.m_dirty = false;
-};

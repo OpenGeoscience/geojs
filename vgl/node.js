@@ -50,7 +50,7 @@ vglModule.node.prototype.setMaterial = function(material) {
   if (material !== this.m_material)
   {
     this.m_material = material;
-    this.setModified();
+    this.modifiedOn();
     return true;
   }
 
@@ -67,7 +67,7 @@ vglModule.node.prototype.visible = function() {
 vglModule.node.prototype.setVisible = function(flag) {
   if (flag !== this.m_visible)   {
     this.m_visible = flag;
-    this.setModified();
+    this.modifiedOn();
     return true;
   }
 
@@ -87,7 +87,7 @@ vglModule.node.prototype.setParent = function(parent) {
       this.m_parent.removeChild(this);
     }
     this.m_parent = parent;
-    this.setModified();
+    this.modifiedOn();
     return true;
   }
 
@@ -104,7 +104,7 @@ vglModule.node.prototype.overlay = function() {
 vglModule.node.prototype.setOverlay = function(flag) {
   if (this.m_overlay !== flag)   {
     this.m_overlay = flag;
-    this.setModified();
+    this.modifiedOn();
     return true;
   }
 
