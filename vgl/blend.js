@@ -30,7 +30,7 @@ vglModule.blendFunction = function(source, destination) {
 
   /// Private variables
   var m_source = source;
-  var m_desination = destination;
+  var m_destination = destination;
 
   /**
    * Apply blend function to the current state
@@ -38,7 +38,7 @@ vglModule.blendFunction = function(source, destination) {
    */
   this.apply = function(renderState) {
     gl.blendFunc(m_source, m_destination);
-  }
+  };
 
   return this;
 }
@@ -54,12 +54,10 @@ vglModule.blend = function() {
   if (!(this instanceof vglModule.blend)) {
     return new vglModule.blend();
   }
-  vglModule.materialAttribute.call(this);
-
-  this.m_type = materialAttributeType.Blend;
+  vglModule.materialAttribute.call(this, materialAttributeType.Blend);
 
   /// Private member variables
-  var m_wasEnabled;
+  var m_wasEnabled  = false;
   var m_blendFunction =
     vglModule.blendFunction(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
@@ -68,12 +66,11 @@ vglModule.blend = function() {
    *
    */
   this.bind  = function(renderState) {
+    m_wasEnabled = gl.isEnabled(gl.BLEND);
 
-    this.m_wasEnabled = gl.IsEnabled(gl.BLEND);
-
-    if (this.m_enabled) {
-      gl.enable(GL_BLEND);
-      this.m_blendFunction.apply(renderState);
+    if (this.enabled()) {
+      gl.enable(gl.BLEND);
+      m_blendFunction.apply(renderState);
     } else {
       gl.disable(gl.BLEND);
     }
@@ -86,15 +83,11 @@ vglModule.blend = function() {
    *
    */
   this.undoBind = function(renderState) {
-
-    if (this.m_wasEnabled) {
-      gl.enable(GL_BLEND);
+    if (m_wasEnabled) {
+      gl.enable(gl.BLEND);
     } else {
-      gl.disable(GL_BLEND);
+      gl.disable(gl.BLEND);
     }
-
-    this.setDirtyStateOff();
-
     return true;
   };
 

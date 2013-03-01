@@ -152,6 +152,7 @@ vglModule.utils.createPlane = function(originX, originY, originZ,
   mapper.setGeometryData(planeSource.create());
 
   var mat = new vglModule.material();
+  var blend = new vglModule.blend();
   var prog = new vglModule.shaderProgram();
   var vertexShader = vglModule.utils.createVertexShader(gl);
   var fragmentShader = vglModule.utils.createFragmentShader(gl);
@@ -175,6 +176,7 @@ vglModule.utils.createPlane = function(originX, originY, originZ,
   prog.addShader(fragmentShader);
   prog.addShader(vertexShader);
   mat.addAttribute(prog);
+  mat.addAttribute(blend);
 
   var actor = new vglModule.actor();
   console.log(actor);
@@ -205,6 +207,7 @@ vglModule.utils.createTexturePlane = function(originX, originY, originZ,
   mapper.setGeometryData(planeSource.create());
 
   var mat = new vglModule.material();
+  var blend = new vglModule.blend();
   var prog = new vglModule.shaderProgram();
   var vertexShader = vglModule.utils.createTextureVertexShader(gl);
   var fragmentShader = vglModule.utils.createTextureFragmentShader(gl);
@@ -226,7 +229,9 @@ vglModule.utils.createTexturePlane = function(originX, originY, originZ,
   prog.addUniform(samplerUniform);
   prog.addShader(fragmentShader);
   prog.addShader(vertexShader);
+
   mat.addAttribute(prog);
+  mat.addAttribute(blend);
 
   var actor = new vglModule.actor();
   console.log(actor);

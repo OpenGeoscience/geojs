@@ -30,43 +30,54 @@ materialAttributeType =   {
     "Depth" : 0x4
   };
 
-vglModule.materialAttribute = function() {
+vglModule.materialAttribute = function(type) {
+
+  if (!(this instanceof vglModule.materialAttribute)) {
+    return new vglModule.materialAttribute();
+  }
   vglModule.object.call(this);
-  this.m_type = materialAttributeType.Undefined;
-  this.m_enabled = true;
+
+  /// Private member variables
+  var m_type = type;
+  var m_enabled = true;
+
+  /// Public member methods
+  this.type = function() {
+    return m_type;
+  };
+
+  this.enabled = function() {
+    return m_enabled;
+  }
+
+  this.setup = function(renderState) {
+    return false;
+  };
+
+
+  this.bind  = function(renderState) {
+    return false;
+  };
+
+  this.undoBind = function(renderState) {
+    return false;
+  };
+
+
+  this.setupVertexData = function(renderState, key) {
+    return false;
+  };
+
+
+  this.bindVertexData = function(renderState, key) {
+    return false;
+  };
+
+  this.undoBindVertexData = function(renderState, key) {
+    return false;
+  };
+
+  return this;
 };
 
 inherit(vglModule.materialAttribute, vglModule.object);
-
-
-vglModule.materialAttribute.prototype.type = function() {
-  return this.m_type;
-};
-
-
-vglModule.materialAttribute.prototype.setup = function(renderState) {
-  return false;
-};
-
-
-vglModule.materialAttribute.prototype.bind  = function(renderState) {
-  return false;
-};
-
-vglModule.materialAttribute.prototype.undoBind = function(renderState) {
-  return false;
-};
-
-
-vglModule.materialAttribute.prototype.setupVertexData = function(renderState, key) {
-  return false;
-};
-
-
-vglModule.materialAttribute.prototype.bindVertexData = function(renderState, key) {
-  return false;
-};
-
-vglModule.materialAttribute.prototype.undoBindVertexData = function(renderState, key) {
-  return false;
-};
