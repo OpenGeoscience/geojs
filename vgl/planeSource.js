@@ -39,7 +39,7 @@ vglModule.planeSource = function() {
     m_origin[0] = x;
     m_origin[1] = y;
     m_origin[2] = z;
-  }
+  };
 
   /**
    * Set point that defines the first axis of the plane
@@ -49,7 +49,7 @@ vglModule.planeSource = function() {
     m_point1[0] = x;
     m_point1[1] = y;
     m_point1[2] = z;
-  }
+  };
 
   /**
    * Set point that defines the first axis of the plane
@@ -59,7 +59,7 @@ vglModule.planeSource = function() {
     m_point2[0] = x;
     m_point2[1] = y;
     m_point2[2] = z;
-  }
+  };
 
   /**
    * Create a plane geometry given input parameters
@@ -72,7 +72,7 @@ vglModule.planeSource = function() {
     x.length = 3, tc.length = 2, v1.length = 3, v2.length = 3;
 
     var  pts = []; pts.length = 3;
-    var i, j, k, ii;
+    var i, j, ii;
     var numPts;
     var numPolys;
     var posIndex = 0, normIndex = 0, colorIndex = 0, texCoordIndex = 0;

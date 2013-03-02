@@ -29,7 +29,7 @@ vglModule.source = function() {
    *
    */
   this.create = function() {
-  }
+  };
 
   return this;
 };

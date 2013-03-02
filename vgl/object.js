@@ -39,11 +39,11 @@ vglModule.object = function() {
 
   this.modifiedOn = function() {
     m_modified = true;
-  }
+  };
 
   this.modifiedOff = function() {
     m_modified = false;
-  }
+  };
 
   return this;
 };

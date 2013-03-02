@@ -224,7 +224,7 @@ vglModule.camera = function() {
     if(vec3.dot(temp, m_cache) < 0.0)
     {
       m_viewUp[0] = -m_viewUp[0];
-      m_viewUp[1] = -m_viewUp[1];s
+      m_viewUp[1] = -m_viewUp[1];
       m_viewUp[2] = -m_viewUp[2];
       mat4.lookAt(m_position, m_focalPoint, m_viewUp, m_viewMatrix);
     }

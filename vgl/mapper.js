@@ -36,7 +36,7 @@
 vglModule.mapper = function() {
 
   if (!(this instanceof vglModule.mapper)) {
-    return new mapper();
+    return new vglModule.mapper();
   }
   vglModule.boundingObject.call(this);
 

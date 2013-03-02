@@ -48,7 +48,7 @@ vglModule.materialAttribute = function(type) {
 
   this.enabled = function() {
     return m_enabled;
-  }
+  };
 
   this.setup = function(renderState) {
     return false;

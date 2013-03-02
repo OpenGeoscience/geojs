@@ -223,17 +223,30 @@ inherit(vglModule.triangles, vglModule.primitive);
 //////////////////////////////////////////////////////////////////////////////
 
 vglModule.vertexDataP3f = function() {
-    this.m_position = [];
+  if (!(this instanceof vglModule.vertexDataP3f)) {
+    return new vglModule.vertexDataP3f();
+  }
+
+  this.m_position = [];
 };
 
 vglModule.vertexDataP3N3f = function() {
-    this.m_position = [];
-    this.m_normal = [];
+
+  if (!(this instanceof vglModule.vertexDataP3N3f)) {
+    return new vglModule.vertexDataP3N3f();
+  }
+
+  this.m_position = [];
+  this.m_normal = [];
 };
 
 vglModule.vertexDataP3T3f = function() {
-    this.m_position = [];
-    this.m_texCoordinate = [];
+  if (!(this instanceof vglModule.vertexDataP3T3f)) {
+    return new vglModule.vertexDataP3T3f();
+  }
+
+  this.m_position = [];
+  this.m_texCoordinate = [];
 };
 
 //////////////////////////////////////////////////////////////////////////////

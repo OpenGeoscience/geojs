@@ -75,7 +75,7 @@ geoModule.layer = function(options) {
    */
   this.actor = function() {
     return null;
-  }
+  };
 
   return this;
 };
@@ -115,7 +115,7 @@ geoModule.featureLayer = function(options, feature) {
    */
   this.actor = function() {
     return m_actor;
-  }
+  };
 
   /**
    * Set feature (points, lines, or polygons)
@@ -123,7 +123,7 @@ geoModule.featureLayer = function(options, feature) {
    */
   this.setFeature = function(feature) {
     this.m_actor = feature;
-  }
+  };
 
   return this;
 };
