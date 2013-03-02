@@ -27,13 +27,13 @@ geoModule.latlng = function(lat, lng) {
     return new geoModule.latlng(lat, lng);
   }
 
-  /// Member variables
+  // / Member variables
   var m_lat = lat;
   var m_lng = lng;
 
-  /// Member methods
+  // / Member methods
   this.lat = function() {
-      return m_lat;
+    return m_lat;
   };
 
   this.lng = function() {
@@ -52,8 +52,8 @@ geoModule.mapOptions = function() {
     return new geoModule.mapOptions();
   }
 
-  /// Member variables
-  this.zoom  = 10;
+  // / Member variables
+  this.zoom = 10;
   this.center = geoModule.latlng(0.0, 0.0);
 };
 
@@ -67,13 +67,16 @@ geoModule.map = function(node, options) {
     return new geoModule.map(node, options);
   }
 
-  /// Member variables
+  // / Member variables
   var m_that = this;
   var m_node = node;
   var m_leftMouseButtonDown = false;
   var m_rightMouseButtonDown = false;
   var m_initialized = false;
-  var m_mouseLastPos = {x : 0, y : 0};
+  var m_mouseLastPos = {
+    x : 0,
+    y : 0
+  };
 
   initWebGL(node);
 
@@ -101,12 +104,9 @@ geoModule.map = function(node, options) {
     var distance = 600;
     distance = 600 - (600 - (60 * m_options.zoom)) + 1;
 
-    m_camera.setPosition(m_options.center.lng(),
-                         m_options.center.lat(),
-                         distance);
-    m_camera.setFocalPoint(m_options.center.lng(),
-                           m_options.center.lat(),
-                           0.0);
+    m_camera.setPosition(m_options.center.lng(), m_options.center.lat(),
+    distance);
+    m_camera.setFocalPoint(m_options.center.lng(), m_options.center.lat(), 0.0);
 
     m_initialized = true;
   }
@@ -138,12 +138,15 @@ geoModule.map = function(node, options) {
     do {
       totalOffsetX += currentElement.offsetLeft;
       totalOffsetY += currentElement.offsetTop;
-    } while(currentElement === currentElement.offsetParent);
+    } while (currentElement === currentElement.offsetParent);
 
     canvasX = event.pageX - totalOffsetX;
     canvasY = event.pageY - totalOffsetY;
 
-    return {x:canvasX, y:canvasY};
+    return {
+      x : canvasX,
+      y : canvasY
+    };
   }
 
   /**
@@ -152,21 +155,30 @@ geoModule.map = function(node, options) {
    */
   function handleMouseMove(event) {
     var canvas = m_node;
+
+    var height = $(canvas).height();
+    var width = $(canvas).width();
+
     var outsideCanvas = false;
     var coords = canvas.relMouseCoords(event);
 
-    var currentMousePos = {x : 0, y : 0};
-    if (coords.x < 0) {
+    var currentMousePos = {
+      x : 0,
+      y : 0
+    };
+    if ((coords.x < 0) || (coords.x > width)) {
       currentMousePos.x = 0;
       outsideCanvas = true;
-    } else {
+    }
+    else {
       currentMousePos.x = coords.x;
     }
 
-    if (coords.y < 0) {
+    if ((coords.y < 0) || (coords.y > height)) {
       currentMousePos.y = 0;
       outsideCanvas = true;
-    } else {
+    }
+    else {
       currentMousePos.y = coords.y;
     }
 
@@ -177,23 +189,21 @@ geoModule.map = function(node, options) {
     if (m_leftMouseButtonDown) {
 
       var focalPoint = m_camera.focalPoint();
-      var focusWorldPt = vec4.createFrom(
-        focalPoint[0], focalPoint[1], focalPoint[2], 1);
+      var focusWorldPt = vec4.createFrom(focalPoint[0], focalPoint[1],
+      focalPoint[2], 1);
 
       var focusDisplayPt = ogs.vgl.renderer.worldToDisplay(focusWorldPt,
-        m_camera.viewMatrix(), m_camera.projectionMatrix(), 1680, 1050);
+      m_camera.viewMatrix(), m_camera.projectionMatrix(), 1680, 1050);
 
-      var displayPt1 = vec4.createFrom(
-        currentMousePos.x, currentMousePos.y, focusDisplayPt[2], 1.0);
-      var displayPt2 = vec4.createFrom(
-        m_mouseLastPos.x, m_mouseLastPos.y, focusDisplayPt[2], 1.0);
+      var displayPt1 = vec4.createFrom(currentMousePos.x, currentMousePos.y,
+      focusDisplayPt[2], 1.0);
+      var displayPt2 = vec4.createFrom(m_mouseLastPos.x, m_mouseLastPos.y,
+      focusDisplayPt[2], 1.0);
 
-      var worldPt1 = ogs.vgl.renderer.displayToWorld(
-        displayPt1, m_camera.viewMatrix(),
-        m_camera.projectionMatrix(), 1680, 1050);
-      var worldPt2 = ogs.vgl.renderer.displayToWorld(
-        displayPt2, m_camera.viewMatrix(),
-        m_camera.projectionMatrix(), 1680, 1050);
+      var worldPt1 = ogs.vgl.renderer.displayToWorld(displayPt1, m_camera
+      .viewMatrix(), m_camera.projectionMatrix(), 1680, 1050);
+      var worldPt2 = ogs.vgl.renderer.displayToWorld(displayPt2, m_camera
+      .viewMatrix(), m_camera.projectionMatrix(), 1680, 1050);
 
       dx = worldPt1[0] - worldPt2[0];
       dy = worldPt1[1] - worldPt2[1];
@@ -225,21 +235,23 @@ geoModule.map = function(node, options) {
     if (event.button === 2) {
       m_rightMouseButtonDown = true;
     }
-    if (event.button === 4)  {
-//        middileMouseButtonDown = true;
+    if (event.button === 4) {
+      // middileMouseButtonDown = true;
     }
 
     coords = canvas.relMouseCoords(event);
 
     if (coords.x < 0) {
       m_mouseLastPos.x = 0;
-    } else  {
+    }
+    else {
       m_mouseLastPos.x = coords.x;
     }
 
     if (coords.y < 0) {
       m_mouseLastPos.y = 0;
-    } else {
+    }
+    else {
       m_mouseLastPos.y = coords.y;
     }
 
@@ -258,7 +270,7 @@ geoModule.map = function(node, options) {
       m_rightMouseButtonDown = false;
     }
     if (event.button === 4) {
-//      middileMouseButtonDown = false;
+      // middileMouseButtonDown = false;
     }
 
     return false;
@@ -267,10 +279,8 @@ geoModule.map = function(node, options) {
   // TODO use zoom and center options
 
   var m_baseLayer = (function() {
-    var mapActor = ogs.vgl.utils.createTexturePlane(
-                      -180.0, -90.0, 0.0,
-                       180.0, -90.0, 0.0,
-                      -180.0, 90.0, 0.0);
+    var mapActor = ogs.vgl.utils.createTexturePlane(-180.0, -90.0, 0.0, 180.0,
+    -90.0, 0.0, -180.0, 90.0, 0.0);
 
     // Setup texture
     worldImage = new Image();
@@ -287,7 +297,9 @@ geoModule.map = function(node, options) {
     document.onmousedown = handleMouseDown;
     document.onmouseup = handleMouseUp;
     document.onmousemove = handleMouseMove;
-    document.oncontextmenu = function() {return false;};
+    document.oncontextmenu = function() {
+      return false;
+    };
     HTMLCanvasElement.prototype.relMouseCoords = relMouseCoords;
 
     draw();
@@ -299,7 +311,8 @@ geoModule.map = function(node, options) {
    * Add layer to the map
    *
    * @method addLayer
-   * @param {geo.layer} layer to be added to the map
+   * @param {geo.layer}
+   *          layer to be added to the map
    * @return {Boolean}
    */
   this.addLayer = function(layer) {
@@ -320,7 +333,8 @@ geoModule.map = function(node, options) {
    * Remove layer from the map
    *
    * @method removeLayer
-   * @param {geo.layer} layer that should be removed from the map
+   * @param {geo.layer}
+   *          layer that should be removed from the map
    * @return {Boolean}
    */
   this.removeLayer = function(layer) {
