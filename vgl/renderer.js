@@ -118,6 +118,7 @@ vglModule.renderer = function() {
       renSt.m_mapper = actor.mapper();
 
       // TODO Fix this shortcut
+
       renSt.m_material.render(renSt);
       renSt.m_mapper.render(renSt);
       renSt.m_material.remove(renSt);

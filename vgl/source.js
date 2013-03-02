@@ -17,6 +17,7 @@
  ========================================================================*/
 
 vglModule.source = function() {
+
   if (!(this instanceof vglModule.source)) {
     return new vglModule.source();
   }
@@ -24,7 +25,7 @@ vglModule.source = function() {
   vglModule.object.call(this);
 
   /**
-   * Derived class should implement this method
+   * Virtual function to create a source instance
    *
    */
   this.create = function() {

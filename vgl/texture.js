@@ -48,7 +48,6 @@ vglModule.texture = function() {
 
   /// Public member methods
   this.setup = function(renderState) {
-
     gl.deleteTexture(this.m_textureHandle);
     this.m_textureHandle = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, this.m_textureHandle);
@@ -80,9 +79,7 @@ vglModule.texture = function() {
     this.modifiedOff();
   };
 
-
   this.bind = function(renderState) {
-
     // TODO Call setup via material setup
     if (this.modified()) {
       this.setup(renderState);
@@ -96,13 +93,11 @@ vglModule.texture = function() {
     gl.bindTexture(gl.TEXTURE_2D, null);
   };
 
-
   this.handleTextureLoaded = function(image) {
     this.m_image = image;
     this.updateDimensions();
     this.modifiedOn(true);
   };
-
 
   this.image = function() {
     return this.m_image;
@@ -116,7 +111,6 @@ vglModule.texture = function() {
 
     return false;
   };
-
 
   this.textureUnit = function() {
     return this.m_textureUnit;
@@ -132,7 +126,6 @@ vglModule.texture = function() {
     return true;
   };
 
-
   this.width = function() {
     return this.m_width;
   };
@@ -143,11 +136,10 @@ vglModule.texture = function() {
     }
 
     this.m_width = width;
-    this.modifiedOn(true);
+    this.modifiedOn();
 
     return true;
   };
-
 
   this.depth = function() {
     return this.m_depth;
@@ -159,16 +151,13 @@ vglModule.texture = function() {
     }
 
     this.m_depth = depth;
-    this.modifiedOn(true);
-
+    this.modifiedOn();
     return true;
   };
-
 
   this.textureHandle = function() {
     return this.m_textureHandle;
   };
-
 
   this.internalFormat = function() {
     return this.m_internalFormat;
@@ -196,7 +185,7 @@ vglModule.texture = function() {
     }
 
     this.m_pixelFormat = pixelFormat;
-    this.modifiedOn(true);
+    this.modifiedOn();
     return true;
   };
 
@@ -212,11 +201,10 @@ vglModule.texture = function() {
 
     this.m_pixelDataTYpe = pixelDataType;
 
-    this.modifiedOn(true);
+    this.modifiedOn();
 
     return true;
   };
-
 
   this.computeInternalFormatUsingImage = function() {
     // Currently image does not define internal format
@@ -245,7 +233,6 @@ vglModule.texture = function() {
     this.m_pixelFormat = gl.RGBA;
     this.m_pixelDataType = gl.UNSIGNED_BYTE;
   };
-
 
   this.updateDimensions = function() {
     if (this.m_image !== null) {

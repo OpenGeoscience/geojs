@@ -31,34 +31,39 @@ vglModule.vertexAttributeKeys = {
   "CountAttributeIndex" : 5
 };
 
-///---------------------------------------------------------------------------
+
 vglModule.vertexAttribute = function (name) {
-  this.m_name = name;
-};
 
-///---------------------------------------------------------------------------
-vglModule.vertexAttribute.prototype.name = function() {
-  return this.m_name;
-};
+  if (!(this instanceof vglModule.vertexAttribute)) {
+    return new vglModule.vertexAttribute(name);
+  }
 
-///---------------------------------------------------------------------------
-vglModule.vertexAttribute.prototype.bindVertexData = function(renderState, key) {
-  var geometryData = renderState.m_mapper.geometryData();
-  var sourceData = geometryData.sourceData(key);
-  var program = renderState.m_material.shaderProgram();
+  /// Private member variables
+  var m_name = name;
 
-  gl.vertexAttribPointer(program.attributeLocation(this.m_name),
-                        sourceData.attributeNumberOfComponents(key),
-                        sourceData.attributeDataType(key),
-                        sourceData.normalized(key),
-                        sourceData.attributeStride(key),
-                        sourceData.attributeOffset(key));
+  /// Public member methods
+  this.name = function() {
+    return m_name;
+  };
 
-  gl.enableVertexAttribArray(program.attributeLocation(this.m_name));
-};
-///---------------------------------------------------------------------------
-vglModule.vertexAttribute.prototype.undoBindVertexData = function(renderState, key) {
-  var program = renderState.m_material.shaderProgram();
+  this.bindVertexData = function(renderState, key) {
+    var geometryData = renderState.m_mapper.geometryData();
+    var sourceData = geometryData.sourceData(key);
+    var program = renderState.m_material.shaderProgram();
 
-  gl.disableVertexAttribArray(program.attributeLocation(this.m_name));
+    gl.vertexAttribPointer(program.attributeLocation(m_name),
+                          sourceData.attributeNumberOfComponents(key),
+                          sourceData.attributeDataType(key),
+                          sourceData.normalized(key),
+                          sourceData.attributeStride(key),
+                          sourceData.attributeOffset(key));
+
+    gl.enableVertexAttribArray(program.attributeLocation(m_name));
+  };
+
+  this.undoBindVertexData = function(renderState, key) {
+    var program = renderState.m_material.shaderProgram();
+
+    gl.disableVertexAttribArray(program.attributeLocation(m_name));
+  };
 };

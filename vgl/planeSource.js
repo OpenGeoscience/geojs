@@ -41,7 +41,6 @@ vglModule.planeSource = function() {
     m_origin[2] = z;
   }
 
-  /////////////////////////////////////////////////////////////////////////////
   /**
    * Set point that defines the first axis of the plane
    *
@@ -52,7 +51,6 @@ vglModule.planeSource = function() {
     m_point1[2] = z;
   }
 
-  /////////////////////////////////////////////////////////////////////////////
   /**
    * Set point that defines the first axis of the plane
    *
@@ -63,7 +61,6 @@ vglModule.planeSource = function() {
     m_point2[2] = z;
   }
 
-  /////////////////////////////////////////////////////////////////////////////
   /**
    * Create a plane geometry given input parameters
    *
@@ -129,7 +126,7 @@ vglModule.planeSource = function() {
       }
     }
 
-    // Generate polygon connectivity
+    /// Generate polygon connectivity
     for (i = 0; i < m_yresolution; i++) {
       for (j = 0; j < m_xresolution; j++) {
         pts[0] = j + i*(m_xresolution+1);

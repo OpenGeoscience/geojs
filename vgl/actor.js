@@ -57,15 +57,14 @@ vglModule.actor = function() {
   };
 
   /**
-   * Get rotation defined by angle (radians) and axis (axis(x, y, z), angle)
+   * Get rotation defined by axis-angle (axis(x, y, z), angle)
    *
    */
-
   this.rotation = function() {
   };
 
   /**
-   * Set rotation defined by angle (radians) and axis (axis(x, y, z), angle)
+   * Set rotation defined by axis-angle (angle in radians)
    *
    */
   this.setRotation = function(angle, x, y, z) {
@@ -116,7 +115,7 @@ vglModule.actor = function() {
   };
 
   /**
-   * Evaluate the transform associated with the vtkvglModule.actor.
+   * Evaluate the transform associated with the actor.
    *
    * @returns Affine transformation for the vglModule.actor.
    */
@@ -127,23 +126,25 @@ vglModule.actor = function() {
   };
 
   /**
+   * Return modelview matrix for the actor
    *
-   *
+   * @returns mat4
    */
   this.matrix = function() {
     return this.modelViewMatrix();
   };
 
   /**
-   * Get mapper of the actor
+   * Return mapper where actor gets it behavior and data
    *
+   * @returns vglModule.mapper
    */
   this.mapper = function() {
     return m_mapper;
   };
 
   /**
-   * Set mapper on the actor
+   * Connect an actor to its data source (mapper)
    *
    */
   this.setMapper = function(mapper) {
@@ -167,12 +168,16 @@ vglModule.actor = function() {
   /**
    * Compute object space to world space matrix
    *
+   * TODO Implement this
+   *
    */
   this.computeLocalToWorldMatrix = function(matrix, visitor) {
   };
 
   /**
    * Compute world space to object space matrix
+   *
+   * TODO Implement this
    *
    */
   this.computeWorldToLocalMatrix = function(matrix, visitor) {
@@ -184,6 +189,8 @@ vglModule.actor = function() {
    */
   this.computeBounds = function() {
   };
+
+  return this;
 };
 
 inherit(vglModule.actor, vglModule.node);

@@ -23,109 +23,145 @@
 //////////////////////////////////////////////////////////////////////////////
 
 vglModule.node = function() {
+
+  if (!(this instanceof vglModule.node)) {
+    return new vglModule.node();
+  }
   vglModule.boundingObject.call(this);
 
-  this.m_parent = null;
-  this.m_material = null;
-  this.m_visible = true;
-  this.m_overlay = false;
+  /// Private member variables
+  var m_parent = null;
+  var m_material = null;
+  var m_visible = true;
+  var m_overlay = false;
+
+  /// Public member methods
+
+  /**
+   * Accept visitor for scene traversal
+   *
+   */
+  this.accept = function(visitor) {
+    visitor.visit(this);
+  };
+
+  /**
+   * Return active material
+   *
+   */
+  this.material = function() {
+    return m_material;
+  };
+
+  /**
+   * Set current material
+   *
+   */
+  this.setMaterial = function(material) {
+    if (material !== m_material)
+    {
+      m_material = material;
+      this.modifiedOn();
+      return true;
+    }
+
+    return false;
+  };
+
+  /**
+   * Return node's visibility
+   *
+   */
+  this.visible = function() {
+    return m_visible;
+  };
+
+  /**
+   * Set visibility of the node
+   *
+   */
+  this.setVisible = function(flag) {
+    if (flag !== m_visible)   {
+      m_visible = flag;
+      this.modifiedOn();
+      return true;
+    }
+
+    return false;
+  };
+
+  /**
+   * Return parent of the node
+   *
+   */
+  this.parent = function() {
+    return m_parent;
+  };
+
+  /**
+   * Set parent of the node
+   *
+   */
+  this.setParent = function(parent) {
+    if (parent !== m_parent) {
+      if (m_parent !== null) {
+        m_parent.removeChild(this);
+      }
+      m_parent = parent;
+      this.modifiedOn();
+      return true;
+    }
+
+    return false;
+  };
+
+  /**
+   * Return if node is an overlay or not
+   *
+   */
+  this.overlay = function() {
+    return m_overlay;
+  };
+
+  /**
+   * Set node overlay state
+   *
+   */
+  this.setOverlay = function(flag) {
+    if (m_overlay !== flag)   {
+      m_overlay = flag;
+      this.modifiedOn();
+      return true;
+    }
+
+    return false;
+  };
+
+  /*
+   * Traverse parent and their parent and so on
+   *
+   */
+  this.ascend = function(visitor) {
+  };
+
+  /**
+   * Traverse children
+   *
+   */
+  this.traverse = function(visitor) {
+  };
+
+  /**
+   * Virtual function to compute bounds of the node
+   *
+   */
+  this.computeBounds = function() {
+    if (this.boundsDirty())   {
+      this.resetBounds();
+    }
+  };
+
+  return this;
 };
 
 inherit(vglModule.node, vglModule.boundingObject);
-
-/// Accept visitor for scene traversal
-//----------------------------------------------------------------------------
-vglModule.node.prototype.accept = function(visitor) {
-  visitor.visit(this);
-};
-
-/// Return active material
-//----------------------------------------------------------------------------
-vglModule.node.prototype.material = function() {
-  return this.m_material;
-};
-/// Set current material
-//----------------------------------------------------------------------------
-vglModule.node.prototype.setMaterial = function(material) {
-  if (material !== this.m_material)
-  {
-    this.m_material = material;
-    this.modifiedOn();
-    return true;
-  }
-
-  return false;
-};
-
-/// Return node's visibility
-//----------------------------------------------------------------------------
-vglModule.node.prototype.visible = function() {
-  return this.m_visible;
-};
-/// Set visibility of the node
-//----------------------------------------------------------------------------
-vglModule.node.prototype.setVisible = function(flag) {
-  if (flag !== this.m_visible)   {
-    this.m_visible = flag;
-    this.modifiedOn();
-    return true;
-  }
-
-  return false;
-};
-
-/// Return parent of the node
-//----------------------------------------------------------------------------
-vglModule.node.prototype.parent = function() {
-  return this.m_parent;
-};
-/// Set parent of the node
-//----------------------------------------------------------------------------
-vglModule.node.prototype.setParent = function(parent) {
-  if (parent !== this.m_parent) {
-    if (this.m_parent !== null) {
-      this.m_parent.removeChild(this);
-    }
-    this.m_parent = parent;
-    this.modifiedOn();
-    return true;
-  }
-
-  return false;
-};
-
-/// Return if node is an overlay or not
-//----------------------------------------------------------------------------
-vglModule.node.prototype.overlay = function() {
-  return this.m_overlay;
-};
-/// Set node overlay state
-//----------------------------------------------------------------------------
-vglModule.node.prototype.setOverlay = function(flag) {
-  if (this.m_overlay !== flag)   {
-    this.m_overlay = flag;
-    this.modifiedOn();
-    return true;
-  }
-
-  return false;
-};
-
-///  Traverse parent and their parent and so on
-//----------------------------------------------------------------------------
-vglModule.node.prototype.ascend = function(visitor) {
-};
-
-/// Traverse children
-//----------------------------------------------------------------------------
-vglModule.node.prototype.traverse = function(visitor) {
-};
-
-/// Reset bounds of the vglModule.node. Actual bound calculation
-/// should be done in the concrete class.
-//----------------------------------------------------------------------------
-vglModule.node.prototype.computeBounds = function() {
-  if (this.boundsDirty())   {
-    this.resetBounds();
-  }
-};

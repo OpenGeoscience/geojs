@@ -15,14 +15,8 @@
   See the License for the specific language governing permissions and
   limitations under the License.
  ========================================================================*/
-
-
-
-/**
- * Not used right now
- */
-function modelViewMatrixStack()
-{
+/// Not used now
+function modelViewMatrixStack() {
   var mvMatrixStack = [];
 
   this.pushMatrix = function(mat) {

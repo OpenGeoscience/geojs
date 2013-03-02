@@ -23,69 +23,68 @@
 //////////////////////////////////////////////////////////////////////////////
 
 vglModule.shader = function(type) {
+
+  if (!(this instanceof vglModule.shader)) {
+    return new vglModule.shader(type);
+  }
   vglModule.object.call(this);
 
-  this.m_shaderHandle = null;
-  this.m_shaderType =  type;
-  this.m_shaderSource = "";
-  this.m_fileName = "";
+  var m_shaderHandle = null;
+  var m_shaderType =  type;
+  var m_shaderSource = "";
+  var m_fileName = "";
+
+  this.shaderHandle = function() {
+  };
+
+  this.shaderType = function() {
+    return m_shaderType;
+  };
+
+  this.fileName = function() {
+    return m_fileName;
+  };
+
+  this.setFileName = function(fileName) {
+    m_fileName = fileName;
+    this.modifiedOn();
+  };
+
+  this.shaderSource = function() {
+    return m_shaderSource;
+  };
+
+  this.setShaderSource = function(source) {
+    m_shaderSource = source;
+    this.modifiedOn();
+  };
+
+  this.compile = function() {
+    if (this.modified() === false) {
+      return m_shaderHandle;
+    }
+
+    gl.deleteShader(m_shaderHandle);
+    m_shaderHandle = gl.createShader(m_shaderType);
+    gl.shaderSource(m_shaderHandle, m_shaderSource);
+    gl.compileShader(m_shaderHandle);
+
+    // See if it compiled successfully
+    if (!gl.getShaderParameter(m_shaderHandle, gl.COMPILE_STATUS)) {
+      console.log("[ERROR] An error occurred compiling the shaders: " +
+                  gl.getShaderInfoLog(m_shaderHandle));
+      gl.deleteShader(m_shaderHandle);
+      return null;
+    }
+
+    this.modifiedOff();
+
+    return m_shaderHandle;
+  };
+
+  this.attachShader = function(programHandle) {
+    gl.attachShader(programHandle, m_shaderHandle);
+  };
 };
 
 inherit(vglModule.shader, vglModule.object);
-
-///---------------------------------------------------------------------------
-vglModule.shader.prototype.shaderHandle = function() {
-};
-
-///---------------------------------------------------------------------------
-vglModule.shader.prototype.shaderType = function() {
-  return this.m_shaderType;
-};
-
-///---------------------------------------------------------------------------
-vglModule.shader.prototype.fileName = function() {
-  return this.m_fileName;
-};
-///---------------------------------------------------------------------------
-vglModule.shader.prototype.setFileName = function(fileName) {
-  this.m_fileName = fileName;
-};
-
-///---------------------------------------------------------------------------
-vglModule.shader.prototype.shaderSource = function() {
-  return this.m_shaderSource;
-};
-///---------------------------------------------------------------------------
-vglModule.shader.prototype.setShaderSource = function(source) {
-  this.m_shaderSource = source;
-
-  this.modifiedOn(true);
-};
-
-///---------------------------------------------------------------------------
-vglModule.shader.prototype.compile = function() {
-
-  if (this.modified() === false) {
-    return null;
-  }
-
-  gl.deleteShader(this.m_shaderHandle);
-  this.m_shaderHandle = gl.createShader(this.m_shaderType);
-  gl.shaderSource(this.m_shaderHandle, this.m_shaderSource);
-  gl.compileShader(this.m_shaderHandle);
-
-  // See if it compiled successfully
-  if (!gl.getShaderParameter(this.m_shaderHandle, gl.COMPILE_STATUS)) {
-    console.log("[ERROR] An error occurred compiling the shaders: " +
-                gl.getShaderInfoLog(this.m_shaderHandle));
-    gl.deleteShader(this.m_shaderHandle);
-    return null;
-  }
-
-  return this.m_shaderHandle;
-};
-
-///---------------------------------------------------------------------------
-vglModule.shader.prototype.attachShader = function(programHandle) {
-  gl.attachShader(programHandle, this.m_shaderHandle);
-};

@@ -52,7 +52,6 @@ vglModule.material = function() {
     this.modifiedOn();
   };
 
-
   this.exists = function(attr) {
     if (attr.type() === vglModule.materialAttribute.Texture) {
       return m_textureAttributes.hasOwnProperty(attr);
@@ -60,7 +59,6 @@ vglModule.material = function() {
       return m_attributes.hasOwnProperty(attr);
     }
   };
-
 
   this.addAttribute = function(attr) {
 
@@ -85,21 +83,17 @@ vglModule.material = function() {
     return false;
   };
 
-
   this.shaderProgram = function() {
     return m_shaderProgram;
   };
-
 
   this.render = function(renderState) {
     this.bind(renderState);
   };
 
-
   this.remove = function(renderState) {
     this.undoBind(renderState);
   };
-
 
   this.bind = function(renderState) {
 
@@ -130,7 +124,6 @@ vglModule.material = function() {
       }
     }
   };
-
 
   this.bindVertexData = function(renderState, key) {
 

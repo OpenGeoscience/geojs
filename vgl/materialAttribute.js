@@ -54,7 +54,6 @@ vglModule.materialAttribute = function(type) {
     return false;
   };
 
-
   this.bind  = function(renderState) {
     return false;
   };
@@ -63,11 +62,9 @@ vglModule.materialAttribute = function(type) {
     return false;
   };
 
-
   this.setupVertexData = function(renderState, key) {
     return false;
   };
-
 
   this.bindVertexData = function(renderState, key) {
     return false;

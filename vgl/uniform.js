@@ -23,6 +23,11 @@
 //////////////////////////////////////////////////////////////////////////////
 
 vglModule.uniform = function(type, name) {
+
+  if (!(this instanceof vglModule.uniform)) {
+    return new vglModule.uniform();
+  }
+
   this.getTypeNumberOfComponents = function(type) {
     switch (type) {
       case gl.FLOAT:
@@ -56,91 +61,94 @@ vglModule.uniform = function(type, name) {
     }
   };
 
-  this.m_type = type;
-  this.m_name = name;
-  this.m_dataArray = [this.getTypeNumberOfComponents(this.m_type)];
-  this.m_numberOfElements = 1;
-};
+  var m_type = type;
+  var m_name = name;
+  var m_dataArray = [this.getTypeNumberOfComponents(m_type)];
+  var m_numberOfElements = 1;
 
-vglModule.uniform.prototype.name = function() {
-  return this.m_name;
-};
+  this.name = function() {
+    return m_name;
+  };
 
-vglModule.uniform.prototype.type = function() {
-  return this.m_type;
-};
+  this.type = function() {
+    return m_type;
+  };
 
-vglModule.uniform.prototype.get = function() {
-  // TODO
-};
+  this.get = function() {
+    // TODO
+  };
 
-vglModule.uniform.prototype.set = function(value) {
-  var i = 0;
-  if (value instanceof mat4.constructor) {
-    for (i = 0; i < 16; ++i) {
-      this.m_dataArray[i] = value[i];
+  this.set = function(value) {
+    var i = 0;
+    if (value instanceof mat4.constructor) {
+      for (i = 0; i < 16; ++i) {
+        m_dataArray[i] = value[i];
+      }
     }
-  }
-  else if (value instanceof mat3.constructor) {
-    for (i = 0; i < 9; ++i) {
-      this.m_dataArray[i] = value[i];
+    else if (value instanceof mat3.constructor) {
+      for (i = 0; i < 9; ++i) {
+        m_dataArray[i] = value[i];
+      }
     }
-  }
-  else if (value instanceof vec4.constructor) {
-    for (i = 0; i < 4; ++i) {
-      this.m_dataArray[i] = value[i];
+    else if (value instanceof vec4.constructor) {
+      for (i = 0; i < 4; ++i) {
+        m_dataArray[i] = value[i];
+      }
     }
-  }
-  else if (value instanceof vec3.constructor) {
-    for (i = 0; i < 3; ++i) {
-      this.m_dataArray[i] = value[i];
+    else if (value instanceof vec3.constructor) {
+      for (i = 0; i < 3; ++i) {
+        m_dataArray[i] = value[i];
+      }
     }
-  }
-  else if (value instanceof vec2.constructor) {
-    for (i = 0; i < 2; ++i) {
-      this.m_dataArray[i] = value[i];
+    else if (value instanceof vec2.constructor) {
+      for (i = 0; i < 2; ++i) {
+        m_dataArray[i] = value[i];
+      }
     }
-  }
-  else {
-    this.m_dataArray[0] = value;
-  }
-};
+    else {
+      m_dataArray[0] = value;
+    }
+  };
 
-vglModule.uniform.prototype.callGL = function(location) {
-  if (this.m_numberElements < 1)
-    return;
+  this.callGL = function(location) {
+    if (this.m_numberElements < 1)
+      return;
 
-  switch (this.m_type) {
-    case gl.BOOL:
-    case gl.INT:
-      gl.uniform1iv(location, this.m_dataArray);
-      break;
-    case gl.FLOAT:
-      gl.uniform1fv(location, this.m_dataArray);
-      break;
-    case gl.FLOAT_VEC2:
-      gl.uniform2fv(location, this.m_dataArray);
-      break;
-    case gl.FLOAT_VEC3:
-      gl.uniform3fv(location, this.m_dataArray);
-      break;
-    case gl.FLOAT_VEC4:
-      gl.uniform4fv(location, this.m_dataArray);
-      break;
-    case gl.FLOAT_MAT3:
-      gl.uniformMatrix3fv(location, gl.FALSE, this.m_dataArray);
-      break;
-    case gl.FLOAT_MAT4:
-      gl.uniformMatrix4fv(location, gl.FALSE, this.m_dataArray);
-      break;
-    default:
+    switch (m_type) {
+      case gl.BOOL:
+      case gl.INT:
+        gl.uniform1iv(location, m_dataArray);
         break;
-  }
+      case gl.FLOAT:
+        gl.uniform1fv(location, m_dataArray);
+        break;
+      case gl.FLOAT_VEC2:
+        gl.uniform2fv(location, m_dataArray);
+        break;
+      case gl.FLOAT_VEC3:
+        gl.uniform3fv(location, m_dataArray);
+        break;
+      case gl.FLOAT_VEC4:
+        gl.uniform4fv(location, m_dataArray);
+        break;
+      case gl.FLOAT_MAT3:
+        gl.uniformMatrix3fv(location, gl.FALSE, m_dataArray);
+        break;
+      case gl.FLOAT_MAT4:
+        gl.uniformMatrix4fv(location, gl.FALSE, m_dataArray);
+        break;
+      default:
+          break;
+    }
+  };
+
+  this.update = function(renderState, program) {
+    // Should be implemented by the derived class
+  };
+
+  return this;
 };
 
-vglModule.uniform.prototype.update = function(renderState, program) {
-  // Should be implemented by the derived class
-};
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -150,19 +158,26 @@ vglModule.uniform.prototype.update = function(renderState, program) {
 
 vglModule.modelViewUniform = function(name) {
 
+  if (!(this instanceof vglModule.modelViewUniform)) {
+    return new vglModule.modelViewUniform(name);
+  }
+
   if (name.length === 0) {
     name = "modelViewMatrix";
   }
 
   vglModule.uniform.call(this, gl.FLOAT_MAT4, name);
+
   this.set(mat4.create());
+
+  this.update = function(renderState, program) {
+    this.set(renderState.m_modelViewMatrix);
+  };
+
+  return this;
 };
 
 inherit(vglModule.modelViewUniform, vglModule.uniform);
-
-vglModule.modelViewUniform.prototype.update = function(renderState, program) {
-  this.set(renderState.m_modelViewMatrix);
-};
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -171,19 +186,28 @@ vglModule.modelViewUniform.prototype.update = function(renderState, program) {
 //////////////////////////////////////////////////////////////////////////////
 
 vglModule.projectionUniform  = function(name) {
+
+  if (!(this instanceof vglModule.projectionUniform)) {
+    return new vglModule.projectionUniform(name);
+  }
+
   if (name.length === 0) {
     name = "projectionMatrix";
   }
 
   vglModule.uniform.call(this, gl.FLOAT_MAT4, name);
+
   this.set(mat4.create());
+
+  this.update = function(renderState, program) {
+    this.set(renderState.m_projectionMatrix);
+  };
+
+  return this;
 };
 
 inherit(vglModule.projectionUniform, vglModule.uniform);
 
-vglModule.projectionUniform.prototype.update = function(renderState, program) {
-  this.set(renderState.m_projectionMatrix);
-};
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -192,11 +216,17 @@ vglModule.projectionUniform.prototype.update = function(renderState, program) {
 //////////////////////////////////////////////////////////////////////////////
 
 vglModule.floatUniform  = function(name) {
+
+  if (!(this instanceof vglModule.floatUniform)) {
+    return new vglModule.floatUniform(name);
+  }
+
   if (name.length === 0) {
     name = "floatUniform";
   }
 
   vglModule.uniform.call(this, gl.FLOAT, name);
+
   this.set(1.0);
 };
 

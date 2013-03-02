@@ -23,53 +23,56 @@
 //////////////////////////////////////////////////////////////////////////////
 
 vglModule.boundingObject = function() {
+
+  if (!(this instanceof vglModule.boundingObject)) {
+    return new vglModule.boundingObject();
+  }
   vglModule.object.call(this);
 
-  this.m_boundsDirty = true;
-  this.m_bounds = new Array(6);
+  var m_boundsDirty = true;
+  var m_bounds = new Array(6);
+
+  /// Return dirty state of bounds
+  this.boundsDirty = function() {
+    return m_boundsDirty;
+  };
+
+  /// Set bounds dirty
+  this.setBoundsDirty = function(flag) {
+    if (m_boundsDirty !== flag) {
+      m_boundsDirty = flag;
+      this.modifiedOn();
+      return true;
+    }
+
+    return false;
+  };
+
+  /// Return current bounds
+  this.bounds  = function() {
+    return m_bounds;
+  };
+
+  /// Set current bounds
+  this.setBounds = function(minX, maxX, minY, maxY,
+                                                    minZ, maxZ) {
+    m_bounds[0] = minX;
+    m_bounds[1] = maxX;
+    m_bounds[2] = minY;
+    m_bounds[3] = maxY;
+    m_bounds[4] = minZ;
+    m_bounds[5] = maxZ;
+
+    this.modifiedOn();
+
+    return true;
+  };
+
+  /// Request computing bounds. Should be implemented by the concrete class
+  this.computeBounds = function() {
+  };
+
+  return this;
 };
 
 inherit(vglModule.boundingObject, vglModule.object);
-
-/// Return dirty state of bounds
-//----------------------------------------------------------------------------
-vglModule.boundingObject.prototype.boundsDirty = function() {
-  return this.m_boundsDirty;
-};
-/// Set bounds dirty
-//----------------------------------------------------------------------------
-vglModule.boundingObject.prototype.setBoundsDirty = function(flag) {
-  if (this.m_boundsDirty !== flag) {
-    this.m_boundsDirty = flag;
-    this.modifiedOn();
-    return true;
-  }
-
-  return false;
-};
-
-/// Return current bounds
-//----------------------------------------------------------------------------
-vglModule.boundingObject.prototype.bounds  = function() {
-  return this.m_bounds;
-};
-/// Set current bounds
-//----------------------------------------------------------------------------
-vglModule.boundingObject.prototype.setBounds = function(minX, maxX, minY, maxY,
-                                                  minZ, maxZ) {
-  this.m_bounds[0] = minX;
-  this.m_bounds[1] = maxX;
-  this.m_bounds[2] = minY;
-  this.m_bounds[3] = maxY;
-  this.m_bounds[4] = minZ;
-  this.m_bounds[5] = maxZ;
-
-  this.modifiedOn();
-
-  return true;
-};
-
-/// Request computing bounds. Should be implemented by the concrete class
-//----------------------------------------------------------------------------
-vglModule.boundingObject.prototype.computeBounds = function() {
-};

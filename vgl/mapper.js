@@ -45,17 +45,25 @@ vglModule.mapper = function() {
   var m_buffers = [];
   var m_bufferVertexAttributeMap = {};
 
-  /// Compute bounds of the data
+  /**
+   * Compute bounds of the data
+   *
+   */
   this.computeBounds = function() {
   };
 
-  /// Return stored geometry data if any
-
+  /**
+   * Return stored geometry data if any
+   *
+   */
   this.geometryData = function() {
     return m_geomData;
   };
 
-  /// Set geometry data for the mapper
+  /**
+   * Connect mapper to its geometry data
+   *
+   */
   this.setGeometryData = function(geom) {
     if (m_geomData !== geom )   {
       m_geomData = geom;
@@ -65,28 +73,21 @@ vglModule.mapper = function() {
     }
   };
 
-  /// Render
-
+  /**
+   * Render the mapper
+   *
+   */
   this.render = function(renderState) {
-    // Bind material
-
-    console.log('render 0');
-
     if (m_dirty) {
-
       this.setupDrawObjects(renderState);
     }
-
-    console.log('render 1');
 
     // TODO Use renderState
     var bufferIndex = 0;
     var i = null;
     var j = 0;
     for (i in m_bufferVertexAttributeMap) {
-      console.log('render 2');
       if (m_bufferVertexAttributeMap.hasOwnProperty(i)) {
-        console.log("foo1");
         gl.bindBuffer(gl.ARRAY_BUFFER, m_buffers[bufferIndex]);
         for (j = 0; j < m_bufferVertexAttributeMap[i].length; ++j) {
           renderState.m_material.bindVertexData(
@@ -96,38 +97,31 @@ vglModule.mapper = function() {
       }
     }
 
-    console.log('render 3');
     var noOfPrimitives = m_geomData.numberOfPrimitives();
     for (j = 0; j < noOfPrimitives; ++j) {
-      console.log('render 4');
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, m_buffers[bufferIndex++]);
-      console.log('render 5');
       var primitive = m_geomData.primitive(j);//
       gl.drawElements(primitive.primitiveType(), primitive.numberOfIndices(),
                       primitive.indicesValueType(),  0);
     }
-
-    // Unbind material
   };
 
-  ///
-  /// Internal methods
-  //
-  ///////////////////////////////////////////////////////////////////////////////
-
-  /// Delete previously created buffers
-
+  /**
+   * Delete cached VBO if any
+   *
+   */
   this.deleteVertexBufferObjects = function() {
     for (var i = 0 ; i < m_buffers.length; ++i)   {
       gl.deleteBuffer(m_buffers[i]);
     }
   };
 
-  /// Create new buffers
-
+  /**
+   * Create new VBO for all its geometryData sources and primitives
+   *
+   */
   this.createVertexBufferObjects = function() {
     if (m_geomData) {
-      console.log("creting buffer objects");
       var numberOfSources = m_geomData.numberOfSources();
       var i = 0;
       var bufferId = null;
@@ -136,8 +130,6 @@ vglModule.mapper = function() {
         gl.bindBuffer(gl.ARRAY_BUFFER, bufferId);
         gl.bufferData(gl.ARRAY_BUFFER, m_geomData.source(i).data(),
                       gl.STATIC_DRAW);
-
-        console.log("creting buffer objects 2");
 
         keys = m_geomData.source(i).keys();
         ks = [];
@@ -151,30 +143,28 @@ vglModule.mapper = function() {
 
       var numberOfPrimitives = m_geomData.numberOfPrimitives();
       for (var k = 0; k < numberOfPrimitives; ++k) {
-        console.log("creting buffer objects 3");
-
         bufferId = gl.createBuffer();
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, bufferId);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, m_geomData.primitive(k).indices(),
                      gl.STATIC_DRAW);
-
-        console.log("creting buffer objects 4");
         m_buffers[i++] = bufferId;
       }
     }
-
-    console.log("creting buffer objects 5");
   };
 
-  /// Clear cache related to buffers
-
+  /**
+   * Clear cache related to buffers
+   *
+   */
   this.cleanUpDrawObjects = function() {
   m_bufferVertexAttributeMap = {};
     m_buffers = [];
   };
 
-  /// Setup draw objects; Delete old ones and create new ones
-
+  /**
+   * Setup draw objects; Delete old ones and create new ones
+   *
+   */
   this.setupDrawObjects = function(renderState) {
     // Delete buffer objects from past if any.
     this.deleteVertexBufferObjects();

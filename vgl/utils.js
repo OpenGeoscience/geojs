@@ -27,10 +27,10 @@
  *
  */
 vglModule.utils = function() {
+
   if (!(this instanceof vglModule.utils)) {
     return new vglModule.utils();
   }
-
   vglModule.object.call(this);
 
   return this;

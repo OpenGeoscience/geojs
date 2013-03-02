@@ -23,6 +23,10 @@
 //////////////////////////////////////////////////////////////////////////////
 
 vglModule.camera = function() {
+
+  if (!(this instanceof vglModule.camera)) {
+    return new vglModule.camera();
+  }
   vglModule.groupNode.call(this);
 
   /// Private member variables
@@ -144,7 +148,7 @@ vglModule.camera = function() {
 
 
   /**
-   * Perform yaw on the camera give rotation in degrees
+   * Perform yaw on the camera give a rotation angle (in degrees)
    *
    */
   this.yaw = function(degrees) {
@@ -173,7 +177,7 @@ vglModule.camera = function() {
   };
 
   /**
-   * Perform pitch on the camera give rotation in degrees
+   * Perform pitch on the camera give a rotation (in degrees)
    *
    */
   this.pitch = function(degrees) {
@@ -235,15 +239,21 @@ vglModule.camera = function() {
   };
 
   /**
+   * Return view-matrix for the camera
    *
+   * This method does not compute the view-matrix for the camera. It is
+   * assumed that a call to computeViewMatrix has been made earlier.
+   *
+   * @returns mat4
    *
    */
   this.viewMatrix = function() {
     return m_viewMatrix;
-  }
+  };
 
   /**
    * Compute camera projection matrix
+   *
    *
    */
   this.computeProjectionMatrix = function(aspect, near, far) {
@@ -259,10 +269,14 @@ vglModule.camera = function() {
   /**
    * Return camera projection matrix
    *
+   * This method does not compute the projection-matrix for the camera. It is
+   * assumed that a call to computeProjectionMatrix has been made earlier.
    */
   this.projectionMatrix = function() {
     return m_projectionMatrix;
-  }
+  };
+
+  return this;
 };
 
 inherit(vglModule.camera, vglModule.groupNode);
