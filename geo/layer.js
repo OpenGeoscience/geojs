@@ -21,7 +21,6 @@
 // Layer base class
 //
 //////////////////////////////////////////////////////////////////////////////
-
 /**
  * Layer options object specification
  *
@@ -33,7 +32,7 @@ geoModule.layerOptions = function() {
     return new geoModule.layerOptions();
   }
 
-  this.opacity  = 1;
+  this.opacity = 1;
   this.showAttribution = true;
   this.visible = true;
 
@@ -49,27 +48,35 @@ geoModule.layerOptions = function() {
  */
 geoModule.layer = function(options) {
 
+  this.signals = {
+    "opacityChanged" : "opacityChanged",
+    "layerUpdated" : "layerUpdated"
+  };
+
   if (!(this instanceof geoModule.layer)) {
     return new geoModule.layer(options);
   }
 
   ogs.vgl.object.call(this);
 
-  /// Member variables
+  /** Member variables */
+  var m_that = this;
   var m_opacity = options.opacity || 1.0;
+
+  /** TODO Write a function for this */
   if (m_opacity > 1.0) {
     m_opacity = 1.0;
-    console.log("[warning] Opacity cannot be greater than 1.0");
+    console.log("[WARNING] Opacity cannot be greater than 1.0");
   }
   else if (m_opacity < 0.0) {
-    console.log("[warning] Opacity cannot be less than 1.0");
+    console.log("[WARNING] Opacity cannot be less than 1.0");
   }
 
   var m_showAttribution = options.showAttribution || true;
   var m_visible = options.visible || true;
 
   /**
-   * Return the underlying renderable entity
+   * Return the underlying drawable entity
    *
    * This function should be implemented by the derived classes
    */
@@ -77,22 +84,56 @@ geoModule.layer = function(options) {
     return null;
   };
 
+  /**
+   * Query opacity of the layer (range[0.0, 1.0])
+   *
+   */
+  this.opacity = function() {
+    return m_opacity;
+  };
+
+  /**
+   * Set opacity of the layer in the range of [0.0, 1.0]
+   *
+   */
+  this.setOpacity = function(val) {
+    m_opacity = val;
+    $(m_that).trigger({
+      type : this.signals.opacityChanged,
+      opacity : m_opacity
+    });
+  };
+
+  /**
+   * Virtual function to update the layer *
+   */
+  this.update = function() {
+  };
+
+  /**
+   * Virtual slot to handle opacity change
+   *
+   * Concrete class should implement this method.
+   */
+  this.updateLayerOpacity = function(event) {
+  };
+
   return this;
 };
 
 inherit(geoModule.layer, ogs.vgl.object);
 
-//////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
 //
 // featureLayer class
 //
-//////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
 
 /**
  * Layer to draw points, lines, and polygons on the map
  *
- * The polydata layer provide mechanisms to create and draw geometrical
- * shapes such as points, lines, and polygons.
+ * The polydata layer provide mechanisms to create and draw geometrical shapes
+ * such as points, lines, and polygons.
  *
  */
 geoModule.featureLayer = function(options, feature) {
@@ -101,13 +142,12 @@ geoModule.featureLayer = function(options, feature) {
     return new geoModule.featureLayer(options, feature);
   }
 
-  /// Register with base class
+  // / Register with base class
   geoModule.layer.call(this, options);
 
-  /// Initialize member variables
-  var m_opacity = options.opacity || 1.0;
+  // / Initialize member variables
+  var m_that = this;
   var m_actor = feature;
-
   /**
    * Return the underlying renderable entity
    *
@@ -122,8 +162,27 @@ geoModule.featureLayer = function(options, feature) {
    *
    */
   this.setFeature = function(feature) {
-    this.m_actor = feature;
+    m_actor = feature;
   };
+
+  /**
+   * Slot to handle opacity change
+   *
+   */
+  this.updateLayerOpacity = function(event) {
+    console.log('updated layer opacity');
+
+    var mat = m_actor.material();
+    var opacityUniform = mat.shaderProgram().uniform('opacity');
+
+    if (opacityUniform != null) {
+      opacityUniform.set(event.opacity);
+      $(m_that).trigger(this.signals.layerUpdated);
+    }
+  };
+
+  /** Signal-slot connection */
+  $(m_that).on(this.signals.opacityChanged, m_that.updateLayerOpacity);
 
   return this;
 };

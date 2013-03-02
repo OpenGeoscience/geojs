@@ -90,7 +90,7 @@ geoModule.map = function(node, options) {
   }
 
   // TODO For now using the JQuery
-  $(this).on('CameraEvent', draw);
+  $(this).on('mapUpdated', draw);
 
   var m_renderer = new ogs.vgl.renderer();
   var m_camera = m_renderer.camera();
@@ -210,13 +210,13 @@ geoModule.map = function(node, options) {
 
       // Move the scene in the direction of movement of mouse;
       m_camera.pan(-dx, -dy);
-      $(m_that).trigger('CameraEvent');
+      $(m_that).trigger('mapUpdated');
     }
 
     if (m_rightMouseButtonDown) {
       zTrans = currentMousePos.y - m_mouseLastPos.y;
       m_camera.zoom(zTrans * 0.5);
-      $(m_that).trigger('CameraEvent');
+      $(m_that).trigger('mapUpdated');
     }
 
     m_mouseLastPos.x = currentMousePos.x;
@@ -345,6 +345,14 @@ geoModule.map = function(node, options) {
     }
 
     return false;
+  };
+
+  /**
+   * Manually force to render map
+   *
+   */
+  this.redraw = function() {
+    m_renderer.render();
   };
 
   return this;

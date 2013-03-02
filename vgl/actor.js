@@ -21,7 +21,6 @@
 // actor class
 //
 //////////////////////////////////////////////////////////////////////////////
-
 vglModule.actor = function() {
 
   if (!(this instanceof vglModule.actor)) {
@@ -30,7 +29,7 @@ vglModule.actor = function() {
 
   vglModule.node.call(this);
 
-  /// Initialize member variables
+  // / Initialize member variables
   var m_center = new Array(3);
   var m_rotation = new Array(4);
   var m_scale = new Array(3);
@@ -42,7 +41,7 @@ vglModule.actor = function() {
    * Get center of transformations
    *
    */
-  this.center  = function() {
+  this.center = function() {
     return m_center;
   };
 
@@ -99,16 +98,16 @@ vglModule.actor = function() {
   };
 
   /**
-   * Get reference frame for the transformations. Possible values
-   * are Absolute and Relative.
+   * Get reference frame for the transformations. Possible values are Absolute
+   * and Relative.
    *
    */
   this.referenceFrame = function() {
   };
 
   /**
-   * Set reference frame for the transformations. Possible values
-   * are Absolute and Relative.
+   * Set reference frame for the transformations. Possible values are Absolute
+   * and Relative.
    *
    */
   this.setReferenceFrame = function(referenceFrame) {

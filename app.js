@@ -18,13 +18,11 @@
 
 // Disable console log
 // console.log = function() {}
-
 ///////////////////////////////////////////////////////////////////////////////
 //
 // main program
 //
 ///////////////////////////////////////////////////////////////////////////////
-
 function main() {
 
   var mapOptions = {
@@ -33,14 +31,23 @@ function main() {
   };
 
   var myMap = ogs.geo.map(document.getElementById("glcanvas"), mapOptions);
-  var planeLayer = ogs.geo.featureLayer(
-    {"opacity":1, "showAttribution":1, "visible":1},
-      ogs.geo.planeFeature(ogs.geo.latlng(-90.0, 0.0), ogs.geo.latlng(90.0, 180.0)));
+  var planeLayer = ogs.geo.featureLayer({
+    "opacity" : 1,
+    "showAttribution" : 1,
+    "visible" : 1
+  }, ogs.geo.planeFeature(ogs.geo.latlng(-90.0, 0.0), ogs.geo.latlng(90.0,
+  180.0)));
 
   myMap.addLayer(planeLayer);
 
-  $(myMap).on('CameraEvent', function() {
+  $(myMap).on('mapUpdated', function() {
     // For test purposes only
     console.log("Yohoo.....camera has been moved or something");
+  });
+
+  // / Listen for slider slidechange event
+  $('#slider-vertical').slider().bind('slide', function(event, ui) {
+    planeLayer.setOpacity(ui.value);
+    myMap.redraw();
   });
 }
