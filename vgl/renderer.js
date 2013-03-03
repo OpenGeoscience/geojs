@@ -21,7 +21,6 @@
 // renderState class
 //
 //////////////////////////////////////////////////////////////////////////////
-///---------------------------------------------------------------------------
 vglModule.renderState = function() {
   this.m_modelViewMatrix = mat4.create();
   this.m_projectionMatrix = null;
@@ -47,7 +46,7 @@ vglModule.renderer = function() {
 
   vglModule.object.call(this);
 
-  // / Private member variables
+  /** Private member variables */
   var m_width = 1280;
   var m_height = 1024;
   var m_clippingRange = [ 0.1, 1000.0 ];
@@ -56,7 +55,7 @@ vglModule.renderer = function() {
 
   m_camera.addChild(m_sceneRoot);
 
-  // / Public member methods
+  /** Public member methods */
 
   /**
    * Get scene root
@@ -101,16 +100,15 @@ vglModule.renderer = function() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     perspectiveMatrix = m_camera.computeProjectionMatrix((m_width / m_height),
-    0.1, 10000.0);
+                                                         0.1, 10000.0);
 
     var renSt = new vglModule.renderState();
     renSt.m_projectionMatrix = perspectiveMatrix;
     var children = m_sceneRoot.children();
     for ( var i = 0; i < children.length; ++i) {
-      console.log('actor index ' + i);
       var actor = children[i];
       mat4.multiply(m_camera.computeViewMatrix(), actor.matrix(),
-      renSt.m_modelViewMatrix);
+                    renSt.m_modelViewMatrix);
       renSt.m_material = actor.material();
       renSt.m_mapper = actor.mapper();
 
@@ -171,7 +169,7 @@ vglModule.renderer = function() {
    *
    */
   vglModule.renderer.worldToDisplay = function(worldPt, viewMatrix,
-  projectionMatrix, width, height) {
+                                               projectionMatrix, width, height) {
     var viewProjectionMatrix = mat4.create();
     mat4.multiply(projectionMatrix, viewMatrix, viewProjectionMatrix);
 
@@ -201,7 +199,7 @@ vglModule.renderer = function() {
    *
    */
   vglModule.renderer.displayToWorld = function(displayPt, viewMatrix,
-  projectionMatrix, width, height) {
+                                               projectionMatrix, width, height) {
     var x = (2.0 * displayPt[0] / width) - 1;
     var y = -(2.0 * displayPt[1] / height) + 1;
     var z = displayPt[2];

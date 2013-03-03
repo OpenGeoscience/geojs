@@ -21,7 +21,6 @@
 // utils class
 //
 ///////////////////////////////////////////////////////////////////////////////
-
 /**
  * Utility class provides helper functions to create geometry objects
  *
@@ -45,18 +44,17 @@ inherit(vglModule.utils, vglModule.object);
  * @returns {vglModule.shader}
  */
 vglModule.utils.createTextureFragmentShader = function(context) {
- var fragmentShaderSource = [
-   'varying highp vec3 iTextureCoord;',
-   'uniform sampler2D sampler2d;',
-   'uniform mediump float opacity;',
-   'void main(void) {',
-     'gl_FragColor = vec4(texture2D(sampler2d, vec2(iTextureCoord.s, iTextureCoord.t)).xyz, opacity);',
-   '}'
-  ].join('\n');
+  var fragmentShaderSource = [
+                              'varying highp vec3 iTextureCoord;',
+                              'uniform sampler2D sampler2d;',
+                              'uniform mediump float opacity;',
+                              'void main(void) {',
+                              'gl_FragColor = vec4(texture2D(sampler2d, vec2(iTextureCoord.s, iTextureCoord.t)).xyz, opacity);',
+                              '}' ].join('\n');
 
- var shader = new vglModule.shader(gl.FRAGMENT_SHADER);
- shader.setShaderSource(fragmentShaderSource);
- return shader;
+  var shader = new vglModule.shader(gl.FRAGMENT_SHADER);
+  shader.setShaderSource(fragmentShaderSource);
+  return shader;
 };
 
 /**
@@ -66,17 +64,15 @@ vglModule.utils.createTextureFragmentShader = function(context) {
  * @returns {vglModule.shader}
  */
 vglModule.utils.createFragmentShader = function(context) {
- var fragmentShaderSource = [
-   'varying mediump vec3 iVertexColor;',
-   'uniform mediump float opacity;',
-   'void main(void) {',
-     'gl_FragColor = vec4(iVertexColor, opacity);',
-   '}'
-  ].join('\n');
+  var fragmentShaderSource = [ 'varying mediump vec3 iVertexColor;',
+                              'uniform mediump float opacity;',
+                              'void main(void) {',
+                              'gl_FragColor = vec4(iVertexColor, opacity);',
+                              '}' ].join('\n');
 
- var shader = new vglModule.shader(gl.FRAGMENT_SHADER);
- shader.setShaderSource(fragmentShaderSource);
- return shader;
+  var shader = new vglModule.shader(gl.FRAGMENT_SHADER);
+  shader.setShaderSource(fragmentShaderSource);
+  return shader;
 };
 
 /**
@@ -86,22 +82,20 @@ vglModule.utils.createFragmentShader = function(context) {
  * @returns {vglModule.shader}
  */
 vglModule.utils.createTextureVertexShader = function(context) {
- var vertexShaderSource = [
-   'attribute vec3 vertexPosition;',
-   'attribute vec3 textureCoord;',
-   'uniform mat4 modelViewMatrix;',
-   'uniform mat4 projectionMatrix;',
-   'varying highp vec3 iTextureCoord;',
-   'void main(void)',
-   '{',
-   'gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
-   ' iTextureCoord = textureCoord;',
-   '}'
- ].join('\n');
+  var vertexShaderSource = [
+                            'attribute vec3 vertexPosition;',
+                            'attribute vec3 textureCoord;',
+                            'uniform mat4 modelViewMatrix;',
+                            'uniform mat4 projectionMatrix;',
+                            'varying highp vec3 iTextureCoord;',
+                            'void main(void)',
+                            '{',
+                            'gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
+                            ' iTextureCoord = textureCoord;', '}' ].join('\n');
 
- var shader = new vglModule.shader(gl.VERTEX_SHADER);
- shader.setShaderSource(vertexShaderSource);
- return shader;
+  var shader = new vglModule.shader(gl.VERTEX_SHADER);
+  shader.setShaderSource(vertexShaderSource);
+  return shader;
 };
 
 /**
@@ -111,25 +105,23 @@ vglModule.utils.createTextureVertexShader = function(context) {
  * @returns {vglModule.shader}
  */
 vglModule.utils.createVertexShader = function(context) {
-   var vertexShaderSource = [
-     'attribute vec3 vertexPosition;',
-     'attribute vec3 textureCoord;',
-     'attribute vec3 vertexColor;',
-     'uniform mat4 modelViewMatrix;',
-     'uniform mat4 projectionMatrix;',
-     'varying mediump vec3 iVertexColor;',
-     'varying highp vec3 iTextureCoord;',
-     'void main(void)',
-     '{',
-     'gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
-     ' iTextureCoord = textureCoord;',
-     ' iVertexColor = vertexColor;',
-     '}'
-   ].join('\n');
+  var vertexShaderSource = [
+                            'attribute vec3 vertexPosition;',
+                            'attribute vec3 textureCoord;',
+                            'attribute vec3 vertexColor;',
+                            'uniform mat4 modelViewMatrix;',
+                            'uniform mat4 projectionMatrix;',
+                            'varying mediump vec3 iVertexColor;',
+                            'varying highp vec3 iTextureCoord;',
+                            'void main(void)',
+                            '{',
+                            'gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
+                            ' iTextureCoord = textureCoord;',
+                            ' iVertexColor = vertexColor;', '}' ].join('\n');
 
-   var shader = new vglModule.shader(gl.VERTEX_SHADER);
-   shader.setShaderSource(vertexShaderSource);
-   return shader;
+  var shader = new vglModule.shader(gl.VERTEX_SHADER);
+  shader.setShaderSource(vertexShaderSource);
+  return shader;
 };
 
 /**
@@ -141,9 +133,9 @@ vglModule.utils.createVertexShader = function(context) {
  * @returns actor
  *
  */
-vglModule.utils.createPlane = function(originX, originY, originZ,
-                                        point1X, point1Y, point1Z,
-                                        point2X, point2Y, point2Z) {
+vglModule.utils.createPlane = function(originX, originY, originZ, point1X,
+                                       point1Y, point1Z, point2X, point2Y,
+                                       point2Z) {
   var mapper = new vglModule.mapper();
   var planeSource = new vglModule.planeSource();
   planeSource.setOrigin(originX, originY, originZ);
@@ -164,12 +156,10 @@ vglModule.utils.createPlane = function(originX, originY, originZ,
   var modelViewUniform = new vglModule.modelViewUniform("modelViewMatrix");
   var projectionUniform = new vglModule.projectionUniform("projectionMatrix");
 
-  prog.addVertexAttribute(posVertAttr,
-    vglModule.vertexAttributeKeys.Position);
-  prog.addVertexAttribute(colorVertAttr,
-    vglModule.vertexAttributeKeys.Color);
+  prog.addVertexAttribute(posVertAttr, vglModule.vertexAttributeKeys.Position);
+  prog.addVertexAttribute(colorVertAttr, vglModule.vertexAttributeKeys.Color);
   prog.addVertexAttribute(texCoordVertAttr,
-    vglModule.vertexAttributeKeys.TextureCoordinate);
+                          vglModule.vertexAttributeKeys.TextureCoordinate);
   prog.addUniform(opacityUniform);
   prog.addUniform(modelViewUniform);
   prog.addUniform(projectionUniform);
@@ -179,7 +169,6 @@ vglModule.utils.createPlane = function(originX, originY, originZ,
   mat.addAttribute(blend);
 
   var actor = new vglModule.actor();
-  console.log(actor);
   actor.setMapper(mapper);
   actor.setMaterial(mat);
 
@@ -196,8 +185,8 @@ vglModule.utils.createPlane = function(originX, originY, originZ,
  *
  */
 vglModule.utils.createTexturePlane = function(originX, originY, originZ,
-                                               point1X, point1Y, point1Z,
-                                               point2X, point2Y, point2Z) {
+                                              point1X, point1Y, point1Z,
+                                              point2X, point2Y, point2Z) {
 
   var mapper = new vglModule.mapper();
   var planeSource = new vglModule.planeSource();
@@ -219,10 +208,9 @@ vglModule.utils.createTexturePlane = function(originX, originY, originZ,
   var samplerUniform = new vglModule.uniform(gl.INT, "sampler2d");
   samplerUniform.set(0);
 
-  prog.addVertexAttribute(posVertAttr,
-    vglModule.vertexAttributeKeys.Position);
+  prog.addVertexAttribute(posVertAttr, vglModule.vertexAttributeKeys.Position);
   prog.addVertexAttribute(texCoordVertAttr,
-    vglModule.vertexAttributeKeys.TextureCoordinate);
+                          vglModule.vertexAttributeKeys.TextureCoordinate);
   prog.addUniform(opacityUniform);
   prog.addUniform(modelViewUniform);
   prog.addUniform(projectionUniform);
@@ -234,7 +222,6 @@ vglModule.utils.createTexturePlane = function(originX, originY, originZ,
   mat.addAttribute(blend);
 
   var actor = new vglModule.actor();
-  console.log(actor);
   actor.setMapper(mapper);
   actor.setMaterial(mat);
 
