@@ -93,6 +93,7 @@ geoModule.map = function(node, options) {
   $(this).on('mapUpdated', draw);
 
   var m_renderer = new ogs.vgl.renderer();
+  m_renderer.resize($(node).width(), $(node).height());
   var m_camera = m_renderer.camera();
 
   /**
@@ -193,7 +194,7 @@ geoModule.map = function(node, options) {
       focalPoint[2], 1);
 
       var focusDisplayPt = ogs.vgl.renderer.worldToDisplay(focusWorldPt,
-      m_camera.viewMatrix(), m_camera.projectionMatrix(), 1680, 1050);
+      m_camera.viewMatrix(), m_camera.projectionMatrix(), width, height);
 
       var displayPt1 = vec4.createFrom(currentMousePos.x, currentMousePos.y,
       focusDisplayPt[2], 1.0);
@@ -201,9 +202,9 @@ geoModule.map = function(node, options) {
       focusDisplayPt[2], 1.0);
 
       var worldPt1 = ogs.vgl.renderer.displayToWorld(displayPt1, m_camera
-      .viewMatrix(), m_camera.projectionMatrix(), 1680, 1050);
+      .viewMatrix(), m_camera.projectionMatrix(), width, height);
       var worldPt2 = ogs.vgl.renderer.displayToWorld(displayPt2, m_camera
-      .viewMatrix(), m_camera.projectionMatrix(), 1680, 1050);
+      .viewMatrix(), m_camera.projectionMatrix(), width, height);
 
       dx = worldPt1[0] - worldPt2[0];
       dy = worldPt1[1] - worldPt2[1];

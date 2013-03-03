@@ -21,7 +21,6 @@
 // renderState class
 //
 //////////////////////////////////////////////////////////////////////////////
-
 ///---------------------------------------------------------------------------
 vglModule.renderState = function() {
   this.m_modelViewMatrix = mat4.create();
@@ -30,11 +29,11 @@ vglModule.renderState = function() {
   this.m_mapper = null;
 };
 
-//////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
 //
 // renderer class
 //
-//////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
 
 /**
  * renderer class provides key functionality to render a scene
@@ -48,16 +47,16 @@ vglModule.renderer = function() {
 
   vglModule.object.call(this);
 
-  /// Private member variables
+  // / Private member variables
   var m_width = 1280;
   var m_height = 1024;
-  var m_clippingRange = [0.1, 1000.0];
+  var m_clippingRange = [ 0.1, 1000.0 ];
   var m_sceneRoot = new vglModule.groupNode();
   var m_camera = new vglModule.camera();
 
   m_camera.addChild(m_sceneRoot);
 
-  /// Public member methods
+  // / Public member methods
 
   /**
    * Get scene root
@@ -101,19 +100,17 @@ vglModule.renderer = function() {
     gl.depthFunc(gl.LEQUAL);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    // TODO Call it only once
-    this.resize();
-
-    perspectiveMatrix = m_camera.computeProjectionMatrix(
-      (m_width / m_height), 0.1, 10000.0);
+    perspectiveMatrix = m_camera.computeProjectionMatrix((m_width / m_height),
+    0.1, 10000.0);
 
     var renSt = new vglModule.renderState();
     renSt.m_projectionMatrix = perspectiveMatrix;
     var children = m_sceneRoot.children();
-    for (var i = 0; i < children.length; ++i) {
+    for ( var i = 0; i < children.length; ++i) {
       console.log('actor index ' + i);
       var actor = children[i];
-      mat4.multiply(m_camera.computeViewMatrix(), actor.matrix(), renSt.m_modelViewMatrix);
+      mat4.multiply(m_camera.computeViewMatrix(), actor.matrix(),
+      renSt.m_modelViewMatrix);
       renSt.m_material = actor.material();
       renSt.m_mapper = actor.mapper();
 
@@ -137,7 +134,9 @@ vglModule.renderer = function() {
    * Resize viewport based on the new width and height of the window
    *
    */
-  this.resize = function() {
+  this.resize = function(width, height) {
+    m_width = width;
+    m_height = height;
     gl.viewport(0, 0, m_width, m_height);
   };
 
@@ -171,8 +170,8 @@ vglModule.renderer = function() {
    * Transform a point in the world space to display space
    *
    */
-  vglModule.renderer.worldToDisplay = function(
-    worldPt, viewMatrix, projectionMatrix, width, height) {
+  vglModule.renderer.worldToDisplay = function(worldPt, viewMatrix,
+  projectionMatrix, width, height) {
     var viewProjectionMatrix = mat4.create();
     mat4.multiply(projectionMatrix, viewMatrix, viewProjectionMatrix);
 
@@ -185,12 +184,12 @@ vglModule.renderer = function() {
       clipPt[1] = clipPt[1] / clipPt[3];
       clipPt[2] = clipPt[2] / clipPt[3];
       clipPt[3] = 1.0;
-      }
+    }
 
-    var winX = Math.round( ( ( ( clipPt[0]) + 1 ) / 2.0) * width );
-    /// We calculate -point3D.getY() because the screen Y axis is
-    /// oriented top->down
-    var winY = Math.round((( 1 - clipPt[1] ) / 2.0) *  height );
+    var winX = Math.round((((clipPt[0]) + 1) / 2.0) * width);
+    // / We calculate -point3D.getY() because the screen Y axis is
+    // / oriented top->down
+    var winY = Math.round(((1 - clipPt[1]) / 2.0) * height);
     var winZ = clipPt[2];
     var winW = clipPt[3];
 
@@ -201,27 +200,27 @@ vglModule.renderer = function() {
    * Transform a point in display space to world space
    *
    */
-  vglModule.renderer.displayToWorld = function(
-    displayPt, viewMatrix, projectionMatrix, width, height) {
-      var x =  ( 2.0 * displayPt[0] / width )  - 1;
-      var y = -( 2.0 * displayPt[1] / height ) + 1;
-      var z =  displayPt[2];
+  vglModule.renderer.displayToWorld = function(displayPt, viewMatrix,
+  projectionMatrix, width, height) {
+    var x = (2.0 * displayPt[0] / width) - 1;
+    var y = -(2.0 * displayPt[1] / height) + 1;
+    var z = displayPt[2];
 
-      var viewProjectionInverse = mat4.create();
-      mat4.multiply(projectionMatrix, viewMatrix, viewProjectionInverse);
-      mat4.inverse(viewProjectionInverse, viewProjectionInverse);
+    var viewProjectionInverse = mat4.create();
+    mat4.multiply(projectionMatrix, viewMatrix, viewProjectionInverse);
+    mat4.inverse(viewProjectionInverse, viewProjectionInverse);
 
-      var worldPt = vec4.createFrom(x, y, z, 1);
-      mat4.multiplyVec4(viewProjectionInverse, worldPt, worldPt);
+    var worldPt = vec4.createFrom(x, y, z, 1);
+    mat4.multiplyVec4(viewProjectionInverse, worldPt, worldPt);
 
-      if (worldPt[3] !== 0.0) {
-        worldPt[0] = worldPt[0] / worldPt[3];
-        worldPt[1] = worldPt[1] / worldPt[3];
-        worldPt[2] = worldPt[2] / worldPt[3];
-        worldPt[3] = 1.0;
-      }
+    if (worldPt[3] !== 0.0) {
+      worldPt[0] = worldPt[0] / worldPt[3];
+      worldPt[1] = worldPt[1] / worldPt[3];
+      worldPt[2] = worldPt[2] / worldPt[3];
+      worldPt[3] = 1.0;
+    }
 
-      return worldPt;
+    return worldPt;
   };
 
   return this;
