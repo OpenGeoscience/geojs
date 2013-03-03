@@ -203,9 +203,6 @@ vglModule.shaderProgram = function() {
     for ( var i = 0; i < m_uniforms.length; ++i) {
       m_uniformNameToLocation[m_uniforms[i].name()] = this
           .queryUniformLocation(m_uniforms[i].name());
-
-      console.log(m_uniforms[i].name());
-      console.log(this.queryUniformLocation(m_uniforms[i].name()));
     }
   };
 
