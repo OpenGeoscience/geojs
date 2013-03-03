@@ -42,7 +42,6 @@ function main() {
 
   $(myMap).on('mapUpdated', function() {
     // For test purposes only
-    console.log("Yohoo.....camera has been moved or something");
   });
 
   // / Listen for slider slidechange event
