@@ -67,7 +67,11 @@ geoModule.map = function(node, options) {
     return new geoModule.map(node, options);
   }
 
-  // / Member variables
+  // Member variables
+  this.events = {
+    update : "update"
+  };
+
   var m_that = this;
   var m_node = node;
   var m_leftMouseButtonDown = false;
@@ -85,12 +89,12 @@ geoModule.map = function(node, options) {
   if (!options.center) {
     m_options.center = geoModule.latlng(0.0, 0.0);
   }
+
   if (options.zoom === undefined) {
     m_options.zoom = 10;
   }
 
-  // TODO For now using the JQuery
-  $(this).on('mapUpdated', draw);
+  $(this).on(m_that.events.update, draw);
 
   var m_renderer = new ogs.vgl.renderer();
   m_renderer.resize($(node).width(), $(node).height());
@@ -106,7 +110,7 @@ geoModule.map = function(node, options) {
     distance = 600 - (600 - (60 * m_options.zoom)) + 1;
 
     m_camera.setPosition(m_options.center.lng(), m_options.center.lat(),
-    distance);
+                         distance);
     m_camera.setFocalPoint(m_options.center.lng(), m_options.center.lat(), 0.0);
 
     m_initialized = true;
@@ -191,33 +195,34 @@ geoModule.map = function(node, options) {
 
       var focalPoint = m_camera.focalPoint();
       var focusWorldPt = vec4.createFrom(focalPoint[0], focalPoint[1],
-      focalPoint[2], 1);
+                                         focalPoint[2], 1);
 
-      var focusDisplayPt = ogs.vgl.renderer.worldToDisplay(focusWorldPt,
-      m_camera.viewMatrix(), m_camera.projectionMatrix(), width, height);
+      var focusDisplayPt = ogs.vgl.renderer
+          .worldToDisplay(focusWorldPt, m_camera.viewMatrix(), m_camera
+              .projectionMatrix(), width, height);
 
       var displayPt1 = vec4.createFrom(currentMousePos.x, currentMousePos.y,
-      focusDisplayPt[2], 1.0);
+                                       focusDisplayPt[2], 1.0);
       var displayPt2 = vec4.createFrom(m_mouseLastPos.x, m_mouseLastPos.y,
-      focusDisplayPt[2], 1.0);
+                                       focusDisplayPt[2], 1.0);
 
       var worldPt1 = ogs.vgl.renderer.displayToWorld(displayPt1, m_camera
-      .viewMatrix(), m_camera.projectionMatrix(), width, height);
+          .viewMatrix(), m_camera.projectionMatrix(), width, height);
       var worldPt2 = ogs.vgl.renderer.displayToWorld(displayPt2, m_camera
-      .viewMatrix(), m_camera.projectionMatrix(), width, height);
+          .viewMatrix(), m_camera.projectionMatrix(), width, height);
 
       dx = worldPt1[0] - worldPt2[0];
       dy = worldPt1[1] - worldPt2[1];
 
       // Move the scene in the direction of movement of mouse;
       m_camera.pan(-dx, -dy);
-      $(m_that).trigger('mapUpdated');
+      $(m_that).trigger(m_that.events.update);
     }
 
     if (m_rightMouseButtonDown) {
       zTrans = currentMousePos.y - m_mouseLastPos.y;
       m_camera.zoom(zTrans * 0.5);
-      $(m_that).trigger('mapUpdated');
+      $(m_that).trigger(m_that.events.update);
     }
 
     m_mouseLastPos.x = currentMousePos.x;
@@ -281,7 +286,8 @@ geoModule.map = function(node, options) {
 
   var m_baseLayer = (function() {
     var mapActor = ogs.vgl.utils.createTexturePlane(-180.0, -90.0, 0.0, 180.0,
-    -90.0, 0.0, -180.0, 90.0, 0.0);
+                                                    -90.0, 0.0, -180.0, 90.0,
+                                                    0.0);
 
     // Setup texture
     worldImage = new Image();

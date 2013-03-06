@@ -36,15 +36,11 @@ function main() {
     "showAttribution" : 1,
     "visible" : 1
   }, ogs.geo.planeFeature(ogs.geo.latlng(-90.0, 0.0), ogs.geo.latlng(90.0,
-  180.0)));
+                                                                     180.0)));
 
   myMap.addLayer(planeLayer);
 
-  $(myMap).on('mapUpdated', function() {
-    // For test purposes only
-  });
-
-  // / Listen for slider slidechange event
+  // Listen for slider slidechange event
   $('#slider-vertical').slider().bind('slide', function(event, ui) {
     planeLayer.setOpacity(ui.value);
     myMap.redraw();

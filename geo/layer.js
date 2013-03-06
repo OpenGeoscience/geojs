@@ -48,9 +48,9 @@ geoModule.layerOptions = function() {
  */
 geoModule.layer = function(options) {
 
-  this.signals = {
-    "opacityChanged" : "opacityChanged",
-    "layerUpdated" : "layerUpdated"
+  this.events = {
+    "opacitychange" : "opacitychange",
+    "update" : "update"
   };
 
   if (!(this instanceof geoModule.layer)) {
@@ -59,11 +59,11 @@ geoModule.layer = function(options) {
 
   ogs.vgl.object.call(this);
 
-  /** Member variables */
+  // Member variables
   var m_that = this;
   var m_opacity = options.opacity || 1.0;
 
-  /** TODO Write a function for this */
+  // TODO Write a function for this
   if (m_opacity > 1.0) {
     m_opacity = 1.0;
     console.log("[WARNING] Opacity cannot be greater than 1.0");
@@ -99,7 +99,7 @@ geoModule.layer = function(options) {
   this.setOpacity = function(val) {
     m_opacity = val;
     $(m_that).trigger({
-      type : this.signals.opacityChanged,
+      type : this.events.opacitychange,
       opacity : m_opacity
     });
   };
@@ -142,14 +142,15 @@ geoModule.featureLayer = function(options, feature) {
     return new geoModule.featureLayer(options, feature);
   }
 
-  // / Register with base class
+  // Register with base class
   geoModule.layer.call(this, options);
 
-  // / Initialize member variables
+  // Initialize member variables
   var m_that = this;
   var m_actor = feature;
+
   /**
-   * Return the underlying renderable entity
+   * Return the underlying drawable entity
    *
    * This function should be implemented by the derived classes
    */
@@ -175,12 +176,11 @@ geoModule.featureLayer = function(options, feature) {
 
     if (opacityUniform != null) {
       opacityUniform.set(event.opacity);
-      $(m_that).trigger(this.signals.layerUpdated);
+      $(m_that).trigger(this.events.update);
     }
   };
 
-  /** Signal-slot connection */
-  $(m_that).on(this.signals.opacityChanged, m_that.updateLayerOpacity);
+  $(m_that).on(this.events.opacitychange, m_that.updateLayerOpacity);
 
   return this;
 };
