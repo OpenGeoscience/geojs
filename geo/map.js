@@ -362,5 +362,13 @@ geoModule.map = function(node, options) {
     m_renderer.render();
   };
 
+  /**
+   * Resize the maps
+   *
+   */
+  this.resize = function(width, height) {
+    m_renderer.resize(width, height);
+  };
+
   return this;
 };
