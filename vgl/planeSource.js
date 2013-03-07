@@ -16,6 +16,11 @@
   limitations under the License.
  ========================================================================*/
 
+///////////////////////////////////////////////////////////////////////////////
+//
+// Plane source class
+//
+///////////////////////////////////////////////////////////////////////////////
 vglModule.planeSource = function() {
 
   if (!(this instanceof vglModule.planeSource)) {
@@ -23,10 +28,10 @@ vglModule.planeSource = function() {
   }
   vglModule.source.call(this);
 
-  var m_origin = [0.0, 0.0, 0.0];
-  var m_point1 = [1.0, 0.0, 0.0];
-  var m_point2 = [0.0, 1.0, 0.0];
-  var m_normal = [0.0, 0.0, 1.0];
+  var m_origin = [ 0.0, 0.0, 0.0 ];
+  var m_point1 = [ 1.0, 0.0, 0.0 ];
+  var m_point2 = [ 0.0, 1.0, 0.0 ];
+  var m_normal = [ 0.0, 0.0, 1.0 ];
   var m_xresolution = 1;
   var m_yresolution = 1;
   var m_geom = null;
@@ -71,7 +76,8 @@ vglModule.planeSource = function() {
     var x = [], tc = [], v1 = [], v2 = [];
     x.length = 3, tc.length = 2, v1.length = 3, v2.length = 3;
 
-    var  pts = []; pts.length = 3;
+    var pts = [];
+    pts.length = 3;
     var i, j, ii;
     var numPts;
     var numPolys;
@@ -84,7 +90,7 @@ vglModule.planeSource = function() {
     var indices = [];
 
     // Check input
-    for (i = 0; i < 3; i++ ) {
+    for (i = 0; i < 3; i++) {
       v1[i] = m_point1[i] - m_origin[i];
       v2[i] = m_point2[i] - m_origin[i];
     }
@@ -102,11 +108,11 @@ vglModule.planeSource = function() {
     for (k = 0, i = 0; i < (m_yresolution + 1); i++) {
       tc[1] = i / m_yresolution;
 
-      for (j = 0; j < (m_xresolution+1); j++) {
+      for (j = 0; j < (m_xresolution + 1); j++) {
         tc[0] = j / m_xresolution;
 
         for (ii = 0; ii < 3; ii++) {
-          x[ii] = m_origin[ii] + tc[0]*v1[ii] + tc[1]*v2[ii];
+          x[ii] = m_origin[ii] + tc[0] * v1[ii] + tc[1] * v2[ii];
         }
 
         positions[posIndex++] = x[0];
@@ -129,7 +135,7 @@ vglModule.planeSource = function() {
     /// Generate polygon connectivity
     for (i = 0; i < m_yresolution; i++) {
       for (j = 0; j < m_xresolution; j++) {
-        pts[0] = j + i*(m_xresolution+1);
+        pts[0] = j + i * (m_xresolution + 1);
         pts[1] = pts[0] + 1;
         pts[2] = pts[0] + m_xresolution + 2;
         pts[3] = pts[0] + m_xresolution + 1;
