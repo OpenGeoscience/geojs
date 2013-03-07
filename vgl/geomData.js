@@ -117,7 +117,7 @@ vglModule.primitive = function() {
 
   /*
    * Return primitive type
-   *
+   *g
    */
   this.primitiveType = function() {
     return m_primitiveType;
@@ -156,7 +156,7 @@ vglModule.primitive = function() {
   };
   /*
    * Set indices value type
-   *
+   *g
    */
   this.setIndicesValueType = function(type) {
     m_indicesValueType = type;
@@ -191,6 +191,8 @@ vglModule.triangleStrip = function() {
   this.setPrimitiveType(gl.TRIANGLE_STRIP);
   this.setIndicesValueType(gl.UNSIGNED_SHORT);
   this.setIndexCount(3);
+
+  return this;
 };
 
 inherit(vglModule.triangleStrip, vglModule.primitive);
@@ -211,16 +213,17 @@ vglModule.triangles = function() {
   this.setPrimitiveType(gl.TRIANGLES);
   this.setIndicesValueType(gl.UNSIGNED_SHORT);
   this.setIndexCount(3);
+
+  return this;
 };
 
 inherit(vglModule.triangles, vglModule.primitive);
 
-// ////////////////////////////////////////////////////////////////////////////
-//
-// Point
-//
-// ////////////////////////////////////////////////////////////////////////////
-
+/**
+ * Point primitive
+ *g
+ * @returns {vglModule.points}
+ */
 vglModule.points = function() {
 
   if (!(this instanceof vglModule.points)) {
@@ -231,16 +234,17 @@ vglModule.points = function() {
   this.setPrimitiveType(gl.POINTS);
   this.setIndicesValueType(gl.UNSIGNED_SHORT);
   this.setIndexCount(3);
+
+  return this;
 };
 
 inherit(vglModule.points, vglModule.primitive);
 
-// ////////////////////////////////////////////////////////////////////////////
-//
-// vglVertexData
-//
-// ////////////////////////////////////////////////////////////////////////////
-
+/**
+ * VertexData
+ *g
+ * @returns {vglModule.vertexDataP3f}
+ */
 vglModule.vertexDataP3f = function() {
   if (!(this instanceof vglModule.vertexDataP3f)) {
     return new vglModule.vertexDataP3f();
@@ -268,12 +272,10 @@ vglModule.vertexDataP3T3f = function() {
   this.m_texCoordinate = [];
 };
 
-// ////////////////////////////////////////////////////////////////////////////
-//
-// sourceData
-//
-// ////////////////////////////////////////////////////////////////////////////
-
+/**
+ * Source datag
+ * @returns {vglModule.sourceData}
+ */
 vglModule.sourceData = function() {
 
   if (!(this instanceof vglModule.sourceData)) {

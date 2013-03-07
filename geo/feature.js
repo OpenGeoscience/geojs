@@ -86,7 +86,6 @@ geoModule.pointFeature = function(positions, colors) {
   ogs.vgl.actor.call(this);
 
   // Initialize
-
   var actor = ogs.vgl.utils.createPoints(positions, colors);
 
   this.setMapper(actor.mapper());
@@ -95,4 +94,4 @@ geoModule.pointFeature = function(positions, colors) {
   return this;
 };
 
-inherit(geoModule.planeFeature, geoModule.feature);
+inherit(geoModule.pointFeature, geoModule.feature);

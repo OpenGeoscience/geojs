@@ -38,7 +38,14 @@ function main() {
   }, ogs.geo.planeFeature(ogs.geo.latlng(-90.0, 0.0), ogs.geo.latlng(90.0,
                                                                      180.0)));
 
+  var pointLayer = ogs.geo.featureLayer({
+    "opacity" : 1,
+    "showAttribution" : 1,
+    "visible" : 1
+  }, ogs.geo.pointFeature([ 0.0, 0.0, 0.0 ], [ 1.0, 0.0, 0.0 ]));
+
   myMap.addLayer(planeLayer);
+  myMap.addLayer(pointLayer);
 
   // Listen for slider slidechange event
   $('#slider-vertical').slider().bind('slide', function(event, ui) {
@@ -49,17 +56,12 @@ function main() {
   (function() {
     var canvas = document.getElementById('glcanvas');
 
-    // resize the canvas to fill browser window dynamically
+    // Resize the canvas to fill browser window dynamically
     window.addEventListener('resize', resizeCanvas, false);
 
     function resizeCanvas() {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight * 0.85;
-
-      /**
-       * Your drawings need to be inside this function otherwise they will be reset when
-       * you resize the browser window and the canvas goes will be cleared.
-       */
       updateAndDraw(canvas.width, canvas.height);
     }
     resizeCanvas();

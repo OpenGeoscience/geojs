@@ -53,7 +53,7 @@ vglModule.pointSource = function() {
    */
   this.setColors = function(colors) {
     if (colors instanceof Array) {
-      m_colors = colorscolors;
+      m_colors = colors;
     }
     else {
       console.log("[ERROR] Invalid data type for colors. Array is required.");
@@ -96,29 +96,29 @@ vglModule.pointSource = function() {
     }
 
     var pointsPrimitive = new vglModule.points();
-    points.setIndices(indices);
+    pointsPrimitive.setIndices(indices);
 
     var sourcePositions = vglModule.sourceDataP3fv();
     sourcePositions.pushBack(m_positions);
     m_geom.addSource(sourcePositions);
 
-    if (m_colors.length && m_colors.length === m_positions.length) {
+    if ((m_colors.length > 0) && m_colors.length === m_positions.length) {
       var sourceColors = vglModule.sourceDataC3fv();
-      sourceColors.pushBack(colors);
+      sourceColors.pushBack(m_colors);
       m_geom.addSource(sourceColors);
     }
-    else if (m_colors.length && m_colors.length !== m_positions.length) {
+    else if ((m_colors.length > 0) && m_colors.length !== m_positions.length) {
       console
           .log("[ERROR] Number of colors are different than number of points");
     }
 
-    if (m_textureCoords.length
+    if ((m_textureCoords.length > 0)
         && m_textureCoords.length === m_textureCoords.length) {
       var sourceTexCoords = vglModule.sourceDataT2fv();
       sourceTexCoords.pushBack(texCoords);
       m_geom.addSource(sourceTexCoords);
     }
-    else if (m_colors.length
+    else if ((m_textureCoords.length > 0)
              && (m_textureCoords.length / 2) !== (m_positions.length / 3)) {
       console
           .log("[ERROR] Number of texture coordinates are different than number of points");
