@@ -91,6 +91,8 @@ vglModule.pointSource = function() {
     var indices = [];
     indices.length = numPts;
 
+    console.log(numPts);
+
     for (i = 0; i < numPts; ++i) {
       indices[i] = i;
     }

@@ -37,15 +37,44 @@ function main() {
     "visible" : 1
   }, ogs.geo.planeFeature(ogs.geo.latlng(-90.0, 0.0), ogs.geo.latlng(90.0,
                                                                      180.0)));
-
-  var pointLayer = ogs.geo.featureLayer({
-    "opacity" : 1,
-    "showAttribution" : 1,
-    "visible" : 1
-  }, ogs.geo.pointFeature([ 0.0, 0.0, 0.0 ], [ 1.0, 0.0, 0.0 ]));
-
   myMap.addLayer(planeLayer);
-  myMap.addLayer(pointLayer);
+
+  // Read city geo-coded data
+  var table = [];
+  var citieslatlon = [];
+  var colors = [];
+  $.ajax({
+    type : "GET",
+    url : "./data/cities.csv",
+    dataType : "text",
+    success : function(data) {
+      table = processCSVData(data);
+      if (table.length > 0) {
+        var i;
+        for (i = 0; i < table.length; ++i) {
+          if (table[i][2] != undefined) {
+            var lat = table[i][2];
+            lat = lat.replace(/(^\s+|\s+$|^\"|\"$)/g, '');
+            lat = parseFloat(lat);
+
+            var lon = table[i][3];
+            lon = lon.replace(/(^\s+|\s+$|^\"|\"$)/g, '');
+            lon = parseFloat(lon);
+            citieslatlon.push(lon, lat, 0.0);
+            colors.push(1.0, 1.0, 153.0 / 255.0);
+          }
+        }
+
+        var pointLayer = ogs.geo.featureLayer({
+          "opacity" : 1,
+          "showAttribution" : 1,
+          "visible" : 1
+        }, ogs.geo.pointFeature(citieslatlon, colors));
+
+        myMap.addLayer(pointLayer);
+      }
+    }
+  });
 
   // Listen for slider slidechange event
   $('#slider-vertical').slider().bind('slide', function(event, ui) {
@@ -71,4 +100,17 @@ function main() {
       myMap.redraw();
     }
   })();
+}
+
+function processCSVData(csvdata) {
+  var table = [];
+  var lines = csvdata.split(/\r\n|\n/);
+
+  for ( var i = 0; i < lines.length; i++) {
+    var row = lines[i].split(',');
+    table.push(row);
+  }
+
+  console.log(table[0][0]);
+  return table;
 }

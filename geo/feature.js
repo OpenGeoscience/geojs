@@ -86,8 +86,8 @@ geoModule.pointFeature = function(positions, colors) {
   ogs.vgl.actor.call(this);
 
   // Initialize
+  console.log('pos ' + positions);
   var actor = ogs.vgl.utils.createPoints(positions, colors);
-
   this.setMapper(actor.mapper());
   this.setMaterial(actor.material());
 

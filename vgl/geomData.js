@@ -116,8 +116,7 @@ vglModule.primitive = function() {
   };
 
   /*
-   * Return primitive type
-   *g
+   * Return primitive type g
    */
   this.primitiveType = function() {
     return m_primitiveType;
@@ -155,8 +154,7 @@ vglModule.primitive = function() {
     return m_indicesValueType;
   };
   /*
-   * Set indices value type
-   *g
+   * Set indices value type g
    */
   this.setIndicesValueType = function(type) {
     m_indicesValueType = type;
@@ -233,7 +231,7 @@ vglModule.points = function() {
 
   this.setPrimitiveType(gl.POINTS);
   this.setIndicesValueType(gl.UNSIGNED_SHORT);
-  this.setIndexCount(3);
+  this.setIndexCount(1);
 
   return this;
 };
