@@ -109,7 +109,6 @@ vglModule.utils.createTextureVertexShader = function(context) {
 vglModule.utils.createVertexShader = function(context) {
   var vertexShaderSource = [
                             'attribute vec3 vertexPosition;',
-                            'attribute vec3 textureCoord;',
                             'attribute vec3 vertexColor;',
                             'uniform float pointSize;',
                             'uniform mat4 modelViewMatrix;',
@@ -120,7 +119,6 @@ vglModule.utils.createVertexShader = function(context) {
                             '{',
                             'gl_PointSize = pointSize;',
                             'gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
-                            ' iTextureCoord = textureCoord;',
                             ' iVertexColor = vertexColor;', '}' ].join('\n');
 
   var shader = new vglModule.shader(gl.VERTEX_SHADER);
@@ -137,13 +135,13 @@ vglModule.utils.createTextureMaterial = function() {
   var mat = new vglModule.material();
   var blend = new vglModule.blend();
   var prog = new vglModule.shaderProgram();
-  var vertexShader = vglModule.utils.createVertexShader(gl);
-  var fragmentShader = vglModule.utils.createFragmentShader(gl);
+  var vertexShader = vglModule.utils.createTextureVertexShader(gl);
+  var fragmentShader = vglModule.utils.createTextureFragmentShader(gl);
   var posVertAttr = new vglModule.vertexAttribute("vertexPosition");
   var texCoordVertAttr = new vglModule.vertexAttribute("textureCoord");
   var colorVertAttr = new vglModule.vertexAttribute("vertexColor");
   var pointsizeUniform = new vglModule.floatUniform("pointSize", 5.0);
-  var opacityUniform = new vglModule.floatUniform("opacity", 0.5);
+  var opacityUniform = new vglModule.floatUniform("opacity", 1.0);
   var modelViewUniform = new vglModule.modelViewUniform("modelViewMatrix");
   var projectionUniform = new vglModule.projectionUniform("projectionMatrix");
   var samplerUniform = new vglModule.uniform(gl.INT, "sampler2d");
@@ -238,7 +236,6 @@ vglModule.utils.createPlane = function(originX, originY, originZ, point1X,
 vglModule.utils.createTexturePlane = function(originX, originY, originZ,
                                               point1X, point1Y, point1Z,
                                               point2X, point2Y, point2Z) {
-
   var mapper = new vglModule.mapper();
   var planeSource = new vglModule.planeSource();
   planeSource.setOrigin(originX, originY, originZ);

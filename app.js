@@ -110,7 +110,5 @@ function processCSVData(csvdata) {
     var row = lines[i].split(',');
     table.push(row);
   }
-
-  console.log(table[0][0]);
   return table;
 }
