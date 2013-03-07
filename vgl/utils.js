@@ -129,24 +129,47 @@ vglModule.utils.createVertexShader = function(context) {
 };
 
 /**
- * Helper function to create a plane node
+ * Create a texture material
  *
- * This method will create a plane actor with texture coordinates,
- * eventually normal, and plane material.
- *
- * @returns actor
- *
+ * @returns {vglModule.material}
  */
-vglModule.utils.createPlane = function(originX, originY, originZ, point1X,
-                                       point1Y, point1Z, point2X, point2Y,
-                                       point2Z) {
-  var mapper = new vglModule.mapper();
-  var planeSource = new vglModule.planeSource();
-  planeSource.setOrigin(originX, originY, originZ);
-  planeSource.setPoint1(point1X, point1Y, point1Z);
-  planeSource.setPoint2(point2X, point2Y, point2Z);
-  mapper.setGeometryData(planeSource.create());
+vglModule.utils.createTextureMaterial = function() {
+  var mat = new vglModule.material();
+  var blend = new vglModule.blend();
+  var prog = new vglModule.shaderProgram();
+  var vertexShader = vglModule.utils.createVertexShader(gl);
+  var fragmentShader = vglModule.utils.createFragmentShader(gl);
+  var posVertAttr = new vglModule.vertexAttribute("vertexPosition");
+  var texCoordVertAttr = new vglModule.vertexAttribute("textureCoord");
+  var colorVertAttr = new vglModule.vertexAttribute("vertexColor");
+  var pointsizeUniform = new vglModule.floatUniform("pointSize", 5.0);
+  var opacityUniform = new vglModule.floatUniform("opacity", 0.5);
+  var modelViewUniform = new vglModule.modelViewUniform("modelViewMatrix");
+  var projectionUniform = new vglModule.projectionUniform("projectionMatrix");
+  var samplerUniform = new vglModule.uniform(gl.INT, "sampler2d");
+  samplerUniform.set(0);
+  prog.addVertexAttribute(posVertAttr, vglModule.vertexAttributeKeys.Position);
+  prog.addVertexAttribute(colorVertAttr, vglModule.vertexAttributeKeys.Color);
+  prog.addVertexAttribute(texCoordVertAttr,
+                          vglModule.vertexAttributeKeys.TextureCoordinate);
+  prog.addUniform(pointsizeUniform);
+  prog.addUniform(opacityUniform);
+  prog.addUniform(modelViewUniform);
+  prog.addUniform(projectionUniform);
+  prog.addShader(fragmentShader);
+  prog.addShader(vertexShader);
+  mat.addAttribute(prog);
+  mat.addAttribute(blend);
 
+  return mat;
+};
+
+/**
+ * Create a geometry material
+ *
+ * @returns {vglModule.material}
+ */
+vglModule.utils.createGeometryMaterial = function() {
   var mat = new vglModule.material();
   var blend = new vglModule.blend();
   var prog = new vglModule.shaderProgram();
@@ -173,6 +196,29 @@ vglModule.utils.createPlane = function(originX, originY, originZ, point1X,
   mat.addAttribute(prog);
   mat.addAttribute(blend);
 
+  return mat;
+};
+
+/**
+ * Helper function to create a plane node
+ *
+ * This method will create a plane actor with texture coordinates,
+ * eventually normal, and plane material.
+ *
+ * @returns actor
+ *
+ */
+vglModule.utils.createPlane = function(originX, originY, originZ, point1X,
+                                       point1Y, point1Z, point2X, point2Y,
+                                       point2Z) {
+  var mapper = new vglModule.mapper();
+  var planeSource = new vglModule.planeSource();
+  planeSource.setOrigin(originX, originY, originZ);
+  planeSource.setPoint1(point1X, point1Y, point1Z);
+  planeSource.setPoint2(point2X, point2Y, point2Z);
+  mapper.setGeometryData(planeSource.create());
+
+  var mat = vglModule.utils.createGeometryMaterial();
   var actor = new vglModule.actor();
   actor.setMapper(mapper);
   actor.setMaterial(mat);
@@ -200,34 +246,7 @@ vglModule.utils.createTexturePlane = function(originX, originY, originZ,
   planeSource.setPoint2(point2X, point2Y, point2Z);
   mapper.setGeometryData(planeSource.create());
 
-  var mat = new vglModule.material();
-  var blend = new vglModule.blend();
-  var prog = new vglModule.shaderProgram();
-  var vertexShader = vglModule.utils.createTextureVertexShader(gl);
-  var fragmentShader = vglModule.utils.createTextureFragmentShader(gl);
-  var posVertAttr = new vglModule.vertexAttribute("vertexPosition");
-  var texCoordVertAttr = new vglModule.vertexAttribute("textureCoord");
-  var pointsizeUniform = new vglModule.floatUniform("pointSize", 5.0);
-  var opacityUniform = new vglModule.floatUniform("opacity");
-  var modelViewUniform = new vglModule.modelViewUniform("modelViewMatrix");
-  var projectionUniform = new vglModule.projectionUniform("projectionMatrix");
-  var samplerUniform = new vglModule.uniform(gl.INT, "sampler2d");
-  samplerUniform.set(0);
-
-  prog.addVertexAttribute(posVertAttr, vglModule.vertexAttributeKeys.Position);
-  prog.addVertexAttribute(texCoordVertAttr,
-                          vglModule.vertexAttributeKeys.TextureCoordinate);
-  prog.addUniform(pointsizeUniform);
-  prog.addUniform(opacityUniform);
-  prog.addUniform(modelViewUniform);
-  prog.addUniform(projectionUniform);
-  prog.addUniform(samplerUniform);
-  prog.addShader(fragmentShader);
-  prog.addShader(vertexShader);
-
-  mat.addAttribute(prog);
-  mat.addAttribute(blend);
-
+  var mat = vglModule.utils.createTextureMaterial();
   var actor = new vglModule.actor();
   actor.setMapper(mapper);
   actor.setMaterial(mat);
