@@ -21,7 +21,6 @@
 // uniform class
 //
 //////////////////////////////////////////////////////////////////////////////
-
 vglModule.uniform = function(type, name) {
 
   if (!(this instanceof vglModule.uniform)) {
@@ -57,13 +56,13 @@ vglModule.uniform = function(type, name) {
         return 16;
 
       default:
-          return 0;
+        return 0;
     }
   };
 
   var m_type = type;
   var m_name = name;
-  var m_dataArray = [this.getTypeNumberOfComponents(m_type)];
+  var m_dataArray = [ this.getTypeNumberOfComponents(m_type) ];
   var m_numberOfElements = 1;
 
   this.name = function() {
@@ -111,8 +110,9 @@ vglModule.uniform = function(type, name) {
   };
 
   this.callGL = function(location) {
-    if (this.m_numberElements < 1)
+    if (this.m_numberElements < 1) {
       return;
+    }
 
     switch (m_type) {
       case gl.BOOL:
@@ -138,7 +138,7 @@ vglModule.uniform = function(type, name) {
         gl.uniformMatrix4fv(location, gl.FALSE, m_dataArray);
         break;
       default:
-          break;
+        break;
     }
   };
 
@@ -148,13 +148,6 @@ vglModule.uniform = function(type, name) {
 
   return this;
 };
-
-
-//////////////////////////////////////////////////////////////////////////////
-//
-// modelViewUniform class
-//
-//////////////////////////////////////////////////////////////////////////////
 
 vglModule.modelViewUniform = function(name) {
 
@@ -179,13 +172,7 @@ vglModule.modelViewUniform = function(name) {
 
 inherit(vglModule.modelViewUniform, vglModule.uniform);
 
-//////////////////////////////////////////////////////////////////////////////
-//
-// projectionUniform class
-//
-//////////////////////////////////////////////////////////////////////////////
-
-vglModule.projectionUniform  = function(name) {
+vglModule.projectionUniform = function(name) {
 
   if (!(this instanceof vglModule.projectionUniform)) {
     return new vglModule.projectionUniform(name);
@@ -208,26 +195,23 @@ vglModule.projectionUniform  = function(name) {
 
 inherit(vglModule.projectionUniform, vglModule.uniform);
 
-
-//////////////////////////////////////////////////////////////////////////////
-//
-//  floatUniform class
-//
-//////////////////////////////////////////////////////////////////////////////
-
-vglModule.floatUniform  = function(name) {
+vglModule.floatUniform = function(name, value) {
 
   if (!(this instanceof vglModule.floatUniform)) {
-    return new vglModule.floatUniform(name);
+    return new vglModule.floatUniform(name, value);
   }
 
   if (name.length === 0) {
     name = "floatUniform";
   }
 
+  if (!value) {
+    value = 1.0;
+  }
+
   vglModule.uniform.call(this, gl.FLOAT, name);
 
-  this.set(1.0);
+  this.set(value);
 };
 
 inherit(vglModule.floatUniform, vglModule.uniform);

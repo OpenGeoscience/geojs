@@ -34,15 +34,16 @@ vglModule.pointSource = function() {
   var m_geom = null;
 
   /**
-   * Set points for the source
+   * Set positions for the source
    *
    */
-  this.setPoints = function(positions) {
+  this.setPositions = function(positions) {
     if (positions instanceof Array) {
       m_positions = positions;
     }
     else {
-      console.log("[ERROR] Invalid data type. Require data type is Array");
+      console
+          .log("[ERROR] Invalid data type for positions. Array is required.");
     }
   };
 
@@ -55,7 +56,21 @@ vglModule.pointSource = function() {
       m_colors = colorscolors;
     }
     else {
-      console.log("[ERROR] Invalid data type. Require data type is Array");
+      console.log("[ERROR] Invalid data type for colors. Array is required.");
+    }
+  };
+
+  /**
+   * Set texture coordinates for the points
+   *
+   */
+  this.setTextureCoordinates = function(texcoords) {
+    if (texcoords instanceof Array) {
+      m_textureCoords = texcoords;
+    }
+    else {
+      console.log("[ERROR] Invalid data type for "
+                  + "texture coordinates. Array is required.");
     }
   };
 

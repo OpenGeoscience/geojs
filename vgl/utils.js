@@ -151,8 +151,7 @@ vglModule.utils.createPlane = function(originX, originY, originZ, point1X,
   var posVertAttr = new vglModule.vertexAttribute("vertexPosition");
   var texCoordVertAttr = new vglModule.vertexAttribute("textureCoord");
   var colorVertAttr = new vglModule.vertexAttribute("vertexColor");
-  var opacityUniform = new vglModule.floatUniform("opacity");
-  opacityUniform.set(0.5);
+  var opacityUniform = new vglModule.floatUniform("opacity", 0.5);
   var modelViewUniform = new vglModule.modelViewUniform("modelViewMatrix");
   var projectionUniform = new vglModule.projectionUniform("projectionMatrix");
 
@@ -218,6 +217,66 @@ vglModule.utils.createTexturePlane = function(originX, originY, originZ,
   prog.addShader(fragmentShader);
   prog.addShader(vertexShader);
 
+  mat.addAttribute(prog);
+  mat.addAttribute(blend);
+
+  var actor = new vglModule.actor();
+  actor.setMapper(mapper);
+  actor.setMaterial(mat);
+
+  return actor;
+};
+
+/**
+ * Helper function to create a plane node
+ *
+ * This method will create a plane actor with texture coordinates,
+ * eventually normal, and plane material.
+ *
+ * @returns actor
+ *
+ */
+vglModule.utils.createPoints = function(positions, colors, texcoords) {
+  var mapper = new vglModule.mapper();
+  var pointSource = new vglModule.pointSource();
+
+  if (!positions) {
+    console.log("[ERROR] Cannot create points without positions");
+    return null;
+  }
+
+  pointSource.setPositions(positions);
+  if (!colors) {
+    pointSource.setColors(colors);
+  }
+
+  if (!texcoords) {
+    pointSource.setTextureCoordinates(texcoords);
+  }
+
+  mapper.setGeometryData(pointSource.create());
+
+  var mat = new vglModule.material();
+  var blend = new vglModule.blend();
+  var prog = new vglModule.shaderProgram();
+  var vertexShader = vglModule.utils.createVertexShader(gl);
+  var fragmentShader = vglModule.utils.createFragmentShader(gl);
+  var posVertAttr = new vglModule.vertexAttribute("vertexPosition");
+  var texCoordVertAttr = new vglModule.vertexAttribute("textureCoord");
+  var colorVertAttr = new vglModule.vertexAttribute("vertexColor");
+  var opacityUniform = new vglModule.floatUniform("opacity", 1.0);
+  var modelViewUniform = new vglModule.modelViewUniform("modelViewMatrix");
+  var projectionUniform = new vglModule.projectionUniform("projectionMatrix");
+
+  prog.addVertexAttribute(posVertAttr, vglModule.vertexAttributeKeys.Position);
+  prog.addVertexAttribute(colorVertAttr, vglModule.vertexAttributeKeys.Color);
+  prog.addVertexAttribute(texCoordVertAttr,
+                          vglModule.vertexAttributeKeys.TextureCoordinate);
+  prog.addUniform(opacityUniform);
+  prog.addUniform(modelViewUniform);
+  prog.addUniform(projectionUniform);
+  prog.addShader(fragmentShader);
+  prog.addShader(vertexShader);
   mat.addAttribute(prog);
   mat.addAttribute(blend);
 
