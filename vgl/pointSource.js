@@ -30,6 +30,7 @@ vglModule.pointSource = function() {
 
   var m_positions = [];
   var m_colors = [];
+  var m_textureCoords = [];
   var m_geom = null;
 
   /**
@@ -79,8 +80,8 @@ vglModule.pointSource = function() {
       indices[i] = i;
     }
 
-    //    var tristrip = new vglModule.triangleStrip();
-    //    tristrip.setIndices(indices);
+    var pointsPrimitive = new vglModule.points();
+    points.setIndices(indices);
 
     var sourcePositions = vglModule.sourceDataP3fv();
     sourcePositions.pushBack(m_positions);
@@ -91,12 +92,24 @@ vglModule.pointSource = function() {
       sourceColors.pushBack(colors);
       m_geom.addSource(sourceColors);
     }
+    else if (m_colors.length && m_colors.length !== m_positions.length) {
+      console
+          .log("[ERROR] Number of colors are different than number of points");
+    }
 
-    //    var sourceTexCoords = vglModule.sourceDataT2fv();
-    //    sourceTexCoords.pushBack(texCoords);
-    //    m_geom.addSource(sourceTexCoords);
+    if (m_textureCoords.length
+        && m_textureCoords.length === m_textureCoords.length) {
+      var sourceTexCoords = vglModule.sourceDataT2fv();
+      sourceTexCoords.pushBack(texCoords);
+      m_geom.addSource(sourceTexCoords);
+    }
+    else if (m_colors.length
+             && (m_textureCoords.length / 2) !== (m_positions.length / 3)) {
+      console
+          .log("[ERROR] Number of texture coordinates are different than number of points");
+    }
 
-    m_geom.addPrimitive(tristrip);
+    m_geom.addPrimitive(pointsPrimitive);
 
     return m_geom;
   };
