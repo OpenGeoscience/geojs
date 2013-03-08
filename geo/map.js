@@ -291,12 +291,12 @@ geoModule.map = function(node, options) {
 
     // Setup texture
     worldImage = new Image();
-
+    worldImage.src = "./data/land_shallow_topo_2048.png";
     var worldTexture = new vglModule.texture();
     worldTexture.setImage(worldImage);
 
     // TODO Currently hard-coded
-    worldImage.src = "./data/land_shallow_topo_2048.png";
+
     mapActor.material().addAttribute(worldTexture);
 
     m_renderer.addActor(mapActor);

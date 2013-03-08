@@ -86,7 +86,6 @@ geoModule.pointFeature = function(positions, colors) {
   ogs.vgl.actor.call(this);
 
   // Initialize
-  console.log('pos ' + positions);
   var actor = ogs.vgl.utils.createPoints(positions, colors);
   this.setMapper(actor.mapper());
   this.setMaterial(actor.material());
@@ -95,3 +94,29 @@ geoModule.pointFeature = function(positions, colors) {
 };
 
 inherit(geoModule.pointFeature, geoModule.feature);
+
+/**
+ * Point feature class
+ *
+ * @param positions
+ * @param colors
+ * @returns {geoModule.pointFeature}
+ */
+geoModule.pointSpritesFeature = function(imageFilename, positions, colors) {
+
+  if (!(this instanceof geoModule.pointSpritesFeature)) {
+    return new geoModule.pointSpritesFeature(imageFilename, positions, colors);
+  }
+
+  ogs.vgl.actor.call(this);
+
+  // Initialize
+  var actor = ogs.vgl.utils
+      .createPointSprites(imageFilename, positions, colors);
+  this.setMapper(actor.mapper());
+  this.setMaterial(actor.material());
+
+  return this;
+};
+
+inherit(geoModule.pointSpritesFeature, geoModule.feature);

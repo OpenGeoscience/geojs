@@ -21,7 +21,6 @@
 // shader class
 //
 //////////////////////////////////////////////////////////////////////////////
-
 vglModule.shader = function(type) {
 
   if (!(this instanceof vglModule.shader)) {
@@ -30,7 +29,7 @@ vglModule.shader = function(type) {
   vglModule.object.call(this);
 
   var m_shaderHandle = null;
-  var m_shaderType =  type;
+  var m_shaderType = type;
   var m_shaderSource = "";
   var m_fileName = "";
 
@@ -71,8 +70,9 @@ vglModule.shader = function(type) {
 
     // See if it compiled successfully
     if (!gl.getShaderParameter(m_shaderHandle, gl.COMPILE_STATUS)) {
-      console.log("[ERROR] An error occurred compiling the shaders: " +
-                  gl.getShaderInfoLog(m_shaderHandle));
+      console.log("[ERROR] An error occurred compiling the shaders: "
+                  + gl.getShaderInfoLog(m_shaderHandle));
+      console.log(m_shaderSource);
       gl.deleteShader(m_shaderHandle);
       return null;
     }
