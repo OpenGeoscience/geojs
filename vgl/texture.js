@@ -21,7 +21,6 @@
 // texture class
 //
 //////////////////////////////////////////////////////////////////////////////
-
 vglModule.texture = function() {
 
   if (!(this instanceof vglModule.texture)) {
@@ -29,7 +28,7 @@ vglModule.texture = function() {
   }
   vglModule.materialAttribute.call(this, materialAttributeType.Texture);
 
-  /// Private member variables
+  // / Private member variables
   this.m_width = 0;
   this.m_height = 0;
   this.m_depth = 0;
@@ -46,7 +45,7 @@ vglModule.texture = function() {
 
   this.modifiedOn();
 
-  /// Public member methods
+  // / Public member methods
   this.setup = function(renderState) {
     gl.deleteTexture(this.m_textureHandle);
     this.m_textureHandle = gl.createTexture();
@@ -62,9 +61,9 @@ vglModule.texture = function() {
       this.updateDimensions();
       this.computeInternalFormatUsingImage();
 
-      //console.log("m_internalFormat " + this.m_internalFormat);
-      //console.log("m_pixelFormat " + this.m_pixelFormat);
-      //console.log("m_pixelDataType " + this.m_pixelDataType);
+      // console.log("m_internalFormat " + this.m_internalFormat);
+      // console.log("m_pixelFormat " + this.m_pixelFormat);
+      // console.log("m_pixelDataType " + this.m_pixelDataType);
 
       // FOR now support only 2D textures
       gl.texImage2D(gl.TEXTURE_2D, 0, this.m_internalFormat,
@@ -93,19 +92,15 @@ vglModule.texture = function() {
     gl.bindTexture(gl.TEXTURE_2D, null);
   };
 
-  this.handleTextureLoaded = function(image) {
-    this.m_image = image;
-    this.updateDimensions();
-    this.modifiedOn(true);
-  };
-
   this.image = function() {
     return this.m_image;
   };
 
   this.setImage = function(image) {
     if (image !== null) {
-      image.onload = this.handleTextureLoaded(image);
+      this.m_image = image;
+      this.updateDimensions();
+      this.modifiedOn(true);
       return true;
     }
 
@@ -174,7 +169,6 @@ vglModule.texture = function() {
     return false;
   };
 
-
   this.pixelFormat = function() {
     return this.m_pixelFormat;
   };
@@ -188,7 +182,6 @@ vglModule.texture = function() {
     this.modifiedOn();
     return true;
   };
-
 
   this.pixelDataType = function() {
     return this.m_pixelDataType;
@@ -210,23 +203,23 @@ vglModule.texture = function() {
     // Currently image does not define internal format
     // and hence it's pixel format is the only way to query
     // information on how color has been stored.
-//    switch (this.m_image.pixelFormat()) {
-//    case gl.RGB:
-//      this.m_internalFormat = gl.RGB;
-//      break;
-//    case gl.RGBA:
-//      this.m_internalFormat = gl.RGBA;
-//      break;
-//    case gl.Luminance:
-//      this.m_internalFormat = gl.Luminance;
-//      break;
-//    case gl.LuminanceAlpha:
-//      this.m_internalFormat = gl.LuminanceAlpha;
-//      break;
-//    // Do nothing when image pixel format is none or undefined.
-//    default:
-//      break;
-//    };
+    // switch (this.m_image.pixelFormat()) {
+    // case gl.RGB:
+    // this.m_internalFormat = gl.RGB;
+    // break;
+    // case gl.RGBA:
+    // this.m_internalFormat = gl.RGBA;
+    // break;
+    // case gl.Luminance:
+    // this.m_internalFormat = gl.Luminance;
+    // break;
+    // case gl.LuminanceAlpha:
+    // this.m_internalFormat = gl.LuminanceAlpha;
+    // break;
+    // // Do nothing when image pixel format is none or undefined.
+    // default:
+    // break;
+    // };
 
     // TODO Fix this
     this.m_internalFormat = gl.RGBA;

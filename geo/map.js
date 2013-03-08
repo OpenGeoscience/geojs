@@ -74,6 +74,7 @@ geoModule.map = function(node, options) {
 
   var m_that = this;
   var m_node = node;
+  var m_baseLayer = null;
   var m_leftMouseButtonDown = false;
   var m_rightMouseButtonDown = false;
   var m_initialized = false;
@@ -282,25 +283,30 @@ geoModule.map = function(node, options) {
     return false;
   }
 
-  // TODO use zoom and center options
+  /**
+   * On successful loading of the background imagery for
+   * map, use the image as texture and redraw the map.
+   *
+   */
+  function updateMapImage(image) {
+    var worldTexture = new vglModule.texture();
+    worldTexture.updateDimensions();
+    worldTexture.setImage(worldImage);
+    m_baseLayer.material().addAttribute(worldTexture);
+    draw();
+  }
 
-  var m_baseLayer = (function() {
+  // TODO use zoom and center options
+  m_baseLayer = (function() {
     var mapActor = ogs.vgl.utils.createTexturePlane(-180.0, -90.0, 0.0, 180.0,
                                                     -90.0, 0.0, -180.0, 90.0,
                                                     0.0);
-
     // Setup texture
     worldImage = new Image();
     worldImage.src = "./data/land_shallow_topo_2048.png";
-    var worldTexture = new vglModule.texture();
-    worldTexture.setImage(worldImage);
-
-    // TODO Currently hard-coded
-
-    mapActor.material().addAttribute(worldTexture);
+    worldImage.onload = updateMapImage;
 
     m_renderer.addActor(mapActor);
-
     document.onmousedown = handleMouseDown;
     document.onmouseup = handleMouseUp;
     document.onmousemove = handleMouseMove;
@@ -308,8 +314,6 @@ geoModule.map = function(node, options) {
       return false;
     };
     HTMLCanvasElement.prototype.relMouseCoords = relMouseCoords;
-
-    draw();
 
     return mapActor;
   })();
