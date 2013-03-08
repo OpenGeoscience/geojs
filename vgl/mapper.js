@@ -39,6 +39,7 @@ vglModule.mapper = function() {
   vglModule.boundingObject.call(this);
 
   var m_dirty = true;
+  var m_color = [ 1.0, 1.0, 1.0 ];
   var m_geomData = 0;
   var m_buffers = [];
   var m_bufferVertexAttributeMap = {};
@@ -48,6 +49,27 @@ vglModule.mapper = function() {
    *
    */
   this.computeBounds = function() {
+  };
+
+  /**
+   * Get solid color of the geometry
+   *
+   */
+  this.color = function() {
+    return m_color;
+  };
+
+  /**
+   * Set solid color of the geometry. Default is white [1.0, 1.0, 1.0]
+   *
+   * @param r Red component of the color [0.0 - 1.0]
+   * @param g Green component of the color [0.0 - 1.0]
+   * @param b Blue component of the color [0.0 - 1.0]
+   */
+  this.setColor = function(r, g, b) {
+    m_color[0] = r;
+    m_color[1] = g;
+    m_color[2] = br;
   };
 
   /**
@@ -79,6 +101,9 @@ vglModule.mapper = function() {
     if (m_dirty) {
       setupDrawObjects(renderState);
     }
+
+    // Fixed vertex color
+    gl.vertexAttrib3fv(vglModule.vertexAttributeKeys.Color, this.color());
 
     // TODO Use renderState
     var bufferIndex = 0;
