@@ -352,13 +352,14 @@ vglModule.utils.createTexturePlane = function(originX, originY, originZ,
  * @returns {vglModule.actor}
  */
 vglModule.utils.createPoints = function(positions, colors, texcoords) {
-  var mapper = new vglModule.mapper();
-  var pointSource = new vglModule.pointSource();
 
   if (!positions) {
     console.log("[ERROR] Cannot create points without positions");
     return null;
   }
+
+  var mapper = new vglModule.mapper();
+  var pointSource = new vglModule.pointSource();
 
   pointSource.setPositions(positions);
   if (colors) {
@@ -371,31 +372,7 @@ vglModule.utils.createPoints = function(positions, colors, texcoords) {
 
   mapper.setGeometryData(pointSource.create());
 
-  var mat = new vglModule.material();
-  var blend = new vglModule.blend();
-  var prog = new vglModule.shaderProgram();
-  var vertexShader = vglModule.utils.createVertexShader(gl);
-  var fragmentShader = vglModule.utils.createFragmentShader(gl);
-  var posVertAttr = new vglModule.vertexAttribute("vertexPosition");
-  var texCoordVertAttr = new vglModule.vertexAttribute("textureCoord");
-  var colorVertAttr = new vglModule.vertexAttribute("vertexColor");
-  var opacityUniform = new vglModule.floatUniform("opacity", 1.0);
-  var pointsizeUniform = new vglModule.floatUniform("pointSize", 10.0);
-  var modelViewUniform = new vglModule.modelViewUniform("modelViewMatrix");
-  var projectionUniform = new vglModule.projectionUniform("projectionMatrix");
-
-  prog.addVertexAttribute(posVertAttr, vglModule.vertexAttributeKeys.Position);
-  prog.addVertexAttribute(colorVertAttr, vglModule.vertexAttributeKeys.Color);
-  prog.addVertexAttribute(texCoordVertAttr,
-                          vglModule.vertexAttributeKeys.TextureCoordinate);
-  prog.addUniform(pointsizeUniform);
-  prog.addUniform(opacityUniform);
-  prog.addUniform(modelViewUniform);
-  prog.addUniform(projectionUniform);
-  prog.addShader(fragmentShader);
-  prog.addShader(vertexShader);
-  mat.addAttribute(prog);
-  mat.addAttribute(blend);
+  var mat = vglModule.utils.createGeometryMaterial(imageFilename);
 
   var actor = new vglModule.actor();
   actor.setMapper(mapper);
@@ -414,9 +391,6 @@ vglModule.utils.createPoints = function(positions, colors, texcoords) {
  */
 vglModule.utils.createPointSprites = function(imageFilename, positions, colors,
                                               texcoords) {
-  var mapper = new vglModule.mapper();
-  var pointSource = new vglModule.pointSource();
-
   if (!imageFilename) {
     console.log("[ERROR] Point sprites requires an image");
     return null;
@@ -426,6 +400,9 @@ vglModule.utils.createPointSprites = function(imageFilename, positions, colors,
     console.log("[ERROR] Cannot create points without positions");
     return null;
   }
+
+  var mapper = new vglModule.mapper();
+  var pointSource = new vglModule.pointSource();
 
   pointSource.setPositions(positions);
   if (colors) {
