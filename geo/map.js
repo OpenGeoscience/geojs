@@ -290,7 +290,7 @@ geoModule.map = function(node, options) {
                                                     0.0);
     // Setup texture
     var worldImage = new Image();
-    worldImage.src = "./data/assets/land_shallow_topo_2048.png";
+    worldImage.src = "/data/assets/land_shallow_topo_2048.png";
     worldImage.onload = function() {
       var worldTexture = new vglModule.texture();
       worldTexture.updateDimensions();

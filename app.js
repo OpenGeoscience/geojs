@@ -45,7 +45,7 @@ function main() {
   var colors = [];
   $.ajax({
     type : "GET",
-    url : "./data/cities.csv",
+    url : "/data/assets/cities.csv",
     dataType : "text",
     success : function(data) {
       table = processCSVData(data);
