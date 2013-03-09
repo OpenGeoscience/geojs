@@ -285,7 +285,6 @@ vglModule.utils.createPointSpritesMaterial = function(imageFilename) {
   var texture = new vglModule.texture();
   texture.setImage(image);
   mat.addAttribute(texture);
-
   return mat;
 };
 

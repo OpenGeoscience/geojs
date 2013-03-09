@@ -283,28 +283,21 @@ geoModule.map = function(node, options) {
     return false;
   }
 
-  /**
-   * On successful loading of the background imagery for
-   * map, use the image as texture and redraw the map.
-   *
-   */
-  function updateMapImage(image) {
-    var worldTexture = new vglModule.texture();
-    worldTexture.updateDimensions();
-    worldTexture.setImage(worldImage);
-    m_baseLayer.material().addAttribute(worldTexture);
-    draw();
-  }
-
   // TODO use zoom and center options
   m_baseLayer = (function() {
     var mapActor = ogs.vgl.utils.createTexturePlane(-180.0, -90.0, 0.0, 180.0,
                                                     -90.0, 0.0, -180.0, 90.0,
                                                     0.0);
     // Setup texture
-    worldImage = new Image();
+    var worldImage = new Image();
     worldImage.src = "./data/land_shallow_topo_2048.png";
-    worldImage.onload = updateMapImage;
+    worldImage.onload = function() {
+      var worldTexture = new vglModule.texture();
+      worldTexture.updateDimensions();
+      worldTexture.setImage(worldImage);
+      m_baseLayer.material().addAttribute(worldTexture);
+      draw();
+    };
 
     m_renderer.addActor(mapActor);
     document.onmousedown = handleMouseDown;
