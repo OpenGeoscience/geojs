@@ -102,17 +102,16 @@ inherit(geoModule.pointFeature, geoModule.feature);
  * @param colors
  * @returns {geoModule.pointFeature}
  */
-geoModule.pointSpritesFeature = function(imageFilename, positions, colors) {
+geoModule.pointSpritesFeature = function(image, positions, colors) {
 
   if (!(this instanceof geoModule.pointSpritesFeature)) {
-    return new geoModule.pointSpritesFeature(imageFilename, positions, colors);
+    return new geoModule.pointSpritesFeature(image, positions, colors);
   }
 
   ogs.vgl.actor.call(this);
 
   // Initialize
-  var actor = ogs.vgl.utils
-      .createPointSprites(imageFilename, positions, colors);
+  var actor = ogs.vgl.utils.createPointSprites(image, positions, colors);
   this.setMapper(actor.mapper());
   this.setMaterial(actor.material());
 

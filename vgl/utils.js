@@ -250,7 +250,7 @@ vglModule.utils.createGeometryMaterial = function() {
  *
  * @returns {vglModule.material}
  */
-vglModule.utils.createPointSpritesMaterial = function(imageFilename) {
+vglModule.utils.createPointSpritesMaterial = function(image) {
   var mat = new vglModule.material();
   var blend = new vglModule.blend();
   var prog = new vglModule.shaderProgram();
@@ -279,9 +279,7 @@ vglModule.utils.createPointSpritesMaterial = function(imageFilename) {
   mat.addAttribute(prog);
   mat.addAttribute(blend);
 
-  // Load the texture
-  var image = new Image();
-  image.src = imageFilename;
+  // Create and set the texture
   var texture = new vglModule.texture();
   texture.setImage(image);
   mat.addAttribute(texture);
@@ -371,7 +369,7 @@ vglModule.utils.createPoints = function(positions, colors, texcoords) {
 
   mapper.setGeometryData(pointSource.create());
 
-  var mat = vglModule.utils.createGeometryMaterial(imageFilename);
+  var mat = vglModule.utils.createGeometryMaterial();
 
   var actor = new vglModule.actor();
   actor.setMapper(mapper);
@@ -388,9 +386,9 @@ vglModule.utils.createPoints = function(positions, colors, texcoords) {
  *
  * @returns {vglModule.actor}
  */
-vglModule.utils.createPointSprites = function(imageFilename, positions, colors,
+vglModule.utils.createPointSprites = function(image, positions, colors,
                                               texcoords) {
-  if (!imageFilename) {
+  if (!image) {
     console.log("[ERROR] Point sprites requires an image");
     return null;
   }
@@ -414,7 +412,7 @@ vglModule.utils.createPointSprites = function(imageFilename, positions, colors,
 
   mapper.setGeometryData(pointSource.create());
 
-  var mat = vglModule.utils.createPointSpritesMaterial(imageFilename);
+  var mat = vglModule.utils.createPointSpritesMaterial(image);
   var actor = new vglModule.actor();
   actor.setMapper(mapper);
   actor.setMaterial(mat);

@@ -65,14 +65,18 @@ function main() {
           }
         }
 
-        var pointLayer = ogs.geo.featureLayer({
-          "opacity" : 1,
-          "showAttribution" : 1,
-          "visible" : 1
-        }, ogs.geo.pointSpritesFeature('/data/assets/spark.png', citieslatlon,
-                                       colors));
+        // Load image to be used for drawing dots
+        var image = new Image();
+        image.src = '/data/assets/spark.png';
+        image.onload = function() {
+          var pointLayer = ogs.geo.featureLayer({
+            "opacity" : 1,
+            "showAttribution" : 1,
+            "visible" : 1
+          }, ogs.geo.pointSpritesFeature(image, citieslatlon, colors));
 
-        myMap.addLayer(pointLayer);
+          myMap.addLayer(pointLayer);
+        };
       }
     }
   });
