@@ -21,7 +21,6 @@
 // node class
 //
 //////////////////////////////////////////////////////////////////////////////
-
 vglModule.node = function() {
 
   if (!(this instanceof vglModule.node)) {
@@ -29,13 +28,13 @@ vglModule.node = function() {
   }
   vglModule.boundingObject.call(this);
 
-  /// Private member variables
+  // / Private member variables
   var m_parent = null;
   var m_material = null;
   var m_visible = true;
   var m_overlay = false;
 
-  /// Public member methods
+  // / Public member methods
 
   /**
    * Accept visitor for scene traversal
@@ -58,10 +57,9 @@ vglModule.node = function() {
    *
    */
   this.setMaterial = function(material) {
-    if (material !== m_material)
-    {
+    if (material !== m_material) {
       m_material = material;
-      this.modifiedOn();
+      this.modified();
       return true;
     }
 
@@ -81,9 +79,9 @@ vglModule.node = function() {
    *
    */
   this.setVisible = function(flag) {
-    if (flag !== m_visible)   {
+    if (flag !== m_visible) {
       m_visible = flag;
-      this.modifiedOn();
+      this.modified();
       return true;
     }
 
@@ -108,7 +106,7 @@ vglModule.node = function() {
         m_parent.removeChild(this);
       }
       m_parent = parent;
-      this.modifiedOn();
+      this.modified();
       return true;
     }
 
@@ -128,9 +126,9 @@ vglModule.node = function() {
    *
    */
   this.setOverlay = function(flag) {
-    if (m_overlay !== flag)   {
+    if (m_overlay !== flag) {
       m_overlay = flag;
-      this.modifiedOn();
+      this.modified();
       return true;
     }
 
@@ -156,7 +154,7 @@ vglModule.node = function() {
    *
    */
   this.computeBounds = function() {
-    if (this.boundsDirty())   {
+    if (this.boundsDirty()) {
       this.resetBounds();
     }
   };

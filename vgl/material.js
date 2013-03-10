@@ -21,14 +21,13 @@
 // material class
 //
 //////////////////////////////////////////////////////////////////////////////
-
 vglModule.material = function() {
 
   this.RenderBin = {
-    "Default"     : 0,
-    "Opaque"      : 1,
+    "Default" : 0,
+    "Opaque" : 1,
     "Transparent" : 10,
-    "Overlay"     : 20
+    "Overlay" : 20
   };
 
   if (!(this instanceof vglModule.material)) {
@@ -36,26 +35,27 @@ vglModule.material = function() {
   }
   vglModule.object.call(this);
 
-  /// Private member variables
+  // / Private member variables
   var m_shaderProgram = new vglModule.shaderProgram();
   var m_binNumber = 0;
   var m_textureAttributes = {};
   var m_attributes = {};
 
-  /// Public member methods
+  // / Public member methods
   this.binNumber = function() {
     return m_binNumber;
   };
 
   this.setBinNumber = function(binNo) {
     m_binNumber = binNo;
-    this.modifiedOn();
+    this.modified();
   };
 
   this.exists = function(attr) {
     if (attr.type() === vglModule.materialAttribute.Texture) {
       return m_textureAttributes.hasOwnProperty(attr);
-    } else {
+    }
+    else {
       return m_attributes.hasOwnProperty(attr);
     }
   };
@@ -68,15 +68,17 @@ vglModule.material = function() {
 
     if (attr.type() === materialAttributeType.Texture) {
       m_textureAttributes[attr.textureUnit()] = attr;
-      this.modifiedOn();
+      this.modified();
       return true;
-    } else {
+    }
+    else {
       // Shader is a very special attribute
       if (attr.type() === materialAttributeType.ShaderProgram) {
         m_shaderProgram = attr;
       }
 
       m_attributes[attr.type()] = attr;
+      this.modified();
       return true;
     }
 
@@ -97,13 +99,13 @@ vglModule.material = function() {
 
   this.bind = function(renderState) {
 
-    for (var key in m_attributes) {
+    for ( var key in m_attributes) {
       if (m_attributes.hasOwnProperty(key)) {
         m_attributes[key].bind(renderState);
       }
     }
 
-    for (var key in m_textureAttributes) {
+    for ( var key in m_textureAttributes) {
       if (m_textureAttributes.hasOwnProperty(key)) {
         m_textureAttributes[key].bind(renderState);
       }
@@ -127,7 +129,7 @@ vglModule.material = function() {
 
   this.bindVertexData = function(renderState, key) {
 
-    for (var i in m_attributes) {
+    for ( var i in m_attributes) {
       if (m_attributes.hasOwnProperty(i)) {
         m_attributes[i].bindVertexData(renderState, key);
       }
@@ -135,7 +137,7 @@ vglModule.material = function() {
   };
 
   this.undoBindVertexData = function(renderState, key) {
-    for (var i in m_attributes) {
+    for ( var i in m_attributes) {
       if (m_attributes.hasOwnProperty(i)) {
         m_attributes.undoBindVertexData(renderState, key);
       }

@@ -21,7 +21,6 @@
 // boundingObject class
 //
 //////////////////////////////////////////////////////////////////////////////
-
 vglModule.boundingObject = function() {
 
   if (!(this instanceof vglModule.boundingObject)) {
@@ -32,30 +31,41 @@ vglModule.boundingObject = function() {
   var m_boundsDirty = true;
   var m_bounds = new Array(6);
 
-  /// Return dirty state of bounds
+  /**
+   * Return true if bounds are dirty otherwise false
+   *
+   */
   this.boundsDirty = function() {
     return m_boundsDirty;
   };
 
-  /// Set bounds dirty
+  /**
+   * Mark bounds dirty for the object
+   *
+   */
   this.setBoundsDirty = function(flag) {
     if (m_boundsDirty !== flag) {
       m_boundsDirty = flag;
-      this.modifiedOn();
+      this.modified();
       return true;
     }
 
     return false;
   };
 
-  /// Return current bounds
-  this.bounds  = function() {
+  /**
+   * Get current bounds of the object
+   *
+   */
+  this.bounds = function() {
     return m_bounds;
   };
 
-  /// Set current bounds
-  this.setBounds = function(minX, maxX, minY, maxY,
-                                                    minZ, maxZ) {
+  /**
+   * Set current bounds of the object
+   *
+   */
+  this.setBounds = function(minX, maxX, minY, maxY, minZ, maxZ) {
     m_bounds[0] = minX;
     m_bounds[1] = maxX;
     m_bounds[2] = minY;
@@ -63,12 +73,12 @@ vglModule.boundingObject = function() {
     m_bounds[4] = minZ;
     m_bounds[5] = maxZ;
 
-    this.modifiedOn();
+    this.modified();
 
     return true;
   };
 
-  /// Request computing bounds. Should be implemented by the concrete class
+  // / Request computing bounds. Should be implemented by the concrete class
   this.computeBounds = function() {
   };
 

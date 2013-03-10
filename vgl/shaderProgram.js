@@ -30,6 +30,7 @@ vglModule.shaderProgram = function() {
 
   // / Private member variables
   var m_programHandle = 0;
+  var m_compileTimestamp = coreModule.timestamp();
   var m_shaders = [];
   var m_uniforms = [];
   var m_vertexAttributes = {};
@@ -59,7 +60,7 @@ vglModule.shaderProgram = function() {
 
     m_shaders.push(shader);
 
-    this.modifiedOn();
+    this.modified();
     return true;
   };
 
@@ -69,13 +70,13 @@ vglModule.shaderProgram = function() {
     }
 
     m_uniforms.push(uniform);
-    this.modifiedOn();
+    this.modified();
   };
 
   this.addVertexAttribute = function(attr, key) {
     m_vertexAttributes[key] = attr;
 
-    this.modifiedOn();
+    this.modified();
   };
 
   this.uniformLocation = function(name) {
@@ -144,7 +145,8 @@ vglModule.shaderProgram = function() {
   this.bind = function(renderState) {
     var i = 0;
 
-    if (m_programHandle === 0 || this.modified()) {
+    if (m_programHandle === 0
+        || (m_compileTimestamp.getMTime() < this.getMTime())) {
       m_programHandle = gl.createProgram();
 
       if (m_programHandle === 0) {
@@ -168,7 +170,7 @@ vglModule.shaderProgram = function() {
 
       this.use();
       this.bindUniforms();
-      this.modifiedOff();
+      m_compileTimestamp.modified();
     }
     else {
       this.use();

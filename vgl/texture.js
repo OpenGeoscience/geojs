@@ -28,7 +28,7 @@ vglModule.texture = function() {
   }
   vglModule.materialAttribute.call(this, materialAttributeType.Texture);
 
-  // / Private member variables
+  // Private member variables
   this.m_width = 0;
   this.m_height = 0;
   this.m_depth = 0;
@@ -43,7 +43,7 @@ vglModule.texture = function() {
 
   this.m_image = null;
 
-  this.modifiedOn();
+  var m_setupTimestamp = coreModule.timestamp();
 
   // / Public member methods
   this.setup = function(renderState) {
@@ -75,12 +75,12 @@ vglModule.texture = function() {
     }
 
     gl.bindTexture(gl.TEXTURE_2D, null);
-    this.modifiedOff();
+    m_setupTimestamp.modified();
   };
 
   this.bind = function(renderState) {
     // TODO Call setup via material setup
-    if (this.modified()) {
+    if (this.getMTime() > m_setupTimestamp.getMTime()) {
       this.setup(renderState);
     }
 
@@ -100,7 +100,7 @@ vglModule.texture = function() {
     if (image !== null) {
       this.m_image = image;
       this.updateDimensions();
-      this.modifiedOn(true);
+      this.modified();
       return true;
     }
 
@@ -117,7 +117,7 @@ vglModule.texture = function() {
     }
 
     this.m_textureUnit = unit;
-    this.modifiedOn(true);
+    this.modified();
     return true;
   };
 
@@ -131,7 +131,7 @@ vglModule.texture = function() {
     }
 
     this.m_width = width;
-    this.modifiedOn();
+    this.modified();
 
     return true;
   };
@@ -146,7 +146,7 @@ vglModule.texture = function() {
     }
 
     this.m_depth = depth;
-    this.modifiedOn();
+    this.modified();
     return true;
   };
 
@@ -161,7 +161,7 @@ vglModule.texture = function() {
   this.setInternalFormat = function(internalFormat) {
     if (this.m_internalFormat !== internalFormat) {
       this.m_internalFormat = internalFormat;
-      this.modifiedOn(true);
+      this.modified();
 
       return true;
     }
@@ -179,7 +179,7 @@ vglModule.texture = function() {
     }
 
     this.m_pixelFormat = pixelFormat;
-    this.modifiedOn();
+    this.modified();
     return true;
   };
 
@@ -194,7 +194,7 @@ vglModule.texture = function() {
 
     this.m_pixelDataTYpe = pixelDataType;
 
-    this.modifiedOn();
+    this.modified();
 
     return true;
   };
