@@ -104,11 +104,11 @@ vglModule.vtkUnpack.prototype.parseObject = function(buffer) {
   obj.coded = buffer;
   obj.data = this.decode64(obj.coded);
 
-  var geom = new vglGeometryData();
+  var geom = new vglModule.geometryData();
   geom.setName("World");
 
-  var points = new vglSourceDataP3N3f();
-  var triangles = new vglTriangles();
+  var points = new vglModule.sourceDataP3N3f();
+  var triangles = new vglModule.triangles();
 
   geom.addSource(points);
   geom.addPrimitive(triangles);
@@ -174,7 +174,7 @@ vglModule.vtkUnpack.prototype.parseObject = function(buffer) {
     obj.normals = new Float32Array(test.buffer);
 
     for(i=0; i<obj.numberOfVertices; i++) {
-      var v1 = new vglVertexDataP3N3f();
+      var v1 = new vglModule.vertexDataP3N3f();
       v1.m_position = new Array(obj.vertices[i*3+0], obj.vertices[i*3+1], obj.vertices[i*3+2]);
       v1.m_normal = new Array(obj.normals[i*3+0], obj.normals[i*3+1], obj.normals[i*3+2]);
       //if (i<10) console.log(v1.m_position + " " + v1.m_normal);

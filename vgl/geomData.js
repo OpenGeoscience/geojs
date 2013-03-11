@@ -455,8 +455,8 @@ inherit(vglModule.sourceDataP3T3f, vglModule.sourceData);
  */
 vglModule.sourceDataP3N3f = function() {
 
-  if (!(this instanceof sourceDataP3N3f)) {
-    return new sourceDataP3N3f();
+  if (!(this instanceof vglModule.sourceDataP3N3f)) {
+    return new vglModule.sourceDataP3N3f();
   }
 
   vglModule.sourceData.call(this);
@@ -473,6 +473,8 @@ vglModule.sourceDataP3N3f = function() {
 
   return this;
 };
+
+inherit(vglModule.sourceDataP3N3f, vglModule.sourceData);
 
 /**
  * Create a new instance of class sourceDataP3fv
