@@ -1,24 +1,7 @@
-/*========================================================================
-  VGL --- VTK WebGL Rendering Toolkit
-
-  Copyright 2013 Kitware, Inc.
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
- ========================================================================*/
-
 //////////////////////////////////////////////////////////////////////////////
 //
 // renderState class
+// renderer class
 //
 //////////////////////////////////////////////////////////////////////////////
 vglModule.renderState = function() {
@@ -27,12 +10,6 @@ vglModule.renderState = function() {
   this.m_material = null;
   this.m_mapper = null;
 };
-
-// ////////////////////////////////////////////////////////////////////////////
-//
-// renderer class
-//
-// ////////////////////////////////////////////////////////////////////////////
 
 /**
  * renderer class provides key functionality to render a scene
@@ -46,7 +23,7 @@ vglModule.renderer = function() {
 
   vglModule.object.call(this);
 
-  /** Private member variables */
+  // Private member variables
   var m_width = 1280;
   var m_height = 1024;
   var m_clippingRange = [ 0.1, 1000.0 ];
@@ -55,7 +32,7 @@ vglModule.renderer = function() {
 
   m_camera.addChild(m_sceneRoot);
 
-  /** Public member methods */
+  // Public member methods
 
   /**
    * Get scene root

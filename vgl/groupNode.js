@@ -1,21 +1,3 @@
-/*========================================================================
-  VGL --- VTK WebGL Rendering Toolkit
-
-  Copyright 2013 Kitware, Inc.
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
- ========================================================================*/
-
 ///////////////////////////////////////////////////////////////////////////////
 //
 // groupNode class
@@ -36,7 +18,7 @@ vglModule.groupNode = function() {
       return false;
     }
 
-    for (var i = 0; i < m_children.length; ++i) {
+    for ( var i = 0; i < m_children.length; ++i) {
       m_children[i].setVisible(flag);
     }
 
@@ -77,14 +59,14 @@ vglModule.groupNode = function() {
 
   this.traverse = function(visitor) {
     switch (visitor.type()) {
-    case visitor.UpdateVisitor:
-      this.traverseChildrenAndUpdateBounds(visitor);
-      break;
-    case visitor.CullVisitor:
-      this.traverseChildren(visitor);
-      break;
-    default:
-      break;
+      case visitor.UpdateVisitor:
+        this.traverseChildrenAndUpdateBounds(visitor);
+        break;
+      case visitor.CullVisitor:
+        this.traverseChildren(visitor);
+        break;
+      default:
+        break;
     }
   };
 
@@ -92,7 +74,7 @@ vglModule.groupNode = function() {
     this.computeBounds();
 
     if (visitor.mode() === visitor.TraverseAllChildren) {
-      for (var i = 0; i < m_children.length(); ++i) {
+      for ( var i = 0; i < m_children.length(); ++i) {
         m_children[i].accept(visitor);
         this.updateBounds(m_children[i]);
       }
@@ -110,7 +92,7 @@ vglModule.groupNode = function() {
 
   this.traverseChildren = function(visitor) {
     if (visitor.mode() == vesVisitor.TraverseAllChildren) {
-      for (var i = 0; i < m_children.length(); ++i) {
+      for ( var i = 0; i < m_children.length(); ++i) {
         m_children[i].accept(visitor);
       }
     }
