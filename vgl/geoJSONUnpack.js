@@ -36,27 +36,25 @@ vglModule.geoJSONUnpack.prototype.ExtractCoordinates = function (obj) {
   // Once we demonstrate data delivery to rendering, we need to pull out
   // the connectivity to draw lines and polygons instead of just this.
   var appender = function(element, index, array) {
-	  this.Coordinates = this.Coordinates.concat(element)
+    this.Coordinates = this.Coordinates.concat(element)
   }
 
-  if (obj.hasOwnProperty('geometry') &&
-	  obj['geometry'].hasOwnProperty('geometries')) {
-      this.ExtractCoordinates(obj['geometry'])
-    }
-  if (obj.hasOwnProperty('geometries')) {
-	  this.ExtractCoordinates(obj['geometries'])
-	}
-  if (obj.hasOwnProperty('features')) {
-      this.ExtractCoordinates(obj['features'])
-    }
-  if (obj.hasOwnProperty('geometry') &&
-	  obj['geometry'].hasOwnProperty('coordinates')) {
-	  obj['geometry']['coordinates'].forEach(appender, this);
-	}
   if (obj.hasOwnProperty('coordinates')) {
-	  obj['coordinates'].forEach(appender, this);
-	}
-
+    console.log("found coords");
+    obj['coordinates'].forEach(appender, this);
+  }
+  else
+    {
+      for (var x in obj) {
+        if (obj.hasOwnProperty(x) && typeof(obj[x])=="object" &&
+            obj[x] !== null) {
+          console.log(x + " recurse")
+          this.ExtractCoordinates(obj[x]);
+        } else {
+          console.log(obj[x] + " dead end")
+        }
+      }
+    }
   return;
 }
 
@@ -88,14 +86,14 @@ vglModule.geoJSONUnpack.prototype.parseObject = function(buffer) {
 
     var v1 = new vglModule.vertexDataP3f();
     var x = this.Coordinates[i][0];
-	var y = this.Coordinates[i][1];
-	var z = 0.0;
-	if (this.Coordinates[i].length>2)
-	  {
-	  z = this.Coordinates[i][2];
-	  }
+    var y = this.Coordinates[i][1];
+    var z = 0.0;
+    if (this.Coordinates[i].length>2)
+      {
+      z = this.Coordinates[i][2];
+      }
     v1 = new Array(x,y,z);
-	coords.pushBack(v1);
+    coords.pushBack(v1);
   }
   points.setIndices(indices);
   console.log("coords ARE");
