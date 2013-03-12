@@ -24,8 +24,10 @@ vglModule.renderer = function() {
   vglModule.object.call(this);
 
   // Private member variables
-  var m_width = 1280;
-  var m_height = 1024;
+  var m_x = 0;
+  var m_y = 0;
+  var m_width = 0;
+  var m_height = 0;
   var m_clippingRange = [ 0.1, 1000.0 ];
   var m_sceneRoot = new vglModule.groupNode();
   var m_camera = new vglModule.camera();
@@ -106,17 +108,36 @@ vglModule.renderer = function() {
   };
 
   /**
-   * Resize viewport based on the new width and height of the window
+   * Resize viewport given a width and height
    *
    */
   this.resize = function(width, height) {
     m_width = width;
     m_height = height;
-    gl.viewport(0, 0, m_width, m_height);
+
+    // TODO move this code to camera
+    gl.viewport(m_x, m_y, m_width, m_height);
+
+    this.modified();
   };
 
   /**
-   * Add new actor to the collection.
+   * Resize viewport given a position, width and height
+   *
+   */
+  this.resize = function(x, y, width, height) {
+    m_x = x;
+    m_y = y;
+    m_width = width;
+    m_height = height;
+    // TODO move this code to camera
+    gl.viewport(m_x, m_y, m_width, m_height);
+
+    this.modified();
+  };
+
+  /**
+   * Add new actor to the collection
    *
    */
   this.addActor = function(actor) {
