@@ -48,11 +48,7 @@ geoModule.map = function(node, options) {
   }
   ogs.vgl.object.call(this);
 
-  // Member variables
-  this.events = {
-    update : "update"
-  };
-
+  // Private member variables
   var m_that = this;
   var m_node = node;
   var m_initialized = false;
@@ -76,9 +72,9 @@ geoModule.map = function(node, options) {
 
   var m_renderer = m_viewer.renderWindow().activeRenderer();
 
-  $(m_interactorStyle).on(m_interactorStyle.events.leftButtonPressEvent, draw);
-  $(m_interactorStyle).on(m_interactorStyle.events.rightButtonPressEvent, draw);
-  $(this).on(m_that.events.update, draw);
+  $(m_interactorStyle).on(ogs.vgl.command.leftButtonPressEvent, draw);
+  $(m_interactorStyle).on(ogs.vgl.command.rightButtonPressEvent, draw);
+  $(this).on(geoModule.command.updateEvent, draw);
 
   /**
    * Initialize the scene

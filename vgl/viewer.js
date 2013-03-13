@@ -12,7 +12,9 @@ vglModule.viewer = function(canvas) {
   vglModule.object.call(this);
 
   // Private member variables
+  var m_that = this;
   var m_canvas = canvas;
+  var m_ready = false;
   var m_interactorStyle = null;
   var m_renderer = vglModule.renderer();
   var m_renderWindow = vglModule.renderWindow(m_canvas);
@@ -29,6 +31,7 @@ vglModule.viewer = function(canvas) {
   this.init = function() {
     if (m_renderWindow !== null) {
       m_renderWindow.createWindow();
+      m_ready = true;
     }
     else {
       console.log("[ERROR] No render window attached");
@@ -48,19 +51,52 @@ vglModule.viewer = function(canvas) {
   };
 
   this.handleMouseDown = function(event) {
-    return m_interactorStyle.handleMouseDown(event);
+    if (m_ready === true) {
+      var fixedEvent = $.event.fix(event || window.event);
+      fixedEvent.preventDefault();
+      fixedEvent.state = 'down';
+      fixedEvent.type = vglModule.command.mousePressEvent;
+      $(m_that).trigger(fixedEvent);
+    }
   };
 
   this.handleMouseUp = function(event) {
-    return m_interactorStyle.handleMouseUp(event);
+    if (m_ready === true) {
+      var fixedEvent = $.event.fix(event || window.event);
+      fixedEvent.preventDefault();
+      fixedEvent.state = 'up';
+      fixedEvent.type = vglModule.command.mousePressEvent;
+      $(m_that).trigger(fixedEvent);
+    }
   };
 
   this.handleMouseMove = function(event) {
-    return m_interactorStyle.handleMouseMove(event);
+    if (m_ready === true) {
+      var fixedEvent = $.event.fix(event || window.event);
+      fixedEvent.preventDefault();
+      fixedEvent.type = vglModule.command.mouseMoveEvent;
+      $(m_that).trigger(fixedEvent);
+    }
+  };
+
+  this.handleKeyPress = function(event) {
+    if (m_ready === true) {
+      var fixedEvent = $.event.fix(event || window.event);
+      fixedEvent.preventDefault();
+      fixedEvent.type = vglModule.command.keyPressEvent;
+      $(m_that).trigger(fixedEvent);
+    }
   };
 
   this.handleContextMenu = function(event) {
-    return m_interactorStyle.handleContextMenu(event);
+    if (m_ready === true) {
+      var fixedEvent = $.event.fix(event || window.event);
+      fixedEvent.preventDefault();
+      fixedEvent.type = vglModule.command.contextMenuEvent;
+      $(m_that).trigger(fixedEvent);
+    }
+
+    return false;
   };
 
   this.render = function() {

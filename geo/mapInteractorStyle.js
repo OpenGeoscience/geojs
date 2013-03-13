@@ -7,24 +7,25 @@ geoModule.mapInteractorStyle = function() {
   if (!(this instanceof geoModule.mapInteractorStyle)) {
     return new geoModule.mapInteractorStyle();
   }
-
   ogs.vgl.interactorStyle.call(this);
 
+  var m_that = this;
   var m_leftMouseButtonDown = false;
   var m_rightMouseButtonDown = false;
+  var m_middileMouseButtonDown = false;
   var m_mouseLastPos = {
     x : 0,
     y : 0
   };
 
   this.handleMouseMove = function(event) {
-    var width = this.viewer().renderWindow().windowSize()[0];
-    var height = this.viewer().renderWindow().windowSize()[1];
-    var renderer = this.viewer().renderWindow().activeRenderer();
+    var width = m_that.viewer().renderWindow().windowSize()[0];
+    var height = m_that.viewer().renderWindow().windowSize()[1];
+    var renderer = m_that.viewer().renderWindow().activeRenderer();
     var camera = renderer.camera();
 
     var outsideCanvas = false;
-    var coords = this.viewer().canvas().relMouseCoords(event);
+    var coords = m_that.viewer().canvas().relMouseCoords(event);
 
     var currentMousePos = {
       x : 0,
@@ -76,13 +77,13 @@ geoModule.mapInteractorStyle = function() {
       dy = worldPt1[1] - worldPt2[1];
 
       camera.pan(-dx, -dy);
-      $(this).trigger(this.events.leftButtonPressEvent);
+      $(m_that).trigger(vglModule.command.leftButtonPressEvent);
     }
 
     if (m_rightMouseButtonDown) {
       zTrans = currentMousePos.y - m_mouseLastPos.y;
       camera.zoom(zTrans * 0.5);
-      $(this).trigger(this.events.rightButtonPressEvent);
+      $(m_that).trigger(vglModule.command.rightButtonPressEvent);
     }
 
     m_mouseLastPos.x = currentMousePos.x;
@@ -90,7 +91,11 @@ geoModule.mapInteractorStyle = function() {
   };
 
   this.handleMouseDown = function(event) {
-    var canvas = this.viewer().canvas();
+    if (event.state !== "down") {
+      return;
+    }
+
+    var canvas = m_that.viewer().canvas();
 
     if (event.button === 0) {
       m_leftMouseButtonDown = true;
@@ -99,11 +104,10 @@ geoModule.mapInteractorStyle = function() {
       m_rightMouseButtonDown = true;
     }
     if (event.button === 4) {
-      middileMouseButtonDown = true;
+      m_middileMouseButtonDown = true;
     }
 
     coords = canvas.relMouseCoords(event);
-
     if (coords.x < 0) {
       m_mouseLastPos.x = 0;
     }
@@ -122,6 +126,10 @@ geoModule.mapInteractorStyle = function() {
   };
 
   this.handleMouseUp = function(event) {
+    if (event.state !== "up") {
+      return;
+    }
+
     if (event.button === 0) {
       m_leftMouseButtonDown = false;
     }
@@ -129,7 +137,7 @@ geoModule.mapInteractorStyle = function() {
       m_rightMouseButtonDown = false;
     }
     if (event.button === 4) {
-      middileMouseButtonDown = false;
+      m_middileMouseButtonDown = false;
     }
 
     return false;

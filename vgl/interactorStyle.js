@@ -10,30 +10,7 @@ vglModule.interactorStyle = function() {
   vglModule.object.call(this);
 
   // Private member variables
-  this.events = {
-    keyPressEvent : "keyPressEvent",
-    configureEvent : "configureEvent",
-    enableEvent : "enableEvent",
-    mouseWheelBackwardEvent : "mouseWheelBackwardEvent",
-    keyReleaseEvent : "keyReleaseEvent",
-    middleButtonPressEvent : "middleButtonPressEvent",
-    startInteractionEvent : "startInteractionEvent",
-    enterEvent : "enterEvent",
-    rightButtonPressEvent : "rightButtonPressEvent",
-    middleButtonReleaseEvent : "middleButtonReleaseEvent",
-    charEvent : "charEvent",
-    disableEvent : "disableEvent",
-    endInteractionEvent : "endInteractionEvent",
-    mouseMoveEvent : "mouseMoveEvent",
-    mouseWheelForwardEvent : "mouseWheelForwardEvent",
-    exposeEvent : "exposeEvent",
-    timerEvent : "timerEvent",
-    leftButtonPressEvent : "leftButtonPressEvent",
-    leaveEvent : "leaveEvent",
-    rightButtonReleaseEvent : "rightButtonReleaseEvent",
-    leftButtonReleaseEvent : "leftButtonReleaseEvent"
-  };
-
+  var m_that = this;
   var m_viewer = null;
 
   this.viewer = function() {
@@ -43,17 +20,30 @@ vglModule.interactorStyle = function() {
   this.setViewer = function(viewer) {
     if (viewer !== m_viewer) {
       m_viewer = viewer;
+      $(m_viewer).on(vglModule.command.mousePressEvent, m_that.handleMouseDown);
+      $(m_viewer).on(vglModule.command.mousePressEvent, m_that.handleMouseUp);
+      $(m_viewer).on(vglModule.command.mouseMoveEvent, m_that.handleMouseMove);
+      $(m_viewer).on(vglModule.command.keyPressEvent, m_that.handleKeyPress);
+      $(m_viewer).on(vglModule.command.mouseContextMenuEvent,
+                     m_that.handleContextMenu);
       this.modified();
     }
   };
 
   this.handleMouseDown = function(event) {
+    console.log("mouse move2");
   };
 
   this.handleMouseUp = function(event) {
+    console.log("mouse move2");
   };
 
   this.handleMouseMove = function(event) {
+    console.log("mouse move2");
+  };
+
+  this.handleKeyPress = function(event) {
+    console.log("mouse move2");
   };
 
   this.handleContextMenu = function(event) {
