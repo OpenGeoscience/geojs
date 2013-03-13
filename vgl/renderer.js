@@ -125,6 +125,7 @@ vglModule.renderer = function() {
   this.addActor = function(actor) {
     if (actor instanceof vglModule.actor) {
       m_sceneRoot.addChild(actor);
+      this.modified();
       return true;
     }
 
@@ -137,6 +138,7 @@ vglModule.renderer = function() {
   this.removeActor = function(actor) {
     if (actor in m_sceneRoot.children()) {
       m_sceneRoot.removeChild(actor);
+      this.modified();
       return true;
     }
 
