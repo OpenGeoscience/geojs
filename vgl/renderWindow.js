@@ -153,14 +153,19 @@ vglModule.renderWindow = function(canvas) {
    * Resize window
    */
   this.resize = function(width, height) {
-    this.resize(m_x, m_y, width, height);
+    this.positionAndResize(m_x, m_y, width, height);
   };
 
-  this.resize = function(x, y, width, height) {
+  this.positionAndResize = function(x, y, width, height) {
+    m_x = x;
+    m_y = y;
+    m_width = width;
+    m_height = height;
     var i;
     for (i = 0; i < m_renderers.length; ++i) {
-      m_renderers[i].resize(m_x, m_y, m_width, m_height);
+      m_renderers[i].positionAndResize(m_x, m_y, m_width, m_height);
     }
+    this.modified();
   };
 
   /**

@@ -1,9 +1,7 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// renderState class
-// renderer class
-//
-//////////////////////////////////////////////////////////////////////////////
+/**
+ * @class vglModule.renderState
+ * @returns {vglModule.renderState}
+ */
 vglModule.renderState = function() {
   this.m_modelViewMatrix = mat4.create();
   this.m_projectionMatrix = null;
@@ -12,15 +10,14 @@ vglModule.renderState = function() {
 };
 
 /**
- * renderer class provides key functionality to render a scene
- *
+ * @class vglModule.renderer
+ * @returns {vglModule.renderer}
  */
 vglModule.renderer = function() {
 
   if (!(this instanceof vglModule.renderer)) {
     return new vglModule.renderer();
   }
-
   vglModule.object.call(this);
 
   // Private member variables
@@ -38,7 +35,6 @@ vglModule.renderer = function() {
 
   /**
    * Get scene root
-   *
    */
   this.sceneRoot = function() {
     return m_sceneRoot;
@@ -46,7 +42,6 @@ vglModule.renderer = function() {
 
   /**
    * Get main camera of the renderer
-   *
    */
   this.camera = function() {
     return m_camera;
@@ -54,7 +49,6 @@ vglModule.renderer = function() {
 
   /**
    * Get width of renderer
-   *
    */
   this.width = function() {
     return m_width;
@@ -62,7 +56,6 @@ vglModule.renderer = function() {
 
   /**
    * Get height of renderer
-   *
    */
   this.height = function() {
     return m_height;
@@ -70,7 +63,6 @@ vglModule.renderer = function() {
 
   /**
    * Render the scene
-   *
    */
   this.render = function() {
     gl.clearColor(0.5, 0.5, 0.5, 1.0);
@@ -79,7 +71,8 @@ vglModule.renderer = function() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     perspectiveMatrix = m_camera.computeProjectionMatrix((m_width / m_height),
-                                                         0.1, 10000.0);
+                                                         m_clippingRange[0],
+                                                         m_clippingRange[1]);
 
     var renSt = new vglModule.renderState();
     renSt.m_projectionMatrix = perspectiveMatrix;
@@ -101,7 +94,6 @@ vglModule.renderer = function() {
 
   /**
    * Recalculate camera's clipping range
-   *
    */
   this.resetCameraClippingRange = function() {
     // TODO
@@ -109,36 +101,26 @@ vglModule.renderer = function() {
 
   /**
    * Resize viewport given a width and height
-   *
    */
   this.resize = function(width, height) {
-    m_width = width;
-    m_height = height;
-
-    // TODO move this code to camera
-    gl.viewport(m_x, m_y, m_width, m_height);
-
-    this.modified();
+    this.positionAndResize(m_x, m_y, width, height);
   };
 
   /**
    * Resize viewport given a position, width and height
-   *
    */
-  this.resize = function(x, y, width, height) {
+  this.positionAndResize = function(x, y, width, height) {
     m_x = x;
     m_y = y;
     m_width = width;
     m_height = height;
     // TODO move this code to camera
     gl.viewport(m_x, m_y, m_width, m_height);
-
     this.modified();
   };
 
   /**
    * Add new actor to the collection
-   *
    */
   this.addActor = function(actor) {
     if (actor instanceof vglModule.actor) {
@@ -151,7 +133,6 @@ vglModule.renderer = function() {
 
   /**
    * Remove the actor from the collection
-   *
    */
   this.removeActor = function(actor) {
     if (actor in m_sceneRoot.children()) {
@@ -164,10 +145,9 @@ vglModule.renderer = function() {
 
   /**
    * Transform a point in the world space to display space
-   *
    */
-  vglModule.renderer.worldToDisplay = function(worldPt, viewMatrix,
-                                               projectionMatrix, width, height) {
+  this.worldToDisplay = function(worldPt, viewMatrix, projectionMatrix, width,
+                                 height) {
     var viewProjectionMatrix = mat4.create();
     mat4.multiply(projectionMatrix, viewMatrix, viewProjectionMatrix);
 
@@ -194,10 +174,9 @@ vglModule.renderer = function() {
 
   /**
    * Transform a point in display space to world space
-   *
    */
-  vglModule.renderer.displayToWorld = function(displayPt, viewMatrix,
-                                               projectionMatrix, width, height) {
+  this.displayToWorld = function(displayPt, viewMatrix, projectionMatrix,
+                                 width, height) {
     var x = (2.0 * displayPt[0] / width) - 1;
     var y = -(2.0 * displayPt[1] / height) + 1;
     var z = displayPt[2];

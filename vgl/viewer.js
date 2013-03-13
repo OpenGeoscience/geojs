@@ -20,7 +20,7 @@ vglModule.viewer = function(canvas) {
 
   this.canvas = function() {
     return m_canvas;
-  }
+  };
 
   this.renderWindow = function() {
     return m_renderWindow;
@@ -52,7 +52,7 @@ vglModule.viewer = function(canvas) {
   };
 
   this.handleMouseUp = function(event) {
-    return m_interactorStyle.handleMouseDown(event);
+    return m_interactorStyle.handleMouseUp(event);
   };
 
   this.handleMouseMove = function(event) {

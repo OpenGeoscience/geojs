@@ -54,6 +54,7 @@ geoModule.map = function(node, options) {
   };
 
   var m_that = this;
+  var m_node = node;
   var m_initialized = false;
   var m_baseLayer = null;
   var m_options = options;
@@ -67,10 +68,13 @@ geoModule.map = function(node, options) {
   }
 
   var m_interactorStyle = geoModule.mapInteractorStyle();
-  var m_viewer = ogs.vgl.viewer(node);
-  var m_renderer = m_viewer.renderWindow().activeRenderer();
+
+  var m_viewer = ogs.vgl.viewer(m_node);
   m_viewer.setInteractorStyle(m_interactorStyle);
   m_viewer.init();
+  m_viewer.renderWindow().resize($(m_node).width(), $(m_node).height());
+
+  var m_renderer = m_viewer.renderWindow().activeRenderer();
 
   $(m_interactorStyle).on(m_interactorStyle.events.leftButtonPressEvent, draw);
   $(m_interactorStyle).on(m_interactorStyle.events.rightButtonPressEvent, draw);
@@ -150,7 +154,7 @@ geoModule.map = function(node, options) {
     document.onmousedown = m_viewer.handleMouseDown;
     document.onmouseup = m_viewer.handleMouseUp;
     document.onmousemove = m_viewer.handleMouseMove;
-    document.oncontextmenu = m_viewer.handleMouseMove;
+    document.oncontextmenu = m_viewer.handleContextMenu;
     HTMLCanvasElement.prototype.relMouseCoords = relMouseCoords;
 
     return mapActor;
