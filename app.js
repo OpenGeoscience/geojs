@@ -69,6 +69,11 @@ function main() {
     myMap.redraw();
   });
 
+  $('#slider-vertical').on('mousedown', function(e) {
+    e.stopPropagation();
+    return false;
+  });
+
   (function() {
     var canvas = document.getElementById('glcanvas');
 
