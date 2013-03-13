@@ -77,7 +77,7 @@ function main() {
 
     function resizeCanvas() {
       canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight * 0.85;
+      canvas.height = window.innerHeight;
       updateAndDraw(canvas.width, canvas.height);
     }
     resizeCanvas();
