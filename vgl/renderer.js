@@ -65,7 +65,7 @@ vglModule.renderer = function() {
    * Render the scene
    */
   this.render = function() {
-    gl.clearColor(0.5, 0.5, 0.5, 1.0);
+    gl.clearColor(1.0, 1.0, 1.0, 1.0);
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
