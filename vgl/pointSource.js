@@ -1,8 +1,13 @@
-///////////////////////////////////////////////////////////////////////////////
-//
-// pointSource class
-//
-///////////////////////////////////////////////////////////////////////////////
+/**
+ * @module ogs.vgl
+ */
+
+/**
+ * Create a new instance of class pointSource
+ *
+ * @class
+ * @returns {vglModule.pointSource}
+ */
 vglModule.pointSource = function() {
 
   if (!(this instanceof vglModule.pointSource)) {
@@ -17,7 +22,6 @@ vglModule.pointSource = function() {
 
   /**
    * Set positions for the source
-   *
    */
   this.setPositions = function(positions) {
     if (positions instanceof Array) {
@@ -31,7 +35,6 @@ vglModule.pointSource = function() {
 
   /**
    * Set colors for the points
-   *
    */
   this.setColors = function(colors) {
     if (colors instanceof Array) {
@@ -44,7 +47,6 @@ vglModule.pointSource = function() {
 
   /**
    * Set texture coordinates for the points
-   *
    */
   this.setTextureCoordinates = function(texcoords) {
     if (texcoords instanceof Array) {
@@ -58,7 +60,6 @@ vglModule.pointSource = function() {
 
   /**
    * Create a point geometry given input parameters
-   *
    */
   this.create = function() {
     m_geom = new vglModule.geometryData();

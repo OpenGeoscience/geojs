@@ -1,32 +1,43 @@
-// ////////////////////////////////////////////////////////////////////////////
-//
-// renderWindow class
-//
-// ////////////////////////////////////////////////////////////////////////////
+/**
+ * @module ogs.vgl
+ */
+
 // TODO Current we support only one context
 gl = 0;
 
 /**
- * @class vglModule.renderWindow
+ * Create a new instance of class renderWindow
+ *
+ * @class
+ * @returns {vglModule.renderWindow}
  */
 vglModule.renderWindow = function(canvas) {
 
   if (!(this instanceof vglModule.renderWindow)) {
     return new vglModule.renderWindow(canvas);
   }
-
   vglModule.object.call(this);
 
-  // Private member variables
+  /** @private */
   var m_x = 0;
-  var m_y = 0;
-  var m_width = 400;
-  var m_height = 400;
-  var m_canvas = canvas;
-  var m_activeRender = null;
-  var m_renderers = [];
 
-  // Public member methods
+  /** @private */
+  var m_y = 0;
+
+  /** @private */
+  var m_width = 400;
+
+  /** @private */
+  var m_height = 400;
+
+  /** @private */
+  var m_canvas = canvas;
+
+  /** @private */
+  var m_activeRender = null;
+
+  /** @private */
+  var m_renderers = [];
 
   /**
    * Get size of the render window

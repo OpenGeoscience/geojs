@@ -1,4 +1,10 @@
 /**
+ * @module ogs.vgl
+ */
+
+/**
+ * Create a new instance of class renderState
+ *
  * @class vglModule.renderState
  * @returns {vglModule.renderState}
  */
@@ -10,6 +16,8 @@ vglModule.renderState = function() {
 };
 
 /**
+ * Create a new instance of class renderer
+ *
  * @class vglModule.renderer
  * @returns {vglModule.renderer}
  */
@@ -20,18 +28,28 @@ vglModule.renderer = function() {
   }
   vglModule.object.call(this);
 
-  // Private member variables
+  /** @private */
   var m_x = 0;
+
+  /** @private */
   var m_y = 0;
+
+  /** @private */
   var m_width = 0;
+
+  /** @private */
   var m_height = 0;
+
+  /** @private */
   var m_clippingRange = [ 0.1, 1000.0 ];
+
+  /** @private */
   var m_sceneRoot = new vglModule.groupNode();
+
+  /** @private */
   var m_camera = new vglModule.camera();
 
   m_camera.addChild(m_sceneRoot);
-
-  // Public member methods
 
   /**
    * Get scene root

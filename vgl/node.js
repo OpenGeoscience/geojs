@@ -1,8 +1,13 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// node class
-//
-//////////////////////////////////////////////////////////////////////////////
+/**
+ * @module ogs.vgl
+ */
+
+/**
+ * Create a new instance of class node
+ *
+ * @class
+ * @returns {vglModule.node}
+ */
 vglModule.node = function() {
 
   if (!(this instanceof vglModule.node)) {
@@ -20,7 +25,6 @@ vglModule.node = function() {
 
   /**
    * Accept visitor for scene traversal
-   *
    */
   this.accept = function(visitor) {
     visitor.visit(this);
@@ -28,7 +32,6 @@ vglModule.node = function() {
 
   /**
    * Return active material
-   *
    */
   this.material = function() {
     return m_material;
@@ -36,7 +39,6 @@ vglModule.node = function() {
 
   /**
    * Set current material
-   *
    */
   this.setMaterial = function(material) {
     if (material !== m_material) {
@@ -50,7 +52,6 @@ vglModule.node = function() {
 
   /**
    * Return node's visibility
-   *
    */
   this.visible = function() {
     return m_visible;
@@ -58,7 +59,6 @@ vglModule.node = function() {
 
   /**
    * Set visibility of the node
-   *
    */
   this.setVisible = function(flag) {
     if (flag !== m_visible) {
@@ -72,7 +72,6 @@ vglModule.node = function() {
 
   /**
    * Return parent of the node
-   *
    */
   this.parent = function() {
     return m_parent;
@@ -80,7 +79,6 @@ vglModule.node = function() {
 
   /**
    * Set parent of the node
-   *
    */
   this.setParent = function(parent) {
     if (parent !== m_parent) {
@@ -97,7 +95,6 @@ vglModule.node = function() {
 
   /**
    * Return if node is an overlay or not
-   *
    */
   this.overlay = function() {
     return m_overlay;
@@ -105,7 +102,6 @@ vglModule.node = function() {
 
   /**
    * Set node overlay state
-   *
    */
   this.setOverlay = function(flag) {
     if (m_overlay !== flag) {
@@ -119,21 +115,18 @@ vglModule.node = function() {
 
   /*
    * Traverse parent and their parent and so on
-   *
    */
   this.ascend = function(visitor) {
   };
 
   /**
    * Traverse children
-   *
    */
   this.traverse = function(visitor) {
   };
 
   /**
    * Virtual function to compute bounds of the node
-   *
    */
   this.computeBounds = function() {
     if (this.boundsDirty()) {

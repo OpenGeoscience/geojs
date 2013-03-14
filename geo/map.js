@@ -8,11 +8,12 @@ geoModule.latlng = function(lat, lng) {
     return new geoModule.latlng(lat, lng);
   }
 
-  // Private member variables
+  /** @private */
   var m_lat = lat;
+
+  /** @private */
   var m_lng = lng;
 
-  // Public methods
   this.lat = function() {
     return m_lat;
   };

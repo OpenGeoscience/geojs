@@ -1,15 +1,18 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// Feature base class
-//
-//////////////////////////////////////////////////////////////////////////////
+/**
+ * @module ogs.geo
+ */
+
+/**
+ * Create a new instance of class feature
+ *
+ * @class
+ * @returns {geoModule.feature}
+ */
 geoModule.feature = function() {
 
   if (!(this instanceof geoModule.feature)) {
     return new geoModule.feature();
   }
-
-  // / Register with base class
   ogs.vgl.actor.call(this);
 
   return this;
@@ -18,11 +21,11 @@ geoModule.feature = function() {
 inherit(geoModule.feature, ogs.vgl.actor);
 
 /**
- * Plane feature class
+ * Create a new instance of planeFeature
  *
- * Create a plane feature given a lower left corner point {ogs.geo.latlng} and
- * and upper right corner point {ogs.geo.latlng}
- *
+ * @class
+ * @desc Create a plane feature given a lower left corner point {ogs.geo.latlng}
+ * and and upper right corner point {ogs.geo.latlng}
  * @param lowerleft
  * @param upperright
  * @returns {geoModule.planeFeature}
@@ -53,8 +56,9 @@ geoModule.planeFeature = function(lowerleft, upperright) {
 inherit(geoModule.planeFeature, geoModule.feature);
 
 /**
- * Point feature class
+ * Create a new instance of pointFeature
  *
+ * @class
  * @param positions
  * @param colors
  * @returns {geoModule.pointFeature}
@@ -78,8 +82,9 @@ geoModule.pointFeature = function(positions, colors) {
 inherit(geoModule.pointFeature, geoModule.feature);
 
 /**
- * Point feature class
+ * Create a new instance of pointSpritesFeature
  *
+ * @class
  * @param positions
  * @param colors
  * @returns {geoModule.pointFeature}

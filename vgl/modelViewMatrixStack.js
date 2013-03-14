@@ -1,4 +1,7 @@
-// Not used now
+/**
+ * @module ogs.vgl
+ */
+
 function modelViewMatrixStack() {
   var mvMatrixStack = [];
 

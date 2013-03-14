@@ -1,20 +1,22 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// object class
-//
-//////////////////////////////////////////////////////////////////////////////
-vglModule.object = function() {
-  // / TODO Switch to time based modifications
+/**
+ * @module ogs.vgl
+ */
 
+/**
+ * Create a new instance of class object
+ *
+ * @class
+ * @returns {vglModule.object}
+ */
+vglModule.object = function() {
   if (!(this instanceof vglModule.object)) {
     return new vglModule.object();
   }
 
-  // Private variables
+  /** @private */
   var m_modifiedTime = coreModule.timestamp();
   m_modifiedTime.modified();
 
-  // Public member methods
   this.modified = function() {
     m_modifiedTime.modified();
   };

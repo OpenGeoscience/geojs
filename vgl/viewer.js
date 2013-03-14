@@ -1,5 +1,11 @@
 /**
- * @class vglModule.viewer
+ * @module ogs.vgl
+ */
+
+/**
+ * Create a new instance of class viewer
+ *
+ * @class
  * @param canvas
  * @returns {vglModule.viewer}
  */
@@ -11,12 +17,22 @@ vglModule.viewer = function(canvas) {
 
   vglModule.object.call(this);
 
-  // Private member variables
+  /** @private */
   var m_that = this;
+
+  /** @private */
   var m_canvas = canvas;
+
+  /** @private */
   var m_ready = false;
+
+  /** @private */
   var m_interactorStyle = null;
+
+  /** @private */
   var m_renderer = vglModule.renderer();
+
+  /** @private */
   var m_renderWindow = vglModule.renderWindow(m_canvas);
   m_renderWindow.addRenderer(m_renderer);
 

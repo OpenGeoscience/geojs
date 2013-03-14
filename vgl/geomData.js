@@ -1,8 +1,10 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// Data types
-//
-//////////////////////////////////////////////////////////////////////////////
+/**
+ * @module ogs.vgl
+ */
+
+/**
+ * @desc Vertex attribute keys
+ */
 var vertexAttributeKeys = {
   "Position" : 0,
   "Normal" : 1,
@@ -54,22 +56,28 @@ var vesPrimitiveIndicesValueType = {
   "UnsignedInt" : gl.UNSIGNED_INT
 };
 
-// ////////////////////////////////////////////////////////////////////////////
-//
-// vglPrimitive
-//
-// ////////////////////////////////////////////////////////////////////////////
-
+/**
+ * Create a new instance of class primitive
+ *
+ * @class
+ * @return {vglModule.primitive}
+ */
 vglModule.primitive = function() {
 
   if (!(this instanceof vglModule.primitive)) {
     return new vglModule.primitive();
   }
 
-  // / Private member variables
+  /** @private */
   var m_indexCount = 0;
+
+  /** @private */
   var m_primitiveType = 0;
+
+  /** @private */
   var m_indicesValueType = 0;
+
+  /** @private */
   var m_indices = 0;
 
   this.indices = function() {
@@ -83,7 +91,6 @@ vglModule.primitive = function() {
 
   /**
    * Return the number of indices
-   *
    */
   this.numberOfIndices = function() {
     return m_indices.length;
@@ -91,7 +98,6 @@ vglModule.primitive = function() {
 
   /**
    * Return size of indices in bytes
-   *
    */
   this.sizeInBytes = function() {
     return m_indices.length * Uint16Array.BYTES_PER_ELEMENT;
@@ -106,7 +112,6 @@ vglModule.primitive = function() {
 
   /**
    * Set primitive type
-   *
    */
   this.setPrimitiveType = function(type) {
     m_primitiveType = type;
@@ -114,7 +119,6 @@ vglModule.primitive = function() {
 
   /**
    * Return index count ((how many indices form a primitive) of the primitive
-   *
    */
   this.indexCount = function() {
     return m_indexCount;
@@ -122,7 +126,6 @@ vglModule.primitive = function() {
 
   /**
    * Set index count (how many indices form a primitive)
-   *
    */
   this.setIndexCount = function(count) {
     m_indexCount = count;
@@ -130,7 +133,6 @@ vglModule.primitive = function() {
 
   /**
    * Return indices value type
-   *
    */
   this.indicesValueType = function() {
     return m_indicesValueType;
@@ -144,7 +146,6 @@ vglModule.primitive = function() {
 
   /**
    * Set indices from a array
-   *
    */
   this.setIndices = function(indicesArray) {
     // TODO Check for the type
@@ -154,12 +155,12 @@ vglModule.primitive = function() {
   return this;
 };
 
-// ////////////////////////////////////////////////////////////////////////////
-//
-// TriangleStrip
-//
-// ////////////////////////////////////////////////////////////////////////////
-
+/**
+ * Create a new instance of class triangleStrip
+ *
+ * @class
+ * @returns {vglModule.triangleStrip}
+ */
 vglModule.triangleStrip = function() {
 
   if (!(this instanceof vglModule.triangleStrip)) {
@@ -177,12 +178,12 @@ vglModule.triangleStrip = function() {
 
 inherit(vglModule.triangleStrip, vglModule.primitive);
 
-// ////////////////////////////////////////////////////////////////////////////
-//
-// Triangle
-//
-// ////////////////////////////////////////////////////////////////////////////
-
+/**
+ * Create a new instance of class triangles
+ *
+ * @class
+ * @returns {vglModule.triangles}
+ */
 vglModule.triangles = function() {
 
   if (!(this instanceof vglModule.triangles)) {
@@ -200,8 +201,9 @@ vglModule.triangles = function() {
 inherit(vglModule.triangles, vglModule.primitive);
 
 /**
- * Point primitive
- *g
+ * Create a new instance of class points
+ *
+ * @class
  * @returns {vglModule.points}
  */
 vglModule.points = function() {
@@ -221,8 +223,9 @@ vglModule.points = function() {
 inherit(vglModule.points, vglModule.primitive);
 
 /**
- * VertexData
- *g
+ * Create a new instance of class vertexDataP3f
+ *
+ * @class
  * @returns {vglModule.vertexDataP3f}
  */
 vglModule.vertexDataP3f = function() {
@@ -233,6 +236,12 @@ vglModule.vertexDataP3f = function() {
   this.m_position = [];
 };
 
+/**
+ * Create a new instance of class vertexDataP3N3f
+ *
+ * @class
+ * @returns {vglModule.vertexDataP3N3f}
+ */
 vglModule.vertexDataP3N3f = function() {
 
   if (!(this instanceof vglModule.vertexDataP3N3f)) {
@@ -243,6 +252,12 @@ vglModule.vertexDataP3N3f = function() {
   this.m_normal = [];
 };
 
+/**
+ * Create a new instance of class vertexDataP3T3f
+ *
+ * @class
+ * @returns {vglModule.vertexDataP3T3f}
+ */
 vglModule.vertexDataP3T3f = function() {
   if (!(this instanceof vglModule.vertexDataP3T3f)) {
     return new vglModule.vertexDataP3T3f();
@@ -253,7 +268,9 @@ vglModule.vertexDataP3T3f = function() {
 };
 
 /**
- * Source datag
+ * Create a new instance of class sourceData
+ *
+ * @class
  * @returns {vglModule.sourceData}
  */
 vglModule.sourceData = function() {
@@ -268,24 +285,24 @@ vglModule.sourceData = function() {
   var m_glData = null;
 
   var vglAttributeData = function() {
-    // / Number of components per group
+    // Number of components per group
     this.m_numberOfComponents = 0;
 
-    // / Type of data type (GL_FLOAT etc)
+    // Type of data type (GL_FLOAT etc)
     m_dataType = 0;
 
-    // / Size of data type
+    // Size of data type
     m_dataTypeSize = 0;
 
-    // / Specifies whether fixed-point data values should be normalized
-    // / (true) or converted directly as fixed-point values (false)
-    // / when they are accessed.
+    // Specifies whether fixed-point data values should be normalized
+    // (true) or converted directly as fixed-point values (false)
+    // when they are accessed.
     this.m_normalized = false;
 
-    // / Strides for each attribute.
+    // Strides for each attribute.
     this.m_stride = 0;
 
-    // / Offset
+    // Offset
     this.m_offset = 0;
   };
 
@@ -301,7 +318,6 @@ vglModule.sourceData = function() {
 
   /**
    * Add new attribute data to the source
-   *
    */
   this.addAttribute = function(key, dataType, sizeOfDataType, offset, stride,
                                noOfComponents, normalized) {
@@ -320,7 +336,6 @@ vglModule.sourceData = function() {
 
   /**
    * Return size of the source data
-   *
    */
   this.sizeOfArray = function() {
     return Object.size(m_data);
@@ -328,7 +343,6 @@ vglModule.sourceData = function() {
 
   /**
    * Return size of the source data in bytes
-   *
    */
   this.sizeInBytes = function() {
     var sizeInBytes = 0;
@@ -346,7 +360,6 @@ vglModule.sourceData = function() {
 
   /**
    * Check if there is attribute exists of a given key type
-   *
    */
   this.hasKey = function(key) {
     return (key in m_attributesMap);
@@ -354,7 +367,6 @@ vglModule.sourceData = function() {
 
   /**
    * Return keys of all attributes
-   *
    */
   this.keys = function() {
     return Object.keys(m_attributesMap);
@@ -362,7 +374,6 @@ vglModule.sourceData = function() {
 
   /**
    * Return number of attributes of source data
-   *
    */
   this.numberOfAttributes = function() {
     return Object.size(m_attributesMap);
@@ -370,7 +381,6 @@ vglModule.sourceData = function() {
 
   /**
    * Return number of components of the attribute data
-   *
    */
   this.attributeNumberOfComponents = function(key) {
     if (key in m_attributesMap) {
@@ -382,7 +392,6 @@ vglModule.sourceData = function() {
 
   /**
    * Return if the attribute data is normalized
-   *
    */
   this.normalized = function(key) {
     if (key in m_attributesMap) {
@@ -394,7 +403,6 @@ vglModule.sourceData = function() {
 
   /**
    * Return size of the attribute data type
-   *
    */
   this.sizeOfAttributeDataType = function(key) {
     if (key in m_attributesMap) {
@@ -406,7 +414,6 @@ vglModule.sourceData = function() {
 
   /**
    * Return attribute data type
-   *
    */
   this.attributeDataType = function(key) {
     if (key in m_attributesMap) {
@@ -418,7 +425,6 @@ vglModule.sourceData = function() {
 
   /**
    * Return attribute offset
-   *
    */
   this.attributeOffset = function(key) {
     if (key in m_attributesMap) {
@@ -430,7 +436,6 @@ vglModule.sourceData = function() {
 
   /**
    * Return attribute stride
-   *
    */
   this.attributeStride = function(key) {
     if (key in m_attributesMap) {
@@ -442,7 +447,6 @@ vglModule.sourceData = function() {
 
   /**
    * Virtual function to insert new vertex data at the end
-   *
    */
   this.pushBack = function(vertexData) {
     // Should be implemented by the base class
@@ -450,7 +454,6 @@ vglModule.sourceData = function() {
 
   /**
    * Insert new data block to the raw data
-   *
    */
   this.insert = function(data) {
     m_data = m_data.concat(data);
@@ -459,12 +462,12 @@ vglModule.sourceData = function() {
   return this;
 };
 
-// ////////////////////////////////////////////////////////////////////////////
-//
-// sourceDataP3T3f
-//
-// ////////////////////////////////////////////////////////////////////////////
-
+/**
+ * Create a new instance of class sourceDataP3T3f
+ *
+ * @class
+ * @returns {vglModule.sourceDataP3T3f}
+ */
 vglModule.sourceDataP3T3f = function() {
 
   if (!(this instanceof vglModule.sourceDataP3T3f)) {
@@ -487,12 +490,12 @@ vglModule.sourceDataP3T3f = function() {
 
 inherit(vglModule.sourceDataP3T3f, vglModule.sourceData);
 
-// ////////////////////////////////////////////////////////////////////////////
-//
-// sourceDataP3N3f
-//
-// ////////////////////////////////////////////////////////////////////////////
-
+/**
+ * Create a new instance of class sourceDataP3N3f
+ *
+ * @class
+ * @returns {vglModule.sourceDataP3N3f}
+ */
 vglModule.sourceDataP3N3f = function() {
 
   if (!(this instanceof sourceDataP3N3f)) {
@@ -514,12 +517,12 @@ vglModule.sourceDataP3N3f = function() {
   return this;
 };
 
-// ////////////////////////////////////////////////////////////////////////////
-//
-// sourceDataP3fv
-//
-// ////////////////////////////////////////////////////////////////////////////
-
+/**
+ * Create a new instance of class sourceDataP3fv
+ *
+ * @class
+ * @returns {vglModule.sourceDataP3fv}
+ */
 vglModule.sourceDataP3fv = function() {
 
   if (!(this instanceof vglModule.sourceDataP3fv)) {
@@ -540,12 +543,12 @@ vglModule.sourceDataP3fv = function() {
 
 inherit(vglModule.sourceDataP3fv, vglModule.sourceData);
 
-// ////////////////////////////////////////////////////////////////////////////
-//
-// sourceDataT2fv
-//
-// ////////////////////////////////////////////////////////////////////////////
-
+/**
+ * Create a new instance of class sourceDataT2fv
+ *
+ * @class
+ * @returns {vglModule.sourceDataT2fv}
+ */
 vglModule.sourceDataT2fv = function() {
 
   if (!(this instanceof vglModule.sourceDataT2fv)) {
@@ -566,12 +569,12 @@ vglModule.sourceDataT2fv = function() {
 
 inherit(vglModule.sourceDataT2fv, vglModule.sourceData);
 
-// ////////////////////////////////////////////////////////////////////////////
-//
-// sourceDataC3fv
-//
-// ////////////////////////////////////////////////////////////////////////////
-
+/**
+ * Create a new instance of class sourceDataC3fv
+ *
+ * @class
+ * @returns {vglModule.sourceDataC3fv}
+ */
 vglModule.sourceDataC3fv = function() {
 
   if (!(this instanceof vglModule.sourceDataC3fv)) {
@@ -591,12 +594,12 @@ vglModule.sourceDataC3fv = function() {
 
 inherit(vglModule.sourceDataC3fv, vglModule.sourceData);
 
-// ////////////////////////////////////////////////////////////////////////////
-//
-// geometryData
-//
-// ////////////////////////////////////////////////////////////////////////////
-
+/**
+ * Create a new instance of class geometryData
+ *
+ * @class
+ * @returns {vglModule.geometryData}
+ */
 vglModule.geometryData = function() {
   var m_name = "";
   var m_primitives = [];

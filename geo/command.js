@@ -1,6 +1,12 @@
 /**
  * @module ogs.geo
- * @class command
+ */
+
+/**
+ * Create a new instance of class command
+ *
+ * @class
+ * @returns {geoModule.command}
  */
 geoModule.command = function() {
 

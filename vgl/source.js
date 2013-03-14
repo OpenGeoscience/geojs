@@ -1,8 +1,13 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// source class
-//
-//////////////////////////////////////////////////////////////////////////////
+/**
+ * @module ogs.vgl
+ */
+
+/**
+ * Create a new instance of class source
+ *
+ * @class
+ * @returns {vglModule.source}
+ */
 vglModule.source = function() {
 
   if (!(this instanceof vglModule.source)) {
@@ -13,7 +18,6 @@ vglModule.source = function() {
 
   /**
    * Virtual function to create a source instance
-   *
    */
   this.create = function() {
   };

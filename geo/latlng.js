@@ -1,19 +1,16 @@
-///////////////////////////////////////////////////////////////////////////////
-//
-// latlng class defines a geodesy coordinate
-//
-///////////////////////////////////////////////////////////////////////////////
-
 /**
- * A latlng encapsulates geodesy coordinates defined by latitude and longitude
+ * Create a new instance of latlng
  *
+ * @desc A latlng encapsulates geodesy coordinates defined by latitude and
+ * longitude
+ * @returns {geoModule.latlng}
  */
 geoModule.latlng = function(lat, lng) {
   if (!(this instanceof geoModule.latlng)) {
     return new geoModule.latlng(lat, lng);
   }
 
-  // / Private member variables
+  /** @priave */
   var m_lat = lat;
   var m_lng = lng;
 

@@ -1,8 +1,6 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// vertexAttribute class
-//
-//////////////////////////////////////////////////////////////////////////////
+/**
+ * @module ogs.vgl
+ */
 
 vglModule.vertexAttributeKeys = {
   "Position" : 0,
@@ -13,6 +11,13 @@ vglModule.vertexAttributeKeys = {
   "CountAttributeIndex" : 5
 };
 
+/**
+ * Create a new instance of vertexAttribute
+ *
+ * @class
+ * @param name
+ * @returns {vglModule.vertexAttribute}
+ */
 vglModule.vertexAttribute = function(name) {
 
   if (!(this instanceof vglModule.vertexAttribute)) {

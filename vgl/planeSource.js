@@ -1,8 +1,13 @@
-///////////////////////////////////////////////////////////////////////////////
-//
-// planeSource class
-//
-///////////////////////////////////////////////////////////////////////////////
+/**
+ * @module ogs.vgl
+ */
+
+/**
+ * Create a new instance of class planeSource
+ *
+ * @class
+ * @returns {vglModule.planeSource}
+ */
 vglModule.planeSource = function() {
 
   if (!(this instanceof vglModule.planeSource)) {
@@ -20,7 +25,6 @@ vglModule.planeSource = function() {
 
   /**
    * Set origin of the plane
-   *
    */
   this.setOrigin = function(x, y, z) {
     m_origin[0] = x;
@@ -30,7 +34,6 @@ vglModule.planeSource = function() {
 
   /**
    * Set point that defines the first axis of the plane
-   *
    */
   this.setPoint1 = function(x, y, z) {
     m_point1[0] = x;
@@ -40,7 +43,6 @@ vglModule.planeSource = function() {
 
   /**
    * Set point that defines the first axis of the plane
-   *
    */
   this.setPoint2 = function(x, y, z) {
     m_point2[0] = x;
@@ -50,7 +52,6 @@ vglModule.planeSource = function() {
 
   /**
    * Create a plane geometry given input parameters
-   *
    */
   this.create = function() {
     m_geom = new vglModule.geometryData();

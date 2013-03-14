@@ -1,8 +1,13 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// mapper class
-//
-//////////////////////////////////////////////////////////////////////////////
+/**
+ * @module ogs.vgl
+ */
+
+/**
+ * Create a new instance of class mapper
+ *
+ * @class
+ * @returns {vglModule.mapper}
+ */
 vglModule.mapper = function() {
 
   if (!(this instanceof vglModule.mapper)) {
@@ -18,14 +23,12 @@ vglModule.mapper = function() {
 
   /**
    * Compute bounds of the data
-   *
    */
   this.computeBounds = function() {
   };
 
   /**
    * Get solid color of the geometry
-   *
    */
   this.color = function() {
     return m_color;
@@ -46,7 +49,6 @@ vglModule.mapper = function() {
 
   /**
    * Return stored geometry data if any
-   *
    */
   this.geometryData = function() {
     return m_geomData;
@@ -54,7 +56,6 @@ vglModule.mapper = function() {
 
   /**
    * Connect mapper to its geometry data
-   *
    */
   this.setGeometryData = function(geom) {
     if (m_geomData !== geom) {
@@ -67,7 +68,6 @@ vglModule.mapper = function() {
 
   /**
    * Render the mapper
-   *
    */
   this.render = function(renderState) {
     if (m_dirty) {
@@ -103,7 +103,6 @@ vglModule.mapper = function() {
 
   /**
    * Delete cached VBO if any
-   *
    */
   function deleteVertexBufferObjects() {
     for ( var i = 0; i < m_buffers.length; ++i) {
@@ -113,7 +112,6 @@ vglModule.mapper = function() {
 
   /**
    * Create new VBO for all its geometryData sources and primitives
-   *
    */
   function createVertexBufferObjects() {
     if (m_geomData) {
@@ -149,7 +147,6 @@ vglModule.mapper = function() {
 
   /**
    * Clear cache related to buffers
-   *
    */
   function cleanUpDrawObjects() {
     m_bufferVertexAttributeMap = {};
@@ -162,7 +159,6 @@ vglModule.mapper = function() {
 
   /**
    * Setup draw objects; Delete old ones and create new ones
-   *
    */
   function setupDrawObjects(renderState) {
     // Delete buffer objects from past if any.

@@ -1,8 +1,13 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// texture class
-//
-//////////////////////////////////////////////////////////////////////////////
+/**
+ * @module ogs.vgl
+ */
+
+/**
+ * Create a new instance of class texture
+ *
+ * @class
+ * @returns {vglModule.texture}
+ */
 vglModule.texture = function() {
 
   if (!(this instanceof vglModule.texture)) {
@@ -10,7 +15,6 @@ vglModule.texture = function() {
   }
   vglModule.materialAttribute.call(this, materialAttributeType.Texture);
 
-  // Private member variables
   this.m_width = 0;
   this.m_height = 0;
   this.m_depth = 0;
@@ -27,7 +31,6 @@ vglModule.texture = function() {
 
   var m_setupTimestamp = coreModule.timestamp();
 
-  // / Public member methods
   this.setup = function(renderState) {
     gl.deleteTexture(this.m_textureHandle);
     this.m_textureHandle = gl.createTexture();

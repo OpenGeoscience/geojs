@@ -1,8 +1,13 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// shaderProgram class
-//
-//////////////////////////////////////////////////////////////////////////////
+/**
+ * @module ogs.vgl
+ */
+
+/**
+ * Create a new instace of class shaderProgram
+ *
+ * @class
+ * @returns {vglModule.shaderProgram}
+ */
 vglModule.shaderProgram = function() {
 
   if (!(this instanceof vglModule.shaderProgram)) {
@@ -10,17 +15,27 @@ vglModule.shaderProgram = function() {
   }
   vglModule.materialAttribute.call(this, materialAttributeType.ShaderProgram);
 
-  // / Private member variables
+  /** @private */
   var m_programHandle = 0;
+
+  /** @private */
   var m_compileTimestamp = coreModule.timestamp();
+
+  /** @private */
   var m_shaders = [];
+
+  /** @private */
   var m_uniforms = [];
+
+  /** @private */
   var m_vertexAttributes = {};
 
+  /** @private */
   var m_uniformNameToLocation = {};
+
+  /** @private */
   var m_vertexAttributeNameToLocation = {};
 
-  // / Public member methods
   this.queryUniformLocation = function(name) {
     return gl.getUniformLocation(m_programHandle, name);
   };

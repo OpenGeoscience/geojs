@@ -1,9 +1,13 @@
-///////////////////////////////////////////////////////////////////////////////
-//
-// groupNode class
-//
-///////////////////////////////////////////////////////////////////////////////
+/**
+ * @module ogs.vgl
+ */
 
+/**
+ * Create a new instance of class groupNode
+ *
+ * @class
+ * @returns {vglModule.groupNode}
+ */
 vglModule.groupNode = function() {
 
   if (!(this instanceof vglModule.groupNode)) {

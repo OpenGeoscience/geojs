@@ -1,5 +1,12 @@
 /**
+ * @module ogs.vgl
+ */
+
+/**
+ * Create a new instance of class command
+ *
  * @class command
+ * @returns {vglModule.command}
  */
 vglModule.command = function() {
 

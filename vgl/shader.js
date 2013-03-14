@@ -1,8 +1,13 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// shader class
-//
-//////////////////////////////////////////////////////////////////////////////
+/**
+ * @module ogs.vgl
+ */
+
+/**
+ * Create a new instance of class shader
+ *
+ * @class
+ * @returns {vglModule.shader}
+ */
 vglModule.shader = function(type) {
 
   if (!(this instanceof vglModule.shader)) {

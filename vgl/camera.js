@@ -1,8 +1,13 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// camera class
-//
-//////////////////////////////////////////////////////////////////////////////
+/**
+ * @module ogs.vgl
+ */
+
+/**
+ * Create a new instance of class camera
+ *
+ * @class
+ * @returns {vglModule.camera}
+ */
 vglModule.camera = function() {
 
   if (!(this instanceof vglModule.camera)) {
@@ -10,24 +15,40 @@ vglModule.camera = function() {
   }
   vglModule.groupNode.call(this);
 
-  // / Private member variables
+  /** @private */
   var m_viewAngle = 30;
+
+  /** @private */
   var m_position = vec3.create([ 0.0, 0.0, 5.0 ]);
+
+  /** @private */
   var m_focalPoint = vec3.create([ 0.0, 0.0, 0.0 ]);
+
+  /** @private */
   var m_viewUp = vec3.create([ 0.0, 1.0, 0.0 ]);
+
+  /** @private */
   var m_right = vec3.create([ 1.0, 0.0, 0.0 ]);
+
+  /** @private */
   var m_pitchMatrix = mat4.create();
+
+  /** @private */
   var m_directionOfProjection = vec3.createFrom(0.0, 0.0, -1.0);
+
+  /** @private */
   var m_cache = vec3.create([ 1.0, 0.0, 0.0 ]);
 
+  /** @private */
   var m_viewMatrix = mat4.create();
+
+  /** @private */
   var m_projectionMatrix = mat4.create();
 
   mat4.identity(m_pitchMatrix);
 
   /**
    * Set position of the camera
-   *
    */
   this.setPosition = function(x, y, z) {
     m_position = vec3.create([ x, y, z ]);
@@ -35,7 +56,6 @@ vglModule.camera = function() {
 
   /**
    * Get position of the camera
-   *
    */
   this.position = function() {
     return m_position;
@@ -43,7 +63,6 @@ vglModule.camera = function() {
 
   /**
    * Set focal point of the camera
-   *
    */
   this.setFocalPoint = function(x, y, z) {
     m_focalPoint = vec3.create([ x, y, z ]);
@@ -51,7 +70,6 @@ vglModule.camera = function() {
 
   /**
    * Get focal point of the camera
-   *
    */
   this.focalPoint = function() {
     return m_focalPoint;
@@ -59,7 +77,6 @@ vglModule.camera = function() {
 
   /**
    * Set view-up direction of the camera
-   *
    */
   this.setViewUpDirection = function(x, y, z) {
     m_viewUp = vec3.create([ x, y, z ]);
@@ -67,7 +84,6 @@ vglModule.camera = function() {
 
   /**
    * Move camera closer or further away from the scene
-   *
    */
   this.zoom = function(dz) {
     // Since our direction vector is changed, we need to first
@@ -105,7 +121,6 @@ vglModule.camera = function() {
 
   /**
    * Move camera sideways
-   *
    */
   this.pan = function(dx, dy) {
     m_position[0] += dx;
@@ -116,7 +131,6 @@ vglModule.camera = function() {
 
   /**
    * Compute camera coordinate axes
-   *
    */
   this.computeOrthogonalAxes = function() {
     dir = new vec3.create();
@@ -128,7 +142,6 @@ vglModule.camera = function() {
 
   /**
    * Perform yaw on the camera give a rotation angle (in degrees)
-   *
    */
   this.yaw = function(degrees) {
     radians = degrees * (3.14 / 180.0);
@@ -157,7 +170,6 @@ vglModule.camera = function() {
 
   /**
    * Perform pitch on the camera give a rotation (in degrees)
-   *
    */
   this.pitch = function(degrees) {
     radians = degrees * (3.14 / 180.0);
@@ -187,7 +199,6 @@ vglModule.camera = function() {
 
   /**
    * Compute camera view matrix
-   *
    */
   this.computeViewMatrix = function() {
 
@@ -217,13 +228,11 @@ vglModule.camera = function() {
   };
 
   /**
-   * Return view-matrix for the camera
+   * Return view-matrix for the camera This method does not compute the
+   * view-matrix for the camera. It is assumed that a call to computeViewMatrix
+   * has been made earlier.
    *
-   * This method does not compute the view-matrix for the camera. It is
-   * assumed that a call to computeViewMatrix has been made earlier.
-   *
-   * @returns mat4
-   *
+   * @returns {mat4}
    */
   this.viewMatrix = function() {
     return m_viewMatrix;
@@ -231,8 +240,6 @@ vglModule.camera = function() {
 
   /**
    * Compute camera projection matrix
-   *
-   *
    */
   this.computeProjectionMatrix = function(aspect, near, far) {
 
@@ -243,10 +250,11 @@ vglModule.camera = function() {
   };
 
   /**
-   * Return camera projection matrix
+   * Return camera projection matrix This method does not compute the
+   * projection-matrix for the camera. It is assumed that a call to
+   * computeProjectionMatrix has been made earlier.
    *
-   * This method does not compute the projection-matrix for the camera. It is
-   * assumed that a call to computeProjectionMatrix has been made earlier.
+   * @returns {mat4}
    */
   this.projectionMatrix = function() {
     return m_projectionMatrix;

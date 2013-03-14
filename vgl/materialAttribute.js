@@ -1,10 +1,8 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// materialAttribute class
-//
-//////////////////////////////////////////////////////////////////////////////
+/**
+ * @module ogs.vgl
+ */
 
-materialAttributeType = {
+var materialAttributeType = {
   "Undefined" : 0x0,
   "ShaderProgram" : 0x1,
   "Texture" : 0x2,
@@ -12,6 +10,13 @@ materialAttributeType = {
   "Depth" : 0x4
 };
 
+/**
+ * Create a new instance of class materialAttribute
+ *
+ * @class
+ * @param type
+ * @returns {vglModule.materialAttribute}
+ */
 vglModule.materialAttribute = function(type) {
 
   if (!(this instanceof vglModule.materialAttribute)) {
@@ -19,11 +24,12 @@ vglModule.materialAttribute = function(type) {
   }
   vglModule.object.call(this);
 
-  // / Private member variables
+  /** @private */
   var m_type = type;
+
+  /** @private */
   var m_enabled = true;
 
-  // / Public member methods
   this.type = function() {
     return m_type;
   };

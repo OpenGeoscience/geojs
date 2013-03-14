@@ -1,8 +1,13 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// boundingObject class
-//
-//////////////////////////////////////////////////////////////////////////////
+/**
+ * @module ogs.vgl
+ */
+
+/**
+ * Create a new instance of class boundingObject
+ *
+ * @class
+ * @return {vglModule.boundingObject}
+ */
 vglModule.boundingObject = function() {
 
   if (!(this instanceof vglModule.boundingObject)) {
@@ -15,7 +20,6 @@ vglModule.boundingObject = function() {
 
   /**
    * Return true if bounds are dirty otherwise false
-   *
    */
   this.boundsDirty = function() {
     return m_boundsDirty;
@@ -23,7 +27,6 @@ vglModule.boundingObject = function() {
 
   /**
    * Mark bounds dirty for the object
-   *
    */
   this.setBoundsDirty = function(flag) {
     if (m_boundsDirty !== flag) {
@@ -37,7 +40,6 @@ vglModule.boundingObject = function() {
 
   /**
    * Get current bounds of the object
-   *
    */
   this.bounds = function() {
     return m_bounds;
@@ -45,7 +47,6 @@ vglModule.boundingObject = function() {
 
   /**
    * Set current bounds of the object
-   *
    */
   this.setBounds = function(minX, maxX, minY, maxY, minZ, maxZ) {
     m_bounds[0] = minX;
@@ -60,7 +61,11 @@ vglModule.boundingObject = function() {
     return true;
   };
 
-  // / Request computing bounds. Should be implemented by the concrete class
+  /**
+   * Compute bounds of the object
+   *
+   * @desc Should be implemented by the concrete class
+   */
   this.computeBounds = function() {
   };
 

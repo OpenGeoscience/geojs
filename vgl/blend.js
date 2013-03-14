@@ -1,22 +1,31 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// blendFunction class
-//
-//////////////////////////////////////////////////////////////////////////////
+/**
+ * @module ogs.vgl
+ */
 
+/**
+ * Create a new instance of clas blendFunction
+ *
+ * @class
+ * @param source
+ * @param destination
+ * @returns {vglModule.blendFunction}
+ */
 vglModule.blendFunction = function(source, destination) {
 
   if (!(this instanceof vglModule.blendFunction)) {
     return new vglModule.blendFunction(source, destination);
   }
 
-  // / Private variables
+  /** @private */
   var m_source = source;
+
+  /** @private */
   var m_destination = destination;
 
   /**
    * Apply blend function to the current state
    *
+   * @param {vglModule.renderState}
    */
   this.apply = function(renderState) {
     gl.blendFunc(m_source, m_destination);
@@ -25,12 +34,12 @@ vglModule.blendFunction = function(source, destination) {
   return this;
 };
 
-// ////////////////////////////////////////////////////////////////////////////
-//
-// blend class
-//
-// ////////////////////////////////////////////////////////////////////////////
-
+/**
+ * Create a new instance of class blend
+ *
+ * @class
+ * @returns {vglModule.blend}
+ */
 vglModule.blend = function() {
 
   if (!(this instanceof vglModule.blend)) {
@@ -38,14 +47,17 @@ vglModule.blend = function() {
   }
   vglModule.materialAttribute.call(this, materialAttributeType.Blend);
 
-  // / Private member variables
+  /** @private */
   var m_wasEnabled = false;
+
+  /** @private */
   var m_blendFunction = vglModule.blendFunction(gl.SRC_ALPHA,
                                                 gl.ONE_MINUS_SRC_ALPHA);
 
   /**
    * Bind blend attribute
    *
+   * @param {vglModule.renderState}
    */
   this.bind = function(renderState) {
     m_wasEnabled = gl.isEnabled(gl.BLEND);
@@ -62,8 +74,9 @@ vglModule.blend = function() {
   };
 
   /**
-   * Undo blend attribute
+   * Undo bind blend attribute
    *
+   * @param {vglModule.renderState}
    */
   this.undoBind = function(renderState) {
     if (m_wasEnabled) {
