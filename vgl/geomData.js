@@ -157,6 +157,28 @@ vglModule.triangles = function() {
 
 inherit(vglModule.triangles, vglModule.primitive);
 
+//////////////////////////////////////////////////////////////////////////////
+//
+// Lines
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+vglModule.lines = function() {
+
+  if (!(this instanceof vglModule.lines)) {
+    return new vglModule.lines();
+  }
+  vglModule.primitive.call(this);
+
+  this.setPrimitiveType(gl.LINES);
+  this.setIndicesValueType(gl.UNSIGNED_SHORT);
+  this.setIndexCount(2);
+
+  return this;
+};
+
+inherit(vglModule.lines, vglModule.primitive);
+
 /**
  * Create a new instance of class points
  *

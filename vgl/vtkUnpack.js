@@ -18,10 +18,10 @@
 
 //////////////////////////////////////////////////////////////////////////////
 //
-// vtkVTKUnpack class
+// vbgModule.vtkUnpack class
 // This contains code that unpack a json base64 encoded vtkdataset,
-// such as those produce by ParaView's webGL exporter (where much
-// of the code originated from).
+// such as those produced by ParaView's webGL exporter (where much
+// of the code originated from) and convert it to VGL representation.
 //
 //////////////////////////////////////////////////////////////////////////////
 
@@ -44,6 +44,8 @@ vglModule.vtkUnpack.prototype.END_OF_INPUT = -1;
 vglModule.vtkUnpack.prototype.base64Str = "";
 
 vglModule.vtkUnpack.prototype.base64Count = 0;
+
+vglModule.vtkUnpack.prototype.pos = 0;
 
 //--------------------------------------------------------------------------
 vglModule.vtkUnpack.prototype.ntos = function (n) {
@@ -98,179 +100,192 @@ vglModule.vtkUnpack.prototype.decode64 = function(str) {
 }
 
 //--------------------------------------------------------------------------
-vglModule.vtkUnpack.prototype.parseObject = function(buffer) {
-  console.log("PARSING OBJECT")
-  obj = {};
-  obj.coded = buffer;
-  obj.data = this.decode64(obj.coded);
+vglModule.vtkUnpack.prototype.readNumber = function (ss) {
+	var v = ((ss[this.pos++]) +
+			(ss[this.pos++] << 8) +
+			(ss[this.pos++] << 16) +
+			(ss[this.pos++] << 24));
+	return v;
+}
 
+//--------------------------------------------------------------------------
+vglModule.vtkUnpack.prototype.readF3Array =
+	function (numberOfPoints, ss) {
+
+  var i;
+  var test = new Int8Array(numberOfPoints*4*3);
+
+  for(i=0; i<numberOfPoints*4*3; i++)
+    test[i] = ss[this.pos++];
+
+  var points = new Float32Array(test.buffer);
+  return points;
+}
+
+//--------------------------------------------------------------------------
+vglModule.vtkUnpack.prototype.readColorArray =
+	function (numberOfPoints, ss, vglcolors) {
+
+  var i, r,g,b;
+  for(i=0; i<numberOfPoints; i++)
+    {
+    r = ss[this.pos++]/255.0;
+    g = ss[this.pos++]/255.0;
+    b = ss[this.pos++]/255.0;
+    this.pos++;
+    vglcolors.pushBack([r,g,b]);
+  }
+}
+
+//--------------------------------------------------------------------------
+vglModule.vtkUnpack.prototype.parseObject = function(buffer) {
+  var ss = [];
+  var test;
+  var i;
+  var size, type;
+  var numberOfPoints, numberOfIndex;
+  var points, normals, colors, index, tcoord;
+
+  //create the VGL data structure that we populate
   var geom = new vglModule.geometryData();
   geom.setName("World");
 
-  var points = new vglModule.sourceDataP3N3f();
-  var triangles = new vglModule.triangles();
+  //dehexlify
+  var data = this.decode64(buffer);
+  for(i=0; i<data.length; i++) ss[i] = data.charCodeAt(i) & 0xff;
 
-  geom.addSource(points);
-  geom.addPrimitive(triangles);
+  this.pos = 0;
+  size = this.readNumber(ss);
+  type = String.fromCharCode(ss[this.pos++]);
 
-  var ss = []; pos = 0;
-  for(i=0; i<obj.data.length; i++) ss[i] = obj.data.charCodeAt(i) & 0xff;
-
-  size = (ss[pos++]) + (ss[pos++] << 8) + (ss[pos++] << 16) + (ss[pos++] << 24);
-  type = String.fromCharCode(ss[pos++]);
-  obj.type = type;
-  obj.father = this;
-
+  //-=-=-=-=-=[ LINES ]=-=-=-=-=-
   if (type == 'L'){
-    console.log("THIS IS UNTESTED")
+    numberOfPoints = this.readNumber(ss);
+    console.log("LINES " + numberOfPoints)
 
-    obj.numberOfPoints = (ss[pos++]) + (ss[pos++] << 8) + (ss[pos++] << 16) + (ss[pos++] << 24);
     //Getting Points
-    test = new Int8Array(obj.numberOfPoints*4*3);
-    for(i=0; i<obj.numberOfPoints*4*3; i++)
-      test[i] = ss[pos++];
-    obj.points = new Float32Array(test.buffer);
-    //Generating Normals
-    test = new Array(obj.numberOfPoints*3);
-    for(i=0; i<obj.numberOfPoints*3; i++)
-      test[i] = 0.0;
-    obj.normals = new Float32Array(test);
+    var vglpoints = new vglModule.sourceDataP3fv();
+    points = this.readF3Array(numberOfPoints, ss);
+    for(i=0; i<numberOfPoints; i++) {
+        vglpoints.pushBack([points[i*3+0], points[i*3+1], points[i*3+2]]);
+    }
+	geom.addSource(vglpoints);
+
     //Getting Colors
-    test = [];
-    for(i=0; i<obj.numberOfPoints*4; i++)
-      test[i] = ss[pos++]/255.0;
-    obj.colors = new Float32Array(test);
+    var vglcolors = new vglModule.sourceDataC3fv();
+    this.readColorArray(numberOfPoints, ss, vglcolors);
+    geom.addSource(vglcolors);
 
-    obj.numberOfIndex = (ss[pos++]) + (ss[pos++] << 8) + (ss[pos++] << 16) + (ss[pos++] << 24);
-    console.log("Lines " + obj.numberOfIndex)
+    //Getting connectivity
+	var vgllines = new vglModule.lines();
+	geom.addPrimitive(vgllines);
+	numberOfIndex = this.readNumber(ss);
+    test = new Int8Array(numberOfIndex*2);
+    for(i=0; i<numberOfIndex*2; i++)
+      test[i] = ss[this.pos++];
+    index = new Uint16Array(test.buffer);
+    vgllines.setIndices(index);
 
-    //Getting Index
-    test = new Int8Array(obj.numberOfIndex*2);
-    for(i=0; i<obj.numberOfIndex*2; i++)
-      test[i] = ss[pos++];
-    obj.index = new Uint16Array(test.buffer);
+    /*
     //Getting Matrix
+    //TODO: renderer is not doing anything with this yet
     test = new Int8Array(16*4);
     for(i=0; i<16*4; i++)
-      test[i] = ss[pos++];
-    obj.matrix = new Float32Array(test.buffer);
+      test[i] = ss[this.pos++];
+    matrix = new Float32Array(test.buffer);
+    */
   }
 
   //-=-=-=-=-=[ MESH ]=-=-=-=-=-
   else if (type == 'M'){
-    obj.numberOfVertices = (ss[pos++]) + (ss[pos++] << 8) + (ss[pos++] << 16) + (ss[pos++] << 24);
-    console.log("Surface " + obj.numberOfVertices)
 
-    //Getting Vertices
-    test = new Int8Array(obj.numberOfVertices*4*3);
-    for(i=0; i<obj.numberOfVertices*4*3; i++)
-      test[i] = ss[pos++];
-    obj.vertices = new Float32Array(test.buffer);
+    numberOfPoints = this.readNumber(ss);
+    //console.log("MESH " + numberOfPoints)
+
+    //Getting Points
+    var vglpoints = new vglModule.sourceDataP3N3f();
+    points = this.readF3Array(numberOfPoints, ss);
 
     //Getting Normals
-    test = new Int8Array(obj.numberOfVertices*4*3);
-    for(i=0; i<obj.numberOfVertices*4*3; i++)
-      test[i] = ss[pos++];
-    obj.normals = new Float32Array(test.buffer);
+    normals = this.readF3Array(numberOfPoints, ss);
 
-    for(i=0; i<obj.numberOfVertices; i++) {
+    for(i=0; i<numberOfPoints; i++) {
       var v1 = new vglModule.vertexDataP3N3f();
-      v1.m_position = new Array(obj.vertices[i*3+0], obj.vertices[i*3+1], obj.vertices[i*3+2]);
-      v1.m_normal = new Array(obj.normals[i*3+0], obj.normals[i*3+1], obj.normals[i*3+2]);
-      //if (i<10) console.log(v1.m_position + " " + v1.m_normal);
-      //v1.m_texCoordinate = new Array(obj.normals[i*3+0], obj.normals[i*3+1], obj.normals[i*3+2]);
-      points.pushBack(v1);
+      v1.m_position = new Array(points[i*3+0], points[i*3+1], points[i*3+2]);
+      v1.m_normal = new Array(normals[i*3+0], normals[i*3+1], normals[i*3+2]);
+      vglpoints.pushBack(v1);
     }
+	geom.addSource(vglpoints);
 
-    //TODO: renderer is not doing anything with this yet
     //Getting Colors
+    var vglcolors = new vglModule.sourceDataC3fv();
+    this.readColorArray(numberOfPoints, ss, vglcolors);
+    geom.addSource(vglcolors);
+
+	//Getting connectivity
     test = [];
-    for(i=0; i<obj.numberOfVertices*4; i++)
-      test[i] = ss[pos++]/255.0;
-    obj.colors = new Float32Array(test);
+	var vgltriangles = new vglModule.triangles();
+	geom.addPrimitive(vgltriangles);
+	numberOfIndex = this.readNumber(ss);
+	test = new Int8Array(numberOfIndex*2);
+    for(i=0; i<numberOfIndex*2; i++)
+      test[i] = ss[this.pos++];
+    index = new Uint16Array(test.buffer);
+    vgltriangles.setIndices(index);
 
-    //TODO: renderer is not doing anything with this yet
-    obj.numberOfIndex = (ss[pos++]) + (ss[pos++] << 8) + (ss[pos++] << 16) + (ss[pos++] << 24);
-    //Getting Index
-    test = new Int8Array(obj.numberOfIndex*2);
-    for(i=0; i<obj.numberOfIndex*2; i++)
-      test[i] = ss[pos++];
-    obj.index = new Uint16Array(test.buffer);
-    triangles.setIndices(obj.index);
-
-    //TODO: renderer is not doing anything with this yet
+    /*
     //Getting Matrix
+    //TODO: renderer is not doing anything with this yet
     test = new Int8Array(16*4);
     for(i=0; i<16*4; i++)
-      test[i] = ss[pos++];
-    obj.matrix = new Float32Array(test.buffer);
+      test[i] = ss[this.pos++];
+    matrix = new Float32Array(test.buffer);
 
-    //TODO: renderer is not doing anything with this yet
     //Getting TCoord
-    obj.tcoord = null;
-  }
-
-  // ColorMap Widget
-  else if (type == 'C'){
-    console.log("THIS IS UNTESTED")
-
-    obj.numOfColors = size;
-    console.log("colormap " + obj.numOfColors)
-
-    //Getting Position
-    test = new Int8Array(2*4);
-    for(i=0; i<2*4; i++)
-      test[i] = ss[pos++];
-    obj.position = new Float32Array(test.buffer);
-
-    //Getting Size
-    test = new Int8Array(2*4);
-    for(i=0; i<2*4; i++)
-      test[i] = ss[pos++];
-    obj.size = new Float32Array(test.buffer);
-
-    //Getting Colors
-    obj.colors = [];
-    for(c=0; c<obj.numOfColors; c++){
-      test = new Int8Array(4);
-      for(i=0; i<4; i++)
-        test[i] = ss[pos++];
-      v = new Float32Array(test.buffer);
-      xrgb = [v[0], ss[pos++], ss[pos++], ss[pos++]];
-      obj.colors[c] = xrgb;
-    }
-
-    obj.orientation = ss[pos++];
-    obj.numOfLabels = ss[pos++];
-    tt = "";
-    for(jj=0; jj<(ss.length-pos); jj++)
-      tt = tt + String.fromCharCode(ss[pos+jj]);
-    obj.title = tt;
-
+    //TODO: renderer is not doing anything with this yet
+    tcoord = null;
+    */
   }
 
   // Points
   else if (type == 'P'){
-    console.log("THIS IS UNTESTED")
-    obj.numberOfPoints = (ss[pos++]) + (ss[pos++] << 8) + (ss[pos++] << 16) + (ss[pos++] << 24);
-    console.log("POINTS " + obj.numberOfPoints)
-    //Getting Points
-    test = new Int8Array(obj.numberOfPoints*4*3);
-    for(i=0; i<obj.numberOfPoints*4*3; i++)
-      test[i] = ss[pos++];
-    obj.points = new Float32Array(test.buffer);
+    numberOfPoints = this.readNumber(ss);
+    //console.log("POINTS " + numberOfPoints);
+
+    //Getting Points and creating 1:1 connectivity
+    var vglpoints = new vglModule.sourceDataP3fv();
+    points = this.readF3Array(numberOfPoints, ss);
+    var indices = new Uint16Array(numberOfPoints);
+    for (i = 0; i < numberOfPoints; i++) {
+      indices[i] = i;
+      vglpoints.pushBack([points[i*3+0],points[i*3+1],points[i*3+2]]);
+    }
+    geom.addSource(vglpoints);
 
     //Getting Colors
-    test = [];
-    for(i=0; i<obj.numberOfPoints*4; i++)
-      test[i] = ss[pos++]/255.0;
-    obj.colors = new Float32Array(test);
+    var vglcolors = new vglModule.sourceDataC3fv();
+    this.readColorArray(numberOfPoints, ss, vglcolors);
+    geom.addSource(vglcolors);
 
-    //Getting Matrix //Wendel
+    //Getting connectivity
+    var vglVertexes = new vglModule.points();
+    vglVertexes.setIndices(indices);
+	geom.addPrimitive(vglVertexes);
+
+    /*
+    //Getting Matrix
+    //TODO: not used yet
     test = new Int8Array(16*4);
     for(i=0; i<16*4; i++)
-      test[i] = ss[pos++];
-    obj.matrix = new Float32Array(test.buffer);
+      test[i] = ss[this.pos++];
+    matrix = new Float32Array(test.buffer);
+    */
   }
+
+  // Unknown
+  else {
+	  console.log("Ignoring unrecognized encoded data type " + type)
+  }
+
   return geom;
 }
