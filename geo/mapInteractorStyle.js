@@ -1,4 +1,6 @@
 /**
+ * Create a new instance of mapInteractorStyle
+ *
  * @class geoModule.mapInteractorStyle
  * @returns {geoModule.mapInteractorStyle}
  */

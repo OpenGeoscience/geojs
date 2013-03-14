@@ -1,4 +1,8 @@
 /**
+ * @module ogs.geo
+ */
+
+/**
  * Create a new instance of latlng
  *
  * @desc A latlng encapsulates geodesy coordinates defined by latitude and

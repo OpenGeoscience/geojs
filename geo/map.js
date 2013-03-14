@@ -1,6 +1,8 @@
 /**
- * @class geoModule.latlng A latlng is a point in geographical coordinates:
- * latitude and longitude
+ * Create a new instance of class latlng
+ *
+ * @class
+ * @desc A latlng is a point in geographical coordinates: latitude and longitude
  */
 geoModule.latlng = function(lat, lng) {
 
@@ -33,14 +35,18 @@ geoModule.mapOptions = function() {
     return new geoModule.mapOptions();
   }
 
-  // Member variables
+  /** @private */
   this.zoom = 10;
+
+  /** @private */
   this.center = geoModule.latlng(0.0, 0.0);
 };
 
 /**
- * @class geoModule.map Creates a new map inside of the given HTML container
- * (Typically DIV)
+ * Create a new instance of class map
+ *
+ * @class Creates a new map inside of the given HTML container (Typically DIV)
+ * @returns {geoModule.map}
  */
 geoModule.map = function(node, options) {
 
@@ -49,11 +55,19 @@ geoModule.map = function(node, options) {
   }
   ogs.vgl.object.call(this);
 
-  // Private member variables
+  /** @private */
   var m_that = this;
+
+  /** @private */
   var m_node = node;
+
+  /** @private */
   var m_initialized = false;
+
+  /** @private */
   var m_baseLayer = null;
+
+  /** @private */
   var m_options = options;
 
   if (!options.center) {

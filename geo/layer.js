@@ -1,4 +1,8 @@
 /**
+ * @module ogs.geo
+ */
+
+/**
  * Layer options object specification
  */
 geoModule.layerOptions = function() {
@@ -33,8 +37,13 @@ geoModule.layer = function(options) {
 
   ogs.vgl.object.call(this);
 
-  // Member variables
+  /** @private */
   var m_that = this;
+
+  /** @private */
+  var m_name = "";
+
+  /** @private */
   var m_opacity = options.opacity || 1.0;
 
   // TODO Write a function for this
@@ -46,7 +55,10 @@ geoModule.layer = function(options) {
     console.log("[WARNING] Opacity cannot be less than 1.0");
   }
 
+  /** @private */
   var m_showAttribution = options.showAttribution || true;
+
+  /** @private */
   var m_visible = options.visible || true;
 
   /**
@@ -56,6 +68,30 @@ geoModule.layer = function(options) {
   this.actor = function() {
     return null;
   };
+
+  /**
+   * Get name of the layer
+   *
+   * @returns {String}
+   */
+  this.name = function() {
+    return m_name;
+  };
+
+  /**
+   * Set name of the layer
+   *
+   * @param {String} name
+   */
+  this.setName = function(name) {
+    if (m_name !== name) {
+      m_name = name;
+      this.modified();
+      return true;
+    }
+
+    return false;
+  }
 
   /**
    * Query opacity of the layer (range[0.0, 1.0])
@@ -93,16 +129,14 @@ geoModule.layer = function(options) {
 
 inherit(geoModule.layer, ogs.vgl.object);
 
-// ////////////////////////////////////////////////////////////////////////////
-//
-// featureLayer class
-//
-// ////////////////////////////////////////////////////////////////////////////
-
 /**
- * Layer to draw points, lines, and polygons on the map The polydata layer
+ * Create a new instance of class featureLayer
+ *
+ * @class
+ * @dec Layer to draw points, lines, and polygons on the map The polydata layer
  * provide mechanisms to create and draw geometrical shapes such as points,
  * lines, and polygons.
+ * @returns {geoModule.featureLayer}
  */
 geoModule.featureLayer = function(options, feature) {
 
@@ -113,6 +147,8 @@ geoModule.featureLayer = function(options, feature) {
 
   /** @priave */
   var m_that = this;
+
+  /** @priave */
   var m_actor = feature;
 
   /**
