@@ -19,7 +19,7 @@ vglModule.shaderProgram = function() {
   var m_programHandle = 0;
 
   /** @private */
-  var m_compileTimestamp = coreModule.timestamp();
+  var m_compileTimestamp = vglModule.timestamp();
 
   /** @private */
   var m_shaders = [];

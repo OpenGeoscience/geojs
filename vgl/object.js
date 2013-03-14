@@ -14,7 +14,7 @@ vglModule.object = function() {
   }
 
   /** @private */
-  var m_modifiedTime = coreModule.timestamp();
+  var m_modifiedTime = vglModule.timestamp();
   m_modifiedTime.modified();
 
   this.modified = function() {

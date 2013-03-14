@@ -13,49 +13,6 @@ var vertexAttributeKeys = {
   "Scalar" : 4
 };
 
-// TODO Need to figure out how to initialize these values properly
-var vglDataType = {
-  "Float" : gl.FLOAT,
-  "FloatVec2" : gl.FLOAT_VEC2,
-  "FloatVec3" : gl.FLOAT_VEC3,
-  "FloatVec4" : gl.FLOAT_VEC4,
-  "Int" : gl.INT,
-  "IntVec2" : gl.INT_VEC2,
-  "IntVec3" : gl.INT_VEC3,
-  "IntVec4" : gl.INT_VEC4,
-  "Bool" : gl.BOOL,
-  "BoolVec2" : gl.BOOL_VEC2,
-  "BoolVec3" : gl.BOOL_VEC3,
-  "BoolVec4" : gl.BOOL_VEC4,
-  "FloatMat2" : gl.FLOAT_MAT2,
-  "FloatMat3" : gl.FLOAT_MAT3,
-  "FloatMat4" : gl.FLOAT_MAT4,
-  "Sampler1D" : gl.SAMPLER_1D,
-  "Sampler2D" : gl.SAMPLER_2D,
-  "Sampler3D" : gl.SAMPLER_3D,
-  "SamplerCube" : gl.SAMPLER_CUBE,
-
-  "Sampler1DShadow" : gl.SAMPLER_1D_SHADOW,
-  "Sampler2DShadow" : gl.SAMPLER_2D_SHADOW,
-
-  "Undefined" : 0x0
-};
-
-var vglPrimitiveRenderType = {
-  "Points" : gl.POINTS,
-  "LineStrip" : gl.LINE_STRIP,
-  "LineLoop" : gl.LINE_LOOP,
-  "Lines" : gl.LINES,
-  "TriangleStrip" : gl.TRIANGLE_STRIP,
-  "TriangleFan" : gl.TRIANGLE_FAN,
-  "Triangles" : gl.TRIANGLES
-};
-
-var vesPrimitiveIndicesValueType = {
-  "UnsignedShort" : gl.UNSIGNED_SHORT,
-  "UnsignedInt" : gl.UNSIGNED_INT
-};
-
 /**
  * Create a new instance of class primitive
  *

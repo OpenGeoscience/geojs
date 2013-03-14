@@ -33,10 +33,10 @@ vglModule.actor = function() {
   m_translation.length = 3;
 
   /** @private */
-  var m_referenceFrame = 0;
+  var m_referenceFrame = null;
 
   /** @private */
-  var m_mapper = 0;
+  var m_mapper = null;
 
   /**
    * Get center of transformation

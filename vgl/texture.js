@@ -29,7 +29,7 @@ vglModule.texture = function() {
 
   this.m_image = null;
 
-  var m_setupTimestamp = coreModule.timestamp();
+  var m_setupTimestamp = vglModule.timestamp();
 
   this.setup = function(renderState) {
     gl.deleteTexture(this.m_textureHandle);

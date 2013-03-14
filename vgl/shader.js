@@ -16,7 +16,7 @@ vglModule.shader = function(type) {
   vglModule.object.call(this);
 
   var m_shaderHandle = null;
-  var m_compileTimestmap = coreModule.timestamp();
+  var m_compileTimestmap = vglModule.timestamp();
   var m_shaderType = type;
   var m_shaderSource = "";
   var m_fileName = "";
