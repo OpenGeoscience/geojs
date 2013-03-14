@@ -1,33 +1,4 @@
 /**
- * Create a new instance of class latlng
- *
- * @class
- * @desc A latlng is a point in geographical coordinates: latitude and longitude
- */
-geoModule.latlng = function(lat, lng) {
-
-  if (!(this instanceof geoModule.latlng)) {
-    return new geoModule.latlng(lat, lng);
-  }
-
-  /** @private */
-  var m_lat = lat;
-
-  /** @private */
-  var m_lng = lng;
-
-  this.lat = function() {
-    return m_lat;
-  };
-
-  this.lng = function() {
-    return m_lng;
-  };
-
-  return this;
-};
-
-/**
  * Map options object specification
  */
 geoModule.mapOptions = function() {
