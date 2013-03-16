@@ -122,7 +122,7 @@ vglModule.geoJSONUnpack.prototype.readPoint = function(coordinates) {
 	      {
 	      z = coordinates[2];
 	      }
-	    console.log("read " + x + "," + y + "," + z)
+	    console.log("read " + x + "," + y + "," + z);
 	    //TODO: ignoring higher dimensions
 	    vglcoords.pushBack([x,y,z]);
 	  }
@@ -151,7 +151,7 @@ vglModule.geoJSONUnpack.prototype.readMultiPoint = function(coordinates) {
 	      {
 	      z = coordinates[i][2];
 	      }
-	    console.log("read " + x + "," + y + "," + z)
+	    console.log("read " + x + "," + y + "," + z);
 	    //TODO: ignoring higher dimensions
 	    vglcoords.pushBack([x,y,z]);
 	  }
@@ -166,8 +166,8 @@ vglModule.geoJSONUnpack.prototype.readMultiPoint = function(coordinates) {
 //--------------------------------------------------------------------------
 vglModule.geoJSONUnpack.prototype.readLineString = function(coordinates) {
 	  var geom = new vglModule.geometryData();
-	  var vglines = new vglModule.lines();
-	  lines.setIndexCount(coordinates.length);
+	  var vglline = new vglModule.lines();
+	  vglline.setIndexCount(coordinates.length);
 
 	  var vglcoords = new vglModule.sourceDataP3fv();
 	  var indices = new Uint16Array(coordinates.length);
@@ -181,14 +181,15 @@ vglModule.geoJSONUnpack.prototype.readLineString = function(coordinates) {
 	      {
 	      z = coordinates[i][2];
 	      }
+	    console.log("read " + x + "," + y + "," + z);
 	    //TODO: ignoring higher dimensions
 	    vglcoords.pushBack([x,y,z]);
 	  }
 
-	  vgllines.setIndices(indices);
+	  vglline.setIndices(indices);
 
 	  geom.setName("aLineString");
-	  geom.addPrimitive(vgllines);
+	  geom.addPrimitive(vglline);
 	  geom.addSource(vglcoords);
 	  return geom;
 }
@@ -197,15 +198,16 @@ vglModule.geoJSONUnpack.prototype.readLineString = function(coordinates) {
 vglModule.geoJSONUnpack.prototype.readMultiLineString = function(coordinates) {
 	  var geom = new vglModule.geometryData();
 	  var vglcoords = new vglModule.sourceDataP3fv();
-	  var indices = new Uint16Array();
-
+	  var indices = new Uint16Array(8); //TODO:UH OH
 	  var ccount = 0;
 	  for (var i = 0; i < coordinates.length; i++) {
+		  console.log("getting line " + i);
 		  var vglline = new vglModule.lines();
 		  var thisLineLength = coordinates[i].length;
-		  lines.setIndexCount(thisLineLength);
+		  vglline.setIndexCount(thisLineLength);
 		  for (var j = 0; j < thisLineLength; j++) {
-			indices.pushBack(ccount++);
+			indices[ccount]=ccount;
+			ccount++;
 		    var x = coordinates[i][j][0];
 		    var y = coordinates[i][j][1];
 		    var z = 0.0;
@@ -213,6 +215,7 @@ vglModule.geoJSONUnpack.prototype.readMultiLineString = function(coordinates) {
 		      {
 		      z = coordinates[i][j][2];
 		      }
+		    console.log("read " + x + "," + y + "," + z);
 		    //TODO: ignoring higher dimensions
 		    vglcoords.pushBack([x,y,z]);
 		  }
@@ -248,6 +251,7 @@ vglModule.geoJSONUnpack.prototype.readPolygon = function(coordinates) {
 	      {
 	      z = coordinates[0][i][2];
 	      }
+	    console.log("read " + x + "," + y + "," + z);
 	    //TODO: ignoring higher dimensions
 	    vglcoords.pushBack([x,y,z]);
 	  }
@@ -263,23 +267,26 @@ vglModule.geoJSONUnpack.prototype.readPolygon = function(coordinates) {
 vglModule.geoJSONUnpack.prototype.readMultiPolygon = function(coordinates) {
 	  var geom = new vglModule.geometryData();
 	  var vglcoords = new vglModule.sourceDataP3fv();
-	  var indices = new Uint16Array();
+	  var indices = new Uint16Array(6); //TODO:UH OH
 
 	  var ccount = 0;
 	  var numPolys = coordinates.length;
 	  for (var i = 0; i < numPolys; i++) {
-		  var triangle = new vglModule.triangles();
+		  console.log("getting poly " + i);
+		  var vgltriangle = new vglModule.triangles();
 		  var thisPolyLength = coordinates[i][0].length;
-		  triangle.setIndexCount(thisPolyLength);
+		  vgltriangle.setIndexCount(thisPolyLength);
 		  for (var j = 0; j < thisPolyLength; j++) {
-			indices.pushBack(ccount++);
-		    var x = coordinates[i][j][0][0];
-		    var y = coordinates[i][j][0][1];
+			indices[ccount] = ccount;
+			ccount++;
+		    var x = coordinates[i][0][j][0];
+		    var y = coordinates[i][0][j][1];
 		    var z = 0.0;
-		    if (coordinates[i][j][0].length>2)
+		    if (coordinates[i][0][j].length>2)
 		      {
-		      z = coordinates[i][j][0][2];
+		      z = coordinates[i][0][j][2];
 		      }
+		    console.log("read " + x + "," + y + "," + z);
 		    //TODO: ignoring higher dimensions
 		    vglcoords.pushBack([x,y,z]);
 		  }
@@ -326,9 +333,9 @@ vglModule.geoJSONUnpack.prototype.readGJObject = function(object) {
 	case "GeometryCollection":
 	    console.log("parsed GeometryCollection");
 		var nextset = [];
-		for (var i = 0; i < object.features.length; i++)
+		for (var i = 0; i < object.geometries.length; i++)
 		  {
-		  next = this.readGJObject(object.features[i]);
+		  next = this.readGJObject(object.geometries[i]);
 		  nextset.push(next);
 		  }
 	    return nextset;
@@ -361,13 +368,7 @@ vglModule.geoJSONUnpack.prototype.linearizeGeoms = function(geoms, geom) {
 		  this.linearizeGeoms(geoms, geom[i]);
 		  }
 	} else {
-		console.log("appending ");
-		console.log(geom);
-		console.log("to");
-		console.log(geoms);
 		geoms.push(geom);
-		console.log("results in");
-		console.log(geoms);
 	}
 }
 
@@ -377,17 +378,11 @@ vglModule.geoJSONUnpack.prototype.getPrimitives = function(buffer) {
   if (!buffer) return [];
 
   var obj = JSON.parse(buffer);
-  console.log("OBJ IS");
-  console.log(obj);
 
   var geom = this.readGJObject(obj);
-  console.log("GEOM IS");
-  console.log(geom);
 
   var geoms = [];
   this.linearizeGeoms(geoms, geom);
-  console.log("GEOMS ARE");
-  console.log(geoms);
 
   return geoms;
 }
