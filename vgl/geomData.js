@@ -170,7 +170,7 @@ vglModule.lines = function() {
   }
   vglModule.primitive.call(this);
 
-  this.setPrimitiveType(gl.LINES);
+  this.setPrimitiveType(gl.LINE_STRIP);
   this.setIndicesValueType(gl.UNSIGNED_SHORT);
   this.setIndexCount(2);
 

@@ -27,82 +27,6 @@
 //////////////////////////////////////////////////////////////////////////////
 
 vglModule.geoJSONUnpack = function() {
-	this.Coordinates = [];
-}
-
-//--------------------------------------------------------------------------
-vglModule.geoJSONUnpack.prototype.ExtractCoordinates = function (obj) {
-  // I'm just recursively getting all the points out into a flat list.
-  // Once we demonstrate data delivery to rendering, we need to pull out
-  // the connectivity to draw lines and polygons instead of just this.
-  var appender = function(element, index, array) {
-    this.Coordinates = this.Coordinates.concat(element)
-  }
-
-  if (obj.hasOwnProperty('coordinates')) {
-    console.log("found coords");
-    obj['coordinates'].forEach(appender, this);
-  }
-  else
-    {
-      for (var x in obj) {
-        if (obj.hasOwnProperty(x) && typeof(obj[x])=="object" &&
-            obj[x] !== null) {
-          console.log(x + " recurse")
-          this.ExtractCoordinates(obj[x]);
-        } else {
-          console.log(obj[x] + " dead end")
-        }
-      }
-    }
-  return;
-}
-
-//--------------------------------------------------------------------------
-vglModule.geoJSONUnpack.prototype.parseObject = function(buffer) {
-  console.log("PARSING GEOJSON");
-  //console.log(buffer);
-  if (!buffer) return;
-
-  var obj = JSON.parse(buffer);
-  console.log("PARSED");
-  console.log(obj);
-
-  this.ExtractCoordinates(obj);
-  console.log(this.Coordinates);
-
-  var geom = new vglModule.geometryData();
-  geom.setName("FOO");
-
-  var points = new vglModule.points();
-  geom.addPrimitive(points);
-  var indices = new Uint16Array(this.Coordinates.length);
-
-  var coords = new vglModule.sourceDataP3fv();
-  geom.addSource(coords);
-
-  for (var i = 0; i < this.Coordinates.length; i++) {
-    indices[i] = i;
-
-    var v1 = new vglModule.vertexDataP3f();
-    var x = this.Coordinates[i][0];
-    var y = this.Coordinates[i][1];
-    var z = 0.0;
-    if (this.Coordinates[i].length>2)
-      {
-      z = this.Coordinates[i][2];
-      }
-    v1 = new Array(x,y,z);
-    coords.pushBack(v1);
-  }
-  points.setIndices(indices);
-  console.log("coords ARE");
-  console.log(coords);
-  console.log("points ARE ");
-  console.log(points);
-  console.log(points.indices());
-
-  return geom;
 }
 
 //--------------------------------------------------------------------------
@@ -170,10 +94,10 @@ vglModule.geoJSONUnpack.prototype.readLineString = function(coordinates) {
 	  vglline.setIndexCount(coordinates.length);
 
 	  var vglcoords = new vglModule.sourceDataP3fv();
-	  var indices = new Uint16Array(coordinates.length);
+	  var indices = [];
 
 	  for (var i = 0; i < coordinates.length; i++) {
-		indices[i] = i;
+		indices.push(i);
 	    var x = coordinates[i][0];
 	    var y = coordinates[i][1];
 	    var z = 0.0;
@@ -185,7 +109,6 @@ vglModule.geoJSONUnpack.prototype.readLineString = function(coordinates) {
 	    //TODO: ignoring higher dimensions
 	    vglcoords.pushBack([x,y,z]);
 	  }
-
 	  vglline.setIndices(indices);
 
 	  geom.setName("aLineString");
@@ -198,16 +121,15 @@ vglModule.geoJSONUnpack.prototype.readLineString = function(coordinates) {
 vglModule.geoJSONUnpack.prototype.readMultiLineString = function(coordinates) {
 	  var geom = new vglModule.geometryData();
 	  var vglcoords = new vglModule.sourceDataP3fv();
-	  var indices = new Uint16Array(8); //TODO:UH OH
 	  var ccount = 0;
 	  for (var i = 0; i < coordinates.length; i++) {
+		  var indices = [];
 		  console.log("getting line " + i);
 		  var vglline = new vglModule.lines();
 		  var thisLineLength = coordinates[i].length;
 		  vglline.setIndexCount(thisLineLength);
 		  for (var j = 0; j < thisLineLength; j++) {
-			indices[ccount]=ccount;
-			ccount++;
+			indices.push(ccount++);
 		    var x = coordinates[i][j][0];
 		    var y = coordinates[i][j][1];
 		    var z = 0.0;
@@ -219,6 +141,7 @@ vglModule.geoJSONUnpack.prototype.readMultiLineString = function(coordinates) {
 		    //TODO: ignoring higher dimensions
 		    vglcoords.pushBack([x,y,z]);
 		  }
+		  vglline.setIndices(indices);
 		  geom.addPrimitive(vglline);
 	  }
 
@@ -229,36 +152,37 @@ vglModule.geoJSONUnpack.prototype.readMultiLineString = function(coordinates) {
 
 //--------------------------------------------------------------------------
 vglModule.geoJSONUnpack.prototype.readPolygon = function(coordinates) {
+	  //TODO: ignoring holes given in coordinates[1...]
+	  //TODO: ignoring convex
+	  //TODO: implement ear clipping in VGL instead of this to handle both
 	  var geom = new vglModule.geometryData();
-
-	  //TODO: handle concave
-	  var vgltriangle = new vglModule.triangles();
-	  //TODO: no gl.POLYGON
-	  var thisPolyLength = coordinates[0].length;
-	  vgltriangle.setIndexCount(thisPolyLength);
-
 	  var vglcoords = new vglModule.sourceDataP3fv();
 
-	  //TODO: ignoring holes given in coordinates[1...]
-	  var indices = new Uint16Array(thisPolyLength);
+	  var thisPolyLength = coordinates[0].length;
+      var vl = 1;
 	  for (var i = 0; i < thisPolyLength; i++) {
-	    indices[i] = i;
-
-	    var x = coordinates[0][i][0];
-	    var y = coordinates[0][i][1];
-	    var z = 0.0;
-	    if (coordinates[0][i].length>2)
-	      {
-	      z = coordinates[0][i][2];
-	      }
-	    console.log("read " + x + "," + y + "," + z);
-	    //TODO: ignoring higher dimensions
-	    vglcoords.pushBack([x,y,z]);
+		 var x = coordinates[0][i][0];
+		 var y = coordinates[0][i][1];
+		 var z = 0.0;
+		 if (coordinates[0][i].length>2)
+		   {
+		   z = coordinates[0][i][2];
+		   }
+         console.log("read " + x + "," + y + "," + z);
+		 //TODO: ignoring higher dimensions
+		 vglcoords.pushBack([x,y,z]);
+	     if (i > 1)
+           {
+	       console.log("Cutting new triangle 0,"+ vl+ ","+ i);
+	       var indices = new Uint16Array([0,vl,i]);
+		   var vgltriangle = new vglModule.triangles();
+           vgltriangle.setIndices(indices);
+		   geom.addPrimitive(vgltriangle);
+		   vl = i;
+		   }
 	  }
-	  vgltriangle.setIndices(indices);
 
 	  geom.setName("POLY");
-	  geom.addPrimitive(vgltriangle);
 	  geom.addSource(vglcoords);
 	  return geom;
 }
@@ -267,30 +191,38 @@ vglModule.geoJSONUnpack.prototype.readPolygon = function(coordinates) {
 vglModule.geoJSONUnpack.prototype.readMultiPolygon = function(coordinates) {
 	  var geom = new vglModule.geometryData();
 	  var vglcoords = new vglModule.sourceDataP3fv();
-	  var indices = new Uint16Array(6); //TODO:UH OH
 
 	  var ccount = 0;
 	  var numPolys = coordinates.length;
-	  for (var i = 0; i < numPolys; i++) {
-		  console.log("getting poly " + i);
-		  var vgltriangle = new vglModule.triangles();
-		  var thisPolyLength = coordinates[i][0].length;
-		  vgltriangle.setIndexCount(thisPolyLength);
-		  for (var j = 0; j < thisPolyLength; j++) {
-			indices[ccount] = ccount;
-			ccount++;
-		    var x = coordinates[i][0][j][0];
-		    var y = coordinates[i][0][j][1];
-		    var z = 0.0;
-		    if (coordinates[i][0][j].length>2)
-		      {
-		      z = coordinates[i][0][j][2];
-		      }
-		    console.log("read " + x + "," + y + "," + z);
-		    //TODO: ignoring higher dimensions
-		    vglcoords.pushBack([x,y,z]);
+	  console.log("NUMPOLYS " + numPolys);
+	  for (var j = 0; j < numPolys; j++) {
+		  console.log("getting poly " + j);
+
+		  var thisPolyLength = coordinates[j][0].length;
+	      var vf = ccount;
+	      var vl = ccount+1;
+		  for (var i = 0; i < thisPolyLength; i++) {
+			 var x = coordinates[j][0][i][0];
+			 var y = coordinates[j][0][i][1];
+			 var z = 0.0;
+			 if (coordinates[j][0][i].length>2)
+			   {
+			   z = coordinates[j][0][i][2];
+			   }
+	         console.log("read " + x + "," + y + "," + z);
+			 //TODO: ignoring higher dimensions
+			 vglcoords.pushBack([x,y,z]);
+		     if (i > 1)
+	           {
+		       console.log("Cutting new triangle "+ vf + "," + vl + "," + ccount);
+		       var indices = new Uint16Array([vf,vl,ccount]);
+			   var vgltriangle = new vglModule.triangles();
+               vgltriangle.setIndices(indices);
+			   geom.addPrimitive(vgltriangle);
+			   vl = ccount;
+			   }
+			 ccount++;
 		  }
-		  geom.addPrimitive(vgltriangle);
 	  }
 
 	  geom.setName("aMultiPoly");
