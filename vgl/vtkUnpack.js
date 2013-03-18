@@ -185,7 +185,7 @@ vglModule.vtkUnpack.prototype.parseObject = function(buffer) {
       test[i] = ss[this.pos++];
     index = new Uint16Array(test.buffer);
     vgllines.setIndices(index);
-
+    vgllines.setPrimitiveType(gl.LINES);
     /*
     //Getting Matrix
     //TODO: renderer is not doing anything with this yet
