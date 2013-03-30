@@ -94,7 +94,7 @@ geoModule.createGisDataList = function(rootId, heading, layersRootId, data) {
     row.appendChild(col);
 
     $(button).on("click", function() {
-      addLayer(layersRootId, this);
+      geoModule.addLayer(layersRootId, this);
       $(button).attr("disabled", "disabled");
       /*$(removeButton).removeAttr("disabled");
       $(removeButton).removeClass("disabled");*/
