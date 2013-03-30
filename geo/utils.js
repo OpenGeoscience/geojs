@@ -46,7 +46,7 @@ geoModule.createGisLayerList = function(rootId, heading) {
  * @param layersRootId
  * @param data
  */
-geoModule.createGisDataList = function(rootId, heading, layersRootId, data) {
+geoModule.createGisDataList = function(rootId, heading, layersRootId, data, callback) {
   var listRoot = document.getElementById(rootId);
   var itemRoot = document.createElement("div");
   itemRoot.setAttribute("class", "accordion-group");
@@ -88,17 +88,19 @@ geoModule.createGisDataList = function(rootId, heading, layersRootId, data) {
     button.setAttribute("class", "btn btn-primary");
     button.setAttribute("_id", item._id);
     button.setAttribute("name", item.name);
+    button.setAttribute("basename", item.basename);
     button.setAttribute("data-toggle", "button");
     button.appendChild(document.createTextNode("Add"));
     col.appendChild(button);
     row.appendChild(col);
 
-    $(button).on("click", function() {
-      geoModule.addLayer(layersRootId, this);
-      $(button).attr("disabled", "disabled");
-      /*$(removeButton).removeAttr("disabled");
-      $(removeButton).removeClass("disabled");*/
-    });
+    if (callback != undefined) {
+      $(button).on("click", callback);
+      /*$(button).on("click", function() {
+        geoModule.addLayer(layersRootId, this);
+        $(button).attr("disabled", "disabled");
+      });*/
+    }
   });
 };
 
