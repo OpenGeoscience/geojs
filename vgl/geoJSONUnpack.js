@@ -1,36 +1,23 @@
-/*========================================================================
-  VGL --- VTK WebGL Rendering Toolkit
+/**
+ * @module ogs.vgl
+ */
 
-  Copyright 2013 Kitware, Inc.
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
- ========================================================================*/
-
-//////////////////////////////////////////////////////////////////////////////
-//
-// geoJSONUnpack class
-// This contains code that reads a geoJSON file and produces rendering
-// primitives from it.
-//
-//////////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////////
-
-vglModule.geoJSONUnpack = function() {
+/**
+ * Create a new instance of geojson reader
+ *
+ * This contains code that reads a geoJSON file and produces rendering
+ * primitives from it.
+ *
+ * @class
+ * @returns {vglModule.geojsonReader}
+ */
+vglModule.geojsonReader = function() {
 }
 
-//--------------------------------------------------------------------------
-vglModule.geoJSONUnpack.prototype.readPoint = function(coordinates) {
+/**
+ *
+ */
+vglModule.geojsonReader.readPoint = function(coordinates) {
 	  var geom = new vglModule.geometryData();
 	  var vglpoints = new vglModule.points();
 	  var vglcoords = new vglModule.sourceDataP3fv();
@@ -75,8 +62,10 @@ vglModule.geoJSONUnpack.prototype.readPoint = function(coordinates) {
 	  return geom;
 }
 
-//--------------------------------------------------------------------------
-vglModule.geoJSONUnpack.prototype.readMultiPoint = function(coordinates) {
+/**
+ *
+ */
+vglModule.geojsonReader.readMultiPoint = function(coordinates) {
 	  var geom = new vglModule.geometryData();
 	  var vglpoints = new vglModule.points();
 	  var vglcoords = new vglModule.sourceDataP3fv();
@@ -119,8 +108,10 @@ vglModule.geoJSONUnpack.prototype.readMultiPoint = function(coordinates) {
 	  return geom;
 }
 
-//--------------------------------------------------------------------------
-vglModule.geoJSONUnpack.prototype.readLineString = function(coordinates) {
+/**
+ *
+ */
+vglModule.geojsonReader.readLineString = function(coordinates) {
 	  var geom = new vglModule.geometryData();
 	  var vglline = new vglModule.lines();
 	  vglline.setIndexCount(coordinates.length);
@@ -165,8 +156,10 @@ vglModule.geoJSONUnpack.prototype.readLineString = function(coordinates) {
 	  return geom;
 }
 
-//--------------------------------------------------------------------------
-vglModule.geoJSONUnpack.prototype.readMultiLineString = function(coordinates) {
+/**
+ *
+ */
+vglModule.geojsonReader.readMultiLineString = function(coordinates) {
 	  var geom = new vglModule.geometryData();
 	  var vglcoords = new vglModule.sourceDataP3fv();
 	  var colorarray;
@@ -214,8 +207,10 @@ vglModule.geoJSONUnpack.prototype.readMultiLineString = function(coordinates) {
 	  return geom;
 }
 
-//--------------------------------------------------------------------------
-vglModule.geoJSONUnpack.prototype.readPolygon = function(coordinates) {
+/**
+ *
+ */
+vglModule.geojsonReader.readPolygon = function(coordinates) {
 	  //TODO: ignoring holes given in coordinates[1...]
 	  //TODO: ignoring convex
 	  //TODO: implement ear clipping in VGL instead of this to handle both
@@ -267,8 +262,10 @@ vglModule.geoJSONUnpack.prototype.readPolygon = function(coordinates) {
 	  return geom;
 }
 
-//--------------------------------------------------------------------------
-vglModule.geoJSONUnpack.prototype.readMultiPolygon = function(coordinates) {
+/**
+ *
+ */
+vglModule.geojsonReader.readMultiPolygon = function(coordinates) {
 	  var geom = new vglModule.geometryData();
 	  var vglcoords = new vglModule.sourceDataP3fv();
 	  var colorarray;
@@ -326,8 +323,10 @@ vglModule.geoJSONUnpack.prototype.readMultiPolygon = function(coordinates) {
 	  return geom;
 }
 
-//--------------------------------------------------------------------------
-vglModule.geoJSONUnpack.prototype.readGJObject = function(object) {
+/**
+ *
+ */
+vglModule.geojsonReader.readGJObject = function(object) {
 	//TODO: ignoring "crs" and "bbox" and misc meta data on all of these,
 	//best to handle as references into original probably
     if (!object.hasOwnProperty('type')) {
@@ -388,8 +387,10 @@ vglModule.geoJSONUnpack.prototype.readGJObject = function(object) {
 	}
 }
 
-//--------------------------------------------------------------------------
-vglModule.geoJSONUnpack.prototype.linearizeGeoms = function(geoms, geom) {
+/**
+ *
+ */
+vglModule.geojsonReader.linearizeGeoms = function(geoms, geom) {
 	if( Object.prototype.toString.call( geom ) === '[object Array]' ) {
 		for (var i = 0; i < geom.length; i++)
 		  {
@@ -400,8 +401,10 @@ vglModule.geoJSONUnpack.prototype.linearizeGeoms = function(geoms, geom) {
 	}
 }
 
-//--------------------------------------------------------------------------
-vglModule.geoJSONUnpack.prototype.getPrimitives = function(buffer) {
+/**
+ *
+ */
+vglModule.geojsonReader.getPrimitives = function(buffer) {
   //console.log("PARSING GEOJSON");
   if (!buffer) return [];
 
