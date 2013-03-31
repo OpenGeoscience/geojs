@@ -106,3 +106,33 @@ geoModule.pointSpritesFeature = function(image, positions, colors) {
 };
 
 inherit(geoModule.pointSpritesFeature, geoModule.feature);
+
+/**
+ * Create a new instance of geometryFeature
+ *
+ * @class
+ * @desc Create a geometry feature given a geometry {ogs.vgl.geometryData} *
+ * @param geometry data {ogs.vgl.geometryData} *
+ * @returns {geoModule.planeFeature}
+ */
+geoModule.geometryFeature = function(geom) {
+
+  if (!(this instanceof geoModule.geometryFeature)) {
+    return new geoModule.geometryFeature(geom);
+  }
+
+  ogs.vgl.actor.call(this);
+
+  // Initialize
+  var mapper = ogs.vgl.mapper();
+  mapper.setGeometryData(geom);
+
+  this.setMapper(mapper);
+
+  var material = ogs.vgl.utils.createGeometryMaterial();
+  this.setMaterial(material);
+
+  return this;
+};
+
+inherit(geoModule.geometryFeature, geoModule.feature);

@@ -12,7 +12,7 @@
  * @returns {this}
  */
 vglModule.geojsonReader = function() {
-  if (!(this instanceof this)) {
+  if (!(this instanceof vglModule.geojsonReader)) {
     return new vglModule.geojsonReader();
   }
 
@@ -352,6 +352,7 @@ vglModule.geojsonReader = function() {
           next = this.readGJObject(object.geometries[i]);
           nextset.push(next);
         }
+        console.log(nextset);
         return nextset;
         break;
       case "Feature":
