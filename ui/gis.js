@@ -1,10 +1,19 @@
+
+uiModule.gis = function() {
+  if (!(this instanceof uiModule.gis)) {
+    return new uiModule.gis();
+  }
+
+  return this;
+};
+
 /**
  * Create a placeholder to display current layers
  *
  * @param rootId
  * @param heading
  */
-geoModule.createGisLayerList = function(rootId, heading) {
+uiModule.gis.createGisLayerList = function(rootId, heading) {
   var listRoot = document.getElementById(rootId);
   var itemRoot = document.createElement("div");
   itemRoot.setAttribute("class", "accordion-group");
@@ -46,7 +55,7 @@ geoModule.createGisLayerList = function(rootId, heading) {
  * @param layersRootId
  * @param data
  */
-geoModule.createGisDataList = function(rootId, heading, layersRootId, data, callback) {
+uiModule.gis.createGisDataList = function(rootId, heading, layersRootId, data, callback) {
   var listRoot = document.getElementById(rootId);
   var itemRoot = document.createElement("div");
   itemRoot.setAttribute("class", "accordion-group");
@@ -112,7 +121,7 @@ geoModule.createGisDataList = function(rootId, heading, layersRootId, data, call
  * @param layersRootId
  * @param elem
  */
-geoModule.addLayer = function(layersRootId, elem) {
+uiModule.gis.addLayer = function(layersRootId, elem) {
   var rootId = "#" + layersRootId;
   var _id = $(elem).attr("_id");
   if (_id !== null) {
@@ -132,7 +141,7 @@ geoModule.addLayer = function(layersRootId, elem) {
  * @param elem
  * @returns {Boolean}
  */
-geoModule.removeLayer = function(elem) {
+uiModule.gis.removeLayer = function(elem) {
   var _id = $(elem).attr("_id");
   var layerId = "#layer_" + _id;
   $(layerId).remove();
