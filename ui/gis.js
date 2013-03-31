@@ -121,7 +121,7 @@ uiModule.gis.createGisDataList = function(rootId, heading, layersRootId, data, c
  * @param layersRootId
  * @param elem
  */
-uiModule.gis.addLayer = function(layersRootId, elem) {
+uiModule.gis.addLayer = function(layersRootId, elem, callback) {
   var rootId = "#" + layersRootId;
   var _id = $(elem).attr("_id");
   if (_id !== null) {
@@ -130,9 +130,17 @@ uiModule.gis.addLayer = function(layersRootId, elem) {
     $(elem).removeClass("btn-primary");
     $(elem).addClass("btn-success");
     $(elem).addClass("disabled");
-    $(tbody).append("<tr id=layer_"+_id+">");
+    var layerId = 'layer_'+basename;
+    $(tbody).append("<tr id="+layerId+">");
     $(rootId + " tr:last").append("<td>" + basename + "</td>")
     $(rootId + " tr:last").append("<td><button class='btn btn-warning'> Hide </button></td>");
+    $(rootId + " tr:last").append("<div id='spinner'></div>");
+    layerId = '#'+layerId;
+
+    // @todo Just calling fadeIn does not work. It has to be set invisible
+    // and then only it works. We need to check if this is expected.
+    $(layerId).fadeOut(0);
+    $(layerId).fadeIn('slow', callback);
   }
 };
 
