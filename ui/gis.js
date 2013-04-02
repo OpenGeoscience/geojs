@@ -133,12 +133,12 @@ uiModule.gis.addLayer = function(object, layersRootId, elem, togglefunc, removef
     var layerId = basename;
     $(tbody).append("<tr id="+layerId+">");
     $(rootId + " tr:last").append("<td>" + basename + "</td>")
-    $(rootId + " tr:last").append("<td><button class='layer-button btn btn-warning disabled' disabled='disabled' onclick="+togglefunc+"('"+basename+"')> Toggle </button></td>")
-    $(rootId + " tr:last").append("<td><button class='layer-button btn btn-danger disabled' disabled='disabled'> Remove </button></td>")
+    $(rootId + " tr:last").append("<td class='td-btn-layer'><button class='btn-layer btn btn-warning disabled' disabled='disabled' onclick="+togglefunc+"('"+basename+"')> Toggle </button></td>")
+    $(rootId + " tr:last").append("<td class='td-btn-layer'><button class='btn-layer btn btn-danger disabled' disabled='disabled'> Remove </button></td>")
     layerId = '#'+layerId;
 
-    $('.layer-button').width(Math.max.apply(Math,
-                                            $('.layer-button').map(function(){
+    $('.btn-layer').width(Math.max.apply(Math,
+                                            $('.btn-layer').map(function(){
                                               return $(this).outerWidth();}).get()));
     }
     // @todo Just calling fadeIn does not work. It has to be set invisible
