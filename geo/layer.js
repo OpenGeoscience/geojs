@@ -24,7 +24,7 @@ geoModule.layerOptions = function() {
  * rendered on top of the map base. This could include image, points, line, and
  * polygons.
  */
-geoModule.layer = function(options) {
+geoModule.layer = function(options, feature) {
 
   this.events = {
     "opacitychange" : "opacitychange",
@@ -32,7 +32,7 @@ geoModule.layer = function(options) {
   };
 
   if (!(this instanceof geoModule.layer)) {
-    return new geoModule.layer(options);
+    return new geoModule.layer(options, feature);
   }
 
   ogs.vgl.object.call(this);
@@ -42,6 +42,9 @@ geoModule.layer = function(options) {
 
   /** @private */
   var m_name = "";
+
+  /** @private */
+  var m_actor = feature;
 
   /** @private */
   var m_opacity = options.opacity || 1.0;
@@ -65,9 +68,25 @@ geoModule.layer = function(options) {
    * Return the underlying drawable entity This function should be implemented
    * by the derived classes
    */
-  this.actor = function() {
-    return null;
+  this.feature = function() {
+    return m_actor;
   };
+
+  /**
+   * Set feature
+   *
+   * @param {ogs.vgl.actor}
+   */
+  this.setFeature = function(actor) {
+    if (actor === m_actor) {
+      return false;
+    }
+
+    m_actor = actor;
+    this.modified();
+
+    return true;
+  }
 
   /**
    * Get name of the layer
@@ -104,11 +123,42 @@ geoModule.layer = function(options) {
    * Set opacity of the layer in the range of [0.0, 1.0]
    */
   this.setOpacity = function(val) {
+
+    if (m_opacity === val) {
+      return false;
+    }
+
     m_opacity = val;
     $(m_that).trigger({
       type : this.events.opacitychange,
       opacity : m_opacity
     });
+
+    this.modified();
+    return true;
+  };
+
+  /**
+   * Get if layer is visible
+   *
+   * @returns {Boolean}
+   */
+  this.visible = function() {
+    return m_actor.visible();
+  };
+
+  /**
+   * Set layer visible true or false
+   *
+   */
+  this.setVisible = function(flag) {
+
+    if (m_actor.visible() === flag) {
+      return false;
+    }
+
+    this.modified();
+    return m_actor.setVisible(flag);
   };
 
   /**
@@ -143,28 +193,10 @@ geoModule.featureLayer = function(options, feature) {
   if (!(this instanceof geoModule.featureLayer)) {
     return new geoModule.featureLayer(options, feature);
   }
-  geoModule.layer.call(this, options);
+  geoModule.layer.call(this, options, feature);
 
   /** @priave */
   var m_that = this;
-
-  /** @priave */
-  var m_actor = feature;
-
-  /**
-   * Return the underlying drawable entity This function should be implemented
-   * by the derived classes
-   */
-  this.actor = function() {
-    return m_actor;
-  };
-
-  /**
-   * Set feature (points, lines, or polygons)
-   */
-  this.setFeature = function(feature) {
-    m_actor = feature;
-  };
 
   /**
    * Slot to handle opacity change

@@ -121,7 +121,7 @@ uiModule.gis.createGisDataList = function(rootId, heading, layersRootId, data, c
  * @param layersRootId
  * @param elem
  */
-uiModule.gis.addLayer = function(layersRootId, elem, callback) {
+uiModule.gis.addLayer = function(object, layersRootId, elem, callback) {
   var rootId = "#" + layersRootId;
   var _id = $(elem).attr("_id");
   if (_id !== null) {
@@ -130,11 +130,11 @@ uiModule.gis.addLayer = function(layersRootId, elem, callback) {
     $(elem).removeClass("btn-primary");
     $(elem).addClass("btn-success");
     $(elem).addClass("disabled");
-    var layerId = 'layer_'+basename;
+    var layerId = basename;
     $(tbody).append("<tr id="+layerId+">");
     $(rootId + " tr:last").append("<td>" + basename + "</td>")
-    $(rootId + " tr:last").append("<td><button class='btn btn-warning'> Hide </button></td>");
-    $(rootId + " tr:last").append("<div id='spinner'></div>");
+    $(rootId + " tr:last").append("<td><button class='btn btn-warning'> Hide </button></td>")
+    $(rootId + " tr:last").append("<td><button class='btn btn-danger'> Remove </button></td>")
     layerId = '#'+layerId;
 
     // @todo Just calling fadeIn does not work. It has to be set invisible
@@ -149,9 +149,10 @@ uiModule.gis.addLayer = function(layersRootId, elem, callback) {
  * @param elem
  * @returns {Boolean}
  */
-uiModule.gis.removeLayer = function(elem) {
-  var _id = $(elem).attr("_id");
-  var layerId = "#layer_" + _id;
-  $(layerId).remove();
-  return false;
+uiModule.gis.removeLayer = function(layerId) {
+  console.log('remove layer ' + layerId);
 };
+
+uiModule.gis.toggleLayer = function(layerId) {
+
+}
