@@ -97,6 +97,11 @@ vglModule.renderer = function() {
     var children = m_sceneRoot.children();
     for ( var i = 0; i < children.length; ++i) {
       var actor = children[i];
+
+      if (actor.visible() === false) {
+        continue;
+      }
+
       mat4.multiply(m_camera.computeViewMatrix(), actor.matrix(),
                     renSt.m_modelViewMatrix);
       renSt.m_material = actor.material();

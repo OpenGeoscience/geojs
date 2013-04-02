@@ -209,14 +209,9 @@ geoModule.map = function(node, options) {
    * @returns {geo.layer}
    */
   this.findLayerById = function(layerId) {
-    for (var key in m_layers) {
-      if (m_layers.hasOwnProperty(key)) {
-        console.log("found " + key);
-        console.log("found " + m_layers[key]);
-        return m_layers[key];
-      }
+    if (m_layers.hasOwnProperty(layerId)) {
+      return m_layers[layerId];
     }
-
     return null;
   }
 

@@ -121,7 +121,7 @@ uiModule.gis.createGisDataList = function(rootId, heading, layersRootId, data, c
  * @param layersRootId
  * @param elem
  */
-uiModule.gis.addLayer = function(object, layersRootId, elem, callback) {
+uiModule.gis.addLayer = function(object, layersRootId, elem, togglefunc, removefunc, callback) {
   var rootId = "#" + layersRootId;
   var _id = $(elem).attr("_id");
   if (_id !== null) {
@@ -133,7 +133,7 @@ uiModule.gis.addLayer = function(object, layersRootId, elem, callback) {
     var layerId = basename;
     $(tbody).append("<tr id="+layerId+">");
     $(rootId + " tr:last").append("<td>" + basename + "</td>")
-    $(rootId + " tr:last").append("<td><button class='btn btn-warning'> Hide </button></td>")
+    $(rootId + " tr:last").append("<td><button class='btn btn-warning' onclick="+togglefunc+"('"+basename+"')> Hide </button></td>")
     $(rootId + " tr:last").append("<td><button class='btn btn-danger'> Remove </button></td>")
     layerId = '#'+layerId;
 
