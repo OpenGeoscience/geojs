@@ -202,7 +202,7 @@ geoModule.featureLayer = function(options, feature) {
    * Slot to handle opacity change
    */
   this.updateLayerOpacity = function(event) {
-    var mat = m_actor.material();
+    var mat = this.feature().material();
     var opacityUniform = mat.shaderProgram().uniform('opacity');
 
     if (opacityUniform != null) {
