@@ -159,7 +159,7 @@ vglModule.renderer = function() {
    * Remove the actor from the collection
    */
   this.removeActor = function(actor) {
-    if (actor in m_sceneRoot.children()) {
+    if (m_sceneRoot.children().indexOf(actor) !== -1) {
       m_sceneRoot.removeChild(actor);
       this.modified();
       return true;

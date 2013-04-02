@@ -46,7 +46,7 @@ vglModule.groupNode = function() {
 
   this.removeChild = function(childNode) {
     if (childNode.parent() === this) {
-      var index = m_children.indexof(childNode);
+      var index = m_children.indexOf(childNode);
       m_children.splice(index, 1);
       this.setBoundsDirty(true);
       return true;
