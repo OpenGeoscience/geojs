@@ -95,6 +95,7 @@ uiModule.gis.createGisDataList = function(rootId, heading, layersRootId, data, c
     var button = document.createElement("button");
     button.setAttribute("type", "button");
     button.setAttribute("class", "btn btn-primary");
+    button.setAttribute("id", "btn-add-" + item.name);
     button.setAttribute("_id", item._id);
     button.setAttribute("name", item.name);
     button.setAttribute("basename", item.basename);
@@ -149,11 +150,28 @@ uiModule.gis.addLayer = function(object, layersRootId, elem, togglefunc, removef
 
 /**
  * Remove a layer from the list
+ *
  * @param elem
  * @returns {Boolean}
  */
 uiModule.gis.removeLayer = function(layerId) {
-  console.log('remove layer ' + layerId);
+  var buttonId = $('#btn-add-'+layerId);
+  var button = $(buttonId);
+
+  if (button !== null || button !== undefined) {
+    button.removeClass('disabled');
+    button.removeClass('btn-success');
+    button.removeClass('active');
+    button.addClass('btn-primary');
+
+    $('#' + layerId).fadeOut(function() {
+      $('#' + layerId).remove();
+    });
+
+    return true;
+  }
+
+  return false;
 };
 
 uiModule.gis.toggleLayer = function(layerId) {
