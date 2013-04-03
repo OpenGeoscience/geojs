@@ -90,8 +90,22 @@ uiModule.gis.createGisDataList = function(rootId, heading, layersRootId, data, c
     var col = document.createElement("td");
     col.appendChild(document.createTextNode(item.basename));
     row.appendChild(col);
-    col = document.createElement("td");
 
+    // Add drop-down so that users can select a variable
+    col = document.createElement("td");
+    var select = document.createElement('select');
+    col.appendChild(select);
+    for (var k = 0; k < item.variables.length; ++k) {
+      var varname = item.variables[k].name;
+      var option= document.createElement('option');
+      option.setAttribute('value', varname);
+      option.innerHTML = varname;
+      select.appendChild(option);
+    }
+    row.appendChild(col);
+
+    // Add 'add' button
+    col = document.createElement("td");
     var button = document.createElement("button");
     button.setAttribute("type", "button");
     button.setAttribute("class", "btn btn-primary");
