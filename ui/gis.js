@@ -94,6 +94,7 @@ uiModule.gis.createGisDataList = function(rootId, heading, layersRootId, data, c
     // Add drop-down so that users can select a variable
     col = document.createElement("td");
     var select = document.createElement('select');
+    select.setAttribute('class', 'combobox');
     col.appendChild(select);
     for (var k = 0; k < item.variables.length; ++k) {
       var varname = item.variables[k].name;
@@ -126,6 +127,8 @@ uiModule.gis.createGisDataList = function(rootId, heading, layersRootId, data, c
       });*/
     }
   });
+
+  $('.combobox').select2();
 };
 
 /**
