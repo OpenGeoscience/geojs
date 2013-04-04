@@ -81,6 +81,7 @@ uiModule.gis.createGisDataList = function(rootId, heading, layersRootId, data, c
   subItemsList.setAttribute("class", "accordion-inner");
   subItemsRoot.appendChild(subItemsList);
   var tableRoot = document.createElement("table");
+  tableRoot.setAttribute('class', 'table-stripped');
   subItemsList.appendChild(tableRoot);
 
   $.each(data, function(i, item) {
@@ -88,7 +89,9 @@ uiModule.gis.createGisDataList = function(rootId, heading, layersRootId, data, c
     row.setAttribute("class", "success");
     tableRoot.appendChild(row);
     var col = document.createElement("td");
-    col.appendChild(document.createTextNode(item.basename));
+    var he = document.createElement("h4");
+    he.innerHTML = item.basename;
+    col.appendChild(he);
     row.appendChild(col);
 
     // Add drop-down so that users can select a variable
@@ -150,7 +153,7 @@ uiModule.gis.addLayer = function(object, layersRootId, elem, togglefunc, removef
     $(elem).addClass("disabled");
     var layerId = basename;
     $(tbody).append("<tr id="+layerId+">");
-    $(rootId + " tr:last").append("<td>" + basename + "</td>")
+    $(rootId + " tr:last").append("<td><h4>" + basename + "<h4></td>")
     $(rootId + " tr:last").append("<td class='td-btn-layer'><button class='btn-layer btn btn-warning disabled' disabled='disabled' onclick="+togglefunc+"('"+basename+"')> Toggle </button></td>")
     $(rootId + " tr:last").append("<td class='td-btn-layer'><button class='btn-layer btn btn-danger disabled' disabled='disabled' onclick="+removefunc+"('"+basename+"')> Remove </button></td>")
     layerId = '#'+layerId;
