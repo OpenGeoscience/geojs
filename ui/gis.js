@@ -81,7 +81,7 @@ uiModule.gis.createGisDataList = function(rootId, heading, layersRootId, data, c
   subItemsList.setAttribute("class", "accordion-inner");
   subItemsRoot.appendChild(subItemsList);
   var tableRoot = document.createElement("table");
-  tableRoot.setAttribute('class', 'table-stripped');
+  tableRoot.setAttribute('class', 'table-striped table-hover');
   subItemsList.appendChild(tableRoot);
 
   $.each(data, function(i, item) {
