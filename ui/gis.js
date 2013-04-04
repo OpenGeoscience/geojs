@@ -154,8 +154,8 @@ uiModule.gis.addLayer = function(object, layersRootId, elem, togglefunc, removef
     var layerId = basename;
     $(tbody).append("<tr id="+layerId+">");
     $(rootId + " tr:last").append("<td><h4>" + basename + "<h4></td>")
-    $(rootId + " tr:last").append("<td class='td-btn-layer'><button class='btn-layer btn btn-warning disabled' disabled='disabled' onclick="+togglefunc+"('"+basename+"')> Toggle </button></td>")
-    $(rootId + " tr:last").append("<td class='td-btn-layer'><button class='btn-layer btn btn-danger disabled' disabled='disabled' onclick="+removefunc+"('"+basename+"')> Remove </button></td>")
+    $(rootId + " tr:last").append("<td class='td-btn-layer'><button class='btn-layer btn btn-warning disabled' disabled='disabled' onclick="+togglefunc+"('"+basename+"')> Toggle </button>")
+    $(rootId + " td:last").append("<button class='btn-layer btn btn-danger disabled' disabled='disabled' onclick="+removefunc+"('"+basename+"')> Remove </button></td>")
     layerId = '#'+layerId;
 
     $('.btn-layer').width(Math.max.apply(Math,
