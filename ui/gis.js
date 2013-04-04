@@ -131,6 +131,9 @@ uiModule.gis.createGisDataList = function(rootId, heading, layersRootId, data, c
     }
   });
 
+  $('.combobox').width(Math.max.apply(Math,
+                                       $('.combobox').map(function(){
+                                         return $(this).outerWidth();}).get()));
   $('.combobox').select2();
 };
 
