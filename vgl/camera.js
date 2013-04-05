@@ -186,7 +186,9 @@ vglModule.camera = function() {
   };
 
   /**
-   *
+   * Rotate camera around center of rotation
+   * @param dx Rotation around vertical axis in degrees
+   * @param dy Rotation around horizontal axis in degrees
    */
   this.rotate = function(dx, dy) {
     dx = dx * (3.14 / 180.0)
