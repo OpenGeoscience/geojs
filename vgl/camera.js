@@ -228,17 +228,14 @@ vglModule.camera = function() {
     mat4.multiplyVec3(mat, m_focalPoint, m_focalPoint);
 
     // Update view up vector
-    mat4.identity(mat);
-    mat4.rotate(mat, dx, m_viewUp, mat);
     mat4.multiplyVec3(mat, m_right);
     vec3.normalize(m_right);
 
     // Update right vector
-    mat4.identity(mat);
-    mat4.rotate(mat, dy, m_right, mat);
     mat4.multiplyVec3(mat, m_viewUp);
     vec3.normalize(m_viewUp);
 
+    // Update direction of projection
     this.computeDirectionOfProjection();
 
     this.modified();
