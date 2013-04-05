@@ -58,19 +58,26 @@ vglModule.camera = function() {
   var m_computeProjectMatrixTime = ogs.vgl.timestamp();
 
   /**
-   * Set position of the camera
-   */
-  this.setPosition = function(x, y, z) {
-    m_position = vec3.create([ x, y, z ]);
-    this.modified();
-  };
-
-  /**
    * Get position of the camera
    */
   this.position = function() {
     return m_position;
   };
+
+ /**
+  * Set position of the camera
+  */
+ this.setPosition = function(x, y, z) {
+   m_position = vec3.create([ x, y, z ]);
+   this.modified();
+ };
+
+ /**
+  * Get focal point of the camera
+  */
+ this.focalPoint = function() {
+   return m_focalPoint;
+ };
 
   /**
    * Set focal point of the camera
@@ -81,11 +88,11 @@ vglModule.camera = function() {
   };
 
   /**
-   * Get focal point of the camera
+   * Get view-up direction of camera
    */
-  this.focalPoint = function() {
-    return m_focalPoint;
-  };
+  this.viewUpDirection = function() {
+    return m_viewUp;
+  }
 
   /**
    * Set view-up direction of the camera
@@ -94,6 +101,21 @@ vglModule.camera = function() {
     m_viewUp = vec3.create([ x, y, z ]);
     this.modified();
   };
+
+  /**
+   * Get center of rotation for camera
+   */
+  this.centerOfRotation = function() {
+    return m_centerOrRotation;
+  }
+
+  /**
+   * Set center of rotation for camera
+   */
+  this.setCenterOfRotation = function(centerOfRotation) {
+    m_centerOrRotation = centerOfRotation;
+    this.modified();
+  }
 
   /**
    * Get clipping range of the camera
