@@ -57,15 +57,15 @@ geoModule.mapInteractorStyle = function() {
     if (m_middileMouseButtonDown) {
 
       var focalPoint = camera.focalPoint();
-      var focusWorldPt = vec4.createFrom(focalPoint[0], focalPoint[1],
+      var focusWorldPt = vec4.fromValues(focalPoint[0], focalPoint[1],
                                          focalPoint[2], 1);
 
       var focusDisplayPt = renderer.worldToDisplay(focusWorldPt, camera
           .viewMatrix(), camera.projectionMatrix(), width, height);
 
-      var displayPt1 = vec4.createFrom(currentMousePos.x, currentMousePos.y,
+      var displayPt1 = vec4.fromValues(currentMousePos.x, currentMousePos.y,
                                        focusDisplayPt[2], 1.0);
-      var displayPt2 = vec4.createFrom(m_mouseLastPos.x, m_mouseLastPos.y,
+      var displayPt2 = vec4.fromValues(m_mouseLastPos.x, m_mouseLastPos.y,
                                        focusDisplayPt[2], 1.0);
 
       var worldPt1 = renderer.displayToWorld(displayPt1, camera.viewMatrix(),

@@ -71,8 +71,8 @@ vglModule.renderer = function() {
         continue;
       }
 
-      mat4.multiply(m_camera.viewMatrix(), actor.matrix(),
-                    renSt.m_modelViewMatrix);
+      mat4.multiply(renSt.m_modelViewMatrix, m_camera.viewMatrix(),
+                    actor.matrix());
       renSt.m_material = actor.material();
       renSt.m_mapper = actor.mapper();
 
@@ -140,11 +140,11 @@ vglModule.renderer = function() {
   this.worldToDisplay = function(worldPt, viewMatrix, projectionMatrix, width,
                                  height) {
     var viewProjectionMatrix = mat4.create();
-    mat4.multiply(projectionMatrix, viewMatrix, viewProjectionMatrix);
+    mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
 
     // Transform world to clipping coordinates
     var clipPt = vec4.create();
-    mat4.multiplyVec4(viewProjectionMatrix, worldPt, clipPt);
+    vec4.transformMat4(clipPt, worldPt, viewProjectionMatrix);
 
     if (clipPt[3] !== 0.0) {
       clipPt[0] = clipPt[0] / clipPt[3];
@@ -160,7 +160,7 @@ vglModule.renderer = function() {
     var winZ = clipPt[2];
     var winW = clipPt[3];
 
-    return vec4.createFrom(winX, winY, winZ, winW);
+    return vec4.fromValues(winX, winY, winZ, winW);
   };
 
   /**
@@ -173,12 +173,12 @@ vglModule.renderer = function() {
     var z = displayPt[2];
 
     var viewProjectionInverse = mat4.create();
-    mat4.multiply(projectionMatrix, viewMatrix, viewProjectionInverse);
-    mat4.inverse(viewProjectionInverse, viewProjectionInverse);
+    mat4.multiply(viewProjectionInverse, projectionMatrix, viewMatrix);
+    mat4.invert(viewProjectionInverse, viewProjectionInverse);
 
-    var worldPt = vec4.createFrom(x, y, z, 1);
-    mat4.multiplyVec4(viewProjectionInverse, worldPt, worldPt);
-
+    var worldPt = vec4.fromValues(x, y, z, 1);
+    var myvec = vec4.create();
+    vec4.transformMat4(worldPt, worldPt, viewProjectionInverse);
     if (worldPt[3] !== 0.0) {
       worldPt[0] = worldPt[0] / worldPt[3];
       worldPt[1] = worldPt[1] / worldPt[3];
