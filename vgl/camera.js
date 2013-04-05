@@ -208,8 +208,8 @@ vglModule.camera = function() {
    * @param dy Rotation around horizontal axis in degrees
    */
   this.rotate = function(dx, dy) {
-    dx = dx * (3.14 / 180.0)
-    dy = dy * (3.14 / 180.0)
+    dx = dx * (22.0 / (7.0 * 180.0));
+    dy = dy * (22.0 / (7.0 * 180.0));
 
     var mat = mat4.create();
     mat4.identity(mat);
@@ -286,6 +286,8 @@ vglModule.camera = function() {
   this.projectionMatrix = function() {
     return this.computeProjectionMatrix();
   };
+
+  this.computeDirectionOfProjection();
 
   return this;
 };
