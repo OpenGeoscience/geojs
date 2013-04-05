@@ -62,6 +62,7 @@ geoModule.map = function(node, options) {
   var m_renderer = m_viewer.renderWindow().activeRenderer();
 
   $(m_interactorStyle).on(ogs.vgl.command.leftButtonPressEvent, draw);
+  $(m_interactorStyle).on(ogs.vgl.command.middleButtonPressEvent, draw);
   $(m_interactorStyle).on(ogs.vgl.command.rightButtonPressEvent, draw);
   $(this).on(geoModule.command.updateEvent, draw);
 

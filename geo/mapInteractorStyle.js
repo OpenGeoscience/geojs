@@ -54,7 +54,7 @@ geoModule.mapInteractorStyle = function() {
       return;
     }
 
-    if (m_leftMouseButtonDown) {
+    if (m_middileMouseButtonDown) {
 
       var focalPoint = camera.focalPoint();
       var focusWorldPt = vec4.createFrom(focalPoint[0], focalPoint[1],
@@ -75,13 +75,17 @@ geoModule.mapInteractorStyle = function() {
                                              camera.projectionMatrix(), width,
                                              height);
 
-      dx = worldPt1[0] - worldPt2[0];
-      dy = worldPt1[1] - worldPt2[1];
-
-      camera.pan(-dx, -dy);
+      var dx = worldPt1[0] - worldPt2[0],
+      dy = worldPt1[1] - worldPt2[1],
+      dz = worldPt1[2] - worldPt2[2];
+      camera.pan(-dx, -dy, -dz);
+      $(m_that).trigger(vglModule.command.middleButtonPressEvent);
+    }
+    if (m_leftMouseButtonDown) {
+      camera.rotate((m_mouseLastPos.x - currentMousePos.x),
+                    (m_mouseLastPos.y - currentMousePos.y));
       $(m_that).trigger(vglModule.command.leftButtonPressEvent);
     }
-
     if (m_rightMouseButtonDown) {
       zTrans = currentMousePos.y - m_mouseLastPos.y;
       camera.zoom(zTrans * 0.5);
@@ -102,11 +106,11 @@ geoModule.mapInteractorStyle = function() {
     if (event.button === 0) {
       m_leftMouseButtonDown = true;
     }
+    if (event.button === 1) {
+      m_middileMouseButtonDown = true;
+    }
     if (event.button === 2) {
       m_rightMouseButtonDown = true;
-    }
-    if (event.button === 4) {
-      m_middileMouseButtonDown = true;
     }
 
     coords = canvas.relMouseCoords(event);
@@ -135,11 +139,11 @@ geoModule.mapInteractorStyle = function() {
     if (event.button === 0) {
       m_leftMouseButtonDown = false;
     }
+    if (event.button === 1) {
+      m_middileMouseButtonDown = false;
+    }
     if (event.button === 2) {
       m_rightMouseButtonDown = false;
-    }
-    if (event.button === 4) {
-      m_middileMouseButtonDown = false;
     }
 
     return false;

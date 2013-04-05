@@ -29,21 +29,6 @@ vglModule.renderer = function() {
   vglModule.object.call(this);
 
   /** @private */
-  var m_x = 0;
-
-  /** @private */
-  var m_y = 0;
-
-  /** @private */
-  var m_width = 0;
-
-  /** @private */
-  var m_height = 0;
-
-  /** @private */
-  var m_clippingRange = [ 0.1, 1000.0 ];
-
-  /** @private */
   var m_sceneRoot = new vglModule.groupNode();
 
   /** @private */
@@ -66,20 +51,6 @@ vglModule.renderer = function() {
   };
 
   /**
-   * Get width of renderer
-   */
-  this.width = function() {
-    return m_width;
-  };
-
-  /**
-   * Get height of renderer
-   */
-  this.height = function() {
-    return m_height;
-  };
-
-  /**
    * Render the scene
    */
   this.render = function() {
@@ -88,9 +59,7 @@ vglModule.renderer = function() {
     gl.depthFunc(gl.LEQUAL);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    perspectiveMatrix = m_camera.computeProjectionMatrix((m_width / m_height),
-                                                         m_clippingRange[0],
-                                                         m_clippingRange[1]);
+    perspectiveMatrix = m_camera.projectionMatrix();
 
     var renSt = new vglModule.renderState();
     renSt.m_projectionMatrix = perspectiveMatrix;
@@ -102,7 +71,7 @@ vglModule.renderer = function() {
         continue;
       }
 
-      mat4.multiply(m_camera.computeViewMatrix(), actor.matrix(),
+      mat4.multiply(m_camera.viewMatrix(), actor.matrix(),
                     renSt.m_modelViewMatrix);
       renSt.m_material = actor.material();
       renSt.m_mapper = actor.mapper();
@@ -133,12 +102,9 @@ vglModule.renderer = function() {
    * Resize viewport given a position, width and height
    */
   this.positionAndResize = function(x, y, width, height) {
-    m_x = x;
-    m_y = y;
-    m_width = width;
-    m_height = height;
     // TODO move this code to camera
-    gl.viewport(m_x, m_y, m_width, m_height);
+    gl.viewport(x, y, width, height);
+    m_camera.setViewAspect(width / height);
     this.modified();
   };
 
