@@ -160,11 +160,6 @@ vglModule.camera = function() {
    * Move camera closer or further away from the scene
    */
   this.zoom = function(dz) {
-    // Since our direction vector is changed, we need to first
-    // calculate this new direction
-    var lastPosition = vec3.createFrom(m_position[0], m_position[1],
-                                       m_position[2]);
-
     var deltaX = m_directionOfProjection[0] * dz;
     var deltaY = m_directionOfProjection[1] * dz;
     var deltaZ = m_directionOfProjection[2] * dz;
