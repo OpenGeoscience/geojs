@@ -227,11 +227,11 @@ vglModule.camera = function() {
     mat4.multiplyVec3(mat, m_position, m_position);
     mat4.multiplyVec3(mat, m_focalPoint, m_focalPoint);
 
-    // Update view up vector
+    // Update right vector
     mat4.multiplyVec3(mat, m_right);
     vec3.normalize(m_right);
 
-    // Update right vector
+    // Update viewup vector
     mat4.multiplyVec3(mat, m_viewUp);
     vec3.normalize(m_viewUp);
 
