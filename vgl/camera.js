@@ -154,6 +154,7 @@ vglModule.camera = function() {
   this.computeDirectionOfProjection = function() {
     vec3.subtract(m_directionOfProjection, m_focalPoint, m_position);
     vec3.normalize(m_directionOfProjection, m_directionOfProjection);
+    this.modified();
   }
 
   /**
@@ -192,14 +193,10 @@ vglModule.camera = function() {
    * Compute camera coordinate axes
    */
   this.computeOrthogonalAxes = function() {
-    var mat = this.computeViewMatrix();
-    m_viewUp[0] = mat[4];
-    m_viewUp[1] = mat[5];
-    m_viewUp[2] = mat[6];
-
-    m_right[0] = mat[0];
-    m_right[1] = mat[1];
-    m_right[2] = mat[2];
+    this.computeDirectionOfProjection();
+    vec3.cross(m_right, m_directionOfProjection, m_viewUp);
+    vec3.normalize(m_right, m_right);
+    this.modified();
   };
 
   /**
@@ -208,8 +205,10 @@ vglModule.camera = function() {
    * @param dy Rotation around horizontal axis in degrees
    */
   this.rotate = function(dx, dy) {
-    dx = 0.5 * dx * (22.0 / (7.0 * 180.0));
-    dy = 0.5 * dy * (22.0 / (7.0 * 180.0));
+
+    // Convert degrees into radians
+    dx = 0.5 * dx * (Math.PI / 180.0);
+    dy = 0.5 * dy * (Math.PI / 180.0);
 
     var mat = mat4.create();
     mat4.identity(mat, mat);
@@ -219,21 +218,9 @@ vglModule.camera = function() {
     invtrans[1] = -m_centerOrRotation[1];
     invtrans[2] = -m_centerOrRotation[2];
 
-    var right = vec3.create();
-    right[0] = m_viewMatrix[0];
-    right[1] = m_viewMatrix[1];
-    right[2] = m_viewMatrix[2];
-
-    var right2 = vec3.create();
-    vec3.cross(right2, m_directionOfProjection, m_viewUp);
-    vec3.normalize(right2, right2);
-    console.log('right ', right);
-    console.log('right2 ', right2);
-    console.log('m_right ', m_right);
-
     mat4.translate(mat, mat, m_centerOrRotation);
     mat4.rotate(mat, mat, dx, m_viewUp);
-    mat4.rotate(mat, mat, dy, right2);
+    mat4.rotate(mat, mat, dy, m_right);
     mat4.translate(mat, mat, invtrans);
 
     vec3.transformMat4(m_position, m_position, mat);
@@ -248,8 +235,9 @@ vglModule.camera = function() {
     vec3.normalize(m_viewUp, m_viewUp);
 
     // Update direction of projection
-    this.computeDirectionOfProjection();
+    this.computeOrthogonalAxes();
 
+    // Mark modified
     this.modified();
   }
 
