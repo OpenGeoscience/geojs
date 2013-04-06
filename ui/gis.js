@@ -241,7 +241,7 @@ uiModule.gis.toggleLayer = function(elem, layerId) {
 };
 
 /**
- * Update UI to when a select is selected
+ * Update UI to when a layer is selected
  */
 uiModule.gis.selectLayer = function(target, layerId) {
   $('btn-select-layer').siblings().removeClass('active');
