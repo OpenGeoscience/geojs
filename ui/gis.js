@@ -128,10 +128,6 @@ uiModule.gis.createGisDataList = function(rootId, heading, layersRootId, data, c
 
     if (callback != undefined) {
       $(button).on("click", callback);
-      /*$(button).on("click", function() {
-        geoModule.addLayer(layersRootId, this);
-        $(button).attr("disabled", "disabled");
-      });*/
     }
   });
 
@@ -161,12 +157,48 @@ uiModule.gis.addLayer = function(object, layersRootId, elem, selectfunc, togglef
     $(elem).addClass("btn-success");
     $(elem).addClass("disabled");
     var layerId = basename;
-    $(tbody).append("<tr id="+layerId+">");
-    $(rootId + " tr:last").append("<td><h4>" + basename + "<h4></td>")
-    $(rootId + " tr:last").append("<td class='td-btn-layer'><button class='btn-layer btn-select-layer btn btn-primary disabled' disabled='disabled' onclick="+selectfunc+"(this,'"+basename+"')> Select </button>")
-    $(rootId + " td:last").append("<button class='btn-layer btn-toggle-layer btn btn-warning disabled' disabled='disabled' onclick="+togglefunc+"(this,'"+basename+"')> Toggle </button>")
-    $(rootId + " td:last").append("<button class='btn-layer btn-remove-layer btn btn-danger disabled' disabled='disabled' onclick="+removefunc+"(this,'"+basename+"')> Remove </button></td>")
-    layerId = '#'+layerId;
+
+    var tr = $(document.createElement('tr'));
+    tr.attr('id', layerId);
+    $(tbody).append(tr);
+
+    // Name of the layer
+    var td = $(document.createElement('td'));
+    td.append($(document.createElement('h4')).html(basename));
+    tr.append(td);
+
+    // Select button
+    td = $(document.createElement('td'));
+    td.attr('class', 'td-btn-layer');
+    var button = $(document.createElement('button'));
+    button.attr('class', 'btn-layer btn-select-layer btn btn-primary disabled');
+    button.attr('disabled', 'disabled');
+    button.html('Select');
+    button.click(layerId, function() {
+      selectfunc(this, layerId);
+    });
+    td.append(button);
+
+    // Toggle button
+    button = $(document.createElement('button'));
+    button.attr('class', 'btn-layer btn-toggle-layer btn btn-warning disabled');
+    button.attr('disabled', 'disabled');
+    button.html('Toggle');
+    button.click(layerId, function() {
+      togglefunc(this, layerId);
+    });
+    td.append(button);
+
+    // Remove button
+    button = $(document.createElement('button'));
+    button.attr('class', 'btn-layer btn-remove-layer btn btn-danger disabled');
+    button.attr('disabled', 'disabled');
+    button.html('Remove');
+    button.click(layerId, function() {
+      removefunc(this, layerId);
+    });
+    td.append(button);
+    tr.append(td);
 
     $('.btn-layer').width(Math.max.apply(Math,
                                             $('.btn-layer').map(function(){
@@ -174,8 +206,8 @@ uiModule.gis.addLayer = function(object, layersRootId, elem, selectfunc, togglef
     }
     // @todo Just calling fadeIn does not work. It has to be set invisible
     // and then only it works. We need to check if this is expected.
-    $(layerId).fadeOut(0);
-    $(layerId).fadeIn('slow', callback);
+    $('#'+layerId).fadeOut(0);
+    $('#'+layerId).fadeIn('slow', callback);
 };
 
 /**
