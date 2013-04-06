@@ -245,6 +245,10 @@ uiModule.gis.toggleLayer = function(elem, layerId) {
  */
 uiModule.gis.selectLayer = function(target, layerId) {
   $('btn-select-layer').siblings().removeClass('active');
-  $(target).addClass('active');
+
+  if (target !== null || target !== undefined) {
+    $(target).addClass('active');
+  }
+
   return true;
 };
