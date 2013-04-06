@@ -145,7 +145,9 @@ uiModule.gis.createGisDataList = function(rootId, heading, layersRootId, data, c
  * @param layersRootId
  * @param elem
  */
-uiModule.gis.addLayer = function(object, layersRootId, elem, togglefunc, removefunc, callback) {
+uiModule.gis.addLayer = function(object, layersRootId, elem, selectfunc, togglefunc,
+  removefunc, callback) {
+
   var rootId = "#" + layersRootId;
   var _id = $(elem).attr("_id");
   if (_id !== null) {
@@ -157,8 +159,9 @@ uiModule.gis.addLayer = function(object, layersRootId, elem, togglefunc, removef
     var layerId = basename;
     $(tbody).append("<tr id="+layerId+">");
     $(rootId + " tr:last").append("<td><h4>" + basename + "<h4></td>")
-    $(rootId + " tr:last").append("<td class='td-btn-layer'><button class='btn-layer btn btn-warning disabled' disabled='disabled' onclick="+togglefunc+"('"+basename+"')> Toggle </button>")
-    $(rootId + " td:last").append("<button class='btn-layer btn btn-danger disabled' disabled='disabled' onclick="+removefunc+"('"+basename+"')> Remove </button></td>")
+    $(rootId + " tr:last").append("<td class='td-btn-layer'><button class='btn-layer btn-select-layer btn btn-primary disabled' disabled='disabled' onclick="+selectfunc+"(this,'"+basename+"')> Select </button>")
+    $(rootId + " td:last").append("<button class='btn-layer btn-toggle-layer btn btn-warning disabled' disabled='disabled' onclick="+togglefunc+"(this,'"+basename+"')> Toggle </button>")
+    $(rootId + " td:last").append("<button class='btn-layer btn-remove-layer btn btn-danger disabled' disabled='disabled' onclick="+removefunc+"(this,'"+basename+"')> Remove </button></td>")
     layerId = '#'+layerId;
 
     $('.btn-layer').width(Math.max.apply(Math,
@@ -177,7 +180,7 @@ uiModule.gis.addLayer = function(object, layersRootId, elem, togglefunc, removef
  * @param elem
  * @returns {Boolean}
  */
-uiModule.gis.removeLayer = function(layerId) {
+uiModule.gis.removeLayer = function(elem, layerId) {
   var buttonId = $('#btn-add-'+layerId);
   var button = $(buttonId);
 
@@ -197,6 +200,15 @@ uiModule.gis.removeLayer = function(layerId) {
   return false;
 };
 
-uiModule.gis.toggleLayer = function(layerId) {
+uiModule.gis.toggleLayer = function(elem, layerId) {
+  // Do nothing
+};
 
-}
+/**
+ * Update UI to when a select is selected
+ */
+uiModule.gis.selectLayer = function(target, layerId) {
+  $('btn-select-layer').siblings().removeClass('active');
+  $(target).addClass('active');
+  return true;
+};

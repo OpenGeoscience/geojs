@@ -44,6 +44,9 @@ geoModule.map = function(node, options) {
   /** @private **/
   var m_layers = {};
 
+  /** @private **/
+  var m_activeLayer = null;
+
   if (!options.center) {
     m_options.center = geoModule.latlng(0.0, 0.0);
   }
@@ -201,6 +204,33 @@ geoModule.map = function(node, options) {
 
     return false;
   }
+
+  /**
+   * Return current or active layer
+   *
+   * @returns {geo.layer}
+   */
+  this.activeLayer = function() {
+    return m_activeLayer;
+  }
+
+  /**
+   * Make a layer current or active for operations
+   *
+   * @method selectLayer
+   * @param {geo.layer}
+   * @returns {Boolean}
+   *
+   */
+  this.selectLayer = function(layer) {
+    if (layer !== undefined && m_activeLayer != layer) {
+      m_activeLayer = layer;
+      this.modified();
+      return true;
+    }
+
+    return false;
+  };
 
   /**
    * Find layer by layer id

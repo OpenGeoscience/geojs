@@ -24,3 +24,8 @@ inherit(geoModule.command, ogs.vgl.command);
  * Event types
  */
 geoModule.command.updateEvent = "updateEvent";
+geoModule.command.addLayerEvent = "addLayerEvent";
+geoModule.command.removeLayerEvent = "removeLayerEvent";
+geoModule.command.toggleLayerEvent = "toggleLayerEvent";
+geoModule.command.selectLayerEvent = "selectLayerEvent";
+geoModule.command.unselectLayerEvent = "unselectLayerEvent";
