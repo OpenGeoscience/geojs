@@ -1,16 +1,12 @@
 /**
  * Map options object specification
  */
-geoModule.mapOptions = function() {
-  if (!(this instanceof geoModule.mapOptions)) {
-    return new geoModule.mapOptions();
-  }
-
-  /** @private */
-  this.zoom = 10;
-
-  /** @private */
-  this.center = geoModule.latlng(0.0, 0.0);
+geoModule.mapOptions = {
+  zoom: 0,
+  center: [0.0, 0.0],
+  country_boundries: true,
+  us_states: false,
+  source: ""
 };
 
 /**
@@ -55,6 +51,11 @@ geoModule.map = function(node, options) {
     m_options.zoom = 10;
   }
 
+  if (!options.source) {
+    console.log("[error] Map requires valid source for the context");
+    return null;
+  }
+
   var m_interactorStyle = geoModule.mapInteractorStyle();
 
   var m_viewer = ogs.vgl.viewer(m_node);
@@ -78,9 +79,10 @@ geoModule.map = function(node, options) {
     var distance = 600;
     distance = 600 - (600 - (60 * m_options.zoom)) + 1;
 
-    camera
-        .setPosition(m_options.center.lng(), m_options.center.lat(), distance);
-    camera.setFocalPoint(m_options.center.lng(), m_options.center.lat(), 0.0);
+    camera.setPosition(m_options.center.lng(),
+      m_options.center.lat(), distance);
+    camera.setFocalPoint(m_options.center.lng(),
+      m_options.center.lat(), 0.0);
 
     m_initialized = true;
   }
@@ -127,10 +129,10 @@ geoModule.map = function(node, options) {
   m_baseLayer = (function() {
     var mapActor = ogs.vgl.utils.createTexturePlane(-180.0, -90.0, 0.0, 180.0,
                                                     -90.0, 0.0, -180.0, 90.0,
-                                                    0.0);
+                                                     0.0);
     // Setup texture
     var worldImage = new Image();
-    worldImage.src = "/data/assets/land_shallow_topo_2048.png";
+    worldImage.src = m_options.source;
     worldImage.onload = function() {
       var worldTexture = new vglModule.texture();
       worldTexture.updateDimensions();
@@ -259,6 +261,36 @@ geoModule.map = function(node, options) {
   this.resize = function(width, height) {
     m_viewer.renderWindow().resize(width, height);
   };
+
+  /**
+   * Toggle country boundries
+   *
+   * @returns {Boolean}
+   */
+  this.toggleCountryBoundries = function() {
+    var layer = this.findLayerById('country_boundries');
+    if (layer !== null) {
+      layer.setVisible(!layer.visible());
+      return true;
+    }
+    else {
+      // Load countries data first
+    }
+  };
+
+  /**
+   * Toggle us state boudries
+   *
+   * @returns {Boolean}
+   */
+  this.toggleUsStateBoundries = function() {
+    // @todo Imeplement this
+  };
+
+  // Check if need to show country boundries
+  if (m_options.country_boundries === true) {
+    this.toggleCountryBoundries();
+  }
 
   return this;
 };
