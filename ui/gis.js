@@ -56,71 +56,75 @@ uiModule.gis.createGisLayerList = function(rootId, heading) {
  * @param data
  */
 uiModule.gis.createGisDataList = function(rootId, heading, layersRootId, data, callback) {
-  var listRoot = document.getElementById(rootId);
-  var itemRoot = document.createElement("div");
-  itemRoot.setAttribute("class", "accordion-group");
-  listRoot.appendChild(itemRoot);
+  var listRoot = $(document.getElementById(rootId));
 
-  var itemHeading = document.createElement("div");
-  itemHeading.setAttribute("class", "accordion-heading");
-  itemRoot.appendChild(itemHeading);
+  var itemRoot = $(document.createElement('div'));
+  itemRoot.attr('class', 'accordion-group');
+  listRoot.append(itemRoot);
 
-  var itemCollection = document.createElement("a");
-  itemCollection.setAttribute("class", "accordion-toggle");
-  itemCollection.setAttribute("data-toggle", "collapse");
-  itemCollection.setAttribute("data-parent", "#"+rootId);
-  itemCollection.setAttribute("href", "#collapse-"+rootId);
-  itemCollection.appendChild(document.createTextNode(heading));
-  itemHeading.appendChild(itemCollection);
+  var itemHeading = $(document.createElement('div'));
+  itemHeading.attr('class', 'accordion-heading');
+  itemRoot.append(itemHeading);
 
-  var subItemsRoot = document.createElement("div");
-  subItemsRoot.setAttribute("class", "accordion-body collapse in");
-  subItemsRoot.setAttribute("id", "collapse-"+rootId);
-  itemRoot.appendChild(subItemsRoot);
-  var subItemsList = document.createElement("div");
-  subItemsList.setAttribute("class", "accordion-inner");
-  subItemsRoot.appendChild(subItemsList);
-  var tableRoot = document.createElement("table");
-  tableRoot.setAttribute('class', 'table-striped table-hover');
-  subItemsList.appendChild(tableRoot);
+  var itemCollection = $(document.createElement('a'));
+  itemCollection.attr('class', 'accordion-toggle');
+  itemCollection.attr('data-toggle', 'collapse');
+  itemCollection.attr('data-parent', '#'+rootId);
+  itemCollection.attr('href', '#collapse-'+rootId);
+  itemCollection.append(document.createTextNode(heading));
+  itemHeading.append(itemCollection);
+
+  var subItemsRoot = $(document.createElement('div'));
+  subItemsRoot.attr('class', 'accordion-body collapse in');
+  subItemsRoot.attr('id', 'collapse-'+rootId);
+  itemRoot.append(subItemsRoot);
+
+  var subItemsList = $(document.createElement('div'));
+  subItemsList.attr('class', 'accordion-inner');
+  subItemsRoot.append(subItemsList);
+
+  var tableRoot = $(document.createElement('table'));
+  tableRoot.attr('class', 'table-hover');
+  subItemsList.append(tableRoot);
 
   $.each(data, function(i, item) {
-    var row = document.createElement("tr");
-    row.setAttribute("class", "success");
-    tableRoot.appendChild(row);
-    var col = document.createElement("td");
-    var he = document.createElement("h4");
-    he.innerHTML = item.basename;
-    col.appendChild(he);
-    row.appendChild(col);
+    var row = $(document.createElement('tr'));
+    row.attr('class', 'success');
+    tableRoot.append(row);
+
+    var col = $(document.createElement('td'));
+    var he = $(document.createElement('h4'));
+    he.html(item.basename);
+    col.append(he);
+    row.append(col);
 
     // Add drop-down so that users can select a variable
-    col = document.createElement("td");
-    var select = document.createElement('select');
-    select.setAttribute('class', 'combobox');
-    col.appendChild(select);
+    col = $(document.createElement('td'));
+    var select = $(document.createElement('select'));
+    select.attr('class', 'combobox');
+    col.append(select);
     for (var k = 0; k < item.variables.length; ++k) {
       var varname = item.variables[k].name;
-      var option= document.createElement('option');
-      option.setAttribute('value', varname);
-      option.innerHTML = varname;
-      select.appendChild(option);
+      var option = $(document.createElement('option'));
+      option.attr('value', varname);
+      option.html(varname);
+      select.append(option);
     }
-    row.appendChild(col);
+    row.append(col);
 
     // Add 'add' button
-    col = document.createElement("td");
-    var button = document.createElement("button");
-    button.setAttribute("type", "button");
-    button.setAttribute("class", "btn btn-primary");
-    button.setAttribute("id", "btn-add-" + item.name);
-    button.setAttribute("_id", item._id);
-    button.setAttribute("name", item.name);
-    button.setAttribute("basename", item.basename);
-    button.setAttribute("data-toggle", "button");
-    button.appendChild(document.createTextNode("Add"));
-    col.appendChild(button);
-    row.appendChild(col);
+    col = $(document.createElement('td'));
+    var button = $(document.createElement('button'));
+    button.attr('type', 'button');
+    button.attr('class', 'btn btn-primary');
+    button.attr('id', 'btn-add-' + item.name);
+    button.attr('_id', item._id);
+    button.attr('name', item.name);
+    button.attr('basename', item.basename);
+    button.attr('data-toggle', 'button');
+    button.append($(document.createTextNode('Add')));
+    col.append(button);
+    row.append(col);
 
     if (callback != undefined) {
       $(button).on("click", callback);
