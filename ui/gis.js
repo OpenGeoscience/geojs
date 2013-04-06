@@ -13,7 +13,7 @@ uiModule.gis = function() {
  * @param rootId
  * @param heading
  */
-uiModule.gis.createGisLayerList = function(rootId, heading) {
+uiModule.gis.createList = function(rootId, heading) {
   var listRoot = document.getElementById(rootId);
   var itemRoot = document.createElement("div");
   itemRoot.setAttribute("class", "accordion-group");
@@ -55,7 +55,7 @@ uiModule.gis.createGisLayerList = function(rootId, heading) {
  * @param layersRootId
  * @param data
  */
-uiModule.gis.createGisDataList = function(rootId, heading, layersRootId, data, callback) {
+uiModule.gis.createDataList = function(rootId, heading, layersRootId, data, callback) {
   var listRoot = $(document.getElementById(rootId));
 
   var itemRoot = $(document.createElement('div'));
@@ -185,7 +185,7 @@ uiModule.gis.addLayer = function(object, layersRootId, elem, selectfunc, togglef
     button.attr('disabled', 'disabled');
     button.html('Toggle');
     button.click(layerId, function() {
-      togglefunc(this, layerId);
+      togglefunc(this, layedId);
     });
     td.append(button);
 
@@ -195,7 +195,7 @@ uiModule.gis.addLayer = function(object, layersRootId, elem, selectfunc, togglef
     button.attr('disabled', 'disabled');
     button.html('Remove');
     button.click(layerId, function() {
-      removefunc(this, layerId);
+      removefunc(this, layedId);
     });
     td.append(button);
     tr.append(td);
