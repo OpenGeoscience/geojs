@@ -40,7 +40,7 @@ uiModule.gis.createList = function(rootId, heading) {
   subItemsRoot.appendChild(subItemsList);
 
   var tableRoot = document.createElement("table");
-  tableRoot.setAttribute("id", rootId + '-table');
+  tableRoot.setAttribute("id", 'table-' + rootId);
   subItemsList.appendChild(tableRoot);
 
   var tbody = document.createElement("tbody");
