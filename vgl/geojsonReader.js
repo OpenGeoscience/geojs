@@ -60,7 +60,7 @@ vglModule.geojsonReader = function() {
     geom.addPrimitive(vglpoints);
     geom.setName("aPoint");
     return geom;
-  }
+  };
 
   /**
    *
@@ -104,7 +104,7 @@ vglModule.geojsonReader = function() {
     geom.addSource(vglcoords);
     geom.setName("manyPoints");
     return geom;
-  }
+  };
 
   /**
    *
@@ -114,9 +114,10 @@ vglModule.geojsonReader = function() {
     var vglline = new vglModule.lines();
     vglline.setIndexCount(coordinates.length);
     var vglcoords = new vglModule.sourceDataP3fv();
-    var colorarray;
+    var colorarray = new vglModule.sourceDataC3fv();
     var indices = [];
 
+    // @todo We need color array or somehow the code fails
     for (var i = 0; i < coordinates.length; i++) {
       indices.push(i);
       var x = coordinates[i][0];
@@ -135,21 +136,20 @@ vglModule.geojsonReader = function() {
         var r = coordinates[i][3];
         var g = coordinates[i][4];
         var b = coordinates[i][5];
-        if (i == 0) {
-          colorarray = new vglModule.sourceDataC3fv();
-          geom.addSource(colorarray);
-        }
         colorarray.pushBack([r,g,b]);
+      }
+      else {
+        colorarray.pushBack([1.0, 0.5, 0.0]);
       }
     }
 
     vglline.setIndices(indices);
-
     geom.setName("aLineString");
     geom.addPrimitive(vglline);
     geom.addSource(vglcoords);
+    geom.addSource(colorarray);
     return geom;
-  }
+  };
 
   /**
    *
@@ -199,7 +199,7 @@ vglModule.geojsonReader = function() {
     geom.setName("aMultiLineString");
     geom.addSource(vglcoords);
     return geom;
-  }
+  };
 
   /**
    *
@@ -251,7 +251,7 @@ vglModule.geojsonReader = function() {
     geom.setName("POLY");
     geom.addSource(vglcoords);
     return geom;
-  }
+  };
 
   /**
    *
@@ -309,7 +309,7 @@ vglModule.geojsonReader = function() {
     geom.setName("aMultiPoly");
     geom.addSource(vglcoords);
     return geom;
-  }
+  };
 
   /**
    *
@@ -372,7 +372,7 @@ vglModule.geojsonReader = function() {
         console.log("Don't understand type " + type);
       break;
     }
-  }
+  };
 
   /**
    *
@@ -386,7 +386,7 @@ vglModule.geojsonReader = function() {
     else {
      geoms.push(geom);
    }
- }
+ };
 
   /**
    *
@@ -400,7 +400,7 @@ vglModule.geojsonReader = function() {
     var geoms = [];
     this.linearizeGeoms(geoms, geom);
     return geoms;
-  }
+  };
 
   return this;
-}
+};

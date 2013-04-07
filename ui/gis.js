@@ -185,7 +185,7 @@ uiModule.gis.addLayer = function(object, layersRootId, elem, selectfunc, togglef
     button.attr('disabled', 'disabled');
     button.html('Toggle');
     button.click(layerId, function() {
-      togglefunc(this, layedId);
+      togglefunc(this, layerId);
     });
     td.append(button);
 
@@ -195,7 +195,7 @@ uiModule.gis.addLayer = function(object, layersRootId, elem, selectfunc, togglef
     button.attr('disabled', 'disabled');
     button.html('Remove');
     button.click(layerId, function() {
-      removefunc(this, layedId);
+      removefunc(this, layerId);
     });
     td.append(button);
     tr.append(td);

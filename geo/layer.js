@@ -52,10 +52,10 @@ geoModule.layer = function(options, feature) {
   // TODO Write a function for this
   if (m_opacity > 1.0) {
     m_opacity = 1.0;
-    console.log("[WARNING] Opacity cannot be greater than 1.0");
+    console.log("[warning] Opacity cannot be greater than 1.0");
   }
   else if (m_opacity < 0.0) {
-    console.log("[WARNING] Opacity cannot be less than 1.0");
+    console.log("[warning] Opacity cannot be less than 1.0");
   }
 
   /** @private */
@@ -124,9 +124,10 @@ geoModule.layer = function(options, feature) {
    */
   this.setOpacity = function(val) {
 
-    if (m_opacity === val) {
-      return false;
-    }
+    // @todo For now set the opacity every time
+    // if (m_opacity === val) {
+    //   return false;
+    // }
 
     m_opacity = val;
     $(m_that).trigger({
@@ -204,7 +205,6 @@ geoModule.featureLayer = function(options, feature) {
   this.updateLayerOpacity = function(event) {
     var mat = this.feature().material();
     var opacityUniform = mat.shaderProgram().uniform('opacity');
-
     if (opacityUniform != null) {
       opacityUniform.set(event.opacity);
       $(m_that).trigger(this.events.update);
@@ -212,6 +212,8 @@ geoModule.featureLayer = function(options, feature) {
   };
 
   $(m_that).on(this.events.opacitychange, m_that.updateLayerOpacity);
+
+  this.setOpacity(this.opacity());
 
   return this;
 };

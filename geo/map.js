@@ -275,6 +275,17 @@ geoModule.map = function(node, options) {
     }
     else {
       // Load countries data first
+      var reader = ogs.vgl.geojsonReader();
+      var geoms = reader.readGJObject(ogs.geo.countries);
+      for (var i = 0; i < geoms.length; ++i) {
+        var layer = ogs.geo.featureLayer({
+          "opacity" : 1,
+          "showAttribution" : 1,
+          "visible" : 1
+        }, ogs.geo.geometryFeature(geoms[i]));
+        layer.setName('countries ' + i);
+        this.addLayer(layer);
+      }
     }
   };
 
