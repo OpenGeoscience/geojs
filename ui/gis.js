@@ -122,7 +122,8 @@ uiModule.gis.createDataList = function(rootId, heading, layersRootId, data, call
     button.attr('name', item.name);
     button.attr('basename', item.basename);
     button.attr('data-toggle', 'button');
-    button.append($(document.createTextNode('Add')));
+    button.attr('data-loading-text', 'Loading...');
+    button.html('Add');
     col.append(button);
     row.append(col);
 
@@ -153,9 +154,8 @@ uiModule.gis.addLayer = function(object, layersRootId, elem, selectfunc, togglef
   if (_id !== null) {
     var tbody = $(rootId).find('tbody');
     var basename = $(elem).attr("name");
-    $(elem).removeClass("btn-primary");
-    $(elem).addClass("btn-success");
-    $(elem).addClass("disabled");
+    $(elem).button('loading');
+
     var layerId = basename;
 
     var tr = $(document.createElement('tr'));
@@ -211,6 +211,18 @@ uiModule.gis.addLayer = function(object, layersRootId, elem, selectfunc, togglef
 };
 
 /**
+ *
+ */
+uiModule.gis.layerAdded = function(elem) {
+  $(elem).removeClass("btn-primary");
+  $(elem).addClass("btn-success");
+  $(elem).addClass("disabled");
+  $(elem).attr('data-loading-text', 'Added');
+  $(elem).attr('disabled', 'disabled');
+  $(elem).html('Added');
+}
+
+/**
  * Remove a layer from the list
  *
  * @param elem
@@ -222,8 +234,10 @@ uiModule.gis.removeLayer = function(elem, layerId) {
 
   if (button !== null || button !== undefined) {
     button.removeClass('disabled');
+    button.removeAttr('disabled');
     button.removeClass('btn-success');
     button.removeClass('active');
+    button.button('reset');
     button.addClass('btn-primary');
 
     $('#' + layerId).fadeOut(function() {
