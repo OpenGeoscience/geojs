@@ -149,6 +149,25 @@ geoModule.mapInteractorStyle = function() {
     return false;
   };
 
+  this.zoom = function(options, useCurrent) {
+    var renderer = m_that.viewer().renderWindow().activeRenderer();
+    var camera = renderer.camera();
+
+    var distance = 600;
+    distance = 600 - (600 - (60 * options.zoom)) + 1;
+
+    if (useCurrent === undefined || useCurrent === false)  {
+      camera.setPosition(options.center.lng(),
+        options.center.lat(), distance);
+      camera.setFocalPoint(options.center.lng(),
+        options.center.lat(), 0.0);
+    } else {
+      var currPosition = camera.position();
+      camera.setPosition(currPosition[0], currPosition[1], distance);
+      camera.setFocalPoint(currPosition[0], currPosition[1], 0.0);
+    }
+  }
+
   return this;
 };
 

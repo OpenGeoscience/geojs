@@ -81,16 +81,8 @@ geoModule.map = function(node, options) {
   /**
    * Update view extents based on the zoom
    */
-  function updateZoom() {
-    console.log('zoom is now ', m_options.zoom);
-    var camera = m_renderer.camera();
-    var distance = 600;
-    distance = 600 - (600 - (60 * m_options.zoom)) + 1;
-
-    camera.setPosition(m_options.center.lng(),
-      m_options.center.lat(), distance);
-    camera.setFocalPoint(m_options.center.lng(),
-      m_options.center.lat(), 0.0);
+  function updateZoom(useCurrent) {
+    m_interactorStyle.zoom(m_options, useCurrent);
   }
 
   /**
@@ -182,7 +174,7 @@ geoModule.map = function(node, options) {
   this.setZoom = function(val) {
     if (val !== m_options.zoom) {
       m_options.zoom = val;
-      updateZoom();
+      updateZoom(true);
       this.modified();
       return true;
     }
