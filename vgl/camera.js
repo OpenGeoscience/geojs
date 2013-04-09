@@ -246,6 +246,7 @@ vglModule.camera = function() {
    */
   this.computeViewMatrix = function() {
     if (m_computeModelViewMatrixTime.getMTime() < this.getMTime()) {
+      console.log('recomputing modelview');
       mat4.lookAt(m_viewMatrix, m_position, m_focalPoint, m_viewUp);
       m_computeModelViewMatrixTime.modified();
     }

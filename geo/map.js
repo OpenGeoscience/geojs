@@ -6,7 +6,7 @@ geoModule.mapOptions = {
   center: [0.0, 0.0],
   country_boundries: true,
   us_states: false,
-  source: ""
+  sourcebigb: ""
 };
 
 /**
@@ -74,8 +74,16 @@ geoModule.map = function(node, options) {
    * Initialize the scene
    */
   function initScene() {
-    var camera = m_renderer.camera();
+    updateZoom();
+    m_initialized = true;
+  }
 
+  /**
+   * Update view extents based on the zoom
+   */
+  function updateZoom() {
+    console.log('zoom is now ', m_options.zoom);
+    var camera = m_renderer.camera();
     var distance = 600;
     distance = 600 - (600 - (60 * m_options.zoom)) + 1;
 
@@ -83,8 +91,6 @@ geoModule.map = function(node, options) {
       m_options.center.lat(), distance);
     camera.setFocalPoint(m_options.center.lng(),
       m_options.center.lat(), 0.0);
-
-    m_initialized = true;
   }
 
   /**
@@ -150,6 +156,39 @@ geoModule.map = function(node, options) {
 
     return mapActor;
   })();
+
+  /**
+   * Get map options
+   */
+   this.options = function() {
+    return m_options;
+   };
+
+
+  /**
+   * Get the zoom level of the map
+   *
+   * @returns {Number}
+   */
+   this.zoom = function() {
+     return m_options.zoom;
+   }
+
+   /**
+    * Set zoom level of the map
+    *
+    * @param val {0-17}
+    */
+  this.setZoom = function(val) {
+    if (val !== m_options.zoom) {
+      m_options.zoom = val;
+      updateZoom();
+      this.modified();
+      return true;
+    }
+
+    return false;
+  }
 
   /**
    * Add layer to the map

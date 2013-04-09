@@ -266,3 +266,62 @@ uiModule.gis.selectLayer = function(target, layerId) {
 
   return true;
 };
+
+
+uiModule.gis.generateOptions = function(rootId, map) {
+  var options = map.options();
+
+  var parent = $('#'+rootId);
+
+  for (var key in options) {
+    if (options.hasOwnProperty(key)) {
+      switch(key) {
+        case "zoom":
+          // Create a slider here
+          var row = $(document.createElement('tr'));
+          row.attr('class', 'row-fluid');
+          parent.append(row);
+          var col = $(document.createElement('td'));
+          row.append(col);
+          var heading = $(document.createElement('h4'));
+          heading.html(key);
+          col.append(heading);
+          col = $(document.createElement('td'));
+          col.attr('class', 'span2');
+          console.log(options['zoom']);
+          var sliderDiv = $(document.createElement('div'));
+          sliderDiv.slider({
+            range: "min",
+            min: 0.0,
+            max: 17.0,
+            step: 1,
+            value: options[key],
+            slide: function( event, ui ) {
+              map.setZoom( ui.value );
+              map.redraw();
+            }
+          });
+          $(sliderDiv).on('mousedown', function(e) {
+            e.stopPropagation();
+            return false;
+          });
+          col.attr('class', 'span10');
+          $(col).append(sliderDiv);
+          row.append(col);
+          break;
+        case "center":
+          // Text box
+          break;
+        case "country_boundries":
+          // Boolean
+          break;
+        case "us_states":
+          // Boolean
+          break;
+        case "source":
+          // Dropdown
+          break;
+      }
+    }
+  }
+};
