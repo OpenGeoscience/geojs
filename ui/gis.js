@@ -319,6 +319,7 @@ uiModule.gis.generateOptions = function(rootId, map) {
 
           var input = $(document.createElement('input'));
           input.attr('type', 'checkbox');
+          input.attr('checked', map.isCountryBoundriesVisible());
           input.click(function() {
             map.toggleCountryBoundries();
             map.redraw();
