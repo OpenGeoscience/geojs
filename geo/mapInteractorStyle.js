@@ -22,13 +22,18 @@ geoModule.mapInteractorStyle = function() {
 
 
   this.handleMouseMove = function(event) {
+    var canvas = m_that.viewer().canvas();
+    if (event.target !== canvas) {
+      return true;
+    }
+
     var width = m_that.viewer().renderWindow().windowSize()[0];
     var height = m_that.viewer().renderWindow().windowSize()[1];
     var renderer = m_that.viewer().renderWindow().activeRenderer();
     var camera = renderer.camera();
 
     var outsideCanvas = false;
-    var coords = m_that.viewer().canvas().relMouseCoords(event);
+    var coords = canvas.relMouseCoords(event);
 
     var currentMousePos = {
       x : 0,
@@ -101,11 +106,15 @@ geoModule.mapInteractorStyle = function() {
 
 
   this.handleMouseDown = function(event) {
+    var canvas = m_that.viewer().canvas();
+
+    if (event.target !== canvas) {
+      return true;
+    }
+
     if (event.state !== "down") {
       return;
     }
-
-    var canvas = m_that.viewer().canvas();
 
     if (event.button === 0) {
       m_leftMouseButtonDown = true;
@@ -136,9 +145,16 @@ geoModule.mapInteractorStyle = function() {
   };
 
 
+  // @note We never get mouse up from scroll bar: See the bug report here
+  // http://bugs.jquery.com/ticket/8184
   this.handleMouseUp = function(event) {
+    var canvas = m_that.viewer().canvas();
+    if (event.target !== canvas) {
+      return true;
+    }
+
     if (event.state !== "up") {
-      return;
+      return true;
     }
 
     if (event.button === 0) {
