@@ -275,20 +275,20 @@ uiModule.gis.generateOptions = function(rootId, map) {
 
   for (var key in options) {
     if (options.hasOwnProperty(key)) {
+
+      var row = $(document.createElement('tr'));
+      parent.append(row);
+      var col = $(document.createElement('td'));
+      row.append(col);
+
+      var heading = $(document.createElement('h4'));
+      heading.html(key);
+      col.append(heading);
+
       switch(key) {
         case "zoom":
           // Create a slider here
-          var row = $(document.createElement('tr'));
-          row.attr('class', 'row-fluid');
-          parent.append(row);
-          var col = $(document.createElement('td'));
-          row.append(col);
-          var heading = $(document.createElement('h4'));
-          heading.html(key);
-          col.append(heading);
           col = $(document.createElement('td'));
-          col.attr('class', 'span2');
-          console.log(options['zoom']);
           var sliderDiv = $(document.createElement('div'));
           sliderDiv.slider({
             range: "min",
@@ -314,6 +314,17 @@ uiModule.gis.generateOptions = function(rootId, map) {
           break;
         case "country_boundries":
           // Boolean
+          col = $(document.createElement('td'));
+          row.append(col);
+
+          var input = $(document.createElement('input'));
+          input.attr('type', 'checkbox');
+          input.click(function() {
+            map.toggleCountryBoundries();
+            map.redraw();
+          });
+          col.append(input);
+
           break;
         case "us_states":
           // Boolean
