@@ -150,9 +150,9 @@ geoModule.map = function(node, options) {
   /**
    * Get map options
    */
-   this.options = function() {
+  this.options = function() {
     return m_options;
-   };
+  };
 
 
   /**
@@ -160,20 +160,21 @@ geoModule.map = function(node, options) {
    *
    * @returns {Number}
    */
-   this.zoom = function() {
-     return m_options.zoom;
-   }
+  this.zoom = function() {
+    return m_options.zoom;
+  }
 
-   /**
-    * Set zoom level of the map
-    *
-    * @param val {0-17}
-    */
+  /**
+   * Set zoom level of the map
+   *
+   * @param val {0-17}
+   */
   this.setZoom = function(val) {
     if (val !== m_options.zoom) {
       m_options.zoom = val;
       updateZoom(true);
       this.modified();
+      $(this).trigger(geoModule.command.updateEvent);
       return true;
     }
 
@@ -196,6 +197,8 @@ geoModule.map = function(node, options) {
       m_layers[layer.name()] = layer;
       m_viewer.render();
       this.modified();
+
+      $(this).trigger({type: geoModule.command.addLayerEvent, layer: layer});
       return true;
     }
 
@@ -213,6 +216,7 @@ geoModule.map = function(node, options) {
     if (layer !== null || layer !== undefined) {
       m_renderer.removeActor(layer.feature());
       this.modified();
+      $(this).trigger({type: geoModule.command.removeLayerEvent, layer: layer});
       return true;
     }
 
@@ -230,6 +234,7 @@ geoModule.map = function(node, options) {
     if (layer !== null || layer !== undefined) {
       layer.setVisible(!layer.visible());
       this.modified();
+      $(this).trigger({type: geoModule.command.toggleLayerEvent, layer: layer});
       return true;
     }
 
@@ -255,8 +260,14 @@ geoModule.map = function(node, options) {
    */
   this.selectLayer = function(layer) {
     if (layer !== undefined && m_activeLayer != layer) {
+      var tempLayer = layer;
       m_activeLayer = layer;
       this.modified();
+      if (layer !== null) {
+        $(this).trigger({type: geoModule.command.selectLayerEvent, layer: layer});
+      } else {
+        $(this).trigger({type: geoModule.command.unselectLayerEvent, layer: tempLayer});
+      }
       return true;
     }
 
@@ -289,6 +300,8 @@ geoModule.map = function(node, options) {
    */
   this.resize = function(width, height) {
     m_viewer.renderWindow().resize(width, height);
+    $(this).trigger({type: geoModule.command.resizeEvent, width: width,
+      height: height});
   };
 
   /**

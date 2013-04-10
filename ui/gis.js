@@ -392,6 +392,15 @@ uiModule.gis.createControls = function(table, map) {
     value: 0.5,
   });
 
+  $(map).on(ogs.geo.command.selectLayerEvent, function(event) {
+    opacityDiv.slider({disabled: false});
+  });
+
+  $(map).on(ogs.geo.command.unselectLayerEvent, function(event) {
+    console.log(event);
+    opacityDiv.slider({disabled: true});
+  });
+
   // Listen for slider slidechange event
   opacityDiv.slider().bind('slide', function(event, ui) {
     if (map.activeLayer() !== null) {
@@ -404,4 +413,6 @@ uiModule.gis.createControls = function(table, map) {
     e.stopPropagation();
     return false;
   });
+
+  opacityDiv.slider({disabled: true});
 };

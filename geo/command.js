@@ -29,3 +29,5 @@ geoModule.command.removeLayerEvent = "removeLayerEvent";
 geoModule.command.toggleLayerEvent = "toggleLayerEvent";
 geoModule.command.selectLayerEvent = "selectLayerEvent";
 geoModule.command.unselectLayerEvent = "unselectLayerEvent";
+geoModule.command.updateZoomEvent = "updateZoomEvent";
+geoModule.command.resizeEvent = "resizeEvent";
