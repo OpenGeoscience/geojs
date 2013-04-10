@@ -274,6 +274,10 @@ uiModule.gis.generateOptions = function(rootId, map) {
   var parent = $('#'+rootId);
 
   for (var key in options) {
+    if (key === "source" || key === "center") {
+      continue;
+    }
+
     if (options.hasOwnProperty(key)) {
 
       var row = $(document.createElement('tr'));
