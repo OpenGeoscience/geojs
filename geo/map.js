@@ -299,7 +299,7 @@ geoModule.map = function(node, options) {
    * @returns {Boolean}
    */
   this.toggleCountryBoundries = function() {
-    var layer = this.findLayerById('country_boundries');
+    var layer = this.findLayerById('country-boundries');
     if (layer !== null) {
       layer.setVisible(!layer.visible());
       return true;
@@ -308,15 +308,14 @@ geoModule.map = function(node, options) {
       // Load countries data first
       var reader = ogs.vgl.geojsonReader();
       var geoms = reader.readGJObject(ogs.geo.countries);
-      for (var i = 0; i < geoms.length; ++i) {
-        var layer = ogs.geo.featureLayer({
-          "opacity" : 1,
-          "showAttribution" : 1,
-          "visible" : 1
-        }, ogs.geo.geometryFeature(geoms[i]));
-        layer.setName('countries ' + i);
-        this.addLayer(layer);
-      }
+      var layer = ogs.geo.featureLayer({
+        "opacity" : 1,
+        "showAttribution" : 1,
+        "visible" : 1
+      }, ogs.geo.multiGeometryFeature(geoms));
+
+      layer.setName('country-boundries');
+      this.addLayer(layer);
     }
   };
 

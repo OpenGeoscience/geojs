@@ -15,11 +15,23 @@ vglModule.mapper = function() {
   }
   vglModule.boundingObject.call(this);
 
+  /** @private */
   var m_dirty = true;
+
+  /** @private */
   var m_color = [ 1.0, 1.0, 1.0 ];
-  var m_geomData = 0;
+
+  /** @private */
+  var m_geomData = null;
+
+  /** @private */
   var m_buffers = [];
+
+  /** @private */
   var m_bufferVertexAttributeMap = {};
+
+  /** @private */
+  var m_glCompileTimestamp = vglModule.timestamp();
 
   /**
    * Compute bounds of the data
@@ -45,6 +57,8 @@ vglModule.mapper = function() {
     m_color[0] = r;
     m_color[1] = g;
     m_color[2] = br;
+
+    this.modified();
   };
 
   /**
@@ -61,8 +75,7 @@ vglModule.mapper = function() {
     if (m_geomData !== geom) {
       m_geomData = geom;
 
-      // TODO we need
-      m_dirty = true;
+      this.modified();
     }
   };
 
@@ -70,7 +83,7 @@ vglModule.mapper = function() {
    * Render the mapper
    */
   this.render = function(renderState) {
-    if (m_dirty) {
+    if (this.getMTime() > m_glCompileTimestamp.getMTime()) {
       setupDrawObjects(renderState);
     }
 
@@ -142,6 +155,8 @@ vglModule.mapper = function() {
             .indices(), gl.STATIC_DRAW);
         m_buffers[i++] = bufferId;
       }
+
+      m_glCompileTimestamp.modified();
     }
   }
 

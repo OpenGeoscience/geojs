@@ -113,7 +113,7 @@ inherit(geoModule.pointSpritesFeature, geoModule.feature);
  * @class
  * @desc Create a geometry feature given a geometry {ogs.vgl.geometryData} *
  * @param geometry data {ogs.vgl.geometryData} *
- * @returns {geoModule.planeFeature}
+ * @returns {geoModule.geometryFeature}
  */
 geoModule.geometryFeature = function(geom) {
 
@@ -136,3 +136,33 @@ geoModule.geometryFeature = function(geom) {
 };
 
 inherit(geoModule.geometryFeature, geoModule.feature);
+
+/**
+ * Create a new instance of multiGeometryFeature
+ *
+ * @class
+ * @desc Create a multi geometry feature given a array of geometry data {ogs.vgl.geometryData} *
+ * @param {Array}
+ * @returns {geoModule.multiGeometryFeature}
+ */
+geoModule.multiGeometryFeature = function(geoms) {
+
+  if (!(this instanceof geoModule.multiGeometryFeature)) {
+    return new geoModule.multiGeometryFeature(geoms);
+  }
+
+  ogs.vgl.actor.call(this);
+
+  // Initialize
+  var mapper = ogs.vgl.groupMapper();
+  mapper.setGeometryDataArray(geoms);
+
+  this.setMapper(mapper);
+
+  var material = ogs.vgl.utils.createGeometryMaterial();
+  this.setMaterial(material);
+
+  return this;
+};
+
+inherit(geoModule.multiGeometryFeature, geoModule.geometryFeature);

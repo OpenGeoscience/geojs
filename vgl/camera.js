@@ -34,10 +34,10 @@ vglModule.camera = function() {
   var m_right = vec3.fromValues(1.0, 0.0, 0.0);
 
   /** @private */
-  var m_near = 0.1;
+  var m_near = 1.0;
 
   /** @private */
-  var m_far = 10000.0;
+  var m_far = 1000.0;
 
   /** @private */
   var m_viewAspect = 1.0;

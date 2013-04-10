@@ -16,7 +16,7 @@ vglModule.shader = function(type) {
   vglModule.object.call(this);
 
   var m_shaderHandle = null;
-  var m_compileTimestmap = vglModule.timestamp();
+  var m_compileTimestamp = vglModule.timestamp();
   var m_shaderType = type;
   var m_shaderSource = "";
   var m_fileName = "";
@@ -47,7 +47,7 @@ vglModule.shader = function(type) {
   };
 
   this.compile = function() {
-    if (this.getMTime() < m_compileTimestmap.getMTime()) {
+    if (this.getMTime() < m_compileTimestamp.getMTime()) {
       return m_shaderHandle;
     }
 
@@ -65,7 +65,7 @@ vglModule.shader = function(type) {
       return null;
     }
 
-    m_compileTimestmap.modified();
+    m_compileTimestamp.modified();
 
     return m_shaderHandle;
   };
