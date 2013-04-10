@@ -3,7 +3,7 @@
  */
 geoModule.mapOptions = {
   zoom: 0,
-  center: [0.0, 0.0],
+  center: geoModule.latlng(0.0, 0.0),
   country_boundries: true,
   state_boundries: {},
   sourcebigb: ""

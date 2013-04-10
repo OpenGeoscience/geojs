@@ -277,6 +277,7 @@ uiModule.gis.generateOptions = function(rootId, map) {
     if (options.hasOwnProperty(key)) {
 
       var row = $(document.createElement('tr'));
+      row.attr('class', 'row-fluid');
       parent.append(row);
       var col = $(document.createElement('td'));
       row.append(col);
@@ -288,7 +289,6 @@ uiModule.gis.generateOptions = function(rootId, map) {
       switch(key) {
         case "zoom":
           // Create a slider here
-          col = $(document.createElement('td'));
           var sliderDiv = $(document.createElement('div'));
           sliderDiv.slider({
             range: "min",
@@ -307,34 +307,41 @@ uiModule.gis.generateOptions = function(rootId, map) {
           });
           col.attr('class', 'span10');
           $(col).append(sliderDiv);
-          row.append(col);
           break;
         case "center":
+          // @todo We need to update center dynamically which
+          // will require quite a bit of work.
           // Text box
-          col = $(document.createElement('td'));
-          row.append(col);
+          // var latInput = $(document.createElement('input'));
+          // latInput.attr('type', 'number');
+          // latInput.attr('min', -180.0);
+          // latInput.attr('max', +180.0);
+          // latInput.val(map.options().center.lat());
+          // latInput.click(function() {
+          //   map.redraw();
+          // });
+          // $(latInput).on('mousedown', function(e) {
+          //   e.stopPropagation();
+          //   return false;
+          // });
+          // col.append(latInput);
 
-          var latInput = $(document.createElement('input'));
-          latInput.attr('type', 'number');
-          //latInput.attr('value', map.options().center[0]);
-          latInput.click(function() {
-            map.redraw();
-          });
-          col.append(input);
-
-          var lngInput = $(document.createElement('input'));
-          lngInput.attr('type', 'number');
-          //lngInput.attr('value', map.options().center[1]);
-          lngInput.click(function() {
-            map.redraw();
-          });
-          col.append(input);
+          // var lngInput = $(document.createElement('input'));
+          // lngInput.attr('type', 'number');
+          // lngInput.attr('min', -90.0);
+          // lngInput.attr('max', +90.0);
+          // lngInput.val(map.options().center.lng());
+          // lngInput.click(function() {
+          //   map.redraw();
+          // });
+          // $(lngInput).on('mousedown', function(e) {
+          //   e.stopPropagation();
+          //   return false;
+          // });
+          // col.append(lngInput);
           break;
         case "country_boundries":
           // Boolean
-          col = $(document.createElement('td'));
-          row.append(col);
-
           var input = $(document.createElement('input'));
           input.attr('type', 'checkbox');
           input.attr('checked', map.options().country_boundries);
