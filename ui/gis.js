@@ -45,6 +45,8 @@ uiModule.gis.createList = function(rootId, heading) {
 
   var tbody = document.createElement("tbody");
   tableRoot.appendChild(tbody);
+
+  return tableRoot;
 };
 
 /**
@@ -268,10 +270,10 @@ uiModule.gis.selectLayer = function(target, layerId) {
 };
 
 
-uiModule.gis.generateOptions = function(rootId, map) {
+uiModule.gis.generateOptions = function(table, map) {
   var options = map.options();
 
-  var parent = $('#'+rootId);
+  var parent = $(table);
 
   for (var key in options) {
     if (key === "source" || key === "center") {
@@ -366,3 +368,40 @@ uiModule.gis.generateOptions = function(rootId, map) {
     }
   }
 };
+
+
+uiModule.gis.createControls = function(table, map) {
+  var tbody = $($(table).find('tbody'));
+  var row = $(document.createElement('tr'));
+  tbody.append(row);
+
+  var col = $(document.createElement('td'));
+  row.append(col);
+  col.append('<h4>opacity</h4>');
+
+  // Create slider to control opacity of a layer
+  var opacityDiv = $(document.createElement('div'));
+  opacityDiv.addClass('ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all');
+  col.append(opacityDiv);
+
+  opacityDiv.slider({
+    range: "min",
+    min: 0.0,
+    max: 1.0,
+    step: 0.01,
+    value: 0.5,
+  });
+
+  // Listen for slider slidechange event
+  opacityDiv.slider().bind('slide', function(event, ui) {
+    if (map.activeLayer() !== null) {
+      map.activeLayer().setOpacity(ui.value);
+    }
+    map.redraw();
+  });
+
+  opacityDiv.on('mousedown', function(e) {
+    e.stopPropagation();
+    return false;
+  });
+}
