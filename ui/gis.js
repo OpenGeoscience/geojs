@@ -311,6 +311,24 @@ uiModule.gis.generateOptions = function(rootId, map) {
           break;
         case "center":
           // Text box
+          col = $(document.createElement('td'));
+          row.append(col);
+
+          var latInput = $(document.createElement('input'));
+          latInput.attr('type', 'number');
+          //latInput.attr('value', map.options().center[0]);
+          latInput.click(function() {
+            map.redraw();
+          });
+          col.append(input);
+
+          var lngInput = $(document.createElement('input'));
+          lngInput.attr('type', 'number');
+          //lngInput.attr('value', map.options().center[1]);
+          lngInput.click(function() {
+            map.redraw();
+          });
+          col.append(input);
           break;
         case "country_boundries":
           // Boolean
@@ -319,7 +337,7 @@ uiModule.gis.generateOptions = function(rootId, map) {
 
           var input = $(document.createElement('input'));
           input.attr('type', 'checkbox');
-          input.attr('checked', map.isCountryBoundriesVisible());
+          input.attr('checked', map.options().country_boundries);
           input.click(function() {
             map.toggleCountryBoundries();
             map.redraw();

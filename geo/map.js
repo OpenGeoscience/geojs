@@ -5,7 +5,7 @@ geoModule.mapOptions = {
   zoom: 0,
   center: [0.0, 0.0],
   country_boundries: true,
-  us_states: false,
+  state_boundries: {},
   sourcebigb: ""
 };
 
@@ -320,40 +320,12 @@ geoModule.map = function(node, options) {
   };
 
   /**
-   * Return visibility state of country boundries
-   *
-   * @returns {Boolean}
-   */
-  this.isCountryBoundriesVisible = function() {
-     var layer = this.findLayerById('country-boundries');
-    if (layer !== null) {
-      return layer.visible();
-    } else {
-      return false;
-    }
-  };
-
-  /**
    * Toggle us state boudries
    *
    * @returns {Boolean}
    */
   this.toggleStateBoundries = function(countryName) {
     // @todo Imeplement this
-  };
-
-  /**
-   * Return visibility state of state boundries
-   *
-   * @returns {Boolean}
-   */
-  this.isStateBoundriesVisible = function(countryName) {
-    var layer = this.findLayerById(countryName+'-state-boundries');
-    if (layer !== null) {
-      return layer.visible();
-    } else {
-      return false;
-    }
   };
 
   // Check if need to show country boundries
