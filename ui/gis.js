@@ -260,7 +260,7 @@ uiModule.gis.toggleLayer = function(elem, layerId) {
  * Update UI to when a layer is selected
  */
 uiModule.gis.selectLayer = function(target, layerId) {
-  $('btn-select-layer').siblings().removeClass('active');
+  $(target).siblings().removeClass('active');
 
   if (target !== null || target !== undefined) {
     $(target).addClass('active');
@@ -404,4 +404,4 @@ uiModule.gis.createControls = function(table, map) {
     e.stopPropagation();
     return false;
   });
-}
+};
