@@ -20,6 +20,7 @@ geoModule.mapInteractorStyle = function() {
     y : 0
   };
 
+
   this.handleMouseMove = function(event) {
     var width = m_that.viewer().renderWindow().windowSize()[0];
     var height = m_that.viewer().renderWindow().windowSize()[1];
@@ -94,7 +95,10 @@ geoModule.mapInteractorStyle = function() {
 
     m_mouseLastPos.x = currentMousePos.x;
     m_mouseLastPos.y = currentMousePos.y;
+
+    return false;
   };
+
 
   this.handleMouseDown = function(event) {
     if (event.state !== "down") {
@@ -130,6 +134,7 @@ geoModule.mapInteractorStyle = function() {
 
     return false;
   };
+
 
   this.handleMouseUp = function(event) {
     if (event.state !== "up") {

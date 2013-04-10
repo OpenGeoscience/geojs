@@ -109,18 +109,16 @@ geoModule.map = function(node, options) {
     var canvasY = 0;
     var currentElement = this;
 
-    do {
-      totalOffsetX += currentElement.offsetLeft;
-      totalOffsetY += currentElement.offsetTop;
-    } while (currentElement === currentElement.offsetParent);
+    do{
+        totalOffsetX += currentElement.offsetLeft - currentElement.scrollLeft;
+        totalOffsetY += currentElement.offsetTop - currentElement.scrollTop;
+    }
+    while(currentElement = currentElement.offsetParent)
 
     canvasX = event.pageX - totalOffsetX;
     canvasY = event.pageY - totalOffsetY;
 
-    return {
-      x : canvasX,
-      y : canvasY
-    };
+    return {x:canvasX, y:canvasY}
   }
 
   // TODO use zoom and center options
