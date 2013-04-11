@@ -1,11 +1,14 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
     <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
-    <script type="text/javascript" src="geoweb.min.js">
-    <script type="text/javascript" src="sphere.js">
-    <script type="text/javascript">
-      ( function() {
-          var node = $('#glcanvas');
+    <script type="text/javascript" src="gl-matrix.js"></script>
+    <script type="text/javascript" src="geoweb.min.js"></script>
+    <script>
+      var testDrawSphere = {};
+      testDrawSphere.main = function() {
+        $.getJSON('sample.json', function(data) {
+          var node = document.getElementById("glcanvas");
           var viewer = ogs.vgl.viewer(node);
           viewer.init();
 
@@ -13,24 +16,28 @@
           var renderer = viewer.renderWindow().activeRenderer();
 
           var reader = ogs.vgl.geojsonReader();
-          var geom = reader.readGJObject();
+          var geoms = reader.readGJObject(data);
 
-          var mapper = ogs.vgl.mapper();
-          mapper.setGeometryData(geom);
+          for (var i = 0; i < geoms.length; ++i) {
+            var mapper = ogs.vgl.mapper();
+            mapper.setGeometryData(geoms[i]);
 
-          var actor = ogs.vgl.actor();
-          actor.setMapper(mapper);
+            var material = ogs.vgl.utils.createGeometryMaterial();
 
-          renderer.addActor(actor);
+            var actor = ogs.vgl.actor();
+            actor.setMapper(mapper);
+            actor.setMaterial(material);
+            renderer.addActor(actor);
+          }
+
           viewer.render();
-        }
-      );
+        });
+      }
     </script>
   </head>
-  <body>
+  <body onload="testDrawSphere.main()">
     <div style="width:100%; height:100%;">
-      <canvas id="glcanvas" style="width:100%; height:100%;" >
-      </canvas>
+      <canvas id="glcanvas" style="width:100%; height:100%;"></canvas>
     </div>
   </body>
 </html>
