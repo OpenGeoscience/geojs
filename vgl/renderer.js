@@ -29,12 +29,33 @@ vglModule.renderer = function() {
   vglModule.object.call(this);
 
   /** @private */
+  var m_backgroundColor = [1.0, 1.0, 1.0, 1.0];
+
+  /** @private */
   var m_sceneRoot = new vglModule.groupNode();
 
   /** @private */
   var m_camera = new vglModule.camera();
-
   m_camera.addChild(m_sceneRoot);
+
+  /**
+   * Get background color
+   */
+  this.backgroundColor = function() {
+    return m_backgroundColor;
+  };
+
+  /**
+   * Set background color
+   */
+  this.setBackgroundColor = function(r, g, b, a) {
+    m_backgroundColor[0] = r;
+    m_backgroundColor[1] = g;
+    m_backgroundColor[2] = b;
+    m_backgroundColor[3] = a;
+
+    this.modified();
+  }
 
   /**
    * Get scene root
@@ -54,7 +75,8 @@ vglModule.renderer = function() {
    * Render the scene
    */
   this.render = function() {
-    gl.clearColor(1.0, 1.0, 1.0, 1.0);
+    gl.clearColor(m_backgroundColor[0], m_backgroundColor[1],
+      m_backgroundColor[2], m_backgroundColor[3]);
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);

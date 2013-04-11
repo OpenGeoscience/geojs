@@ -19,7 +19,7 @@ vglModule.mapper = function() {
   var m_dirty = true;
 
   /** @private */
-  var m_color = [ 1.0, 1.0, 1.0 ];
+  var m_color = [ 0.0, 1.0, 1.0 ];
 
   /** @private */
   var m_geomData = null;
