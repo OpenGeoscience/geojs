@@ -1,0 +1,36 @@
+<html>
+  <head>
+    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+    <script type="text/javascript" src="geoweb.min.js">
+    <script type="text/javascript" src="sphere.js">
+    <script type="text/javascript">
+      ( function() {
+          var node = $('#glcanvas');
+          var viewer = ogs.vgl.viewer(node);
+          viewer.init();
+
+          viewer.renderWindow().resize($(node).width(), $(node).height());
+          var renderer = viewer.renderWindow().activeRenderer();
+
+          var reader = ogs.vgl.geojsonReader();
+          var geom = reader.readGJObject();
+
+          var mapper = ogs.vgl.mapper();
+          mapper.setGeometryData(geom);
+
+          var actor = ogs.vgl.actor();
+          actor.setMapper(mapper);
+
+          renderer.addActor(actor);
+          viewer.render();
+        }
+      );
+    </script>
+  </head>
+  <body>
+    <div style="width:100%; height:100%;">
+      <canvas id="glcanvas" style="width:100%; height:100%;" >
+      </canvas>
+    </div>
+  </body>
+</html>
