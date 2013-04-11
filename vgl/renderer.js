@@ -88,7 +88,7 @@ vglModule.renderer = function() {
     var children = m_sceneRoot.children();
     for ( var i = 0; i < children.length; ++i) {
       var actor = children[i];
-
+      actor.computeBounds();
       if (actor.visible() === false) {
         continue;
       }
@@ -104,6 +104,82 @@ vglModule.renderer = function() {
       renSt.m_mapper.render(renSt);
       renSt.m_material.remove(renSt);
     }
+  };
+
+  /**
+   * Automatically set up the camera based on visible actors
+   */
+  this.resetCamera = function() {
+    m_camera.computeBounds();
+
+    var vn = m_camera.directionOfProjection();
+    var visibleBounds = m_camera.bounds();
+
+    // console.log('visibleBounds ', visibleBounds);
+
+    var center = [
+      (visibleBounds[0] + visibleBounds[1]) / 2.0,
+      (visibleBounds[2] + visibleBounds[3]) / 2.0,
+      (visibleBounds[4] + visibleBounds[5]) / 2.0];
+
+    // console.log('center ', center);
+
+    var diagonals = [
+      visibleBounds[1] - visibleBounds[0],
+      visibleBounds[3] - visibleBounds[2],
+      visibleBounds[5] - visibleBounds[4],
+    ];
+
+    var radius = 0.0;
+    if (diagonals[0] > diagonals[1]) {
+      if (diagonals[0] > diagonals[2]) {
+        radius = diagonals[0] / 2.0;
+      } else {
+        radius = diagonals[2] / 2.0;
+      }
+    } else {
+      if (diagonals[1] > diagonals[2]) {
+        radius = diagonals[1] / 2.0;
+      } else {
+        radius = diagonals[2] / 2.0;
+      }
+    }
+
+    console.log('radius ', radius);
+
+    var aspect = m_camera.viewAspect();
+    var angle = m_camera.viewAngle();
+
+    console.log('angle1', angle);
+    console.log('aspect', aspect);
+
+    // Need to figure out what's happening here
+    console.log(Math.tan(angle * 0.5) * aspect);
+
+    if (aspect >= 1.0) {
+      angle = 2.0 * Math.atan(Math.tan(angle * 0.5) / aspect);
+    } else {
+      angle = 2.0 * Math.atan(Math.tan(angle * 0.5) * aspect);
+    }
+
+    console.log('angle2', angle);
+
+    var distance =  radius / Math.sin(angle * 0.5);
+
+    console.log('distance ', distance);
+
+    var vup = m_camera.viewUpDirection();
+
+    if (Math.abs(vec3.dot(vup, vn)) > 0.999) {
+      m_camera.setViewDirection(-vup[2], vup[1], vup[1]);
+    }
+
+    m_camera.setFocalPoint(center[0], center[1], center[2]);
+    m_camera.setPosition(center[0] + distance * -vn[0],
+      center[1] + distance * -vn[1], center[2] + distance * -vn[2]);
+
+    console.log('camera focal point ', m_camera.focalPoint());
+    console.log('camera position ', m_camera.position());
   };
 
   /**

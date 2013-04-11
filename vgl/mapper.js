@@ -37,6 +37,22 @@ vglModule.mapper = function() {
    * Compute bounds of the data
    */
   this.computeBounds = function() {
+    if (m_geomData === null || m_geomData === undefined) {
+      this.resetBounds();
+      return;
+    }
+
+    var computeBoundsTimestamp = this.computeBoundsTimestamp();
+    var boundsDirtyTimestamp = this.boundsDirtyTimestamp();
+
+    if (boundsDirtyTimestamp.getMTime() > computeBoundsTimestamp.getMTime()) {
+      var geomBounds = m_geomData.bounds();
+
+      this.setBounds(geomBounds[0], geomBounds[1], geomBounds[2],
+        geomBounds[3], geomBounds[4], geomBounds[5]) ;
+
+      computeBoundsTimestamp.modified();
+    }
   };
 
   /**
@@ -76,6 +92,7 @@ vglModule.mapper = function() {
       m_geomData = geom;
 
       this.modified();
+      this.boundsDirtyTimestamp().modified();
     }
   };
 
@@ -121,7 +138,7 @@ vglModule.mapper = function() {
     for ( var i = 0; i < m_buffers.length; ++i) {
       gl.deleteBuffer(m_buffers[i]);
     }
-  }
+  };
 
   /**
    * Create new VBO for all its geometryData sources and primitives
@@ -158,7 +175,7 @@ vglModule.mapper = function() {
 
       m_glCompileTimestamp.modified();
     }
-  }
+  };
 
   /**
    * Clear cache related to buffers
@@ -166,7 +183,7 @@ vglModule.mapper = function() {
   function cleanUpDrawObjects() {
     m_bufferVertexAttributeMap = {};
     m_buffers = [];
-  }
+  };
 
   /**
    * Internal methods
@@ -186,7 +203,7 @@ vglModule.mapper = function() {
     createVertexBufferObjects();
 
     m_dirty = false;
-  }
+  };
 
   return this;
 };

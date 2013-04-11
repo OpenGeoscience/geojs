@@ -15,28 +15,14 @@ vglModule.boundingObject = function() {
   }
   vglModule.object.call(this);
 
-  var m_boundsDirty = true;
-  var m_bounds = new Array(6);
+  /** @private */
+  var m_bounds = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
 
-  /**
-   * Return true if bounds are dirty otherwise false
-   */
-  this.boundsDirty = function() {
-    return m_boundsDirty;
-  };
+  /** @private */
+  var m_computeBoundsTimestamp = vglModule.timestamp();
 
-  /**
-   * Mark bounds dirty for the object
-   */
-  this.setBoundsDirty = function(flag) {
-    if (m_boundsDirty !== flag) {
-      m_boundsDirty = flag;
-      this.modified();
-      return true;
-    }
-
-    return false;
-  };
+  /** @private */
+  var m_boundsDirtyTimestamp = vglModule.timestamp();
 
   /**
    * Get current bounds of the object
@@ -57,8 +43,23 @@ vglModule.boundingObject = function() {
     m_bounds[5] = maxZ;
 
     this.modified();
+    m_computeBoundsTimestamp.modified();
 
     return true;
+  };
+
+  /**
+   * Reset bounds to default values
+   */
+  this.resetBounds = function() {
+    m_bounds[0] = Number.MAX_VALUE;
+    m_bounds[1] = -Number.MAX_VALUE;
+    m_bounds[2] = Number.MAX_VALUE;
+    m_bounds[3] = -Number.MAX_VALUE;
+    m_bounds[4] = Number.MAX_VALUE;
+    m_bounds[5] = -Number.MAX_VALUE;
+
+    this.modified();
   };
 
   /**
@@ -68,6 +69,24 @@ vglModule.boundingObject = function() {
    */
   this.computeBounds = function() {
   };
+
+  /**
+   * Return bounds computation modification time
+   * @returns {vglModule.timestamp}
+   */
+  this.computeBoundsTimestamp = function() {
+    return m_computeBoundsTimestamp;
+  };
+
+  /**
+   * Return bounds dirty timestamp
+   * @returns {vglModule.timestamp}
+   */
+  this.boundsDirtyTimestamp = function() {
+    return m_boundsDirtyTimestamp;
+  };
+
+  this.resetBounds();
 
   return this;
 };

@@ -30,11 +30,8 @@
             renderer.addActor(actor);
           }
 
-          var camera = renderer.camera();
-          camera.setPosition(104.08, 1.1, 4.1);
-          camera.setFocalPoint(104.08, 1.1, 0.1);
-
-          renderer.setBackgroundColor(1.0, 0.0, 0.0, 1.0);
+          renderer.setBackgroundColor(0.0, 0.0, 0.0, 1.0);
+          renderer.resetCamera();
 
           viewer.render();
         });
@@ -42,7 +39,7 @@
     </script>
   </head>
   <body onload="testDrawSphere.main()">
-    <div style="width:100%; height:100%;">
+    <div style="width:400px; height:400px;">
       <canvas id="glcanvas" style="width:100%; height:100%;"></canvas>
     </div>
   </body>

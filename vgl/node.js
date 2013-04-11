@@ -15,13 +15,17 @@ vglModule.node = function() {
   }
   vglModule.boundingObject.call(this);
 
-  // Private member variables
+  /** @private */
   var m_parent = null;
-  var m_material = null;
-  var m_visible = true;
-  var m_overlay = false;
 
-  // Public member methods
+  /** @private */
+  var m_material = null;
+
+  /** @private */
+  var m_visible = true;
+
+  /** @private */
+  var m_overlay = false;
 
   /**
    * Accept visitor for scene traversal
@@ -123,15 +127,6 @@ vglModule.node = function() {
    * Traverse children
    */
   this.traverse = function(visitor) {
-  };
-
-  /**
-   * Virtual function to compute bounds of the node
-   */
-  this.computeBounds = function() {
-    if (this.boundsDirty()) {
-      this.resetBounds();
-    }
   };
 
   return this;

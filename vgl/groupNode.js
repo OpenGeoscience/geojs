@@ -34,8 +34,7 @@ vglModule.groupNode = function() {
       if (m_children.indexOf(childNode) === -1) {
         childNode.setParent(this);
         m_children.push(childNode);
-        this.setBoundsDirty(true);
-
+        this.boundsDirtyTimestamp().modified();
         return true;
       }
       return false;
@@ -102,8 +101,48 @@ vglModule.groupNode = function() {
     }
   };
 
-  this.updateBounds = function(childNode) {
-    // TODO: Compute bounds here
+  this.computeBounds = function() {
+    if (this.computeBoundsTimestamp().getMTime() >
+        this.boundsDirtyTimestamp().getMTime()) {
+      return;
+    }
+
+    for ( var i = 0; i < m_children.length; ++i) {
+      this.updateBounds(m_children[i]);
+    }
+  };
+
+  this.updateBounds = function(child) {
+    // FIXME: This check should not be required and possibly is incorrect
+    if (child.overlay()) {
+      return;
+    }
+
+    // Make sure that child bounds are upto date
+    child.computeBounds();
+
+    var bounds = this.bounds();
+    var childBounds = child.bounds();
+
+    // console.log('bounds ' + bounds);
+    // console.log('child bounds ' + child + ' ', childBounds);
+
+    var istep = 0;
+    var jstep = 0;
+
+    for (var i = 0; i < 3; ++i) {
+      istep = i * 2;
+      jstep = i * 2 + 1;
+      if (childBounds[istep] < bounds[istep]) {
+        bounds[istep] = childBounds[istep];
+      }
+      if (childBounds[jstep] > bounds[jstep]) {
+        bounds[jstep] = childBounds[jstep];
+      }
+    }
+
+    this.setBounds(bounds[0], bounds[1], bounds[2], bounds[3],
+                   bounds[4], bounds[5]);
   };
 
   return this;
