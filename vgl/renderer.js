@@ -145,41 +145,27 @@ vglModule.renderer = function() {
       }
     }
 
-    console.log('radius ', radius);
-
     var aspect = m_camera.viewAspect();
     var angle = m_camera.viewAngle();
 
-    console.log('angle1', angle);
-    console.log('aspect', aspect);
-
-    // Need to figure out what's happening here
-    console.log(Math.tan(angle * 0.5) * aspect);
-
+    // @todo Need to figure out what's happening here
     if (aspect >= 1.0) {
       angle = 2.0 * Math.atan(Math.tan(angle * 0.5) / aspect);
     } else {
       angle = 2.0 * Math.atan(Math.tan(angle * 0.5) * aspect);
     }
 
-    console.log('angle2', angle);
-
     var distance =  radius / Math.sin(angle * 0.5);
-
-    console.log('distance ', distance);
 
     var vup = m_camera.viewUpDirection();
 
     if (Math.abs(vec3.dot(vup, vn)) > 0.999) {
-      m_camera.setViewDirection(-vup[2], vup[1], vup[1]);
+      m_camera.setViewDirection(-vup[2], vup[0], vup[1]);
     }
 
     m_camera.setFocalPoint(center[0], center[1], center[2]);
     m_camera.setPosition(center[0] + distance * -vn[0],
       center[1] + distance * -vn[1], center[2] + distance * -vn[2]);
-
-    console.log('camera focal point ', m_camera.focalPoint());
-    console.log('camera position ', m_camera.position());
   };
 
   /**

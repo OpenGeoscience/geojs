@@ -287,6 +287,7 @@ vglModule.camera = function() {
       mat4.lookAt(m_viewMatrix, m_position, m_focalPoint, m_viewUp);
       m_computeModelViewMatrixTime.modified();
     }
+
     return m_viewMatrix;
   };
 
@@ -295,7 +296,6 @@ vglModule.camera = function() {
    */
   this.computeProjectionMatrix = function() {
     if (m_computeProjectMatrixTime.getMTime() < this.getMTime()) {
-      mat4.identity(m_projectionMatrix, m_projectionMatrix);
       mat4.perspective(m_projectionMatrix, m_viewAngle, m_viewAspect, m_near, m_far);
       m_computeProjectMatrixTime.modified();
     }
