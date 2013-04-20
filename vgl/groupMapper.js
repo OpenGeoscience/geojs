@@ -70,23 +70,43 @@ vglModule.groupMapper = function() {
    * Compute bounds of the data
    */
   this.computeBounds = function() {
-    // if (m_geomData === null || m_geomData === undefined) {
-    //   this.resetBounds();
-    //   return;
-    // }
+    if (m_geomDataArray === null || m_geomDataArray === undefined) {
+      this.resetBounds();
+      return;
+    }
 
-    // var computeBoundsTimestamp = this.computeBoundsTimestamp();
-    // var boundsDirtyTimestamp = this.boundsDirtyTimestamp();
+    var computeBoundsTimestamp = this.computeBoundsTimestamp(),
+        boundsDirtyTimestamp = this.boundsDirtyTimestamp(),
+        geomBounds = null;
 
-    // if (boundsDirtyTimestamp.getMTime() > computeBoundsTimestamp.getMTime()) {
-    //   // @todo Finish this
-    //   // var geomBounds = m_geomData.bounds();
+    if (boundsDirtyTimestamp.getMTime() > computeBoundsTimestamp.getMTime()) {
 
-    //   // this.setBounds(geomBounds[0], geomBounds[1], geomBounds[2],
-    //   //   geomBounds[3], geomBounds[4], geomBounds[5]) ;
+      for (var i = 0; i < m_geomDataArray.length; ++i) {
+        geomBounds = m_geomData.bounds();
 
-    //   computeBoundsTimestamp.modified();
-    // }
+        if (m_bounds[0] > geomBounds[0]) {
+          m_bounds[0] = geomBounds[0];
+        }
+        if (m_bounds[1] < geomBounds[1]) {
+          m_bounds[1] = geomBounds[1];
+        }
+        if (m_bounds[2] > geomBounds[2]) {
+          m_bounds[2] = geomBounds[2];
+        }
+        if (m_bounds[3] < geomBounds[3]) {
+          m_bounds[3] = geomBounds[3];
+        }
+        if (m_bounds[4] > geomBounds[4]) {
+          m_bounds[4] = geomBounds[4];
+        }
+        if (m_bounds[5] < geomBounds[5]) {
+          m_bounds[5] = geomBounds[5];
+        }
+      }
+
+      this.modified();
+      computeBoundsTimestamp.modified();
+    }
   };
 
   /**
