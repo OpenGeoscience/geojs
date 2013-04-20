@@ -129,6 +129,18 @@ vglModule.node = function() {
   this.traverse = function(visitor) {
   };
 
+  /**
+   *
+   */
+  this.boundsModified = function() {
+    // @todo Implement this
+    this.boundsDirtyTimestamp().modified();
+
+    if (m_parent != null) {
+      m_parent.boundsModified();
+    }
+  }
+
   return this;
 };
 

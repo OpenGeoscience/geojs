@@ -77,6 +77,7 @@ vglModule.actor = function() {
    * @param {Number} z
    */
   this.setRotation = function(angle, x, y, z) {
+    this.boundsModified();
   };
 
   /**
@@ -95,6 +96,7 @@ vglModule.actor = function() {
    * @param {Number} z Scale in z direction
    */
   this.setScale = function(x, y, z) {
+    this.boundsModified();
   };
 
   /**
@@ -113,6 +115,7 @@ vglModule.actor = function() {
    * @param {Number} z Translation in z direction
    */
   this.setTranslation = function(x, y, z) {
+    this.boundsModified();
   };
 
   /**
@@ -166,11 +169,9 @@ vglModule.actor = function() {
    * @param {vglModule.mapper}
    */
   this.setMapper = function(mapper) {
-    m_mapper = mapper;
-    this.boundsDirtyTimestamp().modified();
-
-    if (this.parent() !== null) {
-      this.parent().boundsDirtyTimestamp().modified();
+    if (mapper !== m_mapper) {
+      m_mapper = mapper;
+      this.boundsModified();
     }
   };
 
@@ -232,7 +233,8 @@ vglModule.actor = function() {
         minPt[2] > maxPt[2] ? minPt[2] : maxPt[2]
       ];
 
-      this.setBounds(newBounds[0], newBounds[1], newBounds[2], newBounds[3],
+      this.setBounds(newBounds[0], newBounds[1],
+                     newBounds[2], newBounds[3],
                      newBounds[4], newBounds[5]);
 
       computeBoundsTimestamp.modified();
