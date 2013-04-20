@@ -214,6 +214,7 @@ vglModule.actor = function() {
 
     if (this.boundsDirtyTimestamp().getMTime() > computeBoundsTimestamp.getMTime() ||
       m_mapper.boundsDirtyTimestamp().getMTime() > computeBoundsTimestamp.getMTime()) {
+
       m_mapper.computeBounds();
       var mapperBounds = m_mapper.bounds();
 

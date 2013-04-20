@@ -321,6 +321,13 @@ vglModule.sourceData = function() {
   };
 
   /**
+   * Return length of array
+   */
+  this.lengthOfArray = function() {
+    return m_data.length;
+  };
+
+  /**
    * Return size of the source data in bytes
    */
   this.sizeInBytes = function() {
@@ -454,9 +461,9 @@ vglModule.sourceDataP3T3f = function() {
   }
   vglModule.sourceData.call(this);
 
-  this.addAttribute(vertexAttributeKeys.Position, gl.FLOAT, 4, 0, 6 * 4, 3,
+  this.addAttribute(vglModule.vertexAttributeKeys.Position, gl.FLOAT, 4, 0, 6 * 4, 3,
                     false);
-  this.addAttribute(vertexAttributeKeys.TextureCoordinate, gl.FLOAT, 4, 12,
+  this.addAttribute(vglModule.vertexAttributeKeys.TextureCoordinate, gl.FLOAT, 4, 12,
                     6 * 4, 3, false);
 
   this.pushBack = function(value) {
@@ -483,9 +490,9 @@ vglModule.sourceDataP3N3f = function() {
 
   vglModule.sourceData.call(this);
 
-  this.addAttribute(vertexAttributeKeys.Position, gl.FLOAT, 4, 0, 6 * 4, 3,
+  this.addAttribute(vglModule.vertexAttributeKeys.Position, gl.FLOAT, 4, 0, 6 * 4, 3,
                     false);
-  this.addAttribute(vertexAttributeKeys.Normal, gl.FLOAT, 4, 12, 6 * 4, 3,
+  this.addAttribute(vglModule.vertexAttributeKeys.Normal, gl.FLOAT, 4, 12, 6 * 4, 3,
                     false);
 
   this.pushBack = function(value) {
@@ -512,7 +519,7 @@ vglModule.sourceDataP3fv = function() {
 
   vglModule.sourceData.call(this);
 
-  this.addAttribute(vertexAttributeKeys.Position, gl.FLOAT, 4, 0, 3 * 4, 3,
+  this.addAttribute(vglModule.vertexAttributeKeys.Position, gl.FLOAT, 4, 0, 3 * 4, 3,
                     false);
 
   this.pushBack = function(value) {
@@ -538,7 +545,7 @@ vglModule.sourceDataT2fv = function() {
 
   vglModule.sourceData.call(this);
 
-  this.addAttribute(vertexAttributeKeys.TextureCoordinate, gl.FLOAT, 4, 0,
+  this.addAttribute(vglModule.vertexAttributeKeys.TextureCoordinate, gl.FLOAT, 4, 0,
                     2 * 4, 2, false);
 
   this.pushBack = function(value) {
@@ -564,7 +571,7 @@ vglModule.sourceDataC3fv = function() {
 
   vglModule.sourceData.call(this);
 
-  this.addAttribute(vertexAttributeKeys.Color, gl.FLOAT, 4, 0, 3 * 4, 3, false);
+  this.addAttribute(vglModule.vertexAttributeKeys.Color, gl.FLOAT, 4, 0, 3 * 4, 3, false);
 
   this.pushBack = function(value) {
     this.insert(value);
@@ -739,16 +746,15 @@ vglModule.geometryData = function() {
 
     if (m_boundsDirtyTimestamp.getMTime() > m_computeBoundsTimestamp.getMTime()) {
 
-      var sourceData = this.source(vglModule.vertexAttributeKeys.Position);
+      var sourceData = this.sourceData(vglModule.vertexAttributeKeys.Position);
       var data = sourceData.data();
       var numberOfComponents = sourceData.attributeNumberOfComponents(
         vglModule.vertexAttributeKeys.Position);
-      var count = sourceData.sizeOfArray() / numberOfComponents;
+      var count = sourceData.lengthOfArray() / numberOfComponents;
       var ib = 0, jb = 0;
       var value = null;
 
       this.resetBounds();
-
       for (var i = 0; i < count; ++i) {
         var vertexPosition = i * numberOfComponents;
         for (var j = 0; j < numberOfComponents; ++j) {
@@ -770,8 +776,6 @@ vglModule.geometryData = function() {
           }
         }
       }
-
-      // console.log('geom bounds ', m_bounds);
 
       m_computeBoundsTimestamp.modified();
     }
