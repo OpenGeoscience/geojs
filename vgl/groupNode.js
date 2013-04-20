@@ -47,7 +47,7 @@ vglModule.groupNode = function() {
     if (childNode.parent() === this) {
       var index = m_children.indexOf(childNode);
       m_children.splice(index, 1);
-      this.setBoundsDirty(true);
+      this.boundsDirtyTimestamp().modified();
       return true;
     }
   };
@@ -74,6 +74,13 @@ vglModule.groupNode = function() {
   };
 
   this.traverseChildrenAndUpdateBounds = function(visitor) {
+
+    if (this.m_parent && this.boundsDirtyTimestamp().getMTime() >
+      this.computeBoundsTimestamp().getMTime()) {
+      // Flag parents bounds dirty.
+      this.m_parent.boundsDirtyTimestamp.modified();
+    }
+
     this.computeBounds();
 
     if (visitor.mode() === visitor.TraverseAllChildren) {
@@ -83,14 +90,7 @@ vglModule.groupNode = function() {
       }
     }
 
-    if (this.m_parent && this.boundsDirty()) {
-      // Flag parents bounds dirty.
-      this.m_parent.setBoundsDirty(true);
-    }
-
-    // Since by now, we have updated the node bounds it is
-    // safe to mark that bounds are no longer dirty anymore
-    this.setBoundsDirty(false);
+    this.computeBoundsTimestamp().modified();
   };
 
   this.traverseChildren = function(visitor) {
