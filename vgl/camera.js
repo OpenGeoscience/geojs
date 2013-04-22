@@ -16,28 +16,34 @@ vglModule.camera = function() {
   vglModule.groupNode.call(this);
 
   /** @private */
-  var m_viewAngle = 30;
+  var m_viewAngle = (Math.PI * 30) / 180.0;
 
   /** @private */
-  var m_position = vec3.create([ 0.0, 0.0, 5.0 ]);
+  var m_position = vec3.fromValues(0.0, 0.0, 0.0);
 
   /** @private */
-  var m_focalPoint = vec3.create([ 0.0, 0.0, 0.0 ]);
+  var m_focalPoint = vec3.fromValues(0.0, 0.0, -5.0);
 
   /** @private */
-  var m_viewUp = vec3.create([ 0.0, 1.0, 0.0 ]);
+  var m_centerOrRotation = vec3.fromValues(0.0, 0.0, 0.0);
 
   /** @private */
-  var m_right = vec3.create([ 1.0, 0.0, 0.0 ]);
+  var m_viewUp = vec3.fromValues(0.0, 1.0, 0.0);
 
   /** @private */
-  var m_pitchMatrix = mat4.create();
+  var m_right = vec3.fromValues(1.0, 0.0, 0.0);
 
   /** @private */
-  var m_directionOfProjection = vec3.createFrom(0.0, 0.0, -1.0);
+  var m_near = 1.0;
 
   /** @private */
-  var m_cache = vec3.create([ 1.0, 0.0, 0.0 ]);
+  var m_far = 1000.0;
+
+  /** @private */
+  var m_viewAspect = 1.0;
+
+  /** @private */
+  var m_directionOfProjection = vec3.fromValues(0.0, 0.0, -1.0);
 
   /** @private */
   var m_viewMatrix = mat4.create();
@@ -45,13 +51,17 @@ vglModule.camera = function() {
   /** @private */
   var m_projectionMatrix = mat4.create();
 
-  mat4.identity(m_pitchMatrix);
+  /** @private */
+  var m_computeModelViewMatrixTime = ogs.vgl.timestamp();
+
+  /** @private */
+  var m_computeProjectMatrixTime = ogs.vgl.timestamp();
 
   /**
-   * Set position of the camera
+   * Get view angle of the camera
    */
-  this.setPosition = function(x, y, z) {
-    m_position = vec3.create([ x, y, z ]);
+  this.viewAngle = function() {
+    return m_viewAngle;
   };
 
   /**
@@ -61,170 +71,97 @@ vglModule.camera = function() {
     return m_position;
   };
 
+ /**
+  * Set position of the camera
+  */
+ this.setPosition = function(x, y, z) {
+   m_position = vec3.fromValues(x, y, z);
+   this.modified();
+ };
+
+ /**
+  * Get focal point of the camera
+  */
+ this.focalPoint = function() {
+   return m_focalPoint;
+ };
+
   /**
    * Set focal point of the camera
    */
   this.setFocalPoint = function(x, y, z) {
-    m_focalPoint = vec3.create([ x, y, z ]);
+    m_focalPoint = vec3.fromValues(x, y, z);
+    this.modified();
   };
 
   /**
-   * Get focal point of the camera
+   * Get view-up direction of camera
    */
-  this.focalPoint = function() {
-    return m_focalPoint;
+  this.viewUpDirection = function() {
+    return m_viewUp;
   };
 
   /**
    * Set view-up direction of the camera
    */
   this.setViewUpDirection = function(x, y, z) {
-    m_viewUp = vec3.create([ x, y, z ]);
+    m_viewUp = vec3.fromValues(x, y, z);
+    this.modified();
   };
 
   /**
-   * Move camera closer or further away from the scene
+   * Get center of rotation for camera
    */
-  this.zoom = function(dz) {
-    // Since our direction vector is changed, we need to first
-    // calculate this new direction
-    var lastPosition = vec3.createFrom(m_position[0], m_position[1],
-                                       m_position[2]);
+  this.centerOfRotation = function() {
+    return m_centerOrRotation;
+  }
 
-    var deltaX = m_directionOfProjection[0] * dz;
-    var deltaY = m_directionOfProjection[1] * dz;
-    var deltaZ = m_directionOfProjection[2] * dz;
+  /**
+   * Set center of rotation for camera
+   */
+  this.setCenterOfRotation = function(centerOfRotation) {
+    m_centerOrRotation = centerOfRotation;
+    this.modified();
+  }
 
-    m_position[0] += deltaX;
-    m_position[1] += deltaY;
-    m_position[2] += deltaZ;
+  /**
+   * Get clipping range of the camera
+   */
+  this.getClippingRange = function() {
+    return [m_near, m_far];
+  }
 
-    var distance = vec3.create();
-    var directionOfProjection = vec3.create();
-    vec3.subtract(m_focalPoint, m_position, distance);
-    vec3.normalize(distance, directionOfProjection);
+  /**
+   * Set clipping range of the camera
+   */
+  this.setClippingRange = function(near, far) {
+    m_near = near;
+    m_far = far;
+    this.modified();
+  }
 
-    if (vec3.dot(directionOfProjection, m_directionOfProjection) <= 0) {
-      // We are on the other side of the focal point
-      m_position[0] = lastPosition[0];
-      m_position[1] = lastPosition[1];
-      m_position[2] = lastPosition[2];
-    }
-
-    // m_focalPoint[0] += dir[0] * dz;
-    // m_focalPoint[1] += dir[1] * dz;
-    // m_focalPoint[2] += dir[2] * dz;
-
-    // TODO: If the distance between focal point and the camera position
-    // goes really low then we run into issues
+  /**
+   * Get view aspect
+   */
+  this.viewAspect = function() {
+    return m_viewAspect;
   };
 
   /**
-   * Move camera sideways
+   * Set view aspect
    */
-  this.pan = function(dx, dy) {
-    m_position[0] += dx;
-    m_position[1] += dy;
-    m_focalPoint[0] += dx;
-    m_focalPoint[1] += dy;
+  this.setViewAspect = function(aspect) {
+    m_viewAspect = aspect;
+    this.modified();
   };
 
   /**
-   * Compute camera coordinate axes
+   * Return direction of projection
    */
-  this.computeOrthogonalAxes = function() {
-    dir = new vec3.create();
-    vec3.direction(m_focalPoint, m_position, dir);
-    vec3.normalize(dir);
-    vec3.cross(dir, m_viewUp, m_right);
-    vec3.normalize(m_right);
-  };
+  this.directionOfProjection = function() {
+    this.computeDirectionOfProjection();
 
-  /**
-   * Perform yaw on the camera give a rotation angle (in degrees)
-   */
-  this.yaw = function(degrees) {
-    radians = degrees * (3.14 / 180.0);
-
-    mat = mat4.create();
-    mat4.identity(mat);
-
-    // We would like to rotate about focal point and to do so
-    // and since our rotation is calculated assuming that rotation point or
-    // axis is at origin, we need to inverse transte, rotate and again translate
-    // to calculate the complete transformation matrix.
-    invDir = new vec3.create();
-    invDir[0] = -m_focalPoint[0];
-    invDir[1] = -m_focalPoint[1];
-    invDir[2] = -m_focalPoint[2];
-
-    mat4.translate(mat, m_focalPoint, mat);
-    mat4.rotate(mat, radians, m_viewUp, mat);
-    mat4.translate(mat, invDir, mat);
-
-    // console.log(m_viewUp);
-    mat4.multiplyVec3(mat, m_position, m_position);
-
-    this.computeOrthogonalAxes();
-  };
-
-  /**
-   * Perform pitch on the camera give a rotation (in degrees)
-   */
-  this.pitch = function(degrees) {
-    radians = degrees * (3.14 / 180.0);
-
-    mat = mat4.create();
-    mat4.identity(mat);
-
-    // We would like to rotate about focal point and to do so
-    // and since our rotation is calculated assuming that rotation point or
-    // axis is at origin, we need to inverse transte, rotate and again translate
-    // to calculate the complete transformation matrix.
-    invDir = new vec3.create();
-    invDir[0] = -m_focalPoint[0];
-    invDir[1] = -m_focalPoint[1];
-    invDir[2] = -m_focalPoint[2];
-
-    mat4.translate(mat, m_focalPoint, mat);
-    mat4.rotate(mat, radians, m_right, mat);
-    mat4.translate(mat, invDir, mat);
-
-    dir = vec3.create();
-    vec3.direction(m_position, m_focalPoint, dir);
-
-    // Now update the position
-    mat4.multiplyVec3(mat, m_position, m_position);
-  };
-
-  /**
-   * Compute camera view matrix
-   */
-  this.computeViewMatrix = function() {
-
-    this.computeOrthogonalAxes();
-
-    mat4.lookAt(m_position, m_focalPoint, m_viewUp, m_viewMatrix);
-
-    temp = vec3.create([ m_viewMatrix[0], m_viewMatrix[1], m_viewMatrix[2] ]);
-
-    // If we realize a flip in x axis, then we need to flip our vertical axis
-    // since
-    // we don't want to look upside down.
-    if (vec3.dot(temp, m_cache) < 0.0) {
-      m_viewUp[0] = -m_viewUp[0];
-      m_viewUp[1] = -m_viewUp[1];
-      m_viewUp[2] = -m_viewUp[2];
-      mat4.lookAt(m_position, m_focalPoint, m_viewUp, m_viewMatrix);
-    }
-
-    temp = vec3.create([ m_viewMatrix[0], m_viewMatrix[1], m_viewMatrix[2] ]);
-    vec3.set(temp, m_cache);
-
-    vec3.subtract(m_focalPoint, m_position, m_directionOfProjection);
-    vec3.normalize(m_directionOfProjection, m_directionOfProjection);
-
-    return m_viewMatrix;
+    return m_directionOfProjection;
   };
 
   /**
@@ -235,18 +172,7 @@ vglModule.camera = function() {
    * @returns {mat4}
    */
   this.viewMatrix = function() {
-    return m_viewMatrix;
-  };
-
-  /**
-   * Compute camera projection matrix
-   */
-  this.computeProjectionMatrix = function(aspect, near, far) {
-
-    mat4.identity(m_projectionMatrix);
-    mat4.perspective(m_viewAngle, aspect, near, far, m_projectionMatrix);
-
-    return m_projectionMatrix;
+    return this.computeViewMatrix();
   };
 
   /**
@@ -257,8 +183,127 @@ vglModule.camera = function() {
    * @returns {mat4}
    */
   this.projectionMatrix = function() {
+    return this.computeProjectionMatrix();
+  };
+
+  /**
+   * Compute direction of projection
+   */
+  this.computeDirectionOfProjection = function() {
+    vec3.subtract(m_directionOfProjection, m_focalPoint, m_position);
+    vec3.normalize(m_directionOfProjection, m_directionOfProjection);
+    this.modified();
+  };
+
+  /**
+   * Move camera closer or further away from the scene
+   */
+  this.zoom = function(dz) {
+    var deltaX = m_directionOfProjection[0] * dz;
+    var deltaY = m_directionOfProjection[1] * dz;
+    var deltaZ = m_directionOfProjection[2] * dz;
+
+    m_position[0] += deltaX;
+    m_position[1] += deltaY;
+    m_position[2] += deltaZ;
+
+    this.modified();
+    // TODO: If the distance between focal point and the camera position
+    // goes really low then we run into issues
+  };
+
+  /**
+   * Move camera sideways
+   */
+  this.pan = function(dx, dy, dz) {
+    m_position[0] += dx;
+    m_position[1] += dy;
+    m_position[2] += dz;
+
+    m_focalPoint[0] += dx;
+    m_focalPoint[1] += dy
+    m_focalPoint[2] += dz;
+
+    this.modified();
+  };
+
+  /**
+   * Compute camera coordinate axes
+   */
+  this.computeOrthogonalAxes = function() {
+    this.computeDirectionOfProjection();
+    vec3.cross(m_right, m_directionOfProjection, m_viewUp);
+    vec3.normalize(m_right, m_right);
+    this.modified();
+  };
+
+  /**
+   * Rotate camera around center of rotation
+   * @param dx Rotation around vertical axis in degrees
+   * @param dy Rotation around horizontal axis in degrees
+   */
+  this.rotate = function(dx, dy) {
+
+    // Convert degrees into radians
+    dx = 0.5 * dx * (Math.PI / 180.0);
+    dy = 0.5 * dy * (Math.PI / 180.0);
+
+    var mat = mat4.create();
+    mat4.identity(mat, mat);
+
+    var invtrans = new vec3.create();
+    invtrans[0] = -m_centerOrRotation[0];
+    invtrans[1] = -m_centerOrRotation[1];
+    invtrans[2] = -m_centerOrRotation[2];
+
+    mat4.translate(mat, mat, m_centerOrRotation);
+    mat4.rotate(mat, mat, dx, m_viewUp);
+    mat4.rotate(mat, mat, dy, m_right);
+    mat4.translate(mat, mat, invtrans);
+
+    vec3.transformMat4(m_position, m_position, mat);
+    vec3.transformMat4(m_focalPoint, m_focalPoint, mat);
+
+    // Update right vector
+    vec3.transformMat4(m_right, m_right, mat);
+    vec3.normalize(m_right, m_right);
+
+    // Update viewup vector
+    vec3.transformMat4(m_viewUp, m_viewUp, mat);
+    vec3.normalize(m_viewUp, m_viewUp);
+
+    // Update direction of projection
+    this.computeOrthogonalAxes();
+
+    // Mark modified
+    this.modified();
+  }
+
+  /**
+   * Compute camera view matrix
+   */
+  this.computeViewMatrix = function() {
+    if (m_computeModelViewMatrixTime.getMTime() < this.getMTime()) {
+      mat4.lookAt(m_viewMatrix, m_position, m_focalPoint, m_viewUp);
+      m_computeModelViewMatrixTime.modified();
+    }
+
+    return m_viewMatrix;
+  };
+
+  /**
+   * Compute camera projection matrix
+   */
+  this.computeProjectionMatrix = function() {
+    if (m_computeProjectMatrixTime.getMTime() < this.getMTime()) {
+      mat4.perspective(m_projectionMatrix, m_viewAngle, m_viewAspect, m_near, m_far);
+      m_computeProjectMatrixTime.modified();
+    }
+
     return m_projectionMatrix;
   };
+
+  this.computeDirectionOfProjection();
 
   return this;
 };

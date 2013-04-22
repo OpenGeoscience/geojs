@@ -1,16 +1,12 @@
 /**
  * Map options object specification
  */
-geoModule.mapOptions = function() {
-  if (!(this instanceof geoModule.mapOptions)) {
-    return new geoModule.mapOptions();
-  }
-
-  /** @private */
-  this.zoom = 10;
-
-  /** @private */
-  this.center = geoModule.latlng(0.0, 0.0);
+geoModule.mapOptions = {
+  zoom: 0,
+  center: geoModule.latlng(0.0, 0.0),
+  country_boundries: true,
+  state_boundries: {},
+  sourcebigb: ""
 };
 
 /**
@@ -41,12 +37,23 @@ geoModule.map = function(node, options) {
   /** @private */
   var m_options = options;
 
+  /** @private **/
+  var m_layers = {};
+
+  /** @private **/
+  var m_activeLayer = null;
+
   if (!options.center) {
     m_options.center = geoModule.latlng(0.0, 0.0);
   }
 
   if (options.zoom === undefined) {
     m_options.zoom = 10;
+  }
+
+  if (!options.source) {
+    console.log("[error] Map requires valid source for the context");
+    return null;
   }
 
   var m_interactorStyle = geoModule.mapInteractorStyle();
@@ -59,6 +66,7 @@ geoModule.map = function(node, options) {
   var m_renderer = m_viewer.renderWindow().activeRenderer();
 
   $(m_interactorStyle).on(ogs.vgl.command.leftButtonPressEvent, draw);
+  $(m_interactorStyle).on(ogs.vgl.command.middleButtonPressEvent, draw);
   $(m_interactorStyle).on(ogs.vgl.command.rightButtonPressEvent, draw);
   $(this).on(geoModule.command.updateEvent, draw);
 
@@ -66,16 +74,15 @@ geoModule.map = function(node, options) {
    * Initialize the scene
    */
   function initScene() {
-    var camera = m_renderer.camera();
-
-    var distance = 600;
-    distance = 600 - (600 - (60 * m_options.zoom)) + 1;
-
-    camera
-        .setPosition(m_options.center.lng(), m_options.center.lat(), distance);
-    camera.setFocalPoint(m_options.center.lng(), m_options.center.lat(), 0.0);
-
+    updateZoom();
     m_initialized = true;
+  }
+
+  /**
+   * Update view extents based on the zoom
+   */
+  function updateZoom(useCurrent) {
+    m_interactorStyle.zoom(m_options, useCurrent);
   }
 
   /**
@@ -102,28 +109,26 @@ geoModule.map = function(node, options) {
     var canvasY = 0;
     var currentElement = this;
 
-    do {
-      totalOffsetX += currentElement.offsetLeft;
-      totalOffsetY += currentElement.offsetTop;
-    } while (currentElement === currentElement.offsetParent);
+    do{
+        totalOffsetX += currentElement.offsetLeft - currentElement.scrollLeft;
+        totalOffsetY += currentElement.offsetTop - currentElement.scrollTop;
+    }
+    while(currentElement = currentElement.offsetParent)
 
     canvasX = event.pageX - totalOffsetX;
     canvasY = event.pageY - totalOffsetY;
 
-    return {
-      x : canvasX,
-      y : canvasY
-    };
+    return {x:canvasX, y:canvasY}
   }
 
   // TODO use zoom and center options
   m_baseLayer = (function() {
     var mapActor = ogs.vgl.utils.createTexturePlane(-180.0, -90.0, 0.0, 180.0,
                                                     -90.0, 0.0, -180.0, 90.0,
-                                                    0.0);
+                                                     0.0);
     // Setup texture
     var worldImage = new Image();
-    worldImage.src = "/data/assets/land_shallow_topo_2048.png";
+    worldImage.src = m_options.source;
     worldImage.onload = function() {
       var worldTexture = new vglModule.texture();
       worldTexture.updateDimensions();
@@ -143,6 +148,40 @@ geoModule.map = function(node, options) {
   })();
 
   /**
+   * Get map options
+   */
+  this.options = function() {
+    return m_options;
+  };
+
+
+  /**
+   * Get the zoom level of the map
+   *
+   * @returns {Number}
+   */
+  this.zoom = function() {
+    return m_options.zoom;
+  }
+
+  /**
+   * Set zoom level of the map
+   *
+   * @param val {0-17}
+   */
+  this.setZoom = function(val) {
+    if (val !== m_options.zoom) {
+      m_options.zoom = val;
+      updateZoom(true);
+      this.modified();
+      $(this).trigger(geoModule.command.updateEvent);
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
    * Add layer to the map
    *
    * @method addLayer
@@ -154,9 +193,12 @@ geoModule.map = function(node, options) {
     if (layer != null) {
       // TODO Check if the layer already exists
       // TODO Set the rendering order correctly
-      m_renderer.addActor(layer.actor());
+      m_renderer.addActor(layer.feature());
+      m_layers[layer.name()] = layer;
       m_viewer.render();
       this.modified();
+
+      $(this).trigger({type: geoModule.command.addLayerEvent, layer: layer});
       return true;
     }
 
@@ -171,14 +213,80 @@ geoModule.map = function(node, options) {
    * @return {Boolean}
    */
   this.removeLayer = function(layer) {
-    if (!layer) {
-      m_renderer.removeActor(layer);
+    if (layer !== null || layer !== undefined) {
+      m_renderer.removeActor(layer.feature());
       this.modified();
+      $(this).trigger({type: geoModule.command.removeLayerEvent, layer: layer});
       return true;
     }
 
     return false;
   };
+
+  /**
+   * Toggle visibility of a layer
+   *
+   *  @method toggleLayer
+   *  @param {geo.layer}
+   *  @returns {Boolean}
+   */
+  this.toggleLayer = function(layer) {
+    if (layer !== null || layer !== undefined) {
+      layer.setVisible(!layer.visible());
+      this.modified();
+      $(this).trigger({type: geoModule.command.toggleLayerEvent, layer: layer});
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Return current or active layer
+   *
+   * @returns {geo.layer}
+   */
+  this.activeLayer = function() {
+    return m_activeLayer;
+  }
+
+  /**
+   * Make a layer current or active for operations
+   *
+   * @method selectLayer
+   * @param {geo.layer}
+   * @returns {Boolean}
+   *
+   */
+  this.selectLayer = function(layer) {
+    if (layer !== undefined && m_activeLayer != layer) {
+      var tempLayer = layer;
+      m_activeLayer = layer;
+      this.modified();
+      if (layer !== null) {
+        $(this).trigger({type: geoModule.command.selectLayerEvent, layer: layer});
+      } else {
+        $(this).trigger({type: geoModule.command.unselectLayerEvent, layer: tempLayer});
+      }
+      return true;
+    }
+
+    return false;
+  };
+
+  /**
+   * Find layer by layer id
+   *
+   * @method toggleLayer
+   * @param {String}
+   * @returns {geo.layer}
+   */
+  this.findLayerById = function(layerId) {
+    if (m_layers.hasOwnProperty(layerId)) {
+      return m_layers[layerId];
+    }
+    return null;
+  }
 
   /**
    * Manually force to render map
@@ -192,7 +300,49 @@ geoModule.map = function(node, options) {
    */
   this.resize = function(width, height) {
     m_viewer.renderWindow().resize(width, height);
+    $(this).trigger({type: geoModule.command.resizeEvent, width: width,
+      height: height});
   };
+
+  /**
+   * Toggle country boundries
+   *
+   * @returns {Boolean}
+   */
+  this.toggleCountryBoundries = function() {
+    var layer = this.findLayerById('country-boundries');
+    if (layer !== null) {
+      layer.setVisible(!layer.visible());
+      return true;
+    }
+    else {
+      // Load countries data first
+      var reader = ogs.vgl.geojsonReader();
+      var geoms = reader.readGJObject(ogs.geo.countries);
+      var layer = ogs.geo.featureLayer({
+        "opacity" : 1,
+        "showAttribution" : 1,
+        "visible" : 1
+      }, ogs.geo.multiGeometryFeature(geoms));
+
+      layer.setName('country-boundries');
+      this.addLayer(layer);
+    }
+  };
+
+  /**
+   * Toggle us state boudries
+   *
+   * @returns {Boolean}
+   */
+  this.toggleStateBoundries = function(countryName) {
+    // @todo Imeplement this
+  };
+
+  // Check if need to show country boundries
+  if (m_options.country_boundries === true) {
+    this.toggleCountryBoundries();
+  }
 
   return this;
 };

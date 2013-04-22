@@ -29,27 +29,33 @@ vglModule.renderer = function() {
   vglModule.object.call(this);
 
   /** @private */
-  var m_x = 0;
-
-  /** @private */
-  var m_y = 0;
-
-  /** @private */
-  var m_width = 0;
-
-  /** @private */
-  var m_height = 0;
-
-  /** @private */
-  var m_clippingRange = [ 0.1, 1000.0 ];
+  var m_backgroundColor = [1.0, 1.0, 1.0, 1.0];
 
   /** @private */
   var m_sceneRoot = new vglModule.groupNode();
 
   /** @private */
   var m_camera = new vglModule.camera();
-
   m_camera.addChild(m_sceneRoot);
+
+  /**
+   * Get background color
+   */
+  this.backgroundColor = function() {
+    return m_backgroundColor;
+  };
+
+  /**
+   * Set background color
+   */
+  this.setBackgroundColor = function(r, g, b, a) {
+    m_backgroundColor[0] = r;
+    m_backgroundColor[1] = g;
+    m_backgroundColor[2] = b;
+    m_backgroundColor[3] = a;
+
+    this.modified();
+  }
 
   /**
    * Get scene root
@@ -66,39 +72,29 @@ vglModule.renderer = function() {
   };
 
   /**
-   * Get width of renderer
-   */
-  this.width = function() {
-    return m_width;
-  };
-
-  /**
-   * Get height of renderer
-   */
-  this.height = function() {
-    return m_height;
-  };
-
-  /**
    * Render the scene
    */
   this.render = function() {
-    gl.clearColor(1.0, 1.0, 1.0, 1.0);
+    gl.clearColor(m_backgroundColor[0], m_backgroundColor[1],
+      m_backgroundColor[2], m_backgroundColor[3]);
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    perspectiveMatrix = m_camera.computeProjectionMatrix((m_width / m_height),
-                                                         m_clippingRange[0],
-                                                         m_clippingRange[1]);
+    perspectiveMatrix = m_camera.projectionMatrix();
 
     var renSt = new vglModule.renderState();
     renSt.m_projectionMatrix = perspectiveMatrix;
     var children = m_sceneRoot.children();
     for ( var i = 0; i < children.length; ++i) {
       var actor = children[i];
-      mat4.multiply(m_camera.computeViewMatrix(), actor.matrix(),
-                    renSt.m_modelViewMatrix);
+      actor.computeBounds();
+      if (actor.visible() === false) {
+        continue;
+      }
+
+      mat4.multiply(renSt.m_modelViewMatrix, m_camera.viewMatrix(),
+                    actor.matrix());
       renSt.m_material = actor.material();
       renSt.m_mapper = actor.mapper();
 
@@ -108,6 +104,68 @@ vglModule.renderer = function() {
       renSt.m_mapper.render(renSt);
       renSt.m_material.remove(renSt);
     }
+  };
+
+  /**
+   * Automatically set up the camera based on visible actors
+   */
+  this.resetCamera = function() {
+    m_camera.computeBounds();
+
+    var vn = m_camera.directionOfProjection();
+    var visibleBounds = m_camera.bounds();
+
+    // console.log('visibleBounds ', visibleBounds);
+
+    var center = [
+      (visibleBounds[0] + visibleBounds[1]) / 2.0,
+      (visibleBounds[2] + visibleBounds[3]) / 2.0,
+      (visibleBounds[4] + visibleBounds[5]) / 2.0];
+
+    // console.log('center ', center);
+
+    var diagonals = [
+      visibleBounds[1] - visibleBounds[0],
+      visibleBounds[3] - visibleBounds[2],
+      visibleBounds[5] - visibleBounds[4],
+    ];
+
+    var radius = 0.0;
+    if (diagonals[0] > diagonals[1]) {
+      if (diagonals[0] > diagonals[2]) {
+        radius = diagonals[0] / 2.0;
+      } else {
+        radius = diagonals[2] / 2.0;
+      }
+    } else {
+      if (diagonals[1] > diagonals[2]) {
+        radius = diagonals[1] / 2.0;
+      } else {
+        radius = diagonals[2] / 2.0;
+      }
+    }
+
+    var aspect = m_camera.viewAspect();
+    var angle = m_camera.viewAngle();
+
+    // @todo Need to figure out what's happening here
+    if (aspect >= 1.0) {
+      angle = 2.0 * Math.atan(Math.tan(angle * 0.5) / aspect);
+    } else {
+      angle = 2.0 * Math.atan(Math.tan(angle * 0.5) * aspect);
+    }
+
+    var distance =  radius / Math.sin(angle * 0.5);
+
+    var vup = m_camera.viewUpDirection();
+
+    if (Math.abs(vec3.dot(vup, vn)) > 0.999) {
+      m_camera.setViewDirection(-vup[2], vup[0], vup[1]);
+    }
+
+    m_camera.setFocalPoint(center[0], center[1], center[2]);
+    m_camera.setPosition(center[0] + distance * -vn[0],
+      center[1] + distance * -vn[1], center[2] + distance * -vn[2]);
   };
 
   /**
@@ -128,12 +186,9 @@ vglModule.renderer = function() {
    * Resize viewport given a position, width and height
    */
   this.positionAndResize = function(x, y, width, height) {
-    m_x = x;
-    m_y = y;
-    m_width = width;
-    m_height = height;
     // TODO move this code to camera
-    gl.viewport(m_x, m_y, m_width, m_height);
+    gl.viewport(x, y, width, height);
+    m_camera.setViewAspect(width / height);
     this.modified();
   };
 
@@ -154,7 +209,7 @@ vglModule.renderer = function() {
    * Remove the actor from the collection
    */
   this.removeActor = function(actor) {
-    if (actor in m_sceneRoot.children()) {
+    if (m_sceneRoot.children().indexOf(actor) !== -1) {
       m_sceneRoot.removeChild(actor);
       this.modified();
       return true;
@@ -169,11 +224,11 @@ vglModule.renderer = function() {
   this.worldToDisplay = function(worldPt, viewMatrix, projectionMatrix, width,
                                  height) {
     var viewProjectionMatrix = mat4.create();
-    mat4.multiply(projectionMatrix, viewMatrix, viewProjectionMatrix);
+    mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
 
     // Transform world to clipping coordinates
     var clipPt = vec4.create();
-    mat4.multiplyVec4(viewProjectionMatrix, worldPt, clipPt);
+    vec4.transformMat4(clipPt, worldPt, viewProjectionMatrix);
 
     if (clipPt[3] !== 0.0) {
       clipPt[0] = clipPt[0] / clipPt[3];
@@ -189,7 +244,7 @@ vglModule.renderer = function() {
     var winZ = clipPt[2];
     var winW = clipPt[3];
 
-    return vec4.createFrom(winX, winY, winZ, winW);
+    return vec4.fromValues(winX, winY, winZ, winW);
   };
 
   /**
@@ -202,12 +257,12 @@ vglModule.renderer = function() {
     var z = displayPt[2];
 
     var viewProjectionInverse = mat4.create();
-    mat4.multiply(projectionMatrix, viewMatrix, viewProjectionInverse);
-    mat4.inverse(viewProjectionInverse, viewProjectionInverse);
+    mat4.multiply(viewProjectionInverse, projectionMatrix, viewMatrix);
+    mat4.invert(viewProjectionInverse, viewProjectionInverse);
 
-    var worldPt = vec4.createFrom(x, y, z, 1);
-    mat4.multiplyVec4(viewProjectionInverse, worldPt, worldPt);
-
+    var worldPt = vec4.fromValues(x, y, z, 1);
+    var myvec = vec4.create();
+    vec4.transformMat4(worldPt, worldPt, viewProjectionInverse);
     if (worldPt[3] !== 0.0) {
       worldPt[0] = worldPt[0] / worldPt[3];
       worldPt[1] = worldPt[1] / worldPt[3];

@@ -15,7 +15,7 @@ var vertexAttributeKeys = {
 
 /**
  * Create a new instance of class primitive
- *
+ *F
  * @class
  * @return {vglModule.primitive}
  */
@@ -321,6 +321,13 @@ vglModule.sourceData = function() {
   };
 
   /**
+   * Return length of array
+   */
+  this.lengthOfArray = function() {
+    return m_data.length;
+  };
+
+  /**
    * Return size of the source data in bytes
    */
   this.sizeInBytes = function() {
@@ -454,9 +461,9 @@ vglModule.sourceDataP3T3f = function() {
   }
   vglModule.sourceData.call(this);
 
-  this.addAttribute(vertexAttributeKeys.Position, gl.FLOAT, 4, 0, 6 * 4, 3,
+  this.addAttribute(vglModule.vertexAttributeKeys.Position, gl.FLOAT, 4, 0, 6 * 4, 3,
                     false);
-  this.addAttribute(vertexAttributeKeys.TextureCoordinate, gl.FLOAT, 4, 12,
+  this.addAttribute(vglModule.vertexAttributeKeys.TextureCoordinate, gl.FLOAT, 4, 12,
                     6 * 4, 3, false);
 
   this.pushBack = function(value) {
@@ -483,9 +490,9 @@ vglModule.sourceDataP3N3f = function() {
 
   vglModule.sourceData.call(this);
 
-  this.addAttribute(vertexAttributeKeys.Position, gl.FLOAT, 4, 0, 6 * 4, 3,
+  this.addAttribute(vglModule.vertexAttributeKeys.Position, gl.FLOAT, 4, 0, 6 * 4, 3,
                     false);
-  this.addAttribute(vertexAttributeKeys.Normal, gl.FLOAT, 4, 12, 6 * 4, 3,
+  this.addAttribute(vglModule.vertexAttributeKeys.Normal, gl.FLOAT, 4, 12, 6 * 4, 3,
                     false);
 
   this.pushBack = function(value) {
@@ -512,7 +519,7 @@ vglModule.sourceDataP3fv = function() {
 
   vglModule.sourceData.call(this);
 
-  this.addAttribute(vertexAttributeKeys.Position, gl.FLOAT, 4, 0, 3 * 4, 3,
+  this.addAttribute(vglModule.vertexAttributeKeys.Position, gl.FLOAT, 4, 0, 3 * 4, 3,
                     false);
 
   this.pushBack = function(value) {
@@ -538,7 +545,7 @@ vglModule.sourceDataT2fv = function() {
 
   vglModule.sourceData.call(this);
 
-  this.addAttribute(vertexAttributeKeys.TextureCoordinate, gl.FLOAT, 4, 0,
+  this.addAttribute(vglModule.vertexAttributeKeys.TextureCoordinate, gl.FLOAT, 4, 0,
                     2 * 4, 2, false);
 
   this.pushBack = function(value) {
@@ -564,7 +571,7 @@ vglModule.sourceDataC3fv = function() {
 
   vglModule.sourceData.call(this);
 
-  this.addAttribute(vertexAttributeKeys.Color, gl.FLOAT, 4, 0, 3 * 4, 3, false);
+  this.addAttribute(vglModule.vertexAttributeKeys.Color, gl.FLOAT, 4, 0, 3 * 4, 3, false);
 
   this.pushBack = function(value) {
     this.insert(value);
@@ -582,34 +589,60 @@ inherit(vglModule.sourceDataC3fv, vglModule.sourceData);
  * @returns {vglModule.geometryData}
  */
 vglModule.geometryData = function() {
+  /** @private */
   var m_name = "";
-  var m_primitives = [];
-  var m_sources = [];
-  var m_bounds = [];
-  var m_computeBounds = true;
 
-  // / Return ID of the geometry data
+  /** @private */
+  var m_primitives = [];
+
+  /** @private */
+  var m_sources = [];
+
+  /** @private */
+  var m_bounds = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
+
+  /** @private */
+  var m_computeBoundsTimestamp = vglModule.timestamp();
+
+  /** @private */
+  var m_boundsDirtyTimestamp = vglModule.timestamp();
+
+  /**
+   * Return ID of the geometry data
+   */
   this.name = function() {
     return m_name;
   };
-  // / Set name of the geometry data
+
+  /**
+   * Set name of the geometry data
+   */
   this.setName = function(name) {
     m_name = name;
   };
 
-  // / Add new source
+  /**
+   * Add new source
+   */
   this.addSource = function(source) {
-    // TODO Check if the incoming source has duplicate keys
+    // @todo Check if the incoming source has duplicate keys
 
     // NOTE This might not work on IE8 or lower
     if (m_sources.indexOf(source) == -1) {
       m_sources.push(source);
+
+      if (source.hasKey(vglModule.vertexAttributeKeys.Position)) {
+        m_boundsDirtyTimestamp.modified();
+      }
       return true;
     }
 
     return false;
   };
-  // / Return source for a given index. Returns 0 if not found.
+
+  /**
+   * Return source for a given index. Returns 0 if not found.
+   */
   this.source = function(index) {
     if (index < m_sources.length) {
       return m_sources[index];
@@ -617,11 +650,17 @@ vglModule.geometryData = function() {
 
     return 0;
   };
-  // / Return number of sources
+
+  /**
+   * Return number of sources
+   */
   this.numberOfSources = function() {
     return m_sources.length;
   };
-  // / Return source data given a key
+
+  /**
+   * Return source data given a key
+   */
   this.sourceData = function(key) {
     for ( var i = 0; i < m_sources.length; ++i) {
       if (m_sources[i].hasKey(key)) {
@@ -632,7 +671,9 @@ vglModule.geometryData = function() {
     return null;
   };
 
-  // / Add new primitive
+  /**
+   * Add new primitive
+   */
   this.addPrimitive = function(primitive) {
     if (m_primitives.indexOf(primitive) == -1) {
       m_primitives.push(primitive);
@@ -641,7 +682,10 @@ vglModule.geometryData = function() {
 
     return false;
   };
-  // / Return primitive for a given index. Returns 0 if not found.
+
+  /**
+   * Return primitive for a given index. Returns 0 if not found.
+   */
   this.primitive = function(index) {
     if (index < m_primitives.length) {
       return m_primitives[index];
@@ -649,16 +693,39 @@ vglModule.geometryData = function() {
 
     return null;
   };
-  // / Return number of primitives
+
+  /**
+   * Return number of primitives
+   */
   this.numberOfPrimitives = function() {
     return m_primitives.length;
   };
 
-  // / Return bounds [minX, maxX, minY, maxY, minZ, maxZ]
+  /**
+   * Return bounds [minX, maxX, minY, maxY, minZ, maxZ]
+   */
   this.bounds = function() {
+    if (m_boundsDirtyTimestamp.getMTime() > m_computeBoundsTimestamp.getMTime()) {
+      this.computeBounds();
+    }
     return m_bounds;
   };
-  // / Set bounds
+
+  /**
+   * Reset bounds
+   */
+  this.resetBounds = function() {
+    m_bounds[0] = 0.0;
+    m_bounds[1] = 0.0;
+    m_bounds[2] = 0.0;
+    m_bounds[3] = 0.0;
+    m_bounds[4] = 0.0;
+    m_bounds[5] = 0.0;
+  }
+
+  /**
+   * Set bounds
+   */
   this.setBounds = function(minX, maxX, minY, maxY, minZ, maxZ) {
     m_bounds[0] = minX;
     m_bounds[1] = maxX;
@@ -666,5 +733,53 @@ vglModule.geometryData = function() {
     m_bounds[3] = maxY;
     m_bounds[4] = minZ;
     m_bounds[5] = maxZ;
+
+    m_computeBoundsTimestamp.modified();
+
+    return true;
   };
+
+  /**
+   * Compute bounds
+   */
+  this.computeBounds = function() {
+
+    if (m_boundsDirtyTimestamp.getMTime() > m_computeBoundsTimestamp.getMTime()) {
+
+      var sourceData = this.sourceData(vglModule.vertexAttributeKeys.Position);
+      var data = sourceData.data();
+      var numberOfComponents = sourceData.attributeNumberOfComponents(
+        vglModule.vertexAttributeKeys.Position);
+      var count = sourceData.lengthOfArray() / numberOfComponents;
+      var ib = 0, jb = 0;
+      var value = null;
+
+      this.resetBounds();
+      for (var i = 0; i < count; ++i) {
+        var vertexPosition = i * numberOfComponents;
+        for (var j = 0; j < numberOfComponents; ++j) {
+
+          value = data[vertexPosition + j];
+          ib = j * 2;
+          jb = j * 2 + 1;
+
+          if (i === 0) {
+            m_bounds[ib] = value;
+            m_bounds[jb] = value;
+          } else {
+            if (value > m_bounds[jb]) {
+              m_bounds[jb] = value;
+            }
+            if (value < m_bounds[ib]) {
+              m_bounds[ib] = value;
+            }
+          }
+        }
+      }
+
+      m_computeBoundsTimestamp.modified();
+    }
+  };
+
+  return this;
 };

@@ -165,6 +165,7 @@ vglModule.renderWindow = function(canvas) {
    */
   this.resize = function(width, height) {
     this.positionAndResize(m_x, m_y, width, height);
+    this.modified();
   };
 
   this.positionAndResize = function(x, y, width, height) {

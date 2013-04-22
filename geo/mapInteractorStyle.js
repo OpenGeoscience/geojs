@@ -20,14 +20,20 @@ geoModule.mapInteractorStyle = function() {
     y : 0
   };
 
+
   this.handleMouseMove = function(event) {
+    var canvas = m_that.viewer().canvas();
+    if (event.target !== canvas) {
+      return true;
+    }
+
     var width = m_that.viewer().renderWindow().windowSize()[0];
     var height = m_that.viewer().renderWindow().windowSize()[1];
     var renderer = m_that.viewer().renderWindow().activeRenderer();
     var camera = renderer.camera();
 
     var outsideCanvas = false;
-    var coords = m_that.viewer().canvas().relMouseCoords(event);
+    var coords = canvas.relMouseCoords(event);
 
     var currentMousePos = {
       x : 0,
@@ -54,18 +60,18 @@ geoModule.mapInteractorStyle = function() {
       return;
     }
 
-    if (m_leftMouseButtonDown) {
+    if (m_middileMouseButtonDown) {
 
       var focalPoint = camera.focalPoint();
-      var focusWorldPt = vec4.createFrom(focalPoint[0], focalPoint[1],
+      var focusWorldPt = vec4.fromValues(focalPoint[0], focalPoint[1],
                                          focalPoint[2], 1);
 
       var focusDisplayPt = renderer.worldToDisplay(focusWorldPt, camera
           .viewMatrix(), camera.projectionMatrix(), width, height);
 
-      var displayPt1 = vec4.createFrom(currentMousePos.x, currentMousePos.y,
+      var displayPt1 = vec4.fromValues(currentMousePos.x, currentMousePos.y,
                                        focusDisplayPt[2], 1.0);
-      var displayPt2 = vec4.createFrom(m_mouseLastPos.x, m_mouseLastPos.y,
+      var displayPt2 = vec4.fromValues(m_mouseLastPos.x, m_mouseLastPos.y,
                                        focusDisplayPt[2], 1.0);
 
       var worldPt1 = renderer.displayToWorld(displayPt1, camera.viewMatrix(),
@@ -75,13 +81,17 @@ geoModule.mapInteractorStyle = function() {
                                              camera.projectionMatrix(), width,
                                              height);
 
-      dx = worldPt1[0] - worldPt2[0];
-      dy = worldPt1[1] - worldPt2[1];
-
-      camera.pan(-dx, -dy);
+      var dx = worldPt1[0] - worldPt2[0],
+      dy = worldPt1[1] - worldPt2[1],
+      dz = worldPt1[2] - worldPt2[2];
+      camera.pan(-dx, -dy, -dz);
+      $(m_that).trigger(vglModule.command.middleButtonPressEvent);
+    }
+    if (m_leftMouseButtonDown) {
+      camera.rotate((m_mouseLastPos.x - currentMousePos.x),
+                    (m_mouseLastPos.y - currentMousePos.y));
       $(m_that).trigger(vglModule.command.leftButtonPressEvent);
     }
-
     if (m_rightMouseButtonDown) {
       zTrans = currentMousePos.y - m_mouseLastPos.y;
       camera.zoom(zTrans * 0.5);
@@ -90,23 +100,30 @@ geoModule.mapInteractorStyle = function() {
 
     m_mouseLastPos.x = currentMousePos.x;
     m_mouseLastPos.y = currentMousePos.y;
+
+    return false;
   };
 
+
   this.handleMouseDown = function(event) {
+    var canvas = m_that.viewer().canvas();
+
+    if (event.target !== canvas) {
+      return true;
+    }
+
     if (event.state !== "down") {
       return;
     }
 
-    var canvas = m_that.viewer().canvas();
-
     if (event.button === 0) {
       m_leftMouseButtonDown = true;
     }
+    if (event.button === 1) {
+      m_middileMouseButtonDown = true;
+    }
     if (event.button === 2) {
       m_rightMouseButtonDown = true;
-    }
-    if (event.button === 4) {
-      m_middileMouseButtonDown = true;
     }
 
     coords = canvas.relMouseCoords(event);
@@ -127,23 +144,50 @@ geoModule.mapInteractorStyle = function() {
     return false;
   };
 
+
+  // @note We never get mouse up from scroll bar: See the bug report here
+  // http://bugs.jquery.com/ticket/8184
   this.handleMouseUp = function(event) {
+    var canvas = m_that.viewer().canvas();
+    if (event.target !== canvas) {
+      return true;
+    }
+
     if (event.state !== "up") {
-      return;
+      return true;
     }
 
     if (event.button === 0) {
       m_leftMouseButtonDown = false;
     }
+    if (event.button === 1) {
+      m_middileMouseButtonDown = false;
+    }
     if (event.button === 2) {
       m_rightMouseButtonDown = false;
-    }
-    if (event.button === 4) {
-      m_middileMouseButtonDown = false;
     }
 
     return false;
   };
+
+  this.zoom = function(options, useCurrent) {
+    var renderer = m_that.viewer().renderWindow().activeRenderer();
+    var camera = renderer.camera();
+
+    var distance = 600;
+    distance = 600 - (600 - (60 * options.zoom)) + 1;
+
+    if (useCurrent === undefined || useCurrent === false)  {
+      camera.setPosition(options.center.lng(),
+        options.center.lat(), distance);
+      camera.setFocalPoint(options.center.lng(),
+        options.center.lat(), 0.0);
+    } else {
+      var currPosition = camera.position();
+      camera.setPosition(currPosition[0], currPosition[1], distance);
+      camera.setFocalPoint(currPosition[0], currPosition[1], 0.0);
+    }
+  }
 
   return this;
 };

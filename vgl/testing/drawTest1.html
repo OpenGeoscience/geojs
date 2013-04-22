@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+    <script src="http://code.jquery.com/ui/1.10.1/jquery-ui.js"></script>
+    <script type="text/javascript" src="/common/js/bootstrap.js"></script>
+    <script type="text/javascript" src="/common/js/gl-matrix.js"></script>
+    <script type="text/javascript" src="/common/js/select2.min.js"></script>
+    <script type="text/javascript" src="/lib/geoweb.min.js"></script>
+    <script>
+      var data = { "type": "FeatureCollection",
+        "features": [
+          { "type": "Feature",
+            "geometry": {"type": "Point", "coordinates": [102.0, 0.5]},
+            "properties": {"prop0": "value0"}
+            },
+          { "type": "Feature",
+            "geometry": {
+              "type": "LineString",
+              "coordinates": [
+                [102.0, 0.0], [103.0, 1.0], [104.0, 0.0], [105.0, 1.0]
+                ]
+              },
+            "properties": {
+              "prop0": "value0",
+              "prop1": 0.0
+              }
+            }
+        ]
+      };
+
+      var testDrawSphere = {};
+      testDrawSphere.main = function() {
+        var node = document.getElementById("glcanvas");
+        var viewer = ogs.vgl.viewer(node);
+        viewer.init();
+
+        viewer.renderWindow().resize($(node).width(), $(node).height());
+        var renderer = viewer.renderWindow().activeRenderer();
+
+        var reader = ogs.vgl.geojsonReader();
+        var geoms = reader.readGJObject(data);
+
+        for (var i = 0; i < geoms.length; ++i) {
+          var mapper = ogs.vgl.mapper();
+          mapper.setGeometryData(geoms[i]);
+
+          var material = ogs.vgl.utils.createGeometryMaterial();
+
+          var actor = ogs.vgl.actor();
+          actor.setMapper(mapper);
+          actor.setMaterial(material);
+          renderer.addActor(actor);
+        }
+
+        renderer.setBackgroundColor(0.0, 0.0, 0.0, 1.0);
+        renderer.resetCamera();
+
+        viewer.render();
+      }
+    </script>
+  </head>
+  <body onload="testDrawSphere.main()">
+    <div>
+      <!-- It is important that canvas has height and width -->
+      <canvas id="glcanvas" width="400px" height="400px"></canvas>
+    </div>
+  </body>
+</html>

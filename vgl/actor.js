@@ -77,6 +77,7 @@ vglModule.actor = function() {
    * @param {Number} z
    */
   this.setRotation = function(angle, x, y, z) {
+    this.boundsModified();
   };
 
   /**
@@ -95,6 +96,7 @@ vglModule.actor = function() {
    * @param {Number} z Scale in z direction
    */
   this.setScale = function(x, y, z) {
+    this.boundsModified();
   };
 
   /**
@@ -113,6 +115,7 @@ vglModule.actor = function() {
    * @param {Number} z Translation in z direction
    */
   this.setTranslation = function(x, y, z) {
+    this.boundsModified();
   };
 
   /**
@@ -166,37 +169,77 @@ vglModule.actor = function() {
    * @param {vglModule.mapper}
    */
   this.setMapper = function(mapper) {
-    m_mapper = mapper;
+    if (mapper !== m_mapper) {
+      m_mapper = mapper;
+      this.boundsModified();
+    }
   };
 
   /**
-   * TODO Implement this
+   * @todo
    */
   this.accept = function(visitor) {
   };
 
   /**
-   * TODO Implement this
+   * @todo
    */
   this.ascend = function(visitor) {
   };
 
   /**
-   * Compute object space to world space matrix TODO Implement this
+   * Compute object space to world space matrix
+   * @todo
    */
   this.computeLocalToWorldMatrix = function(matrix, visitor) {
   };
 
   /**
-   * Compute world space to object space matrix TODO Implement this
+   * Compute world space to object space matrix
+   * @todo
    */
   this.computeWorldToLocalMatrix = function(matrix, visitor) {
   };
 
   /**
-   * Compute actor bounds TODO
+   * Compute actor bounds
    */
   this.computeBounds = function() {
+    if (m_mapper === null || m_mapper === undefined) {
+      this.resetBounds();
+      return;
+    }
+
+    var computeBoundsTimestamp = this.computeBoundsTimestamp();
+
+    if (this.boundsDirtyTimestamp().getMTime() > computeBoundsTimestamp.getMTime() ||
+      m_mapper.boundsDirtyTimestamp().getMTime() > computeBoundsTimestamp.getMTime()) {
+
+      m_mapper.computeBounds();
+      var mapperBounds = m_mapper.bounds();
+
+      var minPt = [mapperBounds[0], mapperBounds[2], mapperBounds[4]];
+      var maxPt = [mapperBounds[1], mapperBounds[3], mapperBounds[5]];
+
+      var actorMatrix = this.modelViewMatrix();
+      vec3.transformMat4(minPt, minPt, actorMatrix);
+      vec3.transformMat4(maxPt, maxPt, actorMatrix);
+
+      var newBounds = [
+        minPt[0] > maxPt[0] ? maxPt[0] : minPt[0],
+        minPt[0] > maxPt[0] ? minPt[0] : maxPt[0],
+        minPt[1] > maxPt[1] ? maxPt[1] : minPt[1],
+        minPt[1] > maxPt[1] ? minPt[1] : maxPt[1],
+        minPt[2] > maxPt[2] ? maxPt[2] : minPt[2],
+        minPt[2] > maxPt[2] ? minPt[2] : maxPt[2]
+      ];
+
+      this.setBounds(newBounds[0], newBounds[1],
+                     newBounds[2], newBounds[3],
+                     newBounds[4], newBounds[5]);
+
+      computeBoundsTimestamp.modified();
+    }
   };
 
   return this;

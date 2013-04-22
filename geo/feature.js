@@ -106,3 +106,63 @@ geoModule.pointSpritesFeature = function(image, positions, colors) {
 };
 
 inherit(geoModule.pointSpritesFeature, geoModule.feature);
+
+/**
+ * Create a new instance of geometryFeature
+ *
+ * @class
+ * @desc Create a geometry feature given a geometry {ogs.vgl.geometryData} *
+ * @param geometry data {ogs.vgl.geometryData} *
+ * @returns {geoModule.geometryFeature}
+ */
+geoModule.geometryFeature = function(geom) {
+
+  if (!(this instanceof geoModule.geometryFeature)) {
+    return new geoModule.geometryFeature(geom);
+  }
+
+  ogs.vgl.actor.call(this);
+
+  // Initialize
+  var mapper = ogs.vgl.mapper();
+  mapper.setGeometryData(geom);
+
+  this.setMapper(mapper);
+
+  var material = ogs.vgl.utils.createGeometryMaterial();
+  this.setMaterial(material);
+
+  return this;
+};
+
+inherit(geoModule.geometryFeature, geoModule.feature);
+
+/**
+ * Create a new instance of multiGeometryFeature
+ *
+ * @class
+ * @desc Create a multi geometry feature given a array of geometry data {ogs.vgl.geometryData} *
+ * @param {Array}
+ * @returns {geoModule.multiGeometryFeature}
+ */
+geoModule.multiGeometryFeature = function(geoms) {
+
+  if (!(this instanceof geoModule.multiGeometryFeature)) {
+    return new geoModule.multiGeometryFeature(geoms);
+  }
+
+  ogs.vgl.actor.call(this);
+
+  // Initialize
+  var mapper = ogs.vgl.groupMapper();
+  mapper.setGeometryDataArray(geoms);
+
+  this.setMapper(mapper);
+
+  var material = ogs.vgl.utils.createGeometryMaterial();
+  this.setMaterial(material);
+
+  return this;
+};
+
+inherit(geoModule.multiGeometryFeature, geoModule.geometryFeature);
