@@ -11,6 +11,7 @@ srvModule.webSocketOptions = function() {
   }
 
   this.url = 'ws://' + window.location.host + '/ws';
+  this.nodes = [];
 
   return this;
 };
@@ -24,7 +25,8 @@ srvModule.webSocket = function(options) {
   this.events = {
     "message_recieved" : "message_recieved",
     "opened" : "opened",
-    "closed" : "closed"
+    "closed" : "closed",
+    "ready" : "ready"
   };
 
   if (!(this instanceof srvModule.webSocket)) {
@@ -38,6 +40,12 @@ srvModule.webSocket = function(options) {
 
   /** @private */
   var m_url = options.url || 'ws://' + window.location.host + '/ws';
+
+  /** @private */
+  var m_nodes = options.nodes || [];
+
+  /** @private */
+  var m_readynodes = {};
 
   /** @private */
   var m_binders = {};
@@ -73,23 +81,50 @@ srvModule.webSocket = function(options) {
   m_ws.onopen = function() {
     m_that.m_open = true;
     $(m_that).trigger({
-      type: this.events.opened
+      type: m_that.events.opened
     });
+
+    //initiate nodes if needed
+    if(m_that.nodes.length == 0) {
+      $(m_that).trigger({
+	type: m_that.events.ready
+      });
+    } else {
+
+      m_that.bind('nodemanager', function(node) {
+	m_readynodes[node] = true;
+	var allReady = true;
+	for(var i = 0; i < m_nodes.length; i++) {
+	  if(!m_readynodes[m_nodes[i]]) {
+	    allReady = false;
+	  }
+	}
+	if(allReady) {
+	  $(m_that).trigger({
+	    type: m_that.events.ready
+	  });
+	}
+      });
+
+      for(var i = 0; i < m_nodes.length; i++) {
+	m_that.message('nodemanager',m_nodes[i]);
+      }
+    }
   }
 
   // websocket connection lost
   m_ws.onclosed = function() {
     m_that.m_open = false;
     $(m_that).trigger({
-      type: this.events.closed
+      type: m_that.events.closed
     });
   }
 
-  // Recived a message from the server
+  // Recieved a message from the server
   // trigger event, and call all callbacks registered for this target
   m_ws.onmessage = function (event) {
     $(m_that).trigger({
-      type : this.events.message_recieved,
+      type : m_that.events.message_recieved,
       message : event.data
     });
 
