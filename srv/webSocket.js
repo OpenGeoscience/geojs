@@ -68,7 +68,7 @@ srvModule.webSocket = function(options) {
   // Close the websocket when the window closes
   window.onbeforeunload = function (event) {
     m_ws.close(1000, 'Window closed');
-    m_that.m_open = false;
+    m_open = false;
 
     if (!event) {
       event = window.event;
@@ -79,13 +79,13 @@ srvModule.webSocket = function(options) {
 
   // websocket connection established
   m_ws.onopen = function() {
-    m_that.m_open = true;
+    m_open = true;
     $(m_that).trigger({
       type: m_that.events.opened
     });
 
     //initiate nodes if needed
-    if(m_that.nodes.length == 0) {
+    if(m_nodes.length == 0) {
       $(m_that).trigger({
 	type: m_that.events.ready
       });
@@ -114,7 +114,7 @@ srvModule.webSocket = function(options) {
 
   // websocket connection lost
   m_ws.onclosed = function() {
-    m_that.m_open = false;
+    m_open = false;
     $(m_that).trigger({
       type: m_that.events.closed
     });
