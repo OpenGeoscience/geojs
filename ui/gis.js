@@ -1,12 +1,12 @@
-
+/*jslint devel: true, eqeq: true, forin: true, newcap: true, plusplus: true, todo: true, indent: 2 nomen: true unparam: true */
+/*global geoModule, uiModule, document, ogs, inherit, $*/
 uiModule.gis = function() {
+  "use strict";
   if (!(this instanceof uiModule.gis)) {
     return new uiModule.gis();
   }
-
   return this;
 };
-
 /**
  * Create a placeholder to display current layers
  *
@@ -14,41 +14,36 @@ uiModule.gis = function() {
  * @param heading
  */
 uiModule.gis.createList = function(rootId, heading) {
-  var listRoot = document.getElementById(rootId);
-  var itemRoot = document.createElement("div");
+  "use strict";
+  var listRoot, itemRoot, itemHeading, itemCollection, subItemsRoot, subItemsList, tableRoot, tbody;
+  listRoot = document.getElementById(rootId);
+  itemRoot = document.createElement("div");
   itemRoot.setAttribute("class", "accordion-group");
   listRoot.appendChild(itemRoot);
-
-  var itemHeading = document.createElement("div");
+  itemHeading = document.createElement("div");
   itemHeading.setAttribute("class", "accordion-heading");
   itemRoot.appendChild(itemHeading);
-
-  var itemCollection = document.createElement("a");
+  itemCollection = document.createElement("a");
   itemCollection.setAttribute("class", "accordion-toggle");
   itemCollection.setAttribute("data-toggle", "collapse");
-  itemCollection.setAttribute("data-parent", "#"+rootId);
-  itemCollection.setAttribute("href", "#collapse-"+rootId);
+  itemCollection.setAttribute("data-parent", "#" + rootId);
+  itemCollection.setAttribute("href", "#collapse-" + rootId);
   itemCollection.appendChild(document.createTextNode(heading));
   itemHeading.appendChild(itemCollection);
-
-  var subItemsRoot = document.createElement("div");
+  subItemsRoot = document.createElement("div");
   subItemsRoot.setAttribute("class", "accordion-body collapse in");
-  subItemsRoot.setAttribute("id", "collapse-"+rootId);
+  subItemsRoot.setAttribute("id", "collapse-" + rootId);
   itemRoot.appendChild(subItemsRoot);
-  var subItemsList = document.createElement("div");
+  subItemsList = document.createElement("div");
   subItemsList.setAttribute("class", "accordion-inner");
   subItemsRoot.appendChild(subItemsList);
-
-  var tableRoot = document.createElement("table");
+  tableRoot = document.createElement("table");
   tableRoot.setAttribute("id", 'table-' + rootId);
   subItemsList.appendChild(tableRoot);
-
-  var tbody = document.createElement("tbody");
+  tbody = document.createElement("tbody");
   tableRoot.appendChild(tbody);
-
   return tableRoot;
 };
-
 /**
  * Create a list of documents that could be added as a layer
  *
@@ -58,65 +53,58 @@ uiModule.gis.createList = function(rootId, heading) {
  * @param data
  */
 uiModule.gis.createDataList = function(rootId, heading, layersRootId, data, callback) {
-  var listRoot = $(document.getElementById(rootId));
-
-  var itemRoot = $(document.createElement('div'));
+  "use strict";
+  var listRoot, itemRoot, itemHeading, itemCollection, subItemsRoot, subItemsList, tableRoot;
+  listRoot = $(document.getElementById(rootId));
+  itemRoot = $(document.createElement('div'));
   itemRoot.attr('class', 'accordion-group');
   listRoot.append(itemRoot);
-
-  var itemHeading = $(document.createElement('div'));
+  itemHeading = $(document.createElement('div'));
   itemHeading.attr('class', 'accordion-heading');
   itemRoot.append(itemHeading);
-
-  var itemCollection = $(document.createElement('a'));
+  itemCollection = $(document.createElement('a'));
   itemCollection.attr('class', 'accordion-toggle');
   itemCollection.attr('data-toggle', 'collapse');
-  itemCollection.attr('data-parent', '#'+rootId);
-  itemCollection.attr('href', '#collapse-'+rootId);
+  itemCollection.attr('data-parent', '#' + rootId);
+  itemCollection.attr('href', '#collapse-' + rootId);
   itemCollection.append(document.createTextNode(heading));
   itemHeading.append(itemCollection);
-
-  var subItemsRoot = $(document.createElement('div'));
+  subItemsRoot = $(document.createElement('div'));
   subItemsRoot.attr('class', 'accordion-body collapse in');
-  subItemsRoot.attr('id', 'collapse-'+rootId);
+  subItemsRoot.attr('id', 'collapse-' + rootId);
   itemRoot.append(subItemsRoot);
-
-  var subItemsList = $(document.createElement('div'));
+  subItemsList = $(document.createElement('div'));
   subItemsList.attr('class', 'accordion-inner');
   subItemsRoot.append(subItemsList);
-
-  var tableRoot = $(document.createElement('table'));
+  tableRoot = $(document.createElement('table'));
   tableRoot.attr('class', 'table-hover');
   subItemsList.append(tableRoot);
-
   $.each(data, function(i, item) {
-    var row = $(document.createElement('tr'));
+    var row, col, he, select, varname, option, button, k;
+    row = $(document.createElement('tr'));
     row.attr('class', 'success');
     tableRoot.append(row);
-
-    var col = $(document.createElement('td'));
-    var he = $(document.createElement('h4'));
+    col = $(document.createElement('td'));
+    he = $(document.createElement('h4'));
     he.html(item.basename);
     col.append(he);
     row.append(col);
-
     // Add drop-down so that users can select a variable
     col = $(document.createElement('td'));
-    var select = $(document.createElement('select'));
+    select = $(document.createElement('select'));
     select.attr('class', 'combobox');
     col.append(select);
-    for (var k = 0; k < item.variables.length; ++k) {
-      var varname = item.variables[k].name;
-      var option = $(document.createElement('option'));
+    for (k = 0; k < item.variables.length; ++k) {
+      varname = item.variables[k].name;
+      option = $(document.createElement('option'));
       option.attr('value', varname);
       option.html(varname);
       select.append(option);
     }
     row.append(col);
-
     // Add 'add' button
     col = $(document.createElement('td'));
-    var button = $(document.createElement('button'));
+    button = $(document.createElement('button'));
     button.attr('type', 'button');
     button.attr('class', 'btn btn-primary');
     button.attr('id', 'btn-add-' + item.name);
@@ -128,18 +116,15 @@ uiModule.gis.createDataList = function(rootId, heading, layersRootId, data, call
     button.html('Add');
     col.append(button);
     row.append(col);
-
     if (callback != undefined) {
       $(button).on("click", callback);
     }
   });
-
-  $('.combobox').width(Math.max.apply(Math,
-                                       $('.combobox').map(function(){
-                                         return $(this).outerWidth();}).get()));
+  $('.combobox').width(Math.max.apply(Math, $('.combobox').map(function() {
+    return $(this).outerWidth();
+  }).get()));
   $('.combobox').select2();
 };
-
 /**
  * Add a document as a layer to the list
  *
@@ -148,31 +133,27 @@ uiModule.gis.createDataList = function(rootId, heading, layersRootId, data, call
  * @param layersRootId
  * @param elem
  */
-uiModule.gis.addLayer = function(object, layersRootId, elem, selectfunc, togglefunc,
-  removefunc, callback) {
-
-  var rootId = "#" + layersRootId;
-  var _id = $(elem).attr("_id");
+uiModule.gis.addLayer = function(object, layersRootId, elem, selectfunc, togglefunc, removefunc, callback) {
+  "use strict";
+  var rootId, _id, tbody, basename, layerId, tr, td, button;
+  rootId = "#" + layersRootId;
+  _id = $(elem).attr("_id");
   if (_id !== null) {
-    var tbody = $(rootId).find('tbody');
-    var basename = $(elem).attr("name");
+    tbody = $(rootId).find('tbody');
+    basename = $(elem).attr("name");
     $(elem).button('loading');
-
-    var layerId = basename;
-
-    var tr = $(document.createElement('tr'));
+    layerId = basename;
+    tr = $(document.createElement('tr'));
     tr.attr('id', layerId);
     $(tbody).append(tr);
-
     // Name of the layer
-    var td = $(document.createElement('td'));
+    td = $(document.createElement('td'));
     td.append($(document.createElement('h4')).html(basename));
     tr.append(td);
-
     // Select button
     td = $(document.createElement('td'));
     td.attr('class', 'td-btn-layer');
-    var button = $(document.createElement('button'));
+    button = $(document.createElement('button'));
     button.attr('class', 'btn-layer btn-select-layer btn btn-primary disabled');
     button.attr('disabled', 'disabled');
     button.html('Select');
@@ -180,7 +161,6 @@ uiModule.gis.addLayer = function(object, layersRootId, elem, selectfunc, togglef
       selectfunc(this, layerId);
     });
     td.append(button);
-
     // Toggle button
     button = $(document.createElement('button'));
     button.attr('class', 'btn-layer btn-toggle-layer btn btn-warning disabled');
@@ -190,7 +170,6 @@ uiModule.gis.addLayer = function(object, layersRootId, elem, selectfunc, togglef
       togglefunc(this, layerId);
     });
     td.append(button);
-
     // Remove button
     button = $(document.createElement('button'));
     button.attr('class', 'btn-layer btn-remove-layer btn btn-danger disabled');
@@ -201,29 +180,24 @@ uiModule.gis.addLayer = function(object, layersRootId, elem, selectfunc, togglef
     });
     td.append(button);
     tr.append(td);
-
-    $('.btn-layer').width(Math.max.apply(Math,
-                                            $('.btn-layer').map(function(){
-                                              return $(this).outerWidth();}).get()));
-    }
-    // @todo Just calling fadeIn does not work. It has to be set invisible
-    // and then only it works. We need to check if this is expected.
-    $('#'+layerId).fadeOut(0);
-    $('#'+layerId).fadeIn('slow', callback);
+    $('.btn-layer').width(Math.max.apply(Math, $('.btn-layer').map(function() {
+      return $(this).outerWidth();
+    }).get()));
+  }
+  // @todo Just calling fadeIn does not work. It has to be set invisible
+  // and then only it works. We need to check if this is expected.
+  $('#' + layerId).fadeOut(0);
+  $('#' + layerId).fadeIn('slow', callback);
 };
-
-/**
- *
- */
 uiModule.gis.layerAdded = function(elem) {
+  "use strict";
   $(elem).removeClass("btn-primary");
   $(elem).addClass("btn-success");
   $(elem).addClass("disabled");
   $(elem).attr('data-loading-text', 'Added');
   $(elem).attr('disabled', 'disabled');
   $(elem).html('Added');
-}
-
+};
 /**
  * Remove a layer from the list
  *
@@ -231,9 +205,10 @@ uiModule.gis.layerAdded = function(elem) {
  * @returns {Boolean}
  */
 uiModule.gis.removeLayer = function(elem, layerId) {
-  var buttonId = $('#btn-add-'+layerId);
-  var button = $(buttonId);
-
+  "use strict";
+  var buttonId, button;
+  buttonId = $('#btn-add-' + layerId);
+  button = $(buttonId);
   if (button !== null || button !== undefined) {
     button.removeClass('disabled');
     button.removeAttr('disabled');
@@ -241,166 +216,151 @@ uiModule.gis.removeLayer = function(elem, layerId) {
     button.removeClass('active');
     button.button('reset');
     button.addClass('btn-primary');
-
     $('#' + layerId).fadeOut(function() {
       $('#' + layerId).remove();
     });
-
     return true;
   }
-
   return false;
 };
-
 uiModule.gis.toggleLayer = function(elem, layerId) {
+  "use strict";
   // Do nothing
 };
-
 /**
  * Update UI to when a layer is selected
  */
 uiModule.gis.selectLayer = function(target, layerId) {
+  "use strict";
   $(target).siblings().removeClass('active');
-
   if (target !== null || target !== undefined) {
     $(target).addClass('active');
   }
-
   return true;
 };
-
-
 uiModule.gis.generateOptions = function(table, map) {
-  var options = map.options();
-
-  var parent = $(table);
-
-  for (var key in options) {
+  "use strict";
+  var options, parent, key, row, col, heading, sliderDiv, input;
+  options = map.options();
+  parent = $(table);
+  for (key in options) {
     if (key === "source" || key === "center") {
       continue;
     }
-
     if (options.hasOwnProperty(key)) {
-
-      var row = $(document.createElement('tr'));
+      row = $(document.createElement('tr'));
       row.attr('class', 'row-fluid');
       parent.append(row);
-      var col = $(document.createElement('td'));
+      col = $(document.createElement('td'));
       row.append(col);
-
-      var heading = $(document.createElement('h4'));
+      heading = $(document.createElement('h4'));
       heading.html(key);
       col.append(heading);
-
-      switch(key) {
-        case "zoom":
-          // Create a slider here
-          var sliderDiv = $(document.createElement('div'));
-          sliderDiv.slider({
-            range: "min",
-            min: 0.0,
-            max: 17.0,
-            step: 1,
-            value: options[key],
-            slide: function( event, ui ) {
-              map.setZoom( ui.value );
-              map.redraw();
-            }
-          });
-          $(sliderDiv).on('mousedown', function(e) {
-            e.stopPropagation();
-            return false;
-          });
-          col.attr('class', 'span10');
-          $(col).append(sliderDiv);
-          break;
-        case "center":
-          // @todo We need to update center dynamically which
-          // will require quite a bit of work.
-          // Text box
-          // var latInput = $(document.createElement('input'));
-          // latInput.attr('type', 'number');
-          // latInput.attr('min', -180.0);
-          // latInput.attr('max', +180.0);
-          // latInput.val(map.options().center.lat());
-          // latInput.click(function() {
-          //   map.redraw();
-          // });
-          // $(latInput).on('mousedown', function(e) {
-          //   e.stopPropagation();
-          //   return false;
-          // });
-          // col.append(latInput);
-
-          // var lngInput = $(document.createElement('input'));
-          // lngInput.attr('type', 'number');
-          // lngInput.attr('min', -90.0);
-          // lngInput.attr('max', +90.0);
-          // lngInput.val(map.options().center.lng());
-          // lngInput.click(function() {
-          //   map.redraw();
-          // });
-          // $(lngInput).on('mousedown', function(e) {
-          //   e.stopPropagation();
-          //   return false;
-          // });
-          // col.append(lngInput);
-          break;
-        case "country_boundries":
-          // Boolean
-          var input = $(document.createElement('input'));
-          input.attr('type', 'checkbox');
-          input.attr('checked', map.options().country_boundries);
-          input.click(function() {
-            map.toggleCountryBoundries();
+      switch (key) {
+      case "zoom":
+        // Create a slider here
+        sliderDiv = $(document.createElement('div'));
+        sliderDiv.slider({
+          range: "min",
+          min: 0.0,
+          max: 17.0,
+          step: 1,
+          value: options[key],
+          slide: function(event, ui) {
+            map.setZoom(ui.value);
             map.redraw();
-          });
-          col.append(input);
-
-          break;
-        case "us_states":
-          // Boolean
-          break;
-        case "source":
-          // Dropdown
-          break;
+          }
+        });
+        $(sliderDiv).on('mousedown', function(e) {
+          e.stopPropagation();
+          return false;
+        });
+        col.attr('class', 'span10');
+        $(col).append(sliderDiv);
+        break;
+      case "center":
+        // @todo We need to update center dynamically which
+        // will require quite a bit of work.
+        // Text box
+        // var latInput = $(document.createElement('input'));
+        // latInput.attr('type', 'number');
+        // latInput.attr('min', -180.0);
+        // latInput.attr('max', +180.0);
+        // latInput.val(map.options().center.lat());
+        // latInput.click(function() {
+        //   map.redraw();
+        // });
+        // $(latInput).on('mousedown', function(e) {
+        //   e.stopPropagation();
+        //   return false;
+        // });
+        // col.append(latInput);
+        // var lngInput = $(document.createElement('input'));
+        // lngInput.attr('type', 'number');
+        // lngInput.attr('min', -90.0);
+        // lngInput.attr('max', +90.0);
+        // lngInput.val(map.options().center.lng());
+        // lngInput.click(function() {
+        //   map.redraw();
+        // });
+        // $(lngInput).on('mousedown', function(e) {
+        //   e.stopPropagation();
+        //   return false;
+        // });
+        // col.append(lngInput);
+        break;
+      case "country_boundries":
+        // Boolean
+        input = $(document.createElement('input'));
+        input.attr('type', 'checkbox');
+        input.attr('checked', map.options().country_boundries);
+        input.click(function() {
+          map.toggleCountryBoundries();
+          map.redraw();
+        });
+        col.append(input);
+        break;
+      case "us_states":
+        // Boolean
+        break;
+      case "source":
+        // Dropdown
+        break;
       }
     }
   }
 };
-
-
 uiModule.gis.createControls = function(table, map) {
-  var tbody = $($(table).find('tbody'));
-  var row = $(document.createElement('tr'));
+  "use strict";
+  var tbody, row, col, opacityDiv;
+  tbody = $($(table).find('tbody'));
+  row = $(document.createElement('tr'));
   tbody.append(row);
-
-  var col = $(document.createElement('td'));
+  col = $(document.createElement('td'));
   row.append(col);
   col.append('<h4>opacity</h4>');
-
   // Create slider to control opacity of a layer
-  var opacityDiv = $(document.createElement('div'));
+  opacityDiv = $(document.createElement('div'));
   opacityDiv.addClass('ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all');
   col.append(opacityDiv);
-
   opacityDiv.slider({
     range: "min",
     min: 0.0,
     max: 1.0,
     step: 0.01,
-    value: 0.5,
+    value: 0.5
   });
-
   $(map).on(ogs.geo.command.selectLayerEvent, function(event) {
-    opacityDiv.slider({disabled: false});
+    opacityDiv.slider({
+      disabled: false
+    });
   });
-
   $(map).on(ogs.geo.command.unselectLayerEvent, function(event) {
     console.log(event);
-    opacityDiv.slider({disabled: true});
+    opacityDiv.slider({
+      disabled: true
+    });
   });
-
   // Listen for slider slidechange event
   opacityDiv.slider().bind('slide', function(event, ui) {
     if (map.activeLayer() !== null) {
@@ -408,11 +368,11 @@ uiModule.gis.createControls = function(table, map) {
     }
     map.redraw();
   });
-
   opacityDiv.on('mousedown', function(e) {
     e.stopPropagation();
     return false;
   });
-
-  opacityDiv.slider({disabled: true});
+  opacityDiv.slider({
+    disabled: true
+  });
 };
