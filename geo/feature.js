@@ -8,8 +8,10 @@
  * @class
  * @returns {geoModule.feature}
  */
+/*global geoModule, ogs, inherit*/
+/*jslint devel: true, eqeq: true, forin: true, newcap: true, plusplus: true, todo: true, indent: 2 */
 geoModule.feature = function() {
-
+  "use strict";
   if (!(this instanceof geoModule.feature)) {
     return new geoModule.feature();
   }
@@ -31,7 +33,7 @@ inherit(geoModule.feature, ogs.vgl.actor);
  * @returns {geoModule.planeFeature}
  */
 geoModule.planeFeature = function(lowerleft, upperright) {
-
+  "use strict";
   if (!(this instanceof geoModule.planeFeature)) {
     return new geoModule.planeFeature(lowerleft, upperright);
   }
@@ -39,11 +41,12 @@ geoModule.planeFeature = function(lowerleft, upperright) {
   ogs.vgl.actor.call(this);
 
   // Initialize
-  var origin = [ lowerleft.lng(), lowerleft.lat(), 0.0 ];
-  var pt2 = [ lowerleft.lng(), upperright.lat(), 0.0 ];
-  var pt1 = [ upperright.lng(), lowerleft.lat(), 0.0 ];
+  var origin, pt2, pt1, actor;
+  origin = [ lowerleft.lng(), lowerleft.lat(), 0.0 ];
+  pt2 = [ lowerleft.lng(), upperright.lat(), 0.0 ];
+  pt1 = [ upperright.lng(), lowerleft.lat(), 0.0 ];
 
-  var actor = ogs.vgl.utils.createPlane(origin[0], origin[1], origin[2],
+  actor = ogs.vgl.utils.createPlane(origin[0], origin[1], origin[2],
                                         pt1[0], pt1[1], pt1[2], pt2[0], pt2[1],
                                         pt2[2]);
 
@@ -64,7 +67,7 @@ inherit(geoModule.planeFeature, geoModule.feature);
  * @returns {geoModule.pointFeature}
  */
 geoModule.pointFeature = function(positions, colors) {
-
+  "use strict";
   if (!(this instanceof geoModule.pointFeature)) {
     return new geoModule.pointFeature(positions, colors);
   }
@@ -90,7 +93,7 @@ inherit(geoModule.pointFeature, geoModule.feature);
  * @returns {geoModule.pointFeature}
  */
 geoModule.pointSpritesFeature = function(image, positions, colors) {
-
+  "use strict";
   if (!(this instanceof geoModule.pointSpritesFeature)) {
     return new geoModule.pointSpritesFeature(image, positions, colors);
   }
@@ -116,7 +119,7 @@ inherit(geoModule.pointSpritesFeature, geoModule.feature);
  * @returns {geoModule.geometryFeature}
  */
 geoModule.geometryFeature = function(geom) {
-
+  "use strict";
   if (!(this instanceof geoModule.geometryFeature)) {
     return new geoModule.geometryFeature(geom);
   }
@@ -124,12 +127,13 @@ geoModule.geometryFeature = function(geom) {
   ogs.vgl.actor.call(this);
 
   // Initialize
-  var mapper = ogs.vgl.mapper();
+  var mapper, material;
+  mapper = ogs.vgl.mapper();
   mapper.setGeometryData(geom);
 
   this.setMapper(mapper);
 
-  var material = ogs.vgl.utils.createGeometryMaterial();
+  material = ogs.vgl.utils.createGeometryMaterial();
   this.setMaterial(material);
 
   return this;
@@ -146,7 +150,7 @@ inherit(geoModule.geometryFeature, geoModule.feature);
  * @returns {geoModule.multiGeometryFeature}
  */
 geoModule.multiGeometryFeature = function(geoms) {
-
+  "use strict";
   if (!(this instanceof geoModule.multiGeometryFeature)) {
     return new geoModule.multiGeometryFeature(geoms);
   }
@@ -154,12 +158,13 @@ geoModule.multiGeometryFeature = function(geoms) {
   ogs.vgl.actor.call(this);
 
   // Initialize
-  var mapper = ogs.vgl.groupMapper();
+  var mapper, material;
+  mapper = ogs.vgl.groupMapper();
   mapper.setGeometryDataArray(geoms);
 
   this.setMapper(mapper);
 
-  var material = ogs.vgl.utils.createGeometryMaterial();
+  material = ogs.vgl.utils.createGeometryMaterial();
   this.setMaterial(material);
 
   return this;

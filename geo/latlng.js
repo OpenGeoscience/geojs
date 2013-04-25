@@ -9,14 +9,17 @@
  * longitude
  * @returns {geoModule.latlng}
  */
+/*global geoModule*/
 geoModule.latlng = function(lat, lng) {
+  "use strict";
   if (!(this instanceof geoModule.latlng)) {
     return new geoModule.latlng(lat, lng);
   }
 
   /** @priave */
-  var m_lat = lat;
-  var m_lng = lng;
+  var m_lat, m_lng;
+  m_lat = lat;
+  m_lng = lng;
 
   // / Public member methods
   this.lat = function() {
