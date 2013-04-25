@@ -5,8 +5,10 @@
 /**
  * Layer options object specification
  */
+/*global geoModule, ogs, inherit, $*/
+/*jslint devel: true, eqeq: true, forin: true, newcap: true, plusplus: true, todo: true, indent: 2 */
 geoModule.layerOptions = function() {
-
+  "use strict";
   // Check against no use of new()
   if (!(this instanceof geoModule.layerOptions)) {
     return new geoModule.layerOptions();
@@ -25,7 +27,7 @@ geoModule.layerOptions = function() {
  * polygons.
  */
 geoModule.layer = function(options, feature) {
-
+  "use strict";
   this.events = {
     "opacitychange" : "opacitychange",
     "update" : "update"
@@ -38,31 +40,31 @@ geoModule.layer = function(options, feature) {
   ogs.vgl.object.call(this);
 
   /** @private */
-  var m_that = this;
+  var m_that, m_name, m_actor, m_opacity, m_showAttribution, m_visible;
+  m_that = this;
 
   /** @private */
-  var m_name = "";
+  m_name = "";
 
   /** @private */
-  var m_actor = feature;
+  m_actor = feature;
 
   /** @private */
-  var m_opacity = options.opacity || 1.0;
+  m_opacity = options.opacity || 1.0;
 
   // TODO Write a function for this
   if (m_opacity > 1.0) {
     m_opacity = 1.0;
     console.log("[warning] Opacity cannot be greater than 1.0");
-  }
-  else if (m_opacity < 0.0) {
+  } else if (m_opacity < 0.0) {
     console.log("[warning] Opacity cannot be less than 1.0");
   }
 
   /** @private */
-  var m_showAttribution = options.showAttribution || true;
+  m_showAttribution = options.showAttribution || true;
 
   /** @private */
-  var m_visible = options.visible || true;
+  m_visible = options.visible || true;
 
   /**
    * Return the underlying drawable entity This function should be implemented
@@ -86,7 +88,7 @@ geoModule.layer = function(options, feature) {
     this.modified();
 
     return true;
-  }
+  };
 
   /**
    * Get name of the layer
@@ -110,7 +112,7 @@ geoModule.layer = function(options, feature) {
     }
 
     return false;
-  }
+  };
 
   /**
    * Query opacity of the layer (range[0.0, 1.0])
@@ -172,7 +174,7 @@ geoModule.layer = function(options, feature) {
    * Virtual slot to handle opacity change Concrete class should implement this
    * method.
    */
-  this.updateLayerOpacity = function(event) {
+  this.updateLayerOpacity = function() {
   };
 
   return this;
@@ -190,7 +192,7 @@ inherit(geoModule.layer, ogs.vgl.object);
  * @returns {geoModule.featureLayer}
  */
 geoModule.featureLayer = function(options, feature) {
-
+  "use strict";
   if (!(this instanceof geoModule.featureLayer)) {
     return new geoModule.featureLayer(options, feature);
   }
@@ -203,8 +205,9 @@ geoModule.featureLayer = function(options, feature) {
    * Slot to handle opacity change
    */
   this.updateLayerOpacity = function(event) {
-    var mat = this.feature().material();
-    var opacityUniform = mat.shaderProgram().uniform('opacity');
+    var mat, opacityUniform;
+    mat = this.feature().material();
+    opacityUniform = mat.shaderProgram().uniform('opacity');
     if (opacityUniform != null) {
       opacityUniform.set(event.opacity);
       $(m_that).trigger(this.events.update);
