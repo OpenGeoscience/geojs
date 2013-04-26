@@ -2,11 +2,12 @@
  * @module ogs.geo
  */
 
+/*global geoModule, ogs, inherit, $*/
+/*jslint devel: true, eqeq: true, forin: true, newcap: true, plusplus: true, todo: true, indent: 2*/
+
 /**
  * Layer options object specification
  */
-/*global geoModule, ogs, inherit, $*/
-/*jslint devel: true, eqeq: true, forin: true, newcap: true, plusplus: true, todo: true, indent: 2 */
 geoModule.layerOptions = function() {
   "use strict";
   // Check against no use of new()

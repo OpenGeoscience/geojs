@@ -1,8 +1,9 @@
+/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image, vglModule, document*/
+/*jslint devel: true, eqeq: true, forin: true, newcap: true, plusplus: true, todo: true, indent: 2*/
+
 /**
  * Map options object specification
  */
-/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image, vglModule, document*/
-/*jslint devel: true, eqeq: true, forin: true, newcap: true, plusplus: true, todo: true, indent: 2 */
 geoModule.mapOptions = {
   zoom: 0,
   center: geoModule.latlng(0.0, 0.0),
@@ -74,10 +75,34 @@ geoModule.map = function(node, options) {
   function updateZoom(useCurrent) {
     m_interactorStyle.zoom(m_options, useCurrent);
   }
-/**
+
+  /**
+   * Get mouse pointer coordinates for canvas
+   */
+  function relMouseCoords(event) {
+    var totalOffsetX = 0,
+        totalOffsetY = 0,
+        canvasX = 0,
+        canvasY = 0,
+        currentElement = this;
+
+    do {
+      totalOffsetX += currentElement.offsetLeft - currentElement.scrollLeft;
+      totalOffsetY += currentElement.offsetTop - currentElement.scrollTop;
+    } while (currentElement == currentElement.offsetParent);
+
+    canvasX = event.pageX - totalOffsetX;
+    canvasY = event.pageY - totalOffsetY;
+
+    return {
+      x: canvasX,
+      y: canvasY
+    };
+  }
+
+  /**
    * Initialize the scene
    */
-
   function initScene() {
     updateZoom();
     m_initialized = true;
@@ -88,22 +113,25 @@ geoModule.map = function(node, options) {
    *
    * @param event
    */
-
   function draw() {
     if (m_initialized === false) {
       initScene();
     }
     m_viewer.render();
   }
+
   $(m_interactorStyle).on(ogs.vgl.command.leftButtonPressEvent, draw);
   $(m_interactorStyle).on(ogs.vgl.command.middleButtonPressEvent, draw);
   $(m_interactorStyle).on(ogs.vgl.command.rightButtonPressEvent, draw);
   $(this).on(geoModule.command.updateEvent, draw);
+
   // TODO use zoom and center options
   m_baseLayer = (function() {
     var mapActor, worldImage, worldTexture;
-    mapActor = ogs.vgl.utils.createTexturePlane(-180.0, -90.0, 0.0, 180.0, -90.0, 0.0, -180.0, 90.0, 0.0);
- // Setup texture
+    mapActor = ogs.vgl.utils.createTexturePlane(-180.0, -90.0, 0.0,
+                                                 180.0, -90.0, 0.0,
+                                                -180.0, 90.0, 0.0);
+    // Setup texture
     worldImage = new Image();
     worldImage.src = m_options.source;
     worldImage.onload = function() {
@@ -119,26 +147,7 @@ geoModule.map = function(node, options) {
     document.onmouseup = m_viewer.handleMouseUp;
     document.onmousemove = m_viewer.handleMouseMove;
     document.oncontextmenu = m_viewer.handleContextMenu;
-    HTMLCanvasElement.prototype.relMouseCoords = function (event) {
-      var totalOffsetX, totalOffsetY, canvasX, canvasY, currentElement = 0;
-      totalOffsetY = 0;
-      canvasX = 0;
-      canvasY = 0;
-      currentElement = this;
-
-      do {
-        totalOffsetX += currentElement.offsetLeft - currentElement.scrollLeft;
-        totalOffsetY += currentElement.offsetTop - currentElement.scrollTop;
-      } while (currentElement == currentElement.offsetParent);
-
-      canvasX = event.pageX - totalOffsetX;
-      canvasY = event.pageY - totalOffsetY;
-
-      return {
-        x: canvasX,
-        y: canvasY
-      };
-    };
+    HTMLCanvasElement.prototype.relMouseCoords = relMouseCoords;
 
     return mapActor;
   }());
@@ -149,7 +158,6 @@ geoModule.map = function(node, options) {
   this.options = function() {
     return m_options;
   };
-
 
   /**
    * Get the zoom level of the map

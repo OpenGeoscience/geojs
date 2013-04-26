@@ -2,14 +2,15 @@
  * @module ogs.geo
  */
 
+ /*global geoModule, ogs, inherit*/
+/*jslint devel: true, eqeq: true, forin: true, newcap: true, plusplus: true, todo: true, indent: 2*/
+
 /**
  * Create a new instance of class command
  *
  * @class
  * @returns {geoModule.command}
  */
-/*global geoModule, ogs, inherit*/
-/*jslint devel: true, eqeq: true, forin: true, newcap: true, plusplus: true, todo: true, indent: 2 */
 geoModule.command = function() {
   "use strict";
   if (!(this instanceof geoModule.command)) {
