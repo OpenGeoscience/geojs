@@ -2,7 +2,7 @@
  * @module ogs.geo
  */
 
-/*jslint devel: true, eqeq: true, forin: true, newcap: true, plusplus: true, indent: 2*/
+/*jslint devel: true, eqeq: true, forin: true, newcap: true, plusplus: true, white: true, todo: true, indent: 2*/
 /*global geoModule, vglModule, ogs, inherit, vec4, $*/
 
 /**
@@ -76,7 +76,7 @@ geoModule.mapInteractorStyle = function() {
       return;
     }
     if (m_middileMouseButtonDown) {
-      m_focalPoint = m_camera.m_focalPoint();
+      m_focalPoint = m_camera.focalPoint();
       m_focusWorldPt = vec4.fromValues(m_focalPoint[0], m_focalPoint[1], m_focalPoint[2], 1);
       m_focusDisplayPt = m_renderer.worldToDisplay(m_focusWorldPt, m_camera.viewMatrix(),
         m_camera.projectionMatrix(), m_width, m_height);
