@@ -3,7 +3,7 @@
  */
 
 /*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image, vglModule, document*/
-/*jslint devel: true, eqeq: true, forin: true, newcap: true, plusplus: true, todo: true, indent: 2*/
+/*jslint devel: true, eqeq: true, forin: true, newcap: true, plusplus: true, indent: 2*/
 
 /**
  * Map options object specification
