@@ -1,3 +1,7 @@
+/**
+ * @module ogs.geo
+ */
+
 /*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image, vglModule, document*/
 /*jslint devel: true, eqeq: true, forin: true, newcap: true, plusplus: true, todo: true, indent: 2*/
 
@@ -26,26 +30,16 @@ geoModule.map = function(node, options) {
   ogs.vgl.object.call(this);
 
   /** @private */
-  var m_that, m_node, m_initialized, m_baseLayer, m_options, m_layers, m_activeLayer, m_interactorStyle, m_viewer, m_renderer;
-  m_that = this;
-
-  /** @private */
-  m_node = node;
-
-  /** @private */
-  m_initialized = false;
-
-  /** @private */
-  m_baseLayer = null;
-
-  /** @private */
-  m_options = options;
-
-  /** @private **/
-  m_layers = {};
-
-  /** @private **/
-  m_activeLayer = null;
+  var m_that = this,
+      m_node = node,
+      m_initialized = false,
+      m_baseLayer = null,
+      m_options = options,
+      m_layers = {},
+      m_activeLayer = null,
+      m_interactorStyle = null,
+      m_viewer = null,
+      m_renderer = null;
 
   if (!options.center) {
     m_options.center = geoModule.latlng(0.0, 0.0);
@@ -61,17 +55,15 @@ geoModule.map = function(node, options) {
   }
 
   m_interactorStyle = geoModule.mapInteractorStyle();
-
   m_viewer = ogs.vgl.viewer(m_node);
   m_viewer.setInteractorStyle(m_interactorStyle);
   m_viewer.init();
   m_viewer.renderWindow().resize($(m_node).width(), $(m_node).height());
-
   m_renderer = m_viewer.renderWindow().activeRenderer();
-/**
+
+  /**
    * Update view extents based on the zoom
    */
-
   function updateZoom(useCurrent) {
     m_interactorStyle.zoom(m_options, useCurrent);
   }

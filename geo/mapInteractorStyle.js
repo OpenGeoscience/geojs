@@ -1,3 +1,7 @@
+/**
+ * @module ogs.geo
+ */
+
 /*jslint devel: true, eqeq: true, forin: true, newcap: true, plusplus: true, todo: true, indent: 2*/
 /*global geoModule, vglModule, ogs, inherit, vec4, $*/
 
