@@ -2,8 +2,8 @@
  * @module ogs.geo
  */
 
+/*jslint devel: true, eqeq: true, forin: true, newcap: true, plusplus: true, white: true, indent: 2*/
 /*global geoModule, ogs, inherit*/
-/*jslint devel: true, eqeq: true, forin: true, newcap: true, plusplus: true, indent: 2*/
 
 /**
  * Create a new instance of class feature
