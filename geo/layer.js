@@ -209,7 +209,7 @@ geoModule.featureLayer = function(options, feature) {
     var mat, opacityUniform;
     mat = this.feature().material();
     opacityUniform = mat.shaderProgram().uniform('opacity');
-    if (opacityUniform != null) {
+    if (opacityUniform !== null) {
       opacityUniform.set(event.opacity);
       $(m_that).trigger(this.events.update);
     }

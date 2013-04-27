@@ -81,7 +81,7 @@ geoModule.map = function(node, options) {
     do {
       totalOffsetX += currentElement.offsetLeft - currentElement.scrollLeft;
       totalOffsetY += currentElement.offsetTop - currentElement.scrollTop;
-    } while (currentElement == currentElement.offsetParent);
+    } while (currentElement === currentElement.offsetParent);
 
     canvasX = event.pageX - totalOffsetX;
     canvasY = event.pageY - totalOffsetY;
@@ -185,8 +185,7 @@ geoModule.map = function(node, options) {
    * @return {Boolean}
    */
   this.addLayer = function(layer) {
-
-    if (layer != null) {
+    if (layer !== null) {
       // TODO Check if the layer already exists
       // TODO Set the rendering order correctly
       m_renderer.addActor(layer.feature());
@@ -200,7 +199,6 @@ geoModule.map = function(node, options) {
       });
       return true;
     }
-
     return false;
   };
 
@@ -264,7 +262,7 @@ geoModule.map = function(node, options) {
    *
    */
   this.selectLayer = function(layer) {
-    if (layer !== undefined && m_activeLayer != layer) {
+    if (layer !== undefined && m_activeLayer !== layer) {
       var tempLayer = layer;
       m_activeLayer = layer;
       this.modified();
@@ -330,7 +328,7 @@ geoModule.map = function(node, options) {
       layer.setVisible(!layer.visible());
       return true;
     }
-    if (layer == null) {
+    if (layer === null) {
       // Load countries data first
       reader = ogs.vgl.geojsonReader();
       geoms = reader.readGJObject(ogs.geo.countries);
