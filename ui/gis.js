@@ -1,12 +1,16 @@
-/*jslint devel: true, eqeq: true, forin: true, newcap: true, plusplus: true, todo: true, indent: 2 nomen: true unparam: true */
-/*global geoModule, uiModule, document, ogs, inherit, $*/
+/*jslint devel: true, forin: true, todo: true, newcap: true, plusplus: true, nomen: true, unparam: true, white: true, indent: 2*/
+/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image, vglModule, document, uiModule, layerId*/
+
+
 uiModule.gis = function() {
   "use strict";
   if (!(this instanceof uiModule.gis)) {
     return new uiModule.gis();
   }
+
   return this;
 };
+
 /**
  * Create a placeholder to display current layers
  *
@@ -20,9 +24,11 @@ uiModule.gis.createList = function(rootId, heading) {
   itemRoot = document.createElement("div");
   itemRoot.setAttribute("class", "accordion-group");
   listRoot.appendChild(itemRoot);
+
   itemHeading = document.createElement("div");
   itemHeading.setAttribute("class", "accordion-heading");
   itemRoot.appendChild(itemHeading);
+
   itemCollection = document.createElement("a");
   itemCollection.setAttribute("class", "accordion-toggle");
   itemCollection.setAttribute("data-toggle", "collapse");
@@ -30,6 +36,7 @@ uiModule.gis.createList = function(rootId, heading) {
   itemCollection.setAttribute("href", "#collapse-" + rootId);
   itemCollection.appendChild(document.createTextNode(heading));
   itemHeading.appendChild(itemCollection);
+
   subItemsRoot = document.createElement("div");
   subItemsRoot.setAttribute("class", "accordion-body collapse in");
   subItemsRoot.setAttribute("id", "collapse-" + rootId);
@@ -37,13 +44,17 @@ uiModule.gis.createList = function(rootId, heading) {
   subItemsList = document.createElement("div");
   subItemsList.setAttribute("class", "accordion-inner");
   subItemsRoot.appendChild(subItemsList);
+
   tableRoot = document.createElement("table");
   tableRoot.setAttribute("id", 'table-' + rootId);
   subItemsList.appendChild(tableRoot);
+
   tbody = document.createElement("tbody");
   tableRoot.appendChild(tbody);
+
   return tableRoot;
 };
+
 /**
  * Create a list of documents that could be added as a layer
  *
@@ -54,14 +65,17 @@ uiModule.gis.createList = function(rootId, heading) {
  */
 uiModule.gis.createDataList = function(rootId, heading, layersRootId, data, callback) {
   "use strict";
-  var listRoot, itemRoot, itemHeading, itemCollection, subItemsRoot, subItemsList, tableRoot;
+  var listRoot, itemRoot, itemCollection, subItemsRoot, subItemsList, tableRoot, itemHeading;
   listRoot = $(document.getElementById(rootId));
+
   itemRoot = $(document.createElement('div'));
   itemRoot.attr('class', 'accordion-group');
   listRoot.append(itemRoot);
+
   itemHeading = $(document.createElement('div'));
   itemHeading.attr('class', 'accordion-heading');
   itemRoot.append(itemHeading);
+
   itemCollection = $(document.createElement('a'));
   itemCollection.attr('class', 'accordion-toggle');
   itemCollection.attr('data-toggle', 'collapse');
@@ -69,26 +83,32 @@ uiModule.gis.createDataList = function(rootId, heading, layersRootId, data, call
   itemCollection.attr('href', '#collapse-' + rootId);
   itemCollection.append(document.createTextNode(heading));
   itemHeading.append(itemCollection);
+
   subItemsRoot = $(document.createElement('div'));
   subItemsRoot.attr('class', 'accordion-body collapse in');
   subItemsRoot.attr('id', 'collapse-' + rootId);
   itemRoot.append(subItemsRoot);
+
   subItemsList = $(document.createElement('div'));
   subItemsList.attr('class', 'accordion-inner');
   subItemsRoot.append(subItemsList);
+
   tableRoot = $(document.createElement('table'));
   tableRoot.attr('class', 'table-hover');
   subItemsList.append(tableRoot);
+
   $.each(data, function(i, item) {
-    var row, col, he, select, varname, option, button, k;
+    var row, col, he, select, k, varname, option, button;
     row = $(document.createElement('tr'));
     row.attr('class', 'success');
     tableRoot.append(row);
+
     col = $(document.createElement('td'));
     he = $(document.createElement('h4'));
     he.html(item.basename);
     col.append(he);
     row.append(col);
+
     // Add drop-down so that users can select a variable
     col = $(document.createElement('td'));
     select = $(document.createElement('select'));
@@ -102,6 +122,7 @@ uiModule.gis.createDataList = function(rootId, heading, layersRootId, data, call
       select.append(option);
     }
     row.append(col);
+
     // Add 'add' button
     col = $(document.createElement('td'));
     button = $(document.createElement('button'));
@@ -116,15 +137,18 @@ uiModule.gis.createDataList = function(rootId, heading, layersRootId, data, call
     button.html('Add');
     col.append(button);
     row.append(col);
-    if (callback != undefined) {
+
+    if (callback !== undefined) {
       $(button).on("click", callback);
     }
   });
+
   $('.combobox').width(Math.max.apply(Math, $('.combobox').map(function() {
     return $(this).outerWidth();
   }).get()));
   $('.combobox').select2();
 };
+
 /**
  * Add a document as a layer to the list
  *
@@ -135,21 +159,25 @@ uiModule.gis.createDataList = function(rootId, heading, layersRootId, data, call
  */
 uiModule.gis.addLayer = function(object, layersRootId, elem, selectfunc, togglefunc, removefunc, callback) {
   "use strict";
-  var rootId, _id, tbody, basename, layerId, tr, td, button;
+  var rootId, tbody, basename, layerId, tr, td, button, _id;
   rootId = "#" + layersRootId;
   _id = $(elem).attr("_id");
-  if (_id !== null) {
-    tbody = $(rootId).find('tbody');
+   if (_id !== null) {
+    tbody= $(rootId).find('tbody');
     basename = $(elem).attr("name");
     $(elem).button('loading');
+
     layerId = basename;
+
     tr = $(document.createElement('tr'));
     tr.attr('id', layerId);
     $(tbody).append(tr);
+
     // Name of the layer
     td = $(document.createElement('td'));
     td.append($(document.createElement('h4')).html(basename));
     tr.append(td);
+
     // Select button
     td = $(document.createElement('td'));
     td.attr('class', 'td-btn-layer');
@@ -161,6 +189,7 @@ uiModule.gis.addLayer = function(object, layersRootId, elem, selectfunc, togglef
       selectfunc(this, layerId);
     });
     td.append(button);
+
     // Toggle button
     button = $(document.createElement('button'));
     button.attr('class', 'btn-layer btn-toggle-layer btn btn-warning disabled');
@@ -170,6 +199,7 @@ uiModule.gis.addLayer = function(object, layersRootId, elem, selectfunc, togglef
       togglefunc(this, layerId);
     });
     td.append(button);
+
     // Remove button
     button = $(document.createElement('button'));
     button.attr('class', 'btn-layer btn-remove-layer btn btn-danger disabled');
@@ -180,6 +210,7 @@ uiModule.gis.addLayer = function(object, layersRootId, elem, selectfunc, togglef
     });
     td.append(button);
     tr.append(td);
+
     $('.btn-layer').width(Math.max.apply(Math, $('.btn-layer').map(function() {
       return $(this).outerWidth();
     }).get()));
@@ -189,6 +220,10 @@ uiModule.gis.addLayer = function(object, layersRootId, elem, selectfunc, togglef
   $('#' + layerId).fadeOut(0);
   $('#' + layerId).fadeIn('slow', callback);
 };
+
+/**
+ *
+ */
 uiModule.gis.layerAdded = function(elem) {
   "use strict";
   $(elem).removeClass("btn-primary");
@@ -198,6 +233,7 @@ uiModule.gis.layerAdded = function(elem) {
   $(elem).attr('disabled', 'disabled');
   $(elem).html('Added');
 };
+
 /**
  * Remove a layer from the list
  *
@@ -206,9 +242,9 @@ uiModule.gis.layerAdded = function(elem) {
  */
 uiModule.gis.removeLayer = function(elem, layerId) {
   "use strict";
-  var buttonId, button;
-  buttonId = $('#btn-add-' + layerId);
+  var buttonId, button = $('#btn-add-' + layerId);
   button = $(buttonId);
+
   if (button !== null || button !== undefined) {
     button.removeClass('disabled');
     button.removeAttr('disabled');
@@ -216,46 +252,58 @@ uiModule.gis.removeLayer = function(elem, layerId) {
     button.removeClass('active');
     button.button('reset');
     button.addClass('btn-primary');
+
     $('#' + layerId).fadeOut(function() {
       $('#' + layerId).remove();
     });
+
     return true;
   }
+
   return false;
 };
+
 uiModule.gis.toggleLayer = function(elem, layerId) {
   "use strict";
   // Do nothing
 };
+
 /**
  * Update UI to when a layer is selected
  */
 uiModule.gis.selectLayer = function(target, layerId) {
   "use strict";
   $(target).siblings().removeClass('active');
+
   if (target !== null || target !== undefined) {
     $(target).addClass('active');
   }
+
   return true;
 };
+
+
 uiModule.gis.generateOptions = function(table, map) {
   "use strict";
-  var options, parent, key, row, col, heading, sliderDiv, input;
+  var options, parent, key, row, col, heading, input, sliderDiv;
   options = map.options();
+
   parent = $(table);
+
   for (key in options) {
-    if (key === "source" || key === "center") {
-      continue;
-    }
+
     if (options.hasOwnProperty(key)) {
+
       row = $(document.createElement('tr'));
       row.attr('class', 'row-fluid');
       parent.append(row);
       col = $(document.createElement('td'));
       row.append(col);
+
       heading = $(document.createElement('h4'));
       heading.html(key);
       col.append(heading);
+
       switch (key) {
       case "zoom":
         // Create a slider here
@@ -319,6 +367,7 @@ uiModule.gis.generateOptions = function(table, map) {
           map.redraw();
         });
         col.append(input);
+
         break;
       case "us_states":
         // Boolean
@@ -330,19 +379,24 @@ uiModule.gis.generateOptions = function(table, map) {
     }
   }
 };
+
+
 uiModule.gis.createControls = function(table, map) {
   "use strict";
   var tbody, row, col, opacityDiv;
   tbody = $($(table).find('tbody'));
   row = $(document.createElement('tr'));
   tbody.append(row);
+
   col = $(document.createElement('td'));
   row.append(col);
   col.append('<h4>opacity</h4>');
+
   // Create slider to control opacity of a layer
   opacityDiv = $(document.createElement('div'));
   opacityDiv.addClass('ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all');
   col.append(opacityDiv);
+
   opacityDiv.slider({
     range: "min",
     min: 0.0,
@@ -350,17 +404,20 @@ uiModule.gis.createControls = function(table, map) {
     step: 0.01,
     value: 0.5
   });
+
   $(map).on(ogs.geo.command.selectLayerEvent, function(event) {
     opacityDiv.slider({
       disabled: false
     });
   });
+
   $(map).on(ogs.geo.command.unselectLayerEvent, function(event) {
     console.log(event);
     opacityDiv.slider({
       disabled: true
     });
   });
+
   // Listen for slider slidechange event
   opacityDiv.slider().bind('slide', function(event, ui) {
     if (map.activeLayer() !== null) {
@@ -368,10 +425,12 @@ uiModule.gis.createControls = function(table, map) {
     }
     map.redraw();
   });
+
   opacityDiv.on('mousedown', function(e) {
     e.stopPropagation();
     return false;
   });
+
   opacityDiv.slider({
     disabled: true
   });

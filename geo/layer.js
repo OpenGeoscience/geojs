@@ -2,11 +2,12 @@
  * @module ogs.geo
  */
 
+/*jslint devel: true, forin: true, newcap: true, plusplus: true, white: true, indent: 2*/
+/*global geoModule, ogs, inherit, $*/
+
 /**
  * Layer options object specification
  */
-/*global geoModule, ogs, inherit, $*/
-/*jslint devel: true, eqeq: true, forin: true, newcap: true, plusplus: true, todo: true, indent: 2 */
 geoModule.layerOptions = function() {
   "use strict";
   // Check against no use of new()
@@ -208,7 +209,7 @@ geoModule.featureLayer = function(options, feature) {
     var mat, opacityUniform;
     mat = this.feature().material();
     opacityUniform = mat.shaderProgram().uniform('opacity');
-    if (opacityUniform != null) {
+    if (opacityUniform !== null) {
       opacityUniform.set(event.opacity);
       $(m_that).trigger(this.events.update);
     }

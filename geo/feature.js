@@ -2,14 +2,15 @@
  * @module ogs.geo
  */
 
+/*jslint devel: true, forin: true, newcap: true, plusplus: true, white: true, indent: 2*/
+/*global geoModule, ogs, inherit*/
+
 /**
  * Create a new instance of class feature
  *
  * @class
  * @returns {geoModule.feature}
  */
-/*global geoModule, ogs, inherit*/
-/*jslint devel: true, eqeq: true, forin: true, newcap: true, plusplus: true, todo: true, indent: 2 */
 geoModule.feature = function() {
   "use strict";
   if (!(this instanceof geoModule.feature)) {

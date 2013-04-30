@@ -1,4 +1,4 @@
-/*jslint devel: true, eqeq: true, forin: true, newcap: true, plusplus: true, todo: true, indent: 2 */
+/*jslint devel: true, forin: true, newcap: true, plusplus: true, white: true, indent: 2*/
 /*global geoModule, ogs, inherit*/
 geoModule.countries = {
   "type": "FeatureCollection",

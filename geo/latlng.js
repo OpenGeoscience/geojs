@@ -2,6 +2,9 @@
  * @module ogs.geo
  */
 
+/*jslint devel: true, forin: true, newcap: true, plusplus: true, white: true, indent: 2*/
+/*global geoModule*/
+
 /**
  * Create a new instance of latlng
  *
@@ -9,7 +12,6 @@
  * longitude
  * @returns {geoModule.latlng}
  */
-/*global geoModule*/
 geoModule.latlng = function(lat, lng) {
   "use strict";
   if (!(this instanceof geoModule.latlng)) {

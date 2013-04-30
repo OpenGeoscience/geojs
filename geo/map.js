@@ -1,8 +1,13 @@
 /**
+ * @module ogs.geo
+ */
+
+/*jslint devel: true, forin: true, newcap: true, plusplus: true, white: true, indent: 2*/
+/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image, vglModule, document*/
+
+/**
  * Map options object specification
  */
-/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image, vglModule, document*/
-/*jslint devel: true, eqeq: true, forin: true, newcap: true, plusplus: true, todo: true, indent: 2 */
 geoModule.mapOptions = {
   zoom: 0,
   center: geoModule.latlng(0.0, 0.0),
@@ -25,26 +30,16 @@ geoModule.map = function(node, options) {
   ogs.vgl.object.call(this);
 
   /** @private */
-  var m_that, m_node, m_initialized, m_baseLayer, m_options, m_layers, m_activeLayer, m_interactorStyle, m_viewer, m_renderer;
-  m_that = this;
-
-  /** @private */
-  m_node = node;
-
-  /** @private */
-  m_initialized = false;
-
-  /** @private */
-  m_baseLayer = null;
-
-  /** @private */
-  m_options = options;
-
-  /** @private **/
-  m_layers = {};
-
-  /** @private **/
-  m_activeLayer = null;
+  var m_that = this,
+      m_node = node,
+      m_initialized = false,
+      m_baseLayer = null,
+      m_options = options,
+      m_layers = {},
+      m_activeLayer = null,
+      m_interactorStyle = null,
+      m_viewer = null,
+      m_renderer = null;
 
   if (!options.center) {
     m_options.center = geoModule.latlng(0.0, 0.0);
@@ -60,24 +55,46 @@ geoModule.map = function(node, options) {
   }
 
   m_interactorStyle = geoModule.mapInteractorStyle();
-
   m_viewer = ogs.vgl.viewer(m_node);
   m_viewer.setInteractorStyle(m_interactorStyle);
   m_viewer.init();
   m_viewer.renderWindow().resize($(m_node).width(), $(m_node).height());
-
   m_renderer = m_viewer.renderWindow().activeRenderer();
-/**
+
+  /**
    * Update view extents based on the zoom
    */
-
   function updateZoom(useCurrent) {
     m_interactorStyle.zoom(m_options, useCurrent);
   }
-/**
+
+  /**
+   * Get mouse pointer coordinates for canvas
+   */
+  function relMouseCoords(event) {
+    var totalOffsetX = 0,
+        totalOffsetY = 0,
+        canvasX = 0,
+        canvasY = 0,
+        currentElement = m_node;
+
+    do {
+      totalOffsetX += currentElement.offsetLeft - currentElement.scrollLeft;
+      totalOffsetY += currentElement.offsetTop - currentElement.scrollTop;
+    } while (currentElement === currentElement.offsetParent);
+
+    canvasX = event.pageX - totalOffsetX;
+    canvasY = event.pageY - totalOffsetY;
+
+    return {
+      x: canvasX,
+      y: canvasY
+    };
+  }
+
+  /**
    * Initialize the scene
    */
-
   function initScene() {
     updateZoom();
     m_initialized = true;
@@ -88,22 +105,25 @@ geoModule.map = function(node, options) {
    *
    * @param event
    */
-
   function draw() {
     if (m_initialized === false) {
       initScene();
     }
     m_viewer.render();
   }
+
   $(m_interactorStyle).on(ogs.vgl.command.leftButtonPressEvent, draw);
   $(m_interactorStyle).on(ogs.vgl.command.middleButtonPressEvent, draw);
   $(m_interactorStyle).on(ogs.vgl.command.rightButtonPressEvent, draw);
   $(this).on(geoModule.command.updateEvent, draw);
+
   // TODO use zoom and center options
   m_baseLayer = (function() {
     var mapActor, worldImage, worldTexture;
-    mapActor = ogs.vgl.utils.createTexturePlane(-180.0, -90.0, 0.0, 180.0, -90.0, 0.0, -180.0, 90.0, 0.0);
- // Setup texture
+    mapActor = ogs.vgl.utils.createTexturePlane(-180.0, -90.0, 0.0,
+                                                 180.0, -90.0, 0.0,
+                                                -180.0, 90.0, 0.0);
+    // Setup texture
     worldImage = new Image();
     worldImage.src = m_options.source;
     worldImage.onload = function() {
@@ -119,26 +139,7 @@ geoModule.map = function(node, options) {
     document.onmouseup = m_viewer.handleMouseUp;
     document.onmousemove = m_viewer.handleMouseMove;
     document.oncontextmenu = m_viewer.handleContextMenu;
-    HTMLCanvasElement.prototype.relMouseCoords = function (event) {
-      var totalOffsetX, totalOffsetY, canvasX, canvasY, currentElement = 0;
-      totalOffsetY = 0;
-      canvasX = 0;
-      canvasY = 0;
-      currentElement = this;
-
-      do {
-        totalOffsetX += currentElement.offsetLeft - currentElement.scrollLeft;
-        totalOffsetY += currentElement.offsetTop - currentElement.scrollTop;
-      } while (currentElement == currentElement.offsetParent);
-
-      canvasX = event.pageX - totalOffsetX;
-      canvasY = event.pageY - totalOffsetY;
-
-      return {
-        x: canvasX,
-        y: canvasY
-      };
-    };
+    HTMLCanvasElement.prototype.relMouseCoords = relMouseCoords;
 
     return mapActor;
   }());
@@ -149,7 +150,6 @@ geoModule.map = function(node, options) {
   this.options = function() {
     return m_options;
   };
-
 
   /**
    * Get the zoom level of the map
@@ -185,8 +185,7 @@ geoModule.map = function(node, options) {
    * @return {Boolean}
    */
   this.addLayer = function(layer) {
-
-    if (layer != null) {
+    if (layer !== null) {
       // TODO Check if the layer already exists
       // TODO Set the rendering order correctly
       m_renderer.addActor(layer.feature());
@@ -200,7 +199,6 @@ geoModule.map = function(node, options) {
       });
       return true;
     }
-
     return false;
   };
 
@@ -264,7 +262,7 @@ geoModule.map = function(node, options) {
    *
    */
   this.selectLayer = function(layer) {
-    if (layer !== undefined && m_activeLayer != layer) {
+    if (layer !== undefined && m_activeLayer !== layer) {
       var tempLayer = layer;
       m_activeLayer = layer;
       this.modified();
@@ -330,7 +328,7 @@ geoModule.map = function(node, options) {
       layer.setVisible(!layer.visible());
       return true;
     }
-    if (layer == null) {
+    if (layer === null) {
       // Load countries data first
       reader = ogs.vgl.geojsonReader();
       geoms = reader.readGJObject(ogs.geo.countries);

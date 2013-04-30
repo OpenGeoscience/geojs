@@ -3,5 +3,5 @@
  */
 
 /** Define ogs.ui namespace */
-/*global ogs*/
+/*global ogs, uiModule*/
 var uiModule = ogs.namespace("ui");
