@@ -20,23 +20,11 @@
         var renderer = viewer.renderWindow().activeRenderer();
 
         var reader = ogs.vgl.geojsonReader();
-
-        var ts1 = new Date().getMilliseconds();
-
         $.getJSON("/data/sphere_big.json", {
           format: "json"
           })
         .done(function(data) {
-          var ts2 = new Date().getMilliseconds();
-
-
           var geoms = reader.readGJObject(data);
-
-          var ts3 = new Date().getMilliseconds();
-
-          console.log('t1 ,', ts1);
-          console.log('t2 ,', ts2);
-          console.log('t3 ,', ts3);
 
           for (var i = 0; i < geoms.length; ++i) {
             var mapper = ogs.vgl.mapper();
@@ -50,16 +38,23 @@
             renderer.addActor(actor);
           }
 
-          var ts4 = new Date().getMilliseconds();
-          console.log('t4 ,', ts4);
-
           renderer.setBackgroundColor(0.0, 0.0, 0.0, 1.0);
           renderer.resetCamera();
 
-          viewer.render();
+          var interactorStyle = geoModule.mapInteractorStyle();
+          viewer.setInteractorStyle(interactorStyle);
 
-          var ts5 = new Date().getMilliseconds();
-          console.log('t4 ,', ts5);
+          document.onmousedown = viewer.handleMouseDown;
+          document.onmouseup = viewer.handleMouseUp;
+          document.onmousemove = viewer.handleMouseMove;
+          document.oncontextmenu = viewer.handleContextMenu;
+          HTMLCanvasElement.prototype.relMouseCoords = viewer.relMouseCoords;
+
+          $(interactorStyle).on(ogs.vgl.command.leftButtonPressEvent, viewer.render);
+          $(interactorStyle).on(ogs.vgl.command.middleButtonPressEvent, viewer.render);
+          $(interactorStyle).on(ogs.vgl.command.rightButtonPressEvent, viewer.render);
+
+          viewer.render();
         });
       }
     </script>

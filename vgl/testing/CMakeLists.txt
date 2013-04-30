@@ -1,5 +1,6 @@
 set(tests
   drawTest1.html
+  drawSphere.html
 )
 
 # Copy testing paths / files to the deployment directory

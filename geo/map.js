@@ -69,30 +69,6 @@ geoModule.map = function(node, options) {
   }
 
   /**
-   * Get mouse pointer coordinates for canvas
-   */
-  function relMouseCoords(event) {
-    var totalOffsetX = 0,
-        totalOffsetY = 0,
-        canvasX = 0,
-        canvasY = 0,
-        currentElement = m_node;
-
-    do {
-      totalOffsetX += currentElement.offsetLeft - currentElement.scrollLeft;
-      totalOffsetY += currentElement.offsetTop - currentElement.scrollTop;
-    } while (currentElement === currentElement.offsetParent);
-
-    canvasX = event.pageX - totalOffsetX;
-    canvasY = event.pageY - totalOffsetY;
-
-    return {
-      x: canvasX,
-      y: canvasY
-    };
-  }
-
-  /**
    * Initialize the scene
    */
   function initScene() {
@@ -139,7 +115,7 @@ geoModule.map = function(node, options) {
     document.onmouseup = m_viewer.handleMouseUp;
     document.onmousemove = m_viewer.handleMouseMove;
     document.oncontextmenu = m_viewer.handleContextMenu;
-    HTMLCanvasElement.prototype.relMouseCoords = relMouseCoords;
+    HTMLCanvasElement.prototype.relMouseCoords = m_viewer.relMouseCoords;
 
     return mapActor;
   }());
