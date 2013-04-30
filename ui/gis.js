@@ -290,6 +290,19 @@ uiModule.gis.generateOptions = function(table, map) {
 
   parent = $(table);
 
+  function slideZoom(event, ui) {
+            map.setZoom(ui.value);
+            map.redraw();
+          }
+  function stopSlider(e) {
+          e.stopPropagation();
+          return false;
+        }
+  function selCountryBound() {
+          map.toggleCountryBoundries();
+          map.redraw();
+        }
+
   for (key in options) {
 
     if (options.hasOwnProperty(key)) {
@@ -314,15 +327,10 @@ uiModule.gis.generateOptions = function(table, map) {
           max: 17.0,
           step: 1,
           value: options[key],
-          slide: function(event, ui) {
-            map.setZoom(ui.value);
-            map.redraw();
-          }
+          slide: slideZoom()
         });
-        $(sliderDiv).on('mousedown', function(e) {
-          e.stopPropagation();
-          return false;
-        });
+        //Undefined e... please check
+        $(sliderDiv).on('mousedown', stopSlider(e));
         col.attr('class', 'span10');
         $(col).append(sliderDiv);
         break;
@@ -362,10 +370,7 @@ uiModule.gis.generateOptions = function(table, map) {
         input = $(document.createElement('input'));
         input.attr('type', 'checkbox');
         input.attr('checked', map.options().country_boundries);
-        input.click(function() {
-          map.toggleCountryBoundries();
-          map.redraw();
-        });
+        input.click(selCountryBound());
         col.append(input);
 
         break;
