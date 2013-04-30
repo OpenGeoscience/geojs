@@ -281,7 +281,10 @@ geoModule.map = function(node, options) {
   };
 
   /**
-   * Resize the maps
+   * Resize map
+   *
+   * @param {Number} width
+   * @param {Number} height
    */
   this.resize = function(width, height) {
     m_viewer.renderWindow().resize(width, height);
