@@ -327,10 +327,10 @@ uiModule.gis.generateOptions = function(table, map) {
           max: 17.0,
           step: 1,
           value: options[key],
-          slide: slideZoom()
+          slide: slideZoom
         });
         //Undefined e... please check
-        $(sliderDiv).on('mousedown', stopSlider(e));
+        $(sliderDiv).on('mousedown', stopSlider);
         col.attr('class', 'span10');
         $(col).append(sliderDiv);
         break;
@@ -370,7 +370,7 @@ uiModule.gis.generateOptions = function(table, map) {
         input = $(document.createElement('input'));
         input.attr('type', 'checkbox');
         input.attr('checked', map.options().country_boundries);
-        input.click(selCountryBound());
+        input.click(selCountryBound);
         col.append(input);
 
         break;
