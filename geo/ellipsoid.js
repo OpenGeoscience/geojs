@@ -4,7 +4,7 @@
 
 /*jslint devel: true, forin: true, newcap: true, plusplus: true, white: true, indent: 2*/
 /*global geoModule, ogs, inherit*/
-s
+
 /**
  * Create an instance of quadratic surface generator
  * in Cartesian coordinates by the equation
@@ -18,7 +18,7 @@ s
  *
  * @returns {geoModule.ellipsoid}
  */
-geoModule.ellipsoid = function(x. y. z) {
+geoModule.ellipsoid = function(x, y, z) {
   "use strict";
   if (!(this instanceof geoModule.ellipsoid)) {
     return new geoModule.ellipsoid(x, y, z);
@@ -61,10 +61,7 @@ geoModule.ellipsoid = function(x. y. z) {
       return m_maximumRadius;
     }
 
-    return this;
-  };
-
-/**
+  /**
    * Return minimum radius of the ellipsoid
    *
    * @return {vec3} The maximum radius of the ellipsoid
