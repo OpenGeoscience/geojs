@@ -151,7 +151,7 @@ vglModule.mapper = function() {
       for (; i < numberOfSources; ++i) {
         bufferId = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, bufferId);
-        gl.bufferData(gl.ARRAY_BUFFER, m_geomData.source(i).data(),
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(m_geomData.source(i).data()),
                       gl.STATIC_DRAW);
 
         keys = m_geomData.source(i).keys();

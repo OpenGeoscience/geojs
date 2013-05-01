@@ -56,6 +56,41 @@
 
           viewer.render();
         });
+
+        // Read country data now
+        $.getJSON("/data/countries.json", {
+          format: "json"
+          })
+        .done(function(data) {
+          var geoms = reader.readGJObject(data),
+              positions = null,
+              ellipsoid = ogs.geo.ellipsoid();
+
+          console.log('reading countries.json');
+          for (var i = 0; i < geoms.length; ++i) {
+            console.log('geoms ', i);
+            positions = geoms[i].sourceData(vglModule.vertexAttributeKeys.Position);
+            // Assuming component size of three we conver these positions into wgs84 coordinate system
+
+            for (var j = 0; j < positions.length; j=j+3) {
+              ellipsoid.cartographicToCartesian(positions[j], positions[j+1], positions[j+2], true);
+            }
+
+            var mapper = ogs.vgl.mapper();
+            mapper.setGeometryData(geoms[i]);
+
+            var material = ogs.vgl.utils.createGeometryMaterial();
+
+            var actor = ogs.vgl.actor();
+            actor.setMapper(mapper);
+            actor.setMaterial(material);
+            renderer.addActor(actor);
+
+            viewer.render();
+          }
+        }).fail(function(error) {
+          console.log('[error] Error parsing countries data. Message: ', error);
+        });
       }
     </script>
   </head>

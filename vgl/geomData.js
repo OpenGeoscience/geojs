@@ -261,7 +261,6 @@ vglModule.sourceData = function() {
   // / Private member variables
   var m_attributesMap = {};
   var m_data = [];
-  var m_glData = null;
 
   var vglAttributeData = function() {
     // Number of components per group
@@ -291,8 +290,7 @@ vglModule.sourceData = function() {
    * @returns {Float32Array}
    */
   this.data = function() {
-    this.m_glData = new Float32Array(m_data);
-    return this.m_glData;
+    return m_data;
   };
 
   /**

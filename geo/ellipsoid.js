@@ -82,47 +82,56 @@ geoModule.ellipsoid = function(x, y, z) {
    *
    * @exception {DeveloperError} cartographic is required.
    */
-    this.geodeticSurfaceNormal = function(lat, lon) {
-        if (typeof lat === 'undefined' || typeof lon === 'undefined') {
-            throw '[error] Valid latitude and longitude is required';
-        }
+  this.geodeticSurfaceNormal = function(lat, lon) {
+      if (typeof lat === 'undefined' || typeof lon === 'undefined') {
+          throw '[error] Valid latitude and longitude is required';
+      }
 
-        var cosLatitude = Math.cos(lat),
-            x = cosLatitude * Math.cos(lon),
-            y = cosLatitude * Math.sin(lon),
-            z = Math.sin(lat),
-            result = vec3.create();
+      var cosLatitude = Math.cos(lat),
+          x = cosLatitude * Math.cos(lon),
+          y = cosLatitude * Math.sin(lon),
+          z = Math.sin(lat),
+          result = vec3.create();
 
-        result[0] = x;
-        result[1] = y;
-        result[2] = z;
+      result[0] = x;
+      result[1] = y;
+      result[2] = z;
 
-        vec3.normalize(result, result);
+      vec3.normalize(result, result);
 
-        return result;
-    };
+      return result;
+  };
 
-    /**
-     * Converts the provided geographic latitude, longitude, and height to WGS84 coordinate system
-     *
-     * @param {Number} lat Latitude in radians
-     * @param {Number} lon Longitude in radians
-     * @param {Number} elev Elevation
-     * @return {vec3} Position in the WGS84 coordinate system
-     *
-     */
-    this.cartographicToCartesian = function(lat, lon, elev) {
-        //`cartographic is required` is thrown from geodeticSurfaceNormalCartographic.
-        var normal = this.geodeticSurfaceNormalCartographic(lat, lon),
-        cartesian = vec3.create(),
-        gamma  = null;
-        vec3.multiply(cartesian, m_radiiSqaured, normal);
-        gamma = Math.sqrt(vec3.dot(normal, cartesian));
-        vec3.scale(cartesian, cartesian, gamma);
-        // Scaled normal
-        vec3.scale(normal, normal, elev);
-        return vec3.add(cartesian, cartesian, normal);
-    };
+  /**
+   * Converts the provided geographic latitude, longitude, and height to WGS84 coordinate system
+   *
+   * @param {Number} lat Latitude in radians
+   * @param {Number} lon Longitude in radians
+   * @param {Number} elev Elevation
+   * @return {vec3} Position in the WGS84 coordinate system
+   *
+   */
+  this.cartographicToCartesian = function(lat, lon, elev, inplace) {
+      //`cartographic is required` is thrown from geodeticSurfaceNormalCartographic.
+      var normal = this.geodeticSurfaceNormal(lat, lon),
+      cartesian = vec3.create(),
+      gamma  = null;
+      vec3.multiply(cartesian, m_radiiSqaured, normal);
+      gamma = Math.sqrt(vec3.dot(normal, cartesian));
+      vec3.scale(cartesian, cartesian, gamma);
+
+      // Scaled normal
+      vec3.scale(normal, normal, elev);
+      vec3.add(cartesian, cartesian, normal);
+
+      if (inplace === true) {
+        lat = cartesian[0];
+        lon = cartesian[1];
+        elev = cartesian[2];
+      }
+
+      return cartesian;
+  };
 
   return this;
 };
@@ -133,12 +142,12 @@ geoModule.ellipsoid = function(x, y, z) {
  * @memberof ellipsoid
  *
  */
-geoModule.ellipsoid.ellipsoid.WGS84 = freezeObject(
-  new ellipsoid(6378137.0, 6378137.0, 6356752.3142451793));
+geoModule.ellipsoid.WGS84 = ogs.vgl.freezeObject(
+  geoModule.ellipsoid(6378137.0, 6378137.0, 6356752.3142451793));
 
 /**
  * An Ellipsoid instance initialized to radii of (1.0, 1.0, 1.0).
  * @memberof ellipsoid
  */
-geoModule.ellipsoid.ellipsoid.UNIT_SPHERE = freezeObject(
-  new ellipsoid(1.0, 1.0, 1.0));
+geoModule.ellipsoid.UNIT_SPHERE = ogs.vgl.freezeObject(
+  geoModule.ellipsoid(1.0, 1.0, 1.0));
