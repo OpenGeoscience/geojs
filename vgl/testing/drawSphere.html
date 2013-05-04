@@ -54,7 +54,7 @@
           $(interactorStyle).on(ogs.vgl.command.middleButtonPressEvent, viewer.render);
           $(interactorStyle).on(ogs.vgl.command.rightButtonPressEvent, viewer.render);
 
-          viewer.render();
+          //viewer.render();
         });
 
         // Read country data now
@@ -63,17 +63,40 @@
           })
         .done(function(data) {
           var geoms = reader.readGJObject(data),
-              positions = null,
-              ellipsoid = ogs.geo.ellipsoid();
+              index = 0,
+              sourceData = null,
+              sourceDataArray = null,
+              stride = null,
+              offset = null,
+              noOfComponents = null,
+              sizeOfDataType = null,
+              ellipsoid = ogs.geo.ellipsoid.WGS84;
 
-          console.log('reading countries.json');
           for (var i = 0; i < geoms.length; ++i) {
-            console.log('geoms ', i);
-            positions = geoms[i].sourceData(vglModule.vertexAttributeKeys.Position);
-            // Assuming component size of three we conver these positions into wgs84 coordinate system
+            // console.log('geoms ', i);
+            sourceData = geoms[i].sourceData(vglModule.vertexAttributeKeys.Position);
+            sourceDataArray = sourceData.data();
+            noOfComponents =
+              sourceData.attributeNumberOfComponents(vglModule.vertexAttributeKeys.Position);
+            stride = sourceData.attributeStride(vglModule.vertexAttributeKeys.Position);
+            offset = sourceData.attributeOffset(vglModule.vertexAttributeKeys.Position);
+            sizeOfDataType = sourceData.sizeOfAttributeDataType(vglModule.vertexAttributeKeys.Position);
+            stride /= sizeOfDataType;
+            offset /= sizeOfDataType;
 
-            for (var j = 0; j < positions.length; j=j+3) {
-              ellipsoid.cartographicToCartesian(positions[j], positions[j+1], positions[j+2], true);
+            if (noOfComponents != 3) {
+              throw ('[error] Requires positions with three components');
+            }
+
+            for (var j = 0; j < sourceDataArray.length / noOfComponents; ++j) {
+              index = j * stride + offset;
+              var x = sourceDataArray[index], y = sourceDataArray[index + 1],
+                z = sourceDataArray[index + 2];
+              // console.log('x, y, z before', x, y, z);
+              var res = ellipsoid.cartographicToCartesian(y, x, z, true);
+              sourceDataArray[index] = res[0] * 0.0001;
+              sourceDataArray[index + 1] = res[1] * 0.0001;
+              sourceDataArray[index + 2] = res[2] * 0.0001;
             }
 
             var mapper = ogs.vgl.mapper();
@@ -86,6 +109,7 @@
             actor.setMaterial(material);
             renderer.addActor(actor);
 
+            viewer.renderWindow().activeRenderer().resetCamera();
             viewer.render();
           }
         }).fail(function(error) {

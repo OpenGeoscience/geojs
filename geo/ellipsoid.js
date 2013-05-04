@@ -24,9 +24,9 @@ geoModule.ellipsoid = function(x, y, z) {
     return new geoModule.ellipsoid(x, y, z);
   }
 
-  x = vglModule.defaultValue(x, 0.0);
-  y = vglModule.defaultValue(y, 0.0);
-  z = vglModule.defaultValue(z, 0.0);
+  x = ogs.vgl.defaultValue(x, 0.0);
+  y = ogs.vgl.defaultValue(y, 0.0);
+  z = ogs.vgl.defaultValue(z, 0.0);
 
   if (x < 0.0 || y < 0.0 || z < 0.0) {
     return console.log('[error] Al radii components must be greater than zero');
@@ -98,7 +98,6 @@ geoModule.ellipsoid = function(x, y, z) {
       result[2] = z;
 
       vec3.normalize(result, result);
-
       return result;
   };
 
@@ -112,25 +111,27 @@ geoModule.ellipsoid = function(x, y, z) {
    *
    */
   this.cartographicToCartesian = function(lat, lon, elev, inplace) {
-      //`cartographic is required` is thrown from geodeticSurfaceNormalCartographic.
-      var normal = this.geodeticSurfaceNormal(lat, lon),
-      cartesian = vec3.create(),
-      gamma  = null;
-      vec3.multiply(cartesian, m_radiiSqaured, normal);
-      gamma = Math.sqrt(vec3.dot(normal, cartesian));
-      vec3.scale(cartesian, cartesian, gamma);
+      lat = lat *  Math.PI / 180.0;
+      lon = lon * Math.PI / 180.0;
 
-      // Scaled normal
-      vec3.scale(normal, normal, elev);
-      vec3.add(cartesian, cartesian, normal);
+      var n = this.geodeticSurfaceNormal(lat, lon),
+          k = vec3.create(),
+          gamma  = null,
+          result = vec3.create();
+
+      vec3.multiply(k, m_radiiSqaured, n);
+      gamma = Math.sqrt(vec3.dot(n, k));
+      vec3.scale(k, k, 1/gamma);
+      vec3.scale(n, n, elev);
+      vec3.add(result, n,  k);
 
       if (inplace === true) {
-        lat = cartesian[0];
-        lon = cartesian[1];
-        elev = cartesian[2];
+        lon  = result[0];
+        lat  = result[1];
+        elev = result[2];
       }
 
-      return cartesian;
+      return result;
   };
 
   return this;

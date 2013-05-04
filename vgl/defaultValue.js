@@ -10,10 +10,6 @@
  * @returns {vglModule.defaultValue}
  */
 vglModule.defaultValue = function(a, b) {
-  if (!(this instanceof vglModule.defaultValue)) {
-    return new vglModule.defaultValue(a, b);
-  }
-
   if (typeof a !== 'undefined') {
     return a;
   }

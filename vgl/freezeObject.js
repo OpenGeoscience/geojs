@@ -12,7 +12,7 @@ vglModule.freezeObject = function(obj) {
    *
    * @exports freezeObject
    */
-  var freezedObject = Object.freeze;
+  var freezedObject = Object.freeze(obj);
   if (typeof freezedObject === 'undefined') {
     freezedObject = function(o) {
       return o;
