@@ -741,29 +741,31 @@ vglModule.geometryData = function() {
    * Compute bounds
    */
   this.computeBounds = function() {
-
     if (m_boundsDirtyTimestamp.getMTime() > m_computeBoundsTimestamp.getMTime()) {
+      var sourceData = this.sourceData(
+            vglModule.vertexAttributeKeys.Position),
+          data = sourceData.data(),
+          numberOfComponents = sourceData.attributeNumberOfComponents(
+            vglModule.vertexAttributeKeys.Position),
+          stride = sourceData.attributeStride(
+            vglModule.vertexAttributeKeys.Position),
+          offset = sourceData.attributeOffset(
+            vglModule.vertexAttributeKeys.Position),
+          sizeOfDataType = sourceData.sizeOfAttributeDataType(
+            vglModule.vertexAttributeKeys.Position),
+          count = data.length,
+          ib = 0,
+          jb = 0,
+          value = null,
+          vertexPosition = null;
 
-      var sourceData = this.sourceData(vglModule.vertexAttributeKeys.Position),
-          data = sourceData.data();
-      var numberOfComponents = sourceData.attributeNumberOfComponents(
-        vglModule.vertexAttributeKeys.Position),
-        stride = sourceData.attributeStride(vglModule.vertexAttributeKeys.Position),
-        offset = sourceData.attributeOffset(vglModule.vertexAttributeKeys.Position),
-        sizeOfDataType = sourceData.sizeOfAttributeDataType(
-          vglModule.vertexAttributeKeys.Position),
-        count = data.length / numberOfComponents,
-        ib = 0,
-        jb = 0,
-        value = null,
-        vertexPosition = null;
-
+      // We need to operate on arrays
       stride /= sizeOfDataType;
       offset /= sizeOfDataType;
 
       this.resetBounds();
 
-      for (var i = 0; i < count; ++i) {
+      for (var i = 0; i < count; i += numberOfComponents) {
         vertexPosition = i * stride + offset;
         for (var j = 0; j < numberOfComponents; ++j) {
           value = data[vertexPosition + j];
