@@ -207,8 +207,16 @@ vglModule.renderer = function() {
    */
   this.positionAndResize = function(x, y, width, height) {
     // TODO move this code to camera
-    gl.viewport(x, y, width, height);
-    m_camera.setViewAspect(width / height);
+    if (x < 0 || y < 0 || width < 0 || height < 0) {
+      console.log('[error] Invalid position and resize values',
+        x, y, width, height);
+    }
+
+    m_width = width;
+    m_height = height;
+
+    gl.viewport(x, y, m_width, m_height);
+    m_camera.setViewAspect(m_width / m_height);
     this.modified();
   };
 

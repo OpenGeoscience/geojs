@@ -35,13 +35,13 @@ vglModule.picker = function() {
    */
   this.pick = function(selectionX, selectionY, renderer) {
     // Check if variables are acceptable
-    if (typeof(selectionX) == "undefined"){
+    if (typeof(selectionX) === "undefined"){
       return 0;
     }
-    if (typeof(selectionY) == "undefined"){
+    if (typeof(selectionY) === "undefined"){
       return 0;
     }
-    if (typeof(renderer) == "undefined"){
+    if (typeof(renderer) === "undefined"){
       return 0;
     }
 
@@ -50,15 +50,17 @@ vglModule.picker = function() {
 
     //
     var camera = renderer.camera();
-    var width = renderer.width(); //m_that.viewer().renderWindow().windowSize()[0];
-    var height = renderer.height();//m_that.viewer().renderWindow().windowSize()[1];
+    var width = renderer.width();
+    var height = renderer.height();
 
     // Get focal point
     var fpoint = camera.focalPoint();
     var focusWorldPt = vec4.fromValues(fpoint[0], fpoint[1], fpoint[2], 1.0);
-    var focusDisplayPt = renderer.worldToDisplay(focusWorldPt, camera.viewMatrix(),
-                                                 camera.projectionMatrix(), width, height);
+    var focusDisplayPt = renderer.worldToDisplay(
+      focusWorldPt, camera.viewMatrix(),
+      camera.projectionMatrix(), width, height);
     var displayPt = vec4.fromValues(selectionX, selectionY, focusDisplayPt[2], 1.0)
+
     // Convert selection point into world coordinates
     var worldPt = renderer.displayToWorld(displayPt, camera.viewMatrix(),
                                           camera.projectionMatrix(), width, height);
@@ -123,8 +125,6 @@ vglModule.picker = function() {
     }
     return count;
   };
-
-
 
   return this;
 };
