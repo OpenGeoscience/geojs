@@ -38,6 +38,26 @@ vglModule.renderer = function() {
   var m_camera = new vglModule.camera();
   m_camera.addChild(m_sceneRoot);
 
+  /** @private */
+  var m_width = 0;
+
+  /** @private */
+  var m_height = 0;
+
+  /**
+   * Get width of the renderer
+   */
+  this.width = function() {
+    return m_width;
+  }
+
+  /**
+   * Get height of the renderer
+   */
+  this.height = function() {
+    return m_height;
+  }
+
   /**
    * Get background color
    */
