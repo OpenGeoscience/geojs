@@ -110,7 +110,7 @@ geoModule.ellipsoid = function(x, y, z) {
    * @param {Number} elev Elevation
    * @return {vec3} Position in the WGS84 coordinate system
    */
-  this.cartographicToCartesian = function(lat, lon, elev) {
+  this.transformPoint = function(lat, lon, elev) {
       lat = lat *  (Math.PI / 180.0);
       lon = lon * (Math.PI / 180.0);
 
@@ -136,7 +136,7 @@ geoModule.ellipsoid = function(x, y, z) {
    * @param {Number} elev Elevation
    * @return {vec3} Position in the WGS84 coordinate system
    */
-  this.transformCartographicToCartesian = function(geom) {
+  this.transformGeometry = function(geom) {
     if (!geom) {
       throw '[error] Failed to transform to cartesian. Invalid geometry.';
     }

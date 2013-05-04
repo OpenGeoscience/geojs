@@ -77,12 +77,13 @@ vglModule.groupMapper = function() {
 
     var computeBoundsTimestamp = this.computeBoundsTimestamp(),
         boundsDirtyTimestamp = this.boundsDirtyTimestamp(),
-        geomBounds = null;
+        m_bounds = this.bounds(),
+        geomBounds = null
 
     if (boundsDirtyTimestamp.getMTime() > computeBoundsTimestamp.getMTime()) {
 
       for (var i = 0; i < m_geomDataArray.length; ++i) {
-        geomBounds = m_geomData.bounds();
+        geomBounds = m_geomDataArray[i].bounds();
 
         if (m_bounds[0] > geomBounds[0]) {
           m_bounds[0] = geomBounds[0];

@@ -20,9 +20,11 @@ vglModule.boundingObject = function() {
 
   /** @private */
   var m_computeBoundsTimestamp = vglModule.timestamp();
+  m_computeBoundsTimestamp.modified();
 
   /** @private */
   var m_boundsDirtyTimestamp = vglModule.timestamp();
+  m_boundsDirtyTimestamp.modified();
 
   /**
    * Get current bounds of the object
