@@ -37,7 +37,7 @@ vglModule.camera = function() {
   var m_near = 1.0;
 
   /** @private */
-  var m_far = 10000.0;
+  var m_far = 10000000.0;
 
   /** @private */
   var m_viewAspect = 1.0;

@@ -35,12 +35,10 @@
             var actor = ogs.vgl.actor();
             actor.setMapper(mapper);
             actor.setMaterial(material);
-            renderer.addActor(actor);
+            // renderer.addActor(actor);
           }
 
           renderer.setBackgroundColor(0.0, 0.0, 0.0, 1.0);
-          renderer.resetCamera();
-
           var interactorStyle = geoModule.mapInteractorStyle();
           viewer.setInteractorStyle(interactorStyle);
 
@@ -94,9 +92,9 @@
                 z = sourceDataArray[index + 2];
               // console.log('x, y, z before', x, y, z);
               var res = ellipsoid.cartographicToCartesian(y, x, z, true);
-              sourceDataArray[index] = res[0] * 0.0001;
-              sourceDataArray[index + 1] = res[1] * 0.0001;
-              sourceDataArray[index + 2] = res[2] * 0.0001;
+              sourceDataArray[index] = res[0];
+              sourceDataArray[index + 1] = res[1];
+              sourceDataArray[index + 2] = res[2];
             }
 
             var mapper = ogs.vgl.mapper();
@@ -108,10 +106,9 @@
             actor.setMapper(mapper);
             actor.setMaterial(material);
             renderer.addActor(actor);
-
-            viewer.renderWindow().activeRenderer().resetCamera();
-            viewer.render();
           }
+          renderer.resetCamera();
+          viewer.render();
         }).fail(function(error) {
           console.log('[error] Error parsing countries data. Message: ', error);
         });

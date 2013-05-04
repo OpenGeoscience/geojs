@@ -135,8 +135,6 @@ vglModule.renderer = function() {
     var vn = m_camera.directionOfProjection();
     var visibleBounds = m_camera.bounds();
 
-    console.log('visibleBounds ', visibleBounds);
-
     var center = [
       (visibleBounds[0] + visibleBounds[1]) / 2.0,
       (visibleBounds[2] + visibleBounds[3]) / 2.0,

@@ -744,19 +744,28 @@ vglModule.geometryData = function() {
 
     if (m_boundsDirtyTimestamp.getMTime() > m_computeBoundsTimestamp.getMTime()) {
 
-      var sourceData = this.sourceData(vglModule.vertexAttributeKeys.Position);
-      var data = sourceData.data();
+      var sourceData = this.sourceData(vglModule.vertexAttributeKeys.Position),
+          data = sourceData.data();
       var numberOfComponents = sourceData.attributeNumberOfComponents(
-        vglModule.vertexAttributeKeys.Position);
-      var count = sourceData.lengthOfArray() / numberOfComponents;
-      var ib = 0, jb = 0;
-      var value = null;
+        vglModule.vertexAttributeKeys.Position),
+        stride = sourceData.attributeStride(vglModule.vertexAttributeKeys.Position),
+        offset = sourceData.attributeOffset(vglModule.vertexAttributeKeys.Position),
+        sizeOfDataType = sourceData.sizeOfAttributeDataType(
+          vglModule.vertexAttributeKeys.Position),
+        count = data.length / numberOfComponents,
+        ib = 0,
+        jb = 0,
+        value = null,
+        vertexPosition = null;
+
+      stride /= sizeOfDataType;
+      offset /= sizeOfDataType;
 
       this.resetBounds();
-      for (var i = 0; i < count; ++i) {
-        var vertexPosition = i * numberOfComponents;
-        for (var j = 0; j < numberOfComponents; ++j) {
 
+      for (var i = 0; i < count; ++i) {
+        vertexPosition = i * stride + offset;
+        for (var j = 0; j < numberOfComponents; ++j) {
           value = data[vertexPosition + j];
           ib = j * 2;
           jb = j * 2 + 1;
