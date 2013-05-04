@@ -111,8 +111,8 @@ geoModule.ellipsoid = function(x, y, z) {
    *
    */
   this.cartographicToCartesian = function(lat, lon, elev, inplace) {
-      lat = lat *  Math.PI / 180.0;
-      lon = lon * Math.PI / 180.0;
+      lat = lat *  (Math.PI / 180.0);
+      lon = lon * (Math.PI / 180.0);
 
       var n = this.geodeticSurfaceNormal(lat, lon),
           k = vec3.create(),
