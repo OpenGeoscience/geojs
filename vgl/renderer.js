@@ -131,7 +131,6 @@ vglModule.renderer = function() {
    */
   this.resetCamera = function() {
     m_camera.computeBounds();
-
     var vn = m_camera.directionOfProjection();
     var visibleBounds = m_camera.bounds();
 
@@ -184,13 +183,85 @@ vglModule.renderer = function() {
     m_camera.setFocalPoint(center[0], center[1], center[2]);
     m_camera.setPosition(center[0] + distance * -vn[0],
       center[1] + distance * -vn[1], center[2] + distance * -vn[2]);
+
+    this.resetCameraClippingRange(visibleBounds);
   };
 
   /**
    * Recalculate camera's clipping range
    */
-  this.resetCameraClippingRange = function() {
-    // TODO
+  this.resetCameraClippingRange = function(bounds) {
+    var vn = null,
+        position = null,
+        a = null,
+        b = null,
+        c = null,
+        d = null,
+        range = vec2.create(),
+        dist = null,
+        i = null,
+        j = null,
+        k = null;
+
+    vn = m_camera.viewPlaneNormal();
+    position = m_camera.position();
+    a = -vn[0];
+    b = -vn[1];
+    c = -vn[2];
+    d = -(a*position[0] + b*position[1] + c*position[2]);
+
+    // Set the max near clipping plane and the min far clipping plane
+    range[0] = a * bounds[0] + b * bounds[2] + c * bounds[4] + d;
+    range[1] = 1e-18;
+
+    // Find the closest / farthest bounding box vertex
+    for ( k = 0; k < 2; k++ ) {
+      for ( j = 0; j < 2; j++ ) {
+        for ( i = 0; i < 2; i++ ) {
+          dist = a*bounds[i] + b*bounds[2+j] + c*bounds[4+k] + d;
+          range[0] = (dist<range[0])?(dist):(range[0]);
+          range[1] = (dist>range[1])?(dist):(range[1]);
+        }
+      }
+    }
+
+    // Do not let the range behind the camera throw off the calculation.
+    if (range[0] < 0.0) {
+      range[0] = 0.0;
+    }
+
+    // Give ourselves a little breathing room
+    range[0] = 0.99*range[0] - (range[1] - range[0])*0.5;
+    range[1] = 1.01*range[1] + (range[1] - range[0])*0.5;
+
+    // Make sure near is not bigger than far
+    range[0] = (range[0] >= range[1])?(0.01*range[1]):(range[0]);
+
+    // @todo
+    // Make sure near is at least some fraction of far - this prevents near
+    // from being behind the camera or too close in front. How close is too
+    // close depends on the resolution of the depth buffer
+    // if (!this->NearClippingPlaneTolerance)
+    //   {
+    //   this->NearClippingPlaneTolerance = 0.01;
+    //   if (this->RenderWindow)
+    //     {
+    //     int ZBufferDepth = this->RenderWindow->GetDepthBufferSize();
+    //     if ( ZBufferDepth > 16 )
+    //       {
+    //       this->NearClippingPlaneTolerance = 0.001;
+    //       }
+    //     }
+    //   }
+
+    // make sure the front clipping range is not too far from the far clippnig
+    // range, this is to make sure that the zbuffer resolution is effectively
+    // used
+    // if (range[0] < this->NearClippingPlaneTolerance*range[1]) {
+    //   range[0] = this->NearClippingPlaneTolerance*range[1];
+    // }
+
+    m_camera.setClippingRange(range[0], range[1]);
   };
 
   /**

@@ -34,16 +34,19 @@ vglModule.camera = function() {
   var m_right = vec3.fromValues(1.0, 0.0, 0.0);
 
   /** @private */
-  var m_near = 1.0;
+  var m_near = 0.1;
 
   /** @private */
-  var m_far = 10000000.0;
+  var m_far = 10000.0;
 
   /** @private */
   var m_viewAspect = 1.0;
 
   /** @private */
   var m_directionOfProjection = vec3.fromValues(0.0, 0.0, -1.0);
+
+  /** @private */
+  var m_viewPlaneNormal = vec3.fromValues(0.0, 0.0, 1.0);
 
   /** @private */
   var m_viewMatrix = mat4.create();
@@ -160,9 +163,16 @@ vglModule.camera = function() {
    */
   this.directionOfProjection = function() {
     this.computeDirectionOfProjection();
-
     return m_directionOfProjection;
   };
+
+  /**
+   * Return view plane normal direction
+   */
+  this.viewPlaneNormal = function() {
+    this.computeViewPlaneNormal();
+    return m_viewPlaneNormal;
+  }
 
   /**
    * Return view-matrix for the camera This method does not compute the
@@ -194,6 +204,15 @@ vglModule.camera = function() {
     vec3.normalize(m_directionOfProjection, m_directionOfProjection);
     this.modified();
   };
+
+  /**
+   * Compute view plane normal
+   */
+  this.computeViewPlaneNormal = function() {
+    m_viewPlaneNormal[0] = -m_directionOfProjection[0];
+    m_viewPlaneNormal[1] = -m_directionOfProjection[1];
+    m_viewPlaneNormal[2] = -m_directionOfProjection[2];
+  }
 
   /**
    * Move camera closer or further away from the scene
