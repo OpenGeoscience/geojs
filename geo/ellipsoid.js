@@ -82,7 +82,7 @@ geoModule.ellipsoid = function(x, y, z) {
    *
    * @exception {DeveloperError} cartographic is required.
    */
-  this.geodeticSurfaceNormal = function(lat, lon) {
+  this.computeGeodeticSurfaceNormal = function(lat, lon) {
       if (typeof lat === 'undefined' || typeof lon === 'undefined') {
           throw '[error] Valid latitude and longitude is required';
       }
@@ -102,19 +102,19 @@ geoModule.ellipsoid = function(x, y, z) {
   };
 
   /**
-   * Converts the provided geographic latitude, longitude, and height to WGS84 coordinate system
+   * Converts the provided geographic latitude, longitude,
+   * and height to WGS84 coordinate system
    *
    * @param {Number} lat Latitude in radians
    * @param {Number} lon Longitude in radians
    * @param {Number} elev Elevation
    * @return {vec3} Position in the WGS84 coordinate system
-   *
    */
-  this.cartographicToCartesian = function(lat, lon, elev, inplace) {
+  this.cartographicToCartesian = function(lat, lon, elev) {
       lat = lat *  (Math.PI / 180.0);
       lon = lon * (Math.PI / 180.0);
 
-      var n = this.geodeticSurfaceNormal(lat, lon),
+      var n = this.computeGeodeticSurfaceNormal(lat, lon),
           k = vec3.create(),
           gamma  = null,
           result = vec3.create();
@@ -124,14 +124,66 @@ geoModule.ellipsoid = function(x, y, z) {
       vec3.scale(k, k, 1/gamma);
       vec3.scale(n, n, elev);
       vec3.add(result, n,  k);
-
-      if (inplace === true) {
-        lon  = result[0];
-        lat  = result[1];
-        elev = result[2];
-      }
-
       return result;
+  };
+
+  /**
+   * Converts the provided geographic latitude, longitude,
+   * and height to WGS84 coordinate system
+   *
+   * @param {Number} lat Latitude in radians
+   * @param {Number} lon Longitude in radians
+   * @param {Number} elev Elevation
+   * @return {vec3} Position in the WGS84 coordinate system
+   */
+  this.transformCartographicToCartesian = function(geom) {
+    if (!geom) {
+      throw '[error] Failed to transform to cartesian. Invalid geometry.';
+    }
+
+    var sourceData = geom.sourceData(vglModule.vertexAttributeKeys.Position),
+        sourceDataArray = sourceData.data(),
+        noOfComponents =  sourceData.attributeNumberOfComponents(
+          vglModule.vertexAttributeKeys.Position),
+        stride = sourceData.attributeStride(
+          vglModule.vertexAttributeKeys.Position),
+        offset = sourceData.attributeOffset(
+          vglModule.vertexAttributeKeys.Position),
+        sizeOfDataType = sourceData.sizeOfAttributeDataType(
+          vglModule.vertexAttributeKeys.Position),
+        index = null,
+        count = null,
+        gamma = null,
+        n = null,
+        k = vec3.create(),
+        result = vec3.create();
+
+    stride /= sizeOfDataType;
+    offset /= sizeOfDataType;
+
+    if (noOfComponents != 3) {
+      throw ('[error] Requires positions with three components');
+    }
+
+    count = sourceDataArray.length * (1.0 / noOfComponents);
+    for (var j = 0; j < count; ++j) {
+      index = j * stride + offset;
+
+      sourceDataArray[index] = sourceDataArray[index] * (Math.PI / 180.0);
+      sourceDataArray[index + 1] = sourceDataArray[index + 1] * (Math.PI / 180.0);
+
+      n = this.computeGeodeticSurfaceNormal(sourceDataArray[index + 1],
+                                            sourceDataArray[index]);
+      vec3.multiply(k, m_radiiSqaured, n);
+      gamma = Math.sqrt(vec3.dot(n, k));
+      vec3.scale(k, k, 1/gamma);
+      vec3.scale(n, n, sourceDataArray[index + 2]);
+      vec3.add(result, n,  k);
+
+      sourceDataArray[index] = result[0];
+      sourceDataArray[index + 1] = result[1];
+      sourceDataArray[index + 2] = result[2];
+    }
   };
 
   return this;

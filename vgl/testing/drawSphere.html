@@ -71,32 +71,8 @@
               ellipsoid = ogs.geo.ellipsoid.WGS84;
 
           for (var i = 0; i < geoms.length; ++i) {
-            // console.log('geoms ', i);
-            sourceData = geoms[i].sourceData(vglModule.vertexAttributeKeys.Position);
-            sourceDataArray = sourceData.data();
-            noOfComponents =
-              sourceData.attributeNumberOfComponents(vglModule.vertexAttributeKeys.Position);
-            stride = sourceData.attributeStride(vglModule.vertexAttributeKeys.Position);
-            offset = sourceData.attributeOffset(vglModule.vertexAttributeKeys.Position);
-            sizeOfDataType = sourceData.sizeOfAttributeDataType(vglModule.vertexAttributeKeys.Position);
-            stride /= sizeOfDataType;
-            offset /= sizeOfDataType;
-
-            if (noOfComponents != 3) {
-              throw ('[error] Requires positions with three components');
-            }
-
-            for (var j = 0; j < sourceDataArray.length / noOfComponents; ++j) {
-              index = j * stride + offset;
-              var x = sourceDataArray[index], y = sourceDataArray[index + 1],
-                z = sourceDataArray[index + 2];
-              // console.log('x, y, z before', x, y, z);
-              var res = ellipsoid.cartographicToCartesian(y, x, z, true);
-              sourceDataArray[index] = res[0];
-              sourceDataArray[index + 1] = res[1];
-              sourceDataArray[index + 2] = res[2];
-            }
-
+            // console.log('x, y, z before', x, y, z);
+            ellipsoid.transformCartographicToCartesian(geoms[i]);
             var mapper = ogs.vgl.mapper();
             mapper.setGeometryData(geoms[i]);
 
