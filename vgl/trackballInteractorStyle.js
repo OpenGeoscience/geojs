@@ -1,20 +1,20 @@
 /**
- * @module ogs.geo
+ * @module ogs.vgl
  */
 
 /*jslint devel: true, forin: true, newcap: true, plusplus: true, white: true, indent: 2*/
-/*global geoModule, geoModule, ogs, inherit, vec4, $*/
+/*global vglModule, vglModule, ogs, inherit, vec4, $*/
 
 /**
- * Create a new instance of mapInteractorStyle
+ * Create a new instance of trackballInteractorStyle
  *
- * @class geoModule.mapInteractorStyle
- * @returns {geoModule.mapInteractorStyle}
+ * @class vglModule.trackballInteractorStyle
+ * @returns {vglModule.trackballInteractorStyle}
  */
-geoModule.mapInteractorStyle = function() {
+vglModule.trackballInteractorStyle = function() {
   "use strict";
-  if (!(this instanceof geoModule.mapInteractorStyle)) {
-    return new geoModule.mapInteractorStyle();
+  if (!(this instanceof vglModule.trackballInteractorStyle)) {
+    return new vglModule.trackballInteractorStyle();
   }
   ogs.vgl.interactorStyle.call(this);
   var m_that = this,
@@ -92,12 +92,17 @@ geoModule.mapInteractorStyle = function() {
       m_dy = m_worldPt1[1] - m_worldPt2[1];
       m_dz = m_worldPt1[2] - m_worldPt2[2];
       m_camera.pan(-m_dx, -m_dy, -m_dz);
-      $(m_that).trigger(ogs.vgl.command.middleButtonPressEvent);
+      $(m_that).trigger(vglModule.command.middleButtonPressEvent);
+    }
+    if (m_leftMouseButtonDown) {
+      m_camera.rotate((m_mouseLastPos.x - m_currentMousePos.x),
+      (m_mouseLastPos.y - m_currentMousePos.y));
+      $(m_that).trigger(vglModule.command.leftButtonPressEvent);
     }
     if (m_rightMouseButtonDown) {
       m_zTrans = m_currentMousePos.y - m_mouseLastPos.y;
       m_camera.zoom(m_zTrans * 0.5);
-      $(m_that).trigger(ogs.vgl.command.rightButtonPressEvent);
+      $(m_that).trigger(vglModule.command.rightButtonPressEvent);
     }
     m_mouseLastPos.x = m_currentMousePos.x;
     m_mouseLastPos.y = m_currentMousePos.y;
@@ -175,4 +180,4 @@ geoModule.mapInteractorStyle = function() {
   };
   return this;
 };
-inherit(geoModule.mapInteractorStyle, ogs.vgl.interactorStyle);
+inherit(vglModule.trackballInteractorStyle, ogs.vgl.interactorStyle);

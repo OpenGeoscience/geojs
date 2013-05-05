@@ -39,7 +39,7 @@
           }
 
           renderer.setBackgroundColor(0.0, 0.0, 0.0, 1.0);
-          var interactorStyle = geoModule.mapInteractorStyle();
+          var interactorStyle = ogs.vgl.trackballInteractorStyle();
           viewer.setInteractorStyle(interactorStyle);
 
           document.onmousedown = viewer.handleMouseDown;
