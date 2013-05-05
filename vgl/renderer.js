@@ -177,7 +177,7 @@ vglModule.renderer = function() {
     var vup = m_camera.viewUpDirection();
 
     if (Math.abs(vec3.dot(vup, vn)) > 0.999) {
-      m_camera.setViewDirection(-vup[2], vup[0], vup[1]);
+      m_camera.setViewUpDirection(-vup[2], vup[0], vup[1]);
     }
 
     m_camera.setFocalPoint(center[0], center[1], center[2]);

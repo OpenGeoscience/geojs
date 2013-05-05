@@ -28,10 +28,10 @@ vglModule.camera = function() {
   var m_centerOrRotation = vec3.fromValues(0.0, 0.0, 0.0);
 
   /** @private */
-  var m_viewUp = vec3.fromValues(0.0, 1.0, 0.0);
+  var m_viewUp = vec4.fromValues(0.0, 1.0, 0.0, 0.0);
 
   /** @private */
-  var m_right = vec3.fromValues(1.0, 0.0, 0.0);
+  var m_right = vec4.fromValues(1.0, 0.0, 0.0, 0.0);
 
   /** @private */
   var m_near = 0.1;
@@ -43,10 +43,10 @@ vglModule.camera = function() {
   var m_viewAspect = 1.0;
 
   /** @private */
-  var m_directionOfProjection = vec3.fromValues(0.0, 0.0, -1.0);
+  var m_directionOfProjection = vec4.fromValues(0.0, 0.0, -1.0, 0.0);
 
   /** @private */
-  var m_viewPlaneNormal = vec3.fromValues(0.0, 0.0, 1.0);
+  var m_viewPlaneNormal = vec4.fromValues(0.0, 0.0, 1.0, 0.0);
 
   /** @private */
   var m_viewMatrix = mat4.create();
@@ -283,13 +283,9 @@ vglModule.camera = function() {
     vec3.transformMat4(m_position, m_position, mat);
     vec3.transformMat4(m_focalPoint, m_focalPoint, mat);
 
-    // Update right vector
-    vec3.transformMat4(m_right, m_right, mat);
-    vec3.normalize(m_right, m_right);
-
     // Update viewup vector
-    vec3.transformMat4(m_viewUp, m_viewUp, mat);
-    vec3.normalize(m_viewUp, m_viewUp);
+    vec4.transformMat4(m_viewUp, m_viewUp, mat);
+    vec4.normalize(m_viewUp, m_viewUp);
 
     // Update direction of projection
     this.computeOrthogonalAxes();
