@@ -243,7 +243,7 @@ uiModule.gis.layerAdded = function(elem) {
 uiModule.gis.removeLayer = function(elem, layerId) {
   "use strict";
   var buttonId, button = $('#btn-add-' + layerId);
-  button = $(buttonId);
+  //button = $(buttonId);
 
   if (button !== null || button !== undefined) {
     button.removeClass('disabled');
