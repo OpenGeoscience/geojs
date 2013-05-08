@@ -13,7 +13,16 @@
           { "type": "Feature",
             "geometry": {"type": "Point", "coordinates": [102.0, 0.5]},
             "properties": {"prop0": "value0"}
-            },
+          },
+          { "type": "Feature",
+            "geometry": {
+               "type": "Polygon",
+               "coordinates": [
+                 [[103.5, 1.1],[104.0, 1.1],[103.75, 2.0]]
+               ]
+             },
+            "properties": { "prop0": "value0" }
+          },
           { "type": "Feature",
             "geometry": {
               "type": "LineString",
@@ -28,15 +37,23 @@
             }
         ]
       };
+      function doMouseDown(event){
+        var pick = ogs.vgl.picker();
+        var r = pick.pick(event.pageX, event.pageY, renderer);
+        console.log([event.pageX, event.pageY, r]);
+      }
 
+      var renderer;
       var testDrawSphere = {};
       testDrawSphere.main = function() {
         var node = document.getElementById("glcanvas");
         var viewer = ogs.vgl.viewer(node);
         viewer.init();
 
+        node.addEventListener("mousedown", doMouseDown, false);
+
         viewer.renderWindow().resize($(node).width(), $(node).height());
-        var renderer = viewer.renderWindow().activeRenderer();
+        renderer = viewer.renderWindow().activeRenderer();
 
         var reader = ogs.vgl.geojsonReader();
         var geoms = reader.readGJObject(data);
