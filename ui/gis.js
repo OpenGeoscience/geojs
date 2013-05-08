@@ -346,13 +346,13 @@ uiModule.gis.generateOptions = function(table, map) {
           // });
           // col.append(lngInput);
           break;
-        case "country_boundries":
+        case "country_boundaries":
           // Boolean
           var input = $(document.createElement('input'));
           input.attr('type', 'checkbox');
-          input.attr('checked', map.options().country_boundries);
+          input.attr('checked', map.options().country_boundaries);
           input.click(function() {
-            map.toggleCountryBoundries();
+            map.toggleCountryBoundaries();
             map.redraw();
           });
           col.append(input);

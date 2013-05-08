@@ -35,7 +35,7 @@ vglModule.primitive = function() {
   var m_indicesValueType = 0;
 
   /** @private */
-  var m_indices = 0;
+  var m_indices = null;
 
   this.indices = function() {
     return m_indices;
@@ -43,7 +43,7 @@ vglModule.primitive = function() {
 
   this.createIndices = function(type) {
     // TODO Check for the type
-    m_indices = new Uint16Array();
+    m_indices = new Uint16Array(m_indexCount);
   };
 
   /**
@@ -212,7 +212,10 @@ vglModule.vertexDataP3f = function() {
     return new vglModule.vertexDataP3f();
   }
 
+  /** @private */
   this.m_position = [];
+
+  return this;
 };
 
 /**
@@ -227,8 +230,13 @@ vglModule.vertexDataP3N3f = function() {
     return new vglModule.vertexDataP3N3f();
   }
 
+  /** @private */
   this.m_position = [];
+
+  /** @private */
   this.m_normal = [];
+
+  return this;
 };
 
 /**
@@ -242,8 +250,13 @@ vglModule.vertexDataP3T3f = function() {
     return new vglModule.vertexDataP3T3f();
   }
 
+  /** @private */
   this.m_position = [];
+
+  /** @private */
   this.m_texCoordinate = [];
+
+  return this
 };
 
 /**
@@ -258,8 +271,10 @@ vglModule.sourceData = function() {
     return new vglModule.sourceData();
   }
 
-  // / Private member variables
+  /** @private */
   var m_attributesMap = {};
+
+  /** @private */
   var m_data = [];
 
   var vglAttributeData = function() {
@@ -267,10 +282,10 @@ vglModule.sourceData = function() {
     this.m_numberOfComponents = 0;
 
     // Type of data type (GL_FLOAT etc)
-    m_dataType = 0;
+    this.m_dataType = 0;
 
     // Size of data type
-    m_dataTypeSize = 0;
+    this.m_dataTypeSize = 0;
 
     // Specifies whether fixed-point data values should be normalized
     // (true) or converted directly as fixed-point values (false)
@@ -287,7 +302,7 @@ vglModule.sourceData = function() {
   /**
    * Return raw data for this source
    *
-   * @returns {Float32Array}
+   * @returns {Array}
    */
   this.data = function() {
     return m_data;
@@ -404,6 +419,7 @@ vglModule.sourceData = function() {
       return m_attributesMap[key].m_dataType;
     }
 
+    // @note: where is this defined?
     return vglDataType.Undefined;
   };
 
@@ -719,7 +735,7 @@ vglModule.geometryData = function() {
     m_bounds[3] = 0.0;
     m_bounds[4] = 0.0;
     m_bounds[5] = 0.0;
-  }
+  };
 
   /**
    * Set bounds

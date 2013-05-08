@@ -25,7 +25,7 @@ vglModule.camera = function() {
   var m_focalPoint = vec3.fromValues(0.0, 0.0, -5.0);
 
   /** @private */
-  var m_centerOrRotation = vec3.fromValues(0.0, 0.0, 0.0);
+  var m_centerOfRotation = vec3.fromValues(0.0, 0.0, 0.0);
 
   /** @private */
   var m_viewUp = vec4.fromValues(0.0, 1.0, 0.0, 0.0);
@@ -116,23 +116,23 @@ vglModule.camera = function() {
    * Get center of rotation for camera
    */
   this.centerOfRotation = function() {
-    return m_centerOrRotation;
-  }
+    return m_centerOfRotation;
+  };
 
   /**
    * Set center of rotation for camera
    */
   this.setCenterOfRotation = function(centerOfRotation) {
-    m_centerOrRotation = centerOfRotation;
+    m_centerOfRotation = centerOfRotation;
     this.modified();
-  }
+  };
 
   /**
    * Get clipping range of the camera
    */
   this.getClippingRange = function() {
     return [m_near, m_far];
-  }
+  };
 
   /**
    * Set clipping range of the camera
@@ -141,7 +141,7 @@ vglModule.camera = function() {
     m_near = near;
     m_far = far;
     this.modified();
-  }
+  };
 
   /**
    * Get view aspect
@@ -172,7 +172,7 @@ vglModule.camera = function() {
   this.viewPlaneNormal = function() {
     this.computeViewPlaneNormal();
     return m_viewPlaneNormal;
-  }
+  };
 
   /**
    * Return view-matrix for the camera This method does not compute the
@@ -212,7 +212,7 @@ vglModule.camera = function() {
     m_viewPlaneNormal[0] = -m_directionOfProjection[0];
     m_viewPlaneNormal[1] = -m_directionOfProjection[1];
     m_viewPlaneNormal[2] = -m_directionOfProjection[2];
-  }
+  };
 
   /**
    * Move camera closer or further away from the scene
@@ -240,7 +240,7 @@ vglModule.camera = function() {
     m_position[2] += dz;
 
     m_focalPoint[0] += dx;
-    m_focalPoint[1] += dy
+    m_focalPoint[1] += dy;
     m_focalPoint[2] += dz;
 
     this.modified();
@@ -267,18 +267,19 @@ vglModule.camera = function() {
     dx = 0.5 * dx * (Math.PI / 180.0);
     dy = 0.5 * dy * (Math.PI / 180.0);
 
-    var mat = mat4.create();
-    mat4.identity(mat, mat);
+    var mat = mat4.create(),
+        inverseCenterOfRotation = new vec3.create();
 
-    var invtrans = new vec3.create();
-    invtrans[0] = -m_centerOrRotation[0];
-    invtrans[1] = -m_centerOrRotation[1];
-    invtrans[2] = -m_centerOrRotation[2];
+    mat4.identity(mat);
 
-    mat4.translate(mat, mat, m_centerOrRotation);
+    inverseCenterOfRotation[0] = -m_centerOfRotation[0];
+    inverseCenterOfRotation[1] = -m_centerOfRotation[1];
+    inverseCenterOfRotation[2] = -m_centerOfRotation[2];
+
+    mat4.translate(mat, mat, m_centerOfRotation);
     mat4.rotate(mat, mat, dx, m_viewUp);
     mat4.rotate(mat, mat, dy, m_right);
-    mat4.translate(mat, mat, invtrans);
+    mat4.translate(mat, mat, inverseCenterOfRotation);
 
     vec3.transformMat4(m_position, m_position, mat);
     vec3.transformMat4(m_focalPoint, m_focalPoint, mat);
@@ -292,7 +293,7 @@ vglModule.camera = function() {
 
     // Mark modified
     this.modified();
-  }
+  };
 
   /**
    * Compute camera view matrix

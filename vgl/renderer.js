@@ -49,14 +49,14 @@ vglModule.renderer = function() {
    */
   this.width = function() {
     return m_width;
-  }
+  };
 
   /**
    * Get height of the renderer
    */
   this.height = function() {
     return m_height;
-  }
+  };
 
   /**
    * Get background color
@@ -75,7 +75,7 @@ vglModule.renderer = function() {
     m_backgroundColor[3] = a;
 
     this.modified();
-  }
+  };
 
   /**
    * Get scene root
@@ -101,11 +101,11 @@ vglModule.renderer = function() {
     gl.depthFunc(gl.LEQUAL);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    perspectiveMatrix = m_camera.projectionMatrix();
+    var renSt = new vglModule.renderState(),
+        children = m_sceneRoot.children();
 
-    var renSt = new vglModule.renderState();
-    renSt.m_projectionMatrix = perspectiveMatrix;
-    var children = m_sceneRoot.children();
+    renSt.m_projectionMatrix = m_camera.projectionMatrix();
+
     for ( var i = 0; i < children.length; ++i) {
       var actor = children[i];
       actor.computeBounds();
@@ -131,23 +131,23 @@ vglModule.renderer = function() {
    */
   this.resetCamera = function() {
     m_camera.computeBounds();
-    var vn = m_camera.directionOfProjection();
-    var visibleBounds = m_camera.bounds();
 
-    var center = [
-      (visibleBounds[0] + visibleBounds[1]) / 2.0,
-      (visibleBounds[2] + visibleBounds[3]) / 2.0,
-      (visibleBounds[4] + visibleBounds[5]) / 2.0];
+    var vn = m_camera.directionOfProjection(),
+        visibleBounds = m_camera.bounds(),
+        center = [
+          (visibleBounds[0] + visibleBounds[1]) / 2.0,
+          (visibleBounds[2] + visibleBounds[3]) / 2.0,
+          (visibleBounds[4] + visibleBounds[5]) / 2.0
+        ],
+        diagonals = [
+          visibleBounds[1] - visibleBounds[0],
+          visibleBounds[3] - visibleBounds[2],
+          visibleBounds[5] - visibleBounds[4]
+        ],
+        radius = 0.0,
+        aspect = m_camera.viewAspect(),
+        angle = m_camera.viewAngle();
 
-    // console.log('center ', center);
-
-    var diagonals = [
-      visibleBounds[1] - visibleBounds[0],
-      visibleBounds[3] - visibleBounds[2],
-      visibleBounds[5] - visibleBounds[4],
-    ];
-
-    var radius = 0.0;
     if (diagonals[0] > diagonals[1]) {
       if (diagonals[0] > diagonals[2]) {
         radius = diagonals[0] / 2.0;
@@ -162,9 +162,6 @@ vglModule.renderer = function() {
       }
     }
 
-    var aspect = m_camera.viewAspect();
-    var angle = m_camera.viewAngle();
-
     // @todo Need to figure out what's happening here
     if (aspect >= 1.0) {
       angle = 2.0 * Math.atan(Math.tan(angle * 0.5) / aspect);
@@ -172,9 +169,8 @@ vglModule.renderer = function() {
       angle = 2.0 * Math.atan(Math.tan(angle * 0.5) * aspect);
     }
 
-    var distance =  radius / Math.sin(angle * 0.5);
-
-    var vup = m_camera.viewUpDirection();
+    var distance = radius / Math.sin(angle * 0.5),
+        vup = m_camera.viewUpDirection();
 
     if (Math.abs(vec3.dot(vup, vn)) > 0.999) {
       m_camera.setViewUpDirection(-vup[2], vup[0], vup[1]);
@@ -191,36 +187,26 @@ vglModule.renderer = function() {
    * Recalculate camera's clipping range
    */
   this.resetCameraClippingRange = function(bounds) {
-    var vn = null,
-        position = null,
-        a = null,
-        b = null,
-        c = null,
-        d = null,
+    var vn = m_camera.viewPlaneNormal(),
+        position = m_camera.position(),
+        a = -vn[0],
+        b = -vn[1],
+        c = -vn[2],
+        d = -(a*position[0] + b*position[1] + c*position[2]),
         range = vec2.create(),
-        dist = null,
-        i = null,
-        j = null,
-        k = null;
-
-    vn = m_camera.viewPlaneNormal();
-    position = m_camera.position();
-    a = -vn[0];
-    b = -vn[1];
-    c = -vn[2];
-    d = -(a*position[0] + b*position[1] + c*position[2]);
+        dist = null;
 
     // Set the max near clipping plane and the min far clipping plane
     range[0] = a * bounds[0] + b * bounds[2] + c * bounds[4] + d;
     range[1] = 1e-18;
 
     // Find the closest / farthest bounding box vertex
-    for ( k = 0; k < 2; k++ ) {
-      for ( j = 0; j < 2; j++ ) {
-        for ( i = 0; i < 2; i++ ) {
-          dist = a*bounds[i] + b*bounds[2+j] + c*bounds[4+k] + d;
-          range[0] = (dist<range[0])?(dist):(range[0]);
-          range[1] = (dist>range[1])?(dist):(range[1]);
+    for (var k = 0; k < 2; k++ ) {
+      for (var j = 0; j < 2; j++) {
+        for (var i = 0; i < 2; i++) {
+          dist = a * bounds[i] + b * bounds[2 + j] + c * bounds[4 + k] + d;
+          range[0] = (dist < range[0]) ? (dist) : (range[0]);
+          range[1] = (dist > range[1]) ? (dist) : (range[1]);
         }
       }
     }
@@ -268,6 +254,7 @@ vglModule.renderer = function() {
    * Resize viewport given a width and height
    */
   this.resize = function(width, height) {
+    // @note: where do m_x and m_y come from?
     this.positionAndResize(m_x, m_y, width, height);
   };
 
@@ -349,16 +336,15 @@ vglModule.renderer = function() {
    */
   this.displayToWorld = function(displayPt, viewMatrix, projectionMatrix,
                                  width, height) {
-    var x = (2.0 * displayPt[0] / width) - 1;
-    var y = -(2.0 * displayPt[1] / height) + 1;
-    var z = displayPt[2];
+    var x = (2.0 * displayPt[0] / width) - 1,
+        y = -(2.0 * displayPt[1] / height) + 1,
+        z = displayPt[2];
 
     var viewProjectionInverse = mat4.create();
     mat4.multiply(viewProjectionInverse, projectionMatrix, viewMatrix);
     mat4.invert(viewProjectionInverse, viewProjectionInverse);
 
     var worldPt = vec4.fromValues(x, y, z, 1);
-    var myvec = vec4.create();
     vec4.transformMat4(worldPt, worldPt, viewProjectionInverse);
     if (worldPt[3] !== 0.0) {
       worldPt[0] = worldPt[0] / worldPt[3];

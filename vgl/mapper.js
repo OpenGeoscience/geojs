@@ -37,13 +37,13 @@ vglModule.mapper = function() {
    * Compute bounds of the data
    */
   this.computeBounds = function() {
-    if (m_geomData === null || m_geomData === undefined) {
+    if (m_geomData === null || typeof m_geomData === 'undefined') {
       this.resetBounds();
       return;
     }
 
-    var computeBoundsTimestamp = this.computeBoundsTimestamp();
-    var boundsDirtyTimestamp = this.boundsDirtyTimestamp();
+    var computeBoundsTimestamp = this.computeBoundsTimestamp(),
+        boundsDirtyTimestamp = this.boundsDirtyTimestamp();
 
     if (boundsDirtyTimestamp.getMTime() > computeBoundsTimestamp.getMTime()) {
       var geomBounds = m_geomData.bounds();
@@ -72,7 +72,7 @@ vglModule.mapper = function() {
   this.setColor = function(r, g, b) {
     m_color[0] = r;
     m_color[1] = g;
-    m_color[2] = br;
+    m_color[2] = b;
 
     this.modified();
   };
@@ -108,10 +108,9 @@ vglModule.mapper = function() {
     gl.vertexAttrib3fv(vglModule.vertexAttributeKeys.Color, this.color());
 
     // TODO Use renderState
-    var bufferIndex = 0;
-    var i = null;
-    var j = 0;
-    for (i in m_bufferVertexAttributeMap) {
+    var bufferIndex = 0,
+        j = 0;
+    for (var i in m_bufferVertexAttributeMap) {
       if (m_bufferVertexAttributeMap.hasOwnProperty(i)) {
         gl.bindBuffer(gl.ARRAY_BUFFER, m_buffers[bufferIndex]);
         for (j = 0; j < m_bufferVertexAttributeMap[i].length; ++j) {
@@ -138,7 +137,7 @@ vglModule.mapper = function() {
     for ( var i = 0; i < m_buffers.length; ++i) {
       gl.deleteBuffer(m_buffers[i]);
     }
-  };
+  }
 
   /**
    * Create new VBO for all its geometryData sources and primitives
@@ -154,8 +153,8 @@ vglModule.mapper = function() {
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(m_geomData.source(i).data()),
                       gl.STATIC_DRAW);
 
-        keys = m_geomData.source(i).keys();
-        ks = [];
+        var keys = m_geomData.source(i).keys(),
+            ks = [];
         for ( var j = 0; j < keys.length; ++j) {
           ks.push(keys[j]);
         }
@@ -175,7 +174,7 @@ vglModule.mapper = function() {
 
       m_glCompileTimestamp.modified();
     }
-  };
+  }
 
   /**
    * Clear cache related to buffers
@@ -183,7 +182,7 @@ vglModule.mapper = function() {
   function cleanUpDrawObjects() {
     m_bufferVertexAttributeMap = {};
     m_buffers = [];
-  };
+  }
 
   /**
    * Internal methods
@@ -192,7 +191,7 @@ vglModule.mapper = function() {
   /**
    * Setup draw objects; Delete old ones and create new ones
    */
-  function setupDrawObjects(renderState) {
+  function setupDrawObjects() {
     // Delete buffer objects from past if any.
     deleteVertexBufferObjects();
 
@@ -203,7 +202,7 @@ vglModule.mapper = function() {
     createVertexBufferObjects();
 
     m_dirty = false;
-  };
+  }
 
   return this;
 };

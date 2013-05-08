@@ -20,7 +20,7 @@ geoModule.mapInteractorStyle = function() {
   var m_that = this,
       m_leftMouseButtonDown = false,
       m_rightMouseButtonDown = false,
-      m_middileMouseButtonDown = false,
+      m_middleMouseButtonDown = false,
       m_width,
       m_height,
       m_renderer,
@@ -75,7 +75,7 @@ geoModule.mapInteractorStyle = function() {
     if (m_outsideCanvas === true) {
       return;
     }
-    if (m_middileMouseButtonDown) {
+    if (m_middleMouseButtonDown) {
       m_focalPoint = m_camera.focalPoint();
       m_focusWorldPt = vec4.fromValues(m_focalPoint[0], m_focalPoint[1], m_focalPoint[2], 1);
       m_focusDisplayPt = m_renderer.worldToDisplay(m_focusWorldPt, m_camera.viewMatrix(),
@@ -116,7 +116,7 @@ geoModule.mapInteractorStyle = function() {
       m_leftMouseButtonDown = true;
     }
     if (event.button === 1) {
-      m_middileMouseButtonDown = true;
+      m_middleMouseButtonDown = true;
     }
     if (event.button === 2) {
       m_rightMouseButtonDown = true;
@@ -149,7 +149,7 @@ geoModule.mapInteractorStyle = function() {
       m_leftMouseButtonDown = false;
     }
     if (event.button === 1) {
-      m_middileMouseButtonDown = false;
+      m_middleMouseButtonDown = false;
     }
     if (event.button === 2) {
       m_rightMouseButtonDown = false;
@@ -162,7 +162,6 @@ geoModule.mapInteractorStyle = function() {
     var m_renderer, m_camera, distance, currPosition;
     m_renderer = m_that.viewer().renderWindow().activeRenderer();
     m_camera = m_renderer.camera();
-    distance = 600;
     distance = 600 - (600 - (60 * options.zoom)) + 1;
     if (useCurrent === undefined || useCurrent === false) {
       m_camera.setPosition(options.center.lng(), options.center.lat(), distance);

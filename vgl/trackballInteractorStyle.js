@@ -20,7 +20,7 @@ vglModule.trackballInteractorStyle = function() {
   var m_that = this,
       m_leftMouseButtonDown = false,
       m_rightMouseButtonDown = false,
-      m_middileMouseButtonDown = false,
+      m_middleMouseButtonDown = false,
       m_width,
       m_height,
       m_renderer,
@@ -91,7 +91,7 @@ vglModule.trackballInteractorStyle = function() {
     m_dy = m_worldPt1[1] - m_worldPt2[1];
     m_dz = m_worldPt1[2] - m_worldPt2[2];
 
-    if (m_middileMouseButtonDown) {
+    if (m_middleMouseButtonDown) {
       m_camera.pan(-m_dx, -m_dy, -m_dz);
       $(m_that).trigger(vglModule.command.middleButtonPressEvent);
     }
@@ -121,7 +121,7 @@ vglModule.trackballInteractorStyle = function() {
       m_leftMouseButtonDown = true;
     }
     if (event.button === 1) {
-      m_middileMouseButtonDown = true;
+      m_middleMouseButtonDown = true;
     }
     if (event.button === 2) {
       m_rightMouseButtonDown = true;
@@ -154,7 +154,7 @@ vglModule.trackballInteractorStyle = function() {
       m_leftMouseButtonDown = false;
     }
     if (event.button === 1) {
-      m_middileMouseButtonDown = false;
+      m_middleMouseButtonDown = false;
     }
     if (event.button === 2) {
       m_rightMouseButtonDown = false;
@@ -167,7 +167,6 @@ vglModule.trackballInteractorStyle = function() {
     var m_renderer, m_camera, distance, currPosition;
     m_renderer = m_that.viewer().renderWindow().activeRenderer();
     m_camera = m_renderer.camera();
-    distance = 600;
     distance = 600 - (600 - (60 * options.zoom)) + 1;
     if (useCurrent === undefined || useCurrent === false) {
       m_camera.setPosition(options.center.lng(), options.center.lat(), distance);

@@ -122,6 +122,7 @@ vglModule.viewer = function(canvas) {
         canvasY = 0,
         currentElement = m_canvas;
 
+    // @note: how does this loop terminate?
     do {
       totalOffsetX += currentElement.offsetLeft - currentElement.scrollLeft;
       totalOffsetY += currentElement.offsetTop - currentElement.scrollTop;

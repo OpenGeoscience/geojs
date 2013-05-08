@@ -33,7 +33,7 @@ geoModule.ellipsoid = function(x, y, z) {
   }
 
   var m_radii = new vec3.fromValues(x, y, z),
-      m_radiiSqaured = new vec3.fromValues(
+      m_radiiSquared = new vec3.fromValues(
         x * x, y * y, z * z),
       m_minimumRadius = Math.min(x, y, z),
       m_maximumRadius = Math.max(x, y, z);
@@ -43,32 +43,32 @@ geoModule.ellipsoid = function(x, y, z) {
    */
   this.radii = function() {
     return m_radii;
-  }
+  };
 
   /**
    * Return squared radii of the ellipsoid
    */
   this.radiiSquared = function() {
-    return m_radiiSqaured;
-  }
+    return m_radiiSquared;
+  };
 
   /**
    * Return maximum radius of the ellipsoid
    *
-   * @return {vec3} The maximum radius of the ellipsoid
+   * @return {Number} The maximum radius of the ellipsoid
    */
   this.maximumRadius = function() {
       return m_maximumRadius;
-    }
+  };
 
   /**
    * Return minimum radius of the ellipsoid
    *
-   * @return {vec3} The maximum radius of the ellipsoid
+   * @return {Number} The maximum radius of the ellipsoid
    */
-  this.minimumrRadius = function() {
-    return m_maximumRadius;
-  }
+  this.minimumRadius = function() {
+    return m_minimumRadius;
+  };
 
 
   /**
@@ -77,7 +77,7 @@ geoModule.ellipsoid = function(x, y, z) {
    *
    * @param {Number} lat The cartographic latitude for which to to determine the geodetic normal
    * @param {Number} lon The cartographic longitude for which to to determine the geodetic normal
-   * @param {Number} The object onto which to store the result
+   *
    * @return {vec3}
    *
    * @exception {DeveloperError} cartographic is required.
@@ -88,14 +88,11 @@ geoModule.ellipsoid = function(x, y, z) {
       }
 
       var cosLatitude = Math.cos(lat),
-          x = cosLatitude * Math.cos(lon),
-          y = cosLatitude * Math.sin(lon),
-          z = Math.sin(lat),
           result = vec3.create();
 
-      result[0] = x;
-      result[1] = y;
-      result[2] = z;
+      result[0] = cosLatitude * Math.cos(lon);
+      result[1] = cosLatitude * Math.sin(lon);
+      result[2] = Math.sin(lat);
 
       vec3.normalize(result, result);
       return result;
@@ -116,11 +113,10 @@ geoModule.ellipsoid = function(x, y, z) {
 
       var n = this.computeGeodeticSurfaceNormal(lat, lon),
           k = vec3.create(),
-          gamma  = null,
+          gamma  = Math.sqrt(vec3.dot(n, k)),
           result = vec3.create();
 
-      vec3.multiply(k, m_radiiSqaured, n);
-      gamma = Math.sqrt(vec3.dot(n, k));
+      vec3.multiply(k, m_radiiSquared, n);
       vec3.scale(k, k, 1/gamma);
       vec3.scale(n, n, elev);
       vec3.add(result, n,  k);
@@ -131,10 +127,7 @@ geoModule.ellipsoid = function(x, y, z) {
    * Converts the provided geographic latitude, longitude,
    * and height to WGS84 coordinate system
    *
-   * @param {Number} lat Latitude in radians
-   * @param {Number} lon Longitude in radians
-   * @param {Number} elev Elevation
-   * @return {vec3} Position in the WGS84 coordinate system
+   * @param {vglModule.geometryData} geom
    */
   this.transformGeometry = function(geom) {
     if (!geom) {
@@ -152,7 +145,7 @@ geoModule.ellipsoid = function(x, y, z) {
         sizeOfDataType = sourceData.sizeOfAttributeDataType(
           vglModule.vertexAttributeKeys.Position),
         index = null,
-        count = null,
+        count = sourceDataArray.length * (1.0 / noOfComponents),
         gamma = null,
         n = null,
         k = vec3.create(),
@@ -165,7 +158,6 @@ geoModule.ellipsoid = function(x, y, z) {
       throw ('[error] Requires positions with three components');
     }
 
-    count = sourceDataArray.length * (1.0 / noOfComponents);
     for (var j = 0; j < count; ++j) {
       index = j * stride + offset;
 
@@ -174,7 +166,7 @@ geoModule.ellipsoid = function(x, y, z) {
 
       n = this.computeGeodeticSurfaceNormal(sourceDataArray[index + 1],
                                             sourceDataArray[index]);
-      vec3.multiply(k, m_radiiSqaured, n);
+      vec3.multiply(k, m_radiiSquared, n);
       gamma = Math.sqrt(vec3.dot(n, k));
       vec3.scale(k, k, 1/gamma);
       vec3.scale(n, n, sourceDataArray[index + 2]);
