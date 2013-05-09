@@ -161,7 +161,7 @@ vglModule.vtkUnpack.prototype.parseObject = function(buffer) {
   //-=-=-=-=-=[ LINES ]=-=-=-=-=-
   if (type == 'L'){
     numberOfPoints = this.readNumber(ss);
-    console.log("LINES " + numberOfPoints)
+    //console.log("LINES " + numberOfPoints)
 
     //Getting Points
     var vglpoints = new vglModule.sourceDataP3fv();

@@ -134,7 +134,15 @@ geoModule.geometryFeature = function(geom) {
 
   this.setMapper(mapper);
 
-  material = ogs.vgl.utils.createGeometryMaterial();
+  var material;
+  if (geom.scalarFormat == "values") {
+    material = ogs.vgl.utils.createColorMappedMaterial(geom.scalarRange);
+  } else if (geom.scalarFormat == "rgb") {
+    material = ogs.vgl.utils.createColorMaterial();
+  } else {
+    //todo: should be set by actor's color
+    material = ogs.vgl.utils.createGeometryMaterial([1.0,0.5,0.0]);
+  }
   this.setMaterial(material);
 
   return this;
@@ -165,7 +173,8 @@ geoModule.multiGeometryFeature = function(geoms) {
 
   this.setMapper(mapper);
 
-  material = ogs.vgl.utils.createGeometryMaterial();
+  //todo: should be set by actor's color
+  var material = ogs.vgl.utils.createGeometryMaterial([1.0,0.5,0.0]);
   this.setMaterial(material);
 
   return this;

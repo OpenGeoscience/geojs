@@ -320,7 +320,6 @@ vglModule.lookupTable = function() {
     if (this.m_range === range) {
       return false;
     }
-    console.log("SET RANGE " + range)
     this.m_range = range;
     this.modified();
     return true;

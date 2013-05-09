@@ -47,14 +47,6 @@ vglModule.geojsonReader = function() {
       var g = coordinates[4];
       var b = coordinates[5];
       array.pushBack([r,g,b]);
-    } else {
-      //make up an arbitrary color, otherwise vgl won't render it
-      array = geom.sourceData(vertexAttributeKeys.Color);
-      if (!array) {
-        array = new vglModule.sourceDataC3fv();
-        geom.addSource(array);
-      }
-      array.pushBack([1,1,1]);
     }
   }
 
@@ -245,7 +237,7 @@ vglModule.geojsonReader = function() {
 
     var ccount = 0;
     var numPolys = coordinates.length;
-    console.log("NUMPOLYS " + numPolys);
+    //console.log("NUMPOLYS " + numPolys);
     for (var j = 0; j < numPolys; j++) {
       //console.log("getting poly " + j);
 
@@ -314,32 +306,34 @@ vglModule.geojsonReader = function() {
       this.m_scalarFormat = "rgb";
     }
 
+    var ret;
     //TODO: ignoring "crs" and "bbox" and misc meta data on all of these,
     //best to handle as references into original probably
     var type = object.type;
     switch (type) {
       case "Point":
         //console.log("parsed Point");
-        return this.readPoint(object.coordinates);
+        ret = this.readPoint(object.coordinates);
+        break;
       case "MultiPoint":
         //console.log("parsed MultiPoint");
-        return this.readMultiPoint(object.coordinates);
+        ret = this.readMultiPoint(object.coordinates);
         break;
       case "LineString":
         //console.log("parsed LineString");
-        return this.readLineString(object.coordinates);
+        ret = this.readLineString(object.coordinates);
         break;
       case "MultiLineString":
         //console.log("parsed MultiLineString");
-        return this.readMultiLineString(object.coordinates);
+        ret = this.readMultiLineString(object.coordinates);
         break;
       case "Polygon":
         //console.log("parsed Polygon");
-        return this.readPolygon(object.coordinates);
+        ret = this.readPolygon(object.coordinates);
         break;
       case "MultiPolygon":
         //console.log("parsed MultiPolygon");
-        return this.readMultiPolygon(object.coordinates);
+        ret = this.readMultiPolygon(object.coordinates);
         break;
       case "GeometryCollection":
         //console.log("parsed GeometryCollection");
@@ -348,12 +342,13 @@ vglModule.geojsonReader = function() {
           next = this.readGJObject(object.geometries[i]);
           nextset.push(next);
         }
-        return nextset;
+        ret = nextset;
         break;
       case "Feature":
         //console.log("parsed Feature");
         next = this.readGJObject(object.geometry);
-        return next;
+        ret = next;
+        break;
       case "FeatureCollection":
         //console.log("parsed FeatureCollection");
         var nextset = [];
@@ -361,11 +356,16 @@ vglModule.geojsonReader = function() {
           next = this.readGJObject(object.features[i]);
           nextset.push(next)
         }
-        return nextset;
+        ret = nextset;
+        break;
       default:
         console.log("Don't understand type " + type);
+        ret = null;
       break;
     }
+    ret.scalarFormat = this.m_scalarFormat;
+    ret.scalarRange = this.m_scalarRange;
+    return ret;
   };
 
   /**
@@ -386,7 +386,7 @@ vglModule.geojsonReader = function() {
    *
    */
   this.getPrimitives = function(buffer) {
-    console.log("Parsing geoJSON");
+    //console.log("Parsing geoJSON");
     if (!buffer) return [];
 
     this.m_scalarFormat = "none";
