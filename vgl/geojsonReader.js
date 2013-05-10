@@ -112,7 +112,7 @@ vglModule.geojsonReader = function() {
   this.readLineString = function(coordinates) {
     var geom = new vglModule.geometryData();
     var vglline = new vglModule.lines();
-    vglline.setIndexCount(coordinates.length);
+    vglline.setIndicesPerPrimitive(coordinates.length);
     var vglcoords = new vglModule.sourceDataP3fv();
     var colorarray = new vglModule.sourceDataC3fv();
     var indices = [];
@@ -164,7 +164,7 @@ vglModule.geojsonReader = function() {
       //console.log("getting line " + j);
       var vglline = new vglModule.lines();
       var thisLineLength = coordinates[j].length;
-      vglline.setIndexCount(thisLineLength);
+      vglline.setIndicesPerPrimitive(thisLineLength);
       for (var i = 0; i < thisLineLength; i++) {
         indices.push(ccount++);
         var x = coordinates[j][i][0];

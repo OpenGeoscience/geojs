@@ -26,7 +26,7 @@ vglModule.primitive = function() {
   }
 
   /** @private */
-  var m_indexCount = 0;
+  var m_indicesPerPrimitive = 0;
 
   /** @private */
   var m_primitiveType = 0;
@@ -43,7 +43,7 @@ vglModule.primitive = function() {
 
   this.createIndices = function(type) {
     // TODO Check for the type
-    m_indices = new Uint16Array(m_indexCount);
+    m_indices = new Uint16Array();
   };
 
   /**
@@ -75,17 +75,17 @@ vglModule.primitive = function() {
   };
 
   /**
-   * Return index count ((how many indices form a primitive) of the primitive
+   * Return count of indices that form a primitives
    */
-  this.indexCount = function() {
-    return m_indexCount;
+  this.indicesPerPrimitive = function() {
+    return m_indicesPerPrimitive;
   };
 
   /**
-   * Set index count (how many indices form a primitive)
+   * Set count of indices that form a primitive
    */
-  this.setIndexCount = function(count) {
-    m_indexCount = count;
+  this.setIndicesPerPrimitive = function(count) {
+    m_indicesPerPrimitive = count;
   };
 
   /**
@@ -128,7 +128,7 @@ vglModule.triangleStrip = function() {
 
   this.setPrimitiveType(gl.TRIANGLE_STRIP);
   this.setIndicesValueType(gl.UNSIGNED_SHORT);
-  this.setIndexCount(3);
+  this.setIndicesPerPrimitive(3);
 
   return this;
 };
@@ -150,7 +150,7 @@ vglModule.triangles = function() {
 
   this.setPrimitiveType(gl.TRIANGLES);
   this.setIndicesValueType(gl.UNSIGNED_SHORT);
-  this.setIndexCount(3);
+  this.setIndicesPerPrimitive(3);
 
   return this;
 };
@@ -172,7 +172,7 @@ vglModule.lines = function() {
 
   this.setPrimitiveType(gl.LINE_STRIP);
   this.setIndicesValueType(gl.UNSIGNED_SHORT);
-  this.setIndexCount(2);
+  this.setIndicesPerPrimitive(2);
 
   return this;
 };
@@ -194,7 +194,7 @@ vglModule.points = function() {
 
   this.setPrimitiveType(gl.POINTS);
   this.setIndicesValueType(gl.UNSIGNED_SHORT);
-  this.setIndexCount(1);
+  this.setIndicesPerPrimitive(1);
 
   return this;
 };
