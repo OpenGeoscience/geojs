@@ -58,7 +58,7 @@ geoModule.ellipsoid = function(x, y, z) {
    * @return {Number} The maximum radius of the ellipsoid
    */
   this.maximumRadius = function() {
-      return m_maximumRadius;
+    return m_maximumRadius;
   };
 
   /**
@@ -83,19 +83,19 @@ geoModule.ellipsoid = function(x, y, z) {
    * @exception {DeveloperError} cartographic is required.
    */
   this.computeGeodeticSurfaceNormal = function(lat, lon) {
-      if (typeof lat === 'undefined' || typeof lon === 'undefined') {
-          throw '[error] Valid latitude and longitude is required';
-      }
+    if (typeof lat === 'undefined' || typeof lon === 'undefined') {
+      throw '[error] Valid latitude and longitude is required';
+    }
 
-      var cosLatitude = Math.cos(lat),
-          result = vec3.create();
+    var cosLatitude = Math.cos(lat),
+        result = vec3.create();
 
-      result[0] = cosLatitude * Math.cos(lon);
-      result[1] = cosLatitude * Math.sin(lon);
-      result[2] = Math.sin(lat);
+    result[0] = cosLatitude * Math.cos(lon);
+    result[1] = cosLatitude * Math.sin(lon);
+    result[2] = Math.sin(lat);
 
-      vec3.normalize(result, result);
-      return result;
+    vec3.normalize(result, result);
+    return result;
   };
 
   /**
@@ -108,19 +108,19 @@ geoModule.ellipsoid = function(x, y, z) {
    * @return {vec3} Position in the WGS84 coordinate system
    */
   this.transformPoint = function(lat, lon, elev) {
-      lat = lat *  (Math.PI / 180.0);
-      lon = lon * (Math.PI / 180.0);
+    lat = lat *  (Math.PI / 180.0);
+    lon = lon * (Math.PI / 180.0);
 
-      var n = this.computeGeodeticSurfaceNormal(lat, lon),
-          k = vec3.create(),
-          gamma  = Math.sqrt(vec3.dot(n, k)),
-          result = vec3.create();
+    var n = this.computeGeodeticSurfaceNormal(lat, lon),
+        k = vec3.create(),
+        gamma  = Math.sqrt(vec3.dot(n, k)),
+        result = vec3.create();
 
-      vec3.multiply(k, m_radiiSquared, n);
-      vec3.scale(k, k, 1/gamma);
-      vec3.scale(n, n, elev);
-      vec3.add(result, n,  k);
-      return result;
+    vec3.multiply(k, m_radiiSquared, n);
+    vec3.scale(k, k, 1/gamma);
+    vec3.scale(n, n, elev);
+    vec3.add(result, n,  k);
+    return result;
   };
 
   /**
