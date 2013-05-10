@@ -75,8 +75,10 @@ geoModule.ellipsoid = function(x, y, z) {
    * Computes the normal of the plane tangent to the surface of
    * the ellipsoid at the provided position
    *
-   * @param {Number} lat The cartographic latitude for which to to determine the geodetic normal
-   * @param {Number} lon The cartographic longitude for which to to determine the geodetic normal
+   * @param {Number} lat The cartographic latitude for which
+   *  to to determine the geodetic normal
+   * @param {Number} lon The cartographic longitude for which
+   *  to to determine the geodetic normal
    *
    * @return {vec3}
    *

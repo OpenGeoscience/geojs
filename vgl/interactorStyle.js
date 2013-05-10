@@ -38,23 +38,23 @@ vglModule.interactorStyle = function() {
   };
 
   this.handleMouseDown = function(event) {
-    console.log("mouse move2");
+    return true;
   };
 
   this.handleMouseUp = function(event) {
-    console.log("mouse move2");
+    return true;
   };
 
   this.handleMouseMove = function(event) {
-    console.log("mouse move2");
+    return true;
   };
 
   this.handleKeyPress = function(event) {
-    console.log("mouse move2");
+    return true;
   };
 
   this.handleContextMenu = function(event) {
-    return false;
+    return true;
   };
 
   return this;

@@ -74,6 +74,8 @@ vglModule.viewer = function(canvas) {
       fixedEvent.type = vglModule.command.mousePressEvent;
       $(m_that).trigger(fixedEvent);
     }
+
+    return true;
   };
 
   this.handleMouseUp = function(event) {
@@ -84,6 +86,8 @@ vglModule.viewer = function(canvas) {
       fixedEvent.type = vglModule.command.mousePressEvent;
       $(m_that).trigger(fixedEvent);
     }
+
+    return true;
   };
 
   this.handleMouseMove = function(event) {
@@ -93,6 +97,8 @@ vglModule.viewer = function(canvas) {
       fixedEvent.type = vglModule.command.mouseMoveEvent;
       $(m_that).trigger(fixedEvent);
     }
+
+    return true;
   };
 
   this.handleKeyPress = function(event) {
@@ -102,6 +108,8 @@ vglModule.viewer = function(canvas) {
       fixedEvent.type = vglModule.command.keyPressEvent;
       $(m_that).trigger(fixedEvent);
     }
+
+    return true;
   };
 
   this.handleContextMenu = function(event) {
@@ -122,11 +130,10 @@ vglModule.viewer = function(canvas) {
         canvasY = 0,
         currentElement = m_canvas;
 
-    // @note: how does this loop terminate?
     do {
       totalOffsetX += currentElement.offsetLeft - currentElement.scrollLeft;
       totalOffsetY += currentElement.offsetTop - currentElement.scrollTop;
-    } while (currentElement === currentElement.offsetParent);
+    } while (currentElement = currentElement.offsetParent);
 
     canvasX = event.pageX - totalOffsetX;
     canvasY = event.pageY - totalOffsetY;
