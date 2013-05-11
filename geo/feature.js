@@ -135,13 +135,15 @@ geoModule.geometryFeature = function(geom) {
   this.setMapper(mapper);
 
   var material;
-  if (geom.scalarFormat == "values") {
+  /// NOTE geom does not has scalarFormat??
+  if (geom.scalarFormat === "values") {
+    /// NOTE geom does not has scalarRange???
     material = ogs.vgl.utils.createColorMappedMaterial(geom.scalarRange);
-  } else if (geom.scalarFormat == "rgb") {
+  } else if (geom.scalarFormat === "rgb") {
     material = ogs.vgl.utils.createColorMaterial();
   } else {
-    //todo: should be set by actor's color
-    material = ogs.vgl.utils.createGeometryMaterial([1.0,0.5,0.0]);
+    /// mapper sets the solid color
+    material = ogs.vgl.utils.createGeometryMaterial();
   }
   this.setMaterial(material);
 
