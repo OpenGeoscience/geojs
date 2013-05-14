@@ -621,6 +621,9 @@ vglModule.geometryData = function() {
   /** @private */
   var m_boundsDirtyTimestamp = vglModule.timestamp();
 
+  /** @private */
+  var m_scalarFormat = null;
+
   /**
    * Return ID of the geometry data
    */
@@ -751,6 +754,23 @@ vglModule.geometryData = function() {
     m_computeBoundsTimestamp.modified();
 
     return true;
+  };
+
+  /**
+   * Set scalar format
+   */
+  this.setScalarFormat = function(format) {
+    if (m_scalarFormat !== format) {
+      m_scalarFormat = format;
+      this.modified();
+    }
+  };
+
+  /**
+   * Get scalar format
+   */
+  this.scalarFormat = function() {
+    return m_scalarFormat;
   };
 
   /**

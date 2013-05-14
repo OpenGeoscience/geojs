@@ -135,11 +135,9 @@ geoModule.geometryFeature = function(geom) {
   this.setMapper(mapper);
 
   var material;
-  /// NOTE geom does not has scalarFormat??
-  if (geom.scalarFormat === "values") {
-    /// NOTE geom does not has scalarRange???
+  if (geom.scalarFormat() === "values") {
     material = ogs.vgl.utils.createColorMappedMaterial(geom.scalarRange);
-  } else if (geom.scalarFormat === "rgb") {
+  } else if (geom.scalarFormat() === "rgb") {
     material = ogs.vgl.utils.createColorMaterial();
   } else {
     /// mapper sets the solid color
