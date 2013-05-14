@@ -103,30 +103,6 @@ vglModule.utils.createVertexShader = function(context) {
  * @param context
  * @returns {vglModule.shader}
  */
-vglModule.utils.createVertexShaderSolidColor = function(context) {
-  var vertexShaderSource = [
-                            'attribute vec3 vertexPosition;',
-                            'uniform mediump float pointSize;',
-                            'uniform mat4 modelViewMatrix;',
-                            'uniform mat4 projectionMatrix;',
-                            'void main(void)',
-                            '{',
-                            'gl_PointSize = pointSize;',
-                            'gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
-                            '}' ].join('\n');
-
-  var shader = new vglModule.shader(gl.VERTEX_SHADER);
-  shader.setShaderSource(vertexShaderSource);
-  return shader;
-};
-
-/**
- * Create a new instance of default vertex shader
- *
- * @desc Helper function to create default vertex shader *
- * @param context
- * @returns {vglModule.shader}
- */
 vglModule.utils.createVertexShaderColorMap = function(context, min, max) {
   var vertexShaderSource = [
                             'attribute vec3 vertexPosition;',
@@ -162,24 +138,6 @@ vglModule.utils.createFragmentShader = function(context) {
                               'uniform mediump float opacity;',
                               'void main(void) {',
                               'gl_FragColor = vec4(iVertexColor, opacity);',
-                              '}' ].join('\n');
-
-  var shader = new vglModule.shader(gl.FRAGMENT_SHADER);
-  shader.setShaderSource(fragmentShaderSource);
-  return shader;
-};
-
-/**
- * Create a new instance of default fragment shader
- *
- * @desc Helper function to create default fragment shader *
- * @param context
- * @returns {vglModule.shader}
- */
-vglModule.utils.createFragmentShaderSolidColor = function(context, color) {
-  var fragmentShaderSource = ['uniform mediump float opacity;',
-                              'void main(void) {',
-                              'gl_FragColor = vec4(' + color[0] + ',' + color[1] + ',' + color[2] + ', opacity);',
                               '}' ].join('\n');
 
   var shader = new vglModule.shader(gl.FRAGMENT_SHADER);
@@ -300,15 +258,12 @@ vglModule.utils.createTextureMaterial = function() {
  * @desc Helper function to create geometry material
  * @returns {vglModule.material}
  */
-vglModule.utils.createGeometryMaterial = function(color) {
-  if (!color) {
-    color = [1.0,1.0,1.0];
-  }
+vglModule.utils.createGeometryMaterial = function() {
   var mat = new vglModule.material();
   var blend = new vglModule.blend();
   var prog = new vglModule.shaderProgram();
-  var vertexShader = vglModule.utils.createVertexShaderSolidColor(gl);
-  var fragmentShader = vglModule.utils.createFragmentShaderSolidColor(gl, color);
+  var vertexShader = vglModule.utils.createVertexShader(gl);
+  var fragmentShader = vglModule.utils.createFragmentShader(gl);
   var posVertAttr = new vglModule.vertexAttribute("vertexPosition");
   var pointsizeUniform = new vglModule.floatUniform("pointSize", 5.0);
   var opacityUniform = new vglModule.floatUniform("opacity", 0.5);
