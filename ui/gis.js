@@ -100,7 +100,7 @@ uiModule.gis.createDataList = function(rootId, heading, layersRootId, data, call
   subItemsList.append(tableRoot);
 
   $.each(data, function(i, item) {
-    var row, col, he, select, k, varname, option, button;
+    var row, col, he, select, k, varname, option, button, trange, time, tval;
     row = $(document.createElement('tr'));
     row.attr('class', 'success');
     tableRoot.append(row);
@@ -111,10 +111,33 @@ uiModule.gis.createDataList = function(rootId, heading, layersRootId, data, call
     col.append(he);
     row.append(col);
 
+    trange = ["NA","NA"];
+    if (item.temporalrange != null)
+      {
+      trange = item.temporalrange;
+      }
+
+    // Add a drop down to let user select time
+    col = $(document.createElement('td'));
+    time = $(document.createElement('select'));
+    time.attr('class', 'combobox');
+    time.attr('id', item.name + "_tselect");
+    col.append(time);
+    for (k = 0; k < trange.length; ++k) {
+      tval = trange[k];
+      option = $(document.createElement('option'));
+      option.attr('value', tval);
+      option.html(tval);
+      time.append(option);
+    }
+    col.append(time);
+    row.append(col);
+
     // Add drop-down so that users can select a variable
     col = $(document.createElement('td'));
     select = $(document.createElement('select'));
     select.attr('class', 'combobox');
+    select.attr('id', item.name + "_vselect");
     col.append(select);
     for (k = 0; k < item.variables.length; ++k) {
       varname = item.variables[k].name;
