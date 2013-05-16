@@ -597,6 +597,39 @@ vglModule.sourceDataC3fv = function() {
 inherit(vglModule.sourceDataC3fv, vglModule.sourceData);
 
 /**
+ * Create a new instance of class sourceDataSf meant to hold scalar float values
+ *
+ * @class
+ * @returns {vglModule.sourceDataSf}
+ */
+vglModule.sourceDataSf = function() {
+
+  if (!(this instanceof vglModule.sourceDataSf)) {
+    return new vglModule.sourceDataSg();
+  }
+
+  var m_min = null;
+  var m_max = null;
+
+  vglModule.sourceData.call(this);
+
+  this.addAttribute(vglModule.vertexAttributeKeys.Scalar, gl.FLOAT, 4, 0, 4, 1, false);
+
+  this.pushBack = function(value) {
+    if (m_max == null || value > m_max) m_max = value;
+    if (m_min == null || value < m_min) m_min = value;
+    this.insert(value);
+  };
+
+  this.scalarRange = function() {
+    return [m_min, m_max];
+  }
+  return this;
+};
+
+inherit(vglModule.sourceDataSf, vglModule.sourceData);
+
+/**
  * Create a new instance of class geometryData
  *
  * @class
@@ -620,9 +653,6 @@ vglModule.geometryData = function() {
 
   /** @private */
   var m_boundsDirtyTimestamp = vglModule.timestamp();
-
-  /** @private */
-  var m_scalarFormat = null;
 
   /**
    * Return ID of the geometry data
@@ -754,23 +784,6 @@ vglModule.geometryData = function() {
     m_computeBoundsTimestamp.modified();
 
     return true;
-  };
-
-  /**
-   * Set scalar format
-   */
-  this.setScalarFormat = function(format) {
-    if (m_scalarFormat !== format) {
-      m_scalarFormat = format;
-      this.modified();
-    }
-  };
-
-  /**
-   * Get scalar format
-   */
-  this.scalarFormat = function() {
-    return m_scalarFormat;
   };
 
   /**

@@ -28,12 +28,7 @@ vglModule.geojsonReader = function() {
       var s = coordinates[3];
       array = geom.sourceData(vertexAttributeKeys.Scalar);
       if (!array) {
-        array = new vglModule.sourceData();
-        array.addAttribute(vertexAttributeKeys.Scalar, gl.FLOAT, 4, 0, 4, 1,
-                false);
-        array.pushBack = function(scal) {
-          this.insert(scal);
-        }
+        array = new vglModule.sourceDataSf();
         geom.addSource(array);
       }
       array.pushBack(s);
@@ -288,17 +283,6 @@ vglModule.geojsonReader = function() {
         object.properties.ScalarFormat &&
         object.properties.ScalarFormat == "values") {
       this.m_scalarFormat = "values"
-      if (this.m_scalarRange == null) {
-        this.m_scalarRange = object.properties.ScalarRange;
-      }
-      else {
-        if (object.properties.ScalarRange[0] < this.m_scalarRange[0]) {
-            this.m_scalarRange[0] = object.properties.ScalarRange[0];
-        }
-        if (object.properties.ScalarRange[1] > this.m_scalarRange[1]) {
-          this.m_scalarRange[1] = object.properties.ScalarRange[1];
-        }
-      }
     }
     if (object.properties &&
         object.properties.ScalarFormat &&
@@ -363,8 +347,6 @@ vglModule.geojsonReader = function() {
         ret = null;
       break;
     }
-    ret.scalarFormat = this.m_scalarFormat;
-    ret.scalarRange = this.m_scalarRange;
     return ret;
   };
 
@@ -381,6 +363,17 @@ vglModule.geojsonReader = function() {
      geoms.push(geom);
    }
  };
+
+ /**
+ *
+ */
+ this.readGeomObject = function(object) {
+    var geom;
+    var geoms = [];
+    geom = this.readGJObject(object);
+    this.linearizeGeoms(geoms, geom);
+    return geoms;
+ }
 
   /**
    *

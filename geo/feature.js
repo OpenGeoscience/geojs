@@ -135,13 +135,14 @@ geoModule.geometryFeature = function(geom) {
   this.setMapper(mapper);
 
   var material;
-  if (geom.scalarFormat() === "values") {
-    material = ogs.vgl.utils.createColorMappedMaterial(geom.scalarRange);
-  } else if (geom.scalarFormat() === "rgb") {
+  var values = geom.sourceData(vertexAttributeKeys.Scalar);
+  var colors = geom.sourceData(vertexAttributeKeys.Color);
+  if (values) {
+    material = ogs.vgl.utils.createColorMappedMaterial(values.scalarRange());
+  } else if (colors) {
     material = ogs.vgl.utils.createColorMaterial();
   } else {
-    /// mapper sets the solid color
-    material = ogs.vgl.utils.createGeometryMaterial();
+    material = ogs. vgl.utils.createSolidColorMaterial();
   }
   this.setMaterial(material);
 
@@ -158,10 +159,10 @@ inherit(geoModule.geometryFeature, geoModule.feature);
  * @param {Array}
  * @returns {geoModule.multiGeometryFeature}
  */
-geoModule.multiGeometryFeature = function(geoms) {
+geoModule.multiGeometryFeature = function(geoms, color) {
   "use strict";
   if (!(this instanceof geoModule.multiGeometryFeature)) {
-    return new geoModule.multiGeometryFeature(geoms);
+    return new geoModule.multiGeometryFeature(geoms, color);
   }
 
   ogs.vgl.actor.call(this);
@@ -173,8 +174,12 @@ geoModule.multiGeometryFeature = function(geoms) {
 
   this.setMapper(mapper);
 
-  //todo: should be set by actor's color
-  var material = ogs.vgl.utils.createGeometryMaterial([1.0,0.5,0.0]);
+  var material;
+  if (!color) {
+    material = ogs.vgl.utils.createGeometryMaterial();
+  } else {
+    material = ogs.vgl.utils.createSolidColorMaterial(color);
+  }
   this.setMaterial(material);
 
   return this;
