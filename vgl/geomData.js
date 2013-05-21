@@ -459,6 +459,16 @@ vglModule.sourceData = function() {
     m_data = m_data.concat(data);
   };
 
+  this.insertAt = function(index, data) {
+    if (!data.length) {
+      m_data[index] = data;
+    } else {
+      for (var i = 0; i < data.length; i++) {
+        m_data[index*data.length+i] = data[i];
+      }
+    }
+  };
+
   return this;
 };
 
@@ -605,7 +615,7 @@ inherit(vglModule.sourceDataC3fv, vglModule.sourceData);
 vglModule.sourceDataSf = function() {
 
   if (!(this instanceof vglModule.sourceDataSf)) {
-    return new vglModule.sourceDataSg();
+    return new vglModule.sourceDataSf();
   }
 
   var m_min = null;
@@ -619,6 +629,14 @@ vglModule.sourceDataSf = function() {
     if (m_max == null || value > m_max) m_max = value;
     if (m_min == null || value < m_min) m_min = value;
     this.insert(value);
+  };
+
+  this.insertAt = function(index, value) {
+    if (m_max == null || value > m_max) m_max = value;
+    if (m_min == null || value < m_min) m_min = value;
+    //call superclass ??
+    //vglModule.sourceData.insertAt.call(this, index, value);
+    this.data()[index] = value;
   };
 
   this.scalarRange = function() {
@@ -722,10 +740,10 @@ vglModule.geometryData = function() {
    * Add new primitive
    */
   this.addPrimitive = function(primitive) {
-    if (m_primitives.indexOf(primitive) == -1) {
+    //if (m_primitives.indexOf(primitive) == -1) {
       m_primitives.push(primitive);
       return true;
-    }
+    //}
 
     return false;
   };
