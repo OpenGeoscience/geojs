@@ -41,17 +41,12 @@ geoModule.layer = function(options, feature) {
   ogs.vgl.object.call(this);
 
   /** @private */
-  var m_that, m_name, m_actor, m_opacity, m_showAttribution, m_visible;
-  m_that = this;
-
-  /** @private */
-  m_name = "";
-
-  /** @private */
-  m_actor = feature;
-
-  /** @private */
-  m_opacity = options.opacity || 1.0;
+  var m_that = this,
+      m_name = "",
+      m_actor = feature,
+      m_opacity = options.opacity || 1.0,
+      m_showAttribution = options.showAttribution || true,
+      m_visible = options.visible || true;
 
   // TODO Write a function for this
   if (m_opacity > 1.0) {
@@ -60,12 +55,6 @@ geoModule.layer = function(options, feature) {
   } else if (m_opacity < 0.0) {
     console.log("[warning] Opacity cannot be less than 1.0");
   }
-
-  /** @private */
-  m_showAttribution = options.showAttribution || true;
-
-  /** @private */
-  m_visible = options.visible || true;
 
   /**
    * Return the underlying drawable entity This function should be implemented
@@ -166,9 +155,26 @@ geoModule.layer = function(options, feature) {
   };
 
   /**
+   * Get source of the layer
+   *
+   */
+   this.dataSource = function() {
+
+   }
+
+   /**
+    * Set source of the layer
+    *
+    */
+  this.setDataSource = function() {
+
+  }
+
+  /**
    * Virtual function to update the layer *
    */
-  this.update = function() {
+  this.update = function(time) {
+    // TODO Call source update here
   };
 
   /**
