@@ -658,10 +658,9 @@ inherit(vglModule.sourceDataSf, vglModule.sourceData);
  /////////////////////////////////////////////////////////////////////////////
 vglModule.geometryData = function() {
 
-  if ((!this.instanceof vglModule.geometryData)) {
+  if (!(this instanceof vglModule.geometryData)) {
     return vglModule.geometryData();
   }
-
   vglModule.data.call(this);
 
   /** @private */

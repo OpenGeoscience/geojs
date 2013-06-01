@@ -290,6 +290,19 @@ vglModule.renderer = function() {
   };
 
   /**
+   * Add an array of actors to the collection
+   */
+  this.addActors = function(actors) {
+    var i = null
+    if (actors instanceof Array) {
+      for (i = 0; i < actors.length; ++i) {
+        m_sceneRoot.addChild(actors[i]);
+      }
+      this.modified();
+    }
+  };
+
+  /**
    * Remove the actor from the collection
    */
   this.removeActor = function(actor) {
@@ -301,6 +314,13 @@ vglModule.renderer = function() {
 
     return false;
   };
+
+  /**
+   * Remove all actors for a renderer
+   */
+  this.removeAllActors = function() {
+    m_sceneRoot.removeChildren();
+  }
 
   /**
    * Transform a point in the world space to display space

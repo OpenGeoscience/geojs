@@ -164,15 +164,15 @@ geoModule.multiGeometryFeature = function(geoms, color) {
   if (!(this instanceof geoModule.multiGeometryFeature)) {
     return new geoModule.multiGeometryFeature(geoms, color);
   }
-
   ogs.vgl.actor.call(this);
 
-  // Initialize
-  var mapper, material;
-  mapper = ogs.vgl.groupMapper();
-  mapper.setGeometryDataArray(geoms);
+  var m_mapper = ogs.vgl.groupMapper(),
+      m_material;
+  this.setMapper(m_mapper);
 
-  this.setMapper(mapper);
+  if (geoms) {
+    m_mapper.setGeometryDataArray(geoms);
+  }
 
   var material;
   if (!color) {
@@ -181,6 +181,30 @@ geoModule.multiGeometryFeature = function(geoms, color) {
     material = ogs.vgl.utils.createSolidColorMaterial(color);
   }
   this.setMaterial(material);
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get geometries
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.geomtries = function() {
+    return m_mapper.geometryDataArray();
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set geometries
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.setGeometries = function(geoms) {
+    if (m_mapper.geometryDataArray() !== geoms) {
+      m_mapper.setGeometryDataArray(geoms);
+      this.modified();
+      return true;
+    }
+
+    return false;
+  };
 
   return this;
 };
