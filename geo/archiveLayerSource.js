@@ -15,10 +15,10 @@
 //////////////////////////////////////////////////////////////////////////////
 geoModule.archiveLayerSource = function(name, vars) {
 
-  if (!(this is instanceof archiveLayerSource) ) {
-    return new archiveLayerSource();
+  if (!(this instanceof geoModule.archiveLayerSource) ) {
+    return new geoModule.archiveLayerSource(name, vars);
   }
-  vglModule.layerSource.call(this);
+  geoModule.layerSource.call(this);
 
   var m_name = name,
       m_vars = vars;
@@ -30,7 +30,8 @@ geoModule.archiveLayerSource = function(name, vars) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.getData = function(time, callback) {
-    var asyncVal = false;
+    var asyncVal = false,
+        retVal = [];
 
     if (callback) {
       asyncVal = true;
@@ -51,16 +52,15 @@ geoModule.archiveLayerSource = function(name, vars) {
           console.log("[error] " + response.error ? response.error : "no results returned from server");
         } else {
           var reader = ogs.vgl.geojsonReader();
-          var geoms = reader.readGJObject(jQuery.parseJSON(response.result.data[0]));
-
-          if (callback) {
-            callback(geoms);
-          } else {
-            return geoms;
-          }
+          retVal = reader.readGJObject(jQuery.parseJSON(response.result.data[0]));
         }
       }
     });
+
+    if (callback) {
+      callback(retVal);
+    }
+    return retVal;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -88,8 +88,8 @@ geoModule.archiveLayerSource = function(name, vars) {
       type: 'POST',
       url: '/data/query',
       data: {
-        expr: name
-        vars: var,
+        expr: m_name,
+        vars: m_vars,
         fields: ['timerange']
       },
       dataType: 'json',
@@ -115,3 +115,5 @@ geoModule.archiveLayerSource = function(name, vars) {
 
   return this;
 };
+
+inherit(geoModule.archiveLayerSource, geoModule.layerSource);

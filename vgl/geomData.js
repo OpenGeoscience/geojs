@@ -901,3 +901,5 @@ vglModule.geometryData = function() {
 
   return this;
 };
+
+inherit(ogs.vgl.geometryData, ogs.vgl.data);

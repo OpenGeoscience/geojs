@@ -47,3 +47,5 @@ geoModule.layerSource = function() {
   this.getSpatialRange = function() {
   };
 };
+
+inherit(geoModule.layerSource, ogs.vgl.object);

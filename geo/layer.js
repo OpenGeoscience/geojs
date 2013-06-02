@@ -47,6 +47,10 @@ geoModule.layer = function(options, source) {
   }
   ogs.vgl.object.call(this);
 
+  if (!options) {
+    options = geoModule.layerOptions();
+  }
+
   /** @private */
   var m_that = this,
       m_name = "",
@@ -310,17 +314,23 @@ geoModule.featureLayer = function(options, feature) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.update = function(time) {
-    if (!m_dataSource) {
+    if (!this.dataSource()) {
       console.log('[info] No valid data source found.');
       return;
     }
 
     var i = 0,
-        data = m_dataSource.getData(time);
+        data = this.dataSource().getData(time);
+
+    console.log('data is ', data);
+    console.log('time is ', time);
 
     for(i = 0; i < data.length; ++i) {
-      switch(data.type()) {
+      switch(data[i].type()) {
         case vglModule.data.geometry:
+          console.log("adding new geometry");
+          var geomFeature = geoModule.geometryFeature(data[i]);
+          m_features.push(geomFeature);
           break;
         case vglModule.data.raster:
           break;
@@ -383,9 +393,7 @@ geoModule.featureLayer = function(options, feature) {
   };
 
   $(m_that).on(this.events.opacitychange, m_that.updateLayerOpacity);
-
   this.setOpacity(this.opacity());
-
   return this;
 };
 
