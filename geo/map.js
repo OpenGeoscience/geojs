@@ -99,9 +99,9 @@ geoModule.map = function(node, options) {
   // TODO use zoom and center options
   m_baseLayer = (function() {
     var mapActor, worldImage, worldTexture;
-    mapActor = ogs.vgl.utils.createTexturePlane(-180.0, -90.0, 0.0,
-                                                 180.0, -90.0, 0.0,
-                                                -180.0, 90.0, 0.0);
+    mapActor = ogs.vgl.utils.createTexturePlane(-180.0, -90.0, -1.0,
+                                                 180.0, -90.0, -1.0,
+                                                -180.0, 90.0, -1.0);
     // Setup texture
     worldImage = new Image();
     worldImage.src = m_options.source;
