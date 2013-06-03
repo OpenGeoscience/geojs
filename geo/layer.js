@@ -38,8 +38,7 @@ geoModule.layerOptions = function() {
 geoModule.layer = function(options, source) {
   "use strict";
   this.events = {
-    "opacitychange" : "opacitychange",
-    "update" : "update"
+    "opacitychange" : "opacitychange"
   };
 
   if (!(this instanceof geoModule.layer)) {
@@ -144,10 +143,11 @@ geoModule.layer = function(options, source) {
   ////////////////////////////////////////////////////////////////////////////
   this.setOpacity = function(val) {
     m_opacity = val;
-    $(m_that).trigger({
-      type : this.events.opacitychange,
-      opacity : m_opacity
-    });
+    this.updateLayerOpacity(m_opacity);
+    // $(m_that).trigger({
+    //   type : this.events.opacitychange,
+    //   opacity : m_opacity
+    // });
 
     this.modified();
     return true;
@@ -373,7 +373,7 @@ geoModule.featureLayer = function(options, feature) {
    * Slot to handle opacity change
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.updateLayerOpacity = function(event) {
+  this.updateLayerOpacity = function(opacity) {
     if (!m_features) {
       return;
     }
@@ -386,13 +386,13 @@ geoModule.featureLayer = function(options, feature) {
       mat = m_features[i].material();
       opacityUniform = mat.shaderProgram().uniform('opacity');
       if (opacityUniform !== null) {
-        opacityUniform.set(event.opacity);
-        $(m_that).trigger(this.events.update);
+        opacityUniform.set(opacity);
+        $(m_that).trigger(geoModule.command.updateLayerOpacityEvent);
       }
     }
   };
 
-  $(m_that).on(this.events.opacitychange, m_that.updateLayerOpacity);
+  // $(m_that).on(this.events.opacitychange, m_that.updateLayerOpacity);
   this.setOpacity(this.opacity());
   return this;
 };
