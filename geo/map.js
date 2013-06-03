@@ -366,13 +366,17 @@ geoModule.map = function(node, options) {
       }
 
       console.log('sorted actors are', sortedActors);
-
       sortedActors.sort(function(a, b) {return a[0] - b[0]});
+
+      // First add base layer
+      m_renderer.addActor(m_baseLayer);
+
       // Add actors to renderer in sorted order
       for (i = 0; i < sortedActors.length; ++i) {
         console.log('adding ', sortedActors[i][1]);
         m_renderer.addActors(sortedActors[i][1]);
       }
+
       this.redraw();
     }
   };
