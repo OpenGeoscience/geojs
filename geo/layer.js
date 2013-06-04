@@ -322,13 +322,14 @@ geoModule.featureLayer = function(options, feature) {
     var i = 0,
         data = this.dataSource().getData(time);
 
-    console.log('data is ', data);
-    console.log('time is ', time);
+    // console.log('data is ', data);
+    // console.log('time is ', time);
+    // For now remove the existing features
+    m_features = [];
 
     for(i = 0; i < data.length; ++i) {
       switch(data[i].type()) {
         case vglModule.data.geometry:
-          console.log("adding new geometry");
           var geomFeature = geoModule.geometryFeature(data[i]);
           m_features.push(geomFeature);
           break;
@@ -360,10 +361,7 @@ geoModule.featureLayer = function(options, feature) {
     }
 
     // TODO Finish this
-    var currentFeatures = layersDrawables.features(this.name());
-    if (currentFeatures === null) {
-      layersDrawables.setFeatures(this.name(), m_features);
-    }
+    layersDrawables.setFeatures(this.name(), m_features);
 
     m_prepareRenderTime.modified();
   };

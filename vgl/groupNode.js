@@ -53,8 +53,9 @@ vglModule.groupNode = function() {
   };
 
   this.removeChildren = function() {
-    var i = 0;
+    var i = null;
     for (i = 0; i < m_children.length; ++i) {
+      console.log('removing children', i);
       this.removeChild(m_children[i]);
     }
 

@@ -16,6 +16,10 @@ geoModule.mapOptions = {
   sourcebigb: ""
 };
 
+var g_tween;
+var g_sourceTime;
+var g_targetTime;
+
 /**
  * Create a new instance of class map
  *
@@ -42,8 +46,7 @@ geoModule.map = function(node, options) {
       m_previousLayerDrawablesTime = null,
       m_interactorStyle = null,
       m_viewer = null,
-      m_renderer = null,
-      m_tween;
+      m_renderer = null;
 
   m_renderTime.modified();
 
@@ -165,7 +168,7 @@ geoModule.map = function(node, options) {
    * @return {Boolean}
    */
   this.addLayer = function(layer) {
-    console.log('layer bin number is ', layer.binNumber() ,layer.name());
+    // console.log('layer bin number is ', layer.binNumber() ,layer.name());
     if (layer !== null) {
       // TODO Check if the layer already exists
       // TODO Set the rendering order correctly
@@ -176,6 +179,11 @@ geoModule.map = function(node, options) {
       m_layers[layer.name()] = layer;
       this.prepareForRendering();
       this.modified();
+
+      if (layer.name() == 'clt') {
+        var layers = [m_layers[layer.name()]];
+        this.animate(layers, 10);
+      }
 
       $(this).trigger({
         type: geoModule.command.addLayerEvent,
@@ -366,26 +374,24 @@ geoModule.map = function(node, options) {
           m_layerDrawables.features(layerName)]);
       }
 
-      console.log('sorted actors are', sortedActors);
+      // console.log('sorted actors are', sortedActors);
       sortedActors.sort(function(a, b) {return a[0] - b[0]});
 
       // First add base layer
-      m_renderer.addActor(m_baseLayer);
+      // m_renderer.addActor(m_baseLayer);
 
       // Add actors to renderer in sorted order
       for (i = 0; i < sortedActors.length; ++i) {
-        console.log('adding ', sortedActors[i][1]);
+        // console.log('adding ', sortedActors[i][1]);
         m_renderer.addActors(sortedActors[i][1]);
       }
-
-      this.redraw();
     }
   };
 
   /**
    * Animate layers of a map
    */
-  this.animate = function(source, target, layers, timeDuration)  {
+  this.animate = function(layers, timeDuration)  {
     var i = null,
         that = this;
 
@@ -398,15 +404,22 @@ geoModule.map = function(node, options) {
     }
 
     // Create new
-    m_tween = new TWEEN.Tween(source).to(target, timeDuration);
+    g_sourceTime = {x: 0};
+    g_targetTime = {x: 10};
 
-    m_tween.onUpdate(function() {
-      for (i = 0; i < m_layers.length; ++i) {
-        m_layers[i].update(source.time);
-      }
-    }
+    var tween = new TWEEN.Tween( { x: 0 } )
+      .to( { x: 119 }, 4000 )
+      .onUpdate( function () {
+        console.log('x ', this.x);
+        for (i = 0; i < layers.length; ++i) {
+          layers[i].update(Math.round(this.x));
+        }
+        that.prepareForRendering();
+        that.redraw();
+    })
+    .start();
 
-    that.redraw();
+    globalAnimate();
   };
 
   // Check if need to show country boundaries
@@ -415,6 +428,12 @@ geoModule.map = function(node, options) {
   }
 
   return this;
+};
+
+function globalAnimate() {
+  // console.log('globalAnimate');
+  requestAnimationFrame(globalAnimate);
+  TWEEN.update();
 };
 
 inherit(geoModule.map, ogs.vgl.object);
