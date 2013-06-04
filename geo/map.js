@@ -42,7 +42,8 @@ geoModule.map = function(node, options) {
       m_previousLayerDrawablesTime = null,
       m_interactorStyle = null,
       m_viewer = null,
-      m_renderer = null;
+      m_renderer = null,
+      m_tween;
 
   m_renderTime.modified();
 
@@ -379,6 +380,33 @@ geoModule.map = function(node, options) {
 
       this.redraw();
     }
+  };
+
+  /**
+   * Animate layers of a map
+   */
+  this.animate = function(source, target, layers, timeDuration)  {
+    var i = null,
+        that = this;
+
+    if (!layers) {
+      layers = m_layers;
+    }
+
+    if (!timeDuration) {
+      timeDuration = 10000; // 10 seconds
+    }
+
+    // Create new
+    m_tween = new TWEEN.Tween(source).to(target, timeDuration);
+
+    m_tween.onUpdate(function() {
+      for (i = 0; i < m_layers.length; ++i) {
+        m_layers[i].update(source.time);
+      }
+    }
+
+    that.redraw();
   };
 
   // Check if need to show country boundaries
