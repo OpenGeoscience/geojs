@@ -182,7 +182,7 @@ geoModule.map = function(node, options) {
       // TODO Remove this
       if (layer.name() == 'clt') {
         var layers = [m_layers[layer.name()]];
-        this.animate([0, 119], layers);
+        this.animate([0, 2], layers);
       }
 
       $(this).trigger({
@@ -414,7 +414,7 @@ geoModule.map = function(node, options) {
 
     var that = this,
         currentTime = timeRange[0],
-        endTime = timeRange[timeRange.length],
+        endTime = timeRange[timeRange.length - 1],
         index = -1;
 
     if (timeRange.length > 2) {
