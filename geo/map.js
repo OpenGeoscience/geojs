@@ -178,7 +178,7 @@ geoModule.map = function(node, options) {
       // TODO Remove this
       if (layer.name() == 'clt') {
         var layers = [m_layers[layer.name()]];
-        this.animate([0, 2], layers);
+        this.animate([0, 119], layers);
       }
 
       $(this).trigger({

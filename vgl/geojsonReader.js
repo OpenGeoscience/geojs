@@ -271,6 +271,9 @@ vglModule.geojsonReader = function() {
     //preallocate with size estimate
     vglcoords.data().length = numPolys*3; //x,y,z
 
+    var vgltriangle = new vglModule.triangles();
+    var indexes = []
+
     for (var j = 0; j < numPolys; j++) {
       //console.log("getting poly " + j);
 
@@ -299,10 +302,7 @@ vglModule.geojsonReader = function() {
 
         if (i > 1) {
           //console.log("Cutting new triangle "+ vf + "," + vl + "," + ccount);
-          var indices = new Uint16Array([vf,vl,ccount]);
-          var vgltriangle = new vglModule.triangles();
-          vgltriangle.setIndices(indices);
-          geom.addPrimitive(vgltriangle);
+          indexes = indexes.concat([vf,vl,ccount])
           vl = ccount;
         }
         ccount++;
@@ -313,6 +313,9 @@ vglModule.geojsonReader = function() {
         //d = d + (timee-timed)
       }
     }
+    vgltriangle.setIndices(indexes);
+    geom.addPrimitive(vgltriangle);
+
     //console.log("NUMPOLYS " + pntcnt);
     //console.log("RMP: ", a, ",", b, ",", c, ",", d)
     //var time2 = new Date().getTime()
