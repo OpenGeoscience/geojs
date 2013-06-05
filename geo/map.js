@@ -16,10 +16,6 @@ geoModule.mapOptions = {
   sourcebigb: ""
 };
 
-var g_tween;
-var g_sourceTime;
-var g_targetTime;
-
 /**
  * Create a new instance of class map
  *
