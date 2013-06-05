@@ -41,9 +41,10 @@ geoModule.map = function(node, options) {
       m_options = options,
       m_layers = {},
       m_activeLayer = null,
-      m_layerDrawables = geoModule.layerDrawables(),
+      m_layersCurrentDrawables = geoModule.layerDrawables(),
+      m_layersPreviousDrawables = geoModule.layerDrawables(),
       m_renderTime = ogs.vgl.timestamp(),
-      m_previousLayerDrawablesTime = null,
+      m_previousLayerDrawablesTime = ogs.vgl.timestamp(),
       m_interactorStyle = null,
       m_viewer = null,
       m_renderer = null;
@@ -168,10 +169,8 @@ geoModule.map = function(node, options) {
    * @return {Boolean}
    */
   this.addLayer = function(layer) {
-    // console.log('layer bin number is ', layer.binNumber() ,layer.name());
     if (layer !== null) {
       // TODO Check if the layer already exists
-      // TODO Set the rendering order correctly
       if (!layer.binNumber() || layer.binNumber() === -1) {
         layer.setBinNumber(Object.keys(m_layers).length);
       }
@@ -180,9 +179,10 @@ geoModule.map = function(node, options) {
       this.prepareForRendering();
       this.modified();
 
+      // TODO Remove this
       if (layer.name() == 'clt') {
         var layers = [m_layers[layer.name()]];
-        this.animate(layers, 10);
+        this.animate(0, 119, layers);
       }
 
       $(this).trigger({
@@ -359,67 +359,66 @@ geoModule.map = function(node, options) {
 
     for (layerName in m_layers) {
       if (m_layers.hasOwnProperty(layerName)) {
-        m_layers[layerName].prepareForRendering(m_layerDrawables);
+        m_layers[layerName].prepareForRendering(m_layersCurrentDrawables);
       }
     }
 
-    if (!m_previousLayerDrawablesTime || (
-      m_layerDrawables.GetMTime() && m_previousLayerDrawablesTime.GetMTime())) {
-      // Clear all actors
-      m_renderer.removeAllActors();
+    if (m_layersCurrentDrawables.getMTime() >
+        m_previousLayerDrawablesTime.getMTime()) {
+
+      // Clear features from all layers except the baseone
+      if (m_layersPreviousDrawables) {
+        for (layerName in m_layers) {
+          if (m_layers[layerName] !== m_baseLayer) {
+            if (m_layersPreviousDrawables.isEmpty()) {
+              continue;
+            }
+            m_renderer.removeActors(
+              m_layersPreviousDrawables.features(layerName));
+          }
+        }
+      }
 
       // Sort actors by layer bin number
       for (layerName in m_layers) {
         sortedActors.push([m_layers[layerName].binNumber(),
-          m_layerDrawables.features(layerName)]);
+          m_layersCurrentDrawables.features(layerName)]);
       }
 
       // console.log('sorted actors are', sortedActors);
       sortedActors.sort(function(a, b) {return a[0] - b[0]});
 
-      // First add base layer
-      // m_renderer.addActor(m_baseLayer);
-
       // Add actors to renderer in sorted order
       for (i = 0; i < sortedActors.length; ++i) {
-        // console.log('adding ', sortedActors[i][1]);
         m_renderer.addActors(sortedActors[i][1]);
       }
+
+      m_layersCurrentDrawables.clone(m_layersPreviousDrawables);
+      m_previousLayerDrawablesTime.modified();
     }
   };
 
   /**
    * Animate layers of a map
    */
-  this.animate = function(layers, timeDuration)  {
-    var i = null,
-        that = this;
+  this.animate = function(fromTime, toTime, layers) {
+    var that = this;
 
-    if (!layers) {
-      layers = m_layers;
-    }
-
-    if (!timeDuration) {
-      timeDuration = 10000; // 10 seconds
-    }
-
-    // Create new
-    g_sourceTime = {x: 0};
-    g_targetTime = {x: 10};
-
-    var tween = new TWEEN.Tween( { x: 0 } )
-      .to( { x: 119 }, 4000 )
-      .onUpdate( function () {
-        console.log('x ', this.x);
+    // Update every 1 ms
+    var intervalId = setInterval(frame, 10);
+    function frame() {
+      var i = 0;
+      ++fromTime;
+      if (fromTime > toTime) {
+        clearInterval(intervalId);
+      } else {
         for (i = 0; i < layers.length; ++i) {
-          layers[i].update(Math.round(this.x));
+          layers[i].update(fromTime);
         }
         that.prepareForRendering();
         that.redraw();
-    })
-    .start();
-
-    globalAnimate();
+      }
+    }
   };
 
   // Check if need to show country boundaries
@@ -428,12 +427,6 @@ geoModule.map = function(node, options) {
   }
 
   return this;
-};
-
-function globalAnimate() {
-  // console.log('globalAnimate');
-  requestAnimationFrame(globalAnimate);
-  TWEEN.update();
 };
 
 inherit(geoModule.map, ogs.vgl.object);
