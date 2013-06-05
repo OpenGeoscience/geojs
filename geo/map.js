@@ -182,7 +182,7 @@ geoModule.map = function(node, options) {
       // TODO Remove this
       if (layer.name() == 'clt') {
         var layers = [m_layers[layer.name()]];
-        this.animate(0, 119, layers);
+        this.animate([0, 119], layers);
       }
 
       $(this).trigger({
@@ -401,24 +401,48 @@ geoModule.map = function(node, options) {
   /**
    * Animate layers of a map
    */
-  this.animate = function(fromTime, toTime, layers) {
-    var that = this;
+  this.animate = function(timeRange, layers) {
+    if (!timeRange) {
+      console.log('[error] Invalid time range');
+      return;
+    }
+
+    if (timeRange.length < 2) {
+      console.log('[error] Invalid time range. Requires atleast begin and end time');
+      return;
+    }
+
+    var that = this,
+        currentTime = timeRange[0],
+        endTime = timeRange[timeRange.length],
+        increment = 1,
+        index = 0;
+
+    if (timeRange.length > 2) {
+      increment = -1;
+    }
 
     // Update every 1 ms
     var intervalId = setInterval(frame, 10);
     function frame() {
       var i = 0;
-      ++fromTime;
-      if (fromTime > toTime) {
+      if (increment > 0) {
+        ++currentTime;
+      } else {
+        ++index;
+        currentTime = timeRange[index];
+      }
+
+      if (currentTime > endTime || index > timeRange.length) {
         clearInterval(intervalId);
       } else {
         for (i = 0; i < layers.length; ++i) {
-          layers[i].update(fromTime);
+          layers[i].update(currentTime);
         }
         $(this).trigger({
           type: geoModule.command.animateEvent,
-          currentTime: fromTime,
-          endTime: toTime
+          currentTime: currentTime,
+          endTime: endTime
         });
         that.prepareForRendering();
         that.redraw();
