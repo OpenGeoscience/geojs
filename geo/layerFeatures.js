@@ -1,7 +1,7 @@
-geoModule.layerDrawables = function() {
+geoModule.layerFeatures = function() {
   "use strict";
-  if (!(this instanceof geoModule.layerDrawables)) {
-    return new geoModule.layerDrawables();
+  if (!(this instanceof geoModule.layerFeatures)) {
+    return new geoModule.layerFeatures();
   }
   ogs.vgl.object.call(this);
 
@@ -62,4 +62,4 @@ geoModule.layerDrawables = function() {
   };
 };
 
-inherit(geoModule.layerDrawables, ogs.vgl.object);
+inherit(geoModule.layerFeatures, ogs.vgl.object);
