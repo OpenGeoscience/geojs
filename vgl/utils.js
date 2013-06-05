@@ -97,6 +97,60 @@ vglModule.utils.createVertexShader = function(context) {
 };
 
 /**
+ * Create a new instance of vertex shader with a solid color
+ *
+ * @desc Helper function to create default vertex shader *
+ * @param context
+ * @returns {vglModule.shader}
+ */
+vglModule.utils.createVertexShaderSolidColor = function(context) {
+  var vertexShaderSource = [
+                            'attribute vec3 vertexPosition;',
+                            'uniform mediump float pointSize;',
+                            'uniform mat4 modelViewMatrix;',
+                            'uniform mat4 projectionMatrix;',
+                            'void main(void)',
+                            '{',
+                            'gl_PointSize = pointSize;',
+                            'gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
+                            '}' ].join('\n');
+
+  var shader = new vglModule.shader(gl.VERTEX_SHADER);
+  shader.setShaderSource(vertexShaderSource);
+  return shader;
+};
+
+/**
+ * Create a new instance of vertex shader that passes values through for color mapping
+ *
+ * @desc Helper function to create default vertex shader *
+ * @param context
+ * @returns {vglModule.shader}
+ */
+vglModule.utils.createVertexShaderColorMap = function(context, min, max) {
+  var vertexShaderSource = [
+                            'attribute vec3 vertexPosition;',
+                            'attribute float vertexScalar;',
+                            'uniform mediump float pointSize;',
+                            'uniform mat4 modelViewMatrix;',
+                            'uniform mat4 projectionMatrix;',
+                            'uniform float lutMin;',
+                            'uniform float lutMax;',
+                            'varying mediump float iVertexScalar;',
+                            'void main(void)',
+                            '{',
+                            'gl_PointSize = pointSize;',
+                            'gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
+                            'iVertexScalar = (vertexScalar-lutMin)/(lutMax-lutMin);',
+                            '}' ].join('\n');
+
+  var shader = new vglModule.shader(gl.VERTEX_SHADER);
+  shader.setShaderSource(vertexShaderSource);
+  return shader;
+};
+
+
+/**
  * Create a new instance of default fragment shader
  *
  * @desc Helper function to create default fragment shader *
@@ -108,6 +162,44 @@ vglModule.utils.createFragmentShader = function(context) {
                               'uniform mediump float opacity;',
                               'void main(void) {',
                               'gl_FragColor = vec4(iVertexColor, opacity);',
+                              '}' ].join('\n');
+
+  var shader = new vglModule.shader(gl.FRAGMENT_SHADER);
+  shader.setShaderSource(fragmentShaderSource);
+  return shader;
+};
+
+/**
+ * Create a new instance of fragment shader with an assigned constant color.
+ *
+ * @desc Helper function to create default fragment shader *
+ * @param context
+ * @returns {vglModule.shader}
+ */
+vglModule.utils.createFragmentShaderSolidColor = function(context, color) {
+  var fragmentShaderSource = ['uniform mediump float opacity;',
+                              'void main(void) {',
+                              'gl_FragColor = vec4(' + color[0] + ',' + color[1] + ',' + color[2] + ', opacity);',
+                              '}' ].join('\n');
+
+  var shader = new vglModule.shader(gl.FRAGMENT_SHADER);
+  shader.setShaderSource(fragmentShaderSource);
+  return shader;
+};
+
+/**
+ * Create a new instance of fragment shader that maps values into colors bia lookup table
+ *
+ * @desc Helper function to create default fragment shader *
+ * @param context
+ * @returns {vglModule.shader}
+ */
+vglModule.utils.createFragmentShaderColorMap = function(context) {
+  var fragmentShaderSource = [ 'varying mediump float iVertexScalar;',
+                              'uniform sampler2D sampler2d;',
+                              'uniform mediump float opacity;',
+                              'void main(void) {',
+                              'gl_FragColor = vec4(texture2D(sampler2d, vec2(iVertexScalar, 0.0)).xyz, opacity);',
                               '}' ].join('\n');
 
   var shader = new vglModule.shader(gl.FRAGMENT_SHADER);
@@ -215,6 +307,37 @@ vglModule.utils.createGeometryMaterial = function() {
   var vertexShader = vglModule.utils.createVertexShader(gl);
   var fragmentShader = vglModule.utils.createFragmentShader(gl);
   var posVertAttr = new vglModule.vertexAttribute("vertexPosition");
+  var pointsizeUniform = new vglModule.floatUniform("pointSize", 5.0);
+  var opacityUniform = new vglModule.floatUniform("opacity", 0.5);
+  var modelViewUniform = new vglModule.modelViewUniform("modelViewMatrix");
+  var projectionUniform = new vglModule.projectionUniform("projectionMatrix");
+
+  prog.addVertexAttribute(posVertAttr, vglModule.vertexAttributeKeys.Position);
+  prog.addUniform(pointsizeUniform);
+  prog.addUniform(opacityUniform);
+  prog.addUniform(modelViewUniform);
+  prog.addUniform(projectionUniform);
+  prog.addShader(fragmentShader);
+  prog.addShader(vertexShader);
+  mat.addAttribute(prog);
+  mat.addAttribute(blend);
+
+  return mat;
+};
+
+/**
+ * Create a new instance of colored geometry material
+ *
+ * @desc Helper function to create color geometry material
+ * @returns {vglModule.material}
+ */
+vglModule.utils.createColorMaterial = function() {
+  var mat = new vglModule.material();
+  var blend = new vglModule.blend();
+  var prog = new vglModule.shaderProgram();
+  var vertexShader = vglModule.utils.createVertexShader(gl);
+  var fragmentShader = vglModule.utils.createFragmentShader(gl);
+  var posVertAttr = new vglModule.vertexAttribute("vertexPosition");
   var texCoordVertAttr = new vglModule.vertexAttribute("textureCoord");
   var colorVertAttr = new vglModule.vertexAttribute("vertexColor");
   var pointsizeUniform = new vglModule.floatUniform("pointSize", 5.0);
@@ -226,6 +349,89 @@ vglModule.utils.createGeometryMaterial = function() {
   prog.addVertexAttribute(colorVertAttr, vglModule.vertexAttributeKeys.Color);
   prog.addVertexAttribute(texCoordVertAttr,
                           vglModule.vertexAttributeKeys.TextureCoordinate);
+  prog.addUniform(pointsizeUniform);
+  prog.addUniform(opacityUniform);
+  prog.addUniform(modelViewUniform);
+  prog.addUniform(projectionUniform);
+  prog.addShader(fragmentShader);
+  prog.addShader(vertexShader);
+  mat.addAttribute(prog);
+  mat.addAttribute(blend);
+
+  return mat;
+};
+
+/**
+ * Create a new instance of geometry material
+ *
+ * @desc Helper function to create geometry material
+ * @returns {vglModule.material}
+ */
+vglModule.utils.createColorMappedMaterial = function(scalarRange) {
+  if (!scalarRange) {
+    scalarRange = [0.0,1.0];
+  }
+  var mat = new vglModule.material();
+  var blend = new vglModule.blend();
+  var prog = new vglModule.shaderProgram();
+  var vertexShader = vglModule.utils.createVertexShaderColorMap(gl,scalarRange[0],scalarRange[1]);
+  var fragmentShader = vglModule.utils.createFragmentShaderColorMap(gl);
+  var posVertAttr = new vglModule.vertexAttribute("vertexPosition");
+  var scalarVertAttr = new vglModule.vertexAttribute("vertexScalar");
+  var pointsizeUniform = new vglModule.floatUniform("pointSize", 5.0);
+  var opacityUniform = new vglModule.floatUniform("opacity", 0.5);
+  var lutMinUniform = new vglModule.floatUniform("lutMin", scalarRange[0]);
+  var lutMaxUniform = new vglModule.floatUniform("lutMax", scalarRange[1]);
+  var modelViewUniform = new vglModule.modelViewUniform("modelViewMatrix");
+  var projectionUniform = new vglModule.projectionUniform("projectionMatrix");
+  var samplerUniform = new vglModule.uniform(gl.FLOAT, "sampler2d");
+  samplerUniform.set(0);
+  prog.addVertexAttribute(posVertAttr, vglModule.vertexAttributeKeys.Position);
+  prog.addVertexAttribute(scalarVertAttr, vglModule.vertexAttributeKeys.Scalar);
+  prog.addUniform(pointsizeUniform);
+  prog.addUniform(opacityUniform);
+  prog.addUniform(lutMinUniform);
+  prog.addUniform(lutMaxUniform);
+  prog.addUniform(modelViewUniform);
+  prog.addUniform(projectionUniform);
+  prog.addShader(fragmentShader);
+  prog.addShader(vertexShader);
+  mat.addAttribute(prog);
+  mat.addAttribute(blend);
+  var lut = new ogs.vgl.lookupTable();
+  //standard rainbow instead of paraview
+  //lut.setColorTable([255,0,0,255,
+  //                   255,255,0,255,
+  //                   0,255,0,255,
+  //                   0,255,255,255,
+  //                   0,0,255,255])
+  mat.addAttribute(lut);
+  return mat;
+};
+
+/**
+ * Create a new instance of solid color material
+ *
+ * @desc Helper function to create geometry material
+ * @returns {vglModule.material}
+ */
+vglModule.utils.createSolidColorMaterial = function(color) {
+  if (!color) {
+    color = [1.0,1.0,1.0];
+  }
+
+  var mat = new vglModule.material();
+  var blend = new vglModule.blend();
+  var prog = new vglModule.shaderProgram();
+  var vertexShader = vglModule.utils.createVertexShaderSolidColor(gl);
+  var fragmentShader = vglModule.utils.createFragmentShaderSolidColor(gl, color);
+  var posVertAttr = new vglModule.vertexAttribute("vertexPosition");
+  var pointsizeUniform = new vglModule.floatUniform("pointSize", 5.0);
+  var opacityUniform = new vglModule.floatUniform("opacity", 0.5);
+  var modelViewUniform = new vglModule.modelViewUniform("modelViewMatrix");
+  var projectionUniform = new vglModule.projectionUniform("projectionMatrix");
+
+  prog.addVertexAttribute(posVertAttr, vglModule.vertexAttributeKeys.Position);
   prog.addUniform(pointsizeUniform);
   prog.addUniform(opacityUniform);
   prog.addUniform(modelViewUniform);

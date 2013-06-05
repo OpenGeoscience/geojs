@@ -177,7 +177,7 @@ vglModule.texture = function() {
       return false;
     }
 
-    this.m_pixelDataTYpe = pixelDataType;
+    this.m_pixelDataType = pixelDataType;
 
     this.modified();
 
@@ -207,9 +207,9 @@ vglModule.texture = function() {
     // };
 
     // TODO Fix this
-    this.m_internalFormat = gl.RGBA;
-    this.m_pixelFormat = gl.RGBA;
-    this.m_pixelDataType = gl.UNSIGNED_BYTE;
+	    this.m_internalFormat = gl.RGBA;
+	    this.m_pixelFormat = gl.RGBA;
+	    this.m_pixelDataType = gl.UNSIGNED_BYTE;
   };
 
   this.updateDimensions = function() {
@@ -224,3 +224,108 @@ vglModule.texture = function() {
 };
 
 inherit(vglModule.texture, vglModule.materialAttribute);
+
+/**
+ * Create a new instance of class lookupTable
+ *
+ * @class
+ * @returns {vglModule.lookupTable}
+ */
+vglModule.lookupTable = function() {
+
+  if (!(this instanceof vglModule.lookupTable)) {
+    return new vglModule.lookupTable();
+  }
+  vglModule.texture.call(this);
+
+  var m_setupTimestamp = vglModule.timestamp();
+  var m_range = [0,0];
+
+  this.m_colorTable = //paraview bwr colortable
+	  [0.07514311,0.468049805,1,1,
+	   0.247872569,0.498782363,1,1,
+	   0.339526309,0.528909511,1,1,
+	   0.409505078,0.558608486,1,1,
+	   0.468487184,0.588057293,1,1,
+	   0.520796675,0.617435078,1,1,
+	   0.568724526,0.646924167,1,1,
+	   0.613686735,0.676713218,1,1,
+	   0.656658579,0.707001303,1,1,
+	   0.698372844,0.738002964,1,1,
+	   0.739424025,0.769954435,1,1,
+	   0.780330104,0.803121429,1,1,
+	   0.821573924,0.837809045,1,1,
+	   0.863634967,0.874374691,1,1,
+	   0.907017747,0.913245283,1,1,
+	   0.936129275,0.938743558,0.983038586,1,
+	   0.943467973,0.943498599,0.943398095,1,
+	   0.990146732,0.928791426,0.917447482,1,
+	   1,0.88332677,0.861943246,1,
+	   1,0.833985467,0.803839606,1,
+	   1,0.788626485,0.750707739,1,
+	   1,0.746206642,0.701389973,1,
+	   1,0.70590052,0.654994046,1,
+	   1,0.667019783,0.610806959,1,
+	   1,0.6289553,0.568237474,1,
+	   1,0.591130233,0.526775617,1,
+	   1,0.552955184,0.485962266,1,
+	   1,0.513776083,0.445364274,1,
+	   1,0.472800903,0.404551679,1,
+	   1,0.428977855,0.363073592,1,
+	   1,0.380759558,0.320428137,1,
+	   0.961891484,0.313155629,0.265499262,1,
+	   0.916482116,0.236630659,0.209939162,1].map(
+             function(x) {return x*255;});
+
+  this.setup = function(renderState) {
+    gl.deleteTexture(this.m_textureHandle);
+    this.m_textureHandle = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, this.m_textureHandle);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+
+    this.m_width = this.m_colorTable.length/4;
+    this.m_height = 1;
+    this.m_depth = 0;
+    gl.texImage2D(gl.TEXTURE_2D,
+                  0, gl.RGBA, this.m_width, this.m_height, this.m_depth,
+                  gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(this.m_colorTable));
+
+    gl.bindTexture(gl.TEXTURE_2D, null);
+    m_setupTimestamp.modified();
+  };
+
+  this.colorTable = function() {
+    return this.m_colorTable;
+  };
+
+  this.setColorTable = function(colors) {
+    if (this.m_colorTable === colors) {
+      return false;
+    }
+
+    this.m_colorTable = colors;
+    this.modified();
+    return true;
+  };
+
+  this.range = function() {
+    return this.m_range;
+  };
+
+  this.setRange = function(range) {
+    if (this.m_range === range) {
+      return false;
+    }
+    this.m_range = range;
+    this.modified();
+    return true;
+  };
+
+  return this;
+};
+
+inherit(vglModule.lookupTable, vglModule.texture);

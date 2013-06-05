@@ -134,7 +134,16 @@ geoModule.geometryFeature = function(geom) {
 
   this.setMapper(mapper);
 
-  material = ogs.vgl.utils.createGeometryMaterial();
+  var material;
+  var values = geom.sourceData(vertexAttributeKeys.Scalar);
+  var colors = geom.sourceData(vertexAttributeKeys.Color);
+  if (values) {
+    material = ogs.vgl.utils.createColorMappedMaterial(values.scalarRange());
+  } else if (colors) {
+    material = ogs.vgl.utils.createColorMaterial();
+  } else {
+    material = ogs. vgl.utils.createSolidColorMaterial();
+  }
   this.setMaterial(material);
 
   return this;
@@ -150,10 +159,10 @@ inherit(geoModule.geometryFeature, geoModule.feature);
  * @param {Array}
  * @returns {geoModule.multiGeometryFeature}
  */
-geoModule.multiGeometryFeature = function(geoms) {
+geoModule.multiGeometryFeature = function(geoms, color) {
   "use strict";
   if (!(this instanceof geoModule.multiGeometryFeature)) {
-    return new geoModule.multiGeometryFeature(geoms);
+    return new geoModule.multiGeometryFeature(geoms, color);
   }
 
   ogs.vgl.actor.call(this);
@@ -165,7 +174,12 @@ geoModule.multiGeometryFeature = function(geoms) {
 
   this.setMapper(mapper);
 
-  material = ogs.vgl.utils.createGeometryMaterial();
+  var material;
+  if (!color) {
+    material = ogs.vgl.utils.createGeometryMaterial();
+  } else {
+    material = ogs.vgl.utils.createSolidColorMaterial(color);
+  }
   this.setMaterial(material);
 
   return this;

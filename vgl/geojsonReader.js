@@ -16,6 +16,49 @@ vglModule.geojsonReader = function() {
     return new vglModule.geojsonReader();
   }
 
+  var m_scalarFormat = "none";
+  var m_scalarRange = null;
+
+  /**
+   *
+   */
+  this.readScalars = function(coordinates, geom, size_estimate, idx) {
+    if (this.m_scalarFormat == "values" && coordinates.length==4)
+    {
+      var s = coordinates[3];
+      array = geom.sourceData(vertexAttributeKeys.Scalar);
+      if (!array) {
+        array = new vglModule.sourceDataSf();
+        if (!(size_estimate === undefined)) {
+          array.length = size_estimate
+        }
+        geom.addSource(array);
+      }
+      if (size_estimate === undefined) {
+        array.pushBack(s);
+      } else {
+        array.insertAt(idx, s);
+      }
+    } else if (this.m_scalarFormat == "rgb" && coordinates.length==6) {
+      array = geom.sourceData(vertexAttributeKeys.Color);
+      if (!array) {
+        array = new vglModule.sourceDataC3fv();
+        if (!(size_estimate === undefined)) {
+          array.length = size_estimate*3
+        }
+        geom.addSource(array);
+      }
+      var r = coordinates[3];
+      var g = coordinates[4];
+      var b = coordinates[5];
+      if (size_estimate === undefined) {
+        array.pushBack([r,g,b]);
+      } else {
+        array.insertAt(idx, [r,g,b]);
+      }
+    }
+  }
+
   /**
    *
    */
@@ -24,7 +67,6 @@ vglModule.geojsonReader = function() {
     var vglpoints = new vglModule.points();
     var vglcoords = new vglModule.sourceDataP3fv();
     geom.addSource(vglcoords);
-    var colorarray;
     var indices = new Uint16Array(1);
 
     for (var i = 0; i < 1; i++) {
@@ -40,20 +82,8 @@ vglModule.geojsonReader = function() {
       //console.log("read " + x + "," + y + "," + z);
       vglcoords.pushBack([x,y,z]);
 
-     //attributes
-     //TODO: Learn and follow a convention for this.
-      if (coordinates.length==6) {
-        var r = coordinates[3];
-        var g = coordinates[4];
-        var b = coordinates[5];
-        //console.log("readc " + r + "," + g + "," + b);
-        //if (i == 0)
-        //{
-        colorarray = new vglModule.sourceDataC3fv();
-        geom.addSource(colorarray);
-        //}
-        colorarray.pushBack([r,g,b]);
-      }
+      //attributes
+      this.readScalars(coordinates, geom);
     }
 
     vglpoints.setIndices(indices);
@@ -69,8 +99,12 @@ vglModule.geojsonReader = function() {
     var geom = new vglModule.geometryData();
     var vglpoints = new vglModule.points();
     var vglcoords = new vglModule.sourceDataP3fv();
-    var colorarray;
     var indices = new Uint16Array(coordinates.length);
+    var pntcnt = 0;
+    var estpntcnt = coordinates.length;
+
+    //preallocate with size estimate
+    vglcoords.data().length = estptcnt*3; //x,y,z
 
     for (var i = 0; i < coordinates.length; i++) {
       indices[i] = i;
@@ -83,20 +117,12 @@ vglModule.geojsonReader = function() {
       }
 
       //console.log("read " + x + "," + y + "," + z);
-      vglcoords.pushBack([x,y,z]);
+      vglcoords.insertAt(pntcnt, [x,y,z]);
 
       //attributes
-      //TODO: Learn and follow a convention for this.
-      if (coordinates[i].length==6) {
-        var r = coordinates[i][3];
-        var g = coordinates[i][4];
-        var b = coordinates[i][5];
-        if (i == 0) {
-          colorarray = new vglModule.sourceDataC3fv();
-          geom.addSource(colorarray);
-        }
-        colorarray.pushBack([r,g,b]);
-      }
+      this.readScalars(coordinates[i], geom, estpntcnt, pntcnt)
+
+      pntcnt++;
     }
 
     vglpoints.setIndices(indices);
@@ -114,10 +140,8 @@ vglModule.geojsonReader = function() {
     var vglline = new vglModule.lines();
     vglline.setIndicesPerPrimitive(coordinates.length);
     var vglcoords = new vglModule.sourceDataP3fv();
-    var colorarray = new vglModule.sourceDataC3fv();
     var indices = [];
 
-    // @todo We need color array or somehow the code fails
     for (var i = 0; i < coordinates.length; i++) {
       indices.push(i);
       var x = coordinates[i][0];
@@ -131,23 +155,13 @@ vglModule.geojsonReader = function() {
       vglcoords.pushBack([x,y,z]);
 
       //attributes
-      //TODO: Learn and follow a convention for this.
-      if (coordinates[i].length==6) {
-        var r = coordinates[i][3];
-        var g = coordinates[i][4];
-        var b = coordinates[i][5];
-        colorarray.pushBack([r,g,b]);
-      }
-      else {
-        colorarray.pushBack([1.0, 0.5, 0.0]);
-      }
+      this.readScalars(coordinates[i], geom)
     }
 
     vglline.setIndices(indices);
-    geom.setName("aLineString");
     geom.addPrimitive(vglline);
     geom.addSource(vglcoords);
-    geom.addSource(colorarray);
+    geom.setName("aLineString");
     return geom;
   };
 
@@ -157,8 +171,12 @@ vglModule.geojsonReader = function() {
   this.readMultiLineString = function(coordinates) {
     var geom = new vglModule.geometryData();
     var vglcoords = new vglModule.sourceDataP3fv();
-    var colorarray;
-    var ccount = 0;
+    var pntcnt = 0;
+    var estpntcnt = coordinates.length*2; //lines should be at least 2 verts long, underest OK
+
+    //preallocate with size estimate
+    vglcoords.data().length = estpntcnt*3; //x,y,z
+
     for (var j = 0; j < coordinates.length; j++) {
       var indices = [];
       //console.log("getting line " + j);
@@ -166,7 +184,7 @@ vglModule.geojsonReader = function() {
       var thisLineLength = coordinates[j].length;
       vglline.setIndicesPerPrimitive(thisLineLength);
       for (var i = 0; i < thisLineLength; i++) {
-        indices.push(ccount++);
+        indices.push(pntcnt);
         var x = coordinates[j][i][0];
         var y = coordinates[j][i][1];
         var z = 0.0;
@@ -175,21 +193,12 @@ vglModule.geojsonReader = function() {
         }
 
         //console.log("read " + x + "," + y + "," + z);
-        vglcoords.pushBack([x,y,z]);
+        vglcoords.insertAt(pntcnt, [x,y,z]);
 
         //attributes
-        //TODO: Learn and follow a convention for this.
-        if (coordinates[j][i].length==6) {
-          var r = coordinates[j][i][3];
-          var g = coordinates[j][i][4];
-          var b = coordinates[j][i][5];
-          if (j == 0 && i == 0) {
-            colorarray = new vglModule.sourceDataC3fv();
-            geom.addSource(colorarray);
-          }
-          //console.log("readc " + r + "," + g + "," + b);
-          colorarray.pushBack([r,g,b]);
-        }
+        this.readScalars(coordinates[j][i], geom, estpntcnt*2, pntcnt)
+
+        pntcnt++;
       }
 
       vglline.setIndices(indices);
@@ -210,7 +219,6 @@ vglModule.geojsonReader = function() {
     //TODO: implement ear clipping in VGL instead of this to handle both
     var geom = new vglModule.geometryData();
     var vglcoords = new vglModule.sourceDataP3fv();
-    var colorarray;
 
     var thisPolyLength = coordinates[0].length;
     var vl = 1;
@@ -226,17 +234,7 @@ vglModule.geojsonReader = function() {
       vglcoords.pushBack([x,y,z]);
 
       //attributes
-      //TODO: Learn and follow a convention for this.
-      if (coordinates[0][i].length==6) {
-        var r = coordinates[0][i][3];
-        var g = coordinates[0][i][4];
-        var b = coordinates[0][i][5];
-        if (i == 0) {
-          colorarray = new vglModule.sourceDataC3fv();
-          geom.addSource(colorarray);
-        }
-        colorarray.pushBack([r,g,b]);
-      }
+      this.readScalars(coordinates[0][i], geom)
 
       if (i > 1) {
         //console.log("Cutting new triangle 0,"+ vl+ ","+ i);
@@ -259,11 +257,20 @@ vglModule.geojsonReader = function() {
   this.readMultiPolygon = function(coordinates) {
     var geom = new vglModule.geometryData();
     var vglcoords = new vglModule.sourceDataP3fv();
-    var colorarray;
-
     var ccount = 0;
     var numPolys = coordinates.length;
-    //console.log("NUMPOLYS " + numPolys);
+    var pntcnt = 0;
+    var estpntcnt = numPolys*3;// assume triangles, underest is fine
+
+    //var time1 = new Date().getTime()
+    //var a = 0;
+    //var b = 0;
+    //var c = 0;
+    //var d = 0;
+
+    //preallocate with size estimate
+    vglcoords.data().length = numPolys*3; //x,y,z
+
     for (var j = 0; j < numPolys; j++) {
       //console.log("getting poly " + j);
 
@@ -271,28 +278,24 @@ vglModule.geojsonReader = function() {
       var vf = ccount;
       var vl = ccount+1;
       for (var i = 0; i < thisPolyLength; i++) {
+        //var timea = new Date().getTime()
+
         var x = coordinates[j][0][i][0];
         var y = coordinates[j][0][i][1];
         var z = 0.0;
         if (coordinates[j][0][i].length>2) {
           z = coordinates[j][0][i][2];
         }
-
+        //var timeb = new Date().getTime();
         //console.log("read " + x + "," + y + "," + z);
-        vglcoords.pushBack([x,y,z]);
+
+        vglcoords.insertAt(pntcnt, [x,y,z]);
+        //var timec = new Date().getTime();
 
         //attributes
-        //TODO: Learn and follow a convention for this.
-        if (coordinates[j][0][i].length==6) {
-          var r = coordinates[j][0][i][3];
-          var g = coordinates[j][0][i][4];
-          var b = coordinates[j][0][i][5];
-          if (j == 0 && i == 0) {
-            colorarray = new vglModule.sourceDataC3fv();
-            geom.addSource(colorarray);
-          }
-          colorarray.pushBack([r,g,b]);
-        }
+        this.readScalars(coordinates[j][0][i], geom, estpntcnt, pntcnt)
+        pntcnt++;
+        //var timed = new Date().getTime()
 
         if (i > 1) {
           //console.log("Cutting new triangle "+ vf + "," + vl + "," + ccount);
@@ -303,47 +306,73 @@ vglModule.geojsonReader = function() {
           vl = ccount;
         }
         ccount++;
+        //var timee = new Date().getTime()
+        //a = a + (timeb-timea)
+        //b = b + (timec-timeb)
+        //c = c + (timed-timec)
+        //d = d + (timee-timed)
       }
     }
+    //console.log("NUMPOLYS " + pntcnt);
+    //console.log("RMP: ", a, ",", b, ",", c, ",", d)
+    //var time2 = new Date().getTime()
 
     geom.setName("aMultiPoly");
     geom.addSource(vglcoords);
+    //var time3 = new Date().getTime()
+    //console.log("RMP: ", time2-time1, ",", time3-time2)
+
     return geom;
   };
 
   /**
    *
    */
-  this.readGJObject = function(object) {
-    //TODO: ignoring "crs" and "bbox" and misc meta data on all of these,
-    //best to handle as references into original probably
+  this.readGJObjectInt = function(object) {
     if (!object.hasOwnProperty('type')) {
       //console.log("uh oh, not a geojson object");
     }
+
+    //look for properties type annotation
+    if (object.properties &&
+        object.properties.ScalarFormat &&
+        object.properties.ScalarFormat == "values") {
+      this.m_scalarFormat = "values"
+    }
+    if (object.properties &&
+        object.properties.ScalarFormat &&
+        object.properties.ScalarFormat == "rgb") {
+      this.m_scalarFormat = "rgb";
+    }
+
+    var ret;
+    //TODO: ignoring "crs" and "bbox" and misc meta data on all of these,
+    //best to handle as references into original probably
     var type = object.type;
     switch (type) {
       case "Point":
         //console.log("parsed Point");
-        return this.readPoint(object.coordinates);
+        ret = this.readPoint(object.coordinates);
+        break;
       case "MultiPoint":
         //console.log("parsed MultiPoint");
-        return this.readMultiPoint(object.coordinates);
+        ret = this.readMultiPoint(object.coordinates);
         break;
       case "LineString":
         //console.log("parsed LineString");
-        return this.readLineString(object.coordinates);
+        ret = this.readLineString(object.coordinates);
         break;
       case "MultiLineString":
         //console.log("parsed MultiLineString");
-        return this.readMultiLineString(object.coordinates);
+        ret = this.readMultiLineString(object.coordinates);
         break;
       case "Polygon":
         //console.log("parsed Polygon");
-        return this.readPolygon(object.coordinates);
+        ret = this.readPolygon(object.coordinates);
         break;
       case "MultiPolygon":
         //console.log("parsed MultiPolygon");
-        return this.readMultiPolygon(object.coordinates);
+        ret = this.readMultiPolygon(object.coordinates);
         break;
       case "GeometryCollection":
         //console.log("parsed GeometryCollection");
@@ -352,14 +381,13 @@ vglModule.geojsonReader = function() {
           next = this.readGJObject(object.geometries[i]);
           nextset.push(next);
         }
-        console.log(nextset);
-        return nextset;
+        ret = nextset;
         break;
       case "Feature":
         //console.log("parsed Feature");
-        //TODO: object.properties, object.ids
         next = this.readGJObject(object.geometry);
-        return next;
+        ret = next;
+        break;
       case "FeatureCollection":
         //console.log("parsed FeatureCollection");
         var nextset = [];
@@ -367,11 +395,24 @@ vglModule.geojsonReader = function() {
           next = this.readGJObject(object.features[i]);
           nextset.push(next)
         }
-        return nextset;
+        ret = nextset;
+        break;
       default:
         console.log("Don't understand type " + type);
+        ret = null;
       break;
     }
+    return ret;
+  }
+
+  this.readGJObject = function(object) {
+    //var time1, time2;
+    var ret;
+    //time1 = new Date().getTime()
+    ret = this.readGJObjectInt(object)
+    //time2 = new Date().getTime()
+    //console.log("ELAPSED: ", time2-time1)
+    return ret;
   };
 
   /**
@@ -388,18 +429,35 @@ vglModule.geojsonReader = function() {
    }
  };
 
+ /**
+ *
+ */
+ this.readGeomObject = function(object) {
+    var geom;
+    var geoms = [];
+    geom = this.readGJObject(object);
+    this.linearizeGeoms(geoms, geom);
+    return geoms;
+ }
+
   /**
    *
    */
   this.getPrimitives = function(buffer) {
-    //console.log("PARSING GEOJSON");
+    //console.log("Parsing geoJSON");
     if (!buffer) return [];
+
+    this.m_scalarFormat = "none";
+    this.m_scalarRange = null;
 
     var obj = JSON.parse(buffer);
     var geom = this.readGJObject(obj);
     var geoms = [];
     this.linearizeGeoms(geoms, geom);
-    return geoms;
+
+    return {"geoms":geoms,
+            "scalarFormat":this.m_scalarFormat,
+            "scalarRange":this.m_scalarRange};
   };
 
   return this;
