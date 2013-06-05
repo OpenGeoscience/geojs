@@ -168,23 +168,23 @@ uiModule.gis.createDataList = function(rootId, heading, layersRootId, data, call
     }
 
     // Add 'stream' button
-    col = $(document.createElement('td'));
-    var streamBtn = $(document.createElement('button'));
-    streamBtn.attr('type', 'button');
-    streamBtn.attr('class', 'btn btn-primary');
-    streamBtn.attr('id', 'btn-add-' + item.name);
-    streamBtn.attr('_id', item._id);
-    streamBtn.attr('name', item.name);
-    streamBtn.attr('basename', item.basename);
-    streamBtn.attr('data-toggle', 'button');
-    streamBtn.attr('data-loading-text', 'Loading...');
-    streamBtn.html('Add');
-    col.append(streamBtn);
-    row.append(col);
-
-    streamBtn.click(function(){
-
-    });
+//    col = $(document.createElement('td'));
+//    var streamBtn = $(document.createElement('button'));
+//    streamBtn.attr('type', 'button');
+//    streamBtn.attr('class', 'btn btn-primary');
+//    streamBtn.attr('id', 'btn-add-' + item.name);
+//    streamBtn.attr('_id', item._id);
+//    streamBtn.attr('name', item.name);
+//    streamBtn.attr('basename', item.basename);
+//    streamBtn.attr('data-toggle', 'button');
+//    streamBtn.attr('data-loading-text', 'Loading...');
+//    streamBtn.html('Add');
+//    col.append(streamBtn);
+//    row.append(col);
+//
+//    streamBtn.click(function(){
+//
+//    });
   });
 
   $('.combobox').width(Math.max.apply(Math, $('.combobox').map(function() {
