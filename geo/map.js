@@ -417,8 +417,8 @@ geoModule.map = function(node, options) {
       index = 0;
     }
 
-    // Update every 1 ms
-    var intervalId = setInterval(frame, 10);
+    // Update every 2 ms. Updating every ms might be too much.
+    var intervalId = setInterval(frame, 2);
     function frame() {
       var i = 0;
       if (index < 0) {
