@@ -415,6 +415,11 @@ geoModule.map = function(node, options) {
         for (i = 0; i < layers.length; ++i) {
           layers[i].update(fromTime);
         }
+        $(this).trigger({
+          type: geoModule.command.animateEvent,
+          currentTime: fromTime,
+          endTime: toTime
+        });
         that.prepareForRendering();
         that.redraw();
       }
