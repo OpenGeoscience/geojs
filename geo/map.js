@@ -415,18 +415,17 @@ geoModule.map = function(node, options) {
     var that = this,
         currentTime = timeRange[0],
         endTime = timeRange[timeRange.length],
-        increment = 1,
-        index = 0;
+        index = -1;
 
     if (timeRange.length > 2) {
-      increment = -1;
+      index = 0;
     }
 
     // Update every 1 ms
     var intervalId = setInterval(frame, 10);
     function frame() {
       var i = 0;
-      if (increment > 0) {
+      if (index < 0) {
         ++currentTime;
       } else {
         ++index;
