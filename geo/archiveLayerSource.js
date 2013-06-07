@@ -11,18 +11,27 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
  * archiveLayerSource provides data to a layer
+ *
+ * onError function of the form:
+ *
+ *   function(String errorText)
+ *
+ * It allows the propgation of errors to the caller, so the user
+ * can be provided with the appropriate error message.
  */
 //////////////////////////////////////////////////////////////////////////////
-geoModule.archiveLayerSource = function(name, vars) {
+geoModule.archiveLayerSource = function(name, vars, onError) {
 
   if (!(this instanceof geoModule.archiveLayerSource) ) {
-    return new geoModule.archiveLayerSource(name, vars);
+    return new geoModule.archiveLayerSource(name, vars, onError);
   }
   geoModule.layerSource.call(this);
 
   var m_name = name,
-      m_vars = vars;
-
+      m_vars = vars,
+      m_onError = function(errorString) {};
+      if (onError)
+        m_onError = onError;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -49,11 +58,18 @@ geoModule.archiveLayerSource = function(name, vars) {
       async: asyncVal,
       success: function(response) {
         if (response.error !== null) {
-          console.log("[error] " + response.error ? response.error : "no results returned from server");
+          var errorString = "[error] " + response.error ? response.error : "no results returned from server"
+          console.log(errorString);
+          m_onError(errorString)
         } else {
           var reader = ogs.vgl.geojsonReader();
           retVal = reader.readGJObject(jQuery.parseJSON(response.result.data[0]));
         }
+      },
+      error: function(jqXHR, textStatus, errorThrown ) {
+        errorString = "Error reading " + m_name + ": " + errorThrown;
+        console.log(errorString);
+        m_onError(errorString);
       }
     });
 
@@ -96,11 +112,19 @@ geoModule.archiveLayerSource = function(name, vars) {
       async: asyncVal,
       success: function(response) {
         if (response.error !== null) {
-          console.log("[error] " + response.error ? response.error : "no results returned from server");
+          var errorString = "[error] " + response.error ? response.error : "no results returned from server";
+          console.log(errorString);
+          m_onError(errorString);
         } else {
           // TODO implement this
           return null;
         }
+      },
+      error: function(jqXHR, textStatus, errorThrown ) {
+        errorString = "Error reading timerange for " + m_name + ": " + errorThrown;
+        console.log(errorString);
+        m_onError(errorString);
+
       }
     });
   };
