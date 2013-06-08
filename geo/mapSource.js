@@ -42,7 +42,8 @@ geoModule.mapSource = function(node, options) {
       m_renderer = null,
       m_actors = [],
       m_actors_texture = [],
-      m_tiles = [];
+      m_tiles = [],
+      m_previousZoom = null;
 
   /** @public **/
   var MAP_OSM = 0,
@@ -151,36 +152,6 @@ geoModule.mapSource = function(node, options) {
   };
 
 
-  /**
-   * Initialize Tiles
-   */
-  // this.initTiles = function() {
-  //   // Get node dimensions
-  //   var w = node.width, h = node.height;
-
-  //   // Calculate number of tiles in X and Y
-  //   // Add +1 to round up.. not using ceiling as precaution
-  //   var tilesize = 128;//256;
-  //   var x = Math.round(w/tilesize)+1;
-  //   var y = Math.round(h/tilesize)+1;
-
-  //   for(var i=0; i<x; ++i){
-  //     for(var j=0; j<y; ++j){
-  //       // Calculate Tile Position
-  //       var posx = -(x*tilesize/2) + i*tilesize;
-  //       var posy = -(y*tilesize/2) + j*tilesize;
-  //       // Create Tile Actor and Image
-  //       var actor = ogs.vgl.utils.createTexturePlane(posx, posy,
-  //         0.0, posx+tilesize, posy, 0.0, posx, posy+tilesize, 0.0);
-  //       var tile = new Image();
-  //       tile.actor = actor;
-  //       m_actors.push(actor);
-  //       m_tiles.push(tile);
-  //       m_renderer.addActor(actor);
-  //     }
-  //   }
-  // }
-
   this.hasTile = function(zoom, x, y) {
     if (!m_tiles[zoom]) {
       return false;
@@ -199,16 +170,13 @@ geoModule.mapSource = function(node, options) {
 
 
   this.addTile = function(zoom, x, y) {
+
     // Compute corner points
-    var noOfTilesX = Math.pow(2, zoom);
-    var noOfTilesY = Math.pow(2, zoom);
+    var noOfTilesX = Math.max(1, Math.pow(2, zoom));
+    var noOfTilesY = Math.max(1, Math.pow(2, zoom));
 
     // Conver into mercator
-    var mercatorBound = 85.0511;
-    var totalLatDegrees = (180 / Math.PI) * Math.log(Math.tan(mercatorBound*Math.PI/180) +
-     1/Math.cos(mercatorBound*Math.PI/180));
-    totalLatDegrees *= 2;
-
+    var totalLatDegrees = 360.0; // in mercator
     var lonPerTile = 360.0 / noOfTilesX;
     var latPerTile = totalLatDegrees / noOfTilesY;
 
@@ -217,10 +185,12 @@ geoModule.mapSource = function(node, options) {
     var urx = -180.0 + (x + 1) * lonPerTile;
     var ury = -totalLatDegrees * 0.5 + (y + 1) * latPerTile;
 
-    console.log('llx, lly, urx, ury', llx, lly, urx, ury);
+    // console.log('noOfTilesX, noOfTilesY', noOfTilesX, noOfTilesY);
+    // console.log('x, y', x, y);
+    // console.log('llx, lly, urx, ury', llx, lly, urx, ury);
 
     var actor = ogs.vgl.utils.createTexturePlane(llx, lly,
-      1.0, urx - 1, lly, 1.0, llx, ury - 1, 1.0);
+      1.0, urx, lly, 1.0, llx, ury, 1.0);
     var tile = new Image();
     tile.actor = actor;
 
@@ -239,7 +209,8 @@ geoModule.mapSource = function(node, options) {
     m_tiles[zoom][x][y] = tile;
 
     tile.crossOrigin = 'anonymous';
-    tile.src = "http://tile.openstreetmap.org/" + zoom + "/" + (x) + "/" + (Math.pow(2,zoom) - 1 - y) + ".png";
+    tile.src = "http://tile.openstreetmap.org/" + zoom + "/" + (x)
+      + "/" + (Math.pow(2,zoom) - 1 - y) + ".png";
     tile.texture = new vglModule.texture();
     tile.onload = function() {
       this.texture.updateDimensions();
@@ -251,46 +222,110 @@ geoModule.mapSource = function(node, options) {
     return tile;
   };
 
+
+  this.clearTiles = function() {
+    if (m_previousZoom === null) {
+      m_previousZoom = m_options.zoom;
+      return;
+    }
+
+    if (m_previousZoom === m_options.zoom) {
+      return;
+    }
+
+    if (!m_tiles) {
+      return;
+    }
+
+    // For now just clear the tiles from the last zoom.
+    // TODO Remove tiles if more than threshold
+    var i = null,
+        j = null,
+        k =  null;
+
+    for (i = 0; i < m_tiles.length; ++i) {
+      if (i === m_options.zoom) {
+        continue;
+      }
+
+      if (!m_tiles[i]) {
+        continue;
+      }
+
+      for (j = 0;  j < m_tiles[i].length; ++j) {
+        if (!m_tiles[i][j]) {
+          continue;
+        }
+        for (k = 0;  k < m_tiles[i][j].length; ++k) {
+          if (!m_tiles[i][j][k]) {
+            continue;
+          }
+          m_renderer.removeActor(m_tiles[i][j][k].actor);
+          m_tiles[i][j][k] = null;
+        }
+      }
+    }
+  };
+
   /**
    * Get Texture and Draw the Tiles
    */
   this.drawTiles = function() {
-    var mercatorBound = 85.0511;
-    var totalLatDegrees = (180 / Math.PI) * Math.log(Math.tan(mercatorBound*Math.PI/180) +
-     1/Math.cos(mercatorBound*Math.PI/180));
-    totalLatDegrees *= 2;
+    var camera = m_renderer.camera();
+    // console.log(camera.position()[2]);
 
+    /// Compute the zoom level
+    /// TODO This is HACK!. Come with a better solution
+    if (camera.position()[2] < 600) {
+      m_options.zoom = 3;
+    }
+    if (camera.position()[2] < 200) {
+      m_options.zoom = 4;
+    }
+    if (camera.position()[2] < 100) {
+      m_options.zoom = 5;
+    }
+    if (camera.position()[2] < 50) {
+      m_options.zoom = 6;
+    }
+    if (camera.position()[2] < 25) {
+      m_options.zoom = 7;
+    }
+    if (camera.position()[2] < 15) {
+      m_options.zoom = 8;
+    }
+    if (camera.position()[2] < 5) {
+      m_options.zoom = 9;
+    }
+
+    var totalLatDegrees = 360.0;
     var zoom = m_options.zoom;
-    console.log('zoom', zoom);
+    // console.log('zoom', zoom);
 
     // First get corner points
-    var llx = 0.0;
-    var lly = 0.0;
+    // In display coordinates the origin is on top left corner (0, 0)
+    var llx = 0.0,
+        lly = node.height,
+        urx = node.width,
+        ury = 0.0,
+    // Now convert display point to world point
+        focalPoint = m_renderer.camera().focalPoint(),
+        focusWorldPt = vec4.fromValues(focalPoint[0], focalPoint[1], focalPoint[2], 1),
+        focusDisplayPt = m_renderer.worldToDisplay(focusWorldPt, camera.viewMatrix(),
+          camera.projectionMatrix(), node.width, node.height),
+        displayPt1 = vec4.fromValues(
+          llx, lly, focusDisplayPt[2], 1.0),
+        displayPt2 = vec4.fromValues(
+          urx, ury, focusDisplayPt[2], 1.0),
+        worldPt1 = m_renderer.displayToWorld(
+          displayPt1, camera.viewMatrix(), camera.projectionMatrix(), node.width, node.height),
+        worldPt2 = m_renderer.displayToWorld(
+          displayPt2, camera.viewMatrix(), camera.projectionMatrix(), node.width, node.height);
 
-    var urx = node.width;
-    var ury = node.height;
+    // console.log('worldPt1', worldPt1);
+    // console.log('worldPt2', worldPt2);
 
-    var camera = m_renderer.camera();
-    var focalPoint = m_renderer.camera().focalPoint();
-    var focusWorldPt = vec4.fromValues(focalPoint[0], focalPoint[1], focalPoint[2], 1);
-    var focusDisplayPt = m_renderer.worldToDisplay(focusWorldPt, camera.viewMatrix(),
-      camera.projectionMatrix(), node.width, node.height);
-
-    var displayPt1 = vec4.fromValues(
-      llx, lly, focusDisplayPt[2], 1.0);
-
-    var displayPt2 = vec4.fromValues(
-      urx, ury, focusDisplayPt[2], 1.0);
-
-    var worldPt1 = m_renderer.displayToWorld(
-      displayPt1, camera.viewMatrix(), camera.projectionMatrix(), node.width, node.height);
-
-    var worldPt2 = m_renderer.displayToWorld(
-      displayPt2, camera.viewMatrix(), camera.projectionMatrix(), node.width, node.height);
-
-    console.log('worldPt1', worldPt1);
-    console.log('worldPt2', worldPt2);
-
+    // Clamp world points
     worldPt1[0] = Math.max(worldPt1[0], -180.0);
     worldPt1[0] = Math.min(worldPt1[0],  180.0);
     worldPt1[1] = Math.max(worldPt1[1], -totalLatDegrees * 0.5);
@@ -301,140 +336,43 @@ geoModule.mapSource = function(node, options) {
     worldPt2[1] = Math.max(worldPt2[1], -totalLatDegrees * 0.5);
     worldPt2[1] = Math.min(worldPt2[1],  totalLatDegrees * 0.5);
 
-    // Compute
+    // Compute tilex and tiley
     var tile1x = geoModule.mercator.long2tilex(worldPt1[0], zoom);
     var tile1y = geoModule.mercator.lat2tiley(worldPt1[1], zoom);
 
     var tile2x = geoModule.mercator.long2tilex(worldPt2[0], zoom);
     var tile2y = geoModule.mercator.lat2tiley(worldPt2[1], zoom);
 
-    // Clamp
+    // Clamp tilex and tiley
     tile1x = Math.max(tile1x, 0);
-    tile1x = Math.min(Math.pow(2, zoom), tile1x);
+    tile1x = Math.min(Math.pow(2, zoom) - 1, tile1x);
     tile1y = Math.max(tile1y, 0);
-    tile1y = Math.min(Math.pow(2, zoom), tile1y);
+    tile1y = Math.min(Math.pow(2, zoom) - 1, tile1y);
 
     tile2x = Math.max(tile2x, 0);
-    tile2x = Math.min(Math.pow(2, zoom), tile2x);
+    tile2x = Math.min(Math.pow(2, zoom) - 1, tile2x);
     tile2y = Math.max(tile2y, 0);
-    tile2y = Math.min(Math.pow(2, zoom), tile2y);
+    tile2y = Math.min(Math.pow(2, zoom) - 1, tile2y);
 
-    for (var i = tile1x; i < tile2x; ++i) {
-      for (var j = tile1y; j < tile2y; ++j) {
-        if  (m_that.hasTile(zoom, i, j)) {
+    // TODO Using brute force method to clear out tiles from last zoom
+    m_that.clearTiles();
+
+    var invJ =  null;
+    for (var i = tile1x; i <= tile2x; ++i) {
+      for (var j = tile2y; j <= tile1y; ++j) {
+        invJ = (Math.pow(2,zoom) - 1 - j)
+        if  (m_that.hasTile(zoom, i, invJ)) {
           // Do something here
         } else {
-          var tile = m_that.addTile(zoom, i, j);
+          var tile = m_that.addTile(zoom, i, invJ);
           m_renderer.addActor(tile.actor);
         }
       }
     }
 
     draw();
-
-    // // Clean Textures
-    // m_actors_texture = [];
-
-    // // Get node dimensions
-    // var w = node.width, h = node.height;
-
-    // // Calculate number of tiles in X and Y
-    // // Add +1 to round up.. not using ceiling as precaution
-    // var tilesize = 128;//256;
-    // var x = Math.round(w/tilesize)+1;
-    // var y = Math.round(h/tilesize)+1;
-
-    // //get zoom level
-    // var zoom = m_options.zoom;
-
-    // //calculate number of tiles based on zoom level
-    // // and max number of tiles
-    // var max_tiles = [x, y];
-    // if (zoom === 1) {
-    //   max_tiles = [2, 2];
-    // } else if (zoom === 2) {
-    //   max_tiles = [4, 4];
-    // }
-    // // Inverting Y axis
-    // var inv_y = y;
-    // if (y > max_tiles[1]) {
-    //   inv_y = max_tiles[1];
-    // }
-    // // Max Tiles in the map
-    // var max_tilemap = Math.pow(2, zoom);
-
-    // // Calculate Center Deviation
-    // var cameraPos = m_renderer.camera().position();
-
-    // console.log(cameraPos[0]);
-
-    // var t1 = geoModule.mercator.long2tilex2(cameraPos[0], zoom);
-    // var t2 = geoModule.mercator.lat2tiley2(cameraPos[1], zoom);
-    // var mod_x = t1[0] - x/2;
-    // var mod_y = t2[0] - y/2;
-
-    // // Get Integer part
-    // mod_x = Math.round(mod_x);
-    // mod_y = Math.round(mod_y);
-
-    // // Calculate translation to keep center for the first 3 levels
-    // var npos = [ (x-max_tiles[0])*tilesize/2.0,
-    //              (y-max_tiles[1])*tilesize/2.0,
-    //              0];
-
-    // // Apply fraction of tilex to put latlng in the center
-    // npos[0] -= t1[1]*tilesize;
-    // npos[1] += t2[1]*tilesize;
-
-    // for(var i=0; i<x; ++i){
-    //   for(var j=0; j<y; ++j){
-    //     var actor = m_actors[j+(i*y)];
-    //     var tile = m_tiles[j+(i*y)];
-
-    //     // Will hide the tile actors if its the border of the map
-    //     if (i >= max_tiles[0] || j >= max_tiles[1]
-    //         || (i+mod_x) >= max_tilemap || ((inv_y-1)-j+mod_y) >= max_tilemap
-    //         || i+mod_x < 0 || (inv_y-1)-j+mod_y < 0) {
-    //       actor.setVisible(false);
-
-    //     } else {
-    //       actor.setTranslation(npos[0], npos[1], npos[2]);
-    //       actor.setVisible(true);
-    //       var tileText = new vglModule.texture();
-    //       m_actors_texture.push(tileText);
-    //       tile.texture = tileText;
-    //       //To support Cross Domain request
-    //       tile.crossOrigin = 'anonymous';
-
-    //       var src = "";
-    //       console.log('map type', m_that.m_maptype);
-
-    //       switch (m_that.m_maptype) {
-    //       case MAP_OSM:
-    //         src = "http://tile.openstreetmap.org/" + zoom + "/" + (i+mod_x) + "/" + ((inv_y-1)-j+mod_y) + ".png";
-    //         break;
-    //       case MAP_MQOSM:
-    //         src = "http://otile1.mqcdn.com/tiles/1.0.0/osm/" + zoom + "/" + (i+mod_x) + "/" + ((inv_y-1)-j+mod_y) + ".jpg";
-    //         break;
-    //       case MAP_MQAERIAL:
-    //       default:
-    //         src = "http://otile1.mqcdn.com/tiles/1.0.0/sat/" + zoom + "/" + (i+mod_x) + "/" + ((inv_y-1)-j+mod_y) + ".jpg";
-    //         break;
-    //       }
-    //       tile.src = src;
-
-    //       tile.onload = function() {
-    //         this.texture.updateDimensions();
-    //         this.texture.setImage(this);
-    //         this.actor.material().addAttribute(this.texture);
-    //         draw();
-    //       };
-    //     }
-    //   }
-    // }
   };
 
-  // this.initTiles();
   this.setZoom(3);
   this.drawTiles();
 
@@ -446,7 +384,7 @@ geoModule.mapSource = function(node, options) {
 
   $(m_interactorStyle).on(ogs.vgl.command.leftButtonPressEvent, this.drawTiles);
   $(m_interactorStyle).on(ogs.vgl.command.middleButtonPressEvent, draw);
-  $(m_interactorStyle).on(ogs.vgl.command.rightButtonPressEvent, draw);
+  $(m_interactorStyle).on(ogs.vgl.command.rightButtonPressEvent, this.drawTiles);
   $(this).on(geoModule.command.updateEvent, draw);
 
 

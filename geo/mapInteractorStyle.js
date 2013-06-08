@@ -95,7 +95,7 @@ geoModule.mapInteractorStyle = function() {
       m_camera.pan(-m_dx, -m_dy, -m_dz);
       $(m_that).trigger(vglModule.command.leftButtonPressEvent);
     }
-    if (m_rightMouseButtonDown) {
+    if (m_middileMouseButtonDown) {
       //Limit Rotation to only X, and between 0 to 60
       var xrot = (m_mouseLastPos.y - m_currentMousePos.y);
       var a = m_camera.viewUpDirection();
@@ -104,21 +104,21 @@ geoModule.mapInteractorStyle = function() {
         m_camera.rotate(0, xrot);
       else if (xrot < 0 && angle > 0)
         m_camera.rotate(0, xrot);
-      $(m_that).trigger(vglModule.command.rightButtonPressEvent);
-    }
-    if (m_middileMouseButtonDown) {
-      var difx = m_currentMousePos.x - m_mouseLastPos.x;
-      var dify = m_currentMousePos.y - m_mouseLastPos.y;
-
-      var move = 1.2/Math.pow(2, m_map.options().zoom);
-      var c = m_map.center();
-
-      var n = geoModule.latlng(c.lat()+(move*dify), c.lng()-(move*difx));
-      m_map.setCenter(n);
-
-      //m_zTrans = m_currentMousePos.y - m_mouseLastPos.y;
-      //m_camera.zoom(m_zTrans * 0.5);
       $(m_that).trigger(vglModule.command.middleButtonPressEvent);
+    }
+    if (m_rightMouseButtonDown) {
+      // var difx = m_currentMousePos.x - m_mouseLastPos.x;
+      // var dify = m_currentMousePos.y - m_mouseLastPos.y;
+
+      // var move = 1.2/Math.pow(2, m_map.options().zoom);
+      // var c = m_map.center();
+
+      // var n = geoModule.latlng(c.lat()+(move*dify), c.lng()-(move*difx));
+      // m_map.setCenter(n);
+
+      m_zTrans = m_currentMousePos.y - m_mouseLastPos.y;
+      m_camera.zoom(m_zTrans * 0.5);
+      $(m_that).trigger(vglModule.command.rightButtonPressEvent);
     }
     m_mouseLastPos.x = m_currentMousePos.x;
     m_mouseLastPos.y = m_currentMousePos.y;
