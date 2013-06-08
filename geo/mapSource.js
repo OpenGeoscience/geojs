@@ -203,21 +203,24 @@ geoModule.mapSource = function(node, options) {
     var noOfTilesX = Math.pow(2, zoom);
     var noOfTilesY = Math.pow(2, zoom);
 
-    var lonPerTile = 360.0 / noOfTilesX;
-    var latPerTile = 180.0 / noOfTilesY;
+    // Conver into mercator
+    var mercatorBound = 85.0511;
+    var totalLatDegrees = (180 / Math.PI) * Math.log(Math.tan(mercatorBound*Math.PI/180) +
+     1/Math.cos(mercatorBound*Math.PI/180));
+    totalLatDegrees *= 2;
 
-    // var prevX = Math.max(0.0, x-1);
-    // var prevY = Math.max(0.0, y-1);
+    var lonPerTile = 360.0 / noOfTilesX;
+    var latPerTile = totalLatDegrees / noOfTilesY;
 
     var llx = -180.0 + x * lonPerTile;
-    var lly = -90.0 + y * latPerTile;
+    var lly = -totalLatDegrees * 0.5 + y * latPerTile;
     var urx = -180.0 + (x + 1) * lonPerTile;
-    var ury = -90.0 + (y + 1) * latPerTile;
+    var ury = -totalLatDegrees * 0.5 + (y + 1) * latPerTile;
 
     console.log('llx, lly, urx, ury', llx, lly, urx, ury);
 
     var actor = ogs.vgl.utils.createTexturePlane(llx, lly,
-      1.0, urx, lly, 1.0, llx, ury, 1.0);
+      1.0, urx - 1, lly, 1.0, llx, ury - 1, 1.0);
     var tile = new Image();
     tile.actor = actor;
 
