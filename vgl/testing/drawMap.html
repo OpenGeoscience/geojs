@@ -24,7 +24,7 @@
         };
         var map = ogs.geo.mapSource(node, mapOptions);
 
-        viewer.renderWindow().resize($(node).width(), $(node).height());
+        map.resize($(node).width(), $(node).height());
         renderer = viewer.renderWindow().activeRenderer();
 
         renderer.setBackgroundColor(0.0, 0.0, 0.0, 1.0);

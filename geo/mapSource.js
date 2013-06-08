@@ -528,6 +528,10 @@ geoModule.mapSource = function(node, options) {
    */
   this.resize = function(width, height) {
     m_viewer.renderWindow().resize(width, height);
+    console.log('width', width);
+    console.log('height', height);
+    m_renderer.camera().setParallelProjection(
+      -width * 0.5, width * 0.5, height * 0.5, -height * 0.5);
     $(this).trigger({
       type: geoModule.command.resizeEvent,
       width: width,
