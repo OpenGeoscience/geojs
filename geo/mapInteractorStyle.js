@@ -76,8 +76,7 @@ geoModule.mapInteractorStyle = function() {
     if (m_outsideCanvas === true) {
       return;
     }
-    if (m_middileMouseButtonDown) {
-      /*
+    if (m_leftMouseButtonDown) {
       m_focalPoint = m_camera.focalPoint();
       m_focusWorldPt = vec4.fromValues(m_focalPoint[0], m_focalPoint[1], m_focalPoint[2], 1);
       m_focusDisplayPt = m_renderer.worldToDisplay(m_focusWorldPt, m_camera.viewMatrix(),
@@ -94,8 +93,7 @@ geoModule.mapInteractorStyle = function() {
       m_dy = m_worldPt1[1] - m_worldPt2[1];
       m_dz = m_worldPt1[2] - m_worldPt2[2];
       m_camera.pan(-m_dx, -m_dy, -m_dz);
-     */
-      $(m_that).trigger(vglModule.command.middleButtonPressEvent);
+      $(m_that).trigger(vglModule.command.leftButtonPressEvent);
     }
     if (m_rightMouseButtonDown) {
       //Limit Rotation to only X, and between 0 to 60
@@ -108,7 +106,7 @@ geoModule.mapInteractorStyle = function() {
         m_camera.rotate(0, xrot);
       $(m_that).trigger(vglModule.command.rightButtonPressEvent);
     }
-    if (m_leftMouseButtonDown) {
+    if (m_middileMouseButtonDown) {
       var difx = m_currentMousePos.x - m_mouseLastPos.x;
       var dify = m_currentMousePos.y - m_mouseLastPos.y;
 
@@ -120,7 +118,7 @@ geoModule.mapInteractorStyle = function() {
 
       //m_zTrans = m_currentMousePos.y - m_mouseLastPos.y;
       //m_camera.zoom(m_zTrans * 0.5);
-      $(m_that).trigger(vglModule.command.leftButtonPressEvent);
+      $(m_that).trigger(vglModule.command.middleButtonPressEvent);
     }
     m_mouseLastPos.x = m_currentMousePos.x;
     m_mouseLastPos.y = m_currentMousePos.y;

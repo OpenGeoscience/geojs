@@ -65,7 +65,7 @@ vglModule.camera = function() {
   var m_top = +1.0;
   var m_bottom = -1.0;
 
-  var m_enableParallelProjection = true;
+  var m_enableParallelProjection = false;
 
   /**
    * Get view angle of the camera

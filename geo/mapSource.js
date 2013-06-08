@@ -151,143 +151,322 @@ geoModule.mapSource = function(node, options) {
   };
 
 
-  $(m_interactorStyle).on(ogs.vgl.command.leftButtonPressEvent, draw);
-  $(m_interactorStyle).on(ogs.vgl.command.middleButtonPressEvent, draw);
-  $(m_interactorStyle).on(ogs.vgl.command.rightButtonPressEvent, draw);
-  $(this).on(geoModule.command.updateEvent, draw);
-
-
   /**
    * Initialize Tiles
    */
-  this.initTiles = function() {
-    // Get node dimensions
-    var w = node.width, h = node.height;
+  // this.initTiles = function() {
+  //   // Get node dimensions
+  //   var w = node.width, h = node.height;
 
-    // Calculate number of tiles in X and Y
-    // Add +1 to round up.. not using ceiling as precaution
-    var tilesize = 128;//256;
-    var x = Math.round(w/tilesize)+1;
-    var y = Math.round(h/tilesize)+1;
+  //   // Calculate number of tiles in X and Y
+  //   // Add +1 to round up.. not using ceiling as precaution
+  //   var tilesize = 128;//256;
+  //   var x = Math.round(w/tilesize)+1;
+  //   var y = Math.round(h/tilesize)+1;
 
-    for(var i=0; i<x; ++i){
-      for(var j=0; j<y; ++j){
-        // Calculate Tile Position
-        var posx = -(x*tilesize/2) + i*tilesize;
-        var posy = -(y*tilesize/2) + j*tilesize;
-        // Create Tile Actor and Image
-        var actor = ogs.vgl.utils.createTexturePlane(posx, posy,
-          0.0, posx+tilesize, posy, 0.0, posx, posy+tilesize, 0.0);
-        var tile = new Image();
-        tile.actor = actor;
-        m_actors.push(actor);
-        m_tiles.push(tile);
-        m_renderer.addActor(actor);
-      }
+  //   for(var i=0; i<x; ++i){
+  //     for(var j=0; j<y; ++j){
+  //       // Calculate Tile Position
+  //       var posx = -(x*tilesize/2) + i*tilesize;
+  //       var posy = -(y*tilesize/2) + j*tilesize;
+  //       // Create Tile Actor and Image
+  //       var actor = ogs.vgl.utils.createTexturePlane(posx, posy,
+  //         0.0, posx+tilesize, posy, 0.0, posx, posy+tilesize, 0.0);
+  //       var tile = new Image();
+  //       tile.actor = actor;
+  //       m_actors.push(actor);
+  //       m_tiles.push(tile);
+  //       m_renderer.addActor(actor);
+  //     }
+  //   }
+  // }
+
+  this.hasTile = function(zoom, x, y) {
+    if (!m_tiles[zoom]) {
+      return false;
     }
-  }
+
+    if (!m_tiles[zoom][x]) {
+      return false;
+    }
+
+    if (!m_tiles[zoom][x][y]) {
+      return false;
+    }
+
+    return m_tiles[zoom][x][y];
+  };
+
+
+  this.addTile = function(zoom, x, y) {
+    // Compute corner points
+    var noOfTilesX = Math.pow(2, zoom);
+    var noOfTilesY = Math.pow(2, zoom);
+
+    var lonPerTile = 360.0 / noOfTilesX;
+    var latPerTile = 180.0 / noOfTilesY;
+
+    var prevX = Math.max(0.0, x-1);
+    var prevY = Math.max(0.0, y-1);
+
+    var llx = -180.0 + prevX * lonPerTile;
+    var lly = -90.0 + prevY * latPerTile;
+    var urx = -180.0 + (x + 1) * lonPerTile - 1.0;
+    var ury = -90.0 + (y + 1) * latPerTile - 1.0;
+
+    console.log('llx, lly, urx, ury', llx, lly, urx, ury);
+
+    var actor = ogs.vgl.utils.createTexturePlane(llx, lly,
+      1.0, urx, lly, 1.0, llx, ury, 1.0);
+    var tile = new Image();
+    tile.actor = actor;
+
+    if (!m_tiles[zoom]) {
+      m_tiles[zoom] = [];
+    }
+
+    if (!m_tiles[zoom][x]) {
+      m_tiles[zoom][x] = [];
+    }
+
+    if (!m_tiles[zoom][x][y]) {
+      m_tiles[zoom][x][y] = [];
+    }
+
+    m_tiles[zoom][x][y] = tile;
+
+    tile.crossOrigin = 'anonymous';
+    tile.src = "http://tile.openstreetmap.org/" + zoom + "/" + (x) + "/" + (Math.pow(2,3) - 1 - y) + ".png";
+    tile.texture = new vglModule.texture();
+    tile.onload = function() {
+      console.log('drawing', tile);
+      this.texture.updateDimensions();
+      this.texture.setImage(this);
+      this.actor.material().addAttribute(this.texture);
+      draw();
+    };
+
+    return tile;
+  };
 
   /**
    * Get Texture and Draw the Tiles
    */
   this.drawTiles = function() {
-    // Clean Textures
-    m_actors_texture = [];
+    console.log('drawTiles');
 
-    // Get node dimensions
-    var w = node.width, h = node.height;
+    // First get corner points
+    var llx = 0.0;
+    var lly = 0.0;
 
-    // Calculate number of tiles in X and Y
-    // Add +1 to round up.. not using ceiling as precaution
-    var tilesize = 128;//256;
-    var x = Math.round(w/tilesize)+1;
-    var y = Math.round(h/tilesize)+1;
+    var urx = node.width;
+    var ury = node.height;
 
-    //get zoom level
-    var zoom = m_options.zoom;
+    var camera = m_renderer.camera();
+    var focalPoint = m_renderer.camera().focalPoint();
+    var focusWorldPt = vec4.fromValues(focalPoint[0], focalPoint[1], focalPoint[2], 1);
+    var focusDisplayPt = m_renderer.worldToDisplay(focusWorldPt, camera.viewMatrix(),
+      camera.projectionMatrix(), node.width, node.height);
 
-    //calculate number of tiles based on zoom level
-    // and max number of tiles
-    var max_tiles = [x, y];
-    if (zoom === 1) {
-      max_tiles = [2, 2];
-    } else if (zoom === 2) {
-      max_tiles = [4, 4];
+    var displayPt1 = vec4.fromValues(
+      llx, lly, focusDisplayPt[2], 1.0);
+
+    var displayPt2 = vec4.fromValues(
+      urx, ury, focusDisplayPt[2], 1.0);
+
+    var worldPt1 = m_renderer.displayToWorld(
+      displayPt1, camera.viewMatrix(), camera.projectionMatrix(), node.width, node.height);
+
+    var worldPt2 = m_renderer.displayToWorld(
+      displayPt2, camera.viewMatrix(), camera.projectionMatrix(), node.width, node.height);
+
+    console.log('worldPt1', worldPt1);
+    console.log('worldPt2', worldPt2);
+
+    if (worldPt1[0] < -180.0) {
+      worldPt1[0] = -180.0;
     }
-    // Inverting Y axis
-    var inv_y = y;
-    if (y > max_tiles[1]) {
-      inv_y = max_tiles[1];
+    if (worldPt2[0] < -180.0) {
+      worldPt2[0] = -180.0;
     }
-    // Max Tiles in the map
-    var max_tilemap = Math.pow(2, zoom);
 
-    // Calculate Center Deviation
-    var t1 = geoModule.mercator.long2tilex2(m_options.center.lng(), zoom);
-    var t2 = geoModule.mercator.lat2tiley2(m_options.center.lat(), zoom);
-    var mod_x = t1[0] - x/2;
-    var mod_y = t2[0] - y/2;
+    if (worldPt1[0] > 180.0) {
+      worldPt1[0] = 180.0;
+    }
+    if (worldPt2[0] > 180.0) {
+      worldPt2[0] = 180.0;
+    }
 
-    // Get Integer part
-    mod_x = Math.round(mod_x);
-    mod_y = Math.round(mod_y);
+    if (worldPt1[1] < -90.0) {
+      worldPt1[1] = -90.0;
+    }
+    if (worldPt2[1] < -90.0) {
+      worldPt2[1] = -90.0;
+    }
 
-    // Calculate translation to keep center for the first 3 levels
-    var npos = [ (x-max_tiles[0])*tilesize/2.0,
-                 (y-max_tiles[1])*tilesize/2.0,
-                 0];
+    if (worldPt1[1] > 90.0) {
+      worldPt1[1] = 90.0;
+    }
+    if (worldPt2[1] > 90.0) {
+      worldPt2[1] = 90.0;
+    }
 
-    // Apply fraction of tilex to put latlng in the center
-    npos[0] -= t1[1]*tilesize;
-    npos[1] += t2[1]*tilesize;
+    var tile1x = geoModule.mercator.long2tilex(worldPt1[0], 3);
+    if (tile1x < 0) {
+      tile1x = 0;
+    }
+    if (tile1x > Math.pow(2, 3)) {
+      tile1x = Math.pow(2, 3);
+    }
 
-    for(var i=0; i<x; ++i){
-      for(var j=0; j<y; ++j){
-        var actor = m_actors[j+(i*y)];
-        var tile = m_tiles[j+(i*y)];
+    var tile2x = geoModule.mercator.long2tilex(worldPt2[0], 3);
 
-        // Will hide the tile actors if its the border of the map
-        if (i >= max_tiles[0] || j >= max_tiles[1]
-            || (i+mod_x) >= max_tilemap || ((inv_y-1)-j+mod_y) >= max_tilemap
-            || i+mod_x < 0 || (inv_y-1)-j+mod_y < 0) {
-          actor.setVisible(false);
+    if (tile2x < 0) {
+      tile2x = 0;
+    }
+    if (tile2x > Math.pow(2, 3)) {
+      tile2x = Math.pow(2, 3);
+    }
 
+    console.log(tile1x);
+    console.log(tile2x);
+
+    var tile1y = geoModule.mercator.lat2tiley(worldPt1[1], 3);
+    var tile2y = geoModule.mercator.lat2tiley(worldPt2[1], 3);
+
+    if (tile1y < 0) {
+      tile1y = 0;
+    }
+    if (tile1y > Math.pow(2, 3)) {
+      tile1y = Math.pow(2, 3);
+    }
+
+    if (tile2y < 0) {
+      tile2y = 0;
+    }
+    if (tile2y > Math.pow(2, 3)) {
+      tile2y = Math.pow(2, 3);
+    }
+
+    console.log(tile1y);
+    console.log(tile2y);
+
+    for (var i = tile1x; i < tile2x; ++i) {
+      for (var j = tile1y; j < tile2y; ++j) {
+        if  (m_that.hasTile(3, i, j)) {
+          // Do something here
         } else {
-          actor.setTranslation(npos[0], npos[1], npos[2]);
-          actor.setVisible(true);
-          var tileText = new vglModule.texture();
-          m_actors_texture.push(tileText);
-          tile.texture = tileText;
-          //To support Cross Domain request
-          tile.crossOrigin = 'anonymous';
-
-          var src = "";
-          switch (this.m_maptype) {
-          case MAP_OSM:
-            src = "http://tile.openstreetmap.org/" + zoom + "/" + (i+mod_x) + "/" + ((inv_y-1)-j+mod_y) + ".png";
-            break;
-          case MAP_MQOSM:
-            src = "http://otile1.mqcdn.com/tiles/1.0.0/osm/" + zoom + "/" + (i+mod_x) + "/" + ((inv_y-1)-j+mod_y) + ".jpg";
-            break;
-          case MAP_MQAERIAL:
-          default:
-            src = "http://otile1.mqcdn.com/tiles/1.0.0/sat/" + zoom + "/" + (i+mod_x) + "/" + ((inv_y-1)-j+mod_y) + ".jpg";
-            break;
-          }
-          tile.src = src;
-
-          tile.onload = function() {
-            this.texture.updateDimensions();
-            this.texture.setImage(this);
-            this.actor.material().addAttribute(this.texture);
-            draw();
-          };
+          var tile = m_that.addTile(3, i, j);
+          m_renderer.addActor(tile.actor);
         }
       }
     }
-  }
 
-  this.initTiles();
+    draw();
+
+    // // Clean Textures
+    // m_actors_texture = [];
+
+    // // Get node dimensions
+    // var w = node.width, h = node.height;
+
+    // // Calculate number of tiles in X and Y
+    // // Add +1 to round up.. not using ceiling as precaution
+    // var tilesize = 128;//256;
+    // var x = Math.round(w/tilesize)+1;
+    // var y = Math.round(h/tilesize)+1;
+
+    // //get zoom level
+    // var zoom = m_options.zoom;
+
+    // //calculate number of tiles based on zoom level
+    // // and max number of tiles
+    // var max_tiles = [x, y];
+    // if (zoom === 1) {
+    //   max_tiles = [2, 2];
+    // } else if (zoom === 2) {
+    //   max_tiles = [4, 4];
+    // }
+    // // Inverting Y axis
+    // var inv_y = y;
+    // if (y > max_tiles[1]) {
+    //   inv_y = max_tiles[1];
+    // }
+    // // Max Tiles in the map
+    // var max_tilemap = Math.pow(2, zoom);
+
+    // // Calculate Center Deviation
+    // var cameraPos = m_renderer.camera().position();
+
+    // console.log(cameraPos[0]);
+
+    // var t1 = geoModule.mercator.long2tilex2(cameraPos[0], zoom);
+    // var t2 = geoModule.mercator.lat2tiley2(cameraPos[1], zoom);
+    // var mod_x = t1[0] - x/2;
+    // var mod_y = t2[0] - y/2;
+
+    // // Get Integer part
+    // mod_x = Math.round(mod_x);
+    // mod_y = Math.round(mod_y);
+
+    // // Calculate translation to keep center for the first 3 levels
+    // var npos = [ (x-max_tiles[0])*tilesize/2.0,
+    //              (y-max_tiles[1])*tilesize/2.0,
+    //              0];
+
+    // // Apply fraction of tilex to put latlng in the center
+    // npos[0] -= t1[1]*tilesize;
+    // npos[1] += t2[1]*tilesize;
+
+    // for(var i=0; i<x; ++i){
+    //   for(var j=0; j<y; ++j){
+    //     var actor = m_actors[j+(i*y)];
+    //     var tile = m_tiles[j+(i*y)];
+
+    //     // Will hide the tile actors if its the border of the map
+    //     if (i >= max_tiles[0] || j >= max_tiles[1]
+    //         || (i+mod_x) >= max_tilemap || ((inv_y-1)-j+mod_y) >= max_tilemap
+    //         || i+mod_x < 0 || (inv_y-1)-j+mod_y < 0) {
+    //       actor.setVisible(false);
+
+    //     } else {
+    //       actor.setTranslation(npos[0], npos[1], npos[2]);
+    //       actor.setVisible(true);
+    //       var tileText = new vglModule.texture();
+    //       m_actors_texture.push(tileText);
+    //       tile.texture = tileText;
+    //       //To support Cross Domain request
+    //       tile.crossOrigin = 'anonymous';
+
+    //       var src = "";
+    //       console.log('map type', m_that.m_maptype);
+
+    //       switch (m_that.m_maptype) {
+    //       case MAP_OSM:
+    //         src = "http://tile.openstreetmap.org/" + zoom + "/" + (i+mod_x) + "/" + ((inv_y-1)-j+mod_y) + ".png";
+    //         break;
+    //       case MAP_MQOSM:
+    //         src = "http://otile1.mqcdn.com/tiles/1.0.0/osm/" + zoom + "/" + (i+mod_x) + "/" + ((inv_y-1)-j+mod_y) + ".jpg";
+    //         break;
+    //       case MAP_MQAERIAL:
+    //       default:
+    //         src = "http://otile1.mqcdn.com/tiles/1.0.0/sat/" + zoom + "/" + (i+mod_x) + "/" + ((inv_y-1)-j+mod_y) + ".jpg";
+    //         break;
+    //       }
+    //       tile.src = src;
+
+    //       tile.onload = function() {
+    //         this.texture.updateDimensions();
+    //         this.texture.setImage(this);
+    //         this.actor.material().addAttribute(this.texture);
+    //         draw();
+    //       };
+    //     }
+    //   }
+    // }
+  };
+
+  // this.initTiles();
   this.setZoom(3);
   this.drawTiles();
 
@@ -296,6 +475,12 @@ geoModule.mapSource = function(node, options) {
   document.onmousemove = m_viewer.handleMouseMove;
   document.oncontextmenu = m_viewer.handleContextMenu;
   HTMLCanvasElement.prototype.relMouseCoords = relMouseCoords;
+
+  $(m_interactorStyle).on(ogs.vgl.command.leftButtonPressEvent, this.drawTiles);
+  $(m_interactorStyle).on(ogs.vgl.command.middleButtonPressEvent, draw);
+  $(m_interactorStyle).on(ogs.vgl.command.rightButtonPressEvent, draw);
+  $(this).on(geoModule.command.updateEvent, draw);
+
 
   document.onkeydown = function(evt) {
     var move = 10.0/Math.pow(2, m_options.zoom);
