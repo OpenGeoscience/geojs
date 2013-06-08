@@ -255,7 +255,13 @@ geoModule.mapSource = function(node, options) {
    * Get Texture and Draw the Tiles
    */
   this.drawTiles = function() {
-    console.log('drawTiles');
+    var mercatorBound = 85.0511;
+    var totalLatDegrees = (180 / Math.PI) * Math.log(Math.tan(mercatorBound*Math.PI/180) +
+     1/Math.cos(mercatorBound*Math.PI/180));
+    totalLatDegrees *= 2;
+
+    var zoom = m_options.zoom;
+    console.log('zoom', zoom);
 
     // First get corner points
     var llx = 0.0;
@@ -287,38 +293,38 @@ geoModule.mapSource = function(node, options) {
 
     worldPt1[0] = Math.max(worldPt1[0], -180.0);
     worldPt1[0] = Math.min(worldPt1[0],  180.0);
-    worldPt1[1] = Math.max(worldPt1[1], -90.0);
-    worldPt1[1] = Math.min(worldPt1[1],  90.0);
+    worldPt1[1] = Math.max(worldPt1[1], -totalLatDegrees * 0.5);
+    worldPt1[1] = Math.min(worldPt1[1],  totalLatDegrees * 0.5);
 
     worldPt2[0] = Math.max(worldPt2[0], -180.0);
     worldPt2[0] = Math.min(worldPt2[0],  180.0);
-    worldPt2[1] = Math.max(worldPt2[1], -90.0);
-    worldPt2[1] = Math.min(worldPt2[1],  90.0);
+    worldPt2[1] = Math.max(worldPt2[1], -totalLatDegrees * 0.5);
+    worldPt2[1] = Math.min(worldPt2[1],  totalLatDegrees * 0.5);
 
     // Compute
-    var tile1x = geoModule.mercator.long2tilex(worldPt1[0], 3);
-    var tile1y = geoModule.mercator.lat2tiley(worldPt1[1], 3);
+    var tile1x = geoModule.mercator.long2tilex(worldPt1[0], zoom);
+    var tile1y = geoModule.mercator.lat2tiley(worldPt1[1], zoom);
 
-    var tile2x = geoModule.mercator.long2tilex(worldPt2[0], 3);
-    var tile2y = geoModule.mercator.lat2tiley(worldPt2[1], 3);
+    var tile2x = geoModule.mercator.long2tilex(worldPt2[0], zoom);
+    var tile2y = geoModule.mercator.lat2tiley(worldPt2[1], zoom);
 
     // Clamp
     tile1x = Math.max(tile1x, 0);
-    tile1x = Math.min(Math.pow(2, 3), tile1x);
+    tile1x = Math.min(Math.pow(2, zoom), tile1x);
     tile1y = Math.max(tile1y, 0);
-    tile1y = Math.min(Math.pow(2, 3), tile1y);
+    tile1y = Math.min(Math.pow(2, zoom), tile1y);
 
     tile2x = Math.max(tile2x, 0);
-    tile2x = Math.min(Math.pow(2, 3), tile2x);
+    tile2x = Math.min(Math.pow(2, zoom), tile2x);
     tile2y = Math.max(tile2y, 0);
-    tile2y = Math.min(Math.pow(2, 3), tile2y);
+    tile2y = Math.min(Math.pow(2, zoom), tile2y);
 
     for (var i = tile1x; i < tile2x; ++i) {
       for (var j = tile1y; j < tile2y; ++j) {
-        if  (m_that.hasTile(3, i, j)) {
+        if  (m_that.hasTile(zoom, i, j)) {
           // Do something here
         } else {
-          var tile = m_that.addTile(3, i, j);
+          var tile = m_that.addTile(zoom, i, j);
           m_renderer.addActor(tile.actor);
         }
       }

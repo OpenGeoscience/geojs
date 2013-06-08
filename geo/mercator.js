@@ -37,7 +37,7 @@ geoModule.mercator.long2tilex = function(lon, z) {
  */
 geoModule.mercator.lat2tiley = function(lat, z) {
   var rad = lat * Math.PI/180.0;
-  return Math.round(Math.floor((1.0 - Math.log( Math.tan(rad) + 1.0 / Math.cos(rad)) / Math.PI) / 2.0 * Math.pow(2.0, z)));
+  return Math.round(Math.floor((1.0 - rad / Math.PI) / 2.0 * Math.pow(2.0, z)));
 }
 
 /**
