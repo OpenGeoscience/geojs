@@ -211,8 +211,8 @@ geoModule.mapSource = function(node, options) {
 
     var llx = -180.0 + x * lonPerTile;
     var lly = -90.0 + y * latPerTile;
-    var urx = -180.0 + (x + 1) * lonPerTile - 1.0;
-    var ury = -90.0 + (y + 1) * latPerTile - 1.0;
+    var urx = -180.0 + (x + 1) * lonPerTile;
+    var ury = -90.0 + (y + 1) * latPerTile;
 
     console.log('llx, lly, urx, ury', llx, lly, urx, ury);
 
@@ -282,73 +282,33 @@ geoModule.mapSource = function(node, options) {
     console.log('worldPt1', worldPt1);
     console.log('worldPt2', worldPt2);
 
-    if (worldPt1[0] < -180.0) {
-      worldPt1[0] = -180.0;
-    }
-    if (worldPt2[0] < -180.0) {
-      worldPt2[0] = -180.0;
-    }
+    worldPt1[0] = Math.max(worldPt1[0], -180.0);
+    worldPt1[0] = Math.min(worldPt1[0],  180.0);
+    worldPt1[1] = Math.max(worldPt1[1], -90.0);
+    worldPt1[1] = Math.min(worldPt1[1],  90.0);
 
-    if (worldPt1[0] > 180.0) {
-      worldPt1[0] = 180.0;
-    }
-    if (worldPt2[0] > 180.0) {
-      worldPt2[0] = 180.0;
-    }
+    worldPt2[0] = Math.max(worldPt2[0], -180.0);
+    worldPt2[0] = Math.min(worldPt2[0],  180.0);
+    worldPt2[1] = Math.max(worldPt2[1], -90.0);
+    worldPt2[1] = Math.min(worldPt2[1],  90.0);
 
-    if (worldPt1[1] < -90.0) {
-      worldPt1[1] = -90.0;
-    }
-    if (worldPt2[1] < -90.0) {
-      worldPt2[1] = -90.0;
-    }
-
-    if (worldPt1[1] > 90.0) {
-      worldPt1[1] = 90.0;
-    }
-    if (worldPt2[1] > 90.0) {
-      worldPt2[1] = 90.0;
-    }
-
+    // Compute
     var tile1x = geoModule.mercator.long2tilex(worldPt1[0], 3);
-    if (tile1x < 0) {
-      tile1x = 0;
-    }
-    if (tile1x > Math.pow(2, 3)) {
-      tile1x = Math.pow(2, 3);
-    }
+    var tile1y = geoModule.mercator.lat2tiley(worldPt1[1], 3);
 
     var tile2x = geoModule.mercator.long2tilex(worldPt2[0], 3);
-
-    if (tile2x < 0) {
-      tile2x = 0;
-    }
-    if (tile2x > Math.pow(2, 3)) {
-      tile2x = Math.pow(2, 3);
-    }
-
-    console.log(tile1x);
-    console.log(tile2x);
-
-    var tile1y = geoModule.mercator.lat2tiley(worldPt1[1], 3);
     var tile2y = geoModule.mercator.lat2tiley(worldPt2[1], 3);
 
-    if (tile1y < 0) {
-      tile1y = 0;
-    }
-    if (tile1y > Math.pow(2, 3)) {
-      tile1y = Math.pow(2, 3);
-    }
+    // Clamp
+    tile1x = Math.max(tile1x, 0);
+    tile1x = Math.min(Math.pow(2, 3), tile1x);
+    tile1y = Math.max(tile1y, 0);
+    tile1y = Math.min(Math.pow(2, 3), tile1y);
 
-    if (tile2y < 0) {
-      tile2y = 0;
-    }
-    if (tile2y > Math.pow(2, 3)) {
-      tile2y = Math.pow(2, 3);
-    }
-
-    console.log(tile1y);
-    console.log(tile2y);
+    tile2x = Math.max(tile2x, 0);
+    tile2x = Math.min(Math.pow(2, 3), tile2x);
+    tile2y = Math.max(tile2y, 0);
+    tile2y = Math.min(Math.pow(2, 3), tile2y);
 
     for (var i = tile1x; i < tile2x; ++i) {
       for (var j = tile1y; j < tile2y; ++j) {
