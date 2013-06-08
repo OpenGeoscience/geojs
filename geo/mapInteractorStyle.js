@@ -3,7 +3,7 @@
  */
 
 /*jslint devel: true, forin: true, newcap: true, plusplus: true, white: true, indent: 2*/
-/*global geoModule, geoModule, ogs, inherit, vec4, $*/
+/*global geoModule, vglModule, ogs, inherit, vec4, $*/
 
 /**
  * Create a new instance of mapInteractorStyle
@@ -20,7 +20,7 @@ geoModule.mapInteractorStyle = function() {
   var m_that = this,
       m_leftMouseButtonDown = false,
       m_rightMouseButtonDown = false,
-      m_middleMouseButtonDown = false,
+      m_middileMouseButtonDown = false,
       m_width,
       m_height,
       m_renderer,
@@ -35,6 +35,7 @@ geoModule.mapInteractorStyle = function() {
       m_displayPt2,
       m_worldPt1,
       m_worldPt2,
+      m_map,
       m_dx,
       m_dy,
       m_dz,
@@ -43,7 +44,7 @@ geoModule.mapInteractorStyle = function() {
         x: 0,
         y: 0
       };
-
+  var m_picker = new ogs.vgl.picker();
 
   this.handleMouseMove = function(event) {
     var canvas = m_that.viewer().canvas();
@@ -75,7 +76,8 @@ geoModule.mapInteractorStyle = function() {
     if (m_outsideCanvas === true) {
       return;
     }
-    if (m_middleMouseButtonDown) {
+    if (m_middileMouseButtonDown) {
+      /*
       m_focalPoint = m_camera.focalPoint();
       m_focusWorldPt = vec4.fromValues(m_focalPoint[0], m_focalPoint[1], m_focalPoint[2], 1);
       m_focusDisplayPt = m_renderer.worldToDisplay(m_focusWorldPt, m_camera.viewMatrix(),
@@ -92,12 +94,33 @@ geoModule.mapInteractorStyle = function() {
       m_dy = m_worldPt1[1] - m_worldPt2[1];
       m_dz = m_worldPt1[2] - m_worldPt2[2];
       m_camera.pan(-m_dx, -m_dy, -m_dz);
-      $(m_that).trigger(ogs.vgl.command.middleButtonPressEvent);
+     */
+      $(m_that).trigger(vglModule.command.middleButtonPressEvent);
     }
     if (m_rightMouseButtonDown) {
-      m_zTrans = m_currentMousePos.y - m_mouseLastPos.y;
-      m_camera.zoom(m_zTrans * 0.5);
-      $(m_that).trigger(ogs.vgl.command.rightButtonPressEvent);
+      //Limit Rotation to only X, and between 0 to 60
+      var xrot = (m_mouseLastPos.y - m_currentMousePos.y);
+      var a = m_camera.viewUpDirection();
+      var angle = Math.atan2(a[2],a[1])*180/Math.PI;
+      if (xrot > 0 && angle < 60)
+        m_camera.rotate(0, xrot);
+      else if (xrot < 0 && angle > 0)
+        m_camera.rotate(0, xrot);
+      $(m_that).trigger(vglModule.command.rightButtonPressEvent);
+    }
+    if (m_leftMouseButtonDown) {
+      var difx = m_currentMousePos.x - m_mouseLastPos.x;
+      var dify = m_currentMousePos.y - m_mouseLastPos.y;
+
+      var move = 1.2/Math.pow(2, m_map.options().zoom);
+      var c = m_map.center();
+
+      var n = geoModule.latlng(c.lat()+(move*dify), c.lng()-(move*difx));
+      m_map.setCenter(n);
+
+      //m_zTrans = m_currentMousePos.y - m_mouseLastPos.y;
+      //m_camera.zoom(m_zTrans * 0.5);
+      $(m_that).trigger(vglModule.command.leftButtonPressEvent);
     }
     m_mouseLastPos.x = m_currentMousePos.x;
     m_mouseLastPos.y = m_currentMousePos.y;
@@ -116,7 +139,7 @@ geoModule.mapInteractorStyle = function() {
       m_leftMouseButtonDown = true;
     }
     if (event.button === 1) {
-      m_middleMouseButtonDown = true;
+      m_middileMouseButtonDown = true;
     }
     if (event.button === 2) {
       m_rightMouseButtonDown = true;
@@ -147,9 +170,15 @@ geoModule.mapInteractorStyle = function() {
     }
     if (event.button === 0) {
       m_leftMouseButtonDown = false;
+      var width = m_that.viewer().renderWindow().windowSize()[0];
+      var height = m_that.viewer().renderWindow().windowSize()[1];
+      var renderer = m_that.viewer().renderWindow().activeRenderer();
+      if(m_mouseLastPos.x >= 0 && m_mouseLastPos.x <= width && m_mouseLastPos.y >= 0 && m_mouseLastPos.y <= height){
+        var num = m_picker.pick(m_mouseLastPos.x, m_mouseLastPos.y, renderer);
+      }
     }
     if (event.button === 1) {
-      m_middleMouseButtonDown = false;
+      m_middileMouseButtonDown = false;
     }
     if (event.button === 2) {
       m_rightMouseButtonDown = false;
@@ -158,11 +187,16 @@ geoModule.mapInteractorStyle = function() {
   };
 
 
+  this.setMap = function(map) {
+    m_map = map;
+  }
+
   this.zoom = function(options, useCurrent) {
     var m_renderer, m_camera, distance, currPosition;
     m_renderer = m_that.viewer().renderWindow().activeRenderer();
     m_camera = m_renderer.camera();
-    distance = 600 - (600 - (60 * options.zoom)) + 1;
+    distance = 600;
+    distance = 1100 - (600 - (60 * options.zoom)) + 1;
     if (useCurrent === undefined || useCurrent === false) {
       m_camera.setPosition(options.center.lng(), options.center.lat(), distance);
       m_camera.setFocalPoint(options.center.lng(), options.center.lat(), 0.0);

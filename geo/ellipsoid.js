@@ -3,7 +3,7 @@
  */
 
 /*jslint devel: true, forin: true, newcap: true, plusplus: true, white: true, indent: 2*/
-/*global geoModule, ogs, inherit*/
+/*global geoModule, ogs, inherit, vec3*/
 
 /**
  * Create an instance of quadratic surface generator
@@ -129,38 +129,39 @@ geoModule.ellipsoid = function(x, y, z) {
    * Converts the provided geographic latitude, longitude,
    * and height to WGS84 coordinate system
    *
-   * @param {vglModule.geometryData} geom
+   * @param {ogs.vgl.geometryData} geom
    */
   this.transformGeometry = function(geom) {
     if (!geom) {
       throw '[error] Failed to transform to cartesian. Invalid geometry.';
     }
 
-    var sourceData = geom.sourceData(vglModule.vertexAttributeKeys.Position),
+    var sourceData = geom.sourceData(ogs.vgl.vertexAttributeKeys.Position),
         sourceDataArray = sourceData.data(),
         noOfComponents =  sourceData.attributeNumberOfComponents(
-          vglModule.vertexAttributeKeys.Position),
+          ogs.vgl.vertexAttributeKeys.Position),
         stride = sourceData.attributeStride(
-          vglModule.vertexAttributeKeys.Position),
+          ogs.vgl.vertexAttributeKeys.Position),
         offset = sourceData.attributeOffset(
-          vglModule.vertexAttributeKeys.Position),
+          ogs.vgl.vertexAttributeKeys.Position),
         sizeOfDataType = sourceData.sizeOfAttributeDataType(
-          vglModule.vertexAttributeKeys.Position),
+          ogs.vgl.vertexAttributeKeys.Position),
         index = null,
         count = sourceDataArray.length * (1.0 / noOfComponents),
         gamma = null,
         n = null,
+        j = 0,
         k = vec3.create(),
         result = vec3.create();
 
     stride /= sizeOfDataType;
     offset /= sizeOfDataType;
 
-    if (noOfComponents != 3) {
+    if (noOfComponents !== 3) {
       throw ('[error] Requires positions with three components');
     }
 
-    for (var j = 0; j < count; ++j) {
+    for (j = 0; j < count; ++j) {
       index = j * stride + offset;
 
       sourceDataArray[index] = sourceDataArray[index] * (Math.PI / 180.0);

@@ -321,7 +321,7 @@ geoModule.map = function(node, options) {
       // Load countries data first
       reader = ogs.vgl.geojsonReader();
       geoms = reader.readGJObject(ogs.geo.countries);
-      //todo if opacity is on layer, solid color should be too
+      // @todo if opacity is on layer, solid color should be too
       layer = ogs.geo.featureLayer({
         "opacity": 1,
         "showAttribution": 1,
