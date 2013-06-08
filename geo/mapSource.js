@@ -206,11 +206,11 @@ geoModule.mapSource = function(node, options) {
     var lonPerTile = 360.0 / noOfTilesX;
     var latPerTile = 180.0 / noOfTilesY;
 
-    var prevX = Math.max(0.0, x-1);
-    var prevY = Math.max(0.0, y-1);
+    // var prevX = Math.max(0.0, x-1);
+    // var prevY = Math.max(0.0, y-1);
 
-    var llx = -180.0 + prevX * lonPerTile;
-    var lly = -90.0 + prevY * latPerTile;
+    var llx = -180.0 + x * lonPerTile;
+    var lly = -90.0 + y * latPerTile;
     var urx = -180.0 + (x + 1) * lonPerTile - 1.0;
     var ury = -90.0 + (y + 1) * latPerTile - 1.0;
 
