@@ -236,10 +236,9 @@ geoModule.mapSource = function(node, options) {
     m_tiles[zoom][x][y] = tile;
 
     tile.crossOrigin = 'anonymous';
-    tile.src = "http://tile.openstreetmap.org/" + zoom + "/" + (x) + "/" + (Math.pow(2,3) - 1 - y) + ".png";
+    tile.src = "http://tile.openstreetmap.org/" + zoom + "/" + (x) + "/" + (Math.pow(2,zoom) - 1 - y) + ".png";
     tile.texture = new vglModule.texture();
     tile.onload = function() {
-      console.log('drawing', tile);
       this.texture.updateDimensions();
       this.texture.setImage(this);
       this.actor.material().addAttribute(this.texture);
