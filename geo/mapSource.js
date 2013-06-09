@@ -357,7 +357,8 @@ geoModule.mapSource = function(node, options) {
     // TODO Using brute force method to clear out tiles from last zoom
     m_that.clearTiles();
 
-    var invJ =  null;
+    var invJ =  null,
+        changed = false;
     for (var i = tile1x; i <= tile2x; ++i) {
       for (var j = tile2y; j <= tile1y; ++j) {
         invJ = (Math.pow(2,zoom) - 1 - j)
@@ -366,7 +367,12 @@ geoModule.mapSource = function(node, options) {
         } else {
           var tile = m_that.addTile(zoom, i, invJ);
           m_renderer.addActor(tile.actor);
+          changed = true;
         }
+      }
+      if (changed) {
+        draw();
+        changed = false;
       }
     }
 
