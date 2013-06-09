@@ -43,6 +43,7 @@ geoModule.mapSource = function(node, options) {
       m_actors = [],
       m_actors_texture = [],
       m_tiles = [],
+      m_deleteTiles = [],
       m_previousZoom = null;
 
   /** @public **/
@@ -202,10 +203,6 @@ geoModule.mapSource = function(node, options) {
       m_tiles[zoom][x] = [];
     }
 
-    if (!m_tiles[zoom][x][y]) {
-      m_tiles[zoom][x][y] = [];
-    }
-
     m_tiles[zoom][x][y] = tile;
 
     tile.crossOrigin = 'anonymous';
@@ -216,10 +213,22 @@ geoModule.mapSource = function(node, options) {
       this.texture.updateDimensions();
       this.texture.setImage(this);
       this.actor.material().addAttribute(this.texture);
+      m_renderer.addActor(this.actor);
       draw();
     };
 
     return tile;
+  };
+
+  this.removeTiles = function() {
+    var i = 0;
+
+    for (i = 0; i < m_deleteTiles.length; ++i) {
+      console.log('removing actor', m_deleteTiles[i].actor);
+      m_renderer.removeActor(m_deleteTiles[i].actor);
+    }
+    m_deleteTiles = [];
+    draw();
   };
 
 
@@ -244,11 +253,11 @@ geoModule.mapSource = function(node, options) {
         k =  null;
 
     for (i = 0; i < m_tiles.length; ++i) {
-      if (i === m_options.zoom) {
+      if (!m_tiles[i]) {
         continue;
       }
 
-      if (!m_tiles[i]) {
+      if (i === m_options.zoom) {
         continue;
       }
 
@@ -260,8 +269,19 @@ geoModule.mapSource = function(node, options) {
           if (!m_tiles[i][j][k]) {
             continue;
           }
-          m_renderer.removeActor(m_tiles[i][j][k].actor);
+
+          if (!m_tiles[i][j][k].actor) {
+            continue;
+          }
+
+          if (m_tiles[i][j][k].REMOVED) {
+            continue;
+          }
+
+          m_tiles[i][j][k].REMOVED = true;
+          m_deleteTiles.push(m_tiles[i][j][k]);
           m_tiles[i][j][k] = null;
+          // m_renderer.removeActor(m_tiles[i][j][k].actor);
         }
       }
     }
@@ -357,8 +377,7 @@ geoModule.mapSource = function(node, options) {
     // TODO Using brute force method to clear out tiles from last zoom
     m_that.clearTiles();
 
-    var invJ =  null,
-        changed = false;
+    var invJ =  null;
     for (var i = tile1x; i <= tile2x; ++i) {
       for (var j = tile2y; j <= tile1y; ++j) {
         invJ = (Math.pow(2,zoom) - 1 - j)
@@ -366,17 +385,12 @@ geoModule.mapSource = function(node, options) {
           // Do something here
         } else {
           var tile = m_that.addTile(zoom, i, invJ);
-          m_renderer.addActor(tile.actor);
-          changed = true;
         }
-      }
-      if (changed) {
-        draw();
-        changed = false;
       }
     }
 
     draw();
+    setTimeout(function(){m_that.removeTiles();}, 1000);
   };
 
   this.setZoom(3);
