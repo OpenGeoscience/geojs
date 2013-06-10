@@ -69,7 +69,9 @@ vglModule.viewer = function(canvas) {
   this.handleMouseDown = function(event) {
     if (m_ready === true) {
       var fixedEvent = $.event.fix(event || window.event);
-      fixedEvent.preventDefault();
+      // Only prevent default action for right mouse button
+      if (event.button == 2)
+        fixedEvent.preventDefault();
       fixedEvent.state = 'down';
       fixedEvent.type = vglModule.command.mousePressEvent;
       $(m_that).trigger(fixedEvent);
