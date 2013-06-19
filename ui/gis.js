@@ -201,7 +201,7 @@ uiModule.gis.createDataList = function(rootId, heading, layersRootId, data, call
  * @param layersRootId
  * @param elem
  */
-uiModule.gis.addLayer = function(object, layersRootId, elem, selectfunc, togglefunc, removefunc, callback) {
+uiModule.gis.addLayer = function(object, layersRootId, elem, selectfunc, togglefunc, removefunc, workflowfunc, callback) {
   "use strict";
   var rootId, tbody, basename, layerId, tr, td, button, _id;
   rootId = "#" + layersRootId;
@@ -251,6 +251,16 @@ uiModule.gis.addLayer = function(object, layersRootId, elem, selectfunc, togglef
     button.html('Remove');
     button.click(layerId, function() {
       removefunc(this, layerId);
+    });
+    td.append(button);
+
+    // Workflow button
+    button = $(document.createElement('button'));
+    button.attr('class', 'btn-layer btn-workflow-layer btn btn-info disabled');
+    button.attr('disabled', 'disabled');
+    button.html('Workflow');
+    button.click(layerId, function() {
+      workflowfunc(this, layerId);
     });
     td.append(button);
     tr.append(td);
