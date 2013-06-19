@@ -52,6 +52,15 @@ vglModule.groupNode = function() {
     }
   };
 
+  this.removeChildren = function() {
+    var i = null;
+    for (i = 0; i < m_children.length; ++i) {
+      this.removeChild(m_children[i]);
+    }
+
+    this.modified();
+  };
+
   this.children = function() {
     return m_children;
   };

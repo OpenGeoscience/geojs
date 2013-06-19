@@ -37,9 +37,15 @@ geoModule.map = function(node, options) {
       m_options = options,
       m_layers = {},
       m_activeLayer = null,
+      m_layersCurrentDrawables = geoModule.layerFeatures(),
+      m_layersPreviousDrawables = geoModule.layerFeatures(),
+      m_renderTime = ogs.vgl.timestamp(),
+      m_previousLayerDrawablesTime = ogs.vgl.timestamp(),
       m_interactorStyle = null,
       m_viewer = null,
       m_renderer = null;
+
+  m_renderTime.modified();
 
   if (!options.center) {
     m_options.center = geoModule.latlng(0.0, 0.0);
@@ -94,9 +100,9 @@ geoModule.map = function(node, options) {
   // TODO use zoom and center options
   m_baseLayer = (function() {
     var mapActor, worldImage, worldTexture;
-    mapActor = ogs.vgl.utils.createTexturePlane(-180.0, -90.0, 0.0,
-                                                 180.0, -90.0, 0.0,
-                                                -180.0, 90.0, 0.0);
+    mapActor = ogs.vgl.utils.createTexturePlane(-180.0, -90.0, -1.0,
+                                                 180.0, -90.0, -1.0,
+                                                -180.0, 90.0, -1.0);
     // Setup texture
     worldImage = new Image();
     worldImage.src = m_options.source;
@@ -161,11 +167,19 @@ geoModule.map = function(node, options) {
   this.addLayer = function(layer) {
     if (layer !== null) {
       // TODO Check if the layer already exists
-      // TODO Set the rendering order correctly
-      m_renderer.addActor(layer.feature());
+      if (!layer.binNumber() || layer.binNumber() === -1) {
+        layer.setBinNumber(Object.keys(m_layers).length);
+      }
+
       m_layers[layer.name()] = layer;
-      m_viewer.render();
+      this.prepareForRendering();
       this.modified();
+
+      // TODO Remove this
+      if (layer.name() == 'clt') {
+        var layers = [m_layers[layer.name()]];
+        this.animate([0, 119], layers);
+      }
 
       $(this).trigger({
         type: geoModule.command.addLayerEvent,
@@ -312,9 +326,11 @@ geoModule.map = function(node, options) {
         "opacity": 1,
         "showAttribution": 1,
         "visible": 1
-      }, ogs.geo.multiGeometryFeature(geoms, [1.0,0.5,0.0]));
+      }, ogs.geo.multiGeometryFeature(geoms, [1.0,0.5, 0.0]));
 
       layer.setName('country-boundaries');
+      // Use a very high bin number to always draw it last
+      layer.setBinNumber(10000);
       this.addLayer(layer);
       return layer.visible();
     }
@@ -327,6 +343,106 @@ geoModule.map = function(node, options) {
    */
   this.toggleStateBoundaries = function() {
     // @todo Implement this
+  };
+
+  /**
+   * Prepare map for rendering
+   */
+  this.prepareForRendering = function() {
+    var i = 0,
+        layerName = 0,
+        sortedActors = [];
+
+    for (layerName in m_layers) {
+      if (m_layers.hasOwnProperty(layerName)) {
+        m_layers[layerName].prepareForRendering(m_layersCurrentDrawables);
+      }
+    }
+
+    if (m_layersCurrentDrawables.getMTime() >
+        m_previousLayerDrawablesTime.getMTime()) {
+
+      // Clear features from all layers except the baseone
+      if (m_layersPreviousDrawables) {
+        for (layerName in m_layers) {
+          if (m_layers[layerName] !== m_baseLayer) {
+            if (m_layersPreviousDrawables.isEmpty()) {
+              continue;
+            }
+            m_renderer.removeActors(
+              m_layersPreviousDrawables.features(layerName));
+          }
+        }
+      }
+
+      // Sort actors by layer bin number
+      for (layerName in m_layers) {
+        sortedActors.push([m_layers[layerName].binNumber(),
+          m_layersCurrentDrawables.features(layerName)]);
+      }
+
+      // console.log('sorted actors are', sortedActors);
+      sortedActors.sort(function(a, b) {return a[0] - b[0]});
+
+      // Add actors to renderer in sorted order
+      for (i = 0; i < sortedActors.length; ++i) {
+        m_renderer.addActors(sortedActors[i][1]);
+      }
+
+      m_layersCurrentDrawables.clone(m_layersPreviousDrawables);
+      m_previousLayerDrawablesTime.modified();
+    }
+  };
+
+  /**
+   * Animate layers of a map
+   */
+  this.animate = function(timeRange, layers) {
+    if (!timeRange) {
+      console.log('[error] Invalid time range');
+      return;
+    }
+
+    if (timeRange.length < 2) {
+      console.log('[error] Invalid time range. Requires atleast begin and end time');
+      return;
+    }
+
+    var that = this,
+        currentTime = timeRange[0],
+        endTime = timeRange[timeRange.length - 1],
+        index = -1;
+
+    if (timeRange.length > 2) {
+      index = 0;
+    }
+
+    // Update every 2 ms. Updating every ms might be too much.
+    var intervalId = setInterval(frame, 2);
+    function frame() {
+      var i = 0;
+      if (index < 0) {
+        ++currentTime;
+      } else {
+        ++index;
+        currentTime = timeRange[index];
+      }
+
+      if (currentTime > endTime || index > timeRange.length) {
+        clearInterval(intervalId);
+      } else {
+        for (i = 0; i < layers.length; ++i) {
+          layers[i].update(currentTime);
+        }
+        $(this).trigger({
+          type: geoModule.command.animateEvent,
+          currentTime: currentTime,
+          endTime: endTime
+        });
+        that.prepareForRendering();
+        that.redraw();
+      }
+    }
   };
 
   // Check if need to show country boundaries

@@ -27,6 +27,7 @@ inherit(geoModule.command, ogs.vgl.command);
  * Event types
  */
 geoModule.command.updateEvent = "updateEvent";
+geoModule.command.updateLayerOpacityEvent = "updateLayerOpacityEvent";
 geoModule.command.addLayerEvent = "addLayerEvent";
 geoModule.command.removeLayerEvent = "removeLayerEvent";
 geoModule.command.toggleLayerEvent = "toggleLayerEvent";
@@ -34,3 +35,4 @@ geoModule.command.selectLayerEvent = "selectLayerEvent";
 geoModule.command.unselectLayerEvent = "unselectLayerEvent";
 geoModule.command.updateZoomEvent = "updateZoomEvent";
 geoModule.command.resizeEvent = "resizeEvent";
+geoModule.command.animateEvent = "animateEvent";

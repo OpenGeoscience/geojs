@@ -29,7 +29,7 @@ vglModule.renderer = function() {
   vglModule.object.call(this);
 
   /** @private */
-  var m_backgroundColor = [1.0, 1.0, 1.0, 1.0];
+  var m_backgroundColor = [0.0, 0.0, 0.0, 1.0];
 
   /** @private */
   var m_sceneRoot = new vglModule.groupNode();
@@ -290,6 +290,19 @@ vglModule.renderer = function() {
   };
 
   /**
+   * Add an array of actors to the collection
+   */
+  this.addActors = function(actors) {
+    var i = null
+    if (actors instanceof Array) {
+      for (i = 0; i < actors.length; ++i) {
+        m_sceneRoot.addChild(actors[i]);
+      }
+      this.modified();
+    }
+  };
+
+  /**
    * Remove the actor from the collection
    */
   this.removeActor = function(actor) {
@@ -301,6 +314,29 @@ vglModule.renderer = function() {
 
     return false;
   };
+
+  /**
+   * Remove actors from the collection
+   */
+  this.removeActors = function(actors) {
+    if (!(actors instanceof Array)) {
+      return false;
+    }
+
+    var i = null;
+    for (i = 0; i < actors.length; ++i) {
+      m_sceneRoot.removeChild(actors[i]);
+    }
+    this.modified();
+    return true;
+  };
+
+  /**
+   * Remove all actors for a renderer
+   */
+  this.removeAllActors = function() {
+    m_sceneRoot.removeChildren();
+  }
 
   /**
    * Transform a point in the world space to display space
