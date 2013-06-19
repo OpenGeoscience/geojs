@@ -115,10 +115,10 @@ geoModule.map = function(node, options) {
     };
 
     m_renderer.addActor(mapActor);
-    document.onmousedown = m_viewer.handleMouseDown;
-    document.onmouseup = m_viewer.handleMouseUp;
-    document.onmousemove = m_viewer.handleMouseMove;
-    document.oncontextmenu = m_viewer.handleContextMenu;
+    m_viewer.canvas().onmousedown = m_viewer.handleMouseDown;
+    m_viewer.canvas().onmouseup = m_viewer.handleMouseUp;
+    m_viewer.canvas().onmousemove = m_viewer.handleMouseMove;
+    m_viewer.canvas().oncontextmenu = m_viewer.handleContextMenu;
     HTMLCanvasElement.prototype.relMouseCoords = m_viewer.relMouseCoords;
 
     return mapActor;
