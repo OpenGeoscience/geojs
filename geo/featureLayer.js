@@ -198,8 +198,8 @@ geoModule.featureLayer = function(options, feature) {
     }
 
     var featureCollection = request.featureCollection();
-    featureCollection.setNewFeatures(this.name(), m_newFeatures);
-    featureCollection.setExpiredFeatures(this.name(), m_expiredFeatures);
+    featureCollection.setNewFeatures(this.id(), m_newFeatures);
+    featureCollection.setExpiredFeatures(this.id(), m_expiredFeatures);
 
     m_predrawTime.modified();
   };

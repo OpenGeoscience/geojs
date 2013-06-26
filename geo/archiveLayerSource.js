@@ -32,7 +32,7 @@ geoModule.archiveLayerSource = function(name, vars, onError) {
 
   var m_name = name,
       m_vars = vars,
-      m_time = null,
+      m_time = -1,
       m_onError = function(errorString) {};
 
   if (onError) {
@@ -78,7 +78,7 @@ geoModule.archiveLayerSource = function(name, vars, onError) {
       data: {
         expr: name,
         vars: JSON.stringify(vars),
-        time: time
+        time: JSON.stringify(time)
       },
       dataType: 'json',
       async: asyncVal,
@@ -111,7 +111,7 @@ geoModule.archiveLayerSource = function(name, vars, onError) {
    * Return metadata related to data
    */
    ////////////////////////////////////////////////////////////////////////////
-  this.getMetaData = function() {
+  this.getMetaData = function(time) {
   };
 
   ////////////////////////////////////////////////////////////////////////////
