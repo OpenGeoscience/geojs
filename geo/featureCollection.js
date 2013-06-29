@@ -102,7 +102,9 @@ geoModule.featureCollection = function() {
   ////////////////////////////////////////////////////////////////////////////
   this.isEmpty = function() {
     // ECMAScript 5 supports the syntax below
-    return Object.keys(m_newFeaturesMap).length === 0;
+    return
+      (Object.keys(m_newFeaturesMap).length === 0 &&
+       Object.keys(m_expiredFeaturesMap).length === 0) ;
   };
 };
 
