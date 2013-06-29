@@ -256,7 +256,7 @@ geoModule.layer = function(options, source) {
    * Prepare layer for rendering
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.prepareForRendering = function(layersDrawables) {
+  this.prepareForRendering = function(featureCollection) {
     // Concrete class should implement this
   };
 
