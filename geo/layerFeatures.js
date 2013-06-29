@@ -24,29 +24,55 @@ geoModule.layerFeatures = function() {
   ogs.vgl.object.call(this);
 
   var m_layerFeaturesMap = {};
+  var m_layerExpiredFeaturesMap = {};
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get drawbles that belong to a layer
+   * Get features that belong to a layer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.features = function(layerName) {
-    if (m_layerFeaturesMap.hasOwnProperty(layerName)) {
-      return m_layerFeaturesMap[layerName];
+  this.features = function(layerId) {
+    if (m_layerFeaturesMap.hasOwnProperty(layerId)) {
+      return m_layerFeaturesMap[layerId];
     }
 
-    m_layerFeaturesMap[layerName] = null;
-    return m_layerFeaturesMap[layerName];
+    m_layerFeaturesMap[layerId] = null;
+    return m_layerFeaturesMap[layerId];
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Update layer to a particular time
+   * Set new features of a layer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setFeatures = function(layerName, features) {
+  this.setFeatures = function(layerId, features) {
     // TODO Check if drawables are changed for now just set it
-    m_layerFeaturesMap[layerName] = features;
+    m_layerFeaturesMap[layerId] = features;
+    this.modified();
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get expired features of a layer
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.expiredFeatures = function(layerId) {
+    if (m_layerExpiredFeaturesMap.hasOwnProperty(layerId)) {
+      return m_layerExpiredFeaturesMap[layerId];
+    }
+
+    m_layerExpiredFeaturesMap[layerId] = null;
+    return m_layerExpiredFeaturesMap[layerId];
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set expired features of a layer
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.setExpiredFeatures = function(layerId, expiredFeatures) {
+    // TODO Check if drawables are changed for now just set it
+    m_layerExpiredFeaturesMap[layerId] = expiredFeatures;
     this.modified();
   };
 
@@ -60,11 +86,11 @@ geoModule.layerFeatures = function() {
       return;
     }
 
-    var layerName = null;
+    var layerId = null;
 
-    for (layerName in m_layerFeaturesMap) {
-      if (m_layerFeaturesMap.hasOwnProperty(layerName)) {
-        other.setFeatures(layerName, m_layerFeaturesMap[layerName]);
+    for (layerId in m_layerFeaturesMap) {
+      if (m_layerFeaturesMap.hasOwnProperty(layerId)) {
+        other.setFeatures(layerId, m_layerFeaturesMap[layerId]);
       }
     }
   };
