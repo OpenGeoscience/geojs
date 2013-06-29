@@ -8,11 +8,11 @@
    white: true, indent: 2*/
 /*global geoModule, ogs, inherit, $*/
 
-geoModule.mapDrawVisitor = function(viewer, featureCollection) {
+geoModule.prepareForRenderRequest = function(viewer, featureCollection) {
   "use strict";
 
-  if (!(this instanceof geoModule.mapDrawVisitor)) {
-    return new geoModule.mapDrawVisitor(viewer, featureCollection);
+  if (!(this instanceof geoModule.prepareForRenderRequest)) {
+    return new geoModule.prepareForRenderRequest(viewer, featureCollection);
   }
   ogs.vgl.object.call(this);
 
@@ -39,12 +39,21 @@ geoModule.mapDrawVisitor = function(viewer, featureCollection) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Make a request to travere scene tree for rendering
+   * Make a request traverse scene for rendering purposes
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.requestRenderTraversal = function() {
-    $(this).trigger(geoModule.command.requestRenderTraversalEvent);
+  this.requestPredraw = function() {
+    $(this).trigger(geoModule.command.requestPredrawEvent);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Make a request to draw scene again
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.requestRedraw = function() {
+    $(this).trigger(geoModule.command.requestRedrawEvent);
   };
 };
 
-inherit(geoModule.mapDrawVisitor, ogs.vgl.object);
+inherit(geoModule.prepareForRenderRequest, ogs.vgl.object);

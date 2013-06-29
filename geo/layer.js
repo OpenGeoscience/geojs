@@ -15,7 +15,7 @@
 //////////////////////////////////////////////////////////////////////////////
 geoModule.layerOptions = function() {
   "use strict";
-  // Check against no use of new()
+
   if (!(this instanceof geoModule.layerOptions)) {
     return new geoModule.layerOptions();
   }
@@ -247,7 +247,7 @@ geoModule.layer = function(options, source) {
    * Virtual function to update the layer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.update = function(time) {
+  this.update = function(request) {
     // Concrete class should implement this
   };
 
@@ -256,7 +256,16 @@ geoModule.layer = function(options, source) {
    * Prepare layer for rendering
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.prepareForRendering = function(featureCollection) {
+  this.predraw = function(request) {
+    // Concrete class should implement this
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Perform actions after draw has happened
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.postdraw = function(request) {
     // Concrete class should implement this
   };
 

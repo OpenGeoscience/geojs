@@ -27,28 +27,35 @@ geoModule.featureLayer = function(options, feature) {
   var m_that = this,
       m_newFeatures = [],
       m_expiredFeatures = [],
-      m_prepareRenderTime = ogs.vgl.timestamp(),
-      m_updateFeaturesTime = ogs.vgl.timestamp();
+      m_predrawTime = ogs.vgl.timestamp(),
+      m_updateTime = ogs.vgl.timestamp();
 
   if (feature) {
     m_newFeatures.push(feature);
   }
-  m_prepareRenderTime.modified();
-  m_updateFeaturesTime.modified()
+  m_predrawTime.modified();
+  m_updateTime.modified()
 
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Update layer to a particular time
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.update = function(time) {
+  this.update = function(request) {
     if (!this.dataSource()) {
       console.log('[info] No valid data source found.');
       return;
     }
 
     var i = 0,
-        data = this.dataSource().getData(time);
+        time = request.time(),
+        data = null;
+
+    if (!time) {
+      return;
+    }
+
+    data = this.dataSource().getData(time);
 
     // Clear our existing features
     m_expiredFeatures = m_newFeatures.slice(0);
@@ -68,7 +75,7 @@ geoModule.featureLayer = function(options, feature) {
     }
 
     if (data.length > 0) {
-      m_updateFeaturesTime. modified();
+      m_updateTime. modified();
     }
   };
 
@@ -77,16 +84,16 @@ geoModule.featureLayer = function(options, feature) {
    * Prepare layer for rendering
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.prepareForRendering = function(mapDrawVisitor) {
-    if (m_prepareRenderTime.getMTime() > m_updateFeaturesTime.getMTime()) {
+  this.predraw = function(request) {
+    if (m_predrawTime.getMTime() > m_updateTime.getMTime()) {
       return;
     }
 
-    var featureCollection = mapDrawVisitor.featureCollection();
+    var featureCollection = request.featureCollection();
     featureCollection.setNewFeatures(this.name(), m_newFeatures);
     featureCollection.setExpiredFeatures(this.name(), m_expiredFeatures);
 
-    m_prepareRenderTime.modified();
+    m_predrawTime.modified();
   };
 
   ////////////////////////////////////////////////////////////////////////////

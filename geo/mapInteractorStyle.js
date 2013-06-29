@@ -78,17 +78,25 @@ geoModule.mapInteractorStyle = function() {
     }
     if (m_leftMouseButtonDown) {
       m_focalPoint = m_camera.focalPoint();
-      m_focusWorldPt = vec4.fromValues(m_focalPoint[0], m_focalPoint[1], m_focalPoint[2], 1);
-      m_focusDisplayPt = m_renderer.worldToDisplay(m_focusWorldPt, m_camera.viewMatrix(),
+
+      m_focusWorldPt = vec4.fromValues(
+        m_focalPoint[0], m_focalPoint[1], m_focalPoint[2], 1);
+      m_focusDisplayPt = m_renderer.worldToDisplay(
+        m_focusWorldPt, m_camera.viewMatrix(),
         m_camera.projectionMatrix(), m_width, m_height);
+
       m_displayPt1 = vec4.fromValues(
         m_currentMousePos.x, m_currentMousePos.y, m_focusDisplayPt[2], 1.0);
       m_displayPt2 = vec4.fromValues(
         m_mouseLastPos.x, m_mouseLastPos.y, m_focusDisplayPt[2], 1.0);
+
       m_worldPt1 = m_renderer.displayToWorld(
-        m_displayPt1, m_camera.viewMatrix(), m_camera.projectionMatrix(), m_width, m_height);
+        m_displayPt1, m_camera.viewMatrix(), m_camera.projectionMatrix(),
+        m_width, m_height);
       m_worldPt2 = m_renderer.displayToWorld(
-        m_displayPt2, m_camera.viewMatrix(), m_camera.projectionMatrix(), m_width, m_height);
+        m_displayPt2, m_camera.viewMatrix(), m_camera.projectionMatrix(),
+        m_width, m_height);
+
       m_dx = m_worldPt1[0] - m_worldPt2[0];
       m_dy = m_worldPt1[1] - m_worldPt2[1];
       m_dz = m_worldPt1[2] - m_worldPt2[2];
@@ -107,17 +115,9 @@ geoModule.mapInteractorStyle = function() {
       $(m_that).trigger(vglModule.command.middleButtonPressEvent);
     }
     if (m_rightMouseButtonDown) {
-      // var difx = m_currentMousePos.x - m_mouseLastPos.x;
-      // var dify = m_currentMousePos.y - m_mouseLastPos.y;
-
-      // var move = 1.2/Math.pow(2, m_map.options().zoom);
-      // var c = m_map.center();
-
-      // var n = geoModule.latlng(c.lat()+(move*dify), c.lng()-(move*difx));
-      // m_map.setCenter(n);
-
       m_zTrans = m_currentMousePos.y - m_mouseLastPos.y;
       m_camera.zoom(m_zTrans * 0.5);
+      $(m_that).trigger(geoModule.command.updateViewZoomEvent);
       $(m_that).trigger(vglModule.command.rightButtonPressEvent);
     }
     m_mouseLastPos.x = m_currentMousePos.x;
@@ -156,7 +156,7 @@ geoModule.mapInteractorStyle = function() {
     return false;
   };
 
-  // @note We never get mouse up from scroll bar: See the bug report here
+  // @NOTE We never get mouse up from scroll bar: See the bug report here
   // http://bugs.jquery.com/ticket/8184
   this.handleMouseUp = function(event) {
     var canvas = m_that.viewer().canvas();
@@ -171,7 +171,8 @@ geoModule.mapInteractorStyle = function() {
       var width = m_that.viewer().renderWindow().windowSize()[0];
       var height = m_that.viewer().renderWindow().windowSize()[1];
       var renderer = m_that.viewer().renderWindow().activeRenderer();
-      if(m_mouseLastPos.x >= 0 && m_mouseLastPos.x <= width && m_mouseLastPos.y >= 0 && m_mouseLastPos.y <= height){
+      if(m_mouseLastPos.x >= 0 && m_mouseLastPos.x <= width &&
+         m_mouseLastPos.y >= 0 && m_mouseLastPos.y <= height) {
         var num = m_picker.pick(m_mouseLastPos.x, m_mouseLastPos.y, renderer);
       }
     }

@@ -15,9 +15,9 @@
 geoModule.mapOptions = {
   zoom: 0,
   center: geoModule.latlng(0.0, 0.0),
+  projection: "mercator",
   country_boundaries: true,
-  state_boundaries: {},
-  sourcebigb: ""
+  state_boundaries: false,
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -39,7 +39,6 @@ geoModule.map = function(node, options) {
   var m_that = this,
       m_node = node,
       m_initialized = false,
-      m_baseLayer = null,
       m_options = options,
       m_layers = {},
       m_activeLayer = null,
@@ -49,7 +48,8 @@ geoModule.map = function(node, options) {
       m_interactorStyle = null,
       m_viewer = null,
       m_renderer = null,
-      m_mapDrawVisitor = null;
+      m_updateRequest = null,
+      m_prepareForRenderRequest = null;
 
   m_renderTime.modified();
 
@@ -66,25 +66,71 @@ geoModule.map = function(node, options) {
     return null;
   }
 
+  // Initialize
   m_interactorStyle = geoModule.mapInteractorStyle();
   m_viewer = ogs.vgl.viewer(m_node);
   m_viewer.setInteractorStyle(m_interactorStyle);
   m_viewer.init();
   m_viewer.renderWindow().resize($(m_node).width(), $(m_node).height());
   m_renderer = m_viewer.renderWindow().activeRenderer();
-  m_mapDrawVisitor = geoModule.mapDrawVisitor(m_viewer, m_featureCollection);
 
-  $(m_mapDrawVisitor).on(geoModule.requestRenderTraversalEvent, function(event) {
-    this.prepareForRendering();
+  m_prepareForRenderRequest =
+    geoModule.prepareForRenderRequest(m_viewer, m_featureCollection);
+  m_updateRequest = geoModule.updateRequest(null, m_options, m_viewer, m_node);
+
+  $(m_prepareForRenderRequest).on(geoModule.command.requestPredrawEvent,
+    function(event) {
+      m_that.predraw();
+      m_that.redraw();
+  });
+  $(m_updateRequest).on(geoModule.command.requestPredrawEvent,
+    function(event) {
+      m_that.predraw();
+      m_that.redraw();
   });
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Update view extents based on the zoom
+   * Update view based on the zoom
    */
   ////////////////////////////////////////////////////////////////////////////
-  function updateZoom(useCurrent) {
+  function updateViewZoom(useCurrent) {
     m_interactorStyle.zoom(m_options, useCurrent);
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Compute zoom level based on the camera distance
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  function updateZoom() {
+    var camera = m_renderer.camera();
+
+    if (camera.position()[2] < Number.MAX_VALUE) {
+      m_options.zoom = 1;
+    }
+    if (camera.position()[2] < 200) {
+      m_options.zoom = 2;
+    }
+    if (camera.position()[2] < 100) {
+      m_options.zoom = 3;
+    }
+    if (camera.position()[2] < 50) {
+      m_options.zoom = 4;
+    }
+    if (camera.position()[2] < 25) {
+      m_options.zoom = 5;
+    }
+    if (camera.position()[2] < 15) {
+      m_options.zoom = 6;
+    }
+    if (camera.position()[2] < 5) {
+      m_options.zoom = 7;
+    }
+
+    console.log('zoom, position ', m_options.zoom, camera.position()[2]);
+
+    m_that.update(m_updateRequest);
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -93,7 +139,7 @@ geoModule.map = function(node, options) {
    */
   ////////////////////////////////////////////////////////////////////////////
   function initScene() {
-    updateZoom();
+    updateViewZoom();
     m_initialized = true;
   }
 
@@ -109,37 +155,11 @@ geoModule.map = function(node, options) {
     m_viewer.render();
   }
 
+  $(m_interactorStyle).on(ogs.geo.command.updateViewZoomEvent, updateZoom);
   $(m_interactorStyle).on(ogs.vgl.command.leftButtonPressEvent, draw);
   $(m_interactorStyle).on(ogs.vgl.command.middleButtonPressEvent, draw);
   $(m_interactorStyle).on(ogs.vgl.command.rightButtonPressEvent, draw);
   $(this).on(geoModule.command.updateEvent, draw);
-
-  // TODO use zoom and center options
-  m_baseLayer = (function() {
-    var mapActor, worldImage, worldTexture;
-    mapActor = ogs.vgl.utils.createTexturePlane(-180.0, -90.0, -1.0,
-                                                 180.0, -90.0, -1.0,
-                                                -180.0, 90.0, -1.0);
-    // Setup texture
-    worldImage = new Image();
-    worldImage.src = m_options.source;
-    worldImage.onload = function() {
-      worldTexture = new vglModule.texture();
-      worldTexture.updateDimensions();
-      worldTexture.setImage(worldImage);
-      m_baseLayer.material().addAttribute(worldTexture);
-      draw();
-    };
-
-    m_renderer.addActor(mapActor);
-    document.onmousedown = m_viewer.handleMouseDown;
-    document.onmouseup = m_viewer.handleMouseUp;
-    document.onmousemove = m_viewer.handleMouseMove;
-    document.oncontextmenu = m_viewer.handleContextMenu;
-    HTMLCanvasElement.prototype.relMouseCoords = m_viewer.relMouseCoords;
-
-    return mapActor;
-  }());
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -171,9 +191,7 @@ geoModule.map = function(node, options) {
   this.setZoom = function(val) {
     if (val !== m_options.zoom) {
       m_options.zoom = val;
-      updateZoom(true);
-      this.modified();
-      $(this).trigger(geoModule.command.updateEvent);
+      $(this).trigger(geoModule.command.updateViewZoomEvent);
       return true;
     }
 
@@ -197,14 +215,8 @@ geoModule.map = function(node, options) {
       }
 
       m_layers[layer.name()] = layer;
-      this.prepareForRendering();
+      this.predraw();
       this.modified();
-
-      // TODO Remove this
-      if (layer.name() == 'clt') {
-        var layers = [m_layers[layer.name()]];
-        this.animate([0, 119], layers);
-      }
 
       $(this).trigger({
         type: geoModule.command.addLayerEvent,
@@ -390,10 +402,26 @@ geoModule.map = function(node, options) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Update layers
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.update = function() {
+    // For now update all layers. In the future, we should be
+    // able to perform updates based on the layer type
+    var layerName = null;
+    for (layerName in m_layers) {
+      if (m_layers.hasOwnProperty(layerName)) {
+        m_layers[layerName].update(m_updateRequest);
+      }
+    }
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Prepare map for rendering
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.prepareForRendering = function() {
+  this.predraw = function() {
     var i = 0,
         layerName = 0,
         expiredFreatures = null,
@@ -403,7 +431,7 @@ geoModule.map = function(node, options) {
 
     for (layerName in m_layers) {
       if (m_layers.hasOwnProperty(layerName)) {
-        m_layers[layerName].prepareForRendering(m_mapDrawVisitor);
+        m_layers[layerName].predraw(m_prepareForRenderRequest);
       }
     }
 
@@ -468,18 +496,30 @@ geoModule.map = function(node, options) {
         clearInterval(intervalId);
       } else {
         for (i = 0; i < layers.length; ++i) {
-          layers[i].update(currentTime);
+          layers[i].update(ogs.geo.updateRequest(currentTime));
         }
         $(this).trigger({
           type: geoModule.command.animateEvent,
           currentTime: currentTime,
           endTime: endTime
         });
-        that.prepareForRendering();
+        that.predraw();
         that.redraw();
       }
     }
   };
+
+  document.onmousedown = m_viewer.handleMouseDown;
+  document.onmouseup = m_viewer.handleMouseUp;
+  document.onmousemove = m_viewer.handleMouseMove;
+  document.oncontextmenu = m_viewer.handleContextMenu;
+  HTMLCanvasElement.prototype.relMouseCoords = m_viewer.relMouseCoords;
+
+  // Create map layer
+  var mapLayer = geoModule.openStreetMapLayer();
+  mapLayer.update(m_updateRequest);
+  mapLayer.predraw(m_prepareForRenderRequest);
+  this.addLayer(mapLayer);
 
   // Check if need to show country boundaries
   if (m_options.country_boundaries === true) {
