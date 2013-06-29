@@ -411,17 +411,9 @@ geoModule.map = function(node, options) {
           m_featureCollection.expiredFeatures(layerName));
       }
 
-      // Sort actors by layer bin number
+      // Add new actors (Will do sorting by bin and then material later)
       for (layerName in m_layers) {
-        sortedActors.push([m_layers[layerName].binNumber(),
-          m_featureCollection.newFeatures(layerName)]);
-      }
-
-      sortedActors.sort(function(a, b) {return a[0] - b[0]});
-
-      // Add actors to renderer in sorted order
-      for (i = 0; i < sortedActors.length; ++i) {
-        m_renderer.addActors(sortedActors[i][1]);
+        m_renderer.addActors(m_featureCollection.newFeatures(layerName));
       }
 
       m_lastPrepareToRenderingTime.modified();
