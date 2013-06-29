@@ -10,16 +10,16 @@
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Create a new instance of class layerFeatures
+ * Create a new instance of class featureCollection
  *
  * @class
- * @returns {geoModule.layerFeatures}
+ * @returns {geoModule.featureCollection}
  */
 //////////////////////////////////////////////////////////////////////////////
-geoModule.layerFeatures = function() {
+geoModule.featureCollection = function() {
   "use strict";
-  if (!(this instanceof geoModule.layerFeatures)) {
-    return new geoModule.layerFeatures();
+  if (!(this instanceof geoModule.featureCollection)) {
+    return new geoModule.featureCollection();
   }
   ogs.vgl.object.call(this);
 
@@ -106,4 +106,4 @@ geoModule.layerFeatures = function() {
   };
 };
 
-inherit(geoModule.layerFeatures, ogs.vgl.object);
+inherit(geoModule.featureCollection, ogs.vgl.object);
