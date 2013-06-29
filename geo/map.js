@@ -391,6 +391,8 @@ geoModule.map = function(node, options) {
         expiredFreatures = null,
         sortedActors = [];
 
+    m_featureCollection.resetAll();
+
     for (layerName in m_layers) {
       if (m_layers.hasOwnProperty(layerName)) {
         m_layers[layerName].prepareForRendering(m_featureCollection);

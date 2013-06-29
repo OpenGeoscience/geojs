@@ -106,6 +106,16 @@ geoModule.featureCollection = function() {
       (Object.keys(m_newFeaturesMap).length === 0 &&
        Object.keys(m_expiredFeaturesMap).length === 0) ;
   };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Reset all states of feature collection
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.resetAll = function() {
+    m_newFeaturesMap = {};
+    m_expiredFeaturesMap = {};
+  };
 };
 
 inherit(geoModule.featureCollection, ogs.vgl.object);
