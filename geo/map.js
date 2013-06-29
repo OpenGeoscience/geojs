@@ -5,9 +5,11 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true, white: true, indent: 2*/
 /*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image, vglModule, document*/
 
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Map options object specification
  */
+//////////////////////////////////////////////////////////////////////////////
 geoModule.mapOptions = {
   zoom: 0,
   center: geoModule.latlng(0.0, 0.0),
@@ -16,12 +18,14 @@ geoModule.mapOptions = {
   sourcebigb: ""
 };
 
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class map
  *
  * @class Creates a new map inside of the given HTML container (Typically DIV)
  * @returns {geoModule.map}
  */
+//////////////////////////////////////////////////////////////////////////////
 geoModule.map = function(node, options) {
   "use strict";
   if (!(this instanceof geoModule.map)) {
@@ -66,24 +70,30 @@ geoModule.map = function(node, options) {
   m_viewer.renderWindow().resize($(m_node).width(), $(m_node).height());
   m_renderer = m_viewer.renderWindow().activeRenderer();
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Update view extents based on the zoom
    */
+  ////////////////////////////////////////////////////////////////////////////
   function updateZoom(useCurrent) {
     m_interactorStyle.zoom(m_options, useCurrent);
   }
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize the scene
    */
+  ////////////////////////////////////////////////////////////////////////////
   function initScene() {
     updateZoom();
     m_initialized = true;
   }
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize the scene (if not initialized) and then render the map
    */
+  ////////////////////////////////////////////////////////////////////////////
   function draw() {
     if (m_initialized === false) {
       initScene();
@@ -123,27 +133,33 @@ geoModule.map = function(node, options) {
     return mapActor;
   }());
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get map options
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.options = function() {
     return m_options;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get the zoom level of the map
    *
    * @returns {Number}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.zoom = function() {
     return m_options.zoom;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Set zoom level of the map
    *
    * @param val [0-17]
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.setZoom = function(val) {
     if (val !== m_options.zoom) {
       m_options.zoom = val;
@@ -156,6 +172,7 @@ geoModule.map = function(node, options) {
     return false;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Add layer to the map
    *
@@ -163,6 +180,7 @@ geoModule.map = function(node, options) {
    * @param {geo.layer} layer to be added to the map
    * @return {Boolean}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.addLayer = function(layer) {
     if (layer !== null) {
       // TODO Check if the layer already exists
@@ -189,6 +207,7 @@ geoModule.map = function(node, options) {
     return false;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Remove layer from the map
    *
@@ -196,6 +215,7 @@ geoModule.map = function(node, options) {
    * @param {geo.layer} layer that should be removed from the map
    * @return {Boolean}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.removeLayer = function(layer) {
     if (layer !== null && typeof layer !== 'undefined') {
       m_renderer.removeActor(layer.feature());
@@ -210,6 +230,7 @@ geoModule.map = function(node, options) {
     return false;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Toggle visibility of a layer
    *
@@ -217,6 +238,7 @@ geoModule.map = function(node, options) {
    *  @param {geo.layer} layer
    *  @returns {Boolean}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.toggleLayer = function(layer) {
     if (layer !== null && typeof layer !== 'undefined') {
       layer.setVisible(!layer.visible());
@@ -231,15 +253,18 @@ geoModule.map = function(node, options) {
     return false;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Return current or active layer
    *
    * @returns {geo.layer}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.activeLayer = function() {
     return m_activeLayer;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Make a layer current or active for operations
    *
@@ -248,6 +273,7 @@ geoModule.map = function(node, options) {
    * @returns {Boolean}
    *
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.selectLayer = function(layer) {
     if (typeof layer !== 'undefined' && m_activeLayer !== layer) {
       m_activeLayer = layer;
@@ -269,6 +295,7 @@ geoModule.map = function(node, options) {
     return false;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Find layer by layer id
    *
@@ -276,6 +303,7 @@ geoModule.map = function(node, options) {
    * @param {String} layerId
    * @returns {geo.layer}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.findLayerById = function(layerId) {
     if (m_layers.hasOwnProperty(layerId)) {
       return m_layers[layerId];
@@ -283,19 +311,23 @@ geoModule.map = function(node, options) {
     return null;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Manually force to render map
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.redraw = function() {
     m_viewer.render();
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Resize map
    *
    * @param {Number} width
    * @param {Number} height
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.resize = function(width, height) {
     m_viewer.renderWindow().resize(width, height);
     $(this).trigger({
@@ -305,11 +337,13 @@ geoModule.map = function(node, options) {
     });
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Toggle country boundaries
    *
    * @returns {Boolean}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.toggleCountryBoundaries = function() {
     var layer, reader, geoms;
     layer = this.findLayerById('country-boundaries');
@@ -335,18 +369,22 @@ geoModule.map = function(node, options) {
     }
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Toggle us state boundaries
    *
    * @returns {Boolean}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.toggleStateBoundaries = function() {
     // @todo Implement this
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Prepare map for rendering
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.prepareForRendering = function() {
     var i = 0,
         layerName = 0,
@@ -390,9 +428,11 @@ geoModule.map = function(node, options) {
     }
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Animate layers of a map
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.animate = function(timeRange, layers) {
     if (!timeRange) {
       console.log('[error] Invalid time range');
