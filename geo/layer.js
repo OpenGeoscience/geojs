@@ -86,15 +86,7 @@ geoModule.layer = function(options, source) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.setFeatures = function(features) {
-    // if (actor === m_feature) {
-    //   return false;
-    // }
-
-    // m_feature = actor;
-    // this.modified();
-
-    // return true;
-
+    // Concrete class should implement this
     return false;
   };
 
@@ -144,11 +136,6 @@ geoModule.layer = function(options, source) {
   this.setOpacity = function(val) {
     m_opacity = val;
     this.updateLayerOpacity(m_opacity);
-    // $(m_that).trigger({
-    //   type : this.events.opacitychange,
-    //   opacity : m_opacity
-    // });
-
     this.modified();
     return true;
   };
@@ -174,12 +161,6 @@ geoModule.layer = function(options, source) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.setVisible = function(flag) {
-    // if (m_feature.visible() === flag) {
-    //   return false;
-    // }
-
-    // this.modified();
-    // return m_feature.setVisible(flag);
     return false;
   };
 
@@ -238,7 +219,7 @@ geoModule.layer = function(options, source) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.update = function(time) {
-    // TODO Call source update here
+    // Concrete class should implement this
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -247,11 +228,7 @@ geoModule.layer = function(options, source) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.prepareForRendering = function(layersDrawables) {
-    // var layerDrawables = layersDrawables.get(this);
-    // if (layerDrawables) {
-    // } else {
-    //   layersDrawables.add(this, ...)
-    // }
+    // Concrete class should implement this
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -260,8 +237,7 @@ geoModule.layer = function(options, source) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.getUpdateTime = function() {
-    // TODO Implement this
-    // m_updateTime.getMTime();
+    // Concrete class should implement this
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -271,6 +247,7 @@ geoModule.layer = function(options, source) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.updateLayerOpacity = function() {
+    // Concrete class should implement this
   };
 
   return this;

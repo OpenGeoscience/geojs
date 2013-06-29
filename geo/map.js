@@ -38,7 +38,7 @@ geoModule.map = function(node, options) {
       m_layers = {},
       m_activeLayer = null,
       m_layersCurrentDrawables = geoModule.layerFeatures(),
-      m_layersPreviousDrawables = geoModule.layerFeatures(),
+      m_expiredFeatures = geoModule.layerFeatures(),
       m_renderTime = ogs.vgl.timestamp(),
       m_previousLayerDrawablesTime = ogs.vgl.timestamp(),
       m_interactorStyle = null,
@@ -363,14 +363,14 @@ geoModule.map = function(node, options) {
         m_previousLayerDrawablesTime.getMTime()) {
 
       // Clear features from all layers except the baseone
-      if (m_layersPreviousDrawables) {
+      if (m_expiredFeatures) {
         for (layerName in m_layers) {
           if (m_layers[layerName] !== m_baseLayer) {
-            if (m_layersPreviousDrawables.isEmpty()) {
+            if (m_expiredFeatures.isEmpty()) {
               continue;
             }
             m_renderer.removeActors(
-              m_layersPreviousDrawables.features(layerName));
+              m_expiredFeatures.features(layerName));
           }
         }
       }
@@ -381,7 +381,6 @@ geoModule.map = function(node, options) {
           m_layersCurrentDrawables.features(layerName)]);
       }
 
-      // console.log('sorted actors are', sortedActors);
       sortedActors.sort(function(a, b) {return a[0] - b[0]});
 
       // Add actors to renderer in sorted order
@@ -389,7 +388,7 @@ geoModule.map = function(node, options) {
         m_renderer.addActors(sortedActors[i][1]);
       }
 
-      m_layersCurrentDrawables.clone(m_layersPreviousDrawables);
+      m_layersCurrentDrawables.clone(m_expiredFeatures);
       m_previousLayerDrawablesTime.modified();
     }
   };
