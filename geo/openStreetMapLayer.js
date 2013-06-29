@@ -234,19 +234,23 @@ geoModule.openStreetMapLayer = function(options) {
         lly = node.height,
         urx = node.width,
         ury = 0.0,
-    // Now convert display point to world point
+        // Now convert display point to world point
         focalPoint = m_renderer.camera().focalPoint(),
-        focusWorldPt = vec4.fromValues(focalPoint[0], focalPoint[1], focalPoint[2], 1),
-        focusDisplayPt = m_renderer.worldToDisplay(focusWorldPt, camera.viewMatrix(),
+        focusWorldPt = vec4.fromValues(
+          focalPoint[0], focalPoint[1], focalPoint[2], 1),
+        focusDisplayPt = m_renderer.worldToDisplay(
+          focusWorldPt, camera.viewMatrix(),
           camera.projectionMatrix(), node.width, node.height),
         displayPt1 = vec4.fromValues(
           llx, lly, focusDisplayPt[2], 1.0),
         displayPt2 = vec4.fromValues(
           urx, ury, focusDisplayPt[2], 1.0),
         worldPt1 = m_renderer.displayToWorld(
-          displayPt1, camera.viewMatrix(), camera.projectionMatrix(), node.width, node.height),
+          displayPt1, camera.viewMatrix(), camera.projectionMatrix(),
+          node.width, node.height),
         worldPt2 = m_renderer.displayToWorld(
-          displayPt2, camera.viewMatrix(), camera.projectionMatrix(), node.width, node.height);
+          displayPt2, camera.viewMatrix(), camera.projectionMatrix(),
+          node.width, node.height);
 
     // console.log('worldPt1', worldPt1);
     // console.log('worldPt2', worldPt2);

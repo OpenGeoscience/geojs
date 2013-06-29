@@ -271,8 +271,8 @@ geoModule.layer = function(options, source) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Virtual slot to handle opacity change Concrete class should implement this
-   * method.
+   * Virtual method to handle opacity change.
+   * Concrete class should implement this method.
    */
   ////////////////////////////////////////////////////////////////////////////
   this.updateLayerOpacity = function() {
