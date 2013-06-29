@@ -43,7 +43,7 @@ geoModule.mapDrawVisitor = function(viewer, featureCollection) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.requestRenderTraversal = function() {
-    // Trigger the event here
+    $(this).trigger(geoModule.command.requestRenderTraversalEvent);
   };
 };
 

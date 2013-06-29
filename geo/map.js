@@ -1,9 +1,11 @@
+//////////////////////////////////////////////////////////////////////////////
 /**
  * @module ogs.geo
  */
 
 /*jslint devel: true, forin: true, newcap: true, plusplus: true, white: true, indent: 2*/
 /*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image, vglModule, document*/
+//////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -71,6 +73,10 @@ geoModule.map = function(node, options) {
   m_viewer.renderWindow().resize($(m_node).width(), $(m_node).height());
   m_renderer = m_viewer.renderWindow().activeRenderer();
   m_mapDrawVisitor = geoModule.mapDrawVisitor(m_viewer, m_featureCollection);
+
+  $(m_mapDrawVisitor).on(geoModule.requestRenderTraversalEvent, function(event) {
+    this.prepareForRendering();
+  });
 
   ////////////////////////////////////////////////////////////////////////////
   /**
