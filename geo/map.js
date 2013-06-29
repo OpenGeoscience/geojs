@@ -402,15 +402,13 @@ geoModule.map = function(node, options) {
     if (m_featureCollection.getMTime() >
         m_lastPrepareToRenderingTime.getMTime()) {
 
-      // Clear features from all layers except the baseone
+      // Remove expired features from the renderer
       for (layerName in m_layers) {
-        if (m_layers[layerName] !== m_baseLayer) {
-          if (m_featureCollection.expiredFeatures(layerName).length === 0) {
-            continue;
-          }
-          m_renderer.removeActors(
-            m_featureCollection.expiredFeatures(layerName));
+        if (m_featureCollection.expiredFeatures(layerName).length === 0) {
+          continue;
         }
+        m_renderer.removeActors(
+          m_featureCollection.expiredFeatures(layerName));
       }
 
       // Sort actors by layer bin number
