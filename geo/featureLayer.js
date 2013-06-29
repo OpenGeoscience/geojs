@@ -1,11 +1,18 @@
+/**
+ * @module ogs.geo
+ */
+
+/*jslint devel: true, forin: true, newcap: true, plusplus: true, white: true, indent: 2*/
+/*global geoModule, ogs, inherit, $, Image, vglModule, document*/
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class featureLayer
  *
  * @class
  * @dec Layer to draw points, lines, and polygons on the map The polydata layer
- * provide mechanisms to create and draw geometrical shapes such as points,
- * lines, and polygons.
+ *      provide mechanisms to create and draw geometrical shapes such as points,
+ *      lines, and polygons.
  * @returns {geoModule.featureLayer}
  */
 //////////////////////////////////////////////////////////////////////////////
