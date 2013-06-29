@@ -44,6 +44,7 @@ geoModule.featureLayer = function(options, feature) {
         data = this.dataSource().getData(time);
 
     // Clear our existing features
+    m_expiredFeatures = m_newFeatures.slice(0);
     m_newFeatures = [];
 
     for(i = 0; i < data.length; ++i) {
@@ -75,6 +76,7 @@ geoModule.featureLayer = function(options, feature) {
     }
 
     layersDrawables.setNewFeatures(this.name(), m_newFeatures);
+    layersDrawables.setExpiredFeatures(this.name(), m_expiredFeatures);
 
     m_prepareRenderTime.modified();
   };

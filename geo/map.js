@@ -365,7 +365,7 @@ geoModule.map = function(node, options) {
       // Clear features from all layers except the baseone
       for (layerName in m_layers) {
         if (m_layers[layerName] !== m_baseLayer) {
-          if (m_featureCollection.expiredFeatures(layerName).length > 0) {
+          if (m_featureCollection.expiredFeatures(layerName).length === 0) {
             continue;
           }
           m_renderer.removeActors(
