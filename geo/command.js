@@ -36,3 +36,4 @@ geoModule.command.unselectLayerEvent = "unselectLayerEvent";
 geoModule.command.updateZoomEvent = "updateZoomEvent";
 geoModule.command.resizeEvent = "resizeEvent";
 geoModule.command.animateEvent = "animateEvent";
+geoModule.command.requestRenderTraversalEvent = "requestRenderTraversalEvent";

@@ -46,7 +46,8 @@ geoModule.map = function(node, options) {
       m_lastPrepareToRenderingTime = ogs.vgl.timestamp(),
       m_interactorStyle = null,
       m_viewer = null,
-      m_renderer = null;
+      m_renderer = null,
+      m_mapDrawVisitor = null;
 
   m_renderTime.modified();
 
@@ -69,6 +70,7 @@ geoModule.map = function(node, options) {
   m_viewer.init();
   m_viewer.renderWindow().resize($(m_node).width(), $(m_node).height());
   m_renderer = m_viewer.renderWindow().activeRenderer();
+  m_mapDrawVisitor = geoModule.mapDrawVisitor(m_viewer, m_featureCollection);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -395,7 +397,7 @@ geoModule.map = function(node, options) {
 
     for (layerName in m_layers) {
       if (m_layers.hasOwnProperty(layerName)) {
-        m_layers[layerName].prepareForRendering(m_featureCollection);
+        m_layers[layerName].prepareForRendering(m_mapDrawVisitor);
       }
     }
 

@@ -77,13 +77,14 @@ geoModule.featureLayer = function(options, feature) {
    * Prepare layer for rendering
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.prepareForRendering = function(layersDrawables) {
+  this.prepareForRendering = function(mapDrawVisitor) {
     if (m_prepareRenderTime.getMTime() > m_updateFeaturesTime.getMTime()) {
       return;
     }
 
-    layersDrawables.setNewFeatures(this.name(), m_newFeatures);
-    layersDrawables.setExpiredFeatures(this.name(), m_expiredFeatures);
+    var featureCollection = mapDrawVisitor.featureCollection();
+    featureCollection.setNewFeatures(this.name(), m_newFeatures);
+    featureCollection.setExpiredFeatures(this.name(), m_expiredFeatures);
 
     m_prepareRenderTime.modified();
   };
