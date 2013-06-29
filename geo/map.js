@@ -37,10 +37,9 @@ geoModule.map = function(node, options) {
       m_options = options,
       m_layers = {},
       m_activeLayer = null,
-      m_layersCurrentDrawables = geoModule.layerFeatures(),
-      m_expiredFeatures = geoModule.layerFeatures(),
+      m_featureCollection = geoModule.layerFeatures(),
       m_renderTime = ogs.vgl.timestamp(),
-      m_previousLayerDrawablesTime = ogs.vgl.timestamp(),
+      m_lastPrepareToRenderingTime = ogs.vgl.timestamp(),
       m_interactorStyle = null,
       m_viewer = null,
       m_renderer = null;
@@ -351,34 +350,33 @@ geoModule.map = function(node, options) {
   this.prepareForRendering = function() {
     var i = 0,
         layerName = 0,
+        expiredFreatures = null,
         sortedActors = [];
 
     for (layerName in m_layers) {
       if (m_layers.hasOwnProperty(layerName)) {
-        m_layers[layerName].prepareForRendering(m_layersCurrentDrawables);
+        m_layers[layerName].prepareForRendering(m_featureCollection);
       }
     }
 
-    if (m_layersCurrentDrawables.getMTime() >
-        m_previousLayerDrawablesTime.getMTime()) {
+    if (m_featureCollection.getMTime() >
+        m_lastPrepareToRenderingTime.getMTime()) {
 
       // Clear features from all layers except the baseone
-      if (m_expiredFeatures) {
-        for (layerName in m_layers) {
-          if (m_layers[layerName] !== m_baseLayer) {
-            if (m_expiredFeatures.isEmpty()) {
-              continue;
-            }
-            m_renderer.removeActors(
-              m_expiredFeatures.features(layerName));
+      for (layerName in m_layers) {
+        if (m_layers[layerName] !== m_baseLayer) {
+          if (m_featureCollection.expiredFeatures(layerName).length > 0) {
+            continue;
           }
+          m_renderer.removeActors(
+            m_featureCollection.expiredFeatures(layerName));
         }
       }
 
       // Sort actors by layer bin number
       for (layerName in m_layers) {
         sortedActors.push([m_layers[layerName].binNumber(),
-          m_layersCurrentDrawables.features(layerName)]);
+          m_featureCollection.newFeatures(layerName)]);
       }
 
       sortedActors.sort(function(a, b) {return a[0] - b[0]});
@@ -388,8 +386,7 @@ geoModule.map = function(node, options) {
         m_renderer.addActors(sortedActors[i][1]);
       }
 
-      m_layersCurrentDrawables.clone(m_expiredFeatures);
-      m_previousLayerDrawablesTime.modified();
+      m_lastPrepareToRenderingTime.modified();
     }
   };
 

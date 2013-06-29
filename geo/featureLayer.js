@@ -16,14 +16,15 @@ geoModule.featureLayer = function(options, feature) {
   }
   geoModule.layer.call(this, options);
 
-  /** @priave */
+  /** @private */
   var m_that = this,
-      m_features = [],
+      m_newFeatures = [],
+      m_expiredFeatures = [],
       m_prepareRenderTime = ogs.vgl.timestamp(),
       m_updateFeaturesTime = ogs.vgl.timestamp();
 
   if (feature) {
-    m_features.push(feature);
+    m_newFeatures.push(feature);
   }
   m_prepareRenderTime.modified();
   m_updateFeaturesTime.modified()
@@ -43,13 +44,13 @@ geoModule.featureLayer = function(options, feature) {
         data = this.dataSource().getData(time);
 
     // Clear our existing features
-    m_features = [];
+    m_newFeatures = [];
 
     for(i = 0; i < data.length; ++i) {
       switch(data[i].type()) {
         case vglModule.data.geometry:
           var geomFeature = geoModule.geometryFeature(data[i]);
-          m_features.push(geomFeature);
+          m_newFeatures.push(geomFeature);
           break;
         case vglModule.data.raster:
           break;
@@ -73,7 +74,7 @@ geoModule.featureLayer = function(options, feature) {
       return;
     }
 
-    layersDrawables.setFeatures(this.name(), m_features);
+    layersDrawables.setNewFeatures(this.name(), m_newFeatures);
 
     m_prepareRenderTime.modified();
   };
@@ -84,7 +85,7 @@ geoModule.featureLayer = function(options, feature) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.updateLayerOpacity = function(opacity) {
-    if (!m_features) {
+    if (!m_newFeatures) {
       return;
     }
 
@@ -92,8 +93,8 @@ geoModule.featureLayer = function(options, feature) {
          mat,
          opacityUniform;
 
-    for (i = 0; i < m_features.length; ++i) {
-      mat = m_features[i].material();
+    for (i = 0; i < m_newFeatures.length; ++i) {
+      mat = m_newFeatures[i].material();
       opacityUniform = mat.shaderProgram().uniform('opacity');
       if (opacityUniform !== null) {
         opacityUniform.set(opacity);
