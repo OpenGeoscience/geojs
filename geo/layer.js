@@ -23,7 +23,7 @@ geoModule.layerOptions = function() {
   this.opacity = 1;
   this.showAttribution = true;
   this.visible = true;
-  this.binNumber = -1;
+  this.binNumber = ogs.vgl.material.RenderBin.Default;
 
   return this;
 };

@@ -65,6 +65,7 @@ geoModule.featureLayer = function(options, feature) {
       switch(data[i].type()) {
         case vglModule.data.geometry:
           var geomFeature = geoModule.geometryFeature(data[i]);
+          geomFeature.material().setBinNumber(this.binNumber());
           m_newFeatures.push(geomFeature);
           break;
         case vglModule.data.raster:

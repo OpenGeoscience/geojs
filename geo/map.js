@@ -382,8 +382,6 @@ geoModule.map = function(node, options) {
       }, ogs.geo.multiGeometryFeature(geoms, [1.0,0.5, 0.0]));
 
       layer.setName('country-boundaries');
-      // Use a very high bin number to always draw it last
-      layer.setBinNumber(10000);
       this.addLayer(layer);
       return layer.visible();
     }

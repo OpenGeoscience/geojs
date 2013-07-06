@@ -95,23 +95,39 @@ vglModule.renderer = function() {
    * Render the scene
    */
   this.render = function() {
+    var i = 0,
+        renSt = null,
+        children = null,
+        actor = null,
+        sortedActors = [];
+
     gl.clearColor(m_backgroundColor[0], m_backgroundColor[1],
       m_backgroundColor[2], m_backgroundColor[3]);
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    var renSt = new vglModule.renderState(),
-        children = m_sceneRoot.children();
+    renSt = new vglModule.renderState();
+    children = m_sceneRoot.children();
 
     renSt.m_projectionMatrix = m_camera.projectionMatrix();
 
-    for ( var i = 0; i < children.length; ++i) {
-      var actor = children[i];
+    for ( i = 0; i < children.length; ++i) {
+      actor = children[i];
       actor.computeBounds();
       if (actor.visible() === false) {
         continue;
       }
+
+      sortedActors.push([actor.material().binNumber(), actor]);
+    }
+
+    // Now perform sorting
+    sortedActors.sort(function(a, b) {return a[0] - b[0]});
+
+    for ( i = 0; i < sortedActors.length; ++i) {
+      console.log(sortedActors[i][0]);
+      actor = sortedActors[i][1];
 
       mat4.multiply(renSt.m_modelViewMatrix, m_camera.viewMatrix(),
                     actor.matrix());
@@ -119,7 +135,6 @@ vglModule.renderer = function() {
       renSt.m_mapper = actor.mapper();
 
       // TODO Fix this shortcut
-
       renSt.m_material.render(renSt);
       renSt.m_mapper.render(renSt);
       renSt.m_material.remove(renSt);

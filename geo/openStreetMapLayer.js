@@ -87,7 +87,7 @@ geoModule.openStreetMapLayer = function() {
     // console.log('llx, lly, urx, ury', llx, lly, urx, ury);
 
     var actor = ogs.vgl.utils.createTexturePlane(llx, lly,
-      1.0, urx - 1, lly, 1.0, llx, ury - 1, 1.0);
+      -1.0, urx - 1, lly, -1.0, llx, ury - 1, -1.0);
     var tile = new Image();
     tile.actor = actor;
 
@@ -109,6 +109,7 @@ geoModule.openStreetMapLayer = function() {
       this.texture.updateDimensions();
       this.texture.setImage(this);
       this.actor.material().addAttribute(this.texture);
+      this.actor.material().setBinNumber(m_that.binNumber());
       m_newFeatures.push(this.actor);
       m_updateTime.modified();
       request.requestPredraw();
@@ -335,6 +336,8 @@ geoModule.openStreetMapLayer = function() {
 
     m_predrawTime.modified();
   }
+
+  this.setBinNumber(ogs.vgl.material.RenderBin.Base);
 };
 
 inherit(geoModule.openStreetMapLayer, geoModule.featureLayer);
