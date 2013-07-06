@@ -15,7 +15,7 @@
 geoModule.mapOptions = {
   zoom: 0,
   center: geoModule.latlng(0.0, 0.0),
-  projection: "mercator",
+  gcs: 'EPSG:3857',
   country_boundaries: true,
   state_boundaries: false,
 };
@@ -52,6 +52,10 @@ geoModule.map = function(node, options) {
       m_prepareForRenderRequest = null;
 
   m_renderTime.modified();
+
+  if (!options.gcs) {
+    m_options.gcs = 'EPSG:3857';
+  }
 
   if (!options.center) {
     m_options.center = geoModule.latlng(0.0, 0.0);
@@ -92,6 +96,7 @@ geoModule.map = function(node, options) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Update view based on the zoom
+   * @private
    */
   ////////////////////////////////////////////////////////////////////////////
   function updateViewZoom(useCurrent) {
@@ -101,6 +106,7 @@ geoModule.map = function(node, options) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Compute zoom level based on the camera distance
+   * @private
    */
   ////////////////////////////////////////////////////////////////////////////
   function updateZoom() {
@@ -136,6 +142,7 @@ geoModule.map = function(node, options) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize the scene
+   * @private
    */
   ////////////////////////////////////////////////////////////////////////////
   function initScene() {
@@ -146,6 +153,7 @@ geoModule.map = function(node, options) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize the scene (if not initialized) and then render the map
+   * @private
    */
   ////////////////////////////////////////////////////////////////////////////
   function draw() {
@@ -380,6 +388,8 @@ geoModule.map = function(node, options) {
         "showAttribution": 1,
         "visible": 1
       }, ogs.geo.multiGeometryFeature(geoms, [1.0,0.5, 0.0]));
+      geoModule.geoTransform.transformLayer(layer.gcs(), m_options.gcs,
+        layer);
 
       layer.setName('country-boundaries');
       this.addLayer(layer);

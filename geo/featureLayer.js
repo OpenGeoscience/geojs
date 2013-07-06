@@ -25,6 +25,7 @@ geoModule.featureLayer = function(options, feature) {
 
   /** @private */
   var m_that = this,
+      m_features = [],
       m_newFeatures = [],
       m_expiredFeatures = [],
       m_predrawTime = ogs.vgl.timestamp(),
@@ -32,9 +33,39 @@ geoModule.featureLayer = function(options, feature) {
 
   if (feature) {
     m_newFeatures.push(feature);
+    m_features.push(feature);
   }
   m_predrawTime.modified();
   m_updateTime.modified()
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return the underlying drawable entity.
+   * @returns {geoModule.feature}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.features = function() {
+    return m_features;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set feature.
+   *
+   * @param {Array} Array of feature
+   * @returns {Boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.setFeatures = function(features) {
+    if (features.length > 0) {
+      m_newFeatures = features.slice(0);
+      m_features = features.slice(0);
+      this.modified();
+      m_updateTime. modified();
+      return true;
+    }
+    return false;
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -74,6 +105,8 @@ geoModule.featureLayer = function(options, feature) {
           console.log('[warning] Data type not handled', data.type());
       }
     }
+
+    m_features = m_newFeatures.slice(0);
 
     if (data.length > 0) {
       m_updateTime. modified();

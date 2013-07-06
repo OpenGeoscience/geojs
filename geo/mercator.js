@@ -95,3 +95,11 @@ geoModule.mercator.tiley2lat = function(y, z) {
   n = Math.PI - 2.0 * Math.PI * y / pow(2.0, z);
   return 180.0 / Math.PI * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
 }
+
+geoModule.mercator.y2lat = function(a) {
+ return 180/Math.PI * (2 * Math.atan(Math.exp(a*Math.PI/180)) - Math.PI/2);
+}
+
+geoModule.mercator.lat2y = function(a) {
+  return 180/Math.PI * Math.log(Math.tan(Math.PI/4+a*(Math.PI/180)/2));
+}

@@ -54,6 +54,7 @@ geoModule.layer = function(options, source) {
   var m_that = this,
       m_name = "",
       m_dataSource = source,
+      m_gcs = 'EPSG:4326',
       m_opacity = options.opacity || 1.0,
       m_showAttribution = options.showAttribution || true,
       m_visible = options.visible || true,
@@ -81,7 +82,7 @@ geoModule.layer = function(options, source) {
   /**
    * Set feature.
    *
-   * @param {ogs.vgl.actor}
+   * @param {Array} Array of feature
    * @returns {Boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -193,9 +194,9 @@ geoModule.layer = function(options, source) {
     return false;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get source of the layer
-   *
    */
   ////////////////////////////////////////////////////////////////////////////
   this.dataSource = function() {
@@ -205,12 +206,35 @@ geoModule.layer = function(options, source) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Set source of the layer
-   *
    */
   ////////////////////////////////////////////////////////////////////////////
   this.setDataSource = function(source) {
     if (m_dataSource !== source) {
       m_dataSource = source;
+      this.modified();
+      return true;
+    }
+
+    return false;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get GCS of the layer
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.gcs = function() {
+    return m_gcs;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set source of the layer
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.setGcs = function(gcs) {
+    if (m_gcs !== gcs) {
+      m_gcs = gcs;
       this.modified();
       return true;
     }

@@ -87,7 +87,7 @@ geoModule.openStreetMapLayer = function() {
     // console.log('llx, lly, urx, ury', llx, lly, urx, ury);
 
     var actor = ogs.vgl.utils.createTexturePlane(llx, lly,
-      -1.0, urx - 1, lly, -1.0, llx, ury - 1, -1.0);
+      -1.0, urx, lly, -1.0, llx, ury, -1.0);
     var tile = new Image();
     tile.actor = actor;
 

@@ -47,6 +47,13 @@ vglModule.groupMapper = function() {
   };
 
   /**
+   * Return stored geometry data array if any
+   */
+  this.geometryDataArray = function() {
+    return m_geomDataArray;
+  };
+
+  /**
    * Connect mapper to its geometry data
    *
    * @param geoms {Array}
