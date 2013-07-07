@@ -77,7 +77,8 @@ vglModule.groupMapper = function() {
    * Compute bounds of the data
    */
   this.computeBounds = function() {
-    if (m_geomDataArray === null || m_geomDataArray === undefined) {
+    if (m_geomDataArray === null ||
+        m_geomDataArray === undefined) {
       this.resetBounds();
       return;
     }
@@ -87,7 +88,8 @@ vglModule.groupMapper = function() {
         m_bounds = this.bounds(),
         geomBounds = null
 
-    if (boundsDirtyTimestamp.getMTime() > computeBoundsTimestamp.getMTime()) {
+    if (boundsDirtyTimestamp.getMTime() >
+        computeBoundsTimestamp.getMTime()) {
 
       for (var i = 0; i < m_geomDataArray.length; ++i) {
         geomBounds = m_geomDataArray[i].bounds();

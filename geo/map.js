@@ -3,8 +3,11 @@
  * @module ogs.geo
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true, white: true, indent: 2*/
-/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image, vglModule, document*/
+/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
+/*white: true, indent: 2*/
+
+/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
+/*vglModule, document*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -105,11 +108,11 @@ geoModule.map = function(node, options) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Compute zoom level based on the camera distance
+   * Compute zoom level based on the camera distance and then perform update
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
-  function updateZoom() {
+  function computeZoom() {
     var camera = m_renderer.camera();
 
     if (camera.position()[2] < Number.MAX_VALUE) {
@@ -133,9 +136,15 @@ geoModule.map = function(node, options) {
     if (camera.position()[2] < 5) {
       m_options.zoom = 7;
     }
+  }
 
-    console.log('zoom, position ', m_options.zoom, camera.position()[2]);
-
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Update view extents
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  function updateViewExtents() {
     m_that.update(m_updateRequest);
   }
 
@@ -162,12 +171,6 @@ geoModule.map = function(node, options) {
     }
     m_viewer.render();
   }
-
-  $(m_interactorStyle).on(ogs.geo.command.updateViewZoomEvent, updateZoom);
-  $(m_interactorStyle).on(ogs.vgl.command.leftButtonPressEvent, draw);
-  $(m_interactorStyle).on(ogs.vgl.command.middleButtonPressEvent, draw);
-  $(m_interactorStyle).on(ogs.vgl.command.rightButtonPressEvent, draw);
-  $(this).on(geoModule.command.updateEvent, draw);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -414,6 +417,8 @@ geoModule.map = function(node, options) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.update = function() {
+    computeZoom();
+
     // For now update all layers. In the future, we should be
     // able to perform updates based on the layer type
     var layerName = null;
@@ -476,7 +481,8 @@ geoModule.map = function(node, options) {
     }
 
     if (timeRange.length < 2) {
-      console.log('[error] Invalid time range. Requires atleast begin and end time');
+      console.log('[error] Invalid time range. Requires atleast
+        begin and end time');
       return;
     }
 
@@ -517,6 +523,7 @@ geoModule.map = function(node, options) {
     }
   };
 
+  // Bind events to handlers
   document.onmousedown = m_viewer.handleMouseDown;
   document.onmouseup = m_viewer.handleMouseUp;
   document.onmousemove = m_viewer.handleMouseMove;
@@ -533,6 +540,13 @@ geoModule.map = function(node, options) {
   if (m_options.country_boundaries === true) {
     this.toggleCountryBoundaries();
   }
+
+  $(m_interactorStyle).on(ogs.geo.command.updateViewZoomEvent, this.update);
+  $(m_interactorStyle).on(ogs.geo.command.updateViewPositionEvent, this.update);
+  $(m_interactorStyle).on(ogs.vgl.command.leftButtonPressEvent, draw);
+  $(m_interactorStyle).on(ogs.vgl.command.middleButtonPressEvent, draw);
+  $(m_interactorStyle).on(ogs.vgl.command.rightButtonPressEvent, draw);
+  $(this).on(geoModule.command.updateEvent, draw);
 
   return this;
 };

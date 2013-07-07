@@ -306,10 +306,6 @@ geoModule.openStreetMapLayer = function() {
       return;
     }
 
-    if (m_previousZoom === mapOptions.zoom) {
-      return;
-    }
-
     this.updateTiles(request);
 
     // Update previous zoom if necessary

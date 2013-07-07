@@ -101,6 +101,7 @@ geoModule.mapInteractorStyle = function() {
       m_dy = m_worldPt1[1] - m_worldPt2[1];
       m_dz = m_worldPt1[2] - m_worldPt2[2];
       m_camera.pan(-m_dx, -m_dy, -m_dz);
+      $(m_that).trigger(geoModule.command.updateViewPositionEvent);
       $(m_that).trigger(vglModule.command.leftButtonPressEvent);
     }
     if (m_middileMouseButtonDown) {
