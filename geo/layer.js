@@ -60,7 +60,7 @@ geoModule.layer = function(options, source) {
       m_opacity = options.opacity || 1.0,
       m_showAttribution = options.showAttribution || true,
       m_visible = options.visible || true,
-      m_binNumber = -1;
+      m_binNumber = vglModule.material.RenderBin.Transparent;
 
   // TODO Write a function for this
   if (m_opacity > 1.0) {
