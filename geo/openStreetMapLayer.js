@@ -108,8 +108,10 @@ geoModule.openStreetMapLayer = function() {
     m_tiles[zoom][x][y] = tile;
 
     tile.crossOrigin = 'anonymous';
-    tile.src = "http://tile.openstreetmap.org/" + zoom + "/" + (x)
-      + "/" + (Math.pow(2,zoom) - 1 - y) + ".png";
+    // tile.src = "http://tile.openstreetmap.org/" + zoom + "/" + (x)
+    //   + "/" + (Math.pow(2,zoom) - 1 - y) + ".png";
+    tile.src = "http://otile1.mqcdn.com/tiles/1.0.0/osm/" + zoom + "/" +
+      (x) + "/" + (Math.pow(2,zoom) - 1 - y) + ".jpg";
     tile.texture = new vglModule.texture();
     tile.onload = function() {
       this.texture.updateDimensions();
