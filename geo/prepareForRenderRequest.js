@@ -10,25 +10,36 @@
 /*vglModule, document*/
 //////////////////////////////////////////////////////////////////////////////
 
-geoModule.prepareForRenderRequest = function(viewer, featureCollection) {
+geoModule.prepareForRenderRequest = function(mapOptions, viewer, featureCollection) {
   "use strict";
 
   if (!(this instanceof geoModule.prepareForRenderRequest)) {
-    return new geoModule.prepareForRenderRequest(viewer, featureCollection);
+    return new geoModule.prepareForRenderRequest(mapOptions,
+      viewer, featureCollection);
   }
   ogs.vgl.object.call(this);
 
-   var m_viewer = viewer,
+   var m_mapOptions = mapOptions,
+       m_viewer = viewer,
        m_featureCollection = featureCollection;
 
-   ///////////////////////////////////////////////////////////////////////////
-   /**
-    * Return viewer instance
-    */
-   ///////////////////////////////////////////////////////////////////////////
-   this.viewer = function() {
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return map options instance
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.mapOptions = function() {
+    return m_mapOptions;
+  };
+
+  ///////////////////////////////////////////////////////////////////////////
+  /**
+   * Return viewer instance
+   */
+  ///////////////////////////////////////////////////////////////////////////
+  this.viewer = function() {
     return m_viewer;
-   };
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -37,15 +48,6 @@ geoModule.prepareForRenderRequest = function(viewer, featureCollection) {
   ////////////////////////////////////////////////////////////////////////////
   this.featureCollection = function() {
     return m_featureCollection;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Make a request traverse scene for rendering purposes
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.requestPredraw = function() {
-    $(this).trigger(geoModule.command.requestPredrawEvent);
   };
 
   ////////////////////////////////////////////////////////////////////////////

@@ -34,8 +34,7 @@ geoModule.openStreetMapLayer = function() {
       MAP_MQAERIAL = 2,
       MAP_NUMTYPES = 3,
       m_mapType = MAP_MQOSM,
-      m_tiles = [],
-      m_deleteTiles = [],
+      m_tiles = {},
       m_newFeatures = [],
       m_expiredFeatures = [],
       m_previousZoom = null,
@@ -74,6 +73,18 @@ geoModule.openStreetMapLayer = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.addTile = function(request, zoom, x, y) {
+    if (!m_tiles[zoom]) {
+      m_tiles[zoom] = {};
+    }
+
+    if (!m_tiles[zoom][x]) {
+      m_tiles[zoom][x] = {};
+    }
+
+    if (m_tiles[zoom][x][y]) {
+      return;
+    }
+
     // Compute corner points
     var noOfTilesX = Math.max(1, Math.pow(2, zoom));
     var noOfTilesY = Math.max(1, Math.pow(2, zoom));
@@ -96,23 +107,15 @@ geoModule.openStreetMapLayer = function() {
       -1.0, urx, lly, -1.0, llx, ury, -1.0);
     var tile = new Image();
     tile.actor = actor;
-
-    if (!m_tiles[zoom]) {
-      m_tiles[zoom] = [];
-    }
-
-    if (!m_tiles[zoom][x]) {
-      m_tiles[zoom][x] = [];
-    }
-
-    m_tiles[zoom][x][y] = tile;
-
     tile.crossOrigin = 'anonymous';
     // tile.src = "http://tile.openstreetmap.org/" + zoom + "/" + (x)
     //   + "/" + (Math.pow(2,zoom) - 1 - y) + ".png";
     tile.src = "http://otile1.mqcdn.com/tiles/1.0.0/osm/" + zoom + "/" +
       (x) + "/" + (Math.pow(2,zoom) - 1 - y) + ".jpg";
     tile.texture = new vglModule.texture();
+
+    m_tiles[zoom][x][y] = tile;
+
     tile.onload = function() {
       this.texture.updateDimensions();
       this.texture.setImage(this);
@@ -120,23 +123,10 @@ geoModule.openStreetMapLayer = function() {
       this.actor.material().setBinNumber(m_that.binNumber());
       m_newFeatures.push(this.actor);
       m_updateTime.modified();
-      request.requestPredraw();
+      request.requestRedraw();
     };
 
     return tile;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Remove tiles from the renderer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.removeTiles = function() {
-    var i = 0;
-    for (i = 0; i < m_deleteTiles.length; ++i) {
-      m_expiredFeatures.push(m_deleteTiles[i].actor);
-    }
-    m_deleteTiles = [];
   };
 
 
@@ -145,7 +135,7 @@ geoModule.openStreetMapLayer = function() {
    * Clear tiles that are no longer required
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.clearTiles = function(request) {
+  this.removeTiles = function(request) {
     var mapOptions = request.mapOptions();
 
     if (!mapOptions) {
@@ -153,11 +143,7 @@ geoModule.openStreetMapLayer = function() {
       return;
     }
 
-    if (m_previousZoom === null) {
-      return;
-    }
-
-    if (m_previousZoom === mapOptions.zoom) {
+    if (m_previousZoom === null || m_previousZoom == mapOptions.zoom) {
       return;
     }
 
@@ -167,40 +153,35 @@ geoModule.openStreetMapLayer = function() {
 
     // For now just clear the tiles from the last zoom.
     // TODO Remove tiles if more than threshold
-    var i = null,
-        j = null,
-        k =  null;
+    var zoom = null,
+        x = null,
+        y =  null;
 
-    for (i = 0; i < m_tiles.length; ++i) {
-      if (!m_tiles[i]) {
+    for (zoom in m_tiles) {
+      if (!m_tiles[zoom]) {
         continue;
       }
 
-      if (i === mapOptions.zoom) {
+      if (zoom === mapOptions.zoom) {
         continue;
       }
 
-      for (j = 0;  j < m_tiles[i].length; ++j) {
-        if (!m_tiles[i][j]) {
+      for (x in m_tiles[zoom]) {
+        if (!m_tiles[zoom][x]) {
           continue;
         }
-        for (k = 0;  k < m_tiles[i][j].length; ++k) {
-          if (!m_tiles[i][j][k]) {
+        for (y in m_tiles[zoom][x]) {
+          if (!m_tiles[zoom][x][y]) {
             continue;
           }
 
-          if (!m_tiles[i][j][k].actor) {
+          if (m_tiles[zoom][x][y].actor.REMOVED) {
             continue;
           }
 
-          if (m_tiles[i][j][k].REMOVED) {
-            continue;
-          }
-
-          m_tiles[i][j][k].REMOVED = true;
-          m_deleteTiles.push(m_tiles[i][j][k]);
-          m_tiles[i][j][k] = null;
-          // m_renderer.removeActor(m_tiles[i][j][k].actor);
+          m_tiles[zoom][x][y].actor.REMOVED = true;
+          m_expiredFeatures.push(m_tiles[zoom][x][y].actor);
+          m_tiles[zoom][x][y] = null;
         }
       }
     }
@@ -227,7 +208,6 @@ geoModule.openStreetMapLayer = function() {
 
     var totalLatDegrees = 360.0;
     var zoom = mapOptions.zoom;
-    // console.log('zoom', zoom);
 
     // First get corner points
     // In display coordinates the origin is on top left corner (0, 0)
@@ -252,6 +232,10 @@ geoModule.openStreetMapLayer = function() {
         worldPt2 = renderer.displayToWorld(
           displayPt2, camera.viewMatrix(), camera.projectionMatrix(),
           node.width, node.height);
+
+    // @TODO Currently we blindly remove all tiles from previous zoom
+    // state. This could be optimized.
+    m_that.removeTiles(request);
 
     // Clamp world points
     worldPt1[0] = Math.max(worldPt1[0], -180.0);
@@ -282,23 +266,16 @@ geoModule.openStreetMapLayer = function() {
     tile2y = Math.max(tile2y, 0);
     tile2y = Math.min(Math.pow(2, zoom) - 1, tile2y);
 
-    // @TODO Currently we blindly remove all tiles from previous zoom
-    // state. This could be optimized.
-    m_that.clearTiles(request);
-
     var invJ =  null;
     for (var i = tile1x; i <= tile2x; ++i) {
       for (var j = tile2y; j <= tile1y; ++j) {
         invJ = (Math.pow(2,zoom) - 1 - j)
-        if  (m_that.hasTile(zoom, i, invJ)) {
-          // Do something here
-        } else {
+        if  (!m_that.hasTile(zoom, i, invJ)) {
           var tile = m_that.addTile(request, zoom, i, invJ);
         }
       }
     }
 
-    m_that.removeTiles();
     m_updateTime.modified();
   };
 
@@ -331,15 +308,16 @@ geoModule.openStreetMapLayer = function() {
     if (m_predrawTime.getMTime() > m_updateTime.getMTime()) {
       return;
     }
-    var featureCollection = request.featureCollection();
-    featureCollection.setNewFeatures(this.name(), m_newFeatures);
-    featureCollection.setExpiredFeatures(this.name(), m_expiredFeatures);
 
-    m_newFeatures = [];
-    m_expiredFeatures = [];
+    var featureCollection = request.featureCollection();
+    featureCollection.setNewFeatures(this.name(), m_newFeatures.slice(0));
+    featureCollection.setExpiredFeatures(this.name(), m_expiredFeatures.slice(0));
+
+    m_newFeatures.length = 0;
+    m_expiredFeatures.length = 0;
 
     m_predrawTime.modified();
-  }
+  };
 
   this.setBinNumber(ogs.vgl.material.RenderBin.Base);
 };

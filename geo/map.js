@@ -88,17 +88,15 @@ geoModule.map = function(node, options) {
   m_renderer = m_viewer.renderWindow().activeRenderer();
 
   m_prepareForRenderRequest =
-    geoModule.prepareForRenderRequest(m_viewer, m_featureCollection);
+    geoModule.prepareForRenderRequest(m_options, m_viewer, m_featureCollection);
   m_updateRequest = geoModule.updateRequest(null, m_options, m_viewer, m_node);
 
-  $(m_prepareForRenderRequest).on(geoModule.command.requestPredrawEvent,
+  $(m_prepareForRenderRequest).on(geoModule.command.requestRedrawEvent,
     function(event) {
-      m_that.predraw();
       m_that.redraw();
   });
-  $(m_updateRequest).on(geoModule.command.requestPredrawEvent,
+  $(m_updateRequest).on(geoModule.command.requestRedrawEvent,
     function(event) {
-      m_that.predraw();
       m_that.redraw();
   });
 
@@ -356,15 +354,6 @@ geoModule.map = function(node, options) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Manually force to render map
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.redraw = function() {
-    m_viewer.render();
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
    * Resize map
    *
    * @param {Number} width
@@ -440,7 +429,7 @@ geoModule.map = function(node, options) {
         m_layers[layerName].update(m_updateRequest);
       }
     }
-  }
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -449,9 +438,7 @@ geoModule.map = function(node, options) {
   ////////////////////////////////////////////////////////////////////////////
   this.predraw = function() {
     var i = 0,
-        layerName = 0,
-        expiredFreatures = null,
-        sortedActors = [];
+        layerName = 0;
 
     m_featureCollection.resetAll();
 
@@ -466,20 +453,46 @@ geoModule.map = function(node, options) {
 
       // Remove expired features from the renderer
       for (layerName in m_layers) {
-        if (m_featureCollection.expiredFeatures(layerName).length === 0) {
-          continue;
-        }
         m_renderer.removeActors(
           m_featureCollection.expiredFeatures(layerName));
-      }
 
-      // Add new actors (Will do sorting by bin and then material later)
-      for (layerName in m_layers) {
-        m_renderer.addActors(m_featureCollection.newFeatures(layerName));
+        // Add new actors (Will do sorting by bin and then material later)
+        m_renderer.addActors(
+          m_featureCollection.newFeatures(layerName));
       }
 
       m_lastPrepareToRenderingTime.modified();
     }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Manually force to render map
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.redraw = function() {
+    m_that.predraw();
+    draw();
+    m_that.postdraw();
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Prepare map for rendering
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.postdraw = function() {
+    // TODO Implement this
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Animate layers of a map
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.updateAndDraw = function() {
+    m_that.update();
+    m_that.redraw();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -554,12 +567,11 @@ geoModule.map = function(node, options) {
     this.toggleCountryBoundaries();
   }
 
-  $(m_interactorStyle).on(ogs.geo.command.updateViewZoomEvent, this.update);
-  $(m_interactorStyle).on(ogs.geo.command.updateViewPositionEvent, this.update);
-  $(m_interactorStyle).on(ogs.vgl.command.leftButtonPressEvent, draw);
-  $(m_interactorStyle).on(ogs.vgl.command.middleButtonPressEvent, draw);
-  $(m_interactorStyle).on(ogs.vgl.command.rightButtonPressEvent, draw);
-  $(this).on(geoModule.command.updateEvent, draw);
+  $(m_interactorStyle).on(
+    ogs.geo.command.updateViewZoomEvent, this.updateAndDraw);
+  $(m_interactorStyle).on(
+    ogs.geo.command.updateViewPositionEvent, this.updateAndDraw);
+  $(this).on(geoModule.command.updateEvent, this.updateAndDraw);
 
   return this;
 };

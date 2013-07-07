@@ -141,7 +141,7 @@ geoModule.featureLayer = function(options, feature) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.updateLayerOpacity = function(opacity) {
-    if (!m_newFeatures) {
+    if (!m_features) {
       return;
     }
 
@@ -149,8 +149,8 @@ geoModule.featureLayer = function(options, feature) {
          mat,
          opacityUniform;
 
-    for (i = 0; i < m_newFeatures.length; ++i) {
-      mat = m_newFeatures[i].material();
+    for (i = 0; i < m_features.length; ++i) {
+      mat = m_features[i].material();
       opacityUniform = mat.shaderProgram().uniform('opacity');
       if (opacityUniform !== null) {
         opacityUniform.set(opacity);
