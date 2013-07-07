@@ -12,9 +12,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- *
  * Create a new instance of openStreetMapLayer
- *
  */
 //////////////////////////////////////////////////////////////////////////////
 geoModule.openStreetMapLayer = function() {
@@ -24,14 +22,17 @@ geoModule.openStreetMapLayer = function() {
   }
   geoModule.featureLayer.call(this);
 
-  /** @public **/
-  var MAP_OSM = 0,
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Private member variables
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  var m_that = this,
+      MAP_OSM = 0,
       MAP_MQOSM = 1,
       MAP_MQAERIAL = 2,
-      MAP_NUMTYPES = 3;
-
-  /** @private */
-  var m_that = this,
+      MAP_NUMTYPES = 3,
       m_mapType = MAP_MQOSM,
       m_tiles = [],
       m_deleteTiles = [],

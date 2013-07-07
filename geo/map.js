@@ -19,6 +19,7 @@ geoModule.mapOptions = {
   zoom: 0,
   center: geoModule.latlng(0.0, 0.0),
   gcs: 'EPSG:3857',
+  display_gcs: 'EPSG:4326',
   country_boundaries: true,
   state_boundaries: false,
 };
@@ -38,7 +39,12 @@ geoModule.map = function(node, options) {
   }
   ogs.vgl.object.call(this);
 
-  /** @private */
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Private member variables
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
   var m_that = this,
       m_node = node,
       m_initialized = false,
@@ -124,17 +130,20 @@ geoModule.map = function(node, options) {
     if (camera.position()[2] < 100) {
       m_options.zoom = 3;
     }
-    if (camera.position()[2] < 50) {
+    if (camera.position()[2] < 75) {
       m_options.zoom = 4;
     }
-    if (camera.position()[2] < 25) {
+    if (camera.position()[2] < 50) {
       m_options.zoom = 5;
     }
-    if (camera.position()[2] < 15) {
+    if (camera.position()[2] < 25) {
       m_options.zoom = 6;
     }
-    if (camera.position()[2] < 5) {
+    if (camera.position()[2] < 15) {
       m_options.zoom = 7;
+    }
+    if (camera.position()[2] < 10) {
+      m_options.zoom = 8;
     }
   }
 
@@ -224,6 +233,9 @@ geoModule.map = function(node, options) {
       if (!layer.binNumber() || layer.binNumber() === -1) {
         layer.setBinNumber(Object.keys(m_layers).length);
       }
+
+      // Transform layer
+      geoModule.geoTransform.transformLayer(m_options.gcs, layer);
 
       m_layers[layer.name()] = layer;
       this.predraw();
@@ -376,7 +388,10 @@ geoModule.map = function(node, options) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.toggleCountryBoundaries = function() {
-    var layer, reader, geoms;
+    var layer = null,
+        reader = null,
+        geoms = null;
+
     layer = this.findLayerById('country-boundaries');
     if (layer !== null) {
       layer.setVisible(!layer.visible());
@@ -391,8 +406,6 @@ geoModule.map = function(node, options) {
         "showAttribution": 1,
         "visible": 1
       }, ogs.geo.multiGeometryFeature(geoms, [1.0,0.5, 0.0]));
-      geoModule.geoTransform.transformLayer(layer.gcs(), m_options.gcs,
-        layer);
 
       layer.setName('country-boundaries');
       this.addLayer(layer);

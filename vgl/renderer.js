@@ -126,7 +126,6 @@ vglModule.renderer = function() {
     sortedActors.sort(function(a, b) {return a[0] - b[0]});
 
     for ( i = 0; i < sortedActors.length; ++i) {
-      console.log(sortedActors[i][0]);
       actor = sortedActors[i][1];
 
       mat4.multiply(renSt.m_modelViewMatrix, m_camera.viewMatrix(),

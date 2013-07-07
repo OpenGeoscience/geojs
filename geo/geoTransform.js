@@ -55,7 +55,7 @@ geoModule.geoTransform.osmTransformFeature = function(srcGcs, destGcs, feature) 
   if (feature.mapper() instanceof ogs.vgl.groupMapper) {
     geometryDataArray = feature.mapper().geometryDataArray();
   } else {
-    geometryDataArray.push(feature.mapper().geometryData());s
+    geometryDataArray.push(feature.mapper().geometryData());
   }
 
   noOfGeoms = geometryDataArray.length;
@@ -203,7 +203,7 @@ geoModule.geoTransform.transformFeature = function(srcGcs, destGcs, feature) {
  * projection.
  */
 //////////////////////////////////////////////////////////////////////////////
-geoModule.geoTransform.transformLayer = function(srcGcs, destGcs, layer) {
+geoModule.geoTransform.transformLayer = function(destGcs, layer) {
   'use strict';
 
   if (!layer) {
@@ -216,6 +216,7 @@ geoModule.geoTransform.transformLayer = function(srcGcs, destGcs, layer) {
       i = 0;
   for (i = 0; i < count; ++i) {
     // TODO Ignoring src and destination projections
-    geoModule.geoTransform.osmTransformFeature(srcGcs, destGcs, features[i]);
+    geoModule.geoTransform.osmTransformFeature(
+      destGcs, layer.gcs(), features[i]);
   }
 };
