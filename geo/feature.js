@@ -1,9 +1,14 @@
+//////////////////////////////////////////////////////////////////////////////
 /**
  * @module ogs.geo
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true, white: true, indent: 2*/
-/*global geoModule, ogs, inherit*/
+/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
+/*white: true, indent: 2*/
+
+/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
+/*vglModule, document*/
+//////////////////////////////////////////////////////////////////////////////
 
 /**
  * Create a new instance of class feature
