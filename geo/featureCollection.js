@@ -4,10 +4,10 @@
  */
 
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*white: true, indent: 2*/
+/*jslint white: true, indent: 2*/
 
 /*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*vglModule, document*/
+/*global vglModule, document*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -25,8 +25,8 @@ geoModule.featureCollection = function() {
   }
   ogs.vgl.object.call(this);
 
-  var m_newFeaturesMap = {};
-  var m_expiredFeaturesMap = {};
+  var m_newFeaturesMap = {},
+      m_expiredFeaturesMap = {};
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -65,7 +65,7 @@ geoModule.featureCollection = function() {
 
     m_expiredFeaturesMap[layerId] = [];
     return m_expiredFeaturesMap[layerId];
-  }
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -104,9 +104,8 @@ geoModule.featureCollection = function() {
   ////////////////////////////////////////////////////////////////////////////
   this.isEmpty = function() {
     // ECMAScript 5 supports the syntax below
-    return
-      (Object.keys(m_newFeaturesMap).length === 0 &&
-       Object.keys(m_expiredFeaturesMap).length === 0) ;
+    return (Object.keys(m_newFeaturesMap).length === 0 &&
+            Object.keys(m_expiredFeaturesMap).length === 0) ;
   };
 
   ////////////////////////////////////////////////////////////////////////////

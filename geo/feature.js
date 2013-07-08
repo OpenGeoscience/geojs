@@ -4,10 +4,10 @@
  */
 
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*white: true, indent: 2*/
+/*jslint white: true, indent: 2*/
 
 /*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*vglModule, document*/
+/*global vglModule, document*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -143,15 +143,15 @@ geoModule.geometryFeature = function(geom) {
   ogs.vgl.actor.call(this);
 
   // Initialize
-  var mapper, material;
+  var mapper = null,
+      material = null,
+      values = geom.sourceData(vglModule.vertexAttributeKeys.Scalar),
+      colors = geom.sourceData(vglModule.vertexAttributeKeys.Color);
+
   mapper = ogs.vgl.mapper();
   mapper.setGeometryData(geom);
-
   this.setMapper(mapper);
 
-  var material;
-  var values = geom.sourceData(vertexAttributeKeys.Scalar);
-  var colors = geom.sourceData(vertexAttributeKeys.Color);
   if (values) {
     material = ogs.vgl.utils.createColorMappedMaterial(values.scalarRange());
   } else if (colors) {
@@ -184,14 +184,13 @@ geoModule.multiGeometryFeature = function(geoms, color) {
   ogs.vgl.actor.call(this);
 
   var m_mapper = ogs.vgl.groupMapper(),
-      m_material;
+      material;
   this.setMapper(m_mapper);
 
   if (geoms) {
     m_mapper.setGeometryDataArray(geoms);
   }
 
-  var material;
   if (!color) {
     material = ogs.vgl.utils.createGeometryMaterial();
   } else {

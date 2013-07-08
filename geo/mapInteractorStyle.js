@@ -4,10 +4,10 @@
  */
 
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*white: true, indent: 2*/
+/*jslint white: true, indent: 2*/
 
 /*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*vglModule, document*/
+/*global vglModule, vec4, document*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -49,8 +49,8 @@ geoModule.mapInteractorStyle = function() {
       m_mouseLastPos = {
         x: 0,
         y: 0
-      };
-  var m_picker = new ogs.vgl.picker();
+      },
+      m_picker = new ogs.vgl.picker();
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -58,7 +58,11 @@ geoModule.mapInteractorStyle = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.handleMouseMove = function(event) {
-    var canvas = m_that.viewer().canvas();
+    var canvas = m_that.viewer().canvas(),
+        xrot = null,
+        a = null,
+        angle = null;
+
     if (event.target !== canvas) {
       return true;
     }
@@ -117,13 +121,14 @@ geoModule.mapInteractorStyle = function() {
     }
     if (m_middileMouseButtonDown) {
       //Limit Rotation to only X, and between 0 to 60
-      var xrot = (m_mouseLastPos.y - m_currentMousePos.y);
-      var a = m_camera.viewUpDirection();
-      var angle = Math.atan2(a[2],a[1])*180/Math.PI;
-      if (xrot > 0 && angle < 60)
+      xrot = (m_mouseLastPos.y - m_currentMousePos.y);
+      a = m_camera.viewUpDirection();
+      angle = Math.atan2(a[2],a[1])*180/Math.PI;
+      if (xrot > 0 && angle < 60) {
         m_camera.rotate(0, xrot);
-      else if (xrot < 0 && angle > 0)
+      } else if (xrot < 0 && angle > 0) {
         m_camera.rotate(0, xrot);
+      }
       $(m_that).trigger(vglModule.command.middleButtonPressEvent);
     }
     if (m_rightMouseButtonDown) {
@@ -180,7 +185,12 @@ geoModule.mapInteractorStyle = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.handleMouseUp = function(event) {
-    var canvas = m_that.viewer().canvas();
+    var canvas = m_that.viewer().canvas(),
+        width = null,
+        height = null,
+        renderer = null,
+        num = null;
+
     if (event.target !== canvas) {
       return true;
     }
@@ -189,12 +199,12 @@ geoModule.mapInteractorStyle = function() {
     }
     if (event.button === 0) {
       m_leftMouseButtonDown = false;
-      var width = m_that.viewer().renderWindow().windowSize()[0];
-      var height = m_that.viewer().renderWindow().windowSize()[1];
-      var renderer = m_that.viewer().renderWindow().activeRenderer();
+      width = m_that.viewer().renderWindow().windowSize()[0];
+      height = m_that.viewer().renderWindow().windowSize()[1];
+      renderer = m_that.viewer().renderWindow().activeRenderer();
       if(m_mouseLastPos.x >= 0 && m_mouseLastPos.x <= width &&
-         m_mouseLastPos.y >= 0 && m_mouseLastPos.y <= height) {
-        var num = m_picker.pick(m_mouseLastPos.x, m_mouseLastPos.y, renderer);
+        m_mouseLastPos.y >= 0 && m_mouseLastPos.y <= height) {
+        num = m_picker.pick(m_mouseLastPos.x, m_mouseLastPos.y, renderer);
       }
     }
     if (event.button === 1) {

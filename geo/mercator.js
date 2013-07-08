@@ -4,10 +4,10 @@
  */
 
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*white: true, indent: 2*/
+/*jslint white: true, indent: 2*/
 
 /*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*vglModule, document*/
+/*global vglModule, document*/
 //////////////////////////////////////////////////////////////////////////////
 
 geoModule.mercator = {};
@@ -23,9 +23,9 @@ geoModule.mercator = {};
 //////////////////////////////////////////////////////////////////////////////
 geoModule.mercator.long2tilex = function(lon, z) {
   "use strict";
-  var rad = (lon + 180.0) / 360.0;
-  var f = Math.floor(rad * Math.pow(2.0, z));
-  return Math.round(f)
+  var rad = (lon + 180.0) / 360.0,
+      f = Math.floor(rad * Math.pow(2.0, z));
+  return Math.round(f);
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -54,10 +54,10 @@ geoModule.mercator.lat2tiley = function(lat, z) {
 //////////////////////////////////////////////////////////////////////////////
 geoModule.mercator.long2tilex2 = function(lon, z) {
   "use strict";
-  var rad = (lon + 180.0) / 360.0;
-  var f = rad * Math.pow(2.0, z);
-  var ret = Math.floor(f);
-  var frac = f-ret;
+  var rad = (lon + 180.0) / 360.0,
+      f = rad * Math.pow(2.0, z),
+      ret = Math.floor(f),
+      frac = f-ret;
   return [ret, frac];
 };
 
@@ -72,10 +72,11 @@ geoModule.mercator.long2tilex2 = function(lon, z) {
 //////////////////////////////////////////////////////////////////////////////
 geoModule.mercator.lat2tiley2 = function(lat, z) {
   "use strict";
-  var rad = lat * Math.PI/180.0;
-  var f = (1.0 - Math.log( Math.tan(rad) + 1.0 / Math.cos(rad)) / Math.PI) / 2.0 * Math.pow(2.0, z);
-  var ret = Math.floor(f);
-  var frac = f-ret;
+  var rad = lat * Math.PI/180.0,
+      f = (1.0 - Math.log(Math.tan(rad) + 1.0 / Math.cos(rad)) /
+           Math.PI) / 2.0 * Math.pow(2.0, z),
+      ret = Math.floor(f),
+      frac = f-ret;
   return [ret, frac];
 };
 
@@ -90,7 +91,7 @@ geoModule.mercator.lat2tiley2 = function(lat, z) {
 //////////////////////////////////////////////////////////////////////////////
 geoModule.mercator.tilex2long = function(x, z) {
   "use strict";
-  return x / pow(2.0, z) * 360.0 - 180.0;
+  return x / Math.pow(2.0, z) * 360.0 - 180.0;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -104,7 +105,7 @@ geoModule.mercator.tilex2long = function(x, z) {
 //////////////////////////////////////////////////////////////////////////////
 geoModule.mercator.tiley2lat = function(y, z) {
   "use strict";
-  n = Math.PI - 2.0 * Math.PI * y / pow(2.0, z);
+  var n = Math.PI - 2.0 * Math.PI * y / Math.pow(2.0, z);
   return 180.0 / Math.PI * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
 };
 
@@ -119,7 +120,7 @@ geoModule.mercator.tiley2lat = function(y, z) {
 //////////////////////////////////////////////////////////////////////////////
 geoModule.mercator.y2lat = function(a) {
   "use strict";
- return 180/Math.PI * (2 * Math.atan(Math.exp(a*Math.PI/180)) - Math.PI/2);
+  return 180/Math.PI * (2 * Math.atan(Math.exp(a*Math.PI/180)) - Math.PI/2);
 };
 
 //////////////////////////////////////////////////////////////////////////////

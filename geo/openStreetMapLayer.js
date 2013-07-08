@@ -4,10 +4,10 @@
  */
 
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*white: true, indent: 2*/
+/*jslint white: true, continue:true, indent: 2*/
 
 /*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*vglModule, document*/
+/*global vglModule, vec4, document*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -86,26 +86,20 @@ geoModule.openStreetMapLayer = function() {
     }
 
     // Compute corner points
-    var noOfTilesX = Math.max(1, Math.pow(2, zoom));
-    var noOfTilesY = Math.max(1, Math.pow(2, zoom));
+    var noOfTilesX = Math.max(1, Math.pow(2, zoom)),
+        noOfTilesY = Math.max(1, Math.pow(2, zoom)),
+        // Convert into mercator
+        totalLatDegrees = 360.0,
+        lonPerTile = 360.0 / noOfTilesX,
+        latPerTile = totalLatDegrees / noOfTilesY,
+        llx = -180.0 + x * lonPerTile,
+        lly = -totalLatDegrees * 0.5 + y * latPerTile,
+        urx = -180.0 + (x + 1) * lonPerTile,
+        ury = -totalLatDegrees * 0.5 + (y + 1) * latPerTile,
+        actor = ogs.vgl.utils.createTexturePlane(llx, lly,
+          -1.0, urx, lly, -1.0, llx, ury, -1.0),
+        tile = new Image();
 
-    // Conver into mercator
-    var totalLatDegrees = 360.0; // in mercator
-    var lonPerTile = 360.0 / noOfTilesX;
-    var latPerTile = totalLatDegrees / noOfTilesY;
-
-    var llx = -180.0 + x * lonPerTile;
-    var lly = -totalLatDegrees * 0.5 + y * latPerTile;
-    var urx = -180.0 + (x + 1) * lonPerTile;
-    var ury = -totalLatDegrees * 0.5 + (y + 1) * latPerTile;
-
-    // console.log('noOfTilesX, noOfTilesY', noOfTilesX, noOfTilesY);
-    // console.log('x, y', x, y);
-    // console.log('llx, lly, urx, ury', llx, lly, urx, ury);
-
-    var actor = ogs.vgl.utils.createTexturePlane(llx, lly,
-      -1.0, urx, lly, -1.0, llx, ury, -1.0);
-    var tile = new Image();
     tile.LOADING = true;
     tile.LOADED = false;
     tile.UNLOAD = false;
@@ -117,9 +111,6 @@ geoModule.openStreetMapLayer = function() {
     tile.src = "http://otile1.mqcdn.com/tiles/1.0.0/osm/" + zoom + "/" +
       (x) + "/" + (Math.pow(2,zoom) - 1 - y) + ".jpg";
     tile.texture = new vglModule.texture();
-
-    m_tiles[zoom][x][y] = tile;
-
     tile.onload = function() {
       if (this.UNLOAD) {
         this.LOADING = false;
@@ -137,6 +128,7 @@ geoModule.openStreetMapLayer = function() {
       request.requestRedraw();
     };
 
+    m_tiles[zoom][x][y] = tile;
     return tile;
   };
 
@@ -147,14 +139,17 @@ geoModule.openStreetMapLayer = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.removeTiles = function(request) {
-    var mapOptions = request.mapOptions();
+    var mapOptions = request.mapOptions(),
+        zoom = null,
+        x = null,
+        y = null;
 
     if (!mapOptions) {
-      console.log("[info] Invalid map  options. Cannot clear tile.")
+      console.log("[info] Invalid map  options. Cannot clear tile.");
       return;
     }
 
-    if (m_previousZoom === null || m_previousZoom == mapOptions.zoom) {
+    if (m_previousZoom === null || m_previousZoom === mapOptions.zoom) {
       return;
     }
 
@@ -163,11 +158,6 @@ geoModule.openStreetMapLayer = function() {
     }
 
     // For now just clear the tiles from the last zoom.
-    // TODO Remove tiles if more than threshold
-    var zoom = null,
-        x = null,
-        y =  null;
-
     for (zoom in m_tiles) {
       if (!m_tiles[zoom]) {
         continue;
@@ -210,29 +200,33 @@ geoModule.openStreetMapLayer = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.updateTiles = function(request) {
-    var viewer = request.viewer(),
-        renderer = null,
-        camera = null,
-        mapOptions = request.mapOptions(),
-        node = request.node();
-
-    if (!viewer) {
+    if (!request.viewer()) {
       console.log('[info] Invlaid viewer');
       return;
     }
-    renderer = viewer.renderWindow().activeRenderer();
-    camera = renderer.camera();
 
-    var totalLatDegrees = 360.0;
-    var zoom = mapOptions.zoom;
-
-    // First get corner points
-    // In display coordinates the origin is on top left corner (0, 0)
-    var llx = 0.0,
+    var viewer = request.viewer(),
+        renderer = viewer.renderWindow().activeRenderer(),
+        camera = renderer.camera(),
+        mapOptions = request.mapOptions(),
+        node = request.node(),
+        totalLatDegrees = 360.0,
+        zoom = mapOptions.zoom,
+        // First get corner points
+        // In display coordinates the origin is on top left corner (0, 0)
+        llx = 0.0,
         lly = node.height,
         urx = node.width,
         ury = 0.0,
         temp = null,
+        tile = null,
+        tile1x = null,
+        tile1y = null,
+        tile2x = null,
+        tile2y = null,
+        invJ = null,
+        i = 0,
+        j = 0,
         // Now convert display point to world point
         focalPoint = camera.focalPoint(),
         focusWorldPt = vec4.fromValues(
@@ -266,11 +260,11 @@ geoModule.openStreetMapLayer = function() {
     worldPt2[1] = Math.min(worldPt2[1],  totalLatDegrees * 0.5);
 
     // Compute tilex and tiley
-    var tile1x = geoModule.mercator.long2tilex(worldPt1[0], zoom);
-    var tile1y = geoModule.mercator.lat2tiley(worldPt1[1], zoom);
+    tile1x = geoModule.mercator.long2tilex(worldPt1[0], zoom);
+    tile1y = geoModule.mercator.lat2tiley(worldPt1[1], zoom);
 
-    var tile2x = geoModule.mercator.long2tilex(worldPt2[0], zoom);
-    var tile2y = geoModule.mercator.lat2tiley(worldPt2[1], zoom);
+    tile2x = geoModule.mercator.long2tilex(worldPt2[0], zoom);
+    tile2y = geoModule.mercator.lat2tiley(worldPt2[1], zoom);
 
     // Clamp tilex and tiley
     tile1x = Math.max(tile1x, 0);
@@ -297,12 +291,11 @@ geoModule.openStreetMapLayer = function() {
       tile2y = temp;
     }
 
-    var invJ =  null;
-    for (var i = tile1x; i <= tile2x; ++i) {
-      for (var j = tile2y; j <= tile1y; ++j) {
-        invJ = (Math.pow(2,zoom) - 1 - j)
+    for (i = tile1x; i <= tile2x; ++i) {
+      for (j = tile2y; j <= tile1y; ++j) {
+        invJ = (Math.pow(2,zoom) - 1 - j);
         if  (!m_that.hasTile(zoom, i, invJ)) {
-          var tile = m_that.addTile(request, zoom, i, invJ);
+          tile = m_that.addTile(request, zoom, i, invJ);
         }
       }
     }
@@ -318,7 +311,7 @@ geoModule.openStreetMapLayer = function() {
   this.update = function(request) {
     var mapOptions = request.mapOptions();
     if (!mapOptions) {
-      console.log("[warning] Invalid map options.")
+      console.log("[warning] Invalid map options.");
       return;
     }
 

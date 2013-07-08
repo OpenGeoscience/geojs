@@ -4,10 +4,10 @@
  */
 
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*white: true, indent: 2*/
+/*jslint white: true, indent: 2*/
 
 /*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*vglModule, document*/
+/*global vglModule, document*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -41,7 +41,7 @@ geoModule.featureLayer = function(options, feature) {
     m_features.push(feature);
   }
   m_predrawTime.modified();
-  m_updateTime.modified()
+  m_updateTime.modified();
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -85,7 +85,8 @@ geoModule.featureLayer = function(options, feature) {
 
     var i = 0,
         time = request.time(),
-        data = null;
+        data = null,
+        geomFeature = null;
 
     if (!time) {
       return;
@@ -99,12 +100,12 @@ geoModule.featureLayer = function(options, feature) {
 
     for(i = 0; i < data.length; ++i) {
       switch(data[i].type()) {
-        case vglModule.data.geometry:
-          var geomFeature = geoModule.geometryFeature(data[i]);
+        case ogs.vgl.data.geometry:
+          geomFeature = geoModule.geometryFeature(data[i]);
           geomFeature.material().setBinNumber(this.binNumber());
           m_newFeatures.push(geomFeature);
           break;
-        case vglModule.data.raster:
+        case ogs.vgl.data.raster:
           break;
         default:
           console.log('[warning] Data type not handled', data.type());

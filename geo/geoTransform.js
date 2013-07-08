@@ -4,10 +4,10 @@
  */
 
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*white: true, indent: 2*/
+/*jslint white: true, indent: 2*/
 
 /*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*vglModule, document*/
+/*global vglModule, proj4, document*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -143,7 +143,7 @@ geoModule.geoTransform.transformFeature = function(srcGcs, destGcs, feature) {
   if (feature.mapper() instanceof ogs.vgl.groupMapper) {
     geometryDataArray = feature.mapper().geometryDataArray();
   } else {
-    geometryDataArray.push(feature.mapper().geometryData());s
+    geometryDataArray.push(feature.mapper().geometryData());
   }
 
   noOfGeoms = geometryDataArray.length;

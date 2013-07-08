@@ -4,10 +4,10 @@
  */
 
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*white: true, indent: 2*/
+/*jslint white: true, indent: 2*/
 
 /*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*vglModule, document*/
+/*global vglModule, document*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -54,13 +54,14 @@ geoModule.layer = function(options, source) {
 
   /** @private */
   var m_that = this,
+      m_id = "",
       m_name = "",
       m_dataSource = source,
       m_gcs = 'EPSG:4326',
       m_opacity = options.opacity || 1.0,
       m_showAttribution = options.showAttribution || true,
       m_visible = options.visible || true,
-      m_binNumber = vglModule.material.RenderBin.Transparent;
+      m_binNumber = ogs.vgl.material.RenderBin.Transparent;
 
   // TODO Write a function for this
   if (m_opacity > 1.0) {
@@ -144,6 +145,7 @@ geoModule.layer = function(options, source) {
   this.setName = function(name) {
     if (m_name !== name) {
       m_name = name;
+      m_id = name;
       this.modified();
       return true;
     }
@@ -266,7 +268,7 @@ geoModule.layer = function(options, source) {
     m_binNumber = binNumber;
     this.modified();
     return true;
-  }
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -302,7 +304,7 @@ geoModule.layer = function(options, source) {
   ////////////////////////////////////////////////////////////////////////////
   this.getUpdateTime = function() {
     // Concrete class should implement this
-  }
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**

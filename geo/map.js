@@ -4,10 +4,10 @@
  */
 
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*white: true, indent: 2*/
+/*jslint white: true, indent: 2*/
 
 /*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*vglModule, document*/
+/*global vglModule, document*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -51,6 +51,7 @@ geoModule.map = function(node, options) {
       m_options = options,
       m_layers = {},
       m_activeLayer = null,
+      m_mapLayer = null,
       m_featureCollection = geoModule.featureCollection(),
       m_renderTime = ogs.vgl.timestamp(),
       m_lastPrepareToRenderingTime = ogs.vgl.timestamp(),
@@ -382,12 +383,13 @@ geoModule.map = function(node, options) {
   this.toggleCountryBoundaries = function() {
     var layer = null,
         reader = null,
-        geoms = null;
+        geoms = null,
+        result = false;
 
     layer = this.findLayerById('country-boundaries');
     if (layer !== null) {
       layer.setVisible(!layer.visible());
-      return layer.visible();
+      result = layer.visible();
     } else {
       // Load countries data first
       reader = ogs.vgl.geojsonReader();
@@ -401,8 +403,10 @@ geoModule.map = function(node, options) {
 
       layer.setName('country-boundaries');
       this.addLayer(layer);
-      return layer.visible();
+      result = layer.visible();
     }
+
+    return result;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -509,7 +513,7 @@ geoModule.map = function(node, options) {
     }
 
     if (timeRange.length < 2) {
-      console.log('[error] Invalid time range. Requires atleast
+      console.log('[error] Invalid time range. Requires atleast \
         begin and end time');
       return;
     }
@@ -517,14 +521,13 @@ geoModule.map = function(node, options) {
     var that = this,
         currentTime = timeRange[0],
         endTime = timeRange[timeRange.length - 1],
-        index = -1;
+        index = -1,
+        intervalId = null;
 
     if (timeRange.length > 2) {
       index = 0;
     }
 
-    // Update every 2 ms. Updating every ms might be too much.
-    var intervalId = setInterval(frame, 2);
     function frame() {
       var i = 0;
       if (index < 0) {
@@ -540,7 +543,7 @@ geoModule.map = function(node, options) {
         for (i = 0; i < layers.length; ++i) {
           layers[i].update(ogs.geo.updateRequest(currentTime));
         }
-        $(this).trigger({
+        $(m_that).trigger({
           type: geoModule.command.animateEvent,
           currentTime: currentTime,
           endTime: endTime
@@ -549,6 +552,9 @@ geoModule.map = function(node, options) {
         that.redraw();
       }
     }
+
+    // Update every 2 ms. Updating every ms might be too much.
+    intervalId = setInterval(frame, 2);
   };
 
   // Bind events to handlers
@@ -559,10 +565,10 @@ geoModule.map = function(node, options) {
   HTMLCanvasElement.prototype.relMouseCoords = m_viewer.relMouseCoords;
 
   // Create map layer
-  var mapLayer = geoModule.openStreetMapLayer();
-  mapLayer.update(m_updateRequest);
-  mapLayer.predraw(m_prepareForRenderRequest);
-  this.addLayer(mapLayer);
+  m_mapLayer = geoModule.openStreetMapLayer();
+  m_mapLayer.update(m_updateRequest);
+  m_mapLayer.predraw(m_prepareForRenderRequest);
+  this.addLayer(m_mapLayer);
 
   // Check if need to show country boundaries
   if (m_options.country_boundaries === true) {
