@@ -73,7 +73,7 @@ geoModule.geoTransform.osmTransformFeature = function(srcGcs, destGcs, feature) 
       vglModule.vertexAttributeKeys.Position);
     sizeOfDataType = posSourceData.sizeOfAttributeDataType(
       vglModule.vertexAttributeKeys.Position);
-    count = data.length;
+    count = data.length / noOfComponents;
 
     source = new proj4.Proj(srcGcs);
     dest = new proj4.Proj(destGcs);
