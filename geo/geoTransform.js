@@ -45,7 +45,7 @@ geoModule.geoTransform.osmTransformFeature = function(srcGcs, destGcs, feature) 
       i = 0,
       ib = 0,
       jb = 0,
-      value = null,
+      lat = null,
       inPos = [],
       projPoint = null,
       vertexPos = null,
@@ -92,7 +92,16 @@ geoModule.geoTransform.osmTransformFeature = function(srcGcs, destGcs, feature) 
 
     for (i = 0; i < count; ++i) {
       vertexPos = i * stride + offset;
-      data[vertexPos + 1] = geoModule.mercator.lat2y(data[vertexPos + 1]);
+      lat = data[vertexPos + 1];
+      // Y goes from 0 (top edge is 85.0511 °N) to 2zoom − 1 (bottom edge is 85.0511 °S)
+      // in a Mercator projection
+      if (lat > 85.0511) {
+            lat = 85.0511;
+        }
+        if (lat < -85.0511) {
+            lat = -85.0511;
+        }
+      data[vertexPos + 1] = geoModule.mercator.lat2y(lat);
     }
   }
 };
