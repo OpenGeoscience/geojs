@@ -10,6 +10,7 @@
 /*vglModule, document*/
 //////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Create an instance of quadratic surface generator
  * in Cartesian coordinates by the equation
@@ -23,6 +24,7 @@
  *
  * @returns {geoModule.ellipsoid}
  */
+ //////////////////////////////////////////////////////////////////////////////
 geoModule.ellipsoid = function(x, y, z) {
   "use strict";
   if (!(this instanceof geoModule.ellipsoid)) {
@@ -43,39 +45,47 @@ geoModule.ellipsoid = function(x, y, z) {
       m_minimumRadius = Math.min(x, y, z),
       m_maximumRadius = Math.max(x, y, z);
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Return radii of ellipsoid
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.radii = function() {
     return m_radii;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Return squared radii of the ellipsoid
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.radiiSquared = function() {
     return m_radiiSquared;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Return maximum radius of the ellipsoid
    *
    * @return {Number} The maximum radius of the ellipsoid
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.maximumRadius = function() {
     return m_maximumRadius;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Return minimum radius of the ellipsoid
    *
    * @return {Number} The maximum radius of the ellipsoid
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.minimumRadius = function() {
     return m_minimumRadius;
   };
 
-
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Computes the normal of the plane tangent to the surface of
    * the ellipsoid at the provided position
@@ -89,6 +99,7 @@ geoModule.ellipsoid = function(x, y, z) {
    *
    * @exception {DeveloperError} cartographic is required.
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.computeGeodeticSurfaceNormal = function(lat, lon) {
     if (typeof lat === 'undefined' || typeof lon === 'undefined') {
       throw '[error] Valid latitude and longitude is required';
@@ -105,6 +116,7 @@ geoModule.ellipsoid = function(x, y, z) {
     return result;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Converts the provided geographic latitude, longitude,
    * and height to WGS84 coordinate system
@@ -114,6 +126,7 @@ geoModule.ellipsoid = function(x, y, z) {
    * @param {Number} elev Elevation
    * @return {vec3} Position in the WGS84 coordinate system
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.transformPoint = function(lat, lon, elev) {
     lat = lat *  (Math.PI / 180.0);
     lon = lon * (Math.PI / 180.0);
@@ -130,12 +143,14 @@ geoModule.ellipsoid = function(x, y, z) {
     return result;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Converts the provided geographic latitude, longitude,
    * and height to WGS84 coordinate system
    *
    * @param {ogs.vgl.geometryData} geom
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.transformGeometry = function(geom) {
     if (!geom) {
       throw '[error] Failed to transform to cartesian. Invalid geometry.';
@@ -189,18 +204,21 @@ geoModule.ellipsoid = function(x, y, z) {
   return this;
 };
 
-
+////////////////////////////////////////////////////////////////////////////
 /**
  * An Ellipsoid instance initialized to the WGS84 standard.
  * @memberof ellipsoid
  *
  */
+////////////////////////////////////////////////////////////////////////////
 geoModule.ellipsoid.WGS84 = ogs.vgl.freezeObject(
   geoModule.ellipsoid(6378137.0, 6378137.0, 6356752.3142451793));
 
+////////////////////////////////////////////////////////////////////////////
 /**
  * An Ellipsoid instance initialized to radii of (1.0, 1.0, 1.0).
  * @memberof ellipsoid
  */
+////////////////////////////////////////////////////////////////////////////
 geoModule.ellipsoid.UNIT_SPHERE = ogs.vgl.freezeObject(
   geoModule.ellipsoid(1.0, 1.0, 1.0));

@@ -37,7 +37,7 @@ geoModule.archiveLayerSource = function(name, vars, onError) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Should be implemented by a concrete class
+   * Return raw data
    */
   ////////////////////////////////////////////////////////////////////////////
   this.getData = function(time, callback) {
@@ -83,7 +83,7 @@ geoModule.archiveLayerSource = function(name, vars, onError) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Should be implemented by a concrete class
+   * Return metadata related to data
    */
    ////////////////////////////////////////////////////////////////////////////
   this.getMetaData = function(time) {
@@ -91,7 +91,7 @@ geoModule.archiveLayerSource = function(name, vars, onError) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Should be implemented by a concrete class
+   * Return time-range for the entire dataset
    */
   ////////////////////////////////////////////////////////////////////////////
   this.getTimeRange = function(callback) {
@@ -133,7 +133,7 @@ geoModule.archiveLayerSource = function(name, vars, onError) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Should be implemented by a concrete class
+   * Return spatial-range for the entire dataset
    */
   ////////////////////////////////////////////////////////////////////////////
   this.getSpatialRange = function() {

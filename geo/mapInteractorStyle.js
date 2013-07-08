@@ -10,12 +10,14 @@
 /*vglModule, document*/
 //////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of mapInteractorStyle
  *
  * @class geoModule.mapInteractorStyle
  * @returns {geoModule.mapInteractorStyle}
  */
+//////////////////////////////////////////////////////////////////////////////
 geoModule.mapInteractorStyle = function() {
   "use strict";
   if (!(this instanceof geoModule.mapInteractorStyle)) {
@@ -40,7 +42,6 @@ geoModule.mapInteractorStyle = function() {
       m_displayPt2,
       m_worldPt1,
       m_worldPt2,
-      m_map,
       m_dx,
       m_dy,
       m_dz,
@@ -51,6 +52,11 @@ geoModule.mapInteractorStyle = function() {
       };
   var m_picker = new ogs.vgl.picker();
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Handle mouse move event
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.handleMouseMove = function(event) {
     var canvas = m_that.viewer().canvas();
     if (event.target !== canvas) {
@@ -131,6 +137,11 @@ geoModule.mapInteractorStyle = function() {
     return false;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Handle mouse down event
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.handleMouseDown = function(event) {
     var canvas = m_that.viewer().canvas();
     if (event.target !== canvas) {
@@ -162,8 +173,12 @@ geoModule.mapInteractorStyle = function() {
     return false;
   };
 
-  // @NOTE We never get mouse up from scroll bar: See the bug report here
-  // http://bugs.jquery.com/ticket/8184
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * @NOTE We never get mouse up from scroll bar: See the bug report here
+   * http://bugs.jquery.com/ticket/8184
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.handleMouseUp = function(event) {
     var canvas = m_that.viewer().canvas();
     if (event.target !== canvas) {
@@ -191,11 +206,11 @@ geoModule.mapInteractorStyle = function() {
     return false;
   };
 
-
-  this.setMap = function(map) {
-    m_map = map;
-  }
-
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Update view in response to a zoom request
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.zoom = function(options, useCurrent) {
     var m_renderer, m_camera, distance, currPosition;
     m_renderer = m_that.viewer().renderWindow().activeRenderer();
