@@ -232,6 +232,7 @@ geoModule.openStreetMapLayer = function() {
         lly = node.height,
         urx = node.width,
         ury = 0.0,
+        temp = null,
         // Now convert display point to world point
         focalPoint = camera.focalPoint(),
         focusWorldPt = vec4.fromValues(
@@ -254,7 +255,6 @@ geoModule.openStreetMapLayer = function() {
     // state. This could be optimized.
     m_that.removeTiles(request);
 
-    // Clamp world points
     worldPt1[0] = Math.max(worldPt1[0], -180.0);
     worldPt1[0] = Math.min(worldPt1[0],  180.0);
     worldPt1[1] = Math.max(worldPt1[1], -totalLatDegrees * 0.5);
@@ -282,6 +282,20 @@ geoModule.openStreetMapLayer = function() {
     tile2x = Math.min(Math.pow(2, zoom) - 1, tile2x);
     tile2y = Math.max(tile2y, 0);
     tile2y = Math.min(Math.pow(2, zoom) - 1, tile2y);
+
+    // Check and update variables appropriately if view
+    // direction is flipped. This should not happen but
+    // just in case.
+    if (tile1x > tile2x) {
+      temp = tile1x;
+      tile1x = tile2x;
+      tile2x = temp;
+    }
+    if (tile2y > tile1y) {
+      temp = tile1y;
+      tile1x = tile2y;
+      tile2y = temp;
+    }
 
     var invJ =  null;
     for (var i = tile1x; i <= tile2x; ++i) {

@@ -143,6 +143,9 @@ geoModule.map = function(node, options) {
     if (camera.position()[2] < 10) {
       m_options.zoom = 8;
     }
+    if (camera.position()[2] < 0) {
+      m_options.zoom = 3;
+    }
   }
 
   ////////////////////////////////////////////////////////////////////////////
