@@ -440,8 +440,6 @@ geoModule.map = function(node, options) {
     var i = 0,
         layerName = 0;
 
-    m_featureCollection.resetAll();
-
     for (layerName in m_layers) {
       if (m_layers.hasOwnProperty(layerName)) {
         m_layers[layerName].predraw(m_prepareForRenderRequest);
@@ -461,6 +459,7 @@ geoModule.map = function(node, options) {
           m_featureCollection.newFeatures(layerName));
       }
 
+      m_featureCollection.resetAll();
       m_lastPrepareToRenderingTime.modified();
     }
   };

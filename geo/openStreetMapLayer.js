@@ -106,6 +106,10 @@ geoModule.openStreetMapLayer = function() {
     var actor = ogs.vgl.utils.createTexturePlane(llx, lly,
       -1.0, urx, lly, -1.0, llx, ury, -1.0);
     var tile = new Image();
+    tile.LOADING = true;
+    tile.LOADED = false;
+    tile.UNLOAD = false;
+    tile.REMOVED = false;
     tile.actor = actor;
     tile.crossOrigin = 'anonymous';
     // tile.src = "http://tile.openstreetmap.org/" + zoom + "/" + (x)
@@ -117,6 +121,13 @@ geoModule.openStreetMapLayer = function() {
     m_tiles[zoom][x][y] = tile;
 
     tile.onload = function() {
+      if (this.UNLOAD) {
+        this.LOADING = false;
+        m_tiles[zoom][x][y] = null;
+        return;
+      }
+      this.LOADING = false;
+      this.LOADED = true;
       this.texture.updateDimensions();
       this.texture.setImage(this);
       this.actor.material().addAttribute(this.texture);
@@ -175,10 +186,16 @@ geoModule.openStreetMapLayer = function() {
             continue;
           }
 
-          if (m_tiles[zoom][x][y].actor.REMOVED) {
+          if (!m_tiles[zoom][x][y].LOADED) {
+            m_tiles[zoom][x][y].UNLOAD = true;
             continue;
           }
 
+          if (m_tiles[zoom][x][y].REMOVED) {
+            continue;
+          }
+
+          m_tiles[zoom][x][y].REMOVED = true;
           m_tiles[zoom][x][y].actor.REMOVED = true;
           m_expiredFeatures.push(m_tiles[zoom][x][y].actor);
           m_tiles[zoom][x][y] = null;
