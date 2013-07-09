@@ -89,7 +89,7 @@ geoModule.featureLayer = function(options, feature) {
         geomFeature = null;
 
     if (!time) {
-      return;
+      console.log('[info] No timestep provided.');
     }
 
     data = this.dataSource().getData(time);
