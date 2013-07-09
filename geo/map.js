@@ -120,32 +120,35 @@ geoModule.map = function(node, options) {
   function computeZoom() {
     var camera = m_renderer.camera();
 
-    if (camera.position()[2] < Number.MAX_VALUE) {
-      m_options.zoom = 1;
-    }
-    if (camera.position()[2] < 200) {
-      m_options.zoom = 2;
-    }
-    if (camera.position()[2] < 100) {
-      m_options.zoom = 3;
-    }
-    if (camera.position()[2] < 75) {
-      m_options.zoom = 4;
-    }
-    if (camera.position()[2] < 50) {
-      m_options.zoom = 5;
-    }
-    if (camera.position()[2] < 25) {
-      m_options.zoom = 6;
-    }
-    if (camera.position()[2] < 15) {
-      m_options.zoom = 7;
-    }
-    if (camera.position()[2] < 10) {
-      m_options.zoom = 8;
-    }
     if (camera.position()[2] < 0) {
       m_options.zoom = 3;
+    }
+    else if (camera.position()[2] < 1) {
+      m_options.zoom = 10;
+    }
+    else if (camera.position()[2] < 5) {
+      m_options.zoom = 9;
+    }
+    else if (camera.position()[2] < 15) {
+      m_options.zoom = 8;
+    }
+    else if (camera.position()[2] < 20) {
+      m_options.zoom = 7;
+    }
+    else if (camera.position()[2] < 25) {
+      m_options.zoom = 6;
+    }
+    else if (camera.position()[2] < 50) {
+      m_options.zoom = 5;
+    }
+    else if (camera.position()[2] < 100) {
+      m_options.zoom = 4;
+    }
+    else if (camera.position()[2] < 200) {
+      m_options.zoom = 3;
+    }
+    else if (camera.position()[2] < Number.MAX_VALUE) {
+      m_options.zoom = 2;
     }
   }
 
