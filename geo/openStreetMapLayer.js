@@ -260,12 +260,27 @@ geoModule.openStreetMapLayer = function() {
     worldPt2[1] = Math.min(worldPt2[1],  totalLatDegrees * 0.5);
 
     // Compute tilex and tiley
-    // Adding / Subtracting 1 to compensate for the roundoff issues
-    tile1x = geoModule.mercator.long2tilex(worldPt1[0], zoom) - 1;
-    tile1y = geoModule.mercator.lat2tiley(worldPt1[1], zoom) + 1;
+    tile1x = geoModule.mercator.long2tilex(worldPt1[0], zoom);
+    tile1y = geoModule.mercator.lat2tiley(worldPt1[1], zoom);
 
-    tile2x = geoModule.mercator.long2tilex(worldPt2[0], zoom) + 1;
-    tile2y = geoModule.mercator.lat2tiley(worldPt2[1], zoom) - 1;
+    tile2x = geoModule.mercator.long2tilex(worldPt2[0], zoom);
+    tile2y = geoModule.mercator.lat2tiley(worldPt2[1], zoom);
+
+    // Adding / Subtracting 1 to compensate for the roundoff issues
+    if (tile1x > tile2x) {
+      tile1x = tile1x + 1;
+      tile2x = tile2x - 1;
+    } else {
+      tile1x = tile1x - 1;
+      tile2x = tile2x + 1;
+    }
+    if (tile2y > tile1y) {
+      tile2y = tile2y + 1;
+      tile1y = tile1y - 1;
+    } else {
+      tile2y = tile2y - 1;
+      tile1y = tile1y + 1;
+    }
 
     // Clamp tilex and tiley
     tile1x = Math.max(tile1x, 0);
