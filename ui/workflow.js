@@ -286,6 +286,12 @@ uiModule.workflow = function(options) {
     return m_data;
   };
 
+  this.updateElementPositions = function() {
+    for(var key in m_modules) {
+      m_modules[key].updateElementPositions();
+    }
+  };
+
   if(options.data.hasOwnProperty('workflow')) {
     this.generateModulesFromData();
     this.generateConnectionsFromData();
@@ -537,6 +543,8 @@ uiModule.module = function(options, data) {
     return null;
   };
 
+  this.updateElementPositions = function() {};
+
   return this;
 };
 
@@ -766,7 +774,7 @@ uiModule.inputModule = function(options, data) {
     ////////////////////////////////////////////////////////////////////////////
   this.getMetrics = function() {
     return m_metrics;
-  }
+  };
 
 
   ////////////////////////////////////////////////////////////////////////////
@@ -785,11 +793,8 @@ uiModule.inputModule = function(options, data) {
     var portWidth = style.module.port.width,
       mx = m_metrics.mx,
       my = m_metrics.my,
-      inPortX = m_metrics.inPortX,
-      outPortX = m_metrics.outPortX,
       m_inPorts = this.getInPorts(),
       m_outPorts = this.getOutPorts(),
-      i,
       key;
 
     //draw rectangle
@@ -821,6 +826,17 @@ uiModule.inputModule = function(options, data) {
       mx + Math.floor((m_metrics.moduleWidth - m_metrics.fontMetrics.width)/2),
       my + m_metrics.textHeight + style.module.text.ypad);
 
+  };
+
+  this.updateElementPositions = function() {
+    var key,
+      m_inPorts = this.getInPorts();
+    for(key in m_inPorts) {
+      m_inPorts[key].updateElementPosition(
+        m_inPorts[key].x(),
+        m_inPorts[key].y()
+      );
+    }
   };
 
   return this;
@@ -897,7 +913,8 @@ uiModule.inputPort = function(options, data) {
   }
   uiModule.outputPort.call(this, options, data);
 
-  var m_input_elem;
+  var m_input_elem,
+    m_baseSetPosition = this.setPosition;
 
   this.drawName = function(ctx, width) {
     ctx.fillStyle = style.module.text.fill;
@@ -906,10 +923,39 @@ uiModule.inputPort = function(options, data) {
   };
 
   function createElementFromType() {
-    //todo
+    //TODO: support other types of input for color, dates, etc.
+    m_input_elem = document.createElement('input');
+    m_input_elem.type = 'text';
+    $(m_input_elem).css({
+      position: 'absolute'
+    });
+    $('#canvasContainer').append(m_input_elem);
   }
 
-  m_input_elem = createElementFromType();
+  this.setPosition = function(x,y) {
+    m_baseSetPosition(x,y);
+    this.updateElementPosition(x,y);
+  };
+
+  this.updateElementPosition = function(x,y) {
+    var totalOffsetX = 0,
+      totalOffsetY = 0,
+      currentElement = $('#workspace')[0],
+      translated = activeWorkflow.translated();
+
+//    do{
+//      totalOffsetX += currentElement.offsetLeft - currentElement.scrollLeft;
+//      totalOffsetY += currentElement.offsetTop - currentElement.scrollTop;
+//    }
+//    while(currentElement = currentElement.offsetParent)
+
+    $(m_input_elem).css({
+      top: y + translated.y + style.module.port.width,
+      left: x + translated.x
+    });
+  }
+
+  createElementFromType();
 
   return this;
 };
@@ -980,13 +1026,17 @@ uiModule.connection = function(options, data) {
       centerOffset = Math.floor(style.module.port.width/2);
     for(var i = 0; i < m_data.port.length; i++) {
       var port = m_data.port[i];
-      if(port['@type'] == 'source') {
+      if(port['@type'] == 'source' || port['@type'] == 'output') {
         sourceModule = activeWorkflow.modules()[port['@moduleId']];
         sourcePort = sourceModule.getOutPorts()[port['@name']];
       } else {
         targetModule = activeWorkflow.modules()[port['@moduleId']];
         targetPort = targetModule.getInPorts()[port['@name']];
       }
+    }
+
+    if(!sourcePort || !targetPort) {
+      var placeholder = 1;
     }
 
     return {
