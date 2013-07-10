@@ -2,11 +2,13 @@
 /**
  * @module ogs.geo
  */
-//////////////////////////////////////////////////////////////////////////////
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true,
-   white: true, indent: 2*/
-/*global geoModule, ogs, inherit, $*/
+/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
+/*jslint white: true, indent: 2*/
+
+/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
+/*global vglModule, document*/
+//////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -15,7 +17,7 @@
 //////////////////////////////////////////////////////////////////////////////
 geoModule.layerOptions = function() {
   "use strict";
-  // Check against no use of new()
+
   if (!(this instanceof geoModule.layerOptions)) {
     return new geoModule.layerOptions();
   }
@@ -23,7 +25,7 @@ geoModule.layerOptions = function() {
   this.opacity = 1;
   this.showAttribution = true;
   this.visible = true;
-  this.binNumber = -1;
+  this.binNumber = ogs.vgl.material.RenderBin.Default;
 
   return this;
 };
@@ -52,12 +54,14 @@ geoModule.layer = function(options, source) {
 
   /** @private */
   var m_that = this,
+      m_id = "",
       m_name = "",
       m_dataSource = source,
+      m_gcs = 'EPSG:4326',
       m_opacity = options.opacity || 1.0,
       m_showAttribution = options.showAttribution || true,
       m_visible = options.visible || true,
-      m_binNumber = -1;
+      m_binNumber = ogs.vgl.material.RenderBin.Transparent;
 
   // TODO Write a function for this
   if (m_opacity > 1.0) {
@@ -81,19 +85,40 @@ geoModule.layer = function(options, source) {
   /**
    * Set feature.
    *
-   * @param {ogs.vgl.actor}
+   * @param {Array} Array of feature
    * @returns {Boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.setFeatures = function(features) {
-    // if (actor === m_feature) {
-    //   return false;
-    // }
+    // Concrete class should implement this
+    return false;
+  };
 
-    // m_feature = actor;
-    // this.modified();
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get id of the layer
+   *
+   * @returns {String}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.id = function() {
+    return m_id;
+  };
 
-    // return true;
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set id of the layer
+   *
+   * @param {String} name
+   * @returns {Boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.setId = function(id) {
+    if (m_id !== id) {
+      m_id = id;
+      this.modified();
+      return true;
+    }
 
     return false;
   };
@@ -120,6 +145,7 @@ geoModule.layer = function(options, source) {
   this.setName = function(name) {
     if (m_name !== name) {
       m_name = name;
+      m_id = name;
       this.modified();
       return true;
     }
@@ -144,11 +170,6 @@ geoModule.layer = function(options, source) {
   this.setOpacity = function(val) {
     m_opacity = val;
     this.updateLayerOpacity(m_opacity);
-    // $(m_that).trigger({
-    //   type : this.events.opacitychange,
-    //   opacity : m_opacity
-    // });
-
     this.modified();
     return true;
   };
@@ -174,18 +195,12 @@ geoModule.layer = function(options, source) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.setVisible = function(flag) {
-    // if (m_feature.visible() === flag) {
-    //   return false;
-    // }
-
-    // this.modified();
-    // return m_feature.setVisible(flag);
     return false;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get source of the layer
-   *
    */
   ////////////////////////////////////////////////////////////////////////////
   this.dataSource = function() {
@@ -195,12 +210,35 @@ geoModule.layer = function(options, source) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Set source of the layer
-   *
    */
   ////////////////////////////////////////////////////////////////////////////
   this.setDataSource = function(source) {
     if (m_dataSource !== source) {
       m_dataSource = source;
+      this.modified();
+      return true;
+    }
+
+    return false;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get GCS of the layer
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.gcs = function() {
+    return m_gcs;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set source of the layer
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.setGcs = function(gcs) {
+    if (m_gcs !== gcs) {
+      m_gcs = gcs;
       this.modified();
       return true;
     }
@@ -230,15 +268,15 @@ geoModule.layer = function(options, source) {
     m_binNumber = binNumber;
     this.modified();
     return true;
-  }
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Virtual function to update the layer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.update = function(time) {
-    // TODO Call source update here
+  this.update = function(request) {
+    // Concrete class should implement this
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -246,12 +284,17 @@ geoModule.layer = function(options, source) {
    * Prepare layer for rendering
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.prepareForRendering = function(layersDrawables) {
-    // var layerDrawables = layersDrawables.get(this);
-    // if (layerDrawables) {
-    // } else {
-    //   layersDrawables.add(this, ...)
-    // }
+  this.predraw = function(request) {
+    // Concrete class should implement this
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Perform actions after draw has happened
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.postdraw = function(request) {
+    // Concrete class should implement this
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -260,139 +303,20 @@ geoModule.layer = function(options, source) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.getUpdateTime = function() {
-    // TODO Implement this
-    // m_updateTime.getMTime();
-  }
+    // Concrete class should implement this
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Virtual slot to handle opacity change Concrete class should implement this
-   * method.
+   * Virtual method to handle opacity change.
+   * Concrete class should implement this method.
    */
   ////////////////////////////////////////////////////////////////////////////
   this.updateLayerOpacity = function() {
+    // Concrete class should implement this
   };
 
   return this;
 };
 
 inherit(geoModule.layer, ogs.vgl.object);
-
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Create a new instance of class featureLayer
- *
- * @class
- * @dec Layer to draw points, lines, and polygons on the map The polydata layer
- * provide mechanisms to create and draw geometrical shapes such as points,
- * lines, and polygons.
- * @returns {geoModule.featureLayer}
- */
-//////////////////////////////////////////////////////////////////////////////
-geoModule.featureLayer = function(options, feature) {
-  "use strict";
-  if (!(this instanceof geoModule.featureLayer)) {
-    return new geoModule.featureLayer(options, feature);
-  }
-  geoModule.layer.call(this, options);
-
-  /** @priave */
-  var m_that = this,
-      m_features = [],
-      m_prepareRenderTime = ogs.vgl.timestamp(),
-      m_updateFeaturesTime = ogs.vgl.timestamp();
-
-  if (feature) {
-    m_features.push(feature);
-  }
-  m_prepareRenderTime.modified();
-  m_updateFeaturesTime.modified()
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Update layer to a particular time
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.update = function(time) {
-    if (!this.dataSource()) {
-      console.log('[info] No valid data source found.');
-      return;
-    }
-
-    var i = 0,
-        data = this.dataSource().getData(time);
-
-    // console.log('data is ', data);
-    // console.log('time is ', time);
-    // For now remove the existing features
-    m_features = [];
-
-    for(i = 0; i < data.length; ++i) {
-      switch(data[i].type()) {
-        case vglModule.data.geometry:
-          var geomFeature = geoModule.geometryFeature(data[i]);
-          m_features.push(geomFeature);
-          break;
-        case vglModule.data.raster:
-          break;
-        default:
-          console.log('[warning] Data type not handled', data.type());
-      }
-    }
-
-    if (data.length > 0) {
-      m_updateFeaturesTime. modified();
-    }
-
-    // Update the source
-    // Get updated data
-    // If feature is not created yet, create new feature
-    // Update feature with the data
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Prepare layer for rendering
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.prepareForRendering = function(layersDrawables) {
-    if (m_prepareRenderTime.getMTime() > m_updateFeaturesTime.getMTime()) {
-      return;
-    }
-
-    // TODO Finish this
-    layersDrawables.setFeatures(this.name(), m_features);
-
-    m_prepareRenderTime.modified();
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Slot to handle opacity change
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.updateLayerOpacity = function(opacity) {
-    if (!m_features) {
-      return;
-    }
-
-    var  i = 0,
-         mat,
-         opacityUniform;
-
-    for (i = 0; i < m_features.length; ++i) {
-      mat = m_features[i].material();
-      opacityUniform = mat.shaderProgram().uniform('opacity');
-      if (opacityUniform !== null) {
-        opacityUniform.set(opacity);
-        $(m_that).trigger(geoModule.command.updateLayerOpacityEvent);
-      }
-    }
-  };
-
-  // $(m_that).on(this.events.opacitychange, m_that.updateLayerOpacity);
-  this.setOpacity(this.opacity());
-  return this;
-};
-
-inherit(geoModule.featureLayer, geoModule.layer);

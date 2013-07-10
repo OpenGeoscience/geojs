@@ -2,11 +2,13 @@
 /**
  * @module ogs.geo
  */
-//////////////////////////////////////////////////////////////////////////////
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true,
-  white: true, indent: 2*/
-/*global geoModule, ogs, inherit, $*/
+/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
+/*jslint white: true, indent: 2*/
+
+/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
+/*global vglModule, jQuery, document*/
+//////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -21,6 +23,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 geoModule.archiveLayerSource = function(name, vars, onError) {
+  'use strict';
 
   if (!(this instanceof geoModule.archiveLayerSource) ) {
     return new geoModule.archiveLayerSource(name, vars, onError);
@@ -30,17 +33,21 @@ geoModule.archiveLayerSource = function(name, vars, onError) {
   var m_name = name,
       m_vars = vars,
       m_onError = function(errorString) {};
-      if (onError)
-        m_onError = onError;
+
+  if (onError) {
+    m_onError = onError;
+  }
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Should be implemented by a concrete class
+   * Return raw data
    */
   ////////////////////////////////////////////////////////////////////////////
   this.getData = function(time, callback) {
     var asyncVal = false,
-        retVal = [];
+        retVal = [],
+        errorString = null,
+        reader = null;
 
     if (callback) {
       asyncVal = true;
@@ -58,11 +65,12 @@ geoModule.archiveLayerSource = function(name, vars, onError) {
       async: asyncVal,
       success: function(response) {
         if (response.error !== null) {
-          var errorString = "[error] " + response.error ? response.error : "no results returned from server"
+          errorString = "[error] " + response.error ?
+            response.error : "no results returned from server";
           console.log(errorString);
-          m_onError(errorString)
+          m_onError(errorString);
         } else {
-          var reader = ogs.vgl.geojsonReader();
+          reader = ogs.vgl.geojsonReader();
           retVal = reader.readGJObject(jQuery.parseJSON(response.result.data[0]));
         }
       },
@@ -81,7 +89,7 @@ geoModule.archiveLayerSource = function(name, vars, onError) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Should be implemented by a concrete class
+   * Return metadata related to data
    */
    ////////////////////////////////////////////////////////////////////////////
   this.getMetaData = function(time) {
@@ -89,12 +97,13 @@ geoModule.archiveLayerSource = function(name, vars, onError) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Should be implemented by a concrete class
+   * Return time-range for the entire dataset
    */
   ////////////////////////////////////////////////////////////////////////////
   this.getTimeRange = function(callback) {
-    var timeRange = [];
-    var asyncVal = false;
+    var timeRange = [],
+        asyncVal = false,
+        errorString = null;
 
     if (callback) {
       asyncVal = true;
@@ -112,7 +121,8 @@ geoModule.archiveLayerSource = function(name, vars, onError) {
       async: asyncVal,
       success: function(response) {
         if (response.error !== null) {
-          var errorString = "[error] " + response.error ? response.error : "no results returned from server";
+          errorString = "[error] " + response.error ?
+            response.error : "no results returned from server";
           console.log(errorString);
           m_onError(errorString);
         } else {
@@ -131,7 +141,7 @@ geoModule.archiveLayerSource = function(name, vars, onError) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Should be implemented by a concrete class
+   * Return spatial-range for the entire dataset
    */
   ////////////////////////////////////////////////////////////////////////////
   this.getSpatialRange = function() {

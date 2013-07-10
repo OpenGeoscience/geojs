@@ -1,5 +1,14 @@
-/*jslint devel: true, forin: true, newcap: true, plusplus: true, white: true, indent: 2*/
-/*global geoModule, ogs, inherit*/
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * @module ogs.geo
+ */
+
+/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
+/*jslint white: true, indent: 2*/
+
+/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
+/*vglModule, document*/
+//////////////////////////////////////////////////////////////////////////////
 geoModule.countries = {
   "type": "FeatureCollection",
   "features": [{

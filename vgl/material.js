@@ -8,15 +8,8 @@
  * @class
  * @returns {vglModule.material}
  */
+
 vglModule.material = function() {
-
-  this.RenderBin = {
-    "Default" : 0,
-    "Opaque" : 1,
-    "Transparent" : 10,
-    "Overlay" : 20
-  };
-
   if (!(this instanceof vglModule.material)) {
     return new vglModule.material();
   }
@@ -24,7 +17,7 @@ vglModule.material = function() {
 
   // / Private member variables
   var m_shaderProgram = new vglModule.shaderProgram();
-  var m_binNumber = 0;
+  var m_binNumber = 100;
   var m_textureAttributes = {};
   var m_attributes = {};
 
@@ -132,6 +125,14 @@ vglModule.material = function() {
   };
 
   return this;
+};
+
+vglModule.material.RenderBin = {
+  "Base" : 0,
+  "Default" : 100,
+  "Opaque" : 100,
+  "Transparent" : 1000,
+  "Overlay" : 10000
 };
 
 inherit(vglModule.material, vglModule.object);

@@ -1,10 +1,16 @@
+//////////////////////////////////////////////////////////////////////////////
 /**
  * @module ogs.geo
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true, white: true, indent: 2*/
-/*global geoModule*/
+/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
+/*jslint white: true, indent: 2*/
 
+/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
+/*global vglModule, document*/
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of latlng
  *
@@ -12,6 +18,7 @@
  * longitude
  * @returns {geoModule.latlng}
  */
+//////////////////////////////////////////////////////////////////////////////
 geoModule.latlng = function(lat, lng) {
   "use strict";
   if (!(this instanceof geoModule.latlng)) {
@@ -19,15 +26,23 @@ geoModule.latlng = function(lat, lng) {
   }
 
   /** @priave */
-  var m_lat, m_lng;
-  m_lat = lat;
-  m_lng = lng;
+  var m_lat = lat,
+      m_lng = lng;
 
-  // / Public member methods
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return latitude
+   */
+  //////////////////////////////////////////////////////////////////////////////
   this.lat = function() {
     return m_lat;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return longitude
+   */
+  //////////////////////////////////////////////////////////////////////////////
   this.lng = function() {
     return m_lng;
   };

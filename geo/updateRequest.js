@@ -10,45 +10,64 @@
 /*global vglModule, document*/
 //////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////
-/**
- * layerSource provides data to a layer
- */
-//////////////////////////////////////////////////////////////////////////////
-geoModule.layerSource = function() {
+geoModule.updateRequest = function(time, options, viewer, node) {
   "use strict";
 
+  if (!(this instanceof geoModule.updateRequest)) {
+    return new geoModule.updateRequest(time, options, viewer, node);
+  }
+  ogs.vgl.object.call(this);
+
+   var m_that = this,
+       m_time = time,
+       m_mapOptions = options,
+       m_node = node,
+       m_viewer = viewer;
+
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Should be implemented by a concrete class
+   * Return time for the update
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.getData = function(time) {
+  this.time = function() {
+    return m_time;
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Should be implemented by a concrete class
+   * Return map options instance
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.getMetaData = function(time) {
+  this.mapOptions = function() {
+    return m_mapOptions;
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Should be implemented by a concrete class
+   * Return canvas node
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.getTimeRange = function() {
+  this.node = function() {
+    return m_node;
   };
+
+   ///////////////////////////////////////////////////////////////////////////
+   /**
+    * Return viewer instance
+    */
+   ///////////////////////////////////////////////////////////////////////////
+   this.viewer = function() {
+    return m_viewer;
+   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Should be implemented by a concrete class
+   * Make a request to draw scene again
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.getSpatialRange = function() {
+  this.requestRedraw = function() {
+    $(this).trigger(geoModule.command.requestRedrawEvent);
   };
 };
 
-inherit(geoModule.layerSource, ogs.vgl.object);
+inherit(geoModule.updateRequest, ogs.vgl.object);

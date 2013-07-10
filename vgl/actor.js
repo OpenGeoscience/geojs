@@ -29,7 +29,7 @@ vglModule.actor = function() {
   m_scale.length = 3;
 
   /** @private */
-  var m_translation = [];
+    var m_translation = [0, 0, 0];
   m_translation.length = 3;
 
   /** @private */
@@ -105,6 +105,7 @@ vglModule.actor = function() {
    * @returns {Array}
    */
   this.translation = function() {
+    return m_translation;
   };
 
   /**
@@ -115,6 +116,7 @@ vglModule.actor = function() {
    * @param {Number} z Translation in z direction
    */
   this.setTranslation = function(x, y, z) {
+    m_translation = [x, y, z];
     this.boundsModified();
   };
 
@@ -142,6 +144,7 @@ vglModule.actor = function() {
   this.modelViewMatrix = function() {
     var mat = mat4.create();
     mat4.identity(mat);
+    mat4.translate(mat, mat, m_translation);
     return mat;
   };
 
