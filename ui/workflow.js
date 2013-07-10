@@ -412,8 +412,6 @@ uiModule.module = function(options, data) {
     ctx.strokeRect(mx, my, m_metrics.moduleWidth, m_metrics.moduleHeight);
 
     //draw ports
-    ctx.fillStyle = style.module.port.fill;
-    ctx.strokeStyle = style.module.port.stroke;
     for(key in m_inPorts) {
       if(m_inPorts.hasOwnProperty(key)) {
         m_inPorts[key].draw(ctx, portWidth);
@@ -429,10 +427,11 @@ uiModule.module = function(options, data) {
     //draw module name
     ctx.fillStyle = style.module.text.fill;
     ctx.font = style.module.text.font;
-    ctx.fillText(m_data['@name'],
+    ctx.fillText(
+      m_data['@name'],
       mx + Math.floor((m_metrics.moduleWidth - m_metrics.fontMetrics.width)/2),
-      my + style.module.port.pad*2 + portWidth + m_metrics.textHeight +
-        style.module.text.ypad);
+      my + m_metrics.textHeight + style.module.text.ypad
+    );
 
   };
 
@@ -507,6 +506,8 @@ uiModule.port = function(options, data) {
    */
     ////////////////////////////////////////////////////////////////////////////
   this.draw = function(ctx, width) {
+    ctx.fillStyle = style.module.port.fill;
+    ctx.strokeStyle = style.module.port.stroke;
     ctx.fillRect(m_x, m_y, width, width);
     ctx.strokeRect(m_x, m_y, width, width);
   };
@@ -541,7 +542,8 @@ uiModule.inputModule = function(options, data) {
   /** @priave */
   var m_that = this,
     m_metrics,
-    m_baseRecomputeMetrics = this.recomputeMetrics;
+    m_baseRecomputeMetrics = this.recomputeMetrics,
+    m_baseGetMetrics = this.getMetrics;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -554,7 +556,7 @@ uiModule.inputModule = function(options, data) {
 
   this.recomputeMetrics = function(ctx, style) {
     m_baseRecomputeMetrics.call(this, ctx, style);
-    var base_metrics = this.getMetrics(),
+    var base_metrics = m_baseGetMetrics.call(this),
       new_metrics,
       maxInPortTextWidth = 0,
       maxOutPortTextWidth = 0,
@@ -631,6 +633,9 @@ uiModule.inputModule = function(options, data) {
       outPortTextX: mx + inPortsWidth + portWidth + style.module.port.pad*4
     };
 
+    merge_options_overwrite(base_metrics, new_metrics);
+    m_metrics = base_metrics;
+
     //compute port positions
     for(key in this.getInPorts()) {
       if(this.getInPorts().hasOwnProperty(key)) {
@@ -643,12 +648,9 @@ uiModule.inputModule = function(options, data) {
     for(key in this.getOutPorts()) {
       if(this.getOutPorts().hasOwnProperty(key)) {
         this.getOutPorts()[key].setPosition(base_metrics.outPortX, outPortY);
-        outPortY += textHeight + style.module.port.outpad;
+        outPortY -= textHeight + style.module.port.outpad;
       }
     }
-
-    merge_options_overwrite(base_metrics, new_metrics);
-    m_metrics = base_metrics;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -708,10 +710,10 @@ uiModule.inputModule = function(options, data) {
     //draw module name
     ctx.fillStyle = style.module.text.fill;
     ctx.font = style.module.text.font;
-    ctx.fillText(this.getData()['@name'],
+    ctx.fillText(
+      this.getData()['@name'],
       mx + Math.floor((m_metrics.moduleWidth - m_metrics.fontMetrics.width)/2),
-      my + style.module.port.pad*2 + portWidth + m_metrics.textHeight +
-        style.module.text.ypad);
+      my + m_metrics.textHeight + style.module.text.ypad);
 
   };
 
@@ -748,8 +750,10 @@ uiModule.outputPort = function(options, data) {
    */
     ////////////////////////////////////////////////////////////////////////////
   this.draw = function(ctx, width) {
+    ctx.fillStyle = style.module.port.fill;
+    ctx.strokeStyle = style.module.port.stroke;
     ctx.fillRect(this.x(), this.y(), width, width);
-    ctx.strokeRect(this.y(), this.y(), width, width);
+    ctx.strokeRect(this.x(), this.y(), width, width);
     this.drawName(ctx, width);
   };
 
