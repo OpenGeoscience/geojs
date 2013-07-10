@@ -29,6 +29,10 @@ vglModule.geojsonReader = function() {
       array = geom.sourceData(vertexAttributeKeys.Scalar);
       if (!array) {
         array = new vglModule.sourceDataSf();
+        if (this.m_scalarRange)
+          {
+          array.setScalarRange(this.m_scalarRange[0],this.m_scalarRange[1]);
+          }
         if (!(size_estimate === undefined)) {
           array.length = size_estimate
         }
@@ -280,6 +284,7 @@ vglModule.geojsonReader = function() {
       var thisPolyLength = coordinates[j][0].length;
       var vf = ccount;
       var vl = ccount+1;
+      var flip = [false,false,false];
       for (var i = 0; i < thisPolyLength; i++) {
         //var timea = new Date().getTime()
 
@@ -288,6 +293,16 @@ vglModule.geojsonReader = function() {
         var z = 0.0;
         if (coordinates[j][0][i].length>2) {
           z = coordinates[j][0][i][2];
+        }
+        var flipped = false;
+        if (x > 180) {
+          flipped = true
+          x = x - 360
+        }
+        if (i == 0) {
+          flip[0] = flipped
+        } else {
+          flip[1+(i-1)%2] = flipped
         }
         //var timeb = new Date().getTime();
         //console.log("read " + x + "," + y + "," + z);
@@ -302,7 +317,11 @@ vglModule.geojsonReader = function() {
 
         if (i > 1) {
           //console.log("Cutting new triangle "+ vf + "," + vl + "," + ccount);
-          indexes = indexes.concat([vf,vl,ccount])
+          if (flip[0] == flip[1] && flip[1] == flip[2]) {
+            indexes = indexes.concat([vf,vl,ccount])
+          } else {
+            //TODO: duplicate triangles that straddle boundary on either side
+          }
           vl = ccount;
         }
         ccount++;
@@ -341,6 +360,9 @@ vglModule.geojsonReader = function() {
         object.properties.ScalarFormat &&
         object.properties.ScalarFormat == "values") {
       this.m_scalarFormat = "values"
+      if (object.properties.ScalarRange) {
+        this.m_scalarRange = object.properties.ScalarRange
+      }
     }
     if (object.properties &&
         object.properties.ScalarFormat &&
