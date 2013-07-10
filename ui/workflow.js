@@ -732,6 +732,9 @@ uiModule.inputModule = function(options, data) {
       inPortY = my + style.module.port.pad + textHeight + portWidth*2,
       outPortY = my + moduleHeight - style.module.port.pad - portWidth;
 
+    debug('inportwidth ' + inPortsWidth);
+    debug('outputwidth ' + outPortsWidth);
+
     new_metrics = {
       mx: mx,
         my: my,
@@ -938,19 +941,10 @@ uiModule.inputPort = function(options, data) {
   };
 
   this.updateElementPosition = function(x,y) {
-    var totalOffsetX = 0,
-      totalOffsetY = 0,
-      currentElement = $('#workspace')[0],
-      translated = activeWorkflow.translated();
-
-//    do{
-//      totalOffsetX += currentElement.offsetLeft - currentElement.scrollLeft;
-//      totalOffsetY += currentElement.offsetTop - currentElement.scrollTop;
-//    }
-//    while(currentElement = currentElement.offsetParent)
+    var translated = activeWorkflow.translated();
 
     $(m_input_elem).css({
-      top: y + translated.y + style.module.port.width,
+      top: y + translated.y + style.module.port.width*2,
       left: x + translated.x
     });
   }
