@@ -138,8 +138,30 @@ uiModule.workflow = function(options) {
     this.data().workflow.module.push(module);
   };
 
-  this.generateConnectionsFromData = function() {
+  this.addConnection = function(sourceModule, sourcePort, targetModule,
+                                targetPort) {
 
+  };
+
+  this.generateConnectionsFromData = function() {
+    var i = 0,
+      maxId = 0,
+      nextId = nextConnectionId(),
+      connections = m_data.workflow.connection,
+      options = {vertical: m_moduleClass == uiModule.module};
+
+    for(; i < connections.length; i++) {
+      var cid = parseInt(connections[i]['@id']);
+      m_connections[cid] = uiModule.connection(options, connections[i]);
+
+      if(cid > maxId) {
+        maxId = cid;
+      }
+
+      while (maxId > nextId) {
+        nextId = nextConnectionId();
+      }
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -214,6 +236,11 @@ uiModule.workflow = function(options) {
     return m_data;
   };
 
+  if(options.data.hasOwnProperty('workflow')) {
+    this.generateModulesFromData();
+    this.generateConnectionsFromData();
+  }
+
   return this;
 };
 
@@ -266,10 +293,10 @@ uiModule.module = function(options, data) {
 
   for(; i < m_ports.length; i++) {
     if(m_ports[i]['@type'] != 'output') {
-      m_inPorts[m_ports[i]['@id']] = this.inputPortClass(null, m_ports[i]);
+      m_inPorts[m_ports[i]['@name']] = this.inputPortClass(null, m_ports[i]);
       m_inPortCount++;
     } else {
-      m_outPorts[m_ports[i]['@id']] = this.outputPortClass(null, m_ports[i]);
+      m_outPorts[m_ports[i]['@name']] = this.outputPortClass(null, m_ports[i]);
       m_outPortCount++;
     }
   }
@@ -841,7 +868,7 @@ uiModule.connection = function(options, data) {
   };
 
   this.draw = function(ctx, style) {
-    this.drawCurve(ctx, style, this.computePositions());
+    this.drawCurve(ctx, style, this.computePositions(style));
   };
 
   this.drawCurve = function(ctx, style, posInfo) {
@@ -863,32 +890,32 @@ uiModule.connection = function(options, data) {
 
   this.getCurveOffsets = function(style) {
     return {
-      x1:  m_vertical ? 0 : style.conn.bezierOffset,
-      x2:  m_vertical ? 0 : style.conn.bezierOffset,
-      y1: !m_vertical ? 0 : style.conn.bezierOffset,
-      y2: !m_vertical ? 0 : style.conn.bezierOffset
+      x1:  m_vertical ? 0 :  style.conn.bezierOffset,
+      x2:  m_vertical ? 0 : -style.conn.bezierOffset,
+      y1: !m_vertical ? 0 :  style.conn.bezierOffset,
+      y2: !m_vertical ? 0 : -style.conn.bezierOffset
     }
   };
 
-  this.computePositions = function() {
+  this.computePositions = function(style) {
     var sourceModule, targetModule, sourcePort, targetPort,
       centerOffset = Math.floor(style.module.port.width/2);
     for(var i = 0; i < m_data.port.length; i++) {
       var port = m_data.port[i];
       if(port['@type'] == 'source') {
-        sourcePort = port;
         sourceModule = activeWorkflow.modules()[port['@moduleId']];
+        sourcePort = sourceModule.getOutPorts()[port['@name']];
       } else {
-        targetPort = port;
         targetModule = activeWorkflow.modules()[port['@moduleId']];
+        targetPort = targetModule.getInPorts()[port['@name']];
       }
     }
 
     return {
-      cx1: moduleSourcePortX[sourceModule['@id']] + centerOffset,
-      cy1: moduleSourcePortY[sourceModule['@id']][sourcePort['@name']] + centerOffset,
-      cx2: moduleTargetPortX[targetModule['@id']] + centerOffset,
-      cy2: moduleTargetPortY[targetModule['@id']][targetPort['@name']] + centerOffset
+      cx1: sourcePort.x() + centerOffset,
+      cy1: sourcePort.y() + centerOffset,
+      cx2: targetPort.x() + centerOffset,
+      cy2: targetPort.y() + centerOffset
     };
   };
 
