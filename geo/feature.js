@@ -1,16 +1,23 @@
+//////////////////////////////////////////////////////////////////////////////
 /**
  * @module ogs.geo
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true, white: true, indent: 2*/
-/*global geoModule, ogs, inherit*/
+/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
+/*jslint white: true, indent: 2*/
 
+/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
+/*global vglModule, document*/
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class feature
  *
  * @class
  * @returns {geoModule.feature}
  */
+//////////////////////////////////////////////////////////////////////////////
 geoModule.feature = function() {
   "use strict";
   if (!(this instanceof geoModule.feature)) {
@@ -23,6 +30,7 @@ geoModule.feature = function() {
 
 inherit(geoModule.feature, ogs.vgl.actor);
 
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of planeFeature
  *
@@ -33,6 +41,7 @@ inherit(geoModule.feature, ogs.vgl.actor);
  * @param upperright
  * @returns {geoModule.planeFeature}
  */
+//////////////////////////////////////////////////////////////////////////////
 geoModule.planeFeature = function(lowerleft, upperright) {
   "use strict";
   if (!(this instanceof geoModule.planeFeature)) {
@@ -59,6 +68,7 @@ geoModule.planeFeature = function(lowerleft, upperright) {
 
 inherit(geoModule.planeFeature, geoModule.feature);
 
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of pointFeature
  *
@@ -67,6 +77,7 @@ inherit(geoModule.planeFeature, geoModule.feature);
  * @param colors
  * @returns {geoModule.pointFeature}
  */
+//////////////////////////////////////////////////////////////////////////////
 geoModule.pointFeature = function(positions, colors) {
   "use strict";
   if (!(this instanceof geoModule.pointFeature)) {
@@ -85,6 +96,7 @@ geoModule.pointFeature = function(positions, colors) {
 
 inherit(geoModule.pointFeature, geoModule.feature);
 
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of pointSpritesFeature
  *
@@ -93,6 +105,7 @@ inherit(geoModule.pointFeature, geoModule.feature);
  * @param colors
  * @returns {geoModule.pointFeature}
  */
+//////////////////////////////////////////////////////////////////////////////
 geoModule.pointSpritesFeature = function(image, positions, colors) {
   "use strict";
   if (!(this instanceof geoModule.pointSpritesFeature)) {
@@ -111,6 +124,7 @@ geoModule.pointSpritesFeature = function(image, positions, colors) {
 
 inherit(geoModule.pointSpritesFeature, geoModule.feature);
 
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of geometryFeature
  *
@@ -119,6 +133,7 @@ inherit(geoModule.pointSpritesFeature, geoModule.feature);
  * @param geometry data {ogs.vgl.geometryData} *
  * @returns {geoModule.geometryFeature}
  */
+//////////////////////////////////////////////////////////////////////////////
 geoModule.geometryFeature = function(geom) {
   "use strict";
   if (!(this instanceof geoModule.geometryFeature)) {
@@ -128,15 +143,15 @@ geoModule.geometryFeature = function(geom) {
   ogs.vgl.actor.call(this);
 
   // Initialize
-  var mapper, material;
+  var mapper = null,
+      material = null,
+      values = geom.sourceData(vglModule.vertexAttributeKeys.Scalar),
+      colors = geom.sourceData(vglModule.vertexAttributeKeys.Color);
+
   mapper = ogs.vgl.mapper();
   mapper.setGeometryData(geom);
-
   this.setMapper(mapper);
 
-  var material;
-  var values = geom.sourceData(vertexAttributeKeys.Scalar);
-  var colors = geom.sourceData(vertexAttributeKeys.Color);
   if (values) {
     material = ogs.vgl.utils.createColorMappedMaterial(values.scalarRange());
   } else if (colors) {
@@ -151,6 +166,7 @@ geoModule.geometryFeature = function(geom) {
 
 inherit(geoModule.geometryFeature, geoModule.feature);
 
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of multiGeometryFeature
  *
@@ -159,6 +175,7 @@ inherit(geoModule.geometryFeature, geoModule.feature);
  * @param {Array}
  * @returns {geoModule.multiGeometryFeature}
  */
+//////////////////////////////////////////////////////////////////////////////
 geoModule.multiGeometryFeature = function(geoms, color) {
   "use strict";
   if (!(this instanceof geoModule.multiGeometryFeature)) {
@@ -167,14 +184,13 @@ geoModule.multiGeometryFeature = function(geoms, color) {
   ogs.vgl.actor.call(this);
 
   var m_mapper = ogs.vgl.groupMapper(),
-      m_material;
+      material;
   this.setMapper(m_mapper);
 
   if (geoms) {
     m_mapper.setGeometryDataArray(geoms);
   }
 
-  var material;
   if (!color) {
     material = ogs.vgl.utils.createGeometryMaterial();
   } else {

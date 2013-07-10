@@ -874,7 +874,7 @@ vglModule.geometryData = function() {
 
       this.resetBounds();
 
-      for (var i = 0; i < count; i += numberOfComponents) {
+      for (var i = 0; i < count; i += 1) {
         vertexPosition = i * stride + offset;
         for (var j = 0; j < numberOfComponents; ++j) {
           value = data[vertexPosition + j];

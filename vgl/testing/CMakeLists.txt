@@ -1,4 +1,5 @@
 set(tests
+  drawMap.html
   drawTest1.html
   drawSphere.html
 )

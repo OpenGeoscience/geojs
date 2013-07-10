@@ -31,7 +31,7 @@ vglModule.camera = function() {
   var m_viewUp = vec4.fromValues(0.0, 1.0, 0.0, 0.0);
 
   /** @private */
-  var m_right = vec4.fromValues(1.0, 0.0, 0.0, 0.0);
+  var m_rightDir = vec4.fromValues(1.0, 0.0, 0.0, 0.0);
 
   /** @private */
   var m_near = 0.1;
@@ -59,6 +59,13 @@ vglModule.camera = function() {
 
   /** @private */
   var m_computeProjectMatrixTime = ogs.vgl.timestamp();
+
+  var m_left = -1.0;
+  var m_right = 1.0;
+  var m_top = +1.0;
+  var m_bottom = -1.0;
+
+  var m_enableParallelProjection = false;
 
   /**
    * Get view angle of the camera
@@ -159,6 +166,37 @@ vglModule.camera = function() {
   };
 
   /**
+   * Return if parallel projection is enabled
+   */
+  this.isEnabledParallelProjection = function() {
+    return m_enableParallelProjection;
+  }
+
+  /**
+   * Enable / disable parallel projection
+   */
+  this.enableParallelProjection = function(flag) {
+    if (flag !== m_enableParallelProjection) {
+      m_enableParallelProjection = flag;
+      this.modified();
+      return true;
+    }
+
+    return false;
+  };
+
+  /**
+   * Set parallel projection parameters
+   */
+  this.setParallelProjection = function(left, right, top, bottom) {
+    m_left = left;
+    m_right = right;
+    m_top = top;
+    m_bottom = bottom;
+    this.modified();
+  };
+
+  /**
    * Return direction of projection
    */
   this.directionOfProjection = function() {
@@ -251,8 +289,8 @@ vglModule.camera = function() {
    */
   this.computeOrthogonalAxes = function() {
     this.computeDirectionOfProjection();
-    vec3.cross(m_right, m_directionOfProjection, m_viewUp);
-    vec3.normalize(m_right, m_right);
+    vec3.cross(m_rightDir, m_directionOfProjection, m_viewUp);
+    vec3.normalize(m_rightDir, m_rightDir);
     this.modified();
   };
 
@@ -278,7 +316,7 @@ vglModule.camera = function() {
 
     mat4.translate(mat, mat, m_centerOfRotation);
     mat4.rotate(mat, mat, dx, m_viewUp);
-    mat4.rotate(mat, mat, dy, m_right);
+    mat4.rotate(mat, mat, dy, m_rightDir);
     mat4.translate(mat, mat, inverseCenterOfRotation);
 
     vec3.transformMat4(m_position, m_position, mat);
@@ -312,7 +350,14 @@ vglModule.camera = function() {
    */
   this.computeProjectionMatrix = function() {
     if (m_computeProjectMatrixTime.getMTime() < this.getMTime()) {
-      mat4.perspective(m_projectionMatrix, m_viewAngle, m_viewAspect, m_near, m_far);
+      if (!m_enableParallelProjection) {
+        mat4.perspective(m_projectionMatrix, m_viewAngle, m_viewAspect, m_near, m_far);
+      } else {
+        console.log('paralle projection');
+        mat4.ortho(m_projectionMatrix,
+          m_left, m_right, m_bottom, m_top, m_near, m_far);
+      }
+
       m_computeProjectMatrixTime.modified();
     }
 
