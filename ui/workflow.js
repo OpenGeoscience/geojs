@@ -732,9 +732,6 @@ uiModule.inputModule = function(options, data) {
       inPortY = my + style.module.port.pad + textHeight + portWidth*2,
       outPortY = my + moduleHeight - style.module.port.pad - portWidth;
 
-    debug('inportwidth ' + inPortsWidth);
-    debug('outputwidth ' + outPortsWidth);
-
     new_metrics = {
       mx: mx,
         my: my,
