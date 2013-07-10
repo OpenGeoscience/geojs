@@ -1,3 +1,13 @@
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * @module ogs.ui
+ */
+//////////////////////////////////////////////////////////////////////////////
+
+/*jslint devel: true, forin: true, newcap: true, plusplus: true,
+ white: true, indent: 2*/
+/*global geoModule, ogs, inherit, $*/
+
 /**
  * Overwrites obj1's values with obj2's and adds obj2's if non existent in obj1
  * @param obj1
@@ -31,15 +41,26 @@ var nextLocationId = createIdCounter();
 var nextConnectionId = createIdCounter();
 var nextPortId = createIdCounter();
 
-//////////////////////////////////////////////////////////////////////////////
-/**
- * @module ogs.ui
- */
-//////////////////////////////////////////////////////////////////////////////
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true,
- white: true, indent: 2*/
-/*global geoModule, ogs, inherit, $*/
+function blankWorkflow(name, version, connections, modules, vistrail_id, id) {
+  name = defaultValue(name, 'untitled');
+  version = defaultValue(version, '1.0.2');
+  connections = defaultValue(connections, []);
+  modules = defaultValue(modules, []);
+  vistrail_id = defaultValue(vistrail_id, "");
+  id = defaultValue(id, nextWorkflowId());
+  return {
+    "workflow": {
+      "@name": name,
+      "@version": version,
+      "@{http://www.w3.org/2001/XMLSchema-instance}schemaLocation": "http://www.vistrails.org/workflow.xsd",
+      "connection": connections,
+      "module": modules,
+      "@vistrail_id": vistrail_id,
+      "@id": id
+    }
+  };
+}
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -53,7 +74,7 @@ uiModule.workflowOptions = function() {
     return new uiModule.workflowOptions();
   }
 
-  this.data = {};
+  this.data = blankWorkflow();
   this.modules = {};
   this.connections = {};
   this.style = climatePipesStyle;
@@ -140,6 +161,35 @@ uiModule.workflow = function(options) {
 
   this.addConnection = function(sourceModule, sourcePort, targetModule,
                                 targetPort) {
+    if(sourcePort.data()['@type'] == targetPort.data()['@type']) {
+      debug("Must connect output to input");
+      return;
+    } else if (sourceModule == targetModule) {
+      debug("Cannot make connection between ports on same module.")
+    }
+    var connection = {
+        "@id": nextConnectionId(),
+        "port": [
+          {
+            "@moduleName": targetModule.getData()['@name'],
+            "@name": targetPort.data()['@name'],
+            "@signature": targetPort.data()['@sigstring'],
+            "@id": nextPortId(),
+            "@type": targetPort.data()['@type'],
+            "@moduleId": targetModule.getData()['@id']
+          }, {
+            "@moduleName": sourceModule.getData()['@name'],
+            "@name": sourcePort.data()['@name'],
+            "@signature": sourcePort.data()['@sigstring'],
+            "@id": nextPortId(),
+            "@type": sourcePort.data()['@type'],
+            "@moduleId": sourceModule.getData()['@id']
+          }
+        ]
+      },
+      options = {vertical: m_moduleClass == uiModule.module};
+    m_connections[connection['@id']] = uiModule.connection(options, connection);
+    this.data().workflow.connection.push(connection);
 
   };
 
@@ -469,7 +519,22 @@ uiModule.module = function(options, data) {
   };
 
   this.portByPos = function(pos) {
-    //todo
+    var key;
+    for(key in m_inPorts) {
+      if(m_inPorts.hasOwnProperty(key)) {
+        if (m_inPorts[key].contains(pos)) {
+          return m_inPorts[key];
+        }
+      }
+    }
+    for(key in m_outPorts) {
+      if(m_outPorts.hasOwnProperty(key)) {
+        if (m_outPorts[key].contains(pos)) {
+          return m_outPorts[key];
+        }
+      }
+    }
+    return null;
   };
 
   return this;
@@ -498,7 +563,8 @@ uiModule.port = function(options, data) {
   var m_that = this,
     m_data = data,
     m_x = 0,
-    m_y = 0;
+    m_y = 0,
+    m_width = style.module.port.width;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -541,6 +607,19 @@ uiModule.port = function(options, data) {
 
   this.getName = function() {
     return this.data()['@name'];
+  };
+
+  this.contains = function(pos) {
+    if(pos.x >= m_x) {
+      if(pos.y >= m_y) {
+        if(pos.x <= m_x + m_width) {
+          if(pos.y <= m_y + m_width) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
   };
 
   return this;
@@ -885,7 +964,6 @@ uiModule.connection = function(options, data) {
     // line color
     ctx.strokeStyle = style.conn.stroke;
     ctx.stroke();
-
   };
 
   this.getCurveOffsets = function(style) {
