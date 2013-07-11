@@ -127,7 +127,7 @@ uiModule.workflow = function(options) {
 
     for(; i < modules.length; i++) {
       var mid = parseInt(modules[i]['@id']);
-      m_modules[mid] = m_moduleClass(null, modules[i]);
+      m_modules[mid] = m_moduleClass({workflow: m_that}, modules[i]);
 
       if(mid > maxId) {
         maxId = mid;
@@ -155,7 +155,7 @@ uiModule.workflow = function(options) {
         "@id": nextModuleId()
       };
 
-    m_modules[module['@id']] = m_moduleClass(null, module);
+    m_modules[module['@id']] = m_moduleClass({workflow: m_that}, module);
     this.data().workflow.module.push(module);
   };
 
@@ -187,7 +187,7 @@ uiModule.workflow = function(options) {
           }
         ]
       },
-      options = {vertical: m_moduleClass == uiModule.module};
+      options = {vertical: m_moduleClass == uiModule.module, workflow: m_that};
     m_connections[connection['@id']] = uiModule.connection(options, connection);
     this.data().workflow.connection.push(connection);
 
@@ -198,7 +198,7 @@ uiModule.workflow = function(options) {
       maxId = 0,
       nextId = nextConnectionId(),
       connections = m_data.workflow.connection,
-      options = {vertical: m_moduleClass == uiModule.module};
+      options = {vertical: m_moduleClass == uiModule.module, workflow: m_that};
 
     for(; i < connections.length; i++) {
       var cid = parseInt(connections[i]['@id']);
@@ -274,8 +274,26 @@ uiModule.workflow = function(options) {
   };
 
   this.show = function() {
+    if(activeWorkflow) {
+      activeWorkflow.hide();
+    }
+    activeWorkflow = this;
     this.setVisible(true);
     this.resize();
+    for(var key in m_modules) {
+      if(m_modules.hasOwnProperty(key)) {
+        m_modules[key].show();
+      }
+    }
+  };
+
+  this.hide = function() {
+    this.setVisible(false);
+    for(var key in m_modules) {
+      if(m_modules.hasOwnProperty(key)) {
+        m_modules[key].hide();
+      }
+    }
   };
 
   this.modules = function() {
@@ -290,6 +308,24 @@ uiModule.workflow = function(options) {
     for(var key in m_modules) {
       m_modules[key].updateElementPositions();
     }
+  };
+
+  this.getModuleByName = function(name) {
+    var key;
+    for(key in m_modules) {
+      if(m_modules.hasOwnProperty(key)) {
+        if(m_modules[key].getData()['@name'] == name) {
+          return m_modules[key];
+        }
+      }
+    }
+  };
+
+  this.setDefaultWorkflowInputs = function(target) {
+    this.getModuleByName('Dataset')
+      .setInput('file', target.basename);
+    this.getModuleByName('Variable')
+      .setInput('name', target.name);
   };
 
   if(options.data.hasOwnProperty('workflow')) {
@@ -329,7 +365,8 @@ uiModule.module = function(options, data) {
     m_outPorts = {},
     m_inPortCount = 0,
     m_outPortCount = 0,
-    i = 0;
+    i = 0,
+    m_workflow = options.workflow;
 
   //ensure location values are floating point numbers
   data.location['@x'] = parseFloat(data.location['@x']);
@@ -349,13 +386,17 @@ uiModule.module = function(options, data) {
 
   for(; i < m_ports.length; i++) {
     if(m_ports[i]['@type'] != 'output') {
-      m_inPorts[m_ports[i]['@name']] = this.inputPortClass(null, m_ports[i]);
+      m_inPorts[m_ports[i]['@name']] = this.inputPortClass({module: m_that}, m_ports[i]);
       m_inPortCount++;
     } else {
-      m_outPorts[m_ports[i]['@name']] = this.outputPortClass(null, m_ports[i]);
+      m_outPorts[m_ports[i]['@name']] = this.outputPortClass({module: m_that}, m_ports[i]);
       m_outPortCount++;
     }
   }
+
+  this.workflow = function() {
+    return m_workflow;
+  };
 
   this.inPortCount = function() {
     return m_inPortCount;
@@ -543,6 +584,22 @@ uiModule.module = function(options, data) {
     return null;
   };
 
+  this.hide = function() {
+    for(var key in m_inPorts) {
+      if(m_inPorts.hasOwnProperty(key)) {
+        m_inPorts[key].hide();
+      }
+    }
+  };
+
+  this.show = function() {
+    for(var key in m_inPorts) {
+      if(m_inPorts.hasOwnProperty(key)) {
+        m_inPorts[key].show();
+      }
+    }
+  };
+
   this.updateElementPositions = function() {};
 
   return this;
@@ -572,7 +629,8 @@ uiModule.port = function(options, data) {
     m_data = data,
     m_x = 0,
     m_y = 0,
-    m_width = style.module.port.width;
+    m_width = style.module.port.width,
+    m_module = options.module;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -585,6 +643,10 @@ uiModule.port = function(options, data) {
   this.setPosition = function(x, y) {
     m_x = x;
     m_y = y;
+  };
+
+  this.module = function() {
+    return m_module;
   };
 
   this.x = function() {
@@ -629,6 +691,9 @@ uiModule.port = function(options, data) {
     }
     return false;
   };
+
+  this.hide = function() {};
+  this.show = function() {};
 
   return this;
 };
@@ -839,6 +904,18 @@ uiModule.inputModule = function(options, data) {
     }
   };
 
+  this.setInput = function(name, value) {
+    var key,
+      m_inPorts = this.getInPorts();
+    for(key in m_inPorts) {
+      if(m_inPorts.hasOwnProperty(key)) {
+        if(m_inPorts[key].data()['@name'] == name) {
+          $(m_inPorts[key].getElement()).val(value);
+        }
+      }
+    }
+  };
+
   return this;
 };
 
@@ -913,8 +990,13 @@ uiModule.inputPort = function(options, data) {
   }
   uiModule.outputPort.call(this, options, data);
 
-  var m_input_elem,
+  var m_that = this,
+    m_input_elem,
     m_baseSetPosition = this.setPosition;
+
+  this.getElement = function() {
+    return m_input_elem;
+  };
 
   this.drawName = function(ctx, width) {
     ctx.fillStyle = style.module.text.fill;
@@ -928,7 +1010,10 @@ uiModule.inputPort = function(options, data) {
     m_input_elem.type = 'text';
     $(m_input_elem).css({
       position: 'absolute'
-    });
+    }).change(function() {
+        //TODO: update functions in workflow JSON data
+      });
+
     $('#canvasContainer').append(m_input_elem);
   }
 
@@ -938,13 +1023,21 @@ uiModule.inputPort = function(options, data) {
   };
 
   this.updateElementPosition = function(x,y) {
-    var translated = activeWorkflow.translated();
+    var translated = this.module().workflow().translated();
 
     $(m_input_elem).css({
       top: y + translated.y + style.module.port.width*2,
       left: x + translated.x
     });
-  }
+  };
+
+  this.show = function() {
+    $(m_input_elem).show();
+  };
+
+  this.hide = function() {
+    $(m_input_elem).hide();
+  };
 
   createElementFromType();
 
@@ -962,6 +1055,7 @@ uiModule.connectionOptions = function() {
   }
 
   this.vertical = false;
+  this.workflow = null;
   return this;
 
 }
@@ -977,7 +1071,8 @@ uiModule.connection = function(options, data) {
   options = merge_options(uiModule.connectionOptions(), options);
 
   var m_data = data,
-    m_vertical = options.vertical;
+    m_vertical = options.vertical,
+    m_workflow = options.workflow;
 
   this.data = function() {
     return m_data;
@@ -1018,10 +1113,10 @@ uiModule.connection = function(options, data) {
     for(var i = 0; i < m_data.port.length; i++) {
       var port = m_data.port[i];
       if(port['@type'] == 'source' || port['@type'] == 'output') {
-        sourceModule = activeWorkflow.modules()[port['@moduleId']];
+        sourceModule = m_workflow.modules()[port['@moduleId']];
         sourcePort = sourceModule.getOutPorts()[port['@name']];
       } else {
-        targetModule = activeWorkflow.modules()[port['@moduleId']];
+        targetModule = m_workflow.modules()[port['@moduleId']];
         targetPort = targetModule.getInPorts()[port['@name']];
       }
     }
