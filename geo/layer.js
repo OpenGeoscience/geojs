@@ -56,12 +56,12 @@ geoModule.layer = function(options, source) {
   var m_that = this,
       m_id = "",
       m_name = "",
-      m_dataSource = source,
-      m_gcs = 'EPSG:4326',
       m_opacity = options.opacity || 1.0,
+      m_gcs = 'EPSG:4326',
       m_showAttribution = options.showAttribution || true,
       m_visible = options.visible || true,
-      m_binNumber = ogs.vgl.material.RenderBin.Transparent;
+      m_binNumber = ogs.vgl.material.RenderBin.Transparent,
+      m_dataSource = source;
 
   // TODO Write a function for this
   if (m_opacity > 1.0) {
@@ -176,50 +176,13 @@ geoModule.layer = function(options, source) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get if layer is visible. This should be implemented by the derived class
+   * Get current time of the layer.
    *
-   * @returns {Boolean}
+   * This should be implemented by the derived class
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.visible = function() {
-    // return m_feature.visible();
-    return false;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Set layer visible true or false. This should be implemented by the
-   * the derived class.
-   *
-   * @returns {Boolean}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.setVisible = function(flag) {
-    return false;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get source of the layer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.dataSource = function() {
-    return m_dataSource;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Set source of the layer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.setDataSource = function(source) {
-    if (m_dataSource !== source) {
-      m_dataSource = source;
-      this.modified();
-      return true;
-    }
-
-    return false;
+  this.time = function() {
+    return null;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -248,6 +211,30 @@ geoModule.layer = function(options, source) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Get if layer is visible. This should be implemented by the derived class
+   *
+   * @returns {Boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.visible = function() {
+    // return m_feature.visible();
+    return false;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set layer visible true or false. This should be implemented by the
+   * the derived class.
+   *
+   * @returns {Boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.setVisible = function(flag) {
+    return false;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Get bin number of the layer
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -268,6 +255,30 @@ geoModule.layer = function(options, source) {
     m_binNumber = binNumber;
     this.modified();
     return true;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get source of the layer
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.dataSource = function() {
+    return m_dataSource;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set source of the layer
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.setDataSource = function(source) {
+    if (m_dataSource !== source) {
+      m_dataSource = source;
+      this.modified();
+      return true;
+    }
+
+    return false;
   };
 
   ////////////////////////////////////////////////////////////////////////////

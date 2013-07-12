@@ -32,6 +32,7 @@ geoModule.archiveLayerSource = function(name, vars, onError) {
 
   var m_name = name,
       m_vars = vars,
+      m_time = null,
       m_onError = function(errorString) {};
 
   if (onError) {
@@ -44,6 +45,13 @@ geoModule.archiveLayerSource = function(name, vars, onError) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.getData = function(time, callback) {
+
+    if (m_time === time) {
+      console.log('[info] No new data as timestamp has not changed.');
+      return;
+    }
+    m_time = time;
+
     var asyncVal = false,
         retVal = [],
         errorString = null,
