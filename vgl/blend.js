@@ -28,7 +28,7 @@ vglModule.blendFunction = function(source, destination) {
    * @param {vglModule.renderState}
    */
   this.apply = function(renderState) {
-    gl.blendFunc(m_source, m_destination);
+    gl.blendFuncSeparate(m_source, m_destination, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
   };
 
   return this;
@@ -85,6 +85,7 @@ vglModule.blend = function() {
     else {
       gl.disable(gl.BLEND);
     }
+
     return true;
   };
 
