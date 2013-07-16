@@ -559,6 +559,27 @@ geoModule.map = function(node, options) {
     intervalId = setInterval(frame, 2);
   };
 
+
+
+  /**
+   * Convert window coordinates to world coordinates
+   */
+  this.windowToWorld = function(win_x, win_y) {
+    var camera = m_renderer.camera();
+
+    var winSize = m_viewer.renderWindow().windowSize();
+    var displayPt = vec4.fromValues(win_x, win_y, 0, 1.0);
+    var worldPt = m_renderer.displayToWorld(
+        displayPt,
+        camera.viewMatrix(),
+        camera.projectionMatrix(),
+        winSize[0], winSize[1]);
+
+    return [worldPt[0], worldPt[1]];
+  }
+
+
+
   // Bind events to handlers
   document.onmousedown = m_viewer.handleMouseDown;
   document.onmouseup = m_viewer.handleMouseUp;
