@@ -61,6 +61,8 @@ geoModule.layer = function(options, source) {
       m_showAttribution = options.showAttribution || true,
       m_visible = options.visible || true,
       m_binNumber = ogs.vgl.material.RenderBin.Transparent,
+      m_defaultLookupTable = vglModule.lookupTable(),
+      m_lookupTables = {},
       m_dataSource = source;
 
   // TODO Write a function for this
@@ -259,6 +261,44 @@ geoModule.layer = function(options, source) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Get lookup table of the layer
+   * @param {string} varname Name of the variable. If null or empty will
+   *  return default lookup table
+   */
+    ////////////////////////////////////////////////////////////////////////////
+  this.lookupTable = function(varname) {
+    if (varname && varname in m_lookupTables) {
+      return m_lookupTables[varname]
+    }
+
+    return m_defaultLookupTable;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set lookup table for this layer for a particular variable if provided.
+   * @param {string} varname Name of the variable for which to set the
+   *  lookup table
+   */
+    ////////////////////////////////////////////////////////////////////////////
+  this.setLookupTable = function(varname, lut) {
+    if (!lut) {
+      console.log('[warning] Invalid lookup table');
+      return false;
+    }
+
+    if (varname) {
+      m_lookupTables[varname] = lut;
+
+      // TODO Make sure that all of the existing feature use this lookup table
+      this.modified();
+    }
+
+    return true;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Get source of the layer
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -277,7 +317,6 @@ geoModule.layer = function(options, source) {
       this.modified();
       return true;
     }
-
     return false;
   };
 

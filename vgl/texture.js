@@ -325,6 +325,25 @@ vglModule.lookupTable = function() {
     return true;
   };
 
+  /**
+   * Given a [min,max] range update the lookup table range
+   */
+  this.updateRange = function(range) {
+    if (!(range instanceof Array)) {
+      console.log('[error] Invalid data type for range. Requires array [min,max]');
+    }
+
+    if (range[0] < m_range[0]) {
+      m_range[0] = range[0];
+      this.modified();
+    }
+
+    if (range[1] > m_range[1]) {
+      m_range[1] = range[1];
+      this.modified();
+    }
+  };
+
   return this;
 };
 

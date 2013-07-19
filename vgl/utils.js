@@ -367,7 +367,7 @@ vglModule.utils.createColorMaterial = function() {
  * @desc Helper function to create geometry material
  * @returns {vglModule.material}
  */
-vglModule.utils.createColorMappedMaterial = function(scalarRange) {
+vglModule.utils.createColorMappedMaterial = function(scalarRange, lut) {
   if (!scalarRange) {
     scalarRange = [0.0,1.0];
   }
@@ -385,6 +385,7 @@ vglModule.utils.createColorMappedMaterial = function(scalarRange) {
   var modelViewUniform = new vglModule.modelViewUniform("modelViewMatrix");
   var projectionUniform = new vglModule.projectionUniform("projectionMatrix");
   var samplerUniform = new vglModule.uniform(gl.FLOAT, "sampler2d");
+  var lookupTable = lut;
   samplerUniform.set(0);
   prog.addVertexAttribute(posVertAttr, vglModule.vertexAttributeKeys.Position);
   prog.addVertexAttribute(scalarVertAttr, vglModule.vertexAttributeKeys.Scalar);
@@ -398,14 +399,10 @@ vglModule.utils.createColorMappedMaterial = function(scalarRange) {
   prog.addShader(vertexShader);
   mat.addAttribute(prog);
   mat.addAttribute(blend);
-  var lut = new ogs.vgl.lookupTable();
-  //standard rainbow instead of paraview
-  //lut.setColorTable([255,0,0,255,
-  //                   255,255,0,255,
-  //                   0,255,0,255,
-  //                   0,255,255,255,
-  //                   0,0,255,255])
-  mat.addAttribute(lut);
+  if (!lookupTable) {
+    lookupTable = new ogs.vgl.lookupTable();
+    mat.addAttribute(lookupTable);
+  }
   return mat;
 };
 
@@ -614,4 +611,128 @@ vglModule.utils.createPointSprites = function(image, positions, colors,
   actor.setMaterial(mat);
 
   return actor;
+};
+
+/**
+ * Create lines given positions, colors, and desired length
+ *
+ * @param positions
+ * @param colors
+ */
+vglModule.utils.createLines = function(positions, length, colors) {
+  if (!positions) {
+    console.log("[ERROR] Cannot create points without positions");
+    return null;
+  }
+
+  var lineLength = length || 1.0,
+      mapper = new vglModule.mapper(),
+      lineSource = new vglModule.lineSource(),
+      mat = vglModule.utils.createGeometryMaterial(),
+      actor = new vglModule.actor();
+
+  lineSource.setLength(lineLength);
+  lineSource.setPositions(positions);
+  if (colors) {
+    lineSource.setColors(colors);
+  }
+
+  mapper.setGeometryData(lineSource.create());
+  actor.setMapper(mapper);
+  actor.setMaterial(mat);
+
+  return actor;
+};
+
+/**
+ *
+ * @param lookupTable
+ * @param width
+ * @param height
+ * @param origin
+ * @param divs
+ * @returns {Array}
+ */
+vglModule.utils.createColorLegend = function(lookupTable, width, height, origin, divs) {
+  if (!lookupTable) {
+    console.log('[error] Invalid lookup table');
+    return;
+  }
+
+  // TODO Currently we assume that the ticks are laid on x-axis
+  // and this is on a 2D plane (ignoring Z axis. For now lets
+  // not draw minor ticks.
+  /**
+   *
+   * @param originX
+   * @param originY
+   * @param originZ
+   * @param pt1X
+   * @param pt1Y
+   * @param pt1Z
+   * @param pt2X
+   * @param pt2Y
+   * @param pt2Z
+   * @param divs
+   * @param heightMajor
+   * @param heightMinor
+   * @returns {*}
+   */
+  function createTicks (originX, originY, originZ,
+                        pt1X, pt1Y, pt1Z,
+                        pt2X, pt2Y, pt2Z, divs, heightMajor, heightMinor) {
+
+    var width = pt2X - pt1X,
+        index = null,
+        noOfTicks = Math.floor((1.0 * width) / divs) + 1,
+        delta = width / noOfTicks,
+        positions = [];
+
+    for (index = 0; index < noOfTicks; ++i) {
+      positions.push(pt1X + delta * index);
+    }
+
+    return vglModule.createLines(positions, heightMajor);
+  }
+
+  /**
+   * Create labels for the legend
+   * @param ticks
+   * @param range
+   * @param divs
+   */
+  function createLabels(ticks, range, divs) {
+    // TODO
+  }
+
+  // TODO Currently we create only one type of legend
+  var pt1X = origin[0] + width,
+      pt1Y = origin[1],
+      pt1Z = 0.0,
+      pt2X = origin[0],
+      pt2Y = origin[1] + height,
+      pt2Z = 0.0,
+      actors = [],
+      actor = null,
+      mapper = null,
+      mat = null,
+      group = vglModule.groupNode();
+
+  actor = vglModule.utils.createTexturePlane(
+    origin[0], origin[1], origin[2],
+    pt1X, pt1Y, pt1Z,
+    pt2X, pt2Y, pt2Z
+  );
+
+  mat = actor.material();
+  mat.addAttribute(lookupTable);
+  actor.setMaterial(mat);
+  group.addChild(actor);
+  actor.setReferenceFrame(vglModule.boundingObject.ReferenceFrame.Absolute);
+  // For now just return the actor
+  actors.push(actor);
+
+  // TODO This needs to change so that we can return a group node
+  // which should get appended to the scene graph
+  return actors;
 };

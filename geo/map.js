@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @module ogs.geo
+ * @module geoModule
  */
 
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
@@ -37,7 +37,7 @@ geoModule.map = function(node, options) {
   if (!(this instanceof geoModule.map)) {
     return new geoModule.map(node, options);
   }
-  ogs.vgl.object.call(this);
+  vglModule.object.call(this);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -53,8 +53,8 @@ geoModule.map = function(node, options) {
       m_activeLayer = null,
       m_mapLayer = null,
       m_featureCollection = geoModule.featureCollection(),
-      m_renderTime = ogs.vgl.timestamp(),
-      m_lastPrepareToRenderingTime = ogs.vgl.timestamp(),
+      m_renderTime = vglModule.timestamp(),
+      m_lastPrepareToRenderingTime = vglModule.timestamp(),
       m_interactorStyle = null,
       m_viewer = null,
       m_renderer = null,
@@ -82,7 +82,7 @@ geoModule.map = function(node, options) {
 
   // Initialize
   m_interactorStyle = geoModule.mapInteractorStyle();
-  m_viewer = ogs.vgl.viewer(m_node);
+  m_viewer = vglModule.viewer(m_node);
   m_viewer.setInteractorStyle(m_interactorStyle);
   m_viewer.init();
   m_viewer.renderWindow().resize($(m_node).width(), $(m_node).height());
@@ -395,14 +395,14 @@ geoModule.map = function(node, options) {
       result = layer.visible();
     } else {
       // Load countries data first
-      reader = ogs.vgl.geojsonReader();
-      geoms = reader.readGJObject(ogs.geo.countries);
+      reader = vglModule.geojsonReader();
+      geoms = reader.readGJObject(geoModule.countries);
       // @todo if opacity is on layer, solid color should be too
-      layer = ogs.geo.featureLayer({
+      layer = geoModule.featureLayer({
         "opacity": 1,
         "showAttribution": 1,
         "visible": 1
-      }, ogs.geo.multiGeometryFeature(geoms, [1.0,0.5, 0.0]));
+      }, geoModule.compositeGeometryFeature(geoms, [1.0,0.5, 0.0]));
 
       layer.setName('country-boundaries');
       this.addLayer(layer);
@@ -544,7 +544,7 @@ geoModule.map = function(node, options) {
         clearInterval(intervalId);
       } else {
         for (i = 0; i < layers.length; ++i) {
-          layers[i].update(ogs.geo.updateRequest(currentTime));
+          layers[i].update(geoModule.updateRequest(currentTime));
         }
         $(m_that).trigger({
           type: geoModule.command.animateEvent,
@@ -579,12 +579,12 @@ geoModule.map = function(node, options) {
   }
 
   $(m_interactorStyle).on(
-    ogs.geo.command.updateViewZoomEvent, this.updateAndDraw);
+    geoModule.command.updateViewZoomEvent, this.updateAndDraw);
   $(m_interactorStyle).on(
-    ogs.geo.command.updateViewPositionEvent, this.updateAndDraw);
+    geoModule.command.updateViewPositionEvent, this.updateAndDraw);
   $(this).on(geoModule.command.updateEvent, this.updateAndDraw);
 
   return this;
 };
 
-inherit(geoModule.map, ogs.vgl.object);
+inherit(geoModule.map, vglModule.object);

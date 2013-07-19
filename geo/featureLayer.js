@@ -35,7 +35,8 @@ geoModule.featureLayer = function(options, feature) {
       m_newFeatures = [],
       m_expiredFeatures = [],
       m_predrawTime = ogs.vgl.timestamp(),
-      m_updateTime = ogs.vgl.timestamp();
+      m_updateTime = ogs.vgl.timestamp(),
+      m_legend = null;
 
   if (feature) {
     m_newFeatures.push(feature);
@@ -149,6 +150,13 @@ geoModule.featureLayer = function(options, feature) {
       return;
     }
 
+    if (!m_legend) {
+      var lut = vglModule.lookupTable();
+      lut.setRange([-100.0, 100.0]);
+      m_legend = vglModule.utils.createColorLegend(lut, 400, 20, [20.0, 60.0, 0.0], 10);
+      m_newFeatures.push(m_legend);
+    }
+
     var featureCollection = request.featureCollection();
     featureCollection.setNewFeatures(this.name(), m_newFeatures);
     featureCollection.setExpiredFeatures(this.name(), m_expiredFeatures);
@@ -166,9 +174,9 @@ geoModule.featureLayer = function(options, feature) {
       return;
     }
 
-    var  i = 0,
-         mat,
-         opacityUniform;
+    var i = null,
+        mat,
+        opacityUniform;
 
     for (i = 0; i < m_features.length; ++i) {
       mat = m_features[i].material();
