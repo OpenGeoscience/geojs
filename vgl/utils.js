@@ -619,19 +619,17 @@ vglModule.utils.createPointSprites = function(image, positions, colors,
  * @param positions
  * @param colors
  */
-vglModule.utils.createLines = function(positions, length, colors) {
+vglModule.utils.createLines = function(positions, colors) {
   if (!positions) {
     console.log("[ERROR] Cannot create points without positions");
     return null;
   }
 
-  var lineLength = length || 1.0,
-      mapper = new vglModule.mapper(),
+  var mapper = new vglModule.mapper(),
       lineSource = new vglModule.lineSource(),
       mat = vglModule.utils.createGeometryMaterial(),
       actor = new vglModule.actor();
 
-  lineSource.setLength(lineLength);
   lineSource.setPositions(positions);
   if (colors) {
     lineSource.setColors(colors);
@@ -653,7 +651,8 @@ vglModule.utils.createLines = function(positions, length, colors) {
  * @param divs
  * @returns {Array}
  */
-vglModule.utils.createColorLegend = function(lookupTable, width, height, origin, divs) {
+vglModule.utils.createColorLegend = function(lookupTable, width,
+                                             height, origin, divs) {
   if (!lookupTable) {
     console.log('[error] Invalid lookup table');
     return;
@@ -678,21 +677,38 @@ vglModule.utils.createColorLegend = function(lookupTable, width, height, origin,
    * @param heightMinor
    * @returns {*}
    */
-  function createTicks (originX, originY, originZ,
+  function createTicksAndLabels(lut,
+                        originX, originY, originZ,
                         pt1X, pt1Y, pt1Z,
-                        pt2X, pt2Y, pt2Z, divs, heightMajor, heightMinor) {
+                        pt2X, pt2Y, pt2Z, divs,
+                        heightMajor, heightMinor) {
 
     var width = pt2X - pt1X,
         index = null,
         noOfTicks = Math.floor((1.0 * width) / divs) + 1,
         delta = width / noOfTicks,
-        positions = [];
+        positions = [],
+        actor = null,
+        actors = [];
 
-    for (index = 0; index < noOfTicks; ++i) {
+    for (index = 0; index < noOfTicks; ++index) {
       positions.push(pt1X + delta * index);
+      positions.push(pt1Y);
+      positions.push(pt1Z);
+
+      positions.push(pt1X + delta * index);
+      positions.push(pt1Y + heightMajor);
+      positions.push(pt1Z);
     }
 
-    return vglModule.createLines(positions, heightMajor);
+    actor = vglModule.utils.createLines(positions, null);
+    actor.setReferenceFrame(vglModule.boundingObject.ReferenceFrame.Absolute);
+    actors.push(actor);
+
+    actors = actors.concat(createLabels(positions, lut.range()));
+
+
+    return actor;
   }
 
   /**
@@ -701,8 +717,50 @@ vglModule.utils.createColorLegend = function(lookupTable, width, height, origin,
    * @param range
    * @param divs
    */
-  function createLabels(ticks, range, divs) {
-    // TODO
+  function createLabels(positions, range) {
+    if (!positions) {
+      console.log('[error] Create labels requires positions (x,y,z) array');
+      return;
+    }
+
+    if (!range) {
+      console.log('[error] Create labels requires Valid range');
+      return;
+    }
+
+    var actor = null,
+        actors = [],
+        origin = [],
+        pt1 = [],
+        pt2 = [],
+        delta = positions[4] - positions[0];
+
+    origin.length = 3;
+    pt1.length = 3;
+    pt2.length = 3;
+
+    // For now just create labels for end points
+    origin[0] = positions[0] - delta;
+    origin[1] = positions[1] - delta;
+    origin[2] = positions[2];
+
+    pt1[0] = origin[0] + delta * 2.0;
+    pt1[1] = origin[1] - delta;
+    pt1[2] = origin[2];
+
+    pt2[0] = origin[0];
+    pt2[1] = origin[1];
+    pt2[2] = origin[2];
+
+    actor = vglModule.utils.createTexturePlane(
+      origin[0], origin[1], origin[2],
+      pt1[0], pt1[1], pt1[2],
+      pt2[0], pt2[1], pt2[2]);
+    actor.material().addAttribute(vglModule.utils.renderText(range[0], 12));
+
+    actors.push(actor);
+
+    return actors;
   }
 
   // TODO Currently we create only one type of legend
@@ -729,10 +787,52 @@ vglModule.utils.createColorLegend = function(lookupTable, width, height, origin,
   actor.setMaterial(mat);
   group.addChild(actor);
   actor.setReferenceFrame(vglModule.boundingObject.ReferenceFrame.Absolute);
-  // For now just return the actor
   actors.push(actor);
+  actors = actors.concat(createTicksAndLabels(
+                          lookupTable,
+                          origin[0], origin[1], origin[1],
+                          pt2X, pt1Y, pt1Z,
+                          pt1X, pt1Y, pt1Z,
+                          divs, 5, 3));
 
   // TODO This needs to change so that we can return a group node
   // which should get appended to the scene graph
   return actors;
+};
+
+vglModule.utils.renderText = function(textToWrite, textSize, color) {
+  function getPowerOfTwo(value, pow) {
+    var pow = pow || 1;
+    while(pow<value) {
+      pow *= 2;
+    }
+    return pow;
+  }
+
+  var canvas = document.createElement('canvas'),
+      ctx = canvas.getContext('2d'),
+      texture = vglModule.texture();
+
+  canvas.setAttribute('id', 'text');
+
+  // This determines the text colour, it can take a hex value or rgba value (e.g. rgba(255,0,0,0.5))
+  ctx.fillStyle = "#333333";
+
+  // This determines the alignment of text, e.g. left, center, right
+  ctx.textAlign = "center";
+
+  // This determines the baseline of the text, e.g. top, middle, bottom
+  ctx.textBaseline = "middle";
+
+  // This determines the size of the text and the font family used
+  ctx.font = textSize + "px monospace";
+
+  canvas.width = getPowerOfTwo(ctx.measureText(textToWrite).width);
+  canvas.height = getPowerOfTwo(2*textSize);
+
+  ctx.fillText(textToWrite, canvas.width/2, canvas.height/2);
+
+  texture.setImage(canvas);
+
+  return texture;
 };
