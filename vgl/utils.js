@@ -652,7 +652,7 @@ vglModule.utils.createLines = function(positions, colors) {
  * @returns {Array}
  */
 vglModule.utils.createColorLegend = function(lookupTable, width,
-                                             height, origin, divs) {
+                                             height, origin, countMajor, countMinor) {
   if (!lookupTable) {
     console.log('[error] Invalid lookup table');
     return;
@@ -675,23 +675,23 @@ vglModule.utils.createColorLegend = function(lookupTable, width,
    * @param divs
    * @param heightMajor
    * @param heightMinor
-   * @returns {*}
+   * @returns {vglModule.actor}
    */
   function createTicksAndLabels(lut,
                         originX, originY, originZ,
                         pt1X, pt1Y, pt1Z,
-                        pt2X, pt2Y, pt2Z, divs,
+                        pt2X, pt2Y, pt2Z,
+                        countMajor, countMinor,
                         heightMajor, heightMinor) {
 
     var width = pt2X - pt1X,
         index = null,
-        noOfTicks = Math.floor((1.0 * width) / divs) + 1,
-        delta = width / noOfTicks,
+        delta = width / countMajor,
         positions = [],
         actor = null,
         actors = [];
 
-    for (index = 0; index < noOfTicks; ++index) {
+    for (index = 0; index <= countMajor; ++index) {
       positions.push(pt1X + delta * index);
       positions.push(pt1Y);
       positions.push(pt1Z);
@@ -706,9 +706,7 @@ vglModule.utils.createColorLegend = function(lookupTable, width,
     actors.push(actor);
 
     actors = actors.concat(createLabels(positions, lut.range()));
-
-
-    return actor;
+    return actors;
   }
 
   /**
@@ -723,42 +721,54 @@ vglModule.utils.createColorLegend = function(lookupTable, width,
       return;
     }
 
+    if (positions.length % 3 !== 0) {
+      console.log('[error] Create labels require positions array contain 3d points');
+      return;
+    }
+
     if (!range) {
       console.log('[error] Create labels requires Valid range');
       return;
     }
 
     var actor = null,
+        i = 0,
+        index = 0,
         actors = [],
         origin = [],
         pt1 = [],
         pt2 = [],
-        delta = positions[4] - positions[0];
+        delta = (positions[6] - positions[0]);
 
     origin.length = 3;
     pt1.length = 3;
     pt2.length = 3;
 
     // For now just create labels for end points
-    origin[0] = positions[0] - delta;
-    origin[1] = positions[1] - delta;
-    origin[2] = positions[2];
+    for (; i < 2; ++i) {
+      index = i * (positions.length - 3);
 
-    pt1[0] = origin[0] + delta * 2.0;
-    pt1[1] = origin[1] - delta;
-    pt1[2] = origin[2];
+      origin[0] = positions[index] - delta;
+      origin[1] = positions[index + 1] - 2 * delta;
+      origin[2] = positions[index + 2];
 
-    pt2[0] = origin[0];
-    pt2[1] = origin[1];
-    pt2[2] = origin[2];
+      pt1[0] = positions[index] + delta;
+      pt1[1] = origin[1];
+      pt1[2] = origin[2];
 
-    actor = vglModule.utils.createTexturePlane(
-      origin[0], origin[1], origin[2],
-      pt1[0], pt1[1], pt1[2],
-      pt2[0], pt2[1], pt2[2]);
-    actor.material().addAttribute(vglModule.utils.renderText(range[0], 12));
+      pt2[0] = origin[0];
+      pt2[1] = positions[1];
+      pt2[2] = origin[2];
 
-    actors.push(actor);
+      actor = vglModule.utils.createTexturePlane(
+        origin[0], origin[1], origin[2],
+        pt1[0], pt1[1], pt1[2],
+        pt2[0], pt2[1], pt2[2]);
+
+      actor.setReferenceFrame(vglModule.boundingObject.ReferenceFrame.Absolute);
+      actor.material().addAttribute(vglModule.utils.renderText(range[i], 12));
+      actors.push(actor);
+    }
 
     return actors;
   }
@@ -793,13 +803,20 @@ vglModule.utils.createColorLegend = function(lookupTable, width,
                           origin[0], origin[1], origin[1],
                           pt2X, pt1Y, pt1Z,
                           pt1X, pt1Y, pt1Z,
-                          divs, 5, 3));
+                          countMajor, countMinor, 5, 3));
 
   // TODO This needs to change so that we can return a group node
   // which should get appended to the scene graph
   return actors;
 };
 
+/**
+ *
+ * @param textToWrite
+ * @param textSize
+ * @param color
+ * @returns {*}
+ */
 vglModule.utils.renderText = function(textToWrite, textSize, color) {
   function getPowerOfTwo(value, pow) {
     var pow = pow || 1;
@@ -813,26 +830,32 @@ vglModule.utils.renderText = function(textToWrite, textSize, color) {
       ctx = canvas.getContext('2d'),
       texture = vglModule.texture();
 
-  canvas.setAttribute('id', 'text');
-
-  // This determines the text colour, it can take a hex value or rgba value (e.g. rgba(255,0,0,0.5))
-  ctx.fillStyle = "#333333";
-
-  // This determines the alignment of text, e.g. left, center, right
-  ctx.textAlign = "center";
-
-  // This determines the baseline of the text, e.g. top, middle, bottom
-  ctx.textBaseline = "middle";
-
-  // This determines the size of the text and the font family used
-  ctx.font = textSize + "px monospace";
+  canvas.setAttribute('id', 'textRendering');
+  canvas.style.display = 'none';
 
   canvas.width = getPowerOfTwo(ctx.measureText(textToWrite).width);
-  canvas.height = getPowerOfTwo(2*textSize);
+  canvas.height = getPowerOfTwo(2 * textSize);
 
-  ctx.fillText(textToWrite, canvas.width/2, canvas.height/2);
+  ctx.fillStyle = 'rgba(0, 0, 0, 0)';
+  ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-  texture.setImage(canvas);
+  // This determines the text colour, it can take a hex value or rgba value (e.g. rgba(255,0,0,0.5))
+  ctx.fillStyle = 'rgba(255, 255, 255, 1.0)';
+
+  // This determines the alignment of text, e.g. left, center, right
+  ctx.textAlign = "left";
+
+  // This determines the baseline of the text, e.g. top, middle, bottom
+  ctx.textBaseline = "bottom";
+
+  // This determines the size of the text and the font family used
+  ctx.font = "12px monospace";
+
+
+  ctx.fillText(textToWrite, canvas.width/8, canvas.height/2);
+
+  texture.setImage(canvas)
+  texture.updateDimensions();
 
   return texture;
 };

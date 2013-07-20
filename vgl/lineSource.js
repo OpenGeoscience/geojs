@@ -66,6 +66,11 @@ vglModule.lineSource = function(positions, colors) {
     }
 
     if (m_positions.length % 3 !== 0) {
+      console.log("[error] Line source requires 3d points");
+      return;
+    }
+
+    if (m_positions.length % 3 !== 0) {
       console.log("[ERROR] Invalid length of the points array");
       return;
     }

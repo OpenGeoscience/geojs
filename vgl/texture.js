@@ -207,9 +207,9 @@ vglModule.texture = function() {
     // };
 
     // TODO Fix this
-	    this.m_internalFormat = gl.RGBA;
-	    this.m_pixelFormat = gl.RGBA;
-	    this.m_pixelDataType = gl.UNSIGNED_BYTE;
+    this.m_internalFormat = gl.RGBA;
+    this.m_pixelFormat = gl.RGBA;
+    this.m_pixelDataType = gl.UNSIGNED_BYTE;
   };
 
   this.updateDimensions = function() {

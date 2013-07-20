@@ -153,7 +153,8 @@ geoModule.featureLayer = function(options, feature) {
     if (!m_legend) {
       var lut = vglModule.lookupTable();
       lut.setRange([-100.0, 100.0]);
-      m_legend = vglModule.utils.createColorLegend(lut, 400, 20, [20.0, 60.0, 0.0], 10);
+      m_legend = vglModule.utils.createColorLegend(
+                  lut, 400, 20, [20.0, 60.0, 0.0], 10, 0);
       m_newFeatures = m_newFeatures.concat(m_legend);
     }
 
