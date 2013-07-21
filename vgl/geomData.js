@@ -158,11 +158,11 @@ vglModule.triangles = function() {
 inherit(vglModule.triangles, vglModule.primitive);
 
 //////////////////////////////////////////////////////////////////////////////
-//
-// Lines
-//
-// ////////////////////////////////////////////////////////////////////////////
-
+/**
+ * create a instance of lines primitive type
+ * @returns {vglModule.lines}
+ */
+//////////////////////////////////////////////////////////////////////////////
 vglModule.lines = function() {
 
   if (!(this instanceof vglModule.lines)) {
@@ -176,8 +176,28 @@ vglModule.lines = function() {
 
   return this;
 };
-
 inherit(vglModule.lines, vglModule.primitive);
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * create a instance of line strip primitive type
+ * @returns {vglModule.lineStrip}
+ */
+//////////////////////////////////////////////////////////////////////////////
+vglModule.lineStrip = function() {
+
+  if (!(this instanceof vglModule.lineStrip)) {
+    return new vglModule.lineStrip();
+  }
+  vglModule.primitive.call(this);
+
+  this.setPrimitiveType(gl.LINE_STRIP);
+  this.setIndicesValueType(gl.UNSIGNED_SHORT);
+  this.setIndicesPerPrimitive(2);
+
+  return this;
+};
+inherit(vglModule.lineStrip, vglModule.primitive);
 
 /**
  * Create a new instance of class points
