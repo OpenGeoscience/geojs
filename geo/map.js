@@ -186,7 +186,6 @@ geoModule.map = function(node, options) {
     m_viewer.render();
   }
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get map options
    */

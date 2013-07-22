@@ -167,6 +167,25 @@ uiModule.gis.createDataList = function(rootId, heading, layersRootId, data, call
     if (callback !== undefined) {
       $(button).on("click", callback);
     }
+
+    // Add 'stream' button
+//    col = $(document.createElement('td'));
+//    var streamBtn = $(document.createElement('button'));
+//    streamBtn.attr('type', 'button');
+//    streamBtn.attr('class', 'btn btn-primary');
+//    streamBtn.attr('id', 'btn-add-' + item.name);
+//    streamBtn.attr('_id', item._id);
+//    streamBtn.attr('name', item.name);
+//    streamBtn.attr('basename', item.basename);
+//    streamBtn.attr('data-toggle', 'button');
+//    streamBtn.attr('data-loading-text', 'Loading...');
+//    streamBtn.html('Add');
+//    col.append(streamBtn);
+//    row.append(col);
+//
+//    streamBtn.click(function(){
+//
+//    });
   });
 
   $('.combobox').width(Math.max.apply(Math, $('.combobox').map(function() {
@@ -183,7 +202,7 @@ uiModule.gis.createDataList = function(rootId, heading, layersRootId, data, call
  * @param layersRootId
  * @param elem
  */
-uiModule.gis.addLayer = function(object, layersRootId, elem, selectfunc, togglefunc, removefunc, callback) {
+uiModule.gis.addLayer = function(object, layersRootId, elem, selectfunc, togglefunc, removefunc, workflowfunc, callback) {
   "use strict";
   var rootId, tbody, basename, layerId, tr, td, button, _id;
   rootId = "#" + layersRootId;
@@ -233,6 +252,16 @@ uiModule.gis.addLayer = function(object, layersRootId, elem, selectfunc, togglef
     button.html('Remove');
     button.click(layerId, function() {
       removefunc(this, layerId);
+    });
+    td.append(button);
+
+    // Workflow button
+    button = $(document.createElement('button'));
+    button.attr('class', 'btn-layer btn-workflow-layer btn btn-info disabled');
+    button.attr('disabled', 'disabled');
+    button.html('Workflow');
+    button.click(layerId, function() {
+      workflowfunc(this, layerId);
     });
     td.append(button);
     tr.append(td);
