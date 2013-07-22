@@ -798,7 +798,7 @@ vglModule.utils.createColorLegend = function(lookupTable, width,
         pt2[0], pt2[1], pt2[2], true);
 
       actor.setReferenceFrame(vglModule.boundingObject.ReferenceFrame.Absolute);
-      actor.material().addAttribute(vglModule.utils.renderText(range[i], 12));
+      actor.material().addAttribute(vglModule.utils.create2DTexture(range[i], 12));
       actors.push(actor);
     }
 
@@ -843,13 +843,12 @@ vglModule.utils.createColorLegend = function(lookupTable, width,
 };
 
 /**
- *
  * @param textToWrite
  * @param textSize
  * @param color
  * @returns {*}
  */
-vglModule.utils.renderText = function(textToWrite, textSize, color) {
+vglModule.utils.create2DTexture = function(textToWrite, textSize, color) {
   function getPowerOfTwo(value, pow) {
     var pow = pow || 1;
     while(pow<value) {
@@ -858,9 +857,13 @@ vglModule.utils.renderText = function(textToWrite, textSize, color) {
     return pow;
   }
 
-  var canvas = document.createElement('canvas'),
-      ctx = canvas.getContext('2d'),
+  var canvas = document.getElementById('textRendering'),
+      ctx = null,
       texture = vglModule.texture();
+
+  if (!canvas) {
+    canvas = document.createElement('canvas');
+  }
 
   canvas.setAttribute('id', 'textRendering');
   canvas.style.display = 'none';
@@ -868,6 +871,7 @@ vglModule.utils.renderText = function(textToWrite, textSize, color) {
   canvas.width = getPowerOfTwo(ctx.measureText(textToWrite).width);
   canvas.height = getPowerOfTwo(2 * textSize);
 
+  ctx = canvas.getContext('2d');
   ctx.fillStyle = 'rgba(0, 0, 0, 0)';
   ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
