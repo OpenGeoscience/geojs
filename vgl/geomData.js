@@ -621,6 +621,8 @@ vglModule.sourceDataSf = function() {
 
   var m_min = null;
   var m_max = null;
+  var m_fixedmin = null;
+  var m_fixedmax = null;
 
   vglModule.sourceData.call(this);
 
@@ -641,8 +643,19 @@ vglModule.sourceDataSf = function() {
   };
 
   this.scalarRange = function() {
-    return [m_min, m_max];
+    if (m_fixedmin == null || m_fixedmax == null) {
+      return [m_min, m_max]
+    }
+    else {
+      return [m_fixedmin, m_fixedmax]
+    }
   }
+
+  this.setScalarRange = function(min, max) {
+    m_fixedmin = min
+    m_fixedmax = max
+  }
+
   return this;
 };
 

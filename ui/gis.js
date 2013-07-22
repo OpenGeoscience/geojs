@@ -100,7 +100,7 @@ uiModule.gis.createDataList = function(rootId, heading, layersRootId, data, call
   subItemsList.append(tableRoot);
 
   $.each(data, function(i, item) {
-    var row, col, he, select, k, varname, option, button, trange, time, tval;
+    var row, col, he, select, k, varname, option, button, rawTimes, time, tval;
     row = $(document.createElement('tr'));
     row.attr('class', 'success');
     tableRoot.append(row);
@@ -111,10 +111,11 @@ uiModule.gis.createDataList = function(rootId, heading, layersRootId, data, call
     col.append(he);
     row.append(col);
 
-    trange = ["NA","NA"];
-    if (item.temporalrange != null)
+    rawTimes = ["na","na"];
+    if (item.timeInfo.rawTimes)
       {
-      trange = item.temporalrange;
+      console.log(item.timeInfo)
+      rawTimes = item.timeInfo.rawTimes;
       }
 
     // Add a drop down to let user select time
@@ -123,8 +124,8 @@ uiModule.gis.createDataList = function(rootId, heading, layersRootId, data, call
     time.attr('class', 'combobox');
     time.attr('id', item.name + "_tselect");
     col.append(time);
-    for (k = 0; k < trange.length; ++k) {
-      tval = trange[k];
+    for (k = 0; k < rawTimes.length; ++k) {
+      tval = rawTimes[k];
       option = $(document.createElement('option'));
       option.attr('value', tval);
       option.html(tval);

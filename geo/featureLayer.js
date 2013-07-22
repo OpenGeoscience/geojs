@@ -30,6 +30,7 @@ geoModule.featureLayer = function(options, feature) {
 
   /** @private */
   var m_that = this,
+      m_time = null,
       m_features = [],
       m_newFeatures = [],
       m_expiredFeatures = [],
@@ -42,6 +43,17 @@ geoModule.featureLayer = function(options, feature) {
   }
   m_predrawTime.modified();
   m_updateTime.modified();
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get current time of the layer.
+   *
+   * This should be implemented by the derived class
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.time = function() {
+     return m_time;
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -89,10 +101,18 @@ geoModule.featureLayer = function(options, feature) {
         geomFeature = null;
 
     if (!time) {
-      console.log('[info] No timestep provided.');
+      console.log('[info] No timestep provided. Using time from previous update.');
+      // Use previous time
+      time = m_time;
+    } else {
+      m_time = time;
     }
 
     data = this.dataSource().getData(time);
+
+    if (!data) {
+      return;
+    }
 
     // Clear our existing features
     m_expiredFeatures = m_newFeatures.slice(0);
