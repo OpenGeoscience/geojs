@@ -48,6 +48,7 @@ vglModule.utils.createTextureVertexShader = function(context) {
   return shader;
 };
 
+
 /**
  * Create a new instance of default fragment shader that uses a texture
  *
@@ -57,12 +58,32 @@ vglModule.utils.createTextureVertexShader = function(context) {
  */
 vglModule.utils.createTextureFragmentShader = function(context) {
   var fragmentShaderSource = [
-                              'varying highp vec3 iTextureCoord;',
-                              'uniform sampler2D sampler2d;',
-                              'uniform mediump float opacity;',
-                              'void main(void) {',
-                              'gl_FragColor = vec4(texture2D(sampler2d, vec2(iTextureCoord.s, iTextureCoord.t)).xyz, opacity);',
-                              '}' ].join('\n');
+    'varying highp vec3 iTextureCoord;',
+    'uniform sampler2D sampler2d;',
+    'uniform mediump float opacity;',
+    'void main(void) {',
+    'gl_FragColor = vec4(texture2D(sampler2d, vec2(iTextureCoord.s, iTextureCoord.t)).xyz, opacity);',
+    '}' ].join('\n');
+
+  var shader = new vglModule.shader(gl.FRAGMENT_SHADER);
+  shader.setShaderSource(fragmentShaderSource);
+  return shader;
+};
+
+/**
+ * Create variation of createTextureFragmentShader which uses texture alpha
+ *
+ * @desc Helper function to create default fragment shader with sampler *
+ * @param context
+ * @returns {vglModule.shader}
+ */
+vglModule.utils.createRgbaTextureFragmentShader = function(context) {
+  var fragmentShaderSource = [
+    'varying highp vec3 iTextureCoord;',
+    'uniform sampler2D sampler2d;',
+    'void main(void) {',
+    'gl_FragColor = vec4(texture2D(sampler2d, vec2(iTextureCoord.s, iTextureCoord.t)).xyzw);',
+    '}' ].join('\n');
 
   var shader = new vglModule.shader(gl.FRAGMENT_SHADER);
   shader.setShaderSource(fragmentShaderSource);
@@ -242,15 +263,15 @@ vglModule.utils.createPointSpritesVertexShader = function(context) {
  */
 vglModule.utils.createPointSpritesFragmentShader = function(context) {
   var fragmentShaderSource = [
-                              'varying mediump vec3 iVertexColor;',
-                              'uniform sampler2D sampler2d;',
-                              'uniform mediump float opacity;',
-                              'uniform mediump float vertexColorWeight;',
-                              'void main(void) {',
-                              'highp vec4 texColor = texture2D(sampler2d, gl_PointCoord);',
-                              'highp vec3 finalColor = iVertexColor * vertexColorWeight + (1.0 - vertexColorWeight) * texColor.xyz;',
-                              'gl_FragColor = vec4(finalColor, opacity * texColor.w);',
-                              '}' ].join('\n');
+    'varying mediump vec3 iVertexColor;',
+    'uniform sampler2D sampler2d;',
+    'uniform mediump float opacity;',
+    'uniform mediump float vertexColorWeight;',
+    'void main(void) {',
+    'highp vec4 texColor = texture2D(sampler2d, gl_PointCoord);',
+    'highp vec3 finalColor = iVertexColor * vertexColorWeight + (1.0 - vertexColorWeight) * texColor.xyz;',
+    'gl_FragColor = vec4(finalColor, opacity * texColor.w);',
+    '}' ].join('\n');
 
   var shader = new vglModule.shader(gl.FRAGMENT_SHADER);
   shader.setShaderSource(fragmentShaderSource);
@@ -263,29 +284,39 @@ vglModule.utils.createPointSpritesFragmentShader = function(context) {
  * @desc Helper function to create a texture material
  * @returns {vglModule.material}
  */
-vglModule.utils.createTextureMaterial = function() {
+vglModule.utils.createTextureMaterial = function(isRgba) {
   var mat = new vglModule.material();
   var blend = new vglModule.blend();
   var prog = new vglModule.shaderProgram();
   var vertexShader = vglModule.utils.createTextureVertexShader(gl);
-  var fragmentShader = vglModule.utils.createTextureFragmentShader(gl);
+  var fragmentShader = null;
+
   var posVertAttr = new vglModule.vertexAttribute("vertexPosition");
   var texCoordVertAttr = new vglModule.vertexAttribute("textureCoord");
   var colorVertAttr = new vglModule.vertexAttribute("vertexColor");
   var pointsizeUniform = new vglModule.floatUniform("pointSize", 5.0);
-  var opacityUniform = new vglModule.floatUniform("opacity", 1.0);
+
   var modelViewUniform = new vglModule.modelViewUniform("modelViewMatrix");
   var projectionUniform = new vglModule.projectionUniform("projectionMatrix");
   var samplerUniform = new vglModule.uniform(gl.INT, "sampler2d");
   samplerUniform.set(0);
+
   prog.addVertexAttribute(posVertAttr, vglModule.vertexAttributeKeys.Position);
   prog.addVertexAttribute(colorVertAttr, vglModule.vertexAttributeKeys.Color);
   prog.addVertexAttribute(texCoordVertAttr,
                           vglModule.vertexAttributeKeys.TextureCoordinate);
   prog.addUniform(pointsizeUniform);
-  prog.addUniform(opacityUniform);
   prog.addUniform(modelViewUniform);
   prog.addUniform(projectionUniform);
+
+  if (isRgba) {
+    fragmentShader = vglModule.utils.createRgbaTextureFragmentShader(gl);
+  } else {
+    fragmentShader = vglModule.utils.createTextureFragmentShader(gl);
+    var opacityUniform = new vglModule.floatUniform("opacity", 1.0);
+    prog.addUniform(opacityUniform);
+  }
+
   prog.addShader(fragmentShader);
   prog.addShader(vertexShader);
   mat.addAttribute(prog);
@@ -514,20 +545,21 @@ vglModule.utils.createPlane = function(originX, originY, originZ, point1X,
  * @desc Helper function to create a plane textured node This method will create
  * a plane actor with texture coordinates, eventually normal, and plane
  * material. *
- * @returns actor
+ * @returns {vglModule.actor}
  */
 vglModule.utils.createTexturePlane = function(originX, originY, originZ,
                                               point1X, point1Y, point1Z,
-                                              point2X, point2Y, point2Z) {
-  var mapper = new vglModule.mapper();
-  var planeSource = new vglModule.planeSource();
+                                              point2X, point2Y, point2Z, isRgba) {
+  var mapper = new vglModule.mapper(),
+      planeSource = new vglModule.planeSource(),
+      mat = vglModule.utils.createTextureMaterial(isRgba),
+      actor = new vglModule.actor();
+
   planeSource.setOrigin(originX, originY, originZ);
   planeSource.setPoint1(point1X, point1Y, point1Z);
   planeSource.setPoint2(point2X, point2Y, point2Z);
   mapper.setGeometryData(planeSource.create());
 
-  var mat = vglModule.utils.createTextureMaterial();
-  var actor = new vglModule.actor();
   actor.setMapper(mapper);
   actor.setMaterial(mat);
 
@@ -763,7 +795,7 @@ vglModule.utils.createColorLegend = function(lookupTable, width,
       actor = vglModule.utils.createTexturePlane(
         origin[0], origin[1], origin[2],
         pt1[0], pt1[1], pt1[2],
-        pt2[0], pt2[1], pt2[2]);
+        pt2[0], pt2[1], pt2[2], true);
 
       actor.setReferenceFrame(vglModule.boundingObject.ReferenceFrame.Absolute);
       actor.material().addAttribute(vglModule.utils.renderText(range[i], 12));
