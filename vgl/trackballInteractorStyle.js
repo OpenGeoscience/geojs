@@ -114,9 +114,6 @@ vglModule.trackballInteractorStyle = function() {
     if (event.target !== canvas) {
       return true;
     }
-    if (event.state !== "down") {
-      return;
-    }
     if (event.button === 0) {
       m_leftMouseButtonDown = true;
     }
@@ -145,9 +142,6 @@ vglModule.trackballInteractorStyle = function() {
   this.handleMouseUp = function(event) {
     var canvas = m_that.viewer().canvas();
     if (event.target !== canvas) {
-      return true;
-    }
-    if (event.state !== "up") {
       return true;
     }
     if (event.button === 0) {

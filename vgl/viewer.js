@@ -85,7 +85,7 @@ vglModule.viewer = function(canvas) {
       var fixedEvent = $.event.fix(event || window.event);
       fixedEvent.preventDefault();
       fixedEvent.state = 'up';
-      fixedEvent.type = vglModule.command.mousePressEvent;
+      fixedEvent.type = vglModule.command.mouseReleaseEvent;
       $(m_that).trigger(fixedEvent);
     }
 
