@@ -34,8 +34,8 @@ geoModule.featureLayer = function(options, feature) {
       m_features = [],
       m_newFeatures = [],
       m_expiredFeatures = [],
-      m_predrawTime = ogs.vgl.timestamp(),
-      m_updateTime = ogs.vgl.timestamp(),
+      m_predrawTime = vglModule.timestamp(),
+      m_updateTime = vglModule.timestamp(),
       m_legend = null;
 
   if (feature) {
@@ -59,7 +59,7 @@ geoModule.featureLayer = function(options, feature) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Return the underlying drawable entity.
-   * @returns {geoModule.feature}
+   * @returns {Array}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.features = function() {
@@ -99,10 +99,11 @@ geoModule.featureLayer = function(options, feature) {
     var i = 0,
         time = request.time(),
         data = null,
-        geomFeature = null;
+        geomFeature = null,
+        lut = this.lookupTable();
 
     if (!time) {
-      console.log('[info] No timestep provided. Using time from previous update.');
+      console.log('[info] Timestamp not provided. Using time from previous update.');
       // Use previous time
       time = m_time;
     } else {
@@ -110,7 +111,6 @@ geoModule.featureLayer = function(options, feature) {
     }
 
     data = this.dataSource().getData(time);
-
     if (!data) {
       return;
     }
@@ -119,14 +119,25 @@ geoModule.featureLayer = function(options, feature) {
     m_expiredFeatures = m_newFeatures.slice(0);
     m_newFeatures = [];
 
+    // Create legend if not created earlier
+    if (!m_legend) {
+      lut = vglModule.lookupTable();
+      lut.setRange(this.dataSource().getScalarRange());
+      m_legend = vglModule.utils.createColorLegend(
+        lut, 400, 20, [20.0, 60.0, 0.0], 10, 0);
+      m_newFeatures = m_newFeatures.concat(m_legend);
+      this.setLookupTable(lut);
+    }
+
     for(i = 0; i < data.length; ++i) {
       switch(data[i].type()) {
-        case ogs.vgl.data.geometry:
+        case vglModule.data.geometry:
           geomFeature = geoModule.geometryFeature(data[i]);
           geomFeature.material().setBinNumber(this.binNumber());
+          geomFeature.setLookupTable(lut);
           m_newFeatures.push(geomFeature);
           break;
-        case ogs.vgl.data.raster:
+        case vglModule.data.raster:
           break;
         default:
           console.log('[warning] Data type not handled', data.type());
@@ -150,14 +161,6 @@ geoModule.featureLayer = function(options, feature) {
       return;
     }
 
-    if (!m_legend) {
-      var lut = vglModule.lookupTable();
-      lut.setRange([-100.0, 100.0]);
-      m_legend = vglModule.utils.createColorLegend(
-                  lut, 400, 20, [20.0, 60.0, 0.0], 10, 0);
-      m_newFeatures = m_newFeatures.concat(m_legend);
-    }
-
     var featureCollection = request.featureCollection();
     featureCollection.setNewFeatures(this.name(), m_newFeatures);
     featureCollection.setExpiredFeatures(this.name(), m_expiredFeatures);
@@ -175,17 +178,34 @@ geoModule.featureLayer = function(options, feature) {
       return;
     }
 
-    var i = null,
-        mat,
-        opacityUniform;
+    var i = 0,
+        mat = null,
+        opacityUniform = null;
 
-    for (i = 0; i < m_features.length; ++i) {
+    for (; i < m_features.length; ++i) {
       mat = m_features[i].material();
       opacityUniform = mat.shaderProgram().uniform('opacity');
       if (opacityUniform !== null) {
         opacityUniform.set(opacity);
         $(m_that).trigger(geoModule.command.updateLayerOpacityEvent);
       }
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Update color mapping for the layer for a particular variable.
+   * This should be called when lookup table or any other parameters
+   * that could affect color mappings changes.
+   */
+    ////////////////////////////////////////////////////////////////////////////
+  this.updateColorMapping = function(varname) {
+    var i = 0,
+        lut = this.lookupTable(varname);
+
+    lut.setRange(this.dataSource().getScalarRange(varname));
+    for (; i < m_features.length; ++i) {
+      m_features.setLookupTable(lut);
     }
   };
 

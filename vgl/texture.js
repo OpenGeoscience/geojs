@@ -313,14 +313,14 @@ vglModule.lookupTable = function() {
   };
 
   this.range = function() {
-    return this.m_range;
+    return m_range;
   };
 
   this.setRange = function(range) {
-    if (this.m_range === range) {
+    if (m_range === range) {
       return false;
     }
-    this.m_range = range;
+    m_range = range;
     this.modified();
     return true;
   };

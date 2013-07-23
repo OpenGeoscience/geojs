@@ -398,10 +398,12 @@ vglModule.utils.createColorMaterial = function() {
  * @desc Helper function to create geometry material
  * @returns {vglModule.material}
  */
-vglModule.utils.createColorMappedMaterial = function(scalarRange, lut) {
-  if (!scalarRange) {
-    scalarRange = [0.0,1.0];
+vglModule.utils.createColorMappedMaterial = function(lut) {
+  if (!lut) {
+    lut = new vglModule.lookupTable();
   }
+
+  var scalarRange = lut.range();
   var mat = new vglModule.material();
   var blend = new vglModule.blend();
   var prog = new vglModule.shaderProgram();
@@ -418,6 +420,7 @@ vglModule.utils.createColorMappedMaterial = function(scalarRange, lut) {
   var samplerUniform = new vglModule.uniform(gl.FLOAT, "sampler2d");
   var lookupTable = lut;
   samplerUniform.set(0);
+
   prog.addVertexAttribute(posVertAttr, vglModule.vertexAttributeKeys.Position);
   prog.addVertexAttribute(scalarVertAttr, vglModule.vertexAttributeKeys.Scalar);
   prog.addUniform(pointsizeUniform);
@@ -430,11 +433,38 @@ vglModule.utils.createColorMappedMaterial = function(scalarRange, lut) {
   prog.addShader(vertexShader);
   mat.addAttribute(prog);
   mat.addAttribute(blend);
-  if (!lookupTable) {
-    lookupTable = new ogs.vgl.lookupTable();
-    mat.addAttribute(lookupTable);
-  }
+  mat.addAttribute(lookupTable);
+
   return mat;
+};
+
+/**
+ * Update color mapped material
+ *
+ * @param mat
+ * @param scalarRange
+ * @param lut
+ */
+vglModule.utils.updateColorMappedMaterial = function(mat, lut) {
+  if (!mat) {
+    console.log('[warning] Invalid material. Nothing to update.')
+    return;
+  }
+
+  if (!lut) {
+    console.log('[warning] Invalid lookup table. Nothing to update.')
+    return;
+  }
+
+
+  var lutMin = mat.shaderProgram().uniform('lutMin'),
+      lutMax = mat.shaderProgram().uniform('lutMax');
+
+  lutMin.set(lut.range()[0]);
+  lutMax.set(lut.range()[1]);
+
+  // This will replace the existing lookup table
+  mat.setAttribute(lut);
 };
 
 /**
@@ -798,7 +828,8 @@ vglModule.utils.createColorLegend = function(lookupTable, width,
         pt2[0], pt2[1], pt2[2], true);
 
       actor.setReferenceFrame(vglModule.boundingObject.ReferenceFrame.Absolute);
-      actor.material().addAttribute(vglModule.utils.create2DTexture(range[i], 12));
+      actor.material().addAttribute(vglModule.utils.create2DTexture(
+        range[i].toString(), 12, null));
       actors.push(actor);
     }
 
@@ -864,14 +895,18 @@ vglModule.utils.create2DTexture = function(textToWrite, textSize, color) {
   if (!canvas) {
     canvas = document.createElement('canvas');
   }
+  ctx = canvas.getContext('2d');
 
   canvas.setAttribute('id', 'textRendering');
   canvas.style.display = 'none';
 
-  canvas.width = getPowerOfTwo(ctx.measureText(textToWrite).width);
-  canvas.height = getPowerOfTwo(2 * textSize);
+//  canvas.width = getPowerOfTwo(ctx.measureText(textToWrite).width);
 
-  ctx = canvas.getContext('2d');
+  // Make width and height equal so that we get pretty looking
+  // text.
+  canvas.height = getPowerOfTwo(2 * textSize);
+  canvas.width = canvas.height;
+
   ctx.fillStyle = 'rgba(0, 0, 0, 0)';
   ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
@@ -879,7 +914,7 @@ vglModule.utils.create2DTexture = function(textToWrite, textSize, color) {
   ctx.fillStyle = 'rgba(255, 255, 255, 1.0)';
 
   // This determines the alignment of text, e.g. left, center, right
-  ctx.textAlign = "left";
+  ctx.textAlign = "center";
 
   // This determines the baseline of the text, e.g. top, middle, bottom
   ctx.textBaseline = "bottom";
@@ -888,7 +923,7 @@ vglModule.utils.create2DTexture = function(textToWrite, textSize, color) {
   ctx.font = "12px monospace";
 
 
-  ctx.fillText(textToWrite, canvas.width/8, canvas.height/2);
+  ctx.fillText(textToWrite, canvas.width/2, canvas.height/2);
 
   texture.setImage(canvas)
   texture.updateDimensions();

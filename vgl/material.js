@@ -8,7 +8,6 @@
  * @class
  * @returns {vglModule.material}
  */
-
 vglModule.material = function() {
   if (!(this instanceof vglModule.material)) {
     return new vglModule.material();
@@ -40,13 +39,47 @@ vglModule.material = function() {
     }
   };
 
-  this.addAttribute = function(attr) {
+  /**
+   *
+   * @param attr
+   * @returns {boolean}
+   */
+  this.setAttribute = function(attr) {
+    if (attr.type() === materialAttributeType.Texture &&
+        m_textureAttributes[attr.textureUnit()] !== attr) {
+      m_textureAttributes[attr.textureUnit()] = attr;
+      this.modified();
+      return true;
+    }
+    else {
+      if (m_attributes[attr.type()] === attr) {
+        return false;
+      }
 
+      // Shader is a very special attribute
+      if (attr.type() === materialAttributeType.ShaderProgram) {
+        m_shaderProgram = attr;
+      }
+
+      m_attributes[attr.type()] = attr;
+      this.modified();
+      return true;
+    }
+  };
+
+  /**
+   *
+   * @param attr
+   * @returns {boolean}
+   */
+  this.addAttribute = function(attr) {
     if (this.exists(attr)) {
       return false;
     }
 
     if (attr.type() === materialAttributeType.Texture) {
+      // TODO Currently we don't check if we are replacing or not.
+      // It would be nice to have a flag for it.
       m_textureAttributes[attr.textureUnit()] = attr;
       this.modified();
       return true;

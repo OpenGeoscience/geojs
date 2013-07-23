@@ -43,9 +43,7 @@ geoModule.feature = function() {
   this.setLookupTable = function(lut) {
     if (lut !== m_lookupTable) {
       m_lookupTable = lut;
-
-      this.updateColorMapping(this.material());
-
+      this.updateColorMapping();
       this.modified();
       return true;
     }
@@ -55,23 +53,14 @@ geoModule.feature = function() {
   /**
    * Update color mapping
    */
-  this.updateColorMapping = function(material) {
-    if (material && !(material instanceof vglModule.material)) {
-      console.log('[warning] Invalid material');
-      return;
-    }
-
+  this.updateColorMapping = function() {
     if (!m_lookupTable) {
       console.log('[warning] Invalid lookup table');
       return;
     }
 
-    // Update the material
-    if (this.material()) {
-      this.material().setAttribute(materialAttributeType.Texture,
-        m_lookupTable);
-    }
-  }
+    vglModule.utils.updateColorMappedMaterial(this.material(), m_lookupTable);
+  };
 
   return this;
 };
@@ -189,8 +178,7 @@ geoModule.geometryFeature = function(geom) {
   if (!(this instanceof geoModule.geometryFeature)) {
     return new geoModule.geometryFeature(geom);
   }
-
-  vglModule.actor.call(this);
+  geoModule.feature.call(this);
 
   // Initialize
   var mapper = vglModule.mapper(),
@@ -205,9 +193,12 @@ geoModule.geometryFeature = function(geom) {
   if (scalar) {
     if (lut) {
       lut.updateRange(scalar.scalarRange());
-      material = vglModule.utils.createColorMappedMaterial(lut.range(), lut);
+      material = vglModule.utils.createColorMappedMaterial(lut);
     } else {
-      material = vglModule.utils.createColorMappedMaterial(scalar.scalarRange());
+      lut = vglModule.lookupTable();
+      lut.updateRange(scalar.scalarRange());
+      this.setLookupTable(lut);
+      material = vglModule.utils.createColorMappedMaterial(lut);
     }
   } else if (colors) {
     material = vglModule.utils.createColorMaterial();
@@ -283,7 +274,7 @@ geoModule.compositeGeometryFeature = function(geoms, color) {
     }
 
     if (hasScalars) {
-      m_material = vglModule.utils.createColorMappedMaterial(lut.range(), lut);
+      m_material = vglModule.utils.createColorMappedMaterial(lut);
     } else {
       m_material = vglModule.utils.createGeometryMaterial();
     }

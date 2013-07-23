@@ -288,9 +288,11 @@ geoModule.layer = function(options, source) {
     }
 
     if (varname) {
+      if (varname in m_lookupTables && m_lookupTables[varname] === lut) {
+        return false;
+      }
       m_lookupTables[varname] = lut;
-
-      // TODO Make sure that all of the existing feature use this lookup table
+      this.updateColorMapping(varname);
       this.modified();
     }
 
@@ -363,6 +365,16 @@ geoModule.layer = function(options, source) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.updateLayerOpacity = function() {
+    // Concrete class should implement this
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Virtual method to update color mapping for the layer.
+   * Concrete class should implement this method.
+   */
+    ////////////////////////////////////////////////////////////////////////////
+  this.updateColorMapping = function() {
     // Concrete class should implement this
   };
 
