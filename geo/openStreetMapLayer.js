@@ -99,6 +99,7 @@ geoModule.openStreetMapLayer = function() {
         actor = ogs.vgl.utils.createTexturePlane(llx, lly,
           -1.0, urx, lly, -1.0, llx, ury, -1.0),
         tile = new Image();
+        //console.log("New tile: ["+llx+" , "+lly+"] ["+urx+" , "+ury+"]");
 
     tile.LOADING = true;
     tile.LOADED = false;
@@ -244,6 +245,7 @@ geoModule.openStreetMapLayer = function() {
         worldPt2 = renderer.displayToWorld(
           displayPt2, camera.viewMatrix(), camera.projectionMatrix(),
           node.width, node.height);
+
 
     // @TODO Currently we blindly remove all tiles from previous zoom
     // state. This could be optimized.
