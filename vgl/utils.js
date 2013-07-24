@@ -970,6 +970,14 @@ vglModule.utils.createColorLegend = function(
 //////////////////////////////////////////////////////////////////////////////
 vglModule.utils.create2DTexture = function(textToWrite, textSize, color) {
   'use strict';
+
+  /**
+   * Helper function to compute power of 2 number
+   *
+   * @param value
+   * @param pow
+   * @returns {*|number}
+   */
   function getPowerOfTwo(value, pow) {
     var pow = pow || 1;
     while(pow<value) {
@@ -992,8 +1000,7 @@ vglModule.utils.create2DTexture = function(textToWrite, textSize, color) {
 
 //  canvas.width = getPowerOfTwo(ctx.measureText(textToWrite).width);
 
-  // Make width and height equal so that we get pretty looking
-  // text.
+  // Make width and height equal so that we get pretty looking text.
   canvas.height = getPowerOfTwo(2 * textSize);
   canvas.width = canvas.height;
 
@@ -1010,8 +1017,7 @@ vglModule.utils.create2DTexture = function(textToWrite, textSize, color) {
   ctx.textBaseline = "bottom";
 
   // This determines the size of the text and the font family used
-  ctx.font = "12px monospace";
-
+  ctx.font = textSize + "px monospace";
 
   ctx.fillText(textToWrite, canvas.width/2, canvas.height/2);
 
