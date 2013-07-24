@@ -162,7 +162,7 @@ geoModule.archiveLayerSource = function(name, vars, onError) {
     ////////////////////////////////////////////////////////////////////////////
   this.getScalarRange = function(varname) {
     // TODO This should be read from the archive
-    return [0, 100];
+    return [0, 200];
   };
 
   return this;

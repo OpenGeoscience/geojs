@@ -786,8 +786,9 @@ vglModule.utils.createLines = function(positions, colors) {
  * @returns {Array}
  */
 //////////////////////////////////////////////////////////////////////////////
-vglModule.utils.createColorLegend = function(
-  lookupTable, width, height, origin, countMajor, countMinor) {
+vglModule.utils.createColorLegend = function(varname, lookupTable, width,
+                                             height, origin, countMajor,
+                                             countMinor) {
   'use strict';
 
   if (!lookupTable) {
