@@ -814,7 +814,7 @@ vglModule.utils.createColorLegend = function(
    * @param divs
    * @param heightMajor
    * @param heightMinor
-   * @returns {vglModule.actor}
+   * @returns {Array}
    */
   //////////////////////////////////////////////////////////////////////////////
   function createTicksAndLabels(lut,
@@ -844,6 +844,7 @@ vglModule.utils.createColorLegend = function(
 
     actor = vglModule.utils.createLines(positions, null);
     actor.setReferenceFrame(vglModule.boundingObject.ReferenceFrame.Absolute);
+    actor.material().setBinNumber(vglModule.material.RenderBin.Overlay);
     actors.push(actor);
 
     actors = actors.concat(createLabels(positions, lut.range()));
@@ -911,6 +912,7 @@ vglModule.utils.createColorLegend = function(
         pt2[0], pt2[1], pt2[2], true);
 
       actor.setReferenceFrame(vglModule.boundingObject.ReferenceFrame.Absolute);
+      actor.material().setBinNumber(vglModule.material.RenderBin.Overlay);
       actor.material().addAttribute(vglModule.utils.create2DTexture(
         range[i].toString(), 12, null));
       actors.push(actor);
