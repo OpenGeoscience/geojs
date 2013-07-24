@@ -178,11 +178,11 @@ geoModule.featureLayer = function(options, feature) {
       return;
     }
 
-    var i = 0,
+    var i = null,
         mat = null,
         opacityUniform = null;
 
-    for (; i < m_features.length; ++i) {
+    for (i = 0; i < m_features.length; ++i) {
       mat = m_features[i].material();
       opacityUniform = mat.shaderProgram().uniform('opacity');
       if (opacityUniform !== null) {
@@ -200,11 +200,11 @@ geoModule.featureLayer = function(options, feature) {
    */
     ////////////////////////////////////////////////////////////////////////////
   this.updateColorMapping = function(varname) {
-    var i = 0,
+    var i = null,
         lut = this.lookupTable(varname);
 
     lut.setRange(this.dataSource().getScalarRange(varname));
-    for (; i < m_features.length; ++i) {
+    for (i = 0; i < m_features.length; ++i) {
       m_features.setLookupTable(lut);
     }
   };

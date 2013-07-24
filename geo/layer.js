@@ -267,8 +267,8 @@ geoModule.layer = function(options, source) {
    */
     ////////////////////////////////////////////////////////////////////////////
   this.lookupTable = function(varname) {
-    if (varname && varname in m_lookupTables) {
-      return m_lookupTables[varname]
+    if (varname && m_lookupTables.hasOwnProperty(varname)) {
+      return m_lookupTables[varname];
     }
 
     return m_defaultLookupTable;
@@ -288,7 +288,8 @@ geoModule.layer = function(options, source) {
     }
 
     if (varname) {
-      if (varname in m_lookupTables && m_lookupTables[varname] === lut) {
+      if (m_lookupTables.hasOwnProperty(varname) &&
+          m_lookupTables[varname] === lut) {
         return false;
       }
       m_lookupTables[varname] = lut;

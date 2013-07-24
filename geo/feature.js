@@ -229,22 +229,9 @@ geoModule.compositeGeometryFeature = function(geoms, color) {
   }
   vglModule.actor.call(this);
 
-  var m_mapper = vglModule.groupMapper(),
+  var m_that = this,
+      m_mapper = vglModule.groupMapper(),
       m_material = null;
-
-  // Constructor
-  this.setMapper(m_mapper);
-
-  if (geoms) {
-    m_mapper.setGeometryDataArray(geoms);
-  }
-
-  if (!color) {
-    updateMaterial(geoms);
-  } else {
-    m_material = vglModule.utils.createSolidColorMaterial(color);
-  }
-  this.setMaterial(m_material);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -257,7 +244,7 @@ geoModule.compositeGeometryFeature = function(geoms, color) {
         i = null,
         scalar = null,
         hasScalars = false,
-        lut = this.lookupTable();
+        lut = m_that.lookupTable();
 
     if (geoms) {
       count  = geoms.length;
@@ -266,6 +253,7 @@ geoModule.compositeGeometryFeature = function(geoms, color) {
         if (scalar) {
           if (!lut) {
             lut = vglModule.lookupTable();
+            m_that.setLookupTable(lut);
           }
           hasScalars = true;
           lut.updateRange(scalar.scalarRange());
@@ -278,7 +266,7 @@ geoModule.compositeGeometryFeature = function(geoms, color) {
     } else {
       m_material = vglModule.utils.createGeometryMaterial();
     }
-    this.setMaterial(m_material);
+    m_that.setMaterial(m_material);
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -289,6 +277,20 @@ geoModule.compositeGeometryFeature = function(geoms, color) {
   this.geometries = function() {
     return m_mapper.geometryDataArray();
   };
+
+  // Initializations
+  this.setMapper(m_mapper);
+
+  if (geoms) {
+    m_mapper.setGeometryDataArray(geoms);
+  }
+
+  if (!color) {
+    updateMaterial(geoms);
+  } else {
+    m_material = vglModule.utils.createSolidColorMaterial(color);
+  }
+  this.setMaterial(m_material);
 
   return this;
 };
