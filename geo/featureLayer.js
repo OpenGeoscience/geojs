@@ -99,6 +99,7 @@ geoModule.featureLayer = function(options, feature) {
     var i = 0,
         time = request.time(),
         data = null,
+        varnames = null,
         geomFeature = null,
         lut = this.lookupTable();
 
@@ -121,12 +122,19 @@ geoModule.featureLayer = function(options, feature) {
 
     // Create legend if not created earlier
     if (!m_legend) {
-      lut = vglModule.lookupTable();
-      lut.setRange(this.dataSource().getScalarRange());
-      m_legend = vglModule.utils.createColorLegend(
-        lut, 400, 20, [20.0, 60.0, 0.0], 10, 0);
-      m_newFeatures = m_newFeatures.concat(m_legend);
-      this.setLookupTable(lut);
+      // Assuming that first variable is the scalar
+      varnames = this.dataSource().variableNames();
+      if (varnames.length > 0) {
+        // Create new lookup table if none exist
+        if (!lut) {
+          lut = vglModule.lookupTable();
+          this.setLookupTable(lut);
+        }
+        lut.setRange(this.dataSource().getScalarRange());
+        m_legend = vglModule.utils.createColorLegend(
+          varnames[0], lut, 400, 20, [20.0, 60.0, 0.0], 10, 0);
+        m_newFeatures = m_newFeatures.concat(m_legend);
+      }
     }
 
     for(i = 0; i < data.length; ++i) {

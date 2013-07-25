@@ -28,6 +28,23 @@ inherit(vglModule.utils, vglModule.object);
 
 //////////////////////////////////////////////////////////////////////////////
 /**
+ * Helper function to compute power of 2 number
+ *
+ * @param value
+ * @param pow
+ * @returns {*|number}
+ */
+//////////////////////////////////////////////////////////////////////////////
+vglModule.utils.computePowerOfTwo = function(value, pow) {
+  var pow = pow || 1;
+  while (pow < value) {
+    pow *= 2;
+  }
+  return pow;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+/**
  * Create a new instance of default vertex shader that uses a texture
  *
  * @desc Helper function to create default vertex shader
@@ -818,7 +835,7 @@ vglModule.utils.createColorLegend = function(varname, lookupTable, width,
    * @returns {Array}
    */
   //////////////////////////////////////////////////////////////////////////////
-  function createTicksAndLabels(lut,
+  function createTicksAndLabels(varname, lut,
                         originX, originY, originZ,
                         pt1X, pt1Y, pt1Z,
                         pt2X, pt2Y, pt2Z,
@@ -848,7 +865,7 @@ vglModule.utils.createColorLegend = function(varname, lookupTable, width,
     actor.material().setBinNumber(vglModule.material.RenderBin.Overlay);
     actors.push(actor);
 
-    actors = actors.concat(createLabels(positions, lut.range()));
+    actors = actors.concat(createLabels(varname, positions, lut.range()));
     return actors;
   }
 
@@ -861,7 +878,7 @@ vglModule.utils.createColorLegend = function(varname, lookupTable, width,
    * @param divs
    */
   //////////////////////////////////////////////////////////////////////////////
-  function createLabels(positions, range) {
+  function createLabels(varname, positions, range) {
     'use strict';
     if (!positions) {
       console.log('[error] Create labels requires positions (x,y,z) array');
@@ -880,12 +897,14 @@ vglModule.utils.createColorLegend = function(varname, lookupTable, width,
 
     var actor = null,
         i = 0,
+        size = vglModule.utils.computePowerOfTwo(48),
         index = 0,
         actors = [],
         origin = [],
         pt1 = [],
         pt2 = [],
-        delta = (positions[6] - positions[0]);
+        delta = (positions[6] - positions[0]),
+        axisLabelOffset = 4;
 
     origin.length = 3;
     pt1.length = 3;
@@ -919,6 +938,33 @@ vglModule.utils.createColorLegend = function(varname, lookupTable, width,
       actors.push(actor);
     }
 
+    // Create axis label
+    origin[0] = (positions[0] + positions[positions.length - 3]  - size) * 0.5;
+    origin[1] = positions[1] + axisLabelOffset;
+    origin[2] = positions[2];
+
+    pt1[0] = origin[0] + size;
+    pt1[1] = origin[1];
+    pt1[2] = origin[2];
+
+    pt2[0] = origin[0];
+    pt2[1] = origin[1] + size;
+    pt2[2] = origin[2];
+
+    console.log(origin);
+    console.log(pt1);
+    console.log(pt2);
+
+    actor = vglModule.utils.createTexturePlane(
+      origin[0], origin[1], origin[2],
+      pt1[0], pt1[1], pt1[2],
+      pt2[0], pt2[1], pt2[2], true);
+    actor.setReferenceFrame(vglModule.boundingObject.ReferenceFrame.Absolute);
+    actor.material().setBinNumber(vglModule.material.RenderBin.Overlay);
+    actor.material().addAttribute(vglModule.utils.create2DTexture(
+      varname, 24, null));
+    actors.push(actor);
+
     return actors;
   }
 
@@ -948,6 +994,7 @@ vglModule.utils.createColorLegend = function(varname, lookupTable, width,
   actor.setReferenceFrame(vglModule.boundingObject.ReferenceFrame.Absolute);
   actors.push(actor);
   actors = actors.concat(createTicksAndLabels(
+                          varname,
                           lookupTable,
                           origin[0], origin[1], origin[1],
                           pt2X, pt1Y, pt1Z,
@@ -972,21 +1019,6 @@ vglModule.utils.createColorLegend = function(varname, lookupTable, width,
 vglModule.utils.create2DTexture = function(textToWrite, textSize, color) {
   'use strict';
 
-  /**
-   * Helper function to compute power of 2 number
-   *
-   * @param value
-   * @param pow
-   * @returns {*|number}
-   */
-  function getPowerOfTwo(value, pow) {
-    var pow = pow || 1;
-    while(pow<value) {
-      pow *= 2;
-    }
-    return pow;
-  }
-
   var canvas = document.getElementById('textRendering'),
       ctx = null,
       texture = vglModule.texture();
@@ -1002,7 +1034,7 @@ vglModule.utils.create2DTexture = function(textToWrite, textSize, color) {
 //  canvas.width = getPowerOfTwo(ctx.measureText(textToWrite).width);
 
   // Make width and height equal so that we get pretty looking text.
-  canvas.height = getPowerOfTwo(2 * textSize);
+  canvas.height = vglModule.utils.computePowerOfTwo(2 * textSize);
   canvas.width = canvas.height;
 
   ctx.fillStyle = 'rgba(0, 0, 0, 0)';

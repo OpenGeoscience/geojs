@@ -77,7 +77,7 @@ geoModule.archiveLayerSource = function(name, vars, onError) {
       url: '/data/read',
       data: {
         expr: name,
-        vars: vars,
+        vars: JSON.stringify(vars),
         time: time
       },
       dataType: 'json',
@@ -133,7 +133,7 @@ geoModule.archiveLayerSource = function(name, vars, onError) {
       url: '/data/query',
       data: {
         expr: m_name,
-        vars: m_vars,
+        vars: m_vars[0],
         fields: ['timerange']
       },
       dataType: 'json',
