@@ -132,7 +132,8 @@ geoModule.featureLayer = function(options, feature) {
         }
         lut.setRange(this.dataSource().getScalarRange());
         m_legend = vglModule.utils.createColorLegend(
-          varnames[0], lut, 400, 20, [20.0, 60.0, 0.0], 10, 0);
+          varnames[0], lut, this.legendOrigin(), this.legendWidth(),
+          this.legendHeight(), 10, 0);
         m_newFeatures = m_newFeatures.concat(m_legend);
       }
     }

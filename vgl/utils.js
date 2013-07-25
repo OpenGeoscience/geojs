@@ -803,8 +803,8 @@ vglModule.utils.createLines = function(positions, colors) {
  * @returns {Array}
  */
 //////////////////////////////////////////////////////////////////////////////
-vglModule.utils.createColorLegend = function(varname, lookupTable, width,
-                                             height, origin, countMajor,
+vglModule.utils.createColorLegend = function(varname, lookupTable, origin,
+                                             width, height, countMajor,
                                              countMinor) {
   'use strict';
 

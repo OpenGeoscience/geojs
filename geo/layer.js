@@ -63,6 +63,10 @@ geoModule.layer = function(options, source) {
       m_binNumber = ogs.vgl.material.RenderBin.Transparent,
       m_defaultLookupTable = vglModule.lookupTable(),
       m_lookupTables = {},
+      m_legendOrigin = [20, 60, 0.0],
+      m_legendWidth = 400,
+      m_legendHeight = 20,
+      m_legendPositionAndSizeMTime = vglModule.timestamp(),
       m_dataSource = source;
 
   // TODO Write a function for this
@@ -72,6 +76,8 @@ geoModule.layer = function(options, source) {
   } else if (m_opacity < 0.0) {
     console.log("[warning] Opacity cannot be less than 1.0");
   }
+
+  m_legendPositionAndSizeMTime.modified();
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -321,6 +327,90 @@ geoModule.layer = function(options, source) {
       return true;
     }
     return false;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get origin (bottom left corner) of the legend
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.legendOrigin = function() {
+    return m_legendOrigin;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set origin (bottom left corner) of the legend
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.setLegendOrigin = function(origin) {
+    if (origin !== m_legendOrigin) {
+      m_legendOrigin = origin;
+      m_legendPositionAndSizeMTime.modified();
+      this.modified();
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get width of the legend
+   * @returns {Number}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.legendWidth = function() {
+    return m_legendWidth;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set width of the legend
+   *
+   * @param width
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.setLegendWidth = function(width) {
+    if (width !== m_legendWidth) {
+      m_legendWidth = width;
+      m_legendPositionAndSizeMTime.modified();
+      this.modified();
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get height of the legend
+   *
+   * @returns {Number}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.legendHeight = function() {
+    return m_legendHeight;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set height of the legend
+   *
+   * @param height
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.setLegendHeight = function(height) {
+    if (height !== m_legendHeight) {
+      m_legendHeight = height;
+      m_legendPositionAndSizeMTime.modified();
+      this.modified();
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get legend position and size modified time
+   *
+   * @returns {Number}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.legendPositionAndSizeMTime = function(height) {
+    return m_legendPositionAndSizeMTime;
   };
 
   ////////////////////////////////////////////////////////////////////////////
