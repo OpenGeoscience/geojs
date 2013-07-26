@@ -631,7 +631,6 @@ geoModule.map = function(node, options) {
 
   for (var name in m_layers)
     $(m_layers[name]).on(geoModule.command.queryResultEvent, function(event, queryResult) {
-      console.log("got a query result: " + queryResult);
       $(m_that).trigger(event, queryResult);
       return true;
     });

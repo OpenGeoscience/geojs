@@ -369,9 +369,7 @@ geoModule.openStreetMapLayer = function() {
         "tileX": tx,
         "tileY": ty
     };
-    console.log("triggering");
     $(this).trigger(geoModule.command.queryResultEvent, result);
-
   }
 
 
