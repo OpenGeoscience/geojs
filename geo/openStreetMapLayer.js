@@ -202,7 +202,7 @@ geoModule.openStreetMapLayer = function() {
   ////////////////////////////////////////////////////////////////////////////
   this.updateTiles = function(request) {
     if (!request.viewer()) {
-      console.log('[info] Invlaid viewer');
+      console.log('[info] Invalid viewer');
       return;
     }
 
@@ -360,6 +360,20 @@ geoModule.openStreetMapLayer = function() {
 
     m_predrawTime.modified();
   };
+
+  this.queryLocation = function(location) {
+    // TODO: query something useful from OSM
+    var tx = geoModule.mercator.long2tilex(location.lng(), m_previousZoom);
+    var ty = geoModule.mercator.lat2tiley(location.lat(), m_previousZoom);
+    var result = {
+        "tileX": tx,
+        "tileY": ty
+    };
+    console.log("triggering");
+    $(this).trigger(geoModule.command.queryResultEvent, result);
+
+  }
+
 
   this.setBinNumber(ogs.vgl.material.RenderBin.Base);
 };

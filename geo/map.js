@@ -598,13 +598,10 @@ geoModule.map = function(node, options) {
      * Queries each layer for information at this location.
      *
      * @param {geoModule.latlng} location
-     * @returns List of dictionaries, one per layer
      */
     this.queryLocation = function(location) {
-        var infos = [];
         for (var layerName in m_layers)
-            infos.push(m_layers[layerName].queryLocation(location));
-        return infos;
+            m_layers[layerName].queryLocation(location);
     };
 
 
@@ -631,6 +628,14 @@ geoModule.map = function(node, options) {
   $(m_interactorStyle).on(
     ogs.geo.command.updateViewPositionEvent, this.updateAndDraw);
   $(this).on(geoModule.command.updateEvent, this.updateAndDraw);
+
+  for (var name in m_layers)
+    $(m_layers[name]).on(geoModule.command.queryResultEvent, function(event, queryResult) {
+      console.log("got a query result: " + queryResult);
+      $(m_that).trigger(event, queryResult);
+      return true;
+    });
+
 
   return this;
 };

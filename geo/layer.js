@@ -336,12 +336,10 @@ geoModule.layer = function(options, source) {
   /**
    * Virtual method to return information about a given point.
    * Concrete class should implement this method.
-   *
-   * @returns A dictionary containing information about this point.
    */
   ////////////////////////////////////////////////////////////////////////////
   this.queryLocation = function(location) {
-    return {};
+    // Concrete class should implement this
   }
 
 

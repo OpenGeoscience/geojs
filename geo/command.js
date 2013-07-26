@@ -49,3 +49,4 @@ geoModule.command.resizeEvent = "resizeEvent";
 geoModule.command.animateEvent = "animateEvent";
 geoModule.command.requestRedrawEvent = "requestRedrawEvent";
 geoModule.command.requestPredrawEvent = "requestPredrawEvent";
+geoModule.command.queryResultEvent = "queryResultEvent";
