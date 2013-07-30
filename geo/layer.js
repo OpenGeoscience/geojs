@@ -66,7 +66,6 @@ geoModule.layer = function(options, source) {
       m_legendOrigin = [20, 60, 0.0],
       m_legendWidth = 400,
       m_legendHeight = 20,
-      m_legendPositionAndSizeMTime = vglModule.timestamp(),
       m_dataSource = source;
 
   // TODO Write a function for this
@@ -77,7 +76,6 @@ geoModule.layer = function(options, source) {
     console.log("[warning] Opacity cannot be less than 1.0");
   }
 
-  m_legendPositionAndSizeMTime.modified();
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -346,7 +344,6 @@ geoModule.layer = function(options, source) {
   this.setLegendOrigin = function(origin) {
     if (origin !== m_legendOrigin) {
       m_legendOrigin = origin;
-      m_legendPositionAndSizeMTime.modified();
       this.modified();
     }
   };
@@ -371,7 +368,6 @@ geoModule.layer = function(options, source) {
   this.setLegendWidth = function(width) {
     if (width !== m_legendWidth) {
       m_legendWidth = width;
-      m_legendPositionAndSizeMTime.modified();
       this.modified();
     }
   };
@@ -397,21 +393,10 @@ geoModule.layer = function(options, source) {
   this.setLegendHeight = function(height) {
     if (height !== m_legendHeight) {
       m_legendHeight = height;
-      m_legendPositionAndSizeMTime.modified();
       this.modified();
     }
   };
 
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get legend position and size modified time
-   *
-   * @returns {Number}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.legendPositionAndSizeMTime = function(height) {
-    return m_legendPositionAndSizeMTime;
-  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
