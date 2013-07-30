@@ -215,15 +215,31 @@ geoModule.featureLayer = function(options, feature) {
     }
 
     var i = null,
+        j = null,
         mat = null,
+        skipFeature = false,
         opacityUniform = null;
 
     for (i = 0; i < m_features.length; ++i) {
-      mat = m_features[i].material();
-      opacityUniform = mat.shaderProgram().uniform('opacity');
-      if (opacityUniform !== null) {
-        opacityUniform.set(opacity);
-        $(m_that).trigger(geoModule.command.updateLayerOpacityEvent);
+      skipFeature = false;
+      if (m_legend && m_legend.length) {
+        for (j = 0; j < m_legend.length; ++j) {
+          if (m_features[i] === m_legend[j]) {
+            skipFeature = true;
+            break;
+          }
+        }
+
+        if (skipFeature) {
+          continue;
+        }
+
+        mat = m_features[i].material();
+        opacityUniform = mat.shaderProgram().uniform('opacity');
+        if (opacityUniform !== null) {
+          opacityUniform.set(opacity);
+          $(m_that).trigger(geoModule.command.updateLayerOpacityEvent);
+        }
       }
     }
   };
