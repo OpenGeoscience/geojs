@@ -87,6 +87,46 @@ geoModule.featureLayer = function(options, feature) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Create legend for this layer
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.createLegend = function() {
+    if (m_legend) {
+      console.log('[info] Legend already exists for this layer')
+      return;
+    }
+
+    // Assuming that first variable is the scalar
+    var varnames = this.dataSource().variableNames(),
+        lut = this.lookupTable();
+
+    if (varnames.length > 0) {
+      // Create new lookup table if none exist
+      if (!lut) {
+        lut = vglModule.lookupTable();
+        this.setLookupTable(lut);
+      }
+      lut.setRange(this.dataSource().getScalarRange());
+      m_legend = vglModule.utils.createColorLegend(
+        varnames[0], lut, this.legendOrigin(), this.legendWidth(),
+        this.legendHeight(), 10, 0);
+      m_newFeatures = m_newFeatures.concat(m_legend);
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Update legend because parameters are changed
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.updateLegend = function() {
+    // For now just delete the last one and create on from scratch
+    m_legend = null;
+    this.createLegend();
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Update layer to a particular time
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -122,20 +162,7 @@ geoModule.featureLayer = function(options, feature) {
 
     // Create legend if not created earlier
     if (!m_legend) {
-      // Assuming that first variable is the scalar
-      varnames = this.dataSource().variableNames();
-      if (varnames.length > 0) {
-        // Create new lookup table if none exist
-        if (!lut) {
-          lut = vglModule.lookupTable();
-          this.setLookupTable(lut);
-        }
-        lut.setRange(this.dataSource().getScalarRange());
-        m_legend = vglModule.utils.createColorLegend(
-          varnames[0], lut, this.legendOrigin(), this.legendWidth(),
-          this.legendHeight(), 10, 0);
-        m_newFeatures = m_newFeatures.concat(m_legend);
-      }
+      this.createLegend();
     }
 
     for(i = 0; i < data.length; ++i) {
