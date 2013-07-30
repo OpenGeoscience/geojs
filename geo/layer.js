@@ -407,7 +407,10 @@ geoModule.layer = function(options, source) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Virtual function to update legend of the layer
+   * Virtual function to update legend of the layer.
+   *
+   * This should be called manually if the caller modifies the legend's
+   * properties.
    */
   ////////////////////////////////////////////////////////////////////////////
   this.updateLegend = function() {
