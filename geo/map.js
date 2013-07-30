@@ -560,49 +560,55 @@ geoModule.map = function(node, options) {
   };
 
 
-
+  ////////////////////////////////////////////////////////////////////////////
   /**
-   * Convert window coordinates to world coordinates
+   * Convert display coordinates to map coordinates
    */
-    this.windowToLatLng = function(winX, winY) {
-        var camera = m_renderer.camera();
-        var width = m_renderer.width();
-        var height = m_renderer.height();
-        var fpoint = camera.focalPoint();
-        var focusWorldPt = vec4.fromValues(fpoint[0], fpoint[1], fpoint[2], 1.0); // same as fpoint
-        var focusDisplayPt = m_renderer.worldToDisplay(
-            focusWorldPt,
-            camera.viewMatrix(),
-            camera.projectionMatrix(),
-            width, height);
-        var displayPt = vec4.fromValues(winX, winY, focusDisplayPt[2], 1.0);
+  ////////////////////////////////////////////////////////////////////////////
+  this.displayToMap = function(winX, winY) {
+    var camera = m_renderer.camera();
+    var width = m_renderer.width();
+    var height = m_renderer.height();
+    var fpoint = camera.focalPoint();
+    var focusWorldPt = vec4.fromValues(fpoint[0], fpoint[1], fpoint[2], 1.0); // same as fpoint
+    var focusDisplayPt = m_renderer.worldToDisplay(
+      focusWorldPt,
+      camera.viewMatrix(),
+      camera.projectionMatrix(),
+      width, height);
+    var displayPt = vec4.fromValues(winX, winY, focusDisplayPt[2], 1.0);
 
-        var worldPt = m_renderer.displayToWorld(displayPt,
-                                                camera.viewMatrix(),
-                                                camera.projectionMatrix(),
-                                                width, height);
+    var worldPt = m_renderer.displayToWorld(displayPt,
+                                            camera.viewMatrix(),
+                                            camera.projectionMatrix(),
+                                            width, height);
 
-        var src = new proj4.Proj('EPSG:3857'); // web mercator
-        var dst = new proj4.Proj('EPSG:4326'); // GPS lon-lat
-        var webMercBoundX = 20037508.3427892;
-        var mercX = worldPt[0]/180 * webMercBoundX;
-        var webMercBoundY =  20037508.3427892;
-        var mercY = worldPt[1]/180. * webMercBoundY;
+    // NOTE: the map is using (nearly) normalized web-mercator.
+    // The constants below bring it to actual EPSG:3857 units.
+    var webMercBoundX = 20037508.3427892;
+    var mercX = worldPt[0]/180 * webMercBoundX;
+    var webMercBoundY =  20037508.3427892;
+    var mercY = worldPt[1]/180. * webMercBoundY;
+    return {x:mercX, y:mercY};
+  };
 
-        var projPoint = new proj4.Point(mercX, mercY);
-        proj4.transform(src, dst, projPoint);
-        return geoModule.latlng(projPoint.y, projPoint.x);
-    };
-
-    /**
-     * Queries each layer for information at this location.
-     *
-     * @param {geoModule.latlng} location
-     */
-    this.queryLocation = function(location) {
-        for (var layerName in m_layers)
-            m_layers[layerName].queryLocation(location);
-    };
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Queries each layer for information at this location.
+   *
+   * @param location
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.queryLocation = function(location) {
+    var src = new proj4.Proj(m_options.gcs); // web mercator
+    for (var layerName in m_layers) {
+      var layer = m_layers[layerName];
+      var dst = new proj4.Proj(layer.gcs());
+      var point = new proj4.Point(location.x, location.y);
+      proj4.transform(src, dst, point);
+      layer.queryLocation(point);
+    }
+  };
 
 
   // Bind events to handlers
@@ -640,3 +646,8 @@ geoModule.map = function(node, options) {
 };
 
 inherit(geoModule.map, ogs.vgl.object);
+
+/* Local Variables:   */
+/* mode: js           */
+/* js-indent-level: 2 */
+/* End:               */

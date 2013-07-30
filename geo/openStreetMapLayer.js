@@ -361,13 +361,15 @@ geoModule.openStreetMapLayer = function() {
     m_predrawTime.modified();
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Implements querying locations
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.queryLocation = function(location) {
-    // TODO: query something useful from OSM
-    var tx = geoModule.mercator.long2tilex(location.lng(), m_previousZoom);
-    var ty = geoModule.mercator.lat2tiley(location.lat(), m_previousZoom);
     var result = {
-        "tileX": tx,
-        "tileY": ty
+        "OSM_x": location.x,
+        "OSM_y": location.y
     };
     $(this).trigger(geoModule.command.queryResultEvent, result);
   }
@@ -377,3 +379,8 @@ geoModule.openStreetMapLayer = function() {
 };
 
 inherit(geoModule.openStreetMapLayer, geoModule.featureLayer);
+
+/* Local Variables:   */
+/* mode: js           */
+/* js-indent-level: 2 */
+/* End:               */

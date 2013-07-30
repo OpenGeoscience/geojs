@@ -347,3 +347,8 @@ geoModule.layer = function(options, source) {
 };
 
 inherit(geoModule.layer, ogs.vgl.object);
+
+/* Local Variables:   */
+/* mode: js           */
+/* js-indent-level: 2 */
+/* End:               */

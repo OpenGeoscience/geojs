@@ -233,3 +233,8 @@ geoModule.mapInteractorStyle = function() {
   return this;
 };
 inherit(geoModule.mapInteractorStyle, ogs.vgl.interactorStyle);
+
+/* Local Variables:   */
+/* mode: js           */
+/* js-indent-level: 2 */
+/* End:               */
