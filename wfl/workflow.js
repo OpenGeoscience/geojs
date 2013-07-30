@@ -67,11 +67,11 @@ function blankWorkflow(name, version, connections, modules, vistrail_id, id) {
  * Workflow options object specification
  */
 //////////////////////////////////////////////////////////////////////////////
-uiModule.workflowOptions = function() {
+wflModule.workflowOptions = function() {
   "use strict";
   // Check against no use of new()
-  if (!(this instanceof uiModule.workflowOptions)) {
-    return new uiModule.workflowOptions();
+  if (!(this instanceof wflModule.workflowOptions)) {
+    return new wflModule.workflowOptions();
   }
 
   this.data = blankWorkflow();
@@ -79,7 +79,7 @@ uiModule.workflowOptions = function() {
   this.connections = {};
   this.style = climatePipesStyle;
   this.translated = {x:0, y:0};
-  this.moduleClass = uiModule.inputModule;
+  this.moduleClass = wflModule.inputModule;
 
   return this;
 };
@@ -89,20 +89,20 @@ uiModule.workflowOptions = function() {
  * Base class for all workflow types ogs.ui.workflow.
  */
 //////////////////////////////////////////////////////////////////////////////
-uiModule.workflow = function(options) {
+wflModule.workflow = function(options) {
   "use strict";
   this.events = {
     "moduleAdded" : "moduleAdded",
     "connectionAdded" : "connectionAdded"
   };
 
-  if (!(this instanceof uiModule.workflow)) {
-    return new uiModule.workflow(options);
+  if (!(this instanceof wflModule.workflow)) {
+    return new wflModule.workflow(options);
   }
   vglModule.object.call(this);
 
   options = typeof options !== 'undefined' ? options : {};
-  options = merge_options(uiModule.workflowOptions(), options);
+  options = merge_options(wflModule.workflowOptions(), options);
 
   /** @private */
   var m_that = this,
@@ -187,8 +187,8 @@ uiModule.workflow = function(options) {
           }
         ]
       },
-      options = {vertical: m_moduleClass == uiModule.module, workflow: m_that};
-    m_connections[connection['@id']] = uiModule.connection(options, connection);
+      options = {vertical: m_moduleClass == wflModule.workflowModule, workflow: m_that};
+    m_connections[connection['@id']] = wflModule.connection(options, connection);
     this.data().workflow.connection.push(connection);
 
   };
@@ -198,11 +198,11 @@ uiModule.workflow = function(options) {
       maxId = 0,
       nextId = nextConnectionId(),
       connections = m_data.workflow.connection,
-      options = {vertical: m_moduleClass == uiModule.module, workflow: m_that};
+      options = {vertical: m_moduleClass == wflModule.workflowModule, workflow: m_that};
 
     for(; i < connections.length; i++) {
       var cid = parseInt(connections[i]['@id']);
-      m_connections[cid] = uiModule.connection(options, connections[i]);
+      m_connections[cid] = wflModule.connection(options, connections[i]);
 
       if(cid > maxId) {
         maxId = cid;
@@ -336,276 +336,7 @@ uiModule.workflow = function(options) {
   return this;
 };
 
-inherit(uiModule.workflow, vglModule.object);
-
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Create a new instance of class module
- *
- * @class
- * @dec
- * @param {object} data
- * @returns {uiModule.module}
- */
-//////////////////////////////////////////////////////////////////////////////
-uiModule.module = function(options, data) {
-  "use strict";
-  if (!(this instanceof uiModule.module)) {
-    return new uiModule.module(options, data);
-  }
-  vglModule.object.call(this);
-
-  /** @private */
-  var m_that = this,
-    m_data = data,
-    m_registry = moduleRegistry[data['@package']][data['@name']],
-    m_metrics,
-    m_ports = m_registry.portSpec,
-    m_inPorts = {},
-    m_outPorts = {},
-    m_inPortCount = 0,
-    m_outPortCount = 0,
-    i = 0,
-    m_workflow = options.workflow;
-
-  //ensure location values are floating point numbers
-  data.location['@x'] = parseFloat(data.location['@x']);
-  data.location['@y'] = parseFloat(data.location['@y']);
-
-  if(!(m_ports instanceof Array)) {
-    m_ports = [m_ports];
-  }
-
-  if(!this.hasOwnProperty('inputPortClass')) {
-    this.inputPortClass = uiModule.port;
-  }
-
-  if(!this.hasOwnProperty('outputPortClass')) {
-    this.outputPortClass = uiModule.port;
-  }
-
-  for(; i < m_ports.length; i++) {
-    if(m_ports[i]['@type'] != 'output') {
-      m_inPorts[m_ports[i]['@name']] = this.inputPortClass({module: m_that}, m_ports[i]);
-      m_inPortCount++;
-    } else {
-      m_outPorts[m_ports[i]['@name']] = this.outputPortClass({module: m_that}, m_ports[i]);
-      m_outPortCount++;
-    }
-  }
-
-  this.workflow = function() {
-    return m_workflow;
-  };
-
-  this.inPortCount = function() {
-    return m_inPortCount;
-  };
-
-  this.outPortCount = function() {
-    return m_outPortCount;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Recompute drawing metrics for this module
-   *
-   * @param {CanvasRenderingContext2D} ctx
-   * @param {object} style
-   */
-    ////////////////////////////////////////////////////////////////////////////
-  this.recomputeMetrics = function(ctx, style) {
-    var portWidth = style.module.port.width,
-      totalPortWidth = portWidth + style.module.port.pad,
-      inPortsWidth = m_inPortCount * totalPortWidth + style.module.text.xpad,
-      outPortsWidth = m_outPortCount * totalPortWidth,
-      fontMetrics = ctx.measureText(m_data['@name']),
-      textWidth = fontMetrics.width + style.module.text.xpad * 2,
-      moduleWidth = Math.max(inPortsWidth, outPortsWidth+style.module.text.xpad,
-        textWidth, style.module.minWidth),
-      textHeight = 12, //TODO: get real height based on text font
-      moduleHeight = style.module.port.pad*4 + portWidth*2 +
-        style.module.text.ypad*2 + textHeight,
-      mx = Math.floor(m_data.location['@x'] - moduleWidth/2),
-      my = -Math.floor(m_data.location['@y']),
-      inPortX = mx + style.module.port.pad,
-      outPortX = mx + moduleWidth - outPortsWidth,
-      key;
-
-    m_metrics = {
-      mx: mx,
-      my: my,
-      totalPortWidth: totalPortWidth,
-      inPortsWidth: inPortsWidth,
-      fontMetrics: fontMetrics,
-      textWidth: textWidth,
-      moduleWidth: moduleWidth,
-      textHeight: textHeight,
-      moduleHeight: moduleHeight,
-      inPortX: inPortX,
-      inPortY: my + style.module.port.pad,
-      outPortX: outPortX,
-      outPortY: my + moduleHeight - style.module.port.pad - portWidth
-    };
-
-    for(key in m_inPorts) {
-      if(m_inPorts.hasOwnProperty(key)) {
-        m_inPorts[key].setPosition(inPortX, m_metrics.inPortY);
-        inPortX += portWidth + style.module.port.pad;
-      }
-    }
-
-    for(key in m_outPorts) {
-      if(m_outPorts.hasOwnProperty(key)) {
-        m_outPorts[key].setPosition(outPortX, m_metrics.outPortY);
-        outPortX += portWidth + style.module.port.pad;
-      }
-    }
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get drawing metrics for this module
-   */
-    ////////////////////////////////////////////////////////////////////////////
-  this.getMetrics = function() {
-    return m_metrics;
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get input ports for this module
-   */
-    ////////////////////////////////////////////////////////////////////////////
-  this.getInPorts = function() {
-    return m_inPorts;
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get output ports for this module
-   */
-    ////////////////////////////////////////////////////////////////////////////
-  this.getOutPorts = function() {
-    return m_outPorts;
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get registry for this module
-   */
-    ////////////////////////////////////////////////////////////////////////////
-  this.getRegistry = function() {
-    return m_registry;
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get data for this module
-   */
-    ////////////////////////////////////////////////////////////////////////////
-  this.getData = function() {
-    return m_data;
-  }
-
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Draw the module onto given context.
-   *
-   * @param {CanvasRenderingContext2D} ctx
-   */
-    ////////////////////////////////////////////////////////////////////////////
-  this.draw = function(ctx, style) {
-    if(!m_metrics) {
-      this.recomputeMetrics(ctx, style);
-    }
-
-    var portWidth = style.module.port.width,
-      mx = m_metrics.mx,
-      my = m_metrics.my,
-      inPortX = m_metrics.inPortX,
-      outPortX = m_metrics.outPortX,
-      i,
-      key;
-
-    //draw rectangle
-    ctx.fillStyle = style.module.fill;
-    ctx.strokeStyle = style.module.stroke;
-    ctx.fillRect(mx, my, m_metrics.moduleWidth, m_metrics.moduleHeight);
-    ctx.strokeRect(mx, my, m_metrics.moduleWidth, m_metrics.moduleHeight);
-
-    //draw ports
-    for(key in m_inPorts) {
-      if(m_inPorts.hasOwnProperty(key)) {
-        m_inPorts[key].draw(ctx, portWidth);
-      }
-    }
-
-    for(key in m_outPorts) {
-      if(m_outPorts.hasOwnProperty(key)) {
-        m_outPorts[key].draw(ctx, portWidth);
-      }
-    }
-
-    //draw module name
-    ctx.fillStyle = style.module.text.fill;
-    ctx.font = style.module.text.font;
-    ctx.fillText(
-      m_data['@name'],
-      mx + Math.floor((m_metrics.moduleWidth - m_metrics.fontMetrics.width)/2),
-      my + m_metrics.textHeight + style.module.text.ypad
-    );
-
-  };
-
-  this.contains = function(pos) {
-    var metrics = this.getMetrics();
-    return pos.x > metrics.mx && pos.x < metrics.mx + metrics.moduleWidth &&
-      pos.y > metrics.my && pos.y < metrics.my + metrics.moduleHeight;
-  };
-
-  this.portByPos = function(pos) {
-    var key;
-    for(key in m_inPorts) {
-      if(m_inPorts.hasOwnProperty(key)) {
-        if (m_inPorts[key].contains(pos)) {
-          return m_inPorts[key];
-        }
-      }
-    }
-    for(key in m_outPorts) {
-      if(m_outPorts.hasOwnProperty(key)) {
-        if (m_outPorts[key].contains(pos)) {
-          return m_outPorts[key];
-        }
-      }
-    }
-    return null;
-  };
-
-  this.hide = function() {
-    for(var key in m_inPorts) {
-      if(m_inPorts.hasOwnProperty(key)) {
-        m_inPorts[key].hide();
-      }
-    }
-  };
-
-  this.show = function() {
-    for(var key in m_inPorts) {
-      if(m_inPorts.hasOwnProperty(key)) {
-        m_inPorts[key].show();
-      }
-    }
-  };
-
-  this.updateElementPositions = function() {};
-
-  return this;
-};
-
-inherit(uiModule.module, vglModule.object);
+inherit(wflModule.workflow, vglModule.object);
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -614,13 +345,13 @@ inherit(uiModule.module, vglModule.object);
  * @class
  * @dec
  * @param {object} data
- * @returns {uiModule.port}
+ * @returns {wflModule.port}
  */
 //////////////////////////////////////////////////////////////////////////////
-uiModule.port = function(options, data) {
+wflModule.port = function(options, data) {
   "use strict"
-  if (!(this instanceof uiModule.port)) {
-    return new uiModule.port(options, data);
+  if (!(this instanceof wflModule.port)) {
+    return new wflModule.port(options, data);
   }
   vglModule.object.call(this);
 
@@ -698,7 +429,7 @@ uiModule.port = function(options, data) {
   return this;
 };
 
-inherit(uiModule.port, vglModule.object);
+inherit(wflModule.port, vglModule.object);
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -706,17 +437,17 @@ inherit(uiModule.port, vglModule.object);
  *
  * @class
  * @dec
- * @returns {uiModule.inputModule}
+ * @returns {wflModule.inputModule}
  */
 //////////////////////////////////////////////////////////////////////////////
-uiModule.inputModule = function(options, data) {
+wflModule.inputModule = function(options, data) {
   "use strict";
-  if (!(this instanceof uiModule.inputModule)) {
-    return new uiModule.inputModule(options, data);
+  if (!(this instanceof wflModule.inputModule)) {
+    return new wflModule.inputModule(options, data);
   }
-  this.inputPortClass = uiModule.inputPort;
-  this.outputPortClass = uiModule.outputPort;
-  uiModule.module.call(this, options, data);
+  this.inputPortClass = wflModule.inputPort;
+  this.outputPortClass = wflModule.outputPort;
+  wflModule.workflowModule.call(this, options, data);
 
   /** @priave */
   var m_that = this,
@@ -919,7 +650,7 @@ uiModule.inputModule = function(options, data) {
   return this;
 };
 
-inherit(uiModule.inputModule, uiModule.module);
+inherit(wflModule.inputModule, wflModule.workflowModule);
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -929,15 +660,15 @@ inherit(uiModule.inputModule, uiModule.module);
  * @class
  * @dec
  * @param {object} data
- * @returns {uiModule.port}
+ * @returns {wflModule.port}
  */
 //////////////////////////////////////////////////////////////////////////////
-uiModule.outputPort = function(options, data) {
+wflModule.outputPort = function(options, data) {
   "use strict"
-  if (!(this instanceof uiModule.outputPort)) {
-    return new uiModule.outputPort(options, data);
+  if (!(this instanceof wflModule.outputPort)) {
+    return new wflModule.outputPort(options, data);
   }
-  uiModule.port.call(this, options, data);
+  wflModule.port.call(this, options, data);
 
   var m_name_width = 0;
 
@@ -970,7 +701,7 @@ uiModule.outputPort = function(options, data) {
   return this;
 };
 
-inherit(uiModule.outputPort, uiModule.port);
+inherit(wflModule.outputPort, wflModule.port);
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -980,15 +711,15 @@ inherit(uiModule.outputPort, uiModule.port);
  * @class
  * @dec
  * @param {object} data
- * @returns {uiModule.inputPort}
+ * @returns {wflModule.inputPort}
  */
 //////////////////////////////////////////////////////////////////////////////
-uiModule.inputPort = function(options, data) {
+wflModule.inputPort = function(options, data) {
   "use strict"
-  if (!(this instanceof uiModule.inputPort)) {
-    return new uiModule.inputPort(options, data);
+  if (!(this instanceof wflModule.inputPort)) {
+    return new wflModule.inputPort(options, data);
   }
-  uiModule.outputPort.call(this, options, data);
+  wflModule.outputPort.call(this, options, data);
 
   var m_that = this,
     m_input_elem,
@@ -1044,14 +775,14 @@ uiModule.inputPort = function(options, data) {
   return this;
 };
 
-inherit(uiModule.inputPort, uiModule.outputPort);
+inherit(wflModule.inputPort, wflModule.outputPort);
 
-uiModule.connectionOptions = function() {
+wflModule.connectionOptions = function() {
 
   "use strict";
   // Check against no use of new()
-  if (!(this instanceof uiModule.connectionOptions)) {
-    return new uiModule.connectionOptions();
+  if (!(this instanceof wflModule.connectionOptions)) {
+    return new wflModule.connectionOptions();
   }
 
   this.vertical = false;
@@ -1060,15 +791,15 @@ uiModule.connectionOptions = function() {
 
 }
 
-uiModule.connection = function(options, data) {
+wflModule.connection = function(options, data) {
   "use strict"
-  if (!(this instanceof uiModule.connection)) {
-    return new uiModule.connection(options, data);
+  if (!(this instanceof wflModule.connection)) {
+    return new wflModule.connection(options, data);
   }
   vglModule.object.call(this, options, data);
 
   options = typeof options !== 'undefined' ? options : {};
-  options = merge_options(uiModule.connectionOptions(), options);
+  options = merge_options(wflModule.connectionOptions(), options);
 
   var m_data = data,
     m_vertical = options.vertical,
@@ -1136,4 +867,4 @@ uiModule.connection = function(options, data) {
   return this;
 };
 
-inherit(uiModule.connection, vglModule.object);
+inherit(wflModule.connection, vglModule.object);
