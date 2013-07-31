@@ -567,6 +567,8 @@ geoModule.map = function(node, options) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Convert display coordinates to map coordinates
+   *
+   * @returns {'x': number, 'y': number}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.displayToMap = function(winX, winY) {
@@ -585,14 +587,12 @@ geoModule.map = function(node, options) {
                                             width, height),
         // NOTE: the map is using (nearly) normalized web-mercator.
         // The constants below bring it to actual EPSG:3857 units.
+        latlon = geoModule.mercator.m2ll(
+          geoModule.mercator.deg2rad(worldPt[0]) * geoModule.mercator.r_major,
+          geoModule.mercator.deg2rad(worldPt[1]) * geoModule.mercator.r_minor),
+        location = {'x': latlon.lon, 'y': latlon.lat};
 
-        dstPrj = new proj4.Proj(m_options.display_gcs),
-        srcPrj = new proj4.Proj(m_options.gcs),
-        ret = geoModule.mercator.ll2m(worldPt[0], worldPt[1]),
-        point = new proj4.Point(ret.x, ret.y);
-
-    proj4.transform(srcPrj, dstPrj, point);
-    return point;
+    return location;
   };
 
   ////////////////////////////////////////////////////////////////////////////
