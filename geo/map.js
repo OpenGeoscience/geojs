@@ -581,11 +581,8 @@ geoModule.map = function(node, options) {
                                             width, height),
         // NOTE: the map is using (nearly) normalized web-mercator.
         // The constants below bring it to actual EPSG:3857 units.
-        webMercBoundX = 6378137.000,
-        mercX = (Math.PI/180.0) * worldPt[0] * webMercBoundX,
-        webMercBoundY = 6378137.000,
-        mercY = (Math.PI/180.0) * worldPt[1] * webMercBoundY;
-    return {x:mercX, y:mercY};
+        ret = geoModule.mercator.ll2m(worldPt[0], worldPt[1]);
+    return ret;
   };
 
   ////////////////////////////////////////////////////////////////////////////

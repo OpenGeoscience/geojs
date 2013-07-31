@@ -177,26 +177,24 @@ geoModule.mercator.rad2deg = function(r) {
 //////////////////////////////////////////////////////////////////////////////
 geoModule.mercator.ll2m = function(lon,lat) {
   //lat, lon in rad
-  var x=this.r_major * this.deg2rad(lon);
+  var x = this.r_major * this.deg2rad(lon);
+  console.log('x   ', x);
 
   if (lat > 89.5) lat = 89.5;
   if (lat < -89.5) lat = -89.5;
 
+  var temp = this.r_minor / this.r_major,
+      es = 1.0 - (temp * temp),
+      eccent = Math.sqrt(es),
+      phi = this.deg2rad(lat),
+      sinphi = Math.sin(phi),
+      con = eccent * sinphi,
+      com = .5 * eccent,
+      con2 = Math.pow((1.0-con)/(1.0+con), com),
+      ts = Math.tan(.5 * (Math.PI*0.5 - phi))/con2,
+      y = 0 - this.r_major * Math.log(ts),
+      ret={'x':x,'y':y};
 
-  var temp = this.r_minor / this.r_major;
-  var es = 1.0 - (temp * temp);
-  var eccent = Math.sqrt(es);
-
-  var phi = this.deg2rad(lat);
-
-  var sinphi = Math.sin(phi);
-
-  var con = eccent * sinphi;
-  var com = .5 * eccent;
-  var con2 = Math.pow((1.0-con)/(1.0+con), com);
-  var ts = Math.tan(.5 * (Math.PI*0.5 - phi))/con2;
-  var y = 0 - this.r_major * Math.log(ts);
-  var ret={'x':x,'y':y};
   return ret;
 };
 
@@ -209,13 +207,11 @@ geoModule.mercator.ll2m = function(lon,lat) {
  */
 //////////////////////////////////////////////////////////////////////////////
 geoModule.mercator.m2ll = function(x,y) {
-  var lon=this.rad2deg((x/this.r_major));
-
-  var temp = this.r_minor / this.r_major;
-  var e = Math.sqrt(1.0 - (temp * temp));
-  var lat=this.rad2deg(this.pjPhi2( Math.exp( 0-(y/this.r_major)), e));
-
-  var ret={'lon':lon,'lat':lat};
+  var lon=this.rad2deg((x/this.r_major)),
+      temp = this.r_minor / this.r_major,
+      e = Math.sqrt(1.0 - (temp * temp)),
+      lat=this.rad2deg(this.pjPhi2( Math.exp( 0-(y/this.r_major)), e)),
+      ret={'lon':lon,'lat':lat};
 
   return ret;
 };
@@ -230,16 +226,14 @@ geoModule.mercator.m2ll = function(x,y) {
  */
 //////////////////////////////////////////////////////////////////////////////
 geoModule.mercator.pjPhi2 = function(ts, e) {
-  var N_ITER=15;
-  var HALFPI=Math.PI/2;
+  var N_ITER=15,
+      HALFPI=Math.PI/2,
+      TOL=0.0000000001,
+      eccnth, Phi, con, dphi,
+      i = N_ITER,
+      eccnth = .5 * e,
+      Phi = HALFPI - 2. * Math.atan (ts);
 
-
-  var TOL=0.0000000001;
-  var eccnth, Phi, con, dphi;
-  var i;
-  var eccnth = .5 * e;
-  Phi = HALFPI - 2. * Math.atan (ts);
-  i = N_ITER;
   do
   {
     con = e * Math.sin (Phi);
