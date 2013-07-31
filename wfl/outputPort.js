@@ -37,16 +37,16 @@ wflModule.outputPort = function(options, data) {
    */
     ////////////////////////////////////////////////////////////////////////////
   this.draw = function(ctx, width) {
-    ctx.fillStyle = style.module.port.fill;
-    ctx.strokeStyle = style.module.port.stroke;
+    ctx.fillStyle = currentWorkflowStyle.module.port.fill;
+    ctx.strokeStyle = currentWorkflowStyle.module.port.stroke;
     ctx.fillRect(this.x(), this.y(), width, width);
     ctx.strokeRect(this.x(), this.y(), width, width);
     this.drawName(ctx, width);
   };
 
   this.drawName = function(ctx, width) {
-    ctx.fillStyle = style.module.text.fill;
-    ctx.font = style.module.text.font;
+    ctx.fillStyle = currentWorkflowStyle.module.text.fill;
+    ctx.font = currentWorkflowStyle.module.text.font;
     if(m_name_width == 0) {
       var metrics = ctx.measureText(this.data()['@name']);
       m_name_width = metrics.width;

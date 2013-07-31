@@ -36,8 +36,8 @@ wflModule.inputPort = function(options, data) {
   };
 
   this.drawName = function(ctx, width) {
-    ctx.fillStyle = style.module.text.fill;
-    ctx.font = style.module.text.font;
+    ctx.fillStyle = currentWorkflowStyle.module.text.fill;
+    ctx.font = currentWorkflowStyle.module.text.font;
     ctx.fillText(this.data()['@name'], this.x() + width*2, this.y()+width);
   };
 
@@ -63,7 +63,7 @@ wflModule.inputPort = function(options, data) {
     var translated = this.module().workflow().translated();
 
     $(m_input_elem).css({
-      top: y + translated.y + style.module.port.width*2,
+      top: y + translated.y + currentWorkflowStyle.module.port.width*2,
       left: x + translated.x
     });
   };

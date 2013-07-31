@@ -10,60 +10,6 @@
 /*global vglModule, proj4, document*/
 //////////////////////////////////////////////////////////////////////////////
 
-/**
- * Overwrites obj1's values with obj2's and adds obj2's if non existent in obj1
- * @param obj1
- * @param obj2
- * @returns obj3 a new object based on obj1 and obj2
- */
-function merge_options(obj1,obj2){
-  var obj3 = {};
-  for (var attrName in obj1) { obj3[attrName] = obj1[attrName]; }
-  for (var attrName in obj2) { obj3[attrName] = obj2[attrName]; }
-  return obj3;
-}
-
-function merge_options_overwrite(obj1, obj2) {
-  for (var attrName in obj2) { obj1[attrName] = obj2[attrName]; }
-  return obj1;
-}
-
-function defaultValue(param, _default) {
-  return typeof param !== 'undefined' ? param: _default;
-}
-
-function createIdCounter(initialId) {
-  initialId = defaultValue(initialId, -1);
-  return function() { initialId += 1; return initialId; };
-}
-
-var nextWorkflowId = createIdCounter();
-var nextModuleId = createIdCounter();
-var nextLocationId = createIdCounter();
-var nextConnectionId = createIdCounter();
-var nextPortId = createIdCounter();
-
-
-function blankWorkflow(name, version, connections, modules, vistrail_id, id) {
-  name = defaultValue(name, 'untitled');
-  version = defaultValue(version, '1.0.2');
-  connections = defaultValue(connections, []);
-  modules = defaultValue(modules, []);
-  vistrail_id = defaultValue(vistrail_id, "");
-  id = defaultValue(id, nextWorkflowId());
-  return {
-    "workflow": {
-      "@name": name,
-      "@version": version,
-      "@{http://www.w3.org/2001/XMLSchema-instance}schemaLocation": "http://www.vistrails.org/workflow.xsd",
-      "connection": connections,
-      "module": modules,
-      "@vistrail_id": vistrail_id,
-      "@id": id
-    }
-  };
-}
-
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Workflow options object specification
@@ -79,7 +25,7 @@ wflModule.workflowOptions = function() {
   this.data = blankWorkflow();
   this.modules = {};
   this.connections = {};
-  this.style = climatePipesStyle;
+  this.currentWorkflowStyle = climatePipesStyle;
   this.translated = {x:0, y:0};
   this.moduleClass = wflModule.inputModule;
 
@@ -111,7 +57,7 @@ wflModule.workflow = function(options) {
     m_data = options.data,
     m_modules = options.modules,
     m_connections = options.connections,
-    m_style = options.style,
+    m_currentWorkflowStyle = options.currentWorkflowStyle,
     m_translated = options.translated,
     m_moduleClass = options.moduleClass,
     m_visible = false;
@@ -226,18 +172,18 @@ wflModule.workflow = function(options) {
   this.draw = function(ctx) {
     var key;
 
-    ctx.fillStyle = style.fill;
+    ctx.fillStyle = currentWorkflowStyle.fill;
     ctx.fillRect(-m_translated.x, -m_translated.y, ctx.canvas.width, ctx.canvas.height);
 
     for(key in m_modules) {
       if(m_modules.hasOwnProperty(key)) {
-        m_modules[key].draw(ctx, m_style);
+        m_modules[key].draw(ctx, m_currentWorkflowStyle);
       }
     }
 
     for(key in m_connections) {
       if(m_connections.hasOwnProperty(key)) {
-        m_connections[key].draw(ctx, m_style);
+        m_connections[key].draw(ctx, m_currentWorkflowStyle);
       }
     }
   };

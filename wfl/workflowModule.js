@@ -71,24 +71,24 @@ wflModule.workflowModule = function(options, data) {
    * Recompute drawing metrics for this module
    *
    * @param {CanvasRenderingContext2D} ctx
-   * @param {object} style
+   * @param {object} currentWorkflowStyle
    */
     ////////////////////////////////////////////////////////////////////////////
-  this.recomputeMetrics = function(ctx, style) {
-    var portWidth = style.module.port.width,
-      totalPortWidth = portWidth + style.module.port.pad,
-      inPortsWidth = m_inPortCount * totalPortWidth + style.module.text.xpad,
+  this.recomputeMetrics = function(ctx, currentWorkflowStyle) {
+    var portWidth = currentWorkflowStyle.module.port.width,
+      totalPortWidth = portWidth + currentWorkflowStyle.module.port.pad,
+      inPortsWidth = m_inPortCount * totalPortWidth + currentWorkflowStyle.module.text.xpad,
       outPortsWidth = m_outPortCount * totalPortWidth,
       fontMetrics = ctx.measureText(m_data['@name']),
-      textWidth = fontMetrics.width + style.module.text.xpad * 2,
-      moduleWidth = Math.max(inPortsWidth, outPortsWidth+style.module.text.xpad,
-        textWidth, style.module.minWidth),
+      textWidth = fontMetrics.width + currentWorkflowStyle.module.text.xpad * 2,
+      moduleWidth = Math.max(inPortsWidth, outPortsWidth+currentWorkflowStyle.module.text.xpad,
+        textWidth, currentWorkflowStyle.module.minWidth),
       textHeight = 12, //TODO: get real height based on text font
-      moduleHeight = style.module.port.pad*4 + portWidth*2 +
-        style.module.text.ypad*2 + textHeight,
+      moduleHeight = currentWorkflowStyle.module.port.pad*4 + portWidth*2 +
+        currentWorkflowStyle.module.text.ypad*2 + textHeight,
       mx = Math.floor(m_data.location['@x'] - moduleWidth/2),
       my = -Math.floor(m_data.location['@y']),
-      inPortX = mx + style.module.port.pad,
+      inPortX = mx + currentWorkflowStyle.module.port.pad,
       outPortX = mx + moduleWidth - outPortsWidth,
       key;
 
@@ -103,22 +103,22 @@ wflModule.workflowModule = function(options, data) {
       textHeight: textHeight,
       moduleHeight: moduleHeight,
       inPortX: inPortX,
-      inPortY: my + style.module.port.pad,
+      inPortY: my + currentWorkflowStyle.module.port.pad,
       outPortX: outPortX,
-      outPortY: my + moduleHeight - style.module.port.pad - portWidth
+      outPortY: my + moduleHeight - currentWorkflowStyle.module.port.pad - portWidth
     };
 
     for(key in m_inPorts) {
       if(m_inPorts.hasOwnProperty(key)) {
         m_inPorts[key].setPosition(inPortX, m_metrics.inPortY);
-        inPortX += portWidth + style.module.port.pad;
+        inPortX += portWidth + currentWorkflowStyle.module.port.pad;
       }
     }
 
     for(key in m_outPorts) {
       if(m_outPorts.hasOwnProperty(key)) {
         m_outPorts[key].setPosition(outPortX, m_metrics.outPortY);
-        outPortX += portWidth + style.module.port.pad;
+        outPortX += portWidth + currentWorkflowStyle.module.port.pad;
       }
     }
   };
@@ -176,12 +176,12 @@ wflModule.workflowModule = function(options, data) {
    * @param {CanvasRenderingContext2D} ctx
    */
     ////////////////////////////////////////////////////////////////////////////
-  this.draw = function(ctx, style) {
+  this.draw = function(ctx, currentWorkflowStyle) {
     if(!m_metrics) {
-      this.recomputeMetrics(ctx, style);
+      this.recomputeMetrics(ctx, currentWorkflowStyle);
     }
 
-    var portWidth = style.module.port.width,
+    var portWidth = currentWorkflowStyle.module.port.width,
       mx = m_metrics.mx,
       my = m_metrics.my,
       inPortX = m_metrics.inPortX,
@@ -190,8 +190,8 @@ wflModule.workflowModule = function(options, data) {
       key;
 
     //draw rectangle
-    ctx.fillStyle = style.module.fill;
-    ctx.strokeStyle = style.module.stroke;
+    ctx.fillStyle = currentWorkflowStyle.module.fill;
+    ctx.strokeStyle = currentWorkflowStyle.module.stroke;
     ctx.fillRect(mx, my, m_metrics.moduleWidth, m_metrics.moduleHeight);
     ctx.strokeRect(mx, my, m_metrics.moduleWidth, m_metrics.moduleHeight);
 
@@ -209,12 +209,12 @@ wflModule.workflowModule = function(options, data) {
     }
 
     //draw module name
-    ctx.fillStyle = style.module.text.fill;
-    ctx.font = style.module.text.font;
+    ctx.fillStyle = currentWorkflowStyle.module.text.fill;
+    ctx.font = currentWorkflowStyle.module.text.font;
     ctx.fillText(
       m_data['@name'],
       mx + Math.floor((m_metrics.moduleWidth - m_metrics.fontMetrics.width)/2),
-      my + m_metrics.textHeight + style.module.text.ypad
+      my + m_metrics.textHeight + currentWorkflowStyle.module.text.ypad
     );
 
   };
@@ -258,6 +258,55 @@ wflModule.workflowModule = function(options, data) {
         m_inPorts[key].show();
       }
     }
+  };
+
+  /**
+   * Adds new function or updates function value if it already exists
+   *
+   * @param name
+   * @param value
+   */
+  this.addOrUpdateFunction = function(name, value, type) {
+    if(m_data.hasOwnProperty('function')) {
+      if(!$.isArray(m_data.function)) {
+        m_data.function = [m_data.function];
+      }
+
+      for(var i = 0; i < m_data.function.length; i++) {
+        var f = m_data.function[i];
+        if(f['@name'] == name) {
+          f.parameter['@val'] = value.toString();
+          return;
+        }
+      }
+    } else {
+      m_data.function = [];
+    }
+
+    m_data.function.push(this.newFunction(name, value, type));
+  };
+
+  this.newFunction = function(name, value, type, pos, alias, description) {
+    var id = nextFunctionId();
+    pos = defaultValue(pos, "0");
+    alias = defaultValue(alias, "");
+    description = defaultValue(description, "<no description>");
+    return {
+      "@name": name,
+      "#tail": "\n    ",
+      "@id": id,
+      "@pos": pos,
+      "#text": "\n      ",
+      "parameter": {
+        "@val": value.toString(),
+        "@name": description,
+        "#tail": "\n    ",
+        "@pos": "0",
+        "@alias": alias,
+        "@id": id,
+        "@type": type
+      }
+    };
   };
 
   this.updateElementPositions = function() {};

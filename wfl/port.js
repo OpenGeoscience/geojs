@@ -32,7 +32,7 @@ wflModule.port = function(options, data) {
     m_data = data,
     m_x = 0,
     m_y = 0,
-    m_width = style.module.port.width,
+    m_width = currentWorkflowStyle.module.port.width,
     m_module = options.module;
 
   ////////////////////////////////////////////////////////////////////////////
@@ -72,8 +72,8 @@ wflModule.port = function(options, data) {
    */
     ////////////////////////////////////////////////////////////////////////////
   this.draw = function(ctx, width) {
-    ctx.fillStyle = style.module.port.fill;
-    ctx.strokeStyle = style.module.port.stroke;
+    ctx.fillStyle = currentWorkflowStyle.module.port.fill;
+    ctx.strokeStyle = currentWorkflowStyle.module.port.stroke;
     ctx.fillRect(m_x, m_y, width, width);
     ctx.strokeRect(m_x, m_y, width, width);
   };

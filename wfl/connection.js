@@ -42,12 +42,12 @@ wflModule.connection = function(options, data) {
     return m_data;
   };
 
-  this.draw = function(ctx, style) {
-    this.drawCurve(ctx, style, this.computePositions(style));
+  this.draw = function(ctx, currentWorkflowStyle) {
+    this.drawCurve(ctx, currentWorkflowStyle, this.computePositions(currentWorkflowStyle));
   };
 
-  this.drawCurve = function(ctx, style, posInfo) {
-    var offsets = this.getCurveOffsets(style);
+  this.drawCurve = function(ctx, currentWorkflowStyle, posInfo) {
+    var offsets = this.getCurveOffsets(currentWorkflowStyle);
     ctx.beginPath();
     ctx.moveTo(posInfo.cx1, posInfo.cy1);
     ctx.bezierCurveTo(
@@ -55,25 +55,25 @@ wflModule.connection = function(options, data) {
       posInfo.cx2 + offsets.x2, posInfo.cy2 + offsets.y2,
       posInfo.cx2, posInfo.cy2
     );
-    ctx.lineWidth = style.conn.lineWidth;
+    ctx.lineWidth = currentWorkflowStyle.conn.lineWidth;
 
     // line color
-    ctx.strokeStyle = style.conn.stroke;
+    ctx.strokeStyle = currentWorkflowStyle.conn.stroke;
     ctx.stroke();
   };
 
-  this.getCurveOffsets = function(style) {
+  this.getCurveOffsets = function(currentWorkflowStyle) {
     return {
-      x1:  m_vertical ? 0 :  style.conn.bezierOffset,
-      x2:  m_vertical ? 0 : -style.conn.bezierOffset,
-      y1: !m_vertical ? 0 :  style.conn.bezierOffset,
-      y2: !m_vertical ? 0 : -style.conn.bezierOffset
+      x1:  m_vertical ? 0 :  currentWorkflowStyle.conn.bezierOffset,
+      x2:  m_vertical ? 0 : -currentWorkflowStyle.conn.bezierOffset,
+      y1: !m_vertical ? 0 :  currentWorkflowStyle.conn.bezierOffset,
+      y2: !m_vertical ? 0 : -currentWorkflowStyle.conn.bezierOffset
     }
   };
 
-  this.computePositions = function(style) {
+  this.computePositions = function(currentWorkflowStyle) {
     var sourceModule, targetModule, sourcePort, targetPort,
-      centerOffset = Math.floor(style.module.port.width/2);
+      centerOffset = Math.floor(currentWorkflowStyle.module.port.width/2);
     for(var i = 0; i < m_data.port.length; i++) {
       var port = m_data.port[i];
       if(port['@type'] == 'source' || port['@type'] == 'output') {
