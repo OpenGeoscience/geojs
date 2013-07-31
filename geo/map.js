@@ -67,6 +67,10 @@ geoModule.map = function(node, options) {
     m_options.gcs = 'EPSG:3857';
   }
 
+  if (!options.display_gcs) {
+    m_options.display_gcs = 'EPSG:4326';
+  }
+
   if (!options.center) {
     m_options.center = geoModule.latlng(0.0, 0.0);
   }
@@ -581,8 +585,14 @@ geoModule.map = function(node, options) {
                                             width, height),
         // NOTE: the map is using (nearly) normalized web-mercator.
         // The constants below bring it to actual EPSG:3857 units.
-        ret = geoModule.mercator.ll2m(worldPt[0], worldPt[1]);
-    return ret;
+
+        dstPrj = new proj4.Proj(m_options.display_gcs),
+        srcPrj = new proj4.Proj(m_options.gcs),
+        ret = geoModule.mercator.ll2m(worldPt[0], worldPt[1]),
+        point = new proj4.Point(ret.x, ret.y);
+
+    proj4.transform(srcPrj, dstPrj, point);
+    return point;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -593,12 +603,15 @@ geoModule.map = function(node, options) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.queryLocation = function(location) {
-    var src = new proj4.Proj(m_options.gcs); // web mercator
+    var layer = null,
+        srcPrj = new proj4.Proj(m_options.display_gcs),
+        dstPrj = new proj4.Proj(m_options.gcs),
+        point = new proj4.Point(location.x, location.y);
+
+    proj4.transform(srcPrj, dstPrj, point);
+
     for (var layerName in m_layers) {
-      var layer = m_layers[layerName];
-      var dst = new proj4.Proj(layer.gcs());
-      var point = new proj4.Point(location.x, location.y);
-      proj4.transform(src, dst, point);
+      layer = m_layers[layerName];
       layer.queryLocation(point);
     }
   };
