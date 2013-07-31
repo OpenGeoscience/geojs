@@ -18,7 +18,7 @@ geoModule.mercator = {
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Convert Longitute (Degree) to Tile X
+ * Convert longitude (Degree) to Tile X
  *
  *  @method long2tilex
  *  @param {float, integer}
@@ -34,7 +34,7 @@ geoModule.mercator.long2tilex = function(lon, z) {
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Convert Latitude (Degree) to Tile Y
+ * Convert latitude (Degree) to Tile Y
  *
  *  @method lat2tiley
  *  @param {float, integer}
