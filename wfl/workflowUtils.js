@@ -129,8 +129,19 @@ function setupWorkflowCSS() {
     position: 'relative',
     width: '100%',
     height: '100%',
-    overflow: 'hidden'
+    overflow: 'hidden',
+    'background-image': 'url(/common/img/tweed.png)',
+    'background-repeat': 'repeat'
   });
+
+  //give modules a texture fill
+  var $canvas = $('#workspace'),
+    context = $canvas[0].getContext('2d'),
+    img = new Image();
+  img.onload = function() {
+    climatePipesStyle.module.fill = context.createPattern(img, 'repeat');
+  };
+  img.src = '/common/img/squairy_light.png';
 }
 
 function setupWorkflowDragAndDrop() {

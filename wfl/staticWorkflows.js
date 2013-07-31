@@ -55,8 +55,8 @@ var defaultWorkflow = {
       "@cache": "1",
       "location": {
         "#tail": "\n  ",
-        "@x": "20.0",
-        "@y": "20.0",
+        "@x": "220.0",
+        "@y": "-20.0",
         "@id": "0"
       },
       "#text": "\n    ",
@@ -70,8 +70,8 @@ var defaultWorkflow = {
       "@cache": "1",
       "location": {
         "#tail": "\n  ",
-        "@x": "250.0",
-        "@y": "121.0",
+        "@x": "575.0",
+        "@y": "-121.0",
         "@id": "1"
       },
       "#text": "\n    ",
@@ -85,8 +85,8 @@ var defaultWorkflow = {
       "@cache": "1",
       "location": {
         "#tail": "\n  ",
-        "@x": "500.0",
-        "@y": "240.0",
+        "@x": "950.0",
+        "@y": "-240.0",
         "@id": "2"
       },
       "#text": "\n    ",

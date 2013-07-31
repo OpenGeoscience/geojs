@@ -172,8 +172,9 @@ wflModule.workflow = function(options) {
   this.draw = function(ctx) {
     var key;
 
-    ctx.fillStyle = currentWorkflowStyle.fill;
-    ctx.fillRect(-m_translated.x, -m_translated.y, ctx.canvas.width, ctx.canvas.height);
+    //ctx.fillStyle = currentWorkflowStyle.fill;
+    //ctx.fillRect(-m_translated.x, -m_translated.y, ctx.canvas.width, ctx.canvas.height);
+    ctx.clearRect(-m_translated.x, -m_translated.y, ctx.canvas.width, ctx.canvas.height);
 
     for(key in m_modules) {
       if(m_modules.hasOwnProperty(key)) {
