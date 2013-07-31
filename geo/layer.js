@@ -63,10 +63,18 @@ geoModule.layer = function(options, source) {
       m_name = "",
       m_opacity = options.opacity || 1.0,
       m_gcs = 'EPSG:4326',
-      m_showAttribution = options.showAttribution || true, // might as well write m_showAttribution = true
-      m_visible = options.visible || true, // same as above
+      m_showAttribution = true,
+      m_visible = true,
       m_binNumber = ogs.vgl.material.RenderBin.Transparent,
       m_dataSource = source;
+
+  if (options.showAttribution) {
+    m_showAttribution = options.showAttribution;
+  }
+
+  if (options.m_visible) {
+    m_visible = options.m_visible;
+  }
 
   // TODO Write a function for this
   if (m_opacity > 1.0) {
