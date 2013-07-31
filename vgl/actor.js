@@ -9,11 +9,9 @@
  * @returns {vglModule.actor}
  */
 vglModule.actor = function() {
-
   if (!(this instanceof vglModule.actor)) {
     return new vglModule.actor();
   }
-
   vglModule.node.call(this);
 
   /** @private */
@@ -33,7 +31,7 @@ vglModule.actor = function() {
   m_translation.length = 3;
 
   /** @private */
-  var m_referenceFrame = null;
+  var m_referenceFrame = vglModule.boundingObject.ReferenceFrame.Relative;
 
   /** @private */
   var m_mapper = null;
@@ -126,14 +124,22 @@ vglModule.actor = function() {
    * @returns {String} Possible values are Absolute or Relative
    */
   this.referenceFrame = function() {
+    return m_referenceFrame;
   };
 
   /**
    * Set reference frame for the transformations
    *
-   * @param {String} referenceFrame Possible values are (Absolute | Relative)
+   * @param {vglModule.boundingObject.ReferenceFrame}
+   * referenceFrame Possible values are (Absolute | Relative)
    */
   this.setReferenceFrame = function(referenceFrame) {
+    if (referenceFrame !== m_referenceFrame) {
+      m_referenceFrame = referenceFrame;
+      this.modified();
+      return true;
+    }
+    return false;
   };
 
   /**

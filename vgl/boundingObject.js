@@ -93,4 +93,9 @@ vglModule.boundingObject = function() {
   return this;
 };
 
+vglModule.boundingObject.ReferenceFrame = {
+  "Relative" : 0,
+  "Absolute" : 1
+};
+
 inherit(vglModule.boundingObject, vglModule.object);

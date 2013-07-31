@@ -66,6 +66,11 @@ geoModule.layer = function(options, source) {
       m_showAttribution = true,
       m_visible = true,
       m_binNumber = ogs.vgl.material.RenderBin.Transparent,
+      m_defaultLookupTable = vglModule.lookupTable(),
+      m_lookupTables = {},
+      m_legendOrigin = [20, 60, 0.0],
+      m_legendWidth = 400,
+      m_legendHeight = 20,
       m_dataSource = source;
 
   if (options.showAttribution) {
@@ -83,6 +88,7 @@ geoModule.layer = function(options, source) {
   } else if (m_opacity < 0.0) {
     console.log("[warning] Opacity cannot be less than 1.0");
   }
+
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -272,6 +278,47 @@ geoModule.layer = function(options, source) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Get lookup table of the layer
+   * @param {string} varname Name of the variable. If null or empty will
+   *  return default lookup table
+   */
+    ////////////////////////////////////////////////////////////////////////////
+  this.lookupTable = function(varname) {
+    if (varname && m_lookupTables.hasOwnProperty(varname)) {
+      return m_lookupTables[varname];
+    }
+
+    return m_defaultLookupTable;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set lookup table for this layer for a particular variable if provided.
+   * @param {string} varname Name of the variable for which to set the
+   *  lookup table
+   */
+    ////////////////////////////////////////////////////////////////////////////
+  this.setLookupTable = function(varname, lut) {
+    if (!lut) {
+      console.log('[warning] Invalid lookup table');
+      return false;
+    }
+
+    if (varname) {
+      if (m_lookupTables.hasOwnProperty(varname) &&
+          m_lookupTables[varname] === lut) {
+        return false;
+      }
+      m_lookupTables[varname] = lut;
+      this.updateColorMapping(varname);
+      this.modified();
+    }
+
+    return true;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Get source of the layer
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -290,8 +337,96 @@ geoModule.layer = function(options, source) {
       this.modified();
       return true;
     }
-
     return false;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get origin (bottom left corner) of the legend
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.legendOrigin = function() {
+    return m_legendOrigin;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set origin (bottom left corner) of the legend
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.setLegendOrigin = function(origin) {
+    if (origin !== m_legendOrigin) {
+      m_legendOrigin = origin;
+      this.modified();
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get width of the legend
+   * @returns {Number}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.legendWidth = function() {
+    return m_legendWidth;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set width of the legend
+   *
+   * @param width
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.setLegendWidth = function(width) {
+    if (width !== m_legendWidth) {
+      m_legendWidth = width;
+      this.modified();
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get height of the legend
+   *
+   * @returns {Number}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.legendHeight = function() {
+    return m_legendHeight;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set height of the legend
+   *
+   * @param height
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.setLegendHeight = function(height) {
+    if (height !== m_legendHeight) {
+      m_legendHeight = height;
+      this.modified();
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Virtual function to create legend for the layer
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.createLegend = function() {
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Virtual function to update legend of the layer.
+   *
+   * This should be called manually if the caller modifies the legend's
+   * properties.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.updateLegend = function() {
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -343,6 +478,7 @@ geoModule.layer = function(options, source) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Virtual method to return information about a given point.
+   *
    * Concrete class should implement this method.
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -350,13 +486,17 @@ geoModule.layer = function(options, source) {
     // Concrete class should implement this
   }
 
+  ////////////////////////////////////////////////////////////////////////////
+  /*
+   * Virtual method to update color mapping for the layer.
+   * Concrete class should implement this method.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.updateColorMapping = function() {
+    // Concrete class should implement this
+  };
 
   return this;
 };
 
 inherit(geoModule.layer, ogs.vgl.object);
-
-/* Local Variables:   */
-/* mode: js           */
-/* js-indent-level: 2 */
-/* End:               */

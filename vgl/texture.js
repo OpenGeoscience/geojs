@@ -207,9 +207,9 @@ vglModule.texture = function() {
     // };
 
     // TODO Fix this
-	    this.m_internalFormat = gl.RGBA;
-	    this.m_pixelFormat = gl.RGBA;
-	    this.m_pixelDataType = gl.UNSIGNED_BYTE;
+    this.m_internalFormat = gl.RGBA;
+    this.m_pixelFormat = gl.RGBA;
+    this.m_pixelDataType = gl.UNSIGNED_BYTE;
   };
 
   this.updateDimensions = function() {
@@ -313,16 +313,35 @@ vglModule.lookupTable = function() {
   };
 
   this.range = function() {
-    return this.m_range;
+    return m_range;
   };
 
   this.setRange = function(range) {
-    if (this.m_range === range) {
+    if (m_range === range) {
       return false;
     }
-    this.m_range = range;
+    m_range = range;
     this.modified();
     return true;
+  };
+
+  /**
+   * Given a [min,max] range update the lookup table range
+   */
+  this.updateRange = function(range) {
+    if (!(range instanceof Array)) {
+      console.log('[error] Invalid data type for range. Requires array [min,max]');
+    }
+
+    if (range[0] < m_range[0]) {
+      m_range[0] = range[0];
+      this.modified();
+    }
+
+    if (range[1] > m_range[1]) {
+      m_range[1] = range[1];
+      this.modified();
+    }
   };
 
   return this;

@@ -22,7 +22,6 @@ vglModule.renderState = function() {
  * @returns {vglModule.renderer}
  */
 vglModule.renderer = function() {
-
   if (!(this instanceof vglModule.renderer)) {
     return new vglModule.renderer();
   }
@@ -110,8 +109,6 @@ vglModule.renderer = function() {
     renSt = new vglModule.renderState();
     children = m_sceneRoot.children();
 
-    renSt.m_projectionMatrix = m_camera.projectionMatrix();
-
     for ( i = 0; i < children.length; ++i) {
       actor = children[i];
       actor.computeBounds();
@@ -126,13 +123,19 @@ vglModule.renderer = function() {
     sortedActors.sort(function(a, b) {return a[0] - b[0]});
 
     for ( i = 0; i < sortedActors.length; ++i) {
-      if (actor.REMOVED) {
-        console.log("Actor is removed");
-      }
       actor = sortedActors[i][1];
 
-      mat4.multiply(renSt.m_modelViewMatrix, m_camera.viewMatrix(),
-                    actor.matrix());
+      if (actor.referenceFrame() ===
+          vglModule.boundingObject.ReferenceFrame.Relative) {
+        mat4.multiply(renSt.m_modelViewMatrix, m_camera.viewMatrix(),
+          actor.matrix());
+        renSt.m_projectionMatrix = m_camera.projectionMatrix();
+      } else {
+        renSt.m_modelViewMatrix = actor.matrix();
+        renSt.m_projectionMatrix = mat4.create();
+        mat4.ortho(renSt.m_projectionMatrix, 0, m_width, 0, m_height, -1, 1);
+      }
+
       renSt.m_material = actor.material();
       renSt.m_mapper = actor.mapper();
 

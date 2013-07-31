@@ -34,8 +34,9 @@ geoModule.featureLayer = function(options, feature) {
       m_features = [],
       m_newFeatures = [],
       m_expiredFeatures = [],
-      m_predrawTime = ogs.vgl.timestamp(),
-      m_updateTime = ogs.vgl.timestamp();
+      m_predrawTime = vglModule.timestamp(),
+      m_updateTime = vglModule.timestamp(),
+      m_legend = null;
 
   if (feature) {
     m_newFeatures.push(feature);
@@ -58,7 +59,7 @@ geoModule.featureLayer = function(options, feature) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Return the underlying drawable entity.
-   * @returns {geoModule.feature}
+   * @returns {Array}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.features = function() {
@@ -86,6 +87,46 @@ geoModule.featureLayer = function(options, feature) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Create legend for this layer
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.createLegend = function() {
+    if (m_legend) {
+      console.log('[info] Legend already exists for this layer')
+      return;
+    }
+
+    // Assuming that first variable is the scalar
+    var varnames = this.dataSource().variableNames(),
+        lut = this.lookupTable();
+
+    if (varnames.length > 0) {
+      // Create new lookup table if none exist
+      if (!lut) {
+        lut = vglModule.lookupTable();
+        this.setLookupTable(lut);
+      }
+      lut.setRange(this.dataSource().getScalarRange());
+      m_legend = vglModule.utils.createColorLegend(
+        varnames[0], lut, this.legendOrigin(), this.legendWidth(),
+        this.legendHeight(), 10, 0);
+      m_newFeatures = m_newFeatures.concat(m_legend);
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Update legend because parameters are changed
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.updateLegend = function() {
+    // For now just delete the last one and create on from scratch
+    m_legend = null;
+    this.createLegend();
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Update layer to a particular time
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -98,10 +139,12 @@ geoModule.featureLayer = function(options, feature) {
     var i = 0,
         time = request.time(),
         data = null,
-        geomFeature = null;
+        varnames = null,
+        geomFeature = null,
+        lut = this.lookupTable();
 
     if (!time) {
-      console.log('[info] No timestep provided. Using time from previous update.');
+      console.log('[info] Timestamp not provided. Using time from previous update.');
       // Use previous time
       time = m_time;
     } else {
@@ -109,7 +152,6 @@ geoModule.featureLayer = function(options, feature) {
     }
 
     data = this.dataSource().getData(time);
-
     if (!data) {
       return;
     }
@@ -118,14 +160,20 @@ geoModule.featureLayer = function(options, feature) {
     m_expiredFeatures = m_newFeatures.slice(0);
     m_newFeatures = [];
 
+    // Create legend if not created earlier
+    if (!m_legend) {
+      this.createLegend();
+    }
+
     for(i = 0; i < data.length; ++i) {
       switch(data[i].type()) {
-        case ogs.vgl.data.geometry:
+        case vglModule.data.geometry:
           geomFeature = geoModule.geometryFeature(data[i]);
           geomFeature.material().setBinNumber(this.binNumber());
+          geomFeature.setLookupTable(lut);
           m_newFeatures.push(geomFeature);
           break;
-        case ogs.vgl.data.raster:
+        case vglModule.data.raster:
           break;
         default:
           console.log('[warning] Data type not handled', data.type());
@@ -166,17 +214,50 @@ geoModule.featureLayer = function(options, feature) {
       return;
     }
 
-    var  i = 0,
-         mat,
-         opacityUniform;
+    var i = null,
+        j = null,
+        mat = null,
+        skipFeature = false,
+        opacityUniform = null;
 
     for (i = 0; i < m_features.length; ++i) {
-      mat = m_features[i].material();
-      opacityUniform = mat.shaderProgram().uniform('opacity');
-      if (opacityUniform !== null) {
-        opacityUniform.set(opacity);
-        $(m_that).trigger(geoModule.command.updateLayerOpacityEvent);
+      skipFeature = false;
+      if (m_legend && m_legend.length) {
+        for (j = 0; j < m_legend.length; ++j) {
+          if (m_features[i] === m_legend[j]) {
+            skipFeature = true;
+            break;
+          }
+        }
+
+        if (skipFeature) {
+          continue;
+        }
+
+        mat = m_features[i].material();
+        opacityUniform = mat.shaderProgram().uniform('opacity');
+        if (opacityUniform !== null) {
+          opacityUniform.set(opacity);
+          $(m_that).trigger(geoModule.command.updateLayerOpacityEvent);
+        }
       }
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Update color mapping for the layer for a particular variable.
+   * This should be called when lookup table or any other parameters
+   * that could affect color mappings changes.
+   */
+    ////////////////////////////////////////////////////////////////////////////
+  this.updateColorMapping = function(varname) {
+    var i = null,
+        lut = this.lookupTable(varname);
+
+    lut.setRange(this.dataSource().getScalarRange(varname));
+    for (i = 0; i < m_features.length; ++i) {
+      m_features.setLookupTable(lut);
     }
   };
 
