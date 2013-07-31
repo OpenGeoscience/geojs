@@ -75,7 +75,8 @@ function debug(msg) {
 
 function initWorkflowCanvas() {
   $(window).on('resize', function() {
-    activeWorkflow.resize();
+    if (activeWorkflow)
+      activeWorkflow.resize();
   });
 
   //append workflow html elements
@@ -89,8 +90,8 @@ function initWorkflowCanvas() {
   );
 
   setupWorkflowDragAndDrop();
-  setupModuleList();
-  setupInteraction();
+  setupWorkflowModuleList();
+  setupWorkflowInteraction();
   setupWorkflowCSS();
 }
 
@@ -188,7 +189,7 @@ function setupWorkflowDragAndDrop() {
   });
 }
 
-function setupModuleList() {
+function setupWorkflowModuleList() {
   var $moduleTableBody = $('#moduletable > tbody:last');
 
   for(var i = 0; i < reg.registry.package.length; i++) {
@@ -227,7 +228,7 @@ function addModuleToList(moduleInfo, $moduleTableBody) {
   $moduleTableBody.append($tr.append($td.append($text)));
 }
 
-function setupInteraction() {
+function setupWorkflowInteraction() {
   var $canvas = $('#workspace'),
     ctx = $canvas[0].getContext('2d'),
     panning,
