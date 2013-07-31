@@ -566,29 +566,25 @@ geoModule.map = function(node, options) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.displayToMap = function(winX, winY) {
-    var camera = m_renderer.camera();
-    var width = m_renderer.width();
-    var height = m_renderer.height();
-    var fpoint = camera.focalPoint();
-    var focusWorldPt = vec4.fromValues(fpoint[0], fpoint[1], fpoint[2], 1.0); // same as fpoint
-    var focusDisplayPt = m_renderer.worldToDisplay(
-      focusWorldPt,
-      camera.viewMatrix(),
-      camera.projectionMatrix(),
-      width, height);
-    var displayPt = vec4.fromValues(winX, winY, focusDisplayPt[2], 1.0);
-
-    var worldPt = m_renderer.displayToWorld(displayPt,
+    var camera = m_renderer.camera(),
+        width = m_renderer.width(),
+        height = m_renderer.height(),
+        fpoint = camera.focalPoint(),
+        focusWorldPt = vec4.fromValues(fpoint[0], fpoint[1], fpoint[2], 1.0),
+        focusDisplayPt = m_renderer.worldToDisplay(focusWorldPt, camera.viewMatrix(),
+                                                    camera.projectionMatrix(),
+                                                    width, height),
+        displayPt = vec4.fromValues(winX, winY, focusDisplayPt[2], 1.0),
+        worldPt = m_renderer.displayToWorld(displayPt,
                                             camera.viewMatrix(),
                                             camera.projectionMatrix(),
-                                            width, height);
-
-    // NOTE: the map is using (nearly) normalized web-mercator.
-    // The constants below bring it to actual EPSG:3857 units.
-    var webMercBoundX = 20037508.3427892;
-    var mercX = worldPt[0]/180 * webMercBoundX;
-    var webMercBoundY =  20037508.3427892;
-    var mercY = worldPt[1]/180. * webMercBoundY;
+                                            width, height),
+        // NOTE: the map is using (nearly) normalized web-mercator.
+        // The constants below bring it to actual EPSG:3857 units.
+        webMercBoundX = 20037508.3427892,
+        mercX = worldPt[0]/180 * webMercBoundX,
+        webMercBoundY =  20037508.3427892,
+        mercY = worldPt[1]/180. * webMercBoundY,
     return {x:mercX, y:mercY};
   };
 
