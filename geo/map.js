@@ -581,10 +581,10 @@ geoModule.map = function(node, options) {
                                             width, height),
         // NOTE: the map is using (nearly) normalized web-mercator.
         // The constants below bring it to actual EPSG:3857 units.
-        webMercBoundX = 20037508.3427892,
-        mercX = worldPt[0]/180 * webMercBoundX,
-        webMercBoundY =  20037508.3427892,
-        mercY = worldPt[1]/180. * webMercBoundY,
+        webMercBoundX = 6378137.000,
+        mercX = (Math.PI/180.0) * worldPt[0] * webMercBoundX,
+        webMercBoundY = 6378137.000,
+        mercY = (Math.PI/180.0) * worldPt[1] * webMercBoundY;
     return {x:mercX, y:mercY};
   };
 
@@ -605,7 +605,6 @@ geoModule.map = function(node, options) {
       layer.queryLocation(point);
     }
   };
-
 
   // Bind events to handlers
   document.onmousedown = m_viewer.handleMouseDown;
