@@ -41,6 +41,17 @@ geoModule.archiveLayerSource = function(name, vars, onError) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Get variable names for which source is producing the data
+   *
+   * @returns {String}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.variableNames = function() {
+    return m_vars;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Return raw data
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -66,7 +77,7 @@ geoModule.archiveLayerSource = function(name, vars, onError) {
       url: '/data/read',
       data: {
         expr: name,
-        vars: vars,
+        vars: JSON.stringify(vars),
         time: time
       },
       dataType: 'json',
@@ -100,7 +111,7 @@ geoModule.archiveLayerSource = function(name, vars, onError) {
    * Return metadata related to data
    */
    ////////////////////////////////////////////////////////////////////////////
-  this.getMetaData = function(time) {
+  this.getMetaData = function() {
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -122,7 +133,7 @@ geoModule.archiveLayerSource = function(name, vars, onError) {
       url: '/data/query',
       data: {
         expr: m_name,
-        vars: m_vars,
+        vars: m_vars[0],
         fields: ['timerange']
       },
       dataType: 'json',
@@ -149,10 +160,23 @@ geoModule.archiveLayerSource = function(name, vars, onError) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Return spatial-range for the entire dataset
+   * Return spatial-range for the data
+   * @returns {Array}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.getSpatialRange = function() {
+  this.getSpatialRange = function(varname) {
+    return [0, 0];
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return scalar-range
+   * @returns {Array}
+   */
+    ////////////////////////////////////////////////////////////////////////////
+  this.getScalarRange = function(varname) {
+    // TODO This should be read from the archive
+    return [0, 200];
   };
 
   return this;
