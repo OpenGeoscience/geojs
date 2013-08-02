@@ -34,9 +34,10 @@ geoModule.featureLayer = function(options, feature) {
       m_features = [],
       m_newFeatures = [],
       m_expiredFeatures = [],
-      m_predrawTime = vglModule.timestamp(),
-      m_updateTime = vglModule.timestamp(),
+      m_predrawTime = ogs.vgl.timestamp(),
+      m_updateTime = ogs.vgl.timestamp();
       m_legend = null;
+      m_visible = true;
 
   if (feature) {
     m_newFeatures.push(feature);
@@ -167,7 +168,7 @@ geoModule.featureLayer = function(options, feature) {
 
     for(i = 0; i < data.length; ++i) {
       switch(data[i].type()) {
-        case vglModule.data.geometry:
+        case ogs.vgl.data.geometry:
           geomFeature = geoModule.geometryFeature(data[i]);
           geomFeature.material().setBinNumber(this.binNumber());
           geomFeature.setLookupTable(lut);
@@ -260,6 +261,34 @@ geoModule.featureLayer = function(options, feature) {
       m_features.setLookupTable(lut);
     }
   };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get if layer is visible.
+   *
+   * @returns {Boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.visible = function() {
+    return m_visible;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set layer visible true or false. Set the visability of the features in
+   * this layer.
+   *
+   * @returns {Boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.setVisible = function(flag) {
+    m_visible = flag
+
+    $.each(m_features, function(i, feature){
+      feature.setVisible(flag)
+    });
+  };
+
 
   this.setOpacity(this.opacity());
   return this;
