@@ -182,7 +182,13 @@ wflModule.inputModule = function(options, data) {
     //draw rectangle
     ctx.fillStyle = currentWorkflowStyle.module.fill;
     ctx.strokeStyle = currentWorkflowStyle.module.stroke;
-    ctx.fillRect(mx, my, m_metrics.moduleWidth, m_metrics.moduleHeight);
+
+    //translate to ensure fill pattern is consistent
+    ctx.save();
+    ctx.translate(mx,my);
+    ctx.fillRect(0, 0, m_metrics.moduleWidth, m_metrics.moduleHeight);
+    ctx.restore();
+
     ctx.strokeRect(mx, my, m_metrics.moduleWidth, m_metrics.moduleHeight);
 
     //draw ports
