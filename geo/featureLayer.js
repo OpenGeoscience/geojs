@@ -35,8 +35,8 @@ geoModule.featureLayer = function(options, feature) {
       m_newFeatures = [],
       m_expiredFeatures = [],
       m_predrawTime = ogs.vgl.timestamp(),
-      m_updateTime = ogs.vgl.timestamp();
-      m_legend = null;
+      m_updateTime = ogs.vgl.timestamp(),
+      m_legend = null,
       m_visible = true;
 
   if (feature) {
