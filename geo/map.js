@@ -245,7 +245,7 @@ geoModule.map = function(node, options) {
       // Transform layer
       geoModule.geoTransform.transformLayer(m_options.gcs, layer);
 
-      m_layers[layer.name()] = layer;
+      m_layers[layer.id()] = layer;
       this.predraw();
       this.modified();
 
@@ -650,4 +650,9 @@ geoModule.map = function(node, options) {
   return this;
 };
 
-inherit(geoModule.map, vglModule.object);
+inherit(geoModule.map, ogs.vgl.object);
+
+/* Local Variables:   */
+/* mode: js           */
+/* js-indent-level: 2 */
+/* End:               */
