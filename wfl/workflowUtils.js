@@ -79,13 +79,13 @@ function initWorkflowCanvas() {
       activeWorkflow.resize();
   });
 
-  //append workflow html elements
+//  append workflow html elements
   $('body').append(
     [
       '<div id="workflow-dialog" title="Workflow"><table id="mainTable">',
       '<tr><td><div id="modulediv"><table id="moduletable">',
       '<tbody></tbody></table></div></td>',
-      '<td id="canvasContainer"><canvas id="workspace"/></td></tr></table></div>'
+      '<td id="canvasContainer"><canvas id="workspace"></canvas></td></tr></table></div>'
     ].join('')
   );
 
@@ -134,6 +134,8 @@ function setupWorkflowCSS() {
     'background-image': 'url(/common/img/tweed.png)',
     'background-repeat': 'repeat'
   });
+
+  $('#workflow-dialog').hide();
 
   //give modules a texture fill
   var $canvas = $('#workspace'),
