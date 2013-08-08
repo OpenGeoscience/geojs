@@ -76,20 +76,20 @@ geoModule.mapInteractorStyle = function() {
       x: 0,
       y: 0
     };
-    if ((m_coords.x < 0) || (m_coords.x > m_width)) {
+    if ((m_coords.x < 0) || (m_coords.x > m_width)) { // off-by-one error
       m_currentMousePos.x = 0;
       m_outsideCanvas = true;
     } else {
       m_currentMousePos.x = m_coords.x;
     }
-    if ((m_coords.y < 0) || (m_coords.y > m_height)) {
+    if ((m_coords.y < 0) || (m_coords.y > m_height)) { // off-by-one error
       m_currentMousePos.y = 0;
       m_outsideCanvas = true;
     } else {
       m_currentMousePos.y = m_coords.y;
     }
     if (m_outsideCanvas === true) {
-      return;
+      return true; // allow bubbling up the event
     }
     if (m_leftMouseButtonDown) {
       m_focalPoint = m_camera.focalPoint();
@@ -152,9 +152,6 @@ geoModule.mapInteractorStyle = function() {
     if (event.target !== canvas) {
       return true;
     }
-    if (event.state !== "down") {
-      return;
-    }
     if (event.button === 0) {
       m_leftMouseButtonDown = true;
     }
@@ -192,9 +189,6 @@ geoModule.mapInteractorStyle = function() {
         num = null;
 
     if (event.target !== canvas) {
-      return true;
-    }
-    if (event.state !== "up") {
       return true;
     }
     if (event.button === 0) {
@@ -239,3 +233,8 @@ geoModule.mapInteractorStyle = function() {
   return this;
 };
 inherit(geoModule.mapInteractorStyle, ogs.vgl.interactorStyle);
+
+/* Local Variables:   */
+/* mode: js           */
+/* js-indent-level: 2 */
+/* End:               */

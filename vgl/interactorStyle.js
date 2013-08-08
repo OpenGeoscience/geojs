@@ -28,7 +28,7 @@ vglModule.interactorStyle = function() {
     if (viewer !== m_viewer) {
       m_viewer = viewer;
       $(m_viewer).on(vglModule.command.mousePressEvent, m_that.handleMouseDown);
-      $(m_viewer).on(vglModule.command.mousePressEvent, m_that.handleMouseUp);
+      $(m_viewer).on(vglModule.command.mouseReleaseEvent, m_that.handleMouseUp);
       $(m_viewer).on(vglModule.command.mouseMoveEvent, m_that.handleMouseMove);
       $(m_viewer).on(vglModule.command.keyPressEvent, m_that.handleKeyPress);
       $(m_viewer).on(vglModule.command.mouseContextMenuEvent,

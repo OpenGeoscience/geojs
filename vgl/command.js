@@ -25,6 +25,7 @@ inherit(vglModule.command, vglModule.object);
  */
 vglModule.command.keyPressEvent = "keyPressEvent";
 vglModule.command.mousePressEvent = "mousePressEvent";
+vglModule.command.mouseReleaseEvent = "mouseReleaseEvent";
 vglModule.command.contextMenuEvent = "contextMenuEvent";
 vglModule.command.configureEvent = "configureEvent";
 vglModule.command.enableEvent = "enableEvent";

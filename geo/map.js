@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @module ogs.geo
+ * @module geoModule
  */
 
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
@@ -37,7 +37,7 @@ geoModule.map = function(node, options) {
   if (!(this instanceof geoModule.map)) {
     return new geoModule.map(node, options);
   }
-  ogs.vgl.object.call(this);
+  vglModule.object.call(this);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -53,8 +53,8 @@ geoModule.map = function(node, options) {
       m_activeLayer = null,
       m_mapLayer = null,
       m_featureCollection = geoModule.featureCollection(),
-      m_renderTime = ogs.vgl.timestamp(),
-      m_lastPrepareToRenderingTime = ogs.vgl.timestamp(),
+      m_renderTime = vglModule.timestamp(),
+      m_lastPrepareToRenderingTime = vglModule.timestamp(),
       m_interactorStyle = null,
       m_viewer = null,
       m_renderer = null,
@@ -65,6 +65,10 @@ geoModule.map = function(node, options) {
 
   if (!options.gcs) {
     m_options.gcs = 'EPSG:3857';
+  }
+
+  if (!options.display_gcs) {
+    m_options.display_gcs = 'EPSG:4326';
   }
 
   if (!options.center) {
@@ -82,7 +86,7 @@ geoModule.map = function(node, options) {
 
   // Initialize
   m_interactorStyle = geoModule.mapInteractorStyle();
-  m_viewer = ogs.vgl.viewer(m_node);
+  m_viewer = vglModule.viewer(m_node);
   m_viewer.setInteractorStyle(m_interactorStyle);
   m_viewer.init();
   m_viewer.renderWindow().resize($(m_node).width(), $(m_node).height());
@@ -394,14 +398,14 @@ geoModule.map = function(node, options) {
       result = layer.visible();
     } else {
       // Load countries data first
-      reader = ogs.vgl.geojsonReader();
-      geoms = reader.readGJObject(ogs.geo.countries);
+      reader = vglModule.geojsonReader();
+      geoms = reader.readGJObject(geoModule.countries);
       // @todo if opacity is on layer, solid color should be too
-      layer = ogs.geo.featureLayer({
+      layer = geoModule.featureLayer({
         "opacity": 1,
         "showAttribution": 1,
         "visible": 1
-      }, ogs.geo.multiGeometryFeature(geoms, [1.0,0.5, 0.0]));
+      }, geoModule.compositeGeometryFeature(geoms, [1.0,0.5, 0.0]));
 
       layer.setName('country-boundaries');
       this.addLayer(layer);
@@ -543,7 +547,7 @@ geoModule.map = function(node, options) {
         clearInterval(intervalId);
       } else {
         for (i = 0; i < layers.length; ++i) {
-          layers[i].update(ogs.geo.updateRequest(currentTime));
+          layers[i].update(geoModule.updateRequest(currentTime));
         }
         $(m_that).trigger({
           type: geoModule.command.animateEvent,
@@ -557,6 +561,59 @@ geoModule.map = function(node, options) {
 
     // Update every 2 ms. Updating every ms might be too much.
     intervalId = setInterval(frame, 2);
+  };
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Convert display coordinates to map coordinates
+   *
+   * @returns {'x': number, 'y': number}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.displayToMap = function(winX, winY) {
+    var camera = m_renderer.camera(),
+        width = m_renderer.width(),
+        height = m_renderer.height(),
+        fpoint = camera.focalPoint(),
+        focusWorldPt = vec4.fromValues(fpoint[0], fpoint[1], fpoint[2], 1.0),
+        focusDisplayPt = m_renderer.worldToDisplay(focusWorldPt, camera.viewMatrix(),
+                                                    camera.projectionMatrix(),
+                                                    width, height),
+        displayPt = vec4.fromValues(winX, winY, focusDisplayPt[2], 1.0),
+        worldPt = m_renderer.displayToWorld(displayPt,
+                                            camera.viewMatrix(),
+                                            camera.projectionMatrix(),
+                                            width, height),
+        // NOTE: the map is using (nearly) normalized web-mercator.
+        // The constants below bring it to actual EPSG:3857 units.
+        latlon = geoModule.mercator.m2ll(
+          geoModule.mercator.deg2rad(worldPt[0]) * geoModule.mercator.r_major,
+          geoModule.mercator.deg2rad(worldPt[1]) * geoModule.mercator.r_minor),
+        location = {'x': latlon.lon, 'y': latlon.lat};
+
+    return location;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Queries each layer for information at this location.
+   *
+   * @param location
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.queryLocation = function(location) {
+    var layer = null,
+        srcPrj = new proj4.Proj(m_options.display_gcs),
+        dstPrj = new proj4.Proj(m_options.gcs),
+        point = new proj4.Point(location.x, location.y);
+
+    proj4.transform(srcPrj, dstPrj, point);
+
+    for (var layerName in m_layers) {
+      layer = m_layers[layerName];
+      layer.queryLocation(point);
+    }
   };
 
   // Bind events to handlers
@@ -578,12 +635,19 @@ geoModule.map = function(node, options) {
   }
 
   $(m_interactorStyle).on(
-    ogs.geo.command.updateViewZoomEvent, this.updateAndDraw);
+    geoModule.command.updateViewZoomEvent, this.updateAndDraw);
   $(m_interactorStyle).on(
-    ogs.geo.command.updateViewPositionEvent, this.updateAndDraw);
+    geoModule.command.updateViewPositionEvent, this.updateAndDraw);
   $(this).on(geoModule.command.updateEvent, this.updateAndDraw);
+
+  for (var name in m_layers)
+    $(m_layers[name]).on(geoModule.command.queryResultEvent, function(event, queryResult) {
+      $(m_that).trigger(event, queryResult);
+      return true;
+    });
+
 
   return this;
 };
 
-inherit(geoModule.map, ogs.vgl.object);
+inherit(geoModule.map, vglModule.object);
