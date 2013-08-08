@@ -3,12 +3,12 @@ var baseStyle = {
   module: {
     text: {
       fill: '#000000',
-      font: '12pt monoco',
+      font: '15pt wingdings teal',
       xpad: 20,
       ypad: 10
     },
     port: {
-      width: 10,
+      width: 15,
       pad: 5,
       fill: 'lightgray',
       stroke: 'black',
@@ -33,8 +33,20 @@ var vistrailStyle = jQuery.extend(true, {}, baseStyle);
 var climatePipesStyle = jQuery.extend(true, {}, baseStyle);
 
 climatePipesStyle.fill = 'teal';
+
 climatePipesStyle.module.port.inputHeight = 30;
-climatePipesStyle.module.port.inputWidth = 200;
+climatePipesStyle.module.port.inputWidth = 220;
 climatePipesStyle.module.port.inputYPad = 5;
 climatePipesStyle.module.port.inpad = 10;
 climatePipesStyle.module.port.outpad = 10;
+climatePipesStyle.module.port.fill = "white";
+climatePipesStyle.module.port.stroke = "lightgreen";
+climatePipesStyle.module.port.lineWidth = 2;
+
+climatePipesStyle.module.shadowBlur = 20;
+climatePipesStyle.module.shadowColor = "lightblue";
+climatePipesStyle.module.cornerRadius = 25;
+climatePipesStyle.module.lineWidth = 5;
+climatePipesStyle.module.stroke = "lightgreen";
+
+climatePipesStyle.conn.stroke = "lightgreen"

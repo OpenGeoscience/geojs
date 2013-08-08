@@ -78,6 +78,19 @@ wflModule.port = function(options, data) {
     ctx.strokeRect(m_x, m_y, width, width);
   };
 
+  this.drawAsCircle = function(ctx, width) {
+    ctx.fillStyle = currentWorkflowStyle.module.port.fill;
+    ctx.strokeStyle = currentWorkflowStyle.module.port.stroke;
+    ctx.lineWidth = currentWorkflowStyle.module.port.lineWidth;
+
+    var radius = width/2;
+    ctx.beginPath();
+    ctx.arc(m_x+radius, m_y+radius, radius, 0, 2 * Math.PI, false);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+  };
+
   this.getName = function() {
     return this.data()['@name'];
   };

@@ -41,10 +41,11 @@ wflModule.inputPort = function(options, data) {
     ctx.fillText(this.data()['@name'], this.x() + width*2, this.y()+width);
   };
 
-  function createElementFromType() {
+  function createElementFromType(placeholder) {
     //TODO: support other types of input for color, dates, etc.
     m_input_elem = document.createElement('input');
     m_input_elem.type = 'text';
+    m_input_elem.placeholder = defaultValue(placeholder, "");
     $(m_input_elem).css({
       position: 'absolute'
     }).change(function() {
@@ -63,8 +64,9 @@ wflModule.inputPort = function(options, data) {
     var translated = this.module().workflow().translated();
 
     $(m_input_elem).css({
-      top: y + translated.y + currentWorkflowStyle.module.port.width*2,
-      left: x + translated.x
+      top: y + translated.y,
+      left: x + translated.x + currentWorkflowStyle.module.port.width +
+        currentWorkflowStyle.module.port.pad
     });
   };
 
@@ -76,7 +78,7 @@ wflModule.inputPort = function(options, data) {
     $(m_input_elem).hide();
   };
 
-  createElementFromType();
+  createElementFromType(this.data()['@name']);
 
   return this;
 };

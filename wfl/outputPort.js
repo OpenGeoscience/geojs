@@ -37,11 +37,8 @@ wflModule.outputPort = function(options, data) {
    */
     ////////////////////////////////////////////////////////////////////////////
   this.draw = function(ctx, width) {
-    ctx.fillStyle = currentWorkflowStyle.module.port.fill;
-    ctx.strokeStyle = currentWorkflowStyle.module.port.stroke;
-    ctx.fillRect(this.x(), this.y(), width, width);
-    ctx.strokeRect(this.x(), this.y(), width, width);
-    this.drawName(ctx, width);
+    this.drawAsCircle(ctx, width);
+    //this.drawName(ctx, width);
   };
 
   this.drawName = function(ctx, width) {

@@ -47,55 +47,24 @@ wflModule.inputModule = function(options, data) {
     m_baseRecomputeMetrics.call(this, ctx, currentWorkflowStyle);
     var base_metrics = m_baseGetMetrics.call(this),
       new_metrics,
-      maxInPortTextWidth = 0,
-      maxOutPortTextWidth = 0,
-      maxInPortTextKey,
-      maxOutPortTextKey,
       portWidth = currentWorkflowStyle.module.port.width,
       key;
 
-    //find longest port name
-    for(key in this.getInPorts()) {
-      if(this.getInPorts().hasOwnProperty(key)) {
-        if(this.getInPorts()[key].getName().length > maxInPortTextWidth) {
-          maxInPortTextWidth = this.getInPorts()[key].getName().length;
-          maxInPortTextKey = key;
-        }
-      }
-    }
-
-    for(key in this.getOutPorts()) {
-      if(this.getOutPorts().hasOwnProperty(key)) {
-        if(this.getOutPorts()[key].getName().length > maxOutPortTextWidth) {
-          maxOutPortTextWidth = this.getOutPorts()[key].getName().length;
-          maxOutPortTextKey = key;
-        }
-      }
-    }
-
-    var textHeight = 12, //TODO: get real height based on text font
+    var textHeight = 15, //TODO: get real height based on text font
       totalInPortHeight = currentWorkflowStyle.module.port.inputHeight +
         textHeight + currentWorkflowStyle.module.port.inputYPad +
         currentWorkflowStyle.module.port.inpad,
       totalOutPortHeight = textHeight + currentWorkflowStyle.module.port.outpad,
       inPortsHeight = this.inPortCount() * totalInPortHeight +
         currentWorkflowStyle.module.text.xpad,
-      outPortsHeight = this.outPortCount() * totalOutPortHeight;
-    var
+      outPortsHeight = this.outPortCount() * totalOutPortHeight,
       fontMetrics = ctx.measureText(this.getData()['@name']),
-      textWidth = fontMetrics.width + currentWorkflowStyle.module.text.xpad * 2;
-    var
-      inPortFontMetrics = maxInPortTextKey ? ctx.measureText(
-        this.getInPorts()[maxInPortTextKey]['@name']) : {width:0};
-    var
-      outPortFontMetrics = maxOutPortTextKey ? ctx.measureText(
-        this.getOutPorts()[maxOutPortTextKey]['@name']) : {width:0},
-      inPortsWidth = Math.max(inPortFontMetrics.width,
-        currentWorkflowStyle.module.port.inputWidth),
-      outPortsWidth = outPortFontMetrics.width,
+      textWidth = fontMetrics.width + currentWorkflowStyle.module.text.xpad * 2,
+      inPortsWidth = this.getInPorts().length > 0 ?
+        this.getInPorts()[0].getElement().width :
+          currentWorkflowStyle.module.port.inputWidth,
       moduleWidth = Math.max(
-        inPortsWidth + outPortsWidth + portWidth*2 +
-          currentWorkflowStyle.module.port.pad*6,
+        inPortsWidth + portWidth*2 + currentWorkflowStyle.module.port.pad*4,
         textWidth + currentWorkflowStyle.module.text.xpad*2,
         currentWorkflowStyle.module.minWidth
       ),
@@ -181,15 +150,19 @@ wflModule.inputModule = function(options, data) {
 
     //draw rectangle
     ctx.fillStyle = currentWorkflowStyle.module.fill;
+    ctx.lineWidth = currentWorkflowStyle.module.lineWidth;
     ctx.strokeStyle = currentWorkflowStyle.module.stroke;
 
-    //translate to ensure fill pattern is consistent
     ctx.save();
-    ctx.translate(mx,my);
-    ctx.fillRect(0, 0, m_metrics.moduleWidth, m_metrics.moduleHeight);
-    ctx.restore();
+    ctx.shadowBlur = currentWorkflowStyle.module.shadowBlur;
+    ctx.shadowColor = currentWorkflowStyle.module.shadowColor;
 
-    ctx.strokeRect(mx, my, m_metrics.moduleWidth, m_metrics.moduleHeight);
+    //translate to ensure fill pattern is consistent
+    ctx.translate(mx,my);
+    roundRect(ctx, 0, 0, m_metrics.moduleWidth, m_metrics.moduleHeight,
+      currentWorkflowStyle.module.cornerRadius, true, true);
+
+    ctx.restore();
 
     //draw ports
     ctx.fillStyle = currentWorkflowStyle.module.port.fill;
