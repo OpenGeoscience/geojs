@@ -364,13 +364,30 @@ uiModule.gis.addLayer = function(object, layersRootId, dataSet, selectfunc,
     nameDiv.append($(document.createElement('h4')).html(basename));
 
     if (displayProgress) {
+      var downloadStatus = $(document.createElement('div'))
+      downloadStatus.attr('id', 'progress');
       var progress
-        = $(document.createElement('div')).addClass('progress progress-success progress-striped active')
+        = $(document.createElement('div')).addClass('progress progress-success progress-striped active');
+      progress.css({float: 'left', width: '80%'});
       var bar = $(document.createElement('div')).addClass('bar');
       progress.append(bar);
       bar.width('0%');
-      nameDiv.append(progress);
+      var cancel = $(document.createElement('button')).addClass('btn btn-mini');
+      cancel.attr('type', 'button');
+      cancel.css({width: '20px', height: '20px', position: 'relative',
+                  top: '-1px', left: '3px'});
+      icon = $(document.createElement('i'));
+      icon.addClass('icon-remove icon-black');
+      icon.css({position: 'relative', left: '-4px', top: '-1px'});
+      cancel.append(icon);
+      downloadStatus.append(progress).append(cancel);
+      nameDiv.append(downloadStatus);
+
+      cancel.click(layerId, function(){
+        tr.trigger('cancel-download-task');
+      });
     }
+
 
     td.append(nameDiv);
     tr.append(td);
