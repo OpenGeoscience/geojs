@@ -352,8 +352,8 @@ geoModule.openStreetMapLayer = function() {
     }
 
     var featureCollection = request.featureCollection();
-    featureCollection.setNewFeatures(this.name(), m_newFeatures.slice(0));
-    featureCollection.setExpiredFeatures(this.name(), m_expiredFeatures.slice(0));
+    featureCollection.setNewFeatures(this.id(), m_newFeatures.slice(0));
+    featureCollection.setExpiredFeatures(this.id(), m_expiredFeatures.slice(0));
 
     m_newFeatures.length = 0;
     m_expiredFeatures.length = 0;
