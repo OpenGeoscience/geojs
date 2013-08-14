@@ -261,8 +261,43 @@ geoModule.featureLayer = function(options, feature) {
     }
   };
 
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Queries the scalar value closest to the location
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.queryLocation = function(location) {
+    var attrScalar = vglModule.vertexAttributeKeys.Scalar;
+    var features = this.features();
+    for (var fi in features) {
+      var mapper = features[fi].mapper();
+      var geomData = mapper.geometryData();
+      var closest = geomData.findClosestVertex(location);
+      var sourceDataScalar = geomData.sourceData(attrScalar);
+      if (closest != null) {
+        var value = geomData.getScalar(closest);
+        if (value != null) {
+          var result = {
+            "layer" : this.name() ,
+            "feature" : fi ,
+            "location" : location,
+            "closest index" : closest,
+            "value" : value
+          };
+          $(this).trigger(geoModule.command.queryResultEvent, result);
+        }
+      }
+    }
+  }
+
   this.setOpacity(this.opacity());
   return this;
 };
 
 inherit(geoModule.featureLayer, geoModule.layer);
+
+/* Local Variables:   */
+/* mode: js           */
+/* js-indent-level: 2 */
+/* End:               */

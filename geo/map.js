@@ -249,6 +249,11 @@ geoModule.map = function(node, options) {
       this.predraw();
       this.modified();
 
+      $(layer).on(geoModule.command.queryResultEvent, function(event, queryResult) {
+        $(m_that).trigger(event, queryResult);
+        return true;
+      });
+
       $(this).trigger({
         type: geoModule.command.addLayerEvent,
         layer: layer
@@ -604,14 +609,13 @@ geoModule.map = function(node, options) {
   ////////////////////////////////////////////////////////////////////////////
   this.queryLocation = function(location) {
     var layer = null,
-        srcPrj = new proj4.Proj(m_options.display_gcs),
-        dstPrj = new proj4.Proj(m_options.gcs),
-        point = new proj4.Point(location.x, location.y);
-
-    proj4.transform(srcPrj, dstPrj, point);
+        srcPrj = new proj4.Proj(m_options.display_gcs);
 
     for (var layerName in m_layers) {
       layer = m_layers[layerName];
+      var dstPrj = new proj4.Proj(layer.gcs());
+      var point = new proj4.Point(location.x, location.y);
+      proj4.transform(srcPrj, dstPrj, point);
       layer.queryLocation(point);
     }
   };
@@ -639,12 +643,6 @@ geoModule.map = function(node, options) {
   $(m_interactorStyle).on(
     geoModule.command.updateViewPositionEvent, this.updateAndDraw);
   $(this).on(geoModule.command.updateEvent, this.updateAndDraw);
-
-  for (var name in m_layers)
-    $(m_layers[name]).on(geoModule.command.queryResultEvent, function(event, queryResult) {
-      $(m_that).trigger(event, queryResult);
-      return true;
-    });
 
 
   return this;
