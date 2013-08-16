@@ -196,8 +196,8 @@ wflModule.workflow = function(options) {
         rect = canvasContainer.getBoundingClientRect(),
         translated = this.translated(),
         ctx;
-      canvas.width = rect.width - 20;
-      canvas.height = rect.height - 20;
+      //canvas.width = rect.width - 20;
+      //canvas.height = rect.height - 20;
       ctx = canvas.getContext('2d');
       ctx.translate(translated.x, translated.y);
       this.draw(ctx);

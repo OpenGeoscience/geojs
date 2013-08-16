@@ -83,7 +83,7 @@ function initWorkflowCanvas() {
   $('body').append(
     [
       '<div id="workflow-dialog" title="Workflow"><table id="mainTable">',
-      '<tr><td><div id="modulediv"><table id="moduletable">',
+      '<tr><td><div id="modulediv"><select id="workflowselect"></select><br /><table id="moduletable">',
       '<tbody></tbody></table></div></td>',
       '<td id="canvasContainer"><canvas id="workspace"></canvas></td></tr></table></div>'
     ].join('')
@@ -116,19 +116,19 @@ function setupWorkflowCSS() {
   }
 
   $('#mainTable').css({
-    height: '100%',
-    width: '100%'
+    height: '100%'
   });
 
   $('#modulediv').css({
     height: '100%',
-    width: 160,
+    width: $('workflowselect').width()+20,
+    //width: 160,
     overflow: 'auto'
   });
 
   $('#canvasContainer').css({
     position: 'relative',
-    width: '100%',
+    //width: '100%',
     height: '100%',
     overflow: 'hidden',
     'background-image': 'url(/common/img/tweed.png)',
@@ -145,6 +145,14 @@ function setupWorkflowCSS() {
     climatePipesStyle.module.fill = context.createPattern(img, 'repeat');
   };
   img.src = '/common/img/squairy_light.png';
+
+  $canvas.css({
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0
+  });
 }
 
 function setupWorkflowDragAndDrop() {
@@ -192,10 +200,15 @@ function setupWorkflowDragAndDrop() {
 }
 
 function setupWorkflowModuleList() {
-  var $moduleTableBody = $('#moduletable > tbody:last');
+  var $moduleTableBody = $('#moduletable > tbody:last'),
+    $workflowSelect = $('#workflowselect'),
+    $option,
+    pkg,
+    moduleInfo,
+    title;
 
   for(var i = 0; i < reg.registry.package.length; i++) {
-    var pkg = reg.registry.package[i];
+    pkg = reg.registry.package[i];
     if(!moduleRegistry.hasOwnProperty(pkg['@identifier'])) {
       moduleRegistry[pkg['@identifier']] = {};
     }
@@ -203,11 +216,31 @@ function setupWorkflowModuleList() {
       continue;
     }
     for(var j = 0; j < pkg.moduleDescriptor.length; j++) {
-      var moduleInfo = pkg.moduleDescriptor[j];
+      moduleInfo = pkg.moduleDescriptor[j];
       moduleRegistry[pkg['@identifier']][moduleInfo['@name']] = moduleInfo;
       addModuleToList(moduleInfo, $moduleTableBody);
     }
   }
+
+  //setup dropdown items
+  var workflows = {
+    "Default": defaultWorkflow,
+    "10 year average": averageWorkflow
+  };
+
+  for(title in workflows) {
+    if(workflows.hasOwnProperty(title)) {
+      $option = $(document.createElement('option'));
+      $option.text(title);
+      $option.hover(function() {
+        //todo: update workflow
+      }, function() {});
+      $workflowSelect.append($option);
+    }
+  }
+
+  //todo: update workflow
+  $workflowSelect.change(function() {});
 }
 
 function addModuleToList(moduleInfo, $moduleTableBody) {
