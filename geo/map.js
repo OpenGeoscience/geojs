@@ -59,7 +59,8 @@ geoModule.map = function(node, options) {
       m_viewer = null,
       m_renderer = null,
       m_updateRequest = null,
-      m_prepareForRenderRequest = null;
+      m_prepareForRenderRequest = null,
+      m_animationTimestepIndex = 0;
 
   m_renderTime.modified();
 
@@ -269,7 +270,7 @@ geoModule.map = function(node, options) {
   ////////////////////////////////////////////////////////////////////////////
   this.removeLayer = function(layer) {
     if (layer !== null && typeof layer !== 'undefined') {
-      m_renderer.removeActor(layer.feature());
+      m_renderer.removeActors(layer.features());
       this.modified();
       $(this).trigger({
         type: geoModule.command.removeLayerEvent,
@@ -507,6 +508,31 @@ geoModule.map = function(node, options) {
     m_that.redraw();
   };
 
+  this.incrementAnimationTimestep = function() {
+    return ++m_animationTimestepIndex;
+  }
+
+  this.animationTimestep = function() {
+    return m_animationTimestepIndex;
+  }
+
+  this.resetAnimationTimestep = function() {
+    m_animationTimestepIndex = 0;
+  }
+
+  this.animateTimestep = function(currentTime, layers) {
+    for (i = 0; i < layers.length; ++i) {
+      layers[i].update(geoModule.updateRequest(currentTime));
+      geoModule.geoTransform.transformLayer(m_options.gcs, layers[i]);
+    }
+    $(m_that).trigger({
+      type: geoModule.command.animateEvent,
+      currentTime: currentTime,
+    });
+    this.predraw();
+    this.redraw();
+  }
+
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Animate layers of a map
@@ -527,35 +553,32 @@ geoModule.map = function(node, options) {
     var that = this,
         currentTime = timeRange[0],
         endTime = timeRange[timeRange.length - 1],
-        index = -1,
         intervalId = null;
 
-    if (timeRange.length > 2) {
-      index = 0;
-    }
+    var stop = false;
+
+    $(this).on('animation-stop', function () {
+      stop = true;
+    });
 
     function frame() {
       var i = 0;
-      if (index < 0) {
+      if (that.animationTimestep() < 0) {
         ++currentTime;
       } else {
-        ++index;
-        currentTime = timeRange[index];
+        currentTime = timeRange[that.incrementAnimationTimestep()];
       }
 
-      if (currentTime > endTime || index > timeRange.length) {
+      if (currentTime > endTime || that.animationTimestep() > timeRange.length) {
         clearInterval(intervalId);
-      } else {
-        for (i = 0; i < layers.length; ++i) {
-          layers[i].update(geoModule.updateRequest(currentTime));
-        }
-        $(m_that).trigger({
-          type: geoModule.command.animateEvent,
-          currentTime: currentTime,
-          endTime: endTime
-        });
-        that.predraw();
-        that.redraw();
+        that.resetAnimationTimestep();
+      }
+      else if (stop) {
+        clearInterval(intervalId);
+      }
+      else {
+
+        that.animateTimestep(currentTime, layers);
       }
     }
 
@@ -563,6 +586,29 @@ geoModule.map = function(node, options) {
     intervalId = setInterval(frame, 2);
   };
 
+  this.pauseAnimation = function() {
+    $(this).trigger('animation-stop');
+  }
+
+  this.stopAnimation = function() {
+    $(this).trigger('animation-stop');
+    m_animationTimestepIndex = 0;
+  }
+
+  this.stepAnimationForward = function(timeRange, layers) {
+    if (m_animationTimestepIndex >= timeRange.length)
+      return
+
+    this.animateTimestep(++m_animationTimestepIndex, layers)
+  }
+
+  this.stepAnimationBackward = function(timeRange, layers) {
+
+    if (m_animationTimestepIndex <= 0)
+      return
+
+    this.animateTimestep(--m_animationTimestepIndex, layers)
+  }
 
   ////////////////////////////////////////////////////////////////////////////
   /**
