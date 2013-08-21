@@ -588,9 +588,8 @@ geoModule.map = function(node, options) {
     var that = this,
         currentTime = timeRange[0],
         endTime = timeRange[timeRange.length - 1],
-        intervalId = null;
-
-    var stop = false;
+        intervalId = null,
+        stop = false;
 
     $(this).on('animation-stop', function () {
       stop = true;
