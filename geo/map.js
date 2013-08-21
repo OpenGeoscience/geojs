@@ -521,6 +521,17 @@ geoModule.map = function(node, options) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Decrement current animation step and then return its current value
+   *
+   * @returns {number}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.prevAnimationStep = function() {
+    return ++m_animationStep;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Return current animation timestep
    *
    * @returns {number}
