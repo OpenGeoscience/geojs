@@ -500,7 +500,7 @@ geoModule.map = function(node, options) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Animate layers of a map
+   * Update the map and then request a draw
    */
   ////////////////////////////////////////////////////////////////////////////
   this.updateAndDraw = function() {
@@ -508,20 +508,41 @@ geoModule.map = function(node, options) {
     m_that.redraw();
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Update the map and then request a
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.incrementAnimationTimestep = function() {
     return ++m_animationTimestepIndex;
   }
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return index into the time-step for animations
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.animationTimestep = function() {
     return m_animationTimestepIndex;
   }
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Reset the animation time-step
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.resetAnimationTimestep = function() {
     m_animationTimestepIndex = 0;
   }
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Update the map and then request a
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.animateTimestep = function(currentTime, layers) {
-    for (i = 0; i < layers.length; ++i) {
+    var i = 0;
+    for (; i < layers.length; ++i) {
       layers[i].update(geoModule.updateRequest(currentTime));
       geoModule.geoTransform.transformLayer(m_options.gcs, layers[i]);
     }
@@ -529,7 +550,6 @@ geoModule.map = function(node, options) {
       type: geoModule.command.animateEvent,
       currentTime: currentTime,
     });
-    this.predraw();
     this.redraw();
   }
 
