@@ -170,6 +170,7 @@ uiModule.gis.createLayerList = function(map, rootId, heading, toggleFunct, remov
       var layer = data.layer;
 
       map.animate(dataset.timesteps, [layer]);
+      $('#timestep-display').fadeIn('slow');
     });
   });
 
@@ -225,6 +226,27 @@ uiModule.gis.createLayerList = function(map, rootId, heading, toggleFunct, remov
       $(button).attr('disabled', 'true');
     });
   });
+
+  // Add div to hold timestep information
+  var timestepDisplay = $('<div>', { id: 'timestep-display',
+    style: 'position: absolute; z-index: 99; top: 55px;' +
+    'left: 10px; background: rgba(255,255,255,0.5); ' +
+    'padding: 5px; border-radius: 5px;'}).append($('<h4>'));
+
+  var heading = $('h4', timestepDisplay);
+
+  $(map).on(geoModule.command.animateEvent, function(event) {
+
+    var format = d3.time.format("%Y-%m-%d  %H:%M:%S:%L");
+    if (event.currentTime)
+      heading.html(format(new Date(event.currentTime*24*60*60*1000)));
+  });
+
+
+  $('body').append(timestepDisplay);
+  timestepDisplay.hide();
+
+
 
   controls.hide();
 
