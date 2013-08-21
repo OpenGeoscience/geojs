@@ -60,7 +60,7 @@ geoModule.map = function(node, options) {
       m_renderer = null,
       m_updateRequest = null,
       m_prepareForRenderRequest = null,
-      m_animationTimestepIndex = 0;
+      m_animationStep = 0;
 
   m_renderTime.modified();
 
@@ -510,30 +510,34 @@ geoModule.map = function(node, options) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Update the map and then request a
+   * Increment current animation step and then return its current value
+   *
+   * @returns {number}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.incrementAnimationTimestep = function() {
-    return ++m_animationTimestepIndex;
-  }
+  this.nextAnimationStep = function() {
+    return ++m_animationStep;
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Return index into the time-step for animations
+   * Return current animation timestep
+   *
+   * @returns {number}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.animationTimestep = function() {
-    return m_animationTimestepIndex;
-  }
+  this.animationStep = function() {
+    return m_animationStep;
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Reset the animation time-step
+   * Reset the animation step
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.resetAnimationTimestep = function() {
-    m_animationTimestepIndex = 0;
-  }
+  this.resetAnimationStep = function() {
+    m_animationStep = 0;
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -551,7 +555,7 @@ geoModule.map = function(node, options) {
       currentTime: currentTime,
     });
     this.redraw();
-  }
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -582,16 +586,15 @@ geoModule.map = function(node, options) {
     });
 
     function frame() {
-      var i = 0;
-      if (that.animationTimestep() < 0) {
+      if (that.animationStep() < 0) {
         ++currentTime;
       } else {
-        currentTime = timeRange[that.incrementAnimationTimestep()];
+        currentTime = timeRange[that.nextAnimationStep()];
       }
 
-      if (currentTime > endTime || that.animationTimestep() > timeRange.length) {
+      if (currentTime > endTime || that.animationStep() > timeRange.length) {
         clearInterval(intervalId);
-        that.resetAnimationTimestep();
+        that.resetAnimationStep();
       }
       else if (stop) {
         clearInterval(intervalId);
@@ -612,22 +615,22 @@ geoModule.map = function(node, options) {
 
   this.stopAnimation = function() {
     $(this).trigger('animation-stop');
-    m_animationTimestepIndex = 0;
+    m_animationStep = 0;
   }
 
   this.stepAnimationForward = function(timeRange, layers) {
-    if (m_animationTimestepIndex >= timeRange.length)
+    if (m_animationStep >= timeRange.length)
       return
 
-    this.animateTimestep(++m_animationTimestepIndex, layers)
+    this.animateTimestep(++m_animationStep, layers)
   }
 
   this.stepAnimationBackward = function(timeRange, layers) {
 
-    if (m_animationTimestepIndex <= 0)
+    if (m_animationStep <= 0)
       return
 
-    this.animateTimestep(--m_animationTimestepIndex, layers)
+    this.animateTimestep(--m_animationStep, layers)
   }
 
   ////////////////////////////////////////////////////////////////////////////
