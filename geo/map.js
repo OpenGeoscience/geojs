@@ -212,7 +212,7 @@ geoModule.map = function(node, options) {
    */
   ////////////////////////////////////////////////////////////////////////////
   function prevAnimationStep() {
-    return ++m_animationStep;
+    return --m_animationStep;
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -651,7 +651,7 @@ geoModule.map = function(node, options) {
     if (m_animationStep >= timeRange.length)
       return
 
-    this.animateTimestep(nextAnimationStep(), layers);
+    this.animateTimestep(timeRange[nextAnimationStep()], layers);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -663,7 +663,7 @@ geoModule.map = function(node, options) {
     if (m_animationStep <= 0)
       return
 
-    this.animateTimestep(prevAnimationStep(), layers);
+    this.animateTimestep(timeRange[prevAnimationStep()], layers);
   };
 
   ////////////////////////////////////////////////////////////////////////////
