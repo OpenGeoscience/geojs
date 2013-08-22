@@ -95,7 +95,7 @@ vglModule.primitive = function() {
     return m_indicesValueType;
   };
   /*
-   * Set indices value type g
+   * Set indices value type
    */
   this.setIndicesValueType = function(type) {
     m_indicesValueType = type;
@@ -979,6 +979,28 @@ vglModule.geometryData = function() {
     return minIndex;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Returns the requested vertex position
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.getPosition = function(index) {
+    var attr = vglModule.vertexAttributeKeys.Position;
+    var sourceData = this.sourceData(attr);
+    var sizeOfDataType = sourceData.sizeOfAttributeDataType(attr);
+    var numberOfComponents = sourceData.attributeNumberOfComponents(attr);
+    var data = sourceData.data();
+    var stride = sourceData.attributeStride(attr) / sizeOfDataType;
+    var offset = sourceData.attributeOffset(attr) / sizeOfDataType;
+
+    // assume positions are always triplets
+    if (numberOfComponents != 3)
+      console.log("fix me");
+
+    return [ data[offset + index*stride + 0],
+             data[offset + index*stride + 1],
+             data[offset + index*stride + 2] ];
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
