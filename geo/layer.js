@@ -24,7 +24,7 @@ geoModule.layerOptions = function() {
     return new geoModule.layerOptions();
   }
 
-  this.opacity = 1;
+  this.opacity = 0.5;
   this.showAttribution = true;
   this.visible = true;
   this.binNumber = ogs.vgl.material.RenderBin.Default;
@@ -61,7 +61,7 @@ geoModule.layer = function(options, source) {
   var m_that = this,
       m_id = "",
       m_name = "",
-      m_opacity = options.opacity || 1.0,
+      m_opacity = options.opacity || 0.5,
       m_gcs = 'EPSG:4326',
       m_showAttribution = true,
       m_visible = true,
@@ -87,6 +87,7 @@ geoModule.layer = function(options, source) {
     console.log("[warning] Opacity cannot be greater than 1.0");
   } else if (m_opacity < 0.0) {
     console.log("[warning] Opacity cannot be less than 1.0");
+    m_opacity = 0.0;
   }
 
 

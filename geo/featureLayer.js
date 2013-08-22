@@ -185,6 +185,8 @@ geoModule.featureLayer = function(options, feature) {
 
     if (data.length > 0) {
       m_updateTime. modified();
+      console.log('my opacity', this.opacity());
+      this.setOpacity(this.opacity());
     }
   };
 
@@ -289,8 +291,6 @@ geoModule.featureLayer = function(options, feature) {
     });
   };
 
-
-  this.setOpacity(this.opacity());
   return this;
 };
 
