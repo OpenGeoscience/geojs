@@ -368,8 +368,11 @@ geoModule.openStreetMapLayer = function() {
   ////////////////////////////////////////////////////////////////////////////
   this.queryLocation = function(location) {
     var result = {
-        "OSM_x": location.x,
-        "OSM_y": location.y
+      layer : this,
+      data : {
+        "lon": location.x,
+        "lat": location.y
+      }
     };
     $(this).trigger(geoModule.command.queryResultEvent, result);
   }

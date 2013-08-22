@@ -306,11 +306,11 @@ geoModule.featureLayer = function(options, feature) {
         var value = geomData.getScalar(closest);
         if (value != null) {
           var result = {
-            "layer" : this.name() ,
-            "feature" : fi ,
-            "location" : location,
-            "closest index" : closest,
-            "value" : value
+            layer : this,
+            data : {
+              "feature" : fi ,
+              "value" : value
+            }
           };
           $(this).trigger(geoModule.command.queryResultEvent, result);
         }
