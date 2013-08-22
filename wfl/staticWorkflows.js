@@ -4,108 +4,95 @@ var staticWorkflows = {
       "@name": "untitled",
       "@version": "1.0.3",
       "@{http://www.w3.org/2001/XMLSchema-instance}schemaLocation": "http://www.vistrails.org/workflow.xsd",
-      "connection": [
-        {
-          "#tail": "\n  ",
-          "#text": "\n    ",
+      "connection": [{
+        "#tail": "\n  ",
+        "#text": "\n    ",
+        "@id": "0",
+        "port": [{
+          "@moduleName": "Dataset",
+          "@name": "self",
+          "#tail": "\n    ",
+          "@signature": "(org.opengeoscience.geoweb.climate:Dataset)",
           "@id": "0",
-          "port": [
-            {
-              "@moduleName": "Dataset",
-              "@name": "self",
-              "#tail": "\n    ",
-              "@signature": "(org.opengeoscience.geoweb.climate:Dataset)",
-              "@id": "0",
-              "@type": "source",
-              "@moduleId": "0"
-            },
-            {
-              "@moduleName": "Variable",
-              "@name": "dataset",
-              "#tail": "\n  ",
-              "@signature": "(org.opengeoscience.geoweb.climate:Dataset)",
-              "@id": "1",
-              "@type": "destination",
-              "@moduleId": "1"
-            }
-          ]
-        },
-        {
+          "@type": "source",
+          "@moduleId": "0"
+        }, {
+          "@moduleName": "Variable",
+          "@name": "dataset",
           "#tail": "\n  ",
-          "#text": "\n    ",
+          "@signature": "(org.opengeoscience.geoweb.climate:Dataset)",
           "@id": "1",
-          "port": [
-            {
-              "@moduleName": "Variable",
-              "@name": "self",
-              "#tail": "\n    ",
-              "@signature": "(org.opengeoscience.geoweb.climate:Variable)",
-              "@id": "2",
-              "@type": "source",
-              "@moduleId": "1"
-            },
-            {
-              "@moduleName": "ToGeoJSON",
-              "@name": "variable",
-              "#tail": "\n  ",
-              "@signature": "(org.opengeoscience.geoweb.climate:Variable)",
-              "@id": "3",
-              "@type": "destination",
-              "@moduleId": "2"
-            }
-          ]
-        }
-      ],
-      "module": [
-        {
-          "@name": "Dataset",
-          "@package": "org.opengeoscience.geoweb.climate",
-          "@version": "0.9.0",
-          "@namespace": "",
+          "@type": "destination",
+          "@moduleId": "1"
+        }]
+      }, {
+        "#tail": "\n  ",
+        "#text": "\n    ",
+        "@id": "1",
+        "port": [{
+          "@moduleName": "Variable",
+          "@name": "self",
+          "#tail": "\n    ",
+          "@signature": "(org.opengeoscience.geoweb.climate:Variable)",
+          "@id": "2",
+          "@type": "source",
+          "@moduleId": "1"
+        }, {
+          "@moduleName": "ToGeoJSON",
+          "@name": "variable",
           "#tail": "\n  ",
-          "@cache": "1",
-          "location": {
-            "#tail": "\n  ",
-            "@x": "220.0",
-            "@y": "-20.0",
-            "@id": "0"
-          },
-          "#text": "\n    ",
+          "@signature": "(org.opengeoscience.geoweb.climate:Variable)",
+          "@id": "3",
+          "@type": "destination",
+          "@moduleId": "2"
+        }]
+      }],
+      "module": [{
+        "@name": "Dataset",
+        "@package": "org.opengeoscience.geoweb.climate",
+        "@version": "0.9.0",
+        "@namespace": "",
+        "#tail": "\n  ",
+        "@cache": "1",
+        "location": {
+          "#tail": "\n  ",
+          "@x": "-209.0",
+          "@y": "188.0",
           "@id": "0"
         },
-        {
-          "@name": "Variable",
-          "@package": "org.opengeoscience.geoweb.climate",
-          "@version": "0.9.0",
-          "@namespace": "",
+        "#text": "\n    ",
+        "@id": "0"
+      }, {
+        "@name": "Variable",
+        "@package": "org.opengeoscience.geoweb.climate",
+        "@version": "0.9.0",
+        "@namespace": "",
+        "#tail": "\n  ",
+        "@cache": "1",
+        "location": {
           "#tail": "\n  ",
-          "@cache": "1",
-          "location": {
-            "#tail": "\n  ",
-            "@x": "575.0",
-            "@y": "-121.0",
-            "@id": "1"
-          },
-          "#text": "\n    ",
+          "@x": "-64.0",
+          "@y": "70.0",
           "@id": "1"
         },
-        {
-          "@name": "ToGeoJSON",
-          "@package": "org.opengeoscience.geoweb.climate",
-          "@version": "0.9.0",
-          "@namespace": "",
-          "#tail": "\n",
-          "@cache": "1",
-          "location": {
-            "#tail": "\n  ",
-            "@x": "950.0",
-            "@y": "-240.0",
-            "@id": "2"
-          },
-          "#text": "\n    ",
+        "#text": "\n    ",
+        "@id": "1"
+      }, {
+        "@name": "ToGeoJSON",
+        "@package": "org.opengeoscience.geoweb.climate",
+        "@version": "0.9.0",
+        "@namespace": "",
+        "#tail": "\n",
+        "@cache": "1",
+        "location": {
+          "#tail": "\n  ",
+          "@x": "153.0",
+          "@y": "-83.0",
           "@id": "2"
-        }
-      ],
+        },
+        "#text": "\n    ",
+        "@id": "2"
+      }],
       "@vistrail_id": "",
       "#text": "\n  ",
       "@id": "0"

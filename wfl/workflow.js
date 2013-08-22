@@ -322,6 +322,8 @@ wflModule.workflow = function(options) {
       .setInput('file', target.basename);
     this.getModuleByName('Variable')
       .setInput('name', target.name);
+    this.getModuleByName('Variable')
+      .setInput('time', target.timestep);
   };
 
   if(options.data.hasOwnProperty('workflow')) {
