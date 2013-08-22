@@ -11,6 +11,18 @@ uiModule.gis = function() {
   return this;
 };
 
+uiModule.gis.selectedLayers = function() {
+  var layers = []
+  $('#table-layers tr').each(function(i, tr) {
+    // call the function passing the id
+    if ($('#selected', tr)[0].checked)
+      layers.push(tr.id);
+  });
+
+  return layers;
+}
+
+
 /**
  * Create a placeholder to display current layers
  *
@@ -29,6 +41,7 @@ uiModule.gis.createLayerList = function(map, rootId, heading, toggleFunct, remov
   // Toggle button
   var toggleButton = $(document.createElement('button'));
   toggleButton.attr('class', 'btn-toggle-layer btn-small btn-warning layer-control-btn');
+  toggleButton.attr('disabled', 'true');
   toggleButton.html('Toggle');
   toggleButton.width('70px');
   controls.append(toggleButton)
@@ -53,6 +66,7 @@ uiModule.gis.createLayerList = function(map, rootId, heading, toggleFunct, remov
   // Remove button
   var removeButton = $(document.createElement('button'));
   removeButton.attr('class', 'btn-edit-layer btn-small btn-danger layer-control-btn');
+  removeButton.attr('disabled', 'true');
   removeButton.html('Remove');
   removeButton.width('70px');
   controls.append(removeButton);
@@ -69,6 +83,7 @@ uiModule.gis.createLayerList = function(map, rootId, heading, toggleFunct, remov
   // Modify button
   var modifyButton =  $(document.createElement('button'));
   modifyButton.attr('class', 'btn-small btn-success');
+  modifyButton.attr('disabled', 'true');
   modifyButton.html('Modify');
   modifyButton.width('70px');
   controls.append(modifyButton);
@@ -80,19 +95,7 @@ uiModule.gis.createLayerList = function(map, rootId, heading, toggleFunct, remov
     editDiv.width(200);
     editDiv.height(200);
 
-    var selectedLayers =   function() {
-      var layers = []
-      $('#table-layers tr').each(function(i, tr) {
-        // call the function passing the id
-        if ($('#selected', tr)[0].checked)
-          layers.push(tr.id);
-      });
-
-      return layers;
-
-    }
-
-    uiModule.gis.createOpacityControl(editDiv, map, selectedLayers);
+    uiModule.gis.createOpacityControl(editDiv, map, uiModule.gis.selectedLayers);
 
     return editDiv;
   }
@@ -116,6 +119,111 @@ uiModule.gis.createLayerList = function(map, rootId, heading, toggleFunct, remov
   // Hide the popover if the controls are minimsed
   $('#drawer').on('click', function(event){
     modifyButton.popover('hide');
+  });
+
+  // Add animation controls
+
+  var animationControls =
+    $('<div>', {id: 'animation-controls',  class: 'btn-group'}).append(
+      $('<button>', {id: 'step-backward', class: 'btn btn-small', disabled: 'true'}).append(
+        $('<i>', {class: 'icon-step-backward'})
+      )
+      ,
+      $('<button>', {id: 'play', class: 'btn btn-small', disabled: 'true'}).append(
+        $('<i>', {class: 'icon-play'})
+      )
+      ,
+      $('<button>', {id: 'pause', class: 'btn btn-small', disabled: 'true'}).append(
+        $('<i>', {class: 'icon-pause'})
+      )
+      ,
+      $('<button>', {id: 'stop', class: 'btn btn-small', disabled: 'true'}).append(
+        $('<i>', {class: 'icon-stop'})
+      )
+      ,
+      $('<button>', {id: 'step-forward', class: 'btn btn-small', disabled: 'true'}).append(
+        $('<i>', {class: 'icon-step-forward'})
+      )
+    );
+
+  animationControls.css({left: "10px"});
+  controls.append($(animationControls));
+
+  var layersToAnimate = function() {
+    var layers = []
+
+    $.each(uiModule.gis.selectedLayers(), function(i, id) {
+      var dataset = $('#'+id).data('dataset');
+      var layer = map.findLayerById(dataset.dataset_id);
+
+      layers.push({dataset: dataset, layer: layer});
+    });
+
+    return layers;
+  };
+
+  $('#play', animationControls).click(function() {
+    $(this).addClass('active');
+    $('#pause', animationControls).removeClass('active');
+    $.each(layersToAnimate(), function(i, data) {
+      var dataset = data.dataset;
+      var layer = data.layer;
+
+      map.animate(dataset.timesteps, [layer]);
+    });
+  });
+
+  $('#pause', animationControls).click(function() {
+    $(this).addClass('active');
+    $('#play', animationControls).removeClass('active');
+    map.pauseAnimation();
+  })
+
+  $('#stop', animationControls).click(function() {
+    $('#play', animationControls).removeClass('active');
+    $('#pause', animationControls).removeClass('active');
+    map.stopAnimation();
+  })
+
+  $('#step-forward', animationControls).click(function() {
+    $.each(uiModule.gis.selectedLayers(), function(i, id) {
+      var dataset = $('#'+id).data('dataset');
+      var layer = map.findLayerById(dataset.dataset_id);
+
+      map.stepAnimationForward(dataset.timesteps, [layer]);
+    });
+  });
+
+  $('#step-backward', animationControls).click(function() {
+    $.each(uiModule.gis.selectedLayers(), function(i, id) {
+      var dataset = $('#'+id).data('dataset');
+      var layer = map.findLayerById(dataset.dataset_id);
+
+      map.stepAnimationBackward(dataset.timesteps, [layer]);
+    });
+  });
+
+  $(map).on(geoModule.command.animateEvent, function (event) {
+    if (event.currentTime == event.endTime)
+      $('#play', animationControls).removeClass('active');
+  });
+
+  $('#table-layers').on('layers-selection', function() {
+    $.each($('#layer-control-btns button'), function(i, button) {
+      $(button).removeAttr('disabled');
+    });
+    $.each($('#animation-controls button'), function(i, button) {
+      $(button).removeAttr('disabled');
+    });
+  });
+
+  $('#table-layers').on('layers-no-selection', function() {
+    $.each($('#layer-control-btns button'), function(i, button) {
+      $(button).attr('disabled', 'true');
+    });
+    $.each($('#animation-controls button'), function(i, button) {
+      $(button).attr('disabled', 'true');
+    });
   });
 
   controls.hide();
@@ -318,6 +426,25 @@ uiModule.gis.addLayer = function(object, layersRootId, dataSet, selectfunc,
     td.append(checkBox)
     tr.append(td);
 
+    checkBox.click(function() {
+
+      var selected = 0;
+
+      $('#table-layers tr').each(function(i, tr) {
+        // call the function passing the id
+        if ($('#selected', tr)[0].checked)
+          selected++
+      });
+
+      if (selected == 1) {
+        $('#table-layers').trigger('layers-selection');
+      }
+      else if (selected == 0) {
+        $('#table-layers').trigger('layers-no-selection');
+      }
+    });
+
+
     // Toggle layer button
     td = $(document.createElement('td'));
     td.width('30px');
@@ -364,13 +491,30 @@ uiModule.gis.addLayer = function(object, layersRootId, dataSet, selectfunc,
     nameDiv.append($(document.createElement('h4')).html(basename));
 
     if (displayProgress) {
+      var downloadStatus = $(document.createElement('div'))
+      downloadStatus.attr('id', 'progress');
       var progress
-        = $(document.createElement('div')).addClass('progress progress-success progress-striped active')
+        = $(document.createElement('div')).addClass('progress progress-success progress-striped active');
+      progress.css({float: 'left', width: '80%'});
       var bar = $(document.createElement('div')).addClass('bar');
       progress.append(bar);
       bar.width('0%');
-      nameDiv.append(progress);
+      var cancel = $(document.createElement('button')).addClass('btn btn-mini');
+      cancel.attr('type', 'button');
+      cancel.css({width: '20px', height: '20px', position: 'relative',
+                  top: '-1px', left: '3px'});
+      icon = $(document.createElement('i'));
+      icon.addClass('icon-remove icon-black');
+      icon.css({position: 'relative', left: '-4px', top: '-1px'});
+      cancel.append(icon);
+      downloadStatus.append(progress).append(cancel);
+      nameDiv.append(downloadStatus);
+
+      cancel.click(layerId, function(){
+        tr.trigger('cancel-download-task');
+      });
     }
+
 
     td.append(nameDiv);
     tr.append(td);
