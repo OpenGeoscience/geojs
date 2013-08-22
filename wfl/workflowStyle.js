@@ -49,4 +49,10 @@ climatePipesStyle.module.cornerRadius = 25;
 climatePipesStyle.module.lineWidth = 5;
 climatePipesStyle.module.stroke = "lightgreen";
 
+climatePipesStyle.shadowBlur = 20;
+climatePipesStyle.shadowColor = "lightblue";
+climatePipesStyle.cornerRadius = 25;
+climatePipesStyle.lineWidth = 5;
+climatePipesStyle.stroke = "lightgreen";
+
 climatePipesStyle.conn.stroke = "lightgreen"

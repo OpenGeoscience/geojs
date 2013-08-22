@@ -172,9 +172,36 @@ wflModule.workflow = function(options) {
   this.draw = function(ctx) {
     var key;
 
-    //ctx.fillStyle = currentWorkflowStyle.fill;
-    //ctx.fillRect(-m_translated.x, -m_translated.y, ctx.canvas.width, ctx.canvas.height);
-    ctx.clearRect(-m_translated.x, -m_translated.y, ctx.canvas.width, ctx.canvas.height);
+    ctx.clearRect(-m_translated.x, -m_translated.y, ctx.canvas.width,
+      ctx.canvas.height);
+
+    //draw rectangle
+    ctx.fillStyle = currentWorkflowStyle.fill;
+    ctx.lineWidth = currentWorkflowStyle.lineWidth;
+    ctx.strokeStyle = currentWorkflowStyle.stroke;
+
+    ctx.save();
+    ctx.shadowBlur = currentWorkflowStyle.shadowBlur;
+    ctx.shadowColor = currentWorkflowStyle.shadowColor;
+
+    var pad = ctx.shadowBlur,
+      wx = pad - m_translated.x,
+      wy = pad - m_translated.y,
+      ww = ctx.canvas.width - pad*2,
+      wh = ctx.canvas.height - pad*2;
+
+    //translate to ensure fill pattern is consistent
+    roundRect(ctx, wx, wy, ww, wh,
+      currentWorkflowStyle.cornerRadius, true, true);
+
+    ctx.restore();
+
+    //define clipping region
+    ctx.save();
+
+    roundRect(ctx, wx, wy, ww, wh,
+      currentWorkflowStyle.cornerRadius, false, false);
+    ctx.clip();
 
     for(key in m_modules) {
       if(m_modules.hasOwnProperty(key)) {
@@ -187,6 +214,8 @@ wflModule.workflow = function(options) {
         m_connections[key].draw(ctx, m_currentWorkflowStyle);
       }
     }
+
+    ctx.restore();
   };
 
   this.resize = function() {
@@ -196,8 +225,8 @@ wflModule.workflow = function(options) {
         rect = canvasContainer.getBoundingClientRect(),
         translated = this.translated(),
         ctx;
-      //canvas.width = rect.width - 20;
-      //canvas.height = rect.height - 20;
+      canvas.width = rect.width - 20;
+      canvas.height = rect.height - 20;
       ctx = canvas.getContext('2d');
       ctx.translate(translated.x, translated.y);
       this.draw(ctx);
@@ -234,6 +263,14 @@ wflModule.workflow = function(options) {
         m_modules[key].show();
       }
     }
+//    $('#modulediv').append($('#algorithm-select'));
+//    $('#modulediv').append($('#moduletable'));
+//    $('#algorithm-select').off('change').change(function() {
+//      if(m_that.visible()) {
+//        m_that.setData(staticWorkflows[$(this).val()]);
+//        m_that.resize();
+//      }
+//    });
   };
 
   this.hide = function() {
@@ -243,6 +280,7 @@ wflModule.workflow = function(options) {
         m_modules[key].hide();
       }
     }
+    $('#algorithm-select').off('change');
   };
 
   this.modules = function() {
@@ -251,6 +289,15 @@ wflModule.workflow = function(options) {
 
   this.data = function() {
     return m_data;
+  };
+
+  this.setData = function(data) {
+    m_data = data;
+    m_modules = {};
+    m_connections = {};
+    m_translated = {x:0, y:0};
+    this.generateModulesFromData();
+    this.generateConnectionsFromData();
   };
 
   this.updateElementPositions = function() {
