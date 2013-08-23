@@ -103,231 +103,297 @@ var staticWorkflows = {
       "@name": "untitled",
       "@version": "1.0.3",
       "@{http://www.w3.org/2001/XMLSchema-instance}schemaLocation": "http://www.vistrails.org/workflow.xsd",
-      "connection": [
-        {
-          "#tail": "\n  ",
-          "#text": "\n    ",
+      "connection": [{
+        "#tail": "\n  ",
+        "#text": "\n    ",
+        "@id": "1",
+        "port": [{
+          "@moduleName": "Dataset",
+          "@name": "self",
+          "#tail": "\n    ",
+          "@signature": "(org.opengeoscience.geoweb.climate:Dataset)",
           "@id": "2",
-          "port": [
-            {
-              "@moduleName": "SubSelect",
-              "@name": "variable",
-              "#tail": "\n    ",
-              "@signature": "(org.opengeoscience.geoweb.climate:Variable)",
-              "@id": "4",
-              "@type": "source",
-              "@moduleId": "5"
-            },
-            {
-              "@moduleName": "Average",
-              "@name": "variable",
-              "#tail": "\n  ",
-              "@signature": "(org.opengeoscience.geoweb.climate:Variable)",
-              "@id": "5",
-              "@type": "destination",
-              "@moduleId": "4"
-            }
-          ]
-        },
-        {
+          "@type": "source",
+          "@moduleId": "1"
+        }, {
+          "@moduleName": "Variable",
+          "@name": "dataset",
           "#tail": "\n  ",
-          "#text": "\n    ",
+          "@signature": "(org.opengeoscience.geoweb.climate:Dataset)",
           "@id": "3",
-          "port": [
-            {
-              "@moduleName": "MonthlyTimeBounds",
-              "@name": "variable",
-              "#tail": "\n    ",
-              "@signature": "(org.opengeoscience.geoweb.climate:Variable)",
-              "@id": "6",
-              "@type": "source",
-              "@moduleId": "3"
-            },
-            {
-              "@moduleName": "SubSelect",
-              "@name": "variable",
-              "#tail": "\n  ",
-              "@signature": "(org.opengeoscience.geoweb.climate:Variable)",
-              "@id": "7",
-              "@type": "destination",
-              "@moduleId": "5"
-            }
-          ]
-        },
-        {
-          "#tail": "\n  ",
-          "#text": "\n    ",
+          "@type": "destination",
+          "@moduleId": "2"
+        }]
+      }, {
+        "#tail": "\n  ",
+        "#text": "\n    ",
+        "@id": "2",
+        "port": [{
+          "@moduleName": "Variable",
+          "@name": "self",
+          "#tail": "\n    ",
+          "@signature": "(org.opengeoscience.geoweb.climate:Variable)",
           "@id": "4",
-          "port": [
-            {
-              "@moduleName": "Dataset",
-              "@name": "self",
-              "#tail": "\n    ",
-              "@signature": "(org.opengeoscience.geoweb.climate:Dataset)",
-              "@id": "8",
-              "@type": "source",
-              "@moduleId": "0"
-            },
-            {
-              "@moduleName": "Variable",
-              "@name": "dataset",
-              "#tail": "\n  ",
-              "@signature": "(org.opengeoscience.geoweb.climate:Dataset)",
-              "@id": "9",
-              "@type": "destination",
-              "@moduleId": "1"
-            }
-          ]
-        },
-        {
+          "@type": "source",
+          "@moduleId": "2"
+        }, {
+          "@moduleName": "SubSelect",
+          "@name": "variable",
           "#tail": "\n  ",
-          "#text": "\n    ",
+          "@signature": "(org.opengeoscience.geoweb.climate:Variable)",
           "@id": "5",
-          "port": [
-            {
-              "@moduleName": "Variable",
-              "@name": "self",
-              "#tail": "\n    ",
-              "@signature": "(org.opengeoscience.geoweb.climate:Variable)",
-              "@id": "10",
-              "@type": "source",
-              "@moduleId": "1"
-            },
-            {
-              "@moduleName": "MonthlyTimeBounds",
-              "@name": "variable",
-              "#tail": "\n  ",
-              "@signature": "(org.opengeoscience.geoweb.climate:Variable)",
-              "@id": "11",
-              "@type": "destination",
-              "@moduleId": "3"
-            }
-          ]
-        },
-        {
-          "#tail": "\n  ",
-          "#text": "\n    ",
+          "@type": "destination",
+          "@moduleId": "3"
+        }]
+      }, {
+        "#tail": "\n  ",
+        "#text": "\n    ",
+        "@id": "3",
+        "port": [{
+          "@moduleName": "SubSelect",
+          "@name": "variable",
+          "#tail": "\n    ",
+          "@signature": "(org.opengeoscience.geoweb.climate:Variable)",
           "@id": "6",
-          "port": [
-            {
-              "@moduleName": "Average",
-              "@name": "variable",
-              "#tail": "\n    ",
-              "@signature": "(org.opengeoscience.geoweb.climate:Variable)",
-              "@id": "12",
-              "@type": "source",
-              "@moduleId": "4"
-            },
-            {
-              "@moduleName": "ToGeoJSON",
-              "@name": "variable",
-              "#tail": "\n  ",
-              "@signature": "(org.opengeoscience.geoweb.climate:Variable)",
-              "@id": "13",
-              "@type": "destination",
-              "@moduleId": "2"
-            }
-          ]
-        }
-      ],
-      "module": [
-        {
-          "@name": "Dataset",
-          "@package": "org.opengeoscience.geoweb.climate",
-          "@version": "0.9.0",
-          "@namespace": "",
+          "@type": "source",
+          "@moduleId": "3"
+        }, {
+          "@moduleName": "MonthlyTimeBounds",
+          "@name": "variable",
           "#tail": "\n  ",
-          "@cache": "1",
-          "location": {
-            "#tail": "\n  ",
-            "@x": "-194.0",
-            "@y": "165.0",
-            "@id": "0"
-          },
-          "#text": "\n    ",
-          "@id": "0"
+          "@signature": "(org.opengeoscience.geoweb.climate:Variable)",
+          "@id": "7",
+          "@type": "destination",
+          "@moduleId": "4"
+        }]
+      }, {
+        "#tail": "\n  ",
+        "#text": "\n    ",
+        "@id": "4",
+        "port": [{
+          "@moduleName": "MonthlyTimeBounds",
+          "@name": "variable",
+          "#tail": "\n    ",
+          "@signature": "(org.opengeoscience.geoweb.climate:Variable)",
+          "@id": "8",
+          "@type": "source",
+          "@moduleId": "4"
+        }, {
+          "@moduleName": "Average",
+          "@name": "variable",
+          "#tail": "\n  ",
+          "@signature": "(org.opengeoscience.geoweb.climate:Variable)",
+          "@id": "9",
+          "@type": "destination",
+          "@moduleId": "5"
+        }]
+      }, {
+        "#tail": "\n  ",
+        "#text": "\n    ",
+        "@id": "5",
+        "port": [{
+          "@moduleName": "Average",
+          "@name": "variable",
+          "#tail": "\n    ",
+          "@signature": "(org.opengeoscience.geoweb.climate:Variable)",
+          "@id": "10",
+          "@type": "source",
+          "@moduleId": "5"
+        }, {
+          "@moduleName": "ToGeoJSON",
+          "@name": "variable",
+          "#tail": "\n  ",
+          "@signature": "(org.opengeoscience.geoweb.climate:Variable)",
+          "@id": "11",
+          "@type": "destination",
+          "@moduleId": "6"
+        }]
+      }],
+      "module": [{
+        "function": {
+          "@name": "file",
+          "#tail": "\n  ",
+          "@id": "6",
+          "@pos": "0",
+          "#text": "\n      ",
+          "parameter": {
+            "@val": "",
+            "@name": "<no description>",
+            "#tail": "\n    ",
+            "@pos": "0",
+            "@alias": "",
+            "@id": "8",
+            "@type": "org.vistrails.vistrails.basic:String"
+          }
         },
-        {
-          "@name": "Variable",
-          "@package": "org.opengeoscience.geoweb.climate",
-          "@version": "0.9.0",
-          "@namespace": "",
-          "#tail": "\n  ",
-          "@cache": "1",
-          "location": {
-            "#tail": "\n  ",
-            "@x": "-65.0",
-            "@y": "121.0",
-            "@id": "1"
-          },
-          "#text": "\n    ",
+        "@name": "Dataset",
+        "@package": "org.opengeoscience.geoweb.climate",
+        "@version": "0.9.0",
+        "@namespace": "",
+        "#tail": "\n  ",
+        "@cache": "1",
+        "location": {
+          "#tail": "\n    ",
+          "@x": "-247.0",
+          "@y": "-250.0",
           "@id": "1"
         },
-        {
-          "@name": "ToGeoJSON",
-          "@package": "org.opengeoscience.geoweb.climate",
-          "@version": "0.9.0",
-          "@namespace": "",
+        "#text": "\n    ",
+        "@id": "1"
+      }, {
+        "function": {
+          "@name": "name",
           "#tail": "\n  ",
-          "@cache": "1",
-          "location": {
-            "#tail": "\n  ",
-            "@x": "81.0",
-            "@y": "51.0",
-            "@id": "2"
-          },
-          "#text": "\n    ",
-          "@id": "2"
+          "@id": "1",
+          "@pos": "0",
+          "#text": "\n      ",
+          "parameter": {
+            "@val": "",
+            "@name": "<no description>",
+            "#tail": "\n    ",
+            "@pos": "0",
+            "@alias": "",
+            "@id": "9",
+            "@type": "org.vistrails.vistrails.basic:String"
+          }
         },
-        {
-          "@name": "MonthlyTimeBounds",
-          "@package": "org.opengeoscience.geoweb.climate",
-          "@version": "0.9.0",
-          "@namespace": "",
+        "@name": "Variable",
+        "@package": "org.opengeoscience.geoweb.climate",
+        "@version": "0.9.0",
+        "@namespace": "",
+        "#tail": "\n  ",
+        "@cache": "1",
+        "location": {
+          "#tail": "\n    ",
+          "@x": "-163.0",
+          "@y": "-312.0",
+          "@id": "7"
+        },
+        "#text": "\n    ",
+        "@id": "2"
+      }, {
+        "function": [{
+          "@name": "axis",
+          "#tail": "\n    ",
+          "@id": "2",
+          "@pos": "0",
+          "#text": "\n      ",
+          "parameter": {
+            "@val": "time",
+            "@name": "<no description>",
+            "#tail": "\n    ",
+            "@pos": "0",
+            "@alias": "",
+            "@id": "2",
+            "@type": "org.vistrails.vistrails.basic:String"
+          }
+        }, {
+          "@name": "end",
+          "#tail": "\n    ",
+          "@id": "3",
+          "@pos": "1",
+          "#text": "\n      ",
+          "parameter": {
+            "@val": "1983-01-01",
+            "@name": "<no description>",
+            "#tail": "\n    ",
+            "@pos": "0",
+            "@alias": "",
+            "@id": "3",
+            "@type": "org.vistrails.vistrails.basic:String"
+          }
+        }, {
+          "@name": "start",
           "#tail": "\n  ",
-          "@cache": "1",
-          "location": {
-            "#tail": "\n  ",
-            "@x": "-162.0",
-            "@y": "8.0",
-            "@id": "3"
-          },
-          "#text": "\n    ",
+          "@id": "4",
+          "@pos": "2",
+          "#text": "\n      ",
+          "parameter": {
+            "@val": "1973-01-01",
+            "@name": "<no description>",
+            "#tail": "\n    ",
+            "@pos": "0",
+            "@alias": "",
+            "@id": "4",
+            "@type": "org.vistrails.vistrails.basic:String"
+          }
+        }],
+        "@name": "SubSelect",
+        "@package": "org.opengeoscience.geoweb.climate",
+        "@version": "0.9.0",
+        "@namespace": "",
+        "#tail": "\n  ",
+        "@cache": "1",
+        "location": {
+          "#tail": "\n    ",
+          "@x": "-69.0",
+          "@y": "-378.0",
           "@id": "3"
         },
-        {
-          "@name": "Average",
-          "@package": "org.opengeoscience.geoweb.climate",
-          "@version": "0.9.0",
-          "@namespace": "",
+        "#text": "\n    ",
+        "@id": "3"
+      }, {
+        "@name": "MonthlyTimeBounds",
+        "@package": "org.opengeoscience.geoweb.climate",
+        "@version": "0.9.0",
+        "@namespace": "",
+        "#tail": "\n  ",
+        "@cache": "1",
+        "location": {
           "#tail": "\n  ",
-          "@cache": "1",
-          "location": {
-            "#tail": "\n  ",
-            "@x": "76.0",
-            "@y": "-104.0",
-            "@id": "4"
-          },
-          "#text": "\n    ",
+          "@x": "37.0",
+          "@y": "-467.0",
           "@id": "4"
         },
-        {
-          "@name": "SubSelect",
-          "@package": "org.opengeoscience.geoweb.climate",
-          "@version": "0.9.0",
-          "@namespace": "",
-          "#tail": "\n",
-          "@cache": "1",
-          "location": {
-            "#tail": "\n  ",
-            "@x": "10.0",
-            "@y": "-32.0",
-            "@id": "5"
-          },
-          "#text": "\n    ",
+        "#text": "\n    ",
+        "@id": "4"
+      }, {
+        "function": {
+          "@name": "axis",
+          "#tail": "\n  ",
+          "@id": "5",
+          "@pos": "0",
+          "#text": "\n      ",
+          "parameter": {
+            "@val": "t",
+            "@name": "<no description>",
+            "#tail": "\n    ",
+            "@pos": "0",
+            "@alias": "",
+            "@id": "5",
+            "@type": "org.vistrails.vistrails.basic:String"
+          }
+        },
+        "@name": "Average",
+        "@package": "org.opengeoscience.geoweb.climate",
+        "@version": "0.9.0",
+        "@namespace": "",
+        "#tail": "\n  ",
+        "@cache": "1",
+        "location": {
+          "#tail": "\n    ",
+          "@x": "101.0",
+          "@y": "-542.0",
           "@id": "5"
-        }
-      ],
+        },
+        "#text": "\n    ",
+        "@id": "5"
+      }, {
+        "@name": "ToGeoJSON",
+        "@package": "org.opengeoscience.geoweb.climate",
+        "@version": "0.9.0",
+        "@namespace": "",
+        "#tail": "\n",
+        "@cache": "1",
+        "location": {
+          "#tail": "\n  ",
+          "@x": "220.0",
+          "@y": "-609.0",
+          "@id": "6"
+        },
+        "#text": "\n    ",
+        "@id": "6"
+      }],
       "@vistrail_id": "",
       "#text": "\n  ",
       "@id": "0"
