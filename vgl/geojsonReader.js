@@ -30,6 +30,7 @@ vglModule.geojsonReader = function() {
   var m_scalarFormat = "none",
       m_scalarRange = null;
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Read scalars
    *
@@ -38,19 +39,26 @@ vglModule.geojsonReader = function() {
    * @param size_estimate
    * @param idx
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.readScalars = function(coordinates, geom, size_estimate, idx) {
-    if (this.m_scalarFormat == "values" && coordinates.length==4)
+    var array = null,
+        s = null,
+        r  = null,
+        g = null,
+        b = null;
+
+    if (this.m_scalarFormat === "values" && coordinates.length === 4)
     {
-      var s = coordinates[3];
-      array = geom.sourceData(vertexAttributeKeys.Scalar);
+      s = coordinates[3];
+      array = geom.sourceData(vglModule.vertexAttributeKeys.Scalar);
+
       if (!array) {
         array = new vglModule.sourceDataSf();
-        if (this.m_scalarRange)
-          {
+        if (this.m_scalarRange) {
           array.setScalarRange(this.m_scalarRange[0],this.m_scalarRange[1]);
-          }
-        if (!(size_estimate === undefined)) {
-          array.length = size_estimate
+        }
+        if (size_estimate !== undefined) {
+          array.length = size_estimate;
         }
         geom.addSource(array);
       }
@@ -59,45 +67,51 @@ vglModule.geojsonReader = function() {
       } else {
         array.insertAt(idx, s);
       }
-    } else if (this.m_scalarFormat == "rgb" && coordinates.length==6) {
-      array = geom.sourceData(vertexAttributeKeys.Color);
+    } else if (this.m_scalarFormat === "rgb" && coordinates.length === 6) {
+      array = geom.sourceData(vglModule.vertexAttributeKeys.Color);
       if (!array) {
         array = new vglModule.sourceDataC3fv();
-        if (!(size_estimate === undefined)) {
-          array.length = size_estimate*3
+        if (size_estimate !== undefined) {
+          array.length = size_estimate*3;
         }
         geom.addSource(array);
       }
-      var r = coordinates[3];
-      var g = coordinates[4];
-      var b = coordinates[5];
+      r = coordinates[3];
+      g = coordinates[4];
+      b = coordinates[5];
       if (size_estimate === undefined) {
         array.pushBack([r,g,b]);
       } else {
         array.insertAt(idx, [r,g,b]);
       }
     }
-  }
+  };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Read point data
    *
    * @param coordinates
    * @returns {vglModule.geometryData}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.readPoint = function(coordinates) {
-    var geom = new vglModule.geometryData();
-    var vglpoints = new vglModule.points();
-    var vglcoords = new vglModule.sourceDataP3fv();
-    geom.addSource(vglcoords);
-    var indices = new Uint16Array(1);
+    var geom = new vglModule.geometryData(),
+        vglpoints = new vglModule.points(),
+        vglcoords = new vglModule.sourceDataP3fv(),
+        indices = new Uint16Array(1),
+        x = null,
+        y = null,
+        z = null,
+        i = null;
 
-    for (var i = 0; i < 1; i++) {
+    geom.addSource(vglcoords);
+    for (i = 0; i < 1; i++) {
       indices[i] = i;
 
-      var x = coordinates[0];
-      var y = coordinates[1];
-      var z = 0.0;
+      x = coordinates[0];
+      y = coordinates[1];
+      z = 0.0;
       if (coordinates.length>2) {
         z = coordinates[2];
       }
@@ -115,29 +129,34 @@ vglModule.geojsonReader = function() {
     return geom;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Read multipoint data
    *
    * @param coordinates
    * @returns {vglModule.geometryData}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.readMultiPoint = function(coordinates) {
-    var geom = new vglModule.geometryData();
-    var vglpoints = new vglModule.points();
-    var vglcoords = new vglModule.sourceDataP3fv();
-    var indices = new Uint16Array(coordinates.length);
-    var pntcnt = 0;
-    var estpntcnt = coordinates.length;
+    var geom = new vglModule.geometryData(),
+        vglpoints = new vglModule.points(),
+        vglcoords = new vglModule.sourceDataP3fv(),
+        indices = new Uint16Array(coordinates.length),
+        pntcnt = 0,
+        estpntcnt = coordinates.length,
+        x = null,
+        y = null,
+        z = null,
+        i;
 
     //preallocate with size estimate
-    vglcoords.data().length = estptcnt*3; //x,y,z
+    vglcoords.data().length = estpntcnt * 3; //x,y,z
 
-    for (var i = 0; i < coordinates.length; i++) {
+    for (i = 0; i < coordinates.length; i++) {
       indices[i] = i;
-
-      var x = coordinates[i][0];
-      var y = coordinates[i][1];
-      var z = 0.0;
+      x = coordinates[i][0];
+      y = coordinates[i][1];
+      z = 0.0;
       if (coordinates[i].length>2) {
         z = coordinates[i][2];
       }
@@ -146,7 +165,7 @@ vglModule.geojsonReader = function() {
       vglcoords.insertAt(pntcnt, [x,y,z]);
 
       //attributes
-      this.readScalars(coordinates[i], geom, estpntcnt, pntcnt)
+      this.readScalars(coordinates[i], geom, estpntcnt, pntcnt);
 
       pntcnt++;
     }
@@ -158,24 +177,31 @@ vglModule.geojsonReader = function() {
     return geom;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Read line string data
    *
    * @param coordinates
    * @returns {vglModule.geometryData}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.readLineString = function(coordinates) {
-    var geom = new vglModule.geometryData();
-    var vglline = new vglModule.lineStrip();
-    vglline.setIndicesPerPrimitive(coordinates.length);
-    var vglcoords = new vglModule.sourceDataP3fv();
-    var indices = [];
+    var geom = new vglModule.geometryData(),
+        vglline = new vglModule.lineStrip(),
+        vglcoords = new vglModule.sourceDataP3fv(),
+        indices = [],
+        i = null,
+        x = null,
+        y = null,
+        z = null;
 
-    for (var i = 0; i < coordinates.length; i++) {
+    vglline.setIndicesPerPrimitive(coordinates.length);
+
+    for (i = 0; i < coordinates.length; i++) {
       indices.push(i);
-      var x = coordinates[i][0];
-      var y = coordinates[i][1];
-      var z = 0.0;
+      x = coordinates[i][0];
+      y = coordinates[i][1];
+      z = 0.0;
       if (coordinates[i].length>2) {
         z = coordinates[i][2];
       }
@@ -184,7 +210,7 @@ vglModule.geojsonReader = function() {
       vglcoords.pushBack([x,y,z]);
 
       //attributes
-      this.readScalars(coordinates[i], geom)
+      this.readScalars(coordinates[i], geom);
     }
 
     vglline.setIndices(indices);
@@ -194,26 +220,33 @@ vglModule.geojsonReader = function() {
     return geom;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Read multi line string
    *
    * @param coordinates
    * @returns {vglModule.geometryData}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.readMultiLineString = function(coordinates) {
-    var geom = new vglModule.geometryData();
-    var vglcoords = new vglModule.sourceDataP3fv();
-    var pntcnt = 0;
-    var estpntcnt = coordinates.length*2; //lines should be at least 2 verts long, underest OK
+    var geom = new vglModule.geometryData(),
+        vglcoords = new vglModule.sourceDataP3fv(),
+        pntcnt = 0,
+        //lines should be at least 2 verts long, underest OK
+        estpntcnt = coordinates.length * 2,
+        j = null,
+        indices = null,
+        vglline = null,
+        thisLineLength = null;
 
-    //preallocate with size estimate
+    // Preallocate with size estimate
     vglcoords.data().length = estpntcnt*3; //x,y,z
 
-    for (var j = 0; j < coordinates.length; j++) {
-      var indices = [];
+    for (j = 0; j < coordinates.length; j++) {
+      indices = [];
       //console.log("getting line " + j);
-      var vglline = new vglModule.lineStrip();
-      var thisLineLength = coordinates[j].length;
+      vglline = new vglModule.lineStrip();
+      thisLineLength = coordinates[j].length;
       vglline.setIndicesPerPrimitive(thisLineLength);
       for (var i = 0; i < thisLineLength; i++) {
         indices.push(pntcnt);
@@ -242,12 +275,14 @@ vglModule.geojsonReader = function() {
     return geom;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Read polygon data
    *
    * @param coordinates
    * @returns {vglModule.geometryData}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.readPolygon = function(coordinates) {
     //TODO: ignoring holes given in coordinates[1...]
     //TODO: ignoring convex
@@ -286,12 +321,14 @@ vglModule.geojsonReader = function() {
     return geom;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Read multi polygon data
    *
    * @param coordinates
    * @returns {vglModule.geometryData}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.readMultiPolygon = function(coordinates) {
     var geom = new vglModule.geometryData();
     var vglcoords = new vglModule.sourceDataP3fv();
@@ -381,10 +418,12 @@ vglModule.geojsonReader = function() {
     return geom;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * @param object
    * @returns {*}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.readGJObjectInt = function(object) {
     if (!object.hasOwnProperty('type')) {
       //console.log("uh oh, not a geojson object");
@@ -463,12 +502,14 @@ vglModule.geojsonReader = function() {
       break;
     }
     return ret;
-  }
+  };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * @param object
    * @returns {*}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.readGJObject = function(object) {
     //var time1, time2;
     var ret;
@@ -496,26 +537,30 @@ vglModule.geojsonReader = function() {
    }
  };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Read geometries from geojson object
    *
    * @param object
    * @returns {Array}
    */
+ ////////////////////////////////////////////////////////////////////////////
  this.readGeomObject = function(object) {
     var geom;
     var geoms = [];
     geom = this.readGJObject(object);
     this.linearizeGeoms(geoms, geom);
     return geoms;
- }
+ };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Given a buffer get rendering primitives
    *
    * @param buffer
    * @returns {*}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.getPrimitives = function(buffer) {
     //console.log("Parsing geoJSON");
     if (!buffer) return [];
