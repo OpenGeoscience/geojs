@@ -234,8 +234,8 @@ var staticWorkflows = {
         "@cache": "1",
         "location": {
           "#tail": "\n    ",
-          "@x": "-247.0",
-          "@y": "-250.0",
+          "@x": "-259.0",
+          "@y": "-33.0",
           "@id": "1"
         },
         "#text": "\n    ",
@@ -265,8 +265,8 @@ var staticWorkflows = {
         "@cache": "1",
         "location": {
           "#tail": "\n    ",
-          "@x": "-163.0",
-          "@y": "-312.0",
+          "@x": "50.0",
+          "@y": "-177.0",
           "@id": "7"
         },
         "#text": "\n    ",
@@ -326,8 +326,8 @@ var staticWorkflows = {
         "@cache": "1",
         "location": {
           "#tail": "\n    ",
-          "@x": "-69.0",
-          "@y": "-378.0",
+          "@x": "380.0",
+          "@y": "-208.0",
           "@id": "3"
         },
         "#text": "\n    ",
@@ -341,8 +341,8 @@ var staticWorkflows = {
         "@cache": "1",
         "location": {
           "#tail": "\n  ",
-          "@x": "37.0",
-          "@y": "-467.0",
+          "@x": "705.0",
+          "@y": "-336.0",
           "@id": "4"
         },
         "#text": "\n    ",
@@ -372,8 +372,8 @@ var staticWorkflows = {
         "@cache": "1",
         "location": {
           "#tail": "\n    ",
-          "@x": "101.0",
-          "@y": "-542.0",
+          "@x": "992.0",
+          "@y": "-508.0",
           "@id": "5"
         },
         "#text": "\n    ",
@@ -387,8 +387,8 @@ var staticWorkflows = {
         "@cache": "1",
         "location": {
           "#tail": "\n  ",
-          "@x": "220.0",
-          "@y": "-609.0",
+          "@x": "1317.0",
+          "@y": "-532.0",
           "@id": "6"
         },
         "#text": "\n    ",

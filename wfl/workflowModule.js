@@ -44,13 +44,22 @@ wflModule.workflowModule = function(options, data) {
     this.outputPortClass = wflModule.port;
   }
 
-  for(; i < m_ports.length; i++) {
-    if(m_ports[i]['@type'] != 'output') {
-      m_inPorts[m_ports[i]['@name']] = this.inputPortClass({module: m_that}, m_ports[i]);
-      m_inPortCount++;
-    } else {
-      m_outPorts[m_ports[i]['@name']] = this.outputPortClass({module: m_that}, m_ports[i]);
-      m_outPortCount++;
+  /**
+   * @private createPorts - creates port objects from workflow json
+   */
+  function createPorts() {
+    for(; i < m_ports.length; i++) {
+      if(m_ports[i]['@type'] != 'output') {
+        m_inPorts[m_ports[i]['@name']] = m_that.inputPortClass({
+            module: m_that
+          }, m_ports[i]);
+        m_inPortCount++;
+      } else {
+        m_outPorts[m_ports[i]['@name']] = m_that.outputPortClass({
+            module: m_that
+          }, m_ports[i]);
+        m_outPortCount++;
+      }
     }
   }
 
@@ -332,6 +341,8 @@ wflModule.workflowModule = function(options, data) {
   };
 
   this.updateElementPositions = function() {};
+
+  createPorts();
 
   return this;
 };

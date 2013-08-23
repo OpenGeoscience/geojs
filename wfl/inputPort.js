@@ -47,7 +47,8 @@ wflModule.inputPort = function(options, data) {
     m_input_elem.type = 'text';
     m_input_elem.placeholder = defaultValue(placeholder, "");
     $(m_input_elem).css({
-      position: 'absolute'
+      position: 'absolute',
+      'pointer-events': 'auto'
     }).change(function() {
         m_that.module().addOrUpdateFunction(
           m_that.data()['@name'],
@@ -55,8 +56,8 @@ wflModule.inputPort = function(options, data) {
           m_that.data()['portSpecItem']['@module']
         );
       });
-
-    $('#canvasContainer').append(m_input_elem);
+    m_that.setElementValueFromData();
+    $('#inputContainer').append(m_input_elem);
   }
 
   this.setPosition = function(x,y) {
@@ -68,9 +69,9 @@ wflModule.inputPort = function(options, data) {
     var translated = this.module().workflow().translated();
 
     $(m_input_elem).css({
-      top: y + translated.y,
+      top: y + translated.y - currentWorkflowStyle.shadowBlur,
       left: x + translated.x + currentWorkflowStyle.module.port.width +
-        currentWorkflowStyle.module.port.pad
+        currentWorkflowStyle.module.port.pad - currentWorkflowStyle.shadowBlur
     });
   };
 
@@ -80,6 +81,11 @@ wflModule.inputPort = function(options, data) {
 
   this.hide = function() {
     $(m_input_elem).hide();
+  };
+
+  this.setElementValueFromData = function() {
+    $(m_input_elem).val(
+      m_that.module().getFunctionValue(m_that.data()['@name']));
   };
 
   createElementFromType(this.data()['@name']);

@@ -85,7 +85,7 @@ function initWorkflowCanvas() {
       '<div id="workflow-dialog" title="Workflow"><table id="mainTable">',
       '<tr><td><div id="modulediv"><!--select id="workflowselect"></select--><table id="moduletable">',
       '<tbody></tbody></table></div></td>',
-      '<td id="canvasContainer"><canvas id="workspace"></canvas></td></tr></table></div>'
+      '<td id="canvasContainer"><canvas id="workspace"></canvas><div id="inputContainer"></div></td></tr></table></div>'
     ].join('')
   );
 
@@ -133,6 +133,15 @@ function setupWorkflowCSS() {
     overflow: 'hidden'
 //    'background-image': 'url(/common/img/tweed.png)',
 //    'background-repeat': 'repeat'
+  });
+
+  $('#inputContainer').css({
+    position: 'relative',
+    width: '100%',
+    height: '100%',
+    overflow: 'hidden',
+    margin: climatePipesStyle.shadowBlur,
+    'pointer-events': 'none'
   });
 
   $('#workflow-dialog').hide();
