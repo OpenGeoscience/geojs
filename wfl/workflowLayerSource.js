@@ -64,6 +64,13 @@ wflModule.workflowLayerSource = function(name, vars, workflow, onError) {
       asyncVal = true;
     }
 
+    //set time function on workflow
+    try {
+      m_workflow.getModuleByName('Variable').setInput('time', m_time);
+    } catch (e) {
+      console.log('[info] Unable to set time on workflow');
+    }
+
     $.ajax({
       type: 'POST',
       url: '/services/vistrail/execute/',

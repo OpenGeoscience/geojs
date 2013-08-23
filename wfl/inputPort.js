@@ -49,7 +49,11 @@ wflModule.inputPort = function(options, data) {
     $(m_input_elem).css({
       position: 'absolute'
     }).change(function() {
-        //TODO: update functions in workflow JSON data
+        m_that.module().addOrUpdateFunction(
+          m_that.data()['@name'],
+          $(this).val(),
+          m_that.data()['portSpecItem']['@module']
+        );
       });
 
     $('#canvasContainer').append(m_input_elem);

@@ -148,7 +148,7 @@ wflModule.workflowModule = function(options, data) {
     ////////////////////////////////////////////////////////////////////////////
   this.getOutPorts = function() {
     return m_outPorts;
-  }
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -258,6 +258,28 @@ wflModule.workflowModule = function(options, data) {
         m_inPorts[key].show();
       }
     }
+  };
+
+  /**
+   * Gets the value of a function on this module, or null.
+   *
+   * @param {String} name - the name of the function
+   * @returns {String|null}
+   */
+  this.getFunctionValue = function(name) {
+    if(m_data.hasOwnProperty('function')) {
+      if(!$.isArray(m_data.function)) {
+        m_data.function = [m_data.function];
+      }
+
+      for(var i = 0; i < m_data.function.length; i++) {
+        var f = m_data.function[i];
+        if(f['@name'] == name) {
+          return f.parameter['@val'];
+        }
+      }
+    }
+    return null;
   };
 
   /**
