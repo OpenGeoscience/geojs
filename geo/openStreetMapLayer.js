@@ -211,7 +211,6 @@ geoModule.openStreetMapLayer = function() {
         camera = renderer.camera(),
         mapOptions = request.mapOptions(),
         node = request.node(),
-        totalLatDegrees = 360.0,
         zoom = mapOptions.zoom,
         // First get corner points
         // In display coordinates the origin is on top left corner (0, 0)
@@ -253,13 +252,13 @@ geoModule.openStreetMapLayer = function() {
 
     worldPt1[0] = Math.max(worldPt1[0], -180.0);
     worldPt1[0] = Math.min(worldPt1[0],  180.0);
-    worldPt1[1] = Math.max(worldPt1[1], -totalLatDegrees * 0.5);
-    worldPt1[1] = Math.min(worldPt1[1],  totalLatDegrees * 0.5);
+    worldPt1[1] = Math.max(worldPt1[1], -180.0);
+    worldPt1[1] = Math.min(worldPt1[1],  180.0);
 
     worldPt2[0] = Math.max(worldPt2[0], -180.0);
     worldPt2[0] = Math.min(worldPt2[0],  180.0);
-    worldPt2[1] = Math.max(worldPt2[1], -totalLatDegrees * 0.5);
-    worldPt2[1] = Math.min(worldPt2[1],  totalLatDegrees * 0.5);
+    worldPt2[1] = Math.max(worldPt2[1], -180.0);
+    worldPt2[1] = Math.min(worldPt2[1],  180.0);
 
     // Compute tilex and tiley
     tile1x = geoModule.mercator.long2tilex(worldPt1[0], zoom);

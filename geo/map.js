@@ -128,32 +128,50 @@ geoModule.map = function(node, options) {
     if (camera.position()[2] < 0) {
       m_options.zoom = 3;
     }
+    else if (camera.position()[2] < 0.02) {
+      m_options.zoom = 17;
+    }
+    else if (camera.position()[2] < 0.05) {
+      m_options.zoom = 16;
+    }
+    else if (camera.position()[2] < 0.10) {
+      m_options.zoom = 15;
+    }
+    else if (camera.position()[2] < 0.15) {
+      m_options.zoom = 14;
+    }
+    else if (camera.position()[2] < 0.25) {
+      m_options.zoom = 13;
+    }
+    else if (camera.position()[2] < 0.5) {
+      m_options.zoom = 12;
+    }
     else if (camera.position()[2] < 1) {
-      m_options.zoom = 10;
+      m_options.zoom = 11;
     }
     else if (camera.position()[2] < 3) {
-      m_options.zoom = 9;
+      m_options.zoom = 10;
     }
     else if (camera.position()[2] < 5) {
-      m_options.zoom = 8;
+      m_options.zoom = 9;
     }
     else if (camera.position()[2] < 10) {
-      m_options.zoom = 7;
+      m_options.zoom = 8;
     }
     else if (camera.position()[2] < 15) {
-      m_options.zoom = 6;
+      m_options.zoom = 7;
     }
     else if (camera.position()[2] < 35) {
-      m_options.zoom = 5;
+      m_options.zoom = 6;
     }
     else if (camera.position()[2] < 50) {
-      m_options.zoom = 4;
+      m_options.zoom = 5;
     }
     else if (camera.position()[2] < 200) {
-      m_options.zoom = 3;
+      m_options.zoom = 4;
     }
     else if (camera.position()[2] < Number.MAX_VALUE) {
-      m_options.zoom = 2;
+      m_options.zoom = 3;
     }
   }
 

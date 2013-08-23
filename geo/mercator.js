@@ -29,7 +29,7 @@ geoModule.mercator.long2tilex = function(lon, z) {
   "use strict";
   var rad = (lon + 180.0) / 360.0,
       f = Math.floor(rad * Math.pow(2.0, z));
-  return Math.round(f);
+  return f;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -44,7 +44,7 @@ geoModule.mercator.long2tilex = function(lon, z) {
 geoModule.mercator.lat2tiley = function(lat, z) {
   "use strict";
   var rad = lat * Math.PI/180.0;
-  return Math.round(Math.floor((1.0 - rad / Math.PI) / 2.0 * Math.pow(2.0, z)));
+  return Math.floor((1.0 - rad / Math.PI) / 2.0 * Math.pow(2.0, z));
 };
 
 //////////////////////////////////////////////////////////////////////////////
