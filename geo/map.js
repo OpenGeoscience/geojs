@@ -125,10 +125,13 @@ geoModule.map = function(node, options) {
   function computeZoom() {
     var camera = m_renderer.camera();
 
-    console.log('camera position is', camera.position()[2]);
+//    console.log('camera position is', camera.position()[2]);
 
-    if (camera.position()[2] < 0.125) {
+    if (camera.position()[2] < 0.0625) {
       m_options.zoom = 15;
+    }
+    else if (camera.position()[2] < 0.125) {
+      m_options.zoom = 14;
     }
     else if (camera.position()[2] < 0.25) {
       m_options.zoom = 13;
