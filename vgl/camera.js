@@ -26,7 +26,7 @@ vglModule.camera = function() {
   vglModule.groupNode.call(this);
 
   /** @private */
-  var m_viewAngle = (Math.PI * 30) / 180.0
+  var m_viewAngle = (Math.PI * 30) / 180.0,
       m_position = vec3.fromValues(0.0, 0.0, 0.0),
       m_focalPoint = vec3.fromValues(0.0, 0.0, -5.0),
       m_centerOfRotation = vec3.fromValues(0.0, 0.0, 0.0),
