@@ -9,15 +9,18 @@
 /*global vglModule, ogs, vec4, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class timestamp
  *
  * @class
  * @returns {vglModule.timestamp}
  */
-m_globalModifiedTime = 0;
+//////////////////////////////////////////////////////////////////////////////
+var m_globalModifiedTime = 0;
 
 vglModule.timestamp = function() {
+  "use strict";
 
   if (!(this instanceof vglModule.timestamp)) {
     return new vglModule.timestamp();
