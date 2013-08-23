@@ -80,7 +80,7 @@ geoModule.mercator.lat2tiley2 = function(lat, z) {
       f = (1.0 - Math.log(Math.tan(rad) + 1.0 / Math.cos(rad)) /
            Math.PI) / 2.0 * Math.pow(2.0, z),
       ret = Math.floor(f),
-      frac = f-ret;
+      frac = f - ret;
   return [ret, frac];
 };
 

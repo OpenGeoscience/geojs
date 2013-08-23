@@ -125,20 +125,10 @@ geoModule.map = function(node, options) {
   function computeZoom() {
     var camera = m_renderer.camera();
 
-    if (camera.position()[2] < 0) {
-      m_options.zoom = 3;
-    }
-    else if (camera.position()[2] < 0.02) {
-      m_options.zoom = 17;
-    }
-    else if (camera.position()[2] < 0.05) {
-      m_options.zoom = 16;
-    }
-    else if (camera.position()[2] < 0.10) {
+    console.log('camera position is', camera.position()[2]);
+
+    if (camera.position()[2] < 0.125) {
       m_options.zoom = 15;
-    }
-    else if (camera.position()[2] < 0.15) {
-      m_options.zoom = 14;
     }
     else if (camera.position()[2] < 0.25) {
       m_options.zoom = 13;
@@ -149,25 +139,25 @@ geoModule.map = function(node, options) {
     else if (camera.position()[2] < 1) {
       m_options.zoom = 11;
     }
-    else if (camera.position()[2] < 3) {
+    else if (camera.position()[2] < 2) {
       m_options.zoom = 10;
     }
-    else if (camera.position()[2] < 5) {
+    else if (camera.position()[2] < 4) {
       m_options.zoom = 9;
     }
-    else if (camera.position()[2] < 10) {
+    else if (camera.position()[2] < 8) {
       m_options.zoom = 8;
     }
-    else if (camera.position()[2] < 15) {
+    else if (camera.position()[2] < 16) {
       m_options.zoom = 7;
     }
-    else if (camera.position()[2] < 35) {
+    else if (camera.position()[2] < 32) {
       m_options.zoom = 6;
     }
-    else if (camera.position()[2] < 50) {
+    else if (camera.position()[2] < 64) {
       m_options.zoom = 5;
     }
-    else if (camera.position()[2] < 200) {
+    else if (camera.position()[2] < 128) {
       m_options.zoom = 4;
     }
     else if (camera.position()[2] < Number.MAX_VALUE) {

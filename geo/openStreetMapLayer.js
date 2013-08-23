@@ -97,7 +97,7 @@ geoModule.openStreetMapLayer = function() {
         urx = -180.0 + (x + 1) * lonPerTile,
         ury = -totalLatDegrees * 0.5 + (y + 1) * latPerTile,
         actor = ogs.vgl.utils.createTexturePlane(llx, lly,
-          -1.0, urx, lly, -1.0, llx, ury, -1.0),
+          0.0, urx, lly, 0.0, llx, ury, 0.0),
         tile = new Image();
         //console.log("New tile: ["+llx+" , "+lly+"] ["+urx+" , "+ury+"]");
 
@@ -228,9 +228,10 @@ geoModule.openStreetMapLayer = function() {
         i = 0,
         j = 0,
         // Now convert display point to world point
+          // @NOTE Tiles are drawn at z = 0.
         focalPoint = camera.focalPoint(),
         focusWorldPt = vec4.fromValues(
-          focalPoint[0], focalPoint[1], focalPoint[2], 1),
+          focalPoint[0], focalPoint[1], 0.0, 1),
         focusDisplayPt = renderer.worldToDisplay(
           focusWorldPt, camera.viewMatrix(),
           camera.projectionMatrix(), node.width, node.height),
@@ -266,22 +267,6 @@ geoModule.openStreetMapLayer = function() {
 
     tile2x = geoModule.mercator.long2tilex(worldPt2[0], zoom);
     tile2y = geoModule.mercator.lat2tiley(worldPt2[1], zoom);
-
-    // Adding / Subtracting 1 to compensate for the roundoff issues
-    if (tile1x > tile2x) {
-      tile1x = tile1x + 1;
-      tile2x = tile2x - 1;
-    } else {
-      tile1x = tile1x - 1;
-      tile2x = tile2x + 1;
-    }
-    if (tile2y > tile1y) {
-      tile2y = tile2y + 1;
-      tile1y = tile1y - 1;
-    } else {
-      tile2y = tile2y - 1;
-      tile1y = tile1y + 1;
-    }
 
     // Clamp tilex and tiley
     tile1x = Math.max(tile1x, 0);
