@@ -1,6 +1,13 @@
+//////////////////////////////////////////////////////////////////////////////
 /**
  * @module ogs.vgl
  */
+
+/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
+/*jslint white: true, continue:true, indent: 2*/
+
+/*global vglModule, ogs, vec4, inherit, $*/
+//////////////////////////////////////////////////////////////////////////////
 
 /*jslint devel: true, forin: true, newcap: true, plusplus: true, white: true, indent: 2*/
 /*global vglModule, vglModule, ogs, inherit, vec4, $*/
