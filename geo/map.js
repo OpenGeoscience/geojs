@@ -234,16 +234,34 @@ geoModule.map = function(node, options) {
    */
   ////////////////////////////////////////////////////////////////////////////
   function updateLegends(width, height) {
-    var noOfLayers = Object.size(m_layers),
-        heightPerLayer =  100 > (height / noOfLayers) ?
-                            (height / noOfLayers) : 100,
-        i = 0,
+    var noOfLayers = 0,
+        heightPerLayer =  0,
+        i = 1.5,
         layerName,
         layer = null;
+
+    // First find out how many layers has legend
+    for (layerName in m_layers) {
+      layer = m_layers[layerName];
+      if (layer.hasLegend()) {
+        ++noOfLayers;
+      }
+    }
+
+    if (noOfLayers > 0) {
+      heightPerLayer = 100 > (height / noOfLayers) ?
+                         (height / noOfLayers) : 100;
+    } else {
+      return;
+    }
 
     for (layerName in m_layers) {
       if (m_layers.hasOwnProperty(layerName)) {
         layer = m_layers[layerName];
+        if (!layer.hasLegend()) {
+          continue;
+        }
+
         layer.setLegendOrigin(
           [width - width * 0.25,
           height - i * heightPerLayer,
