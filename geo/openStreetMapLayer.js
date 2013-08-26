@@ -339,8 +339,6 @@ geoModule.openStreetMapLayer = function() {
     featureCollection.setNewFeatures(this.id(), m_newFeatures.slice(0));
     featureCollection.setExpiredFeatures(this.id(), m_expiredFeatures.slice(0));
 
-    console.log('osm expired features', m_expiredFeatures);
-
     m_newFeatures.length = 0;
     m_expiredFeatures.length = 0;
 

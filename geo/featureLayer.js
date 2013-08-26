@@ -119,7 +119,6 @@ geoModule.featureLayer = function(options, feature) {
   ////////////////////////////////////////////////////////////////////////////
   this.hasLegend = function() {
     if (!this.dataSource()) {
-      console.log('lahyer does not has legend ', this.name());
       return false;
     } else {
       return true;

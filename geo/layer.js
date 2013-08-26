@@ -357,7 +357,6 @@ geoModule.layer = function(options, source) {
   ////////////////////////////////////////////////////////////////////////////
   this.setLegendOrigin = function(origin) {
     m_legendOrigin = origin.splice(0);
-    console.log('setting legend origin ', m_name, m_legendOrigin);
     this.modified();
   };
 

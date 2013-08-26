@@ -951,10 +951,6 @@ vglModule.utils.createColorLegend = function(varname, lookupTable, origin,
     pt2[1] = origin[1] + size;
     pt2[2] = origin[2];
 
-    console.log(origin);
-    console.log(pt1);
-    console.log(pt2);
-
     actor = vglModule.utils.createTexturePlane(
       origin[0], origin[1], origin[2],
       pt1[0], pt1[1], pt1[2],
@@ -1051,8 +1047,6 @@ vglModule.utils.create2DTexture = function(textToWrite, textSize, color) {
 
   // This determines the size of the text and the font family used
   ctx.font = textSize + "px monospace";
-
-  console.log('textToWrite ', textToWrite);
 
   ctx.fillText(textToWrite, canvas.width/2, canvas.height/2);
 
