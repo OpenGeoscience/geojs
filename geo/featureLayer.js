@@ -197,6 +197,10 @@ geoModule.featureLayer = function(options, feature) {
 
     m_newFeatures = [];
 
+    if (m_legend && m_legend.length > 0) {
+      m_newFeatures = m_newFeatures.concat(m_legend);
+    }
+
     // Create legend if not created earlier
     if (!m_legend) {
       this.createLegend();
@@ -204,7 +208,7 @@ geoModule.featureLayer = function(options, feature) {
 
     for(i = 0; i < data.length; ++i) {
       switch(data[i].type()) {
-        case ogs.vgl.data.geometry:
+        case vglModule.data.geometry:
           geomFeature = geoModule.geometryFeature(data[i]);
           geomFeature.material().setBinNumber(this.binNumber());
           geomFeature.setLookupTable(lut);
@@ -238,6 +242,8 @@ geoModule.featureLayer = function(options, feature) {
     var featureCollection = request.featureCollection();
     featureCollection.setNewFeatures(this.id(), m_newFeatures);
     featureCollection.setExpiredFeatures(this.id(), m_expiredFeatures);
+
+    m_expiredFeatures = [];
 
     m_predrawTime.modified();
   };

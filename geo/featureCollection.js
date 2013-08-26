@@ -49,7 +49,7 @@ geoModule.featureCollection = function() {
   ////////////////////////////////////////////////////////////////////////////
   this.setNewFeatures = function(layerId, features) {
     // TODO Check if drawables are changed for now just set it
-    m_newFeaturesMap[layerId] = features;
+    m_newFeaturesMap[layerId] = features.slice(0);
     this.modified();
   };
 
@@ -74,7 +74,7 @@ geoModule.featureCollection = function() {
   ////////////////////////////////////////////////////////////////////////////
   this.setExpiredFeatures = function(layerId, expiredFeatures) {
     // TODO Check if drawables are changed for now just set it
-    m_expiredFeaturesMap[layerId] = expiredFeatures;
+    m_expiredFeaturesMap[layerId] = expiredFeatures.slice(0);
     this.modified();
   };
 
