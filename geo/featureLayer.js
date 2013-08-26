@@ -221,7 +221,7 @@ geoModule.featureLayer = function(options, feature) {
       m_expiredFeatures = m_newFeatures.slice(0);
     }
 
-    m_newFeatures = [];
+    m_newFeatures.length = 0;
 
     if (m_legend && m_legend.length > 0) {
       m_newFeatures = m_newFeatures.concat(m_legend);
@@ -269,7 +269,7 @@ geoModule.featureLayer = function(options, feature) {
     featureCollection.setNewFeatures(this.id(), m_newFeatures);
     featureCollection.setExpiredFeatures(this.id(), m_expiredFeatures);
 
-    m_expiredFeatures = [];
+    m_expiredFeatures.length = 0;
 
     m_predrawTime.modified();
   };

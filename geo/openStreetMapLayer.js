@@ -341,8 +341,8 @@ geoModule.openStreetMapLayer = function() {
 
     console.log('osm expired features', m_expiredFeatures);
 
-    m_newFeatures = [];
-    m_expiredFeatures = [];
+    m_newFeatures.length = 0;
+    m_expiredFeatures.length = 0;
 
     m_predrawTime.modified();
   };
