@@ -126,7 +126,6 @@ geoModule.featureLayer = function(options, feature) {
   ////////////////////////////////////////////////////////////////////////////
   this.updateLegend = function() {
     // For now just delete the last one and create on from scratch
-    console.log('Removing old legend ', m_legend);
     var i,
         index;
     if (m_legend && m_legend.length > 0) {
@@ -208,7 +207,6 @@ geoModule.featureLayer = function(options, feature) {
 
     if (data.length > 0) {
       m_updateTime. modified();
-      console.log('my opacity', this.opacity());
       this.setOpacity(this.opacity());
     }
   };
