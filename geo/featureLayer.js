@@ -97,6 +97,10 @@ geoModule.featureLayer = function(options, feature) {
       return;
     }
 
+    if (!this.dataSource()) {
+      return;
+    }
+
     // Assuming that first variable is the scalar
     var varnames = this.dataSource().variableNames(),
         lut = this.lookupTable();
@@ -122,6 +126,20 @@ geoModule.featureLayer = function(options, feature) {
   ////////////////////////////////////////////////////////////////////////////
   this.updateLegend = function() {
     // For now just delete the last one and create on from scratch
+    console.log('Removing old legend ', m_legend);
+    var i,
+        index;
+    if (m_legend && m_legend.length > 0) {
+      m_expiredFeatures = m_expiredFeatures.concat(m_legend);
+
+      // Also remove it from new features if exists
+      for (i = 0; i < m_legend.length; ++i) {
+        index = m_newFeatures.indexOf(m_legend[i]);
+        if (index != -1) {
+          m_newFeatures.splice(index, 1);
+        }
+      }
+    }
     m_legend = null;
     this.createLegend();
   };
@@ -158,7 +176,12 @@ geoModule.featureLayer = function(options, feature) {
     }
 
     // Clear our existing features
-    m_expiredFeatures = m_newFeatures.slice(0);
+    if (m_expiredFeatures.length > 0) {
+      m_expiredFeatures = m_expiredFeatures.concat(m_newFeatures.slice(0));
+    } else {
+      m_expiredFeatures = m_newFeatures.slice(0);
+    }
+
     m_newFeatures = [];
 
     // Create legend if not created earlier

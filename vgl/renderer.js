@@ -343,7 +343,7 @@ vglModule.renderer = function() {
       return false;
     }
 
-    var i = null;
+    var i;
     for (i = 0; i < actors.length; ++i) {
       m_sceneRoot.removeChild(actors[i]);
     }
