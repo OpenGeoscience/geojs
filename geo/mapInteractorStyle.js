@@ -132,8 +132,15 @@ geoModule.mapInteractorStyle = function() {
       $(m_that).trigger(vglModule.command.middleButtonPressEvent);
     }
     if (m_rightMouseButtonDown) {
-      m_zTrans = m_currentMousePos.y - m_mouseLastPos.y;
-      m_camera.zoom(m_zTrans * 0.5);
+      m_zTrans = (m_currentMousePos.y - m_mouseLastPos.y) / m_height;
+
+      // Calculate zoom scale here
+      if (m_zTrans > 0) {
+        m_camera.zoom(1 - Math.abs(m_zTrans));
+      } else {
+        m_camera.zoom(1 + Math.abs(m_zTrans));
+      }
+
       $(m_that).trigger(geoModule.command.updateViewZoomEvent);
       $(m_that).trigger(vglModule.command.rightButtonPressEvent);
     }
@@ -232,7 +239,7 @@ geoModule.mapInteractorStyle = function() {
   };
   return this;
 };
-inherit(geoModule.mapInteractorStyle, ogs.vgl.interactorStyle);
+inherit(geoModule.mapInteractorStyle, vglModule.interactorStyle);
 
 /* Local Variables:   */
 /* mode: js           */
