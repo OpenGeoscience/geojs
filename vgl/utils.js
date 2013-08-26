@@ -1052,6 +1052,8 @@ vglModule.utils.create2DTexture = function(textToWrite, textSize, color) {
   // This determines the size of the text and the font family used
   ctx.font = textSize + "px monospace";
 
+  console.log('textToWrite ', textToWrite);
+
   ctx.fillText(textToWrite, canvas.width/2, canvas.height/2);
 
   texture.setImage(canvas)
