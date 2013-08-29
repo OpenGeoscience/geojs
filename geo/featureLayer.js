@@ -295,60 +295,63 @@ geoModule.featureLayer = function(options, feature) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.queryLocation = function(location) {
-    var attrScalar = vglModule.vertexAttributeKeys.Scalar;
-    var features = this.features();
-    for (var fi in features) {
-      var mapper = features[fi].mapper();
-      var geomData = mapper.geometryData();
+    var attrScalar = vglModule.vertexAttributeKeys.Scalar,
+        features = this.features(),
+        mapper, geomData, p, prim, idx, indices, ia, ib, ic, va, vb, vc,
+        point, isLeftTurn, triArea, totalArea, alpha, beta, gamma, sa,
+        sb, sc, result;
 
-      for (var p=0; p<geomData.numberOfPrimitives(); ++p) {
-        var prim = geomData.primitive(p);
+    for (var fi in features) {
+      mapper = features[fi].mapper();
+      geomData = mapper.geometryData();
+
+      for (p = 0; p < geomData.numberOfPrimitives(); ++p) {
+        prim = geomData.primitive(p);
         if (prim.primitiveType() == gl.TRIANGLES) {
           if (prim.indicesPerPrimitive() != 3)
-            console.log("makes no sense, triangles should have 3 vertices");
-          console.log("TRIANGLES: " + prim.numberOfIndices()/3 );
-          for (var idx=0; idx<prim.numberOfIndices(); idx+=3) {
-            var indices = prim.indices();
-            var ia = indices[idx+0];
-            var ib = indices[idx+1];
-            var ic = indices[idx+2];
-            var va = geomData.getPosition(ia);
-            var vb = geomData.getPosition(ib);
-            var vc = geomData.getPosition(ic);
+            console.log("[warning] Triangles should have 3 vertices");
 
-            /*
-             * TODO: this assume triangles in a plane z=0.
-             * Otherwise we would need full-fledged geometric intersection tests.
-             */
-            var point = vec3.create();
+          for (idx = 0; idx < prim.numberOfIndices(); idx += 3) {
+            indices = prim.indices();
+            ia = indices[idx+0];
+            ib = indices[idx+1];
+            ic = indices[idx+2];
+            va = geomData.getPosition(ia);
+            vb = geomData.getPosition(ib);
+            vc = geomData.getPosition(ic);
+
+
+            ///  TODO: this assume triangles in a plane z=0.
+            /// Otherwise we would need full-fledged geometric intersection tests.
+            ///
+            point = vec3.create();
             point[0] = location.x;
             point[1] = location.y;
             point[2] = 0;
 
-            var isLeftTurn = function(a, b, c) {
+            isLeftTurn = function(a, b, c) {
               return (b[0]-a[0])*(c[1]-a[1]) - (c[0]-a[0])*(b[1]-a[1]) >= 0;
             };
 
-            /* NOTE:
-             * Doing all by hand because gl-matrix breaks API depending on version.
-             * e.g. destination argument can be either first or last.
-             */
+            /// NOTE:
+            /// Doing all by hand because gl-matrix breaks API depending on version.
+            /// e.g. destination argument can be either first or last.
             var cross = function(a, b) {
               return [a[1]*b[2] - a[2]*b[1],
                       a[2]*b[0] - a[0]*b[2],
                       a[0]*b[1] - a[1]*b[0]];
             };
-            var triArea = function(a, b, c) {
-              var ab = [b[0]-a[0], b[1]-a[1], b[2]-a[2]];
-              var ac = [c[0]-a[0], c[1]-a[1], c[2]-a[2]];
-              var r = cross(ab, ac);
+
+            triArea = function(a, b, c) {
+              var ab = [b[0]-a[0], b[1]-a[1], b[2]-a[2]],
+                  ac = [c[0]-a[0], c[1]-a[1], c[2]-a[2]],
+                  r = cross(ab, ac);
+
               // NOTE: actual area is half of this
               return Math.sqrt(r[0]*r[0] + r[1]*r[1] + r[2]*r[2]);
             };
 
-            //console.log("pos: " + va + " : " + vb + " : " + vc);
-
-            var totalArea = triArea(va, vb, vc);
+            totalArea = triArea(va, vb, vc);
             if (totalArea == 0) {
               //console.log("degenerated triangle");
               continue;
@@ -356,18 +359,15 @@ geoModule.featureLayer = function(options, feature) {
 
             // this is data that is going down the WebGL pipeline, it better be CCW
             if (isLeftTurn(va, vb, point) && isLeftTurn(vb, vc, point) && isLeftTurn(vc, va, point)) {
-              console.log("found a triangle!");
               // now compute barycentric coordinates
-              var alpha = triArea(point, vb, vc)/ totalArea;
-              var beta  = triArea(point, vc, va)/ totalArea;
-              var gamma = triArea(point, va, vb)/ totalArea;
-              //console.log("area: " + totalArea);
-              //console.log("coords: " + alpha + " : " + beta + " : " + gamma);
-              // and interpolate it
-              var sa = geomData.getScalar(ia);
-              var sb = geomData.getScalar(ib);
-              var sc = geomData.getScalar(ic);
-              var result = {
+              alpha = triArea(point, vb, vc)/ totalArea;
+              beta  = triArea(point, vc, va)/ totalArea;
+              gamma = triArea(point, va, vb)/ totalArea;
+
+              sa = geomData.getScalar(ia);
+              sb = geomData.getScalar(ib);
+              sc = geomData.getScalar(ic);
+              result = {
                 layer : this,
                 data : {
                   "feature" : fi ,
