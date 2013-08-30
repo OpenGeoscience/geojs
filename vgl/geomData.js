@@ -1035,9 +1035,3 @@ vglModule.geometryData = function() {
 };
 
 inherit(ogs.vgl.geometryData, ogs.vgl.data);
-
-
-/* Local Variables:   */
-/* mode: js           */
-/* js-indent-level: 2 */
-/* End:               */
