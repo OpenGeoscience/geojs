@@ -95,7 +95,7 @@ vglModule.primitive = function() {
     return m_indicesValueType;
   };
   /*
-   * Set indices value type g
+   * Set indices value type
    */
   this.setIndicesValueType = function(type) {
     m_indicesValueType = type;
@@ -364,6 +364,19 @@ vglModule.sourceData = function() {
   /**
    * Return size of the source data in bytes
    */
+  /*
+    * TODO: code below is probably wrong.
+    *   Example:
+    *            format P3N3f
+    *            m_data = [ 1, 2, 3, 4, 5, 6 ]; // contains one vertex, one normal, m_data.length == 6
+    *
+    *       The inner loop computes:
+    *             sizeInBytes += 3 * 4; // for position
+    *             sizeInBytes += 3 * 4; // for normal
+    *
+    *        Then sizeInBytes *= 6; // m_data.length == 6
+    *        which gives sizeInBytes == 144 bytes when it should have been 4*6 = 24
+    */
   this.sizeInBytes = function() {
     var sizeInBytes = 0;
     var keys = this.keys();
@@ -813,7 +826,7 @@ vglModule.geometryData = function() {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Return primitive for a given index. Returns 0 if not found.
+   * Return primitive for a given index. Returns null if not found.
    */
   ////////////////////////////////////////////////////////////////////////////
   this.primitive = function(index) {
@@ -884,37 +897,31 @@ vglModule.geometryData = function() {
   ////////////////////////////////////////////////////////////////////////////
   this.computeBounds = function() {
     if (m_boundsDirtyTimestamp.getMTime() > m_computeBoundsTimestamp.getMTime()) {
-      var sourceData = this.sourceData(
-            vglModule.vertexAttributeKeys.Position),
+      var attr = vglModule.vertexAttributeKeys.Position;
+      var sourceData = this.sourceData(attr),
           data = sourceData.data(),
-          numberOfComponents = sourceData.attributeNumberOfComponents(
-            vglModule.vertexAttributeKeys.Position),
-          stride = sourceData.attributeStride(
-            vglModule.vertexAttributeKeys.Position),
-          offset = sourceData.attributeOffset(
-            vglModule.vertexAttributeKeys.Position),
-          sizeOfDataType = sourceData.sizeOfAttributeDataType(
-            vglModule.vertexAttributeKeys.Position),
+          numberOfComponents = sourceData.attributeNumberOfComponents(attr),
+          stride = sourceData.attributeStride(attr),
+          offset = sourceData.attributeOffset(attr),
+          sizeOfDataType = sourceData.sizeOfAttributeDataType(attr),
           count = data.length,
           ib = 0,
           jb = 0,
-          value = null,
-          vertexPosition = null;
+          value = null;
 
-      // We need to operate on arrays
+      // We advance by index, not by byte
       stride /= sizeOfDataType;
       offset /= sizeOfDataType;
 
       this.resetBounds();
 
-      for (var i = 0; i < count; i += 1) {
-        vertexPosition = i * stride + offset;
+      for (var vertexIndex = offset; vertexIndex < count; vertexIndex += stride) {
         for (var j = 0; j < numberOfComponents; ++j) {
-          value = data[vertexPosition + j];
+          value = data[vertexIndex + j];
           ib = j * 2;
           jb = j * 2 + 1;
 
-          if (i === 0) {
+          if (vertexIndex == offset) {
             m_bounds[ib] = value;
             m_bounds[jb] = value;
           } else {
@@ -932,7 +939,105 @@ vglModule.geometryData = function() {
     }
   };
 
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Returns the vertex closest to a given position
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.findClosestVertex = function(point) {
+    var attr = vglModule.vertexAttributeKeys.Position;
+    var sourceData = this.sourceData(attr);
+    var sizeOfDataType = sourceData.sizeOfAttributeDataType(attr);
+    var numberOfComponents = sourceData.attributeNumberOfComponents(attr);
+    var data = sourceData.data();
+    var stride = sourceData.attributeStride(attr) / sizeOfDataType;
+    var offset = sourceData.attributeOffset(attr) / sizeOfDataType;
+    var minDist = 1.0 / 0.0;
+    var minIndex = null;
+
+    // assume positions are always triplets
+    if (numberOfComponents != 3)
+      console.log("fix me");
+
+    if (!point.z)
+      point = {x:point.x, y:point.y, z:0};
+
+    for (var vi = offset, i=0; vi < data.length; vi += stride, i++) {
+      var vPos = [data[vi + 0],
+                  data[vi + 1],
+                  data[vi + 2]];
+      var dx = vPos[0] - point.x;
+      var dy = vPos[1] - point.y;
+      var dz = vPos[2] - point.z;
+      var dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
+      if (dist < minDist) {
+        minDist = dist;
+        minIndex = i;
+      }
+    }
+    return minIndex;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Returns the requested vertex position
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.getPosition = function(index) {
+    var attr = vglModule.vertexAttributeKeys.Position;
+    var sourceData = this.sourceData(attr);
+    var sizeOfDataType = sourceData.sizeOfAttributeDataType(attr);
+    var numberOfComponents = sourceData.attributeNumberOfComponents(attr);
+    var data = sourceData.data();
+    var stride = sourceData.attributeStride(attr) / sizeOfDataType;
+    var offset = sourceData.attributeOffset(attr) / sizeOfDataType;
+
+    // assume positions are always triplets
+    if (numberOfComponents != 3)
+      console.log("fix me");
+
+    return [ data[offset + index*stride + 0],
+             data[offset + index*stride + 1],
+             data[offset + index*stride + 2] ];
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Returns the scalar corresponding to a given vertex index
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.getScalar = function(index) {
+    var attr = vglModule.vertexAttributeKeys.Scalar;
+    var sourceData = this.sourceData(attr);
+    if (!sourceData)
+      return null;
+
+    var numberOfComponents = sourceData.attributeNumberOfComponents(attr);
+    var sizeOfDataType = sourceData.sizeOfAttributeDataType(attr);
+    var data = sourceData.data();
+    var stride = sourceData.attributeStride(attr) / sizeOfDataType;
+    var offset = sourceData.attributeOffset(attr) / sizeOfDataType;
+
+    //console.log("index for scalar is " + index);
+    //console.log("offset for scalar is " + offset);
+    //console.log("stride for scalar is " + stride);
+
+    //console.log("have " + data.length + " scalars");
+
+    if (index * stride + offset >= data.length)
+      console.log("access out of bounds in getScalar");
+
+    return data[index * stride + offset];
+  };
+
   return this;
 };
 
 inherit(ogs.vgl.geometryData, ogs.vgl.data);
+
+
+/* Local Variables:   */
+/* mode: js           */
+/* js-indent-level: 2 */
+/* End:               */

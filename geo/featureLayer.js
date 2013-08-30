@@ -357,6 +357,103 @@ geoModule.featureLayer = function(options, feature) {
     });
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Queries the scalar value closest to the location
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.queryLocation = function(location) {
+    var attrScalar = vglModule.vertexAttributeKeys.Scalar,
+        features = this.features(),
+        mapper, geomData, p, prim, idx, indices, ia, ib, ic, va, vb, vc,
+        point, isLeftTurn, triArea, totalArea, alpha, beta, gamma, sa,
+        sb, sc, result;
+
+    for (var fi in features) {
+      mapper = features[fi].mapper();
+      geomData = mapper.geometryData();
+
+      for (p = 0; p < geomData.numberOfPrimitives(); ++p) {
+        prim = geomData.primitive(p);
+        if (prim.primitiveType() == gl.TRIANGLES) {
+          if (prim.indicesPerPrimitive() != 3)
+            console.log("[warning] Triangles should have 3 vertices");
+
+          for (idx = 0; idx < prim.numberOfIndices(); idx += 3) {
+            indices = prim.indices();
+            ia = indices[idx+0];
+            ib = indices[idx+1];
+            ic = indices[idx+2];
+            va = geomData.getPosition(ia);
+            vb = geomData.getPosition(ib);
+            vc = geomData.getPosition(ic);
+
+
+            ///  TODO: this assume triangles in a plane z=0.
+            /// Otherwise we would need full-fledged geometric intersection tests.
+            ///
+            point = vec3.create();
+            point[0] = location.x;
+            point[1] = location.y;
+            point[2] = 0;
+
+            isLeftTurn = function(a, b, c) {
+              return (b[0]-a[0])*(c[1]-a[1]) - (c[0]-a[0])*(b[1]-a[1]) >= 0;
+            };
+
+            /// NOTE:
+            /// Doing all by hand because gl-matrix breaks API depending on version.
+            /// e.g. destination argument can be either first or last.
+            var cross = function(a, b) {
+              return [a[1]*b[2] - a[2]*b[1],
+                      a[2]*b[0] - a[0]*b[2],
+                      a[0]*b[1] - a[1]*b[0]];
+            };
+
+            triArea = function(a, b, c) {
+              var ab = [b[0]-a[0], b[1]-a[1], b[2]-a[2]],
+                  ac = [c[0]-a[0], c[1]-a[1], c[2]-a[2]],
+                  r = cross(ab, ac);
+
+              // NOTE: actual area is half of this
+              return Math.sqrt(r[0]*r[0] + r[1]*r[1] + r[2]*r[2]);
+            };
+
+            totalArea = triArea(va, vb, vc);
+            if (totalArea == 0) {
+              //console.log("degenerated triangle");
+              continue;
+            };
+
+            // this is data that is going down the WebGL pipeline, it better be CCW
+            if (isLeftTurn(va, vb, point) && isLeftTurn(vb, vc, point) && isLeftTurn(vc, va, point)) {
+              // now compute barycentric coordinates
+              alpha = triArea(point, vb, vc)/ totalArea;
+              beta  = triArea(point, vc, va)/ totalArea;
+              gamma = triArea(point, va, vb)/ totalArea;
+
+              sa = geomData.getScalar(ia);
+              sb = geomData.getScalar(ib);
+              sc = geomData.getScalar(ic);
+              result = {
+                layer : this,
+                data : {
+                  "feature" : fi ,
+                  "value" : alpha*sa + beta*sb + gamma*sc
+                }
+              };
+              $(this).trigger(geoModule.command.queryResultEvent, result);
+              return; // should we continue checking?
+            }
+          }
+        }
+        else if (prim.primitiveType() == gl.TRIANGLE_STRIP) {
+          console.log("TRIANGLE_STRIP: " + prim.numberOfIndices() );
+          // TODO: how to make sense of this? triangleStrip says it has 3 indices per primitive
+        }
+      }
+    }
+  }
   return this;
 };
 
