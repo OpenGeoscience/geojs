@@ -21,7 +21,7 @@ geoModule.mapOptions = {
   gcs: 'EPSG:3857',
   display_gcs: 'EPSG:4326',
   country_boundaries: true,
-  state_boundaries: false,
+  state_boundaries: false
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -60,7 +60,8 @@ geoModule.map = function(node, options) {
       m_renderer = null,
       m_updateRequest = null,
       m_prepareForRenderRequest = null,
-      m_animationStep = 0;
+      // Holds the time range, current time and layers ...
+      m_animationState = { range: null, currentTime: null, layers: null};
 
   m_renderTime.modified();
 
@@ -125,35 +126,46 @@ geoModule.map = function(node, options) {
   function computeZoom() {
     var camera = m_renderer.camera();
 
-    if (camera.position()[2] < 0) {
-      m_options.zoom = 3;
+//    console.log('camera position is', camera.position()[2]);
+
+    if (camera.position()[2] < 0.0625) {
+      m_options.zoom = 15;
+    }
+    else if (camera.position()[2] < 0.125) {
+      m_options.zoom = 14;
+    }
+    else if (camera.position()[2] < 0.25) {
+      m_options.zoom = 13;
+    }
+    else if (camera.position()[2] < 0.5) {
+      m_options.zoom = 12;
     }
     else if (camera.position()[2] < 1) {
+      m_options.zoom = 11;
+    }
+    else if (camera.position()[2] < 2) {
       m_options.zoom = 10;
     }
-    else if (camera.position()[2] < 3) {
+    else if (camera.position()[2] < 4) {
       m_options.zoom = 9;
     }
-    else if (camera.position()[2] < 5) {
+    else if (camera.position()[2] < 8) {
       m_options.zoom = 8;
     }
-    else if (camera.position()[2] < 10) {
+    else if (camera.position()[2] < 16) {
       m_options.zoom = 7;
     }
-    else if (camera.position()[2] < 15) {
+    else if (camera.position()[2] < 32) {
       m_options.zoom = 6;
     }
-    else if (camera.position()[2] < 35) {
+    else if (camera.position()[2] < 64) {
       m_options.zoom = 5;
     }
-    else if (camera.position()[2] < 50) {
+    else if (camera.position()[2] < 128) {
       m_options.zoom = 4;
     }
-    else if (camera.position()[2] < 200) {
-      m_options.zoom = 3;
-    }
     else if (camera.position()[2] < Number.MAX_VALUE) {
-      m_options.zoom = 2;
+      m_options.zoom = 3;
     }
   }
 
@@ -193,37 +205,88 @@ geoModule.map = function(node, options) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Increment current animation step and then return its current value
-   *
-   * @returns {number}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  function nextAnimationStep() {
-    return ++m_animationStep;
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Decrement current animation step and then return its current value
-   *
-   * @returns {number}
+   * Reset the animation time
    *
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
-  function prevAnimationStep() {
-    return --m_animationStep;
+  function resetAnimation() {
+    m_animationState.currentTime = new Date(m_animationState.range.start.getTime());
   }
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Reset the animation step
+   * Update the map and then request redraw
    *
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
-  function resetAnimationStep() {
-    m_animationStep = 0;
+  function animateTimestep() {
+
+    if (!m_animationState)
+      return;
+
+    var i = 0;
+    var layers = m_animationState.layers;
+    for (; i < layers.length; ++i) {
+      layers[i].update(geoModule.updateRequest(
+          m_animationState.currentTime.getTime()));
+      geoModule.geoTransform.transformLayer(m_options.gcs, layers[i]);
+    }
+    $(m_that).trigger({
+      type: geoModule.command.animateEvent,
+      currentTime: m_animationState.currentTime,
+      endTime: m_animationState.range.end
+    });
+    m_that.redraw();
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Update legends for layers
+   *
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  function updateLegends(width, height) {
+    var noOfLayers = 0,
+        heightPerLayer =  0,
+        i = 1.5,
+        layerName,
+        layer = null;
+
+    // First find out how many layers has legend
+    for (layerName in m_layers) {
+      layer = m_layers[layerName];
+      if (layer.hasLegend()) {
+        ++noOfLayers;
+      }
+    }
+
+    if (noOfLayers > 0) {
+      heightPerLayer = 100 > (height / noOfLayers) ?
+                         (height / noOfLayers) : 100;
+    } else {
+      return;
+    }
+
+    for (layerName in m_layers) {
+      if (m_layers.hasOwnProperty(layerName)) {
+        layer = m_layers[layerName];
+        if (!layer.hasLegend()) {
+          continue;
+        }
+
+        layer.setLegendOrigin(
+          [width - width * 0.25,
+          height - i * heightPerLayer,
+          0.0]);
+        layer.setLegendWidth(width * 0.20);
+        layer.setLegendHeight(heightPerLayer * 0.20);
+        layer.updateLegend();
+        ++i;
+      }
+    }
   }
 
   /**
@@ -280,10 +343,18 @@ geoModule.map = function(node, options) {
 
       // Transform layer
       geoModule.geoTransform.transformLayer(m_options.gcs, layer);
-
       m_layers[layer.id()] = layer;
+
+      // Update legends
+      updateLegends($(m_node).width(), $(m_node).height());
+
       this.predraw();
       this.modified();
+
+      $(layer).on(geoModule.command.queryResultEvent, function(event, queryResult) {
+        $(m_that).trigger(event, queryResult);
+        return true;
+      });
 
       $(this).trigger({
         type: geoModule.command.addLayerEvent,
@@ -306,7 +377,12 @@ geoModule.map = function(node, options) {
   this.removeLayer = function(layer) {
     if (layer !== null && typeof layer !== 'undefined') {
       m_renderer.removeActors(layer.features());
+
+      // Update legends
+      updateLegends($(m_node).width(), $(m_node).height());
+
       this.modified();
+
       $(this).trigger({
         type: geoModule.command.removeLayerEvent,
         layer: layer
@@ -408,6 +484,9 @@ geoModule.map = function(node, options) {
   ////////////////////////////////////////////////////////////////////////////
   this.resize = function(width, height) {
     m_viewer.renderWindow().resize(width, height);
+
+    updateLegends(width, height);
+
     $(this).trigger({
       type: geoModule.command.resizeEvent,
       width: width,
@@ -556,24 +635,6 @@ geoModule.map = function(node, options) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Update the map and then request a
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.animateTimestep = function(currentTime, layers) {
-    var i = 0;
-    for (; i < layers.length; ++i) {
-      layers[i].update(geoModule.updateRequest(currentTime));
-      geoModule.geoTransform.transformLayer(m_options.gcs, layers[i]);
-    }
-    $(m_that).trigger({
-      type: geoModule.command.animateEvent,
-      currentTime: currentTime,
-    });
-    this.redraw();
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
    * Animate layers of a map
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -583,40 +644,50 @@ geoModule.map = function(node, options) {
       return;
     }
 
-    if (timeRange.length < 2) {
+    // Save the animation state
+    if (m_animationState.currentTime == null) {
+      m_animationState = { range: timeRange, currentTime: new Date(timeRange.start.getTime()),
+                           layers: layers };
+    }
+
+    var newTime = new Date(timeRange.start.getTime());
+    geoModule.time.incrementTime(newTime, timeRange.units, timeRange.delta);
+
+    if (newTime > timeRange.end) {
       console.log('[error] Invalid time range. Requires atleast \
         begin and end time');
       return;
     }
 
     var that = this,
-        currentTime = timeRange[0],
-        endTime = timeRange[timeRange.length - 1],
+        endTime = timeRange.end,
         intervalId = null,
-        stop = false;
+        stop = false,
+        pause = false;
 
     $(this).on('animation-stop', function () {
       stop = true;
     });
 
-    function frame() {
-      if (that.animationStep() < 0) {
-        ++currentTime;
-      } else {
-        currentTime = timeRange[nextAnimationStep()];
-      }
+    $(this).on('animation-pause', function () {
+      pause = true;
+    });
 
-      if (currentTime > endTime || that.animationStep() > timeRange.length) {
+    function frame() {
+      if (m_animationState.currentTime > endTime || stop) {
         clearInterval(intervalId);
-        resetAnimationStep();
+        m_animationState.currentTime = null;
       }
-      else if (stop) {
+      else if (pause) {
         clearInterval(intervalId);
       }
       else {
-
-        that.animateTimestep(currentTime, layers);
+        animateTimestep();
+        geoModule.time.incrementTime(m_animationState.currentTime,
+          m_animationState.range.units, m_animationState.range.delta);
       }
+
+
     }
 
     // Update every 2 ms. Updating every ms might be too much.
@@ -629,7 +700,7 @@ geoModule.map = function(node, options) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.pauseAnimation = function() {
-    $(this).trigger('animation-stop');
+    $(this).trigger('animation-pause');
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -639,7 +710,6 @@ geoModule.map = function(node, options) {
   ////////////////////////////////////////////////////////////////////////////
   this.stopAnimation = function() {
     $(this).trigger('animation-stop');
-    m_animationStep = 0;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -647,11 +717,21 @@ geoModule.map = function(node, options) {
    * Play next animation step and then pause
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.stepAnimationForward = function(timeRange, layers) {
-    if (m_animationStep >= timeRange.length)
+  this.stepAnimationForward = function() {
+
+    if (!m_animationState.currentTime)
+      resetAnimation();
+
+    var time = new Date(m_animationState.currentTime.getTime());
+    geoModule.time.incrementTime(time, m_animationState.range.units,
+        m_animationState.range.delta);
+
+    if (time > m_animationState.range.end)
       return
 
-    this.animateTimestep(timeRange[nextAnimationStep()], layers);
+    m_animationState.currentTime = time;
+
+    animateTimestep();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -659,11 +739,21 @@ geoModule.map = function(node, options) {
    * Play previous animation step and then pause
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.stepAnimationBackward = function(timeRange, layers) {
-    if (m_animationStep <= 0)
-      return
+  this.stepAnimationBackward = function() {
 
-    this.animateTimestep(timeRange[prevAnimationStep()], layers);
+    if (!m_animationState)
+      return;
+
+    var time = new Date(m_animationState.currentTime.getTime());
+    geoModule.time.incrementTime(time, m_animationState.range.units,
+        -m_animationState.range.delta);
+
+    if (time < m_animationState.range.start)
+      return;
+
+    m_animationState.currentTime = time;
+
+    animateTimestep();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -706,14 +796,13 @@ geoModule.map = function(node, options) {
   ////////////////////////////////////////////////////////////////////////////
   this.queryLocation = function(location) {
     var layer = null,
-        srcPrj = new proj4.Proj(m_options.display_gcs),
-        dstPrj = new proj4.Proj(m_options.gcs),
-        point = new proj4.Point(location.x, location.y);
-
-    proj4.transform(srcPrj, dstPrj, point);
+        srcPrj = new proj4.Proj(m_options.display_gcs);
 
     for (var layerName in m_layers) {
       layer = m_layers[layerName];
+      var dstPrj = new proj4.Proj(layer.gcs());
+      var point = new proj4.Point(location.x, location.y);
+      proj4.transform(srcPrj, dstPrj, point);
       layer.queryLocation(point);
     }
   };
@@ -742,19 +831,8 @@ geoModule.map = function(node, options) {
     geoModule.command.updateViewPositionEvent, this.updateAndDraw);
   $(this).on(geoModule.command.updateEvent, this.updateAndDraw);
 
-  for (var name in m_layers)
-    $(m_layers[name]).on(geoModule.command.queryResultEvent, function(event, queryResult) {
-      $(m_that).trigger(event, queryResult);
-      return true;
-    });
-
 
   return this;
 };
 
-inherit(geoModule.map, ogs.vgl.object);
-
-/* Local Variables:   */
-/* mode: js           */
-/* js-indent-level: 2 */
-/* End:               */
+inherit(geoModule.map, vglModule.object);

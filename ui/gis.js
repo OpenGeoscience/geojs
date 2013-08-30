@@ -29,7 +29,8 @@ uiModule.gis.selectedLayers = function() {
  * @param rootId
  * @param heading
  */
-uiModule.gis.createLayerList = function(map, rootId, heading, toggleFunct, removeFunct) {
+uiModule.gis.createLayerList = function(map, rootId, heading, toggleFunct, removeFunct,
+    rangeFunction) {
   var tableRoot = uiModule.gis.createList(rootId, heading);
 
   // Add the controls
@@ -149,27 +150,72 @@ uiModule.gis.createLayerList = function(map, rootId, heading, toggleFunct, remov
   animationControls.css({left: "10px"});
   controls.append($(animationControls));
 
-  var layersToAnimate = function() {
-    var layers = []
-
-    $.each(uiModule.gis.selectedLayers(), function(i, id) {
-      var dataset = $('#'+id).data('dataset');
-      var layer = map.findLayerById(dataset.dataset_id);
-
-      layers.push({dataset: dataset, layer: layer});
-    });
-
-    return layers;
-  };
-
   $('#play', animationControls).click(function() {
     $(this).addClass('active');
     $('#pause', animationControls).removeClass('active');
-    $.each(layersToAnimate(), function(i, data) {
-      var dataset = data.dataset;
-      var layer = data.layer;
 
-      map.animate(dataset.timesteps, [layer]);
+    var layers = []
+
+    var delta = -1, stdDelta = -1, units = null, start = null, stdStart = null,
+    end = null, stdEnd = null, selectedLayers = uiModule.gis.selectedLayers(),
+    rangesToProcess = selectedLayers.length;
+
+    // Function used to process an incoming range
+    var processTimeInfo = function(timeInfo) {
+      if (delta == -1 || timeInfo.stdDelta < stdDelta) {
+        stdDelta = timeInfo.stdDelta;
+        delta = timeInfo.nativeDelta;
+        units = timeInfo.nativeUnits;
+      }
+
+      if (!start || timeInfo.stdTimeRange[0] < stdStart) {
+        stdStart = timeInfo.stdTimeRange[0];
+        start = timeInfo.dateRange[0];
+      }
+
+      if (!end || timeInfo.stdTimeRange[1] > stdEnd) {
+        stdEnd = timeInfo.stdTimeRange[1];
+        var startDate = timeInfo.dateRange[0];
+        end = new Date(Date.UTC(startDate[0], startDate[1], startDate[2]));
+        geoModule.time.incrementTime(end, timeInfo.nativeUnits,
+            timeInfo.nativeDelta * timeInfo.numSteps);
+      }
+
+      --rangesToProcess;
+
+      // Are we done processing? If so pass the information to the map to
+      // todo the animation.
+      if (rangesToProcess == 0) {
+
+        if (delta == -1 || units == null || end == null || start == null ) {
+          console.log('Unable to calculate time range.');
+          return;
+        }
+
+        var startDate = new Date(Date.UTC(start[0], start[1], start[2]));
+
+        map.animate({start: startDate, end: end, delta: delta, units: units}, layers);
+        $('#timestep-display').fadeIn('slow');
+      }
+    };
+
+    // Iterate through the selected layers and calcuate the range we are going
+    // to animate over.
+    $.each(selectedLayers, function(i, id){
+      var dataset = $('#'+id).data('dataset');
+
+      // Do we already have the range?
+      if (dataset.timeInfo) {
+        processTimeInfo(dataset.timeInfo);
+      }
+      // We need to call the range function ( i.e. ask the server )
+      else {
+        rangeFunction(dataset.name.replace(".nc", ""), processTimeInfo);
+      }
+
+      var layer = map.findLayerById(dataset.dataset_id);
+
+      layers.push(layer);
     });
   });
 
@@ -204,8 +250,9 @@ uiModule.gis.createLayerList = function(map, rootId, heading, toggleFunct, remov
   });
 
   $(map).on(geoModule.command.animateEvent, function (event) {
-    if (event.currentTime == event.endTime)
+    if (event.currentTime >= event.endTime) {
       $('#play', animationControls).removeClass('active');
+    }
   });
 
   $('#table-layers').on('layers-selection', function() {
@@ -225,6 +272,27 @@ uiModule.gis.createLayerList = function(map, rootId, heading, toggleFunct, remov
       $(button).attr('disabled', 'true');
     });
   });
+
+  // Add div to hold timestep information
+  var timestepDisplay = $('<div>', { id: 'timestep-display',
+    style: 'position: absolute; z-index: 99; top: 55px;' +
+    'left: 10px; background: rgba(255,255,255,0.5); ' +
+    'padding: 5px; border-radius: 5px;'}).append($('<h4>'));
+
+  var heading = $('h4', timestepDisplay);
+
+  $(map).on(geoModule.command.animateEvent, function(event) {
+
+    var format = d3.time.format("%Y-%m-%d");
+    if (event.currentTime)
+      heading.html(format(event.currentTime));
+  });
+
+
+  $('body').append(timestepDisplay);
+  timestepDisplay.hide();
+
+
 
   controls.hide();
 

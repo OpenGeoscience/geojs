@@ -317,13 +317,13 @@ wflModule.workflow = function(options) {
     }
   };
 
-  this.setDefaultWorkflowInputs = function(target) {
+  this.setDefaultWorkflowInputs = function(name, filepath, timestep) {
     this.getModuleByName('Dataset')
-      .setInput('file', target.basename);
+      .setInput('file', filepath);
     this.getModuleByName('Variable')
-      .setInput('name', target.name);
+      .setInput('name', name);
     this.getModuleByName('Variable')
-      .setInput('time', target.timestep);
+      .setInput('time', timestep);
   };
 
   if(options.data.hasOwnProperty('workflow')) {

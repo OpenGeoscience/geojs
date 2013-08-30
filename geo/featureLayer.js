@@ -88,12 +88,55 @@ geoModule.featureLayer = function(options, feature) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Return array that holds expired features for this layer
+   *
+   * This method is mostly should be used by the derived class.
+   *
+   * @returns {Array}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.expiredFeatures = function() {
+    return m_expiredFeatures;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return array that holds new features for this layer
+   *
+   * This method is mostly should be used by the derived class.
+   *
+   * @returns {Array}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.newFeatures = function() {
+    return m_newFeatures;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Virtual function that inform if the layer has a legend
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.hasLegend = function() {
+    if (!this.dataSource()) {
+      return false;
+    } else {
+      return true;
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Create legend for this layer
    */
   ////////////////////////////////////////////////////////////////////////////
   this.createLegend = function() {
     if (m_legend) {
       console.log('[info] Legend already exists for this layer')
+      return;
+    }
+
+    if (!this.dataSource()) {
       return;
     }
 
@@ -122,6 +165,19 @@ geoModule.featureLayer = function(options, feature) {
   ////////////////////////////////////////////////////////////////////////////
   this.updateLegend = function() {
     // For now just delete the last one and create on from scratch
+    var i,
+        index;
+    if (m_legend && m_legend.length > 0) {
+      m_expiredFeatures = m_expiredFeatures.concat(m_legend);
+
+      // Also remove it from new features if exists
+      for (i = 0; i < m_legend.length; ++i) {
+        index = m_newFeatures.indexOf(m_legend[i]);
+        if (index != -1) {
+          m_newFeatures.splice(index, 1);
+        }
+      }
+    }
     m_legend = null;
     this.createLegend();
   };
@@ -158,8 +214,17 @@ geoModule.featureLayer = function(options, feature) {
     }
 
     // Clear our existing features
-    m_expiredFeatures = m_newFeatures.slice(0);
-    m_newFeatures = [];
+    if (m_expiredFeatures.length > 0) {
+      m_expiredFeatures = m_expiredFeatures.concat(m_newFeatures.slice(0));
+    } else {
+      m_expiredFeatures = m_newFeatures.slice(0);
+    }
+
+    m_newFeatures.length = 0;
+
+    if (m_legend && m_legend.length > 0) {
+      m_newFeatures = m_newFeatures.concat(m_legend);
+    }
 
     // Create legend if not created earlier
     if (!m_legend) {
@@ -168,7 +233,7 @@ geoModule.featureLayer = function(options, feature) {
 
     for(i = 0; i < data.length; ++i) {
       switch(data[i].type()) {
-        case ogs.vgl.data.geometry:
+        case vglModule.data.geometry:
           geomFeature = geoModule.geometryFeature(data[i]);
           geomFeature.material().setBinNumber(this.binNumber());
           geomFeature.setLookupTable(lut);
@@ -185,6 +250,7 @@ geoModule.featureLayer = function(options, feature) {
 
     if (data.length > 0) {
       m_updateTime. modified();
+      this.setOpacity(this.opacity());
     }
   };
 
@@ -201,6 +267,8 @@ geoModule.featureLayer = function(options, feature) {
     var featureCollection = request.featureCollection();
     featureCollection.setNewFeatures(this.id(), m_newFeatures);
     featureCollection.setExpiredFeatures(this.id(), m_expiredFeatures);
+
+    m_expiredFeatures.length = 0;
 
     m_predrawTime.modified();
   };
@@ -289,8 +357,103 @@ geoModule.featureLayer = function(options, feature) {
     });
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Queries the scalar value closest to the location
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.queryLocation = function(location) {
+    var attrScalar = vglModule.vertexAttributeKeys.Scalar,
+        features = this.features(),
+        mapper, geomData, p, prim, idx, indices, ia, ib, ic, va, vb, vc,
+        point, isLeftTurn, triArea, totalArea, alpha, beta, gamma, sa,
+        sb, sc, result;
 
-  this.setOpacity(this.opacity());
+    for (var fi in features) {
+      mapper = features[fi].mapper();
+      geomData = mapper.geometryData();
+
+      for (p = 0; p < geomData.numberOfPrimitives(); ++p) {
+        prim = geomData.primitive(p);
+        if (prim.primitiveType() == gl.TRIANGLES) {
+          if (prim.indicesPerPrimitive() != 3)
+            console.log("[warning] Triangles should have 3 vertices");
+
+          for (idx = 0; idx < prim.numberOfIndices(); idx += 3) {
+            indices = prim.indices();
+            ia = indices[idx+0];
+            ib = indices[idx+1];
+            ic = indices[idx+2];
+            va = geomData.getPosition(ia);
+            vb = geomData.getPosition(ib);
+            vc = geomData.getPosition(ic);
+
+
+            ///  TODO: this assume triangles in a plane z=0.
+            /// Otherwise we would need full-fledged geometric intersection tests.
+            ///
+            point = vec3.create();
+            point[0] = location.x;
+            point[1] = location.y;
+            point[2] = 0;
+
+            isLeftTurn = function(a, b, c) {
+              return (b[0]-a[0])*(c[1]-a[1]) - (c[0]-a[0])*(b[1]-a[1]) >= 0;
+            };
+
+            /// NOTE:
+            /// Doing all by hand because gl-matrix breaks API depending on version.
+            /// e.g. destination argument can be either first or last.
+            var cross = function(a, b) {
+              return [a[1]*b[2] - a[2]*b[1],
+                      a[2]*b[0] - a[0]*b[2],
+                      a[0]*b[1] - a[1]*b[0]];
+            };
+
+            triArea = function(a, b, c) {
+              var ab = [b[0]-a[0], b[1]-a[1], b[2]-a[2]],
+                  ac = [c[0]-a[0], c[1]-a[1], c[2]-a[2]],
+                  r = cross(ab, ac);
+
+              // NOTE: actual area is half of this
+              return Math.sqrt(r[0]*r[0] + r[1]*r[1] + r[2]*r[2]);
+            };
+
+            totalArea = triArea(va, vb, vc);
+            if (totalArea == 0) {
+              //console.log("degenerated triangle");
+              continue;
+            };
+
+            // this is data that is going down the WebGL pipeline, it better be CCW
+            if (isLeftTurn(va, vb, point) && isLeftTurn(vb, vc, point) && isLeftTurn(vc, va, point)) {
+              // now compute barycentric coordinates
+              alpha = triArea(point, vb, vc)/ totalArea;
+              beta  = triArea(point, vc, va)/ totalArea;
+              gamma = triArea(point, va, vb)/ totalArea;
+
+              sa = geomData.getScalar(ia);
+              sb = geomData.getScalar(ib);
+              sc = geomData.getScalar(ic);
+              result = {
+                layer : this,
+                data : {
+                  "feature" : fi ,
+                  "value" : alpha*sa + beta*sb + gamma*sc
+                }
+              };
+              $(this).trigger(geoModule.command.queryResultEvent, result);
+              return; // should we continue checking?
+            }
+          }
+        }
+        else if (prim.primitiveType() == gl.TRIANGLE_STRIP) {
+          console.log("TRIANGLE_STRIP: " + prim.numberOfIndices() );
+          // TODO: how to make sense of this? triangleStrip says it has 3 indices per primitive
+        }
+      }
+    }
+  }
   return this;
 };
 

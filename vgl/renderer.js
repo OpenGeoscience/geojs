@@ -237,11 +237,11 @@ vglModule.renderer = function() {
     }
 
     // Give ourselves a little breathing room
-    range[0] = 0.99*range[0] - (range[1] - range[0])*0.5;
-    range[1] = 1.01*range[1] + (range[1] - range[0])*0.5;
+    range[0] = 0.99 * range[0] - (range[1] - range[0]) * 0.5;
+    range[1] = 1.01 * range[1] + (range[1] - range[0]) * 0.5;
 
     // Make sure near is not bigger than far
-    range[0] = (range[0] >= range[1])?(0.01*range[1]):(range[0]);
+    range[0] = (range[0] >= range[1]) ? (0.01 * range[1]) : (range[0]);
 
     // @todo
     // Make sure near is at least some fraction of far - this prevents near
@@ -343,7 +343,7 @@ vglModule.renderer = function() {
       return false;
     }
 
-    var i = null;
+    var i;
     for (i = 0; i < actors.length; ++i) {
       m_sceneRoot.removeChild(actors[i]);
     }

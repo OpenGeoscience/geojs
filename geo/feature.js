@@ -197,7 +197,6 @@ geoModule.geometryFeature = function(geom) {
     } else {
       lut = vglModule.lookupTable();
       lut.updateRange(scalar.scalarRange());
-      this.setLookupTable(lut);
       material = vglModule.utils.createColorMappedMaterial(lut);
     }
   } else if (colors) {
@@ -206,6 +205,7 @@ geoModule.geometryFeature = function(geom) {
     material = vglModule.utils.createSolidColorMaterial();
   }
   this.setMaterial(material);
+  this.setLookupTable(lut);
 
   return this;
 };
