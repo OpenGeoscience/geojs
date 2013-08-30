@@ -60,7 +60,8 @@ geoModule.map = function(node, options) {
       m_renderer = null,
       m_updateRequest = null,
       m_prepareForRenderRequest = null,
-      m_animationStep = 0;
+      // Holds the time range, current time and layers ...
+      m_animationState = { range: null, currentTime: null, layers: null};
 
   m_renderTime.modified();
 
@@ -204,38 +205,41 @@ geoModule.map = function(node, options) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Increment current animation step and then return its current value
-   *
-   * @returns {number}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  function nextAnimationStep() {
-    return ++m_animationStep;
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Decrement current animation step and then return its current value
-   *
-   * @returns {number}
+   * Reset the animation time
    *
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
-  function prevAnimationStep() {
-    return --m_animationStep;
+  function resetAnimation() {
+    m_animationState.currentTime = new Date(m_animationState.range.start.getTime());
   }
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Reset the animation step
+   * Update the map and then request redraw
    *
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
-  function resetAnimationStep() {
-    m_animationStep = 0;
-  }
+  function animateTimestep() {
+
+    if (!m_animationState)
+      return;
+
+    var i = 0;
+    var layers = m_animationState.layers;
+    for (; i < layers.length; ++i) {
+      layers[i].update(geoModule.updateRequest(
+          m_animationState.currentTime.getTime()));
+      geoModule.geoTransform.transformLayer(m_options.gcs, layers[i]);
+    }
+    $(m_that).trigger({
+      type: geoModule.command.animateEvent,
+      currentTime: m_animationState.currentTime,
+      endTime: m_animationState.range.end
+    });
+    m_that.redraw();
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -626,24 +630,6 @@ geoModule.map = function(node, options) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Update the map and then request a
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.animateTimestep = function(currentTime, layers) {
-    var i = 0;
-    for (; i < layers.length; ++i) {
-      layers[i].update(geoModule.updateRequest(currentTime));
-      geoModule.geoTransform.transformLayer(m_options.gcs, layers[i]);
-    }
-    $(m_that).trigger({
-      type: geoModule.command.animateEvent,
-      currentTime: currentTime,
-    });
-    this.redraw();
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
    * Animate layers of a map
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -653,40 +639,50 @@ geoModule.map = function(node, options) {
       return;
     }
 
-    if (timeRange.length < 2) {
+    // Save the animation state
+    if (m_animationState.currentTime == null) {
+      m_animationState = { range: timeRange, currentTime: new Date(timeRange.start.getTime()),
+                           layers: layers };
+    }
+
+    var newTime = new Date(timeRange.start.getTime());
+    geoModule.time.incrementTime(newTime, timeRange.units, timeRange.delta);
+
+    if (newTime > timeRange.end) {
       console.log('[error] Invalid time range. Requires atleast \
         begin and end time');
       return;
     }
 
     var that = this,
-        currentTime = timeRange[0],
-        endTime = timeRange[timeRange.length - 1],
+        endTime = timeRange.end,
         intervalId = null,
-        stop = false;
+        stop = false,
+        pause = false;
 
     $(this).on('animation-stop', function () {
       stop = true;
     });
 
-    function frame() {
-      if (that.animationStep() < 0) {
-        ++currentTime;
-      } else {
-        currentTime = timeRange[nextAnimationStep()];
-      }
+    $(this).on('animation-pause', function () {
+      pause = true;
+    });
 
-      if (currentTime > endTime || that.animationStep() > timeRange.length) {
+    function frame() {
+      if (m_animationState.currentTime > endTime || stop) {
         clearInterval(intervalId);
-        resetAnimationStep();
+        m_animationState.currentTime = null;
       }
-      else if (stop) {
+      else if (pause) {
         clearInterval(intervalId);
       }
       else {
-
-        that.animateTimestep(currentTime, layers);
+        animateTimestep();
+        geoModule.time.incrementTime(m_animationState.currentTime,
+          m_animationState.range.units, m_animationState.range.delta);
       }
+
+
     }
 
     // Update every 2 ms. Updating every ms might be too much.
@@ -699,7 +695,7 @@ geoModule.map = function(node, options) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.pauseAnimation = function() {
-    $(this).trigger('animation-stop');
+    $(this).trigger('animation-pause');
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -709,7 +705,6 @@ geoModule.map = function(node, options) {
   ////////////////////////////////////////////////////////////////////////////
   this.stopAnimation = function() {
     $(this).trigger('animation-stop');
-    m_animationStep = 0;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -717,11 +712,21 @@ geoModule.map = function(node, options) {
    * Play next animation step and then pause
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.stepAnimationForward = function(timeRange, layers) {
-    if (m_animationStep >= timeRange.length)
+  this.stepAnimationForward = function() {
+
+    if (!m_animationState.currentTime)
+      resetAnimation();
+
+    var time = new Date(m_animationState.currentTime.getTime());
+    geoModule.time.incrementTime(time, m_animationState.range.units,
+        m_animationState.range.delta);
+
+    if (time > m_animationState.range.end)
       return
 
-    this.animateTimestep(timeRange[nextAnimationStep()], layers);
+    m_animationState.currentTime = time;
+
+    animateTimestep();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -729,11 +734,21 @@ geoModule.map = function(node, options) {
    * Play previous animation step and then pause
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.stepAnimationBackward = function(timeRange, layers) {
-    if (m_animationStep <= 0)
-      return
+  this.stepAnimationBackward = function() {
 
-    this.animateTimestep(timeRange[prevAnimationStep()], layers);
+    if (!m_animationState)
+      return;
+
+    var time = new Date(m_animationState.currentTime.getTime());
+    geoModule.time.incrementTime(time, m_animationState.range.units,
+        -m_animationState.range.delta);
+
+    if (time < m_animationState.range.start)
+      return;
+
+    m_animationState.currentTime = time;
+
+    animateTimestep();
   };
 
   ////////////////////////////////////////////////////////////////////////////
