@@ -14,7 +14,7 @@
  * Create a new instance of class interactorStyle
  *
  * @class vglModule.interactorStyle
- * @desc interactorStyle is a base class for all interactor styles
+ * interactorStyle is a base class for all interactor styles
  * @returns {vglModule.interactorStyle}
  */
 ////////////////////////////////////////////////////////////////////////////

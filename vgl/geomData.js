@@ -10,7 +10,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 /**
- * @desc Vertex attribute keys
+ * Vertex attribute keys
  */
 var vertexAttributeKeys = {
   "Position" : 0,

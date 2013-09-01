@@ -81,7 +81,7 @@ vglModule.boundingObject = function() {
   /**
    * Compute bounds of the object
    *
-   * @desc Should be implemented by the concrete class
+   * Should be implemented by the concrete class
    */
   ////////////////////////////////////////////////////////////////////////////
   this.computeBounds = function() {

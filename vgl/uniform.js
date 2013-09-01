@@ -11,10 +11,11 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 /**
+ * Create a new instance of class uniform
  *
  * @param type
  * @param name
- * @returns {*}
+ * @returns {vglModule.uniform} OpenGL uniform encapsulation
  */
 ///////////////////////////////////////////////////////////////////////////////
 vglModule.uniform = function(type, name) {
@@ -56,13 +57,14 @@ vglModule.uniform = function(type, name) {
     }
   };
 
-  var m_type = type;
-  var m_name = name;
-  var m_dataArray = [ this.getTypeNumberOfComponents(m_type) ];
-  var m_numberOfElements = 1;
+  var m_type = type,
+      m_name = name,
+      m_dataArray = [ this.getTypeNumberOfComponents(m_type) ],
+      m_numberOfElements = 1;
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Get name of the uniform
    *
    * @returns {*}
    */
@@ -73,6 +75,7 @@ vglModule.uniform = function(type, name) {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Get type of the uniform
    *
    * @returns {*}
    */
@@ -83,15 +86,18 @@ vglModule.uniform = function(type, name) {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Get value of the uniform
    *
+   * @returns {Array}
    */
   /////////////////////////////////////////////////////////////////////////////
   this.get = function() {
-    // TODO
+    return m_dataArray;
   };
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Set value of the uniform
    *
    * @param value
    */
@@ -130,6 +136,7 @@ vglModule.uniform = function(type, name) {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Call GL and pass updated values to the current shader
    *
    * @param location
    */
@@ -169,6 +176,9 @@ vglModule.uniform = function(type, name) {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Virtual method to update the uniform
+   *
+   * Should be implemented by the derived class.
    *
    * @param renderState
    * @param program
@@ -183,9 +193,10 @@ vglModule.uniform = function(type, name) {
 
 ///////////////////////////////////////////////////////////////////////////////
 /**
+ * Create new instance of class modelViewUniform
  *
  * @param name
- * @returns {*}
+ * @returns {vglModule.modelViewUniform}
  */
 ///////////////////////////////////////////////////////////////////////////////
 vglModule.modelViewUniform = function(name) {
@@ -204,9 +215,10 @@ vglModule.modelViewUniform = function(name) {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Update the uniform given a render state and shader program
    *
-   * @param renderState
-   * @param program
+   * @param {vglModule.renderState} renderState
+   * @param {vglModule.shaderProgram} program
    */
   /////////////////////////////////////////////////////////////////////////////
   this.update = function(renderState, program) {
@@ -220,9 +232,10 @@ inherit(vglModule.modelViewUniform, vglModule.uniform);
 
 //////////////////////////////////////////////////////////////////////////////
 /**
+ * Create a new instance of class projectionUniform
  *
  * @param name
- * @returns {*}
+ * @returns {vglModule.projectionUniform}
  */
 ///////////////////////////////////////////////////////////////////////////////
 vglModule.projectionUniform = function(name) {
@@ -241,6 +254,7 @@ vglModule.projectionUniform = function(name) {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Update the uniform given a render state and shader program
    *
    * @param renderState
    * @param program
@@ -257,6 +271,7 @@ inherit(vglModule.projectionUniform, vglModule.uniform);
 
 ///////////////////////////////////////////////////////////////////////////////
 /**
+ * Create a new instance of class floatUniform
  *
  * @param name
  * @param value

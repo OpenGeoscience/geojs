@@ -9,12 +9,14 @@
 /*global vglModule, ogs, vec4, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instace of class shaderProgram
  *
  * @class
  * @returns {vglModule.shaderProgram}
  */
+//////////////////////////////////////////////////////////////////////////////
 vglModule.shaderProgram = function() {
 
   if (!(this instanceof vglModule.shaderProgram)) {
@@ -23,28 +25,17 @@ vglModule.shaderProgram = function() {
   vglModule.materialAttribute.call(this, materialAttributeType.ShaderProgram);
 
   /** @private */
-  var m_programHandle = 0;
-
-  /** @private */
-  var m_compileTimestamp = vglModule.timestamp();
-
-  /** @private */
-  var m_shaders = [];
-
-  /** @private */
-  var m_uniforms = [];
-
-  /** @private */
-  var m_vertexAttributes = {};
-
-  /** @private */
-  var m_uniformNameToLocation = {};
-
-  /** @private */
-  var m_vertexAttributeNameToLocation = {};
+  var m_programHandle = 0,
+      m_compileTimestamp = vglModule.timestamp(),
+      m_shaders = [],
+      m_uniforms = [],
+      m_vertexAttributes = {},
+      m_uniformNameToLocation = {},
+      m_vertexAttributeNameToLocation = {};
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Query uniform location in the program
    *
    * @param name
    * @returns {*}
@@ -56,6 +47,7 @@ vglModule.shaderProgram = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Query attribute location in the program
    *
    * @param name
    * @returns {*}
@@ -67,6 +59,7 @@ vglModule.shaderProgram = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Add a new shader to the program
    *
    * @param shader
    * @returns {boolean}
@@ -91,6 +84,7 @@ vglModule.shaderProgram = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Add a new uniform to the program
    *
    * @param uniform
    * @returns {boolean}
@@ -107,6 +101,7 @@ vglModule.shaderProgram = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Add a new vertex attribute to the program
    *
    * @param attr
    * @param key
@@ -120,31 +115,37 @@ vglModule.shaderProgram = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Get uniform location
+   *
+   * This method does not perform any query into the program but relies on
+   * the fact that it depends on a call to queryUniformLocation earlier.
    *
    * @param name
-   * @returns {*}
+   * @returns {number}
    */
   /////////////////////////////////////////////////////////////////////////////
   this.uniformLocation = function(name) {
     return m_uniformNameToLocation[name];
   };
 
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get attribute location
+   *
+   * This method does not perform any query into the program but relies on the
+   * fact that it depends on a call to queryUniformLocation earlier.
+   *
+   * @param name
+   * @returns {number}
+   */
+  /////////////////////////////////////////////////////////////////////////////
   this.attributeLocation = function(name) {
     return m_vertexAttributeNameToLocation[name];
   };
 
   /////////////////////////////////////////////////////////////////////////////
   /**
-   *
-   * @returns {boolean}
-   */
-  /////////////////////////////////////////////////////////////////////////////
-  this.uniformExist = function() {
-    return false;
-  };
-
-  /////////////////////////////////////////////////////////////////////////////
-  /**
+   * Get uniform object using name as the key
    *
    * @param name
    * @returns {*}
@@ -162,7 +163,9 @@ vglModule.shaderProgram = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Update all uniforms
    *
+   * This method should be used directly unless required
    */
   /////////////////////////////////////////////////////////////////////////////
   this.updateUniforms = function() {
@@ -173,6 +176,7 @@ vglModule.shaderProgram = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Link shader program
    *
    * @returns {boolean}
    */
@@ -191,16 +195,7 @@ vglModule.shaderProgram = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
-   *
-   */
-  /////////////////////////////////////////////////////////////////////////////
-  this.validate = function() {
-    // TODO
-  };
-
-  /////////////////////////////////////////////////////////////////////////////
-  /**
-   *
+   * Use the shader program
    */
   /////////////////////////////////////////////////////////////////////////////
   this.use = function() {
@@ -209,7 +204,7 @@ vglModule.shaderProgram = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
-   *
+   * Peform any clean up required when the program gets deleted
    */
   /////////////////////////////////////////////////////////////////////////////
   this.cleanUp = function() {
@@ -219,7 +214,7 @@ vglModule.shaderProgram = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
-   *
+   * Delete the shader program
    */
   /////////////////////////////////////////////////////////////////////////////
   this.deleteProgram = function() {
@@ -228,7 +223,7 @@ vglModule.shaderProgram = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
-   *
+   * Delete vertex and fragment shaders
    */
   /////////////////////////////////////////////////////////////////////////////
   this.deleteVertexAndFragment = function() {
@@ -239,6 +234,7 @@ vglModule.shaderProgram = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Bind the program with its shaders
    *
    * @param renderState
    * @returns {boolean}
@@ -289,6 +285,7 @@ vglModule.shaderProgram = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Undo binding of the shader program
    *
    * @param renderState
    */
@@ -299,6 +296,7 @@ vglModule.shaderProgram = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Bind vertex data
    *
    * @param renderState
    * @param key
@@ -312,6 +310,7 @@ vglModule.shaderProgram = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Undo bind vetex data
    *
    * @param renderState
    * @param key
@@ -325,7 +324,7 @@ vglModule.shaderProgram = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
-   *
+   * Bind uniforms
    */
   /////////////////////////////////////////////////////////////////////////////
   this.bindUniforms = function() {
@@ -337,7 +336,7 @@ vglModule.shaderProgram = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
-   *
+   * Bind vertex attributes
    */
   /////////////////////////////////////////////////////////////////////////////
   this.bindAttributes = function() {

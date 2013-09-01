@@ -13,7 +13,6 @@
 /**
  * Create a new instance of class source
  *
- * @class
  * @returns {vglModule.source}
  */
 ///////////////////////////////////////////////////////////////////////////////

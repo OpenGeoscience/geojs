@@ -24,15 +24,14 @@ vglModule.shader = function(type) {
   }
   vglModule.object.call(this);
 
-  var m_shaderHandle = null;
-  var m_compileTimestamp = vglModule.timestamp();
-  var m_shaderType = type;
-  var m_shaderSource = "";
-  var m_fileName = "";
+  var m_shaderHandle = null,
+      m_compileTimestamp = vglModule.timestamp(),
+      m_shaderType = type,
+      m_shaderSource = "";
 
   /////////////////////////////////////////////////////////////////////////////
   /**
-   * Return shader handle
+   * Get shader handle
    */
   /////////////////////////////////////////////////////////////////////////////
   this.shaderHandle = function() {
@@ -52,27 +51,7 @@ vglModule.shader = function(type) {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
-   *
-   * @returns {string}
-   */
-  /////////////////////////////////////////////////////////////////////////////
-  this.fileName = function() {
-    return m_fileName;
-  };
-
-  /////////////////////////////////////////////////////////////////////////////
-  /**
-   *
-   * @param fileName
-   */
-  /////////////////////////////////////////////////////////////////////////////
-  this.setFileName = function(fileName) {
-    m_fileName = fileName;
-    this.modified();
-  };
-
-  /////////////////////////////////////////////////////////////////////////////
-  /**
+   * Get shader source
    *
    * @returns {string}
    */
@@ -83,8 +62,9 @@ vglModule.shader = function(type) {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Set shader source
    *
-   * @param source
+   * @param {string} source
    */
   /////////////////////////////////////////////////////////////////////////////
   this.setShaderSource = function(source) {
@@ -94,6 +74,7 @@ vglModule.shader = function(type) {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Compile the shader
    *
    * @returns {null}
    */
@@ -124,6 +105,7 @@ vglModule.shader = function(type) {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Attach shader to the program
    *
    * @param programHandle
    */

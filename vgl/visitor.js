@@ -11,11 +11,12 @@
 
 //////////////////////////////////////////////////////////////////////////////
 /**
+ * Type of traverse modes
  *
  * @type {{TraverseNone: number, TraverseParents: number,
  *         TraverseAllChildren: number, TraverseActiveChildren: number}}
  */
-  //////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 var TraversalMode = {
   "TraverseNone" : 0x1,
   "TraverseParents" : 0x2,
@@ -25,6 +26,7 @@ var TraversalMode = {
 
 //////////////////////////////////////////////////////////////////////////////
 /**
+ * Types of visitor type
  *
  * @type {{ActorVisitor: number, UpdateVisitor: number, EventVisitor: number,
  *         CullVisitor: number}}
@@ -39,8 +41,9 @@ var VisitorType = {
 
 //////////////////////////////////////////////////////////////////////////////
 /**
+ * Create a new instance of visitor class
  *
- * @returns {*}
+ * @returns {vglModule.visitor}
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.visitor = function() {
@@ -53,6 +56,7 @@ vglModule.visitor = function() {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Push incoming model-view matrix to the stack
    *
    * @param mat
    */
@@ -63,7 +67,7 @@ vglModule.visitor = function() {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   *
+   * Pop model-view matrix from the stack
    */
   ////////////////////////////////////////////////////////////////////////////
   this..popModelViewMatrix = function() {
@@ -72,6 +76,7 @@ vglModule.visitor = function() {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Push incoming projection matrix to the stack
    *
    * @param mat
    */
@@ -82,7 +87,7 @@ vglModule.visitor = function() {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   *
+   * Pop projection matrix from the stack
    */
   ////////////////////////////////////////////////////////////////////////////
   this.popProjectionMatrix = function() {
@@ -91,15 +96,18 @@ vglModule.visitor = function() {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Get accumulated model-view matrix
    *
-   * @returns {*}
+   * @returns {mat4}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.modelViewMatrix = function() {
-    mvMat = mat4.create();
+    var mvMat = mat4.create(),
+        i;
+
     mat4.identity(mvMat);
 
-    for ( var i = 0; i < this.m_modelViewMatrixStack.length; ++i) {
+    for (i = 0; i < this.m_modelViewMatrixStack.length; ++i) {
       mat4.multiply(mvMat, this.m_modelViewMatrixStack[i], mvMat);
     }
 
@@ -108,15 +116,18 @@ vglModule.visitor = function() {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Get accumulated projection matrix
    *
-   * @returns {*}
+   * @returns {mat4}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.projectionMatrix = function() {
-    projMat = mat4.create();
+    var projMat = mat4.create(),
+        i;
+
     mat4.identity(projMat);
 
-    for ( var i = 0; i < this.m_modelViewMatrixStack.length; ++i) {
+    for (i = 0; i < this.m_modelViewMatrixStack.length; ++i) {
       mat4.multiply(mvMat, this.m_modelViewMatrixStack[i], projMat);
     }
 
@@ -125,8 +136,9 @@ vglModule.visitor = function() {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Traverse node and its children if any
    *
-   * @param node
+   * @param {vglModule.node} node
    */
   ////////////////////////////////////////////////////////////////////////////
   this.traverse = function(node) {
@@ -142,8 +154,9 @@ vglModule.visitor = function() {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Start node traversal
    *
-   * @param node
+   * @param {vglModule.node} node
    */
   ////////////////////////////////////////////////////////////////////////////
   this.visit = function(node) {
@@ -152,8 +165,9 @@ vglModule.visitor = function() {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Start actor traversal
    *
-   * @param actor
+   * @param {vglModule.actor} actor
    */
   ////////////////////////////////////////////////////////////////////////////
   this.visit = function(actor) {

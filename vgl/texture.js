@@ -42,6 +42,7 @@ vglModule.texture = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Create texture, update parameters, and bind data
    *
    * @param renderState
    */
@@ -80,6 +81,7 @@ vglModule.texture = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Create texture and if already created use it
    *
    * @param renderState
    */
@@ -96,6 +98,7 @@ vglModule.texture = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Turn off the use of this texture
    *
    * @param renderState
    */
@@ -106,17 +109,20 @@ vglModule.texture = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Get image used by the texture
    *
-   * @returns {*}
+   * @returns {vglModule.image}
    */
+  /////////////////////////////////////////////////////////////////////////////
   this.image = function() {
     return this.m_image;
   };
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Set image for the texture
    *
-   * @param image
+   * @param {vglModule.image} image
    * @returns {boolean}
    */
   /////////////////////////////////////////////////////////////////////////////
@@ -133,8 +139,9 @@ vglModule.texture = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Get texture unit of the texture
    *
-   * @returns {*}
+   * @returns {number}
    */
   /////////////////////////////////////////////////////////////////////////////
   this.textureUnit = function() {
@@ -143,8 +150,9 @@ vglModule.texture = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Set texture unit of the texture. Default is 0.
    *
-   * @param unit
+   * @param {number} unit
    * @returns {boolean}
    */
   /////////////////////////////////////////////////////////////////////////////
@@ -160,6 +168,7 @@ vglModule.texture = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Get width of the texture
    *
    * @returns {*}
    */
@@ -170,8 +179,9 @@ vglModule.texture = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Set width of the texture
    *
-   * @param width
+   * @param {number} width
    * @returns {boolean}
    */
   /////////////////////////////////////////////////////////////////////////////
@@ -188,8 +198,9 @@ vglModule.texture = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Get depth of the texture
    *
-   * @returns {*}
+   * @returns {number}
    */
   /////////////////////////////////////////////////////////////////////////////
   this.depth = function() {
@@ -198,8 +209,9 @@ vglModule.texture = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Set depth of the texture
    *
-   * @param depth
+   * @param {number} depth
    * @returns {boolean}
    */
   /////////////////////////////////////////////////////////////////////////////
@@ -215,6 +227,7 @@ vglModule.texture = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Get the texture handle (id) of the texture
    *
    * @returns {*}
    */
@@ -225,6 +238,7 @@ vglModule.texture = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Get internal format of the texture
    *
    * @returns {*}
    */
@@ -235,6 +249,7 @@ vglModule.texture = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Set internal format of the texture
    *
    * @param internalFormat
    * @returns {boolean}
@@ -244,7 +259,6 @@ vglModule.texture = function() {
     if (this.m_internalFormat !== internalFormat) {
       this.m_internalFormat = internalFormat;
       this.modified();
-
       return true;
     }
 
@@ -253,6 +267,7 @@ vglModule.texture = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Get pixel format of the texture
    *
    * @returns {*}
    */
@@ -263,6 +278,7 @@ vglModule.texture = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Set pixel format of the texture
    *
    * @param pixelFormat
    * @returns {boolean}
@@ -280,6 +296,7 @@ vglModule.texture = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Get pixel data type
    *
    * @returns {*}
    */
@@ -290,6 +307,7 @@ vglModule.texture = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Set pixel data type
    *
    * @param pixelDataType
    * @returns {boolean}
@@ -309,7 +327,7 @@ vglModule.texture = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
-   *
+   * Compute internal format of the texture
    */
   /////////////////////////////////////////////////////////////////////////////
   this.computeInternalFormatUsingImage = function() {
@@ -342,7 +360,7 @@ vglModule.texture = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
-   *
+   * Update texture dimensions
    */
   /////////////////////////////////////////////////////////////////////////////
   this.updateDimensions = function() {
@@ -414,8 +432,9 @@ vglModule.lookupTable = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Create lookup table, initialize parameters, and bind data to it
    *
-   * @param renderState
+   * @param {vglModule.renderState} renderState
    */
   /////////////////////////////////////////////////////////////////////////////
   this.setup = function(renderState) {
@@ -441,6 +460,7 @@ vglModule.lookupTable = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Get color table used by the lookup table
    *
    * @returns {*}
    */
@@ -451,6 +471,7 @@ vglModule.lookupTable = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Set color table used by the lookup table
    *
    * @param colors
    * @returns {boolean}
@@ -468,6 +489,7 @@ vglModule.lookupTable = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Get scalar range
    *
    * @returns {Array}
    */
@@ -478,6 +500,7 @@ vglModule.lookupTable = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Set scalar range for the lookup table
    *
    * @param range
    * @returns {boolean}

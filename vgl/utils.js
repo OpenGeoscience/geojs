@@ -13,9 +13,9 @@
 /**
  * Create a new instance of class utils
  *
- * @class
- * @decs Utility class provides helper functions such as functions to create
+ * Utility class provides helper functions such as functions to create
  * shaders, geometry etc.
+ *
  * @returns {vglModule.utils}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -37,7 +37,8 @@ inherit(vglModule.utils, vglModule.object);
  *
  * @param value
  * @param pow
- * @returns {*|number}
+ *
+ * @returns {number}
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.utils.computePowerOfTwo = function(value, pow) {
@@ -52,7 +53,8 @@ vglModule.utils.computePowerOfTwo = function(value, pow) {
 /**
  * Create a new instance of default vertex shader that uses a texture
  *
- * @desc Helper function to create default vertex shader
+ * Helper function to create default vertex shader
+ *
  * @param context
  * @returns {vglModule.shader}
  */
@@ -80,7 +82,8 @@ vglModule.utils.createTextureVertexShader = function(context) {
 /**
  * Create a new instance of default fragment shader that uses a texture
  *
- * @desc Helper function to create default fragment shader with sampler *
+ * Helper function to create default fragment shader with sampler
+ *
  * @param context
  * @returns {vglModule.shader}
  */
@@ -104,7 +107,8 @@ vglModule.utils.createTextureFragmentShader = function(context) {
 /**
  * Create variation of createTextureFragmentShader which uses texture alpha
  *
- * @desc Helper function to create default fragment shader with sampler *
+ * Helper function to create default fragment shader with sampler
+ *
  * @param context
  * @returns {vglModule.shader}
  */
@@ -127,7 +131,8 @@ vglModule.utils.createRgbaTextureFragmentShader = function(context) {
 /**
  * Create a new instance of default vertex shader
  *
- * @desc Helper function to create default vertex shader *
+ * Helper function to create default vertex shader
+ *
  * @param context
  * @returns {vglModule.shader}
  */
@@ -157,7 +162,8 @@ vglModule.utils.createVertexShader = function(context) {
 /**
  * Create a new instance of vertex shader with a solid color
  *
- * @desc Helper function to create default vertex shader *
+ * Helper function to create default vertex shader
+ *
  * @param context
  * @returns {vglModule.shader}
  */
@@ -182,9 +188,11 @@ vglModule.utils.createVertexShaderSolidColor = function(context) {
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Create a new instance of vertex shader that passes values through for color mapping
+ * Create a new instance of vertex shader that passes values through
+ * for color mapping
  *
- * @desc Helper function to create default vertex shader *
+ * Helper function to create default vertex shader
+ *
  * @param context
  * @returns {vglModule.shader}
  */
@@ -216,7 +224,8 @@ vglModule.utils.createVertexShaderColorMap = function(context, min, max) {
 /**
  * Create a new instance of default fragment shader
  *
- * @desc Helper function to create default fragment shader *
+ * Helper function to create default fragment shader
+ *
  * @param context
  * @returns {vglModule.shader}
  */
@@ -238,7 +247,8 @@ vglModule.utils.createFragmentShader = function(context) {
 /**
  * Create a new instance of fragment shader with an assigned constant color.
  *
- * @desc Helper function to create default fragment shader *
+ * Helper function to create default fragment shader
+ *
  * @param context
  * @returns {vglModule.shader}
  */
@@ -259,7 +269,8 @@ vglModule.utils.createFragmentShaderSolidColor = function(context, color) {
 /**
  * Create a new instance of fragment shader that maps values into colors bia lookup table
  *
- * @desc Helper function to create default fragment shader *
+ * Helper function to create default fragment shader
+ *
  * @param context
  * @returns {vglModule.shader}
  */
@@ -283,7 +294,8 @@ vglModule.utils.createFragmentShaderColorMap = function(context) {
 /**
  * Create a new instance of vertex shader for point sprites
  *
- * @desc Helper function to create default point sprites vertex shader *
+ * Helper function to create default point sprites vertex shader
+ *
  * @param context
  * @returns {vglModule.shader}
  */
@@ -311,7 +323,8 @@ vglModule.utils.createPointSpritesVertexShader = function(context) {
 /**
  * Create a new instance of fragment shader for point sprites
  *
- * @desc Helper function to create default point sprites fragment shader *
+ * Helper function to create default point sprites fragment shader
+ *
  * @param context
  * @returns {vglModule.shader}
  */
@@ -338,7 +351,8 @@ vglModule.utils.createPointSpritesFragmentShader = function(context) {
 /**
  * Create a new instance of texture material
  *
- * @desc Helper function to create a texture material
+ * Helper function to create a texture material
+ *
  * @returns {vglModule.material}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -388,7 +402,8 @@ vglModule.utils.createTextureMaterial = function(isRgba) {
 /**
  * Create a new instance of geometry material
  *
- * @desc Helper function to create geometry material
+ * Helper function to create geometry material
+ *
  * @returns {vglModule.material}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -422,7 +437,8 @@ vglModule.utils.createGeometryMaterial = function() {
 /**
  * Create a new instance of colored geometry material
  *
- * @desc Helper function to create color geometry material
+ * Helper function to create color geometry material
+ *
  * @returns {vglModule.material}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -461,7 +477,8 @@ vglModule.utils.createColorMaterial = function() {
 /**
  * Create a new instance of geometry material
  *
- * @desc Helper function to create geometry material
+ * Helper function to create geometry material
+ *
  * @returns {vglModule.material}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -544,7 +561,8 @@ vglModule.utils.updateColorMappedMaterial = function(mat, lut) {
 /**
  * Create a new instance of solid color material
  *
- * @desc Helper function to create geometry material
+ * Helper function to create geometry material
+ *
  * @returns {vglModule.material}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -582,7 +600,8 @@ vglModule.utils.createSolidColorMaterial = function(color) {
 /**
  * Create a new instance of point sprites material
  *
- * @desc Helper function to create point sprites material
+ * Helper function to create point sprites material
+ *
  * @returns {vglModule.material}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -627,8 +646,9 @@ vglModule.utils.createPointSpritesMaterial = function(image) {
 /**
  * Create a new instance of an actor that contains a plane geometry
  *
- * @Helper function to create a plane node This method will create a plane actor
- * with texture coordinates, eventually normal, and plane material. *
+ * Function to create a plane node This method will create a plane actor
+ * with texture coordinates, eventually normal, and plane material.
+ *
  * @returns {vglModule.actor}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -656,9 +676,10 @@ vglModule.utils.createPlane = function(originX, originY, originZ,
 /**
  * Create a new instance of an actor that contains a texture plane geometry
  *
- * @desc Helper function to create a plane textured node This method will create
+ * Helper function to create a plane textured node This method will create
  * a plane actor with texture coordinates, eventually normal, and plane
- * material. *
+ * material.
+ *
  * @returns {vglModule.actor}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -687,8 +708,9 @@ vglModule.utils.createTexturePlane = function(originX, originY, originZ,
 /**
  * Create a new instance of an actor that contains points
  *
- * @desc Helper function to create a point node This method will create a point
- * actor with texture coordinates, eventually normal, and plane material. *
+ * Helper function to create a point node This method will create a point
+ * actor with texture coordinates, eventually normal, and plane material.
+ *
  * @returns {vglModule.actor}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -724,9 +746,10 @@ vglModule.utils.createPoints = function(positions, colors, texcoords) {
 /**
  * Create a new instance of an actor that contains point sprites
  *
- * @desc Helper function to create a point sprites node This method will create
+ * Helper function to create a point sprites node This method will create
  * a point sprites actor with texture coordinates, normals, and a point sprites
  * material.
+ *
  * @returns {vglModule.actor}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -837,7 +860,7 @@ vglModule.utils.createColorLegend = function(varname, lookupTable, origin,
    * @param divs
    * @param heightMajor
    * @param heightMinor
-   * @returns {Array}
+   * @returns {Array} Returns array of vglModule.actor
    */
   //////////////////////////////////////////////////////////////////////////////
   function createTicksAndLabels(varname, lut,
@@ -1014,7 +1037,7 @@ vglModule.utils.createColorLegend = function(varname, lookupTable, origin,
  * @param textToWrite
  * @param textSize
  * @param color
- * @returns {*}
+ * @returns {vglModule.texture}
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.utils.create2DTexture = function(textToWrite, textSize, color) {
