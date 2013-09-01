@@ -9,12 +9,14 @@
 /*global vglModule, ogs, vec4, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class groupNode
  *
  * @class
  * @returns {vglModule.groupNode}
  */
+//////////////////////////////////////////////////////////////////////////////
 vglModule.groupNode = function() {
 
   if (!(this instanceof vglModule.groupNode)) {
@@ -24,6 +26,14 @@ vglModule.groupNode = function() {
 
   var m_children = [];
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Turn on / off visibility
+   *
+   * @param flag
+   * @returns {boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.setVisible = function(flag) {
     if (node.prototype.setVisible.call(this, flag) !== true) {
       return false;
@@ -36,6 +46,14 @@ vglModule.groupNode = function() {
     return true;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Make the incoming node as child of the group node
+   *
+   * @param childNode
+   * @returns {boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.addChild = function(childNode) {
     if (childNode instanceof vglModule.node) {
       if (m_children.indexOf(childNode) === -1) {
@@ -50,6 +68,14 @@ vglModule.groupNode = function() {
     return false;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Remove parent-child relationship between the group and incoming node
+   *
+   * @param childNode
+   * @returns {boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.removeChild = function(childNode) {
     if (childNode.parent() === this) {
       var index = m_children.indexOf(childNode);
@@ -59,8 +85,13 @@ vglModule.groupNode = function() {
     }
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Remove parent-child relationship between child nodes and the group node
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.removeChildren = function() {
-    var i = null;
+    var i;
     for (i = 0; i < m_children.length; ++i) {
       this.removeChild(m_children[i]);
     }
@@ -68,14 +99,35 @@ vglModule.groupNode = function() {
     this.modified();
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return children of this group node
+   *
+   * @returns {Array}
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.children = function() {
     return m_children;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Accept a visitor and traverse the scene tree
+   *
+   * @param visitor
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.accept = function(visitor) {
     visitor.visit(this);
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Traverse the scene
+   *
+   * @param visitor
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.traverse = function(visitor) {
     switch (visitor.type()) {
       case visitor.UpdateVisitor:
@@ -89,6 +141,13 @@ vglModule.groupNode = function() {
     }
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Traverse all of the children and update the bounds for each
+   *
+   * @param visitor
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.traverseChildrenAndUpdateBounds = function(visitor) {
 
     if (this.m_parent && this.boundsDirtyTimestamp().getMTime() >
@@ -109,6 +168,13 @@ vglModule.groupNode = function() {
     this.computeBoundsTimestamp().modified();
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Traverse children of the group node
+   *
+   * @param visitor
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.traverseChildren = function(visitor) {
     if (visitor.mode() == vesVisitor.TraverseAllChildren) {
       for ( var i = 0; i < m_children.length(); ++i) {
@@ -117,6 +183,11 @@ vglModule.groupNode = function() {
     }
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Compute bounds for the group node
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.computeBounds = function() {
     if (this.computeBoundsTimestamp().getMTime() >
         this.boundsDirtyTimestamp().getMTime()) {
@@ -128,6 +199,16 @@ vglModule.groupNode = function() {
     }
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Update bounds for the group node
+   *
+   * This method is used internally to update bounds of the group node by
+   * traversing each of its child.
+   *
+   * @param child
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.updateBounds = function(child) {
     // FIXME: This check should not be required and possibly is incorrect
     if (child.overlay()) {

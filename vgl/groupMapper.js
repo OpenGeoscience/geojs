@@ -24,11 +24,13 @@ vglModule.groupMapper = function() {
   /** @private */
   var m_geomDataArray = [];
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Return stored geometry data if any
    *
    * @param index optional
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.geometryData = function(index) {
     if (index !== undefined && index < m_geomDataArray.length ) {
       return m_geomDataArray[index];
@@ -41,11 +43,13 @@ vglModule.groupMapper = function() {
     }
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Connect mapper to its geometry data
    *
    * @param geom {vglModule.geomData}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.setGeometryData = function(geom) {
     if (m_geomDataArray.length == 1) {
       if (m_geomDataArray[0] === geom) {
@@ -57,18 +61,22 @@ vglModule.groupMapper = function() {
     this.modified();
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Return stored geometry data array if any
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.geometryDataArray = function() {
     return m_geomDataArray;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Connect mapper to its geometry data
    *
    * @param geoms {Array}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.setGeometryDataArray = function(geoms) {
     if (geoms instanceof Array) {
       if (m_geomDataArray != geoms) {
@@ -84,9 +92,11 @@ vglModule.groupMapper = function() {
     return false;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Compute bounds of the data
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.computeBounds = function() {
     if (m_geomDataArray === null ||
         m_geomDataArray === undefined) {
@@ -130,9 +140,11 @@ vglModule.groupMapper = function() {
     }
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Render the mapper
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.render = function(renderState) {
     if (this.getMTime() > m_createMappersTimestamp.getMTime()) {
       // @note Hoping that it will release the graphics resources

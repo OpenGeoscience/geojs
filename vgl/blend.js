@@ -9,6 +9,7 @@
 /*global vglModule, ogs, vec4, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of clas blendFunction
  *
@@ -17,6 +18,7 @@
  * @param destination
  * @returns {vglModule.blendFunction}
  */
+//////////////////////////////////////////////////////////////////////////////
 vglModule.blendFunction = function(source, destination) {
 
   if (!(this instanceof vglModule.blendFunction)) {
@@ -29,11 +31,13 @@ vglModule.blendFunction = function(source, destination) {
   /** @private */
   var m_destination = destination;
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Apply blend function to the current state
    *
    * @param {vglModule.renderState}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.apply = function(renderState) {
     gl.blendFuncSeparate(m_source, m_destination, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
   };
@@ -41,12 +45,14 @@ vglModule.blendFunction = function(source, destination) {
   return this;
 };
 
+////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class blend
  *
  * @class
  * @returns {vglModule.blend}
  */
+////////////////////////////////////////////////////////////////////////////
 vglModule.blend = function() {
 
   if (!(this instanceof vglModule.blend)) {
@@ -61,11 +67,13 @@ vglModule.blend = function() {
   var m_blendFunction = vglModule.blendFunction(gl.SRC_ALPHA,
                                                 gl.ONE_MINUS_SRC_ALPHA);
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Bind blend attribute
    *
    * @param {vglModule.renderState}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.bind = function(renderState) {
     m_wasEnabled = gl.isEnabled(gl.BLEND);
 
@@ -80,11 +88,13 @@ vglModule.blend = function() {
     return true;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Undo bind blend attribute
    *
    * @param {vglModule.renderState}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.undoBind = function(renderState) {
     if (m_wasEnabled) {
       gl.enable(gl.BLEND);

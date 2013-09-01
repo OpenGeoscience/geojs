@@ -9,12 +9,14 @@
 /*global vglModule, ogs, vec4, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class material
  *
  * @class
  * @returns {vglModule.material}
  */
+//////////////////////////////////////////////////////////////////////////////
 vglModule.material = function() {
   if (!(this instanceof vglModule.material)) {
     return new vglModule.material();
@@ -27,16 +29,38 @@ vglModule.material = function() {
   var m_textureAttributes = {};
   var m_attributes = {};
 
-  // / Public member methods
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return bin number for the material
+   *
+   * @default 100
+   * @returns {number}
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.binNumber = function() {
     return m_binNumber;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set bin number for the material
+   *
+   * @param binNo
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.setBinNumber = function(binNo) {
     m_binNumber = binNo;
     this.modified();
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Check if incoming attribute already exists in the material
+   *
+   * @param attr
+   * @returns {boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.exists = function(attr) {
     if (attr.type() === vglModule.materialAttribute.Texture) {
       return m_textureAttributes.hasOwnProperty(attr);
@@ -46,11 +70,17 @@ vglModule.material = function() {
     }
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
+   * Set a new attribute for the material
+   *
+   * This method replace any existing attribute except for textures as
+   * materials can have multiple textures.
    *
    * @param attr
    * @returns {boolean}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.setAttribute = function(attr) {
     if (attr.type() === materialAttributeType.Texture &&
         m_textureAttributes[attr.textureUnit()] !== attr) {
@@ -74,11 +104,14 @@ vglModule.material = function() {
     }
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
+   * Add a new attribute to the material.
    *
    * @param attr
    * @returns {boolean}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.addAttribute = function(attr) {
     if (this.exists(attr)) {
       return false;
@@ -105,18 +138,46 @@ vglModule.material = function() {
     return false;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return shader program used by the material
+   *
+   * @returns {vglModule.shaderProgram}
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.shaderProgram = function() {
     return m_shaderProgram;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Activate the material
+   *
+   * @param renderState
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.render = function(renderState) {
     this.bind(renderState);
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Deactivate the material
+   *
+   * @param renderState
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.remove = function(renderState) {
     this.undoBind(renderState);
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Bind and activate material states
+   *
+   * @param renderState
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.bind = function(renderState) {
 
     for ( var key in m_attributes) {
@@ -132,6 +193,13 @@ vglModule.material = function() {
     }
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Undo-bind and de-activate material states
+   *
+   * @param renderState
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.undoBind = function(renderState) {
     var key = null;
     for (key in m_attributes) {
@@ -147,8 +215,15 @@ vglModule.material = function() {
     }
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Bind vertex data
+   *
+   * @param renderState
+   * @param key
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.bindVertexData = function(renderState, key) {
-
     for ( var i in m_attributes) {
       if (m_attributes.hasOwnProperty(i)) {
         m_attributes[i].bindVertexData(renderState, key);
@@ -156,6 +231,14 @@ vglModule.material = function() {
     }
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Undo bind vertex data
+   *
+   * @param renderState
+   * @param key
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.undoBindVertexData = function(renderState, key) {
     for ( var i in m_attributes) {
       if (m_attributes.hasOwnProperty(i)) {

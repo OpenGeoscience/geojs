@@ -9,12 +9,14 @@
 /*global vglModule, ogs, vec4, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class mapper
  *
  * @class
  * @returns {vglModule.mapper}
  */
+//////////////////////////////////////////////////////////////////////////////
 vglModule.mapper = function() {
 
   if (!(this instanceof vglModule.mapper)) {
@@ -40,9 +42,11 @@ vglModule.mapper = function() {
   /** @private */
   var m_glCompileTimestamp = vglModule.timestamp();
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Compute bounds of the data
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.computeBounds = function() {
     if (m_geomData === null || typeof m_geomData === 'undefined') {
       this.resetBounds();
@@ -62,13 +66,16 @@ vglModule.mapper = function() {
     }
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get solid color of the geometry
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.color = function() {
     return m_color;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Set solid color of the geometry. Default is white [1.0, 1.0, 1.0]
    *
@@ -76,6 +83,7 @@ vglModule.mapper = function() {
    * @param g Green component of the color [0.0 - 1.0]
    * @param b Blue component of the color [0.0 - 1.0]
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.setColor = function(r, g, b) {
     m_color[0] = r;
     m_color[1] = g;
@@ -84,16 +92,20 @@ vglModule.mapper = function() {
     this.modified();
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Return stored geometry data if any
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.geometryData = function() {
     return m_geomData;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Connect mapper to its geometry data
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.setGeometryData = function(geom) {
     if (m_geomData !== geom) {
       m_geomData = geom;
@@ -103,9 +115,11 @@ vglModule.mapper = function() {
     }
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Render the mapper
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.render = function(renderState) {
     if (this.getMTime() > m_glCompileTimestamp.getMTime()) {
       setupDrawObjects(renderState);
@@ -137,18 +151,26 @@ vglModule.mapper = function() {
     }
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Delete cached VBO if any
+   *
+   * @private
    */
+  ////////////////////////////////////////////////////////////////////////////
   function deleteVertexBufferObjects() {
     for ( var i = 0; i < m_buffers.length; ++i) {
       gl.deleteBuffer(m_buffers[i]);
     }
   }
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Create new VBO for all its geometryData sources and primitives
+   *
+   * @private
    */
+  ////////////////////////////////////////////////////////////////////////////
   function createVertexBufferObjects() {
     if (m_geomData) {
       var numberOfSources = m_geomData.numberOfSources();
@@ -183,21 +205,25 @@ vglModule.mapper = function() {
     }
   }
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Clear cache related to buffers
+   *
+   * @private
    */
+  ////////////////////////////////////////////////////////////////////////////
   function cleanUpDrawObjects() {
     m_bufferVertexAttributeMap = {};
     m_buffers = [];
   }
 
-  /**
-   * Internal methods
-   */
-
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Setup draw objects; Delete old ones and create new ones
+   *
+   * @private
    */
+  ////////////////////////////////////////////////////////////////////////////
   function setupDrawObjects() {
     // Delete buffer objects from past if any.
     deleteVertexBufferObjects();

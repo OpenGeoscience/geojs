@@ -51,7 +51,7 @@ vglModule.camera = function() {
   /**
    * Get view angle of the camera
    */
-    ////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////
   this.viewAngle = function() {
     return m_viewAngle;
   };
@@ -70,10 +70,10 @@ vglModule.camera = function() {
    * Set position of the camera
    */
   ////////////////////////////////////////////////////////////////////////////
- this.setPosition = function(x, y, z) {
-   m_position = vec3.fromValues(x, y, z);
-   this.modified();
- };
+  this.setPosition = function(x, y, z) {
+    m_position = vec3.fromValues(x, y, z);
+    this.modified();
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**

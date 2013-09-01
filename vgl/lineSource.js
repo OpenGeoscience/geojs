@@ -9,12 +9,14 @@
 /*global vglModule, ogs, vec4, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class lineSource
  *
  * @class
  * @returns {vglModule.lineSource}
  */
+//////////////////////////////////////////////////////////////////////////////
 vglModule.lineSource = function(positions, colors) {
 
   if (!(this instanceof vglModule.lineSource)) {
@@ -27,11 +29,13 @@ vglModule.lineSource = function(positions, colors) {
       m_height = null,
       m_geom = null;
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Set start positions for the lines
    *
    * @param positions
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.setPositions = function(positions) {
     if (positions instanceof Array) {
       m_positions = positions;
@@ -45,11 +49,13 @@ vglModule.lineSource = function(positions, colors) {
     return false;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Set colors for the lines
    *
    * @param colors
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.setColors = function(colors) {
     if (colors instanceof Array) {
       m_colors = colors;
@@ -63,9 +69,11 @@ vglModule.lineSource = function(positions, colors) {
     return false;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Create a point geometry given input parameters
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.create = function() {
     if (!m_positions) {
       console.log("[error] Invalid positions");
