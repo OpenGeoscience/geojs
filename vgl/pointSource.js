@@ -9,12 +9,14 @@
 /*global vglModule, ogs, vec4, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class pointSource
  *
  * @class
  * @returns {vglModule.pointSource}
  */
+//////////////////////////////////////////////////////////////////////////////
 vglModule.pointSource = function() {
 
   if (!(this instanceof vglModule.pointSource)) {
@@ -27,9 +29,13 @@ vglModule.pointSource = function() {
   var m_textureCoords = [];
   var m_geom = null;
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Set positions for the source
+   *
+   * @param positions
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.setPositions = function(positions) {
     if (positions instanceof Array) {
       m_positions = positions;
@@ -40,9 +46,13 @@ vglModule.pointSource = function() {
     }
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Set colors for the points
+   *
+   * @param colors
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.setColors = function(colors) {
     if (colors instanceof Array) {
       m_colors = colors;
@@ -52,9 +62,13 @@ vglModule.pointSource = function() {
     }
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Set texture coordinates for the points
+   *
+   * @param texcoords
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.setTextureCoordinates = function(texcoords) {
     if (texcoords instanceof Array) {
       m_textureCoords = texcoords;
@@ -65,9 +79,11 @@ vglModule.pointSource = function() {
     }
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Create a point geometry given input parameters
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.create = function() {
     m_geom = new vglModule.geometryData();
 

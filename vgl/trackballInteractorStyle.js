@@ -51,6 +51,13 @@ vglModule.trackballInteractorStyle = function() {
       };
 
 
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   *
+   * @param event
+   * @returns {boolean}
+   */
+  /////////////////////////////////////////////////////////////////////////////
   this.handleMouseMove = function(event) {
     var canvas = m_that.viewer().canvas();
     if (event.target !== canvas) {
@@ -116,6 +123,13 @@ vglModule.trackballInteractorStyle = function() {
     return false;
   };
 
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   *
+   * @param event
+   * @returns {boolean}
+   */
+  /////////////////////////////////////////////////////////////////////////////
   this.handleMouseDown = function(event) {
     var canvas = m_that.viewer().canvas();
     if (event.target !== canvas) {
@@ -146,6 +160,13 @@ vglModule.trackballInteractorStyle = function() {
 
   // @note We never get mouse up from scroll bar: See the bug report here
   // http://bugs.jquery.com/ticket/8184
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   *
+   * @param event
+   * @returns {boolean}
+   */
+  /////////////////////////////////////////////////////////////////////////////
   this.handleMouseUp = function(event) {
     var canvas = m_that.viewer().canvas();
     if (event.target !== canvas) {
@@ -163,7 +184,13 @@ vglModule.trackballInteractorStyle = function() {
     return false;
   };
 
-
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   *
+   * @param options
+   * @param useCurrent
+   */
+  /////////////////////////////////////////////////////////////////////////////
   this.zoom = function(options, useCurrent) {
     var m_renderer, m_camera, distance, currPosition;
     m_renderer = m_that.viewer().renderWindow().activeRenderer();

@@ -9,12 +9,14 @@
 /*global vglModule, ogs, vec4, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class planeSource
  *
  * @class
  * @returns {vglModule.planeSource}
  */
+//////////////////////////////////////////////////////////////////////////////
 vglModule.planeSource = function() {
 
   if (!(this instanceof vglModule.planeSource)) {
@@ -30,36 +32,58 @@ vglModule.planeSource = function() {
   var m_yresolution = 1;
   var m_geom = null;
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Set origin of the plane
+   *
+   * @param x
+   * @param y
+   * @param z
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.setOrigin = function(x, y, z) {
     m_origin[0] = x;
     m_origin[1] = y;
     m_origin[2] = z;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Set point that defines the first axis of the plane
+   *
+   * @param x
+   * @param y
+   * @param z
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.setPoint1 = function(x, y, z) {
     m_point1[0] = x;
     m_point1[1] = y;
     m_point1[2] = z;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Set point that defines the first axis of the plane
+   *
+   * @param x
+   * @param y
+   * @param z
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.setPoint2 = function(x, y, z) {
     m_point2[0] = x;
     m_point2[1] = y;
     m_point2[2] = z;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Create a plane geometry given input parameters
+   *
+   * @returns {null}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.create = function() {
     m_geom = new vglModule.geometryData();
 
@@ -122,7 +146,7 @@ vglModule.planeSource = function() {
       }
     }
 
-    // / Generate polygon connectivity
+    /// Generate polygon connectivity
     for (i = 0; i < m_yresolution; i++) {
       for (j = 0; j < m_xresolution; j++) {
         pts[0] = j + i * (m_xresolution + 1);

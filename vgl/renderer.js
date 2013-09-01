@@ -9,12 +9,13 @@
 /*global vglModule, ogs, vec4, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class renderState
  *
- * @class vglModule.renderState
  * @returns {vglModule.renderState}
  */
+//////////////////////////////////////////////////////////////////////////////
 vglModule.renderState = function() {
   this.m_modelViewMatrix = mat4.create();
   this.m_projectionMatrix = null;
@@ -22,12 +23,13 @@ vglModule.renderState = function() {
   this.m_mapper = null;
 };
 
+////////////////////////////////////////////////////////////////////////////
 /**
- * Create a new instance of class renderer
+ * Create a new instance of class renderer *
  *
- * @class vglModule.renderer
  * @returns {vglModule.renderer}
  */
+////////////////////////////////////////////////////////////////////////////
 vglModule.renderer = function() {
   if (!(this instanceof vglModule.renderer)) {
     return new vglModule.renderer();
@@ -50,30 +52,43 @@ vglModule.renderer = function() {
   /** @private */
   var m_height = 0;
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get width of the renderer
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.width = function() {
     return m_width;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get height of the renderer
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.height = function() {
     return m_height;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get background color
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.backgroundColor = function() {
     return m_backgroundColor;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
-   * Set background color
+   * Set background color of the renderer
+   *
+   * @param r
+   * @param g
+   * @param b
+   * @param a
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.setBackgroundColor = function(r, g, b, a) {
     m_backgroundColor[0] = r;
     m_backgroundColor[1] = g;
@@ -83,23 +98,33 @@ vglModule.renderer = function() {
     this.modified();
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get scene root
+   *
+   * @returns {vglModule.groupNode}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.sceneRoot = function() {
     return m_sceneRoot;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get main camera of the renderer
+   *
+   * @returns {vglModule.camera}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.camera = function() {
     return m_camera;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Render the scene
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.render = function() {
     var i = 0,
         renSt = null,
@@ -153,9 +178,11 @@ vglModule.renderer = function() {
     }
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Automatically set up the camera based on visible actors
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.resetCamera = function() {
     m_camera.computeBounds();
 
@@ -210,9 +237,11 @@ vglModule.renderer = function() {
     this.resetCameraClippingRange(visibleBounds);
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Recalculate camera's clipping range
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.resetCameraClippingRange = function(bounds) {
     var vn = m_camera.viewPlaneNormal(),
         position = m_camera.position(),
@@ -277,17 +306,21 @@ vglModule.renderer = function() {
     m_camera.setClippingRange(range[0], range[1]);
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Resize viewport given a width and height
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.resize = function(width, height) {
     // @note: where do m_x and m_y come from?
     this.positionAndResize(m_x, m_y, width, height);
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Resize viewport given a position, width and height
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.positionAndResize = function(x, y, width, height) {
     // TODO move this code to camera
     if (x < 0 || y < 0 || width < 0 || height < 0) {
@@ -303,9 +336,14 @@ vglModule.renderer = function() {
     this.modified();
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Add new actor to the collection
+   *
+   * @param actor
+   * @returns {boolean}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.addActor = function(actor) {
     if (actor instanceof vglModule.actor) {
       m_sceneRoot.addChild(actor);
@@ -316,9 +354,11 @@ vglModule.renderer = function() {
     return false;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Add an array of actors to the collection
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.addActors = function(actors) {
     var i = null
     if (actors instanceof Array) {
@@ -329,9 +369,14 @@ vglModule.renderer = function() {
     }
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Remove the actor from the collection
+   *
+   * @param actor
+   * @returns {boolean}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.removeActor = function(actor) {
     if (m_sceneRoot.children().indexOf(actor) !== -1) {
       m_sceneRoot.removeChild(actor);
@@ -342,9 +387,14 @@ vglModule.renderer = function() {
     return false;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Remove actors from the collection
+   *
+   * @param actors
+   * @returns {boolean}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.removeActors = function(actors) {
     if (!(actors instanceof Array)) {
       return false;
@@ -358,16 +408,22 @@ vglModule.renderer = function() {
     return true;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Remove all actors for a renderer
+   *
+   * @returns {*}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.removeAllActors = function() {
-    m_sceneRoot.removeChildren();
+    return m_sceneRoot.removeChildren();
   }
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Transform a point in the world space to display space
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.worldToDisplay = function(worldPt, viewMatrix, projectionMatrix, width,
                                  height) {
     var viewProjectionMatrix = mat4.create();
@@ -394,9 +450,17 @@ vglModule.renderer = function() {
     return vec4.fromValues(winX, winY, winZ, winW);
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Transform a point in display space to world space
+   * @param displayPt
+   * @param viewMatrix
+   * @param projectionMatrix
+   * @param width
+   * @param height
+   * @returns {vec4}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.displayToWorld = function(displayPt, viewMatrix, projectionMatrix,
                                  width, height) {
     var x = (2.0 * displayPt[0] / width) - 1,

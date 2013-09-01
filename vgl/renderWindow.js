@@ -12,12 +12,14 @@
 // TODO Current we support only one context
 gl = 0;
 
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class renderWindow
  *
  * @class
  * @returns {vglModule.renderWindow}
  */
+//////////////////////////////////////////////////////////////////////////////
 vglModule.renderWindow = function(canvas) {
 
   if (!(this instanceof vglModule.renderWindow)) {
@@ -46,18 +48,26 @@ vglModule.renderWindow = function(canvas) {
   /** @private */
   var m_renderers = [];
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get size of the render window
    *
-   * @returns [width, height]
+   * @returns {Array}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.windowSize = function() {
     return [ m_width, m_height ];
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Set size of the render window
+   *
+   * @param width
+   * @param height
+   * @returns {boolean}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.setWindowSize = function(width, height) {
 
     if (width !== width || height !== height) {
@@ -72,18 +82,26 @@ vglModule.renderWindow = function(canvas) {
     return false;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get window position (top left coordinates)
    *
-   * @returns [x,y]
+   * @returns {Array}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.windowPosition = function() {
     return [ m_x, m_y ];
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Set window position (top left coordinates)
+   *
+   * @param x
+   * @param y
+   * @returns {boolean}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.setWindowPosition = function(x, y) {
     if ((m_x != x) || (m_y != y)) {
       m_x = x;
@@ -97,16 +115,25 @@ vglModule.renderWindow = function(canvas) {
     return false;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get active renderer of the the render window
+   *
+   * @returns vglModule.renderer
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.activeRenderer = function() {
     return m_activeRender;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Add renderer to the render window
+   *
+   * @param ren
+   * @returns {boolean}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.addRenderer = function(ren) {
     if (this.hasRenderer(ren) === false) {
       m_renderers.push(ren);
@@ -120,9 +147,14 @@ vglModule.renderWindow = function(canvas) {
     return false;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Remove renderer from the render window
+   *
+   * @param ren
+   * @returns {boolean}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.removeRenderer = function(ren) {
     var index = m_renderers.indexOf(ren);
     if (index !== -1) {
@@ -137,11 +169,14 @@ vglModule.renderWindow = function(canvas) {
     return false;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Return a renderer at a given index
    *
+   * @param index
    * @returns {vglModule.renderer}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.getRenderer = function(index) {
     if (index < m_renderers.length) {
       return m_renderers[index];
@@ -153,9 +188,14 @@ vglModule.renderWindow = function(canvas) {
     return null;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Check if the renderer exists
+   *
+   * @param ren
+   * @returns {boolean}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.hasRenderer = function(ren) {
     var i;
     for (i = 0; i < m_renderers.length; ++i) {
@@ -167,14 +207,29 @@ vglModule.renderWindow = function(canvas) {
     return false;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Resize window
+   *
+   * @param width
+   * @param height
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.resize = function(width, height) {
     this.positionAndResize(m_x, m_y, width, height);
     this.modified();
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Resize and reposition the window
+   *
+   * @param x
+   * @param y
+   * @param width
+   * @param height
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.positionAndResize = function(x, y, width, height) {
     m_x = x;
     m_y = y;
@@ -187,9 +242,13 @@ vglModule.renderWindow = function(canvas) {
     this.modified();
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Create the window
+   *
+   * @returns {boolean}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.createWindow = function() {
     // Initialize the global variable gl to null.
     gl = null;
@@ -223,16 +282,20 @@ vglModule.renderWindow = function(canvas) {
     return false;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Delete this window and release any graphics resources
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.deleteWindow = function() {
     // TODO
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Render the scene
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.render = function() {
     var i;
     for (i = 0; i < m_renderers.length; ++i) {
