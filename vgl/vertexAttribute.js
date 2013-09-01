@@ -24,6 +24,7 @@ vglModule.vertexAttributeKeys = {
   "CountAttributeIndex" : 11
 };
 
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of vertexAttribute
  *
@@ -31,20 +32,34 @@ vglModule.vertexAttributeKeys = {
  * @param name
  * @returns {vglModule.vertexAttribute}
  */
+//////////////////////////////////////////////////////////////////////////////
 vglModule.vertexAttribute = function(name) {
 
   if (!(this instanceof vglModule.vertexAttribute)) {
     return new vglModule.vertexAttribute(name);
   }
 
-  // / Private member variables
   var m_name = name;
 
-  // / Public member methods
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get name of the vertex attribute
+   *
+   * @returns {*}
+   */
+  //////////////////////////////////////////////////////////////////////////////
   this.name = function() {
     return m_name;
   };
 
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * Bind vertex data to the given render state
+   *
+   * @param renderState
+   * @param key
+   */
+  //////////////////////////////////////////////////////////////////////////////
   this.bindVertexData = function(renderState, key) {
     var geometryData = renderState.m_mapper.geometryData();
     var sourceData = geometryData.sourceData(key);
@@ -59,6 +74,14 @@ vglModule.vertexAttribute = function(name) {
     gl.enableVertexAttribArray(program.attributeLocation(m_name));
   };
 
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * Undo bind vertex data for a given render state
+   *
+   * @param renderState
+   * @param key
+   */
+  //////////////////////////////////////////////////////////////////////////////
   this.undoBindVertexData = function(renderState, key) {
     var program = renderState.m_material.shaderProgram();
 

@@ -9,6 +9,7 @@
 /*global vglModule, ogs, vec4, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class viewer
  *
@@ -16,6 +17,7 @@
  * @param canvas
  * @returns {vglModule.viewer}
  */
+//////////////////////////////////////////////////////////////////////////////
 vglModule.viewer = function(canvas) {
 
   if (!(this instanceof vglModule.viewer)) {
@@ -39,18 +41,39 @@ vglModule.viewer = function(canvas) {
   /** @private */
   var m_renderer = vglModule.renderer();
 
-  /** @private */
   var m_renderWindow = vglModule.renderWindow(m_canvas);
   m_renderWindow.addRenderer(m_renderer);
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get canvas referenced by the viewer
+   *
+   * @returns {*}
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.canvas = function() {
     return m_canvas;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return render window references by the viewer
+   *
+   * @returns {*}
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.renderWindow = function() {
     return m_renderWindow;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Initialize the viewer
+   *
+   * This is a must call or otherwise render context may not initialized
+   * properly.
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.init = function() {
     if (m_renderWindow !== null) {
       m_renderWindow.createWindow();
@@ -61,10 +84,24 @@ vglModule.viewer = function(canvas) {
     }
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get interactor style of the viewer
+   *
+   * @returns {null}
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.interactorStyle = function() {
     return m_interactorStyle;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set interactor style to be used by the viewer
+   *
+   * @param style
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.setInteractorStyle = function(style) {
     if (style !== m_interactorStyle) {
       m_interactorStyle = style;
@@ -73,6 +110,13 @@ vglModule.viewer = function(canvas) {
     }
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   *
+   * @param event
+   * @returns {boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.handleMouseDown = function(event) {
     if (m_ready === true) {
       var fixedEvent = $.event.fix(event || window.event);
@@ -87,6 +131,13 @@ vglModule.viewer = function(canvas) {
     return true;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   *
+   * @param event
+   * @returns {boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.handleMouseUp = function(event) {
     if (m_ready === true) {
       var fixedEvent = $.event.fix(event || window.event);
@@ -99,6 +150,13 @@ vglModule.viewer = function(canvas) {
     return true;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   *
+   * @param event
+   * @returns {boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.handleMouseMove = function(event) {
     if (m_ready === true) {
       var fixedEvent = $.event.fix(event || window.event);
@@ -110,6 +168,13 @@ vglModule.viewer = function(canvas) {
     return true;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   *
+   * @param event
+   * @returns {boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.handleKeyPress = function(event) {
     if (m_ready === true) {
       var fixedEvent = $.event.fix(event || window.event);
@@ -121,6 +186,13 @@ vglModule.viewer = function(canvas) {
     return true;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   *
+   * @param event
+   * @returns {boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.handleContextMenu = function(event) {
     if (m_ready === true) {
       var fixedEvent = $.event.fix(event || window.event);
@@ -132,6 +204,13 @@ vglModule.viewer = function(canvas) {
     return false;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   *
+   * @param event
+   * @returns {{x: number, y: number}}
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.relMouseCoords = function(event) {
     var totalOffsetX = 0,
         totalOffsetY = 0,
@@ -153,6 +232,11 @@ vglModule.viewer = function(canvas) {
     };
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   *
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.render = function() {
     m_renderWindow.render();
   };
