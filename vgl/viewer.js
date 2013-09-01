@@ -13,7 +13,6 @@
 /**
  * Create a new instance of class viewer
  *
- * @class
  * @param canvas
  * @returns {vglModule.viewer}
  */
@@ -26,27 +25,18 @@ vglModule.viewer = function(canvas) {
 
   vglModule.object.call(this);
 
-  /** @private */
-  var m_that = this;
+  var m_that = this,
+      m_canvas = canvas,
+      m_ready = false,
+      m_interactorStyle = null,
+      m_renderer = vglModule.renderer(),
+      m_renderWindow = vglModule.renderWindow(m_canvas);
 
-  /** @private */
-  var m_canvas = canvas;
-
-  /** @private */
-  var m_ready = false;
-
-  /** @private */
-  var m_interactorStyle = null;
-
-  /** @private */
-  var m_renderer = vglModule.renderer();
-
-  var m_renderWindow = vglModule.renderWindow(m_canvas);
   m_renderWindow.addRenderer(m_renderer);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get canvas referenced by the viewer
+   * Get canvas of the viewer
    *
    * @returns {*}
    */
@@ -57,9 +47,9 @@ vglModule.viewer = function(canvas) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Return render window references by the viewer
+   * Return render window of the viewer
    *
-   * @returns {*}
+   * @returns {vglModule.renderWindow}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.renderWindow = function() {
@@ -88,7 +78,7 @@ vglModule.viewer = function(canvas) {
   /**
    * Get interactor style of the viewer
    *
-   * @returns {null}
+   * @returns {vglModule.interactorStyle}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.interactorStyle = function() {
@@ -99,7 +89,7 @@ vglModule.viewer = function(canvas) {
   /**
    * Set interactor style to be used by the viewer
    *
-   * @param style
+   * @param {vglModule.interactorStyle} style
    */
   ////////////////////////////////////////////////////////////////////////////
   this.setInteractorStyle = function(style) {
@@ -112,6 +102,7 @@ vglModule.viewer = function(canvas) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Handle mouse down event
    *
    * @param event
    * @returns {boolean}
@@ -133,6 +124,7 @@ vglModule.viewer = function(canvas) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Handle mouse up event
    *
    * @param event
    * @returns {boolean}
@@ -152,6 +144,7 @@ vglModule.viewer = function(canvas) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Handle mouse move event
    *
    * @param event
    * @returns {boolean}
@@ -170,6 +163,7 @@ vglModule.viewer = function(canvas) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Handle key press event
    *
    * @param event
    * @returns {boolean}
@@ -188,6 +182,7 @@ vglModule.viewer = function(canvas) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Handle context menu event
    *
    * @param event
    * @returns {boolean}
@@ -206,6 +201,7 @@ vglModule.viewer = function(canvas) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Get mouse coodinates related to canvas
    *
    * @param event
    * @returns {{x: number, y: number}}
@@ -234,7 +230,7 @@ vglModule.viewer = function(canvas) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   *
+   * Render
    */
   ////////////////////////////////////////////////////////////////////////////
   this.render = function() {
