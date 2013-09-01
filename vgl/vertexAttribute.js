@@ -9,6 +9,16 @@
 /*global vglModule, ogs, vec4, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Keys to identify vertex attributes
+ *
+ * @type {{Position: number, Normal: number, TextureCoordinate: number,
+ *         Color: number, Scalar: number, Scalar2: number, Scalar3: number,
+ *         Scalar4: number, Scalar5: number, Scalar6: number, Scalar7: number,
+ *         CountAttributeIndex: number}}
+ */
+//////////////////////////////////////////////////////////////////////////////
 vglModule.vertexAttributeKeys = {
   "Position" : 0,
   "Normal" : 1,
@@ -28,8 +38,7 @@ vglModule.vertexAttributeKeys = {
 /**
  * Create a new instance of vertexAttribute
  *
- * @class
- * @param name
+ * @param {string} name
  * @returns {vglModule.vertexAttribute}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -45,7 +54,7 @@ vglModule.vertexAttribute = function(name) {
   /**
    * Get name of the vertex attribute
    *
-   * @returns {*}
+   * @returns {string}
    */
   //////////////////////////////////////////////////////////////////////////////
   this.name = function() {
@@ -56,8 +65,8 @@ vglModule.vertexAttribute = function(name) {
   /**
    * Bind vertex data to the given render state
    *
-   * @param renderState
-   * @param key
+   * @param {vglModule.renderState} renderState
+   * @param {vglModule.vertexAttributeKeys} key
    */
   //////////////////////////////////////////////////////////////////////////////
   this.bindVertexData = function(renderState, key) {
@@ -78,8 +87,8 @@ vglModule.vertexAttribute = function(name) {
   /**
    * Undo bind vertex data for a given render state
    *
-   * @param renderState
-   * @param key
+   * @param {vglModule.renderState} renderState
+   * @param {vglModule.vertexAttributeKeys} key
    */
   //////////////////////////////////////////////////////////////////////////////
   this.undoBindVertexData = function(renderState, key) {
