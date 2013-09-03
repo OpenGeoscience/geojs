@@ -56,7 +56,8 @@ function blankWorkflow(name, version, connections, modules, vistrail_id, id) {
     "workflow": {
       "@name": name,
       "@version": version,
-      "@{http://www.w3.org/2001/XMLSchema-instance}schemaLocation": "http://www.vistrails.org/workflow.xsd",
+      "@{http://www.w3.org/2001/XMLSchema-instance}schemaLocation":
+        "http://www.vistrails.org/workflow.xsd",
       "connection": connections,
       "module": modules,
       "@vistrail_id": vistrail_id,
@@ -82,10 +83,12 @@ function initWorkflowCanvas() {
 //  append workflow html elements
   $('body').append(
     [
-      '<div id="workflow-dialog" title="Workflow"><table id="mainTable">',
-      '<tr><td><div id="modulediv"><!--select id="workflowselect"></select--><table id="moduletable">',
-      '<tbody></tbody></table></div></td>',
-      '<td id="canvasContainer"><canvas id="workspace"></canvas><div id="inputContainer"></div></td></tr></table></div>'
+      '<div id="workflow-dialog" title="Workflow">',
+      '<div id="modulediv"><table id="moduletable">',
+      '<tbody></tbody></table></div>',
+      '<div id="canvasContainer"><canvas id="workspace"></canvas>',
+      '<div id="inputContainer"></div>',
+      '</div>'
     ].join('')
   );
 
@@ -115,32 +118,26 @@ function setupWorkflowCSS() {
     stylesheet.addRule(selector, rule, -1);
   }
 
-  $('#mainTable').css({
-    height: '100%'
-  });
-
   $('#modulediv').css({
     height: '100%',
-    //width: $('workflowselect').width()+20,
     width: 225,
-    overflow: 'auto'
+    overflow: 'auto',
+    float: 'left'
   });
 
   $('#canvasContainer').css({
     position: 'relative',
-    width: '100%',
     height: '100%',
     overflow: 'hidden'
-//    'background-image': 'url(/common/img/tweed.png)',
-//    'background-repeat': 'repeat'
   });
 
   $('#inputContainer').css({
-    position: 'relative',
-    width: '100%',
-    height: '100%',
+    position: 'absolute',
+    top: climatePipesStyle.shadowBlur,
+    left: climatePipesStyle.shadowBlur,
+    bottom: climatePipesStyle.shadowBlur,
+    right: climatePipesStyle.shadowBlur,
     overflow: 'hidden',
-    margin: climatePipesStyle.shadowBlur,
     'pointer-events': 'none'
   });
 
@@ -152,7 +149,8 @@ function setupWorkflowCSS() {
     modulePattern = new Image(),
     workflowPattern = new Image();
   modulePattern.onload = function() {
-    climatePipesStyle.module.fill = context.createPattern(modulePattern, 'repeat');
+    climatePipesStyle.module.fill = context.createPattern(modulePattern,
+      'repeat');
   };
   modulePattern.src = '/common/img/squairy_light.png';
 
@@ -160,14 +158,6 @@ function setupWorkflowCSS() {
     climatePipesStyle.fill = context.createPattern(workflowPattern, 'repeat');
   };
   workflowPattern.src = '/common/img/tweed.png';
-
-  $canvas.css({
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0
-  });
 }
 
 function setupWorkflowDragAndDrop() {
@@ -245,7 +235,8 @@ function addModuleToList(moduleInfo, $moduleTableBody) {
         e = e.originalEvent;
       }
       e.dataTransfer.effectAllowed = 'copy';
-      e.dataTransfer.setData("Text", JSON.stringify($(this).data('moduleInfo')));
+      e.dataTransfer.setData("Text",
+        JSON.stringify($(this).data('moduleInfo')));
 
       debug(e);
     });
@@ -304,7 +295,8 @@ function setupWorkflowInteraction() {
       var newPoint = this.ctxMousePos(e);
       draggingModule.getData().location['@x'] += newPoint.x - lastPoint.x;
       draggingModule.getData().location['@y'] -= newPoint.y - lastPoint.y;
-      draggingModule.recomputeMetrics($canvas[0].getContext('2d'), currentWorkflowStyle);
+      draggingModule.recomputeMetrics($canvas[0].getContext('2d'),
+        currentWorkflowStyle);
       lastPoint = newPoint;
       activeWorkflow.draw(ctx);
     } else if (draggingPort) {
