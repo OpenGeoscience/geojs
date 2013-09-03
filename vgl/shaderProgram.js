@@ -6,7 +6,7 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, continue:true, indent: 2*/
 
-/*global vglModule, ogs, vec4, inherit, $*/
+/*global vglModule, gl, ogs, vec4, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -72,7 +72,8 @@ vglModule.shaderProgram = function() {
       return false;
     }
 
-    for ( var i = 0; i < m_shaders.length; ++i) {
+    var i;
+    for (i = 0; i < m_shaders.length; ++i) {
       if (m_shaders[i].shaderType() === shader.shaderType()) {
         m_shaders.splice(m_shaders.indexOf(shader), 1);
       }
@@ -154,7 +155,8 @@ vglModule.shaderProgram = function() {
    */
   /////////////////////////////////////////////////////////////////////////////
   this.uniform = function(name) {
-    for ( var i = 0; i < m_uniforms.length; ++i) {
+    var i;
+    for (i = 0; i < m_uniforms.length; ++i) {
       if (m_uniforms[i].name() === name) {
         return m_uniforms[i];
       }
@@ -171,7 +173,9 @@ vglModule.shaderProgram = function() {
    */
   /////////////////////////////////////////////////////////////////////////////
   this.updateUniforms = function() {
-    for ( var i = 0; i < m_uniforms.length; ++i) {
+    var i;
+
+    for (i = 0; i < m_uniforms.length; ++i) {
       m_uniforms[i].callGL(m_uniformNameToLocation[m_uniforms[i].name()]);
     }
   };
@@ -229,7 +233,8 @@ vglModule.shaderProgram = function() {
    */
   /////////////////////////////////////////////////////////////////////////////
   this.deleteVertexAndFragment = function() {
-    for ( var i = 0; i < m_shaders.length; ++i) {
+    var i;
+    for (i = 0; i < m_shaders.length; ++i) {
       gl.deleteShader(m_shaders[i].shaderHandle());
     }
   };
@@ -330,7 +335,8 @@ vglModule.shaderProgram = function() {
    */
   /////////////////////////////////////////////////////////////////////////////
   this.bindUniforms = function() {
-    for ( var i = 0; i < m_uniforms.length; ++i) {
+    var i;
+    for (i = 0; i < m_uniforms.length; ++i) {
       m_uniformNameToLocation[m_uniforms[i].name()] = this
           .queryUniformLocation(m_uniforms[i].name());
     }
@@ -342,9 +348,10 @@ vglModule.shaderProgram = function() {
    */
   /////////////////////////////////////////////////////////////////////////////
   this.bindAttributes = function() {
-    for (var key in m_vertexAttributes) {
-      var name = m_vertexAttributes[key].name();
-      gl.bindAttribLocation(m_programHandle, key, name);
+    var key, name;
+    for (key in m_vertexAttributes) {
+      name = m_vertexAttributes[key].name();
+      gl.bindAttrisbLocation(m_programHandle, key, name);
       m_vertexAttributeNameToLocation[name] = key;
     }
   };
