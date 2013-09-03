@@ -6,7 +6,7 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, continue:true, indent: 2*/
 
-/*global vglModule, ogs, vec4, inherit, $*/
+/*global vglModule, gl, ogs, vec4, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -20,6 +20,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.blendFunction = function(source, destination) {
+  'use strict';
 
   if (!(this instanceof vglModule.blendFunction)) {
     return new vglModule.blendFunction(source, destination);
@@ -47,16 +48,17 @@ vglModule.blendFunction = function(source, destination) {
 /**
  * Create a new instance of class blend
  *
- * @class
  * @returns {vglModule.blend}
  */
 ////////////////////////////////////////////////////////////////////////////
 vglModule.blend = function() {
+  'use strict';
 
   if (!(this instanceof vglModule.blend)) {
     return new vglModule.blend();
   }
-  vglModule.materialAttribute.call(this, materialAttributeType.Blend);
+  vglModule.materialAttribute.call(
+    this, vglModule.materialAttributeType.Blend);
 
   /** @private */
   var m_wasEnabled = false,
@@ -71,8 +73,6 @@ vglModule.blend = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.bind = function(renderState) {
-    'use strict';
-
     m_wasEnabled = gl.isEnabled(gl.BLEND);
 
     if (this.enabled()) {

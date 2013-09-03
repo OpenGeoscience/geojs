@@ -6,7 +6,7 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, continue:true, indent: 2*/
 
-/*global vglModule, ogs, vec4, inherit, $*/
+/*global vglModule, gl, ogs, vec2, vec3, vec4, mat4, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -149,7 +149,7 @@ vglModule.renderer = function() {
     }
 
     // Now perform sorting
-    sortedActors.sort(function(a, b) {return a[0] - b[0]});
+    sortedActors.sort(function(a, b) {return a[0] - b[0];});
 
     for ( i = 0; i < sortedActors.length; ++i) {
       actor = sortedActors[i][1];
@@ -197,7 +197,9 @@ vglModule.renderer = function() {
         ],
         radius = 0.0,
         aspect = m_camera.viewAspect(),
-        angle = m_camera.viewAngle();
+        angle = m_camera.viewAngle(),
+        distance = null,
+        vup = null;
 
     if (diagonals[0] > diagonals[1]) {
       if (diagonals[0] > diagonals[2]) {
@@ -220,8 +222,8 @@ vglModule.renderer = function() {
       angle = 2.0 * Math.atan(Math.tan(angle * 0.5) * aspect);
     }
 
-    var distance = radius / Math.sin(angle * 0.5),
-        vup = m_camera.viewUpDirection();
+    distance = radius / Math.sin(angle * 0.5);
+    vup = m_camera.viewUpDirection();
 
     if (Math.abs(vec3.dot(vup, vn)) > 0.999) {
       m_camera.setViewUpDirection(-vup[2], vup[0], vup[1]);
@@ -247,16 +249,19 @@ vglModule.renderer = function() {
         c = -vn[2],
         d = -(a*position[0] + b*position[1] + c*position[2]),
         range = vec2.create(),
-        dist = null;
+        dist = null,
+        i = null,
+        j = null,
+        k = null;
 
     // Set the max near clipping plane and the min far clipping plane
     range[0] = a * bounds[0] + b * bounds[2] + c * bounds[4] + d;
     range[1] = 1e-18;
 
     // Find the closest / farthest bounding box vertex
-    for (var k = 0; k < 2; k++ ) {
-      for (var j = 0; j < 2; j++) {
-        for (var i = 0; i < 2; i++) {
+    for (k = 0; k < 2; k++ ) {
+      for (j = 0; j < 2; j++) {
+        for (i = 0; i < 2; i++) {
           dist = a * bounds[i] + b * bounds[2 + j] + c * bounds[4 + k] + d;
           range[0] = (dist < range[0]) ? (dist) : (range[0]);
           range[1] = (dist > range[1]) ? (dist) : (range[1]);

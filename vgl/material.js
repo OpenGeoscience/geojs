@@ -67,9 +67,8 @@ vglModule.material = function() {
     if (attr.type() === vglModule.materialAttribute.Texture) {
       return m_textureAttributes.hasOwnProperty(attr);
     }
-    else {
-      return m_attributes.hasOwnProperty(attr);
-    }
+
+    return m_attributes.hasOwnProperty(attr);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -84,26 +83,25 @@ vglModule.material = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.setAttribute = function(attr) {
-    if (attr.type() === materialAttributeType.Texture &&
+    if (attr.type() === vglModule.materialAttributeType.Texture &&
         m_textureAttributes[attr.textureUnit()] !== attr) {
       m_textureAttributes[attr.textureUnit()] = attr;
       this.modified();
       return true;
     }
-    else {
-      if (m_attributes[attr.type()] === attr) {
-        return false;
-      }
 
-      // Shader is a very special attribute
-      if (attr.type() === materialAttributeType.ShaderProgram) {
-        m_shaderProgram = attr;
-      }
-
-      m_attributes[attr.type()] = attr;
-      this.modified();
-      return true;
+    if (m_attributes[attr.type()] === attr) {
+      return false;
     }
+
+    // Shader is a very special attribute
+    if (attr.type() === vglModule.materialAttributeType.ShaderProgram) {
+      m_shaderProgram = attr;
+    }
+
+    m_attributes[attr.type()] = attr;
+    this.modified();
+    return true;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -119,25 +117,22 @@ vglModule.material = function() {
       return false;
     }
 
-    if (attr.type() === materialAttributeType.Texture) {
+    if (attr.type() === vglModule.materialAttributeType.Texture) {
       // TODO Currently we don't check if we are replacing or not.
       // It would be nice to have a flag for it.
       m_textureAttributes[attr.textureUnit()] = attr;
       this.modified();
       return true;
     }
-    else {
-      // Shader is a very special attribute
-      if (attr.type() === materialAttributeType.ShaderProgram) {
-        m_shaderProgram = attr;
-      }
 
-      m_attributes[attr.type()] = attr;
-      this.modified();
-      return true;
+    // Shader is a very special attribute
+    if (attr.type() === vglModule.materialAttributeType.ShaderProgram) {
+      m_shaderProgram = attr;
     }
 
-    return false;
+    m_attributes[attr.type()] = attr;
+    this.modified();
+    return true;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -181,13 +176,15 @@ vglModule.material = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.bind = function(renderState) {
-    for ( var key in m_attributes) {
+    var key = null;
+
+    for (key in m_attributes) {
       if (m_attributes.hasOwnProperty(key)) {
         m_attributes[key].bind(renderState);
       }
     }
 
-    for ( var key in m_textureAttributes) {
+    for (key in m_textureAttributes) {
       if (m_textureAttributes.hasOwnProperty(key)) {
         m_textureAttributes[key].bind(renderState);
       }
@@ -225,7 +222,9 @@ vglModule.material = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.bindVertexData = function(renderState, key) {
-    for ( var i in m_attributes) {
+    var i = null;
+
+    for (i in m_attributes) {
       if (m_attributes.hasOwnProperty(i)) {
         m_attributes[i].bindVertexData(renderState, key);
       }
@@ -241,7 +240,9 @@ vglModule.material = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.undoBindVertexData = function(renderState, key) {
-    for ( var i in m_attributes) {
+    var i = null;
+
+    for (i in m_attributes) {
       if (m_attributes.hasOwnProperty(i)) {
         m_attributes.undoBindVertexData(renderState, key);
       }

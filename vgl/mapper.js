@@ -6,7 +6,7 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, continue:true, indent: 2*/
 
-/*global vglModule, ogs, vec4, inherit, $*/
+/*global vglModule, gl, ogs, vec4, Float32Array, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -45,10 +45,11 @@ vglModule.mapper = function() {
     }
 
     var computeBoundsTimestamp = this.computeBoundsTimestamp(),
-        boundsDirtyTimestamp = this.boundsDirtyTimestamp();
+        boundsDirtyTimestamp = this.boundsDirtyTimestamp(),
+        geomBounds = null;
 
     if (boundsDirtyTimestamp.getMTime() > computeBoundsTimestamp.getMTime()) {
-      var geomBounds = m_geomData.bounds();
+      geomBounds = m_geomData.bounds();
 
       this.setBounds(geomBounds[0], geomBounds[1], geomBounds[2],
         geomBounds[3], geomBounds[4], geomBounds[5]) ;
@@ -113,7 +114,7 @@ vglModule.mapper = function() {
   ////////////////////////////////////////////////////////////////////////////
   this.render = function(renderState) {
     if (this.getMTime() > m_glCompileTimestamp.getMTime()) {
-      setupDrawObjects(renderState);
+      this.setupDrawObjects(renderState);
     }
 
     // Fixed vertex color
@@ -121,7 +122,7 @@ vglModule.mapper = function() {
 
     // TODO Use renderState
     var bufferIndex = 0,
-        j = 0, i;
+        j = 0, i, noOfPrimitives = null, primitive = null;
 
     for (i in m_bufferVertexAttributeMap) {
       if (m_bufferVertexAttributeMap.hasOwnProperty(i)) {
@@ -134,10 +135,10 @@ vglModule.mapper = function() {
       }
     }
 
-    var noOfPrimitives = m_geomData.numberOfPrimitives();
+    noOfPrimitives = m_geomData.numberOfPrimitives();
     for (j = 0; j < noOfPrimitives; ++j) {
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, m_buffers[bufferIndex++]);
-      var primitive = m_geomData.primitive(j);//
+      primitive = m_geomData.primitive(j);//
       gl.drawElements(primitive.primitiveType(), primitive.numberOfIndices(),
                       primitive.indicesValueType(), 0);
     }

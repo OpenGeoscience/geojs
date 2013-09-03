@@ -349,29 +349,29 @@ vglModule.sourceData = function() {
   }
 
   var m_attributesMap = {},
-      m_data = [];
+      m_data = [],
 
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Attribute data for the source
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  var vglAttributeData = function() {
-    // Number of components per group
-    // Type of data type (GL_FLOAT etc)
-    this.m_numberOfComponents = 0;
-        // Size of data type
-    this.m_dataType = 0;
-    this.m_dataTypeSize = 0;
-    // Specifies whether fixed-point data values should be normalized
-    // (true) or converted directly as fixed-point values (false)
-    // when they are accessed.
-    this.m_normalized = false;
-    // Strides for each attribute.
-    this.m_stride = 0;
-    // Offset
-    this.m_offset = 0;
-  };
+      ////////////////////////////////////////////////////////////////////////////
+      /**
+       * Attribute data for the source
+       */
+      ////////////////////////////////////////////////////////////////////////////
+      vglAttributeData = function() {
+        // Number of components per group
+        // Type of data type (GL_FLOAT etc)
+        this.m_numberOfComponents = 0;
+            // Size of data type
+        this.m_dataType = 0;
+        this.m_dataTypeSize = 0;
+        // Specifies whether fixed-point data values should be normalized
+        // (true) or converted directly as fixed-point values (false)
+        // when they are accessed.
+        this.m_normalized = false;
+        // Strides for each attribute.
+        this.m_stride = 0;
+        // Offset
+        this.m_offset = 0;
+      };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -1050,7 +1050,7 @@ vglModule.geometryData = function() {
         data = sourceData.data(),
         stride = sourceData.attributeStride(attr) / sizeOfDataType,
         offset = sourceData.attributeOffset(attr) / sizeOfDataType,
-        minDist = (1.0 / 0.0),
+        minDist = Number.MAX_VALUE,
         minIndex = null,
         vi, vPos, dx, dy, dz, dist, i;
 
