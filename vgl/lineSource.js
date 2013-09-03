@@ -43,10 +43,9 @@ vglModule.lineSource = function(positions, colors) {
       this.modified();
       return true;
     }
-    else {
-      console
-        .log("[ERROR] Invalid data type for positions. Array is required.");
-    }
+
+    console
+      .log("[ERROR] Invalid data type for positions. Array is required.");
     return false;
   };
 
@@ -63,10 +62,8 @@ vglModule.lineSource = function(positions, colors) {
       this.modified();
       return true;
     }
-    else {
-      console.log("[ERROR] Invalid data type for colors. Array is required.");
-    }
 
+    console.log("[ERROR] Invalid data type for colors. Array is required.");
     return false;
   };
 
@@ -93,25 +90,28 @@ vglModule.lineSource = function(positions, colors) {
 
     var m_geom = new vglModule.geometryData(),
         numPts = m_positions.length / 3,
-        i = 0,
-        indices = [];
+        i,
+        indices = [],
+        linesPrimitive,
+        sourcePositions,
+        sourceColors;
 
     indices.length = numPts;
 
-    for (; i < numPts; ++i) {
+    for (i = 0; i < numPts; ++i) {
       indices[i] = i;
     }
 
-    var linesPrimitive = new vglModule.lines();
+    linesPrimitive = new vglModule.lines();
     linesPrimitive.setIndices(indices);
 
-    var sourcePositions = vglModule.sourceDataP3fv();
+    sourcePositions = vglModule.sourceDataP3fv();
     sourcePositions.pushBack(m_positions);
     m_geom.addSource(sourcePositions);
 
     if ( m_colors && (m_colors.length > 0) &&
          m_colors.length === m_positions.length) {
-      var sourceColors = vglModule.sourceDataC3fv();
+      sourceColors = vglModule.sourceDataC3fv();
       sourceColors.pushBack(m_colors);
       m_geom.addSource(sourceColors);
     }
