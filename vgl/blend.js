@@ -26,10 +26,8 @@ vglModule.blendFunction = function(source, destination) {
   }
 
   /** @private */
-  var m_source = source;
-
-  /** @private */
-  var m_destination = destination;
+  var m_source = source,
+      m_destination = destination;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -61,10 +59,8 @@ vglModule.blend = function() {
   vglModule.materialAttribute.call(this, materialAttributeType.Blend);
 
   /** @private */
-  var m_wasEnabled = false;
-
-  /** @private */
-  var m_blendFunction = vglModule.blendFunction(gl.SRC_ALPHA,
+  var m_wasEnabled = false,
+      m_blendFunction = vglModule.blendFunction(gl.SRC_ALPHA,
                                                 gl.ONE_MINUS_SRC_ALPHA);
 
   ////////////////////////////////////////////////////////////////////////////

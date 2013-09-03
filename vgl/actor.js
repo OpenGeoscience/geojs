@@ -24,26 +24,17 @@ vglModule.actor = function() {
   vglModule.node.call(this);
 
   /** @private */
-  var m_center = [];
+  var m_center = [],
+      m_rotation = [],
+      m_scale = [],
+      m_translation = [0, 0, 0],
+      m_referenceFrame = vglModule.boundingObject.ReferenceFrame.Relative,
+      m_mapper = null;
+
   m_center.length = 3;
-
-  /** @private */
-  var m_rotation = [];
   m_rotation.length = 4;
-
-  /** @private */
-  var m_scale = [];
   m_scale.length = 3;
-
-  /** @private */
-    var m_translation = [0, 0, 0];
   m_translation.length = 3;
-
-  /** @private */
-  var m_referenceFrame = vglModule.boundingObject.ReferenceFrame.Relative;
-
-  /** @private */
-  var m_mapper = null;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -266,22 +257,23 @@ vglModule.actor = function() {
       return;
     }
 
-    var computeBoundsTimestamp = this.computeBoundsTimestamp();
+    var computeBoundsTimestamp = this.computeBoundsTimestamp(),
+        mapperBounds, minPt, maxPt, actorMatrix, newBounds;
 
     if (this.boundsDirtyTimestamp().getMTime() > computeBoundsTimestamp.getMTime() ||
       m_mapper.boundsDirtyTimestamp().getMTime() > computeBoundsTimestamp.getMTime()) {
 
       m_mapper.computeBounds();
-      var mapperBounds = m_mapper.bounds();
+      mapperBounds = m_mapper.bounds();
 
-      var minPt = [mapperBounds[0], mapperBounds[2], mapperBounds[4]];
-      var maxPt = [mapperBounds[1], mapperBounds[3], mapperBounds[5]];
+      minPt = [mapperBounds[0], mapperBounds[2], mapperBounds[4]];
+      maxPt = [mapperBounds[1], mapperBounds[3], mapperBounds[5]];
 
-      var actorMatrix = this.modelViewMatrix();
+      actorMatrix = this.modelViewMatrix();
       vec3.transformMat4(minPt, minPt, actorMatrix);
       vec3.transformMat4(maxPt, maxPt, actorMatrix);
 
-      var newBounds = [
+      newBounds = [
         minPt[0] > maxPt[0] ? maxPt[0] : minPt[0],
         minPt[0] > maxPt[0] ? minPt[0] : maxPt[0],
         minPt[1] > maxPt[1] ? maxPt[1] : minPt[1],
