@@ -16,13 +16,9 @@ vglModule.groupMapper = function() {
   vglModule.mapper.call(this);
 
   /** @private */
-  var m_createMappersTimestamp = vglModule.timestamp();
-
-  /** @private */
-  var m_mappers = [];
-
-  /** @private */
-  var m_geomDataArray = [];
+  var m_createMappersTimestamp = vglModule.timestamp(),
+      m_mappers = [],
+      m_geomDataArray = [];
 
   ////////////////////////////////////////////////////////////////////////////
   /**

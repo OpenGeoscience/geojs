@@ -26,8 +26,8 @@ vglModule.interactorStyle = function() {
   vglModule.object.call(this);
 
   // Private member variables
-  var m_that = this;
-  var m_viewer = null;
+  var m_that = this,
+      m_viewer = null;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
