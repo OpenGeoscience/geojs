@@ -4,7 +4,7 @@
  */
 
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
+/*jslint white: true, continue:true, bitwise:true, indent: 2*/
 
 /*global vglModule, gl, ogs, vec2, vec3, vec4, mat4, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
@@ -44,6 +44,8 @@ vglModule.renderer = function() {
   var m_backgroundColor = [0.0, 0.0, 0.0, 1.0],
       m_sceneRoot = new vglModule.groupNode(),
       m_camera = new vglModule.camera(),
+      m_x = 0,
+      m_y = 0,
       m_width = 0,
       m_height = 0;
 
@@ -362,7 +364,7 @@ vglModule.renderer = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.addActors = function(actors) {
-    var i = null
+    var i = null;
     if (actors instanceof Array) {
       for (i = 0; i < actors.length; ++i) {
         m_sceneRoot.addChild(actors[i]);
@@ -419,7 +421,7 @@ vglModule.renderer = function() {
   ////////////////////////////////////////////////////////////////////////////
   this.removeAllActors = function() {
     return m_sceneRoot.removeChildren();
-  }
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -428,11 +430,18 @@ vglModule.renderer = function() {
   ////////////////////////////////////////////////////////////////////////////
   this.worldToDisplay = function(worldPt, viewMatrix, projectionMatrix, width,
                                  height) {
-    var viewProjectionMatrix = mat4.create();
+    var viewProjectionMatrix = mat4.create(),
+        winX = null,
+        winY = null,
+        winZ = null,
+        winW = null,
+        clipPt = null;
+
+
     mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
 
     // Transform world to clipping coordinates
-    var clipPt = vec4.create();
+    clipPt = vec4.create();
     vec4.transformMat4(clipPt, worldPt, viewProjectionMatrix);
 
     if (clipPt[3] !== 0.0) {
@@ -442,12 +451,12 @@ vglModule.renderer = function() {
       clipPt[3] = 1.0;
     }
 
-    var winX = Math.round((((clipPt[0]) + 1) / 2.0) * width);
-    // / We calculate -point3D.getY() because the screen Y axis is
-    // / oriented top->down
-    var winY = Math.round(((1 - clipPt[1]) / 2.0) * height);
-    var winZ = clipPt[2];
-    var winW = clipPt[3];
+    winX = Math.round((((clipPt[0]) + 1) / 2.0) * width);
+    // We calculate -point3D.getY() because the screen Y axis is
+    // oriented top->down
+    winY = Math.round(((1 - clipPt[1]) / 2.0) * height);
+    winZ = clipPt[2];
+    winW = clipPt[3];
 
     return vec4.fromValues(winX, winY, winZ, winW);
   };
@@ -467,13 +476,14 @@ vglModule.renderer = function() {
                                  width, height) {
     var x = (2.0 * displayPt[0] / width) - 1,
         y = -(2.0 * displayPt[1] / height) + 1,
-        z = displayPt[2];
+        z = displayPt[2],
+        viewProjectionInverse = mat4.create(),
+        worldPt = null;
 
-    var viewProjectionInverse = mat4.create();
     mat4.multiply(viewProjectionInverse, projectionMatrix, viewMatrix);
     mat4.invert(viewProjectionInverse, viewProjectionInverse);
 
-    var worldPt = vec4.fromValues(x, y, z, 1);
+    worldPt = vec4.fromValues(x, y, z, 1);
     vec4.transformMat4(worldPt, worldPt, viewProjectionInverse);
     if (worldPt[3] !== 0.0) {
       worldPt[0] = worldPt[0] / worldPt[3];
