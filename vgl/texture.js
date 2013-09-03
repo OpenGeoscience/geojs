@@ -23,7 +23,8 @@ vglModule.texture = function() {
   if (!(this instanceof vglModule.texture)) {
     return new vglModule.texture();
   }
-  vglModule.materialAttribute.call(this, materialAttributeType.Texture);
+  vglModule.materialAttribute.call(
+    this, vglModule.materialAttributeType.Texture);
 
   this.m_width = 0;
   this.m_height = 0;

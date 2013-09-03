@@ -23,7 +23,8 @@ vglModule.shaderProgram = function() {
   if (!(this instanceof vglModule.shaderProgram)) {
     return new vglModule.shaderProgram();
   }
-  vglModule.materialAttribute.call(this, materialAttributeType.ShaderProgram);
+  vglModule.materialAttribute.call(
+    this, vglModule.materialAttributeType.ShaderProgram);
 
   /** @private */
   var m_programHandle = 0,

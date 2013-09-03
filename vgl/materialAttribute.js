@@ -9,7 +9,7 @@
 /*global vglModule, ogs, vec4, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
-var materialAttributeType = {
+vglModule.materialAttributeType = {
   "Undefined" : 0x0,
   "ShaderProgram" : 0x1,
   "Texture" : 0x2,

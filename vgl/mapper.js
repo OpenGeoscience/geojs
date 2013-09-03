@@ -114,7 +114,7 @@ vglModule.mapper = function() {
   ////////////////////////////////////////////////////////////////////////////
   this.render = function(renderState) {
     if (this.getMTime() > m_glCompileTimestamp.getMTime()) {
-      this.setupDrawObjects(renderState);
+      setupDrawObjects(renderState);
     }
 
     // Fixed vertex color
