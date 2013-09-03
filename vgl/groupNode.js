@@ -18,6 +18,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.groupNode = function() {
+  'use strict';
 
   if (!(this instanceof vglModule.groupNode)) {
     return new vglModule.groupNode();

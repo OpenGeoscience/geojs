@@ -18,6 +18,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.planeSource = function() {
+  'use strict';
 
   if (!(this instanceof vglModule.planeSource)) {
     return new vglModule.planeSource();

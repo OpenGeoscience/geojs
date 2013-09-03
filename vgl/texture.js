@@ -18,6 +18,7 @@
  */
 ///////////////////////////////////////////////////////////////////////////////
 vglModule.texture = function() {
+  'use strict';
 
   if (!(this instanceof vglModule.texture)) {
     return new vglModule.texture();

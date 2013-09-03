@@ -47,6 +47,8 @@ var VisitorType = {
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.visitor = function() {
+  'use strict';
+
   vglModule.object.call(this);
 
   var m_visitorType = VisitorType.UpdateVisitor,

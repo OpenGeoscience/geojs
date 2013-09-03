@@ -18,6 +18,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.lineSource = function(positions, colors) {
+  'use strict';
 
   if (!(this instanceof vglModule.lineSource)) {
     return new vglModule.lineSource();

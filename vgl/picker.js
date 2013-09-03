@@ -18,6 +18,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.picker = function() {
+  'use strict';
 
   if (!(this instanceof vglModule.picker)) {
     return new vglModule.picker();

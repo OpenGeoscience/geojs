@@ -21,6 +21,8 @@
  */
 ////////////////////////////////////////////////////////////////////////////
 vglModule.legend = function() {
+    'use strict';
+
     if (!(this instanceof vglModule.legend)) {
         return new vglModule.legend();
     }

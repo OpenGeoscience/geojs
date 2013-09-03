@@ -21,6 +21,7 @@ gl = 0;
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.renderWindow = function(canvas) {
+  'use strict';
 
   if (!(this instanceof vglModule.renderWindow)) {
     return new vglModule.renderWindow(canvas);

@@ -21,6 +21,7 @@
 //////////////////////////////////////////////////////////////////////////////
 vglModule.utils = function() {
   'use strict';
+
   if (!(this instanceof vglModule.utils)) {
     return new vglModule.utils();
   }

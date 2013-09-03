@@ -19,6 +19,7 @@
  */
 ////////////////////////////////////////////////////////////////////////////
 vglModule.interactorStyle = function() {
+  'use strict';
 
   if (!(this instanceof vglModule.interactorStyle)) {
     return new vglModule.interactorStyle();

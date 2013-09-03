@@ -71,6 +71,8 @@ vglModule.blend = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.bind = function(renderState) {
+    'use strict';
+
     m_wasEnabled = gl.isEnabled(gl.BLEND);
 
     if (this.enabled()) {

@@ -18,7 +18,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.boundingObject = function() {
-  "use strict";
+  'use strict';
 
   if (!(this instanceof vglModule.boundingObject)) {
     return new vglModule.boundingObject();

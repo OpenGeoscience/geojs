@@ -34,6 +34,7 @@ var vertexAttributeKeys = {
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.primitive = function() {
+  'use strict';
 
   if (!(this instanceof vglModule.primitive)) {
     return new vglModule.primitive();
@@ -160,6 +161,7 @@ vglModule.primitive = function() {
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.triangleStrip = function() {
+  'use strict';
 
   if (!(this instanceof vglModule.triangleStrip)) {
     return new vglModule.triangleStrip();
@@ -184,6 +186,7 @@ inherit(vglModule.triangleStrip, vglModule.primitive);
  */
 ////////////////////////////////////////////////////////////////////////////
 vglModule.triangles = function() {
+  'use strict';
 
   if (!(this instanceof vglModule.triangles)) {
     return new vglModule.triangles();
@@ -207,6 +210,7 @@ inherit(vglModule.triangles, vglModule.primitive);
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.lines = function() {
+  'use strict';
 
   if (!(this instanceof vglModule.lines)) {
     return new vglModule.lines();
@@ -229,6 +233,7 @@ inherit(vglModule.lines, vglModule.primitive);
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.lineStrip = function() {
+  'use strict';
 
   if (!(this instanceof vglModule.lineStrip)) {
     return new vglModule.lineStrip();
@@ -251,6 +256,7 @@ inherit(vglModule.lineStrip, vglModule.primitive);
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.points = function() {
+  'use strict';
 
   if (!(this instanceof vglModule.points)) {
     return new vglModule.points();
@@ -274,6 +280,8 @@ inherit(vglModule.points, vglModule.primitive);
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.vertexDataP3f = function() {
+  'use strict';
+
   if (!(this instanceof vglModule.vertexDataP3f)) {
     return new vglModule.vertexDataP3f();
   }
@@ -293,6 +301,7 @@ vglModule.vertexDataP3f = function() {
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.vertexDataP3N3f = function() {
+  'use strict';
 
   if (!(this instanceof vglModule.vertexDataP3N3f)) {
     return new vglModule.vertexDataP3N3f();
@@ -314,6 +323,8 @@ vglModule.vertexDataP3N3f = function() {
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.vertexDataP3T3f = function() {
+  'use strict';
+
   if (!(this instanceof vglModule.vertexDataP3T3f)) {
     return new vglModule.vertexDataP3T3f();
   }
@@ -333,6 +344,7 @@ vglModule.vertexDataP3T3f = function() {
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.sourceData = function() {
+  'use strict';
 
   if (!(this instanceof vglModule.sourceData)) {
     return new vglModule.sourceData();
@@ -590,6 +602,7 @@ vglModule.sourceData = function() {
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.sourceDataP3T3f = function() {
+  'use strict';
 
   if (!(this instanceof vglModule.sourceDataP3T3f)) {
     return new vglModule.sourceDataP3T3f();
@@ -619,6 +632,7 @@ inherit(vglModule.sourceDataP3T3f, vglModule.sourceData);
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.sourceDataP3N3f = function() {
+  'use strict';
 
   if (!(this instanceof vglModule.sourceDataP3N3f)) {
     return new vglModule.sourceDataP3N3f();
@@ -649,6 +663,7 @@ inherit(vglModule.sourceDataP3N3f, vglModule.sourceData);
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.sourceDataP3fv = function() {
+  'use strict';
 
   if (!(this instanceof vglModule.sourceDataP3fv)) {
     return new vglModule.sourceDataP3fv();
@@ -676,6 +691,7 @@ inherit(vglModule.sourceDataP3fv, vglModule.sourceData);
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.sourceDataT2fv = function() {
+  'use strict';
 
   if (!(this instanceof vglModule.sourceDataT2fv)) {
     return new vglModule.sourceDataT2fv();
@@ -703,6 +719,7 @@ inherit(vglModule.sourceDataT2fv, vglModule.sourceData);
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.sourceDataC3fv = function() {
+  'use strict';
 
   if (!(this instanceof vglModule.sourceDataC3fv)) {
     return new vglModule.sourceDataC3fv();
@@ -730,6 +747,7 @@ inherit(vglModule.sourceDataC3fv, vglModule.sourceData);
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.sourceDataSf = function() {
+  'use strict';
 
   if (!(this instanceof vglModule.sourceDataSf)) {
     return new vglModule.sourceDataSf();
@@ -786,6 +804,7 @@ inherit(vglModule.sourceDataSf, vglModule.sourceData);
  */
  /////////////////////////////////////////////////////////////////////////////
 vglModule.geometryData = function() {
+  'use strict';
 
   if (!(this instanceof vglModule.geometryData)) {
     return vglModule.geometryData();

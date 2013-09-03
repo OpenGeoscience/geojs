@@ -17,6 +17,8 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.renderState = function() {
+  'use strict';
+
   this.m_modelViewMatrix = mat4.create();
   this.m_projectionMatrix = null;
   this.m_material = null;
@@ -31,6 +33,8 @@ vglModule.renderState = function() {
  */
 ////////////////////////////////////////////////////////////////////////////
 vglModule.renderer = function() {
+  'use strict';
+
   if (!(this instanceof vglModule.renderer)) {
     return new vglModule.renderer();
   }

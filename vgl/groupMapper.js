@@ -10,6 +10,8 @@
 //////////////////////////////////////////////////////////////////////////////
 
 vglModule.groupMapper = function() {
+  'use strict';
+
   if (!(this instanceof vglModule.groupMapper)) {
     return new vglModule.groupMapper();
   }

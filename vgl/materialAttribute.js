@@ -27,6 +27,7 @@ var materialAttributeType = {
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.materialAttribute = function(type) {
+  'use strict';
 
   if (!(this instanceof vglModule.materialAttribute)) {
     return new vglModule.materialAttribute();

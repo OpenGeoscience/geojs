@@ -18,7 +18,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.camera = function() {
-  "use strict";
+  'use strict';
 
   if (!(this instanceof vglModule.camera)) {
     return new vglModule.camera();

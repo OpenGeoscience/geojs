@@ -18,6 +18,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.node = function() {
+  'use strict';
 
   if (!(this instanceof vglModule.node)) {
     return new vglModule.node();

@@ -19,6 +19,7 @@
  */
 ///////////////////////////////////////////////////////////////////////////////
 vglModule.uniform = function(type, name) {
+  'use strict';
 
   if (!(this instanceof vglModule.uniform)) {
     return new vglModule.uniform();

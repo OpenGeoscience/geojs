@@ -18,7 +18,8 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.trackballInteractorStyle = function() {
-  "use strict";
+  'use strict';
+
   if (!(this instanceof vglModule.trackballInteractorStyle)) {
     return new vglModule.trackballInteractorStyle();
   }

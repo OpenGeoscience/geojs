@@ -18,6 +18,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.pointSource = function() {
+  'use strict';
 
   if (!(this instanceof vglModule.pointSource)) {
     return new vglModule.pointSource();

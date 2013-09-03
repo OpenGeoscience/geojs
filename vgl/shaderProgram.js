@@ -18,6 +18,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.shaderProgram = function() {
+  'use strict';
 
   if (!(this instanceof vglModule.shaderProgram)) {
     return new vglModule.shaderProgram();

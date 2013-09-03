@@ -17,6 +17,7 @@
  */
 ///////////////////////////////////////////////////////////////////////////////
 vglModule.source = function() {
+  'use strict';
 
   if (!(this instanceof vglModule.source)) {
     return new vglModule.source();

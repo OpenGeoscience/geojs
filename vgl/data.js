@@ -10,7 +10,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 vglModule.data = function() {
-  "use strict";
+  'use strict';
 
   if (!(this instanceof vglModule.data)) {
     return new vglModule.data();

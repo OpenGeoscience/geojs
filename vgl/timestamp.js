@@ -20,7 +20,7 @@
 var m_globalModifiedTime = 0;
 
 vglModule.timestamp = function() {
-  "use strict";
+  'use strict';
 
   if (!(this instanceof vglModule.timestamp)) {
     return new vglModule.timestamp();

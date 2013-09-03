@@ -18,7 +18,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.object = function() {
-  "use strict";
+  'use strict';
 
   if (!(this instanceof vglModule.object)) {
     return new vglModule.object();

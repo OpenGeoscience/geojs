@@ -18,6 +18,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.mapper = function() {
+  'use strict';
 
   if (!(this instanceof vglModule.mapper)) {
     return new vglModule.mapper();

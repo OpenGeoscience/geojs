@@ -43,6 +43,7 @@ vglModule.vertexAttributeKeys = {
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.vertexAttribute = function(name) {
+  'use strict';
 
   if (!(this instanceof vglModule.vertexAttribute)) {
     return new vglModule.vertexAttribute(name);

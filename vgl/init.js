@@ -20,7 +20,7 @@ var ogs = ogs || {};
  */
 //////////////////////////////////////////////////////////////////////////////
 ogs.namespace = function(ns_string) {
-  "use strict";
+  'use strict';
 
   var parts = ns_string.split('.'), parent = ogs, i;
 

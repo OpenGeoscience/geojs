@@ -18,6 +18,8 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.material = function() {
+  'use strict';
+
   if (!(this instanceof vglModule.material)) {
     return new vglModule.material();
   }

@@ -19,7 +19,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.defaultValue = function(a, b) {
-  "use strict";
+  'use strict';
 
   if (typeof a !== 'undefined') {
     return a;

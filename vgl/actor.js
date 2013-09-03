@@ -18,6 +18,8 @@
  */
 ////////////////////////////////////////////////////////////////////////////
 vglModule.actor = function() {
+  'use strict';
+
   if (!(this instanceof vglModule.actor)) {
     return new vglModule.actor();
   }

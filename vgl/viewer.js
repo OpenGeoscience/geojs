@@ -18,6 +18,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.viewer = function(canvas) {
+  'use strict';
 
   if (!(this instanceof vglModule.viewer)) {
     return new vglModule.viewer(canvas);
