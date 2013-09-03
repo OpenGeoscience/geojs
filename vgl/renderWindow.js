@@ -59,7 +59,7 @@ vglModule.renderWindow = function(canvas) {
   ////////////////////////////////////////////////////////////////////////////
   this.setWindowSize = function(width, height) {
 
-    if (width !== width || height !== height) {
+    if (m_width !== width || m_height !== height) {
       m_width = width;
       m_height = height;
 
@@ -92,7 +92,7 @@ vglModule.renderWindow = function(canvas) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.setWindowPosition = function(x, y) {
-    if ((m_x != x) || (m_y != y)) {
+    if ((m_x !== x) || (m_y !== y)) {
       m_x = x;
       m_y = y;
       this.modified();
