@@ -1,14 +1,24 @@
+//////////////////////////////////////////////////////////////////////////////
 /**
  * @module ogs.vgl
  */
 
+/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
+/*jslint white: true, continue:true, indent: 2*/
+
+/*global vglModule, ogs, vec4, inherit, $*/
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class command
  *
  * @class command
  * @returns {vglModule.command}
  */
+//////////////////////////////////////////////////////////////////////////////
 vglModule.command = function() {
+  "use strict";
 
   if (!(this instanceof vglModule.command)) {
     return new vglModule.command();
@@ -20,9 +30,11 @@ vglModule.command = function() {
 
 inherit(vglModule.command, vglModule.object);
 
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Event types
  */
+//////////////////////////////////////////////////////////////////////////////
 vglModule.command.keyPressEvent = "keyPressEvent";
 vglModule.command.mousePressEvent = "mousePressEvent";
 vglModule.command.mouseReleaseEvent = "mouseReleaseEvent";

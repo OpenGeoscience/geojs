@@ -1,9 +1,27 @@
+//////////////////////////////////////////////////////////////////////////////
 /**
  * @module ogs.vgl
  */
+
+/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
+/*jslint white: true, continue:true, indent: 2*/
+
+/*global vglModule, ogs, vec4, inherit, $*/
+//////////////////////////////////////////////////////////////////////////////
+
 var ogs = ogs || {};
 
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Create namespace for the given name
+ *
+ * @param ns_string
+ * @returns {*|{}}
+ */
+//////////////////////////////////////////////////////////////////////////////
 ogs.namespace = function(ns_string) {
+  "use strict";
+
   var parts = ns_string.split('.'), parent = ogs, i;
 
   // strip redundant leading global
@@ -23,7 +41,17 @@ ogs.namespace = function(ns_string) {
 /** ogs.vgl namespace */
 var vglModule = ogs.namespace("vgl");
 
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Convenient function to define JS inheritance
+ *
+ * @param C
+ * @param P
+ */
+//////////////////////////////////////////////////////////////////////////////
 function inherit(C, P) {
+  "use strict";
+
   var F = function() {
   };
   F.prototype = P.prototype;
@@ -32,7 +60,17 @@ function inherit(C, P) {
   C.prototype.constructor = C;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Convenient function to get size of an object
+ *
+ * @param obj
+ * @returns {number} *
+ */
+//////////////////////////////////////////////////////////////////////////////
 Object.size = function(obj) {
+  "use strict";
+
   var size = 0, key = null;
   for (key in obj) {
     if (obj.hasOwnProperty(key)) {
