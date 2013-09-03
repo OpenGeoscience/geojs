@@ -6,7 +6,7 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, continue:true, indent: 2*/
 
-/*global vglModule, ogs, vec4, inherit, $*/
+/*global vglModule, gl, ogs, vec2, vec3, vec4, mat3, mat4, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -37,9 +37,9 @@ vglModule.uniform = function(type, name) {
       case gl.BOOL_VEC2:
         return 2;
 
-      case gl.FLOAT_VEC2:
-      case gl.INT_VEC2:
       case gl.FLOAT_VEC3:
+      case gl.INT_VEC3:
+      case gl.BOOLT_VEC3:
         return 3;
 
       case gl.FLOAT_VEC4:
@@ -201,6 +201,7 @@ vglModule.uniform = function(type, name) {
  */
 ///////////////////////////////////////////////////////////////////////////////
 vglModule.modelViewUniform = function(name) {
+  'use strict';
 
   if (!(this instanceof vglModule.modelViewUniform)) {
     return new vglModule.modelViewUniform(name);
@@ -240,6 +241,7 @@ inherit(vglModule.modelViewUniform, vglModule.uniform);
  */
 ///////////////////////////////////////////////////////////////////////////////
 vglModule.projectionUniform = function(name) {
+  'use strict';
 
   if (!(this instanceof vglModule.projectionUniform)) {
     return new vglModule.projectionUniform(name);
@@ -280,6 +282,7 @@ inherit(vglModule.projectionUniform, vglModule.uniform);
  */
 ///////////////////////////////////////////////////////////////////////////////
 vglModule.floatUniform = function(name, value) {
+  'use strict';
 
   if (!(this instanceof vglModule.floatUniform)) {
     return new vglModule.floatUniform(name, value);
