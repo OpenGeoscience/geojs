@@ -6,7 +6,7 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, continue:true, indent: 2*/
 
-/*global vglModule, ogs, vec4, inherit, $*/
+/*global window, vglModule, ogs, vec4, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -113,8 +113,9 @@ vglModule.viewer = function(canvas) {
     if (m_ready === true) {
       var fixedEvent = $.event.fix(event || window.event);
       // Only prevent default action for right mouse button
-      if (event.button == 2)
+      if (event.button === 2) {
         fixedEvent.preventDefault();
+      }
       fixedEvent.state = 'down';
       fixedEvent.type = vglModule.command.mousePressEvent;
       $(m_that).trigger(fixedEvent);
@@ -218,7 +219,7 @@ vglModule.viewer = function(canvas) {
     do {
       totalOffsetX += currentElement.offsetLeft - currentElement.scrollLeft;
       totalOffsetY += currentElement.offsetTop - currentElement.scrollTop;
-    } while (currentElement = currentElement.offsetParent);
+    } while (currentElement === currentElement.offsetParent);
 
     canvasX = event.pageX - totalOffsetX;
     canvasY = event.pageY - totalOffsetY;
