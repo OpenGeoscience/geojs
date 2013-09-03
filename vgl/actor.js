@@ -6,7 +6,7 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, continue:true, indent: 2*/
 
-/*global vglModule, ogs, vec4, inherit, $*/
+/*global vglModule, ogs, vec3, vec4, mat4, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////

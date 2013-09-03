@@ -18,11 +18,11 @@ vglModule.data = function() {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Return data type. Should be implemented by a derived class
+   * Return data type. Should be implemented by the derived class
    */
   ////////////////////////////////////////////////////////////////////////////
   this.type = function() {
-  }
+  };
 };
 
 vglModule.data.raster = 0;

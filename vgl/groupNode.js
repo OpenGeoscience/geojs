@@ -36,11 +36,13 @@ vglModule.groupNode = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.setVisible = function(flag) {
+    var i;
+
     if (node.prototype.setVisible.call(this, flag) !== true) {
       return false;
     }
 
-    for ( var i = 0; i < m_children.length; ++i) {
+    for (i = 0; i < m_children.length; ++i) {
       m_children[i].setVisible(flag);
     }
 
@@ -150,6 +152,7 @@ vglModule.groupNode = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.traverseChildrenAndUpdateBounds = function(visitor) {
+    var i;
 
     if (this.m_parent && this.boundsDirtyTimestamp().getMTime() >
       this.computeBoundsTimestamp().getMTime()) {
@@ -160,7 +163,7 @@ vglModule.groupNode = function() {
     this.computeBounds();
 
     if (visitor.mode() === visitor.TraverseAllChildren) {
-      for ( var i = 0; i < m_children.length(); ++i) {
+      for (i = 0; i < m_children.length(); ++i) {
         m_children[i].accept(visitor);
         this.updateBounds(m_children[i]);
       }
@@ -177,8 +180,10 @@ vglModule.groupNode = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.traverseChildren = function(visitor) {
-    if (visitor.mode() == vesVisitor.TraverseAllChildren) {
-      for ( var i = 0; i < m_children.length(); ++i) {
+    var i;
+
+    if (visitor.mode() === vglModule.vesVisitor.TraverseAllChildren) {
+      for (i = 0; i < m_children.length(); ++i) {
         m_children[i].accept(visitor);
       }
     }
@@ -190,12 +195,14 @@ vglModule.groupNode = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.computeBounds = function() {
+    var i = 0;
+
     if (this.computeBoundsTimestamp().getMTime() >
         this.boundsDirtyTimestamp().getMTime()) {
       return;
     }
 
-    for ( var i = 0; i < m_children.length; ++i) {
+    for (i = 0; i < m_children.length; ++i) {
       this.updateBounds(m_children[i]);
     }
   };
@@ -219,16 +226,13 @@ vglModule.groupNode = function() {
     // Make sure that child bounds are upto date
     child.computeBounds();
 
-    var bounds = this.bounds();
-    var childBounds = child.bounds();
+    var bounds = this.bounds(),
+        childBounds = child.bounds(),
+        istep = 0,
+        jstep = 0,
+        i;
 
-    // console.log('bounds ' + bounds);
-    // console.log('child bounds ' + child + ' ', childBounds);
-
-    var istep = 0;
-    var jstep = 0;
-
-    for (var i = 0; i < 3; ++i) {
+    for (i = 0; i < 3; ++i) {
       istep = i * 2;
       jstep = i * 2 + 1;
       if (childBounds[istep] < bounds[istep]) {

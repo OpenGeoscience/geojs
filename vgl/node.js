@@ -183,7 +183,7 @@ vglModule.node = function() {
     // @todo Implement this
     this.boundsDirtyTimestamp().modified();
 
-    if (m_parent != null) {
+    if (m_parent !== null) {
       m_parent.boundsModified();
     }
   };
