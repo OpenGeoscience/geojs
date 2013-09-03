@@ -6,7 +6,7 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, continue:true, indent: 2*/
 
-/*global vglModule, ogs, vec4, inherit, $*/
+/*global Uint8Array, vglModule, gl, ogs, vec4, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -387,14 +387,15 @@ inherit(vglModule.texture, vglModule.materialAttribute);
  */
 ///////////////////////////////////////////////////////////////////////////////
 vglModule.lookupTable = function() {
+  'use strict';
 
   if (!(this instanceof vglModule.lookupTable)) {
     return new vglModule.lookupTable();
   }
   vglModule.texture.call(this);
 
-  var m_setupTimestamp = vglModule.timestamp();
-  var m_range = [0,0];
+  var m_setupTimestamp = vglModule.timestamp(),
+      m_range = [0,0];
 
   this.m_colorTable = //paraview bwr colortable
 	  [0.07514311,0.468049805,1,1,
