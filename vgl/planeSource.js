@@ -95,7 +95,10 @@ vglModule.planeSource = function() {
         texCoords = [], indices = [], tristrip = null,
         sourcePositions = null, sourceColors = null, sourceTexCoords;
 
-    x.length = 3, tc.length = 2, v1.length = 3, v2.length = 3;
+    x.length = 3;
+    tc.length = 2;
+    v1.length = 3;
+    v2.length = 3;
     pts.length = 3;
 
     // Check input
