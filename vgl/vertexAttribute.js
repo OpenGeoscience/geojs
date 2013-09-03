@@ -6,7 +6,7 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, continue:true, indent: 2*/
 
-/*global vglModule, ogs, vec4, inherit, $*/
+/*global vglModule, gl, ogs, vec4, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -71,9 +71,9 @@ vglModule.vertexAttribute = function(name) {
    */
   //////////////////////////////////////////////////////////////////////////////
   this.bindVertexData = function(renderState, key) {
-    var geometryData = renderState.m_mapper.geometryData();
-    var sourceData = geometryData.sourceData(key);
-    var program = renderState.m_material.shaderProgram();
+    var geometryData = renderState.m_mapper.geometryData(),
+        sourceData = geometryData.sourceData(key),
+        program = renderState.m_material.shaderProgram();
 
     gl.vertexAttribPointer(program.attributeLocation(m_name), sourceData
         .attributeNumberOfComponents(key), sourceData.attributeDataType(key),
