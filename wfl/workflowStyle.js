@@ -1,3 +1,8 @@
+/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
+/*jslint white: true, indent: 2*/
+
+/*global jQuery*/
+
 var baseStyle = {
   fill: 'darkgray',
   module: {
@@ -55,4 +60,4 @@ climatePipesStyle.cornerRadius = 25;
 climatePipesStyle.lineWidth = 5;
 climatePipesStyle.stroke = "lightgreen";
 
-climatePipesStyle.conn.stroke = "lightgreen"
+climatePipesStyle.conn.stroke = "lightgreen";

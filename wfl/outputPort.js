@@ -7,7 +7,7 @@
 /*jslint white: true, indent: 2*/
 
 /*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vglModule, proj4, document*/
+/*global vglModule, proj4, document, wflModule, currentWorkflowStyle*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -21,7 +21,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 wflModule.outputPort = function(options, data) {
-  "use strict"
+  "use strict";
   if (!(this instanceof wflModule.outputPort)) {
     return new wflModule.outputPort(options, data);
   }
@@ -44,7 +44,7 @@ wflModule.outputPort = function(options, data) {
   this.drawName = function(ctx, width) {
     ctx.fillStyle = currentWorkflowStyle.module.text.fill;
     ctx.font = currentWorkflowStyle.module.text.font;
-    if(m_name_width == 0) {
+    if(m_name_width === 0) {
       var metrics = ctx.measureText(this.data()['@name']);
       m_name_width = metrics.width;
     }

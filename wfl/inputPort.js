@@ -6,8 +6,8 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, indent: 2*/
 
-/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vglModule, proj4, document*/
+/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image, defaultValue*/
+/*global vglModule, proj4, document, wflModule, currentWorkflowStyle*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -21,7 +21,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 wflModule.inputPort = function(options, data) {
-  "use strict"
+  "use strict";
   if (!(this instanceof wflModule.inputPort)) {
     return new wflModule.inputPort(options, data);
   }
@@ -53,7 +53,7 @@ wflModule.inputPort = function(options, data) {
         m_that.module().addOrUpdateFunction(
           m_that.data()['@name'],
           $(this).val(),
-          m_that.data()['portSpecItem']['@module']
+          m_that.data().portSpecItem['@module']
         );
       });
     m_that.setElementValueFromData();

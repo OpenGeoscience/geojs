@@ -6,8 +6,8 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, indent: 2*/
 
-/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vglModule, proj4, document*/
+/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image, wflModule*/
+/*global vglModule, proj4, document, climatePipesStyle, window, reg*/
 //////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -16,20 +16,23 @@
  * @param obj2 object
  * @returns object a new object based on obj1 and obj2
  */
+"use strict";
+
 function merge_options(obj1,obj2){
-  var obj3 = {};
-  for (var attrName in obj1) { obj3[attrName] = obj1[attrName]; }
-  for (var attrName in obj2) { obj3[attrName] = obj2[attrName]; }
+  var obj3 = {}, attrName;
+  for (attrName in obj1) { obj3[attrName] = obj1[attrName]; }
+  for (attrName in obj2) { obj3[attrName] = obj2[attrName]; }
   return obj3;
 }
 
 function merge_options_in_place(obj1, obj2) {
-  for (var attrName in obj2) { obj1[attrName] = obj2[attrName]; }
+  var attrName;
+  for (attrName in obj2) { obj1[attrName] = obj2[attrName]; }
   return obj1;
 }
 
-function defaultValue(param, _default) {
-  return typeof param !== 'undefined' ? param: _default;
+function defaultValue(param, dflt) {
+  return typeof param !== 'undefined' ? param: dflt;
 }
 
 function createIdCounter(initialId) {
@@ -74,30 +77,6 @@ function debug(msg) {
   console.log(msg);
 }
 
-function initWorkflowCanvas() {
-  $(window).on('resize', function() {
-    if (activeWorkflow)
-      activeWorkflow.resize();
-  });
-
-//  append workflow html elements
-  $('body').append(
-    [
-      '<div id="workflow-dialog" title="Workflow">',
-      '<div id="modulediv"><table id="moduletable">',
-      '<tbody></tbody></table></div>',
-      '<div id="canvasContainer"><canvas id="workspace"></canvas>',
-      '<div id="inputContainer"></div>',
-      '</div>'
-    ].join('')
-  );
-
-  setupWorkflowDragAndDrop();
-  setupWorkflowModuleList();
-  setupWorkflowInteraction();
-  setupWorkflowCSS();
-}
-
 function setupWorkflowCSS() {
   var stylesheet = document.styleSheets[0],
     selector = "[draggable]",
@@ -109,10 +88,15 @@ function setupWorkflowCSS() {
       '-khtml-user-drag: element;',
       '-webkit-user-drag: element;',
       'cursor: move;}'
-    ].join('');
+    ].join(''),
+    pos,
+    $canvas = $('#workspace'),
+    context = $canvas[0].getContext('2d'),
+    modulePattern = new Image(),
+    workflowPattern = new Image();
 
   if (stylesheet.insertRule) {
-    var pos = stylesheet.cssRules ? stylesheet.cssRules.length : 0;
+    pos = stylesheet.cssRules ? stylesheet.cssRules.length : 0;
     stylesheet.insertRule(selector + rule, pos);
   } else if (stylesheet.addRule) {
     stylesheet.addRule(selector, rule, -1);
@@ -144,10 +128,6 @@ function setupWorkflowCSS() {
   $('#workflow-dialog').hide();
 
   //give modules a texture fill
-  var $canvas = $('#workspace'),
-    context = $canvas[0].getContext('2d'),
-    modulePattern = new Image(),
-    workflowPattern = new Image();
   modulePattern.onload = function() {
     climatePipesStyle.module.fill = context.createPattern(modulePattern,
       'repeat');
@@ -176,6 +156,8 @@ function setupWorkflowDragAndDrop() {
   });
 
   $canvas.on('drop', function(e) {
+    var ctxPos = this.ctxMousePos(e);
+
     if (e.originalEvent) { //jQuery
       e = e.originalEvent;
     }
@@ -190,7 +172,6 @@ function setupWorkflowDragAndDrop() {
       e.stopPropagation(); // stops the browser from redirecting.
     }
 
-    var ctxPos = this.ctxMousePos(e);
 
     activeWorkflow.addNewModule(
       e.dataTransfer.getData("Text"),
@@ -204,29 +185,11 @@ function setupWorkflowDragAndDrop() {
   });
 }
 
-function setupWorkflowModuleList() {
-  var $moduleTableBody = $('#moduletable > tbody:last'),
-    pkg,
-    moduleInfo;
-
-  for(var i = 0; i < reg.registry.package.length; i++) {
-    pkg = reg.registry.package[i];
-    if(!moduleRegistry.hasOwnProperty(pkg['@identifier'])) {
-      moduleRegistry[pkg['@identifier']] = {};
-    }
-    if(!pkg.hasOwnProperty('moduleDescriptor')) {
-      continue;
-    }
-    for(var j = 0; j < pkg.moduleDescriptor.length; j++) {
-      moduleInfo = pkg.moduleDescriptor[j];
-      moduleRegistry[pkg['@identifier']][moduleInfo['@name']] = moduleInfo;
-      addModuleToList(moduleInfo, $moduleTableBody);
-    }
-  }
-}
-
 function addModuleToList(moduleInfo, $moduleTableBody) {
-  var $text = $(document.createElement('div'));
+  var $text = $(document.createElement('div')),
+    $td = $(document.createElement('td')),
+    $tr = $(document.createElement('tr'));
+
   $text.append(moduleInfo['@name'])
     .attr('draggable', 'true')
     .data('moduleInfo', moduleInfo)
@@ -241,9 +204,29 @@ function addModuleToList(moduleInfo, $moduleTableBody) {
       debug(e);
     });
 
-  var $td = $(document.createElement('td'));
-  var $tr = $(document.createElement('tr'));
   $moduleTableBody.append($tr.append($td.append($text)));
+}
+
+function setupWorkflowModuleList() {
+  var $moduleTableBody = $('#moduletable > tbody:last'),
+    pkg,
+    moduleInfo,
+    i,
+    j;
+
+  for(i = 0; i < reg.registry.package.length; i++) {
+    pkg = reg.registry.package[i];
+    if(!moduleRegistry.hasOwnProperty(pkg['@identifier'])) {
+      moduleRegistry[pkg['@identifier']] = {};
+    }
+    if(pkg.hasOwnProperty('moduleDescriptor')) {
+      for(j = 0; j < pkg.moduleDescriptor.length; j++) {
+        moduleInfo = pkg.moduleDescriptor[j];
+        moduleRegistry[pkg['@identifier']][moduleInfo['@name']] = moduleInfo;
+        addModuleToList(moduleInfo, $moduleTableBody);
+      }
+    }
+  }
 }
 
 function setupWorkflowInteraction() {
@@ -270,7 +253,8 @@ function setupWorkflowInteraction() {
       if(modules.hasOwnProperty(key)) {
         module = modules[key];
         if(module.contains(lastPoint)) {
-          if(draggingPort = module.portByPos(lastPoint)) {
+          draggingPort = module.portByPos(lastPoint);
+          if(draggingPort) {
             draggingPortPos = lastPoint;
             draggingPortModule = module;
           } else {
@@ -334,7 +318,8 @@ function setupWorkflowInteraction() {
         if(modules.hasOwnProperty(key)) {
           module = modules[key];
           if(module.contains(lastPoint)) {
-            if(port = module.portByPos(lastPoint)) {
+            port = module.portByPos(lastPoint);
+            if(port) {
               activeWorkflow.addConnection(
                 draggingPortModule,
                 draggingPort,
@@ -358,7 +343,7 @@ function setupWorkflowInteraction() {
   });
 }
 
-function ctxMousePos(event){
+var ctxMousePos = function(event){
   var totalOffsetX = 0,
     totalOffsetY = 0,
     currentElement = this,
@@ -367,14 +352,15 @@ function ctxMousePos(event){
   do{
     totalOffsetX += currentElement.offsetLeft - currentElement.scrollLeft;
     totalOffsetY += currentElement.offsetTop - currentElement.scrollTop;
+    currentElement = currentElement.offsetParent;
   }
-  while(currentElement = currentElement.offsetParent)
+  while(currentElement);
 
   return {
     x: event.pageX - totalOffsetX - translated.x,
     y: event.pageY - totalOffsetY - translated.y
   };
-}
+};
 
 /**
  * Draws a rounded rectangle using the current state of the canvas.
@@ -404,12 +390,37 @@ function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
   ctx.lineTo(x, y + radius);
   ctx.quadraticCurveTo(x, y, x + radius, y);
   ctx.closePath();
-  if (stroke || typeof stroke == "undefined") {
+  if (stroke || typeof stroke === "undefined") {
     ctx.stroke();
   }
   if (fill) {
     ctx.fill();
   }
+}
+
+function initWorkflowCanvas() {
+  $(window).on('resize', function() {
+    if (activeWorkflow) {
+      activeWorkflow.resize();
+    }
+  });
+
+//  append workflow html elements
+  $('body').append(
+    [
+      '<div id="workflow-dialog" title="Workflow">',
+      '<div id="modulediv"><table id="moduletable">',
+      '<tbody></tbody></table></div>',
+      '<div id="canvasContainer"><canvas id="workspace"></canvas>',
+      '<div id="inputContainer"></div>',
+      '</div>'
+    ].join('')
+  );
+
+  setupWorkflowDragAndDrop();
+  setupWorkflowModuleList();
+  setupWorkflowInteraction();
+  setupWorkflowCSS();
 }
 
 HTMLCanvasElement.prototype.ctxMousePos = ctxMousePos;

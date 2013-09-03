@@ -7,7 +7,7 @@
 /*jslint white: true, indent: 2*/
 
 /*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vglModule, jQuery, document*/
+/*global vglModule, jQuery, document, wflModule, defaultValue*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -42,23 +42,23 @@ wflModule.workflowLayerSource = function(name, vars, workflow, onError) {
     ////////////////////////////////////////////////////////////////////////////
   this.getData = function(time, callback) {
 
+    var asyncVal = false,
+      retVal = [],
+      errorString = null,
+      reader = null;
+
     if (m_time === time) {
       console.log('[info] No new data as timestamp has not changed.');
       return;
     }
     m_time = time;
 
-    var replacer = function(key, value) {
+    function replacer(key, value) {
       if(typeof value === 'number') {
-        return value+'';
+        return value.toString();
       }
       return value;
-    };
-
-    var asyncVal = false,
-      retVal = [],
-      errorString = null,
-      reader = null;
+    }
 
     if (callback) {
       asyncVal = true;
@@ -109,7 +109,7 @@ wflModule.workflowLayerSource = function(name, vars, workflow, onError) {
    */
   this.workflow = function() {
     return m_workflow;
-  }
+  };
 
   return this;
 };

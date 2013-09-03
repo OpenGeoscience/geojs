@@ -1,5 +1,17 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
+ * @module ogs.wfl
+ */
+
+/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
+/*jslint white: true, indent: 2*/
+
+/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image, nextFunctionId*/
+/*global vglModule, jQuery, document, wflModule, moduleRegistry, defaultValue*/
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+/**
  * Create a new instance of class module
  *
  * @class
@@ -48,8 +60,9 @@ wflModule.workflowModule = function(options, data) {
    * @private createPorts - creates port objects from workflow json
    */
   function createPorts() {
-    for(; i < m_ports.length; i++) {
-      if(m_ports[i]['@type'] != 'output') {
+    var i;
+    for(i = 0; i < m_ports.length; i++) {
+      if(m_ports[i]['@type'] !== 'output') {
         m_inPorts[m_ports[i]['@name']] = m_that.inputPortClass({
             module: m_that
           }, m_ports[i]);
@@ -139,7 +152,7 @@ wflModule.workflowModule = function(options, data) {
     ////////////////////////////////////////////////////////////////////////////
   this.getMetrics = function() {
     return m_metrics;
-  }
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -148,7 +161,7 @@ wflModule.workflowModule = function(options, data) {
     ////////////////////////////////////////////////////////////////////////////
   this.getInPorts = function() {
     return m_inPorts;
-  }
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -166,7 +179,7 @@ wflModule.workflowModule = function(options, data) {
     ////////////////////////////////////////////////////////////////////////////
   this.getRegistry = function() {
     return m_registry;
-  }
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -175,7 +188,7 @@ wflModule.workflowModule = function(options, data) {
     ////////////////////////////////////////////////////////////////////////////
   this.getData = function() {
     return m_data;
-  }
+  };
 
 
   ////////////////////////////////////////////////////////////////////////////
@@ -254,7 +267,8 @@ wflModule.workflowModule = function(options, data) {
   };
 
   this.hide = function() {
-    for(var key in m_inPorts) {
+    var key;
+    for(key in m_inPorts) {
       if(m_inPorts.hasOwnProperty(key)) {
         m_inPorts[key].hide();
       }
@@ -262,7 +276,8 @@ wflModule.workflowModule = function(options, data) {
   };
 
   this.show = function() {
-    for(var key in m_inPorts) {
+    var key;
+    for(key in m_inPorts) {
       if(m_inPorts.hasOwnProperty(key)) {
         m_inPorts[key].show();
       }
@@ -276,14 +291,15 @@ wflModule.workflowModule = function(options, data) {
    * @returns {String|null}
    */
   this.getFunctionValue = function(name) {
+    var i, f;
     if(m_data.hasOwnProperty('function')) {
       if(!$.isArray(m_data.function)) {
         m_data.function = [m_data.function];
       }
 
-      for(var i = 0; i < m_data.function.length; i++) {
-        var f = m_data.function[i];
-        if(f['@name'] == name) {
+      for(i = 0; i < m_data.function.length; i++) {
+        f = m_data.function[i];
+        if(f['@name'] === name) {
           return f.parameter['@val'];
         }
       }
@@ -298,14 +314,15 @@ wflModule.workflowModule = function(options, data) {
    * @param value
    */
   this.addOrUpdateFunction = function(name, value, type) {
+    var i, f;
     if(m_data.hasOwnProperty('function')) {
       if(!$.isArray(m_data.function)) {
         m_data.function = [m_data.function];
       }
 
-      for(var i = 0; i < m_data.function.length; i++) {
-        var f = m_data.function[i];
-        if(f['@name'] == name) {
+      for(i = 0; i < m_data.function.length; i++) {
+        f = m_data.function[i];
+        if(f['@name'] === name) {
           f.parameter['@val'] = value.toString();
           return;
         }

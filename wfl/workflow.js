@@ -6,8 +6,11 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, indent: 2*/
 
-/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vglModule, proj4, document*/
+/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image, merge_options*/
+/*global vglModule, proj4, document, blankWorkflow, nextModuleId, nextPortId*/
+/*global climatePipesStyle, nextLocationId, debug, nextConnectionId, wflModule*/
+/*global currentWorkflowStyle, roundRect, activeWorkflow:true*/
+
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -68,13 +71,13 @@ wflModule.workflow = function(options) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.generateModulesFromData = function() {
-    var i = 0,
+    var i, mid,
       maxId = 0,
       nextId = nextModuleId(),
       modules = m_data.workflow.module;
 
-    for(; i < modules.length; i++) {
-      var mid = parseInt(modules[i]['@id']);
+    for(i = 0; i < modules.length; i++) {
+      mid = parseInt(modules[i]['@id'], 10);
       m_modules[mid] = m_moduleClass({workflow: m_that}, modules[i]);
 
       if(mid > maxId) {
@@ -109,12 +112,15 @@ wflModule.workflow = function(options) {
 
   this.addConnection = function(sourceModule, sourcePort, targetModule,
                                 targetPort) {
-    if(sourcePort.data()['@type'] == targetPort.data()['@type']) {
+    if(sourcePort.data()['@type'] === targetPort.data()['@type']) {
       debug("Must connect output to input");
       return;
-    } else if (sourceModule == targetModule) {
-      debug("Cannot make connection between ports on same module.")
     }
+
+    if (sourceModule === targetModule) {
+      debug("Cannot make connection between ports on same module.");
+    }
+
     var connection = {
         "@id": nextConnectionId(),
         "port": [
@@ -135,21 +141,22 @@ wflModule.workflow = function(options) {
           }
         ]
       },
-      options = {vertical: m_moduleClass == wflModule.workflowModule, workflow: m_that};
+      options = {vertical: m_moduleClass === wflModule.workflowModule, workflow: m_that};
     m_connections[connection['@id']] = wflModule.connection(options, connection);
     this.data().workflow.connection.push(connection);
 
   };
 
   this.generateConnectionsFromData = function() {
-    var i = 0,
+    var i,
+      cid,
       maxId = 0,
       nextId = nextConnectionId(),
       connections = m_data.workflow.connection,
-      options = {vertical: m_moduleClass == wflModule.workflowModule, workflow: m_that};
+      options = {vertical: m_moduleClass === wflModule.workflowModule, workflow: m_that};
 
-    for(; i < connections.length; i++) {
-      var cid = parseInt(connections[i]['@id']);
+    for(i = 0; i < connections.length; i++) {
+      cid = parseInt(connections[i]['@id'], 10);
       m_connections[cid] = wflModule.connection(options, connections[i]);
 
       if(cid > maxId) {
@@ -170,7 +177,7 @@ wflModule.workflow = function(options) {
    */
     ////////////////////////////////////////////////////////////////////////////
   this.draw = function(ctx) {
-    var key;
+    var key, pad, wx, wy, ww, wh;
 
     ctx.clearRect(-m_translated.x, -m_translated.y, ctx.canvas.width,
       ctx.canvas.height);
@@ -184,11 +191,11 @@ wflModule.workflow = function(options) {
     ctx.shadowBlur = currentWorkflowStyle.shadowBlur;
     ctx.shadowColor = currentWorkflowStyle.shadowColor;
 
-    var pad = ctx.shadowBlur,
-      wx = pad - m_translated.x,
-      wy = pad - m_translated.y,
-      ww = ctx.canvas.width - pad*2,
-      wh = ctx.canvas.height - pad*2;
+    pad = ctx.shadowBlur;
+    wx = pad - m_translated.x;
+    wy = pad - m_translated.y;
+    ww = ctx.canvas.width - pad*2;
+    wh = ctx.canvas.height - pad*2;
 
     //translate to ensure fill pattern is consistent
     roundRect(ctx, wx, wy, ww, wh,
@@ -252,13 +259,14 @@ wflModule.workflow = function(options) {
   };
 
   this.show = function() {
+    var key;
     if(activeWorkflow) {
       activeWorkflow.hide();
     }
     activeWorkflow = this;
     this.setVisible(true);
     this.resize();
-    for(var key in m_modules) {
+    for(key in m_modules) {
       if(m_modules.hasOwnProperty(key)) {
         m_modules[key].show();
       }
@@ -274,8 +282,9 @@ wflModule.workflow = function(options) {
   };
 
   this.hide = function() {
+    var key;
     this.setVisible(false);
-    for(var key in m_modules) {
+    for(key in m_modules) {
       if(m_modules.hasOwnProperty(key)) {
         m_modules[key].hide();
       }
@@ -301,7 +310,8 @@ wflModule.workflow = function(options) {
   };
 
   this.updateElementPositions = function() {
-    for(var key in m_modules) {
+    var key;
+    for(key in m_modules) {
       m_modules[key].updateElementPositions();
     }
   };
@@ -310,7 +320,7 @@ wflModule.workflow = function(options) {
     var key;
     for(key in m_modules) {
       if(m_modules.hasOwnProperty(key)) {
-        if(m_modules[key].getData()['@name'] == name) {
+        if(m_modules[key].getData()['@name'] === name) {
           return m_modules[key];
         }
       }

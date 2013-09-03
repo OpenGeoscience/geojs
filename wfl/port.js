@@ -7,7 +7,7 @@
 /*jslint white: true, indent: 2*/
 
 /*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vglModule, proj4, document*/
+/*global vglModule, proj4, document, wflModule, currentWorkflowStyle*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -21,7 +21,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 wflModule.port = function(options, data) {
-  "use strict"
+  "use strict";
   if (!(this instanceof wflModule.port)) {
     return new wflModule.port(options, data);
   }

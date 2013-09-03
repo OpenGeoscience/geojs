@@ -7,7 +7,7 @@
 /*jslint white: true, indent: 2*/
 
 /*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vglModule, proj4, document*/
+/*global vglModule, proj4, document, wflModule, merge_options_in_place, roundRect*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -48,9 +48,8 @@ wflModule.inputModule = function(options, data) {
     var base_metrics = m_baseGetMetrics.call(this),
       new_metrics,
       portWidth = currentWorkflowStyle.module.port.width,
-      key;
-
-    var textHeight = 15, //TODO: get real height based on text font
+      key,
+      textHeight = 15, //TODO: get real height based on text font
       totalInPortHeight = currentWorkflowStyle.module.port.inputHeight +
         textHeight + currentWorkflowStyle.module.port.inputYPad +
         currentWorkflowStyle.module.port.inpad,
@@ -209,9 +208,9 @@ wflModule.inputModule = function(options, data) {
     for(key in m_inPorts) {
       if(m_inPorts.hasOwnProperty(key)) {
         port = m_inPorts[key];
-        if(port.data()['@name'] == name) {
+        if(port.data()['@name'] === name) {
           $(port.getElement()).val(value);
-          portSpec = port.data()['portSpecItem'];
+          portSpec = port.data().portSpecItem;
           //portType = [portSpec['@package'], '.', portSpec['@module']].join('');
           portType = portSpec['@module'];
           this.addOrUpdateFunction(name, value, portType);

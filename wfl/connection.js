@@ -7,7 +7,7 @@
 /*jslint white: true, indent: 2*/
 
 /*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vglModule, proj4, document*/
+/*global vglModule, proj4, document, wflModule, merge_options*/
 //////////////////////////////////////////////////////////////////////////////
 
 wflModule.connectionOptions = function() {
@@ -22,10 +22,10 @@ wflModule.connectionOptions = function() {
   this.workflow = null;
   return this;
 
-}
+};
 
 wflModule.connection = function(options, data) {
-  "use strict"
+  "use strict";
   if (!(this instanceof wflModule.connection)) {
     return new wflModule.connection(options, data);
   }
@@ -68,25 +68,22 @@ wflModule.connection = function(options, data) {
       x2:  m_vertical ? 0 : -currentWorkflowStyle.conn.bezierOffset,
       y1: !m_vertical ? 0 :  currentWorkflowStyle.conn.bezierOffset,
       y2: !m_vertical ? 0 : -currentWorkflowStyle.conn.bezierOffset
-    }
+    };
   };
 
   this.computePositions = function(currentWorkflowStyle) {
     var sourceModule, targetModule, sourcePort, targetPort,
-      centerOffset = Math.floor(currentWorkflowStyle.module.port.width/2);
-    for(var i = 0; i < m_data.port.length; i++) {
-      var port = m_data.port[i];
-      if(port['@type'] == 'source' || port['@type'] == 'output') {
+      centerOffset = Math.floor(currentWorkflowStyle.module.port.width/2),
+      i, port;
+    for(i = 0; i < m_data.port.length; i++) {
+      port = m_data.port[i];
+      if(port['@type'] === 'source' || port['@type'] === 'output') {
         sourceModule = m_workflow.modules()[port['@moduleId']];
         sourcePort = sourceModule.getOutPorts()[port['@name']];
       } else {
         targetModule = m_workflow.modules()[port['@moduleId']];
         targetPort = targetModule.getInPorts()[port['@name']];
       }
-    }
-
-    if(!sourcePort || !targetPort) {
-      var placeholder = 1;
     }
 
     return {
