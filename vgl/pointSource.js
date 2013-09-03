@@ -93,24 +93,28 @@ vglModule.pointSource = function() {
       return;
     }
 
-    var numPts = m_positions.length / 3;
-    var i = 0;
-    var indices = [];
-    indices.length = numPts;
+    var numPts = m_positions.length / 3,
+        i = 0,
+        indices = [],
+        pointsPrimitive,
+        sourcePositions,
+        sourceColors,
+        sourceTexCoords;
 
+    indices.length = numPts;
     for (i = 0; i < numPts; ++i) {
       indices[i] = i;
     }
 
-    var pointsPrimitive = new vglModule.points();
+    pointsPrimitive = new vglModule.points();
     pointsPrimitive.setIndices(indices);
 
-    var sourcePositions = vglModule.sourceDataP3fv();
+    sourcePositions = vglModule.sourceDataP3fv();
     sourcePositions.pushBack(m_positions);
     m_geom.addSource(sourcePositions);
 
     if ((m_colors.length > 0) && m_colors.length === m_positions.length) {
-      var sourceColors = vglModule.sourceDataC3fv();
+      sourceColors = vglModule.sourceDataC3fv();
       sourceColors.pushBack(m_colors);
       m_geom.addSource(sourceColors);
     }
@@ -120,9 +124,9 @@ vglModule.pointSource = function() {
     }
 
     if ((m_textureCoords.length > 0)
-        && m_textureCoords.length === m_textureCoords.length) {
-      var sourceTexCoords = vglModule.sourceDataT2fv();
-      sourceTexCoords.pushBack(texCoords);
+        && m_textureCoords.length === m_positions.length) {
+      sourceTexCoords = vglModule.sourceDataT2fv();
+      sourceTexCoords.pushBack(m_textureCoords);
       m_geom.addSource(sourceTexCoords);
     }
     else if ((m_textureCoords.length > 0)
