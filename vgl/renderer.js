@@ -37,20 +37,13 @@ vglModule.renderer = function() {
   vglModule.object.call(this);
 
   /** @private */
-  var m_backgroundColor = [0.0, 0.0, 0.0, 1.0];
+  var m_backgroundColor = [0.0, 0.0, 0.0, 1.0],
+      m_sceneRoot = new vglModule.groupNode(),
+      m_camera = new vglModule.camera(),
+      m_width = 0,
+      m_height = 0;
 
-  /** @private */
-  var m_sceneRoot = new vglModule.groupNode();
-
-  /** @private */
-  var m_camera = new vglModule.camera();
   m_camera.addChild(m_sceneRoot);
-
-  /** @private */
-  var m_width = 0;
-
-  /** @private */
-  var m_height = 0;
 
   ////////////////////////////////////////////////////////////////////////////
   /**

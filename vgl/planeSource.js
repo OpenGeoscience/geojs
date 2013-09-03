@@ -24,13 +24,13 @@ vglModule.planeSource = function() {
   }
   vglModule.source.call(this);
 
-  var m_origin = [ 0.0, 0.0, 0.0 ];
-  var m_point1 = [ 1.0, 0.0, 0.0 ];
-  var m_point2 = [ 0.0, 1.0, 0.0 ];
-  var m_normal = [ 0.0, 0.0, 1.0 ];
-  var m_xresolution = 1;
-  var m_yresolution = 1;
-  var m_geom = null;
+  var m_origin = [ 0.0, 0.0, 0.0 ],
+      m_point1 = [ 1.0, 0.0, 0.0 ],
+      m_point2 = [ 0.0, 1.0, 0.0 ],
+      m_normal = [ 0.0, 0.0, 1.0 ],
+      m_xresolution = 1,
+      m_yresolution = 1,
+      m_geom = null;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -87,21 +87,15 @@ vglModule.planeSource = function() {
   this.create = function() {
     m_geom = new vglModule.geometryData();
 
-    var x = [], tc = [], v1 = [], v2 = [];
+    var x = [], tc = [], v1 = [], v2 = [],
+        pts = [], i, j, k, ii, numPts, numPolys,
+        posIndex = 0, normIndex = 0, colorIndex = 0, texCoordIndex = 0,
+        positions = [], normals = [], colors = [],
+        texCoords = [], indices = [], tristrip = null,
+        sourcePositions = null, sourceColors = null, sourceTexCoords;
+
     x.length = 3, tc.length = 2, v1.length = 3, v2.length = 3;
-
-    var pts = [];
     pts.length = 3;
-    var i, j, ii;
-    var numPts;
-    var numPolys;
-    var posIndex = 0, normIndex = 0, colorIndex = 0, texCoordIndex = 0;
-
-    var positions = [];
-    var normals = [];
-    var colors = [];
-    var texCoords = [];
-    var indices = [];
 
     // Check input
     for (i = 0; i < 3; i++) {
@@ -110,7 +104,6 @@ vglModule.planeSource = function() {
     }
 
     // TODO Compute center and normal
-
     // Set things up; allocate memory
     numPts = (m_xresolution + 1) * (m_yresolution + 1);
     numPolys = m_xresolution * m_yresolution * 2;
@@ -160,16 +153,16 @@ vglModule.planeSource = function() {
       indices[i] = i;
     }
 
-    var tristrip = new vglModule.triangleStrip();
+    tristrip = new vglModule.triangleStrip();
     tristrip.setIndices(indices);
 
-    var sourcePositions = vglModule.sourceDataP3fv();
+    sourcePositions = vglModule.sourceDataP3fv();
     sourcePositions.pushBack(positions);
 
-    var sourceColors = vglModule.sourceDataC3fv();
+    sourceColors = vglModule.sourceDataC3fv();
     sourceColors.pushBack(colors);
 
-    var sourceTexCoords = vglModule.sourceDataT2fv();
+    sourceTexCoords = vglModule.sourceDataT2fv();
     sourceTexCoords.pushBack(texCoords);
 
     m_geom.addSource(sourcePositions);

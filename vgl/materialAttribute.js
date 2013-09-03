@@ -34,10 +34,8 @@ vglModule.materialAttribute = function(type) {
   vglModule.object.call(this);
 
   /** @private */
-  var m_type = type;
-
-  /** @private */
-  var m_enabled = true;
+  var m_type = type,
+      m_enabled = true;
 
   ////////////////////////////////////////////////////////////////////////////
   /**

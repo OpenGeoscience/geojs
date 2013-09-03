@@ -25,22 +25,12 @@ vglModule.mapper = function() {
   vglModule.boundingObject.call(this);
 
   /** @private */
-  var m_dirty = true;
-
-  /** @private */
-  var m_color = [ 0.0, 1.0, 1.0 ];
-
-  /** @private */
-  var m_geomData = null;
-
-  /** @private */
-  var m_buffers = [];
-
-  /** @private */
-  var m_bufferVertexAttributeMap = {};
-
-  /** @private */
-  var m_glCompileTimestamp = vglModule.timestamp();
+  var m_dirty = true,
+      m_color = [ 0.0, 1.0, 1.0 ],
+      m_geomData = null,
+      m_buffers = [],
+      m_bufferVertexAttributeMap = {},
+      m_glCompileTimestamp = vglModule.timestamp();
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -130,8 +120,9 @@ vglModule.mapper = function() {
 
     // TODO Use renderState
     var bufferIndex = 0,
-        j = 0;
-    for (var i in m_bufferVertexAttributeMap) {
+        j = 0, i;
+
+    for (i in m_bufferVertexAttributeMap) {
       if (m_bufferVertexAttributeMap.hasOwnProperty(i)) {
         gl.bindBuffer(gl.ARRAY_BUFFER, m_buffers[bufferIndex]);
         for (j = 0; j < m_bufferVertexAttributeMap[i].length; ++j) {
@@ -159,7 +150,8 @@ vglModule.mapper = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   function deleteVertexBufferObjects() {
-    for ( var i = 0; i < m_buffers.length; ++i) {
+    var i;
+    for (i = 0; i < m_buffers.length; ++i) {
       gl.deleteBuffer(m_buffers[i]);
     }
   }
@@ -173,18 +165,19 @@ vglModule.mapper = function() {
   ////////////////////////////////////////////////////////////////////////////
   function createVertexBufferObjects() {
     if (m_geomData) {
-      var numberOfSources = m_geomData.numberOfSources();
-      var i = 0;
-      var bufferId = null;
-      for (; i < numberOfSources; ++i) {
+      var numberOfSources = m_geomData.numberOfSources(),
+          i, j, k, bufferId = null, keys, ks, numberOfPrimitives;
+
+      for (i = 0; i < numberOfSources; ++i) {
         bufferId = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, bufferId);
         gl.bufferData(gl.ARRAY_BUFFER,
           new Float32Array(m_geomData.source(i).data()), gl.STATIC_DRAW);
 
-        var keys = m_geomData.source(i).keys(),
-            ks = [];
-        for ( var j = 0; j < keys.length; ++j) {
+        keys = m_geomData.source(i).keys();
+        ks = [];
+
+        for (j = 0; j < keys.length; ++j) {
           ks.push(keys[j]);
         }
 
@@ -192,8 +185,8 @@ vglModule.mapper = function() {
         m_buffers[i] = bufferId;
       }
 
-      var numberOfPrimitives = m_geomData.numberOfPrimitives();
-      for ( var k = 0; k < numberOfPrimitives; ++k) {
+      numberOfPrimitives = m_geomData.numberOfPrimitives();
+      for (k = 0; k < numberOfPrimitives; ++k) {
         bufferId = gl.createBuffer();
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, bufferId);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, m_geomData.primitive(k)

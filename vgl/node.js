@@ -25,16 +25,10 @@ vglModule.node = function() {
   vglModule.boundingObject.call(this);
 
   /** @private */
-  var m_parent = null;
-
-  /** @private */
-  var m_material = null;
-
-  /** @private */
-  var m_visible = true;
-
-  /** @private */
-  var m_overlay = false;
+  var m_parent = null,
+      m_material = null,
+      m_visible = true,
+      m_overlay = false;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -191,7 +185,7 @@ vglModule.node = function() {
     if (m_parent != null) {
       m_parent.boundsModified();
     }
-  }
+  };
 
   return this;
 };

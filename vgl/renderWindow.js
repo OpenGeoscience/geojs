@@ -28,25 +28,13 @@ vglModule.renderWindow = function(canvas) {
   vglModule.object.call(this);
 
   /** @private */
-  var m_x = 0;
-
-  /** @private */
-  var m_y = 0;
-
-  /** @private */
-  var m_width = 400;
-
-  /** @private */
-  var m_height = 400;
-
-  /** @private */
-  var m_canvas = canvas;
-
-  /** @private */
-  var m_activeRender = null;
-
-  /** @private */
-  var m_renderers = [];
+  var m_x = 0,
+      m_y = 0,
+      m_width = 400,
+      m_height = 400,
+      m_canvas = canvas,
+      m_activeRender = null,
+      m_renderers = [];
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -106,12 +94,9 @@ vglModule.renderWindow = function(canvas) {
     if ((m_x != x) || (m_y != y)) {
       m_x = x;
       m_y = y;
-
       this.modified();
-
       return true;
     }
-
     return false;
   };
 
@@ -143,7 +128,6 @@ vglModule.renderWindow = function(canvas) {
       this.modified();
       return true;
     }
-
     return false;
   };
 
@@ -165,7 +149,6 @@ vglModule.renderWindow = function(canvas) {
       this.modified();
       return true;
     }
-
     return false;
   };
 
@@ -181,10 +164,8 @@ vglModule.renderWindow = function(canvas) {
     if (index < m_renderers.length) {
       return m_renderers[index];
     }
-    else {
-      console.log("[WARNING] Out of index array");
-    }
 
+    console.log("[WARNING] Out of index array");
     return null;
   };
 

@@ -24,10 +24,10 @@ vglModule.material = function() {
   vglModule.object.call(this);
 
   // / Private member variables
-  var m_shaderProgram = new vglModule.shaderProgram();
-  var m_binNumber = 100;
-  var m_textureAttributes = {};
-  var m_attributes = {};
+  var m_shaderProgram = new vglModule.shaderProgram(),
+      m_binNumber = 100,
+      m_textureAttributes = {},
+      m_attributes = {};
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -179,7 +179,6 @@ vglModule.material = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.bind = function(renderState) {
-
     for ( var key in m_attributes) {
       if (m_attributes.hasOwnProperty(key)) {
         m_attributes[key].bind(renderState);

@@ -24,10 +24,10 @@ vglModule.pointSource = function() {
   }
   vglModule.source.call(this);
 
-  var m_positions = [];
-  var m_colors = [];
-  var m_textureCoords = [];
-  var m_geom = null;
+  var m_positions = [],
+      m_colors = [],
+      m_textureCoords = [],
+      m_geom = null;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
