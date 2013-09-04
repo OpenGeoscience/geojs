@@ -1,42 +1,55 @@
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * @module ogs.vgl
+ */
+
+/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
+/*jslint white: true, continue:true, indent: 2*/
+
+/*global vglModule, ogs, vec4, inherit, $*/
+//////////////////////////////////////////////////////////////////////////////
+
 vglModule.groupMapper = function() {
+  'use strict';
+
   if (!(this instanceof vglModule.groupMapper)) {
     return new vglModule.groupMapper();
   }
   vglModule.mapper.call(this);
 
   /** @private */
-  var m_createMappersTimestamp = vglModule.timestamp();
+  var m_createMappersTimestamp = vglModule.timestamp(),
+      m_mappers = [],
+      m_geomDataArray = [];
 
-  /** @private */
-  var m_mappers = [];
-
-  /** @private */
-  var m_geomDataArray = [];
-
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Return stored geometry data if any
    *
    * @param index optional
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.geometryData = function(index) {
     if (index !== undefined && index < m_geomDataArray.length ) {
       return m_geomDataArray[index];
-    } else {
-      if (m_geomDataArray.length > 0) {
-        return m_geomDataArray[0];
-      } else {
-        return null;
-      }
     }
+
+    if (m_geomDataArray.length > 0) {
+      return m_geomDataArray[0];
+    }
+
+    return null;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Connect mapper to its geometry data
    *
    * @param geom {vglModule.geomData}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.setGeometryData = function(geom) {
-    if (m_geomDataArray.length == 1) {
+    if (m_geomDataArray.length === 1) {
       if (m_geomDataArray[0] === geom) {
         return;
       }
@@ -46,21 +59,25 @@ vglModule.groupMapper = function() {
     this.modified();
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Return stored geometry data array if any
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.geometryDataArray = function() {
     return m_geomDataArray;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Connect mapper to its geometry data
    *
    * @param geoms {Array}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.setGeometryDataArray = function(geoms) {
     if (geoms instanceof Array) {
-      if (m_geomDataArray != geoms) {
+      if (m_geomDataArray !== geoms) {
         m_geomDataArray = [];
         m_geomDataArray = geoms;
         this.modified();
@@ -73,9 +90,11 @@ vglModule.groupMapper = function() {
     return false;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Compute bounds of the data
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.computeBounds = function() {
     if (m_geomDataArray === null ||
         m_geomDataArray === undefined) {
@@ -86,12 +105,13 @@ vglModule.groupMapper = function() {
     var computeBoundsTimestamp = this.computeBoundsTimestamp(),
         boundsDirtyTimestamp = this.boundsDirtyTimestamp(),
         m_bounds = this.bounds(),
-        geomBounds = null
+        geomBounds = null,
+        i = null;
 
     if (boundsDirtyTimestamp.getMTime() >
         computeBoundsTimestamp.getMTime()) {
 
-      for (var i = 0; i < m_geomDataArray.length; ++i) {
+      for (i = 0; i < m_geomDataArray.length; ++i) {
         geomBounds = m_geomDataArray[i].bounds();
 
         if (m_bounds[0] > geomBounds[0]) {
@@ -119,22 +139,24 @@ vglModule.groupMapper = function() {
     }
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Render the mapper
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.render = function(renderState) {
-    if (this.getMTime() > m_createMappersTimestamp.getMTime()) {
-      // @note Hoping that it will release the graphics resources
-      m_mappers = [];
+    var i = null;
 
-      for (var i = 0; i < m_geomDataArray.length; ++i) {
+    if (this.getMTime() > m_createMappersTimestamp.getMTime()) {
+      // NOTE Hoping that it will release the graphics resources
+      for (i = 0; i < m_geomDataArray.length; ++i) {
         m_mappers.push(vglModule.mapper());
         m_mappers[i].setGeometryData(m_geomDataArray[i]);
       }
         m_createMappersTimestamp.modified();
     }
 
-    for (var i = 0; i < m_mappers.length; ++i) {
+    for (i = 0; i < m_mappers.length; ++i) {
       m_mappers[i].render(renderState);
     }
   };

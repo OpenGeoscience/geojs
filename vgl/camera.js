@@ -6,7 +6,7 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, continue:true, indent: 2*/
 
-/*global vglModule, ogs, vec4, inherit, $*/
+/*global vglModule, ogs, vec3, vec4, mat4, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -18,7 +18,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.camera = function() {
-  "use strict";
+  'use strict';
 
   if (!(this instanceof vglModule.camera)) {
     return new vglModule.camera();
@@ -51,7 +51,7 @@ vglModule.camera = function() {
   /**
    * Get view angle of the camera
    */
-    ////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////
   this.viewAngle = function() {
     return m_viewAngle;
   };
@@ -70,10 +70,10 @@ vglModule.camera = function() {
    * Set position of the camera
    */
   ////////////////////////////////////////////////////////////////////////////
- this.setPosition = function(x, y, z) {
-   m_position = vec3.fromValues(x, y, z);
-   this.modified();
- };
+  this.setPosition = function(x, y, z) {
+    m_position = vec3.fromValues(x, y, z);
+    this.modified();
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -178,7 +178,7 @@ vglModule.camera = function() {
   ////////////////////////////////////////////////////////////////////////////
   this.isEnabledParallelProjection = function() {
     return m_enableParallelProjection;
-  }
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**

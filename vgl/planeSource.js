@@ -1,76 +1,105 @@
+//////////////////////////////////////////////////////////////////////////////
 /**
  * @module ogs.vgl
  */
 
+/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
+/*jslint white: true, continue:true, indent: 2*/
+
+/*global vglModule, ogs, vec4, inherit, $*/
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class planeSource
  *
  * @class
  * @returns {vglModule.planeSource}
  */
+//////////////////////////////////////////////////////////////////////////////
 vglModule.planeSource = function() {
+  'use strict';
 
   if (!(this instanceof vglModule.planeSource)) {
     return new vglModule.planeSource();
   }
   vglModule.source.call(this);
 
-  var m_origin = [ 0.0, 0.0, 0.0 ];
-  var m_point1 = [ 1.0, 0.0, 0.0 ];
-  var m_point2 = [ 0.0, 1.0, 0.0 ];
-  var m_normal = [ 0.0, 0.0, 1.0 ];
-  var m_xresolution = 1;
-  var m_yresolution = 1;
-  var m_geom = null;
+  var m_origin = [ 0.0, 0.0, 0.0 ],
+      m_point1 = [ 1.0, 0.0, 0.0 ],
+      m_point2 = [ 0.0, 1.0, 0.0 ],
+      m_normal = [ 0.0, 0.0, 1.0 ],
+      m_xresolution = 1,
+      m_yresolution = 1,
+      m_geom = null;
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Set origin of the plane
+   *
+   * @param x
+   * @param y
+   * @param z
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.setOrigin = function(x, y, z) {
     m_origin[0] = x;
     m_origin[1] = y;
     m_origin[2] = z;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Set point that defines the first axis of the plane
+   *
+   * @param x
+   * @param y
+   * @param z
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.setPoint1 = function(x, y, z) {
     m_point1[0] = x;
     m_point1[1] = y;
     m_point1[2] = z;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Set point that defines the first axis of the plane
+   *
+   * @param x
+   * @param y
+   * @param z
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.setPoint2 = function(x, y, z) {
     m_point2[0] = x;
     m_point2[1] = y;
     m_point2[2] = z;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Create a plane geometry given input parameters
+   *
+   * @returns {null}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.create = function() {
     m_geom = new vglModule.geometryData();
 
-    var x = [], tc = [], v1 = [], v2 = [];
-    x.length = 3, tc.length = 2, v1.length = 3, v2.length = 3;
+    var x = [], tc = [], v1 = [], v2 = [],
+        pts = [], i, j, k, ii, numPts, numPolys,
+        posIndex = 0, normIndex = 0, colorIndex = 0, texCoordIndex = 0,
+        positions = [], normals = [], colors = [],
+        texCoords = [], indices = [], tristrip = null,
+        sourcePositions = null, sourceColors = null, sourceTexCoords;
 
-    var pts = [];
+    x.length = 3;
+    tc.length = 2;
+    v1.length = 3;
+    v2.length = 3;
     pts.length = 3;
-    var i, j, ii;
-    var numPts;
-    var numPolys;
-    var posIndex = 0, normIndex = 0, colorIndex = 0, texCoordIndex = 0;
-
-    var positions = [];
-    var normals = [];
-    var colors = [];
-    var texCoords = [];
-    var indices = [];
 
     // Check input
     for (i = 0; i < 3; i++) {
@@ -79,7 +108,6 @@ vglModule.planeSource = function() {
     }
 
     // TODO Compute center and normal
-
     // Set things up; allocate memory
     numPts = (m_xresolution + 1) * (m_yresolution + 1);
     numPolys = m_xresolution * m_yresolution * 2;
@@ -115,7 +143,7 @@ vglModule.planeSource = function() {
       }
     }
 
-    // / Generate polygon connectivity
+    /// Generate polygon connectivity
     for (i = 0; i < m_yresolution; i++) {
       for (j = 0; j < m_xresolution; j++) {
         pts[0] = j + i * (m_xresolution + 1);
@@ -129,16 +157,16 @@ vglModule.planeSource = function() {
       indices[i] = i;
     }
 
-    var tristrip = new vglModule.triangleStrip();
+    tristrip = new vglModule.triangleStrip();
     tristrip.setIndices(indices);
 
-    var sourcePositions = vglModule.sourceDataP3fv();
+    sourcePositions = vglModule.sourceDataP3fv();
     sourcePositions.pushBack(positions);
 
-    var sourceColors = vglModule.sourceDataC3fv();
+    sourceColors = vglModule.sourceDataC3fv();
     sourceColors.pushBack(colors);
 
-    var sourceTexCoords = vglModule.sourceDataT2fv();
+    sourceTexCoords = vglModule.sourceDataT2fv();
     sourceTexCoords.pushBack(texCoords);
 
     m_geom.addSource(sourcePositions);

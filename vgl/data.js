@@ -1,5 +1,16 @@
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * @module ogs.vgl
+ */
+
+/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
+/*jslint white: true, continue:true, indent: 2*/
+
+/*global vglModule, ogs, vec4, inherit, $*/
+//////////////////////////////////////////////////////////////////////////////
 
 vglModule.data = function() {
+  'use strict';
 
   if (!(this instanceof vglModule.data)) {
     return new vglModule.data();
@@ -7,11 +18,11 @@ vglModule.data = function() {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Return data type. Should be implemented by a derived class
+   * Return data type. Should be implemented by the derived class
    */
-   ////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////
   this.type = function() {
-  }
+  };
 };
 
 vglModule.data.raster = 0;

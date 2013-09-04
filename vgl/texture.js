@@ -1,19 +1,30 @@
+//////////////////////////////////////////////////////////////////////////////
 /**
  * @module ogs.vgl
  */
 
+/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
+/*jslint white: true, continue:true, indent: 2*/
+
+/*global Uint8Array, vglModule, gl, ogs, vec4, inherit, $*/
+//////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class texture
  *
  * @class
  * @returns {vglModule.texture}
  */
+///////////////////////////////////////////////////////////////////////////////
 vglModule.texture = function() {
+  'use strict';
 
   if (!(this instanceof vglModule.texture)) {
     return new vglModule.texture();
   }
-  vglModule.materialAttribute.call(this, materialAttributeType.Texture);
+  vglModule.materialAttribute.call(
+    this, vglModule.materialAttributeType.Texture);
 
   this.m_width = 0;
   this.m_height = 0;
@@ -31,6 +42,13 @@ vglModule.texture = function() {
 
   var m_setupTimestamp = vglModule.timestamp();
 
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Create texture, update parameters, and bind data
+   *
+   * @param renderState
+   */
+  /////////////////////////////////////////////////////////////////////////////
   this.setup = function(renderState) {
     gl.deleteTexture(this.m_textureHandle);
     this.m_textureHandle = gl.createTexture();
@@ -63,6 +81,13 @@ vglModule.texture = function() {
     m_setupTimestamp.modified();
   };
 
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Create texture and if already created use it
+   *
+   * @param renderState
+   */
+  /////////////////////////////////////////////////////////////////////////////
   this.bind = function(renderState) {
     // TODO Call setup via material setup
     if (this.getMTime() > m_setupTimestamp.getMTime()) {
@@ -73,14 +98,36 @@ vglModule.texture = function() {
     gl.bindTexture(gl.TEXTURE_2D, this.m_textureHandle);
   };
 
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Turn off the use of this texture
+   *
+   * @param renderState
+   */
+  /////////////////////////////////////////////////////////////////////////////
   this.undoBind = function(renderState) {
     gl.bindTexture(gl.TEXTURE_2D, null);
   };
 
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get image used by the texture
+   *
+   * @returns {vglModule.image}
+   */
+  /////////////////////////////////////////////////////////////////////////////
   this.image = function() {
     return this.m_image;
   };
 
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set image for the texture
+   *
+   * @param {vglModule.image} image
+   * @returns {boolean}
+   */
+  /////////////////////////////////////////////////////////////////////////////
   this.setImage = function(image) {
     if (image !== null) {
       this.m_image = image;
@@ -92,10 +139,25 @@ vglModule.texture = function() {
     return false;
   };
 
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get texture unit of the texture
+   *
+   * @returns {number}
+   */
+  /////////////////////////////////////////////////////////////////////////////
   this.textureUnit = function() {
     return this.m_textureUnit;
   };
 
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set texture unit of the texture. Default is 0.
+   *
+   * @param {number} unit
+   * @returns {boolean}
+   */
+  /////////////////////////////////////////////////////////////////////////////
   this.setTextureUnit = function(unit) {
     if (this.m_textureUnit === unit) {
       return false;
@@ -106,10 +168,25 @@ vglModule.texture = function() {
     return true;
   };
 
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get width of the texture
+   *
+   * @returns {*}
+   */
+  /////////////////////////////////////////////////////////////////////////////
   this.width = function() {
     return this.m_width;
   };
 
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set width of the texture
+   *
+   * @param {number} width
+   * @returns {boolean}
+   */
+  /////////////////////////////////////////////////////////////////////////////
   this.setWidth = function(width) {
     if (this.m_image === null) {
       return false;
@@ -121,10 +198,25 @@ vglModule.texture = function() {
     return true;
   };
 
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get depth of the texture
+   *
+   * @returns {number}
+   */
+  /////////////////////////////////////////////////////////////////////////////
   this.depth = function() {
     return this.m_depth;
   };
 
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set depth of the texture
+   *
+   * @param {number} depth
+   * @returns {boolean}
+   */
+  /////////////////////////////////////////////////////////////////////////////
   this.setDepth = function(depth) {
     if (this.m_image === null) {
       return false;
@@ -135,29 +227,65 @@ vglModule.texture = function() {
     return true;
   };
 
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get the texture handle (id) of the texture
+   *
+   * @returns {*}
+   */
+  /////////////////////////////////////////////////////////////////////////////
   this.textureHandle = function() {
     return this.m_textureHandle;
   };
 
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get internal format of the texture
+   *
+   * @returns {*}
+   */
+  /////////////////////////////////////////////////////////////////////////////
   this.internalFormat = function() {
     return this.m_internalFormat;
   };
 
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set internal format of the texture
+   *
+   * @param internalFormat
+   * @returns {boolean}
+   */
+  /////////////////////////////////////////////////////////////////////////////
   this.setInternalFormat = function(internalFormat) {
     if (this.m_internalFormat !== internalFormat) {
       this.m_internalFormat = internalFormat;
       this.modified();
-
       return true;
     }
 
     return false;
   };
 
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get pixel format of the texture
+   *
+   * @returns {*}
+   */
+  /////////////////////////////////////////////////////////////////////////////
   this.pixelFormat = function() {
     return this.m_pixelFormat;
   };
 
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set pixel format of the texture
+   *
+   * @param pixelFormat
+   * @returns {boolean}
+   */
+  /////////////////////////////////////////////////////////////////////////////
   this.setPixelFormat = function(pixelFormat) {
     if (this.m_image === null) {
       return false;
@@ -168,10 +296,25 @@ vglModule.texture = function() {
     return true;
   };
 
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get pixel data type
+   *
+   * @returns {*}
+   */
+  /////////////////////////////////////////////////////////////////////////////
   this.pixelDataType = function() {
     return this.m_pixelDataType;
   };
 
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set pixel data type
+   *
+   * @param pixelDataType
+   * @returns {boolean}
+   */
+  /////////////////////////////////////////////////////////////////////////////
   this.setPixelDataType = function(pixelDataType) {
     if (this.m_image === null) {
       return false;
@@ -184,6 +327,11 @@ vglModule.texture = function() {
     return true;
   };
 
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Compute internal format of the texture
+   */
+  /////////////////////////////////////////////////////////////////////////////
   this.computeInternalFormatUsingImage = function() {
     // Currently image does not define internal format
     // and hence it's pixel format is the only way to query
@@ -212,6 +360,11 @@ vglModule.texture = function() {
     this.m_pixelDataType = gl.UNSIGNED_BYTE;
   };
 
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Update texture dimensions
+   */
+  /////////////////////////////////////////////////////////////////////////////
   this.updateDimensions = function() {
     if (this.m_image !== null) {
       this.m_width = this.m_image.width;
@@ -225,21 +378,24 @@ vglModule.texture = function() {
 
 inherit(vglModule.texture, vglModule.materialAttribute);
 
+///////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class lookupTable
  *
  * @class
  * @returns {vglModule.lookupTable}
  */
+///////////////////////////////////////////////////////////////////////////////
 vglModule.lookupTable = function() {
+  'use strict';
 
   if (!(this instanceof vglModule.lookupTable)) {
     return new vglModule.lookupTable();
   }
   vglModule.texture.call(this);
 
-  var m_setupTimestamp = vglModule.timestamp();
-  var m_range = [0,0];
+  var m_setupTimestamp = vglModule.timestamp(),
+      m_range = [0,0];
 
   this.m_colorTable = //paraview bwr colortable
 	  [0.07514311,0.468049805,1,1,
@@ -277,6 +433,13 @@ vglModule.lookupTable = function() {
 	   0.916482116,0.236630659,0.209939162,1].map(
              function(x) {return x*255;});
 
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Create lookup table, initialize parameters, and bind data to it
+   *
+   * @param {vglModule.renderState} renderState
+   */
+  /////////////////////////////////////////////////////////////////////////////
   this.setup = function(renderState) {
     gl.deleteTexture(this.m_textureHandle);
     this.m_textureHandle = gl.createTexture();
@@ -298,10 +461,25 @@ vglModule.lookupTable = function() {
     m_setupTimestamp.modified();
   };
 
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get color table used by the lookup table
+   *
+   * @returns {*}
+   */
+  /////////////////////////////////////////////////////////////////////////////
   this.colorTable = function() {
     return this.m_colorTable;
   };
 
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set color table used by the lookup table
+   *
+   * @param colors
+   * @returns {boolean}
+   */
+  /////////////////////////////////////////////////////////////////////////////
   this.setColorTable = function(colors) {
     if (this.m_colorTable === colors) {
       return false;
@@ -312,10 +490,25 @@ vglModule.lookupTable = function() {
     return true;
   };
 
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get scalar range
+   *
+   * @returns {Array}
+   */
+  /////////////////////////////////////////////////////////////////////////////
   this.range = function() {
     return m_range;
   };
 
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set scalar range for the lookup table
+   *
+   * @param range
+   * @returns {boolean}
+   */
+  /////////////////////////////////////////////////////////////////////////////
   this.setRange = function(range) {
     if (m_range === range) {
       return false;
@@ -325,9 +518,13 @@ vglModule.lookupTable = function() {
     return true;
   };
 
+  /////////////////////////////////////////////////////////////////////////////
   /**
    * Given a [min,max] range update the lookup table range
+   *
+   * @param range
    */
+  /////////////////////////////////////////////////////////////////////////////
   this.updateRange = function(range) {
     if (!(range instanceof Array)) {
       console.log('[error] Invalid data type for range. Requires array [min,max]');

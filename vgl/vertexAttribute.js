@@ -1,7 +1,24 @@
+//////////////////////////////////////////////////////////////////////////////
 /**
  * @module ogs.vgl
  */
 
+/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
+/*jslint white: true, continue:true, indent: 2*/
+
+/*global vglModule, gl, ogs, vec4, inherit, $*/
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Keys to identify vertex attributes
+ *
+ * @type {{Position: number, Normal: number, TextureCoordinate: number,
+ *         Color: number, Scalar: number, Scalar2: number, Scalar3: number,
+ *         Scalar4: number, Scalar5: number, Scalar6: number, Scalar7: number,
+ *         CountAttributeIndex: number}}
+ */
+//////////////////////////////////////////////////////////////////////////////
 vglModule.vertexAttributeKeys = {
   "Position" : 0,
   "Normal" : 1,
@@ -17,31 +34,46 @@ vglModule.vertexAttributeKeys = {
   "CountAttributeIndex" : 11
 };
 
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of vertexAttribute
  *
- * @class
- * @param name
+ * @param {string} name
  * @returns {vglModule.vertexAttribute}
  */
+//////////////////////////////////////////////////////////////////////////////
 vglModule.vertexAttribute = function(name) {
+  'use strict';
 
   if (!(this instanceof vglModule.vertexAttribute)) {
     return new vglModule.vertexAttribute(name);
   }
 
-  // / Private member variables
   var m_name = name;
 
-  // / Public member methods
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get name of the vertex attribute
+   *
+   * @returns {string}
+   */
+  //////////////////////////////////////////////////////////////////////////////
   this.name = function() {
     return m_name;
   };
 
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * Bind vertex data to the given render state
+   *
+   * @param {vglModule.renderState} renderState
+   * @param {vglModule.vertexAttributeKeys} key
+   */
+  //////////////////////////////////////////////////////////////////////////////
   this.bindVertexData = function(renderState, key) {
-    var geometryData = renderState.m_mapper.geometryData();
-    var sourceData = geometryData.sourceData(key);
-    var program = renderState.m_material.shaderProgram();
+    var geometryData = renderState.m_mapper.geometryData(),
+        sourceData = geometryData.sourceData(key),
+        program = renderState.m_material.shaderProgram();
 
     gl.vertexAttribPointer(program.attributeLocation(m_name), sourceData
         .attributeNumberOfComponents(key), sourceData.attributeDataType(key),
@@ -52,6 +84,14 @@ vglModule.vertexAttribute = function(name) {
     gl.enableVertexAttribArray(program.attributeLocation(m_name));
   };
 
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * Undo bind vertex data for a given render state
+   *
+   * @param {vglModule.renderState} renderState
+   * @param {vglModule.vertexAttributeKeys} key
+   */
+  //////////////////////////////////////////////////////////////////////////////
   this.undoBindVertexData = function(renderState, key) {
     var program = renderState.m_material.shaderProgram();
 

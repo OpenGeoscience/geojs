@@ -72,7 +72,7 @@ inherit(geoModule.feature, vglModule.actor);
  * Create a new instance of planeFeature
  *
  * @class
- * @desc Create a plane feature given a lower left corner point {ogs.geo.latlng}
+ * Create a plane feature given a lower left corner point {ogs.geo.latlng}
  * and and upper right corner point {ogs.geo.latlng}
  * @param lowerleft
  * @param upperright
@@ -168,7 +168,7 @@ inherit(geoModule.pointSpritesFeature, geoModule.feature);
  * Create a new instance of geometryFeature
  *
  * @class
- * @desc Create a geometry feature given a geometry {vglModule.geometryData} *
+ * Create a geometry feature given a geometry {vglModule.geometryData} *
  * @param geometry data {vglModule.geometryData} *
  * @returns {geoModule.geometryFeature}
  */
@@ -217,7 +217,7 @@ inherit(geoModule.geometryFeature, geoModule.feature);
  * Create a new instance of compositeGeometryFeature
  *
  * @class
- * @desc Create a multi geometry feature given a array of geometry data {vglModule.geometryData} *
+ * Create a multi geometry feature given a array of geometry data {vglModule.geometryData} *
  * @param {Array}
  * @returns {geoModule.compositeGeometryFeature}
  */
