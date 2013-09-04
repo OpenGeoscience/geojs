@@ -1055,7 +1055,7 @@ vglModule.utils.create2DTexture = function(textToWrite, textSize, color) {
 //  canvas.width = getPowerOfTwo(ctx.measureText(textToWrite).width);
 
   // Make width and height equal so that we get pretty looking text.
-  canvas.height = vglModule.utils.computePowerOfTwo(2 * textSize);
+  canvas.height = vglModule.utils.computePowerOfTwo(8 * textSize);
   canvas.width = canvas.height;
 
   ctx.fillStyle = 'rgba(0, 0, 0, 0)';
@@ -1071,7 +1071,7 @@ vglModule.utils.create2DTexture = function(textToWrite, textSize, color) {
   ctx.textBaseline = "bottom";
 
   // This determines the size of the text and the font family used
-  ctx.font = "bold " + textSize + "px sans-serif";
+  ctx.font = "bold " + 4 * textSize + "px sans-serif";
 
   ctx.fillText(textToWrite, canvas.width/2, canvas.height/2);
 
