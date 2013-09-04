@@ -6,7 +6,7 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, continue:true, indent: 2*/
 
-/*global vglModule, ogs, vec4, inherit, $*/
+/*global document, vglModule, gl, ogs, vec4, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -43,7 +43,8 @@ inherit(vglModule.utils, vglModule.object);
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.utils.computePowerOfTwo = function(value, pow) {
-  var pow = pow || 1;
+  'use strict';
+  pow = pow || 1;
   while (pow < value) {
     pow *= 2;
   }
@@ -538,12 +539,12 @@ vglModule.utils.createColorMappedMaterial = function(lut) {
 vglModule.utils.updateColorMappedMaterial = function(mat, lut) {
   'use strict';
   if (!mat) {
-    console.log('[warning] Invalid material. Nothing to update.')
+    console.log('[warning] Invalid material. Nothing to update.');
     return;
   }
 
   if (!lut) {
-    console.log('[warning] Invalid lookup table. Nothing to update.')
+    console.log('[warning] Invalid lookup table. Nothing to update.');
     return;
   }
 
@@ -608,21 +609,22 @@ vglModule.utils.createSolidColorMaterial = function(color) {
 //////////////////////////////////////////////////////////////////////////////
 vglModule.utils.createPointSpritesMaterial = function(image) {
   'use strict';
-  var mat = new vglModule.material();
-  var blend = new vglModule.blend();
-  var prog = new vglModule.shaderProgram();
-  var vertexShader = vglModule.utils.createPointSpritesVertexShader(gl);
-  var fragmentShader = vglModule.utils.createPointSpritesFragmentShader(gl);
-  var posVertAttr = new vglModule.vertexAttribute("vertexPosition");
-  var colorVertAttr = new vglModule.vertexAttribute("vertexColor");
-  var pointsizeUniform = new vglModule.floatUniform("pointSize", 5.0);
-  var opacityUniform = new vglModule.floatUniform("opacity", 1.0);
-  var vertexColorWeightUniform = new vglModule.floatUniform(
-                                                            "vertexColorWeight",
-                                                            0.0);
-  var modelViewUniform = new vglModule.modelViewUniform("modelViewMatrix");
-  var projectionUniform = new vglModule.projectionUniform("projectionMatrix");
-  var samplerUniform = new vglModule.uniform(gl.INT, "sampler2d");
+  var mat = new vglModule.material(),
+      blend = new vglModule.blend(),
+      prog = new vglModule.shaderProgram(),
+      vertexShader = vglModule.utils.createPointSpritesVertexShader(gl),
+      fragmentShader = vglModule.utils.createPointSpritesFragmentShader(gl),
+      posVertAttr = new vglModule.vertexAttribute("vertexPosition"),
+      colorVertAttr = new vglModule.vertexAttribute("vertexColor"),
+      pointsizeUniform = new vglModule.floatUniform("pointSize", 5.0),
+      opacityUniform = new vglModule.floatUniform("opacity", 1.0),
+      vertexColorWeightUniform =
+        new vglModule.floatUniform("vertexColorWeight", 0.0),
+      modelViewUniform = new vglModule.modelViewUniform("modelViewMatrix"),
+      projectionUniform = new vglModule.projectionUniform("projectionMatrix"),
+      samplerUniform = new vglModule.uniform(gl.INT, "sampler2d"),
+      texture = new vglModule.texture();
+
   samplerUniform.set(0);
   prog.addVertexAttribute(posVertAttr, vglModule.vertexAttributeKeys.Position);
   prog.addVertexAttribute(colorVertAttr, vglModule.vertexAttributeKeys.Color);
@@ -636,8 +638,6 @@ vglModule.utils.createPointSpritesMaterial = function(image) {
   mat.addAttribute(prog);
   mat.addAttribute(blend);
 
-  // Create and set the texture
-  var texture = new vglModule.texture();
   texture.setImage(image);
   mat.addAttribute(texture);
   return mat;
@@ -843,62 +843,6 @@ vglModule.utils.createColorLegend = function(varname, lookupTable, origin,
   }
 
   //////////////////////////////////////////////////////////////////////////////
-  // TODO Currently we assume that the ticks are laid on x-axis
-  // and this is on a 2D plane (ignoring Z axis. For now lets
-  // not draw minor ticks.
-  /**
-   * Create ticks and labels
-   *
-   * @param originX
-   * @param originY
-   * @param originZ
-   * @param pt1X
-   * @param pt1Y
-   * @param pt1Z
-   * @param pt2X
-   * @param pt2Y
-   * @param pt2Z
-   * @param divs
-   * @param heightMajor
-   * @param heightMinor
-   * @returns {Array} Returns array of vglModule.actor
-   */
-  //////////////////////////////////////////////////////////////////////////////
-  function createTicksAndLabels(varname, lut,
-                        originX, originY, originZ,
-                        pt1X, pt1Y, pt1Z,
-                        pt2X, pt2Y, pt2Z,
-                        countMajor, countMinor,
-                        heightMajor, heightMinor) {
-    'use strict';
-
-    var width = pt2X - pt1X,
-        index = null,
-        delta = width / countMajor,
-        positions = [],
-        actor = null,
-        actors = [];
-
-    for (index = 0; index <= countMajor; ++index) {
-      positions.push(pt1X + delta * index);
-      positions.push(pt1Y);
-      positions.push(pt1Z);
-
-      positions.push(pt1X + delta * index);
-      positions.push(pt1Y + heightMajor);
-      positions.push(pt1Z);
-    }
-
-    actor = vglModule.utils.createLines(positions, null);
-    actor.setReferenceFrame(vglModule.boundingObject.ReferenceFrame.Absolute);
-    actor.material().setBinNumber(vglModule.material.RenderBin.Overlay);
-    actors.push(actor);
-
-    actors = actors.concat(createLabels(varname, positions, lut.range()));
-    return actors;
-  }
-
-  //////////////////////////////////////////////////////////////////////////////
   /**
    * Create labels for the legend
    *
@@ -908,7 +852,6 @@ vglModule.utils.createColorLegend = function(varname, lookupTable, origin,
    */
   //////////////////////////////////////////////////////////////////////////////
   function createLabels(varname, positions, range) {
-    'use strict';
     if (!positions) {
       console.log('[error] Create labels requires positions (x,y,z) array');
       return;
@@ -925,7 +868,6 @@ vglModule.utils.createColorLegend = function(varname, lookupTable, origin,
     }
 
     var actor = null,
-        i = 0,
         size = vglModule.utils.computePowerOfTwo(48),
         index = 0,
         actors = [],
@@ -933,14 +875,14 @@ vglModule.utils.createColorLegend = function(varname, lookupTable, origin,
         pt1 = [],
         pt2 = [],
         delta = (positions[6] - positions[0]),
-        axisLabelOffset = 4;
+        axisLabelOffset = 4, i;
 
     origin.length = 3;
     pt1.length = 3;
     pt2.length = 3;
 
     // For now just create labels for end points
-    for (; i < 2; ++i) {
+    for (i = 0; i < 2; ++i) {
       index = i * (positions.length - 3);
 
       origin[0] = positions[index] - delta;
@@ -990,6 +932,60 @@ vglModule.utils.createColorLegend = function(varname, lookupTable, origin,
       varname, 24, null));
     actors.push(actor);
 
+    return actors;
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+  // TODO Currently we assume that the ticks are laid on x-axis
+  // and this is on a 2D plane (ignoring Z axis. For now lets
+  // not draw minor ticks.
+  /**
+   * Create ticks and labels
+   *
+   * @param originX
+   * @param originY
+   * @param originZ
+   * @param pt1X
+   * @param pt1Y
+   * @param pt1Z
+   * @param pt2X
+   * @param pt2Y
+   * @param pt2Z
+   * @param divs
+   * @param heightMajor
+   * @param heightMinor
+   * @returns {Array} Returns array of vglModule.actor
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  function createTicksAndLabels(varname, lut,
+                        originX, originY, originZ,
+                        pt1X, pt1Y, pt1Z,
+                        pt2X, pt2Y, pt2Z,
+                        countMajor, countMinor,
+                        heightMajor, heightMinor) {
+    var width = pt2X - pt1X,
+        index = null,
+        delta = width / countMajor,
+        positions = [],
+        actor = null,
+        actors = [];
+
+    for (index = 0; index <= countMajor; ++index) {
+      positions.push(pt1X + delta * index);
+      positions.push(pt1Y);
+      positions.push(pt1Z);
+
+      positions.push(pt1X + delta * index);
+      positions.push(pt1Y + heightMajor);
+      positions.push(pt1Z);
+    }
+
+    actor = vglModule.utils.createLines(positions, null);
+    actor.setReferenceFrame(vglModule.boundingObject.ReferenceFrame.Absolute);
+    actor.material().setBinNumber(vglModule.material.RenderBin.Overlay);
+    actors.push(actor);
+
+    actors = actors.concat(createLabels(varname, positions, lut.range()));
     return actors;
   }
 
@@ -1079,7 +1075,7 @@ vglModule.utils.create2DTexture = function(textToWrite, textSize, color) {
 
   ctx.fillText(textToWrite, canvas.width/2, canvas.height/2);
 
-  texture.setImage(canvas)
+  texture.setImage(canvas);
   texture.updateDimensions();
 
   return texture;
