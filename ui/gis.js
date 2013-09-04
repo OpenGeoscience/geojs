@@ -122,6 +122,14 @@ uiModule.gis.createLayerList = function(map, rootId, heading, toggleFunct, remov
     modifyButton.popover('hide');
   });
 
+  // Hide the popover if ESC is pressed
+  var KEYCODE_ESC = 27;
+
+  $(document).keydown(function(event) {
+    if (event.which == KEYCODE_ESC)
+      modifyButton.popover('hide');
+  });
+
   // Add animation controls
 
   var animationControls =
