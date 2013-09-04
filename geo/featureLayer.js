@@ -150,7 +150,7 @@ geoModule.featureLayer = function(options, feature) {
         lut = vglModule.lookupTable();
         this.setLookupTable(lut);
       }
-      lut.setRange(this.dataSource().getScalarRange());
+      lut.setRange(this.dataSource().getScalarRange(varnames[0]));
       m_legend = vglModule.utils.createColorLegend(
         varnames[0], lut, this.legendOrigin(), this.legendWidth(),
         this.legendHeight(), 10, 0);
