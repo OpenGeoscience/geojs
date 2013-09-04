@@ -7,7 +7,7 @@
 /*jslint white: true, indent: 2*/
 
 /*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vglModule, proj4, document, wflModule, merge_options_in_place, roundRect*/
+/*global vglModule, proj4, document, wflModule*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -26,7 +26,7 @@ wflModule.inputModule = function(options, data) {
   }
   this.inputPortClass = wflModule.inputPort;
   this.outputPortClass = wflModule.outputPort;
-  wflModule.workflowModule.call(this, options, data);
+  wflModule.module.call(this, options, data);
 
   /** @priave */
   var m_that = this,
@@ -96,7 +96,7 @@ wflModule.inputModule = function(options, data) {
         currentWorkflowStyle.module.port.pad*4
     };
 
-    merge_options_in_place(base_metrics, new_metrics);
+    wflModule.utils.merge_options_in_place(base_metrics, new_metrics);
     m_metrics = base_metrics;
 
     //compute port positions
@@ -134,13 +134,13 @@ wflModule.inputModule = function(options, data) {
    * @param {CanvasRenderingContext2D} ctx
    */
     ////////////////////////////////////////////////////////////////////////////
-  this.draw = function(ctx, currentWorkflowStyle) {
+  this.draw = function(ctx, drawStyle) {
 
     if(!m_metrics) {
-      this.recomputeMetrics(ctx, currentWorkflowStyle);
+      this.recomputeMetrics(ctx, drawStyle);
     }
 
-    var portWidth = currentWorkflowStyle.module.port.width,
+    var portWidth = drawStyle.module.port.width,
       mx = m_metrics.mx,
       my = m_metrics.my,
       m_inPorts = this.getInPorts(),
@@ -148,24 +148,24 @@ wflModule.inputModule = function(options, data) {
       key;
 
     //draw rectangle
-    ctx.fillStyle = currentWorkflowStyle.module.fill;
-    ctx.lineWidth = currentWorkflowStyle.module.lineWidth;
-    ctx.strokeStyle = currentWorkflowStyle.module.stroke;
+    ctx.fillStyle = drawStyle.module.fill;
+    ctx.lineWidth = drawStyle.module.lineWidth;
+    ctx.strokeStyle = drawStyle.module.stroke;
 
     ctx.save();
-    ctx.shadowBlur = currentWorkflowStyle.module.shadowBlur;
-    ctx.shadowColor = currentWorkflowStyle.module.shadowColor;
+    ctx.shadowBlur = drawStyle.module.shadowBlur;
+    ctx.shadowColor = drawStyle.module.shadowColor;
 
     //translate to ensure fill pattern is consistent
     ctx.translate(mx,my);
-    roundRect(ctx, 0, 0, m_metrics.moduleWidth, m_metrics.moduleHeight,
-      currentWorkflowStyle.module.cornerRadius, true, true);
+    wflModule.utils.roundRect(ctx, 0, 0, m_metrics.moduleWidth,
+      m_metrics.moduleHeight, drawStyle.module.cornerRadius, true, true);
 
     ctx.restore();
 
     //draw ports
-    ctx.fillStyle = currentWorkflowStyle.module.port.fill;
-    ctx.strokeStyle = currentWorkflowStyle.module.port.stroke;
+    ctx.fillStyle = drawStyle.module.port.fill;
+    ctx.strokeStyle = drawStyle.module.port.stroke;
     for(key in m_inPorts) {
       if(m_inPorts.hasOwnProperty(key)) {
         m_inPorts[key].draw(ctx, portWidth);
@@ -179,12 +179,12 @@ wflModule.inputModule = function(options, data) {
     }
 
     //draw module name
-    ctx.fillStyle = currentWorkflowStyle.module.text.fill;
-    ctx.font = currentWorkflowStyle.module.text.font;
+    ctx.fillStyle = drawStyle.module.text.fill;
+    ctx.font = drawStyle.module.text.font;
     ctx.fillText(
       this.getData()['@name'],
       mx + Math.floor((m_metrics.moduleWidth - m_metrics.fontMetrics.width)/2),
-      my + m_metrics.textHeight + currentWorkflowStyle.module.text.ypad);
+      my + m_metrics.textHeight + drawStyle.module.text.ypad);
 
   };
 
@@ -223,4 +223,4 @@ wflModule.inputModule = function(options, data) {
   return this;
 };
 
-inherit(wflModule.inputModule, wflModule.workflowModule);
+inherit(wflModule.inputModule, wflModule.module);

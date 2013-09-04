@@ -7,12 +7,12 @@
 /*jslint white: true, indent: 2*/
 
 /*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vglModule, jQuery, document, wflModule, defaultValue*/
+/*global vglModule, jQuery, document, wflModule*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * workflowLayerSource retrieves its data by running a workflow
+ * workflow layerSource retrieves its data by running a workflow
  *
  * onError function of the form:
  *
@@ -22,17 +22,17 @@
  * can be provided with the appropriate error message.
  */
 //////////////////////////////////////////////////////////////////////////////
-wflModule.workflowLayerSource = function(name, vars, workflow, onError) {
+wflModule.layerSource = function(name, vars, workflow, onError) {
   'use strict';
 
-  if (!(this instanceof wflModule.workflowLayerSource) ) {
-    return new wflModule.workflowLayerSource(name, vars, workflow, onError);
+  if (!(this instanceof wflModule.layerSource) ) {
+    return new wflModule.layerSource(name, vars, workflow, onError);
   }
   geoModule.archiveLayerSource.call(this, name, vars, onError);
 
   var m_time = -1,
     m_name = name,
-    m_onError = defaultValue(onError, function(errorString) {}),
+    m_onError = wflModule.utils.defaultValue(onError, function(errorString) {}),
     m_workflow = workflow;
 
   ////////////////////////////////////////////////////////////////////////////
@@ -114,4 +114,4 @@ wflModule.workflowLayerSource = function(name, vars, workflow, onError) {
   return this;
 };
 
-inherit(wflModule.workflowLayerSource, geoModule.archiveLayerSource);
+inherit(wflModule.layerSource, geoModule.archiveLayerSource);

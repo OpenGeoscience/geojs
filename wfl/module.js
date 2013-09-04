@@ -6,9 +6,11 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, indent: 2*/
 
-/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image, nextFunctionId*/
-/*global vglModule, jQuery, document, wflModule, moduleRegistry, defaultValue*/
+/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
+/*global vglModule, jQuery, document, wflModule*/
 //////////////////////////////////////////////////////////////////////////////
+
+var nextFunctionId = wflModule.utils.createIdCounter();
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -17,27 +19,27 @@
  * @class
  * @dec
  * @param {object} data
- * @returns {wflModule.workflowModule}
+ * @returns {wflModule.module}
  */
 //////////////////////////////////////////////////////////////////////////////
-wflModule.workflowModule = function(options, data) {
+wflModule.module = function(options, data) {
   "use strict";
-  if (!(this instanceof wflModule.workflowModule)) {
-    return new wflModule.workflowModule(options, data);
+  if (!(this instanceof wflModule.module)) {
+    return new wflModule.module(options, data);
   }
   vglModule.object.call(this);
 
   /** @private */
   var m_that = this,
     m_data = data,
-    m_registry = moduleRegistry[data['@package']][data['@name']],
+    m_registryMap = wflModule.utils.moduleRegistryMap,
+    m_registry = m_registryMap[data['@package']][data['@name']],
     m_metrics,
     m_ports = m_registry.portSpec,
     m_inPorts = {},
     m_outPorts = {},
     m_inPortCount = 0,
     m_outPortCount = 0,
-    i = 0,
     m_workflow = options.workflow;
 
   //ensure location values are floating point numbers
@@ -93,24 +95,25 @@ wflModule.workflowModule = function(options, data) {
    * Recompute drawing metrics for this module
    *
    * @param {CanvasRenderingContext2D} ctx
-   * @param {object} currentWorkflowStyle
+   * @param {object} drawStyle
    */
     ////////////////////////////////////////////////////////////////////////////
-  this.recomputeMetrics = function(ctx, currentWorkflowStyle) {
-    var portWidth = currentWorkflowStyle.module.port.width,
-      totalPortWidth = portWidth + currentWorkflowStyle.module.port.pad,
-      inPortsWidth = m_inPortCount * totalPortWidth + currentWorkflowStyle.module.text.xpad,
+  this.recomputeMetrics = function(ctx, drawStyle) {
+    var portWidth = drawStyle.module.port.width,
+      totalPortWidth = portWidth + drawStyle.module.port.pad,
+      inPortsWidth = m_inPortCount * totalPortWidth +
+        drawStyle.module.text.xpad,
       outPortsWidth = m_outPortCount * totalPortWidth,
       fontMetrics = ctx.measureText(m_data['@name']),
-      textWidth = fontMetrics.width + currentWorkflowStyle.module.text.xpad * 2,
-      moduleWidth = Math.max(inPortsWidth, outPortsWidth+currentWorkflowStyle.module.text.xpad,
-        textWidth, currentWorkflowStyle.module.minWidth),
+      textWidth = fontMetrics.width + drawStyle.module.text.xpad * 2,
+      moduleWidth = Math.max(inPortsWidth, outPortsWidth +
+        drawStyle.module.text.xpad, textWidth, drawStyle.module.minWidth),
       textHeight = 12, //TODO: get real height based on text font
-      moduleHeight = currentWorkflowStyle.module.port.pad*4 + portWidth*2 +
-        currentWorkflowStyle.module.text.ypad*2 + textHeight,
+      moduleHeight = drawStyle.module.port.pad*4 + portWidth*2 +
+        drawStyle.module.text.ypad*2 + textHeight,
       mx = Math.floor(m_data.location['@x'] - moduleWidth/2),
       my = -Math.floor(m_data.location['@y']),
-      inPortX = mx + currentWorkflowStyle.module.port.pad,
+      inPortX = mx + drawStyle.module.port.pad,
       outPortX = mx + moduleWidth - outPortsWidth,
       key;
 
@@ -125,22 +128,22 @@ wflModule.workflowModule = function(options, data) {
       textHeight: textHeight,
       moduleHeight: moduleHeight,
       inPortX: inPortX,
-      inPortY: my + currentWorkflowStyle.module.port.pad,
+      inPortY: my + drawStyle.module.port.pad,
       outPortX: outPortX,
-      outPortY: my + moduleHeight - currentWorkflowStyle.module.port.pad - portWidth
+      outPortY: my + moduleHeight - drawStyle.module.port.pad - portWidth
     };
 
     for(key in m_inPorts) {
       if(m_inPorts.hasOwnProperty(key)) {
         m_inPorts[key].setPosition(inPortX, m_metrics.inPortY);
-        inPortX += portWidth + currentWorkflowStyle.module.port.pad;
+        inPortX += portWidth + drawStyle.module.port.pad;
       }
     }
 
     for(key in m_outPorts) {
       if(m_outPorts.hasOwnProperty(key)) {
         m_outPorts[key].setPosition(outPortX, m_metrics.outPortY);
-        outPortX += portWidth + currentWorkflowStyle.module.port.pad;
+        outPortX += portWidth + drawStyle.module.port.pad;
       }
     }
   };
@@ -198,22 +201,19 @@ wflModule.workflowModule = function(options, data) {
    * @param {CanvasRenderingContext2D} ctx
    */
     ////////////////////////////////////////////////////////////////////////////
-  this.draw = function(ctx, currentWorkflowStyle) {
+  this.draw = function(ctx, drawStyle) {
     if(!m_metrics) {
-      this.recomputeMetrics(ctx, currentWorkflowStyle);
+      this.recomputeMetrics(ctx, drawStyle);
     }
 
-    var portWidth = currentWorkflowStyle.module.port.width,
+    var portWidth = drawStyle.module.port.width,
       mx = m_metrics.mx,
       my = m_metrics.my,
-      inPortX = m_metrics.inPortX,
-      outPortX = m_metrics.outPortX,
-      i,
       key;
 
     //draw rectangle
-    ctx.fillStyle = currentWorkflowStyle.module.fill;
-    ctx.strokeStyle = currentWorkflowStyle.module.stroke;
+    ctx.fillStyle = drawStyle.module.fill;
+    ctx.strokeStyle = drawStyle.module.stroke;
     ctx.fillRect(mx, my, m_metrics.moduleWidth, m_metrics.moduleHeight);
     ctx.strokeRect(mx, my, m_metrics.moduleWidth, m_metrics.moduleHeight);
 
@@ -231,12 +231,12 @@ wflModule.workflowModule = function(options, data) {
     }
 
     //draw module name
-    ctx.fillStyle = currentWorkflowStyle.module.text.fill;
-    ctx.font = currentWorkflowStyle.module.text.font;
+    ctx.fillStyle = drawStyle.module.text.fill;
+    ctx.font = drawStyle.module.text.font;
     ctx.fillText(
       m_data['@name'],
       mx + Math.floor((m_metrics.moduleWidth - m_metrics.fontMetrics.width)/2),
-      my + m_metrics.textHeight + currentWorkflowStyle.module.text.ypad
+      my + m_metrics.textHeight + drawStyle.module.text.ypad
     );
 
   };
@@ -275,11 +275,11 @@ wflModule.workflowModule = function(options, data) {
     }
   };
 
-  this.show = function() {
+  this.show = function(inputContainer) {
     var key;
     for(key in m_inPorts) {
       if(m_inPorts.hasOwnProperty(key)) {
-        m_inPorts[key].show();
+        m_inPorts[key].show(inputContainer);
       }
     }
   };
@@ -336,9 +336,9 @@ wflModule.workflowModule = function(options, data) {
 
   this.newFunction = function(name, value, type, pos, alias, description) {
     var id = nextFunctionId();
-    pos = defaultValue(pos, "0");
-    alias = defaultValue(alias, "");
-    description = defaultValue(description, "<no description>");
+    pos = wflModule.utils.defaultValue(pos, "0");
+    alias = wflModule.utils.defaultValue(alias, "");
+    description = wflModule.utils.defaultValue(description, "<no description>");
     return {
       "@name": name,
       "#tail": "\n    ",
@@ -364,4 +364,4 @@ wflModule.workflowModule = function(options, data) {
   return this;
 };
 
-inherit(wflModule.workflowModule, vglModule.object);
+inherit(wflModule.module, vglModule.object);

@@ -1,5 +1,4 @@
-var reg = {
-  "registry": {
+wflModule.registry = {
     "@rootDescriptorId": "0",
     "package": [{
       "@loadConfiguration": "True",
@@ -2660,5 +2659,4 @@ var reg = {
     "@{http://www.w3.org/2001/XMLSchema-instance}schemaLocation": "http://www.vistrails.org/registry.xsd",
     "#text": "\n  ",
     "@id": ""
-  }
-};
+  };

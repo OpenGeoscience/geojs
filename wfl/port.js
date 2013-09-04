@@ -7,8 +7,26 @@
 /*jslint white: true, indent: 2*/
 
 /*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vglModule, proj4, document, wflModule, currentWorkflowStyle*/
+/*global vglModule, proj4, document, wflModule, climatePipesStyle*/
 //////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * port options object specification
+ */
+//////////////////////////////////////////////////////////////////////////////
+wflModule.portOptions = function() {
+  "use strict";
+  // Check against no use of new()
+  if (!(this instanceof wflModule.portOptions)) {
+    return new wflModule.portOptions();
+  }
+
+  this.module = null;
+  this.drawStyle = climatePipesStyle;
+
+  return this;
+};
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -27,13 +45,22 @@ wflModule.port = function(options, data) {
   }
   vglModule.object.call(this);
 
+  options = typeof options !== 'undefined' ? options : {};
+  options = wflModule.utils.merge_options(wflModule.portOptions(), options);
+
   /** @private */
   var m_that = this,
     m_data = data,
+    m_module = options.module,
+    m_style = options.drawStyle,
     m_x = 0,
     m_y = 0,
-    m_width = currentWorkflowStyle.module.port.width,
-    m_module = options.module;
+    m_width = m_style.module.port.width;
+
+  this.drawStyle = function() {
+    //@todo: only store and use port portion of style
+    return m_style;
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -72,16 +99,16 @@ wflModule.port = function(options, data) {
    */
     ////////////////////////////////////////////////////////////////////////////
   this.draw = function(ctx, width) {
-    ctx.fillStyle = currentWorkflowStyle.module.port.fill;
-    ctx.strokeStyle = currentWorkflowStyle.module.port.stroke;
+    ctx.fillStyle = m_style.module.port.fill;
+    ctx.strokeStyle = m_style.module.port.stroke;
     ctx.fillRect(m_x, m_y, width, width);
     ctx.strokeRect(m_x, m_y, width, width);
   };
 
   this.drawAsCircle = function(ctx, width) {
-    ctx.fillStyle = currentWorkflowStyle.module.port.fill;
-    ctx.strokeStyle = currentWorkflowStyle.module.port.stroke;
-    ctx.lineWidth = currentWorkflowStyle.module.port.lineWidth;
+    ctx.fillStyle = m_style.module.port.fill;
+    ctx.strokeStyle = m_style.module.port.stroke;
+    ctx.lineWidth = m_style.module.port.lineWidth;
 
     var radius = width/2;
     ctx.beginPath();
@@ -109,7 +136,7 @@ wflModule.port = function(options, data) {
   };
 
   this.hide = function() {};
-  this.show = function() {};
+  this.show = function(inputContainer) {};
 
   return this;
 };

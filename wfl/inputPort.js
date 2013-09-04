@@ -6,8 +6,8 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, indent: 2*/
 
-/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image, defaultValue*/
-/*global vglModule, proj4, document, wflModule, currentWorkflowStyle*/
+/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
+/*global vglModule, proj4, document, wflModule*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -36,8 +36,9 @@ wflModule.inputPort = function(options, data) {
   };
 
   this.drawName = function(ctx, width) {
-    ctx.fillStyle = currentWorkflowStyle.module.text.fill;
-    ctx.font = currentWorkflowStyle.module.text.font;
+    var drawStyle = this.drawStyle();
+    ctx.fillStyle = drawStyle.module.text.fill;
+    ctx.font = drawStyle.module.text.font;
     ctx.fillText(this.data()['@name'], this.x() + width*2, this.y()+width);
   };
 
@@ -45,7 +46,7 @@ wflModule.inputPort = function(options, data) {
     //TODO: support other types of input for color, dates, etc.
     m_input_elem = document.createElement('input');
     m_input_elem.type = 'text';
-    m_input_elem.placeholder = defaultValue(placeholder, "");
+    m_input_elem.placeholder = wflModule.utils.defaultValue(placeholder, "");
     $(m_input_elem).css({
       position: 'absolute',
       'pointer-events': 'auto'
@@ -57,7 +58,6 @@ wflModule.inputPort = function(options, data) {
         );
       });
     m_that.setElementValueFromData();
-    $('#inputContainer').append(m_input_elem);
   }
 
   this.setPosition = function(x,y) {
@@ -66,21 +66,24 @@ wflModule.inputPort = function(options, data) {
   };
 
   this.updateElementPosition = function(x,y) {
-    var translated = this.module().workflow().translated();
+    var translated = this.module().workflow().translated(),
+      drawStyle = this.drawStyle();
 
     $(m_input_elem).css({
-      top: y + translated.y - currentWorkflowStyle.shadowBlur,
-      left: x + translated.x + currentWorkflowStyle.module.port.width +
-        currentWorkflowStyle.module.port.pad - currentWorkflowStyle.shadowBlur
+      top: y + translated.y - drawStyle.shadowBlur,
+      left: x + translated.x + drawStyle.module.port.width +
+        drawStyle.module.port.pad - drawStyle.shadowBlur
     });
   };
 
-  this.show = function() {
+  this.show = function(inputContainer) {
+    inputContainer.appendChild(m_input_elem);
     $(m_input_elem).show();
   };
 
   this.hide = function() {
     $(m_input_elem).hide();
+    $(m_input_elem).detach();
   };
 
   this.setElementValueFromData = function() {
