@@ -1071,7 +1071,7 @@ vglModule.utils.create2DTexture = function(textToWrite, textSize, color) {
   ctx.textBaseline = "bottom";
 
   // This determines the size of the text and the font family used
-  ctx.font = textSize + "px monospace";
+  ctx.font = "bold " + textSize + "px monospace";
 
   ctx.fillText(textToWrite, canvas.width/2, canvas.height/2);
 
