@@ -351,7 +351,7 @@ vglModule.shaderProgram = function() {
     var key, name;
     for (key in m_vertexAttributes) {
       name = m_vertexAttributes[key].name();
-      gl.bindAttrisbLocation(m_programHandle, key, name);
+      gl.bindAttribLocation(m_programHandle, key, name);
       m_vertexAttributeNameToLocation[name] = key;
     }
   };
