@@ -1037,12 +1037,20 @@ vglModule.utils.createColorLegend = function(varname, lookupTable, origin,
  * @returns {vglModule.texture}
  */
 //////////////////////////////////////////////////////////////////////////////
-vglModule.utils.create2DTexture = function(textToWrite, textSize, color) {
+vglModule.utils.create2DTexture = function(textToWrite, textSize,
+  color, font, alignment, baseline, bold) {
   'use strict';
 
   var canvas = document.getElementById('textRendering'),
       ctx = null,
-      texture = vglModule.texture();
+      texture = vglModule.texture(),
+      font = font || 'sans-serif',
+      alignment = alignment || 'center',
+      baseline = baseline || 'bottom';
+
+  if (typeof bold === 'undefined') {
+    bold = true;
+  }
 
   if (!canvas) {
     canvas = document.createElement('canvas');
@@ -1051,8 +1059,6 @@ vglModule.utils.create2DTexture = function(textToWrite, textSize, color) {
 
   canvas.setAttribute('id', 'textRendering');
   canvas.style.display = 'none';
-
-//  canvas.width = getPowerOfTwo(ctx.measureText(textToWrite).width);
 
   // Make width and height equal so that we get pretty looking text.
   canvas.height = vglModule.utils.computePowerOfTwo(8 * textSize);
@@ -1065,13 +1071,16 @@ vglModule.utils.create2DTexture = function(textToWrite, textSize, color) {
   ctx.fillStyle = 'rgba(200, 150, 20, 1.0)';
 
   // This determines the alignment of text, e.g. left, center, right
-  ctx.textAlign = "center";
+  ctx.textAlign = alignment;
 
   // This determines the baseline of the text, e.g. top, middle, bottom
-  ctx.textBaseline = "bottom";
+  ctx.textBaseline = baseline;
 
   // This determines the size of the text and the font family used
-  ctx.font = "bold " + 4 * textSize + "px sans-serif";
+  ctx.font = 4 * textSize + "px " + font;
+  if (bold) {
+    ctx.font = "bold " + ctx.font;
+  }
 
   ctx.fillText(textToWrite, canvas.width/2, canvas.height/2);
 
