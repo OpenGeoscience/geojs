@@ -1068,7 +1068,7 @@ vglModule.utils.create2DTexture = function(textToWrite, textSize,
   ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
   // This determines the text colour, it can take a hex value or rgba value (e.g. rgba(255,0,0,0.5))
-  ctx.fillStyle = 'rgba(200, 150, 20, 1.0)';
+  ctx.fillStyle = 'rgba(200, 85, 10, 1.0)';
 
   // This determines the alignment of text, e.g. left, center, right
   ctx.textAlign = alignment;
