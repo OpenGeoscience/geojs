@@ -1043,10 +1043,11 @@ vglModule.utils.create2DTexture = function(textToWrite, textSize,
 
   var canvas = document.getElementById('textRendering'),
       ctx = null,
-      texture = vglModule.texture(),
-      font = font || 'sans-serif',
-      alignment = alignment || 'center',
-      baseline = baseline || 'bottom';
+      texture = vglModule.texture();
+
+  font = font || 'sans-serif';
+  alignment = alignment || 'center';
+  baseline = baseline || 'bottom';
 
   if (typeof bold === 'undefined') {
     bold = true;
