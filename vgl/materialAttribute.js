@@ -9,7 +9,7 @@
 /*global vglModule, ogs, vec4, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
-var materialAttributeType = {
+vglModule.materialAttributeType = {
   "Undefined" : 0x0,
   "ShaderProgram" : 0x1,
   "Texture" : 0x2,
@@ -17,6 +17,7 @@ var materialAttributeType = {
   "Depth" : 0x4
 };
 
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class materialAttribute
  *
@@ -24,7 +25,9 @@ var materialAttributeType = {
  * @param type
  * @returns {vglModule.materialAttribute}
  */
+//////////////////////////////////////////////////////////////////////////////
 vglModule.materialAttribute = function(type) {
+  'use strict';
 
   if (!(this instanceof vglModule.materialAttribute)) {
     return new vglModule.materialAttribute();
@@ -32,39 +35,102 @@ vglModule.materialAttribute = function(type) {
   vglModule.object.call(this);
 
   /** @private */
-  var m_type = type;
+  var m_type = type,
+      m_enabled = true;
 
-  /** @private */
-  var m_enabled = true;
-
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return tyep of the material attribute
+   *
+   * @returns {*}
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.type = function() {
     return m_type;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return if material attribute is enabled or not
+   *
+   * @returns {boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.enabled = function() {
     return m_enabled;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Setup (initialize) the material attribute
+   *
+   * @param renderState
+   * @returns {boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.setup = function(renderState) {
     return false;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Bind and activate the material attribute
+   *
+   * @param renderState
+   * @returns {boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.bind = function(renderState) {
     return false;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Undo bind and deactivate the material
+   *
+   * @param renderState
+   * @returns {boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.undoBind = function(renderState) {
     return false;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Initialize vertex data for the material attribute
+   *
+   * @param renderState
+   * @param key
+   * @returns {boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.setupVertexData = function(renderState, key) {
     return false;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Bind and activate vertex specific data
+   *
+   * @param renderState
+   * @param key
+   * @returns {boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.bindVertexData = function(renderState, key) {
     return false;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Undo bind and deactivate vertex specific data
+   *
+   * @param renderState
+   * @param key
+   * @returns {boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.undoBindVertexData = function(renderState, key) {
     return false;
   };

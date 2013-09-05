@@ -21,7 +21,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.geojsonReader = function() {
-  "use strict";
+  'use strict';
 
   if (!(this instanceof vglModule.geojsonReader)) {
     return new vglModule.geojsonReader();

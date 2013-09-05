@@ -14,7 +14,7 @@
 /**
  * Create a new instance of latlng
  *
- * @desc A latlng encapsulates geodesy coordinates defined by latitude and
+ * A latlng encapsulates geodesy coordinates defined by latitude and
  * longitude
  * @returns {geoModule.latlng}
  */

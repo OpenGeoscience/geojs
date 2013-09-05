@@ -18,7 +18,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.object = function() {
-  "use strict";
+  'use strict';
 
   if (!(this instanceof vglModule.object)) {
     return new vglModule.object();
@@ -28,10 +28,22 @@ vglModule.object = function() {
   var m_modifiedTime = vglModule.timestamp();
   m_modifiedTime.modified();
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Mark the object modified
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.modified = function() {
     m_modifiedTime.modified();
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return modified time of the object
+   *
+   * @returns {*}
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.getMTime = function() {
     return m_modifiedTime.getMTime();
   };

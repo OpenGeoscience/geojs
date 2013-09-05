@@ -6,21 +6,22 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, continue:true, indent: 2*/
 
-/*global vglModule, ogs, vec4, inherit, $*/
+/*global document, vglModule, gl, ogs, vec4, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class utils
  *
- * @class
- * @decs Utility class provides helper functions such as functions to create
+ * Utility class provides helper functions such as functions to create
  * shaders, geometry etc.
+ *
  * @returns {vglModule.utils}
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.utils = function() {
   'use strict';
+
   if (!(this instanceof vglModule.utils)) {
     return new vglModule.utils();
   }
@@ -37,11 +38,13 @@ inherit(vglModule.utils, vglModule.object);
  *
  * @param value
  * @param pow
- * @returns {*|number}
+ *
+ * @returns {number}
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.utils.computePowerOfTwo = function(value, pow) {
-  var pow = pow || 1;
+  'use strict';
+  pow = pow || 1;
   while (pow < value) {
     pow *= 2;
   }
@@ -52,7 +55,8 @@ vglModule.utils.computePowerOfTwo = function(value, pow) {
 /**
  * Create a new instance of default vertex shader that uses a texture
  *
- * @desc Helper function to create default vertex shader
+ * Helper function to create default vertex shader
+ *
  * @param context
  * @returns {vglModule.shader}
  */
@@ -80,7 +84,8 @@ vglModule.utils.createTextureVertexShader = function(context) {
 /**
  * Create a new instance of default fragment shader that uses a texture
  *
- * @desc Helper function to create default fragment shader with sampler *
+ * Helper function to create default fragment shader with sampler
+ *
  * @param context
  * @returns {vglModule.shader}
  */
@@ -104,7 +109,8 @@ vglModule.utils.createTextureFragmentShader = function(context) {
 /**
  * Create variation of createTextureFragmentShader which uses texture alpha
  *
- * @desc Helper function to create default fragment shader with sampler *
+ * Helper function to create default fragment shader with sampler
+ *
  * @param context
  * @returns {vglModule.shader}
  */
@@ -127,7 +133,8 @@ vglModule.utils.createRgbaTextureFragmentShader = function(context) {
 /**
  * Create a new instance of default vertex shader
  *
- * @desc Helper function to create default vertex shader *
+ * Helper function to create default vertex shader
+ *
  * @param context
  * @returns {vglModule.shader}
  */
@@ -157,7 +164,8 @@ vglModule.utils.createVertexShader = function(context) {
 /**
  * Create a new instance of vertex shader with a solid color
  *
- * @desc Helper function to create default vertex shader *
+ * Helper function to create default vertex shader
+ *
  * @param context
  * @returns {vglModule.shader}
  */
@@ -182,9 +190,11 @@ vglModule.utils.createVertexShaderSolidColor = function(context) {
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Create a new instance of vertex shader that passes values through for color mapping
+ * Create a new instance of vertex shader that passes values through
+ * for color mapping
  *
- * @desc Helper function to create default vertex shader *
+ * Helper function to create default vertex shader
+ *
  * @param context
  * @returns {vglModule.shader}
  */
@@ -216,7 +226,8 @@ vglModule.utils.createVertexShaderColorMap = function(context, min, max) {
 /**
  * Create a new instance of default fragment shader
  *
- * @desc Helper function to create default fragment shader *
+ * Helper function to create default fragment shader
+ *
  * @param context
  * @returns {vglModule.shader}
  */
@@ -238,7 +249,8 @@ vglModule.utils.createFragmentShader = function(context) {
 /**
  * Create a new instance of fragment shader with an assigned constant color.
  *
- * @desc Helper function to create default fragment shader *
+ * Helper function to create default fragment shader
+ *
  * @param context
  * @returns {vglModule.shader}
  */
@@ -259,7 +271,8 @@ vglModule.utils.createFragmentShaderSolidColor = function(context, color) {
 /**
  * Create a new instance of fragment shader that maps values into colors bia lookup table
  *
- * @desc Helper function to create default fragment shader *
+ * Helper function to create default fragment shader
+ *
  * @param context
  * @returns {vglModule.shader}
  */
@@ -283,7 +296,8 @@ vglModule.utils.createFragmentShaderColorMap = function(context) {
 /**
  * Create a new instance of vertex shader for point sprites
  *
- * @desc Helper function to create default point sprites vertex shader *
+ * Helper function to create default point sprites vertex shader
+ *
  * @param context
  * @returns {vglModule.shader}
  */
@@ -311,7 +325,8 @@ vglModule.utils.createPointSpritesVertexShader = function(context) {
 /**
  * Create a new instance of fragment shader for point sprites
  *
- * @desc Helper function to create default point sprites fragment shader *
+ * Helper function to create default point sprites fragment shader
+ *
  * @param context
  * @returns {vglModule.shader}
  */
@@ -338,7 +353,8 @@ vglModule.utils.createPointSpritesFragmentShader = function(context) {
 /**
  * Create a new instance of texture material
  *
- * @desc Helper function to create a texture material
+ * Helper function to create a texture material
+ *
  * @returns {vglModule.material}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -388,7 +404,8 @@ vglModule.utils.createTextureMaterial = function(isRgba) {
 /**
  * Create a new instance of geometry material
  *
- * @desc Helper function to create geometry material
+ * Helper function to create geometry material
+ *
  * @returns {vglModule.material}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -422,7 +439,8 @@ vglModule.utils.createGeometryMaterial = function() {
 /**
  * Create a new instance of colored geometry material
  *
- * @desc Helper function to create color geometry material
+ * Helper function to create color geometry material
+ *
  * @returns {vglModule.material}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -461,7 +479,8 @@ vglModule.utils.createColorMaterial = function() {
 /**
  * Create a new instance of geometry material
  *
- * @desc Helper function to create geometry material
+ * Helper function to create geometry material
+ *
  * @returns {vglModule.material}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -520,12 +539,12 @@ vglModule.utils.createColorMappedMaterial = function(lut) {
 vglModule.utils.updateColorMappedMaterial = function(mat, lut) {
   'use strict';
   if (!mat) {
-    console.log('[warning] Invalid material. Nothing to update.')
+    console.log('[warning] Invalid material. Nothing to update.');
     return;
   }
 
   if (!lut) {
-    console.log('[warning] Invalid lookup table. Nothing to update.')
+    console.log('[warning] Invalid lookup table. Nothing to update.');
     return;
   }
 
@@ -544,7 +563,8 @@ vglModule.utils.updateColorMappedMaterial = function(mat, lut) {
 /**
  * Create a new instance of solid color material
  *
- * @desc Helper function to create geometry material
+ * Helper function to create geometry material
+ *
  * @returns {vglModule.material}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -582,27 +602,29 @@ vglModule.utils.createSolidColorMaterial = function(color) {
 /**
  * Create a new instance of point sprites material
  *
- * @desc Helper function to create point sprites material
+ * Helper function to create point sprites material
+ *
  * @returns {vglModule.material}
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.utils.createPointSpritesMaterial = function(image) {
   'use strict';
-  var mat = new vglModule.material();
-  var blend = new vglModule.blend();
-  var prog = new vglModule.shaderProgram();
-  var vertexShader = vglModule.utils.createPointSpritesVertexShader(gl);
-  var fragmentShader = vglModule.utils.createPointSpritesFragmentShader(gl);
-  var posVertAttr = new vglModule.vertexAttribute("vertexPosition");
-  var colorVertAttr = new vglModule.vertexAttribute("vertexColor");
-  var pointsizeUniform = new vglModule.floatUniform("pointSize", 5.0);
-  var opacityUniform = new vglModule.floatUniform("opacity", 1.0);
-  var vertexColorWeightUniform = new vglModule.floatUniform(
-                                                            "vertexColorWeight",
-                                                            0.0);
-  var modelViewUniform = new vglModule.modelViewUniform("modelViewMatrix");
-  var projectionUniform = new vglModule.projectionUniform("projectionMatrix");
-  var samplerUniform = new vglModule.uniform(gl.INT, "sampler2d");
+  var mat = new vglModule.material(),
+      blend = new vglModule.blend(),
+      prog = new vglModule.shaderProgram(),
+      vertexShader = vglModule.utils.createPointSpritesVertexShader(gl),
+      fragmentShader = vglModule.utils.createPointSpritesFragmentShader(gl),
+      posVertAttr = new vglModule.vertexAttribute("vertexPosition"),
+      colorVertAttr = new vglModule.vertexAttribute("vertexColor"),
+      pointsizeUniform = new vglModule.floatUniform("pointSize", 5.0),
+      opacityUniform = new vglModule.floatUniform("opacity", 1.0),
+      vertexColorWeightUniform =
+        new vglModule.floatUniform("vertexColorWeight", 0.0),
+      modelViewUniform = new vglModule.modelViewUniform("modelViewMatrix"),
+      projectionUniform = new vglModule.projectionUniform("projectionMatrix"),
+      samplerUniform = new vglModule.uniform(gl.INT, "sampler2d"),
+      texture = new vglModule.texture();
+
   samplerUniform.set(0);
   prog.addVertexAttribute(posVertAttr, vglModule.vertexAttributeKeys.Position);
   prog.addVertexAttribute(colorVertAttr, vglModule.vertexAttributeKeys.Color);
@@ -616,8 +638,6 @@ vglModule.utils.createPointSpritesMaterial = function(image) {
   mat.addAttribute(prog);
   mat.addAttribute(blend);
 
-  // Create and set the texture
-  var texture = new vglModule.texture();
   texture.setImage(image);
   mat.addAttribute(texture);
   return mat;
@@ -627,8 +647,9 @@ vglModule.utils.createPointSpritesMaterial = function(image) {
 /**
  * Create a new instance of an actor that contains a plane geometry
  *
- * @Helper function to create a plane node This method will create a plane actor
- * with texture coordinates, eventually normal, and plane material. *
+ * Function to create a plane node This method will create a plane actor
+ * with texture coordinates, eventually normal, and plane material.
+ *
  * @returns {vglModule.actor}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -656,9 +677,10 @@ vglModule.utils.createPlane = function(originX, originY, originZ,
 /**
  * Create a new instance of an actor that contains a texture plane geometry
  *
- * @desc Helper function to create a plane textured node This method will create
+ * Helper function to create a plane textured node This method will create
  * a plane actor with texture coordinates, eventually normal, and plane
- * material. *
+ * material.
+ *
  * @returns {vglModule.actor}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -687,8 +709,9 @@ vglModule.utils.createTexturePlane = function(originX, originY, originZ,
 /**
  * Create a new instance of an actor that contains points
  *
- * @desc Helper function to create a point node This method will create a point
- * actor with texture coordinates, eventually normal, and plane material. *
+ * Helper function to create a point node This method will create a point
+ * actor with texture coordinates, eventually normal, and plane material.
+ *
  * @returns {vglModule.actor}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -724,9 +747,10 @@ vglModule.utils.createPoints = function(positions, colors, texcoords) {
 /**
  * Create a new instance of an actor that contains point sprites
  *
- * @desc Helper function to create a point sprites node This method will create
+ * Helper function to create a point sprites node This method will create
  * a point sprites actor with texture coordinates, normals, and a point sprites
  * material.
+ *
  * @returns {vglModule.actor}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -819,62 +843,6 @@ vglModule.utils.createColorLegend = function(varname, lookupTable, origin,
   }
 
   //////////////////////////////////////////////////////////////////////////////
-  // TODO Currently we assume that the ticks are laid on x-axis
-  // and this is on a 2D plane (ignoring Z axis. For now lets
-  // not draw minor ticks.
-  /**
-   * Create ticks and labels
-   *
-   * @param originX
-   * @param originY
-   * @param originZ
-   * @param pt1X
-   * @param pt1Y
-   * @param pt1Z
-   * @param pt2X
-   * @param pt2Y
-   * @param pt2Z
-   * @param divs
-   * @param heightMajor
-   * @param heightMinor
-   * @returns {Array}
-   */
-  //////////////////////////////////////////////////////////////////////////////
-  function createTicksAndLabels(varname, lut,
-                        originX, originY, originZ,
-                        pt1X, pt1Y, pt1Z,
-                        pt2X, pt2Y, pt2Z,
-                        countMajor, countMinor,
-                        heightMajor, heightMinor) {
-    'use strict';
-
-    var width = pt2X - pt1X,
-        index = null,
-        delta = width / countMajor,
-        positions = [],
-        actor = null,
-        actors = [];
-
-    for (index = 0; index <= countMajor; ++index) {
-      positions.push(pt1X + delta * index);
-      positions.push(pt1Y);
-      positions.push(pt1Z);
-
-      positions.push(pt1X + delta * index);
-      positions.push(pt1Y + heightMajor);
-      positions.push(pt1Z);
-    }
-
-    actor = vglModule.utils.createLines(positions, null);
-    actor.setReferenceFrame(vglModule.boundingObject.ReferenceFrame.Absolute);
-    actor.material().setBinNumber(vglModule.material.RenderBin.Overlay);
-    actors.push(actor);
-
-    actors = actors.concat(createLabels(varname, positions, lut.range()));
-    return actors;
-  }
-
-  //////////////////////////////////////////////////////////////////////////////
   /**
    * Create labels for the legend
    *
@@ -884,7 +852,6 @@ vglModule.utils.createColorLegend = function(varname, lookupTable, origin,
    */
   //////////////////////////////////////////////////////////////////////////////
   function createLabels(varname, positions, range) {
-    'use strict';
     if (!positions) {
       console.log('[error] Create labels requires positions (x,y,z) array');
       return;
@@ -901,7 +868,6 @@ vglModule.utils.createColorLegend = function(varname, lookupTable, origin,
     }
 
     var actor = null,
-        i = 0,
         size = vglModule.utils.computePowerOfTwo(48),
         index = 0,
         actors = [],
@@ -909,14 +875,14 @@ vglModule.utils.createColorLegend = function(varname, lookupTable, origin,
         pt1 = [],
         pt2 = [],
         delta = (positions[6] - positions[0]),
-        axisLabelOffset = 4;
+        axisLabelOffset = 4, i;
 
     origin.length = 3;
     pt1.length = 3;
     pt2.length = 3;
 
     // For now just create labels for end points
-    for (; i < 2; ++i) {
+    for (i = 0; i < 2; ++i) {
       index = i * (positions.length - 3);
 
       origin[0] = positions[index] - delta;
@@ -969,6 +935,60 @@ vglModule.utils.createColorLegend = function(varname, lookupTable, origin,
     return actors;
   }
 
+  //////////////////////////////////////////////////////////////////////////////
+  // TODO Currently we assume that the ticks are laid on x-axis
+  // and this is on a 2D plane (ignoring Z axis. For now lets
+  // not draw minor ticks.
+  /**
+   * Create ticks and labels
+   *
+   * @param originX
+   * @param originY
+   * @param originZ
+   * @param pt1X
+   * @param pt1Y
+   * @param pt1Z
+   * @param pt2X
+   * @param pt2Y
+   * @param pt2Z
+   * @param divs
+   * @param heightMajor
+   * @param heightMinor
+   * @returns {Array} Returns array of vglModule.actor
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  function createTicksAndLabels(varname, lut,
+                        originX, originY, originZ,
+                        pt1X, pt1Y, pt1Z,
+                        pt2X, pt2Y, pt2Z,
+                        countMajor, countMinor,
+                        heightMajor, heightMinor) {
+    var width = pt2X - pt1X,
+        index = null,
+        delta = width / countMajor,
+        positions = [],
+        actor = null,
+        actors = [];
+
+    for (index = 0; index <= countMajor; ++index) {
+      positions.push(pt1X + delta * index);
+      positions.push(pt1Y);
+      positions.push(pt1Z);
+
+      positions.push(pt1X + delta * index);
+      positions.push(pt1Y + heightMajor);
+      positions.push(pt1Z);
+    }
+
+    actor = vglModule.utils.createLines(positions, null);
+    actor.setReferenceFrame(vglModule.boundingObject.ReferenceFrame.Absolute);
+    actor.material().setBinNumber(vglModule.material.RenderBin.Overlay);
+    actors.push(actor);
+
+    actors = actors.concat(createLabels(varname, positions, lut.range()));
+    return actors;
+  }
+
   // TODO Currently we create only one type of legend
   var pt1X = origin[0] + width,
       pt1Y = origin[1],
@@ -1014,7 +1034,7 @@ vglModule.utils.createColorLegend = function(varname, lookupTable, origin,
  * @param textToWrite
  * @param textSize
  * @param color
- * @returns {*}
+ * @returns {vglModule.texture}
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.utils.create2DTexture = function(textToWrite, textSize, color) {
@@ -1055,7 +1075,7 @@ vglModule.utils.create2DTexture = function(textToWrite, textSize, color) {
 
   ctx.fillText(textToWrite, canvas.width/2, canvas.height/2);
 
-  texture.setImage(canvas)
+  texture.setImage(canvas);
   texture.updateDimensions();
 
   return texture;

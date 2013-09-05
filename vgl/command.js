@@ -18,7 +18,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 vglModule.command = function() {
-  "use strict";
+  'use strict';
 
   if (!(this instanceof vglModule.command)) {
     return new vglModule.command();

@@ -9,14 +9,17 @@
 /*global vglModule, ogs, vec4, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
+////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class interactorStyle
  *
  * @class vglModule.interactorStyle
- * @desc interactorStyle is a base class for all interactor styles
+ * interactorStyle is a base class for all interactor styles
  * @returns {vglModule.interactorStyle}
  */
+////////////////////////////////////////////////////////////////////////////
 vglModule.interactorStyle = function() {
+  'use strict';
 
   if (!(this instanceof vglModule.interactorStyle)) {
     return new vglModule.interactorStyle();
@@ -24,13 +27,27 @@ vglModule.interactorStyle = function() {
   vglModule.object.call(this);
 
   // Private member variables
-  var m_that = this;
-  var m_viewer = null;
+  var m_that = this,
+      m_viewer = null;
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return viewer referenced by the interactor style
+   *
+   * @returns {null}
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.viewer = function() {
     return m_viewer;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set viewer for the interactor style
+   *
+   * @param viewer
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.setViewer = function(viewer) {
     if (viewer !== m_viewer) {
       m_viewer = viewer;
@@ -44,22 +61,62 @@ vglModule.interactorStyle = function() {
     }
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Handle mouse down event
+   *
+   * @param event
+   * @returns {boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.handleMouseDown = function(event) {
     return true;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Handle mouse up event
+   *
+   * @param event
+   * @returns {boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.handleMouseUp = function(event) {
     return true;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Handle mouse move event
+   *
+   * @param event
+   * @returns {boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.handleMouseMove = function(event) {
     return true;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Handle key press event
+   *
+   * @param event
+   * @returns {boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.handleKeyPress = function(event) {
     return true;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Handle context menu event
+   *
+   * @param event
+   * @returns {boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.handleContextMenu = function(event) {
     return true;
   };

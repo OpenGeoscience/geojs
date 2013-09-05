@@ -9,17 +9,17 @@
 /*global vglModule, ogs, vec4, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true, white: true, indent: 2*/
-/*global vglModule, vglModule, ogs, inherit, vec4, $*/
-
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of trackballInteractorStyle
  *
  * @class vglModule.trackballInteractorStyle
  * @returns {vglModule.trackballInteractorStyle}
  */
+//////////////////////////////////////////////////////////////////////////////
 vglModule.trackballInteractorStyle = function() {
-  "use strict";
+  'use strict';
+
   if (!(this instanceof vglModule.trackballInteractorStyle)) {
     return new vglModule.trackballInteractorStyle();
   }
@@ -51,6 +51,14 @@ vglModule.trackballInteractorStyle = function() {
       };
 
 
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Handle mouse move event
+   *
+   * @param event
+   * @returns {boolean}
+   */
+  /////////////////////////////////////////////////////////////////////////////
   this.handleMouseMove = function(event) {
     var canvas = m_that.viewer().canvas();
     if (event.target !== canvas) {
@@ -116,6 +124,14 @@ vglModule.trackballInteractorStyle = function() {
     return false;
   };
 
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Handle mouse down event
+   *
+   * @param event
+   * @returns {boolean}
+   */
+  /////////////////////////////////////////////////////////////////////////////
   this.handleMouseDown = function(event) {
     var canvas = m_that.viewer().canvas();
     if (event.target !== canvas) {
@@ -146,6 +162,14 @@ vglModule.trackballInteractorStyle = function() {
 
   // @note We never get mouse up from scroll bar: See the bug report here
   // http://bugs.jquery.com/ticket/8184
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Handle mouse up event
+   *
+   * @param event
+   * @returns {boolean}
+   */
+  /////////////////////////////////////////////////////////////////////////////
   this.handleMouseUp = function(event) {
     var canvas = m_that.viewer().canvas();
     if (event.target !== canvas) {
@@ -163,7 +187,14 @@ vglModule.trackballInteractorStyle = function() {
     return false;
   };
 
-
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Perform zoom based on the current zoom level
+   *
+   * @param options
+   * @param useCurrent
+   */
+  /////////////////////////////////////////////////////////////////////////////
   this.zoom = function(options, useCurrent) {
     var m_renderer, m_camera, distance, currPosition;
     m_renderer = m_that.viewer().renderWindow().activeRenderer();

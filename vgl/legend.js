@@ -10,22 +10,44 @@
 /*global vglModule*/
 //////////////////////////////////////////////////////////////////////////////
 
+////////////////////////////////////////////////////////////////////////////
+/**
+ * Create a new instance of class legend
+ *
+ * @class vglModule.legend
+ * @description legend class is intended to create legend for 2D/3D scene.
+ *
+ * @returns {vglModule.legend}
+ */
+////////////////////////////////////////////////////////////////////////////
 vglModule.legend = function() {
+    'use strict';
+
     if (!(this instanceof vglModule.legend)) {
         return new vglModule.legend();
     }
     vglModule.actor.call(this);
 
-    this.lookupTable = function() {
-      return m_lookupTable;
-    };
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   *
+   * @returns {*}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.lookupTable = function() {
+    return m_lookupTable;
+  };
 
-    this.setLookupTable = function(lookupTable) {
-      m_lookupTable = lookupTable;
-      this.modified();
-    };
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   *
+   * @param lookupTable
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.setLookupTable = function(lookupTable) {
+    m_lookupTable = lookupTable;
+    this.modified();
+  };
 
-
-
-    return this;
+  return this;
 };

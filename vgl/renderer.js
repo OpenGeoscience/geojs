@@ -4,76 +4,90 @@
  */
 
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
+/*jslint white: true, continue:true, bitwise:true, indent: 2*/
 
-/*global vglModule, ogs, vec4, inherit, $*/
+/*global vglModule, gl, ogs, vec2, vec3, vec4, mat4, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class renderState
  *
- * @class vglModule.renderState
  * @returns {vglModule.renderState}
  */
+//////////////////////////////////////////////////////////////////////////////
 vglModule.renderState = function() {
+  'use strict';
+
   this.m_modelViewMatrix = mat4.create();
   this.m_projectionMatrix = null;
   this.m_material = null;
   this.m_mapper = null;
 };
 
+////////////////////////////////////////////////////////////////////////////
 /**
- * Create a new instance of class renderer
+ * Create a new instance of class renderer *
  *
- * @class vglModule.renderer
  * @returns {vglModule.renderer}
  */
+////////////////////////////////////////////////////////////////////////////
 vglModule.renderer = function() {
+  'use strict';
+
   if (!(this instanceof vglModule.renderer)) {
     return new vglModule.renderer();
   }
   vglModule.object.call(this);
 
   /** @private */
-  var m_backgroundColor = [0.0, 0.0, 0.0, 1.0];
+  var m_backgroundColor = [0.0, 0.0, 0.0, 1.0],
+      m_sceneRoot = new vglModule.groupNode(),
+      m_camera = new vglModule.camera(),
+      m_x = 0,
+      m_y = 0,
+      m_width = 0,
+      m_height = 0;
 
-  /** @private */
-  var m_sceneRoot = new vglModule.groupNode();
-
-  /** @private */
-  var m_camera = new vglModule.camera();
   m_camera.addChild(m_sceneRoot);
 
-  /** @private */
-  var m_width = 0;
-
-  /** @private */
-  var m_height = 0;
-
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get width of the renderer
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.width = function() {
     return m_width;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get height of the renderer
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.height = function() {
     return m_height;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get background color
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.backgroundColor = function() {
     return m_backgroundColor;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
-   * Set background color
+   * Set background color of the renderer
+   *
+   * @param r
+   * @param g
+   * @param b
+   * @param a
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.setBackgroundColor = function(r, g, b, a) {
     m_backgroundColor[0] = r;
     m_backgroundColor[1] = g;
@@ -83,23 +97,33 @@ vglModule.renderer = function() {
     this.modified();
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get scene root
+   *
+   * @returns {vglModule.groupNode}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.sceneRoot = function() {
     return m_sceneRoot;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get main camera of the renderer
+   *
+   * @returns {vglModule.camera}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.camera = function() {
     return m_camera;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Render the scene
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.render = function() {
     var i = 0,
         renSt = null,
@@ -127,7 +151,7 @@ vglModule.renderer = function() {
     }
 
     // Now perform sorting
-    sortedActors.sort(function(a, b) {return a[0] - b[0]});
+    sortedActors.sort(function(a, b) {return a[0] - b[0];});
 
     for ( i = 0; i < sortedActors.length; ++i) {
       actor = sortedActors[i][1];
@@ -153,9 +177,11 @@ vglModule.renderer = function() {
     }
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Automatically set up the camera based on visible actors
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.resetCamera = function() {
     m_camera.computeBounds();
 
@@ -173,7 +199,9 @@ vglModule.renderer = function() {
         ],
         radius = 0.0,
         aspect = m_camera.viewAspect(),
-        angle = m_camera.viewAngle();
+        angle = m_camera.viewAngle(),
+        distance = null,
+        vup = null;
 
     if (diagonals[0] > diagonals[1]) {
       if (diagonals[0] > diagonals[2]) {
@@ -196,8 +224,8 @@ vglModule.renderer = function() {
       angle = 2.0 * Math.atan(Math.tan(angle * 0.5) * aspect);
     }
 
-    var distance = radius / Math.sin(angle * 0.5),
-        vup = m_camera.viewUpDirection();
+    distance = radius / Math.sin(angle * 0.5);
+    vup = m_camera.viewUpDirection();
 
     if (Math.abs(vec3.dot(vup, vn)) > 0.999) {
       m_camera.setViewUpDirection(-vup[2], vup[0], vup[1]);
@@ -210,9 +238,11 @@ vglModule.renderer = function() {
     this.resetCameraClippingRange(visibleBounds);
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Recalculate camera's clipping range
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.resetCameraClippingRange = function(bounds) {
     var vn = m_camera.viewPlaneNormal(),
         position = m_camera.position(),
@@ -221,16 +251,19 @@ vglModule.renderer = function() {
         c = -vn[2],
         d = -(a*position[0] + b*position[1] + c*position[2]),
         range = vec2.create(),
-        dist = null;
+        dist = null,
+        i = null,
+        j = null,
+        k = null;
 
     // Set the max near clipping plane and the min far clipping plane
     range[0] = a * bounds[0] + b * bounds[2] + c * bounds[4] + d;
     range[1] = 1e-18;
 
     // Find the closest / farthest bounding box vertex
-    for (var k = 0; k < 2; k++ ) {
-      for (var j = 0; j < 2; j++) {
-        for (var i = 0; i < 2; i++) {
+    for (k = 0; k < 2; k++ ) {
+      for (j = 0; j < 2; j++) {
+        for (i = 0; i < 2; i++) {
           dist = a * bounds[i] + b * bounds[2 + j] + c * bounds[4 + k] + d;
           range[0] = (dist < range[0]) ? (dist) : (range[0]);
           range[1] = (dist > range[1]) ? (dist) : (range[1]);
@@ -277,17 +310,21 @@ vglModule.renderer = function() {
     m_camera.setClippingRange(range[0], range[1]);
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Resize viewport given a width and height
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.resize = function(width, height) {
     // @note: where do m_x and m_y come from?
     this.positionAndResize(m_x, m_y, width, height);
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Resize viewport given a position, width and height
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.positionAndResize = function(x, y, width, height) {
     // TODO move this code to camera
     if (x < 0 || y < 0 || width < 0 || height < 0) {
@@ -303,9 +340,14 @@ vglModule.renderer = function() {
     this.modified();
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Add new actor to the collection
+   *
+   * @param actor
+   * @returns {boolean}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.addActor = function(actor) {
     if (actor instanceof vglModule.actor) {
       m_sceneRoot.addChild(actor);
@@ -316,11 +358,13 @@ vglModule.renderer = function() {
     return false;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Add an array of actors to the collection
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.addActors = function(actors) {
-    var i = null
+    var i = null;
     if (actors instanceof Array) {
       for (i = 0; i < actors.length; ++i) {
         m_sceneRoot.addChild(actors[i]);
@@ -329,9 +373,14 @@ vglModule.renderer = function() {
     }
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Remove the actor from the collection
+   *
+   * @param actor
+   * @returns {boolean}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.removeActor = function(actor) {
     if (m_sceneRoot.children().indexOf(actor) !== -1) {
       m_sceneRoot.removeChild(actor);
@@ -342,9 +391,14 @@ vglModule.renderer = function() {
     return false;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Remove actors from the collection
+   *
+   * @param actors
+   * @returns {boolean}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.removeActors = function(actors) {
     if (!(actors instanceof Array)) {
       return false;
@@ -358,23 +412,36 @@ vglModule.renderer = function() {
     return true;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Remove all actors for a renderer
+   *
+   * @returns {*}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.removeAllActors = function() {
-    m_sceneRoot.removeChildren();
-  }
+    return m_sceneRoot.removeChildren();
+  };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Transform a point in the world space to display space
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.worldToDisplay = function(worldPt, viewMatrix, projectionMatrix, width,
                                  height) {
-    var viewProjectionMatrix = mat4.create();
+    var viewProjectionMatrix = mat4.create(),
+        winX = null,
+        winY = null,
+        winZ = null,
+        winW = null,
+        clipPt = null;
+
+
     mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
 
     // Transform world to clipping coordinates
-    var clipPt = vec4.create();
+    clipPt = vec4.create();
     vec4.transformMat4(clipPt, worldPt, viewProjectionMatrix);
 
     if (clipPt[3] !== 0.0) {
@@ -384,30 +451,39 @@ vglModule.renderer = function() {
       clipPt[3] = 1.0;
     }
 
-    var winX = Math.round((((clipPt[0]) + 1) / 2.0) * width);
-    // / We calculate -point3D.getY() because the screen Y axis is
-    // / oriented top->down
-    var winY = Math.round(((1 - clipPt[1]) / 2.0) * height);
-    var winZ = clipPt[2];
-    var winW = clipPt[3];
+    winX = Math.round((((clipPt[0]) + 1) / 2.0) * width);
+    // We calculate -point3D.getY() because the screen Y axis is
+    // oriented top->down
+    winY = Math.round(((1 - clipPt[1]) / 2.0) * height);
+    winZ = clipPt[2];
+    winW = clipPt[3];
 
     return vec4.fromValues(winX, winY, winZ, winW);
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Transform a point in display space to world space
+   * @param displayPt
+   * @param viewMatrix
+   * @param projectionMatrix
+   * @param width
+   * @param height
+   * @returns {vec4}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.displayToWorld = function(displayPt, viewMatrix, projectionMatrix,
                                  width, height) {
     var x = (2.0 * displayPt[0] / width) - 1,
         y = -(2.0 * displayPt[1] / height) + 1,
-        z = displayPt[2];
+        z = displayPt[2],
+        viewProjectionInverse = mat4.create(),
+        worldPt = null;
 
-    var viewProjectionInverse = mat4.create();
     mat4.multiply(viewProjectionInverse, projectionMatrix, viewMatrix);
     mat4.invert(viewProjectionInverse, viewProjectionInverse);
 
-    var worldPt = vec4.fromValues(x, y, z, 1);
+    worldPt = vec4.fromValues(x, y, z, 1);
     vec4.transformMat4(worldPt, worldPt, viewProjectionInverse);
     if (worldPt[3] !== 0.0) {
       worldPt[0] = worldPt[0] / worldPt[3];

@@ -9,27 +9,34 @@
 /*global vglModule, ogs, vec4, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class pointSource
  *
  * @class
  * @returns {vglModule.pointSource}
  */
+//////////////////////////////////////////////////////////////////////////////
 vglModule.pointSource = function() {
+  'use strict';
 
   if (!(this instanceof vglModule.pointSource)) {
     return new vglModule.pointSource();
   }
   vglModule.source.call(this);
 
-  var m_positions = [];
-  var m_colors = [];
-  var m_textureCoords = [];
-  var m_geom = null;
+  var m_positions = [],
+      m_colors = [],
+      m_textureCoords = [],
+      m_geom = null;
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Set positions for the source
+   *
+   * @param positions
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.setPositions = function(positions) {
     if (positions instanceof Array) {
       m_positions = positions;
@@ -40,9 +47,13 @@ vglModule.pointSource = function() {
     }
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Set colors for the points
+   *
+   * @param colors
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.setColors = function(colors) {
     if (colors instanceof Array) {
       m_colors = colors;
@@ -52,9 +63,13 @@ vglModule.pointSource = function() {
     }
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Set texture coordinates for the points
+   *
+   * @param texcoords
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.setTextureCoordinates = function(texcoords) {
     if (texcoords instanceof Array) {
       m_textureCoords = texcoords;
@@ -65,9 +80,11 @@ vglModule.pointSource = function() {
     }
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Create a point geometry given input parameters
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.create = function() {
     m_geom = new vglModule.geometryData();
 
@@ -76,24 +93,28 @@ vglModule.pointSource = function() {
       return;
     }
 
-    var numPts = m_positions.length / 3;
-    var i = 0;
-    var indices = [];
-    indices.length = numPts;
+    var numPts = m_positions.length / 3,
+        i = 0,
+        indices = [],
+        pointsPrimitive,
+        sourcePositions,
+        sourceColors,
+        sourceTexCoords;
 
+    indices.length = numPts;
     for (i = 0; i < numPts; ++i) {
       indices[i] = i;
     }
 
-    var pointsPrimitive = new vglModule.points();
+    pointsPrimitive = new vglModule.points();
     pointsPrimitive.setIndices(indices);
 
-    var sourcePositions = vglModule.sourceDataP3fv();
+    sourcePositions = vglModule.sourceDataP3fv();
     sourcePositions.pushBack(m_positions);
     m_geom.addSource(sourcePositions);
 
     if ((m_colors.length > 0) && m_colors.length === m_positions.length) {
-      var sourceColors = vglModule.sourceDataC3fv();
+      sourceColors = vglModule.sourceDataC3fv();
       sourceColors.pushBack(m_colors);
       m_geom.addSource(sourceColors);
     }
@@ -103,9 +124,9 @@ vglModule.pointSource = function() {
     }
 
     if ((m_textureCoords.length > 0)
-        && m_textureCoords.length === m_textureCoords.length) {
-      var sourceTexCoords = vglModule.sourceDataT2fv();
-      sourceTexCoords.pushBack(texCoords);
+        && m_textureCoords.length === m_positions.length) {
+      sourceTexCoords = vglModule.sourceDataT2fv();
+      sourceTexCoords.pushBack(m_textureCoords);
       m_geom.addSource(sourceTexCoords);
     }
     else if ((m_textureCoords.length > 0)

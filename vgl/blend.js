@@ -6,9 +6,10 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, continue:true, indent: 2*/
 
-/*global vglModule, ogs, vec4, inherit, $*/
+/*global vglModule, gl, ogs, vec4, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of clas blendFunction
  *
@@ -17,23 +18,25 @@
  * @param destination
  * @returns {vglModule.blendFunction}
  */
+//////////////////////////////////////////////////////////////////////////////
 vglModule.blendFunction = function(source, destination) {
+  'use strict';
 
   if (!(this instanceof vglModule.blendFunction)) {
     return new vglModule.blendFunction(source, destination);
   }
 
   /** @private */
-  var m_source = source;
+  var m_source = source,
+      m_destination = destination;
 
-  /** @private */
-  var m_destination = destination;
-
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Apply blend function to the current state
    *
    * @param {vglModule.renderState}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.apply = function(renderState) {
     gl.blendFuncSeparate(m_source, m_destination, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
   };
@@ -41,31 +44,34 @@ vglModule.blendFunction = function(source, destination) {
   return this;
 };
 
+////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class blend
  *
- * @class
  * @returns {vglModule.blend}
  */
+////////////////////////////////////////////////////////////////////////////
 vglModule.blend = function() {
+  'use strict';
 
   if (!(this instanceof vglModule.blend)) {
     return new vglModule.blend();
   }
-  vglModule.materialAttribute.call(this, materialAttributeType.Blend);
+  vglModule.materialAttribute.call(
+    this, vglModule.materialAttributeType.Blend);
 
   /** @private */
-  var m_wasEnabled = false;
-
-  /** @private */
-  var m_blendFunction = vglModule.blendFunction(gl.SRC_ALPHA,
+  var m_wasEnabled = false,
+      m_blendFunction = vglModule.blendFunction(gl.SRC_ALPHA,
                                                 gl.ONE_MINUS_SRC_ALPHA);
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Bind blend attribute
    *
    * @param {vglModule.renderState}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.bind = function(renderState) {
     m_wasEnabled = gl.isEnabled(gl.BLEND);
 
@@ -80,11 +86,13 @@ vglModule.blend = function() {
     return true;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Undo bind blend attribute
    *
    * @param {vglModule.renderState}
    */
+  ////////////////////////////////////////////////////////////////////////////
   this.undoBind = function(renderState) {
     if (m_wasEnabled) {
       gl.enable(gl.BLEND);
