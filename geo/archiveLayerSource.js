@@ -34,6 +34,7 @@ geoModule.archiveLayerSource = function(name, config, vars, onError) {
       m_config = config,
       m_vars = vars,
       m_time = -1,
+      m_resultCache = null,
       m_onError = function(errorString) {};
 
   if (onError) {
@@ -60,7 +61,7 @@ geoModule.archiveLayerSource = function(name, config, vars, onError) {
 
     if (m_time === time) {
       console.log('[info] No new data as timestamp has not changed.');
-      return;
+      return m_resultCache;
     }
     m_time = time;
 
@@ -104,6 +105,7 @@ geoModule.archiveLayerSource = function(name, config, vars, onError) {
     if (callback) {
       callback(retVal);
     }
+    m_resultCache = retVal;
     return retVal;
   };
 
@@ -179,9 +181,10 @@ geoModule.archiveLayerSource = function(name, config, vars, onError) {
     // TODO This should be read from the archive
     var range = [0, 1],
         query = {'basename': m_name, 'name': varname},
-        data = null;
+        data = null,
+        errorString;
 
-    $.ajax({
+    $.ajax({s
       type: 'POST',
       url: '/mongo/' + m_config.server + '/' + m_config.database + '/'
         + m_config.collection,
