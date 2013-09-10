@@ -22,13 +22,13 @@
  * can be provided with the appropriate error message.
  */
 //////////////////////////////////////////////////////////////////////////////
-wflModule.layerSource = function(name, vars, workflow, onError) {
+wflModule.layerSource = function(name, config, vars, workflow, onError) {
   'use strict';
 
   if (!(this instanceof wflModule.layerSource) ) {
-    return new wflModule.layerSource(name, vars, workflow, onError);
+    return new wflModule.layerSource(name, config, vars, workflow, onError);
   }
-  geoModule.archiveLayerSource.call(this, name, vars, onError);
+  geoModule.archiveLayerSource.call(this, name, config, vars, onError);
 
   var m_time = -1,
     m_name = name,

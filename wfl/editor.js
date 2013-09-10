@@ -113,8 +113,14 @@ wflModule.editor = function(options) {
       pos;
 
     if (stylesheet.insertRule) {
-      pos = stylesheet.cssRules ? stylesheet.cssRules.length : 0;
-      stylesheet.insertRule(selector + rule, pos);
+      try {
+        pos = stylesheet.cssRules ? stylesheet.cssRules.length : 0;
+        stylesheet.insertRule(selector + rule, pos);
+      } catch (e) {
+        if (stylesheet.addRule) {
+          stylesheet.addRule(selector, rule, -1);
+        }
+      }
     } else if (stylesheet.addRule) {
       stylesheet.addRule(selector, rule, -1);
     }
