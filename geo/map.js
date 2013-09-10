@@ -373,8 +373,8 @@ geoModule.map = function(node, options) {
   ////////////////////////////////////////////////////////////////////////////
   this.removeLayer = function(layer) {
     if (layer !== null && typeof layer !== 'undefined') {
+      layer.destroy();
       m_renderer.removeActors(layer.features());
-
       updateLegends($(m_node).width(), $(m_node).height());
       this.modified();
 

@@ -218,6 +218,17 @@ geoModule.featureLayer = function(options, feature) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Perform clean up at deletion
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.destroy = function() {
+    if (this.dataSource()) {
+      this.dataSource().destroy();
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Update layer to a particular time
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -490,6 +501,10 @@ geoModule.featureLayer = function(options, feature) {
       }
     }
   }
+
+  // Initialize this layer with defaults
+  this.init();
+
   return this;
 };
 

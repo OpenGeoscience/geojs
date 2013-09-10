@@ -54,6 +54,15 @@ geoModule.archiveLayerSource = function(name, config, vars, onError) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Perform any clean at deletion
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.destroy = function () {
+    m_resultCache = null;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Return raw data
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -184,7 +193,7 @@ geoModule.archiveLayerSource = function(name, config, vars, onError) {
         data = null,
         errorString;
 
-    $.ajax({s
+    $.ajax({
       type: 'POST',
       url: '/mongo/' + m_config.server + '/' + m_config.database + '/'
         + m_config.collection,
@@ -220,6 +229,7 @@ geoModule.archiveLayerSource = function(name, config, vars, onError) {
     return range;
   };
 
+  this.init();
   return this;
 };
 
