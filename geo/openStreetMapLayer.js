@@ -358,7 +358,9 @@ geoModule.openStreetMapLayer = function() {
         "lat": location.y
       }
     };
-    $(this).trigger(geoModule.command.queryResultEvent, result);
+    var revent = $.Event(geoModule.command.queryResultEvent);
+    revent.srcEvent = location.event;
+    $(this).trigger(revent, result);
   }
 
 

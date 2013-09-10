@@ -485,18 +485,19 @@ geoModule.featureLayer = function(options, feature) {
               result = {
                 layer : this,
                 data : {
-                  "feature" : fi ,
                   "value" : alpha*sa + beta*sb + gamma*sc
                 }
               };
-              $(this).trigger(geoModule.command.queryResultEvent, result);
+              var revent = $.Event(geoModule.command.queryResultEvent);
+              revent.srcEvent = location.event
+              $(this).trigger(revent, result);
               return; // should we continue checking?
             }
           }
         }
         else if (prim.primitiveType() == gl.TRIANGLE_STRIP) {
-          console.log("TRIANGLE_STRIP: " + prim.numberOfIndices() );
-          // TODO: how to make sense of this? triangleStrip says it has 3 indices per primitive
+          //console.log("TRIANGLE_STRIP: " + prim.numberOfIndices() );
+          // TODO: interpret the triangle strip indices
         }
       }
     }
