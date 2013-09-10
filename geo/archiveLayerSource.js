@@ -34,6 +34,7 @@ geoModule.archiveLayerSource = function(name, config, vars, onError) {
       m_config = config,
       m_vars = vars,
       m_time = -1,
+      m_resultCache = null,
       m_onError = function(errorString) {};
 
   if (onError) {
@@ -53,6 +54,15 @@ geoModule.archiveLayerSource = function(name, config, vars, onError) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Perform any clean at deletion
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.destroy = function () {
+    m_resultCache = null;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Return raw data
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -60,7 +70,7 @@ geoModule.archiveLayerSource = function(name, config, vars, onError) {
 
     if (m_time === time) {
       console.log('[info] No new data as timestamp has not changed.');
-      return;
+      return m_resultCache;
     }
     m_time = time;
 
@@ -104,6 +114,7 @@ geoModule.archiveLayerSource = function(name, config, vars, onError) {
     if (callback) {
       callback(retVal);
     }
+    m_resultCache = retVal;
     return retVal;
   };
 
@@ -218,6 +229,7 @@ geoModule.archiveLayerSource = function(name, config, vars, onError) {
     return range;
   };
 
+  this.init();
   return this;
 };
 

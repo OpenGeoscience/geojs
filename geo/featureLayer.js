@@ -37,6 +37,7 @@ geoModule.featureLayer = function(options, feature) {
       m_predrawTime = ogs.vgl.timestamp(),
       m_updateTime = ogs.vgl.timestamp(),
       m_legend = null,
+      m_invalidData = true,
       m_visible = true;
 
   if (feature) {
@@ -133,29 +134,62 @@ geoModule.featureLayer = function(options, feature) {
   this.createLegend = function() {
     if (m_legend) {
       console.log('[info] Legend already exists for this layer')
-      return;
+      return false;
     }
 
     if (!this.dataSource()) {
-      return;
+      return false;
     }
 
     // Assuming that first variable is the scalar
-    var varnames = this.dataSource().variableNames(),
-        lut = this.lookupTable();
+    var varnames = this.dataSource().variableNames(), lut;
 
     if (varnames.length > 0) {
+      lut = this.lookupTable(varnames[0]);
+
       // Create new lookup table if none exist
       if (!lut) {
-        lut = vglModule.lookupTable();
+        lut = vglModule.lookupTable(varnames[0]);
         this.setLookupTable(lut);
       }
       lut.setRange(this.dataSource().getScalarRange(varnames[0]));
       m_legend = vglModule.utils.createColorLegend(
         varnames[0], lut, this.legendOrigin(), this.legendWidth(),
         this.legendHeight(), 10, 0);
-      m_newFeatures = m_newFeatures.concat(m_legend);
     }
+
+    return true;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Delete legend of this layer
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.deleteLegend = function() {
+    var i, index;
+
+    if (m_legend && m_legend.length > 0) {
+      m_expiredFeatures = m_expiredFeatures.concat(m_legend);
+
+      // Also remove it from new and existing features if exists
+      for (i = 0; i < m_legend.length; ++i) {
+        index = m_newFeatures.indexOf(m_legend[i]);
+        if (index !== -1) {
+          m_newFeatures.splice(index, 1);
+        }
+      }
+
+      for (i = 0; i < m_legend.length; ++i) {
+        index = m_features.indexOf(m_legend[i]);
+        if (index !== -1) {
+          m_features.splice(index, 1);
+        }
+      }
+    }
+    m_legend = null;
+
+    return true;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -163,23 +197,34 @@ geoModule.featureLayer = function(options, feature) {
    * Update legend because parameters are changed
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.updateLegend = function() {
-    // For now just delete the last one and create on from scratch
-    var i,
-        index;
-    if (m_legend && m_legend.length > 0) {
-      m_expiredFeatures = m_expiredFeatures.concat(m_legend);
-
-      // Also remove it from new features if exists
-      for (i = 0; i < m_legend.length; ++i) {
-        index = m_newFeatures.indexOf(m_legend[i]);
-        if (index != -1) {
-          m_newFeatures.splice(index, 1);
-        }
-      }
+  this.updateLegend = function(deletePrevious) {
+    if (deletePrevious || m_invalidData) {
+      this.deleteLegend();
     }
-    m_legend = null;
-    this.createLegend();
+
+    if (m_invalidData) {
+      return;
+    }
+
+    if (deletePrevious || !m_legend) {
+      this.createLegend();
+    }
+
+    if (m_legend && m_legend.length > 0) {
+      m_newFeatures = m_newFeatures.concat(m_legend);
+      m_features = m_features.concat(m_legend);
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Perform clean up at deletion
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.destroy = function() {
+    if (this.dataSource()) {
+      this.dataSource().destroy();
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -193,6 +238,11 @@ geoModule.featureLayer = function(options, feature) {
       return;
     }
 
+    if (!request) {
+      console.log('[info] Invalid request.');
+      return;
+    }
+
     var i = 0,
         time = request.time(),
         data = null,
@@ -200,8 +250,10 @@ geoModule.featureLayer = function(options, feature) {
         geomFeature = null,
         lut = this.lookupTable();
 
+    m_invalidData = true;
     if (!time) {
-      console.log('[info] Timestamp not provided. Using time from previous update.');
+      console.log('[info] Timestamp not provided. ' +
+        'Using time from previous update.');
       // Use previous time
       time = m_time;
     } else {
@@ -209,27 +261,23 @@ geoModule.featureLayer = function(options, feature) {
     }
 
     data = this.dataSource().getData(time);
-    if (!data) {
+    if ((data && data.length < 1) || !data) {
+      this.deleteLegend();
       return;
     }
+    m_invalidData = false;
 
     // Clear our existing features
     if (m_expiredFeatures.length > 0) {
-      m_expiredFeatures = m_expiredFeatures.concat(m_newFeatures.slice(0));
+      m_expiredFeatures = m_expiredFeatures.concat(m_newFeatures);
     } else {
       m_expiredFeatures = m_newFeatures.slice(0);
     }
 
     m_newFeatures.length = 0;
 
-    if (m_legend && m_legend.length > 0) {
-      m_newFeatures = m_newFeatures.concat(m_legend);
-    }
-
     // Create legend if not created earlier
-    if (!m_legend) {
-      this.createLegend();
-    }
+    this.updateLegend(false);
 
     for(i = 0; i < data.length; ++i) {
       switch(data[i].type()) {
@@ -265,11 +313,10 @@ geoModule.featureLayer = function(options, feature) {
     }
 
     var featureCollection = request.featureCollection();
-    featureCollection.setNewFeatures(this.id(), m_newFeatures);
-    featureCollection.setExpiredFeatures(this.id(), m_expiredFeatures);
-
+    featureCollection.setNewFeatures(this.id(), m_newFeatures.slice(0));
+    featureCollection.setExpiredFeatures(this.id(),
+                                         m_expiredFeatures.slice(0));
     m_expiredFeatures.length = 0;
-
     m_predrawTime.modified();
   };
 
@@ -454,6 +501,10 @@ geoModule.featureLayer = function(options, feature) {
       }
     }
   }
+
+  // Initialize this layer with defaults
+  this.init();
+
   return this;
 };
 

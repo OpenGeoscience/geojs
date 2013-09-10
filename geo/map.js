@@ -100,11 +100,11 @@ geoModule.map = function(node, options) {
 
   $(m_prepareForRenderRequest).on(geoModule.command.requestRedrawEvent,
     function(event) {
-      m_that.redraw();
+      m_that.draw();
   });
   $(m_updateRequest).on(geoModule.command.requestRedrawEvent,
     function(event) {
-      m_that.redraw();
+      m_that.draw();
   });
 
   ////////////////////////////////////////////////////////////////////////////
@@ -238,7 +238,7 @@ geoModule.map = function(node, options) {
       currentTime: m_animationState.currentTime,
       endTime: m_animationState.range.end
     });
-    m_that.redraw();
+    m_that.draw();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -283,7 +283,7 @@ geoModule.map = function(node, options) {
           0.0]);
         layer.setLegendWidth(width * 0.20);
         layer.setLegendHeight(heightPerLayer * 0.20);
-        layer.updateLegend();
+        layer.updateLegend(true);
         ++i;
       }
     }
@@ -345,10 +345,7 @@ geoModule.map = function(node, options) {
       geoModule.geoTransform.transformLayer(m_options.gcs, layer);
       m_layers[layer.id()] = layer;
 
-      // Update legends
       updateLegends($(m_node).width(), $(m_node).height());
-
-      this.predraw();
       this.modified();
 
       $(layer).on(geoModule.command.queryResultEvent, function(event, queryResult) {
@@ -376,11 +373,9 @@ geoModule.map = function(node, options) {
   ////////////////////////////////////////////////////////////////////////////
   this.removeLayer = function(layer) {
     if (layer !== null && typeof layer !== 'undefined') {
+      layer.destroy();
       m_renderer.removeActors(layer.features());
-
-      // Update legends
       updateLegends($(m_node).width(), $(m_node).height());
-
       this.modified();
 
       $(this).trigger({
@@ -485,7 +480,8 @@ geoModule.map = function(node, options) {
   this.resize = function(width, height) {
     m_viewer.renderWindow().resize(width, height);
 
-    updateLegends(width, height);
+    updateLegends($(m_node).width(), $(m_node).height());
+    this.updateAndDraw();
 
     $(this).trigger({
       type: geoModule.command.resizeEvent,
@@ -597,7 +593,7 @@ geoModule.map = function(node, options) {
    * Manually force to render map
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.redraw = function() {
+  this.draw = function() {
     m_that.predraw();
     draw();
     m_that.postdraw();
@@ -619,7 +615,7 @@ geoModule.map = function(node, options) {
   ////////////////////////////////////////////////////////////////////////////
   this.updateAndDraw = function() {
     m_that.update();
-    m_that.redraw();
+    m_that.draw();
   };
 
   ////////////////////////////////////////////////////////////////////////////
