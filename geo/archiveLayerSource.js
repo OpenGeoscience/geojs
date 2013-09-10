@@ -22,15 +22,16 @@
  * can be provided with the appropriate error message.
  */
 //////////////////////////////////////////////////////////////////////////////
-geoModule.archiveLayerSource = function(name, vars, onError) {
+geoModule.archiveLayerSource = function(name, config, vars, onError) {
   'use strict';
 
   if (!(this instanceof geoModule.archiveLayerSource) ) {
-    return new geoModule.archiveLayerSource(name, vars, onError);
+    return new geoModule.archiveLayerSource(name, config, vars, onError);
   }
   geoModule.layerSource.call(this);
 
   var m_name = name,
+      m_config = config,
       m_vars = vars,
       m_time = -1,
       m_onError = function(errorString) {};
@@ -76,7 +77,7 @@ geoModule.archiveLayerSource = function(name, vars, onError) {
       type: 'POST',
       url: '/data/read',
       data: {
-        expr: name,
+        expr: JSON.stringify(name),
         vars: JSON.stringify(vars),
         time: JSON.stringify(time)
       },
@@ -176,7 +177,45 @@ geoModule.archiveLayerSource = function(name, vars, onError) {
     ////////////////////////////////////////////////////////////////////////////
   this.getScalarRange = function(varname) {
     // TODO This should be read from the archive
-    return [0, 200];
+    var range = [0, 1],
+        query = {'basename': m_name, 'name': varname},
+        data = null,
+        errorString;
+
+    $.ajax({
+      type: 'POST',
+      url: '/mongo/' + m_config.server + '/' + m_config.database + '/'
+        + m_config.collection,
+      data: {
+        query: JSON.stringify(query),
+        fields: JSON.stringify(['name', 'basename', 'timeInfo', 'variables'])
+      },
+      dataType: 'json',
+      async: false,
+      success: function(response) {
+        if (response.error !== null) {
+          errorString = "[error] " + response.error ?
+            response.error : "no results returned from server";
+          console.log(errorString);
+          m_onError(errorString);
+        }
+
+        // TODO We always should get JSON as the result.
+        // NOTE It is possible that we will get multiple datasets but we
+        // just pick the top one
+        data = response.result.data[0];
+
+        // Should get at-least one variable
+        range = data.variables[0].range;
+      },
+      error: function(jqXHR, textStatus, errorThrown ) {
+        errorString = "Error reading timerange for " + m_name + ": " + errorThrown;
+        console.log(errorString);
+        m_onError(errorString);
+      }
+    });
+
+    return range;
   };
 
   return this;
