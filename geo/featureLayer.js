@@ -201,7 +201,8 @@ geoModule.featureLayer = function(options, feature) {
         lut = this.lookupTable();
 
     if (!time) {
-      console.log('[info] Timestamp not provided. Using time from previous update.');
+      console.log('[info] Timestamp not provided. ' +
+        'Using time from previous update.');
       // Use previous time
       time = m_time;
     } else {
