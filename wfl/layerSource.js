@@ -31,6 +31,7 @@ wflModule.layerSource = function(name, config, vars, workflow, onError) {
   geoModule.archiveLayerSource.call(this, name, config, vars, onError);
 
   var m_time = -1,
+    m_that = this,
     m_name = name,
     m_onError = wflModule.utils.defaultValue(onError, function(errorString) {}),
     m_workflow = workflow;
@@ -49,7 +50,7 @@ wflModule.layerSource = function(name, config, vars, workflow, onError) {
 
     if (m_time === time) {
       console.log('[info] No new data as timestamp has not changed.');
-      return;
+      return m_that.resultCache();
     }
     m_time = time;
 
@@ -100,6 +101,8 @@ wflModule.layerSource = function(name, config, vars, workflow, onError) {
     if (callback) {
       callback(retVal);
     }
+
+    m_that.p_setResultCache(retVal);
     return retVal;
   };
 
