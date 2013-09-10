@@ -40,7 +40,7 @@ wflModule.layerSource = function(name, config, vars, workflow, onError) {
   /**
    * Return data by running workflow
    */
-    ////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////
   this.getData = function(time, callback) {
 
     var asyncVal = false,
