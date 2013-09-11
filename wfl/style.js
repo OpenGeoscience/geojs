@@ -48,16 +48,17 @@ climatePipesStyle.module.port.fill = "white";
 climatePipesStyle.module.port.stroke = "lightgreen";
 climatePipesStyle.module.port.lineWidth = 2;
 
-climatePipesStyle.module.shadowBlur = 20;
+climatePipesStyle.module.shadowBlur = 10;
 climatePipesStyle.module.shadowColor = "lightblue";
 climatePipesStyle.module.cornerRadius = 25;
 climatePipesStyle.module.lineWidth = 5;
 climatePipesStyle.module.stroke = "lightgreen";
 
-climatePipesStyle.shadowBlur = 20;
+climatePipesStyle.shadowBlur = 10;
 climatePipesStyle.shadowColor = "lightblue";
 climatePipesStyle.cornerRadius = 25;
 climatePipesStyle.lineWidth = 5;
 climatePipesStyle.stroke = "lightgreen";
 
 climatePipesStyle.conn.stroke = "lightgreen";
+climatePipesStyle.conn.lineWidth = 4;
