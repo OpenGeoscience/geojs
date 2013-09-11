@@ -2191,7 +2191,7 @@ wflModule.registry = {
       "moduleDescriptor": [{
         "#text": "\n      ",
         "@name": "Average",
-        "@package": "org.opengeoscience.geoweb.climate",
+        "@package": "org.opengeoscience.geojs.climate",
         "@id": "34",
         "portSpec": [{
           "@sortKey": "-1",
@@ -2199,7 +2199,7 @@ wflModule.registry = {
           "#tail": "\n      ",
           "portSpecItem": {
             "@default": "",
-            "@package": "org.opengeoscience.geoweb.climate",
+            "@package": "org.opengeoscience.geojs.climate",
             "@pos": "0",
             "@label": "",
             "@namespace": "",
@@ -2243,7 +2243,7 @@ wflModule.registry = {
           "#tail": "\n    ",
           "portSpecItem": {
             "@default": "",
-            "@package": "org.opengeoscience.geoweb.climate",
+            "@package": "org.opengeoscience.geojs.climate",
             "@pos": "0",
             "@label": "",
             "@namespace": "",
@@ -2268,7 +2268,7 @@ wflModule.registry = {
       }, {
         "#text": "\n      ",
         "@name": "ToGeoJSON",
-        "@package": "org.opengeoscience.geoweb.climate",
+        "@package": "org.opengeoscience.geojs.climate",
         "@id": "35",
         "portSpec": [{
           "@sortKey": "-1",
@@ -2276,7 +2276,7 @@ wflModule.registry = {
           "#tail": "\n      ",
           "portSpecItem": {
             "@default": "",
-            "@package": "org.opengeoscience.geoweb.climate",
+            "@package": "org.opengeoscience.geojs.climate",
             "@pos": "0",
             "@label": "",
             "@namespace": "",
@@ -2323,7 +2323,7 @@ wflModule.registry = {
       }, {
         "#text": "\n      ",
         "@name": "Dataset",
-        "@package": "org.opengeoscience.geoweb.climate",
+        "@package": "org.opengeoscience.geojs.climate",
         "@id": "36",
         "portSpec": [{
           "@sortKey": "-1",
@@ -2353,7 +2353,7 @@ wflModule.registry = {
           "#tail": "\n    ",
           "portSpecItem": {
             "@default": "",
-            "@package": "org.opengeoscience.geoweb.climate",
+            "@package": "org.opengeoscience.geojs.climate",
             "@pos": "0",
             "@label": "",
             "@namespace": "",
@@ -2378,7 +2378,7 @@ wflModule.registry = {
       }, {
         "#text": "\n      ",
         "@name": "Variable",
-        "@package": "org.opengeoscience.geoweb.climate",
+        "@package": "org.opengeoscience.geojs.climate",
         "@id": "37",
         "portSpec": [{
           "@sortKey": "-1",
@@ -2386,7 +2386,7 @@ wflModule.registry = {
           "#tail": "\n      ",
           "portSpecItem": {
             "@default": "",
-            "@package": "org.opengeoscience.geoweb.climate",
+            "@package": "org.opengeoscience.geojs.climate",
             "@pos": "0",
             "@label": "",
             "@namespace": "",
@@ -2452,7 +2452,7 @@ wflModule.registry = {
           "#tail": "\n    ",
           "portSpecItem": {
             "@default": "",
-            "@package": "org.opengeoscience.geoweb.climate",
+            "@package": "org.opengeoscience.geojs.climate",
             "@pos": "0",
             "@label": "",
             "@namespace": "",
@@ -2477,7 +2477,7 @@ wflModule.registry = {
       }, {
         "#text": "\n      ",
         "@name": "SubSelect",
-        "@package": "org.opengeoscience.geoweb.climate",
+        "@package": "org.opengeoscience.geojs.climate",
         "@id": "38",
         "portSpec": [{
           "@sortKey": "-1",
@@ -2485,7 +2485,7 @@ wflModule.registry = {
           "#tail": "\n      ",
           "portSpecItem": {
             "@default": "",
-            "@package": "org.opengeoscience.geoweb.climate",
+            "@package": "org.opengeoscience.geojs.climate",
             "@pos": "0",
             "@label": "",
             "@namespace": "",
@@ -2573,7 +2573,7 @@ wflModule.registry = {
           "#tail": "\n    ",
           "portSpecItem": {
             "@default": "",
-            "@package": "org.opengeoscience.geoweb.climate",
+            "@package": "org.opengeoscience.geojs.climate",
             "@pos": "0",
             "@label": "",
             "@namespace": "",
@@ -2598,7 +2598,7 @@ wflModule.registry = {
       }, {
         "#text": "\n      ",
         "@name": "MonthlyTimeBounds",
-        "@package": "org.opengeoscience.geoweb.climate",
+        "@package": "org.opengeoscience.geojs.climate",
         "@id": "39",
         "portSpec": [{
           "@sortKey": "-1",
@@ -2606,7 +2606,7 @@ wflModule.registry = {
           "#tail": "\n      ",
           "portSpecItem": {
             "@default": "",
-            "@package": "org.opengeoscience.geoweb.climate",
+            "@package": "org.opengeoscience.geojs.climate",
             "@pos": "0",
             "@label": "",
             "@namespace": "",
@@ -2628,7 +2628,7 @@ wflModule.registry = {
           "#tail": "\n    ",
           "portSpecItem": {
             "@default": "",
-            "@package": "org.opengeoscience.geoweb.climate",
+            "@package": "org.opengeoscience.geojs.climate",
             "@pos": "0",
             "@label": "",
             "@namespace": "",
@@ -2651,7 +2651,7 @@ wflModule.registry = {
         "@version": "",
         "@baseDescriptorId": "0"
       }],
-      "@identifier": "org.opengeoscience.geoweb.climate",
+      "@identifier": "org.opengeoscience.geojs.climate",
       "@codepath": "Climate",
       "@id": "2"
     }],

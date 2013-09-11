@@ -12,7 +12,7 @@ var staticWorkflows = {
           "@moduleName": "Dataset",
           "@name": "self",
           "#tail": "\n    ",
-          "@signature": "(org.opengeoscience.geoweb.climate:Dataset)",
+          "@signature": "(org.opengeoscience.geojs.climate:Dataset)",
           "@id": "0",
           "@type": "source",
           "@moduleId": "0"
@@ -20,7 +20,7 @@ var staticWorkflows = {
           "@moduleName": "Variable",
           "@name": "dataset",
           "#tail": "\n  ",
-          "@signature": "(org.opengeoscience.geoweb.climate:Dataset)",
+          "@signature": "(org.opengeoscience.geojs.climate:Dataset)",
           "@id": "1",
           "@type": "destination",
           "@moduleId": "1"
@@ -33,7 +33,7 @@ var staticWorkflows = {
           "@moduleName": "Variable",
           "@name": "self",
           "#tail": "\n    ",
-          "@signature": "(org.opengeoscience.geoweb.climate:Variable)",
+          "@signature": "(org.opengeoscience.geojs.climate:Variable)",
           "@id": "2",
           "@type": "source",
           "@moduleId": "1"
@@ -41,7 +41,7 @@ var staticWorkflows = {
           "@moduleName": "ToGeoJSON",
           "@name": "variable",
           "#tail": "\n  ",
-          "@signature": "(org.opengeoscience.geoweb.climate:Variable)",
+          "@signature": "(org.opengeoscience.geojs.climate:Variable)",
           "@id": "3",
           "@type": "destination",
           "@moduleId": "2"
@@ -49,7 +49,7 @@ var staticWorkflows = {
       }],
       "module": [{
         "@name": "Dataset",
-        "@package": "org.opengeoscience.geoweb.climate",
+        "@package": "org.opengeoscience.geojs.climate",
         "@version": "0.9.0",
         "@namespace": "",
         "#tail": "\n  ",
@@ -64,7 +64,7 @@ var staticWorkflows = {
         "@id": "0"
       }, {
         "@name": "Variable",
-        "@package": "org.opengeoscience.geoweb.climate",
+        "@package": "org.opengeoscience.geojs.climate",
         "@version": "0.9.0",
         "@namespace": "",
         "#tail": "\n  ",
@@ -79,7 +79,7 @@ var staticWorkflows = {
         "@id": "1"
       }, {
         "@name": "ToGeoJSON",
-        "@package": "org.opengeoscience.geoweb.climate",
+        "@package": "org.opengeoscience.geojs.climate",
         "@version": "0.9.0",
         "@namespace": "",
         "#tail": "\n",
@@ -111,7 +111,7 @@ var staticWorkflows = {
           "@moduleName": "Dataset",
           "@name": "self",
           "#tail": "\n    ",
-          "@signature": "(org.opengeoscience.geoweb.climate:Dataset)",
+          "@signature": "(org.opengeoscience.geojs.climate:Dataset)",
           "@id": "2",
           "@type": "source",
           "@moduleId": "1"
@@ -119,7 +119,7 @@ var staticWorkflows = {
           "@moduleName": "Variable",
           "@name": "dataset",
           "#tail": "\n  ",
-          "@signature": "(org.opengeoscience.geoweb.climate:Dataset)",
+          "@signature": "(org.opengeoscience.geojs.climate:Dataset)",
           "@id": "3",
           "@type": "destination",
           "@moduleId": "2"
@@ -132,7 +132,7 @@ var staticWorkflows = {
           "@moduleName": "Variable",
           "@name": "self",
           "#tail": "\n    ",
-          "@signature": "(org.opengeoscience.geoweb.climate:Variable)",
+          "@signature": "(org.opengeoscience.geojs.climate:Variable)",
           "@id": "4",
           "@type": "source",
           "@moduleId": "2"
@@ -140,7 +140,7 @@ var staticWorkflows = {
           "@moduleName": "SubSelect",
           "@name": "variable",
           "#tail": "\n  ",
-          "@signature": "(org.opengeoscience.geoweb.climate:Variable)",
+          "@signature": "(org.opengeoscience.geojs.climate:Variable)",
           "@id": "5",
           "@type": "destination",
           "@moduleId": "3"
@@ -153,7 +153,7 @@ var staticWorkflows = {
           "@moduleName": "SubSelect",
           "@name": "variable",
           "#tail": "\n    ",
-          "@signature": "(org.opengeoscience.geoweb.climate:Variable)",
+          "@signature": "(org.opengeoscience.geojs.climate:Variable)",
           "@id": "6",
           "@type": "source",
           "@moduleId": "3"
@@ -161,7 +161,7 @@ var staticWorkflows = {
           "@moduleName": "MonthlyTimeBounds",
           "@name": "variable",
           "#tail": "\n  ",
-          "@signature": "(org.opengeoscience.geoweb.climate:Variable)",
+          "@signature": "(org.opengeoscience.geojs.climate:Variable)",
           "@id": "7",
           "@type": "destination",
           "@moduleId": "4"
@@ -174,7 +174,7 @@ var staticWorkflows = {
           "@moduleName": "MonthlyTimeBounds",
           "@name": "variable",
           "#tail": "\n    ",
-          "@signature": "(org.opengeoscience.geoweb.climate:Variable)",
+          "@signature": "(org.opengeoscience.geojs.climate:Variable)",
           "@id": "8",
           "@type": "source",
           "@moduleId": "4"
@@ -182,7 +182,7 @@ var staticWorkflows = {
           "@moduleName": "Average",
           "@name": "variable",
           "#tail": "\n  ",
-          "@signature": "(org.opengeoscience.geoweb.climate:Variable)",
+          "@signature": "(org.opengeoscience.geojs.climate:Variable)",
           "@id": "9",
           "@type": "destination",
           "@moduleId": "5"
@@ -195,7 +195,7 @@ var staticWorkflows = {
           "@moduleName": "Average",
           "@name": "variable",
           "#tail": "\n    ",
-          "@signature": "(org.opengeoscience.geoweb.climate:Variable)",
+          "@signature": "(org.opengeoscience.geojs.climate:Variable)",
           "@id": "10",
           "@type": "source",
           "@moduleId": "5"
@@ -203,7 +203,7 @@ var staticWorkflows = {
           "@moduleName": "ToGeoJSON",
           "@name": "variable",
           "#tail": "\n  ",
-          "@signature": "(org.opengeoscience.geoweb.climate:Variable)",
+          "@signature": "(org.opengeoscience.geojs.climate:Variable)",
           "@id": "11",
           "@type": "destination",
           "@moduleId": "6"
@@ -227,7 +227,7 @@ var staticWorkflows = {
           }
         },
         "@name": "Dataset",
-        "@package": "org.opengeoscience.geoweb.climate",
+        "@package": "org.opengeoscience.geojs.climate",
         "@version": "0.9.0",
         "@namespace": "",
         "#tail": "\n  ",
@@ -258,7 +258,7 @@ var staticWorkflows = {
           }
         },
         "@name": "Variable",
-        "@package": "org.opengeoscience.geoweb.climate",
+        "@package": "org.opengeoscience.geojs.climate",
         "@version": "0.9.0",
         "@namespace": "",
         "#tail": "\n  ",
@@ -319,7 +319,7 @@ var staticWorkflows = {
           }
         }],
         "@name": "SubSelect",
-        "@package": "org.opengeoscience.geoweb.climate",
+        "@package": "org.opengeoscience.geojs.climate",
         "@version": "0.9.0",
         "@namespace": "",
         "#tail": "\n  ",
@@ -334,7 +334,7 @@ var staticWorkflows = {
         "@id": "3"
       }, {
         "@name": "MonthlyTimeBounds",
-        "@package": "org.opengeoscience.geoweb.climate",
+        "@package": "org.opengeoscience.geojs.climate",
         "@version": "0.9.0",
         "@namespace": "",
         "#tail": "\n  ",
@@ -365,7 +365,7 @@ var staticWorkflows = {
           }
         },
         "@name": "Average",
-        "@package": "org.opengeoscience.geoweb.climate",
+        "@package": "org.opengeoscience.geojs.climate",
         "@version": "0.9.0",
         "@namespace": "",
         "#tail": "\n  ",
@@ -380,7 +380,7 @@ var staticWorkflows = {
         "@id": "5"
       }, {
         "@name": "ToGeoJSON",
-        "@package": "org.opengeoscience.geoweb.climate",
+        "@package": "org.opengeoscience.geojs.climate",
         "@version": "0.9.0",
         "@namespace": "",
         "#tail": "\n",
