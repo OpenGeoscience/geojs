@@ -18,7 +18,7 @@ srvModule.webSocketOptions = function() {
 
 
 /**
- * WebSocket wrapper to more easily communicate with geojs server
+ * WebSocket wrapper to more easily communicate with geoweb server
  */
 srvModule.webSocket = function(options) {
 
