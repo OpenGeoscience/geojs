@@ -93,7 +93,7 @@ wflModule.editor = function(options) {
   };
 
   this.show = function() {
-    $(m_mainDiv).resize();
+    m_that.resize();
     m_workflow.show(m_canvasInput);
   };
 
@@ -215,7 +215,7 @@ wflModule.editor = function(options) {
     });
 
     $canvas.on('drop', function(e) {
-      var ctxPos = ctxMousePos(e);
+      var ctxPos;
 
       if (e.originalEvent) { //jQuery
         e = e.originalEvent;
@@ -231,11 +231,14 @@ wflModule.editor = function(options) {
         e.stopPropagation(); // stops the browser from redirecting.
       }
 
+      ctxPos = ctxMousePos(e);
+
       m_workflow.addNewModule(
         e.dataTransfer.getData("Text"),
         ctxPos.x,
         ctxPos.y
       );
+      m_workflow.show(m_canvasInput); //makes newly added input elements visible
 
       m_that.drawWorkflow();
 
