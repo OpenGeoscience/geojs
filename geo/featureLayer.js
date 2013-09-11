@@ -503,9 +503,6 @@ geoModule.featureLayer = function(options, feature) {
     }
   }
 
-  // Initialize this layer with defaults
-  this.init();
-
   return this;
 };
 
