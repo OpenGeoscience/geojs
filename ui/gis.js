@@ -701,7 +701,7 @@ uiModule.gis.createMapControls = function(map, container) {
 
   function slideZoom(event, ui) {
             map.setZoom(ui.value);
-            map.redraw();
+            map.draw();
           }
   function stopSlider(e) {
           e.stopPropagation();
@@ -709,7 +709,7 @@ uiModule.gis.createMapControls = function(map, container) {
         }
   function selCountryBound() {
           map.toggleCountryBoundries();
-          map.redraw();
+          map.draw();
         }
 
   for (key in options) {
@@ -753,7 +753,7 @@ uiModule.gis.createMapControls = function(map, container) {
         // latInput.attr('max', +180.0);
         // latInput.val(map.options().center.lat());
         // latInput.click(function() {
-        //   map.redraw();
+        //   map.draw();
         // });
         // $(latInput).on('mousedown', function(e) {
         //   e.stopPropagation();
@@ -766,7 +766,7 @@ uiModule.gis.createMapControls = function(map, container) {
         // lngInput.attr('max', +90.0);
         // lngInput.val(map.options().center.lng());
         // lngInput.click(function() {
-        //   map.redraw();
+        //   map.draw();
         // });
         // $(lngInput).on('mousedown', function(e) {
         //   e.stopPropagation();
@@ -837,7 +837,7 @@ uiModule.gis.createOpacityControl = function(parent, map, layersFunction) {
       map.findLayerById(layerId).setOpacity(ui.value);
     });
 
-    map.redraw();
+    map.draw();
   });
 
   opacityDiv.on('mousedown', function(e) {

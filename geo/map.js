@@ -196,7 +196,7 @@ geoModule.map = function(node, options) {
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
-  function draw() {
+  function renderScene() {
     if (m_initialized === false) {
       initScene();
     }
@@ -595,7 +595,7 @@ geoModule.map = function(node, options) {
   ////////////////////////////////////////////////////////////////////////////
   this.draw = function() {
     m_that.predraw();
-    draw();
+    renderScene();
     m_that.postdraw();
   };
 
