@@ -1,4 +1,4 @@
-//////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 /**
  * @module geoModule
  */
@@ -792,21 +792,23 @@ geoModule.map = function(node, options) {
   ////////////////////////////////////////////////////////////////////////////
   this.queryLocation = function(location) {
     var layer = null,
-        srcPrj = new proj4.Proj(m_options.display_gcs);
+        srcPrj = new proj4.Proj(m_options.display_gcs),
+        event = location.event;
 
     for (var layerName in m_layers) {
       layer = m_layers[layerName];
       var dstPrj = new proj4.Proj(layer.gcs());
       var point = new proj4.Point(location.x, location.y);
       proj4.transform(srcPrj, dstPrj, point);
+      point.event = event;
       layer.queryLocation(point);
     }
   };
 
   // Bind events to handlers
-  document.onmousedown = m_viewer.handleMouseDown;
-  document.onmouseup = m_viewer.handleMouseUp;
-  document.onmousemove = m_viewer.handleMouseMove;
+  $(document).on("mousedown", m_viewer.handleMouseDown);
+  $(document).on("mouseup", m_viewer.handleMouseUp);
+  $(document).on("mousemove", m_viewer.handleMouseMove);
   document.oncontextmenu = m_viewer.handleContextMenu;
   HTMLCanvasElement.prototype.relMouseCoords = m_viewer.relMouseCoords;
 
