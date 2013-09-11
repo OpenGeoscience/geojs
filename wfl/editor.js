@@ -79,7 +79,7 @@ wflModule.editor = function(options) {
 
   refreshContext();
 
-  $(m_mainDiv).resize(function() {
+  this.resize = function() {
     var rect = m_canvasContainer.getBoundingClientRect(),
       translated = m_workflow.translated();
 
@@ -90,7 +90,7 @@ wflModule.editor = function(options) {
 
     m_context.translate(translated.x, translated.y);
     m_that.drawWorkflow();
-  });
+  };
 
   this.show = function() {
     $(m_mainDiv).resize();
