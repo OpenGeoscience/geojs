@@ -16,11 +16,9 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 geoModule.layerSource = function() {
-  "use strict";
+  'use strict';
 
-   /**
-    * @private
-    */
+   /** @private */
   var m_requestDataMTime = vglModule.timestamp();
 
   this.requestDataMTime = function() {
@@ -87,8 +85,6 @@ geoModule.layerSource = function() {
     ////////////////////////////////////////////////////////////////////////////
   this.getScalarRange = function(varname) {
   };
-
-
 };
 
-inherit(geoModule.layerSource, ogs.vgl.object);
+inherit(geoModule.layerSource, vglModule.object);
