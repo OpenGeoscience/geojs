@@ -368,8 +368,3 @@ geoModule.openStreetMapLayer = function() {
 };
 
 inherit(geoModule.openStreetMapLayer, geoModule.featureLayer);
-
-/* Local Variables:   */
-/* mode: js           */
-/* js-indent-level: 2 */
-/* End:               */
