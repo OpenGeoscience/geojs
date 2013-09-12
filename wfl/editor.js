@@ -296,6 +296,7 @@ wflModule.editor = function(options) {
   function setupInteraction() {
     var $canvas = $(m_canvas),
       panning,
+      firstPoint,
       lastPoint,
       lastPanEvent,
       draggingPort,
@@ -309,7 +310,7 @@ wflModule.editor = function(options) {
         key,
         module;
 
-      lastPoint = ctxMousePos(e);
+      firstPoint = lastPoint = ctxMousePos(e);
 
       // find modules
       for(key in modules) {
@@ -340,8 +341,8 @@ wflModule.editor = function(options) {
 
       if(draggingModule) {
         var newPoint = ctxMousePos(e);
-        draggingModule.getData().location['@x'] += newPoint.x - lastPoint.x;
-        draggingModule.getData().location['@y'] -= newPoint.y - lastPoint.y;
+        draggingModule.data().location['@x'] += newPoint.x - lastPoint.x;
+        draggingModule.data().location['@y'] -= newPoint.y - lastPoint.y;
         draggingModule.recomputeMetrics($canvas[0].getContext('2d'), m_style);
         lastPoint = newPoint;
         m_workflow.draw(m_context);
@@ -368,7 +369,6 @@ wflModule.editor = function(options) {
 
     $canvas.mouseup(function (e) {
       panning = false;
-      draggingModule = null;
       if( draggingPort ) {
         var port,
           modules = m_workflow.modules(),
@@ -396,7 +396,13 @@ wflModule.editor = function(options) {
         draggingPortModule = null;
         draggingPortPos = null;
         m_that.drawWorkflow();
+      } else if (draggingModule) {
+        if(firstPoint.x === lastPoint.x && firstPoint.y === lastPoint.y) {
+          draggingModule.toggleSelected();
+          m_that.drawWorkflow();
+        }
       }
+      draggingModule = null;
     });
 
     $canvas.mouseout(function (e) {

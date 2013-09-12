@@ -116,6 +116,36 @@ wflModule.workflow = function(options) {
     }
   };
 
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Delete selected modules and connections connected to them.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.deleteSelectedModules = function() {
+    var id;
+
+    for(id in m_connections) {
+      if(m_connections.hasOwnProperty(id)) {
+        if(m_connections[id].sourceModule().isSelected() ||
+          m_connections[id].targetModule().isSelected()) {
+          m_connections[id].delete();
+          delete m_connections[id];
+        }
+      }
+    }
+
+    for(id in m_modules) {
+      if(m_modules.hasOwnProperty(id)) {
+        if(m_modules[id].isSelected()) {
+          m_modules[id].delete();
+          delete m_modules[id];
+        }
+      }
+    }
+  };
+
+
   this.addNewModule = function(data, x, y) {
     var moduleInfo = JSON.parse(data),
       module = {
@@ -152,19 +182,19 @@ wflModule.workflow = function(options) {
         "@id": nextConnectionId(),
         "port": [
           {
-            "@moduleName": targetModule.getData()['@name'],
+            "@moduleName": targetModule.data()['@name'],
             "@name": targetPort.data()['@name'],
             "@signature": targetPort.data()['@sigstring'],
             "@id": nextPortId(),
             "@type": targetPort.data()['@type'],
-            "@moduleId": targetModule.getData()['@id']
+            "@moduleId": targetModule.data()['@id']
           }, {
-            "@moduleName": sourceModule.getData()['@name'],
+            "@moduleName": sourceModule.data()['@name'],
             "@name": sourcePort.data()['@name'],
             "@signature": sourcePort.data()['@sigstring'],
             "@id": nextPortId(),
             "@type": sourcePort.data()['@type'],
-            "@moduleId": sourceModule.getData()['@id']
+            "@moduleId": sourceModule.data()['@id']
           }
         ]
       },
@@ -318,7 +348,7 @@ wflModule.workflow = function(options) {
     var key;
     for(key in m_modules) {
       if(m_modules.hasOwnProperty(key)) {
-        if(m_modules[key].getData()['@name'] === name) {
+        if(m_modules[key].data()['@name'] === name) {
           return m_modules[key];
         }
       }
