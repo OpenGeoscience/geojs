@@ -137,6 +137,7 @@ wflModule.port = function(options, data) {
 
   this.hide = function() {};
   this.show = function(inputContainer) {};
+  this.delete = function() {};
 
   return this;
 };

@@ -35,12 +35,28 @@ wflModule.connection = function(options, data) {
   options = wflModule.utils.merge_options(wflModule.connectionOptions(),
     options);
 
-  var m_data = data,
+  var m_that = this,
+    m_data = data,
     m_vertical = options.vertical,
-    m_workflow = options.workflow;
+    m_workflow = options.workflow,
+    m_sourceModule,
+    m_targetModule;
 
   this.data = function() {
     return m_data;
+  };
+
+  this.delete = function() {
+    var j,
+      connectionDataList = m_workflow.data().workflow.connection;
+
+    //remove from workflow json data
+    for(j = 0; j < connectionDataList.length; j++) {
+      if(m_that.data() === connectionDataList[j]) {
+        connectionDataList.splice(j, 1);
+        break;
+      }
+    }
   };
 
   this.draw = function(ctx, currentWorkflowStyle) {
@@ -72,17 +88,45 @@ wflModule.connection = function(options, data) {
     };
   };
 
-  this.computePositions = function(currentWorkflowStyle) {
-    var sourceModule, targetModule, sourcePort, targetPort,
-      centerOffset = Math.floor(currentWorkflowStyle.module.port.width/2),
-      i, port;
+  function getSourceTargetModules() {
+    var port,
+      i;
     for(i = 0; i < m_data.port.length; i++) {
       port = m_data.port[i];
       if(port['@type'] === 'source' || port['@type'] === 'output') {
-        sourceModule = m_workflow.modules()[port['@moduleId']];
+        m_sourceModule = m_workflow.modules()[port['@moduleId']];
+      } else {
+        m_targetModule = m_workflow.modules()[port['@moduleId']];
+      }
+    }
+  }
+
+  this.sourceModule = function() {
+    if(typeof m_sourceModule === 'undefined') {
+      getSourceTargetModules();
+    }
+    return m_sourceModule;
+  };
+
+  this.targetModule = function() {
+    if(typeof m_targetModule === 'undefined') {
+      getSourceTargetModules();
+    }
+    return m_targetModule;
+  };
+
+  this.computePositions = function(currentWorkflowStyle) {
+    var sourceModule = m_that.sourceModule(),
+      targetModule = m_that.targetModule(),
+      sourcePort, targetPort,
+      centerOffset = Math.floor(currentWorkflowStyle.module.port.width/2),
+      i, port;
+
+    for(i = 0; i < m_data.port.length; i++) {
+      port = m_data.port[i];
+      if(port['@type'] === 'source' || port['@type'] === 'output') {
         sourcePort = sourceModule.getOutPorts()[port['@name']];
       } else {
-        targetModule = m_workflow.modules()[port['@moduleId']];
         targetPort = targetModule.getInPorts()[port['@name']];
       }
     }
