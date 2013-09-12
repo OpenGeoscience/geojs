@@ -206,10 +206,9 @@ geoModule.archiveLayerSource = function(name, config, vars, onError) {
     ////////////////////////////////////////////////////////////////////////////
   this.getScalarRange = function(varname) {
     // TODO This should be read from the archive
-    var range = [0, 1],
-        query = {'basename': m_name, 'name': varname},
-        data = null,
-        errorString;
+    var range = null,
+        query = {'basename': m_name},
+        data = null, i, errorString;
 
     $.ajax({
       type: 'POST',
@@ -230,12 +229,15 @@ geoModule.archiveLayerSource = function(name, config, vars, onError) {
         }
 
         // TODO We always should get JSON as the result.
-        // NOTE It is possible that we will get multiple datasets but we
-        // just pick the top one
+        // NOTE It is possible that we will get multiple datasets but
+        // for now we will just pick the top one
         data = response.result.data[0];
-
-        // Should get at-least one variable
-        range = data.variables[0].range;
+        for (i = 0; i < data.variables.length; ++i) {
+          if (data.variables[i].name === varname) {
+            range = data.variables[i].range;
+            break;
+          }
+        }
       },
       error: function(jqXHR, textStatus, errorThrown ) {
         errorString = "Error reading timerange for " + m_name + ": " + errorThrown;
