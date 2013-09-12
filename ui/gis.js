@@ -1,9 +1,24 @@
-/*jslint devel: true, forin: true, newcap: true, plusplus: true, white: true, indent: 2*/
-/*global geoModule, ogs, $, document, uiModule*/
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * @module ogs.geo
+ */
 
+/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
+/*jslint white: true, indent: 2*/
 
+/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
+/*global vglModule, uiModule, document, d3*/
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Create a new instance of class gis
+ *
+ * @returns {*}
+ */
+//////////////////////////////////////////////////////////////////////////////
 uiModule.gis = function() {
-  "use strict";
+  'use strict';
   if (!(this instanceof uiModule.gis)) {
     return new uiModule.gis();
   }
@@ -11,49 +26,82 @@ uiModule.gis = function() {
   return this;
 };
 
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Select all layers
+ *
+ * @returns {Array}
+ */
+//////////////////////////////////////////////////////////////////////////////
 uiModule.gis.selectedLayers = function() {
-  var layers = []
+  'use strict';
+  var layers = [];
   $('#table-layers tr').each(function(i, tr) {
     // call the function passing the id
-    if ($('#selected', tr)[0].checked)
+    if ($('#selected', tr)[0].checked) {
       layers.push(tr.id);
+    }
   });
-
   return layers;
-}
+};
 
-
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a placeholder to display current layers
  *
  * @param rootId
  * @param heading
  */
-uiModule.gis.createLayerList = function(map, rootId, heading, toggleFunct, removeFunct,
-    rangeFunction) {
-  var tableRoot = uiModule.gis.createList(rootId, heading);
+//////////////////////////////////////////////////////////////////////////////
+uiModule.gis.createLayerList = function(map, rootId, heading, toggleFunct,
+                                        removeFunct, rangeFunction) {
+  'use strict';
+  var tableRoot = uiModule.gis.createList(rootId, heading),
+      // Add the controls
+      controls = $(document.createElement('div')),
+      toggleButton = $(document.createElement('button')),
+      removeButton = $(document.createElement('button')),
+      modifyButton =  $(document.createElement('button')),
+      forEachSelectedLayer = function(funct) {
+        $('#table-layers tr').each(function(i, tr) {
+          // call the function passing the id
+          if ($('#selected', tr)[0].checked) {
+            funct(tr.id);
+          }
+        });
+      },
+      editFunction = function() {
+        var editDiv =  $(document.createElement('div'));
+        editDiv.attr('id', 'edit-layer-controls');
+        editDiv.width(200);
+        editDiv.height(200);
+        uiModule.gis.createOpacityControl(editDiv, map,
+          uiModule.gis.selectedLayers);
+        return editDiv;
+      },
+      popoverOptions = {
+        html: true,
+        container: "body",
+        placement: "right",
+        trigger: "click",
+        title: null,
+        content: editFunction,
+        delay: {
+            show: 100,
+            hide: 100
+        }
+      }, KEYCODE_ESC, animationControls, timestepDisplay;
 
-  // Add the controls
-  var controls = $(document.createElement('div'));
+
   controls.attr('id', 'layer-control-btns');
   controls.addClass('btn-group');
   //controls.width('400px');
 
-  // Toggle button
-  var toggleButton = $(document.createElement('button'));
   toggleButton.attr('class', 'btn-toggle-layer btn-small btn-warning layer-control-btn');
   toggleButton.attr('disabled', 'true');
   toggleButton.html('Toggle');
   toggleButton.width('70px');
-  controls.append(toggleButton)
-
-  var forEachSelectedLayer = function(funct) {
-    $('#table-layers tr').each(function(i, tr) {
-      // call the function passing the id
-      if ($('#selected', tr)[0].checked)
-        funct(tr.id);
-    });
-  };
+  controls.append(toggleButton);
 
   // Add click action
   toggleButton.click(function() {
@@ -61,11 +109,9 @@ uiModule.gis.createLayerList = function(map, rootId, heading, toggleFunct, remov
     forEachSelectedLayer(function(id) {
       toggleFunct(this, id);
     });
-
   });
 
   // Remove button
-  var removeButton = $(document.createElement('button'));
   removeButton.attr('class', 'btn-edit-layer btn-small btn-danger layer-control-btn');
   removeButton.attr('disabled', 'true');
   removeButton.html('Remove');
@@ -78,41 +124,14 @@ uiModule.gis.createLayerList = function(map, rootId, heading, toggleFunct, remov
     forEachSelectedLayer(function(id) {
       removeFunct(this, id);
     });
-
   });
 
   // Modify button
-  var modifyButton =  $(document.createElement('button'));
   modifyButton.attr('class', 'btn-small btn-success');
   modifyButton.attr('disabled', 'true');
   modifyButton.html('Modify');
   modifyButton.width('70px');
   controls.append(modifyButton);
-
-  var editFunction = function() {
-
-    var editDiv =  $(document.createElement('div'));
-    editDiv.attr('id', 'edit-layer-controls');
-    editDiv.width(200);
-    editDiv.height(200);
-
-    uiModule.gis.createOpacityControl(editDiv, map, uiModule.gis.selectedLayers);
-
-    return editDiv;
-  }
-
-  var popoverOptions = {
-      html: true,
-      container: "body",
-      placement: "right",
-      trigger: "click",
-      title: null,
-      content: editFunction,
-      delay: {
-          show: 100,
-          hide: 100
-      }
-  };
 
   //popoverOptions.content = editDiv;
   modifyButton.popover(popoverOptions);
@@ -122,17 +141,15 @@ uiModule.gis.createLayerList = function(map, rootId, heading, toggleFunct, remov
     modifyButton.popover('hide');
   });
 
-  // Hide the popover if ESC is pressed
-  var KEYCODE_ESC = 27;
 
   $(document).keydown(function(event) {
-    if (event.which == KEYCODE_ESC)
+    if (event.which === KEYCODE_ESC) {
       modifyButton.popover('hide');
+    }
   });
 
   // Add animation controls
-
-  var animationControls =
+  animationControls =
     $('<div>', {id: 'animation-controls',  class: 'btn-group'}).append(
       $('<button>', {id: 'step-backward', class: 'btn btn-small', disabled: 'true'}).append(
         $('<i>', {class: 'icon-step-backward'})
@@ -162,50 +179,48 @@ uiModule.gis.createLayerList = function(map, rootId, heading, toggleFunct, remov
     $(this).addClass('active');
     $('#pause', animationControls).removeClass('active');
 
-    var layers = []
+    var layer, layers = [], delta = -1, stdDelta = -1, units = null,
+        start = null, stdStart = null, end = null, stdEnd = null,
+        selectedLayers = uiModule.gis.selectedLayers(),
+        rangesToProcess = selectedLayers.length,
+        processTimeInfo = function(timeInfo) {
+          var startDate;
 
-    var delta = -1, stdDelta = -1, units = null, start = null, stdStart = null,
-    end = null, stdEnd = null, selectedLayers = uiModule.gis.selectedLayers(),
-    rangesToProcess = selectedLayers.length;
+          if (delta === -1 || timeInfo.stdDelta < stdDelta) {
+            stdDelta = timeInfo.stdDelta;
+            delta = timeInfo.nativeDelta;
+            units = timeInfo.nativeUnits;
+          }
 
-    // Function used to process an incoming range
-    var processTimeInfo = function(timeInfo) {
-      if (delta == -1 || timeInfo.stdDelta < stdDelta) {
-        stdDelta = timeInfo.stdDelta;
-        delta = timeInfo.nativeDelta;
-        units = timeInfo.nativeUnits;
-      }
+          if (!start || timeInfo.stdTimeRange[0] < stdStart) {
+            stdStart = timeInfo.stdTimeRange[0];
+            start = timeInfo.dateRange[0];
+          }
 
-      if (!start || timeInfo.stdTimeRange[0] < stdStart) {
-        stdStart = timeInfo.stdTimeRange[0];
-        start = timeInfo.dateRange[0];
-      }
+          if (!end || timeInfo.stdTimeRange[1] > stdEnd) {
+            stdEnd = timeInfo.stdTimeRange[1];
+            startDate = timeInfo.dateRange[0];
+            end = new Date(Date.UTC(startDate[0], startDate[1], startDate[2]));
+            geoModule.time.incrementTime(end, timeInfo.nativeUnits,
+                timeInfo.nativeDelta * timeInfo.numSteps);
+          }
 
-      if (!end || timeInfo.stdTimeRange[1] > stdEnd) {
-        stdEnd = timeInfo.stdTimeRange[1];
-        var startDate = timeInfo.dateRange[0];
-        end = new Date(Date.UTC(startDate[0], startDate[1], startDate[2]));
-        geoModule.time.incrementTime(end, timeInfo.nativeUnits,
-            timeInfo.nativeDelta * timeInfo.numSteps);
-      }
+          --rangesToProcess;
 
-      --rangesToProcess;
+          // Are we done processing? If so pass the information to the map to
+          // todo the animation.
+          if (rangesToProcess === 0) {
 
-      // Are we done processing? If so pass the information to the map to
-      // todo the animation.
-      if (rangesToProcess == 0) {
-
-        if (delta == -1 || units == null || end == null || start == null ) {
-          console.log('Unable to calculate time range.');
-          return;
-        }
-
-        var startDate = new Date(Date.UTC(start[0], start[1], start[2]));
-
-        map.animate({start: startDate, end: end, delta: delta, units: units}, layers);
-        $('#timestep-display').fadeIn('slow');
-      }
-    };
+            if (delta === -1 || units === null || end === null ||
+                start === null ) {
+              console.log('Unable to calculate time range.');
+              return;
+            }
+            startDate = new Date(Date.UTC(start[0], start[1], start[2]));
+            map.animate({start: startDate, end: end, delta: delta, units: units}, layers);
+            $('#timestep-display').fadeIn('slow');
+          }
+        };
 
     // Iterate through the selected layers and calcuate the range we are going
     // to animate over.
@@ -221,8 +236,7 @@ uiModule.gis.createLayerList = function(map, rootId, heading, toggleFunct, remov
         rangeFunction(dataset.name.replace(".nc", ""), processTimeInfo);
       }
 
-      var layer = map.findLayerById(dataset.dataset_id);
-
+      layer = map.findLayerById(dataset.dataset_id);
       layers.push(layer);
     });
   });
@@ -231,28 +245,26 @@ uiModule.gis.createLayerList = function(map, rootId, heading, toggleFunct, remov
     $(this).addClass('active');
     $('#play', animationControls).removeClass('active');
     map.pauseAnimation();
-  })
+  });
 
   $('#stop', animationControls).click(function() {
     $('#play', animationControls).removeClass('active');
     $('#pause', animationControls).removeClass('active');
     map.stopAnimation();
-  })
+  });
 
   $('#step-forward', animationControls).click(function() {
     $.each(uiModule.gis.selectedLayers(), function(i, id) {
-      var dataset = $('#'+id).data('dataset');
-      var layer = map.findLayerById(dataset.dataset_id);
-
+      var dataset = $('#'+id).data('dataset'),
+          layer = map.findLayerById(dataset.dataset_id);
       map.stepAnimationForward(dataset.timesteps, [layer]);
     });
   });
 
   $('#step-backward', animationControls).click(function() {
     $.each(uiModule.gis.selectedLayers(), function(i, id) {
-      var dataset = $('#'+id).data('dataset');
-      var layer = map.findLayerById(dataset.dataset_id);
-
+      var dataset = $('#'+id).data('dataset'),
+          layer = map.findLayerById(dataset.dataset_id);
       map.stepAnimationBackward(dataset.timesteps, [layer]);
     });
   });
@@ -282,31 +294,35 @@ uiModule.gis.createLayerList = function(map, rootId, heading, toggleFunct, remov
   });
 
   // Add div to hold timestep information
-  var timestepDisplay = $('<div>', { id: 'timestep-display',
+  timestepDisplay = $('<div>', { id: 'timestep-display',
     style: 'position: absolute; z-index: 99; top: 55px;' +
     'left: 10px; background: rgba(255,255,255,0.5); ' +
     'padding: 5px; border-radius: 5px;'}).append($('<h4>'));
 
-  var heading = $('h4', timestepDisplay);
-
+  heading = $('h4', timestepDisplay);
   $(map).on(geoModule.command.animateEvent, function(event) {
-
     var format = d3.time.format("%Y-%m-%d");
-    if (event.currentTime)
+    if (event.currentTime) {
       heading.html(format(event.currentTime));
+    }
   });
 
-
   $('body').append(timestepDisplay);
+
   timestepDisplay.hide();
-
-
-
   controls.hide();
 
-  $('#'+rootId + ' .accordion-inner').prepend(controls)
-}
+  $('#'+rootId + ' .accordion-inner').prepend(controls);
+};
 
+//////////////////////////////////////////////////////////////////////////////
+/**
+ *
+ * @param rootId
+ * @param heading
+ * @returns {HTMLElement}
+ */
+//////////////////////////////////////////////////////////////////////////////
 uiModule.gis.createList = function(rootId, heading) {
   "use strict";
   var listRoot, itemRoot, itemHeading, itemCollection, subItemsRoot,
@@ -347,6 +363,7 @@ uiModule.gis.createList = function(rootId, heading) {
   return tableRoot;
 };
 
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Create a list of documents that could be added as a layer
  *
@@ -355,6 +372,7 @@ uiModule.gis.createList = function(rootId, heading) {
  * @param layersRootId
  * @param data
  */
+//////////////////////////////////////////////////////////////////////////////
 uiModule.gis.createDataList = function(rootId, heading, layersRootId, data, callback) {
   "use strict";
   var listRoot, itemRoot, itemCollection, subItemsRoot, subItemsList, tableRoot, itemHeading;
@@ -402,11 +420,10 @@ uiModule.gis.createDataList = function(rootId, heading, layersRootId, data, call
     row.append(col);
 
     rawTimes = ["na","na"];
-    if (item.timeInfo.rawTimes)
-      {
-      console.log(item.timeInfo)
+    if (item.timeInfo.rawTimes) {
+      console.log(item.timeInfo);
       rawTimes = item.timeInfo.rawTimes;
-      }
+    }
 
     // Add a drop down to let user select time
     col = $(document.createElement('td'));
@@ -445,7 +462,7 @@ uiModule.gis.createDataList = function(rootId, heading, layersRootId, data, call
     button.attr('type', 'button');
     button.attr('class', 'btn btn-primary');
     button.attr('id', 'btn-add-' + item.name);
-    button.attr('_id', item._id);
+    button.attr('_id', item.id);
     button.attr('name', item.name);
     button.attr('basename', item.basename);
     button.attr('data-toggle', 'button');
@@ -465,6 +482,7 @@ uiModule.gis.createDataList = function(rootId, heading, layersRootId, data, call
   $('.combobox').select2();
 };
 
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Add a document as a layer to the list
  *
@@ -473,6 +491,7 @@ uiModule.gis.createDataList = function(rootId, heading, layersRootId, data, call
  * @param layersRootId
  * @param elem
  */
+//////////////////////////////////////////////////////////////////////////////
 uiModule.gis.addLayer = function(object, layersRootId, dataSet, selectfunc,
     togglefunc, removefunc, callback, workflowfunc, displayProgress) {
   "use strict";
@@ -480,7 +499,10 @@ uiModule.gis.addLayer = function(object, layersRootId, dataSet, selectfunc,
   // Show controls
   $('#layer-control-btns').show();
 
-  var rootId, tbody, basename, layerId, tr, td, button, _id;
+  var rootId, tbody, basename, layerId, tr, td, button,
+      checkBox, toggleButton, icon, workflowButton,
+      nameDiv, downloadStatus, progress, bar, cancel;
+
   rootId = "#" + layersRootId;
   layerId = $(dataSet).attr("dataset_id");
    if (layerId !== null) {
@@ -496,26 +518,26 @@ uiModule.gis.addLayer = function(object, layersRootId, dataSet, selectfunc,
     // Layer checkbox
     td = $(document.createElement('td'));
     td.width('20px');
-    var checkBox = $(document.createElement('input'));
+
+    checkBox = $(document.createElement('input'));
     checkBox.attr('type', 'checkbox');
     checkBox.attr('id', 'selected');
-    td.append(checkBox)
+    td.append(checkBox);
     tr.append(td);
 
     checkBox.click(function() {
-
       var selected = 0;
-
       $('#table-layers tr').each(function(i, tr) {
         // call the function passing the id
-        if ($('#selected', tr)[0].checked)
-          selected++
+        if ($('#selected', tr)[0].checked) {
+          selected++;
+        }
       });
 
-      if (selected == 1) {
+      if (selected === 1) {
         $('#table-layers').trigger('layers-selection');
       }
-      else if (selected == 0) {
+      else if (selected === 0) {
         $('#table-layers').trigger('layers-no-selection');
       }
     });
@@ -524,9 +546,9 @@ uiModule.gis.addLayer = function(object, layersRootId, dataSet, selectfunc,
     // Toggle layer button
     td = $(document.createElement('td'));
     td.width('30px');
-    var toggleButton = $(document.createElement('button'));
-    toggleButton.addClass('btn btn-success btn-mini')
-    toggleButton.attr('data-toggle', 'button')
+    toggleButton = $(document.createElement('button'));
+    toggleButton.addClass('btn btn-success btn-mini');
+    toggleButton.attr('data-toggle', 'button');
     toggleButton.attr('type', 'button');
 
     // Add the click action
@@ -535,8 +557,8 @@ uiModule.gis.addLayer = function(object, layersRootId, dataSet, selectfunc,
     });
 
     // Add icon
-    var icon = $(document.createElement('i'));
-    icon.addClass('icon-globe icon-white')
+    icon = $(document.createElement('i'));
+    icon.addClass('icon-globe icon-white');
     toggleButton.append(icon);
     td.append(toggleButton);
     tr.append(td);
@@ -544,8 +566,9 @@ uiModule.gis.addLayer = function(object, layersRootId, dataSet, selectfunc,
     // Workflow button
     td = $(document.createElement('td'));
     td.width('45px');
-    var workflowButton = $(document.createElement('button'));
-    workflowButton.addClass('btn btn-info btn-mini')
+
+    workflowButton = $(document.createElement('button'));
+    workflowButton.addClass('btn btn-info btn-mini');
     workflowButton.attr('type', 'button');
 
     // Add the click action
@@ -554,28 +577,30 @@ uiModule.gis.addLayer = function(object, layersRootId, dataSet, selectfunc,
     });
 
     // Add icon
-    var icon = $(document.createElement('i'));
-    icon.addClass('icon-edit icon-white')
+    icon = $(document.createElement('i'));
+    icon.addClass('icon-edit icon-white');
     workflowButton.append(icon);
     td.append(workflowButton);
     tr.append(td);
 
     // Name of the layer
     td = $(document.createElement('td'));
-    var nameDiv = $(document.createElement('div'));
+    nameDiv = $(document.createElement('div'));
     nameDiv.attr('id', 'name');
     nameDiv.append($(document.createElement('h4')).html(basename));
 
     if (displayProgress) {
-      var downloadStatus = $(document.createElement('div'))
+      downloadStatus = $(document.createElement('div'));
       downloadStatus.attr('id', 'progress');
-      var progress
-        = $(document.createElement('div')).addClass('progress progress-success progress-striped active');
+      progress = $(document.createElement('div')).addClass(
+                   'progress progress-success progress-striped active');
       progress.css({float: 'left', width: '80%'});
-      var bar = $(document.createElement('div')).addClass('bar');
+
+      bar = $(document.createElement('div')).addClass('bar');
       progress.append(bar);
       bar.width('0%');
-      var cancel = $(document.createElement('button')).addClass('btn btn-mini');
+
+      cancel = $(document.createElement('button')).addClass('btn btn-mini');
       cancel.attr('type', 'button');
       cancel.css({width: '20px', height: '20px', position: 'relative',
                   top: '-1px', left: '3px'});
@@ -609,9 +634,13 @@ uiModule.gis.addLayer = function(object, layersRootId, dataSet, selectfunc,
   $('#' + layerId).fadeIn('slow', callback);
 };
 
+//////////////////////////////////////////////////////////////////////////////
 /**
+ * Handle layer being added to the map
  *
+ * @param elem
  */
+//////////////////////////////////////////////////////////////////////////////
 uiModule.gis.layerAdded = function(elem) {
   "use strict";
   $(elem).removeClass("btn-primary");
@@ -622,12 +651,14 @@ uiModule.gis.layerAdded = function(elem) {
   $(elem).html('Added');
 };
 
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Remove a layer from the list
  *
  * @param elem
  * @returns {Boolean}
  */
+//////////////////////////////////////////////////////////////////////////////
 uiModule.gis.removeLayer = function(elem, layerId) {
   "use strict";
   var buttonId, button = $('#btn-add-' + layerId);
@@ -650,17 +681,21 @@ uiModule.gis.removeLayer = function(elem, layerId) {
   return false;
 };
 
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Toggle visibility of a layer
  */
+//////////////////////////////////////////////////////////////////////////////
 uiModule.gis.toggleLayer = function(elem, layerId) {
   "use strict";
   // Do nothing
 };
 
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Update UI to when a layer is selected
  */
+//////////////////////////////////////////////////////////////////////////////
 uiModule.gis.selectLayer = function(target, layerId) {
   "use strict";
   $(target).siblings().removeClass('active');
@@ -672,25 +707,36 @@ uiModule.gis.selectLayer = function(target, layerId) {
   return true;
 };
 
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Check if a table contains reference to a layer
+ *
+ * @param layerTable
+ * @param layerId
+ * @returns {boolean}
+ */
+//////////////////////////////////////////////////////////////////////////////
 uiModule.gis.hasLayer = function(layerTable, layerId) {
   "use strict";
 
   var found = false;
   $('tr', $(layerTable)).each(function(i, tr) {
-    if (tr.id == layerId) {
+    if (tr.id === layerId) {
       found = true;
       return;
     }
   });
 
   return found;
-}
+};
 
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Adds map controls that are overalled on the map, such as zoom controls.
  * map - This is the map object.
  * map - Container is the parent div holding the gl canvas
  */
+//////////////////////////////////////////////////////////////////////////////
 uiModule.gis.createMapControls = function(map, container) {
   "use strict";
 
@@ -792,29 +838,21 @@ uiModule.gis.createMapControls = function(map, container) {
       }
     }
   }
+};
 
-
-}
-
-
+//////////////////////////////////////////////////////////////////////////////
 /**
  * Create control for opacity
  */
+//////////////////////////////////////////////////////////////////////////////
 uiModule.gis.createOpacityControl = function(parent, map, layersFunction) {
   "use strict";
-//  var tbody, row, col, opacityDiv;
-//  tbody = $($(table).find('tbody'));
-//  row = $(document.createElement('tr'));
-//  tbody.append(row);
-//
-//  col = $(document.createElement('td'));
-//  row.append(col);
-//  col.append('<h4>opacity</h4>');
+  var opacityControl, opacityDiv;
 
   // Create slider to control opacity of a layer
-  var opacityControl = $(document.createElement('div'));
+  opacityControl = $(document.createElement('div'));
   opacityControl.append('<h4>opacity</h4>');
-  var opacityDiv = $(document.createElement('div'));
+  opacityDiv = $(document.createElement('div'));
   opacityDiv.width('100%');
   opacityDiv.addClass('ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all');
   opacityControl.append(opacityDiv);
