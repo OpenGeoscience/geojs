@@ -905,7 +905,7 @@ vglModule.utils.createColorLegend = function(varname, lookupTable, origin,
       actor.setReferenceFrame(vglModule.boundingObject.ReferenceFrame.Absolute);
       actor.material().setBinNumber(vglModule.material.RenderBin.Overlay);
       actor.material().addAttribute(vglModule.utils.create2DTexture(
-        range[i].toString(), 12, null));
+        range[i].toFixed(2).toString(), 12, null));
       actors.push(actor);
     }
 
@@ -1083,7 +1083,7 @@ vglModule.utils.create2DTexture = function(textToWrite, textSize,
     ctx.font = "bold " + ctx.font;
   }
 
-  ctx.fillText(textToWrite, canvas.width/2, canvas.height/2);
+  ctx.fillText(textToWrite, canvas.width/2, canvas.height/2, canvas.width);
 
   texture.setImage(canvas);
   texture.updateDimensions();
