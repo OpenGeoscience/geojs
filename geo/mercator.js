@@ -26,7 +26,7 @@ geoModule.mercator = {
  */
 //////////////////////////////////////////////////////////////////////////////
 geoModule.mercator.long2tilex = function(lon, z) {
-  "use strict";
+  'use strict';
   var rad = (lon + 180.0) / 360.0,
       f = Math.floor(rad * Math.pow(2.0, z));
   return f;
@@ -42,7 +42,7 @@ geoModule.mercator.long2tilex = function(lon, z) {
  */
 //////////////////////////////////////////////////////////////////////////////
 geoModule.mercator.lat2tiley = function(lat, z) {
-  "use strict";
+  'use strict';
   var rad = lat * Math.PI/180.0;
   return Math.floor((1.0 - rad / Math.PI) / 2.0 * Math.pow(2.0, z));
 };
@@ -57,7 +57,7 @@ geoModule.mercator.lat2tiley = function(lat, z) {
  */
 //////////////////////////////////////////////////////////////////////////////
 geoModule.mercator.long2tilex2 = function(lon, z) {
-  "use strict";
+  'use strict';
   var rad = (lon + 180.0) / 360.0,
       f = rad * Math.pow(2.0, z),
       ret = Math.floor(f),
@@ -75,7 +75,7 @@ geoModule.mercator.long2tilex2 = function(lon, z) {
  */
 //////////////////////////////////////////////////////////////////////////////
 geoModule.mercator.lat2tiley2 = function(lat, z) {
-  "use strict";
+  'use strict';
   var rad = lat * Math.PI/180.0,
       f = (1.0 - Math.log(Math.tan(rad) + 1.0 / Math.cos(rad)) /
            Math.PI) / 2.0 * Math.pow(2.0, z),
@@ -94,7 +94,7 @@ geoModule.mercator.lat2tiley2 = function(lat, z) {
  */
 //////////////////////////////////////////////////////////////////////////////
 geoModule.mercator.tilex2long = function(x, z) {
-  "use strict";
+  'use strict';
   return x / Math.pow(2.0, z) * 360.0 - 180.0;
 };
 
@@ -108,7 +108,7 @@ geoModule.mercator.tilex2long = function(x, z) {
  */
 //////////////////////////////////////////////////////////////////////////////
 geoModule.mercator.tiley2lat = function(y, z) {
-  "use strict";
+  'use strict';
   var n = Math.PI - 2.0 * Math.PI * y / Math.pow(2.0, z);
   return 180.0 / Math.PI * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
 };
@@ -137,7 +137,7 @@ geoModule.mercator.y2lat = function(a) {
  */
 //////////////////////////////////////////////////////////////////////////////
 geoModule.mercator.lat2y = function(a) {
-  "use strict";
+  'use strict';
   return 180/Math.PI * Math.log(Math.tan(Math.PI/4+a*(Math.PI/180)/2));
 };
 
@@ -149,6 +149,7 @@ geoModule.mercator.lat2y = function(a) {
  */
 //////////////////////////////////////////////////////////////////////////////
 geoModule.mercator.deg2rad = function(d) {
+  'use strict';
   var r= d * (Math.PI/180.0);
   return r;
 };
@@ -162,6 +163,7 @@ geoModule.mercator.deg2rad = function(d) {
  */
 //////////////////////////////////////////////////////////////////////////////
 geoModule.mercator.rad2deg = function(r) {
+  'use strict';
   var d= r / (Math.PI/180.0);
   return d;
 };
@@ -176,23 +178,26 @@ geoModule.mercator.rad2deg = function(r) {
  */
 //////////////////////////////////////////////////////////////////////////////
 geoModule.mercator.ll2m = function(lon,lat) {
-  //lat, lon in rad
-  var x = this.r_major * this.deg2rad(lon);
-  console.log('x   ', x);
+  'use strict';
+  if (lat > 89.5) {
+    lat = 89.5;
+  }
 
-  if (lat > 89.5) lat = 89.5;
-  if (lat < -89.5) lat = -89.5;
+  if (lat < -89.5) {
+    lat = -89.5;
+  }
 
-  var temp = this.r_minor / this.r_major,
+  var x = this.r_major * this.deg2rad(lon),
+      temp = this.r_minor / this.r_major,
       es = 1.0 - (temp * temp),
       eccent = Math.sqrt(es),
       phi = this.deg2rad(lat),
       sinphi = Math.sin(phi),
       con = eccent * sinphi,
-      com = .5 * eccent,
+      com = 0.5 * eccent,
       con2 = Math.pow((1.0-con)/(1.0+con), com),
-      ts = Math.tan(.5 * (Math.PI*0.5 - phi))/con2,
-      y = 0 - this.r_major * Math.log(ts),
+      ts = Math.tan(0.5 * (Math.PI * 0.5 - phi)) / con2,
+      y = -this.r_major * Math.log(ts),
       ret={'x':x,'y':y};
 
   return ret;
@@ -207,10 +212,11 @@ geoModule.mercator.ll2m = function(lon,lat) {
  */
 //////////////////////////////////////////////////////////////////////////////
 geoModule.mercator.m2ll = function(x,y) {
+  'use strict';
   var lon=this.rad2deg((x/this.r_major)),
       temp = this.r_minor / this.r_major,
       e = Math.sqrt(1.0 - (temp * temp)),
-      lat=this.rad2deg(this.pjPhi2( Math.exp( 0-(y/this.r_major)), e)),
+      lat=this.rad2deg(this.pjPhi2(Math.exp(-(y/this.r_major)), e)),
       ret={'lon':lon,'lat':lat};
 
   return ret;
@@ -226,18 +232,20 @@ geoModule.mercator.m2ll = function(x,y) {
  */
 //////////////////////////////////////////////////////////////////////////////
 geoModule.mercator.pjPhi2 = function(ts, e) {
+  'use strict';
   var N_ITER=15,
       HALFPI=Math.PI/2,
       TOL=0.0000000001,
-      eccnth, Phi, con, dphi,
+      con, dphi,
       i = N_ITER,
-      eccnth = .5 * e,
-      Phi = HALFPI - 2. * Math.atan (ts);
+      eccnth = 0.5 * e,
+      Phi = HALFPI - 2.0 * Math.atan (ts);
 
   do
   {
     con = e * Math.sin (Phi);
-    dphi = HALFPI - 2. * Math.atan (ts * Math.pow((1. - con) / (1. + con), eccnth)) - Phi;
+    dphi = HALFPI - 2.0 * Math.atan (ts * Math.pow(
+            (1.0 - con) / (1.0 + con), eccnth)) - Phi;
     Phi += dphi;
 
   }
