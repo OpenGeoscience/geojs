@@ -21,6 +21,7 @@ var baseStyle = {
     },
     fill: 'lightgray',
     stroke: 'black',
+    selectedStroke: 'yellow',
     lineWidth: 2,
     minWidth: 100,
     ypad: 40,
@@ -49,7 +50,7 @@ climatePipesStyle.module.port.stroke = "lightgreen";
 climatePipesStyle.module.port.lineWidth = 2;
 
 climatePipesStyle.module.shadowBlur = 10;
-climatePipesStyle.module.shadowColor = "lightblue";
+climatePipesStyle.module.shadowColor = "yellow";
 climatePipesStyle.module.cornerRadius = 25;
 climatePipesStyle.module.lineWidth = 5;
 climatePipesStyle.module.stroke = "lightgreen";

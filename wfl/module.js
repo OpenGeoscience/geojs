@@ -40,6 +40,7 @@ wflModule.module = function(options, data) {
     m_outPorts = {},
     m_inPortCount = 0,
     m_outPortCount = 0,
+    m_selected = false,
     m_workflow = options.workflow;
 
   //ensure location values are floating point numbers
@@ -152,7 +153,7 @@ wflModule.module = function(options, data) {
   /**
    * Get drawing metrics for this module
    */
-    ////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////
   this.getMetrics = function() {
     return m_metrics;
   };
@@ -161,7 +162,7 @@ wflModule.module = function(options, data) {
   /**
    * Get input ports for this module
    */
-    ////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////
   this.getInPorts = function() {
     return m_inPorts;
   };
@@ -170,7 +171,7 @@ wflModule.module = function(options, data) {
   /**
    * Get output ports for this module
    */
-    ////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////
   this.getOutPorts = function() {
     return m_outPorts;
   };
@@ -179,7 +180,7 @@ wflModule.module = function(options, data) {
   /**
    * Get registry for this module
    */
-    ////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////
   this.getRegistry = function() {
     return m_registry;
   };
@@ -188,8 +189,8 @@ wflModule.module = function(options, data) {
   /**
    * Get data for this module
    */
-    ////////////////////////////////////////////////////////////////////////////
-  this.getData = function() {
+  ////////////////////////////////////////////////////////////////////////////
+  this.data = function() {
     return m_data;
   };
 
@@ -200,7 +201,7 @@ wflModule.module = function(options, data) {
    *
    * @param {CanvasRenderingContext2D} ctx
    */
-    ////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////
   this.draw = function(ctx, drawStyle) {
     if(!m_metrics) {
       this.recomputeMetrics(ctx, drawStyle);
@@ -305,6 +306,42 @@ wflModule.module = function(options, data) {
       }
     }
     return null;
+  };
+
+  this.toggleSelected = function() {
+    m_selected = !m_selected;
+  };
+
+  this.isSelected = function() {
+    return m_selected;
+  };
+
+  this.delete = function() {
+    var j,
+      moduleDataList = m_that.workflow().data().workflow.module,
+      portName;
+
+    //remove from worfklow json data
+    for(j = 0; j < moduleDataList.length; j++) {
+      if(m_that.data() === moduleDataList[j]) {
+        moduleDataList.splice(j, 1);
+        break;
+      }
+    }
+
+    //delete input elements
+    for(portName in m_inPorts) {
+      if(m_inPorts.hasOwnProperty(portName)) {
+        m_inPorts[portName].delete();
+      }
+    }
+
+    //delete output elements
+    for(portName in m_outPorts) {
+      if(m_outPorts.hasOwnProperty(portName)) {
+        m_outPorts[portName].delete();
+      }
+    }
   };
 
   /**

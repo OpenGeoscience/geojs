@@ -91,6 +91,10 @@ wflModule.inputPort = function(options, data) {
       m_that.module().getFunctionValue(m_that.data()['@name']));
   };
 
+  this.delete = function() {
+    $(m_input_elem).remove();
+  };
+
   createElementFromType(this.data()['@name']);
 
   return this;

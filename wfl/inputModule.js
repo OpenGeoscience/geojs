@@ -57,7 +57,7 @@ wflModule.inputModule = function(options, data) {
       inPortsHeight = this.inPortCount() * totalInPortHeight +
         currentWorkflowStyle.module.text.xpad,
       outPortsHeight = this.outPortCount() * totalOutPortHeight,
-      fontMetrics = ctx.measureText(this.getData()['@name']),
+      fontMetrics = ctx.measureText(this.data()['@name']),
       textWidth = fontMetrics.width + currentWorkflowStyle.module.text.xpad * 2,
       inPortsWidth = this.getInPorts().length > 0 ?
         this.getInPorts()[0].getElement().width :
@@ -72,8 +72,8 @@ wflModule.inputModule = function(options, data) {
         outPortsHeight,
         currentWorkflowStyle.module.minWidth
       ) + currentWorkflowStyle.module.text.ypad*2 + textHeight,
-      mx = Math.floor(this.getData().location['@x'] - moduleWidth/2),
-      my = -Math.floor(this.getData().location['@y']),
+      mx = Math.floor(this.data().location['@x'] - moduleWidth/2),
+      my = -Math.floor(this.data().location['@y']),
       inPortY = my + currentWorkflowStyle.module.port.pad + textHeight +
         portWidth*2,
       outPortY = my + moduleHeight - currentWorkflowStyle.module.port.pad -
@@ -140,7 +140,8 @@ wflModule.inputModule = function(options, data) {
       this.recomputeMetrics(ctx, drawStyle);
     }
 
-    var portWidth = drawStyle.module.port.width,
+    var mStyle = drawStyle.module,
+      portWidth = mStyle.port.width,
       mx = m_metrics.mx,
       my = m_metrics.my,
       m_inPorts = this.getInPorts(),
@@ -148,24 +149,26 @@ wflModule.inputModule = function(options, data) {
       key;
 
     //draw rectangle
-    ctx.fillStyle = drawStyle.module.fill;
-    ctx.lineWidth = drawStyle.module.lineWidth;
-    ctx.strokeStyle = drawStyle.module.stroke;
+    ctx.fillStyle = mStyle.fill;
+    ctx.lineWidth = mStyle.lineWidth;
+    ctx.strokeStyle = this.isSelected() ? mStyle.selectedStroke : mStyle.stroke;
 
     ctx.save();
-    ctx.shadowBlur = drawStyle.module.shadowBlur;
-    ctx.shadowColor = drawStyle.module.shadowColor;
+    if(this.isSelected()) {
+      ctx.shadowBlur = mStyle.shadowBlur;
+      ctx.shadowColor = mStyle.shadowColor;
+    }
 
     //translate to ensure fill pattern is consistent
     ctx.translate(mx,my);
     wflModule.utils.roundRect(ctx, 0, 0, m_metrics.moduleWidth,
-      m_metrics.moduleHeight, drawStyle.module.cornerRadius, true, true);
+      m_metrics.moduleHeight, mStyle.cornerRadius, true, true);
 
     ctx.restore();
 
     //draw ports
-    ctx.fillStyle = drawStyle.module.port.fill;
-    ctx.strokeStyle = drawStyle.module.port.stroke;
+    ctx.fillStyle = mStyle.port.fill;
+    ctx.strokeStyle = mStyle.port.stroke;
     for(key in m_inPorts) {
       if(m_inPorts.hasOwnProperty(key)) {
         m_inPorts[key].draw(ctx, portWidth);
@@ -179,12 +182,12 @@ wflModule.inputModule = function(options, data) {
     }
 
     //draw module name
-    ctx.fillStyle = drawStyle.module.text.fill;
-    ctx.font = drawStyle.module.text.font;
+    ctx.fillStyle = mStyle.text.fill;
+    ctx.font = mStyle.text.font;
     ctx.fillText(
-      this.getData()['@name'],
+      this.data()['@name'],
       mx + Math.floor((m_metrics.moduleWidth - m_metrics.fontMetrics.width)/2),
-      my + m_metrics.textHeight + drawStyle.module.text.ypad);
+      my + m_metrics.textHeight + mStyle.text.ypad);
 
   };
 
