@@ -23,12 +23,12 @@ geoModule.layerSource = function() {
 
   this.requestDataMTime = function() {
       return m_requestDataMTime;
-  }
+  };
 
   this.requestDataMTimeModified = function() {
       // TODO Check for caller here
       m_requestDataMTime.modified();
-  }
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
