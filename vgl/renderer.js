@@ -125,11 +125,7 @@ vglModule.renderer = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.render = function() {
-    var i = 0,
-        renSt = null,
-        children = null,
-        actor = null,
-        sortedActors = [];
+    var i, renSt, children, actor = null, sortedActors = [];
 
     gl.clearColor(m_backgroundColor[0], m_backgroundColor[1],
       m_backgroundColor[2], m_backgroundColor[3]);
