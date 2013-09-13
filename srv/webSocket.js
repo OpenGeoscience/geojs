@@ -1,10 +1,22 @@
-/*global $, document, window, console*/
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * @module ogs.geo
+ */
 
+/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
+/*jslint white: true, indent: 2*/
+
+/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
+/*global vglModule, uiModule, srvModule, window, document, d3*/
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
 /**
  * WebSocket options object specification
  */
+//////////////////////////////////////////////////////////////////////////////
 srvModule.webSocketOptions = function() {
-
+  'use strict';
   // Check against no use of new()
   if (!(this instanceof srvModule.webSocketOptions)) {
     return new srvModule.webSocketOptions();
@@ -16,12 +28,13 @@ srvModule.webSocketOptions = function() {
   return this;
 };
 
-
+//////////////////////////////////////////////////////////////////////////////
 /**
  * WebSocket wrapper to more easily communicate with geoweb server
  */
+//////////////////////////////////////////////////////////////////////////////
 srvModule.webSocket = function(options) {
-
+  'use strict';
   this.events = {
     "message_recieved" : "message_recieved",
     "opened" : "opened",
@@ -33,28 +46,13 @@ srvModule.webSocket = function(options) {
     return new srvModule.webSocket(options);
   }
 
-  ogs.vgl.object.call(this);
+  vglModule.object.call(this);
 
   /** @private */
-  var m_that = this;
-
-  /** @private */
-  var m_url = options.url || 'ws://' + window.location.host + '/ws';
-
-  /** @private */
-  var m_nodes = options.nodes || [];
-
-  /** @private */
-  var m_readynodes = {};
-
-  /** @private */
-  var m_binders = {};
-
-  /** @private */
-  var m_open = false;
-
-  /** @private */
-  var m_ws;
+  var m_that = this,
+      m_url = options.url || 'ws://' + window.location.host + '/ws',
+      m_nodes = options.nodes || [], m_readynodes = {},
+      m_binders = {}, m_open = false, m_ws, allReady, i;
 
   if (window.WebSocket) {
     m_ws = new window.WebSocket(m_url);
@@ -85,32 +83,31 @@ srvModule.webSocket = function(options) {
     });
 
     //initiate nodes if needed
-    if(m_nodes.length == 0) {
+    if(m_nodes.length === 0) {
       $(m_that).trigger({
-	type: m_that.events.ready
+	      type: m_that.events.ready
       });
     } else {
-
       m_that.bind('nodemanager', function(node) {
-	m_readynodes[node] = true;
-	var allReady = true;
-	for(var i = 0; i < m_nodes.length; i++) {
-	  if(!m_readynodes[m_nodes[i]]) {
-	    allReady = false;
-	  }
-	}
-	if(allReady) {
-	  $(m_that).trigger({
-	    type: m_that.events.ready
-	  });
-	}
-      });
+        m_readynodes[node] = true;
+        allReady = true;
 
-      for(var i = 0; i < m_nodes.length; i++) {
-	m_that.message('nodemanager',m_nodes[i]);
+        for(i = 0; i < m_nodes.length; i++) {
+          if(!m_readynodes[m_nodes[i]]) {
+            allReady = false;
+          }
+        }
+        if(allReady) {
+          $(m_that).trigger({
+            type: m_that.events.ready
+          });
+        }
+      });
+      for(i = 0; i < m_nodes.length; i++) {
+	      m_that.message('nodemanager',m_nodes[i]);
       }
     }
-  }
+  };
 
   // websocket connection lost
   m_ws.onclosed = function() {
@@ -118,7 +115,7 @@ srvModule.webSocket = function(options) {
     $(m_that).trigger({
       type: m_that.events.closed
     });
-  }
+  };
 
   // Recieved a message from the server
   // trigger event, and call all callbacks registered for this target
@@ -128,14 +125,15 @@ srvModule.webSocket = function(options) {
       message : event.data
     });
 
-    data = JSON.parse(event.data);
+    var data = JSON.parse(event.data), i;
     if(m_binders.hasOwnProperty(data.target)) {
-      for(var i in m_binders[data.target]) {
-	m_binders[data.target][i].call(m_that, data.message);
+      for(i in m_binders[data.target]) {
+	      m_binders[data.target][i].call(m_that, data.message);
       }
     }
-  }
+  };
 
+  //////////////////////////////////////////////////////////////////////////////
   /**
    * Send a signal to a server node
    *
@@ -144,27 +142,30 @@ srvModule.webSocket = function(options) {
    * @param {array} args [optional]
    * @param {object} kwargs [optional]
    */
+  //////////////////////////////////////////////////////////////////////////////
   this.signal = function(node, slot, args, kwargs) {
     args = typeof args !== 'undefined' ? args : [];
     kwargs = typeof kwargs !== 'undefined' ? kwargs : {};
     var json = {
       target:node,
       message: {
-	slot: slot,
-	args: args,
-	kwargs: kwargs
+	      slot: slot,
+	      args: args,
+	      kwargs: kwargs
       }
     };
 
     m_ws.send(JSON.stringify(json));
   };
 
+  //////////////////////////////////////////////////////////////////////////////
   /**
    * Send a message to a server node or handler
    *
    * @param {String} target
    * @param {Mixed} message
    */
+  //////////////////////////////////////////////////////////////////////////////
   this.message = function(node, message) {
     var json = {
       target: node,
@@ -174,33 +175,40 @@ srvModule.webSocket = function(options) {
     m_ws.send(JSON.stringify(json));
   };
 
+  //////////////////////////////////////////////////////////////////////////////
   /**
    * Get the url used by this websocket
    *
    * @returns {String}
    */
+  //////////////////////////////////////////////////////////////////////////////
   this.url = function() {
     return m_url;
   };
 
+  //////////////////////////////////////////////////////////////////////////////
   /**
    * Get the open status of this websocket
    *
    * @returns {Boolean}
    */
+  //////////////////////////////////////////////////////////////////////////////
   this.open = function() {
     return m_open;
   };
 
+  //////////////////////////////////////////////////////////////////////////////
   /**
    * Get the underlying websocket
    *
    * @returns {WebSocket}
    */
+  //////////////////////////////////////////////////////////////////////////////
   this.name = function() {
     return m_ws;
   };
 
+  //////////////////////////////////////////////////////////////////////////////
   /**
    * Bind to named websocket messages from the server
    * 'this' for the callback will be this websocket object
@@ -208,28 +216,34 @@ srvModule.webSocket = function(options) {
    * @param {String} name
    * @param {function} callback
    */
+  //////////////////////////////////////////////////////////////////////////////
   this.bind = function(name, callback) {
     if( !m_binders.hasOwnProperty(name)) {
       m_binders[name] = [];
     }
     m_binders[name].push(callback);
-  }
+  };
 
+  //////////////////////////////////////////////////////////////////////////////
   /**
    * Unbind from named websocket messages from the server
    *
    * @param {String} name
    * @param {function} callback
    */
+  //////////////////////////////////////////////////////////////////////////////
   this.unbind = function(name, callback) {
+    var index;
+
     if( m_binders.hasOwnProperty(name)) {
       index = m_binders[name].indexof(callback);
-      if(index != -1) {
-	m_binders.splice(index,1);
+      if(index !== -1) {
+	      m_binders.splice(index,1);
       }
     }
-  }
+  };
 
+  //////////////////////////////////////////////////////////////////////////////
   /**
    * Unbind all callbacks from named websocket messages from the server
    * If name is blank, all binded functions for all names are removed
@@ -237,15 +251,16 @@ srvModule.webSocket = function(options) {
    *
    * @param {String} name [optional]
    */
+  //////////////////////////////////////////////////////////////////////////////
   this.unbindAll = function(name) {
     if(typeof name !== 'undefined') {
       if( m_binders.hasOwnProperty(name)) {
-	m_binders[name] = [];
+	      m_binders[name] = [];
       }
     } else {
-      m_binders = {}
+      m_binders = {};
     }
-  }
+  };
 
   return this;
 };
