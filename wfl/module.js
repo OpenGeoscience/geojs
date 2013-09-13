@@ -383,7 +383,7 @@ wflModule.module = function(options, data) {
       "@pos": pos,
       "#text": "\n      ",
       "parameter": {
-        "@val": value.toString(),
+        "@val": value ? value.toString() : "",
         "@name": description,
         "#tail": "\n    ",
         "@pos": "0",
