@@ -1,9 +1,12 @@
+//////////////////////////////////////////////////////////////////////////////
 /**
  * @module ogs.srv
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true, white: true, indent: 2*/
-/*global ogs*/
+/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
+/*jslint white: true, indent: 2*/
 
-/** Define ogs.srv namespace */
+/*global geoModule, ogs*/
+//////////////////////////////////////////////////////////////////////////////
+
 var srvModule = ogs.namespace("srv");
