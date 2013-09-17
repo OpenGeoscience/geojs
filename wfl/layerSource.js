@@ -66,10 +66,12 @@ wflModule.layerSource = function(name, config, vars, workflow, onError) {
     }
 
     //set time function on workflow
-    try {
-      m_workflow.getModuleByName('Variable').setInput('time', m_time);
-    } catch (e) {
-      console.log('[info] Unable to set time on workflow');
+    if (!isNaN(parseFloat(m_time))) {  //make sure timestep is a number
+      try {
+        m_workflow.getModuleByName('Variable').setInput('time', m_time);
+      } catch (e) {
+        console.log('[info] Unable to set time on workflow');
+      }
     }
 
     $.ajax({

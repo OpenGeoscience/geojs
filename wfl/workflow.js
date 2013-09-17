@@ -361,8 +361,10 @@ wflModule.workflow = function(options) {
       .setInput('file', filepath);
     this.getModuleByName('Variable')
       .setInput('name', name);
-    this.getModuleByName('Variable')
-      .setInput('time', timestep);
+    if (!isNaN(parseFloat(timestep))) {  //make sure timestep is a number
+      this.getModuleByName('Variable')
+        .setInput('time', timestep);
+    }
   };
 
   if(options.data.hasOwnProperty('workflow')) {
