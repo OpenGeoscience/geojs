@@ -1,0 +1,3 @@
+[submodule "vgl"]
+	path = vgl
+	url = git@github.com:OpenGeoscience/vgl.git
