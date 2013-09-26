@@ -149,7 +149,8 @@ wflModule.editor = function(options) {
     $(m_canvasContainer).css({
       position: 'relative',
       height: '100%',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      cursor: m_style.cursor
     });
 
     $(m_canvasInput).css({
@@ -261,8 +262,6 @@ wflModule.editor = function(options) {
         e.dataTransfer.effectAllowed = 'copy';
         e.dataTransfer.setData("Text",
           JSON.stringify($(this).data('moduleInfo')));
-
-        wflModule.utils.debug(e);
       });
 
     $moduleTableBody.append($tr.append($td.append($text)));
@@ -303,30 +302,26 @@ wflModule.editor = function(options) {
       draggingPortPos,
       draggingPortModule,
       draggingModule,
+      hoverModule = null,
+      hoverPort = null,
       tempConnection = wflModule.connection();
 
     $canvas.mousedown(function (e) {
-      var modules = m_workflow.modules(),
-        key,
-        module;
+      var module;
 
       firstPoint = lastPoint = ctxMousePos(e);
 
-      // find modules
-      for(key in modules) {
-        if(modules.hasOwnProperty(key)) {
-          module = modules[key];
-          if(module.contains(lastPoint)) {
-            draggingPort = module.portByPos(lastPoint);
-            if(draggingPort) {
-              draggingPortPos = lastPoint;
-              draggingPortModule = module;
-            } else {
-              draggingModule = module;
-            }
-            return;
-          }
+      module = m_workflow.moduleByPos(lastPoint);
+
+      if(module !== null) {
+        draggingPort = module.portByPos(lastPoint);
+        if(draggingPort) {
+          draggingPortPos = lastPoint;
+          draggingPortModule = module;
+        } else {
+          draggingModule = module;
         }
+        return;
       }
 
       // find connections
@@ -337,10 +332,27 @@ wflModule.editor = function(options) {
     });
 
     $canvas.mousemove(function (e) {
-      // if dragging module
+      var newPoint;
+
+      function getNewHoverPort() {
+        hoverPort = hoverModule.portByPos(newPoint);
+        if(hoverPort !== null) {
+          hoverPort.setHover(true);
+          $(m_canvasContainer).css('cursor', m_style.module.port.cursor);
+        }
+      }
+
+      function getNewHoverModule() {
+        hoverModule = m_workflow.moduleByPos(newPoint);
+        if(hoverModule !== null) {
+          hoverModule.setHover(true);
+          m_that.drawWorkflow();
+          $(m_canvasContainer).css('cursor', m_style.module.cursor);
+        }
+      }
 
       if(draggingModule) {
-        var newPoint = ctxMousePos(e);
+        newPoint = ctxMousePos(e);
         draggingModule.data().location['@x'] += newPoint.x - lastPoint.x;
         draggingModule.data().location['@y'] -= newPoint.y - lastPoint.y;
         draggingModule.recomputeMetrics($canvas[0].getContext('2d'), m_style);
@@ -364,6 +376,32 @@ wflModule.editor = function(options) {
         lastPanEvent = e;
         m_that.drawWorkflow();
         m_workflow.updateElementPositions();
+      } else {
+        //find hover modules and ports
+        newPoint = ctxMousePos(e);
+
+        if(hoverModule !== null) {
+          if(!hoverModule.contains(newPoint)) {
+            hoverModule.setHover(false);
+            m_that.drawWorkflow();
+            $(m_canvasContainer).css('cursor', m_style.cursor);
+            getNewHoverModule();
+          }
+        } else {
+          getNewHoverModule();
+        }
+
+        if(hoverModule !== null) {
+          if(hoverPort !== null) {
+            if(!hoverPort.contains(newPoint)) {
+              hoverPort.setHover(false);
+              $(m_canvasContainer).css('cursor', m_style.module.cursor);
+              getNewHoverPort();
+            }
+          } else {
+            getNewHoverPort();
+          }
+        }
       }
     });
 

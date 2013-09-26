@@ -41,6 +41,7 @@ wflModule.module = function(options, data) {
     m_inPortCount = 0,
     m_outPortCount = 0,
     m_selected = false,
+    m_isHover,
     m_workflow = options.workflow;
 
   //ensure location values are floating point numbers
@@ -392,6 +393,14 @@ wflModule.module = function(options, data) {
         "@type": type
       }
     };
+  };
+
+  this.setHover = function(value) {
+    m_isHover = value;
+  };
+
+  this.isHover = function() {
+    return m_isHover;
   };
 
   this.updateElementPositions = function() {};

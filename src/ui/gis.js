@@ -90,7 +90,8 @@ uiModule.gis.createLayerList = function(map, rootId, heading, toggleFunct,
             show: 100,
             hide: 100
         }
-      }, KEYCODE_ESC, animationControls, timestepDisplay;
+      }, KEYCODE_ESC, animationControls, timestepDisplay, ensureTimeInfo,
+      hideTimeStepDisplay;
 
 
   controls.attr('id', 'layer-control-btns');
@@ -175,70 +176,47 @@ uiModule.gis.createLayerList = function(map, rootId, heading, toggleFunct,
   animationControls.css({left: "10px"});
   controls.append($(animationControls));
 
+  // Before we animate we needt to make sure timeInfo has been loaded
+  ensureTimeInfo = function(layerIds, onDone) {
+
+    var datasets = [], numberOfRequests;
+    $.each(layerIds, function(i, id) {
+      var dataset = $('#'+id).data('dataset');
+      if (!dataset.timeInfo) {
+        datasets.push(dataset);
+      }
+    });
+
+    numberOfRequests = datasets.length;
+
+    if (numberOfRequests === 0) {
+        onDone(layerIds);
+    }
+
+
+    $.each(datasets, function(i, dataset) {
+        rangeFunction(dataset.name.replace(".nc", ""), function(timeInfo) {
+          dataset.timeInfo = timeInfo;
+
+          numberOfRequests--;
+
+          if (numberOfRequests === 0) {
+            onDone(layerIds);
+          }
+        });
+    });
+  };
+
+  hideTimeStepDisplay = function() {
+    $('#timestep-display').fadeOut('slow');
+    $('#timestep-display h4').html("");
+  };
+
   $('#play', animationControls).click(function() {
     $(this).addClass('active');
     $('#pause', animationControls).removeClass('active');
-
-    var layer, layers = [], delta = -1, stdDelta = -1, units = null,
-        start = null, stdStart = null, end = null, stdEnd = null,
-        selectedLayers = uiModule.gis.selectedLayers(),
-        rangesToProcess = selectedLayers.length,
-        processTimeInfo = function(timeInfo) {
-          var startDate;
-
-          if (delta === -1 || timeInfo.stdDelta < stdDelta) {
-            stdDelta = timeInfo.stdDelta;
-            delta = timeInfo.nativeDelta;
-            units = timeInfo.nativeUnits;
-          }
-
-          if (!start || timeInfo.stdTimeRange[0] < stdStart) {
-            stdStart = timeInfo.stdTimeRange[0];
-            start = timeInfo.dateRange[0];
-          }
-
-          if (!end || timeInfo.stdTimeRange[1] > stdEnd) {
-            stdEnd = timeInfo.stdTimeRange[1];
-            startDate = timeInfo.dateRange[0];
-            end = new Date(Date.UTC(startDate[0], startDate[1], startDate[2]));
-            geoModule.time.incrementTime(end, timeInfo.nativeUnits,
-                timeInfo.nativeDelta * timeInfo.numSteps);
-          }
-
-          --rangesToProcess;
-
-          // Are we done processing? If so pass the information to the map to
-          // todo the animation.
-          if (rangesToProcess === 0) {
-
-            if (delta === -1 || units === null || end === null ||
-                start === null ) {
-              console.log('Unable to calculate time range.');
-              return;
-            }
-            startDate = new Date(Date.UTC(start[0], start[1], start[2]));
-            map.animate({start: startDate, end: end, delta: delta, units: units}, layers);
-            $('#timestep-display').fadeIn('slow');
-          }
-        };
-
-    // Iterate through the selected layers and calcuate the range we are going
-    // to animate over.
-    $.each(selectedLayers, function(i, id){
-      var dataset = $('#'+id).data('dataset');
-
-      // Do we already have the range?
-      if (dataset.timeInfo) {
-        processTimeInfo(dataset.timeInfo);
-      }
-      // We need to call the range function ( i.e. ask the server )
-      else {
-        rangeFunction(dataset.name.replace(".nc", ""), processTimeInfo);
-      }
-
-      layer = map.findLayerById(dataset.dataset_id);
-      layers.push(layer);
-    });
+    ensureTimeInfo(uiModule.gis.selectedLayers(), map.animate);
+    $('#timestep-display').fadeIn('slow');
   });
 
   $('#pause', animationControls).click(function() {
@@ -251,27 +229,31 @@ uiModule.gis.createLayerList = function(map, rootId, heading, toggleFunct,
     $('#play', animationControls).removeClass('active');
     $('#pause', animationControls).removeClass('active');
     map.stopAnimation();
+    hideTimeStepDisplay();
   });
 
   $('#step-forward', animationControls).click(function() {
-    $.each(uiModule.gis.selectedLayers(), function(i, id) {
-      var dataset = $('#'+id).data('dataset'),
-          layer = map.findLayerById(dataset.dataset_id);
-      map.stepAnimationForward(dataset.timesteps, [layer]);
-    });
+      ensureTimeInfo(uiModule.gis.selectedLayers(), map.stepAnimationForward);
+      $('#timestep-display').fadeIn('slow');
   });
 
   $('#step-backward', animationControls).click(function() {
-    $.each(uiModule.gis.selectedLayers(), function(i, id) {
-      var dataset = $('#'+id).data('dataset'),
-          layer = map.findLayerById(dataset.dataset_id);
-      map.stepAnimationBackward(dataset.timesteps, [layer]);
-    });
+      ensureTimeInfo(uiModule.gis.selectedLayers(), map.stepAnimationBackward);
+      $('#timestep-display').fadeIn('slow');
   });
 
   $(map).on(geoModule.command.animateEvent, function (event) {
     if (event.currentTime >= event.endTime) {
       $('#play', animationControls).removeClass('active');
+    }
+  });
+
+  $('#table-layers').on('layer-removed', function(e) {
+    if ($.inArray(e.id, uiModule.gis.selectedLayers())) {
+      map.stopAnimation(true);
+      $('#play', animationControls).removeClass('active');
+      $('#pause', animationControls).removeClass('active');
+      hideTimeStepDisplay();
     }
   });
 
@@ -301,7 +283,7 @@ uiModule.gis.createLayerList = function(map, rootId, heading, toggleFunct,
 
   heading = $('h4', timestepDisplay);
   $(map).on(geoModule.command.animateEvent, function(event) {
-    var format = d3.time.format("%Y-%m-%d");
+    var format = d3.time.format.utc("%Y-%m-%d");
     if (event.currentTime) {
       heading.html(format(event.currentTime));
     }
@@ -674,6 +656,8 @@ uiModule.gis.removeLayer = function(elem, layerId) {
     $('#' + layerId).fadeOut(function() {
       $('#' + layerId).remove();
     });
+
+    $('#table-layers').trigger('layer-removed', {id: layerId});
 
     return true;
   }

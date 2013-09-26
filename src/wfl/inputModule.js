@@ -154,7 +154,7 @@ wflModule.inputModule = function(options, data) {
     ctx.strokeStyle = this.isSelected() ? mStyle.selectedStroke : mStyle.stroke;
 
     ctx.save();
-    if(this.isSelected()) {
+    if(this.isHover()) {
       ctx.shadowBlur = mStyle.shadowBlur;
       ctx.shadowColor = mStyle.shadowColor;
     }

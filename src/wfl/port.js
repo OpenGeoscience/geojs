@@ -55,7 +55,8 @@ wflModule.port = function(options, data) {
     m_style = options.drawStyle,
     m_x = 0,
     m_y = 0,
-    m_width = m_style.module.port.width;
+    m_width = m_style.module.port.width,
+    m_hover;
 
   this.drawStyle = function() {
     //@todo: only store and use port portion of style
@@ -133,6 +134,10 @@ wflModule.port = function(options, data) {
       }
     }
     return false;
+  };
+
+  this.setHover = function(value) {
+    m_hover = value;
   };
 
   this.hide = function() {};

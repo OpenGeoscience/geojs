@@ -367,6 +367,20 @@ wflModule.workflow = function(options) {
     }
   };
 
+  this.moduleByPos = function(point) {
+    var key,
+      module;
+    for(key in m_modules) {
+      if(m_modules.hasOwnProperty(key)) {
+        module = m_modules[key];
+        if(module.contains(point)) {
+          return module;
+        }
+      }
+    }
+    return null;
+  };
+
   if(options.data.hasOwnProperty('workflow')) {
     this.generateModulesFromData();
     this.generateConnectionsFromData();
