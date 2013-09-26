@@ -292,6 +292,105 @@ geoModule.map = function(node, options) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Animate layers of a map
+   *
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  function animateInternal() {
+    var timeRange = m_animationState.range,
+        newTime = new Date(timeRange.start.getTime()),
+        endTime = timeRange.end,
+        intervalId = null,
+        stop = false,
+        pause = false;
+
+    geoModule.time.incrementTime(newTime, timeRange.units, timeRange.delta);
+    if (newTime > timeRange.end) {
+      console.log('[error] Invalid time range. Requires atleast \
+        begin and end time');
+      return;
+    }
+
+    $(m_that).on('animation-stop', function () {
+      stop = true;
+    });
+
+    $(m_that).on('animation-pause', function () {
+      pause = true;
+    });
+
+    function frame() {
+      if (m_animationState.currentTime > endTime || stop) {
+        clearInterval(intervalId);
+        m_animationState.currentTime = null;
+      }
+      else if (pause) {
+        clearInterval(intervalId);
+      }
+      else {
+        animateTimestep();
+        geoModule.time.incrementTime(m_animationState.currentTime,
+          m_animationState.range.units, m_animationState.range.delta);
+      }
+    }
+
+    // Update every 2 ms. Updating every ms might be too much.
+    intervalId = setInterval(frame, 2);
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Play next animation step and then pause
+   *
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  function stepAnimationForwardInternal() {
+    if (!m_animationState.currentTime) {
+      resetAnimation();
+    }
+
+    var time = new Date(m_animationState.currentTime.getTime());
+    geoModule.time.incrementTime(time, m_animationState.range.units,
+        m_animationState.range.delta);
+
+    if (time > m_animationState.range.end) {
+      return;
+    }
+
+    m_animationState.currentTime = time;
+    animateTimestep();
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Play previous animation step and then pause
+   *
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  function stepAnimationBackwardInternal() {
+
+    if (!m_animationState) {
+      return;
+    }
+
+    var time = new Date(m_animationState.currentTime.getTime());
+    geoModule.time.incrementTime(time, m_animationState.range.units,
+        -m_animationState.range.delta);
+
+    if (time < m_animationState.range.start) {
+      return;
+    }
+
+    m_animationState.currentTime = time;
+
+    animateTimestep();
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Get map options
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -634,64 +733,97 @@ geoModule.map = function(node, options) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Animate data give a time range
+   *
+   * @param selectedLayers
+   * @param onRange
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.animateTimeRange = function(selectedLayers, onRange) {
+    var delta = -1, stdDelta = -1, units = null,
+        start = null, stdStart = null, end = null, stdEnd = null,
+        rangesToProcess = selectedLayers.length,
+        processTimeInfo = function(timeInfo) {
+          var startDate;
+
+          if (delta === -1 || timeInfo.stdDelta < stdDelta) {
+            stdDelta = timeInfo.stdDelta;
+            delta = timeInfo.nativeDelta;
+            units = timeInfo.nativeUnits;
+          }
+
+          if (!start || timeInfo.stdTimeRange[0] < stdStart) {
+            stdStart = timeInfo.stdTimeRange[0];
+            start = timeInfo.dateRange[0];
+          }
+
+          if (!end || timeInfo.stdTimeRange[1] > stdEnd) {
+            stdEnd = timeInfo.stdTimeRange[1];
+            startDate = timeInfo.dateRange[0];
+            end = new Date(Date.UTC(startDate[0], startDate[1]-1, startDate[2]));
+            geoModule.time.incrementTime(end, timeInfo.nativeUnits,
+                timeInfo.nativeDelta * timeInfo.numSteps);
+          }
+
+          --rangesToProcess;
+
+          // Are we done processing? If so pass the information to the map
+          // for animation.
+          if (rangesToProcess === 0) {
+            if (delta === -1 || units === null || end === null ||
+                start === null ) {
+              console.log('Unable to calculate time range.');
+              return;
+            }
+            startDate = new Date(Date.UTC(start[0], start[1]-1, start[2]));
+            onRange({start: startDate, end: end, delta: delta, units: units});
+          }
+        };
+
+    // Iterate through the selected layers and calculate the range we are going
+    // to animate over.
+    $.each(selectedLayers, function(i, layer){
+      // TODO this data should be part of the layer
+      var dataset = $('#'+layer.id()).data('dataset');
+
+      // Do we already have the range?
+      if (dataset.timeInfo) {
+        processTimeInfo(dataset.timeInfo);
+      }
+      else {
+        console.log("Data does not have timeInfo");
+      }
+    });
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Animate layers of a map
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.animate = function(timeRange, layers) {
-    if (!timeRange) {
-      console.log('[error] Invalid time range');
-      return;
-    }
-
+  this.animate = function(layerIds) {
     // Save the animation state
-    if (m_animationState.currentTime === null) {
-      m_animationState = {
-        range: timeRange, currentTime: new Date(timeRange.start.getTime()),
-        layers: layers
-      };
+    if (!m_animationState.currentTime) {
+
+      var layers = [];
+
+      // Looks layers
+      $.each(layerIds, function(i, id) {
+        var layer = m_that.findLayerById(id);
+        layers.push(layer);
+      });
+
+      m_that.animateTimeRange(layers, function(timeRange) {
+          m_animationState = {
+            range: timeRange, currentTime: new Date(timeRange.start.getTime()),
+            layers: layers
+          };
+          animateInternal();
+      });
     }
-
-    var newTime = new Date(timeRange.start.getTime()),
-        that = this,
-        endTime = timeRange.end,
-        intervalId = null,
-        stop = false,
-        pause = false;
-
-    geoModule.time.incrementTime(newTime, timeRange.units, timeRange.delta);
-    if (newTime > timeRange.end) {
-      console.log('[error] Invalid time range. Requires atleast \
-        begin and end time');
-      return;
+    else {
+      animateInternal();
     }
-
-    $(this).on('animation-stop', function () {
-      stop = true;
-    });
-
-    $(this).on('animation-pause', function () {
-      pause = true;
-    });
-
-    function frame() {
-      if (m_animationState.currentTime > endTime || stop) {
-        clearInterval(intervalId);
-        m_animationState.currentTime = null;
-      }
-      else if (pause) {
-        clearInterval(intervalId);
-      }
-      else {
-        animateTimestep();
-        geoModule.time.incrementTime(m_animationState.currentTime,
-          m_animationState.range.units, m_animationState.range.delta);
-      }
-
-
-    }
-
-    // Update every 2 ms. Updating every ms might be too much.
-    intervalId = setInterval(frame, 2);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -708,8 +840,12 @@ geoModule.map = function(node, options) {
    * Stop animation
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.stopAnimation = function() {
+  this.stopAnimation = function(cleanState) {
     $(this).trigger('animation-stop');
+
+    if (cleanState) {
+      m_animationState = { range: null, currentTime: null, layers: null};
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -717,23 +853,28 @@ geoModule.map = function(node, options) {
    * Play next animation step and then pause
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.stepAnimationForward = function() {
-
+  this.stepAnimationForward = function(layerIds) {
     if (!m_animationState.currentTime) {
-      resetAnimation();
+
+      var layers = [];
+      // Looks layers
+      $.each(layerIds, function(i, id) {
+        var layer = m_that.findLayerById(id);
+        layers.push(layer);
+      });
+
+
+      m_that.animateTimeRange(layers, function(timeRange) {
+          m_animationState = {
+            range: timeRange, currentTime: new Date(timeRange.start.getTime()),
+            layers: layers
+          };
+          stepAnimationForwardInternal();
+      });
     }
-
-    var time = new Date(m_animationState.currentTime.getTime());
-    geoModule.time.incrementTime(time, m_animationState.range.units,
-        m_animationState.range.delta);
-
-    if (time > m_animationState.range.end) {
-      return;
+    else {
+      stepAnimationForwardInternal();
     }
-
-    m_animationState.currentTime = time;
-
-    animateTimestep();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -741,23 +882,27 @@ geoModule.map = function(node, options) {
    * Play previous animation step and then pause
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.stepAnimationBackward = function() {
+  this.stepAnimationBackward = function(layerIds) {
+    if (!m_animationState.currentTime) {
 
-    if (!m_animationState) {
-      return;
+      var layers = [];
+      // Looks layers
+      $.each(layerIds, function(i, id) {
+        var layer = m_that.findLayerById(id);
+        layers.push(layer);
+      });
+
+      m_that.animateTimeRange(layers, function(timeRange) {
+          m_animationState = {
+            range: timeRange, currentTime: new Date(timeRange.start.getTime()),
+            layers: layers
+          };
+          stepAnimationBackwardInternal();
+      });
     }
-
-    var time = new Date(m_animationState.currentTime.getTime());
-    geoModule.time.incrementTime(time, m_animationState.range.units,
-        -m_animationState.range.delta);
-
-    if (time < m_animationState.range.start) {
-      return;
+    else {
+      stepAnimationBackwardInternal();
     }
-
-    m_animationState.currentTime = time;
-
-    animateTimestep();
   };
 
   ////////////////////////////////////////////////////////////////////////////
