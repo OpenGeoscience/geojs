@@ -58,7 +58,11 @@ set(_exclude_js_lint
   wfl/staticWorkflows.js
 )
 
-set(_min_js_file ${DEPLOY_LIB_DIR}/geojs.min.js)
+if(NOT DEFINED ${DEPLOY_LIB_DIR})
+  set(DEPLOY_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/deploy")
+  file(MAKE_DIRECTORY ${DEPLOY_LIB_DIR})
+endif()
+  set(_min_js_file ${DEPLOY_LIB_DIR}/geojs.min.js)
 
 macro(list_contains var value)
   set(${var})
