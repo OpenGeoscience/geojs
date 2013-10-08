@@ -58,7 +58,26 @@ set(_exclude_js_lint
   wfl/staticWorkflows.js
 )
 
-set(_min_js_file ${DEPLOY_LIB_DIR}/geojs.min.js)
+# GeoJS requires a deployment directory
+if (NOT EXISTS GEOJS_DEPLOY_DIR)
+  set(GEOJS_DEPLOY_DIR "${CMAKE_CURRENT_BINARY_DIR}/deploy"
+      CACHE PATH "PATH to deployment directory" FORCE)
+  set(GEOJS_DEPLOY_LIB_DIR "${GEOJS_DEPLOY_DIR}/web/lib" CACHE PATH
+      "Path to deployment library directory" FORCE)
+endif()
+
+# Create deploy directory if it does not exists
+if(NOT EXISTS "${GEOJS_DEPLOY_LIB_DIR}")
+  add_custom_command(OUTPUT "${GEOJS_DEPLOY_LIB_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${GEOJS_DEPLOY_LIB_DIR}"
+  )
+  add_custom_target(geojs_pre_deploy ALL DEPENDS ${GEOJS_DEPLOY_LIB_DIR})
+endif()
+
+set(VGL_DEPLOY_DIR "${GEOJS_DEPLOY_DIR}")
+set(VGL_DEPLOY_LIB_DIR "${GEOJS_DEPLOY_LIB_DIR}")
+
+set(_min_js_file ${GEOJS_DEPLOY_LIB_DIR}/geojs.min.js)
 
 macro(list_contains var value)
   set(${var})
@@ -84,7 +103,7 @@ if (UglifyJS_EXECUTABLE)
     OUTPUT ${_min_js_file}
     COMMAND ${UglifyJS_EXECUTABLE} -o ${_min_js_file} ${_js_uglify_files}
             ${MINIFY_FLAG} ${MANGLE_FLAG}
-    DEPENDS ${DEPLOY_LIB_DIR} ${_js_uglify_files}
+    DEPENDS ${GEOJS_DEPLOY_LIB_DIR} ${_js_uglify_files}
   )
 else()
   # Use custom command to call CMake script to cat files together
@@ -94,15 +113,16 @@ else()
             # Note the quotes so we get the ; included
             "-DCAT_FILES=${_js_uglify_files}"
             -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/cat.cmake
-    DEPENDS ${DEPLOY_LIB_DIR} ${_js_uglify_files}
+    DEPENDS ${GEOJS_DEPLOY_LIB_DIR} ${_js_uglify_files}
     VERBATIM
   )
 endif()
 
 add_custom_target(${PROJECT_NAME} ALL DEPENDS ${_min_js_file})
-add_dependencies(${PROJECT_NAME} predeploy)
+add_dependencies(${PROJECT_NAME} geojs_pre_deploy)
 
 add_subdirectory(vgl)
+add_dependencies(vgl geojs_pre_deploy)
 
 # Testing
 if (BUILD_TESTING)
