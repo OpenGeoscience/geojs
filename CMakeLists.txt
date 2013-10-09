@@ -59,7 +59,7 @@ set(_exclude_js_lint
 )
 
 # GeoJS requires a deployment directory
-if (NOT EXISTS GEOJS_DEPLOY_DIR)
+if (NOT DEFINED GEOJS_DEPLOY_DIR)
   set(GEOJS_DEPLOY_DIR "${CMAKE_CURRENT_BINARY_DIR}/deploy"
       CACHE PATH "PATH to deployment directory" FORCE)
   set(GEOJS_DEPLOY_LIB_DIR "${GEOJS_DEPLOY_DIR}/web/lib" CACHE PATH
@@ -67,7 +67,7 @@ if (NOT EXISTS GEOJS_DEPLOY_DIR)
 endif()
 
 # Create deploy directory if it does not exists
-if(NOT EXISTS "${GEOJS_DEPLOY_LIB_DIR}")
+if(NOT DEFINED "${GEOJS_DEPLOY_LIB_DIR}")
   add_custom_command(OUTPUT "${GEOJS_DEPLOY_LIB_DIR}"
     COMMAND ${CMAKE_COMMAND} -E make_directory "${GEOJS_DEPLOY_LIB_DIR}"
   )
