@@ -540,7 +540,7 @@ uiModule.gis.addLayer = function(object, layersRootId, dataSet, selectfunc,
 
     // Add icon
     icon = $(document.createElement('i'));
-    icon.addClass('icon-globe icon-white');
+    icon.addClass('icon-eye-open icon-white');
     toggleButton.append(icon);
     td.append(toggleButton);
     tr.append(td);
@@ -560,7 +560,7 @@ uiModule.gis.addLayer = function(object, layersRootId, dataSet, selectfunc,
 
     // Add icon
     icon = $(document.createElement('i'));
-    icon.addClass('icon-edit icon-white');
+    icon.addClass('icon-wrench icon-white');
     workflowButton.append(icon);
     td.append(workflowButton);
     tr.append(td);

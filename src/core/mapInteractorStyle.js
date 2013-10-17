@@ -25,21 +25,22 @@ geoModule.mapInteractorStyle = function() {
   }
   ogs.vgl.interactorStyle.call(this);
   var m_that = this,
+      m_map,
       m_leftMouseButtonDown = false,
       m_rightMouseButtonDown = false,
       m_middileMouseButtonDown = false,
+      m_drawRegionMode = false,
+      m_planeFeatureIndex = -1,
+      m_clickLatLng,
       m_width,
       m_height,
       m_renderer,
+      m_renderWindow,
       m_camera,
       m_outsideCanvas,
       m_coords,
       m_currentMousePos,
-      m_focalPoint,
-      m_focusWorldPt,
-      m_focusDisplayPt,
-      m_displayPt1,
-      m_displayPt2,
+      m_focusDisplayPoint,
       m_worldPt1,
       m_worldPt2,
       m_dx,
@@ -54,6 +55,38 @@ geoModule.mapInteractorStyle = function() {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Sets or gets map for this interactor
+   *
+   * @param {geoModule.map} newMap optional
+   * @returns {geoModule.mapInteractorStyle|geoModule.map}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.map = function(newMap) {
+    if(typeof newMap !== 'undefined') {
+      m_map = newMap;
+      return this;
+    }
+    return m_map;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Sets or gets drawRegionMode for this interactor
+   *
+   * @param {Boolean} newValue optional
+   * @returns {geoModule.mapInteractorStyle|Boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.drawRegionMode = function(newValue) {
+    if(typeof newValue !== 'undefined') {
+      m_drawRegionMode = newValue;
+      return this;
+    }
+    return m_drawRegionMode;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Handle mouse move event
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -61,15 +94,13 @@ geoModule.mapInteractorStyle = function() {
     var canvas = m_that.viewer().canvas(),
         xrot = null,
         a = null,
-        angle = null;
+        angle = null,
+        mouseWorldPoint,
+        features;
 
     if (event.target !== canvas) {
       return true;
     }
-    m_width = m_that.viewer().renderWindow().windowSize()[0];
-    m_height = m_that.viewer().renderWindow().windowSize()[1];
-    m_renderer = m_that.viewer().renderWindow().activeRenderer();
-    m_camera = m_renderer.camera();
     m_outsideCanvas = false;
     m_coords = canvas.relMouseCoords(event);
     m_currentMousePos = {
@@ -92,32 +123,31 @@ geoModule.mapInteractorStyle = function() {
       return true; // allow bubbling up the event
     }
     if (m_leftMouseButtonDown) {
-      m_focalPoint = m_camera.focalPoint();
+      if(m_drawRegionMode) {
+        //update plane feature
+        mouseWorldPoint = m_renderWindow.displayToWorld(m_currentMousePos.x,
+          m_currentMousePos.y);
+        features = m_map.mapLayer().features();
+        features[features.length-1] = geoModule.planeFeature(m_clickLatLng,
+          geoModule.latlng(mouseWorldPoint[0], mouseWorldPoint[1]));
 
-      m_focusWorldPt = vec4.fromValues(
-        m_focalPoint[0], m_focalPoint[1], m_focalPoint[2], 1);
-      m_focusDisplayPt = m_renderer.worldToDisplay(
-        m_focusWorldPt, m_camera.viewMatrix(),
-        m_camera.projectionMatrix(), m_width, m_height);
+        //redraw map layer
+        m_map.draw();
+      } else {
+        m_focusDisplayPoint = m_renderWindow.focusDisplayPoint();
+        m_worldPt1 = m_renderWindow.displayToWorld(m_currentMousePos.x,
+          m_currentMousePos.y, m_focusDisplayPoint);
+        m_worldPt2 = m_renderWindow.displayToWorld(m_mouseLastPos.x,
+          m_mouseLastPos.y, m_focusDisplayPoint);
 
-      m_displayPt1 = vec4.fromValues(
-        m_currentMousePos.x, m_currentMousePos.y, m_focusDisplayPt[2], 1.0);
-      m_displayPt2 = vec4.fromValues(
-        m_mouseLastPos.x, m_mouseLastPos.y, m_focusDisplayPt[2], 1.0);
+        m_dx = m_worldPt1[0] - m_worldPt2[0];
+        m_dy = m_worldPt1[1] - m_worldPt2[1];
+        m_dz = m_worldPt1[2] - m_worldPt2[2];
 
-      m_worldPt1 = m_renderer.displayToWorld(
-        m_displayPt1, m_camera.viewMatrix(), m_camera.projectionMatrix(),
-        m_width, m_height);
-      m_worldPt2 = m_renderer.displayToWorld(
-        m_displayPt2, m_camera.viewMatrix(), m_camera.projectionMatrix(),
-        m_width, m_height);
-
-      m_dx = m_worldPt1[0] - m_worldPt2[0];
-      m_dy = m_worldPt1[1] - m_worldPt2[1];
-      m_dz = m_worldPt1[2] - m_worldPt2[2];
-      m_camera.pan(-m_dx, -m_dy, -m_dz);
-      $(m_that).trigger(geoModule.command.updateViewPositionEvent);
-      $(m_that).trigger(vglModule.command.leftButtonPressEvent);
+        m_camera.pan(-m_dx, -m_dy, -m_dz);
+        $(m_that).trigger(geoModule.command.updateViewPositionEvent);
+        $(m_that).trigger(vglModule.command.leftButtonPressEvent);
+      }
     }
     if (m_middileMouseButtonDown) {
       //Limit Rotation to only X, and between 0 to 60
@@ -155,7 +185,8 @@ geoModule.mapInteractorStyle = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.handleMouseDown = function(event) {
-    var canvas = m_that.viewer().canvas();
+    var canvas = m_that.viewer().canvas(),
+      point;
     if (event.target !== canvas) {
       return true;
     }
@@ -179,6 +210,21 @@ geoModule.mapInteractorStyle = function() {
     } else {
       m_mouseLastPos.y = m_coords.y;
     }
+    m_renderWindow = m_that.viewer().renderWindow();
+    m_width = m_renderWindow.windowSize()[0];
+    m_height = m_renderWindow.windowSize()[1];
+    m_renderer = m_that.viewer().renderWindow().activeRenderer();
+    m_camera = m_renderer.camera();
+
+    if(m_drawRegionMode && m_leftMouseButtonDown) {
+      point = m_renderWindow.displayToWorld(m_mouseLastPos.x, m_mouseLastPos.y);
+      m_clickLatLng = geoModule.latlng(point[0], point[1]);
+
+      //add placeholder feature
+      m_map.mapLayer().features().push(geoModule.planeFeature(m_clickLatLng,
+        m_clickLatLng));
+    }
+
     return false;
   };
 
@@ -206,6 +252,9 @@ geoModule.mapInteractorStyle = function() {
       if(m_mouseLastPos.x >= 0 && m_mouseLastPos.x <= width &&
         m_mouseLastPos.y >= 0 && m_mouseLastPos.y <= height) {
         num = m_picker.pick(m_mouseLastPos.x, m_mouseLastPos.y, renderer);
+      }
+      if(m_drawRegionMode) {
+        m_map.mapLayer().features().pop();
       }
     }
     if (event.button === 1) {
@@ -237,8 +286,44 @@ geoModule.mapInteractorStyle = function() {
       m_camera.setFocalPoint(currPosition[0], currPosition[1], 0.0);
     }
   };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Sets or gets the lastMousePosition for this interactor
+   *
+   * @param newPosition optional
+   * @param {Number} newPosition.x
+   * @param {Number} newPosition.y
+   * @returns {geoModule.mapInteractorStyle|Object}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.lastMousePosition = function(newPosition) {
+    if(typeof newPosition !== 'undefined') {
+      m_mouseLastPos = newPosition;
+      return this;
+    }
+    return m_mouseLastPos;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Sets or gets leftMouseDown for this interactor
+   *
+   * @param {Boolean} newValue optional
+   * @returns {geoModule.mapInteractorStyle|Boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.leftMouseDown = function(newValue) {
+    if(typeof newValue !== 'undefined') {
+      m_leftMouseButtonDown = newValue;
+      return this;
+    }
+    return m_leftMouseButtonDown;
+  };
+
   return this;
 };
+
 inherit(geoModule.mapInteractorStyle, vglModule.interactorStyle);
 
 /* Local Variables:   */

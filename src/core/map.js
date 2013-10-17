@@ -89,6 +89,7 @@ geoModule.map = function(node, options) {
 
   // Initialize
   m_interactorStyle = geoModule.mapInteractorStyle();
+  m_interactorStyle.map(this);
   m_viewer = vglModule.viewer(m_node);
   m_viewer.setInteractorStyle(m_interactorStyle);
   m_viewer.init();
@@ -956,6 +957,38 @@ geoModule.map = function(node, options) {
       point.event = event;
       layer.queryLocation(point);
     }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Sets or gets the viewer for this map
+   *
+   * @param newViewer {vglModule.viewer}
+   * @returns {geoModule.map|vglModule.viewer}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.viewer = function(newViewer) {
+    if(typeof newViewer !== 'undefined') {
+      m_viewer = newViewer;
+      return this;
+    }
+    return m_viewer;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Sets or gets mapLayer for this map
+   *
+   * @param {geoModule.layer} newMapLayer optional
+   * @returns {geoModule.map|geoModule.layer}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.mapLayer = function(newMapLayer) {
+    if(typeof newMapLayer !== 'undefined') {
+      m_mapLayer = newMapLayer;
+      return this;
+    }
+    return m_mapLayer;
   };
 
   // Bind events to handlers
