@@ -57,7 +57,8 @@ wflModule.inputModule = function(options, data) {
       inPortsHeight = this.inPortCount() * totalInPortHeight +
         currentWorkflowStyle.module.text.xpad,
       outPortsHeight = this.outPortCount() * totalOutPortHeight,
-      fontMetrics = ctx.measureText(this.data()['@name']),
+      m_data = this.data(),
+      fontMetrics = this.getFontMetrics(ctx, currentWorkflowStyle),
       textWidth = fontMetrics.width + currentWorkflowStyle.module.text.xpad * 2,
       inPortsWidth = this.getInPorts().length > 0 ?
         this.getInPorts()[0].getElement().width :
