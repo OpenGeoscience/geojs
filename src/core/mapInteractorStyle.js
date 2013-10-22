@@ -186,7 +186,8 @@ geoModule.mapInteractorStyle = function() {
   ////////////////////////////////////////////////////////////////////////////
   this.handleMouseDown = function(event) {
     var canvas = m_that.viewer().canvas(),
-      point;
+      point,
+      plane;
     if (event.target !== canvas) {
       return true;
     }
@@ -219,10 +220,12 @@ geoModule.mapInteractorStyle = function() {
     if(m_drawRegionMode && m_leftMouseButtonDown) {
       point = m_renderWindow.displayToWorld(m_mouseLastPos.x, m_mouseLastPos.y);
       m_clickLatLng = geoModule.latlng(point[0], point[1]);
+      var tempForTesting = geoModule.latlng(point[0]+50, point[1]+50);
+
+      plane = geoModule.planeFeature(m_clickLatLng, tempForTesting, -40);
 
       //add placeholder feature
-      m_map.mapLayer().features().push(geoModule.planeFeature(m_clickLatLng,
-        m_clickLatLng));
+      m_map.mapLayer().features().push(plane);
     }
 
     return false;
