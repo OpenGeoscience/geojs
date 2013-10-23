@@ -103,7 +103,7 @@ geoModule.archiveLayerSource = function(name, config, vars, onError) {
 
     $.ajax({
       type: 'POST',
-      url: '/data/read',
+      url: '/services/data/read',
       data: {
         expr: JSON.stringify(name),
         vars: JSON.stringify(vars),
@@ -160,7 +160,7 @@ geoModule.archiveLayerSource = function(name, config, vars, onError) {
 
     $.ajax({
       type: 'POST',
-      url: '/data/query',
+      url: '/services/data/query',
       data: {
         expr: m_name,
         vars: m_vars[0],
@@ -212,7 +212,7 @@ geoModule.archiveLayerSource = function(name, config, vars, onError) {
 
     $.ajax({
       type: 'POST',
-      url: '/mongo/' + m_config.server + '/' + m_config.database + '/'
+      url: '/services/mongo/' + m_config.server + '/' + m_config.database + '/'
         + m_config.collection,
       data: {
         query: JSON.stringify(query),
