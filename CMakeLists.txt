@@ -118,17 +118,24 @@ else()
   )
 endif()
 
+# Testing
+if (BUILD_TESTING)
+  include(CTest)
+  enable_testing()
+
+  if(EXISTS "${GEOJS_DATA_DIR}" AND IS_DIRECTORY "${GEOJS_DATA_DIR}")
+    message("[info] GeoJS data directory is set to ${GEOJS_DATA_DIR}")
+    set(VGL_DATA_DIR "${GEOJS_DATA_DIR}")
+  else()
+    message(FATAL_ERROR "GeoJS testing requires valid data directory")
+  endif()
+endif()
+
 add_custom_target(${PROJECT_NAME} ALL DEPENDS ${_min_js_file})
 add_dependencies(${PROJECT_NAME} geojs_pre_deploy)
 
 add_subdirectory(vgl)
 add_dependencies(vgl geojs_pre_deploy)
-
-# Testing
-if (BUILD_TESTING)
-  include(CTest)
-  enable_testing()
-endif()
 
 # JSLint tests.
 foreach(f ${_js_lint_files})
