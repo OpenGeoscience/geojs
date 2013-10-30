@@ -4,6 +4,9 @@ project(geojs)
 
 set(MINIFY ON CACHE BOOL "Minify the JavaScript files prior to concatenating.")
 set(MANGLE ON CACHE BOOL "When minifying, also mangle non-public symbol names.")
+set(GEOJS_DATA_DIR "" CACHE PATH  "Path to directory containing data for testing.")
+set(GEOJS_BASELINE_DIR "" CACHE PATH "Path to directory containing baseline images for testing.")
+set(BUILD_TESTING OFF CACHE BOOL "Enable testing")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
@@ -62,12 +65,11 @@ set(_exclude_js_lint
 if (NOT DEFINED GEOJS_DEPLOY_DIR)
   set(GEOJS_DEPLOY_DIR "${CMAKE_CURRENT_BINARY_DIR}/deploy"
       CACHE PATH "PATH to deployment directory" FORCE)
-  set(GEOJS_DEPLOY_LIB_DIR "${GEOJS_DEPLOY_DIR}/web/lib" CACHE PATH
-      "Path to deployment library directory" FORCE)
 endif()
 
 # Create deploy directory if it does not exists
 if(NOT DEFINED "${GEOJS_DEPLOY_LIB_DIR}")
+  set(GEOJS_DEPLOY_LIB_DIR "${GEOJS_DEPLOY_DIR}/web/lib")
   add_custom_command(OUTPUT "${GEOJS_DEPLOY_LIB_DIR}"
     COMMAND ${CMAKE_COMMAND} -E make_directory "${GEOJS_DEPLOY_LIB_DIR}"
   )
@@ -118,17 +120,24 @@ else()
   )
 endif()
 
+# Testing
+if (BUILD_TESTING)
+  include(CTest)
+  enable_testing()
+
+  if(EXISTS "${GEOJS_DATA_DIR}" AND IS_DIRECTORY "${GEOJS_DATA_DIR}")
+    message("[info] GeoJS data directory is set to ${GEOJS_DATA_DIR}")
+    set(VGL_DATA_DIR "${GEOJS_DATA_DIR}")
+  else()
+    message(FATAL_ERROR "GeoJS testing requires valid data directory")
+  endif()
+endif()
+
 add_custom_target(${PROJECT_NAME} ALL DEPENDS ${_min_js_file})
 add_dependencies(${PROJECT_NAME} geojs_pre_deploy)
 
 add_subdirectory(vgl)
 add_dependencies(vgl geojs_pre_deploy)
-
-# Testing
-if (BUILD_TESTING)
-  include(CTest)
-  enable_testing()
-endif()
 
 # JSLint tests.
 foreach(f ${_js_lint_files})
