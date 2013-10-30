@@ -4,6 +4,8 @@ project(geojs)
 
 set(MINIFY ON CACHE BOOL "Minify the JavaScript files prior to concatenating.")
 set(MANGLE ON CACHE BOOL "When minifying, also mangle non-public symbol names.")
+set(GEOJS_DATA_DIR "" CACHE PATH  "Path to directory containing data for testing.")
+set(GEOJS_BASELINE_DIR "" CACHE PATH "Path to directory containing baseline images for testing.")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
@@ -62,12 +64,11 @@ set(_exclude_js_lint
 if (NOT DEFINED GEOJS_DEPLOY_DIR)
   set(GEOJS_DEPLOY_DIR "${CMAKE_CURRENT_BINARY_DIR}/deploy"
       CACHE PATH "PATH to deployment directory" FORCE)
-  set(GEOJS_DEPLOY_LIB_DIR "${GEOJS_DEPLOY_DIR}/web/lib" CACHE PATH
-      "Path to deployment library directory" FORCE)
 endif()
 
 # Create deploy directory if it does not exists
 if(NOT DEFINED "${GEOJS_DEPLOY_LIB_DIR}")
+  set(GEOJS_DEPLOY_LIB_DIR "${GEOJS_DEPLOY_DIR}/web/lib")
   add_custom_command(OUTPUT "${GEOJS_DEPLOY_LIB_DIR}"
     COMMAND ${CMAKE_COMMAND} -E make_directory "${GEOJS_DEPLOY_LIB_DIR}"
   )
