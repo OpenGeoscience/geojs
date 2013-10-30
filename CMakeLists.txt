@@ -6,6 +6,7 @@ set(MINIFY ON CACHE BOOL "Minify the JavaScript files prior to concatenating.")
 set(MANGLE ON CACHE BOOL "When minifying, also mangle non-public symbol names.")
 set(GEOJS_DATA_DIR "" CACHE PATH  "Path to directory containing data for testing.")
 set(GEOJS_BASELINE_DIR "" CACHE PATH "Path to directory containing baseline images for testing.")
+set(BUILD_TESTING OFF CACHE BOOL "Enable testing")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
