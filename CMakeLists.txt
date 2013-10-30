@@ -131,6 +131,13 @@ if (BUILD_TESTING)
   else()
     message(FATAL_ERROR "GeoJS testing requires valid data directory")
   endif()
+
+  if(EXISTS "${GEOJS_BASELINE_DIR}" AND IS_DIRECTORY "${GEOJS_BASELINE_DIR}")
+    message("[info] GeoJS baseline directory is set to ${GEOJS_BASELINE_DIR}")
+    set(VGL_BASELINE_DIR "${GEOJS_BASELINE_DIR}")
+  else()
+    message(FATAL_ERROR "GeoJS testing requires valid baseline directory")
+  endif()
 endif()
 
 add_custom_target(${PROJECT_NAME} ALL DEPENDS ${_min_js_file})
