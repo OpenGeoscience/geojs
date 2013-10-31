@@ -22,19 +22,18 @@
  * can be provided with the appropriate error message.
  */
 //////////////////////////////////////////////////////////////////////////////
-wflModule.layerSource = function(name, config, vars, workflow, onError) {
+wflModule.layerSource = function(id, name, path, config, vars, workflow, onError) {
   'use strict';
 
   if (!(this instanceof wflModule.layerSource) ) {
-    return new wflModule.layerSource(name, config, vars, workflow, onError);
+    return new wflModule.layerSource(id, name, path, config, vars, workflow, onError);
   }
-  geoModule.archiveLayerSource.call(this, name, config, vars, onError);
+  geoModule.archiveLayerSource.call(this, id, name, path, config, vars, onError);
 
   var m_time = -1,
-    m_that = this,
-    m_name = name,
-    m_onError = wflModule.utils.defaultValue(onError, function(errorString) {}),
-    m_workflow = workflow;
+      m_that = this,
+      m_onError = wflModule.utils.defaultValue(onError, function(errorString) {}),
+      m_workflow = workflow;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -94,7 +93,7 @@ wflModule.layerSource = function(name, config, vars, workflow, onError) {
         }
       },
       error: function(jqXHR, textStatus, errorThrown ) {
-        errorString = "Error reading " + m_name + ": " + errorThrown;
+        errorString = "Error reading " + this.name() + ": " + errorThrown;
         console.log(errorString);
         m_onError(errorString);
       }
