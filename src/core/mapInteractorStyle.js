@@ -217,16 +217,24 @@ geoModule.mapInteractorStyle = function() {
     m_renderer = m_that.viewer().renderWindow().activeRenderer();
     m_camera = m_renderer.camera();
 
-    if(m_drawRegionMode && m_leftMouseButtonDown) {
+    //if(m_drawRegionMode && m_leftMouseButtonDown) {
       point = m_renderWindow.displayToWorld(m_mouseLastPos.x, m_mouseLastPos.y);
       m_clickLatLng = geoModule.latlng(point[0], point[1]);
       var tempForTesting = geoModule.latlng(point[0]+50, point[1]+50);
 
-      plane = geoModule.planeFeature(m_clickLatLng, tempForTesting, -40);
+      plane = geoModule.planeFeature(m_clickLatLng, tempForTesting, 99);
+
+      console.log(point);
 
       //add placeholder feature
       m_map.mapLayer().features().push(plane);
-    }
+
+      //force redraw
+      m_map.draw();
+
+      console.log(plane.bounds());
+
+    //}
 
     return false;
   };
