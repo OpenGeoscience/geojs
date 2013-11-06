@@ -308,7 +308,7 @@ uiModule.gis.createLayerList = function(map, rootId, heading, toggleFunct,
 uiModule.gis.createList = function(rootId, heading) {
   "use strict";
   var listRoot, itemRoot, itemHeading, itemCollection, subItemsRoot,
-      subItemsList, tableRoot, tbody;
+      subItemsList, tableRoot, tbody, tableRootContainer;
 
   listRoot = document.getElementById(rootId);
   itemRoot = document.createElement("div");
@@ -335,9 +335,13 @@ uiModule.gis.createList = function(rootId, heading) {
   subItemsList.setAttribute("class", "accordion-inner");
   subItemsRoot.appendChild(subItemsList);
 
+  tableRootContainer = document.createElement("div");
+  tableRootContainer.setAttribute("class", "layer-table-container");
+  subItemsList.appendChild(tableRootContainer);
+
   tableRoot = document.createElement("table");
   tableRoot.setAttribute("id", 'table-' + rootId);
-  subItemsList.appendChild(tableRoot);
+  tableRootContainer.appendChild(tableRoot);
 
   tbody = document.createElement("tbody");
   tableRoot.appendChild(tbody);

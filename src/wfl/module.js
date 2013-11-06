@@ -92,6 +92,21 @@ wflModule.module = function(options, data) {
     return m_outPortCount;
   };
 
+  /**
+   * Compute context font metrics based on drawStyle
+   * @param ctx {CanvasRenderingContext2D}
+   * @param drawStyle {Object}
+   * @returns {TextMetrics}
+   */
+  this.getFontMetrics = function(ctx, drawStyle) {
+    var result;
+    ctx.save();
+    ctx.font = drawStyle.module.text.font;
+    result = ctx.measureText(m_data['@name']);
+    ctx.restore();
+    return result;
+  };
+
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Recompute drawing metrics for this module
@@ -106,7 +121,7 @@ wflModule.module = function(options, data) {
       inPortsWidth = m_inPortCount * totalPortWidth +
         drawStyle.module.text.xpad,
       outPortsWidth = m_outPortCount * totalPortWidth,
-      fontMetrics = ctx.measureText(m_data['@name']),
+      fontMetrics = this.getFontMetrics(ctx, drawStyle),
       textWidth = fontMetrics.width + drawStyle.module.text.xpad * 2,
       moduleWidth = Math.max(inPortsWidth, outPortsWidth +
         drawStyle.module.text.xpad, textWidth, drawStyle.module.minWidth),
