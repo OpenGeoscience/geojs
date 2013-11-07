@@ -489,6 +489,7 @@ geoModule.featureLayer = function(options, feature) {
                 }
               };
               revent = $.Event(geoModule.command.queryResultEvent);
+              revent.location = location;
               revent.srcEvent = location.event;
               $(this).trigger(revent, result);
               return; // should we continue checking?
