@@ -22,16 +22,15 @@
  * can be provided with the appropriate error message.
  */
 //////////////////////////////////////////////////////////////////////////////
-geoModule.archiveLayerSource = function(name, config, vars, onError) {
+geoModule.archiveLayerSource = function(id, name, path, config, vars, onError) {
   'use strict';
 
   if (!(this instanceof geoModule.archiveLayerSource) ) {
-    return new geoModule.archiveLayerSource(name, config, vars, onError);
+    return new geoModule.archiveLayerSource(id, name, path, config, vars, onError);
   }
-  geoModule.layerSource.call(this);
+  geoModule.layerSource.call(this, id, name, path);
 
-  var m_name = name,
-      m_config = config,
+  var m_config = config,
       m_vars = vars,
       m_time = -1,
       m_resultCache = null,
@@ -162,7 +161,7 @@ geoModule.archiveLayerSource = function(name, config, vars, onError) {
       type: 'POST',
       url: '/services/data/query',
       data: {
-        expr: m_name,
+        expr: this.path(),
         vars: m_vars[0],
         fields: ['timerange']
       },
@@ -180,7 +179,7 @@ geoModule.archiveLayerSource = function(name, config, vars, onError) {
         }
       },
       error: function(jqXHR, textStatus, errorThrown ) {
-        errorString = "Error reading timerange for " + m_name + ": " + errorThrown;
+        errorString = "Error reading timerange for " + this.path() + ": " + errorThrown;
         console.log(errorString);
         m_onError(errorString);
 
@@ -207,7 +206,7 @@ geoModule.archiveLayerSource = function(name, config, vars, onError) {
   this.getScalarRange = function(varname) {
     // TODO This should be read from the archive
     var range = null,
-        query = {'basename': m_name},
+        query = {'basename': this.path()},
         data = null, i, errorString;
 
     $.ajax({
@@ -240,7 +239,7 @@ geoModule.archiveLayerSource = function(name, config, vars, onError) {
         }
       },
       error: function(jqXHR, textStatus, errorThrown ) {
-        errorString = "Error reading timerange for " + m_name + ": " + errorThrown;
+        errorString = "Error reading timerange for " + this.path() + ": " + errorThrown;
         console.log(errorString);
         m_onError(errorString);
       }
