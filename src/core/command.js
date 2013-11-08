@@ -45,6 +45,7 @@ geoModule.command.unselectLayerEvent = "unselectLayerEvent";
 geoModule.command.updateZoomEvent = "updateZoomEvent";
 geoModule.command.updateViewZoomEvent = "updateViewZoomEvent";
 geoModule.command.updateViewPositionEvent = "updateViewPositionEvent";
+geoModule.command.updateDrawRegionEvent = "updateDrawRegionEvent";
 geoModule.command.resizeEvent = "resizeEvent";
 geoModule.command.animateEvent = "animateEvent";
 geoModule.command.requestRedrawEvent = "requestRedrawEvent";

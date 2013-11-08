@@ -87,7 +87,7 @@ geoModule.planeFeature = function(lowerleft, upperright, z) {
 
   vglModule.actor.call(this);
 
-  z = typeof zIndex !== 'undefined' ? zIndex : 0.0;
+  z = typeof z !== 'undefined' ? z : 0.0;
 
   // Initialize
   var origin, pt2, pt1, actor;
@@ -103,6 +103,17 @@ geoModule.planeFeature = function(lowerleft, upperright, z) {
 
   this.setMapper(actor.mapper());
   this.setMaterial(actor.material());
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Gets the coordinates for this plane
+   *
+   * @returns {Array} [lat1, lon1, lat2, lon2]
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.getCoords = function() {
+    return [origin[1], origin[0], pt2[1], pt1[0]];
+  };
 
   return this;
 };

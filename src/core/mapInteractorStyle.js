@@ -30,7 +30,7 @@ geoModule.mapInteractorStyle = function() {
       m_rightMouseButtonDown = false,
       m_middileMouseButtonDown = false,
       m_drawRegionMode = false,
-      m_planeFeatureIndex = -1,
+      m_drawRegionLayer,
       m_clickLatLng,
       m_width,
       m_height,
@@ -55,16 +55,38 @@ geoModule.mapInteractorStyle = function() {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Sets or gets map for this interactor
+   * Sets or gets map for this interactor, adds draw region layer if needed
    *
    * @param {geoModule.map} newMap optional
    * @returns {geoModule.mapInteractorStyle|geoModule.map}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.map = function(newMap) {
+    var plane;
+
     if(typeof newMap !== 'undefined') {
       m_map = newMap;
-      return this;
+
+      m_drawRegionLayer = m_map.findLayerById('draw-region');
+      //create/add draw region layer if it doesn't exist yet
+      if(m_drawRegionLayer === null) {
+        plane = geoModule.planeFeature(
+          geoModule.latlng(0, 0),
+          geoModule.latlng(0, 0),
+          99
+        );
+
+        m_drawRegionLayer = geoModule.featureLayer({
+          "opacity": 0.5,
+          "showAttribution": 1
+        }, plane);
+        m_drawRegionLayer.setVisible(false);
+        m_drawRegionLayer.setName('draw-region');
+        m_map.addLayer(m_drawRegionLayer);
+        console.log('added feature layer');
+      }
+
+      return m_that;
     }
     return m_map;
   };
@@ -80,7 +102,9 @@ geoModule.mapInteractorStyle = function() {
   this.drawRegionMode = function(newValue) {
     if(typeof newValue !== 'undefined') {
       m_drawRegionMode = newValue;
-      return this;
+      m_drawRegionLayer.setVisible(newValue);
+      m_map.updateAndDraw();
+      return m_that;
     }
     return m_drawRegionMode;
   };
@@ -124,15 +148,10 @@ geoModule.mapInteractorStyle = function() {
     }
     if (m_leftMouseButtonDown) {
       if(m_drawRegionMode) {
-        //update plane feature
         mouseWorldPoint = m_renderWindow.displayToWorld(m_currentMousePos.x,
           m_currentMousePos.y);
-        features = m_map.mapLayer().features();
-        features[features.length-1] = geoModule.planeFeature(m_clickLatLng,
-          geoModule.latlng(mouseWorldPoint[0], mouseWorldPoint[1]));
-
-        //redraw map layer
-        m_map.draw();
+        m_that.setDrawRegion(m_clickLatLng.lat(), m_clickLatLng.lng(),
+          mouseWorldPoint[1], mouseWorldPoint[0]);
       } else {
         m_focusDisplayPoint = m_renderWindow.focusDisplayPoint();
         m_worldPt1 = m_renderWindow.displayToWorld(m_currentMousePos.x,
@@ -217,24 +236,11 @@ geoModule.mapInteractorStyle = function() {
     m_renderer = m_that.viewer().renderWindow().activeRenderer();
     m_camera = m_renderer.camera();
 
-    //if(m_drawRegionMode && m_leftMouseButtonDown) {
+    if(m_drawRegionMode && m_leftMouseButtonDown) {
       point = m_renderWindow.displayToWorld(m_mouseLastPos.x, m_mouseLastPos.y);
-      m_clickLatLng = geoModule.latlng(point[0], point[1]);
-      var tempForTesting = geoModule.latlng(point[0]+50, point[1]+50);
-
-      plane = geoModule.planeFeature(m_clickLatLng, tempForTesting, 99);
-
-      console.log(point);
-
-      //add placeholder feature
-      m_map.mapLayer().features().push(plane);
-
-      //force redraw
-      m_map.draw();
-
-      console.log(plane.bounds());
-
-    //}
+      m_clickLatLng = geoModule.latlng(point[1], point[0]);
+      m_that.setDrawRegion(point[1], point[0], point[1], point[0]);
+    }
 
     return false;
   };
@@ -311,7 +317,7 @@ geoModule.mapInteractorStyle = function() {
   this.lastMousePosition = function(newPosition) {
     if(typeof newPosition !== 'undefined') {
       m_mouseLastPos = newPosition;
-      return this;
+      return m_that;
     }
     return m_mouseLastPos;
   };
@@ -327,9 +333,44 @@ geoModule.mapInteractorStyle = function() {
   this.leftMouseDown = function(newValue) {
     if(typeof newValue !== 'undefined') {
       m_leftMouseButtonDown = newValue;
-      return this;
+      return m_that;
     }
     return m_leftMouseButtonDown;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Sets the draw region coordinates for this interactor
+   *
+   * @param {Number} lat1
+   * @param {Number} lon1
+   * @param {Number} lat2
+   * @param {Number} lon2
+   * @returns {geoModule.mapInteractorStyle}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.setDrawRegion = function(lat1, lon1, lat2, lon2) {
+    m_drawRegionLayer.setFeatures([
+      geoModule.planeFeature(
+        geoModule.latlng(lat1, lon1),
+        geoModule.latlng(lat2, lon2),
+        99
+      )
+    ]);
+
+    $(m_that).trigger(geoModule.command.updateDrawRegionEvent);
+    return m_that;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Gets the draw region coordinates for this interactor
+   *
+   * @returns {Array} [lat1, lon1, lat2, lon2]
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.getDrawRegion = function() {
+    return m_drawRegionLayer.features()[0].getCoords();
   };
 
   return this;
