@@ -67,7 +67,7 @@ geoModule.layerSource = function(id, name, path) {
       this.modified();
       return true;
     }
-    return false
+    return false;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -93,7 +93,7 @@ geoModule.layerSource = function(id, name, path) {
       return true;
     }
 
-    return false
+    return false;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -118,7 +118,7 @@ geoModule.layerSource = function(id, name, path) {
       this.modified();
       return true;
     }
-    return false
+    return false;
   };
 
   ////////////////////////////////////////////////////////////////////////////
