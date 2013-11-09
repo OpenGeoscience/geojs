@@ -143,10 +143,18 @@ uiModule.gis.createLayerList = function(map, rootId, heading, toggleFunct,
   });
 
 
+  // Hide popover on ESC
   $(document).keydown(function(event) {
-    if (event.which === KEYCODE_ESC) {
+    if (event.which === $.ui.keyCode.ESCAPE) {
       modifyButton.popover('hide');
     }
+  });
+
+  // Hide popover if the user clicks elsewhere
+  $(document).click(function(event) {
+      if(!$(event.target).is(modifyButton)) {
+        modifyButton.popover('hide');
+      }
   });
 
   // Add animation controls
