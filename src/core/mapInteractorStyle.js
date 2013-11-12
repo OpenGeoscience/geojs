@@ -62,30 +62,8 @@ geoModule.mapInteractorStyle = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.map = function(newMap) {
-    var plane;
-
     if(typeof newMap !== 'undefined') {
       m_map = newMap;
-
-      m_drawRegionLayer = m_map.findLayerById('draw-region');
-      //create/add draw region layer if it doesn't exist yet
-      if(m_drawRegionLayer === null) {
-        plane = geoModule.planeFeature(
-          geoModule.latlng(0, 0),
-          geoModule.latlng(0, 0),
-          99
-        );
-
-        m_drawRegionLayer = geoModule.featureLayer({
-          "opacity": 0.5,
-          "showAttribution": 1
-        }, plane);
-        m_drawRegionLayer.setVisible(false);
-        m_drawRegionLayer.setName('draw-region');
-        m_map.addLayer(m_drawRegionLayer);
-        console.log('added feature layer');
-      }
-
       return m_that;
     }
     return m_map;
@@ -350,15 +328,23 @@ geoModule.mapInteractorStyle = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.setDrawRegion = function(lat1, lon1, lat2, lon2) {
-    m_drawRegionLayer.setFeatures([
-      geoModule.planeFeature(
-        geoModule.latlng(lat1, lon1),
-        geoModule.latlng(lat2, lon2),
-        99
-      )
-    ]);
+    var plane = geoModule.planeFeature(
+      geoModule.latlng(lat1, lon1),
+      geoModule.latlng(lat2, lon2),
+      99
+    );
+
+    m_map.removeLayer(m_drawRegionLayer);
+
+    m_drawRegionLayer = geoModule.featureLayer({
+      "opacity": 0.5,
+      "showAttribution": 1
+    }, plane);
+
+    m_map.addLayer(m_drawRegionLayer);
 
     $(m_that).trigger(geoModule.command.updateDrawRegionEvent);
+
     return m_that;
   };
 
