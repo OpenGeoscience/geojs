@@ -80,7 +80,9 @@ geoModule.mapInteractorStyle = function() {
   this.drawRegionMode = function(newValue) {
     if(typeof newValue !== 'undefined') {
       m_drawRegionMode = newValue;
-      m_drawRegionLayer.setVisible(newValue);
+      if(m_drawRegionLayer) {
+        m_drawRegionLayer.setVisible(newValue);
+      }
       m_map.updateAndDraw();
       return m_that;
     }
@@ -126,10 +128,10 @@ geoModule.mapInteractorStyle = function() {
     }
     if (m_leftMouseButtonDown) {
       if(m_drawRegionMode) {
-        mouseWorldPoint = m_renderWindow.displayToWorld(m_currentMousePos.x,
+        mouseWorldPoint = m_map.displayToMap(m_currentMousePos.x,
           m_currentMousePos.y);
         m_that.setDrawRegion(m_clickLatLng.lat(), m_clickLatLng.lng(),
-          mouseWorldPoint[1], mouseWorldPoint[0]);
+          mouseWorldPoint.y, mouseWorldPoint.x);
       } else {
         m_focusDisplayPoint = m_renderWindow.focusDisplayPoint();
         m_worldPt1 = m_renderWindow.displayToWorld(m_currentMousePos.x,
@@ -215,9 +217,9 @@ geoModule.mapInteractorStyle = function() {
     m_camera = m_renderer.camera();
 
     if(m_drawRegionMode && m_leftMouseButtonDown) {
-      point = m_renderWindow.displayToWorld(m_mouseLastPos.x, m_mouseLastPos.y);
-      m_clickLatLng = geoModule.latlng(point[1], point[0]);
-      m_that.setDrawRegion(point[1], point[0], point[1], point[0]);
+      point = m_map.displayToMap(m_mouseLastPos.x, m_mouseLastPos.y);
+      m_clickLatLng = geoModule.latlng(point.y, point.x);
+      m_that.setDrawRegion(point.y, point.x, point.y, point.x);
     }
 
     return false;
@@ -247,9 +249,6 @@ geoModule.mapInteractorStyle = function() {
       if(m_mouseLastPos.x >= 0 && m_mouseLastPos.x <= width &&
         m_mouseLastPos.y >= 0 && m_mouseLastPos.y <= height) {
         num = m_picker.pick(m_mouseLastPos.x, m_mouseLastPos.y, renderer);
-      }
-      if(m_drawRegionMode) {
-        m_map.mapLayer().features().pop();
       }
     }
     if (event.button === 1) {
