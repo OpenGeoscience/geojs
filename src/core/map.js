@@ -958,6 +958,49 @@ geoModule.map = function(node, options) {
     }
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Sets or gets the viewer for this map
+   *
+   * @param newViewer {vglModule.viewer}
+   * @returns {geoModule.map|vglModule.viewer}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.viewer = function(newViewer) {
+    if(typeof newViewer !== 'undefined') {
+      m_viewer = newViewer;
+      return this;
+    }
+    return m_viewer;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Sets or gets mapLayer for this map
+   *
+   * @param {geoModule.layer} newMapLayer optional
+   * @returns {geoModule.map|geoModule.layer}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.mapLayer = function(newMapLayer) {
+    if(typeof newMapLayer !== 'undefined') {
+      m_mapLayer = newMapLayer;
+      return this;
+    }
+    return m_mapLayer;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Gets the interactorStyle for this map
+   *
+   * @returns {vglModule.interactorStyle]
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.getInteractorStyle = function() {
+    return m_interactorStyle;
+  };
+
   // Bind events to handlers
   $(document).on("mousedown", m_viewer.handleMouseDown);
   $(document).on("mouseup", m_viewer.handleMouseUp);
@@ -980,8 +1023,12 @@ geoModule.map = function(node, options) {
     geoModule.command.updateViewZoomEvent, this.updateAndDraw);
   $(m_interactorStyle).on(
     geoModule.command.updateViewPositionEvent, this.updateAndDraw);
+  $(m_interactorStyle).on(
+    geoModule.command.updateDrawRegionEvent, this.updateAndDraw);
+
   $(this).on(geoModule.command.updateEvent, this.updateAndDraw);
 
+  m_interactorStyle.map(this);
 
   return this;
 };

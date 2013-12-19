@@ -79,7 +79,7 @@ inherit(geoModule.feature, vglModule.actor);
  * @returns {geoModule.planeFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geoModule.planeFeature = function(lowerleft, upperright) {
+geoModule.planeFeature = function(lowerleft, upperright, z) {
   "use strict";
   if (!(this instanceof geoModule.planeFeature)) {
     return new geoModule.planeFeature(lowerleft, upperright);
@@ -87,11 +87,13 @@ geoModule.planeFeature = function(lowerleft, upperright) {
 
   vglModule.actor.call(this);
 
+  z = typeof z !== 'undefined' ? z : 0.0;
+
   // Initialize
   var origin, pt2, pt1, actor;
-  origin = [ lowerleft.lng(), lowerleft.lat(), 0.0 ];
-  pt2 = [ lowerleft.lng(), upperright.lat(), 0.0 ];
-  pt1 = [ upperright.lng(), lowerleft.lat(), 0.0 ];
+  origin = [ lowerleft.lng(), lowerleft.lat(), z ];
+  pt2 = [ lowerleft.lng(), upperright.lat(), z ];
+  pt1 = [ upperright.lng(), lowerleft.lat(), z ];
 
   actor = vglModule.utils.createPlane(origin[0], origin[1], origin[2],
                                         pt1[0], pt1[1], pt1[2], pt2[0], pt2[1],
@@ -101,6 +103,17 @@ geoModule.planeFeature = function(lowerleft, upperright) {
 
   this.setMapper(actor.mapper());
   this.setMaterial(actor.material());
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Gets the coordinates for this plane
+   *
+   * @returns {Array} [lat1, lon1, lat2, lon2]
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.getCoords = function() {
+    return [origin[1], origin[0], pt2[1], pt1[0]];
+  };
 
   return this;
 };
