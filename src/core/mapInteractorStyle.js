@@ -327,6 +327,8 @@ geoModule.mapInteractorStyle = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.setDrawRegion = function(lat1, lon1, lat2, lon2) {
+    // TODO
+    // Use z-indexing or some other technique for the offsetting
     var plane = geoModule.planeFeature(
       geoModule.latlng(lat1, lon1),
       geoModule.latlng(lat2, lon2),

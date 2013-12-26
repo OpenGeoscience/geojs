@@ -344,17 +344,17 @@ geoModule.featureLayer = function(options, feature) {
             break;
           }
         }
+      }
 
-        if (skipFeature) {
-          continue;
-        }
+      if (skipFeature) {
+        continue;
+      }
 
-        mat = m_features[i].material();
-        opacityUniform = mat.shaderProgram().uniform('opacity');
-        if (opacityUniform !== null) {
-          opacityUniform.set(opacity);
-          $(m_that).trigger(geoModule.command.updateLayerOpacityEvent);
-        }
+      mat = m_features[i].material();
+      opacityUniform = mat.shaderProgram().uniform('opacity');
+      if (opacityUniform !== null) {
+        opacityUniform.set(opacity);
+        $(m_that).trigger(geoModule.command.updateLayerOpacityEvent);
       }
     }
   };
@@ -504,6 +504,9 @@ geoModule.featureLayer = function(options, feature) {
     }
   };
 
+  // Update the opacity of the layer
+  this.setOpacity(this.opacity());
+  
   return this;
 };
 

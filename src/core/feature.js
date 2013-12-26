@@ -96,8 +96,8 @@ geoModule.planeFeature = function(lowerleft, upperright, z) {
   pt1 = [ upperright.lng(), lowerleft.lat(), z ];
 
   actor = vglModule.utils.createPlane(origin[0], origin[1], origin[2],
-                                        pt1[0], pt1[1], pt1[2], pt2[0], pt2[1],
-                                        pt2[2]);
+                                      pt1[0], pt1[1], pt1[2], pt2[0], pt2[1],
+                                      pt2[2]);
 
 
 
