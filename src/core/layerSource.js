@@ -1,13 +1,13 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @module ogs.geo
+ * @module geo
  */
 
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, indent: 2*/
 
-/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vglModule, document*/
+/*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
+/*global vgl, document*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -15,11 +15,11 @@
  * layerSource provides data to a layer
  */
 //////////////////////////////////////////////////////////////////////////////
-geoModule.layerSource = function(id, name, path) {
+geo.layerSource = function(id, name, path) {
   'use strict';
 
    /** @private */
-  var m_requestDataMTime = vglModule.timestamp(),
+  var m_requestDataMTime = vgl.timestamp(),
       m_id = id,
       m_name = name,
       m_path = path;
@@ -178,4 +178,4 @@ geoModule.layerSource = function(id, name, path) {
   };
 };
 
-inherit(geoModule.layerSource, vglModule.object);
+inherit(geo.layerSource, vgl.object);

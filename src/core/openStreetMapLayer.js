@@ -1,13 +1,13 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @module ogs.geo
+ * @module geo
  */
 
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, continue:true, indent: 2*/
 
-/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vglModule, vec4, document*/
+/*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
+/*global vgl, vec4, document*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -15,13 +15,14 @@
  * Create a new instance of openStreetMapLayer
  */
 //////////////////////////////////////////////////////////////////////////////
-geoModule.openStreetMapLayer = function() {
+geo.openStreetMapLayer = function() {
   "use strict";
-  if (!(this instanceof geoModule.openStreetMapLayer)) {
-    return new geoModule.openStreetMapLayer();
+  if (!(this instanceof geo.openStreetMapLayer)) {
+    return new geo.openStreetMapLayer();
   }
-  geoModule.featureLayer.call(this);
+  geo.featureLayer.call(this);
 
+  this.setGcs("EPSG:3857")
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Private member variables
@@ -38,8 +39,8 @@ geoModule.openStreetMapLayer = function() {
       m_newFeatures = this.newFeatures(),
       m_expiredFeatures = this.expiredFeatures(),
       m_previousZoom = null,
-      m_predrawTime = ogs.vgl.timestamp(),
-      m_updateTime = ogs.vgl.timestamp();
+      m_predrawTime = vgl.timestamp(),
+      m_updateTime = vgl.timestamp();
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -96,7 +97,7 @@ geoModule.openStreetMapLayer = function() {
         lly = -totalLatDegrees * 0.5 + y * latPerTile,
         urx = -180.0 + (x + 1) * lonPerTile,
         ury = -totalLatDegrees * 0.5 + (y + 1) * latPerTile,
-        actor = ogs.vgl.utils.createTexturePlane(llx, lly,
+        actor = vgl.utils.createTexturePlane(llx, lly,
           0.0, urx, lly, 0.0, llx, ury, 0.0),
         tile = new Image();
         //console.log("New tile: ["+llx+" , "+lly+"] ["+urx+" , "+ury+"]");
@@ -111,7 +112,7 @@ geoModule.openStreetMapLayer = function() {
     //   + "/" + (Math.pow(2,zoom) - 1 - y) + ".png";
     tile.src = "http://otile1.mqcdn.com/tiles/1.0.0/osm/" + zoom + "/" +
       (x) + "/" + (Math.pow(2,zoom) - 1 - y) + ".jpg";
-    tile.texture = new vglModule.texture();
+    tile.texture = new vgl.texture();
     tile.onload = function() {
       if (this.UNLOAD) {
         this.LOADING = false;
@@ -262,11 +263,11 @@ geoModule.openStreetMapLayer = function() {
     worldPt2[1] = Math.min(worldPt2[1],  180.0);
 
     // Compute tilex and tiley
-    tile1x = geoModule.mercator.long2tilex(worldPt1[0], zoom);
-    tile1y = geoModule.mercator.lat2tiley(worldPt1[1], zoom);
+    tile1x = geo.mercator.long2tilex(worldPt1[0], zoom);
+    tile1y = geo.mercator.lat2tiley(worldPt1[1], zoom);
 
-    tile2x = geoModule.mercator.long2tilex(worldPt2[0], zoom);
-    tile2y = geoModule.mercator.lat2tiley(worldPt2[1], zoom);
+    tile2x = geo.mercator.long2tilex(worldPt2[0], zoom);
+    tile2y = geo.mercator.lat2tiley(worldPt2[1], zoom);
 
     // Clamp tilex and tiley
     tile1x = Math.max(tile1x, 0);
@@ -358,13 +359,22 @@ geoModule.openStreetMapLayer = function() {
         "lat": location.y
       }
     },
-    revent = $.Event(geoModule.command.queryResultEvent);
+    revent = $.Event(geo.command.queryResultEvent);
 
     revent.srcEvent = location.event;
     $(this).trigger(revent, result);
   };
 
-  this.setBinNumber(ogs.vgl.material.RenderBin.Base);
+
+  this.worldToGcs = function(x, y) {
+    if (this.referenceLayer()) {
+      return [x * geo.mercator.r_major, y * geo.mercator.r_minor(true)];
+    }
+    
+    throw "This layer is not a reference layer so cannot do the conversion";
+  };
+
+  this.setBinNumber(vgl.material.RenderBin.Base);
 };
 
-inherit(geoModule.openStreetMapLayer, geoModule.featureLayer);
+inherit(geo.openStreetMapLayer, geo.featureLayer);

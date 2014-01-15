@@ -6,8 +6,8 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, indent: 2*/
 
-/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vglModule, proj4, document, wflModule*/
+/*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
+/*global vgl, proj4, document, wflModule*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////

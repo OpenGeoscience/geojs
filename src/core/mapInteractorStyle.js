@@ -1,29 +1,29 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @module ogs.geo
+ * @module geo
  */
 
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, indent: 2*/
 
-/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vglModule, vec4, document*/
+/*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
+/*global vgl, vec4, document*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of mapInteractorStyle
  *
- * @class geoModule.mapInteractorStyle
- * @returns {geoModule.mapInteractorStyle}
+ * @class geo.mapInteractorStyle
+ * @returns {geo.mapInteractorStyle}
  */
 //////////////////////////////////////////////////////////////////////////////
-geoModule.mapInteractorStyle = function() {
+geo.mapInteractorStyle = function() {
   "use strict";
-  if (!(this instanceof geoModule.mapInteractorStyle)) {
-    return new geoModule.mapInteractorStyle();
+  if (!(this instanceof geo.mapInteractorStyle)) {
+    return new geo.mapInteractorStyle();
   }
-  ogs.vgl.interactorStyle.call(this);
+  vgl.interactorStyle.call(this);
   var m_that = this,
       m_map,
       m_leftMouseButtonDown = false,
@@ -51,14 +51,14 @@ geoModule.mapInteractorStyle = function() {
         x: 0,
         y: 0
       },
-      m_picker = new ogs.vgl.picker();
+      m_picker = new vgl.picker();
 
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Sets or gets map for this interactor, adds draw region layer if needed
    *
-   * @param {geoModule.map} newMap optional
-   * @returns {geoModule.mapInteractorStyle|geoModule.map}
+   * @param {geo.map} newMap optional
+   * @returns {geo.mapInteractorStyle|geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.map = function(newMap) {
@@ -74,7 +74,7 @@ geoModule.mapInteractorStyle = function() {
    * Sets or gets drawRegionMode for this interactor
    *
    * @param {Boolean} newValue optional
-   * @returns {geoModule.mapInteractorStyle|Boolean}
+   * @returns {geo.mapInteractorStyle|Boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.drawRegionMode = function(newValue) {
@@ -144,8 +144,8 @@ geoModule.mapInteractorStyle = function() {
         m_dz = m_worldPt1[2] - m_worldPt2[2];
 
         m_camera.pan(-m_dx, -m_dy, -m_dz);
-        $(m_that).trigger(geoModule.command.updateViewPositionEvent);
-        $(m_that).trigger(vglModule.command.leftButtonPressEvent);
+        $(m_that).trigger(geo.command.updateViewPositionEvent);
+        $(m_that).trigger(vgl.command.leftButtonPressEvent, [-m_dx, -m_dy]);
       }
     }
     if (m_middileMouseButtonDown) {
@@ -158,7 +158,7 @@ geoModule.mapInteractorStyle = function() {
       } else if (xrot < 0 && angle > 0) {
         m_camera.rotate(0, xrot);
       }
-      $(m_that).trigger(vglModule.command.middleButtonPressEvent);
+      $(m_that).trigger(vgl.command.middleButtonPressEvent);
     }
     if (m_rightMouseButtonDown) {
       m_zTrans = (m_currentMousePos.y - m_mouseLastPos.y) / m_height;
@@ -170,8 +170,8 @@ geoModule.mapInteractorStyle = function() {
         m_camera.zoom(1 + Math.abs(m_zTrans));
       }
 
-      $(m_that).trigger(geoModule.command.updateViewZoomEvent);
-      $(m_that).trigger(vglModule.command.rightButtonPressEvent);
+      $(m_that).trigger(geo.command.updateViewZoomEvent);
+      $(m_that).trigger(vgl.command.rightButtonPressEvent);
     }
     m_mouseLastPos.x = m_currentMousePos.x;
     m_mouseLastPos.y = m_currentMousePos.y;
@@ -218,7 +218,7 @@ geoModule.mapInteractorStyle = function() {
 
     if(m_drawRegionMode && m_leftMouseButtonDown) {
       point = m_map.displayToMap(m_mouseLastPos.x, m_mouseLastPos.y);
-      m_clickLatLng = geoModule.latlng(point.y, point.x);
+      m_clickLatLng = geo.latlng(point.y, point.x);
       m_that.setDrawRegion(point.y, point.x, point.y, point.x);
     }
 
@@ -288,7 +288,7 @@ geoModule.mapInteractorStyle = function() {
    * @param newPosition optional
    * @param {Number} newPosition.x
    * @param {Number} newPosition.y
-   * @returns {geoModule.mapInteractorStyle|Object}
+   * @returns {geo.mapInteractorStyle|Object}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.lastMousePosition = function(newPosition) {
@@ -304,7 +304,7 @@ geoModule.mapInteractorStyle = function() {
    * Sets or gets leftMouseDown for this interactor
    *
    * @param {Boolean} newValue optional
-   * @returns {geoModule.mapInteractorStyle|Boolean}
+   * @returns {geo.mapInteractorStyle|Boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.leftMouseDown = function(newValue) {
@@ -323,29 +323,46 @@ geoModule.mapInteractorStyle = function() {
    * @param {Number} lon1
    * @param {Number} lat2
    * @param {Number} lon2
-   * @returns {geoModule.mapInteractorStyle}
+   * @returns {geo.mapInteractorStyle}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.setDrawRegion = function(lat1, lon1, lat2, lon2) {
-    var plane = geoModule.planeFeature(
-      geoModule.latlng(lat1, lon1),
-      geoModule.latlng(lat2, lon2),
+    // TODO
+    // Use z-indexing or some other technique for the offsetting
+    var plane = geo.planeFeature(
+      geo.latlng(lat1, lon1),
+      geo.latlng(lat2, lon2),
       99
     );
 
     m_map.removeLayer(m_drawRegionLayer);
 
-    m_drawRegionLayer = geoModule.featureLayer({
+    m_drawRegionLayer = geo.featureLayer({
       "opacity": 0.5,
       "showAttribution": 1
     }, plane);
 
     m_map.addLayer(m_drawRegionLayer);
 
-    $(m_that).trigger(geoModule.command.updateDrawRegionEvent);
+    $(m_that).trigger(geo.command.updateDrawRegionEvent);
 
     return m_that;
   };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Clear draw region for this interactor
+   *
+   * @returns {geo.mapInteractorStyle}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.clearDrawRegion = function()  {
+
+    if (m_drawRegionLayer)
+      m_map.removeLayer(m_drawRegionLayer);
+
+    m_drawRegionLayer = null;
+  }
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -361,7 +378,7 @@ geoModule.mapInteractorStyle = function() {
   return this;
 };
 
-inherit(geoModule.mapInteractorStyle, vglModule.interactorStyle);
+inherit(geo.mapInteractorStyle, vgl.interactorStyle);
 
 /* Local Variables:   */
 /* mode: js           */

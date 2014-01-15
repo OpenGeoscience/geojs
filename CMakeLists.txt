@@ -8,6 +8,16 @@ set(GEOJS_DATA_DIR "" CACHE PATH  "Path to directory containing data for testing
 set(GEOJS_BASELINE_DIR "" CACHE PATH "Path to directory containing baseline images for testing.")
 set(BUILD_TESTING OFF CACHE BOOL "Enable testing")
 
+# Uglify and concatenate the library js files.
+if(NOT ${MINIFY})
+    set(MINIFY_FLAG "-b")
+endif()
+
+if(${MINIFY} AND ${MANGLE})
+    set(MANGLE_FLAG "-m")
+endif()
+
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 # Find JSLint.
@@ -27,6 +37,8 @@ set(_source_files
   core/featureCollection.js
   core/layerSource.js
   core/archiveLayerSource.js
+  core/floodLayerSource.js
+  core/floodLayer.js
   core/command.js
   core/updateRequest.js
   core/prepareForRenderRequest.js
@@ -120,6 +132,10 @@ else()
   )
 endif()
 
+# Build project
+add_custom_target(${PROJECT_NAME} ALL DEPENDS ${_min_js_file})
+add_dependencies(${PROJECT_NAME} geojs_pre_deploy)
+
 # Testing
 if (BUILD_TESTING)
   include(CTest)
@@ -138,10 +154,18 @@ if (BUILD_TESTING)
   else()
     message(FATAL_ERROR "GeoJS testing requires valid baseline directory")
   endif()
-endif()
 
-add_custom_target(${PROJECT_NAME} ALL DEPENDS ${_min_js_file})
-add_dependencies(${PROJECT_NAME} geojs_pre_deploy)
+  add_custom_command(
+    OUTPUT "${GEOJS_DEPLOY_DIR}/testing"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/testing
+            "${GEOJS_DEPLOY_DIR}/testing"
+  )
+  add_custom_target(geojs_testing ALL DEPENDS "${GEOJS_DEPLOY_DIR}/testing")
+  add_dependencies(${PROJECT_NAME} geojs_testing)
+
+  # GUI testing (requires python)
+  find_package(PythonInterp REQUIRED)
+endif()
 
 add_subdirectory(vgl)
 add_dependencies(vgl geojs_pre_deploy)

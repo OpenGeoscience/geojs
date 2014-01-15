@@ -6,8 +6,8 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, indent: 2*/
 
-/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vglModule, proj4, document, wflModule, climatePipesStyle*/
+/*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
+/*global vgl, proj4, document, wflModule, climatePipesStyle*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -43,7 +43,7 @@ wflModule.port = function(options, data) {
   if (!(this instanceof wflModule.port)) {
     return new wflModule.port(options, data);
   }
-  vglModule.object.call(this);
+  vgl.object.call(this);
 
   options = typeof options !== 'undefined' ? options : {};
   options = wflModule.utils.merge_options(wflModule.portOptions(), options);
@@ -147,4 +147,4 @@ wflModule.port = function(options, data) {
   return this;
 };
 
-inherit(wflModule.port, vglModule.object);
+inherit(wflModule.port, vgl.object);

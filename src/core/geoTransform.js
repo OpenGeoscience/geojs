@@ -1,13 +1,13 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @module ogs.geo
+ * @module geo
  */
 
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, indent: 2*/
 
-/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vglModule, proj4, document*/
+/*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
+/*global vgl, proj4, document*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -16,18 +16,22 @@
  * projection.
  */
 //////////////////////////////////////////////////////////////////////////////
-geoModule.geoTransform = {};
+geo.geoTransform = {};
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Custorm transform for a feature used for OpenStreetMap
+ * Custom transform for a feature used for OpenStreetMap
  */
 //////////////////////////////////////////////////////////////////////////////
-geoModule.geoTransform.osmTransformFeature = function(srcGcs, destGcs, feature) {
+geo.geoTransform.osmTransformFeature = function(destGcs, feature) {
   'use strict';
 
   if (!feature) {
     console.log('[warning] Invalid (null) feature');
+    return;
+  }
+
+  if (feature.gcs() === destGcs) {
     return;
   }
 
@@ -49,10 +53,11 @@ geoModule.geoTransform.osmTransformFeature = function(srcGcs, destGcs, feature) 
       inPos = [],
       projPoint = null,
       vertexPos = null,
+      srcGcs = feature.gcs(),
       source = new proj4.Proj(srcGcs),
       dest = new proj4.Proj(destGcs);
 
-  if (feature.mapper() instanceof ogs.vgl.groupMapper) {
+  if (feature.mapper() instanceof vgl.groupMapper) {
     geometryDataArray = feature.mapper().geometryDataArray();
   } else {
     geometryDataArray.push(feature.mapper().geometryData());
@@ -63,16 +68,16 @@ geoModule.geoTransform.osmTransformFeature = function(srcGcs, destGcs, feature) 
   for (index = 0; index < noOfGeoms; ++index) {
     geometryData = geometryDataArray[index];
     posSourceData = geometryData.sourceData(
-      vglModule.vertexAttributeKeys.Position);
+      vgl.vertexAttributeKeys.Position);
     data = posSourceData.data();
     noOfComponents = posSourceData.attributeNumberOfComponents(
-      vglModule.vertexAttributeKeys.Position);
+      vgl.vertexAttributeKeys.Position);
     stride = posSourceData.attributeStride(
-      vglModule.vertexAttributeKeys.Position);
+      vgl.vertexAttributeKeys.Position);
     offset = posSourceData.attributeOffset(
-      vglModule.vertexAttributeKeys.Position);
+      vgl.vertexAttributeKeys.Position);
     sizeOfDataType = posSourceData.sizeOfAttributeDataType(
-      vglModule.vertexAttributeKeys.Position);
+      vgl.vertexAttributeKeys.Position);
     count = data.length / noOfComponents;
 
     source = new proj4.Proj(srcGcs);
@@ -101,21 +106,28 @@ geoModule.geoTransform.osmTransformFeature = function(srcGcs, destGcs, feature) 
         if (lat < -85.0511) {
             lat = -85.0511;
         }
-      data[vertexPos + 1] = geoModule.mercator.lat2y(lat);
+      data[vertexPos + 1] = geo.mercator.lat2y(lat);
     }
   }
+
+  // Update the features gcs field
+  feature.setGcs(destGcs);
 };
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Transform a feature in source GCS to destination GCS
+ * Transform a feature to destination GCS
  */
 //////////////////////////////////////////////////////////////////////////////
-geoModule.geoTransform.transformFeature = function(srcGcs, destGcs, feature) {
+geo.geoTransform.transformFeature = function(destGcs, feature) {
   'use strict';
 
   if (!feature) {
     console.log('[warning] Invalid (null) feature');
+    return;
+  }
+
+  if (feature.gcs() === destGcs) {
     return;
   }
 
@@ -137,10 +149,11 @@ geoModule.geoTransform.transformFeature = function(srcGcs, destGcs, feature) {
       inPos = [],
       projPoint = null,
       vertexPos = null,
+      srcGcs = feature.gcs(),
       source = new proj4.Proj(srcGcs),
       dest = new proj4.Proj(destGcs);
 
-  if (feature.mapper() instanceof ogs.vgl.groupMapper) {
+  if (feature.mapper() instanceof vgl.groupMapper) {
     geometryDataArray = feature.mapper().geometryDataArray();
   } else {
     geometryDataArray.push(feature.mapper().geometryData());
@@ -151,16 +164,16 @@ geoModule.geoTransform.transformFeature = function(srcGcs, destGcs, feature) {
   for (index = 0; index < noOfGeoms; ++index) {
     geometryData = geometryDataArray[index];
     posSourceData = geometryData.sourceData(
-      vglModule.vertexAttributeKeys.Position);
+      vgl.vertexAttributeKeys.Position);
     data = posSourceData.data();
     noOfComponents = posSourceData.attributeNumberOfComponents(
-      vglModule.vertexAttributeKeys.Position);
+      vgl.vertexAttributeKeys.Position);
     stride = posSourceData.attributeStride(
-      vglModule.vertexAttributeKeys.Position);
+      vgl.vertexAttributeKeys.Position);
     offset = posSourceData.attributeOffset(
-      vglModule.vertexAttributeKeys.Position);
+      vgl.vertexAttributeKeys.Position);
     sizeOfDataType = posSourceData.sizeOfAttributeDataType(
-      vglModule.vertexAttributeKeys.Position);
+      vgl.vertexAttributeKeys.Position);
     count = data.length;
 
     source = new proj4.Proj(srcGcs);
@@ -204,6 +217,9 @@ geoModule.geoTransform.transformFeature = function(srcGcs, destGcs, feature) {
       }
     }
   }
+
+  // Update the features gcs field
+  feature.setGcs(destGcs);
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -212,7 +228,7 @@ geoModule.geoTransform.transformFeature = function(srcGcs, destGcs, feature) {
  * projection.
  */
 //////////////////////////////////////////////////////////////////////////////
-geoModule.geoTransform.transformLayer = function(destGcs, layer) {
+geo.geoTransform.transformLayer = function(destGcs, layer) {
   'use strict';
 
   if (!layer) {
@@ -225,7 +241,7 @@ geoModule.geoTransform.transformLayer = function(destGcs, layer) {
       i = 0;
   for (i = 0; i < count; ++i) {
     // TODO Ignoring src and destination projections
-    geoModule.geoTransform.osmTransformFeature(
-      destGcs, layer.gcs(), features[i]);
+    geo.geoTransform.osmTransformFeature(
+      destGcs, features[i]);
   }
 };

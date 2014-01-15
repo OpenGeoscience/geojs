@@ -1,13 +1,13 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @module ogs.geo
+ * @module geo
  */
 
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, indent: 2*/
 
-/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vglModule, document*/
+/*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
+/*global vgl, document*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -15,15 +15,15 @@
  * Create a new instance of class featureCollection
  *
  * @class
- * @returns {geoModule.featureCollection}
+ * @returns {geo.featureCollection}
  */
 //////////////////////////////////////////////////////////////////////////////
-geoModule.featureCollection = function() {
+geo.featureCollection = function() {
   "use strict";
-  if (!(this instanceof geoModule.featureCollection)) {
-    return new geoModule.featureCollection();
+  if (!(this instanceof geo.featureCollection)) {
+    return new geo.featureCollection();
   }
-  ogs.vgl.object.call(this);
+  vgl.object.call(this);
 
   var m_newFeaturesMap = {},
       m_expiredFeaturesMap = {};
@@ -119,4 +119,4 @@ geoModule.featureCollection = function() {
   };
 };
 
-inherit(geoModule.featureCollection, ogs.vgl.object);
+inherit(geo.featureCollection, vgl.object);

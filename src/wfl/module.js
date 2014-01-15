@@ -6,8 +6,8 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, indent: 2*/
 
-/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vglModule, jQuery, document, wflModule*/
+/*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
+/*global vgl, jQuery, document, wflModule*/
 //////////////////////////////////////////////////////////////////////////////
 
 var nextFunctionId = wflModule.utils.createIdCounter();
@@ -27,7 +27,7 @@ wflModule.module = function(options, data) {
   if (!(this instanceof wflModule.module)) {
     return new wflModule.module(options, data);
   }
-  vglModule.object.call(this);
+  vgl.object.call(this);
 
   /** @private */
   var m_that = this,
@@ -425,4 +425,4 @@ wflModule.module = function(options, data) {
   return this;
 };
 
-inherit(wflModule.module, vglModule.object);
+inherit(wflModule.module, vgl.object);

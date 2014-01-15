@@ -1,12 +1,12 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @module ogs.geojs
+ * @module geojs
  */
 
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, continue:true, indent: 2*/
 
-/*global vglModule, ogs, vec4, inherit, $*/
+/*global vgl, ogs, vec4, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
 if(typeof ogs === 'undefined') {
@@ -40,8 +40,8 @@ ogs.namespace = function(ns_string) {
   return parent;
 };
 
-/** ogs.vgl namespace */
-var geoModule = ogs.namespace("geo");
+/** vgl namespace */
+var geo = ogs.namespace("geo");
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -81,3 +81,21 @@ Object.size = function(obj) {
   }
   return size;
 };
+
+function createSuper(that) {
+  var parent = {}
+
+  for (m in that) {
+    if (that.hasOwnProperty(m))
+      parent[m] = that[m];
+  }
+
+  return parent;
+}
+
+function callSuper(parent, that) {
+
+   parent.apply(that, Array.prototype.slice.call(arguments, 2));
+
+  return createSuper(that);
+}

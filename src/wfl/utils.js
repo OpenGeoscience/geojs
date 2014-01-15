@@ -6,8 +6,8 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, indent: 2*/
 
-/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image, wflModule*/
-/*global vglModule, proj4, document, climatePipesStyle, window, reg*/
+/*global geo, ogs, inherit, $, HTMLCanvasElement, Image, wflModule*/
+/*global vgl, proj4, document, climatePipesStyle, window, reg*/
 //////////////////////////////////////////////////////////////////////////////
 
 "use strict";

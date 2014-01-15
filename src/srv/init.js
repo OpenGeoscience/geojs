@@ -6,7 +6,7 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, indent: 2*/
 
-/*global geoModule, ogs*/
+/*global geo, ogs*/
 //////////////////////////////////////////////////////////////////////////////
 
 var srvModule = ogs.namespace("srv");

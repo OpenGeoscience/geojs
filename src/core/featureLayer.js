@@ -1,13 +1,13 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @module ogs.geo
+ * @module geo
  */
 
 /*jslint devel: true, forin: true, newcap: true, plusplus: true, */
 /*jslint white: true, indent: 2, continue:true*/
 
-/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vglModule, document, gl, vec3*/
+/*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
+/*global vgl, document, gl, vec3*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -18,15 +18,15 @@
  * @dec Layer to draw points, lines, and polygons on the map The polydata layer
  *      provide mechanisms to create and draw geometrical shapes such as points,
  *      lines, and polygons.
- * @returns {geoModule.featureLayer}
+ * @returns {geo.featureLayer}
  */
 //////////////////////////////////////////////////////////////////////////////
-geoModule.featureLayer = function(options, feature) {
+geo.featureLayer = function(options, feature) {
   "use strict";
-  if (!(this instanceof geoModule.featureLayer)) {
-    return new geoModule.featureLayer(options, feature);
+  if (!(this instanceof geo.featureLayer)) {
+    return new geo.featureLayer(options, feature);
   }
-  geoModule.layer.call(this, options);
+  geo.layer.call(this, options);
 
   /** @private */
   var m_that = this,
@@ -34,11 +34,14 @@ geoModule.featureLayer = function(options, feature) {
       m_features = [],
       m_newFeatures = [],
       m_expiredFeatures = [],
-      m_predrawTime = ogs.vgl.timestamp(),
-      m_updateTime = ogs.vgl.timestamp(),
+      m_predrawTime = vgl.timestamp(),
+      m_updateTime = vgl.timestamp(),
       m_legend = null,
+      m_usePointSprites = false,
+      m_pointSpritesImage = null,
       m_invalidData = true,
-      m_visible = true;
+      m_visible = true,
+      m_request;
 
   if (feature) {
     m_newFeatures.push(feature);
@@ -56,6 +59,48 @@ geoModule.featureLayer = function(options, feature) {
   ////////////////////////////////////////////////////////////////////////////
   this.time = function() {
      return m_time;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return if using point sprites for rendering points
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.isUsingPointSprites = function() {
+    return m_usePointSprites;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set use point sprites for geometries that only has points
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.setUsePointSprites = function(val) {
+    if (val !== m_usePointSprites) {
+      m_usePointSprites = val;
+      this.modified();
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return image for the point sprites
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.pointSpritesImage = function() {
+    return m_pointSpritesImage;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set use point sprites for geometries that only has points
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.setPointSpritesImage = function(psimage) {
+    if (psimage !== m_pointSpritesImage) {
+      m_pointSpritesImage = psimage;
+      this.modified();
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -125,6 +170,25 @@ geoModule.featureLayer = function(options, feature) {
     return true;
   };
 
+  this.createOrUpdateLookupTable = function() {
+    /// Assuming that first variable is the scalar
+    var varnames = this.dataSource().variableNames(), lut = null;
+
+    if (varnames.length > 0) {
+      lut = this.lookupTable(varnames[0]);
+
+      // Create new lookup table if none exist
+      if (!lut) {
+        lut = vgl.lookupTable(varnames[0]);
+        this.setLookupTable(lut);
+      }
+      lut.setRange(this.dataSource().getScalarRange(varnames[0]));
+      m_legend = vgl.utils.createColorLegend(
+        varnames[0], lut, this.legendOrigin(), this.legendWidth(),
+        this.legendHeight(), 10, 0);
+    }
+  };
+
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Create legend for this layer
@@ -140,22 +204,8 @@ geoModule.featureLayer = function(options, feature) {
       return false;
     }
 
-    // Assuming that first variable is the scalar
-    var varnames = this.dataSource().variableNames(), lut;
-
-    if (varnames.length > 0) {
-      lut = this.lookupTable(varnames[0]);
-
-      // Create new lookup table if none exist
-      if (!lut) {
-        lut = vglModule.lookupTable(varnames[0]);
-        this.setLookupTable(lut);
-      }
-      lut.setRange(this.dataSource().getScalarRange(varnames[0]));
-      m_legend = vglModule.utils.createColorLegend(
-        varnames[0], lut, this.legendOrigin(), this.legendWidth(),
-        this.legendHeight(), 10, 0);
-    }
+    /// Assuming that first variable is the scalar
+    this.createOrUpdateLookupTable();
 
     return true;
   };
@@ -201,15 +251,21 @@ geoModule.featureLayer = function(options, feature) {
       this.deleteLegend();
     }
 
-    if (m_invalidData) {
-      return;
-    }
+//    if (m_invalidData) {
+//      return;
+//    }
 
     if (deletePrevious || !m_legend) {
       this.createLegend();
     }
 
     if (m_legend && m_legend.length > 0) {
+
+      // Set the visibility based on the layer
+      $.each(m_legend, function(i, feature) {
+        feature.setVisible(m_that.visible());
+      });
+
       m_newFeatures = m_newFeatures.concat(m_legend);
       m_features = m_features.concat(m_legend);
     }
@@ -225,6 +281,71 @@ geoModule.featureLayer = function(options, feature) {
       this.dataSource().destroy();
     }
   };
+
+  this.addData = function(data, append) {
+    append = typeof append !== 'undefined' ? append : false;
+
+    var i = 0,
+        geomFeature = null,
+        noOfPrimitives = 0;
+
+    if ((data && data.length < 1) || !data) {
+      this.deleteLegend();
+      return;
+    }
+
+
+
+    // Clear our existing features
+    if (!append) {
+      if (m_expiredFeatures.length > 0) {
+        m_expiredFeatures = m_expiredFeatures.concat(m_features);
+      } else {
+        m_expiredFeatures = m_features.slice(0);
+      }
+    }
+
+    m_newFeatures.length = 0;
+
+    /// Create of update lookup table if any
+    this.createOrUpdateLookupTable();
+
+    for(i = 0; i < data.length; ++i) {
+      switch(data[i].type()) {
+        case vgl.data.geometry:
+            geomFeature = geo.geometryFeature(data[i]);
+            geo.geoTransform.osmTransformFeature(this.container().options().gcs, geomFeature);
+            geomFeature.setVisible(this.visible());
+            geomFeature.material().setBinNumber(this.binNumber());
+          // Check if geometry has points only
+          // TODO this code could be moved to vgl
+          noOfPrimitives = data[i].numberOfPrimitives();
+          if (m_usePointSprites && noOfPrimitives === 1 &&
+            data[i].primitive(0).primitiveType() === gl.POINTS) {
+             geomFeature.setMaterial(vgl.utils.createPointSpritesMaterial(
+              m_pointSpritesImage, this.lookupTable()));
+          } else {
+          }
+          m_newFeatures.push(geomFeature);
+          break;
+        case vgl.data.raster:
+          break;
+        default:
+          console.log('[warning] Data type not handled', data.type());
+      }
+    }
+
+    if (append)
+      m_features = m_features.concat(m_newFeatures.slice(0));
+    else
+      m_features = m_newFeatures.slice(0);
+
+    if (data.length > 0) {
+      m_updateTime.modified();
+      this.setOpacity(this.opacity());
+    }
+  };
+
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -242,12 +363,11 @@ geoModule.featureLayer = function(options, feature) {
       return;
     }
 
-    var i = 0,
-        time = request.time(),
-        data = null,
-        varnames = null,
-        geomFeature = null,
-        lut = this.lookupTable();
+    // Cache the request so we can use it in add data
+    m_request = request;
+
+    var time = request.time(),
+        data = null;
 
     m_invalidData = true;
     if (!time) {
@@ -260,45 +380,9 @@ geoModule.featureLayer = function(options, feature) {
     }
 
     data = this.dataSource().getData(time);
-    if ((data && data.length < 1) || !data) {
-      this.deleteLegend();
-      return;
-    }
-    m_invalidData = false;
-
-    // Clear our existing features
-    if (m_expiredFeatures.length > 0) {
-      m_expiredFeatures = m_expiredFeatures.concat(m_newFeatures);
-    } else {
-      m_expiredFeatures = m_newFeatures.slice(0);
-    }
-
-    m_newFeatures.length = 0;
-
-    // Create legend if not created earlier
-    this.updateLegend(false);
-
-    for(i = 0; i < data.length; ++i) {
-      switch(data[i].type()) {
-        case vglModule.data.geometry:
-          geomFeature = geoModule.geometryFeature(data[i]);
-          geomFeature.material().setBinNumber(this.binNumber());
-          geomFeature.setLookupTable(lut);
-          m_newFeatures.push(geomFeature);
-          break;
-        case vglModule.data.raster:
-          break;
-        default:
-          console.log('[warning] Data type not handled', data.type());
-      }
-    }
-
-    m_features = m_newFeatures.slice(0);
-
-    if (data.length > 0) {
-      m_updateTime. modified();
-      this.setOpacity(this.opacity());
-    }
+    this.addData(data);
+    if (data != null)
+      m_invalidData = false;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -344,17 +428,17 @@ geoModule.featureLayer = function(options, feature) {
             break;
           }
         }
+      }
 
-        if (skipFeature) {
-          continue;
-        }
+      if (skipFeature) {
+        continue;
+      }
 
-        mat = m_features[i].material();
-        opacityUniform = mat.shaderProgram().uniform('opacity');
-        if (opacityUniform !== null) {
-          opacityUniform.set(opacity);
-          $(m_that).trigger(geoModule.command.updateLayerOpacityEvent);
-        }
+      mat = m_features[i].material();
+      opacityUniform = mat.shaderProgram().uniform('opacity');
+      if (opacityUniform !== null) {
+        opacityUniform.set(opacity);
+        $(m_that).trigger(geo.command.updateLayerOpacityEvent);
       }
     }
   };
@@ -409,7 +493,7 @@ geoModule.featureLayer = function(options, feature) {
    */
     ////////////////////////////////////////////////////////////////////////////
   this.queryLocation = function (location) {
-    var attrScalar = vglModule.vertexAttributeKeys.Scalar,
+    var attrScalar = vgl.vertexAttributeKeys.Scalar,
       features = this.features(),
       mapper, geomData, p, prim, idx, indices, ia, ib, ic, va, vb, vc,
       point, isLeftTurn, triArea, totalArea, alpha, beta, gamma, sa,
@@ -488,7 +572,7 @@ geoModule.featureLayer = function(options, feature) {
                   "value": alpha * sa + beta * sb + gamma * sc
                 }
               };
-              revent = $.Event(geoModule.command.queryResultEvent);
+              revent = $.Event(geo.command.queryResultEvent);
               revent.location = location;
               revent.srcEvent = location.event;
               $(this).trigger(revent, result);
@@ -504,7 +588,10 @@ geoModule.featureLayer = function(options, feature) {
     }
   };
 
+  // Update the opacity of the layer
+  this.setOpacity(this.opacity());
+
   return this;
 };
 
-inherit(geoModule.featureLayer, geoModule.layer);
+inherit(geo.featureLayer, geo.layer);
