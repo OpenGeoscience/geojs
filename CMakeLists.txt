@@ -8,6 +8,16 @@ set(GEOJS_DATA_DIR "" CACHE PATH  "Path to directory containing data for testing
 set(GEOJS_BASELINE_DIR "" CACHE PATH "Path to directory containing baseline images for testing.")
 set(BUILD_TESTING OFF CACHE BOOL "Enable testing")
 
+# Uglify and concatenate the library js files.
+if(NOT ${MINIFY})
+    set(MINIFY_FLAG "-b")
+endif()
+
+if(${MINIFY} AND ${MANGLE})
+    set(MANGLE_FLAG "-m")
+endif()
+
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 # Find JSLint.
