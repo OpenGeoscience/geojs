@@ -210,6 +210,12 @@ geoModule.featureLayer = function(options, feature) {
     }
 
     if (m_legend && m_legend.length > 0) {
+
+      // Set the visibility based on the layer
+      $.each(m_legend, function(i, feature) {
+        feature.setVisible(m_that.visible());
+      });
+
       m_newFeatures = m_newFeatures.concat(m_legend);
       m_features = m_features.concat(m_legend);
     }
