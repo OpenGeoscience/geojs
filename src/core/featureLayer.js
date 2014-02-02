@@ -210,6 +210,12 @@ geoModule.featureLayer = function(options, feature) {
     }
 
     if (m_legend && m_legend.length > 0) {
+
+      // Set the visibility based on the layer
+      $.each(m_legend, function(i, feature) {
+        feature.setVisible(m_that.visible());
+      });
+
       m_newFeatures = m_newFeatures.concat(m_legend);
       m_features = m_features.concat(m_legend);
     }
@@ -282,6 +288,7 @@ geoModule.featureLayer = function(options, feature) {
       switch(data[i].type()) {
         case vglModule.data.geometry:
           geomFeature = geoModule.geometryFeature(data[i]);
+          geomFeature.setVisible(this.visible());
           geomFeature.material().setBinNumber(this.binNumber());
           geomFeature.setLookupTable(lut);
           m_newFeatures.push(geomFeature);
