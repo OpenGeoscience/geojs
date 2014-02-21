@@ -82,11 +82,6 @@ geoModule.map = function(node, options) {
     m_options.zoom = 10;
   }
 
-  if (!options.source) {
-    console.log("[error] Map requires valid source for the context");
-    return null;
-  }
-
   // Initialize
   m_interactorStyle = geoModule.mapInteractorStyle();
   m_viewer = vglModule.viewer(m_node);
