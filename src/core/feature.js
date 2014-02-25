@@ -255,11 +255,12 @@ geoModule.compositeGeometryFeature = function(geoms, color) {
   if (!(this instanceof geoModule.compositeGeometryFeature)) {
     return new geoModule.compositeGeometryFeature(geoms, color);
   }
-  vglModule.actor.call(this);
+  geoModule.feature.call(this);
 
   var m_that = this,
       m_mapper = vglModule.groupMapper(),
-      m_material = null;
+      m_material = null,
+      m_gcs = "EPSG:4326";
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -304,6 +305,13 @@ geoModule.compositeGeometryFeature = function(geoms, color) {
   ////////////////////////////////////////////////////////////////////////////
   this.geometries = function() {
     return m_mapper.geometryDataArray();
+  };
+
+  /**
+   * Get projection
+   */
+  this.gcs = function() {
+    return m_gcs;
   };
 
   // Initializations

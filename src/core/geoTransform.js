@@ -110,7 +110,7 @@ geoModule.geoTransform.osmTransformFeature = function(destGcs, feature) {
   }
 
   // Update the features gcs field
-  feature.setGcs(desGcs);
+  feature.setGcs(destGcs);
 };
 
 //////////////////////////////////////////////////////////////////////////////
