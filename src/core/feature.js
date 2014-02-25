@@ -28,7 +28,8 @@ geoModule.feature = function() {
   /**
    * @private
    */
-  var m_lookupTable = null;
+  var m_lookupTable = null,
+      m_gcs = "EPSG:4326";
 
   /**
    * Get lookup table
@@ -48,6 +49,20 @@ geoModule.feature = function() {
       return true;
     }
     return false;
+  };
+
+  /**
+   * Get projection
+   */
+  this.gcs = function() {
+    return m_gcs;
+  };
+
+  /**
+   * Set the projection
+   */
+  this.setGcs = function(gcs) {
+    m_gcs = gcs;
   };
 
   /**

@@ -20,16 +20,19 @@ geoModule.geoTransform = {};
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Custorm transform for a feature used for OpenStreetMap
+ * Custom transform for a feature used for OpenStreetMap
  */
 //////////////////////////////////////////////////////////////////////////////
-geoModule.geoTransform.osmTransformFeature = function(srcGcs, destGcs, feature) {
+geoModule.geoTransform.osmTransformFeature = function(destGcs, feature) {
   'use strict';
 
   if (!feature) {
     console.log('[warning] Invalid (null) feature');
     return;
   }
+
+  if (feature.gcs() === destGcs)
+      return;
 
   var geometryDataArray = [],
       noOfGeoms = 0,
@@ -49,6 +52,7 @@ geoModule.geoTransform.osmTransformFeature = function(srcGcs, destGcs, feature) 
       inPos = [],
       projPoint = null,
       vertexPos = null,
+      srcGcs = feature.gcs(),
       source = new proj4.Proj(srcGcs),
       dest = new proj4.Proj(destGcs);
 
@@ -104,20 +108,26 @@ geoModule.geoTransform.osmTransformFeature = function(srcGcs, destGcs, feature) 
       data[vertexPos + 1] = geoModule.mercator.lat2y(lat);
     }
   }
+
+  // Update the features gcs field
+  feature.setGcs(desGcs);
 };
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Transform a feature in source GCS to destination GCS
+ * Transform a feature to destination GCS
  */
 //////////////////////////////////////////////////////////////////////////////
-geoModule.geoTransform.transformFeature = function(srcGcs, destGcs, feature) {
+geoModule.geoTransform.transformFeature = function(destGcs, feature) {
   'use strict';
 
   if (!feature) {
     console.log('[warning] Invalid (null) feature');
     return;
   }
+
+  if (feature.gcs() === destGcs)
+    return;
 
   var geometryDataArray = [],
       noOfGeoms = 0,
@@ -137,6 +147,7 @@ geoModule.geoTransform.transformFeature = function(srcGcs, destGcs, feature) {
       inPos = [],
       projPoint = null,
       vertexPos = null,
+      srcGcs = feature.gcs(),
       source = new proj4.Proj(srcGcs),
       dest = new proj4.Proj(destGcs);
 
@@ -204,6 +215,9 @@ geoModule.geoTransform.transformFeature = function(srcGcs, destGcs, feature) {
       }
     }
   }
+
+  // Update the features gcs field
+  feature.setGcs(desGcs);
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -226,6 +240,6 @@ geoModule.geoTransform.transformLayer = function(destGcs, layer) {
   for (i = 0; i < count; ++i) {
     // TODO Ignoring src and destination projections
     geoModule.geoTransform.osmTransformFeature(
-      destGcs, layer.gcs(), features[i]);
+      destGcs, features[i]);
   }
 };
