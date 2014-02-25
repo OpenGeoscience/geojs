@@ -331,4 +331,4 @@ geoModule.compositeGeometryFeature = function(geoms, color) {
   return this;
 };
 
-inherit(geoModule.compositeGeometryFeature, geoModule.geometryFeature);
+inherit(geoModule.compositeGeometryFeature, geoModule.feature);
