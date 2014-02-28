@@ -100,7 +100,7 @@ geoModule.planeFeature = function(lowerleft, upperright, z) {
     return new geoModule.planeFeature(lowerleft, upperright);
   }
 
-  vglModule.actor.call(this);
+  geoModule.feature.call(this);
 
   z = typeof z !== 'undefined' ? z : 0.0;
 
