@@ -72,7 +72,8 @@ geoModule.layer = function(options, source) {
       m_legendWidth = 400,
       m_legendHeight = 20,
       m_dataSource = source,
-      m_container = null;
+      m_container = null,
+      m_referenceLayer = false;
 
   if (options.showAttribution) {
     m_showAttribution = options.showAttribution;
@@ -548,6 +549,15 @@ geoModule.layer = function(options, source) {
       return m_that;
     }
     return m_container;
+  };
+
+  this.referenceLayer = function(referenceLayer) {
+
+    if(typeof referenceLayer !== 'undefined') {
+      m_referenceLayer = referenceLayer;
+      return m_that;
+    }
+    return m_referenceLayer;
   };
 
   return this;
