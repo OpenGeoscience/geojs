@@ -458,6 +458,9 @@ geoModule.map = function(node, options) {
         type: geoModule.command.addLayerEvent,
         layer: layer
       });
+
+      layer.container(this);
+
       return true;
     }
     return false;

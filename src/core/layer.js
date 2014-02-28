@@ -71,7 +71,8 @@ geoModule.layer = function(options, source) {
       m_legendOrigin = [20, 60, 0.0],
       m_legendWidth = 400,
       m_legendHeight = 20,
-      m_dataSource = source;
+      m_dataSource = source,
+      m_container = null;
 
   if (options.showAttribution) {
     m_showAttribution = options.showAttribution;
@@ -538,6 +539,15 @@ geoModule.layer = function(options, source) {
   ////////////////////////////////////////////////////////////////////////////
   this.updateColorMapping = function() {
     // Concrete class should implement this
+  };
+
+  this.container = function(container) {
+
+    if(typeof container !== 'undefined') {
+      m_container = container;
+      return m_that;
+    }
+    return m_container;
   };
 
   return this;
