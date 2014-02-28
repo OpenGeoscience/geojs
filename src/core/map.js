@@ -987,6 +987,14 @@ geoModule.map = function(node, options) {
   ////////////////////////////////////////////////////////////////////////////
   this.mapLayer = function(newMapLayer) {
     if(typeof newMapLayer !== 'undefined') {
+
+      // The GCS of the layer must match the map
+      if (this.gcs() === newMapLayer.gcs()) {
+        throw "The layer has a GCS of '" + newMapLayer.gcs() +
+              "' which does match the map GCS of '" +
+              this.gcs() + "'";
+      }
+
       m_mapLayer = newMapLayer;
 
       // Set the layer as the reference layer
