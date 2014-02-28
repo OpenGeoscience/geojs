@@ -22,6 +22,7 @@ geoModule.openStreetMapLayer = function() {
   }
   geoModule.featureLayer.call(this);
 
+  this.setGcs("EPSG:3857")
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Private member variables
