@@ -560,6 +560,10 @@ geoModule.layer = function(options, source) {
     return m_referenceLayer;
   };
 
+  this.worldToGcs = function(x, y) {
+    throw "Should be implemented by derivied classes";
+  };
+
   return this;
 };
 

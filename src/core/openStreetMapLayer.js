@@ -365,6 +365,16 @@ geoModule.openStreetMapLayer = function() {
     $(this).trigger(revent, result);
   };
 
+
+  this.worldToGcs = function(x, y) {
+    if (this.referenceLayer()) {
+      return [x * geoModule.mercator.r_major, y * geoModule.mercator.r_minor];
+    }
+    else {
+      throw "This layer is not a reference layer so cannot do the convertion";
+    }
+  };
+
   this.setBinNumber(ogs.vgl.material.RenderBin.Base);
 };
 
