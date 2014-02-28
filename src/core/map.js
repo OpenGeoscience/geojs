@@ -988,6 +988,10 @@ geoModule.map = function(node, options) {
   this.mapLayer = function(newMapLayer) {
     if(typeof newMapLayer !== 'undefined') {
       m_mapLayer = newMapLayer;
+
+      // Set the layer as the reference layer
+      m_mapLayer.referenceLayer(true);
+
       return this;
     }
     return m_mapLayer;
@@ -1013,6 +1017,7 @@ geoModule.map = function(node, options) {
 
   // Create map layer
   m_mapLayer = geoModule.openStreetMapLayer();
+  m_mapLayer.referenceLayer(true);
   m_mapLayer.update(m_updateRequest);
   m_mapLayer.predraw(m_prepareForRenderRequest);
   this.addLayer(m_mapLayer);
