@@ -1016,6 +1016,22 @@ geoModule.map = function(node, options) {
     return m_interactorStyle;
   };
 
+  this.worldToDisplayGcs = function(x, y) {
+    var gcsPoint,
+        source,
+        dest,
+        transformedPoint;
+
+    gcsPoint = m_mapLayer.worldToGcs(x, y);
+    source = new proj4.Proj(this.options().gcs);
+    dest = new proj4.Proj(this.options().display_gcs);
+    transformedPoint = new proj4.Point(gcsPoint[0], gcsPoint[1]);
+
+    proj4.transform(source, dest, transformedPoint);
+
+    return [transformedPoint.x, transformedPoint.y];
+  };
+
   // Bind events to handlers
   $(document).on("mousedown", m_viewer.handleMouseDown);
   $(document).on("mouseup", m_viewer.handleMouseUp);
