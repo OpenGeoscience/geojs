@@ -6,7 +6,7 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, indent: 2*/
 
-/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
+/*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
 /*global vglModule, proj4, document*/
 //////////////////////////////////////////////////////////////////////////////
 
@@ -16,14 +16,14 @@
  * projection.
  */
 //////////////////////////////////////////////////////////////////////////////
-geoModule.geoTransform = {};
+geo.geoTransform = {};
 
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Custom transform for a feature used for OpenStreetMap
  */
 //////////////////////////////////////////////////////////////////////////////
-geoModule.geoTransform.osmTransformFeature = function(destGcs, feature) {
+geo.geoTransform.osmTransformFeature = function(destGcs, feature) {
   'use strict';
 
   if (!feature) {
@@ -105,7 +105,7 @@ geoModule.geoTransform.osmTransformFeature = function(destGcs, feature) {
         if (lat < -85.0511) {
             lat = -85.0511;
         }
-      data[vertexPos + 1] = geoModule.mercator.lat2y(lat);
+      data[vertexPos + 1] = geo.mercator.lat2y(lat);
     }
   }
 
@@ -118,7 +118,7 @@ geoModule.geoTransform.osmTransformFeature = function(destGcs, feature) {
  * Transform a feature to destination GCS
  */
 //////////////////////////////////////////////////////////////////////////////
-geoModule.geoTransform.transformFeature = function(destGcs, feature) {
+geo.geoTransform.transformFeature = function(destGcs, feature) {
   'use strict';
 
   if (!feature) {
@@ -226,7 +226,7 @@ geoModule.geoTransform.transformFeature = function(destGcs, feature) {
  * projection.
  */
 //////////////////////////////////////////////////////////////////////////////
-geoModule.geoTransform.transformLayer = function(destGcs, layer) {
+geo.geoTransform.transformLayer = function(destGcs, layer) {
   'use strict';
 
   if (!layer) {
@@ -239,7 +239,7 @@ geoModule.geoTransform.transformLayer = function(destGcs, layer) {
       i = 0;
   for (i = 0; i < count; ++i) {
     // TODO Ignoring src and destination projections
-    geoModule.geoTransform.osmTransformFeature(
+    geo.geoTransform.osmTransformFeature(
       destGcs, features[i]);
   }
 };

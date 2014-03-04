@@ -6,7 +6,7 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, indent: 2*/
 
-/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
+/*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
 /*global vglModule, uiModule, document, d3*/
 //////////////////////////////////////////////////////////////////////////////
 
@@ -250,7 +250,7 @@ uiModule.gis.createLayerList = function(map, rootId, heading, toggleFunct,
       $('#timestep-display').fadeIn('slow');
   });
 
-  $(map).on(geoModule.command.animateEvent, function (event) {
+  $(map).on(geo.command.animateEvent, function (event) {
     if (event.currentTime >= event.endTime) {
       $('#play', animationControls).removeClass('active');
     }
@@ -290,7 +290,7 @@ uiModule.gis.createLayerList = function(map, rootId, heading, toggleFunct,
     'padding: 5px; border-radius: 5px;'}).append($('<h4>'));
 
   heading = $('h4', timestepDisplay);
-  $(map).on(geoModule.command.animateEvent, function(event) {
+  $(map).on(geo.command.animateEvent, function(event) {
     var format = d3.time.format.utc("%Y-%m-%d");
     if (event.currentTime) {
       heading.html(format(event.currentTime));

@@ -6,15 +6,15 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, indent: 2*/
 
-/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
+/*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
 /*global vglModule, document*/
 //////////////////////////////////////////////////////////////////////////////
 
-geoModule.updateRequest = function(time, options, viewer, node) {
+geo.updateRequest = function(time, options, viewer, node) {
   "use strict";
 
-  if (!(this instanceof geoModule.updateRequest)) {
-    return new geoModule.updateRequest(time, options, viewer, node);
+  if (!(this instanceof geo.updateRequest)) {
+    return new geo.updateRequest(time, options, viewer, node);
   }
   ogs.vgl.object.call(this);
 
@@ -66,8 +66,8 @@ geoModule.updateRequest = function(time, options, viewer, node) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.requestRedraw = function() {
-    $(this).trigger(geoModule.command.requestRedrawEvent);
+    $(this).trigger(geo.command.requestRedrawEvent);
   };
 };
 
-inherit(geoModule.updateRequest, ogs.vgl.object);
+inherit(geo.updateRequest, ogs.vgl.object);

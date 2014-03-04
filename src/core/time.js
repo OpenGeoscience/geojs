@@ -6,13 +6,13 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, indent: 2*/
 
-/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
+/*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
 /*global vglModule, document*/
 //////////////////////////////////////////////////////////////////////////////
 
-geoModule.time = {};
+geo.time = {};
 
-geoModule.time.incrementTime = function (time, unit, delta) {
+geo.time.incrementTime = function (time, unit, delta) {
   'use strict';
 
   if (unit === 'days') {

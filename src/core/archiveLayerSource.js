@@ -6,7 +6,7 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, indent: 2*/
 
-/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
+/*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
 /*global vglModule, jQuery, document*/
 //////////////////////////////////////////////////////////////////////////////
 
@@ -22,13 +22,13 @@
  * can be provided with the appropriate error message.
  */
 //////////////////////////////////////////////////////////////////////////////
-geoModule.archiveLayerSource = function(id, name, path, config, vars, onError) {
+geo.archiveLayerSource = function(id, name, path, config, vars, onError) {
   'use strict';
 
-  if (!(this instanceof geoModule.archiveLayerSource) ) {
-    return new geoModule.archiveLayerSource(id, name, path, config, vars, onError);
+  if (!(this instanceof geo.archiveLayerSource) ) {
+    return new geo.archiveLayerSource(id, name, path, config, vars, onError);
   }
-  geoModule.layerSource.call(this, id, name, path);
+  geo.layerSource.call(this, id, name, path);
 
   var m_config = config,
       m_vars = vars,
@@ -252,4 +252,4 @@ geoModule.archiveLayerSource = function(id, name, path, config, vars, onError) {
   return this;
 };
 
-inherit(geoModule.archiveLayerSource, geoModule.layerSource);
+inherit(geo.archiveLayerSource, geo.layerSource);

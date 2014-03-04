@@ -41,7 +41,7 @@ ogs.namespace = function(ns_string) {
 };
 
 /** ogs.vgl namespace */
-var geoModule = ogs.namespace("geo");
+var geo = ogs.namespace("geo");
 
 //////////////////////////////////////////////////////////////////////////////
 /**

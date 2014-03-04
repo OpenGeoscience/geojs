@@ -6,7 +6,7 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, indent: 2*/
 
-/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
+/*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
 /*global vglModule, document*/
 //////////////////////////////////////////////////////////////////////////////
 
@@ -16,13 +16,13 @@
  *
  * A latlng encapsulates geodesy coordinates defined by latitude and
  * longitude
- * @returns {geoModule.latlng}
+ * @returns {geo.latlng}
  */
 //////////////////////////////////////////////////////////////////////////////
-geoModule.latlng = function(lat, lng) {
+geo.latlng = function(lat, lng) {
   "use strict";
-  if (!(this instanceof geoModule.latlng)) {
-    return new geoModule.latlng(lat, lng);
+  if (!(this instanceof geo.latlng)) {
+    return new geo.latlng(lat, lng);
   }
 
   /** @priave */

@@ -6,7 +6,7 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true, */
 /*jslint white: true, indent: 2, continue:true*/
 
-/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
+/*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
 /*global vglModule, document, gl, vec3*/
 //////////////////////////////////////////////////////////////////////////////
 
@@ -18,15 +18,15 @@
  * @dec Layer to draw points, lines, and polygons on the map The polydata layer
  *      provide mechanisms to create and draw geometrical shapes such as points,
  *      lines, and polygons.
- * @returns {geoModule.featureLayer}
+ * @returns {geo.featureLayer}
  */
 //////////////////////////////////////////////////////////////////////////////
-geoModule.featureLayer = function(options, feature) {
+geo.featureLayer = function(options, feature) {
   "use strict";
-  if (!(this instanceof geoModule.featureLayer)) {
-    return new geoModule.featureLayer(options, feature);
+  if (!(this instanceof geo.featureLayer)) {
+    return new geo.featureLayer(options, feature);
   }
-  geoModule.layer.call(this, options);
+  geo.layer.call(this, options);
 
   /** @private */
   var m_that = this,
@@ -287,7 +287,7 @@ geoModule.featureLayer = function(options, feature) {
     for(i = 0; i < data.length; ++i) {
       switch(data[i].type()) {
         case vglModule.data.geometry:
-          geomFeature = geoModule.geometryFeature(data[i]);
+          geomFeature = geo.geometryFeature(data[i]);
           geomFeature.setVisible(this.visible());
           geomFeature.material().setBinNumber(this.binNumber());
           geomFeature.setLookupTable(lut);
@@ -361,7 +361,7 @@ geoModule.featureLayer = function(options, feature) {
       opacityUniform = mat.shaderProgram().uniform('opacity');
       if (opacityUniform !== null) {
         opacityUniform.set(opacity);
-        $(m_that).trigger(geoModule.command.updateLayerOpacityEvent);
+        $(m_that).trigger(geo.command.updateLayerOpacityEvent);
       }
     }
   };
@@ -495,7 +495,7 @@ geoModule.featureLayer = function(options, feature) {
                   "value": alpha * sa + beta * sb + gamma * sc
                 }
               };
-              revent = $.Event(geoModule.command.queryResultEvent);
+              revent = $.Event(geo.command.queryResultEvent);
               revent.location = location;
               revent.srcEvent = location.event;
               $(this).trigger(revent, result);
@@ -517,4 +517,4 @@ geoModule.featureLayer = function(options, feature) {
   return this;
 };
 
-inherit(geoModule.featureLayer, geoModule.layer);
+inherit(geo.featureLayer, geo.layer);

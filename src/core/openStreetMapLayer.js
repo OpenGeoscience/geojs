@@ -6,7 +6,7 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, continue:true, indent: 2*/
 
-/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
+/*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
 /*global vglModule, vec4, document*/
 //////////////////////////////////////////////////////////////////////////////
 
@@ -15,12 +15,12 @@
  * Create a new instance of openStreetMapLayer
  */
 //////////////////////////////////////////////////////////////////////////////
-geoModule.openStreetMapLayer = function() {
+geo.openStreetMapLayer = function() {
   "use strict";
-  if (!(this instanceof geoModule.openStreetMapLayer)) {
-    return new geoModule.openStreetMapLayer();
+  if (!(this instanceof geo.openStreetMapLayer)) {
+    return new geo.openStreetMapLayer();
   }
-  geoModule.featureLayer.call(this);
+  geo.featureLayer.call(this);
 
   this.setGcs("EPSG:3857")
   ////////////////////////////////////////////////////////////////////////////
@@ -263,11 +263,11 @@ geoModule.openStreetMapLayer = function() {
     worldPt2[1] = Math.min(worldPt2[1],  180.0);
 
     // Compute tilex and tiley
-    tile1x = geoModule.mercator.long2tilex(worldPt1[0], zoom);
-    tile1y = geoModule.mercator.lat2tiley(worldPt1[1], zoom);
+    tile1x = geo.mercator.long2tilex(worldPt1[0], zoom);
+    tile1y = geo.mercator.lat2tiley(worldPt1[1], zoom);
 
-    tile2x = geoModule.mercator.long2tilex(worldPt2[0], zoom);
-    tile2y = geoModule.mercator.lat2tiley(worldPt2[1], zoom);
+    tile2x = geo.mercator.long2tilex(worldPt2[0], zoom);
+    tile2y = geo.mercator.lat2tiley(worldPt2[1], zoom);
 
     // Clamp tilex and tiley
     tile1x = Math.max(tile1x, 0);
@@ -359,7 +359,7 @@ geoModule.openStreetMapLayer = function() {
         "lat": location.y
       }
     },
-    revent = $.Event(geoModule.command.queryResultEvent);
+    revent = $.Event(geo.command.queryResultEvent);
 
     revent.srcEvent = location.event;
     $(this).trigger(revent, result);
@@ -368,7 +368,7 @@ geoModule.openStreetMapLayer = function() {
 
   this.worldToGcs = function(x, y) {
     if (this.referenceLayer()) {
-      return [x * geoModule.mercator.r_major, y * geoModule.mercator.r_minor];
+      return [x * geo.mercator.r_major, y * geo.mercator.r_minor];
     }
     else {
       throw "This layer is not a reference layer so cannot do the convertion";
@@ -378,4 +378,4 @@ geoModule.openStreetMapLayer = function() {
   this.setBinNumber(ogs.vgl.material.RenderBin.Base);
 };
 
-inherit(geoModule.openStreetMapLayer, geoModule.featureLayer);
+inherit(geo.openStreetMapLayer, geo.featureLayer);
