@@ -22,7 +22,8 @@ geo.openStreetMapLayer = function() {
   }
   geo.featureLayer.call(this);
 
-  this.setGcs("EPSG:3857")
+  this.setGcs("EPSG:3857");
+
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Private member variables
@@ -370,9 +371,8 @@ geo.openStreetMapLayer = function() {
     if (this.referenceLayer()) {
       return [x * geo.mercator.r_major, y * geo.mercator.r_minor];
     }
-    else {
-      throw "This layer is not a reference layer so cannot do the convertion";
-    }
+    
+    throw "This layer is not a reference layer so cannot do the convertion";
   };
 
   this.setBinNumber(ogs.vgl.material.RenderBin.Base);
