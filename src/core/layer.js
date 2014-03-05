@@ -1,12 +1,12 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @module ogs.geo
+ * @module geo
  */
 
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, indent: 2*/
 
-/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
+/*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
 /*global vglModule, document*/
 //////////////////////////////////////////////////////////////////////////////
 
@@ -14,14 +14,14 @@
 /**
  * Layer options object specification
  *
- * @class geoModule.layerOptions
+ * @class geo.layerOptions
  */
 //////////////////////////////////////////////////////////////////////////////
-geoModule.layerOptions = function() {
+geo.layerOptions = function() {
   "use strict";
 
-  if (!(this instanceof geoModule.layerOptions)) {
-    return new geoModule.layerOptions();
+  if (!(this instanceof geo.layerOptions)) {
+    return new geo.layerOptions();
   }
 
   this.opacity = 0.5;
@@ -34,27 +34,27 @@ geoModule.layerOptions = function() {
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Base class for all layer types ogs.geo.layer represents any object that be
+ * Base class for all layer types geo.layer represents any object that be
  * rendered on top of the map base. This could include image, points, line, and
  * polygons.
  *
- * @class geoModule.layer
- * @returns {geoModule.layer}
+ * @class geo.layer
+ * @returns {geo.layer}
  */
 //////////////////////////////////////////////////////////////////////////////
-geoModule.layer = function(options, source) {
+geo.layer = function(options, source) {
   "use strict";
   this.events = {
     "opacitychange" : "opacitychange"
   };
 
-  if (!(this instanceof geoModule.layer)) {
-    return new geoModule.layer(options, source);
+  if (!(this instanceof geo.layer)) {
+    return new geo.layer(options, source);
   }
   ogs.vgl.object.call(this);
 
   if (!options) {
-    options = geoModule.layerOptions();
+    options = geo.layerOptions();
   }
 
   /** @private */
@@ -71,7 +71,9 @@ geoModule.layer = function(options, source) {
       m_legendOrigin = [20, 60, 0.0],
       m_legendWidth = 400,
       m_legendHeight = 20,
-      m_dataSource = source;
+      m_dataSource = source,
+      m_container = null,
+      m_referenceLayer = false;
 
   if (options.showAttribution) {
     m_showAttribution = options.showAttribution;
@@ -94,7 +96,7 @@ geoModule.layer = function(options, source) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Return the underlying drawable entity.
-   * @returns {geoModule.feature}
+   * @returns {geo.feature}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.features = function() {
@@ -540,7 +542,29 @@ geoModule.layer = function(options, source) {
     // Concrete class should implement this
   };
 
+  this.container = function(container) {
+
+    if(typeof container !== 'undefined') {
+      m_container = container;
+      return m_that;
+    }
+    return m_container;
+  };
+
+  this.referenceLayer = function(referenceLayer) {
+
+    if(typeof referenceLayer !== 'undefined') {
+      m_referenceLayer = referenceLayer;
+      return m_that;
+    }
+    return m_referenceLayer;
+  };
+
+  this.worldToGcs = function(x, y) {
+    throw "Should be implemented by derivied classes";
+  };
+
   return this;
 };
 
-inherit(geoModule.layer, ogs.vgl.object);
+inherit(geo.layer, ogs.vgl.object);

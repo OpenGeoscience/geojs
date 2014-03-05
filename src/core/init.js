@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @module ogs.geojs
+ * @module geojs
  */
 
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
@@ -41,7 +41,7 @@ ogs.namespace = function(ns_string) {
 };
 
 /** ogs.vgl namespace */
-var geoModule = ogs.namespace("geo");
+var geo = ogs.namespace("geo");
 
 //////////////////////////////////////////////////////////////////////////////
 /**

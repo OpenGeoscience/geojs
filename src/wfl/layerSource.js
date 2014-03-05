@@ -6,7 +6,7 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, indent: 2*/
 
-/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
+/*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
 /*global vglModule, jQuery, document, wflModule*/
 //////////////////////////////////////////////////////////////////////////////
 
@@ -28,7 +28,7 @@ wflModule.layerSource = function(id, name, path, config, vars, workflow, onError
   if (!(this instanceof wflModule.layerSource) ) {
     return new wflModule.layerSource(id, name, path, config, vars, workflow, onError);
   }
-  geoModule.archiveLayerSource.call(this, id, name, path, config, vars, onError);
+  geo.archiveLayerSource.call(this, id, name, path, config, vars, onError);
 
   var m_time = -1,
       m_that = this,
@@ -118,4 +118,4 @@ wflModule.layerSource = function(id, name, path, config, vars, workflow, onError
   return this;
 };
 
-inherit(wflModule.layerSource, geoModule.archiveLayerSource);
+inherit(wflModule.layerSource, geo.archiveLayerSource);

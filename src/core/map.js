@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
 /**
- * @module geoModule
+ * @module geo
  */
 
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, indent: 2, continue: true*/
 
-/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image*/
+/*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
 /*global vglModule, document, vec2, vec3, vec4, proj4*/
 //////////////////////////////////////////////////////////////////////////////
 
@@ -15,9 +15,9 @@
  * Map options object specification
  */
 //////////////////////////////////////////////////////////////////////////////
-geoModule.mapOptions = {
+geo.mapOptions = {
   zoom: 0,
-  center: geoModule.latlng(0.0, 0.0),
+  center: geo.latlng(0.0, 0.0),
   gcs: 'EPSG:3857',
   display_gcs: 'EPSG:4326',
   country_boundaries: true,
@@ -29,13 +29,13 @@ geoModule.mapOptions = {
  * Create a new instance of class map
  *
  * @class Creates a new map inside of the given HTML container (Typically DIV)
- * @returns {geoModule.map}
+ * @returns {geo.map}
  */
 //////////////////////////////////////////////////////////////////////////////
-geoModule.map = function(node, options) {
+geo.map = function(node, options) {
   "use strict";
-  if (!(this instanceof geoModule.map)) {
-    return new geoModule.map(node, options);
+  if (!(this instanceof geo.map)) {
+    return new geo.map(node, options);
   }
   vglModule.object.call(this);
 
@@ -52,7 +52,7 @@ geoModule.map = function(node, options) {
       m_layers = {},
       m_activeLayer = null,
       m_mapLayer = null,
-      m_featureCollection = geoModule.featureCollection(),
+      m_featureCollection = geo.featureCollection(),
       m_renderTime = vglModule.timestamp(),
       m_lastPrepareToRenderingTime = vglModule.timestamp(),
       m_interactorStyle = null,
@@ -75,7 +75,7 @@ geoModule.map = function(node, options) {
   }
 
   if (!options.center) {
-    m_options.center = geoModule.latlng(0.0, 0.0);
+    m_options.center = geo.latlng(0.0, 0.0);
   }
 
   if (options.zoom === undefined) {
@@ -83,7 +83,7 @@ geoModule.map = function(node, options) {
   }
 
   // Initialize
-  m_interactorStyle = geoModule.mapInteractorStyle();
+  m_interactorStyle = geo.mapInteractorStyle();
   m_viewer = vglModule.viewer(m_node);
   m_viewer.setInteractorStyle(m_interactorStyle);
   m_viewer.init();
@@ -91,14 +91,14 @@ geoModule.map = function(node, options) {
   m_renderer = m_viewer.renderWindow().activeRenderer();
 
   m_prepareForRenderRequest =
-    geoModule.prepareForRenderRequest(m_options, m_viewer, m_featureCollection);
-  m_updateRequest = geoModule.updateRequest(null, m_options, m_viewer, m_node);
+    geo.prepareForRenderRequest(m_options, m_viewer, m_featureCollection);
+  m_updateRequest = geo.updateRequest(null, m_options, m_viewer, m_node);
 
-  $(m_prepareForRenderRequest).on(geoModule.command.requestRedrawEvent,
+  $(m_prepareForRenderRequest).on(geo.command.requestRedrawEvent,
     function(event) {
       m_that.draw();
   });
-  $(m_updateRequest).on(geoModule.command.requestRedrawEvent,
+  $(m_updateRequest).on(geo.command.requestRedrawEvent,
     function(event) {
       m_that.draw();
   });
@@ -225,12 +225,12 @@ geoModule.map = function(node, options) {
 
     var i, layers = m_animationState.layers;
     for (i = 0; i < layers.length; ++i) {
-      layers[i].update(geoModule.updateRequest(
+      layers[i].update(geo.updateRequest(
           m_animationState.currentTime.getTime()));
-      geoModule.geoTransform.transformLayer(m_options.gcs, layers[i]);
+      geo.geoTransform.transformLayer(m_options.gcs, layers[i]);
     }
     $(m_that).trigger({
-      type: geoModule.command.animateEvent,
+      type: geo.command.animateEvent,
       currentTime: m_animationState.currentTime,
       endTime: m_animationState.range.end
     });
@@ -300,7 +300,7 @@ geoModule.map = function(node, options) {
         stop = false,
         pause = false;
 
-    geoModule.time.incrementTime(newTime, timeRange.units, timeRange.delta);
+    geo.time.incrementTime(newTime, timeRange.units, timeRange.delta);
     if (newTime > timeRange.end) {
       console.log('[error] Invalid time range. Requires atleast \
         begin and end time');
@@ -325,7 +325,7 @@ geoModule.map = function(node, options) {
       }
       else {
         animateTimestep();
-        geoModule.time.incrementTime(m_animationState.currentTime,
+        geo.time.incrementTime(m_animationState.currentTime,
           m_animationState.range.units, m_animationState.range.delta);
       }
     }
@@ -347,7 +347,7 @@ geoModule.map = function(node, options) {
     }
 
     var time = new Date(m_animationState.currentTime.getTime());
-    geoModule.time.incrementTime(time, m_animationState.range.units,
+    geo.time.incrementTime(time, m_animationState.range.units,
         m_animationState.range.delta);
 
     if (time > m_animationState.range.end) {
@@ -372,7 +372,7 @@ geoModule.map = function(node, options) {
     }
 
     var time = new Date(m_animationState.currentTime.getTime());
-    geoModule.time.incrementTime(time, m_animationState.range.units,
+    geo.time.incrementTime(time, m_animationState.range.units,
         -m_animationState.range.delta);
 
     if (time < m_animationState.range.start) {
@@ -414,7 +414,7 @@ geoModule.map = function(node, options) {
   this.setZoom = function(val) {
     if (val !== m_options.zoom) {
       m_options.zoom = val;
-      $(this).trigger(geoModule.command.updateViewZoomEvent);
+      $(this).trigger(geo.command.updateViewZoomEvent);
       return true;
     }
 
@@ -438,21 +438,24 @@ geoModule.map = function(node, options) {
       }
 
       // Transform layer
-      geoModule.geoTransform.transformLayer(m_options.gcs, layer);
+      geo.geoTransform.transformLayer(m_options.gcs, layer);
       m_layers[layer.id()] = layer;
 
       updateLegends($(m_node).width(), $(m_node).height());
       this.modified();
 
-      $(layer).on(geoModule.command.queryResultEvent, function(event, queryResult) {
+      $(layer).on(geo.command.queryResultEvent, function(event, queryResult) {
         $(m_that).trigger(event, queryResult);
         return true;
       });
 
       $(this).trigger({
-        type: geoModule.command.addLayerEvent,
+        type: geo.command.addLayerEvent,
         layer: layer
       });
+
+      layer.container(this);
+
       return true;
     }
     return false;
@@ -476,7 +479,7 @@ geoModule.map = function(node, options) {
       this.modified();
 
       $(this).trigger({
-        type: geoModule.command.removeLayerEvent,
+        type: geo.command.removeLayerEvent,
         layer: layer
       });
       return true;
@@ -499,7 +502,7 @@ geoModule.map = function(node, options) {
       layer.setVisible(!layer.visible());
       this.modified();
       $(this).trigger({
-        type: geoModule.command.toggleLayerEvent,
+        type: geo.command.toggleLayerEvent,
         layer: layer
       });
       return true;
@@ -535,12 +538,12 @@ geoModule.map = function(node, options) {
       this.modified();
       if (layer !== null) {
         $(this).trigger({
-          type: geoModule.command.selectLayerEvent,
+          type: geo.command.selectLayerEvent,
           layer: layer
         });
       } else {
         $(this).trigger({
-          type: geoModule.command.unselectLayerEvent,
+          type: geo.command.unselectLayerEvent,
           layer: layer
         });
       }
@@ -581,7 +584,7 @@ geoModule.map = function(node, options) {
     this.updateAndDraw();
 
     $(this).trigger({
-      type: geoModule.command.resizeEvent,
+      type: geo.command.resizeEvent,
       width: width,
       height: height
     });
@@ -607,13 +610,13 @@ geoModule.map = function(node, options) {
     } else {
       // Load countries data first
       reader = vglModule.geojsonReader();
-      geoms = reader.readGJObject(geoModule.countries);
+      geoms = reader.readGJObject(geo.countries);
       // @todo if opacity is on layer, solid color should be too
-      layer = geoModule.featureLayer({
+      layer = geo.featureLayer({
         "opacity": 1,
         "showAttribution": 1,
         "visible": 1
-      }, geoModule.compositeGeometryFeature(geoms, [1.0,0.5, 0.0]));
+      }, geo.compositeGeometryFeature(geoms, [1.0,0.5, 0.0]));
 
       layer.setName('country-boundaries');
       this.addLayer(layer);
@@ -756,7 +759,7 @@ geoModule.map = function(node, options) {
             stdEnd = timeInfo.stdTimeRange[1];
             startDate = timeInfo.dateRange[0];
             end = new Date(Date.UTC(startDate[0], startDate[1]-1, startDate[2]));
-            geoModule.time.incrementTime(end, timeInfo.nativeUnits,
+            geo.time.incrementTime(end, timeInfo.nativeUnits,
                 timeInfo.nativeDelta * timeInfo.numSteps);
           }
 
@@ -923,9 +926,9 @@ geoModule.map = function(node, options) {
                                             width, height),
         // NOTE: the map is using (nearly) normalized web-mercator.
         // The constants below bring it to actual EPSG:3857 units.
-        latlon = geoModule.mercator.m2ll(
-          geoModule.mercator.deg2rad(worldPt[0]) * geoModule.mercator.r_major,
-          geoModule.mercator.deg2rad(worldPt[1]) * geoModule.mercator.r_minor),
+        latlon = geo.mercator.m2ll(
+          geo.mercator.deg2rad(worldPt[0]) * geo.mercator.r_major,
+          geo.mercator.deg2rad(worldPt[1]) * geo.mercator.r_minor),
         location = {'x': latlon.lon, 'y': latlon.lat};
 
     return location;
@@ -958,7 +961,7 @@ geoModule.map = function(node, options) {
    * Sets or gets the viewer for this map
    *
    * @param newViewer {vglModule.viewer}
-   * @returns {geoModule.map|vglModule.viewer}
+   * @returns {geo.map|vglModule.viewer}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.viewer = function(newViewer) {
@@ -973,13 +976,25 @@ geoModule.map = function(node, options) {
   /**
    * Sets or gets mapLayer for this map
    *
-   * @param {geoModule.layer} newMapLayer optional
-   * @returns {geoModule.map|geoModule.layer}
+   * @param {geo.layer} newMapLayer optional
+   * @returns {geo.map|geo.layer}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.mapLayer = function(newMapLayer) {
     if(typeof newMapLayer !== 'undefined') {
+
+      // The GCS of the layer must match the map
+      if (this.gcs() === newMapLayer.gcs()) {
+        throw "The layer has a GCS of '" + newMapLayer.gcs() +
+              "' which does match the map GCS of '" +
+              this.gcs() + "'";
+      }
+
       m_mapLayer = newMapLayer;
+
+      // Set the layer as the reference layer
+      m_mapLayer.referenceLayer(true);
+
       return this;
     }
     return m_mapLayer;
@@ -996,6 +1011,22 @@ geoModule.map = function(node, options) {
     return m_interactorStyle;
   };
 
+  this.worldToDisplayGcs = function(x, y) {
+    var gcsPoint,
+        source,
+        dest,
+        transformedPoint;
+
+    gcsPoint = m_mapLayer.worldToGcs(x, y);
+    source = new proj4.Proj(this.options().gcs);
+    dest = new proj4.Proj(this.options().display_gcs);
+    transformedPoint = new proj4.Point(gcsPoint[0], gcsPoint[1]);
+
+    proj4.transform(source, dest, transformedPoint);
+
+    return [transformedPoint.x, transformedPoint.y];
+  };
+
   // Bind events to handlers
   $(document).on("mousedown", m_viewer.handleMouseDown);
   $(document).on("mouseup", m_viewer.handleMouseUp);
@@ -1004,7 +1035,8 @@ geoModule.map = function(node, options) {
   HTMLCanvasElement.prototype.relMouseCoords = m_viewer.relMouseCoords;
 
   // Create map layer
-  m_mapLayer = geoModule.openStreetMapLayer();
+  m_mapLayer = geo.openStreetMapLayer();
+  m_mapLayer.referenceLayer(true);
   m_mapLayer.update(m_updateRequest);
   m_mapLayer.predraw(m_prepareForRenderRequest);
   this.addLayer(m_mapLayer);
@@ -1015,17 +1047,17 @@ geoModule.map = function(node, options) {
   }
 
   $(m_interactorStyle).on(
-    geoModule.command.updateViewZoomEvent, this.updateAndDraw);
+    geo.command.updateViewZoomEvent, this.updateAndDraw);
   $(m_interactorStyle).on(
-    geoModule.command.updateViewPositionEvent, this.updateAndDraw);
+    geo.command.updateViewPositionEvent, this.updateAndDraw);
   $(m_interactorStyle).on(
-    geoModule.command.updateDrawRegionEvent, this.updateAndDraw);
+    geo.command.updateDrawRegionEvent, this.updateAndDraw);
 
-  $(this).on(geoModule.command.updateEvent, this.updateAndDraw);
+  $(this).on(geo.command.updateEvent, this.updateAndDraw);
 
   m_interactorStyle.map(this);
 
   return this;
 };
 
-inherit(geoModule.map, vglModule.object);
+inherit(geo.map, vglModule.object);

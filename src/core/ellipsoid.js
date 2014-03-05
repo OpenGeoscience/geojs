@@ -1,12 +1,12 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @module ogs.geo
+ * @module geo
  */
 
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, indent: 2*/
 
-/*global geoModule, ogs, inherit, $, HTMLCanvasElement, Image, vec3*/
+/*global geo, ogs, inherit, $, HTMLCanvasElement, Image, vec3*/
 /*global vglModule, document*/
 //////////////////////////////////////////////////////////////////////////////
 
@@ -22,13 +22,13 @@
  * @param {Number} [y=0]  Radius in Y direction
  * @param {Number} [z=0]  Radius in Z direction
  *
- * @returns {geoModule.ellipsoid}
+ * @returns {geo.ellipsoid}
  */
  //////////////////////////////////////////////////////////////////////////////
-geoModule.ellipsoid = function(x, y, z) {
+geo.ellipsoid = function(x, y, z) {
   "use strict";
-  if (!(this instanceof geoModule.ellipsoid)) {
-    return new geoModule.ellipsoid(x, y, z);
+  if (!(this instanceof geo.ellipsoid)) {
+    return new geo.ellipsoid(x, y, z);
   }
 
   x = ogs.vgl.defaultValue(x, 0.0);
@@ -211,8 +211,8 @@ geoModule.ellipsoid = function(x, y, z) {
  *
  */
 ////////////////////////////////////////////////////////////////////////////
-geoModule.ellipsoid.WGS84 = ogs.vgl.freezeObject(
-  geoModule.ellipsoid(6378137.0, 6378137.0, 6356752.3142451793));
+geo.ellipsoid.WGS84 = ogs.vgl.freezeObject(
+  geo.ellipsoid(6378137.0, 6378137.0, 6356752.3142451793));
 
 ////////////////////////////////////////////////////////////////////////////
 /**
@@ -220,5 +220,5 @@ geoModule.ellipsoid.WGS84 = ogs.vgl.freezeObject(
  * @memberof ellipsoid
  */
 ////////////////////////////////////////////////////////////////////////////
-geoModule.ellipsoid.UNIT_SPHERE = ogs.vgl.freezeObject(
-  geoModule.ellipsoid(1.0, 1.0, 1.0));
+geo.ellipsoid.UNIT_SPHERE = ogs.vgl.freezeObject(
+  geo.ellipsoid(1.0, 1.0, 1.0));
