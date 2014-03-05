@@ -7,7 +7,7 @@
 /*jslint white: true, indent: 2*/
 
 /*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vgl, proj4, document, wflModule*/
+/*global proj4, document, wflModule*/
 //////////////////////////////////////////////////////////////////////////////
 
 wflModule.connectionOptions = function() {
@@ -29,7 +29,7 @@ wflModule.connection = function(options, data) {
   if (!(this instanceof wflModule.connection)) {
     return new wflModule.connection(options, data);
   }
-  vgl.object.call(this, options, data);
+  geo.object.call(this, options, data);
 
   options = typeof options !== 'undefined' ? options : {};
   options = wflModule.utils.merge_options(wflModule.connectionOptions(),
@@ -142,4 +142,4 @@ wflModule.connection = function(options, data) {
   return this;
 };
 
-inherit(wflModule.connection, vgl.object);
+inherit(wflModule.connection, geo.object);

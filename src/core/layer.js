@@ -51,7 +51,7 @@ geo.layer = function(options, source) {
   if (!(this instanceof geo.layer)) {
     return new geo.layer(options, source);
   }
-  vgl.object.call(this);
+  geo.object.call(this);
 
   if (!options) {
     options = geo.layerOptions();
@@ -567,4 +567,4 @@ geo.layer = function(options, source) {
   return this;
 };
 
-inherit(geo.layer, vgl.object);
+inherit(geo.layer, geo.object);

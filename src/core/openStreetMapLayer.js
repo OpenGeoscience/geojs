@@ -40,8 +40,8 @@ geo.openStreetMapLayer = function() {
       m_newFeatures = this.newFeatures(),
       m_expiredFeatures = this.expiredFeatures(),
       m_previousZoom = null,
-      m_predrawTime = vgl.timestamp(),
-      m_updateTime = vgl.timestamp();
+      m_predrawTime = geo.timestamp(),
+      m_updateTime = geo.timestamp();
 
   ////////////////////////////////////////////////////////////////////////////
   /**
