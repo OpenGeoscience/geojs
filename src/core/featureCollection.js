@@ -7,7 +7,7 @@
 /*jslint white: true, indent: 2*/
 
 /*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vgl, document*/
+/*global document*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -23,7 +23,7 @@ geo.featureCollection = function() {
   if (!(this instanceof geo.featureCollection)) {
     return new geo.featureCollection();
   }
-  vgl.object.call(this);
+  geo.object.call(this);
 
   var m_newFeaturesMap = {},
       m_expiredFeaturesMap = {};
@@ -119,4 +119,4 @@ geo.featureCollection = function() {
   };
 };
 
-inherit(geo.featureCollection, vgl.object);
+inherit(geo.featureCollection, geo.object);

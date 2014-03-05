@@ -40,8 +40,8 @@ geo.openStreetMapLayer = function() {
       m_newFeatures = this.newFeatures(),
       m_expiredFeatures = this.expiredFeatures(),
       m_previousZoom = null,
-      m_predrawTime = vgl.timestamp(),
-      m_updateTime = vgl.timestamp();
+      m_predrawTime = geo.timestamp(),
+      m_updateTime = geo.timestamp();
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -125,7 +125,8 @@ geo.openStreetMapLayer = function() {
       this.texture.updateDimensions();
       this.texture.setImage(this);
       this.actor.material().addAttribute(this.texture);
-      this.actor.material().setBinNumber(m_that.binNumber());
+      // Set bin number through new layering interface
+      //this.actor.material().setBinNumber(m_that.binNumber());
       m_newFeatures.push(this.actor);
       m_updateTime.modified();
       request.requestRedraw();
@@ -375,7 +376,6 @@ geo.openStreetMapLayer = function() {
     throw "This layer is not a reference layer so cannot do the convertion";
   };
 
-  this.setBinNumber(vgl.material.RenderBin.Base);
 };
 
 inherit(geo.openStreetMapLayer, geo.featureLayer);

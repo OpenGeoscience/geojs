@@ -37,7 +37,7 @@ geo.map = function(node, options) {
   if (!(this instanceof geo.map)) {
     return new geo.map(node, options);
   }
-  vgl.object.call(this);
+  geo.object.call(this);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -53,8 +53,8 @@ geo.map = function(node, options) {
       m_activeLayer = null,
       m_mapLayer = null,
       m_featureCollection = geo.featureCollection(),
-      m_renderTime = vgl.timestamp(),
-      m_lastPrepareToRenderingTime = vgl.timestamp(),
+      m_renderTime = geo.timestamp(),
+      m_lastPrepareToRenderingTime = geo.timestamp(),
       m_interactorStyle = null,
       m_viewer = null,
       m_renderer = null,
@@ -433,9 +433,6 @@ geo.map = function(node, options) {
   this.addLayer = function(layer) {
     if (layer !== null) {
       // TODO Check if the layer already exists
-      if (!layer.binNumber() || layer.binNumber() === -1) {
-        layer.setBinNumber(Object.keys(m_layers).length);
-      }
 
       // Transform layer
       geo.geoTransform.transformLayer(m_options.gcs, layer);
@@ -1060,4 +1057,4 @@ geo.map = function(node, options) {
   return this;
 };
 
-inherit(geo.map, vgl.object);
+inherit(geo.map, geo.object);

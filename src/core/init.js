@@ -6,7 +6,7 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, continue:true, indent: 2*/
 
-/*global vgl, ogs, vec4, inherit, $*/
+/*global ogs, vec4, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
 if(typeof ogs === 'undefined') {
@@ -40,7 +40,7 @@ ogs.namespace = function(ns_string) {
   return parent;
 };
 
-/** vgl namespace */
+/** geo namespace */
 var geo = ogs.namespace("geo");
 
 //////////////////////////////////////////////////////////////////////////////

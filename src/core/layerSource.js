@@ -7,7 +7,7 @@
 /*jslint white: true, indent: 2*/
 
 /*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vgl, document*/
+/*global document*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -19,7 +19,7 @@ geo.layerSource = function(id, name, path) {
   'use strict';
 
    /** @private */
-  var m_requestDataMTime = vgl.timestamp(),
+  var m_requestDataMTime = geo.timestamp(),
       m_id = id,
       m_name = name,
       m_path = path;
@@ -178,4 +178,4 @@ geo.layerSource = function(id, name, path) {
   };
 };
 
-inherit(geo.layerSource, vgl.object);
+inherit(geo.layerSource, geo.object);

@@ -7,7 +7,7 @@
 /*jslint white: true, indent: 2*/
 
 /*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vgl, jQuery, document, wflModule*/
+/*global geo, jQuery, document, wflModule*/
 //////////////////////////////////////////////////////////////////////////////
 
 var nextFunctionId = wflModule.utils.createIdCounter();
@@ -27,7 +27,7 @@ wflModule.module = function(options, data) {
   if (!(this instanceof wflModule.module)) {
     return new wflModule.module(options, data);
   }
-  vgl.object.call(this);
+  geo.object.call(this);
 
   /** @private */
   var m_that = this,
@@ -425,4 +425,4 @@ wflModule.module = function(options, data) {
   return this;
 };
 
-inherit(wflModule.module, vgl.object);
+inherit(wflModule.module, geo.object);

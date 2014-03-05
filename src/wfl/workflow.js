@@ -7,7 +7,7 @@
 /*jslint white: true, indent: 2*/
 
 /*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vgl, proj4, document, climatePipesStyle, wflModule*/
+/*global proj4, document, climatePipesStyle, wflModule*/
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -76,7 +76,7 @@ wflModule.workflow = function(options) {
   if (!(this instanceof wflModule.workflow)) {
     return new wflModule.workflow(options);
   }
-  vgl.object.call(this);
+  geo.object.call(this);
 
   options = typeof options !== 'undefined' ? options : {};
   options = wflModule.utils.merge_options(wflModule.workflowOptions(), options);
@@ -389,4 +389,4 @@ wflModule.workflow = function(options) {
   return this;
 };
 
-inherit(wflModule.workflow, vgl.object);
+inherit(wflModule.workflow, geo.object);
