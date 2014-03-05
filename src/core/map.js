@@ -433,9 +433,6 @@ geo.map = function(node, options) {
   this.addLayer = function(layer) {
     if (layer !== null) {
       // TODO Check if the layer already exists
-      if (!layer.binNumber() || layer.binNumber() === -1) {
-        layer.setBinNumber(Object.keys(m_layers).length);
-      }
 
       // Transform layer
       geo.geoTransform.transformLayer(m_options.gcs, layer);
