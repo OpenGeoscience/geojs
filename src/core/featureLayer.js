@@ -7,7 +7,7 @@
 /*jslint white: true, indent: 2, continue:true*/
 
 /*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vglModule, document, gl, vec3*/
+/*global vgl, document, gl, vec3*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -34,8 +34,8 @@ geo.featureLayer = function(options, feature) {
       m_features = [],
       m_newFeatures = [],
       m_expiredFeatures = [],
-      m_predrawTime = ogs.vgl.timestamp(),
-      m_updateTime = ogs.vgl.timestamp(),
+      m_predrawTime = vgl.timestamp(),
+      m_updateTime = vgl.timestamp(),
       m_legend = null,
       m_invalidData = true,
       m_visible = true;
@@ -148,11 +148,11 @@ geo.featureLayer = function(options, feature) {
 
       // Create new lookup table if none exist
       if (!lut) {
-        lut = vglModule.lookupTable(varnames[0]);
+        lut = vgl.lookupTable(varnames[0]);
         this.setLookupTable(lut);
       }
       lut.setRange(this.dataSource().getScalarRange(varnames[0]));
-      m_legend = vglModule.utils.createColorLegend(
+      m_legend = vgl.utils.createColorLegend(
         varnames[0], lut, this.legendOrigin(), this.legendWidth(),
         this.legendHeight(), 10, 0);
     }
@@ -286,14 +286,14 @@ geo.featureLayer = function(options, feature) {
 
     for(i = 0; i < data.length; ++i) {
       switch(data[i].type()) {
-        case vglModule.data.geometry:
+        case vgl.data.geometry:
           geomFeature = geo.geometryFeature(data[i]);
           geomFeature.setVisible(this.visible());
           geomFeature.material().setBinNumber(this.binNumber());
           geomFeature.setLookupTable(lut);
           m_newFeatures.push(geomFeature);
           break;
-        case vglModule.data.raster:
+        case vgl.data.raster:
           break;
         default:
           console.log('[warning] Data type not handled', data.type());
@@ -416,7 +416,7 @@ geo.featureLayer = function(options, feature) {
    */
     ////////////////////////////////////////////////////////////////////////////
   this.queryLocation = function (location) {
-    var attrScalar = vglModule.vertexAttributeKeys.Scalar,
+    var attrScalar = vgl.vertexAttributeKeys.Scalar,
       features = this.features(),
       mapper, geomData, p, prim, idx, indices, ia, ib, ic, va, vb, vc,
       point, isLeftTurn, triArea, totalArea, alpha, beta, gamma, sa,

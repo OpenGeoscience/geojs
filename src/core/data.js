@@ -7,7 +7,7 @@
 /*jslint white: true, indent: 2*/
 
 /*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*vglModule, document*/
+/*vgl, document*/
 //////////////////////////////////////////////////////////////////////////////
 geo.countries = {
   "type": "FeatureCollection",

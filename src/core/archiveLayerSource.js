@@ -7,7 +7,7 @@
 /*jslint white: true, indent: 2*/
 
 /*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vglModule, jQuery, document*/
+/*global vgl, jQuery, document*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -117,7 +117,7 @@ geo.archiveLayerSource = function(id, name, path, config, vars, onError) {
           console.log(errorString);
           m_onError(errorString);
         } else {
-          reader = ogs.vgl.geojsonReader();
+          reader = vgl.geojsonReader();
           retVal = reader.readGJObject(jQuery.parseJSON(response.result.data[0]));
         }
       },

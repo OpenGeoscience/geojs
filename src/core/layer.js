@@ -7,7 +7,7 @@
 /*jslint white: true, indent: 2*/
 
 /*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vglModule, document*/
+/*global vgl, document*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -27,7 +27,7 @@ geo.layerOptions = function() {
   this.opacity = 0.5;
   this.showAttribution = true;
   this.visible = true;
-  this.binNumber = ogs.vgl.material.RenderBin.Default;
+  this.binNumber = vgl.material.RenderBin.Default;
 
   return this;
 };
@@ -51,7 +51,7 @@ geo.layer = function(options, source) {
   if (!(this instanceof geo.layer)) {
     return new geo.layer(options, source);
   }
-  ogs.vgl.object.call(this);
+  vgl.object.call(this);
 
   if (!options) {
     options = geo.layerOptions();
@@ -65,8 +65,8 @@ geo.layer = function(options, source) {
       m_gcs = 'EPSG:4326',
       m_showAttribution = true,
       m_visible = true,
-      m_binNumber = ogs.vgl.material.RenderBin.Transparent,
-      m_defaultLookupTable = vglModule.lookupTable(),
+      m_binNumber = vgl.material.RenderBin.Transparent,
+      m_defaultLookupTable = vgl.lookupTable(),
       m_lookupTables = {},
       m_legendOrigin = [20, 60, 0.0],
       m_legendWidth = 400,
@@ -567,4 +567,4 @@ geo.layer = function(options, source) {
   return this;
 };
 
-inherit(geo.layer, ogs.vgl.object);
+inherit(geo.layer, vgl.object);

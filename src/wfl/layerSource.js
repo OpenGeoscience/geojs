@@ -7,7 +7,7 @@
 /*jslint white: true, indent: 2*/
 
 /*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vglModule, jQuery, document, wflModule*/
+/*global vgl, jQuery, document, wflModule*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -88,7 +88,7 @@ wflModule.layerSource = function(id, name, path, config, vars, workflow, onError
           console.log(errorString);
           m_onError(errorString);
         } else {
-          reader = ogs.vgl.geojsonReader();
+          reader = vgl.geojsonReader();
           retVal = reader.readGJObject(jQuery.parseJSON(response.result));
         }
       },

@@ -31,10 +31,10 @@ function processCSVData(csvdata) {
 $(function() {
     var mapOptions = {
       zoom : 6,
-      center : geoModule.latlng(0.0, 0.0)
+      center : geo.latlng(0.0, 0.0)
     };
 
-    var myMap = geoModule.map(document.getElementById("glcanvas"), mapOptions),
+    var myMap = geo.map(document.getElementById("glcanvas"), mapOptions),
         canvas = document.getElementById('glcanvas'),
         table = [],
         citieslatlon = [],
@@ -84,11 +84,11 @@ $(function() {
           var image = new Image();
           image.src = '/data/spark.png';
           image.onload = function() {
-            var pointLayer = geoModule.featureLayer({
+            var pointLayer = geo.featureLayer({
               "opacity" : 1,
               "showAttribution" : 1,
               "visible" : 1
-            }, geoModule.pointSpritesFeature(image, citieslatlon, colors));
+            }, geo.pointSpritesFeature(image, citieslatlon, colors));
             pointLayer.setName('cities');
            myMap.addLayer(pointLayer);
 	   myMap.draw();
