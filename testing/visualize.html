@@ -30,14 +30,14 @@
 <script>
     var mapOptions = {
         zoom: 6,
-        center: geoModule.latlng(0.0, 0.0)
+        center: geo.latlng(0.0, 0.0)
     };
 
     var canvas = document.getElementById('glcanvas'),
-        map = geoModule.map(documemt.getElementById("glcanvas"), mapOptions);
+        map = geo.map(documemt.getElementById("glcanvas"), mapOptions);
 
     // Create feature layer
-    var pointLayer = geoModule.featureLayer(),
+    var pointLayer = geo.featureLayer(),
         reader = vglModule.geojsonReader(),
         features = [];
 
@@ -50,7 +50,7 @@
         var mapper = ogs.vgl.mapper();
         mapper.setGeometryData(geoms[i]);
         var material = vglModule.utils.createGeometryMaterial();
-        var feature = geoModule.feature();
+        var feature = geo.feature();
         feature.setMapper(mapper);
         features.push(feature);
       }
