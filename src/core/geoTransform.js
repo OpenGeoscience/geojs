@@ -31,8 +31,9 @@ geo.geoTransform.osmTransformFeature = function(destGcs, feature) {
     return;
   }
 
-  if (feature.gcs() === destGcs)
-      return;
+  if (feature.gcs() === destGcs) {
+    return;
+  }
 
   var geometryDataArray = [],
       noOfGeoms = 0,
@@ -126,8 +127,9 @@ geo.geoTransform.transformFeature = function(destGcs, feature) {
     return;
   }
 
-  if (feature.gcs() === destGcs)
+  if (feature.gcs() === destGcs) {
     return;
+  }
 
   var geometryDataArray = [],
       noOfGeoms = 0,
@@ -217,7 +219,7 @@ geo.geoTransform.transformFeature = function(destGcs, feature) {
   }
 
   // Update the features gcs field
-  feature.setGcs(desGcs);
+  feature.setGcs(destGcs);
 };
 
 //////////////////////////////////////////////////////////////////////////////

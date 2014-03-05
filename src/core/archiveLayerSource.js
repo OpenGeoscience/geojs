@@ -122,7 +122,7 @@ geo.archiveLayerSource = function(id, name, path, config, vars, onError) {
         }
       },
       error: function(jqXHR, textStatus, errorThrown ) {
-        errorString = "Error reading " + m_name + ": " + errorThrown;
+        errorString = "Error reading " + name + ": " + errorThrown;
         console.log(errorString);
         m_onError(errorString);
       }
