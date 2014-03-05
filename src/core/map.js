@@ -7,7 +7,7 @@
 /*jslint white: true, indent: 2, continue: true*/
 
 /*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vglModule, document, vec2, vec3, vec4, proj4*/
+/*global vgl, document, vec2, vec3, vec4, proj4*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -37,7 +37,7 @@ geo.map = function(node, options) {
   if (!(this instanceof geo.map)) {
     return new geo.map(node, options);
   }
-  vglModule.object.call(this);
+  vgl.object.call(this);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -53,8 +53,8 @@ geo.map = function(node, options) {
       m_activeLayer = null,
       m_mapLayer = null,
       m_featureCollection = geo.featureCollection(),
-      m_renderTime = vglModule.timestamp(),
-      m_lastPrepareToRenderingTime = vglModule.timestamp(),
+      m_renderTime = vgl.timestamp(),
+      m_lastPrepareToRenderingTime = vgl.timestamp(),
       m_interactorStyle = null,
       m_viewer = null,
       m_renderer = null,
@@ -84,7 +84,7 @@ geo.map = function(node, options) {
 
   // Initialize
   m_interactorStyle = geo.mapInteractorStyle();
-  m_viewer = vglModule.viewer(m_node);
+  m_viewer = vgl.viewer(m_node);
   m_viewer.setInteractorStyle(m_interactorStyle);
   m_viewer.init();
   m_viewer.renderWindow().resize($(m_node).width(), $(m_node).height());
@@ -609,7 +609,7 @@ geo.map = function(node, options) {
       result = layer.visible();
     } else {
       // Load countries data first
-      reader = vglModule.geojsonReader();
+      reader = vgl.geojsonReader();
       geoms = reader.readGJObject(geo.countries);
       // @todo if opacity is on layer, solid color should be too
       layer = geo.featureLayer({
@@ -960,8 +960,8 @@ geo.map = function(node, options) {
   /**
    * Sets or gets the viewer for this map
    *
-   * @param newViewer {vglModule.viewer}
-   * @returns {geo.map|vglModule.viewer}
+   * @param newViewer {vgl.viewer}
+   * @returns {geo.map|vgl.viewer}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.viewer = function(newViewer) {
@@ -1004,7 +1004,7 @@ geo.map = function(node, options) {
   /**
    * Gets the interactorStyle for this map
    *
-   * @returns {vglModule.interactorStyle]
+   * @returns {vgl.interactorStyle]
    */
   ////////////////////////////////////////////////////////////////////////////
   this.getInteractorStyle = function() {
@@ -1060,4 +1060,4 @@ geo.map = function(node, options) {
   return this;
 };
 
-inherit(geo.map, vglModule.object);
+inherit(geo.map, vgl.object);

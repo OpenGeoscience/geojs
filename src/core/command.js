@@ -7,7 +7,7 @@
 /*jslint white: true, indent: 2*/
 
 /*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vglModule, document*/
+/*global vgl, document*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -23,12 +23,12 @@ geo.command = function() {
   if (!(this instanceof geo.command)) {
     return new geo.command();
   }
-  ogs.vgl.command.call(this);
+  vgl.command.call(this);
 
   return this;
 };
 
-inherit(geo.command, ogs.vgl.command);
+inherit(geo.command, vgl.command);
 
 //////////////////////////////////////////////////////////////////////////////
 /**

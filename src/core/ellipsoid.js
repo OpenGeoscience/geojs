@@ -7,7 +7,7 @@
 /*jslint white: true, indent: 2*/
 
 /*global geo, ogs, inherit, $, HTMLCanvasElement, Image, vec3*/
-/*global vglModule, document*/
+/*global vgl, document*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -31,9 +31,9 @@ geo.ellipsoid = function(x, y, z) {
     return new geo.ellipsoid(x, y, z);
   }
 
-  x = ogs.vgl.defaultValue(x, 0.0);
-  y = ogs.vgl.defaultValue(y, 0.0);
-  z = ogs.vgl.defaultValue(z, 0.0);
+  x = vgl.defaultValue(x, 0.0);
+  y = vgl.defaultValue(y, 0.0);
+  z = vgl.defaultValue(z, 0.0);
 
   if (x < 0.0 || y < 0.0 || z < 0.0) {
     return console.log('[error] Al radii components must be greater than zero');
@@ -148,7 +148,7 @@ geo.ellipsoid = function(x, y, z) {
    * Converts the provided geographic latitude, longitude,
    * and height to WGS84 coordinate system
    *
-   * @param {ogs.vgl.geometryData} geom
+   * @param {vgl.geometryData} geom
    */
   ////////////////////////////////////////////////////////////////////////////
   this.transformGeometry = function(geom) {
@@ -156,16 +156,16 @@ geo.ellipsoid = function(x, y, z) {
       throw '[error] Failed to transform to cartesian. Invalid geometry.';
     }
 
-    var sourceData = geom.sourceData(ogs.vgl.vertexAttributeKeys.Position),
+    var sourceData = geom.sourceData(vgl.vertexAttributeKeys.Position),
         sourceDataArray = sourceData.data(),
         noOfComponents =  sourceData.attributeNumberOfComponents(
-          ogs.vgl.vertexAttributeKeys.Position),
+          vgl.vertexAttributeKeys.Position),
         stride = sourceData.attributeStride(
-          ogs.vgl.vertexAttributeKeys.Position),
+          vgl.vertexAttributeKeys.Position),
         offset = sourceData.attributeOffset(
-          ogs.vgl.vertexAttributeKeys.Position),
+          vgl.vertexAttributeKeys.Position),
         sizeOfDataType = sourceData.sizeOfAttributeDataType(
-          ogs.vgl.vertexAttributeKeys.Position),
+          vgl.vertexAttributeKeys.Position),
         index = null,
         count = sourceDataArray.length * (1.0 / noOfComponents),
         gamma = null,
@@ -211,7 +211,7 @@ geo.ellipsoid = function(x, y, z) {
  *
  */
 ////////////////////////////////////////////////////////////////////////////
-geo.ellipsoid.WGS84 = ogs.vgl.freezeObject(
+geo.ellipsoid.WGS84 = vgl.freezeObject(
   geo.ellipsoid(6378137.0, 6378137.0, 6356752.3142451793));
 
 ////////////////////////////////////////////////////////////////////////////
@@ -220,5 +220,5 @@ geo.ellipsoid.WGS84 = ogs.vgl.freezeObject(
  * @memberof ellipsoid
  */
 ////////////////////////////////////////////////////////////////////////////
-geo.ellipsoid.UNIT_SPHERE = ogs.vgl.freezeObject(
+geo.ellipsoid.UNIT_SPHERE = vgl.freezeObject(
   geo.ellipsoid(1.0, 1.0, 1.0));

@@ -7,7 +7,7 @@
 /*jslint white: true, indent: 2*/
 
 /*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vglModule, document*/
+/*global vgl, document*/
 //////////////////////////////////////////////////////////////////////////////
 
 geo.prepareForRenderRequest = function(mapOptions, viewer, featureCollection) {
@@ -17,7 +17,7 @@ geo.prepareForRenderRequest = function(mapOptions, viewer, featureCollection) {
     return new geo.prepareForRenderRequest(mapOptions,
       viewer, featureCollection);
   }
-  ogs.vgl.object.call(this);
+  vgl.object.call(this);
 
    var m_mapOptions = mapOptions,
        m_viewer = viewer,
@@ -60,4 +60,4 @@ geo.prepareForRenderRequest = function(mapOptions, viewer, featureCollection) {
   };
 };
 
-inherit(geo.prepareForRenderRequest, ogs.vgl.object);
+inherit(geo.prepareForRenderRequest, vgl.object);

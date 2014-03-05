@@ -7,7 +7,7 @@
 /*jslint white: true, indent: 2*/
 
 /*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vglModule, uiModule, srvModule, window, document, d3*/
+/*global vgl, uiModule, srvModule, window, document, d3*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -46,7 +46,7 @@ srvModule.webSocket = function(options) {
     return new srvModule.webSocket(options);
   }
 
-  vglModule.object.call(this);
+  vgl.object.call(this);
 
   /** @private */
   var m_that = this,
@@ -265,4 +265,4 @@ srvModule.webSocket = function(options) {
   return this;
 };
 
-inherit(srvModule.webSocket, ogs.vgl.object);
+inherit(srvModule.webSocket, vgl.object);

@@ -7,7 +7,7 @@
 /*jslint white: true, indent: 2*/
 
 /*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vglModule, proj4, document*/
+/*global vgl, proj4, document*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -57,7 +57,7 @@ geo.geoTransform.osmTransformFeature = function(destGcs, feature) {
       source = new proj4.Proj(srcGcs),
       dest = new proj4.Proj(destGcs);
 
-  if (feature.mapper() instanceof ogs.vgl.groupMapper) {
+  if (feature.mapper() instanceof vgl.groupMapper) {
     geometryDataArray = feature.mapper().geometryDataArray();
   } else {
     geometryDataArray.push(feature.mapper().geometryData());
@@ -68,16 +68,16 @@ geo.geoTransform.osmTransformFeature = function(destGcs, feature) {
   for (index = 0; index < noOfGeoms; ++index) {
     geometryData = geometryDataArray[index];
     posSourceData = geometryData.sourceData(
-      vglModule.vertexAttributeKeys.Position);
+      vgl.vertexAttributeKeys.Position);
     data = posSourceData.data();
     noOfComponents = posSourceData.attributeNumberOfComponents(
-      vglModule.vertexAttributeKeys.Position);
+      vgl.vertexAttributeKeys.Position);
     stride = posSourceData.attributeStride(
-      vglModule.vertexAttributeKeys.Position);
+      vgl.vertexAttributeKeys.Position);
     offset = posSourceData.attributeOffset(
-      vglModule.vertexAttributeKeys.Position);
+      vgl.vertexAttributeKeys.Position);
     sizeOfDataType = posSourceData.sizeOfAttributeDataType(
-      vglModule.vertexAttributeKeys.Position);
+      vgl.vertexAttributeKeys.Position);
     count = data.length / noOfComponents;
 
     source = new proj4.Proj(srcGcs);
@@ -153,7 +153,7 @@ geo.geoTransform.transformFeature = function(destGcs, feature) {
       source = new proj4.Proj(srcGcs),
       dest = new proj4.Proj(destGcs);
 
-  if (feature.mapper() instanceof ogs.vgl.groupMapper) {
+  if (feature.mapper() instanceof vgl.groupMapper) {
     geometryDataArray = feature.mapper().geometryDataArray();
   } else {
     geometryDataArray.push(feature.mapper().geometryData());
@@ -164,16 +164,16 @@ geo.geoTransform.transformFeature = function(destGcs, feature) {
   for (index = 0; index < noOfGeoms; ++index) {
     geometryData = geometryDataArray[index];
     posSourceData = geometryData.sourceData(
-      vglModule.vertexAttributeKeys.Position);
+      vgl.vertexAttributeKeys.Position);
     data = posSourceData.data();
     noOfComponents = posSourceData.attributeNumberOfComponents(
-      vglModule.vertexAttributeKeys.Position);
+      vgl.vertexAttributeKeys.Position);
     stride = posSourceData.attributeStride(
-      vglModule.vertexAttributeKeys.Position);
+      vgl.vertexAttributeKeys.Position);
     offset = posSourceData.attributeOffset(
-      vglModule.vertexAttributeKeys.Position);
+      vgl.vertexAttributeKeys.Position);
     sizeOfDataType = posSourceData.sizeOfAttributeDataType(
-      vglModule.vertexAttributeKeys.Position);
+      vgl.vertexAttributeKeys.Position);
     count = data.length;
 
     source = new proj4.Proj(srcGcs);

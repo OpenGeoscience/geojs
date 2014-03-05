@@ -7,7 +7,7 @@
 /*jslint white: true, continue:true, indent: 2*/
 
 /*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vglModule, vec4, document*/
+/*global vgl, vec4, document*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -40,8 +40,8 @@ geo.openStreetMapLayer = function() {
       m_newFeatures = this.newFeatures(),
       m_expiredFeatures = this.expiredFeatures(),
       m_previousZoom = null,
-      m_predrawTime = ogs.vgl.timestamp(),
-      m_updateTime = ogs.vgl.timestamp();
+      m_predrawTime = vgl.timestamp(),
+      m_updateTime = vgl.timestamp();
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -98,7 +98,7 @@ geo.openStreetMapLayer = function() {
         lly = -totalLatDegrees * 0.5 + y * latPerTile,
         urx = -180.0 + (x + 1) * lonPerTile,
         ury = -totalLatDegrees * 0.5 + (y + 1) * latPerTile,
-        actor = ogs.vgl.utils.createTexturePlane(llx, lly,
+        actor = vgl.utils.createTexturePlane(llx, lly,
           0.0, urx, lly, 0.0, llx, ury, 0.0),
         tile = new Image();
         //console.log("New tile: ["+llx+" , "+lly+"] ["+urx+" , "+ury+"]");
@@ -113,7 +113,7 @@ geo.openStreetMapLayer = function() {
     //   + "/" + (Math.pow(2,zoom) - 1 - y) + ".png";
     tile.src = "http://otile1.mqcdn.com/tiles/1.0.0/osm/" + zoom + "/" +
       (x) + "/" + (Math.pow(2,zoom) - 1 - y) + ".jpg";
-    tile.texture = new vglModule.texture();
+    tile.texture = new vgl.texture();
     tile.onload = function() {
       if (this.UNLOAD) {
         this.LOADING = false;
@@ -375,7 +375,7 @@ geo.openStreetMapLayer = function() {
     throw "This layer is not a reference layer so cannot do the convertion";
   };
 
-  this.setBinNumber(ogs.vgl.material.RenderBin.Base);
+  this.setBinNumber(vgl.material.RenderBin.Base);
 };
 
 inherit(geo.openStreetMapLayer, geo.featureLayer);

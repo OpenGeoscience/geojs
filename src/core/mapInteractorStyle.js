@@ -7,7 +7,7 @@
 /*jslint white: true, indent: 2*/
 
 /*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vglModule, vec4, document*/
+/*global vgl, vec4, document*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -23,7 +23,7 @@ geo.mapInteractorStyle = function() {
   if (!(this instanceof geo.mapInteractorStyle)) {
     return new geo.mapInteractorStyle();
   }
-  ogs.vgl.interactorStyle.call(this);
+  vgl.interactorStyle.call(this);
   var m_that = this,
       m_map,
       m_leftMouseButtonDown = false,
@@ -51,7 +51,7 @@ geo.mapInteractorStyle = function() {
         x: 0,
         y: 0
       },
-      m_picker = new ogs.vgl.picker();
+      m_picker = new vgl.picker();
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -145,7 +145,7 @@ geo.mapInteractorStyle = function() {
 
         m_camera.pan(-m_dx, -m_dy, -m_dz);
         $(m_that).trigger(geo.command.updateViewPositionEvent);
-        $(m_that).trigger(vglModule.command.leftButtonPressEvent);
+        $(m_that).trigger(vgl.command.leftButtonPressEvent);
       }
     }
     if (m_middileMouseButtonDown) {
@@ -158,7 +158,7 @@ geo.mapInteractorStyle = function() {
       } else if (xrot < 0 && angle > 0) {
         m_camera.rotate(0, xrot);
       }
-      $(m_that).trigger(vglModule.command.middleButtonPressEvent);
+      $(m_that).trigger(vgl.command.middleButtonPressEvent);
     }
     if (m_rightMouseButtonDown) {
       m_zTrans = (m_currentMousePos.y - m_mouseLastPos.y) / m_height;
@@ -171,7 +171,7 @@ geo.mapInteractorStyle = function() {
       }
 
       $(m_that).trigger(geo.command.updateViewZoomEvent);
-      $(m_that).trigger(vglModule.command.rightButtonPressEvent);
+      $(m_that).trigger(vgl.command.rightButtonPressEvent);
     }
     m_mouseLastPos.x = m_currentMousePos.x;
     m_mouseLastPos.y = m_currentMousePos.y;
@@ -363,7 +363,7 @@ geo.mapInteractorStyle = function() {
   return this;
 };
 
-inherit(geo.mapInteractorStyle, vglModule.interactorStyle);
+inherit(geo.mapInteractorStyle, vgl.interactorStyle);
 
 /* Local Variables:   */
 /* mode: js           */

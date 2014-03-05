@@ -7,7 +7,7 @@
 /*jslint white: true, indent: 2*/
 
 /*global geo, ogs, inherit, $, HTMLCanvasElement, Image, wflModule*/
-/*global vglModule, proj4, document, climatePipesStyle, window, reg*/
+/*global vgl, proj4, document, climatePipesStyle, window, reg*/
 //////////////////////////////////////////////////////////////////////////////
 
 "use strict";

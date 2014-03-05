@@ -7,7 +7,7 @@
 /*jslint white: true, indent: 2*/
 
 /*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vglModule, document*/
+/*global vgl, document*/
 //////////////////////////////////////////////////////////////////////////////
 
 geo.updateRequest = function(time, options, viewer, node) {
@@ -16,7 +16,7 @@ geo.updateRequest = function(time, options, viewer, node) {
   if (!(this instanceof geo.updateRequest)) {
     return new geo.updateRequest(time, options, viewer, node);
   }
-  ogs.vgl.object.call(this);
+  vgl.object.call(this);
 
    var m_that = this,
        m_time = time,
@@ -70,4 +70,4 @@ geo.updateRequest = function(time, options, viewer, node) {
   };
 };
 
-inherit(geo.updateRequest, ogs.vgl.object);
+inherit(geo.updateRequest, vgl.object);
