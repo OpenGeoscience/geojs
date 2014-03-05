@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @module ogs.geojs
+ * @module geojs
  */
 
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/

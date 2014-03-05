@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @module ogs.geo
+ * @module geo
  */
 
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
@@ -87,8 +87,8 @@ inherit(geo.feature, vglModule.actor);
  * Create a new instance of planeFeature
  *
  * @class
- * Create a plane feature given a lower left corner point {ogs.geo.latlng}
- * and and upper right corner point {ogs.geo.latlng}
+ * Create a plane feature given a lower left corner point {geo.latlng}
+ * and and upper right corner point {geo.latlng}
  * @param lowerleft
  * @param upperright
  * @returns {geo.planeFeature}

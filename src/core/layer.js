@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @module ogs.geo
+ * @module geo
  */
 
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
@@ -34,7 +34,7 @@ geo.layerOptions = function() {
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Base class for all layer types ogs.geo.layer represents any object that be
+ * Base class for all layer types geo.layer represents any object that be
  * rendered on top of the map base. This could include image, points, line, and
  * polygons.
  *
