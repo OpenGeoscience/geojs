@@ -21,7 +21,7 @@
  * @returns {geo.featureLayer}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.featureLayer = function(options, features) {
+geo.featureLayer = function(options, feature) {
   "use strict";
   if (!(this instanceof geo.featureLayer)) {
     return new geo.featureLayer(options, feature);
@@ -37,13 +37,12 @@ geo.featureLayer = function(options, features) {
       m_predrawTime = vgl.timestamp(),
       m_updateTime = vgl.timestamp(),
       m_legend = null,
+      m_usePointSprites = false,
+      m_pointSpritesImage = null,
       m_invalidData = true,
       m_visible = true;
 
-  if (features instanceof Array) {
-    m_newFeatures = m_newFeatures.concat(features);
-    m_features = m_features.concat(features);
-  } else if (features !== null) {
+  if (feature) {
     m_newFeatures.push(feature);
     m_features.push(feature);
   }
@@ -59,6 +58,48 @@ geo.featureLayer = function(options, features) {
   ////////////////////////////////////////////////////////////////////////////
   this.time = function() {
      return m_time;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return if using point sprites for rendering points
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.isUsingPointSprites = function() {
+    return m_usePointSprites;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set use point sprites for geometries that only has points
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.setUsePointSprites = function(val) {
+    if (val !== m_usePointSprites) {
+      m_usePointSprites = val;
+      this.modified();
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return image for the point sprites
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.pointSpritesImage = function() {
+    return m_pointSpritesImage;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set use point sprites for geometries that only has points
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.setPointSpritesImage = function(psimage) {
+    if (psimage !== m_pointSpritesImage) {
+      m_pointSpritesImage = psimage;
+      this.modified();
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -251,7 +292,7 @@ geo.featureLayer = function(options, features) {
       return;
     }
 
-    var i = 0, j = 0,
+    var i = 0,
         time = request.time(),
         data = null,
         varnames = null,
@@ -291,10 +332,20 @@ geo.featureLayer = function(options, features) {
     for(i = 0; i < data.length; ++i) {
       switch(data[i].type()) {
         case vgl.data.geometry:
-          geomFeature = geo.geometryFeature(data[i]);
-          geomFeature.setVisible(this.visible());
-          geomFeature.material().setBinNumber(this.binNumber());
-          geomFeature.setLookupTable(lut);
+            geomFeature = geo.geometryFeature(data[i]);
+            geomFeature.setVisible(this.visible());
+            geomFeature.material().setBinNumber(this.binNumber());
+            geomFeature.setLookupTable(lut);
+          // Check if geometry has points only
+          // TODO this code could be moved to vgl
+          noOfPrimitives = data[i].numberOfPrimitives();
+          if (m_usePointSprites && noOfPrimitives === 1 &&
+              data[i].primitive(0).primitiveType() === gl.POINTS) {
+             geomFeature.setMaterial(vgl.utils.createPointSpritesMaterial(
+              m_pointSpritesImage));
+          } else {
+
+          }
           m_newFeatures.push(geomFeature);
           break;
         case vgl.data.raster:
