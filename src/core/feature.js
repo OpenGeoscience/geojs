@@ -6,8 +6,7 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, indent: 2*/
 
-/*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vgl, document*/
+/*global geo, ogs, inherit, document$*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -18,130 +17,64 @@
  * @returns {geo.feature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.feature = function() {
+geo.feature = function(cfg) {
   "use strict";
   if (!(this instanceof geo.feature)) {
-    return new geo.feature();
+    return new geo.feature(cfg);
   }
-  vgl.object.call(this);
+  geo.object.call(this);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
-  var m_colors = null,
-      m_lookupTable = null,
-      m_style = {},
-      m_gcs = "EPSG:4326";
+  cfg = cfg || {};
+
+  var m_style = cfg.style === undefined ? {} : cfg.style,
+      m_gcs = cgf.gcs === undefined ? "EPSG:4326" : cfg.gcs;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get colors
+   * Get/Set style used by the feature
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.colors = function() {
-    return m_colors;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Set colors
-   *
-   * If both colors and lookup table are set, then colors will be
-   * used to color the feature. It should be noted that colors could
-   * be a single value, an array, or a function.
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.setColors = function(colors) {
-    if (colors !== m_colors) {
-      m_colors = colors;
+  this.style = function(val) {
+    if (val === undefined ) {
+      return m_style;
+    } else {
+      m_style = val;
       this.modified();
-      return true;
+      return this;
     }
-    return false;
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get lookup table
+   * Get/Set projection of the feature
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.lookupTable = function() {
-    return m_lookupTable;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Set lookup table
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.setLookupTable = function(lut) {
-    if (lut !== m_lookupTable) {
-      m_lookupTable = lut;
+  this.gcs = function(val) {
+    if (val === undefined ) {
+      return m_gcs;
+    } else {
+      m_gcs = val;
       this.modified();
-      return true;
+      return this;
     }
-    return false;
   };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get style
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.style = function() {
-    return m_style;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Set style of the feature
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.setStyle = function(style) {
-    if (style !== m_style) {
-      m_style = style;
-      this.modified();
-      return true;
-    }
-    return false;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get projection
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.gcs = function() {
-    return m_gcs;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Set the projection
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.setGcs = function(gcs) {
-    if (gcs !== m_gcs) {
-      m_gcs = gcs;
-      this.modified();
-      return true;
-    }
-
-    return false;
-  };
-
 
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Update
+   *
+   * Derived class should implement this
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.update = function() {
+  this._update = function() {
   };
 
   return this;
 };
 
-inherit(geo.feature, vgl.object);
+inherit(geo.feature, geo.object);

@@ -6,8 +6,7 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, indent: 2*/
 
-/*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vgl, document*/
+/*global geo, ogs, inherit, document$*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -18,15 +17,19 @@
  * @returns {geo.pointFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.pointFeature = function() {
+geo.pointFeature = function(cfg) {
   "use strict";
   if (!(this instanceof geo.pointFeature)) {
-    return new geo.pointFeature();
+    return new geo.pointFeature(cfg);
   }
-  geo.feature.call(this);
-  this.setStyle({"size":[1.0],
-                 "color": [{1.0, 1.0, 1.0, 1.0}],
-                 "image": null});
+  cfg = cfg || {};
+  geo.feature.call(this, cfg);
+
+  cfg.style = cfg.style === undefined ? {"size":[1.0],
+              "color": [{1.0, 1.0, 1.0, 1.0}],
+              "point_sprites": false,
+              "image": null} : cfg.style;
+
   return this;
 };
 
