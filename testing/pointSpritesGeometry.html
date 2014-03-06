@@ -73,13 +73,12 @@ $(function() {
 
         for (i = 0; i < geoms.length; ++i) {
           geomFeature = geo.geometryFeature(geoms[i])
-          geomFeature.setMaterial(vgl.utils.createPointSpritesMaterial(image));
+          geomLayer.setUsePointSprites(true);
+          geomLayer.setPointSpritesImage(image);
           geomLayer = geo.featureLayer({
             "opacity" : 1,
             "showAttribution" : 1,
             "visible" : 1}, geomFeature);
-          geomLayer.setUsePointSprites(true);
-          geomLayer.setPointSpritesImage(image);
           myMap.addLayer(geomLayer);
           myMap.draw();
         }
