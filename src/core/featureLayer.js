@@ -338,9 +338,9 @@ geo.featureLayer = function(options, feature) {
             geomFeature.setLookupTable(lut);
           // Check if geometry has points only
           // TODO this code could be moved to vgl
-          noOfPrimitives = geom.numberOfPrimitives();
+          noOfPrimitives = data[i].numberOfPrimitives();
           if (m_usePointSprites && noOfPrimitives === 1 &&
-              geom.source(j).primitiveType() === gl.POINTS) {
+              data[i].source(j).primitiveType() === gl.POINTS) {
              geomFeature.setMaterial(vgl.utils.createPointSpritesMaterial(
               m_pointSpritesImage));
           } else {
