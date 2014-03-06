@@ -38,7 +38,7 @@ geo.featureLayer = function(options, feature) {
       m_updateTime = vgl.timestamp(),
       m_legend = null,
       m_usePointSprites = false,
-      m_usePointSpritesImage = null,
+      m_pointSpritesImage = null,
       m_invalidData = true,
       m_visible = true;
 
@@ -87,7 +87,7 @@ geo.featureLayer = function(options, feature) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.pointSpritesImage = function() {
-    return m_usePointSpritesImage;
+    return m_pointSpritesImage;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -96,8 +96,8 @@ geo.featureLayer = function(options, feature) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.setPointSpritesImage = function(psimage) {
-    if (psimage !== m_usePointSpritesImage) {
-      m_usePointSpritesImage = psimage;
+    if (psimage !== m_pointSpritesImage) {
+      m_pointSpritesImage = psimage;
       this.modified();
     }
   };
@@ -342,7 +342,7 @@ geo.featureLayer = function(options, feature) {
           if (m_usePointSprites && noOfPrimitives === 1 &&
               geom.source(j).primitiveType() === gl.POINTS) {
              geomFeature.setMaterial(vgl.utils.createPointSpritesMaterial(
-              m_usePointSpritesImage));
+              m_pointSpritesImage));
           } else {
 
           }
