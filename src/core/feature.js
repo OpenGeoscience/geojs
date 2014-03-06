@@ -208,31 +208,80 @@ geo.geometryFeature = function(geom) {
   geo.feature.call(this);
 
   // Initialize
-  var mapper = vgl.mapper(),
-      material = null,
-      scalar = geom.sourceData(vgl.vertexAttributeKeys.Scalar),
-      colors = geom.sourceData(vgl.vertexAttributeKeys.Color),
-      lut = this.lookupTable();
+  var m_mapper = vgl.mapper(),
+      m_material = null,
+      m_scalar = geom.sourceData(vgl.vertexAttributeKeys.Scalar),
+      m_colors = geom.sourceData(vgl.vertexAttributeKeys.Color),
+      m_noOfPrimitives = geom.numberOfPrimitives(),
+      m_lut = this.lookupTable(),
+      m_usePointSprites = false,
+      m_pointSpritesImage = null;
 
-  mapper.setGeometryData(geom);
-  this.setMapper(mapper);
+  m_mapper.setGeometryData(geom);
+  this.setMapper(m_mapper);
 
-  if (scalar) {
-    if (lut) {
-      lut.updateRange(scalar.scalarRange());
-      material = vgl.utils.createColorMappedMaterial(lut);
-    } else {
-      lut = vgl.lookupTable();
-      lut.updateRange(scalar.scalarRange());
-      material = vgl.utils.createColorMappedMaterial(lut);
-    }
-  } else if (colors) {
-    material = vgl.utils.createColorMaterial();
-  } else {
-    material = vgl.utils.createSolidColorMaterial();
+  if (m_usePointSprites && m_pointSpritesImage !== null &&
+      m_noOfPrimitives === 1 && geom.source(j).primitiveType() === gl.POINTS) {
+    m_material = vgl.utils.createPointSpritesMaterial(m_usePointSpritesImage);
   }
-  this.setMaterial(material);
-  this.setLookupTable(lut);
+  else if (m_scalar) {
+    if (m_lut) {
+      m_lut.updateRange(m_scalar.scalarRange());
+      m_material = vgl.utils.createColorMappedMaterial(m_lut);
+    } else {
+      m_lut = vgl.lookupTable();
+      m_lut.updateRange(m_scalar.scalarRange());
+      m_material = vgl.utils.createColorMappedMaterial(m_lut);
+    }
+  } else if (m_colors) {
+    m_material = vgl.utils.createColorMaterial();
+  } else {
+    m_material = vgl.utils.createSolidColorMaterial();
+  }
+  this.setMaterial(m_material);
+  this.setLookupTable(m_lut);
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return if using point sprites for rendering points
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.isUsingPointSprites = function() {
+    return m_usePointSprites;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set use point sprites for geometries that only has points
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.setUsePointSprites = function(val) {
+    if (val !== m_usePointSprites) {
+      m_usePointSprites = val;
+      this.modified();
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return image for the point sprites
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.pointSpritesImage = function() {
+    return m_pointSpritesImage;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set use point sprites for geometries that only has points
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.setPointSpritesImage = function(psimage) {
+    if (psimage !== m_pointSpritesImage) {
+      m_pointSpritesImage = psimage;
+      this.modified();
+    }
+  };
 
   return this;
 };
