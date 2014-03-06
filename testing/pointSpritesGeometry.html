@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="/testing/common/js/jquery-1.9.1.js"></script>
+    <script type="text/javascript" src="/testing/common/js/gl-matrix.js"></script>
+    <script type="text/javascript" src="/testing/common/js/d3.v3.min.js"></script>
+    <script type="text/javascript" src="/testing/common/js/proj4.js"></script>
+    <script type="text/javascript" src="/web/lib/vgl.min.js"></script>
+    <script type="text/javascript" src="/web/lib/geojs.min.js"></script>
+    <style>
+        html{
+            height: 100%;
+        }
+    </style>
+
+</head>
+<body style="height: 100%;">
+<script>
+function processCSVData(csvdata) {
+  var table = [];
+  var lines = csvdata.split(/\r\n|\n/);
+
+  for ( var i = 0; i < lines.length; i++) {
+    var row = lines[i].split(',');
+    table.push(row);
+  }
+  return table;
+};
+
+$(function() {
+    var mapOptions = {
+      zoom : 6,
+      center : geo.latlng(0.0, 0.0)
+    };
+
+    var myMap = geo.map(document.getElementById("glcanvas"), mapOptions),
+        canvas = document.getElementById('glcanvas'),
+        reader = vgl.geojsonReader(),
+        table = [],
+        citieslatlon = [],
+        colors = [];
+
+    // Resize the canvas to fill browser window dynamically
+    window.addEventListener('resize', resizeCanvas, false);
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      updateAndDraw(canvas.width, canvas.height);
+    }
+    resizeCanvas();
+
+    function updateAndDraw(width, height) {
+      myMap.draw();
+      myMap.resize(width, height);
+      myMap.update();
+      myMap.draw();
+    }
+
+    // Read city geo-coded data
+    $.getJSON("/data/geopoints.json", {
+      format : "json"
+    }).done(function(data) {
+
+      // Now load the image to be used for drawing dots
+      var image = new Image(),
+          geomLayer = null,
+          geomFeature = null;
+      image.src = '/data/spark.png';
+      image.onload = function() {
+        geoms = reader.readGJObject(data);
+
+        for (i = 0; i < geoms.length; ++i) {
+          geomFeature = geo.geometryFeature(geoms[i])
+          geomFeature.setMaterial(vgl.utils.createPointSpritesMaterial(image));
+          geomLayer = geo.featureLayer({
+            "opacity" : 1,
+            "showAttribution" : 1,
+            "visible" : 1}, geomFeature);
+          geomLayer.setUsePointSprites(true);
+          geomLayer.setPointSpritesImage(image);
+          myMap.addLayer(geomLayer);
+          myMap.draw();
+        }
+      }});
+  }
+);
+</script>
+
+<div id=map style="width:100%; height:100%;">
+  <canvas id="glcanvas" style="width:100%; height:100%;" ></canvas>
+</div>
+
+</body>

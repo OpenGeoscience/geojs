@@ -150,8 +150,7 @@ geo.pointFeature = function(positions, colors) {
   if (!(this instanceof geo.pointFeature)) {
     return new geo.pointFeature(positions, colors);
   }
-
-  vgl.actor.call(this);
+  geo.feature.call(this);
 
   // Initialize
   var actor = vgl.utils.createPoints(positions, colors);
@@ -179,7 +178,7 @@ geo.pointSpritesFeature = function(image, positions, colors) {
     return new geo.pointSpritesFeature(image, positions, colors);
   }
 
-  vgl.actor.call(this);
+  geo.feature.call(this);
 
   // Initialize
   var actor = vgl.utils.createPointSprites(image, positions, colors);
