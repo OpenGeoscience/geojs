@@ -25,10 +25,13 @@ geo.pointFeature = function(cfg) {
   cfg = cfg || {};
   geo.feature.call(this, cfg);
 
-  cfg.style = cfg.style === undefined ? {"size":[1.0],
+  cfg.style = cfg.style === undefined ? $.extend({}, {"size":[1.0],
               "color": [{1.0, 1.0, 1.0, 1.0}],
               "point_sprites": false,
-              "image": null} : cfg.style;
+              "image": null}, cfg.style) : cfg.style;
+
+  // Update style
+  this.style(cfg.style);
 
   return this;
 };
