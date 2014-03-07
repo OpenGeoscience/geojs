@@ -333,9 +333,6 @@ geo.featureLayer = function(options, feature) {
       switch(data[i].type()) {
         case vgl.data.geometry:
             geomFeature = geo.geometryFeature(data[i]);
-            geomFeature.setVisible(this.visible());
-            geomFeature.material().setBinNumber(this.binNumber());
-            geomFeature.setLookupTable(lut);
           // Check if geometry has points only
           // TODO this code could be moved to vgl
           noOfPrimitives = data[i].numberOfPrimitives();
@@ -343,6 +340,10 @@ geo.featureLayer = function(options, feature) {
               data[i].primitive(0).primitiveType() === gl.POINTS) {
              geomFeature.setMaterial(vgl.utils.createPointSpritesMaterial(
               m_pointSpritesImage));
+
+            geomFeature.setVisible(this.visible());
+            geomFeature.material().setBinNumber(this.binNumber());
+            geomFeature.setLookupTable(lut);
           } else {
 
           }

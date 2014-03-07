@@ -6,31 +6,8 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, indent: 2*/
 
-/*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vgl, document*/
+/*global geo, ogs, document, inherit, $, HTMLCanvasElement, Image*/
 //////////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Layer options object specification
- *
- * @class geo.layerOptions
- */
-//////////////////////////////////////////////////////////////////////////////
-geo.layerOptions = function() {
-  "use strict";
-
-  if (!(this instanceof geo.layerOptions)) {
-    return new geo.layerOptions();
-  }
-
-  this.opacity = 0.5;
-  this.showAttribution = true;
-  this.visible = true;
-  this.binNumber = vgl.material.RenderBin.Default;
-
-  return this;
-};
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -42,56 +19,34 @@ geo.layerOptions = function() {
  * @returns {geo.layer}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.layer = function(options, source) {
+geo.layer = function(arg) {
   "use strict";
-  this.events = {
-    "opacitychange" : "opacitychange"
-  };
 
   if (!(this instanceof geo.layer)) {
-    return new geo.layer(options, source);
+    return new geo.layer(arg);
   }
-  vgl.object.call(this);
+  arg = arg || {};
+  geo.object.call(this, arg);
 
-  if (!options) {
-    options = geo.layerOptions();
-  }
-
-  /** @private */
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * @private
+   */
+  //////////////////////////////////////////////////////////////////////////////
   var m_that = this,
+      m_style = arg.style === undefined ? {"opacity" : 0.5,
+                                           "color" : [0.8, 0.8, 0.8],
+                                           "visible" : true,
+                                           "bin" : 100} : arg.style;
       m_id = "",
       m_name = "",
-      m_opacity = options.opacity || 0.5,
       m_gcs = 'EPSG:4326',
-      m_showAttribution = true,
-      m_visible = true,
-      m_binNumber = vgl.material.RenderBin.Transparent,
-      m_defaultLookupTable = vgl.lookupTable(),
-      m_lookupTables = {},
-      m_legendOrigin = [20, 60, 0.0],
-      m_legendWidth = 400,
-      m_legendHeight = 20,
-      m_dataSource = source,
-      m_container = null,
-      m_referenceLayer = false;
-
-  if (options.showAttribution) {
-    m_showAttribution = options.showAttribution;
-  }
-
-  if (options.m_visible) {
-    m_visible = options.m_visible;
-  }
-
-  // TODO Write a function for this
-  if (m_opacity > 1.0) {
-    m_opacity = 1.0;
-    console.log("[warning] Opacity cannot be greater than 1.0");
-  } else if (m_opacity < 0.0) {
-    console.log("[warning] Opacity cannot be less than 1.0");
-    m_opacity = 0.0;
-  }
-
+      m_timeRange = [],
+      m_source = arg.source || null,
+      m_container = arg.container,
+      m_isReference = false,
+      m_updateTime = vgl.timestamp(),
+      m_node = null;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -99,407 +54,132 @@ geo.layer = function(options, source) {
    * @returns {geo.feature}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.features = function() {
-    return null;
+  this.create = function(fname) {
+    // TODO Implement this
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Set feature.
+   * Get/Set root node of the layer
    *
-   * @param {Array} Array of feature
-   * @returns {Boolean}
+   * @returns {div}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setFeatures = function(features) {
-    // Concrete class should implement this
-    return false;
+  this.node = function() {
+    return m_node;
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get id of the layer
+   * Get/Set id of the layer
    *
    * @returns {String}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.id = function() {
-    return m_id;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Set id of the layer
-   *
-   * @param {String} name
-   * @returns {Boolean}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.setId = function(id) {
-    if (m_id !== id) {
+  this.id = function(val) {
+    if (val === undefined ) {
+      return m_id;
+    } else {
       m_id = id;
       this.modified();
-      return true;
+      return this;
     }
-
-    return false;
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get name of the layer
+   * Get/Set name of the layer
    *
    * @returns {String}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.name = function() {
-    return m_name;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Set name of the layer
-   *
-   * @param {String} name
-   * @returns {Boolean}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.setName = function(name) {
-    if (m_name !== name) {
-      m_name = name;
-      m_id = name;
+  this.name = function(val) {
+    if (val === undefined ) {
+      return m_name;
+    } else {
+      m_name = val;
       this.modified();
-      return true;
-    }
-
-    return false;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Query opacity of the layer (range[0.0, 1.0])
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.opacity = function() {
-    return m_opacity;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Set opacity of the layer in the range of [0.0, 1.0]
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.setOpacity = function(val) {
-    m_opacity = val;
-    this.updateLayerOpacity(m_opacity);
-    this.modified();
-    return true;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get current time of the layer.
-   *
-   * This should be implemented by the derived class
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.time = function() {
-    return null;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get GCS of the layer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.gcs = function() {
-    return m_gcs;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Set source of the layer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.setGcs = function(gcs) {
-    if (m_gcs !== gcs) {
-      m_gcs = gcs;
-      this.modified();
-      return true;
-    }
-
-    return false;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get if layer is visible. This should be implemented by the derived class
-   *
-   * @returns {Boolean}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.visible = function() {
-    // return m_feature.visible();
-    return false;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Set layer visible true or false. This should be implemented by the
-   * the derived class.
-   *
-   * @returns {Boolean}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.setVisible = function(flag) {
-    return false;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get bin number of the layer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.binNumber = function() {
-    return m_binNumber;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Set bin number of the layer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.setBinNumber = function(binNumber) {
-    if (m_binNumber && m_binNumber === binNumber) {
-      return false;
-    }
-
-    m_binNumber = binNumber;
-    this.modified();
-    return true;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get lookup table of the layer
-   * @param {string} varname Name of the variable. If null or empty will
-   *  return default lookup table
-   */
-    ////////////////////////////////////////////////////////////////////////////
-  this.lookupTable = function(varname) {
-    if (varname && m_lookupTables.hasOwnProperty(varname)) {
-      return m_lookupTables[varname];
-    }
-
-    return m_defaultLookupTable;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Set lookup table for this layer for a particular variable if provided.
-   * @param {string} varname Name of the variable for which to set the
-   *  lookup table
-   */
-    ////////////////////////////////////////////////////////////////////////////
-  this.setLookupTable = function(varname, lut) {
-    if (!lut) {
-      console.log('[warning] Invalid lookup table');
-      return false;
-    }
-
-    if (varname) {
-      if (m_lookupTables.hasOwnProperty(varname) &&
-          m_lookupTables[varname] === lut) {
-        return false;
-      }
-      m_lookupTables[varname] = lut;
-      this.updateColorMapping(varname);
-      this.modified();
-    }
-
-    return true;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get source of the layer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.dataSource = function() {
-    return m_dataSource;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Set source of the layer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.setDataSource = function(source) {
-    if (m_dataSource !== source) {
-      m_dataSource = source;
-      this.modified();
-      return true;
-    }
-    return false;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get origin (bottom left corner) of the legend
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.legendOrigin = function() {
-    return m_legendOrigin;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Set origin (bottom left corner) of the legend
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.setLegendOrigin = function(origin) {
-    m_legendOrigin = origin.splice(0);
-    this.modified();
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get width of the legend
-   * @returns {Number}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.legendWidth = function() {
-    return m_legendWidth;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Set width of the legend
-   *
-   * @param width
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.setLegendWidth = function(width) {
-    if (width !== m_legendWidth) {
-      m_legendWidth = width;
-      this.modified();
+      return this;
     }
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get height of the legend
+   * Get/Set opacity of the layer
    *
    * @returns {Number}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.legendHeight = function() {
-    return m_legendHeight;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Set height of the legend
-   *
-   * @param height
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.setLegendHeight = function(height) {
-    if (height !== m_legendHeight) {
-      m_legendHeight = height;
+  this.opacity = function(val) {
+    if (val === undefined ) {
+      return m_style.opacity;
+    } else {
+      m_style.opacity = val;
       this.modified();
+      return this;
     }
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Virtual function that inform if the layer has a legend
+   * Get/Set visibility of the layer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.hasLegend = function() {
-    return false;
+  this.visible = function(val) {
+    if (val === undefined ) {
+      return m_style.visible;
+    } else {
+      m_style.visible = val;
+      this.modified();
+      return this;
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Virtual function to turn on legend
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.showLegend = function() {
-    return false;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Virtual function to turn on legend
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.hideLegend = function() {
-    return false;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Virtual function to create legend for the layer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.createLegend = function() {
-    return false;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Virtual function to delete legend of the layer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.deleteLegend = function() {
-    return false;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Virtual function to update legend of the layer.
+   * Get/Set bin of the layer
    *
-   * This should be called manually if the caller modifies the legend's
-   * properties.
+   * @returns {Number}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.updateLegend = function(deletePrevious) {
+  this.bin = function(val) {
+    if (val === undefined ) {
+      return m_style.bin;
+    } else {
+      m_style.bin = val;
+      this.modified();
+      return this;
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Virtual function to notify deletion of the layer
+   * Get/Set projection of the layer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.destroy = function() {
+  this.gcs = function(val) {
+    if (val === undefined ) {
+      return m_gcs;
+    } else {
+      m_gcs = val;
+      this.modified();
+      return this;
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Virtual function to update the layer
+   * Get/Set source of the layer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.update = function(request) {
-    // Concrete class should implement this
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Prepare layer for rendering
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.predraw = function(request) {
-    // Concrete class should implement this
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Perform actions after draw has happened
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.postdraw = function(request) {
-    // Concrete class should implement this
+  this.source = function(val) {
+    if (val === undefined ) {
+      return m_source;
+    } else {
+      m_source = val;
+      this.modified();
+      return this;
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -507,62 +187,112 @@ geo.layer = function(options, source) {
    * Return the modified time for the last update that did something
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.getUpdateTime = function() {
-    // Concrete class should implement this
+  this.updateTime = function() {
+    return m_updateTime;
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Virtual method to return information about a given point.
-   *
-   * Concrete class should implement this method.
+   * Run given query and result afterwards
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.queryLocation = function(location) {
-    // Concrete class should implement this
+  this.query = function(arg) {
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Virtual method to handle opacity change.
-   * Concrete class should implement this method.
+   * Get/Set layer as the reference layer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.updateLayerOpacity = function() {
-    // Concrete class should implement this
+  this.isReference = function(val) {
+    if(val === undefined) {
+      m_isReference = val;
+      this.modified();
+      return this;
+    }
+    return m_isReference;
   };
 
   ////////////////////////////////////////////////////////////////////////////
-  /*
-   * Virtual method to update color mapping for the layer.
-   * Concrete class should implement this method.
+  /**
+   * Convert array of points from world to GCS coordinate space
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.updateColorMapping = function() {
-    // Concrete class should implement this
-  };
-
-  this.container = function(container) {
-
-    if(typeof container !== 'undefined') {
-      m_container = container;
-      return m_that;
-    }
-    return m_container;
-  };
-
-  this.referenceLayer = function(referenceLayer) {
-
-    if(typeof referenceLayer !== 'undefined') {
-      m_referenceLayer = referenceLayer;
-      return m_that;
-    }
-    return m_referenceLayer;
-  };
-
-  this.worldToGcs = function(x, y) {
+  this.worldToGcs = function([]) {
     throw "Should be implemented by derivied classes";
   };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Convert array of points from world to display space
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.worldToDisplay = function([]) {
+    throw "Should be implemented by derivied classes";
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Convert array of points from display to world space
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.displayToWorld = function([]) {
+    throw "Should be implemented by derivied classes";
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Convert array of points from display to GCS space
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.displayToGcs = function([]) {
+    throw "Should be implemented by derivied classes";
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Init layer
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._init = function() {
+    if (m_container === undefined) {
+      throw "Layer requires valid container";
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Clean up resouces
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._exit = function(request) {
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Prepare layer for rendering
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._predraw = function(request) {
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Prepare layer for rendering
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._draw = function(request) {
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Perform actions after draw has happened
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._postdraw = function(request) {
+  };
+
+  this._init();
 
   return this;
 };

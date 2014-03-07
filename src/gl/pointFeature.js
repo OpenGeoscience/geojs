@@ -32,14 +32,11 @@ ggl.pointFeature = function(arg) {
   ////////////////////////////////////////////////////////////////////////////
   var m_actor = vgl.utils.createPoints(this.positions(),
                 this.style().colors),
-      m_buildTime = null,
-      m_updateTime = null;
+      m_buildTime = vgl.timestamp(),
+      m_updateTime = vgl.timestamp();
 
   function build() {
-    if (!m_buildTime) {
-      m_buildTime = vgl.timestamp();
-      m_buildTime.modified();
-    }
+    m_buildTime.modified();
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -50,20 +47,15 @@ ggl.pointFeature = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._update = function() {
-    if (!m_buildTime || this.dataTimestamp().getMTime() >
-                        m_buildTime.getMTime()) {
+    if (this.dataTimestamp().getMTime() > m_buildTime.getMTime()) {
       build();
     }
 
-    if (m_updateTime && m_updateTime.getMTime() < this.getMTime()) {
+    if (m_updateTime.getMTime() < this.getMTime()) {
       if (this.style.color instanceof vgl.lookupTable) {
         vgl.utils.updateColorMappedMaterial(this.material(),
           this.style.color);
-      } else {
-        // TODO
       }
-    } else {
-      m_updateTime = vgl.timestamp();
       m_updateTime.modified();
     }
   };
