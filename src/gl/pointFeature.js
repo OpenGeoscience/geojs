@@ -1,26 +1,46 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Create a new instance of pointGeomFeature
+ * @module geo.gl
+ */
+
+/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
+/*jslint white: true, indent: 2*/
+
+/*global geo, ggl, inherit, document$*/
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Create a new instance of pointFeature
  *
  * @class
- * @param positions
- * @param colors
- * @returns {geo.pointGeomFeature}
+ * @returns {ggl.pointFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.pointGeomFeature = function(positions, colors) {
+ggl.pointFeature = function(arg) {
   "use strict";
-  if (!(this instanceof geo.pointGeomFeature)) {
-    return new geo.pointGeomFeature(positions, colors);
+  if (!(this instanceof geo.pointFeature)) {
+    return new geo.pointFeature(arg);
   }
-  geo.pointFeature.call(this);
+  arg = arg || {};
+  geo.pointFeature.call(this, arg);
 
-  // Initialize
-  var m_actor = vgl.utils.createPoints(positions, colors),
-      m_lastModifiedTimestamp = null;
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  var m_actor = vgl.utils.createPoints(this.positions(),
+                this.style().colors),
+      m_buildTime = null,
+      m_updateTime = null;
 
-  this.setMapper(m_actor.mapper());
-  this.setMaterial(m_actor.material());
+  function build() {
+    if (!m_buildTime) {
+      m_buildTime = vgl.timestamp();
+      m_buildTime.modified();
+    }
+  }
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -29,21 +49,26 @@ geo.pointGeomFeature = function(positions, colors) {
    * @override
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.update = function() {
-    if (m_lastModifiedTimestamp &&
-        m_lastModifiedTimestamp.getMTime() < this.getMTime()) {
+  this._update = function() {
+    if (!m_buildTime || this.dataTimestamp().getMTime() >
+                        m_buildTime.getMTime()) {
+      build();
+    }
 
-      vgl.utils.updateColorMappedMaterial(this.material(), m_lookupTable);
-
+    if (m_updateTime && m_updateTime.getMTime() < this.getMTime()) {
+      if (this.style.color instanceof vgl.lookupTable) {
+        vgl.utils.updateColorMappedMaterial(this.material(),
+          this.style.color);
+      } else {
+        // TODO
+      }
     } else {
-
-      m_lastModifiedTimestamp = vgl.timestamp();
-      m_lastModifiedTimestamp.modified();
-
+      m_updateTime = vgl.timestamp();
+      m_updateTime.modified();
     }
   };
 
   return this;
 };
 
-inherit(geo.pointGeomFeature, geo.feature);
+inherit(geo.pointFeature, geo.feature);

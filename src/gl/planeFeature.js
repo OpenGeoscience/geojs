@@ -1,19 +1,19 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Create a new instance of planeGeom
+ * Create a new instance of planeFeature
  *
  * @class
  * Create a plane feature given a lower left corner point {geo.latlng}
  * and and upper right corner point {geo.latlng}
  * @param lowerleft
  * @param upperright
- * @returns {geo.planeGeom}
+ * @returns {geo.planeFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.planeGeom = function(lowerleft, upperright, z) {
+ggl.planeFeature = function(lowerleft, upperright, z) {
   "use strict";
-  if (!(this instanceof geo.planeGeom)) {
-    return new geo.planeGeom(lowerleft, upperright);
+  if (!(this instanceof geo.planeFeature)) {
+    return new geo.planeFeature(lowerleft, upperright);
   }
 
   geo.polygonFeature.call(this);
@@ -70,4 +70,4 @@ geo.planeGeom = function(lowerleft, upperright, z) {
   return this;
 };
 
-inherit(geo.planeGeom, geo.polygonFeature);
+inherit(geo.planeFeature, geo.polygonFeature);

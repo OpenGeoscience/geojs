@@ -32,7 +32,8 @@ geo.feature = function(arg) {
   arg = arg || {};
 
   var m_style = arg.style === undefined ? {"opacity": 1.0} : arg.style,
-      m_gcs = arg.gcs === undefined ? "EPSG:4326" : arg.gcs;
+      m_gcs = arg.gcs === undefined ? "EPSG:4326" : arg.gcs,
+      m_dataTimestamp = vgl.timestamp();
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -63,6 +64,21 @@ geo.feature = function(arg) {
       return this;
     }
   };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set timestamp of data change
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.m_dataTimestamp = function(val) {
+    if (val === undefined ) {
+      return m_dataTimestamp;
+    } else {
+      m_dataTimestamp = val;
+      this.modified();
+      return this;
+    }
+  }
 
   ////////////////////////////////////////////////////////////////////////////
   /**

@@ -28,7 +28,7 @@ geo.pointFeature = function(arg) {
   arg.style = arg.style === undefined ? $.extend({}, {"size":[1.0],
               "color": [{1.0, 1.0, 1.0, 1.0}],
               "point_sprites": false,
-              "image": null}, arg.style) : arg.style;
+              "point_sprites_image": null}, arg.style) : arg.style;
 
   // Update style
   this.style(arg.style);
@@ -38,7 +38,10 @@ geo.pointFeature = function(arg) {
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
-  var m_positions = arg.positions === undefined ? [] : arg.positions;
+  var m_positions = arg.positions === undefined ? null : arg.positions;
+  if (m_positions) {
+    this.dataTimestamp().modified();
+  }
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -53,6 +56,7 @@ geo.pointFeature = function(arg) {
     } else {
       // Copy incoming array of positions
       m_positions = positions.slice(0);
+      this.dataTimestamp().modified();
       this.modified();
       return this;
     }

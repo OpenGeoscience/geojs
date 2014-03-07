@@ -44,8 +44,17 @@ set(_source_files
   core/time.js
   core/map.js
   core/feature.js
+  core/pointFeature.js
+  core/lineFeature.js
+  core/polygonFeature.js
+  core/planeFeature.js
+  core/geomFeature.js
   core/geoTransform.js
   core/data.js
+  gl/init.js
+  gl/pointFeature.js
+  gl/geomFeature.js
+  gl/pointFeature.js
   ui/init.js
   ui/gis.js
   srv/init.js

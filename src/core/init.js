@@ -40,7 +40,7 @@ ogs.namespace = function(ns_string) {
   return parent;
 };
 
-/** vgl namespace */
+/** geo namespace */
 var geo = ogs.namespace("geo");
 
 //////////////////////////////////////////////////////////////////////////////
