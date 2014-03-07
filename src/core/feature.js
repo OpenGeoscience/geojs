@@ -31,7 +31,7 @@ geo.feature = function(cfg) {
   ////////////////////////////////////////////////////////////////////////////
   cfg = cfg || {};
 
-  var m_style = cfg.style === undefined ? {} : cfg.style,
+  var m_style = cfg.style === undefined ? {"opacity": 1.0} : cfg.style,
       m_gcs = cgf.gcs === undefined ? "EPSG:4326" : cfg.gcs;
 
   ////////////////////////////////////////////////////////////////////////////
@@ -43,7 +43,7 @@ geo.feature = function(cfg) {
     if (val === undefined ) {
       return m_style;
     } else {
-      m_style = val;
+      $.extend(true, m_style, val);
       this.modified();
       return this;
     }

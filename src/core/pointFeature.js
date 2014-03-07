@@ -33,6 +33,31 @@ geo.pointFeature = function(cfg) {
   // Update style
   this.style(cfg.style);
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  var m_positions = cfg.positions === undefined ? [] : cfg.positions;
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set positions
+   *
+   * @returns {geo.pointFeature}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.positions = function(val) {
+    if (val === undefined ) {
+      return m_positions;
+    } else {
+      // Copy incoming array of positions
+      m_positions = positions.slice(0);
+      this.modified();
+      return this;
+    }
+  };
+
   return this;
 };
 
