@@ -17,28 +17,28 @@
  * @returns {geo.pointFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.pointFeature = function(cfg) {
+geo.pointFeature = function(arg) {
   "use strict";
   if (!(this instanceof geo.pointFeature)) {
-    return new geo.pointFeature(cfg);
+    return new geo.pointFeature(arg);
   }
-  cfg = cfg || {};
-  geo.feature.call(this, cfg);
+  arg = arg || {};
+  geo.feature.call(this, arg);
 
-  cfg.style = cfg.style === undefined ? $.extend({}, {"size":[1.0],
+  arg.style = arg.style === undefined ? $.extend({}, {"size":[1.0],
               "color": [{1.0, 1.0, 1.0, 1.0}],
               "point_sprites": false,
-              "image": null}, cfg.style) : cfg.style;
+              "image": null}, arg.style) : arg.style;
 
   // Update style
-  this.style(cfg.style);
+  this.style(arg.style);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
-  var m_positions = cfg.positions === undefined ? [] : cfg.positions;
+  var m_positions = arg.positions === undefined ? [] : arg.positions;
 
   ////////////////////////////////////////////////////////////////////////////
   /**

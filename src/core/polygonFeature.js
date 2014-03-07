@@ -17,21 +17,21 @@
  * @returns {geo.polygonFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.polygonFeature = function(cfg) {
+geo.polygonFeature = function(arg) {
   "use strict";
   if (!(this instanceof geo.polygonFeature)) {
-    return new geo.polygonFeature(cfg);
+    return new geo.polygonFeature(arg);
   }
-  cfg = cfg || {};
-  geo.feature.call(this, cfg);
+  arg = arg || {};
+  geo.feature.call(this, arg);
 
-  cfg.style = cfg.style === undefined ? $.extend({}, {
+  arg.style = arg.style === undefined ? $.extend({}, {
               "color": [{1.0, 1.0, 1.0, 1.0}],
               "fill_color": [1.0, 1.0, 1.0],
-              "fill": true}, cfg.style) : cfg.style;
+              "fill": true}, arg.style) : arg.style;
 
   // Update style
-  this.style(cfg.style);
+  this.style(arg.style);
 
   return this;
 };

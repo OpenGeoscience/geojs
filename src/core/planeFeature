@@ -11,70 +11,78 @@
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Create a new instance of class feature
+ * Create a new instance of class planeFeature
  *
  * @class
- * @returns {geo.feature}
+ * @returns {geo.planeFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.feature = function(arg) {
+geo.planeFeature = function(arg) {
   "use strict";
-  if (!(this instanceof geo.feature)) {
-    return new geo.feature(arg);
+  if (!(this instanceof geo.planeFeature)) {
+    return new geo.planeFeature(arg);
   }
-  geo.object.call(this);
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * @private
-   */
-  ////////////////////////////////////////////////////////////////////////////
   arg = arg || {};
+  geo.polygonFeature.call(this, arg);
 
-  var m_style = arg.style === undefined ? {"opacity": 1.0} : arg.style,
-      m_gcs = arg.gcs === undefined ? "EPSG:4326" : arg.gcs;
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get/Set style used by the feature
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.style = function(val) {
-    if (val === undefined ) {
-      return m_style;
-    } else {
-      $.extend(true, m_style, val);
-      this.modified();
-      return this;
-    }
-  };
+  var m_origin = [arg.ul.x, arg.lr.y, arg.depth],
+      m_upperLeft = [arg.ul.x, arg.ul.y, arg.depth],
+      m_lowerRight = [arg.lr.x, arg.lr.y, arg.depth];
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get/Set projection of the feature
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.gcs = function(val) {
-    if (val === undefined ) {
-      return m_gcs;
-    } else {
-      m_gcs = val;
-      this.modified();
-      return this;
-    }
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Update
+   * Get/Set origin
    *
-   * Derived class should implement this
+   * @returns {geo.planeFeature}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._update = function() {
+  this.origin = function(val) {
+    if (val === undefined ) {
+      return m_origin;
+    } else {
+      m_origin = val.slice(0);
+      this.modified();
+      return this;
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set pt1
+   *
+   * @returns {geo.planeFeature}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.upperLeft = function(val) {
+    if (val === undefined ) {
+      return m_upperLeft;
+    } else {
+      // Copy incoming array of positions
+      m_upperLeft = val.slice(0);
+      this.modified();
+      return this;
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set origin
+   *
+   * @returns {geo.planeFeature}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.lowerRight = function(val) {
+    if (val === undefined ) {
+      return m_lowerRight;
+    } else {
+      // Copy incoming array of positions
+      m_lowerRight = val.slice(0);
+      this.modified();
+      return this;
+    }
   };
 
   return this;
 };
 
-inherit(geo.feature, geo.object);
+inherit(geo.planeFeature, geo.polygonFeature);
