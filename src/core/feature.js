@@ -33,7 +33,9 @@ geo.feature = function(arg) {
 
   var m_style = arg.style === undefined ? {"opacity": 1.0} : arg.style,
       m_gcs = arg.gcs === undefined ? "EPSG:4326" : arg.gcs,
-      m_dataTimestamp = vgl.timestamp();
+      m_renderer = null,
+      m_dataTime = vgl.timestamp(),
+      m_updateTime = vgl.timestamp();
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -45,6 +47,21 @@ geo.feature = function(arg) {
       return m_style;
     } else {
       $.extend(true, m_style, val);
+      this.modified();
+      return this;
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set renderer used by the feature
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.renderer = function(val) {
+    if (val === undefined ) {
+      return m_renderer;
+    } else {
+      m_renderer = val
       this.modified();
       return this;
     }
@@ -70,15 +87,50 @@ geo.feature = function(arg) {
    * Get/Set timestamp of data change
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.m_dataTimestamp = function(val) {
+  this.dataTime = function(val) {
     if (val === undefined ) {
-      return m_dataTimestamp;
+      return m_dataTime;
     } else {
-      m_dataTimestamp = val;
+      m_dataTime = val;
       this.modified();
       return this;
     }
-  }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set timestamp of last time update happened
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.updateTime = function(val) {
+    if (val === undefined ) {
+      return m_updateTime;
+    } else {
+      m_updateTime = val;
+      this.modified();
+      return this;
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Initialize
+   *
+   * Derived class should implement this
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._init = function() {
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Build
+   *
+   * Derived class should implement this
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._build = function() {
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -88,6 +140,16 @@ geo.feature = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._update = function() {
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Destroy
+   *
+   * Derived class should implement this
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._destroy = function() {
   };
 
   return this;

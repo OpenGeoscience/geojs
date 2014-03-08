@@ -32,12 +32,28 @@ ggl.pointFeature = function(arg) {
   ////////////////////////////////////////////////////////////////////////////
   var m_actor = vgl.utils.createPoints(this.positions(),
                 this.style().colors),
-      m_buildTime = vgl.timestamp(),
-      m_updateTime = vgl.timestamp();
+      m_buildTime = vgl.timestamp();
 
-  function build() {
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Initialize
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._init = function() {
+    geo.registerFeature('webgl', 'pointFeature');
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Build
+   *
+   * @override
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._build = function() {
+    this.renderer().glRenderer().addActor(m_actor);
     m_buildTime.modified();
-  }
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -51,15 +67,16 @@ ggl.pointFeature = function(arg) {
       build();
     }
 
-    if (m_updateTime.getMTime() < this.getMTime()) {
+    if (this.updateTime().getMTime() < this.getMTime()) {
       if (this.style.color instanceof vgl.lookupTable) {
         vgl.utils.updateColorMappedMaterial(this.material(),
           this.style.color);
       }
-      m_updateTime.modified();
+      this.updateTime().modified();
     }
   };
 
+  this._init();
   return this;
 };
 

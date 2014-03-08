@@ -6,23 +6,9 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, indent: 2, continue: true*/
 
-/*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vgl, document, vec2, vec3, vec4, proj4*/
+/*global vgl, geo, ogs, inherit, $, HTMLCanvasElement, Image*/
+/*global document, vec2, vec3, vec4, proj4*/
 //////////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Map options object specification
- */
-//////////////////////////////////////////////////////////////////////////////
-geo.mapOptions = {
-  zoom: 0,
-  center: geo.latlng(0.0, 0.0),
-  gcs: 'EPSG:3857',
-  display_gcs: 'EPSG:4326',
-  country_boundaries: true,
-  state_boundaries: false
-};
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -32,12 +18,13 @@ geo.mapOptions = {
  * @returns {geo.map}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.map = function(node, options) {
+geo.map = function(arg) {
   "use strict";
   if (!(this instanceof geo.map)) {
-    return new geo.map(node, options);
+    return new geo.map(arg);
   }
-  vgl.object.call(this);
+  arg = arg || {};
+  geo.object.call(this, arg);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -45,159 +32,20 @@ geo.map = function(node, options) {
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
-  var m_that = this,
-      m_node = node,
-      m_initialized = false,
-      m_options = options,
-      m_layers = {},
-      m_activeLayer = null,
-      m_mapLayer = null,
-      m_featureCollection = geo.featureCollection(),
-      m_renderTime = vgl.timestamp(),
-      m_lastPrepareToRenderingTime = vgl.timestamp(),
-      m_interactorStyle = null,
-      m_viewer = null,
-      m_renderer = null,
-      m_updateRequest = null,
-      m_prepareForRenderRequest = null,
-      // Holds the time range, current time and layers ...
+  var m_this = this,
+      m_node = $('#' + arg.node),
+      m_gcs = arg.gcs === undefined ? "EPSG:3857" : arg.gcs,
+      m_uigcs = arg.uigcs === undefined ? "EPSG:4326" : arg.uigcs,
+      m_center = arg.center === undefined ? [0.0, 0.0] :
+                 arg.center,
+      m_zoom = arg.zoom === undefined ? 10 : arg.zoom,
+      m_layers = arg.layers,
+      m_baseLayer = null,
+      m_updateTime = vgl.timestamp(),
+      m_drawTime = vgl.timestamp(),
+      m_interactorStyle = geo.mapInteractorStyle(),
       m_animationState = { range: null, currentTime: null, layers: null},
       m_animationStep = null;
-
-  m_renderTime.modified();
-
-  if (!options.gcs) {
-    m_options.gcs = 'EPSG:3857';
-  }
-
-  if (!options.display_gcs) {
-    m_options.display_gcs = 'EPSG:4326';
-  }
-
-  if (!options.center) {
-    m_options.center = geo.latlng(0.0, 0.0);
-  }
-
-  if (options.zoom === undefined) {
-    m_options.zoom = 10;
-  }
-
-  // Initialize
-  m_interactorStyle = geo.mapInteractorStyle();
-  m_viewer = vgl.viewer(m_node);
-  m_viewer.setInteractorStyle(m_interactorStyle);
-  m_viewer.init();
-  m_viewer.renderWindow().resize($(m_node).width(), $(m_node).height());
-  m_renderer = m_viewer.renderWindow().activeRenderer();
-
-  m_prepareForRenderRequest =
-    geo.prepareForRenderRequest(m_options, m_viewer, m_featureCollection);
-  m_updateRequest = geo.updateRequest(null, m_options, m_viewer, m_node);
-
-  $(m_prepareForRenderRequest).on(geo.command.requestRedrawEvent,
-    function(event) {
-      m_that.draw();
-  });
-  $(m_updateRequest).on(geo.command.requestRedrawEvent,
-    function(event) {
-      m_that.draw();
-  });
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Update view based on the zoom
-   * @private
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  function updateViewZoom(useCurrent) {
-    m_interactorStyle.zoom(m_options, useCurrent);
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Compute zoom level based on the camera distance and then perform update
-   * @private
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  function computeZoom() {
-    var camera = m_renderer.camera();
-
-//    console.log('camera position is', camera.position()[2]);
-
-    if (camera.position()[2] < 0.0625) {
-      m_options.zoom = 15;
-    }
-    else if (camera.position()[2] < 0.125) {
-      m_options.zoom = 14;
-    }
-    else if (camera.position()[2] < 0.25) {
-      m_options.zoom = 13;
-    }
-    else if (camera.position()[2] < 0.5) {
-      m_options.zoom = 12;
-    }
-    else if (camera.position()[2] < 1) {
-      m_options.zoom = 11;
-    }
-    else if (camera.position()[2] < 2) {
-      m_options.zoom = 10;
-    }
-    else if (camera.position()[2] < 4) {
-      m_options.zoom = 9;
-    }
-    else if (camera.position()[2] < 8) {
-      m_options.zoom = 8;
-    }
-    else if (camera.position()[2] < 16) {
-      m_options.zoom = 7;
-    }
-    else if (camera.position()[2] < 32) {
-      m_options.zoom = 6;
-    }
-    else if (camera.position()[2] < 64) {
-      m_options.zoom = 5;
-    }
-    else if (camera.position()[2] < 128) {
-      m_options.zoom = 4;
-    }
-    else if (camera.position()[2] < Number.MAX_VALUE) {
-      m_options.zoom = 3;
-    }
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Update view extents
-   * @private
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  function updateViewExtents() {
-    m_that.update(m_updateRequest);
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Initialize the scene
-   * @private
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  function initScene() {
-    updateViewZoom();
-    m_initialized = true;
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Initialize the scene (if not initialized) and then render the map
-   * @private
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  function renderScene() {
-    if (m_initialized === false) {
-      initScene();
-    }
-    m_viewer.render();
-  }
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -207,7 +55,8 @@ geo.map = function(node, options) {
    */
   ////////////////////////////////////////////////////////////////////////////
   function resetAnimation() {
-    m_animationState.currentTime = new Date(m_animationState.range.start.getTime());
+    // m_animationState.currentTime =
+    //   new Date(m_animationState.range.start.getTime());
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -218,71 +67,22 @@ geo.map = function(node, options) {
    */
   ////////////////////////////////////////////////////////////////////////////
   function animateTimestep() {
+    // if (!m_animationState) {
+    //   return;
+    // }
 
-    if (!m_animationState) {
-      return;
-    }
-
-    var i, layers = m_animationState.layers;
-    for (i = 0; i < layers.length; ++i) {
-      layers[i].update(geo.updateRequest(
-          m_animationState.currentTime.getTime()));
-      geo.geoTransform.transformLayer(m_options.gcs, layers[i]);
-    }
-    $(m_that).trigger({
-      type: geo.command.animateEvent,
-      currentTime: m_animationState.currentTime,
-      endTime: m_animationState.range.end
-    });
-    m_that.draw();
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Update legends for layers
-   *
-   * @private
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  function updateLegends(width, height) {
-    var noOfLayers = 0,
-        heightPerLayer =  0,
-        i = 1.5,
-        layerName,
-        layer = null;
-
-    // First find out how many layers has legend
-    for (layerName in m_layers) {
-      layer = m_layers[layerName];
-      if (layer.hasLegend()) {
-        ++noOfLayers;
-      }
-    }
-
-    if (noOfLayers > 0) {
-      heightPerLayer = 100 > (height / noOfLayers) ?
-                         (height / noOfLayers) : 100;
-    } else {
-      return;
-    }
-
-    for (layerName in m_layers) {
-      if (m_layers.hasOwnProperty(layerName)) {
-        layer = m_layers[layerName];
-        if (!layer.hasLegend()) {
-          continue;
-        }
-
-        layer.setLegendOrigin(
-          [width - width * 0.25,
-          height - i * heightPerLayer,
-          0.0]);
-        layer.setLegendWidth(width * 0.20);
-        layer.setLegendHeight(heightPerLayer * 0.20);
-        layer.updateLegend(true);
-        ++i;
-      }
-    }
+    // var i, layers = m_animationState.layers;
+    // for (i = 0; i < layers.length; ++i) {
+    //   layers[i].update(geo.updateRequest(
+    //       m_animationState.currentTime.getTime()));
+    //   geo.geoTransform.transformLayer(m_options.gcs, layers[i]);
+    // }
+    // $(m_this).trigger({
+    //   type: geo.command.animateEvent,
+    //   currentTime: m_animationState.currentTime,
+    //   endTime: m_animationState.range.end
+    // });
+    // m_this.draw();
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -293,45 +93,45 @@ geo.map = function(node, options) {
    */
   ////////////////////////////////////////////////////////////////////////////
   function animateInternal() {
-    var timeRange = m_animationState.range,
-        newTime = new Date(timeRange.start.getTime()),
-        endTime = timeRange.end,
-        intervalId = null,
-        stop = false,
-        pause = false;
+    // var timeRange = m_animationState.range,
+    //     newTime = new Date(timeRange.start.getTime()),
+    //     endTime = timeRange.end,
+    //     intervalId = null,
+    //     stop = false,
+    //     pause = false;
 
-    geo.time.incrementTime(newTime, timeRange.units, timeRange.delta);
-    if (newTime > timeRange.end) {
-      console.log('[error] Invalid time range. Requires atleast \
-        begin and end time');
-      return;
-    }
+    // geo.time.incrementTime(newTime, timeRange.units, timeRange.delta);
+    // if (newTime > timeRange.end) {
+    //   console.log('[error] Invalid time range. Requires atleast \
+    //     begin and end time');
+    //   return;
+    // }
 
-    $(m_that).on('animation-stop', function () {
-      stop = true;
-    });
+    // $(m_this).on('animation-stop', function () {
+    //   stop = true;
+    // });
 
-    $(m_that).on('animation-pause', function () {
-      pause = true;
-    });
+    // $(m_this).on('animation-pause', function () {
+    //   pause = true;
+    // });
 
-    function frame() {
-      if (m_animationState.currentTime > endTime || stop) {
-        clearInterval(intervalId);
-        m_animationState.currentTime = null;
-      }
-      else if (pause) {
-        clearInterval(intervalId);
-      }
-      else {
-        animateTimestep();
-        geo.time.incrementTime(m_animationState.currentTime,
-          m_animationState.range.units, m_animationState.range.delta);
-      }
-    }
+    // function frame() {
+    //   if (m_animationState.currentTime > endTime || stop) {
+    //     clearInterval(intervalId);
+    //     m_animationState.currentTime = null;
+    //   }
+    //   else if (pause) {
+    //     clearInterval(intervalId);
+    //   }
+    //   else {
+    //     animateTimestep();
+    //     geo.time.incrementTime(m_animationState.currentTime,
+    //       m_animationState.range.units, m_animationState.range.delta);
+    //   }
+    // }
 
-    // Update every 2 ms. Updating every ms might be too much.
-    intervalId = setInterval(frame, 2);
+    // // Update every 2 ms. Updating every ms might be too much.
+    // intervalId = setInterval(frame, 2);
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -342,20 +142,20 @@ geo.map = function(node, options) {
    */
   ////////////////////////////////////////////////////////////////////////////
   function stepAnimationForwardInternal() {
-    if (!m_animationState.currentTime) {
-      resetAnimation();
-    }
+    // if (!m_animationState.currentTime) {
+    //   resetAnimation();
+    // }
 
-    var time = new Date(m_animationState.currentTime.getTime());
-    geo.time.incrementTime(time, m_animationState.range.units,
-        m_animationState.range.delta);
+    // var time = new Date(m_animationState.currentTime.getTime());
+    // geo.time.incrementTime(time, m_animationState.range.units,
+    //     m_animationState.range.delta);
 
-    if (time > m_animationState.range.end) {
-      return;
-    }
+    // if (time > m_animationState.range.end) {
+    //   return;
+    // }
 
-    m_animationState.currentTime = time;
-    animateTimestep();
+    // m_animationState.currentTime = time;
+    // animateTimestep();
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -366,59 +166,68 @@ geo.map = function(node, options) {
    */
   ////////////////////////////////////////////////////////////////////////////
   function stepAnimationBackwardInternal() {
+    // if (!m_animationState) {
+    //   return;
+    // }
 
-    if (!m_animationState) {
-      return;
-    }
+    // var time = new Date(m_animationState.currentTime.getTime());
+    // geo.time.incrementTime(time, m_animationState.range.units,
+    //     -m_animationState.range.delta);
 
-    var time = new Date(m_animationState.currentTime.getTime());
-    geo.time.incrementTime(time, m_animationState.range.units,
-        -m_animationState.range.delta);
+    // if (time < m_animationState.range.start) {
+    //   return;
+    // }
 
-    if (time < m_animationState.range.start) {
-      return;
-    }
+    // m_animationState.currentTime = time;
 
-    m_animationState.currentTime = time;
-
-    animateTimestep();
+    // animateTimestep();
   }
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get map options
+   * Get root node of the map
+   *
+   * @returns {jquery object}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.options = function() {
-    return m_options;
+  this.node = function() {
+    return m_node;
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get the zoom level of the map
+   * Get/Set zoom level of the map
    *
-   * @returns {Number}
+   * @returns {Number|geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.zoom = function() {
-    return m_options.zoom;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Set zoom level of the map
-   *
-   * @param val [0-17]
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.setZoom = function(val) {
-    if (val !== m_options.zoom) {
-      m_options.zoom = val;
-      $(this).trigger(geo.command.updateViewZoomEvent);
-      return true;
+  this.zoom = function(val) {
+    if (val === undefined ) {
+      return m_zoom;
+    } else {
+      m_zoom = val;
+      $(m_this).trigger(geo.event.zoom);
+      this.modified();
+      return m_this;
     }
+  };
 
-    return false;
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set center of the map
+   *
+   * @returns {Array|geo.map}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.center = function(val) {
+    if (val === undefined ) {
+      return m_center;
+    } else {
+      m_center = val.slice
+      $(m_this).trigger(geo.event.center);
+      this.modified();
+      return m_this;
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -427,38 +236,28 @@ geo.map = function(node, options) {
    *
    * @method addLayer
    * @param {geo.layer} layer to be added to the map
-   * @return {Boolean}
+   * @return {geom.map}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.addLayer = function(layer) {
-    if (layer !== null) {
-      // TODO Check if the layer already exists
-      if (!layer.binNumber() || layer.binNumber() === -1) {
-        layer.setBinNumber(Object.keys(m_layers).length);
-      }
-
-      // Transform layer
-      geo.geoTransform.transformLayer(m_options.gcs, layer);
-      m_layers[layer.id()] = layer;
-
-      updateLegends($(m_node).width(), $(m_node).height());
-      this.modified();
-
-      $(layer).on(geo.command.queryResultEvent, function(event, queryResult) {
-        $(m_that).trigger(event, queryResult);
-        return true;
-      });
-
-      $(this).trigger({
-        type: geo.command.addLayerEvent,
-        layer: layer
-      });
-
+    if (layer !== null || layer !== undefined) {
       layer.container(this);
 
-      return true;
+      if (layer.isReference() && m_gcs !== layer.gcs()) {
+        throw "Reference layer gcs does not match with map gcs";
+      } else {
+        // TODO Add api to layer
+        layer.transformGcs(m_gcs);
+      }
+      m_layers[layer.id()] = layer;
+      this.modified();
+
+      $(this).trigger({
+        type: geo.event.addLayer,
+        target: layer
+      });
     }
-    return false;
+    return this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -467,26 +266,23 @@ geo.map = function(node, options) {
    *
    * @method removeLayer
    * @param {geo.layer} layer that should be removed from the map
-   * @return {Boolean}
+   * @return {geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.removeLayer = function(layer) {
-    if (layer !== null && typeof layer !== 'undefined') {
+    if (layer !== null && layer !== undefined) {
       delete m_layers[layer.id()];
-      layer.destroy();
-      m_renderer.removeActors(layer.features());
-      updateLegends($(m_node).width(), $(m_node).height());
+      layer._exit();
       this.modified();
-
       $(this).trigger({
-        type: geo.command.removeLayerEvent,
-        layer: layer
+        type: geo.event.removeLayer,
+        target: layer
       });
-      return true;
     }
 
-    return false;
+    return this;
   };
+
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -497,94 +293,37 @@ geo.map = function(node, options) {
    *  @returns {Boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.toggleLayer = function(layer) {
-    if (layer !== null && typeof layer !== 'undefined') {
-      layer.setVisible(!layer.visible());
-      this.modified();
+  this.toggle = function(layer) {
+    if (layer !== null && layer !== undefined) {
+      layer.visible(!layer.visible())
+      m_this.modified();
       $(this).trigger({
-        type: geo.command.toggleLayerEvent,
-        layer: layer
+        type: geo.event.toggle,
+        target: layer
       });
-      return true;
     }
-
-    return false;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Return current or active layer
-   *
-   * @returns {geo.layer}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.activeLayer = function() {
-    return m_activeLayer;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Make a layer current or active for operations
-   *
-   * @method selectLayer
-   * @param {geo.layer} layer
-   * @returns {Boolean}
-   *
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.selectLayer = function(layer) {
-    if (typeof layer !== 'undefined' && m_activeLayer !== layer) {
-      m_activeLayer = layer;
-      this.modified();
-      if (layer !== null) {
-        $(this).trigger({
-          type: geo.command.selectLayerEvent,
-          layer: layer
-        });
-      } else {
-        $(this).trigger({
-          type: geo.command.unselectLayerEvent,
-          layer: layer
-        });
-      }
-      return true;
-    }
-
-    return false;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Find layer by layer id
-   *
-   * @method findLayerById
-   * @param {String} layerId
-   * @returns {geo.layer}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.findLayerById = function(layerId) {
-    if (m_layers.hasOwnProperty(layerId)) {
-      return m_layers[layerId];
-    }
-    return null;
+    return this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Resize map
    *
-   * @param {Number} width
-   * @param {Number} height
+   * @param {Number} x x-offset in display space
+   * @param {Number} y y-offset in display space
+   * @param {Number} w width in display space
+   * @param {Number} h height in display space
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.resize = function(width, height) {
-    m_viewer.renderWindow().resize(width, height);
-
-    updateLegends($(m_node).width(), $(m_node).height());
-    this.updateAndDraw();
+  this.resize = function(x, y, w, h) {
+    var i = 0;
+    for (; i <  m_layers.length; ++i) {
+      m_layers[i].resize(x, y, w, h);
+    }
 
     $(this).trigger({
-      type: geo.command.resizeEvent,
+      type: geo.event.resize,
+      target: this,
       width: width,
       height: height
     });
@@ -592,100 +331,92 @@ geo.map = function(node, options) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Toggle country boundaries
+   * Convert display coordinates to map coordinates
    *
-   * @returns {Boolean}
+   * @returns {'x': number, 'y': number}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.toggleCountryBoundaries = function() {
-    var layer = null,
-        reader = null,
-        geoms = null,
-        result = false;
+  this.displayToMap = function(winX, winY) {
+    return m_baseLayer.dislayToGcs(winX, winY);
+  };
 
-    layer = this.findLayerById('country-boundaries');
-    if (layer !== null) {
-      layer.setVisible(!layer.visible());
-      result = layer.visible();
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Convert world coordinates to map ui gcs
+   *
+   * @returns {'x': number, 'y': number}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.worldToMap = function(x, y) {
+    var gcsPoint,
+        source,
+        dest,
+        transformedPoint;
+
+    gcsPoint = m_baseLayer.worldToGcs(x, y);
+    source = new proj4.Proj(this.options().gcs);
+    dest = new proj4.Proj(this.options().display_gcs);
+    transformedPoint = new proj4.Point(gcsPoint[0], gcsPoint[1]);
+
+    proj4.transform(source, dest, transformedPoint);
+
+    return [transformedPoint.x, transformedPoint.y];
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Queries each layer for information at this location.
+   *
+   * @param location
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.query = function(arg) {
+    // TODO Implement this
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Sets or gets base layer for this map
+   *
+   * @param {geo.layer} baseLayer optional
+   * @returns {geo.map|geo.layer}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.baseLayer = function(baseLayer) {
+    if(typeof baseLayer !== 'undefined') {
+
+      // The GCS of the layer must match the map
+      if (this.gcs() === baseLayer.gcs()) {
+        throw "The layer has a GCS of '" + baseLayer.gcs() +
+              "' which does match the map GCS of '" +
+              this.gcs() + "'";
+      }
+
+      m_baseLayer = baseLayer;
+
+      // Set the layer as the reference layer
+      m_baseLayer.referenceLayer(true);
+
+      return this;
+    }
+    return m_baseLayer;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Gets the interactorStyle for this map
+   *
+   * @returns {vgl.interactorStyle]
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.interactorStyle = function(style) {
+    if (style === undefined) {
+      return m_interactorStyle;
     } else {
-      // Load countries data first
-      reader = vgl.geojsonReader();
-      geoms = reader.readGJObject(geo.countries);
-      // @todo if opacity is on layer, solid color should be too
-      layer = geo.featureLayer({
-        "opacity": 1,
-        "showAttribution": 1,
-        "visible": 1
-      }, geo.compositeGeometryFeature(geoms, [1.0,0.5, 0.0]));
-
-      layer.setName('country-boundaries');
-      this.addLayer(layer);
-      result = layer.visible();
+      m_interactorStyle = style;
+      this.modified();
     }
-
-    return result;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Toggle us state boundaries
-   *
-   * @returns {Boolean}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.toggleStateBoundaries = function() {
-    // @todo Implement this
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Update layers
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.update = function() {
-    computeZoom();
-
-    // For now update all layers. In the future, we should be
-    // able to perform updates based on the layer type
-    var layerName = null;
-    for (layerName in m_layers) {
-      if (m_layers.hasOwnProperty(layerName)) {
-        m_layers[layerName].update(m_updateRequest);
-      }
-    }
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Prepare map for rendering
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.predraw = function() {
-    var i = 0,
-        layerName = 0;
-
-    for (layerName in m_layers) {
-      if (m_layers.hasOwnProperty(layerName)) {
-        m_layers[layerName].predraw(m_prepareForRenderRequest);
-      }
-    }
-
-    if (m_featureCollection.getMTime() >
-        m_lastPrepareToRenderingTime.getMTime()) {
-
-      // Remove expired features from the renderer
-      for (layerName in m_layers) {
-        m_renderer.removeActors(
-          m_featureCollection.expiredFeatures(layerName));
-
-        // Add new actors (Will do sorting by bin and then material later)
-        m_renderer.addActors(
-          m_featureCollection.newFeatures(layerName));
-      }
-
-      m_featureCollection.resetAll();
-      m_lastPrepareToRenderingTime.modified();
-    }
+    return m_interactorStyle;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -694,28 +425,22 @@ geo.map = function(node, options) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.draw = function() {
-    m_that.predraw();
-    renderScene();
-    m_that.postdraw();
-  };
 
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Prepare map for rendering
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.postdraw = function() {
-    // TODO Implement this
-  };
+    $(this).trigger({
+        type: geo.event.draw,
+        target: this
+    });
 
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Update the map and then request a draw
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.updateAndDraw = function() {
-    m_that.update();
-    m_that.draw();
+    for (var layerName in m_layers) {
+      if (m_layers.hasOwnProperty(layerName)) {
+        m_layers[layerName].draw();
+      }
+    }
+
+    $(this).trigger({
+        type: geo.event.draw_end,
+        target: this
+    });
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -726,7 +451,7 @@ geo.map = function(node, options) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.animationStep = function() {
-    return m_animationStep;
+    // return m_animationStep;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -738,60 +463,60 @@ geo.map = function(node, options) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.animateTimeRange = function(selectedLayers, onRange) {
-    var delta = -1, stdDelta = -1, units = null,
-        start = null, stdStart = null, end = null, stdEnd = null,
-        rangesToProcess = selectedLayers.length,
-        processTimeInfo = function(timeInfo) {
-          var startDate;
+    // var delta = -1, stdDelta = -1, units = null,
+    //     start = null, stdStart = null, end = null, stdEnd = null,
+    //     rangesToProcess = selectedLayers.length,
+    //     processTimeInfo = function(timeInfo) {
+    //       var startDate;
 
-          if (delta === -1 || timeInfo.stdDelta < stdDelta) {
-            stdDelta = timeInfo.stdDelta;
-            delta = timeInfo.nativeDelta;
-            units = timeInfo.nativeUnits;
-          }
+    //       if (delta === -1 || timeInfo.stdDelta < stdDelta) {
+    //         stdDelta = timeInfo.stdDelta;
+    //         delta = timeInfo.nativeDelta;
+    //         units = timeInfo.nativeUnits;
+    //       }
 
-          if (!start || timeInfo.stdTimeRange[0] < stdStart) {
-            stdStart = timeInfo.stdTimeRange[0];
-            start = timeInfo.dateRange[0];
-          }
+    //       if (!start || timeInfo.stdTimeRange[0] < stdStart) {
+    //         stdStart = timeInfo.stdTimeRange[0];
+    //         start = timeInfo.dateRange[0];
+    //       }
 
-          if (!end || timeInfo.stdTimeRange[1] > stdEnd) {
-            stdEnd = timeInfo.stdTimeRange[1];
-            startDate = timeInfo.dateRange[0];
-            end = new Date(Date.UTC(startDate[0], startDate[1]-1, startDate[2]));
-            geo.time.incrementTime(end, timeInfo.nativeUnits,
-                timeInfo.nativeDelta * timeInfo.numSteps);
-          }
+    //       if (!end || timeInfo.stdTimeRange[1] > stdEnd) {
+    //         stdEnd = timeInfo.stdTimeRange[1];
+    //         startDate = timeInfo.dateRange[0];
+    //         end = new Date(Date.UTC(startDate[0], startDate[1]-1, startDate[2]));
+    //         geo.time.incrementTime(end, timeInfo.nativeUnits,
+    //             timeInfo.nativeDelta * timeInfo.numSteps);
+    //       }
 
-          --rangesToProcess;
+    //       --rangesToProcess;
 
-          // Are we done processing? If so pass the information to the map
-          // for animation.
-          if (rangesToProcess === 0) {
-            if (delta === -1 || units === null || end === null ||
-                start === null ) {
-              console.log('Unable to calculate time range.');
-              return;
-            }
-            startDate = new Date(Date.UTC(start[0], start[1]-1, start[2]));
-            onRange({start: startDate, end: end, delta: delta, units: units});
-          }
-        };
+    //       // Are we done processing? If so pass the information to the map
+    //       // for animation.
+    //       if (rangesToProcess === 0) {
+    //         if (delta === -1 || units === null || end === null ||
+    //             start === null ) {
+    //           console.log('Unable to calculate time range.');
+    //           return;
+    //         }
+    //         startDate = new Date(Date.UTC(start[0], start[1]-1, start[2]));
+    //         onRange({start: startDate, end: end, delta: delta, units: units});
+    //       }
+    //     };
 
-    // Iterate through the selected layers and calculate the range we are going
-    // to animate over.
-    $.each(selectedLayers, function(i, layer){
-      // TODO this data should be part of the layer
-      var dataset = $('#'+layer.id()).data('dataset');
+    // // Iterate through the selected layers and calculate the range we are going
+    // // to animate over.
+    // $.each(selectedLayers, function(i, layer){
+    //   // TODO this data should be part of the layer
+    //   var dataset = $('#'+layer.id()).data('dataset');
 
-      // Do we already have the range?
-      if (dataset.timeInfo) {
-        processTimeInfo(dataset.timeInfo);
-      }
-      else {
-        console.log("Data does not have timeInfo");
-      }
-    });
+    //   // Do we already have the range?
+    //   if (dataset.timeInfo) {
+    //     processTimeInfo(dataset.timeInfo);
+    //   }
+    //   else {
+    //     console.log("Data does not have timeInfo");
+    //   }
+    // });
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -800,28 +525,28 @@ geo.map = function(node, options) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.animate = function(layerIds) {
-    // Save the animation state
-    if (!m_animationState.currentTime) {
+    // // Save the animation state
+    // if (!m_animationState.currentTime) {
 
-      var layers = [];
+    //   var layers = [];
 
-      // Looks layers
-      $.each(layerIds, function(i, id) {
-        var layer = m_that.findLayerById(id);
-        layers.push(layer);
-      });
+    //   // Looks layers
+    //   $.each(layerIds, function(i, id) {
+    //     var layer = m_this.findLayerById(id);
+    //     layers.push(layer);
+    //   });
 
-      m_that.animateTimeRange(layers, function(timeRange) {
-          m_animationState = {
-            range: timeRange, currentTime: new Date(timeRange.start.getTime()),
-            layers: layers
-          };
-          animateInternal();
-      });
-    }
-    else {
-      animateInternal();
-    }
+    //   m_this.animateTimeRange(layers, function(timeRange) {
+    //       m_animationState = {
+    //         range: timeRange, currentTime: new Date(timeRange.start.getTime()),
+    //         layers: layers
+    //       };
+    //       animateInternal();
+    //   });
+    // }
+    // else {
+    //   animateInternal();
+    // }
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -830,7 +555,7 @@ geo.map = function(node, options) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.pauseAnimation = function() {
-    $(this).trigger('animation-pause');
+    // $(this).trigger('animation-pause');
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -839,11 +564,11 @@ geo.map = function(node, options) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.stopAnimation = function(cleanState) {
-    $(this).trigger('animation-stop');
+    // $(this).trigger('animation-stop');
 
-    if (cleanState) {
-      m_animationState = { range: null, currentTime: null, layers: null};
-    }
+    // if (cleanState) {
+    //   m_animationState = { range: null, currentTime: null, layers: null};
+    // }
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -852,27 +577,27 @@ geo.map = function(node, options) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.stepAnimationForward = function(layerIds) {
-    if (!m_animationState.currentTime) {
+    // if (!m_animationState.currentTime) {
 
-      var layers = [];
-      // Looks layers
-      $.each(layerIds, function(i, id) {
-        var layer = m_that.findLayerById(id);
-        layers.push(layer);
-      });
+    //   var layers = [];
+    //   // Looks layers
+    //   $.each(layerIds, function(i, id) {
+    //     var layer = m_this.findLayerById(id);
+    //     layers.push(layer);
+    //   });
 
 
-      m_that.animateTimeRange(layers, function(timeRange) {
-          m_animationState = {
-            range: timeRange, currentTime: new Date(timeRange.start.getTime()),
-            layers: layers
-          };
-          stepAnimationForwardInternal();
-      });
-    }
-    else {
-      stepAnimationForwardInternal();
-    }
+    //   m_this.animateTimeRange(layers, function(timeRange) {
+    //       m_animationState = {
+    //         range: timeRange, currentTime: new Date(timeRange.start.getTime()),
+    //         layers: layers
+    //       };
+    //       stepAnimationForwardInternal();
+    //   });
+    // }
+    // else {
+    //   stepAnimationForwardInternal();
+    // }
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -881,181 +606,104 @@ geo.map = function(node, options) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.stepAnimationBackward = function(layerIds) {
-    if (!m_animationState.currentTime) {
+    // if (!m_animationState.currentTime) {
 
-      var layers = [];
-      // Looks layers
-      $.each(layerIds, function(i, id) {
-        var layer = m_that.findLayerById(id);
-        layers.push(layer);
-      });
+    //   var layers = [];
+    //   // Looks layers
+    //   $.each(layerIds, function(i, id) {
+    //     var layer = m_this.findLayerById(id);
+    //     layers.push(layer);
+    //   });
 
-      m_that.animateTimeRange(layers, function(timeRange) {
-          m_animationState = {
-            range: timeRange, currentTime: new Date(timeRange.start.getTime()),
-            layers: layers
-          };
-          stepAnimationBackwardInternal();
-      });
-    }
-    else {
-      stepAnimationBackwardInternal();
-    }
+    //   m_this.animateTimeRange(layers, function(timeRange) {
+    //       m_animationState = {
+    //         range: timeRange, currentTime: new Date(timeRange.start.getTime()),
+    //         layers: layers
+    //       };
+    //       stepAnimationBackwardInternal();
+    //   });
+    // }
+    // else {
+    //   stepAnimationBackwardInternal();
+    // }
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Convert display coordinates to map coordinates
-   *
-   * @returns {'x': number, 'y': number}
+   * Initialize the map
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.displayToMap = function(winX, winY) {
-    var camera = m_renderer.camera(),
-        width = m_renderer.width(),
-        height = m_renderer.height(),
-        fpoint = camera.focalPoint(),
-        focusWorldPt = vec4.fromValues(fpoint[0], fpoint[1], fpoint[2], 1.0),
-        focusDisplayPt = m_renderer.worldToDisplay(focusWorldPt, camera.viewMatrix(),
-                                                    camera.projectionMatrix(),
-                                                    width, height),
-        displayPt = vec4.fromValues(winX, winY, focusDisplayPt[2], 1.0),
-        worldPt = m_renderer.displayToWorld(displayPt,
-                                            camera.viewMatrix(),
-                                            camera.projectionMatrix(),
-                                            width, height),
-        // NOTE: the map is using (nearly) normalized web-mercator.
-        // The constants below bring it to actual EPSG:3857 units.
-        latlon = geo.mercator.m2ll(
-          geo.mercator.deg2rad(worldPt[0]) * geo.mercator.r_major,
-          geo.mercator.deg2rad(worldPt[1]) * geo.mercator.r_minor),
-        location = {'x': latlon.lon, 'y': latlon.lat};
+  this._init = function() {
+    var i;
 
-    return location;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Queries each layer for information at this location.
-   *
-   * @param location
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.queryLocation = function(location) {
-    var layer = null,
-        srcPrj = new proj4.Proj(m_options.display_gcs),
-        event = location.event, layerName, dstPrj, point;
-
-    for (layerName in m_layers) {
-      layer = m_layers[layerName];
-      dstPrj = new proj4.Proj(layer.gcs());
-      point = new proj4.Point(location.x, location.y);
-      proj4.transform(srcPrj, dstPrj, point);
-      point.event = event;
-      layer.queryLocation(point);
+    if (m_node === undefined || m_node === null) {
+      throw "Map require DIV node";
     }
-  };
 
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Sets or gets the viewer for this map
-   *
-   * @param newViewer {vgl.viewer}
-   * @returns {geo.map|vgl.viewer}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.viewer = function(newViewer) {
-    if(typeof newViewer !== 'undefined') {
-      m_viewer = newViewer;
-      return this;
+    if (m_layers.length === 0) {
+      throw "Map requires atleast one layer";
     }
-    return m_viewer;
-  };
 
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Sets or gets mapLayer for this map
-   *
-   * @param {geo.layer} newMapLayer optional
-   * @returns {geo.map|geo.layer}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.mapLayer = function(newMapLayer) {
-    if(typeof newMapLayer !== 'undefined') {
-
-      // The GCS of the layer must match the map
-      if (this.gcs() === newMapLayer.gcs()) {
-        throw "The layer has a GCS of '" + newMapLayer.gcs() +
-              "' which does match the map GCS of '" +
-              this.gcs() + "'";
+    for (i = 0; i < m_layers.length; ++i) {
+      if (i === 0) {
+        this.baseLayer(m_layers[0]);
       }
 
-      m_mapLayer = newMapLayer;
-
-      // Set the layer as the reference layer
-      m_mapLayer.referenceLayer(true);
-
-      return this;
+      this.addLayer(m_layers[i]);
     }
-    return m_mapLayer;
+
+    $(m_interactorStyle).on(
+      geo.event.zoom, function() {
+        m_this.update();
+        m_this.draw();
+    });
+
+    $(m_interactorStyle).on(
+      geo.event.move, function() {
+        m_this.update();
+        m_this.draw();
+    });
+
+    $(m_interactorStyle).on(
+      geo.event.aoi, function() {
+        m_this.update();
+        m_this.draw();
+    });
+
+    $(m_interactorStyle).on(
+      geo.event.update, function() {
+        m_this.update();
+        m_this.draw();
+    });
+
+    m_interactorStyle.map(m_this);
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Gets the interactorStyle for this map
-   *
-   * @returns {vgl.interactorStyle]
+   * Update map
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.getInteractorStyle = function() {
-    return m_interactorStyle;
+  this._update = function() {
+    for (var layerId in m_layers) {
+      if (m_layers.hasOwnProperty(layerId)) {
+        m_layers[layerId]._update();
+      }
+    }
   };
 
-  this.worldToDisplayGcs = function(x, y) {
-    var gcsPoint,
-        source,
-        dest,
-        transformedPoint;
-
-    gcsPoint = m_mapLayer.worldToGcs(x, y);
-    source = new proj4.Proj(this.options().gcs);
-    dest = new proj4.Proj(this.options().display_gcs);
-    transformedPoint = new proj4.Point(gcsPoint[0], gcsPoint[1]);
-
-    proj4.transform(source, dest, transformedPoint);
-
-    return [transformedPoint.x, transformedPoint.y];
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Exit this map
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._exit = function() {
+    for (var layerId in m_layers) {
+      if (m_layers.hasOwnProperty(layerId)) {
+        m_layers[layerId]._exit();
+      }
+    }
   };
-
-  // Bind events to handlers
-  $(document).on("mousedown", m_viewer.handleMouseDown);
-  $(document).on("mouseup", m_viewer.handleMouseUp);
-  $(document).on("mousemove", m_viewer.handleMouseMove);
-  document.oncontextmenu = m_viewer.handleContextMenu;
-  HTMLCanvasElement.prototype.relMouseCoords = m_viewer.relMouseCoords;
-
-  // Create map layer
-  m_mapLayer = geo.openStreetMapLayer();
-  m_mapLayer.referenceLayer(true);
-  m_mapLayer.update(m_updateRequest);
-  m_mapLayer.predraw(m_prepareForRenderRequest);
-  this.addLayer(m_mapLayer);
-
-  // Check if need to show country boundaries
-  if (m_options.country_boundaries === true) {
-    this.toggleCountryBoundaries();
-  }
-
-  $(m_interactorStyle).on(
-    geo.command.updateViewZoomEvent, this.updateAndDraw);
-  $(m_interactorStyle).on(
-    geo.command.updateViewPositionEvent, this.updateAndDraw);
-  $(m_interactorStyle).on(
-    geo.command.updateDrawRegionEvent, this.updateAndDraw);
-
-  $(this).on(geo.command.updateEvent, this.updateAndDraw);
-
-  m_interactorStyle.map(this);
 
   return this;
 };

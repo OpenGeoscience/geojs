@@ -33,13 +33,10 @@ set(_source_files
   core/latlng.js
   core/layer.js
   core/featureLayer.js
-  core/openStreetMapLayer.js
   core/featureCollection.js
   core/layerSource.js
   core/archiveLayerSource.js
-  core/command.js
-  core/updateRequest.js
-  core/prepareForRenderRequest.js
+  core/event.js
   core/mapInteractorStyle.js
   core/time.js
   core/map.js
@@ -47,7 +44,6 @@ set(_source_files
   core/pointFeature.js
   core/lineFeature.js
   core/polygonFeature.js
-  core/planeFeature.js
   core/geomFeature.js
   core/geoTransform.js
   core/data.js
@@ -55,6 +51,7 @@ set(_source_files
   gl/pointFeature.js
   gl/geomFeature.js
   gl/pointFeature.js
+  gl/openStreetMapLayer.js
   ui/init.js
   ui/gis.js
   srv/init.js

@@ -45,18 +45,15 @@ geo.layer = function(arg) {
       m_source = arg.source || null,
       m_container = arg.container,
       m_isReference = false,
+      m_xOffset = 0,
+      m_yOffset = 0,
+      m_width = 0,
+      m_height = 0,
+      m_node = null,
+      m_sharedContext = null,
+      m_rendererType = arg.renderer  === undefined ?  'webgl' : arg.renderer,
       m_updateTime = vgl.timestamp(),
-      m_node = null;
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Return the underlying drawable entity.
-   * @returns {geo.feature}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.create = function(fname) {
-    // TODO Implement this
-  };
+      m_drawTime = vgl.timestamp();
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -118,7 +115,7 @@ geo.layer = function(arg) {
       this.modified();
       return this;
     }
-  };
+  };s
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -169,6 +166,21 @@ geo.layer = function(arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Get/Set time range of the layer
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.timeRange = function(val) {
+    if (val === undefined ) {
+      return timeRange;
+    } else {
+      timeRange = val.slice(0);
+      this.modified();
+      return this;
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Get/Set source of the layer
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -184,6 +196,34 @@ geo.layer = function(arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Get renderer type for the layer
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.rendererType = function() {
+    return m_rendererType;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get shared context (gl, canvas2D) of the layer
+   *
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.sharedContext = function() {
+    return m_sharedContext;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get viewport of the layer
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.viewport = function() {
+    return [m_xOffset, m_yOffset, m_width, m_height];
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Return the modified time for the last update that did something
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -193,7 +233,16 @@ geo.layer = function(arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Run given query and result afterwards
+   * Return the modified time for the last draw call that did something
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.drawTime = function() {
+    return m_drawTime;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Run given query and return result afterwards
    */
   ////////////////////////////////////////////////////////////////////////////
   this.query = function(arg) {
@@ -215,10 +264,33 @@ geo.layer = function(arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Resize layer
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.resize = function(x, y, w, h) {
+    m_xOffset = x;
+    m_yOffset = y;
+    m_width = w;
+    m_height = h;
+
+    $(this).trigger({
+      type: geo.event.resize,
+      target: m_this,
+      x_offset: m_xOffset,
+      y_offset: m_yOffset,
+      width: width,
+      height: height
+    });
+
+    this.modified();
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Convert array of points from world to GCS coordinate space
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.worldToGcs = function([]) {
+  this.worldToGcs = function(points) {
     throw "Should be implemented by derivied classes";
   };
 
@@ -227,7 +299,7 @@ geo.layer = function(arg) {
    * Convert array of points from world to display space
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.worldToDisplay = function([]) {
+  this.worldToDisplay = function(points) {
     throw "Should be implemented by derivied classes";
   };
 
@@ -236,7 +308,7 @@ geo.layer = function(arg) {
    * Convert array of points from display to world space
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.displayToWorld = function([]) {
+  this.displayToWorld = function(points) {
     throw "Should be implemented by derivied classes";
   };
 
@@ -245,7 +317,7 @@ geo.layer = function(arg) {
    * Convert array of points from display to GCS space
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.displayToGcs = function([]) {
+  this.displayToGcs = function(points) {
     throw "Should be implemented by derivied classes";
   };
 
@@ -258,6 +330,13 @@ geo.layer = function(arg) {
     if (m_container === undefined) {
       throw "Layer requires valid container";
     }
+
+    // // Create top level div for the layer hers
+    // m_node = $(document.createElemenet('div'));
+    // m_node.attr('id', m_name);
+    // m_container.node().append(m_node);
+
+    // m_renderer = geo.createRenderer(m_rendererType, m_node);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -270,10 +349,10 @@ geo.layer = function(arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Prepare layer for rendering
+   * Update layer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._predraw = function(request) {
+  this._update = function(request) {
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -282,14 +361,6 @@ geo.layer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._draw = function(request) {
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Perform actions after draw has happened
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._postdraw = function(request) {
   };
 
   this._init();

@@ -26,7 +26,7 @@ geo.lineFeature = function(arg) {
   geo.feature.call(this, arg);
 
   arg.style = arg.style === undefined ? $.extend({}, {"width":[1.0],
-              "color": [{1.0, 1.0, 1.0}],
+              "color": [1.0, 1.0, 1.0],
               "pattern": "solid"}, arg.style) : arg.style;
 
   // Update style

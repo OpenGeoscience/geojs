@@ -35,18 +35,18 @@ ggl.geomFeature = function(arg) {
   this._build = function() {
     // Vertex color gets the preference
     if (m_geom !== null) {
-      m_scalar = geom.sourceData(vgl.vertexAttributeKeys.Scalar),
-      m_color = geom.sourceData(vgl.vertexAttributeKeys.Color);
-      m_mapper.setGeometryData(geom);
+      m_scalar = m_geom.sourceData(vgl.vertexAttributeKeys.Scalar),
+      m_color = m_geom.sourceData(vgl.vertexAttributeKeys.Color);
+      m_mapper.setGeometryData(m_geom);
     }
 
     this.setMapper(m_mapper);
 
     if (style.point_sprites !== undefined && style.point_sprites &&
-        style.point_sprites_image !=== undefined &&
-        style.point_sprites_image !== null)
+        style.point_sprites_image !== undefined &&
+        style.point_sprites_image !== null &&
         m_noOfPrimitives === 1 &&
-        geom.source(j).primitiveType() === gl.POINTS) {
+        m_geom.primitive(0).primitiveType() === gl.POINTS) {
       m_material = vgl.utils.createPointSpritesMaterial(
                      style.point_sprites_image);
     }

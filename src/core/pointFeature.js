@@ -26,7 +26,7 @@ geo.pointFeature = function(arg) {
   geo.feature.call(this, arg);
 
   arg.style = arg.style === undefined ? $.extend({}, {"size":[1.0],
-              "color": [{1.0, 1.0, 1.0, 1.0}],
+              "color":[1.0, 1.0, 1.0],
               "point_sprites": false,
               "point_sprites_image": null}, arg.style) : arg.style;
 
