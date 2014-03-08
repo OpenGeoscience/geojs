@@ -28,6 +28,7 @@ find_package(UglifyJS)
 
 set(_source_files
   core/init.js
+  core/object.js
   core/ellipsoid.js
   core/mercator.js
   core/latlng.js

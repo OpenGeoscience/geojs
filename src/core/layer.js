@@ -50,7 +50,7 @@ geo.layer = function(arg) {
       m_width = 0,
       m_height = 0,
       m_node = null,
-      m_context = null,
+      m_canvas = null,
       m_renderer = null,
       m_rendererType = arg.renderer  === undefined ?  'webgl' : arg.renderer,
       m_updateTime = vgl.timestamp(),
@@ -211,7 +211,7 @@ geo.layer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.context = function() {
-    return m_context;
+    return m_canvas;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -338,11 +338,11 @@ geo.layer = function(arg) {
     m_container.node().append(m_node);
 
     // Share context if have valid one
-    if (m_context) {
-      m_renderer = geo.createRenderer(m_rendererType, m_node, m_context);
+    if (m_canvas) {
+      m_renderer = geo.createRenderer(m_rendererType, m_node, m_canvas);
     } else {
       m_renderer = geo.createRenderer(m_rendererType, m_node);
-      m_context = m_renderer.context();
+      m_canvas = m_renderer.context();
     }
   };
 

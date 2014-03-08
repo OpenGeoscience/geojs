@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="/testing/common/js/jquery-1.9.1.js"></script>
+    <script type="text/javascript" src="/testing/common/js/gl-matrix.js"></script>
+    <script type="text/javascript" src="/testing/common/js/d3.v3.min.js"></script>
+    <script type="text/javascript" src="/testing/common/js/proj4.js"></script>
+    <script type="text/javascript" src="/web/lib/vgl.min.js"></script>
+    <script type="text/javascript" src="/web/lib/geojs.min.js"></script>
+    <style>
+        html{
+            height: 100%;
+        }
+    </style>
+
+</head>
+<body style="height: 100%;">
+<script>
+function processCSVData(csvdata) {
+  var table = [];
+  var lines = csvdata.split(/\r\n|\n/);
+
+  for ( var i = 0; i < lines.length; i++) {
+    var row = lines[i].split(',');
+    table.push(row);
+  }
+  return table;
+};
+
+$(function() {
+    var mapOptions = {
+      zoom : 6,
+      center : [0.0, 0.0]
+    };
+
+    var myMap = geo.map("map", mapOptions),
+        table = [],
+        citieslatlon = [],
+        colors = [];
+
+    // Resize the canvas to fill browser window dynamically
+    window.addEventListener('resize', resizeCanvas, false);
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      updateAndDraw(canvas.width, canvas.height);
+    }
+    resizeCanvas();
+
+    function updateAndDraw(width, height) {
+      myMap.resize(0, 0, width, height);
+      myMap.draw();
+    }
+
+    // Read city geo-coded data
+    $.ajax({
+      type : "GET",
+      url : "/data/cities.csv",
+      dataType : "text",
+      success : function(data) {
+        table = processCSVData(data);
+        if (table.length > 0) {
+          var i;
+          for (i = 0; i < table.length; ++i) {
+            if (table[i][2] != undefined) {
+              var lat = table[i][2];
+              lat = lat.replace(/(^\s+|\s+$|^\"|\"$)/g, '');
+              lat = parseFloat(lat);
+
+              var lon = table[i][3];
+              lon = lon.replace(/(^\s+|\s+$|^\"|\"$)/g, '');
+              lon = parseFloat(lon);
+              citieslatlon.push(lon, lat, 0.0);
+              colors.push(1.0, 1.0, 153.0 / 255.0);
+            }
+          }
+        }
+
+        // Load image to be used for drawing dots
+        var pointLayer = geo.featureLayer({
+            'renderer' : 'webgl'});
+        var feature = pointLayer.create('point_feature');
+        feature.positons(citieslatlon);
+
+        myMap.addLayer(pointLayer);
+        myMap.draw();
+      }});
+});
+</script>
+
+<div id=map style="width:100%; height:100%;">
+  <canvas id="glcanvas" style="width:100%; height:100%;" ></canvas>
+</div>
+
+</body>
