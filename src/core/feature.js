@@ -149,7 +149,7 @@ geo.feature = function(arg) {
    * Derived class should implement this
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._destroy = function() {
+  this._exit = function() {
   };
 
   return this;

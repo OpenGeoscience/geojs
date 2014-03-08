@@ -40,7 +40,6 @@ ggl.pointFeature = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function() {
-    geo.registerFeature('webgl', 'pointFeature');
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -81,3 +80,6 @@ ggl.pointFeature = function(arg) {
 };
 
 inherit(geo.pointFeature, geo.feature);
+
+// Now register it
+geo.registerFeature('webgl', 'pointFeature', ggl.pointFeature);

@@ -37,7 +37,6 @@ set(_source_files
   core/layerSource.js
   core/archiveLayerSource.js
   core/event.js
-  core/mapInteractorStyle.js
   core/time.js
   core/map.js
   core/feature.js
@@ -47,11 +46,12 @@ set(_source_files
   core/geomFeature.js
   core/geoTransform.js
   core/data.js
+  core/renderer.js
   gl/init.js
   gl/pointFeature.js
   gl/geomFeature.js
   gl/pointFeature.js
-  gl/openStreetMapLayer.js
+  gl/simpleRenderer.js
   ui/init.js
   ui/gis.js
   srv/init.js

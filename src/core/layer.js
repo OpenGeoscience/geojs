@@ -50,7 +50,8 @@ geo.layer = function(arg) {
       m_width = 0,
       m_height = 0,
       m_node = null,
-      m_sharedContext = null,
+      m_context = null,
+      m_renderer = null,
       m_rendererType = arg.renderer  === undefined ?  'webgl' : arg.renderer,
       m_updateTime = vgl.timestamp(),
       m_drawTime = vgl.timestamp();
@@ -209,8 +210,8 @@ geo.layer = function(arg) {
    *
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.sharedContext = function() {
-    return m_sharedContext;
+  this.context = function() {
+    return m_context;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -331,12 +332,18 @@ geo.layer = function(arg) {
       throw "Layer requires valid container";
     }
 
-    // // Create top level div for the layer hers
-    // m_node = $(document.createElemenet('div'));
-    // m_node.attr('id', m_name);
-    // m_container.node().append(m_node);
+    // Create top level div for the layer hers
+    m_node = $(document.createElemenet('div'));
+    m_node.attr('id', m_name);
+    m_container.node().append(m_node);
 
-    // m_renderer = geo.createRenderer(m_rendererType, m_node);
+    // Share context if have valid one
+    if (m_context) {
+      m_renderer = geo.createRenderer(m_rendererType, m_node, m_context);
+    } else {
+      m_renderer = geo.createRenderer(m_rendererType, m_node);
+      m_context = m_renderer.context();
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////

@@ -43,6 +43,9 @@ ogs.namespace = function(ns_string) {
 /** geo namespace */
 var geo = ogs.namespace("geo");
 
+geo.renderers = {};
+geo.features = {};
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Convenient function to define JS inheritance
@@ -80,4 +83,31 @@ Object.size = function(obj) {
     }
   }
   return size;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Register a new renderer type
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.registerRenderer = function(category, name, func) {
+  if (geo.renderers.hasKey(category)) {
+    geo.renderers[category] = {};
+  }
+
+  geo.renderers[category][name] = func;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Register a new feature type
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.registerFeature = function(category, name, func) {
+  if (geo.features.hasKey(category)) {
+    geo.features[category] = {};
+  }
+
+  // TODO Add warning if the name already exists
+  geo.features[category][name] = func;
 };
