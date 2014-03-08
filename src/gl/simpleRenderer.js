@@ -27,8 +27,8 @@ ggl.simpleRenderer = function(container, canvas) {
 
   var m_this = this,
       m_canvas = canvas,
-      m_viewer = null;
-      s_init = this.init;
+      m_viewer = null,
+      s_init = this._init;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -36,12 +36,12 @@ ggl.simpleRenderer = function(container, canvas) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function() {
-    s.init();
+    s_init();
 
     if (!m_canvas) {
-      m_canvas = $(document.createElemenet('div'));
+      m_canvas = $(document.createElement('div'));
       m_canvas.attr('class', '.webgl-canvas');
-      m_container.node().append(m_canvas);
+      this.container().node().append(m_canvas);
     }
 
     m_viewer = vgl.viewer(m_canvas);
@@ -54,6 +54,16 @@ ggl.simpleRenderer = function(container, canvas) {
   ////////////////////////////////////////////////////////////////////////////
   this._canvas = function() {
     return m_canvas;
+  };
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get API used by the renderer
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._api = function() {
+    return 'webgl';
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -88,4 +98,4 @@ ggl.simpleRenderer = function(container, canvas) {
 
 inherit(ggl.simpleRenderer, geo.renderer);
 
-geo.registerRenderer('webgl', 'simple_renderer', ggl.simpleRenderer);
+geo.registerRenderer('simple_renderer', ggl.simpleRenderer);

@@ -37,13 +37,13 @@ geo.layer = function(arg) {
       m_style = arg.style === undefined ? {"opacity" : 0.5,
                                            "color" : [0.8, 0.8, 0.8],
                                            "visible" : true,
-                                           "bin" : 100} : arg.style;
+                                           "bin" : 100} : arg.style,
       m_id = "",
       m_name = "",
       m_gcs = 'EPSG:4326',
       m_timeRange = [],
       m_source = arg.source || null,
-      m_container = arg.container,
+      m_container = arg.container === undefined ? null : args.container,
       m_isReference = false,
       m_xOffset = 0,
       m_yOffset = 0,
@@ -52,9 +52,12 @@ geo.layer = function(arg) {
       m_node = null,
       m_canvas = null,
       m_renderer = null,
-      m_rendererType = arg.renderer  === undefined ?  'webgl' : arg.renderer,
+      m_rendererApi = null,
+      m_rendererName = arg.renderer  === undefined ?  'simple-renderer' : arg.renderer,
       m_updateTime = vgl.timestamp(),
       m_drawTime = vgl.timestamp();
+
+
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -116,7 +119,7 @@ geo.layer = function(arg) {
       this.modified();
       return this;
     }
-  };s
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -197,11 +200,27 @@ geo.layer = function(arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Get/Set container of the layer
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.container = function(val) {
+    if (val === undefined ) {
+      return m_container;
+    } else {
+      m_container = val;
+      m_container.node().append(m_node);
+      this.modified();
+      return this;
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Get renderer type for the layer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.rendererType = function() {
-    return m_rendererType;
+  this.rendererApi = function() {
+    return m_rendererApi;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -328,22 +347,18 @@ geo.layer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function() {
-    if (m_container === undefined) {
-      throw "Layer requires valid container";
-    }
-
     // Create top level div for the layer hers
-    m_node = $(document.createElemenet('div'));
+    m_node = $(document.createElement('div'));
     m_node.attr('id', m_name);
-    m_container.node().append(m_node);
 
     // Share context if have valid one
     if (m_canvas) {
-      m_renderer = geo.createRenderer(m_rendererType, m_node, m_canvas);
+      m_renderer = geo.createRenderer(m_rendererName, this, m_canvas);
     } else {
-      m_renderer = geo.createRenderer(m_rendererType, m_node);
-      m_canvas = m_renderer.context();
+      m_renderer = geo.createRenderer(m_rendererName, this);
+      m_canvas = m_renderer.canvas();
     }
+    m_rendererApi = m_renderer.api();
   };
 
   ////////////////////////////////////////////////////////////////////////////

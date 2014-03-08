@@ -90,13 +90,25 @@ Object.size = function(obj) {
  * Register a new renderer type
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.registerRenderer = function(category, name, func) {
-  if (geo.renderers.hasKey(category)) {
-    geo.renderers[category] = {};
+geo.registerRenderer = function(name, func) {
+  if (geo.renderers === undefined) {
+    geo.renderers = {};
   }
 
-  geo.renderers[category][name] = func;
+  geo.renderers[name] = func;
 };
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Create new instance of the renderer
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.createRenderer  = function(name, container, canvas) {
+  if (name in geo.renderers) {
+    return geo.renderers[name](container, canvas);
+  }
+  return null;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -104,7 +116,7 @@ geo.registerRenderer = function(category, name, func) {
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.registerFeature = function(category, name, func) {
-  if (geo.features.hasKey(category)) {
+  if (!(category in geo.features)) {
     geo.features[category] = {};
   }
 

@@ -39,11 +39,10 @@ geo.map = function(arg) {
       m_center = arg.center === undefined ? [0.0, 0.0] :
                  arg.center,
       m_zoom = arg.zoom === undefined ? 10 : arg.zoom,
-      m_layers = arg.layers,
+      m_layers = arg.layers === undefined || [],
       m_baseLayer = null,
       m_updateTime = vgl.timestamp(),
       m_drawTime = vgl.timestamp(),
-      m_interactorStyle = geo.mapInteractorStyle(),
       m_animationState = { range: null, currentTime: null, layers: null},
       m_animationStep = null;
 
@@ -249,7 +248,7 @@ geo.map = function(arg) {
         // TODO Add api to layer
         layer.transformGcs(m_gcs);
       }
-      m_layers[layer.id()] = layer;
+      m_layers.push(layer);
       this.modified();
 
       $(this).trigger({
@@ -270,8 +269,16 @@ geo.map = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.removeLayer = function(layer) {
+    var i;
+
     if (layer !== null && layer !== undefined) {
-      delete m_layers[layer.id()];
+
+      for (i = 0; i < m_layers.length; ++i) {
+        if (m_layers[i] === layer) {
+          m_layers = m_layers.splice(i, 1);
+        }
+      }
+
       layer._exit();
       this.modified();
       $(this).trigger({
@@ -324,8 +331,10 @@ geo.map = function(arg) {
     $(this).trigger({
       type: geo.event.resize,
       target: this,
-      width: width,
-      height: height
+      x_offset: x,
+      y_offset: y,
+      width: w,
+      height: h
     });
   };
 
@@ -425,22 +434,22 @@ geo.map = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.draw = function() {
+    var i = 0;
 
-    $(this).trigger({
-        type: geo.event.draw,
-        target: this
-    });
+    // TODO Fix this
+    // $(this).trigger({
+    //     type: geo.event.draw,
+    //     target: m_this
+    // });
 
-    for (var layerName in m_layers) {
-      if (m_layers.hasOwnProperty(layerName)) {
-        m_layers[layerName].draw();
-      }
+    for (i = 0; i < m_layers.length; ++i) {
+      m_layers[i].draw();
     }
 
-    $(this).trigger({
-        type: geo.event.draw_end,
-        target: this
-    });
+    // $(this).trigger({
+    //     type: geo.event.draw_end,
+    //     target: m_this
+    // });
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -651,32 +660,6 @@ geo.map = function(arg) {
 
       this.addLayer(m_layers[i]);
     }
-
-    $(m_interactorStyle).on(
-      geo.event.zoom, function() {
-        m_this.update();
-        m_this.draw();
-    });
-
-    $(m_interactorStyle).on(
-      geo.event.move, function() {
-        m_this.update();
-        m_this.draw();
-    });
-
-    $(m_interactorStyle).on(
-      geo.event.aoi, function() {
-        m_this.update();
-        m_this.draw();
-    });
-
-    $(m_interactorStyle).on(
-      geo.event.update, function() {
-        m_this.update();
-        m_this.draw();
-    });
-
-    m_interactorStyle.map(m_this);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -685,10 +668,9 @@ geo.map = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._update = function() {
-    for (var layerId in m_layers) {
-      if (m_layers.hasOwnProperty(layerId)) {
-        m_layers[layerId]._update();
-      }
+    var i = 0;
+    for (i = 0; i < m_layers.length; ++i) {
+      m_layers[i]._update();
     }
   };
 
@@ -698,14 +680,13 @@ geo.map = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function() {
-    for (var layerId in m_layers) {
-      if (m_layers.hasOwnProperty(layerId)) {
-        m_layers[layerId]._exit();
-      }
+    var i = 0;
+    for (i = 0; i < m_layers.length; ++i) {
+      m_layers[i]._exit();
     }
   };
 
   return this;
 };
 
-inherit(geo.map, vgl.object);
+inherit(geo.map, geo.object);
