@@ -311,6 +311,10 @@ geo.layer = function(arg) {
     m_width = w;
     m_height = h;
 
+    if (m_renderer) {
+      m_renderer.resize(x, y, w, h);
+    }
+
     $(this).trigger({
       type: geo.event.resize,
       target: m_this,
@@ -365,12 +369,14 @@ geo.layer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function() {
-    // Create top level div for the layer hers
+    // Create top level div for the layer
     m_node = $(document.createElement('div'));
     m_node.attr('id', m_name);
 
     if (m_container) {
       m_container.node().append(m_node);
+    } else {
+      throw "Layer requires valid container";
     }
 
     // Share context if have valid one
