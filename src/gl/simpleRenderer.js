@@ -48,6 +48,7 @@ ggl.simpleRenderer = function(container, canvas) {
     m_viewer.init();
 
     // TODO Take it out
+    m_viewer.renderWindow().activeRenderer().setBackgroundColor(0.0, 0.0, 0.0, 1.0);
     m_viewer.renderWindow().resize(400, 400);
   };
 

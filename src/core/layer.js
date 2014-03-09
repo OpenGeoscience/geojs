@@ -33,7 +33,7 @@ geo.layer = function(arg) {
    * @private
    */
   //////////////////////////////////////////////////////////////////////////////
-  var m_that = this,
+  var m_this = this,
       m_style = arg.style === undefined ? {"opacity" : 0.5,
                                            "color" : [0.8, 0.8, 0.8],
                                            "visible" : true,
@@ -369,6 +369,10 @@ geo.layer = function(arg) {
     m_node = $(document.createElement('div'));
     m_node.attr('id', m_name);
 
+    if (m_container) {
+      m_container.node().append(m_node);
+    }
+
     // Share context if have valid one
     if (m_canvas) {
       m_renderer = geo.createRenderer(m_rendererName, this, m_canvas);
@@ -404,7 +408,6 @@ geo.layer = function(arg) {
   };
 
   this._init();
-
   return this;
 };
 
