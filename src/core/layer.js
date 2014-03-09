@@ -45,8 +45,8 @@ geo.layer = function(arg) {
       m_source = arg.source || null,
       m_container = arg.container === undefined ? null : args.container,
       m_isReference = false,
-      m_xOffset = 0,
-      m_yOffset = 0,
+      m_x = 0,
+      m_y = 0,
       m_width = 0,
       m_height = 0,
       m_node = null,
@@ -257,7 +257,7 @@ geo.layer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.viewport = function() {
-    return [m_xOffset, m_yOffset, m_width, m_height];
+    return [m_x, m_y, m_width, m_height];
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -306,18 +306,18 @@ geo.layer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.resize = function(x, y, w, h) {
-    m_xOffset = x;
-    m_yOffset = y;
+    m_x = x;
+    m_y = y;
     m_width = w;
     m_height = h;
 
     $(this).trigger({
       type: geo.event.resize,
       target: m_this,
-      x_offset: m_xOffset,
-      y_offset: m_yOffset,
-      width: width,
-      height: height
+      x_offset: m_x,
+      y_offset: m_y,
+      width: w,
+      height: h
     });
 
     this.modified();
