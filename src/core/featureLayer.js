@@ -43,7 +43,9 @@ geo.featureLayer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.create = function(featureName) {
-    return geo.createFeature(this.rendererApi(), featureName);
+    m_features.push(geo.createFeature(this.rendererApi(), featureName));
+
+    return m_features[m_features.length - 1];
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -59,10 +61,6 @@ geo.featureLayer = function(arg) {
       return m_features;
     } else {
       m_features = val.slice(0);
-
-      for (; i < m_features.length; ++i) {
-        m_features.renderer(this.renderer());
-      }
       this.modified();
     }
   };
@@ -73,15 +71,20 @@ geo.featureLayer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._update = function() {
-    var i = 0;
+    var i;
 
-    if (!this.source() || m_features.length === 0) {
+    if (!this.source() && m_features.length === 0) {
       console.log('[info] No valid data source found.');
       return;
     }
 
-    for (; i < m_features.length; ++i) {
-        m_features._update()
+    // TODO Fix this
+    for (i = 0; i < m_features.length; ++i) {
+        m_features[i].renderer(this.renderer());
+    }
+
+    for (i = 0; i < m_features.length; ++i) {
+        m_features[i]._update()
       }
   };
 

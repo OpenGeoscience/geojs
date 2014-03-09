@@ -443,6 +443,8 @@ geo.map = function(arg) {
     //     target: m_this
     // });
 
+    this._update();
+
     for (i = 0; i < m_layers.length; ++i) {
       m_layers[i]._draw();
     }
@@ -650,10 +652,6 @@ geo.map = function(arg) {
       throw "Map require DIV node";
     }
 
-    if (m_layers.length === 0) {
-      throw "Map requires atleast one layer";
-    }
-
     for (i = 0; i < m_layers.length; ++i) {
       if (i === 0) {
         this.baseLayer(m_layers[0]);
@@ -687,6 +685,7 @@ geo.map = function(arg) {
     }
   };
 
+  this._init();
   return this;
 };
 

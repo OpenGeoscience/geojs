@@ -19,8 +19,8 @@
 //////////////////////////////////////////////////////////////////////////////
 ggl.pointFeature = function(arg) {
   "use strict";
-  if (!(this instanceof geo.pointFeature)) {
-    return new geo.pointFeature(arg);
+  if (!(this instanceof ggl.pointFeature)) {
+    return new ggl.pointFeature(arg);
   }
   arg = arg || {};
   geo.pointFeature.call(this, arg);
@@ -30,8 +30,7 @@ ggl.pointFeature = function(arg) {
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
-  var m_actor = vgl.utils.createPoints(this.positions(),
-                this.style().colors),
+  var m_actor = null,
       m_buildTime = vgl.timestamp();
 
   ////////////////////////////////////////////////////////////////////////////
@@ -50,7 +49,12 @@ ggl.pointFeature = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._build = function() {
-    this.renderer().glRenderer().addActor(m_actor);
+    if (m_actor) {
+      this.renderer()._contextRenderer().removeActor(m_actor);
+    }
+
+    m_actor = vgl.utils.createPoints(this.positions(), this.style().colors);
+    this.renderer()._contextRenderer().addActor(m_actor);
     m_buildTime.modified();
   };
 
@@ -62,8 +66,8 @@ ggl.pointFeature = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._update = function() {
-    if (this.dataTimestamp().getMTime() > m_buildTime.getMTime()) {
-      build();
+    if (this.dataTime().getMTime() > m_buildTime.getMTime()) {
+      this._build();
     }
 
     if (this.updateTime().getMTime() < this.getMTime()) {
