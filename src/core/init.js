@@ -105,7 +105,9 @@ geo.registerRenderer = function(name, func) {
 //////////////////////////////////////////////////////////////////////////////
 geo.createRenderer  = function(name, container, canvas) {
   if (name in geo.renderers) {
-    return geo.renderers[name](container, canvas);
+    var ren = geo.renderers[name](container, canvas);
+    ren._init();
+    return ren;
   }
   return null;
 }
@@ -116,6 +118,11 @@ geo.createRenderer  = function(name, container, canvas) {
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.registerFeature = function(category, name, func) {
+
+  if (geo.features === undefined) {
+    geo.features = {};
+  }
+
   if (!(category in geo.features)) {
     geo.features[category] = {};
   }
@@ -123,3 +130,15 @@ geo.registerFeature = function(category, name, func) {
   // TODO Add warning if the name already exists
   geo.features[category][name] = func;
 };
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Create new instance of the renderer
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.createFeature  = function(category, name, canvas) {
+  if (category in geo.features && name in geo.features[category]) {
+    return geo.features[category][name]();
+  }
+  return null;
+}

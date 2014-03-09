@@ -34,12 +34,12 @@ geo.map = function(arg) {
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       m_node = $('#' + arg.node),
-      m_gcs = arg.gcs === undefined ? "EPSG:3857" : arg.gcs,
+      m_gcs = arg.gcs === undefined ? "EPSG:4326" : arg.gcs,
       m_uigcs = arg.uigcs === undefined ? "EPSG:4326" : arg.uigcs,
       m_center = arg.center === undefined ? [0.0, 0.0] :
                  arg.center,
       m_zoom = arg.zoom === undefined ? 10 : arg.zoom,
-      m_layers = arg.layers === undefined || [],
+      m_layers = arg.layers === undefined ? [] : arg.layers,
       m_baseLayer = null,
       m_updateTime = vgl.timestamp(),
       m_drawTime = vgl.timestamp(),
@@ -242,19 +242,20 @@ geo.map = function(arg) {
     if (layer !== null || layer !== undefined) {
       layer.container(this);
 
-      if (layer.isReference() && m_gcs !== layer.gcs()) {
+      if (layer.isReference() && m_gcs != null && m_gcs !== layer.gcs()) {
         throw "Reference layer gcs does not match with map gcs";
       } else {
         // TODO Add api to layer
-        layer.transformGcs(m_gcs);
+        layer.transform(m_gcs);
       }
       m_layers.push(layer);
       this.modified();
 
-      $(this).trigger({
-        type: geo.event.addLayer,
-        target: layer
-      });
+      // TODO Fix this
+      // $(this).trigger({
+      //   type: geo.event.addLayer,
+      //   target: layer
+      // });
     }
     return this;
   };
@@ -443,7 +444,7 @@ geo.map = function(arg) {
     // });
 
     for (i = 0; i < m_layers.length; ++i) {
-      m_layers[i].draw();
+      m_layers[i]._draw();
     }
 
     // $(this).trigger({

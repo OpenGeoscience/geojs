@@ -80,7 +80,7 @@ $(function() {
         var pointLayer = geo.featureLayer({
             'renderer' : 'simple_renderer'});
         var feature = pointLayer.create('point_feature');
-        feature.positons(citieslatlon);
+        feature.positions(citieslatlon);
 
         myMap.addLayer(pointLayer);
         myMap.draw();

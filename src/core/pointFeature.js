@@ -40,7 +40,7 @@ geo.pointFeature = function(arg) {
   ////////////////////////////////////////////////////////////////////////////
   var m_positions = arg.positions === undefined ? null : arg.positions;
   if (m_positions) {
-    this.dataTimestamp().modified();
+    this.dataTime().modified();
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -55,8 +55,8 @@ geo.pointFeature = function(arg) {
       return m_positions;
     } else {
       // Copy incoming array of positions
-      m_positions = positions.slice(0);
-      this.dataTimestamp().modified();
+      m_positions = val.slice(0);
+      this.dataTime().modified();
       this.modified();
       return this;
     }
