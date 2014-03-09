@@ -39,12 +39,16 @@ ggl.simpleRenderer = function(container, canvas) {
     s_init();
 
     if (!m_canvas) {
-      m_canvas = $(document.createElement('div'));
+      m_canvas = $(document.createElement('canvas'));
       m_canvas.attr('class', '.webgl-canvas');
       this.container().node().append(m_canvas);
     }
 
-    m_viewer = vgl.viewer(m_canvas);
+    m_viewer = vgl.viewer(m_canvas.get(0));
+    m_viewer.init();
+
+    // TODO Take it out
+    m_viewer.renderWindow().resize(400, 400);
   };
 
   ////////////////////////////////////////////////////////////////////////////
