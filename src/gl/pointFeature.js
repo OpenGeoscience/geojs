@@ -40,8 +40,8 @@ ggl.pointFeature = function(arg) {
    * Initialize
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._init = function() {
-    s_init();
+  this._init = function(arg) {
+    s_init.call(this, arg);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -69,7 +69,7 @@ ggl.pointFeature = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._update = function() {
-    s_update();
+    s_update.call(this);
 
     if (this.dataTime().getMTime() > m_buildTime.getMTime()) {
       this._build();
@@ -84,7 +84,7 @@ ggl.pointFeature = function(arg) {
     }
   };
 
-  this._init();
+  this._init(arg);
   return this;
 };
 

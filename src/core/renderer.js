@@ -17,18 +17,18 @@
  * @returns {geo.renderer}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.renderer = function(container, canvas) {
+geo.renderer = function(arg) {
   'use strict';
 
   if (!(this instanceof geo.renderer)) {
-    return new geo.renderer(container, canvas);
+    return new geo.renderer(arg);
   }
   geo.object.call(this);
 
-
+  arg = arg || {};
   var m_this = this,
-      m_container = container,
-      m_canvas = canvas === undefined ? null : canvas;
+      m_container = arg.container === undefined ? null : arg.container,
+      m_canvas = arg.canvas === undefined ? null : arg.canvas;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -102,7 +102,7 @@ geo.renderer = function(container, canvas) {
    * Initialize
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._init = function() {
+  this._init = function(arg) {
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -159,7 +159,7 @@ geo.renderer = function(container, canvas) {
   this._exit = function() {
   };
 
-  this._init();
+  this._init(arg);
   return this;
 };
 

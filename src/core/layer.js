@@ -350,7 +350,7 @@ geo.layer = function(arg) {
    * Init layer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._init = function() {
+  this._init = function(arg) {
     // Create top level div for the layer
     m_node = $(document.createElement('div'));
     m_node.attr('id', m_name);
@@ -411,7 +411,7 @@ geo.layer = function(arg) {
   this._draw = function() {
   };
 
-  this._init();
+  this._init(arg);
   return this;
 };
 

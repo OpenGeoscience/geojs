@@ -25,23 +25,13 @@ geo.pointFeature = function(arg) {
   arg = arg || {};
   geo.feature.call(this, arg);
 
-  arg.style = arg.style === undefined ? $.extend({}, {"size":[1.0],
-              "color":[1.0, 1.0, 1.0],
-              "point_sprites": false,
-              "point_sprites_image": null}, arg.style) : arg.style;
-
-  // Update style
-  this.style(arg.style);
-
   ////////////////////////////////////////////////////////////////////////////
   /**
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
-  var m_positions = arg.positions === undefined ? null : arg.positions;
-  if (m_positions) {
-    this.dataTime().modified();
-  }
+  var m_positions = arg.positions === undefined ? null : arg.positions,
+      s_init = this._init;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -62,6 +52,28 @@ geo.pointFeature = function(arg) {
     }
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Initialize
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._init = function(arg) {
+    s_init.call(this, arg);
+
+    var defaultStyle = $.extend({}, {"size":[1.0],
+                       "color":[1.0, 1.0, 1.0],
+                       "point_sprites": false,
+                       "point_sprites_image": null},
+                       arg.style === undefined ? {} : arg.style);
+
+    this.style(defaultStyle);
+
+    if (m_positions) {
+      this.dataTime().modified();
+    }
+  };
+
+  this._init(arg);
   return this;
 };
 

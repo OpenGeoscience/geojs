@@ -25,14 +25,23 @@ geo.polygonFeature = function(arg) {
   arg = arg || {};
   geo.feature.call(this, arg);
 
-  arg.style = arg.style === undefined ? $.extend({}, {
-              "color": [1.0, 1.0, 1.0],
-              "fill_color": [1.0, 1.0, 1.0],
-              "fill": true}, arg.style) : arg.style;
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Initialize
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._init = function(arg) {
+    s_init.call(this, arg);
+    var defaultStyle = $.extend({}, {
+                         "color": [1.0, 1.0, 1.0],
+                         "fill_color": [1.0, 1.0, 1.0],
+                         "fill": true},
+                         arg.style === undefined ? {} : arg.style);
 
-  // Update style
-  this.style(arg.style);
+    this.style(defaultStyle);
+  };
 
+  this._init(arg);
   return this;
 };
 

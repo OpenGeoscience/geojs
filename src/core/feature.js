@@ -31,7 +31,7 @@ geo.feature = function(arg) {
   ////////////////////////////////////////////////////////////////////////////
   arg = arg || {};
 
-  var m_style = arg.style === undefined ?  {} : arg.style,
+  var m_style = {},
       m_gcs = arg.gcs === undefined ? "EPSG:4326" : arg.gcs,
       m_renderer = null,
       m_dataTime = vgl.timestamp(),
@@ -46,7 +46,7 @@ geo.feature = function(arg) {
     if (val === undefined ) {
       return m_style;
     } else {
-      $.extend(true, m_style, val);
+      m_style = $.extend({}, m_style, val);
       this.modified();
       return this;
     }
@@ -119,8 +119,10 @@ geo.feature = function(arg) {
    * Derived class should implement this
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._init = function() {
-    m_style = $.extend({}, {"opacity": 1.0}, m_style);
+  this._init = function(arg) {
+    m_style = $.extend({},
+                {"opacity": 1.0}, arg.style === undefined ? {} :
+                arg.style);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -153,6 +155,7 @@ geo.feature = function(arg) {
   this._exit = function() {
   };
 
+  this._init(arg);
   return this;
 };
 

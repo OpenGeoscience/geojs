@@ -338,7 +338,7 @@ geo.map = function(arg) {
    * Initialize the map
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._init = function() {
+  this._init = function(arg) {
     var i;
 
     if (m_node === undefined || m_node === null) {
@@ -378,7 +378,7 @@ geo.map = function(arg) {
     }
   };
 
-  this._init();
+  this._init(arg);
   return this;
 };
 

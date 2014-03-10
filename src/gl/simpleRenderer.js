@@ -17,13 +17,13 @@
  * @returns {ggl.simpleRenderer}
  */
 //////////////////////////////////////////////////////////////////////////////
-ggl.simpleRenderer = function(container, canvas) {
+ggl.simpleRenderer = function(arg) {
   'use strict';
 
   if (!(this instanceof ggl.simpleRenderer)) {
-    return new ggl.simpleRenderer(container, canvas);
+    return new ggl.simpleRenderer(arg);
   }
-  geo.renderer.call(this, container, canvas);
+  geo.renderer.call(this, arg);
 
   var m_this = this,
       m_viewer = null,
@@ -34,8 +34,8 @@ ggl.simpleRenderer = function(container, canvas) {
    * Initialize
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._init = function() {
-    s_init();
+  this._init = function(arg) {
+    s_init.call(this, arg);
 
     if (!this.canvas()) {
       var canvas = $(document.createElement('canvas'));
@@ -94,7 +94,7 @@ ggl.simpleRenderer = function(container, canvas) {
   this._exit = function() {
   };
 
-  this._init();
+  this._init(arg);
   return this;
 };
 
