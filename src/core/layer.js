@@ -52,7 +52,6 @@ geo.layer = function(arg) {
       m_node = null,
       m_canvas = null,
       m_renderer = null,
-      m_rendererApi = null,
       m_rendererName = arg.renderer  === undefined ?  'simpleRenderer' : arg.renderer,
       m_dataTime = vgl.timestamp(),
       m_updateTime = vgl.timestamp(),
@@ -224,15 +223,6 @@ geo.layer = function(arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get renderer type for the layer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.rendererApi = function() {
-    return m_rendererApi;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
    * Get renderer for the layer if any
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -374,7 +364,6 @@ geo.layer = function(arg) {
       m_renderer = geo.createRenderer(m_rendererName, this);
       m_canvas = m_renderer.canvas();
     }
-    m_rendererApi = m_renderer.api();
   };
 
   ////////////////////////////////////////////////////////////////////////////

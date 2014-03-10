@@ -34,7 +34,7 @@ geo.featureLayer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
-      m_features = [],
+      m_features = null,
       s_update = this._update;
 
 
@@ -44,11 +44,7 @@ geo.featureLayer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.create = function(featureName) {
-    var newFeautre = geo.createFeature(this.rendererApi(), featureName);
-    m_features.push(newFeautre);
-    this.features(m_features);
-    this.modified();
-    return newFeautre;
+    return this._create(featureName);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -59,6 +55,15 @@ geo.featureLayer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.features = function(val) {
+    return this._features(val);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set drawables
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._features = function(val) {
     var i = 0;
     if (val === undefined) {
       return m_features;
@@ -67,6 +72,25 @@ geo.featureLayer = function(arg) {
       this.dataTime().modified();
       this.modified();
     }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Create feature
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._create = function(featureName) {
+    var newFeautre = geo.createFeature(this.renderer().api(), featureName);
+
+    // Default is array of fetures
+    if (!m_features) {
+      m_features = [];
+    }
+
+    m_features.push(newFeautre);
+    this.features(m_features);
+    this.modified();
+    return newFeautre;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -97,7 +121,6 @@ geo.featureLayer = function(arg) {
 
     this.updateTime().modified();
   };
-
 
   ////////////////////////////////////////////////////////////////////////////
   /**
