@@ -45,8 +45,8 @@ geo.map = function(arg) {
       m_zoom = arg.zoom === undefined ? 10 : arg.zoom,
       m_layers = arg.layers === undefined ? [] : arg.layers,
       m_baseLayer = null,
-      m_updateTime = vgl.timestamp(),
-      m_drawTime = vgl.timestamp();
+      m_updateTime = geo.timestamp(),
+      m_drawTime = geo.timestamp();
 
   ////////////////////////////////////////////////////////////////////////////
   /**

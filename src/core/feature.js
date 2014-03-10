@@ -34,8 +34,8 @@ geo.feature = function(arg) {
   var m_style = {},
       m_gcs = arg.gcs === undefined ? "EPSG:4326" : arg.gcs,
       m_renderer = null,
-      m_dataTime = vgl.timestamp(),
-      m_updateTime = vgl.timestamp();
+      m_dataTime = geo.timestamp(),
+      m_updateTime = geo.timestamp();
 
   ////////////////////////////////////////////////////////////////////////////
   /**

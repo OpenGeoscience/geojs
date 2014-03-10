@@ -53,9 +53,9 @@ geo.layer = function(arg) {
       m_canvas = null,
       m_renderer = null,
       m_rendererName = arg.renderer  === undefined ?  'simpleRenderer' : arg.renderer,
-      m_dataTime = vgl.timestamp(),
-      m_updateTime = vgl.timestamp(),
-      m_drawTime = vgl.timestamp();
+      m_dataTime = geo.timestamp(),
+      m_updateTime = geo.timestamp(),
+      m_drawTime = geo.timestamp();
 
   ////////////////////////////////////////////////////////////////////////////
   /**
