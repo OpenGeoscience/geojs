@@ -118,11 +118,11 @@ geo.map = function(arg) {
       m_layers.push(layer);
       this.modified();
 
-      // TODO Fix this
-      // $(this).trigger({
-      //   type: geo.event.addLayer,
-      //   target: layer
-      // });
+      $(this).trigger({
+        type: geo.event.layerAdd,
+        target: m_this,
+        layer: layer
+      });
     }
     return this;
   };
@@ -149,9 +149,11 @@ geo.map = function(arg) {
 
       layer._exit();
       this.modified();
+
       $(this).trigger({
-        type: geo.event.removeLayer,
-        target: layer
+        type: geo.event.layerRemove,
+        target: m_this,
+        layer: layer
       });
     }
 
@@ -172,9 +174,11 @@ geo.map = function(arg) {
     if (layer !== null && layer !== undefined) {
       layer.visible(!layer.visible())
       m_this.modified();
+
       $(this).trigger({
-        type: geo.event.toggle,
-        target: layer
+        type: geo.event.layerToggle,
+        target: m_this,
+        layer: layer
       });
     }
     return this;
@@ -312,11 +316,10 @@ geo.map = function(arg) {
   this.draw = function() {
     var i = 0;
 
-    // TODO Fix this
-    // $(this).trigger({
-    //     type: geo.event.draw,
-    //     target: m_this
-    // });
+    $(this).trigger({
+        type: geo.event.draw,
+        target: m_this
+    });
 
     this._update();
 

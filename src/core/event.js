@@ -35,6 +35,8 @@ inherit(geo.event, vgl.command);
  * Event types
  */
 //////////////////////////////////////////////////////////////////////////////
+
+// TODO Add documentation
 geo.event.update = "geo.update";
 geo.event.opacityUpdate = "geo.opacityUpdate";
 geo.event.layerAdd = "geo.layerAdd";
@@ -49,3 +51,6 @@ geo.event.rotate = "geo.rotate";
 geo.event.resize = "geo.resize";
 geo.event.animate = "geo.animate";
 geo.event.query = "geo.query";
+geo.event.draw = "geo.draw";
+geo.event.drawEnd = "geo.drawEnd";
+
