@@ -31,7 +31,9 @@ ggl.pointFeature = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   var m_actor = null,
-      m_buildTime = vgl.timestamp();
+      m_buildTime = vgl.timestamp(),
+      s_init = this._init,
+      s_update = this._update;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -39,6 +41,7 @@ ggl.pointFeature = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function() {
+    s_init();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -66,6 +69,8 @@ ggl.pointFeature = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._update = function() {
+    s_update();
+
     if (this.dataTime().getMTime() > m_buildTime.getMTime()) {
       this._build();
     }
@@ -86,4 +91,4 @@ ggl.pointFeature = function(arg) {
 inherit(ggl.pointFeature, geo.pointFeature);
 
 // Now register it
-geo.registerFeature('webgl', 'point_feature', ggl.pointFeature);
+geo.registerFeature('webgl', 'pointFeature', ggl.pointFeature);
