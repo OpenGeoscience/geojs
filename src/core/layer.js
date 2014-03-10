@@ -6,7 +6,7 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, indent: 2*/
 
-/*global geo, ogs, document, inherit, $, HTMLCanvasElement, Image*/
+/*global geo, ogs, vgl, document, inherit, $, HTMLCanvasElement, Image*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////

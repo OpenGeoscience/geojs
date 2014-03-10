@@ -45,10 +45,6 @@ ggl.simpleRenderer = function(container, canvas) {
     }
     m_viewer = vgl.viewer(this.canvas().get(0));
     m_viewer.init();
-
-    // TODO Take it out
-    //m_viewer.renderWindow().activeRenderer().setBackgroundColor(0.5, 0.5, 0.5, 1.0);
-    //m_viewer.renderWindow().resize(1920, 1080);
   };
 
   ////////////////////////////////////////////////////////////////////////////
