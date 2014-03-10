@@ -41,17 +41,14 @@ ggl.simpleRenderer = function(container, canvas) {
     if (!m_canvas) {
       m_canvas = $(document.createElement('canvas'));
       m_canvas.attr('class', '.webgl-canvas');
-      m_canvas.attr('width', 1920);
-      m_canvas.attr('height', 1080);
       this.container().node().append(m_canvas);
     }
-
     m_viewer = vgl.viewer(m_canvas.get(0));
     m_viewer.init();
 
     // TODO Take it out
-    m_viewer.renderWindow().activeRenderer().setBackgroundColor(0.5, 0.5, 0.5, 1.0);
-    m_viewer.renderWindow().resize(1920, 1080);
+    //m_viewer.renderWindow().activeRenderer().setBackgroundColor(0.5, 0.5, 0.5, 1.0);
+    //m_viewer.renderWindow().resize(1920, 1080);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -80,6 +77,17 @@ ggl.simpleRenderer = function(container, canvas) {
   ////////////////////////////////////////////////////////////////////////////
   this._contextRenderer = function() {
     return m_viewer.renderWindow().activeRenderer();
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Handle resize event
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._resize = function(x, y, w, h) {
+    m_canvas.attr('width', w);
+    m_canvas.attr('height', h);
+    m_viewer.renderWindow().positionAndResize(x, y, w, h);
   };
 
   ////////////////////////////////////////////////////////////////////////////

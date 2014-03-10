@@ -33,6 +33,10 @@ geo.map = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
+      m_x = 0,
+      m_y = 0,
+      m_width = 0,
+      m_height = 0,
       m_node = $('#' + arg.node),
       m_gcs = arg.gcs === undefined ? "EPSG:4326" : arg.gcs,
       m_uigcs = arg.uigcs === undefined ? "EPSG:4326" : arg.uigcs,
@@ -248,6 +252,7 @@ geo.map = function(arg) {
         // TODO Add api to layer
         layer.transform(m_gcs);
       }
+      layer._resize(m_x, m_y, m_width, m_height);
       m_layers.push(layer);
       this.modified();
 
@@ -325,18 +330,17 @@ geo.map = function(arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.resize = function(x, y, w, h) {
     var i = 0;
+
+    m_x = x;
+    m_y  = y;
+    m_width = w;
+    m_height = h;
+
     for (; i <  m_layers.length; ++i) {
-      m_layers[i].resize(x, y, w, h);
+      m_layers[i]._resize(x, y, w, h);
     }
 
-    $(this).trigger({
-      type: geo.event.resize,
-      target: this,
-      x_offset: x,
-      y_offset: y,
-      width: w,
-      height: h
-    });
+    this.modified();
   };
 
   ////////////////////////////////////////////////////////////////////////////

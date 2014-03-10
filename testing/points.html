@@ -44,6 +44,8 @@ $(function() {
     window.addEventListener('resize', resizeCanvas, false);
 
     function resizeCanvas() {
+      $('#map').width('100%');
+      $('#map').height('100%');
       updateAndDraw($('#map').width(), $('#map').height());
     }
     resizeCanvas();
@@ -89,6 +91,5 @@ $(function() {
 });
 </script>
 
-<div id='map' width='1920' height='1080'></div>
-
+<div id='map'></div>
 </body>

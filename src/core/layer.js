@@ -302,33 +302,6 @@ geo.layer = function(arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Resize layer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.resize = function(x, y, w, h) {
-    m_x = x;
-    m_y = y;
-    m_width = w;
-    m_height = h;
-
-    if (m_renderer) {
-      m_renderer.resize(x, y, w, h);
-    }
-
-    $(this).trigger({
-      type: geo.event.resize,
-      target: m_this,
-      x_offset: m_x,
-      y_offset: m_y,
-      width: w,
-      height: h
-    });
-
-    this.modified();
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
    * Convert array of points from world to GCS coordinate space
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -375,8 +348,6 @@ geo.layer = function(arg) {
 
     if (m_container) {
       m_container.node().append(m_node);
-    } else {
-      throw "Layer requires valid container";
     }
 
     // Share context if have valid one
@@ -403,6 +374,24 @@ geo.layer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._update = function(request) {
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Respond to resize event
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._resize = function(x, y, w, h) {
+    m_x = x;
+    m_y = y;
+    m_width = w;
+    m_height = h;
+
+    if (m_renderer) {
+      m_renderer._resize(x, y, w, h);
+    }
+
+    this.modified();
   };
 
   ////////////////////////////////////////////////////////////////////////////
