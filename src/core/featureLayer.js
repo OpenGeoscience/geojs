@@ -34,7 +34,8 @@ geo.featureLayer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
-      m_features = [];
+      m_features = [],
+      s_update = this._update;
 
 
   ////////////////////////////////////////////////////////////////////////////
@@ -43,9 +44,11 @@ geo.featureLayer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.create = function(featureName) {
-    m_features.push(geo.createFeature(this.rendererApi(), featureName));
-
-    return m_features[m_features.length - 1];
+    var newFeautre = geo.createFeature(this.rendererApi(), featureName);
+    m_features.push(newFeautre);
+    this.features(m_features);
+    this.modified();
+    return newFeautre;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -61,6 +64,7 @@ geo.featureLayer = function(arg) {
       return m_features;
     } else {
       m_features = val.slice(0);
+      this.dataTime().modified();
       this.modified();
     }
   };
@@ -70,22 +74,28 @@ geo.featureLayer = function(arg) {
    * Update layer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._update = function() {
+  this._update = function(request) {
     var i;
+
+    // Call base class update
+    s_update.call(this, request);
 
     if (!this.source() && m_features.length === 0) {
       console.log('[info] No valid data source found.');
       return;
     }
 
-    // TODO Fix this
-    for (i = 0; i < m_features.length; ++i) {
-        m_features[i].renderer(this.renderer());
+    if (this.dataTime().getMTime() > this.updateTime().getMTime()) {
+      for (i = 0; i < m_features.length; ++i) {
+          m_features[i].renderer(this.renderer());
+      }
     }
 
     for (i = 0; i < m_features.length; ++i) {
-        m_features[i]._update()
-      }
+      m_features[i]._update();
+    }
+
+    this.updateTime().modified();
   };
 
 
