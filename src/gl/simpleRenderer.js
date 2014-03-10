@@ -100,4 +100,4 @@ ggl.simpleRenderer = function(container, canvas) {
 
 inherit(ggl.simpleRenderer, geo.renderer);
 
-geo.registerRenderer('simple_renderer', ggl.simpleRenderer);
+geo.registerRenderer('simpleRenderer', ggl.simpleRenderer);

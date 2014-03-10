@@ -35,17 +35,17 @@ inherit(geo.event, vgl.command);
  * Event types
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.event.update = "update";
-geo.event.opacityUpdate = "opacityUpdate";
-geo.event.layerAdd = "layerAdd";
-geo.event.layerRemove = "layerRemove";
-geo.event.layerToggle = "layerToggle";
-geo.event.layerSelect = "layerSelect";
-geo.event.layerUnselect = "layerUnselect";
-geo.event.zoom = "zoom";
-geo.event.center = "center";
-geo.event.pan = "pan";
-geo.event.rotate = "rotate";
-geo.event.resize = "resize";
-geo.event.animate = "animate";
-geo.event.query = "query";
+geo.event.update = "geo.update";
+geo.event.opacityUpdate = "geo.opacityUpdate";
+geo.event.layerAdd = "geo.layerAdd";
+geo.event.layerRemove = "geo.layerRemove";
+geo.event.layerToggle = "geo.layerToggle";
+geo.event.layerSelect = "geo.layerSelect";
+geo.event.layerUnselect = "geo.layerUnselect";
+geo.event.zoom = "geo.zoom";
+geo.event.center = "geo.center";
+geo.event.pan = "geo.pan";
+geo.event.rotate = "geo.rotate";
+geo.event.resize = "geo.resize";
+geo.event.animate = "geo.animate";
+geo.event.query = "geo.query";

@@ -340,6 +340,15 @@ geo.map = function(arg) {
       m_layers[i]._resize(x, y, w, h);
     }
 
+    $(this).trigger({
+      type: geo.event.resize,
+      target: m_this,
+      x_offset: m_x,
+      y_offset: m_y,
+      width: w,
+      height: h
+    });
+
     this.modified();
   };
 
