@@ -26,7 +26,6 @@ ggl.simpleRenderer = function(container, canvas) {
   geo.renderer.call(this, container, canvas);
 
   var m_this = this,
-      m_canvas = canvas,
       m_viewer = null,
       s_init = this._init;
 
@@ -38,28 +37,19 @@ ggl.simpleRenderer = function(container, canvas) {
   this._init = function() {
     s_init();
 
-    if (!m_canvas) {
-      m_canvas = $(document.createElement('canvas'));
-      m_canvas.attr('class', '.webgl-canvas');
-      this.container().node().append(m_canvas);
+    if (!this.canvas()) {
+      var canvas = $(document.createElement('canvas'));
+      canvas.attr('class', '.webgl-canvas');
+      this._canvas(canvas);
+      this.container().node().append(canvas);
     }
-    m_viewer = vgl.viewer(m_canvas.get(0));
+    m_viewer = vgl.viewer(this.canvas().get(0));
     m_viewer.init();
 
     // TODO Take it out
     //m_viewer.renderWindow().activeRenderer().setBackgroundColor(0.5, 0.5, 0.5, 1.0);
     //m_viewer.renderWindow().resize(1920, 1080);
   };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Canvas
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._canvas = function() {
-    return m_canvas;
-  };
-
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -85,8 +75,8 @@ ggl.simpleRenderer = function(container, canvas) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._resize = function(x, y, w, h) {
-    m_canvas.attr('width', w);
-    m_canvas.attr('height', h);
+    this.canvas().attr('width', w);
+    this.canvas().attr('height', h);
     m_viewer.renderWindow().positionAndResize(x, y, w, h);
   };
 

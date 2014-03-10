@@ -27,7 +27,8 @@ geo.renderer = function(container, canvas) {
 
 
   var m_this = this,
-      m_container = container;
+      m_container = container,
+      m_canvas = canvas === undefined ? null : canvas;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -109,7 +110,13 @@ geo.renderer = function(container, canvas) {
    * Get canvas used by the renderer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._canvas = function() {
+  this._canvas = function(val) {
+    if (val === undefined) {
+      return m_canvas;
+    } else {
+      m_canvas = val;
+      this.modified();
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -156,4 +163,4 @@ geo.renderer = function(container, canvas) {
   return this;
 };
 
-inherit(geo.renderer, vgl.object);
+inherit(geo.renderer, geo.object);
