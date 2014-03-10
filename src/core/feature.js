@@ -31,7 +31,7 @@ geo.feature = function(arg) {
   ////////////////////////////////////////////////////////////////////////////
   arg = arg || {};
 
-  var m_style = arg.style === undefined ? {"opacity": 1.0} : arg.style,
+  var m_style = arg.style === undefined ?  {} : arg.style,
       m_gcs = arg.gcs === undefined ? "EPSG:4326" : arg.gcs,
       m_renderer = null,
       m_dataTime = vgl.timestamp(),
@@ -120,6 +120,7 @@ geo.feature = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function() {
+    m_style = $.extend({}, {"opacity": 1.0}, m_style);
   };
 
   ////////////////////////////////////////////////////////////////////////////
