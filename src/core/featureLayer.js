@@ -94,7 +94,7 @@ geo.featureLayer = function(arg) {
    * Draw
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._draw = function(request) {
+  this._draw = function() {
     this.renderer()._render();
   };
 
