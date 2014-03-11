@@ -136,9 +136,11 @@ geo.registerFeature = function(category, name, func) {
  * Create new instance of the renderer
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.createFeature  = function(category, name, canvas) {
+geo.createFeature  = function(name, layer, renderer) {
+  var category = renderer.api();
   if (category in geo.features && name in geo.features[category]) {
-    return geo.features[category][name]();
+    return geo.features[category][name](
+      {'layer':layer, 'renderer: renderer'});
   }
   return null;
 }

@@ -32,9 +32,12 @@ geo.feature = function(arg) {
   arg = arg || {};
 
   var m_style = {},
+      m_layer = arg.layer === undefined ?
+        throw "Feature requires valid layer" : arg.layer,
       m_gcs = arg.gcs === undefined ? "EPSG:4326" : arg.gcs,
-      m_renderer = null,
+      m_renderer = arg.renderer === undefined ? null : arg.renderer,
       m_dataTime = geo.timestamp(),
+      m_buildTime = geo.timestamp(),
       m_updateTime = geo.timestamp();
 
   ////////////////////////////////////////////////////////////////////////////
@@ -54,17 +57,20 @@ geo.feature = function(arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get/Set renderer used by the feature
+   * Get layer referenced by the feature
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.renderer = function(val) {
-    if (val === undefined ) {
-      return m_renderer;
-    } else {
-      m_renderer = val
-      this.modified();
-      return this;
-    }
+  this.layer = function() {
+    return m_layer;
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get renderer used by the feature
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.renderer = function() {
+    return m_renderer;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -92,6 +98,21 @@ geo.feature = function(arg) {
       return m_dataTime;
     } else {
       m_dataTime = val;
+      this.modified();
+      return this;
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set timestamp of last time build happened
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.buildTime = function(val) {
+    if (val === undefined ) {
+      return m_buildTime;
+    } else {
+      m_buildTime = val;
       this.modified();
       return this;
     }
