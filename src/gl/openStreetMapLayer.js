@@ -371,7 +371,7 @@ geo.openStreetMapLayer = function() {
     if (this.referenceLayer()) {
       return [x * geo.mercator.r_major, y * geo.mercator.r_minor];
     }
-    
+
     throw "This layer is not a reference layer so cannot do the convertion";
   };
 

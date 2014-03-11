@@ -27,7 +27,8 @@ geo.planeFeature = function(arg) {
 
   var m_origin = [arg.ul.x, arg.lr.y, arg.depth],
       m_upperLeft = [arg.ul.x, arg.ul.y, arg.depth],
-      m_lowerRight = [arg.lr.x, arg.lr.y, arg.depth];
+      m_lowerRight = [arg.lr.x, arg.lr.y, arg.depth],
+      s_init = this._init;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -82,6 +83,22 @@ geo.planeFeature = function(arg) {
     }
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Initialize
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._init = function(arg) {
+    var style = null;
+    s_init.call(this, arg);
+    style = this.style();
+    if (style.image === undefined) {
+      style.image = null;
+    }
+    this.style(style);
+  };
+
+  this._init();
   return this;
 };
 
