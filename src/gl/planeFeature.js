@@ -42,6 +42,10 @@ ggl.planeFeature = function(lowerleft, upperright, z) {
         image = this.style().image,
         texture = null;
 
+    if (m_actor) {
+      this.renderer()._contextRenderer().removeActor(m_actor);
+    }
+
     if (image) {
       m_actor = vgl.utils.createTexturePlane(or[0], or[1], or[2],
                   ul[0], ul[1], ul[2],
@@ -51,6 +55,7 @@ ggl.planeFeature = function(lowerleft, upperright, z) {
           texture.setImage(image);
           m_actor.material().addAttribute(texture);
           m_actor.material().setBinNumber(m_that.binNumber());
+          this.renderer()._contextRenderer().addActor(m_actor);
           this.renderer()._render();
         }
       };
