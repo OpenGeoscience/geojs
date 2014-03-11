@@ -45,11 +45,15 @@ geo.feature = function(arg) {
    * Get/Set style used by the feature
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.style = function(val) {
-    if (val === undefined ) {
+  this.style = function(arg1, arg2) {
+    if (arg1 === undefined ) {
       return m_style;
+    }  else if (arg2 === undefined) {
+      m_style = $.extend({}, m_style, arg1);
+      this.modified();
+      return this;
     } else {
-      m_style = $.extend({}, m_style, val);
+      m_style[arg1] = arg2;
       this.modified();
       return this;
     }
