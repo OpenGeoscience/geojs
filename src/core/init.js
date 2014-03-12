@@ -140,7 +140,7 @@ geo.createFeature  = function(name, layer, renderer) {
   var category = renderer.api();
   if (category in geo.features && name in geo.features[category]) {
     return geo.features[category][name](
-      {'layer':layer, 'renderer: renderer'});
+      {'layer':layer, 'renderer': renderer});
   }
   return null;
 }

@@ -32,8 +32,7 @@ geo.feature = function(arg) {
   arg = arg || {};
 
   var m_style = {},
-      m_layer = arg.layer === undefined ?
-        throw "Feature requires valid layer" : arg.layer,
+      m_layer = arg.layer === undefined ? null : arg.layer,
       m_gcs = arg.gcs === undefined ? "EPSG:4326" : arg.gcs,
       m_renderer = arg.renderer === undefined ? null : arg.renderer,
       m_dataTime = geo.timestamp(),
@@ -145,6 +144,9 @@ geo.feature = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function(arg) {
+    if (!m_layer) {
+      throw "Feature requires a valid layer";
+    }
     m_style = $.extend({},
                 {"opacity": 1.0}, arg.style === undefined ? {} :
                 arg.style);
