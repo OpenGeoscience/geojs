@@ -107,7 +107,7 @@ geo.planeFeature = function(arg) {
     this.style(style);
   };
 
-  this._init();
+  this._init(arg);
   return this;
 };
 

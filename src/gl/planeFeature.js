@@ -10,12 +10,15 @@
  * @returns {geo.planeFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-ggl.planeFeature = function(lowerleft, upperright, z) {
+ggl.planeFeature = function(arg) {
   "use strict";
-  if (!(this instanceof geo.planeFeature)) {
-    return new geo.planeFeature(lowerleft, upperright);
+  if (!(this instanceof ggl.planeFeature)) {
+    return new ggl.planeFeature(arg);
   }
-  geo.polygonFeature.call(this);
+  geo.planeFeature.call(this, arg);
+
+  var m_this = this,
+      m_actor = null;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -39,32 +42,35 @@ ggl.planeFeature = function(lowerleft, upperright, z) {
     var or = this.origin(),
         ul = this.upperLeft(),
         lr = this.lowerRight(),
-        image = this.style().image,
+        image = null,
+        imageSrc = this.style().image,
         texture = null;
 
     if (m_actor) {
       this.renderer()._contextRenderer().removeActor(m_actor);
     }
 
-    if (image) {
+    if (imageSrc) {
+      image = new Image();
+      image.src = imageSrc;
       m_actor = vgl.utils.createTexturePlane(or[0], or[1], or[2],
-                  ul[0], ul[1], ul[2],
-                  lr[0], lr[1], lr[2]);
-        image.onload = function() {
-          texture = vgl.texture();
-          texture.setImage(image);
-          m_actor.material().addAttribute(texture);
-          m_actor.material().setBinNumber(m_that.binNumber());
-          this.renderer()._contextRenderer().addActor(m_actor);
-          this.renderer()._render();
-        }
-      };
-    } else {
+                  lr[0], lr[1], lr[2],
+                  ul[0], ul[1], ul[2], true);
+      m_this.renderer()._contextRenderer().addActor(m_actor);
+      image.onload = function() {
+        texture = vgl.texture();
+        texture.setImage(image);
+        m_actor.material().addAttribute(texture);
+        m_this.renderer()._contextRenderer().resetCamera();
+        m_this.renderer()._render();
+      }
+    }
+    else {
       m_actor = vgl.utils.createPlane(or[0], or[1], or[2],
                   ul[0], ul[1], ul[2],
                   lr[0], lr[1], lr[2]);
     }
-    this.buildTime.modified();
+    this.buildTime().modified();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -75,10 +81,10 @@ ggl.planeFeature = function(lowerleft, upperright, z) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._update = function() {
-    if (this.buildTime().getMTime() < this.dataTime().getMTime())
+    if (this.buildTime().getMTime() <= this.dataTime().getMTime()) {
       this._build();
     }
-    if (this.updateTime().getMTime() < this.getMTime()) {
+    if (this.updateTime().getMTime() <= this.getMTime()) {
       // TODO Implement this
     }
 
@@ -88,4 +94,7 @@ ggl.planeFeature = function(lowerleft, upperright, z) {
   return this;
 };
 
-inherit(geo.planeFeature, geo.polygonFeature);
+inherit(ggl.planeFeature, geo.planeFeature);
+
+// Now register it
+geo.registerFeature('webgl', 'planeFeature', ggl.planeFeature);
