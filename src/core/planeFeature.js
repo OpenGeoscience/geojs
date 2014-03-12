@@ -48,6 +48,7 @@ geo.planeFeature = function(arg) {
       return m_origin;
     } else {
       m_origin = val.slice(0);
+      this.dataTime().modified();
       this.modified();
       return this;
     }
@@ -66,6 +67,7 @@ geo.planeFeature = function(arg) {
     } else {
       // Copy incoming array of positions
       m_upperLeft = val.slice(0);
+      this.dataTime().modified();
       this.modified();
       return this;
     }
@@ -84,6 +86,7 @@ geo.planeFeature = function(arg) {
     } else {
       // Copy incoming array of positions
       m_lowerRight = val.slice(0);
+      this.dataTime().modified();
       this.modified();
       return this;
     }
