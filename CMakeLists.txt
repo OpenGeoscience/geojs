@@ -45,6 +45,7 @@ set(_source_files
   core/pointFeature.js
   core/lineFeature.js
   core/polygonFeature.js
+  core/planeFeature.js
   core/geomFeature.js
   core/geoTransform.js
   core/data.js
@@ -53,6 +54,7 @@ set(_source_files
   gl/pointFeature.js
   gl/geomFeature.js
   gl/pointFeature.js
+  gl/planeFeature.js
   gl/simpleRenderer.js
   ui/init.js
   ui/gis.js
