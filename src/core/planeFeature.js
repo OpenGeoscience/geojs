@@ -23,6 +23,12 @@ geo.planeFeature = function(arg) {
     return new geo.planeFeature(arg);
   }
   arg = arg || {};
+
+  // Defaults
+  arg.ul = arg.ul === undefined ? [0.0, 1.0, 0.0] : arg.ul;
+  arg.lr = arg.lr === undefined ? [1.0, 0.0, 0.0] : arg.lr;
+  arg.dept = arg.depth === undefined ? 0.0 : arg.depth;
+
   geo.polygonFeature.call(this, arg);
 
   var m_origin = [arg.ul.x, arg.lr.y, arg.depth],
