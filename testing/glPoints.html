@@ -80,12 +80,12 @@ $(function() {
         }
 
         // Load image to be used for drawing dots
-        var pointLayer = geo.featureLayer({
+        var layer = geo.featureLayer({
             'renderer' : 'simpleRenderer'});
-        var feature = pointLayer.create('pointFeature');
-        feature.positions(citieslatlon);
+        layer.create('pointFeature')
+          .positions(citieslatlon);
 
-        myMap.addLayer(pointLayer);
+        myMap.addLayer(layer);
         myMap.draw();
       }});
 });
