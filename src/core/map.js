@@ -311,7 +311,7 @@ geo.map = function(arg) {
     if(typeof baseLayer !== 'undefined') {
 
       // The GCS of the layer must match the map
-      if (this.gcs() === baseLayer.gcs()) {
+      if (m_gcs !== baseLayer.gcs()) {
         throw "The layer has a GCS of '" + baseLayer.gcs() +
               "' which does match the map GCS of '" +
               this.gcs() + "'";
