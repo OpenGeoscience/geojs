@@ -58,10 +58,10 @@ ggl.simpleRenderer = function(arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Render
+   * Get context specific renderer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._contextRenderer = function() {
+  this.contextRenderer = function() {
     return m_viewer.renderWindow().activeRenderer();
   };
 
