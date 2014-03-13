@@ -51,6 +51,7 @@ set(_source_files
   core/data.js
   core/renderer.js
   gl/init.js
+  gl/renderer.js
   gl/pointFeature.js
   gl/geomFeature.js
   gl/pointFeature.js

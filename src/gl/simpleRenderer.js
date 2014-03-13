@@ -23,7 +23,7 @@ ggl.simpleRenderer = function(arg) {
   if (!(this instanceof ggl.simpleRenderer)) {
     return new ggl.simpleRenderer(arg);
   }
-  geo.renderer.call(this, arg);
+  ggl.renderer.call(this, arg);
 
   var m_this = this,
       m_viewer = null,
@@ -41,7 +41,7 @@ ggl.simpleRenderer = function(arg) {
       var canvas = $(document.createElement('canvas'));
       canvas.attr('class', '.webgl-canvas');
       this._canvas(canvas);
-      this.container().node().append(canvas);
+      this.layer().node().append(canvas);
     }
     m_viewer = vgl.viewer(this.canvas().get(0));
     m_viewer.init();
@@ -58,7 +58,7 @@ ggl.simpleRenderer = function(arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Render
+   * Get context specific renderer
    */
   ////////////////////////////////////////////////////////////////////////////
   this._contextRenderer = function() {
@@ -98,6 +98,6 @@ ggl.simpleRenderer = function(arg) {
   return this;
 };
 
-inherit(ggl.simpleRenderer, geo.renderer);
+inherit(ggl.simpleRenderer, ggl.renderer);
 
 geo.registerRenderer('simpleRenderer', ggl.simpleRenderer);

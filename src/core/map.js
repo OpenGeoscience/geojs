@@ -14,7 +14,7 @@
 /**
  * Create a new instance of class map
  *
- * @class Creates a new map inside of the given HTML container (Typically DIV)
+ * @class Creates a new map inside of the given HTML layer (Typically DIV)
  * @returns {geo.map}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -47,6 +47,36 @@ geo.map = function(arg) {
       m_baseLayer = null,
       m_updateTime = geo.timestamp(),
       m_drawTime = geo.timestamp();
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get map gcs
+   *
+   * @returns {String EPSG format}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.gcs = function() {
+    return m_gcs;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get map user interface GCS
+   *
+   * @returns {String EPSG format}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.uigcs = function() {
+    return m_uigcs;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get root node of the map
+   *
+   * @returns {jquery object}
+   */
+  ////////////////////////////////////////////////////////////////////////////
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -106,15 +136,21 @@ geo.map = function(arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.addLayer = function(layer) {
     if (layer !== null || layer !== undefined) {
-      layer.container(this);
+      layer.map(this);
 
-      if (layer.isReference() && m_gcs != null && m_gcs !== layer.gcs()) {
+      if (layer.referenceLayer() && m_gcs != null &&
+          m_gcs !== layer.gcs()) {
         throw "Reference layer gcs does not match with map gcs";
       } else {
         // TODO Add api to layer
         layer.transform(m_gcs);
       }
       layer._resize(m_x, m_y, m_width, m_height);
+
+      if (layer.referenceLayer()) {
+        this.baseLayer(layer);
+      }
+
       m_layers.push(layer);
       this.modified();
 
@@ -275,7 +311,7 @@ geo.map = function(arg) {
     if(typeof baseLayer !== 'undefined') {
 
       // The GCS of the layer must match the map
-      if (this.gcs() === baseLayer.gcs()) {
+      if (m_gcs !== baseLayer.gcs()) {
         throw "The layer has a GCS of '" + baseLayer.gcs() +
               "' which does match the map GCS of '" +
               this.gcs() + "'";
