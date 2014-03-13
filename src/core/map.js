@@ -108,13 +108,19 @@ geo.map = function(arg) {
     if (layer !== null || layer !== undefined) {
       layer.container(this);
 
-      if (layer.isReference() && m_gcs != null && m_gcs !== layer.gcs()) {
+      if (layer.referenceLayer() && m_gcs != null &&
+          m_gcs !== layer.gcs()) {
         throw "Reference layer gcs does not match with map gcs";
       } else {
         // TODO Add api to layer
         layer.transform(m_gcs);
       }
       layer._resize(m_x, m_y, m_width, m_height);
+
+      if (layer.referenceLayer()) {
+        this.baseLayer(layer);
+      }
+
       m_layers.push(layer);
       this.modified();
 

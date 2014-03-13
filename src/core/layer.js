@@ -289,7 +289,7 @@ geo.layer = function(arg) {
    * Get/Set layer as the reference layer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.isReference = function(val) {
+  this.referenceLayer = function(val) {
     if(val === undefined) {
       m_isReference = val;
       this.modified();
