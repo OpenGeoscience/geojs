@@ -23,7 +23,7 @@ ggl.simpleRenderer = function(arg) {
   if (!(this instanceof ggl.simpleRenderer)) {
     return new ggl.simpleRenderer(arg);
   }
-  geo.renderer.call(this, arg);
+  ggl.renderer.call(this, arg);
 
   var m_this = this,
       m_viewer = null,
@@ -61,7 +61,7 @@ ggl.simpleRenderer = function(arg) {
    * Get context specific renderer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.contextRenderer = function() {
+  this._contextRenderer = function() {
     return m_viewer.renderWindow().activeRenderer();
   };
 
@@ -98,6 +98,6 @@ ggl.simpleRenderer = function(arg) {
   return this;
 };
 
-inherit(ggl.simpleRenderer, geo.renderer);
+inherit(ggl.simpleRenderer, ggl.renderer);
 
 geo.registerRenderer('simpleRenderer', ggl.simpleRenderer);
