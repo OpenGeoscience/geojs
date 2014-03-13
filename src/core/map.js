@@ -14,7 +14,7 @@
 /**
  * Create a new instance of class map
  *
- * @class Creates a new map inside of the given HTML container (Typically DIV)
+ * @class Creates a new map inside of the given HTML layer (Typically DIV)
  * @returns {geo.map}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -136,7 +136,7 @@ geo.map = function(arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.addLayer = function(layer) {
     if (layer !== null || layer !== undefined) {
-      layer.container(this);
+      layer.map(this);
 
       if (layer.referenceLayer() && m_gcs != null &&
           m_gcs !== layer.gcs()) {

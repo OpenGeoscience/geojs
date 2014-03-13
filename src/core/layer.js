@@ -43,7 +43,7 @@ geo.layer = function(arg) {
       m_gcs = 'EPSG:4326',
       m_timeRange = [],
       m_source = arg.source || null,
-      m_container = arg.container === undefined ? null : args.container,
+      m_map = arg.map === undefined ? null : args.map,
       m_isReference = false,
       m_x = 0,
       m_y = 0,
@@ -207,15 +207,15 @@ geo.layer = function(arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get/Set container of the layer
+   * Get/Set map of the layer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.container = function(val) {
+  this.map = function(val) {
     if (val === undefined ) {
-      return m_container;
+      return m_map;
     } else {
-      m_container = val;
-      m_container.node().append(m_node);
+      m_map = val;
+      m_map.node().append(m_node);
       this.modified();
       return this;
     }
@@ -353,8 +353,8 @@ geo.layer = function(arg) {
     m_node = $(document.createElement('div'));
     m_node.attr('id', m_name);
 
-    if (m_container) {
-      m_container.node().append(m_node);
+    if (m_map) {
+      m_map.node().append(m_node);
     }
 
     // Share context if have valid one

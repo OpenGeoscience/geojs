@@ -41,7 +41,7 @@ ggl.simpleRenderer = function(arg) {
       var canvas = $(document.createElement('canvas'));
       canvas.attr('class', '.webgl-canvas');
       this._canvas(canvas);
-      this.container().node().append(canvas);
+      this.layer().node().append(canvas);
     }
     m_viewer = vgl.viewer(this.canvas().get(0));
     m_viewer.init();

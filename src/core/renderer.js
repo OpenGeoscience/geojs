@@ -27,18 +27,18 @@ geo.renderer = function(arg) {
 
   arg = arg || {};
   var m_this = this,
-      m_container = arg.container === undefined ? null : arg.container,
+      m_layer = arg.layer === undefined ? null : arg.layer,
       m_canvas = arg.canvas === undefined ? null : arg.canvas;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get container of the renderer
+   * Get layer of the renderer
    *
    * @returns {*}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.container = function() {
-    return m_container;
+  this.layer = function() {
+    return m_layer;
   };
 
   ////////////////////////////////////////////////////////////////////////////
