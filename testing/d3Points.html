@@ -82,8 +82,16 @@ $(function() {
         // Load image to be used for drawing dots
         var layer = geo.featureLayer({
             'renderer' : 'd3Renderer'});
+        var color = d3.scale.category10()
+                        .domain(d3.range(10));
         layer.create('pointFeature')
-          .positions(citieslatlon);
+            .positions(citieslatlon)
+            .setStyle( {
+                attributes: { cx: function (d) { return d.lon; },
+                              cy: function (d) { return d.lat; }},
+                style: { 'fill': function () { return color(Math.floor(10*Math.random())); } }
+            } )
+             ._build(); // why does build not get called?
 
         myMap.addLayer(layer);
         myMap.draw();

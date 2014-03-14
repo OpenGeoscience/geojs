@@ -3,8 +3,7 @@
  * @module gd3
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
+/*jslint devel: true, unparam: true, indent: 2*/
 
 /*global window, geo, gd3, ogs, vec4, inherit, d3*/
 //////////////////////////////////////////////////////////////////////////////
@@ -24,9 +23,20 @@ gd3.d3Renderer = function(arg) {
     return new gd3.d3Renderer(arg);
   }
   geo.renderer.call(this, arg);
+  gd3.object.call(this);
 
+  function setAttrs(select, attrs) {
+    var key;
+    for (key in attrs) {
+      if (attrs.hasOwnProperty(key)) {
+        select.attr(key, attrs[key]);
+      }
+    }
+  }
+  
   var m_this = this,
-      s_init = this._init;
+      s_init = this._init,
+      m_features = {};
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -38,7 +48,7 @@ gd3.d3Renderer = function(arg) {
 
     if (!this.canvas()) {
       var canvas = d3.select(this.layer().node().get(0)).append('svg');
-      canvas.attr('class', '.d3-canvas');
+      canvas.attr('class', this._d3id());
       this._canvas(canvas);
     }
   };
@@ -80,7 +90,25 @@ gd3.d3Renderer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function() {
-      this.canvas().remove();
+    this.canvas().remove();
+  };
+
+  this.createFeatures = function (arg) {
+    var svg = this._canvas(),
+        selection = svg.selectAll('.' + arg.id)
+                        .data(arg.data),
+        enter = selection.enter().append(arg.append);
+    
+    setAttrs(enter, arg.attributes);
+    enter.attr('class', arg.classes.concat([arg.id]).join(' '));
+    enter.style(arg.style);
+    arg.selection = selection;
+    m_features[arg.id] = selection;
+    return selection;
+  };
+
+  // placeholder for now
+  this.redrawFeatures = function () {
   };
 
   this._init(arg);

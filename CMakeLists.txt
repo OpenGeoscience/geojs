@@ -59,6 +59,7 @@ set(_source_files
   gl/planeFeature.js
   gl/simpleRenderer.js
   d3/init.js
+  d3/object.js
   d3/pointFeature.js
   d3/d3Renderer.js
   ui/init.js
