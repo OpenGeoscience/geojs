@@ -54,6 +54,9 @@ set(_source_files
   gl/geomFeature.js
   gl/pointFeature.js
   gl/simpleRenderer.js
+  d3/init.js
+  d3/pointFeature.js
+  d3/d3Renderer.js
   ui/init.js
   ui/gis.js
   srv/init.js

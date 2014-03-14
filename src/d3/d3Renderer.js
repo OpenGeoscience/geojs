@@ -1,0 +1,93 @@
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * @module gd3
+ */
+
+/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
+/*jslint white: true, continue:true, indent: 2*/
+
+/*global window, geo, gd3, ogs, vec4, inherit, d3*/
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Create a new instance of class d3Renderer
+ *
+ * @param canvas
+ * @returns {gd3.d3Renderer}
+ */
+//////////////////////////////////////////////////////////////////////////////
+gd3.d3Renderer = function(arg) {
+  'use strict';
+
+  if (!(this instanceof gd3.d3Renderer)) {
+    return new gd3.d3Renderer(arg);
+  }
+  geo.renderer.call(this, arg);
+
+  var m_this = this,
+      s_init = this._init;
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Initialize
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._init = function(arg) {
+    s_init.call(this, arg);
+
+    if (!this.canvas()) {
+      var canvas = d3.select(this.container().node().get(0)).append('svg');
+      canvas.attr('class', '.d3-canvas');
+      this._canvas(canvas);
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get API used by the renderer
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._api = function() {
+    return 'd3';
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Handle resize event
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._resize = function(x, y, w, h) {
+    this.canvas().attr('width', w);
+    this.canvas().attr('height', h);
+    // recenter?
+    // propagate resize event here?
+    //m_viewer.renderWindow().positionAndResize(x, y, w, h);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Render
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._render = function() {
+    // unnecessary here?
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Exit
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._exit = function() {
+      this.canvas().remove();
+  };
+
+  this._init(arg);
+  this.interactorStyle(gd3.d3InteractorStyle);
+  return this;
+};
+
+inherit(gd3.d3Renderer, geo.renderer);
+
+geo.registerRenderer('d3Renderer', gd3.d3Renderer);
