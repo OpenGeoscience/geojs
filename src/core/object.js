@@ -25,58 +25,13 @@ geo.object = function(cfg) {
   }
   
   var m_this = this,
-      m_eventHandlers = {},
-      m_parent = null,
-      m_children = [];
+      m_eventHandlers = {};
 
-
-//////////////////////////////////////////////////////////////////////////////
-/**
- *  Get/set parent of the object
- */
-//////////////////////////////////////////////////////////////////////////////
-  this.parent = function (arg) {
-    if (arg === undefined) {
-      return m_parent;
-    }
-    m_parent = arg;
-    return this;
-  };
-
-//////////////////////////////////////////////////////////////////////////////
-/**
- *  Add a child to the object
- */
-//////////////////////////////////////////////////////////////////////////////
-  this.addChild = function (child) {
-    m_children.push(child);
-    return this;
-  };
-
-//////////////////////////////////////////////////////////////////////////////
-/**
- *  Add a child to the object
- */
-//////////////////////////////////////////////////////////////////////////////
-  this.removeChild = function (child) {
-    m_children = m_children.filter(function (c) { return c !== child; });
-    return this;
-  };
-
-//////////////////////////////////////////////////////////////////////////////
-/**
- *  Get an array of child objects
- */
-//////////////////////////////////////////////////////////////////////////////
-  this.children = function () {
-    return m_children.slice();
-  };
-
-//////////////////////////////////////////////////////////////////////////////
-/**
- *  Bind an event handler to this object
- */
-//////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   *  Bind an event handler to this object
+   */
+  //////////////////////////////////////////////////////////////////////////////
   this.on = function (event, handler) {
     if (Array.isArray(event)) {
       event.forEach(function (e) {
@@ -91,18 +46,12 @@ geo.object = function(cfg) {
     return this;
   };
 
-//////////////////////////////////////////////////////////////////////////////
-/**
- *  Trigger an event (or events) on this object and call all handlers
- */
-//////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   *  Trigger an event (or events) on this object and call all handlers
+   */
+  //////////////////////////////////////////////////////////////////////////////
   this.trigger = function (event, args) {
-    // If the event was not triggered by the parent, just propagate up the tree
-    if (m_parent && args._triggeredBy !== m_parent) {
-      args._triggeredBy = m_this;
-      m_parent.trigger(event, args);
-      return this;
-    }
 
     // if we have an array of events, recall with single events
     if (Array.isArray(event)) {
@@ -112,30 +61,23 @@ geo.object = function(cfg) {
       return this;
     }
 
-    // call the object's own handlers
     if (m_eventHandlers.hasOwnProperty(event)) {
       m_eventHandlers[event].forEach(function (handler) {
         handler(args);
       });
     }
 
-    // trigger the event on the children
-    m_children.forEach(function (child) {
-      args._triggeredBy = m_this;
-      child.trigger(event, args);
-    });
-
     return this;
   };
 
-//////////////////////////////////////////////////////////////////////////////
-/**
- *  Remove handlers from an event (or an array of events).
- *
- *  @param arg a function or array of functions to remove from the events
- *             or if falsey remove all handlers from the events
- */
-//////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   *  Remove handlers from an event (or an array of events).
+   *
+   *  @param arg a function or array of functions to remove from the events
+   *             or if falsey remove all handlers from the events
+   */
+  //////////////////////////////////////////////////////////////////////////////
   this.off = function (event, arg) {
     if (Array.isArray(event)) {
       event.forEach(function (e) {
