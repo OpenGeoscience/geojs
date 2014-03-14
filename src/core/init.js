@@ -103,9 +103,9 @@ geo.registerRenderer = function(name, func) {
  * Create new instance of the renderer
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.createRenderer  = function(name, container, canvas) {
+geo.createRenderer  = function(name, layer, canvas) {
   if (name in geo.renderers) {
-    var ren = geo.renderers[name]({'container': container, 'canvas': canvas});
+    var ren = geo.renderers[name]({'layer': layer, 'canvas': canvas});
     ren._init();
     return ren;
   }
@@ -136,9 +136,11 @@ geo.registerFeature = function(category, name, func) {
  * Create new instance of the renderer
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.createFeature  = function(category, name, canvas) {
+geo.createFeature  = function(name, layer, renderer) {
+  var category = renderer.api();
   if (category in geo.features && name in geo.features[category]) {
-    return geo.features[category][name]();
+    return geo.features[category][name](
+      {'layer':layer, 'renderer': renderer});
   }
   return null;
 }
