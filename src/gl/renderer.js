@@ -1,0 +1,54 @@
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * @module ggl
+ */
+
+/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
+/*jslint white: true, continue:true, indent: 2*/
+
+/*global window, ggl, ogs, vec4, inherit, $*/
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Create a new instance of class simpleRenderer
+ *
+ * @param canvas
+ * @returns {ggl.simpleRenderer}
+ */
+//////////////////////////////////////////////////////////////////////////////
+ggl.renderer = function(arg) {
+  'use strict';
+
+  if (!(this instanceof ggl.renderer)) {
+    return new ggl.renderer(arg);
+  }
+  geo.renderer.call(this, arg);
+
+  var m_this = this;
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get context specific renderer
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.contextRenderer = function() {
+    return this._contextRenderer();
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get context specific renderer
+   *
+   * Derive class should implement this.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._contextRenderer = function() {
+  };
+
+  return this;
+};
+
+inherit(ggl.renderer, geo.renderer);
+
+geo.registerRenderer('simpleRenderer', ggl.simpleRenderer);

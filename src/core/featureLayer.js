@@ -80,7 +80,8 @@ geo.featureLayer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._create = function(featureName) {
-    var newFeautre = geo.createFeature(this.renderer().api(), featureName);
+    var newFeautre = geo.createFeature(
+      featureName, m_this, this.renderer());
 
     // Default is array of fetures
     if (!m_features) {

@@ -71,11 +71,11 @@ ggl.pointFeature = function(arg) {
   this._update = function() {
     s_update.call(this);
 
-    if (this.dataTime().getMTime() > m_buildTime.getMTime()) {
+    if (this.dataTime().getMTime() >= m_buildTime.getMTime()) {
       this._build();
     }
 
-    if (this.updateTime().getMTime() < this.getMTime()) {
+    if (this.updateTime().getMTime() <= this.getMTime()) {
       if (this.style.color instanceof vgl.lookupTable) {
         vgl.utils.updateColorMappedMaterial(this.material(),
           this.style.color);

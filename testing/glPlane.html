@@ -55,39 +55,16 @@ $(function() {
       myMap.draw();
     }
 
-    // Read city geo-coded data
-    $.ajax({
-      type : "GET",
-      url : "/data/cities.csv",
-      dataType : "text",
-      success : function(data) {
-        table = processCSVData(data);
-        if (table.length > 0) {
-          var i;
-          for (i = 0; i < table.length; ++i) {
-            if (table[i][2] != undefined) {
-              var lat = table[i][2];
-              lat = lat.replace(/(^\s+|\s+$|^\"|\"$)/g, '');
-              lat = parseFloat(lat);
-
-              var lon = table[i][3];
-              lon = lon.replace(/(^\s+|\s+$|^\"|\"$)/g, '');
-              lon = parseFloat(lon);
-              citieslatlon.push(lon, lat, 0.0);
-              colors.push(1.0, 1.0, 153.0 / 255.0);
-            }
-          }
-        }
-
-        // Load image to be used for drawing dots
-        var pointLayer = geo.featureLayer({
-            'renderer' : 'simpleRenderer'});
-        var feature = pointLayer.create('pointFeature');
-        feature.positions(citieslatlon);
-
-        myMap.addLayer(pointLayer);
-        myMap.draw();
-      }});
+    // Load image to be used for drawing dots
+    var layer = geo.featureLayer({
+        'renderer' : 'simpleRenderer'});
+    layer.create('planeFeature')
+      .origin([0.0, 0.0, 0.0])
+      .upperLeft([0.0, 1.0, 0.0])
+      .lowerRight([2.0, 0.0, 0.0])
+      .style('image', window.location.protocol + "//" + window.location.host + '/data/land_shallow_topo_2048.png');
+    myMap.addLayer(layer);
+    myMap.draw();
 });
 </script>
 

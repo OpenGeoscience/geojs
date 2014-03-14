@@ -10,40 +10,66 @@
  * @returns {geo.planeFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-ggl.planeFeature = function(lowerleft, upperright, z) {
+ggl.planeFeature = function(arg) {
   "use strict";
-  if (!(this instanceof geo.planeFeature)) {
-    return new geo.planeFeature(lowerleft, upperright);
+  if (!(this instanceof ggl.planeFeature)) {
+    return new ggl.planeFeature(arg);
   }
+  geo.planeFeature.call(this, arg);
 
-  geo.polygonFeature.call(this);
-
-  z = typeof z !== 'undefined' ? z : 0.0;
-
-  // Initialize
-  var m_origin, m_pt2, m_pt1, m_actor, m_lastModifiedTimestamp;
-  m_origin = [ lowerleft.lng(), lowerleft.lat(), z ];
-  m_pt2 = [ lowerleft.lng(), upperright.lat(), z ];
-  m_pt1 = [ upperright.lng(), lowerleft.lat(), z ];
-
-  m_actor = vgl.utils.createPlane(m_origin[0], m_origin[1], m_origin[2],
-                                  m_pt1[0], m_pt1[1], m_pt1[2], m_pt2[0],
-                                  m_pt2[1], m_pt2[2]);
-
-
-
-  this.setMapper(m_actor.mapper());
-  this.setMaterial(m_actor.material());
+  var m_this = this,
+      m_actor = null;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Gets the coordinates for this plane
    *
-   * @returns {Array} [lat1, lon1, lat2, lon2]
+   * @returns {Array} [[origin], [upper left] [lower right]]
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.getCoords = function() {
-    return [m_origin[1], m_origin[0], m_pt2[1], m_pt1[0]];
+  this.coords = function() {
+    return [this.origin(), this.upperLeft(), this.lowerRight()];
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Build this feature
+   *
+   * @override
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._build = function() {
+    var or = this.origin(),
+        ul = this.upperLeft(),
+        lr = this.lowerRight(),
+        image = null,
+        imageSrc = this.style().image,
+        texture = null;
+
+    if (m_actor) {
+      this.renderer()._contextRenderer().removeActor(m_actor);
+    }
+
+    if (imageSrc) {
+      image = new Image();
+      image.src = imageSrc;
+      m_actor = vgl.utils.createTexturePlane(or[0], or[1], or[2],
+                  lr[0], lr[1], lr[2],
+                  ul[0], ul[1], ul[2], true);
+      m_this.renderer()._contextRenderer().addActor(m_actor);
+      image.onload = function() {
+        texture = vgl.texture();
+        texture.setImage(image);
+        m_actor.material().addAttribute(texture);
+        m_this.renderer()._render();
+      }
+    }
+    else {
+      m_actor = vgl.utils.createPlane(or[0], or[1], or[2],
+                  ul[0], ul[1], ul[2],
+                  lr[0], lr[1], lr[2]);
+    }
+    this.buildTime().modified();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -53,21 +79,21 @@ ggl.planeFeature = function(lowerleft, upperright, z) {
    * @override
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.update = function() {
-    if (m_lastModifiedTimestamp &&
-        m_lastModifiedTimestamp.getMTime() < this.getMTime()) {
-
-      vgl.utils.updateColorMappedMaterial(this.material(), m_lookupTable);
-
-    } else {
-
-      m_lastModifiedTimestamp = vgl.timestamp();
-      m_lastModifiedTimestamp.modified();
-
+  this._update = function() {
+    if (this.buildTime().getMTime() <= this.dataTime().getMTime()) {
+      this._build();
     }
+    if (this.updateTime().getMTime() <= this.getMTime()) {
+      // TODO Implement this
+    }
+
+    this.updateTime().modified();
   };
 
   return this;
 };
 
-inherit(geo.planeFeature, geo.polygonFeature);
+inherit(ggl.planeFeature, geo.planeFeature);
+
+// Now register it
+geo.registerFeature('webgl', 'planeFeature', ggl.planeFeature);

@@ -23,11 +23,18 @@ geo.planeFeature = function(arg) {
     return new geo.planeFeature(arg);
   }
   arg = arg || {};
+
+  // Defaults
+  arg.ul = arg.ul === undefined ? [0.0, 1.0, 0.0] : arg.ul;
+  arg.lr = arg.lr === undefined ? [1.0, 0.0, 0.0] : arg.lr;
+  arg.dept = arg.depth === undefined ? 0.0 : arg.depth;
+
   geo.polygonFeature.call(this, arg);
 
   var m_origin = [arg.ul.x, arg.lr.y, arg.depth],
       m_upperLeft = [arg.ul.x, arg.ul.y, arg.depth],
-      m_lowerRight = [arg.lr.x, arg.lr.y, arg.depth];
+      m_lowerRight = [arg.lr.x, arg.lr.y, arg.depth],
+      s_init = this._init;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -41,6 +48,7 @@ geo.planeFeature = function(arg) {
       return m_origin;
     } else {
       m_origin = val.slice(0);
+      this.dataTime().modified();
       this.modified();
       return this;
     }
@@ -59,6 +67,7 @@ geo.planeFeature = function(arg) {
     } else {
       // Copy incoming array of positions
       m_upperLeft = val.slice(0);
+      this.dataTime().modified();
       this.modified();
       return this;
     }
@@ -77,11 +86,28 @@ geo.planeFeature = function(arg) {
     } else {
       // Copy incoming array of positions
       m_lowerRight = val.slice(0);
+      this.dataTime().modified();
       this.modified();
       return this;
     }
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Initialize
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._init = function(arg) {
+    var style = null;
+    s_init.call(this, arg);
+    style = this.style();
+    if (style.image === undefined) {
+      style.image = null;
+    }
+    this.style(style);
+  };
+
+  this._init(arg);
   return this;
 };
 

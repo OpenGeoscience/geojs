@@ -25,6 +25,8 @@ geo.polygonFeature = function(arg) {
   arg = arg || {};
   geo.feature.call(this, arg);
 
+  var s_init = this._init;
+
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize

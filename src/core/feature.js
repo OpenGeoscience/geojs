@@ -32,9 +32,11 @@ geo.feature = function(arg) {
   arg = arg || {};
 
   var m_style = {},
+      m_layer = arg.layer === undefined ? null : arg.layer,
       m_gcs = arg.gcs === undefined ? "EPSG:4326" : arg.gcs,
-      m_renderer = null,
+      m_renderer = arg.renderer === undefined ? null : arg.renderer,
       m_dataTime = geo.timestamp(),
+      m_buildTime = geo.timestamp(),
       m_updateTime = geo.timestamp();
 
   ////////////////////////////////////////////////////////////////////////////
@@ -42,11 +44,15 @@ geo.feature = function(arg) {
    * Get/Set style used by the feature
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.style = function(val) {
-    if (val === undefined ) {
+  this.style = function(arg1, arg2) {
+    if (arg1 === undefined ) {
       return m_style;
+    }  else if (arg2 === undefined) {
+      m_style = $.extend({}, m_style, arg1);
+      this.modified();
+      return this;
     } else {
-      m_style = $.extend({}, m_style, val);
+      m_style[arg1] = arg2;
       this.modified();
       return this;
     }
@@ -54,17 +60,29 @@ geo.feature = function(arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get/Set renderer used by the feature
+   * Get layer referenced by the feature
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.renderer = function(val) {
-    if (val === undefined ) {
-      return m_renderer;
-    } else {
-      m_renderer = val
-      this.modified();
-      return this;
-    }
+  this.layer = function() {
+    return m_layer;
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get renderer used by the feature
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.renderer = function() {
+    return m_renderer;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get list of drawables or nodes that are context/api specific.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.drawables = function() {
+    return this._drawables();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -99,6 +117,21 @@ geo.feature = function(arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Get/Set timestamp of last time build happened
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.buildTime = function(val) {
+    if (val === undefined ) {
+      return m_buildTime;
+    } else {
+      m_buildTime = val;
+      this.modified();
+      return this;
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Get/Set timestamp of last time update happened
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -120,6 +153,9 @@ geo.feature = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function(arg) {
+    if (!m_layer) {
+      throw "Feature requires a valid layer";
+    }
     m_style = $.extend({},
                 {"opacity": 1.0}, arg.style === undefined ? {} :
                 arg.style);
@@ -133,6 +169,16 @@ geo.feature = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._build = function() {
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get context specific drawables
+   *
+   * Derived class should implement this
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._drawables = function() {
   };
 
   ////////////////////////////////////////////////////////////////////////////
