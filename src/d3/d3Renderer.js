@@ -37,7 +37,7 @@ gd3.d3Renderer = function(arg) {
     s_init.call(this, arg);
 
     if (!this.canvas()) {
-      var canvas = d3.select(this.container().node().get(0)).append('svg');
+      var canvas = d3.select(this.layer().node().get(0)).append('svg');
       canvas.attr('class', '.d3-canvas');
       this._canvas(canvas);
     }
@@ -84,7 +84,6 @@ gd3.d3Renderer = function(arg) {
   };
 
   this._init(arg);
-  this.interactorStyle(gd3.d3InteractorStyle);
   return this;
 };
 

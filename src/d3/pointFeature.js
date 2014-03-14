@@ -80,11 +80,11 @@ gd3.pointFeature = function(arg) {
     //          - id
     //          - style?
     function lat(d) {
-      return d.y();
+      return d.lat;
     }
 
     function lng(d) {
-      return d.x();
+      return d.lon;
     }
 
     function id(d, i) {
