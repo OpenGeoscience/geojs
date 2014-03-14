@@ -24,7 +24,53 @@ geo.object = function(cfg) {
     return new geo.object();
   }
   
-  var m_eventHandlers = {};
+  var m_this = this,
+      m_eventHandlers = {},
+      m_parent = null,
+      m_children = [];
+
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ *  Get/set parent of the object
+ */
+//////////////////////////////////////////////////////////////////////////////
+  this.parent = function (arg) {
+    if (arg === undefined) {
+      return m_parent;
+    }
+    m_parent = arg;
+    return this;
+  };
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ *  Add a child to the object
+ */
+//////////////////////////////////////////////////////////////////////////////
+  this.addChild = function (child) {
+    m_children.push(child);
+    return this;
+  };
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ *  Add a child to the object
+ */
+//////////////////////////////////////////////////////////////////////////////
+  this.removeChild = function (child) {
+    m_children = m_children.filter(function (c) { return c !== child; });
+    return this;
+  };
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ *  Get an array of child objects
+ */
+//////////////////////////////////////////////////////////////////////////////
+  this.children = function () {
+    return m_children.slice();
+  };
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -51,17 +97,34 @@ geo.object = function(cfg) {
  */
 //////////////////////////////////////////////////////////////////////////////
   this.trigger = function (event, args) {
+    // If the event was not triggered by the parent, just propagate up the tree
+    if (m_parent && args._triggeredBy !== m_parent) {
+      args._triggeredBy = m_this;
+      m_parent.trigger(event, args);
+      return this;
+    }
+
+    // if we have an array of events, recall with single events
     if (Array.isArray(event)) {
       event.forEach(function (e) {
-        this.trigger(e, args);
+        m_this.trigger(e, args);
       });
       return this;
     }
+
+    // call the object's own handlers
     if (m_eventHandlers.hasOwnProperty(event)) {
       m_eventHandlers[event].forEach(function (handler) {
         handler(args);
       });
     }
+
+    // trigger the event on the children
+    m_children.forEach(function (child) {
+      args._triggeredBy = m_this;
+      child.trigger(event, args);
+    });
+
     return this;
   };
 
