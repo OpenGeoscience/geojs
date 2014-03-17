@@ -38,7 +38,8 @@ $(function() {
     var myMap = geo.map(mapOptions),
         table = [],
         citieslatlon = [],
-        colors = [];
+        colors = [],
+        width, height;
 
     // Resize the canvas to fill browser window dynamically
     window.addEventListener('resize', resizeCanvas, false);
@@ -46,7 +47,9 @@ $(function() {
     function resizeCanvas() {
       $('#map').width('100%');
       $('#map').height('100%');
-      updateAndDraw($('#map').width(), $('#map').height());
+      width = $('#map').width();
+      height = $('#map').height();
+      updateAndDraw(width, height);
     }
     resizeCanvas();
 
@@ -64,7 +67,7 @@ $(function() {
         table = processCSVData(data);
         if (table.length > 0) {
           var i;
-          for (i = 0; i < table.length; ++i) {
+          for (i = 0; i < 1000; ++i) {//table.length; ++i) {
             if (table[i][2] != undefined) {
               var lat = table[i][2];
               lat = lat.replace(/(^\s+|\s+$|^\"|\"$)/g, '');
@@ -83,18 +86,23 @@ $(function() {
         var layer = geo.featureLayer({
             'renderer' : 'd3Renderer'});
         var color = d3.scale.category10()
-                        .domain(d3.range(10));
-        layer.create('pointFeature')
+                      .domain(d3.range(10)),
+            style = {
+                attributes: { cx: function (d) { return (10*(180 + d.lon)) % width; },
+                              cy: function (d) { return height - (10*(90 + d.lat)) % height; }},
+                style: {fill: function (d, i) { return color(i % 10); }},
+            };
+        var points = layer.create('pointFeature')
             .positions(citieslatlon)
-            .setStyle( {
-                attributes: { cx: function (d) { return d.lon; },
-                              cy: function (d) { return d.lat; }},
-                style: { 'fill': function () { return color(Math.floor(10*Math.random())); } }
-            } )
-             ._build(); // why does build not get called?
-
+            .style(style)._build();
+        
         myMap.addLayer(layer);
         myMap.draw();
+        
+        window.setInterval(function () {
+            citieslatlon.push(citieslatlon.shift());
+            points.positions(citieslatlon).style(style)._build();
+        }, 5000);
       }});
 });
 </script>

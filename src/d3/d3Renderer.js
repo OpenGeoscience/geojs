@@ -93,22 +93,18 @@ gd3.d3Renderer = function(arg) {
     this.canvas().remove();
   };
 
-  this.createFeatures = function (arg) {
+  this.drawFeatures = function (arg) {
     var svg = this._canvas(),
         selection = svg.selectAll('.' + arg.id)
-                        .data(arg.data),
-        enter = selection.enter().append(arg.append);
-    
-    setAttrs(enter, arg.attributes);
-    enter.attr('class', arg.classes.concat([arg.id]).join(' '));
-    enter.style(arg.style);
+                        .data(arg.data, arg.dataIndex);
+    selection.enter().append(arg.append);
+    selection.exit().remove();
+    setAttrs(selection, arg.attributes);
+    selection.attr('class', arg.classes.concat([arg.id]).join(' '));
+    selection.style(arg.style);
     arg.selection = selection;
     m_features[arg.id] = selection;
     return selection;
-  };
-
-  // placeholder for now
-  this.redrawFeatures = function () {
   };
 
   this._init(arg);

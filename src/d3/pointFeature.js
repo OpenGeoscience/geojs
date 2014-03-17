@@ -65,9 +65,12 @@ gd3.pointFeature = function(arg) {
     return this;
   };
 
-  this.setStyle = function (arg) {
-    m_style = unpackArg.call(this, arg);
-    return this;
+  this.style = function (arg) {
+    if (arg !== undefined) {
+      m_style = unpackArg.call(this, arg);
+      return this;
+    }
+    return m_style;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -78,9 +81,11 @@ gd3.pointFeature = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._build = function() {
+    var data = this.positions();
+    if (!data) { data = []; }
     s_update.call(this);
-    m_style.data = this.positions();
-    this.renderer().createFeatures(m_style);
+    m_style.data = data;
+    this.renderer().drawFeatures(m_style);
     return this;
   };
 
@@ -92,9 +97,7 @@ gd3.pointFeature = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._update = function() {
-    s_update.call(this);
-
-    this.renderer().redrawFeatures(this._d3id());
+    this._build();
     return this;
   };
 

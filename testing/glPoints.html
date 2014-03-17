@@ -37,8 +37,7 @@ $(function() {
 
     var myMap = geo.map(mapOptions),
         table = [],
-        citieslatlon = [],
-        colors = [];
+        citieslatlon = [];
 
     // Resize the canvas to fill browser window dynamically
     window.addEventListener('resize', resizeCanvas, false);
@@ -74,16 +73,23 @@ $(function() {
               lon = lon.replace(/(^\s+|\s+$|^\"|\"$)/g, '');
               lon = parseFloat(lon);
               citieslatlon.push(lon, lat, 0.0);
-              colors.push(1.0, 1.0, 153.0 / 255.0);
             }
           }
         }
 
         // Load image to be used for drawing dots
         var layer = geo.featureLayer({
-            'renderer' : 'simpleRenderer'});
-        layer.create('pointFeature')
-          .positions(citieslatlon);
+            'renderer' : 'simpleRenderer'}),
+            color = d3.category20().domain(d3.range(20)),
+            j = 0,
+            style = {
+                style: {fill: function (d, i) { return color(i % 20); }},
+                dataIndex: function (d, i) { return (i + j) % citieslatlon.length; }
+            };
+
+        var points = layer.create('pointFeature')
+            .positions(citieslatlon)
+            .style(style);
 
         myMap.addLayer(layer);
         myMap.draw();
