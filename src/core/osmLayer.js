@@ -12,17 +12,15 @@
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Create a new instance of openStreetMapLayer
+ * Create a new instance of osmLayer
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.openStreetMapLayer = function() {
+geo.osmLayer = function() {
   "use strict";
-  if (!(this instanceof geo.openStreetMapLayer)) {
-    return new geo.openStreetMapLayer();
+  if (!(this instanceof geo.osmLayer)) {
+    return new geo.osmLayer();
   }
   geo.featureLayer.call(this);
-
-  this.setGcs("EPSG:3857");
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -37,11 +35,8 @@ geo.openStreetMapLayer = function() {
       MAP_NUMTYPES = 3,
       m_mapType = MAP_MQOSM,
       m_tiles = {},
-      m_newFeatures = this.newFeatures(),
-      m_expiredFeatures = this.expiredFeatures(),
       m_previousZoom = null,
-      m_predrawTime = vgl.timestamp(),
-      m_updateTime = vgl.timestamp();
+      s_update = this._update;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -98,8 +93,7 @@ geo.openStreetMapLayer = function() {
         lly = -totalLatDegrees * 0.5 + y * latPerTile,
         urx = -180.0 + (x + 1) * lonPerTile,
         ury = -totalLatDegrees * 0.5 + (y + 1) * latPerTile,
-        actor = vgl.utils.createTexturePlane(llx, lly,
-          0.0, urx, lly, 0.0, llx, ury, 0.0),
+        feature = null,
         tile = new Image();
         //console.log("New tile: ["+llx+" , "+lly+"] ["+urx+" , "+ury+"]");
 
@@ -107,13 +101,20 @@ geo.openStreetMapLayer = function() {
     tile.LOADED = false;
     tile.UNLOAD = false;
     tile.REMOVED = false;
-    tile.actor = actor;
     tile.crossOrigin = 'anonymous';
     // tile.src = "http://tile.openstreetmap.org/" + zoom + "/" + (x)
     //   + "/" + (Math.pow(2,zoom) - 1 - y) + ".png";
     tile.src = "http://otile1.mqcdn.com/tiles/1.0.0/osm/" + zoom + "/" +
       (x) + "/" + (Math.pow(2,zoom) - 1 - y) + ".jpg";
-    tile.texture = new vgl.texture();
+
+    feature = this.create('planeFeature')
+                  .origin([llx, lly])
+                  .upperLeft([llx, ury])
+                  .lowerRight([urx, lly])
+                  .gcs('"EPSG:3857"')
+                  .style('image', tile);
+    tile.feature = feature;
+    /// TODO Fix this
     tile.onload = function() {
       if (this.UNLOAD) {
         this.LOADING = false;
@@ -122,13 +123,6 @@ geo.openStreetMapLayer = function() {
       }
       this.LOADING = false;
       this.LOADED = true;
-      this.texture.updateDimensions();
-      this.texture.setImage(this);
-      this.actor.material().addAttribute(this.texture);
-      this.actor.material().setBinNumber(m_that.binNumber());
-      m_newFeatures.push(this.actor);
-      m_updateTime.modified();
-      request.requestRedraw();
     };
 
     m_tiles[zoom][x][y] = tile;
@@ -142,17 +136,12 @@ geo.openStreetMapLayer = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.removeTiles = function(request) {
-    var mapOptions = request.mapOptions(),
-        zoom = null,
+    var request = request === undefined ? {} : request,
+        zoom = request.zoom === undefined ? 0 : request.zoom,
         x = null,
         y = null;
 
-    if (!mapOptions) {
-      console.log("[info] Invalid map  options. Cannot clear tile.");
-      return;
-    }
-
-    if (m_previousZoom === null || m_previousZoom === mapOptions.zoom) {
+    if (m_previousZoom === null || m_previousZoom === zoom) {
       return;
     }
 
@@ -166,7 +155,7 @@ geo.openStreetMapLayer = function() {
         continue;
       }
 
-      if (zoom === mapOptions.zoom) {
+      if (zoom === request.zoom) {
         continue;
       }
 
@@ -189,8 +178,7 @@ geo.openStreetMapLayer = function() {
           }
 
           m_tiles[zoom][x][y].REMOVED = true;
-          m_tiles[zoom][x][y].actor.REMOVED = true;
-          m_expiredFeatures.push(m_tiles[zoom][x][y].actor);
+          m_this._delete(m_tiles[zoom][x][y].feature);
           m_tiles[zoom][x][y] = null;
         }
       }
@@ -203,22 +191,15 @@ geo.openStreetMapLayer = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.updateTiles = function(request) {
-    if (!request.viewer()) {
-      console.log('[info] Invalid viewer');
-      return;
-    }
-
-    var viewer = request.viewer(),
-        renderer = viewer.renderWindow().activeRenderer(),
-        camera = renderer.camera(),
-        mapOptions = request.mapOptions(),
-        node = request.node(),
-        zoom = mapOptions.zoom,
+    var ren = this.renderer(),
+        node = this.node(),
+        // TODO: Fix zoom
+        zoom = 6,
         // First get corner points
         // In display coordinates the origin is on top left corner (0, 0)
         llx = 0.0,
-        lly = node.height,
-        urx = node.width,
+        lly = node.height(),
+        urx = node.width(),
         ury = 0.0,
         temp = null,
         tile = null,
@@ -229,24 +210,8 @@ geo.openStreetMapLayer = function() {
         invJ = null,
         i = 0,
         j = 0,
-        // Now convert display point to world point
-          // @NOTE Tiles are drawn at z = 0.
-        focalPoint = camera.focalPoint(),
-        focusWorldPt = vec4.fromValues(
-          focalPoint[0], focalPoint[1], 0.0, 1),
-        focusDisplayPt = renderer.worldToDisplay(
-          focusWorldPt, camera.viewMatrix(),
-          camera.projectionMatrix(), node.width, node.height),
-        displayPt1 = vec4.fromValues(
-          llx, lly, focusDisplayPt[2], 1.0),
-        displayPt2 = vec4.fromValues(
-          urx, ury, focusDisplayPt[2], 1.0),
-        worldPt1 = renderer.displayToWorld(
-          displayPt1, camera.viewMatrix(), camera.projectionMatrix(),
-          node.width, node.height),
-        worldPt2 = renderer.displayToWorld(
-          displayPt2, camera.viewMatrix(), camera.projectionMatrix(),
-          node.width, node.height);
+        worldPt1 = ren.displayToWorld([llx, lly])[0],
+        worldPt2 = ren.displayToWorld([urx, ury])[0];
 
 
     // @TODO Currently we blindly remove all tiles from previous zoom
@@ -304,68 +269,16 @@ geo.openStreetMapLayer = function() {
       }
     }
 
-    m_updateTime.modified();
+    this.updateTime().modified();
   };
 
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Update the layer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.update = function(request) {
-    var mapOptions = request.mapOptions();
-    if (!mapOptions) {
-      console.log("[warning] Invalid map options.");
-      return;
-    }
-
+  this._update = function(request) {
+    /// TODO Finish this implementation
     this.updateTiles(request);
 
-    // Update previous zoom if necessary
-    if (m_previousZoom !== mapOptions.zoom) {
-      m_previousZoom = mapOptions.zoom;
-    }
+    /// Now call base class update
+    s_update.call(this, request);
   };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Collect new and expired features
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.predraw = function(request) {
-    if (m_predrawTime.getMTime() > m_updateTime.getMTime()) {
-      return;
-    }
-
-    var featureCollection = request.featureCollection();
-    featureCollection.setNewFeatures(this.id(), m_newFeatures.slice(0));
-    featureCollection.setExpiredFeatures(this.id(), m_expiredFeatures.slice(0));
-
-    m_newFeatures.length = 0;
-    m_expiredFeatures.length = 0;
-
-    m_predrawTime.modified();
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Implements querying locations
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.queryLocation = function(location) {
-    var result = {
-      layer : this,
-      data : {
-        "lon": location.x,
-        "lat": location.y
-      }
-    },
-    revent = $.Event(geo.command.queryResultEvent);
-
-    revent.srcEvent = location.event;
-    $(this).trigger(revent, result);
-  };
-
 
   this.worldToGcs = function(x, y) {
     if (this.referenceLayer()) {
@@ -375,7 +288,10 @@ geo.openStreetMapLayer = function() {
     throw "This layer is not a reference layer so cannot do the convertion";
   };
 
-  this.setBinNumber(vgl.material.RenderBin.Base);
+  this._init = function() {
+    s_init.call(this, arg);
+    this.gcs("EPSG:3857");
+  };
 };
 
-inherit(geo.openStreetMapLayer, geo.featureLayer);
+inherit(geo.osmLayer, geo.featureLayer);

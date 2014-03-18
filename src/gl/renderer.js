@@ -33,17 +33,7 @@ ggl.renderer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.contextRenderer = function() {
-    return this._contextRenderer();
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get context specific renderer
-   *
-   * Derive class should implement this.
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._contextRenderer = function() {
+    throw "Should be implemented by derived classes";
   };
 
   return this;

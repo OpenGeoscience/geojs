@@ -42,26 +42,35 @@ ggl.planeFeature = function(arg) {
     var or = this.origin(),
         ul = this.upperLeft(),
         lr = this.lowerRight(),
+        /// img could be a source or an Image
+        img = this.style().image,
         image = null,
-        imageSrc = this.style().image,
+        onloadCallback = null,
         texture = null;
 
     if (m_actor) {
-      this.renderer()._contextRenderer().removeActor(m_actor);
+      this.renderer().contextRenderer().removeActor(m_actor);
     }
 
-    if (imageSrc) {
+    if (img && img instanceof Image) {
+      image = img;
+      onloadCallback = img.onload;
+    } else if (img) {
       image = new Image();
-      image.src = imageSrc;
+      image.src = img;
+    }
+
+    if (image) {
       m_actor = vgl.utils.createTexturePlane(or[0], or[1], or[2],
                   lr[0], lr[1], lr[2],
                   ul[0], ul[1], ul[2], true);
-      m_this.renderer()._contextRenderer().addActor(m_actor);
+      m_this.renderer().contextRenderer().addActor(m_actor);
       image.onload = function() {
         texture = vgl.texture();
         texture.setImage(image);
         m_actor.material().addAttribute(texture);
         m_this.renderer()._render();
+        onloadCallback.call(this);
       }
     }
     else {
@@ -88,6 +97,15 @@ ggl.planeFeature = function(arg) {
     }
 
     this.updateTime().modified();
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Destroy
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._exit = function() {
+    m_this.renderer().contextRenderer().removeActor(m_actor);
   };
 
   return this;

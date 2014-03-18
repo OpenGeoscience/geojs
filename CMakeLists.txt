@@ -50,7 +50,8 @@ set(_source_files
   core/geomFeature.js
   core/geoTransform.js
   core/data.js
-  core/renderer.js
+  core/renderer.js 
+  core/osmLayer.js
   gl/init.js
   gl/renderer.js
   gl/pointFeature.js
