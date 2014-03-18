@@ -17,28 +17,12 @@
 </head>
 <body style="height: 100%;">
 <script>
-function processCSVData(csvdata) {
-  var table = [];
-  var lines = csvdata.split(/\r\n|\n/);
-
-  for ( var i = 0; i < lines.length; i++) {
-    var row = lines[i].split(',');
-    table.push(row);
-  }
-  return table;
-};
-
 $(function() {
-    var mapOptions = {
-      node: 'map',
-      zoom : 6,
-      center : [0.0, 0.0]
-    };
-
-    var myMap = geo.map(mapOptions),
-        table = [],
-        citieslatlon = [],
-        colors = [];
+    var mapOptions = {node: 'map',
+                      zoom : 6,
+                      center : [0.0, 0.0]},
+      myMap = geo.map(mapOptions),
+      layer = geo.featureLayer({'renderer' : 'simpleRenderer'});
 
     // Resize the canvas to fill browser window dynamically
     window.addEventListener('resize', resizeCanvas, false);
@@ -55,14 +39,11 @@ $(function() {
       myMap.draw();
     }
 
-    // Load image to be used for drawing dots
-    var layer = geo.featureLayer({
-        'renderer' : 'simpleRenderer'});
     layer.create('planeFeature')
-      .origin([0.0, 0.0, 0.0])
-      .upperLeft([0.0, 1.0, 0.0])
-      .lowerRight([2.0, 0.0, 0.0])
-      .style('image', window.location.protocol + "//" + window.location.host + '/data/land_shallow_topo_2048.png');
+      .origin(geo.latlng(0.0, 0.0))
+      .upperLeft(geo.latlng(1.0, 0.0))
+      .lowerRight(geo.latlng(0.0, 2.0))
+      .style('image', '/data/land_shallow_topo_2048.png');
     myMap.addLayer(layer);
     myMap.draw();
 });
