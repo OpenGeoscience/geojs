@@ -53,7 +53,7 @@ ggl.pointFeature = function(arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._build = function() {
     if (m_actor) {
-      this.renderer()._contextRenderer().removeActor(m_actor);
+      this.renderer().contextRenderer().removeActor(m_actor);
     }
 
     m_actor = vgl.utils.createPoints(this.positions(), this.style().colors);

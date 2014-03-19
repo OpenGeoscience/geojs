@@ -31,6 +31,55 @@ ggl.simpleRenderer = function(arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Convert array of points from display to world space
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.displayToWorld = function(points) {
+    if (points instanceof Array) {
+      var xyzFormat = points.length % 3 === 0 ? true : false,
+          node = this.canvas(),
+          delta = xyzFormat ? 3 : 2, ren = this.contextRenderer(),
+          cam = ren.camera(), fp = cam.focalPoint(),
+          fwp = vec4.fromValues(fp[0], fp[1], 0.0, 1.0),
+          fdp = ren.worldToDisplay(fwp, cam.viewMatrix(),
+                                   cam.projectionMatrix(),
+                                   node.width(), node.height()),
+          i, wps = [];
+      for (i = 0; i < points.length; i =+ delta) {
+        wps.push(ren.displayToWorld(vec4.fromValues(
+          points[i],
+          points[i + 1],
+          fdp[2],
+          1.0), cam.viewMatrix(), cam.projectionMatrix(),
+          node.width(), node.height()));
+      }
+
+      return wps;
+    }
+
+    throw "Display to world conversion requires array of 2D/3D points";
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get context specific renderer
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.contextRenderer = function() {
+    return m_viewer.renderWindow().activeRenderer();
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get API used by the renderer
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.api = function() {
+    return 'webgl';
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Initialize
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -40,29 +89,31 @@ ggl.simpleRenderer = function(arg) {
     if (!this.canvas()) {
       var canvas = $(document.createElement('canvas'));
       canvas.attr('class', '.webgl-canvas');
-      this._canvas(canvas);
+      this.canvas(canvas);
       this.layer().node().append(canvas);
     }
     m_viewer = vgl.viewer(this.canvas().get(0));
     m_viewer.init();
-  };
 
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get API used by the renderer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._api = function() {
-    return 'webgl';
-  };
+    this.canvas().on('mousemove', function(event) {
+      m_viewer.handleMouseMove(event);
+    });
 
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get context specific renderer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._contextRenderer = function() {
-    return m_viewer.renderWindow().activeRenderer();
+    this.canvas().on('mouseup', function(event) {
+      m_viewer.handleMouseUp(event);
+    });
+
+    this.canvas().on('mousedown', function(event) {
+      m_viewer.handleMouseDown(event);
+    });
+
+    this.canvas().on('keypress', function(event) {
+      m_viewer.handleKeyPress(event);
+    });
+
+    this.canvas().on('contextmenu', function(event) {
+      m_viewer.handleContextMenu(event);
+    });
   };
 
   ////////////////////////////////////////////////////////////////////////////
