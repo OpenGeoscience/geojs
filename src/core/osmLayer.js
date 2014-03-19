@@ -15,12 +15,12 @@
  * Create a new instance of osmLayer
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.osmLayer = function() {
+geo.osmLayer = function(arg) {
   "use strict";
   if (!(this instanceof geo.osmLayer)) {
-    return new geo.osmLayer();
+    return new geo.osmLayer(arg);
   }
-  geo.featureLayer.call(this);
+  geo.featureLayer.call(this, arg);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -28,7 +28,7 @@ geo.osmLayer = function() {
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
-  var m_that = this,
+  var m_this = this,
       MAP_OSM = 0,
       MAP_MQOSM = 1,
       MAP_MQAERIAL = 2,
@@ -215,10 +215,9 @@ geo.osmLayer = function() {
         worldPt1 = ren.displayToWorld([llx, lly])[0],
         worldPt2 = ren.displayToWorld([urx, ury])[0];
 
-
     /// TODO Currently we blindly remove all tiles from previous zoom
     /// state. This could be optimized.
-    m_that._removeTiles(request);
+    m_this._removeTiles(request);
 
     worldPt1[0] = Math.max(worldPt1[0], -180.0);
     worldPt1[0] = Math.min(worldPt1[0],  180.0);
@@ -265,8 +264,8 @@ geo.osmLayer = function() {
     for (i = tile1x; i <= tile2x; ++i) {
       for (j = tile2y; j <= tile1y; ++j) {
         invJ = (Math.pow(2,zoom) - 1 - j);
-        if  (!m_that._hasTile(zoom, i, invJ)) {
-          tile = m_that._addTiles(request, zoom, i, invJ);
+        if  (!m_this._hasTile(zoom, i, invJ)) {
+          tile = m_this._addTiles(request, zoom, i, invJ);
         }
       }
     }
@@ -292,10 +291,18 @@ geo.osmLayer = function() {
    * Initialize
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._init = function() {
-    s_init.call(this, arg);
+  this._init = function(arg) {
     this.gcs("EPSG:3857");
+
+    this.on(geo.event.resize, function(event) {
+      m_this.renderer()._resize(event.x, event.y, event.width, event.height);
+      m_this._update({});
+      m_this.renderer()._render();
+    })
   };
+
+  this._init(arg);
+  return this;
 };
 
 inherit(geo.osmLayer, geo.featureLayer);

@@ -26,7 +26,7 @@ geo.layer = function(arg) {
     return new geo.layer(arg);
   }
   arg = arg || {};
-  geo.object.call(this, arg);
+  geo.sceneObject.call(this, arg);
 
   //////////////////////////////////////////////////////////////////////////////
   /**
@@ -348,11 +348,9 @@ geo.layer = function(arg) {
     m_width = w;
     m_height = h;
 
-    if (m_renderer) {
-      m_renderer._resize(x, y, w, h);
-    }
-
     this.modified();
+    this.trigger(geo.event.resize,
+      {x: x, y: y, width: m_width, height: m_height});
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -367,4 +365,4 @@ geo.layer = function(arg) {
   return this;
 };
 
-inherit(geo.layer, geo.object);
+inherit(geo.layer, geo.sceneObject);

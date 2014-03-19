@@ -58,6 +58,7 @@ set(_source_files
   gl/geomFeature.js
   gl/pointFeature.js
   gl/planeFeature.js
+  gl/mapInteractorStyle.js	
   gl/simpleRenderer.js
   ui/init.js
   ui/gis.js

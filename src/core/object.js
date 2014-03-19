@@ -23,7 +23,7 @@ geo.object = function(cfg) {
   if (!(this instanceof geo.object)) {
     return new geo.object();
   }
-  
+
   var m_this = this,
       m_eventHandlers = {};
 
