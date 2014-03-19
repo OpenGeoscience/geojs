@@ -46,7 +46,7 @@ geo.osmLayer = function() {
    * @param y {number} Y axis tile index
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.hasTile = function(zoom, x, y) {
+  this._hasTile = function(zoom, x, y) {
     if (!m_tiles[zoom]) {
       return false;
     }
@@ -69,7 +69,7 @@ geo.osmLayer = function() {
    * @param y {number} Y axis tile index
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.addTile = function(request, zoom, x, y) {
+  this._addTiles = function(request, zoom, x, y) {
     if (!m_tiles[zoom]) {
       m_tiles[zoom] = {};
     }
@@ -82,10 +82,10 @@ geo.osmLayer = function() {
       return;
     }
 
-    // Compute corner points
+    /// Compute corner points
     var noOfTilesX = Math.max(1, Math.pow(2, zoom)),
         noOfTilesY = Math.max(1, Math.pow(2, zoom)),
-        // Convert into mercator
+        /// Convert into mercator
         totalLatDegrees = 360.0,
         lonPerTile = 360.0 / noOfTilesX,
         latPerTile = totalLatDegrees / noOfTilesY,
@@ -101,7 +101,9 @@ geo.osmLayer = function() {
     tile.LOADED = false;
     tile.UNLOAD = false;
     tile.REMOVED = false;
+
     tile.crossOrigin = 'anonymous';
+
     // tile.src = "http://tile.openstreetmap.org/" + zoom + "/" + (x)
     //   + "/" + (Math.pow(2,zoom) - 1 - y) + ".png";
     tile.src = "http://otile1.mqcdn.com/tiles/1.0.0/osm/" + zoom + "/" +
@@ -113,11 +115,12 @@ geo.osmLayer = function() {
                   .lowerRight([urx, lly])
                   .gcs('"EPSG:3857"')
                   .style('image', tile);
+
     tile.feature = feature;
-    /// TODO Fix this
     tile.onload = function() {
       if (this.UNLOAD) {
         this.LOADING = false;
+        m_this._delete(m_tiles[zoom][x][y].feature);
         m_tiles[zoom][x][y] = null;
         return;
       }
@@ -135,7 +138,7 @@ geo.osmLayer = function() {
    * Clear tiles that are no longer required
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.removeTiles = function(request) {
+  this._removeTiles = function(request) {
     var request = request === undefined ? {} : request,
         zoom = request.zoom === undefined ? 0 : request.zoom,
         x = null,
@@ -149,7 +152,7 @@ geo.osmLayer = function() {
       return;
     }
 
-    // For now just clear the tiles from the last zoom.
+    /// For now just clear the tiles from the last zoom.
     for (zoom in m_tiles) {
       if (!m_tiles[zoom]) {
         continue;
@@ -190,13 +193,12 @@ geo.osmLayer = function() {
    * Create / delete tiles as necessary
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.updateTiles = function(request) {
+  this._updateTiles = function(request) {
     var ren = this.renderer(),
         node = this.node(),
-        // TODO: Fix zoom
-        zoom = 6,
-        // First get corner points
-        // In display coordinates the origin is on top left corner (0, 0)
+        zoom = this.map().zoom(),
+        /// First get corner points
+        /// In display coordinates the origin is on top left corner (0, 0)
         llx = 0.0,
         lly = node.height(),
         urx = node.width(),
@@ -214,9 +216,9 @@ geo.osmLayer = function() {
         worldPt2 = ren.displayToWorld([urx, ury])[0];
 
 
-    // @TODO Currently we blindly remove all tiles from previous zoom
-    // state. This could be optimized.
-    m_that.removeTiles(request);
+    /// TODO Currently we blindly remove all tiles from previous zoom
+    /// state. This could be optimized.
+    m_that._removeTiles(request);
 
     worldPt1[0] = Math.max(worldPt1[0], -180.0);
     worldPt1[0] = Math.min(worldPt1[0],  180.0);
@@ -228,14 +230,14 @@ geo.osmLayer = function() {
     worldPt2[1] = Math.max(worldPt2[1], -180.0);
     worldPt2[1] = Math.min(worldPt2[1],  180.0);
 
-    // Compute tilex and tiley
+    /// Compute tilex and tiley
     tile1x = geo.mercator.long2tilex(worldPt1[0], zoom);
     tile1y = geo.mercator.lat2tiley(worldPt1[1], zoom);
 
     tile2x = geo.mercator.long2tilex(worldPt2[0], zoom);
     tile2y = geo.mercator.lat2tiley(worldPt2[1], zoom);
 
-    // Clamp tilex and tiley
+    /// Clamp tilex and tiley
     tile1x = Math.max(tile1x, 0);
     tile1x = Math.min(Math.pow(2, zoom) - 1, tile1x);
     tile1y = Math.max(tile1y, 0);
@@ -246,9 +248,9 @@ geo.osmLayer = function() {
     tile2y = Math.max(tile2y, 0);
     tile2y = Math.min(Math.pow(2, zoom) - 1, tile2y);
 
-    // Check and update variables appropriately if view
-    // direction is flipped. This should not happen but
-    // just in case.
+    /// Check and update variables appropriately if view
+    /// direction is flipped. This should not happen but
+    /// just in case.
     if (tile1x > tile2x) {
       temp = tile1x;
       tile1x = tile2x;
@@ -263,8 +265,8 @@ geo.osmLayer = function() {
     for (i = tile1x; i <= tile2x; ++i) {
       for (j = tile2y; j <= tile1y; ++j) {
         invJ = (Math.pow(2,zoom) - 1 - j);
-        if  (!m_that.hasTile(zoom, i, invJ)) {
-          tile = m_that.addTile(request, zoom, i, invJ);
+        if  (!m_that._hasTile(zoom, i, invJ)) {
+          tile = m_that._addTiles(request, zoom, i, invJ);
         }
       }
     }
@@ -272,22 +274,24 @@ geo.osmLayer = function() {
     this.updateTime().modified();
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Update layer
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this._update = function(request) {
-    /// TODO Finish this implementation
-    this.updateTiles(request);
+    /// Update tiles (create new / delete old etc...)
+    this._updateTiles(request);
 
     /// Now call base class update
     s_update.call(this, request);
   };
 
-  this.worldToGcs = function(x, y) {
-    if (this.referenceLayer()) {
-      return [x * geo.mercator.r_major, y * geo.mercator.r_minor];
-    }
-
-    throw "This layer is not a reference layer so cannot do the convertion";
-  };
-
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Initialize
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this._init = function() {
     s_init.call(this, arg);
     this.gcs("EPSG:3857");
