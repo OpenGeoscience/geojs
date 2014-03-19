@@ -31,24 +31,6 @@ ggl.simpleRenderer = function(arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Initialize
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._init = function(arg) {
-    s_init.call(this, arg);
-
-    if (!this.canvas()) {
-      var canvas = $(document.createElement('canvas'));
-      canvas.attr('class', '.webgl-canvas');
-      this._canvas(canvas);
-      this.layer().node().append(canvas);
-    }
-    m_viewer = vgl.viewer(this.canvas().get(0));
-    m_viewer.init();
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
    * Convert array of points from display to world space
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -92,8 +74,26 @@ ggl.simpleRenderer = function(arg) {
    * Get API used by the renderer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._api = function() {
+  this.api = function() {
     return 'webgl';
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Initialize
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._init = function(arg) {
+    s_init.call(this, arg);
+
+    if (!this.canvas()) {
+      var canvas = $(document.createElement('canvas'));
+      canvas.attr('class', '.webgl-canvas');
+      this.canvas(canvas);
+      this.layer().node().append(canvas);
+    }
+    m_viewer = vgl.viewer(this.canvas().get(0));
+    m_viewer.init();
   };
 
   ////////////////////////////////////////////////////////////////////////////
