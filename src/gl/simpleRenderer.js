@@ -94,6 +94,26 @@ ggl.simpleRenderer = function(arg) {
     }
     m_viewer = vgl.viewer(this.canvas().get(0));
     m_viewer.init();
+
+    this.canvas().on('mousemove', function(event) {
+      m_viewer.handleMouseMove(event);
+    });
+
+    this.canvas().on('mouseup', function(event) {
+      m_viewer.handleMouseUp(event);
+    });
+
+    this.canvas().on('mousedown', function(event) {
+      m_viewer.handleMouseDown(event);
+    });
+
+    this.canvas().on('keypress', function(event) {
+      m_viewer.handleKeyPress(event);
+    });
+
+    this.canvas().on('contextmenu', function(event) {
+      m_viewer.handleContextMenu(event);
+    });
   };
 
   ////////////////////////////////////////////////////////////////////////////
