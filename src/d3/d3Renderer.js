@@ -81,7 +81,7 @@ gd3.d3Renderer = function(arg) {
     s_init.call(this, arg);
 
     if (!this.canvas()) {
-      var canvas = d3.select(this.layer().node().get(0)).append('svg');
+      var canvas = d3.select(this.layer().node().get(0)).append('svg').append('g');
       canvas.attr('class', this._d3id());
       this._canvas(canvas);
     }
@@ -152,7 +152,7 @@ gd3.d3Renderer = function(arg) {
   };
 
   this.drawFeatures = function (arg) {
-    var svg = this._canvas(),
+    var svg = this._canvas().append('g').attr('class', 'group-' + m_this._d3id()),
         selection = svg.selectAll('.' + arg.id)
                         .data(arg.data, arg.dataIndex);
     selection.enter().append(arg.append);
@@ -164,6 +164,21 @@ gd3.d3Renderer = function(arg) {
     m_features[arg.id] = selection;
     return selection;
   };
+
+  // translate the layer by a vector delta
+  function translate (delta) {
+    this._canvas()
+      .selectAll('.group-' + m_this._d3id())
+        .attr('transform', 'translate(' + [delta.x, delta.y].join() + ')');
+  }
+
+  // connect to pan event
+  this.on(geo.event.pan, function (event) {
+    translate({
+      x: event.prevPos.display.x - event.currPos.display.x,
+      y: event.prevPos.display.y - event.currPos.display.y
+    });
+  });
 
   this._init(arg);
   return this;
