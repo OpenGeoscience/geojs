@@ -25,6 +25,10 @@ gd3.d3Renderer = function(arg) {
   geo.renderer.call(this, arg);
   gd3.object.call(this);
 
+  var m_this = this,
+      s_init = this._init,
+      m_features = {};
+
   function setAttrs(select, attrs) {
     var key;
     for (key in attrs) {
@@ -33,11 +37,41 @@ gd3.d3Renderer = function(arg) {
       }
     }
   }
-  
-  var m_this = this,
-      s_init = this._init,
-      m_features = {};
 
+  function getMap() {
+    var layer = m_this.layer();
+    if (!layer) {
+      return null;
+    }
+    return layer.map();
+  }
+
+  function getBaseLayer() {
+    var map = getMap();
+    if (!map) {
+      return null;
+    }
+    return map.baseLayer();
+  }
+
+  function getBaseRenderer() {
+    var base = getBaseLayer();
+    if (!base) {
+      return null;
+    }
+    return base.renderer();
+  }
+
+  this.latLngToDisplayGenerator = function () {
+    var baseRenderer = getBaseRenderer();
+    return function (pt) {
+      var xy = baseRenderer.worldToDisplay(pt.lat(), pt.lng());
+      return { 'x': function () { return xy[0]; },
+               'y': function () { return xy[1]; }
+      };
+    };
+  }
+  
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
@@ -51,6 +85,30 @@ gd3.d3Renderer = function(arg) {
       canvas.attr('class', this._d3id());
       this._canvas(canvas);
     }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Projection functions, for now we pass values to the base layer renderer
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.displayToWorld = function (pt) {
+    var baseRenderer = getBaseRenderer();
+    if (!baseRenderer) {
+      throw "Cannot project until this layer is connected to a map with a base layer.";
+    }
+    return baseRenderer.displayToWorld(pt);
+  };
+  
+  this.worldToDisplay = function (pt) {
+    var baseRenderer = getBaseRenderer();
+    if (!baseRenderer) {
+      throw "Cannot project until this layer is connected to a map with a base layer.";
+    }
+    return baseRenderer.worldToDisplay(pt);
+  };
+
+  this.worldToDisplay = function (pt) {
   };
 
   ////////////////////////////////////////////////////////////////////////////
