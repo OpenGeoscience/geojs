@@ -31,7 +31,7 @@ function processCSVData(csvdata) {
 $(function() {
     var mapOptions = {
       node: 'map',
-      zoom : 6,
+      zoom : 3,
       center : [0.0, 0.0]
     };
 
@@ -98,7 +98,9 @@ $(function() {
             .style(style)._build();
         
         myMap.addLayer(osm).addLayer(layer);
+        resizeCanvas();
         myMap.draw();
+        layer.node().css('pointer-events', 'none');
         
         window.setInterval(function () {
             citieslatlon.push(citieslatlon.shift());

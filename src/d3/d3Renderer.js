@@ -84,6 +84,8 @@ gd3.d3Renderer = function(arg) {
     if (!this.canvas()) {
       var canvas = d3.select(this.layer().node().get(0)).append('svg');
       canvas.attr('class', this._d3id());
+      canvas.attr('width', this.layer().node().width());
+      canvas.attr('height', this.layer().node().height());
       this.canvas(canvas);
     }
   };
@@ -190,6 +192,10 @@ gd3.d3Renderer = function(arg) {
       x: event.curr_display_pos.x - event.last_display_pos.x,
       y: event.curr_display_pos.y - event.last_display_pos.y
     });
+  });
+
+  this.on(geo.event.resize, function (event) {
+    m_this._resize(event.x, event.y, event.width, event.height);
   });
 
   this._init(arg);
