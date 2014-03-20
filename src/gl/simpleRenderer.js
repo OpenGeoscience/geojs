@@ -121,7 +121,8 @@ ggl.simpleRenderer = function(arg) {
       m_viewer.handleContextMenu(event);
     });
 
-    $(m_viewer).on(geo.event.pan, function(event) {
+    /// VGL uses jquery trigger on methods
+    $(m_interactorStyle).on(geo.event.pan, function(event) {
       m_this.trigger(geo.event.pan, event);
     });
   };
