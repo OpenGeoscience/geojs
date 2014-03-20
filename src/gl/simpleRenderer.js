@@ -33,6 +33,10 @@ ggl.simpleRenderer = function(arg) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Convert array of points from display to world space
+   *
+   * @param points {array} Array of 2D or 3D points. In case of 3D points
+   *        the third coordinate will be ignored.
+   *
    */
   ////////////////////////////////////////////////////////////////////////////
   this.displayToWorld = function(points) {
@@ -57,6 +61,46 @@ ggl.simpleRenderer = function(arg) {
     }
 
     throw "Display to world conversion requires array of 2D/3D points";
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Convert array of points from world space to display space
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.worldToDisplay = function(points) {
+    if (points instanceof Array) {
+
+      var xyzFormat = points.length % 3 === 0 ? true : false,
+          node = this.canvas(),
+          delta = xyzFormat ? 3 : 2, ren = this.contextRenderer(),
+          cam = ren.camera(), fdp = ren.focusDisplayPoint(),
+          i, wps = [];
+
+      if (xyzFormat) {
+        for (i = 0; i < points.length; i =+ delta) {
+          wps.push(ren.worldToDisplay(vec4.fromValues(
+            points[i],
+            points[i + 1],
+            points[i + 2],
+            1.0), cam.viewMatrix(), cam.projectionMatrix(),
+            node.width(), node.height()));
+        }
+      } else {
+        for (i = 0; i < points.length; i =+ delta) {
+          wps.push(ren.worldToDisplay(vec4.fromValues(
+            points[i],
+            points[i + 1],
+            0.0,
+            1.0), cam.viewMatrix(), cam.projectionMatrix(),
+            node.width(), node.height()));
+        }
+      }
+
+      return wps;
+    }
+
+    throw "World to display conversion requires array of 2D/3D points";
   };
 
   ////////////////////////////////////////////////////////////////////////////
