@@ -122,10 +122,14 @@ geo.featureLayer = function(arg) {
   this._update = function(request) {
     var i;
 
-    // Call base class update
+    if (!m_features) {
+      return;
+    }
+
+    /// Call base class update
     s_update.call(this, request);
 
-    if (!this.source() && m_features.length === 0) {
+    if (!this.source() && m_features && m_features.length === 0) {
       console.log('[info] No valid data source found.');
       return;
     }

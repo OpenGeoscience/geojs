@@ -27,6 +27,7 @@ ggl.simpleRenderer = function(arg) {
 
   var m_this = this,
       m_viewer = null,
+      m_interactorStyle = ggl.mapInteractorStyle(),
       s_init = this._init;
 
   ////////////////////////////////////////////////////////////////////////////
@@ -36,15 +37,13 @@ ggl.simpleRenderer = function(arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.displayToWorld = function(points) {
     if (points instanceof Array) {
+
       var xyzFormat = points.length % 3 === 0 ? true : false,
           node = this.canvas(),
           delta = xyzFormat ? 3 : 2, ren = this.contextRenderer(),
-          cam = ren.camera(), fp = cam.focalPoint(),
-          fwp = vec4.fromValues(fp[0], fp[1], 0.0, 1.0),
-          fdp = ren.worldToDisplay(fwp, cam.viewMatrix(),
-                                   cam.projectionMatrix(),
-                                   node.width(), node.height()),
+          cam = ren.camera(), fdp = ren.focusDisplayPoint(),
           i, wps = [];
+
       for (i = 0; i < points.length; i =+ delta) {
         wps.push(ren.displayToWorld(vec4.fromValues(
           points[i],
@@ -84,16 +83,23 @@ ggl.simpleRenderer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function(arg) {
+    var canvas;
+
     s_init.call(this, arg);
 
     if (!this.canvas()) {
-      var canvas = $(document.createElement('canvas'));
+      canvas = $(document.createElement('canvas'));
       canvas.attr('class', '.webgl-canvas');
       this.canvas(canvas);
       this.layer().node().append(canvas);
     }
     m_viewer = vgl.viewer(this.canvas().get(0));
+    m_viewer.setInteractorStyle(m_interactorStyle);
     m_viewer.init();
+
+    m_viewer.renderWindow().resize(this.canvas().width(),
+                                   this.canvas().height());
+    m_interactorStyle.map(this.layer().map());
 
     this.canvas().on('mousemove', function(event) {
       m_viewer.handleMouseMove(event);
@@ -114,6 +120,10 @@ ggl.simpleRenderer = function(arg) {
     this.canvas().on('contextmenu', function(event) {
       m_viewer.handleContextMenu(event);
     });
+
+    $(m_viewer).on(geo.event.pan, function(event) {
+      m_this.trigger(geo.event.pan, event);
+    });
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -125,6 +135,7 @@ ggl.simpleRenderer = function(arg) {
     this.canvas().attr('width', w);
     this.canvas().attr('height', h);
     m_viewer.renderWindow().positionAndResize(x, y, w, h);
+    this._render();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -133,7 +144,6 @@ ggl.simpleRenderer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._render = function() {
-    m_viewer.renderWindow().activeRenderer().resetCamera();
     m_viewer.render();
   };
 
