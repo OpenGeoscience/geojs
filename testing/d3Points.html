@@ -83,8 +83,9 @@ $(function() {
         }
 
         // Load image to be used for drawing dots
-        var layer = geo.featureLayer({
-            'renderer' : 'd3Renderer'});
+        var osm = geo.osmLayer({'renderer': 'vglRenderer'}).referenceLayer(true);
+            layer = geo.featureLayer({
+                'renderer' : 'd3Renderer'});
         var color = d3.scale.category10()
                       .domain(d3.range(10)),
             style = {
@@ -96,7 +97,7 @@ $(function() {
             .positions(citieslatlon)
             .style(style)._build();
         
-        myMap.addLayer(layer);
+        myMap.addLayer(osm).addLayer(layer);
         myMap.draw();
         
         window.setInterval(function () {

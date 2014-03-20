@@ -27,7 +27,8 @@ gd3.d3Renderer = function(arg) {
 
   var m_this = this,
       s_init = this._init,
-      m_features = {};
+      m_features = {},
+      m_translate = [0, 0];
 
   function setAttrs(select, attrs) {
     var key;
@@ -81,9 +82,9 @@ gd3.d3Renderer = function(arg) {
     s_init.call(this, arg);
 
     if (!this.canvas()) {
-      var canvas = d3.select(this.layer().node().get(0)).append('svg').append('g');
+      var canvas = d3.select(this.layer().node().get(0)).append('svg');
       canvas.attr('class', this._d3id());
-      this._canvas(canvas);
+      this.canvas(canvas);
     }
   };
 
@@ -116,7 +117,7 @@ gd3.d3Renderer = function(arg) {
    * Get API used by the renderer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._api = function() {
+  this.api = function() {
     return 'd3';
   };
 
@@ -151,8 +152,17 @@ gd3.d3Renderer = function(arg) {
     this.canvas().remove();
   };
 
+  function getGroup(grp) {
+    var svg = m_this.canvas();
+    return svg.selectAll('.' + grp)
+       .data([0])
+      .enter()
+        .append('g')
+          .attr('class', grp);
+  }
+
   this.drawFeatures = function (arg) {
-    var svg = this._canvas().append('g').attr('class', 'group-' + m_this._d3id()),
+    var svg = getGroup('group-' + m_this._d3id()),
         selection = svg.selectAll('.' + arg.id)
                         .data(arg.data, arg.dataIndex);
     selection.enter().append(arg.append);
@@ -167,16 +177,18 @@ gd3.d3Renderer = function(arg) {
 
   // translate the layer by a vector delta
   function translate (delta) {
-    this._canvas()
+    m_translate[0] += delta.x;
+    m_translate[1] += delta.y;
+    m_this.canvas()
       .selectAll('.group-' + m_this._d3id())
-        .attr('transform', 'translate(' + [delta.x, delta.y].join() + ')');
+        .attr('transform', 'translate(' + m_translate.join() + ')');
   }
 
   // connect to pan event
   this.on(geo.event.pan, function (event) {
     translate({
-      x: event.prevPos.display.x - event.currPos.display.x,
-      y: event.prevPos.display.y - event.currPos.display.y
+      x: event.curr_display_pos.x - event.last_display_pos.x,
+      y: event.curr_display_pos.y - event.last_display_pos.y
     });
   });
 
