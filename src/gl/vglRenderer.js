@@ -166,8 +166,8 @@ ggl.vglRenderer = function(arg) {
     });
 
     /// VGL uses jquery trigger on methods
-    $(m_interactorStyle).on(geo.event.pan, function(event) {
-      m_this.trigger(geo.event.pan, event);
+    $(m_interactorStyle).on(geo.event.pan, function(event, arg) {
+      m_this.trigger(geo.event.pan, arg);
     });
   };
 
