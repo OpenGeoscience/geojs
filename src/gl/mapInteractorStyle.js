@@ -1,12 +1,12 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @module geo
+ * @module ggl
  */
 
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, indent: 2*/
 
-/*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
+/*global ggl, geo, ogs, inherit, $, HTMLCanvasElement, Image*/
 /*global vgl, vec4, document*/
 //////////////////////////////////////////////////////////////////////////////
 
@@ -18,10 +18,10 @@
  * @returns {geo.mapInteractorStyle}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.mapInteractorStyle = function() {
+ggl.mapInteractorStyle = function() {
   "use strict";
-  if (!(this instanceof geo.mapInteractorStyle)) {
-    return new geo.mapInteractorStyle();
+  if (!(this instanceof ggl.mapInteractorStyle)) {
+    return new ggl.mapInteractorStyle();
   }
   vgl.interactorStyle.call(this);
   var m_that = this,
@@ -83,7 +83,7 @@ geo.mapInteractorStyle = function() {
       if(m_drawRegionLayer) {
         m_drawRegionLayer.setVisible(newValue);
       }
-      m_map.updateAndDraw();
+      m_map.draw();
       return m_that;
     }
     return m_drawRegionMode;
@@ -95,18 +95,15 @@ geo.mapInteractorStyle = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.handleMouseMove = function(event) {
-    var canvas = m_that.viewer().canvas(),
-        xrot = null,
-        a = null,
-        angle = null,
-        mouseWorldPoint,
-        features;
+    var canvas = m_that.viewer().canvas(), xrot = null, a = null,
+        angle = null, mouseWorldPoint, features, lastWorldPos, currWorldPos,
+        evt;
 
     if (event.target !== canvas) {
       return true;
     }
     m_outsideCanvas = false;
-    m_coords = canvas.relMouseCoords(event);
+    m_coords = m_that.viewer().relMouseCoords(event);
     m_currentMousePos = {
       x: 0,
       y: 0
@@ -143,9 +140,20 @@ geo.mapInteractorStyle = function() {
         m_dy = m_worldPt1[1] - m_worldPt2[1];
         m_dz = m_worldPt1[2] - m_worldPt2[2];
 
+        //console.log('pan event ' + m_dx + ' ' + m_dy + ' ' + m_dz);
+
+        lastWorldPos = m_camera.position();
         m_camera.pan(-m_dx, -m_dy, -m_dz);
-        $(m_that).trigger(geo.command.updateViewPositionEvent);
-        $(m_that).trigger(vgl.command.leftButtonPressEvent);
+        currWorldPos = m_camera.position();
+
+        evt = jQuery.Event(geo.event.pan, {last_display_pos: m_mouseLastPos,
+                                           curr_display_pos: m_currentMousePos,
+                                           last_world_pos: lastWorldPos,
+                                           curr_world_pos: currWorldPos});
+
+        $(m_that).trigger(geo.event.pan, evt);
+        /// TODO Fix it
+        // $(m_that).trigger(vgl.event.leftButtonPress);
       }
     }
     if (m_middileMouseButtonDown) {
@@ -158,7 +166,12 @@ geo.mapInteractorStyle = function() {
       } else if (xrot < 0 && angle > 0) {
         m_camera.rotate(0, xrot);
       }
-      $(m_that).trigger(vgl.command.middleButtonPressEvent);
+
+      evt = jQuery.Event(geo.event.rotate);
+      $(m_that).trigger(geo.event.rotate, evt);
+
+      /// TODO Fix it
+      // $(m_that).trigger(vgl.event.middleButtonPress);
     }
     if (m_rightMouseButtonDown) {
       m_zTrans = (m_currentMousePos.y - m_mouseLastPos.y) / m_height;
@@ -170,8 +183,11 @@ geo.mapInteractorStyle = function() {
         m_camera.zoom(1 + Math.abs(m_zTrans));
       }
 
-      $(m_that).trigger(geo.command.updateViewZoomEvent);
-      $(m_that).trigger(vgl.command.rightButtonPressEvent);
+      evt = jQuery.Event(geo.event.rotate, {zoom: m_camera.zoom()});
+      $(m_that).trigger(geo.event.zoom, evt);
+
+      /// TODO Fix it
+      // $(m_that).trigger(vgl.event.rightButtonPress);
     }
     m_mouseLastPos.x = m_currentMousePos.x;
     m_mouseLastPos.y = m_currentMousePos.y;
@@ -184,9 +200,8 @@ geo.mapInteractorStyle = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.handleMouseDown = function(event) {
-    var canvas = m_that.viewer().canvas(),
-      point,
-      plane;
+    var canvas = m_that.viewer().canvas(), point, plane;
+
     if (event.target !== canvas) {
       return true;
     }
@@ -199,7 +214,7 @@ geo.mapInteractorStyle = function() {
     if (event.button === 2) {
       m_rightMouseButtonDown = true;
     }
-    m_coords = canvas.relMouseCoords(event);
+    m_coords = m_that.viewer().relMouseCoords(event);
     if (m_coords.x < 0) {
       m_mouseLastPos.x = 0;
     } else {
@@ -221,7 +236,6 @@ geo.mapInteractorStyle = function() {
       m_clickLatLng = geo.latlng(point.y, point.x);
       m_that.setDrawRegion(point.y, point.x, point.y, point.x);
     }
-
     return false;
   };
 
@@ -235,7 +249,6 @@ geo.mapInteractorStyle = function() {
     var canvas = m_that.viewer().canvas(),
         width = null,
         height = null,
-        renderer = null,
         num = null;
 
     if (event.target !== canvas) {
@@ -245,10 +258,10 @@ geo.mapInteractorStyle = function() {
       m_leftMouseButtonDown = false;
       width = m_that.viewer().renderWindow().windowSize()[0];
       height = m_that.viewer().renderWindow().windowSize()[1];
-      renderer = m_that.viewer().renderWindow().activeRenderer();
+      m_renderer = m_that.viewer().renderWindow().activeRenderer();
       if(m_mouseLastPos.x >= 0 && m_mouseLastPos.x <= width &&
         m_mouseLastPos.y >= 0 && m_mouseLastPos.y <= height) {
-        num = m_picker.pick(m_mouseLastPos.x, m_mouseLastPos.y, renderer);
+        num = m_picker.pick(m_mouseLastPos.x, m_mouseLastPos.y, m_renderer);
       }
     }
     if (event.button === 1) {
@@ -266,7 +279,7 @@ geo.mapInteractorStyle = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.zoom = function(options, useCurrent) {
-    var m_renderer, m_camera, distance, currPosition;
+    var distance, currPosition;
     m_renderer = m_that.viewer().renderWindow().activeRenderer();
     m_camera = m_renderer.camera();
     distance = 600;
@@ -344,7 +357,9 @@ geo.mapInteractorStyle = function() {
 
     m_map.addLayer(m_drawRegionLayer);
 
-    $(m_that).trigger(geo.command.updateDrawRegionEvent);
+    /// TODO pass bounding box
+    evt = jQuery.Event(geo.event.updateDrawRegionEvent);
+    $(m_that).trigger(geo.command.updateDrawRegionEvent, evt);
 
     return m_that;
   };
@@ -363,7 +378,7 @@ geo.mapInteractorStyle = function() {
   return this;
 };
 
-inherit(geo.mapInteractorStyle, vgl.interactorStyle);
+inherit(ggl.mapInteractorStyle, vgl.interactorStyle);
 
 /* Local Variables:   */
 /* mode: js           */

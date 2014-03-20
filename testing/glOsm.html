@@ -19,12 +19,15 @@
 <script>
 $(function() {
     var mapOptions = {node: 'map',
-                      zoom : 6,
+                      zoom : 3,
                       center : [0.0, 0.0]},
       myMap = geo.map(mapOptions),
-      layer = geo.featureLayer({'renderer' : 'vglRenderer'});
+      layer = geo.osmLayer({'renderer' : 'vglRenderer'});
 
-    // Resize the canvas to fill browser window dynamically
+    /// Add layer to the map
+    myMap.addLayer(layer);
+
+    /// Resize the canvas to fill browser window dynamically
     window.addEventListener('resize', resizeCanvas, false);
 
     function resizeCanvas() {
@@ -38,14 +41,6 @@ $(function() {
       myMap.resize(0, 0, width, height);
       myMap.draw();
     }
-
-    layer.create('planeFeature')
-      .origin(geo.latlng(0.0, 0.0))
-      .upperLeft(geo.latlng(1.0, 0.0))
-      .lowerRight(geo.latlng(0.0, 2.0))
-      .style('image', '/data/land_shallow_topo_2048.png');
-    myMap.addLayer(layer);
-    myMap.draw();
 });
 </script>
 

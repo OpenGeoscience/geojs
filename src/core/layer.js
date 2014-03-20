@@ -26,7 +26,7 @@ geo.layer = function(arg) {
     return new geo.layer(arg);
   }
   arg = arg || {};
-  geo.object.call(this, arg);
+  geo.sceneObject.call(this, arg);
 
   //////////////////////////////////////////////////////////////////////////////
   /**
@@ -52,7 +52,7 @@ geo.layer = function(arg) {
       m_node = null,
       m_canvas = null,
       m_renderer = null,
-      m_rendererName = arg.renderer  === undefined ?  'simpleRenderer' : arg.renderer,
+      m_rendererName = arg.renderer  === undefined ?  'vglRenderer' : arg.renderer,
       m_dataTime = geo.timestamp(),
       m_updateTime = geo.timestamp(),
       m_drawTime = geo.timestamp();
@@ -300,51 +300,6 @@ geo.layer = function(arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Convert array of points from world to GCS coordinate space
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.worldToGcs = function(points) {
-    throw "Should be implemented by derivied classes";
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Convert array of points from display to GCS space
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.displayToGcs = function(points) {
-    throw "Should be implemented by derivied classes";
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Convert array of points from display to GCS space
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.gcsToDisplay = function(points) {
-    throw "Should be implemented by derivied classes";
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Convert array of points from world to display space
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.worldToDisplay = function(points) {
-    throw "Should be implemented by derivied classes";
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Convert array of points from display to world space
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.displayToWorld = function(points) {
-    throw "Should be implemented by derivied classes";
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
    * Init layer
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -364,6 +319,7 @@ geo.layer = function(arg) {
       m_renderer = geo.createRenderer(m_rendererName, this);
       m_canvas = m_renderer.canvas();
     }
+    this.addChild(m_renderer);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -393,11 +349,9 @@ geo.layer = function(arg) {
     m_width = w;
     m_height = h;
 
-    if (m_renderer) {
-      m_renderer._resize(x, y, w, h);
-    }
-
     this.modified();
+    this.trigger(geo.event.resize,
+      {x: x, y: y, width: m_width, height: m_height});
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -412,4 +366,4 @@ geo.layer = function(arg) {
   return this;
 };
 
-inherit(geo.layer, geo.object);
+inherit(geo.layer, geo.sceneObject);

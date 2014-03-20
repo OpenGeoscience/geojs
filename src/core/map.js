@@ -24,7 +24,8 @@ geo.map = function(arg) {
     return new geo.map(arg);
   }
   arg = arg || {};
-  geo.object.call(this, arg);
+  geo.sceneObject.call(this, arg);
+  arg.layers = arg.layers === undefined ? [] : arg.layers;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -43,7 +44,6 @@ geo.map = function(arg) {
       m_center = arg.center === undefined ? [0.0, 0.0] :
                  arg.center,
       m_zoom = arg.zoom === undefined ? 10 : arg.zoom,
-      m_layers = arg.layers === undefined ? [] : arg.layers,
       m_baseLayer = null,
       m_updateTime = geo.timestamp(),
       m_drawTime = geo.timestamp();
@@ -101,7 +101,7 @@ geo.map = function(arg) {
       return m_zoom;
     } else {
       m_zoom = val;
-      $(m_this).trigger(geo.event.zoom);
+      m_this.trigger(geo.event.zoom);
       this.modified();
       return m_this;
     }
@@ -119,7 +119,7 @@ geo.map = function(arg) {
       return m_center;
     } else {
       m_center = val.slice
-      $(m_this).trigger(geo.event.center);
+      m_this.trigger(geo.event.center);
       this.modified();
       return m_this;
     }
@@ -138,23 +138,17 @@ geo.map = function(arg) {
     if (layer !== null || layer !== undefined) {
       layer.map(this);
 
-      if (layer.referenceLayer() && m_gcs != null &&
-          m_gcs !== layer.gcs()) {
-        throw "Reference layer gcs does not match with map gcs";
+      if (layer.referenceLayer()) {
+        this.baseLayer(layer);
       } else {
-        // TODO Add api to layer
         layer.transform(m_gcs);
       }
       layer._resize(m_x, m_y, m_width, m_height);
 
-      if (layer.referenceLayer()) {
-        this.baseLayer(layer);
-      }
-
-      m_layers.push(layer);
+      this.addChild(layer);
       this.modified();
 
-      $(this).trigger({
+      m_this.trigger({
         type: geo.event.layerAdd,
         target: m_this,
         layer: layer
@@ -176,17 +170,13 @@ geo.map = function(arg) {
     var i;
 
     if (layer !== null && layer !== undefined) {
-
-      for (i = 0; i < m_layers.length; ++i) {
-        if (m_layers[i] === layer) {
-          m_layers = m_layers.splice(i, 1);
-        }
-      }
-
       layer._exit();
+
+      this.removeChild(layer);
+
       this.modified();
 
-      $(this).trigger({
+      m_this.trigger({
         type: geo.event.layerRemove,
         target: m_this,
         layer: layer
@@ -211,7 +201,7 @@ geo.map = function(arg) {
       layer.visible(!layer.visible())
       m_this.modified();
 
-      $(this).trigger({
+      m_this.trigger({
         type: geo.event.layerToggle,
         target: m_this,
         layer: layer
@@ -231,22 +221,22 @@ geo.map = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.resize = function(x, y, w, h) {
-    var i = 0;
+    var i = 0, layers = this.children();
 
     m_x = x;
     m_y  = y;
     m_width = w;
     m_height = h;
 
-    for (; i <  m_layers.length; ++i) {
-      m_layers[i]._resize(x, y, w, h);
+    for (; i <  layers.length; ++i) {
+      layers[i]._resize(x, y, w, h);
     }
 
-    $(this).trigger({
+    m_this.trigger({
       type: geo.event.resize,
       target: m_this,
-      x_offset: m_x,
-      y_offset: m_y,
+      x: m_x,
+      y: m_y,
       width: w,
       height: h
     });
@@ -312,9 +302,7 @@ geo.map = function(arg) {
 
       // The GCS of the layer must match the map
       if (m_gcs !== baseLayer.gcs()) {
-        throw "The layer has a GCS of '" + baseLayer.gcs() +
-              "' which does match the map GCS of '" +
-              this.gcs() + "'";
+        this.gcs(baseLayer.gcs());
       }
 
       m_baseLayer = baseLayer;
@@ -350,20 +338,20 @@ geo.map = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.draw = function() {
-    var i = 0;
+    var i = 0, layers = this.children();
 
-    $(this).trigger({
+    m_this.trigger({
         type: geo.event.draw,
         target: m_this
     });
 
     this._update();
 
-    for (i = 0; i < m_layers.length; ++i) {
-      m_layers[i]._draw();
+    for (i = 0; i < layers.length; ++i) {
+      layers[i]._draw();
     }
 
-    $(this).trigger({
+    m_this.trigger({
         type: geo.event.drawEnd,
         target: m_this
     });
@@ -381,12 +369,14 @@ geo.map = function(arg) {
       throw "Map require DIV node";
     }
 
-    for (i = 0; i < m_layers.length; ++i) {
-      if (i === 0) {
-        this.baseLayer(m_layers[0]);
-      }
+    if (arg !== undefined && arg.layers !== undefined) {
+      for (i = 0; i < arg.layers.length; ++i) {
+        if (i === 0) {
+          this.baseLayer(arg.layers[i]);
+        }
 
-      this.addLayer(m_layers[i]);
+        this.addLayer(arg.layers[i]);
+      }
     }
   };
 
@@ -396,9 +386,9 @@ geo.map = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._update = function() {
-    var i = 0;
-    for (i = 0; i < m_layers.length; ++i) {
-      m_layers[i]._update();
+    var i = 0, layers = this.children();
+    for (i = 0; i < layers.length; ++i) {
+      layers[i]._update();
     }
   };
 
@@ -408,9 +398,9 @@ geo.map = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function() {
-    var i = 0;
-    for (i = 0; i < m_layers.length; ++i) {
-      m_layers[i]._exit();
+    var i = 0, layers = this.children();
+    for (i = 0; i < layers.length; ++i) {
+      layers[i]._exit();
     }
   };
 
@@ -418,4 +408,4 @@ geo.map = function(arg) {
   return this;
 };
 
-inherit(geo.map, geo.object);
+inherit(geo.map, geo.sceneObject);

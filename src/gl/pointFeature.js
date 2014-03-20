@@ -53,7 +53,7 @@ ggl.pointFeature = function(arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._build = function() {
     if (m_actor) {
-      this.renderer()._contextRenderer().removeActor(m_actor);
+      this.renderer().contextRenderer().removeActor(m_actor);
     }
 
     m_actor = vgl.utils.createPoints(this.positions(), this.style().colors);
@@ -91,4 +91,4 @@ ggl.pointFeature = function(arg) {
 inherit(ggl.pointFeature, geo.pointFeature);
 
 // Now register it
-geo.registerFeature('webgl', 'pointFeature', ggl.pointFeature);
+geo.registerFeature('vgl', 'pointFeature', ggl.pointFeature);

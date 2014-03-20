@@ -96,16 +96,40 @@ geo.featureLayer = function(arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Delete feature
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._delete = function(feature) {
+
+    var i;
+
+    for(i = 0; i < m_features.length; ++i) {
+      if (m_features[i] === feature) {
+        m_features[i]._exit();
+        m_features.splice(i, 1);
+        return this;
+      }
+    }
+
+    return this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Update layer
    */
   ////////////////////////////////////////////////////////////////////////////
   this._update = function(request) {
     var i;
 
-    // Call base class update
+    if (!m_features) {
+      return;
+    }
+
+    /// Call base class update
     s_update.call(this, request);
 
-    if (!this.source() && m_features.length === 0) {
+    if (!this.source() && m_features && m_features.length === 0) {
       console.log('[info] No valid data source found.');
       return;
     }

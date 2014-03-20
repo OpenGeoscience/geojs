@@ -29,6 +29,7 @@ find_package(UglifyJS)
 set(_source_files
   core/init.js
   core/object.js
+  core/sceneObject.js
   core/timestamp.js
   core/ellipsoid.js
   core/mercator.js
@@ -49,14 +50,16 @@ set(_source_files
   core/geomFeature.js
   core/geoTransform.js
   core/data.js
-  core/renderer.js
+  core/renderer.js 
+  core/osmLayer.js
   gl/init.js
   gl/renderer.js
   gl/pointFeature.js
   gl/geomFeature.js
   gl/pointFeature.js
   gl/planeFeature.js
-  gl/simpleRenderer.js
+  gl/mapInteractorStyle.js	
+  gl/vglRenderer.js
   ui/init.js
   ui/gis.js
   srv/init.js
