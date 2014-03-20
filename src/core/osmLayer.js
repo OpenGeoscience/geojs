@@ -289,11 +289,15 @@ geo.osmLayer = function(arg) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
+   *
+   * Do not call parent _init as that is not required for this layer
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function(arg) {
+    /// Set gcs
     this.gcs("EPSG:3857");
 
+    /// Bind events to handlers
     this.on(geo.event.resize, function(event) {
       m_this.renderer()._resize(event.x, event.y, event.width, event.height);
       m_this._update({});
@@ -306,6 +310,7 @@ geo.osmLayer = function(arg) {
     });
   };
 
+  /// Initialize
   this._init(arg);
   return this;
 };
