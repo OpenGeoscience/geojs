@@ -81,7 +81,7 @@ $(function() {
 
         // Load image to be used for drawing dots
         var layer = geo.featureLayer({
-            'renderer' : 'simpleRenderer'});
+            'renderer' : 'vglRenderer'});
         layer.create('pointFeature')
           .positions(citieslatlon);
 

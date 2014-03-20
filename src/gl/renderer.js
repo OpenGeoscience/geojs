@@ -11,10 +11,10 @@
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Create a new instance of class simpleRenderer
+ * Create a new instance of class vglRenderer
  *
  * @param canvas
- * @returns {ggl.simpleRenderer}
+ * @returns {ggl.vglRenderer}
  */
 //////////////////////////////////////////////////////////////////////////////
 ggl.renderer = function(arg) {
@@ -41,4 +41,4 @@ ggl.renderer = function(arg) {
 
 inherit(ggl.renderer, geo.renderer);
 
-geo.registerRenderer('simpleRenderer', ggl.simpleRenderer);
+geo.registerRenderer('vglRenderer', ggl.vglRenderer);

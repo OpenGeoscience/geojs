@@ -22,7 +22,7 @@ $(function() {
                       zoom : 3,
                       center : [0.0, 0.0]},
       myMap = geo.map(mapOptions),
-      layer = geo.osmLayer({'renderer' : 'simpleRenderer'});
+      layer = geo.osmLayer({'renderer' : 'vglRenderer'});
 
     /// Add layer to the map
     myMap.addLayer(layer);

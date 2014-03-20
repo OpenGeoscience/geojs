@@ -11,17 +11,17 @@
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Create a new instance of class simpleRenderer
+ * Create a new instance of class vglRenderer
  *
  * @param canvas
- * @returns {ggl.simpleRenderer}
+ * @returns {ggl.vglRenderer}
  */
 //////////////////////////////////////////////////////////////////////////////
-ggl.simpleRenderer = function(arg) {
+ggl.vglRenderer = function(arg) {
   'use strict';
 
-  if (!(this instanceof ggl.simpleRenderer)) {
-    return new ggl.simpleRenderer(arg);
+  if (!(this instanceof ggl.vglRenderer)) {
+    return new ggl.vglRenderer(arg);
   }
   ggl.renderer.call(this, arg);
 
@@ -204,6 +204,6 @@ ggl.simpleRenderer = function(arg) {
   return this;
 };
 
-inherit(ggl.simpleRenderer, ggl.renderer);
+inherit(ggl.vglRenderer, ggl.renderer);
 
-geo.registerRenderer('simpleRenderer', ggl.simpleRenderer);
+geo.registerRenderer('vglRenderer', ggl.vglRenderer);
