@@ -95,12 +95,9 @@ ggl.mapInteractorStyle = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.handleMouseMove = function(event) {
-    var canvas = m_that.viewer().canvas(),
-        xrot = null,
-        a = null,
-        angle = null,
-        mouseWorldPoint,
-        features;
+    var canvas = m_that.viewer().canvas(), xrot = null, a = null,
+        angle = null, mouseWorldPoint, features, lastWorldPos, currWorldPos,
+        evt;
 
     if (event.target !== canvas) {
       return true;
@@ -145,8 +142,16 @@ ggl.mapInteractorStyle = function() {
 
         //console.log('pan event ' + m_dx + ' ' + m_dy + ' ' + m_dz);
 
+        lastWorldPos = m_camera.position();
         m_camera.pan(-m_dx, -m_dy, -m_dz);
-        $(m_that.viewer()).trigger(geo.event.pan);
+        currWorldPos = m_camera.position();
+
+        evt = jQuery.Event(geo.event.pan, {last_display_pos: m_mouseLastPos,
+                                           curr_display_pos: m_currentMousePos,
+                                           last_world_pos: lastWorldPos,
+                                           curr_world_pos: currWorldPos});
+
+        $(m_that).trigger(geo.event.pan, evt);
         /// TODO Fix it
         // $(m_that).trigger(vgl.event.leftButtonPress);
       }
@@ -161,7 +166,9 @@ ggl.mapInteractorStyle = function() {
       } else if (xrot < 0 && angle > 0) {
         m_camera.rotate(0, xrot);
       }
-      $(m_that.viewer()).trigger(geo.event.rotate);
+
+      evt = jQuery.Event(geo.event.rotate);
+      $(m_that).trigger(geo.event.rotate, evt);
 
       /// TODO Fix it
       // $(m_that).trigger(vgl.event.middleButtonPress);
@@ -176,7 +183,9 @@ ggl.mapInteractorStyle = function() {
         m_camera.zoom(1 + Math.abs(m_zTrans));
       }
 
-      $(m_that.viewer()).trigger(geo.event.zoom);
+      evt = jQuery.Event(geo.event.rotate, {zoom: m_camera.zoom()});
+      $(m_that).trigger(geo.event.zoom, evt);
+
       /// TODO Fix it
       // $(m_that).trigger(vgl.event.rightButtonPress);
     }
@@ -348,7 +357,9 @@ ggl.mapInteractorStyle = function() {
 
     m_map.addLayer(m_drawRegionLayer);
 
-    $(m_that).trigger(geo.command.updateDrawRegionEvent);
+    /// TODO pass bounding box
+    evt = jQuery.Event(geo.event.updateDrawRegionEvent);
+    $(m_that).trigger(geo.command.updateDrawRegionEvent, evt);
 
     return m_that;
   };

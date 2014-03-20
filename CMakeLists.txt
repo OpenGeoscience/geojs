@@ -59,7 +59,7 @@ set(_source_files
   gl/pointFeature.js
   gl/planeFeature.js
   gl/mapInteractorStyle.js	
-  gl/simpleRenderer.js
+  gl/vglRenderer.js
   d3/init.js
   d3/object.js
   d3/pointFeature.js

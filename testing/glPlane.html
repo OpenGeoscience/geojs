@@ -22,7 +22,7 @@ $(function() {
                       zoom : 6,
                       center : [0.0, 0.0]},
       myMap = geo.map(mapOptions),
-      layer = geo.featureLayer({'renderer' : 'simpleRenderer'});
+      layer = geo.featureLayer({'renderer' : 'vglRenderer'});
 
     // Resize the canvas to fill browser window dynamically
     window.addEventListener('resize', resizeCanvas, false);

@@ -11,17 +11,17 @@
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Create a new instance of class simpleRenderer
+ * Create a new instance of class vglRenderer
  *
  * @param canvas
- * @returns {ggl.simpleRenderer}
+ * @returns {ggl.vglRenderer}
  */
 //////////////////////////////////////////////////////////////////////////////
-ggl.simpleRenderer = function(arg) {
+ggl.vglRenderer = function(arg) {
   'use strict';
 
-  if (!(this instanceof ggl.simpleRenderer)) {
-    return new ggl.simpleRenderer(arg);
+  if (!(this instanceof ggl.vglRenderer)) {
+    return new ggl.vglRenderer(arg);
   }
   ggl.renderer.call(this, arg);
 
@@ -33,6 +33,10 @@ ggl.simpleRenderer = function(arg) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Convert array of points from display to world space
+   *
+   * @param points {array} Array of 2D or 3D points. In case of 3D points
+   *        the third coordinate will be ignored.
+   *
    */
   ////////////////////////////////////////////////////////////////////////////
   this.displayToWorld = function(points) {
@@ -61,6 +65,46 @@ ggl.simpleRenderer = function(arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Convert array of points from world space to display space
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.worldToDisplay = function(points) {
+    if (points instanceof Array) {
+
+      var xyzFormat = points.length % 3 === 0 ? true : false,
+          node = this.canvas(),
+          delta = xyzFormat ? 3 : 2, ren = this.contextRenderer(),
+          cam = ren.camera(), fdp = ren.focusDisplayPoint(),
+          i, wps = [];
+
+      if (xyzFormat) {
+        for (i = 0; i < points.length; i =+ delta) {
+          wps.push(ren.worldToDisplay(vec4.fromValues(
+            points[i],
+            points[i + 1],
+            points[i + 2],
+            1.0), cam.viewMatrix(), cam.projectionMatrix(),
+            node.width(), node.height()));
+        }
+      } else {
+        for (i = 0; i < points.length; i =+ delta) {
+          wps.push(ren.worldToDisplay(vec4.fromValues(
+            points[i],
+            points[i + 1],
+            0.0,
+            1.0), cam.viewMatrix(), cam.projectionMatrix(),
+            node.width(), node.height()));
+        }
+      }
+
+      return wps;
+    }
+
+    throw "World to display conversion requires array of 2D/3D points";
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Get context specific renderer
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -74,7 +118,7 @@ ggl.simpleRenderer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.api = function() {
-    return 'webgl';
+    return 'vgl';
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -121,7 +165,8 @@ ggl.simpleRenderer = function(arg) {
       m_viewer.handleContextMenu(event);
     });
 
-    $(m_viewer).on(geo.event.pan, function(event) {
+    /// VGL uses jquery trigger on methods
+    $(m_interactorStyle).on(geo.event.pan, function(event) {
       m_this.trigger(geo.event.pan, event);
     });
   };
@@ -159,6 +204,6 @@ ggl.simpleRenderer = function(arg) {
   return this;
 };
 
-inherit(ggl.simpleRenderer, ggl.renderer);
+inherit(ggl.vglRenderer, ggl.renderer);
 
-geo.registerRenderer('simpleRenderer', ggl.simpleRenderer);
+geo.registerRenderer('vglRenderer', ggl.vglRenderer);

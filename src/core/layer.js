@@ -52,7 +52,7 @@ geo.layer = function(arg) {
       m_node = null,
       m_canvas = null,
       m_renderer = null,
-      m_rendererName = arg.renderer  === undefined ?  'simpleRenderer' : arg.renderer,
+      m_rendererName = arg.renderer  === undefined ?  'vglRenderer' : arg.renderer,
       m_dataTime = geo.timestamp(),
       m_updateTime = geo.timestamp(),
       m_drawTime = geo.timestamp();
