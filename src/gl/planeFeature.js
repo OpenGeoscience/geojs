@@ -114,4 +114,4 @@ ggl.planeFeature = function(arg) {
 inherit(ggl.planeFeature, geo.planeFeature);
 
 // Now register it
-geo.registerFeature('webgl', 'planeFeature', ggl.planeFeature);
+geo.registerFeature('vgl', 'planeFeature', ggl.planeFeature);
