@@ -290,7 +290,7 @@ geo.layer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.referenceLayer = function(val) {
-    if(val === undefined) {
+    if(val !== undefined) {
       m_isReference = val;
       this.modified();
       return this;
