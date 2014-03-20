@@ -32,6 +32,16 @@ geo.layerOptions = function() {
   return this;
 };
 
+geo.newLayerId = (function () {
+    var currentId = 1;
+    return function () {
+        var id = currentId;
+        currentId++;
+        return id;
+    };
+}) ();
+
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Base class for all layer types geo.layer represents any object that be
@@ -59,8 +69,8 @@ geo.layer = function(options, source) {
 
   /** @private */
   var m_that = this,
-      m_id = "",
-      m_name = "",
+      m_id = options.id || geo.newLayerId(),
+      m_name = options.name || "",
       m_opacity = options.opacity || 0.5,
       m_gcs = 'EPSG:4326',
       m_showAttribution = true,
