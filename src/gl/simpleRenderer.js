@@ -122,14 +122,7 @@ ggl.simpleRenderer = function(arg) {
     });
 
     $(m_viewer).on(geo.event.pan, function(event) {
-      /// TODO
-      // this.layer().trigger(geo.event.pan, event);
-
-      // console.log('event is ', event);
-      m_this.layer()._update({});
-      //m_this.layer().map().draw();
-
-      m_viewer.render();
+      m_this.trigger(geo.event.pan, event);
     });
   };
 

@@ -319,6 +319,7 @@ geo.layer = function(arg) {
       m_renderer = geo.createRenderer(m_rendererName, this);
       m_canvas = m_renderer.canvas();
     }
+    this.addChild(m_renderer);
   };
 
   ////////////////////////////////////////////////////////////////////////////

@@ -17,16 +17,17 @@
  * @returns {geo.sceneObject}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.sceneObject = function(cfg) {
+geo.sceneObject = function(arg) {
   "use strict";
   if (!(this instanceof geo.sceneObject)) {
     return new geo.sceneObject();
   }
-  
+  geo.object.call(this, arg);
+
   var m_this = this,
       m_parent = null,
-      m_children = [];
-
+      m_children = [],
+      s_trigger = this.trigger;
 
   //////////////////////////////////////////////////////////////////////////////
   /**
@@ -51,6 +52,7 @@ geo.sceneObject = function(cfg) {
       child.forEach(this.addChild);
       return this;
     }
+    child.parent(this);
     m_children.push(child);
     return this;
   };
@@ -84,6 +86,8 @@ geo.sceneObject = function(cfg) {
    */
   //////////////////////////////////////////////////////////////////////////////
   this.trigger = function (event, args) {
+    args = args || {};
+
     // If the event was not triggered by the parent, just propagate up the tree
     if (m_parent && args._triggeredBy !== m_parent) {
       args._triggeredBy = m_this;
@@ -92,7 +96,7 @@ geo.sceneObject = function(cfg) {
     }
 
     // call the object's own handlers
-    geo.object.trigger.call(this, args);
+    s_trigger.call(this, args);
 
     // trigger the event on the children
     m_children.forEach(function (child) {
@@ -102,8 +106,6 @@ geo.sceneObject = function(cfg) {
 
     return this;
   };
-
-  geo.object.call(this);
 
   return this;
 };

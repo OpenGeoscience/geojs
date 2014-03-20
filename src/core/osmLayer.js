@@ -298,7 +298,12 @@ geo.osmLayer = function(arg) {
       m_this.renderer()._resize(event.x, event.y, event.width, event.height);
       m_this._update({});
       m_this.renderer()._render();
-    })
+    });
+
+    this.on(geo.event.pan, function(event) {
+      m_this.layer()._update({});
+      m_this.renderer()._render();
+    });
   };
 
   this._init(arg);
