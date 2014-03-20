@@ -19,12 +19,15 @@
 <script>
 $(function() {
     var mapOptions = {node: 'map',
-                      zoom : 6,
+                      zoom : 3,
                       center : [0.0, 0.0]},
       myMap = geo.map(mapOptions),
       layer = geo.osmLayer({'renderer' : 'simpleRenderer'});
 
-    // Resize the canvas to fill browser window dynamically
+    /// Add layer to the map
+    myMap.addLayer(layer);
+
+    /// Resize the canvas to fill browser window dynamically
     window.addEventListener('resize', resizeCanvas, false);
 
     function resizeCanvas() {
@@ -35,7 +38,6 @@ $(function() {
     resizeCanvas();
 
     function updateAndDraw(width, height) {
-      myMap.addLayer(layer);
       myMap.resize(0, 0, width, height);
       myMap.draw();
     }

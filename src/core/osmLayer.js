@@ -301,7 +301,7 @@ geo.osmLayer = function(arg) {
     });
 
     this.on(geo.event.pan, function(event) {
-      m_this.layer()._update({});
+      m_this._update({});
       m_this.renderer()._render();
     });
   };

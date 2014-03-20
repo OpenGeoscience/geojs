@@ -23,7 +23,7 @@ geo.renderer = function(arg) {
   if (!(this instanceof geo.renderer)) {
     return new geo.renderer(arg);
   }
-  geo.object.call(this);
+  geo.sceneObject.call(this);
 
   arg = arg || {};
   var m_this = this,
@@ -174,4 +174,4 @@ geo.renderer = function(arg) {
   return this;
 };
 
-inherit(geo.renderer, geo.object);
+inherit(geo.renderer, geo.sceneObject);

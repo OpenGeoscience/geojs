@@ -96,7 +96,7 @@ geo.sceneObject = function(arg) {
     }
 
     // call the object's own handlers
-    s_trigger.call(this, args);
+    s_trigger.call(this, event, args);
 
     // trigger the event on the children
     m_children.forEach(function (child) {
