@@ -148,7 +148,7 @@ geo.map = function(arg) {
       this.addChild(layer);
       this.modified();
 
-      m_this.trigger({
+      m_this.trigger(geo.event.layerAdd, {
         type: geo.event.layerAdd,
         target: m_this,
         layer: layer
@@ -176,7 +176,7 @@ geo.map = function(arg) {
 
       this.modified();
 
-      m_this.trigger({
+      m_this.trigger(geo.event.layerRemove, {
         type: geo.event.layerRemove,
         target: m_this,
         layer: layer
@@ -201,7 +201,7 @@ geo.map = function(arg) {
       layer.visible(!layer.visible())
       m_this.modified();
 
-      m_this.trigger({
+      m_this.trigger(geo.event.layerToggle, {
         type: geo.event.layerToggle,
         target: m_this,
         layer: layer
@@ -232,7 +232,7 @@ geo.map = function(arg) {
       layers[i]._resize(x, y, w, h);
     }
 
-    m_this.trigger({
+    m_this.trigger(geo.event.resize, {
       type: geo.event.resize,
       target: m_this,
       x: m_x,
@@ -340,7 +340,7 @@ geo.map = function(arg) {
   this.draw = function() {
     var i = 0, layers = this.children();
 
-    m_this.trigger({
+    m_this.trigger(geo.event.draw, {
         type: geo.event.draw,
         target: m_this
     });
@@ -351,7 +351,7 @@ geo.map = function(arg) {
       layers[i]._draw();
     }
 
-    m_this.trigger({
+    m_this.trigger(geo.event.drawEnd, {
         type: geo.event.drawEnd,
         target: m_this
     });
