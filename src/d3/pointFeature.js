@@ -87,6 +87,10 @@ gd3.pointFeature = function(arg) {
     return m_style;
   };
 
+  this._drawables = function () {
+    return d3.selectAll('.' + this._d3id());
+  };
+
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Build
