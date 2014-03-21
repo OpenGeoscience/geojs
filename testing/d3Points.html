@@ -79,7 +79,8 @@ $(function() {
             }
           }
         }
-
+        
+        var mouseOverElement = 0;
         // Load image to be used for drawing dots
         var osm = geo.osmLayer({'renderer': 'vglRenderer'}).referenceLayer(true);
             layer = geo.featureLayer({
@@ -87,7 +88,7 @@ $(function() {
         var color = d3.scale.category10()
                       .domain(d3.range(10)),
             style = {
-                style: {fill: function (d, i) { return color(i % 10); }},
+                style: {fill: function (d, i) { return color(i % 10); }}
             };
         var points = layer.create('pointFeature')
             .positions(citieslatlon)
@@ -96,12 +97,18 @@ $(function() {
         myMap.addLayer(osm).addLayer(layer);
         resizeCanvas();
         myMap.draw();
-        //layer.node().css('pointer-events', 'none');
         
-        window.setInterval(function () {
-            citieslatlon.push(citieslatlon.shift());
-            points.positions(citieslatlon).style(style)._build();
-        }, 5000);
+        points.drawables()
+          .on('mouseover', function (d) {
+            d3.select(this).transition().attr('r', '15pt');
+          })
+          .on('mouseout', function (d) {
+            d3.select(this).transition().attr('r', '3pt');
+          })
+          .on('click', function (d) {
+            d3.select(this).transition().style('opacity', 0.0).remove();
+          });
+        
       }});
 });
 </script>
