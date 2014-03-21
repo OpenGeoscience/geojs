@@ -143,7 +143,6 @@ ggl.vglRenderer = function(arg) {
 
     m_viewer.renderWindow().resize(this.canvas().width(),
                                    this.canvas().height());
-    m_interactorStyle.map(this.layer().map());
 
     /// VGL uses jquery trigger on methods
     $(m_interactorStyle).on(geo.event.pan, function(event, arg) {
@@ -178,6 +177,7 @@ ggl.vglRenderer = function(arg) {
       m_viewer.handleContextMenu(event);
     });
 
+    m_interactorStyle.map(this.layer().map());
   };
   this.on(geo.event.layerAdd, function (event) {
     if (event.layer === m_this.layer()) {

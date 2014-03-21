@@ -95,13 +95,15 @@ ggl.mapInteractorStyle = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.handleMouseMove = function(event) {
-    var canvas = m_that.viewer().canvas(), xrot = null, a = null,
+    var canvas = m_that.map(), xrot = null, a = null,
         angle = null, mouseWorldPoint, features, lastWorldPos, currWorldPos,
         evt;
 
-    if (event.target !== canvas) {
+    /* TODO: Fix for layers
+    if (!canvas || event.target !== canvas.node()) {
       return true;
     }
+    */
     m_outsideCanvas = false;
     m_coords = m_that.viewer().relMouseCoords(event);
     m_currentMousePos = {
@@ -200,11 +202,13 @@ ggl.mapInteractorStyle = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.handleMouseDown = function(event) {
-    var canvas = m_that.viewer().canvas(), point, plane;
-
-    if (event.target !== canvas) {
+    var canvas = m_that.map(), point, plane;
+   
+    /* TODO: Fix for layers
+    if (!canvas || event.target !== canvas.node()) {
       return true;
     }
+    */
     if (event.button === 0) {
       m_leftMouseButtonDown = true;
     }
@@ -246,14 +250,16 @@ ggl.mapInteractorStyle = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.handleMouseUp = function(event) {
-    var canvas = m_that.viewer().canvas(),
+    var canvas = m_that.map(),
         width = null,
         height = null,
         num = null;
-
-    if (event.target !== canvas) {
+  
+    /* TODO: Fix for layers
+    if (!canvas || event.target !== canvas.node()) {
       return true;
     }
+    */
     if (event.button === 0) {
       m_leftMouseButtonDown = false;
       width = m_that.viewer().renderWindow().windowSize()[0];
