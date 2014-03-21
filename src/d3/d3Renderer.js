@@ -111,9 +111,6 @@ gd3.d3Renderer = function(arg) {
     return baseRenderer.worldToDisplay(pt);
   };
 
-  this.worldToDisplay = function (pt) {
-  };
-
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Get API used by the renderer

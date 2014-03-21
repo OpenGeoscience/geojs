@@ -25,13 +25,27 @@ gd3.pointFeature = function(arg) {
   geo.pointFeature.call(this, arg);
   gd3.object.call(this);
 
+  var m_this = this,
+      m_style;
+
+  // georeference a point with caching
+  function georef(d) {
+    if (d.hasOwnProperty('_dispx') && d.hasOwnProperty('_dispy')) {
+      return d;
+    }
+    var r = m_this.renderer(), p;
+    p = r.worldToDisplay([d.lng(), d.lat()]);
+    d._dispx = function () { return p[0][0]; };
+    d._dispy = function () { return p[0][1]; };
+    return d;
+  }
+
   var d_attr = {
-        cx: function (d) { return d.x; },
-        cy: function (d) { return d.y; },
+        cx: function (d) { return georef(d)._dispx(); },
+        cy: function (d) { return georef(d)._dispy(); },
         r: '3pt'
       },
-      d_style = {},
-      m_style;
+      d_style = {};
 
 
   function unpackArg (arg) {

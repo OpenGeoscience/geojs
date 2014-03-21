@@ -32,13 +32,12 @@ $(function() {
     var mapOptions = {
       node: 'map',
       zoom : 3,
-      center : [0.0, 0.0]
+      center : [40, 105]
     };
 
     var myMap = geo.map(mapOptions),
         table = [],
         citieslatlon = [],
-        colors = [],
         width, height;
 
     // Resize the canvas to fill browser window dynamically
@@ -76,8 +75,7 @@ $(function() {
               var lon = table[i][3];
               lon = lon.replace(/(^\s+|\s+$|^\"|\"$)/g, '');
               lon = parseFloat(lon);
-              citieslatlon.push({lon: lon, lat: lat});
-              colors.push(1.0, 1.0, 153.0 / 255.0);
+              citieslatlon.push(geo.latlng(lat, lon));
             }
           }
         }
@@ -89,13 +87,11 @@ $(function() {
         var color = d3.scale.category10()
                       .domain(d3.range(10)),
             style = {
-                attributes: { cx: function (d) { return (10*(180 + d.lon)) % width; },
-                              cy: function (d) { return height - (10*(90 + d.lat)) % height; }},
                 style: {fill: function (d, i) { return color(i % 10); }},
             };
         var points = layer.create('pointFeature')
             .positions(citieslatlon)
-            .style(style)._build();
+            .style(style);
         
         myMap.addLayer(osm).addLayer(layer);
         resizeCanvas();
