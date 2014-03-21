@@ -96,7 +96,7 @@ $(function() {
         myMap.addLayer(osm).addLayer(layer);
         resizeCanvas();
         myMap.draw();
-        layer.node().css('pointer-events', 'none');
+        //layer.node().css('pointer-events', 'none');
         
         window.setInterval(function () {
             citieslatlon.push(citieslatlon.shift());
