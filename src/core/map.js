@@ -55,8 +55,12 @@ geo.map = function(arg) {
    * @returns {String EPSG format}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.gcs = function() {
-    return m_gcs;
+  this.gcs = function(arg) {
+    if (arg === undefined) {
+      return m_gcs;
+    }
+    m_gcs = arg;
+    return this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
