@@ -67,7 +67,8 @@ gd3.pointFeature = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   var s_init = this._init,
-      s_update = this._update;
+      s_update = this._update,
+      m_buildTime = geo.timestamp();
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -104,6 +105,8 @@ gd3.pointFeature = function(arg) {
     s_update.call(this);
     m_style.data = data;
     this.renderer().drawFeatures(m_style);
+    m_buildTime.modified();
+    this.updateTime().modified();
     return this;
   };
 
@@ -115,7 +118,12 @@ gd3.pointFeature = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._update = function() {
-    this._build();
+    s_update.call(this);
+
+    if (this.dataTime().getMTime() >= m_buildTime.getMTime()) {
+      this._build();
+    }
+
     return this;
   };
 

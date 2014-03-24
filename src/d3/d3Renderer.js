@@ -63,7 +63,7 @@ gd3.d3Renderer = function(arg) {
     return base.renderer();
   }
   
-  // translate the layer by a vector delta
+  // translate the layer by a vector delta or reset translation to zero
   function translate (delta) {
     if (delta === undefined) {
       m_translate[0] = 0;
@@ -85,7 +85,7 @@ gd3.d3Renderer = function(arg) {
                'y': function () { return xy[1]; }
       };
     };
-  }
+  };
   
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -144,9 +144,6 @@ gd3.d3Renderer = function(arg) {
     m_this.canvas().attr('height', h);
     translate();
     m_this.updateFeatures();
-    // recenter?
-    // propagate resize event here?
-    //m_viewer.renderWindow().positionAndResize(x, y, w, h);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -191,10 +188,11 @@ gd3.d3Renderer = function(arg) {
   };
 
   this.updateFeatures = function (id) {
+    var key;
     if (id === undefined) {
-      for (id in m_features) {
-        if (m_features.hasOwnProperty(id)) {
-          m_this.updateFeatures(id);
+      for (key in m_features) {
+        if (m_features.hasOwnProperty(key)) {
+          m_this.updateFeatures(key);
         }
       }
       return this;
