@@ -24,6 +24,10 @@ geo.geoTransform = {};
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.geoTransform.osmTransformFeature = function(destGcs, feature) {
+  /// TODO
+  /// Currently we make assumption that incoming feature is in 4326
+  /// which may not be true.
+
   'use strict';
 
   if (!feature) {
@@ -35,83 +39,59 @@ geo.geoTransform.osmTransformFeature = function(destGcs, feature) {
     return;
   }
 
-  var geometryDataArray = [],
-      noOfGeoms = 0,
-      index = 0,
-      geometryData = null,
-      posSourceData = null,
-      data = null,
-      noOfComponents = null,
-      stride = null,
-      offset = null,
-      sizeOfDataType = null,
-      count = null,
-      i = 0,
-      ib = 0,
-      jb = 0,
-      lat = null,
-      inPos = [],
-      projPoint = null,
-      vertexPos = null,
-      srcGcs = feature.gcs(),
-      source = new proj4.Proj(srcGcs),
-      dest = new proj4.Proj(destGcs);
-
-  if (feature.mapper() instanceof vgl.groupMapper) {
-    geometryDataArray = feature.mapper().geometryDataArray();
-  } else {
-    geometryDataArray.push(feature.mapper().geometryData());
+  if (!(feature instanceof geo.pointFeature)) {
+    throw "Supports only point feature";
   }
 
-  noOfGeoms = geometryDataArray.length;
+  var noOfComponents = null, count = null, inPos = null, outPos = null,
+      projPoint = null, srcGcs = feature.gcs(), i, inplace = inplace || false,
+      source = new proj4.Proj(srcGcs), dest = new proj4.Proj(destGcs),
+      lat;
 
-  for (index = 0; index < noOfGeoms; ++index) {
-    geometryData = geometryDataArray[index];
-    posSourceData = geometryData.sourceData(
-      vgl.vertexAttributeKeys.Position);
-    data = posSourceData.data();
-    noOfComponents = posSourceData.attributeNumberOfComponents(
-      vgl.vertexAttributeKeys.Position);
-    stride = posSourceData.attributeStride(
-      vgl.vertexAttributeKeys.Position);
-    offset = posSourceData.attributeOffset(
-      vgl.vertexAttributeKeys.Position);
-    sizeOfDataType = posSourceData.sizeOfAttributeDataType(
-      vgl.vertexAttributeKeys.Position);
-    count = data.length / noOfComponents;
+  source = new proj4.Proj(srcGcs);
+  dest = new proj4.Proj(destGcs);
 
-    source = new proj4.Proj(srcGcs);
-    dest = new proj4.Proj(destGcs);
+  if (feature instanceof geo.pointFeature) {
+    inPos = feature.positions();
+    count = inPos.length
 
-    if (noOfComponents < 2 || noOfComponents > 3) {
-      console.log('[error] Geotransform requires 2d or 3d points.');
-      console.log('[error] Geotransform got ', noOfComponents);
-      return;
+    if (!(inPos instanceof Array)) {
+      throw "Supports Array of 2D and 3D points";
     }
 
-    inPos.length = 3;
+    noOfComponents = (count % 2 === 0 ? 2 :
+                       (count % 3 === 0 ? 3 : null));
 
-    // We need to operate on arrays
-    stride /= sizeOfDataType;
-    offset /= sizeOfDataType;
+    if (noOfComponents !== 2 && noOfComponents !== 3) {
+      throw "Transform points require points in 2D or 3D";
+    }
 
-    for (i = 0; i < count; ++i) {
-      vertexPos = i * stride + offset;
-      lat = data[vertexPos + 1];
-      // Y goes from 0 (top edge is 85.0511 °N) to 2zoom − 1 (bottom edge is 85.0511 °S)
-      // in a Mercator projection
+    for (i = 0; i < count; i += noOfComponents) {
+      if (inplace) {
+        outPos = inPos;
+      } else {
+        outPos = [];
+        outPos.length = inPos.length;
+      }
+
+      /// Y goes from 0 (top edge is 85.0511 °N) to 2zoom − 1
+      /// (bottom edge is 85.0511 °S) in a Mercator projection.
+      lat = inPos[i + 1];
       if (lat > 85.0511) {
             lat = 85.0511;
         }
         if (lat < -85.0511) {
             lat = -85.0511;
         }
-      data[vertexPos + 1] = geo.mercator.lat2y(lat);
+      outPos[i + 1] = geo.mercator.lat2y(lat);
     }
+
+    feature.positions(outPos);
+    feature.gcs(destGcs);
+    return outPos;
   }
 
-  // Update the features gcs field
-  feature.setGcs(destGcs);
+  return null;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -143,7 +123,7 @@ geo.geoTransform.transformFeature = function(destGcs, feature, inplace) {
   dest = new proj4.Proj(destGcs);
 
   if (feature instanceof geo.pointFeature) {
-    inPos = feature.inPositions();
+    inPos = feature.positions();
     count = inPos.length
 
     if (!(inPos instanceof Array)) {
@@ -153,7 +133,7 @@ geo.geoTransform.transformFeature = function(destGcs, feature, inplace) {
     noOfComponents = (count % 2 === 0 ? 2 :
                        (count % 3 === 0 ? 3 : null));
 
-    if (noOfComponents !== 2 || noOfComponents !== 3) {
+    if (noOfComponents !== 2 && noOfComponents !== 3) {
       throw "Transform points require points in 2D or 3D";
     }
 

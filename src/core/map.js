@@ -142,6 +142,7 @@ geo.map = function(arg) {
     if (layer !== null || layer !== undefined) {
       layer.map(this);
 
+      console.log(m_gcs);
       if (layer.referenceLayer()) {
         this.baseLayer(layer);
       } else {
