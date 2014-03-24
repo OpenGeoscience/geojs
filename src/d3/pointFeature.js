@@ -68,6 +68,7 @@ gd3.pointFeature = function(arg) {
   ////////////////////////////////////////////////////////////////////////////
   var s_init = this._init,
       s_update = this._update,
+      s_style = this.style,
       m_buildTime = geo.timestamp();
 
   ////////////////////////////////////////////////////////////////////////////
@@ -81,6 +82,8 @@ gd3.pointFeature = function(arg) {
   };
 
   this.style = function (arg) {
+    s_style.call(this, arg);
+
     if (arg !== undefined) {
       m_style = unpackArg.call(this, arg);
       return this;
