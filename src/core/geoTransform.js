@@ -23,7 +23,7 @@ geo.geoTransform = {};
  * Custom transform for a feature used for OpenStreetMap
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.geoTransform.osmTransformFeature = function(destGcs, feature) {
+geo.geoTransform.osmTransformFeature = function(destGcs, feature, inplace) {
   /// TODO
   /// Currently we make assumption that incoming feature is in 4326
   /// which may not be true.
@@ -46,7 +46,7 @@ geo.geoTransform.osmTransformFeature = function(destGcs, feature) {
   var noOfComponents = null, count = null, inPos = null, outPos = null,
       projPoint = null, srcGcs = feature.gcs(), i, inplace = inplace || false,
       source = new proj4.Proj(srcGcs), dest = new proj4.Proj(destGcs),
-      lat;
+      xCoord, yCoord;
 
   source = new proj4.Proj(srcGcs);
   dest = new proj4.Proj(destGcs);
@@ -59,8 +59,12 @@ geo.geoTransform.osmTransformFeature = function(destGcs, feature) {
       throw "Supports Array of 2D and 3D points";
     }
 
-    noOfComponents = (count % 2 === 0 ? 2 :
+    if (inPos.length > 0 && inPos[0] instanceof geo.latlng) {
+      noOfComponents = 2;
+    } else {
+      noOfComponents = (count % 2 === 0 ? 2 :
                        (count % 3 === 0 ? 3 : null));
+    }
 
     if (noOfComponents !== 2 && noOfComponents !== 3) {
       throw "Transform points require points in 2D or 3D";
@@ -70,23 +74,32 @@ geo.geoTransform.osmTransformFeature = function(destGcs, feature) {
       if (inplace) {
         outPos = inPos;
       } else {
-        outPos = [];
-        outPos.length = inPos.length;
+        outPos = inPos.slice(0);
       }
 
       /// Y goes from 0 (top edge is 85.0511 °N) to 2zoom − 1
       /// (bottom edge is 85.0511 °S) in a Mercator projection.
-      lat = inPos[i + 1];
-      if (lat > 85.0511) {
-            lat = 85.0511;
-        }
-        if (lat < -85.0511) {
-            lat = -85.0511;
-        }
-      outPos[i + 1] = geo.mercator.lat2y(lat);
+      if (inPos[i] instanceof geo.latlng) {
+        yCoord = inPos[i].lat();
+      } else {
+        yCoord = inPos[i + 1];
+      }
+
+      if (yCoord > 85.0511) {
+        yCoord = 85.0511;
+      }
+      if (yCoord < -85.0511) {
+        yCoord = -85.0511;
+      }
+      if (inPos[i] instanceof geo.latlng) {
+        outPos[i] = geo.latlng(geo.mercator.lat2y(yCoord) , outPos[i].lng())
+      } else {
+        outPos[i + 1] = geo.mercator.lat2y(yCoord);
+      }
     }
 
     feature.positions(outPos);
+    feature._update();
     feature.gcs(destGcs);
     return outPos;
   }
@@ -130,8 +143,12 @@ geo.geoTransform.transformFeature = function(destGcs, feature, inplace) {
       throw "Supports Array of 2D and 3D points";
     }
 
-    noOfComponents = (count % 2 === 0 ? 2 :
+    if (inPos.length > 0 && inPos[0] instanceof geo.latlng) {
+      noOfComponents = 2;
+    } else {
+      noOfComponents = (count % 2 === 0 ? 2 :
                        (count % 3 === 0 ? 3 : null));
+    }
 
     if (noOfComponents !== 2 && noOfComponents !== 3) {
       throw "Transform points require points in 2D or 3D";
