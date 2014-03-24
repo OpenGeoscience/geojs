@@ -43,9 +43,9 @@ geo.geoTransform.osmTransformFeature = function(destGcs, feature, inplace) {
     throw "Supports only point feature";
   }
 
-  var noOfComponents = null, count = null, inPos = null, outPos = null,
-      srcGcs = feature.gcs(), i, inplace = inplace || false,
-      projSrcGcs = new proj4.Proj(srcGcs),
+  var noOfComponents = null, pointOffset = 0, count = null,
+      inPos = null, outPos = null, srcGcs = feature.gcs(), i,
+      inplace = inplace || false, projSrcGcs = new proj4.Proj(srcGcs),
       projDestGcs = new proj4.Proj(destGcs), xCoord, yCoord;
 
   if (feature instanceof geo.pointFeature) {
@@ -65,16 +65,18 @@ geo.geoTransform.osmTransformFeature = function(destGcs, feature, inplace) {
 
     if (inPos.length > 0 && inPos[0] instanceof geo.latlng) {
       noOfComponents = 2;
+      pointOffset = 1;
     } else {
       noOfComponents = (count % 2 === 0 ? 2 :
                        (count % 3 === 0 ? 3 : null));
+      pointOffset = noOfComponents;
     }
 
     if (noOfComponents !== 2 && noOfComponents !== 3) {
       throw "Transform points require points in 2D or 3D";
     }
 
-    for (i = 0; i < count; i += noOfComponents) {
+    for (i = 0; i < count; i += pointOffset) {
       if (inplace) {
         outPos = inPos;
       } else {
@@ -131,7 +133,7 @@ geo.geoTransform.transformFeature = function(destGcs, feature, inplace) {
     throw "Supports only point feature";
   }
 
-  var noOfComponents = null, count = null, inPos = null,
+  var noOfComponents = null, pointOffset = 0, count = null, inPos = null,
       outPos = null, projPoint = null, srcGcs = feature.gcs(), i,
       inplace = inplace || false, projSrcGcs = new proj4.Proj(srcGcs),
       dest = new proj4.Proj(destGcs);
@@ -146,16 +148,18 @@ geo.geoTransform.transformFeature = function(destGcs, feature, inplace) {
 
     if (inPos.length > 0 && inPos[0] instanceof geo.latlng) {
       noOfComponents = 2;
+      pointOffset = 1;
     } else {
       noOfComponents = (count % 2 === 0 ? 2 :
                        (count % 3 === 0 ? 3 : null));
+      pointOffset = noOfComponents;
     }
 
     if (noOfComponents !== 2 && noOfComponents !== 3) {
       throw "Transform points require points in 2D or 3D";
     }
 
-    for (i = 0; i < count; i += noOfComponents) {
+    for (i = 0; i < count; i += pointOffset) {
       if (noOfComponents === 2) {
         projPoint = new proj4.Point(inPos[i], inPos[i + 1], 0.0);
       } else {
