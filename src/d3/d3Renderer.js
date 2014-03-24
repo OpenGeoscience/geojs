@@ -116,7 +116,7 @@ gd3.d3Renderer = function(arg) {
     }
     return baseRenderer.displayToWorld(pt);
   };
-  
+
   this.worldToDisplay = function (pt) {
     var baseRenderer = getBaseRenderer();
     if (!baseRenderer) {

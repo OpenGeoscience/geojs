@@ -74,7 +74,7 @@ ggl.vglRenderer = function(arg) {
       var xyzFormat = points.length % 3 === 0 ? true : false,
           node = this.canvas(),
           delta = xyzFormat ? 3 : 2, ren = this.contextRenderer(),
-          cam = ren.camera(), fdp = ren.focusDisplayPoint(),
+          cam = ren.camera(), fp = cam.focalPoint(),
           i, wps = [];
 
       if (xyzFormat) {
@@ -91,7 +91,7 @@ ggl.vglRenderer = function(arg) {
           wps.push(ren.worldToDisplay(vec4.fromValues(
             points[i],
             points[i + 1],
-            0.0,
+            fp[2],
             1.0), cam.viewMatrix(), cam.projectionMatrix(),
             node.width(), node.height()));
         }
