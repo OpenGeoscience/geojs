@@ -131,12 +131,10 @@ geo.geoTransform.transformFeature = function(destGcs, feature, inplace) {
     throw "Supports only point feature";
   }
 
-  var noOfComponents = null, count = null, inPos = null, outPos = null,
-      projPoint = null, srcGcs = feature.gcs(), i, inplace = inplace || false,
-      source = new proj4.Proj(srcGcs), dest = new proj4.Proj(destGcs);
-
-  source = new proj4.Proj(srcGcs);
-  dest = new proj4.Proj(destGcs);
+  var noOfComponents = null, count = null, inPos = null,
+      outPos = null, projPoint = null, srcGcs = feature.gcs(), i,
+      inplace = inplace || false, projSrcGcs = new proj4.Proj(srcGcs),
+      dest = new proj4.Proj(destGcs);
 
   if (feature instanceof geo.pointFeature) {
     inPos = feature.positions();
@@ -164,7 +162,7 @@ geo.geoTransform.transformFeature = function(destGcs, feature, inplace) {
         projPoint = new proj4.Point(inPos[i], inPos[i + 1], inPos[i + 2]);
       }
 
-      proj4.transform(source, dest, projPoint);
+      proj4.transform(projSrcGcs, projDestGcs, projPoint);
 
       if (inplace) {
         outPos = inPos;
