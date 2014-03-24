@@ -99,7 +99,6 @@ geo.geoTransform.osmTransformFeature = function(destGcs, feature, inplace) {
     }
 
     feature.positions(outPos);
-    feature._update();
     feature.gcs(destGcs);
     return outPos;
   }
