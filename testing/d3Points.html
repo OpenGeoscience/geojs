@@ -28,7 +28,7 @@ function processCSVData(csvdata) {
   return table;
 };
 
-$(function() {
+$(window).load(function() {
     var mapOptions = {
       node: 'map',
       zoom : 3,
@@ -44,8 +44,8 @@ $(function() {
     window.addEventListener('resize', resizeCanvas, false);
 
     function resizeCanvas() {
-      $('#map').width('100%');
-      $('#map').height('100%');
+      // $('#map').width('100%');
+      // $('#map').height('100%');
       width = $('#map').width();
       height = $('#map').height();
       updateAndDraw(width, height);
@@ -57,62 +57,71 @@ $(function() {
       myMap.draw();
     }
 
-    // Read city geo-coded data
-    $.ajax({
-      type : "GET",
-      url : "/data/cities.csv",
-      dataType : "text",
-      success : function(data) {
-        table = processCSVData(data);
-        if (table.length > 0) {
-          var i;
-          for (i = 0; i < 1000; ++i) {//table.length; ++i) {
-            if (table[i][2] != undefined) {
-              var lat = table[i][2];
-              lat = lat.replace(/(^\s+|\s+$|^\"|\"$)/g, '');
-              lat = parseFloat(lat);
+    table = [
+          [ "NEW YORK","NY","40.757929","-73.985506"],
+          [ "LOS ANGELES","CA","34.052187","-118.243425"],
+          [ "DENVER","CO","39.755092","-104.988123"],
+          [ "PORTLAND","OR","45.523104","-122.670132"],
+          [ "HONOLULU","HI","21.291982","-157.821856"],
+          [ "ANCHORAGE","AK","61.216583","-149.899597"],
+          [ "DALLAS","TX","32.781078","-96.797111"],
+          [ "SALT LAKE CITY","UT","40.771592","-111.888189"],
+          [ "MIAMI","FL","25.774252","-80.190262"],
+          [ "PHOENIX","AZ","33.448263","-112.073821"],
+          [ "CHICAGO","IL","41.879535","-87.624333"],
+          [ "WASHINGTON","DC","38.892091","-77.024055"],
+          [ "SEATTLE","WA","47.620716","-122.347533"],
+          [ "NEW ORLEANS","LA","30.042487","-90.025126"],
+          [ "SAN FRANCISCO","CA","37.775196","-122.419204"],
+          [ "ATLANTA","GA","33.754487","-84.389663"]
+        ]
+        
+    if (table.length > 0) {
+      var i;
+      for (i = 0; i < table.length; ++i) {
+        if (table[i][2] != undefined) {
+          var lat = table[i][2];
+          lat = lat.replace(/(^\s+|\s+$|^\"|\"$)/g, '');
+          lat = parseFloat(lat);
 
-              var lon = table[i][3];
-              lon = lon.replace(/(^\s+|\s+$|^\"|\"$)/g, '');
-              lon = parseFloat(lon);
-              citieslatlon.push(geo.latlng(lat, lon));
-            }
-          }
+          var lon = table[i][3];
+          lon = lon.replace(/(^\s+|\s+$|^\"|\"$)/g, '');
+          lon = parseFloat(lon);
+          citieslatlon.push(geo.latlng(lat, lon));
         }
+      }
+    }
 
-        var mouseOverElement = 0;
-        // Load image to be used for drawing dots
-        var osm = geo.osmLayer({'renderer': 'vglRenderer'}).referenceLayer(true);
-            layer = geo.featureLayer({
-                'renderer' : 'd3Renderer'});
-        var color = d3.scale.category10()
-                      .domain(d3.range(10)),
-            style = {
-                style: {fill: function (d, i) { return color(i % 10); }}
-            };
-            var points = layer.create('pointFeature')
-            .gcs(osm.gcs())
-            .positions(citieslatlon)
-            .style(style);
+    var mouseOverElement = 0;
+    // Load image to be used for drawing dots
+    var osm = geo.osmLayer({'renderer': 'vglRenderer'}).referenceLayer(true);
+        layer = geo.featureLayer({
+            'renderer' : 'd3Renderer'});
+    var color = d3.scale.category10()
+                  .domain(d3.range(10)),
+        style = {
+            style: {fill: function (d, i) { return color(i % 10); }}
+        };
+        var points = layer.create('pointFeature')
+        .positions(citieslatlon)
+        .style(style);
 
-        myMap.addLayer(osm).addLayer(layer);
-        resizeCanvas();
-        myMap.draw();
+    myMap.addLayer(osm).addLayer(layer);
+    resizeCanvas();
+    myMap.draw();
 
-        points.drawables()
-          .on('mouseover', function (d) {
-            d3.select(this).transition().attr('r', '15pt');
-          })
-          .on('mouseout', function (d) {
-            d3.select(this).transition().attr('r', '3pt');
-          })
-          .on('click', function (d) {
-            d3.select(this).transition().style('opacity', 0.0).remove();
-          });
+    points.drawables()
+      .on('mouseover', function (d) {
+        d3.select(this).transition().attr('r', '15pt');
+      })
+      .on('mouseout', function (d) {
+        d3.select(this).transition().attr('r', '3pt');
+      })
+      .on('click', function (d) {
+        d3.select(this).transition().style('opacity', 0.0).remove();
+      });
 
-      }});
 });
 </script>
-
-<div id='map'></div>
+<div id='map' style='width: 80%; height: 80%; position: absolute; left: 50px; top: 50px;'></div>
 </body>
