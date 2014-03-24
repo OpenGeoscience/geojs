@@ -62,6 +62,20 @@ gd3.d3Renderer = function(arg) {
     }
     return base.renderer();
   }
+  
+  // translate the layer by a vector delta
+  function translate (delta) {
+    if (delta === undefined) {
+      m_translate[0] = 0;
+      m_translate[1] = 0;
+    } else {
+      m_translate[0] += delta.x;
+      m_translate[1] += delta.y;
+    }
+    m_this.canvas()
+      .selectAll('.group-' + m_this._d3id())
+        .attr('transform', 'translate(' + m_translate.join() + ')');
+  }
 
   this.latLngToDisplayGenerator = function () {
     var baseRenderer = getBaseRenderer();
@@ -126,8 +140,10 @@ gd3.d3Renderer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._resize = function(x, y, w, h) {
-    this.canvas().attr('width', w);
-    this.canvas().attr('height', h);
+    m_this.canvas().attr('width', w);
+    m_this.canvas().attr('height', h);
+    translate();
+    m_this.updateFeatures();
     // recenter?
     // propagate resize event here?
     //m_viewer.renderWindow().positionAndResize(x, y, w, h);
@@ -152,36 +168,53 @@ gd3.d3Renderer = function(arg) {
   };
 
   function getGroup(grp) {
-    var svg = m_this.canvas();
-    return svg.selectAll('.' + grp)
-       .data([0])
+    var svg = m_this.canvas(),
+        selection = svg.selectAll('.group-' + grp)
+       .data([0]);
+    selection
       .enter()
         .append('g')
-          .attr('class', grp);
+          .attr('class', 'group-' + grp);
+    return selection;
   }
 
   this.drawFeatures = function (arg) {
-    var svg = getGroup('group-' + m_this._d3id()),
-        selection = svg.selectAll('.' + arg.id)
-                        .data(arg.data, arg.dataIndex);
-    selection.enter().append(arg.append);
-    selection.exit().remove();
-    setAttrs(selection, arg.attributes);
-    selection.attr('class', arg.classes.concat([arg.id]).join(' '));
-    selection.style(arg.style);
-    arg.selection = selection;
-    m_features[arg.id] = selection;
-    return selection;
+    m_features[arg.id] = {
+      data: arg.data,
+      index: arg.dataIndex,
+      style: arg.style,
+      attributes: arg.attributes,
+      classes: arg.classes,
+      append: arg.append
+    };
+    return m_this.updateFeatures(arg.id);
   };
 
-  // translate the layer by a vector delta
-  function translate (delta) {
-    m_translate[0] += delta.x;
-    m_translate[1] += delta.y;
-    m_this.canvas()
-      .selectAll('.group-' + m_this._d3id())
-        .attr('transform', 'translate(' + m_translate.join() + ')');
-  }
+  this.updateFeatures = function (id) {
+    if (id === undefined) {
+      for (id in m_features) {
+        if (m_features.hasOwnProperty(id)) {
+          m_this.updateFeatures(id);
+        }
+      }
+      return this;
+    }
+    var svg = getGroup(m_this._d3id()),
+        data = m_features[id].data,
+        index = m_features[id].index,
+        style = m_features[id].style,
+        attributes = m_features[id].attributes,
+        classes = m_features[id].classes,
+        append = m_features[id].append,
+        selection = svg.selectAll('.' + id).data(data, index);
+    selection.enter().append(append);
+    selection.exit().remove();
+    setAttrs(selection, attributes);
+    selection.attr('class', classes.concat([id]).join(' '));
+    selection.style(style);
+    return this;
+  };
+
 
   // connect to pan event
   this.on(geo.event.pan, function (event) {

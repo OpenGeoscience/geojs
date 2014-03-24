@@ -29,8 +29,8 @@ gd3.pointFeature = function(arg) {
       m_style;
 
   // georeference a point with caching
-  function georef(d) {
-    if (d.hasOwnProperty('_dispx') && d.hasOwnProperty('_dispy')) {
+  function georef(d, refresh) {
+    if (!refresh && d.hasOwnProperty('_dispx') && d.hasOwnProperty('_dispy')) {
       return d;
     }
     var r = m_this.renderer(), p;
@@ -41,7 +41,7 @@ gd3.pointFeature = function(arg) {
   }
 
   var d_attr = {
-        cx: function (d) { return georef(d)._dispx(); },
+        cx: function (d) { return georef(d, true)._dispx(); },
         cy: function (d) { return georef(d)._dispy(); },
         r: '3pt'
       },
