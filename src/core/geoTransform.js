@@ -44,14 +44,18 @@ geo.geoTransform.osmTransformFeature = function(destGcs, feature, inplace) {
   }
 
   var noOfComponents = null, count = null, inPos = null, outPos = null,
-      projPoint = null, srcGcs = feature.gcs(), i, inplace = inplace || false,
-      source = new proj4.Proj(srcGcs), dest = new proj4.Proj(destGcs),
-      xCoord, yCoord;
-
-  source = new proj4.Proj(srcGcs);
-  dest = new proj4.Proj(destGcs);
+      srcGcs = feature.gcs(), i, inplace = inplace || false,
+      projSrcGcs = new proj4.Proj(srcGcs),
+      projDestGcs = new proj4.Proj(destGcs), xCoord, yCoord;
 
   if (feature instanceof geo.pointFeature) {
+
+    ///  If source GCS is not in 4326, transform it first into 4326
+    /// before we transform it for OSM.
+    if (srcGcs !== "EPSG:4326") {
+      geo.geoTransform.transformFeature("EPSG:4326", feature, true);
+    }
+
     inPos = feature.positions();
     count = inPos.length
 
