@@ -6,7 +6,7 @@
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
 /*jslint white: true, continue:true, indent: 2*/
 
-/*global window, ggl, ogs, vec4, inherit, $*/
+/*global window, ggl, ogs, vec4, inherit, $, geo*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -74,7 +74,7 @@ ggl.vglRenderer = function(arg) {
       var xyzFormat = points.length % 3 === 0 ? true : false,
           node = this.canvas(),
           delta = xyzFormat ? 3 : 2, ren = this.contextRenderer(),
-          cam = ren.camera(), fdp = ren.focusDisplayPoint(),
+          cam = ren.camera(), fp = cam.focalPoint(),
           i, wps = [];
 
       if (xyzFormat) {
@@ -91,7 +91,7 @@ ggl.vglRenderer = function(arg) {
           wps.push(ren.worldToDisplay(vec4.fromValues(
             points[i],
             points[i + 1],
-            0.0,
+            fp[2],
             1.0), cam.viewMatrix(), cam.projectionMatrix(),
             node.width(), node.height()));
         }
@@ -143,33 +143,47 @@ ggl.vglRenderer = function(arg) {
 
     m_viewer.renderWindow().resize(this.canvas().width(),
                                    this.canvas().height());
-    m_interactorStyle.map(this.layer().map());
-
-    this.canvas().on('mousemove', function(event) {
-      m_viewer.handleMouseMove(event);
-    });
-
-    this.canvas().on('mouseup', function(event) {
-      m_viewer.handleMouseUp(event);
-    });
-
-    this.canvas().on('mousedown', function(event) {
-      m_viewer.handleMouseDown(event);
-    });
-
-    this.canvas().on('keypress', function(event) {
-      m_viewer.handleKeyPress(event);
-    });
-
-    this.canvas().on('contextmenu', function(event) {
-      m_viewer.handleContextMenu(event);
-    });
 
     /// VGL uses jquery trigger on methods
     $(m_interactorStyle).on(geo.event.pan, function(event, arg) {
       m_this.trigger(geo.event.pan, arg);
     });
   };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Connect events to the map layer
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._connectMapEvents = function() {
+    var map = $(m_this.layer().map().node());
+    map.on('mousemove', function(event) {
+      m_viewer.handleMouseMove(event);
+    });
+
+    map.on('mouseup', function(event) {
+      m_viewer.handleMouseUp(event);
+    });
+
+    map.on('mousedown', function(event) {
+      m_viewer.handleMouseDown(event);
+    });
+
+    map.on('keypress', function(event) {
+      m_viewer.handleKeyPress(event);
+    });
+
+    map.on('contextmenu', function(event) {
+      m_viewer.handleContextMenu(event);
+    });
+
+    m_interactorStyle.map(this.layer().map());
+  };
+  this.on(geo.event.layerAdd, function (event) {
+    if (event.layer === m_this.layer()) {
+      m_this._connectMapEvents();
+    }
+  });
 
   ////////////////////////////////////////////////////////////////////////////
   /**

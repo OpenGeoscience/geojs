@@ -172,7 +172,8 @@ geo.layer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.transform = function(val) {
-    // TODO implement this
+    geo.geoTransform.transformLayer(val, this, m_map.baseLayer());
+    return this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -290,7 +291,7 @@ geo.layer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.referenceLayer = function(val) {
-    if(val === undefined) {
+    if(val !== undefined) {
       m_isReference = val;
       this.modified();
       return this;
@@ -307,9 +308,16 @@ geo.layer = function(arg) {
     // Create top level div for the layer
     m_node = $(document.createElement('div'));
     m_node.attr('id', m_name);
+    // TODO: need to position according to offsets from the map element
+    //       and maybe respond to events in case the map element moves
+    //       around the page.
+    m_node.css('position', 'absolute');
+    m_node.css('width', '100%');
+    m_node.css('height', '100%');
 
     if (m_map) {
       m_map.node().append(m_node);
+
     }
 
     // Share context if have valid one

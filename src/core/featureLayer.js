@@ -66,7 +66,7 @@ geo.featureLayer = function(arg) {
   this._features = function(val) {
     var i = 0;
     if (val === undefined) {
-      return m_features;
+      return m_features || [];
     } else {
       m_features = val.slice(0);
       this.dataTime().modified();
