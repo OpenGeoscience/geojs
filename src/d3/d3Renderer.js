@@ -80,9 +80,9 @@ gd3.d3Renderer = function(arg) {
   this.latLngToDisplayGenerator = function () {
     var baseRenderer = getBaseRenderer();
     return function (pt) {
-      var xy = baseRenderer.worldToDisplay(pt.lat(), pt.lng());
-      return { 'x': function () { return xy[0]; },
-               'y': function () { return xy[1]; }
+      var xy = baseRenderer.worldToDisplay([pt.lng(), pt.lat()]);
+      return { 'x': function () { return xy[0][0]; },
+               'y': function () { return xy[0][1]; }
       };
     };
   };
