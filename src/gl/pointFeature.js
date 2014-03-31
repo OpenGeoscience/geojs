@@ -58,7 +58,7 @@ ggl.pointFeature = function(arg) {
 
     m_actor = vgl.utils.createPoints(this.positions(), this.style().colors);
     this.renderer().contextRenderer().addActor(m_actor);
-    m_buildTime.modified();
+    this.buildTime().modified();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -71,7 +71,7 @@ ggl.pointFeature = function(arg) {
   this._update = function() {
     s_update.call(this);
 
-    if (this.dataTime().getMTime() >= m_buildTime.getMTime()) {
+    if (this.dataTime().getMTime() >= this.buildTime().getMTime()) {
       this._build();
     }
 
