@@ -40,8 +40,11 @@ ogs.namespace = function(ns_string) {
   return parent;
 };
 
-/** vgl namespace */
+/** geo namespace */
 var geo = ogs.namespace("geo");
+
+geo.renderers = {};
+geo.features = {};
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -81,3 +84,62 @@ Object.size = function(obj) {
   }
   return size;
 };
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Register a new renderer type
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.registerRenderer = function(name, func) {
+  if (geo.renderers === undefined) {
+    geo.renderers = {};
+  }
+
+  geo.renderers[name] = func;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Create new instance of the renderer
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.createRenderer  = function(name, layer, canvas) {
+  if (name in geo.renderers) {
+    var ren = geo.renderers[name]({'layer': layer, 'canvas': canvas});
+    return ren;
+  }
+  return null;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Register a new feature type
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.registerFeature = function(category, name, func) {
+
+  if (geo.features === undefined) {
+    geo.features = {};
+  }
+
+  if (!(category in geo.features)) {
+    geo.features[category] = {};
+  }
+
+  // TODO Add warning if the name already exists
+  geo.features[category][name] = func;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Create new instance of the renderer
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.createFeature  = function(name, layer, renderer) {
+  var category = renderer.api();
+  if (category in geo.features && name in geo.features[category]) {
+    return geo.features[category][name](
+      {'layer':layer, 'renderer': renderer});
+  }
+  return null;
+}

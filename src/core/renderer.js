@@ -4,205 +4,183 @@
  */
 
 /*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, indent: 2*/
+/*jslint white: true, continue:true, indent: 2*/
 
-/*global geo, ogs, inherit, document$*/
+/*global window, geo, ogs, vec4, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Create a new instance of class feature
+ * Create a new instance of class renderer
  *
- * @class
- * @returns {geo.feature}
+ * @param canvas
+ * @returns {geo.renderer}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.feature = function(arg) {
-  "use strict";
-  if (!(this instanceof geo.feature)) {
-    return new geo.feature(arg);
+geo.renderer = function(arg) {
+  'use strict';
+
+  if (!(this instanceof geo.renderer)) {
+    return new geo.renderer(arg);
   }
-  geo.object.call(this);
+  geo.sceneObject.call(this);
 
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * @private
-   */
-  ////////////////////////////////////////////////////////////////////////////
   arg = arg || {};
-
-  var m_style = {},
+  var m_this = this,
       m_layer = arg.layer === undefined ? null : arg.layer,
-      m_gcs = arg.gcs === undefined ? "EPSG:4326" : arg.gcs,
-      m_renderer = arg.renderer === undefined ? null : arg.renderer,
-      m_dataTime = geo.timestamp(),
-      m_buildTime = geo.timestamp(),
-      m_updateTime = geo.timestamp();
+      m_canvas = arg.canvas === undefined ? null : arg.canvas;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get/Set style used by the feature
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.style = function(arg1, arg2) {
-    if (arg1 === undefined ) {
-      return m_style;
-    }  else if (arg2 === undefined) {
-      m_style = $.extend({}, m_style, arg1);
-      this.modified();
-      return this;
-    } else {
-      m_style[arg1] = arg2;
-      this.modified();
-      return this;
-    }
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get layer referenced by the feature
+   * Get layer of the renderer
+   *
+   * @returns {*}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.layer = function() {
     return m_layer;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get canvas for the renderer
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.canvas = function(val) {
+    if (val === undefined) {
+      return m_canvas;
+    } else {
+      m_canvas = val;
+      this.modified();
+    }
   }
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get renderer used by the feature
+   * Get render API used by the renderer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.renderer = function() {
-    return m_renderer;
+  this.api = function() {
+    throw "Should be implemented by derivied classes";
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Convert array of points from world to GCS coordinate space
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.worldToGcs = function(points) {
+    throw "Should be implemented by derivied classes";
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get list of drawables or nodes that are context/api specific.
+   * Convert array of points from display to GCS space
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.drawables = function() {
-    return this._drawables();
+  this.displayToGcs = function(points) {
+    throw "Should be implemented by derivied classes";
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get/Set projection of the feature
+   * Convert array of points from display to GCS space
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.gcs = function(val) {
-    if (val === undefined ) {
-      return m_gcs;
-    } else {
-      m_gcs = val;
-      this.modified();
-      return this;
-    }
+  this.gcsToDisplay = function(points) {
+    throw "Should be implemented by derivied classes";
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get/Set timestamp of data change
+   * Convert array of points from world to display space
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.dataTime = function(val) {
-    if (val === undefined ) {
-      return m_dataTime;
-    } else {
-      m_dataTime = val;
-      this.modified();
-      return this;
-    }
+  this.worldToDisplay = function(points) {
+    throw "Should be implemented by derivied classes";
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get/Set timestamp of last time build happened
+   * Convert array of points from display to world space
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.buildTime = function(val) {
-    if (val === undefined ) {
-      return m_buildTime;
-    } else {
-      m_buildTime = val;
-      this.modified();
-      return this;
-    }
+  this.displayToWorld = function(points) {
+    throw "Should be implemented by derivied classes";
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get/Set timestamp of last time update happened
+   * Get mouse coodinates related to canvas
+   *
+   * @param event
+   * @returns {{x: number, y: number}}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.updateTime = function(val) {
-    if (val === undefined ) {
-      return m_updateTime;
-    } else {
-      m_updateTime = val;
-      this.modified();
-      return this;
-    }
+  this.relMouseCoords = function(event) {
+    var totalOffsetX = 0,
+        totalOffsetY = 0,
+        canvasX = 0,
+        canvasY = 0,
+        currentElement = this.canvas();
+
+    do {
+      totalOffsetX += currentElement.offsetLeft - currentElement.scrollLeft;
+      totalOffsetY += currentElement.offsetTop - currentElement.scrollTop;
+    } while (currentElement = currentElement.offsetParent);
+
+    canvasX = event.pageX - totalOffsetX;
+    canvasY = event.pageY - totalOffsetY;
+
+    return {
+      x: canvasX,
+      y: canvasY
+    };
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
-   *
-   * Derived class should implement this
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function(arg) {
-    if (!m_layer) {
-      throw "Feature requires a valid layer";
-    }
-    m_style = $.extend({},
-                {"opacity": 1.0}, arg.style === undefined ? {} :
-                arg.style);
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Build
-   *
-   * Derived class should implement this
+   * Handle resize event
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._build = function() {
+  this._resize = function(x, y, w, h) {
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get context specific drawables
-   *
-   * Derived class should implement this
+   * Render
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._drawables = function() {
+  this._render = function() {
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Update
-   *
-   * Derived class should implement this
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._update = function() {
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Destroy
-   *
-   * Derived class should implement this
+   * Exit
    */
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function() {
+  };
+  
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Connect mouse events to the map layer
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._connectMouseEvents = function() {
+            
   };
 
   this._init(arg);
   return this;
 };
 
-inherit(geo.feature, geo.object);
+inherit(geo.renderer, geo.sceneObject);

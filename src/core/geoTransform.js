@@ -23,7 +23,11 @@ geo.geoTransform = {};
  * Custom transform for a feature used for OpenStreetMap
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.geoTransform.osmTransformFeature = function(destGcs, feature) {
+geo.geoTransform.osmTransformFeature = function(destGcs, feature, inplace) {
+  /// TODO
+  /// Currently we make assumption that incoming feature is in 4326
+  /// which may not be true.
+
   'use strict';
 
   if (!feature) {
@@ -35,83 +39,77 @@ geo.geoTransform.osmTransformFeature = function(destGcs, feature) {
     return;
   }
 
-  var geometryDataArray = [],
-      noOfGeoms = 0,
-      index = 0,
-      geometryData = null,
-      posSourceData = null,
-      data = null,
-      noOfComponents = null,
-      stride = null,
-      offset = null,
-      sizeOfDataType = null,
-      count = null,
-      i = 0,
-      ib = 0,
-      jb = 0,
-      lat = null,
-      inPos = [],
-      projPoint = null,
-      vertexPos = null,
-      srcGcs = feature.gcs(),
-      source = new proj4.Proj(srcGcs),
-      dest = new proj4.Proj(destGcs);
-
-  if (feature.mapper() instanceof vgl.groupMapper) {
-    geometryDataArray = feature.mapper().geometryDataArray();
-  } else {
-    geometryDataArray.push(feature.mapper().geometryData());
+  if (!(feature instanceof geo.pointFeature)) {
+    throw "Supports only point feature";
   }
 
-  noOfGeoms = geometryDataArray.length;
+  var noOfComponents = null, pointOffset = 0, count = null,
+      inPos = null, outPos = null, srcGcs = feature.gcs(), i,
+      inplace = inplace || false, projSrcGcs = new proj4.Proj(srcGcs),
+      projDestGcs = new proj4.Proj(destGcs), xCoord, yCoord;
 
-  for (index = 0; index < noOfGeoms; ++index) {
-    geometryData = geometryDataArray[index];
-    posSourceData = geometryData.sourceData(
-      vgl.vertexAttributeKeys.Position);
-    data = posSourceData.data();
-    noOfComponents = posSourceData.attributeNumberOfComponents(
-      vgl.vertexAttributeKeys.Position);
-    stride = posSourceData.attributeStride(
-      vgl.vertexAttributeKeys.Position);
-    offset = posSourceData.attributeOffset(
-      vgl.vertexAttributeKeys.Position);
-    sizeOfDataType = posSourceData.sizeOfAttributeDataType(
-      vgl.vertexAttributeKeys.Position);
-    count = data.length / noOfComponents;
+  if (feature instanceof geo.pointFeature) {
 
-    source = new proj4.Proj(srcGcs);
-    dest = new proj4.Proj(destGcs);
-
-    if (noOfComponents < 2 || noOfComponents > 3) {
-      console.log('[error] Geotransform requires 2d or 3d points.');
-      console.log('[error] Geotransform got ', noOfComponents);
-      return;
+    ///  If source GCS is not in 4326, transform it first into 4326
+    /// before we transform it for OSM.
+    if (srcGcs !== "EPSG:4326") {
+      geo.geoTransform.transformFeature("EPSG:4326", feature, true);
     }
 
-    inPos.length = 3;
+    inPos = feature.positions();
+    count = inPos.length
 
-    // We need to operate on arrays
-    stride /= sizeOfDataType;
-    offset /= sizeOfDataType;
-
-    for (i = 0; i < count; ++i) {
-      vertexPos = i * stride + offset;
-      lat = data[vertexPos + 1];
-      // Y goes from 0 (top edge is 85.0511 °N) to 2zoom − 1 (bottom edge is 85.0511 °S)
-      // in a Mercator projection
-      if (lat > 85.0511) {
-            lat = 85.0511;
-        }
-        if (lat < -85.0511) {
-            lat = -85.0511;
-        }
-      data[vertexPos + 1] = geo.mercator.lat2y(lat);
+    if (!(inPos instanceof Array)) {
+      throw "Supports Array of 2D and 3D points";
     }
+
+    if (inPos.length > 0 && inPos[0] instanceof geo.latlng) {
+      noOfComponents = 2;
+      pointOffset = 1;
+    } else {
+      noOfComponents = (count % 2 === 0 ? 2 :
+                       (count % 3 === 0 ? 3 : null));
+      pointOffset = noOfComponents;
+    }
+
+    if (noOfComponents !== 2 && noOfComponents !== 3) {
+      throw "Transform points require points in 2D or 3D";
+    }
+
+    for (i = 0; i < count; i += pointOffset) {
+      if (inplace) {
+        outPos = inPos;
+      } else {
+        outPos = inPos.slice(0);
+      }
+
+      /// Y goes from 0 (top edge is 85.0511 °N) to 2zoom − 1
+      /// (bottom edge is 85.0511 °S) in a Mercator projection.
+      if (inPos[i] instanceof geo.latlng) {
+        yCoord = inPos[i].lat();
+      } else {
+        yCoord = inPos[i + 1];
+      }
+
+      if (yCoord > 85.0511) {
+        yCoord = 85.0511;
+      }
+      if (yCoord < -85.0511) {
+        yCoord = -85.0511;
+      }
+      if (inPos[i] instanceof geo.latlng) {
+        outPos[i] = geo.latlng(geo.mercator.lat2y(yCoord) , outPos[i].lng())
+      } else {
+        outPos[i + 1] = geo.mercator.lat2y(yCoord);
+      }
+    }
+
+    feature.positions(outPos);
+    feature.gcs(destGcs);
+    return outPos;
   }
 
-  // Update the features gcs field
-  feature.setGcs(destGcs);
+  return null;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -119,7 +117,7 @@ geo.geoTransform.osmTransformFeature = function(destGcs, feature) {
  * Transform a feature to destination GCS
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.geoTransform.transformFeature = function(destGcs, feature) {
+geo.geoTransform.transformFeature = function(destGcs, feature, inplace) {
   'use strict';
 
   if (!feature) {
@@ -131,95 +129,68 @@ geo.geoTransform.transformFeature = function(destGcs, feature) {
     return;
   }
 
-  var geometryDataArray = [],
-      noOfGeoms = 0,
-      index = 0,
-      geometryData = null,
-      posSourceData = null,
-      data = null,
-      noOfComponents = null,
-      stride = null,
-      offset = null,
-      sizeOfDataType = null,
-      count = null,
-      i = 0,
-      ib = 0,
-      jb = 0,
-      value = null,
-      inPos = [],
-      projPoint = null,
-      vertexPos = null,
-      srcGcs = feature.gcs(),
-      source = new proj4.Proj(srcGcs),
+  if (!(feature instanceof geo.pointFeature)) {
+    throw "Supports only point feature";
+  }
+
+  var noOfComponents = null, pointOffset = 0, count = null, inPos = null,
+      outPos = null, projPoint = null, srcGcs = feature.gcs(), i,
+      inplace = inplace || false, projSrcGcs = new proj4.Proj(srcGcs),
       dest = new proj4.Proj(destGcs);
 
-  if (feature.mapper() instanceof vgl.groupMapper) {
-    geometryDataArray = feature.mapper().geometryDataArray();
-  } else {
-    geometryDataArray.push(feature.mapper().geometryData());
-  }
+  if (feature instanceof geo.pointFeature) {
+    inPos = feature.positions();
+    count = inPos.length
 
-  noOfGeoms = geometryDataArray.length;
-
-  for (index = 0; index < noOfGeoms; ++index) {
-    geometryData = geometryDataArray[index];
-    posSourceData = geometryData.sourceData(
-      vgl.vertexAttributeKeys.Position);
-    data = posSourceData.data();
-    noOfComponents = posSourceData.attributeNumberOfComponents(
-      vgl.vertexAttributeKeys.Position);
-    stride = posSourceData.attributeStride(
-      vgl.vertexAttributeKeys.Position);
-    offset = posSourceData.attributeOffset(
-      vgl.vertexAttributeKeys.Position);
-    sizeOfDataType = posSourceData.sizeOfAttributeDataType(
-      vgl.vertexAttributeKeys.Position);
-    count = data.length;
-
-    source = new proj4.Proj(srcGcs);
-    dest = new proj4.Proj(destGcs);
-
-    if (noOfComponents < 2 || noOfComponents > 3) {
-      console.log('[error] Geotransform requires 2d or 3d points.');
-      console.log('[error] Geotransform got ', noOfComponents);
-      return;
+    if (!(inPos instanceof Array)) {
+      throw "Supports Array of 2D and 3D points";
     }
 
-    inPos.length = 3;
+    if (inPos.length > 0 && inPos[0] instanceof geo.latlng) {
+      noOfComponents = 2;
+      pointOffset = 1;
+    } else {
+      noOfComponents = (count % 2 === 0 ? 2 :
+                       (count % 3 === 0 ? 3 : null));
+      pointOffset = noOfComponents;
+    }
 
-    // We need to operate on arrays
-    stride /= sizeOfDataType;
-    offset /= sizeOfDataType;
+    if (noOfComponents !== 2 && noOfComponents !== 3) {
+      throw "Transform points require points in 2D or 3D";
+    }
 
-    for (i = 0; i < count; ++i) {
-      vertexPos = i * stride + offset;
-
+    for (i = 0; i < count; i += pointOffset) {
       if (noOfComponents === 2) {
-        inPos[0] = data[vertexPos];
-        inPos[1] = data[vertexPos + 1];
-        inPos[2] = 0.0;
+        projPoint = new proj4.Point(inPos[i], inPos[i + 1], 0.0);
       } else {
-        inPos[0] = data[vertexPos];
-        inPos[1] = data[vertexPos + 1];
-        inPos[2] = data[vertexPos + 2];
+        projPoint = new proj4.Point(inPos[i], inPos[i + 1], inPos[i + 2]);
       }
 
-      projPoint = new proj4.Point(inPos[0], inPos[1], inPos[2]);
-      proj4.transform(source, dest, projPoint);
+      proj4.transform(projSrcGcs, projDestGcs, projPoint);
+
+      if (inplace) {
+        outPos = inPos;
+      } else {
+        outPos = [];
+        outPos.length = inPos.length;
+      }
 
       if (noOfComponents === 2) {
-        data[vertexPos] =  projPoint.x;
-        data[vertexPos + 1] = projPoint.y;
+        outPos[i] =  projPoint.x;
+        outPos[i + 1] = projPoint.y;
       } else {
-        data[vertexPos] = projPoint.x;
-        data[vertexPos + 1] = projPoint.y;
-        data[vertexPos + 2] = projPoint.z;
+        outPos[i] = projPoint.x;
+        outPos[i + 1] = projPoint.y;
+        outPos[i + 2] = projPoint.z;
       }
     }
+
+    feature.positions(outPos);
+    feature.gcs(destGcs);
+    return outPos;
   }
 
-  // Update the features gcs field
-  feature.setGcs(destGcs);
+  return null;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -228,20 +199,40 @@ geo.geoTransform.transformFeature = function(destGcs, feature) {
  * projection.
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.geoTransform.transformLayer = function(destGcs, layer) {
+geo.geoTransform.transformLayer = function(destGcs, layer, baseLayer) {
   'use strict';
 
+  var features, count, i;
+
   if (!layer) {
-    console.log('[warning] Invalid (null) layer');
+    throw "Requires valid layer for tranformation";
+  }
+
+  if (!baseLayer) {
+    throw "Requires baseLayer used by the map";
+  }
+
+  if (layer === baseLayer) {
     return;
   }
 
-  var features = layer.features(),
-      count = features.length,
-      i = 0;
-  for (i = 0; i < count; ++i) {
-    // TODO Ignoring src and destination projections
-    geo.geoTransform.osmTransformFeature(
-      destGcs, features[i]);
+  if (layer instanceof geo.featureLayer) {
+    features = layer.features();
+    count = features.length;
+    i = 0;
+
+    for (i = 0; i < count; ++i) {
+      if (destGcs === "EPSG:3857" && baseLayer instanceof geo.osmLayer) {
+        geo.geoTransform.osmTransformFeature(
+          destGcs, features[i], true);
+      } else {
+        geo.geoTransform.transformFeature(
+          destGcs, features[i], true);
+      }
+    }
+
+    layer.gcs(destGcs);
+  } else {
+    throw "Only feature layer transformation is supported";
   }
 };

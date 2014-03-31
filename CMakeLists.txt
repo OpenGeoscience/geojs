@@ -28,24 +28,42 @@ find_package(UglifyJS)
 
 set(_source_files
   core/init.js
+  core/object.js
+  core/sceneObject.js
+  core/timestamp.js
   core/ellipsoid.js
   core/mercator.js
   core/latlng.js
   core/layer.js
   core/featureLayer.js
-  core/openStreetMapLayer.js
   core/featureCollection.js
   core/layerSource.js
   core/archiveLayerSource.js
-  core/command.js
-  core/updateRequest.js
-  core/prepareForRenderRequest.js
-  core/mapInteractorStyle.js
+  core/event.js
   core/time.js
   core/map.js
   core/feature.js
+  core/pointFeature.js
+  core/lineFeature.js
+  core/polygonFeature.js
+  core/planeFeature.js
+  core/geomFeature.js
   core/geoTransform.js
   core/data.js
+  core/renderer.js 
+  core/osmLayer.js
+  gl/init.js
+  gl/renderer.js
+  gl/pointFeature.js
+  gl/geomFeature.js
+  gl/pointFeature.js
+  gl/planeFeature.js
+  gl/mapInteractorStyle.js	
+  gl/vglRenderer.js
+  d3/init.js
+  d3/object.js
+  d3/pointFeature.js
+  d3/d3Renderer.js
   ui/init.js
   ui/gis.js
   srv/init.js

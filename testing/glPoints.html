@@ -30,12 +30,12 @@ function processCSVData(csvdata) {
 
 $(function() {
     var mapOptions = {
+      node: 'map',
       zoom : 6,
-      center : geo.latlng(0.0, 0.0)
+      center : [0.0, 0.0]
     };
 
-    var myMap = geo.map(document.getElementById("glcanvas"), mapOptions),
-        canvas = document.getElementById('glcanvas'),
+    var myMap = geo.map(mapOptions),
         table = [],
         citieslatlon = [],
         colors = [];
@@ -44,16 +44,14 @@ $(function() {
     window.addEventListener('resize', resizeCanvas, false);
 
     function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      updateAndDraw(canvas.width, canvas.height);
+      $('#map').width('100%');
+      $('#map').height('100%');
+      updateAndDraw($('#map').width(), $('#map').height());
     }
     resizeCanvas();
 
     function updateAndDraw(width, height) {
-      myMap.draw();
-      myMap.resize(width, height);
-      myMap.update();
+      myMap.resize(0, 0, width, height);
       myMap.draw();
     }
 
@@ -79,28 +77,19 @@ $(function() {
               colors.push(1.0, 1.0, 153.0 / 255.0);
             }
           }
-
-          // Load image to be used for drawing dots
-          var image = new Image();
-          image.src = '/data/spark.png';
-          image.onload = function() {
-            var pointLayer = geo.featureLayer({
-              "opacity" : 1,
-              "showAttribution" : 1,
-              "visible" : 1
-            }, geo.pointSpritesFeature(image, citieslatlon, colors));
-            pointLayer.setName('cities');
-           myMap.addLayer(pointLayer);
-	         myMap.draw();
-          };
         }
-      }
-    });
+
+        // Load image to be used for drawing dots
+        var layer = geo.featureLayer({
+            'renderer' : 'vglRenderer'});
+        layer.create('pointFeature')
+          .positions(citieslatlon);
+
+        myMap.addLayer(layer);
+        myMap.draw();
+      }});
 });
 </script>
 
-<div id=map style="width:100%; height:100%;">
-  <canvas id="glcanvas" style="width:100%; height:100%;" ></canvas>
-</div>
-
+<div id='map'></div>
 </body>
