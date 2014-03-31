@@ -4,6 +4,7 @@
   "devDependencies": {
     "grunt": "*",
     "grunt-contrib-watch": "*",
-    "grunt-shell": "*"
+    "grunt-shell": "*",
+    "grunt-contrib-jasmine": "^0.6.3"
   }
 }
