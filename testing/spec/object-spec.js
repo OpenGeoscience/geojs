@@ -31,6 +31,10 @@ describe('geo.object', function() {
 
       obj.trigger('test', evtData);
       expect(foo.ncalls).toBe(2);
+
+      obj.off('testevent', foo.call);
+      obj.trigger('testevent', evtData);
+      expect(foo.ncalls).toBe(2);
     });
 
     it('Make a single object with several handlers on one event', function () {
@@ -70,6 +74,15 @@ describe('geo.object', function() {
       
       obj.trigger('another event', evtData);
       checkAll(3);
+
+      obj.off('event', foo.handler1.call);
+      obj.off('event', foo.handler3.call);
+      obj.trigger('event', evtData);
+      expect(foo.handler1.ncalls).toBe(3);
+      expect(foo.handler2.ncalls).toBe(4);
+      expect(foo.handler3.ncalls).toBe(3);
+      expect(foo.handler4.ncalls).toBe(4);
+
     });
 
     it('Make several objects with several events', function () {
@@ -135,6 +148,32 @@ describe('geo.object', function() {
       
       obj.trigger('event2');
       checkAll(1, 4, 3, 2);
+
+      obj.off('event4', foo.evt2.handler.call);
+      obj.off('event1', foo.evt1.handler.call);
+      obj.off('event3', foo.evt3.handler.call);
+
+      obj.trigger('event3', foo.evt3.data);
+      checkAll(1, 4, 3, 2);
+
+      obj.trigger('event5');
+      checkAll(1, 4, 3, 2);
+      
+      obj.trigger('event1', foo.evt1.data);
+      checkAll(1, 5, 3, 2);
+      
+      obj.trigger('event4', foo.evt4.data);
+      checkAll(1, 5, 3, 3);
+      
+      obj.trigger('event4', foo.evt4.data);
+      checkAll(1, 5, 3, 4);
+      
+      obj.trigger('event3', foo.evt3.data);
+      checkAll(1, 5, 3, 4);
+      
+      obj.trigger('event2');
+      checkAll(1, 6, 3, 4);
+
     });
 
     it('Test object.on([], function) call signature', function () {
@@ -142,13 +181,21 @@ describe('geo.object', function() {
           data = {},
           foo = new CallCounter(data);
       
-      obj.on(['event1', 'event2'], foo.call);
+      obj.on(['event1', 'event2', 'event3'], foo.call);
 
       obj.trigger('event1', data);
       expect(foo.ncalls).toBe(1);
       
       obj.trigger('event2', data);
       expect(foo.ncalls).toBe(2);
+
+      obj.off(['event2', 'event1'], foo.call);
+
+      obj.trigger('event1', data);
+      expect(foo.ncalls).toBe(2);
+      
+      obj.trigger('event3', data);
+      expect(foo.ncalls).toBe(3);
     });
 
   });
