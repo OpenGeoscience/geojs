@@ -106,6 +106,7 @@ geo.registerRenderer = function(name, func) {
 geo.createRenderer  = function(name, layer, canvas) {
   if (name in geo.renderers) {
     var ren = geo.renderers[name]({'layer': layer, 'canvas': canvas});
+    ren._init();
     return ren;
   }
   return null;

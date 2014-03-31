@@ -35,6 +35,7 @@ geo.featureLayer = function(arg) {
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       m_features = null,
+      s_init = this._init,
       s_update = this._update;
 
 
@@ -80,6 +81,8 @@ geo.featureLayer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._create = function(featureName) {
+    this._init();
+
     var newFeautre = geo.createFeature(
       featureName, m_this, this.renderer());
 
@@ -116,6 +119,36 @@ geo.featureLayer = function(arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Initialize
+   *
+   * Do not call parent _init method as its already been executed
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._init = function() {
+    if (this.initialized()) {
+      return this;
+    }
+
+    /// Call super class init
+    s_init.call(this);
+
+    /// Bind events to handlers
+    this.on(geo.event.resize, function(event) {
+      m_this.renderer()._resize(event.x, event.y, event.width, event.height);
+      m_this._update({});
+      m_this.renderer()._render();
+    });
+
+    this.on(geo.event.pan, function(event) {
+      m_this._update({});
+      m_this.renderer()._render();
+    });
+
+    return this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Update layer
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -123,7 +156,7 @@ geo.featureLayer = function(arg) {
     var i;
 
     if (!m_features) {
-      return;
+      return this;
     }
 
     /// Call base class update
@@ -145,6 +178,8 @@ geo.featureLayer = function(arg) {
     }
 
     this.updateTime().modified();
+
+    return this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -154,6 +189,7 @@ geo.featureLayer = function(arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._draw = function() {
     this.renderer()._render();
+    return this;
   };
 
   return this;

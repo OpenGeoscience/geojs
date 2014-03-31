@@ -28,7 +28,8 @@ geo.renderer = function(arg) {
   arg = arg || {};
   var m_this = this,
       m_layer = arg.layer === undefined ? null : arg.layer,
-      m_canvas = arg.canvas === undefined ? null : arg.canvas;
+      m_canvas = arg.canvas === undefined ? null : arg.canvas,
+      m_initialized = false;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -53,7 +54,21 @@ geo.renderer = function(arg) {
       m_canvas = val;
       this.modified();
     }
-  }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set if renderer has been initialized
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.initialized = function(val) {
+    if (val === undefined) {
+      return m_initialized;
+    } else {
+      m_initialized = val;
+      return this;
+    }
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -143,7 +158,7 @@ geo.renderer = function(arg) {
    * Initialize
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._init = function(arg) {
+  this._init = function() {
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -169,17 +184,16 @@ geo.renderer = function(arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function() {
   };
-  
+
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Connect mouse events to the map layer
    */
   ////////////////////////////////////////////////////////////////////////////
   this._connectMouseEvents = function() {
-            
+
   };
 
-  this._init(arg);
   return this;
 };
 

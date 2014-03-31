@@ -48,7 +48,6 @@ $(function() {
       $('#map').height('100%');
       updateAndDraw($('#map').width(), $('#map').height());
     }
-    resizeCanvas();
 
     function updateAndDraw(width, height) {
       myMap.resize(0, 0, width, height);
@@ -86,7 +85,7 @@ $(function() {
           .positions(citieslatlon);
 
         myMap.addLayer(layer);
-        myMap.draw();
+    	resizeCanvas();
       }});
 });
 </script>
