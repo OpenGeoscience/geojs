@@ -35,7 +35,7 @@ geo.object = function(cfg) {
   this.on = function (event, handler) {
     if (Array.isArray(event)) {
       event.forEach(function (e) {
-        this.on(e, handler);
+        m_this.on(e, handler);
       });
       return this;
     }
@@ -81,7 +81,7 @@ geo.object = function(cfg) {
   this.off = function (event, arg) {
     if (Array.isArray(event)) {
       event.forEach(function (e) {
-        this.off(e, arg);
+        m_this.off(e, arg);
       });
       return this;
     }
@@ -89,7 +89,7 @@ geo.object = function(cfg) {
       m_eventHandlers[event] = [];
     } else if (Array.isArray(arg)) {
       arg.forEach(function (handler) {
-        this.off(event, handler);
+        m_this.off(event, handler);
       });
       return this;
     }

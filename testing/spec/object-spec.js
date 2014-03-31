@@ -136,6 +136,21 @@ describe('geo.object', function() {
       obj.trigger('event2');
       checkAll(1, 4, 3, 2);
     });
+
+    it('Test object.on([], function) call signature', function () {
+      var obj = new geo.object(),
+          data = {},
+          foo = new CallCounter(data);
+      
+      obj.on(['event1', 'event2'], foo.call);
+
+      obj.trigger('event1', data);
+      expect(foo.ncalls).toBe(1);
+      
+      obj.trigger('event2', data);
+      expect(foo.ncalls).toBe(2);
+    });
+
   });
 
 });
