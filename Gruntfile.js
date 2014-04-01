@@ -39,5 +39,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-shell');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-jasmine');
-  grunt.registerTask('default', ['watch']);
+  grunt.registerTask('default', ['shell']);
+  grunt.registerTask('test', ['shell', 'jasmine']);
 };
