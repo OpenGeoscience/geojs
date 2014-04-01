@@ -76,6 +76,7 @@ $(function() {
           geomLayer.setUsePointSprites(true);
           geomLayer.setPointSpritesImage(image);
           geomLayer = geo.featureLayer({
+            "name" : "point_sprite_geom_feature_layer",
             "opacity" : 1,
             "showAttribution" : 1,
             "visible" : 1}, geomFeature);

@@ -143,7 +143,7 @@ geo.map = function(arg) {
       layer.map(this);
 
       console.log(m_gcs);
-      if (layer.referenceLayer()) {
+      if (layer.referenceLayer() || this.children().length === 0) {
         this.baseLayer(layer);
       } else {
         layer.transform(m_gcs);

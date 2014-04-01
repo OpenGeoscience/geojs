@@ -11,6 +11,37 @@
 
 //////////////////////////////////////////////////////////////////////////////
 /**
+ * Layer options object specification
+ *
+ * @class geo.layerOptions
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.layerOptions = function() {
+  "use strict";
+
+  if (!(this instanceof geo.layerOptions)) {
+    return new geo.layerOptions();
+  }
+
+  this.opacity = 0.5;
+  this.showAttribution = true;
+  this.visible = true;
+  this.binNumber = vgl.material.RenderBin.Default;
+
+  return this;
+};
+
+geo.newLayerId = (function () {
+    var currentId = 1;
+    return function () {
+        var id = currentId;
+        currentId++;
+        return id;
+    };
+}) ();
+
+//////////////////////////////////////////////////////////////////////////////
+/**
  * Base class for all layer types geo.layer represents any object that be
  * rendered on top of the map base. This could include image, points, line, and
  * polygons.
@@ -38,7 +69,7 @@ geo.layer = function(arg) {
                                            "color" : [0.8, 0.8, 0.8],
                                            "visible" : true,
                                            "bin" : 100} : arg.style,
-      m_id = "",
+      m_id = arg.id === undefined ? geo.newLayerId() : arg.id,
       m_name = "",
       m_gcs = 'EPSG:4326',
       m_timeRange = [],

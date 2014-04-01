@@ -57,7 +57,7 @@ ggl.pointFeature = function(arg) {
     }
 
     m_actor = vgl.utils.createPoints(this.positions(), this.style().colors);
-    this.renderer()._contextRenderer().addActor(m_actor);
+    this.renderer().contextRenderer().addActor(m_actor);
     m_buildTime.modified();
   };
 
