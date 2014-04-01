@@ -63,6 +63,7 @@ set(_source_files
   d3/init.js
   d3/object.js
   d3/pointFeature.js
+  d3/lineFeature.js
   d3/d3Renderer.js
   ui/init.js
   ui/gis.js

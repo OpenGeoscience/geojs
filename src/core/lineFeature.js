@@ -45,7 +45,7 @@ geo.lineFeature = function(arg) {
       return m_positions;
     } else {
       // Copy incoming array of positions
-      m_positions = positions.slice(0);
+      m_positions = val.slice(0);
       this.modified();
       return this;
     }
