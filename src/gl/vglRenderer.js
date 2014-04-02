@@ -126,11 +126,13 @@ ggl.vglRenderer = function(arg) {
    * Initialize
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._init = function(arg) {
+  this._init = function() {
+    if (this.initialized()) {
+      return this;
+    }
+
     var canvas;
-
-    s_init.call(this, arg);
-
+    s_init.call(this);
     if (!this.canvas()) {
       canvas = $(document.createElement('canvas'));
       canvas.attr('class', '.webgl-canvas');
@@ -145,9 +147,11 @@ ggl.vglRenderer = function(arg) {
                                    this.canvas().height());
 
     /// VGL uses jquery trigger on methods
-    $(m_interactorStyle).on(geo.event.pan, function(event, arg) {
-      m_this.trigger(geo.event.pan, arg);
+    $(m_interactorStyle).on(geo.event.pan, function(event) {
+      m_this.trigger(geo.event.pan, event);
     });
+
+    return this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -195,6 +199,7 @@ ggl.vglRenderer = function(arg) {
     this.canvas().attr('height', h);
     m_viewer.renderWindow().positionAndResize(x, y, w, h);
     this._render();
+    return this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -204,6 +209,7 @@ ggl.vglRenderer = function(arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._render = function() {
     m_viewer.render();
+    return this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -214,7 +220,6 @@ ggl.vglRenderer = function(arg) {
   this._exit = function() {
   };
 
-  this._init(arg);
   return this;
 };
 

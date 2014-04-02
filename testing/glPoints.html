@@ -30,8 +30,8 @@ function processCSVData(csvdata) {
 
 $(function() {
     var mapOptions = {
-      node: '#map',
-      zoom : 6,
+      node: 'map',
+      zoom : 3,
       center : [0.0, 0.0]
     };
 
@@ -40,22 +40,20 @@ $(function() {
         citieslatlon = [],
         colors = [];
 
-    // Resize the canvas to fill browser window dynamically
+    /// Resize the canvas to fill browser window dynamically
     window.addEventListener('resize', resizeCanvas, false);
 
     function resizeCanvas() {
       $('#map').width('100%');
       $('#map').height('100%');
-      updateAndDraw($('#map').width(), $('#map').height());
-    }
-    resizeCanvas();
 
-    function updateAndDraw(width, height) {
-      myMap.resize(0, 0, width, height);
+      myMap.resize(0, 0, $('#map').width(), $('#map').height());
       myMap.draw();
     }
 
-    // Read city geo-coded data
+    resizeCanvas();
+
+    /// Read city geo-coded data
     $.ajax({
       type : "GET",
       url : "/data/cities.csv",
@@ -84,9 +82,7 @@ $(function() {
             'renderer' : 'vglRenderer'});
         layer.create('pointFeature')
           .positions(citieslatlon);
-
         myMap.addLayer(layer);
-        myMap.draw();
       }});
 });
 </script>

@@ -141,6 +141,7 @@ geo.map = function(arg) {
   this.addLayer = function(layer) {
     if (layer !== null || layer !== undefined) {
       layer.map(this);
+      layer._init();
 
       console.log(m_gcs);
       if (layer.referenceLayer() || this.children().length === 0) {

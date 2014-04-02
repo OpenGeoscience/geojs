@@ -83,6 +83,7 @@ geo.layer = function(arg) {
       m_node = null,
       m_canvas = null,
       m_renderer = null,
+      m_initialized = false,
       m_rendererName = arg.renderer  === undefined ?  'vglRenderer' : arg.renderer,
       m_dataTime = geo.timestamp(),
       m_updateTime = geo.timestamp(),
@@ -330,12 +331,30 @@ geo.layer = function(arg) {
     return m_isReference;
   };
 
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set if the layer has been initialized
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.initialized = function(val) {
+    if(val !== undefined) {
+      m_initialized = val;
+      return this;
+    }
+    return m_initialized;
+  };
+
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Init layer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._init = function(arg) {
+  this._init = function() {
+    if (m_initialized) {
+      return this;
+    }
+
     // Create top level div for the layer
     m_node = $(document.createElement('div'));
     m_node.attr('id', m_name);
@@ -359,6 +378,10 @@ geo.layer = function(arg) {
       m_canvas = m_renderer.canvas();
     }
     this.addChild(m_renderer);
+
+    m_initialized = true;
+
+    return this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -391,6 +414,8 @@ geo.layer = function(arg) {
     this.modified();
     this.trigger(geo.event.resize,
       {x: x, y: y, width: m_width, height: m_height});
+
+    return this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -401,7 +426,6 @@ geo.layer = function(arg) {
   this._draw = function() {
   };
 
-  this._init(arg);
   return this;
 };
 

@@ -36,6 +36,7 @@ geo.osmLayer = function(arg) {
       m_mapType = MAP_MQOSM,
       m_tiles = {},
       m_previousZoom = null,
+      s_init = this._init,
       s_update = this._update;
 
   ////////////////////////////////////////////////////////////////////////////
@@ -145,11 +146,11 @@ geo.osmLayer = function(arg) {
         y = null;
 
     if (m_previousZoom === null || m_previousZoom === zoom) {
-      return;
+      return this;
     }
 
     if (!m_tiles) {
-      return;
+      return this;
     }
 
     /// For now just clear the tiles from the last zoom.
@@ -186,6 +187,8 @@ geo.osmLayer = function(arg) {
         }
       }
     }
+
+    return this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -271,6 +274,22 @@ geo.osmLayer = function(arg) {
     }
 
     this.updateTime().modified();
+
+    return this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Initialize
+   *
+   * Do not call parent _init method as its already been executed
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._init = function() {
+    s_init.call(this);
+    this.gcs("EPSG:3857");
+
+    return this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -286,32 +305,6 @@ geo.osmLayer = function(arg) {
     s_update.call(this, request);
   };
 
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Initialize
-   *
-   * Do not call parent _init as that is not required for this layer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._init = function(arg) {
-    /// Set gcs
-    this.gcs("EPSG:3857");
-
-    /// Bind events to handlers
-    this.on(geo.event.resize, function(event) {
-      m_this.renderer()._resize(event.x, event.y, event.width, event.height);
-      m_this._update({});
-      m_this.renderer()._render();
-    });
-
-    this.on(geo.event.pan, function(event) {
-      m_this._update({});
-      m_this.renderer()._render();
-    });
-  };
-
-  /// Initialize
-  this._init(arg);
   return this;
 };
 
