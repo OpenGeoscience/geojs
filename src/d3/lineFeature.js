@@ -24,6 +24,7 @@ gd3.lineFeature = function(arg) {
   }
   arg = arg || {};
   geo.lineFeature.call(this, arg);
+  gd3.object.call(this);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -32,6 +33,7 @@ gd3.lineFeature = function(arg) {
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       s_init = this._init,
+      m_buildTime = geo.timestamp(),
       s_update = this._update,
       m_style = {};
 
@@ -53,22 +55,28 @@ gd3.lineFeature = function(arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._init = function(arg) {
     s_init.call(this, arg);
+    return this;
   };
 
   this._build = function() {
     var data = this.positions(),
         s_style = this.style(),
         line = d3.svg.line()
-                .x(function (d) { return georef(d, true); })
-                .y(function (d) { return georef(d); });
+                .x(function (d) {
+                  return georef(d, true)._dispx();
+                })
+                .y(function (d) { return georef(d)._dispy(); });
     s_update.call(this);
     
-    m_style.data = data;
+    m_style.id = m_this._d3id();
+    m_style.data = [data];
     m_style.append = 'path';
+    m_style.classes = [ 'd3LineFeature' ];
     m_style.attributes = {
       d: line
     };
     m_style.style = {
+      fill: 'none',
       stroke: d3.rgb(s_style.color[0]*255, s_style.color[1]*255, s_style.color[2]*255),
       'stroke-width': s_style.width[0].toString() + 'px',
       'stroke-opacity': s_style.opacity
@@ -80,6 +88,22 @@ gd3.lineFeature = function(arg) {
     return this;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Update
+   *
+   * @override
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._update = function() {
+    s_update.call(this);
+
+    if (this.dataTime().getMTime() >= m_buildTime.getMTime()) {
+      this._build();
+    }
+
+    return this;
+  };
   
   this._init(arg);
   return this;

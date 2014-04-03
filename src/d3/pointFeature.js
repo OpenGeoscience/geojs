@@ -91,6 +91,7 @@ gd3.pointFeature = function(arg) {
     if (!data) { data = []; }
 
     // fill in d3 renderer style object defaults
+    m_style.id = m_this._d3id();
     m_style.data = data;
     m_style.append = 'circle';
     m_style.style = $.extend({}, d_style);
