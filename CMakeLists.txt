@@ -48,7 +48,7 @@ set(_source_files
   core/polygonFeature.js
   core/planeFeature.js
   core/geomFeature.js
-  core/geoTransform.js
+  core/transform.js
   core/data.js
   core/renderer.js 
   core/osmLayer.js
