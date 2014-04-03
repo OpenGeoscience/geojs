@@ -39,8 +39,9 @@ geo.transform.osmTransformFeature = function(destGcs, feature, inplace) {
     return;
   }
 
-  if (!(feature instanceof geo.pointFeature)) {
-    throw "Supports only point feature";
+  if (!(feature instanceof geo.pointFeature ||
+        feature instanceof geo.lineFeature)) {
+    throw "Supports only point or line feature";
   }
 
   var noOfComponents = null, pointOffset = 0, count = null,
@@ -48,7 +49,8 @@ geo.transform.osmTransformFeature = function(destGcs, feature, inplace) {
       inplace = inplace || false, projSrcGcs = new proj4.Proj(srcGcs),
       projDestGcs = new proj4.Proj(destGcs), xCoord, yCoord;
 
-  if (feature instanceof geo.pointFeature) {
+  if (feature instanceof geo.pointFeature ||
+      feature instanceof geo.lineFeature) {
 
     ///  If source GCS is not in 4326, transform it first into 4326
     /// before we transform it for OSM.
@@ -129,8 +131,9 @@ geo.transform.transformFeature = function(destGcs, feature, inplace) {
     return;
   }
 
-  if (!(feature instanceof geo.pointFeature)) {
-    throw "Supports only point feature";
+  if (!(feature instanceof geo.pointFeature ||
+        feature instanceof geo.lineFeature)) {
+    throw "Supports only point or line feature";
   }
 
   var noOfComponents = null, pointOffset = 0, count = null, inPos = null,
@@ -138,7 +141,8 @@ geo.transform.transformFeature = function(destGcs, feature, inplace) {
       inplace = inplace || false, projSrcGcs = new proj4.Proj(srcGcs),
       dest = new proj4.Proj(destGcs);
 
-  if (feature instanceof geo.pointFeature) {
+  if (feature instanceof geo.pointFeature ||
+      feature instanceof geo.lineFeature) {
     inPos = feature.positions();
     count = inPos.length
 
