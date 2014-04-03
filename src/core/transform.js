@@ -16,14 +16,14 @@
  * projection.
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.geoTransform = {};
+geo.transform = {};
 
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Custom transform for a feature used for OpenStreetMap
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.geoTransform.osmTransformFeature = function(destGcs, feature, inplace) {
+geo.transform.osmTransformFeature = function(destGcs, feature, inplace) {
   /// TODO
   /// Currently we make assumption that incoming feature is in 4326
   /// which may not be true.
@@ -39,8 +39,9 @@ geo.geoTransform.osmTransformFeature = function(destGcs, feature, inplace) {
     return;
   }
 
-  if (!(feature instanceof geo.pointFeature)) {
-    throw "Supports only point feature";
+  if (!(feature instanceof geo.pointFeature ||
+        feature instanceof geo.lineFeature)) {
+    throw "Supports only point or line feature";
   }
 
   var noOfComponents = null, pointOffset = 0, count = null,
@@ -48,12 +49,13 @@ geo.geoTransform.osmTransformFeature = function(destGcs, feature, inplace) {
       inplace = inplace || false, projSrcGcs = new proj4.Proj(srcGcs),
       projDestGcs = new proj4.Proj(destGcs), xCoord, yCoord;
 
-  if (feature instanceof geo.pointFeature) {
+  if (feature instanceof geo.pointFeature ||
+      feature instanceof geo.lineFeature) {
 
     ///  If source GCS is not in 4326, transform it first into 4326
     /// before we transform it for OSM.
     if (srcGcs !== "EPSG:4326") {
-      geo.geoTransform.transformFeature("EPSG:4326", feature, true);
+      geo.transform.transformFeature("EPSG:4326", feature, true);
     }
 
     inPos = feature.positions();
@@ -117,7 +119,7 @@ geo.geoTransform.osmTransformFeature = function(destGcs, feature, inplace) {
  * Transform a feature to destination GCS
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.geoTransform.transformFeature = function(destGcs, feature, inplace) {
+geo.transform.transformFeature = function(destGcs, feature, inplace) {
   'use strict';
 
   if (!feature) {
@@ -129,8 +131,9 @@ geo.geoTransform.transformFeature = function(destGcs, feature, inplace) {
     return;
   }
 
-  if (!(feature instanceof geo.pointFeature)) {
-    throw "Supports only point feature";
+  if (!(feature instanceof geo.pointFeature ||
+        feature instanceof geo.lineFeature)) {
+    throw "Supports only point or line feature";
   }
 
   var noOfComponents = null, pointOffset = 0, count = null, inPos = null,
@@ -138,7 +141,8 @@ geo.geoTransform.transformFeature = function(destGcs, feature, inplace) {
       inplace = inplace || false, projSrcGcs = new proj4.Proj(srcGcs),
       dest = new proj4.Proj(destGcs);
 
-  if (feature instanceof geo.pointFeature) {
+  if (feature instanceof geo.pointFeature ||
+      feature instanceof geo.lineFeature) {
     inPos = feature.positions();
     count = inPos.length
 
@@ -199,7 +203,7 @@ geo.geoTransform.transformFeature = function(destGcs, feature, inplace) {
  * projection.
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.geoTransform.transformLayer = function(destGcs, layer, baseLayer) {
+geo.transform.transformLayer = function(destGcs, layer, baseLayer) {
   'use strict';
 
   var features, count, i;
@@ -223,10 +227,10 @@ geo.geoTransform.transformLayer = function(destGcs, layer, baseLayer) {
 
     for (i = 0; i < count; ++i) {
       if (destGcs === "EPSG:3857" && baseLayer instanceof geo.osmLayer) {
-        geo.geoTransform.osmTransformFeature(
+        geo.transform.osmTransformFeature(
           destGcs, features[i], true);
       } else {
-        geo.geoTransform.transformFeature(
+        geo.transform.transformFeature(
           destGcs, features[i], true);
       }
     }
