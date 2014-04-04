@@ -204,7 +204,7 @@ geo.layer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.transform = function(val) {
-    geo.geoTransform.transformLayer(val, this, m_map.baseLayer());
+    geo.transform.transformLayer(val, this, m_map.baseLayer());
     return this;
   };
 
