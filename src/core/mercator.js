@@ -12,9 +12,40 @@
 
 geo.mercator = {
   r_major:6378137.0,  //Equatorial Radius, WGS84
-  r_minor:6356752.314245179,  //defined as constant
-  f:298.257223563 //1/f=(a-b)/a , a=r_major, b=r_minor
 };
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Returns the polar radius based on the projection.
+ *
+ * @method r_minor
+ * @param {Boolean}
+ * @returns {Number}
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.mercator.r_minor = function(spherical) {
+  var r_minor;
+
+  spherical = spherical !== undefined ? spherical : false;
+
+  if (spherical) {
+    r_minor = 6378137.0;
+  }
+  else {
+    r_minor = 6356752.314245179;
+  }
+
+  return r_minor;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * 1/f=(a-b)/a , a=r_major, b=r_minor
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.mercator.f = function(spherical) {
+  return (geo.mercator.r_major-geo.mercator.r_minor(spherical))/geo.mercator.r_major;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -177,8 +208,9 @@ geo.mercator.rad2deg = function(r) {
  * @returns {{x: number, y: number}}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.mercator.ll2m = function(lon,lat) {
+geo.mercator.ll2m = function(lon,lat,spherical) {
   'use strict';
+
   if (lat > 89.5) {
     lat = 89.5;
   }
@@ -188,7 +220,7 @@ geo.mercator.ll2m = function(lon,lat) {
   }
 
   var x = this.r_major * this.deg2rad(lon),
-      temp = this.r_minor / this.r_major,
+      temp = this.r_minor(spherical) / this.r_major,
       es = 1.0 - (temp * temp),
       eccent = Math.sqrt(es),
       phi = this.deg2rad(lat),
@@ -211,10 +243,10 @@ geo.mercator.ll2m = function(lon,lat) {
  * @param y
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.mercator.m2ll = function(x,y) {
+geo.mercator.m2ll = function(x,y,spherical) {
   'use strict';
   var lon=this.rad2deg((x/this.r_major)),
-      temp = this.r_minor / this.r_major,
+      temp = this.r_minor(spherical) / this.r_major,
       e = Math.sqrt(1.0 - (temp * temp)),
       lat=this.rad2deg(this.pjPhi2(Math.exp(-(y/this.r_major)), e)),
       ret={'lon':lon,'lat':lat};
