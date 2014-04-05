@@ -25,8 +25,7 @@ gd3.pointFeature = function(arg) {
   geo.pointFeature.call(this, arg);
   gd3.object.call(this);
 
-  var m_this = this,
-      m_style;
+  var m_this = this;
 
   // georeference a point with caching
   function georef(d, refresh) {
@@ -43,23 +42,12 @@ gd3.pointFeature = function(arg) {
   var d_attr = {
         cx: function (d) { return georef(d, true)._dispx(); },
         cy: function (d) { return georef(d)._dispy(); },
-        r: '3pt'
+        r: '1px'
       },
-      d_style = {};
-
-
-  function unpackArg (arg) {
-    // convert from geojs argument conventions (to be determined) 
-    // to what is used by d3Renderer
-    return {
-      'id': this._d3id(),
-      'append': 'circle',
-      'dataIndex': arg.dataIndex || function (d, i) { return i; },
-      'attributes': $.extend({}, d_attr, arg.attributes || {}),
-      'classes': arg.classes || [],
-      'style': $.extend({}, d_style, arg.style || {})
-    };
-  }
+      d_style = {
+        fill: 'black',
+        stroke: 'none'
+      };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -68,8 +56,8 @@ gd3.pointFeature = function(arg) {
   ////////////////////////////////////////////////////////////////////////////
   var s_init = this._init,
       s_update = this._update,
-      s_style = this.style,
-      m_buildTime = geo.timestamp();
+      m_buildTime = geo.timestamp(),
+      m_style = {};
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -79,16 +67,6 @@ gd3.pointFeature = function(arg) {
   this._init = function(arg) {
     s_init.call(this, arg);
     return this;
-  };
-
-  this.style = function (arg) {
-    s_style.call(this, arg);
-
-    if (arg !== undefined) {
-      m_style = unpackArg.call(this, arg);
-      return this;
-    }
-    return m_style;
   };
 
   this._drawables = function () {
@@ -103,11 +81,32 @@ gd3.pointFeature = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._build = function() {
-    var data = this.positions();
-    if (!data) { data = []; }
+    var data = this.positions(),
+        s_style = this.style();
+
+    // call super-method
     s_update.call(this);
+    
+    // default to empty data array
+    if (!data) { data = []; }
+
+    // fill in d3 renderer style object defaults
+    m_style.id = m_this._d3id();
     m_style.data = data;
+    m_style.append = 'circle';
+    m_style.style = $.extend({}, d_style);
+    m_style.attributes = $.extend({}, d_attr);
+    m_style.classes = [ 'd3PointFeature' ];
+
+    // replace with user defined styles
+    m_style.style.fill = d3.rgb(s_style.color[0]*255, s_style.color[1]*255, s_style.color[2]*255);
+    m_style.attributes.r = s_style.size[0].toString() + "px";
+    m_style.style['fill-opacity'] = s_style.opacity;
+
+    // pass to renderer to draw
     this.renderer().drawFeatures(m_style);
+
+    // update time stamps
     m_buildTime.modified();
     this.updateTime().modified();
     return this;

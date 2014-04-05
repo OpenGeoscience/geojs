@@ -30,7 +30,7 @@ function processCSVData(csvdata) {
 
 $(window).load(function() {
     var mapOptions = {
-      node: '#map',
+      node: 'map',
       zoom : 3,
       center : [40, 105]
     };
@@ -104,24 +104,13 @@ $(window).load(function() {
                     size: [5],
                     opacity: 0.5
                 };
-        var points = layer.create('pointFeature')
+        var points = layer.create('lineFeature')
         .positions(citieslatlon)
         .style(style);
 
     myMap.addLayer(osm).addLayer(layer);
     resizeCanvas();
     myMap.draw();
-
-    points.drawables()
-      .on('mouseover', function (d) {
-        d3.select(this).transition().attr('r', '15pt');
-      })
-      .on('mouseout', function (d) {
-        d3.select(this).transition().attr('r', '3pt');
-      })
-      .on('click', function (d) {
-        d3.select(this).transition().style('opacity', 0.0).remove();
-      });
 
 });
 </script>
