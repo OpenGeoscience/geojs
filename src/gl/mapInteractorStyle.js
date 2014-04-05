@@ -97,7 +97,7 @@ ggl.mapInteractorStyle = function() {
   this.handleMouseMove = function(event) {
     var canvas = m_that.map(), xrot = null, a = null,
         angle = null, mouseWorldPoint, features, lastWorldPos, currWorldPos,
-        evt;
+        lastZoom, evt;
 
     /* TODO: Fix for layers
     if (!canvas || event.target !== canvas.node()) {
@@ -148,12 +148,13 @@ ggl.mapInteractorStyle = function() {
         m_camera.pan(-m_dx, -m_dy, -m_dz);
         currWorldPos = m_camera.position();
 
-        evt = jQuery.Event(geo.event.pan, {last_display_pos: m_mouseLastPos,
-                                           curr_display_pos: m_currentMousePos,
-                                           last_world_pos: lastWorldPos,
-                                           curr_world_pos: currWorldPos});
+        evt = {type: geo.event.pan,
+               last_display_pos: m_mouseLastPos,
+               curr_display_pos: m_currentMousePos,
+               last_world_pos: lastWorldPos,
+               curr_world_pos: currWorldPos};
 
-        $(m_that).trigger(geo.event.pan, evt);
+        $(m_that).trigger(evt);
         /// TODO Fix it
         // $(m_that).trigger(vgl.event.leftButtonPress);
       }
@@ -169,8 +170,9 @@ ggl.mapInteractorStyle = function() {
         m_camera.rotate(0, xrot);
       }
 
-      evt = jQuery.Event(geo.event.rotate);
-      $(m_that).trigger(geo.event.rotate, evt);
+      evt = { type: geo.event.rotate,
+              rot: xrot };
+      $(m_that).trigger(evt);
 
       /// TODO Fix it
       // $(m_that).trigger(vgl.event.middleButtonPress);
@@ -179,14 +181,18 @@ ggl.mapInteractorStyle = function() {
       m_zTrans = (m_currentMousePos.y - m_mouseLastPos.y) / m_height;
 
       // Calculate zoom scale here
+      lastZoom = m_camera.zoom();
       if (m_zTrans > 0) {
         m_camera.zoom(1 - Math.abs(m_zTrans));
       } else {
         m_camera.zoom(1 + Math.abs(m_zTrans));
       }
 
-      evt = jQuery.Event(geo.event.rotate, {zoom: m_camera.zoom()});
-      $(m_that).trigger(geo.event.zoom, evt);
+      evt = {type: geo.event.zoom,
+             curr_zoom: m_camera.zoom(),
+             last_zoom: lastZoom};
+
+      $(m_that).trigger(evt);
 
       /// TODO Fix it
       // $(m_that).trigger(vgl.event.rightButtonPress);
@@ -203,7 +209,7 @@ ggl.mapInteractorStyle = function() {
   ////////////////////////////////////////////////////////////////////////////
   this.handleMouseDown = function(event) {
     var canvas = m_that.map(), point, plane;
-   
+
     /* TODO: Fix for layers
     if (!canvas || event.target !== canvas.node()) {
       return true;
@@ -254,7 +260,7 @@ ggl.mapInteractorStyle = function() {
         width = null,
         height = null,
         num = null;
-  
+
     /* TODO: Fix for layers
     if (!canvas || event.target !== canvas.node()) {
       return true;
