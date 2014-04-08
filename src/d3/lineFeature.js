@@ -84,6 +84,7 @@ gd3.lineFeature = function(arg) {
 
     this.renderer().drawFeatures(m_style);
 
+    m_buildTime.modified();
     this.updateTime().modified();
     return this;
   };
