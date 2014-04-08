@@ -122,7 +122,12 @@ gd3.d3Renderer = function(arg) {
     if (!baseRenderer) {
       throw "Cannot project until this layer is connected to a map with a base layer.";
     }
-    return baseRenderer.worldToDisplay(pt);
+    var vals = baseRenderer.worldToDisplay(pt);
+    vals.forEach(function (v) {
+      v[0] -= m_translate[0];
+      v[1] -= m_translate[1];
+    });
+    return vals;
   };
 
   ////////////////////////////////////////////////////////////////////////////
