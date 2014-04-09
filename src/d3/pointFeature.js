@@ -33,7 +33,7 @@ gd3.pointFeature = function(arg) {
       return d;
     }
     var map = m_this.layer().map(), p;
-    p = map.latlngToDisplay([d]);
+    p = map.gcsToDisplay(d);
     d._dispx = function () { return p[0].x; };
     d._dispy = function () { return p[0].y; };
     return d;

@@ -142,14 +142,11 @@ geo.map = function(arg) {
     if (layer !== null || layer !== undefined) {
       layer.map(this);
       layer._init();
+      layer._resize(m_x, m_y, m_width, m_height);
 
-      console.log(m_gcs);
       if (layer.referenceLayer() || this.children().length === 0) {
         this.baseLayer(layer);
-      } else {
-        layer.transform(m_gcs);
       }
-      layer._resize(m_x, m_y, m_width, m_height);
 
       this.addChild(layer);
       this.modified();
@@ -255,44 +252,47 @@ geo.map = function(arg) {
    * Convert from latitude-longitude to display coordinates
    *
    * @param input {[geo.latlng], [{x:_x, y: _y}], [x1,y1, x2, y2]}
+   *
+   * NOTE: Currently only lat-lon inputs are supported
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.latlngToDisplay = function(input) {
-    var i, output, toDisplay;
+  this.gcsToDisplay = function(input) {
+    var i, world, toDisplay, output = [];
 
     /// Private function to convert geo.latlng to display coordinates
-    toDisplay = function(x, y) {
-      var xy = { x: x, y: y };
-      /// Now convert from mercLatLon to display here
-      return m_baseLayer.renderer().worldToDisplay(xy);
+    toDisplay = function() {
+      return (function(x, y) {
+        var xy = { x: x, y: y };
+        /// Now convert from mercLatLon to display here
+        return m_baseLayer.renderer().worldToDisplay(xy);
+      });
     };
 
     /// Now handle different data types
-    /// Input is arrays
     if (input instanceof Array && input.length > 0) {
-      /// If input is array then output is array as well
-      output = [];
 
+      /// Input is array of geo.latlng
       if (input[0] instanceof geo.latlng) {
-        output.length = input.length;
         for (i = 0; i < input.length; ++i) {
-          output[i] = toDisplay(input[i].lng(), input[i].lat());
+          world = m_baseLayer.toLocal(input)[0];
+          output.push(toDisplay()(world.x(), world.y())[0]);
         }
       } else {
-        output = m_baseLayer.renderer().worldToDisplay(input).slice();
+        /// Input is array of positions
+        output = m_baseLayer.renderer().worldToDisplay(input).slice(0);
       }
-      return output;
-    /// Input is geo.latlng
     } else if (input instanceof geo.latlng) {
-      return toDisplay(input.lng(), input.lat());
-    /// Input is Object
+      world = m_baseLayer.toLocal(input)[0];
+      output.push(toDisplay()(world.x(), world.y())[0]);
     } else if (input instanceof Object) {
-      return toDisplay(input.x, input.y);
-    }
-    /// Everything else
-    else {
+       /// Input is Object
+      output.push(toDisplay()(input.x, input.y)[0]);
+    } else {
+      /// Everything else
       throw 'Conversion method latLonToDisplay does not handle ' + input;
     }
+
+    return output;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -300,31 +300,17 @@ geo.map = function(arg) {
    * Convert from display to latitude longitude coordinates
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.displayToLatLon = function(input) {
-    /// TODO Implement this
-  };
+  this.displayToGcs = function(input) {
+    var toLatLng, output;
 
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Convert world coordinates to map ui gcs
-   *
-   * @returns {'x': number, 'y': number}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.worldToMap = function(x, y) {
-    var gcsPoint,
-        source,
-        dest,
-        transformedPoint;
-
-    gcsPoint = m_baseLayer.worldToGcs(x, y);
-    source = new proj4.Proj(this.options().gcs);
-    dest = new proj4.Proj(this.options().display_gcs);
-    transformedPoint = new proj4.Point(gcsPoint[0], gcsPoint[1]);
-
-    proj4.transform(source, dest, transformedPoint);
-
-    return [transformedPoint.x, transformedPoint.y];
+    /// Now handle different data types
+    /// Input is arrays
+    if (input instanceof Array && input.length > 0) {
+      output = m_baseLayer.renderer().displayToWorld(input);
+    }
+    else {
+      throw 'Conversion method latLonToDisplay does not handle ' + input;
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////

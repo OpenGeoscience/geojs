@@ -41,6 +41,49 @@ geo.osmLayer = function(arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Transform a point or array of points in GCS space to
+   * local space of the layer
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.toLocal = function(input) {
+    var i, output = [];
+
+    /// Now handle different data types
+    if (input instanceof Array && input.length > 0) {
+      output.length = input.length;
+
+
+      /// Input is array of geo.latlng
+      if (input[0] instanceof geo.latlng) {
+        for (i = 0; i < input.length; ++i) {
+          output[i] = geo.latlng(input[i]);
+          output[i].lat(geo.mercator.lat2y(output[i].lat()));
+        }
+      } else {
+        output = m_baseLayer.renderer().worldToDisplay(input).slice(0);
+      }
+    } else if (input instanceof geo.latlng) {
+      output.push(geo.latlng(input));
+      output[0].lat(geo.mercator.lat2y(output[0].lat()));
+    } else {
+      throw 'Conversion method latLonToDisplay does not handle ' + input;
+    }
+
+    return output;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Transform a point or array of points in local space to
+   * latitude-longitude space
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.fromLocal = function(input) {
+    throw "Not yet implemented";
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Check if a tile exists in the cache
    * @param zoom {number} The zoom value for the map [1-17]
    * @param x {number} X axis tile index

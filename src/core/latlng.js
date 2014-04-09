@@ -19,10 +19,10 @@
  * @returns {geo.latlng}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.latlng = function(lat, lng) {
+geo.latlng = function(arg1, arg2) {
   "use strict";
   if (!(this instanceof geo.latlng)) {
-    return new geo.latlng(lat, lng);
+    return new geo.latlng(arg1, arg2);
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -30,16 +30,20 @@ geo.latlng = function(lat, lng) {
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
-  var m_lat = lat,
-      m_lng = lng;
+  var m_lat = arg2 === undefined ? arg1.lat() : arg1,
+      m_lng = arg2 === undefined ? arg1.lng() : arg2;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Return latitude
    */
   //////////////////////////////////////////////////////////////////////////////
-  this.lat = function() {
-    return m_lat;
+  this.lat = function(val) {
+    if (val === undefined) {
+      return m_lat;
+    } else {
+      m_lat = val;
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -47,8 +51,12 @@ geo.latlng = function(lat, lng) {
    * Return longitude
    */
   //////////////////////////////////////////////////////////////////////////////
-  this.lng = function() {
-    return m_lng;
+  this.lng = function(val) {
+    if (val === undefined) {
+      return m_lng;
+    } else {
+      m_lng = val;
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -56,8 +64,12 @@ geo.latlng = function(lat, lng) {
    * Return x coodinate
    */
   //////////////////////////////////////////////////////////////////////////////
-  this.x = function() {
-    return this.lng();
+  this.x = function(val) {
+    if (val === undefined) {
+      return this.lng();
+    } else {
+      m_lng = val;
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -65,8 +77,12 @@ geo.latlng = function(lat, lng) {
    * Return y coodinate
    */
   //////////////////////////////////////////////////////////////////////////////
-  this.y = function() {
-    return this.lat();
+  this.y = function(val) {
+    if (val === undefined) {
+      return this.lat();
+    } else {
+      m_lat = val;
+    }
   };
 
   return this;
