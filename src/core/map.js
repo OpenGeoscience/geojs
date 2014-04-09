@@ -252,13 +252,56 @@ geo.map = function(arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Convert display coordinates to map coordinates
+   * Convert from latitude-longitude to display coordinates
    *
-   * @returns {'x': number, 'y': number}
+   * @param input {[geo.latlng], [{x:_x, y: _y}], [x1,y1, x2, y2]}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.displayToMap = function(winX, winY) {
-    return m_baseLayer.dislayToGcs(winX, winY);
+  this.latlngToDisplay = function(input) {
+    var i, output, toDisplay;
+
+    /// Private function to convert geo.latlng to display coordinates
+    toDisplay = function(x, y) {
+      var xy = { x: x, y: y };
+      /// Now convert from mercLatLon to display here
+      return m_baseLayer.renderer().worldToDisplay(xy);
+    };
+
+    /// Now handle different data types
+    /// Input is arrays
+    if (input instanceof Array && input.length > 0) {
+      /// If input is array then output is array as well
+      output = [];
+
+      if (input[0] instanceof geo.latlng) {
+        output.length = input.length;
+        for (i = 0; i < input.length; ++i) {
+          output[i] = toDisplay(input[i].lng(), input[i].lat());
+        }
+      } else {
+        output = m_baseLayer.renderer().worldToDisplay(input).slice();
+      }
+      return output;
+    /// Input is geo.latlng
+    } else if (input instanceof geo.latlng) {
+      return toDisplay(input.lng(), input.lat());
+    /// Input is Object
+    } else if (input instanceof Object) {
+      return toDisplay(input.x, input.y);
+    }
+    /// Everything else
+    else {
+      throw 'Conversion method latLonToDisplay does not handle ' + input;
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Convert from display to latitude longitude coordinates
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.displayToLatLon = function(input) {
+    /// TODO Implement this
   };
 
   ////////////////////////////////////////////////////////////////////////////

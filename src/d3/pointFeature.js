@@ -32,10 +32,10 @@ gd3.pointFeature = function(arg) {
     if (!refresh && d.hasOwnProperty('_dispx') && d.hasOwnProperty('_dispy')) {
       return d;
     }
-    var r = m_this.renderer(), p;
-    p = r.worldToDisplay([d.lng(), d.lat()]);
-    d._dispx = function () { return p[0][0]; };
-    d._dispy = function () { return p[0][1]; };
+    var map = m_this.layer().map(), p;
+    p = map.latlngToDisplay([d]);
+    d._dispx = function () { return p[0].x; };
+    d._dispy = function () { return p[0].y; };
     return d;
   }
 
@@ -86,7 +86,7 @@ gd3.pointFeature = function(arg) {
 
     // call super-method
     s_update.call(this);
-    
+
     // default to empty data array
     if (!data) { data = []; }
 

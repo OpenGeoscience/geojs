@@ -40,6 +40,7 @@ ggl.vglRenderer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.displayToWorld = function(points) {
+    /// TODO Update to support object input
     if (points instanceof Array) {
 
       var xyzFormat = points.length % 3 === 0 ? true : false,
@@ -66,40 +67,54 @@ ggl.vglRenderer = function(arg) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Convert array of points from world space to display space
+   *
+   * @param input {[{x:x1, y:y1}, ...], [x1, y1, x2, y2, x3, y3...] }
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.worldToDisplay = function(points) {
-    if (points instanceof Array) {
+  this.worldToDisplay = function(input) {
+    var points= input, xyzFormat = points.length % 3 === 0 ? true : false,
+        node = this.canvas(), ren = this.contextRenderer(),
+        cam = ren.camera(), fp = cam.focalPoint(), delta = xyzFormat ? 3 : 2,
+        i, wps = [], toDisplay;
 
-      var xyzFormat = points.length % 3 === 0 ? true : false,
-          node = this.canvas(),
-          delta = xyzFormat ? 3 : 2, ren = this.contextRenderer(),
-          cam = ren.camera(), fp = cam.focalPoint(),
-          i, wps = [];
+    /// Helper private function
+    toDisplay = function(x, y, z, isObject) {
+      var result;
 
-      if (xyzFormat) {
+      isObject = isObject === undefined ? false : true;
+      if (!isObject) {
+        wps.push(ren.worldToDisplay(vec4.fromValues(
+          x, y, z, 1.0), cam.viewMatrix(), cam.projectionMatrix(),
+          node.width(), node.height()));
+        return;
+      }
+      result = ren.worldToDisplay(vec4.fromValues(
+                 x, y, z, 1.0), cam.viewMatrix(), cam.projectionMatrix(),
+                 node.width(), node.height());
+      wps.push({x: result[0], y: result[1], z: result[2]});
+    };
+
+    if (input instanceof Array && input.length > 0) {
+      if (input[0] instanceof Object) {
+        /// Special case
+        delta = 1;
+        for (i = 0; i < input.length; i =+ delta) {
+          toDisplay(input[i].x, input[i].y, fp[2], true);
+        }
+      } else if (xyzFormat) {
         for (i = 0; i < points.length; i =+ delta) {
-          wps.push(ren.worldToDisplay(vec4.fromValues(
-            points[i],
-            points[i + 1],
-            points[i + 2],
-            1.0), cam.viewMatrix(), cam.projectionMatrix(),
-            node.width(), node.height()));
+          toDisplay(points[i], points[i + 1], points[i + 2]);
         }
       } else {
         for (i = 0; i < points.length; i =+ delta) {
-          wps.push(ren.worldToDisplay(vec4.fromValues(
-            points[i],
-            points[i + 1],
-            fp[2],
-            1.0), cam.viewMatrix(), cam.projectionMatrix(),
-            node.width(), node.height()));
+          toDisplay(points[i], points[i + 1], fp[2]);
         }
       }
-
       return wps;
+    } else if (input instanceof Object) {
+      toDisplay(input.x, input.y, fp[2], true);
+      return wps[0];
     }
-
     throw "World to display conversion requires array of 2D/3D points";
   };
 
