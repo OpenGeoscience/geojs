@@ -310,13 +310,15 @@ geo.map = function(arg) {
     var toLatLng, output;
 
     /// Now handle different data types
-    /// Input is arrays
-    if (input instanceof Array && input.length > 0) {
+    if (input instanceof Array && input.length > 0 ||
+        input instanceof Object) {
       output = m_baseLayer.renderer().displayToWorld(input);
+      output = m_baseLayer.fromLocal(output);
     }
     else {
       throw 'Conversion method latLonToDisplay does not handle ' + input;
     }
+    return;
   };
 
   ////////////////////////////////////////////////////////////////////////////
