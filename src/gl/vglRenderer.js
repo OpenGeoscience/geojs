@@ -33,28 +33,30 @@ ggl.vglRenderer = function(arg) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Convert input data in display space to world space
+   *
+   * @param input {[x:x1, y:y1], [x1,y1,x2,y2]}
+   * @returns {[{x:x1, y:y1}], [[x1, y1]]}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.displayToWorld = function(input) {
-    var i, xyzFormat, delta, node = this.canvas(),
+    var i, delta, node = this.canvas(),
         ren = this.contextRenderer(), cam = ren.camera(),
-        fdp = ren.focusDisplayPoint(), result = [], temp;
+        fdp = ren.focusDisplayPoint(), output = [], temp;
 
     if (input instanceof Array && input.length > 0) {
-      xyzFormat = input.length % 3 === 0 ? true : false;
-      delta = xyzFormat ? 3 : 2;
-
       if (input[0] instanceof Object) {
+        delta = 1;
         for (i = 0; i < points.length; i =+ delta) {
           temp = ren.displayToWorld(vec4.fromValues(
                    input.x, input.y, fdp[2], 1.0),
                    cam.viewMatrix(), cam.projectionMatrix(),
                    node.width(), node.height());
-          result.push({x: temp[0], y: temp[1], z: temp[2], w: temp[3]});
+          output.push({x: temp[0], y: temp[1], z: temp[2], w: temp[3]});
         }
       } else {
+        delta = input.length % 3 === 0 ? 3 : 2;
         for (i = 0; i < input.length; i =+ delta) {
-          result.push(ren.displayToWorld(vec4.fromValues(
+          output.push(ren.displayToWorld(vec4.fromValues(
             input[i],
             input[i + 1],
             fdp[2],
@@ -62,17 +64,16 @@ ggl.vglRenderer = function(arg) {
             node.width(), node.height()));
         }
       }
-
-      return result;
     } else if (input instanceof Object) {
       temp = ren.displayToWorld(vec4.fromValues(
                input.x, input.y, fdp[2], 1.0),
                cam.viewMatrix(), cam.projectionMatrix(),
                node.width(), node.height());
-      return {x: temp[0], y: temp[1], z: temp[2], w: temp[3]};
+      output.push({x: temp[0], y: temp[1], z: temp[2], w: temp[3]});
+    } else {
+      throw "Display to world conversion requires array of 2D/3D points";
     }
-
-    throw "Display to world conversion requires array of 2D/3D points";
+    return output;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -80,6 +81,7 @@ ggl.vglRenderer = function(arg) {
    * Convert input data in world space to display space
    *
    * @param input {[{x:x1, y:y1}, ...], [x1, y1, x2, y2, x3, y3...] }
+   * @returns {[{x:x1, y:y1}. ...], [[x1, y1], [x2, y2]]}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.worldToDisplay = function(input) {

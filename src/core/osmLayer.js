@@ -41,7 +41,7 @@ geo.osmLayer = function(arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Transform a point or array of points in GCS space to
+   * Transform a point or array of points in latitude-longitude space to
    * local space of the layer
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -51,7 +51,6 @@ geo.osmLayer = function(arg) {
     /// Now handle different data types
     if (input instanceof Array && input.length > 0) {
       output.length = input.length;
-
 
       /// Input is array of geo.latlng
       if (input[0] instanceof geo.latlng) {
@@ -66,7 +65,7 @@ geo.osmLayer = function(arg) {
       output.push(geo.latlng(input));
       output[0].lat(geo.mercator.lat2y(output[0].lat()));
     } else {
-      throw 'Conversion method latLonToDisplay does not handle ' + input;
+      throw 'toLocal does not handle ' + input;
     }
 
     return output;
@@ -79,7 +78,27 @@ geo.osmLayer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.fromLocal = function(input) {
-    throw "Not yet implemented";
+    var output = [];
+
+    if (input instanceof Array && input.length > 0) {
+      output.length = input.length;
+
+      if (input[0] instanceof Object) {
+        for (i = 0; i < input.length; ++i) {
+          output[i].x = input[i].x;
+          output[i].y = geo.mercator.y2lat(input[i].y);
+        }
+      } else {
+        for (i = 0; i < input.length; ++i) {
+          output[i] = input[i];
+          output[i + 1] = geo.mercator.y2lat(input[i + 1]);
+        }
+      }
+    } else {
+      throw 'fromLocal does not handle ' + input;
+    }
+
+    return output;
   };
 
   ////////////////////////////////////////////////////////////////////////////

@@ -318,7 +318,7 @@ geo.map = function(arg) {
     else {
       throw 'Conversion method latLonToDisplay does not handle ' + input;
     }
-    return;
+    return output;
   };
 
   ////////////////////////////////////////////////////////////////////////////
