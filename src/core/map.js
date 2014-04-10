@@ -249,17 +249,18 @@ geo.map = function(arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Convert from latitude-longitude to display coordinates
+   * Convert from gcs coordinates to display coordinates
    *
    * @param input {[geo.latlng], [{x:_x, y: _y}], [x1,y1, x2, y2]}
+   * @return [x:x1, y:y1, ...], [x1, y1, x2, y2]
    *
-   * NOTE: Currently only lat-lon inputs are supported
+   * @note Currently only lat-lon inputs are supported
    */
   ////////////////////////////////////////////////////////////////////////////
   this.gcsToDisplay = function(input) {
-    var i, world, toDisplay, output = [];
+    var i, world, toDisplay, latlngToDisplay, output = [];
 
-    /// Private function to convert geo.latlng to display coordinates
+    /// Private function to convert gcs coordinates to display coordinates
     toDisplay = function() {
       return (function(x, y) {
         var xy = { x: x, y: y };
@@ -268,22 +269,27 @@ geo.map = function(arg) {
       });
     };
 
+    /// Private function to convert latlng to display coordinates
+    latlngToDisplay = function() {
+      return function(latlng) {
+        world = m_baseLayer.toLocal(input)[0];
+        output.push(toDisplay()(world.x(), world.y())[0]);
+      }
+    }
+
     /// Now handle different data types
     if (input instanceof Array && input.length > 0) {
-
       /// Input is array of geo.latlng
       if (input[0] instanceof geo.latlng) {
         for (i = 0; i < input.length; ++i) {
-          world = m_baseLayer.toLocal(input)[0];
-          output.push(toDisplay()(world.x(), world.y())[0]);
+          latlngToDisplay()(input);
         }
       } else {
         /// Input is array of positions
         output = m_baseLayer.renderer().worldToDisplay(input).slice(0);
       }
     } else if (input instanceof geo.latlng) {
-      world = m_baseLayer.toLocal(input)[0];
-      output.push(toDisplay()(world.x(), world.y())[0]);
+      latlngToDisplay()(input);
     } else if (input instanceof Object) {
        /// Input is Object
       output.push(toDisplay()(input.x, input.y)[0]);
