@@ -140,7 +140,13 @@ geo.featureLayer = function(arg) {
     });
 
     this.on(geo.event.pan, function(event) {
-      m_this._update({});
+      m_this._update({event: event});
+      m_this.renderer()._render();
+    });
+
+    this.on(geo.event.zoom, function(event) {
+      m_this.map().zoom(event.curr_zoom);
+      m_this._update({event: event});
       m_this.renderer()._render();
     });
 

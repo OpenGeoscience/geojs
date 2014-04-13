@@ -155,8 +155,6 @@ ggl.mapInteractorStyle = function() {
                curr_world_pos: currWorldPos};
 
         $(m_that).trigger(evt);
-        /// TODO Fix it
-        // $(m_that).trigger(vgl.event.leftButtonPress);
       }
     }
     if (m_middileMouseButtonDown) {
@@ -193,9 +191,6 @@ ggl.mapInteractorStyle = function() {
              last_zoom: lastZoom};
 
       $(m_that).trigger(evt);
-
-      /// TODO Fix it
-      // $(m_that).trigger(vgl.event.rightButtonPress);
     }
     m_mouseLastPos.x = m_currentMousePos.x;
     m_mouseLastPos.y = m_currentMousePos.y;
@@ -354,7 +349,7 @@ ggl.mapInteractorStyle = function() {
   this.setDrawRegion = function(lat1, lon1, lat2, lon2) {
     // TODO
     // Use z-indexing or some other technique for the offsetting
-    var plane = geo.planeFeature(
+    var evt, plane = geo.planeFeature(
       geo.latlng(lat1, lon1),
       geo.latlng(lat2, lon2),
       99

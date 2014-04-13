@@ -105,7 +105,8 @@ geo.map = function(arg) {
       return m_zoom;
     } else {
       m_zoom = val;
-      m_this.trigger(geo.event.zoom);
+      // TODO Fix this
+//      m_this.trigger(geo.event.zoom);
       this.modified();
       return m_this;
     }
@@ -123,7 +124,8 @@ geo.map = function(arg) {
       return m_center;
     } else {
       m_center = val.slice
-      m_this.trigger(geo.event.center);
+      // TODO Fix this
+//      m_this.trigger(geo.event.center);
       this.modified();
       return m_this;
     }

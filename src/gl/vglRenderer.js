@@ -183,6 +183,10 @@ ggl.vglRenderer = function(arg) {
       m_this.trigger(geo.event.pan, event);
     });
 
+    $(m_interactorStyle).on(geo.event.zoom, function(event) {
+      m_this.trigger(geo.event.zoom, event);
+    });
+
     return this;
   };
 
