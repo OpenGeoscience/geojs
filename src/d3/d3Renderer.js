@@ -62,7 +62,7 @@ gd3.d3Renderer = function(arg) {
     }
     return base.renderer();
   }
-  
+
   // translate the layer by a vector delta or reset translation to zero
   function translate (delta) {
     if (delta === undefined) {
