@@ -258,41 +258,29 @@ geo.map = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.gcsToDisplay = function(input) {
-    var i, world, toDisplay, latlngToDisplay, output = [];
-
-    /// Private function to convert gcs coordinates to display coordinates
-    toDisplay = function() {
-      return (function(x, y) {
-        var xy = { x: x, y: y };
-        /// Now convert from mercLatLon to display here
-        return m_baseLayer.renderer().worldToDisplay(xy);
-      });
-    };
-
-    /// Private function to convert latlng to display coordinates
-    latlngToDisplay = function() {
-      return function(latlng) {
-        world = m_baseLayer.toLocal(input)[0];
-        output.push(toDisplay()(world.x(), world.y())[0]);
-      }
-    }
+    var i, world, output = [];
 
     /// Now handle different data types
     if (input instanceof Array && input.length > 0) {
       /// Input is array of geo.latlng
       if (input[0] instanceof geo.latlng) {
         for (i = 0; i < input.length; ++i) {
-          latlngToDisplay()(input);
+        world = m_baseLayer.toLocal(input)[0];
+        output.push(m_baseLayer.renderer().worldToDisplay(
+          {x: world.x(), y: world.y()})[0]);
         }
       } else {
         /// Input is array of positions
         output = m_baseLayer.renderer().worldToDisplay(input).slice(0);
       }
     } else if (input instanceof geo.latlng) {
-      latlngToDisplay()(input);
+      world = m_baseLayer.toLocal(input)[0];
+      output.push(m_baseLayer.renderer().worldToDisplay(
+        {x: world.x(), y: world.y()})[0]);
     } else if (input instanceof Object) {
        /// Input is Object
-      output.push(toDisplay()(input.x, input.y)[0]);
+      output.push(m_baseLayer.renderer().worldToDisplay(
+          {x: input.x, y: input.y})[0]);
     } else {
       /// Everything else
       throw 'Conversion method latLonToDisplay does not handle ' + input;
@@ -307,7 +295,7 @@ geo.map = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.displayToGcs = function(input) {
-    var toLatLng, output;
+    var output;
 
     /// Now handle different data types
     if (input instanceof Array && input.length > 0 ||

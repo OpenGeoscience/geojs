@@ -78,7 +78,7 @@ geo.osmLayer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.fromLocal = function(input) {
-    var output = [];
+    var i, output = [];
 
     if (input instanceof Array && input.length > 0) {
       output.length = input.length;
