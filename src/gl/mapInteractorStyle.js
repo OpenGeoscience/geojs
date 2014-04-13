@@ -26,6 +26,7 @@ ggl.mapInteractorStyle = function() {
   vgl.interactorStyle.call(this);
   var m_that = this,
       m_map,
+      m_mapZoomLevel = 3,
       m_leftMouseButtonDown = false,
       m_rightMouseButtonDown = false,
       m_middileMouseButtonDown = false,
@@ -38,7 +39,6 @@ ggl.mapInteractorStyle = function() {
       m_renderWindow,
       m_camera,
       m_outsideCanvas,
-      m_coords,
       m_currentMousePos,
       m_focusDisplayPoint,
       m_worldPt1,
@@ -47,6 +47,7 @@ ggl.mapInteractorStyle = function() {
       m_dy,
       m_dz,
       m_zTrans,
+      m_coords,
       m_mouseLastPos = {
         x: 0,
         y: 0
@@ -97,7 +98,7 @@ ggl.mapInteractorStyle = function() {
   this.handleMouseMove = function(event) {
     var canvas = m_that.map(), xrot = null, a = null,
         angle = null, mouseWorldPoint, features, lastWorldPos, currWorldPos,
-        lastZoom, evt;
+        lastZoom, evt, newMercPerPixel, oldMercPerPixel;
 
     /* TODO: Fix for layers
     if (!canvas || event.target !== canvas.node()) {
@@ -178,18 +179,36 @@ ggl.mapInteractorStyle = function() {
     if (m_rightMouseButtonDown) {
       m_zTrans = (m_currentMousePos.y - m_mouseLastPos.y) / m_height;
 
-      // Calculate zoom scale here
-      lastZoom = m_camera.zoom();
+      /// Compute meters per pixel here and based on that decide the
+      /// zoom level
+      m_worldPt1 = m_renderWindow.displayToWorld(0, 0, m_focusDisplayPoint);
+      m_worldPt2 = m_renderWindow.displayToWorld(m_width, m_height, m_focusDisplayPoint);
+
+      /// Computer mercator per pixel before changing the camera position
+      oldMercPerPixel = (m_worldPt2[0] - m_worldPt1[0]) / m_width;
+
+      /// Calculate zoom scale here
       if (m_zTrans > 0) {
         m_camera.zoom(1 - Math.abs(m_zTrans));
       } else {
         m_camera.zoom(1 + Math.abs(m_zTrans));
       }
+      m_renderer.resetCameraClippingRange();
 
-      evt = {type: geo.event.zoom,
-             curr_zoom: m_camera.zoom(),
-             last_zoom: lastZoom};
+      m_worldPt1 = m_renderWindow.displayToWorld(0, 0, m_focusDisplayPoint);
+      m_worldPt2 = m_renderWindow.displayToWorld(m_width, m_height,
+                     m_focusDisplayPoint);
 
+      /// Computer mercator per pixel as of now
+      newMercPerPixel = (m_worldPt2[0] - m_worldPt1[0]) / m_width;
+
+      /// Compute meters per pixel here and based on that decide the
+      /// zoom level
+      evt = { type: geo.event.zoom,
+              curr_zoom: computeZoomLevel(newMercPerPixel),
+              last_zoom: computeZoomLevel(oldMercPerPixel) };
+
+      console.log(evt);
       $(m_that).trigger(evt);
     }
     m_mouseLastPos.x = m_currentMousePos.x;
@@ -381,6 +400,31 @@ ggl.mapInteractorStyle = function() {
   this.getDrawRegion = function() {
     return m_drawRegionLayer.features()[0].getCoords();
   };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Compute zoom level
+   *
+   * @param deltaMerc mercator/per pixel
+   * @returns {Number} zoom level
+   *
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  function computeZoomLevel(deltaMerc) {
+    var i, metersPerPixel, metersPerPixelFull = 156412;
+    metersPerPixel = geo.mercator.deg2rad(Math.abs(deltaMerc)) *
+                     geo.mercator.r_major;
+//    console.log('metersPerPixel ' + metersPerPixel);
+    for (i = 20; i > 0; --i) {
+      if (metersPerPixel <= (metersPerPixelFull / Math.pow(2, i))) {
+        return (i);
+      }
+    }
+
+    return 0;
+  };
+
 
   return this;
 };
