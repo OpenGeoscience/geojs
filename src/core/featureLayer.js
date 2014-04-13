@@ -103,13 +103,12 @@ geo.featureLayer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._delete = function(feature) {
-
-    var i;
+    var i
 
     for(i = 0; i < m_features.length; ++i) {
       if (m_features[i] === feature) {
         m_features[i]._exit();
-        m_features.splice(i, 1);
+        m_features = m_features.splice(i, 1);
         return this;
       }
     }

@@ -421,8 +421,6 @@ ggl.mapInteractorStyle = function() {
         return (i);
       }
     }
-
-    return 0;
   };
 
 
