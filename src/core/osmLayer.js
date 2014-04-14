@@ -37,7 +37,7 @@ geo.osmLayer = function(arg) {
       MAP_NUMTYPES = 3,
       m_mapType = MAP_MQOSM,
       m_tiles = {},
-      m_pendingTiles = [],
+      m_pendingNewTiles = [],
       m_numberOfCachedTiles = 0,
       m_maximumNumberOfActiveTiles = 100,
       m_previousZoom = null,
@@ -186,7 +186,7 @@ geo.osmLayer = function(arg) {
       (x) + "/" + (Math.pow(2,zoom) - 1 - y) + ".jpg";
 
     m_tiles[zoom][x][y] = tile;
-    m_pendingTiles.push(tile);
+    m_pendingNewTiles.push(tile);
 
     ++m_numberOfCachedTiles;
     return tile;
@@ -328,8 +328,8 @@ geo.osmLayer = function(arg) {
       }
     }
 
-    for (i = 0; i < m_pendingTiles.length; ++i) {
-      var tile = m_pendingTiles[i];
+    for (i = 0; i < m_pendingNewTiles.length; ++i) {
+      var tile = m_pendingNewTiles[i];
 
       /// No need to load pending tiles that are not in the same
       /// zoom level
@@ -362,7 +362,7 @@ geo.osmLayer = function(arg) {
                   .style('image', tile);
       tile.feature = feature;
     }
-    m_pendingTiles = [];
+    m_pendingNewTiles = [];
     m_this._draw();
     m_this._removeTiles(request);
     m_this._draw();
@@ -389,7 +389,6 @@ geo.osmLayer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._update = function(request) {
-
     /// Update tiles (create new / delete old etc...)
     this._updateTiles(request);
 
