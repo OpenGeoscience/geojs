@@ -199,7 +199,7 @@ geo.osmLayer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._removeTiles = function(request) {
-    var x, y, zoom = this.map().zoom();
+    var x, y, tile, zoom = this.map().zoom();
 
     if (m_previousZoom === null) {
       m_previousZoom = zoom;
@@ -244,13 +244,16 @@ geo.osmLayer = function(arg) {
 
           m_tiles[zoom][x][y].REMOVING = true;
           m_tiles[zoom][x][y].feature.visible(0);
+          tile = m_tiles[zoom][x][y];
           m_tiles[zoom][x][y] = null
-          var tile = m_tiles[zoom][x][y];
           setTimeout(function() {
             if (tile && m_numberOfCachedTiles > m_maximumNumberOfActiveTiles) {
               tile.REMOVED = true;
               tile.REMOVING = false;
-              m_this._delete(tile.feature);
+              if (tile.feature) {
+                console.log('feature deleted ');
+                m_this._delete(tile.feature);
+              }
               --m_numberOfCachedTiles;
             }
           }, 100);
@@ -339,20 +342,10 @@ geo.osmLayer = function(arg) {
 
       tile.onload = function() {
         this.LOADING = false;
-        if (this.UNLOAD && this.zoom !== m_this.map().zoom()) {
-          this.LOADED = false;
-          if (tile.feature) {
-            m_this._delete(tile.feature);
-            if (m_tiles[this.zoom] &&
-                m_tiles[this.zoom][this.index_x] &&
-                m_tiles[this.zoom][this.index_x][this.index_y]) {
-              m_tiles[this.zoom][this.index_x][this.index_y] = null;
-            }
-          }
-          return;
-        }
         this.LOADED = true;
         this.UNLOAD = false;
+        this.REMOVING = false;
+        this.REMOVED = false;
       };
       feature = this.create('planeFeature')
                   .origin([tile.llx, tile.lly])
