@@ -171,6 +171,7 @@ geo.osmLayer = function(arg) {
     tile.UNLOAD = false;
     tile.REMOVED = false;
     tile.REMOVING = false;
+
     tile.crossOrigin = 'anonymous';
     tile.zoom = zoom;
     tile.index_x = x;
@@ -246,12 +247,14 @@ geo.osmLayer = function(arg) {
           m_tiles[zoom][x][y].feature.visible(0);
           tile = m_tiles[zoom][x][y];
           m_tiles[zoom][x][y] = null
+
+          /// Async deletion of tiles and their feature
           setTimeout(function() {
-            if (tile && m_numberOfCachedTiles > m_maximumNumberOfActiveTiles) {
+            if (tile && !tile.REMOVED &&
+                m_numberOfCachedTiles > m_maximumNumberOfActiveTiles) {
               tile.REMOVED = true;
               tile.REMOVING = false;
               if (tile.feature) {
-                console.log('feature deleted ');
                 m_this._delete(tile.feature);
               }
               --m_numberOfCachedTiles;
@@ -356,7 +359,6 @@ geo.osmLayer = function(arg) {
       tile.feature = feature;
     }
     m_pendingNewTiles = [];
-    m_this._draw();
     m_this._removeTiles(request);
     m_this._draw();
     this.updateTime().modified();
