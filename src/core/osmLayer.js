@@ -265,24 +265,13 @@ geo.osmLayer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._updateTiles = function(request) {
-    var ren = this.renderer(),
-        node = this.node(),
+    var feature, ren = this.renderer(), node = this.node(),
         zoom = this.map().zoom(),
         /// First get corner points
         /// In display coordinates the origin is on top left corner (0, 0)
-        llx = 0.0,
-        lly = node.height(),
-        urx = node.width(),
-        ury = 0.0,
-        temp = null,
-        tile = null,
-        tile1x = null,
-        tile1y = null,
-        tile2x = null,
-        tile2y = null,
-        invJ = null,
-        i = 0,
-        j = 0,
+        llx = 0.0, lly = node.height(), urx = node.width(), ury = 0.0,
+        temp = null, tile = null, tile1x = null, tile1y = null, tile2x = null,
+        tile2y = null, invJ = null, i = 0, j = 0,
         worldPt1 = ren.displayToWorld([llx, lly])[0],
         worldPt2 = ren.displayToWorld([urx, ury])[0];
 
@@ -363,12 +352,12 @@ geo.osmLayer = function(arg) {
         this.LOADED = true;
         this.UNLOAD = false;
       };
-      var feature = this.create('planeFeature')
-                      .origin([tile.llx, tile.lly])
-                      .upperLeft([tile.llx, tile.ury])
-                      .lowerRight([tile.urx, tile.lly])
-                      .gcs('"EPSG:3857"')
-                      .style('image', tile);
+      feature = this.create('planeFeature')
+                  .origin([tile.llx, tile.lly])
+                  .upperLeft([tile.llx, tile.ury])
+                  .lowerRight([tile.urx, tile.lly])
+                  .gcs('"EPSG:3857"')
+                  .style('image', tile);
       tile.feature = feature;
     }
     m_pendingTiles = [];
@@ -376,7 +365,6 @@ geo.osmLayer = function(arg) {
     m_this._removeTiles(request);
     m_this._draw();
     this.updateTime().modified();
-
     return this;
   };
 
