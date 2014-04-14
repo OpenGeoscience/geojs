@@ -39,6 +39,7 @@ geo.osmLayer = function(arg) {
       m_tiles = {},
       m_pendingTiles = [],
       m_numberOfCachedTiles = 0,
+      m_maximumNumberOfActiveTiles = 100,
       m_previousZoom = null,
       s_init = this._init,
       s_update = this._update;
@@ -246,10 +247,11 @@ geo.osmLayer = function(arg) {
           m_tiles[zoom][x][y] = null
           var tile = m_tiles[zoom][x][y];
           setTimeout(function() {
-            if (tile) {
+            if (tile && m_numberOfCachedTiles > m_maximumNumberOfActiveTiles) {
               tile.REMOVED = true;
               tile.REMOVING = false;
               m_this._delete(tile.feature);
+              --m_numberOfCachedTiles;
             }
           }, 100);
         }
