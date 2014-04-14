@@ -143,8 +143,6 @@ ggl.mapInteractorStyle = function() {
         m_dy = m_worldPt1[1] - m_worldPt2[1];
         m_dz = m_worldPt1[2] - m_worldPt2[2];
 
-        //console.log('pan event ' + m_dx + ' ' + m_dy + ' ' + m_dz);
-
         lastWorldPos = m_camera.position();
         m_camera.pan(-m_dx, -m_dy, -m_dz);
         currWorldPos = m_camera.position();
@@ -182,7 +180,8 @@ ggl.mapInteractorStyle = function() {
       /// Compute meters per pixel here and based on that decide the
       /// zoom level
       m_worldPt1 = m_renderWindow.displayToWorld(0, 0, m_focusDisplayPoint);
-      m_worldPt2 = m_renderWindow.displayToWorld(m_width, m_height, m_focusDisplayPoint);
+      m_worldPt2 = m_renderWindow.displayToWorld(m_width, m_height,
+                                                 m_focusDisplayPoint);
 
       /// Computer mercator per pixel before changing the camera position
       oldMercPerPixel = (m_worldPt2[0] - m_worldPt1[0]) / m_width;
@@ -207,8 +206,6 @@ ggl.mapInteractorStyle = function() {
       evt = { type: geo.event.zoom,
               curr_zoom: computeZoomLevel(newMercPerPixel),
               last_zoom: computeZoomLevel(oldMercPerPixel) };
-
-      console.log(evt);
       $(m_that).trigger(evt);
     }
     m_mouseLastPos.x = m_currentMousePos.x;
@@ -415,10 +412,9 @@ ggl.mapInteractorStyle = function() {
     var i, metersPerPixel, metersPerPixelFull = 156412;
     metersPerPixel = geo.mercator.deg2rad(Math.abs(deltaMerc)) *
                      geo.mercator.r_major;
-//    console.log('metersPerPixel ' + metersPerPixel);
-    for (i = 20; i > 0; --i) {
-      if (metersPerPixel <= (metersPerPixelFull / Math.pow(2, i))) {
-        return (i);
+    for (i = 4; i < 20; ++i) {
+      if (metersPerPixel > (metersPerPixelFull / Math.pow(2, i))) {
+        return (i - 1);
       }
     }
   };

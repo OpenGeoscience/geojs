@@ -83,18 +83,18 @@ geo.featureLayer = function(arg) {
   this._create = function(featureName) {
     this._init();
 
-    var newFeautre = geo.createFeature(
+    var newFeature = geo.createFeature(
       featureName, m_this, this.renderer());
 
-    // Default is array of fetures
+    /// Initialize feature list
     if (!m_features) {
       m_features = [];
     }
 
-    m_features.push(newFeautre);
+    m_features.push(newFeature);
     this.features(m_features);
     this.modified();
-    return newFeautre;
+    return newFeature;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -103,16 +103,18 @@ geo.featureLayer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._delete = function(feature) {
-    var i
+    var i;
 
     for(i = 0; i < m_features.length; ++i) {
       if (m_features[i] === feature) {
         m_features[i]._exit();
-        m_features = m_features.splice(i, 1);
-        return this;
+        this.dataTime().modified();
+        this.modified();
+        return m_features.splice(i, 1);
       }
     }
 
+    console.log('feature not found ', feature);
     return this;
   };
 
