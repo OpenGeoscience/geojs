@@ -16,7 +16,8 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.osmLayer = function(arg) {
-  "use strict";
+  'use strict';
+
   if (!(this instanceof geo.osmLayer)) {
     return new geo.osmLayer(arg);
   }
@@ -25,6 +26,7 @@ geo.osmLayer = function(arg) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Private member variables
+   *
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -35,6 +37,9 @@ geo.osmLayer = function(arg) {
       MAP_NUMTYPES = 3,
       m_mapType = MAP_MQOSM,
       m_tiles = {},
+      m_pendingNewTiles = [],
+      m_numberOfCachedTiles = 0,
+      m_maximumNumberOfActiveTiles = 100,
       m_previousZoom = null,
       s_init = this._init,
       s_update = this._update;
@@ -104,6 +109,7 @@ geo.osmLayer = function(arg) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Check if a tile exists in the cache
+   *
    * @param zoom {number} The zoom value for the map [1-17]
    * @param x {number} X axis tile index
    * @param y {number} Y axis tile index
@@ -164,34 +170,26 @@ geo.osmLayer = function(arg) {
     tile.LOADED = false;
     tile.UNLOAD = false;
     tile.REMOVED = false;
+    tile.REMOVING = false;
 
     tile.crossOrigin = 'anonymous';
+    tile.zoom = zoom;
+    tile.index_x = x;
+    tile.index_y = y;
+    tile.llx = llx;
+    tile.lly = lly;
+    tile.urx = urx;
+    tile.ury = ury;
 
     // tile.src = "http://tile.openstreetmap.org/" + zoom + "/" + (x)
     //   + "/" + (Math.pow(2,zoom) - 1 - y) + ".png";
     tile.src = "http://otile1.mqcdn.com/tiles/1.0.0/osm/" + zoom + "/" +
       (x) + "/" + (Math.pow(2,zoom) - 1 - y) + ".jpg";
 
-    feature = this.create('planeFeature')
-                  .origin([llx, lly])
-                  .upperLeft([llx, ury])
-                  .lowerRight([urx, lly])
-                  .gcs('"EPSG:3857"')
-                  .style('image', tile);
-
-    tile.feature = feature;
-    tile.onload = function() {
-      if (this.UNLOAD) {
-        this.LOADING = false;
-        m_this._delete(m_tiles[zoom][x][y].feature);
-        m_tiles[zoom][x][y] = null;
-        return;
-      }
-      this.LOADING = false;
-      this.LOADED = true;
-    };
-
     m_tiles[zoom][x][y] = tile;
+    m_pendingNewTiles.push(tile);
+
+    ++m_numberOfCachedTiles;
     return tile;
   };
 
@@ -202,14 +200,16 @@ geo.osmLayer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._removeTiles = function(request) {
-    var request = request === undefined ? {} : request,
-        zoom = request.zoom === undefined ? 0 : request.zoom,
-        x = null,
-        y = null;
+    var x, y, tile, zoom = this.map().zoom();
 
-    if (m_previousZoom === null || m_previousZoom === zoom) {
+    if (m_previousZoom === null) {
+      m_previousZoom = zoom;
+    }
+
+    if (m_previousZoom === zoom) {
       return this;
     }
+    m_previousZoom = zoom;
 
     if (!m_tiles) {
       return this;
@@ -217,11 +217,10 @@ geo.osmLayer = function(arg) {
 
     /// For now just clear the tiles from the last zoom.
     for (zoom in m_tiles) {
-      if (!m_tiles[zoom]) {
+      if (m_previousZoom === zoom) {
         continue;
       }
-
-      if (zoom === request.zoom) {
+      if (!m_tiles[zoom]) {
         continue;
       }
 
@@ -239,13 +238,28 @@ geo.osmLayer = function(arg) {
             continue;
           }
 
-          if (m_tiles[zoom][x][y].REMOVED) {
+          if (m_tiles[zoom][x][y].REMOVED ||
+              m_tiles[zoom][x][y].REMOVING) {
             continue;
           }
 
-          m_tiles[zoom][x][y].REMOVED = true;
-          m_this._delete(m_tiles[zoom][x][y].feature);
-          m_tiles[zoom][x][y] = null;
+          m_tiles[zoom][x][y].REMOVING = true;
+          m_tiles[zoom][x][y].feature.visible(0);
+          tile = m_tiles[zoom][x][y];
+          m_tiles[zoom][x][y] = null
+
+          /// Async deletion of tiles and their feature
+          setTimeout(function() {
+            if (tile && !tile.REMOVED &&
+                m_numberOfCachedTiles > m_maximumNumberOfActiveTiles) {
+              tile.REMOVED = true;
+              tile.REMOVING = false;
+              if (tile.feature) {
+                m_this._delete(tile.feature);
+              }
+              --m_numberOfCachedTiles;
+            }
+          }, 100);
         }
       }
     }
@@ -259,30 +273,15 @@ geo.osmLayer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._updateTiles = function(request) {
-    var ren = this.renderer(),
-        node = this.node(),
+    var feature, ren = this.renderer(), node = this.node(),
         zoom = this.map().zoom(),
         /// First get corner points
         /// In display coordinates the origin is on top left corner (0, 0)
-        llx = 0.0,
-        lly = node.height(),
-        urx = node.width(),
-        ury = 0.0,
-        temp = null,
-        tile = null,
-        tile1x = null,
-        tile1y = null,
-        tile2x = null,
-        tile2y = null,
-        invJ = null,
-        i = 0,
-        j = 0,
+        llx = 0.0, lly = node.height(), urx = node.width(), ury = 0.0,
+        temp = null, tile = null, tile1x = null, tile1y = null, tile2x = null,
+        tile2y = null, invJ = null, i = 0, j = 0,
         worldPt1 = ren.displayToWorld([llx, lly])[0],
         worldPt2 = ren.displayToWorld([urx, ury])[0];
-
-    /// TODO Currently we blindly remove all tiles from previous zoom
-    /// state. This could be optimized.
-    m_this._removeTiles(request);
 
     worldPt1[0] = Math.max(worldPt1[0], -180.0);
     worldPt1[0] = Math.min(worldPt1[0],  180.0);
@@ -335,8 +334,34 @@ geo.osmLayer = function(arg) {
       }
     }
 
-    this.updateTime().modified();
+    for (i = 0; i < m_pendingNewTiles.length; ++i) {
+      var tile = m_pendingNewTiles[i];
 
+      /// No need to load pending tiles that are not in the same
+      /// zoom level
+      if (tile.zoom !== m_this.map().zoom()) {
+        continue;
+      }
+
+      tile.onload = function() {
+        this.LOADING = false;
+        this.LOADED = true;
+        this.UNLOAD = false;
+        this.REMOVING = false;
+        this.REMOVED = false;
+      };
+      feature = this.create('planeFeature')
+                  .origin([tile.llx, tile.lly])
+                  .upperLeft([tile.llx, tile.ury])
+                  .lowerRight([tile.urx, tile.lly])
+                  .gcs('"EPSG:3857"')
+                  .style('image', tile);
+      tile.feature = feature;
+    }
+    m_pendingNewTiles = [];
+    m_this._removeTiles(request);
+    m_this._draw();
+    this.updateTime().modified();
     return this;
   };
 
@@ -350,7 +375,6 @@ geo.osmLayer = function(arg) {
   this._init = function() {
     s_init.call(this);
     this.gcs("EPSG:3857");
-
     return this;
   };
 

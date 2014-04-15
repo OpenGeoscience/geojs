@@ -34,6 +34,7 @@ geo.feature = function(arg) {
   var m_style = {},
       m_layer = arg.layer === undefined ? null : arg.layer,
       m_gcs = arg.gcs === undefined ? "EPSG:4326" : arg.gcs,
+      m_visible = arg.visible === undefined ? true : arg.visible,
       m_renderer = arg.renderer === undefined ? null : arg.renderer,
       m_dataTime = geo.timestamp(),
       m_buildTime = geo.timestamp(),
@@ -95,6 +96,21 @@ geo.feature = function(arg) {
       return m_gcs;
     } else {
       m_gcs = val;
+      this.modified();
+      return this;
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set visibility of the feature
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.visible = function(val) {
+    if (val === undefined ) {
+      return m_visible;
+    } else {
+      m_visible = val;
       this.modified();
       return this;
     }

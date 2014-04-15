@@ -60,23 +60,22 @@ ggl.planeFeature = function(arg) {
       image.src = img;
     }
 
-    if (image) {
+    if (!image) {
+      m_actor = vgl.utils.createPlane(or[0], or[1], or[2],
+        ul[0], ul[1], ul[2],
+        lr[0], lr[1], lr[2]);
+    } else {
       m_actor = vgl.utils.createTexturePlane(or[0], or[1], or[2],
-                  lr[0], lr[1], lr[2],
-                  ul[0], ul[1], ul[2], true);
+        lr[0], lr[1], lr[2],
+        ul[0], ul[1], ul[2], true);
       m_this.renderer().contextRenderer().addActor(m_actor);
-      image.onload = function() {
+      image.onload = function () {
         texture = vgl.texture();
         texture.setImage(image);
         m_actor.material().addAttribute(texture);
         m_this.renderer()._render();
         onloadCallback.call(this);
       }
-    }
-    else {
-      m_actor = vgl.utils.createPlane(or[0], or[1], or[2],
-                  ul[0], ul[1], ul[2],
-                  lr[0], lr[1], lr[2]);
     }
     this.buildTime().modified();
   };
@@ -93,7 +92,7 @@ ggl.planeFeature = function(arg) {
       this._build();
     }
     if (this.updateTime().getMTime() <= this.getMTime()) {
-      // TODO Implement this
+      m_actor.setVisible(this.visible());
     }
 
     this.updateTime().modified();
