@@ -68,15 +68,19 @@ ggl.planeFeature = function(arg) {
       m_actor = vgl.utils.createTexturePlane(or[0], or[1], or[2],
         lr[0], lr[1], lr[2],
         ul[0], ul[1], ul[2], true);
-      m_this.renderer().contextRenderer().addActor(m_actor);
+      m_actor.setVisible(false);
+      texture = vgl.texture();
+      m_this.visible(m_actor.visible());
       image.onload = function () {
-        texture = vgl.texture();
+        m_actor.setVisible(true);
+        m_this.visible(m_actor.visible());
         texture.setImage(image);
         m_actor.material().addAttribute(texture);
         m_this.renderer()._render();
         onloadCallback.call(this);
       }
     }
+    m_this.renderer().contextRenderer().addActor(m_actor);
     this.buildTime().modified();
   };
 
