@@ -222,6 +222,15 @@ gd3.d3Renderer = function(arg) {
     });
   });
 
+  // connect to zoom event
+  this.on(geo.event.zoom, function (event) {
+    // reset the translation
+    translate();
+
+    // redraw
+    m_this.updateFeatures();
+  });
+
   this.on(geo.event.resize, function (event) {
     m_this._resize(event.x, event.y, event.width, event.height);
   });
