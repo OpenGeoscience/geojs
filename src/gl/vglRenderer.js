@@ -90,22 +90,19 @@ ggl.vglRenderer = function(arg) {
         fp = cam.focalPoint(), output = [];
 
     /// Helper private function
-    toDisplay = function() {
-      return (
-        function(x, y, z, isObject) {
-          var result;
-          isObject = isObject === undefined ? false : true;
-          if (!isObject) {
-            output.push(ren.worldToDisplay(vec4.fromValues(
-              x, y, z, 1.0), cam.viewMatrix(), cam.projectionMatrix(),
-              node.width(), node.height()));
-            return;
-          }
-          result = ren.worldToDisplay(vec4.fromValues(
-            x, y, z, 1.0), cam.viewMatrix(), cam.projectionMatrix(),
-            node.width(), node.height());
-          output.push({x: result[0], y: result[1], z: result[2]});
-      })
+    toDisplay = function(x, y, z, isObject) {
+      var result;
+      isObject = isObject === undefined ? false : true;
+      if (!isObject) {
+        output.push(ren.worldToDisplay(vec4.fromValues(
+          x, y, z, 1.0), cam.viewMatrix(), cam.projectionMatrix(),
+          node.width(), node.height()));
+        return;
+      }
+      result = ren.worldToDisplay(vec4.fromValues(
+        x, y, z, 1.0), cam.viewMatrix(), cam.projectionMatrix(),
+        node.width(), node.height());
+      output.push({x: result[0], y: result[1], z: result[2]});
     };
 
     if (input instanceof Array && input.length > 0) {
@@ -114,22 +111,22 @@ ggl.vglRenderer = function(arg) {
       if (input[0] instanceof Object) {
         delta = 1;
         for (i = 0; i < input.length; i =+ delta) {
-          toDisplay()(input[i].x, input[i].y, fp[2], true);
+          toDisplay(input[i].x, input[i].y, fp[2], true);
         }
       } else if (xyzFormat) {
         delta = 3;
         for (i = 0; i < input.length; i =+ delta) {
-          toDisplay()(input[i], input[i + 1], input[i + 2]);
+          toDisplay(input[i], input[i + 1], input[i + 2]);
         }
       } else {
         delta = 2;
         for (i = 0; i < input.length; i =+ delta) {
-          toDisplay()(input[i], input[i + 1], fp[2]);
+          toDisplay(input[i], input[i + 1], fp[2]);
         }
       }
       return output;
     } else if (input instanceof Object) {
-      toDisplay()(input.x, input.y, fp[2], true);
+      toDisplay(input.x, input.y, fp[2], true);
       return output;
     }
     throw "World to display conversion requires array of 2D/3D points";
