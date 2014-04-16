@@ -266,7 +266,7 @@ geo.osmLayer = function(arg) {
       }
       m_pendingInactiveTiles = [];
       m_this._draw();
-    }, 100);
+    }, 1000);
 
     return this;
   };
