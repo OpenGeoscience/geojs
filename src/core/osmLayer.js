@@ -38,6 +38,7 @@ geo.osmLayer = function(arg) {
       m_mapType = MAP_MQOSM,
       m_tiles = {},
       m_pendingNewTiles = [],
+      m_pendingInactiveTiles = [],
       m_numberOfCachedTiles = 0,
       m_maximumNumberOfActiveTiles = 100,
       m_previousZoom = null,
@@ -119,15 +120,12 @@ geo.osmLayer = function(arg) {
     if (!m_tiles[zoom]) {
       return false;
     }
-
     if (!m_tiles[zoom][x]) {
       return false;
     }
-
     if (!m_tiles[zoom][x][y]) {
       return false;
     }
-
     return m_tiles[zoom][x][y];
   };
 
@@ -142,11 +140,9 @@ geo.osmLayer = function(arg) {
     if (!m_tiles[zoom]) {
       m_tiles[zoom] = {};
     }
-
     if (!m_tiles[zoom][x]) {
       m_tiles[zoom][x] = {};
     }
-
     if (m_tiles[zoom][x][y]) {
       return;
     }
@@ -200,7 +196,7 @@ geo.osmLayer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._removeTiles = function(request) {
-    var x, y, tile, zoom = this.map().zoom();
+    var i, x, y, tile, zoom = this.map().zoom();
 
     if (m_previousZoom === null) {
       m_previousZoom = zoom;
@@ -243,26 +239,34 @@ geo.osmLayer = function(arg) {
             continue;
           }
 
-          m_tiles[zoom][x][y].REMOVING = true;
-          m_tiles[zoom][x][y].feature.visible(0);
           tile = m_tiles[zoom][x][y];
-          m_tiles[zoom][x][y] = null
-
-          /// Async deletion of tiles and their feature
-          setTimeout(function() {
-            if (tile && !tile.REMOVED &&
-                m_numberOfCachedTiles > m_maximumNumberOfActiveTiles) {
-              tile.REMOVED = true;
-              tile.REMOVING = false;
-              if (tile.feature) {
-                m_this._delete(tile.feature);
-              }
-              --m_numberOfCachedTiles;
-            }
-          }, 100);
+          tile.REMOVING = true;
+          m_pendingInactiveTiles.push(tile);
         }
       }
     }
+
+    /// Async deletion or hiding of tiles and their feature
+    setTimeout(function() {
+      var tile;
+      for (i = 0; i < m_pendingInactiveTiles.length; ++i) {
+        tile = m_pendingInactiveTiles[i];
+        if (m_numberOfCachedTiles > m_maximumNumberOfActiveTiles) {
+          m_tiles[tile.zoom][tile.index_x][tile.index_y] = null;
+          tile.REMOVED = true;
+          tile.REMOVING = false;
+          if (tile.feature) {
+            m_this._delete(tile.feature);
+          }
+          --m_numberOfCachedTiles;
+        } else if (!tile.REMOVED && tile.feature) {
+          tile.REMOVING = false;
+          tile.feature.visible(false);
+        }
+      }
+      m_pendingInactiveTiles = [];
+      m_this._draw();
+    }, 1000);
 
     return this;
   };
@@ -329,7 +333,15 @@ geo.osmLayer = function(arg) {
       for (j = tile2y; j <= tile1y; ++j) {
         invJ = (Math.pow(2,zoom) - 1 - j);
         if  (!m_this._hasTile(zoom, i, invJ)) {
-          tile = m_this._addTiles(request, zoom, i, invJ);
+          m_this._addTiles(request, zoom, i, invJ);
+        } else {
+          /// NOTE Do not set visibility to true if the tile is not loaded yet
+          /// as it may result in dark spots during the rendering because of
+          /// the missing texture. We need to wait for the image to be loaded
+          /// first before we want to show the tile on the screen.
+          if (m_tiles[zoom][i][invJ].LOADED) {
+            m_tiles[zoom][i][invJ].feature.visible(true);
+          }
         }
       }
     }
