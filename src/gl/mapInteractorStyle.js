@@ -266,9 +266,18 @@ ggl.mapInteractorStyle = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.handleMouseOut = function(event) {
-    m_leftMouseButtonDown = m_leftMouseButtonDown ? false : m_leftMouseButtonDown;
-    m_middileMouseButtonDown = m_middileMouseButtonDown ? false : m_middileMouseButtonDown;
-    m_rightMouseButtonDown = m_rightMouseButtonDown ? false : m_rightMouseButtonDown;
+    if (m_leftMouseButtonDown) {
+      m_leftMouseButtonDown = false;
+    } else if (m_middileMouseButtonDown) {
+      m_middileMouseButtonDown = false;
+    } if (m_rightMouseButtonDown) {
+      m_rightMouseButtonDown = false;
+      m_initRightBtnMouseDown = false;
+
+      /// Perform zoom when the mouse goes out of canvas as we
+      /// are treating mouse out as right button up.
+      m_this.zoom();
+    }
   }
 
   ////////////////////////////////////////////////////////////////////////////
