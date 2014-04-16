@@ -49,7 +49,6 @@ set(_source_files
   core/planeFeature.js
   core/geomFeature.js
   core/transform.js
-  core/data.js
   core/renderer.js 
   core/osmLayer.js
   gl/init.js
