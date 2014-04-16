@@ -77,6 +77,7 @@ ggl.planeFeature = function(arg) {
         texture.setImage(image);
         m_actor.material().addAttribute(texture);
         m_this.renderer()._render();
+        m_this.modified();
         onloadCallback.call(this);
       }
     }
