@@ -68,15 +68,20 @@ ggl.planeFeature = function(arg) {
       m_actor = vgl.utils.createTexturePlane(or[0], or[1], or[2],
         lr[0], lr[1], lr[2],
         ul[0], ul[1], ul[2], true);
-      m_actor.setVisible(false);
+      this.visible(false);
+      m_actor.setVisible(this.visible());
       texture = vgl.texture();
       m_this.visible(m_actor.visible());
       image.onload = function () {
-        m_actor.setVisible(true);
-        m_this.visible(m_actor.visible());
         texture.setImage(image);
         m_actor.material().addAttribute(texture);
+        /// NOTE Currently we assume that we want to show the feature as
+        /// soon as the image gets loaded. However, there might be a case
+        /// where we want to lock down the visibility. We will deal with that
+        /// later.
         m_this.modified();
+        m_this.visible(true);
+        m_actor.setVisible(m_this.visible());
         m_this.renderer()._render();
         onloadCallback.call(this);
       }

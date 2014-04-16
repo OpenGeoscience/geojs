@@ -335,8 +335,13 @@ geo.osmLayer = function(arg) {
         if  (!m_this._hasTile(zoom, i, invJ)) {
           m_this._addTiles(request, zoom, i, invJ);
         } else {
-          /// Make it visible
-          m_tiles[zoom][i][invJ].feature.visible(true);
+          /// NOTE Do not set visibility to true if the tile is not loaded yet
+          /// as it may result in dark spots during the rendering because of
+          /// the missing texture. We need to wait for the image to be loaded
+          /// first before we want to show the tile on the screen.
+          if (m_tiles[zoom][i][invJ].LOADED) {
+            m_tiles[zoom][i][invJ].feature.visible(true);
+          }
         }
       }
     }
