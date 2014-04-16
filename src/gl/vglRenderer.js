@@ -206,6 +206,11 @@ ggl.vglRenderer = function(arg) {
       m_viewer.handleMouseDown(event);
     });
 
+    map.on('mouseout', function(event) {
+      console.log('mouse is out');
+      m_viewer.handleMouseOut(event);
+    });
+
     map.on('keypress', function(event) {
       m_viewer.handleKeyPress(event);
     });

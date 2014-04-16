@@ -262,6 +262,17 @@ ggl.mapInteractorStyle = function() {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Handle event when mouse goes out of canvas
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.handleMouseOut = function(event) {
+    m_leftMouseButtonDown = m_leftMouseButtonDown ? false : m_leftMouseButtonDown;
+    m_middileMouseButtonDown = m_middileMouseButtonDown ? false : m_middileMouseButtonDown;
+    m_rightMouseButtonDown = m_rightMouseButtonDown ? false : m_rightMouseButtonDown;
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Update view in response to a zoom request
    */
   ////////////////////////////////////////////////////////////////////////////
