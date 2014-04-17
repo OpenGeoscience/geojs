@@ -82,6 +82,7 @@ set(_source_files
   wfl/editor.js
   wfl/style.js
   wfl/staticWorkflows.js
+  plugin/jquery-plugin.js
 )
 
 set(_exclude_js_lint
