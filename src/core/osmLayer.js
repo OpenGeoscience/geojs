@@ -167,6 +167,7 @@ geo.osmLayer = function(arg) {
     tile.UNLOAD = false;
     tile.REMOVED = false;
     tile.REMOVING = false;
+    tile.HIDING = false;
 
     tile.crossOrigin = 'anonymous';
     tile.zoom = zoom;
@@ -241,6 +242,7 @@ geo.osmLayer = function(arg) {
 
           tile = m_tiles[zoom][x][y];
           tile.REMOVING = true;
+          tile.HIDING = true;
           m_pendingInactiveTiles.push(tile);
         }
       }
@@ -255,16 +257,20 @@ geo.osmLayer = function(arg) {
           m_tiles[tile.zoom][tile.index_x][tile.index_y] = null;
           tile.REMOVED = true;
           tile.REMOVING = false;
+          tile.HIDING = false;
           if (tile.feature) {
             m_this._delete(tile.feature);
           }
           --m_numberOfCachedTiles;
-        } else if (!tile.REMOVED && tile.feature) {
+        } else if (tile.HIDING && tile.feature) {
           tile.REMOVING = false;
+          tile.HIDDEN = true;
           tile.feature.visible(false);
+          tile.feature._update();
         }
       }
       m_pendingInactiveTiles = [];
+      m_this._update();
       m_this._draw();
     }, 1000);
 
@@ -349,8 +355,7 @@ geo.osmLayer = function(arg) {
     for (i = 0; i < m_pendingNewTiles.length; ++i) {
       var tile = m_pendingNewTiles[i];
 
-      /// No need to load pending tiles that are not in the same
-      /// zoom level
+      /// No need to load pending tiles that do not have the tile zoom level
       if (tile.zoom !== m_this.map().zoom()) {
         continue;
       }
@@ -361,6 +366,12 @@ geo.osmLayer = function(arg) {
         this.UNLOAD = false;
         this.REMOVING = false;
         this.REMOVED = false;
+        if ((tile.HIDDEN || this.HIDING) && this.feature) {
+          this.feature.visible(false);
+          this.HIDING = false;
+        }
+        this.feature._update();
+        m_this._draw();
       };
       feature = this.create('planeFeature')
                   .origin([tile.llx, tile.lly])
@@ -372,7 +383,6 @@ geo.osmLayer = function(arg) {
     }
     m_pendingNewTiles = [];
     m_this._removeTiles(request);
-    m_this._draw();
     this.updateTime().modified();
     return this;
   };
