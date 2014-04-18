@@ -153,7 +153,8 @@ ggl.mapInteractorStyle = function() {
       // $(m_this).trigger(evt);
     }
     if (m_rightMouseButtonDown) {
-      m_zTrans = (m_currentMousePos.y - m_mouseLastPos.y) / m_height;
+      /// 2.0 is sort of speed up factor
+      m_zTrans = 2.0 * (m_currentMousePos.y - m_mouseLastPos.y) / m_height;
 
       /// Calculate zoom scale here
       if (m_zTrans > 0) {
