@@ -78,7 +78,10 @@ ggl.planeFeature = function(arg) {
         /// where we want to lock down the visibility. We will deal with that
         /// later.
         m_this.visible(true);
-        onloadCallback.call(this);
+
+        if (onloadCallback) {
+          onloadCallback.call(this);
+        }
       }
     }
     m_this.renderer().contextRenderer().addActor(m_actor);

@@ -278,14 +278,35 @@ ggl.mapInteractorStyle = function() {
       /// are treating mouse out as right button up.
       m_this.zoom();
     }
+    return false;
   }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Handle mouse wheel event
+   *
+   * @param event
+   * @returns {boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.handleMouseWheel = function(event) {
+    var delta = event.originalEvent.wheelDelta / 120.0;
+    console.log('delta is ', delta);
+    m_renderer = m_this.viewer().renderWindow().activeRenderer();
+    m_camera = m_renderer.camera();
+
+    delta = Math.pow(1 + Math.abs(delta)/2 , delta > 0 ? 1 : -1);
+    console.log('delta now is ', delta);
+    m_this.zoom(delta);
+    return false;
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Update view in response to a zoom request
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.zoom = function() {
+  this.zoom = function(val) {
     var oldMercPerPixel, newMercPerPixel, evt;
 
     m_zTrans = (m_currentMousePos.y - m_mouseLastPos.y) / m_height;
@@ -300,10 +321,14 @@ ggl.mapInteractorStyle = function() {
     oldMercPerPixel = (m_worldPt2[0] - m_worldPt1[0]) / m_width;
 
     /// Calculate zoom scale here
-    if (m_zTrans > 0) {
-      m_camera.zoom(1 - Math.abs(m_zTrans));
+    if (val === undefined) {
+      if (m_zTrans > 0) {
+        m_camera.zoom(1 - Math.abs(m_zTrans));
+      } else {
+        m_camera.zoom(1 + Math.abs(m_zTrans));
+      }
     } else {
-      m_camera.zoom(1 + Math.abs(m_zTrans));
+      m_camera.zoom(val);
     }
     m_renderer.resetCameraClippingRange();
 
