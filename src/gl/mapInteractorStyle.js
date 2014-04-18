@@ -290,13 +290,11 @@ ggl.mapInteractorStyle = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.handleMouseWheel = function(event) {
-    var delta = event.originalEvent.wheelDelta / 120.0;
-    console.log('delta is ', delta);
     m_renderer = m_this.viewer().renderWindow().activeRenderer();
     m_camera = m_renderer.camera();
 
+    var delta = event.originalEvent.wheelDelta / 120.0;
     delta = Math.pow(1 + Math.abs(delta)/2 , delta > 0 ? 1 : -1);
-    console.log('delta now is ', delta);
     m_this.zoom(delta);
     return false;
   };
