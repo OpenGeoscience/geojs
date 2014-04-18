@@ -37,6 +37,8 @@ geo.osmLayer = function(arg) {
       MAP_NUMTYPES = 3,
       m_mapType = MAP_MQOSM,
       m_tiles = {},
+      m_hiddenBinNumber = 0,
+      m_visibleBinNumber = 1000,
       m_pendingNewTiles = [],
       m_pendingInactiveTiles = [],
       m_numberOfCachedTiles = 0,
@@ -265,7 +267,7 @@ geo.osmLayer = function(arg) {
         } else if (tile.HIDING && tile.feature) {
           tile.REMOVING = false;
           tile.HIDDEN = true;
-          tile.feature.visible(false);
+          tile.feature.bin(m_hiddenBinNumber);
           tile.feature._update();
         }
       }
@@ -346,7 +348,7 @@ geo.osmLayer = function(arg) {
           /// the missing texture. We need to wait for the image to be loaded
           /// first before we want to show the tile on the screen.
           if (m_tiles[zoom][i][invJ].LOADED) {
-            m_tiles[zoom][i][invJ].feature.visible(true);
+            m_tiles[zoom][i][invJ].feature.bin(m_visibleBinNumber);
           }
         }
       }
@@ -367,8 +369,10 @@ geo.osmLayer = function(arg) {
         this.REMOVING = false;
         this.REMOVED = false;
         if ((tile.HIDDEN || this.HIDING) && this.feature) {
-          this.feature.visible(false);
+          this.feature.bin(m_hiddenBinNumber);
           this.HIDING = false;
+        } else {
+          this.feature.bin(m_visibleBinNumber);
         }
         this.feature._update();
         m_this._draw();

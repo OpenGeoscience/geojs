@@ -98,6 +98,7 @@ ggl.planeFeature = function(arg) {
     }
     if (this.updateTime().getMTime() <= this.getMTime()) {
       m_actor.setVisible(this.visible());
+      m_actor.material().setBinNumber(this.bin());
     }
 
     this.updateTime().modified();
