@@ -138,7 +138,7 @@ geo.osmLayer = function(arg) {
    * @param y {number} Y axis tile index
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._addTiles = function(request, zoom, x, y) {
+  this._addTile = function(request, zoom, x, y) {
     if (!m_tiles[zoom]) {
       m_tiles[zoom] = {};
     }
@@ -284,7 +284,7 @@ geo.osmLayer = function(arg) {
    * Create / delete tiles as necessary
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._updateTiles = function(request) {
+  this._addTiles = function(request) {
     var feature, ren = this.renderer(), node = this.node(),
         zoom = this.map().zoom(),
         /// First get corner points
@@ -341,7 +341,7 @@ geo.osmLayer = function(arg) {
       for (j = tile2y; j <= tile1y; ++j) {
         invJ = (Math.pow(2,zoom) - 1 - j);
         if  (!m_this._hasTile(zoom, i, invJ)) {
-          m_this._addTiles(request, zoom, i, invJ);
+          m_this._addTile(request, zoom, i, invJ);
         } else {
           /// NOTE Do not set visibility to true if the tile is not loaded yet
           /// as it may result in dark spots during the rendering because of
@@ -354,6 +354,7 @@ geo.osmLayer = function(arg) {
       }
     }
 
+    /// And now finally add them
     for (i = 0; i < m_pendingNewTiles.length; ++i) {
       var tile = m_pendingNewTiles[i];
 
@@ -386,7 +387,22 @@ geo.osmLayer = function(arg) {
       tile.feature = feature;
     }
     m_pendingNewTiles = [];
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Create / delete tiles as necessary
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._updateTiles = function(request) {
+
+    /// Add tiles that are currently visible
+    this._addTiles(request);
+
+    /// Remove or hide tiles that are not visible
     m_this._removeTiles(request);
+
+
     this.updateTime().modified();
     return this;
   };
