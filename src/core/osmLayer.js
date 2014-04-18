@@ -375,6 +375,13 @@ geo.osmLayer = function(arg) {
         } else {
           this.feature.bin(m_visibleBinNumber);
         }
+
+        if (tile.zoom !== m_this.map().zoom()) {
+          this.HIDING = false;
+          this.HIDDEN = true;
+          this.feature.bin(m_hiddenBinNumber);
+        }
+
         this.feature._update();
         m_this._draw();
       };
