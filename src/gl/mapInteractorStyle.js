@@ -308,6 +308,9 @@ ggl.mapInteractorStyle = function() {
   this.zoom = function(val) {
     var oldMercPerPixel, newMercPerPixel, evt;
 
+    /// Grab the render window
+    m_renderWindow = m_this.viewer().renderWindow();
+
     m_zTrans = (m_currentMousePos.y - m_mouseLastPos.y) / m_height;
 
     /// Compute meters per pixel here and based on that decide the
