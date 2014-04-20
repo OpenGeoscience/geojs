@@ -143,7 +143,6 @@ geo.createFeature  = function(name, layer, renderer, arg) {
     if (arg !== undefined) {
       $.extend(true, options, arg);
     }
-    console.log('option are ', options);
     return geo.features[category][name](options);
   }
   return null;
