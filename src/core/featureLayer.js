@@ -41,11 +41,26 @@ geo.featureLayer = function(arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Create feature
+   * Create feature give a name
+   *
+   * @returns {geo.Feature} Will return a new feature
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.create = function(featureName) {
-    return this._create(featureName);
+  this.create = function(featureName, arg) {
+    this._init();
+
+    var newFeature = geo.createFeature(
+      featureName, m_this, this.renderer(), arg);
+
+    /// Initialize feature list
+    if (!m_features) {
+      m_features = [];
+    }
+
+    m_features.push(newFeature);
+    this.features(m_features);
+    this.modified();
+    return newFeature;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -73,28 +88,6 @@ geo.featureLayer = function(arg) {
       this.dataTime().modified();
       this.modified();
     }
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Create feature
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._create = function(featureName) {
-    this._init();
-
-    var newFeature = geo.createFeature(
-      featureName, m_this, this.renderer());
-
-    /// Initialize feature list
-    if (!m_features) {
-      m_features = [];
-    }
-
-    m_features.push(newFeature);
-    this.features(m_features);
-    this.modified();
-    return newFeature;
   };
 
   ////////////////////////////////////////////////////////////////////////////

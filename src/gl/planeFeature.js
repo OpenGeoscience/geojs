@@ -82,6 +82,11 @@ ggl.planeFeature = function(arg) {
         if (onloadCallback) {
           onloadCallback.call(this);
         }
+
+        if (m_this.drawOnAsyncResourceLoad()) {
+          m_this._update();
+          m_this.layer()._draw();
+        }
       }
     }
     m_this.renderer().contextRenderer().addActor(m_actor);
