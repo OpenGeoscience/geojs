@@ -35,6 +35,8 @@ geo.planeFeature = function(arg) {
       m_upperLeft = [arg.ul.x, arg.ul.y, arg.depth],
       m_lowerRight = [arg.lr.x, arg.lr.y, arg.depth],
       m_defaultDepth = arg.depth,
+      m_drawOnAsyncResourceLoad = arg.drawOnAsyncResourceLoad === undefined ?
+                                    true : false,
       s_init = this._init;
 
   ////////////////////////////////////////////////////////////////////////////
@@ -115,6 +117,20 @@ geo.planeFeature = function(arg) {
     this.modified();
     return this;
   };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set if draw should happen as soon as a async resource is loaded
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.drawOnAsyncResourceLoad = function(val) {
+    if (val === undefined) {
+      return m_drawOnAsyncResourceLoad;
+    } else {
+      m_drawOnAsyncResourceLoad = val;
+      return this;
+    }
+  }
 
   ////////////////////////////////////////////////////////////////////////////
   /**

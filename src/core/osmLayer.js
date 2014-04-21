@@ -37,10 +37,12 @@ geo.osmLayer = function(arg) {
       MAP_NUMTYPES = 3,
       m_mapType = MAP_MQOSM,
       m_tiles = {},
+      m_hiddenBinNumber = 0,
+      m_visibleBinNumber = 1000,
       m_pendingNewTiles = [],
       m_pendingInactiveTiles = [],
       m_numberOfCachedTiles = 0,
-      m_maximumNumberOfActiveTiles = 100,
+      m_maximumNumberOfActiveTiles = 50,
       m_previousZoom = null,
       s_init = this._init,
       s_update = this._update;
@@ -136,7 +138,7 @@ geo.osmLayer = function(arg) {
    * @param y {number} Y axis tile index
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._addTiles = function(request, zoom, x, y) {
+  this._addTile = function(request, zoom, x, y) {
     if (!m_tiles[zoom]) {
       m_tiles[zoom] = {};
     }
@@ -265,7 +267,7 @@ geo.osmLayer = function(arg) {
         } else if (tile.HIDING && tile.feature) {
           tile.REMOVING = false;
           tile.HIDDEN = true;
-          tile.feature.visible(false);
+          tile.feature.bin(m_hiddenBinNumber);
           tile.feature._update();
         }
       }
@@ -282,7 +284,7 @@ geo.osmLayer = function(arg) {
    * Create / delete tiles as necessary
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._updateTiles = function(request) {
+  this._addTiles = function(request) {
     var feature, ren = this.renderer(), node = this.node(),
         zoom = this.map().zoom(),
         /// First get corner points
@@ -339,19 +341,20 @@ geo.osmLayer = function(arg) {
       for (j = tile2y; j <= tile1y; ++j) {
         invJ = (Math.pow(2,zoom) - 1 - j);
         if  (!m_this._hasTile(zoom, i, invJ)) {
-          m_this._addTiles(request, zoom, i, invJ);
+          m_this._addTile(request, zoom, i, invJ);
         } else {
           /// NOTE Do not set visibility to true if the tile is not loaded yet
           /// as it may result in dark spots during the rendering because of
           /// the missing texture. We need to wait for the image to be loaded
           /// first before we want to show the tile on the screen.
           if (m_tiles[zoom][i][invJ].LOADED) {
-            m_tiles[zoom][i][invJ].feature.visible(true);
+            m_tiles[zoom][i][invJ].feature.bin(m_visibleBinNumber);
           }
         }
       }
     }
 
+    /// And now finally add them
     for (i = 0; i < m_pendingNewTiles.length; ++i) {
       var tile = m_pendingNewTiles[i];
 
@@ -367,13 +370,22 @@ geo.osmLayer = function(arg) {
         this.REMOVING = false;
         this.REMOVED = false;
         if ((tile.HIDDEN || this.HIDING) && this.feature) {
-          this.feature.visible(false);
+          this.feature.bin(m_hiddenBinNumber);
           this.HIDING = false;
+        } else {
+          this.feature.bin(m_visibleBinNumber);
         }
+
+        if (tile.zoom !== m_this.map().zoom()) {
+          this.HIDING = false;
+          this.HIDDEN = true;
+          this.feature.bin(m_hiddenBinNumber);
+        }
+
         this.feature._update();
         m_this._draw();
       };
-      feature = this.create('planeFeature')
+      feature = this.create('planeFeature', {drawOnAsyncResourceLoad: false})
                   .origin([tile.llx, tile.lly])
                   .upperLeft([tile.llx, tile.ury])
                   .lowerRight([tile.urx, tile.lly])
@@ -382,7 +394,22 @@ geo.osmLayer = function(arg) {
       tile.feature = feature;
     }
     m_pendingNewTiles = [];
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Create / delete tiles as necessary
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._updateTiles = function(request) {
+
+    /// Add tiles that are currently visible
+    this._addTiles(request);
+
+    /// Remove or hide tiles that are not visible
     m_this._removeTiles(request);
+
+
     this.updateTime().modified();
     return this;
   };

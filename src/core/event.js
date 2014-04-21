@@ -28,7 +28,7 @@ geo.event = function() {
   return this;
 };
 
-inherit(geo.event, vgl.command);
+inherit(geo.event, vgl.event);
 
 //////////////////////////////////////////////////////////////////////////////
 /**

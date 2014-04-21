@@ -136,11 +136,14 @@ geo.registerFeature = function(category, name, func) {
  * Create new instance of the renderer
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.createFeature  = function(name, layer, renderer) {
-  var category = renderer.api();
+geo.createFeature  = function(name, layer, renderer, arg) {
+  var category = renderer.api(),
+      options = {'layer':layer, 'renderer': renderer};
   if (category in geo.features && name in geo.features[category]) {
-    return geo.features[category][name](
-      {'layer':layer, 'renderer': renderer});
+    if (arg !== undefined) {
+      $.extend(true, options, arg);
+    }
+    return geo.features[category][name](options);
   }
   return null;
 }

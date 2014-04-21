@@ -35,6 +35,7 @@ geo.feature = function(arg) {
       m_layer = arg.layer === undefined ? null : arg.layer,
       m_gcs = arg.gcs === undefined ? "EPSG:4326" : arg.gcs,
       m_visible = arg.visible === undefined ? true : arg.visible,
+      m_bin = arg.bin === undefined ? 0 : arg.bin,
       m_renderer = arg.renderer === undefined ? null : arg.renderer,
       m_dataTime = geo.timestamp(),
       m_buildTime = geo.timestamp(),
@@ -111,6 +112,23 @@ geo.feature = function(arg) {
       return m_visible;
     } else {
       m_visible = val;
+      this.modified();
+      return this;
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set bin of the feature
+   *
+   * Bin number is typically used for sorting the order of rendering
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.bin = function(val) {
+    if (val === undefined ) {
+      return m_bin;
+    } else {
+      m_bin = val;
       this.modified();
       return this;
     }
