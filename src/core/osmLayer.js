@@ -30,7 +30,7 @@ geo.osmLayer = function(arg) {
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
-  var m_this = this,
+    var m_this = this,
       MAP_OSM = 0,
       MAP_MQOSM = 1,
       MAP_MQAERIAL = 2,
@@ -42,7 +42,7 @@ geo.osmLayer = function(arg) {
       m_pendingNewTiles = [],
       m_pendingInactiveTiles = [],
       m_numberOfCachedTiles = 0,
-      m_maximumNumberOfActiveTiles = 50,
+      m_maximumNumberOfCachedTiles = 100,
       m_previousZoom = null,
       s_init = this._init,
       s_update = this._update;
@@ -166,10 +166,8 @@ geo.osmLayer = function(arg) {
 
     tile.LOADING = true;
     tile.LOADED = false;
-    tile.UNLOAD = false;
     tile.REMOVED = false;
     tile.REMOVING = false;
-    tile.HIDING = false;
 
     tile.crossOrigin = 'anonymous';
     tile.zoom = zoom;
@@ -199,82 +197,48 @@ geo.osmLayer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._removeTiles = function(request) {
-    var i, x, y, tile, zoom = this.map().zoom();
-
-    if (m_previousZoom === null) {
-      m_previousZoom = zoom;
-    }
-
-    if (m_previousZoom === zoom) {
-      return this;
-    }
-    m_previousZoom = zoom;
+    var i, x, y, tile, zoom, currZoom = this.map().zoom();
 
     if (!m_tiles) {
       return this;
     }
 
-    /// For now just clear the tiles from the last zoom.
+    if (m_previousZoom === currZoom) {
+      return this;
+    }
+    m_previousZoom = currZoom;
+
     for (zoom in m_tiles) {
-      if (m_previousZoom === zoom) {
+      if (currZoom === zoom) {
         continue;
       }
-      if (!m_tiles[zoom]) {
-        continue;
-      }
-
       for (x in m_tiles[zoom]) {
-        if (!m_tiles[zoom][x]) {
-          continue;
-        }
         for (y in m_tiles[zoom][x]) {
-          if (!m_tiles[zoom][x][y]) {
-            continue;
-          }
-
-          if (!m_tiles[zoom][x][y].LOADED) {
-            m_tiles[zoom][x][y].UNLOAD = true;
-            continue;
-          }
-
-          if (m_tiles[zoom][x][y].REMOVED ||
-              m_tiles[zoom][x][y].REMOVING) {
-            continue;
-          }
-
           tile = m_tiles[zoom][x][y];
           tile.REMOVING = true;
-          tile.HIDING = true;
           m_pendingInactiveTiles.push(tile);
         }
       }
     }
 
-    /// Async deletion or hiding of tiles and their feature
     setTimeout(function() {
       var tile;
       for (i = 0; i < m_pendingInactiveTiles.length; ++i) {
         tile = m_pendingInactiveTiles[i];
-        if (m_numberOfCachedTiles > m_maximumNumberOfActiveTiles) {
-          m_tiles[tile.zoom][tile.index_x][tile.index_y] = null;
+        if (tile.zoom !== m_this.map().zoom()) {
+          tile.REMOVING = false;
           tile.REMOVED = true;
-          tile.REMOVING = false;
-          tile.HIDING = false;
-          if (tile.feature) {
-            m_this._delete(tile.feature);
-          }
-          --m_numberOfCachedTiles;
-        } else if (tile.HIDING && tile.feature) {
-          tile.REMOVING = false;
-          tile.HIDDEN = true;
           tile.feature.bin(m_hiddenBinNumber);
-          tile.feature._update();
+        } else {
+          tile.REMOVING = false;
+          tile.REMOVED = false;
+          tile.feature.bin(m_visibleBinNumber);
         }
+        tile.feature._update();
       }
       m_pendingInactiveTiles = [];
-      m_this._update();
       m_this._draw();
-    }, 1000);
+    }, 100);
 
     return this;
   };
@@ -343,45 +307,30 @@ geo.osmLayer = function(arg) {
         if  (!m_this._hasTile(zoom, i, invJ)) {
           m_this._addTile(request, zoom, i, invJ);
         } else {
-          /// NOTE Do not set visibility to true if the tile is not loaded yet
-          /// as it may result in dark spots during the rendering because of
-          /// the missing texture. We need to wait for the image to be loaded
-          /// first before we want to show the tile on the screen.
-          if (m_tiles[zoom][i][invJ].LOADED) {
-            m_tiles[zoom][i][invJ].feature.bin(m_visibleBinNumber);
-          }
+          tile = m_tiles[zoom][i][invJ];
+          tile.feature.bin(m_visibleBinNumber);
+          tile.feature._update();
         }
       }
     }
 
     /// And now finally add them
     for (i = 0; i < m_pendingNewTiles.length; ++i) {
-      var tile = m_pendingNewTiles[i];
-
-      /// No need to load pending tiles that do not have the tile zoom level
-      if (tile.zoom !== m_this.map().zoom()) {
-        continue;
-      }
+      tile = m_pendingNewTiles[i];
 
       tile.onload = function() {
         this.LOADING = false;
         this.LOADED = true;
-        this.UNLOAD = false;
-        this.REMOVING = false;
-        this.REMOVED = false;
-        if ((tile.HIDDEN || this.HIDING) && this.feature) {
+        if ((tile.REMOVING || this.REMOVED) &&
+          this.feature &&
+          tile.zoom !== m_this.map().zoom()) {
           this.feature.bin(m_hiddenBinNumber);
-          this.HIDING = false;
+          this.REMOVING = false;
+          this.REMOVED = true;
         } else {
+          this.REMOVED = false;
           this.feature.bin(m_visibleBinNumber);
         }
-
-        if (tile.zoom !== m_this.map().zoom()) {
-          this.HIDING = false;
-          this.HIDDEN = true;
-          this.feature.bin(m_hiddenBinNumber);
-        }
-
         this.feature._update();
         m_this._draw();
       };
@@ -402,13 +351,23 @@ geo.osmLayer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._updateTiles = function(request) {
-
+    var zoom = m_this.map().zoom();
     /// Add tiles that are currently visible
     this._addTiles(request);
 
     /// Remove or hide tiles that are not visible
     m_this._removeTiles(request);
 
+    /// NOTE No need to do this
+    // for (var x in m_tiles[zoom])  {
+    //   for (var y in m_tiles[zoom][x]) {
+    //     m_tiles[zoom][x][y].feature.bin(m_visibleBinNumber);
+    //     m_tiles[zoom][x][y].feature._update();
+    //   }
+    // }
+
+    /// Trigger draw now
+    m_this._draw();
 
     this.updateTime().modified();
     return this;
