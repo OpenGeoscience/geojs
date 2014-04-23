@@ -23,7 +23,7 @@ geo.event = function() {
   if (!(this instanceof geo.event)) {
     return new geo.event();
   }
-  vgl.command.call(this);
+  vgl.event.call(this);
 
   return this;
 };
