@@ -30,7 +30,8 @@ ggl.pointFeature = function(arg) {
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
-  var m_actor = null,
+  var m_this = this,
+      m_actor = null,
       m_buildTime = vgl.timestamp(),
       s_init = this._init,
       s_update = this._update;
@@ -56,7 +57,16 @@ ggl.pointFeature = function(arg) {
       this.renderer().contextRenderer().removeActor(m_actor);
     }
 
-    m_actor = vgl.utils.createPoints(this.positions(), this.style().colors);
+    if (m_this.style().point_sprites === true) {
+      if (!m_this.style.point_sprites_image == null) {
+        throw "[error] Invalid image for point sprites";
+      }
+
+      m_actor = vgl.utils.createPointSprites(m_this.style().point_sprites_image,
+                 this.positions(), this.style().colors);
+    } else {
+      m_actor = vgl.utils.createPoints(this.positions(), this.style().colors);
+    }
     this.renderer().contextRenderer().addActor(m_actor);
     this.buildTime().modified();
   };

@@ -80,23 +80,22 @@ $(function() {
             }
           }
 
-          // Load image to be used for drawing dots
-          var image = new Image();
-          image.src = '/data/spark.png';
-          image.onload = function() {
-            var pointLayer = geo.featureLayer({
-              "opacity" : 1,
-              "showAttribution" : 1,
-              "visible" : 1
-            }, geo.pointSpritesFeature(image, citieslatlon, colors));
-            pointLayer.setName('cities');
-           myMap.addLayer(pointLayer);
-	         myMap.draw();
-          };
+        // Load image to be used for drawing dots
+        var image = new Image();
+        image.src = '/data/spark.png';
+
+        image.onload = function() {
+          var layer = geo.featureLayer({'renderer' : 'vglRenderer'});
+          layer.create('pointFeature', {
+                         'point_sprites': false,
+                         'point_sprites_image': image})
+            .positions(citieslatlon);
+          myMap.addLayer(layer);
+          myMap.draw();
         }
       }
-    });
-});
+    }
+  });
 </script>
 
 <div id=map style="width:100%; height:100%;">
