@@ -30,7 +30,8 @@ ggl.pointFeature = function(arg) {
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
-  var m_actor = null,
+  var m_this = this,
+      m_actor = null,
       m_buildTime = vgl.timestamp(),
       s_init = this._init,
       s_update = this._update;
@@ -52,11 +53,23 @@ ggl.pointFeature = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._build = function() {
+    var style = m_this.style();
+
     if (m_actor) {
       this.renderer().contextRenderer().removeActor(m_actor);
     }
 
-    m_actor = vgl.utils.createPoints(this.positions(), this.style().colors);
+    if (style.point_sprites === true) {
+      if (!style.point_sprites_image == null) {
+        throw "[error] Invalid image for point sprites";
+      }
+
+      m_actor = vgl.utils.createPointSprites(style.point_sprites_image,
+                 this.positions(), style.colors);
+    } else {
+      m_actor = vgl.utils.createPoints(this.positions(), style.colors);
+    }
+
     this.renderer().contextRenderer().addActor(m_actor);
     this.buildTime().modified();
   };
@@ -69,6 +82,8 @@ ggl.pointFeature = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._update = function() {
+    var style =  m_this.style();
+
     s_update.call(this);
 
     if (this.dataTime().getMTime() >= this.buildTime().getMTime()) {
@@ -80,8 +95,29 @@ ggl.pointFeature = function(arg) {
         vgl.utils.updateColorMappedMaterial(this.material(),
           this.style.color);
       }
-      this.updateTime().modified();
+
+      if (style.point_sprites === true) {
+        if (!style.point_sprites_image == null) {
+          throw "[error] Invalid image for point sprites";
+        }
+
+        if (style.width && style.height) {
+          m_actor.material().shaderProgram().uniform('pointSize').set(
+            [style.width, style.height]);
+        }
+        else if (style.size) {
+          m_actor.material().shaderProgram().uniform('pointSize').set(
+            [style.size, style.size]);
+        }
+      } else {
+        /// Points only has support for size
+        if (style.size) {
+          m_actor.material().shaderProgram().uniform('pointSize').set(
+            style.size);
+        }
+      }
     }
+    this.updateTime().modified();
   };
 
   this._init(arg);
