@@ -30,34 +30,30 @@ function processCSVData(csvdata) {
 
 $(function() {
     var mapOptions = {
-      zoom : 6,
-      center : geo.latlng(0.0, 0.0)
+      node: '#map',
+      zoom : 3,
+      center : [0.0, 0.0]
     };
 
-    var myMap = geo.map(document.getElementById("glcanvas"), mapOptions),
-        canvas = document.getElementById('glcanvas'),
+    var myMap = geo.map(mapOptions),
         table = [],
         citieslatlon = [],
         colors = [];
 
-    // Resize the canvas to fill browser window dynamically
+    /// Resize the canvas to fill browser window dynamically
     window.addEventListener('resize', resizeCanvas, false);
 
     function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      updateAndDraw(canvas.width, canvas.height);
+      $('#map').width('100%');
+      $('#map').height('100%');
+
+      myMap.resize(0, 0, $('#map').width(), $('#map').height());
+      myMap.draw();
     }
+
     resizeCanvas();
 
-    function updateAndDraw(width, height) {
-      myMap.draw();
-      myMap.resize(width, height);
-      myMap.update();
-      myMap.draw();
-    }
-
-    // Read city geo-coded data
+    /// Read city geo-coded data
     $.ajax({
       type : "GET",
       url : "/data/cities.csv",
@@ -79,6 +75,7 @@ $(function() {
               colors.push(1.0, 1.0, 153.0 / 255.0);
             }
           }
+        }
 
         // Load image to be used for drawing dots
         var image = new Image();
@@ -86,20 +83,19 @@ $(function() {
 
         image.onload = function() {
           var layer = geo.featureLayer({'renderer' : 'vglRenderer'});
-          layer.create('pointFeature', {
-                         'point_sprites': false,
-                         'point_sprites_image': image})
+          layer.create('pointFeature', {style: {
+                         point_sprites: true,
+                         point_sprites_image: image,
+                         width: 20, height: 10}})
             .positions(citieslatlon);
           myMap.addLayer(layer);
-          myMap.draw();
         }
       }
-    }
-  });
+    });
+});
+
 </script>
 
-<div id=map style="width:100%; height:100%;">
-  <canvas id="glcanvas" style="width:100%; height:100%;" ></canvas>
-</div>
-
+<div id='map'></div>
 </body>
+

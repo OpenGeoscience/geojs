@@ -53,20 +53,23 @@ ggl.pointFeature = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._build = function() {
+    var style = m_this.style();
+
     if (m_actor) {
       this.renderer().contextRenderer().removeActor(m_actor);
     }
 
-    if (m_this.style().point_sprites === true) {
-      if (!m_this.style.point_sprites_image == null) {
+    if (style.point_sprites === true) {
+      if (!style.point_sprites_image == null) {
         throw "[error] Invalid image for point sprites";
       }
 
-      m_actor = vgl.utils.createPointSprites(m_this.style().point_sprites_image,
-                 this.positions(), this.style().colors);
+      m_actor = vgl.utils.createPointSprites(style.point_sprites_image,
+                 this.positions(), style.colors);
     } else {
-      m_actor = vgl.utils.createPoints(this.positions(), this.style().colors);
+      m_actor = vgl.utils.createPoints(this.positions(), style.colors);
     }
+
     this.renderer().contextRenderer().addActor(m_actor);
     this.buildTime().modified();
   };
@@ -79,6 +82,8 @@ ggl.pointFeature = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._update = function() {
+    var style =  m_this.style();
+
     s_update.call(this);
 
     if (this.dataTime().getMTime() >= this.buildTime().getMTime()) {
@@ -90,8 +95,28 @@ ggl.pointFeature = function(arg) {
         vgl.utils.updateColorMappedMaterial(this.material(),
           this.style.color);
       }
-      this.updateTime().modified();
+
+      if (style.point_sprites === true) {
+        if (!style.point_sprites_image == null) {
+          throw "[error] Invalid image for point sprites";
+        }
+
+        if (style.width && style.height) {
+          m_actor.material().shaderProgram().uniform('pointSize').set(
+            [style.width, style.height]);
+        }
+        else {
+          if (style.width && style.height) {
+            if (style.width > style.height) {
+              m_actor.material().uniform('pointSize').set(style.width);
+            } else {
+              m_actor.material().uniform('pointSize').set(style.height);
+            }
+          }
+        }
+      }
     }
+    this.updateTime().modified();
   };
 
   this._init(arg);
