@@ -61,6 +61,7 @@ geo.pointFeature = function(arg) {
     s_init.call(this, arg);
 
     var defaultStyle = $.extend({}, {
+                         size: 1.0,
                          width:1.0,
                          height: 1.0,
                          color:[1.0, 1.0, 1.0],
