@@ -43,9 +43,9 @@ gd3.lineFeature = function(arg) {
       return d;
     }
     var r = m_this.renderer(), p;
-    p = r.worldToDisplay([d.lng(), d.lat()]);
-    d._dispx = function () { return p[0][0]; };
-    d._dispy = function () { return p[0][1]; };
+    p = r.worldToDisplay(d);
+    d._dispx = function () { return p[0].x; };
+    d._dispy = function () { return p[0].y; };
     return d;
   }
   ////////////////////////////////////////////////////////////////////////////
