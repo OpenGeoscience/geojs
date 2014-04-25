@@ -93,9 +93,9 @@ $(window).load(function() {
     }
     
     citieslatlon.forEach(function (c, i) {
-        c.children = citieslatlon;
+        c.children = [ citieslatlon[(i + 1) % citieslatlon.length ],
+                       citieslatlon[(i + 2) % citieslatlon.length ] ];
     });
-
     var mouseOverElement = 0;
     // Load image to be used for drawing dots
     var osm = geo.osmLayer({'renderer': 'vglRenderer'}).referenceLayer(true);
@@ -110,7 +110,8 @@ $(window).load(function() {
                         opacity: 0.5
                     },
                     lines: {
-                        color: [0, 0, 0]
+                        color: [0, 0, 0],
+                        nodelink: true
                     }
                 };
         var points = layer.create('graphFeature')

@@ -38,15 +38,10 @@ gd3.lineFeature = function(arg) {
       m_style = {};
 
   // georeference a point with caching
-  function georef(d, refresh) {
-    if (!refresh && d.hasOwnProperty('_dispx') && d.hasOwnProperty('_dispy')) {
-      return d;
-    }
+  function georef(d) {
     var r = m_this.renderer(), p;
     p = r.worldToDisplay(d);
-    d._dispx = function () { return p[0].x; };
-    d._dispy = function () { return p[0].y; };
-    return d;
+    return p[0];
   }
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -63,18 +58,48 @@ gd3.lineFeature = function(arg) {
         s_style = this.style(),
         line = d3.svg.line()
                 .x(function (d) {
-                  return georef(d, true)._dispx();
+                  return georef(d).x;
                 })
-                .y(function (d) { return georef(d)._dispy(); });
+                .y(function (d) { return georef(d).y; }),
+        tmp, diag;
     s_update.call(this);
-    
+
+    if (s_style.nodelink) {
+      diag = function (d) {
+          var source = georef(d.source),
+              target = georef(d.target),
+            p = {
+            source: source,
+            target: target
+          };
+          return d3.svg.diagonal()(p);
+        };
+      tmp = [];
+      data.forEach(function (d, i) {
+        var src, trg;
+        if (i < data.length - 1) {
+          src = d;
+          trg = data[i + 1];
+          tmp.push({
+            source: src,
+            target: trg
+          });
+        }
+      });
+      m_style.data = tmp;
+      m_style.attributes = {
+        d: diag
+      };
+    } else {
+      m_style.data = [data];
+      m_style.attributes = {
+        d: line
+      };
+    }
+
     m_style.id = m_this._d3id();
-    m_style.data = [data];
     m_style.append = 'path';
     m_style.classes = [ 'd3LineFeature' ];
-    m_style.attributes = {
-      d: line
-    };
     m_style.style = {
       fill: 'none',
       stroke: d3.rgb(s_style.color[0]*255, s_style.color[1]*255, s_style.color[2]*255),
