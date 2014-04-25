@@ -48,6 +48,7 @@ set(_source_files
   core/polygonFeature.js
   core/planeFeature.js
   core/geomFeature.js
+  core/graphFeature.js
   core/transform.js
   core/renderer.js 
   core/osmLayer.js
@@ -63,6 +64,7 @@ set(_source_files
   d3/object.js
   d3/pointFeature.js
   d3/lineFeature.js
+  d3/graphFeature.js
   d3/d3Renderer.js
   ui/init.js
   ui/gis.js
