@@ -123,7 +123,7 @@ ggl.mapInteractorStyle = function() {
     if (m_middileMouseButtonDown) {
       /// DO NOTHING AS OF NOW
     }
-    if (m_rightMouseButtonDown) {
+    if (m_rightMouseButtonDown && m_height > 0) {
       /// 2.0 is sort of speed up factor
       m_zTrans = 2.0 * (m_currentMousePos.y - m_mouseLastPos.y) / m_height;
 
