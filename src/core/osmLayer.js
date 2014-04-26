@@ -42,10 +42,23 @@ geo.osmLayer = function(arg) {
       m_pendingNewTiles = [],
       m_pendingInactiveTiles = [],
       m_numberOfCachedTiles = 0,
-      m_maximumNumberOfCachedTiles = 100,
+      m_tileCacheSize = 100,
       m_previousZoom = null,
       s_init = this._init,
       s_update = this._update;
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set tile cache size
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.tileCacheSize = function(val) {
+    if (val === undefined) {
+      return m_tileCacheSize;
+    }
+    m_tileCacheSize = val;
+    this.modified();
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -235,7 +248,7 @@ geo.osmLayer = function(arg) {
       i = 0;
       /// Get rid of tiles if we have reached our threshold. However,
       /// If the tile is required for current zoom, then do nothing.
-      while (m_numberOfCachedTiles > m_maximumNumberOfCachedTiles &&
+      while (m_numberOfCachedTiles > m_tileCacheSize &&
         i < m_pendingInactiveTiles.length) {
         tile = m_pendingInactiveTiles[i];
         if (tile.zoom !== m_this.map().zoom()) {
