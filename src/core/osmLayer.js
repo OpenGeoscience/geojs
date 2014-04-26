@@ -142,7 +142,7 @@ geo.osmLayer = function(arg) {
     if (!m_tiles[zoom]) {
       m_tiles[zoom] = {};
     }
-    if (!m_tiles[zoom][x] ) {
+    if (!m_tiles[zoom][x]) {
       m_tiles[zoom][x] = {};
     }
     if (m_tiles[zoom][x][y]) {
