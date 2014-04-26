@@ -119,13 +119,13 @@ geo.osmLayer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._hasTile = function(zoom, x, y) {
-    if (m_tiles[zoom] === undefined || m_tiles[zoom] === null) {
+    if (!m_tiles[zoom]) {
       return false;
     }
-    if (m_tiles[zoom][x] === undefined || m_tiles[zoom][x] === null) {
+    if (!m_tiles[zoom][x]) {
       return false;
     }
-    if (m_tiles[zoom][x][y] === undefined || m_tiles[zoom][x][y] === null) {
+    if (!m_tiles[zoom][x][y]) {
       return false;
     }
     return true;
@@ -139,13 +139,13 @@ geo.osmLayer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._addTile = function(request, zoom, x, y) {
-    if (m_tiles[zoom] === undefined || m_tiles[zoom] == null) {
+    if (!m_tiles[zoom]) {
       m_tiles[zoom] = {};
     }
-    if (m_tiles[zoom][x] === undefined || m_tiles[zoom][x] == null) {
+    if (!m_tiles[zoom][x] ) {
       m_tiles[zoom][x] = {};
     }
-    if (m_tiles[zoom][x][y] !== undefined && m_tiles[zoom][x][y] !== null) {
+    if (m_tiles[zoom][x][y]) {
       return;
     }
 
