@@ -107,7 +107,6 @@ geo.featureLayer = function(arg) {
       }
     }
 
-    console.log('feature not found ', feature);
     return this;
   };
 
