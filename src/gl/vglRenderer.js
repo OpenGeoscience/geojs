@@ -41,21 +41,23 @@ ggl.vglRenderer = function(arg) {
   this.displayToWorld = function(input) {
     var i, delta, node = this.canvas(),
         ren = this.contextRenderer(), cam = ren.camera(),
-        fdp = ren.focusDisplayPoint(), output = [], temp;
+        fdp = ren.focusDisplayPoint(), output = [], temp,
+        point;
 
     if (input instanceof Array && input.length > 0) {
       if (input[0] instanceof Object) {
         delta = 1;
-        for (i = 0; i < points.length; i =+ delta) {
+        for (i = 0; i < input.length; i += delta) {
+          point = input[i];
           temp = ren.displayToWorld(vec4.fromValues(
-                   input.x, input.y, fdp[2], 1.0),
+                   point.x, point.y, fdp[2], 1.0),
                    cam.viewMatrix(), cam.projectionMatrix(),
                    node.width(), node.height());
           output.push({x: temp[0], y: temp[1], z: temp[2], w: temp[3]});
         }
       } else {
         delta = input.length % 3 === 0 ? 3 : 2;
-        for (i = 0; i < input.length; i =+ delta) {
+        for (i = 0; i < input.length; i += delta) {
           output.push(ren.displayToWorld(vec4.fromValues(
             input[i],
             input[i + 1],

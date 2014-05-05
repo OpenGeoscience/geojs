@@ -106,6 +106,7 @@ geo.osmLayer = function(arg) {
 
       if (input[0] instanceof Object) {
         for (i = 0; i < input.length; ++i) {
+          output[i] = {};
           output[i].x = input[i].x;
           output[i].y = geo.mercator.y2lat(input[i].y);
         }
