@@ -194,6 +194,9 @@ ggl.vglRenderer = function(arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._connectMapEvents = function() {
     var map = $(m_this.layer().map().node());
+    map.on('mousewheel', function (event) {
+      m_viewer.handleMouseWheel(event);
+    });
     map.on('mousemove', function(event) {
       m_viewer.handleMouseMove(event);
     });
