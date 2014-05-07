@@ -191,6 +191,28 @@ geo.featureLayer = function(arg) {
     return this;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Clear all features in layer
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.clear = function() {
+    var i;
+
+    if (!m_features)
+      return this;
+
+    for(i = 0; i < m_features.length; ++i) {
+      m_features[i]._exit();
+    }
+
+    this.dataTime().modified();
+    this.modified();
+    m_features = [];
+
+    return this;
+  };
+
   return this;
 };
 
