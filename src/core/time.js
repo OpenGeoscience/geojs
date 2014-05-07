@@ -24,6 +24,9 @@ geo.time.incrementTime = function (time, unit, delta) {
   else if (unit === 'years') {
     time.setYear(time.getYear() + delta);
   }
+  else if (unit === 'index') {
+    time = time + delta;
+  }
 
   return time;
 };
