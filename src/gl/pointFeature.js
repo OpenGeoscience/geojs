@@ -120,6 +120,15 @@ ggl.pointFeature = function(arg) {
     this.updateTime().modified();
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Destroy
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._exit = function() {
+    m_this.renderer().contextRenderer().removeActor(m_actor);
+  };
+
   this._init(arg);
   return this;
 };
