@@ -382,8 +382,8 @@ geo.layer = function(arg) {
     //       and maybe respond to events in case the map element moves
     //       around the page.
     m_node.css('position', 'absolute');
-    m_node.css('width', '100%');
-    m_node.css('height', '100%');
+    m_node.width(m_node.parent().width());
+    m_node.height(m_node.parent().height());
 
     if (m_map) {
       m_map.node().append(m_node);
@@ -431,6 +431,8 @@ geo.layer = function(arg) {
     m_width = w;
     m_height = h;
 
+    m_node.width(w);
+    m_node.height(h);
     this.modified();
     this.trigger(geo.event.resize,
       {x: x, y: y, width: m_width, height: m_height});
