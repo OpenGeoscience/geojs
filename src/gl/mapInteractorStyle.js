@@ -441,9 +441,9 @@ ggl.mapInteractorStyle = function() {
   this.m_updateRenderParams = function() {
     /// TODO We should probably just check for the time when viewer got
     /// updated. Currently VGL does not have it but we can add it later.
-    if (m_updateRenderParamsTime.getMTime() > m_this.getMTime()) {
-      return;
-    }
+    //if (m_updateRenderParamsTime.getMTime() > m_this.getMTime()) {
+    //  return;
+    //}
 
     m_renderWindow = m_this.viewer().renderWindow();
     m_width = m_renderWindow.windowSize()[0];

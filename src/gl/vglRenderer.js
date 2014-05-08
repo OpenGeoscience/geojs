@@ -28,7 +28,9 @@ ggl.vglRenderer = function(arg) {
   var m_this = this,
       m_viewer = null,
       m_interactorStyle = ggl.mapInteractorStyle(),
-      s_init = this._init;
+      s_init = this._init,
+      m_width = 0,
+      m_height = 0;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -50,7 +52,7 @@ ggl.vglRenderer = function(arg) {
           temp = ren.displayToWorld(vec4.fromValues(
                    input.x, input.y, fdp[2], 1.0),
                    cam.viewMatrix(), cam.projectionMatrix(),
-                   node.width(), node.height());
+                   m_width, m_height);
           output.push({x: temp[0], y: temp[1], z: temp[2], w: temp[3]});
         }
       } else {
@@ -61,14 +63,14 @@ ggl.vglRenderer = function(arg) {
             input[i + 1],
             fdp[2],
             1.0), cam.viewMatrix(), cam.projectionMatrix(),
-            node.width(), node.height()));
+            m_width, m_height));
         }
       }
     } else if (input instanceof Object) {
       temp = ren.displayToWorld(vec4.fromValues(
                input.x, input.y, fdp[2], 1.0),
                cam.viewMatrix(), cam.projectionMatrix(),
-               node.width(), node.height());
+               m_width, m_height);
       output.push({x: temp[0], y: temp[1], z: temp[2], w: temp[3]});
     } else {
       throw "Display to world conversion requires array of 2D/3D points";
@@ -96,12 +98,12 @@ ggl.vglRenderer = function(arg) {
       if (!isObject) {
         output.push(ren.worldToDisplay(vec4.fromValues(
           x, y, z, 1.0), cam.viewMatrix(), cam.projectionMatrix(),
-          node.width(), node.height()));
+          m_width, m_height));
         return;
       }
       result = ren.worldToDisplay(vec4.fromValues(
         x, y, z, 1.0), cam.viewMatrix(), cam.projectionMatrix(),
-        node.width(), node.height());
+        m_width, m_height);
       output.push({x: result[0], y: result[1], z: result[2]});
     };
 
@@ -245,6 +247,8 @@ ggl.vglRenderer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._resize = function(x, y, w, h) {
+    m_width = w;
+    m_height = h;
     this.canvas().attr('width', w);
     this.canvas().attr('height', h);
     m_viewer.renderWindow().positionAndResize(x, y, w, h);
