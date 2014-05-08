@@ -49,7 +49,7 @@ set(_source_files
   core/planeFeature.js
   core/geomFeature.js
   core/transform.js
-  core/renderer.js 
+  core/renderer.js
   core/osmLayer.js
   gl/init.js
   gl/renderer.js
@@ -57,7 +57,7 @@ set(_source_files
   gl/geomFeature.js
   gl/pointFeature.js
   gl/planeFeature.js
-  gl/mapInteractorStyle.js	
+  gl/mapInteractorStyle.js
   gl/vglRenderer.js
   d3/init.js
   d3/object.js
