@@ -77,16 +77,6 @@ gd3.d3Renderer = function(arg) {
         .attr('transform', 'translate(' + m_translate.join() + ')');
   }
 
-  this.latLngToDisplayGenerator = function () {
-    var baseRenderer = getBaseRenderer();
-    return function (pt) {
-      var xy = baseRenderer.worldToDisplay([pt.lng(), pt.lat()]);
-      return { 'x': function () { return xy[0][0]; },
-               'y': function () { return xy[0][1]; }
-      };
-    };
-  };
-  
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
@@ -110,22 +100,22 @@ gd3.d3Renderer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.displayToWorld = function (pt) {
-    var baseRenderer = getBaseRenderer();
-    if (!baseRenderer) {
-      throw "Cannot project until this layer is connected to a map with a base layer.";
+    var map = getMap();
+    if (!map) {
+      throw "Cannot project until this layer is connected to a map.";
     }
-    return baseRenderer.displayToWorld(pt);
+    return map.displayToGcs(pt);
   };
 
   this.worldToDisplay = function (pt) {
-    var baseRenderer = getBaseRenderer();
-    if (!baseRenderer) {
-      throw "Cannot project until this layer is connected to a map with a base layer.";
+    var map = getMap();
+    if (!map) {
+      throw "Cannot project until this layer is connected to a map.";
     }
-    var vals = baseRenderer.worldToDisplay(pt);
+    var vals = map.gcsToDisplay(pt);
     vals.forEach(function (v) {
-      v[0] -= m_translate[0];
-      v[1] -= m_translate[1];
+      v.x -= m_translate[0];
+      v.y -= m_translate[1];
     });
     return vals;
   };

@@ -32,8 +32,8 @@ gd3.pointFeature = function(arg) {
     if (!refresh && d.hasOwnProperty('_dispx') && d.hasOwnProperty('_dispy')) {
       return d;
     }
-    var map = m_this.layer().map(), p;
-    p = map.gcsToDisplay(d);
+    var r = m_this.renderer(), p;
+    p = r.worldToDisplay(d);
     d._dispx = function () { return p[0].x; };
     d._dispy = function () { return p[0].y; };
     return d;
@@ -100,7 +100,7 @@ gd3.pointFeature = function(arg) {
 
     // replace with user defined styles
     m_style.style.fill = d3.rgb(s_style.color[0]*255, s_style.color[1]*255, s_style.color[2]*255);
-    m_style.attributes.r = s_style.size[0].toString() + "px";
+    m_style.attributes.r = s_style.size.toString() + "px";
     m_style.style['fill-opacity'] = s_style.opacity;
 
     // pass to renderer to draw
