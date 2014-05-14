@@ -9,6 +9,40 @@
 /*global window, ggl, ogs, vec4, inherit, $, geo*/
 //////////////////////////////////////////////////////////////////////////////
 
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Single VGL viewer
+ *
+ * This singleton instance is used to share a single GL context across multiple
+ * vlgRenderer and therefore layers.
+ */
+//////////////////////////////////////////////////////////////////////////////
+ggl._vglViewerInstance = null;
+
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Retrives the singleton, lazily constructs as necessary.
+ *
+ * @return {vgl.viewer} the single viewer instance.
+ */
+//////////////////////////////////////////////////////////////////////////////
+
+ggl.vglViewerInstance = function() {
+  var canvas;
+
+  if (ggl._vglViewerInstance === null) {
+    canvas = $(document.createElement('canvas'));
+    canvas.attr('class', '.webgl-canvas');
+    ggl._vglViewerInstance = vgl.viewer(canvas.get(0));
+    ggl._vglViewerInstance.setInteractorStyle(ggl.mapInteractorStyle());
+    ggl._vglViewerInstance.init();
+  }
+
+  return ggl._vglViewerInstance;
+};
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class vglRenderer
@@ -26,8 +60,8 @@ ggl.vglRenderer = function(arg) {
   ggl.renderer.call(this, arg);
 
   var m_this = this,
-      m_viewer = null,
-      m_interactorStyle = ggl.mapInteractorStyle(),
+      m_viewer = ggl.vglViewerInstance(),
+      m_contextRenderer = vgl.renderer(),
       s_init = this._init;
 
   ////////////////////////////////////////////////////////////////////////////
@@ -138,7 +172,7 @@ ggl.vglRenderer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.contextRenderer = function() {
-    return m_viewer.renderWindow().activeRenderer();
+    return m_contextRenderer;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -160,27 +194,19 @@ ggl.vglRenderer = function(arg) {
       return this;
     }
 
-    var canvas;
     s_init.call(this);
-    if (!this.canvas()) {
-      canvas = $(document.createElement('canvas'));
-      canvas.attr('class', '.webgl-canvas');
-      this.canvas(canvas);
-      this.layer().node().append(canvas);
-    }
-    m_viewer = vgl.viewer(this.canvas().get(0));
-    m_viewer.setInteractorStyle(m_interactorStyle);
-    m_viewer.init();
 
-    m_viewer.renderWindow().resize(this.canvas().width(),
-                                   this.canvas().height());
+    this.canvas($(m_viewer.canvas()));
+    m_viewer.renderWindow().addRenderer(m_contextRenderer);
+
+    this.layer().node().append(this.canvas());
 
     /// VGL uses jquery trigger on methods
-    $(m_interactorStyle).on(geo.event.pan, function(event) {
+    $(m_viewer.interactorStyle()).on(geo.event.pan, function(event) {
       m_this.trigger(geo.event.pan, event);
     });
 
-    $(m_interactorStyle).on(geo.event.zoom, function(event) {
+    $(m_viewer.interactorStyle()).on(geo.event.zoom, function(event) {
       m_this.trigger(geo.event.zoom, event);
     });
 
@@ -231,7 +257,7 @@ ggl.vglRenderer = function(arg) {
       m_viewer.handleContextMenu(event);
     });
 
-    m_interactorStyle.map(this.layer().map());
+    m_viewer.interactorStyle().map(this.layer().map());
   };
   this.on(geo.event.layerAdd, function (event) {
     if (event.layer === m_this.layer()) {
