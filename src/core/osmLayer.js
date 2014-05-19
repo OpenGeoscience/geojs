@@ -44,8 +44,13 @@ geo.osmLayer = function(arg) {
     m_numberOfCachedTiles = 0,
     m_tileCacheSize = 100,
     m_previousZoom = null,
+    m_baseUrl = 'http://otile1.mqcdn.com/tiles/1.0.0/osm/',
     s_init = this._init,
     s_update = this._update;
+
+  if (arg && arg.baseUrl !== undefined) {
+    m_baseUrl = arg.baseUrl;
+  }
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -195,7 +200,7 @@ geo.osmLayer = function(arg) {
 
     // tile.src = "http://tile.openstreetmap.org/" + zoom + "/" + (x)
     //   + "/" + (Math.pow(2,zoom) - 1 - y) + ".png";
-    tile.src = "http://otile1.mqcdn.com/tiles/1.0.0/osm/" + zoom + "/" +
+    tile.src = m_baseUrl + zoom + "/" +
       (x) + "/" + (Math.pow(2,zoom) - 1 - y) + ".jpg";
 
     m_tiles[zoom][x][y] = tile;
