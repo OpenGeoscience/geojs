@@ -82,7 +82,7 @@ ggl.mapInteractorStyle = function() {
         currWorldPos, lastZoom, evt, newMercPerPixel, oldMercPerPixel;
 
     /// Update render params
-    m_this.m_updateRenderParams();
+    m_this.updateRenderParams();
 
     /// Compute current mouse position
     m_this._computeCurrentMousePos(event);
@@ -154,7 +154,7 @@ ggl.mapInteractorStyle = function() {
     var canvas = m_this.map(), point, plane;
 
     /// Update render parameters
-    m_this.m_updateRenderParams();
+    m_this.updateRenderParams();
 
     if (event.button === 0) {
       m_leftMouseButtonDown = true;
@@ -199,7 +199,7 @@ ggl.mapInteractorStyle = function() {
         num = null;
 
     /// Update render params
-    m_this.m_updateRenderParams();
+    m_this.updateRenderParams();
 
     if (event.button === 0) {
       m_leftMouseButtonDown = false;
@@ -231,7 +231,7 @@ ggl.mapInteractorStyle = function() {
   ////////////////////////////////////////////////////////////////////////////
   this.handleMouseOut = function(event) {
     /// Update render params
-    m_this.m_updateRenderParams();
+    m_this.updateRenderParams();
 
     if (m_leftMouseButtonDown) {
       m_leftMouseButtonDown = false;
@@ -258,7 +258,7 @@ ggl.mapInteractorStyle = function() {
   ////////////////////////////////////////////////////////////////////////////
   this.handleMouseWheel = function(event) {
     /// Update render params
-    m_this.m_updateRenderParams();
+    m_this.updateRenderParams();
 
     var delta = event.originalEvent.wheelDelta / 120.0;
     delta = Math.pow(1 + Math.abs(delta)/2 , delta > 0 ? 1 : -1);
@@ -279,7 +279,7 @@ ggl.mapInteractorStyle = function() {
     var oldMercPerPixel, newMercPerPixel, evt;
 
     /// Update render params
-    m_this.m_updateRenderParams();
+    m_this.updateRenderParams();
 
     m_zTrans = (m_currentMousePos.y - m_mouseLastPos.y) / m_height;
 
@@ -409,7 +409,7 @@ ggl.mapInteractorStyle = function() {
   ////////////////////////////////////////////////////////////////////////////
   this._computeCurrentMousePos = function(event) {
     /// Update render params
-    m_this.m_updateRenderParams();
+    m_this.updateRenderParams();
 
     m_outsideCanvas = false;
     m_coords = m_this.viewer().relMouseCoords(event);
@@ -438,13 +438,7 @@ ggl.mapInteractorStyle = function() {
    * @protected
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.m_updateRenderParams = function() {
-    /// TODO We should probably just check for the time when viewer got
-    /// updated. Currently VGL does not have it but we can add it later.
-    if (m_updateRenderParamsTime.getMTime() > m_this.getMTime()) {
-      return;
-    }
-
+  this.updateRenderParams = function() {
     m_renderWindow = m_this.viewer().renderWindow();
     m_width = m_renderWindow.windowSize()[0];
     m_height = m_renderWindow.windowSize()[1];

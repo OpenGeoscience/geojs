@@ -36,9 +36,9 @@ geo.map = function(arg) {
   var m_this = this,
       m_x = 0,
       m_y = 0,
-      m_width = 0,
-      m_height = 0,
       m_node = $(arg.node),
+      m_width = m_node.width(),
+      m_height = m_node.height(),
       m_gcs = arg.gcs === undefined ? "EPSG:4326" : arg.gcs,
       m_uigcs = arg.uigcs === undefined ? "EPSG:4326" : arg.uigcs,
       m_center = arg.center === undefined ? [0.0, 0.0] :
