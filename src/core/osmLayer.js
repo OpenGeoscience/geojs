@@ -30,22 +30,22 @@ geo.osmLayer = function(arg) {
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
-    var m_this = this,
-      MAP_OSM = 0,
-      MAP_MQOSM = 1,
-      MAP_MQAERIAL = 2,
-      MAP_NUMTYPES = 3,
-      m_mapType = MAP_MQOSM,
-      m_tiles = {},
-      m_hiddenBinNumber = 0,
-      m_visibleBinNumber = 1000,
-      m_pendingNewTiles = [],
-      m_pendingInactiveTiles = [],
-      m_numberOfCachedTiles = 0,
-      m_tileCacheSize = 100,
-      m_previousZoom = null,
-      s_init = this._init,
-      s_update = this._update;
+  var m_this = this,
+    MAP_OSM = 0,
+    MAP_MQOSM = 1,
+    MAP_MQAERIAL = 2,
+    MAP_NUMTYPES = 3,
+    m_mapType = MAP_MQOSM,
+    m_tiles = {},
+    m_hiddenBinNumber = 0,
+    m_visibleBinNumber = 1000,
+    m_pendingNewTiles = [],
+    m_pendingInactiveTiles = [],
+    m_numberOfCachedTiles = 0,
+    m_tileCacheSize = 100,
+    m_previousZoom = null,
+    s_init = this._init,
+    s_update = this._update;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
