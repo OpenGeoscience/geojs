@@ -240,6 +240,19 @@ if(BUILD_GEOJS_TESTING)
     set(PHANTOMJS_REL_DIR "test/phantomjs")
     set(PHANTOMJS_ABS_DIR "${GEOJS_DEPLOY_DIR}/${PHANTOMJS_REL_DIR}")
 
+    # copy blanket JS files
+    configure_file(
+      ${CMAKE_CURRENT_SOURCE_DIR}/testing/js/blanket.min.js
+      ${GEOJS_DEPLOY_DIR}/test/js-coverage/blanket.min.js
+      COPYONLY
+    )
+    configure_file(
+      ${CMAKE_CURRENT_SOURCE_DIR}/testing/js/jasmine-blanket.js
+      ${GEOJS_DEPLOY_DIR}/test/js-coverage/jasmine-blanket.js
+      COPYONLY
+    )
+
+
     file(GLOB JS_UNIT_TEST_CASES
       ${CMAKE_CURRENT_SOURCE_DIR}/testing/test-cases/phantomjs-tests/*.js
     )
@@ -271,6 +284,22 @@ if(BUILD_GEOJS_TESTING)
                 http://${TESTING_HOST}:${TESTING_PORT}/${PHANTOMJS_REL_DIR}/${f}.html
       )
     endforeach()
+
+    # generate the coverage report
+    set(coverage_test ${GEOJS_DEPLOY_DIR}/test/js-coverage/geojs-coverage.html)
+    set(coverage_configurator ${CMAKE_CURRENT_SOURCE_DIR}/cmake/configure-js-coverage-test.cmake)
+    add_custom_command(
+      OUTPUT ${coverage_test}
+      COMMAND ${CMAKE_COMMAND} "-DJS_UNIT_TEST_CASES=\"${JS_UNIT_TEST_CASES}\""
+                                -DSOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
+                                -DDEPLOY_DIR="${GEOJS_DEPLOY_DIR}"
+                                -P ${coverage_configurator}
+      COMMAND ${CMAKE_COMMAND} -E touch ${coverage_test}
+      DEPENDS ${JS_UNIT_TEST_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/coverage-runner.html.in ${coverage_configurator}
+      COMMENT "Generating geojs coverage report"
+    )
+
+    list(APPEND JS_UNIT_TEST_FILES ${coverage_test})
 
     add_custom_target(
       phantomjs_tests
