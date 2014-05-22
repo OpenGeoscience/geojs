@@ -3,8 +3,15 @@
 import sys
 import subprocess
 import threading
-import SocketServer
-import SimpleHTTPServer
+
+if sys.version_info[0] == 2:
+    import SocketServer
+    import SimpleHTTPServer
+elif sys.version_info[0] == 3:
+    import socketserver as SocketServer
+    from http import server as SimpleHTTPServer
+else:
+    raise Exception("Unsupported python version")
 
 
 HOST = "@TESTING_HOST@"
