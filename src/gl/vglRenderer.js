@@ -219,46 +219,53 @@ ggl.vglRenderer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._connectMapEvents = function() {
-    var map = $(m_this.layer().map().node());
-    map.on('mousewheel', function (event) {
-      m_viewer.handleMouseWheel(event);
-    });
-    map.on('mousemove', function(event) {
-      m_viewer.handleMouseMove(event);
-    });
 
-    map.on('mouseup', function(event) {
-      m_viewer.handleMouseUp(event);
-    });
+    // Only connect up events if this renderer is associated with the
+    // reference/base layer.
+    if (m_this.layer().referenceLayer()) {
 
-    map.on('mousedown', function(event) {
-      m_viewer.handleMouseDown(event);
-    });
+      var map = $(m_this.layer().map().node());
+      map.on('mousewheel', function (event) {
+        m_viewer.handleMouseWheel(event);
+      });
+      map.on('mousemove', function(event) {
+        m_viewer.handleMouseMove(event);
+      });
 
-    map.on('mouseout', function(event) {
-      // check if the mouse actually left the map area
-      var selection = $(map),
-          offset = selection.offset(),
-          width = selection.width(),
-          height = selection.height(),
-          x = event.pageX - offset.left,
-          y = event.pageY - offset.top;
-      if ( x < 0 || x >= width ||
-           y < 0 || y >= height ) {
-        m_viewer.handleMouseOut(event);
-      }
-    });
+      map.on('mouseup', function(event) {
+        m_viewer.handleMouseUp(event);
+      });
 
-    map.on('keypress', function(event) {
-      m_viewer.handleKeyPress(event);
-    });
+      map.on('mousedown', function(event) {
+        m_viewer.handleMouseDown(event);
+      });
 
-    map.on('contextmenu', function(event) {
-      m_viewer.handleContextMenu(event);
-    });
+      map.on('mouseout', function(event) {
+        // check if the mouse actually left the map area
+        var selection = $(map),
+            offset = selection.offset(),
+            width = selection.width(),
+            height = selection.height(),
+            x = event.pageX - offset.left,
+            y = event.pageY - offset.top;
+        if ( x < 0 || x >= width ||
+             y < 0 || y >= height ) {
+          m_viewer.handleMouseOut(event);
+        }
+      });
+
+      map.on('keypress', function(event) {
+        m_viewer.handleKeyPress(event);
+      });
+
+      map.on('contextmenu', function(event) {
+        m_viewer.handleContextMenu(event);
+      });
+    }
 
     m_viewer.interactorStyle().map(this.layer().map());
   };
+
   this.on(geo.event.layerAdd, function (event) {
     if (event.layer === m_this.layer()) {
       m_this._connectMapEvents();
