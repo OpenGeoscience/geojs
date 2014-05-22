@@ -9,7 +9,7 @@ set(MANGLE ON CACHE BOOL "When minifying, also mangle non-public symbol names.")
 set(BUILD_TESTING_OLD OFF CACHE BOOL "Enable old testing (to be removed)")
 set(BUILD_TESTING OFF CACHE BOOL "Enable vgl testing")
 
-set(BUILD_GEOJS_TESTING OFF CACHE BOOL "Enable geojs testing")
+set(BUILD_GEOJS_TESTING ON CACHE BOOL "Enable geojs testing")
 
 set(need_python FALSE)
 if(${BUILD_TESTING_OLD} OR ${BUILD_TESTING})
@@ -20,6 +20,15 @@ endif()
 
 if(${BUILD_GEOJS_TESTING})
   set(need_python TRUE)
+
+  # turn on when fixed
+  set(JS_LINT_TESTS OFF CACHE BOOL "Generate style tests for JS source files.")
+
+  set(PHANTOMJS_TESTS ON CACHE BOOL "Generate phantomjs unit tests.")
+
+  # once implemented
+  #set(COVERAGE_TESTS OFF CACHE BOOL "Generate coverage reports.")
+  #set(SELENIUM_TESTS OFF CACHE BOOL "Generate selenium unit tests.")
 endif()
 
 # set up python variables for starting a test server
@@ -42,9 +51,6 @@ if(${MINIFY} AND ${MANGLE})
 endif()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-
-# Find JSLint.
-find_package(JSLint)
 
 # Find UglifyJS.
 find_package(UglifyJS)
@@ -79,7 +85,6 @@ set(_source_files
   gl/renderer.js
   gl/pointFeature.js
   gl/geomFeature.js
-  gl/pointFeature.js
   gl/planeFeature.js
   gl/mapInteractorStyle.js	
   gl/vglRenderer.js
@@ -212,11 +217,6 @@ endif()
 add_subdirectory(vgl)
 add_dependencies(vgl geojs_pre_deploy)
 
-# JSLint tests.
-foreach(f ${_js_lint_files})
-    add_test(jslint-${f} ${JSLint_EXECUTABLE} ${f})
-endforeach()
-
 # add a test with a resource lock for the web server
 function(add_geojs_test test_name)
   add_test(
@@ -234,47 +234,63 @@ if(BUILD_GEOJS_TESTING)
   include(CTest)
   enable_testing()
 
-  find_package(PhantomJS REQUIRED)
+  if(PHANTOMJS_TESTS)
+    find_package(PhantomJS REQUIRED)
 
-  set(PHANTOMJS_REL_DIR "test/phantomjs")
-  set(PHANTOMJS_ABS_DIR "${GEOJS_DEPLOY_DIR}/${PHANTOMJS_REL_DIR}")
+    set(PHANTOMJS_REL_DIR "test/phantomjs")
+    set(PHANTOMJS_ABS_DIR "${GEOJS_DEPLOY_DIR}/${PHANTOMJS_REL_DIR}")
 
-  file(GLOB JS_UNIT_TEST_CASES
-    ${CMAKE_CURRENT_SOURCE_DIR}/testing/test-cases/phantomjs-tests/*.js
-  )
-
-  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/geojs-test-runner.py.in
-                 ${CMAKE_CURRENT_BINARY_DIR}/test/geojs-test-runner.py
-  )
-
-  list(APPEND TESTING_DEPENDENCIES ${_min_js_file})
-
-  # add phantomjs unit tests
-  foreach(js ${JS_UNIT_TEST_CASES})
-    get_filename_component(f "${js}" NAME_WE)
-    set(html "${PHANTOMJS_ABS_DIR}/${f}.html")
-
-    add_custom_command(OUTPUT ${html}
-      COMMAND ${CMAKE_COMMAND} -DTEST_HTML="${html}"
-                               -DSOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
-                               -DSOURCE_FILE="${js}"
-                               -P ${CMAKE_SOURCE_DIR}/cmake/configure-js-unit-test.cmake
-      COMMAND ${CMAKE_COMMAND} -E touch ${html}
-      DEPENDS ${js} ${CMAKE_SOURCE_DIR}/testing/test-runners/jasmine-runner.html.in
-      COMMENT "Generating phantomjs unit test ${f}"
+    file(GLOB JS_UNIT_TEST_CASES
+      ${CMAKE_CURRENT_SOURCE_DIR}/testing/test-cases/phantomjs-tests/*.js
     )
-    list(APPEND JS_UNIT_TEST_FILES ${html})
 
-    add_geojs_test(phantomjs-test:js:${f}
-      ${PHANTOMJS_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/run-jasmine.js
-              http://${TESTING_HOST}:${TESTING_PORT}/${PHANTOMJS_REL_DIR}/${f}.html
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/geojs-test-runner.py.in
+                   ${CMAKE_CURRENT_BINARY_DIR}/test/geojs-test-runner.py
     )
-  endforeach()
 
-  add_custom_target(
-    phantomjs_tests
-    ALL
-    DEPENDS ${JS_UNIT_TEST_FILES}
-  )
+    list(APPEND TESTING_DEPENDENCIES ${_min_js_file})
+
+    # add phantomjs unit tests
+    foreach(js ${JS_UNIT_TEST_CASES})
+      get_filename_component(f "${js}" NAME_WE)
+      set(html "${PHANTOMJS_ABS_DIR}/${f}.html")
+
+      add_custom_command(OUTPUT ${html}
+        COMMAND ${CMAKE_COMMAND} -DTEST_HTML="${html}"
+                                 -DSOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
+                                 -DSOURCE_FILE="${js}"
+                                 -P ${CMAKE_SOURCE_DIR}/cmake/configure-js-unit-test.cmake
+        COMMAND ${CMAKE_COMMAND} -E touch ${html}
+        DEPENDS ${js} ${CMAKE_SOURCE_DIR}/testing/test-runners/jasmine-runner.html.in
+        COMMENT "Generating phantomjs unit test ${f}"
+      )
+      list(APPEND JS_UNIT_TEST_FILES ${html})
+
+      add_geojs_test(phantomjs:${f}
+        ${PHANTOMJS_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/run-jasmine.js
+                http://${TESTING_HOST}:${TESTING_PORT}/${PHANTOMJS_REL_DIR}/${f}.html
+      )
+    endforeach()
+
+    add_custom_target(
+      phantomjs_tests
+      ALL
+      DEPENDS ${JS_UNIT_TEST_FILES}
+    )
+  endif() # PHANTOMJS_TESTS
+
+  # JSLint tests.
+  if(${JS_LINT_TESTS})
+    # Find JSLint.
+    find_package(JSLint REQUIRED)
+
+    foreach(js ${_js_lint_files})
+      add_test(
+        NAME "jslint:${js}"
+        COMMAND ${JSLint_EXECUTABLE} ${js}
+      )
+    endforeach()
+
+  endif() # JS_LINT_TESTS
 
 endif()
