@@ -122,7 +122,7 @@ ggl.mapInteractorStyle = function() {
         lastWorldPos = m_camera.position();
         // Pan all cameras associated with the render window.
         renderers = m_renderWindow.renderers();
-        for(i=0; i<renderers.length; i++) {
+        for(i = 0; i < renderers.length; i++) {
           m_this._panCamera(renderers[i]);
         }
         currWorldPos = m_camera.position();
@@ -301,7 +301,7 @@ ggl.mapInteractorStyle = function() {
     m_renderer.resetCameraClippingRange();
 
     renderers = m_renderWindow.renderers();
-    for(i=0; i< renderers.length; i++) {
+    for (i = 0; i < renderers.length; i++) {
       if (renderers[i].camera() !== m_camera) {
         renderers[i].camera().zoom(val);
         renderers[i].resetCameraClippingRange();
