@@ -1,0 +1,19 @@
+language: node_js
+
+node_js:
+    - "0.10"
+
+before_install:
+    - sudo apt-get update -qq
+    - sudo apt-get install -y phantomjs
+    - sudo apt-get install -y cmake
+
+script:
+    - git submodule init
+    - git submodule update
+    - mkdir build
+    - cd build
+    - cmake ..
+    - make
+    - ctest
+
