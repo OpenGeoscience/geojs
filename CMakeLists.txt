@@ -7,9 +7,8 @@ set(MINIFY ON CACHE BOOL "Minify the JavaScript files prior to concatenating.")
 set(MANGLE ON CACHE BOOL "When minifying, also mangle non-public symbol names.")
 
 set(BUILD_TESTING_OLD OFF CACHE BOOL "Enable old testing (to be removed)")
-set(BUILD_TESTING OFF CACHE BOOL "Enable vgl testing")
 
-set(BUILD_GEOJS_TESTING ON CACHE BOOL "Enable geojs testing")
+set(BUILD_TESTING ON CACHE BOOL "Enable geojs testing")
 
 set(need_python FALSE)
 if(${BUILD_TESTING_OLD} OR ${BUILD_TESTING})
@@ -18,7 +17,7 @@ if(${BUILD_TESTING_OLD} OR ${BUILD_TESTING})
   set(GEOJS_BASELINE_DIR "" CACHE PATH "Path to directory containing baseline images for testing.")
 endif()
 
-if(${BUILD_GEOJS_TESTING})
+if(${BUILD_TESTING})
   set(need_python TRUE)
 
   # turn on when fixed
@@ -230,7 +229,7 @@ function(add_geojs_test test_name)
 endfunction()
 
 # set up testing framework and add tests
-if(BUILD_GEOJS_TESTING)
+if(BUILD_TESTING)
   include(CTest)
   enable_testing()
 
