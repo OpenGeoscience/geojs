@@ -11,9 +11,8 @@ before_install:
 script:
     - git submodule init
     - git submodule update
-    - mkdir build
-    - cd build
+    - mkdir _build
+    - cd _build
     - cmake ..
-    - make
-    - ctest -D Continuous
-
+    - ctest -V -S ../cmake/travis_build.cmake
+    - ctest -V -S ../cmake/travis_submit.cmake
