@@ -1,4 +1,5 @@
 <!doctype html>
+<script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
 <link href=http://jasmine.github.io/css/docco.css rel=stylesheet>
 <link href=http://jasmine.github.io/css/jasmine_docco-1.3.1.css rel=stylesheet>
 <link href=http://jasmine.github.io/lib/jasmine-1.3.1/jasmine.css rel=stylesheet>
