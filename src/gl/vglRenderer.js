@@ -36,6 +36,8 @@ ggl.vglViewerInstance = function() {
     canvas = $(document.createElement('canvas'));
     canvas.attr('class', '.webgl-canvas');
     ggl._vglViewerInstance = vgl.viewer(canvas.get(0));
+    ggl._vglViewerInstance.renderWindow().removeRenderer(
+      ggl._vglViewerInstance.renderWindow().activeRenderer());
     ggl._vglViewerInstance.setInteractorStyle(ggl.mapInteractorStyle());
     ggl._vglViewerInstance.init();
   }
