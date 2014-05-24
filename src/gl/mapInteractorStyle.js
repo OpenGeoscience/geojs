@@ -474,6 +474,7 @@ ggl.mapInteractorStyle = function() {
     m_height = m_renderWindow.windowSize()[1];
     m_renderer = m_this.viewer().renderWindow().activeRenderer();
     m_camera = m_renderer.camera();
+    m_focusDisplayPoint = m_renderWindow.focusDisplayPoint();
     m_updateRenderParamsTime.modified();
   };
 
