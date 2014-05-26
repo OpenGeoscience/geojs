@@ -1,0 +1,33 @@
+/*global $, blanket*/
+
+(function () {
+    'use strict';
+
+    function reporter(cov) {
+        // convert sparse arrays into objects
+        $.each(cov.files, function (fname, arr) {
+            // delete the source key
+            delete arr.source;
+
+            cov.files[fname] = $.extend({}, arr);
+        });
+
+
+        // post coverage results to the server
+        $.ajax({
+            url: 'http://@REPORTER_HOST@:@REPORTER_PORT@/',
+            data: JSON.stringify(cov),
+            dataType: 'json',
+            type: 'PUT',
+            contentType: 'application/json',
+            error: function () {
+                console.log('Failed to post coverage data to the server');
+            },
+            success: function () {
+                console.log('Posted data to server successfully.');
+            }
+        });
+    }
+
+    blanket.options('reporter', reporter);
+}());

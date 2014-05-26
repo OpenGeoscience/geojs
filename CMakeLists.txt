@@ -258,16 +258,26 @@ if(BUILD_TESTING)
     set(PHANTOMJS_REL_DIR "test/phantomjs")
     set(PHANTOMJS_ABS_DIR "${GEOJS_DEPLOY_DIR}/${PHANTOMJS_REL_DIR}")
 
+    set(REPORTER_HOST localhost CACHE STRING "The host to submit coverage reports to.")
+    mark_as_advanced(REPORTER_HOST)
+    set(REPORTER_PORT 50110 CACHE STRING "The port to submit coverage reports to.")
+    mark_as_advanced(REPORTER_PORT)
+
+
     # copy blanket JS files
     configure_file(
       ${CMAKE_CURRENT_SOURCE_DIR}/testing/js/blanket.min.js
-      ${GEOJS_DEPLOY_DIR}/test/js-coverage/blanket.min.js
+      ${GEOJS_DEPLOY_DIR}/test/lib/blanket.min.js
       COPYONLY
     )
     configure_file(
       ${CMAKE_CURRENT_SOURCE_DIR}/testing/js/jasmine-blanket.js
-      ${GEOJS_DEPLOY_DIR}/test/js-coverage/jasmine-blanket.js
+      ${GEOJS_DEPLOY_DIR}/test/lib/jasmine-blanket.js
       COPYONLY
+    )
+    configure_file(
+      ${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/aggregate-json-reporter.js.in
+      ${GEOJS_DEPLOY_DIR}/test/lib//aggregate-json-reporter.js
     )
 
     file(GLOB JS_UNIT_TEST_CASES

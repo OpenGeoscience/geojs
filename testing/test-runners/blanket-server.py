@@ -1,0 +1,164 @@
+#!/usr/bin/env python
+
+import sys
+import time
+import json
+import collections
+
+import xml.etree.cElementTree as ET
+
+if sys.version_info[0] == 2:
+    import SocketServer
+    import SimpleHTTPServer
+    import BaseHTTPServer
+elif sys.version_info[0] == 3:
+    import socketserver as SocketServer
+    from http import server as SimpleHTTPServer
+    BaseHTTPServer = SimpleHTTPServer
+else:
+    raise Exception("Unsupported python version")
+
+
+class Aggregator(object):
+
+    def __init__(self):
+        self._files = collections.defaultdict(
+            lambda: collections.defaultdict(int)
+        )
+
+    def append(self, coverage):
+        for _file, counts in coverage['files'].iteritems():
+            f = self._files[_file]
+
+            for line, count in counts.iteritems():
+                f[line] += (count or 0)
+
+        print json.dumps(self.stats(), indent=4)
+
+    def stats(self):
+        stats = {
+            'totalSloc': 0,
+            'totalHits': 0,
+            'files': {}
+        }
+        for _file, lines in self._files.iteritems():
+            hits, sloc = 0, 0
+            for lineNum, hit in lines.iteritems():
+                sloc += 1
+                hits += hit and 1
+
+            stats['totalSloc'] += sloc
+            stats['totalHits'] += hits
+            stats['files'][_file] = {
+                'sloc': sloc,
+                'hits': hits
+            }
+        return stats
+
+    @classmethod
+    def _percent(cls, num, den):
+        den = den or 1  # prevent divide by zero
+        return float(num) / float(den)
+
+    def output(self):
+        stats = self.stats()
+        totalPct = self._percent(stats['totalHits'], stats['totalSloc'])
+
+        print 'Total coverage: %i / %i (%.2f%%)' % (
+            stats['totalHits'],
+            stats['totalSloc'],
+            totalPct * 100
+        )
+
+        coverageEl = ET.Element('coverage', {
+            'branch-rate': '0',
+            'line-rate': str(totalPct),
+            'version': '3.6',
+            'timestamp': str(int(time.time()))
+        })
+        packagesEl = ET.SubElement(coverageEl, 'packages')
+        packageEl = ET.SubElement(packagesEl, 'package', {
+            'branch-rate': '0',
+            'complexity': '0',
+            'line-rate': str(totalPct),
+            'name': ''
+        })
+        classesEl = ET.SubElement(packageEl, 'classes')
+
+        for _file, data in self._files.iteritems():
+            lineRate = self._percent(
+                stats['files'][_file]['hits'],
+                stats['files'][_file]['sloc']
+            )
+            classEl = ET.SubElement(classesEl, 'class', {
+                'branch-rate': '0',
+                'complexity': '0',
+                'line-rate': str(lineRate),
+                'filename': _file,
+                'name': _file
+            })
+            linesEl = ET.SubElement(classEl, 'lines')
+            ET.SubElement(classEl, 'methods')
+            for lineNum, hit in data.iteritems():
+                ET.SubElement(linesEl, 'line', {
+                    'number': str(lineNum),
+                    'hits': str(hit)
+                })
+
+        tree = ET.ElementTree(coverageEl)
+        return ET.tostring(tree.getroot())
+
+
+class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
+    agg = Aggregator()
+
+    def do_OPTIONS(self):
+        self.send_response(200, "ok")
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header(
+            'Access-Control-Allow-Methods',
+            'GET, POST, PUT, OPTIONS'
+        )
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header(
+            'Access-Control-Allow-Methods',
+            'GET, POST, PUT, OPTIONS'
+        )
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header("Content-type", "application/json")
+        self.end_headers()
+
+        self.wfile.write(self.agg.output())
+
+    def do_PUT(self):
+        l = int(self.headers['Content-Length'])
+        print 'received %i bytes' % l
+        self.agg.append(json.loads(self.rfile.read(l)))
+
+        self.send_response(200)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header(
+            'Access-Control-Allow-Methods',
+            'GET, POST, PUT, OPTIONS'
+        )
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header("Content-type", "application/json")
+        self.end_headers()
+
+
+def serve(host='localhost', port=6116):
+    server = SocketServer.TCPServer(
+        (host, int(port)),
+        Handler
+    )
+    try:
+        server.serve_forever()
+    finally:
+        server.server_close()
+
+if __name__ == '__main__':
+    serve(*sys.argv[1:])
