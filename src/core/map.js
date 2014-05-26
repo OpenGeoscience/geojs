@@ -574,8 +574,8 @@ geo.map = function(arg) {
         layer._update({timestep: timestep});
       });
 
-      this.trigger({
-        type: geo.event.animate,
+      this.trigger(
+        geo.event.animate, {
         timestep: m_animationState.timestep
       });
       this.draw();
