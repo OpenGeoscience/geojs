@@ -125,6 +125,9 @@ if (NOT DEFINED GEOJS_DEPLOY_DIR)
       CACHE PATH "PATH to deployment directory" FORCE)
 endif()
 
+# define where to copy files within the web root
+set(GEOJS_SRC_DIR "${GEOJS_DEPLOY_DIR}/src")
+
 # Create deploy directory if it does not exists
 if(NOT DEFINED "${GEOJS_DEPLOY_LIB_DIR}")
   set(GEOJS_DEPLOY_LIB_DIR "${GEOJS_DEPLOY_DIR}/web/lib")
@@ -151,12 +154,25 @@ endmacro(list_contains)
 set(_js_lint_files)
 set(_js_uglify_files)
 foreach(d ${_source_files})
+  add_custom_command(
+    OUTPUT "${GEOJS_SRC_DIR}/${d}"
+    COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/src/${d}" "${GEOJS_SRC_DIR}/${d}"
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/${d}"
+  )
   list_contains(contains d ${_exclude_js_lint})
   if(NOT contains)
       set(_js_lint_files ${_js_lint_files} ${CMAKE_CURRENT_SOURCE_DIR}/src/${d})
   endif()
-  set(_js_uglify_files ${_js_uglify_files} ${CMAKE_CURRENT_SOURCE_DIR}/src/${d})
+  set(_js_uglify_files ${_js_uglify_files} "${GEOJS_SRC_DIR}/${d}")
 endforeach()
+
+# configure version information
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/version.js.in
+  ${GEOJS_SRC_DIR}/core/version.js
+)
+set(_js_uglify_files ${_js_uglify_files} ${GEOJS_SRC_DIR}/core/version.js)
+
 
 if (UglifyJS_EXECUTABLE)
   add_custom_command(
