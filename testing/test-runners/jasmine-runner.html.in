@@ -8,7 +8,7 @@
 <script src=//cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.2.1/gl-matrix.js></script>
 <script src=//cdnjs.cloudflare.com/ajax/libs/proj4js/2.1.0/proj4.js></script>
 <script src=/web/lib/vgl.min.js></script>
-<script src=/web/lib/geojs.min.js></script>
+@SCRIPT_INCLUDE@
 <script>
 @TEST_SOURCE@
 

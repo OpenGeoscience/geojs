@@ -153,6 +153,7 @@ endmacro(list_contains)
 
 set(_js_lint_files)
 set(_js_uglify_files)
+set(_script_include)
 foreach(d ${_source_files})
   add_custom_command(
     OUTPUT "${GEOJS_SRC_DIR}/${d}"
@@ -164,6 +165,7 @@ foreach(d ${_source_files})
       set(_js_lint_files ${_js_lint_files} ${CMAKE_CURRENT_SOURCE_DIR}/src/${d})
   endif()
   set(_js_uglify_files ${_js_uglify_files} "${GEOJS_SRC_DIR}/${d}")
+  set(_script_include ${_script_include}<script src=\"/src/${d}\" data-cover></script>)
 endforeach()
 
 # configure version information
@@ -172,6 +174,7 @@ configure_file(
   ${GEOJS_SRC_DIR}/core/version.js
 )
 set(_js_uglify_files ${_js_uglify_files} ${GEOJS_SRC_DIR}/core/version.js)
+set(_script_include ${_script_include}<script src=\"/src/core/version.js\" data-cover></script>)
 
 
 if (UglifyJS_EXECUTABLE)
@@ -267,7 +270,6 @@ if(BUILD_TESTING)
       COPYONLY
     )
 
-
     file(GLOB JS_UNIT_TEST_CASES
       ${CMAKE_CURRENT_SOURCE_DIR}/testing/test-cases/phantomjs-tests/*.js
     )
@@ -287,6 +289,7 @@ if(BUILD_TESTING)
         COMMAND ${CMAKE_COMMAND} -DTEST_HTML="${html}"
                                  -DSOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
                                  -DSOURCE_FILE="${js}"
+                                 -DSCRIPT_INCLUDE="${_script_include}"
                                  -P ${CMAKE_SOURCE_DIR}/cmake/configure-js-unit-test.cmake
         COMMAND ${CMAKE_COMMAND} -E touch ${html}
         DEPENDS ${js} ${CMAKE_SOURCE_DIR}/testing/test-runners/jasmine-runner.html.in
