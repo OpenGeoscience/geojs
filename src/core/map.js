@@ -49,7 +49,9 @@ geo.map = function(arg) {
       m_drawTime = geo.timestamp(),
       toMillis, calculateGlobalAnimationRange, cloneTimestep,
       m_animationState = {range: null, timestep: null, layers: null},
-      m_intervalMap = {};
+      m_intervalMap = {},
+      m_pause,
+      m_stop;
 
       m_intervalMap.milliseconds = 1;
       m_intervalMap.seconds = m_intervalMap.milliseconds * 1000;
@@ -59,6 +61,9 @@ geo.map = function(arg) {
       m_intervalMap.weeks = m_intervalMap.days * 7;
       m_intervalMap.months = m_intervalMap.weeks * 4;
       m_intervalMap.years = m_intervalMap.months * 12;
+
+  this.on(geo.event.animationPause, function() { m_pause = true; });
+  this.on(geo.event.animationStop, function() { m_stop = true; });
 
   toMillis = function(delta) {
     var deltaLowercase = delta.toLowerCase();
@@ -521,12 +526,12 @@ geo.map = function(arg) {
 
 
   this._animate = function() {
-    var animationRange, nextTimestep, stop, pause, id;
+    var animationRange, nextTimestep, id;
 
     animationRange = m_animationState.range;
     nextTimestep = cloneTimestep(animationRange.start);
-    stop = false;
-    pause = false;
+    m_stop = false;
+    m_pause = false;
 
     nextTimestep = geo.time.incrementTime(nextTimestep, animationRange.deltaUnits,
       animationRange.delta);
@@ -535,21 +540,13 @@ geo.map = function(arg) {
       throw "Invalid time range";
     }
 
-    this.off(geo.event.animationPause).on(geo.event.animationPause,
-        function() { pause = true; console.log("pause event recieved") });
-
-    this.off(geo.event.animationStop).on(geo.event.animationStop,
-        function() { stop = true; });
-
-
     function renderTimestep() {
-      if (m_animationState.timestep > animationRange.end || stop) {
+      if (m_animationState.timestep > animationRange.end || m_stop) {
         clearInterval(id);
         m_animationState.timestep = null;
         m_this.trigger(geo.event.animationComplete);
       }
-      else if (pause) {
-        console.log('paused');
+      else if (m_pause) {
         clearInterval(id);
       }
       else {
