@@ -106,6 +106,7 @@ geo.osmLayer = function(arg) {
 
       if (input[0] instanceof Object) {
         for (i = 0; i < input.length; ++i) {
+          output[i] = {};
           output[i].x = input[i].x;
           output[i].y = geo.mercator.y2lat(input[i].y);
         }
@@ -291,7 +292,7 @@ geo.osmLayer = function(arg) {
         zoom = this.map().zoom(),
         /// First get corner points
         /// In display coordinates the origin is on top left corner (0, 0)
-        llx = 0.0, lly = node.height(), urx = node.width(), ury = 0.0,
+        llx = 0.0, lly = this.height(), urx = this.width(), ury = 0.0,
         temp = null, tile = null, tile1x = null, tile1y = null, tile2x = null,
         tile2y = null, invJ = null, i = 0, j = 0,
         worldPt1 = ren.displayToWorld([llx, lly])[0],

@@ -29,9 +29,8 @@ ggl.mapInteractorStyle = function() {
       m_initRightBtnMouseDown = false, m_drawRegionMode = false,
       m_drawRegionLayer, m_clickLatLng, m_width, m_height,
       m_renderer, m_renderWindow, m_camera, m_outsideCanvas,
-      m_currentMousePos, m_focusDisplayPoint, m_worldPt1,
-      m_worldPt2, m_dx, m_dy, m_dz, m_zTrans, m_coords,
-      m_mouseLastPos = { x: 0, y: 0 }, m_picker = new vgl.picker(),
+      m_currentMousePos, m_focusDisplayPoint, m_zTrans,
+      m_coords, m_mouseLastPos = { x: 0, y: 0 }, m_picker = new vgl.picker(),
       m_updateRenderParamsTime = vgl.timestamp();
 
   ////////////////////////////////////////////////////////////////////////////
@@ -72,6 +71,28 @@ ggl.mapInteractorStyle = function() {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Internal function to pan a camera associated with a renderer.
+   *
+   * @param {vgl.renderer} the renderer whose camera should be panned.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._panCamera = function(renderer) {
+    var worldPt1, worldPt2, dx, dy, dz, focusDisplayPoint = renderer.focusDisplayPoint();
+
+    worldPt1 = m_renderWindow.displayToWorld(m_currentMousePos.x,
+      m_currentMousePos.y, focusDisplayPoint, renderer);
+    worldPt2 = m_renderWindow.displayToWorld(m_mouseLastPos.x,
+      m_mouseLastPos.y, focusDisplayPoint, renderer);
+
+    dx = worldPt1[0] - worldPt2[0];
+    dy = worldPt1[1] - worldPt2[1];
+    dz = worldPt1[2] - worldPt2[2];
+
+    renderer.camera().pan(-dx, -dy, -dz);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Handle mouse move event
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -79,10 +100,11 @@ ggl.mapInteractorStyle = function() {
     /// Local vars
     var canvas = m_this.map(), xrot = null, a = null,
         angle = null, mouseWorldPoint, features, lastWorldPos,
-        currWorldPos, lastZoom, evt, newMercPerPixel, oldMercPerPixel;
+        currWorldPos, lastZoom, evt, newMercPerPixel, oldMercPerPixel, i,
+        renderers;
 
     /// Update render params
-    m_this.m_updateRenderParams();
+    m_this.updateRenderParams();
 
     /// Compute current mouse position
     m_this._computeCurrentMousePos(event);
@@ -97,20 +119,15 @@ ggl.mapInteractorStyle = function() {
         m_this.setDrawRegion(m_clickLatLng.lat(), m_clickLatLng.lng(),
           mouseWorldPoint.y, mouseWorldPoint.x);
       } else {
-        m_focusDisplayPoint = m_renderWindow.focusDisplayPoint();
-        m_worldPt1 = m_renderWindow.displayToWorld(m_currentMousePos.x,
-          m_currentMousePos.y, m_focusDisplayPoint);
-        m_worldPt2 = m_renderWindow.displayToWorld(m_mouseLastPos.x,
-          m_mouseLastPos.y, m_focusDisplayPoint);
-
-        m_dx = m_worldPt1[0] - m_worldPt2[0];
-        m_dy = m_worldPt1[1] - m_worldPt2[1];
-        m_dz = m_worldPt1[2] - m_worldPt2[2];
-
         lastWorldPos = m_camera.position();
-        m_camera.pan(-m_dx, -m_dy, -m_dz);
+        // Pan all cameras associated with the render window.
+        renderers = m_renderWindow.renderers();
+        for(i = 0; i < renderers.length; i++) {
+          m_this._panCamera(renderers[i]);
+        }
         currWorldPos = m_camera.position();
 
+        // TODO Do we need to emit an event for each ?
         evt = {type: geo.event.pan,
                last_display_pos: m_mouseLastPos,
                curr_display_pos: m_currentMousePos,
@@ -126,18 +143,11 @@ ggl.mapInteractorStyle = function() {
     if (m_rightMouseButtonDown && m_height > 0) {
       /// 2.0 is sort of speed up factor
       m_zTrans = 2.0 * (m_currentMousePos.y - m_mouseLastPos.y) / m_height;
-
-      /// Calculate zoom scale here
-      if (m_zTrans > 0) {
-        m_camera.zoom(1 - Math.abs(m_zTrans));
-      } else {
-        m_camera.zoom(1 + Math.abs(m_zTrans));
-      }
-      m_renderer.resetCameraClippingRange();
+      m_this._zoomCameras();
 
       /// For now just trigger the render. Later on, we may want to
       /// trigger an external event
-      m_renderer.render();
+      m_renderWindow.render();
     }
 
     m_mouseLastPos.x = m_currentMousePos.x;
@@ -154,7 +164,7 @@ ggl.mapInteractorStyle = function() {
     var canvas = m_this.map(), point, plane;
 
     /// Update render parameters
-    m_this.m_updateRenderParams();
+    m_this.updateRenderParams();
 
     if (event.button === 0) {
       m_leftMouseButtonDown = true;
@@ -199,7 +209,7 @@ ggl.mapInteractorStyle = function() {
         num = null;
 
     /// Update render params
-    m_this.m_updateRenderParams();
+    m_this.updateRenderParams();
 
     if (event.button === 0) {
       m_leftMouseButtonDown = false;
@@ -231,7 +241,7 @@ ggl.mapInteractorStyle = function() {
   ////////////////////////////////////////////////////////////////////////////
   this.handleMouseOut = function(event) {
     /// Update render params
-    m_this.m_updateRenderParams();
+    m_this.updateRenderParams();
 
     if (m_leftMouseButtonDown) {
       m_leftMouseButtonDown = false;
@@ -258,7 +268,7 @@ ggl.mapInteractorStyle = function() {
   ////////////////////////////////////////////////////////////////////////////
   this.handleMouseWheel = function(event) {
     /// Update render params
-    m_this.m_updateRenderParams();
+    m_this.updateRenderParams();
 
     var delta = event.originalEvent.wheelDelta / 120.0;
     delta = Math.pow(1 + Math.abs(delta)/2 , delta > 0 ? 1 : -1);
@@ -272,44 +282,64 @@ ggl.mapInteractorStyle = function() {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Internal function to zoom cameras
+   * @param {Number} optional value to zoom by
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._zoomCameras = function(val) {
+    var val, i, renderers;
+
+    if (val === undefined) {
+      if (m_zTrans > 0) {
+        val = 1 - Math.abs(m_zTrans);
+      } else {
+        val = 1 + Math.abs(m_zTrans);
+      }
+    }
+
+    m_camera.zoom(val);
+    m_renderer.resetCameraClippingRange();
+
+    renderers = m_renderWindow.renderers();
+    for (i = 0; i < renderers.length; i++) {
+      if (renderers[i].camera() !== m_camera) {
+        renderers[i].camera().zoom(val);
+        renderers[i].resetCameraClippingRange();
+      }
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Update view in response to a zoom request
    */
   ////////////////////////////////////////////////////////////////////////////
   this.zoom = function(val) {
-    var oldMercPerPixel, newMercPerPixel, evt;
+    var oldMercPerPixel, newMercPerPixel, evt, i, renderers, worldPt1,
+        worldPt2;
 
     /// Update render params
-    m_this.m_updateRenderParams();
+    m_this.updateRenderParams();
 
     m_zTrans = (m_currentMousePos.y - m_mouseLastPos.y) / m_height;
 
     /// Compute meters per pixel here and based on that decide the
     /// zoom level
-    m_worldPt1 = m_renderWindow.displayToWorld(0, 0, m_focusDisplayPoint);
-    m_worldPt2 = m_renderWindow.displayToWorld(m_width, m_height,
-                                               m_focusDisplayPoint);
+    worldPt1 = m_renderWindow.displayToWorld(0, 0, m_focusDisplayPoint);
+    worldPt2 = m_renderWindow.displayToWorld(m_width, m_height,
+                                             m_focusDisplayPoint);
 
     /// Computer mercator per pixel before changing the camera position
-    oldMercPerPixel = (m_worldPt2[0] - m_worldPt1[0]) / m_width;
+    oldMercPerPixel = (worldPt2[0] - worldPt1[0]) / m_width;
 
-    /// Calculate zoom scale here
-    if (val === undefined) {
-      if (m_zTrans > 0) {
-        m_camera.zoom(1 - Math.abs(m_zTrans));
-      } else {
-        m_camera.zoom(1 + Math.abs(m_zTrans));
-      }
-    } else {
-      m_camera.zoom(val);
-    }
-    m_renderer.resetCameraClippingRange();
+    this._zoomCameras(val);
 
-    m_worldPt1 = m_renderWindow.displayToWorld(0, 0, m_focusDisplayPoint);
-    m_worldPt2 = m_renderWindow.displayToWorld(m_width, m_height,
+    worldPt1 = m_renderWindow.displayToWorld(0, 0, m_focusDisplayPoint);
+    worldPt2 = m_renderWindow.displayToWorld(m_width, m_height,
                    m_focusDisplayPoint);
 
     /// Computer mercator per pixel as of now
-    newMercPerPixel = (m_worldPt2[0] - m_worldPt1[0]) / m_width;
+    newMercPerPixel = (worldPt2[0] - worldPt1[0]) / m_width;
 
     /// Compute meters per pixel here and based on that decide the
     /// zoom level
@@ -409,7 +439,7 @@ ggl.mapInteractorStyle = function() {
   ////////////////////////////////////////////////////////////////////////////
   this._computeCurrentMousePos = function(event) {
     /// Update render params
-    m_this.m_updateRenderParams();
+    m_this.updateRenderParams();
 
     m_outsideCanvas = false;
     m_coords = m_this.viewer().relMouseCoords(event);
@@ -438,18 +468,13 @@ ggl.mapInteractorStyle = function() {
    * @protected
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.m_updateRenderParams = function() {
-    /// TODO We should probably just check for the time when viewer got
-    /// updated. Currently VGL does not have it but we can add it later.
-    if (m_updateRenderParamsTime.getMTime() > m_this.getMTime()) {
-      return;
-    }
-
+  this.updateRenderParams = function() {
     m_renderWindow = m_this.viewer().renderWindow();
     m_width = m_renderWindow.windowSize()[0];
     m_height = m_renderWindow.windowSize()[1];
     m_renderer = m_this.viewer().renderWindow().activeRenderer();
     m_camera = m_renderer.camera();
+    m_focusDisplayPoint = m_renderWindow.focusDisplayPoint();
     m_updateRenderParamsTime.modified();
   };
 

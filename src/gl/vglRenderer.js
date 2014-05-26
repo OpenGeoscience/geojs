@@ -9,6 +9,42 @@
 /*global window, ggl, ogs, vec4, inherit, $, geo*/
 //////////////////////////////////////////////////////////////////////////////
 
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Single VGL viewer
+ *
+ * This singleton instance is used to share a single GL context across multiple
+ * vlgRenderer and therefore layers.
+ */
+//////////////////////////////////////////////////////////////////////////////
+ggl._vglViewerInstance = null;
+
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Retrives the singleton, lazily constructs as necessary.
+ *
+ * @return {vgl.viewer} the single viewer instance.
+ */
+//////////////////////////////////////////////////////////////////////////////
+
+ggl.vglViewerInstance = function() {
+  var canvas;
+
+  if (ggl._vglViewerInstance === null) {
+    canvas = $(document.createElement('canvas'));
+    canvas.attr('class', '.webgl-canvas');
+    ggl._vglViewerInstance = vgl.viewer(canvas.get(0));
+    ggl._vglViewerInstance.renderWindow().removeRenderer(
+      ggl._vglViewerInstance.renderWindow().activeRenderer());
+    ggl._vglViewerInstance.setInteractorStyle(ggl.mapInteractorStyle());
+    ggl._vglViewerInstance.init();
+  }
+
+  return ggl._vglViewerInstance;
+};
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class vglRenderer
@@ -26,8 +62,10 @@ ggl.vglRenderer = function(arg) {
   ggl.renderer.call(this, arg);
 
   var m_this = this,
-      m_viewer = null,
-      m_interactorStyle = ggl.mapInteractorStyle(),
+      m_viewer = ggl.vglViewerInstance(),
+      m_contextRenderer = vgl.renderer(),
+      m_width = 0,
+      m_height = 0,
       s_init = this._init;
 
   ////////////////////////////////////////////////////////////////////////////
@@ -41,34 +79,36 @@ ggl.vglRenderer = function(arg) {
   this.displayToWorld = function(input) {
     var i, delta, node = this.canvas(),
         ren = this.contextRenderer(), cam = ren.camera(),
-        fdp = ren.focusDisplayPoint(), output = [], temp;
+        fdp = ren.focusDisplayPoint(), output = [], temp,
+        point;
 
     if (input instanceof Array && input.length > 0) {
       if (input[0] instanceof Object) {
         delta = 1;
-        for (i = 0; i < points.length; i =+ delta) {
+        for (i = 0; i < input.length; i += delta) {
+          point = input[i];
           temp = ren.displayToWorld(vec4.fromValues(
-                   input.x, input.y, fdp[2], 1.0),
+                   point.x, point.y, fdp[2], 1.0),
                    cam.viewMatrix(), cam.projectionMatrix(),
-                   node.width(), node.height());
+                   m_width, m_height);
           output.push({x: temp[0], y: temp[1], z: temp[2], w: temp[3]});
         }
       } else {
         delta = input.length % 3 === 0 ? 3 : 2;
-        for (i = 0; i < input.length; i =+ delta) {
+        for (i = 0; i < input.length; i += delta) {
           output.push(ren.displayToWorld(vec4.fromValues(
             input[i],
             input[i + 1],
             fdp[2],
             1.0), cam.viewMatrix(), cam.projectionMatrix(),
-            node.width(), node.height()));
+            m_width, m_height));
         }
       }
     } else if (input instanceof Object) {
       temp = ren.displayToWorld(vec4.fromValues(
                input.x, input.y, fdp[2], 1.0),
                cam.viewMatrix(), cam.projectionMatrix(),
-               node.width(), node.height());
+               m_width, m_height);
       output.push({x: temp[0], y: temp[1], z: temp[2], w: temp[3]});
     } else {
       throw "Display to world conversion requires array of 2D/3D points";
@@ -96,12 +136,12 @@ ggl.vglRenderer = function(arg) {
       if (!isObject) {
         output.push(ren.worldToDisplay(vec4.fromValues(
           x, y, z, 1.0), cam.viewMatrix(), cam.projectionMatrix(),
-          node.width(), node.height()));
+          m_width, m_height));
         return;
       }
       result = ren.worldToDisplay(vec4.fromValues(
         x, y, z, 1.0), cam.viewMatrix(), cam.projectionMatrix(),
-        node.width(), node.height());
+        m_width, m_height);
       output.push({x: result[0], y: result[1], z: result[2]});
     };
 
@@ -138,7 +178,7 @@ ggl.vglRenderer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.contextRenderer = function() {
-    return m_viewer.renderWindow().activeRenderer();
+    return m_contextRenderer;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -160,27 +200,19 @@ ggl.vglRenderer = function(arg) {
       return this;
     }
 
-    var canvas;
     s_init.call(this);
-    if (!this.canvas()) {
-      canvas = $(document.createElement('canvas'));
-      canvas.attr('class', '.webgl-canvas');
-      this.canvas(canvas);
-      this.layer().node().append(canvas);
-    }
-    m_viewer = vgl.viewer(this.canvas().get(0));
-    m_viewer.setInteractorStyle(m_interactorStyle);
-    m_viewer.init();
 
-    m_viewer.renderWindow().resize(this.canvas().width(),
-                                   this.canvas().height());
+    this.canvas($(m_viewer.canvas()));
+    m_viewer.renderWindow().addRenderer(m_contextRenderer);
+
+    this.layer().node().append(this.canvas());
 
     /// VGL uses jquery trigger on methods
-    $(m_interactorStyle).on(geo.event.pan, function(event) {
+    $(m_viewer.interactorStyle()).on(geo.event.pan, function(event) {
       m_this.trigger(geo.event.pan, event);
     });
 
-    $(m_interactorStyle).on(geo.event.zoom, function(event) {
+    $(m_viewer.interactorStyle()).on(geo.event.zoom, function(event) {
       m_this.trigger(geo.event.zoom, event);
     });
 
@@ -193,43 +225,53 @@ ggl.vglRenderer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._connectMapEvents = function() {
-    var map = $(m_this.layer().map().node());
-    map.on('mousemove', function(event) {
-      m_viewer.handleMouseMove(event);
-    });
 
-    map.on('mouseup', function(event) {
-      m_viewer.handleMouseUp(event);
-    });
+    // Only connect up events if this renderer is associated with the
+    // reference/base layer.
+    if (m_this.layer().referenceLayer()) {
 
-    map.on('mousedown', function(event) {
-      m_viewer.handleMouseDown(event);
-    });
+      var map = $(m_this.layer().map().node());
+      map.on('mousewheel', function (event) {
+        m_viewer.handleMouseWheel(event);
+      });
+      map.on('mousemove', function(event) {
+        m_viewer.handleMouseMove(event);
+      });
 
-    map.on('mouseout', function(event) {
-      // check if the mouse actually left the map area
-      var selection = $(map),
-          offset = selection.offset(),
-          width = selection.width(),
-          height = selection.height(),
-          x = event.pageX - offset.left,
-          y = event.pageY - offset.top;
-      if ( x < 0 || x >= width ||
-           y < 0 || y >= height ) {
-        m_viewer.handleMouseOut(event);
-      }
-    });
+      map.on('mouseup', function(event) {
+        m_viewer.handleMouseUp(event);
+      });
 
-    map.on('keypress', function(event) {
-      m_viewer.handleKeyPress(event);
-    });
+      map.on('mousedown', function(event) {
+        m_viewer.handleMouseDown(event);
+      });
 
-    map.on('contextmenu', function(event) {
-      m_viewer.handleContextMenu(event);
-    });
+      map.on('mouseout', function(event) {
+        // check if the mouse actually left the map area
+        var selection = $(map),
+            offset = selection.offset(),
+            width = selection.width(),
+            height = selection.height(),
+            x = event.pageX - offset.left,
+            y = event.pageY - offset.top;
+        if ( x < 0 || x >= width ||
+             y < 0 || y >= height ) {
+          m_viewer.handleMouseOut(event);
+        }
+      });
 
-    m_interactorStyle.map(this.layer().map());
+      map.on('keypress', function(event) {
+        m_viewer.handleKeyPress(event);
+      });
+
+      map.on('contextmenu', function(event) {
+        m_viewer.handleContextMenu(event);
+      });
+    }
+
+    m_viewer.interactorStyle().map(this.layer().map());
   };
+
   this.on(geo.event.layerAdd, function (event) {
     if (event.layer === m_this.layer()) {
       m_this._connectMapEvents();
@@ -242,6 +284,8 @@ ggl.vglRenderer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._resize = function(x, y, w, h) {
+    m_width = w;
+    m_height = h;
     this.canvas().attr('width', w);
     this.canvas().attr('height', h);
     m_viewer.renderWindow().positionAndResize(x, y, w, h);
