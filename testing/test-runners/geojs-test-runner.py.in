@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import time
 import sys
 import subprocess
 import threading
@@ -51,6 +52,7 @@ def main():
     server_thread = threading.Thread(target=server.serve_forever)
     server_thread.start()
 
+    time.sleep(0.5)
     try:
         status = subprocess.call(sys.argv[1:])
     finally:
