@@ -10,6 +10,7 @@ ctest_start("Continuous")
 ctest_configure()
 ctest_build()
 ctest_test(PARALLEL_LEVEL 3 RETURN_VALUE res)
+ctest_coverage()
 
 if(NOT res EQUAL 0)
   message(FATAL_ERROR "Test failures occurred.")

@@ -244,7 +244,9 @@ function(add_geojs_test test_name)
             ${CMAKE_CURRENT_BINARY_DIR}/test/geojs-test-runner.py
             ${ARGN}
   )
-  set_property(TEST "${test_name}" PROPERTY RESOURCE_LOCK webserver)
+set_property(TEST "${test_name}" APPEND PROPERTY RESOURCE_LOCK webserver)
+set_property(TEST "${test_name}" APPEND PROPERTY DEPENDS "coverage-reset")
+set_property(TEST "coverage-report" APPEND PROPERTY DEPENDS "${test_name}")
 endfunction()
 
 # set up testing framework and add tests
@@ -282,12 +284,29 @@ if(BUILD_TESTING)
                    ${CMAKE_CURRENT_BINARY_DIR}/test/geojs-test-runner.py
     )
 
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/blanket-server.py
-                   ${CMAKE_CURRENT_BINARY_DIR}/test/blanket-server.py
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/blanket_server.py
+                   ${CMAKE_CURRENT_BINARY_DIR}/test/blanket_server.py
                    COPYONLY
     )
 
     list(APPEND TESTING_DEPENDENCIES ${_min_js_file})
+
+    add_test(
+      NAME "coverage-reset"
+      WORKING_DIRECTORY "${GEOJS_DEPLOY_DIR}"
+      COMMAND "${PYTHON_EXECUTABLE}"
+              "${CMAKE_CURRENT_BINARY_DIR}/test/blanket_server.py"
+              "reset"
+    )
+
+    add_test(
+      NAME "coverage-report"
+      WORKING_DIRECTORY "${GEOJS_DEPLOY_DIR}"
+      COMMAND "${PYTHON_EXECUTABLE}"
+              "${CMAKE_CURRENT_BINARY_DIR}/test/blanket_server.py"
+              "report" "${CMAKE_CURRENT_BINARY_DIR}/coverage.xml"
+    )
+    set_property(TEST "coverage-report" APPEND PROPERTY DEPENDS "coverage-reset")
 
     # add phantomjs unit tests
     foreach(js ${JS_UNIT_TEST_CASES})
@@ -311,22 +330,6 @@ if(BUILD_TESTING)
                 http://${TESTING_HOST}:${TESTING_PORT}/${PHANTOMJS_REL_DIR}/${f}.html
       )
     endforeach()
-
-    # generate the coverage report
-    set(coverage_test ${GEOJS_DEPLOY_DIR}/test/js-coverage/geojs-coverage.html)
-    set(coverage_configurator ${CMAKE_CURRENT_SOURCE_DIR}/cmake/configure-js-coverage-test.cmake)
-    add_custom_command(
-      OUTPUT ${coverage_test}
-      COMMAND ${CMAKE_COMMAND} "-DJS_UNIT_TEST_CASES=\"${JS_UNIT_TEST_CASES}\""
-                                -DSOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
-                                -DDEPLOY_DIR="${GEOJS_DEPLOY_DIR}"
-                                -P ${coverage_configurator}
-      COMMAND ${CMAKE_COMMAND} -E touch ${coverage_test}
-      DEPENDS ${JS_UNIT_TEST_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/coverage-runner.html.in ${coverage_configurator}
-      COMMENT "Generating geojs coverage report"
-    )
-
-    list(APPEND JS_UNIT_TEST_FILES ${coverage_test})
 
     add_custom_target(
       phantomjs_tests

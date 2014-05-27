@@ -13,17 +13,16 @@ elif sys.version_info[0] == 3:
 else:
     raise Exception("Unsupported python version")
 
-try:
-    from blanket_server import Handler as BlanketHandler
-except ImportError:
-    HTTPHandler = SimpleHTTPServer.SimpleHTTPRequestHandler
+HTTPHandler = SimpleHTTPServer.SimpleHTTPRequestHandler
+
+from blanket_server import Handler as BlanketHandler
 
 
 HOST = "@TESTING_HOST@"
 PORT = @TESTING_PORT@
 
 
-class Handler(HTTPHandler):
+class Handler(BlanketHandler, HTTPHandler):
 
     def do_GET(self):
         if self.path == '/coverage':
@@ -56,7 +55,7 @@ def main():
         status = subprocess.call(sys.argv[1:])
     finally:
         server.shutdown()
-        server_thread.join()
+        server_thread.join(1)
 
     return status
 

@@ -91,7 +91,7 @@ class Aggregator(object):
         den = den or 1  # prevent divide by zero
         return float(num) / float(den)
 
-    def output(self):
+    def output(self, fname=None):
         cov = self.read_cov()
         stats = self.stats(cov)
         totalPct = self._percent(stats['totalHits'], stats['totalSloc'])
@@ -138,7 +138,10 @@ class Aggregator(object):
                 })
 
         tree = ET.ElementTree(coverageEl)
-        open(self.OUTFILE, 'w').write(ET.tostring(tree.getroot()))
+        out_fname = fname
+        if out_fname is None:
+            out_fname = self.OUTFILE
+        open(out_fname, 'w').write(ET.tostring(tree.getroot()))
         return json.dumps(cov, indent=4)
 
 
@@ -181,8 +184,14 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
         l = int(self.headers['Content-Length'])
         print 'received %i bytes' % l
 
+        s = self.rfile.read(l)
+        try:
+            obj = json.loads(s)
+        except ValueError as e:
+            print '--' + s + '--'
+            raise e
         self.wfile.write(
-            self.agg.append(json.loads(self.rfile.read(l)))
+            self.agg.append(obj)
         )
 
 
@@ -197,4 +206,9 @@ def serve(host='localhost', port=6116):
         server.server_close()
 
 if __name__ == '__main__':
-    serve(*sys.argv[1:])
+    if len(sys.argv[1:]) == 1 and sys.argv[1] == 'reset':
+        Aggregator().reset()
+    elif len(sys.argv[1:]) == 2 and sys.argv[1] == 'report':
+        print Aggregator().output(sys.argv[2])
+    else:
+        serve(*sys.argv[1:])
