@@ -258,12 +258,6 @@ if(BUILD_TESTING)
     set(PHANTOMJS_REL_DIR "test/phantomjs")
     set(PHANTOMJS_ABS_DIR "${GEOJS_DEPLOY_DIR}/${PHANTOMJS_REL_DIR}")
 
-    set(REPORTER_HOST localhost CACHE STRING "The host to submit coverage reports to.")
-    mark_as_advanced(REPORTER_HOST)
-    set(REPORTER_PORT 50110 CACHE STRING "The port to submit coverage reports to.")
-    mark_as_advanced(REPORTER_PORT)
-
-
     # copy blanket JS files
     configure_file(
       ${CMAKE_CURRENT_SOURCE_DIR}/testing/js/blanket.min.js
@@ -286,6 +280,11 @@ if(BUILD_TESTING)
 
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/geojs-test-runner.py.in
                    ${CMAKE_CURRENT_BINARY_DIR}/test/geojs-test-runner.py
+    )
+
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/blanket-server.py
+                   ${CMAKE_CURRENT_BINARY_DIR}/test/blanket-server.py
+                   COPYONLY
     )
 
     list(APPEND TESTING_DEPENDENCIES ${_min_js_file})

@@ -13,9 +13,29 @@ elif sys.version_info[0] == 3:
 else:
     raise Exception("Unsupported python version")
 
+try:
+    from blanket_server import Handler as BlanketHandler
+except ImportError:
+    HTTPHandler = SimpleHTTPServer.SimpleHTTPRequestHandler
+
 
 HOST = "@TESTING_HOST@"
 PORT = @TESTING_PORT@
+
+
+class Handler(HTTPHandler):
+
+    def do_GET(self):
+        if self.path == '/coverage':
+            BlanketHandler.do_GET(self)
+        else:
+            HTTPHandler.do_GET(self)
+
+    def do_PUT(self):
+        if self.path == '/coverage':
+            BlanketHandler.do_PUT(self)
+        else:
+            HTTPHandler.do_PUT(self)
 
 
 class Server(SocketServer.TCPServer):
@@ -26,7 +46,7 @@ def main():
     status = 1
     server = Server(
         (HOST, PORT),
-        SimpleHTTPServer.SimpleHTTPRequestHandler
+        Handler
     )
 
     server_thread = threading.Thread(target=server.serve_forever)

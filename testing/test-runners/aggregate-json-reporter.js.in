@@ -15,12 +15,14 @@
 
         // post coverage results to the server
         $.ajax({
-            url: 'http://@REPORTER_HOST@:@REPORTER_PORT@/',
+            url: '/coverage',
             data: JSON.stringify(cov),
             dataType: 'json',
             type: 'PUT',
             contentType: 'application/json',
-            error: function () {
+            error: function (xhr, status, error) {
+                console.log('status:' + status);
+                console.log('error:' + error);
                 console.log('Failed to post coverage data to the server');
             },
             success: function () {

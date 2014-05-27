@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys
+import os
 import time
 import json
 import collections
@@ -20,28 +21,58 @@ else:
 
 
 class Aggregator(object):
+    COVROOT = os.path.curdir
+    COVFILE = os.path.join(COVROOT, 'cov.json')
+    OUTFILE = os.path.join(COVROOT, 'coverage.xml')
 
-    def __init__(self):
-        self._files = collections.defaultdict(
-            lambda: collections.defaultdict(int)
-        )
+    def read_cov(self):
+        '''
+        read the current coverage file
+        '''
+        if not os.path.isfile(self.COVFILE):
+            return {}
+        else:
+            return json.loads(open(self.COVFILE, 'r').read())
+
+    def write_cov(self, cov):
+        '''
+        write the coverage information to a file
+        '''
+        s = json.dumps(cov, indent=4)
+        open(self.COVFILE, 'w').write(s)
+        return s
+
+    def reset(self):
+        '''
+        delete the coverage information
+        '''
+        if os.path.isfile(self.COVFILE):
+            os.remove(self.COVFILE)
+        if os.path.isfile(self.OUTFILE):
+            os.remove(self.OUTFILE)
+        return '{}'
 
     def append(self, coverage):
+        '''
+        append data to the coverage
+        '''
+
+        total = self.read_cov()
         for _file, counts in coverage['files'].iteritems():
-            f = self._files[_file]
+            f = total.get(_file, {})
+            total[_file] = f
 
             for line, count in counts.iteritems():
-                f[line] += (count or 0)
+                f[line] = f.get(line, 0) + (count or 0)
+        return self.write_cov(total)
 
-        print json.dumps(self.stats(), indent=4)
-
-    def stats(self):
+    def stats(self, cov):
         stats = {
             'totalSloc': 0,
             'totalHits': 0,
             'files': {}
         }
-        for _file, lines in self._files.iteritems():
+        for _file, lines in cov.iteritems():
             hits, sloc = 0, 0
             for lineNum, hit in lines.iteritems():
                 sloc += 1
@@ -61,7 +92,8 @@ class Aggregator(object):
         return float(num) / float(den)
 
     def output(self):
-        stats = self.stats()
+        cov = self.read_cov()
+        stats = self.stats(cov)
         totalPct = self._percent(stats['totalHits'], stats['totalSloc'])
 
         print 'Total coverage: %i / %i (%.2f%%)' % (
@@ -85,7 +117,7 @@ class Aggregator(object):
         })
         classesEl = ET.SubElement(packageEl, 'classes')
 
-        for _file, data in self._files.iteritems():
+        for _file, data in cov.iteritems():
             lineRate = self._percent(
                 stats['files'][_file]['hits'],
                 stats['files'][_file]['sloc']
@@ -106,14 +138,15 @@ class Aggregator(object):
                 })
 
         tree = ET.ElementTree(coverageEl)
-        return ET.tostring(tree.getroot())
+        open(self.OUTFILE, 'w').write(ET.tostring(tree.getroot()))
+        return json.dumps(cov, indent=4)
 
 
 class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
     agg = Aggregator()
 
     def do_OPTIONS(self):
-        self.send_response(200, "ok")
+        self.send_response(200)
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header(
             'Access-Control-Allow-Methods',
@@ -135,10 +168,6 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.wfile.write(self.agg.output())
 
     def do_PUT(self):
-        l = int(self.headers['Content-Length'])
-        print 'received %i bytes' % l
-        self.agg.append(json.loads(self.rfile.read(l)))
-
         self.send_response(200)
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header(
@@ -148,6 +177,13 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.send_header("Content-type", "application/json")
         self.end_headers()
+
+        l = int(self.headers['Content-Length'])
+        print 'received %i bytes' % l
+
+        self.wfile.write(
+            self.agg.append(json.loads(self.rfile.read(l)))
+        )
 
 
 def serve(host='localhost', port=6116):
