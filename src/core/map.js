@@ -46,7 +46,75 @@ geo.map = function(arg) {
       m_zoom = arg.zoom === undefined ? 10 : arg.zoom,
       m_baseLayer = null,
       m_updateTime = geo.timestamp(),
-      m_drawTime = geo.timestamp();
+      m_drawTime = geo.timestamp(),
+      toMillis, calculateGlobalAnimationRange, cloneTimestep,
+      m_animationState = {range: null, timestep: null, layers: null},
+      m_intervalMap = {},
+      m_pause,
+      m_stop;
+
+      m_intervalMap.milliseconds = 1;
+      m_intervalMap.seconds = m_intervalMap.milliseconds * 1000;
+      m_intervalMap.minutes = m_intervalMap.seconds * 60;
+      m_intervalMap.hours = m_intervalMap.minutes * 60;
+      m_intervalMap.days = m_intervalMap.hours * 24;
+      m_intervalMap.weeks = m_intervalMap.days * 7;
+      m_intervalMap.months = m_intervalMap.weeks * 4;
+      m_intervalMap.years = m_intervalMap.months * 12;
+
+  this.on(geo.event.animationPause, function() { m_pause = true; });
+  this.on(geo.event.animationStop, function() { m_stop = true; });
+
+  toMillis = function(delta) {
+    var deltaLowercase = delta.toLowerCase();
+    return m_intervalMap[deltaLowercase];
+  };
+
+  calculateGlobalAnimationRange = function(layers) {
+    var delta, deltaUnits, start = null, end = null, layerTimeRange, layerDelta,
+        indexTimestep = false, smallestDeltaInMillis = Number.MAX_VALUE;
+
+    $.each(layers, function(i, layer) {
+      layerTimeRange = layer.timeRange();
+
+      if (layerTimeRange.deltaUnits === 'index') {
+        indexTimestep = true;
+        layerDelta = layerTimeRange.delta;
+      }
+      else {
+        if (indexTimestep) {
+          throw "Can't mix index timesteps with time based timesteps";
+        }
+
+        layerDelta = toMillis(layerTimeRange.deltaUnits)*layerTimeRange.delta;
+      }
+
+      if (layerDelta < smallestDeltaInMillis) {
+        delta = layerTimeRange.delta;
+        deltaUnits = layerTimeRange.deltaUnits;
+        smallestDeltaInMillis = layerDelta;
+      }
+
+      if (start == null || layerTimeRange.start < start) {
+        start = layerTimeRange.start;
+      }
+
+      if (end == null || layerTimeRange.end < end) {
+        end = layerTimeRange.end;
+      }
+    });
+
+    return {'start': start, 'end': end, 'delta': delta, 'deltaUnits': deltaUnits};
+  };
+
+  cloneTimestep = function(timestep) {
+
+    if (timestep instanceof Date) {
+      timestep = new Date(timestep.getTime());
+    }
+
+    return timestep;
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -392,6 +460,168 @@ geo.map = function(arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.animate = function(layers) {
+    var animationRange;
+    layers = layers === undefined ? this.children() : layers;
+
+    if(m_animationState.timestep == null) {
+      animationRange = calculateGlobalAnimationRange(layers)
+      m_animationState = {
+                           range: animationRange,
+                           timestep: cloneTimestep(animationRange.start),
+                           'layers': layers
+                         };
+    }
+
+    this._animate();
+  };
+
+  this.pauseAnimation = function() {
+    this.trigger(geo.event.animationPause);
+  };
+
+  this.stopAnimation = function() {
+    this.trigger(geo.event.animationStop);
+    m_animationState.timestep = null;
+  };
+
+  this.stepAnimationForward = function(layers) {
+    var animationRange, timestep;
+    layers = layers === undefined ? m_animationState.layers: layers;
+
+    if (layers === null) {
+      layers = this.children();
+    }
+
+    if (m_animationState.timestep == null) {
+      animationRange = calculateGlobalAnimationRange(layers);
+
+      m_animationState = {range: animationRange,
+          timestep: cloneTimestep(animationRange.start), 'layers': layers};
+    }
+
+    this._stepAnimationForward();
+  };
+
+  this.stepAnimationBackward = function(layers) {
+    var animationRange, timestep;
+    layers = layers === undefined ? m_animationState.layers: layers;
+
+    if (layers === null) {
+      layers = this.children();
+    }
+
+    if (m_animationState.timestep == null) {
+      animationRange = calculateGlobalAnimationRange(layers);
+
+      m_animationState = {range: animationRange,
+          timestep: cloneTimestep(animationRange.end), 'layers': layers};
+    }
+
+    this._stepAnimationBackward();
+  };
+
+
+
+  this._animate = function() {
+    var animationRange, nextTimestep, id;
+
+    animationRange = m_animationState.range;
+    nextTimestep = cloneTimestep(animationRange.start);
+    m_stop = false;
+    m_pause = false;
+
+    nextTimestep = geo.time.incrementTime(nextTimestep, animationRange.deltaUnits,
+      animationRange.delta);
+
+    if (nextTimestep > animationRange.end) {
+      throw "Invalid time range";
+    }
+
+    function renderTimestep() {
+      if (m_animationState.timestep > animationRange.end || m_stop) {
+        clearInterval(id);
+        m_animationState.timestep = null;
+        m_this.trigger(geo.event.animationComplete);
+      }
+      else if (m_pause) {
+        clearInterval(id);
+      }
+      else {
+        m_this._animateTimestep();
+        m_animationState.timestep = geo.time.incrementTime(m_animationState.timestep,
+            m_animationState.range.deltaUnits, m_animationState.range.delta);
+      }
+
+    };
+
+    id = setInterval(renderTimestep, 10);
+  };
+
+  this._animateTimestep = function() {
+
+    if (m_animationState) {
+
+      $.each(m_animationState.layers, function(i, layer) {
+        var timestep = m_animationState.timestep;
+
+        if (timestep instanceof Date) {
+          timestep = timestep.getTime();
+        }
+
+        layer._update({timestep: timestep});
+      });
+
+      this.trigger(
+        geo.event.animate, {
+        timestep: m_animationState.timestep
+      });
+      this.draw();
+    }
+  };
+
+  this._stepAnimationForward = function() {
+    var nextTimestep;
+
+    if (m_animationState.timestep == null) {
+      m_animationState.timestep = cloneTimestep(m_animationState.range.start);
+    }
+
+    nextTimestep = cloneTimestep(m_animationState.timestep);
+    nextTimestep = geo.time.incrementTime(nextTimestep, m_animationState.range.deltaUnits,
+        m_animationState.range.delta);
+
+    if (nextTimestep > m_animationState.range.end) {
+      return;
+    }
+
+    m_animationState.timestep = nextTimestep;
+    this._animateTimestep();
+  };
+
+  this._stepAnimationBackward = function() {
+    var previousTimestep;
+
+    if (m_animationState.timestep == null) {
+      m_animationState.timestep = cloneTimestep(m_animationState.range.end);
+    }
+
+    previousTimestep = cloneTimestep(m_animationState.timestep);
+    previousTimestep = geo.time.incrementTime(previousTimestep, m_animationState.range.deltaUnits,
+        -m_animationState.range.delta);
+
+    if (previousTimestep < m_animationState.range.start) {
+      return;
+    }
+
+    m_animationState.timestep = previousTimestep;
+    this._animateTimestep();
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Initialize the map
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -418,10 +648,10 @@ geo.map = function(arg) {
    * Update map
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._update = function() {
+  this._update = function(request) {
     var i = 0, layers = this.children();
     for (i = 0; i < layers.length; ++i) {
-      layers[i]._update();
+      layers[i]._update(request);
     }
   };
 
