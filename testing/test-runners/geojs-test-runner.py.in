@@ -21,6 +21,7 @@ from blanket_server import Handler as BlanketHandler
 
 HOST = "@TESTING_HOST@"
 PORT = @TESTING_PORT@
+server = None
 
 
 class Handler(BlanketHandler, HTTPHandler):
@@ -38,26 +39,38 @@ class Handler(BlanketHandler, HTTPHandler):
             HTTPHandler.do_PUT(self)
 
 
-class Server(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
+class _Server(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     allow_reuse_address = True
+
+
+class TestServer(object):
+
+    @classmethod
+    def start(cls, host='localhost', port='8000'):
+        cls.server = _Server(
+            (host, port),
+            Handler
+        )
+        cls.server_thread = threading.Thread(target=cls.server.serve_forever)
+        cls.server_thread.start()
+
+        time.sleep(0.5)
+
+    @classmethod
+    def stop(cls):
+        cls.server.shutdown()
+        cls.server_thread.join(1)
 
 
 def main():
     status = 1
-    server = Server(
-        (HOST, PORT),
-        Handler
-    )
 
-    server_thread = threading.Thread(target=server.serve_forever)
-    server_thread.start()
-
-    time.sleep(0.5)
+    testServer = TestServer()
+    testServer.start(HOST, PORT)
     try:
         status = subprocess.call(sys.argv[1:])
     finally:
-        server.shutdown()
-        server_thread.join(1)
+        testServer.stop()
 
     return status
 
