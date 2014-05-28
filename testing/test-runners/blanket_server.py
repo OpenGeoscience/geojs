@@ -209,6 +209,6 @@ if __name__ == '__main__':
     if len(sys.argv[1:]) == 1 and sys.argv[1] == 'reset':
         Aggregator().reset()
     elif len(sys.argv[1:]) == 2 and sys.argv[1] == 'report':
-        print Aggregator().output(sys.argv[2])
+        Aggregator().output(sys.argv[2])
     else:
         serve(*sys.argv[1:])
