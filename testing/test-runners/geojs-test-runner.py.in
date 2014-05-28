@@ -38,7 +38,7 @@ class Handler(BlanketHandler, HTTPHandler):
             HTTPHandler.do_PUT(self)
 
 
-class Server(SocketServer.TCPServer):
+class Server(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     allow_reuse_address = True
 
 
