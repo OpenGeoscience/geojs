@@ -241,7 +241,7 @@ function(add_geojs_test test_name)
     NAME "${test_name}"
     WORKING_DIRECTORY "${GEOJS_DEPLOY_DIR}"
     COMMAND ${PYTHON_EXECUTABLE}
-            ${CMAKE_CURRENT_BINARY_DIR}/test/geojs-test-runner.py
+            ${CMAKE_CURRENT_BINARY_DIR}/test/geojs_test_runner.py
             ${ARGN}
   )
 set_property(TEST "${test_name}" APPEND PROPERTY RESOURCE_LOCK webserver)
@@ -280,8 +280,8 @@ if(BUILD_TESTING)
       ${CMAKE_CURRENT_SOURCE_DIR}/testing/test-cases/phantomjs-tests/*.js
     )
 
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/geojs-test-runner.py.in
-                   ${CMAKE_CURRENT_BINARY_DIR}/test/geojs-test-runner.py
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/geojs_test_runner.py.in
+                   ${CMAKE_CURRENT_BINARY_DIR}/test/geojs_test_runner.py
     )
 
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/blanket_server.py
