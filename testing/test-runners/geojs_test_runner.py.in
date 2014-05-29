@@ -26,6 +26,9 @@ server = None
 
 class Handler(BlanketHandler, HTTPHandler):
 
+    def log_message(self, *arg, **kw):
+        pass
+
     def do_GET(self):
         if self.path == '/coverage':
             BlanketHandler.do_GET(self)
