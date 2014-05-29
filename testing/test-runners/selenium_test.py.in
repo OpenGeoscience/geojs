@@ -1,0 +1,244 @@
+#!/usr/bin/env python
+
+'''
+Base TestCase for selenium based unit testing.
+Requires python packages:
+    pillow
+    selenium
+Should be installable by:
+    pip install Pillow selenium
+'''
+
+import os
+from unittest import TestCase
+from urllib2 import urlopen
+from cStringIO import StringIO
+from math import sqrt
+
+from selenium import webdriver
+from selenium.webdriver.support.wait import WebDriverWait
+from PIL import Image, ImageStat, ImageChops
+
+from geojs_test_runner import TestServer
+
+
+# to be set by cmake:
+TEST_HOST = "@TESTING_HOST@"
+TEST_PORT = @TESTING_PORT@
+SELENIUM_HOST = "@SELENIUM_HOST@"
+SELENIUM_PORT = @SELENIUM_PORT@
+DEPLOY_PATH = "@GEOJS_DEPLOY_DIR@"
+BUILD_PATH = "@CMAKE_CURRENT_BINARY_DIR@"
+SOURCE_PATH = "@CMAKE_CURRENT_SOURCE_DIR@"
+
+
+class NullDriver(object):
+    '''
+    A placeholder for selenium drivers that does nothing.
+    '''
+    pass
+
+
+class ImageDifferenceException(Exception):
+    '''
+    Exception to be raised when two images differ.
+    '''
+    pass
+
+
+drivers = {
+    'firefox': webdriver.Firefox,
+    'chrome': webdriver.Chrome,
+    'opera': webdriver.Opera,
+    'phantomjs': webdriver.PhantomJS,
+    'safari': webdriver.Safari,
+    'ie': webdriver.Ie,
+    'null': NullDriver
+}
+
+
+class BaseTest(TestCase):
+    '''
+    Base class for all selenium based tests.
+    '''
+    driverName = 'null'
+    testHost = TEST_HOST
+    testPort = TEST_PORT
+    seleniumHost = SELENIUM_HOST
+    seleniumPort = SELENIUM_PORT
+    testBaseURL = 'http://' + testHost + ':' + str(testPort)
+    testPath = ('test', 'selenium')
+    srcTestPath = ('testing', 'test-cases', 'selenium-tests')
+    imageDifferenceThreshold = 0.0
+
+    @classmethod
+    def startServer(cls):
+        '''
+        Start a local web server.
+        '''
+        cls.server = TestServer()
+        cls.server.start(cls.testHost, cls.testPort)
+
+    @classmethod
+    def stopServer(cls):
+        '''
+        Stop the local webserver.
+        '''
+        cls.server.stop()
+
+    def setUp(self):
+        '''
+        Start up a selenium driver.
+        '''
+        self.driver = drivers[self.driverName]()
+
+    def tearDown(self):
+        '''
+        Stop the selenium driver.
+        '''
+        self.driver.execute_script(
+            'if (window.stopTest) { window.stopTest(); }'
+        )
+        self.driver.quit()
+
+    def wait(self, variable='window.testComplete', timeout=5):
+        '''
+        Wait for a variable to be set to true.  Raise an error
+        if timeout is exceeded.
+        '''
+        def check_status(drv):
+            try:
+                return drv.execute_script('return !!%s' % variable)
+            except Exception:
+                return False
+
+        WebDriverWait(
+            self.driver,
+            timeout
+        ).until(check_status, 'checking truthiness of %s' % variable)
+
+    def resizeWindow(self, width, height):
+        '''
+        Resize the browser to the given width and height.
+        '''
+        self.driver.set_window_size(width, height)
+
+    def getElement(self, selector):
+        '''
+        Find an element on the page by a css selector.
+        i.e.: test.getElement('#my-div')
+
+        '''
+        return self.driver.find_element_by_css_selector(selector)
+
+    def getElements(self, selector):
+        '''
+        Find all elements on the page matching a css selector.
+        i.e.: test.getElements('div')
+
+        '''
+        return self.driver.find_elements_by_css_selector(selector)
+
+    def screenshot(self):
+        '''
+        Capture a screenshot and return it as a base64 encoded string.
+        '''
+        png = self.driver.get_screenshot_as_png()
+        return Image.open(StringIO(png))
+
+    def loadURL(self, url, relative=True):
+        '''
+        Load a url on the test server.  This method automatically
+        prefixes the url with the host, so
+
+        loadURL('/test.html')
+
+        will load something like 'http://localhost:8000/test.html'.
+        '''
+        if relative:
+            url = '/'.join(
+                (self.testBaseURL,) +
+                tuple(self.testPath) +
+                (url,)
+            )
+        else:
+            url = self.testBaseURL + url
+        return self.driver.get(url)
+
+    @classmethod
+    def loadImageFile(cls, filename, relative=True):
+        '''
+        Load an image from a local file.  If relative is True, then
+        load it relative the current testing directory, otherwise
+        assume an absolute path.
+        '''
+        if relative:
+            filename = os.path.join(*(
+                (SOURCE_PATH,) +
+                tuple(cls.srcTestPath) +
+                (filename,)
+            ))
+        return Image.open(filename)
+
+    @classmethod
+    def loadImageURL(cls, filename, relative=True):
+        '''
+        Load an image from a URL.  If relative is True, then
+        load it relative the current testing path, otherwise
+        assume an absolute URL.
+        '''
+        if relative:
+            filename = '/'.join(
+                (cls.testBaseURL,) +
+                tuple(cls.testPath) +
+                (filename,)
+            )
+        request = urlopen(filename)
+        if request.getcode() != 200:
+            raise Exception("Could not load image at %s" % filename)
+        img = StringIO(request.read())
+        return Image.open(img)
+
+    @classmethod
+    def compareImages(cls, img1, img2):
+        '''
+        Compute the difference between two images and throw a
+        ImageDifferenceException if the difference is above
+        cls.imageDifferenceThreshold.
+        '''
+        if img1.size != img2.size:
+            raise Exception(
+                "Compared images are not the same size."
+            )
+        diff = ImageChops.difference(img1, img2)
+        st = ImageStat.Stat(diff)
+        sum2 = st.sum2
+        val = sqrt(reduce(lambda x, y: x + y, sum2, 0)/len(sum2))
+        if val > cls.imageDifferenceThreshold:
+            raise ImageDifferenceException(
+                "Calculated image difference %f over threshold %f" % (
+                    val, cls.imageDifferenceThreshold
+                )
+            )
+
+
+class FirefoxTest(BaseTest):
+    '''
+    Firefox test class.
+    '''
+    driverName = 'firefox'
+
+
+class ChromeTest(BaseTest):
+    '''
+    Chrome test class.
+    '''
+    driverName = 'chrome'
+
+
+def setUpModule():
+    BaseTest.startServer()
+
+
+def tearDownModule():
+    BaseTest.stopServer()

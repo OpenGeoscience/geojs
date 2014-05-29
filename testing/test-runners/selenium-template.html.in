@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script src=//cdnjs.cloudflare.com/ajax/libs/d3/3.4.8/d3.min.js></script>
+    <script src=//cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.2.1/gl-matrix.js></script>
+    <script src=//cdnjs.cloudflare.com/ajax/libs/proj4js/2.1.0/proj4.js></script>
+    <script src=//cdnjs.cloudflare.com/ajax/libs/d3/3.4.8/d3.min.js></script>
+    <script src=/test/lib/blanket.min.js></script>
+    <script src=/test/lib/aggregate-json-reporter.js></script>
+    <script type="text/javascript" src="/web/lib/vgl.min.js"></script>
+@SCRIPT_INCLUDE@ 
+    <style>
+        html, body{
+            height: 100%;
+        }
+    </style>
+    <style>
+@TEST_SOURCE_CSS@
+    </style>
+    <script>
+@TEST_SOURCE_JS@
+    </script>
+    <script src=/test/lib/selenium-blanket.js></script>
+</head>
+<body>
+@TEST_SOURCE_HTML@
+</body>

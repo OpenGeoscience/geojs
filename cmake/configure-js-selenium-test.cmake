@@ -1,0 +1,8 @@
+file(READ "${HTML_INCLUDE}" TEST_SOURCE_HTML)
+file(READ "${JS_INCLUDE}" TEST_SOURCE_JS)
+file(READ "${CSS_INCLUDE}" TEST_SOURCE_CSS)
+
+configure_file(
+    ${TEMPLATE_HTML}
+    ${OUTPUT_HTML}
+)
