@@ -147,7 +147,7 @@ ggl.mapInteractorStyle = function() {
 
       /// For now just trigger the render. Later on, we may want to
       /// trigger an external event
-      m_renderWindow.render();
+      // m_renderWindow.render();
     }
 
     m_mouseLastPos.x = m_currentMousePos.x;
@@ -287,16 +287,7 @@ ggl.mapInteractorStyle = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._zoomCameras = function(val) {
-    var val, i, renderers;
-
-    if (val === undefined) {
-      if (m_zTrans < 0) {
-        val = 1 - Math.abs(m_zTrans);
-      } else {
-        val = 1 + Math.abs(m_zTrans);
-      }
-    }
-
+    var i, renderers;
     m_camera.zoom(val);
     m_renderer.resetCameraClippingRange();
 
@@ -316,36 +307,44 @@ ggl.mapInteractorStyle = function() {
   ////////////////////////////////////////////////////////////////////////////
   this.zoom = function(val) {
     var oldMercPerPixel, newMercPerPixel, evt, i, renderers, worldPt1,
-        worldPt2;
+        worldPt2, newZoomLevel, oldZoomLevel, pos = m_camera.position();
 
     /// Update render params
     m_this.updateRenderParams();
 
     m_zTrans = (m_currentMousePos.y - m_mouseLastPos.y) / m_height;
 
-    /// Compute meters per pixel here and based on that decide the
-    /// zoom level
-    worldPt1 = m_renderWindow.displayToWorld(0, 0, m_focusDisplayPoint);
-    worldPt2 = m_renderWindow.displayToWorld(m_width, m_height,
-                                             m_focusDisplayPoint);
+    if (val === undefined) {
+      if (m_zTrans < 0) {
+        val = 1 - Math.abs(m_zTrans);
+      } else {
+        val = 1 + Math.abs(m_zTrans);
+      }
+    }
 
-    /// Computer mercator per pixel before changing the camera position
-    oldMercPerPixel = (worldPt2[0] - worldPt1[0]) / m_width;
+    oldZoomLevel = computeZoomLevel();
 
-    this._zoomCameras(val);
+    if (pos[2] * Math.sin(m_camera.viewAngle()) >= 360.0 && val > 1) {
+      console.log(pos[2]);
+      console.log(pos[2] * Math.sin(m_camera.viewAngle()));
 
-    worldPt1 = m_renderWindow.displayToWorld(0, 0, m_focusDisplayPoint);
-    worldPt2 = m_renderWindow.displayToWorld(m_width, m_height,
-                   m_focusDisplayPoint);
+      m_camera.setPosition(pos[0], pos[1], computeCameraDistance(0));
+      m_renderer.resetCameraClippingRange();
 
-    /// Computer mercator per pixel as of now
-    newMercPerPixel = (worldPt2[0] - worldPt1[0]) / m_width;
+      /// We are forcing the minimum zoom level to 2 so that we can get
+      /// high res imagery even at the zoom level 0 distance
+      newZoomLevel = 2;
+    } else {
+      this._zoomCameras(val);
 
-    /// Compute meters per pixel here and based on that decide the
-    /// zoom level
+      /// Compute meters per pixel here and based on that decide the
+      /// zoom level
+      newZoomLevel = computeZoomLevel();
+    }
+
     evt = { type: geo.event.zoom,
-            curr_zoom: computeZoomLevel(newMercPerPixel),
-            last_zoom: computeZoomLevel(oldMercPerPixel) };
+            curr_zoom: newZoomLevel,
+            last_zoom: oldZoomLevel };
     $(m_this).trigger(evt);
   };
 
@@ -489,15 +488,47 @@ ggl.mapInteractorStyle = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   function computeZoomLevel(deltaMerc) {
+    var i, pos = m_camera.position(),
+        width = (pos[2] * Math.sin(m_camera.viewAngle()));
+    for (i = 0; i < 20; ++i) {
+      if (width >= (360.0 / Math.pow(2, i))) {
+        /// We are forcing the minimum zoom level to 2 so that we can get
+        /// high res imagery even at the zoom level 0 distance
+        return (i + 2);
+      }
+    }
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Compute meters per pixel
+   *
+   * @returns {Number} meters per pixel
+   *
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  function computeMetersPerPixel() {
     var i, metersPerPixel, metersPerPixelFull = 156412;
     metersPerPixel = geo.mercator.deg2rad(Math.abs(deltaMerc)) *
                      geo.mercator.r_major;
-    for (i = 4; i < 20; ++i) {
-      if (metersPerPixel > (metersPerPixelFull / Math.pow(2, i))) {
-        return (i - 1);
-      }
-    }
-  };
+    return metersPerPixel;
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Compute camera distance for a given zoom level
+   *
+   * @returns {Number} camera distance from the map
+   *
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  function computeCameraDistance(zoomLevel) {
+    var deg = 360.0 / Math.pow(2, zoomLevel),
+        pos = m_camera.position();
+    return (deg / Math.sin(m_camera.viewAngle()));
+  }
 
   return this;
 };
