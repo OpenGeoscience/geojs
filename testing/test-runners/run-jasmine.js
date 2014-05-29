@@ -21,7 +21,7 @@ var page = require('webpage').create();
 var url = system.args[1];
 
 // Set a timeout (in milliseconds).
-var timeout = 3000;
+var timeout = 5000;
 
 // Route "console.log()" calls from within the Page context to the main Phantom
 // context (i.e.  current "this")
@@ -50,7 +50,8 @@ page.open(url, function (status) {
             var now = new Date().getTime(),
                 done,
                 i,
-                exitCode;
+                exitCode,
+                reporterDone;
 
             // If the test has timed out bail out with an error.
             if (now - start > timeout) {
@@ -63,10 +64,14 @@ page.open(url, function (status) {
                 return document.body.querySelector(".symbolSummary .pending") === null;
             });
 
+            reporterDone = page.evaluate(function () {
+                return document.body.className === 'reporter-done';
+            });
+
             // If the tests are done, then count how many of them failed, print
             // some errors if applicable, and exit with an appropriate error
             // code.
-            if (done) {
+            if (done && reporterDone) {
                 exitCode = page.evaluate(function () {
                     var list = document.body.querySelectorAll('.results > #details > .specDetail.failed'),
                         el,

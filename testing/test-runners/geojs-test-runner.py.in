@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import time
 import sys
 import subprocess
 import threading
@@ -13,12 +14,31 @@ elif sys.version_info[0] == 3:
 else:
     raise Exception("Unsupported python version")
 
+HTTPHandler = SimpleHTTPServer.SimpleHTTPRequestHandler
+
+from blanket_server import Handler as BlanketHandler
+
 
 HOST = "@TESTING_HOST@"
 PORT = @TESTING_PORT@
 
 
-class Server(SocketServer.TCPServer):
+class Handler(BlanketHandler, HTTPHandler):
+
+    def do_GET(self):
+        if self.path == '/coverage':
+            BlanketHandler.do_GET(self)
+        else:
+            HTTPHandler.do_GET(self)
+
+    def do_PUT(self):
+        if self.path == '/coverage':
+            BlanketHandler.do_PUT(self)
+        else:
+            HTTPHandler.do_PUT(self)
+
+
+class Server(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     allow_reuse_address = True
 
 
@@ -26,17 +46,18 @@ def main():
     status = 1
     server = Server(
         (HOST, PORT),
-        SimpleHTTPServer.SimpleHTTPRequestHandler
+        Handler
     )
 
     server_thread = threading.Thread(target=server.serve_forever)
     server_thread.start()
 
+    time.sleep(0.5)
     try:
         status = subprocess.call(sys.argv[1:])
     finally:
         server.shutdown()
-        server_thread.join()
+        server_thread.join(1)
 
     return status
 

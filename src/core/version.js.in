@@ -1,0 +1,3 @@
+/*global geo*/
+
+geo.version = "@GEOJS_VERSION@";

@@ -14,5 +14,5 @@ script:
     - mkdir _build
     - cd _build
     - cmake ..
-    - ctest -V -S ../cmake/travis_build.cmake
-    - ctest -V -S ../cmake/travis_submit.cmake
+    - ctest -VV -S ../cmake/travis_build.cmake
+    - ctest -VV -S ../cmake/travis_submit.cmake

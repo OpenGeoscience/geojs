@@ -1,0 +1,47 @@
+/*global $, blanket, window*/
+
+(function () {
+    'use strict';
+
+    function reporter(cov) {
+        function setStatus() {
+            $('body').attr('class', 'reporter-done');
+        }
+
+        // convert sparse arrays into objects
+        var coverage = {
+            'files': {}
+        };
+        $.each(cov.files, function (fname, arr) {
+            var f = fname.split('/').slice(3).join('/');
+
+            if (f === 'src/core/version.js') { return ; }
+
+            // delete the source key
+            delete arr.source;
+
+            coverage.files[f] = $.extend({}, arr);
+        });
+
+        // post coverage results to the server
+        $.ajax({
+            url: '/coverage',
+            data: JSON.stringify(coverage),
+            dataType: 'json',
+            type: 'PUT',
+            contentType: 'application/json',
+            error: function (xhr, status, error) {
+                console.log('status:' + status);
+                console.log('error:' + error);
+                console.log('Failed to post coverage data to the server');
+                setStatus();
+            },
+            success: function () {
+                console.log('Posted data to server successfully.');
+                setStatus();
+            }
+        });
+    }
+
+    blanket.options('reporter', reporter);
+}());
