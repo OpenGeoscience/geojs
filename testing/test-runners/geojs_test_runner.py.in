@@ -49,31 +49,46 @@ class _Server(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
 class TestServer(object):
 
     @classmethod
-    def start(cls, host='localhost', port='8000'):
+    def start(cls, host='localhost', port='8000', block=False):
+        print 'Starting test server at: http://%s:%s' % (host, port)
         cls.server = _Server(
             (host, port),
             Handler
         )
-        cls.server_thread = threading.Thread(target=cls.server.serve_forever)
-        cls.server_thread.start()
+        if block:
+            cls.server.serve_forever()
+        else:
+            cls.server_thread = threading.Thread(
+                target=cls.server.serve_forever
+            )
+            cls.server_thread.start()
 
-        time.sleep(0.5)
+            time.sleep(0.5)
 
     @classmethod
     def stop(cls):
+        print 'Stopping test server'
         cls.server.shutdown()
         cls.server_thread.join(1)
 
 
 def main():
-    status = 1
+    status = 0
 
+    block = not len(sys.argv[1:])
     testServer = TestServer()
-    testServer.start(HOST, PORT)
+
     try:
-        status = subprocess.call(sys.argv[1:])
-    finally:
-        testServer.stop()
+        testServer.start(HOST, PORT, block)
+    except KeyboardInterrupt:
+        pass
+
+    if len(sys.argv[1:]):
+        status = 1
+        try:
+            status = subprocess.call(sys.argv[1:])
+        finally:
+            testServer.stop()
 
     return status
 
