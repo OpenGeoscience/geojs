@@ -7,29 +7,26 @@ from selenium_test import FirefoxTest, ChromeTest,\
 
 
 class osmBase(object):
+    testCase = ('osmLayer',)
 
     def test_osm_draw(self):
 
+        testName = 'osmDraw'
         self.loadURL('osmLayer/index.html')
         self.wait()
         self.resizeWindow(640, 480)
 
-        im1 = self.loadImageFile(
-            os.path.join('osmLayer', 'osm-%s.png' % self.driverName)
-        )
-
-        im2 = self.screenshot()
-        im2.save('osm-%s.png' % self.driverName)
-
-        self.compareImages(im1, im2)
+        baseImg = self.loadTestImage(testName)
+        testImg = self.screenshot()
+        self.compareImages(baseImg, testImg, testName)
 
 
 class FirefoxOSM(osmBase, FirefoxTest):
-    pass
+    testCase = osmBase.testCase + ('firefox',)
 
 
 class ChromeOSM(osmBase, ChromeTest):
-    pass
+    testCase = osmBase.testCase + ('chrome',)
 
 
 if __name__ == '__main__':

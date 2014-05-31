@@ -70,6 +70,26 @@ class BaseTest(TestCase):
     testPath = ('test', 'selenium')
     srcTestPath = ('testing', 'test-cases', 'selenium-tests')
     imageDifferenceThreshold = 0.0
+    testImageBaseURL = 'https://raw.githubusercontent.com/' + \
+        'OpenGeoscience/geojs-data/master/test/images'
+    testCase = tuple()
+
+    @classmethod
+    def _relativeImagePath(cls, testName):
+        '''
+        Get the standard path for storing a test image as a list.
+        '''
+        case = cls.testCase
+
+        if isinstance(case, basestring):
+            case = case.split('/')
+        if isinstance(testName, basestring):
+            testName = testName.split('/')
+
+        testName = list(testName)
+        testName[-1] += '.png'
+
+        return list(case) + testName
 
     @classmethod
     def startServer(cls):
@@ -200,20 +220,67 @@ class BaseTest(TestCase):
         return Image.open(img)
 
     @classmethod
-    def compareImages(cls, img1, img2):
+    def loadTestImage(cls, testName):
+        '''
+        Load an image from the globally configured image store.
+        '''
+
+        return cls.loadImageURL(
+            '/'.join(
+                [cls.testImageBaseURL] +
+                cls._relativeImagePath(testName)
+            ),
+            relative=False
+        )
+
+    @classmethod
+    def compareImages(cls, baseImage, computedImage, testName=None):
         '''
         Compute the difference between two images and throw a
         ImageDifferenceException if the difference is above
         cls.imageDifferenceThreshold.
+
+        If testName is set, then store the images under the server path.
         '''
-        if img1.size != img2.size:
+        if baseImage.size != computedImage.size:
             raise Exception(
                 "Compared images are not the same size."
             )
-        diff = ImageChops.difference(img1, img2)
+        diff = ImageChops.difference(baseImage, computedImage)
         st = ImageStat.Stat(diff)
         sum2 = st.sum2
         val = sqrt(reduce(lambda x, y: x + y, sum2, 0)/len(sum2))
+
+        if testName is not None:
+            deploy = DEPLOY_PATH.split(os.path.sep)
+            fullPathList = \
+                list(deploy) + \
+                list(cls.testPath) + \
+                cls._relativeImagePath(testName)
+            fullPath = os.path.sep.join(fullPathList[:-1])
+            try:
+                os.makedirs(fullPath)
+            except OSError:
+                pass  # directory already exists... probably
+
+            splt = os.path.splitext(fullPathList[-1])
+            baseImageName = os.path.join(
+                fullPath,
+                splt[0] + '_base' + splt[1]
+            )
+            testImageName = os.path.join(
+                fullPath,
+                splt[0] + '_test' + splt[1]
+            )
+            diffImageName = os.path.join(
+                fullPath,
+                splt[0] + '_diff' + splt[1]
+            )
+            print baseImageName
+            baseImage.save(baseImageName)
+            computedImage.save(testImageName)
+            diff.save(diffImageName)
+
         if val > cls.imageDifferenceThreshold:
             raise ImageDifferenceException(
                 "Calculated image difference %f over threshold %f" % (
