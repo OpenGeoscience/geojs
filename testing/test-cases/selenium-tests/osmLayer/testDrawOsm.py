@@ -16,9 +16,7 @@ class osmBase(object):
         self.wait()
         self.resizeWindow(640, 480)
 
-        baseImg = self.loadTestImage(testName)
-        testImg = self.screenshot()
-        self.compareImages(baseImg, testImg, testName)
+        self.screenshotTest(testName)
 
 
 class FirefoxOSM(osmBase, FirefoxTest):

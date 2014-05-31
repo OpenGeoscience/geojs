@@ -340,6 +340,7 @@ if(BUILD_TESTING)
 
   if(SELENIUM_TESTS)
 
+    set(DATA_REPO_PATH "" CACHE PATH "Local path to the geojs data repository (optional).")
     set(SELENIUM_TEST_DIR "${GEOJS_DEPLOY_DIR}/test/selenium")
     set(SELENIUM_HOST localhost CACHE STRING "The selenium test server host.")
     mark_as_advanced(SELENIUM_HOST)
