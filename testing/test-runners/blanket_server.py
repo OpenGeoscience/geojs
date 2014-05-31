@@ -182,7 +182,6 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.end_headers()
 
         l = int(self.headers['Content-Length'])
-        print 'received %i bytes' % l
 
         s = self.rfile.read(l)
         try:
