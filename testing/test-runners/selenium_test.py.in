@@ -17,6 +17,7 @@ from math import sqrt
 
 from selenium import webdriver
 from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.common.action_chains import ActionChains
 from PIL import Image, ImageStat, ImageChops
 
 from geojs_test_runner import TestServer
@@ -185,6 +186,23 @@ class BaseTest(TestCase):
         else:
             url = self.testBaseURL + url
         return self.driver.get(url)
+
+    def drag(self, element, delta, offset=(0, 0)):
+        '''
+        Drag the element given (by a css selector) starting
+        at `offset` relative to the center of the element by
+        an amount `delta`.  Where `delta` and `offset`
+        are two element iterables containing two integers:
+            [x, y]
+        '''
+        el = self.getElement(element)
+        action = ActionChains(self.driver)
+
+        action.move_to_element_with_offset(el, offset[0], offset[1])
+        action.click_and_hold()
+        action.move_by_offset(delta[0], delta[1])
+        action.release()
+        action.perform()
 
     @classmethod
     def loadImageFile(cls, filename, relative=True):
