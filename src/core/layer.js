@@ -215,9 +215,9 @@ geo.layer = function(arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.timeRange = function(val) {
     if (val === undefined ) {
-      return timeRange;
+      return m_timeRange;
     } else {
-      timeRange = val.slice(0);
+      m_timeRange = val.slice(0);
       this.modified();
       return this;
     }
