@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 2.8)
 project(geojs)
 set(GEOJS_VERSION 0.1.0)
 
-set(MINIFY ON CACHE BOOL "Minify the JavaScript files prior to concatenating.")
-set(MANGLE ON CACHE BOOL "When minifying, also mangle non-public symbol names.")
+set(MINIFY OFF CACHE BOOL "Build minified library.")
+set(MANGLE OFF CACHE BOOL "When minifying, also mangle non-public symbol names.")
 
 set(BUILD_TESTING_OLD OFF CACHE BOOL "Enable old testing (to be removed)")
 
@@ -40,19 +40,7 @@ if(${need_python})
   set(TESTING_PORT 50100 CACHE STRING "The port number to use for the testing web server")
 endif()
 
-# Uglify and concatenate the library js files.
-if(NOT ${MINIFY})
-    set(MINIFY_FLAG "-b")
-endif()
-
-if(${MINIFY} AND ${MANGLE})
-    set(MANGLE_FLAG "-m")
-endif()
-
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-
-# Find UglifyJS.
-find_package(UglifyJS)
 
 set(_source_files
   core/init.js
@@ -140,7 +128,8 @@ endif()
 set(VGL_DEPLOY_DIR "${GEOJS_DEPLOY_DIR}")
 set(VGL_DEPLOY_LIB_DIR "${GEOJS_DEPLOY_LIB_DIR}")
 
-set(_min_js_file ${GEOJS_DEPLOY_LIB_DIR}/geojs.min.js)
+set(_min_js_file ${GEOJS_DEPLOY_LIB_DIR}/geo.min.js)
+set(_js_file ${GEOJS_DEPLOY_LIB_DIR}/geo.js)
 
 macro(list_contains var value)
   set(${var})
@@ -176,29 +165,37 @@ configure_file(
 set(_js_uglify_files ${_js_uglify_files} ${GEOJS_SRC_DIR}/core/version.js)
 set(_script_include ${_script_include}<script src=\"/src/core/version.js\" data-cover></script>)
 
+# Build concatonated js file
+add_custom_command(
+  OUTPUT ${_js_file}
+  COMMAND ${CMAKE_COMMAND} -DCAT_OUTPUT_FILE=${_js_file}
+          # Note the quotes so we get the ; included
+          "-DCAT_FILES=${_js_uglify_files}"
+          -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/cat.cmake
+  DEPENDS ${GEOJS_DEPLOY_LIB_DIR} ${_js_uglify_files}
+  VERBATIM
+)
 
-if (UglifyJS_EXECUTABLE)
+if(MINIFY)
+  # Find UglifyJS.
+  find_package(UglifyJS REQUIRED)
+
+  if(MANGLE)
+      set(MANGLE_FLAG "-m")
+  endif()
+
+  # Build minified js file
   add_custom_command(
     OUTPUT ${_min_js_file}
-    COMMAND ${UglifyJS_EXECUTABLE} -o ${_min_js_file} ${_js_uglify_files}
-            ${MINIFY_FLAG} ${MANGLE_FLAG}
-    DEPENDS ${GEOJS_DEPLOY_LIB_DIR} ${_js_uglify_files}
+    COMMAND ${UglifyJS_EXECUTABLE} -o ${_min_js_file} ${_js_file}
+            ${MANGLE_FLAG}
+    DEPENDS ${GEOJS_DEPLOY_LIB_DIR} ${_js_file}
   )
+  add_custom_target(${PROJECT_NAME} ALL DEPENDS ${_min_js_file})
 else()
-  # Use custom command to call CMake script to cat files together
-  add_custom_command(
-    OUTPUT ${_min_js_file}
-    COMMAND ${CMAKE_COMMAND} -DCAT_OUTPUT_FILE=${_min_js_file}
-            # Note the quotes so we get the ; included
-            "-DCAT_FILES=${_js_uglify_files}"
-            -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/cat.cmake
-    DEPENDS ${GEOJS_DEPLOY_LIB_DIR} ${_js_uglify_files}
-    VERBATIM
-  )
+  add_custom_target(${PROJECT_NAME} ALL DEPENDS ${_js_file})
 endif()
 
-# Build project
-add_custom_target(${PROJECT_NAME} ALL DEPENDS ${_min_js_file})
 add_dependencies(${PROJECT_NAME} geojs_pre_deploy)
 
 # Old testing framework
