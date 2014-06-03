@@ -26,7 +26,7 @@ if(${BUILD_TESTING})
   set(PHANTOMJS_TESTS ON CACHE BOOL "Generate phantomjs unit tests.")
 
   # once implemented
-  #set(COVERAGE_TESTS OFF CACHE BOOL "Generate coverage reports.")
+  set(COVERAGE_TESTS OFF CACHE BOOL "Generate coverage reports.")
   set(SELENIUM_TESTS OFF CACHE BOOL "Generate selenium unit tests.")
 endif()
 
@@ -245,8 +245,10 @@ function(add_geojs_test test_name)
             ${ARGN}
   )
   set_property(TEST "${test_name}" APPEND PROPERTY RESOURCE_LOCK webserver)
-  set_property(TEST "${test_name}" APPEND PROPERTY DEPENDS "coverage-reset")
-  set_property(TEST "coverage-report" APPEND PROPERTY DEPENDS "${test_name}")
+  if (COVERAGE_TESTS)
+    set_property(TEST "${test_name}" APPEND PROPERTY DEPENDS "coverage-reset")
+    set_property(TEST "coverage-report" APPEND PROPERTY DEPENDS "${test_name}")
+  endif()
 endfunction()
 
 # set up testing framework and add tests
@@ -273,22 +275,31 @@ if(BUILD_TESTING)
                  COPYONLY
   )
 
-  add_test(
-    NAME "coverage-reset"
-    WORKING_DIRECTORY "${GEOJS_DEPLOY_DIR}"
-    COMMAND "${PYTHON_EXECUTABLE}"
-            "${CMAKE_CURRENT_BINARY_DIR}/test/blanket_server.py"
-            "reset"
-  )
+  if (COVERAGE_TESTS)
 
-  add_test(
-    NAME "coverage-report"
-    WORKING_DIRECTORY "${GEOJS_DEPLOY_DIR}"
-    COMMAND "${PYTHON_EXECUTABLE}"
-            "${CMAKE_CURRENT_BINARY_DIR}/test/blanket_server.py"
-            "report" "${CMAKE_CURRENT_BINARY_DIR}/coverage.xml"
-  )
-  set_property(TEST "coverage-report" APPEND PROPERTY DEPENDS "coverage-reset")
+    set(BLANKET_INCLUDE "<script src=/test/lib/blanket.min.js></script>")
+    add_test(
+      NAME "coverage-reset"
+      WORKING_DIRECTORY "${GEOJS_DEPLOY_DIR}"
+      COMMAND "${PYTHON_EXECUTABLE}"
+              "${CMAKE_CURRENT_BINARY_DIR}/test/blanket_server.py"
+              "reset"
+    )
+
+    add_test(
+      NAME "coverage-report"
+      WORKING_DIRECTORY "${GEOJS_DEPLOY_DIR}"
+      COMMAND "${PYTHON_EXECUTABLE}"
+              "${CMAKE_CURRENT_BINARY_DIR}/test/blanket_server.py"
+              "report" "${CMAKE_CURRENT_BINARY_DIR}/coverage.xml"
+    )
+    set_property(TEST "coverage-report" APPEND PROPERTY DEPENDS "coverage-reset")
+
+  else()
+
+      set(BLANKET_INCLUDE "")
+
+  endif()
 
   if(PHANTOMJS_TESTS)
     find_package(PhantomJS REQUIRED)
@@ -318,6 +329,7 @@ if(BUILD_TESTING)
                                  -DSOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
                                  -DSOURCE_FILE="${js}"
                                  -DSCRIPT_INCLUDE="${_script_include}"
+                                 -DBLANKET_INCLUDE="${BLANKET_INCLUDE}"
                                  -P ${CMAKE_SOURCE_DIR}/cmake/configure-js-unit-test.cmake
         COMMAND ${CMAKE_COMMAND} -E touch ${html}
         DEPENDS ${js} ${CMAKE_SOURCE_DIR}/testing/test-runners/jasmine-runner.html.in
@@ -375,6 +387,7 @@ if(BUILD_TESTING)
                                    -DSCRIPT_INCLUDE="${_script_include}"
                                    -DOUTPUT_HTML="${output_html}"
                                    -DTEMPLATE_HTML="${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/selenium-template.html.in"
+                                   -DBLANKET_INCLUDE="${BLANKET_INCLUDE}"
                                    -P ${CMAKE_SOURCE_DIR}/cmake/configure-js-selenium-test.cmake
           COMMAND ${CMAKE_COMMAND} -E touch "${output_html}"
           DEPENDS "${html}" "${js}" "${css}" "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/selenium-template.html.in"
@@ -388,8 +401,11 @@ if(BUILD_TESTING)
           COMMAND ${PYTHON_EXECUTABLE} -m unittest discover -v -s "${dir}"
         )
         set_property(TEST "selenium:${f}" APPEND PROPERTY RESOURCE_LOCK webserver)
-        set_property(TEST "selenium:${f}" APPEND PROPERTY DEPENDS "coverage-reset")
-        set_property(TEST "coverage-report" APPEND PROPERTY DEPENDS "selenium:${f}")
+
+        if (COVERAGE_TESTS)
+          set_property(TEST "selenium:${f}" APPEND PROPERTY DEPENDS "coverage-reset")
+          set_property(TEST "coverage-report" APPEND PROPERTY DEPENDS "selenium:${f}")
+        endif()
         set_property(TEST "selenium:${f}" PROPERTY ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/test")
       endif()
     endforeach()

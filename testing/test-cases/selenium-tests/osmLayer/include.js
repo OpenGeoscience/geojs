@@ -12,17 +12,18 @@ window.startTest = function(done) {
     /// Resize the canvas to fill browser window dynamically
     window.addEventListener('resize', resizeCanvas, false);
 
+
+    function updateAndDraw(width, height) {
+      myMap.resize(0, 0, width, height);
+      myMap.draw();
+    }
+
     function resizeCanvas() {
       $('#map').width('100%');
       $('#map').height('100%');
       updateAndDraw($('#map').width(), $('#map').height());
     }
     resizeCanvas();
-
-    function updateAndDraw(width, height) {
-      myMap.resize(0, 0, width, height);
-      myMap.draw();
-    }
 
     // give the tiles a chance to load
     // we should add signals in geojs to do this...

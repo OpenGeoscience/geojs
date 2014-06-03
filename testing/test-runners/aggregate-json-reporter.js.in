@@ -3,10 +3,11 @@
 (function () {
     'use strict';
 
+    function setStatus() {
+        $('body').attr('class', 'reporter-done');
+    }
+
     function reporter(cov) {
-        function setStatus() {
-            $('body').attr('class', 'reporter-done');
-        }
 
         // convert sparse arrays into objects
         var coverage = {
@@ -43,5 +44,11 @@
         });
     }
 
-    blanket.options('reporter', reporter);
+    var blanket = window.blanket;
+    if (blanket) {
+        blanket.options('reporter', reporter);
+    } else {
+        $(setStatus);
+    }
+
 }());

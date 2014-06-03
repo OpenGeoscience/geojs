@@ -7,7 +7,7 @@
     <script src=//cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.2.1/gl-matrix.js></script>
     <script src=//cdnjs.cloudflare.com/ajax/libs/proj4js/2.1.0/proj4.js></script>
     <script src=//cdnjs.cloudflare.com/ajax/libs/d3/3.4.8/d3.min.js></script>
-    <script src=/test/lib/blanket.min.js></script>
+@BLANKET_INCLUDE@
     <script src=/test/lib/aggregate-json-reporter.js></script>
     <script type="text/javascript" src="/web/lib/vgl.min.js"></script>
 @SCRIPT_INCLUDE@ 

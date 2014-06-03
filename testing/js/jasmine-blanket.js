@@ -31,60 +31,64 @@
             .replace(/\'/g, "&apos;");
     }
 
-    /**
-     * based on https://raw.github.com/larrymyers/jasmine-reporters/master/src/jasmine.junit_reporter.js
-     */
-    var BlanketReporter = function(savePath, consolidate, useDotNotation) {
-        
-        blanket.setupCoverage();
-    };
-    BlanketReporter.finished_at = null; // will be updated after all files have been written
+    var blanket = window.blanket;
 
-    BlanketReporter.prototype = {
-        reportSpecStarting: function(spec) {
-            blanket.onTestStart();
-        },
+    if (blanket) {
+      /**
+       * based on https://raw.github.com/larrymyers/jasmine-reporters/master/src/jasmine.junit_reporter.js
+       */
+      var BlanketReporter = function(savePath, consolidate, useDotNotation) {
 
-        reportSpecResults: function(suite) {
-            var results = suite.results();
+          blanket.setupCoverage();
+      };
+      BlanketReporter.finished_at = null; // will be updated after all files have been written
 
-            blanket.onTestDone(results.totalCount,results.passed());
-        },
+      BlanketReporter.prototype = {
+          reportSpecStarting: function(spec) {
+              blanket.onTestStart();
+          },
 
-        reportRunnerResults: function(runner) {
-            blanket.onTestsDone();
-        },
+          reportSpecResults: function(suite) {
+              var results = suite.results();
 
-        log: function(str) {
-            var console = jasmine.getGlobal().console;
+              blanket.onTestDone(results.totalCount,results.passed());
+          },
 
-            if (console && console.log) {
-                console.log(str);
-            }
-        }
-    };
+          reportRunnerResults: function(runner) {
+              blanket.onTestsDone();
+          },
+
+          log: function(str) {
+              var console = jasmine.getGlobal().console;
+
+              if (console && console.log) {
+                  console.log(str);
+              }
+          }
+      };
 
 
-    // export public
-    jasmine.BlanketReporter = BlanketReporter;
+      // export public
+      jasmine.BlanketReporter = BlanketReporter;
 
-    //override existing jasmine execute
-    jasmine.getEnv().execute = function(){ console.log("waiting for blanket..."); };
-    
-    //check to make sure requirejs is completed before we start the test runner
-    var allLoaded = function() {
-        return window.jasmine.getEnv().currentRunner().specs().length > 0 && blanket.requireFilesLoaded();
-    };
+      //override existing jasmine execute
+      jasmine.getEnv().execute = function(){ console.log("waiting for blanket..."); };
 
-    blanket.beforeStartTestRunner({
-        checkRequirejs:true,
-        condition: allLoaded,
-        callback:function(){
-            jasmine.getEnv().addReporter(new jasmine.BlanketReporter());
-            window.jasmine.getEnv().currentRunner().execute();
-            jasmine.getEnv().execute = function () {
-                jasmine.getEnv().currentRunner().execute();   
-            };  
-        }
-    });
+      //check to make sure requirejs is completed before we start the test runner
+      var allLoaded = function() {
+          return window.jasmine.getEnv().currentRunner().specs().length > 0 && blanket.requireFilesLoaded();
+      };
+
+      blanket.beforeStartTestRunner({
+          checkRequirejs:true,
+          condition: allLoaded,
+          callback:function(){
+              jasmine.getEnv().addReporter(new jasmine.BlanketReporter());
+              window.jasmine.getEnv().currentRunner().execute();
+              jasmine.getEnv().execute = function () {
+                  jasmine.getEnv().currentRunner().execute();
+              };
+          }
+      });
+    }
 })();

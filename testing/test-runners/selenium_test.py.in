@@ -277,11 +277,10 @@ class BaseTest(TestCase):
             fullPath,
             splt[0] + kind + splt[1]
         )
-
         img.save(imageName)
 
     @classmethod
-    def compareImages(cls, baseImage, computedImage, testName=None):
+    def compareImages(cls, baseImage, testImage, testName=None):
         '''
         Compute the difference between two images and throw a
         ImageDifferenceException if the difference is above
@@ -289,14 +288,15 @@ class BaseTest(TestCase):
 
         If testName is set, then store the images under the server path.
         '''
-        if baseImage.size != computedImage.size:
+        if baseImage.size != testImage.size:
             raise Exception(
                 "Compared images are not the same size."
             )
-        diff = ImageChops.difference(baseImage, computedImage)
+        nPixels = baseImage.size[0] * baseImage.size[1]
+        diff = ImageChops.difference(baseImage, testImage)
         st = ImageStat.Stat(diff)
         sum2 = st.sum2
-        val = sqrt(reduce(lambda x, y: x + y, sum2, 0)/len(sum2))
+        val = sqrt(reduce(lambda x, y: x + y, sum2, 0)/(len(sum2) * nPixels))
 
         if testName is not None:
             cls.exportTestImage(baseImage, testName, 'base')
@@ -314,7 +314,7 @@ class BaseTest(TestCase):
         testImage = self.screenshot()
         self.exportTestImage(testImage, testName, deploy=TEST_REPO_PATH)
         baseImage = self.loadTestImage(testName)
-        self.compareImages(baseImage, testImage)
+        self.compareImages(baseImage, testImage, testName)
 
 
 class FirefoxTest(BaseTest):
