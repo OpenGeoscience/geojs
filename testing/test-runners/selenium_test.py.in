@@ -10,6 +10,7 @@ Should be installable by:
 '''
 
 import os
+import unittest
 from unittest import TestCase
 from urllib2 import urlopen
 from cStringIO import StringIO
@@ -317,6 +318,10 @@ class BaseTest(TestCase):
         self.compareImages(baseImage, testImage, testName)
 
 
+@unittest.skipIf(
+    os.environ.get('FIREFOX_TESTS', 'ON') == 'OFF',
+    "Firefox tests disabled by $FIREFOX_TESTS"
+)
 class FirefoxTest(BaseTest):
     '''
     Firefox test class.
@@ -324,6 +329,10 @@ class FirefoxTest(BaseTest):
     driverName = 'firefox'
 
 
+@unittest.skipIf(
+    os.environ.get('CHROME_TESTS', 'OFF') == 'OFF',
+    "Chrome tests disabled by $CHROME_TESTS"
+)
 class ChromeTest(BaseTest):
     '''
     Chrome test class.
