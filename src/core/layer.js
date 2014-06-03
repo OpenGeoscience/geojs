@@ -72,7 +72,7 @@ geo.layer = function(arg) {
       m_id = arg.id === undefined ? geo.newLayerId() : arg.id,
       m_name = "",
       m_gcs = 'EPSG:4326',
-      m_timeRange = [],
+      m_timeRange = null,
       m_source = arg.source || null,
       m_map = arg.map === undefined ? null : args.map,
       m_isReference = false,
@@ -217,7 +217,7 @@ geo.layer = function(arg) {
     if (val === undefined ) {
       return m_timeRange;
     } else {
-      m_timeRange = val.slice(0);
+      m_timeRange = val;
       this.modified();
       return this;
     }

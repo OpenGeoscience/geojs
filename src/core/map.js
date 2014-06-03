@@ -72,10 +72,13 @@ geo.map = function(arg) {
 
   calculateGlobalAnimationRange = function(layers) {
     var delta, deltaUnits, start = null, end = null, layerTimeRange, layerDelta,
-        indexTimestep = false, smallestDeltaInMillis = Number.MAX_VALUE;
+        indexTimestep = false, smallestDeltaInMillis = Number.MAX_VALUE, i;
 
-    $.each(layers, function(i, layer) {
-      layerTimeRange = layer.timeRange();
+    for(i = 0; i < layers.length; i++) {
+      layerTimeRange = layers[i].timeRange();
+
+      if (!layerTimeRange)
+          continue
 
       if (layerTimeRange.deltaUnits === 'index') {
         indexTimestep = true;
@@ -102,7 +105,7 @@ geo.map = function(arg) {
       if (end == null || layerTimeRange.end < end) {
         end = layerTimeRange.end;
       }
-    });
+    }
 
     return {'start': start, 'end': end, 'delta': delta, 'deltaUnits': deltaUnits};
   };
@@ -468,6 +471,12 @@ geo.map = function(arg) {
 
     if(m_animationState.timestep == null) {
       animationRange = calculateGlobalAnimationRange(layers)
+
+      if (!animationRange.start || !animationRange.end) {
+          throw "Animation range could not be calculated. " +
+                "Check that layers have ranges associated with them";
+      }
+
       m_animationState = {
                            range: animationRange,
                            timestep: cloneTimestep(animationRange.start),
