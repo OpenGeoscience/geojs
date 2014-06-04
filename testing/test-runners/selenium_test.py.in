@@ -303,9 +303,7 @@ class BaseTest(TestCase):
         If testName is set, then store the images under the server path.
         '''
         if baseImage.size != testImage.size:
-            raise Exception(
-                "Compared images are not the same size."
-            )
+            raise ImageDifferenceException(-1, iImage)
         nPixels = baseImage.size[0] * baseImage.size[1]
         diff = ImageChops.difference(baseImage, testImage)
         st = ImageStat.Stat(diff)
