@@ -11,22 +11,21 @@ class osmBase(object):
     testCase = ('osmLayer',)
 
     def loadPage(self):
+        self.resizeWindow(640, 480)
         self.loadURL('osmLayer/index.html')
         self.wait()
-        self.resizeWindow(640, 480)
-        time.sleep(0.1)
 
     def test_osm_draw(self):
         testName = 'osmDraw'
         self.loadPage()
-        self.screenshotTest(testName)
+        self.screenshotTest(testName, revision=0)
 
     def test_osm_pan(self):
         testName = 'osmPan'
         self.loadPage()
         self.drag('#map', (200, 150))
         time.sleep(1)  # wait for tiles to load
-        self.screenshotTest(testName)
+        self.screenshotTest(testName, revision=0)
 
 
 class FirefoxOSM(osmBase, FirefoxTest):

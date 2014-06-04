@@ -15,6 +15,7 @@ from unittest import TestCase
 from urllib2 import urlopen
 from cStringIO import StringIO
 from math import sqrt
+import json
 
 from selenium import webdriver
 from selenium.webdriver.support.wait import WebDriverWait
@@ -22,7 +23,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from PIL import Image, ImageStat, ImageChops
 
 from geojs_test_runner import TestServer
-
+from midas_handler import MidasHandler
 
 # to be set by cmake:
 TEST_HOST = "@TESTING_HOST@"
@@ -33,6 +34,8 @@ DEPLOY_PATH = "@GEOJS_DEPLOY_DIR@"
 BUILD_PATH = "@CMAKE_CURRENT_BINARY_DIR@"
 SOURCE_PATH = "@CMAKE_CURRENT_SOURCE_DIR@"
 TEST_REPO_PATH = "@DATA_REPO_PATH@"
+MIDAS_BASE_URL = "@MIDAS_BASE_URL@"
+MIDAS_COMMUNITY = "@MIDAS_COMMUNITY@"
 
 
 class NullDriver(object):
@@ -46,7 +49,11 @@ class ImageDifferenceException(Exception):
     '''
     Exception to be raised when two images differ.
     '''
-    pass
+    def __init__(self, diff, iImage):
+        self.diff = diff
+        self.iImage = iImage
+        s = 'Calculated image difference %f over threshold.' % diff
+        super(ImageDifferenceException, self).__init__(s)
 
 
 drivers = {
@@ -71,11 +78,12 @@ class BaseTest(TestCase):
     seleniumPort = SELENIUM_PORT
     testBaseURL = 'http://' + testHost + ':' + str(testPort)
     testPath = ('test', 'selenium')
+    midasPath = ('Testing', ) + testPath
     srcTestPath = ('testing', 'test-cases', 'selenium-tests')
     imageDifferenceThreshold = 0.0
-    testImageBaseURL = 'https://raw.githubusercontent.com/' + \
-        'OpenGeoscience/geojs-data/master/' + '/'.join(testPath)
     testCase = tuple()
+    midas = MidasHandler(MIDAS_BASE_URL, MIDAS_COMMUNITY)
+    testRevision = 0
 
     @classmethod
     def _relativeImagePath(cls, testName):
@@ -240,18 +248,22 @@ class BaseTest(TestCase):
         return Image.open(img)
 
     @classmethod
-    def loadTestImage(cls, testName):
+    def loadTestImages(cls, testName, revision=None):
         '''
         Load an image from the globally configured image store.
         '''
 
-        return cls.loadImageURL(
-            '/'.join(
-                [cls.testImageBaseURL] +
-                cls._relativeImagePath(testName)
-            ),
-            relative=False
-        )
+        if revision is None:
+            revision = cls.testRevision
+        testImagePath = \
+            list(cls.midasPath) + \
+            list(cls._relativeImagePath(testName))
+        images = cls.midas.getImages(testImagePath, revision)
+        if not len(images):
+            raise Exception(
+                "No images found at path '%s'" % '/'.join(testImagePath)
+            )
+        return images
 
     @classmethod
     def exportTestImage(cls, img, testName, kind='', deploy=''):
@@ -278,10 +290,11 @@ class BaseTest(TestCase):
             fullPath,
             splt[0] + kind + splt[1]
         )
+        img.putalpha(255)
         img.save(imageName)
 
     @classmethod
-    def compareImages(cls, baseImage, testImage, testName=None):
+    def compareImages(cls, baseImage, testImage, testName=None, iImage=0):
         '''
         Compute the difference between two images and throw a
         ImageDifferenceException if the difference is above
@@ -300,22 +313,37 @@ class BaseTest(TestCase):
         val = sqrt(reduce(lambda x, y: x + y, sum2, 0)/(len(sum2) * nPixels))
 
         if testName is not None:
-            cls.exportTestImage(baseImage, testName, 'base')
+            cls.exportTestImage(baseImage, testName, 'base_%02i' % iImage)
             cls.exportTestImage(testImage, testName, 'test')
-            cls.exportTestImage(diff, testName, 'diff')
+            cls.exportTestImage(diff, testName, 'diff_%02i' % iImage)
 
         if val > cls.imageDifferenceThreshold:
-            raise ImageDifferenceException(
-                "Calculated image difference %f over threshold %f" % (
-                    val, cls.imageDifferenceThreshold
-                )
-            )
+            raise ImageDifferenceException(val, iImage)
 
-    def screenshotTest(self, testName):
+    def screenshotTest(self, testName, revision=None):
         testImage = self.screenshot()
         self.exportTestImage(testImage, testName, deploy=TEST_REPO_PATH)
-        baseImage = self.loadTestImage(testName)
-        self.compareImages(baseImage, testImage, testName)
+        baseImages = self.loadTestImages(testName, revision)
+        success = False
+        iImage = 0
+        minDiff = None
+        iDiff = None
+        while not success and iImage < len(baseImages):
+            try:
+                self.compareImages(
+                    baseImages[iImage],
+                    testImage,
+                    testName,
+                    iImage
+                )
+                success = True
+            except ImageDifferenceException as e:
+                if minDiff is None or minDiff < e.diff:
+                    minDiff = e.diff
+                    iDiff = iImage
+                iImage += 1
+        if not success:
+            raise ImageDifferenceException(minDiff, iDiff)
 
 
 @unittest.skipIf(

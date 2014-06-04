@@ -361,6 +361,11 @@ if(BUILD_TESTING)
     set(SELENIUM_PORT 4444 CACHE STRING "The selenium test server port.")
     mark_as_advanced(SELENIUM_PORT)
 
+    set(MIDAS_BASE_URL "http://midas3.kitware.com/midas" CACHE STRING "MIDAS data store URL.")
+    mark_as_advanced(MIDAS_BASE_URL)
+    set(MIDAS_COMMUNITY "GeoJS" CACHE STRING "MIDAS community hosting test images.")
+    mark_as_advanced(MIDAS_COMMUNITY)
+
     configure_file(
       ${CMAKE_CURRENT_SOURCE_DIR}/testing/js/selenium-blanket.js
       ${GEOJS_DEPLOY_DIR}/test/lib/selenium-blanket.js
@@ -369,6 +374,11 @@ if(BUILD_TESTING)
     configure_file(
       "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/selenium_test.py.in"
       "${CMAKE_CURRENT_BINARY_DIR}/test/selenium_test.py"
+    )
+    configure_file(
+      "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/midas_handler.py"
+      "${CMAKE_CURRENT_BINARY_DIR}/test/midas_handler.py"
+      COPYONLY
     )
     file(GLOB SELENIUM_TEST_DIRS
       ${CMAKE_CURRENT_SOURCE_DIR}/testing/test-cases/selenium-tests/*
