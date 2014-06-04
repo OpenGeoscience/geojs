@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+import sys
+import hashlib
+import getpass
 from cStringIO import StringIO
 from PIL import Image
 
@@ -17,21 +20,22 @@ class MidasHandler(object):
         '''
         Initialize private variables.
         '''
-        self._driver = pydas.drivers.CoreDriver(MIDAS_BASE_URL)
+        self._apiURL = MIDAS_BASE_URL + '/api/json?method='
         self._communityName = MIDAS_COMMUNITY
         self._community = None
+        self._token = None
+        self._apiKey = None
 
     def _request(self, method, parameters=None, asjson=True):
         '''
         Like pydas.drivers.BaseDriver.request, but without the retry.
         '''
-        method_url = self._driver.full_url + method
+        method_url = self._apiURL + method
         request = http.post(
             method_url,
             params=parameters,
             allow_redirects=True,
-            verify=False,
-            auth=self._driver.auth
+            verify=False
         )
         try:
             response = request.json()
@@ -42,6 +46,7 @@ class MidasHandler(object):
             }
 
         if request.status_code not in (200, 302) or response['stat'] != 'ok':
+            print >> sys.stderr, str(response)
             raise Exception("Could not complete request to %s." % method)
 
         return response['data']
@@ -87,26 +92,32 @@ class MidasHandler(object):
             'midas.folder.children',
             {'id': root}
         )['items']
+        item_id = None
         for item in items:
             if item['name'] == path[-1]:
-                return item['item_id']
-        raise Exception("Item '%s' not found." % '/'.join(path))
+                item_id = item['item_id']
+        if item_id is None:
+            raise Exception("Item '%s' not found." % '/'.join(path))
+        return self._request(
+            'midas.item.get',
+            {'id': item_id}
+        )
 
     def getImages(self, path, revision):
         '''
         Download images in an item at the given path and revision.
         '''
-        item_id = self.getItem(path)
+        item_id = self.getItem(path)['item_id']
         item = self._request(
             'midas.item.get',
             {'id': item_id}
         )
         images = []
         revisions = item['revisions']
-        if revision >= len(revisions) or revision < 0:
+        if revision > len(revisions) or revision < 1:
             raise Exception("Invalid revision number.")
 
-        for bitstream in revisions[revision]['bitstreams']:
+        for bitstream in revisions[revision-1]['bitstreams']:
             data = self._request(
                 'midas.bitstream.download',
                 {'id': bitstream['bitstream_id']}
@@ -114,6 +125,127 @@ class MidasHandler(object):
             images.append(Image.open(StringIO(data)))
         return images
 
+    def login(self, email=None, password=None, apiKey=None):
+        '''
+        Log into midas and return a token.  If `email` or `password`
+        are not provided, they must be entered in stdin.
+        '''
+        if self._token is None:
+            if email is None:
+                email = raw_input('email: ')
+            nTries = 0
+
+            if apiKey is not None:
+                self._apiKey = apiKey
+
+            while self._apiKey is None and nTries < 3:
+                if password is None:
+                    password = getpass.getpass()
+                resp = http.post(
+                    self._apiURL + 'midas.user.apikey.default',
+                    params={
+                        'email': email,
+                        'password': password
+                    }
+                )
+                try:
+                    self._apiKey = resp.json()['data']['apikey']
+                except Exception:
+                    print "Could not log in with the provided information."
+
+            resp = http.get(
+                self._apiURL + 'midas.login',
+                params={
+                    'email': email,
+                    'apikey': self._apiKey,
+                    'appname': 'Default'
+                }
+            )
+
+            try:
+                self._token = resp.json()['data']['token']
+            except Exception:
+                raise Exception("Could not get a login token.")
+        return self._token
+
+    def getOrCreateItem(self, path):
+        '''
+        Create an empty item at the given path if none exists.
+        Return the item's id.
+        '''
+        token = self.login()
+        root = None
+        for p in path[:-1]:
+            try:
+                root = self.getFolder(p, root)
+            except Exception:
+                root = self._request(
+                    'midas.folder.create',
+                    {
+                        'token': token,
+                        'name': p,
+                        'reuseExisting': True,
+                        'parentid': root
+                    }
+                )['folder_id']
+        try:
+            item = self.getItem([path[-1]], root=root)
+        except Exception:
+            item = self._request(
+                'midas.item.create',
+                {
+                    'token': token,
+                    'parentid': root,
+                    'name': path[-1],
+                }
+            )
+            item = self.getItem([path[-1]], root=root)
+
+        return item
+
+    def uploadFile(self, fileData, path, revision=None):
+        '''
+        Uploads a file to the midas server to the given path.
+        If revision is not specified, it will create a new revision.
+        Otherwise, append the file to the given revision number.
+        '''
+        item = self.getOrCreateItem(path)
+        if revision is not None and len(item['revisions']) < revision:
+            revision = None
+        token = self.login()
+        fileIO = StringIO(fileData)
+
+        # md5 = hashlib.md5()
+
+        ul_token = self._request(
+            'midas.upload.generatetoken',
+            {
+                'token': token,
+                'itemid': item['item_id'],
+                'filename': path[-1]
+            }
+        )['token']
+
+        params = {
+            'uploadtoken': ul_token,
+            'filename': path[-1],
+            'length': len(fileData),
+        }
+        if revision is not None:
+            params['revision'] = revision
+
+        resp = http.post(
+            self._apiURL + 'midas.upload.perform',
+            params=params,
+            data=fileIO
+        )
+
+        try:
+            resp = resp.json()['data']
+        except Exception:
+            print >> sys.stderr, resp.content
+            raise Exception("Could not upload data.")
+        return resp
 
 if __name__ == '__main__':
 

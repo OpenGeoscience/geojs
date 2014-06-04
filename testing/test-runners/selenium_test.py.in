@@ -36,6 +36,7 @@ SOURCE_PATH = "@CMAKE_CURRENT_SOURCE_DIR@"
 TEST_REPO_PATH = "@DATA_REPO_PATH@"
 MIDAS_BASE_URL = "@MIDAS_BASE_URL@"
 MIDAS_COMMUNITY = "@MIDAS_COMMUNITY@"
+UPLOAD_FAILED_TESTS = "@UPLOAD_FAILED_TESTS@"
 
 
 class NullDriver(object):
@@ -83,7 +84,7 @@ class BaseTest(TestCase):
     imageDifferenceThreshold = 0.0
     testCase = tuple()
     midas = MidasHandler(MIDAS_BASE_URL, MIDAS_COMMUNITY)
-    testRevision = 0
+    testRevision = 1
 
     @classmethod
     def _relativeImagePath(cls, testName):
@@ -319,9 +320,15 @@ class BaseTest(TestCase):
             raise ImageDifferenceException(val, iImage)
 
     def screenshotTest(self, testName, revision=None):
+        failure = False
         testImage = self.screenshot()
         self.exportTestImage(testImage, testName, deploy=TEST_REPO_PATH)
-        baseImages = self.loadTestImages(testName, revision)
+        try:
+            baseImages = self.loadTestImages(testName, revision)
+        except Exception as e:
+            if UPLOAD_FAILED_TESTS != 'ON':
+                raise e
+            baseImages = []
         success = False
         iImage = 0
         minDiff = None
@@ -341,7 +348,21 @@ class BaseTest(TestCase):
                     iDiff = iImage
                 iImage += 1
         if not success:
-            raise ImageDifferenceException(minDiff, iDiff)
+            if revision is None:
+                revision = self.testRevision
+            if UPLOAD_FAILED_TESTS == 'ON':
+                imdata = StringIO()
+                testImage.save(imdata, 'png')
+                imdata.seek(0)
+                path = list(self.midasPath) + \
+                    list(self._relativeImagePath(testName))
+                self.midas.uploadFile(
+                    imdata.read(),
+                    path,
+                    revision
+                )
+            else:
+                raise ImageDifferenceException(minDiff, iDiff)
 
 
 @unittest.skipIf(
