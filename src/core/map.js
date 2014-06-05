@@ -74,11 +74,12 @@ geo.map = function(arg) {
     var delta, deltaUnits, start = null, end = null, layerTimeRange, layerDelta,
         indexTimestep = false, smallestDeltaInMillis = Number.MAX_VALUE, i;
 
-    for(i = 0; i < layers.length; i++) {
+    for (i = 0; i < layers.length; i++) {
       layerTimeRange = layers[i].timeRange();
 
-      if (!layerTimeRange)
-          continue
+      if (!layerTimeRange) {
+          continue;
+      }
 
       if (layerTimeRange.deltaUnits === 'index') {
         indexTimestep = true;
@@ -98,11 +99,11 @@ geo.map = function(arg) {
         smallestDeltaInMillis = layerDelta;
       }
 
-      if (start == null || layerTimeRange.start < start) {
+      if (start === null || layerTimeRange.start < start) {
         start = layerTimeRange.start;
       }
 
-      if (end == null || layerTimeRange.end < end) {
+      if (end === null || layerTimeRange.end < end) {
         end = layerTimeRange.end;
       }
     }
@@ -174,13 +175,12 @@ geo.map = function(arg) {
   this.zoom = function(val) {
     if (val === undefined ) {
       return m_zoom;
-    } else {
-      m_zoom = val;
-      // TODO Fix this
-//      m_this.trigger(geo.event.zoom);
-      this.modified();
-      return m_this;
     }
+    m_zoom = val;
+    // TODO Fix this
+    //      m_this.trigger(geo.event.zoom);
+    this.modified();
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -193,13 +193,12 @@ geo.map = function(arg) {
   this.center = function(val) {
     if (val === undefined ) {
       return m_center;
-    } else {
-      m_center = val.slice
-      // TODO Fix this
-//      m_this.trigger(geo.event.center);
-      this.modified();
-      return m_this;
     }
+    m_center = val.slice;
+    // TODO Fix this
+    //      m_this.trigger(geo.event.center);
+    this.modified();
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -274,7 +273,7 @@ geo.map = function(arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.toggle = function(layer) {
     if (layer !== null && layer !== undefined) {
-      layer.visible(!layer.visible())
+      layer.visible(!layer.visible());
       m_this.modified();
 
       m_this.trigger(geo.event.layerToggle, {
@@ -304,7 +303,7 @@ geo.map = function(arg) {
     m_width = w;
     m_height = h;
 
-    for (; i <  layers.length; ++i) {
+    for (; i < layers.length; ++i) {
       layers[i]._resize(x, y, w, h);
     }
 
