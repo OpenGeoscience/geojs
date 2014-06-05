@@ -32,13 +32,14 @@ geo.layerOptions = function() {
 };
 
 geo.newLayerId = (function () {
+    "use strict";
     var currentId = 1;
     return function () {
         var id = currentId;
         currentId++;
         return id;
     };
-}) ();
+}());
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -72,7 +73,7 @@ geo.layer = function(arg) {
       m_id = arg.id === undefined ? geo.newLayerId() : arg.id,
       m_name = "",
       m_gcs = 'EPSG:4326',
-      m_timeRange = [],
+      m_timeRange = null,
       m_source = arg.source || null,
       m_map = arg.map === undefined ? null : args.map,
       m_isReference = false,
@@ -110,11 +111,10 @@ geo.layer = function(arg) {
   this.id = function(val) {
     if (val === undefined ) {
       return m_id;
-    } else {
-      m_id = id;
-      this.modified();
-      return this;
     }
+    m_id = id;
+    this.modified();
+    return this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -127,11 +127,10 @@ geo.layer = function(arg) {
   this.name = function(val) {
     if (val === undefined ) {
       return m_name;
-    } else {
-      m_name = val;
-      this.modified();
-      return this;
     }
+    m_name = val;
+    this.modified();
+    return this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -144,11 +143,10 @@ geo.layer = function(arg) {
   this.opacity = function(val) {
     if (val === undefined ) {
       return m_style.opacity;
-    } else {
-      m_style.opacity = val;
-      this.modified();
-      return this;
     }
+    m_style.opacity = val;
+    this.modified();
+    return this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -159,11 +157,10 @@ geo.layer = function(arg) {
   this.visible = function(val) {
     if (val === undefined ) {
       return m_style.visible;
-    } else {
-      m_style.visible = val;
-      this.modified();
-      return this;
     }
+    m_style.visible = val;
+    this.modified();
+    return this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -176,11 +173,10 @@ geo.layer = function(arg) {
   this.bin = function(val) {
     if (val === undefined ) {
       return m_style.bin;
-    } else {
-      m_style.bin = val;
-      this.modified();
-      return this;
     }
+    m_style.bin = val;
+    this.modified();
+    return this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -191,11 +187,10 @@ geo.layer = function(arg) {
   this.gcs = function(val) {
     if (val === undefined ) {
       return m_gcs;
-    } else {
-      m_gcs = val;
-      this.modified();
-      return this;
     }
+    m_gcs = val;
+    this.modified();
+    return this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -215,12 +210,11 @@ geo.layer = function(arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.timeRange = function(val) {
     if (val === undefined ) {
-      return timeRange;
-    } else {
-      timeRange = val.slice(0);
-      this.modified();
-      return this;
+      return m_timeRange;
     }
+    m_timeRange = val;
+    this.modified();
+    return this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -231,11 +225,10 @@ geo.layer = function(arg) {
   this.source = function(val) {
     if (val === undefined ) {
       return m_source;
-    } else {
-      m_source = val;
-      this.modified();
-      return this;
     }
+    m_source = val;
+    this.modified();
+    return this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -246,12 +239,11 @@ geo.layer = function(arg) {
   this.map = function(val) {
     if (val === undefined ) {
       return m_map;
-    } else {
-      m_map = val;
-      m_map.node().append(m_node);
-      this.modified();
-      return this;
     }
+    m_map = val;
+    m_map.node().append(m_node);
+    this.modified();
+    return this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
