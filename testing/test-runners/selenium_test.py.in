@@ -36,7 +36,6 @@ SOURCE_PATH = "@CMAKE_CURRENT_SOURCE_DIR@"
 TEST_REPO_PATH = "@DATA_REPO_PATH@"
 MIDAS_BASE_URL = "@MIDAS_BASE_URL@"
 MIDAS_COMMUNITY = "@MIDAS_COMMUNITY@"
-UPLOAD_FAILED_TESTS = "@UPLOAD_FAILED_TESTS@"
 
 
 class NullDriver(object):
@@ -46,14 +45,20 @@ class NullDriver(object):
     pass
 
 
-class ImageDifferenceException(Exception):
+class ImageDifferenceException(BaseException):
     '''
     Exception to be raised when two images differ.
+    Stores extra information that can be captured to handle uploading
+    failed tests.
     '''
-    def __init__(self, diff, iImage):
-        self.diff = diff
-        self.iImage = iImage
-        s = 'Calculated image difference %f over threshold.' % diff
+    def __init__(self, **kw):
+        self.stats = kw
+        self.stats.update({
+            'midas_url': MIDAS_BASE_URL,
+            'midas_community': MIDAS_COMMUNITY
+        })
+        s = 'Calculated image difference %f over threshold.' % \
+            kw.get('difference', float('inf'))
         super(ImageDifferenceException, self).__init__(s)
 
 
@@ -77,6 +82,9 @@ class BaseTest(TestCase):
     testPort = TEST_PORT
     seleniumHost = SELENIUM_HOST
     seleniumPort = SELENIUM_PORT
+    deploy_path = DEPLOY_PATH
+    build_path = BUILD_PATH
+    source_path = SOURCE_PATH
     testBaseURL = 'http://' + testHost + ':' + str(testPort)
     testPath = ('test', 'selenium')
     midasPath = ('Testing', ) + testPath
@@ -293,9 +301,10 @@ class BaseTest(TestCase):
         )
         img.putalpha(255)
         img.save(imageName)
+        return imageName
 
     @classmethod
-    def compareImages(cls, baseImage, testImage, testName=None, iImage=0):
+    def compareImages(cls, baseImage, testImage, testName, iImage=0):
         '''
         Compute the difference between two images and throw a
         ImageDifferenceException if the difference is above
@@ -303,36 +312,81 @@ class BaseTest(TestCase):
 
         If testName is set, then store the images under the server path.
         '''
+
+        basePath = cls.exportTestImage(
+            baseImage,
+            testName,
+            'base_%02i' % iImage
+        )
+        testPath = cls.exportTestImage(testImage, testName, 'test')
+
+        stats = dict(
+            difference=float('inf'),
+            iImage=iImage,
+            testName=testName,
+            testPath=testPath,
+            basePath=basePath,
+            midas_path=list(cls.midasPath) +
+            list(cls._relativeImagePath(testName))
+        )
+
         if baseImage.size != testImage.size:
-            raise ImageDifferenceException(-1, iImage)
+            raise ImageDifferenceException(**stats)
+
         nPixels = baseImage.size[0] * baseImage.size[1]
         diff = ImageChops.difference(baseImage, testImage)
         st = ImageStat.Stat(diff)
         sum2 = st.sum2
         val = sqrt(reduce(lambda x, y: x + y, sum2, 0)/(len(sum2) * nPixels))
 
-        if testName is not None:
-            cls.exportTestImage(baseImage, testName, 'base_%02i' % iImage)
-            cls.exportTestImage(testImage, testName, 'test')
-            cls.exportTestImage(diff, testName, 'diff_%02i' % iImage)
+        diffPath = cls.exportTestImage(diff, testName, 'diff_%02i' % iImage)
 
+        stats.update({
+            'difference': val,
+            'diffPath': diffPath
+        })
         if val > cls.imageDifferenceThreshold:
-            raise ImageDifferenceException(val, iImage)
+            raise ImageDifferenceException(**stats)
 
     def screenshotTest(self, testName, revision=None):
+        '''
+        Convenience method for taking a screenshot and comparing
+        to stored images.  Throws an exception if the images differ
+        by more than self.imageDiffereceThreshold.
+        '''
         failure = False
         testImage = self.screenshot()
-        self.exportTestImage(testImage, testName, deploy=TEST_REPO_PATH)
+        testImagePath = self.exportTestImage(
+            testImage,
+            testName,
+            deploy=TEST_REPO_PATH
+        )
+
+        if revision is None:
+            revision = self.testRevision
+
+        # collect test stats for possibly uploading new images to server
+        stats = {
+            'testPath': testImagePath,
+            'testName': testName,
+            'revision': revision,
+            'difference': float('inf'),
+            'iImage': -1,
+            'midas_path': list(self.midasPath) +
+            list(self._relativeImagePath(testName))
+        }
+
         try:
             baseImages = self.loadTestImages(testName, revision)
-        except Exception as e:
-            if UPLOAD_FAILED_TESTS != 'ON':
-                raise e
-            baseImages = []
+            assert len(baseImages)
+        except Exception:
+            raise ImageDifferenceException(**stats)
+
         success = False
         iImage = 0
-        minDiff = None
-        iDiff = None
+        minDiff = float('inf')
+        iDiff = -1
+        excep = None
         while not success and iImage < len(baseImages):
             try:
                 self.compareImages(
@@ -343,26 +397,19 @@ class BaseTest(TestCase):
                 )
                 success = True
             except ImageDifferenceException as e:
-                if minDiff is None or minDiff < e.diff:
-                    minDiff = e.diff
+                if e.stats['difference'] <= minDiff:
+                    stats.update(e.stats)
+                    e.stats = stats
+                    minDiff = e.stats['difference']
                     iDiff = iImage
+                    excep = e
                 iImage += 1
+            except Exception as e:
+                if excep is None:
+                    excep = e
+
         if not success:
-            if revision is None:
-                revision = self.testRevision
-            if UPLOAD_FAILED_TESTS == 'ON':
-                imdata = StringIO()
-                testImage.save(imdata, 'png')
-                imdata.seek(0)
-                path = list(self.midasPath) + \
-                    list(self._relativeImagePath(testName))
-                self.midas.uploadFile(
-                    imdata.read(),
-                    path,
-                    revision
-                )
-            else:
-                raise ImageDifferenceException(minDiff, iDiff)
+            raise excep
 
 
 @unittest.skipIf(

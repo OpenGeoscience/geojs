@@ -2,6 +2,7 @@
 
 import time
 import sys
+import os
 import subprocess
 import threading
 
@@ -19,12 +20,17 @@ HTTPHandler = SimpleHTTPServer.SimpleHTTPRequestHandler
 from blanket_server import Handler as BlanketHandler
 
 
+DEPLOY_PATH = "@GEOJS_DEPLOY_DIR@"
 HOST = "@TESTING_HOST@"
 PORT = @TESTING_PORT@
 server = None
 
 
 class Handler(BlanketHandler, HTTPHandler):
+
+    def __init__(self, *arg, **kw):
+        os.chdir(DEPLOY_PATH)
+        HTTPHandler.__init__(self, *arg, **kw)
 
     def log_message(self, *arg, **kw):
         pass
@@ -81,7 +87,8 @@ def main():
     try:
         testServer.start(HOST, PORT, block)
     except KeyboardInterrupt:
-        pass
+        print 'Stopping test server'
+        sys.exit(0)
 
     if len(sys.argv[1:]):
         status = 1

@@ -365,8 +365,6 @@ if(BUILD_TESTING)
     mark_as_advanced(MIDAS_BASE_URL)
     set(MIDAS_COMMUNITY "GeoJS" CACHE STRING "MIDAS community hosting test images.")
     mark_as_advanced(MIDAS_COMMUNITY)
-    set(UPLOAD_FAILED_TESTS OFF CACHE BOOL "Upload new images for failed selenium tests.")
-    mark_as_advanced(UPLOAD_FAILED_TESTS)
 
     configure_file(
       ${CMAKE_CURRENT_SOURCE_DIR}/testing/js/selenium-blanket.js
@@ -380,6 +378,11 @@ if(BUILD_TESTING)
     configure_file(
       "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/midas_handler.py"
       "${CMAKE_CURRENT_BINARY_DIR}/test/midas_handler.py"
+      COPYONLY
+    )
+    configure_file(
+      "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/upload_test_cases.py"
+      "${CMAKE_CURRENT_BINARY_DIR}/test/upload_test_cases.py"
       COPYONLY
     )
     file(GLOB SELENIUM_TEST_DIRS
