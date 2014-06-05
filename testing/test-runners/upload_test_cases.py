@@ -59,6 +59,7 @@ def handleImageDifference(**kw):
     print 'Would you like to view the screenshot?'
     yesorno = raw_input('[y/n]: ')
     if yesorno.lower() == 'y':
+        print 'Trying to open %s' % kw['testPath']
         testImage = Image.open(kw['testPath'])
         testImage.show()
 
@@ -67,6 +68,7 @@ def handleImageDifference(**kw):
         print '\n'.join(textwrap.wrap(s))
         yesorno = raw_input('[y/n]: ')
         if yesorno.lower() == 'y':
+            print 'Trying to open %s' % kw['basePath']
             baseImage = Image.open(kw['basePath'])
             baseImage.show()
 
@@ -75,6 +77,7 @@ def handleImageDifference(**kw):
         print '\n'.join(textwrap.wrap(s))
         yesorno = raw_input('[y/n]: ')
         if yesorno.lower() == 'y':
+            print 'Trying to open %s' % kw['diffPath']
             diffImage = Image.open(kw['diffPath'])
             diffImage.show()
 
@@ -139,4 +142,19 @@ def main(paths):
         BaseTest.stopServer()
 
 if __name__ == '__main__':
+    s = 'This is an interactive utility for uploading base line images ' + \
+        'to the default midas data store.  Before uploading any images ' + \
+        'you will be asked for your log in information at the midas ' + \
+        'server.  You will need to have an account there as well as write' + \
+        'access to the community where the data is stored.'
+    print '\n'.join(textwrap.wrap(s))
+
+    print ''
+    s = 'Note: If you are unable to view any images with this program ' + \
+        'on linux, make sure you have imagemagick installed.'
+    print '\n'.join(textwrap.wrap(s))
+    print ''
+    if not len(sys.argv[1:]):
+        print 'usage: python %s <testdir> [ <testdir> ... ]' % sys.argv[0]
+        sys.exit(1)
     main(sys.argv[1:])
