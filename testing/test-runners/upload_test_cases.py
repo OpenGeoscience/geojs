@@ -56,11 +56,13 @@ def handleImageDifference(**kw):
     print '\n'.join(textwrap.wrap(s))
 
     print ''
+
+    print 'Trying to open %s' % kw['testPath']
+    testImage = Image.open(kw['testPath'])
+
     print 'Would you like to view the screenshot?'
     yesorno = raw_input('[y/n]: ')
     if yesorno.lower() == 'y':
-        print 'Trying to open %s' % kw['testPath']
-        testImage = Image.open(kw['testPath'])
         testImage.show()
 
     if kw.get('basePath'):
