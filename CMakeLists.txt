@@ -278,7 +278,7 @@ if(BUILD_TESTING)
 
   if (COVERAGE_TESTS)
 
-    set(BLANKET_INCLUDE "<script src=/test/lib/blanket.min.js></script>")
+    set(BLANKET_INCLUDE <script src=/test/lib/blanket.min.js></script>)
     add_test(
       NAME "coverage-reset"
       WORKING_DIRECTORY "${GEOJS_DEPLOY_DIR}"
