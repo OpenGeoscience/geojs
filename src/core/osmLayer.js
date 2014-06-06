@@ -30,22 +30,27 @@ geo.osmLayer = function(arg) {
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
-    var m_this = this,
-      MAP_OSM = 0,
-      MAP_MQOSM = 1,
-      MAP_MQAERIAL = 2,
-      MAP_NUMTYPES = 3,
-      m_mapType = MAP_MQOSM,
-      m_tiles = {},
-      m_hiddenBinNumber = 0,
-      m_visibleBinNumber = 1000,
-      m_pendingNewTiles = [],
-      m_pendingInactiveTiles = [],
-      m_numberOfCachedTiles = 0,
-      m_tileCacheSize = 100,
-      m_previousZoom = null,
-      s_init = this._init,
-      s_update = this._update;
+  var m_this = this,
+    MAP_OSM = 0,
+    MAP_MQOSM = 1,
+    MAP_MQAERIAL = 2,
+    MAP_NUMTYPES = 3,
+    m_mapType = MAP_MQOSM,
+    m_tiles = {},
+    m_hiddenBinNumber = 0,
+    m_visibleBinNumber = 1000,
+    m_pendingNewTiles = [],
+    m_pendingInactiveTiles = [],
+    m_numberOfCachedTiles = 0,
+    m_tileCacheSize = 100,
+    m_previousZoom = null,
+    m_baseUrl = 'http://otile1.mqcdn.com/tiles/1.0.0/osm/',
+    s_init = this._init,
+    s_update = this._update;
+
+  if (arg && arg.baseUrl !== undefined) {
+    m_baseUrl = arg.baseUrl;
+  }
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -195,7 +200,7 @@ geo.osmLayer = function(arg) {
 
     // tile.src = "http://tile.openstreetmap.org/" + zoom + "/" + (x)
     //   + "/" + (Math.pow(2,zoom) - 1 - y) + ".png";
-    tile.src = "http://otile1.mqcdn.com/tiles/1.0.0/osm/" + zoom + "/" +
+    tile.src = m_baseUrl + zoom + "/" +
       (x) + "/" + (Math.pow(2,zoom) - 1 - y) + ".jpg";
 
     m_tiles[zoom][x][y] = tile;
