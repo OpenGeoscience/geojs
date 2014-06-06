@@ -254,6 +254,7 @@ endfunction()
 # set up testing framework and add tests
 if(BUILD_TESTING)
   include(CTest)
+  include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/MIDAS3.cmake)
   enable_testing()
 
   # copy blanket JS files
@@ -366,6 +367,11 @@ if(BUILD_TESTING)
     set(MIDAS_COMMUNITY "GeoJS" CACHE STRING "MIDAS community hosting test images.")
     mark_as_advanced(MIDAS_COMMUNITY)
 
+    # set variables for MIDAS3.cmake
+    set(MIDAS_REST_URL "${MIDAS_BASE_URL}/api/json")
+    set(MIDAS_KEY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-data")
+    set(MIDAS_DATA_DIR "${GEOJS_DEPLOY_DIR}/data")
+
     configure_file(
       ${CMAKE_CURRENT_SOURCE_DIR}/testing/js/selenium-blanket.js
       ${GEOJS_DEPLOY_DIR}/test/lib/selenium-blanket.js
@@ -429,11 +435,13 @@ if(BUILD_TESTING)
       endif()
     endforeach()
 
+    add_download_target()
     add_custom_target(
       selenium_tests
       ALL
-      DEPENDS ${SELENIUM_TEST_FILES}
+      DEPENDS ${SELENIUM_TEST_FILES} ${MIDAS_DOWNLOAD_FILES}
     )
+
   endif()
 
   # JSLint tests.
