@@ -179,6 +179,7 @@ gd3.d3Renderer = function(arg) {
       classes: arg.classes,
       append: arg.append
     };
+    translate();
     return m_this.updateFeatures(arg.id);
   };
 
