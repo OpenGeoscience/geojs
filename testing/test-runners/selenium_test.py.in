@@ -157,6 +157,12 @@ class BaseTest(TestCase):
             timeout
         ).until(check_status, 'checking truthiness of %s' % variable)
 
+    def runScript(self, script):
+        '''
+        Run a js script in the browser.
+        '''
+        return self.driver.execute_script(script)
+
     def resizeWindow(self, width, height):
         '''
         Resize the browser to the given width and height.
