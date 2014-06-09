@@ -1,0 +1,103 @@
+#!/usr/bin/env python
+
+import time
+import sys
+import os
+import subprocess
+import threading
+
+if sys.version_info[0] == 2:
+    import SocketServer
+    import SimpleHTTPServer
+elif sys.version_info[0] == 3:
+    import socketserver as SocketServer
+    from http import server as SimpleHTTPServer
+else:
+    raise Exception("Unsupported python version")
+
+HTTPHandler = SimpleHTTPServer.SimpleHTTPRequestHandler
+
+from blanket_server import Handler as BlanketHandler
+
+
+DEPLOY_PATH = "@GEOJS_DEPLOY_DIR@"
+HOST = "@TESTING_HOST@"
+PORT = @TESTING_PORT@
+server = None
+
+
+class Handler(BlanketHandler, HTTPHandler):
+
+    def __init__(self, *arg, **kw):
+        os.chdir(DEPLOY_PATH)
+        HTTPHandler.__init__(self, *arg, **kw)
+
+    def log_message(self, *arg, **kw):
+        pass
+
+    def do_GET(self):
+        if self.path == '/coverage':
+            BlanketHandler.do_GET(self)
+        else:
+            HTTPHandler.do_GET(self)
+
+    def do_PUT(self):
+        if self.path == '/coverage':
+            BlanketHandler.do_PUT(self)
+        else:
+            HTTPHandler.do_PUT(self)
+
+
+class _Server(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
+    allow_reuse_address = True
+
+
+class TestServer(object):
+
+    @classmethod
+    def start(cls, host='localhost', port='8000', block=False):
+        print 'Starting test server at: http://%s:%s' % (host, port)
+        cls.server = _Server(
+            (host, port),
+            Handler
+        )
+        if block:
+            cls.server.serve_forever()
+        else:
+            cls.server_thread = threading.Thread(
+                target=cls.server.serve_forever
+            )
+            cls.server_thread.start()
+
+            time.sleep(0.5)
+
+    @classmethod
+    def stop(cls):
+        print 'Stopping test server'
+        cls.server.shutdown()
+        cls.server_thread.join(1)
+
+
+def main():
+    status = 0
+
+    block = not len(sys.argv[1:])
+    testServer = TestServer()
+
+    try:
+        testServer.start(HOST, PORT, block)
+    except KeyboardInterrupt:
+        print 'Stopping test server'
+        sys.exit(0)
+
+    if len(sys.argv[1:]):
+        status = 1
+        try:
+            status = subprocess.call(sys.argv[1:])
+        finally:
+            testServer.stop()
+
+    return status
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -1,0 +1,448 @@
+#!/usr/bin/env python
+
+'''
+Base TestCase for selenium based unit testing.
+Requires python packages:
+    pillow
+    selenium
+Should be installable by:
+    pip install Pillow selenium
+'''
+
+import os
+import unittest
+from unittest import TestCase
+from urllib2 import urlopen
+from cStringIO import StringIO
+from math import sqrt
+import json
+
+from selenium import webdriver
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.common.action_chains import ActionChains
+from PIL import Image, ImageStat, ImageChops
+
+from geojs_test_runner import TestServer
+from midas_handler import MidasHandler
+
+# to be set by cmake:
+TEST_HOST = "@TESTING_HOST@"
+TEST_PORT = @TESTING_PORT@
+SELENIUM_HOST = "@SELENIUM_HOST@"
+SELENIUM_PORT = @SELENIUM_PORT@
+DEPLOY_PATH = "@GEOJS_DEPLOY_DIR@"
+BUILD_PATH = "@CMAKE_CURRENT_BINARY_DIR@"
+SOURCE_PATH = "@CMAKE_CURRENT_SOURCE_DIR@"
+TEST_REPO_PATH = "@DATA_REPO_PATH@"
+MIDAS_BASE_URL = "@MIDAS_BASE_URL@"
+MIDAS_COMMUNITY = "@MIDAS_COMMUNITY@"
+
+
+class NullDriver(object):
+    '''
+    A placeholder for selenium drivers that does nothing.
+    '''
+    pass
+
+
+class ImageDifferenceException(BaseException):
+    '''
+    Exception to be raised when two images differ.
+    Stores extra information that can be captured to handle uploading
+    failed tests.
+    '''
+    def __init__(self, **kw):
+        self.stats = kw
+        self.stats.update({
+            'midas_url': MIDAS_BASE_URL,
+            'midas_community': MIDAS_COMMUNITY
+        })
+        s = 'Calculated image difference %f over threshold.' % \
+            kw.get('difference', float('inf'))
+        super(ImageDifferenceException, self).__init__(s)
+
+
+drivers = {
+    'firefox': webdriver.Firefox,
+    'chrome': webdriver.Chrome,
+    'opera': webdriver.Opera,
+    'phantomjs': webdriver.PhantomJS,
+    'safari': webdriver.Safari,
+    'ie': webdriver.Ie,
+    'null': NullDriver
+}
+
+
+class BaseTest(TestCase):
+    '''
+    Base class for all selenium based tests.
+    '''
+    driverName = 'null'
+    testHost = TEST_HOST
+    testPort = TEST_PORT
+    seleniumHost = SELENIUM_HOST
+    seleniumPort = SELENIUM_PORT
+    deploy_path = DEPLOY_PATH
+    build_path = BUILD_PATH
+    source_path = SOURCE_PATH
+    testBaseURL = 'http://' + testHost + ':' + str(testPort)
+    testPath = ('test', 'selenium')
+    midasPath = ('Testing', ) + testPath
+    srcTestPath = ('testing', 'test-cases', 'selenium-tests')
+    imageDifferenceThreshold = 0.0
+    testCase = tuple()
+    midas = MidasHandler(MIDAS_BASE_URL, MIDAS_COMMUNITY)
+    testRevision = 1
+
+    @classmethod
+    def _relativeImagePath(cls, testName):
+        '''
+        Get the standard path for storing a test image as a list.
+        '''
+        case = cls.testCase
+
+        if isinstance(case, basestring):
+            case = case.split('/')
+        if isinstance(testName, basestring):
+            testName = testName.split('/')
+
+        testName = list(testName)
+        testName[-1] += '.png'
+
+        return list(case) + testName
+
+    @classmethod
+    def startServer(cls):
+        '''
+        Start a local web server.
+        '''
+        cls.server = TestServer()
+        cls.server.start(cls.testHost, cls.testPort)
+
+    @classmethod
+    def stopServer(cls):
+        '''
+        Stop the local webserver.
+        '''
+        cls.server.stop()
+
+    def setUp(self):
+        '''
+        Start up a selenium driver.
+        '''
+        self.driver = drivers[self.driverName]()
+
+    def tearDown(self):
+        '''
+        Stop the selenium driver.
+        '''
+        self.driver.execute_script(
+            'if (window.stopTest) { window.stopTest(); }'
+        )
+        self.driver.quit()
+
+    def wait(self, variable='window.testComplete', timeout=5):
+        '''
+        Wait for a variable to be set to true.  Raise an error
+        if timeout is exceeded.
+        '''
+        def check_status(drv):
+            try:
+                return drv.execute_script('return !!%s' % variable)
+            except Exception:
+                return False
+
+        WebDriverWait(
+            self.driver,
+            timeout
+        ).until(check_status, 'checking truthiness of %s' % variable)
+
+    def runScript(self, script):
+        '''
+        Run a js script in the browser.
+        '''
+        return self.driver.execute_script(script)
+
+    def resizeWindow(self, width, height):
+        '''
+        Resize the browser to the given width and height.
+        '''
+        self.driver.set_window_size(width, height)
+
+    def getElement(self, selector):
+        '''
+        Find an element on the page by a css selector.
+        i.e.: test.getElement('#my-div')
+
+        '''
+        return self.driver.find_element_by_css_selector(selector)
+
+    def getElements(self, selector):
+        '''
+        Find all elements on the page matching a css selector.
+        i.e.: test.getElements('div')
+
+        '''
+        return self.driver.find_elements_by_css_selector(selector)
+
+    def screenshot(self):
+        '''
+        Capture a screenshot and return it as a base64 encoded string.
+        '''
+        png = self.driver.get_screenshot_as_png()
+        return Image.open(StringIO(png))
+
+    def loadURL(self, url, relative=True):
+        '''
+        Load a url on the test server.  This method automatically
+        prefixes the url with the host, so
+
+        loadURL('/test.html')
+
+        will load something like 'http://localhost:8000/test.html'.
+        '''
+        if relative:
+            url = '/'.join(
+                (self.testBaseURL,) +
+                tuple(self.testPath) +
+                (url,)
+            )
+        else:
+            url = self.testBaseURL + url
+        return self.driver.get(url)
+
+    def drag(self, element, delta, offset=(0, 0)):
+        '''
+        Drag the element given (by a css selector) starting
+        at `offset` relative to the center of the element by
+        an amount `delta`.  Where `delta` and `offset`
+        are two element iterables containing two integers:
+            [x, y]
+        '''
+        el = self.getElement(element)
+        action = ActionChains(self.driver)
+
+        action.move_to_element_with_offset(el, offset[0], offset[1])
+        action.click_and_hold()
+        action.move_by_offset(delta[0], delta[1])
+        action.release()
+        action.perform()
+
+    @classmethod
+    def loadImageFile(cls, filename, relative=True):
+        '''
+        Load an image from a local file.  If relative is True, then
+        load it relative the current testing directory, otherwise
+        assume an absolute path.
+        '''
+        if relative:
+            filename = os.path.join(*(
+                (SOURCE_PATH,) +
+                tuple(cls.srcTestPath) +
+                (filename,)
+            ))
+        return Image.open(filename)
+
+    @classmethod
+    def loadImageURL(cls, filename, relative=True):
+        '''
+        Load an image from a URL.  If relative is True, then
+        load it relative the current testing path, otherwise
+        assume an absolute URL.
+        '''
+        if relative:
+            filename = '/'.join(
+                (cls.testBaseURL,) +
+                tuple(cls.testPath) +
+                (filename,)
+            )
+        request = urlopen(filename)
+        if request.getcode() != 200:
+            raise Exception("Could not load image at %s" % filename)
+        img = StringIO(request.read())
+        return Image.open(img)
+
+    @classmethod
+    def loadTestImages(cls, testName, revision=None):
+        '''
+        Load an image from the globally configured image store.
+        '''
+
+        if revision is None:
+            revision = cls.testRevision
+        testImagePath = \
+            list(cls.midasPath) + \
+            list(cls._relativeImagePath(testName))
+        images = cls.midas.getImages(testImagePath, revision)
+        if not len(images):
+            raise Exception(
+                "No images found at path '%s'" % '/'.join(testImagePath)
+            )
+        return images
+
+    @classmethod
+    def exportTestImage(cls, img, testName, kind='', deploy=''):
+
+        if not deploy:
+            deploy = DEPLOY_PATH
+        deploy = deploy.split(os.path.sep)
+        fullPathList = \
+            list(deploy) + \
+            list(cls.testPath) + \
+            cls._relativeImagePath(testName)
+        fullPath = os.path.sep.join(fullPathList[:-1])
+        try:
+            os.makedirs(fullPath)
+        except OSError:
+            pass  # directory already exists... probably
+
+        splt = os.path.splitext(fullPathList[-1])
+
+        if kind:
+            kind = '_' + kind
+
+        imageName = os.path.join(
+            fullPath,
+            splt[0] + kind + splt[1]
+        )
+        img.putalpha(255)
+        img.save(imageName)
+        return imageName
+
+    @classmethod
+    def compareImages(cls, baseImage, testImage, testName, iImage=0):
+        '''
+        Compute the difference between two images and throw a
+        ImageDifferenceException if the difference is above
+        cls.imageDifferenceThreshold.
+
+        If testName is set, then store the images under the server path.
+        '''
+
+        basePath = cls.exportTestImage(
+            baseImage,
+            testName,
+            'base_%02i' % iImage
+        )
+        testPath = cls.exportTestImage(testImage, testName, 'test')
+
+        stats = dict(
+            difference=float('inf'),
+            iImage=iImage,
+            testName=testName,
+            testPath=testPath,
+            basePath=basePath,
+            midas_path=list(cls.midasPath) +
+            list(cls._relativeImagePath(testName))
+        )
+
+        if baseImage.size != testImage.size:
+            raise ImageDifferenceException(**stats)
+
+        nPixels = baseImage.size[0] * baseImage.size[1]
+        diff = ImageChops.difference(baseImage, testImage)
+        st = ImageStat.Stat(diff)
+        sum2 = st.sum2
+        val = sqrt(reduce(lambda x, y: x + y, sum2, 0)/(len(sum2) * nPixels))
+
+        diffPath = cls.exportTestImage(diff, testName, 'diff_%02i' % iImage)
+
+        stats.update({
+            'difference': val,
+            'diffPath': diffPath
+        })
+        if val > cls.imageDifferenceThreshold:
+            raise ImageDifferenceException(**stats)
+
+    def screenshotTest(self, testName, revision=None):
+        '''
+        Convenience method for taking a screenshot and comparing
+        to stored images.  Throws an exception if the images differ
+        by more than self.imageDiffereceThreshold.
+        '''
+        failure = False
+        testImage = self.screenshot()
+        testImagePath = self.exportTestImage(
+            testImage,
+            testName,
+            deploy=TEST_REPO_PATH
+        )
+
+        if revision is None:
+            revision = self.testRevision
+
+        # collect test stats for possibly uploading new images to server
+        stats = {
+            'testPath': testImagePath,
+            'testName': testName,
+            'revision': revision,
+            'difference': float('inf'),
+            'iImage': -1,
+            'midas_path': list(self.midasPath) +
+            list(self._relativeImagePath(testName))
+        }
+
+        try:
+            baseImages = self.loadTestImages(testName, revision)
+            assert len(baseImages)
+        except Exception:
+            raise ImageDifferenceException(**stats)
+
+        success = False
+        iImage = 0
+        minDiff = float('inf')
+        iDiff = -1
+        excep = None
+        while not success and iImage < len(baseImages):
+            try:
+                self.compareImages(
+                    baseImages[iImage],
+                    testImage,
+                    testName,
+                    iImage
+                )
+                success = True
+            except ImageDifferenceException as e:
+                if e.stats['difference'] <= minDiff:
+                    stats.update(e.stats)
+                    e.stats = stats
+                    minDiff = e.stats['difference']
+                    iDiff = iImage
+                    excep = e
+                iImage += 1
+            except Exception as e:
+                if excep is None:
+                    excep = e
+
+        if not success:
+            raise excep
+
+
+@unittest.skipIf(
+    os.environ.get('FIREFOX_TESTS', 'ON') == 'OFF',
+    "Firefox tests disabled by $FIREFOX_TESTS"
+)
+class FirefoxTest(BaseTest):
+    '''
+    Firefox test class.
+    '''
+    driverName = 'firefox'
+
+
+@unittest.skipIf(
+    os.environ.get('CHROME_TESTS', 'OFF') == 'OFF',
+    "Chrome tests disabled by $CHROME_TESTS"
+)
+class ChromeTest(BaseTest):
+    '''
+    Chrome test class.
+    '''
+    driverName = 'chrome'
+
+
+def setUpModule():
+    BaseTest.startServer()
+
+
+def tearDownModule():
+    BaseTest.stopServer()

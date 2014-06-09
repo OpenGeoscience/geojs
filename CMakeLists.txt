@@ -26,8 +26,8 @@ if(${BUILD_TESTING})
   set(PHANTOMJS_TESTS ON CACHE BOOL "Generate phantomjs unit tests.")
 
   # once implemented
-  #set(COVERAGE_TESTS OFF CACHE BOOL "Generate coverage reports.")
-  #set(SELENIUM_TESTS OFF CACHE BOOL "Generate selenium unit tests.")
+  set(COVERAGE_TESTS OFF CACHE BOOL "Generate coverage reports.")
+  set(SELENIUM_TESTS OFF CACHE BOOL "Generate selenium unit tests.")
 endif()
 
 # set up python variables for starting a test server
@@ -241,56 +241,44 @@ function(add_geojs_test test_name)
     NAME "${test_name}"
     WORKING_DIRECTORY "${GEOJS_DEPLOY_DIR}"
     COMMAND ${PYTHON_EXECUTABLE}
-            ${CMAKE_CURRENT_BINARY_DIR}/test/geojs-test-runner.py
+            ${CMAKE_CURRENT_BINARY_DIR}/test/geojs_test_runner.py
             ${ARGN}
   )
-set_property(TEST "${test_name}" APPEND PROPERTY RESOURCE_LOCK webserver)
-set_property(TEST "${test_name}" APPEND PROPERTY DEPENDS "coverage-reset")
-set_property(TEST "coverage-report" APPEND PROPERTY DEPENDS "${test_name}")
+  set_property(TEST "${test_name}" APPEND PROPERTY RESOURCE_LOCK webserver)
+  if (COVERAGE_TESTS)
+    set_property(TEST "${test_name}" APPEND PROPERTY DEPENDS "coverage-reset")
+    set_property(TEST "coverage-report" APPEND PROPERTY DEPENDS "${test_name}")
+  endif()
 endfunction()
 
 # set up testing framework and add tests
 if(BUILD_TESTING)
   include(CTest)
+  include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/MIDAS3.cmake)
   enable_testing()
 
-  if(PHANTOMJS_TESTS)
-    find_package(PhantomJS REQUIRED)
+  # copy blanket JS files
+  configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/testing/js/blanket.min.js
+    ${GEOJS_DEPLOY_DIR}/test/lib/blanket.min.js
+    COPYONLY
+  )
+  configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/aggregate-json-reporter.js.in
+    ${GEOJS_DEPLOY_DIR}/test/lib//aggregate-json-reporter.js
+  )
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/geojs_test_runner.py.in
+                 ${CMAKE_CURRENT_BINARY_DIR}/test/geojs_test_runner.py
+  )
 
-    set(PHANTOMJS_REL_DIR "test/phantomjs")
-    set(PHANTOMJS_ABS_DIR "${GEOJS_DEPLOY_DIR}/${PHANTOMJS_REL_DIR}")
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/blanket_server.py
+                 ${CMAKE_CURRENT_BINARY_DIR}/test/blanket_server.py
+                 COPYONLY
+  )
 
-    # copy blanket JS files
-    configure_file(
-      ${CMAKE_CURRENT_SOURCE_DIR}/testing/js/blanket.min.js
-      ${GEOJS_DEPLOY_DIR}/test/lib/blanket.min.js
-      COPYONLY
-    )
-    configure_file(
-      ${CMAKE_CURRENT_SOURCE_DIR}/testing/js/jasmine-blanket.js
-      ${GEOJS_DEPLOY_DIR}/test/lib/jasmine-blanket.js
-      COPYONLY
-    )
-    configure_file(
-      ${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/aggregate-json-reporter.js.in
-      ${GEOJS_DEPLOY_DIR}/test/lib//aggregate-json-reporter.js
-    )
+  if (COVERAGE_TESTS)
 
-    file(GLOB JS_UNIT_TEST_CASES
-      ${CMAKE_CURRENT_SOURCE_DIR}/testing/test-cases/phantomjs-tests/*.js
-    )
-
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/geojs-test-runner.py.in
-                   ${CMAKE_CURRENT_BINARY_DIR}/test/geojs-test-runner.py
-    )
-
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/blanket_server.py
-                   ${CMAKE_CURRENT_BINARY_DIR}/test/blanket_server.py
-                   COPYONLY
-    )
-
-    list(APPEND TESTING_DEPENDENCIES ${_min_js_file})
-
+    set(BLANKET_INCLUDE <script src=/test/lib/blanket.min.js></script>)
     add_test(
       NAME "coverage-reset"
       WORKING_DIRECTORY "${GEOJS_DEPLOY_DIR}"
@@ -308,6 +296,30 @@ if(BUILD_TESTING)
     )
     set_property(TEST "coverage-report" APPEND PROPERTY DEPENDS "coverage-reset")
 
+  else()
+
+      set(BLANKET_INCLUDE "")
+
+  endif()
+
+  if(PHANTOMJS_TESTS)
+    find_package(PhantomJS REQUIRED)
+
+    set(PHANTOMJS_REL_DIR "test/phantomjs")
+    set(PHANTOMJS_ABS_DIR "${GEOJS_DEPLOY_DIR}/${PHANTOMJS_REL_DIR}")
+
+    configure_file(
+      ${CMAKE_CURRENT_SOURCE_DIR}/testing/js/jasmine-blanket.js
+      ${GEOJS_DEPLOY_DIR}/test/lib/jasmine-blanket.js
+      COPYONLY
+    )
+
+    file(GLOB JS_UNIT_TEST_CASES
+      ${CMAKE_CURRENT_SOURCE_DIR}/testing/test-cases/phantomjs-tests/*.js
+    )
+
+    list(APPEND TESTING_DEPENDENCIES ${_min_js_file})
+
     # add phantomjs unit tests
     foreach(js ${JS_UNIT_TEST_CASES})
       get_filename_component(f "${js}" NAME_WE)
@@ -318,6 +330,7 @@ if(BUILD_TESTING)
                                  -DSOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
                                  -DSOURCE_FILE="${js}"
                                  -DSCRIPT_INCLUDE="${_script_include}"
+                                 -DBLANKET_INCLUDE="${BLANKET_INCLUDE}"
                                  -P ${CMAKE_SOURCE_DIR}/cmake/configure-js-unit-test.cmake
         COMMAND ${CMAKE_COMMAND} -E touch ${html}
         DEPENDS ${js} ${CMAKE_SOURCE_DIR}/testing/test-runners/jasmine-runner.html.in
@@ -337,6 +350,99 @@ if(BUILD_TESTING)
       DEPENDS ${JS_UNIT_TEST_FILES}
     )
   endif() # PHANTOMJS_TESTS
+
+  if(SELENIUM_TESTS)
+
+    set(FIREFOX_TESTS ON CACHE BOOL "Turn on Firefox selenium tests.")
+    set(CHROME_TESTS OFF CACHE BOOL "Turn on Chrome selenium tests.")
+    set(DATA_REPO_PATH "" CACHE PATH "Local path to the geojs data repository (optional).")
+    set(SELENIUM_TEST_DIR "${GEOJS_DEPLOY_DIR}/test/selenium")
+    set(SELENIUM_HOST localhost CACHE STRING "The selenium test server host.")
+    mark_as_advanced(SELENIUM_HOST)
+    set(SELENIUM_PORT 4444 CACHE STRING "The selenium test server port.")
+    mark_as_advanced(SELENIUM_PORT)
+
+    set(MIDAS_BASE_URL "http://midas3.kitware.com/midas" CACHE STRING "MIDAS data store URL.")
+    mark_as_advanced(MIDAS_BASE_URL)
+    set(MIDAS_COMMUNITY "GeoJS" CACHE STRING "MIDAS community hosting test images.")
+    mark_as_advanced(MIDAS_COMMUNITY)
+
+    # set variables for MIDAS3.cmake
+    set(MIDAS_REST_URL "${MIDAS_BASE_URL}/api/json")
+    set(MIDAS_KEY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-data")
+    set(MIDAS_DATA_DIR "${GEOJS_DEPLOY_DIR}/data")
+
+    configure_file(
+      ${CMAKE_CURRENT_SOURCE_DIR}/testing/js/selenium-blanket.js
+      ${GEOJS_DEPLOY_DIR}/test/lib/selenium-blanket.js
+      COPYONLY
+    )
+    configure_file(
+      "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/selenium_test.py.in"
+      "${CMAKE_CURRENT_BINARY_DIR}/test/selenium_test.py"
+    )
+    configure_file(
+      "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/midas_handler.py"
+      "${CMAKE_CURRENT_BINARY_DIR}/test/midas_handler.py"
+      COPYONLY
+    )
+    configure_file(
+      "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/upload_test_cases.py"
+      "${CMAKE_CURRENT_BINARY_DIR}/test/upload_test_cases.py"
+      COPYONLY
+    )
+    file(GLOB SELENIUM_TEST_DIRS
+      ${CMAKE_CURRENT_SOURCE_DIR}/testing/test-cases/selenium-tests/*
+    )
+    foreach(dir ${SELENIUM_TEST_DIRS})
+      if(IS_DIRECTORY "${dir}")
+        set(html "${dir}/include.html")
+        set(js "${dir}/include.js")
+        set(css "${dir}/include.css")
+        get_filename_component(f "${dir}" NAME_WE)
+        set(test_dir "${SELENIUM_TEST_DIR}/${f}")
+        set(output_html "${test_dir}/index.html")
+
+        add_custom_command(OUTPUT "${output_html}"
+          COMMAND ${CMAKE_COMMAND} -DHTML_INCLUDE="${html}"
+                                   -DJS_INCLUDE="${js}"
+                                   -DCSS_INCLUDE="${css}"
+                                   -DSCRIPT_INCLUDE="${_script_include}"
+                                   -DOUTPUT_HTML="${output_html}"
+                                   -DTEMPLATE_HTML="${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/selenium-template.html.in"
+                                   -DBLANKET_INCLUDE="${BLANKET_INCLUDE}"
+                                   -P ${CMAKE_SOURCE_DIR}/cmake/configure-js-selenium-test.cmake
+          COMMAND ${CMAKE_COMMAND} -E touch "${output_html}"
+          DEPENDS "${html}" "${js}" "${css}" "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/selenium-template.html.in"
+          COMMENT "Generating selenium test ${f}"
+        )
+        list(APPEND SELENIUM_TEST_FILES "${output_html}")
+
+        add_test(
+          NAME "selenium:${f}"
+          WORKING_DIRECTORY "${GEOJS_DEPLOY_DIR}"
+          COMMAND ${PYTHON_EXECUTABLE} -m unittest discover -v -s "${dir}"
+        )
+        set_property(TEST "selenium:${f}" APPEND PROPERTY RESOURCE_LOCK webserver)
+
+        if (COVERAGE_TESTS)
+          set_property(TEST "selenium:${f}" APPEND PROPERTY DEPENDS "coverage-reset")
+          set_property(TEST "coverage-report" APPEND PROPERTY DEPENDS "selenium:${f}")
+        endif()
+        set_property(TEST "selenium:${f}" APPEND PROPERTY ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/test")
+        set_property(TEST "selenium:${f}" APPEND PROPERTY ENVIRONMENT "FIREFOX_TESTS=${FIREFOX_TESTS}")
+        set_property(TEST "selenium:${f}" APPEND PROPERTY ENVIRONMENT "CHROME_TESTS=${CHROME_TESTS}")
+      endif()
+    endforeach()
+
+    add_download_target()
+    add_custom_target(
+      selenium_tests
+      ALL
+      DEPENDS ${SELENIUM_TEST_FILES} ${MIDAS_DOWNLOAD_FILES}
+    )
+
+  endif()
 
   # JSLint tests.
   if(${JS_LINT_TESTS})
