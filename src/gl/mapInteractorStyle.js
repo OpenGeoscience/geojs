@@ -290,7 +290,7 @@ ggl.mapInteractorStyle = function() {
     var val, i, renderers;
 
     if (val === undefined) {
-      if (m_zTrans > 0) {
+      if (m_zTrans < 0) {
         val = 1 - Math.abs(m_zTrans);
       } else {
         val = 1 + Math.abs(m_zTrans);
