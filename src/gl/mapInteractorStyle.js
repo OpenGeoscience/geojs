@@ -143,7 +143,7 @@ ggl.mapInteractorStyle = function() {
     if (m_rightMouseButtonDown && m_height > 0) {
       /// 2.0 is sort of speed up factor
       m_zTrans = 2.0 * (m_currentMousePos.y - m_mouseLastPos.y) / m_height;
-      m_this._zoomCameras();
+      m_this.zoom();
 
       /// For now just trigger the render. Later on, we may want to
       /// trigger an external event
@@ -290,7 +290,7 @@ ggl.mapInteractorStyle = function() {
     var val, i, renderers;
 
     if (val === undefined) {
-      if (m_zTrans > 0) {
+      if (m_zTrans < 0) {
         val = 1 - Math.abs(m_zTrans);
       } else {
         val = 1 + Math.abs(m_zTrans);
