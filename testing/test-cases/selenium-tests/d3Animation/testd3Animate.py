@@ -8,7 +8,7 @@ from selenium_test import FirefoxTest, ChromeTest,\
 
 
 class osmBase(object):
-    testCase = ('osmLayer',)
+    testCase = ('d3Animation',)
 
     def loadPage(self):
         self.resizeWindow(640, 480)
