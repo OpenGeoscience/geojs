@@ -9,7 +9,7 @@
     <script src=//cdnjs.cloudflare.com/ajax/libs/d3/3.4.8/d3.min.js></script>
 @BLANKET_INCLUDE@
     <script src=/test/lib/aggregate-json-reporter.js></script>
-    <script type="text/javascript" src="/web/lib/vgl.min.js"></script>
+    <script type="text/javascript" src="/web/lib/vgl.js"></script>
 @SCRIPT_INCLUDE@ 
     <style>
         html, body{
