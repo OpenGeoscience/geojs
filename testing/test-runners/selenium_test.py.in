@@ -89,7 +89,7 @@ class BaseTest(TestCase):
     testPath = ('test', 'selenium')
     midasPath = ('Testing', ) + testPath
     srcTestPath = ('testing', 'test-cases', 'selenium-tests')
-    imageDifferenceThreshold = 0.0
+    imageDifferenceThreshold = 2.0
     testCase = tuple()
     midas = MidasHandler(MIDAS_BASE_URL, MIDAS_COMMUNITY)
     testRevision = 1
