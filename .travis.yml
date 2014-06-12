@@ -6,8 +6,8 @@ node_js:
 before_install:
     - sudo apt-get update -qq
     - sudo apt-get install -y phantomjs
-    - npm install -g uglify-js
     - sudo apt-get install -y cmake
+    - npm install -g uglify-js
 
 script:
     - git submodule init
