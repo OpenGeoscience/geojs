@@ -325,9 +325,6 @@ ggl.mapInteractorStyle = function() {
     oldZoomLevel = computeZoomLevel();
 
     if (pos[2] * Math.sin(m_camera.viewAngle()) >= 360.0 && val > 1) {
-      console.log(pos[2]);
-      console.log(pos[2] * Math.sin(m_camera.viewAngle()));
-
       m_camera.setPosition(pos[0], pos[1], computeCameraDistance(0));
       m_renderer.resetCameraClippingRange();
 
@@ -479,6 +476,33 @@ ggl.mapInteractorStyle = function() {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Reset to default
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.reset = function() {
+    var pos, newZoomLevel, evt;
+
+    if (!m_map) {
+      return;
+    }
+
+    m_this.updateRenderParams();
+    pos = m_camera.position();
+    m_camera.setPosition(pos[0], pos[1], computeCameraDistance(m_map.zoom()));
+    m_renderer.resetCameraClippingRange();
+
+    /// We are forcing the minimum zoom level to 2 so that we can get
+    /// high res imagery even at the zoom level 0 distance
+    newZoomLevel = m_map.zoom();
+
+    evt = { type: geo.event.zoom,
+            curr_zoom: newZoomLevel,
+            last_zoom: newZoomLevel };
+    $(m_this).trigger(evt);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Compute zoom level
    *
    * @param deltaMerc mercator/per pixel
@@ -525,8 +549,7 @@ ggl.mapInteractorStyle = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   function computeCameraDistance(zoomLevel) {
-    var deg = 360.0 / Math.pow(2, zoomLevel),
-        pos = m_camera.position();
+    var deg = 360.0 / Math.pow(2, zoomLevel);
     return (deg / Math.sin(m_camera.viewAngle()));
   }
 
