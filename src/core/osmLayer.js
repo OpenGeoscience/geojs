@@ -44,8 +44,8 @@ geo.osmLayer = function(arg) {
     m_numberOfCachedTiles = 0,
     m_tileCacheSize = 100,
     m_previousZoom = null,
-    m_baseUrl = 'http://otile1.mqcdn.com/tiles/1.0.0/osm/',
-    m_imageFormat = 'jpg',
+    m_baseUrl = 'http://tile.openstreetmap.org/',
+    m_imageFormat = 'png',
     s_init = this._init,
     s_update = this._update;
 

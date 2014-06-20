@@ -375,8 +375,10 @@ geo.map = function(arg) {
         input instanceof Object) {
       output = m_baseLayer.renderer().displayToWorld(input);
       output = m_baseLayer.fromLocal(output);
-    }
-    else {
+    } else if (input instanceof Object) {
+      output = m_baseLayer.renderer().displayToWorld(input);
+      output = m_baseLayer.fromLocal(output);
+    } else {
       throw 'Conversion method latLonToDisplay does not handle ' + input;
     }
     return output;
