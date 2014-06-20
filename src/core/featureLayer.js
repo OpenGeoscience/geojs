@@ -56,6 +56,10 @@ geo.featureLayer = function (arg) {
     return newFeature;
   };
 
+  this.toLocal = function (input) {
+      return input;
+  };
+
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Delete feature
