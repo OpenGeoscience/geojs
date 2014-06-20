@@ -491,17 +491,25 @@ ggl.mapInteractorStyle = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.reset = function() {
-    var pos, newZoomLevel, evt, zoom;
+    var pos, fp, newZoomLevel, evt, zoom, center;
 
     if (!m_map) {
       return;
     }
 
-    zoom = m_map.zoom();
-
     m_this.updateRenderParams();
+
+    zoom = m_map.zoom();
+    center = m_map.center();
+    fp = m_camera.focalPoint();
+
+    center = m_map.baseLayer().toLocal(geo.latlng(center[0], center[1]));
+
+    console.log(center);
+
     pos = m_camera.position();
-    m_camera.setPosition(pos[0], pos[1], computeCameraDistance(zoom));
+    m_camera.setPosition(center.x, center.y, computeCameraDistance(zoom));
+    m_camera.setFocalPoint(center.x, center.y, fp[2]);
     m_renderer.resetCameraClippingRange();
 
     evt = { type: geo.event.zoom,

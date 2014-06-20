@@ -77,10 +77,11 @@ geo.osmLayer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.toLocal = function(input) {
-    var i, output = [];
+    var i, output;
 
     /// Now handle different data types
     if (input instanceof Array && input.length > 0) {
+      output = [];
       output.length = input.length;
 
       /// Input is array of geo.latlng
@@ -90,11 +91,12 @@ geo.osmLayer = function(arg) {
           output[i].lat(geo.mercator.lat2y(output[i].lat()));
         }
       } else {
-        output = m_baseLayer.renderer().worldToDisplay(input).slice(0);
+        output = m_this.renderer().worldToDisplay(input).slice(0);
       }
     } else if (input instanceof geo.latlng) {
-      output.push(geo.latlng(input));
-      output[0].lat(geo.mercator.lat2y(output[0].lat()));
+      output = {};
+      output.x = input.x();
+      output.y = geo.mercator.lat2y(input.lat());
     } else {
       throw 'toLocal does not handle ' + input;
     }
