@@ -330,13 +330,24 @@ ggl.mapInteractorStyle = function() {
 
       /// We are forcing the minimum zoom level to 2 so that we can get
       /// high res imagery even at the zoom level 0 distance
-      newZoomLevel = 2;
+      newZoomLevel = 0;
     } else {
       this._zoomCameras(val);
 
       /// Compute meters per pixel here and based on that decide the
       /// zoom level
       newZoomLevel = computeZoomLevel();
+    }
+
+    /// Check again here:
+    pos = m_camera.position();
+    if (pos[2] * Math.sin(m_camera.viewAngle()) >= 360.0 && val > 1) {
+      m_camera.setPosition(pos[0], pos[1], computeCameraDistance(0));
+      m_renderer.resetCameraClippingRange();
+
+      /// We are forcing the minimum zoom level to 2 so that we can get
+      /// high res imagery even at the zoom level 0 distance
+      newZoomLevel = 0;
     }
 
     evt = { type: geo.event.zoom,
@@ -480,24 +491,22 @@ ggl.mapInteractorStyle = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.reset = function() {
-    var pos, newZoomLevel, evt;
+    var pos, newZoomLevel, evt, zoom;
 
     if (!m_map) {
       return;
     }
 
+    zoom = m_map.zoom();
+
     m_this.updateRenderParams();
     pos = m_camera.position();
-    m_camera.setPosition(pos[0], pos[1], computeCameraDistance(m_map.zoom()));
+    m_camera.setPosition(pos[0], pos[1], computeCameraDistance(zoom));
     m_renderer.resetCameraClippingRange();
 
-    /// We are forcing the minimum zoom level to 2 so that we can get
-    /// high res imagery even at the zoom level 0 distance
-    newZoomLevel = m_map.zoom();
-
     evt = { type: geo.event.zoom,
-            curr_zoom: newZoomLevel,
-            last_zoom: newZoomLevel };
+            curr_zoom: zoom,
+            last_zoom: zoom };
     $(m_this).trigger(evt);
   };
 
@@ -511,14 +520,14 @@ ggl.mapInteractorStyle = function() {
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
-  function computeZoomLevel(deltaMerc) {
+  function computeZoomLevel() {
     var i, pos = m_camera.position(),
         width = (pos[2] * Math.sin(m_camera.viewAngle()));
     for (i = 0; i < 20; ++i) {
       if (width >= (360.0 / Math.pow(2, i))) {
         /// We are forcing the minimum zoom level to 2 so that we can get
         /// high res imagery even at the zoom level 0 distance
-        return (i + 2);
+        return i;
       }
     }
   }

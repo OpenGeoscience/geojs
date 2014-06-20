@@ -279,6 +279,7 @@ ggl.vglRenderer = function(arg) {
     }
 
     m_viewer.interactorStyle().map(this.layer().map());
+    m_this.reset();
   };
 
   this.on(geo.event.layerAdd, function (event) {

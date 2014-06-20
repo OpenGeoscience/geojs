@@ -24,9 +24,6 @@ $(function() {
       myMap = geo.map(mapOptions),
       layer = geo.osmLayer({'renderer' : 'vglRenderer'});
 
-    /// Add layer to the map
-    myMap.addLayer(layer);
-
     /// Resize the canvas to fill browser window dynamically
     window.addEventListener('resize', resizeCanvas, false);
 
@@ -39,6 +36,8 @@ $(function() {
 
     function updateAndDraw(width, height) {
       myMap.resize(0, 0, width, height);
+      /// Add layer to the map
+      myMap.addLayer(layer);
       myMap.draw();
     }
 });
