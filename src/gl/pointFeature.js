@@ -53,7 +53,8 @@ ggl.pointFeature = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._build = function() {
-    var style = m_this.style();
+    var style = m_this.style(), positions = m_this.positions();
+    // positions = m_this.renderer().layer().map().baseLayer().toLocal(positions);
 
     if (m_actor) {
       this.renderer().contextRenderer().removeActor(m_actor);
@@ -65,9 +66,9 @@ ggl.pointFeature = function(arg) {
       }
 
       m_actor = vgl.utils.createPointSprites(style.point_sprites_image,
-                 this.positions(), style.colors);
+                 positions, style.colors);
     } else {
-      m_actor = vgl.utils.createPoints(this.positions(), style.colors);
+      m_actor = vgl.utils.createPoints(positions, style.colors);
     }
 
     this.renderer().contextRenderer().addActor(m_actor);

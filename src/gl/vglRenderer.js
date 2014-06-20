@@ -163,7 +163,7 @@ ggl.vglRenderer = function(arg) {
       /// Input is an array of objects
       if (input[0] instanceof Object) {
         delta = 1;
-        for (i = 0; i < input.length; i =+ delta) {
+        for (i = 0; i < input.length; i += delta) {
           temp = ren.worldToDisplay(vec4.fromValues(
                    input[i].x, input[i].y, fp[2], 1.0), cam.viewMatrix(),
                    cam.projectionMatrix(),
@@ -173,7 +173,7 @@ ggl.vglRenderer = function(arg) {
       } else if (input[0] instanceof Array) {
         /// Input is an array of array
         delta = 1;
-        for (i = 0; i < input.length; i =+ delta) {
+        for (i = 0; i < input.length; i += delta) {
           temp = ren.worldToDisplay(
                    vec4.fromValues(input[i][0], input[i][1], fp[2], 1.0),
                    cam.viewMatrix(), cam.projectionMatrix(), m_width, m_height);
@@ -183,7 +183,7 @@ ggl.vglRenderer = function(arg) {
         /// Input is a flat array of 2 or 3 dimension
         delta = input.length % 3 === 0 ? 3 : 2;
         if (delta === 2)  {
-          for (i = 0; i < input.length; i =+ delta) {
+          for (i = 0; i < input.length; i += delta) {
             temp = ren.worldToDisplay(vec4.fromValues(
                      input[i], input[i + 1], fp[2], 1.0), cam.viewMatrix(),
                      cam.projectionMatrix(),
@@ -193,7 +193,7 @@ ggl.vglRenderer = function(arg) {
             output.push(temp[2]);
           }
         } else {
-          for (i = 0; i < input.length; i =+ delta) {
+          for (i = 0; i < input.length; i += delta) {
             temp = ren.worldToDisplay(vec4.fromValues(
                          input[i], input[i + 1], input[i + 2], 1.0), cam.viewMatrix(),
                          cam.projectionMatrix(),
@@ -258,6 +258,16 @@ ggl.vglRenderer = function(arg) {
     s_init.call(this);
 
     this.canvas($(m_viewer.canvas()));
+    if (m_viewer.renderWindow().renderers().length > 0) {
+      console.log('layer is ', m_viewer.renderWindow().renderers().length);
+      m_contextRenderer.setLayer(m_viewer.renderWindow().renderers().length);
+      // var pos = m_viewer.renderWindow().renderers()[0].camera().position();
+      // var fp = m_viewer.renderWindow().renderers()[0].camera().focalPoint();
+      // m_contextRenderer.camera().setPosition(pos[0], pos[1], pos[2]);
+      // m_contextRenderer.camera().setFocalPoint(fp[0], fp[1], fp[2]);
+      // m_contextRenderer.setResetScene(false);
+      m_contextRenderer.camera().modified();
+    }
     m_viewer.renderWindow().addRenderer(m_contextRenderer);
 
     this.layer().node().append(this.canvas());

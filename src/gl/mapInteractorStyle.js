@@ -286,18 +286,89 @@ ggl.mapInteractorStyle = function() {
    * @param {Number} optional value to zoom by
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._zoomCameras = function(val) {
-    var i, renderers;
-    m_camera.zoom(val);
-    m_renderer.resetCameraClippingRange();
+  this._syncZoom = function(val) {
+    var i, renderers, pos, fp, cam;
+
+    /// Make sure we are uptodate with renderer and render window
+    m_this.updateRenderParams();
+
+    if (val) {
+      m_camera.zoom(val);
+      m_renderer.resetCameraClippingRange();
+    }
+
+    pos = m_camera.position();
+    fp = m_camera.focalPoint();
 
     renderers = m_renderWindow.renderers();
     for (i = 0; i < renderers.length; i++) {
-      if (renderers[i].camera() !== m_camera) {
-        renderers[i].camera().zoom(val);
+      cam = renderers[i].camera();
+      if (cam !== m_camera) {
+        cam.setPosition(pos[0], pos[1], pos[2]);
+        cam.setFocalPoint(fp[0], fp[1], fp[2]);
         renderers[i].resetCameraClippingRange();
+        renderers[i].render();
       }
     }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Internal function to zoom cameras
+   * @param {Number} optional value to zoom by
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._syncReset = function() {
+    var i, renderers, pos, fp, zoom, center, cam;
+
+    /// Make sure we are uptodate with renderer and render window
+    m_this.updateRenderParams();
+
+    zoom = m_map.zoom();
+    center = m_map.center();
+    fp = m_camera.focalPoint();
+
+    /// TODO: Call base layer - reference layer
+    center = m_map.baseLayer().toLocal(geo.latlng(center[0], center[1]));
+
+    pos = m_camera.position();
+    m_camera.setPosition(center.x, center.y, computeCameraDistance(zoom));
+    m_camera.setFocalPoint(center.x, center.y, fp[2]);
+    m_renderer.resetCameraClippingRange();
+
+    renderers = m_renderWindow.renderers();
+
+    /// TODO Check if we are allowed to transfrom the camera for this renderer
+    for (i = 0; i < renderers.length; i++) {
+      cam = renderers[i].camera();
+      if (cam !== m_camera) {
+        cam.setPosition(center.x, center.y, computeCameraDistance(zoom));
+        cam.setFocalPoint(center.x, center.y, fp[2]);
+        renderers[i].resetCameraClippingRange();
+        renderers[i].render();
+      }
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Internal function to zoom cameras
+   * @param {Number} optional value to zoom by
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._syncPan = function() {
+    /// TODO: Implement this
+    // var i, renderers;
+    // m_camera.zoom(val);
+    // m_renderer.resetCameraClippingRange();
+
+    // renderers = m_renderWindow.renderers();
+    // for (i = 0; i < renderers.length; i++) {
+    //   if (renderers[i].camera() !== m_camera) {
+    //     renderers[i].camera().zoom(val);
+    //     renderers[i].resetCameraClippingRange();
+    //   }
+    // }
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -332,7 +403,7 @@ ggl.mapInteractorStyle = function() {
       /// high res imagery even at the zoom level 0 distance
       newZoomLevel = 0;
     } else {
-      this._zoomCameras(val);
+      this._syncZoom(val);
 
       /// Compute meters per pixel here and based on that decide the
       /// zoom level
@@ -348,6 +419,9 @@ ggl.mapInteractorStyle = function() {
       /// We are forcing the minimum zoom level to 2 so that we can get
       /// high res imagery even at the zoom level 0 distance
       newZoomLevel = 0;
+
+      /// Sync all other camera again.
+      this._syncZoom();
     }
 
     evt = { type: geo.event.zoom,
@@ -497,20 +571,12 @@ ggl.mapInteractorStyle = function() {
       return;
     }
 
-    m_this.updateRenderParams();
+    m_this._syncReset();
 
-    zoom = m_map.zoom();
-    center = m_map.center();
-    fp = m_camera.focalPoint();
-
-    center = m_map.baseLayer().toLocal(geo.latlng(center[0], center[1]));
-
-    console.log(center);
-
-    pos = m_camera.position();
-    m_camera.setPosition(center.x, center.y, computeCameraDistance(zoom));
-    m_camera.setFocalPoint(center.x, center.y, fp[2]);
-    m_renderer.resetCameraClippingRange();
+    // m_renderWindow.renderers()[2].camera().setPosition(center.x, center.y, computeCameraDistance(zoom));
+    // m_renderWindow.renderers()[2].camera().setFocalPoint(center.x, center.y, fp[2]);
+    // m_renderWindow.renderers()[2].camera().modified();
+    // m_renderWindow.renderers()[1].camera().resetCameraClippingRange();
 
     evt = { type: geo.event.zoom,
             curr_zoom: zoom,
