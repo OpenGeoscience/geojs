@@ -72,17 +72,23 @@ ggl.vglRenderer = function(arg) {
   /**
    * Convert input data in display space to world space
    *
-   * @param input {[x:x1, y:y1], [x1,y1,x2,y2]}
-   * @returns {[{x:x1, y:y1}], [[x1, y1]]}
+   * @param input {x:val, y:val}, [{x:val, y:val}],
+   * [{x:val, y:val}], [x1,y1], [[x,y]]
+   *
+   * @returns {x:val, y:val, z:val, w:val}, [{x:val, y:val, z:val, w:val}],
+              [[x, y, z, w]], [x1,y1,z1,w]
    */
   ////////////////////////////////////////////////////////////////////////////
   this.displayToWorld = function(input) {
     var i, delta, node = this.canvas(),
         ren = this.contextRenderer(), cam = ren.camera(),
-        fdp = ren.focusDisplayPoint(), output = [], temp,
+        fdp = ren.focusDisplayPoint(), output, temp,
         point;
 
+    /// Handle if the input is an array [...]
     if (input instanceof Array && input.length > 0) {
+      output = [];
+    /// Input is array of object {x:val, y:val}
       if (input[0] instanceof Object) {
         delta = 1;
         for (i = 0; i < input.length; i += delta) {
@@ -93,17 +99,34 @@ ggl.vglRenderer = function(arg) {
                    m_width, m_height);
           output.push({x: temp[0], y: temp[1], z: temp[2], w: temp[3]});
         }
+    /// Input is array of 2d array [[x,y], [x,y]]
+      } else if (input[0] instanceof Array) {
+        delta = 1;
+        for (i = 0; i < input.length; i += delta) {
+          point = input[i];
+          temp = ren.displayToWorld(vec4.fromValues(
+                   point[0], point[1], fdp[2], 1.0),
+                   cam.viewMatrix(), cam.projectionMatrix(),
+                   m_width, m_height);
+          output.push(temp);
+        }
+    /// Input is flat array [x1,y1,x2,y2]
       } else {
         delta = input.length % 3 === 0 ? 3 : 2;
         for (i = 0; i < input.length; i += delta) {
-          output.push(ren.displayToWorld(vec4.fromValues(
+          temp = ren.displayToWorld(vec4.fromValues(
             input[i],
             input[i + 1],
             fdp[2],
             1.0), cam.viewMatrix(), cam.projectionMatrix(),
-            m_width, m_height));
+            m_width, m_height);
+          output.push(temp[0]);
+          output.push(temp[1]);
+          output.push(temp[2]);
+          output.push(temp[3]);
         }
       }
+    /// Input is object {x:val, y:val}
     } else if (input instanceof Object) {
       temp = ren.displayToWorld(vec4.fromValues(
                input.x, input.y, fdp[2], 1.0),
@@ -120,51 +143,67 @@ ggl.vglRenderer = function(arg) {
   /**
    * Convert input data in world space to display space
    *
-   * @param input {[{x:x1, y:y1}, ...], [x1, y1, x2, y2, x3, y3...] }
-   * @returns {[{x:x1, y:y1}. ...], [[x1, y1], [x2, y2]]}
+   * @param input {x:val, y:val} or {x:val, y:val, z:val} or [{x:val, y:val}]
+   * [{x:val, y:val, z:val}] or [[x,y]] or  [[x,y,z]] or [x1,y1,z1, x2, y2, z2]
+   *
+   * @returns {x:val, y:val} or [{x:val, y:val}] or [[x,y]] or
+   * [x1,y1, x2, y2]
    */
   ////////////////////////////////////////////////////////////////////////////
   this.worldToDisplay = function(input) {
-    var input, xyzFormat, i, output, toDisplay, delta, node = this.canvas(),
+    var input, xyzFormat, i, output, temp, delta, node = this.canvas(),
         ren = this.contextRenderer(), cam = ren.camera(),
         fp = cam.focalPoint(), output = [];
 
-    /// Helper private function
-    toDisplay = function(x, y, z, isObject) {
-      var result;
-      isObject = isObject === undefined ? false : true;
-      if (!isObject) {
-        output.push(ren.worldToDisplay(vec4.fromValues(
-          x, y, z, 1.0), cam.viewMatrix(), cam.projectionMatrix(),
-          m_width, m_height));
-        return;
-      }
-      result = ren.worldToDisplay(vec4.fromValues(
-        x, y, z, 1.0), cam.viewMatrix(), cam.projectionMatrix(),
-        m_width, m_height);
-      output.push({x: result[0], y: result[1], z: result[2]});
-    };
-
+    /// Input is an array
     if (input instanceof Array && input.length > 0) {
-      xyzFormat = input.length % 3 === 0 ? true : false;
+      output = [];
 
+      // xyzFormat = input.length % 3 === 0 ? true : false;
+
+    /// Input is an array of objects
       if (input[0] instanceof Object) {
         delta = 1;
         for (i = 0; i < input.length; i =+ delta) {
-          toDisplay(input[i].x, input[i].y, fp[2], true);
+          temp = ren.worldToDisplay(vec4.fromValues(
+                   input[i].x, input[i].y, fp[2], 1.0), cam.viewMatrix(),
+                   cam.projectionMatrix(),
+                   m_width, m_height);
+          output[i] = {x:temp[0], y:temp[1], z:temp[2]};
         }
-      } else if (xyzFormat) {
-        delta = 3;
+      /// Input is an array of array
+      } else if (input[0] instanceof Array) {
         for (i = 0; i < input.length; i =+ delta) {
-          toDisplay(input[i], input[i + 1], input[i + 2]);
+          // temp = ren.worldToDisplay(
+          //          vec4.fromValues(input[i][0] input[i][1], fp[2], 1.0),
+          //          cam.viewMatrix(), cam.projectionMatrix(), m_width, m_height);
+          // output[i].push(temp);
         }
+      /// Input is a flat array of 2 or 3 dimension
       } else {
-        delta = 2;
-        for (i = 0; i < input.length; i =+ delta) {
-          toDisplay(input[i], input[i + 1], fp[2]);
+        delta = input.length % 3 === 0 ? 3 : 2;
+        if (delta === 2)  {
+          // for (i = 0; i < input.length; i =+ delta) {
+          //   temp = ren.worldToDisplay(vec4.fromValues(
+          //            input[i] input[i + 1], fp[2], 1.0), cam.viewMatrix(),
+          //            cam.projectionMatrix(),
+          //            m_width, m_height);
+          //   output.push(temp[0]);
+          //   output.push(temp[1]);
+          //   output.push(temp[2]);
+          // }
+        } else {
+          for (i = 0; i < input.length; i =+ delta) {
+            // temp = ren.worldToDisplay(vec4.fromValues(
+            //              input[i] input[i + 1], input[i + 2], 1.0), cam.viewMatrix(),
+            //              cam.projectionMatrix(),
+            //              m_width, m_height);
+            // output.push(temp[0]);
+            // output.push(temp[1]);
+            // output.push(temp[2]);
+          }
         }
       }
-      return output;
     } else if (input instanceof Object) {
       toDisplay(input.x, input.y, fp[2], true);
       return output;

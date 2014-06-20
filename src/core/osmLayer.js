@@ -74,6 +74,13 @@ geo.osmLayer = function(arg) {
   /**
    * Transform a point or array of points in latitude-longitude space to
    * local space of the layer
+   *
+   * @param input Input can be of following types:
+   * geo.latlng, [geo.latlng], [x1,y1, x2, y2], [[x,y]], {x:val: y:val},
+   * [{x:val: y:val}]
+   *
+   * @returns geo.latlng, [geo.latlng], or {x:lon, y:lat}, [{x:lon, y:lat}]
+   * [x1,y1, x2, y2], [[x,y]]
    */
   ////////////////////////////////////////////////////////////////////////////
   this.toLocal = function(input) {
@@ -96,9 +103,11 @@ geo.osmLayer = function(arg) {
     } else if (input instanceof geo.latlng) {
       output = {};
       output.x = input.x();
-      output.y = geo.mercator.lat2y(input.lat());
+      output.y = geo.mercator.lat2y(input.y());
     } else {
-      throw 'toLocal does not handle ' + input;
+      output = {};
+      output.x = input.x;
+      output.y = geo.mercator.lat2y(input.y);
     }
 
     return output;
@@ -108,12 +117,16 @@ geo.osmLayer = function(arg) {
   /**
    * Transform a point or array of points in local space to
    * latitude-longitude space
+   *
+   * @input Input An object, array, of array of objects/array representing 2D
+   * point in space. [x,y], [[x,y]], [{x:val: y:val}], {x:val, y:val}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.fromLocal = function(input) {
-    var i, output = [];
+    var i, output;
 
     if (input instanceof Array && input.length > 0) {
+      output = [];
       output.length = input.length;
 
       if (input[0] instanceof Object) {
@@ -122,14 +135,22 @@ geo.osmLayer = function(arg) {
           output[i].x = input[i].x;
           output[i].y = geo.mercator.y2lat(input[i].y);
         }
+      } else if (input[0] instanceof Array) {
+        for (i = 0; i < input.length; ++i) {
+          output[i] = input[i];
+          output[i][1] = geo.mercator.y2lat(input[i][1]);
+        }
       } else {
         for (i = 0; i < input.length; ++i) {
           output[i] = input[i];
           output[i + 1] = geo.mercator.y2lat(input[i + 1]);
         }
       }
-    } else {
-      throw 'fromLocal does not handle ' + input;
+    }
+    else {
+      output = {};
+      output.x = input.x;
+      output.y = geo.mercator.y2lat(input.y);
     }
 
     return output;
@@ -307,8 +328,8 @@ geo.osmLayer = function(arg) {
         llx = 0.0, lly = this.height(), urx = this.width(), ury = 0.0,
         temp = null, tile = null, tile1x = null, tile1y = null, tile2x = null,
         tile2y = null, invJ = null, i = 0, j = 0,
-        worldPt1 = ren.displayToWorld([llx, lly])[0],
-        worldPt2 = ren.displayToWorld([urx, ury])[0];
+        worldPt1 = ren.displayToWorld([llx, lly]),
+        worldPt2 = ren.displayToWorld([urx, ury]);
 
     worldPt1[0] = Math.max(worldPt1[0], -180.0);
     worldPt1[0] = Math.min(worldPt1[0],  180.0);
