@@ -17,12 +17,13 @@
 </head>
 <body style="height: 100%;">
 <script>
+var myMap;
 $(function() {
     var mapOptions = {node: '#map',
                       zoom : 3,
                       center : [0.0, 0.0]},
-      myMap = geo.map(mapOptions),
       layer = geo.osmLayer({'renderer' : 'vglRenderer'});
+    myMap = geo.map(mapOptions);
 
     /// Resize the canvas to fill browser window dynamically
     window.addEventListener('resize', resizeCanvas, false);

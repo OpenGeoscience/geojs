@@ -128,11 +128,12 @@ ggl.vglRenderer = function(arg) {
       }
     /// Input is object {x:val, y:val}
     } else if (input instanceof Object) {
+      output = {};
       temp = ren.displayToWorld(vec4.fromValues(
                input.x, input.y, fdp[2], 1.0),
                cam.viewMatrix(), cam.projectionMatrix(),
                m_width, m_height);
-      output.push({x: temp[0], y: temp[1], z: temp[2], w: temp[3]});
+      output = {x: temp[0], y: temp[1], z: temp[2], w: temp[3]};
     } else {
       throw "Display to world conversion requires array of 2D/3D points";
     }
@@ -151,7 +152,7 @@ ggl.vglRenderer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.worldToDisplay = function(input) {
-    var input, xyzFormat, i, output, temp, delta, node = this.canvas(),
+    var input, i, output, temp, delta, node = this.canvas(),
         ren = this.contextRenderer(), cam = ren.camera(),
         fp = cam.focalPoint(), output = [];
 
@@ -159,9 +160,7 @@ ggl.vglRenderer = function(arg) {
     if (input instanceof Array && input.length > 0) {
       output = [];
 
-      // xyzFormat = input.length % 3 === 0 ? true : false;
-
-    /// Input is an array of objects
+      /// Input is an array of objects
       if (input[0] instanceof Object) {
         delta = 1;
         for (i = 0; i < input.length; i =+ delta) {
@@ -169,46 +168,54 @@ ggl.vglRenderer = function(arg) {
                    input[i].x, input[i].y, fp[2], 1.0), cam.viewMatrix(),
                    cam.projectionMatrix(),
                    m_width, m_height);
-          output[i] = {x:temp[0], y:temp[1], z:temp[2]};
+          output[i] = { x:temp[0], y:temp[1], z:temp[2] };
         }
-      /// Input is an array of array
       } else if (input[0] instanceof Array) {
+        /// Input is an array of array
+        delta = 1;
         for (i = 0; i < input.length; i =+ delta) {
-          // temp = ren.worldToDisplay(
-          //          vec4.fromValues(input[i][0] input[i][1], fp[2], 1.0),
-          //          cam.viewMatrix(), cam.projectionMatrix(), m_width, m_height);
-          // output[i].push(temp);
+          temp = ren.worldToDisplay(
+                   vec4.fromValues(input[i][0], input[i][1], fp[2], 1.0),
+                   cam.viewMatrix(), cam.projectionMatrix(), m_width, m_height);
+          output[i].push(temp);
         }
-      /// Input is a flat array of 2 or 3 dimension
       } else {
+        /// Input is a flat array of 2 or 3 dimension
         delta = input.length % 3 === 0 ? 3 : 2;
         if (delta === 2)  {
-          // for (i = 0; i < input.length; i =+ delta) {
-          //   temp = ren.worldToDisplay(vec4.fromValues(
-          //            input[i] input[i + 1], fp[2], 1.0), cam.viewMatrix(),
-          //            cam.projectionMatrix(),
-          //            m_width, m_height);
-          //   output.push(temp[0]);
-          //   output.push(temp[1]);
-          //   output.push(temp[2]);
-          // }
+          for (i = 0; i < input.length; i =+ delta) {
+            temp = ren.worldToDisplay(vec4.fromValues(
+                     input[i], input[i + 1], fp[2], 1.0), cam.viewMatrix(),
+                     cam.projectionMatrix(),
+                     m_width, m_height);
+            output.push(temp[0]);
+            output.push(temp[1]);
+            output.push(temp[2]);
+          }
         } else {
           for (i = 0; i < input.length; i =+ delta) {
-            // temp = ren.worldToDisplay(vec4.fromValues(
-            //              input[i] input[i + 1], input[i + 2], 1.0), cam.viewMatrix(),
-            //              cam.projectionMatrix(),
-            //              m_width, m_height);
-            // output.push(temp[0]);
-            // output.push(temp[1]);
-            // output.push(temp[2]);
+            temp = ren.worldToDisplay(vec4.fromValues(
+                         input[i], input[i + 1], input[i + 2], 1.0), cam.viewMatrix(),
+                         cam.projectionMatrix(),
+                         m_width, m_height);
+            output.push(temp[0]);
+            output.push(temp[1]);
+            output.push(temp[2]);
           }
         }
       }
     } else if (input instanceof Object) {
-      toDisplay(input.x, input.y, fp[2], true);
-      return output;
+      temp = ren.worldToDisplay(vec4.fromValues(
+               input.x, input.y, fp[2], 1.0), cam.viewMatrix(),
+               cam.projectionMatrix(),
+               m_width, m_height);
+
+      output = {x: temp[0], y: temp[1], z: temp[2]};
+    } else {
+      throw "World to display conversion requires array of 2D/3D points";
     }
-    throw "World to display conversion requires array of 2D/3D points";
+
+    return output;
   };
 
   ////////////////////////////////////////////////////////////////////////////
