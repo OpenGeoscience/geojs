@@ -54,7 +54,7 @@ ggl.pointFeature = function(arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._build = function() {
     var style = m_this.style(), positions = m_this.positions();
-    positions = geo.transform.transformFeature(m_this.renderer().layer().map().gcs(),
+    positions = geo.transform.transformFeature(m_this.renderer().map().gcs(),
                   this, true);
 
     if (m_actor) {
