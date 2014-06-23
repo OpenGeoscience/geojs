@@ -2,12 +2,6 @@
 /**
  * @module geo
  */
-
-/*jslint devel: true, forin: true, newcap: true, plusplus: true, */
-/*jslint white: true, indent: 2, continue:true*/
-
-/*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vgl, document, gl, vec3*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -21,7 +15,7 @@
  * @returns {geo.featureLayer}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.featureLayer = function(arg) {
+geo.featureLayer = function (arg) {
   "use strict";
   if (!(this instanceof geo.featureLayer)) {
     return new geo.featureLayer(arg);
@@ -46,7 +40,7 @@ geo.featureLayer = function(arg) {
    * @returns {geo.Feature} Will return a new feature
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.createFeature = function(featureName, arg) {
+  this.createFeature = function (featureName, arg) {
 
     var newFeature = geo.createFeature(
       featureName, m_this, this.renderer(), arg);
@@ -79,7 +73,7 @@ geo.featureLayer = function(arg) {
    * @returns {Array}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.features = function(val) {
+  this.features = function (val) {
     return this._features(val);
   };
 
@@ -88,8 +82,7 @@ geo.featureLayer = function(arg) {
    * Get/Set drawables
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._features = function(val) {
-    var i = 0;
+  this._features = function (val) {
     if (val === undefined) {
       return m_features || [];
     } else {
@@ -104,10 +97,10 @@ geo.featureLayer = function(arg) {
    * Delete feature
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._delete = function(feature) {
+  this._delete = function (feature) {
     var i;
 
-    for(i = 0; i < m_features.length; ++i) {
+    for (i = 0; i < m_features.length; i += 1) {
       if (m_features[i] === feature) {
         m_features[i]._exit();
         this.dataTime().modified();
@@ -126,7 +119,7 @@ geo.featureLayer = function(arg) {
    * Do not call parent _init method as its already been executed
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._init = function() {
+  this._init = function () {
     if (this.initialized()) {
       return this;
     }
@@ -135,18 +128,18 @@ geo.featureLayer = function(arg) {
     s_init.call(this);
 
     /// Bind events to handlers
-    this.on(geo.event.resize, function(event) {
+    this.on(geo.event.resize, function (event) {
       m_this.renderer()._resize(event.x, event.y, event.width, event.height);
       m_this._update({});
       m_this.renderer()._render();
     });
 
-    this.on(geo.event.pan, function(event) {
+    this.on(geo.event.pan, function (event) {
       m_this._update({event: event});
       m_this.renderer()._render();
     });
 
-    this.on(geo.event.zoom, function(event) {
+    this.on(geo.event.zoom, function (event) {
       if (m_this.map()) {
         m_this.map().zoom(event.curr_zoom);
       }
@@ -162,7 +155,7 @@ geo.featureLayer = function(arg) {
    * Update layer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._update = function(request) {
+  this._update = function (request) {
     var i, reset = false;
 
     if (!m_features) {
@@ -173,18 +166,18 @@ geo.featureLayer = function(arg) {
     s_update.call(this, request);
 
     if (!this.source() && m_features && m_features.length === 0) {
-      console.log('[info] No valid data source found.');
+      console.log("[info] No valid data source found.");
       return;
     }
 
     if (this.dataTime().getMTime() > this.updateTime().getMTime()) {
-      for (i = 0; i < m_features.length; ++i) {
-          m_features[i].renderer(this.renderer());
+      for (i = 0; i < m_features.length; i += 1) {
+        m_features[i].renderer(this.renderer());
       }
       reset = true;
     }
 
-    for (i = 0; i < m_features.length; ++i) {
+    for (i = 0; i < m_features.length; i += 1) {
       m_features[i]._update();
     }
 
@@ -202,7 +195,7 @@ geo.featureLayer = function(arg) {
    * Draw
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._draw = function() {
+  this._draw = function () {
     this.renderer()._render();
     return this;
   };
@@ -212,13 +205,13 @@ geo.featureLayer = function(arg) {
    * Clear all features in layer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.clear = function() {
+  this.clear = function () {
     var i;
 
     if (!m_features)
       return this;
 
-    for(i = 0; i < m_features.length; ++i) {
+    for (i = 0; i < m_features.length; i += 1) {
       m_features[i]._exit();
     }
 

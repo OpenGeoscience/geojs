@@ -2,11 +2,6 @@
 /**
  * @module geo
  */
-
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, indent: 2*/
-
-/*global geo, ogs, inherit, document$*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -17,7 +12,7 @@
  * @returns {geo.feature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.feature = function(arg) {
+geo.feature = function (arg) {
   "use strict";
   if (!(this instanceof geo.feature)) {
     return new geo.feature(arg);
@@ -46,8 +41,8 @@ geo.feature = function(arg) {
    * Get/Set style used by the feature
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.style = function(arg1, arg2) {
-    if (arg1 === undefined ) {
+  this.style = function (arg1, arg2) {
+    if (arg1 === undefined) {
       return m_style;
     }  else if (arg2 === undefined) {
       m_style = $.extend({}, m_style, arg1);
@@ -65,16 +60,16 @@ geo.feature = function(arg) {
    * Get layer referenced by the feature
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.layer = function() {
+  this.layer = function () {
     return m_layer;
-  }
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Get renderer used by the feature
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.renderer = function() {
+  this.renderer = function () {
     return m_renderer;
   };
 
@@ -83,7 +78,7 @@ geo.feature = function(arg) {
    * Get list of drawables or nodes that are context/api specific.
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.drawables = function() {
+  this.drawables = function () {
     return this._drawables();
   };
 
@@ -92,8 +87,8 @@ geo.feature = function(arg) {
    * Get/Set projection of the feature
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.gcs = function(val) {
-    if (val === undefined ) {
+  this.gcs = function (val) {
+    if (val === undefined) {
       return m_gcs;
     } else {
       m_gcs = val;
@@ -107,8 +102,8 @@ geo.feature = function(arg) {
    * Get/Set visibility of the feature
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.visible = function(val) {
-    if (val === undefined ) {
+  this.visible = function (val) {
+    if (val === undefined) {
       return m_visible;
     } else {
       m_visible = val;
@@ -124,8 +119,8 @@ geo.feature = function(arg) {
    * Bin number is typically used for sorting the order of rendering
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.bin = function(val) {
-    if (val === undefined ) {
+  this.bin = function (val) {
+    if (val === undefined) {
       return m_bin;
     } else {
       m_bin = val;
@@ -139,8 +134,8 @@ geo.feature = function(arg) {
    * Get/Set timestamp of data change
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.dataTime = function(val) {
-    if (val === undefined ) {
+  this.dataTime = function (val) {
+    if (val === undefined) {
       return m_dataTime;
     } else {
       m_dataTime = val;
@@ -154,8 +149,8 @@ geo.feature = function(arg) {
    * Get/Set timestamp of last time build happened
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.buildTime = function(val) {
-    if (val === undefined ) {
+  this.buildTime = function (val) {
+    if (val === undefined) {
       return m_buildTime;
     } else {
       m_buildTime = val;
@@ -169,8 +164,8 @@ geo.feature = function(arg) {
    * Get/Set timestamp of last time update happened
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.updateTime = function(val) {
-    if (val === undefined ) {
+  this.updateTime = function (val) {
+    if (val === undefined) {
       return m_updateTime;
     } else {
       m_updateTime = val;
@@ -186,7 +181,7 @@ geo.feature = function(arg) {
    * Derived class should implement this
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._init = function(arg) {
+  this._init = function (arg) {
     if (!m_layer) {
       throw "Feature requires a valid layer";
     }
@@ -202,7 +197,7 @@ geo.feature = function(arg) {
    * Derived class should implement this
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._build = function() {
+  this._build = function () {
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -212,7 +207,7 @@ geo.feature = function(arg) {
    * Derived class should implement this
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._drawables = function() {
+  this._drawables = function () {
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -222,7 +217,7 @@ geo.feature = function(arg) {
    * Derived class should implement this
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._update = function() {
+  this._update = function () {
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -232,7 +227,7 @@ geo.feature = function(arg) {
    * Derived class should implement this
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._exit = function() {
+  this._exit = function () {
   };
 
   this._init(arg);

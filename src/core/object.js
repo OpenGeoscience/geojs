@@ -2,12 +2,6 @@
 /**
  * @module geo
  */
-
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, indent: 2, unparam: true*/
-
-/*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vgl, document*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -18,7 +12,7 @@
  * @returns {geo.object}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.object = function(cfg) {
+geo.object = function () {
   "use strict";
   if (!(this instanceof geo.object)) {
     return new geo.object();
@@ -98,7 +92,8 @@ geo.object = function(cfg) {
     if (m_eventHandlers.hasOwnProperty(event)) {
       m_eventHandlers[event] = m_eventHandlers[event].filter(function (f) {
           return f !== arg;
-      });
+        }
+      );
     }
     return this;
   };
