@@ -87,6 +87,7 @@ set(_source_files
   core/feature.js
   core/pointFeature.js
   core/lineFeature.js
+  core/pathFeature.js
   core/polygonFeature.js
   core/planeFeature.js
   core/geomFeature.js
@@ -106,6 +107,7 @@ set(_source_files
   d3/object.js
   d3/pointFeature.js
   d3/lineFeature.js
+  d3/pathFeature.js
   d3/graphFeature.js
   d3/d3Renderer.js
 )

@@ -6,19 +6,19 @@
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Create a new instance of class lineFeature
+ * Create a new instance of class pathFeature
  *
  * @class
- * @returns {gd3.lineFeature}
+ * @returns {gd3.pathFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-gd3.lineFeature = function (arg) {
+gd3.pathFeature = function (arg) {
   'use strict';
-  if (!(this instanceof gd3.lineFeature)) {
-    return new gd3.lineFeature(arg);
+  if (!(this instanceof gd3.pathFeature)) {
+    return new gd3.pathFeature(arg);
   }
   arg = arg || {};
-  geo.lineFeature.call(this, arg);
+  geo.pathFeature.call(this, arg);
   gd3.object.call(this);
 
   ////////////////////////////////////////////////////////////////////////////
@@ -51,21 +51,38 @@ gd3.lineFeature = function (arg) {
   this._build = function () {
     var data = this.positions(),
         s_style = this.style(),
-        line = d3.svg.line()
-                .x(function (d) {
-                  return georef(d).x;
-                })
-                .y(function (d) { return georef(d).y; });
+        tmp, diag;
     s_update.call(this);
 
-    m_style.data = [data];
+    diag = function (d) {
+        var source = georef(d.source),
+            target = georef(d.target),
+          p = {
+          source: source,
+          target: target
+        };
+        return d3.svg.diagonal()(p);
+      };
+    tmp = [];
+    data.forEach(function (d, i) {
+      var src, trg;
+      if (i < data.length - 1) {
+        src = d;
+        trg = data[i + 1];
+        tmp.push({
+          source: src,
+          target: trg
+        });
+      }
+    });
+    m_style.data = tmp;
     m_style.attributes = {
-      d: line
+      d: diag
     };
 
     m_style.id = m_this._d3id();
     m_style.append = 'path';
-    m_style.classes = [ 'd3LineFeature' ];
+    m_style.classes = [ 'd3PathFeature' ];
     m_style.style = {
       fill: 'none',
       stroke: d3.rgb(
@@ -100,11 +117,11 @@ gd3.lineFeature = function (arg) {
 
     return this;
   };
-
+  
   this._init(arg);
   return this;
 };
 
-inherit(gd3.lineFeature, geo.lineFeature);
+inherit(gd3.pathFeature, geo.pathFeature);
 
-geo.registerFeature('d3', 'line', gd3.lineFeature);
+geo.registerFeature('d3', 'path', gd3.pathFeature);
