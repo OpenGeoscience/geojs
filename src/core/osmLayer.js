@@ -408,7 +408,7 @@ geo.osmLayer = function(arg) {
         this.feature._update();
         m_this._draw();
       };
-      feature = this.create('planeFeature', {drawOnAsyncResourceLoad: false})
+      feature = this.createFeature('plane', {drawOnAsyncResourceLoad: false})
                   .origin([tile.llx, tile.lly])
                   .upperLeft([tile.llx, tile.ury])
                   .lowerRight([tile.urx, tile.lly])
