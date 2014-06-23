@@ -78,10 +78,13 @@ $(function() {
         }
 
         // Load image to be used for drawing dots
+        var osmlayer = geo.osmLayer({'renderer' : 'vglRenderer'});
         var layer = geo.featureLayer({
             'renderer' : 'vglRenderer'});
         layer.create('pointFeature')
           .positions(citieslatlon);
+
+        myMap.addLayer(osm);
         myMap.addLayer(layer);
       }});
 });
