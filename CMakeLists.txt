@@ -441,8 +441,9 @@ if(BUILD_TESTING)
       DEPENDS "${JSHINT_EXECUTABLE}"
     )
     foreach(js ${_js_lint_files})
+      file(RELATIVE_PATH rel_f "${CMAKE_CURRENT_SOURCE_DIR}" "${js}")
       add_test(
-        NAME "jshint:${js}"
+        NAME "jshint:${rel_f}"
         COMMAND ${JSHINT_EXECUTABLE} ${js}
       )
     endforeach()
