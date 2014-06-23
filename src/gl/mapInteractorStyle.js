@@ -331,21 +331,25 @@ ggl.mapInteractorStyle = function() {
     /// TODO: Call base layer - reference layer
     center = m_map.baseLayer().toLocal(geo.latlng(center[0], center[1]));
 
-    pos = m_camera.position();
-    m_camera.setPosition(center.x, center.y, computeCameraDistance(zoom));
-    m_camera.setFocalPoint(center.x, center.y, fp[2]);
-    m_renderer.resetCameraClippingRange();
+    if (center instanceof Object && 'x' in center && 'y' in center &&
+      m_map.baseLayer() instanceof geo.osmLayer) {
 
-    renderers = m_renderWindow.renderers();
+      pos = m_camera.position();
+      m_camera.setPosition(center.x, center.y, computeCameraDistance(zoom));
+      m_camera.setFocalPoint(center.x, center.y, fp[2]);
+      m_renderer.resetCameraClippingRange();
 
-    /// TODO Check if we are allowed to transfrom the camera for this renderer
-    for (i = 0; i < renderers.length; i++) {
-      cam = renderers[i].camera();
-      if (cam !== m_camera) {
-        cam.setPosition(center.x, center.y, computeCameraDistance(zoom));
-        cam.setFocalPoint(center.x, center.y, fp[2]);
-        renderers[i].resetCameraClippingRange();
-        renderers[i].render();
+      renderers = m_renderWindow.renderers();
+
+      /// TODO Check if we are allowed to transfrom the camera for this renderer
+      for (i = 0; i < renderers.length; i++) {
+        cam = renderers[i].camera();
+        if (cam !== m_camera) {
+          cam.setPosition(center.x, center.y, computeCameraDistance(zoom));
+          cam.setFocalPoint(center.x, center.y, fp[2]);
+          renderers[i].resetCameraClippingRange();
+          renderers[i].render();
+        }
       }
     }
   };

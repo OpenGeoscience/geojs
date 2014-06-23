@@ -469,3 +469,5 @@ geo.osmLayer = function(arg) {
 };
 
 inherit(geo.osmLayer, geo.featureLayer);
+
+geo.registerLayer('osm', geo.osmLayer);

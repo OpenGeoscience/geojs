@@ -46,8 +46,7 @@ geo.featureLayer = function(arg) {
    * @returns {geo.Feature} Will return a new feature
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.create = function(featureName, arg) {
-    this._init();
+  this.createFeature = function(featureName, arg) {
 
     var newFeature = geo.createFeature(
       featureName, m_this, this.renderer(), arg);
@@ -61,6 +60,16 @@ geo.featureLayer = function(arg) {
     this.features(m_features);
     this.modified();
     return newFeature;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Delete feature
+   *
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.deleteFeature = function() {
+    // TODO:
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -219,3 +228,6 @@ geo.featureLayer = function(arg) {
 };
 
 inherit(geo.featureLayer, geo.layer);
+
+// Now register it
+geo.registerLayer('feature', geo.featureLayer);

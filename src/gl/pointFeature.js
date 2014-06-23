@@ -138,4 +138,4 @@ ggl.pointFeature = function(arg) {
 inherit(ggl.pointFeature, geo.pointFeature);
 
 // Now register it
-geo.registerFeature('vgl', 'pointFeature', ggl.pointFeature);
+geo.registerFeature('vgl', 'point', ggl.pointFeature);

@@ -210,26 +210,28 @@ geo.map = function(arg) {
    * @return {geom.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.addLayer = function(layer) {
-    if (layer !== null || layer !== undefined) {
-      layer.map(this);
-      layer._init();
-      layer._resize(m_x, m_y, m_width, m_height);
+  this.createLayer = function(layerName, arg) {
+    var newLayer = geo.createLayer(
+      layerName, m_this, arg);
 
-      if (layer.referenceLayer() || this.children().length === 0) {
-        this.baseLayer(layer);
-      }
-
-      this.addChild(layer);
-      this.modified();
-
-      m_this.trigger(geo.event.layerAdd, {
-        type: geo.event.layerAdd,
-        target: m_this,
-        layer: layer
-      });
+    if (newLayer !== null || newLayer !== undefined) {
+      newLayer._resize(m_x, m_y, m_width, m_height);
     }
-    return this;
+
+    if (newLayer.referenceLayer() || m_this.children().length === 0) {
+      m_this.baseLayer(newLayer);
+    }
+
+    m_this.addChild(newLayer);
+    m_this.modified();
+
+    m_this.trigger(geo.event.layerAdd, {
+      type: geo.event.layerAdd,
+      target: m_this,
+      layer: newLayer
+    });
+
+    return newLayer;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -241,7 +243,7 @@ geo.map = function(arg) {
    * @return {geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.removeLayer = function(layer) {
+  this.delete = function(layer) {
     var i;
 
     if (layer !== null && layer !== undefined) {
