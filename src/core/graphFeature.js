@@ -30,7 +30,7 @@ geo.graphFeature = function (arg) {
       s_style = this.style,
       m_nodes = null,
       m_points = null,
-      m_lines = [],
+      m_links = [],
       s_init = this._init;
 
 
@@ -46,11 +46,12 @@ geo.graphFeature = function (arg) {
       {
         nodes: {
           size: 5.0,
-          color: [0.0, 0.0, 1.0],
+          color: [0.0, 0.0, 1.0]
         },
-        lines: {
+        links: {
           color: [1.0, 1.0, 1.0]
-        }
+        },
+        linkType: "path" /* 'pathFeature' || 'lineFeature' */
       },
       arg.style === undefined ? {} : arg.style
     );
@@ -73,8 +74,8 @@ geo.graphFeature = function (arg) {
     }
     // set styles for sub-features
     m_points.style(arg.nodes);
-    m_lines.forEach(function (l) {
-      l.style(arg.lines);
+    m_links.forEach(function (l) {
+      l.style(arg.links);
     });
     return this;
   };
@@ -86,29 +87,36 @@ geo.graphFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.nodes = function (val) {
     var layer = m_this.layer(),
-        nLines = 0;
+        nLinks = 0,
+        style;
 
     if (val === undefined) {
       return m_nodes;
     }
+
+    // get the feature style object
+    style = m_this.style();
+
     // Copy incoming array of nodes
     m_nodes = val.slice(0);
 
     // create point features
     m_points.positions(m_nodes);
 
-    // get lines from node connections
+    // get links from node connections
     m_nodes.forEach(function (source) {
       (source.children || []).forEach(function (target) {
-        nLines += 1;
-        if (m_lines.length < nLines) {
-          m_lines.push(layer.createFeature("line").style(m_this.style().lines));
+        nLinks += 1;
+        if (m_links.length < nLinks) {
+          m_links.push(
+            layer.createFeature(style.linkType).style(style.links)
+          );
         }
-        m_lines[nLines - 1].positions([source, target]);
+        m_links[nLinks - 1].positions([source, target]);
       });
     });
 
-    m_lines.splice(nLines, m_lines.length - nLines).forEach(function (l) {
+    m_links.splice(nLinks, m_links.length - nLinks).forEach(function (l) {
       layer._delete(l);
     });
 
