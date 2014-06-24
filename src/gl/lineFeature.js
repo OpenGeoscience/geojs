@@ -116,4 +116,4 @@ ggl.lineFeature = function(arg) {
 inherit(ggl.lineFeature, geo.lineFeature);
 
 // Now register it
-geo.registerFeature('vgl', 'lineFeature', ggl.lineFeature);
+geo.registerFeature('vgl', 'line', ggl.lineFeature);
