@@ -52,9 +52,6 @@ set(_source_files
   core/latlng.js
   core/layer.js
   core/featureLayer.js
-  core/featureCollection.js
-  core/layerSource.js
-  core/archiveLayerSource.js
   core/event.js
   core/time.js
   core/map.js
@@ -81,30 +78,6 @@ set(_source_files
   d3/lineFeature.js
   d3/graphFeature.js
   d3/d3Renderer.js
-  ui/init.js
-  ui/gis.js
-  srv/init.js
-  srv/webSocket.js
-  wfl/init.js
-  wfl/utils.js
-  wfl/workflow.js
-  wfl/module.js
-  wfl/connection.js
-  wfl/port.js
-  wfl/registry.js
-  wfl/inputModule.js
-  wfl/outputPort.js
-  wfl/inputPort.js
-  wfl/layerSource.js
-  wfl/editor.js
-  wfl/style.js
-  wfl/staticWorkflows.js
-  plugin/jquery-plugin.js
-)
-
-set(_exclude_js_lint
-  wfl/registry.js
-  wfl/staticWorkflows.js
 )
 
 # GeoJS requires a deployment directory
@@ -149,10 +122,6 @@ foreach(d ${_source_files})
     COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/src/${d}" "${GEOJS_SRC_DIR}/${d}"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/${d}"
   )
-  list_contains(contains d ${_exclude_js_lint})
-  if(NOT contains)
-      set(_js_lint_files ${_js_lint_files} ${CMAKE_CURRENT_SOURCE_DIR}/src/${d})
-  endif()
   set(_js_uglify_files ${_js_uglify_files} "${GEOJS_SRC_DIR}/${d}")
   set(_script_include ${_script_include}<script src=\"/src/${d}\" data-cover></script>)
 endforeach()
