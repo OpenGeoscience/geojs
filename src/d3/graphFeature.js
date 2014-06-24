@@ -11,4 +11,4 @@ gd3.graphFeature = function (arg) {
 
 inherit(gd3.graphFeature, geo.graphFeature);
 
-geo.registerFeature('d3', 'graphFeature', gd3.graphFeature);
+geo.registerFeature('d3', 'graph', gd3.graphFeature);

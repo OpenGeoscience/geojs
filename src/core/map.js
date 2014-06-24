@@ -351,7 +351,7 @@ geo.map = function(arg) {
     } else if (input instanceof geo.latlng) {
       world = m_baseLayer.toLocal(input);
       output = m_baseLayer.renderer().worldToDisplay(
-                 {x: world.x(), y: world.y()});
+                 {x: world.x, y: world.y});
     } else if (input instanceof Object) {
        /// Input is Object
       world = m_baseLayer.toLocal(input);
