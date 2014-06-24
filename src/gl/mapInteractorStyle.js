@@ -270,7 +270,7 @@ ggl.mapInteractorStyle = function() {
     /// Update render params
     m_this.updateRenderParams();
 
-    var delta = event.originalEvent.wheelDelta / 120.0;
+    var delta = event.originalEvent.wheelDeltaY / 120.0;
     delta = Math.pow(1 + Math.abs(delta)/2 , delta > 0 ? -1 : 1);
 
     /// Compute current mouse position
