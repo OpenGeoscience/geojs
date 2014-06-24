@@ -335,25 +335,8 @@ geo.map = function(arg) {
     var i, world, output;
 
     /// Now handle different data types
-    if (input instanceof Array && input.length > 0) {
-      output = [];
-      /// Input is array of geo.latlng
-      if (input[0] instanceof geo.latlng) {
-        for (i = 0; i < input.length; ++i) {
-        world = m_baseLayer.toLocal(input)[0];
-        output.push(m_baseLayer.renderer().worldToDisplay(
-          {x: world.x(), y: world.y()}));
-        }
-      } else {
-        /// Input is array of positions
-        output = m_baseLayer.renderer().worldToDisplay(input).slice(0);
-      }
-    } else if (input instanceof geo.latlng) {
-      world = m_baseLayer.toLocal(input);
-      output = m_baseLayer.renderer().worldToDisplay(
-                 {x: world.x, y: world.y});
-    } else if (input instanceof Object) {
-       /// Input is Object
+    if ((input instanceof Array &&
+         input.length > 0) || input instanceof Object) {
       world = m_baseLayer.toLocal(input);
       output = m_baseLayer.renderer().worldToDisplay(world);
     } else {
@@ -373,11 +356,8 @@ geo.map = function(arg) {
     var output;
 
     /// Now handle different data types
-    if (input instanceof Array && input.length > 0 ||
-        input instanceof Object) {
-      output = m_baseLayer.renderer().displayToWorld(input);
-      output = m_baseLayer.fromLocal(output);
-    } else if (input instanceof Object) {
+    if ((input instanceof Array && input.length > 0) ||
+         input instanceof Object) {
       output = m_baseLayer.renderer().displayToWorld(input);
       output = m_baseLayer.fromLocal(output);
     } else {

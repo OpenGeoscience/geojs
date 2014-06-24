@@ -72,11 +72,11 @@ geo.osmLayer = function(arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Transform a point or array of points in latitude-longitude space to
-   * local space of the layer
+   * Transform a point or array of points in latitude-longitude-altitude
+   * space to local space of the layer
    *
    * @param input Input can be of following types:
-   * geo.latlng, [geo.latlng], [x1,y1, x2, y2], [[x,y]], {x:val: y:val},
+   * geo.latlng, [geo.latlng], [x1,y1, x2, y2], [[x,y]], {x:val: y:val, z:val},
    * [{x:val: y:val}]
    *
    * @returns geo.latlng, [geo.latlng], or {x:lon, y:lat}, [{x:lon, y:lat}]
@@ -84,7 +84,7 @@ geo.osmLayer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.toLocal = function(input) {
-    var i, output;
+    var i, output, delta;
 
     /// Now handle different data types
     if (input instanceof Array && input.length > 0) {
@@ -97,8 +97,28 @@ geo.osmLayer = function(arg) {
           output[i] = geo.latlng(input[i]);
           output[i].lat(geo.mercator.lat2y(output[i].lat()));
         }
-      } else {
-        output = m_this.renderer().worldToDisplay(input).slice(0);
+      } else if (input[0] instanceof Array) {
+        delta = input % 3 === 0 ? 3 : 2;
+
+        if (delta === 2) {
+          for (i = 0; i < input.length; i += delta) {
+            output[i] = input[i];
+            output[i+1] = geo.mercator.lat2y(input[i+1]);
+          }
+        } else {
+          for (i = 0; i < input.length; i += delta) {
+            output[i] = input[i];
+            output[i+1] = geo.mercator.lat2y(input[i+1]);
+            output[i+2] = input[i+2];
+          }
+        }
+      } else if (x in input[0] && y in input[0] && z in input[0]) {
+        /// Input is array of object
+        output[i] = { x: input[i].x, y: geo.mercator.lat2y(input[i].y),
+                      z: input[i].z };
+      } else if (x in input[0] && y in input[0] && z in input[0]) {
+        /// Input is array of object
+        output[i] = { x: input[i].x, y: geo.mercator.lat2y(input[i].y)};
       }
     } else if (input instanceof geo.latlng) {
       output = {};
