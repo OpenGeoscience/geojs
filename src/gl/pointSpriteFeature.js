@@ -8,7 +8,7 @@
  * @returns {geo.pointFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.pointSpritesGeomFeature = function(image, positions, colors) {
+geo.pointSpritesGeomFeature = function (image, positions, colors) {
   "use strict";
   if (!(this instanceof geo.pointSpritesGeomFeature)) {
     return new geo.pointSpritesGeomFeature(image, positions, colors);
@@ -17,7 +17,8 @@ geo.pointSpritesGeomFeature = function(image, positions, colors) {
   geo.feature.call(this);
 
   // Initialize
-  var actor = vgl.utils.createPointSprites(image, positions, colors);
+  var actor = vgl.utils.createPointSprites(image, positions, colors),
+      m_lookupTable = null;
   this.setMapper(actor.mapper());
   this.setMaterial(actor.material());
 
@@ -28,9 +29,9 @@ geo.pointSpritesGeomFeature = function(image, positions, colors) {
    * @override
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.updateColorMapping = function() {
-  if (!m_lookupTable) {
-      console.log('[warning] Invalid lookup table');
+  this.updateColorMapping = function () {
+    if (!m_lookupTable) {
+      console.log("[warning] Invalid lookup table");
       return;
     }
 

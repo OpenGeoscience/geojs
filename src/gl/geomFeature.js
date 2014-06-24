@@ -9,7 +9,7 @@
  * @returns {ggl.geomFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-ggl.geomFeature = function(arg) {
+ggl.geomFeature = function (arg) {
   "use strict";
   if (!(this instanceof ggl.geomFeature)) {
     return new ggl.geomFeature(arg);
@@ -18,24 +18,27 @@ ggl.geomFeature = function(arg) {
   geo.geomFeature.call(this, arg);
 
   // Initialize
-  var m_style = this.style(),
-      m_geom = args.geom || null,
+  var m_this = this,
+      m_geom = arg.geom || null,
       m_actor = vgl.actor(),
       m_mapper = vgl.mapper(),
       m_material = null,
       m_scalar = null,
       m_color = arg.color || [1.0, 1.0, 1.0],
-      m_buildTime = null;
+      m_buildTime = null,
+      m_noOfPrimitives = 0;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._build = function() {
+  this._build = function () {
+    var style = m_this.style();
+
     // Vertex color gets the preference
     if (m_geom !== null) {
-      m_scalar = m_geom.sourceData(vgl.vertexAttributeKeys.Scalar),
+      m_scalar = m_geom.sourceData(vgl.vertexAttributeKeys.Scalar);
       m_color = m_geom.sourceData(vgl.vertexAttributeKeys.Color);
       m_mapper.setGeometryData(m_geom);
     }
@@ -75,7 +78,7 @@ ggl.geomFeature = function(arg) {
    * @override
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._update = function() {
+  this._update = function () {
     if (m_buildTime &&
         m_buildTime.getMTime() < this.getMTime()) {
       if (m_color instanceof vgl.lookupTable) {
@@ -97,8 +100,8 @@ ggl.geomFeature = function(arg) {
    * @returns {ggl.geomFeature}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.geometry = function(val) {
-    if (val === undefined ) {
+  this.geometry = function (val) {
+    if (val === undefined) {
       return m_geom;
     } else {
       m_geom = val;

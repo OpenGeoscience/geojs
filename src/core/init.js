@@ -4,12 +4,14 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 
+/* jshint ignore: start */
 var ogs;
 if (!window || window.ogs === undefined) {
   ogs = {};
 } else {
   ogs = window.ogs;
 }
+/* jshint ignore: end */
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -71,7 +73,7 @@ inherit = function (C, P) { // jshint ignore: line
  * @returns {number} *
  */
 //////////////////////////////////////////////////////////////////////////////
-Object.size = function(obj) { // jshint ignore: line
+Object.size = function (obj) { // jshint ignore: line
   "use strict";
 
   var size = 0, key = null;
@@ -160,7 +162,9 @@ geo.createFeature  = function (name, layer, renderer, arg) {
  * Register a new layer type
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.registerLayer = function(name, func) {
+geo.registerLayer = function (name, func) {
+  "use strict";
+
   if (geo.layers === undefined) {
     geo.layers = {};
   }
@@ -173,9 +177,11 @@ geo.registerLayer = function(name, func) {
  * Create new instance of the layer
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.createLayer  = function(name, map, arg) {
+geo.createLayer = function (name, map, arg) {
+  "use strict";
+
   /// Default renderer is vgl
-  var options = {'map': map, 'renderer': 'vglRenderer'},
+  var options = {"map": map, "renderer": "vglRenderer"},
       layer = null;
 
   if (name in geo.layers) {
@@ -188,4 +194,4 @@ geo.createLayer  = function(name, map, arg) {
   } else {
     return null;
   }
-}
+};

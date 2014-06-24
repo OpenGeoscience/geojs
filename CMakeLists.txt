@@ -50,8 +50,7 @@ endif()
 if(${BUILD_TESTING})
   set(need_python TRUE)
 
-  # turn on when fixed
-  set(JS_HINT_TESTS OFF CACHE BOOL "Generate style tests for JS source files.")
+  set(JS_HINT_TESTS ON CACHE BOOL "Generate style tests for JS source files.")
 
   set(PHANTOMJS_TESTS ON CACHE BOOL "Generate phantomjs unit tests.")
 
@@ -143,8 +142,8 @@ macro(list_contains var value)
   endforeach(value2)
 endmacro(list_contains)
 
-set(_js_lint_files)
 set(_js_uglify_files)
+set(_js_lint_files)
 set(_script_include)
 foreach(d ${_source_files})
   add_custom_command(
@@ -152,6 +151,7 @@ foreach(d ${_source_files})
     COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/src/${d}" "${GEOJS_SRC_DIR}/${d}"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/${d}"
   )
+  set(_js_lint_files ${_js_lint_files} "${CMAKE_CURRENT_SOURCE_DIR}/src/${d}")
   set(_js_uglify_files ${_js_uglify_files} "${GEOJS_SRC_DIR}/${d}")
   set(_script_include ${_script_include}<script src=\"/src/${d}\" data-cover></script>)
 endforeach()

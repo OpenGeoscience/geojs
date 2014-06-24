@@ -2,11 +2,6 @@
 /**
  * @module geo
  */
-
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global geo, ogs, vec4, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -17,7 +12,7 @@
  * @returns {geo.timestamp}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.timestamp = function() {
+geo.timestamp = function () {
   'use strict';
   if (!(this instanceof geo.timestamp)) {
     return new geo.timestamp();

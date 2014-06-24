@@ -2,11 +2,6 @@
 /**
  * @module geo
  */
-
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, indent: 2*/
-
-/*global geo, gd3, inherit, document, d3, $*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -17,8 +12,8 @@
  * @returns {gd3.lineFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-gd3.lineFeature = function(arg) {
-  "use strict";
+gd3.lineFeature = function (arg) {
+  'use strict';
   if (!(this instanceof gd3.lineFeature)) {
     return new gd3.lineFeature(arg);
   }
@@ -48,12 +43,12 @@ gd3.lineFeature = function(arg) {
    * Initialize
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._init = function(arg) {
+  this._init = function (arg) {
     s_init.call(this, arg);
     return this;
   };
 
-  this._build = function() {
+  this._build = function () {
     var data = this.positions(),
         s_style = this.style(),
         line = d3.svg.line()
@@ -102,7 +97,11 @@ gd3.lineFeature = function(arg) {
     m_style.classes = [ 'd3LineFeature' ];
     m_style.style = {
       fill: 'none',
-      stroke: d3.rgb(s_style.color[0]*255, s_style.color[1]*255, s_style.color[2]*255),
+      stroke: d3.rgb(
+        s_style.color[0] * 255,
+        s_style.color[1] * 255,
+        s_style.color[2] * 255
+      ),
       'stroke-width': s_style.width[0].toString() + 'px',
       'stroke-opacity': s_style.opacity
     };
@@ -121,7 +120,7 @@ gd3.lineFeature = function(arg) {
    * @override
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._update = function() {
+  this._update = function () {
     s_update.call(this);
 
     if (this.dataTime().getMTime() >= m_buildTime.getMTime()) {

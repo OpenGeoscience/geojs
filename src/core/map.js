@@ -234,7 +234,6 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.deleteLayer = function (layer) {
-    var i;
 
     if (layer !== null && layer !== undefined) {
       layer._exit();
@@ -326,7 +325,7 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.gcsToDisplay = function (input) {
-    var i, world, output;
+    var world, output;
 
     /// Now handle different data types
     if ((input instanceof Array &&

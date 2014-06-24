@@ -102,7 +102,7 @@ geo.graphFeature = function (arg) {
       (source.children || []).forEach(function (target) {
         nLines += 1;
         if (m_lines.length < nLines) {
-          m_lines.push(layer.createFeature('line').style(m_this.style().lines));
+          m_lines.push(layer.createFeature("line").style(m_this.style().lines));
         }
         m_lines[nLines - 1].positions([source, target]);
       });
@@ -117,7 +117,7 @@ geo.graphFeature = function (arg) {
     return this;
   };
 
-  m_points = this.layer().createFeature('point');
+  m_points = this.layer().createFeature("point");
 
   if (arg.nodes) {
     this.nodes(arg.nodes);

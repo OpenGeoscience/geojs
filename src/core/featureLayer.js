@@ -62,7 +62,7 @@ geo.featureLayer = function (arg) {
    *
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.deleteFeature = function() {
+  this.deleteFeature = function () {
     // TODO:
   };
 
@@ -228,4 +228,4 @@ geo.featureLayer = function (arg) {
 inherit(geo.featureLayer, geo.layer);
 
 // Now register it
-geo.registerLayer('feature', geo.featureLayer);
+geo.registerLayer("feature", geo.featureLayer);

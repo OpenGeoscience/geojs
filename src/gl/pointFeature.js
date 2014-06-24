@@ -2,11 +2,6 @@
 /**
  * @module geo.gl
  */
-
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, indent: 2*/
-
-/*global geo, ggl, inherit, document$*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -17,7 +12,7 @@
  * @returns {ggl.pointFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-ggl.pointFeature = function(arg) {
+ggl.pointFeature = function (arg) {
   "use strict";
   if (!(this instanceof ggl.pointFeature)) {
     return new ggl.pointFeature(arg);
@@ -32,7 +27,6 @@ ggl.pointFeature = function(arg) {
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       m_actor = null,
-      m_buildTime = vgl.timestamp(),
       s_init = this._init,
       s_update = this._update;
 
@@ -41,7 +35,7 @@ ggl.pointFeature = function(arg) {
    * Initialize
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._init = function(arg) {
+  this._init = function (arg) {
     s_init.call(this, arg);
   };
 
@@ -52,7 +46,7 @@ ggl.pointFeature = function(arg) {
    * @override
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._build = function() {
+  this._build = function () {
     var style = m_this.style(),
     positions = geo.transform.transformFeature(m_this.renderer().map().gcs(),
                   this, false);
@@ -62,7 +56,7 @@ ggl.pointFeature = function(arg) {
     }
 
     if (style.point_sprites === true) {
-      if (!style.point_sprites_image == null) {
+      if (style.point_sprites_image !== null) {
         throw "[error] Invalid image for point sprites";
       }
 
@@ -83,7 +77,7 @@ ggl.pointFeature = function(arg) {
    * @override
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._update = function() {
+  this._update = function () {
     var style =  m_this.style();
 
     s_update.call(this);
@@ -99,22 +93,22 @@ ggl.pointFeature = function(arg) {
       }
 
       if (style.point_sprites === true) {
-        if (!style.point_sprites_image == null) {
+        if (style.point_sprites_image !== null) {
           throw "[error] Invalid image for point sprites";
         }
 
         if (style.width && style.height) {
-          m_actor.material().shaderProgram().uniform('pointSize').set(
+          m_actor.material().shaderProgram().uniform("pointSize").set(
             [style.width, style.height]);
         }
         else if (style.size) {
-          m_actor.material().shaderProgram().uniform('pointSize').set(
+          m_actor.material().shaderProgram().uniform("pointSize").set(
             [style.size, style.size]);
         }
       } else {
         /// Points only has support for size
         if (style.size) {
-          m_actor.material().shaderProgram().uniform('pointSize').set(
+          m_actor.material().shaderProgram().uniform("pointSize").set(
             style.size);
         }
       }
@@ -127,7 +121,7 @@ ggl.pointFeature = function(arg) {
    * Destroy
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._exit = function() {
+  this._exit = function () {
     m_this.renderer().contextRenderer().removeActor(m_actor);
   };
 
@@ -138,4 +132,4 @@ ggl.pointFeature = function(arg) {
 inherit(ggl.pointFeature, geo.pointFeature);
 
 // Now register it
-geo.registerFeature('vgl', 'point', ggl.pointFeature);
+geo.registerFeature("vgl", "point", ggl.pointFeature);

@@ -2,10 +2,6 @@
 /**
  * @module gd3
  */
-
-/*jslint devel: true, unparam: true, indent: 2*/
-
-/*global window, geo, gd3, ogs, vec4, inherit, d3*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -16,7 +12,7 @@
  * @returns {gd3.d3Renderer}
  */
 //////////////////////////////////////////////////////////////////////////////
-gd3.d3Renderer = function(arg) {
+gd3.d3Renderer = function (arg) {
   'use strict';
 
   if (!(this instanceof gd3.d3Renderer)) {
@@ -47,24 +43,8 @@ gd3.d3Renderer = function(arg) {
     return layer.map();
   }
 
-  function getBaseLayer() {
-    var map = getMap();
-    if (!map) {
-      return null;
-    }
-    return map.baseLayer();
-  }
-
-  function getBaseRenderer() {
-    var base = getBaseLayer();
-    if (!base) {
-      return null;
-    }
-    return base.renderer();
-  }
-
   // translate the layer by a vector delta or reset translation to zero
-  function translate (delta) {
+  function translate(delta) {
     if (delta === undefined) {
       m_translate[0] = 0;
       m_translate[1] = 0;
@@ -82,7 +62,7 @@ gd3.d3Renderer = function(arg) {
    * Initialize
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._init = function(arg) {
+  this._init = function (arg) {
     s_init.call(this, arg);
 
     if (!this.canvas()) {
@@ -102,7 +82,7 @@ gd3.d3Renderer = function(arg) {
   this.displayToWorld = function (pt) {
     var map = getMap();
     if (!map) {
-      throw "Cannot project until this layer is connected to a map.";
+      throw 'Cannot project until this layer is connected to a map.';
     }
     return map.displayToGcs(pt);
   };
@@ -110,7 +90,7 @@ gd3.d3Renderer = function(arg) {
   this.worldToDisplay = function (pt) {
     var map = getMap();
     if (!map) {
-      throw "Cannot project until this layer is connected to a map.";
+      throw 'Cannot project until this layer is connected to a map.';
     }
     var v = map.gcsToDisplay(pt);
     v.x -= m_translate[0];
@@ -123,7 +103,7 @@ gd3.d3Renderer = function(arg) {
    * Get API used by the renderer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.api = function() {
+  this.api = function () {
     return 'd3';
   };
 
@@ -132,7 +112,7 @@ gd3.d3Renderer = function(arg) {
    * Handle resize event
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._resize = function(x, y, w, h) {
+  this._resize = function (x, y, w, h) {
     m_this.canvas().attr('width', w);
     m_this.canvas().attr('height', h);
     translate();
@@ -144,7 +124,7 @@ gd3.d3Renderer = function(arg) {
    * Render
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._render = function() {
+  this._render = function () {
     // unnecessary here?
   };
 
@@ -153,7 +133,7 @@ gd3.d3Renderer = function(arg) {
    * Exit
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._exit = function() {
+  this._exit = function () {
     this.canvas().remove();
   };
 
@@ -217,7 +197,7 @@ gd3.d3Renderer = function(arg) {
   });
 
   // connect to zoom event
-  this.on(geo.event.zoom, function (event) {
+  this.on(geo.event.zoom, function () {
     // reset the translation
     translate();
 
