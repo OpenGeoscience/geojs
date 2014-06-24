@@ -15,7 +15,7 @@ class osmBase(object):
         self.loadURL('d3Animation/index.html')
         self.wait()
         self.drag('#map', (225, 125))
-        time.sleep(1)
+        time.sleep(2)
 
     def testd3AnimateForward(self):
         self.loadPage()
