@@ -78,7 +78,9 @@ $(function() {
         }
 
       myMap.createLayer('osm');
-      myMap.createLayer('feature').createFeature('point')
+      myMap.draw();
+      var layer = myMap.createLayer('feature');
+      layer.createFeature('point')
         .positions(citieslatlon);
       myMap.draw();
     }});

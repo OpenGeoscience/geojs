@@ -319,7 +319,7 @@ ggl.mapInteractorStyle = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._syncReset = function() {
-    var i, renderers, pos, fp, zoom, center, cam;
+    var i, renderers, pos, fp, zoom, center, cam, clippingRange;
 
     /// Make sure we are uptodate with renderer and render window
     m_this.updateRenderParams();
@@ -334,22 +334,27 @@ ggl.mapInteractorStyle = function() {
     if (center instanceof Object && 'x' in center && 'y' in center &&
       m_map.baseLayer() instanceof geo.osmLayer) {
 
-      pos = m_camera.position();
       m_camera.setPosition(center.x, center.y, computeCameraDistance(zoom));
       m_camera.setFocalPoint(center.x, center.y, fp[2]);
       m_renderer.resetCameraClippingRange();
+    }
 
-      renderers = m_renderWindow.renderers();
+    fp = m_camera.focalPoint();
+    pos = m_camera.position();
+    clippingRange = m_camera.clippingRange();
 
-      /// TODO Check if we are allowed to transfrom the camera for this renderer
-      for (i = 0; i < renderers.length; i++) {
-        cam = renderers[i].camera();
-        if (cam !== m_camera) {
-          cam.setPosition(center.x, center.y, computeCameraDistance(zoom));
-          cam.setFocalPoint(center.x, center.y, fp[2]);
-          renderers[i].resetCameraClippingRange();
-          renderers[i].render();
-        }
+    renderers = m_renderWindow.renderers();
+
+    /// TODO Check if we are allowed to transfrom the camera for this renderer
+    for (i = 0; i < renderers.length; i++) {
+      cam = renderers[i].camera();
+      if (cam !== m_camera) {
+        console.log('Setting camera for ren ', renderers[i].layer());
+        console.log('Setting pos ', pos);
+        cam.setPosition(pos[0], pos[1], pos[2]);
+        cam.setFocalPoint(fp[0], fp[1], fp[2]);
+        cam.setClippingRange(clippingRange[0], clippingRange[1]);
+        renderers[i].render();
       }
     }
   };

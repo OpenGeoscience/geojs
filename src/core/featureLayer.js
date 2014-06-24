@@ -163,7 +163,7 @@ geo.featureLayer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._update = function(request) {
-    var i;
+    var i, reset = false;
 
     if (!m_features) {
       return this;
@@ -181,6 +181,7 @@ geo.featureLayer = function(arg) {
       for (i = 0; i < m_features.length; ++i) {
           m_features[i].renderer(this.renderer());
       }
+      reset = true;
     }
 
     for (i = 0; i < m_features.length; ++i) {
@@ -188,6 +189,10 @@ geo.featureLayer = function(arg) {
     }
 
     this.updateTime().modified();
+
+    if (reset) {
+      m_this.renderer().reset();
+    }
 
     return this;
   };

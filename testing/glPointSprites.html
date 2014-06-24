@@ -82,13 +82,13 @@ $(function() {
         image.src = '/data/spark.png';
 
         image.onload = function() {
-          var layer = geo.featureLayer({'renderer' : 'vglRenderer'});
-          layer.create('pointFeature', {style: {
+          var layer = myMap.createLayer('feature');
+          layer.createFeature('point', {style: {
                          point_sprites: true,
                          point_sprites_image: image,
                          width: 20, height: 10}})
             .positions(citieslatlon);
-          myMap.addLayer(layer);
+          myMap.draw();
         }
       }
     });

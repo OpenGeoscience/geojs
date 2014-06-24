@@ -259,14 +259,8 @@ ggl.vglRenderer = function(arg) {
 
     this.canvas($(m_viewer.canvas()));
     if (m_viewer.renderWindow().renderers().length > 0) {
-      console.log('layer is ', m_viewer.renderWindow().renderers().length);
       m_contextRenderer.setLayer(m_viewer.renderWindow().renderers().length);
-      // var pos = m_viewer.renderWindow().renderers()[0].camera().position();
-      // var fp = m_viewer.renderWindow().renderers()[0].camera().focalPoint();
-      // m_contextRenderer.camera().setPosition(pos[0], pos[1], pos[2]);
-      // m_contextRenderer.camera().setFocalPoint(fp[0], fp[1], fp[2]);
-      // m_contextRenderer.setResetScene(false);
-      m_contextRenderer.camera().modified();
+      m_contextRenderer.setResetScene(false);
     }
     m_viewer.renderWindow().addRenderer(m_contextRenderer);
 
@@ -340,7 +334,6 @@ ggl.vglRenderer = function(arg) {
   this.on(geo.event.layerAdd, function (event) {
     if (event.layer === m_this.layer()) {
       m_this._connectMapEvents();
-      m_this.reset();
     }
   });
 
