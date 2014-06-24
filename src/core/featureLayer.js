@@ -46,8 +46,7 @@ geo.featureLayer = function(arg) {
    * @returns {geo.Feature} Will return a new feature
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.create = function(featureName, arg) {
-    this._init();
+  this.createFeature = function(featureName, arg) {
 
     var newFeature = geo.createFeature(
       featureName, m_this, this.renderer(), arg);
@@ -61,6 +60,16 @@ geo.featureLayer = function(arg) {
     this.features(m_features);
     this.modified();
     return newFeature;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Delete feature
+   *
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.deleteFeature = function() {
+    // TODO:
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -138,7 +147,9 @@ geo.featureLayer = function(arg) {
     });
 
     this.on(geo.event.zoom, function(event) {
-      m_this.map().zoom(event.curr_zoom);
+      if (m_this.map()) {
+        m_this.map().zoom(event.curr_zoom);
+      }
       m_this._update({event: event});
       m_this.renderer()._render();
     });
@@ -152,7 +163,7 @@ geo.featureLayer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._update = function(request) {
-    var i;
+    var i, reset = false;
 
     if (!m_features) {
       return this;
@@ -170,6 +181,7 @@ geo.featureLayer = function(arg) {
       for (i = 0; i < m_features.length; ++i) {
           m_features[i].renderer(this.renderer());
       }
+      reset = true;
     }
 
     for (i = 0; i < m_features.length; ++i) {
@@ -177,6 +189,10 @@ geo.featureLayer = function(arg) {
     }
 
     this.updateTime().modified();
+
+    if (reset) {
+      m_this.renderer().reset();
+    }
 
     return this;
   };
@@ -217,3 +233,6 @@ geo.featureLayer = function(arg) {
 };
 
 inherit(geo.featureLayer, geo.layer);
+
+// Now register it
+geo.registerLayer('feature', geo.featureLayer);

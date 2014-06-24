@@ -77,13 +77,13 @@ $(function() {
           }
         }
 
-        // Load image to be used for drawing dots
-        var layer = geo.featureLayer({
-            'renderer' : 'vglRenderer'});
-        layer.create('pointFeature')
-          .positions(citieslatlon);
-        myMap.addLayer(layer);
-      }});
+      myMap.createLayer('osm');
+      myMap.draw();
+      var layer = myMap.createLayer('feature');
+      layer.createFeature('point')
+        .positions(citieslatlon);
+      myMap.draw();
+    }});
 });
 </script>
 

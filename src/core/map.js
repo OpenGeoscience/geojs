@@ -210,26 +210,29 @@ geo.map = function(arg) {
    * @return {geom.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.addLayer = function(layer) {
-    if (layer !== null || layer !== undefined) {
-      layer.map(this);
-      layer._init();
-      layer._resize(m_x, m_y, m_width, m_height);
+  this.createLayer = function(layerName, arg) {
+    var newLayer = geo.createLayer(
+      layerName, m_this, arg);
 
-      if (layer.referenceLayer() || this.children().length === 0) {
-        this.baseLayer(layer);
-      }
-
-      this.addChild(layer);
-      this.modified();
-
-      m_this.trigger(geo.event.layerAdd, {
-        type: geo.event.layerAdd,
-        target: m_this,
-        layer: layer
-      });
+    if (newLayer !== null || newLayer !== undefined) {
+      newLayer._resize(m_x, m_y, m_width, m_height);
+    } else {
+      return null;
     }
-    return this;
+
+    if (newLayer.referenceLayer() || m_this.children().length === 0) {
+      m_this.baseLayer(newLayer);
+    }
+    m_this.addChild(newLayer);
+    m_this.modified();
+
+    m_this.trigger(geo.event.layerAdd, {
+      type: geo.event.layerAdd,
+      target: m_this,
+      layer: newLayer
+    });
+
+    return newLayer;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -241,7 +244,7 @@ geo.map = function(arg) {
    * @return {geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.removeLayer = function(layer) {
+  this.deleteLayer = function(layer) {
     var i;
 
     if (layer !== null && layer !== undefined) {
@@ -258,7 +261,10 @@ geo.map = function(arg) {
       });
     }
 
-    return this;
+    /// Return deleted layer (similar to createLayer) as in the future
+    /// we may provide extension of this method to support deletion of
+    /// layer using id or some sort.
+    return layer;
   };
 
 
@@ -330,29 +336,13 @@ geo.map = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.gcsToDisplay = function(input) {
-    var i, world, output = [];
+    var i, world, output;
 
     /// Now handle different data types
-    if (input instanceof Array && input.length > 0) {
-      /// Input is array of geo.latlng
-      if (input[0] instanceof geo.latlng) {
-        for (i = 0; i < input.length; ++i) {
-        world = m_baseLayer.toLocal(input)[0];
-        output.push(m_baseLayer.renderer().worldToDisplay(
-          {x: world.x(), y: world.y()})[0]);
-        }
-      } else {
-        /// Input is array of positions
-        output = m_baseLayer.renderer().worldToDisplay(input).slice(0);
-      }
-    } else if (input instanceof geo.latlng) {
-      world = m_baseLayer.toLocal(input)[0];
-      output.push(m_baseLayer.renderer().worldToDisplay(
-        {x: world.x(), y: world.y()})[0]);
-    } else if (input instanceof Object) {
-       /// Input is Object
-      output.push(m_baseLayer.renderer().worldToDisplay(
-          {x: input.x, y: input.y})[0]);
+    if ((input instanceof Array &&
+         input.length > 0) || input instanceof Object) {
+      world = m_baseLayer.toLocal(input);
+      output = m_baseLayer.renderer().worldToDisplay(world);
     } else {
       /// Everything else
       throw 'Conversion method latLonToDisplay does not handle ' + input;
@@ -370,12 +360,11 @@ geo.map = function(arg) {
     var output;
 
     /// Now handle different data types
-    if (input instanceof Array && input.length > 0 ||
-        input instanceof Object) {
+    if ((input instanceof Array && input.length > 0) ||
+         input instanceof Object) {
       output = m_baseLayer.renderer().displayToWorld(input);
       output = m_baseLayer.fromLocal(output);
-    }
-    else {
+    } else {
       throw 'Conversion method latLonToDisplay does not handle ' + input;
     }
     return output;

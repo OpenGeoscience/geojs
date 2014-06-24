@@ -75,7 +75,7 @@ geo.layer = function(arg) {
       m_gcs = 'EPSG:4326',
       m_timeRange = null,
       m_source = arg.source || null,
-      m_map = arg.map === undefined ? null : args.map,
+      m_map = arg.map === undefined ? null : arg.map,
       m_isReference = false,
       m_x = 0,
       m_y = 0,
@@ -195,7 +195,7 @@ geo.layer = function(arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Transform layer to the layer gcs
+   * Transform layer to the reference layer gcs
    */
   ////////////////////////////////////////////////////////////////////////////
   this.transform = function(val) {
@@ -344,7 +344,7 @@ geo.layer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.toLocal = function(input) {
-    throw "Not implemented";
+    return input;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -354,7 +354,7 @@ geo.layer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.fromLocal = function(input) {
-    throw "Not implemented";
+    return input;
   };
 
   ////////////////////////////////////////////////////////////////////////////

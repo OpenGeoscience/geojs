@@ -53,7 +53,9 @@ ggl.pointFeature = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._build = function() {
-    var style = m_this.style();
+    var style = m_this.style(),
+    positions = geo.transform.transformFeature(m_this.renderer().map().gcs(),
+                  this, false);
 
     if (m_actor) {
       this.renderer().contextRenderer().removeActor(m_actor);
@@ -65,9 +67,9 @@ ggl.pointFeature = function(arg) {
       }
 
       m_actor = vgl.utils.createPointSprites(style.point_sprites_image,
-                 this.positions(), style.colors);
+                 positions, style.colors);
     } else {
-      m_actor = vgl.utils.createPoints(this.positions(), style.colors);
+      m_actor = vgl.utils.createPoints(positions, style.colors);
     }
 
     this.renderer().contextRenderer().addActor(m_actor);
@@ -136,4 +138,4 @@ ggl.pointFeature = function(arg) {
 inherit(ggl.pointFeature, geo.pointFeature);
 
 // Now register it
-geo.registerFeature('vgl', 'pointFeature', ggl.pointFeature);
+geo.registerFeature('vgl', 'point', ggl.pointFeature);

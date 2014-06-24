@@ -22,7 +22,7 @@ $(function() {
                       zoom : 6,
                       center : [0.0, 0.0]},
       myMap = geo.map(mapOptions),
-      layer = geo.featureLayer({'renderer' : 'vglRenderer'});
+      layer = myMap.createLayer('feature');
 
     // Resize the canvas to fill browser window dynamically
     window.addEventListener('resize', resizeCanvas, false);
@@ -39,12 +39,11 @@ $(function() {
       myMap.draw();
     }
 
-    layer.create('planeFeature')
+    layer.createFeature('plane')
       .origin(geo.latlng(0.0, 0.0))
       .upperLeft(geo.latlng(1.0, 0.0))
       .lowerRight(geo.latlng(0.0, 2.0))
       .style('image', '/data/land_shallow_topo_2048.png');
-    myMap.addLayer(layer);
     myMap.draw();
 });
 </script>

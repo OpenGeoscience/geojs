@@ -4,7 +4,7 @@ window.startTest = function(done) {
                     zoom : 3,
                     center : [40, 105]},
     myMap = geo.map(mapOptions),
-    osm = geo.osmLayer({'renderer' : 'vglRenderer'});
+    osm = myMap.createLayer('osm');
 
   var timeAnimatedLayer = function(arg) {
     "use strict";
@@ -44,7 +44,7 @@ window.startTest = function(done) {
       latlons = arg.data.slice(m_startIndex++, m_endIndex++);
 
       if (!m_pointFeature) {
-        m_pointFeature = this.create('pointFeature');
+        m_pointFeature = this.createFeature('point');
         m_pointFeature.style({
           'size': 5,
           'color': [1, 0, 0]
@@ -60,8 +60,7 @@ window.startTest = function(done) {
   };
   inherit(timeAnimatedLayer, geo.featureLayer);
 
-  /// Add layer to the map
-  myMap.addLayer(osm);
+  geo.registerLayer('timeAnimatedLayer', timeAnimatedLayer);
 
   function updateAndDraw(width, height) {
     myMap.resize(0, 0, width, height);
@@ -79,11 +78,10 @@ window.startTest = function(done) {
   window.addEventListener('resize', resizeCanvas, false);
 
   function draw(data) {
-    var layer = timeAnimatedLayer({
+    var layer = myMap.createLayer('timeAnimatedLayer', {
       renderer: 'd3Renderer',
       data: data
     });
-    myMap.addLayer(layer);
     done();
   }
 

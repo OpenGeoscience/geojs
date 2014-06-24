@@ -78,12 +78,13 @@ geo.transform.osmTransformFeature = function(destGcs, feature, inplace) {
       throw "Transform points require points in 2D or 3D";
     }
 
-    for (i = 0; i < count; i += pointOffset) {
-      if (inplace) {
+    if (inplace) {
         outPos = inPos;
       } else {
         outPos = inPos.slice(0);
       }
+
+    for (i = 0; i < count; i += pointOffset) {
 
       /// Y goes from 0 (top edge is 85.0511 °N) to 2zoom − 1
       /// (bottom edge is 85.0511 °S) in a Mercator projection.
@@ -106,8 +107,10 @@ geo.transform.osmTransformFeature = function(destGcs, feature, inplace) {
       }
     }
 
-    feature.positions(outPos);
-    feature.gcs(destGcs);
+    if (inplace) {
+      feature.positions(outPos);
+      feature.gcs(destGcs);
+    }
     return outPos;
   }
 
@@ -123,12 +126,7 @@ geo.transform.transformFeature = function(destGcs, feature, inplace) {
   'use strict';
 
   if (!feature) {
-    console.log('[warning] Invalid (null) feature');
-    return;
-  }
-
-  if (feature.gcs() === destGcs) {
-    return;
+    throw 'Invalid (null) feature';
   }
 
   if (!(feature instanceof geo.pointFeature ||
@@ -136,10 +134,18 @@ geo.transform.transformFeature = function(destGcs, feature, inplace) {
     throw "Supports only point or line feature";
   }
 
+  if (feature.gcs() === destGcs) {
+    return feature.positions();
+  }
+
+  if (destGcs === "EPSG:3857") {
+    return geo.transform.osmTransformFeature(destGcs, feature, inplace);
+  }
+
   var noOfComponents = null, pointOffset = 0, count = null, inPos = null,
       outPos = null, projPoint = null, srcGcs = feature.gcs(), i,
       inplace = inplace || false, projSrcGcs = new proj4.Proj(srcGcs),
-      dest = new proj4.Proj(destGcs);
+      projDestGcs = new proj4.Proj(destGcs);
 
   if (feature instanceof geo.pointFeature ||
       feature instanceof geo.lineFeature) {
@@ -163,6 +169,13 @@ geo.transform.transformFeature = function(destGcs, feature, inplace) {
       throw "Transform points require points in 2D or 3D";
     }
 
+    if (inplace) {
+        outPos = inPos;
+      } else {
+        outPos = [];
+        outPos.length = inPos.length;
+      }
+
     for (i = 0; i < count; i += pointOffset) {
       if (noOfComponents === 2) {
         projPoint = new proj4.Point(inPos[i], inPos[i + 1], 0.0);
@@ -171,13 +184,6 @@ geo.transform.transformFeature = function(destGcs, feature, inplace) {
       }
 
       proj4.transform(projSrcGcs, projDestGcs, projPoint);
-
-      if (inplace) {
-        outPos = inPos;
-      } else {
-        outPos = [];
-        outPos.length = inPos.length;
-      }
 
       if (noOfComponents === 2) {
         outPos[i] =  projPoint.x;
@@ -189,8 +195,11 @@ geo.transform.transformFeature = function(destGcs, feature, inplace) {
       }
     }
 
-    feature.positions(outPos);
-    feature.gcs(destGcs);
+    if (inplace) {
+      feature.positions(outPos);
+      feature.gcs(destGcs);
+    }
+
     return outPos;
   }
 

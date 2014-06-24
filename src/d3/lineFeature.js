@@ -41,7 +41,7 @@ gd3.lineFeature = function(arg) {
   function georef(d) {
     var r = m_this.renderer(), p;
     p = r.worldToDisplay(d);
-    return p[0];
+    return p;
   }
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -130,11 +130,11 @@ gd3.lineFeature = function(arg) {
 
     return this;
   };
-  
+
   this._init(arg);
   return this;
 };
 
 inherit(gd3.lineFeature, geo.lineFeature);
 
-geo.registerFeature('d3', 'lineFeature', gd3.lineFeature);
+geo.registerFeature('d3', 'line', gd3.lineFeature);

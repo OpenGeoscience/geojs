@@ -78,28 +78,21 @@ $(function() {
         }
 
 
-
-        var layer2 = geo.featureLayer({'renderer' : 'vglRenderer'});
-
-        layer2.create('planeFeature')
-        .origin(geo.latlng(0.0, 0.0))
-        .upperLeft(geo.latlng(1.0, 0.0))
-        .lowerRight(geo.latlng(0.0, 2.0))
-        .style('image', '/data/land_shallow_topo_2048.png');
-
-        // Load image to be used for drawing dots
-        var layer1 = geo.featureLayer({
-            'renderer' : 'vglRenderer'});
-        layer1.create('pointFeature')
+        var layer1 = myMap.createLayer('feature');
+        layer1.createFeature('point')
           .positions(citieslatlon);
-
         layer1.name = 'layer1';
+
+        var layer2 = myMap.createLayer('feature');
+        layer2.createFeature('plane')
+          .origin(geo.latlng(0.0, 0.0))
+          .upperLeft(geo.latlng(1.0, 0.0))
+          .lowerRight(geo.latlng(0.0, 2.0))
+          .style('image', '/data/land_shallow_topo_2048.png');
         layer2.name = 'layer2';
 
-        myMap.addLayer(layer1);
-        myMap.addLayer(layer2);
         myMap.draw();
-
+        myMap.draw();
       }});
 });
 </script>

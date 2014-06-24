@@ -147,3 +147,38 @@ geo.createFeature  = function(name, layer, renderer, arg) {
   }
   return null;
 }
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Register a new layer type
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.registerLayer = function(name, func) {
+  if (geo.layers === undefined) {
+    geo.layers = {};
+  }
+
+  geo.layers[name] = func;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Create new instance of the layer
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.createLayer  = function(name, map, arg) {
+  /// Default renderer is vgl
+  var options = {'map': map, 'renderer': 'vglRenderer'},
+      layer = null;
+
+  if (name in geo.layers) {
+    if (arg !== undefined) {
+      $.extend(true, options, arg);
+    }
+    layer = geo.layers[name](options);
+    layer._init();
+    return layer;
+  } else {
+    return null;
+  }
+}

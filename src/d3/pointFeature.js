@@ -34,8 +34,8 @@ gd3.pointFeature = function(arg) {
     }
     var r = m_this.renderer(), p;
     p = r.worldToDisplay(d);
-    d._dispx = function () { return p[0].x; };
-    d._dispy = function () { return p[0].y; };
+    d._dispx = function () { return p.x; };
+    d._dispy = function () { return p.y; };
     return d;
   }
 
@@ -136,4 +136,4 @@ gd3.pointFeature = function(arg) {
 inherit(gd3.pointFeature, geo.pointFeature);
 
 // Now register it
-geo.registerFeature('d3', 'pointFeature', gd3.pointFeature);
+geo.registerFeature('d3', 'point', gd3.pointFeature);

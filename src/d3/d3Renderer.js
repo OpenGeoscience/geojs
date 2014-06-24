@@ -112,12 +112,10 @@ gd3.d3Renderer = function(arg) {
     if (!map) {
       throw "Cannot project until this layer is connected to a map.";
     }
-    var vals = map.gcsToDisplay(pt);
-    vals.forEach(function (v) {
-      v.x -= m_translate[0];
-      v.y -= m_translate[1];
-    });
-    return vals;
+    var v = map.gcsToDisplay(pt);
+    v.x -= m_translate[0];
+    v.y -= m_translate[1];
+    return v;
   };
 
   ////////////////////////////////////////////////////////////////////////////
