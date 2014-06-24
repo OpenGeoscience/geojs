@@ -4,10 +4,7 @@ window.startTest = function(done) {
                       zoom : 3,
                       center : [0.0, 0.0]},
       myMap = geo.map(mapOptions),
-      layer = geo.osmLayer({'renderer' : 'vglRenderer'});
-
-    /// Add layer to the map
-    myMap.addLayer(layer);
+      layer = myMap.createLayer('osm');
 
     /// Resize the canvas to fill browser window dynamically
     window.addEventListener('resize', resizeCanvas, false);
