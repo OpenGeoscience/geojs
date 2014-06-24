@@ -22,7 +22,7 @@ class osmBase(object):
 
         testName = 'd3AnimateFrame15'
         self.runScript('window.animateForward(15);')
-        self.screenshotTest(testName, revision=2)
+        self.screenshotTest(testName, revision=3)
 
     def testd3AnimateBackward(self):
         self.loadPage()
@@ -30,7 +30,7 @@ class osmBase(object):
         testName = 'd3AnimateFrame75'
         self.runScript('window.animateForward(80);')
         self.runScript('window.animateBackward(5);')
-        self.screenshotTest(testName, revision=2)
+        self.screenshotTest(testName, revision=3)
 
     def testd3AnimateToEnd(self):
         self.loadPage()
@@ -43,7 +43,7 @@ class osmBase(object):
             '''
         )
         self.wait('window.animationTestFinished')
-        self.screenshotTest(testName, revision=2)
+        self.screenshotTest(testName, revision=3)
 
 
 class FirefoxOSM(osmBase, FirefoxTest):
