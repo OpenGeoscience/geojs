@@ -216,12 +216,13 @@ geo.map = function(arg) {
 
     if (newLayer !== null || newLayer !== undefined) {
       newLayer._resize(m_x, m_y, m_width, m_height);
+    } else {
+      return null;
     }
 
     if (newLayer.referenceLayer() || m_this.children().length === 0) {
       m_this.baseLayer(newLayer);
     }
-
     m_this.addChild(newLayer);
     m_this.modified();
 
@@ -243,7 +244,7 @@ geo.map = function(arg) {
    * @return {geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.delete = function(layer) {
+  this.deleteLayer = function(layer) {
     var i;
 
     if (layer !== null && layer !== undefined) {
@@ -260,7 +261,10 @@ geo.map = function(arg) {
       });
     }
 
-    return this;
+    /// Return deleted layer (similar to createLayer) as in the future
+    /// we may provide extension of this method to support deletion of
+    /// layer using id or some sort.
+    return layer;
   };
 
 
