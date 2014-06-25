@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <script type="text/javascript" src="/testing/common/js/jquery-1.9.1.js"></script>
-    <script type="text/javascript" src="/testing/common/js/gl-matrix.js"></script>
-    <script type="text/javascript" src="/testing/common/js/d3.v3.min.js"></script>
-    <script type="text/javascript" src="/testing/common/js/proj4.js"></script>
+    <script type="text/javascript" src="/examples/common/js/jquery-1.9.1.js"></script>
+    <script type="text/javascript" src="/examples/common/js/gl-matrix.js"></script>
+    <script type="text/javascript" src="/examples/common/js/d3.v3.min.js"></script>
+    <script type="text/javascript" src="/examples/common/js/proj4.js"></script>
     <script type="text/javascript" src="/web/lib/vgl.js"></script>
     <script type="text/javascript" src="/web/lib/geo.js"></script>
     <style>
@@ -17,14 +17,15 @@
 </head>
 <body style="height: 100%;">
 <script>
+var myMap;
 $(function() {
     var mapOptions = {node: '#map',
-                      zoom : 6,
+                      zoom : 3,
                       center : [0.0, 0.0]},
-      myMap = geo.map(mapOptions),
-      layer = myMap.createLayer('feature');
+                      myMap = geo.map(mapOptions),
+                      layer = myMap.createLayer('osm');
 
-    // Resize the canvas to fill browser window dynamically
+    /// Resize the canvas to fill browser window dynamically
     window.addEventListener('resize', resizeCanvas, false);
 
     function resizeCanvas() {
@@ -38,13 +39,6 @@ $(function() {
       myMap.resize(0, 0, width, height);
       myMap.draw();
     }
-
-    layer.createFeature('plane')
-      .origin(geo.latlng(0.0, 0.0))
-      .upperLeft(geo.latlng(1.0, 0.0))
-      .lowerRight(geo.latlng(0.0, 2.0))
-      .style('image', '/data/land_shallow_topo_2048.png');
-    myMap.draw();
 });
 </script>
 
