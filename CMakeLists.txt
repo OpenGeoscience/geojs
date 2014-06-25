@@ -6,8 +6,6 @@ set(GEOJS_VERSION 0.1.0)
 set(MINIFY OFF CACHE BOOL "Build minified library.")
 set(MANGLE OFF CACHE BOOL "When minifying, also mangle non-public symbol names.")
 
-set(BUILD_TESTING_OLD OFF CACHE BOOL "Enable old testing (to be removed)")
-
 set(BUILD_TESTING ON CACHE BOOL "Enable geojs testing")
 
 # make npm a hard dependency
@@ -41,20 +39,11 @@ add_custom_command(
 )
 
 set(need_python FALSE)
-if(${BUILD_TESTING_OLD} OR ${BUILD_TESTING})
-  set(need_python TRUE)
-  set(GEOJS_DATA_DIR "" CACHE PATH  "Path to directory containing data for testing.")
-  set(GEOJS_BASELINE_DIR "" CACHE PATH "Path to directory containing baseline images for testing.")
-endif()
-
 if(${BUILD_TESTING})
   set(need_python TRUE)
 
   set(JS_HINT_TESTS ON CACHE BOOL "Generate style tests for JS source files.")
-
   set(PHANTOMJS_TESTS ON CACHE BOOL "Generate phantomjs unit tests.")
-
-  # once implemented
   set(COVERAGE_TESTS OFF CACHE BOOL "Generate coverage reports.")
   set(SELENIUM_TESTS OFF CACHE BOOL "Generate selenium unit tests.")
 endif()
@@ -193,36 +182,18 @@ endif()
 
 add_dependencies(${PROJECT_NAME} geojs_pre_deploy)
 
-# Old testing framework
-if (BUILD_TESTING_OLD)
-  include(CTest)
-  enable_testing()
-
-  if(EXISTS "${GEOJS_DATA_DIR}" AND IS_DIRECTORY "${GEOJS_DATA_DIR}")
-    message("[info] GeoJS data directory is set to ${GEOJS_DATA_DIR}")
-    set(VGL_DATA_DIR "${GEOJS_DATA_DIR}")
-  else()
-    message(FATAL_ERROR "GeoJS testing requires valid data directory")
-  endif()
-
-  if(EXISTS "${GEOJS_BASELINE_DIR}" AND IS_DIRECTORY "${GEOJS_BASELINE_DIR}")
-    message("[info] GeoJS baseline directory is set to ${GEOJS_BASELINE_DIR}")
-    set(VGL_BASELINE_DIR "${GEOJS_BASELINE_DIR}")
-  else()
-    message(FATAL_ERROR "GeoJS testing requires valid baseline directory")
-  endif()
-
+file(GLOB_RECURSE all_example_files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/examples/*")
+set(example_files_deploy)
+foreach(f ${all_example_files})
   add_custom_command(
-    OUTPUT "${GEOJS_DEPLOY_DIR}/testing"
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/testing
-            "${GEOJS_DEPLOY_DIR}/testing"
+    OUTPUT "${GEOJS_DEPLOY_DIR}/${f}"
+    COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/${f}" "${GEOJS_DEPLOY_DIR}/${f}"
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${f}"
+    COMMENT "Copying ${f} to deploy directory."
   )
-  add_custom_target(geojs_testing ALL DEPENDS "${GEOJS_DEPLOY_DIR}/testing")
-  add_dependencies(${PROJECT_NAME} geojs_testing)
-
-  # GUI testing (requires python)
-  find_package(PythonInterp REQUIRED)
-endif()
+  set(example_files_deploy ${example_files_deploy} "${GEOJS_DEPLOY_DIR}/${f}")
+endforeach()
+add_custom_target(geojs_examples ALL DEPENDS ${example_files_deploy} ${MIDAS_DOWNLOAD_FILES})
 
 add_subdirectory(vgl)
 add_dependencies(vgl geojs_pre_deploy)
@@ -243,10 +214,22 @@ function(add_geojs_test test_name)
   endif()
 endfunction()
 
+set(MIDAS_BASE_URL "http://midas3.kitware.com/midas" CACHE STRING "MIDAS data store URL.")
+mark_as_advanced(MIDAS_BASE_URL)
+set(MIDAS_COMMUNITY "GeoJS" CACHE STRING "MIDAS community hosting test images.")
+mark_as_advanced(MIDAS_COMMUNITY)
+
+# set variables for MIDAS3.cmake
+set(MIDAS_REST_URL "${MIDAS_BASE_URL}/api/json")
+set(MIDAS_KEY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-data")
+set(MIDAS_DATA_DIR "${GEOJS_DEPLOY_DIR}/data")
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/MIDAS3.cmake)
+
+add_download_target()
+
 # set up testing framework and add tests
 if(BUILD_TESTING)
   include(CTest)
-  include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/MIDAS3.cmake)
   enable_testing()
 
   # copy blanket JS files
@@ -353,16 +336,6 @@ if(BUILD_TESTING)
     set(SELENIUM_PORT 4444 CACHE STRING "The selenium test server port.")
     mark_as_advanced(SELENIUM_PORT)
 
-    set(MIDAS_BASE_URL "http://midas3.kitware.com/midas" CACHE STRING "MIDAS data store URL.")
-    mark_as_advanced(MIDAS_BASE_URL)
-    set(MIDAS_COMMUNITY "GeoJS" CACHE STRING "MIDAS community hosting test images.")
-    mark_as_advanced(MIDAS_COMMUNITY)
-
-    # set variables for MIDAS3.cmake
-    set(MIDAS_REST_URL "${MIDAS_BASE_URL}/api/json")
-    set(MIDAS_KEY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-data")
-    set(MIDAS_DATA_DIR "${GEOJS_DEPLOY_DIR}/data")
-
     configure_file(
       ${CMAKE_CURRENT_SOURCE_DIR}/testing/js/selenium-blanket.js
       ${GEOJS_DEPLOY_DIR}/test/lib/selenium-blanket.js
@@ -426,7 +399,6 @@ if(BUILD_TESTING)
       endif()
     endforeach()
 
-    add_download_target()
     add_custom_target(
       selenium_tests
       ALL
