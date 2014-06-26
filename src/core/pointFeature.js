@@ -2,11 +2,6 @@
 /**
  * @module geo
  */
-
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, indent: 2*/
-
-/*global geo, ogs, inherit, document$*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -17,7 +12,7 @@
  * @returns {geo.pointFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.pointFeature = function(arg) {
+geo.pointFeature = function (arg) {
   "use strict";
   if (!(this instanceof geo.pointFeature)) {
     return new geo.pointFeature(arg);
@@ -40,8 +35,8 @@ geo.pointFeature = function(arg) {
    * @returns {geo.pointFeature}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.positions = function(val) {
-    if (val === undefined ) {
+  this.positions = function (val) {
+    if (val === undefined) {
       return m_positions;
     } else {
       // Copy incoming array of positions
@@ -57,17 +52,21 @@ geo.pointFeature = function(arg) {
    * Initialize
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._init = function(arg) {
+  this._init = function (arg) {
     s_init.call(this, arg);
 
-    var defaultStyle = $.extend({}, {
-                         size: 1.0,
-                         width:1.0,
-                         height: 1.0,
-                         color:[1.0, 1.0, 1.0],
-                         point_sprites: false,
-                         point_sprites_image: null},
-                         arg.style === undefined ? {} : arg.style);
+    var defaultStyle = $.extend(
+      {},
+      {
+        size: 1.0,
+        width: 1.0,
+        height: 1.0,
+        color: [1.0, 1.0, 1.0],
+        point_sprites: false,
+        point_sprites_image: null
+      },
+      arg.style === undefined ? {} : arg.style
+    );
 
     this.style(defaultStyle);
 

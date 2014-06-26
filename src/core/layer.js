@@ -2,11 +2,6 @@
 /**
  * @module geo
  */
-
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, indent: 2*/
-
-/*global geo, ogs, vgl, document, inherit, $, HTMLCanvasElement, Image*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -16,7 +11,7 @@
  * @class geo.layerOptions
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.layerOptions = function() {
+geo.layerOptions = function () {
   "use strict";
 
   if (!(this instanceof geo.layerOptions)) {
@@ -35,11 +30,12 @@ geo.newLayerId = (function () {
     "use strict";
     var currentId = 1;
     return function () {
-        var id = currentId;
-        currentId++;
-        return id;
+      var id = currentId;
+      currentId += 1;
+      return id;
     };
-}());
+  }()
+);
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -51,7 +47,7 @@ geo.newLayerId = (function () {
  * @returns {geo.layer}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.layer = function(arg) {
+geo.layer = function (arg) {
   "use strict";
 
   if (!(this instanceof geo.layer)) {
@@ -72,7 +68,7 @@ geo.layer = function(arg) {
                                            "bin" : 100} : arg.style,
       m_id = arg.id === undefined ? geo.newLayerId() : arg.id,
       m_name = "",
-      m_gcs = 'EPSG:4326',
+      m_gcs = "EPSG:4326",
       m_timeRange = null,
       m_source = arg.source || null,
       m_map = arg.map === undefined ? null : arg.map,
@@ -85,7 +81,7 @@ geo.layer = function(arg) {
       m_canvas = null,
       m_renderer = null,
       m_initialized = false,
-      m_rendererName = arg.renderer  === undefined ?  'vglRenderer' : arg.renderer,
+      m_rendererName = arg.renderer  === undefined ? "vglRenderer" : arg.renderer,
       m_dataTime = geo.timestamp(),
       m_updateTime = geo.timestamp(),
       m_drawTime = geo.timestamp();
@@ -97,7 +93,7 @@ geo.layer = function(arg) {
    * @returns {div}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.node = function() {
+  this.node = function () {
     return m_node;
   };
 
@@ -108,12 +104,12 @@ geo.layer = function(arg) {
    * @returns {String}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.id = function(val) {
-    if (val === undefined ) {
+  this.id = function (val) {
+    if (val === undefined) {
       return m_id;
     }
-    m_id = id;
-    this.modified();
+    m_id = geo.newLayerId();
+    m_this.modified();
     return this;
   };
 
@@ -124,12 +120,12 @@ geo.layer = function(arg) {
    * @returns {String}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.name = function(val) {
-    if (val === undefined ) {
+  this.name = function (val) {
+    if (val === undefined) {
       return m_name;
     }
     m_name = val;
-    this.modified();
+    m_this.modified();
     return this;
   };
 
@@ -140,12 +136,12 @@ geo.layer = function(arg) {
    * @returns {Number}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.opacity = function(val) {
-    if (val === undefined ) {
+  this.opacity = function (val) {
+    if (val === undefined) {
       return m_style.opacity;
     }
     m_style.opacity = val;
-    this.modified();
+    m_this.modified();
     return this;
   };
 
@@ -154,12 +150,12 @@ geo.layer = function(arg) {
    * Get/Set visibility of the layer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.visible = function(val) {
-    if (val === undefined ) {
+  this.visible = function (val) {
+    if (val === undefined) {
       return m_style.visible;
     }
     m_style.visible = val;
-    this.modified();
+    m_this.modified();
     return this;
   };
 
@@ -170,12 +166,12 @@ geo.layer = function(arg) {
    * @returns {Number}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.bin = function(val) {
-    if (val === undefined ) {
+  this.bin = function (val) {
+    if (val === undefined) {
       return m_style.bin;
     }
     m_style.bin = val;
-    this.modified();
+    m_this.modified();
     return this;
   };
 
@@ -184,12 +180,12 @@ geo.layer = function(arg) {
    * Get/Set projection of the layer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.gcs = function(val) {
-    if (val === undefined ) {
+  this.gcs = function (val) {
+    if (val === undefined) {
       return m_gcs;
     }
     m_gcs = val;
-    this.modified();
+    m_this.modified();
     return this;
   };
 
@@ -198,8 +194,8 @@ geo.layer = function(arg) {
    * Transform layer to the reference layer gcs
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.transform = function(val) {
-    geo.transform.transformLayer(val, this, m_map.baseLayer());
+  this.transform = function (val) {
+    geo.transform.transformLayer(val, m_this, m_map.baseLayer());
     return this;
   };
 
@@ -208,12 +204,12 @@ geo.layer = function(arg) {
    * Get/Set time range of the layer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.timeRange = function(val) {
-    if (val === undefined ) {
+  this.timeRange = function (val) {
+    if (val === undefined) {
       return m_timeRange;
     }
     m_timeRange = val;
-    this.modified();
+    m_this.modified();
     return this;
   };
 
@@ -222,12 +218,12 @@ geo.layer = function(arg) {
    * Get/Set source of the layer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.source = function(val) {
-    if (val === undefined ) {
+  this.source = function (val) {
+    if (val === undefined) {
       return m_source;
     }
     m_source = val;
-    this.modified();
+    m_this.modified();
     return this;
   };
 
@@ -236,13 +232,13 @@ geo.layer = function(arg) {
    * Get/Set map of the layer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.map = function(val) {
-    if (val === undefined ) {
+  this.map = function (val) {
+    if (val === undefined) {
       return m_map;
     }
     m_map = val;
     m_map.node().append(m_node);
-    this.modified();
+    m_this.modified();
     return this;
   };
 
@@ -251,7 +247,7 @@ geo.layer = function(arg) {
    * Get renderer for the layer if any
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.renderer = function() {
+  this.renderer = function () {
     return m_renderer;
   };
 
@@ -261,7 +257,7 @@ geo.layer = function(arg) {
    *
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.canvas = function() {
+  this.canvas = function () {
     return m_canvas;
   };
 
@@ -270,7 +266,7 @@ geo.layer = function(arg) {
    * Get viewport of the layer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.viewport = function() {
+  this.viewport = function () {
     return [m_x, m_y, m_width, m_height];
   };
 
@@ -279,7 +275,7 @@ geo.layer = function(arg) {
    * Return last time data got changed
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.dataTime = function() {
+  this.dataTime = function () {
     return m_dataTime;
   };
 
@@ -288,7 +284,7 @@ geo.layer = function(arg) {
    * Return the modified time for the last update that did something
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.updateTime = function() {
+  this.updateTime = function () {
     return m_updateTime;
   };
 
@@ -297,7 +293,7 @@ geo.layer = function(arg) {
    * Return the modified time for the last draw call that did something
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.drawTime = function() {
+  this.drawTime = function () {
     return m_drawTime;
   };
 
@@ -306,7 +302,7 @@ geo.layer = function(arg) {
    * Run query and return results for it
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.query = function(arg) {
+  this.query = function () {
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -314,10 +310,10 @@ geo.layer = function(arg) {
    * Get/Set layer as the reference layer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.referenceLayer = function(val) {
-    if(val !== undefined) {
+  this.referenceLayer = function (val) {
+    if (val !== undefined) {
       m_isReference = val;
-      this.modified();
+      m_this.modified();
       return this;
     }
     return m_isReference;
@@ -329,8 +325,8 @@ geo.layer = function(arg) {
    * Get/Set if the layer has been initialized
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.initialized = function(val) {
-    if(val !== undefined) {
+  this.initialized = function (val) {
+    if (val !== undefined) {
       m_initialized = val;
       return this;
     }
@@ -343,7 +339,7 @@ geo.layer = function(arg) {
    * local space of the layer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.toLocal = function(input) {
+  this.toLocal = function (input) {
     return input;
   };
 
@@ -353,7 +349,7 @@ geo.layer = function(arg) {
    * latitude-longitude space
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.fromLocal = function(input) {
+  this.fromLocal = function (input) {
     return input;
   };
 
@@ -362,18 +358,18 @@ geo.layer = function(arg) {
    * Init layer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._init = function() {
+  this._init = function () {
     if (m_initialized) {
       return this;
     }
 
     // Create top level div for the layer
-    m_node = $(document.createElement('div'));
-    m_node.attr('id', m_name);
+    m_node = $(document.createElement("div"));
+    m_node.attr("id", m_name);
     // TODO: need to position according to offsets from the map element
     //       and maybe respond to events in case the map element moves
     //       around the page.
-    m_node.css('position', 'absolute');
+    m_node.css("position", "absolute");
 
     if (m_map) {
       m_map.node().append(m_node);
@@ -382,12 +378,12 @@ geo.layer = function(arg) {
 
     // Share context if have valid one
     if (m_canvas) {
-      m_renderer = geo.createRenderer(m_rendererName, this, m_canvas);
+      m_renderer = geo.createRenderer(m_rendererName, m_this, m_canvas);
     } else {
-      m_renderer = geo.createRenderer(m_rendererName, this);
+      m_renderer = geo.createRenderer(m_rendererName, m_this);
       m_canvas = m_renderer.canvas();
     }
-    this.addChild(m_renderer);
+    m_this.addChild(m_renderer);
 
     m_initialized = true;
 
@@ -399,7 +395,7 @@ geo.layer = function(arg) {
    * Clean up resouces
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._exit = function() {
+  this._exit = function () {
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -407,7 +403,7 @@ geo.layer = function(arg) {
    * Update layer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._update = function(request) {
+  this._update = function () {
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -415,7 +411,7 @@ geo.layer = function(arg) {
    * Respond to resize event
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._resize = function(x, y, w, h) {
+  this._resize = function (x, y, w, h) {
     m_x = x;
     m_y = y;
     m_width = w;
@@ -423,8 +419,8 @@ geo.layer = function(arg) {
     m_node.width(w);
     m_node.height(h);
 
-    this.modified();
-    this.trigger(geo.event.resize,
+    m_this.modified();
+    m_this.trigger(geo.event.resize,
       {x: x, y: y, width: m_width, height: m_height});
 
     return this;
@@ -454,7 +450,7 @@ geo.layer = function(arg) {
    * Draw
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._draw = function() {
+  this._draw = function () {
   };
 
   return this;

@@ -2,16 +2,16 @@
 /**
  * @module geojs
  */
-
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global vgl, ogs, vec4, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
-if(typeof ogs === 'undefined') {
-  var ogs = {};
+/* jshint ignore: start */
+var ogs;
+if (!window || window.ogs === undefined) {
+  ogs = {};
+} else {
+  ogs = window.ogs;
 }
+/* jshint ignore: end */
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -21,10 +21,10 @@ if(typeof ogs === 'undefined') {
  * @returns {*|{}}
  */
 //////////////////////////////////////////////////////////////////////////////
-ogs.namespace = function(ns_string) {
-  'use strict';
+ogs.namespace = function (ns_string) {
+  "use strict";
 
-  var parts = ns_string.split('.'), parent = ogs, i;
+  var parts = ns_string.split("."), parent = ogs, i;
 
   // strip redundant leading global
   if (parts[0] === "ogs") {
@@ -32,7 +32,7 @@ ogs.namespace = function(ns_string) {
   }
   for (i = 0; i < parts.length; i += 1) {
     // create a property if it doesn't exist
-    if (typeof parent[parts[i]] === "undefined") {
+    if (parent[parts[i]] === undefined) {
       parent[parts[i]] = {};
     }
     parent = parent[parts[i]];
@@ -41,7 +41,7 @@ ogs.namespace = function(ns_string) {
 };
 
 /** geo namespace */
-var geo = ogs.namespace("geo");
+geo = ogs.namespace("geo"); // jshint ignore: line
 
 geo.renderers = {};
 geo.features = {};
@@ -54,16 +54,16 @@ geo.features = {};
  * @param P
  */
 //////////////////////////////////////////////////////////////////////////////
-function inherit(C, P) {
+inherit = function (C, P) { // jshint ignore: line
   "use strict";
 
-  var F = function() {
+  var F = function () {
   };
   F.prototype = P.prototype;
   C.prototype = new F();
   C.uber = P.prototype;
   C.prototype.constructor = C;
-}
+};
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -73,13 +73,13 @@ function inherit(C, P) {
  * @returns {number} *
  */
 //////////////////////////////////////////////////////////////////////////////
-Object.size = function(obj) {
+Object.size = function (obj) { // jshint ignore: line
   "use strict";
 
   var size = 0, key = null;
   for (key in obj) {
     if (obj.hasOwnProperty(key)) {
-      size++;
+      size += 1;
     }
   }
   return size;
@@ -90,7 +90,9 @@ Object.size = function(obj) {
  * Register a new renderer type
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.registerRenderer = function(name, func) {
+geo.registerRenderer = function (name, func) {
+  "use strict";
+
   if (geo.renderers === undefined) {
     geo.renderers = {};
   }
@@ -103,21 +105,26 @@ geo.registerRenderer = function(name, func) {
  * Create new instance of the renderer
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.createRenderer  = function(name, layer, canvas) {
-  if (name in geo.renderers) {
-    var ren = geo.renderers[name]({'layer': layer, 'canvas': canvas});
+geo.createRenderer  = function (name, layer, canvas) {
+  "use strict";
+
+  if (geo.renderers.hasOwnProperty(name)) {
+    var ren = geo.renderers[name](
+      {"layer": layer, "canvas": canvas}
+    );
     ren._init();
     return ren;
   }
   return null;
-}
+};
 
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Register a new feature type
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.registerFeature = function(category, name, func) {
+geo.registerFeature = function (category, name, func) {
+  "use strict";
 
   if (geo.features === undefined) {
     geo.features = {};
@@ -136,9 +143,11 @@ geo.registerFeature = function(category, name, func) {
  * Create new instance of the renderer
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.createFeature  = function(name, layer, renderer, arg) {
+geo.createFeature  = function (name, layer, renderer, arg) {
+  "use strict";
+
   var category = renderer.api(),
-      options = {'layer':layer, 'renderer': renderer};
+      options = {"layer": layer, "renderer": renderer};
   if (category in geo.features && name in geo.features[category]) {
     if (arg !== undefined) {
       $.extend(true, options, arg);
@@ -146,14 +155,16 @@ geo.createFeature  = function(name, layer, renderer, arg) {
     return geo.features[category][name](options);
   }
   return null;
-}
+};
 
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Register a new layer type
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.registerLayer = function(name, func) {
+geo.registerLayer = function (name, func) {
+  "use strict";
+
   if (geo.layers === undefined) {
     geo.layers = {};
   }
@@ -166,9 +177,11 @@ geo.registerLayer = function(name, func) {
  * Create new instance of the layer
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.createLayer  = function(name, map, arg) {
+geo.createLayer = function (name, map, arg) {
+  "use strict";
+
   /// Default renderer is vgl
-  var options = {'map': map, 'renderer': 'vglRenderer'},
+  var options = {"map": map, "renderer": "vglRenderer"},
       layer = null;
 
   if (name in geo.layers) {
@@ -181,4 +194,4 @@ geo.createLayer  = function(name, map, arg) {
   } else {
     return null;
   }
-}
+};

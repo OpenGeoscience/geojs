@@ -2,12 +2,6 @@
 /**
  * @module geo
  */
-
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, indent: 2*/
-
-/*global geo, ogs, inherit, $, HTMLCanvasElement, Image, vec3*/
-/*global vgl, document*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -25,8 +19,8 @@
  * @returns {geo.ellipsoid}
  */
  //////////////////////////////////////////////////////////////////////////////
-geo.ellipsoid = function(x, y, z) {
-  "use strict";
+geo.ellipsoid = function (x, y, z) {
+  'use strict';
   if (!(this instanceof geo.ellipsoid)) {
     return new geo.ellipsoid(x, y, z);
   }
@@ -50,7 +44,7 @@ geo.ellipsoid = function(x, y, z) {
    * Return radii of ellipsoid
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.radii = function() {
+  this.radii = function () {
     return m_radii;
   };
 
@@ -59,7 +53,7 @@ geo.ellipsoid = function(x, y, z) {
    * Return squared radii of the ellipsoid
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.radiiSquared = function() {
+  this.radiiSquared = function () {
     return m_radiiSquared;
   };
 
@@ -70,7 +64,7 @@ geo.ellipsoid = function(x, y, z) {
    * @return {Number} The maximum radius of the ellipsoid
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.maximumRadius = function() {
+  this.maximumRadius = function () {
     return m_maximumRadius;
   };
 
@@ -81,7 +75,7 @@ geo.ellipsoid = function(x, y, z) {
    * @return {Number} The maximum radius of the ellipsoid
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.minimumRadius = function() {
+  this.minimumRadius = function () {
     return m_minimumRadius;
   };
 
@@ -100,7 +94,7 @@ geo.ellipsoid = function(x, y, z) {
    * @exception {DeveloperError} cartographic is required.
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.computeGeodeticSurfaceNormal = function(lat, lon) {
+  this.computeGeodeticSurfaceNormal = function (lat, lon) {
     if (typeof lat === 'undefined' || typeof lon === 'undefined') {
       throw '[error] Valid latitude and longitude is required';
     }
@@ -127,7 +121,7 @@ geo.ellipsoid = function(x, y, z) {
    * @return {vec3} Position in the WGS84 coordinate system
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.transformPoint = function(lat, lon, elev) {
+  this.transformPoint = function (lat, lon, elev) {
     lat = lat *  (Math.PI / 180.0);
     lon = lon * (Math.PI / 180.0);
 
@@ -137,7 +131,7 @@ geo.ellipsoid = function(x, y, z) {
         result = vec3.create();
 
     vec3.multiply(k, m_radiiSquared, n);
-    vec3.scale(k, k, 1/gamma);
+    vec3.scale(k, k, 1 / gamma);
     vec3.scale(n, n, elev);
     vec3.add(result, n,  k);
     return result;
@@ -151,7 +145,7 @@ geo.ellipsoid = function(x, y, z) {
    * @param {vgl.geometryData} geom
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.transformGeometry = function(geom) {
+  this.transformGeometry = function (geom) {
     if (!geom) {
       throw '[error] Failed to transform to cartesian. Invalid geometry.';
     }
@@ -181,7 +175,7 @@ geo.ellipsoid = function(x, y, z) {
       throw ('[error] Requires positions with three components');
     }
 
-    for (j = 0; j < count; ++j) {
+    for (j = 0; j < count; j += 1) {
       index = j * stride + offset;
 
       sourceDataArray[index] = sourceDataArray[index] * (Math.PI / 180.0);
@@ -191,7 +185,7 @@ geo.ellipsoid = function(x, y, z) {
                                             sourceDataArray[index]);
       vec3.multiply(k, m_radiiSquared, n);
       gamma = Math.sqrt(vec3.dot(n, k));
-      vec3.scale(k, k, 1/gamma);
+      vec3.scale(k, k, 1 / gamma);
       vec3.scale(n, n, sourceDataArray[index + 2]);
       vec3.add(result, n,  k);
 

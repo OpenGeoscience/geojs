@@ -2,11 +2,6 @@
 /**
  * @module geo
  */
-
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, indent: 2*/
-
-/*global geo, ogs, inherit, document$*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -17,7 +12,7 @@
  * @returns {geo.geomFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.geomFeature = function(arg) {
+geo.geomFeature = function (arg) {
   "use strict";
   if (!(this instanceof geo.geomFeature)) {
     return new geo.geomFeature(arg);
@@ -26,9 +21,10 @@ geo.geomFeature = function(arg) {
   geo.feature.call(this, arg);
 
   arg.style = arg.style === undefined ? $.extend({}, {
-              "color": [1.0, 1.0, 1.0],
-              "point_sprites": false,
-              "point_sprites_image":none}, arg.style) : arg.style;
+    "color": [1.0, 1.0, 1.0],
+    "point_sprites": false,
+    "point_sprites_image": null
+  }, arg.style) : arg.style;
 
   // Update style
   this.style(arg.style);

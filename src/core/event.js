@@ -2,12 +2,6 @@
 /**
  * @module geo
  */
-
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, indent: 2*/
-
-/*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vgl, document*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -18,7 +12,7 @@
  * @returns {geo.event}
  */
  //////////////////////////////////////////////////////////////////////////////
-geo.event = function() {
+geo.event = function () {
   "use strict";
   if (!(this instanceof geo.event)) {
     return new geo.event();

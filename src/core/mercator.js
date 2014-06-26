@@ -2,12 +2,6 @@
 /**
  * @module geo
  */
-
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, indent: 2*/
-
-/*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vgl, document*/
 //////////////////////////////////////////////////////////////////////////////
 
 geo.mercator = {
@@ -23,7 +17,9 @@ geo.mercator = {
  * @returns {Number}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.mercator.r_minor = function(spherical) {
+geo.mercator.r_minor = function (spherical) {
+  'use strict';
+
   var r_minor;
 
   spherical = spherical !== undefined ? spherical : false;
@@ -36,16 +32,18 @@ geo.mercator.r_minor = function(spherical) {
   }
 
   return r_minor;
-}
+};
 
 //////////////////////////////////////////////////////////////////////////////
 /**
  * 1/f=(a-b)/a , a=r_major, b=r_minor
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.mercator.f = function(spherical) {
-  return (geo.mercator.r_major-geo.mercator.r_minor(spherical))/geo.mercator.r_major;
-}
+geo.mercator.f = function (spherical) {
+  'use strict';
+
+  return (geo.mercator.r_major - geo.mercator.r_minor(spherical)) / geo.mercator.r_major;
+};
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -56,7 +54,7 @@ geo.mercator.f = function(spherical) {
  *  @returns {integer}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.mercator.long2tilex = function(lon, z) {
+geo.mercator.long2tilex = function (lon, z) {
   'use strict';
   var rad = (lon + 180.0) / 360.0,
       f = Math.floor(rad * Math.pow(2.0, z));
@@ -72,9 +70,9 @@ geo.mercator.long2tilex = function(lon, z) {
  *  @returns {integer}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.mercator.lat2tiley = function(lat, z) {
+geo.mercator.lat2tiley = function (lat, z) {
   'use strict';
-  var rad = lat * Math.PI/180.0;
+  var rad = lat * Math.PI / 180.0;
   return Math.floor((1.0 - rad / Math.PI) / 2.0 * Math.pow(2.0, z));
 };
 
@@ -87,12 +85,12 @@ geo.mercator.lat2tiley = function(lat, z) {
  *  @returns {integer, float}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.mercator.long2tilex2 = function(lon, z) {
+geo.mercator.long2tilex2 = function (lon, z) {
   'use strict';
   var rad = (lon + 180.0) / 360.0,
       f = rad * Math.pow(2.0, z),
       ret = Math.floor(f),
-      frac = f-ret;
+      frac = f - ret;
   return [ret, frac];
 };
 
@@ -105,9 +103,9 @@ geo.mercator.long2tilex2 = function(lon, z) {
  *  @returns {integer, float}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.mercator.lat2tiley2 = function(lat, z) {
+geo.mercator.lat2tiley2 = function (lat, z) {
   'use strict';
-  var rad = lat * Math.PI/180.0,
+  var rad = lat * Math.PI / 180.0,
       f = (1.0 - Math.log(Math.tan(rad) + 1.0 / Math.cos(rad)) /
            Math.PI) / 2.0 * Math.pow(2.0, z),
       ret = Math.floor(f),
@@ -124,7 +122,7 @@ geo.mercator.lat2tiley2 = function(lat, z) {
  *  @returns {float}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.mercator.tilex2long = function(x, z) {
+geo.mercator.tilex2long = function (x, z) {
   'use strict';
   return x / Math.pow(2.0, z) * 360.0 - 180.0;
 };
@@ -138,7 +136,7 @@ geo.mercator.tilex2long = function(x, z) {
  *  @returns {float}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.mercator.tiley2lat = function(y, z) {
+geo.mercator.tiley2lat = function (y, z) {
   'use strict';
   var n = Math.PI - 2.0 * Math.PI * y / Math.pow(2.0, z);
   return 180.0 / Math.PI * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
@@ -153,9 +151,9 @@ geo.mercator.tiley2lat = function(y, z) {
  *  @returns {float}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.mercator.y2lat = function(a) {
-  "use strict";
-  return 180/Math.PI * (2 * Math.atan(Math.exp(a*Math.PI/180)) - Math.PI/2);
+geo.mercator.y2lat = function (a) {
+  'use strict';
+  return 180 / Math.PI * (2 * Math.atan(Math.exp(a * Math.PI / 180)) - Math.PI / 2);
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -167,9 +165,9 @@ geo.mercator.y2lat = function(a) {
  *  @returns {float}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.mercator.lat2y = function(a) {
+geo.mercator.lat2y = function (a) {
   'use strict';
-  return 180/Math.PI * Math.log(Math.tan(Math.PI/4+a*(Math.PI/180)/2));
+  return 180 / Math.PI * Math.log(Math.tan(Math.PI / 4 + a * (Math.PI / 180) / 2));
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -179,9 +177,9 @@ geo.mercator.lat2y = function(a) {
  * @returns {number}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.mercator.deg2rad = function(d) {
+geo.mercator.deg2rad = function (d) {
   'use strict';
-  var r= d * (Math.PI/180.0);
+  var r = d * (Math.PI / 180.0);
   return r;
 };
 
@@ -193,9 +191,9 @@ geo.mercator.deg2rad = function(d) {
  * @returns {number}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.mercator.rad2deg = function(r) {
+geo.mercator.rad2deg = function (r) {
   'use strict';
-  var d= r / (Math.PI/180.0);
+  var d = r / (Math.PI / 180.0);
   return d;
 };
 
@@ -208,7 +206,7 @@ geo.mercator.rad2deg = function(r) {
  * @returns {{x: number, y: number}}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.mercator.ll2m = function(lon,lat,spherical) {
+geo.mercator.ll2m = function (lon, lat, spherical) {
   'use strict';
 
   if (lat > 89.5) {
@@ -227,10 +225,10 @@ geo.mercator.ll2m = function(lon,lat,spherical) {
       sinphi = Math.sin(phi),
       con = eccent * sinphi,
       com = 0.5 * eccent,
-      con2 = Math.pow((1.0-con)/(1.0+con), com),
+      con2 = Math.pow((1.0 - con) / (1.0 + con), com),
       ts = Math.tan(0.5 * (Math.PI * 0.5 - phi)) / con2,
       y = -this.r_major * Math.log(ts),
-      ret={'x':x,'y':y};
+      ret = {'x': x, 'y': y};
 
   return ret;
 };
@@ -243,13 +241,13 @@ geo.mercator.ll2m = function(lon,lat,spherical) {
  * @param y
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.mercator.m2ll = function(x,y,spherical) {
+geo.mercator.m2ll = function (x, y, spherical) {
   'use strict';
-  var lon=this.rad2deg((x/this.r_major)),
+  var lon = this.rad2deg((x / this.r_major)),
       temp = this.r_minor(spherical) / this.r_major,
       e = Math.sqrt(1.0 - (temp * temp)),
-      lat=this.rad2deg(this.pjPhi2(Math.exp(-(y/this.r_major)), e)),
-      ret={'lon':lon,'lat':lat};
+      lat = this.rad2deg(this.pjPhi2(Math.exp(-(y / this.r_major)), e)),
+      ret = {'lon': lon, 'lat': lat};
 
   return ret;
 };
@@ -263,24 +261,23 @@ geo.mercator.m2ll = function(x,y,spherical) {
  * @returns {number}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.mercator.pjPhi2 = function(ts, e) {
+geo.mercator.pjPhi2 = function (ts, e) {
   'use strict';
-  var N_ITER=15,
-      HALFPI=Math.PI/2,
-      TOL=0.0000000001,
+  var N_ITER = 15,
+      HALFPI = Math.PI / 2,
+      TOL = 0.0000000001,
       con, dphi,
       i = N_ITER,
       eccnth = 0.5 * e,
-      Phi = HALFPI - 2.0 * Math.atan (ts);
+      Phi = HALFPI - 2.0 * Math.atan(ts);
 
   do
   {
-    con = e * Math.sin (Phi);
-    dphi = HALFPI - 2.0 * Math.atan (ts * Math.pow(
+    con = e * Math.sin(Phi);
+    dphi = HALFPI - 2.0 * Math.atan(ts * Math.pow(
             (1.0 - con) / (1.0 + con), eccnth)) - Phi;
     Phi += dphi;
-
-  }
-  while ( Math.abs(dphi)>TOL && --i);
+    i -= 1;
+  } while (Math.abs(dphi) > TOL && i);
   return Phi;
 };

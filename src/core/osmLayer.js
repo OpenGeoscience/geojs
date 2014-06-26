@@ -2,12 +2,6 @@
 /**
  * @module geo
  */
-
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vgl, vec4, document*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -15,7 +9,7 @@
  * Create a new instance of osmLayer
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.osmLayer = function(arg) {
+geo.osmLayer = function (arg) {
   'use strict';
 
   if (!(this instanceof geo.osmLayer)) {
@@ -31,11 +25,6 @@ geo.osmLayer = function(arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
-    MAP_OSM = 0,
-    MAP_MQOSM = 1,
-    MAP_MQAERIAL = 2,
-    MAP_NUMTYPES = 3,
-    m_mapType = MAP_MQOSM,
     m_tiles = {},
     m_hiddenBinNumber = 0,
     m_visibleBinNumber = 1000,
@@ -62,7 +51,7 @@ geo.osmLayer = function(arg) {
    * Get/Set tile cache size
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.tileCacheSize = function(val) {
+  this.tileCacheSize = function (val) {
     if (val === undefined) {
       return m_tileCacheSize;
     }
@@ -83,7 +72,7 @@ geo.osmLayer = function(arg) {
    * [x1,y1, x2, y2], [[x,y]]
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.toLocal = function(input) {
+  this.toLocal = function (input) {
     var i, output, delta;
 
     /// Now handle different data types
@@ -93,7 +82,7 @@ geo.osmLayer = function(arg) {
 
       /// Input is array of geo.latlng
       if (input[0] instanceof geo.latlng) {
-        for (i = 0; i < input.length; ++i) {
+        for (i = 0; i < input.length; i += 1) {
           output[i] = geo.latlng(input[i]);
           output[i].lat(geo.mercator.lat2y(output[i].lat()));
         }
@@ -103,20 +92,20 @@ geo.osmLayer = function(arg) {
         if (delta === 2) {
           for (i = 0; i < input.length; i += delta) {
             output[i] = input[i];
-            output[i+1] = geo.mercator.lat2y(input[i+1]);
+            output[i + 1] = geo.mercator.lat2y(input[i + 1]);
           }
         } else {
           for (i = 0; i < input.length; i += delta) {
             output[i] = input[i];
-            output[i+1] = geo.mercator.lat2y(input[i+1]);
-            output[i+2] = input[i+2];
+            output[i + 1] = geo.mercator.lat2y(input[i + 1]);
+            output[i + 2] = input[i + 2];
           }
         }
-      } else if (x in input[0] && y in input[0] && z in input[0]) {
+      } else if ('x' in input[0] && 'y' in input[0] && 'z' in input[0]) {
         /// Input is array of object
         output[i] = { x: input[i].x, y: geo.mercator.lat2y(input[i].y),
                       z: input[i].z };
-      } else if (x in input[0] && y in input[0] && z in input[0]) {
+      } else if ('x' in input[0] && 'y' in input[0] && 'z' in input[0]) {
         /// Input is array of object
         output[i] = { x: input[i].x, y: geo.mercator.lat2y(input[i].y)};
       }
@@ -142,7 +131,7 @@ geo.osmLayer = function(arg) {
    * point in space. [x,y], [[x,y]], [{x:val: y:val}], {x:val, y:val}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.fromLocal = function(input) {
+  this.fromLocal = function (input) {
     var i, output;
 
     if (input instanceof Array && input.length > 0) {
@@ -150,18 +139,18 @@ geo.osmLayer = function(arg) {
       output.length = input.length;
 
       if (input[0] instanceof Object) {
-        for (i = 0; i < input.length; ++i) {
+        for (i = 0; i < input.length; i += 1) {
           output[i] = {};
           output[i].x = input[i].x;
           output[i].y = geo.mercator.y2lat(input[i].y);
         }
       } else if (input[0] instanceof Array) {
-        for (i = 0; i < input.length; ++i) {
+        for (i = 0; i < input.length; i += 1) {
           output[i] = input[i];
           output[i][1] = geo.mercator.y2lat(input[i][1]);
         }
       } else {
-        for (i = 0; i < input.length; ++i) {
+        for (i = 0; i < input.length; i += 1) {
           output[i] = input[i];
           output[i + 1] = geo.mercator.y2lat(input[i + 1]);
         }
@@ -185,7 +174,7 @@ geo.osmLayer = function(arg) {
    * @param y {number} Y axis tile index
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._hasTile = function(zoom, x, y) {
+  this._hasTile = function (zoom, x, y) {
     if (!m_tiles[zoom]) {
       return false;
     }
@@ -205,7 +194,7 @@ geo.osmLayer = function(arg) {
    * @param y {number} Y axis tile index
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._addTile = function(request, zoom, x, y) {
+  this._addTile = function (request, zoom, x, y) {
     if (!m_tiles[zoom]) {
       m_tiles[zoom] = {};
     }
@@ -227,9 +216,7 @@ geo.osmLayer = function(arg) {
         lly = -totalLatDegrees * 0.5 + y * latPerTile,
         urx = -180.0 + (x + 1) * lonPerTile,
         ury = -totalLatDegrees * 0.5 + (y + 1) * latPerTile,
-        feature = null,
         tile = new Image();
-        //console.log("New tile: ["+llx+" , "+lly+"] ["+urx+" , "+ury+"]");
 
     tile.LOADING = true;
     tile.LOADED = false;
@@ -248,13 +235,13 @@ geo.osmLayer = function(arg) {
 
     // tile.src = "http://tile.openstreetmap.org/" + zoom + "/" + (x)
     //   + "/" + (Math.pow(2,zoom) - 1 - y) + ".png";
-    tile.src = m_baseUrl + zoom + "/" +
-      (x) + "/" + (Math.pow(2,zoom) - 1 - y) + "." + m_imageFormat;
+    tile.src = m_baseUrl + zoom + '/' +
+      (x) + '/' + (Math.pow(2, zoom) - 1 - y) + '.' + m_imageFormat;
 
     m_tiles[zoom][x][y] = tile;
     m_pendingNewTiles.push(tile);
 
-    ++m_numberOfCachedTiles;
+    m_numberOfCachedTiles += 1;
     return tile;
   };
 
@@ -264,8 +251,9 @@ geo.osmLayer = function(arg) {
    * Clear tiles that are no longer required
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._removeTiles = function(request) {
-    var i, x, y, tile, zoom, currZoom = this.map().zoom();
+  /* jshint -W089 */
+  this._removeTiles = function () {
+    var x, y, tile, zoom, currZoom = this.map().zoom();
 
     if (!m_tiles) {
       return this;
@@ -291,11 +279,11 @@ geo.osmLayer = function(arg) {
       }
     }
 
-    setTimeout(function() {
+    setTimeout(function () {
       var tile, i;
 
       /// First remove the tiles if we have cached more than max cached limit
-      m_pendingInactiveTiles.sort(function(a, b) {
+      m_pendingInactiveTiles.sort(function (a, b) {
         return a.lastused - b.lastused;
       });
 
@@ -309,12 +297,12 @@ geo.osmLayer = function(arg) {
           m_this._delete(tile.feature);
           delete m_tiles[tile.zoom][tile.index_x][tile.index_y];
           m_pendingInactiveTiles.splice(i, 1);
-          --m_numberOfCachedTiles;
+          m_numberOfCachedTiles -= 1;
         }
-        ++i;
+        i += 1;
       }
 
-      for (i = 0; i < m_pendingInactiveTiles.length; ++i) {
+      for (i = 0; i < m_pendingInactiveTiles.length; i += 1) {
         tile = m_pendingInactiveTiles[i];
         if (tile.zoom !== m_this.map().zoom()) {
           tile.REMOVING = false;
@@ -331,17 +319,19 @@ geo.osmLayer = function(arg) {
       m_pendingInactiveTiles = [];
       m_this._draw();
     }, 100);
+    
 
     return this;
   };
-
+  /* jshint +W089 */
+ 
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Create / delete tiles as necessary
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._addTiles = function(request) {
-    var feature, ren = this.renderer(), node = this.node(),
+  this._addTiles = function (request) {
+    var feature, ren = this.renderer(),
         zoom = this.map().zoom(),
         /// First get corner points
         /// In display coordinates the origin is on top left corner (0, 0)
@@ -393,9 +383,9 @@ geo.osmLayer = function(arg) {
       tile2y = temp;
     }
 
-    for (i = tile1x; i <= tile2x; ++i) {
-      for (j = tile2y; j <= tile1y; ++j) {
-        invJ = (Math.pow(2,zoom) - 1 - j);
+    for (i = tile1x; i <= tile2x; i += 1) {
+      for (j = tile2y; j <= tile1y; j += 1) {
+        invJ = (Math.pow(2, zoom) - 1 - j);
         if  (!m_this._hasTile(zoom, i, invJ)) {
           m_this._addTile(request, zoom, i, invJ);
         } else {
@@ -407,27 +397,32 @@ geo.osmLayer = function(arg) {
       }
     }
 
-    /// And now finally add them
-    for (i = 0; i < m_pendingNewTiles.length; ++i) {
-      tile = m_pendingNewTiles[i];
-
-      tile.onload = function() {
-        this.LOADING = false;
-        this.LOADED = true;
-        if ((tile.REMOVING || this.REMOVED) &&
-          this.feature &&
+    // define a function here to set tile properties after it is loaded
+    function tileOnLoad(tile) {
+      return function () {
+        tile.LOADING = false;
+        tile.LOADED = true;
+        if ((tile.REMOVING || tile.REMOVED) &&
+          tile.feature &&
           tile.zoom !== m_this.map().zoom()) {
-          this.feature.bin(m_hiddenBinNumber);
-          this.REMOVING = false;
-          this.REMOVED = true;
+          tile.feature.bin(m_hiddenBinNumber);
+          tile.REMOVING = false;
+          tile.REMOVED = true;
         } else {
-          this.REMOVED = false;
-          this.lastused = new Date();
-          this.feature.bin(m_visibleBinNumber);
+          tile.REMOVED = false;
+          tile.lastused = new Date();
+          tile.feature.bin(m_visibleBinNumber);
         }
-        this.feature._update();
+        tile.feature._update();
         m_this._draw();
       };
+    }
+    
+    /// And now finally add them
+    for (i = 0; i < m_pendingNewTiles.length; i += 1) {
+      tile = m_pendingNewTiles[i];
+
+      tile.onload = tileOnLoad(tile);
       feature = this.createFeature('plane', {drawOnAsyncResourceLoad: false})
                   .origin([tile.llx, tile.lly])
                   .upperLeft([tile.llx, tile.ury])
@@ -437,15 +432,14 @@ geo.osmLayer = function(arg) {
       tile.feature = feature;
     }
     m_pendingNewTiles = [];
-  }
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Create / delete tiles as necessary
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._updateTiles = function(request) {
-    var zoom = m_this.map().zoom();
+  this._updateTiles = function (request) {
     /// Add tiles that are currently visible
     this._addTiles(request);
 
@@ -466,9 +460,9 @@ geo.osmLayer = function(arg) {
    * Do not call parent _init method as its already been executed
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._init = function() {
+  this._init = function () {
     s_init.call(this);
-    this.gcs("EPSG:3857");
+    this.gcs('EPSG:3857');
     return this;
   };
 
@@ -477,7 +471,7 @@ geo.osmLayer = function(arg) {
    * Update layer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._update = function(request) {
+  this._update = function (request) {
     /// Update tiles (create new / delete old etc...)
     this._updateTiles(request);
 

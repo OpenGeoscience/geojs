@@ -2,11 +2,6 @@
 /**
  * @module geo
  */
-
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, indent: 2*/
-
-/*global geo, ogs, inherit, document$*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -17,7 +12,7 @@
  * @returns {geo.polygonFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.polygonFeature = function(arg) {
+geo.polygonFeature = function (arg) {
   "use strict";
   if (!(this instanceof geo.polygonFeature)) {
     return new geo.polygonFeature(arg);
@@ -32,13 +27,17 @@ geo.polygonFeature = function(arg) {
    * Initialize
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._init = function(arg) {
+  this._init = function (arg) {
     s_init.call(this, arg);
-    var defaultStyle = $.extend({}, {
-                         "color": [1.0, 1.0, 1.0],
-                         "fill_color": [1.0, 1.0, 1.0],
-                         "fill": true},
-                         arg.style === undefined ? {} : arg.style);
+    var defaultStyle = $.extend(
+      {},
+      {
+        "color": [1.0, 1.0, 1.0],
+        "fill_color": [1.0, 1.0, 1.0],
+        "fill": true
+      },
+      arg.style === undefined ? {} : arg.style
+    );
 
     this.style(defaultStyle);
   };

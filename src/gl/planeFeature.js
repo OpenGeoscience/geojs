@@ -10,7 +10,7 @@
  * @returns {geo.planeFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-ggl.planeFeature = function(arg) {
+ggl.planeFeature = function (arg) {
   "use strict";
   if (!(this instanceof ggl.planeFeature)) {
     return new ggl.planeFeature(arg);
@@ -27,7 +27,7 @@ ggl.planeFeature = function(arg) {
    * @returns {Array} [[origin], [upper left] [lower right]]
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.coords = function() {
+  this.coords = function () {
     return [this.origin(), this.upperLeft(), this.lowerRight()];
   };
 
@@ -38,7 +38,7 @@ ggl.planeFeature = function(arg) {
    * @override
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._build = function() {
+  this._build = function () {
     var or = this.origin(),
         ul = this.upperLeft(),
         lr = this.lowerRight(),
@@ -87,7 +87,7 @@ ggl.planeFeature = function(arg) {
           m_this._update();
           m_this.layer()._draw();
         }
-      }
+      };
     }
     m_this.renderer().contextRenderer().addActor(m_actor);
     this.buildTime().modified();
@@ -100,7 +100,7 @@ ggl.planeFeature = function(arg) {
    * @override
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._update = function() {
+  this._update = function () {
     if (this.buildTime().getMTime() <= this.dataTime().getMTime()) {
       this._build();
     }
@@ -117,7 +117,7 @@ ggl.planeFeature = function(arg) {
    * Destroy
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._exit = function() {
+  this._exit = function () {
     m_this.renderer().contextRenderer().removeActor(m_actor);
   };
 
@@ -127,4 +127,4 @@ ggl.planeFeature = function(arg) {
 inherit(ggl.planeFeature, geo.planeFeature);
 
 // Now register it
-geo.registerFeature('vgl', 'plane', ggl.planeFeature);
+geo.registerFeature("vgl", "plane", ggl.planeFeature);

@@ -2,12 +2,6 @@
 /**
  * @module geo
  */
-
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, indent: 2*/
-
-/*global geo, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vgl, document*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -19,7 +13,7 @@
  * @returns {geo.latlng}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.latlng = function(arg1, arg2) {
+geo.latlng = function (arg1, arg2) {
   "use strict";
   if (!(this instanceof geo.latlng)) {
     return new geo.latlng(arg1, arg2);
@@ -38,7 +32,7 @@ geo.latlng = function(arg1, arg2) {
    * Return latitude
    */
   //////////////////////////////////////////////////////////////////////////////
-  this.lat = function(val) {
+  this.lat = function (val) {
     if (val === undefined) {
       return m_lat;
     } else {
@@ -51,7 +45,7 @@ geo.latlng = function(arg1, arg2) {
    * Return longitude
    */
   //////////////////////////////////////////////////////////////////////////////
-  this.lng = function(val) {
+  this.lng = function (val) {
     if (val === undefined) {
       return m_lng;
     } else {
@@ -64,7 +58,7 @@ geo.latlng = function(arg1, arg2) {
    * Return x coodinate
    */
   //////////////////////////////////////////////////////////////////////////////
-  this.x = function(val) {
+  this.x = function (val) {
     if (val === undefined) {
       return this.lng();
     } else {
@@ -77,7 +71,7 @@ geo.latlng = function(arg1, arg2) {
    * Return y coodinate
    */
   //////////////////////////////////////////////////////////////////////////////
-  this.y = function(val) {
+  this.y = function (val) {
     if (val === undefined) {
       return this.lat();
     } else {

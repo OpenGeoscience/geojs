@@ -2,12 +2,6 @@
 /**
  * @module ggl
  */
-
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, indent: 2*/
-
-/*global ggl, geo, ogs, inherit, $, HTMLCanvasElement, Image*/
-/*global vgl, vec4, document*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -18,20 +12,34 @@
  * @returns {geo.mapInteractorStyle}
  */
 //////////////////////////////////////////////////////////////////////////////
-ggl.mapInteractorStyle = function() {
+ggl.mapInteractorStyle = function () {
   "use strict";
   if (!(this instanceof ggl.mapInteractorStyle)) {
     return new ggl.mapInteractorStyle();
   }
   vgl.interactorStyle.call(this);
-  var m_map, m_this = this, m_mapZoomLevel = 3, m_leftMouseButtonDown = false,
-      m_rightMouseButtonDown = false, m_middileMouseButtonDown = false,
-      m_initRightBtnMouseDown = false, m_drawRegionMode = false,
-      m_drawRegionLayer, m_clickLatLng, m_width, m_height,
-      m_renderer, m_renderWindow, m_camera, m_outsideCanvas,
-      m_currentMousePos, m_focusDisplayPoint, m_zTrans,
-      m_coords, m_mouseLastPos = { x: 0, y: 0 }, m_picker = new vgl.picker(),
-      m_updateRenderParamsTime = vgl.timestamp();
+  var m_map,
+    m_this = this,
+    m_leftMouseButtonDown = false,
+    m_rightMouseButtonDown = false,
+    m_middileMouseButtonDown = false,
+    m_initRightBtnMouseDown = false,
+    m_drawRegionMode = false,
+    m_drawRegionLayer,
+    m_clickLatLng,
+    m_width,
+    m_height,
+    m_renderer,
+    m_renderWindow,
+    m_camera,
+    m_outsideCanvas,
+    m_currentMousePos,
+    m_focusDisplayPoint,
+    m_zTrans,
+    m_coords,
+    m_mouseLastPos = { x: 0, y: 0 },
+    m_picker = new vgl.picker(),
+    m_updateRenderParamsTime = vgl.timestamp();
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -41,8 +49,8 @@ ggl.mapInteractorStyle = function() {
    * @returns {geo.mapInteractorStyle|geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.map = function(val) {
-    if (typeof val !== 'undefined') {
+  this.map = function (val) {
+    if (val !== undefined) {
       m_map = val;
       return m_this;
     }
@@ -57,10 +65,10 @@ ggl.mapInteractorStyle = function() {
    * @returns {geo.mapInteractorStyle|Boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.drawRegionMode = function(val) {
-    if (typeof val !== 'undefined') {
+  this.drawRegionMode = function (val) {
+    if (val !== undefined) {
       m_drawRegionMode = val;
-      if(m_drawRegionLayer) {
+      if (m_drawRegionLayer) {
         m_drawRegionLayer.setVisible(val);
       }
       m_map.draw();
@@ -76,7 +84,7 @@ ggl.mapInteractorStyle = function() {
    * @param {vgl.renderer} the renderer whose camera should be panned.
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._panCamera = function(renderer) {
+  this._panCamera = function (renderer) {
     var worldPt1, worldPt2, dx, dy, dz, focusDisplayPoint = renderer.focusDisplayPoint();
 
     worldPt1 = m_renderWindow.displayToWorld(m_currentMousePos.x,
@@ -96,11 +104,13 @@ ggl.mapInteractorStyle = function() {
    * Handle mouse move event
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.handleMouseMove = function(event) {
+  this.handleMouseMove = function (event) {
     /// Local vars
-    var canvas = m_this.map(), xrot = null, a = null,
-        angle = null, mouseWorldPoint, features, lastWorldPos,
-        currWorldPos, lastZoom, evt, newMercPerPixel, oldMercPerPixel, i,
+    var mouseWorldPoint,
+        lastWorldPos,
+        currWorldPos,
+        evt,
+        i,
         renderers;
 
     /// Update render params
@@ -113,7 +123,7 @@ ggl.mapInteractorStyle = function() {
       return true; // allow bubbling up the event
     }
     if (m_leftMouseButtonDown) {
-      if(m_drawRegionMode) {
+      if (m_drawRegionMode) {
         mouseWorldPoint = m_map.displayToMap(m_currentMousePos.x,
           m_currentMousePos.y);
         m_this.setDrawRegion(m_clickLatLng.lat(), m_clickLatLng.lng(),
@@ -122,7 +132,7 @@ ggl.mapInteractorStyle = function() {
         lastWorldPos = m_camera.position();
         // Pan all cameras associated with the render window.
         renderers = m_renderWindow.renderers();
-        for(i = 0; i < renderers.length; i++) {
+        for (i = 0; i < renderers.length; i += 1) {
           m_this._panCamera(renderers[i]);
         }
         currWorldPos = m_camera.position();
@@ -160,8 +170,8 @@ ggl.mapInteractorStyle = function() {
    * Handle mouse down event
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.handleMouseDown = function(event) {
-    var canvas = m_this.map(), point, plane;
+  this.handleMouseDown = function (event) {
+    var point;
 
     /// Update render parameters
     m_this.updateRenderParams();
@@ -188,7 +198,7 @@ ggl.mapInteractorStyle = function() {
       m_mouseLastPos.y = m_coords.y;
     }
 
-    if(m_drawRegionMode && m_leftMouseButtonDown) {
+    if (m_drawRegionMode && m_leftMouseButtonDown) {
       point = m_map.displayToMap(m_mouseLastPos.x, m_mouseLastPos.y);
       m_clickLatLng = geo.latlng(point.y, point.x);
       m_this.setDrawRegion(point.y, point.x, point.y, point.x);
@@ -202,9 +212,8 @@ ggl.mapInteractorStyle = function() {
    * http://bugs.jquery.com/ticket/8184
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.handleMouseUp = function(event) {
-    var canvas = m_this.map(),
-        width = null,
+  this.handleMouseUp = function (event) {
+    var width = null,
         height = null,
         num = null;
 
@@ -216,8 +225,8 @@ ggl.mapInteractorStyle = function() {
       width = m_this.viewer().renderWindow().windowSize()[0];
       height = m_this.viewer().renderWindow().windowSize()[1];
       m_renderer = m_this.viewer().renderWindow().activeRenderer();
-      if(m_mouseLastPos.x >= 0 && m_mouseLastPos.x <= width &&
-        m_mouseLastPos.y >= 0 && m_mouseLastPos.y <= height) {
+      if (m_mouseLastPos.x >= 0 && m_mouseLastPos.x <= width &&
+          m_mouseLastPos.y >= 0 && m_mouseLastPos.y <= height) {
         num = m_picker.pick(m_mouseLastPos.x, m_mouseLastPos.y, m_renderer);
       }
     }
@@ -239,7 +248,7 @@ ggl.mapInteractorStyle = function() {
    * Handle event when mouse goes out of canvas
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.handleMouseOut = function(event) {
+  this.handleMouseOut = function () {
     /// Update render params
     m_this.updateRenderParams();
 
@@ -247,7 +256,8 @@ ggl.mapInteractorStyle = function() {
       m_leftMouseButtonDown = false;
     } else if (m_middileMouseButtonDown) {
       m_middileMouseButtonDown = false;
-    } if (m_rightMouseButtonDown) {
+    }
+    if (m_rightMouseButtonDown) {
       m_rightMouseButtonDown = false;
       m_initRightBtnMouseDown = false;
 
@@ -256,7 +266,7 @@ ggl.mapInteractorStyle = function() {
       m_this.zoom();
     }
     return false;
-  }
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -266,12 +276,12 @@ ggl.mapInteractorStyle = function() {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.handleMouseWheel = function(event) {
+  this.handleMouseWheel = function (event) {
     /// Update render params
     m_this.updateRenderParams();
 
     var delta = event.originalEvent.wheelDeltaY / 120.0;
-    delta = Math.pow(1 + Math.abs(delta)/2 , delta > 0 ? -1 : 1);
+    delta = Math.pow(1 + Math.abs(delta) / 2, delta > 0 ? -1 : 1);
 
     /// Compute current mouse position
     m_this._computeCurrentMousePos(event);
@@ -286,7 +296,7 @@ ggl.mapInteractorStyle = function() {
    * @param {Number} optional value to zoom by
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._syncZoom = function(val) {
+  this._syncZoom = function (val) {
     var i, renderers, pos, fp, cam;
 
     /// Make sure we are uptodate with renderer and render window
@@ -301,7 +311,7 @@ ggl.mapInteractorStyle = function() {
     fp = m_camera.focalPoint();
 
     renderers = m_renderWindow.renderers();
-    for (i = 0; i < renderers.length; i++) {
+    for (i = 0; i < renderers.length; i += 1) {
       cam = renderers[i].camera();
       if (cam !== m_camera) {
         cam.setPosition(pos[0], pos[1], pos[2]);
@@ -318,7 +328,7 @@ ggl.mapInteractorStyle = function() {
    * @param {Number} optional value to zoom by
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._syncReset = function() {
+  this._syncReset = function () {
     var i, renderers, pos, fp, zoom, center, cam, clippingRange;
 
     /// Make sure we are uptodate with renderer and render window
@@ -331,8 +341,10 @@ ggl.mapInteractorStyle = function() {
     /// TODO: Call base layer - reference layer
     center = m_map.baseLayer().toLocal(geo.latlng(center[0], center[1]));
 
-    if (center instanceof Object && 'x' in center && 'y' in center &&
-      m_map.baseLayer() instanceof geo.osmLayer) {
+    if (center instanceof Object &&
+        "x" in center &&
+        "y" in center &&
+        m_map.baseLayer() instanceof geo.osmLayer) {
 
       m_camera.setPosition(center.x, center.y, computeCameraDistance(zoom));
       m_camera.setFocalPoint(center.x, center.y, fp[2]);
@@ -346,11 +358,11 @@ ggl.mapInteractorStyle = function() {
     renderers = m_renderWindow.renderers();
 
     /// TODO Check if we are allowed to transfrom the camera for this renderer
-    for (i = 0; i < renderers.length; i++) {
+    for (i = 0; i < renderers.length; i += 1) {
       cam = renderers[i].camera();
       if (cam !== m_camera) {
-        console.log('Setting camera for ren ', renderers[i].layer());
-        console.log('Setting pos ', pos);
+        console.log("Setting camera for ren ", renderers[i].layer());
+        console.log("Setting pos ", pos);
         cam.setPosition(pos[0], pos[1], pos[2]);
         cam.setFocalPoint(fp[0], fp[1], fp[2]);
         cam.setClippingRange(clippingRange[0], clippingRange[1]);
@@ -365,7 +377,7 @@ ggl.mapInteractorStyle = function() {
    * @param {Number} optional value to zoom by
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._syncPan = function() {
+  this._syncPan = function () {
     /// TODO: Implement this
     // var i, renderers;
     // m_camera.zoom(val);
@@ -385,9 +397,11 @@ ggl.mapInteractorStyle = function() {
    * Update view in response to a zoom request
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.zoom = function(val) {
-    var oldMercPerPixel, newMercPerPixel, evt, i, renderers, worldPt1,
-        worldPt2, newZoomLevel, oldZoomLevel, pos = m_camera.position();
+  this.zoom = function (val) {
+    var evt,
+        newZoomLevel,
+        oldZoomLevel,
+        pos = m_camera.position();
 
     /// Update render params
     m_this.updateRenderParams();
@@ -449,8 +463,8 @@ ggl.mapInteractorStyle = function() {
    * @returns {geo.mapInteractorStyle|Object}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.lastMousePosition = function(newPosition) {
-    if(typeof newPosition !== 'undefined') {
+  this.lastMousePosition = function (newPosition) {
+    if (newPosition !== undefined) {
       m_mouseLastPos = newPosition;
       return m_this;
     }
@@ -465,8 +479,8 @@ ggl.mapInteractorStyle = function() {
    * @returns {geo.mapInteractorStyle|Boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.leftMouseDown = function(newValue) {
-    if(typeof newValue !== 'undefined') {
+  this.leftMouseDown = function (newValue) {
+    if (newValue !== undefined) {
       m_leftMouseButtonDown = newValue;
       return m_this;
     }
@@ -484,7 +498,7 @@ ggl.mapInteractorStyle = function() {
    * @returns {geo.mapInteractorStyle}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setDrawRegion = function(lat1, lon1, lat2, lon2) {
+  this.setDrawRegion = function (lat1, lon1, lat2, lon2) {
     // TODO
     // Use z-indexing or some other technique for the offsetting
     var evt, plane = geo.planeFeature(
@@ -516,7 +530,7 @@ ggl.mapInteractorStyle = function() {
    * @returns {Array} [lat1, lon1, lat2, lon2]
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.getDrawRegion = function() {
+  this.getDrawRegion = function () {
     return m_drawRegionLayer.features()[0].getCoords();
   };
 
@@ -527,7 +541,7 @@ ggl.mapInteractorStyle = function() {
    * @protected
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._computeCurrentMousePos = function(event) {
+  this._computeCurrentMousePos = function (event) {
     /// Update render params
     m_this.updateRenderParams();
 
@@ -558,7 +572,7 @@ ggl.mapInteractorStyle = function() {
    * @protected
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.updateRenderParams = function() {
+  this.updateRenderParams = function () {
     m_renderWindow = m_this.viewer().renderWindow();
     m_width = m_renderWindow.windowSize()[0];
     m_height = m_renderWindow.windowSize()[1];
@@ -573,19 +587,14 @@ ggl.mapInteractorStyle = function() {
    * Reset to default
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.reset = function() {
-    var pos, fp, newZoomLevel, evt, zoom, center;
+  this.reset = function () {
+    var evt, zoom;
 
     if (!m_map) {
       return;
     }
 
     m_this._syncReset();
-
-    // m_renderWindow.renderers()[2].camera().setPosition(center.x, center.y, computeCameraDistance(zoom));
-    // m_renderWindow.renderers()[2].camera().setFocalPoint(center.x, center.y, fp[2]);
-    // m_renderWindow.renderers()[2].camera().modified();
-    // m_renderWindow.renderers()[1].camera().resetCameraClippingRange();
 
     evt = { type: geo.event.zoom,
             curr_zoom: zoom,
@@ -606,29 +615,13 @@ ggl.mapInteractorStyle = function() {
   function computeZoomLevel() {
     var i, pos = m_camera.position(),
         width = (pos[2] * Math.sin(m_camera.viewAngle()));
-    for (i = 0; i < 20; ++i) {
+    for (i = 0; i < 20; i += 1) {
       if (width >= (360.0 / Math.pow(2, i))) {
         /// We are forcing the minimum zoom level to 2 so that we can get
         /// high res imagery even at the zoom level 0 distance
         return i;
       }
     }
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Compute meters per pixel
-   *
-   * @returns {Number} meters per pixel
-   *
-   * @private
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  function computeMetersPerPixel() {
-    var i, metersPerPixel, metersPerPixelFull = 156412;
-    metersPerPixel = geo.mercator.deg2rad(Math.abs(deltaMerc)) *
-                     geo.mercator.r_major;
-    return metersPerPixel;
   }
 
   ////////////////////////////////////////////////////////////////////////////

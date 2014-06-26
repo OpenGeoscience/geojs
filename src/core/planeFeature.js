@@ -2,11 +2,6 @@
 /**
  * @module geo
  */
-
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, indent: 2*/
-
-/*global geo, ogs, inherit, document$*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -17,7 +12,7 @@
  * @returns {geo.planeFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.planeFeature = function(arg) {
+geo.planeFeature = function (arg) {
   "use strict";
   if (!(this instanceof geo.planeFeature)) {
     return new geo.planeFeature(arg);
@@ -46,8 +41,8 @@ geo.planeFeature = function(arg) {
    * @returns {geo.planeFeature}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.origin = function(val) {
-    if (val === undefined ) {
+  this.origin = function (val) {
+    if (val === undefined) {
       return m_origin;
     } else if (val instanceof Array) {
       if (val.length > 3 || val.length < 2) {
@@ -72,8 +67,8 @@ geo.planeFeature = function(arg) {
    * @returns {geo.planeFeature}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.upperLeft = function(val) {
-    if (val === undefined ) {
+  this.upperLeft = function (val) {
+    if (val === undefined) {
       return m_upperLeft;
     } else if (val instanceof Array) {
       if (val.length > 3 || val.length < 2) {
@@ -98,8 +93,8 @@ geo.planeFeature = function(arg) {
    * @returns {geo.planeFeature}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.lowerRight = function(val) {
-    if (val === undefined ) {
+  this.lowerRight = function (val) {
+    if (val === undefined) {
       return m_lowerRight;
     } else if (val instanceof Array) {
       if (val.length > 3 || val.length < 2) {
@@ -123,21 +118,21 @@ geo.planeFeature = function(arg) {
    * Get/Set if draw should happen as soon as a async resource is loaded
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.drawOnAsyncResourceLoad = function(val) {
+  this.drawOnAsyncResourceLoad = function (val) {
     if (val === undefined) {
       return m_drawOnAsyncResourceLoad;
     } else {
       m_drawOnAsyncResourceLoad = val;
       return this;
     }
-  }
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._init = function(arg) {
+  this._init = function (arg) {
     var style = null;
     s_init.call(this, arg);
     style = this.style();

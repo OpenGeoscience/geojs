@@ -2,11 +2,6 @@
 /**
  * @module geo
  */
-
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, indent: 2*/
-
-/*global geo, ogs, inherit, document$*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -17,7 +12,7 @@
  * @returns {geo.lineFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.lineFeature = function(arg) {
+geo.lineFeature = function (arg) {
   "use strict";
   if (!(this instanceof geo.lineFeature)) {
     return new geo.lineFeature(arg);
@@ -30,7 +25,8 @@ geo.lineFeature = function(arg) {
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
-  var m_positions = arg.positions === undefined ? [] : arg.positions,
+  var m_this = this,
+      m_positions = arg.positions === undefined ? [] : arg.positions,
       s_init = this._init;
 
   ////////////////////////////////////////////////////////////////////////////
@@ -40,14 +36,14 @@ geo.lineFeature = function(arg) {
    * @returns {geo.pointFeature}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.positions = function(val) {
-    if (val === undefined ) {
+  this.positions = function (val) {
+    if (val === undefined) {
       return m_positions;
     } else {
       // Copy incoming array of positions
       m_positions = val.slice(0);
-      this.dataTime().modified();
-      this.modified();
+      m_this.dataTime().modified();
+      m_this.modified();
       return this;
     }
   };
@@ -57,18 +53,23 @@ geo.lineFeature = function(arg) {
    * Initialize
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._init = function(arg) {
-    s_init.call(this, arg);
+  this._init = function (arg) {
+    s_init.call(m_this, arg);
 
-    var defaultStyle = $.extend({}, {"width":[1.0],
-                         "color": [1.0, 1.0, 1.0],
-                         "pattern": "solid"},
-                         arg.style === undefined ? {} : arg.style);
+    var defaultStyle = $.extend(
+      {},
+      {
+        "width": [1.0],
+        "color": [1.0, 1.0, 1.0],
+        "pattern": "solid"
+      },
+      arg.style === undefined ? {} : arg.style
+    );
 
-    this.style(defaultStyle);
+    m_this.style(defaultStyle);
 
     if (m_positions) {
-      this.dataTime().modified();
+      m_this.dataTime().modified();
     }
   };
 

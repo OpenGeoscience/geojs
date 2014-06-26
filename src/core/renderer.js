@@ -2,11 +2,6 @@
 /**
  * @module geo
  */
-
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global window, geo, ogs, vec4, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -17,8 +12,8 @@
  * @returns {geo.renderer}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.renderer = function(arg) {
-  'use strict';
+geo.renderer = function (arg) {
+  "use strict";
 
   if (!(this instanceof geo.renderer)) {
     return new geo.renderer(arg);
@@ -38,7 +33,7 @@ geo.renderer = function(arg) {
    * @returns {*}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.layer = function() {
+  this.layer = function () {
     return m_layer;
   };
 
@@ -47,7 +42,7 @@ geo.renderer = function(arg) {
    * Get canvas for the renderer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.canvas = function(val) {
+  this.canvas = function (val) {
     if (val === undefined) {
       return m_canvas;
     } else {
@@ -61,31 +56,31 @@ geo.renderer = function(arg) {
    * Get map that this renderer belongs to
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.map = function() {
+  this.map = function () {
     if (m_layer) {
       return m_layer.map();
     } else {
       return null;
     }
-  }
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Get base layer that belongs to this renderer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.baseLayer = function() {
+  this.baseLayer = function () {
     if (m_this.map()) {
       return m_this.map().baseLayer();
     }
-  }
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set if renderer has been initialized
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.initialized = function(val) {
+  this.initialized = function (val) {
     if (val === undefined) {
       return m_initialized;
     } else {
@@ -99,16 +94,16 @@ geo.renderer = function(arg) {
    * Get render API used by the renderer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.api = function() {
+  this.api = function () {
     throw "Should be implemented by derivied classes";
-  }
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Reset to default
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.reset = function(event) {
+  this.reset = function () {
     return true;
   };
 
@@ -117,7 +112,7 @@ geo.renderer = function(arg) {
    * Convert array of points from world to GCS coordinate space
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.worldToGcs = function(points) {
+  this.worldToGcs = function () {
     throw "Should be implemented by derivied classes";
   };
 
@@ -126,7 +121,7 @@ geo.renderer = function(arg) {
    * Convert array of points from display to GCS space
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.displayToGcs = function(points) {
+  this.displayToGcs = function () {
     throw "Should be implemented by derivied classes";
   };
 
@@ -135,7 +130,7 @@ geo.renderer = function(arg) {
    * Convert array of points from display to GCS space
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.gcsToDisplay = function(points) {
+  this.gcsToDisplay = function () {
     throw "Should be implemented by derivied classes";
   };
 
@@ -144,7 +139,7 @@ geo.renderer = function(arg) {
    * Convert array of points from world to display space
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.worldToDisplay = function(points) {
+  this.worldToDisplay = function () {
     throw "Should be implemented by derivied classes";
   };
 
@@ -153,7 +148,7 @@ geo.renderer = function(arg) {
    * Convert array of points from display to world space
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.displayToWorld = function(points) {
+  this.displayToWorld = function () {
     throw "Should be implemented by derivied classes";
   };
 
@@ -165,7 +160,7 @@ geo.renderer = function(arg) {
    * @returns {{x: number, y: number}}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.relMouseCoords = function(event) {
+  this.relMouseCoords = function (event) {
     var totalOffsetX = 0,
         totalOffsetY = 0,
         canvasX = 0,
@@ -175,7 +170,8 @@ geo.renderer = function(arg) {
     do {
       totalOffsetX += currentElement.offsetLeft - currentElement.scrollLeft;
       totalOffsetY += currentElement.offsetTop - currentElement.scrollTop;
-    } while (currentElement = currentElement.offsetParent);
+      currentElement = currentElement.offsetParent;
+    } while (currentElement);
 
     canvasX = event.pageX - totalOffsetX;
     canvasY = event.pageY - totalOffsetY;
@@ -191,7 +187,7 @@ geo.renderer = function(arg) {
    * Initialize
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._init = function() {
+  this._init = function () {
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -199,7 +195,7 @@ geo.renderer = function(arg) {
    * Handle resize event
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._resize = function(x, y, w, h) {
+  this._resize = function () {
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -207,7 +203,7 @@ geo.renderer = function(arg) {
    * Render
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._render = function() {
+  this._render = function () {
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -215,7 +211,7 @@ geo.renderer = function(arg) {
    * Exit
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._exit = function() {
+  this._exit = function () {
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -223,7 +219,7 @@ geo.renderer = function(arg) {
    * Connect mouse events to the map layer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._connectMouseEvents = function() {
+  this._connectMouseEvents = function () {
 
   };
 

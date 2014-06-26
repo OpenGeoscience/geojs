@@ -2,10 +2,6 @@
 /**
  * @module geo.d3
  */
-
-/*jslint devel: true, unparam: true*/
-
-/*global geo, gd3, inherit, d3, $*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -16,8 +12,8 @@
  * @returns {gd3.pointFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-gd3.pointFeature = function(arg) {
-  "use strict";
+gd3.pointFeature = function (arg) {
+  'use strict';
   if (!(this instanceof gd3.pointFeature)) {
     return new gd3.pointFeature(arg);
   }
@@ -40,14 +36,14 @@ gd3.pointFeature = function(arg) {
   }
 
   var d_attr = {
-        cx: function (d) { return georef(d, true)._dispx(); },
-        cy: function (d) { return georef(d)._dispy(); },
-        r: '1px'
-      },
-      d_style = {
-        fill: 'black',
-        stroke: 'none'
-      };
+      cx: function (d) { return georef(d, true)._dispx(); },
+      cy: function (d) { return georef(d)._dispy(); },
+      r: '1px'
+    },
+    d_style = {
+      fill: 'black',
+      stroke: 'none'
+    };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -64,7 +60,7 @@ gd3.pointFeature = function(arg) {
    * Initialize
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._init = function(arg) {
+  this._init = function (arg) {
     s_init.call(this, arg);
     return this;
   };
@@ -80,7 +76,7 @@ gd3.pointFeature = function(arg) {
    * @override
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._build = function() {
+  this._build = function () {
     var data = this.positions(),
         s_style = this.style();
 
@@ -99,8 +95,12 @@ gd3.pointFeature = function(arg) {
     m_style.classes = [ 'd3PointFeature' ];
 
     // replace with user defined styles
-    m_style.style.fill = d3.rgb(s_style.color[0]*255, s_style.color[1]*255, s_style.color[2]*255);
-    m_style.attributes.r = s_style.size.toString() + "px";
+    m_style.style.fill = d3.rgb(
+      s_style.color[0] * 255,
+      s_style.color[1] * 255,
+      s_style.color[2] * 255
+    );
+    m_style.attributes.r = s_style.size.toString() + 'px';
     m_style.style['fill-opacity'] = s_style.opacity;
 
     // pass to renderer to draw
@@ -119,7 +119,7 @@ gd3.pointFeature = function(arg) {
    * @override
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._update = function() {
+  this._update = function () {
     s_update.call(this);
 
     if (this.dataTime().getMTime() >= m_buildTime.getMTime()) {

@@ -17,7 +17,7 @@
  * @returns {geo.sceneObject}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.sceneObject = function(arg) {
+geo.sceneObject = function (arg) {
   "use strict";
   if (!(this instanceof geo.sceneObject)) {
     return new geo.sceneObject();

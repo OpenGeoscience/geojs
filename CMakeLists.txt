@@ -10,6 +10,36 @@ set(BUILD_TESTING_OLD OFF CACHE BOOL "Enable old testing (to be removed)")
 
 set(BUILD_TESTING ON CACHE BOOL "Enable geojs testing")
 
+# make npm a hard dependency
+find_program(NPM_EXECUTABLE npm)
+if("${NPM_EXECUTABLE}" STREQUAL "NPM_EXECUTABLE-NOTFOUND")
+  message(FATAL_ERROR "Could not find npm executable")
+endif()
+
+# set up targets for node programs
+set(NODE_MODULES_PATH "${CMAKE_CURRENT_BINARY_DIR}/node_modules")
+
+set(JSHINT_EXECUTABLE "${NODE_MODULES_PATH}/jshint/bin/jshint")
+add_custom_command(
+  OUTPUT "${JSHINT_EXECUTABLE}"
+  COMMAND "${NPM_EXECUTABLE}" install jshint@2.4.x
+  COMMENT "Installing jshint."
+)
+
+set(PHANTOMJS_EXECUTABLE "${NODE_MODULES_PATH}/phantomjs/bin/phantomjs")
+add_custom_command(
+  OUTPUT "${PHANTOMJS_EXECUTABLE}"
+  COMMAND "${NPM_EXECUTABLE}" install phantomjs@1.9.x
+  COMMENT "Installing phantomjs."
+)
+
+set(UGLIFYJS_EXECUTABLE "${NODE_MODULES_PATH}/uglify-js/bin/uglifyjs")
+add_custom_command(
+  OUTPUT "${UGLIFYJS_EXECUTABLE}"
+  COMMAND "${NPM_EXECUTABLE}" install uglify-js@2.4.x
+  COMMENT "Installing uglifyjs."
+)
+
 set(need_python FALSE)
 if(${BUILD_TESTING_OLD} OR ${BUILD_TESTING})
   set(need_python TRUE)
@@ -20,8 +50,7 @@ endif()
 if(${BUILD_TESTING})
   set(need_python TRUE)
 
-  # turn on when fixed
-  set(JS_LINT_TESTS OFF CACHE BOOL "Generate style tests for JS source files.")
+  set(JS_HINT_TESTS ON CACHE BOOL "Generate style tests for JS source files.")
 
   set(PHANTOMJS_TESTS ON CACHE BOOL "Generate phantomjs unit tests.")
 
@@ -113,8 +142,8 @@ macro(list_contains var value)
   endforeach(value2)
 endmacro(list_contains)
 
-set(_js_lint_files)
 set(_js_uglify_files)
+set(_js_lint_files)
 set(_script_include)
 foreach(d ${_source_files})
   add_custom_command(
@@ -122,6 +151,7 @@ foreach(d ${_source_files})
     COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/src/${d}" "${GEOJS_SRC_DIR}/${d}"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/${d}"
   )
+  set(_js_lint_files ${_js_lint_files} "${CMAKE_CURRENT_SOURCE_DIR}/src/${d}")
   set(_js_uglify_files ${_js_uglify_files} "${GEOJS_SRC_DIR}/${d}")
   set(_script_include ${_script_include}<script src=\"/src/${d}\" data-cover></script>)
 endforeach()
@@ -137,18 +167,12 @@ set(_script_include ${_script_include}<script src=\"/src/core/version.js\" data-
 # Build concatonated js file
 add_custom_command(
   OUTPUT ${_js_file}
-  COMMAND ${CMAKE_COMMAND} -DCAT_OUTPUT_FILE=${_js_file}
-          # Note the quotes so we get the ; included
-          "-DCAT_FILES=${_js_uglify_files}"
-          -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/cat.cmake
-  DEPENDS ${GEOJS_DEPLOY_LIB_DIR} ${_js_uglify_files}
+  COMMAND ${UGLIFYJS_EXECUTABLE} -b -o ${_js_file} ${_js_uglify_files}
+  DEPENDS ${UGLIFYJS_EXECUTABLE} ${GEOJS_DEPLOY_LIB_DIR} ${_js_uglify_files}
   VERBATIM
 )
 
 if(MINIFY)
-  # Find UglifyJS.
-  find_package(UglifyJS REQUIRED)
-
   if(MANGLE)
       set(MANGLE_FLAG "-m")
   endif()
@@ -156,8 +180,8 @@ if(MINIFY)
   # Build minified js file
   add_custom_command(
     OUTPUT ${_min_js_file}
-    COMMAND ${UglifyJS_EXECUTABLE} ${_js_file} -c ${MANGLE_FLAG} -o ${_min_js_file} ${_js_file}
-    DEPENDS ${GEOJS_DEPLOY_LIB_DIR} ${_js_file}
+    COMMAND ${UGLIFYJS_EXECUTABLE} ${_js_file} -c ${MANGLE_FLAG} -o ${_min_js_file} ${_js_file}
+    DEPENDS ${UGLIFYJS_EXECUTABLE} ${GEOJS_DEPLOY_LIB_DIR} ${_js_file}
   )
   add_custom_target(${PROJECT_NAME} ALL DEPENDS ${_min_js_file})
 else()
@@ -268,8 +292,6 @@ if(BUILD_TESTING)
   endif()
 
   if(PHANTOMJS_TESTS)
-    find_package(PhantomJS REQUIRED)
-
     set(PHANTOMJS_REL_DIR "test/phantomjs")
     set(PHANTOMJS_ABS_DIR "${GEOJS_DEPLOY_DIR}/${PHANTOMJS_REL_DIR}")
 
@@ -312,8 +334,9 @@ if(BUILD_TESTING)
     add_custom_target(
       phantomjs_tests
       ALL
-      DEPENDS ${JS_UNIT_TEST_FILES}
+      DEPENDS ${PHANTOMJS_EXECUTABLE} ${JS_UNIT_TEST_FILES}
     )
+
   endif() # PHANTOMJS_TESTS
 
   if(SELENIUM_TESTS)
@@ -410,17 +433,21 @@ if(BUILD_TESTING)
   endif()
 
   # JSLint tests.
-  if(${JS_LINT_TESTS})
-    # Find JSLint.
-    find_package(JSLint REQUIRED)
-
+  if(${JS_HINT_TESTS})
+    
+    add_custom_target(
+      jshint-binary
+      ALL
+      DEPENDS "${JSHINT_EXECUTABLE}"
+    )
     foreach(js ${_js_lint_files})
+      file(RELATIVE_PATH rel_f "${CMAKE_CURRENT_SOURCE_DIR}" "${js}")
       add_test(
-        NAME "jslint:${js}"
-        COMMAND ${JSLint_EXECUTABLE} ${js}
+        NAME "jshint:${rel_f}"
+        COMMAND ${JSHINT_EXECUTABLE} ${js}
       )
     endforeach()
 
-  endif() # JS_LINT_TESTS
+  endif() # JS_HINT_TESTS
 
 endif()
