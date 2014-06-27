@@ -56,7 +56,7 @@ ggl.pointFeature = function (arg) {
     }
 
     if (style.point_sprites === true) {
-      if (style.point_sprites_image !== null) {
+      if (style.point_sprites_image === null) {
         throw "[error] Invalid image for point sprites";
       }
 
@@ -93,7 +93,7 @@ ggl.pointFeature = function (arg) {
       }
 
       if (style.point_sprites === true) {
-        if (style.point_sprites_image !== null) {
+        if (style.point_sprites_image === null) {
           throw "[error] Invalid image for point sprites";
         }
 
