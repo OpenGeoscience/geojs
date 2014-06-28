@@ -10,8 +10,8 @@ Welcome to geojs's documentation!
 Quick start
 ===========
 
-Software dependencies
----------------------
+Build dependencies
+------------------
 
 The following software is required to build geojs from source:
 
@@ -62,6 +62,77 @@ the source. ::
 
     cmake ..
     make
+
+Compiled javascript libraries will be named ``geo.js`` and ``vgl.js`` in ``deploy/web/lib``.
+Optionally if you have configured ``MINIFY=ON``, the minified files named ``geo.min.js`` and
+``vgl.min.js`` will be there as well.
+
+Using the library
+-----------------
+
+At a minimum, geojs requires the following external libraries:
+
+* `JQuery <http://jquery.com/>`_
+* `glMatrix <http://github.com/toji/gl-matrix>`_
+* `Proj4js <http://github.com/proj4js/proj4js>`_
+* `d3 <http://d3js.org/>`_ (optional for d3 features)
+
+The following html gives an example of including all of the necessary files
+and creating a basic full map using the `osmLayer` class.
+
+.. code-block:: html
+
+    <head>
+        <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.4.8/d3.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.2.1/gl-matrix.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/proj4js/2.1.0/proj4.js"></script>
+
+        <script src="/web/lib/vgl.js"></script>
+        <script src="/web/lib/geo.js"></script>
+
+        <style>
+            html, body, #map {
+                margin: 0;
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+            }
+        </style>
+
+        <script>
+        $(function () {
+            var map;
+
+            function resize() {
+                map.resize(0, 0, $('#map').width(), $('#map').height());
+            }
+
+            map = geo.map({
+                'node': '#map',
+                'zoom': 2
+            });
+            map.createLayer('osm');
+
+            $(window).resize(resize);
+            resize();
+        });
+        </script>
+    </head>
+    <body>
+        <div id="map"></div>
+    </body>
+
+You can save this page into a new file at ``deploy/mymap.html``.  To view your new creation,
+start up a web server from ``deploy`` using the following command ::
+
+    python test/geojs_test_runner.py
+
+Now, if you open up `<http://localhost:50100/mymap.html>`_ in your favorite webgl enabled
+browser, you should see a map like the following:
+
+.. image:: images/osmmap.png
+    :align: center
 
 .. toctree::
    :maxdepth: 2
