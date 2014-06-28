@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 
-'''
-Base TestCase for selenium based unit testing.
-Requires python packages:
-    pillow
-    selenium
-Should be installable by:
-    pip install Pillow selenium
-'''
+# Base TestCase for selenium based unit testing.
+# Requires python packages:
+#     pillow
+#     selenium
+# Should be installable by:
+#     pip install Pillow selenium
 
 import os
 import unittest
@@ -75,23 +73,123 @@ drivers = {
 
 class BaseTest(TestCase):
     '''
-    Base class for all selenium based tests.
+    Base class for all selenium based tests.  This class
+    contains several attributes that are configured by cmake
+    to give the test cases information about the build environment.
+    The class attributes representing paths should not be modified
+    by derived classes in general unless noted in the docstrings.
+
+    The testing framework is intended to be organized as follows:
+
+    *   Each testing subdirectory contains one or more test classes derived from this class.
+        Test classes each have a class attribute :py:attr:`BaseTest.testCase`
+        that should be a tuple of strings.
+    *   Each test class contains one or more test functions that are run independently.
+    *   Each test function contains one or more unit tests that are referred to in the
+        arguments list as ``testName``.
+
+    The tests are discovered and executed using python's
+    `unittest <https://docs.python.org/2/library/unittest.html>`_
+    module on the commandline by executing: ::
+
+        python -m unittest discover
+
+    Paths to test specific resources such as base line images are
+    computed as follows:
+
+    *   Test web page ::
+
+            DEPLOY_PATH/test/selenium/testDirectory/index.html
+
+    *   Test case image store path ::
+
+            DEPLOY_PATH/test/selenium/testDirectory/testCase[0]/testCase[1]/.../
+
+    *   Unit test screenshots ::
+
+            DEPLOY_PATH/test/selenium/testDirectory/testCase[0]/testCase[1]/.../testName.png
+
+    *   MIDAS image store ::
+
+            MIDAS_COMMUNITY/Testing/test/selenium/testDirectory/testCase[0]/testCase[1]/.../testName.png
+
+        Where each MIDAS item contains multiple revisions and bitstreams to account for changes in
+        the code and differences between platforms.
+
+    *   Unit test screenshot comparisons for debugging ::
+
+            DEPLOY_PATH/test/selenium/testDirectory/testCase[0]/testCase[1]/.../testName_test.png
+            DEPLOY_PATH/test/selenium/testDirectory/testCase[0]/testCase[1]/.../testName_base_NN.png
+            DEPLOY_PATH/test/selenium/testDirectory/testCase[0]/testCase[1]/.../testName_diff_NN.png
+
     '''
+
+    #: String representing the selenium driver to be used.
+    #: Currently supports 'firefox' and 'chrome'
     driverName = 'null'
+
+    #: The address of the webserver hosting the test content
+    #: configured by cmake.
     testHost = TEST_HOST
+
+    #: The port of the webserver hosting the test content
+    #: configured by cmake.
     testPort = TEST_PORT
+
+    # unused at the moment
     seleniumHost = SELENIUM_HOST
+
+    # unused at the moment
     seleniumPort = SELENIUM_PORT
+
+    #: The absolute path to the webserver root.
     deploy_path = DEPLOY_PATH
+
+    #: The absolute path to the build root.
     build_path = BUILD_PATH
+
+    #: The absolute path to the source root.
     source_path = SOURCE_PATH
+
+    #: The root URL of the test webserver.
     testBaseURL = 'http://' + testHost + ':' + str(testPort)
+
+    #: A tuple giving the selenium test root relative to both
+    #: :py:attr:`testBaseURL` and :py:attr:`deploy_path`.
     testPath = ('test', 'selenium')
+
+    #: A tuple representing the relative path to test data relative to the
+    #: `geojs MIDAS community <http://midas3.kitware.com/midas/community/40>`_.
     midasPath = ('Testing', ) + testPath
+
+    #: A tuple representing the path to the selenium test
+    #: sources relative to :py:attr:`source_path`.
     srcTestPath = ('testing', 'test-cases', 'selenium-tests')
+
+    #: The maximum allowable image difference between screenshots
+    #: and baseline images.  The difference is calculated as the
+    #: RMS average difference between pixel values in the RGB
+    #: channels.  This should be a number between
+    #: ``0`` and ``255``, with ``0`` meaning a perfect match.
     imageDifferenceThreshold = 2.0
+
+    #: A tuple representing the path to a specific test case.
+    #: This value should be set by all derived classes.  The
+    #: path is used to determine both the image store path
+    #: on MIDAS server and the local image output path.
     testCase = tuple()
+
+    #: A :py:class:`midas_handler.MidasHandler` object providing methods for downloading and
+    #: uploading data to the
+    #: `geojs MIDAS community <http://midas3.kitware.com/midas/community/40>`_.
     midas = MidasHandler(MIDAS_BASE_URL, MIDAS_COMMUNITY)
+
+    #: The revision number of the test.  This value should be set by
+    #: all derived classes and incremented
+    #: whenever there are changes to either the test case or the geojs
+    #: source resulting in an expected change in screenshots.  After
+    #: incrementing this value, new baseline images must be uploaded
+    #: to the MIDAS server.
     testRevision = 1
 
     @classmethod
@@ -134,7 +232,8 @@ class BaseTest(TestCase):
 
     def tearDown(self):
         '''
-        Stop the selenium driver.
+        Stop the selenium driver and calls the coverage handler
+        if enabled.
         '''
         self.driver.execute_script(
             'if (window.stopTest) { window.stopTest(); }'
@@ -145,6 +244,10 @@ class BaseTest(TestCase):
         '''
         Wait for a variable to be set to true.  Raise an error
         if timeout is exceeded.
+
+        :param string variable: The variable to query.
+        :param float timeout: The maximum number of seconds to wait.
+
         '''
         def check_status(drv):
             try:
@@ -159,47 +262,83 @@ class BaseTest(TestCase):
 
     def runScript(self, script):
         '''
-        Run a js script in the browser.
+        Run a javascript script in the browser.  Scripts that execute
+        asynchronously should set a global variable when finished
+        so that a :py:func:`BaseTest.wait` call can be made to block
+        for it to finish, as follows:
+
+        >>> script = 'window.setTimeout(function () { window.finished = true; })'
+        >>> test.runScript(script)
+        >>> test.wait('window.finished')
+
+        :param string script: The script content to run.
         '''
         return self.driver.execute_script(script)
 
     def resizeWindow(self, width, height):
         '''
         Resize the browser to the given width and height.
+
+        :param int width: The width of the view in pixels.
+        :param in height: The height of the view in pixels.
         '''
         self.driver.set_window_size(width, height)
 
     def getElement(self, selector):
         '''
-        Find an element on the page by a css selector.
-        i.e.: test.getElement('#my-div')
+        Find an element on the page by a CSS selector. For example,
 
+        >>> node = test.getElement('#my-div')
+
+        :param string selector: A CSS selector.
+        :rtype: `WebElement`_
+
+        .. _Webelement: http://selenium-python.readthedocs.org/en/latest/api.html#selenium.webdriver.remote.webelement.WebElement
         '''
         return self.driver.find_element_by_css_selector(selector)
 
     def getElements(self, selector):
         '''
         Find all elements on the page matching a css selector.
-        i.e.: test.getElements('div')
+
+        >>> divs = test.getElements('div')
+
+        :param string selector: A CSS selector.
+        :rtype: List of `WebElement`_
+
+        .. _Webelement: http://selenium-python.readthedocs.org/en/latest/api.html#selenium.webdriver.remote.webelement.WebElement
 
         '''
         return self.driver.find_elements_by_css_selector(selector)
 
     def screenshot(self):
         '''
-        Capture a screenshot and return it as a base64 encoded string.
+        Capture a screenshot of the current viewport.
+
+        :rtype: `Image`_
+
+        .. _Image: http://pillow.readthedocs.org/en/latest/reference/Image.html#PIL.Image.Image
         '''
         png = self.driver.get_screenshot_as_png()
         return Image.open(StringIO(png))
 
     def loadURL(self, url, relative=True):
         '''
-        Load a url on the test server.  This method automatically
-        prefixes the url with the host, so
+        Load a URL path on the test server.
 
-        loadURL('/test.html')
+        :param string url: The path to the page go load.
+        :param bool relative: Whether or not to prefix with the current test path.
 
-        will load something like 'http://localhost:8000/test.html'.
+        For example,
+
+        >>> test.loadURL('index.html')
+
+        will load `<http://localhost:50100/index.html>`_, and
+
+        >>> test.loadURL('/index.html', False)
+
+        will load `<http://localhost:50100/path/to/test/index.html>`_
+        using the currently configured test path.
         '''
         if relative:
             url = '/'.join(
@@ -213,11 +352,22 @@ class BaseTest(TestCase):
 
     def drag(self, element, delta, offset=(0, 0)):
         '''
-        Drag the element given (by a css selector) starting
-        at `offset` relative to the center of the element by
-        an amount `delta`.  Where `delta` and `offset`
-        are two element iterables containing two integers:
-            [x, y]
+        Drag the element given (by a CSS selector) starting
+        at ``offset`` relative to the center of the element by
+        an amount ``delta``.
+
+        :param string element: A CSS selector.
+        :param delta: The number of pixels to drag in ``x`` and ``y``.
+        :type delta: [x, y]
+        :param offset:  The offset from the element center to start the drag.
+        :type offset: [x, y]
+
+        For example,
+
+        >>> test.drag('#map', (100, -10), (-50, 0))
+
+        performs a mousedown on ``#map`` ``50`` pixels to the left of its center,
+        drags right ``100`` pixels and up ``10`` pixels, and then performs a mouseup.
         '''
         el = self.getElement(element)
         action = ActionChains(self.driver)
@@ -234,6 +384,12 @@ class BaseTest(TestCase):
         Load an image from a local file.  If relative is True, then
         load it relative the current testing directory, otherwise
         assume an absolute path.
+
+        :param string filename: The file path of the image.
+        :param bool relative: Whether to treat the filename as a relative or absolute path.
+        :rtype: `Image`_
+
+        .. _Image: http://pillow.readthedocs.org/en/latest/reference/Image.html#PIL.Image.Image
         '''
         if relative:
             filename = os.path.join(*(
@@ -249,6 +405,13 @@ class BaseTest(TestCase):
         Load an image from a URL.  If relative is True, then
         load it relative the current testing path, otherwise
         assume an absolute URL.
+
+        :param string filename: The file path of the image.
+        :param bool relative: Whether to treat the filename as a relative or absolute path.
+        :rtype: `Image`_
+        :raises Exception: if the image could not be loaded
+
+        .. _Image: http://pillow.readthedocs.org/en/latest/reference/Image.html#PIL.Image.Image
         '''
         if relative:
             filename = '/'.join(
@@ -265,7 +428,17 @@ class BaseTest(TestCase):
     @classmethod
     def loadTestImages(cls, testName, revision=None):
         '''
-        Load an image from the globally configured image store.
+        Load all images from the globally configured MIDAS image store.  The
+        images are used for matching a screenshot for the current test.
+        Multiple images are possible to account for differences on
+        multiple platforms.  If no revision is provided, then the
+        class attribute :py:attr:`testRevision` is used.
+
+        :param string testName: The name of the current test.
+        :param int revision: The revision number to load.
+        :rtype: List of `Images`_.
+
+        .. _Images: http://pillow.readthedocs.org/en/latest/reference/Image.html#PIL.Image.Image
         '''
 
         if revision is None:
@@ -282,7 +455,21 @@ class BaseTest(TestCase):
 
     @classmethod
     def exportTestImage(cls, img, testName, kind='', deploy=''):
+        '''
+        Save an image to the local image store path.  This is an internal
+        method providing a unified method for saving image outputs from
+        tests for debugging test failures.
 
+        :param img: The image object to save.
+        :type img: `Image`_
+        :param string testName: The name of the test.
+        :param string kind: (optional) Additional string to added to the file name distinguishing multiple images.
+        :param string deploy: (optional) Root path for the local image store.
+        :returns: The full path of the saved image.
+        :rtype: string
+
+        .. _Image: http://pillow.readthedocs.org/en/latest/reference/Image.html#PIL.Image.Image
+        '''
         if not deploy:
             deploy = DEPLOY_PATH
         deploy = deploy.split(os.path.sep)
@@ -313,10 +500,19 @@ class BaseTest(TestCase):
     def compareImages(cls, baseImage, testImage, testName, iImage=0):
         '''
         Compute the difference between two images and throw a
-        ImageDifferenceException if the difference is above
-        cls.imageDifferenceThreshold.
+        :py:class:`ImageDifferenceException` if the difference is above
+        :py:attr:`imageDifferenceThreshold`.  If the two images are
+        different sizes, this function will always raise.
 
-        If testName is set, then store the images under the server path.
+        :param baseImage: The base line image.
+        :type baseImage: `Image`_
+        :param testImage: The image generated by a screenshot.
+        :type testImage: `Image`_
+        :param string testName: The name of the test.
+        :param int iImage: A number used to generate unique file names when doing multiple comparisons per test.
+        :raises ImageDifferenceException: If the images are different.
+
+        .. _Image: http://pillow.readthedocs.org/en/latest/reference/Image.html#PIL.Image.Image
         '''
 
         basePath = cls.exportTestImage(
@@ -358,7 +554,15 @@ class BaseTest(TestCase):
         '''
         Convenience method for taking a screenshot and comparing
         to stored images.  Throws an exception if the images differ
-        by more than self.imageDiffereceThreshold.
+        by more than :py:attr:`imageDifferenceThreshold`.  This method
+        also exports the images and differences under the deploy path
+        for debugging failed tests.  If no revision is provided, then the
+        class attribute :py:attr:`testRevision` is used.
+
+
+        :param string testName: The name of the test.
+        :param int revision: The revision number to compare against.
+        :raises ImageDifferenceException: If the images are different.
         '''
         failure = False
         testImage = self.screenshot()
@@ -424,7 +628,10 @@ class BaseTest(TestCase):
 )
 class FirefoxTest(BaseTest):
     '''
-    Firefox test class.
+    Firefox test base class.  Uses the Firefox selenium driver.  May
+    be extended in the future to handle Firefox specific customizations.
+    Setting the environment variable ``FIREFOX_TESTS`` to ``OFF`` will
+    turn off all tests derived from here.
     '''
     driverName = 'firefox'
 
@@ -435,14 +642,29 @@ class FirefoxTest(BaseTest):
 )
 class ChromeTest(BaseTest):
     '''
-    Chrome test class.
+    Chrome test base class.  Uses the Chrome selenium driver.  May
+    be extended in the future to handle Chrome specific customizations.
+    All tests derived from here are disabled by default because they
+    require special drivers to be installed.
+    Setting the environment variable ``CHROME_TESTS`` to ``ON`` will
+    enable them.
     '''
     driverName = 'chrome'
 
 
 def setUpModule():
+    '''
+    A module wide set up method that starts the test web server.
+    Unless there is a reason to override the default behavior in
+    your test, you should import this function into your test module.
+    '''
     BaseTest.startServer()
 
 
 def tearDownModule():
+    '''
+    A module wide tear down method that stops the test web server.
+    Unless there is a reason to override the default behavior in
+    your test, you should import this function into your test module.
+    '''
     BaseTest.stopServer()

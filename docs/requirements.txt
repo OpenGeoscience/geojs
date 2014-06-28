@@ -1,0 +1,3 @@
+Pillow
+selenium
+requests

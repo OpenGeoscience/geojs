@@ -6,19 +6,23 @@ import getpass
 from cStringIO import StringIO
 from PIL import Image
 
-import pydas
 import requests as http
 
 
 class MidasHandler(object):
     '''
     Contains several utility function for interacting with
-    MIDAS by wrapping pydas api methods and caching the results.
+    MIDAS by wrapping api methods and caching the results.
     '''
 
-    def __init__(self, MIDAS_BASE_URL, MIDAS_COMMUNITY):
+    def __init__(self,
+                 MIDAS_BASE_URL='http://midas3.kitware.com/midas',
+                 MIDAS_COMMUNITY='geojs'):
         '''
         Initialize private variables.
+
+        :param string MIDAS_BASE_URL: URL of the midas server.
+        :param string MIDAS_COMMUNITY: The community name on the server.
         '''
         self._apiURL = MIDAS_BASE_URL + '/api/json?method='
         self._communityName = MIDAS_COMMUNITY
@@ -54,6 +58,25 @@ class MidasHandler(object):
     def community(self):
         '''
         Get the id of the GeoJS community.
+
+        >>> midas.community()
+        {
+            u'admingroup_id': u'121',
+            u'can_join': u'1',
+            u'community_id': u'40',
+            u'creation': u'2014-06-02 11:38:38',
+            u'description': u'',
+            u'folder_id': u'11361',
+            u'membergroup_id': u'123',
+            u'moderatorgroup_id': u'122',
+            u'name': u'GeoJS',
+            u'privacy': u'0',
+            u'uuid': u'538c9a7ead4a21c3b3e4e52724b3e6949487279edfad3',
+            u'view': u'68'
+        }
+
+        :return: MIDAS response object.
+        :rtype: dict
         '''
         if self._community is None:
             self._community = self._request(
@@ -64,7 +87,19 @@ class MidasHandler(object):
 
     def getFolder(self, name, root=None):
         '''
-        Get a folder named `name` under `root`.
+        Get a folder named ``name`` under ``root``.  If no root
+        is given, use the community root.
+
+        >>> midas.getFolder('Testing')
+        u'11364'
+        >>> midas.getFolder('data', '11364')
+        u'11373'
+
+        :param string name: The folder name to find.
+        :param string root: The id of the root folder.
+        :returns: The id of the folder.
+        :rtype: string
+        :raises Exception: If the folder is not found.
         '''
         if root is None:
             root = self.community()['community_id']
@@ -84,7 +119,21 @@ class MidasHandler(object):
 
     def getItem(self, path, root=None):
         '''
-        Get an item at the given path.
+        Get an item at the given path.  If no root is specified, use the
+        community root.
+
+        >>> midas.getItem(('Testing', 'data', 'cities.csv'))
+        {
+            u'date_creation': u'2014-06-02 15:26:12',
+            ...
+            u'view': u'2'
+        }
+
+        :param tuple path: The relative path from ``root``.
+        :param string root: The id of the root folder.
+        :return: MIDAS response object
+        :rtype: dict
+        :raises Exception: If the item is not found.
         '''
         for p in path[:-1]:
             root = self.getFolder(p, root)
@@ -106,6 +155,16 @@ class MidasHandler(object):
     def getImages(self, path, revision):
         '''
         Download images in an item at the given path and revision.
+
+        >>> .getImages(('Testing', 'test', 'selenium', 'osmLayer', 'firefox', 'osmDraw.png'), 2)
+        [<PIL.PngImagePlugin.PngImageFile image mode=RGBA size=640x390 at 0x1019E9200>]
+
+        :param tuple path: The relative path from the community root.
+        :param int revision: The item revision to download.
+        :return: List of `Image`_.
+        :raises Exception: If the path or revision is not found.
+
+        .. _Image: http://pillow.readthedocs.org/en/latest/reference/Image.html#PIL.Image.Image
         '''
         item_id = self.getItem(path)['item_id']
         item = self._request(
@@ -128,7 +187,16 @@ class MidasHandler(object):
     def login(self, email=None, password=None, apiKey=None):
         '''
         Log into midas and return a token.  If `email` or `password`
-        are not provided, they must be entered in stdin.
+        are not provided, they must be entered in stdin.  The token
+        is cached internally, so the user will only be prompted
+        once after a successful login.  Alternatively, an apiKey
+        can be provided as login credentials.
+
+        :param string email: The user's email address.
+        :param string password: The user's password.
+        :param string apiKey: The user's api key.
+        :rtype: string
+        :return: The login token.
         '''
         if self._token is None:
             if email is None:
@@ -151,6 +219,7 @@ class MidasHandler(object):
                 try:
                     self._apiKey = resp.json()['data']['apikey']
                 except Exception:
+                    password = None
                     print "Could not log in with the provided information."
 
             resp = http.get(
@@ -170,8 +239,14 @@ class MidasHandler(object):
 
     def getOrCreateItem(self, path):
         '''
-        Create an empty item at the given path if none exists.
-        Return the item's id.
+        Create an empty item at the given path if none exists
+        otherwise return the item.  This
+        method will create folders as necessary while traversing
+        the path.
+
+        :param tuple path: The relative path from the community root.
+        :return: MIDAS response object
+        :rtype: dict
         '''
         token = self.login()
         root = None
@@ -208,6 +283,13 @@ class MidasHandler(object):
         Uploads a file to the midas server to the given path.
         If revision is not specified, it will create a new revision.
         Otherwise, append the file to the given revision number.
+
+        :param string fileData: The raw file contents to upload.
+        :param tuple path: The relative path to the item.
+        :param int revision: The revision number to append the file to.
+        :raises Exception: If the upload fails for any reason.
+        :returns: MIDAS response object
+        :rtype: dict
         '''
         item = self.getOrCreateItem(path)
         if revision is not None and len(item['revisions']) < revision:

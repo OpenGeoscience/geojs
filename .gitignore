@@ -5,3 +5,5 @@
 .vimrc
 *.py[ocd]
 /docs/_*
+/docs/*.py
+!/docs/conf.py

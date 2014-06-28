@@ -14,11 +14,23 @@
 
 import sys
 import os
+import shutil
+import re
+from glob import glob
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#sys.path.insert(0, os.path.abspath('.'))
+basepath = os.path.dirname(os.path.abspath(__file__))
+toppath = os.path.join(basepath, '..')
+for fname in glob(os.path.join(toppath, 'testing', 'test-runners', '*.py*')):
+    basename = os.path.split(fname)[-1].replace('.in', '')
+    with open(fname, 'r') as f:
+        with open(os.path.join(basepath, basename), 'w') as g:
+            r = re.compile(r'([^"])(@[\w]*@)([^"])')
+            for line in f.readlines():
+                g.write(r.subn(r'\1"\2"\3', line)[0]) 
+sys.path.append(basepath)
 
 # -- General configuration ------------------------------------------------
 
@@ -30,6 +42,7 @@ import os
 # ones.
 extensions = [
     'sphinx.ext.mathjax',
+    'sphinx.ext.autodoc'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
