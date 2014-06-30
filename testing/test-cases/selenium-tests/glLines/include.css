@@ -1,0 +1,15 @@
+html {
+    height: 100%;
+}
+
+body {
+    height: 100%;
+}
+
+#map {
+    width: 80%;
+    height: 80%;
+    position: absolute;
+    left: 50px;
+    top: 50px;
+}
