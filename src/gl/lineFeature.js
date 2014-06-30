@@ -2,11 +2,6 @@
 /**
  * @module geo.gl
  */
-
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, indent: 2*/
-
-/*global geo, ggl, inherit, document$*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -17,7 +12,7 @@
  * @returns {ggl.lineFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-ggl.lineFeature = function(arg) {
+ggl.lineFeature = function (arg) {
   "use strict";
   if (!(this instanceof ggl.lineFeature)) {
     return new ggl.lineFeature(arg);
@@ -32,7 +27,7 @@ ggl.lineFeature = function(arg) {
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       m_actor = null,
-      m_buildTime = vgl.timestamp(),
+      //m_buildTime = vgl.timestamp(),
       s_init = this._init,
       s_update = this._update;
 
@@ -41,7 +36,7 @@ ggl.lineFeature = function(arg) {
    * Initialize
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._init = function(arg) {
+  this._init = function (arg) {
     s_init.call(this, arg);
   };
 
@@ -52,7 +47,7 @@ ggl.lineFeature = function(arg) {
    * @override
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._build = function() {
+  this._build = function () {
     var style = m_this.style();
 
     if (m_actor) {
@@ -72,7 +67,7 @@ ggl.lineFeature = function(arg) {
    * @override
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._update = function() {
+  this._update = function () {
     var style =  m_this.style();
 
     s_update.call(this);
@@ -93,7 +88,7 @@ ggl.lineFeature = function(arg) {
 
       /// Points only has support for size
       if (style.size) {
-        m_actor.material().shaderProgram().uniform('pointSize').set(
+        m_actor.material().shaderProgram().uniform("pointSize").set(
           style.size);
       }
     }
@@ -105,7 +100,7 @@ ggl.lineFeature = function(arg) {
    * Destroy
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._exit = function() {
+  this._exit = function () {
     m_this.renderer().contextRenderer().removeActor(m_actor);
   };
 
@@ -116,4 +111,4 @@ ggl.lineFeature = function(arg) {
 inherit(ggl.lineFeature, geo.lineFeature);
 
 // Now register it
-geo.registerFeature('vgl', 'line', ggl.lineFeature);
+geo.registerFeature("vgl", "line", ggl.lineFeature);
