@@ -7,13 +7,21 @@
 # Should be installable by:
 #     pip install Pillow selenium
 
+import sys
 import os
 import unittest
 from unittest import TestCase
-from urllib2 import urlopen
-from cStringIO import StringIO
 from math import sqrt
 import json
+
+if sys.version_info[0] == 2:
+    from cStringIO import StringIO
+    from urllib2 import urlopen
+elif sys.version_info[0] == 3:
+    from io import BytesIO as StringIO
+    from urllib.request import urlopen
+else:
+    raise Exception("Unknown python version")
 
 from selenium import webdriver
 from selenium.webdriver.support.wait import WebDriverWait

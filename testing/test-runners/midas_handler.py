@@ -3,8 +3,12 @@
 import sys
 import hashlib
 import getpass
-from cStringIO import StringIO
 from PIL import Image
+
+if sys.version_info[0] == 2:
+    from cStringIO import StringIO
+elif sys.version_info[0] == 3:
+    from io import BytesIO as StringIO
 
 import requests as http
 
@@ -50,7 +54,7 @@ class MidasHandler(object):
             }
 
         if request.status_code not in (200, 302) or response['stat'] != 'ok':
-            print >> sys.stderr, str(response)
+            sys.stderr.write(str(response) + '\n')
             raise Exception("Could not complete request to %s." % method)
 
         return response['data']
@@ -220,7 +224,7 @@ class MidasHandler(object):
                     self._apiKey = resp.json()['data']['apikey']
                 except Exception:
                     password = None
-                    print "Could not log in with the provided information."
+                    print("Could not log in with the provided information.")
 
             resp = http.get(
                 self._apiURL + 'midas.login',
@@ -325,7 +329,7 @@ class MidasHandler(object):
         try:
             resp = resp.json()['data']
         except Exception:
-            print >> sys.stderr, resp.content
+            sys.stderr.write(resp.content + '\n')
             raise Exception("Could not upload data.")
         return resp
 
@@ -346,5 +350,5 @@ if __name__ == '__main__':
     img_name = img_base + '_%02i' + img_ext
     for i, image in enumerate(images):
         name = img_name % (i + 1)
-        print 'Saving image to: "%s"' % name
+        print('Saving image to: "%s"' % name)
         image.save(name)

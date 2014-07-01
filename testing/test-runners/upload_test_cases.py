@@ -12,7 +12,13 @@ import sys
 import os
 import unittest
 import textwrap
-from cStringIO import StringIO
+
+if sys.version_info[0] == 2:
+    from cStringIO import StringIO
+elif sys.version_info[0] == 3:
+    from io import BytesIO as StringIO
+else:
+    raise Exception("Unknown python version")
 
 from PIL import Image
 
@@ -53,39 +59,39 @@ def handleImageDifference(**kw):
         because = 'the nearest image in the data store differed ' + \
                   'from the screenshot by %f.' % kw['difference']
     s = ('The test %s failed because ' % kw['testName']) + because
-    print '\n'.join(textwrap.wrap(s))
+    print('\n'.join(textwrap.wrap(s)))
 
-    print ''
+    print('')
 
-    print 'Trying to open %s' % kw['testPath']
+    print('Trying to open %s' % kw['testPath'])
     testImage = Image.open(kw['testPath'])
 
-    print 'Would you like to view the screenshot?'
+    print('Would you like to view the screenshot?')
     yesorno = raw_input('[y/n]: ')
     if yesorno.lower() == 'y':
         testImage.show()
 
     if kw.get('basePath'):
         s = 'Would you like to see the base line image?'
-        print '\n'.join(textwrap.wrap(s))
+        print('\n'.join(textwrap.wrap(s)))
         yesorno = raw_input('[y/n]: ')
         if yesorno.lower() == 'y':
-            print 'Trying to open %s' % kw['basePath']
+            print('Trying to open %s' % kw['basePath'])
             baseImage = Image.open(kw['basePath'])
             baseImage.show()
 
     if hasDiff:
         s = 'Would you like to see the difference image?'
-        print '\n'.join(textwrap.wrap(s))
+        print('\n'.join(textwrap.wrap(s)))
         yesorno = raw_input('[y/n]: ')
         if yesorno.lower() == 'y':
-            print 'Trying to open %s' % kw['diffPath']
+            print('Trying to open %s' % kw['diffPath'])
             diffImage = Image.open(kw['diffPath'])
             diffImage.show()
 
     s = 'Would you like to upload this image to the data store at "%s"?' % \
         '/'.join(kw['midas_path'])
-    print '\n'.join(textwrap.wrap(s))
+    print('\n'.join(textwrap.wrap(s)))
     yesorno = raw_input('[y/n]: ')
     if yesorno.lower() == 'y':
         fileobj = StringIO()
@@ -111,21 +117,21 @@ def exceptionHandler(func):
         except ImageDifferenceException as e:
             handleImageDifference(**e.stats)
         except Exception as e:
-            print >> sys.stderr, "Test failed with an unknown exception."
-            print >> sys.stderr, str(e)
+            sys.stderr.write("Test failed with an unknown exception.\n")
+            sys.stderr.write(str(e) + "\n")
     return wrapped
 
 
 @exceptionHandler
 def runTest(test):
-    print >> sys.stderr, "Running '%s'." % str(test)
+    sys.stderr.write("Running '%s'.\n" % str(test))
     testMethod = getattr(test, test._testMethodName)
     test.setUp()
     try:
         testMethod()
     finally:  # always call the tear down method
         test.tearDown()
-    print "Test passed!"
+    print("Test passed!")
 
 
 def main(paths):
@@ -138,8 +144,8 @@ def main(paths):
                     runTest(test)
                 except Exception as e:
                     # just to make sure no exceptions leak
-                    print >> sys.stderr, "Exception caught"
-                    print >> sys.stderr, str(e)
+                    sys.stderr.write("Exception caught\n")
+                    sys.stderr.write(str(e) + "\n")
     finally:
         BaseTest.stopServer()
 
@@ -149,14 +155,14 @@ if __name__ == '__main__':
         'you will be asked for your log in information at the midas ' + \
         'server.  You will need to have an account there as well as write' + \
         'access to the community where the data is stored.'
-    print '\n'.join(textwrap.wrap(s))
+    print('\n'.join(textwrap.wrap(s)))
 
-    print ''
+    print('')
     s = 'Note: If you are unable to view any images with this program ' + \
         'on linux, make sure you have imagemagick installed.'
-    print '\n'.join(textwrap.wrap(s))
-    print ''
+    print('\n'.join(textwrap.wrap(s)))
+    print('')
     if not len(sys.argv[1:]):
-        print 'usage: python %s <testdir> [ <testdir> ... ]' % sys.argv[0]
+        print('usage: python %s <testdir> [ <testdir> ... ]' % sys.argv[0])
         sys.exit(1)
     main(sys.argv[1:])
