@@ -9,7 +9,7 @@ function processCSVData(csvdata) {
   return table;
 };
 
-$(window).load(function() {
+window.startTest = function(done) {
     var mapOptions = {
       node: '#map',
       zoom : 3,
@@ -92,4 +92,5 @@ $(window).load(function() {
     resizeCanvas();
     myMap.draw();
 
+    done();
 });
