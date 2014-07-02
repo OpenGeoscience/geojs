@@ -1,12 +1,13 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(geojs)
+project(geojs NONE)
 set(GEOJS_VERSION 0.1.0)
 
 set(MINIFY OFF CACHE BOOL "Build minified library.")
 set(MANGLE OFF CACHE BOOL "When minifying, also mangle non-public symbol names.")
 
 set(BUILD_TESTING ON CACHE BOOL "Enable geojs testing")
+set(BUILD_DOCUMENTATION OFF CACHE BOOL "Build documentation")
 
 # make npm a hard dependency
 find_program(NPM_EXECUTABLE npm)
@@ -424,4 +425,37 @@ if(BUILD_TESTING)
 
   endif() # JS_HINT_TESTS
 
+endif()
+
+if(BUILD_DOCUMENTATION)
+  find_program(SPHINX_EXECUTABLE sphinx-build)
+  if("${SPHINX_EXECUTABLE}" STREQUAL "SPHINX_EXECUTABLE-NOTFOUND")
+    message(FATAL_ERROR "Could not find sphinx-build for BUILD_DOCUMENTATION")
+  endif()
+
+  set(docs_sources
+    "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/blanket_server.py"
+    "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/geojs_test_runner.py.in"
+    "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/midas_handler.py"
+    "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/selenium_test.py.in"
+    "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/upload_test_cases.py"
+    "${CMAKE_CURRENT_SOURCE_DIR}/docs/conf.py"
+    "${CMAKE_CURRENT_SOURCE_DIR}/docs/index.rst"
+    "${CMAKE_CURRENT_SOURCE_DIR}/docs/quickstart.rst"
+    "${CMAKE_CURRENT_SOURCE_DIR}/docs/testingutils.rst"
+  )
+
+
+  add_custom_command(
+    OUTPUT "${GEOJS_DEPLOY_DIR}/docs/index.html"
+    DEPENDS ${docs_sources}
+    COMMAND "${CMAKE_COMMAND}" -E make_directory "${GEOJS_DEPLOY_DIR}/docs"
+    COMMAND "${SPHINX_EXECUTABLE}" -c "${CMAKE_CURRENT_SOURCE_DIR}/docs" -b html "${CMAKE_CURRENT_SOURCE_DIR}/docs" "${GEOJS_DEPLOY_DIR}/docs"
+    COMMENT "Building documentation"
+  )
+  add_custom_target(
+    docs
+    ALL
+    DEPENDS "${GEOJS_DEPLOY_DIR}/docs/index.html"
+  )
 endif()
