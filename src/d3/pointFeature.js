@@ -21,39 +21,37 @@ gd3.pointFeature = function (arg) {
   geo.pointFeature.call(this, arg);
   gd3.object.call(this);
 
-  var m_this = this;
-
-  // georeference a point with caching
-  function georef(d, refresh) {
-    if (!refresh && d.hasOwnProperty('_dispx') && d.hasOwnProperty('_dispy')) {
-      return d;
-    }
-    var r = m_this.renderer(), p;
-    p = r.worldToDisplay(d);
-    d._dispx = function () { return p.x; };
-    d._dispy = function () { return p.y; };
-    return d;
-  }
-
-  var d_attr = {
-      cx: function (d) { return georef(d, true)._dispx(); },
-      cy: function (d) { return georef(d)._dispy(); },
-      r: '1px'
-    },
-    d_style = {
-      fill: 'black',
-      stroke: 'none'
-    };
-
   ////////////////////////////////////////////////////////////////////////////
   /**
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
-  var s_init = this._init,
+  var m_this = this,
+      s_init = this._init,
       s_update = this._update,
       m_buildTime = geo.timestamp(),
-      m_style = {};
+      m_style = {},
+      d_attr,
+      d_style,
+      m_sticky;
+
+  // default attributes
+  d_attr = {
+    cx: function (d) { return d.x; },
+    cy: function (d) { return d.y; },
+    r: 1
+  };
+
+  // default style
+  d_style = {
+    fill: 'black',
+    stroke: 'none'
+  };
+
+  m_style = {
+    attributes: d_attr,
+    style: d_style
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -61,12 +59,9 @@ gd3.pointFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
-    s_init.call(this, arg);
-    return this;
-  };
-
-  this._drawables = function () {
-    return d3.selectAll('.' + this._d3id());
+    s_init.call(m_this, arg);
+    m_sticky = m_this.layer().sticky();
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -77,11 +72,15 @@ gd3.pointFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
-    var data = this.positions(),
-        s_style = this.style();
+    var data = m_this.positions() || [],
+        s_style = m_this.style(),
+        m_renderer = m_this.renderer();
+
+    // georeference the positions
+    data = m_renderer.worldToDisplay(data);
 
     // call super-method
-    s_update.call(this);
+    s_update.call(m_this);
 
     // default to empty data array
     if (!data) { data = []; }
@@ -100,16 +99,19 @@ gd3.pointFeature = function (arg) {
       s_style.color[1] * 255,
       s_style.color[2] * 255
     );
-    m_style.attributes.r = s_style.size.toString() + 'px';
+    m_style.attributes.r = function () {
+      var m_scale = m_renderer.scaleFactor();
+      return (s_style.size / m_scale).toString() + 'px';
+    };
     m_style.style['fill-opacity'] = s_style.opacity;
 
     // pass to renderer to draw
-    this.renderer().drawFeatures(m_style);
+    m_this.renderer().drawFeatures(m_style);
 
     // update time stamps
     m_buildTime.modified();
-    this.updateTime().modified();
-    return this;
+    m_this.updateTime().modified();
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -120,14 +122,21 @@ gd3.pointFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._update = function () {
-    s_update.call(this);
+    s_update.call(m_this);
 
-    if (this.dataTime().getMTime() >= m_buildTime.getMTime()) {
-      this._build();
+    if (m_this.dataTime().getMTime() >= m_buildTime.getMTime()) {
+      m_this._build();
     }
 
-    return this;
+    return m_this;
   };
+
+  // attach to geo.event.d3Rescale to scale points on resize
+  m_this.on(geo.event.d3Rescale, function () {
+    m_this.renderer()
+      .select(m_this._d3id())
+        .attr('r', m_style.attributes.r);
+  });
 
   this._init(arg);
   return this;

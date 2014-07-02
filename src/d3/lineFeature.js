@@ -32,32 +32,38 @@ gd3.lineFeature = function (arg) {
       s_update = this._update,
       m_style = {};
 
-  // georeference a point with caching
-  function georef(d) {
-    var r = m_this.renderer(), p;
-    p = r.worldToDisplay(d);
-    return p;
-  }
+  m_style.style = {};
+
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
-    s_init.call(this, arg);
-    return this;
+    s_init.call(m_this, arg);
+    return m_this;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Build
+   *
+   * @override
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
-    var data = this.positions(),
-        s_style = this.style(),
+    var data = m_this.positions() || [],
+        s_style = m_this.style(),
+        m_renderer = m_this.renderer(),
         line = d3.svg.line()
-                .x(function (d) {
-                  return georef(d).x;
-                })
-                .y(function (d) { return georef(d).y; });
-    s_update.call(this);
+                .x(function (d) { return d.x; })
+                .y(function (d) { return d.y; });
+    s_update.call(m_this);
 
+    // georeference the data
+    data = m_renderer.worldToDisplay(data);
+
+    // set the style object for the renderer
     m_style.data = [data];
     m_style.attributes = {
       d: line
@@ -73,15 +79,18 @@ gd3.lineFeature = function (arg) {
         s_style.color[1] * 255,
         s_style.color[2] * 255
       ),
-      'stroke-width': s_style.width[0].toString() + 'px',
+      'stroke-width': function () {
+        var m_scale = m_renderer.scaleFactor();
+        return (s_style.width[0] / m_scale).toString() + 'px';
+      },
       'stroke-opacity': s_style.opacity
     };
 
-    this.renderer().drawFeatures(m_style);
+    m_renderer.drawFeatures(m_style);
 
     m_buildTime.modified();
-    this.updateTime().modified();
-    return this;
+    m_this.updateTime().modified();
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -92,14 +101,21 @@ gd3.lineFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._update = function () {
-    s_update.call(this);
+    s_update.call(m_this);
 
-    if (this.dataTime().getMTime() >= m_buildTime.getMTime()) {
-      this._build();
+    if (m_this.dataTime().getMTime() >= m_buildTime.getMTime()) {
+      m_this._build();
     }
 
-    return this;
+    return m_this;
   };
+
+  // attach to geo.event.d3Rescale to scale line width on resize
+  m_this.on(geo.event.d3Rescale, function () {
+    m_this.renderer()
+      .select(m_this._d3id())
+        .style('stroke-width', m_style.style['stroke-width']);
+  });
 
   this._init(arg);
   return this;

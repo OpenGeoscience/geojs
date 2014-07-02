@@ -84,7 +84,6 @@ window.startTest = function (done) {
       .style(style)
       .positions(citieslatlon);
 
-  resizeCanvas();
   myMap.draw();
   
   done();

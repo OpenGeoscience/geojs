@@ -25,4 +25,7 @@ gd3 = ogs.namespace('geo.d3'); // jshint ignore: line
     }
     return strArray.join('');
   };
+
+  // event propagated when the d3 renderer rescales its group element
+  geo.event.d3Rescale = 'geo.d3.rescale';
 }(gd3));

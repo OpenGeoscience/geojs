@@ -84,7 +84,19 @@ geo.layer = function (arg) {
       m_rendererName = arg.renderer  === undefined ? "vglRenderer" : arg.renderer,
       m_dataTime = geo.timestamp(),
       m_updateTime = geo.timestamp(),
-      m_drawTime = geo.timestamp();
+      m_drawTime = geo.timestamp(),
+      m_sticky = arg.sticky === undefined ? true : arg.sticky;
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get whether or not the layer is sticky (navigates with the map).
+   *
+   * @returns {Boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.sticky = function () {
+    return m_sticky;
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
