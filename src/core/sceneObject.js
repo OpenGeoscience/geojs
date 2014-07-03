@@ -90,11 +90,15 @@ geo.sceneObject = function (arg) {
   //////////////////////////////////////////////////////////////////////////////
   this.trigger = function (event, args, childrenOnly) {
 
+    var geoArgs;
+
     args = args || {};
+    geoArgs = args.geo || {};
+    args.geo = geoArgs;
 
     // If the event was not triggered by the parent, just propagate up the tree
-    if (!childrenOnly && m_parent && args._triggeredBy !== m_parent) {
-      args._triggeredBy = m_this;
+    if (!childrenOnly && m_parent && geoArgs._triggeredBy !== m_parent) {
+      geoArgs._triggeredBy = m_this;
       m_parent.trigger(event, args);
       return m_this;
     }
@@ -103,13 +107,13 @@ geo.sceneObject = function (arg) {
     s_trigger.call(m_this, event, args);
 
     // stop propagation if requested by the handler
-    if (args.stopPropagation) {
+    if (geoArgs.stopPropagation) {
       return m_this;
     }
 
     // trigger the event on the children
     m_children.forEach(function (child) {
-      args._triggeredBy = m_this;
+      geoArgs._triggeredBy = m_this;
       child.trigger(event, args);
     });
 

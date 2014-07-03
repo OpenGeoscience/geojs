@@ -182,7 +182,7 @@ describe('geo.sceneObject', function() {
       expect(child2Called).toBe(true);
 
       child1.on('signal', function (args) {
-        args.stopPropagation = true;
+        args.geo.stopPropagation = true;
       });
 
       child2Called = false;
