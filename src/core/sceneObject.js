@@ -82,14 +82,18 @@ geo.sceneObject = function (arg) {
 
   //////////////////////////////////////////////////////////////////////////////
   /**
-   *  Trigger an event (or events) on this object and call all handlers
+   *  Trigger an event (or events) on this object and call all handlers.
+   *  @param {String} event the event to trigger
+   *  @param {Object} args arbitrary argument to pass to the handler
+   *  @param {Boolean} childrenOnly if true, only propagate down the tree
    */
   //////////////////////////////////////////////////////////////////////////////
-  this.trigger = function (event, args) {
+  this.trigger = function (event, args, childrenOnly) {
+
     args = args || {};
 
     // If the event was not triggered by the parent, just propagate up the tree
-    if (m_parent && args._triggeredBy !== m_parent) {
+    if (!childrenOnly && m_parent && args._triggeredBy !== m_parent) {
       args._triggeredBy = m_this;
       m_parent.trigger(event, args);
       return m_this;
@@ -97,6 +101,11 @@ geo.sceneObject = function (arg) {
 
     // call the object's own handlers
     s_trigger.call(m_this, event, args);
+
+    // stop propagation if requested by the handler
+    if (args.stopPropagation) {
+      return m_this;
+    }
 
     // trigger the event on the children
     m_children.forEach(function (child) {

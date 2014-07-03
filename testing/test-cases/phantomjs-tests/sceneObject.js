@@ -164,5 +164,56 @@ describe('geo.sceneObject', function() {
 
       triggerEach(root);
     });
+
+    it('Stop propagation', function () {
+      var root, child1, child2, child2Called = false;
+      root = geo.sceneObject();
+      child1 = geo.sceneObject();
+      child2 = geo.sceneObject();
+
+      root.addChild(child1);
+      child1.addChild(child2);
+
+      child2.on('signal', function () {
+        child2Called = true;
+      });
+      root.trigger('signal');
+
+      expect(child2Called).toBe(true);
+
+      child1.on('signal', function (args) {
+        args.stopPropagation = true;
+      });
+
+      child2Called = false;
+      root.trigger('signal');
+
+      expect(child2Called).toBe(false);
+    });
+
+    it('Children only', function () {
+      var root, child1, child2, child1Called = false, child2Called = false, rootCalled = false;
+      root = geo.sceneObject();
+      child1 = geo.sceneObject();
+      child2 = geo.sceneObject();
+
+      root.addChild(child1);
+      child1.addChild(child2);
+
+      root.on('signal', function () {
+        rootCalled = true;
+      });
+      child1.on('signal', function () {
+        child1Called = true;
+      });
+      child2.on('signal', function () {
+        child2Called = true;
+      });
+      child1.trigger('signal', {}, true);
+
+      expect(child1Called).toBe(true);
+      expect(child2Called).toBe(true);
+      expect(rootCalled).toBe(false);
+    });
   });
 });
