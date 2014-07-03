@@ -25,7 +25,8 @@ geo.pathFeature = function (arg) {
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
-  var m_positions = arg.positions === undefined ? [] : arg.positions,
+  var m_this = this,
+      m_positions = arg.positions === undefined ? [] : arg.positions,
       s_init = this._init;
 
   ////////////////////////////////////////////////////////////////////////////
@@ -41,9 +42,9 @@ geo.pathFeature = function (arg) {
     }
     // Copy incoming array of positions
     m_positions = val.slice(0);
-    this.dataTime().modified();
-    this.modified();
-    return this;
+    m_this.dataTime().modified();
+    m_this.modified();
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -52,7 +53,7 @@ geo.pathFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
-    s_init.call(this, arg);
+    s_init.call(m_this, arg);
 
     var defaultStyle = $.extend(
       {},
@@ -64,10 +65,10 @@ geo.pathFeature = function (arg) {
       arg.style === undefined ? {} : arg.style
     );
 
-    this.style(defaultStyle);
+    m_this.style(defaultStyle);
 
     if (m_positions) {
-      this.dataTime().modified();
+      m_this.dataTime().modified();
     }
   };
 

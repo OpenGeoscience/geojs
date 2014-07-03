@@ -44,7 +44,7 @@ geo.lineFeature = function (arg) {
       m_positions = val.slice(0);
       m_this.dataTime().modified();
       m_this.modified();
-      return this;
+      return m_this;
     }
   };
 

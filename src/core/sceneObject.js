@@ -39,7 +39,7 @@ geo.sceneObject = function (arg) {
       return m_parent;
     }
     m_parent = arg;
-    return this;
+    return m_this;
   };
 
   //////////////////////////////////////////////////////////////////////////////
@@ -49,12 +49,12 @@ geo.sceneObject = function (arg) {
   //////////////////////////////////////////////////////////////////////////////
   this.addChild = function (child) {
     if (Array.isArray(child)) {
-      child.forEach(this.addChild);
-      return this;
+      child.forEach(m_this.addChild);
+      return m_this;
     }
-    child.parent(this);
+    child.parent(m_this);
     m_children.push(child);
-    return this;
+    return m_this;
   };
 
   //////////////////////////////////////////////////////////////////////////////
@@ -64,11 +64,11 @@ geo.sceneObject = function (arg) {
   //////////////////////////////////////////////////////////////////////////////
   this.removeChild = function (child) {
     if (Array.isArray(child)) {
-      child.forEach(this.removeChild);
-      return this;
+      child.forEach(m_this.removeChild);
+      return m_this;
     }
     m_children = m_children.filter(function (c) { return c !== child; });
-    return this;
+    return m_this;
   };
 
   //////////////////////////////////////////////////////////////////////////////
@@ -92,11 +92,11 @@ geo.sceneObject = function (arg) {
     if (m_parent && args._triggeredBy !== m_parent) {
       args._triggeredBy = m_this;
       m_parent.trigger(event, args);
-      return this;
+      return m_this;
     }
 
     // call the object's own handlers
-    s_trigger.call(this, event, args);
+    s_trigger.call(m_this, event, args);
 
     // trigger the event on the children
     m_children.forEach(function (child) {
@@ -104,7 +104,7 @@ geo.sceneObject = function (arg) {
       child.trigger(event, args);
     });
 
-    return this;
+    return m_this;
   };
 
   return this;

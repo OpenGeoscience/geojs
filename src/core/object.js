@@ -31,13 +31,13 @@ geo.object = function () {
       event.forEach(function (e) {
         m_this.on(e, handler);
       });
-      return this;
+      return m_this;
     }
     if (!m_eventHandlers.hasOwnProperty(event)) {
       m_eventHandlers[event] = [];
     }
     m_eventHandlers[event].push(handler);
-    return this;
+    return m_this;
   };
 
   //////////////////////////////////////////////////////////////////////////////
@@ -52,7 +52,7 @@ geo.object = function () {
       event.forEach(function (e) {
         m_this.trigger(e, args);
       });
-      return this;
+      return m_this;
     }
 
     if (m_eventHandlers.hasOwnProperty(event)) {
@@ -61,7 +61,7 @@ geo.object = function () {
       });
     }
 
-    return this;
+    return m_this;
   };
 
   //////////////////////////////////////////////////////////////////////////////
@@ -77,7 +77,7 @@ geo.object = function () {
       event.forEach(function (e) {
         m_this.off(e, arg);
       });
-      return this;
+      return m_this;
     }
     if (!arg) {
       m_eventHandlers[event] = [];
@@ -85,7 +85,7 @@ geo.object = function () {
       arg.forEach(function (handler) {
         m_this.off(event, handler);
       });
-      return this;
+      return m_this;
     }
     // What do we do if the handler is not already bound?
     //   ignoring for now...
@@ -95,7 +95,7 @@ geo.object = function () {
         }
       );
     }
-    return this;
+    return m_this;
   };
 
   vgl.object.call(this);

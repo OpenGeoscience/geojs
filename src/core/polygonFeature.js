@@ -20,7 +20,8 @@ geo.polygonFeature = function (arg) {
   arg = arg || {};
   geo.feature.call(this, arg);
 
-  var s_init = this._init;
+  var m_this = this,
+      s_init = this._init;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -28,7 +29,7 @@ geo.polygonFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
-    s_init.call(this, arg);
+    s_init.call(m_this, arg);
     var defaultStyle = $.extend(
       {},
       {
@@ -39,11 +40,11 @@ geo.polygonFeature = function (arg) {
       arg.style === undefined ? {} : arg.style
     );
 
-    this.style(defaultStyle);
+    m_this.style(defaultStyle);
   };
 
-  this._init(arg);
-  return this;
+  m_this._init(arg);
+  return m_this;
 };
 
 inherit(geo.polygonFeature, geo.feature);

@@ -17,7 +17,7 @@ geo.feature = function (arg) {
   if (!(this instanceof geo.feature)) {
     return new geo.feature(arg);
   }
-  geo.object.call(this);
+  geo.sceneObject.call(this);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -26,7 +26,8 @@ geo.feature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   arg = arg || {};
 
-  var m_style = {},
+  var m_this = this,
+      m_style = {},
       m_layer = arg.layer === undefined ? null : arg.layer,
       m_gcs = arg.gcs === undefined ? "EPSG:4326" : arg.gcs,
       m_visible = arg.visible === undefined ? true : arg.visible,
@@ -46,12 +47,12 @@ geo.feature = function (arg) {
       return m_style;
     }  else if (arg2 === undefined) {
       m_style = $.extend({}, m_style, arg1);
-      this.modified();
-      return this;
+      m_this.modified();
+      return m_this;
     } else {
       m_style[arg1] = arg2;
-      this.modified();
-      return this;
+      m_this.modified();
+      return m_this;
     }
   };
 
@@ -79,7 +80,7 @@ geo.feature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.drawables = function () {
-    return this._drawables();
+    return m_this._drawables();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -92,8 +93,8 @@ geo.feature = function (arg) {
       return m_gcs;
     } else {
       m_gcs = val;
-      this.modified();
-      return this;
+      m_this.modified();
+      return m_this;
     }
   };
 
@@ -107,8 +108,8 @@ geo.feature = function (arg) {
       return m_visible;
     } else {
       m_visible = val;
-      this.modified();
-      return this;
+      m_this.modified();
+      return m_this;
     }
   };
 
@@ -124,8 +125,8 @@ geo.feature = function (arg) {
       return m_bin;
     } else {
       m_bin = val;
-      this.modified();
-      return this;
+      m_this.modified();
+      return m_this;
     }
   };
 
@@ -139,8 +140,8 @@ geo.feature = function (arg) {
       return m_dataTime;
     } else {
       m_dataTime = val;
-      this.modified();
-      return this;
+      m_this.modified();
+      return m_this;
     }
   };
 
@@ -154,8 +155,8 @@ geo.feature = function (arg) {
       return m_buildTime;
     } else {
       m_buildTime = val;
-      this.modified();
-      return this;
+      m_this.modified();
+      return m_this;
     }
   };
 
@@ -169,8 +170,8 @@ geo.feature = function (arg) {
       return m_updateTime;
     } else {
       m_updateTime = val;
-      this.modified();
-      return this;
+      m_this.modified();
+      return m_this;
     }
   };
 
@@ -234,4 +235,4 @@ geo.feature = function (arg) {
   return this;
 };
 
-inherit(geo.feature, geo.object);
+inherit(geo.feature, geo.sceneObject);

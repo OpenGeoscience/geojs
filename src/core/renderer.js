@@ -47,7 +47,7 @@ geo.renderer = function (arg) {
       return m_canvas;
     } else {
       m_canvas = val;
-      this.modified();
+      m_this.modified();
     }
   };
 
@@ -85,7 +85,7 @@ geo.renderer = function (arg) {
       return m_initialized;
     } else {
       m_initialized = val;
-      return this;
+      return m_this;
     }
   };
 
@@ -165,7 +165,7 @@ geo.renderer = function (arg) {
         totalOffsetY = 0,
         canvasX = 0,
         canvasY = 0,
-        currentElement = this.canvas();
+        currentElement = m_this.canvas();
 
     do {
       totalOffsetX += currentElement.offsetLeft - currentElement.scrollLeft;

@@ -26,7 +26,8 @@ geo.planeFeature = function (arg) {
 
   geo.polygonFeature.call(this, arg);
 
-  var m_origin = [arg.ul.x, arg.lr.y, arg.depth],
+  var m_this = this,
+      m_origin = [arg.ul.x, arg.lr.y, arg.depth],
       m_upperLeft = [arg.ul.x, arg.ul.y, arg.depth],
       m_lowerRight = [arg.lr.x, arg.lr.y, arg.depth],
       m_defaultDepth = arg.depth,
@@ -55,9 +56,9 @@ geo.planeFeature = function (arg) {
     } else if (val instanceof geo.latlng) {
       m_origin = [val.x(), val.y(), m_defaultDepth];
     }
-    this.dataTime().modified();
-    this.modified();
-    return this;
+    m_this.dataTime().modified();
+    m_this.modified();
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -81,9 +82,9 @@ geo.planeFeature = function (arg) {
     } else if (val instanceof geo.latlng) {
       m_upperLeft = [val.x(), val.y(), m_defaultDepth];
     }
-    this.dataTime().modified();
-    this.modified();
-    return this;
+    m_this.dataTime().modified();
+    m_this.modified();
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -104,13 +105,13 @@ geo.planeFeature = function (arg) {
       if (m_lowerRight.length === 2) {
         m_lowerRight[2] = m_defaultDepth;
       }
-      this.dataTime().modified();
+      m_this.dataTime().modified();
     } else if (val instanceof geo.latlng) {
       m_lowerRight = [val.x(), val.y(), m_defaultDepth];
     }
-    this.dataTime().modified();
-    this.modified();
-    return this;
+    m_this.dataTime().modified();
+    m_this.modified();
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -123,7 +124,7 @@ geo.planeFeature = function (arg) {
       return m_drawOnAsyncResourceLoad;
     } else {
       m_drawOnAsyncResourceLoad = val;
-      return this;
+      return m_this;
     }
   };
 
@@ -134,12 +135,12 @@ geo.planeFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
     var style = null;
-    s_init.call(this, arg);
-    style = this.style();
+    s_init.call(m_this, arg);
+    style = m_this.style();
     if (style.image === undefined) {
       style.image = null;
     }
-    this.style(style);
+    m_this.style(style);
   };
 
   this._init(arg);

@@ -56,7 +56,7 @@ geo.osmLayer = function (arg) {
       return m_tileCacheSize;
     }
     m_tileCacheSize = val;
-    this.modified();
+    m_this.modified();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -253,14 +253,14 @@ geo.osmLayer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   /* jshint -W089 */
   this._removeTiles = function () {
-    var x, y, tile, zoom, currZoom = this.map().zoom();
+    var x, y, tile, zoom, currZoom = m_this.map().zoom();
 
     if (!m_tiles) {
-      return this;
+      return m_this;
     }
 
     if (m_previousZoom === currZoom) {
-      return this;
+      return m_this;
     }
     m_previousZoom = currZoom;
 
@@ -321,7 +321,7 @@ geo.osmLayer = function (arg) {
     }, 100);
     
 
-    return this;
+    return m_this;
   };
   /* jshint +W089 */
  
@@ -331,11 +331,11 @@ geo.osmLayer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._addTiles = function (request) {
-    var feature, ren = this.renderer(),
+    var feature, ren = m_this.renderer(),
         zoom = this.map().zoom(),
         /// First get corner points
         /// In display coordinates the origin is on top left corner (0, 0)
-        llx = 0.0, lly = this.height(), urx = this.width(), ury = 0.0,
+        llx = 0.0, lly = m_this.height(), urx = m_this.width(), ury = 0.0,
         temp = null, tile = null, tile1x = null, tile1y = null, tile2x = null,
         tile2y = null, invJ = null, i = 0, j = 0,
         worldPt1 = ren.displayToWorld([llx, lly]),
@@ -423,7 +423,7 @@ geo.osmLayer = function (arg) {
       tile = m_pendingNewTiles[i];
 
       tile.onload = tileOnLoad(tile);
-      feature = this.createFeature('plane', {drawOnAsyncResourceLoad: false})
+      feature = m_this.createFeature('plane', {drawOnAsyncResourceLoad: false})
                   .origin([tile.llx, tile.lly])
                   .upperLeft([tile.llx, tile.ury])
                   .lowerRight([tile.urx, tile.lly])
@@ -441,7 +441,7 @@ geo.osmLayer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._updateTiles = function (request) {
     /// Add tiles that are currently visible
-    this._addTiles(request);
+    m_this._addTiles(request);
 
     /// Remove or hide tiles that are not visible
     m_this._removeTiles(request);
@@ -449,8 +449,8 @@ geo.osmLayer = function (arg) {
     /// Trigger draw now
     m_this._draw();
 
-    this.updateTime().modified();
-    return this;
+    m_this.updateTime().modified();
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -461,9 +461,9 @@ geo.osmLayer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function () {
-    s_init.call(this);
+    s_init.call(m_this);
     this.gcs('EPSG:3857');
-    return this;
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -473,10 +473,10 @@ geo.osmLayer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._update = function (request) {
     /// Update tiles (create new / delete old etc...)
-    this._updateTiles(request);
+    m_this._updateTiles(request);
 
     /// Now call base class update
-    s_update.call(this, request);
+    s_update.call(m_this, request);
   };
 
   return this;

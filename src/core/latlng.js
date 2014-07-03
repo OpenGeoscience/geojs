@@ -24,7 +24,8 @@ geo.latlng = function (arg1, arg2) {
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
-  var m_lat = arg2 === undefined ? arg1.lat() : arg1,
+  var m_this = this,
+      m_lat = arg2 === undefined ? arg1.lat() : arg1,
       m_lng = arg2 === undefined ? arg1.lng() : arg2;
 
   ////////////////////////////////////////////////////////////////////////////
@@ -60,7 +61,7 @@ geo.latlng = function (arg1, arg2) {
   //////////////////////////////////////////////////////////////////////////////
   this.x = function (val) {
     if (val === undefined) {
-      return this.lng();
+      return m_this.lng();
     } else {
       m_lng = val;
     }
@@ -73,7 +74,7 @@ geo.latlng = function (arg1, arg2) {
   //////////////////////////////////////////////////////////////////////////////
   this.y = function (val) {
     if (val === undefined) {
-      return this.lat();
+      return m_this.lat();
     } else {
       m_lat = val;
     }
