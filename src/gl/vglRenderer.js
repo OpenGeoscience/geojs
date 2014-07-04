@@ -303,8 +303,9 @@ ggl.vglRenderer = function (arg) {
             return -evt.originalEvent.detail;
             };
 
+      m_viewer.unbindEventHandlers();
+
       map.on(wheel, function (event) {
-        console.log(wheelDelta(event));
         event.originalEvent.wheelDeltaY = wheelDelta(event);
         event.originalEvent.wheelDelta = event.originalEvent.wheelDeltaY;
         m_viewer.handleMouseWheel(event);
