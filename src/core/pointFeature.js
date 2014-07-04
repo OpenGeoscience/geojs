@@ -25,7 +25,8 @@ geo.pointFeature = function (arg) {
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
-  var m_positions = arg.positions === undefined ? null : arg.positions,
+  var m_this = this,
+      m_positions = arg.positions === undefined ? null : arg.positions,
       s_init = this._init;
 
   ////////////////////////////////////////////////////////////////////////////
@@ -41,9 +42,9 @@ geo.pointFeature = function (arg) {
     } else {
       // Copy incoming array of positions
       m_positions = val.slice(0);
-      this.dataTime().modified();
-      this.modified();
-      return this;
+      m_this.dataTime().modified();
+      m_this.modified();
+      return m_this;
     }
   };
 
@@ -53,7 +54,7 @@ geo.pointFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
-    s_init.call(this, arg);
+    s_init.call(m_this, arg);
 
     var defaultStyle = $.extend(
       {},
@@ -68,15 +69,15 @@ geo.pointFeature = function (arg) {
       arg.style === undefined ? {} : arg.style
     );
 
-    this.style(defaultStyle);
+    m_this.style(defaultStyle);
 
     if (m_positions) {
-      this.dataTime().modified();
+      m_this.dataTime().modified();
     }
   };
 
-  this._init(arg);
-  return this;
+  m_this._init(arg);
+  return m_this;
 };
 
 inherit(geo.pointFeature, geo.feature);

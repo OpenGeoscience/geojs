@@ -40,7 +40,7 @@ geo.graphFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
-    s_init.call(this, arg);
+    s_init.call(m_this, arg);
 
     var defaultStyle = $.extend(true, {},
       {
@@ -56,9 +56,9 @@ geo.graphFeature = function (arg) {
       arg.style === undefined ? {} : arg.style
     );
 
-    this.style(defaultStyle);
+    m_this.style(defaultStyle);
     if (m_nodes) {
-      this.dataTime().modified();
+      m_this.dataTime().modified();
     }
   };
 
@@ -68,8 +68,8 @@ geo.graphFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.style = function (arg) {
-    var out = s_style.call(this, arg);
-    if (out !== this) {
+    var out = s_style.call(m_this, arg);
+    if (out !== m_this) {
       return out;
     }
     // set styles for sub-features
@@ -77,7 +77,7 @@ geo.graphFeature = function (arg) {
     m_links.forEach(function (l) {
       l.style(arg.links);
     });
-    return this;
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -120,9 +120,9 @@ geo.graphFeature = function (arg) {
       layer._delete(l);
     });
 
-    this.dataTime().modified();
-    this.modified();
-    return this;
+    m_this.dataTime().modified();
+    m_this.modified();
+    return m_this;
   };
 
   m_points = this.layer().createFeature("point");

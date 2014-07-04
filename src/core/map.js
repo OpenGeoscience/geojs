@@ -129,7 +129,7 @@ geo.map = function (arg) {
       return m_gcs;
     }
     m_gcs = arg;
-    return this;
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -169,7 +169,7 @@ geo.map = function (arg) {
     // TODO Fix this
     //      m_this.trigger(geo.event.zoom);
     m_this.modified();
-    return this;
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -187,7 +187,7 @@ geo.map = function (arg) {
     // TODO Fix this
     //      m_this.trigger(geo.event.center);
     m_this.modified();
-    return this;
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -276,7 +276,7 @@ geo.map = function (arg) {
         layer: layer
       });
     }
-    return this;
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -311,7 +311,7 @@ geo.map = function (arg) {
     });
 
     m_this.modified();
-    return this;
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -391,30 +391,10 @@ geo.map = function (arg) {
       // Set the layer as the reference layer
       m_baseLayer.referenceLayer(true);
 
-      return this;
+      return m_this;
     }
     return m_baseLayer;
   };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Gets the interactorStyle for this map
-   *
-   * @returns {vgl.interactorStyle]
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  // TODO: Does this belong here?  It isn't doing anything now.
-  /*
-  this.interactorStyle = function () {
-    if (style === undefined) {
-      return m_interactorStyle;
-    } else {
-      m_interactorStyle = style;
-      this.modified();
-    }
-    return m_interactorStyle;
-  };
-  */
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -442,7 +422,7 @@ geo.map = function (arg) {
       }
     );
 
-    return this;
+    return m_this;
   };
 
   // TODO: Add documentation headers:
@@ -469,19 +449,19 @@ geo.map = function (arg) {
       };
     }
 
-    this._animate();
-    return this;
+    m_this._animate();
+    return m_this;
   };
 
   this.pauseAnimation = function () {
     m_this.trigger(geo.event.animationPause);
-    return this;
+    return m_this;
   };
 
   this.stopAnimation = function () {
     m_this.trigger(geo.event.animationStop);
     m_animationState.timestep = null;
-    return this;
+    return m_this;
   };
 
   this.stepAnimationForward = function (layers) {
@@ -503,7 +483,7 @@ geo.map = function (arg) {
     }
 
     m_this._stepAnimationForward();
-    return this;
+    return m_this;
   };
 
   this.stepAnimationBackward = function (layers) {
@@ -525,7 +505,7 @@ geo.map = function (arg) {
     }
 
     m_this._stepAnimationBackward();
-    return this;
+    return m_this;
   };
 
   this._animate = function () {
@@ -561,7 +541,7 @@ geo.map = function (arg) {
     }
 
     id = setInterval(renderTimestep, 10);
-    return this;
+    return m_this;
   };
 
   this._animateTimestep = function () {
@@ -585,7 +565,7 @@ geo.map = function (arg) {
       m_this.draw();
     }
 
-    return this;
+    return m_this;
   };
 
   this._stepAnimationForward = function () {
@@ -604,7 +584,7 @@ geo.map = function (arg) {
       m_this._animateTimestep();
     }
     
-    return this;
+    return m_this;
   };
 
   this._stepAnimationBackward = function () {
@@ -628,7 +608,7 @@ geo.map = function (arg) {
     m_animationState.timestep = previousTimestep;
     m_this._animateTimestep();
 
-    return this;
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -652,7 +632,7 @@ geo.map = function (arg) {
         m_this.addLayer(arg.layers[i]);
       }
     }
-    return this;
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -665,7 +645,7 @@ geo.map = function (arg) {
     for (i = 0; i < layers.length; i += 1) {
       layers[i]._update(request);
     }
-    return this;
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////

@@ -110,7 +110,7 @@ geo.layer = function (arg) {
     }
     m_id = geo.newLayerId();
     m_this.modified();
-    return this;
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -126,7 +126,7 @@ geo.layer = function (arg) {
     }
     m_name = val;
     m_this.modified();
-    return this;
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -142,7 +142,7 @@ geo.layer = function (arg) {
     }
     m_style.opacity = val;
     m_this.modified();
-    return this;
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -156,7 +156,7 @@ geo.layer = function (arg) {
     }
     m_style.visible = val;
     m_this.modified();
-    return this;
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -172,7 +172,7 @@ geo.layer = function (arg) {
     }
     m_style.bin = val;
     m_this.modified();
-    return this;
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -186,7 +186,7 @@ geo.layer = function (arg) {
     }
     m_gcs = val;
     m_this.modified();
-    return this;
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -196,7 +196,7 @@ geo.layer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.transform = function (val) {
     geo.transform.transformLayer(val, m_this, m_map.baseLayer());
-    return this;
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -210,7 +210,7 @@ geo.layer = function (arg) {
     }
     m_timeRange = val;
     m_this.modified();
-    return this;
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -224,7 +224,7 @@ geo.layer = function (arg) {
     }
     m_source = val;
     m_this.modified();
-    return this;
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -239,7 +239,7 @@ geo.layer = function (arg) {
     m_map = val;
     m_map.node().append(m_node);
     m_this.modified();
-    return this;
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -314,7 +314,7 @@ geo.layer = function (arg) {
     if (val !== undefined) {
       m_isReference = val;
       m_this.modified();
-      return this;
+      return m_this;
     }
     return m_isReference;
   };
@@ -328,7 +328,7 @@ geo.layer = function (arg) {
   this.initialized = function (val) {
     if (val !== undefined) {
       m_initialized = val;
-      return this;
+      return m_this;
     }
     return m_initialized;
   };
@@ -360,7 +360,7 @@ geo.layer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._init = function () {
     if (m_initialized) {
-      return this;
+      return m_this;
     }
 
     // Create top level div for the layer
@@ -387,7 +387,7 @@ geo.layer = function (arg) {
 
     m_initialized = true;
 
-    return this;
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -423,7 +423,7 @@ geo.layer = function (arg) {
     m_this.trigger(geo.event.resize,
       {x: x, y: y, width: m_width, height: m_height});
 
-    return this;
+    return m_this;
   };
 
 

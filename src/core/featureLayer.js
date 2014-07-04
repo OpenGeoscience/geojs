@@ -43,16 +43,17 @@ geo.featureLayer = function (arg) {
   this.createFeature = function (featureName, arg) {
 
     var newFeature = geo.createFeature(
-      featureName, m_this, this.renderer(), arg);
+      featureName, m_this, m_this.renderer(), arg);
 
     /// Initialize feature list
     if (!m_features) {
       m_features = [];
     }
 
+    m_this.addChild(newFeature);
     m_features.push(newFeature);
-    this.features(m_features);
-    this.modified();
+    m_this.features(m_features);
+    m_this.modified();
     return newFeature;
   };
 
@@ -62,8 +63,8 @@ geo.featureLayer = function (arg) {
    *
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.deleteFeature = function () {
-    // TODO:
+  this.deleteFeature = function (feature) {
+    return m_this._delete(feature);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -74,7 +75,7 @@ geo.featureLayer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.features = function (val) {
-    return this._features(val);
+    return m_this._features(val);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -87,8 +88,8 @@ geo.featureLayer = function (arg) {
       return m_features || [];
     } else {
       m_features = val.slice(0);
-      this.dataTime().modified();
-      this.modified();
+      m_this.dataTime().modified();
+      m_this.modified();
     }
   };
 
@@ -103,13 +104,14 @@ geo.featureLayer = function (arg) {
     for (i = 0; i < m_features.length; i += 1) {
       if (m_features[i] === feature) {
         m_features[i]._exit();
-        this.dataTime().modified();
-        this.modified();
+        m_this.dataTime().modified();
+        m_this.modified();
         return m_features.splice(i, 1);
       }
     }
+    m_this.removeChild(feature);
 
-    return this;
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -120,26 +122,26 @@ geo.featureLayer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function () {
-    if (this.initialized()) {
-      return this;
+    if (m_this.initialized()) {
+      return m_this;
     }
 
     /// Call super class init
-    s_init.call(this);
+    s_init.call(m_this);
 
     /// Bind events to handlers
-    this.on(geo.event.resize, function (event) {
+    m_this.on(geo.event.resize, function (event) {
       m_this.renderer()._resize(event.x, event.y, event.width, event.height);
       m_this._update({});
       m_this.renderer()._render();
     });
 
-    this.on(geo.event.pan, function (event) {
+    m_this.on(geo.event.pan, function (event) {
       m_this._update({event: event});
       m_this.renderer()._render();
     });
 
-    this.on(geo.event.zoom, function (event) {
+    m_this.on(geo.event.zoom, function (event) {
       if (m_this.map()) {
         m_this.map().zoom(event.curr_zoom);
       }
@@ -147,7 +149,7 @@ geo.featureLayer = function (arg) {
       m_this.renderer()._render();
     });
 
-    return this;
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -159,20 +161,20 @@ geo.featureLayer = function (arg) {
     var i, reset = false;
 
     if (!m_features) {
-      return this;
+      return m_this;
     }
 
     /// Call base class update
-    s_update.call(this, request);
+    s_update.call(m_this, request);
 
-    if (!this.source() && m_features && m_features.length === 0) {
+    if (!m_this.source() && m_features && m_features.length === 0) {
       console.log("[info] No valid data source found.");
       return;
     }
 
-    if (this.dataTime().getMTime() > this.updateTime().getMTime()) {
+    if (m_this.dataTime().getMTime() > m_this.updateTime().getMTime()) {
       for (i = 0; i < m_features.length; i += 1) {
-        m_features[i].renderer(this.renderer());
+        m_features[i].renderer(m_this.renderer());
       }
       reset = true;
     }
@@ -181,13 +183,13 @@ geo.featureLayer = function (arg) {
       m_features[i]._update();
     }
 
-    this.updateTime().modified();
+    m_this.updateTime().modified();
 
     if (reset) {
       m_this.renderer().reset();
     }
 
-    return this;
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -196,8 +198,8 @@ geo.featureLayer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._draw = function () {
-    this.renderer()._render();
-    return this;
+    m_this.renderer()._render();
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -209,20 +211,20 @@ geo.featureLayer = function (arg) {
     var i;
 
     if (!m_features)
-      return this;
+      return m_this;
 
     for (i = 0; i < m_features.length; i += 1) {
       m_features[i]._exit();
     }
 
-    this.dataTime().modified();
-    this.modified();
+    m_this.dataTime().modified();
+    m_this.modified();
     m_features = [];
 
-    return this;
+    return m_this;
   };
 
-  return this;
+  return m_this;
 };
 
 inherit(geo.featureLayer, geo.layer);

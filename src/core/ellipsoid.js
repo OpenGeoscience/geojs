@@ -33,7 +33,8 @@ geo.ellipsoid = function (x, y, z) {
     return console.log('[error] Al radii components must be greater than zero');
   }
 
-  var m_radii = new vec3.fromValues(x, y, z),
+  var m_this = this,
+      m_radii = new vec3.fromValues(x, y, z),
       m_radiiSquared = new vec3.fromValues(
         x * x, y * y, z * z),
       m_minimumRadius = Math.min(x, y, z),
@@ -125,7 +126,7 @@ geo.ellipsoid = function (x, y, z) {
     lat = lat *  (Math.PI / 180.0);
     lon = lon * (Math.PI / 180.0);
 
-    var n = this.computeGeodeticSurfaceNormal(lat, lon),
+    var n = m_this.computeGeodeticSurfaceNormal(lat, lon),
         k = vec3.create(),
         gamma  = Math.sqrt(vec3.dot(n, k)),
         result = vec3.create();
@@ -181,7 +182,7 @@ geo.ellipsoid = function (x, y, z) {
       sourceDataArray[index] = sourceDataArray[index] * (Math.PI / 180.0);
       sourceDataArray[index + 1] = sourceDataArray[index + 1] * (Math.PI / 180.0);
 
-      n = this.computeGeodeticSurfaceNormal(sourceDataArray[index + 1],
+      n = m_this.computeGeodeticSurfaceNormal(sourceDataArray[index + 1],
                                             sourceDataArray[index]);
       vec3.multiply(k, m_radiiSquared, n);
       gamma = Math.sqrt(vec3.dot(n, k));
@@ -195,7 +196,7 @@ geo.ellipsoid = function (x, y, z) {
     }
   };
 
-  return this;
+  return m_this;
 };
 
 ////////////////////////////////////////////////////////////////////////////

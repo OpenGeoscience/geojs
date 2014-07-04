@@ -39,7 +39,7 @@ geo.sceneObject = function (arg) {
       return m_parent;
     }
     m_parent = arg;
-    return this;
+    return m_this;
   };
 
   //////////////////////////////////////////////////////////////////////////////
@@ -49,12 +49,12 @@ geo.sceneObject = function (arg) {
   //////////////////////////////////////////////////////////////////////////////
   this.addChild = function (child) {
     if (Array.isArray(child)) {
-      child.forEach(this.addChild);
-      return this;
+      child.forEach(m_this.addChild);
+      return m_this;
     }
-    child.parent(this);
+    child.parent(m_this);
     m_children.push(child);
-    return this;
+    return m_this;
   };
 
   //////////////////////////////////////////////////////////////////////////////
@@ -64,11 +64,11 @@ geo.sceneObject = function (arg) {
   //////////////////////////////////////////////////////////////////////////////
   this.removeChild = function (child) {
     if (Array.isArray(child)) {
-      child.forEach(this.removeChild);
-      return this;
+      child.forEach(m_this.removeChild);
+      return m_this;
     }
     m_children = m_children.filter(function (c) { return c !== child; });
-    return this;
+    return m_this;
   };
 
   //////////////////////////////////////////////////////////////////////////////
@@ -82,29 +82,42 @@ geo.sceneObject = function (arg) {
 
   //////////////////////////////////////////////////////////////////////////////
   /**
-   *  Trigger an event (or events) on this object and call all handlers
+   *  Trigger an event (or events) on this object and call all handlers.
+   *  @param {String} event the event to trigger
+   *  @param {Object} args arbitrary argument to pass to the handler
+   *  @param {Boolean} childrenOnly if true, only propagate down the tree
    */
   //////////////////////////////////////////////////////////////////////////////
-  this.trigger = function (event, args) {
+  this.trigger = function (event, args, childrenOnly) {
+
+    var geoArgs;
+
     args = args || {};
+    geoArgs = args.geo || {};
+    args.geo = geoArgs;
 
     // If the event was not triggered by the parent, just propagate up the tree
-    if (m_parent && args._triggeredBy !== m_parent) {
-      args._triggeredBy = m_this;
+    if (!childrenOnly && m_parent && geoArgs._triggeredBy !== m_parent) {
+      geoArgs._triggeredBy = m_this;
       m_parent.trigger(event, args);
-      return this;
+      return m_this;
     }
 
     // call the object's own handlers
-    s_trigger.call(this, event, args);
+    s_trigger.call(m_this, event, args);
+
+    // stop propagation if requested by the handler
+    if (geoArgs.stopPropagation) {
+      return m_this;
+    }
 
     // trigger the event on the children
     m_children.forEach(function (child) {
-      args._triggeredBy = m_this;
+      geoArgs._triggeredBy = m_this;
       child.trigger(event, args);
     });
 
-    return this;
+    return m_this;
   };
 
   return this;
