@@ -96,11 +96,11 @@ class Aggregator(object):
         stats = self.stats(cov)
         totalPct = self._percent(stats['totalHits'], stats['totalSloc'])
 
-        print 'Total coverage: %i / %i (%.2f%%)' % (
+        print('Total coverage: %i / %i (%.2f%%)' % (
             stats['totalHits'],
             stats['totalSloc'],
             totalPct * 100
-        )
+        ))
 
         coverageEl = ET.Element('coverage', {
             'branch-rate': '0',
@@ -187,7 +187,7 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
         try:
             obj = json.loads(s)
         except ValueError as e:
-            print '--' + s + '--'
+            print('--' + s + '--')
             raise e
         self.wfile.write(
             self.agg.append(obj)
