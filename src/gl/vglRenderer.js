@@ -289,23 +289,40 @@ ggl.vglRenderer = function (arg) {
     // reference/base layer.
     if (m_this.layer().referenceLayer()) {
 
-      var map = $(m_this.layer().map().node());
-      map.on('mousewheel', function (event) {
+      /// https://developer.mozilla.org/en-US/docs/Web/Events/wheel
+      var map = $(m_this.layer().map().node()),
+          wheel = "onwheel" in map ? "wheel" :
+                  document.onmousewheel !== undefined ? "mousewheel" :
+                  "MozMousePixelScroll",
+          wheelDelta = (wheel === "wheel") ? function(evt) {
+            return evt.originalEvent.deltaY *
+              (evt.originalEvent.deltaMode ? 120 : 1)
+            } : wheel === "mousewheel" ? function(evt) {
+            return evt.originalEvent.wheelDelta;
+            } : function(evt) {
+            return -evt.originalEvent.detail;
+            };
+
+      map.on(wheel, function (event) {
+        console.log(wheelDelta(event));
+        event.originalEvent.wheelDeltaY = wheelDelta(event);
+        event.originalEvent.wheelDelta = event.originalEvent.wheelDeltaY;
         m_viewer.handleMouseWheel(event);
       });
-      map.on('mousemove', function (event) {
+
+      map.on("mousemove", function (event) {
         m_viewer.handleMouseMove(event);
       });
 
-      map.on('mouseup', function (event) {
+      map.on("mouseup", function (event) {
         m_viewer.handleMouseUp(event);
       });
 
-      map.on('mousedown', function (event) {
+      map.on("mousedown", function (event) {
         m_viewer.handleMouseDown(event);
       });
 
-      map.on('mouseout', function (event) {
+      map.on("mouseout", function (event) {
         // check if the mouse actually left the map area
         var selection = $(map),
             offset = selection.offset(),
@@ -319,11 +336,11 @@ ggl.vglRenderer = function (arg) {
         }
       });
 
-      map.on('keypress', function (event) {
+      map.on("keypress", function (event) {
         m_viewer.handleKeyPress(event);
       });
 
-      map.on('contextmenu', function (event) {
+      map.on("contextmenu", function (event) {
         m_viewer.handleContextMenu(event);
       });
     }
