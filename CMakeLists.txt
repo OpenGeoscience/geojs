@@ -134,6 +134,18 @@ macro(list_contains var value)
   endforeach(value2)
 endmacro(list_contains)
 
+# customize files that should be ignored while globbing
+function(glob_filter f)
+  # ignore /.*
+  get_filename_component(base "${f}" NAME)
+  string(SUBSTRING "${base}" 0 1 first)
+  if("${first}" STREQUAL ".")
+    set(glob_ignore true PARENT_SCOPE)
+  else()
+    set(glob_ignore false PARENT_SCOPE)
+  endif()
+endfunction()
+
 set(_js_uglify_files)
 set(_js_lint_files)
 set(_script_include)
@@ -185,13 +197,16 @@ add_dependencies(${PROJECT_NAME} geojs_pre_deploy)
 file(GLOB_RECURSE all_example_files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/examples/*")
 set(example_files_deploy)
 foreach(f ${all_example_files})
-  add_custom_command(
-    OUTPUT "${GEOJS_DEPLOY_DIR}/${f}"
-    COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/${f}" "${GEOJS_DEPLOY_DIR}/${f}"
-    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${f}"
-    COMMENT "Copying ${f} to deploy directory."
-  )
-  set(example_files_deploy ${example_files_deploy} "${GEOJS_DEPLOY_DIR}/${f}")
+  glob_filter("${f}")
+  if(NOT ${glob_ignore})
+    add_custom_command(
+      OUTPUT "${GEOJS_DEPLOY_DIR}/${f}"
+      COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/${f}" "${GEOJS_DEPLOY_DIR}/${f}"
+      DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${f}"
+      COMMENT "Copying ${f} to deploy directory."
+    )
+    set(example_files_deploy ${example_files_deploy} "${GEOJS_DEPLOY_DIR}/${f}")
+  endif()
 endforeach()
 add_custom_target(geojs_examples ALL DEPENDS ${example_files_deploy} ${MIDAS_DOWNLOAD_FILES})
 
@@ -356,9 +371,10 @@ if(BUILD_TESTING)
       COPYONLY
     )
     file(GLOB SELENIUM_TEST_DIRS
-      ${CMAKE_CURRENT_SOURCE_DIR}/testing/test-cases/selenium-tests/*
+      ${CMAKE_CURRENT_SOURCE_DIR}/testing/test-cases/selenium-tests/*/*.js
     )
-    foreach(dir ${SELENIUM_TEST_DIRS})
+    foreach(jsfile ${SELENIUM_TEST_DIRS})
+      get_filename_component(dir "${jsfile}" DIRECTORY)
       if(IS_DIRECTORY "${dir}")
         set(html "${dir}/include.html")
         set(js "${dir}/include.js")
