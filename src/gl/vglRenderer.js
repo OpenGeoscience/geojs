@@ -25,12 +25,12 @@ ggl._vglViewerInstance = null;
 //////////////////////////////////////////////////////////////////////////////
 
 ggl.vglViewerInstance = function () {
-  'use strict';
+  "use strict";
   var canvas;
 
   if (ggl._vglViewerInstance === null) {
-    canvas = $(document.createElement('canvas'));
-    canvas.attr('class', '.webgl-canvas');
+    canvas = $(document.createElement("canvas"));
+    canvas.attr("class", ".webgl-canvas");
     ggl._vglViewerInstance = vgl.viewer(canvas.get(0));
     ggl._vglViewerInstance.renderWindow().removeRenderer(
       ggl._vglViewerInstance.renderWindow().activeRenderer());
@@ -50,7 +50,7 @@ ggl.vglViewerInstance = function () {
  */
 //////////////////////////////////////////////////////////////////////////////
 ggl.vglRenderer = function (arg) {
-  'use strict';
+  "use strict";
 
   if (!(this instanceof ggl.vglRenderer)) {
     return new ggl.vglRenderer(arg);
@@ -135,7 +135,7 @@ ggl.vglRenderer = function (arg) {
                m_width, m_height);
       output = {x: temp[0], y: temp[1], z: temp[2], w: temp[3]};
     } else {
-      throw 'Display to world conversion requires array of 2D/3D points';
+      throw "Display to world conversion requires array of 2D/3D points";
     }
     return output;
   };
@@ -212,7 +212,7 @@ ggl.vglRenderer = function (arg) {
 
       output = {x: temp[0], y: temp[1], z: temp[2]};
     } else {
-      throw 'World to display conversion requires array of 2D/3D points';
+      throw "World to display conversion requires array of 2D/3D points";
     }
 
     return output;
@@ -233,7 +233,7 @@ ggl.vglRenderer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.api = function () {
-    return 'vgl';
+    return "vgl";
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -289,23 +289,41 @@ ggl.vglRenderer = function (arg) {
     // reference/base layer.
     if (m_this.layer().referenceLayer()) {
 
-      var map = $(m_this.layer().map().node());
-      map.on('mousewheel', function (event) {
+      /// https://developer.mozilla.org/en-US/docs/Web/Events/wheel
+      var map = $(m_this.layer().map().node()),
+          wheel = "onwheel" in map ? "wheel" :
+                  document.onmousewheel !== undefined ? "mousewheel" :
+                  "MozMousePixelScroll",
+          wheelDelta = (wheel === "wheel") ? function (evt) {
+            return evt.originalEvent.deltaY *
+              (evt.originalEvent.deltaMode ? 120 : 1);
+          } : wheel === "mousewheel" ? function (evt) {
+            return evt.originalEvent.wheelDelta;
+          } : function (evt) {
+            return -evt.originalEvent.detail;
+          };
+
+      m_viewer.unbindEventHandlers();
+
+      map.on(wheel, function (event) {
+        event.originalEvent.wheelDeltaY = wheelDelta(event);
+        event.originalEvent.wheelDelta = event.originalEvent.wheelDeltaY;
         m_viewer.handleMouseWheel(event);
       });
-      map.on('mousemove', function (event) {
+
+      map.on("mousemove", function (event) {
         m_viewer.handleMouseMove(event);
       });
 
-      map.on('mouseup', function (event) {
+      map.on("mouseup", function (event) {
         m_viewer.handleMouseUp(event);
       });
 
-      map.on('mousedown', function (event) {
+      map.on("mousedown", function (event) {
         m_viewer.handleMouseDown(event);
       });
 
-      map.on('mouseout', function (event) {
+      map.on("mouseout", function (event) {
         // check if the mouse actually left the map area
         var selection = $(map),
             offset = selection.offset(),
@@ -319,11 +337,11 @@ ggl.vglRenderer = function (arg) {
         }
       });
 
-      map.on('keypress', function (event) {
+      map.on("keypress", function (event) {
         m_viewer.handleKeyPress(event);
       });
 
-      map.on('contextmenu', function (event) {
+      map.on("contextmenu", function (event) {
         m_viewer.handleContextMenu(event);
       });
     }
@@ -345,8 +363,8 @@ ggl.vglRenderer = function (arg) {
   this._resize = function (x, y, w, h) {
     m_width = w;
     m_height = h;
-    this.canvas().attr('width', w);
-    this.canvas().attr('height', h);
+    this.canvas().attr("width", w);
+    this.canvas().attr("height", h);
     m_viewer.renderWindow().positionAndResize(x, y, w, h);
     this._render();
     return this;
@@ -375,4 +393,4 @@ ggl.vglRenderer = function (arg) {
 
 inherit(ggl.vglRenderer, ggl.renderer);
 
-geo.registerRenderer('vglRenderer', ggl.vglRenderer);
+geo.registerRenderer("vglRenderer", ggl.vglRenderer);
