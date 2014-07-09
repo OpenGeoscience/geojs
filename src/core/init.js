@@ -41,7 +41,8 @@ ogs.namespace = function (ns_string) {
 };
 
 /** geo namespace */
-geo = ogs.namespace("geo"); // jshint ignore: line
+var geo = ogs.namespace("geo"); // jshint ignore: line
+window.geo = geo; // jshint ignore: line
 
 geo.renderers = {};
 geo.features = {};
