@@ -223,8 +223,8 @@ class MidasHandler(object):
                 try:
                     self._apiKey = resp.json()['data']['apikey']
                 except Exception:
-                    password = None
                     print("Could not log in with the provided information.")
+                    nTries += 1
 
             resp = http.get(
                 self._apiURL + 'midas.login',
