@@ -87,6 +87,7 @@ set(_source_files
   core/osmLayer.js
   gl/init.js
   gl/renderer.js
+  gl/lineFeature.js
   gl/pointFeature.js
   gl/geomFeature.js
   gl/planeFeature.js
