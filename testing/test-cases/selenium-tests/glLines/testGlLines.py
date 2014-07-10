@@ -15,12 +15,6 @@ class osmBase(object):
         self.loadURL('glLines/index.html')
         self.wait()
 
-        self.drag('#map', (225, 125))
-        time.sleep(1)
-        self.drag('#map', (225, 125))
-        time.sleep(1)
-        self.drag('#map', (225, 0))
-
     def testGlPoints(self):
         self.loadPage()
 

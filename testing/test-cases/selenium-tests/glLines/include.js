@@ -1,19 +1,11 @@
-function processCSVData(csvdata) {
-  var table = [];
-  var lines = csvdata.split(/\r\n|\n/);
-
-  for ( var i = 0; i < lines.length; i++) {
-    var row = lines[i].split(',');
-    table.push(row);
-  }
-  return table;
-};
-
 window.startTest = function(done) {
+    $("#map").width("100%");
+    $("#map").height("100%");
+
     var mapOptions = {
       node: '#map',
       zoom : 3,
-      center : [40, 105]
+      center : [38.8, -96.2]
     };
 
     var myMap = geo.map(mapOptions),
@@ -21,12 +13,7 @@ window.startTest = function(done) {
         citieslatlon = [],
         width, height;
 
-    // Resize the canvas to fill browser window dynamically
-    window.addEventListener('resize', resizeCanvas, false);
-
     function resizeCanvas() {
-      // $('#map').width('100%');
-      // $('#map').height('100%');
       width = $('#map').width();
       height = $('#map').height();
       updateAndDraw(width, height);
@@ -93,4 +80,4 @@ window.startTest = function(done) {
     myMap.draw();
 
     done();
-});
+};
