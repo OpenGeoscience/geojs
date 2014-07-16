@@ -90,9 +90,7 @@ window.startTest = function (done) {
   layer.createFeature('graph')
       .style(style)
       .nodes(citieslatlon);
-
-  resizeCanvas();
   myMap.draw();
-  
+
   done();
 };

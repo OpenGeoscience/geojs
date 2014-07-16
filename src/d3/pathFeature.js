@@ -32,34 +32,36 @@ gd3.pathFeature = function (arg) {
       s_update = this._update,
       m_style = {};
 
-  // georeference a point with caching
-  function georef(d) {
-    var r = m_this.renderer(), p;
-    p = r.worldToDisplay(d);
-    return p;
-  }
+  m_style.style = {};
+
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
-    s_init.call(this, arg);
-    return this;
+    s_init.call(m_this, arg);
+    return m_this;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Build
+   *
+   * @override
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
-    var data = this.positions(),
-        s_style = this.style(),
+    var data = m_this.positions() || [],
+        s_style = m_this.style(),
+        m_renderer = m_this.renderer(),
         tmp, diag;
-    s_update.call(this);
+    s_update.call(m_this);
 
     diag = function (d) {
-        var source = georef(d.source),
-            target = georef(d.target),
-          p = {
-          source: source,
-          target: target
+        var p = {
+          source: d.source,
+          target: d.target
         };
         return d3.svg.diagonal()(p);
       };
@@ -70,8 +72,8 @@ gd3.pathFeature = function (arg) {
         src = d;
         trg = data[i + 1];
         tmp.push({
-          source: src,
-          target: trg
+          source: m_renderer.worldToDisplay(src),
+          target: m_renderer.worldToDisplay(trg)
         });
       }
     });
@@ -90,15 +92,18 @@ gd3.pathFeature = function (arg) {
         s_style.color[1] * 255,
         s_style.color[2] * 255
       ),
-      'stroke-width': s_style.width[0].toString() + 'px',
+      'stroke-width': function () {
+        var m_scale = m_renderer.scaleFactor();
+        return (s_style.width[0] / m_scale).toString() + 'px';
+      },
       'stroke-opacity': s_style.opacity
     };
 
-    this.renderer().drawFeatures(m_style);
+    m_this.renderer().drawFeatures(m_style);
 
     m_buildTime.modified();
-    this.updateTime().modified();
-    return this;
+    m_this.updateTime().modified();
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -109,15 +114,22 @@ gd3.pathFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._update = function () {
-    s_update.call(this);
+    s_update.call(m_this);
 
-    if (this.dataTime().getMTime() >= m_buildTime.getMTime()) {
-      this._build();
+    if (m_this.dataTime().getMTime() >= m_buildTime.getMTime()) {
+      m_this._build();
     }
 
-    return this;
+    return m_this;
   };
-  
+
+  // attach to geo.event.d3Rescale to scale line width on resize
+  m_this.on(geo.event.d3Rescale, function () {
+    m_this.renderer()
+      .select(m_this._d3id())
+        .style('stroke-width', m_style.style['stroke-width']);
+  });
+
   this._init(arg);
   return this;
 };
