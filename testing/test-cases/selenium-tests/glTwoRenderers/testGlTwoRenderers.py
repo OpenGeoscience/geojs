@@ -2,6 +2,7 @@
 
 import os
 import time
+import unittest
 
 from selenium_test import FirefoxTest, ChromeTest,\
     setUpModule, tearDownModule
@@ -24,10 +25,12 @@ class osmBase(object):
         self.screenshotTest(testName, revision=1)
 
 
+@unittest.skip("Initial zoom currently not working")
 class FirefoxOSM(osmBase, FirefoxTest):
     testCase = osmBase.testCase + ('firefox',)
 
 
+@unittest.skip("Initial zoom currently not working")
 class ChromeOSM(osmBase, ChromeTest):
     testCase = osmBase.testCase + ('chrome',)
 

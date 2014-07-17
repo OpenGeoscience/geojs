@@ -14,14 +14,13 @@ class osmBase(object):
         self.resizeWindow(640, 480)
         self.loadURL('d3Lines/index.html')
         self.wait()
-        self.drag('#map', (225, 125))
-        time.sleep(2)
+        time.sleep(1)
 
     def testd3DrawLines(self):
         self.loadPage()
 
         testName = 'd3DrawLines'
-        self.screenshotTest(testName, revision=1)
+        self.screenshotTest(testName, revision=2)
 
 
 class FirefoxOSM(osmBase, FirefoxTest):

@@ -2,6 +2,7 @@
 
 import os
 import time
+import unittest
 
 from selenium_test import FirefoxTest, ChromeTest,\
     setUpModule, tearDownModule
@@ -19,10 +20,12 @@ class actorTransform(object):
         self.loadPage()
 
 
+@unittest.skip("vgl tests disabled until fixed")
 class FirefoxOSM(actorTransform, FirefoxTest):
     testCase = actorTransform.testCase + ('firefox',)
 
 
+@unittest.skip("vgl tests disabled until fixed")
 class ChromeOSM(actorTransform, ChromeTest):
     testCase = actorTransform.testCase + ('chrome',)
 

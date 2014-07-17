@@ -16,9 +16,10 @@ class mapCenter(object):
         self.wait()
 
     def test_map_center(self):
-        testName = 'osmDraw'
+        testName = 'mapCenter'
         self.loadPage()
-        self.screenshotTest(testName, revision=3)
+        self.screenshotTest(testName, revision=1)
+
 
 class FirefoxMapCenter(mapCenter, FirefoxTest):
     testCase = mapCenter.testCase + ('firefox',)

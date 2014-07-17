@@ -18,14 +18,14 @@ class osmBase(object):
     def test_osm_draw(self):
         testName = 'osmDraw'
         self.loadPage()
-        self.screenshotTest(testName, revision=3)
+        self.screenshotTest(testName, revision=4)
 
     def test_osm_pan(self):
         testName = 'osmPan'
         self.loadPage()
         self.drag('#map', (200, 150))
         time.sleep(1)  # wait for tiles to load
-        self.screenshotTest(testName, revision=3)
+        self.screenshotTest(testName, revision=4)
 
 
 class FirefoxOSM(osmBase, FirefoxTest):
