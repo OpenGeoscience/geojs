@@ -64,6 +64,8 @@ ggl.vglRenderer = function (arg) {
       m_height = 0,
       s_init = this._init;
 
+  m_contextRenderer.setResetScene(false);
+
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Convert input data in display space to world space
@@ -347,6 +349,7 @@ ggl.vglRenderer = function (arg) {
     }
 
     m_viewer.interactorStyle().map(this.layer().map());
+    m_viewer.interactorStyle().reset();
   };
 
   this.on(geo.event.layerAdd, function (event) {

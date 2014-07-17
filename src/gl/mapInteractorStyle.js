@@ -594,6 +594,8 @@ ggl.mapInteractorStyle = function () {
       return;
     }
 
+    zoom = m_map.zoom();
+
     m_this._syncReset();
 
     evt = { type: geo.event.zoom,
