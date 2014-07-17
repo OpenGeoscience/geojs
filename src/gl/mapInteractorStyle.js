@@ -361,8 +361,6 @@ ggl.mapInteractorStyle = function () {
     for (i = 0; i < renderers.length; i += 1) {
       cam = renderers[i].camera();
       if (cam !== m_camera) {
-        console.log("Setting camera for ren ", renderers[i].layer());
-        console.log("Setting pos ", pos);
         cam.setPosition(pos[0], pos[1], pos[2]);
         cam.setFocalPoint(fp[0], fp[1], fp[2]);
         cam.setClippingRange(clippingRange[0], clippingRange[1]);
