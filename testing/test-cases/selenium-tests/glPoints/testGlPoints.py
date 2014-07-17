@@ -2,6 +2,7 @@
 
 import os
 import time
+import unittest
 
 from selenium_test import FirefoxTest, ChromeTest,\
     setUpModule, tearDownModule
@@ -14,26 +15,21 @@ class osmBase(object):
         self.resizeWindow(640, 480)
         self.loadURL('glPoints/index.html')
         self.wait()
-
-        self.drag('#map', (225, 125))
         time.sleep(1)
-        self.drag('#map', (225, 125))
-        time.sleep(1)
-        self.drag('#map', (225, 0))
 
     def testGlPoints(self):
         self.loadPage()
 
-        time.sleep(1)  # wait for data to load
-
-        testName = 'd3DrawGlPoints'
-        self.screenshotTest(testName, revision=1)
+        testName = 'drawGlPoints'
+        self.screenshotTest(testName, revision=2)
 
 
+@unittest.skip("Initial zoom currently not working")
 class FirefoxOSM(osmBase, FirefoxTest):
     testCase = osmBase.testCase + ('firefox',)
 
 
+@unittest.skip("Initial zoom currently not working")
 class ChromeOSM(osmBase, ChromeTest):
     testCase = osmBase.testCase + ('chrome',)
 

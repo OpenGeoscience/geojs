@@ -14,7 +14,7 @@ window.startTest = function (done) {
 
   var mapOptions = {
     node: '#map',
-    zoom : 3,
+    zoom : 1,
     center : [0.0, 0.0]
   };
 
@@ -59,19 +59,18 @@ window.startTest = function (done) {
         }
       }
 
+      var layer2 = myMap.createLayer('feature');
+      layer2.createFeature('plane')
+        .origin(geo.latlng(-90.0, -180.0))
+        .upperLeft(geo.latlng(90.0, -180.0))
+        .lowerRight(geo.latlng(-90.0, 180.0))
+        .style('image', '/data/land_shallow_topo_2048.png');
+      layer2.name = 'layer2';
 
       var layer1 = myMap.createLayer('feature');
       layer1.createFeature('point')
         .positions(citieslatlon);
       layer1.name = 'layer1';
-
-      var layer2 = myMap.createLayer('feature');
-      layer2.createFeature('plane')
-        .origin(geo.latlng(-10.0, -20.0))
-        .upperLeft(geo.latlng(10.0, -20.0))
-        .lowerRight(geo.latlng(-10.0, 20.0))
-        .style('image', '/data/land_shallow_topo_2048.png');
-      layer2.name = 'layer2';
 
       myMap.draw();
       done();

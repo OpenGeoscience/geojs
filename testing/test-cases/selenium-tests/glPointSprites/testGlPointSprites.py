@@ -2,6 +2,7 @@
 
 import os
 import time
+import unittest
 
 from selenium_test import FirefoxTest, ChromeTest,\
     setUpModule, tearDownModule
@@ -20,14 +21,16 @@ class osmBase(object):
 
         time.sleep(1)  # wait for data to load
 
-        testName = 'd3DrawGlPointSprites'
+        testName = 'drawGlPointSprites'
         self.screenshotTest(testName, revision=1)
 
 
+@unittest.skip("Initial zoom currently not working")
 class FirefoxOSM(osmBase, FirefoxTest):
     testCase = osmBase.testCase + ('firefox',)
 
 
+@unittest.skip("Initial zoom currently not working")
 class ChromeOSM(osmBase, ChromeTest):
     testCase = osmBase.testCase + ('chrome',)
 

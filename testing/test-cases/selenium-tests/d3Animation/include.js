@@ -1,8 +1,8 @@
 /*global window, geo, inherit, $, d3*/
 window.startTest = function(done) {
   var mapOptions = {node: '#map',
-                    zoom : 3,
-                    center : [40, 105]},
+                    zoom : 2,
+                    center : [40, -105]},
     myMap = geo.map(mapOptions),
     osm = myMap.createLayer('osm');
 

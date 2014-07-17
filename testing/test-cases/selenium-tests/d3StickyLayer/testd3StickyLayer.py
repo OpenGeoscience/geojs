@@ -21,7 +21,7 @@ class d3StickyBase(object):
 
         self.drag('#map', (100, 100))
         time.sleep(2)
-        self.screenshotTest(testName, revision=1)
+        self.screenshotTest(testName, revision=2)
 
 
 class FirefoxOSM(d3StickyBase, FirefoxTest):
