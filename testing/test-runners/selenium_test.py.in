@@ -386,6 +386,25 @@ class BaseTest(TestCase):
         action.release()
         action.perform()
 
+    def click(self, element, offset=(0, 0)):
+        '''
+        Click on a element given (by a CSS selector) at ``offset``
+        relative to the center of the element.
+
+        :param string element: A CSS selector
+        :param offset: The offset from the element center
+        :type offset: [x, y]
+
+        For example,
+
+        >>> test.click('button.test-button')
+        '''
+        el = self.getElement(element)
+        action = ActionChains(self.driver)
+        action.move_to_element_with_offset(el, offset[0], offset[1])
+        action.click()
+        action.perform()
+
     @classmethod
     def loadImageFile(cls, filename, relative=True):
         '''

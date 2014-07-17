@@ -1,5 +1,5 @@
 {
-    "predef": ["geo", "vgl", "inherit", "console", "vec3", "vec4", "proj4", "ggl", "gd3", "gl", "d3", "ogs"],
+    "predef": ["geo", "vgl", "inherit", "console", "vec3", "vec4", "proj4", "ggl", "gd3", "gl", "d3", "ogs", "mat4"],
     "bitwise": true,
     "eqeqeq": true,
     "forin": true,
