@@ -292,18 +292,61 @@ ggl.mapInteractorStyle = function () {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Handle click event
+   *
+   * @param event
+   * @returns {boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.handleClick = function(event) {
+    return true;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Handle double click event
+   *
+   * @param event
+   * @returns {boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.handleDoubleClick = function(event) {
+    console.log("double click event");
+
+     m_this.updateRenderParams();
+    // Check if it left double click
+    // Find the double click location
+    // Find the direction between the center point and the clicked point
+    // Slide the camera on this path
+    m_this._computeCurrentMousePos(event);
+    var focusDisplayPoint = m_renderer.focusDisplayPoint(),
+        clickedWorldPoint = m_renderWindow.displayToWorld(m_currentMousePos.x,
+                            m_currentMousePos.y, focusDisplayPoint, m_renderer),
+        cameraPos = m_camera.position(),
+        cameraFp = m_camera.focalPoint(),
+        direction = [-(clickedWorldPoint[0] - cameraPos[0]),
+                     -(clickedWorldPoint[1] - cameraPos[1]),
+                       clickedWorldPoint[2] - cameraPos[2]];
+
+    vec3.normalize(direction, direction);
+    m_this.zoom(0.5, direction);
+    return false;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Internal function to zoom cameras
    * @param {Number} optional value to zoom by
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._syncZoom = function (val) {
+  this._syncZoom = function (val, dir) {
     var i, renderers, pos, fp, cam;
 
     /// Make sure we are uptodate with renderer and render window
     m_this.updateRenderParams();
 
     if (val) {
-      m_camera.zoom(val);
+      m_camera.zoom(val, dir);
       m_renderer.resetCameraClippingRange();
     }
 
@@ -395,7 +438,7 @@ ggl.mapInteractorStyle = function () {
    * Update view in response to a zoom request
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.zoom = function (val) {
+  this.zoom = function (val, dir) {
     var evt,
         newZoomLevel,
         oldZoomLevel,
@@ -424,7 +467,26 @@ ggl.mapInteractorStyle = function () {
       /// high res imagery even at the zoom level 0 distance
       newZoomLevel = 0;
     } else {
-      this._syncZoom(val);
+
+      m_this._computeCurrentMousePos(event);
+      var focusDisplayPoint = m_renderer.focusDisplayPoint(),
+        clickedWorldPoint = m_renderWindow.displayToWorld(m_currentMousePos.x,
+                            m_currentMousePos.y, focusDisplayPoint, m_renderer),
+        cameraPos = m_camera.position(),
+        cameraFp = m_camera.focalPoint(),
+        direction = [clickedWorldPoint[0] - cameraPos[0],
+                     clickedWorldPoint[1] - cameraPos[1],
+                     clickedWorldPoint[2] - cameraPos[2]];
+
+
+      if (val > 1) {
+        direction[0] = -direction[0];
+        direction[1] = -direction[1];
+        direction[2] = -direction[2];
+      }
+
+      vec3.normalize(direction, direction);
+      this._syncZoom(val, direction);
 
       /// Compute meters per pixel here and based on that decide the
       /// zoom level
