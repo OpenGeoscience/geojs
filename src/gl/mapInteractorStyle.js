@@ -33,11 +33,13 @@ ggl.mapInteractorStyle = function () {
     m_renderWindow,
     m_camera,
     m_outsideCanvas,
-    m_currentMousePos,
+    m_currentMousePos = { x : 0, y : 0 },
     m_focusDisplayPoint,
     m_zTrans,
     m_coords,
-    m_mouseLastPos = { x: 0, y: 0 },
+    m_mouseLastPos = { x : 0, y : 0 },
+    m_useLastDirection = false,
+    m_lastDirection = null,
     m_picker = new vgl.picker(),
     m_updateRenderParamsTime = vgl.timestamp();
 
@@ -151,13 +153,10 @@ ggl.mapInteractorStyle = function () {
       /// DO NOTHING AS OF NOW
     }
     if (m_rightMouseButtonDown && m_height > 0) {
-      /// 2.0 is sort of speed up factor
-      m_zTrans = 2.0 * (m_currentMousePos.y - m_mouseLastPos.y) / m_height;
+      if (m_lastDirection !== null) {
+        m_useLastDirection = true;
+      }
       m_this.zoom();
-
-      /// For now just trigger the render. Later on, we may want to
-      /// trigger an external event
-      // m_renderWindow.render();
     }
 
     m_mouseLastPos.x = m_currentMousePos.x;
@@ -175,6 +174,9 @@ ggl.mapInteractorStyle = function () {
 
     /// Update render parameters
     m_this.updateRenderParams();
+
+     /// Compute current mouse position
+    m_this._computeCurrentMousePos(event);
 
     if (event.button === 0) {
       m_leftMouseButtonDown = true;
@@ -203,6 +205,10 @@ ggl.mapInteractorStyle = function () {
       m_clickLatLng = geo.latlng(point.y, point.x);
       m_this.setDrawRegion(point.y, point.x, point.y, point.x);
     }
+
+    m_mouseLastPos.x = m_currentMousePos.x;
+    m_mouseLastPos.y = m_currentMousePos.y;
+
     return false;
   };
 
@@ -236,9 +242,11 @@ ggl.mapInteractorStyle = function () {
     if (event.button === 2) {
       m_rightMouseButtonDown = false;
       m_initRightBtnMouseDown = false;
+      m_useLastDirection = false;
+      m_lastDirection = null;
 
-      /// Now zoom
-      m_this.zoom();
+      /// Compute current mouse position
+      m_this._computeCurrentMousePos(event);
     }
     return false;
   };
@@ -311,7 +319,6 @@ ggl.mapInteractorStyle = function () {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.handleDoubleClick = function(event) {
-    console.log("double click event");
 
      m_this.updateRenderParams();
     // Check if it left double click
@@ -439,10 +446,8 @@ ggl.mapInteractorStyle = function () {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.zoom = function (val, dir) {
-    var evt,
-        newZoomLevel,
-        oldZoomLevel,
-        pos = m_camera.position();
+    var evt, newZoomLevel, oldZoomLevel, cameraPos, cameraFp, newPos, clickedWorldPoint,
+        direction, focusDisplayPoint, maxZoomedOutDist = 0, maxZoomedOut = false;
 
     /// Update render params
     m_this.updateRenderParams();
@@ -450,42 +455,37 @@ ggl.mapInteractorStyle = function () {
     m_zTrans = (m_currentMousePos.y - m_mouseLastPos.y) / m_height;
 
     if (val === undefined) {
-      if (m_zTrans < 0) {
-        val = 1 - Math.abs(m_zTrans);
-      } else {
-        val = 1 + Math.abs(m_zTrans);
-      }
+      val = 2.0 * Math.abs(m_zTrans);
     }
 
     oldZoomLevel = computeZoomLevel();
 
-    if (pos[2] * Math.sin(m_camera.viewAngle()) >= 360.0 && val > 1) {
-      m_camera.setPosition(pos[0], pos[1], computeCameraDistance(0));
-      m_renderer.resetCameraClippingRange();
+    focusDisplayPoint = m_renderer.focusDisplayPoint();
+    clickedWorldPoint = m_renderWindow.displayToWorld(m_currentMousePos.x,
+                        m_currentMousePos.y, focusDisplayPoint, m_renderer);
+    cameraPos = m_camera.position();
+    cameraFp = m_camera.focalPoint();
+    direction = [clickedWorldPoint[0] - cameraPos[0],
+                 clickedWorldPoint[1] - cameraPos[1],
+                 clickedWorldPoint[2] - cameraPos[2]];
 
-      /// We are forcing the minimum zoom level to 2 so that we can get
-      /// high res imagery even at the zoom level 0 distance
-      newZoomLevel = 0;
+    vec3.normalize(direction, direction);
+
+    if (m_useLastDirection) {
+      direction = m_lastDirection.slice(0);
     } else {
+      m_lastDirection = direction.slice(0);
+    }
 
-      m_this._computeCurrentMousePos(event);
-      var focusDisplayPoint = m_renderer.focusDisplayPoint(),
-        clickedWorldPoint = m_renderWindow.displayToWorld(m_currentMousePos.x,
-                            m_currentMousePos.y, focusDisplayPoint, m_renderer),
-        cameraPos = m_camera.position(),
-        cameraFp = m_camera.focalPoint(),
-        direction = [clickedWorldPoint[0] - cameraPos[0],
-                     clickedWorldPoint[1] - cameraPos[1],
-                     clickedWorldPoint[2] - cameraPos[2]];
+    if ((m_mouseLastPos.y - m_currentMousePos.y) < 0 || val > 1) {
+      direction[0] = -direction[0];
+      direction[1] = -direction[1];
+      direction[2] = -direction[2];
+    }
 
-
-      if (val > 1) {
-        direction[0] = -direction[0];
-        direction[1] = -direction[1];
-        direction[2] = -direction[2];
-      }
-
-      vec3.normalize(direction, direction);
+    if (cameraPos[2] * Math.sin(m_camera.viewAngle()) >= 360.0 && val > 1) {
+      maxZoomedOut = true;
+    } else {
       this._syncZoom(val, direction);
 
       /// Compute meters per pixel here and based on that decide the
@@ -494,9 +494,19 @@ ggl.mapInteractorStyle = function () {
     }
 
     /// Check again here:
-    pos = m_camera.position();
-    if (pos[2] * Math.sin(m_camera.viewAngle()) >= 360.0 && val > 1) {
-      m_camera.setPosition(pos[0], pos[1], computeCameraDistance(0));
+    cameraPos = m_camera.position();
+    cameraFp = m_camera.focalPoint();
+
+    if (maxZoomedOut || (cameraPos[2] * Math.sin(m_camera.viewAngle()) >= 360.0)) {
+      maxZoomedOut = false;
+      maxZoomedOutDist = computeCameraDistance(0);
+
+      /// Compute x and y positions based off the max zoomed out distance
+      newPos = [(maxZoomedOutDist - cameraPos[2]) * direction[0] /  direction[2],
+                (maxZoomedOutDist - cameraPos[2]) * direction[1] / direction[2]];
+
+      m_camera.setPosition(cameraPos[0] + newPos[0], cameraPos[1] + newPos[1], maxZoomedOutDist);
+      m_camera.setFocalPoint(cameraPos[0]+ newPos[0], cameraPos[1] + newPos[1], cameraFp[2]);
       m_renderer.resetCameraClippingRange();
 
       /// We are forcing the minimum zoom level to 2 so that we can get
@@ -607,10 +617,6 @@ ggl.mapInteractorStyle = function () {
 
     m_outsideCanvas = false;
     m_coords = m_this.viewer().relMouseCoords(event);
-    m_currentMousePos = {
-      x: 0,
-      y: 0
-    };
     if ((m_coords.x < 0) || (m_coords.x > m_width)) { // off-by-one error
       m_currentMousePos.x = 0;
       m_outsideCanvas = true;
