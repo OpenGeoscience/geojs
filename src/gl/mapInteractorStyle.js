@@ -300,27 +300,15 @@ ggl.mapInteractorStyle = function () {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Handle click event
-   *
-   * @param event
-   * @returns {boolean}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.handleClick = function(event) {
-    return true;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
    * Handle double click event
    *
    * @param event
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.handleDoubleClick = function(event) {
+  this.handleDoubleClick = function (event) {
 
-     m_this.updateRenderParams();
+    m_this.updateRenderParams();
     // Check if it left double click
     // Find the double click location
     // Find the direction between the center point and the clicked point
@@ -330,7 +318,6 @@ ggl.mapInteractorStyle = function () {
         clickedWorldPoint = m_renderWindow.displayToWorld(m_currentMousePos.x,
                             m_currentMousePos.y, focusDisplayPoint, m_renderer),
         cameraPos = m_camera.position(),
-        cameraFp = m_camera.focalPoint(),
         direction = [-(clickedWorldPoint[0] - cameraPos[0]),
                      -(clickedWorldPoint[1] - cameraPos[1]),
                        clickedWorldPoint[2] - cameraPos[2]];
@@ -445,7 +432,7 @@ ggl.mapInteractorStyle = function () {
    * Update view in response to a zoom request
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.zoom = function (val, dir) {
+  this.zoom = function (val) {
     var evt, newZoomLevel, oldZoomLevel, cameraPos, cameraFp, newPos, clickedWorldPoint,
         direction, focusDisplayPoint, maxZoomedOutDist = 0, maxZoomedOut = false;
 
@@ -505,8 +492,10 @@ ggl.mapInteractorStyle = function () {
       newPos = [(maxZoomedOutDist - cameraPos[2]) * direction[0] /  direction[2],
                 (maxZoomedOutDist - cameraPos[2]) * direction[1] / direction[2]];
 
-      m_camera.setPosition(cameraPos[0] + newPos[0], cameraPos[1] + newPos[1], maxZoomedOutDist);
-      m_camera.setFocalPoint(cameraPos[0]+ newPos[0], cameraPos[1] + newPos[1], cameraFp[2]);
+      m_camera.setPosition(cameraPos[0] + newPos[0],
+                           cameraPos[1] + newPos[1], maxZoomedOutDist);
+      m_camera.setFocalPoint(cameraPos[0] + newPos[0],
+                             cameraPos[1] + newPos[1], cameraFp[2]);
       m_renderer.resetCameraClippingRange();
 
       /// We are forcing the minimum zoom level to 2 so that we can get
