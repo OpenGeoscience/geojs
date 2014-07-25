@@ -372,11 +372,10 @@ if(BUILD_TESTING)
       COPYONLY
     )
     file(GLOB SELENIUM_TEST_DIRS
-      ${CMAKE_CURRENT_SOURCE_DIR}/testing/test-cases/selenium-tests/*/*.js
+      ${CMAKE_CURRENT_SOURCE_DIR}/testing/test-cases/selenium-tests/*
     )
-    foreach(jsfile ${SELENIUM_TEST_DIRS})
-      get_filename_component(dir "${jsfile}" DIRECTORY)
-      if(IS_DIRECTORY "${dir}")
+    foreach(dir ${SELENIUM_TEST_DIRS})
+      if(IS_DIRECTORY "${dir}" AND EXISTS "${dir}/include.js")
         set(html "${dir}/include.html")
         set(js "${dir}/include.js")
         set(css "${dir}/include.css")
