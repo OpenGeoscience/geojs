@@ -37,7 +37,7 @@ ggl.mapInteractorStyle = function () {
     m_focusDisplayPoint,
     m_zTrans,
     m_coords,
-    m_mouseLastPos = { x : 0, y : 0 },
+    m_lastMousePos = { x : 0, y : 0 },
     m_useLastDirection = false,
     m_lastDirection = null,
     m_picker = new vgl.picker(),
@@ -91,8 +91,8 @@ ggl.mapInteractorStyle = function () {
 
     worldPt1 = m_renderWindow.displayToWorld(m_currentMousePos.x,
       m_currentMousePos.y, focusDisplayPoint, renderer);
-    worldPt2 = m_renderWindow.displayToWorld(m_mouseLastPos.x,
-      m_mouseLastPos.y, focusDisplayPoint, renderer);
+    worldPt2 = m_renderWindow.displayToWorld(m_lastMousePos.x,
+      m_lastMousePos.y, focusDisplayPoint, renderer);
 
     dx = worldPt1[0] - worldPt2[0];
     dy = worldPt1[1] - worldPt2[1];
@@ -141,7 +141,7 @@ ggl.mapInteractorStyle = function () {
 
         // TODO Do we need to emit an event for each ?
         evt = {type: geo.event.pan,
-               last_display_pos: m_mouseLastPos,
+               last_display_pos: m_lastMousePos,
                curr_display_pos: m_currentMousePos,
                last_world_pos: lastWorldPos,
                curr_world_pos: currWorldPos};
@@ -159,8 +159,8 @@ ggl.mapInteractorStyle = function () {
       m_this.zoom();
     }
 
-    m_mouseLastPos.x = m_currentMousePos.x;
-    m_mouseLastPos.y = m_currentMousePos.y;
+    m_lastMousePos.x = m_currentMousePos.x;
+    m_lastMousePos.y = m_currentMousePos.y;
     return false;
   };
 
@@ -190,24 +190,24 @@ ggl.mapInteractorStyle = function () {
 
     m_coords = m_this.viewer().relMouseCoords(event);
     if (m_coords.x < 0) {
-      m_mouseLastPos.x = 0;
+      m_lastMousePos.x = 0;
     } else {
-      m_mouseLastPos.x = m_coords.x;
+      m_lastMousePos.x = m_coords.x;
     }
     if (m_coords.y < 0) {
-      m_mouseLastPos.y = 0;
+      m_lastMousePos.y = 0;
     } else {
-      m_mouseLastPos.y = m_coords.y;
+      m_lastMousePos.y = m_coords.y;
     }
 
     if (m_drawRegionMode && m_leftMouseButtonDown) {
-      point = m_map.displayToMap(m_mouseLastPos.x, m_mouseLastPos.y);
+      point = m_map.displayToMap(m_lastMousePos.x, m_lastMousePos.y);
       m_clickLatLng = geo.latlng(point.y, point.x);
       m_this.setDrawRegion(point.y, point.x, point.y, point.x);
     }
 
-    m_mouseLastPos.x = m_currentMousePos.x;
-    m_mouseLastPos.y = m_currentMousePos.y;
+    m_lastMousePos.x = m_currentMousePos.x;
+    m_lastMousePos.y = m_currentMousePos.y;
 
     return false;
   };
@@ -231,9 +231,9 @@ ggl.mapInteractorStyle = function () {
       width = m_this.viewer().renderWindow().windowSize()[0];
       height = m_this.viewer().renderWindow().windowSize()[1];
       m_renderer = m_this.viewer().renderWindow().activeRenderer();
-      if (m_mouseLastPos.x >= 0 && m_mouseLastPos.x <= width &&
-          m_mouseLastPos.y >= 0 && m_mouseLastPos.y <= height) {
-        num = m_picker.pick(m_mouseLastPos.x, m_mouseLastPos.y, m_renderer);
+      if (m_lastMousePos.x >= 0 && m_lastMousePos.x <= width &&
+          m_lastMousePos.y >= 0 && m_lastMousePos.y <= height) {
+        num = m_picker.pick(m_lastMousePos.x, m_lastMousePos.y, m_renderer);
       }
     }
     if (event.button === 1) {
@@ -439,7 +439,7 @@ ggl.mapInteractorStyle = function () {
     /// Update render params
     m_this.updateRenderParams();
 
-    m_zTrans = (m_currentMousePos.y - m_mouseLastPos.y) / m_height;
+    m_zTrans = (m_currentMousePos.y - m_lastMousePos.y) / m_height;
 
     if (val === undefined) {
       val = 2.0 * Math.abs(m_zTrans);
@@ -464,7 +464,7 @@ ggl.mapInteractorStyle = function () {
       m_lastDirection = direction.slice(0);
     }
 
-    if ((m_mouseLastPos.y - m_currentMousePos.y) < 0 || val > 1) {
+    if ((m_lastMousePos.y - m_currentMousePos.y) < 0 || val > 1) {
       direction[0] = -direction[0];
       direction[1] = -direction[1];
       direction[2] = -direction[2];
@@ -524,10 +524,10 @@ ggl.mapInteractorStyle = function () {
   ////////////////////////////////////////////////////////////////////////////
   this.lastMousePosition = function (newPosition) {
     if (newPosition !== undefined) {
-      m_mouseLastPos = newPosition;
+      m_lastMousePos = newPosition;
       return m_this;
     }
-    return m_mouseLastPos;
+    return m_lastMousePos;
   };
 
   ////////////////////////////////////////////////////////////////////////////
