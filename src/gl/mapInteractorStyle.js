@@ -601,11 +601,17 @@ ggl.mapInteractorStyle = function () {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._computeCurrentMousePos = function (event) {
+    if (event.pageX === undefined || event.pageY === undefined) {
+      return;
+    }
+
     /// Update render params
     m_this.updateRenderParams();
 
     m_outsideCanvas = false;
+
     m_coords = m_this.viewer().relMouseCoords(event);
+
     if ((m_coords.x < 0) || (m_coords.x > m_width)) { // off-by-one error
       m_currentMousePos.x = 0;
       m_outsideCanvas = true;
