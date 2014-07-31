@@ -291,6 +291,13 @@ ggl.mapInteractorStyle = function () {
     var delta = event.originalEvent.wheelDeltaY / 120.0;
     delta = Math.pow(1 + Math.abs(delta) / 2, delta > 0 ? -1 : 1);
 
+    /// Clamp val between (0.125 - 1.125]
+    if (delta < 1.0) {
+      delta = Math.min(delta, 0.125);
+    } else {
+      delta = Math.min(delta, 1.125);
+    }
+
     /// Compute current mouse position
     m_this._computeCurrentMousePos(event);
 
