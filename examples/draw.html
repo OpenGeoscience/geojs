@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="/examples/common/js/jquery-1.9.1.js"></script>
+
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+    <link rel="stylesheet" href="/examples/common/css/jquery.miniColors.css">
+    <script src="/examples/common/js/jquery.miniColors.min.js"></script>
+
+    <link rel="stylesheet" href="/examples/common/css/bootstrap-slider.min.css">
+    <script src="/examples/common/js/bootstrap-slider.min.js"></script>
+
+    <script type="text/javascript" src="/examples/common/js/gl-matrix.js"></script>
+    <script type="text/javascript" src="/examples/common/js/d3.v3.min.js"></script>
+    <script type="text/javascript" src="/examples/common/js/proj4.js"></script>
+    <script type="text/javascript" src="/web/lib/vgl.js"></script>
+    <script type="text/javascript" src="/web/lib/geo.js"></script>
+    <style>
+        html {
+            height: 100%;
+        }
+
+        div#map {
+            position: absolute;
+            left: 0px;
+            top: 0px;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        div#overlay {
+            position: absolute;
+            left: 0px;
+            top: 0px;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        #style-example {
+            padding-right: 1em;
+        }
+
+        .center-block {
+            float: none;
+        }
+
+        .example-box svg {
+            border: solid;
+            border-radius: 5px;
+            border-color: #a0a0a0;
+            background: #f0f0f0;
+        }
+    </style>
+
+</head>
+<body style="height: 100%;">
+<script>
+  // create the map
+  $(function() {
+      var mapOptions = {node: '#map',
+                        zoom : 3,
+                        center : [0.0, 0.0]},
+          myMap = geo.map(mapOptions),
+          layer = myMap.createLayer('osm'),
+          d3Layer = myMap.createLayer('feature', {'renderer': 'd3Renderer'}),
+          d3Canvas = d3Layer.canvas();
+
+      /// Resize the canvas to fill browser window dynamically
+      window.addEventListener('resize', resizeCanvas, false);
+
+      function resizeCanvas() {
+        $('#map').width('100%');
+        $('#map').height('100%');
+        updateAndDraw($('#map').width(), $('#map').height());
+      }
+      resizeCanvas();
+
+      function updateAndDraw(width, height) {
+        myMap.resize(0, 0, width, height);
+        myMap.draw();
+      }
+
+  // create the control modals
+    $('#point-color-picker').minicolors({
+      theme: 'bootstrap',
+      opacity: 1,
+      inline: true,
+      control: 'wheel',
+      change: function (hex, opacity) {
+        d3.select("#point-style-example circle")
+          .style("fill", hex)
+          .style("fill-opacity", opacity);
+      }
+    });
+    $('#line-color-picker').minicolors({
+      theme: 'bootstrap',
+      opacity: 1,
+      inline: true,
+      control: 'wheel',
+      change: function (hex, opacity) {
+        d3.select("#line-style-example path")
+          .style("stroke", hex)
+          .style("stroke-opacity", opacity);
+      }
+    });
+
+    $('.size-slider').slider({});
+    $('#point-size-slider').on('slide', function () {
+        s = $(this).slider('getValue');
+        d3.select("#point-style-example circle")
+          .attr("r", s);
+      });
+    $('#line-size-slider').on('slide', function () {
+        s = $(this).slider('getValue');
+        d3.select("#line-style-example path")
+          .style("stroke-width", s);
+      });
+
+  // attach javascript to navbar controls
+
+    function make_overlay() {
+      d3.select('#overlay').remove();
+      return d3.select('body')
+        .append('div')
+          .attr('id', 'overlay')
+        .append('svg')
+          .attr('width', '100%')
+          .attr('height', '100%');
+    }
+
+    function create_point() {
+      var r, c, circle, overlay, cobj;
+
+      c = $("#point-color-picker").minicolors('rgbaString');
+      cobj = $("#point-color-picker").minicolors('rgbObject');
+      r = $("#point-size-slider").slider('getValue');
+
+      overlay = make_overlay();
+      circle = overlay
+        .append('circle')
+          .attr('cx', 0)
+          .attr('cy', 0)
+          .attr('r', r)
+          .style('fill', c);
+
+        overlay.on('mousemove', function () {
+          var p = d3.mouse(overlay.node());
+          circle.attr('transform', 'translate(' + p.join() + ')');
+        }).on('click', function () {
+          var p, q;
+
+          p = d3.mouse($("#map").get(0));
+          q = myMap.displayToGcs({x: p[0], y: p[1]});
+
+          d3.select("#overlay").remove();
+
+          d3Layer.createFeature('point')
+            .style({
+              color: [cobj.r/255, cobj.g/255, cobj.b/255],
+              size: [r],
+              opacity: cobj.a
+            })
+            .positions([q]);
+          myMap.draw();
+        });
+    }
+
+    function create_line() {
+    }
+
+    $("#point-settings-modal .modal-footer button.submit-button").click(function () {
+      create_point();
+      $("#point-settings-modal").modal("hide");
+    });
+
+    d3.select("#point-style-example")
+      .append("svg")
+          .attr("width", "101px")
+          .attr("height", "101px")
+        .append("circle")
+          .attr("cx", 50)
+          .attr("cy", 50)
+          .attr("r", $("#point-size-slider").data("value"))
+          .style("fill", $("#point-color-picker").minicolors("rgbaString"));
+
+    d3.select("#line-style-example")
+      .append("svg")
+        .attr("width", "101px")
+        .attr("height", "101px")
+      .append("path")
+        .attr("d", d3.svg.line()([[25, 50], [75, 50]]))
+        .style("stroke-width", $("#line-size-slider").data("value"))
+        .style("stroke", $("#line-color-picker").minicolors("rgbaString"));
+
+  });
+</script>
+
+<div id='map'></div>
+<nav class="navbar navbar-default" role="navigation">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">GeoJS</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="dropdown-label">Select a feature</span><span> </span><span class="caret"></span></a>
+          <ul class="dropdown-menu" role="menu">
+            <li><a href="#" id="create-point-feature" data-toggle="modal" data-target="#point-settings-modal">Point</a></li>
+             <li><a href="#" id="create-line-feature" data-toggle="modal" data-target="#line-settings-modal">Line</a></li>
+             <li><a href="#" id="create-path-feature">Path</a></li>
+             <li><a href="#" id="create-graph-feature">Graph</a></li>
+          </ul>
+        </li>
+      </ul>
+
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="#">Remove all features</a></li>
+        <li><a href="#">About</a></li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+
+<div class="modal fade" id="point-settings-modal">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Customize the style</h4>
+      </div>
+      <div class="modal-body">
+        <form class="form-horizontal">
+          <div class="form-group">
+            <label for="point-color-picker" class="col-md-4 control-label">Choose color and opacity</label>
+            <div class="col-md-8">
+              <input type="text" id="point-color-picker" class="color-picker form-control" value="#ff0000">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="point-size-slider" class="col-md-4 control-label">Choose size</label>
+            <div class="col-md-8">
+              <input type="text" id="point-size-slider" class="size-slider form-control" data-slider-step="0.1" data-slider-min="1" data-slider-max="25" data-slider-value="5" data-value="5"/>
+            </div>
+          </div>
+          <div class="row">
+            <div class="center-block example-box col-md-3" id="point-style-example"></div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary submit-button">Create</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="line-settings-modal">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Customize the style</h4>
+      </div>
+      <div class="modal-body">
+        <form class="form-horizontal">
+          <div class="form-group">
+            <label for="line-color-picker" class="col-md-4 control-label">Choose color and opacity</label>
+            <div class="col-md-8">
+              <input type="text" id="line-color-picker" class="color-picker form-control" value="#ff0000">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="line-size-slider" class="col-md-4 control-label">Choose width</label>
+            <div class="col-md-8">
+              <input type="text" id="line-size-slider" class="size-slider form-control" data-slider-step="0.1" data-slider-min="1" data-slider-max="15" data-slider-value="2" data-value="2"/>
+            </div>
+          </div>
+          <div class="row">
+            <div class="center-block example-box col-md-3" id="line-style-example"></div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary submit-button">Create</button>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
