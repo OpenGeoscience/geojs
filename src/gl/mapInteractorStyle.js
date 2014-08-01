@@ -341,13 +341,34 @@ ggl.mapInteractorStyle = function () {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._syncZoom = function (val, dir) {
-    var i, renderers, pos, fp, cam;
+    var i, renderers, pos, fp, cam, gap, minGap = 0.1;
 
     /// Make sure we are uptodate with renderer and render window
     m_this.updateRenderParams();
 
     if (val) {
       m_camera.zoom(val, dir);
+      if (dir) {
+        pos = m_camera.position();
+        fp = m_camera.focalPoint();
+        m_camera.setFocalPoint(pos[0], pos[1], fp[2])
+      }
+      m_renderer.resetCameraClippingRange();
+    }
+
+    pos = m_camera.position();
+    fp = m_camera.focalPoint();
+    gap = vec3.distance(pos, fp);
+
+    if (!dir) {
+      dir = m_camera.directionOfProjection();
+    }
+    if (Math.abs(gap) < minGap) {
+      pos[0] = fp[0] + minGap * dir[0];
+      pos[1] = fp[1] + minGap * dir[1];
+      pos[2] = fp[2] - minGap * dir[2];
+      m_camera.setPosition(pos[0], pos[1], pos[2]);
+      m_camera.setFocalPoint(pos[0], pos[1], fp[2])
       m_renderer.resetCameraClippingRange();
     }
 
