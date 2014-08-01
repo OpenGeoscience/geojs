@@ -346,6 +346,14 @@ ggl.vglRenderer = function (arg) {
       map.on("contextmenu", function (event) {
         m_viewer.handleContextMenu(event);
       });
+
+      map.on("click", function (event) {
+        m_viewer.handleClick(event);
+      });
+
+      map.on("dblclick", function (event) {
+        m_viewer.handleDoubleClick(event);
+      });
     }
 
     m_viewer.interactorStyle().map(this.layer().map());
