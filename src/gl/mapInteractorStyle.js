@@ -351,7 +351,7 @@ ggl.mapInteractorStyle = function () {
       if (dir) {
         pos = m_camera.position();
         fp = m_camera.focalPoint();
-        m_camera.setFocalPoint(pos[0], pos[1], fp[2])
+        m_camera.setFocalPoint(pos[0], pos[1], fp[2]);
       }
       m_renderer.resetCameraClippingRange();
     }
@@ -368,7 +368,7 @@ ggl.mapInteractorStyle = function () {
       pos[1] = fp[1] + minGap * dir[1];
       pos[2] = fp[2] - minGap * dir[2];
       m_camera.setPosition(pos[0], pos[1], pos[2]);
-      m_camera.setFocalPoint(pos[0], pos[1], fp[2])
+      m_camera.setFocalPoint(pos[0], pos[1], fp[2]);
       m_renderer.resetCameraClippingRange();
     }
 
