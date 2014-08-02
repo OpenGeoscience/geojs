@@ -129,6 +129,28 @@
           .style("stroke-opacity", opacity);
       }
     });
+    $('#graph-node-color-picker').minicolors({
+      theme: 'bootstrap',
+      opacity: 1,
+      inline: true,
+      control: 'wheel',
+      change: function (hex, opacity) {
+        d3.selectAll("#graph-style-example circle")
+          .style("fill", hex)
+          .style("fill-opacity", opacity);
+      }
+    });
+    $('#graph-link-color-picker').minicolors({
+      theme: 'bootstrap',
+      opacity: 1,
+      inline: true,
+      control: 'wheel',
+      change: function (hex, opacity) {
+        d3.selectAll("#graph-style-example path")
+          .style("stroke", hex)
+          .style("stroke-opacity", opacity);
+      }
+    });
 
     $('.size-slider').slider({});
     $('#point-size-slider').on('slide', function () {
@@ -144,6 +166,16 @@
     $('#path-size-slider').on('slide', function () {
         s = $(this).slider('getValue');
         d3.select("#path-style-example path")
+          .style("stroke-width", s);
+      });
+    $('#graph-node-size-slider').on('slide', function () {
+        s = $(this).slider('getValue');
+        d3.selectAll("#graph-style-example circle")
+          .attr("r", s);
+      });
+    $('#graph-link-size-slider').on('slide', function () {
+        s = $(this).slider('getValue');
+        d3.selectAll("#graph-style-example path")
           .style("stroke-width", s);
       });
 
@@ -318,7 +350,7 @@
       create_line();
       $("#line-settings-modal").modal("hide");
     });
-    
+
     $("#path-settings-modal .modal-footer button.submit-button").click(function () {
       create_path();
       $("#path-settings-modal").modal("hide");
@@ -342,7 +374,7 @@
         .attr("d", d3.svg.line()([[25, 50], [75, 50]]))
         .style("stroke-width", $("#line-size-slider").data("value"))
         .style("stroke", $("#line-color-picker").minicolors("rgbaString"));
-        
+
     d3.select("#path-style-example")
       .append("svg")
         .attr("width", "101px")
@@ -352,6 +384,30 @@
         .style("fill", "none")
         .style("stroke-width", $("#path-size-slider").data("value"))
         .style("stroke", $("#path-color-picker").minicolors("rgbaString"));
+
+    var gse = d3.select("#graph-style-example")
+      .append("svg")
+        .attr("width", "101px")
+        .attr("height", "101px");
+    gse.selectAll("path").data([{x: 75, y: 75}, {x: 75, y: 25}]).enter()
+      .append("path")
+      .attr(
+        "d",
+        d3.svg.diagonal()
+          .source({x: 25, y: 50})
+          .target(function (d) {
+            return d;
+          })
+        )
+        .style("fill", "none")
+        .style("stroke-width", $("#graph-link-size-slider").data("value"))
+        .style("stroke", $("#graph-link-color-picker").minicolors("rgbaString"));
+    gse.selectAll('circle').data([[25, 50], [75, 25], [75, 75]]).enter()
+      .append("circle")
+        .attr("cx", function (d) { return d[0];})
+        .attr("cy", function (d) { return d[1];})
+        .attr("r", $("#graph-node-size-slider").data("value"))
+        .style("fill", $("#graph-node-color-picker").minicolors("rgbaString"));
 
   });
 </script>
@@ -367,31 +423,48 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="#">GeoJS</a>
+      <a class="navbar-brand" href="https://github.com/OpenGeoscience/geojs" target="homepage">GeoJS</a>
     </div>
 
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
         <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="dropdown-label">Select a feature</span><span> </span><span class="caret"></span></a>
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="dropdown-label">Add a feature</span><span> </span><span class="caret"></span></a>
           <ul class="dropdown-menu" role="menu">
             <li><a href="#" id="create-point-feature" data-toggle="modal" data-target="#point-settings-modal">Point</a></li>
              <li><a href="#" id="create-line-feature" data-toggle="modal" data-target="#line-settings-modal">Line</a></li>
              <li><a href="#" id="create-path-feature" data-toggle="modal" data-target="#path-settings-modal">Path</a></li>
-             <li><a href="#" id="create-graph-feature">Graph</a></li>
+             <li class="disabled"><a href="#" id="create-graph-feature" data-toggle="modal" data-target="#graph-settings-modal">Graph</a></li>
           </ul>
         </li>
       </ul>
 
       <ul class="nav navbar-nav navbar-right">
-        <li><a href="#">Remove all features</a></li>
-        <li><a href="#">About</a></li>
+        <!-- When implemented:
+        <li><a href="#">Remove all features</a></li> -->
+        <li><a href="#" data-toggle="modal" data-target="#about-modal">About</a></li>
       </ul>
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->
 </nav>
 
+
+<!-- About modal -->
+<div class="modal fade" id="about-modal">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Geojs feature demo</h4>
+      </div>
+      <div class="modal-body">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal" data-target="about-modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Point settings modal -->
 <div class="modal fade" id="point-settings-modal">
@@ -495,4 +568,49 @@
   </div>
 </div>
 
+<!-- Graph settings modal -->
+<div class="modal fade" id="graph-settings-modal">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Customize the style</h4>
+      </div>
+      <div class="modal-body">
+        <form class="form-horizontal">
+          <div class="form-group">
+            <label for="graph-node-color-picker" class="col-md-4 control-label">Choose node color and opacity</label>
+            <div class="col-md-8">
+              <input type="text" id="graph-node-color-picker" class="color-picker form-control" value="#ff0000">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="graph-node-size-slider" class="col-md-4 control-label">Choose node size</label>
+            <div class="col-md-8">
+              <input type="text" id="graph-node-size-slider" class="size-slider form-control" data-slider-step="0.1" data-slider-min="1" data-slider-max="25" data-slider-value="5" data-value="5"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="graph-link-color-picker" class="col-md-4 control-label">Choose link color and opacity</label>
+            <div class="col-md-8">
+              <input type="text" id="graph-link-color-picker" class="color-picker form-control" value="#000000">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="graph-link-size-slider" class="col-md-4 control-label">Choose link width</label>
+            <div class="col-md-8">
+              <input type="text" id="graph-link-size-slider" class="size-slider form-control" data-slider-step="0.1" data-slider-min="1" data-slider-max="15" data-slider-value="2" data-value="2"/>
+            </div>
+          </div>
+          <div class="row">
+            <div class="center-block example-box col-md-3" id="graph-style-example"></div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary submit-button">Create</button>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
