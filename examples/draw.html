@@ -56,6 +56,15 @@
             border-color: #a0a0a0;
             background: #f0f0f0;
         }
+
+        #create-feature-help-box {
+            box-shadow: 3px 3px 6px;
+            position: absolute;
+            right: 25px;
+            bottom:  25px;
+            padding: 1em;
+            pointer-events: none;
+        }
     </style>
 
 </head>
@@ -125,13 +134,22 @@
   // attach javascript to navbar controls
 
     function make_overlay() {
+      var overlaySvg, overlay;
+
       d3.select('#overlay').remove();
-      return d3.select('body')
-        .append('div')
-          .attr('id', 'overlay')
-        .append('svg')
+
+      overlay = d3.select('body').append('div')
+          .attr('id', 'overlay');
+
+      overlay.append('div')
+        .attr('id', 'create-feature-help-box')
+        .attr('class', 'bg-info');
+
+      overlaySvg = overlay.append('svg')
           .attr('width', '100%')
           .attr('height', '100%');
+
+      return overlaySvg;
     }
 
     function create_point() {
@@ -142,6 +160,12 @@
       r = $("#point-size-slider").slider('getValue');
 
       overlay = make_overlay();
+
+      overlay.style('cursor', 'none');
+
+      d3.select("#create-feature-help-box")
+        .text('Click to place a point feature.');
+
       circle = overlay
         .append('circle')
           .attr('cx', 0)
@@ -172,11 +196,58 @@
     }
 
     function create_line() {
+      var r, c, overlay, cobj;
+
+      c = $("#line-color-picker").minicolors('rgbaString');
+      cobj = $("#line-color-picker").minicolors('rgbObject');
+      r = $("#line-size-slider").slider('getValue');
+
+      overlay = make_overlay();
+      overlay.style('cursor', 'crosshair');
+
+      d3.select("#create-feature-help-box")
+        .text('Click and drag the mouse to create a line feature.');
+
+        overlay.on('mousedown', function () {
+          var p = d3.mouse(overlay.node()), line, path;
+
+          overlay.style('cursor', 'none')
+            .on('mousedown', null);
+          line = d3.svg.line();
+          path = overlay.append('path')
+            .attr('d', line([p, p]))
+            .style('stroke-width', r)
+            .style('stroke', c);
+
+          overlay.on('mousemove', function () {
+            var q = d3.mouse(overlay.node());
+            path.attr('d', line([p, q]));
+          });
+
+          overlay.on('mouseup', function () {
+            var q = d3.mouse(overlay.node());
+            coords = myMap.displayToGcs([{x: p[0], y: p[1]}, {x: q[0], y: q[1]}]);
+            d3Layer.createFeature('line')
+              .style({
+                color: [cobj.r/255, cobj.g/255, cobj.b/255],
+                width: [r],
+                opacity: cobj.a
+              })
+              .positions(coords);
+            myMap.draw();
+            d3.select('#overlay').remove();
+          });
+        });
     }
 
     $("#point-settings-modal .modal-footer button.submit-button").click(function () {
       create_point();
       $("#point-settings-modal").modal("hide");
+    });
+
+    $("#line-settings-modal .modal-footer button.submit-button").click(function () {
+      create_line();
+      $("#line-settings-modal").modal("hide");
     });
 
     d3.select("#point-style-example")
@@ -237,6 +308,8 @@
   </div><!-- /.container-fluid -->
 </nav>
 
+
+<!-- Point settings modal -->
 <div class="modal fade" id="point-settings-modal">
   <div class="modal-dialog modal-md">
     <div class="modal-content">
@@ -270,6 +343,7 @@
   </div>
 </div>
 
+<!-- Line settings modal -->
 <div class="modal fade" id="line-settings-modal">
   <div class="modal-dialog modal-md">
     <div class="modal-content">
