@@ -31,6 +31,7 @@
             height: 100%;
             width: 100%;
             overflow: hidden;
+            z-index: 100
         }
 
         div#overlay {
@@ -40,6 +41,7 @@
             height: 100%;
             width: 100%;
             overflow: hidden;
+            z-index: 200;
         }
 
         #style-example {
@@ -64,6 +66,10 @@
             bottom:  25px;
             padding: 1em;
             pointer-events: none;
+        }
+
+        .navbar {
+            z-index: 1001;
         }
     </style>
 
@@ -197,6 +203,15 @@
           .attr('width', '100%')
           .attr('height', '100%');
 
+      $("#feature-dropdown").addClass("hidden");
+      $("#feature-done-button")
+        .removeClass("hidden")
+        .on("click", function () {
+          $(this).addClass("hidden").off("click");
+          $("#feature-dropdown").removeClass("hidden");
+          overlay.remove();
+        });
+
       return overlaySvg;
     }
 
@@ -229,8 +244,6 @@
 
           p = d3.mouse($("#map").get(0));
           q = myMap.displayToGcs({x: p[0], y: p[1]});
-
-          d3.select("#overlay").remove();
 
           d3Layer.createFeature('point')
             .style({
@@ -283,7 +296,6 @@
               })
               .positions(coords);
             myMap.draw();
-            d3.select('#overlay').remove();
           });
         });
     }
@@ -336,7 +348,6 @@
               })
               .positions(q);
             myMap.draw();
-            d3.select('#overlay').remove();
           });
         });
     }
@@ -429,7 +440,7 @@
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
-        <li class="dropdown">
+        <li id="feature-dropdown" class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="dropdown-label">Add a feature</span><span> </span><span class="caret"></span></a>
           <ul class="dropdown-menu" role="menu">
             <li><a href="#" id="create-point-feature" data-toggle="modal" data-target="#point-settings-modal">Point</a></li>
@@ -437,6 +448,9 @@
              <li><a href="#" id="create-path-feature" data-toggle="modal" data-target="#path-settings-modal">Path</a></li>
              <li class="disabled"><a href="#" id="create-graph-feature" data-toggle="modal" data-target="#graph-settings-modal">Graph</a></li>
           </ul>
+        </li>
+        <li>
+          <button id="feature-done-button" type="button" class="btn btn-primary navbar-btn hidden">Click when done</button>
         </li>
       </ul>
 
