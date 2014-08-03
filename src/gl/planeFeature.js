@@ -48,6 +48,8 @@ ggl.planeFeature = function (arg) {
         onloadCallback = null,
         texture = null;
 
+    this.buildTime().modified();
+         
     if (m_actor) {
       this.renderer().contextRenderer().removeActor(m_actor);
     }
@@ -70,27 +72,43 @@ ggl.planeFeature = function (arg) {
         ul[0], ul[1], ul[2], true);
       texture = vgl.texture();
       m_this.visible(false);
-      image.onload = function () {
-        texture.setImage(image);
+
+      /// TODO: Is there a reliable way to make sure that image is loaded already?
+      if (image.complete) {
+         texture.setImage(image);
         m_actor.material().addAttribute(texture);
         /// NOTE Currently we assume that we want to show the feature as
         /// soon as the image gets loaded. However, there might be a case
         /// where we want to lock down the visibility. We will deal with that
         /// later.
         m_this.visible(true);
-
+            
         if (onloadCallback) {
           onloadCallback.call(this);
         }
+        //}
+      } else {
+        image.onload = function () {
+          texture.setImage(image);
+          m_actor.material().addAttribute(texture);
+          /// NOTE Currently we assume that we want to show the feature as
+          /// soon as the image gets loaded. However, there might be a case
+          /// where we want to lock down the visibility. We will deal with that
+          /// later.
+          m_this.visible(true);
 
-        if (m_this.drawOnAsyncResourceLoad()) {
-          m_this._update();
-          m_this.layer()._draw();
-        }
-      };
+          if (onloadCallback) {
+            onloadCallback.call(this);
+          }
+
+          if (m_this.drawOnAsyncResourceLoad()) {
+            m_this._update();
+            m_this.layer()._draw();
+          }
+        };
+      }
     }
     m_this.renderer().contextRenderer().addActor(m_actor);
-    this.buildTime().modified();
   };
 
   ////////////////////////////////////////////////////////////////////////////

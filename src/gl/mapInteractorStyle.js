@@ -294,11 +294,11 @@ ggl.mapInteractorStyle = function () {
 
     /// Convert timestamp diffirence in seconds
     speed = 0.001 * (event.timeStamp -
-              (m_navigationLastTimestamp === null ? 1.0 :
+              (m_navigationLastTimestamp === null ? event.timeStamp :
                m_navigationLastTimestamp));
     m_navigationLastTimestamp = event.timeStamp;
 
-    speed = Math.min(speed, 0.5);
+    speed = Math.max(speed, 0.5);
 
     /// Clamp val between (0.0625 - 1.0625]
     if (delta < 1.0) {

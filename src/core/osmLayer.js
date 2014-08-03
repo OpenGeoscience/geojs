@@ -35,6 +35,7 @@ geo.osmLayer = function (arg) {
     m_previousZoom = null,
     m_baseUrl = 'http://tile.openstreetmap.org/',
     m_imageFormat = 'png',
+    m_updateTimerId = null,
     s_init = this._init,
     s_update = this._update;
 
@@ -249,7 +250,6 @@ geo.osmLayer = function (arg) {
 
     m_tiles[zoom][x][y] = tile;
     m_pendingNewTiles.push(tile);
-
     m_numberOfCachedTiles += 1;
     return tile;
   };
@@ -300,7 +300,7 @@ geo.osmLayer = function (arg) {
       /// Get rid of tiles if we have reached our threshold. However,
       /// If the tile is required for current zoom, then do nothing.
       while (m_numberOfCachedTiles > m_tileCacheSize &&
-        i < m_pendingInactiveTiles.length) {
+        i < m_pendingInactiveTiles.length) {  
         tile = m_pendingInactiveTiles[i];
         if (tile.zoom !== getModifiedMapZoom()) {
           m_this._delete(tile.feature);
@@ -443,12 +443,11 @@ geo.osmLayer = function (arg) {
     m_pendingNewTiles = [];
   };
 
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Create / delete tiles as necessary
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._updateTiles = function (request) {
+  function updateOSMTiles(request) {
+    if (request === undefined) {
+      request = {};
+    }
+
     /// Add tiles that are currently visible
     m_this._addTiles(request);
 
@@ -459,6 +458,21 @@ geo.osmLayer = function (arg) {
     m_this._draw();
 
     m_this.updateTime().modified();
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Create / delete tiles as necessary
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._updateTiles = function (request) {
+    if (m_updateTimerId !== null) {
+      clearTimeout(m_updateTimerId);
+      m_updateTimerId = null;
+      m_updateTimerId = setTimeout(function() {updateOSMTiles(request)}, 300);
+    } else {
+      m_updateTimerId = setTimeout(function() {updateOSMTiles(request)}, 0);
+    }
     return m_this;
   };
 
