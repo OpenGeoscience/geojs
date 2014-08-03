@@ -298,6 +298,8 @@ ggl.mapInteractorStyle = function () {
                m_navigationLastTimestamp));
     m_navigationLastTimestamp = event.timeStamp;
 
+    speed = Math.min(speed, 0.5);
+
     /// Clamp val between (0.0625 - 1.0625]
     if (delta < 1.0) {
       delta = Math.min(delta, speed);
