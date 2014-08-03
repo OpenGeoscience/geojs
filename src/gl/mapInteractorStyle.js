@@ -41,6 +41,7 @@ ggl.mapInteractorStyle = function () {
     m_useLastDirection = false,
     m_lastDirection = null,
     m_picker = new vgl.picker(),
+    m_navigationLastTimestamp = null,
     m_updateRenderParamsTime = vgl.timestamp();
 
   ////////////////////////////////////////////////////////////////////////////
@@ -288,14 +289,20 @@ ggl.mapInteractorStyle = function () {
     /// Update render params
     m_this.updateRenderParams();
 
-    var delta = event.originalEvent.wheelDeltaY / 120.0;
+    var delta = event.originalEvent.wheelDeltaY / 120.0, speed;
     delta = Math.pow(1 + Math.abs(delta) / 2, delta > 0 ? -1 : 1);
 
-    /// Clamp val between (0.125 - 1.125]
+    /// Convert timestamp diffirence in seconds
+    speed = 0.001 * (event.timeStamp -
+              (m_navigationLastTimestamp === null ? 1.0 :
+               m_navigationLastTimestamp));
+    m_navigationLastTimestamp = event.timeStamp;
+
+    /// Clamp val between (0.0625 - 1.0625]
     if (delta < 1.0) {
-      delta = Math.min(delta, 0.125);
+      delta = Math.min(delta, speed);
     } else {
-      delta = Math.min(delta, 1.125);
+      delta = Math.min(delta, 1 + speed) ;
     }
 
     /// Compute current mouse position
