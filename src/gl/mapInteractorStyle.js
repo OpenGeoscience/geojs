@@ -291,32 +291,18 @@ ggl.mapInteractorStyle = function () {
     /// Update render params
     m_this.updateRenderParams();
 
-    var delta = event.originalEvent.wheelDeltaY / 120.0, deltaIsPositive, speed;
-    console.log('delta is ', delta);
-
+    var delta = event.originalEvent.wheelDeltaY / 120.0, deltaIsPositive,
+                speed = 0.1;
     deltaIsPositive = delta >= 0.0 ? true : false;
 
     delta = Math.pow(1 + Math.abs(delta) / 2, delta > 0 ? -1 : 1);
 
-    /// Convert timestamp diffirence in seconds
-    speed = 0.001 * (event.timeStamp -
-              (m_navigationLastTimestamp === null ? event.timeStamp :
-               m_navigationLastTimestamp));
-    m_navigationLastTimestamp = event.timeStamp;
-
-    speed = 0.02;
-
-    /// Clamp val between (0.0625 - 1.0625]
-    if (deltaIsPositive) {
-      delta = speed;
-    } else {
-      delta = 1 + speed;
-    }
+    delta *= speed;
 
     /// Compute current mouse position
     m_this._computeCurrentMousePos(event);
 
-    m_this.zoom(delta);
+    m_this.zoom(delta, !deltaIsPositive);
     return false;
   };
 
@@ -361,7 +347,7 @@ ggl.mapInteractorStyle = function () {
     /// Make sure we are uptodate with renderer and render window
     m_this.updateRenderParams();
 
-    console.log('val is ', val);
+    // console.log('val is ', val);
 
     if (val) {
       m_camera.zoom(val, dir);
@@ -384,7 +370,7 @@ ggl.mapInteractorStyle = function () {
     clipRange = m_camera.clippingRange();
     //minGap = Math.min(clipRange[0], minGap);
 
-    console.log('clipRange ', clipRange);
+    // console.log('clipRange ', clipRange);
 
     if (Math.abs(gap) < minGap || clipRange[0] < minGap) {
       // console.log('reseting camera ');
@@ -484,7 +470,7 @@ ggl.mapInteractorStyle = function () {
    * Update view in response to a zoom request
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.zoom = function (val) {
+  this.zoom = function (val, zoomOut) {
     var evt, newZoomLevel, oldZoomLevel, cameraPos, cameraFp, newPos, clickedWorldPoint,
         direction, focusDisplayPoint, maxZoomedOutDist = 0, maxZoomedOut = false;
 
@@ -518,13 +504,13 @@ ggl.mapInteractorStyle = function () {
 
     console.log('direction is ', direction);
 
-    if ((m_lastMousePos.y - m_currentMousePos.y) < 0 || val > 1) {
+    if ((m_lastMousePos.y - m_currentMousePos.y) < 0 || zoomOut) {
       direction[0] = -direction[0];
       direction[1] = -direction[1];
       direction[2] = -direction[2];
     }
 
-    if (cameraPos[2] * Math.sin(m_camera.viewAngle()) >= 360.0 && val > 1) {
+    if (cameraPos[2] * Math.sin(m_camera.viewAngle()) >= 360.0 && zoomOut) {
       maxZoomedOut = true;
     } else {
       this._syncZoom(val, direction);
