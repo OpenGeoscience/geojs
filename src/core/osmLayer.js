@@ -31,10 +31,11 @@ geo.osmLayer = function (arg) {
     m_pendingNewTiles = [],
     m_pendingInactiveTiles = [],
     m_numberOfCachedTiles = 0,
-    m_tileCacheSize = 100,
+    m_tileCacheSize = 150,
     m_previousZoom = null,
     m_baseUrl = 'http://tile.openstreetmap.org/',
     m_imageFormat = 'png',
+    m_updateTimerId = null,
     s_init = this._init,
     s_update = this._update;
 
@@ -44,6 +45,19 @@ geo.osmLayer = function (arg) {
 
   if (arg && arg.imageFormat !== undefined) {
     m_imageFormat = arg.imageFormat;
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return zoom to be used for fetching the tiles
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  function getModifiedMapZoom() {
+    if (m_this.map().zoom() < 19) {
+      return (m_this.map().zoom() + 1);
+    } else {
+      return m_this.map().zoom();
+    }
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -240,7 +254,6 @@ geo.osmLayer = function (arg) {
 
     m_tiles[zoom][x][y] = tile;
     m_pendingNewTiles.push(tile);
-
     m_numberOfCachedTiles += 1;
     return tile;
   };
@@ -253,7 +266,7 @@ geo.osmLayer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   /* jshint -W089 */
   this._removeTiles = function () {
-    var x, y, tile, zoom, currZoom = m_this.map().zoom();
+    var x, y, tile, zoom, currZoom = getModifiedMapZoom();
 
     if (!m_tiles) {
       return m_this;
@@ -293,7 +306,7 @@ geo.osmLayer = function (arg) {
       while (m_numberOfCachedTiles > m_tileCacheSize &&
         i < m_pendingInactiveTiles.length) {
         tile = m_pendingInactiveTiles[i];
-        if (tile.zoom !== m_this.map().zoom()) {
+        if (tile.zoom !== getModifiedMapZoom()) {
           m_this._delete(tile.feature);
           delete m_tiles[tile.zoom][tile.index_x][tile.index_y];
           m_pendingInactiveTiles.splice(i, 1);
@@ -304,7 +317,7 @@ geo.osmLayer = function (arg) {
 
       for (i = 0; i < m_pendingInactiveTiles.length; i += 1) {
         tile = m_pendingInactiveTiles[i];
-        if (tile.zoom !== m_this.map().zoom()) {
+        if (tile.zoom !== getModifiedMapZoom()) {
           tile.REMOVING = false;
           tile.REMOVED = true;
           tile.feature.bin(m_hiddenBinNumber);
@@ -319,12 +332,12 @@ geo.osmLayer = function (arg) {
       m_pendingInactiveTiles = [];
       m_this._draw();
     }, 100);
-    
+
 
     return m_this;
   };
   /* jshint +W089 */
- 
+
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Create / delete tiles as necessary
@@ -332,7 +345,7 @@ geo.osmLayer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._addTiles = function (request) {
     var feature, ren = m_this.renderer(),
-        zoom = this.map().zoom(),
+        zoom = getModifiedMapZoom(),
         /// First get corner points
         /// In display coordinates the origin is on top left corner (0, 0)
         llx = 0.0, lly = m_this.height(), urx = m_this.width(), ury = 0.0,
@@ -404,7 +417,7 @@ geo.osmLayer = function (arg) {
         tile.LOADED = true;
         if ((tile.REMOVING || tile.REMOVED) &&
           tile.feature &&
-          tile.zoom !== m_this.map().zoom()) {
+          tile.zoom !== getModifiedMapZoom()) {
           tile.feature.bin(m_hiddenBinNumber);
           tile.REMOVING = false;
           tile.REMOVED = true;
@@ -417,7 +430,7 @@ geo.osmLayer = function (arg) {
         m_this._draw();
       };
     }
-    
+
     /// And now finally add them
     for (i = 0; i < m_pendingNewTiles.length; i += 1) {
       tile = m_pendingNewTiles[i];
@@ -434,12 +447,11 @@ geo.osmLayer = function (arg) {
     m_pendingNewTiles = [];
   };
 
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Create / delete tiles as necessary
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._updateTiles = function (request) {
+  function updateOSMTiles(request) {
+    if (request === undefined) {
+      request = {};
+    }
+
     /// Add tiles that are currently visible
     m_this._addTiles(request);
 
@@ -450,6 +462,25 @@ geo.osmLayer = function (arg) {
     m_this._draw();
 
     m_this.updateTime().modified();
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Create / delete tiles as necessary
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._updateTiles = function (request) {
+    if (m_updateTimerId !== null) {
+      clearTimeout(m_updateTimerId);
+      m_updateTimerId = null;
+      m_updateTimerId = setTimeout(function () {
+        updateOSMTiles(request);
+      }, 300);
+    } else {
+      m_updateTimerId = setTimeout(function () {
+        updateOSMTiles(request);
+      }, 0);
+    }
     return m_this;
   };
 

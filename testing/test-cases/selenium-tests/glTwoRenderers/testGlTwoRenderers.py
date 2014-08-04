@@ -8,7 +8,7 @@ from selenium_test import FirefoxTest, ChromeTest,\
     setUpModule, tearDownModule
 
 
-class osmBase(object):
+class glTwoRenderersBase(object):
     testCase = ('glTwoRenderers',)
 
     def loadPage(self):
@@ -21,18 +21,18 @@ class osmBase(object):
 
         time.sleep(1)  # wait for data to load
 
-        testName = 'd3DrawGlTwoRenderers'
+        testName = 'drawGlTwoRenderers'
         self.screenshotTest(testName, revision=1)
 
 
 @unittest.skip("Initial zoom currently not working")
-class FirefoxOSM(osmBase, FirefoxTest):
-    testCase = osmBase.testCase + ('firefox',)
+class FirefoxOSM(glTwoRenderersBase, FirefoxTest):
+    testCase = glTwoRenderersBase.testCase + ('firefox',)
 
 
 @unittest.skip("Initial zoom currently not working")
-class ChromeOSM(osmBase, ChromeTest):
-    testCase = osmBase.testCase + ('chrome',)
+class ChromeOSM(glTwoRenderersBase, ChromeTest):
+    testCase = glTwoRenderersBase.testCase + ('chrome',)
 
 
 if __name__ == '__main__':

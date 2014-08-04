@@ -8,7 +8,7 @@ from selenium_test import FirefoxTest, ChromeTest,\
     setUpModule, tearDownModule
 
 
-class osmBase(object):
+class glPlaneBase(object):
     testCase = ('glPlane',)
 
     def loadPage(self):
@@ -21,18 +21,18 @@ class osmBase(object):
 
         time.sleep(1)  # wait for data to load
 
-        testName = 'd3DrawGlPlane'
+        testName = 'drawGlPlane'
         self.screenshotTest(testName, revision=1)
 
 
 @unittest.skip("Initial zoom currently not working")
-class FirefoxOSM(osmBase, FirefoxTest):
-    testCase = osmBase.testCase + ('firefox',)
+class FirefoxOSM(glPlaneBase, FirefoxTest):
+    testCase = glPlaneBase.testCase + ('firefox',)
 
 
 @unittest.skip("Initial zoom currently not working")
-class ChromeOSM(osmBase, ChromeTest):
-    testCase = osmBase.testCase + ('chrome',)
+class ChromeOSM(glPlaneBase, ChromeTest):
+    testCase = glPlaneBase.testCase + ('chrome',)
 
 
 if __name__ == '__main__':
