@@ -7,7 +7,7 @@ from selenium_test import FirefoxTest, ChromeTest,\
     setUpModule, tearDownModule
 
 
-class osmBase(object):
+class glLinesBase(object):
     testCase = ('glLines',)
 
     def loadPage(self):
@@ -15,21 +15,21 @@ class osmBase(object):
         self.loadURL('glLines/index.html')
         self.wait()
 
-    def testGlPoints(self):
+    def testGlLines(self):
         self.loadPage()
 
         time.sleep(1)  # wait for data to load
 
-        testName = 'd3DrawGlLines'
-        self.screenshotTest(testName, revision=1)
+        testName = 'drawGlLines'
+        self.screenshotTest(testName, revision=2)
 
 
-class FirefoxOSM(osmBase, FirefoxTest):
-    testCase = osmBase.testCase + ('firefox',)
+class FirefoxOSM(glLinesBase, FirefoxTest):
+    testCase = glLinesBase.testCase + ('firefox',)
 
 
-class ChromeOSM(osmBase, ChromeTest):
-    testCase = osmBase.testCase + ('chrome',)
+class ChromeOSM(glLinesBase, ChromeTest):
+    testCase = glLinesBase.testCase + ('chrome',)
 
 
 if __name__ == '__main__':

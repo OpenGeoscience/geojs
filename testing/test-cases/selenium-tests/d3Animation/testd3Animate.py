@@ -7,7 +7,7 @@ from selenium_test import FirefoxTest, ChromeTest,\
     setUpModule, tearDownModule
 
 
-class osmBase(object):
+class d3AnimationBase(object):
     testCase = ('d3Animation',)
 
     def loadPage(self):
@@ -21,7 +21,7 @@ class osmBase(object):
 
         testName = 'd3AnimateFrame15'
         self.runScript('window.animateForward(15);')
-        self.screenshotTest(testName, revision=4)
+        self.screenshotTest(testName, revision=5)
 
     def testd3AnimateBackward(self):
         self.loadPage()
@@ -29,7 +29,7 @@ class osmBase(object):
         testName = 'd3AnimateFrame75'
         self.runScript('window.animateForward(80);')
         self.runScript('window.animateBackward(5);')
-        self.screenshotTest(testName, revision=4)
+        self.screenshotTest(testName, revision=5)
 
     def testd3AnimateToEnd(self):
         self.loadPage()
@@ -42,15 +42,15 @@ class osmBase(object):
             '''
         )
         self.wait('window.animationTestFinished')
-        self.screenshotTest(testName, revision=4)
+        self.screenshotTest(testName, revision=5)
 
 
-class FirefoxOSM(osmBase, FirefoxTest):
-    testCase = osmBase.testCase + ('firefox',)
+class FirefoxOSM(d3AnimationBase, FirefoxTest):
+    testCase = d3AnimationBase.testCase + ('firefox',)
 
 
-class ChromeOSM(osmBase, ChromeTest):
-    testCase = osmBase.testCase + ('chrome',)
+class ChromeOSM(d3AnimationBase, ChromeTest):
+    testCase = d3AnimationBase.testCase + ('chrome',)
 
 
 if __name__ == '__main__':

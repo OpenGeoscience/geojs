@@ -8,7 +8,7 @@ from selenium_test import FirefoxTest, ChromeTest,\
     setUpModule, tearDownModule
 
 
-class osmBase(object):
+class glPointsBase(object):
     testCase = ('glPoints',)
 
     def loadPage(self):
@@ -25,13 +25,13 @@ class osmBase(object):
 
 
 @unittest.skip("Initial zoom currently not working")
-class FirefoxOSM(osmBase, FirefoxTest):
-    testCase = osmBase.testCase + ('firefox',)
+class FirefoxOSM(glPointsBase, FirefoxTest):
+    testCase = glPointsBase.testCase + ('firefox',)
 
 
 @unittest.skip("Initial zoom currently not working")
-class ChromeOSM(osmBase, ChromeTest):
-    testCase = osmBase.testCase + ('chrome',)
+class ChromeOSM(glPointsBase, ChromeTest):
+    testCase = glPointsBase.testCase + ('chrome',)
 
 
 if __name__ == '__main__':

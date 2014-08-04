@@ -7,7 +7,7 @@ from selenium_test import FirefoxTest, ChromeTest,\
     setUpModule, tearDownModule
 
 
-class osmBase(object):
+class d3PointsBase(object):
     testCase = ('d3Points',)
 
     def loadPage(self):
@@ -20,15 +20,15 @@ class osmBase(object):
         self.loadPage()
 
         testName = 'd3DrawPoints'
-        self.screenshotTest(testName, revision=2)
+        self.screenshotTest(testName, revision=3)
 
 
-class FirefoxOSM(osmBase, FirefoxTest):
-    testCase = osmBase.testCase + ('firefox',)
+class FirefoxOSM(d3PointsBase, FirefoxTest):
+    testCase = d3PointsBase.testCase + ('firefox',)
 
 
-class ChromeOSM(osmBase, ChromeTest):
-    testCase = osmBase.testCase + ('chrome',)
+class ChromeOSM(d3PointsBase, ChromeTest):
+    testCase = d3PointsBase.testCase + ('chrome',)
 
 
 if __name__ == '__main__':
