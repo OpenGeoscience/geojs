@@ -157,6 +157,8 @@ ggl.mapInteractorStyle = function () {
       if (m_lastDirection !== null) {
         m_useLastDirection = true;
       }
+
+      console.log("handling mouse move");
       m_this.zoom();
     }
 
@@ -289,7 +291,11 @@ ggl.mapInteractorStyle = function () {
     /// Update render params
     m_this.updateRenderParams();
 
-    var delta = event.originalEvent.wheelDeltaY / 120.0, speed;
+    var delta = event.originalEvent.wheelDeltaY / 120.0, deltaIsPositive, speed;
+    console.log('delta is ', delta);
+
+    deltaIsPositive = delta >= 0.0 ? true : false;
+
     delta = Math.pow(1 + Math.abs(delta) / 2, delta > 0 ? -1 : 1);
 
     /// Convert timestamp diffirence in seconds
@@ -298,13 +304,13 @@ ggl.mapInteractorStyle = function () {
                m_navigationLastTimestamp));
     m_navigationLastTimestamp = event.timeStamp;
 
-    speed = Math.max(speed, 0.5);
+    speed = 0.02;
 
     /// Clamp val between (0.0625 - 1.0625]
-    if (delta < 1.0) {
-      delta = Math.min(delta, speed);
+    if (deltaIsPositive) {
+      delta = speed;
     } else {
-      delta = Math.min(delta, 1 + speed) ;
+      delta = 1 + speed;
     }
 
     /// Compute current mouse position
@@ -350,10 +356,12 @@ ggl.mapInteractorStyle = function () {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._syncZoom = function (val, dir) {
-    var i, renderers, pos, fp, cam, gap, minGap = 0.1;
+    var i, renderers, pos, fp, cam, clipRange, gap, minGap = 0.1;
 
     /// Make sure we are uptodate with renderer and render window
     m_this.updateRenderParams();
+
+    console.log('val is ', val);
 
     if (val) {
       m_camera.zoom(val, dir);
@@ -372,13 +380,20 @@ ggl.mapInteractorStyle = function () {
     if (!dir) {
       dir = m_camera.directionOfProjection();
     }
-    if (Math.abs(gap) < minGap) {
-      pos[0] = fp[0] + minGap * dir[0];
-      pos[1] = fp[1] + minGap * dir[1];
-      pos[2] = fp[2] - minGap * dir[2];
-      m_camera.setPosition(pos[0], pos[1], pos[2]);
-      m_camera.setFocalPoint(pos[0], pos[1], fp[2]);
-      m_renderer.resetCameraClippingRange();
+
+    clipRange = m_camera.clippingRange();
+    //minGap = Math.min(clipRange[0], minGap);
+
+    console.log('clipRange ', clipRange);
+
+    if (Math.abs(gap) < minGap || clipRange[0] < minGap) {
+      // console.log('reseting camera ');
+      // pos[0] = fp[0] + minGap * dir[0];
+      // pos[1] = fp[1] + minGap * dir[1];
+      // pos[2] = fp[2] - minGap * dir[2];
+      // m_camera.setPosition(pos[0], pos[1], pos[2]);
+      // m_camera.setFocalPoint(pos[0], pos[1], fp[2]);
+      // m_renderer.resetCameraClippingRange();
     }
 
     pos = m_camera.position();
@@ -501,6 +516,8 @@ ggl.mapInteractorStyle = function () {
       m_lastDirection = direction.slice(0);
     }
 
+    console.log('direction is ', direction);
+
     if ((m_lastMousePos.y - m_currentMousePos.y) < 0 || val > 1) {
       direction[0] = -direction[0];
       direction[1] = -direction[1];
@@ -522,11 +539,12 @@ ggl.mapInteractorStyle = function () {
     cameraFp = m_camera.focalPoint();
 
     if (maxZoomedOut || (cameraPos[2] * Math.sin(m_camera.viewAngle()) >= 360.0)) {
+      console.log("***************** Max zoom out ");
       maxZoomedOut = false;
       maxZoomedOutDist = computeCameraDistance(0);
 
       /// Compute x and y positions based off the max zoomed out distance
-      newPos = [(maxZoomedOutDist - cameraPos[2]) * direction[0] /  direction[2],
+      newPos = [(maxZoomedOutDist - cameraPos[2]) * direction[0] / direction[2],
                 (maxZoomedOutDist - cameraPos[2]) * direction[1] / direction[2]];
 
       m_camera.setPosition(cameraPos[0] + newPos[0],
@@ -535,8 +553,6 @@ ggl.mapInteractorStyle = function () {
                              cameraPos[1] + newPos[1], cameraFp[2]);
       m_renderer.resetCameraClippingRange();
 
-      /// We are forcing the minimum zoom level to 2 so that we can get
-      /// high res imagery even at the zoom level 0 distance
       newZoomLevel = 0;
 
       /// Sync all other camera again.

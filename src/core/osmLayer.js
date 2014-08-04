@@ -53,7 +53,11 @@ geo.osmLayer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   function getModifiedMapZoom() {
-    return (m_this.map().zoom() + 1);
+    if (m_this.map().zoom() < 19) {
+      return (m_this.map().zoom() + 1);
+    } else {
+      return m_this.map().zoom(); 
+    }
   }
 
   ////////////////////////////////////////////////////////////////////////////
