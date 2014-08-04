@@ -234,7 +234,7 @@
 
     // attach javascript to navbar controls
 
-    function make_overlay() {
+    function make_overlay(done) {
       var overlaySvg, overlay;
 
       d3.select('#overlay').remove();
@@ -255,6 +255,9 @@
       $("#feature-done-button")
         .removeClass("hidden")
         .on("click", function () {
+          if (done) {
+            done();
+          }
           $(this).addClass("hidden").off("click");
           $("#feature-dropdown").removeClass("hidden");
           overlay.remove();
@@ -406,6 +409,178 @@
       });
     }
 
+    function create_graph() {
+      var rn, cn, rl, cl, overlay, cnobj, clobj,
+          nodes = [], links = [], origin = null,
+          originIndex = null, mousedown = false,
+          mouseover = null, overlay_click = false,
+          diag = d3.svg.diagonal();
+
+      cn = $("#graph-node-color-picker").minicolors('rgbaString');
+      cl = $("#graph-link-color-picker").minicolors('rgbaString');
+      cnobj = $("#graph-node-color-picker").minicolors('rgbObject');
+      clobj = $("#graph-link-color-picker").minicolors('rgbObject');
+      rn = $("#graph-node-size-slider").slider('getValue');
+      rl = $("#graph-link-size-slider").slider('getValue');
+
+      function create_feature() {
+        nodes = nodes.map(function (d) {
+          var pt = myMap.displayToGcs(d);
+          pt.children = [];
+          return pt;
+        });
+
+        links.forEach(function (link) {
+          nodes[link.sourcei].children.push(nodes[link.targeti]);
+        });
+
+        d3Layer.createFeature('graph')
+          .style({
+            nodes: {
+              color: [cnobj.r/255, cnobj.g/255, cnobj.b/255],
+              size: [rn],
+              opacity: cnobj.a
+            },
+            links: {
+              color: [clobj.r/255, clobj.g/255, clobj.b/255],
+              width: [rl],
+              opacity: clobj.a
+            },
+            linkType: 'path'
+          })
+          .nodes(nodes);
+        myMap.draw();
+      }
+
+      overlay = make_overlay(create_feature);
+      overlay.append('g').attr('id', 'links');
+      overlay.append('g').attr('id', 'nodes');
+
+      d3.select("#create-feature-help-box")
+        .html('Click to create a new node.<br\>Drag between nodes to create a link.');
+
+      var link = overlay.append('path')
+        .style('pointer-events', 'none')
+        .style('stroke', cl)
+        .style('fill', 'none')
+        .style('stroke-width', rl);
+
+      var circle = overlay.append('circle')
+        .attr('cx', 0)
+        .attr('cy', 0)
+        .attr('r', rn)
+        .attr('class', 'temporary')
+        .style('fill', cn)
+        .style('pointer-events', 'none');
+
+      overlay.on('mousemove', function () {
+        var p = d3.mouse(this);
+
+        p = {x: p[0], y: p[1]};
+        circle.attr('cx', p.x).attr('cy', p.y);
+
+        if (origin) {
+          link.attr('d', diag({source: nodes[originIndex], target: p}));
+        } else {
+          link.attr('d', diag({source: p, target: p}));
+        }
+      });
+
+      function selectNodes() {
+        return overlay.select('#nodes').selectAll('circle.node').data(nodes);
+      }
+
+      function selectLinks() {
+        return overlay.select('#links').selectAll('path.link').data(links);
+      }
+
+      function draw_handler() {
+        var nodesSelect, linksSelect, diagonal, p;
+
+
+        nodesSelect = selectNodes();
+        linksSelect = selectLinks();
+        diagonal = d3.svg.diagonal();
+
+        nodesSelect.enter()
+          .append('circle')
+            .attr('cx', function (d) { return d.x; })
+            .attr('cy', function (d) { return d.y; })
+            .attr('r', rn)
+            .attr('class', 'node')
+            .style('fill', cn)
+            .style('cursor', 'pointer')
+            .on('mousedown', mousedown_node)
+            .on('mouseup', mouseup_node)
+            .on('mouseover', function () {
+              circle.style('fill-opacity', 1e-6);
+            })
+            .on('mouseout', function () {
+              if (!origin) {
+                circle.style('fill-opacity', cnobj.a);
+              }
+            });
+
+        linksSelect.enter()
+          .append('path')
+            .attr('d', diagonal)
+            .style('pointer-events', 'none')
+            .style('stroke', cl)
+            .style('fill', 'none')
+            .style('stroke-width', rl);
+
+        nodesSelect.exit().remove();
+        linksSelect.exit().remove();
+      }
+
+      function click() {
+        origin = null;
+        originIndex = null;
+        p = d3.mouse(this);
+        nodes.push({x: p[0], y: p[1]});
+        draw_handler();
+      }
+
+      function mousedown_node(d, i) {
+        overlay_click = false;
+        origin = d3.select(this);
+        originIndex = i;
+        d3.event.stopPropagation();
+        d3.event.preventDefault();
+        circle.style('fill-opacity', 1e-6);
+
+        overlay.style('cursor', 'no-drop');
+        d3.select(this).style('cursor', 'no-drop');
+        selectNodes().filter(function (sd, si) { return si !== i; })
+          .style('cursor', 'copy');
+      }
+
+      function mouseup() {
+        var p;
+        origin = null;
+        originIndex = null;
+        draw_handler();
+        circle.style('fill-opacity', cnobj.a);
+        overlay.style('cursor', 'none');
+        selectNodes().style('cursor', 'pointer');
+      }
+
+      function mouseup_node(d, i) {
+        if (origin && originIndex !== i) {
+          links.push({
+            source: nodes[originIndex],
+            sourcei: originIndex,
+            target: nodes[i],
+            targeti: i
+          });
+        }
+      }
+
+      overlay.on('mousedown', click)
+        .on('mouseup', mouseup);
+    }
+
+
     $("#point-settings-modal .modal-footer button.submit-button").click(function () {
       create_point();
       $("#point-settings-modal").modal("hide");
@@ -419,6 +594,11 @@
     $("#path-settings-modal .modal-footer button.submit-button").click(function () {
       create_path();
       $("#path-settings-modal").modal("hide");
+    });
+
+    $("#graph-settings-modal .modal-footer button.submit-button").click(function () {
+      create_graph();
+      $("#graph-settings-modal").modal("hide");
     });
 
     d3.select("#point-style-example")
@@ -500,7 +680,7 @@
             <li><a href="#" id="create-point-feature" data-toggle="modal" data-target="#point-settings-modal">Point</a></li>
              <li><a href="#" id="create-line-feature" data-toggle="modal" data-target="#line-settings-modal">Line</a></li>
              <li><a href="#" id="create-path-feature" data-toggle="modal" data-target="#path-settings-modal">Path</a></li>
-             <li class="disabled"><a href="#" id="create-graph-feature" data-toggle="modal" data-target="#graph-settings-modal">Graph</a></li>
+             <li><a href="#" id="create-graph-feature" data-toggle="modal" data-target="#graph-settings-modal">Graph</a></li>
           </ul>
         </li>
         <li>
@@ -654,7 +834,7 @@
           <div class="form-group">
             <label for="graph-node-size-slider" class="col-md-4 control-label">Choose node size</label>
             <div class="col-md-8">
-              <input type="text" id="graph-node-size-slider" class="size-slider form-control" data-slider-step="0.1" data-slider-min="1" data-slider-max="25" data-slider-value="5" data-value="5"/>
+              <input type="text" id="graph-node-size-slider" class="size-slider form-control" data-slider-step="0.1" data-slider-min="1" data-slider-max="25" data-slider-value="10" data-value="10"/>
             </div>
           </div>
           <div class="form-group">
