@@ -304,7 +304,7 @@ geo.osmLayer = function (arg) {
       /// Get rid of tiles if we have reached our threshold. However,
       /// If the tile is required for current zoom, then do nothing.
       while (m_numberOfCachedTiles > m_tileCacheSize &&
-        i < m_pendingInactiveTiles.length) {  
+        i < m_pendingInactiveTiles.length) {
         tile = m_pendingInactiveTiles[i];
         if (tile.zoom !== getModifiedMapZoom()) {
           m_this._delete(tile.feature);
