@@ -56,7 +56,7 @@ geo.osmLayer = function (arg) {
     if (m_this.map().zoom() < 19) {
       return (m_this.map().zoom() + 1);
     } else {
-      return m_this.map().zoom(); 
+      return m_this.map().zoom();
     }
   }
 
@@ -473,9 +473,13 @@ geo.osmLayer = function (arg) {
     if (m_updateTimerId !== null) {
       clearTimeout(m_updateTimerId);
       m_updateTimerId = null;
-      m_updateTimerId = setTimeout(function() {updateOSMTiles(request)}, 300);
+      m_updateTimerId = setTimeout(function () {
+        updateOSMTiles(request);
+      }, 300);
     } else {
-      m_updateTimerId = setTimeout(function() {updateOSMTiles(request)}, 0);
+      m_updateTimerId = setTimeout(function () {
+        updateOSMTiles(request);
+      }, 0);
     }
     return m_this;
   };

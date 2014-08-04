@@ -41,7 +41,6 @@ ggl.mapInteractorStyle = function () {
     m_useLastDirection = false,
     m_lastDirection = null,
     m_picker = new vgl.picker(),
-    m_navigationLastTimestamp = null,
     m_updateRenderParamsTime = vgl.timestamp();
 
   ////////////////////////////////////////////////////////////////////////////
@@ -309,11 +308,10 @@ ggl.mapInteractorStyle = function () {
   /**
    * Handle double click event
    *
-   * @param event
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.handleDoubleClick = function (event) {
+  this.handleDoubleClick = function () {
     m_this.zoom(0.5, false);
     return false;
   };

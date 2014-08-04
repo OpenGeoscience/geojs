@@ -49,7 +49,7 @@ ggl.planeFeature = function (arg) {
         texture = null;
 
     this.buildTime().modified();
-         
+
     if (m_actor) {
       this.renderer().contextRenderer().removeActor(m_actor);
     }
@@ -75,14 +75,14 @@ ggl.planeFeature = function (arg) {
 
       /// TODO: Is there a reliable way to make sure that image is loaded already?
       if (image.complete) {
-         texture.setImage(image);
+        texture.setImage(image);
         m_actor.material().addAttribute(texture);
         /// NOTE Currently we assume that we want to show the feature as
         /// soon as the image gets loaded. However, there might be a case
         /// where we want to lock down the visibility. We will deal with that
         /// later.
         m_this.visible(true);
-            
+
         if (onloadCallback) {
           onloadCallback.call(this);
         }
