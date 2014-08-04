@@ -27,6 +27,7 @@ geo.osmLayer = function (arg) {
   var m_this = this,
     m_tiles = {},
     m_hiddenBinNumber = 0,
+    m_lastVisibleBinNumber = 999,
     m_visibleBinNumber = 1000,
     m_pendingNewTiles = [],
     m_pendingInactiveTiles = [],
@@ -53,8 +54,8 @@ geo.osmLayer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   function getModifiedMapZoom() {
-    if (m_this.map().zoom() < 19) {
-      return (m_this.map().zoom() + 1);
+    if (m_this.map().zoom() < 18) {
+      return (m_this.map().zoom() + 2);
     } else {
       return m_this.map().zoom();
     }
@@ -291,6 +292,8 @@ geo.osmLayer = function (arg) {
         }
       }
     }
+
+    m_previousZoom = currZoom;
 
     setTimeout(function () {
       var tile, i;
