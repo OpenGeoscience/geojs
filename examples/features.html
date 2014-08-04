@@ -89,8 +89,8 @@
   // create the map
   $(function() {
       var mapOptions = {node: '#map',
-                        zoom : 3,
-                        center : [0.0, 0.0]},
+                        zoom : 0,
+                        center : [0, 0]},
           myMap = geo.map(mapOptions),
           layer = myMap.createLayer('osm'),
           d3Layer = myMap.createLayer('feature', {'renderer': 'd3Renderer'}),
@@ -706,6 +706,16 @@
         <h4 class="modal-title">Geojs feature demo</h4>
       </div>
       <div class="modal-body">
+        <p class="text-left">
+          This is an iteractive demo that shows off the feature and style API of
+          <a href="https://github.com/OpenGeoscience/geojs" target="homepage">GeoJS</a>.
+          You can draw one the map by selecting a feature type from the menu.  A dialog
+          will pop up allowing you to customize the style of the new features.  When you are
+          ready to start drawing click the "Create" button and follow the directions in the
+          lower right panel.  When you are finished, click the button in the menu, and the 
+          features will be added to the map using the GeoJS feature API.
+        </p>
+        <p class="text-right">© Kitware, Inc.</p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-primary" data-dismiss="modal" data-target="about-modal">Close</button>
