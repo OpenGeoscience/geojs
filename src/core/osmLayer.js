@@ -32,7 +32,7 @@ geo.osmLayer = function (arg) {
     m_pendingNewTiles = [],
     m_pendingInactiveTiles = [],
     m_numberOfCachedTiles = 0,
-    m_tileCacheSize = 150,
+    m_tileCacheSize = 100,
     m_previousZoom = null,
     m_baseUrl = 'http://tile.openstreetmap.org/',
     m_imageFormat = 'png',
@@ -58,6 +58,19 @@ geo.osmLayer = function (arg) {
       return (m_this.map().zoom() + 2);
     } else {
       return m_this.map().zoom();
+    }
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return modified last zoom
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  function getModifiedLastMapZoom() {
+    if (m_this.map().lastZoom() < 18) {
+      return (m_this.map().lastZoom() + 2);
+    } else {
+      return m_this.map().lastZoom();
     }
   }
 
@@ -267,19 +280,19 @@ geo.osmLayer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   /* jshint -W089 */
   this._removeTiles = function () {
-    var x, y, tile, zoom, currZoom = getModifiedMapZoom();
+    var i, x, y, tile, zoom, currZoom = getModifiedMapZoom(),
+        lastZoom = getModifiedLastMapZoom();
 
     if (!m_tiles) {
       return m_this;
     }
 
-    if (m_previousZoom === currZoom) {
+    if (lastZoom == currZoom) {
       return m_this;
     }
-    m_previousZoom = currZoom;
 
     for (zoom in m_tiles) {
-      if (currZoom === zoom) {
+      if (currZoom == zoom) {
         continue;
       }
       for (x in m_tiles[zoom]) {
@@ -293,49 +306,50 @@ geo.osmLayer = function (arg) {
       }
     }
 
-    m_previousZoom = currZoom;
+    /// First remove the tiles if we have cached more than max cached limit
+    m_pendingInactiveTiles.sort(function (a, b) {
+      return a.lastused - b.lastused;
+    });
 
-    setTimeout(function () {
-      var tile, i;
+    i = 0;
 
-      /// First remove the tiles if we have cached more than max cached limit
-      m_pendingInactiveTiles.sort(function (a, b) {
-        return a.lastused - b.lastused;
-      });
+    /// Get rid of tiles if we have reached our threshold. However,
+    /// If the tile is required for current zoom, then do nothing.
+    while (m_numberOfCachedTiles > m_tileCacheSize &&
+      i < m_pendingInactiveTiles.length) {
+      tile = m_pendingInactiveTiles[i];
 
-      i = 0;
-      /// Get rid of tiles if we have reached our threshold. However,
-      /// If the tile is required for current zoom, then do nothing.
-      while (m_numberOfCachedTiles > m_tileCacheSize &&
-        i < m_pendingInactiveTiles.length) {
-        tile = m_pendingInactiveTiles[i];
-        if (tile.zoom !== getModifiedMapZoom()) {
-          m_this._delete(tile.feature);
-          delete m_tiles[tile.zoom][tile.index_x][tile.index_y];
-          m_pendingInactiveTiles.splice(i, 1);
-          m_numberOfCachedTiles -= 1;
-        }
+      if (tile.zoom === currZoom ||
+          tile.zoom === lastZoom) {
         i += 1;
+        continue;
       }
+      m_this._delete(tile.feature);
+      delete m_tiles[tile.zoom][tile.index_x][tile.index_y];
+      m_pendingInactiveTiles.splice(i, 1);
+      m_numberOfCachedTiles -= 1;
+    }
 
-      for (i = 0; i < m_pendingInactiveTiles.length; i += 1) {
-        tile = m_pendingInactiveTiles[i];
-        if (tile.zoom !== getModifiedMapZoom()) {
-          tile.REMOVING = false;
-          tile.REMOVED = true;
-          tile.feature.bin(m_hiddenBinNumber);
+    for (i = 0; i < m_pendingInactiveTiles.length; i += 1) {
+      tile = m_pendingInactiveTiles[i];
+      if (tile.zoom !== currZoom) {
+        tile.REMOVING = false;
+        tile.REMOVED = true;
+        if (tile.zoom === lastZoom) {
+          tile.feature.bin(m_lastVisibleBinNumber);
         } else {
-          tile.REMOVING = false;
-          tile.REMOVED = false;
-          tile.lastused = new Date();
-          tile.feature.bin(m_visibleBinNumber);
+          tile.feature.bin(m_hiddenBinNumber);
         }
-        tile.feature._update();
+      } else {
+        tile.REMOVING = false;
+        tile.REMOVED = false;
+        tile.lastused = new Date();
+        tile.feature.bin(m_visibleBinNumber);
       }
-      m_pendingInactiveTiles = [];
-      m_this._draw();
-    }, 100);
-
+      tile.feature._update();
+    }
+    m_pendingInactiveTiles = [];
+    m_this._draw();
 
     return m_this;
   };

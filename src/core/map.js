@@ -38,6 +38,7 @@ geo.map = function (arg) {
       m_center = arg.center === undefined ? [0.0, 0.0] :
                  arg.center,
       m_zoom = arg.zoom === undefined ? 10 : arg.zoom,
+      m_lastZoom = m_zoom,
       m_baseLayer = null,
       toMillis, calculateGlobalAnimationRange, cloneTimestep,
       m_animationState = {range: null, timestep: null, layers: null},
@@ -165,11 +166,27 @@ geo.map = function (arg) {
     if (val === undefined) {
       return m_zoom;
     }
-    m_zoom = val;
+
+    if (val !== m_zoom) {
+      m_lastZoom = m_zoom;
+      m_zoom = val;
+      m_this.modified();
+    }
+
     // TODO Fix this
     //      m_this.trigger(geo.event.zoom);
-    m_this.modified();
     return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set last zoom level of the map
+   *
+   * @returns {Number|geo.map}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.lastZoom = function () {
+    return m_lastZoom;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -583,7 +600,7 @@ geo.map = function (arg) {
       m_animationState.timestep = nextTimestep;
       m_this._animateTimestep();
     }
-    
+
     return m_this;
   };
 
