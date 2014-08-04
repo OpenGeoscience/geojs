@@ -21,7 +21,9 @@ ogs.namespace = function(ns_string) {
     return parent;
 };
 
-geo = ogs.namespace("geo");
+var geo = ogs.namespace("geo");
+
+window.geo = geo;
 
 geo.renderers = {};
 
@@ -131,34 +133,34 @@ geo.object = function() {
             event.forEach(function(e) {
                 m_this.on(e, handler);
             });
-            return this;
+            return m_this;
         }
         if (!m_eventHandlers.hasOwnProperty(event)) {
             m_eventHandlers[event] = [];
         }
         m_eventHandlers[event].push(handler);
-        return this;
+        return m_this;
     };
     this.trigger = function(event, args) {
         if (Array.isArray(event)) {
             event.forEach(function(e) {
                 m_this.trigger(e, args);
             });
-            return this;
+            return m_this;
         }
         if (m_eventHandlers.hasOwnProperty(event)) {
             m_eventHandlers[event].forEach(function(handler) {
                 handler(args);
             });
         }
-        return this;
+        return m_this;
     };
     this.off = function(event, arg) {
         if (Array.isArray(event)) {
             event.forEach(function(e) {
                 m_this.off(e, arg);
             });
-            return this;
+            return m_this;
         }
         if (!arg) {
             m_eventHandlers[event] = [];
@@ -166,14 +168,14 @@ geo.object = function() {
             arg.forEach(function(handler) {
                 m_this.off(event, handler);
             });
-            return this;
+            return m_this;
         }
         if (m_eventHandlers.hasOwnProperty(event)) {
             m_eventHandlers[event] = m_eventHandlers[event].filter(function(f) {
                 return f !== arg;
             });
         }
-        return this;
+        return m_this;
     };
     vgl.object.call(this);
     return this;
@@ -193,43 +195,49 @@ geo.sceneObject = function(arg) {
             return m_parent;
         }
         m_parent = arg;
-        return this;
+        return m_this;
     };
     this.addChild = function(child) {
         if (Array.isArray(child)) {
-            child.forEach(this.addChild);
-            return this;
+            child.forEach(m_this.addChild);
+            return m_this;
         }
-        child.parent(this);
+        child.parent(m_this);
         m_children.push(child);
-        return this;
+        return m_this;
     };
     this.removeChild = function(child) {
         if (Array.isArray(child)) {
-            child.forEach(this.removeChild);
-            return this;
+            child.forEach(m_this.removeChild);
+            return m_this;
         }
         m_children = m_children.filter(function(c) {
             return c !== child;
         });
-        return this;
+        return m_this;
     };
     this.children = function() {
         return m_children.slice();
     };
-    this.trigger = function(event, args) {
+    this.trigger = function(event, args, childrenOnly) {
+        var geoArgs;
         args = args || {};
-        if (m_parent && args._triggeredBy !== m_parent) {
-            args._triggeredBy = m_this;
+        geoArgs = args.geo || {};
+        args.geo = geoArgs;
+        if (!childrenOnly && m_parent && geoArgs._triggeredBy !== m_parent) {
+            geoArgs._triggeredBy = m_this;
             m_parent.trigger(event, args);
-            return this;
+            return m_this;
         }
-        s_trigger.call(this, event, args);
+        s_trigger.call(m_this, event, args);
+        if (geoArgs.stopPropagation) {
+            return m_this;
+        }
         m_children.forEach(function(child) {
-            args._triggeredBy = m_this;
+            geoArgs._triggeredBy = m_this;
             child.trigger(event, args);
         });
-        return this;
+        return m_this;
     };
     return this;
 };
@@ -257,7 +265,7 @@ geo.ellipsoid = function(x, y, z) {
     if (x < 0 || y < 0 || z < 0) {
         return console.log("[error] Al radii components must be greater than zero");
     }
-    var m_radii = new vec3.fromValues(x, y, z), m_radiiSquared = new vec3.fromValues(x * x, y * y, z * z), m_minimumRadius = Math.min(x, y, z), m_maximumRadius = Math.max(x, y, z);
+    var m_this = this, m_radii = new vec3.fromValues(x, y, z), m_radiiSquared = new vec3.fromValues(x * x, y * y, z * z), m_minimumRadius = Math.min(x, y, z), m_maximumRadius = Math.max(x, y, z);
     this.radii = function() {
         return m_radii;
     };
@@ -284,7 +292,7 @@ geo.ellipsoid = function(x, y, z) {
     this.transformPoint = function(lat, lon, elev) {
         lat = lat * (Math.PI / 180);
         lon = lon * (Math.PI / 180);
-        var n = this.computeGeodeticSurfaceNormal(lat, lon), k = vec3.create(), gamma = Math.sqrt(vec3.dot(n, k)), result = vec3.create();
+        var n = m_this.computeGeodeticSurfaceNormal(lat, lon), k = vec3.create(), gamma = Math.sqrt(vec3.dot(n, k)), result = vec3.create();
         vec3.multiply(k, m_radiiSquared, n);
         vec3.scale(k, k, 1 / gamma);
         vec3.scale(n, n, elev);
@@ -305,7 +313,7 @@ geo.ellipsoid = function(x, y, z) {
             index = j * stride + offset;
             sourceDataArray[index] = sourceDataArray[index] * (Math.PI / 180);
             sourceDataArray[index + 1] = sourceDataArray[index + 1] * (Math.PI / 180);
-            n = this.computeGeodeticSurfaceNormal(sourceDataArray[index + 1], sourceDataArray[index]);
+            n = m_this.computeGeodeticSurfaceNormal(sourceDataArray[index + 1], sourceDataArray[index]);
             vec3.multiply(k, m_radiiSquared, n);
             gamma = Math.sqrt(vec3.dot(n, k));
             vec3.scale(k, k, 1 / gamma);
@@ -316,7 +324,7 @@ geo.ellipsoid = function(x, y, z) {
             sourceDataArray[index + 2] = result[2];
         }
     };
-    return this;
+    return m_this;
 };
 
 geo.ellipsoid.WGS84 = vgl.freezeObject(geo.ellipsoid(6378137, 6378137, 6356752.314245179));
@@ -442,7 +450,7 @@ geo.latlng = function(arg1, arg2) {
     if (!(this instanceof geo.latlng)) {
         return new geo.latlng(arg1, arg2);
     }
-    var m_lat = arg2 === undefined ? arg1.lat() : arg1, m_lng = arg2 === undefined ? arg1.lng() : arg2;
+    var m_this = this, m_lat = arg2 === undefined ? arg1.lat() : arg1, m_lng = arg2 === undefined ? arg1.lng() : arg2;
     this.lat = function(val) {
         if (val === undefined) {
             return m_lat;
@@ -459,14 +467,14 @@ geo.latlng = function(arg1, arg2) {
     };
     this.x = function(val) {
         if (val === undefined) {
-            return this.lng();
+            return m_this.lng();
         } else {
             m_lng = val;
         }
     };
     this.y = function(val) {
         if (val === undefined) {
-            return this.lat();
+            return m_this.lat();
         } else {
             m_lat = val;
         }
@@ -508,7 +516,10 @@ geo.layer = function(arg) {
         color: [ .8, .8, .8 ],
         visible: true,
         bin: 100
-    } : arg.style, m_id = arg.id === undefined ? geo.newLayerId() : arg.id, m_name = "", m_gcs = "EPSG:4326", m_timeRange = null, m_source = arg.source || null, m_map = arg.map === undefined ? null : arg.map, m_isReference = false, m_x = 0, m_y = 0, m_width = 0, m_height = 0, m_node = null, m_canvas = null, m_renderer = null, m_initialized = false, m_rendererName = arg.renderer === undefined ? "vglRenderer" : arg.renderer, m_dataTime = geo.timestamp(), m_updateTime = geo.timestamp(), m_drawTime = geo.timestamp();
+    } : arg.style, m_id = arg.id === undefined ? geo.newLayerId() : arg.id, m_name = "", m_gcs = "EPSG:4326", m_timeRange = null, m_source = arg.source || null, m_map = arg.map === undefined ? null : arg.map, m_isReference = false, m_x = 0, m_y = 0, m_width = 0, m_height = 0, m_node = null, m_canvas = null, m_renderer = null, m_initialized = false, m_rendererName = arg.renderer === undefined ? "vglRenderer" : arg.renderer, m_dataTime = geo.timestamp(), m_updateTime = geo.timestamp(), m_drawTime = geo.timestamp(), m_sticky = arg.sticky === undefined ? true : arg.sticky;
+    this.sticky = function() {
+        return m_sticky;
+    };
     this.node = function() {
         return m_node;
     };
@@ -518,7 +529,7 @@ geo.layer = function(arg) {
         }
         m_id = geo.newLayerId();
         m_this.modified();
-        return this;
+        return m_this;
     };
     this.name = function(val) {
         if (val === undefined) {
@@ -526,7 +537,7 @@ geo.layer = function(arg) {
         }
         m_name = val;
         m_this.modified();
-        return this;
+        return m_this;
     };
     this.opacity = function(val) {
         if (val === undefined) {
@@ -534,7 +545,7 @@ geo.layer = function(arg) {
         }
         m_style.opacity = val;
         m_this.modified();
-        return this;
+        return m_this;
     };
     this.visible = function(val) {
         if (val === undefined) {
@@ -542,7 +553,7 @@ geo.layer = function(arg) {
         }
         m_style.visible = val;
         m_this.modified();
-        return this;
+        return m_this;
     };
     this.bin = function(val) {
         if (val === undefined) {
@@ -550,7 +561,7 @@ geo.layer = function(arg) {
         }
         m_style.bin = val;
         m_this.modified();
-        return this;
+        return m_this;
     };
     this.gcs = function(val) {
         if (val === undefined) {
@@ -558,11 +569,11 @@ geo.layer = function(arg) {
         }
         m_gcs = val;
         m_this.modified();
-        return this;
+        return m_this;
     };
     this.transform = function(val) {
         geo.transform.transformLayer(val, m_this, m_map.baseLayer());
-        return this;
+        return m_this;
     };
     this.timeRange = function(val) {
         if (val === undefined) {
@@ -570,7 +581,7 @@ geo.layer = function(arg) {
         }
         m_timeRange = val;
         m_this.modified();
-        return this;
+        return m_this;
     };
     this.source = function(val) {
         if (val === undefined) {
@@ -578,7 +589,7 @@ geo.layer = function(arg) {
         }
         m_source = val;
         m_this.modified();
-        return this;
+        return m_this;
     };
     this.map = function(val) {
         if (val === undefined) {
@@ -587,7 +598,7 @@ geo.layer = function(arg) {
         m_map = val;
         m_map.node().append(m_node);
         m_this.modified();
-        return this;
+        return m_this;
     };
     this.renderer = function() {
         return m_renderer;
@@ -612,14 +623,14 @@ geo.layer = function(arg) {
         if (val !== undefined) {
             m_isReference = val;
             m_this.modified();
-            return this;
+            return m_this;
         }
         return m_isReference;
     };
     this.initialized = function(val) {
         if (val !== undefined) {
             m_initialized = val;
-            return this;
+            return m_this;
         }
         return m_initialized;
     };
@@ -631,7 +642,7 @@ geo.layer = function(arg) {
     };
     this._init = function() {
         if (m_initialized) {
-            return this;
+            return m_this;
         }
         m_node = $(document.createElement("div"));
         m_node.attr("id", m_name);
@@ -647,7 +658,7 @@ geo.layer = function(arg) {
         }
         m_this.addChild(m_renderer);
         m_initialized = true;
-        return this;
+        return m_this;
     };
     this._exit = function() {};
     this._update = function() {};
@@ -665,7 +676,7 @@ geo.layer = function(arg) {
             width: m_width,
             height: m_height
         });
-        return this;
+        return m_this;
     };
     this.width = function() {
         return m_width;
@@ -687,26 +698,29 @@ geo.featureLayer = function(arg) {
     geo.layer.call(this, arg);
     var m_this = this, m_features = null, s_init = this._init, s_update = this._update;
     this.createFeature = function(featureName, arg) {
-        var newFeature = geo.createFeature(featureName, m_this, this.renderer(), arg);
+        var newFeature = geo.createFeature(featureName, m_this, m_this.renderer(), arg);
         if (!m_features) {
             m_features = [];
         }
+        m_this.addChild(newFeature);
         m_features.push(newFeature);
-        this.features(m_features);
-        this.modified();
+        m_this.features(m_features);
+        m_this.modified();
         return newFeature;
     };
-    this.deleteFeature = function() {};
+    this.deleteFeature = function(feature) {
+        return m_this._delete(feature);
+    };
     this.features = function(val) {
-        return this._features(val);
+        return m_this._features(val);
     };
     this._features = function(val) {
         if (val === undefined) {
             return m_features || [];
         } else {
             m_features = val.slice(0);
-            this.dataTime().modified();
-            this.modified();
+            m_this.dataTime().modified();
+            m_this.modified();
         }
     };
     this._delete = function(feature) {
@@ -714,30 +728,31 @@ geo.featureLayer = function(arg) {
         for (i = 0; i < m_features.length; i += 1) {
             if (m_features[i] === feature) {
                 m_features[i]._exit();
-                this.dataTime().modified();
-                this.modified();
+                m_this.dataTime().modified();
+                m_this.modified();
                 return m_features.splice(i, 1);
             }
         }
-        return this;
+        m_this.removeChild(feature);
+        return m_this;
     };
     this._init = function() {
-        if (this.initialized()) {
-            return this;
+        if (m_this.initialized()) {
+            return m_this;
         }
-        s_init.call(this);
-        this.on(geo.event.resize, function(event) {
+        s_init.call(m_this);
+        m_this.on(geo.event.resize, function(event) {
             m_this.renderer()._resize(event.x, event.y, event.width, event.height);
             m_this._update({});
             m_this.renderer()._render();
         });
-        this.on(geo.event.pan, function(event) {
+        m_this.on(geo.event.pan, function(event) {
             m_this._update({
                 event: event
             });
             m_this.renderer()._render();
         });
-        this.on(geo.event.zoom, function(event) {
+        m_this.on(geo.event.zoom, function(event) {
             if (m_this.map()) {
                 m_this.map().zoom(event.curr_zoom);
             }
@@ -746,49 +761,45 @@ geo.featureLayer = function(arg) {
             });
             m_this.renderer()._render();
         });
-        return this;
+        return m_this;
     };
     this._update = function(request) {
-        var i, reset = false;
+        var i;
         if (!m_features) {
-            return this;
+            return m_this;
         }
-        s_update.call(this, request);
-        if (!this.source() && m_features && m_features.length === 0) {
+        s_update.call(m_this, request);
+        if (!m_this.source() && m_features && m_features.length === 0) {
             console.log("[info] No valid data source found.");
             return;
         }
-        if (this.dataTime().getMTime() > this.updateTime().getMTime()) {
+        if (m_this.dataTime().getMTime() > m_this.updateTime().getMTime()) {
             for (i = 0; i < m_features.length; i += 1) {
-                m_features[i].renderer(this.renderer());
+                m_features[i].renderer(m_this.renderer());
             }
-            reset = true;
         }
         for (i = 0; i < m_features.length; i += 1) {
             m_features[i]._update();
         }
-        this.updateTime().modified();
-        if (reset) {
-            m_this.renderer().reset();
-        }
-        return this;
+        m_this.updateTime().modified();
+        return m_this;
     };
     this._draw = function() {
-        this.renderer()._render();
-        return this;
+        m_this.renderer()._render();
+        return m_this;
     };
     this.clear = function() {
         var i;
-        if (!m_features) return this;
+        if (!m_features) return m_this;
         for (i = 0; i < m_features.length; i += 1) {
             m_features[i]._exit();
         }
-        this.dataTime().modified();
-        this.modified();
+        m_this.dataTime().modified();
+        m_this.modified();
         m_features = [];
-        return this;
+        return m_this;
     };
-    return this;
+    return m_this;
 };
 
 inherit(geo.featureLayer, geo.layer);
@@ -868,7 +879,7 @@ geo.map = function(arg) {
     arg = arg || {};
     geo.sceneObject.call(this, arg);
     arg.layers = arg.layers === undefined ? [] : arg.layers;
-    var m_this = this, m_x = 0, m_y = 0, m_node = $(arg.node), m_width = m_node.width(), m_height = m_node.height(), m_gcs = arg.gcs === undefined ? "EPSG:4326" : arg.gcs, m_uigcs = arg.uigcs === undefined ? "EPSG:4326" : arg.uigcs, m_center = arg.center === undefined ? [ 0, 0 ] : arg.center, m_zoom = arg.zoom === undefined ? 10 : arg.zoom, m_baseLayer = null, toMillis, calculateGlobalAnimationRange, cloneTimestep, m_animationState = {
+    var m_this = this, m_x = 0, m_y = 0, m_node = $(arg.node), m_width = arg.width || m_node.width(), m_height = arg.height || m_node.height(), m_gcs = arg.gcs === undefined ? "EPSG:4326" : arg.gcs, m_uigcs = arg.uigcs === undefined ? "EPSG:4326" : arg.uigcs, m_center = arg.center === undefined ? [ 0, 0 ] : arg.center, m_zoom = arg.zoom === undefined ? 10 : arg.zoom, m_baseLayer = null, toMillis, calculateGlobalAnimationRange, cloneTimestep, m_animationState = {
         range: null,
         timestep: null,
         layers: null
@@ -937,7 +948,7 @@ geo.map = function(arg) {
             return m_gcs;
         }
         m_gcs = arg;
-        return this;
+        return m_this;
     };
     this.uigcs = function() {
         return m_uigcs;
@@ -951,7 +962,7 @@ geo.map = function(arg) {
         }
         m_zoom = val;
         m_this.modified();
-        return this;
+        return m_this;
     };
     this.center = function(val) {
         if (val === undefined) {
@@ -959,7 +970,7 @@ geo.map = function(arg) {
         }
         m_center = val.slice;
         m_this.modified();
-        return this;
+        return m_this;
     };
     this.createLayer = function(layerName, arg) {
         var newLayer = geo.createLayer(layerName, m_this, arg);
@@ -1003,7 +1014,7 @@ geo.map = function(arg) {
                 layer: layer
             });
         }
-        return this;
+        return m_this;
     };
     this.resize = function(x, y, w, h) {
         var i, layers = m_this.children();
@@ -1023,7 +1034,7 @@ geo.map = function(arg) {
             height: h
         });
         m_this.modified();
-        return this;
+        return m_this;
     };
     this.gcsToDisplay = function(input) {
         var world, output;
@@ -1053,7 +1064,7 @@ geo.map = function(arg) {
             }
             m_baseLayer = baseLayer;
             m_baseLayer.referenceLayer(true);
-            return this;
+            return m_this;
         }
         return m_baseLayer;
     };
@@ -1071,7 +1082,7 @@ geo.map = function(arg) {
             type: geo.event.drawEnd,
             target: m_this
         });
-        return this;
+        return m_this;
     };
     this.animate = function(layers) {
         var animationRange;
@@ -1087,17 +1098,17 @@ geo.map = function(arg) {
                 layers: layers
             };
         }
-        this._animate();
-        return this;
+        m_this._animate();
+        return m_this;
     };
     this.pauseAnimation = function() {
         m_this.trigger(geo.event.animationPause);
-        return this;
+        return m_this;
     };
     this.stopAnimation = function() {
         m_this.trigger(geo.event.animationStop);
         m_animationState.timestep = null;
-        return this;
+        return m_this;
     };
     this.stepAnimationForward = function(layers) {
         var animationRange;
@@ -1114,7 +1125,7 @@ geo.map = function(arg) {
             };
         }
         m_this._stepAnimationForward();
-        return this;
+        return m_this;
     };
     this.stepAnimationBackward = function(layers) {
         var animationRange;
@@ -1131,7 +1142,7 @@ geo.map = function(arg) {
             };
         }
         m_this._stepAnimationBackward();
-        return this;
+        return m_this;
     };
     this._animate = function() {
         var animationRange, nextTimestep, id;
@@ -1156,7 +1167,7 @@ geo.map = function(arg) {
             }
         }
         id = setInterval(renderTimestep, 10);
-        return this;
+        return m_this;
     };
     this._animateTimestep = function() {
         if (m_animationState) {
@@ -1174,7 +1185,7 @@ geo.map = function(arg) {
             });
             m_this.draw();
         }
-        return this;
+        return m_this;
     };
     this._stepAnimationForward = function() {
         var nextTimestep;
@@ -1187,7 +1198,7 @@ geo.map = function(arg) {
             m_animationState.timestep = nextTimestep;
             m_this._animateTimestep();
         }
-        return this;
+        return m_this;
     };
     this._stepAnimationBackward = function() {
         var previousTimestep;
@@ -1201,7 +1212,7 @@ geo.map = function(arg) {
         }
         m_animationState.timestep = previousTimestep;
         m_this._animateTimestep();
-        return this;
+        return m_this;
     };
     this._init = function(arg) {
         var i;
@@ -1216,14 +1227,14 @@ geo.map = function(arg) {
                 m_this.addLayer(arg.layers[i]);
             }
         }
-        return this;
+        return m_this;
     };
     this._update = function(request) {
         var i, layers = m_this.children();
         for (i = 0; i < layers.length; i += 1) {
             layers[i]._update(request);
         }
-        return this;
+        return m_this;
     };
     this._exit = function() {
         var i, layers = m_this.children();
@@ -1242,20 +1253,20 @@ geo.feature = function(arg) {
     if (!(this instanceof geo.feature)) {
         return new geo.feature(arg);
     }
-    geo.object.call(this);
+    geo.sceneObject.call(this);
     arg = arg || {};
-    var m_style = {}, m_layer = arg.layer === undefined ? null : arg.layer, m_gcs = arg.gcs === undefined ? "EPSG:4326" : arg.gcs, m_visible = arg.visible === undefined ? true : arg.visible, m_bin = arg.bin === undefined ? 0 : arg.bin, m_renderer = arg.renderer === undefined ? null : arg.renderer, m_dataTime = geo.timestamp(), m_buildTime = geo.timestamp(), m_updateTime = geo.timestamp();
+    var m_this = this, m_style = {}, m_layer = arg.layer === undefined ? null : arg.layer, m_gcs = arg.gcs === undefined ? "EPSG:4326" : arg.gcs, m_visible = arg.visible === undefined ? true : arg.visible, m_bin = arg.bin === undefined ? 0 : arg.bin, m_renderer = arg.renderer === undefined ? null : arg.renderer, m_dataTime = geo.timestamp(), m_buildTime = geo.timestamp(), m_updateTime = geo.timestamp();
     this.style = function(arg1, arg2) {
         if (arg1 === undefined) {
             return m_style;
         } else if (arg2 === undefined) {
             m_style = $.extend({}, m_style, arg1);
-            this.modified();
-            return this;
+            m_this.modified();
+            return m_this;
         } else {
             m_style[arg1] = arg2;
-            this.modified();
-            return this;
+            m_this.modified();
+            return m_this;
         }
     };
     this.layer = function() {
@@ -1265,15 +1276,15 @@ geo.feature = function(arg) {
         return m_renderer;
     };
     this.drawables = function() {
-        return this._drawables();
+        return m_this._drawables();
     };
     this.gcs = function(val) {
         if (val === undefined) {
             return m_gcs;
         } else {
             m_gcs = val;
-            this.modified();
-            return this;
+            m_this.modified();
+            return m_this;
         }
     };
     this.visible = function(val) {
@@ -1281,8 +1292,8 @@ geo.feature = function(arg) {
             return m_visible;
         } else {
             m_visible = val;
-            this.modified();
-            return this;
+            m_this.modified();
+            return m_this;
         }
     };
     this.bin = function(val) {
@@ -1290,8 +1301,8 @@ geo.feature = function(arg) {
             return m_bin;
         } else {
             m_bin = val;
-            this.modified();
-            return this;
+            m_this.modified();
+            return m_this;
         }
     };
     this.dataTime = function(val) {
@@ -1299,8 +1310,8 @@ geo.feature = function(arg) {
             return m_dataTime;
         } else {
             m_dataTime = val;
-            this.modified();
-            return this;
+            m_this.modified();
+            return m_this;
         }
     };
     this.buildTime = function(val) {
@@ -1308,8 +1319,8 @@ geo.feature = function(arg) {
             return m_buildTime;
         } else {
             m_buildTime = val;
-            this.modified();
-            return this;
+            m_this.modified();
+            return m_this;
         }
     };
     this.updateTime = function(val) {
@@ -1317,8 +1328,8 @@ geo.feature = function(arg) {
             return m_updateTime;
         } else {
             m_updateTime = val;
-            this.modified();
-            return this;
+            m_this.modified();
+            return m_this;
         }
     };
     this._init = function(arg) {
@@ -1337,7 +1348,7 @@ geo.feature = function(arg) {
     return this;
 };
 
-inherit(geo.feature, geo.object);
+inherit(geo.feature, geo.sceneObject);
 
 geo.pointFeature = function(arg) {
     "use strict";
@@ -1346,19 +1357,19 @@ geo.pointFeature = function(arg) {
     }
     arg = arg || {};
     geo.feature.call(this, arg);
-    var m_positions = arg.positions === undefined ? null : arg.positions, s_init = this._init;
+    var m_this = this, m_positions = arg.positions === undefined ? null : arg.positions, s_init = this._init;
     this.positions = function(val) {
         if (val === undefined) {
             return m_positions;
         } else {
             m_positions = val.slice(0);
-            this.dataTime().modified();
-            this.modified();
-            return this;
+            m_this.dataTime().modified();
+            m_this.modified();
+            return m_this;
         }
     };
     this._init = function(arg) {
-        s_init.call(this, arg);
+        s_init.call(m_this, arg);
         var defaultStyle = $.extend({}, {
             size: 1,
             width: 1,
@@ -1367,13 +1378,13 @@ geo.pointFeature = function(arg) {
             point_sprites: false,
             point_sprites_image: null
         }, arg.style === undefined ? {} : arg.style);
-        this.style(defaultStyle);
+        m_this.style(defaultStyle);
         if (m_positions) {
-            this.dataTime().modified();
+            m_this.dataTime().modified();
         }
     };
-    this._init(arg);
-    return this;
+    m_this._init(arg);
+    return m_this;
 };
 
 inherit(geo.pointFeature, geo.feature);
@@ -1393,7 +1404,7 @@ geo.lineFeature = function(arg) {
             m_positions = val.slice(0);
             m_this.dataTime().modified();
             m_this.modified();
-            return this;
+            return m_this;
         }
     };
     this._init = function(arg) {
@@ -1421,26 +1432,26 @@ geo.pathFeature = function(arg) {
     }
     arg = arg || {};
     geo.feature.call(this, arg);
-    var m_positions = arg.positions === undefined ? [] : arg.positions, s_init = this._init;
+    var m_this = this, m_positions = arg.positions === undefined ? [] : arg.positions, s_init = this._init;
     this.positions = function(val) {
         if (val === undefined) {
             return m_positions;
         }
         m_positions = val.slice(0);
-        this.dataTime().modified();
-        this.modified();
-        return this;
+        m_this.dataTime().modified();
+        m_this.modified();
+        return m_this;
     };
     this._init = function(arg) {
-        s_init.call(this, arg);
+        s_init.call(m_this, arg);
         var defaultStyle = $.extend({}, {
             width: [ 1 ],
             color: [ 1, 1, 1 ],
             pattern: "solid"
         }, arg.style === undefined ? {} : arg.style);
-        this.style(defaultStyle);
+        m_this.style(defaultStyle);
         if (m_positions) {
-            this.dataTime().modified();
+            m_this.dataTime().modified();
         }
     };
     this._init(arg);
@@ -1456,18 +1467,18 @@ geo.polygonFeature = function(arg) {
     }
     arg = arg || {};
     geo.feature.call(this, arg);
-    var s_init = this._init;
+    var m_this = this, s_init = this._init;
     this._init = function(arg) {
-        s_init.call(this, arg);
+        s_init.call(m_this, arg);
         var defaultStyle = $.extend({}, {
             color: [ 1, 1, 1 ],
             fill_color: [ 1, 1, 1 ],
             fill: true
         }, arg.style === undefined ? {} : arg.style);
-        this.style(defaultStyle);
+        m_this.style(defaultStyle);
     };
-    this._init(arg);
-    return this;
+    m_this._init(arg);
+    return m_this;
 };
 
 inherit(geo.polygonFeature, geo.feature);
@@ -1482,7 +1493,7 @@ geo.planeFeature = function(arg) {
     arg.lr = arg.lr === undefined ? [ 1, 0, 0 ] : arg.lr;
     arg.depth = arg.depth === undefined ? 0 : arg.depth;
     geo.polygonFeature.call(this, arg);
-    var m_origin = [ arg.ul.x, arg.lr.y, arg.depth ], m_upperLeft = [ arg.ul.x, arg.ul.y, arg.depth ], m_lowerRight = [ arg.lr.x, arg.lr.y, arg.depth ], m_defaultDepth = arg.depth, m_drawOnAsyncResourceLoad = arg.drawOnAsyncResourceLoad === undefined ? true : false, s_init = this._init;
+    var m_this = this, m_origin = [ arg.ul.x, arg.lr.y, arg.depth ], m_upperLeft = [ arg.ul.x, arg.ul.y, arg.depth ], m_lowerRight = [ arg.lr.x, arg.lr.y, arg.depth ], m_defaultDepth = arg.depth, m_drawOnAsyncResourceLoad = arg.drawOnAsyncResourceLoad === undefined ? true : false, s_init = this._init;
     this.origin = function(val) {
         if (val === undefined) {
             return m_origin;
@@ -1497,9 +1508,9 @@ geo.planeFeature = function(arg) {
         } else if (val instanceof geo.latlng) {
             m_origin = [ val.x(), val.y(), m_defaultDepth ];
         }
-        this.dataTime().modified();
-        this.modified();
-        return this;
+        m_this.dataTime().modified();
+        m_this.modified();
+        return m_this;
     };
     this.upperLeft = function(val) {
         if (val === undefined) {
@@ -1515,9 +1526,9 @@ geo.planeFeature = function(arg) {
         } else if (val instanceof geo.latlng) {
             m_upperLeft = [ val.x(), val.y(), m_defaultDepth ];
         }
-        this.dataTime().modified();
-        this.modified();
-        return this;
+        m_this.dataTime().modified();
+        m_this.modified();
+        return m_this;
     };
     this.lowerRight = function(val) {
         if (val === undefined) {
@@ -1530,30 +1541,30 @@ geo.planeFeature = function(arg) {
             if (m_lowerRight.length === 2) {
                 m_lowerRight[2] = m_defaultDepth;
             }
-            this.dataTime().modified();
+            m_this.dataTime().modified();
         } else if (val instanceof geo.latlng) {
             m_lowerRight = [ val.x(), val.y(), m_defaultDepth ];
         }
-        this.dataTime().modified();
-        this.modified();
-        return this;
+        m_this.dataTime().modified();
+        m_this.modified();
+        return m_this;
     };
     this.drawOnAsyncResourceLoad = function(val) {
         if (val === undefined) {
             return m_drawOnAsyncResourceLoad;
         } else {
             m_drawOnAsyncResourceLoad = val;
-            return this;
+            return m_this;
         }
     };
     this._init = function(arg) {
         var style = null;
-        s_init.call(this, arg);
-        style = this.style();
+        s_init.call(m_this, arg);
+        style = m_this.style();
         if (style.image === undefined) {
             style.image = null;
         }
-        this.style(style);
+        m_this.style(style);
     };
     this._init(arg);
     return this;
@@ -1588,7 +1599,7 @@ geo.graphFeature = function(arg) {
     geo.feature.call(this, arg);
     var m_this = this, s_style = this.style, m_nodes = null, m_points = null, m_links = [], s_init = this._init;
     this._init = function(arg) {
-        s_init.call(this, arg);
+        s_init.call(m_this, arg);
         var defaultStyle = $.extend(true, {}, {
             nodes: {
                 size: 5,
@@ -1599,21 +1610,21 @@ geo.graphFeature = function(arg) {
             },
             linkType: "path"
         }, arg.style === undefined ? {} : arg.style);
-        this.style(defaultStyle);
+        m_this.style(defaultStyle);
         if (m_nodes) {
-            this.dataTime().modified();
+            m_this.dataTime().modified();
         }
     };
     this.style = function(arg) {
-        var out = s_style.call(this, arg);
-        if (out !== this) {
+        var out = s_style.call(m_this, arg);
+        if (out !== m_this) {
             return out;
         }
         m_points.style(arg.nodes);
         m_links.forEach(function(l) {
             l.style(arg.links);
         });
-        return this;
+        return m_this;
     };
     this.nodes = function(val) {
         var layer = m_this.layer(), nLinks = 0, style;
@@ -1635,9 +1646,9 @@ geo.graphFeature = function(arg) {
         m_links.splice(nLinks, m_links.length - nLinks).forEach(function(l) {
             layer._delete(l);
         });
-        this.dataTime().modified();
-        this.modified();
-        return this;
+        m_this.dataTime().modified();
+        m_this.modified();
+        return m_this;
     };
     m_points = this.layer().createFeature("point");
     if (arg.nodes) {
@@ -1824,7 +1835,7 @@ geo.renderer = function(arg) {
             return m_canvas;
         } else {
             m_canvas = val;
-            this.modified();
+            m_this.modified();
         }
     };
     this.map = function() {
@@ -1844,7 +1855,7 @@ geo.renderer = function(arg) {
             return m_initialized;
         } else {
             m_initialized = val;
-            return this;
+            return m_this;
         }
     };
     this.api = function() {
@@ -1869,7 +1880,7 @@ geo.renderer = function(arg) {
         throw "Should be implemented by derivied classes";
     };
     this.relMouseCoords = function(event) {
-        var totalOffsetX = 0, totalOffsetY = 0, canvasX = 0, canvasY = 0, currentElement = this.canvas();
+        var totalOffsetX = 0, totalOffsetY = 0, canvasX = 0, canvasY = 0, currentElement = m_this.canvas();
         do {
             totalOffsetX += currentElement.offsetLeft - currentElement.scrollLeft;
             totalOffsetY += currentElement.offsetTop - currentElement.scrollTop;
@@ -1898,19 +1909,26 @@ geo.osmLayer = function(arg) {
         return new geo.osmLayer(arg);
     }
     geo.featureLayer.call(this, arg);
-    var m_this = this, m_tiles = {}, m_hiddenBinNumber = 0, m_visibleBinNumber = 1e3, m_pendingNewTiles = [], m_pendingInactiveTiles = [], m_numberOfCachedTiles = 0, m_tileCacheSize = 100, m_previousZoom = null, m_baseUrl = "http://tile.openstreetmap.org/", m_imageFormat = "png", s_init = this._init, s_update = this._update;
+    var m_this = this, m_tiles = {}, m_hiddenBinNumber = 0, m_visibleBinNumber = 1e3, m_pendingNewTiles = [], m_pendingInactiveTiles = [], m_numberOfCachedTiles = 0, m_tileCacheSize = 150, m_previousZoom = null, m_baseUrl = "http://tile.openstreetmap.org/", m_imageFormat = "png", m_updateTimerId = null, s_init = this._init, s_update = this._update;
     if (arg && arg.baseUrl !== undefined) {
         m_baseUrl = arg.baseUrl;
     }
     if (arg && arg.imageFormat !== undefined) {
         m_imageFormat = arg.imageFormat;
     }
+    function getModifiedMapZoom() {
+        if (m_this.map().zoom() < 19) {
+            return m_this.map().zoom() + 1;
+        } else {
+            return m_this.map().zoom();
+        }
+    }
     this.tileCacheSize = function(val) {
         if (val === undefined) {
             return m_tileCacheSize;
         }
         m_tileCacheSize = val;
-        this.modified();
+        m_this.modified();
     };
     this.toLocal = function(input) {
         var i, output, delta;
@@ -2031,12 +2049,12 @@ geo.osmLayer = function(arg) {
         return tile;
     };
     this._removeTiles = function() {
-        var x, y, tile, zoom, currZoom = this.map().zoom();
+        var x, y, tile, zoom, currZoom = getModifiedMapZoom();
         if (!m_tiles) {
-            return this;
+            return m_this;
         }
         if (m_previousZoom === currZoom) {
-            return this;
+            return m_this;
         }
         m_previousZoom = currZoom;
         for (zoom in m_tiles) {
@@ -2061,7 +2079,7 @@ geo.osmLayer = function(arg) {
             i = 0;
             while (m_numberOfCachedTiles > m_tileCacheSize && i < m_pendingInactiveTiles.length) {
                 tile = m_pendingInactiveTiles[i];
-                if (tile.zoom !== m_this.map().zoom()) {
+                if (tile.zoom !== getModifiedMapZoom()) {
                     m_this._delete(tile.feature);
                     delete m_tiles[tile.zoom][tile.index_x][tile.index_y];
                     m_pendingInactiveTiles.splice(i, 1);
@@ -2071,7 +2089,7 @@ geo.osmLayer = function(arg) {
             }
             for (i = 0; i < m_pendingInactiveTiles.length; i += 1) {
                 tile = m_pendingInactiveTiles[i];
-                if (tile.zoom !== m_this.map().zoom()) {
+                if (tile.zoom !== getModifiedMapZoom()) {
                     tile.REMOVING = false;
                     tile.REMOVED = true;
                     tile.feature.bin(m_hiddenBinNumber);
@@ -2086,10 +2104,10 @@ geo.osmLayer = function(arg) {
             m_pendingInactiveTiles = [];
             m_this._draw();
         }, 100);
-        return this;
+        return m_this;
     };
     this._addTiles = function(request) {
-        var feature, ren = this.renderer(), zoom = this.map().zoom(), llx = 0, lly = this.height(), urx = this.width(), ury = 0, temp = null, tile = null, tile1x = null, tile1y = null, tile2x = null, tile2y = null, invJ = null, i = 0, j = 0, worldPt1 = ren.displayToWorld([ llx, lly ]), worldPt2 = ren.displayToWorld([ urx, ury ]);
+        var feature, ren = m_this.renderer(), zoom = getModifiedMapZoom(), llx = 0, lly = m_this.height(), urx = m_this.width(), ury = 0, temp = null, tile = null, tile1x = null, tile1y = null, tile2x = null, tile2y = null, invJ = null, i = 0, j = 0, worldPt1 = ren.displayToWorld([ llx, lly ]), worldPt2 = ren.displayToWorld([ urx, ury ]);
         worldPt1[0] = Math.max(worldPt1[0], -180);
         worldPt1[0] = Math.min(worldPt1[0], 180);
         worldPt1[1] = Math.max(worldPt1[1], -180);
@@ -2137,7 +2155,7 @@ geo.osmLayer = function(arg) {
             return function() {
                 tile.LOADING = false;
                 tile.LOADED = true;
-                if ((tile.REMOVING || tile.REMOVED) && tile.feature && tile.zoom !== m_this.map().zoom()) {
+                if ((tile.REMOVING || tile.REMOVED) && tile.feature && tile.zoom !== getModifiedMapZoom()) {
                     tile.feature.bin(m_hiddenBinNumber);
                     tile.REMOVING = false;
                     tile.REMOVED = true;
@@ -2153,28 +2171,44 @@ geo.osmLayer = function(arg) {
         for (i = 0; i < m_pendingNewTiles.length; i += 1) {
             tile = m_pendingNewTiles[i];
             tile.onload = tileOnLoad(tile);
-            feature = this.createFeature("plane", {
+            feature = m_this.createFeature("plane", {
                 drawOnAsyncResourceLoad: false
             }).origin([ tile.llx, tile.lly ]).upperLeft([ tile.llx, tile.ury ]).lowerRight([ tile.urx, tile.lly ]).gcs('"EPSG:3857"').style("image", tile);
             tile.feature = feature;
         }
         m_pendingNewTiles = [];
     };
-    this._updateTiles = function(request) {
-        this._addTiles(request);
+    function updateOSMTiles(request) {
+        if (request === undefined) {
+            request = {};
+        }
+        m_this._addTiles(request);
         m_this._removeTiles(request);
         m_this._draw();
-        this.updateTime().modified();
-        return this;
+        m_this.updateTime().modified();
+    }
+    this._updateTiles = function(request) {
+        if (m_updateTimerId !== null) {
+            clearTimeout(m_updateTimerId);
+            m_updateTimerId = null;
+            m_updateTimerId = setTimeout(function() {
+                updateOSMTiles(request);
+            }, 300);
+        } else {
+            m_updateTimerId = setTimeout(function() {
+                updateOSMTiles(request);
+            }, 0);
+        }
+        return m_this;
     };
     this._init = function() {
-        s_init.call(this);
+        s_init.call(m_this);
         this.gcs("EPSG:3857");
-        return this;
+        return m_this;
     };
     this._update = function(request) {
-        this._updateTiles(request);
-        s_update.call(this, request);
+        m_this._updateTiles(request);
+        s_update.call(m_this, request);
     };
     return this;
 };
@@ -2200,6 +2234,56 @@ ggl.renderer = function(arg) {
 inherit(ggl.renderer, geo.renderer);
 
 geo.registerRenderer("vglRenderer", ggl.vglRenderer);
+
+ggl.lineFeature = function(arg) {
+    "use strict";
+    if (!(this instanceof ggl.lineFeature)) {
+        return new ggl.lineFeature(arg);
+    }
+    arg = arg || {};
+    geo.lineFeature.call(this, arg);
+    var m_this = this, m_actor = null, s_init = this._init, s_update = this._update;
+    this._init = function(arg) {
+        s_init.call(this, arg);
+    };
+    this._build = function() {
+        var style = m_this.style();
+        if (m_actor) {
+            this.renderer().contextRenderer().removeActor(m_actor);
+        }
+        m_actor = vgl.utils.createLines(this.positions(), style.colors);
+        this.renderer().contextRenderer().addActor(m_actor);
+        this.buildTime().modified();
+    };
+    this._update = function() {
+        var style = m_this.style();
+        s_update.call(this);
+        if (this.dataTime().getMTime() >= this.buildTime().getMTime()) {
+            this._build();
+        }
+        if (this.updateTime().getMTime() <= this.getMTime()) {
+            if (this.style.color instanceof vgl.lookupTable) {
+                vgl.utils.updateColorMappedMaterial(this.material(), this.style.color);
+            }
+            m_actor.setVisible(this.visible());
+            m_actor.material().setBinNumber(this.bin());
+            console.log(m_actor.material().binNumber());
+            if (style.size) {
+                m_actor.material().shaderProgram().uniform("pointSize").set(style.size);
+            }
+        }
+        this.updateTime().modified();
+    };
+    this._exit = function() {
+        m_this.renderer().contextRenderer().removeActor(m_actor);
+    };
+    this._init(arg);
+    return this;
+};
+
+inherit(ggl.lineFeature, geo.lineFeature);
+
+geo.registerFeature("vgl", "line", ggl.lineFeature);
 
 ggl.pointFeature = function(arg) {
     "use strict";
@@ -2336,6 +2420,7 @@ ggl.planeFeature = function(arg) {
     };
     this._build = function() {
         var or = this.origin(), ul = this.upperLeft(), lr = this.lowerRight(), img = this.style().image, image = null, onloadCallback = null, texture = null;
+        this.buildTime().modified();
         if (m_actor) {
             this.renderer().contextRenderer().removeActor(m_actor);
         }
@@ -2352,21 +2437,29 @@ ggl.planeFeature = function(arg) {
             m_actor = vgl.utils.createTexturePlane(or[0], or[1], or[2], lr[0], lr[1], lr[2], ul[0], ul[1], ul[2], true);
             texture = vgl.texture();
             m_this.visible(false);
-            image.onload = function() {
+            if (image.complete) {
                 texture.setImage(image);
                 m_actor.material().addAttribute(texture);
                 m_this.visible(true);
                 if (onloadCallback) {
                     onloadCallback.call(this);
                 }
-                if (m_this.drawOnAsyncResourceLoad()) {
-                    m_this._update();
-                    m_this.layer()._draw();
-                }
-            };
+            } else {
+                image.onload = function() {
+                    texture.setImage(image);
+                    m_actor.material().addAttribute(texture);
+                    m_this.visible(true);
+                    if (onloadCallback) {
+                        onloadCallback.call(this);
+                    }
+                    if (m_this.drawOnAsyncResourceLoad()) {
+                        m_this._update();
+                        m_this.layer()._draw();
+                    }
+                };
+            }
         }
         m_this.renderer().contextRenderer().addActor(m_actor);
-        this.buildTime().modified();
     };
     this._update = function() {
         if (this.buildTime().getMTime() <= this.dataTime().getMTime()) {
@@ -2394,10 +2487,13 @@ ggl.mapInteractorStyle = function() {
         return new ggl.mapInteractorStyle();
     }
     vgl.interactorStyle.call(this);
-    var m_map, m_this = this, m_leftMouseButtonDown = false, m_rightMouseButtonDown = false, m_middileMouseButtonDown = false, m_initRightBtnMouseDown = false, m_drawRegionMode = false, m_drawRegionLayer, m_clickLatLng, m_width, m_height, m_renderer, m_renderWindow, m_camera, m_outsideCanvas, m_currentMousePos, m_focusDisplayPoint, m_zTrans, m_coords, m_mouseLastPos = {
+    var m_map, m_this = this, m_leftMouseButtonDown = false, m_rightMouseButtonDown = false, m_middileMouseButtonDown = false, m_initRightBtnMouseDown = false, m_drawRegionMode = false, m_drawRegionLayer, m_clickLatLng, m_width, m_height, m_renderer, m_renderWindow, m_camera, m_outsideCanvas, m_currentMousePos = {
         x: 0,
         y: 0
-    }, m_picker = new vgl.picker(), m_updateRenderParamsTime = vgl.timestamp();
+    }, m_focusDisplayPoint, m_zTrans, m_coords, m_lastMousePos = {
+        x: 0,
+        y: 0
+    }, m_useLastDirection = false, m_lastDirection = null, m_picker = new vgl.picker(), m_updateRenderParamsTime = vgl.timestamp();
     this.map = function(val) {
         if (val !== undefined) {
             m_map = val;
@@ -2419,7 +2515,7 @@ ggl.mapInteractorStyle = function() {
     this._panCamera = function(renderer) {
         var worldPt1, worldPt2, dx, dy, dz, focusDisplayPoint = renderer.focusDisplayPoint();
         worldPt1 = m_renderWindow.displayToWorld(m_currentMousePos.x, m_currentMousePos.y, focusDisplayPoint, renderer);
-        worldPt2 = m_renderWindow.displayToWorld(m_mouseLastPos.x, m_mouseLastPos.y, focusDisplayPoint, renderer);
+        worldPt2 = m_renderWindow.displayToWorld(m_lastMousePos.x, m_lastMousePos.y, focusDisplayPoint, renderer);
         dx = worldPt1[0] - worldPt2[0];
         dy = worldPt1[1] - worldPt2[1];
         dz = worldPt1[2] - worldPt2[2];
@@ -2445,7 +2541,7 @@ ggl.mapInteractorStyle = function() {
                 currWorldPos = m_camera.position();
                 evt = {
                     type: geo.event.pan,
-                    last_display_pos: m_mouseLastPos,
+                    last_display_pos: m_lastMousePos,
                     curr_display_pos: m_currentMousePos,
                     last_world_pos: lastWorldPos,
                     curr_world_pos: currWorldPos
@@ -2455,16 +2551,19 @@ ggl.mapInteractorStyle = function() {
         }
         if (m_middileMouseButtonDown) {}
         if (m_rightMouseButtonDown && m_height > 0) {
-            m_zTrans = 2 * (m_currentMousePos.y - m_mouseLastPos.y) / m_height;
+            if (m_lastDirection !== null) {
+                m_useLastDirection = true;
+            }
             m_this.zoom();
         }
-        m_mouseLastPos.x = m_currentMousePos.x;
-        m_mouseLastPos.y = m_currentMousePos.y;
+        m_lastMousePos.x = m_currentMousePos.x;
+        m_lastMousePos.y = m_currentMousePos.y;
         return false;
     };
     this.handleMouseDown = function(event) {
         var point;
         m_this.updateRenderParams();
+        m_this._computeCurrentMousePos(event);
         if (event.button === 0) {
             m_leftMouseButtonDown = true;
         }
@@ -2476,20 +2575,22 @@ ggl.mapInteractorStyle = function() {
         }
         m_coords = m_this.viewer().relMouseCoords(event);
         if (m_coords.x < 0) {
-            m_mouseLastPos.x = 0;
+            m_lastMousePos.x = 0;
         } else {
-            m_mouseLastPos.x = m_coords.x;
+            m_lastMousePos.x = m_coords.x;
         }
         if (m_coords.y < 0) {
-            m_mouseLastPos.y = 0;
+            m_lastMousePos.y = 0;
         } else {
-            m_mouseLastPos.y = m_coords.y;
+            m_lastMousePos.y = m_coords.y;
         }
         if (m_drawRegionMode && m_leftMouseButtonDown) {
-            point = m_map.displayToMap(m_mouseLastPos.x, m_mouseLastPos.y);
+            point = m_map.displayToMap(m_lastMousePos.x, m_lastMousePos.y);
             m_clickLatLng = geo.latlng(point.y, point.x);
             m_this.setDrawRegion(point.y, point.x, point.y, point.x);
         }
+        m_lastMousePos.x = m_currentMousePos.x;
+        m_lastMousePos.y = m_currentMousePos.y;
         return false;
     };
     this.handleMouseUp = function(event) {
@@ -2500,8 +2601,8 @@ ggl.mapInteractorStyle = function() {
             width = m_this.viewer().renderWindow().windowSize()[0];
             height = m_this.viewer().renderWindow().windowSize()[1];
             m_renderer = m_this.viewer().renderWindow().activeRenderer();
-            if (m_mouseLastPos.x >= 0 && m_mouseLastPos.x <= width && m_mouseLastPos.y >= 0 && m_mouseLastPos.y <= height) {
-                num = m_picker.pick(m_mouseLastPos.x, m_mouseLastPos.y, m_renderer);
+            if (m_lastMousePos.x >= 0 && m_lastMousePos.x <= width && m_lastMousePos.y >= 0 && m_lastMousePos.y <= height) {
+                num = m_picker.pick(m_lastMousePos.x, m_lastMousePos.y, m_renderer);
             }
         }
         if (event.button === 1) {
@@ -2510,7 +2611,9 @@ ggl.mapInteractorStyle = function() {
         if (event.button === 2) {
             m_rightMouseButtonDown = false;
             m_initRightBtnMouseDown = false;
-            m_this.zoom();
+            m_useLastDirection = false;
+            m_lastDirection = null;
+            m_this._computeCurrentMousePos(event);
         }
         return false;
     };
@@ -2530,17 +2633,43 @@ ggl.mapInteractorStyle = function() {
     };
     this.handleMouseWheel = function(event) {
         m_this.updateRenderParams();
-        var delta = event.originalEvent.wheelDeltaY / 120;
+        var delta = event.originalEvent.wheelDeltaY / 120, deltaIsPositive, speed = .05;
+        deltaIsPositive = delta >= 0 ? true : false;
         delta = Math.pow(1 + Math.abs(delta) / 2, delta > 0 ? -1 : 1);
+        delta *= speed;
         m_this._computeCurrentMousePos(event);
-        m_this.zoom(delta);
+        m_this.zoom(delta, !deltaIsPositive);
         return false;
     };
-    this._syncZoom = function(val) {
-        var i, renderers, pos, fp, cam;
+    this.handleDoubleClick = function() {
+        m_this.zoom(.5, false);
+        return false;
+    };
+    this._syncZoom = function(val, dir) {
+        var i, renderers, pos, fp, cam, clipRange, gap, minGap = .01;
         m_this.updateRenderParams();
         if (val) {
-            m_camera.zoom(val);
+            m_camera.zoom(val, dir);
+            if (dir) {
+                pos = m_camera.position();
+                fp = m_camera.focalPoint();
+                m_camera.setFocalPoint(pos[0], pos[1], fp[2]);
+            }
+            m_renderer.resetCameraClippingRange();
+        }
+        pos = m_camera.position();
+        fp = m_camera.focalPoint();
+        gap = vec3.distance(pos, fp);
+        if (!dir) {
+            dir = m_camera.directionOfProjection();
+        }
+        clipRange = m_camera.clippingRange();
+        if (vec3.dot(dir, m_camera.directionOfProjection()) > 0 && (Math.abs(gap) < minGap || clipRange[0] < minGap)) {
+            pos[0] = fp[0] + minGap * dir[0];
+            pos[1] = fp[1] + minGap * dir[1];
+            pos[2] = fp[2] - minGap * dir[2];
+            m_camera.setPosition(pos[0], pos[1], pos[2]);
+            m_camera.setFocalPoint(pos[0], pos[1], fp[2]);
             m_renderer.resetCameraClippingRange();
         }
         pos = m_camera.position();
@@ -2575,8 +2704,6 @@ ggl.mapInteractorStyle = function() {
         for (i = 0; i < renderers.length; i += 1) {
             cam = renderers[i].camera();
             if (cam !== m_camera) {
-                console.log("Setting camera for ren ", renderers[i].layer());
-                console.log("Setting pos ", pos);
                 cam.setPosition(pos[0], pos[1], pos[2]);
                 cam.setFocalPoint(fp[0], fp[1], fp[2]);
                 cam.setClippingRange(clippingRange[0], clippingRange[1]);
@@ -2585,29 +2712,44 @@ ggl.mapInteractorStyle = function() {
         }
     };
     this._syncPan = function() {};
-    this.zoom = function(val) {
-        var evt, newZoomLevel, oldZoomLevel, pos = m_camera.position();
+    this.zoom = function(val, zoomOut) {
+        var evt, newZoomLevel, oldZoomLevel, cameraPos, cameraFp, newPos, clickedWorldPoint, direction, focusDisplayPoint, maxZoomedOutDist = 0, maxZoomedOut = false;
         m_this.updateRenderParams();
-        m_zTrans = (m_currentMousePos.y - m_mouseLastPos.y) / m_height;
+        m_zTrans = (m_currentMousePos.y - m_lastMousePos.y) / m_height;
         if (val === undefined) {
-            if (m_zTrans < 0) {
-                val = 1 - Math.abs(m_zTrans);
-            } else {
-                val = 1 + Math.abs(m_zTrans);
-            }
+            val = 2 * Math.abs(m_zTrans);
         }
         oldZoomLevel = computeZoomLevel();
-        if (pos[2] * Math.sin(m_camera.viewAngle()) >= 360 && val > 1) {
-            m_camera.setPosition(pos[0], pos[1], computeCameraDistance(0));
-            m_renderer.resetCameraClippingRange();
-            newZoomLevel = 0;
+        focusDisplayPoint = m_renderer.focusDisplayPoint();
+        clickedWorldPoint = m_renderWindow.displayToWorld(m_currentMousePos.x, m_currentMousePos.y, focusDisplayPoint, m_renderer);
+        cameraPos = m_camera.position();
+        cameraFp = m_camera.focalPoint();
+        direction = [ clickedWorldPoint[0] - cameraPos[0], clickedWorldPoint[1] - cameraPos[1], clickedWorldPoint[2] - cameraPos[2] ];
+        vec3.normalize(direction, direction);
+        if (m_useLastDirection) {
+            direction = m_lastDirection.slice(0);
         } else {
-            this._syncZoom(val);
+            m_lastDirection = direction.slice(0);
+        }
+        if (m_lastMousePos.y - m_currentMousePos.y < 0 || zoomOut) {
+            direction[0] = -direction[0];
+            direction[1] = -direction[1];
+            direction[2] = -direction[2];
+        }
+        if (cameraPos[2] * Math.sin(m_camera.viewAngle()) >= 360 && zoomOut) {
+            maxZoomedOut = true;
+        } else {
+            this._syncZoom(val, direction);
             newZoomLevel = computeZoomLevel();
         }
-        pos = m_camera.position();
-        if (pos[2] * Math.sin(m_camera.viewAngle()) >= 360 && val > 1) {
-            m_camera.setPosition(pos[0], pos[1], computeCameraDistance(0));
+        cameraPos = m_camera.position();
+        cameraFp = m_camera.focalPoint();
+        if (maxZoomedOut || cameraPos[2] * Math.sin(m_camera.viewAngle()) >= 360) {
+            maxZoomedOut = false;
+            maxZoomedOutDist = computeCameraDistance(0);
+            newPos = [ (maxZoomedOutDist - cameraPos[2]) * direction[0] / direction[2], (maxZoomedOutDist - cameraPos[2]) * direction[1] / direction[2] ];
+            m_camera.setPosition(cameraPos[0] + newPos[0], cameraPos[1] + newPos[1], maxZoomedOutDist);
+            m_camera.setFocalPoint(cameraPos[0] + newPos[0], cameraPos[1] + newPos[1], cameraFp[2]);
             m_renderer.resetCameraClippingRange();
             newZoomLevel = 0;
             this._syncZoom();
@@ -2621,10 +2763,10 @@ ggl.mapInteractorStyle = function() {
     };
     this.lastMousePosition = function(newPosition) {
         if (newPosition !== undefined) {
-            m_mouseLastPos = newPosition;
+            m_lastMousePos = newPosition;
             return m_this;
         }
-        return m_mouseLastPos;
+        return m_lastMousePos;
     };
     this.leftMouseDown = function(newValue) {
         if (newValue !== undefined) {
@@ -2649,13 +2791,12 @@ ggl.mapInteractorStyle = function() {
         return m_drawRegionLayer.features()[0].getCoords();
     };
     this._computeCurrentMousePos = function(event) {
+        if (event.pageX === undefined || event.pageY === undefined) {
+            return;
+        }
         m_this.updateRenderParams();
         m_outsideCanvas = false;
         m_coords = m_this.viewer().relMouseCoords(event);
-        m_currentMousePos = {
-            x: 0,
-            y: 0
-        };
         if (m_coords.x < 0 || m_coords.x > m_width) {
             m_currentMousePos.x = 0;
             m_outsideCanvas = true;
@@ -2683,6 +2824,7 @@ ggl.mapInteractorStyle = function() {
         if (!m_map) {
             return;
         }
+        zoom = m_map.zoom();
         m_this._syncReset();
         evt = {
             type: geo.event.zoom,
@@ -2731,6 +2873,7 @@ ggl.vglRenderer = function(arg) {
     }
     ggl.renderer.call(this, arg);
     var m_this = this, m_viewer = ggl.vglViewerInstance(), m_contextRenderer = vgl.renderer(), m_width = 0, m_height = 0, s_init = this._init;
+    m_contextRenderer.setResetScene(false);
     this.displayToWorld = function(input) {
         var i, delta, ren = m_this.contextRenderer(), cam = ren.camera(), fdp = ren.focusDisplayPoint(), output, temp, point;
         if (input instanceof Array && input.length > 0) {
@@ -2859,8 +3002,17 @@ ggl.vglRenderer = function(arg) {
     };
     this._connectMapEvents = function() {
         if (m_this.layer().referenceLayer()) {
-            var map = $(m_this.layer().map().node());
-            map.on("mousewheel", function(event) {
+            var map = $(m_this.layer().map().node()), wheel = "onwheel" in map ? "wheel" : document.onmousewheel !== undefined ? "mousewheel" : "MozMousePixelScroll", wheelDelta = wheel === "wheel" ? function(evt) {
+                return evt.originalEvent.deltaY * (evt.originalEvent.deltaMode ? 120 : 1);
+            } : wheel === "mousewheel" ? function(evt) {
+                return evt.originalEvent.wheelDelta;
+            } : function(evt) {
+                return -evt.originalEvent.detail;
+            };
+            m_viewer.unbindEventHandlers();
+            map.on(wheel, function(event) {
+                event.originalEvent.wheelDeltaY = wheelDelta(event);
+                event.originalEvent.wheelDelta = event.originalEvent.wheelDeltaY;
                 m_viewer.handleMouseWheel(event);
             });
             map.on("mousemove", function(event) {
@@ -2884,8 +3036,15 @@ ggl.vglRenderer = function(arg) {
             map.on("contextmenu", function(event) {
                 m_viewer.handleContextMenu(event);
             });
+            map.on("click", function(event) {
+                m_viewer.handleClick(event);
+            });
+            map.on("dblclick", function(event) {
+                m_viewer.handleDoubleClick(event);
+            });
         }
         m_viewer.interactorStyle().map(this.layer().map());
+        m_viewer.interactorStyle().reset();
     };
     this.on(geo.event.layerAdd, function(event) {
         if (event.layer === m_this.layer()) {
@@ -2926,6 +3085,7 @@ gd3 = ogs.namespace("geo.d3");
         }
         return strArray.join("");
     };
+    geo.event.d3Rescale = "geo.d3.rescale";
 })(gd3);
 
 gd3.object = function(arg) {
@@ -2951,44 +3111,33 @@ gd3.pointFeature = function(arg) {
     arg = arg || {};
     geo.pointFeature.call(this, arg);
     gd3.object.call(this);
-    var m_this = this;
-    function georef(d, refresh) {
-        if (!refresh && d.hasOwnProperty("_dispx") && d.hasOwnProperty("_dispy")) {
-            return d;
-        }
-        var r = m_this.renderer(), p;
-        p = r.worldToDisplay(d);
-        d._dispx = function() {
-            return p.x;
-        };
-        d._dispy = function() {
-            return p.y;
-        };
-        return d;
-    }
-    var d_attr = {
+    var m_this = this, s_init = this._init, s_update = this._update, m_buildTime = geo.timestamp(), m_style = {}, d_attr, d_style, m_sticky;
+    d_attr = {
         cx: function(d) {
-            return georef(d, true)._dispx();
+            return d.x;
         },
         cy: function(d) {
-            return georef(d)._dispy();
+            return d.y;
         },
-        r: "1px"
-    }, d_style = {
+        r: 1
+    };
+    d_style = {
         fill: "black",
         stroke: "none"
     };
-    var s_init = this._init, s_update = this._update, m_buildTime = geo.timestamp(), m_style = {};
-    this._init = function(arg) {
-        s_init.call(this, arg);
-        return this;
+    m_style = {
+        attributes: d_attr,
+        style: d_style
     };
-    this._drawables = function() {
-        return d3.selectAll("." + this._d3id());
+    this._init = function(arg) {
+        s_init.call(m_this, arg);
+        m_sticky = m_this.layer().sticky();
+        return m_this;
     };
     this._build = function() {
-        var data = this.positions(), s_style = this.style();
-        s_update.call(this);
+        var data = m_this.positions() || [], s_style = m_this.style(), m_renderer = m_this.renderer();
+        data = m_renderer.worldToDisplay(data);
+        s_update.call(m_this);
         if (!data) {
             data = [];
         }
@@ -2999,20 +3148,26 @@ gd3.pointFeature = function(arg) {
         m_style.attributes = $.extend({}, d_attr);
         m_style.classes = [ "d3PointFeature" ];
         m_style.style.fill = d3.rgb(s_style.color[0] * 255, s_style.color[1] * 255, s_style.color[2] * 255);
-        m_style.attributes.r = s_style.size.toString() + "px";
+        m_style.attributes.r = function() {
+            var m_scale = m_renderer.scaleFactor();
+            return (s_style.size / m_scale).toString() + "px";
+        };
         m_style.style["fill-opacity"] = s_style.opacity;
-        this.renderer().drawFeatures(m_style);
+        m_this.renderer().drawFeatures(m_style);
         m_buildTime.modified();
-        this.updateTime().modified();
-        return this;
+        m_this.updateTime().modified();
+        return m_this;
     };
     this._update = function() {
-        s_update.call(this);
-        if (this.dataTime().getMTime() >= m_buildTime.getMTime()) {
-            this._build();
+        s_update.call(m_this);
+        if (m_this.dataTime().getMTime() >= m_buildTime.getMTime()) {
+            m_this._build();
         }
-        return this;
+        return m_this;
     };
+    m_this.on(geo.event.d3Rescale, function() {
+        m_this.renderer().select(m_this._d3id()).attr("r", m_style.attributes.r);
+    });
     this._init(arg);
     return this;
 };
@@ -3030,22 +3185,19 @@ gd3.lineFeature = function(arg) {
     geo.lineFeature.call(this, arg);
     gd3.object.call(this);
     var m_this = this, s_init = this._init, m_buildTime = geo.timestamp(), s_update = this._update, m_style = {};
-    function georef(d) {
-        var r = m_this.renderer(), p;
-        p = r.worldToDisplay(d);
-        return p;
-    }
+    m_style.style = {};
     this._init = function(arg) {
-        s_init.call(this, arg);
-        return this;
+        s_init.call(m_this, arg);
+        return m_this;
     };
     this._build = function() {
-        var data = this.positions(), s_style = this.style(), line = d3.svg.line().x(function(d) {
-            return georef(d).x;
+        var data = m_this.positions() || [], s_style = m_this.style(), m_renderer = m_this.renderer(), line = d3.svg.line().x(function(d) {
+            return d.x;
         }).y(function(d) {
-            return georef(d).y;
+            return d.y;
         });
-        s_update.call(this);
+        s_update.call(m_this);
+        data = m_renderer.worldToDisplay(data);
         m_style.data = [ data ];
         m_style.attributes = {
             d: line
@@ -3056,21 +3208,27 @@ gd3.lineFeature = function(arg) {
         m_style.style = {
             fill: "none",
             stroke: d3.rgb(s_style.color[0] * 255, s_style.color[1] * 255, s_style.color[2] * 255),
-            "stroke-width": s_style.width[0].toString() + "px",
+            "stroke-width": function() {
+                var m_scale = m_renderer.scaleFactor();
+                return (s_style.width[0] / m_scale).toString() + "px";
+            },
             "stroke-opacity": s_style.opacity
         };
-        this.renderer().drawFeatures(m_style);
+        m_renderer.drawFeatures(m_style);
         m_buildTime.modified();
-        this.updateTime().modified();
-        return this;
+        m_this.updateTime().modified();
+        return m_this;
     };
     this._update = function() {
-        s_update.call(this);
-        if (this.dataTime().getMTime() >= m_buildTime.getMTime()) {
-            this._build();
+        s_update.call(m_this);
+        if (m_this.dataTime().getMTime() >= m_buildTime.getMTime()) {
+            m_this._build();
         }
-        return this;
+        return m_this;
     };
+    m_this.on(geo.event.d3Rescale, function() {
+        m_this.renderer().select(m_this._d3id()).style("stroke-width", m_style.style["stroke-width"]);
+    });
     this._init(arg);
     return this;
 };
@@ -3088,22 +3246,18 @@ gd3.pathFeature = function(arg) {
     geo.pathFeature.call(this, arg);
     gd3.object.call(this);
     var m_this = this, s_init = this._init, m_buildTime = geo.timestamp(), s_update = this._update, m_style = {};
-    function georef(d) {
-        var r = m_this.renderer(), p;
-        p = r.worldToDisplay(d);
-        return p;
-    }
+    m_style.style = {};
     this._init = function(arg) {
-        s_init.call(this, arg);
-        return this;
+        s_init.call(m_this, arg);
+        return m_this;
     };
     this._build = function() {
-        var data = this.positions(), s_style = this.style(), tmp, diag;
-        s_update.call(this);
+        var data = m_this.positions() || [], s_style = m_this.style(), m_renderer = m_this.renderer(), tmp, diag;
+        s_update.call(m_this);
         diag = function(d) {
-            var source = georef(d.source), target = georef(d.target), p = {
-                source: source,
-                target: target
+            var p = {
+                source: d.source,
+                target: d.target
             };
             return d3.svg.diagonal()(p);
         };
@@ -3114,8 +3268,8 @@ gd3.pathFeature = function(arg) {
                 src = d;
                 trg = data[i + 1];
                 tmp.push({
-                    source: src,
-                    target: trg
+                    source: m_renderer.worldToDisplay(src),
+                    target: m_renderer.worldToDisplay(trg)
                 });
             }
         });
@@ -3129,21 +3283,27 @@ gd3.pathFeature = function(arg) {
         m_style.style = {
             fill: "none",
             stroke: d3.rgb(s_style.color[0] * 255, s_style.color[1] * 255, s_style.color[2] * 255),
-            "stroke-width": s_style.width[0].toString() + "px",
+            "stroke-width": function() {
+                var m_scale = m_renderer.scaleFactor();
+                return (s_style.width[0] / m_scale).toString() + "px";
+            },
             "stroke-opacity": s_style.opacity
         };
-        this.renderer().drawFeatures(m_style);
+        m_this.renderer().drawFeatures(m_style);
         m_buildTime.modified();
-        this.updateTime().modified();
-        return this;
+        m_this.updateTime().modified();
+        return m_this;
     };
     this._update = function() {
-        s_update.call(this);
-        if (this.dataTime().getMTime() >= m_buildTime.getMTime()) {
-            this._build();
+        s_update.call(m_this);
+        if (m_this.dataTime().getMTime() >= m_buildTime.getMTime()) {
+            m_this._build();
         }
-        return this;
+        return m_this;
     };
+    m_this.on(geo.event.d3Rescale, function() {
+        m_this.renderer().select(m_this._d3id()).style("stroke-width", m_style.style["stroke-width"]);
+    });
     this._init(arg);
     return this;
 };
@@ -3172,7 +3332,8 @@ gd3.d3Renderer = function(arg) {
     }
     geo.renderer.call(this, arg);
     gd3.object.call(this);
-    var m_this = this, s_init = this._init, m_features = {}, m_translate = [ 0, 0 ];
+    arg = arg || {};
+    var m_this = this, m_sticky = null, m_features = {}, m_corners = null, m_width = null, m_height = null, m_scale = 1, m_dx = 0, m_dy = 0, m_svg = null;
     function setAttrs(select, attrs) {
         var key;
         for (key in attrs) {
@@ -3188,24 +3349,66 @@ gd3.d3Renderer = function(arg) {
         }
         return layer.map();
     }
-    function translate(delta) {
-        if (delta === undefined) {
-            m_translate[0] = 0;
-            m_translate[1] = 0;
-        } else {
-            m_translate[0] += delta.x;
-            m_translate[1] += delta.y;
-        }
-        m_this.canvas().selectAll(".group-" + m_this._d3id()).attr("transform", "translate(" + m_translate.join() + ")");
+    function getGroup() {
+        return m_svg.select(".group-" + m_this._d3id());
     }
-    this._init = function(arg) {
-        s_init.call(this, arg);
-        if (!this.canvas()) {
-            var canvas = d3.select(this.layer().node().get(0)).append("svg");
-            canvas.attr("class", this._d3id());
-            canvas.attr("width", this.layer().node().width());
-            canvas.attr("height", this.layer().node().height());
-            this.canvas(canvas);
+    function initCorners() {
+        var layer = m_this.layer(), map = layer.map(), width = m_this.layer().width(), height = m_this.layer().height();
+        m_width = width;
+        m_height = height;
+        if (!m_width || !m_height) {
+            throw "Map layer has size 0";
+        }
+        m_corners = {
+            upperLeft: map.displayToGcs({
+                x: 0,
+                y: 0
+            }),
+            lowerRight: map.displayToGcs({
+                x: width,
+                y: height
+            })
+        };
+    }
+    function setTransform() {
+        if (!m_corners) {
+            initCorners();
+        }
+        if (!m_sticky) {
+            return;
+        }
+        var layer = m_this.layer(), map = layer.map(), upperLeft = map.gcsToDisplay(m_corners.upperLeft), lowerRight = map.gcsToDisplay(m_corners.lowerRight), group = getGroup(), dx, dy, scale;
+        dx = upperLeft.x;
+        dy = upperLeft.y;
+        scale = (lowerRight.y - upperLeft.y) / m_height;
+        group.attr("transform", "matrix(" + [ scale, 0, 0, scale, dx, dy ].join() + ")");
+        m_scale = scale;
+        m_dx = dx;
+        m_dy = dy;
+    }
+    function baseToLocal(pt) {
+        return {
+            x: (pt.x - m_dx) / m_scale,
+            y: (pt.y - m_dy) / m_scale
+        };
+    }
+    function localToBase(pt) {
+        return {
+            x: pt.x * m_scale + m_dx,
+            y: pt.y * m_scale + m_dy
+        };
+    }
+    this._init = function() {
+        if (!m_this.canvas()) {
+            var canvas;
+            m_svg = d3.select(m_this.layer().node().get(0)).append("svg");
+            canvas = m_svg.append("g");
+            m_sticky = m_this.layer().sticky();
+            m_svg.attr("class", m_this._d3id());
+            m_svg.attr("width", m_this.layer().node().width());
+            m_svg.attr("height", m_this.layer().node().height());
+            canvas.attr("class", "group-" + m_this._d3id());
+            m_this.canvas(canvas);
         }
     };
     this.displayToWorld = function(pt) {
@@ -3213,36 +3416,52 @@ gd3.d3Renderer = function(arg) {
         if (!map) {
             throw "Cannot project until this layer is connected to a map.";
         }
-        return map.displayToGcs(pt);
+        if (Array.isArray(pt)) {
+            pt = pt.map(function(x) {
+                return map.displayToGcs(localToBase(x));
+            });
+        } else {
+            pt = map.displayToGcs(localToBase(pt));
+        }
+        return pt;
     };
     this.worldToDisplay = function(pt) {
         var map = getMap();
         if (!map) {
             throw "Cannot project until this layer is connected to a map.";
         }
-        var v = map.gcsToDisplay(pt);
-        v.x -= m_translate[0];
-        v.y -= m_translate[1];
+        var v;
+        if (Array.isArray(pt)) {
+            v = pt.map(function(x) {
+                return baseToLocal(map.gcsToDisplay(x));
+            });
+        } else {
+            v = baseToLocal(map.gcsToDisplay(pt));
+        }
         return v;
     };
     this.api = function() {
         return "d3";
     };
+    this.scaleFactor = function() {
+        return m_scale;
+    };
     this._resize = function(x, y, w, h) {
-        m_this.canvas().attr("width", w);
-        m_this.canvas().attr("height", h);
-        translate();
-        m_this.updateFeatures();
+        if (!m_corners) {
+            initCorners();
+        }
+        m_svg.attr("width", w);
+        m_svg.attr("height", h);
+        setTransform();
+        m_this.layer().trigger(geo.event.d3Rescale, {
+            scale: m_scale
+        }, true);
     };
     this._render = function() {};
     this._exit = function() {
-        this.canvas().remove();
+        m_features = {};
+        m_this.canvas().remove();
     };
-    function getGroup(grp) {
-        var svg = m_this.canvas(), selection = svg.selectAll(".group-" + grp).data([ 0 ]);
-        selection.enter().append("g").attr("class", "group-" + grp);
-        return selection;
-    }
     this.drawFeatures = function(arg) {
         m_features[arg.id] = {
             data: arg.data,
@@ -3252,7 +3471,6 @@ gd3.d3Renderer = function(arg) {
             classes: arg.classes,
             append: arg.append
         };
-        translate();
         return m_this.updateFeatures(arg.id);
     };
     this.updateFeatures = function(id) {
@@ -3263,25 +3481,25 @@ gd3.d3Renderer = function(arg) {
                     m_this.updateFeatures(key);
                 }
             }
-            return this;
+            return m_this;
         }
-        var svg = getGroup(m_this._d3id()), data = m_features[id].data, index = m_features[id].index, style = m_features[id].style, attributes = m_features[id].attributes, classes = m_features[id].classes, append = m_features[id].append, selection = svg.selectAll("." + id).data(data, index);
+        var data = m_features[id].data, index = m_features[id].index, style = m_features[id].style, attributes = m_features[id].attributes, classes = m_features[id].classes, append = m_features[id].append, selection = m_this.select(id).data(data, index);
         selection.enter().append(append);
         selection.exit().remove();
         setAttrs(selection, attributes);
         selection.attr("class", classes.concat([ id ]).join(" "));
         selection.style(style);
-        return this;
+        return m_this;
     };
-    this.on(geo.event.pan, function(event) {
-        translate({
-            x: event.curr_display_pos.x - event.last_display_pos.x,
-            y: event.curr_display_pos.y - event.last_display_pos.y
-        });
-    });
+    this.select = function(id) {
+        return getGroup().selectAll("." + id);
+    };
+    this.on(geo.event.pan, setTransform);
     this.on(geo.event.zoom, function() {
-        translate();
-        m_this.updateFeatures();
+        setTransform();
+        m_this.layer().trigger(geo.event.d3Rescale, {
+            scale: m_scale
+        }, true);
     });
     this.on(geo.event.resize, function(event) {
         m_this._resize(event.x, event.y, event.width, event.height);

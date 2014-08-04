@@ -269,6 +269,8 @@ vgl.event.leftButtonPress = "vgl.event.leftButtonPress";
 vgl.event.leave = "vgl.event.leave";
 vgl.event.rightButtonRelease = "vgl.event.rightButtonRelease";
 vgl.event.leftButtonRelease = "vgl.event.leftButtonRelease";
+vgl.event.click = "vgl.event.click";
+vgl.event.dblClick = "vgl.event.dblClick";
 //////////////////////////////////////////////////////////////////////////////
 /**
  * @module vgl
@@ -315,10 +317,32 @@ vgl.boundingObject = function() {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Check if bounds are valid
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.hasValidBounds = function(bounds) {
+    if (bounds[0] == Number.MAX_VALUE ||
+        bounds[1] == -Number.MAX_VALUE ||
+        bounds[2] == Number.MAX_VALUE ||
+        bounds[3] == -Number.MAX_VALUE ||
+        bounds[4] == Number.MAX_VALUE ||
+        bounds[5] == -Number.MAX_VALUE)  {
+      return false;
+    }
+
+    return true;
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Set current bounds of the object
    */
   ////////////////////////////////////////////////////////////////////////////
   this.setBounds = function(minX, maxX, minY, maxY, minZ, maxZ) {
+    if (!this.hasValidBounds([minX, maxX, minY, maxY, minZ, maxZ])) {
+      return;
+    }
+
     m_bounds[0] = minX;
     m_bounds[1] = maxX;
     m_bounds[2] = minY;
@@ -2162,6 +2186,31 @@ vgl.sourceData = function() {
   };
 
   ////////////////////////////////////////////////////////////////////////////
+ /**
+   * Return raw data for this source
+   *
+   * @returns {Array}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.getData = function() {
+    return data();
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set data for this source
+   *
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.setData = function(data) {
+    if (!(data instanceof Array)) {
+      console.log("[error] Requires array");
+      return;
+    }
+    m_data = data.slice(0);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Add new attribute data to the source
    */
@@ -2586,6 +2635,47 @@ vgl.sourceDataSf = function() {
 };
 
 inherit(vgl.sourceDataSf, vgl.sourceData);
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Create a new instance of class sourceDataDf meant to hold data float values
+ *
+ * This source array is the best way to pass a array of floats to the shader
+ * that has one entry for each of the vertices.
+ *
+ * @class
+ * @returns {vgl.sourceDataDf}
+ */
+//////////////////////////////////////////////////////////////////////////////
+vgl.sourceDataDf = function() {
+  'use strict';
+
+  if (!(this instanceof vgl.sourceDataDf)) {
+    return new vgl.sourceDataDf();
+  }
+
+  var m_min = null,
+      m_max = null,
+      m_fixedmin = null,
+      m_fixedmax = null;
+
+  vgl.sourceData.call(this);
+
+  this.addAttribute(vgl.vertexAttributeKeys.Scalar, gl.FLOAT,
+                    4, 0, 4, 1, false);
+
+  this.pushBack = function(value) {
+    this.data()[this.data().length] = value;
+  };
+
+  this.insertAt = function(index, value) {
+    this.data()[index] = value;
+  };
+
+  return this;
+};
+
+inherit(vgl.sourceDataDf, vgl.sourceData);
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -3658,7 +3748,23 @@ vgl.material = function() {
     return m_attributes.hasOwnProperty(attr);
   };
 
-////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get uniform given a name
+
+   * @param name Uniform name
+   * @returns {vgl.uniform}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.uniform = function(name) {
+    if (m_shaderProgram) {
+      return m_shaderProgram.uniform(name);
+    }
+
+    return null;
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * Get material attribute
 
@@ -4165,12 +4271,34 @@ vgl.renderer = function() {
     this.resetCameraClippingRange(visibleBounds);
   };
 
+  this.hasValidBounds = function(bounds) {
+    if (bounds[0] == Number.MAX_VALUE ||
+        bounds[1] == -Number.MAX_VALUE ||
+        bounds[2] == Number.MAX_VALUE ||
+        bounds[3] == -Number.MAX_VALUE ||
+        bounds[4] == Number.MAX_VALUE ||
+        bounds[5] == -Number.MAX_VALUE)  {
+      return false;
+    }
+
+    return true;
+  }
+
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Recalculate camera's clipping range
    */
   ////////////////////////////////////////////////////////////////////////////
   this.resetCameraClippingRange = function(bounds) {
+    if (typeof bounds === 'undefined') {
+      m_camera.computeBounds();
+      bounds = m_camera.bounds();
+    }
+
+    if (!this.hasValidBounds(bounds)) {
+      return;
+    }
+
     var vn = m_camera.viewPlaneNormal(),
         position = m_camera.position(),
         a = -vn[0],
@@ -4185,11 +4313,6 @@ vgl.renderer = function() {
 
     if (!m_resetClippingRange) {
         return;
-    }
-
-    if (typeof bounds === 'undefined') {
-      m_camera.computeBounds();
-      bounds = m_camera.bounds();
     }
 
     // Set the max near clipping plane and the min far clipping plane
@@ -4847,6 +4970,25 @@ vgl.renderWindow = function(canvas) {
       camera.projectionMatrix(), m_width, m_height);
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Transform a point in display space to world space
+   * @param {Number} x
+   * @param {Number} y
+   * @param {vec4} focusDisplayPoint
+   * @returns {vec4}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.worldToDisplay = function(x, y, z, ren) {
+    ren = ren === undefined ? ren = m_activeRender : ren;
+
+    var camera = ren.camera();
+
+    return ren.worldToDisplay(
+      vec4.fromValues(x, y, z, 1.0), camera.viewMatrix(),
+      camera.projectionMatrix(), m_width, m_height);
+  };
+
   return this;
 };
 
@@ -4880,8 +5022,8 @@ vgl.camera = function() {
 
   /** @private */
   var m_viewAngle = (Math.PI * 30) / 180.0,
-      m_position = vec4.fromValues(0.0, 0.0, 0.0, 1.0),
-      m_focalPoint = vec4.fromValues(0.0, 0.0, -5.0, 1.0),
+      m_position = vec4.fromValues(0.0, 0.0, 1.0, 1.0),
+      m_focalPoint = vec4.fromValues(0.0, 0.0, 0.0, 1.0),
       m_centerOfRotation = vec3.fromValues(0.0, 0.0, 0.0),
       m_viewUp = vec4.fromValues(0.0, 1.0, 0.0, 0.0),
       m_rightDir = vec4.fromValues(1.0, 0.0, 0.0, 0.0),
@@ -5319,7 +5461,7 @@ vgl.camera = function() {
    * Move camera closer or further away from the scene
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.zoom = function(d) {
+  this.zoom = function(d, dir) {
     if (d === 0) {
       return;
     }
@@ -5329,13 +5471,18 @@ vgl.camera = function() {
     }
 
     d = d * vec3.distance(m_focalPoint, m_position);
-    m_position[0] = m_focalPoint[0] - d * m_directionOfProjection[0];
-    m_position[1] = m_focalPoint[1] - d * m_directionOfProjection[1];
-    m_position[2] = m_focalPoint[2] - d * m_directionOfProjection[2];
+    if (!dir) {
+      dir = m_directionOfProjection;
+      m_position[0] = m_focalPoint[0] - d * dir[0];
+      m_position[1] = m_focalPoint[1] - d * dir[1];
+      m_position[2] = m_focalPoint[2] - d * dir[2];
+    } else {
+      m_position[0] = m_position[0]  + d * dir[0];
+      m_position[1] = m_position[1]  + d * dir[1];
+      m_position[2] = m_position[2]  + d * dir[2];
+    }
 
     this.modified();
-    // TODO: If the distance between focal point and the camera position
-    // goes really low then we run into issues
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -5515,6 +5662,8 @@ vgl.interactorStyle = function() {
       $(m_viewer).on(vgl.event.mouseWheel, m_that.handleMouseWheel);
       $(m_viewer).on(vgl.event.keyPress, m_that.handleKeyPress);
       $(m_viewer).on(vgl.event.mouseContextMenu, m_that.handleContextMenu);
+      $(m_viewer).on(vgl.event.click, m_that.handleClick);
+      $(m_viewer).on(vgl.event.dblClick, m_that.handleDoubleClick);
       this.modified();
     }
   };
@@ -5576,6 +5725,30 @@ vgl.interactorStyle = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.handleMouseWheel = function(event) {
+    return true;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Handle click event
+   *
+   * @param event
+   * @returns {boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.handleClick = function(event) {
+    return true;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Handle double click event
+   *
+   * @param event
+   * @returns {boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.handleDoubleClick = function(event) {
     return true;
   };
 
@@ -6270,6 +6443,44 @@ vgl.viewer = function(canvas) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Handle click event
+   *
+   * @param event
+   * @returns {boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.handleClick = function(event) {
+   if (m_ready === true) {
+      var fixedEvent = $.event.fix(event || window.event);
+      fixedEvent.preventDefault();
+      fixedEvent.type = vgl.event.click;
+      $(m_that).trigger(fixedEvent);
+    }
+
+    return false;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Handle double click event
+   *
+   * @param event
+   * @returns {boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.handleDoubleClick = function(event) {
+    if (m_ready === true) {
+      var fixedEvent = $.event.fix(event || window.event);
+      fixedEvent.preventDefault();
+      fixedEvent.type = vgl.event.dblClick;
+      $(m_that).trigger(fixedEvent);
+    }
+
+    return false;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Get mouse coodinates related to canvas
    *
    * @param event
@@ -6277,6 +6488,10 @@ vgl.viewer = function(canvas) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.relMouseCoords = function(event) {
+    if (event.pageX === undefined || event.pageY === undefined) {
+      throw "Missing attributes pageX and pageY on the event";
+    }
+
     var totalOffsetX = 0,
         totalOffsetY = 0,
         canvasX = 0,
@@ -6308,16 +6523,37 @@ vgl.viewer = function(canvas) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Initialize
+   * Bind canvas mouse events to their default handlers
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._init = function() {
+  this.bindEventHandlers = function() {
     $(m_canvas).on('mousedown', this.handleMouseDown);
     $(m_canvas).on('mouseup', this.handleMouseUp);
     $(m_canvas).on('mousemove', this.handleMouseMove);
     $(m_canvas).on('mousewheel', this.handleMouseWheel);
     $(m_canvas).on('contextmenu', this.handleContextMenu);
+  }
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Undo earlier binded  handlers for canvas mouse events
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.unbindEventHandlers = function() {
+    $(m_canvas).off('mousedown', this.handleMouseDown);
+    $(m_canvas).off('mouseup', this.handleMouseUp);
+    $(m_canvas).off('mousemove', this.handleMouseMove);
+    $(m_canvas).off('mousewheel', this.handleMouseWheel);
+    $(m_canvas).off('contextmenu', this.handleContextMenu);
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Initialize
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._init = function() {
+    this.bindEventHandlers();
     m_renderWindow.addRenderer(m_renderer);
   }
 
@@ -8111,10 +8347,23 @@ vgl.pointSource = function() {
   }
   vgl.source.call(this);
 
-  var m_positions = [],
+  var m_this = this,
+      m_positions = [],
       m_colors = [],
       m_textureCoords = [],
+      m_size = [],
       m_geom = null;
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get positions for the points
+   *
+   * @param positions
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.getPositions = function(positions) {
+    return m_positions;
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -8131,6 +8380,18 @@ vgl.pointSource = function() {
       console
           .log("[ERROR] Invalid data type for positions. Array is required.");
     }
+    m_this.modified();
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get colors for the points
+   *
+   * @param positions
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.getColors = function(positions) {
+    return m_colors;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -8147,6 +8408,31 @@ vgl.pointSource = function() {
     else {
       console.log("[ERROR] Invalid data type for colors. Array is required.");
     }
+
+    m_this.modified();
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get colors for the points
+   *
+   * @param positions
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.getSize = function(positions) {
+    return m_size;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set colors for the points
+   *
+   * @param colors
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.setSize = function(size) {
+    m_size = size;
+    this.modified();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -8164,6 +8450,7 @@ vgl.pointSource = function() {
       console.log("[ERROR] Invalid data type for "
                   + "texture coordinates. Array is required.");
     }
+    m_this.modified();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -8185,12 +8472,24 @@ vgl.pointSource = function() {
         pointsPrimitive,
         sourcePositions,
         sourceColors,
-        sourceTexCoords;
+        sourceTexCoords,
+        sourceSize;
 
     indices.length = numPts;
     for (i = 0; i < numPts; ++i) {
       indices[i] = i;
     }
+
+    /// Generate array of size if needed
+    sourceSize = vgl.sourceDataDf();
+    if (numPts !== m_size.length) {
+      for (i = 0; i < numPts; ++i) {
+       sourceSize.pushBack(m_size);
+      }
+    } else {
+      sourceSize.setData(m_size);
+    }
+    m_geom.addSource(sourceSize);
 
     pointsPrimitive = new vgl.points();
     pointsPrimitive.setIndices(indices);
@@ -8220,6 +8519,7 @@ vgl.pointSource = function() {
       console
           .log("[ERROR] Number of texture coordinates are different than number of points");
     }
+
 
     m_geom.addPrimitive(pointsPrimitive);
 
@@ -8512,6 +8812,37 @@ vgl.utils.createVertexShader = function(context) {
         'void main(void)',
         '{',
         'gl_PointSize = pointSize;',
+        'gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
+        ' iVertexColor = vertexColor;', '}' ].join('\n'),
+      shader = new vgl.shader(gl.VERTEX_SHADER);
+
+  shader.setShaderSource(vertexShaderSource);
+  return shader;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Create a new instance of default vertex shader
+ *
+ * Helper function to create default vertex shader
+ *
+ * @param context
+ * @returns {vgl.shader}
+ */
+//////////////////////////////////////////////////////////////////////////////
+vgl.utils.createPointVertexShader = function(context) {
+  'use strict';
+  var vertexShaderSource = [
+        'attribute vec3 vertexPosition;',
+        'attribute vec3 vertexColor;',
+        'attribute float vertexSize;',
+        'uniform mat4 modelViewMatrix;',
+        'uniform mat4 projectionMatrix;',
+        'varying mediump vec3 iVertexColor;',
+        'varying highp vec3 iTextureCoord;',
+        'void main(void)',
+        '{',
+        'gl_PointSize =  vertexSize;',
         'gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
         ' iVertexColor = vertexColor;', '}' ].join('\n'),
       shader = new vgl.shader(gl.VERTEX_SHADER);
@@ -8883,12 +9214,14 @@ vgl.utils.createGeometryMaterial = function() {
    var mat = new vgl.material(),
        blend = new vgl.blend(),
        prog = new vgl.shaderProgram(),
+       pointSize = 5.0,
+       opacity = 1.0,
        vertexShader = vgl.utils.createVertexShader(gl),
        fragmentShader = vgl.utils.createFragmentShader(gl),
        posVertAttr = new vgl.vertexAttribute("vertexPosition"),
        colorVertAttr = new vgl.vertexAttribute("vertexColor"),
-       pointsizeUniform = new vgl.floatUniform("pointSize", 5.0),
-       opacityUniform = new vgl.floatUniform("opacity", 1.0),
+       pointsizeUniform = new vgl.floatUniform("pointSize", pointSize),
+       opacityUniform = new vgl.floatUniform("opacity", opacity),
        modelViewUniform = new vgl.modelViewUniform("modelViewMatrix"),
        projectionUniform = new vgl.projectionUniform("projectionMatrix");
 
@@ -8905,6 +9238,45 @@ vgl.utils.createGeometryMaterial = function() {
 
   return mat;
 };
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Create a new instance of geometry material
+ *
+ * Helper function to create geometry material
+ *
+ * @returns {vgl.material}
+ */
+//////////////////////////////////////////////////////////////////////////////
+vgl.utils.createPointGeometryMaterial = function(opacity) {
+  'use strict';
+   var mat = new vgl.material(),
+       blend = new vgl.blend(),
+       prog = new vgl.shaderProgram(),
+       opacity = opacity === undefined ? 1.0 : opacity,
+       vertexShader = vgl.utils.createPointVertexShader(gl),
+       fragmentShader = vgl.utils.createFragmentShader(gl),
+       posVertAttr = new vgl.vertexAttribute("vertexPosition"),
+       colorVertAttr = new vgl.vertexAttribute("vertexColor"),
+       sizeVertAttr = new vgl.vertexAttribute("vertexSize"),
+       opacityUniform = new vgl.floatUniform("opacity", opacity),
+       modelViewUniform = new vgl.modelViewUniform("modelViewMatrix"),
+       projectionUniform = new vgl.projectionUniform("projectionMatrix");
+
+  prog.addVertexAttribute(posVertAttr, vgl.vertexAttributeKeys.Position);
+  prog.addVertexAttribute(colorVertAttr, vgl.vertexAttributeKeys.Color);
+  prog.addVertexAttribute(sizeVertAttr, vgl.vertexAttributeKeys.Scalar);
+  prog.addUniform(opacityUniform);
+  prog.addUniform(modelViewUniform);
+  prog.addUniform(projectionUniform);
+  prog.addShader(fragmentShader);
+  prog.addShader(vertexShader);
+  mat.addAttribute(prog);
+  mat.addAttribute(blend);
+
+  return mat;
+};
+
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -9249,16 +9621,17 @@ vgl.utils.createTexturePlane = function(originX, originY, originZ,
  * @returns {vgl.actor}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.utils.createPoints = function(positions, colors, texcoords) {
+vgl.utils.createPoints = function(positions, size, colors, texcoords, opacity) {
   'use strict';
   if (!positions) {
     console.log("[ERROR] Cannot create points without positions");
     return null;
   }
 
-  var mapper = new vgl.mapper(),
+  var opacity = opacity === undefined ? 1.0 : opacity,
+      mapper = new vgl.mapper(),
       pointSource = new vgl.pointSource(),
-      mat = vgl.utils.createGeometryMaterial(),
+      mat = vgl.utils.createPointGeometryMaterial(opacity),
       actor = new vgl.actor();
 
   pointSource.setPositions(positions);
@@ -9268,6 +9641,12 @@ vgl.utils.createPoints = function(positions, colors, texcoords) {
 
   if (texcoords) {
     pointSource.setTextureCoordinates(texcoords);
+  }
+
+  if (size) {
+    pointSource.setSize(size)
+  } else {
+    pointSource.setSize(1.0);
   }
 
   mapper.setGeometryData(pointSource.create());

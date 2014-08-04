@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="/examples/common/js/jquery-1.9.1.js"></script>
+    <script type="text/javascript" src="/examples/common/js/gl-matrix.js"></script>
+    <script type="text/javascript" src="/examples/common/js/d3.v3.min.js"></script>
+    <script type="text/javascript" src="/examples/common/js/proj4.js"></script>
+    <script type="text/javascript" src="/web/lib/vgl.js"></script>
+    <script type="text/javascript" src="/web/lib/geo.js"></script>
+    <style>
+        html{
+            height: 100%;
+        }
+    </style>
+
+</head>
+<body style="height: 100%;">
+<script>
+
+animatedLayer = function(arg) {
+  "use strict";
+  if (!(this instanceof animatedLayer)) {
+    return new animatedLayer(arg);
+  }
+  geo.featureLayer.call(this, arg);
+
+  var s_update = this._update
+
+  this.timeRange = function() {
+    return {start: 0, end: 25, deltaUnits: 'index', delta: 1};
+  };
+
+  this._update = function(request) {
+
+    if (request === undefined || !request.hasOwnProperty('timestep'))
+      return;
+
+    var timestep = request.timestep, i, latlons;
+
+    latlons = arg.data.slice();
+
+    for(i=1; i<latlons.length;i += 3) {
+      latlons[i] += timestep*5;
+    }
+
+    this.clear();
+    this.create('pointFeature').positions(latlons);
+
+    s_update.call(this, request);
+  };
+
+  return this;
+};
+inherit(animatedLayer, geo.featureLayer);
+
+timeAnimatedLayer = function(arg) {
+  "use strict";
+  if (!(this instanceof timeAnimatedLayer)) {
+    return new timeAnimatedLayer(arg);
+  }
+  geo.featureLayer.call(this, arg);
+
+  var s_update = this._update, m_start, m_end, m_timesteps, i, time, rand;
+
+  m_start = new Date();
+  m_end = new Date(m_start.getTime());
+  m_end.setDate(m_end.getDate() + 100);
+  m_timesteps = {}
+
+  // Generate some fake timesteps
+  for(i=0; i< 100; i++) {
+    time = new Date(m_start.getTime());
+    time.setDate(time.getDate() + i);
+    m_timesteps[time.getTime()]= (Math.random() * 100) + 1;
+  }
+
+  this.timeRange = function() {
+
+    return {'start': m_start, 'end': m_end, deltaUnits: 'days', delta: 1};
+  };
+
+  this._update = function(request) {
+
+    if (request === undefined || !request.hasOwnProperty('timestep'))
+      return;
+
+    var timestep = request.timestep, i, latlons;
+
+    latlons = arg.data.slice();
+
+    var val = m_timesteps[timestep]
+
+    for(i=1; i<latlons.length;i += 3) {
+      latlons[i-1] -= val;
+      latlons[i] += val;
+    }
+    
+    this.clear();
+    this.create('pointFeature').positions(latlons);
+
+    s_update.call(this, request);
+  };
+
+  return this;
+};
+inherit(timeAnimatedLayer, geo.featureLayer);
+
+function processCSVData(csvdata) {
+  var table = [];
+  var lines = csvdata.split(/\r\n|\n/);
+
+  for ( var i = 0; i < lines.length; i++) {
+    var row = lines[i].split(',');
+    table.push(row);
+  }
+  return table;
+};
+
+$(function() {
+    var mapOptions = {
+      node: '#map',
+      zoom : 3,
+      center : [0.0, 0.0]
+    };
+
+    var myMap = geo.map(mapOptions),
+        table = [],
+        citieslatlon = [],
+        colors = [];
+
+    /// Resize the canvas to fill browser window dynamically
+    window.addEventListener('resize', resizeCanvas, false);
+
+    function resizeCanvas() {
+      $('#map').width('100%');
+      $('#map').height('100%');
+
+      myMap.resize(0, 0, $('#map').width(), $('#map').height());
+      myMap.draw();
+    }
+
+    resizeCanvas();
+
+    /// Read city geo-coded data
+    $.ajax({
+      type : "GET",
+      url : "/data/cities.csv",
+      dataType : "text",
+      success : function(data) {
+        table = processCSVData(data);
+        if (table.length > 0) {
+          var i;
+          for (i = 0; i < table.length; ++i) {
+            if (table[i][2] != undefined) {
+              var lat = table[i][2];
+              lat = lat.replace(/(^\s+|\s+$|^\"|\"$)/g, '');
+              lat = parseFloat(lat);
+
+              var lon = table[i][3];
+              lon = lon.replace(/(^\s+|\s+$|^\"|\"$)/g, '');
+              lon = parseFloat(lon);
+              citieslatlon.push(lon, lat, 0.0);
+              colors.push(1.0, 1.0, 153.0 / 255.0);
+            }
+          }
+        }
+
+        // Load image to be used for drawing dots
+        var layer = animatedLayer({
+            'renderer' : 'vglRenderer',
+            data: citieslatlon});
+        myMap.addLayer(layer);
+
+        function testStepForward()  {
+          var n, defer, id;
+
+          defer = new $.Deferred();
+          n = 0;
+          id = setInterval(function() {
+            myMap.stepAnimationForward();
+
+            if (++n === 5) {
+              clearInterval(id);
+              myMap.stopAnimation();
+              defer.resolve();
+            }
+          }, 200);
+
+          return defer;
+        };
+
+        function testStepBackward()  {
+          var n, defer, id;
+
+          defer = new $.Deferred();
+          n = 0;
+          id = setInterval(function() {
+            myMap.stepAnimationBackward();
+
+            if (++n === 5) {
+              clearInterval(id);
+              myMap.stopAnimation();
+              defer.resolve();
+            }
+          }, 200);
+
+          return defer;
+        };
+
+        function testAnimate()  {
+          var defer = new $.Deferred();
+          myMap.on(geo.event.animationComplete, function() {
+            defer.resolve();
+          });
+          myMap.animate();
+
+          return defer;
+        };
+
+        function testPause()  {
+          var n, defer, id;
+
+          defer = new $.Deferred();
+          n = 0;
+          myMap.on(geo.event.animationComplete, function() {
+            defer.resolve();
+          });
+
+          setTimeout(function() {
+            myMap.pauseAnimation();
+
+            setTimeout(function() {
+              myMap.animate();
+            }, 1000);
+
+          }, 400);
+
+          myMap.animate();
+
+          return defer;
+        };
+
+        function testPauseAndStepBackward()  {
+          var n, defer, id;
+
+          defer = new $.Deferred();
+          n = 0;
+          myMap.on(geo.event.animationComplete, function() {
+            defer.resolve();
+          });
+
+          setTimeout(function() {
+            myMap.pauseAnimation();
+
+            id = setInterval(function() {
+              myMap.stepAnimationBackward();
+
+              if (++n === 5) {
+                clearInterval(id);
+                myMap.animate();
+              }
+            }, 1000);
+
+
+          }, 400);
+
+          myMap.animate();
+
+          return defer;
+        };
+
+        function testPauseAndStepForward()  {
+          var n, defer, id;
+
+          defer = new $.Deferred();
+          n = 0;
+          myMap.on(geo.event.animationComplete, function() {
+            defer.resolve();
+          });
+
+          setTimeout(function() {
+            myMap.pauseAnimation();
+
+            id = setInterval(function() {
+              myMap.stepAnimationForward();
+
+              if (++n === 5) {
+                clearInterval(id);
+                myMap.animate();
+              }
+            }, 1000);
+
+
+          }, 400);
+
+          myMap.animate();
+
+          return defer;
+        };
+
+        function testTime()  {
+          var n, defer, id;
+
+          // Add time layer
+          myMap.removeLayer(layer);
+          myMap.addLayer(timeAnimatedLayer({
+            'renderer' : 'vglRenderer',
+            data: citieslatlon}));
+
+          defer = new $.Deferred();
+          n = 0;
+          myMap.on(geo.event.animationComplete, function() {
+            defer.resolve();
+          });
+
+          myMap.animate();
+
+          return defer;
+        };
+
+        testAnimate().then(
+        testStepForward).then(
+        testStepBackward).then(
+        testPause).then(
+        testPauseAndStepForward).then(
+        testPauseAndStepBackward).then(
+        testTime);
+
+      }});
+});
+</script>
+
+<div id='map'></div>
+</body>
