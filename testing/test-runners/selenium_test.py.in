@@ -13,6 +13,7 @@ import unittest
 from unittest import TestCase
 from math import sqrt
 import json
+import inspect
 
 if sys.version_info[0] == 2:
     from cStringIO import StringIO
@@ -248,18 +249,23 @@ class BaseTest(TestCase):
         )
         self.driver.quit()
 
-    def wait(self, variable='window.testComplete', timeout=5):
+    def wait(self, variable='window.testComplete', function=None, timeout=5):
         '''
-        Wait for a variable to be set to true.  Raise an error
-        if timeout is exceeded.
+        Wait for a variable to be set to true, or a function to return true.
+        Raise an error if timeout is exceeded.
 
         :param string variable: The variable to query.
+        :param string function: The function to execute.
         :param float timeout: The maximum number of seconds to wait.
 
         '''
+        if function is None:
+            function = 'return !!%s' % variable
+            variable = 'function return value'
+
         def check_status(drv):
             try:
-                return drv.execute_script('return !!%s' % variable)
+                return drv.execute_script(function)
             except Exception:
                 return False
 
@@ -695,3 +701,45 @@ def tearDownModule():
     your test, you should import this function into your test module.
     '''
     BaseTest.stopServer()
+
+
+def makeAllBrowserTest(cls, baseName=None, **kw):
+    '''
+    Instrument a test class to run in all currently enabled browsers.
+    Takes in a class that will be used to generate browser specific
+    classes using class mixins.  This is a convience function for the
+    case when a test doesn't need any special handling for different
+    browsers.  Extra keyword arguments are appended as class level
+    variables.
+
+    :param class cls: The base test class
+    :param str baseName: Override cls.__name__ to construct generated class names
+
+    For example, ::
+
+        class MyTest(object):
+            def test_example(self):
+                pass  # Do test here
+
+        makeAllBrowserTest(MyTest, aparam=1)
+    '''
+
+    # This black magic is used to get the module of the calling function:
+    module = inspect.getmodule(inspect.stack()[1][0])
+
+    if baseName is None:
+        baseName = cls.__name__
+
+    testCase = tuple(getattr(cls, 'testCase', ()))
+
+    for base in [FirefoxTest, ChromeTest]:
+        name = baseName + base.driverName.capitalize()
+
+        _kw = dict(**kw)
+        _kw['testCase'] = testCase + (base.driverName,)
+
+        setattr(
+            module,
+            name,
+            type(name, (cls, base), _kw)
+        )

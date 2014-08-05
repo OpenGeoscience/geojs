@@ -415,10 +415,55 @@ if(BUILD_TESTING)
       endif()
     endforeach()
 
+    set(jasmine_runner ${CMAKE_CURRENT_BINARY_DIR}/test/selenium_jasmine_runner.py)
+    set(JASMINE_DEPLOY_URL /test/jasmine)
+
+    configure_file(
+      ${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/selenium_jasmine_runner.py.in
+      ${jasmine_runner}
+    )
+
+    list(APPEND JAMINE_TEST_FILES ${jasmine_runner})
+
+    set(JASMINE_TEST_DIR "${GEOJS_DEPLOY_DIR}/test/jasmine")
+    file(GLOB JASMINE_TEST_SOURCES
+      ${CMAKE_CURRENT_SOURCE_DIR}/testing/test-cases/jasmine-tests/*.js
+    )
+    foreach(f ${JASMINE_TEST_SOURCES})
+      get_filename_component(base "${f}" NAME_WE)
+      set(html "${JASMINE_TEST_DIR}/${base}.html")
+
+      add_custom_command(OUTPUT ${html}
+        COMMAND ${CMAKE_COMMAND} -DTEST_HTML="${html}"
+                                 -DSOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
+                                 -DSOURCE_FILE="${f}"
+                                 -DSCRIPT_INCLUDE="${_script_include}"
+                                 -DBLANKET_INCLUDE="${BLANKET_INCLUDE}"
+                                 -P ${CMAKE_SOURCE_DIR}/cmake/configure-js-unit-test.cmake
+        COMMAND ${CMAKE_COMMAND} -E touch ${html}
+        DEPENDS ${f} ${CMAKE_SOURCE_DIR}/testing/test-runners/jasmine-runner.html.in
+        COMMENT "Generating jasmine unit test ${base}"
+      )
+      list(APPEND JASMINE_TEST_FILES ${html})
+
+      add_test(
+        NAME "selenium:jasmine:${base}"
+        COMMAND ${PYTHON_EXECUTABLE} ${jasmine_runner} ${base}
+      )
+      set_property(TEST "selenium:jasmine:${base}" APPEND PROPERTY RESOURCE_LOCK webserver)
+      if(COVERAGE_TESTS)
+        set_property(TEST "selenium:jasmine:${base}" APPEND PROPERTY DEPENDS "coverage-reset")
+        set_property(TEST "coverage-report" APPEND PROPERTY DEPENDS "selenium:jasmine:${base}")
+      endif()
+      set_property(TEST "selenium:jasmine:${base}" APPEND PROPERTY ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/test")
+      set_property(TEST "selenium:jasmine:${base}" APPEND PROPERTY ENVIRONMENT "FIREFOX_TESTS=${FIREFOX_TESTS}")
+      set_property(TEST "selenium:jasmine:${base}" APPEND PROPERTY ENVIRONMENT "CHROME_TESTS=${CHROME_TESTS}")
+    endforeach()
+
     add_custom_target(
       selenium_tests
       ALL
-      DEPENDS ${SELENIUM_TEST_FILES} ${MIDAS_DOWNLOAD_FILES}
+      DEPENDS ${SELENIUM_TEST_FILES} ${MIDAS_DOWNLOAD_FILES} ${JASMINE_TEST_FILES}
     )
 
   endif()

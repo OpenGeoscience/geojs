@@ -2,7 +2,7 @@
 Geojs testing frameworks
 ========================
 
-Geojs employs three different frameworks for unit testing.  These
+Geojs employs several different frameworks for unit testing.  These
 frameworks have been designed to make it easy for developers to
 add more tests as new features are added to the api.
 
@@ -39,6 +39,12 @@ starting up a test server ::
 
 and navigating to `<http://localhost:50100/test/phantomjs>`_ in your
 browser.
+
+For tests that require webgl, there is a similar framework for running
+Jasmine unittests inside selenium.  For these cases, you can add your
+tests inside the ``testing/test-cases/jasmine-tests``.  CMake will
+automatically pick up the scripts in the directory and generate a test
+case for them.
 
 Selenium testing
 ----------------
