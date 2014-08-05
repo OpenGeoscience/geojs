@@ -67,6 +67,28 @@ class ImageDifferenceException(BaseException):
             kw.get('difference', float('inf'))
         super(ImageDifferenceException, self).__init__(s)
 
+    def __str__(self):
+        s = [BaseException.__str__(self)]
+        if 'testPath' in self.stats:
+            s.append(
+                '<DartMeasurementFile name="TestImage" type="image/png">' +
+                self.stats['testPath'] +
+                '</DartMeasurementFile>'
+            )
+        if 'basePath' in self.stats:
+            s.append(
+                '<DartMeasurementFile name="ValidImage" type="image/png">' +
+                self.stats['basePath'] +
+                '</DartMeasurementFile>'
+            )
+        if 'diffPath' in self.stats:
+            s.append(
+                '<DartMeasurementFile name="DifferenceImage" type="image/png">' +
+                self.stats['diffPath'] +
+                '</DartMeasurementFile>'
+            )
+        return '\n'.join(s)
+
 
 drivers = {
     'firefox': webdriver.Firefox,
