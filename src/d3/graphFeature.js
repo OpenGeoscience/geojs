@@ -15,12 +15,12 @@ gd3.graphFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.select = function () {
     var renderer = m_this.renderer(),
-        selection = [],
+        selection = {},
         node = m_this.nodeFeature(),
         links = m_this.linkFeatures();
-    selection = selection.concat(renderer.select(node._d3id()));
-    links.forEach(function (link) {
-      selection = selection.concat(renderer.select(link._d3id()));
+    selection.nodes = renderer.select(node._d3id());
+    selection.links = links.map(function (link) {
+      return renderer.select(link._d3id());
     });
     return selection;
   };
