@@ -18,7 +18,8 @@ geo.pointSpritesGeomFeature = function (image, positions, colors) {
 
   // Initialize
   var actor = vgl.utils.createPointSprites(image, positions, colors),
-      m_lookupTable = null;
+      m_lookupTable = null,
+      m_this = this;
   this.setMapper(actor.mapper());
   this.setMaterial(actor.material());
 
@@ -35,7 +36,8 @@ geo.pointSpritesGeomFeature = function (image, positions, colors) {
       return;
     }
 
-    vgl.utils.updateColorMappedMaterial(this.material(), m_lookupTable);
+    vgl.utils.updateColorMappedMaterial(m_this.material(), m_lookupTable);
+    return m_this;
   };
 
   return this;

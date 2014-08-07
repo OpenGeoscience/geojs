@@ -37,7 +37,7 @@ ggl.lineFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
-    s_init.call(this, arg);
+    s_init.call(m_this, arg);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -51,13 +51,13 @@ ggl.lineFeature = function (arg) {
     var style = m_this.style();
 
     if (m_actor) {
-      this.renderer().contextRenderer().removeActor(m_actor);
+      m_this.renderer().contextRenderer().removeActor(m_actor);
     }
 
-    m_actor = vgl.utils.createLines(this.positions(), style.colors);
+    m_actor = vgl.utils.createLines(m_this.positions(), style.colors);
 
-    this.renderer().contextRenderer().addActor(m_actor);
-    this.buildTime().modified();
+    m_this.renderer().contextRenderer().addActor(m_actor);
+    m_this.buildTime().modified();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -70,21 +70,21 @@ ggl.lineFeature = function (arg) {
   this._update = function () {
     var style =  m_this.style();
 
-    s_update.call(this);
+    s_update.call(m_this);
 
-    if (this.dataTime().getMTime() >= this.buildTime().getMTime()) {
-      this._build();
+    if (m_this.dataTime().getMTime() >= m_this.buildTime().getMTime()) {
+      m_this._build();
     }
 
-    if (this.updateTime().getMTime() <= this.getMTime()) {
-      if (this.style.color instanceof vgl.lookupTable) {
-        vgl.utils.updateColorMappedMaterial(this.material(),
-          this.style.color);
+    if (m_this.updateTime().getMTime() <= m_this.getMTime()) {
+      if (m_this.style.color instanceof vgl.lookupTable) {
+        vgl.utils.updateColorMappedMaterial(m_this.material(),
+          m_this.style.color);
       }
 
-      m_actor.setVisible(this.visible());
-      m_actor.material().setBinNumber(this.bin());
-      console.log(m_actor.material().binNumber());
+      m_actor.setVisible(m_this.visible());
+      m_actor.material().setBinNumber(m_this.bin());
+      // console.log(m_actor.material().binNumber());
 
       /// Points only has support for size
       if (style.size) {
@@ -92,7 +92,7 @@ ggl.lineFeature = function (arg) {
           style.size);
       }
     }
-    this.updateTime().modified();
+    m_this.updateTime().modified();
   };
 
   ////////////////////////////////////////////////////////////////////////////
