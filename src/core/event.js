@@ -50,5 +50,4 @@ geo.event.drawEnd = "geo.drawEnd";
 geo.event.animationPause = "geo.animationPause";
 geo.event.animationStop = "geo.animationStop";
 geo.event.animationComplete = "geo.animationComplete";
-geo.event.osmTilesLoaded = "geo.osm.tilesLoaded";
 
