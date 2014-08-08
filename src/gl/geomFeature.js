@@ -80,10 +80,10 @@ ggl.geomFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._update = function () {
     if (m_buildTime &&
-        m_buildTime.getMTime() < this.getMTime()) {
+        m_buildTime.getMTime() < m_this.getMTime()) {
       if (m_color instanceof vgl.lookupTable) {
-        vgl.utils.updateColorMappedMaterial(this.material(),
-          this.style.color);
+        vgl.utils.updateColorMappedMaterial(m_this.material(),
+          m_this.style.color);
       } else {
         // TODO
       }
@@ -105,8 +105,8 @@ ggl.geomFeature = function (arg) {
       return m_geom;
     } else {
       m_geom = val;
-      this.modified();
-      return this;
+      m_this.modified();
+      return m_this;
     }
   };
 

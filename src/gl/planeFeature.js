@@ -28,7 +28,7 @@ ggl.planeFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.coords = function () {
-    return [this.origin(), this.upperLeft(), this.lowerRight()];
+    return [m_this.origin(), m_this.upperLeft(), m_this.lowerRight()];
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -39,19 +39,19 @@ ggl.planeFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
-    var or = this.origin(),
-        ul = this.upperLeft(),
-        lr = this.lowerRight(),
+    var or = m_this.origin(),
+        ul = m_this.upperLeft(),
+        lr = m_this.lowerRight(),
         /// img could be a source or an Image
-        img = this.style().image,
+        img = m_this.style().image,
         image = null,
         onloadCallback = null,
         texture = null;
 
-    this.buildTime().modified();
+    m_this.buildTime().modified();
 
     if (m_actor) {
-      this.renderer().contextRenderer().removeActor(m_actor);
+      m_this.renderer().contextRenderer().removeActor(m_actor);
     }
 
     if (img && img instanceof Image) {
@@ -84,7 +84,7 @@ ggl.planeFeature = function (arg) {
         m_this.visible(true);
 
         if (onloadCallback) {
-          onloadCallback.call(this);
+          onloadCallback.call(m_this);
         }
         //}
       } else {
@@ -98,7 +98,7 @@ ggl.planeFeature = function (arg) {
           m_this.visible(true);
 
           if (onloadCallback) {
-            onloadCallback.call(this);
+            onloadCallback.call(m_this);
           }
 
           if (m_this.drawOnAsyncResourceLoad()) {
@@ -119,15 +119,15 @@ ggl.planeFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._update = function () {
-    if (this.buildTime().getMTime() <= this.dataTime().getMTime()) {
-      this._build();
+    if (m_this.buildTime().getMTime() <= m_this.dataTime().getMTime()) {
+      m_this._build();
     }
-    if (this.updateTime().getMTime() <= this.getMTime()) {
-      m_actor.setVisible(this.visible());
-      m_actor.material().setBinNumber(this.bin());
+    if (m_this.updateTime().getMTime() <= m_this.getMTime()) {
+      m_actor.setVisible(m_this.visible());
+      m_actor.material().setBinNumber(m_this.bin());
     }
 
-    this.updateTime().modified();
+    m_this.updateTime().modified();
   };
 
   ////////////////////////////////////////////////////////////////////////////

@@ -155,7 +155,7 @@ ggl.vglRenderer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.worldToDisplay = function (input) {
     var i, temp, delta,
-        ren = this.contextRenderer(), cam = ren.camera(),
+        ren = m_this.contextRenderer(), cam = ren.camera(),
         fp = cam.focalPoint(), output = [];
 
     /// Input is an array
@@ -253,20 +253,20 @@ ggl.vglRenderer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function () {
-    if (this.initialized()) {
-      return this;
+    if (m_this.initialized()) {
+      return m_this;
     }
 
-    s_init.call(this);
+    s_init.call(m_this);
 
-    this.canvas($(m_viewer.canvas()));
+    m_this.canvas($(m_viewer.canvas()));
     if (m_viewer.renderWindow().renderers().length > 0) {
       m_contextRenderer.setLayer(m_viewer.renderWindow().renderers().length);
       m_contextRenderer.setResetScene(false);
     }
     m_viewer.renderWindow().addRenderer(m_contextRenderer);
 
-    this.layer().node().append(this.canvas());
+    m_this.layer().node().append(m_this.canvas());
 
     /// VGL uses jquery trigger on methods
     $(m_viewer.interactorStyle()).on(geo.event.pan, function (event) {
@@ -277,7 +277,7 @@ ggl.vglRenderer = function (arg) {
       m_this.trigger(geo.event.zoom, event);
     });
 
-    return this;
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -356,7 +356,7 @@ ggl.vglRenderer = function (arg) {
       });
     }
 
-    m_viewer.interactorStyle().map(this.layer().map());
+    m_viewer.interactorStyle().map(m_this.layer().map());
     m_viewer.interactorStyle().reset();
   };
 
@@ -374,11 +374,11 @@ ggl.vglRenderer = function (arg) {
   this._resize = function (x, y, w, h) {
     m_width = w;
     m_height = h;
-    this.canvas().attr("width", w);
-    this.canvas().attr("height", h);
+    m_this.canvas().attr("width", w);
+    m_this.canvas().attr("height", h);
     m_viewer.renderWindow().positionAndResize(x, y, w, h);
-    this._render();
-    return this;
+    m_this._render();
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -388,7 +388,7 @@ ggl.vglRenderer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._render = function () {
     m_viewer.render();
-    return this;
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////

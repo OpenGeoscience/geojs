@@ -36,7 +36,7 @@ ggl.pointFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
-    s_init.call(this, arg);
+    s_init.call(m_this, arg);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -48,11 +48,14 @@ ggl.pointFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
     var style = m_this.style(),
-    positions = geo.transform.transformFeature(m_this.renderer().map().gcs(),
-                  this, false);
+        positions = geo.transform.transformFeature(
+          m_this.renderer().map().gcs(),
+          m_this,
+          false
+    );
 
     if (m_actor) {
-      this.renderer().contextRenderer().removeActor(m_actor);
+      m_this.renderer().contextRenderer().removeActor(m_actor);
     }
 
     if (style.point_sprites === true) {
@@ -66,8 +69,8 @@ ggl.pointFeature = function (arg) {
       m_actor = vgl.utils.createPoints(positions, style.colors);
     }
 
-    this.renderer().contextRenderer().addActor(m_actor);
-    this.buildTime().modified();
+    m_this.renderer().contextRenderer().addActor(m_actor);
+    m_this.buildTime().modified();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -80,16 +83,16 @@ ggl.pointFeature = function (arg) {
   this._update = function () {
     var style =  m_this.style();
 
-    s_update.call(this);
+    s_update.call(m_this);
 
-    if (this.dataTime().getMTime() >= this.buildTime().getMTime()) {
-      this._build();
+    if (m_this.dataTime().getMTime() >= m_this.buildTime().getMTime()) {
+      m_this._build();
     }
 
-    if (this.updateTime().getMTime() <= this.getMTime()) {
-      if (this.style.color instanceof vgl.lookupTable) {
-        vgl.utils.updateColorMappedMaterial(this.material(),
-          this.style.color);
+    if (m_this.updateTime().getMTime() <= m_this.getMTime()) {
+      if (m_this.style.color instanceof vgl.lookupTable) {
+        vgl.utils.updateColorMappedMaterial(m_this.material(),
+          m_this.style.color);
       }
 
       if (style.point_sprites === true) {
@@ -113,7 +116,7 @@ ggl.pointFeature = function (arg) {
         }
       }
     }
-    this.updateTime().modified();
+    m_this.updateTime().modified();
   };
 
   ////////////////////////////////////////////////////////////////////////////
