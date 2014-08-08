@@ -18,7 +18,8 @@ ggl.planeFeature = function (arg) {
   geo.planeFeature.call(this, arg);
 
   var m_this = this,
-      m_actor = null;
+      m_actor = null,
+      m_onloadCallback = arg.onload === undefined ? null : arg.onload;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -45,7 +46,6 @@ ggl.planeFeature = function (arg) {
         /// img could be a source or an Image
         img = m_this.style().image,
         image = null,
-        onloadCallback = null,
         texture = null;
 
     m_this.buildTime().modified();
@@ -56,7 +56,6 @@ ggl.planeFeature = function (arg) {
 
     if (img && img instanceof Image) {
       image = img;
-      onloadCallback = img.onload;
     } else if (img) {
       image = new Image();
       image.src = img;
@@ -83,8 +82,8 @@ ggl.planeFeature = function (arg) {
         /// later.
         m_this.visible(true);
 
-        if (onloadCallback) {
-          onloadCallback.call(m_this);
+        if (m_onloadCallback) {
+          m_onloadCallback.call(m_this);
         }
         //}
       } else {
@@ -97,8 +96,8 @@ ggl.planeFeature = function (arg) {
           /// later.
           m_this.visible(true);
 
-          if (onloadCallback) {
-            onloadCallback.call(m_this);
+          if (m_onloadCallback) {
+            m_onloadCallback.call(m_this);
           }
 
           if (m_this.drawOnAsyncResourceLoad()) {
