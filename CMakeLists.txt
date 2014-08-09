@@ -73,6 +73,8 @@ set(_source_files
   core/featureLayer.js
   core/event.js
   core/time.js
+  core/fileReader.js
+  core/jsonReader.js
   core/map.js
   core/feature.js
   core/pointFeature.js

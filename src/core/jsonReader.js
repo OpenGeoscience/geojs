@@ -1,0 +1,124 @@
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * @module geo
+ */
+//////////////////////////////////////////////////////////////////////////////
+
+/*global File*/
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Create a new instance of class jsonReader
+ *
+ * @class
+ * @returns {geo.fileReader}
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.jsonReader = function (arg) {
+  'use strict';
+  if (!(this instanceof geo.jsonReader)) {
+    return new geo.jsonReader(arg);
+  }
+
+  var m_this = this, m_style = arg.style || {};
+
+  geo.fileReader.call(this, arg);
+  
+  this.canRead = function (file) {
+    if (file instanceof File) {
+      return (file.type === 'application/json' || file.name.match(/\.json$/));
+    } else if (typeof file === 'string') {
+      try {
+        JSON.parse(file);
+      } catch (e) {
+        return false;
+      }
+      return true;
+    }
+    return false;
+  };
+
+  this._readObject = function (file, done, progress) {
+    var object;
+    function onDone(fileString) {
+      if (typeof fileString !== 'string') {
+        done(false);
+      }
+
+      try {
+        object = JSON.parse(fileString);
+      } catch (e) {
+        done(false);
+      }
+
+      done(object);
+    }
+    m_this._getString(file, onDone, progress);
+  };
+
+  this._featureType = function (spec) {
+    var geometry = spec.geometry || {};
+    if (geometry.type === 'Point') {
+      return 'point';
+    }
+    if (geometry.type === 'LineString') {
+      return 'line';
+    }
+    return null;
+  };
+
+  this._getCoordinates = function (spec) {
+    var geometry = spec.geometry || {},
+        coordinates = geometry.coordinates || [];
+
+    if ((coordinates.length === 2 || coordinates.length === 3) &&
+        (isFinite(coordinates[0]) && isFinite(coordinates[1]))) {
+
+      // special handling for single point coordinates
+      return [geo.latlng(coordinates[1], coordinates[0])];
+    }
+
+    // return an array of latlng's for LineString, MultiPoint, etc...
+    return coordinates.map(function (c) {
+      return geo.latlng(c[1], c[0]);
+    });
+  };
+
+  this._getStyle = function (spec) {
+    return spec.properties || {};
+  };
+
+  this.read = function (file, done, progress) {
+
+    function _done(object) {
+      var features, allFeatures = [];
+
+      features = object.features || [];
+
+      features.forEach(function (feature) {
+        var type = m_this._featureType(feature),
+            coordinates = m_this._getCoordinates(feature),
+            style = m_this._getStyle(feature);
+        allFeatures.push(m_this._addFeature(type, coordinates, style));
+      });
+
+      if (done) {
+        done(allFeatures);
+      }
+    }
+
+    m_this._readObject(file, _done, progress);
+  };
+
+  this._addFeature = function (type, coordinates, style) {
+    var _style = $.extend({}, m_style, style);
+    return m_this.layer().createFeature(type)
+      .positions(coordinates)
+      .style(_style);
+  };
+  
+};
+
+inherit(geo.jsonReader, geo.fileReader);
+
+geo.registerFileReader('jsonReader', geo.jsonReader);
