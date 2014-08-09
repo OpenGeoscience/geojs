@@ -40,7 +40,7 @@ geo.osmLayer = function (arg) {
     m_lastVisibleZoom = null,
     m_visibleTilesRange = {},
     s_init = this._init,
-    m_drawTiles = {},
+    m_pendingNewTilesStat = {},
     s_update = this._update;
 
   if (arg && arg.baseUrl !== undefined) {
@@ -83,6 +83,20 @@ geo.osmLayer = function (arg) {
       }
     }
     return false;
+  }
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Draw new tiles and remove the old ones
+   *
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  function drawTiles() {
+    m_this._removeTiles();
+    m_this._draw();
+    delete m_pendingNewTilesStat[m_updateTimerId];
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -353,9 +367,6 @@ geo.osmLayer = function (arg) {
       }
       tile.feature._update();
     }
-    if (!(m_updateTimerId in m_drawTiles)) {
-      m_this._draw();
-    }
     m_pendingInactiveTiles = [];
 
     return m_this;
@@ -456,7 +467,7 @@ geo.osmLayer = function (arg) {
     m_visibleTilesRange[m_lastVisibleZoom] =
                                 { startX: lastStartX, endX: lastEndX,
                                   startY: lastStartY, endY: lastEndY };
-    m_drawTiles[m_updateTimerId] = { total:
+    m_pendingNewTilesStat[m_updateTimerId] = { total:
       ((tile2x - tile1x + 1) * (tile1y - tile2y + 1)), count: 0 };
 
     for (i = tile1x; i <= tile2x; i += 1) {
@@ -467,8 +478,8 @@ geo.osmLayer = function (arg) {
         } else {
           tile = m_tiles[zoom][i][invJ];
           tile.feature.bin(m_visibleBinNumber);
-          if (tile.LOADED && m_updateTimerId in m_drawTiles) {
-            m_drawTiles[m_updateTimerId].count += 1;
+          if (tile.LOADED && m_updateTimerId in m_pendingNewTilesStat) {
+            m_pendingNewTilesStat[m_updateTimerId].count += 1;
           }
           tile.lastused = new Date();
           tile.feature._update();
@@ -496,17 +507,15 @@ geo.osmLayer = function (arg) {
         tile.feature._update();
 
         if (tile.updateTimerId === m_updateTimerId &&
-            m_updateTimerId in m_drawTiles) {
-          m_drawTiles[m_updateTimerId].count += 1;
-          console.log("count is ", m_drawTiles[m_updateTimerId].count);
-          if (m_drawTiles[m_updateTimerId].count >= m_drawTiles[m_updateTimerId].total) {
-            m_this._draw();
-            console.log("deleting ", m_updateTimerId, m_drawTiles[m_updateTimerId]);
-            delete m_drawTiles[m_updateTimerId];
+            m_updateTimerId in m_pendingNewTilesStat) {
+          m_pendingNewTilesStat[m_updateTimerId].count += 1;
+          if (m_pendingNewTilesStat[m_updateTimerId].count >=
+              m_pendingNewTilesStat[m_updateTimerId].total) {
+            drawTiles();
           }
         } else {
+          tile.REMOVED = true;
           tile.feature.bin(m_hiddenBinNumber);
-          console.log(tile.updateTimerId, m_updateTimerId, tile);
         }
       };
     }
@@ -522,13 +531,14 @@ geo.osmLayer = function (arg) {
                   .gcs('"EPSG:3857"')
                   .style('image', tile);
       tile.feature = feature;
+      tile.feature._update();
     }
     m_pendingNewTiles = [];
 
-    if (m_drawTiles[m_updateTimerId].count >=
-        m_drawTiles[m_updateTimerId].total) {
-      m_this._draw();
-      delete m_drawTiles[m_updateTimerId];
+    if (m_updateTimerId in m_pendingNewTilesStat &&
+        m_pendingNewTilesStat[m_updateTimerId].count >=
+        m_pendingNewTilesStat[m_updateTimerId].total) {
+      drawTiles();
     }
   };
 
@@ -551,9 +561,6 @@ geo.osmLayer = function (arg) {
     /// Add tiles that are currently visible
     m_this._addTiles(request);
 
-    /// Remove or hide tiles that are not visible
-    m_this._removeTiles(request);
-
     /// Update the zoom
     if (m_lastVisibleZoom !== zoom) {
       m_lastVisibleZoom = zoom;
@@ -570,8 +577,8 @@ geo.osmLayer = function (arg) {
   this._updateTiles = function (request) {
     if (m_updateTimerId !== null) {
       clearTimeout(m_updateTimerId);
-      if (m_updateTimerId in m_drawTiles) {
-        delete m_drawTiles[m_updateTimerId]
+      if (m_updateTimerId in m_pendingNewTilesStat) {
+        delete m_pendingNewTilesStat[m_updateTimerId]
       }
       m_updateTimerId = setTimeout(function () {
         updateOSMTiles(request);
