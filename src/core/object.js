@@ -19,7 +19,41 @@ geo.object = function () {
   }
 
   var m_this = this,
-      m_eventHandlers = {};
+      m_eventHandlers = {},
+      m_idleHandlers = [],
+      m_deferredCount = 0;
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   *  Bind a handler that will be called once when all deferreds are resolved.
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  this.onIdle = function (handler) {
+    if (m_deferredCount) {
+      m_idleHandlers.push(handler);
+    } else {
+      handler();
+    }
+  };
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   *  Add a new deferred object preventing idle event handlers from being called.
+   *  Takes a $.Deferred object as an argument.
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  this.addDeferred = function (defer) {
+    m_deferredCount += 1;
+    defer.done(function () {
+      m_deferredCount -= 1;
+      if (!m_deferredCount) {
+        m_idleHandlers.splice(0, m_idleHandlers.length)
+          .forEach(function (handler) {
+            handler();
+          });
+      }
+    });
+  };
 
   //////////////////////////////////////////////////////////////////////////////
   /**
