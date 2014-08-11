@@ -257,6 +257,11 @@ if(BUILD_TESTING)
     COPYONLY
   )
   configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/testing/js/jasmine-boot.js
+    ${GEOJS_DEPLOY_DIR}/test/lib/jasmine-boot.js
+    COPYONLY
+  )
+  configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/aggregate-json-reporter.js.in
     ${GEOJS_DEPLOY_DIR}/test/lib//aggregate-json-reporter.js
   )

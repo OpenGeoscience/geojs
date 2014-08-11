@@ -5,7 +5,7 @@
 <link href=http://jasmine.github.io/2.0/lib/jasmine.css rel=stylesheet>
 <script src=http://jasmine.github.io/2.0/lib/jasmine.js></script>
 <script src=http://jasmine.github.io/2.0/lib/jasmine-html.js></script>
-<script src=http://jasmine.github.io/2.0/lib/boot.js></script>
+<script src=/test/lib/jasmine-boot.js></script>
 <script src=//cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.2.1/gl-matrix.js></script>
 <script src=//cdnjs.cloudflare.com/ajax/libs/proj4js/2.1.0/proj4.js></script>
 @BLANKET_INCLUDE@

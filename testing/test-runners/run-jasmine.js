@@ -61,7 +61,7 @@ page.open(url, function (status) {
 
             // Examine the page to see if the tests are still running.
             done = page.evaluate(function () {
-                return document.body.querySelector(".symbolSummary .pending") === null;
+                return window.jsApiReporter && window.jsApiReporter.finished;
             });
 
             reporterDone = page.evaluate(function () {
@@ -73,20 +73,19 @@ page.open(url, function (status) {
             // code.
             if (done && reporterDone) {
                 exitCode = page.evaluate(function () {
-                    var list = document.body.querySelectorAll('.results > #details > .specDetail.failed'),
+                    var list = document.body.querySelectorAll('.results > .failures > .failed'),
                         el,
                         desc,
                         msg,
                         ret;
 
-                    console.log(document.body.querySelector('.description').innerText);
                     if (list && list.length > 0) {
                         console.log('');
                         console.log(list.length + ' test(s) FAILED:');
                         for (i = 0; i < list.length; i += 1) {
                             el = list[i];
                             desc = el.querySelector('.description');
-                            msg = el.querySelector('.resultMessage.fail');
+                            msg = el.querySelector('.result-message');
 
                             console.log('');
                             console.log(desc.innerText);
@@ -95,7 +94,7 @@ page.open(url, function (status) {
                         }
                         ret = 1;
                     } else {
-                        console.log(document.body.querySelector('.alert > .passingAlert.bar').innerText);
+                        console.log(document.body.querySelector('.alert > .passed.bar').innerText);
                         ret = 0;
                     }
 
