@@ -347,19 +347,14 @@ geo.osmLayer = function (arg) {
       m_numberOfCachedTiles -= 1;
     }
 
-    // console.log("m_numberOfCachedTiles ", m_numberOfCachedTiles);
-    // console.log("m_tileCacheSize ", m_tileCacheSize);
-
     for (i = 0; i < m_pendingInactiveTiles.length; i += 1) {
       tile = m_pendingInactiveTiles[i];
       tile.REMOVING = false;
       tile.REMOVED = false;
-      if (tile.zoom !== currZoom) {
-        if (tile.zoom === lastZoom) {
-          tile.feature.bin(m_lastVisibleBinNumber);
-        } else {
-          tile.feature.bin(m_hiddenBinNumber);
-        }
+      if (tile.zoom !== currZoom && tile.zoom === lastZoom) {
+        tile.feature.bin(m_lastVisibleBinNumber);
+      } else if (tile.zoom !== currZoom) {
+        tile.feature.bin(m_hiddenBinNumber);
       } else {
         tile.lastused = new Date();
         tile.feature.bin(m_visibleBinNumber);
@@ -503,18 +498,21 @@ geo.osmLayer = function (arg) {
           tile.lastused = new Date();
           tile.feature.bin(m_visibleBinNumber);
         }
-        tile.feature._update();
 
         if (tile.updateTimerId === m_updateTimerId &&
             m_updateTimerId in m_pendingNewTilesStat) {
+          tile.feature.bin(m_visibleBinNumber);
           m_pendingNewTilesStat[m_updateTimerId].count += 1;
-          if (m_pendingNewTilesStat[m_updateTimerId].count >=
-              m_pendingNewTilesStat[m_updateTimerId].total) {
-            drawTiles();
-          }
+          tile.feature.actor().updateTimerId = m_updateTimerId;
         } else {
           tile.REMOVED = true;
           tile.feature.bin(m_hiddenBinNumber);
+        }
+        tile.feature._update();
+
+        if (m_pendingNewTilesStat[m_updateTimerId].count >=
+              m_pendingNewTilesStat[m_updateTimerId].total) {
+          drawTiles();
         }
       };
     }
@@ -579,9 +577,11 @@ geo.osmLayer = function (arg) {
       if (m_updateTimerId in m_pendingNewTilesStat) {
         delete m_pendingNewTilesStat[m_updateTimerId];
       }
+      /// Set timeout for 60 ms. 60 ms seems to playing well
+      /// with the events. Also, 60ms corresponds to 15 FPS.
       m_updateTimerId = setTimeout(function () {
         updateOSMTiles(request);
-      }, 10);
+      }, 100);
     } else {
       m_updateTimerId = setTimeout(function () {
         updateOSMTiles(request);

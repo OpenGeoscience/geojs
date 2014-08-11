@@ -73,6 +73,7 @@ ggl.planeFeature = function (arg) {
       m_this.visible(false);
 
       /// TODO: Is there a reliable way to make sure that image is loaded already?
+      m_this.renderer().contextRenderer().addActor(m_actor);
       if (image.complete) {
         texture.setImage(image);
         m_actor.material().addAttribute(texture);
@@ -107,7 +108,6 @@ ggl.planeFeature = function (arg) {
         };
       }
     }
-    m_this.renderer().contextRenderer().addActor(m_actor);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -121,6 +121,7 @@ ggl.planeFeature = function (arg) {
     if (m_this.buildTime().getMTime() <= m_this.dataTime().getMTime()) {
       m_this._build();
     }
+
     if (m_this.updateTime().getMTime() <= m_this.getMTime()) {
       m_actor.setVisible(m_this.visible());
       m_actor.material().setBinNumber(m_this.bin());
