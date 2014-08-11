@@ -180,7 +180,7 @@ geo.map = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get/Set last zoom level of the map
+   * Get last zoom level of the map
    *
    * @returns {Number|geo.map}
    */
