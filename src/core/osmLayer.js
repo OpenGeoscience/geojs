@@ -509,8 +509,9 @@ geo.osmLayer = function (arg) {
         }
         tile.feature._update();
 
-        if (m_pendingNewTilesStat[m_updateTimerId].count >=
-              m_pendingNewTilesStat[m_updateTimerId].total) {
+        if (m_updateTimerId in m_pendingNewTilesStat &&
+            m_pendingNewTilesStat[m_updateTimerId].count >=
+            m_pendingNewTilesStat[m_updateTimerId].total) {
           drawTiles();
         }
       };
