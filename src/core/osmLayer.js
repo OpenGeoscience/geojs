@@ -503,7 +503,6 @@ geo.osmLayer = function (arg) {
             m_updateTimerId in m_pendingNewTilesStat) {
           tile.feature.bin(m_visibleBinNumber);
           m_pendingNewTilesStat[m_updateTimerId].count += 1;
-          tile.feature.actor().updateTimerId = m_updateTimerId;
         } else {
           tile.REMOVED = true;
           tile.feature.bin(m_hiddenBinNumber);
