@@ -33,7 +33,6 @@ geo.osmLayer = function (arg) {
     m_pendingInactiveTiles = [],
     m_numberOfCachedTiles = 0,
     m_tileCacheSize = 100,
-    m_previousZoom = null,
     m_baseUrl = 'http://tile.openstreetmap.org/',
     m_imageFormat = 'png',
     m_updateTimerId = null,
@@ -578,7 +577,7 @@ geo.osmLayer = function (arg) {
     if (m_updateTimerId !== null) {
       clearTimeout(m_updateTimerId);
       if (m_updateTimerId in m_pendingNewTilesStat) {
-        delete m_pendingNewTilesStat[m_updateTimerId]
+        delete m_pendingNewTilesStat[m_updateTimerId];
       }
       m_updateTimerId = setTimeout(function () {
         updateOSMTiles(request);
