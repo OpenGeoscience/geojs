@@ -581,7 +581,7 @@ geo.osmLayer = function (arg) {
       }
       m_updateTimerId = setTimeout(function () {
         updateOSMTiles(request);
-      }, 30);
+      }, 10);
     } else {
       m_updateTimerId = setTimeout(function () {
         updateOSMTiles(request);
