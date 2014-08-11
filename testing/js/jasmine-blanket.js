@@ -44,51 +44,43 @@
       BlanketReporter.finished_at = null; // will be updated after all files have been written
 
       BlanketReporter.prototype = {
-          reportSpecStarting: function(spec) {
-              blanket.onTestStart();
-          },
+              specStarted: function(spec) {
+                  blanket.onTestStart();
+              },
 
-          reportSpecResults: function(suite) {
-              var results = suite.results();
+              specDone: function(result) {
+                  var passed = result.status === "passed" ? 1 : 0;
+                  blanket.onTestDone(1,passed);
+              },
 
-              blanket.onTestDone(results.totalCount,results.passed());
-          },
+              jasmineDone: function() {
+                  blanket.onTestsDone();
+              },
 
-          reportRunnerResults: function(runner) {
-              blanket.onTestsDone();
-          },
+              log: function(str) {
+                  var console = jasmine.getGlobal().console;
 
-          log: function(str) {
-              var console = jasmine.getGlobal().console;
-
-              if (console && console.log) {
-                  console.log(str);
+                  if (console && console.log) {
+                      console.log(str);
+                  }
               }
-          }
-      };
+          };
+
+          // export public
+          jasmine.BlanketReporter = BlanketReporter;
+
+          //override existing jasmine execute
+          var originalJasmineExecute = jasmine.getEnv().execute;
+          jasmine.getEnv().execute = function(){ console.log("waiting for blanket..."); };
 
 
-      // export public
-      jasmine.BlanketReporter = BlanketReporter;
-
-      //override existing jasmine execute
-      jasmine.getEnv().execute = function(){ console.log("waiting for blanket..."); };
-
-      //check to make sure requirejs is completed before we start the test runner
-      var allLoaded = function() {
-          return window.jasmine.getEnv().currentRunner().specs().length > 0 && blanket.requireFilesLoaded();
-      };
-
-      blanket.beforeStartTestRunner({
-          checkRequirejs:true,
-          condition: allLoaded,
-          callback:function(){
-              jasmine.getEnv().addReporter(new jasmine.BlanketReporter());
-              window.jasmine.getEnv().currentRunner().execute();
-              jasmine.getEnv().execute = function () {
-                  jasmine.getEnv().currentRunner().execute();
-              };
-          }
-      });
+          blanket.beforeStartTestRunner({
+              checkRequirejs:true,
+              callback:function(){
+                  jasmine.getEnv().addReporter(new jasmine.BlanketReporter());
+                  jasmine.getEnv().execute = originalJasmineExecute;
+                  jasmine.getEnv().execute();
+              }
+          });
     }
 })();
