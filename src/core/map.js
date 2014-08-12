@@ -165,10 +165,14 @@ geo.map = function (arg) {
     if (val === undefined) {
       return m_zoom;
     }
-    m_zoom = val;
+
+    if (val !== m_zoom) {
+      m_zoom = val;
+      m_this.modified();
+    }
+
     // TODO Fix this
     //      m_this.trigger(geo.event.zoom);
-    m_this.modified();
     return m_this;
   };
 
@@ -583,7 +587,7 @@ geo.map = function (arg) {
       m_animationState.timestep = nextTimestep;
       m_this._animateTimestep();
     }
-    
+
     return m_this;
   };
 

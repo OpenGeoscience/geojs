@@ -27,16 +27,19 @@ geo.osmLayer = function (arg) {
   var m_this = this,
     m_tiles = {},
     m_hiddenBinNumber = 0,
+    m_lastVisibleBinNumber = 999,
     m_visibleBinNumber = 1000,
     m_pendingNewTiles = [],
     m_pendingInactiveTiles = [],
     m_numberOfCachedTiles = 0,
-    m_tileCacheSize = 150,
-    m_previousZoom = null,
+    m_tileCacheSize = 100,
     m_baseUrl = 'http://tile.openstreetmap.org/',
     m_imageFormat = 'png',
     m_updateTimerId = null,
+    m_lastVisibleZoom = null,
+    m_visibleTilesRange = {},
     s_init = this._init,
+    m_pendingNewTilesStat = {},
     s_update = this._update;
 
   if (arg && arg.baseUrl !== undefined) {
@@ -50,14 +53,49 @@ geo.osmLayer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Return zoom to be used for fetching the tiles
+   *
+   * @private
    */
   ////////////////////////////////////////////////////////////////////////////
   function getModifiedMapZoom() {
-    if (m_this.map().zoom() < 19) {
+    if (m_this.map().zoom() < 18) {
       return (m_this.map().zoom() + 1);
     } else {
       return m_this.map().zoom();
     }
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Check if a tile is visible in current view
+   *
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  function isTileVisible(tile) {
+    if (tile.zoom in m_visibleTilesRange) {
+      if (tile.index_x >= m_visibleTilesRange[tile.zoom].startX &&
+          tile.index_x <= m_visibleTilesRange[tile.zoom].endX &&
+          tile.index_y >= m_visibleTilesRange[tile.zoom].startY &&
+          tile.index_y <= m_visibleTilesRange[tile.zoom].endY) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Draw new tiles and remove the old ones
+   *
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  function drawTiles() {
+    m_this._removeTiles();
+    m_this._draw();
+    delete m_pendingNewTilesStat[m_updateTimerId];
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -266,21 +304,14 @@ geo.osmLayer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   /* jshint -W089 */
   this._removeTiles = function () {
-    var x, y, tile, zoom, currZoom = getModifiedMapZoom();
+    var i, x, y, tile, zoom, currZoom = getModifiedMapZoom(),
+        lastZoom = m_lastVisibleZoom;
 
     if (!m_tiles) {
       return m_this;
     }
 
-    if (m_previousZoom === currZoom) {
-      return m_this;
-    }
-    m_previousZoom = currZoom;
-
     for (zoom in m_tiles) {
-      if (currZoom === zoom) {
-        continue;
-      }
       for (x in m_tiles[zoom]) {
         for (y in m_tiles[zoom][x]) {
           tile = m_tiles[zoom][x][y];
@@ -292,47 +323,45 @@ geo.osmLayer = function (arg) {
       }
     }
 
-    setTimeout(function () {
-      var tile, i;
+    /// First remove the tiles if we have cached more than max cached limit
+    m_pendingInactiveTiles.sort(function (a, b) {
+      return a.lastused - b.lastused;
+    });
 
-      /// First remove the tiles if we have cached more than max cached limit
-      m_pendingInactiveTiles.sort(function (a, b) {
-        return a.lastused - b.lastused;
-      });
+    i = 0;
 
-      i = 0;
-      /// Get rid of tiles if we have reached our threshold. However,
-      /// If the tile is required for current zoom, then do nothing.
-      while (m_numberOfCachedTiles > m_tileCacheSize &&
-        i < m_pendingInactiveTiles.length) {
-        tile = m_pendingInactiveTiles[i];
-        if (tile.zoom !== getModifiedMapZoom()) {
-          m_this._delete(tile.feature);
-          delete m_tiles[tile.zoom][tile.index_x][tile.index_y];
-          m_pendingInactiveTiles.splice(i, 1);
-          m_numberOfCachedTiles -= 1;
-        }
+    /// Get rid of tiles if we have reached our threshold. However,
+    /// If the tile is required for current zoom, then do nothing.
+    /// Also don't delete the tile if its from the previous zoom
+    while (m_numberOfCachedTiles > m_tileCacheSize &&
+      i < m_pendingInactiveTiles.length) {
+      tile = m_pendingInactiveTiles[i];
+
+      if (isTileVisible(tile)) {
         i += 1;
+        continue;
       }
+      m_this._delete(tile.feature);
+      delete m_tiles[tile.zoom][tile.index_x][tile.index_y];
+      m_pendingInactiveTiles.splice(i, 1);
+      m_numberOfCachedTiles -= 1;
+    }
 
-      for (i = 0; i < m_pendingInactiveTiles.length; i += 1) {
-        tile = m_pendingInactiveTiles[i];
-        if (tile.zoom !== getModifiedMapZoom()) {
-          tile.REMOVING = false;
-          tile.REMOVED = true;
-          tile.feature.bin(m_hiddenBinNumber);
-        } else {
-          tile.REMOVING = false;
-          tile.REMOVED = false;
-          tile.lastused = new Date();
-          tile.feature.bin(m_visibleBinNumber);
-        }
-        tile.feature._update();
+    for (i = 0; i < m_pendingInactiveTiles.length; i += 1) {
+      tile = m_pendingInactiveTiles[i];
+      tile.REMOVING = false;
+      tile.REMOVED = false;
+      if (tile.zoom !== currZoom && tile.zoom === lastZoom) {
+        tile.feature.bin(m_lastVisibleBinNumber);
+      } else if (tile.zoom !== currZoom) {
+        tile.feature.bin(m_hiddenBinNumber);
+      } else {
+        tile.lastused = new Date();
+        tile.feature.bin(m_visibleBinNumber);
       }
-      m_pendingInactiveTiles = [];
-      m_this._draw();
-    }, 100);
-
+      tile.feature._update();
+    }
+    m_pendingInactiveTiles = [];
 
     return m_this;
   };
@@ -350,7 +379,8 @@ geo.osmLayer = function (arg) {
         /// In display coordinates the origin is on top left corner (0, 0)
         llx = 0.0, lly = m_this.height(), urx = m_this.width(), ury = 0.0,
         temp = null, tile = null, tile1x = null, tile1y = null, tile2x = null,
-        tile2y = null, invJ = null, i = 0, j = 0,
+        tile2y = null, invJ = null, i = 0, j = 0, lastStartX, lastStartY,
+        lastEndX, lastEndY, currStartX, currStartY, currEndX, currEndY,
         worldPt1 = ren.displayToWorld([llx, lly]),
         worldPt2 = ren.displayToWorld([urx, ury]);
 
@@ -392,21 +422,63 @@ geo.osmLayer = function (arg) {
     }
     if (tile2y > tile1y) {
       temp = tile1y;
-      tile1x = tile2y;
+      tile1y = tile2y;
       tile2y = temp;
     }
+
+    /// Compute current tile indices
+    currStartX = tile1x;
+    currEndX = tile2x;
+    currStartY = (Math.pow(2, zoom) - 1 - tile1y);
+    currEndY = (Math.pow(2, zoom) - 1 - tile2y);
+    if (currEndY < currStartY) {
+      temp = currStartY;
+      currStartY = currEndY;
+      currEndY = temp;
+    }
+
+    /// Compute last tile indices
+    lastStartX = geo.mercator.long2tilex(worldPt1[0],
+                   m_lastVisibleZoom);
+    lastStartY = geo.mercator.lat2tiley(worldPt1[1],
+                   m_lastVisibleZoom);
+    lastEndX = geo.mercator.long2tilex(worldPt2[0],
+                   m_lastVisibleZoom);
+    lastEndY = geo.mercator.lat2tiley(worldPt2[1],
+                   m_lastVisibleZoom);
+    lastStartY = Math.pow(2, m_lastVisibleZoom) - 1 - lastStartY;
+    lastEndY   = Math.pow(2, m_lastVisibleZoom) - 1 - lastEndY;
+    if (lastEndY < lastStartY) {
+      temp = lastStartY;
+      lastStartY = lastEndY;
+      lastEndY = temp;
+    }
+
+    m_visibleTilesRange = {};
+    m_visibleTilesRange[zoom] = { startX: currStartX, endX: currEndX,
+                                  startY: currStartY, endY: currEndY };
+
+    m_visibleTilesRange[m_lastVisibleZoom] =
+                                { startX: lastStartX, endX: lastEndX,
+                                  startY: lastStartY, endY: lastEndY };
+    m_pendingNewTilesStat[m_updateTimerId] = { total:
+      ((tile2x - tile1x + 1) * (tile1y - tile2y + 1)), count: 0 };
 
     for (i = tile1x; i <= tile2x; i += 1) {
       for (j = tile2y; j <= tile1y; j += 1) {
         invJ = (Math.pow(2, zoom) - 1 - j);
         if  (!m_this._hasTile(zoom, i, invJ)) {
-          m_this._addTile(request, zoom, i, invJ);
+          tile = m_this._addTile(request, zoom, i, invJ);
         } else {
           tile = m_tiles[zoom][i][invJ];
           tile.feature.bin(m_visibleBinNumber);
+          if (tile.LOADED && m_updateTimerId in m_pendingNewTilesStat) {
+            m_pendingNewTilesStat[m_updateTimerId].count += 1;
+          }
           tile.lastused = new Date();
           tile.feature._update();
         }
+        tile.updateTimerId = m_updateTimerId;
       }
     }
 
@@ -426,40 +498,70 @@ geo.osmLayer = function (arg) {
           tile.lastused = new Date();
           tile.feature.bin(m_visibleBinNumber);
         }
+
+        if (tile.updateTimerId === m_updateTimerId &&
+            m_updateTimerId in m_pendingNewTilesStat) {
+          tile.feature.bin(m_visibleBinNumber);
+          m_pendingNewTilesStat[m_updateTimerId].count += 1;
+        } else {
+          tile.REMOVED = true;
+          tile.feature.bin(m_hiddenBinNumber);
+        }
         tile.feature._update();
-        m_this._draw();
+
+        if (m_updateTimerId in m_pendingNewTilesStat &&
+            m_pendingNewTilesStat[m_updateTimerId].count >=
+            m_pendingNewTilesStat[m_updateTimerId].total) {
+          drawTiles();
+        }
       };
     }
 
     /// And now finally add them
     for (i = 0; i < m_pendingNewTiles.length; i += 1) {
       tile = m_pendingNewTiles[i];
-
-      tile.onload = tileOnLoad(tile);
-      feature = m_this.createFeature('plane', {drawOnAsyncResourceLoad: false})
+      feature = m_this.createFeature('plane', {drawOnAsyncResourceLoad: false,
+                    onload: tileOnLoad(tile)})
                   .origin([tile.llx, tile.lly])
                   .upperLeft([tile.llx, tile.ury])
                   .lowerRight([tile.urx, tile.lly])
                   .gcs('"EPSG:3857"')
                   .style('image', tile);
       tile.feature = feature;
+      tile.feature._update();
     }
     m_pendingNewTiles = [];
+
+    if (m_updateTimerId in m_pendingNewTilesStat &&
+        m_pendingNewTilesStat[m_updateTimerId].count >=
+        m_pendingNewTilesStat[m_updateTimerId].total) {
+      drawTiles();
+    }
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Update OSM tiles as needed
+   */
+  ////////////////////////////////////////////////////////////////////////////
   function updateOSMTiles(request) {
     if (request === undefined) {
       request = {};
     }
 
+    var zoom = getModifiedMapZoom();
+
+    if (!m_lastVisibleZoom) {
+      m_lastVisibleZoom = zoom;
+    }
+
     /// Add tiles that are currently visible
     m_this._addTiles(request);
 
-    /// Remove or hide tiles that are not visible
-    m_this._removeTiles(request);
-
-    /// Trigger draw now
-    m_this._draw();
+    /// Update the zoom
+    if (m_lastVisibleZoom !== zoom) {
+      m_lastVisibleZoom = zoom;
+    }
 
     m_this.updateTime().modified();
   }
@@ -472,10 +574,14 @@ geo.osmLayer = function (arg) {
   this._updateTiles = function (request) {
     if (m_updateTimerId !== null) {
       clearTimeout(m_updateTimerId);
-      m_updateTimerId = null;
+      if (m_updateTimerId in m_pendingNewTilesStat) {
+        delete m_pendingNewTilesStat[m_updateTimerId];
+      }
+      /// Set timeout for 60 ms. 60 ms seems to playing well
+      /// with the events. Also, 60ms corresponds to 15 FPS.
       m_updateTimerId = setTimeout(function () {
         updateOSMTiles(request);
-      }, 300);
+      }, 100);
     } else {
       m_updateTimerId = setTimeout(function () {
         updateOSMTiles(request);

@@ -18,7 +18,8 @@ ggl.planeFeature = function (arg) {
   geo.planeFeature.call(this, arg);
 
   var m_this = this,
-      m_actor = null;
+      m_actor = null,
+      m_onloadCallback = arg.onload === undefined ? null : arg.onload;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -45,7 +46,6 @@ ggl.planeFeature = function (arg) {
         /// img could be a source or an Image
         img = m_this.style().image,
         image = null,
-        onloadCallback = null,
         texture = null;
 
     m_this.buildTime().modified();
@@ -56,7 +56,6 @@ ggl.planeFeature = function (arg) {
 
     if (img && img instanceof Image) {
       image = img;
-      onloadCallback = img.onload;
     } else if (img) {
       image = new Image();
       image.src = img;
@@ -74,6 +73,7 @@ ggl.planeFeature = function (arg) {
       m_this.visible(false);
 
       /// TODO: Is there a reliable way to make sure that image is loaded already?
+      m_this.renderer().contextRenderer().addActor(m_actor);
       if (image.complete) {
         texture.setImage(image);
         m_actor.material().addAttribute(texture);
@@ -83,8 +83,8 @@ ggl.planeFeature = function (arg) {
         /// later.
         m_this.visible(true);
 
-        if (onloadCallback) {
-          onloadCallback.call(m_this);
+        if (m_onloadCallback) {
+          m_onloadCallback.call(m_this);
         }
         //}
       } else {
@@ -97,8 +97,8 @@ ggl.planeFeature = function (arg) {
           /// later.
           m_this.visible(true);
 
-          if (onloadCallback) {
-            onloadCallback.call(m_this);
+          if (m_onloadCallback) {
+            m_onloadCallback.call(m_this);
           }
 
           if (m_this.drawOnAsyncResourceLoad()) {
@@ -108,7 +108,6 @@ ggl.planeFeature = function (arg) {
         };
       }
     }
-    m_this.renderer().contextRenderer().addActor(m_actor);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -122,6 +121,7 @@ ggl.planeFeature = function (arg) {
     if (m_this.buildTime().getMTime() <= m_this.dataTime().getMTime()) {
       m_this._build();
     }
+
     if (m_this.updateTime().getMTime() <= m_this.getMTime()) {
       m_actor.setVisible(m_this.visible());
       m_actor.material().setBinNumber(m_this.bin());
