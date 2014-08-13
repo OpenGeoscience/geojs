@@ -268,9 +268,13 @@ geo.transform.transformLayer = function (destGcs, layer, baseLayer) {
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.transform.transformCoordinates = function (srcGCS, destGCS, coordinates) {
-  var count, offset, xCoord, yCoord, xAcc, yAcc, zAcc, writer, output;
+  "use strict";
 
-  zAcc = function(coordinates, index) {
+  var i, x, y, z, count, offset, xCoord, yCoord, zCoord, xAcc,
+      yAcc, zAcc, writer, output;
+
+  /// Default Z accessor
+  zAcc = function () {
     return;
   };
 
@@ -281,13 +285,12 @@ geo.transform.transformCoordinates = function (srcGCS, destGCS, coordinates) {
   /// Helper methods
   function handleLatLngCoordinates() {
     xAcc = function (index) {
-        return coordinates[index].x();
+      return coordinates[index].x();
     };
     yAcc = function (index) {
       return coordinates[index].y();
     };
-
-    writer = function(x, y) {
+    writer = function (x, y) {
       output.push(geo.latlng(x, y));
     };
   }
@@ -304,7 +307,7 @@ geo.transform.transformCoordinates = function (srcGCS, destGCS, coordinates) {
         yAcc = function (index) {
           return coordinates[index][1];
         };
-        writer = function(x, y) {
+        writer = function (x, y) {
           output.push([x, y]);
         };
       } else if (coordinates[0].length % 3 === 0) {
@@ -318,8 +321,8 @@ geo.transform.transformCoordinates = function (srcGCS, destGCS, coordinates) {
         };
         zAcc = function (index) {
           return coordinates[index][2];
-        }
-        writer = function(x, y, z) {
+        };
+        writer = function (x, y, z) {
           output.push([x, y, z]);
         };
       }
@@ -333,7 +336,7 @@ geo.transform.transformCoordinates = function (srcGCS, destGCS, coordinates) {
         yAcc = function (index) {
           return coordinates[index * offset + 1];
         };
-        writer = function(x, y) {
+        writer = function (x, y) {
           output.push(x);
           output.push(y);
         };
@@ -348,8 +351,8 @@ geo.transform.transformCoordinates = function (srcGCS, destGCS, coordinates) {
         };
         zAcc = function (index) {
           return coordinates[index * offset + 2];
-        }
-        writer = function(x, y, z) {
+        };
+        writer = function (x, y, z) {
           output.push(x);
           output.push(y);
           output.push(z);
@@ -360,7 +363,9 @@ geo.transform.transformCoordinates = function (srcGCS, destGCS, coordinates) {
     }
   }
 
+  /// Helper methods
   function handleObjectCoordinates() {
+
     if (x in coordinates[0] &&
         y in coordinates[0]) {
       xAcc = function (index) {
@@ -374,31 +379,31 @@ geo.transform.transformCoordinates = function (srcGCS, destGCS, coordinates) {
         zAcc = function (index) {
           return coordinates[index].z;
         };
-        writer = function(x, y, z) {
+        writer = function (x, y, z) {
           output.push({x: x, y: y, z: z});
         };
       } else {
-        writer = function(x, y) {
+        writer = function (x, y) {
           output.push({x: x, y: y});
         };
       }
     } else if (x in coordinates && y in coordinates) {
-      xAcc = function (index) {
+      xAcc = function () {
         return coordinates.x;
       };
-      yAcc = function (index) {
+      yAcc = function () {
         return coordinates.y;
       };
 
       if (z in coordinates) {
-        zAcc = function (index) {
+        zAcc = function () {
           return coordinates.z;
         };
-        writer = function(x, y, z) {
+        writer = function (x, y, z) {
           output.push({x: x, y: y, z: z});
         };
       } else {
-        writer = function(x, y) {
+        writer = function (x, y) {
           output.push({x: x, y: y});
         };
       }
