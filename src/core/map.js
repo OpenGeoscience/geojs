@@ -43,7 +43,8 @@ geo.map = function (arg) {
       m_animationState = {range: null, timestep: null, layers: null},
       m_intervalMap = {},
       m_pause,
-      m_stop;
+      m_stop,
+      m_fileReader = null;
 
   m_intervalMap.milliseconds = 1;
   m_intervalMap.seconds = m_intervalMap.milliseconds * 1000;
@@ -617,6 +618,31 @@ geo.map = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Attach a file reader to a layer in the map to be used as a drop target.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.fileReader = function (readerType, opts) {
+    var layer, renderer;
+    opts = opts || {};
+    if (!readerType) {
+      return m_fileReader;
+    }
+    layer = opts.layer;
+    if (!layer) {
+      renderer = opts.renderer;
+      if (!renderer) {
+        renderer = "d3Renderer";
+      }
+      layer = m_this.createLayer("feature", {renderer: renderer});
+    }
+    opts.layer = layer;
+    opts.renderer = renderer;
+    m_fileReader = geo.createFileReader(readerType, opts);
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Initialize the map
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -665,6 +691,38 @@ geo.map = function (arg) {
   };
 
   this._init(arg);
+
+  // set up drag/drop handling
+  this.node().on("dragover", function (e) {
+    var evt = e.originalEvent;
+
+    if (m_this.fileReader()) {
+      evt.stopPropagation();
+      evt.preventDefault();
+      evt.dataTransfer.dropEffect = "copy";
+    }
+  })
+  .on("drop", function (e) {
+    var evt = e.originalEvent, reader = m_this.fileReader(),
+        i, file;
+
+    function done() {
+      m_this.draw();
+    }
+
+    if (reader) {
+      evt.stopPropagation();
+      evt.preventDefault();
+
+      for (i = 0; i < evt.dataTransfer.files.length; i += 1) {
+        file = evt.dataTransfer.files[i];
+        if (reader.canRead(file)) {
+          reader.read(file, done); // to do: trigger event on done
+        }
+      }
+    }
+  });
+
   return this;
 };
 
