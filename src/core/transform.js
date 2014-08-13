@@ -255,3 +255,209 @@ geo.transform.transformLayer = function (destGcs, layer, baseLayer) {
     throw "Only feature layer transformation is supported";
   }
 };
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Transform position coordinates from source projection to destination
+ * projection.
+ *
+ * @param srcGCS GCS of the coordinates
+ * @param destGCS Desired GCS of the transformed coordinates
+ * @param coordinates
+ * @return {Array | geo.latlng} Transformed coordinates
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.transform.transformCoordinates = function (srcGCS, destGCS, coordinates) {
+  var count, offset, xCoord, yCoord, xAcc, yAcc, zAcc, writer, output;
+
+  zAcc = function(coordinates, index) {
+    return;
+  };
+
+  if (destGCS === srcGCS) {
+    return coordinates;
+  }
+
+  /// Helper methods
+  function handleLatLngCoordinates() {
+    xAcc = function (index) {
+        return coordinates[index].x();
+    };
+    yAcc = function (index) {
+      return coordinates[index].y();
+    };
+
+    writer = function(x, y) {
+      output.push(geo.latlng(x, y));
+    };
+  }
+
+  /// Helper methods
+  function handleArrayCoordinates() {
+    if (coordinates[0] instanceof Array) {
+      if (coordinates[0].length % 2 === 0) {
+        offset = 2;
+
+        xAcc = function (index) {
+          return coordinates[index][0];
+        };
+        yAcc = function (index) {
+          return coordinates[index][1];
+        };
+        writer = function(x, y) {
+          output.push([x, y]);
+        };
+      } else if (coordinates[0].length % 3 === 0) {
+        offset = 3;
+
+        xAcc = function (index) {
+          return coordinates[index][0];
+        };
+        yAcc = function (index) {
+          return coordinates[index][1];
+        };
+        zAcc = function (index) {
+          return coordinates[index][2];
+        }
+        writer = function(x, y, z) {
+          output.push([x, y, z]);
+        };
+      }
+    } else {
+      if (coordinates.length % 2 === 0) {
+        offset = 2;
+
+        xAcc = function (index) {
+          return coordinates[index * offset];
+        };
+        yAcc = function (index) {
+          return coordinates[index * offset + 1];
+        };
+        writer = function(x, y) {
+          output.push(x);
+          output.push(y);
+        };
+      } else if (coordinates.length % 3 === 0) {
+        offset = 3;
+
+        xAcc = function (index) {
+          return coordinates[index * offset];
+        };
+        yAcc = function (index) {
+          return coordinates[index * offset + 1];
+        };
+        zAcc = function (index) {
+          return coordinates[index * offset + 2];
+        }
+        writer = function(x, y, z) {
+          output.push(x);
+          output.push(y);
+          output.push(z);
+        };
+      } else {
+        throw "Invalid coordinates";
+      }
+    }
+  }
+
+  function handleObjectCoordinates() {
+    if (x in coordinates[0] &&
+        y in coordinates[0]) {
+      xAcc = function (index) {
+        return coordinates[index].x;
+      };
+      yAcc = function (index) {
+        return coordinates[index].y;
+      };
+
+      if (z in coordinates[0]) {
+        zAcc = function (index) {
+          return coordinates[index].z;
+        };
+        writer = function(x, y, z) {
+          output.push({x: x, y: y, z: z});
+        };
+      } else {
+        writer = function(x, y) {
+          output.push({x: x, y: y});
+        };
+      }
+    } else if (x in coordinates && y in coordinates) {
+      xAcc = function (index) {
+        return coordinates.x;
+      };
+      yAcc = function (index) {
+        return coordinates.y;
+      };
+
+      if (z in coordinates) {
+        zAcc = function (index) {
+          return coordinates.z;
+        };
+        writer = function(x, y, z) {
+          output.push({x: x, y: y, z: z});
+        };
+      } else {
+        writer = function(x, y) {
+          output.push({x: x, y: y});
+        };
+      }
+    } else {
+      throw "Invalid coordinates";
+    }
+  }
+
+  if (coordinates instanceof Array) {
+    output = [];
+    count = coordinates.length;
+
+    if (coordinates[0] instanceof Array ||
+        coordinates[0] instanceof geo.latlng ||
+        coordinates[0] instanceof Object) {
+      offset = 1;
+
+      if (coordinates[0] instanceof Array) {
+        handleArrayCoordinates();
+      } else if (coordinates[0] instanceof geo.latlng) {
+        handleLatLngCoordinates();
+      } else if (coordinates[0] instanceof Object) {
+        handleObjectCoordinates();
+      }
+    } else {
+      handleArrayCoordinates();
+    }
+  } else if (coordinates instanceof Object) {
+    offset = 1;
+    if (coordinates instanceof geo.latlng) {
+      handleLatLngCoordinates();
+    } else if (x in coordinates && y in coordinates) {
+      handleObjectCoordinates();
+    } else {
+      throw "Coordinates are not valid";
+    }
+  }
+
+  if (destGCS === "EPSG:3857" && srcGCS === "EPSG:4326") {
+    for (i = 0; i < count; i += offset) {
+      /// Y goes from 0 (top edge is 85.0511 °N) to 2zoom − 1
+      /// (bottom edge is 85.0511 °S) in a Mercator projection.
+      xCoord = xAcc(i);
+      yCoord = yAcc(i);
+      zCoord = zAcc(i);
+
+      if (yCoord > 85.0511) {
+        yCoord = 85.0511;
+      }
+      if (yCoord < -85.0511) {
+        yCoord = -85.0511;
+      }
+
+      writer(xCoord, geo.mercator.lat2y(yCoord), zCoord);
+    }
+
+    return output;
+  } else {
+    // TODO:
+    throw "Not implemented";
+  }
+};

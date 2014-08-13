@@ -153,13 +153,18 @@ geo.osmLayer = function (arg) {
             output[i + 2] = input[i + 2];
           }
         }
-      } else if ('x' in input[0] && 'y' in input[0] && 'z' in input[0]) {
+      } else if (input[0] instanceof Object &&
+                 'x' in input[0] && 'y' in input[0] && 'z' in input[0]) {
         /// Input is array of object
         output[i] = { x: input[i].x, y: geo.mercator.lat2y(input[i].y),
                       z: input[i].z };
-      } else if ('x' in input[0] && 'y' in input[0] && 'z' in input[0]) {
+      } else if (input[0] instanceof Object &&
+                 'x' in input[0] && 'y' in input[0] && 'z' in input[0]) {
         /// Input is array of object
         output[i] = { x: input[i].x, y: geo.mercator.lat2y(input[i].y)};
+      } else if (input.length >= 2) {
+        output = input.slice(0);
+        output[1] = geo.mercator.lat2y(input[1]);
       }
     } else if (input instanceof geo.latlng) {
       output = {};
@@ -525,7 +530,7 @@ geo.osmLayer = function (arg) {
                   .origin([tile.llx, tile.lly])
                   .upperLeft([tile.llx, tile.ury])
                   .lowerRight([tile.urx, tile.lly])
-                  .gcs('"EPSG:3857"')
+                  .gcs("EPSG:3857")
                   .style('image', tile);
       tile.feature = feature;
       tile.feature._update();

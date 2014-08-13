@@ -75,21 +75,13 @@ geo.featureLayer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.features = function (val) {
-    return m_this._features(val);
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get/Set drawables
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._features = function (val) {
     if (val === undefined) {
       return m_features || [];
     } else {
       m_features = val.slice(0);
       m_this.dataTime().modified();
       m_this.modified();
+      return m_this;
     }
   };
 

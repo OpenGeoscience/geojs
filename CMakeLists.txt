@@ -470,7 +470,7 @@ if(BUILD_TESTING)
 
   # JSLint tests.
   if(${JS_HINT_TESTS})
-    
+
     add_custom_target(
       jshint-binary
       ALL
