@@ -346,7 +346,7 @@ geo.osmLayer = function (arg) {
         i += 1;
         continue;
       }
-      m_this._delete(tile.feature);
+      m_this.deleteFeature(tile.feature);
       delete m_tiles[tile.zoom][tile.index_x][tile.index_y];
       m_pendingInactiveTiles.splice(i, 1);
       m_numberOfCachedTiles -= 1;

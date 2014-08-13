@@ -64,7 +64,19 @@ geo.featureLayer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.deleteFeature = function (feature) {
-    return m_this._delete(feature);
+    var i;
+
+    for (i = 0; i < m_features.length; i += 1) {
+      if (m_features[i] === feature) {
+        m_features[i]._exit();
+        m_this.dataTime().modified();
+        m_this.modified();
+        return m_features.splice(i, 1);
+      }
+    }
+    m_this.removeChild(feature);
+
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -83,27 +95,6 @@ geo.featureLayer = function (arg) {
       m_this.modified();
       return m_this;
     }
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Delete feature
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._delete = function (feature) {
-    var i;
-
-    for (i = 0; i < m_features.length; i += 1) {
-      if (m_features[i] === feature) {
-        m_features[i]._exit();
-        m_this.dataTime().modified();
-        m_this.modified();
-        return m_features.splice(i, 1);
-      }
-    }
-    m_this.removeChild(feature);
-
-    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////

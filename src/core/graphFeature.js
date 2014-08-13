@@ -117,7 +117,7 @@ geo.graphFeature = function (arg) {
     });
 
     m_links.splice(nLinks, m_links.length - nLinks).forEach(function (l) {
-      layer._delete(l);
+      layer.deleteFeature(l);
     });
 
     m_this.dataTime().modified();
