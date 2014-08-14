@@ -690,20 +690,6 @@ geo.map = function (arg) {
     }
   };
 
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Add a function to be called once when the map is in an idle state.
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.onIdle = function (handler) {
-    $.when.apply(
-      $,
-      m_this.children()
-        .map(function (layer) { return layer.getDeferred(); })
-    )
-      .done(handler);
-  };
-
   this._init(arg);
 
   // set up drag/drop handling

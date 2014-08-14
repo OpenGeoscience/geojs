@@ -27,7 +27,35 @@ geo.sceneObject = function (arg) {
   var m_this = this,
       m_parent = null,
       m_children = [],
-      s_trigger = this.trigger;
+      s_trigger = this.trigger,
+      s_addDeferred = this.addDeferred,
+      s_onIdle = this.onIdle;
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   *  Override object.addDeferred to propagate up the scene tree.
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  this.addDeferred = function (defer) {
+    if (m_parent) {
+      m_parent.addDeferred(defer);
+    } else {
+      s_addDeferred(defer);
+    }
+  };
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   *  Override object.onIdle to propagate up the scene tree.
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  this.onIdle = function (handler) {
+    if (m_parent) {
+      m_parent.onIdle(handler);
+    } else {
+      s_onIdle(handler);
+    }
+  };
 
   //////////////////////////////////////////////////////////////////////////////
   /**

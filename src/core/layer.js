@@ -465,16 +465,6 @@ geo.layer = function (arg) {
   this._draw = function () {
   };
 
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Return a $.Deferred object if there are any pending asynchronous
-   * operations, otherwise return null.
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.getDeferred = function () {
-    return null;
-  };
-
   return this;
 };
 
