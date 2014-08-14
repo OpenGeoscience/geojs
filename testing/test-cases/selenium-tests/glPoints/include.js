@@ -66,7 +66,7 @@ window.startTest = function (done) {
       layer.createFeature('point')
         .positions(citieslatlon);
       myMap.draw();
-      done();
+      myMap.onIdle(done);
     }
   });
 };

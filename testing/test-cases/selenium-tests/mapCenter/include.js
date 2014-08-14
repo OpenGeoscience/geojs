@@ -23,6 +23,5 @@ window.startTest = function(done) {
     resizeCanvas();
 
     // give the tiles a chance to load
-    // we should add signals in geojs to do this...
-    window.setTimeout(done, 1000);
+    myMap.onIdle(done);
 };

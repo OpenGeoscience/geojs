@@ -79,7 +79,7 @@ window.startTest = function (done) {
         )
         .positions(citieslatlon);
         myMap.draw();
-        done();
+        myMap.onIdle(done);
       };
     }
   });

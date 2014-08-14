@@ -19,8 +19,6 @@ class glPointSpritesBase(object):
     def testGlPointSprites(self):
         self.loadPage()
 
-        time.sleep(1)  # wait for data to load
-
         testName = 'drawGlPointSprites'
         self.screenshotTest(testName, revision=1)
 

@@ -10,6 +10,12 @@ from selenium_test import FirefoxTest, ChromeTest,\
 class d3StickyBase(object):
     testCase = ('d3StickyLayer',)
 
+    def waitForIdle(self, timeout=5):
+        self.runScript(
+            'window._wait = false; window.gjsmap.onIdle(function () {window._wait = true;});'
+        )
+        self.wait(variable='window._wait', timeout=timeout)
+
     def loadPage(self):
         self.resizeWindow(640, 480)
         self.loadURL('d3StickyLayer/index.html')
@@ -20,7 +26,7 @@ class d3StickyBase(object):
         self.loadPage()
 
         self.drag('#map', (100, 100))
-        time.sleep(2)
+        self.waitForIdle()
         self.screenshotTest(testName, revision=3)
 
 

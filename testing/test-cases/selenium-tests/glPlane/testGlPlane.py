@@ -19,8 +19,6 @@ class glPlaneBase(object):
     def testGlPlane(self):
         self.loadPage()
 
-        time.sleep(1)  # wait for data to load
-
         testName = 'drawGlPlane'
         self.screenshotTest(testName, revision=1)
 

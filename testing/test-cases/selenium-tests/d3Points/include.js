@@ -86,5 +86,5 @@ window.startTest = function (done) {
 
   myMap.draw();
   
-  done();
+  myMap.onIdle(done);
 };

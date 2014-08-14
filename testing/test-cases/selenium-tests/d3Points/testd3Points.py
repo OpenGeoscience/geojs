@@ -14,7 +14,6 @@ class d3PointsBase(object):
         self.resizeWindow(640, 480)
         self.loadURL('d3Points/index.html')
         self.wait()
-        time.sleep(1)
 
     def testd3DrawPoints(self):
         self.loadPage()

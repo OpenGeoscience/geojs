@@ -18,8 +18,6 @@ class glLinesBase(object):
     def testGlLines(self):
         self.loadPage()
 
-        time.sleep(1)  # wait for data to load
-
         testName = 'drawGlLines'
         self.screenshotTest(testName, revision=2)
 

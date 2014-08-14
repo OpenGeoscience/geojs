@@ -92,5 +92,5 @@ window.startTest = function (done) {
       .nodes(citieslatlon);
   myMap.draw();
 
-  done();
+  myMap.onIdle(done);
 };

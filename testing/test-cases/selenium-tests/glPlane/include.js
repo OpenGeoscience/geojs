@@ -32,5 +32,5 @@ window.startTest = function (done) {
     .style('image', '/data/land_shallow_topo_2048.png');
   myMap.draw();
 
-  done();
+  myMap.onIdle(done);
 };
