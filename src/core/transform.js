@@ -289,15 +289,27 @@ geo.transform.transformCoordinates = function (srcGCS, destGCS, coordinates) {
 
   /// Helper methods
   function handleLatLngCoordinates() {
-    xAcc = function (index) {
-      return coordinates[index].x();
-    };
-    yAcc = function (index) {
-      return coordinates[index].y();
-    };
-    writer = function (index, x, y) {
-      output[index] = geo.latlng(x, y);
-    };
+    if (coordinates[0] && coordinates[0] instanceof geo.latlng) {
+      xAcc = function (index) {
+        return coordinates[index].x();
+      };
+      yAcc = function (index) {
+        return coordinates[index].y();
+      };
+      writer = function (index, x, y) {
+        output[index] = geo.latlng(y, x);
+      };
+    } else {
+      xAcc = function (index) {
+        return coordinates.x();
+      };
+      yAcc = function (index) {
+        return coordinates.y();
+      };
+      writer = function (index, x, y) {
+        output = geo.latlng(y, x);
+      };
+    }
   }
 
   /// Helper methods
@@ -439,7 +451,7 @@ geo.transform.transformCoordinates = function (srcGCS, destGCS, coordinates) {
     } else {
       handleArrayCoordinates();
     }
-  } else if (coordinates instanceof Object) {
+  } else if (coordinates && coordinates instanceof Object) {
     count = 1;
     offset = 1;
     if (coordinates instanceof geo.latlng) {

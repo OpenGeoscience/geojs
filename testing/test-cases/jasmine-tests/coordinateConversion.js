@@ -21,4 +21,13 @@ describe('coordinate conversion', function () {
     expect(d0.x).toBeCloseTo(d.x, 0);
     expect(d0.y).toBeCloseTo(180.0, 1);
   });
+
+  it('osm to platcaree projection geo.latlng', function () {
+    var pt = [0.0, 90.0], d, d0;
+    var d = geo.latlng(pt[1], pt[0]);
+    d0 = geo.transform.transformCoordinates("EPSG:4326",
+               "EPSG:3857", d)
+    expect(d0.x()).toBeCloseTo(d.x(), 0);
+    expect(d0.y()).toBeCloseTo(180.0, 1);
+  });
 });
