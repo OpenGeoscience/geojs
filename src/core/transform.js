@@ -316,8 +316,6 @@ geo.transform.transformCoordinates = function (srcGCS, destGCS, coordinates) {
   function handleArrayCoordinates() {
     if (coordinates[0] instanceof Array) {
       if (coordinates[0].length % 2 === 0) {
-        offset = 2;
-
         xAcc = function (index) {
           return coordinates[index][0];
         };
@@ -328,8 +326,6 @@ geo.transform.transformCoordinates = function (srcGCS, destGCS, coordinates) {
           output[index] = [x, y];
         };
       } else if (coordinates[0].length % 3 === 0) {
-        offset = 3;
-
         xAcc = function (index) {
           return coordinates[index][0];
         };
