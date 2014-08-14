@@ -371,8 +371,9 @@ geo.transform.transformCoordinates = function (srcGCS, destGCS, coordinates) {
   /// Helper methods
   function handleObjectCoordinates() {
 
-    if (x in coordinates[0] &&
-        y in coordinates[0]) {
+    if (coordinates[0] &&
+        "x" in coordinates[0] &&
+        "y" in coordinates[0]) {
       xAcc = function (index) {
         return coordinates[index].x;
       };
@@ -380,7 +381,7 @@ geo.transform.transformCoordinates = function (srcGCS, destGCS, coordinates) {
         return coordinates[index].y;
       };
 
-      if (z in coordinates[0]) {
+      if ("z" in coordinates[0]) {
         zAcc = function (index) {
           return coordinates[index].z;
         };
@@ -392,7 +393,8 @@ geo.transform.transformCoordinates = function (srcGCS, destGCS, coordinates) {
           output[index] = {x: x, y: y};
         };
       }
-    } else if (x in coordinates && y in coordinates) {
+    } else if (coordinates &&
+        "x" in coordinates && "y" in coordinates) {
       xAcc = function () {
         return coordinates.x;
       };
@@ -400,16 +402,16 @@ geo.transform.transformCoordinates = function (srcGCS, destGCS, coordinates) {
         return coordinates.y;
       };
 
-      if (z in coordinates) {
+      if ("z" in coordinates) {
         zAcc = function () {
           return coordinates.z;
         };
         writer = function (index, x, y, z) {
-          output[index] = {x: x, y: y, z: z};
+          output = {x: x, y: y, z: z};
         };
       } else {
         writer = function (index, x, y) {
-          output[index] = {x: x, y: y};
+          output = {x: x, y: y};
         };
       }
     } else {
@@ -438,10 +440,11 @@ geo.transform.transformCoordinates = function (srcGCS, destGCS, coordinates) {
       handleArrayCoordinates();
     }
   } else if (coordinates instanceof Object) {
+    count = 1;
     offset = 1;
     if (coordinates instanceof geo.latlng) {
       handleLatLngCoordinates();
-    } else if (x in coordinates && y in coordinates) {
+    } else if (coordinates && "x" in coordinates && "y" in coordinates) {
       handleObjectCoordinates();
     } else {
       throw "Coordinates are not valid";
@@ -463,7 +466,7 @@ geo.transform.transformCoordinates = function (srcGCS, destGCS, coordinates) {
         yCoord = -85.0511;
       }
 
-      writer(xCoord, geo.mercator.lat2y(yCoord), zCoord);
+      writer(i, xCoord, geo.mercator.lat2y(yCoord), zCoord);
     }
 
     return output;
@@ -471,7 +474,7 @@ geo.transform.transformCoordinates = function (srcGCS, destGCS, coordinates) {
     for (i = 0; i < count; i += offset) {
       projPoint = new proj4.Point(xAcc(i), yAcc(i), zAcc(i));
       proj4.transform(projSrcGcs, projDestGcs, projPoint);
-      writer(projPoint[0].x, projPoint.y, projPoint.z);
+      writer(i, projPoint[0].x, projPoint.y, projPoint.z);
       return output;
     }
   }
