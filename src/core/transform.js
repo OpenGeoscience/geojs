@@ -486,7 +486,7 @@ geo.transform.transformCoordinates = function (srcGcs, destGcs, coordinates) {
     for (i = 0; i < count; i += offset) {
       projPoint = new proj4.Point(xAcc(i), yAcc(i), zAcc(i));
       proj4.transform(projSrcGcs, projDestGcs, projPoint);
-      writer(i, projPoint[0].x, projPoint.y, projPoint.z);
+      writer(i, projPoint.x, projPoint.y, projPoint.z);
       return output;
     }
   }
