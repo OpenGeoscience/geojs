@@ -1,5 +1,7 @@
 /*global describe, it, expect, geo*/
 describe('geo.sceneObject', function() {
+  'use strict';
+
   function CallCounter(extraData) {
     var m_this = this;
     this.ncalls = 0;
@@ -21,7 +23,7 @@ describe('geo.sceneObject', function() {
       children.forEach(function (child) {
         parent.addChild(child);
       });
-      
+
       expect(parent.parent()).toBe(null);
       parent.children().forEach(function (child, idx) {
         expect(child).toBe(children[idx]);
@@ -54,11 +56,11 @@ describe('geo.sceneObject', function() {
 
       root.removeChild(root.children()[0]);
       expect(deepCount(root)).toBe(27);
-      
+
       child = root.children()[0];
       child.removeChild(child.children()[2]);
       expect(deepCount(root)).toBe(23);
-      
+
       child = new geo.sceneObject();
       root.addChild(child);
       expect(deepCount(root)).toBe(24);
@@ -114,17 +116,17 @@ describe('geo.sceneObject', function() {
           expect(child.count()).toBe(n);
         });
       }
-      
+
       var i, n;
       for (i = 0; i < 10; i++) {
         makeNode(root);
       }
-      
+
       checkCounts(0);
 
       root.trigger('signal');
       checkCounts(1);
-      
+
       n = 1;
       root.children().forEach(function (child) {
         child.trigger('signal');
@@ -158,7 +160,7 @@ describe('geo.sceneObject', function() {
           triggerEach(child);
         });
       }
-      
+
       makeLevel(root, 0);
       checkCounts(root, 0);
 
@@ -214,6 +216,97 @@ describe('geo.sceneObject', function() {
       expect(child1Called).toBe(true);
       expect(child2Called).toBe(true);
       expect(rootCalled).toBe(false);
+    });
+  });
+  describe('Check onIdle handlers', function () {
+    var root = geo.sceneObject(),
+        child1 = geo.sceneObject(),
+        child2 = geo.sceneObject(),
+        child3 = geo.sceneObject();
+
+    root.addChild(child1);
+    root.addChild(child2);
+    child2.addChild(child3);
+
+    it('child defers to parent', function () {
+      var defer = $.Deferred(),
+          handlerRoot = new CallCounter(null),
+          handler1 = new CallCounter(null),
+          handler2 = new CallCounter(null),
+          handler3 = new CallCounter(null);
+
+      function checkCallCount(count) {
+        expect(handlerRoot.ncalls).toBe(count);
+        expect(handler1.ncalls).toBe(count);
+        expect(handler2.ncalls).toBe(count);
+        expect(handler3.ncalls).toBe(count);
+      }
+
+      child3.addDeferred(defer);
+      root.onIdle(handlerRoot.call);
+      child1.onIdle(handler1.call);
+      child2.onIdle(handler2.call);
+      child3.onIdle(handler3.call);
+
+      checkCallCount(0);
+
+      defer.resolve();
+
+      checkCallCount(1);
+
+      defer = $.Deferred();
+      child3.addDeferred(defer);
+
+      checkCallCount(1);
+
+      defer.resolve();
+
+      checkCallCount(1);
+
+      root.onIdle(handlerRoot.call);
+      child1.onIdle(handler1.call);
+      child2.onIdle(handler2.call);
+      child3.onIdle(handler3.call);
+
+      checkCallCount(2);
+    });
+
+    it('aysnchronous events from multiple children', function (done) {
+      window.setTimeout(function () {
+        var defer = $.Deferred();
+        child1.addDeferred(defer);
+
+        window.setTimeout(function () {
+          defer.resolve();
+        }, 100);
+      }, 0);
+      window.setTimeout(function () {
+        var defer = $.Deferred();
+        child2.addDeferred(defer);
+
+        window.setTimeout(function () {
+          defer.resolve();
+        }, 200);
+      }, 0);
+      window.setTimeout(function () {
+        var defer = $.Deferred();
+        child3.addDeferred(defer);
+
+        window.setTimeout(function () {
+          defer.resolve();
+        }, 40);
+      }, 10);
+
+      window.setTimeout(function () {
+        var handler = new CallCounter(null);
+        root.onIdle(handler.call);
+        expect(handler.ncalls).toBe(0);
+        window.setTimeout(function () {
+          expect(handler.ncalls).toBe(1);
+          done();
+        }, 400);
+      }, 50);
+
     });
   });
 });
