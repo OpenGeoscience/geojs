@@ -267,7 +267,8 @@ geo.transform.transformLayer = function (destGcs, layer, baseLayer) {
  * @return {Array | geo.latlng} Transformed coordinates
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.transform.transformCoordinates = function (srcGcs, destGcs, coordinates) {
+geo.transform.transformCoordinates = function (srcGcs, destGcs, coordinates,
+                                               numberOfComponents) {
   "use strict";
 
   var i, count, offset, xCoord, yCoord, zCoord, xAcc,
@@ -309,8 +310,6 @@ geo.transform.transformCoordinates = function (srcGcs, destGcs, coordinates) {
         return coordinates.y();
       };
       writer = function (index, x, y) {
-        /// TODO Is there a better way to silent warning?
-        index = index;
         output = geo.latlng(y, x);
       };
     }
@@ -319,7 +318,7 @@ geo.transform.transformCoordinates = function (srcGcs, destGcs, coordinates) {
   /// Helper methods
   function handleArrayCoordinates() {
     if (coordinates[0] instanceof Array) {
-      if (coordinates[0].length % 2 === 0) {
+      if (coordinates[0].length === 2) {
         xAcc = function (index) {
           return coordinates[index][0];
         };
@@ -329,7 +328,7 @@ geo.transform.transformCoordinates = function (srcGcs, destGcs, coordinates) {
         writer = function (index, x, y) {
           output[index] = [x, y];
         };
-      } else if (coordinates[0].length % 3 === 0) {
+      } else if (coordinates[0].length === 3) {
         xAcc = function (index) {
           return coordinates[index][0];
         };
@@ -342,9 +341,11 @@ geo.transform.transformCoordinates = function (srcGcs, destGcs, coordinates) {
         writer = function (index, x, y, z) {
           output[index] = [x, y, z];
         };
+      } else {
+        throw "Invalid coordinates. Requires two or three components per array";
       }
     } else {
-      if (coordinates.length % 2 === 0) {
+      if (coordinates.length === 2) {
         offset = 2;
 
         xAcc = function (index) {
@@ -357,7 +358,7 @@ geo.transform.transformCoordinates = function (srcGcs, destGcs, coordinates) {
           output[index] = x;
           output[index + 1] = y;
         };
-      } else if (coordinates.length % 3 === 0) {
+      } else if (coordinates.length === 3) {
         offset = 3;
 
         xAcc = function (index) {
@@ -374,6 +375,34 @@ geo.transform.transformCoordinates = function (srcGcs, destGcs, coordinates) {
           output[index + 1] = y;
           output[index + 2] = z;
         };
+      } else if (numberOfComponents) {
+        if (numberOfComponents === 2 || numberOfComponents || 3) {
+          offset = numberOfComponents;
+
+          xAcc = function (index) {
+            return coordinates[index];
+          };
+          yAcc = function (index) {
+            return coordinates[index + 1];
+          };
+          if (numberOfComponents === 2) {
+            writer = function (index, x, y) {
+              output[index] = x;
+              output[index + 1] = y;
+            };
+          } else {
+            zAcc = function (index) {
+              return coordinates[index + 2];
+            };
+            writer = function (index, x, y, z) {
+              output[index] = x;
+              output[index + 1] = y;
+              output[index + 2] = z;
+            };
+          }
+        } else {
+          throw "Number of components should be two or three";
+        }
       } else {
         throw "Invalid coordinates";
       }
@@ -382,7 +411,6 @@ geo.transform.transformCoordinates = function (srcGcs, destGcs, coordinates) {
 
   /// Helper methods
   function handleObjectCoordinates() {
-
     if (coordinates[0] &&
         "x" in coordinates[0] &&
         "y" in coordinates[0]) {

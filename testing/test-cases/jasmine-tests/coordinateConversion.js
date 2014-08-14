@@ -73,4 +73,17 @@ describe('coordinate conversion', function () {
     expect(d0[1].x()).toBeCloseTo(0.0, 0);
     expect(d0[1].y()).toBeCloseTo(0.0, 1);
   });
+
+  it('osm to platcaree projection array with 3 components', function () {
+    var pt = [0.0, 90.0, 0.0, 0.0, 90.0, 0.0], d, d0;
+    var d = pt;
+    d0 = geo.transform.transformCoordinates("EPSG:4326",
+               "EPSG:3857", d, 3);
+    expect(d0[0]).toBeCloseTo(0.0, 0);
+    expect(d0[1]).toBeCloseTo(180.0, 1);
+    expect(d0[2]).toBeCloseTo(0.0, 0);
+    expect(d0[3]).toBeCloseTo(0.0, 0);
+    expect(d0[4]).toBeCloseTo(180.0, 1);
+    expect(d0[5]).toBeCloseTo(0.0, 0);
+  });
 });
