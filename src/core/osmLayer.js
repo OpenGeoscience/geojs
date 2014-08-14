@@ -40,7 +40,8 @@ geo.osmLayer = function (arg) {
     m_visibleTilesRange = {},
     s_init = this._init,
     m_pendingNewTilesStat = {},
-    s_update = this._update;
+    s_update = this._update,
+    m_updateDefer = null;
 
   if (arg && arg.baseUrl !== undefined) {
     m_baseUrl = arg.baseUrl;
@@ -489,6 +490,9 @@ geo.osmLayer = function (arg) {
 
     // define a function here to set tile properties after it is loaded
     function tileOnLoad(tile) {
+      var defer = $.Deferred();
+      m_this.addDeferred(defer);
+
       return function () {
         tile.LOADING = false;
         tile.LOADED = true;
@@ -519,6 +523,7 @@ geo.osmLayer = function (arg) {
             m_pendingNewTilesStat[m_updateTimerId].total) {
           drawTiles();
         }
+        defer.resolve();
       };
     }
 
@@ -577,8 +582,13 @@ geo.osmLayer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._updateTiles = function (request) {
+    var defer = $.Deferred();
+    m_this.addDeferred(defer);
+
     if (m_updateTimerId !== null) {
       clearTimeout(m_updateTimerId);
+      m_updateDefer.resolve();
+      m_updateDefer = defer;
       if (m_updateTimerId in m_pendingNewTilesStat) {
         delete m_pendingNewTilesStat[m_updateTimerId];
       }
@@ -586,10 +596,13 @@ geo.osmLayer = function (arg) {
       /// with the events. Also, 60ms corresponds to 15 FPS.
       m_updateTimerId = setTimeout(function () {
         updateOSMTiles(request);
+        m_updateDefer.resolve();
       }, 100);
     } else {
+      m_updateDefer = defer;
       m_updateTimerId = setTimeout(function () {
         updateOSMTiles(request);
+        m_updateDefer.resolve();
       }, 0);
     }
     return m_this;
