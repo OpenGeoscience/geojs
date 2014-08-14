@@ -261,29 +261,31 @@ geo.transform.transformLayer = function (destGcs, layer, baseLayer) {
  * Transform position coordinates from source projection to destination
  * projection.
  *
- * @param srcGCS GCS of the coordinates
- * @param destGCS Desired GCS of the transformed coordinates
+ * @param srcGcs GCS of the coordinates
+ * @param destGcs Desired GCS of the transformed coordinates
  * @param coordinates
  * @return {Array | geo.latlng} Transformed coordinates
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.transform.transformCoordinates = function (srcGCS, destGCS, coordinates) {
+geo.transform.transformCoordinates = function (srcGcs, destGcs, coordinates) {
   "use strict";
 
-  var i, x, y, z, count, offset, xCoord, yCoord, zCoord, xAcc,
-      yAcc, zAcc, writer, output, projPoint;
+  var i, count, offset, xCoord, yCoord, zCoord, xAcc,
+      yAcc, zAcc, writer, output, projPoint,
+      projSrcGcs = new proj4.Proj(srcGcs),
+      projDestGcs = new proj4.Proj(destGcs);
 
   /// Default Z accessor
   zAcc = function () {
     return 0.0;
   };
 
-  if (destGCS === srcGCS) {
+  if (destGcs === srcGcs) {
     return coordinates;
   }
 
   /// TODO: Can we check for EPSG code?
-  if (!destGCS || !srcGCS) {
+  if (!destGcs || !srcGcs) {
     throw "Invalid source or destination GCS";
   }
 
@@ -300,13 +302,15 @@ geo.transform.transformCoordinates = function (srcGCS, destGCS, coordinates) {
         output[index] = geo.latlng(y, x);
       };
     } else {
-      xAcc = function (index) {
+      xAcc = function () {
         return coordinates.x();
       };
-      yAcc = function (index) {
+      yAcc = function () {
         return coordinates.y();
       };
       writer = function (index, x, y) {
+        /// TODO Is there a better way to silent warning?
+        index = index;
         output = geo.latlng(y, x);
       };
     }
@@ -459,7 +463,7 @@ geo.transform.transformCoordinates = function (srcGCS, destGCS, coordinates) {
     }
   }
 
-  if (destGCS === "EPSG:3857" && srcGCS === "EPSG:4326") {
+  if (destGcs === "EPSG:3857" && srcGcs === "EPSG:4326") {
     for (i = 0; i < count; i += offset) {
       /// Y goes from 0 (top edge is 85.0511 °N) to 2zoom − 1
       /// (bottom edge is 85.0511 °S) in a Mercator projection.

@@ -49,7 +49,7 @@ ggl.planeFeature = function (arg) {
         texture = null;
 
     /// TODO If for some reason base layer changes its gcs at run time
-    /// then we need to triggen an event to rebuild every feature
+    /// then we need to trigger an event to rebuild every feature
     or = geo.transform.transformCoordinates(m_this.gcs(),
                                             m_this.layer().map().gcs(),
                                             or);
