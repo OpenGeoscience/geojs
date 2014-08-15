@@ -10,7 +10,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.osmLayer = function (arg) {
-  'use strict';
+  "use strict";
 
   if (!(this instanceof geo.osmLayer)) {
     return new geo.osmLayer(arg);
@@ -33,8 +33,8 @@ geo.osmLayer = function (arg) {
     m_pendingInactiveTiles = [],
     m_numberOfCachedTiles = 0,
     m_tileCacheSize = 100,
-    m_baseUrl = 'http://tile.openstreetmap.org/',
-    m_imageFormat = 'png',
+    m_baseUrl = "http://tile.openstreetmap.org/",
+    m_imageFormat = "png",
     m_updateTimerId = null,
     m_lastVisibleZoom = null,
     m_visibleTilesRange = {},
@@ -153,13 +153,18 @@ geo.osmLayer = function (arg) {
             output[i + 2] = input[i + 2];
           }
         }
-      } else if ('x' in input[0] && 'y' in input[0] && 'z' in input[0]) {
+      } else if (input[0] instanceof Object &&
+                 "x" in input[0] && "y" in input[0] && "z" in input[0]) {
         /// Input is array of object
         output[i] = { x: input[i].x, y: geo.mercator.lat2y(input[i].y),
                       z: input[i].z };
-      } else if ('x' in input[0] && 'y' in input[0] && 'z' in input[0]) {
+      } else if (input[0] instanceof Object &&
+                 "x" in input[0] && "y" in input[0] && "z" in input[0]) {
         /// Input is array of object
         output[i] = { x: input[i].x, y: geo.mercator.lat2y(input[i].y)};
+      } else if (input.length >= 2) {
+        output = input.slice(0);
+        output[1] = geo.mercator.lat2y(input[1]);
       }
     } else if (input instanceof geo.latlng) {
       output = {};
@@ -275,7 +280,7 @@ geo.osmLayer = function (arg) {
     tile.REMOVED = false;
     tile.REMOVING = false;
 
-    tile.crossOrigin = 'anonymous';
+    tile.crossOrigin = "anonymous";
     tile.zoom = zoom;
     tile.index_x = x;
     tile.index_y = y;
@@ -287,8 +292,8 @@ geo.osmLayer = function (arg) {
 
     // tile.src = "http://tile.openstreetmap.org/" + zoom + "/" + (x)
     //   + "/" + (Math.pow(2,zoom) - 1 - y) + ".png";
-    tile.src = m_baseUrl + zoom + '/' +
-      (x) + '/' + (Math.pow(2, zoom) - 1 - y) + '.' + m_imageFormat;
+    tile.src = m_baseUrl + zoom + "/" +
+      (x) + "/" + (Math.pow(2, zoom) - 1 - y) + "." + m_imageFormat;
 
     m_tiles[zoom][x][y] = tile;
     m_pendingNewTiles.push(tile);
@@ -332,7 +337,7 @@ geo.osmLayer = function (arg) {
 
     /// Get rid of tiles if we have reached our threshold. However,
     /// If the tile is required for current zoom, then do nothing.
-    /// Also don't delete the tile if its from the previous zoom
+    /// Also don"t delete the tile if its from the previous zoom
     while (m_numberOfCachedTiles > m_tileCacheSize &&
       i < m_pendingInactiveTiles.length) {
       tile = m_pendingInactiveTiles[i];
@@ -341,7 +346,7 @@ geo.osmLayer = function (arg) {
         i += 1;
         continue;
       }
-      m_this._delete(tile.feature);
+      m_this.deleteFeature(tile.feature);
       delete m_tiles[tile.zoom][tile.index_x][tile.index_y];
       m_pendingInactiveTiles.splice(i, 1);
       m_numberOfCachedTiles -= 1;
@@ -520,13 +525,13 @@ geo.osmLayer = function (arg) {
     /// And now finally add them
     for (i = 0; i < m_pendingNewTiles.length; i += 1) {
       tile = m_pendingNewTiles[i];
-      feature = m_this.createFeature('plane', {drawOnAsyncResourceLoad: false,
+      feature = m_this.createFeature("plane", {drawOnAsyncResourceLoad: false,
                     onload: tileOnLoad(tile)})
                   .origin([tile.llx, tile.lly])
                   .upperLeft([tile.llx, tile.ury])
                   .lowerRight([tile.urx, tile.lly])
-                  .gcs('"EPSG:3857"')
-                  .style('image', tile);
+                  .gcs("EPSG:3857")
+                  .style("image", tile);
       tile.feature = feature;
       tile.feature._update();
     }
@@ -599,7 +604,7 @@ geo.osmLayer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._init = function () {
     s_init.call(m_this);
-    this.gcs('EPSG:3857');
+    this.gcs("EPSG:3857");
     return m_this;
   };
 
@@ -621,4 +626,4 @@ geo.osmLayer = function (arg) {
 
 inherit(geo.osmLayer, geo.featureLayer);
 
-geo.registerLayer('osm', geo.osmLayer);
+geo.registerLayer("osm", geo.osmLayer);

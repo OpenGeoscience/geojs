@@ -64,41 +64,6 @@ geo.featureLayer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.deleteFeature = function (feature) {
-    return m_this._delete(feature);
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get/Set drawables
-   *
-   * @returns {Array}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.features = function (val) {
-    return m_this._features(val);
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get/Set drawables
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._features = function (val) {
-    if (val === undefined) {
-      return m_features || [];
-    } else {
-      m_features = val.slice(0);
-      m_this.dataTime().modified();
-      m_this.modified();
-    }
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Delete feature
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._delete = function (feature) {
     var i;
 
     for (i = 0; i < m_features.length; i += 1) {
@@ -112,6 +77,24 @@ geo.featureLayer = function (arg) {
     m_this.removeChild(feature);
 
     return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set drawables
+   *
+   * @returns {Array}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.features = function (val) {
+    if (val === undefined) {
+      return m_features || [];
+    } else {
+      m_features = val.slice(0);
+      m_this.dataTime().modified();
+      m_this.modified();
+      return m_this;
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////

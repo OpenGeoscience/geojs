@@ -48,6 +48,18 @@ ggl.planeFeature = function (arg) {
         image = null,
         texture = null;
 
+    /// TODO If for some reason base layer changes its gcs at run time
+    /// then we need to trigger an event to rebuild every feature
+    or = geo.transform.transformCoordinates(m_this.gcs(),
+                                            m_this.layer().map().gcs(),
+                                            or);
+    ul = geo.transform.transformCoordinates(m_this.gcs(),
+                                            m_this.layer().map().gcs(),
+                                            ul);
+    lr = geo.transform.transformCoordinates(m_this.gcs(),
+                                            m_this.layer().map().gcs(),
+                                            lr);
+
     m_this.buildTime().modified();
 
     if (m_actor) {
@@ -65,6 +77,9 @@ ggl.planeFeature = function (arg) {
       m_actor = vgl.utils.createPlane(or[0], or[1], or[2],
         ul[0], ul[1], ul[2],
         lr[0], lr[1], lr[2]);
+
+      m_this.renderer().contextRenderer().addActor(m_actor);
+
     } else {
       m_actor = vgl.utils.createTexturePlane(or[0], or[1], or[2],
         lr[0], lr[1], lr[2],
@@ -74,6 +89,7 @@ ggl.planeFeature = function (arg) {
 
       /// TODO: Is there a reliable way to make sure that image is loaded already?
       m_this.renderer().contextRenderer().addActor(m_actor);
+
       if (image.complete) {
         texture.setImage(image);
         m_actor.material().addAttribute(texture);

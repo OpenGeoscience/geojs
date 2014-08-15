@@ -255,3 +255,267 @@ geo.transform.transformLayer = function (destGcs, layer, baseLayer) {
     throw "Only feature layer transformation is supported";
   }
 };
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Transform position coordinates from source projection to destination
+ * projection.
+ *
+ * @param srcGcs GCS of the coordinates
+ * @param destGcs Desired GCS of the transformed coordinates
+ * @param coordinates
+ * @return {Array | geo.latlng} Transformed coordinates
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.transform.transformCoordinates = function (srcGcs, destGcs, coordinates,
+                                               numberOfComponents) {
+  "use strict";
+
+  var i, count, offset, xCoord, yCoord, zCoord, xAcc,
+      yAcc, zAcc, writer, output, projPoint,
+      projSrcGcs = new proj4.Proj(srcGcs),
+      projDestGcs = new proj4.Proj(destGcs);
+
+  /// Default Z accessor
+  zAcc = function () {
+    return 0.0;
+  };
+
+  if (destGcs === srcGcs) {
+    return coordinates;
+  }
+
+  /// TODO: Can we check for EPSG code?
+  if (!destGcs || !srcGcs) {
+    throw "Invalid source or destination GCS";
+  }
+
+  /// Helper methods
+  function handleLatLngCoordinates() {
+    if (coordinates[0] && coordinates[0] instanceof geo.latlng) {
+      xAcc = function (index) {
+        return coordinates[index].x();
+      };
+      yAcc = function (index) {
+        return coordinates[index].y();
+      };
+      writer = function (index, x, y) {
+        output[index] = geo.latlng(y, x);
+      };
+    } else {
+      xAcc = function () {
+        return coordinates.x();
+      };
+      yAcc = function () {
+        return coordinates.y();
+      };
+      writer = function (index, x, y) {
+        output = geo.latlng(y, x);
+      };
+    }
+  }
+
+  /// Helper methods
+  function handleArrayCoordinates() {
+    if (coordinates[0] instanceof Array) {
+      if (coordinates[0].length === 2) {
+        xAcc = function (index) {
+          return coordinates[index][0];
+        };
+        yAcc = function (index) {
+          return coordinates[index][1];
+        };
+        writer = function (index, x, y) {
+          output[index] = [x, y];
+        };
+      } else if (coordinates[0].length === 3) {
+        xAcc = function (index) {
+          return coordinates[index][0];
+        };
+        yAcc = function (index) {
+          return coordinates[index][1];
+        };
+        zAcc = function (index) {
+          return coordinates[index][2];
+        };
+        writer = function (index, x, y, z) {
+          output[index] = [x, y, z];
+        };
+      } else {
+        throw "Invalid coordinates. Requires two or three components per array";
+      }
+    } else {
+      if (coordinates.length === 2) {
+        offset = 2;
+
+        xAcc = function (index) {
+          return coordinates[index * offset];
+        };
+        yAcc = function (index) {
+          return coordinates[index * offset + 1];
+        };
+        writer = function (index, x, y) {
+          output[index] = x;
+          output[index + 1] = y;
+        };
+      } else if (coordinates.length === 3) {
+        offset = 3;
+
+        xAcc = function (index) {
+          return coordinates[index * offset];
+        };
+        yAcc = function (index) {
+          return coordinates[index * offset + 1];
+        };
+        zAcc = function (index) {
+          return coordinates[index * offset + 2];
+        };
+        writer = function (index, x, y, z) {
+          output[index] = x;
+          output[index + 1] = y;
+          output[index + 2] = z;
+        };
+      } else if (numberOfComponents) {
+        if (numberOfComponents === 2 || numberOfComponents || 3) {
+          offset = numberOfComponents;
+
+          xAcc = function (index) {
+            return coordinates[index];
+          };
+          yAcc = function (index) {
+            return coordinates[index + 1];
+          };
+          if (numberOfComponents === 2) {
+            writer = function (index, x, y) {
+              output[index] = x;
+              output[index + 1] = y;
+            };
+          } else {
+            zAcc = function (index) {
+              return coordinates[index + 2];
+            };
+            writer = function (index, x, y, z) {
+              output[index] = x;
+              output[index + 1] = y;
+              output[index + 2] = z;
+            };
+          }
+        } else {
+          throw "Number of components should be two or three";
+        }
+      } else {
+        throw "Invalid coordinates";
+      }
+    }
+  }
+
+  /// Helper methods
+  function handleObjectCoordinates() {
+    if (coordinates[0] &&
+        "x" in coordinates[0] &&
+        "y" in coordinates[0]) {
+      xAcc = function (index) {
+        return coordinates[index].x;
+      };
+      yAcc = function (index) {
+        return coordinates[index].y;
+      };
+
+      if ("z" in coordinates[0]) {
+        zAcc = function (index) {
+          return coordinates[index].z;
+        };
+        writer = function (index, x, y, z) {
+          output[i] = {x: x, y: y, z: z};
+        };
+      } else {
+        writer = function (index, x, y) {
+          output[index] = {x: x, y: y};
+        };
+      }
+    } else if (coordinates &&
+        "x" in coordinates && "y" in coordinates) {
+      xAcc = function () {
+        return coordinates.x;
+      };
+      yAcc = function () {
+        return coordinates.y;
+      };
+
+      if ("z" in coordinates) {
+        zAcc = function () {
+          return coordinates.z;
+        };
+        writer = function (index, x, y, z) {
+          output = {x: x, y: y, z: z};
+        };
+      } else {
+        writer = function (index, x, y) {
+          output = {x: x, y: y};
+        };
+      }
+    } else {
+      throw "Invalid coordinates";
+    }
+  }
+
+  if (coordinates instanceof Array) {
+    output = [];
+    output.length = coordinates.length;
+    count = coordinates.length;
+
+    if (coordinates[0] instanceof Array ||
+        coordinates[0] instanceof geo.latlng ||
+        coordinates[0] instanceof Object) {
+      offset = 1;
+
+      if (coordinates[0] instanceof Array) {
+        handleArrayCoordinates();
+      } else if (coordinates[0] instanceof geo.latlng) {
+        handleLatLngCoordinates();
+      } else if (coordinates[0] instanceof Object) {
+        handleObjectCoordinates();
+      }
+    } else {
+      handleArrayCoordinates();
+    }
+  } else if (coordinates && coordinates instanceof Object) {
+    count = 1;
+    offset = 1;
+    if (coordinates instanceof geo.latlng) {
+      handleLatLngCoordinates();
+    } else if (coordinates && "x" in coordinates && "y" in coordinates) {
+      handleObjectCoordinates();
+    } else {
+      throw "Coordinates are not valid";
+    }
+  }
+
+  if (destGcs === "EPSG:3857" && srcGcs === "EPSG:4326") {
+    for (i = 0; i < count; i += offset) {
+      /// Y goes from 0 (top edge is 85.0511 °N) to 2zoom − 1
+      /// (bottom edge is 85.0511 °S) in a Mercator projection.
+      xCoord = xAcc(i);
+      yCoord = yAcc(i);
+      zCoord = zAcc(i);
+
+      if (yCoord > 85.0511) {
+        yCoord = 85.0511;
+      }
+      if (yCoord < -85.0511) {
+        yCoord = -85.0511;
+      }
+
+      writer(i, xCoord, geo.mercator.lat2y(yCoord), zCoord);
+    }
+
+    return output;
+  } else {
+    for (i = 0; i < count; i += offset) {
+      projPoint = new proj4.Point(xAcc(i), yAcc(i), zAcc(i));
+      proj4.transform(projSrcGcs, projDestGcs, projPoint);
+      writer(i, projPoint.x, projPoint.y, projPoint.z);
+      return output;
+    }
+  }
+};
