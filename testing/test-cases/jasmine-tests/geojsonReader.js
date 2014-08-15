@@ -52,7 +52,27 @@ describe("geojsonReader", function () {
           "width": [3]
         },
         "type": "Feature"
-      }
+      },
+      {
+        "geometry": {
+          "coordinates": [
+            [
+              10.0,
+              0.5
+            ],
+            [
+              10.0,
+              -0.5
+            ]
+          ],
+          "type": "MultiPoint"
+        },
+        "properties": {
+          "color": [0, 0, 1],
+          "size": [7]
+        },
+        "type": "Feature"
+      },
     ],
     "type": "FeatureCollection"
   };
@@ -61,7 +81,7 @@ describe("geojsonReader", function () {
 
     expect(reader.canRead(obj)).toBe(true);
     reader.read(obj, function (features) {
-      expect(features.length > 0).toBe(true);
+      expect(features.length === 3).toBe(true);
       done();
     });
   });

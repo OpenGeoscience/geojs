@@ -82,7 +82,7 @@ geo.jsonReader = function (arg) {
 
   this._featureType = function (spec) {
     var geometry = spec.geometry || {};
-    if (geometry.type === 'Point') {
+    if (geometry.type === 'Point' || geometry.type === 'MultiPoint') {
       return 'point';
     }
     if (geometry.type === 'LineString') {
