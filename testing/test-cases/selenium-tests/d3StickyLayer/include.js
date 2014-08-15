@@ -13,6 +13,7 @@ window.startTest = function (done) {
   var myMap = geo.map(mapOptions),
       width, height;
 
+  window.gjsmap = myMap;
   function resizeCanvas() {
     width = $('#map').width();
     height = $('#map').height();
@@ -64,5 +65,5 @@ window.startTest = function (done) {
 
   myMap.draw();
   
-  done();
+  myMap.onIdle(done);
 };

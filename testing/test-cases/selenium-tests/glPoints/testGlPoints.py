@@ -15,7 +15,6 @@ class glPointsBase(object):
         self.resizeWindow(640, 480)
         self.loadURL('glPoints/index.html')
         self.wait()
-        time.sleep(1)
 
     def testGlPoints(self):
         self.loadPage()

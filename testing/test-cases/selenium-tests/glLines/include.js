@@ -79,5 +79,5 @@ window.startTest = function(done) {
     resizeCanvas();
     myMap.draw();
 
-    done();
+    myMap.onIdle(done);
 };

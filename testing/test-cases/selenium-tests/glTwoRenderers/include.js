@@ -73,7 +73,7 @@ window.startTest = function (done) {
       layer1.name = 'layer1';
 
       myMap.draw();
-      done();
+      myMap.onIdle(done);
     }
   });
 };

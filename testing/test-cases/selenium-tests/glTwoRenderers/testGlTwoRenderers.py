@@ -19,8 +19,6 @@ class glTwoRenderersBase(object):
     def testGlTwoRenderers(self):
         self.loadPage()
 
-        time.sleep(1)  # wait for data to load
-
         testName = 'drawGlTwoRenderers'
         self.screenshotTest(testName, revision=1)
 

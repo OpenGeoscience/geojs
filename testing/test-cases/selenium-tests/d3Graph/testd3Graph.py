@@ -14,7 +14,6 @@ class d3GraphBase(object):
         self.resizeWindow(640, 480)
         self.loadURL('d3Graph/index.html')
         self.wait()
-        time.sleep(1)
 
     def testd3DrawGraph(self):
         self.loadPage()

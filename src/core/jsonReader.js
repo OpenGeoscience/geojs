@@ -35,6 +35,11 @@ geo.jsonReader = function (arg) {
       }
       return true;
     }
+    try {
+      if (Array.isArray(m_this._featureArray(file))) {
+        return true;
+      }
+    } catch (e) {}
     return false;
   };
 
@@ -53,12 +58,31 @@ geo.jsonReader = function (arg) {
 
       done(object);
     }
-    m_this._getString(file, onDone, progress);
+    if (file instanceof File) {
+      m_this._getString(file, onDone, progress);
+    } else if (typeof file === 'string') {
+      onDone(file);
+    } else {
+      done(file);
+    }
+  };
+
+  this._featureArray = function (spec) {
+    if (spec.type === 'FeatureCollection') {
+      return spec.features || [];
+    }
+    if (spec.type === 'GeometryCollection') {
+      throw 'GeometryCollection not yet implemented.';
+    }
+    if (Array.isArray(spec.coordinates)) {
+      return spec;
+    }
+    throw 'Unsupported collection type: ' + spec.type;
   };
 
   this._featureType = function (spec) {
     var geometry = spec.geometry || {};
-    if (geometry.type === 'Point') {
+    if (geometry.type === 'Point' || geometry.type === 'MultiPoint') {
       return 'point';
     }
     if (geometry.type === 'LineString') {
@@ -93,13 +117,17 @@ geo.jsonReader = function (arg) {
     function _done(object) {
       var features, allFeatures = [];
 
-      features = object.features || [];
+      features = m_this._featureArray(object);
 
       features.forEach(function (feature) {
         var type = m_this._featureType(feature),
             coordinates = m_this._getCoordinates(feature),
             style = m_this._getStyle(feature);
-        allFeatures.push(m_this._addFeature(type, coordinates, style));
+        if (type) {
+          allFeatures.push(m_this._addFeature(type, coordinates, style));
+        } else {
+          console.log('unsupported feature type: ' + feature.geometry.type);
+        }
       });
 
       if (done) {

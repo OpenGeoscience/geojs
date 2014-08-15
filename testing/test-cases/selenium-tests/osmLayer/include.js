@@ -6,6 +6,8 @@ window.startTest = function(done) {
       myMap = geo.map(mapOptions),
       layer = myMap.createLayer('osm');
 
+    window.gjsmap = myMap;
+
     /// Resize the canvas to fill browser window dynamically
     window.addEventListener('resize', resizeCanvas, false);
 
@@ -23,6 +25,5 @@ window.startTest = function(done) {
     resizeCanvas();
 
     // give the tiles a chance to load
-    // we should add signals in geojs to do this...
-    window.setTimeout(done, 1000);
+    myMap.onIdle(done);
 };

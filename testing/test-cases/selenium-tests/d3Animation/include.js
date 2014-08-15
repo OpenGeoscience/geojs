@@ -82,7 +82,7 @@ window.startTest = function(done) {
       renderer: 'd3Renderer',
       data: data
     });
-    done();
+    myMap.onIdle(done);
   }
 
   $.ajax({
@@ -126,7 +126,7 @@ window.startTest = function(done) {
   window.animateToEnd = function (done) {
     myMap.animate();
     myMap.on(geo.event.animationComplete, function () {
-      done();
+      myMap.onIdle(done);
     });
   };
 };

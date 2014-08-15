@@ -10,6 +10,12 @@ from selenium_test import FirefoxTest, ChromeTest,\
 class osmBase(object):
     testCase = ('osmLayer',)
 
+    def waitForIdle(self, timeout=5):
+        self.runScript(
+            'window._wait = false; window.gjsmap.onIdle(function () {window._wait = true;});'
+        )
+        self.wait(variable='window._wait', timeout=timeout)
+
     def loadPage(self):
         self.resizeWindow(640, 480)
         self.loadURL('osmLayer/index.html')
@@ -24,7 +30,7 @@ class osmBase(object):
         testName = 'osmPan'
         self.loadPage()
         self.drag('#map', (200, 150))
-        time.sleep(1)  # wait for tiles to load
+        self.waitForIdle()
         self.screenshotTest(testName, revision=5)
 
 
