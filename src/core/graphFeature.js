@@ -31,7 +31,8 @@ geo.graphFeature = function (arg) {
       m_nodes = null,
       m_points = null,
       m_links = [],
-      s_init = this._init;
+      s_init = this._init,
+      s_exit = this._exit;
 
 
   ////////////////////////////////////////////////////////////////////////////
@@ -60,6 +61,20 @@ geo.graphFeature = function (arg) {
     if (m_nodes) {
       m_this.dataTime().modified();
     }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Custom _exit method to remove all sub-features
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._exit = function () {
+    m_points._exit();
+    m_links.forEach(function (l) {
+      l._exit();
+    });
+    s_exit();
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
