@@ -28,7 +28,7 @@ geo.featureLayer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
-      m_features = null,
+      m_features = [],
       s_init = this._init,
       s_update = this._update;
 
@@ -44,11 +44,6 @@ geo.featureLayer = function (arg) {
 
     var newFeature = geo.createFeature(
       featureName, m_this, m_this.renderer(), arg);
-
-    /// Initialize feature list
-    if (!m_features) {
-      m_features = [];
-    }
 
     m_this.addChild(newFeature);
     m_features.push(newFeature);
@@ -88,7 +83,7 @@ geo.featureLayer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.features = function (val) {
     if (val === undefined) {
-      return m_features || [];
+      return m_features;
     } else {
       m_features = val.slice(0);
       m_this.dataTime().modified();
@@ -143,7 +138,7 @@ geo.featureLayer = function (arg) {
   this._update = function (request) {
     var i;
 
-    if (!m_features) {
+    if (!m_features.length) {
       return m_this;
     }
 
@@ -188,7 +183,7 @@ geo.featureLayer = function (arg) {
   this.clear = function () {
     var i;
 
-    if (!m_features)
+    if (!m_features.length)
       return m_this;
 
     for (i = 0; i < m_features.length; i += 1) {
