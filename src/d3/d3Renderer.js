@@ -360,6 +360,17 @@ gd3.d3Renderer = function (arg) {
     return getGroup().selectAll('.' + id);
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+  *  Removes a feature from the layer.
+  */
+  ////////////////////////////////////////////////////////////////////////////
+  this._removeFeature = function (id) {
+    m_this.select(id).remove();
+    delete m_features[id];
+    return m_this;
+  };
+
   // connect to pan event
   this.on(geo.event.pan, setTransform);
 

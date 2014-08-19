@@ -35,6 +35,15 @@ gd3.object = function (arg) {
     return m_this.renderer().select(m_this._d3id());
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+  *  Removes the element from the svg and the renderer
+  */
+  ////////////////////////////////////////////////////////////////////////////
+  this._exit = function () {
+    return m_this.renderer()._removeFeature(m_this._d3id());
+  };
+
   geo.sceneObject.call(this);
   return this;
 };

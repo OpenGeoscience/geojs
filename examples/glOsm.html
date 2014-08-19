@@ -22,8 +22,9 @@ $(function() {
     var mapOptions = {node: '#map',
                       zoom : 3,
                       center : [0.0, 0.0]},
-                      myMap = geo.map(mapOptions),
-                      layer = myMap.createLayer('osm');
+        layer;
+    myMap = geo.map(mapOptions);
+    layer = myMap.createLayer('osm');
 
     /// Resize the canvas to fill browser window dynamically
     window.addEventListener('resize', resizeCanvas, false);
