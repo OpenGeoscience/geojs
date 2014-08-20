@@ -49,7 +49,7 @@ geo.featureLayer = function (arg) {
     // Don't attach to the scene tree if requested by the caller.
     // The caller must then manage the feature itself.  This is
     // used mainly for composite features like graphFeature.
-    if (!arg || arg.detached) {
+    if (!arg || !arg.detached) {
       m_this.addChild(newFeature);
       m_features.push(newFeature);
       m_this.features(m_features);
@@ -77,7 +77,8 @@ geo.featureLayer = function (arg) {
         m_features[i]._exit();
         m_this.dataTime().modified();
         m_this.modified();
-        return m_features.splice(i, 1);
+        m_features.splice(i, 1);
+        return m_this;
       }
     }
     m_this.removeChild(feature);

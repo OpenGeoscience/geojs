@@ -18,6 +18,7 @@ gd3.object = function (arg) {
   if (!(this instanceof geo.object)) {
     return new gd3.object(arg);
   }
+  geo.sceneObject.call(this);
 
   var m_id = 'd3-' + gd3.uniqueID(),
       m_this = this,
@@ -42,7 +43,7 @@ gd3.object = function (arg) {
   */
   ////////////////////////////////////////////////////////////////////////////
   this.draw = function () {
-    m_this.renderer()._updateFeatures(m_this._d3id());
+    m_this._update();
     s_draw();
     return m_this;
   };
@@ -56,7 +57,6 @@ gd3.object = function (arg) {
     return m_this.renderer()._removeFeature(m_this._d3id());
   };
 
-  geo.sceneObject.call(this);
   return this;
 };
 

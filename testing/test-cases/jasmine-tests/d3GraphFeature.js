@@ -60,19 +60,7 @@ describe("d3 graph feature", function () {
   it("Remove feature from a layer", function () {
     var selection;
 
-    layer.deleteFeature(feature);
-
-    selection = d3.select("#map svg").selectAll("circle");
-    expect(selection[0].length).toBe(4);
-
-    selection = d3.select("#map svg").selectAll("path");
-    expect(selection[0].length).toBe(3);
-  });
-  
-  it("Call draw on the layer with deleted feature", function () {
-    var selection;
-
-    layer.draw();
+    layer.deleteFeature(feature).draw();
 
     selection = d3.select("#map svg").selectAll("circle");
     expect(selection[0].length).toBe(0);
