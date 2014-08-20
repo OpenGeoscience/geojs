@@ -69,10 +69,9 @@ geo.graphFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
-    m_points._exit();
-    m_links.forEach(function (l) {
-      l._exit();
-    });
+    m_this.nodes([]);
+    m_this.layer().deleteFeature(m_points, true);
+    m_this.removeChild(m_points);
     s_exit();
     return m_this;
   };
@@ -121,18 +120,23 @@ geo.graphFeature = function (arg) {
     // get links from node connections
     m_nodes.forEach(function (source) {
       (source.children || []).forEach(function (target) {
+        var link;
         nLinks += 1;
         if (m_links.length < nLinks) {
-          m_links.push(
-            layer.createFeature(style.linkType).style(style.links)
-          );
+          link = layer.createFeature(
+              style.linkType,
+              {detached: true}
+          ).style(style.links);
+          m_this.addChild(link);
+          m_links.push(link);
         }
         m_links[nLinks - 1].positions([source, target]);
       });
     });
 
     m_links.splice(nLinks, m_links.length - nLinks).forEach(function (l) {
-      layer.deleteFeature(l);
+      layer.deleteFeature(l, true);
+      m_this.removeChild(l);
     });
 
     m_this.dataTime().modified();
@@ -158,7 +162,8 @@ geo.graphFeature = function (arg) {
     return m_links;
   };
 
-  m_points = this.layer().createFeature("point");
+  m_points = this.layer().createFeature("point", {detached: true});
+  m_this.addChild(m_points);
 
   if (arg.nodes) {
     this.nodes(arg.nodes);

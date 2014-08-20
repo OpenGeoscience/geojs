@@ -46,10 +46,15 @@ geo.featureLayer = function (arg) {
     var newFeature = geo.createFeature(
       featureName, m_this, m_this.renderer(), arg);
 
-    m_this.addChild(newFeature);
-    m_features.push(newFeature);
-    m_this.features(m_features);
-    m_this.modified();
+    // Don't attach to the scene tree if requested by the caller.
+    // The caller must then manage the feature itself.  This is
+    // used mainly for composite features like graphFeature.
+    if (!arg || arg.detached) {
+      m_this.addChild(newFeature);
+      m_features.push(newFeature);
+      m_this.features(m_features);
+      m_this.modified();
+    }
     return newFeature;
   };
 
@@ -59,8 +64,13 @@ geo.featureLayer = function (arg) {
    *
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.deleteFeature = function (feature) {
+  this.deleteFeature = function (feature, detached) {
     var i;
+
+    if (detached) {
+      feature._exit();
+      return m_this;
+    }
 
     for (i = 0; i < m_features.length; i += 1) {
       if (m_features[i] === feature) {
