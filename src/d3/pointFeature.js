@@ -106,7 +106,7 @@ gd3.pointFeature = function (arg) {
     m_style.style['fill-opacity'] = s_style.opacity;
 
     // pass to renderer to draw
-    m_this.renderer().drawFeatures(m_style);
+    m_this.renderer()._drawFeatures(m_style);
 
     // update time stamps
     m_buildTime.modified();

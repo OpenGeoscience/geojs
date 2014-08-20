@@ -99,7 +99,7 @@ gd3.pathFeature = function (arg) {
       'stroke-opacity': s_style.opacity
     };
 
-    m_this.renderer().drawFeatures(m_style);
+    m_this.renderer()._drawFeatures(m_style);
 
     m_buildTime.modified();
     m_this.updateTime().modified();

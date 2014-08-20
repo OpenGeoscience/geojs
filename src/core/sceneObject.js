@@ -110,6 +110,19 @@ geo.sceneObject = function (arg) {
 
   //////////////////////////////////////////////////////////////////////////////
   /**
+   *  Force redraw of a scene object, to be implemented by subclasses.
+   *  Base class just calls draw of child objects.
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  this.draw = function (arg) {
+    m_this.children().forEach(function (child) {
+      child.draw(arg);
+    });
+    return m_this;
+  };
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
    *  Trigger an event (or events) on this object and call all handlers.
    *  @param {String} event the event to trigger
    *  @param {Object} args arbitrary argument to pass to the handler

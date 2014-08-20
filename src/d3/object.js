@@ -20,7 +20,8 @@ gd3.object = function (arg) {
   }
 
   var m_id = 'd3-' + gd3.uniqueID(),
-      m_this = this;
+      m_this = this,
+      s_draw = this.draw;
 
   this._d3id = function () {
     return m_id;
@@ -33,6 +34,17 @@ gd3.object = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.select = function () {
     return m_this.renderer().select(m_this._d3id());
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+  *  Redraw the object.
+  */
+  ////////////////////////////////////////////////////////////////////////////
+  this.draw = function () {
+    m_this.renderer()._updateFeatures(m_this._d3id());
+    s_draw();
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////

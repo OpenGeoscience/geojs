@@ -86,7 +86,7 @@ gd3.lineFeature = function (arg) {
       'stroke-opacity': s_style.opacity
     };
 
-    m_renderer.drawFeatures(m_style);
+    m_renderer._drawFeatures(m_style);
 
     m_buildTime.modified();
     m_this.updateTime().modified();

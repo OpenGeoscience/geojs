@@ -30,7 +30,8 @@ geo.featureLayer = function (arg) {
   var m_this = this,
       m_features = [],
       s_init = this._init,
-      s_update = this._update;
+      s_update = this._update,
+      s_draw = this.draw;
 
 
   ////////////////////////////////////////////////////////////////////////////
@@ -170,8 +171,13 @@ geo.featureLayer = function (arg) {
    * Draw
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._draw = function () {
+  this.draw = function () {
+    // Is this necessary if we are redrawing individual features?
+    // Probably, delete after vgl draw methods are added.
     m_this.renderer()._render();
+
+    // Call sceneObject.draw, which calls draw on all child objects.
+    s_draw();
     return m_this;
   };
 

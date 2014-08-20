@@ -15,24 +15,24 @@ describe("d3 point feature", function () {
     var selection;
     feature1 = layer.createFeature("point")
       .positions([geo.latlng(0, 0), geo.latlng(10, 0), geo.latlng(0, 10)])
-      .style({color: [1, 0, 0], size: [5]});
-    map.draw();
+      .style({color: [1, 0, 0], size: [5]})
+      .draw();
 
     selection = d3.select("#map svg").selectAll("circle");
     expect(selection[0].length).toBe(3);
 
     feature2 = layer.createFeature("point")
       .positions([geo.latlng(-10, -10), geo.latlng(10, -10)])
-      .style({color: [0, 1, 0], size: [8]});
-    map.draw();
+      .style({color: [0, 1, 0], size: [8]})
+      .draw();
     
     selection = d3.select("#map svg").selectAll("circle");
     expect(selection[0].length).toBe(5);
 
     feature3 = layer.createFeature("point")
       .positions([geo.latlng(-10, 10)])
-      .style({color: [0, 0, 1], size: [10]});
-    map.draw();
+      .style({color: [0, 0, 1], size: [10]})
+      .draw();
     
     selection = d3.select("#map svg").selectAll("circle");
     expect(selection[0].length).toBe(6);
@@ -41,8 +41,7 @@ describe("d3 point feature", function () {
   it("Remove a feature from a layer", function () {
     var selection;
 
-    layer.deleteFeature(feature2);
-    map.draw();
+    layer.deleteFeature(feature2).draw();
 
     selection = d3.select("#map svg").selectAll("circle");
     expect(selection[0].length).toBe(4);
@@ -50,7 +49,7 @@ describe("d3 point feature", function () {
   it("Remove all features from a layer", function () {
     var selection;
 
-    layer.clear();
+    layer.clear().draw();
     map.draw();
 
     selection = d3.select("#map svg").selectAll("circle");
