@@ -273,15 +273,6 @@ gd3.d3Renderer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Render
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._render = function () {
-    // unnecessary here?
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
    * Update noop for gd3.object api.
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -325,7 +316,7 @@ gd3.d3Renderer = function (arg) {
       classes: arg.classes,
       append: arg.append
     };
-    return m_this._updateFeatures(arg.id);
+    return m_this._render(arg.id);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -334,12 +325,12 @@ gd3.d3Renderer = function (arg) {
   *  provided then this method will update all features.
   */
   ////////////////////////////////////////////////////////////////////////////
-  this._updateFeatures = function (id) {
+  this._render = function (id) {
     var key;
     if (id === undefined) {
       for (key in m_features) {
         if (m_features.hasOwnProperty(key)) {
-          m_this._updateFeatures(key);
+          m_this._render(key);
         }
       }
       return m_this;
