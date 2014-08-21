@@ -92,7 +92,7 @@ geo.graphFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
     m_this.nodes([]);
-    m_this.layer().deleteFeature(m_points, true);
+    m_points._exit();
     m_this.removeChild(m_points);
     s_exit();
     return m_this;
@@ -145,9 +145,8 @@ geo.graphFeature = function (arg) {
         var link;
         nLinks += 1;
         if (m_links.length < nLinks) {
-          link = layer.createFeature(
-              style.linkType,
-              {detached: true}
+          link = geo.createFeature(
+            style.linkType, layer, layer.renderer()
           ).style(style.links);
           m_this.addChild(link);
           m_links.push(link);
@@ -157,7 +156,7 @@ geo.graphFeature = function (arg) {
     });
 
     m_links.splice(nLinks, m_links.length - nLinks).forEach(function (l) {
-      layer.deleteFeature(l, true);
+      l._exit();
       m_this.removeChild(l);
     });
 
@@ -184,7 +183,11 @@ geo.graphFeature = function (arg) {
     return m_links;
   };
 
-  m_points = this.layer().createFeature("point", {detached: true});
+  m_points = geo.createFeature(
+    "point",
+    this.layer(),
+    this.layer().renderer()
+  );
   m_this.addChild(m_points);
 
   if (arg.nodes) {
