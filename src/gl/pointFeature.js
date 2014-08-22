@@ -81,20 +81,16 @@ ggl.pointFeature = function (arg) {
 
   function createGLPoints () {
     var i, numPts = 2 * m_this.positions().length,
-        alpha = 1.0,
-        unit = rect(0, 0, 1, 1),
+        alpha = 1.0, start, unit = rect(0, 0, 1, 1),
         positions = geo.transform.transformCoordinates(
                       m_this.gcs(), m_this.layer().map().gcs(),
                       m_this.positions(), 3),
-        positionArray = [],
+        buffers = vgl.DataBuffers(1024),
         sourcePositions = vgl.sourceDataP3fv(),
-        unitsArray = [],
         sourceUnits = vgl.sourceDataAnyfv(2,
           vgl.vertexAttributeKeys.CountAttributeIndex + 1),
-        radiusArray = [],
         sourceRadius = vgl.sourceDataAnyfv(1,
           vgl.vertexAttributeKeys.CountAttributeIndex + 2),
-        indicesArray = [],
         trianglesPrimitive = vgl.triangles(),
         mat = vgl.material(),
         prog = vgl.shaderProgram(),
@@ -109,6 +105,18 @@ ggl.pointFeature = function (arg) {
         projectionUniform = new vgl.projectionUniform("projectionMatrix"),
         geom = vgl.geometryData(),
         mapper = vgl.mapper();
+
+    buffers.create ('pos', 3);
+    buffers.create ('indices', 1);
+    buffers.create ('unit', 2);
+    buffers.create ('rad', 1);
+
+    // buffers.create ('strokeWidth', 1);
+    // buffers.create ('fillColor', 3);
+    // buffers.create ('fill', 1);
+    // buffers.create ('strokeColor', 3);
+    // buffers.create ('stroke', 1);
+    // buffers.create ('alpha', 1);
 
     prog.addVertexAttribute(posAttr, vgl.vertexAttributeKeys.Position);
     prog.addVertexAttribute(unitAttr, vgl.vertexAttributeKeys.CountAttributeIndex + 1);
@@ -127,73 +135,31 @@ ggl.pointFeature = function (arg) {
     m_actor = vgl.actor();
     m_actor.setMaterial(mat);
 
-    /// Now create the geometry
-    positionArray.length = numPts * 3;
-    unitsArray.length = numPts * 2;
-    radiusArray.length = numPts;
-    indicesArray.length = numPts;
-
-    /// TODO: Write a function to this for us.
-    /// Repeat positions (We need six points to draw two triangles)
-    for (i = 0; i < numPts * 3; i += 18) {
-      positionArray[i + 0] = positions[i];
-      positionArray[i + 1] = positions[i + 1];
-      positionArray[i + 2] = positions[i + 2];
-      positionArray[i + 3] = positions[i];
-      positionArray[i + 4] = positions[i + 1];
-      positionArray[i + 5] = positions[i + 2];
-      positionArray[i + 6] = positions[i];
-      positionArray[i + 7] = positions[i + 1];
-      positionArray[i + 8] = positions[i + 2];
-      positionArray[i + 9] = positions[i];
-      positionArray[i + 10] = positions[i + 1];
-      positionArray[i + 11] = positions[i + 2];
-      positionArray[i + 12] = positions[i];
-      positionArray[i + 13] = positions[i + 1];
-      positionArray[i + 14] = positions[i + 2];
-      positionArray[i + 15] = positions[i];
-      positionArray[i + 16] = positions[i + 1];
-      positionArray[i + 17] = positions[i + 2];
-    }
-
-    for (i = 0; i < numPts * 2; i += 12) {
-      unitsArray[i + 0] = unit[0];
-      unitsArray[i + 1] = unit[1];
-      unitsArray[i + 2] = unit[2];
-      unitsArray[i + 3] = unit[3];
-      unitsArray[i + 4] = unit[4];
-      unitsArray[i + 5] = unit[5];
-      unitsArray[i + 6] = unit[6];
-      unitsArray[i + 7] = unit[7];
-      unitsArray[i + 8] = unit[8];
-      unitsArray[i + 9] = unit[9];
-      unitsArray[i + 10] = unit[10];
-      unitsArray[i + 11] = unit[11];
-    }
-
-    for (i = 0; i < numPts; i += 6) {
-      radiusArray[i + 0] = 1.0;
-      radiusArray[i + 1] = 1.0;
-      radiusArray[i + 2] = 1.0;
-      radiusArray[i + 3] = 1.0;
-      radiusArray[i + 4] = 1.0;
-      radiusArray[i + 5] = 1.0;
-    }
+    start = buffers.alloc (3 * numPts);
 
     for (i = 0; i < numPts; ++i) {
-      indicesArray[i] = i;
+      buffers.repeat ('pos', [positions[i * 3],
+                      positions[i * 3 + 1], positions[i * 3 + 2]],
+                      start + i * 6, 6);
+      buffers.write ('unit', unit, start + i * 6, 6);
     }
 
-    sourcePositions.pushBack(positionArray);
+    buffers.repeat ('rad', [1.0], start, numPts);
+
+    for (i = 0; i < numPts; ++i) {
+      buffers.write("indices", [i], start + i, 1);
+    }
+
+    sourcePositions.pushBack(buffers.get("pos"));
     geom.addSource(sourcePositions);
 
-    sourceUnits.pushBack(unitsArray);
+    sourceUnits.pushBack(buffers.get("unit"));
     geom.addSource(sourceUnits);
 
-    sourceRadius.pushBack(radiusArray);
+    sourceRadius.pushBack(buffers.get("rad"));
     geom.addSource(sourceRadius);
 
-    trianglesPrimitive.setIndices(indicesArray);
+    trianglesPrimitive.setIndices(buffers.get("indices"));
     geom.addPrimitive(trianglesPrimitive);
 
     mapper.setGeometryData(geom);
