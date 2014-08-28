@@ -10,6 +10,7 @@ import hashlib
 import pymongo
 import tangelo
 import requests
+import cherrypy
 
 import dashboard
 
@@ -200,7 +201,8 @@ def post(*arg, **kwarg):
     '''
 
     # retrieve the headers from the request
-    headers = tangelo.request_headers()
+    # headers = tangelo.request_headers() # <- not merged
+    headers = cherrypy.request.headers
 
     # get the request body as a dict
     body = tangelo.request_body()
