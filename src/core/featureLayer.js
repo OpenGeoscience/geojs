@@ -30,7 +30,8 @@ geo.featureLayer = function (arg) {
   var m_this = this,
       m_features = [],
       s_init = this._init,
-      s_update = this._update;
+      s_update = this._update,
+      s_draw = this.draw;
 
 
   ////////////////////////////////////////////////////////////////////////////
@@ -66,7 +67,8 @@ geo.featureLayer = function (arg) {
         m_features[i]._exit();
         m_this.dataTime().modified();
         m_this.modified();
-        return m_features.splice(i, 1);
+        m_features.splice(i, 1);
+        return m_this;
       }
     }
     m_this.removeChild(feature);
@@ -170,7 +172,12 @@ geo.featureLayer = function (arg) {
    * Draw
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._draw = function () {
+  this.draw = function () {
+    // Call sceneObject.draw, which calls draw on all child objects.
+    s_draw();
+
+    // Now call render on the renderer. In certain cases it may not do
+    // anything if the if the child objects are drawn on the screen already.
     m_this.renderer()._render();
     return m_this;
   };

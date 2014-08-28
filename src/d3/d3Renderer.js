@@ -19,7 +19,7 @@ gd3.d3Renderer = function (arg) {
     return new gd3.d3Renderer(arg);
   }
   geo.renderer.call(this, arg);
-  gd3.object.call(this);
+  gd3.object.call(this, arg);
 
   arg = arg || {};
 
@@ -273,11 +273,10 @@ gd3.d3Renderer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Render
+   * Update noop for gd3.object api.
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._render = function () {
-    // unnecessary here?
+  this._update = function () {
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -308,7 +307,7 @@ gd3.d3Renderer = function (arg) {
    *  }
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.drawFeatures = function (arg) {
+  this._drawFeatures = function (arg) {
     m_features[arg.id] = {
       data: arg.data,
       index: arg.dataIndex,
@@ -317,7 +316,7 @@ gd3.d3Renderer = function (arg) {
       classes: arg.classes,
       append: arg.append
     };
-    return m_this.updateFeatures(arg.id);
+    return m_this._render(arg.id);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -326,12 +325,12 @@ gd3.d3Renderer = function (arg) {
   *  provided then this method will update all features.
   */
   ////////////////////////////////////////////////////////////////////////////
-  this.updateFeatures = function (id) {
+  this._render = function (id) {
     var key;
     if (id === undefined) {
       for (key in m_features) {
         if (m_features.hasOwnProperty(key)) {
-          m_this.updateFeatures(key);
+          m_this._render(key);
         }
       }
       return m_this;
@@ -369,6 +368,14 @@ gd3.d3Renderer = function (arg) {
     m_this.select(id).remove();
     delete m_features[id];
     return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+  *  Override draw method to do nothing.
+  */
+  ////////////////////////////////////////////////////////////////////////////
+  this.draw = function () {
   };
 
   // connect to pan event

@@ -95,7 +95,7 @@ geo.osmLayer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   function drawTiles() {
     m_this._removeTiles();
-    m_this._draw();
+    m_this.draw();
     delete m_pendingNewTilesStat[m_updateTimerId];
   }
 

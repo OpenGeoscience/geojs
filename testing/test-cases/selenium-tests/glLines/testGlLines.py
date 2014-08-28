@@ -19,7 +19,7 @@ class glLinesBase(object):
         self.loadPage()
 
         testName = 'drawGlLines'
-        self.screenshotTest(testName, revision=2)
+        self.screenshotTest(testName, revision=3)
 
 
 class FirefoxOSM(glLinesBase, FirefoxTest):

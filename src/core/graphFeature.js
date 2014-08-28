@@ -65,14 +65,35 @@ geo.graphFeature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Call child _build methods
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._build = function () {
+    m_this.children().forEach(function (child) {
+      child._build();
+    });
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Call child _update methods
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._update = function () {
+    m_this.children().forEach(function (child) {
+      child._update();
+    });
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Custom _exit method to remove all sub-features
    */
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
+    m_this.nodes([]);
     m_points._exit();
-    m_links.forEach(function (l) {
-      l._exit();
-    });
+    m_this.removeChild(m_points);
     s_exit();
     return m_this;
   };
@@ -121,18 +142,22 @@ geo.graphFeature = function (arg) {
     // get links from node connections
     m_nodes.forEach(function (source) {
       (source.children || []).forEach(function (target) {
+        var link;
         nLinks += 1;
         if (m_links.length < nLinks) {
-          m_links.push(
-            layer.createFeature(style.linkType).style(style.links)
-          );
+          link = geo.createFeature(
+            style.linkType, layer, layer.renderer()
+          ).style(style.links);
+          m_this.addChild(link);
+          m_links.push(link);
         }
         m_links[nLinks - 1].positions([source, target]);
       });
     });
 
     m_links.splice(nLinks, m_links.length - nLinks).forEach(function (l) {
-      layer.deleteFeature(l);
+      l._exit();
+      m_this.removeChild(l);
     });
 
     m_this.dataTime().modified();
@@ -158,7 +183,12 @@ geo.graphFeature = function (arg) {
     return m_links;
   };
 
-  m_points = this.layer().createFeature("point");
+  m_points = geo.createFeature(
+    "point",
+    this.layer(),
+    this.layer().renderer()
+  );
+  m_this.addChild(m_points);
 
   if (arg.nodes) {
     this.nodes(arg.nodes);

@@ -418,7 +418,7 @@ geo.map = function (arg) {
     m_this._update();
 
     for (i = 0; i < layers.length; i += 1) {
-      layers[i]._draw();
+      layers[i].draw();
     }
 
     m_this.trigger(geo.event.drawEnd, {
