@@ -45,7 +45,7 @@ window.startTest = function (done) {
       table = processCSVData(data);
       if (table.length > 0) {
         var i;
-        for (i = 0; i < 2; i += 1) {
+        for (i = 0; i < table.length; i += 1) {
           if (table[i][2] !== undefined) {
             var lat = table[i][2];
             lat = lat.replace(/(^\s+|\s+$|^\"|\"$)/g, '');

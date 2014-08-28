@@ -58,7 +58,7 @@ ggl.pointFeature = function (arg) {
             unitVar = vec3 (unit, 1.0); \n\
             fillColorVar = vec4 (fillColor, alpha); \n\
             strokeColorVar = vec4 (strokeColor, alpha); \n\
-            strokeWidthVar = stroke; \n\
+            strokeWidthVar = strokeWidth; \n\
             fillVar = fill; \n\
             strokeVar = stroke; \n\
             radiusVar = rad; \n\
@@ -66,7 +66,7 @@ ggl.pointFeature = function (arg) {
             if (p.w != 0.0) { \n\
               p = p/p.w; \n\
             } \n\
-            p += (rad + 1.0) * vec4 (unit.x * pixelWidth, unit.y * pixelWidth * aspect, 0.0, 1.0); \n\
+            p += (rad + strokeWidth) * vec4 (unit.x * pixelWidth, unit.y * pixelWidth * aspect, 0.0, 1.0); \n\
             gl_Position = vec4(p.xyz, 1.0); \n\
           }",
         shader = new vgl.shader(gl.VERTEX_SHADER);
@@ -117,7 +117,7 @@ ggl.pointFeature = function (arg) {
             float radiusWidth = radiusVar; \n\
             // Distance to antialias over \n\
             float antialiasDist = 3.0 / (2.0 * radiusVar); \n\
-            if (rad < radiusWidth + strokeWidthVar) { \n\
+            if (rad < (radiusWidth / (radiusWidth + strokeWidthVar))) { \n\
               float endStep = radiusWidth / (radiusWidth + strokeWidthVar); \n\
               float step = smoothstep (endStep - antialiasDist, endStep, rad); \n\
               gl_FragColor = mix (fillColorVar, strokeColorVar, step); \n\
@@ -175,6 +175,7 @@ ggl.pointFeature = function (arg) {
           vgl.vertexAttributeKeys.CountAttributeIndex + 8),
         trianglesPrimitive = vgl.triangles(),
         mat = vgl.material(),
+        blend = vgl.blend(),
         prog = vgl.shaderProgram(),
         vertexShader = createVertexShader(),
         fragmentShader = createFragmentShader(),
@@ -225,6 +226,7 @@ ggl.pointFeature = function (arg) {
     prog.addShader(vertexShader);
 
     mat.addAttribute(prog);
+    mat.addAttribute(blend);
 
     m_actor = vgl.actor();
     m_actor.setMaterial(mat);
@@ -281,7 +283,7 @@ ggl.pointFeature = function (arg) {
     m_this.styleMap.fill([1.0, 0.0, 0.0]);
     m_this.styleMap.opacity();
     m_this.styleMap.radius();
-    m_this.styleMap.stroke();
+    m_this.styleMap.stroke([1.0, 0.0, 0.0]);
     m_this.styleMap.strokeWidth();
 
     sourcePositions.pushBack(buffers.get("pos"));
