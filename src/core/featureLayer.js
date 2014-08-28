@@ -173,12 +173,12 @@ geo.featureLayer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.draw = function () {
-    // Is this necessary if we are redrawing individual features?
-    // Probably, delete after vgl draw methods are added.
-    m_this.renderer()._render();
-
     // Call sceneObject.draw, which calls draw on all child objects.
     s_draw();
+
+    // Now call render on the renderer. In certain cases it may not do
+    // anything if the if the child objects are drawn on the screen already.
+    m_this.renderer()._render();
     return m_this;
   };
 
