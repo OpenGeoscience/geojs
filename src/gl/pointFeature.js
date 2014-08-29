@@ -251,7 +251,7 @@ ggl.pointFeature = function (arg) {
       },
       'radius': function (rad) {
         if (!rad || rad == 'none') {
-          rad = [10.0];
+          rad = [4.0];
         }
         buffers.repeat ('rad', rad, start, numPts);
       },
@@ -266,7 +266,7 @@ ggl.pointFeature = function (arg) {
       },
       'strokeWidth': function (width) {
         if (!width || width == 'none') {
-          width = [0.0];
+          width = [10.0];
         }
         buffers.repeat ('strokeWidth', width, start, numPts);
       }
@@ -283,7 +283,7 @@ ggl.pointFeature = function (arg) {
     m_this.styleMap.fill([1.0, 0.0, 0.0]);
     m_this.styleMap.opacity();
     m_this.styleMap.radius();
-    m_this.styleMap.stroke([1.0, 0.0, 0.0]);
+    m_this.styleMap.stroke([0.0, 1.0, 0.0]);
     m_this.styleMap.strokeWidth();
 
     sourcePositions.pushBack(buffers.get("pos"));
@@ -300,8 +300,6 @@ ggl.pointFeature = function (arg) {
 
     sourceFillColor.pushBack(buffers.get("fillColor"));
     geom.addSource(sourceFillColor);
-
-    console.log(buffers.get("fill"));
 
     sourceFill.pushBack(buffers.get("fill"));
     geom.addSource(sourceFill);
@@ -374,33 +372,9 @@ ggl.pointFeature = function (arg) {
       m_this._build();
     }
 
-    // if (m_this.updateTime().getMTime() <= m_this.getMTime()) {
-    //   if (m_this.style.color instanceof vgl.lookupTable) {
-    //     vgl.utils.updateColorMappedMaterial(m_this.material(),
-    //       m_this.style.color);
-    //   }
-
-    //   if (style.point_sprites === true) {
-    //     if (style.point_sprites_image === null) {
-    //       throw "[error] Invalid image for point sprites";
-    //     }
-
-    //     if (style.width && style.height) {
-    //       m_actor.material().shaderProgram().uniform("pointSize").set(
-    //         [style.width, style.height]);
-    //     }
-    //     else if (style.size) {
-    //       m_actor.material().shaderProgram().uniform("pointSize").set(
-    //         [style.size, style.size]);
-    //     }
-    //   } else {
-    //     /// Points only has support for size
-    //     if (style.size) {
-    //       m_actor.material().shaderProgram().uniform("pointSize").set(
-    //         style.size);
-    //     }
-    //   }
-    // }
+    if (m_this.updateTime().getMTime() < m_this.getMTime()) {
+      m_this._build();
+    }
     m_this.updateTime().modified();
   };
 
