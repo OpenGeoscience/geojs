@@ -18,7 +18,7 @@ class mapCenter(object):
     def test_map_center(self):
         testName = 'mapCenter'
         self.loadPage()
-        self.screenshotTest(testName, revision=2)
+        self.screenshotTest(testName, revision=3)
 
 
 class FirefoxMapCenter(mapCenter, FirefoxTest):

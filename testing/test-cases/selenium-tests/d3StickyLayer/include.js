@@ -31,7 +31,7 @@ window.startTest = function (done) {
   resizeCanvas();
 
   // create osm base layer
-  myMap.createLayer('osm');
+  myMap.createLayer('osm', {m_baseUrl: '/data/tiles/'});
 
   // create two layers
   var fixedLayer = myMap.createLayer('feature', {'renderer' : 'd3Renderer', 'sticky': false}),

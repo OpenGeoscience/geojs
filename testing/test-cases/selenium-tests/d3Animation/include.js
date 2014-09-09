@@ -4,7 +4,7 @@ window.startTest = function(done) {
                     zoom : 2,
                     center : [40, -105]},
     myMap = geo.map(mapOptions),
-    osm = myMap.createLayer('osm');
+    osm = myMap.createLayer('osm', {baseUrl: '/data/tiles/'});
 
   var timeAnimatedLayer = function(arg) {
     "use strict";
