@@ -202,7 +202,7 @@ class BaseTest(TestCase):
     #: RMS average difference between pixel values in the RGB
     #: channels.  This should be a number between
     #: ``0`` and ``255``, with ``0`` meaning a perfect match.
-    imageDifferenceThreshold = 2.0
+    imageDifferenceThreshold = 5.0
 
     #: A tuple representing the path to a specific test case.
     #: This value should be set by all derived classes.  The
