@@ -53,10 +53,10 @@ describe('geo.object', function() {
         expect(foo.handler4.ncalls).toBe(n);
       }
 
-      obj.on('event', foo.handler1.call);
-      obj.on('event', foo.handler2.call);
-      obj.on('event', foo.handler3.call);
-      obj.on('event', foo.handler4.call);
+      obj.on('event.handler1', foo.handler1.call);
+      obj.on('event.handler2', foo.handler2.call);
+      obj.on('event.handler3', foo.handler3.call);
+      obj.on('event.handler4', foo.handler4.call);
       
       checkAll(0);
 
@@ -72,11 +72,11 @@ describe('geo.object', function() {
       obj.trigger('event', evtData);
       checkAll(3);
       
-      obj.trigger('another event', evtData);
+      obj.trigger('another-event', evtData);
       checkAll(3);
 
-      obj.off('event', foo.handler1.call);
-      obj.off('event', foo.handler3.call);
+      obj.off('.handler1');
+      obj.off('.handler3');
       obj.trigger('event', evtData);
       expect(foo.handler1.ncalls).toBe(3);
       expect(foo.handler2.ncalls).toBe(4);
@@ -116,12 +116,12 @@ describe('geo.object', function() {
         expect(foo.evt3.handler.ncalls).toBe(n3);
         expect(foo.evt4.handler.ncalls).toBe(n4);
       }
-      obj.on('event1', foo.evt1.handler.call);
-      obj.on('event3', foo.evt3.handler.call);
-      obj.on('event4', foo.evt4.handler.call);
-      obj.on('event1', foo.evt2.handler.call);
-      obj.on('event2', foo.evt2.handler.call);
-      obj.on('event4', foo.evt2.handler.call);
+      obj.on('event1.handler1', foo.evt1.handler.call);
+      obj.on('event3.handler3', foo.evt3.handler.call);
+      obj.on('event4.handler4', foo.evt4.handler.call);
+      obj.on('event1.handler2', foo.evt2.handler.call);
+      obj.on('event2.handler2', foo.evt2.handler.call);
+      obj.on('event4.handler2', foo.evt2.handler.call);
 
       checkAll(0, 0, 0, 0);
 
@@ -149,9 +149,9 @@ describe('geo.object', function() {
       obj.trigger('event2');
       checkAll(1, 4, 3, 2);
 
-      obj.off('event4', foo.evt2.handler.call);
-      obj.off('event1', foo.evt1.handler.call);
-      obj.off('event3', foo.evt3.handler.call);
+      obj.off('event4.handler2', foo.evt2.handler.call);
+      obj.off('event1.handler1', foo.evt1.handler.call);
+      obj.off('event3.handler3', foo.evt3.handler.call);
 
       obj.trigger('event3', foo.evt3.data);
       checkAll(1, 4, 3, 2);
@@ -189,7 +189,7 @@ describe('geo.object', function() {
       obj.trigger('event2', data);
       expect(foo.ncalls).toBe(2);
 
-      obj.off(['event2', 'event1'], foo.call);
+      obj.off(['event2', 'event1']);
 
       obj.trigger('event1', data);
       expect(foo.ncalls).toBe(2);
