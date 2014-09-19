@@ -26,26 +26,44 @@ geo.lineFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
-      m_positions = arg.positions === undefined ? [] : arg.positions,
+      m_data = null,
+      m_position = arg.position === undefined ? [] : arg.position,
       s_init = this._init;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get/Set positions
+   * Get/Set data
    *
-   * @returns {geo.pointFeature}
+   * @returns {Array}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.positions = function (val) {
-    if (val === undefined) {
-      return m_positions;
+  this.data = function(data) {
+    if (data === undefined) {
+      return m_data;
     } else {
-      // Copy incoming array of positions
-      m_positions = val.slice(0);
+      m_data = data;
       m_this.dataTime().modified();
       m_this.modified();
       return m_this;
     }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set position
+   *
+   * @returns {geo.pointFeature}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.position = function (val) {
+    if (val === undefined) {
+      return m_position;
+    } else {
+      m_position = val;
+      m_this.dataTime().modified();
+      m_this.modified();
+    }
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -59,16 +77,17 @@ geo.lineFeature = function (arg) {
     var defaultStyle = $.extend(
       {},
       {
-        "width": [1.0],
-        "color": [1.0, 1.0, 1.0],
-        "pattern": "solid"
+        "strokeWidth": function () { return 1.0; },
+        "strokeColor": function () { return [1.0, 1.0, 1.0]; },
+        "strokeStyle": "solid",
+        "strokeOpacity": function () { return 1.0; }
       },
       arg.style === undefined ? {} : arg.style
     );
 
     m_this.style(defaultStyle);
 
-    if (m_positions) {
+    if (m_position) {
       m_this.dataTime().modified();
     }
   };
