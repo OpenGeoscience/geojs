@@ -75,7 +75,7 @@ ggl.pointFeature = function (arg) {
     return shader;
   }
 
-  function createFragmentShader () {
+  function createFragmentShader() {
     var fragmentShaderSource = " \n\n\
           #ifdef GL_ES \n\n\
             precision highp float; \n\n\

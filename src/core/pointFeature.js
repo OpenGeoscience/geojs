@@ -26,28 +26,8 @@ geo.pointFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
-      m_data = null,
       m_position = arg.position === undefined ? null : arg.position,
-      m_radius = arg.radius = undefined ? null : arg.radius,
       s_init = this._init;
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get/Set data
-   *
-   * @returns {Array}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.data = function(data) {
-    if (data === undefined) {
-      return m_data;
-    } else {
-      m_data = data;
-      m_this.dataTime().modified();
-      m_this.modified();
-      return m_this;
-    }
-  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -79,14 +59,14 @@ geo.pointFeature = function (arg) {
     var defaultStyle = $.extend(
       {},
       {
-        radius: function (d) { return 10.0; },
-        stroke: function (d) { return 1.0; },
-        strokeColor: function (d) { return [0.0, 1.0, 0.0]; },
-        strokeWidth: function (d) { return 2.0; },
-        strokeOpacity: function (d) { return 1.0; },
-        fillColor: function (d) { return [1.0, 0.0, 0.0]; },
-        fill: function (d) { return 1.0; },
-        fillOpacity: function (d) { return 1.0; },
+        radius: function () { return 10.0; },
+        stroke: function () { return 1.0; },
+        strokeColor: function () { return [0.0, 1.0, 0.0]; },
+        strokeWidth: function () { return 2.0; },
+        strokeOpacity: function () { return 1.0; },
+        fillColor: function () { return [1.0, 0.0, 0.0]; },
+        fill: function () { return 1.0; },
+        fillOpacity: function () { return 1.0; },
         sprites: false,
         sprites_image: null
       },

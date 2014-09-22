@@ -51,6 +51,77 @@ gd3.d3Renderer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Meta functions for convert from geojs styles to d3.
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._convertColor = function (f, g) {
+    g = g || function () { return true; };
+    return function (d) {
+      if (g(d)) {
+        return d3.rgb.apply(this, f(d).map(function (i) { return i * 255; }));
+      } else {
+        return 'none';
+      }
+    };
+  };
+
+  this._convertPosition = function (f) {
+    return function (d) {
+      return m_this.worldToDisplay(f(d));
+    };
+  };
+
+  this._convertScale = function (f) {
+    return function (d) {
+      return f(d) / m_scale;
+    };
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set styles to a d3 selection.
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  function setStyles(select, styles) {
+    var key, k, f;
+    for (key in styles) {
+      if (styles.hasOwnProperty(key)) {
+        f = null;
+        k = null;
+        if (key === 'strokeColor') {
+          k = 'stroke';
+          f = m_this._convertColor(styles[key], styles.stroke);
+        } else if (key === 'stroke') {
+          key = null;
+        } else if (key === 'strokeWidth') {
+          k = 'stroke-width';
+          f = m_this._convertScale(styles[key]);
+        } else if (key === 'strokeOpacity') {
+          k = 'stroke-opacity';
+          f = styles[key];
+        } else if (key === 'fillColor') {
+          k = 'fill';
+          f = m_this._convertColor(styles[key], styles.fill);
+        } else if (key === 'fill') {
+          k = null;
+        } else if (key === 'fillOpacity') {
+          k = 'fill-opacity';
+          f = styles[key];
+        } else {
+          k = key;
+          f = styles[key];
+        }
+        if (k) {
+          select.style(k, f);
+        }
+      }
+    }
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Get the map instance or return null if not connected to a map.
    * @private
    */
@@ -346,7 +417,7 @@ gd3.d3Renderer = function (arg) {
     selection.exit().remove();
     setAttrs(selection, attributes);
     selection.attr('class', classes.concat([id]).join(' '));
-    selection.style(style);
+    setStyles(selection, style);
     return m_this;
   };
 
@@ -384,6 +455,7 @@ gd3.d3Renderer = function (arg) {
   // connect to zoom event
   this.on(geo.event.zoom, function () {
     setTransform();
+    m_this.updateFeatures();
     m_this.layer().trigger(geo.event.d3Rescale, { scale: m_scale }, true);
   });
 

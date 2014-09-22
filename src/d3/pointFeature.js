@@ -31,27 +31,7 @@ gd3.pointFeature = function (arg) {
       s_update = this._update,
       m_buildTime = geo.timestamp(),
       m_style = {},
-      d_attr,
-      d_style,
       m_sticky;
-
-  // default attributes
-  d_attr = {
-    cx: function (d) { return d.x; },
-    cy: function (d) { return d.y; },
-    r: 1
-  };
-
-  // default style
-  d_style = {
-    fill: 'black',
-    stroke: 'none'
-  };
-
-  m_style = {
-    attributes: d_attr,
-    style: d_style
-  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -72,12 +52,10 @@ gd3.pointFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
-    var data = m_this.positions() || [],
+    var data = m_this.data(),
         s_style = m_this.style(),
-        m_renderer = m_this.renderer();
-
-    // georeference the positions
-    data = m_renderer.worldToDisplay(data);
+        m_renderer = m_this.renderer(),
+        pos_func = m_this.position();
 
     // call super-method
     s_update.call(m_this);
@@ -89,21 +67,17 @@ gd3.pointFeature = function (arg) {
     m_style.id = m_this._d3id();
     m_style.data = data;
     m_style.append = 'circle';
-    m_style.style = $.extend({}, d_style);
-    m_style.attributes = $.extend({}, d_attr);
-    m_style.classes = [ 'd3PointFeature' ];
-
-    // replace with user defined styles
-    m_style.style.fill = d3.rgb(
-      s_style.color[0] * 255,
-      s_style.color[1] * 255,
-      s_style.color[2] * 255
-    );
-    m_style.attributes.r = function () {
-      var m_scale = m_renderer.scaleFactor();
-      return (s_style.size / m_scale).toString() + 'px';
+    m_style.attributes = {
+      r: m_renderer._convertScale(s_style.radius),
+      cx: function (d) {
+        return m_renderer.worldToDisplay(pos_func(d)).x;
+      },
+      cy: function (d) {
+        return m_renderer.worldToDisplay(pos_func(d)).y;
+      }
     };
-    m_style.style['fill-opacity'] = s_style.opacity;
+    m_style.style = s_style;
+    m_style.classes = [ 'd3PointFeature' ];
 
     // pass to renderer to draw
     m_this.renderer()._drawFeatures(m_style);
