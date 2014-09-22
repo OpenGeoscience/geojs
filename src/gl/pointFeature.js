@@ -32,23 +32,43 @@ ggl.pointFeature = function (arg) {
 
 
   function createVertexShader() {
-    var vertexShaderSource = [
-          'attribute vec3 pos;',
-          'attribute vec2 unit;',
-          'attribute float rad;',
-          'uniform float pixelWidth;',
-          'uniform float aspect;',
-          'uniform mat4 modelViewMatrix;',
-          'uniform mat4 projectionMatrix;',
-          'void main(void)',
-          '{',
-          'vec4 p = (projectionMatrix * modelViewMatrix * vec4(pos, 1.0)).xyzw;',
-          'if (p.w != 0.0) {',
-          ' p = p/p.w;',
-          '}',
-          'p += (rad + 1.0) * vec4 (unit.x * pixelWidth, unit.y * pixelWidth * aspect, 0.0, 1.0);',
-          'gl_Position = vec4(p.xyz, 1.0);}'].join('\n'),
-
+    var vertexShaderSource = " \n\
+          attribute vec3 pos; \n\
+          attribute vec2 unit; \n\
+          attribute float rad; \n\
+          attribute vec3 fillColor; \n\
+          attribute vec3 strokeColor; \n\
+          attribute float alpha; \n\
+          attribute float strokeWidth; \n\
+          attribute float fill; \n\
+          attribute float stroke; \n\
+          uniform float pixelWidth; \n\
+          uniform float aspect; \n\
+          uniform mat4 modelViewMatrix; \n\
+          uniform mat4 projectionMatrix; \n\
+          varying vec3 unitVar; \n\
+          varying vec4 fillColorVar; \n\
+          varying vec4 strokeColorVar; \n\
+          varying float radiusVar; \n\
+          varying float strokeWidthVar; \n\
+          varying float fillVar; \n\
+          varying float strokeVar; \n\
+          void main(void) \n\
+          { \n\
+            unitVar = vec3 (unit, 1.0); \n\
+            fillColorVar = vec4 (fillColor, alpha); \n\
+            strokeColorVar = vec4 (strokeColor, alpha); \n\
+            strokeWidthVar = stroke; \n\
+            fillVar = fill; \n\
+            strokeVar = stroke; \n\
+            radiusVar = rad; \n\
+            vec4 p = (projectionMatrix * modelViewMatrix * vec4(pos, 1.0)).xyzw; \n\
+            if (p.w != 0.0) { \n\
+              p = p/p.w; \n\
+            } \n\
+            p += (rad + 1.0) * vec4 (unit.x * pixelWidth, unit.y * pixelWidth * aspect, 0.0, 1.0); \n\
+            gl_Position = vec4(p.xyz, 1.0); \n\
+          }",
         shader = new vgl.shader(gl.VERTEX_SHADER);
 
     shader.setShaderSource(vertexShaderSource);
@@ -56,9 +76,59 @@ ggl.pointFeature = function (arg) {
   }
 
   function createFragmentShader () {
-    var fragmentShaderSource = [
-          'void main(void) {',
-          'gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);}' ].join('\n'),
+    var fragmentShaderSource = " \n\n\
+          #ifdef GL_ES \n\n\
+            precision highp float; \n\n\
+          #endif \n\n\
+          uniform float aspect; \n\
+          varying vec3 unitVar; \n\
+          varying vec4 fillColorVar; \n\
+          varying vec4 strokeColorVar; \n\
+          varying float radiusVar; \n\
+          varying float strokeWidthVar; \n\
+          varying float fillVar; \n\
+          varying float strokeVar; \n\
+          bool to_bool (in float value) { \n\
+            if (value < 0.0) \n\
+              return false; \n\
+            else \n\
+              return true; \n\
+          } \n\
+          void main () { \n\
+            bool fill = to_bool (fillVar); \n\
+            bool stroke = to_bool (strokeVar); \n\
+            vec4 strokeColor, fillColor; \n\
+            // No stroke or fill implies nothing to draw \n\
+            if (!fill && !stroke) \n\
+              discard; \n\
+            // Get normalized texture coordinates and polar r coordinate \n\
+            vec2 tex = (unitVar.xy + 1.0) / 2.0; \n\
+            float rad = length (unitVar.xy); \n\
+            // If there is no stroke, the fill region should transition to nothing \n\
+            if (!stroke) \n\
+              strokeColor = vec4 (fillColorVar.rgb, 0.0); \n\
+            else \n\
+              strokeColor = strokeColorVar; \n\
+            // Likewise, if there is no fill, the stroke should transition to nothing \n\
+            if (!fill) \n\
+              fillColor = vec4 (strokeColor.rgb, 0.0); \n\
+            else \n\
+              fillColor = fillColorVar; \n\
+            float radiusWidth = radiusVar; \n\
+            // Distance to antialias over \n\
+            float antialiasDist = 3.0 / (2.0 * radiusVar); \n\
+            if (rad < radiusWidth + strokeWidthVar) { \n\
+              float endStep = radiusWidth / (radiusWidth + strokeWidthVar); \n\
+              float step = smoothstep (endStep - antialiasDist, endStep, rad); \n\
+              gl_FragColor = mix (fillColorVar, strokeColorVar, step); \n\
+            } \n\
+            else { \n\
+              float step = smoothstep (1.0 - antialiasDist, 1.0, rad); \n\
+              gl_FragColor = mix (strokeColor, vec4 (strokeColor.rgb, 0.0), step); \n\
+            } \n\
+            //float step = smoothstep (1.0 - antialiasDist, 1.0, rad); \n\
+            //gl_FragColor = mix (color, vec4 (color.rgb, 0.0), step); \n\
+          }",
         shader = new vgl.shader(gl.FRAGMENT_SHADER);
     shader.setShaderSource(fragmentShaderSource);
     return shader;
@@ -91,6 +161,18 @@ ggl.pointFeature = function (arg) {
           vgl.vertexAttributeKeys.CountAttributeIndex + 1),
         sourceRadius = vgl.sourceDataAnyfv(1,
           vgl.vertexAttributeKeys.CountAttributeIndex + 2),
+        sourceStokeWidth = vgl.sourceDataAnyfv(1,
+          vgl.vertexAttributeKeys.CountAttributeIndex + 3),
+        sourceFillColor = vgl.sourceDataAnyfv(3,
+          vgl.vertexAttributeKeys.CountAttributeIndex + 4),
+        sourceFill = vgl.sourceDataAnyfv(1,
+          vgl.vertexAttributeKeys.CountAttributeIndex + 5),
+        sourceStrokeColor = vgl.sourceDataAnyfv(3,
+          vgl.vertexAttributeKeys.CountAttributeIndex + 6),
+        sourceStroke = vgl.sourceDataAnyfv(1,
+          vgl.vertexAttributeKeys.CountAttributeIndex + 7),
+        sourceAlpha = vgl.sourceDataAnyfv(1,
+          vgl.vertexAttributeKeys.CountAttributeIndex + 8),
         trianglesPrimitive = vgl.triangles(),
         mat = vgl.material(),
         prog = vgl.shaderProgram(),
@@ -99,6 +181,12 @@ ggl.pointFeature = function (arg) {
         posAttr = vgl.vertexAttribute("pos"),
         unitAttr = vgl.vertexAttribute("unit"),
         radAttr = vgl.vertexAttribute("rad"),
+        stokeWidthAttr = vgl.vertexAttribute("strokeWidth"),
+        fillColorAttr = vgl.vertexAttribute("fillColor"),
+        fillAttr = vgl.vertexAttribute("fill"),
+        strokeColorAttr = vgl.vertexAttribute("strokeColor"),
+        strokeAttr = vgl.vertexAttribute("stroke"),
+        alphaAttr = vgl.vertexAttribute("alpha"),
         pixelWidthUniform = new vgl.floatUniform("pixelWidth", 2.0 / m_this.renderer().width()),
         aspectUniform = new vgl.floatUniform("aspect", m_this.renderer().width() / m_this.renderer().height()),
         modelViewUniform = new vgl.modelViewUniform("modelViewMatrix"),
@@ -110,17 +198,23 @@ ggl.pointFeature = function (arg) {
     buffers.create ('indices', 1);
     buffers.create ('unit', 2);
     buffers.create ('rad', 1);
+    buffers.create ('strokeWidth', 1);
+    buffers.create ('fillColor', 3);
+    buffers.create ('fill', 1);
+    buffers.create ('strokeColor', 3);
+    buffers.create ('stroke', 1);
+    buffers.create ('alpha', 1);
 
-    // buffers.create ('strokeWidth', 1);
-    // buffers.create ('fillColor', 3);
-    // buffers.create ('fill', 1);
-    // buffers.create ('strokeColor', 3);
-    // buffers.create ('stroke', 1);
-    // buffers.create ('alpha', 1);
-
+    // TODO: Right now this is ugly but we will fix it.
     prog.addVertexAttribute(posAttr, vgl.vertexAttributeKeys.Position);
     prog.addVertexAttribute(unitAttr, vgl.vertexAttributeKeys.CountAttributeIndex + 1);
     prog.addVertexAttribute(radAttr, vgl.vertexAttributeKeys.CountAttributeIndex + 2);
+    prog.addVertexAttribute(stokeWidthAttr, vgl.vertexAttributeKeys.CountAttributeIndex + 3);
+    prog.addVertexAttribute(fillColorAttr, vgl.vertexAttributeKeys.CountAttributeIndex + 4);
+    prog.addVertexAttribute(fillAttr, vgl.vertexAttributeKeys.CountAttributeIndex + 5);
+    prog.addVertexAttribute(strokeColorAttr, vgl.vertexAttributeKeys.CountAttributeIndex + 6);
+    prog.addVertexAttribute(strokeAttr, vgl.vertexAttributeKeys.CountAttributeIndex + 7);
+    prog.addVertexAttribute(alphaAttr, vgl.vertexAttributeKeys.CountAttributeIndex + 8);
 
     prog.addUniform(pixelWidthUniform);
     prog.addUniform(aspectUniform);
@@ -137,18 +231,58 @@ ggl.pointFeature = function (arg) {
 
     start = buffers.alloc (3 * numPts);
 
+    // Instructions on how to write to the buffers for specific styles
+    m_this.styleMap = {
+      'fill': function (color) {
+        if (!color || color == 'none') {
+          buffers.repeat ('fill', [-.75], start, numPts);
+        }
+        else {
+          buffers.repeat ('fill', [.75], start, numPts);
+          buffers.repeat ('fillColor', color, start, numPts);                                }
+      },
+      'opacity': function (opacity) {
+        if (!opacity || opacity == 'none') {
+          opacity = [1.0];
+        }
+        buffers.repeat ('alpha', opacity, start, numPts);
+      },
+      'radius': function (rad) {
+        if (!rad || rad == 'none') {
+          rad = [10.0];
+        }
+        buffers.repeat ('rad', rad, start, numPts);
+      },
+      'stroke': function (color) {
+          if (!color || color == 'none') {
+            buffers.repeat ('stroke', [-.75], start, numPts);
+          }
+          else {
+            buffers.repeat ('stroke', [.75], start, numPts);
+            buffers.repeat ('strokeColor', color, start, numPts);
+          }
+      },
+      'strokeWidth': function (width) {
+        if (!width || width == 'none') {
+          width = [0.0];
+        }
+        buffers.repeat ('strokeWidth', width, start, numPts);
+      }
+    };
+
     for (i = 0; i < numPts; ++i) {
       buffers.repeat ('pos', [positions[i * 3],
                       positions[i * 3 + 1], positions[i * 3 + 2]],
                       start + i * 6, 6);
       buffers.write ('unit', unit, start + i * 6, 6);
-    }
-
-    buffers.repeat ('rad', [1.0], start, numPts);
-
-    for (i = 0; i < numPts; ++i) {
       buffers.write("indices", [i], start + i, 1);
     }
+
+    m_this.styleMap.fill([1.0, 0.0, 0.0]);
+    m_this.styleMap.opacity();
+    m_this.styleMap.radius();
+    m_this.styleMap.stroke();
+    m_this.styleMap.strokeWidth();
 
     sourcePositions.pushBack(buffers.get("pos"));
     geom.addSource(sourcePositions);
@@ -158,6 +292,26 @@ ggl.pointFeature = function (arg) {
 
     sourceRadius.pushBack(buffers.get("rad"));
     geom.addSource(sourceRadius);
+
+    sourceStokeWidth.pushBack(buffers.get("strokeWidth"));
+    geom.addSource(sourceStokeWidth);
+
+    sourceFillColor.pushBack(buffers.get("fillColor"));
+    geom.addSource(sourceFillColor);
+
+    console.log(buffers.get("fill"));
+
+    sourceFill.pushBack(buffers.get("fill"));
+    geom.addSource(sourceFill);
+
+    sourceStrokeColor.pushBack(buffers.get("strokeColor"));
+    geom.addSource(sourceStrokeColor);
+
+    sourceStroke.pushBack(buffers.get("stroke"));
+    geom.addSource(sourceStroke);
+
+    sourceAlpha.pushBack(buffers.get("alpha"));
+    geom.addSource(sourceAlpha);
 
     trianglesPrimitive.setIndices(buffers.get("indices"));
     geom.addPrimitive(trianglesPrimitive);
