@@ -71,7 +71,8 @@ gd3.lineFeature = function (arg) {
     m_style.append = 'path';
     m_style.classes = [ 'd3LineFeature' ];
     m_style.style = $.extend({
-      fill: function () { return false; }
+      fill: function () { return false; },
+      fillColor: function () { return { r: 0, g: 0, b: 0 }; }
     }, s_style);
 
     m_renderer._drawFeatures(m_style);

@@ -99,7 +99,6 @@ gd3.d3Renderer = function (arg) {
           k = 'stroke';
           f = m_this._convertColor(styles[key], styles.stroke);
         } else if (key === 'stroke' && styles[key]) {
-          key = 'stroke';
           f = returnNone;
         } else if (key === 'strokeWidth') {
           k = 'stroke-width';
@@ -111,7 +110,6 @@ gd3.d3Renderer = function (arg) {
           k = 'fill';
           f = m_this._convertColor(styles[key], styles.fill);
         } else if (key === 'fill' && styles[key]) {
-          k = 'fill';
           f = returnNone;
         } else if (key === 'fillOpacity') {
           k = 'fill-opacity';
@@ -459,7 +457,7 @@ gd3.d3Renderer = function (arg) {
   // connect to zoom event
   this.on(geo.event.zoom, function () {
     setTransform();
-    m_this.updateFeatures();
+    m_this._render();
     m_this.layer().trigger(geo.event.d3Rescale, { scale: m_scale }, true);
   });
 

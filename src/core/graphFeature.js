@@ -27,6 +27,7 @@ geo.graphFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
+      s_draw = this.draw,
       s_style = this.style,
       m_nodes = null,
       m_points = null,
@@ -47,11 +48,13 @@ geo.graphFeature = function (arg) {
     var defaultStyle = $.extend(true, {},
       {
         nodes: {
-          size: 5.0,
-          color: [0.0, 0.0, 1.0]
+          radius: function () { return 5.0; },
+          fill: function () { return true; },
+          fillColor: function () { return { r: 1.0, g: 0.0, b: 0.0 }; },
+          strokeColor: function () { return { r: 0, g: 0, b: 0 }; }
         },
         links: {
-          color: [1.0, 1.0, 1.0]
+          strokeColor: function () { return { r: 0.0, g: 0.0, b: 0.0 }; }
         },
         linkType: "path" /* 'path' || 'line' */
       },
@@ -59,9 +62,7 @@ geo.graphFeature = function (arg) {
     );
 
     m_this.style(defaultStyle);
-    if (m_nodes) {
-      m_this.dataTime().modified();
-    }
+    m_this.nodes(function (d) { return d; });
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -119,10 +120,10 @@ geo.graphFeature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get/Set children accessor.
+   * Get/Set links accessor.
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.children = function (arg) {
+  this.links = function (arg) {
     if (arg === undefined) {
       return m_children;
     }
@@ -137,46 +138,10 @@ geo.graphFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.nodes = function (val) {
-    var layer = m_this.layer(),
-        nLinks = 0,
-        style;
-
     if (val === undefined) {
       return m_nodes;
     }
-
-    // get the feature style object
-    style = m_this.style();
-
-    // Copy incoming array of nodes
-    m_nodes = val.slice(0);
-
-    // Bind data to the point nodes
-    m_points.data(m_nodes);
-
-
-    // get links from node connections
-    m_nodes.forEach(function (source) {
-      (source.children || []).forEach(function (target) {
-        var link;
-        nLinks += 1;
-        if (m_links.length < nLinks) {
-          link = geo.createFeature(
-            style.linkType, layer, layer.renderer()
-          ).style(style.links);
-          m_this.addChild(link);
-          m_links.push(link);
-        }
-        m_links[nLinks - 1].positions([source, target]);
-      });
-    });
-
-    m_links.splice(nLinks, m_links.length - nLinks).forEach(function (l) {
-      l._exit();
-      m_this.removeChild(l);
-    });
-
-    m_this.dataTime().modified();
+    m_nodes = val;
     m_this.modified();
     return m_this;
   };
@@ -197,6 +162,50 @@ geo.graphFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.linkFeatures = function () {
     return m_links;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Build the feature for drawing
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.draw = function () {
+
+    var layer = m_this.layer(),
+        data = m_this.data(),
+        nLinks = 0,
+        style;
+
+    // get the feature style object
+    style = m_this.style();
+
+    // Bind data to the point nodes
+    m_points.data(data);
+    m_points.style(style.nodes);
+
+    // get links from node connections
+    data.forEach(function (source) {
+      (source.children || []).forEach(function (target) {
+        var link;
+        nLinks += 1;
+        if (m_links.length < nLinks) {
+          link = geo.createFeature(
+            style.linkType, layer, layer.renderer()
+          ).style(style.links);
+          m_this.addChild(link);
+          m_links.push(link);
+        }
+        m_links[nLinks - 1].data([source, target]);
+      });
+    });
+
+    m_links.splice(nLinks, m_links.length - nLinks).forEach(function (l) {
+      l._exit();
+      m_this.removeChild(l);
+    });
+
+    s_draw();
+    return m_this;
   };
 
   m_points = geo.createFeature(
