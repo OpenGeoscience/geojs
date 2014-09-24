@@ -151,8 +151,9 @@ geo.graphFeature = function (arg) {
     // Copy incoming array of nodes
     m_nodes = val.slice(0);
 
-    // create point features
-    m_points.positions(m_nodes);
+    // Bind data to the point nodes
+    m_points.data(m_nodes);
+
 
     // get links from node connections
     m_nodes.forEach(function (source) {

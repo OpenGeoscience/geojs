@@ -88,6 +88,9 @@ gd3.d3Renderer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   function setStyles(select, styles) {
     var key, k, f;
+    function returnNone() {
+      return 'none';
+    }
     for (key in styles) {
       if (styles.hasOwnProperty(key)) {
         f = null;
@@ -95,8 +98,9 @@ gd3.d3Renderer = function (arg) {
         if (key === 'strokeColor') {
           k = 'stroke';
           f = m_this._convertColor(styles[key], styles.stroke);
-        } else if (key === 'stroke') {
-          key = null;
+        } else if (key === 'stroke' && styles[key]) {
+          key = 'stroke';
+          f = returnNone;
         } else if (key === 'strokeWidth') {
           k = 'stroke-width';
           f = m_this._convertScale(styles[key]);
@@ -106,8 +110,9 @@ gd3.d3Renderer = function (arg) {
         } else if (key === 'fillColor') {
           k = 'fill';
           f = m_this._convertColor(styles[key], styles.fill);
-        } else if (key === 'fill') {
-          k = null;
+        } else if (key === 'fill' && styles[key]) {
+          k = 'fill';
+          f = returnNone;
         } else if (key === 'fillOpacity') {
           k = 'fill-opacity';
           f = styles[key];

@@ -105,13 +105,6 @@ gd3.pointFeature = function (arg) {
     return m_this;
   };
 
-  // attach to geo.event.d3Rescale to scale points on resize
-  m_this.on(geo.event.d3Rescale, function () {
-    m_this.renderer()
-      .select(m_this._d3id())
-        .attr('r', m_style.attributes.r);
-  });
-
   this._init(arg);
   return this;
 };
