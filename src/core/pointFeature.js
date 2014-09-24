@@ -26,8 +26,9 @@ geo.pointFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
-      m_position = arg.position === undefined ? null : arg.position,
+      m_position = arg.position === undefined ? function (d) { return d; } : arg.position,
       s_init = this._init;
+
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -60,12 +61,12 @@ geo.pointFeature = function (arg) {
       {},
       {
         radius: function () { return 10.0; },
-        stroke: function () { return 1.0; },
-        strokeColor: function () { return [0.0, 1.0, 0.0]; },
+        stroke: function () { return true; },
+        strokeColor: function () { return { r: 0.0, g: 1.0, b: 0.0 }; },
         strokeWidth: function () { return 2.0; },
         strokeOpacity: function () { return 1.0; },
-        fillColor: function () { return [1.0, 0.0, 0.0]; },
-        fill: function () { return 1.0; },
+        fillColor: function () { return { r: 1.0, g: 0.0, b: 0.0 }; },
+        fill: function () { return true; },
         fillOpacity: function () { return 1.0; },
         sprites: false,
         sprites_image: null

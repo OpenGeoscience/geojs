@@ -81,9 +81,9 @@ window.startTest = function (done) {
     .data(citieslatlon)
     .style('fillColor', function (d) {
       if (d.lng() < -100) {
-        return [1.0, 0.0, 0.0];
+        return {r: 1.0, g: 0.0, b: 0.0};
       }
-      return [0.0, 0.0, 1.0];
+      return {r: 0.0, g: 0.0, b: 1.0};
     })
     .style('fillOpacity', function (d) {
       if (d.lng() < -100) {

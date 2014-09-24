@@ -58,8 +58,10 @@ gd3.d3Renderer = function (arg) {
   this._convertColor = function (f, g) {
     g = g || function () { return true; };
     return function (d) {
+      var c;
       if (g(d)) {
-        return d3.rgb.apply(this, f(d).map(function (i) { return i * 255; }));
+        c = f(d);
+        return d3.rgb(255 * c.r, 255 * c.g, 255 * c.b);
       } else {
         return 'none';
       }

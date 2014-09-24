@@ -201,14 +201,20 @@ ggl.pointFeature = function (arg) {
     strokeOpactityFunc = m_this.style().strokeOpacity;
 
     m_this.data().forEach(function (item) {
-      var p = posFunc(item);
+      var p = posFunc(item), c;
+
       position.push([p.x, p.y, p.z || 0]);
       radius.push(radFunc(item));
       strokeWidth.push(strokeWidthFunc(item));
-      fill.push(fillFunc(item));
-      fillColor.push(fillColorFunc(item));
-      strokeColor.push(strokeColorFunc(item));
-      stroke.push(strokeFunc(item));
+      fill.push(fillFunc(item) ? 1.0 : 0.0);
+
+      c = fillColorFunc(item);
+      fillColor.push([ c.r, c.g, c.b ]);
+
+      c = strokeColorFunc(item);
+      strokeColor.push([ c.r, c.g, c.b ]);
+
+      stroke.push(strokeFunc(item) ? 1.0 : 0.0);
       fillOpacity.push(fillOpacityFunc(item));
       strokeOpacity.push(strokeOpactityFunc(item));
     });
