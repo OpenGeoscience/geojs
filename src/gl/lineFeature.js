@@ -31,52 +31,54 @@ ggl.lineFeature = function (arg) {
       s_update = this._update;
 
   function createVertexShader() {
-      var vertexShaderSource = " \n\
-        attribute vec3 pos; \n\
-        attribute vec3 strokeColor; \n\
-        attribute float strokeOpacity; \n\
-        attribute float strokeWidth; \n\
-        uniform mat4 modelViewMatrix; \n\
-        uniform mat4 projectionMatrix; \n\
-        varying vec3 strokeColorVar; \n\
-        varying float strokeWidthVar; \n\
-        varying float strokeOpacityVar; \n\
-        void main(void) \n\
-        { \n\
-          strokeColorVar = strokeColor; \n\
-          strokeWidthVar = strokeWidth; \n\
-          strokeOpacityVar = strokeOpacity; \n\
-          vec4 p = (projectionMatrix * modelViewMatrix * vec4(pos, 1.0)).xyzw; \n\
-          if (p.w != 0.0) { \n\
-            p = p/p.w; \n\
-          } \n\
-          gl_Position = p; \n\
-        }",
+      var vertexShaderSource = [
+        "attribute vec3 pos;",
+        "attribute vec3 strokeColor;",
+        "attribute float strokeOpacity;",
+        "attribute float strokeWidth;",
+        "uniform mat4 modelViewMatrix;",
+        "uniform mat4 projectionMatrix;",
+        "varying vec3 strokeColorVar;",
+        "varying float strokeWidthVar;",
+        "varying float strokeOpacityVar;",
+        "void main(void)",
+        "{",
+        "  strokeColorVar = strokeColor;",
+        "  strokeWidthVar = strokeWidth;",
+        "  strokeOpacityVar = strokeOpacity;",
+        "  vec4 p = (projectionMatrix * modelViewMatrix * vec4(pos, 1.0)).xyzw;",
+        "  if (p.w != 0.0) {",
+        "    p = p/p.w;",
+        "  }",
+        "  gl_Position = p;",
+        "}"
+      ].join("\n"),
       shader = new vgl.shader(gl.VERTEX_SHADER);
       shader.setShaderSource(vertexShaderSource);
       return shader;
     }
 
-    function createFragmentShader () {
-      var fragmentShaderSource = " \n\n\
-        #ifdef GL_ES \n\n\
-          precision highp float; \n\n\
-        #endif \n\n\
-        varying vec3 strokeColorVar; \n\
-        varying float strokeWidthVar; \n\
-        varying float strokeOpacityVar; \n\
-        void main () { \n\
-          gl_FragColor = vec4 (strokeColorVar, strokeOpacityVar); \n\
-        }",
-      shader = new vgl.shader(gl.FRAGMENT_SHADER);
-      shader.setShaderSource(fragmentShaderSource);
-      return shader;
-    }
+  function createFragmentShader() {
+    var fragmentShaderSource = [
+      "#ifdef GL_ES",
+      "  precision highp float;",
+      "#endif",
+      "varying vec3 strokeColorVar;",
+      "varying float strokeWidthVar;",
+      "varying float strokeOpacityVar;",
+      "void main () {",
+      "  gl_FragColor = vec4 (strokeColorVar, strokeOpacityVar);",
+      "}"
+    ],
+    shader = new vgl.shader(gl.FRAGMENT_SHADER);
+    shader.setShaderSource(fragmentShaderSource);
+    return shader;
+  }
 
   function createGLLines() {
     var i, numPts = m_this.data().length,
         start, position = [], strokeWidth = [],
-        strokeColor = [], strokeOpacity = [], posFunc, strokeWidthFunc ,
+        strokeColor = [], strokeOpacity = [], posFunc, strokeWidthFunc,
         strokeColorFunc, strokeOpacityFunc,
         buffers = vgl.DataBuffers(1024),
         sourcePositions = vgl.sourceDataP3fv(),
@@ -101,33 +103,42 @@ ggl.lineFeature = function (arg) {
         geom = vgl.geometryData(),
         mapper = vgl.mapper();
 
-      posFunc = m_this.position();
-      strokeWidthFunc = m_this.style().strokeWidth;
-      strokeColorFunc = m_this.style().strokeColor;
-      strokeOpacityFunc = m_this.style().strokeOpacity;
+    posFunc = m_this.position();
+    strokeWidthFunc = m_this.style().strokeWidth;
+    strokeColorFunc = m_this.style().strokeColor;
+    strokeOpacityFunc = m_this.style().strokeOpacity;
 
-      m_this.data().forEach(function (item) {
-        position.push(posFunc(item));
-        strokeWidth.push(strokeWidthFunc(item));
-        strokeColor.push(strokeColorFunc(item));
-        strokeOpacity.push(strokeOpacityFunc(item));
-      });
+    m_this.data().forEach(function (item) {
+      position.push(posFunc(item));
+      strokeWidth.push(strokeWidthFunc(item));
+      strokeColor.push(strokeColorFunc(item));
+      strokeOpacity.push(strokeOpacityFunc(item));
+    });
 
     position = geo.transform.transformCoordinates(
                   m_this.gcs(), m_this.layer().map().gcs(),
                   position, 3);
 
-    buffers.create ('pos', 3);
-    buffers.create ('indices', 1);
-    buffers.create ('strokeWidth', 1);
-    buffers.create ('strokeColor', 3);
-    buffers.create ('strokeOpacity', 1);
+    buffers.create("pos", 3);
+    buffers.create("indices", 1);
+    buffers.create("strokeWidth", 1);
+    buffers.create("strokeColor", 3);
+    buffers.create("strokeOpacity", 1);
 
     // TODO: Right now this is ugly but we will fix it.
     prog.addVertexAttribute(posAttr, vgl.vertexAttributeKeys.Position);
-    prog.addVertexAttribute(stokeWidthAttr, vgl.vertexAttributeKeys.CountAttributeIndex + 1);
-    prog.addVertexAttribute(strokeColorAttr, vgl.vertexAttributeKeys.CountAttributeIndex + 2);
-    prog.addVertexAttribute(strokeOpacityAttr, vgl.vertexAttributeKeys.CountAttributeIndex + 3);
+    prog.addVertexAttribute(
+      stokeWidthAttr,
+      vgl.vertexAttributeKeys.CountAttributeIndex + 1
+    );
+    prog.addVertexAttribute(
+      strokeColorAttr,
+      vgl.vertexAttributeKeys.CountAttributeIndex + 2
+    );
+    prog.addVertexAttribute(
+      strokeOpacityAttr,
+      vgl.vertexAttributeKeys.CountAttributeIndex + 3
+    );
 
     prog.addUniform(modelViewUniform);
     prog.addUniform(projectionUniform);
@@ -141,13 +152,13 @@ ggl.lineFeature = function (arg) {
     m_actor = vgl.actor();
     m_actor.setMaterial(mat);
 
-    start = buffers.alloc (numPts);
-    for (i = 0; i < numPts; ++i) {
-      buffers.write ('pos', position[i], start + i, 1);
-      buffers.write ("indices", [i], start + i, 1);
-      buffers.write ("strokeWidth", [strokeWidth[i]], start + i * 1, 1);
-      buffers.write ("strokeColor", strokeColor[i], start + i * 1, 1);
-      buffers.write ("strokeOpacity", [strokeOpacity[i]], start + i * 1, 1);
+    start = buffers.alloc(numPts);
+    for (i = 0; i < numPts; i += 1) {
+      buffers.write("pos", position[i], start + i, 1);
+      buffers.write("indices", [i], start + i, 1);
+      buffers.write("strokeWidth", [strokeWidth[i]], start + i * 1, 1);
+      buffers.write("strokeColor", strokeColor[i], start + i * 1, 1);
+      buffers.write("strokeOpacity", [strokeOpacity[i]], start + i * 1, 1);
     }
 
     sourcePositions.pushBack(buffers.get("pos"));
@@ -187,8 +198,6 @@ ggl.lineFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
-    var style = m_this.style();
-
     if (m_actor) {
       m_this.renderer().contextRenderer().removeActor(m_actor);
     }
