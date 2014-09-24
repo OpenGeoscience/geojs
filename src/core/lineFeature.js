@@ -26,27 +26,8 @@ geo.lineFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
-      m_data = null,
       m_position = arg.position === undefined ? [] : arg.position,
       s_init = this._init;
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get/Set data
-   *
-   * @returns {Array}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.data = function(data) {
-    if (data === undefined) {
-      return m_data;
-    } else {
-      m_data = data;
-      m_this.dataTime().modified();
-      m_this.modified();
-      return m_this;
-    }
-  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**

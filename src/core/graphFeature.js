@@ -30,6 +30,7 @@ geo.graphFeature = function (arg) {
       s_style = this.style,
       m_nodes = null,
       m_points = null,
+      m_children = function (d) { return d.children; },
       m_links = [],
       s_init = this._init,
       s_exit = this._exit;
@@ -52,7 +53,7 @@ geo.graphFeature = function (arg) {
         links: {
           color: [1.0, 1.0, 1.0]
         },
-        linkType: "path" /* 'pathFeature' || 'lineFeature' */
+        linkType: "path" /* 'path' || 'line' */
       },
       arg.style === undefined ? {} : arg.style
     );
@@ -113,6 +114,20 @@ geo.graphFeature = function (arg) {
     m_links.forEach(function (l) {
       l.style(arg.links);
     });
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set children accessor.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.children = function (arg) {
+    if (arg === undefined) {
+      return m_children;
+    }
+
+    m_children = geo.util.ensureFunction(arg);
     return m_this;
   };
 

@@ -51,7 +51,7 @@ gd3.d3Renderer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Meta functions for convert from geojs styles to d3.
+   * Meta functions for converting from geojs styles to d3.
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -80,7 +80,7 @@ gd3.d3Renderer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Set styles to a d3 selection.
+   * Set styles to a d3 selection. Ignores unkown style keys.
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -108,9 +108,6 @@ gd3.d3Renderer = function (arg) {
           k = null;
         } else if (key === 'fillOpacity') {
           k = 'fill-opacity';
-          f = styles[key];
-        } else {
-          k = key;
           f = styles[key];
         }
         if (k) {
