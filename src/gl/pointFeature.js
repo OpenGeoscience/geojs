@@ -201,7 +201,8 @@ ggl.pointFeature = function (arg) {
     strokeOpactityFunc = m_this.style().strokeOpacity;
 
     m_this.data().forEach(function (item) {
-      position.push(posFunc(item));
+      var p = posFunc(item);
+      position.push([p.x, p.y, p.z || 0]);
       radius.push(radFunc(item));
       strokeWidth.push(strokeWidthFunc(item));
       fill.push(fillFunc(item));

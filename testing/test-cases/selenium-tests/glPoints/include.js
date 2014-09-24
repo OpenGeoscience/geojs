@@ -78,7 +78,7 @@ window.startTest = function (done) {
             return 0.25;
           }
         })
-        .position(function(d) { return [d.lon, d.lat, d.elev]; });
+        .position(function(d) { return {x: d.lon, y: d.lat, z: d.elev}; });
       myMap.draw();
       myMap.onIdle(done);
     }

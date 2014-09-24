@@ -109,7 +109,8 @@ ggl.lineFeature = function (arg) {
     strokeOpacityFunc = m_this.style().strokeOpacity;
 
     m_this.data().forEach(function (item) {
-      position.push(posFunc(item));
+      var p = posFunc(item);
+      position.push([p.x, p.y, p.z || 0]);
       strokeWidth.push(strokeWidthFunc(item));
       strokeColor.push(strokeColorFunc(item));
       strokeOpacity.push(strokeOpacityFunc(item));
