@@ -60,7 +60,7 @@ window.startTest = function (done) {
         }
       }
 
-      myMap.createLayer('osm');
+      myMap.createLayer('osm', {m_baseUrl: '/data/tiles/'});
       myMap.draw();
       var layer = myMap.createLayer('feature');
       layer.createFeature('point')

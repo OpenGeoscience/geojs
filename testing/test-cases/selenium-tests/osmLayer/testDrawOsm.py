@@ -24,14 +24,14 @@ class osmBase(object):
     def test_osm_draw(self):
         testName = 'osmDraw'
         self.loadPage()
-        self.screenshotTest(testName, revision=5)
+        self.screenshotTest(testName, revision=6)
 
     def test_osm_pan(self):
         testName = 'osmPan'
         self.loadPage()
         self.drag('#map', (200, 150))
         self.waitForIdle()
-        self.screenshotTest(testName, revision=5)
+        self.screenshotTest(testName, revision=6)
 
 
 class FirefoxOSM(osmBase, FirefoxTest):

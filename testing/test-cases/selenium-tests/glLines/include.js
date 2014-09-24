@@ -62,7 +62,7 @@ window.startTest = function(done) {
 
     var mouseOverElement = 0;
     // Load image to be used for drawing dots
-    var osm = myMap.createLayer('osm'),
+    var osm = myMap.createLayer('osm', {m_baseUrl: '/data/tiles/'}),
         layer = myMap.createLayer('feature');
 
     var color = d3.scale.category10()

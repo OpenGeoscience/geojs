@@ -74,7 +74,7 @@ window.startTest = function (done) {
   );
 
   // Load image to be used for drawing dots
-  myMap.createLayer('osm');
+  myMap.createLayer('osm', {m_baseUrl: '/data/tiles/'});
   var layer = myMap.createLayer('feature', {'renderer' : 'd3Renderer'}),
       style = {
     nodes: {

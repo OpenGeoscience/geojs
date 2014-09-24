@@ -1,10 +1,10 @@
 
 window.startTest = function(done) {
     var mapOptions = {node: '#map',
-                      zoom : 5,
+                      zoom : 4,
                       center : [21.0, 78.0]},
       myMap = geo.map(mapOptions),
-      layer = myMap.createLayer('osm');
+      layer = myMap.createLayer('osm', {m_baseUrl: '/data/tiles/'});
 
     /// Resize the canvas to fill browser window dynamically
     window.addEventListener('resize', resizeCanvas, false);
