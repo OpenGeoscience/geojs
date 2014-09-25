@@ -7,3 +7,4 @@
 /docs/_*
 /docs/*.py
 !/docs/conf.py
+/src/core/version.js
