@@ -8,3 +8,4 @@
 /docs/*.py
 !/docs/conf.py
 /src/core/version.js
+/dist

@@ -11,15 +11,20 @@
     "url": "https://github.com/OpenGeoscience/geojs"
   },
   "dependencies": {
+    "d3-browser": "~3.2",
+    "gl-matrix": "~2.1",
     "grunt": "~0.4",
     "grunt-cli": "~0.1",
+    "grunt-contrib-clean": "~0.6",
     "grunt-contrib-copy": "~0.6",
     "grunt-contrib-uglify": "~0.6",
-    "grunt-contrib-watch": "~0.6",
-    "grunt-express": "~1.4",
-    "jquery-browser": "~1.10"
+    "grunt-template": "~0.2",
+    "jquery-browser": "~1.10",
+    "proj4": "~2.2"
   },
   "devDependencies": {
+    "grunt-contrib-watch": "~0.6",
+    "grunt-express": "~1.4",
     "blanket": "~1.1",
     "jshint": "~2.4",
     "phantomjs": "~1.9"

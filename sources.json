@@ -1,0 +1,105 @@
+{
+  "modules": {
+    "geo.core": {
+      "prefix": "src/core",
+      "files": [
+        "init.js",
+        "version.js",
+        "object.js",
+        "sceneObject.js",
+        "timestamp.js",
+        "ellipsoid.js",
+        "mercator.js",
+        "latlng.js",
+        "layer.js",
+        "featureLayer.js",
+        "event.js",
+        "time.js",
+        "fileReader.js",
+        "jsonReader.js",
+        "map.js",
+        "feature.js",
+        "pointFeature.js",
+        "lineFeature.js",
+        "pathFeature.js",
+        "polygonFeature.js",
+        "planeFeature.js",
+        "geomFeature.js",
+        "graphFeature.js",
+        "transform.js",
+        "renderer.js",
+        "osmLayer.js"
+      ]
+    },
+    "geo.gl": {
+      "prefix": "src/gl",
+      "files": [
+        "init.js",
+        "renderer.js",
+        "lineFeature.js",
+        "pointFeature.js",
+        "geomFeature.js",
+        "planeFeature.js",
+        "mapInteractorStyle.js",
+        "vglRenderer.js"
+      ]
+    },
+    "geo.d3": {
+      "prefix": "src/d3",
+      "files": [
+        "init.js",
+        "object.js",
+        "pointFeature.js",
+        "lineFeature.js",
+        "pathFeature.js",
+        "graphFeature.js",
+        "d3Renderer.js"
+      ]
+    },
+    "vgl": {
+      "prefix": "vgl/src",
+      "files": [
+        "init.js",
+        "GL.js",
+        "timestamp.js",
+        "object.js",
+        "event.js",
+        "boundingObject.js",
+        "node.js",
+        "groupNode.js",
+        "actor.js",
+        "freezeObject.js",
+        "defaultValue.js",
+        "geojsonReader.js",
+        "data.js",
+        "geomData.js",
+        "mapper.js",
+        "groupMapper.js",
+        "materialAttribute.js",
+        "blend.js",
+        "material.js",
+        "renderer.js",
+        "renderWindow.js",
+        "camera.js",
+        "interactorStyle.js",
+        "trackballInteractorStyle.js",
+        "pvwInteractorStyle.js",
+        "viewer.js",
+        "shader.js",
+        "shaderProgram.js",
+        "texture.js",
+        "uniform.js",
+        "vertexAttribute.js",
+        "source.js",
+        "planeSource.js",
+        "pointSource.js",
+        "lineSource.js",
+        "utils.js",
+        "picker.js",
+        "shapefileReader.js",
+        "vtkReader.js",
+        "DataBuffers.js"
+      ]
+    }
+  }
+}
