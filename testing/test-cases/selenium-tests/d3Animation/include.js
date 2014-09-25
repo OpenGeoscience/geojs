@@ -46,12 +46,14 @@ window.startTest = function(done) {
       if (!m_pointFeature) {
         m_pointFeature = this.createFeature('point');
         m_pointFeature.style({
-          'size': 5,
-          'color': [1, 0, 0]
+          'radius': function () { return 5; },
+          'color': function () { return {r: 1, g: 0, b: 0}; },
+          'stroke': function () { return false; }
         });
       }
       
-      m_pointFeature.positions(latlons);
+      m_pointFeature.data(latlons)
+        .position(function (d) { return {x: d.x(), y: d.y()}; });
 
       s_update.call(this, request);
     };
