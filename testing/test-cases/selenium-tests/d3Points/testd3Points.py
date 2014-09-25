@@ -6,6 +6,7 @@ from selenium_test import FirefoxTest, ChromeTest,\
 
 class d3PointsBase(object):
     testCase = ('d3Points',)
+    testRevision = 4
 
     def loadPage(self):
         self.resizeWindow(640, 480)
@@ -21,12 +22,10 @@ class d3PointsBase(object):
 
 class FirefoxOSM(d3PointsBase, FirefoxTest):
     testCase = d3PointsBase.testCase + ('firefox',)
-    testRevision = 3
 
 
 class ChromeOSM(d3PointsBase, ChromeTest):
     testCase = d3PointsBase.testCase + ('chrome',)
-    testRevision = 4
 
 
 if __name__ == '__main__':

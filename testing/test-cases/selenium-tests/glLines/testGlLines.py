@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 
+import unittest
+
 from selenium_test import FirefoxTest, ChromeTest,\
     setUpModule, tearDownModule
 
 
 class glLinesBase(object):
     testCase = ('glLines',)
+    testRevision = 4
 
     def loadPage(self):
         self.resizeWindow(640, 480)
@@ -19,14 +22,14 @@ class glLinesBase(object):
         self.screenshotTest(testName)
 
 
+@unittest.skip("glLines not updated to new api")
 class FirefoxOSM(glLinesBase, FirefoxTest):
     testCase = glLinesBase.testCase + ('firefox',)
-    testRevision = 3
 
 
+@unittest.skip("glLines not updated to new api")
 class ChromeOSM(glLinesBase, ChromeTest):
     testCase = glLinesBase.testCase + ('chrome',)
-    testRevision = 4
 
 
 if __name__ == '__main__':
