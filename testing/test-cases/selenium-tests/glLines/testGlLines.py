@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 
-import os
-import time
-
 from selenium_test import FirefoxTest, ChromeTest,\
     setUpModule, tearDownModule
 
@@ -19,15 +16,17 @@ class glLinesBase(object):
         self.loadPage()
 
         testName = 'drawGlLines'
-        self.screenshotTest(testName, revision=3)
+        self.screenshotTest(testName)
 
 
 class FirefoxOSM(glLinesBase, FirefoxTest):
     testCase = glLinesBase.testCase + ('firefox',)
+    testRevision = 3
 
 
 class ChromeOSM(glLinesBase, ChromeTest):
     testCase = glLinesBase.testCase + ('chrome',)
+    testRevision = 4
 
 
 if __name__ == '__main__':

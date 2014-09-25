@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import os
 import time
 
 from selenium_test import FirefoxTest, ChromeTest,\
@@ -21,7 +20,7 @@ class d3AnimationBase(object):
 
         testName = 'd3AnimateFrame15'
         self.runScript('window.animateForward(15);')
-        self.screenshotTest(testName, revision=5)
+        self.screenshotTest(testName)
 
     def testd3AnimateBackward(self):
         self.loadPage()
@@ -29,7 +28,7 @@ class d3AnimationBase(object):
         testName = 'd3AnimateFrame75'
         self.runScript('window.animateForward(80);')
         self.runScript('window.animateBackward(5);')
-        self.screenshotTest(testName, revision=5)
+        self.screenshotTest(testName)
 
     def testd3AnimateToEnd(self):
         self.loadPage()
@@ -42,15 +41,17 @@ class d3AnimationBase(object):
             '''
         )
         self.wait('window.animationTestFinished')
-        self.screenshotTest(testName, revision=5)
+        self.screenshotTest(testName)
 
 
 class FirefoxOSM(d3AnimationBase, FirefoxTest):
     testCase = d3AnimationBase.testCase + ('firefox',)
+    testRevision = 5
 
 
 class ChromeOSM(d3AnimationBase, ChromeTest):
     testCase = d3AnimationBase.testCase + ('chrome',)
+    testRevision = 6
 
 
 if __name__ == '__main__':

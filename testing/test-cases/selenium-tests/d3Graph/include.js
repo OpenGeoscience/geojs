@@ -77,11 +77,15 @@ window.startTest = function (done) {
   myMap.createLayer('osm', {m_baseUrl: '/data/tiles/'});
   var layer = myMap.createLayer('feature', {'renderer' : 'd3Renderer'}),
       style = {
+      nodes: {
+        stroke: function () { return false; },
+        fillOpacity: function () { return 0.5; }
+      },
       linkType: 'path'
     };
   layer.createFeature('graph')
-      .data(citieslatlon);
-  //    .style(style)
+      .data(citieslatlon)
+      .style(style);
   myMap.draw();
 
   myMap.onIdle(done);

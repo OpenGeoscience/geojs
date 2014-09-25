@@ -91,14 +91,21 @@ class ImageDifferenceException(BaseException):
         return '\n'.join(s)
 
 
+def _chromeOptions():
+    opts = webdriver.ChromeOptions()
+    opts.add_argument('--test-type')
+    return {
+        'chrome_options': opts
+    }
+
 drivers = {
-    'firefox': webdriver.Firefox,
-    'chrome': webdriver.Chrome,
-    'opera': webdriver.Opera,
-    'phantomjs': webdriver.PhantomJS,
-    'safari': webdriver.Safari,
-    'ie': webdriver.Ie,
-    'null': NullDriver
+    'firefox': (webdriver.Firefox, {}),
+    'chrome': (webdriver.Chrome, _chromeOptions()),
+    'opera': (webdriver.Opera, {}),
+    'phantomjs': (webdriver.PhantomJS, {}),
+    'safari': (webdriver.Safari, {}),
+    'ie': (webdriver.Ie, {}),
+    'null': (NullDriver, {})
 }
 
 
@@ -259,7 +266,8 @@ class BaseTest(TestCase):
         '''
         Start up a selenium driver.
         '''
-        self.driver = drivers[self.driverName]()
+        drvTuple = drivers[self.driverName]
+        self.driver = drvTuple[0](**drvTuple[1])
 
     def tearDown(self):
         '''

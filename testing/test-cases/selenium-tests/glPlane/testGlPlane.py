@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-import os
-import time
 import unittest
 
 from selenium_test import FirefoxTest, ChromeTest,\
@@ -10,6 +8,7 @@ from selenium_test import FirefoxTest, ChromeTest,\
 
 class glPlaneBase(object):
     testCase = ('glPlane',)
+    testRevision = 1
 
     def loadPage(self):
         self.resizeWindow(640, 480)
@@ -20,7 +19,7 @@ class glPlaneBase(object):
         self.loadPage()
 
         testName = 'drawGlPlane'
-        self.screenshotTest(testName, revision=1)
+        self.screenshotTest(testName)
 
 
 @unittest.skip("Initial zoom currently not working")
