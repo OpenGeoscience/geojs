@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 
-import os
-import time
-
 from selenium_test import FirefoxTest, ChromeTest,\
     setUpModule, tearDownModule
 
@@ -24,22 +21,24 @@ class osmBase(object):
     def test_osm_draw(self):
         testName = 'osmDraw'
         self.loadPage()
-        self.screenshotTest(testName, revision=6)
+        self.screenshotTest(testName)
 
     def test_osm_pan(self):
         testName = 'osmPan'
         self.loadPage()
         self.drag('#map', (200, 150))
         self.waitForIdle()
-        self.screenshotTest(testName, revision=6)
+        self.screenshotTest(testName)
 
 
 class FirefoxOSM(osmBase, FirefoxTest):
     testCase = osmBase.testCase + ('firefox',)
+    testRevision = 6
 
 
 class ChromeOSM(osmBase, ChromeTest):
     testCase = osmBase.testCase + ('chrome',)
+    testRevision = 7
 
 
 if __name__ == '__main__':

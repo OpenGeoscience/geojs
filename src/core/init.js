@@ -226,3 +226,29 @@ geo.createLayer = function (name, map, arg) {
     return null;
   }
 };
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Generic utilities module
+ */
+//////////////////////////////////////////////////////////////////////////////
+(function () {
+  "use strict";
+  geo.util = {
+    isFunction: function (f) {
+      return typeof f === "function";
+    },
+
+    /**
+     * Returns the argument if it is function, otherwise returns a function
+     * that returns the argument.
+     */
+    ensureFunction: function (f) {
+      if (geo.util.isFunction(f)) {
+        return f;
+      } else {
+        return function () { return f; };
+      }
+    }
+  };
+}());

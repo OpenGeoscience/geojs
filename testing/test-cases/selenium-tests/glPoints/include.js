@@ -54,7 +54,7 @@ window.startTest = function (done) {
             var lon = table[i][3];
             lon = lon.replace(/(^\s+|\s+$|^\"|\"$)/g, '');
             lon = parseFloat(lon);
-            citieslatlon.push(lon, lat, 0.0);
+            citieslatlon.push({lon: lon, lat: lat, elev: 0.0});
             colors.push(1.0, 1.0, 153.0 / 255.0);
           }
         }
@@ -64,7 +64,21 @@ window.startTest = function (done) {
       myMap.draw();
       var layer = myMap.createLayer('feature');
       layer.createFeature('point')
-        .positions(citieslatlon);
+        .data(citieslatlon)
+        .style("fillColor", function(d) {
+          if (d.lon < -100) {
+            return {r: 1.0, g: 0.0, b: 0.0};
+          }
+          return {r: 0.0, g: 0.0, b: 1.0};
+        })
+        .style("fillOpacity", function(d) {
+          if (d.lon < -100) {
+            return 0.5;
+          } else {
+            return 0.25;
+          }
+        })
+        .position(function(d) { return {x: d.lon, y: d.lat, z: d.elev}; });
       myMap.draw();
       myMap.onIdle(done);
     }

@@ -52,7 +52,7 @@ gd3.pathFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
-    var data = m_this.positions() || [],
+    var data = m_this.data() || [],
         s_style = m_this.style(),
         m_renderer = m_this.renderer(),
         tmp, diag;
@@ -85,19 +85,10 @@ gd3.pathFeature = function (arg) {
     m_style.id = m_this._d3id();
     m_style.append = 'path';
     m_style.classes = [ 'd3PathFeature' ];
-    m_style.style = {
-      fill: 'none',
-      stroke: d3.rgb(
-        s_style.color[0] * 255,
-        s_style.color[1] * 255,
-        s_style.color[2] * 255
-      ),
-      'stroke-width': function () {
-        var m_scale = m_renderer.scaleFactor();
-        return (s_style.width[0] / m_scale).toString() + 'px';
-      },
-      'stroke-opacity': s_style.opacity
-    };
+    m_style.style = $.extend({
+      'fill': function () { return false; },
+      'fillColor': function () { return { r: 0, g: 0, b: 0 }; }
+    }, s_style);
 
     m_this.renderer()._drawFeatures(m_style);
 
@@ -122,13 +113,6 @@ gd3.pathFeature = function (arg) {
 
     return m_this;
   };
-
-  // attach to geo.event.d3Rescale to scale line width on resize
-  m_this.on(geo.event.d3Rescale, function () {
-    m_this.renderer()
-      .select(m_this._d3id())
-        .style('stroke-width', m_style.style['stroke-width']);
-  });
 
   this._init(arg);
   return this;

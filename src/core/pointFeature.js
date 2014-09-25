@@ -26,27 +26,28 @@ geo.pointFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
-      m_positions = arg.positions === undefined ? null : arg.positions,
+      m_position = arg.position === undefined ? function (d) { return d; } : arg.position,
       s_init = this._init;
+
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get/Set positions
+   * Get/Set position
    *
    * @returns {geo.pointFeature}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.positions = function (val) {
+  this.position = function (val) {
     if (val === undefined) {
-      return m_positions;
+      return m_position;
     } else {
-      // Copy incoming array of positions
-      m_positions = val.slice(0);
+      m_position = val;
       m_this.dataTime().modified();
       m_this.modified();
-      return m_this;
     }
+    return m_this;
   };
+
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -59,24 +60,27 @@ geo.pointFeature = function (arg) {
     var defaultStyle = $.extend(
       {},
       {
-        size: 1.0,
-        width: 1.0,
-        height: 1.0,
-        color: [1.0, 1.0, 1.0],
-        point_sprites: false,
-        point_sprites_image: null
+        radius: function () { return 10.0; },
+        stroke: function () { return true; },
+        strokeColor: function () { return { r: 0.0, g: 1.0, b: 0.0 }; },
+        strokeWidth: function () { return 2.0; },
+        strokeOpacity: function () { return 1.0; },
+        fillColor: function () { return { r: 1.0, g: 0.0, b: 0.0 }; },
+        fill: function () { return true; },
+        fillOpacity: function () { return 1.0; },
+        sprites: false,
+        sprites_image: null
       },
       arg.style === undefined ? {} : arg.style
     );
 
     m_this.style(defaultStyle);
 
-    if (m_positions) {
+    if (m_position) {
       m_this.dataTime().modified();
     }
   };
 
-  m_this._init(arg);
   return m_this;
 };
 
