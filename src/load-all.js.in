@@ -1,0 +1,34 @@
+/**
+ *  Including this file will load all geojs sources as individual files.
+ */
+(function () {
+  var sources, srcRoot, attrs;
+
+  sources = JSON.parse(
+    '<%= SOURCES_JSON %>'
+  );
+
+  srcRoot = '<%= SOURCES_ROOT %>';
+  attrs = JSON.parse(
+    '<%= SCRIPT_ATTRS %>'
+  );
+
+  sources.forEach(function (src) {
+    var attrString = [], key, value;
+
+    for (key in attrs) {
+      if (attrs.hasOwnProperty(key)) {
+        value = attrs[key];
+        attrString.push(key + '=' + value);
+      }
+    }
+
+    document.write(
+      '<script src="' +
+      srcRoot + src +
+      '"' +
+      attrString.join(' ') +
+      '></script>'
+    );
+  });
+}());

@@ -8,6 +8,8 @@ before_install:
     - sudo apt-get install -y cmake
 
 script:
+    - npm install
+    - node_modules/.bin/grunt
     - git submodule init
     - git submodule update
     - mkdir _build

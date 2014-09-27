@@ -23,8 +23,7 @@
 @BLANKET_INCLUDE@
 <script src=/test/lib/jasmine-blanket.js></script>
 <script src=/test/lib/aggregate-json-reporter.js></script>
-<script src=/web/lib/vgl.js></script>
-@SCRIPT_INCLUDE@
+<script src=/src/load-all-coverage.js></script>
 </head>
 <body>
 <div id=map></div>

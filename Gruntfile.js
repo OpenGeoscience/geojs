@@ -3,7 +3,7 @@
 module.exports = function (grunt) {
   'use strict';
 
-  var sources, geojsVersion, vgl, geo, port;
+  var sources, geojsVersion, vgl, geo, port, sourceList;
 
   geojsVersion = '0.1.0';
   sources = grunt.file.readJSON('sources.json');
@@ -31,6 +31,13 @@ module.exports = function (grunt) {
     d3: moduleFiles('geo.d3')
   };
 
+  sourceList = Array.prototype.concat(
+    vgl.map(function (f) { return 'src/vgl/' + f; }),
+    geo.core,
+    geo.gl,
+    geo.d3
+  );
+
   grunt.config.init({
     pkg: grunt.file.readJSON('package.json'),
 
@@ -40,6 +47,26 @@ module.exports = function (grunt) {
           data: { GEOJS_VERSION: geojsVersion }
         },
         files: { 'src/core/version.js': 'src/core/version.js.in' }
+      },
+      loadAll: {
+        options: {
+          data: {
+            SOURCES_JSON: JSON.stringify(sourceList),
+            SOURCES_ROOT: '/',
+            SCRIPT_ATTRS: '{}'
+          }
+        },
+        files: { 'dist/src/load-all.js': 'src/load-all.js.in' }
+      },
+      loadAllCoverage: {
+        options: {
+          data: {
+            SOURCES_JSON: JSON.stringify(sourceList),
+            SOURCES_ROOT: '/',
+            SCRIPT_ATTRS: '{"data-cover": true}'
+          }
+        },
+        files: { 'dist/src/load-all-coverage.js': 'src/load-all.js.in' }
       }
     },
 
@@ -77,12 +104,7 @@ module.exports = function (grunt) {
 
       geojs: {
         files: {
-          'dist/built/geojs.min.js': Array.prototype.concat(
-            vgl.map(function (f) { return 'src/vgl/' + f; }),
-            geo.core,
-            geo.gl,
-            geo.d3
-          ).map(function (f) {
+          'dist/built/geojs.min.js': sourceList.map(function (f) {
             return 'dist/' + f;
           })
         }
@@ -105,9 +127,10 @@ module.exports = function (grunt) {
           'src/**/*.js',
           'vgl/src/**/*.js',
           'src/core/version.js.in',
-          'Gruntfile.js'
+          'Gruntfile.js',
+          'sources.json'
         ],
-        tasks: ['clean:source', 'version', 'copy', 'uglify:geojs']
+        tasks: ['clean:source', 'template', 'copy', 'uglify:geojs']
       }
     },
 
@@ -133,12 +156,8 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-express');
 
-  grunt.registerTask('version', [
-    'template:version'
-  ]);
-
-  grunt.registerTask('build', [
-    'version',
+  grunt.registerTask('default', [
+    'template',
     'copy',
     'uglify'
   ]);
