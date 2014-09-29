@@ -115,6 +115,7 @@ module.exports = function (grunt) {
           'dist/built/geojs.ext.min.js': [
             'node_modules/jquery-browser/lib/jquery.js',
             'node_modules/gl-matrix/dist/gl-matrix.js',
+            'node_modules/proj4/dist/proj4-src.js',
             'node_modules/d3-browser/lib/d3.js'
           ]
         }
