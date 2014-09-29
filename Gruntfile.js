@@ -98,7 +98,10 @@ module.exports = function (grunt) {
         sourceMap: true,
         sourceMapIncludeSources: true,
         report: 'min',
-        beautify: true,
+        beautify: {
+          ascii_only: true,
+          beautify: true
+        },
         mangle: false
       },
 

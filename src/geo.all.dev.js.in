@@ -26,7 +26,7 @@
       attr = 'data-cover';
     }
 
-    document.write('<script src="' + srcRoot + '<%= BUNDLE_EXT %>"></script>');
+    document.write('<script src="' + srcRoot + '<%= BUNDLE_EXT %>" type="text/javascript" charset="UTF8"></script>');
     document.write(
       '<script src="' +
       srcRoot + src +

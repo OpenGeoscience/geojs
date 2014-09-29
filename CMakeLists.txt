@@ -85,7 +85,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/blanket_server.p
 )
 
 if (COVERAGE_TESTS)
-
+  set(SOURCES_INCLUDE <script src=/built/geo.all.dev.js data-cover></script>)
   set(BLANKET_INCLUDE <script src=/test/lib/blanket.min.js></script>)
   add_test(
     NAME "coverage-reset"
@@ -106,7 +106,8 @@ if (COVERAGE_TESTS)
 
 else()
 
-    set(BLANKET_INCLUDE "")
+  set(SOURCES_INCLUDE <script src=/built/geo.all.js></script>)
+  set(BLANKET_INCLUDE "")
 
 endif()
 
@@ -135,7 +136,7 @@ if(PHANTOMJS_TESTS)
       COMMAND ${CMAKE_COMMAND} -DTEST_HTML="${html}"
                                -DSOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
                                -DSOURCE_FILE="${js}"
-                               -DSCRIPT_INCLUDE="${_script_include}"
+                               -DSOURCES_INCLUDE="${SOURCES_INCLUDE}"
                                -DBLANKET_INCLUDE="${BLANKET_INCLUDE}"
                                -P ${CMAKE_SOURCE_DIR}/cmake/configure-js-unit-test.cmake
       COMMAND ${CMAKE_COMMAND} -E touch ${html}
