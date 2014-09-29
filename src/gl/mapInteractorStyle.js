@@ -32,7 +32,6 @@ ggl.mapInteractorStyle = function () {
     m_renderer,
     m_renderWindow,
     m_camera,
-    m_outsideCanvas,
     m_currentMousePos = { x : 0, y : 0 },
     m_focusDisplayPoint,
     m_zTrans,
@@ -121,9 +120,6 @@ ggl.mapInteractorStyle = function () {
     /// Compute current mouse position
     m_this._computeCurrentMousePos(event);
 
-    if (m_outsideCanvas === true) {
-      return true; // allow bubbling up the event
-    }
     if (m_leftMouseButtonDown) {
       if (m_drawRegionMode) {
         mouseWorldPoint = m_map.displayToMap(m_currentMousePos.x,
@@ -210,6 +206,19 @@ ggl.mapInteractorStyle = function () {
     m_lastMousePos.x = m_currentMousePos.x;
     m_lastMousePos.y = m_currentMousePos.y;
 
+    $(document).on("mousemove", function (evt) {
+      m_this.handleMouseMove(evt);
+      evt.preventDefault();
+      evt.stopPropagation();
+    });
+    $(document).on("mouseup", function (evt) {
+      m_this.handleMouseUp(evt);
+      $(document).off("mousemove");
+      $(document).off("mouseup");
+      evt.preventDefault();
+      evt.stopPropagation();
+    });
+
     return false;
   };
 
@@ -248,31 +257,6 @@ ggl.mapInteractorStyle = function () {
 
       /// Compute current mouse position
       m_this._computeCurrentMousePos(event);
-    }
-    return false;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Handle event when mouse goes out of canvas
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.handleMouseOut = function () {
-    /// Update render params
-    m_this.updateRenderParams();
-
-    if (m_leftMouseButtonDown) {
-      m_leftMouseButtonDown = false;
-    } else if (m_middileMouseButtonDown) {
-      m_middileMouseButtonDown = false;
-    }
-    if (m_rightMouseButtonDown) {
-      m_rightMouseButtonDown = false;
-      m_initRightBtnMouseDown = false;
-
-      /// Perform zoom when the mouse goes out of canvas as we
-      /// are treating mouse out as right button up.
-      m_this.zoom();
     }
     return false;
   };
@@ -619,23 +603,10 @@ ggl.mapInteractorStyle = function () {
 
     /// Update render params
     m_this.updateRenderParams();
-
-    m_outsideCanvas = false;
-
     m_coords = m_this.viewer().relMouseCoords(event);
 
-    if ((m_coords.x < 0) || (m_coords.x > m_width)) { // off-by-one error
-      m_currentMousePos.x = 0;
-      m_outsideCanvas = true;
-    } else {
-      m_currentMousePos.x = m_coords.x;
-    }
-    if ((m_coords.y < 0) || (m_coords.y > m_height)) { // off-by-one error
-      m_currentMousePos.y = 0;
-      m_outsideCanvas = true;
-    } else {
-      m_currentMousePos.y = m_coords.y;
-    }
+    m_currentMousePos.x = m_coords.x;
+    m_currentMousePos.y = m_coords.y;
   };
 
   ////////////////////////////////////////////////////////////////////////////
