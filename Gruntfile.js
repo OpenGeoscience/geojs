@@ -3,7 +3,7 @@
 module.exports = function (grunt) {
   'use strict';
 
-  var sources, geojsVersion, vgl, geo, port, sourceList;
+  var sources, geojsVersion, vgl, geo, port, sourceList, templateData;
 
   geojsVersion = '0.1.0';
   sources = grunt.file.readJSON('sources.json');
@@ -38,35 +38,35 @@ module.exports = function (grunt) {
     geo.d3
   );
 
+  templateData = {
+    GEOJS_Version: geojsVersion,
+    SOURCES_JSON: JSON.stringify(sourceList),
+    SOURCES_ROOT: '/',
+    BUNDLE_EXT: 'built/geojs.ext.min.js',
+    BUNDLE_GEO: 'built/geojs.min.js'
+  };
+
   grunt.config.init({
     pkg: grunt.file.readJSON('package.json'),
 
     template: {
       version: {
         options: {
-          data: { GEOJS_VERSION: geojsVersion }
+          data: templateData
         },
         files: { 'src/core/version.js': 'src/core/version.js.in' }
       },
+      loadDev: {
+        options: {
+          data: templateData
+        },
+        files: { 'dist/built/geo.all.dev.js': 'src/geo.all.dev.js.in' }
+      },
       loadAll: {
         options: {
-          data: {
-            SOURCES_JSON: JSON.stringify(sourceList),
-            SOURCES_ROOT: '/',
-            SCRIPT_ATTRS: '{}'
-          }
+          data: templateData
         },
-        files: { 'dist/src/load-all.js': 'src/load-all.js.in' }
-      },
-      loadAllCoverage: {
-        options: {
-          data: {
-            SOURCES_JSON: JSON.stringify(sourceList),
-            SOURCES_ROOT: '/',
-            SCRIPT_ATTRS: '{"data-cover": true}'
-          }
-        },
-        files: { 'dist/src/load-all-coverage.js': 'src/load-all.js.in' }
+        files: { 'dist/built/geo.all.js': 'src/geo.all.js.in' }
       }
     },
 
