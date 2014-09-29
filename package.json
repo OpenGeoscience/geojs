@@ -28,5 +28,8 @@
     "blanket": "~1.1",
     "jshint": "~2.4",
     "phantomjs": "~1.9"
+  },
+ "scripts": {
+    "postinstall": "./node_modules/.bin/grunt"
   }
 }
