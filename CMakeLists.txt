@@ -286,7 +286,6 @@ if(SELENIUM_TESTS)
 
 endif()
 
-# JSLint tests.
 if(${JS_HINT_TESTS})
 
   add_custom_target(
@@ -294,13 +293,11 @@ if(${JS_HINT_TESTS})
     ALL
     DEPENDS "${JSHINT_EXECUTABLE}"
   )
-  foreach(js ${_js_lint_files})
-    file(RELATIVE_PATH rel_f "${CMAKE_CURRENT_SOURCE_DIR}" "${js}")
-    add_test(
-      NAME "jshint:${rel_f}"
-      COMMAND ${JSHINT_EXECUTABLE} ${js}
-    )
-  endforeach()
+  add_test(
+    NAME "jshint"
+    WORKING_DIRECTORY "${GEOJS_DEPLOY_DIR}"
+    COMMAND "${JSHINT_EXECUTABLE}" "--exclude" "src/vgl" "src"
+  )
 
 endif() # JS_HINT_TESTS
 
