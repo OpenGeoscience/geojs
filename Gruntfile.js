@@ -3,9 +3,10 @@
 module.exports = function (grunt) {
   'use strict';
 
-  var sources, geojsVersion, vgl, geo, port, sourceList, templateData;
+  var sources, geojsVersion, vgl, geo, port, sourceList, templateData, pkg;
 
-  geojsVersion = '0.1.0';
+  pkg = grunt.file.readJSON('package.json');
+  geojsVersion = pkg.version;
   sources = grunt.file.readJSON('sources.json');
   port = Number(grunt.option('port') || '8082');
 
@@ -39,15 +40,15 @@ module.exports = function (grunt) {
   );
 
   templateData = {
-    GEOJS_Version: geojsVersion,
+    GEOJS_VERSION: geojsVersion,
     SOURCES_JSON: JSON.stringify(sourceList),
     SOURCES_ROOT: '/',
-    BUNDLE_EXT: 'built/geojs.ext.min.js',
-    BUNDLE_GEO: 'built/geojs.min.js'
+    BUNDLE_EXT: 'built/geo.ext.min.js',
+    BUNDLE_GEO: 'built/geo.min.js'
   };
 
   grunt.config.init({
-    pkg: grunt.file.readJSON('package.json'),
+    pkg: pkg,
 
     template: {
       version: {
@@ -107,7 +108,7 @@ module.exports = function (grunt) {
 
       geojs: {
         files: {
-          'dist/built/geojs.min.js': sourceList.map(function (f) {
+          'dist/built/geo.min.js': sourceList.map(function (f) {
             return 'dist/' + f;
           })
         }
@@ -115,7 +116,7 @@ module.exports = function (grunt) {
 
       ext: {
         files: {
-          'dist/built/geojs.ext.min.js': [
+          'dist/built/geo.ext.min.js': [
             'node_modules/jquery-browser/lib/jquery.js',
             'node_modules/gl-matrix/dist/gl-matrix.js',
             'node_modules/proj4/dist/proj4-src.js',
