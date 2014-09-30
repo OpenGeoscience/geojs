@@ -59,7 +59,7 @@ window.startTest = function (done) {
     .attr('r', 10)
     .style('fill', 'blue');
   
-  movingLayer.on(geo.event.d3Rescale, function (arg) {
+  movingLayer.on(geo.event.namespace('test').d3Rescale, function (arg) {
     scaledCircle.attr('r', 10 / arg.scale);
   });
 
