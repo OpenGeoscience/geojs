@@ -7,15 +7,15 @@ Build dependencies
 
 The following software is required to build geojs from source:
 
-* `Make <http://www.gnu.org/software/make/>`_
-* `CMake <http://www.cmake.org/>`_
 * `Git <http://git-scm.com/>`_
 * `Node.js <http://nodejs.org/>`_
-* `Python 2.7 <http://www.python.org/>`_
 
 In addition, the following python modules are recommended for development
 and testing of geojs.
 
+* `Python 2.7 <http://www.python.org/>`_
+* `Make <http://www.gnu.org/software/make/>`_
+* `CMake <http://www.cmake.org/>`_
 * `Pillow <http://pillow.readthedocs.org/en/latest/>`_
 * `Requests <http://docs.python-requests.org/en/latest/>`_
 * `Selenium <http://docs.seleniumhq.org/>`_
@@ -43,31 +43,19 @@ vgl submodule. ::
 Building the source
 -------------------
 
-Inside the new ``geojs`` directory, you should create a new directory
-for building the source. ::
+Inside the new ``geojs`` directory, you can simply run the following command to
+install all dependent javascript libraries and bundle together everything that
+is needed. ::
 
-    mkdir build
-    cd build
+    npm install
 
-Now issue the ``cmake`` and ``make`` command to configure and build
-the source. ::
-
-    cmake ..
-    make
-
-Compiled javascript libraries will be named ``geo.js`` and ``vgl.js`` in ``deploy/web/lib``.
-Optionally if you have configured ``MINIFY=ON``, the minified files named ``geo.min.js`` and
-``vgl.min.js`` will be there as well.
+Compiled javascript libraries will be named ``geo.min.js`` and ``geo.ext.min.js`` in ``dist/built``.
+The first file contains geojs and vgl bundled together.  The second file contains all
+of the dependent libraries.  The bundled libraries are minified, but source maps
+are provided
 
 Using the library
 -----------------
-
-At a minimum, geojs requires the following external libraries:
-
-* `JQuery <http://jquery.com/>`_
-* `glMatrix <http://github.com/toji/gl-matrix>`_
-* `Proj4js <http://github.com/proj4js/proj4js>`_
-* `d3 <http://d3js.org/>`_ (optional for d3 features)
 
 The following html gives an example of including all of the necessary files
 and creating a basic full map using the `osmLayer` class.
@@ -75,13 +63,8 @@ and creating a basic full map using the `osmLayer` class.
 .. code-block:: html
 
     <head>
-        <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.4.8/d3.min.js"></script>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.2.1/gl-matrix.js"></script>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/proj4js/2.1.0/proj4.js"></script>
-
-        <script src="/web/lib/vgl.js"></script>
-        <script src="/web/lib/geo.js"></script>
+        <script src="/dist/built/geo.ext.min.js"></script>
+        <script src="/dist/built/geo.min.js"></script>
 
         <style>
             html, body, #map {
@@ -115,12 +98,12 @@ and creating a basic full map using the `osmLayer` class.
         <div id="map"></div>
     </body>
 
-You can save this page into a new file at ``deploy/mymap.html``.  To view your new creation,
-start up a web server from ``deploy`` using the following command ::
+You can save this page into a new file at ``dist/mymap.html``.  To view your new creation,
+start up a web server with the command ::
 
-    python test/geojs_test_runner.py
+    grunt serve
 
-Now, if you open up `<http://localhost:50100/mymap.html>`_ in your favorite webgl enabled
+Now, if you open up `<http://localhost:8082/mymap.html>`_ in your favorite webgl enabled
 browser, you should see a map like the following:
 
 .. image:: images/osmmap.png
