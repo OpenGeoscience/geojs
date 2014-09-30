@@ -14,6 +14,7 @@ from unittest import TestCase
 from math import sqrt
 import json
 import inspect
+import time
 
 if sys.version_info[0] == 2:
     from cStringIO import StringIO
@@ -627,6 +628,10 @@ class BaseTest(TestCase):
         :param int revision: The revision number to compare against.
         :raises ImageDifferenceException: If the images are different.
         '''
+
+        # put in a global 1 second delay for screenshots to ensure the rendering is done
+        time.sleep(1)
+
         failure = False
         testImage = self.screenshot()
         testImagePath = self.exportTestImage(
