@@ -4,7 +4,7 @@ window.startTest = function(done) {
                       zoom : 3,
                       center : [0.0, 0.0]},
       myMap = geo.map(mapOptions),
-      layer = myMap.createLayer('osm');
+      layer = myMap.createLayer('osm', {m_baseUrl: '/data/tiles/'});
 
     window.gjsmap = myMap;
 

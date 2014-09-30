@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 
-import os
-import time
-
 from selenium_test import FirefoxTest, ChromeTest,\
     setUpModule, tearDownModule
 
@@ -19,15 +16,17 @@ class d3LinesBase(object):
         self.loadPage()
 
         testName = 'd3DrawLines'
-        self.screenshotTest(testName, revision=3)
+        self.screenshotTest(testName)
 
 
 class FirefoxOSM(d3LinesBase, FirefoxTest):
     testCase = d3LinesBase.testCase + ('firefox',)
+    testRevision = 3
 
 
 class ChromeOSM(d3LinesBase, ChromeTest):
     testCase = d3LinesBase.testCase + ('chrome',)
+    testRevision = 4
 
 
 if __name__ == '__main__':

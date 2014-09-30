@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 
-import os
-import time
-
 from selenium_test import FirefoxTest, ChromeTest,\
     setUpModule, tearDownModule
 
@@ -27,15 +24,17 @@ class d3StickyBase(object):
 
         self.drag('#map', (100, 100))
         self.waitForIdle()
-        self.screenshotTest(testName, revision=3)
+        self.screenshotTest(testName)
 
 
 class FirefoxOSM(d3StickyBase, FirefoxTest):
     testCase = d3StickyBase.testCase + ('firefox',)
+    testRevision = 3
 
 
 class ChromeOSM(d3StickyBase, ChromeTest):
     testCase = d3StickyBase.testCase + ('chrome',)
+    testRevision = 4
 
 
 if __name__ == '__main__':

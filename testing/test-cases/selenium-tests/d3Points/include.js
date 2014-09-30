@@ -74,15 +74,25 @@ window.startTest = function (done) {
   );
 
   // Load image to be used for drawing dots
-  myMap.createLayer('osm');
+  myMap.createLayer('osm', {m_baseUrl: '/data/tiles/'});
   var layer = myMap.createLayer('feature', {'renderer' : 'd3Renderer'});
-  var style = {
-    color: [0, 1, 0],
-    size: [15]
-  };
+
   layer.createFeature('point')
-      .style(style)
-      .positions(citieslatlon);
+    .data(citieslatlon)
+    .style('fillColor', function (d) {
+      if (d.lng() < -100) {
+        return {r: 1.0, g: 0.0, b: 0.0};
+      }
+      return {r: 0.0, g: 0.0, b: 1.0};
+    })
+    .style('fillOpacity', function (d) {
+      if (d.lng() < -100) {
+        return 0.5;
+      } else {
+        return 0.25;
+      }
+    })
+    .position(function (d) { return d; });
 
   myMap.draw();
   

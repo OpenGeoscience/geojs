@@ -10,21 +10,16 @@
         visibility: hidden;
     }
 </style>
-<script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
 <link href=http://jasmine.github.io/css/docco.css rel=stylesheet>
 <link href=http://jasmine.github.io/css/jasmine_docco.css rel=stylesheet>
 <link href=http://jasmine.github.io/2.0/lib/jasmine.css rel=stylesheet>
 <script src=http://jasmine.github.io/2.0/lib/jasmine.js></script>
 <script src=http://jasmine.github.io/2.0/lib/jasmine-html.js></script>
 <script src=/test/lib/jasmine-boot.js></script>
-<script src=//cdnjs.cloudflare.com/ajax/libs/d3/3.4.8/d3.min.js></script>
-<script src=//cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.2.1/gl-matrix.js></script>
-<script src=//cdnjs.cloudflare.com/ajax/libs/proj4js/2.1.0/proj4.js></script>
 @BLANKET_INCLUDE@
 <script src=/test/lib/jasmine-blanket.js></script>
+@SOURCES_INCLUDE@
 <script src=/test/lib/aggregate-json-reporter.js></script>
-<script src=/web/lib/vgl.js></script>
-@SCRIPT_INCLUDE@
 </head>
 <body>
 <div id=map></div>

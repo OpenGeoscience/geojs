@@ -66,6 +66,33 @@ ggl.vglRenderer = function (arg) {
 
   m_contextRenderer.setResetScene(false);
 
+  /// TODO: Move this API to the base class
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return width of the renderer
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.width = function () {
+    return m_width;
+  };
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return height of the renderer
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.height = function () {
+    return m_height;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return width of the renderer
+   */
+  ////////////////////////////////////////////////////////////////////////////
+
+
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Convert input data in display space to world space
@@ -313,30 +340,8 @@ ggl.vglRenderer = function (arg) {
         m_viewer.handleMouseWheel(event);
       });
 
-      map.on("mousemove", function (event) {
-        m_viewer.handleMouseMove(event);
-      });
-
-      map.on("mouseup", function (event) {
-        m_viewer.handleMouseUp(event);
-      });
-
       map.on("mousedown", function (event) {
         m_viewer.handleMouseDown(event);
-      });
-
-      map.on("mouseout", function (event) {
-        // check if the mouse actually left the map area
-        var selection = $(map),
-            offset = selection.offset(),
-            width = selection.width(),
-            height = selection.height(),
-            x = event.pageX - offset.left,
-            y = event.pageY - offset.top;
-        if (x < 0 || x >= width ||
-            y < 0 || y >= height) {
-          m_viewer.handleMouseOut(event);
-        }
       });
 
       map.on("keypress", function (event) {

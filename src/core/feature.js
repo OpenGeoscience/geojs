@@ -33,6 +33,7 @@ geo.feature = function (arg) {
       m_visible = arg.visible === undefined ? true : arg.visible,
       m_bin = arg.bin === undefined ? 0 : arg.bin,
       m_renderer = arg.renderer === undefined ? null : arg.renderer,
+      m_data = [],
       m_dataTime = geo.timestamp(),
       m_buildTime = geo.timestamp(),
       m_updateTime = geo.timestamp();
@@ -170,6 +171,24 @@ geo.feature = function (arg) {
       return m_updateTime;
     } else {
       m_updateTime = val;
+      m_this.modified();
+      return m_this;
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set data
+   *
+   * @returns {Array}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.data = function (data) {
+    if (data === undefined) {
+      return m_data;
+    } else {
+      m_data = data;
+      m_this.dataTime().modified();
       m_this.modified();
       return m_this;
     }

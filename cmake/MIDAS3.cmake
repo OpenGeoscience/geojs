@@ -46,7 +46,7 @@ function(add_download_target)
   set(downloadFiles "")
 
   foreach(keyfile ${keyfiles})
-    _process_keyfile(${keyfile} 0)
+    _process_keyfile(${keyfile} 1)
   endforeach()
 
   set(MIDAS_DOWNLOAD_FILES "${downloadFiles}" PARENT_SCOPE)
@@ -120,28 +120,18 @@ endif(NOT computedChecksum STREQUAL ${checksum})
 ")
 # End file content
 
-#   if(${extractTgz})
-#     file(APPEND "${MIDAS_DATA_DIR}/MIDAS_FetchScripts/fetch_${checksum}_${base_filename}.cmake"
-# # Start file content
-# "# Extract the contents of the tgz
-# get_filename_component(dirName \"${base_filename}\" NAME_WE)
-# file(MAKE_DIRECTORY \"${MIDAS_DATA_DIR}/\${midas_test_name}_${base_filepath}/\${dirName}\")
-# execute_process(COMMAND \"${CMAKE_COMMAND}\" -E tar xzf \"${MIDAS_DATA_DIR}/MIDAS_Hashes/${checksum}\"
-#                 WORKING_DIRECTORY \"${MIDAS_DATA_DIR}/\${midas_test_name}_${base_filepath}/\${dirName}\")
-# file(REMOVE_RECURSE \"${MIDAS_DATA_DIR}/${base_filepath}/\${dirName}\")
-# file(RENAME \"${MIDAS_DATA_DIR}/\${midas_test_name}_${base_filepath}/\${dirName}\" \"${MIDAS_DATA_DIR}/${base_filepath}/\${dirName}\")
-# ")
-# # End file content
-#   else()
-# file(APPEND "${MIDAS_DATA_DIR}/MIDAS_FetchScripts/fetch_${checksum}_${base_filename}.cmake"
-# # Start file content
-# "# Create a human-readable file name for the data.
-# file(REMOVE \"${MIDAS_DATA_DIR}/\${midas_test_name}_${base_file}\")
-# execute_process(COMMAND \"${CMAKE_COMMAND}\" -E ${cmake_symlink} \"${MIDAS_DATA_DIR}/MIDAS_Hashes/${checksum}\" \"${MIDAS_DATA_DIR}/\${midas_test_name}_${base_file}\" WORKING_DIRECTORY \"${MIDAS_DATA_DIR}\")
-# file(RENAME \"${MIDAS_DATA_DIR}/\${midas_test_name}_${base_file}\" \"${MIDAS_DATA_DIR}/${base_file}\")
-# ")
-# End file content
-#  endif(${extractTgz})
+if("${base_fileext}" STREQUAL ".tgz")
+    file(APPEND "${fetch_scripts_dir}/fetch_${checksum}_${base_filename}.cmake"
+        # Start file content
+        "# Extract the contents of the tgz
+        get_filename_component(dirName \"${base_filename}\" NAME_WE)
+        file(MAKE_DIRECTORY \"${MIDAS_DATA_DIR}/\${dirName}\")
+        execute_process(COMMAND \"${CMAKE_COMMAND}\" -E tar xzf \"${MIDAS_DATA_DIR}/${base_filename}\"
+                        WORKING_DIRECTORY \"${MIDAS_DATA_DIR}/\${dirName}\")
+        "
+        # End file content
+    )
+endif()
 
   add_custom_command(OUTPUT "${MIDAS_DATA_DIR}/${base_filename}"
     COMMAND ${CMAKE_COMMAND} -P "${fetch_scripts_dir}/fetch_${checksum}_${base_filename}.cmake"

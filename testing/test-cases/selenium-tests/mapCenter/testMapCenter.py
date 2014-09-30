@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 
-import os
-import time
-
 from selenium_test import FirefoxTest, ChromeTest,\
     setUpModule, tearDownModule
 
@@ -18,15 +15,17 @@ class mapCenter(object):
     def test_map_center(self):
         testName = 'mapCenter'
         self.loadPage()
-        self.screenshotTest(testName, revision=2)
+        self.screenshotTest(testName)
 
 
 class FirefoxMapCenter(mapCenter, FirefoxTest):
     testCase = mapCenter.testCase + ('firefox',)
+    testRevision = 3
 
 
 class ChromeMapCenter(mapCenter, ChromeTest):
     testCase = mapCenter.testCase + ('chrome',)
+    testRevision = 4
 
 
 if __name__ == '__main__':

@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-import os
-import time
 import unittest
 
 from selenium_test import FirefoxTest, ChromeTest,\
@@ -10,6 +8,7 @@ from selenium_test import FirefoxTest, ChromeTest,\
 
 class glTwoRenderersBase(object):
     testCase = ('glTwoRenderers',)
+    testRevision = 1
 
     def loadPage(self):
         self.resizeWindow(1600, 1400)
@@ -20,7 +19,7 @@ class glTwoRenderersBase(object):
         self.loadPage()
 
         testName = 'drawGlTwoRenderers'
-        self.screenshotTest(testName, revision=1)
+        self.screenshotTest(testName)
 
 
 @unittest.skip("Initial zoom currently not working")

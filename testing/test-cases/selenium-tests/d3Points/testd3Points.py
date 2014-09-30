@@ -1,14 +1,12 @@
 #!/usr/bin/env python
 
-import os
-import time
-
 from selenium_test import FirefoxTest, ChromeTest,\
     setUpModule, tearDownModule
 
 
 class d3PointsBase(object):
     testCase = ('d3Points',)
+    testRevision = 4
 
     def loadPage(self):
         self.resizeWindow(640, 480)
@@ -19,7 +17,7 @@ class d3PointsBase(object):
         self.loadPage()
 
         testName = 'd3DrawPoints'
-        self.screenshotTest(testName, revision=3)
+        self.screenshotTest(testName)
 
 
 class FirefoxOSM(d3PointsBase, FirefoxTest):
