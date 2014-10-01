@@ -320,7 +320,7 @@ ggl.vglRenderer = function (arg) {
 
       /// https://developer.mozilla.org/en-US/docs/Web/Events/wheel
       var map = $(m_this.layer().map().node()),
-          wheel = "onwheel" in map ? "wheel" :
+          wheel = "onwheel" in map.get(0) ? "wheel" :
                   document.onmousewheel !== undefined ? "mousewheel" :
                   "MozMousePixelScroll",
           wheelDelta = (wheel === "wheel") ? function (evt) {
