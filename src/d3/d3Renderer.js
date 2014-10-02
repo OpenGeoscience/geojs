@@ -389,7 +389,7 @@ gd3.d3Renderer = function (arg) {
       classes: arg.classes,
       append: arg.append
     };
-    return m_this._render(arg.id);
+    return m_this.__render(arg.id);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -398,12 +398,12 @@ gd3.d3Renderer = function (arg) {
   *  provided then this method will update all features.
   */
   ////////////////////////////////////////////////////////////////////////////
-  this._render = function (id) {
+  this.__render = function (id) {
     var key;
     if (id === undefined) {
       for (key in m_features) {
         if (m_features.hasOwnProperty(key)) {
-          m_this._render(key);
+          m_this.__render(key);
         }
       }
       return m_this;
@@ -457,7 +457,7 @@ gd3.d3Renderer = function (arg) {
   // connect to zoom event
   this.on(geo.event.zoom, function () {
     setTransform();
-    m_this._render();
+    m_this.__render();
     m_this.layer().trigger(geo.event.d3Rescale, { scale: m_scale }, true);
   });
 
