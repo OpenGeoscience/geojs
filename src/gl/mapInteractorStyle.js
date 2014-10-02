@@ -102,10 +102,23 @@ ggl.mapInteractorStyle = function () {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Handle mouse move event
+   * Handle all mouse move events (update last mouse position)
    */
   ////////////////////////////////////////////////////////////////////////////
   this.handleMouseMove = function (event) {
+    /// Update render params
+    m_this.updateRenderParams();
+
+    /// Compute current mouse position
+    m_this._computeCurrentMousePos(event);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Handle mouse move events attached to document
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._handleMouseMove = function (event) {
     /// Local vars
     var mouseWorldPoint,
         lastWorldPos,
@@ -207,7 +220,7 @@ ggl.mapInteractorStyle = function () {
     m_lastMousePos.y = m_currentMousePos.y;
 
     $(document).on("mousemove", function (evt) {
-      m_this.handleMouseMove(evt);
+      m_this._handleMouseMove(evt);
       evt.preventDefault();
       evt.stopPropagation();
     });
@@ -462,7 +475,8 @@ ggl.mapInteractorStyle = function () {
       m_lastDirection = direction.slice(0);
     }
 
-    if ((m_lastMousePos.y - m_currentMousePos.y) < 0 || zoomOut) {
+    if (zoomOut ||
+        (zoomOut === undefined && (m_lastMousePos.y - m_currentMousePos.y) < 0)) {
       direction[0] = -direction[0];
       direction[1] = -direction[1];
       direction[2] = -direction[2];
