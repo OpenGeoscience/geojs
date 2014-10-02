@@ -344,6 +344,10 @@ ggl.vglRenderer = function (arg) {
         m_viewer.handleMouseDown(event);
       });
 
+      map.on("mousemove", function (event) {
+        m_viewer.handleMouseMove(event);
+      });
+
       map.on("keypress", function (event) {
         m_viewer.handleKeyPress(event);
       });
