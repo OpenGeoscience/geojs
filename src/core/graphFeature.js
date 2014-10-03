@@ -93,7 +93,7 @@ geo.graphFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
-    m_this.nodes([]);
+    m_this.data([]);
     m_points._exit();
     m_this.removeChild(m_points);
     s_exit();
