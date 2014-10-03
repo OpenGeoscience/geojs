@@ -2,22 +2,19 @@
  *  Including this file will load all geojs sources as individual files.
  */
 (function () {
-  var sources, srcRoot, attrs;
+  var sources, srcRoot;
 
   sources = JSON.parse(
     '<%= SOURCES_JSON %>'
   );
 
   srcRoot = '<%= SOURCES_ROOT %>';
-  attrs = JSON.parse(
-    '<%= SCRIPT_ATTRS %>'
-  );
 
   sources.forEach(function (src) {
     var script, attr = '';
 
     // Get the currently executing script tag.
-    script = document.getElementByTagName('script');
+    script = document.getElementsByTagName('script');
     script = script[script.length - 1];
 
     // Pop data cover attribute if present
