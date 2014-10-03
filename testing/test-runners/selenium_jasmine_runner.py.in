@@ -26,8 +26,8 @@ class JasmineTest(object):
 
         self.wait(function=_done)
 
-        failedElements = self.getElements('.specDetail.failed')
-        allElements = self.getElements('.specSummary')
+        failedElements = self.getElements('.specs > .failed')
+        allElements = self.getElements('.specs')
 
         if len(failedElements):
             msg = ["\n%i/%i tests failed" % (len(failedElements), len(allElements))]
