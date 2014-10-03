@@ -8,6 +8,7 @@ describe('osm projection', function () {
   it('Setup map', function () {
     // create an osm map layer
     map = geo.map({
+      'node': '#map',
       'center': [0, 0],
       'zoom': 1
     });
