@@ -25,7 +25,7 @@ module.exports = function (grunt) {
     return files;
   }
 
-  vgl = moduleFiles('vgl');
+  vgl = sources.modules.vgl;
   geo = {
     core: moduleFiles('geo.core'),
     gl: moduleFiles('geo.gl'),
@@ -33,7 +33,7 @@ module.exports = function (grunt) {
   };
 
   sourceList = Array.prototype.concat(
-    vgl.map(function (f) { return 'src/vgl/' + f; }),
+    vgl.files.map(function (f) { return 'src/vgl/' + f; }),
     geo.core,
     geo.gl,
     geo.d3
@@ -85,10 +85,11 @@ module.exports = function (grunt) {
       vgl: {
         files: [
           {
-            src: vgl,
+            src: vgl.files,
             dest: 'dist/src/vgl/',
             filter: 'isFile',
-            flatten: true
+            cwd: 'vgl/src/',
+            expand: true
           }
         ]
       }

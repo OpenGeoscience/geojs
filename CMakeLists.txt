@@ -104,6 +104,8 @@ if (COVERAGE_TESTS)
   )
   set_property(TEST "coverage-report" APPEND PROPERTY DEPENDS "coverage-reset")
 
+  # We need to put sources under the build path for ctest to pick them up
+  file(COPY "${GEOJS_DEPLOY_DIR}/src" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 else()
 
   set(SOURCES_INCLUDE <script src=/built/geo.all.js></script>)

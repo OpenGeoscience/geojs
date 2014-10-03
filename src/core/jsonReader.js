@@ -108,8 +108,10 @@ geo.jsonReader = function (arg) {
     });
   };
 
-  this._getStyle = function (spec) {
-    return spec.properties || {};
+  this._getStyle = function () {
+    // TODO: convert json style object for features
+    //return spec.properties || {};
+    return {};
   };
 
   this.read = function (file, done, progress) {
@@ -141,7 +143,14 @@ geo.jsonReader = function (arg) {
   this._addFeature = function (type, coordinates, style) {
     var _style = $.extend({}, m_style, style);
     return m_this.layer().createFeature(type)
-      .positions(coordinates)
+      .data(coordinates)
+      .position(function (d) {
+        return {
+          x: d.x(),
+          y: d.y(),
+          z: 0
+        };
+      })
       .style(_style);
   };
   

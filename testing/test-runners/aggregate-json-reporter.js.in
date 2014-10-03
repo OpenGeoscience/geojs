@@ -16,8 +16,6 @@
         $.each(cov.files, function (fname, arr) {
             var f = fname.split('/').slice(3).join('/');
 
-            if (f === 'src/core/version.js') { return ; }
-
             // delete the source key
             delete arr.source;
 

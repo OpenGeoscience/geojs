@@ -5,15 +5,17 @@ describe('osm projection', function () {
 
   var map, width = 800, height = 800;
 
-  // create an osm map layer
-  map = geo.map({
-    'center': [0, 0],
-    'zoom': 1
+  it('Setup map', function () {
+    // create an osm map layer
+    map = geo.map({
+      'node': '#map',
+      'center': [0, 0],
+      'zoom': 1
+    });
+    map.createLayer('osm');
+    map.resize(0, 0, width, height);
+    map.draw();
   });
-
-  map.createLayer('osm');
-  map.resize(0, 0, width, height);
-  map.draw();
 
   // make sure georeferencing operators are 
   // inverses of each other for several points
