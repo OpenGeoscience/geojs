@@ -16,7 +16,6 @@
         $.each(cov.files, function (fname, arr) {
             var f = fname.split('/').slice(3).join('/');
 
-            f = '@GEOJS_DEPLOY_DIR@/' + f;
             // delete the source key
             delete arr.source;
 
