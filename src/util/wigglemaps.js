@@ -258,8 +258,9 @@
             this.y = Math.floor (this.y);
             return this;
         };
-        this.zero = function () {
-            return ((this.x + this.y) === 0);
+        this.zero = function (tol) {
+            tol = tol || 0;
+            return (this.length() <= tol);
         };
         this.dot = function (v) {
             return (this.x * v.x) + (this.y * v.y);

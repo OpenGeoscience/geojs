@@ -49,4 +49,5 @@ geo.event.drawEnd = "geo_drawEnd";
 geo.event.animationPause = "geo_animationPause";
 geo.event.animationStop = "geo_animationStop";
 geo.event.animationComplete = "geo_animationComplete";
-
+geo.event.mousemove = "geo_mousemove";
+geo.event.mouseclick = "geo_mouseclick";
