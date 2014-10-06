@@ -102,6 +102,8 @@ geo.featureLayer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function () {
+    var nsEvent = geo.event.namespace("_featureLayer");
+
     if (m_this.initialized()) {
       return m_this;
     }
@@ -110,18 +112,18 @@ geo.featureLayer = function (arg) {
     s_init.call(m_this);
 
     /// Bind events to handlers
-    m_this.on(geo.event.resize, function (event) {
+    m_this.on(nsEvent.resize, function (event) {
       m_this.renderer()._resize(event.x, event.y, event.width, event.height);
       m_this._update({});
       m_this.renderer()._render();
     });
 
-    m_this.on(geo.event.pan, function (event) {
+    m_this.on(nsEvent.pan, function (event) {
       m_this._update({event: event});
       m_this.renderer()._render();
     });
 
-    m_this.on(geo.event.zoom, function (event) {
+    m_this.on(nsEvent.zoom, function (event) {
       if (m_this.map()) {
         m_this.map().zoom(event.curr_zoom);
       }

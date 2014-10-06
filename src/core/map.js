@@ -44,7 +44,8 @@ geo.map = function (arg) {
       m_intervalMap = {},
       m_pause,
       m_stop,
-      m_fileReader = null;
+      m_fileReader = null,
+      nsEvent = geo.event.namespace("_map");
 
   m_intervalMap.milliseconds = 1;
   m_intervalMap.seconds = m_intervalMap.milliseconds * 1000;
@@ -55,8 +56,8 @@ geo.map = function (arg) {
   m_intervalMap.months = m_intervalMap.weeks * 4;
   m_intervalMap.years = m_intervalMap.months * 12;
 
-  this.on(geo.event.animationPause, function () { m_pause = true; });
-  this.on(geo.event.animationStop, function () { m_stop = true; });
+  this.on(nsEvent.animationPause, function () { m_pause = true; });
+  this.on(nsEvent.animationStop, function () { m_stop = true; });
 
   toMillis = function (delta) {
     var deltaLowercase = delta.toLowerCase();

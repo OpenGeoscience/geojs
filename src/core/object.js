@@ -19,7 +19,7 @@ geo.object = function () {
   }
 
   var m_this = this,
-      m_eventHandlers = {},
+      $this = $(this),
       m_idleHandlers = [],
       m_deferredCount = 0;
 
@@ -62,15 +62,9 @@ geo.object = function () {
   //////////////////////////////////////////////////////////////////////////////
   this.on = function (event, handler) {
     if (Array.isArray(event)) {
-      event.forEach(function (e) {
-        m_this.on(e, handler);
-      });
-      return m_this;
+      event = event.join(" ");
     }
-    if (!m_eventHandlers.hasOwnProperty(event)) {
-      m_eventHandlers[event] = [];
-    }
-    m_eventHandlers[event].push(handler);
+    $this.on(event, function (evt, args) { handler(args); });
     return m_this;
   };
 
@@ -89,11 +83,7 @@ geo.object = function () {
       return m_this;
     }
 
-    if (m_eventHandlers.hasOwnProperty(event)) {
-      m_eventHandlers[event].forEach(function (handler) {
-        handler(args);
-      });
-    }
+    $this.trigger(event, args);
 
     return m_this;
   };
@@ -101,34 +91,14 @@ geo.object = function () {
   //////////////////////////////////////////////////////////////////////////////
   /**
    *  Remove handlers from an event (or an array of events).
-   *
-   *  @param arg a function or array of functions to remove from the events
-   *             or if falsey remove all handlers from the events
    */
   //////////////////////////////////////////////////////////////////////////////
-  this.off = function (event, arg) {
+  this.off = function (event) {
     if (Array.isArray(event)) {
-      event.forEach(function (e) {
-        m_this.off(e, arg);
-      });
-      return m_this;
+      event = event.join(" ");
     }
-    if (!arg) {
-      m_eventHandlers[event] = [];
-    } else if (Array.isArray(arg)) {
-      arg.forEach(function (handler) {
-        m_this.off(event, handler);
-      });
-      return m_this;
-    }
-    // What do we do if the handler is not already bound?
-    //   ignoring for now...
-    if (m_eventHandlers.hasOwnProperty(event)) {
-      m_eventHandlers[event] = m_eventHandlers[event].filter(function (f) {
-          return f !== arg;
-        }
-      );
-    }
+
+    $this.off(event);
     return m_this;
   };
 
