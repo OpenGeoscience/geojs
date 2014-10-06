@@ -36,7 +36,185 @@ geo.feature = function (arg) {
       m_data = [],
       m_dataTime = geo.timestamp(),
       m_buildTime = geo.timestamp(),
-      m_updateTime = geo.timestamp();
+      m_updateTime = geo.timestamp(),
+      m_mouseover = null,
+      m_mouseout = null,
+      m_mousemove = null,
+      m_mouseclick = null,
+      m_selectedFeatures = [];
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Private method to bind or unbind mouse handlers on the map element.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._updateMouseHandlers = function () {
+    m_this.geoOff(geo.event.mousemove, m_this._handleMousemove);
+    m_this.geoOff(geo.event.mouseclick, m_this._handleMouseclick);
+    if (m_mouseout || m_mouseover || m_mousemove) {
+      m_this.geoOn(geo.event.mousemove, m_this._handleMousemove);
+    }
+    if (m_mouseclick) {
+      m_this.geoOn(geo.event.mouseclick, m_this._handleMouseclick);
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Public methods for binding mouse events.  These accept functions with
+   * the following call signatures:
+   *
+   * function handler(data, index, mouse) {
+   *   // data - the data object of the feature
+   *   // index - the index inside the data array of the featue
+   *   // mouse - mouse information object (see src/core/mapInteractor.js)
+   *   // this - the current feature object
+   * }
+   *
+   * Call with argument null to unbind.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set the mouseover handler.  Fires once when the mouse enters the
+   * feature.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.mouseover = function (func) {
+    if (func === undefined) {
+      return m_mouseover;
+    }
+    m_mouseover = func;
+    m_this._updateMouseHandlers();
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set the mouseout handler.  Fires once when the mouse exits the
+   * feature.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.mouseout = function (func) {
+    if (func === undefined) {
+      return m_mouseout;
+    }
+    m_mouseout = func;
+    m_this._updateMouseHandlers();
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set the mousemove handler.  Fires continuously as the moves moves
+   * inside the feature.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.mousemove = function (func) {
+    if (func === undefined) {
+      return m_mousemove;
+    }
+    m_mousemove = func;
+    m_this._updateMouseHandlers();
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set the click handler.  Fires continuously as the moves moves
+   * inside the feature.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.click = function (func) {
+    if (func === undefined) {
+      return m_mouseclick;
+    }
+    m_mouseclick = func;
+    m_this._updateMouseHandlers();
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Search for features containing the given point.
+   *
+   * Returns an object:
+   * {
+   *   data: [...] // an array of data objects for matching features
+   *   index: [...] // an array of indices of the matching features
+   * }
+   *
+   * @argument {Object} coordinate
+   * @returns {Object}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Private mousemove handler
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._handleMousemove = function () {
+    var mouse = m_this.layer().map().interactor().mouse(),
+        data = m_this.data(),
+        over = m_this.pointSearch(mouse.geo),
+        newFeatures = [], oldFeatures = [];
+
+    // There are probably faster ways of doing this:
+    newFeatures = over.index.filter(function (i) {
+      return m_selectedFeatures.indexOf(i) < 0;
+    });
+    oldFeatures = m_selectedFeatures.filter(function (i) {
+      return over.index.indexOf(i) < 0;
+    });
+
+    // Fire events for mouse in first.
+    if (m_mouseover) {
+      newFeatures.forEach(function (i) {
+        m_mouseover.call(
+          m_this,
+          data[i],
+          i,
+          mouse
+        );
+      });
+    }
+
+    // Fire events for mouse out next
+    if (m_mouseout) {
+      oldFeatures.forEach(function (i) {
+        m_mouseout.call(
+          m_this,
+          data[i],
+          i,
+          mouse
+        );
+      });
+    }
+
+    // Fire events for mouse move last
+    if (m_mousemove) {
+      over.index.forEach(function (i) {
+        m_mousemove.call(
+          m_this,
+          data[i],
+          i,
+          mouse
+        );
+      });
+    }
+
+    // Replace the selected features array
+    m_selectedFeatures = over.index;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Private mouseclick handler
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._handleMouseclick = function () {
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -248,6 +426,11 @@ geo.feature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
+    m_mouseover = null;
+    m_mouseout = null;
+    m_mousemove = null;
+    m_mouseclick = null;
+    m_this._updateMouseHandlers();
   };
 
   this._init(arg);

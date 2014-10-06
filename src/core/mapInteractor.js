@@ -239,6 +239,7 @@ geo.mapInteractor = function (args) {
       x: evt.pageX - offset.left,
       y: evt.pageY - offset.top
     };
+    m_mouse.geo = m_this.map().displayToGcs(m_mouse.map);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -315,6 +316,7 @@ geo.mapInteractor = function (args) {
     m_this._getMousePosition(evt);
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
+    m_this.map().geoTrigger(geo.event.mousemove, m_this.mouse());
   };
 
   ////////////////////////////////////////////////////////////////////////////
