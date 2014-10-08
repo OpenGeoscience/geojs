@@ -27,7 +27,7 @@ geo.sceneObject = function (arg) {
   var m_this = this,
       m_parent = null,
       m_children = [],
-      s_trigger = this.trigger,
+      s_trigger = this.geoTrigger,
       s_addDeferred = this.addDeferred,
       s_onIdle = this.onIdle;
 
@@ -129,7 +129,7 @@ geo.sceneObject = function (arg) {
    *  @param {Boolean} childrenOnly if true, only propagate down the tree
    */
   //////////////////////////////////////////////////////////////////////////////
-  this.trigger = function (event, args, childrenOnly) {
+  this.geoTrigger = function (event, args, childrenOnly) {
 
     var geoArgs;
 
@@ -140,7 +140,7 @@ geo.sceneObject = function (arg) {
     // If the event was not triggered by the parent, just propagate up the tree
     if (!childrenOnly && m_parent && geoArgs._triggeredBy !== m_parent) {
       geoArgs._triggeredBy = m_this;
-      m_parent.trigger(event, args);
+      m_parent.geoTrigger(event, args);
       return m_this;
     }
 
@@ -155,7 +155,7 @@ geo.sceneObject = function (arg) {
     // trigger the event on the children
     m_children.forEach(function (child) {
       geoArgs._triggeredBy = m_this;
-      child.trigger(event, args);
+      child.geoTrigger(event, args);
     });
 
     return m_this;
