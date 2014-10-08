@@ -20,6 +20,7 @@
     "grunt-contrib-uglify": "~0.6",
     "grunt-template": "~0.2",
     "jquery-browser": "~1.10",
+    "jquery-mousewheel": "^3.1.12",
     "proj4": "~2.2"
   },
   "devDependencies": {
@@ -29,7 +30,7 @@
     "jshint": "~2.4",
     "phantomjs": "~1.9"
   },
- "scripts": {
+  "scripts": {
     "postinstall": "./node_modules/.bin/grunt"
   }
 }
