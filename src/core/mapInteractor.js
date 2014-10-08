@@ -29,6 +29,27 @@ geo.mapInteractor = function (args) {
   // copy the options object
   m_options = $.extend(true, {}, m_options);
 
+  // options supported:
+  // {
+  //   // button that must be pressed to initiate a pan on mousedown
+  //   panMoveButton: 'right' | 'left' | 'middle'
+  //
+  //   // modifier keys that must be pressed to initiate a pan on mousemove
+  //   panMoveModifiers: ['ctrl' | 'alt' | 'meta' | 'shift' ]
+  //
+  //   // button that must be pressed to initiate a zoom on mousedown
+  //   zoomMoveButton: 'right' | 'left' | 'middle'
+  //
+  //   // modifier keys that must be pressed to initiate a zoom on mousemove
+  //   zoomMoveModifiers: ['ctrl' | 'alt' | 'meta' | 'shift' ]
+  //
+  //   // modifier keys that must be pressed to trigger a pan on wheel
+  //   panWheelModifiers: [...]
+  //
+  //   // modifier keys that must be pressed to trigger a zoom on wheel
+  //   zoomWheelModifiers: [...]
+  // }
+
   // default mouse object
   m_mouse = {
     page: { // mouse position relative to the page
