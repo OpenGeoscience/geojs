@@ -26,8 +26,35 @@ geo.mapInteractor = function (args) {
       m_state,
       $node;
 
-  // copy the options object
-  m_options = $.extend(true, {}, m_options);
+  // Helper method to decide if the current button/modifiers match a set of
+  // conditions.
+  // button: 'left' | 'right' | 'middle'
+  // modifiers: [ 'alt' | 'meta' | 'ctrl' | 'shift' ]
+  function eventMatch(button, modifiers) {
+    /* jshint -W018 */
+    return (button === null || !m_mouse.buttons[button]) &&
+      !!m_mouse.modifiers.alt   === !!modifiers.alt   &&
+      !!m_mouse.modifiers.meta  === !!modifiers.meta  &&
+      !!m_mouse.modifiers.shift === !!modifiers.shift &&
+      !!m_mouse.modifiers.ctrl  === !!modifiers.ctrl;
+    /* jshint +W018 */
+  }
+
+  // copy the options object with defaults
+  m_options = $.extend(
+    true,
+    {
+      panMoveButton: 'left',
+      panMoveModifiers: {},
+      zoomMoveButton: 'right',
+      zoomMoveModifiers: {},
+      panWheelEnabled: false,
+      panWheelModifiers: {},
+      zoomWheelEnabled: true,
+      zoomWheelModifiers: {}
+    },
+    m_options
+  );
 
   // options supported:
   // {
@@ -35,19 +62,19 @@ geo.mapInteractor = function (args) {
   //   panMoveButton: 'right' | 'left' | 'middle'
   //
   //   // modifier keys that must be pressed to initiate a pan on mousemove
-  //   panMoveModifiers: ['ctrl' | 'alt' | 'meta' | 'shift' ]
+  //   panMoveModifiers: { 'ctrl' | 'alt' | 'meta' | 'shift' }
   //
   //   // button that must be pressed to initiate a zoom on mousedown
   //   zoomMoveButton: 'right' | 'left' | 'middle'
   //
   //   // modifier keys that must be pressed to initiate a zoom on mousemove
-  //   zoomMoveModifiers: ['ctrl' | 'alt' | 'meta' | 'shift' ]
+  //   zoomMoveModifiers: { 'ctrl' | 'alt' | 'meta' | 'shift' }
   //
   //   // modifier keys that must be pressed to trigger a pan on wheel
-  //   panWheelModifiers: [...]
+  //   panWheelModifiers: {...}
   //
   //   // modifier keys that must be pressed to trigger a zoom on wheel
-  //   zoomWheelModifiers: [...]
+  //   zoomWheelModifiers: {...}
   // }
 
   // default mouse object
@@ -60,6 +87,7 @@ geo.mapInteractor = function (args) {
       x: 0,
       y: 0
     },
+    geo: null, // geographic coordinates, when available
     // mouse button status
     buttons: {
       left: false,
@@ -85,14 +113,14 @@ geo.mapInteractor = function (args) {
   //
   // i.e.
   // {
-  //    'action': 'panning',  // an ongoing pan event
+  //    'action': 'pan',      // an ongoing pan event
   //    'origin': {...},      // mouse object at the start of the action
   //    'delta': {x: *, y: *} // mouse movement since action start
   //                          // not including the current event
   //  }
   //
   //  {
-  //    'action': 'zooming',  // an ongoing zoom event
+  //    'action': 'zoom',  // an ongoing zoom event
   //    ...
   //  }
   m_state = {};
@@ -152,7 +180,7 @@ geo.mapInteractor = function (args) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._getMousePosition = function (evt) {
-    var offset = $node.offset();
+    var offset = $node.offset(), map = m_this.map();
     m_mouse.page = {
       x: evt.pageX,
       y: evt.pageY
@@ -161,6 +189,14 @@ geo.mapInteractor = function (args) {
       x: evt.pageX - offset.left,
       y: evt.pageY - offset.top
     };
+
+    // Always invalidate the last lat/lng position
+    m_mouse.geo = null;
+
+    // If connected to a map do the projection
+    if (map) {
+      m_mouse.geo = map.displayToGcs(m_mouse.map);
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -169,9 +205,13 @@ geo.mapInteractor = function (args) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._getMouseButton = function (evt) {
-    m_mouse.buttons.left = evt.which === 1;
-    m_mouse.buttons.right = evt.which === 3;
-    m_mouse.buttons.middle = evt.which === 2;
+    if (evt.which === 1)
+      m_mouse.buttons.left = evt.type !== 'mouseup';
+    else if (evt.which === 3) {
+      m_mouse.buttons.right = evt.type !== 'mouseup';
+    } else if (evt.which === 2) {
+      m_mouse.buttons.middle = evt.type !== 'mouseup';
+    }
   };
   
   ////////////////////////////////////////////////////////////////////////////
@@ -192,20 +232,31 @@ geo.mapInteractor = function (args) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._handleMouseDown = function (evt) {
+    var action = null;
+
     m_this._getMousePosition(evt);
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
 
-    // store the state object
-    m_state = {
-      action: '', // get the action by configuration
-      origin: $.extend(true, {}, m_mouse),
-      delta: {x: 0, y: 0}
-    };
+    if (eventMatch(m_options.panMoveButton, m_options.panMoveModifiers)) {
+      action = 'pan';
+    } else if (eventMatch(m_options.zoomMoveButton, m_options.zoomMoveModifiers)) {
+      action = 'zoom';
+    }
 
-    // bind temporary handlers to document
-    $(document).on('mousemove.geojs', m_this._handleMouseMoveDocument);
-    $(document).on('mouseup.geojs', m_this._handleMouseUpDocument);
+    if (action) {
+      // store the state object
+      m_state = {
+        action: action,
+        origin: $.extend(true, {}, m_mouse),
+        delta: {x: 0, y: 0}
+      };
+
+      // bind temporary handlers to document
+      $(document).on('mousemove.geojs', m_this._handleMouseMoveDocument);
+      $(document).on('mouseup.geojs', m_this._handleMouseUpDocument);
+    }
+
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -214,6 +265,11 @@ geo.mapInteractor = function (args) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._handleMouseMove = function (evt) {
+    if (m_state.action) {
+      // If currently performing a navigation action, the mouse
+      // coordinates will be captured by the document handler.
+      return;
+    }
     m_this._getMousePosition(evt);
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
@@ -225,11 +281,38 @@ geo.mapInteractor = function (args) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._handleMouseMoveDocument = function (evt) {
+    var dx, dy;
     m_this._getMousePosition(evt);
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
 
+    if (!m_state.action) {
+      // This shouldn't happen
+      console.log('WARNING: Invalid state in mapInteractor.');
+      return;
+    }
+
+    // calculate the delta from the origin point to avoid
+    // accumulation of floating point errors
+    dx = m_mouse.map.x - m_state.origin.x - m_state.delta.x;
+    dy = m_mouse.map.y - m_state.origin.y - m_state.delta.y;
+    m_state.delta.x += dx;
+    m_state.delta.y += dy;
+
     // trigger pan or zoom
+    m_this.map().geoTrigger(
+      geo.events[m_state.action],
+      {
+        screenDelta: {
+          x: dx,
+          y: dy
+        },
+        eventType: geo.events[m_state.action],
+        mouseOrigin: m_state.origin,
+        totalDelta: m_state.delta,
+        mouseCurrent: m_mouse
+      }
+    );
 
     // Stop text selection in particular
     evt.preventDefault();
@@ -269,7 +352,19 @@ geo.mapInteractor = function (args) {
    * Handle mouse wheel event
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._handleMouseWheel = function (/*evt*/) {
+  this._handleMouseWheel = function (evt) {
+    m_this._getMouseModifiers(evt);
+
+    if (m_options.panWheelEnabled &&
+        eventMatch(null, m_options.panWheelModifiers)) {
+      // trigger pan event
+      // dx = evt.deltaX * evt.deltaFactor
+      // dy = evt.deltaY * evt.deltaFactor
+    } else if (m_options.zoomWheelEnabled &&
+               eventMatch(null, m_options.zoomWheelModifiers)) {
+      // trigger zoom event
+      // dy = evt.deltaY * evt.deltaFactor
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////
