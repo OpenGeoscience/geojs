@@ -141,6 +141,12 @@ geo.mapInteractor = function (args) {
 
     // store the connected element
     $node = $(m_options.map.node());
+
+    // add event handlers
+    $node.on('mousemove.geojs', m_this._handleMouseMove);
+    $node.on('mousedown.geojs', m_this._handleMouseDown);
+    $node.on('mouseup.geojs', m_this._handleMouseUp);
+    $node.on('mousewheel.geojs', m_this._handleMouseWheel);
     return m_this;
   };
   
@@ -151,8 +157,9 @@ geo.mapInteractor = function (args) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._disconnectEvents = function () {
-    if (!m_options.map) {
-      return m_this;
+    if ($node) {
+      $node.off('.geojs');
+      $node = null;
     }
     return m_this;
   };
@@ -382,6 +389,7 @@ geo.mapInteractor = function (args) {
   ////////////////////////////////////////////////////////////////////////////
   this.destroy = function () {
     m_this._disconnectEvents();
+    m_this.map(null);
   };
 
   ////////////////////////////////////////////////////////////////////////////
