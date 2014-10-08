@@ -31,23 +31,23 @@ inherit(geo.event, vgl.event);
 //////////////////////////////////////////////////////////////////////////////
 
 // TODO Add documentation
-geo.event.update = "geo.update";
-geo.event.opacityUpdate = "geo.opacityUpdate";
-geo.event.layerAdd = "geo.layerAdd";
-geo.event.layerRemove = "geo.layerRemove";
-geo.event.layerToggle = "geo.layerToggle";
-geo.event.layerSelect = "geo.layerSelect";
-geo.event.layerUnselect = "geo.layerUnselect";
-geo.event.zoom = "geo.zoom";
-geo.event.center = "geo.center";
-geo.event.pan = "geo.pan";
-geo.event.rotate = "geo.rotate";
-geo.event.resize = "geo.resize";
-geo.event.animate = "geo.animate";
-geo.event.query = "geo.query";
-geo.event.draw = "geo.draw";
-geo.event.drawEnd = "geo.drawEnd";
-geo.event.animationPause = "geo.animationPause";
-geo.event.animationStop = "geo.animationStop";
-geo.event.animationComplete = "geo.animationComplete";
+geo.event.update = "geo_update";
+geo.event.opacityUpdate = "geo_opacityUpdate";
+geo.event.layerAdd = "geo_layerAdd";
+geo.event.layerRemove = "geo_layerRemove";
+geo.event.layerToggle = "geo_layerToggle";
+geo.event.layerSelect = "geo_layerSelect";
+geo.event.layerUnselect = "geo_layerUnselect";
+geo.event.zoom = "geo_zoom";
+geo.event.center = "geo_center";
+geo.event.pan = "geo_pan";
+geo.event.rotate = "geo_rotate";
+geo.event.resize = "geo_resize";
+geo.event.animate = "geo_animate";
+geo.event.query = "geo_query";
+geo.event.draw = "geo_draw";
+geo.event.drawEnd = "geo_drawEnd";
+geo.event.animationPause = "geo_animationPause";
+geo.event.animationStop = "geo_animationStop";
+geo.event.animationComplete = "geo_animationComplete";
 
