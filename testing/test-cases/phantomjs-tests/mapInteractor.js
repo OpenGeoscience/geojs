@@ -76,10 +76,12 @@ describe('mapInteractor', function () {
   it('Test pan event propagation', function () {
     var map = mockedMap('#mapNode1');
 
-    geo.mapInteractor({
+    var interactor = geo.mapInteractor({
       map: map,
       panMoveButton: 'left',
-      zoomMoveButton: null
+      panWheelEnabled: false,
+      zoomMoveButton: null,
+      zoomWheelEnabled: false,
     });
 
     function handler(evt) {
@@ -92,13 +94,21 @@ describe('mapInteractor', function () {
     map.geoOn(geo.event.pan, handler);
 
     // initiate a pan
-    $('#mapNode1').trigger(
-        evtObj('mousedown', {pageX: 0, pageY: 0})
+    interactor.simulateEvent(
+      'mousedown',
+      {
+        map: {x: 0, y: 0},
+        button: 'left'
+      }
     );
 
     // trigger a pan
-    $('#mapNode1').trigger(
-      evtObj('mousemove', {pageX: 10, pageY: 10})
+    interactor.simulateEvent(
+      'mousemove',
+      {
+        map: {x: 10, y: 10},
+        button: 'left'
+      }
     );
 
     // check the pan event was called
@@ -113,12 +123,14 @@ describe('mapInteractor', function () {
 
     // check the pan event was called
     expect(handler.nCalls).toBe(2);
-    expect(handler.evt.screenDelta.x).toBe(-10);
-    expect(handler.evt.screenDelta.y).toBe(10);
 
     // end the pan
-    $('#mapNode1').trigger(
-      evtObj('mouseup', {pageX: 0, pageY: 20})
+    interactor.simulateEvent(
+      'mouseup',
+      {
+        map: {x: 0, y: 20},
+        button: 'left'
+      }
     );
 
     // check the pan event was NOT called
@@ -131,5 +143,46 @@ describe('mapInteractor', function () {
 
     // check the pan event was NOT called
     expect(handler.nCalls).toBe(2);
+  });
+
+  it('Test zoom event propagation', function () {
+    var map = mockedMap('#mapNode1');
+
+    var interactor = geo.mapInteractor({
+      map: map,
+      panMoveButton: null,
+      panWheelEnabled: false,
+      zoomMoveButton: null,
+      zoomWheelEnabled: true,
+    });
+
+    function handler(evt) {
+      handler.nCalls += 1;
+      handler.evt = evt;
+    }
+    handler.nCalls = 0;
+    handler.evt = {};
+
+    map.geoOn(geo.event.zoom, handler);
+
+    // initialize the mouse position
+    interactor.simulateEvent(
+      'mousemove',
+      {
+        map: {x: 20, y: 20},
+      }
+    );
+
+    // trigger a zoom
+    interactor.simulateEvent(
+      'mousewheel',
+      {
+        wheelDelta: {x: 20, y: -10},
+      }
+    );
+
+    // check the pan event was called
+    expect(handler.nCalls).toBe(1);
+    expect(handler.evt.zoomFactor).toBe(-10);
   });
 });

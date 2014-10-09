@@ -70,8 +70,14 @@ geo.mapInteractor = function (args) {
   //   // modifier keys that must be pressed to initiate a zoom on mousemove
   //   zoomMoveModifiers: { 'ctrl' | 'alt' | 'meta' | 'shift' }
   //
+  //   // enable or disable panning with the mouse wheel
+  //   panWheelEnabled: true | false
+  //
   //   // modifier keys that must be pressed to trigger a pan on wheel
   //   panWheelModifiers: {...}
+  //
+  //   // enable or disable zooming with the mouse wheel
+  //   zoomWheelEnabled: true | false
   //
   //   // modifier keys that must be pressed to trigger a zoom on wheel
   //   zoomWheelModifiers: {...}
@@ -366,12 +372,24 @@ geo.mapInteractor = function (args) {
     if (m_options.panWheelEnabled &&
         eventMatch('wheel', m_options.panWheelModifiers)) {
       // trigger pan event
-      // dx = evt.deltaX * evt.deltaFactor
-      // dy = evt.deltaY * evt.deltaFactor
+      m_this.map().geoTrigger(
+        geo.event.pan,
+        {
+          screenDelta: {
+            x: evt.deltaX * evt.deltaFactor,
+            y: evt.deltaY * evt.deltaFactor
+          }
+        }
+      );
     } else if (m_options.zoomWheelEnabled &&
                eventMatch('wheel', m_options.zoomWheelModifiers)) {
       // trigger zoom event
-      // dy = evt.deltaY * evt.deltaFactor
+      m_this.map().geoTrigger(
+        geo.event.zoom,
+        {
+          zoomFactor: evt.deltaY * evt.deltaFactor
+        }
+      );
     }
   };
 
@@ -420,6 +438,69 @@ geo.mapInteractor = function (args) {
     return $.extend(true, {}, m_state);
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Simulate a DOM mouse event on connected map.
+   *
+   * The options for creating the events are as follows, not all
+   * options are required for every event type.
+   *
+   * options = {
+   *   page: {x, y} // position on the page
+   *   map: {x, y}  // position on the map (overrides page)
+   *   button: 'left' | 'right' | 'middle'
+   *   modifiers: [ 'alt' | 'ctrl' | 'meta' | 'shift' ]
+   *   wheelDelta: {x, y}
+   * }
+   *
+   * @param {string} type Event type 'mousemove', 'mousedown', 'mouseup', ...
+   * @param {object} options
+   * @returns {mapInteractor}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.simulateEvent = function (type, options) {
+    var evt, page, offset, which;
+
+    if (!m_this.map()) {
+      return m_this;
+    }
+
+    page = options.page || {};
+
+    if (options.map) {
+      offset = $node.offset();
+      page.x = options.map.x + offset.left;
+      page.y = options.map.y + offset.top;
+    }
+
+    if (options.button === 'left') {
+      which = 1;
+    } else if (options.button === 'right') {
+      which = 3;
+    } else if (options.button === 'middle') {
+      which = 2;
+    }
+
+    options.modifiers = options.modifiers || [];
+    options.wheelDelta = options.wheelDelta || {};
+
+    evt = $.Event(
+      type,
+      {
+        pageX: page.x,
+        pageY: page.y,
+        which: which,
+        altKey: options.modifiers.indexOf('alt') >= 0,
+        ctrlKey: options.modifiers.indexOf('ctrl') >= 0,
+        metaKey: options.modifiers.indexOf('meta') >= 0,
+        shiftKey: options.modifiers.indexOf('shift') >= 0,
+        deltaX: options.wheelDelta.x,
+        deltaY: options.wheelDelta.y,
+        deltaFactor: 1
+      }
+    );
+    $node.trigger(evt);
+  };
   this._connectEvents();
   return this;
 };
