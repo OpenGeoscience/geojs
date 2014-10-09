@@ -19,21 +19,21 @@ describe('geo.object', function() {
           evtData = {},
           foo = new CallCounter(evtData);
 
-      obj.on('testevent', foo.call);
-      obj.trigger('anotherevent', evtData);
+      obj.geoOn('testevent', foo.call);
+      obj.geoTrigger('anotherevent', evtData);
       expect(foo.ncalls).toBe(0);
 
-      obj.trigger('testevent', evtData);
+      obj.geoTrigger('testevent', evtData);
       expect(foo.ncalls).toBe(1);
 
-      obj.trigger('testevent', evtData);
+      obj.geoTrigger('testevent', evtData);
       expect(foo.ncalls).toBe(2);
 
-      obj.trigger('test', evtData);
+      obj.geoTrigger('test', evtData);
       expect(foo.ncalls).toBe(2);
 
-      obj.off('testevent', foo.call);
-      obj.trigger('testevent', evtData);
+      obj.geoOff('testevent', foo.call);
+      obj.geoTrigger('testevent', evtData);
       expect(foo.ncalls).toBe(2);
     });
 
@@ -53,31 +53,31 @@ describe('geo.object', function() {
         expect(foo.handler4.ncalls).toBe(n);
       }
 
-      obj.on('event', foo.handler1.call);
-      obj.on('event', foo.handler2.call);
-      obj.on('event', foo.handler3.call);
-      obj.on('event', foo.handler4.call);
+      obj.geoOn('event', foo.handler1.call);
+      obj.geoOn('event', foo.handler2.call);
+      obj.geoOn('event', foo.handler3.call);
+      obj.geoOn('event', foo.handler4.call);
       
       checkAll(0);
 
-      obj.trigger('event', evtData);
+      obj.geoTrigger('event', evtData);
       checkAll(1);
 
-      obj.trigger('notevent', evtData);
+      obj.geoTrigger('notevent', evtData);
       checkAll(1);
 
-      obj.trigger('event', evtData);
+      obj.geoTrigger('event', evtData);
       checkAll(2);
       
-      obj.trigger('event', evtData);
+      obj.geoTrigger('event', evtData);
       checkAll(3);
       
-      obj.trigger('another event', evtData);
+      obj.geoTrigger('another event', evtData);
       checkAll(3);
 
-      obj.off('event', foo.handler1.call);
-      obj.off('event', foo.handler3.call);
-      obj.trigger('event', evtData);
+      obj.geoOff('event', foo.handler1.call);
+      obj.geoOff('event', foo.handler3.call);
+      obj.geoTrigger('event', evtData);
       expect(foo.handler1.ncalls).toBe(3);
       expect(foo.handler2.ncalls).toBe(4);
       expect(foo.handler3.ncalls).toBe(3);
@@ -116,85 +116,85 @@ describe('geo.object', function() {
         expect(foo.evt3.handler.ncalls).toBe(n3);
         expect(foo.evt4.handler.ncalls).toBe(n4);
       }
-      obj.on('event1', foo.evt1.handler.call);
-      obj.on('event3', foo.evt3.handler.call);
-      obj.on('event4', foo.evt4.handler.call);
-      obj.on('event1', foo.evt2.handler.call);
-      obj.on('event2', foo.evt2.handler.call);
-      obj.on('event4', foo.evt2.handler.call);
+      obj.geoOn('event1', foo.evt1.handler.call);
+      obj.geoOn('event3', foo.evt3.handler.call);
+      obj.geoOn('event4', foo.evt4.handler.call);
+      obj.geoOn('event1', foo.evt2.handler.call);
+      obj.geoOn('event2', foo.evt2.handler.call);
+      obj.geoOn('event4', foo.evt2.handler.call);
 
       checkAll(0, 0, 0, 0);
 
-      obj.trigger('event3', foo.evt3.data);
+      obj.geoTrigger('event3', foo.evt3.data);
       checkAll(0, 0, 1, 0);
 
-      obj.trigger('event3', foo.evt3.data);
+      obj.geoTrigger('event3', foo.evt3.data);
       checkAll(0, 0, 2, 0);
       
-      obj.trigger('event5');
+      obj.geoTrigger('event5');
       checkAll(0, 0, 2, 0);
       
-      obj.trigger('event1', foo.evt1.data);
+      obj.geoTrigger('event1', foo.evt1.data);
       checkAll(1, 1, 2, 0);
       
-      obj.trigger('event4', foo.evt4.data);
+      obj.geoTrigger('event4', foo.evt4.data);
       checkAll(1, 2, 2, 1);
       
-      obj.trigger('event4', foo.evt4.data);
+      obj.geoTrigger('event4', foo.evt4.data);
       checkAll(1, 3, 2, 2);
       
-      obj.trigger('event3', foo.evt3.data);
+      obj.geoTrigger('event3', foo.evt3.data);
       checkAll(1, 3, 3, 2);
       
-      obj.trigger('event2');
+      obj.geoTrigger('event2');
       checkAll(1, 4, 3, 2);
 
-      obj.off('event4', foo.evt2.handler.call);
-      obj.off('event1', foo.evt1.handler.call);
-      obj.off('event3', foo.evt3.handler.call);
+      obj.geoOff('event4', foo.evt2.handler.call);
+      obj.geoOff('event1', foo.evt1.handler.call);
+      obj.geoOff('event3', foo.evt3.handler.call);
 
-      obj.trigger('event3', foo.evt3.data);
+      obj.geoTrigger('event3', foo.evt3.data);
       checkAll(1, 4, 3, 2);
 
-      obj.trigger('event5');
+      obj.geoTrigger('event5');
       checkAll(1, 4, 3, 2);
       
-      obj.trigger('event1', foo.evt1.data);
+      obj.geoTrigger('event1', foo.evt1.data);
       checkAll(1, 5, 3, 2);
       
-      obj.trigger('event4', foo.evt4.data);
+      obj.geoTrigger('event4', foo.evt4.data);
       checkAll(1, 5, 3, 3);
       
-      obj.trigger('event4', foo.evt4.data);
+      obj.geoTrigger('event4', foo.evt4.data);
       checkAll(1, 5, 3, 4);
       
-      obj.trigger('event3', foo.evt3.data);
+      obj.geoTrigger('event3', foo.evt3.data);
       checkAll(1, 5, 3, 4);
       
-      obj.trigger('event2');
+      obj.geoTrigger('event2');
       checkAll(1, 6, 3, 4);
 
     });
 
-    it('Test object.on([], function) call signature', function () {
+    it('Test object.geoOn([], function) call signature', function () {
       var obj = new geo.object(),
           data = {},
           foo = new CallCounter(data);
       
-      obj.on(['event1', 'event2', 'event3'], foo.call);
+      obj.geoOn(['event1', 'event2', 'event3'], foo.call);
 
-      obj.trigger('event1', data);
+      obj.geoTrigger('event1', data);
       expect(foo.ncalls).toBe(1);
       
-      obj.trigger('event2', data);
+      obj.geoTrigger('event2', data);
       expect(foo.ncalls).toBe(2);
 
-      obj.off(['event2', 'event1'], foo.call);
+      obj.geoOff(['event2', 'event1'], foo.call);
 
-      obj.trigger('event1', data);
+      obj.geoTrigger('event1', data);
       expect(foo.ncalls).toBe(2);
       
-      obj.trigger('event3', data);
+      obj.geoTrigger('event3', data);
       expect(foo.ncalls).toBe(3);
     });
 

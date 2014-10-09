@@ -432,7 +432,7 @@ geo.layer = function (arg) {
     m_node.height(h);
 
     m_this.modified();
-    m_this.trigger(geo.event.resize,
+    m_this.geoTrigger(geo.event.resize,
       {x: x, y: y, width: m_width, height: m_height});
 
     return m_this;

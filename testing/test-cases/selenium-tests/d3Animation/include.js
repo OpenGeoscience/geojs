@@ -127,7 +127,7 @@ window.startTest = function(done) {
 
   window.animateToEnd = function (done) {
     myMap.animate();
-    myMap.on(geo.event.animationComplete, function () {
+    myMap.geoOn(geo.event.animationComplete, function () {
       myMap.onIdle(done);
     });
   };

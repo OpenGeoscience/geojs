@@ -60,10 +60,10 @@ geo.object = function () {
    *  Bind an event handler to this object
    */
   //////////////////////////////////////////////////////////////////////////////
-  this.on = function (event, handler) {
+  this.geoOn = function (event, handler) {
     if (Array.isArray(event)) {
       event.forEach(function (e) {
-        m_this.on(e, handler);
+        m_this.geoOn(e, handler);
       });
       return m_this;
     }
@@ -79,12 +79,12 @@ geo.object = function () {
    *  Trigger an event (or events) on this object and call all handlers
    */
   //////////////////////////////////////////////////////////////////////////////
-  this.trigger = function (event, args) {
+  this.geoTrigger = function (event, args) {
 
     // if we have an array of events, recall with single events
     if (Array.isArray(event)) {
       event.forEach(function (e) {
-        m_this.trigger(e, args);
+        m_this.geoTrigger(e, args);
       });
       return m_this;
     }
@@ -106,10 +106,10 @@ geo.object = function () {
    *             or if falsey remove all handlers from the events
    */
   //////////////////////////////////////////////////////////////////////////////
-  this.off = function (event, arg) {
+  this.geoOff = function (event, arg) {
     if (Array.isArray(event)) {
       event.forEach(function (e) {
-        m_this.off(e, arg);
+        m_this.geoOff(e, arg);
       });
       return m_this;
     }
@@ -117,7 +117,7 @@ geo.object = function () {
       m_eventHandlers[event] = [];
     } else if (Array.isArray(arg)) {
       arg.forEach(function (handler) {
-        m_this.off(event, handler);
+        m_this.geoOff(event, handler);
       });
       return m_this;
     }

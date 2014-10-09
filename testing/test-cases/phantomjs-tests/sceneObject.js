@@ -80,7 +80,7 @@ describe('geo.sceneObject', function() {
       child.count = function () {
         return child._handler.ncalls;
       };
-      child.on('signal', child._handler.call);
+      child.geoOn('signal', child._handler.call);
       if (root) {
         root.addChild(child);
       }
@@ -98,13 +98,13 @@ describe('geo.sceneObject', function() {
       }
       checkCounts(0);
 
-      root.trigger('signal');
+      root.geoTrigger('signal');
       checkCounts(1);
 
-      child.trigger('signal');
+      child.geoTrigger('signal');
       checkCounts(2);
 
-      grandchild.trigger('signal');
+      grandchild.geoTrigger('signal');
       checkCounts(3);
     });
 
@@ -124,12 +124,12 @@ describe('geo.sceneObject', function() {
 
       checkCounts(0);
 
-      root.trigger('signal');
+      root.geoTrigger('signal');
       checkCounts(1);
 
       n = 1;
       root.children().forEach(function (child) {
-        child.trigger('signal');
+        child.geoTrigger('signal');
         checkCounts(++n);
       });
     });
@@ -154,7 +154,7 @@ describe('geo.sceneObject', function() {
       }
 
       function triggerEach(thisRoot) {
-        thisRoot.trigger('signal');
+        thisRoot.geoTrigger('signal');
         checkCounts(root, ++nTrigger);
         thisRoot.children().forEach(function (child) {
           triggerEach(child);
@@ -176,19 +176,19 @@ describe('geo.sceneObject', function() {
       root.addChild(child1);
       child1.addChild(child2);
 
-      child2.on('signal', function () {
+      child2.geoOn('signal', function () {
         child2Called = true;
       });
-      root.trigger('signal');
+      root.geoTrigger('signal');
 
       expect(child2Called).toBe(true);
 
-      child1.on('signal', function (args) {
+      child1.geoOn('signal', function (args) {
         args.geo.stopPropagation = true;
       });
 
       child2Called = false;
-      root.trigger('signal');
+      root.geoTrigger('signal');
 
       expect(child2Called).toBe(false);
     });
@@ -202,16 +202,16 @@ describe('geo.sceneObject', function() {
       root.addChild(child1);
       child1.addChild(child2);
 
-      root.on('signal', function () {
+      root.geoOn('signal', function () {
         rootCalled = true;
       });
-      child1.on('signal', function () {
+      child1.geoOn('signal', function () {
         child1Called = true;
       });
-      child2.on('signal', function () {
+      child2.geoOn('signal', function () {
         child2Called = true;
       });
-      child1.trigger('signal', {}, true);
+      child1.geoTrigger('signal', {}, true);
 
       expect(child1Called).toBe(true);
       expect(child2Called).toBe(true);

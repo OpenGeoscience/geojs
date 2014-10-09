@@ -55,8 +55,8 @@ geo.map = function (arg) {
   m_intervalMap.months = m_intervalMap.weeks * 4;
   m_intervalMap.years = m_intervalMap.months * 12;
 
-  this.on(geo.event.animationPause, function () { m_pause = true; });
-  this.on(geo.event.animationStop, function () { m_stop = true; });
+  this.geoOn(geo.event.animationPause, function () { m_pause = true; });
+  this.geoOn(geo.event.animationStop, function () { m_stop = true; });
 
   toMillis = function (delta) {
     var deltaLowercase = delta.toLowerCase();
@@ -173,7 +173,7 @@ geo.map = function (arg) {
     }
 
     // TODO Fix this
-    //      m_this.trigger(geo.event.zoom);
+    //      m_this.geoTrigger(geo.event.zoom);
     return m_this;
   };
 
@@ -190,7 +190,7 @@ geo.map = function (arg) {
     }
     m_center = val.slice;
     // TODO Fix this
-    //      m_this.trigger(geo.event.center);
+    //      m_this.geoTrigger(geo.event.center);
     m_this.modified();
     return m_this;
   };
@@ -220,7 +220,7 @@ geo.map = function (arg) {
     m_this.addChild(newLayer);
     m_this.modified();
 
-    m_this.trigger(geo.event.layerAdd, {
+    m_this.geoTrigger(geo.event.layerAdd, {
       type: geo.event.layerAdd,
       target: m_this,
       layer: newLayer
@@ -247,7 +247,7 @@ geo.map = function (arg) {
 
       m_this.modified();
 
-      m_this.trigger(geo.event.layerRemove, {
+      m_this.geoTrigger(geo.event.layerRemove, {
         type: geo.event.layerRemove,
         target: m_this,
         layer: layer
@@ -275,7 +275,7 @@ geo.map = function (arg) {
       layer.visible(!layer.visible());
       m_this.modified();
 
-      m_this.trigger(geo.event.layerToggle, {
+      m_this.geoTrigger(geo.event.layerToggle, {
         type: geo.event.layerToggle,
         target: m_this,
         layer: layer
@@ -306,7 +306,7 @@ geo.map = function (arg) {
       layers[i]._resize(x, y, w, h);
     }
 
-    m_this.trigger(geo.event.resize, {
+    m_this.geoTrigger(geo.event.resize, {
       type: geo.event.resize,
       target: m_this,
       x: m_x,
@@ -409,7 +409,7 @@ geo.map = function (arg) {
   this.draw = function () {
     var i, layers = m_this.children();
 
-    m_this.trigger(geo.event.draw, {
+    m_this.geoTrigger(geo.event.draw, {
         type: geo.event.draw,
         target: m_this
       }
@@ -421,7 +421,7 @@ geo.map = function (arg) {
       layers[i].draw();
     }
 
-    m_this.trigger(geo.event.drawEnd, {
+    m_this.geoTrigger(geo.event.drawEnd, {
         type: geo.event.drawEnd,
         target: m_this
       }
@@ -459,12 +459,12 @@ geo.map = function (arg) {
   };
 
   this.pauseAnimation = function () {
-    m_this.trigger(geo.event.animationPause);
+    m_this.geoTrigger(geo.event.animationPause);
     return m_this;
   };
 
   this.stopAnimation = function () {
-    m_this.trigger(geo.event.animationStop);
+    m_this.geoTrigger(geo.event.animationStop);
     m_animationState.timestep = null;
     return m_this;
   };
@@ -532,7 +532,7 @@ geo.map = function (arg) {
       if (m_animationState.timestep > animationRange.end || m_stop) {
         clearInterval(id);
         m_animationState.timestep = null;
-        m_this.trigger(geo.event.animationComplete);
+        m_this.geoTrigger(geo.event.animationComplete);
       }
       else if (m_pause) {
         clearInterval(id);
@@ -563,7 +563,7 @@ geo.map = function (arg) {
         layer._update({timestep: timestep});
       });
 
-      m_this.trigger(
+      m_this.geoTrigger(
         geo.event.animate, {
         timestep: m_animationState.timestep
       });

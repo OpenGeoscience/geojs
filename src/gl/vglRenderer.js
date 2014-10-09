@@ -297,11 +297,11 @@ ggl.vglRenderer = function (arg) {
 
     /// VGL uses jquery trigger on methods
     $(m_viewer.interactorStyle()).on(geo.event.pan, function (event) {
-      m_this.trigger(geo.event.pan, event);
+      m_this.geoTrigger(geo.event.pan, event);
     });
 
     $(m_viewer.interactorStyle()).on(geo.event.zoom, function (event) {
-      m_this.trigger(geo.event.zoom, event);
+      m_this.geoTrigger(geo.event.zoom, event);
     });
 
     return m_this;
@@ -369,7 +369,7 @@ ggl.vglRenderer = function (arg) {
     m_viewer.interactorStyle().reset();
   };
 
-  this.on(geo.event.layerAdd, function (event) {
+  this.geoOn(geo.event.layerAdd, function (event) {
     if (event.layer === m_this.layer()) {
       m_this._connectMapEvents();
     }
