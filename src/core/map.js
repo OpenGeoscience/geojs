@@ -45,7 +45,7 @@ geo.map = function (arg) {
       m_pause,
       m_stop,
       m_fileReader = null,
-      m_interactor = arg.interactor || geo.mapInteractor({map: this});
+      m_interactor = null;
 
   m_intervalMap.milliseconds = 1;
   m_intervalMap.seconds = m_intervalMap.milliseconds * 1000;
@@ -761,6 +761,8 @@ geo.map = function (arg) {
     }
     return m_this;
   };
+
+  this.interactor(arg.interactor || geo.mapInteractor());
 
   return this;
 };

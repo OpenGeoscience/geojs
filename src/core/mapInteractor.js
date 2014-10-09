@@ -181,9 +181,9 @@ geo.mapInteractor = function (args) {
   this.map = function (val) {
     if (val !== undefined) {
       m_options.map = val;
+      m_this._connectEvents();
       return m_this;
     }
-    m_this._connectEvents();
     return m_options.map;
   };
 
