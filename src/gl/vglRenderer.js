@@ -377,6 +377,75 @@ ggl.vglRenderer = function (arg) {
     };
   });
 
+  this.geoOn(geo.event.zoom, function (evt) {
+    var vglRenderer = m_this.contextRenderer(),
+        camera,
+        focusPoint,
+        centerDisplay,
+        centerGeo,
+        newCenterDisplay,
+        newCenterGeo,
+        renderWindow,
+        layer = m_this.layer(),
+        delta;
+
+    // only the base layer needs to respond
+    if (layer.map().baseLayer() !== layer) {
+      return;
+    }
+
+    // skip handling if the renderer is unconnected
+    if (!vglRenderer || !vglRenderer.camera()) {
+      console.log("Zoom event triggered on unconnected vgl renderer.");
+    }
+
+    renderWindow = m_viewer.renderWindow();
+    camera = vglRenderer.camera();
+
+    delta = evt.zoomFactor / 120;
+    delta = Math.pow(1 + Math.abs(delta) / 2, delta > 0 ? -1 : 1);
+
+    camera.zoom(delta);
+    return;
+
+    focusPoint = renderWindow.focusDisplayPoint();
+
+    // Calculate the center in display coordinates
+    centerDisplay = [ m_width / 2, m_height / 2, 0 ];
+
+    // Calculate the center in world coordinates
+    centerGeo = renderWindow.displayToWorld(
+      centerDisplay[0],
+      centerDisplay[1],
+      focusPoint,
+      vglRenderer
+    );
+
+    newCenterDisplay = [
+      centerDisplay[0] + evt.screenDelta.x,
+      centerDisplay[1] + evt.screenDelta.y
+    ];
+
+    newCenterGeo = renderWindow.displayToWorld(
+      newCenterDisplay[0],
+      newCenterDisplay[1],
+      focusPoint,
+      vglRenderer
+    );
+
+    camera.pan(
+      centerGeo[0] - newCenterGeo[0],
+      centerGeo[1] - newCenterGeo[1],
+      centerGeo[2] - newCenterGeo[2]
+    );
+
+    evt.center = {
+      x: newCenterGeo[0],
+      y: newCenterGeo[1],
+      z: newCenterGeo[2]
+    };
+  });
+
   return this;
 };
 
