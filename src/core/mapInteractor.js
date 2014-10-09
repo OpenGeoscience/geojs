@@ -32,11 +32,11 @@ geo.mapInteractor = function (args) {
   // modifiers: [ 'alt' | 'meta' | 'ctrl' | 'shift' ]
   function eventMatch(button, modifiers) {
     /* jshint -W018 */
-    return (button === null || !m_mouse.buttons[button]) &&
-      !!m_mouse.modifiers.alt   === !!modifiers.alt   &&
-      !!m_mouse.modifiers.meta  === !!modifiers.meta  &&
-      !!m_mouse.modifiers.shift === !!modifiers.shift &&
-      !!m_mouse.modifiers.ctrl  === !!modifiers.ctrl;
+    return (button === 'wheel' || m_mouse.buttons[button]) &&
+      (!!m_mouse.modifiers.alt)   === (!!modifiers.alt)   &&
+      (!!m_mouse.modifiers.meta)  === (!!modifiers.meta)  &&
+      (!!m_mouse.modifiers.shift) === (!!modifiers.shift) &&
+      (!!m_mouse.modifiers.ctrl)  === (!!modifiers.ctrl);
     /* jshint +W018 */
   }
 
@@ -149,7 +149,7 @@ geo.mapInteractor = function (args) {
     $node.on('mousewheel.geojs', m_this._handleMouseWheel);
     return m_this;
   };
-  
+
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Disonnects events to a map.  If the map is not set, then this does nothing.
@@ -188,6 +188,7 @@ geo.mapInteractor = function (args) {
   ////////////////////////////////////////////////////////////////////////////
   this._getMousePosition = function (evt) {
     var offset = $node.offset(), map = m_this.map();
+
     m_mouse.page = {
       x: evt.pageX,
       y: evt.pageY
@@ -220,7 +221,7 @@ geo.mapInteractor = function (args) {
       m_mouse.buttons.middle = evt.type !== 'mouseup';
     }
   };
-  
+
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Stores the current keyboard modifiers
@@ -301,20 +302,20 @@ geo.mapInteractor = function (args) {
 
     // calculate the delta from the origin point to avoid
     // accumulation of floating point errors
-    dx = m_mouse.map.x - m_state.origin.x - m_state.delta.x;
-    dy = m_mouse.map.y - m_state.origin.y - m_state.delta.y;
+    dx = m_mouse.map.x - m_state.origin.map.x - m_state.delta.x;
+    dy = m_mouse.map.y - m_state.origin.map.y - m_state.delta.y;
     m_state.delta.x += dx;
     m_state.delta.y += dy;
 
     // trigger pan or zoom
     m_this.map().geoTrigger(
-      geo.events[m_state.action],
+      geo.event[m_state.action],
       {
         screenDelta: {
           x: dx,
           y: dy
         },
-        eventType: geo.events[m_state.action],
+        eventType: geo.event[m_state.action],
         mouseOrigin: m_state.origin,
         totalDelta: m_state.delta,
         mouseCurrent: m_mouse
@@ -324,7 +325,7 @@ geo.mapInteractor = function (args) {
     // Stop text selection in particular
     evt.preventDefault();
   };
-  
+
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Handle event when a mouse button is unpressed on the document.
@@ -363,12 +364,12 @@ geo.mapInteractor = function (args) {
     m_this._getMouseModifiers(evt);
 
     if (m_options.panWheelEnabled &&
-        eventMatch(null, m_options.panWheelModifiers)) {
+        eventMatch('wheel', m_options.panWheelModifiers)) {
       // trigger pan event
       // dx = evt.deltaX * evt.deltaFactor
       // dy = evt.deltaY * evt.deltaFactor
     } else if (m_options.zoomWheelEnabled &&
-               eventMatch(null, m_options.zoomWheelModifiers)) {
+               eventMatch('wheel', m_options.zoomWheelModifiers)) {
       // trigger zoom event
       // dy = evt.deltaY * evt.deltaFactor
     }
@@ -400,7 +401,7 @@ geo.mapInteractor = function (args) {
   this.mouse = function () {
     return $.extend(true, {}, m_mouse);
   };
-  
+
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Get current keyboard information
