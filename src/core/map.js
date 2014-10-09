@@ -44,7 +44,8 @@ geo.map = function (arg) {
       m_intervalMap = {},
       m_pause,
       m_stop,
-      m_fileReader = null;
+      m_fileReader = null,
+      m_interactor = arg.interactor || geo.mapInteractor({map: this});
 
   m_intervalMap.milliseconds = 1;
   m_intervalMap.seconds = m_intervalMap.milliseconds * 1000;
@@ -688,6 +689,10 @@ geo.map = function (arg) {
     for (i = 0; i < layers.length; i += 1) {
       layers[i]._exit();
     }
+    if (m_this.interactor()) {
+      m_this.interactor().destroy();
+      m_this.interactor(null);
+    }
   };
 
   this._init(arg);
@@ -722,6 +727,40 @@ geo.map = function (arg) {
       }
     }
   });
+
+  // Connect to core interactor events and propagate them first to the
+  // base layer, then to all other layers.
+  this.geoOn([geo.event.pan, geo.event.zoom], function (evt) {
+    var base = m_this.baseLayer();
+    if (base) {
+      base.geoTrigger(evt.eventType, evt, true);
+    }
+    m_this.children().forEach(function (child) {
+      if (child !== base) {
+        child.geoTrigger(evt.eventType, evt, true);
+      }
+    });
+    evt.geo.stopPropagation = true;
+  });
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get or set the map interactor
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.interactor = function (arg) {
+    if (arg === undefined) {
+      return m_interactor;
+    }
+    m_interactor = arg;
+
+    // this makes it possible to set a null interactor
+    // i.e. map.interactor(null);
+    if (m_interactor) {
+      m_interactor.map(m_this);
+    }
+    return m_this;
+  };
 
   return this;
 };

@@ -321,10 +321,7 @@ geo.mapInteractor = function (args) {
           x: dx,
           y: dy
         },
-        eventType: geo.event[m_state.action],
-        mouseOrigin: m_state.origin,
-        totalDelta: m_state.delta,
-        mouseCurrent: m_mouse
+        eventType: geo.event[m_state.action]
       }
     );
 
@@ -378,7 +375,8 @@ geo.mapInteractor = function (args) {
           screenDelta: {
             x: evt.deltaX * evt.deltaFactor,
             y: evt.deltaY * evt.deltaFactor
-          }
+          },
+          eventType: geo.event.pan
         }
       );
     } else if (m_options.zoomWheelEnabled &&
@@ -387,7 +385,8 @@ geo.mapInteractor = function (args) {
       m_this.map().geoTrigger(
         geo.event.zoom,
         {
-          zoomFactor: evt.deltaY * evt.deltaFactor
+          zoomFactor: evt.deltaY * evt.deltaFactor,
+          eventType: geo.event.zoom
         }
       );
     }
