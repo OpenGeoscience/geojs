@@ -41,7 +41,6 @@
         "pointFeature.js",
         "geomFeature.js",
         "planeFeature.js",
-        "mapInteractorStyle.js",
         "vglRenderer.js"
       ]
     },
