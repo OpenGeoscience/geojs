@@ -35,9 +35,8 @@ geo.map = function (arg) {
       m_height = arg.height || m_node.height(),
       m_gcs = arg.gcs === undefined ? "EPSG:4326" : arg.gcs,
       m_uigcs = arg.uigcs === undefined ? "EPSG:4326" : arg.uigcs,
-      m_center = arg.center === undefined ? [0.0, 0.0] :
-                 arg.center,
-      m_zoom = arg.zoom === undefined ? 10 : arg.zoom,
+      m_center = { x: 0, y: 0 },
+      m_zoom = arg.zoom === undefined ? 1 : arg.zoom,
       m_baseLayer = null,
       toMillis, calculateGlobalAnimationRange, cloneTimestep,
       m_animationState = {range: null, timestep: null, layers: null},
@@ -185,8 +184,11 @@ geo.map = function (arg) {
     }
 
     m_zoom = val;
-    // TODO Fix this
-    //      m_this.geoTrigger(geo.event.zoom);
+    m_this.children().forEach(function (child) {
+      if (child !== base) {
+        child.geoTrigger(geo.event.zoom, evt, true);
+      }
+    });
     return m_this;
   };
 
@@ -241,7 +243,7 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.center = function (coordinates) {
-    var newCenter;
+    var newCenter, currentCenter;
 
     if (coordinates === undefined) {
       return m_center;
@@ -249,7 +251,11 @@ geo.map = function (arg) {
 
     // get the screen coordinates of the new center
     newCenter = m_this.gcsToDisplay(coordinates);
-    m_this.pan(newCenter.x - m_center.x, newCenter.y - m_center.y);
+    currentCenter = m_this.gcsToDisplay(m_center);
+    m_this.pan({
+      x: newCenter.x - currentCenter.x,
+      y: newCenter.y - currentCenter.y
+    });
 
     m_this.modified();
     return m_this;
@@ -787,29 +793,6 @@ geo.map = function (arg) {
     }
   });
 
-  // Connect to core interactor events and propagate them first to the
-  // base layer, then to all other layers.
-  this.geoOn([geo.event.pan, geo.event.zoom], function (evt) {
-    var base = m_this.baseLayer();
-
-    if (evt.eventType === geo.event.zoom) {
-      if (evt.zoomLevel < 1 || evt.zoomLevel >= 3) {
-        evt.geo.stopPropagation = true;
-        return;
-      }
-      m_this.zoom(evt.zoomLevel);
-    }
-    if (base) {
-      base.geoTrigger(evt.eventType, evt, true);
-    }
-    m_this.children().forEach(function (child) {
-      if (child !== base) {
-        child.geoTrigger(evt.eventType, evt, true);
-      }
-    });
-    evt.geo.stopPropagation = true;
-  });
-
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Get or set the map interactor
@@ -828,7 +811,14 @@ geo.map = function (arg) {
     }
     return m_this;
   };
-
+/*
+  if (arg.center) {
+    m_this.center(arg.center);
+  }
+  if (arg.zoom) {
+    m_this.zoom(arg.zoom);
+  }
+  */
   this.interactor(arg.interactor || geo.mapInteractor());
 
   return this;

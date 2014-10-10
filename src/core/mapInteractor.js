@@ -339,7 +339,7 @@ geo.mapInteractor = function (args) {
     m_state.delta.y += dy;
 
     if (m_state.action === 'pan') {
-      m_this.map().pan({x: dx, y: dy});
+      m_this.map().pan({x: -dx, y: -dy});
     } else if (m_state.action === 'zoom') {
       m_this.map().zoom(
         m_this.map().zoom() + m_state.delta.y
