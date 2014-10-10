@@ -61,7 +61,8 @@ ggl.vglRenderer = function (arg) {
       m_contextRenderer = vgl.renderer(),
       m_width = 0,
       m_height = 0,
-      s_init = this._init;
+      s_init = this._init,
+      m_zoomLevel = 6;
 
   m_contextRenderer.setResetScene(false);
 
@@ -380,14 +381,14 @@ ggl.vglRenderer = function (arg) {
   this.geoOn(geo.event.zoom, function (evt) {
     var vglRenderer = m_this.contextRenderer(),
         camera,
-        focusPoint,
-        centerDisplay,
-        centerGeo,
-        newCenterDisplay,
-        newCenterGeo,
         renderWindow,
         layer = m_this.layer(),
-        delta;
+        delta,
+        dist,
+        center,
+        dir,
+        focusPoint,
+        position;
 
     // only the base layer needs to respond
     if (layer.map().baseLayer() !== layer) {
@@ -401,49 +402,39 @@ ggl.vglRenderer = function (arg) {
 
     renderWindow = m_viewer.renderWindow();
     camera = vglRenderer.camera();
+    focusPoint = camera.focalPoint();
+    position = camera.position();
 
-    delta = evt.zoomFactor / 120;
-    delta = Math.pow(1 + Math.abs(delta) / 2, delta > 0 ? -1 : 1);
+    delta = evt.zoomFactor / 240;
 
-    camera.zoom(delta);
-    return;
+    dist =  delta * vec3.distance(focusPoint, position);
+    if (position[2] + dist < 1 && delta < 0) {
+      evt.geo.stopPropagation = true;
+      return;
+    }
+    position = camera.position();
+    if (evt.screenPosition && false) {
+      center = renderWindow.displayToWorld(
+        evt.screenPosition.x,
+        evt.screenPosition.y,
+        focusPoint,
+        vglRenderer
+      );
+      dir = [center[0] - position[0], center[1] - position[1], center[2] - position[2]];
+      vec3.normalize(dir, dir);
+    } else {
+      dir = undefined;
+      delta = -delta;
+    }
 
-    focusPoint = renderWindow.focusDisplayPoint();
-
-    // Calculate the center in display coordinates
-    centerDisplay = [ m_width / 2, m_height / 2, 0 ];
-
-    // Calculate the center in world coordinates
-    centerGeo = renderWindow.displayToWorld(
-      centerDisplay[0],
-      centerDisplay[1],
-      focusPoint,
-      vglRenderer
-    );
-
-    newCenterDisplay = [
-      centerDisplay[0] + evt.screenDelta.x,
-      centerDisplay[1] + evt.screenDelta.y
-    ];
-
-    newCenterGeo = renderWindow.displayToWorld(
-      newCenterDisplay[0],
-      newCenterDisplay[1],
-      focusPoint,
-      vglRenderer
-    );
-
-    camera.pan(
-      centerGeo[0] - newCenterGeo[0],
-      centerGeo[1] - newCenterGeo[1],
-      centerGeo[2] - newCenterGeo[2]
-    );
-
-    evt.center = {
-      x: newCenterGeo[0],
-      y: newCenterGeo[1],
-      z: newCenterGeo[2]
-    };
+    m_zoomLevel += delta;
+    evt.curr_zoom = m_zoomLevel;
+    //camera.zoom(delta, dir);
+    camera.setPosition(position[0], position[1], 360 * Math.pow(2, -m_zoomLevel));
+    if (dir) {
+      camera.setFocalPoint(center[0], center[1], focusPoint[2]);
+    }
+    //camera.setPosition(position[0], position[1], position[2] + dist);
   });
 
   return this;

@@ -372,6 +372,10 @@ geo.mapInteractor = function (args) {
       m_this.map().geoTrigger(
         geo.event.pan,
         {
+          screenPosition: {
+            x: m_mouse.map.x,
+            y: m_mouse.map.y
+          },
           screenDelta: {
             x: evt.deltaX * evt.deltaFactor,
             y: evt.deltaY * evt.deltaFactor
@@ -385,6 +389,10 @@ geo.mapInteractor = function (args) {
       m_this.map().geoTrigger(
         geo.event.zoom,
         {
+          screenPosition: {
+            x: m_mouse.map.x,
+            y: m_mouse.map.y
+          },
           zoomFactor: evt.deltaY * evt.deltaFactor,
           eventType: geo.event.zoom
         }
