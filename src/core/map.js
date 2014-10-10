@@ -163,16 +163,28 @@ geo.map = function (arg) {
    * @returns {Number|geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.zoom = function (val) {
-    if (val === undefined) {
+  this.zoom = function (val, direction) {
+    var base, evt;
+    if (val === undefined || val === m_zoom) {
       return m_zoom;
     }
 
-    if (val !== m_zoom) {
-      m_zoom = val;
-      m_this.modified();
+    base = m_this.baseLayer();
+
+    evt = {
+      geo: {},
+      zoomLevel: val,
+      eventType: geo.event.zoom
+    };
+    if (base) {
+      base.geoTrigger(geo.event.zoom, evt, true);
     }
 
+    if (evt.geo.preventDefault) {
+      return;
+    }
+
+    m_zoom = val;
     // TODO Fix this
     //      m_this.geoTrigger(geo.event.zoom);
     return m_this;
@@ -180,18 +192,65 @@ geo.map = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get/Set center of the map
+   * Pan the map by (x: dx, y: dy) pixels.
    *
-   * @returns {Array|geo.map}
+   * @param {Object} delta
+   * @returns {geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.center = function (val) {
-    if (val === undefined) {
+  this.pan = function (delta) {
+    var base = m_this.baseLayer(),
+        evt;
+
+    evt = {
+      geo: {},
+      screenDelta: delta,
+      eventType: geo.event.pan
+    };
+    // first pan the base layer
+    if (base) {
+      base.geoTrigger(geo.event.pan, evt, true);
+    }
+
+    // If the base renderer says the pan is invalid, then cancel the action.
+    if (evt.geo.preventDefault) {
+      return;
+    }
+
+    m_center = m_this.displayToGcs({
+      x: m_width / 2,
+      y: m_height / 2
+    });
+    m_this.children().forEach(function (child) {
+      if (child !== base) {
+        child.geoTrigger(geo.event.pan, evt, true);
+      }
+    });
+
+    m_this.modified();
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set center of the map to the given geographic coordinates, or get the
+   * current center.  Uses bare objects {x: 0, y: 0}.
+   *
+   * @param {Object} coordinates
+   * @returns {Object|geo.map}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.center = function (coordinates) {
+    var newCenter;
+
+    if (coordinates === undefined) {
       return m_center;
     }
-    m_center = val.slice;
-    // TODO Fix this
-    //      m_this.geoTrigger(geo.event.center);
+
+    // get the screen coordinates of the new center
+    newCenter = m_this.gcsToDisplay(coordinates);
+    m_this.pan(newCenter.x - m_center.x, newCenter.y - m_center.y);
+
     m_this.modified();
     return m_this;
   };

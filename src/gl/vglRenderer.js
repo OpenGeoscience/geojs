@@ -383,7 +383,6 @@ ggl.vglRenderer = function (arg) {
         renderWindow,
         layer = m_this.layer(),
         delta,
-        dist,
         center,
         dir,
         focusPoint,
@@ -404,14 +403,6 @@ ggl.vglRenderer = function (arg) {
     focusPoint = camera.focalPoint();
     position = camera.position();
 
-    delta = evt.zoomFactor / 240;
-
-    dist =  delta * vec3.distance(focusPoint, position);
-    if (position[2] + dist < 1 && delta < 0) {
-      evt.geo.stopPropagation = true;
-      return;
-    }
-    position = camera.position();
     if (evt.screenPosition && false) {
       center = renderWindow.displayToWorld(
         evt.screenPosition.x,
@@ -430,7 +421,6 @@ ggl.vglRenderer = function (arg) {
     if (dir) {
       camera.setFocalPoint(center[0], center[1], focusPoint[2]);
     }
-    //camera.setPosition(position[0], position[1], position[2] + dist);
   });
 
   return this;

@@ -52,7 +52,6 @@ geo.mapInteractor = function (args) {
     if (m_wait) {
       return false;
     }
-    console.log('waiting');
     m_wait = true;
     window.setTimeout(function () {
       m_wait = false;
@@ -123,7 +122,6 @@ geo.mapInteractor = function (args) {
       x: 0,
       y: 0
     },
-    geo: null, // geographic coordinates, when available
     // mouse button status
     buttons: {
       left: false,
@@ -223,7 +221,7 @@ geo.mapInteractor = function (args) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._getMousePosition = function (evt) {
-    var offset = $node.offset(), map = m_this.map();
+    var offset = $node.offset();
 
     m_mouse.page = {
       x: evt.pageX,
@@ -233,14 +231,6 @@ geo.mapInteractor = function (args) {
       x: evt.pageX - offset.left,
       y: evt.pageY - offset.top
     };
-
-    // Always invalidate the last lat/lng position
-    m_mouse.geo = null;
-
-    // If connected to a map do the projection
-    if (map) {
-      m_mouse.geo = map.displayToGcs(m_mouse.map);
-    }
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -348,19 +338,15 @@ geo.mapInteractor = function (args) {
     m_state.delta.x += dx;
     m_state.delta.y += dy;
 
-    // trigger pan or zoom
-    m_this.map().geoTrigger(
-      geo.event[m_state.action],
-      {
-        screenDelta: {
-          x: dx,
-          y: dy
-        },
-        eventType: geo.event[m_state.action]
-      }
-    );
+    if (m_state.action === 'pan') {
+      m_this.map().pan({x: dx, y: dy});
+    } else if (m_state.action === 'zoom') {
+      m_this.map().zoom(
+        m_this.map().zoom() + m_state.delta.y
+      );
+    }
 
-    // Stop text selection in particular
+    // Prevent default to stop text selection in particular
     evt.preventDefault();
   };
 
@@ -421,38 +407,19 @@ geo.mapInteractor = function (args) {
 
     if (m_options.panWheelEnabled &&
         eventMatch('wheel', m_options.panWheelModifiers)) {
-      // trigger pan event
-      m_this.map().geoTrigger(
-        geo.event.pan,
-        {
-          screenPosition: {
-            x: m_mouse.map.x,
-            y: m_mouse.map.y
-          },
-          screenDelta: {
-            x: evt.deltaX,
-            y: evt.deltaY
-          },
-          eventType: geo.event.pan
-        }
-      );
+
+      m_this.map().pan({
+        x: evt.deltaX,
+        y: evt.deltaY
+      });
+
     } else if (m_options.zoomWheelEnabled &&
                eventMatch('wheel', m_options.zoomWheelModifiers)) {
 
       zoomFactor = evt.deltaY;
 
-      // trigger zoom event
-      m_this.map().geoTrigger(
-        geo.event.zoom,
-        {
-          screenPosition: {
-            x: m_mouse.map.x,
-            y: m_mouse.map.y
-          },
-          zoomLevel: m_this.map().zoom() + zoomFactor,
-          zoomFactor: zoomFactor,
-          eventType: geo.event.zoom
-        }
+      m_this.map().zoom(
+        m_this.map().zoom() + zoomFactor
       );
     }
   };

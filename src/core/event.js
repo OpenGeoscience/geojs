@@ -39,7 +39,6 @@ geo.event.layerToggle = "geo_layerToggle";
 geo.event.layerSelect = "geo_layerSelect";
 geo.event.layerUnselect = "geo_layerUnselect";
 geo.event.zoom = "geo_zoom";
-geo.event.center = "geo_center";
 geo.event.pan = "geo_pan";
 geo.event.rotate = "geo_rotate";
 geo.event.resize = "geo_resize";
