@@ -452,16 +452,16 @@ gd3.d3Renderer = function (arg) {
   };
 
   // connect to pan event
-  this.geoOn(geo.event.pan, setTransform);
+  this.layer().geoOn(geo.event.pan, setTransform);
 
   // connect to zoom event
-  this.geoOn(geo.event.zoom, function () {
+  this.layer().geoOn(geo.event.zoom, function () {
     setTransform();
     m_this.__render();
     m_this.layer().geoTrigger(geo.event.d3Rescale, { scale: m_scale }, true);
   });
 
-  this.geoOn(geo.event.resize, function (event) {
+  this.layer().geoOn(geo.event.resize, function (event) {
     m_this._resize(event.x, event.y, event.width, event.height);
   });
 

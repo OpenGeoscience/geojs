@@ -176,7 +176,7 @@ geo.map = function (arg) {
       eventType: geo.event.zoom
     };
     if (base) {
-      base.geoTrigger(geo.event.zoom, evt, true);
+      base.renderer().geoTrigger(geo.event.zoom, evt, true);
     }
 
     if (evt.geo.preventDefault) {
@@ -185,9 +185,7 @@ geo.map = function (arg) {
 
     m_zoom = val;
     m_this.children().forEach(function (child) {
-      if (child !== base) {
-        child.geoTrigger(geo.event.zoom, evt, true);
-      }
+      child.geoTrigger(geo.event.zoom, evt, true);
     });
     return m_this;
   };
@@ -211,7 +209,7 @@ geo.map = function (arg) {
     };
     // first pan the base layer
     if (base) {
-      base.geoTrigger(geo.event.pan, evt, true);
+      base.renderer().geoTrigger(geo.event.pan, evt, true);
     }
 
     // If the base renderer says the pan is invalid, then cancel the action.
@@ -224,9 +222,7 @@ geo.map = function (arg) {
       y: m_height / 2
     });
     m_this.children().forEach(function (child) {
-      if (child !== base) {
-        child.geoTrigger(geo.event.pan, evt, true);
-      }
+      child.geoTrigger(geo.event.pan, evt, true);
     });
 
     m_this.modified();
@@ -466,10 +462,14 @@ geo.map = function (arg) {
       if (arg.center) {
         if (Array.isArray(arg.center)) {
           arg.center = {
-            x: arg.center[0],
-            y: arg.center[1]
+            x: arg.center[1],
+            y: arg.center[0]
           };
         }
+
+        // This assumes that the base layer is initially centered at
+        // (0, 0).  May want to add an explicit call to the base layer
+        // to set a given center.
         m_this.pan(arg.center);
       }
       if (arg.zoom !== undefined) {
@@ -826,14 +826,7 @@ geo.map = function (arg) {
     }
     return m_this;
   };
-/*
-  if (arg.center) {
-    m_this.center(arg.center);
-  }
-  if (arg.zoom) {
-    m_this.zoom(arg.zoom);
-  }
-  */
+
   this.interactor(arg.interactor || geo.mapInteractor());
 
   return this;
