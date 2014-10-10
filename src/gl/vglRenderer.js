@@ -61,8 +61,7 @@ ggl.vglRenderer = function (arg) {
       m_contextRenderer = vgl.renderer(),
       m_width = 0,
       m_height = 0,
-      s_init = this._init,
-      m_zoomLevel = 6;
+      s_init = this._init;
 
   m_contextRenderer.setResetScene(false);
 
@@ -427,10 +426,7 @@ ggl.vglRenderer = function (arg) {
       delta = -delta;
     }
 
-    m_zoomLevel += delta;
-    evt.curr_zoom = m_zoomLevel;
-    //camera.zoom(delta, dir);
-    camera.setPosition(position[0], position[1], 360 * Math.pow(2, -m_zoomLevel));
+    camera.setPosition(position[0], position[1], 360 * Math.pow(2, -evt.zoomLevel));
     if (dir) {
       camera.setFocalPoint(center[0], center[1], focusPoint[2]);
     }

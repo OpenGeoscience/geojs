@@ -24,7 +24,10 @@ geo.mapInteractor = function (args) {
       m_mouse,
       m_keyboard,
       m_state,
-      $node;
+      $node,
+      m_wheelQueue = { x: 0, y: 0 },
+      m_throttleTime = 10,
+      m_wait = false;
 
   // Helper method to decide if the current button/modifiers match a set of
   // conditions.
@@ -40,6 +43,27 @@ geo.mapInteractor = function (args) {
     /* jshint +W018 */
   }
 
+  // For throttling mouse events this is a function that
+  // returns true if no actions are in progress and starts
+  // a timer to block events for the next `m_throttleTime` ms.
+  // If it returns false, the caller should ignore the
+  // event.
+  function doRespond() {
+    if (m_wait) {
+      return false;
+    }
+    console.log('waiting');
+    m_wait = true;
+    window.setTimeout(function () {
+      m_wait = false;
+      m_wheelQueue = {
+        x: 0,
+        y: 0
+      };
+    }, m_throttleTime);
+    return true;
+  }
+
   // copy the options object with defaults
   m_options = $.extend(
     true,
@@ -51,7 +75,9 @@ geo.mapInteractor = function (args) {
       panWheelEnabled: false,
       panWheelModifiers: {},
       zoomWheelEnabled: true,
-      zoomWheelModifiers: {}
+      zoomWheelModifiers: {},
+      wheelScaleX: 1,
+      wheelScaleY: 1
     },
     m_options
   );
@@ -81,6 +107,10 @@ geo.mapInteractor = function (args) {
   //
   //   // modifier keys that must be pressed to trigger a zoom on wheel
   //   zoomWheelModifiers: {...}
+  //
+  //   // wheel scale factor to change the magnitude of wheel interactions
+  //   wheelScaleX: 1
+  //   wheelScaleY: 1
   // }
 
   // default mouse object
@@ -306,6 +336,11 @@ geo.mapInteractor = function (args) {
       return;
     }
 
+    // when throttled, do nothing
+    if (!doRespond()) {
+      return;
+    }
+
     // calculate the delta from the origin point to avoid
     // accumulation of floating point errors
     dx = m_mouse.map.x - m_state.origin.map.x - m_state.delta.x;
@@ -364,7 +399,25 @@ geo.mapInteractor = function (args) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._handleMouseWheel = function (evt) {
+    var zoomFactor;
+
     m_this._getMouseModifiers(evt);
+    evt.deltaX = evt.deltaX * m_options.wheelScaleX * evt.deltaFactor / 120;
+    evt.deltaY = evt.deltaY * m_options.wheelScaleY * evt.deltaFactor / 120;
+
+    if (!doRespond()) {
+      m_wheelQueue.x += evt.deltaX;
+      m_wheelQueue.y += evt.deltaY;
+      return;
+    }
+
+    evt.deltaX += m_wheelQueue.x;
+    evt.deltaY += m_wheelQueue.y;
+
+    m_wheelQueue = {
+      x: 0,
+      y: 0
+    };
 
     if (m_options.panWheelEnabled &&
         eventMatch('wheel', m_options.panWheelModifiers)) {
@@ -377,14 +430,17 @@ geo.mapInteractor = function (args) {
             y: m_mouse.map.y
           },
           screenDelta: {
-            x: evt.deltaX * evt.deltaFactor,
-            y: evt.deltaY * evt.deltaFactor
+            x: evt.deltaX,
+            y: evt.deltaY
           },
           eventType: geo.event.pan
         }
       );
     } else if (m_options.zoomWheelEnabled &&
                eventMatch('wheel', m_options.zoomWheelModifiers)) {
+
+      zoomFactor = evt.deltaY;
+
       // trigger zoom event
       m_this.map().geoTrigger(
         geo.event.zoom,
@@ -393,7 +449,8 @@ geo.mapInteractor = function (args) {
             x: m_mouse.map.x,
             y: m_mouse.map.y
           },
-          zoomFactor: evt.deltaY * evt.deltaFactor,
+          zoomLevel: m_this.map().zoom() + zoomFactor,
+          zoomFactor: zoomFactor,
           eventType: geo.event.zoom
         }
       );

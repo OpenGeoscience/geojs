@@ -732,6 +732,14 @@ geo.map = function (arg) {
   // base layer, then to all other layers.
   this.geoOn([geo.event.pan, geo.event.zoom], function (evt) {
     var base = m_this.baseLayer();
+
+    if (evt.eventType === geo.event.zoom) {
+      if (evt.zoomLevel < 1 || evt.zoomLevel >= 3) {
+        evt.geo.stopPropagation = true;
+        return;
+      }
+      m_this.zoom(evt.zoomLevel);
+    }
     if (base) {
       base.geoTrigger(evt.eventType, evt, true);
     }
