@@ -387,9 +387,9 @@ ggl.vglRenderer = function (arg) {
     );
 
     camera.pan(
-      newCenterGeo[0] - centerGeo[0],
-      newCenterGeo[1] - centerGeo[1],
-      newCenterGeo[2] - centerGeo[2]
+      centerGeo[0] - newCenterGeo[0],
+      centerGeo[1] - newCenterGeo[1],
+      centerGeo[2] - newCenterGeo[2]
     );
 
     evt.center = {

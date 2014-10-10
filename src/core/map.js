@@ -251,8 +251,8 @@ geo.map = function (arg) {
 
     // call the pan method
     m_this.pan({
-      x: newCenter.x - currentCenter.x,
-      y: newCenter.y - currentCenter.y
+      x: currentCenter.x - newCenter.x,
+      y: currentCenter.y - newCenter.y
     });
 
     return m_this;

@@ -27,7 +27,8 @@ geo.mapInteractor = function (args) {
       $node,
       m_wheelQueue = { x: 0, y: 0 },
       m_throttleTime = 10,
-      m_wait = false;
+      m_wait = false,
+      m_disableThrottle = true;
 
   // Helper method to decide if the current button/modifiers match a set of
   // conditions.
@@ -49,6 +50,9 @@ geo.mapInteractor = function (args) {
   // If it returns false, the caller should ignore the
   // event.
   function doRespond() {
+    if (m_disableThrottle) {
+      return true;
+    }
     if (m_wait) {
       return false;
     }
@@ -339,7 +343,7 @@ geo.mapInteractor = function (args) {
     m_state.delta.y += dy;
 
     if (m_state.action === 'pan') {
-      m_this.map().pan({x: -dx, y: -dy});
+      m_this.map().pan({x: dx, y: dy});
     } else if (m_state.action === 'zoom') {
       m_this.map().zoom(
         m_this.map().zoom() + m_state.delta.y
