@@ -252,12 +252,13 @@ geo.map = function (arg) {
     // get the screen coordinates of the new center
     newCenter = m_this.gcsToDisplay(coordinates);
     currentCenter = m_this.gcsToDisplay(m_center);
+
+    // call the pan method
     m_this.pan({
       x: newCenter.x - currentCenter.x,
       y: newCenter.y - currentCenter.y
     });
 
-    m_this.modified();
     return m_this;
   };
 
@@ -461,6 +462,20 @@ geo.map = function (arg) {
 
       // Set the layer as the reference layer
       m_baseLayer.referenceLayer(true);
+
+      if (arg.center) {
+        if (Array.isArray(arg.center)) {
+          arg.center = {
+            x: arg.center[0],
+            y: arg.center[1]
+          };
+        }
+        m_this.pan(arg.center);
+      }
+      if (arg.zoom !== undefined) {
+        m_zoom = null;
+        m_this.zoom(arg.zoom);
+      }
 
       return m_this;
     }
