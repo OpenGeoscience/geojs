@@ -59,6 +59,15 @@ geo.map = function (arg) {
   this.geoOn(geo.event.animationPause, function () { m_pause = true; });
   this.geoOn(geo.event.animationStop, function () { m_stop = true; });
 
+  if (arg.center) {
+    if (Array.isArray(arg.center)) {
+      arg.center = {
+        x: arg.center[1],
+        y: arg.center[0]
+      };
+    }
+  }
+
   toMillis = function (delta) {
     var deltaLowercase = delta.toLowerCase();
     return m_intervalMap[deltaLowercase];
@@ -289,6 +298,11 @@ geo.map = function (arg) {
     m_this.addChild(newLayer);
     m_this.modified();
 
+    // TODO: need a better way to set the initial coordinates of a layer
+    if (!newLayer.referenceLayer()) {
+      m_this.center(m_this.center());
+    }
+
     m_this.geoTrigger(geo.event.layerAdd, {
       type: geo.event.layerAdd,
       target: m_this,
@@ -466,17 +480,10 @@ geo.map = function (arg) {
       m_baseLayer.referenceLayer(true);
 
       if (arg.center) {
-        if (Array.isArray(arg.center)) {
-          arg.center = {
-            x: arg.center[1],
-            y: arg.center[0]
-          };
-        }
-
         // This assumes that the base layer is initially centered at
         // (0, 0).  May want to add an explicit call to the base layer
         // to set a given center.
-        m_this.pan(arg.center);
+        m_this.center(arg.center);
       }
       if (arg.zoom !== undefined) {
         m_zoom = null;

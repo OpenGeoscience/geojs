@@ -315,7 +315,7 @@ ggl.vglRenderer = function (arg) {
   this._exit = function () {
   };
 
-  function updateRenderer() {
+  this._updateRendererCamera = function () {
     var vglRenderer = m_this.contextRenderer(),
         renderWindow = m_viewer.renderWindow(),
         camera = vglRenderer.camera(),
@@ -335,7 +335,7 @@ ggl.vglRenderer = function (arg) {
         renderer.render();
       }
     });
-  }
+  };
 
   // connect to interactor events
   this.geoOn(geo.event.pan, function (evt) {
@@ -398,7 +398,7 @@ ggl.vglRenderer = function (arg) {
       z: newCenterGeo[2]
     };
 
-    updateRenderer();
+    m_this._updateRendererCamera();
   });
 
   this.geoOn(geo.event.zoom, function (evt) {
@@ -449,7 +449,7 @@ ggl.vglRenderer = function (arg) {
       camera.setFocalPoint(position[0], position[1], focusPoint[2]);
     }
 
-    updateRenderer();
+    m_this._updateRendererCamera();
   });
 
   return this;
