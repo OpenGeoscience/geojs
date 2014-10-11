@@ -126,7 +126,11 @@ geo.jsonReader = function (arg) {
             coordinates = m_this._getCoordinates(feature),
             style = m_this._getStyle(feature);
         if (type) {
-          allFeatures.push(m_this._addFeature(type, coordinates, style));
+          if (type === 'line') {
+            allFeatures.push(m_this._addFeature(type, [coordinates], style));
+          } else {
+            allFeatures.push(m_this._addFeature(type, coordinates, style));
+          }
         } else {
           console.log('unsupported feature type: ' + feature.geometry.type);
         }
