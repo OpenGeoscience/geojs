@@ -1,27 +1,9 @@
-
 window.startTest = function(done) {
-    var mapOptions = {node: '#map',
-                      zoom : 4,
-                      center : [21.0, 78.0]},
-      myMap = geo.map(mapOptions),
-      layer = myMap.createLayer('osm', {m_baseUrl: '/data/tiles/'});
+  'use strict';
 
-    /// Resize the canvas to fill browser window dynamically
-    window.addEventListener('resize', resizeCanvas, false);
+  var options = { center: { x: 78, y: 21 } };
+  var myMap = window.geoTests.createOsmMap(options);
 
-
-    function updateAndDraw(width, height) {
-      myMap.resize(0, 0, width, height);
-      myMap.draw();
-    }
-
-    function resizeCanvas() {
-      $('#map').width('100%');
-      $('#map').height('100%');
-      updateAndDraw($('#map').width(), $('#map').height());
-    }
-    resizeCanvas();
-
-    // give the tiles a chance to load
-    myMap.onIdle(done);
+  // give the tiles a chance to load
+  myMap.onIdle(done);
 };

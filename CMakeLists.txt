@@ -83,6 +83,10 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/blanket_server.p
                ${CMAKE_CURRENT_BINARY_DIR}/test/blanket_server.py
                COPYONLY
 )
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/selenium-test-utils.js
+               ${GEOJS_DEPLOY_DIR}/test/lib/selenium-test-utils.js
+               COPYONLY
+)
 
 if (COVERAGE_TESTS)
   set(SOURCES_INCLUDE <script src=/built/geo.all.dev.js data-cover></script>)

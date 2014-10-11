@@ -8,7 +8,7 @@ from selenium_test import FirefoxTest, ChromeTest,\
 
 class glPointsBase(object):
     testCase = ('glPoints',)
-    testRevision = 3
+    testRevision = 4
 
     def loadPage(self):
         self.resizeWindow(640, 480)

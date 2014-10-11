@@ -33,12 +33,12 @@ class osmBase(object):
 
 class FirefoxOSM(osmBase, FirefoxTest):
     testCase = osmBase.testCase + ('firefox',)
-    testRevision = 6
+    testRevision = 7
 
 
 class ChromeOSM(osmBase, ChromeTest):
     testCase = osmBase.testCase + ('chrome',)
-    testRevision = 7
+    testRevision = 8
 
 
 if __name__ == '__main__':

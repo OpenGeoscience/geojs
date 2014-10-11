@@ -5,10 +5,12 @@
 @BLANKET_INCLUDE@
 @SOURCES_INCLUDE@
     <script src=/test/lib/aggregate-json-reporter.js></script>
+    <script src=/test/lib/selenium-test-utils.js></script>
     <style>
-        html, body{
+        html, body, #map{
             margin: 0;
             height: 100%;
+            width: 100%;
         }
     </style>
     <style>

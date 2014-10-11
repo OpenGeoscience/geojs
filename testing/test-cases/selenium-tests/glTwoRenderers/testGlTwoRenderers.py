@@ -8,10 +8,10 @@ from selenium_test import FirefoxTest, ChromeTest,\
 
 class glTwoRenderersBase(object):
     testCase = ('glTwoRenderers',)
-    testRevision = 1
+    testRevision = 2
 
     def loadPage(self):
-        self.resizeWindow(1600, 1400)
+        self.resizeWindow(1600, 900)
         self.loadURL('glTwoRenderers/index.html')
         self.wait()
 
@@ -22,12 +22,10 @@ class glTwoRenderersBase(object):
         self.screenshotTest(testName)
 
 
-@unittest.skip("Initial zoom currently not working")
 class FirefoxOSM(glTwoRenderersBase, FirefoxTest):
     testCase = glTwoRenderersBase.testCase + ('firefox',)
 
 
-@unittest.skip("Initial zoom currently not working")
 class ChromeOSM(glTwoRenderersBase, ChromeTest):
     testCase = glTwoRenderersBase.testCase + ('chrome',)
 
