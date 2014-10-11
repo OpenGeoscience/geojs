@@ -23,7 +23,7 @@ geo.jsonReader = function (arg) {
   var m_this = this, m_style = arg.style || {};
 
   geo.fileReader.call(this, arg);
-  
+
   this.canRead = function (file) {
     if (file instanceof File) {
       return (file.type === 'application/json' || file.name.match(/\.json$/));
@@ -50,14 +50,28 @@ geo.jsonReader = function (arg) {
         done(false);
       }
 
+      // We have two possibilities here:
+      // 1) fileString is a JSON string or is
+      // a URL.
       try {
         object = JSON.parse(fileString);
+         done(object);
       } catch (e) {
-        done(false);
+        if (!object) {
+          $.ajax({
+            type : 'GET',
+            url : fileString,
+            dataType : 'text'
+          }).done(function(data) {
+            object = JSON.parse(data);
+            done(object);
+          }).fail(function() {
+            done(false);
+          })
+        }
       }
-
-      done(object);
     }
+
     if (file instanceof File) {
       m_this._getString(file, onDone, progress);
     } else if (typeof file === 'string') {
@@ -157,7 +171,7 @@ geo.jsonReader = function (arg) {
       })
       .style(_style);
   };
-  
+
 };
 
 inherit(geo.jsonReader, geo.fileReader);
