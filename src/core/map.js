@@ -44,7 +44,8 @@ geo.map = function (arg) {
       m_pause,
       m_stop,
       m_fileReader = null,
-      m_interactor = null;
+      m_interactor = null,
+      m_validZoomRange = { min: 0, max: 16 };
 
   m_intervalMap.milliseconds = 1;
   m_intervalMap.seconds = m_intervalMap.milliseconds * 1000;
@@ -164,8 +165,12 @@ geo.map = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.zoom = function (val, direction) {
     var base, evt;
-    if (val === undefined || val === m_zoom) {
+    if (val === undefined) {
       return m_zoom;
+    }
+
+    if (val === m_zoom || val > m_validZoomRange.max || val < m_validZoomRange.min) {
+      return m_this;
     }
 
     base = m_this.baseLayer();
@@ -824,6 +829,23 @@ geo.map = function (arg) {
     if (m_interactor) {
       m_interactor.map(m_this);
     }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get or set the min/max zoom range.
+   *
+   * @param {Object} arg {min: minimumzoom, max: maximumzom}
+   * @returns {Object|geo.map}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.zoomRange = function (arg) {
+    if (arg === undefined) {
+      return $.extend({}, m_validZoomRange);
+    }
+    m_validZoomRange.min = arg.min;
+    m_validZoomRange.max = arg.max;
     return m_this;
   };
 

@@ -41,10 +41,15 @@ geo.osmLayer = function (arg) {
     s_init = this._init,
     m_pendingNewTilesStat = {},
     s_update = this._update,
-    m_updateDefer = null;
+    m_updateDefer = null,
+    m_zoomLevelDelta = 2.5;
 
   if (arg && arg.baseUrl !== undefined) {
     m_baseUrl = arg.baseUrl;
+  }
+
+  if (arg && arg.zoomDelta !== undefined) {
+    m_zoomLevelDelta = arg.zoomDelta;
   }
 
   if (arg && arg.imageFormat !== undefined) {
@@ -59,12 +64,7 @@ geo.osmLayer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   function getModifiedMapZoom() {
-    var zoom = Math.floor(m_this.map().zoom());
-    if (zoom < 18) {
-      return (zoom + 3);
-    } else {
-      return zoom;
-    }
+    return Math.floor(m_this.map().zoom() + m_zoomLevelDelta);
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -618,7 +618,11 @@ geo.osmLayer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._init = function () {
     s_init.call(m_this);
-    this.gcs("EPSG:3857");
+    m_this.gcs("EPSG:3857");
+    m_this.map().zoomRange({
+      min: 0,
+      max: 18 - m_zoomLevelDelta
+    });
     return m_this;
   };
 
