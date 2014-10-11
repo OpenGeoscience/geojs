@@ -8,7 +8,7 @@ from selenium_test import FirefoxTest, ChromeTest,\
 
 class glTwoRenderersBase(object):
     testCase = ('glTwoRenderers',)
-    testRevision = 2
+    testRevision = 1
 
     def loadPage(self):
         self.resizeWindow(1600, 900)
@@ -31,5 +31,4 @@ class ChromeOSM(glTwoRenderersBase, ChromeTest):
 
 
 if __name__ == '__main__':
-    import unittest
     unittest.main()
