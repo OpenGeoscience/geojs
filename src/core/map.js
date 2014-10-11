@@ -178,6 +178,7 @@ geo.map = function (arg) {
     evt = {
       geo: {},
       zoomLevel: val,
+      screenPosition: direction,
       eventType: geo.event.zoom
     };
     if (base) {

@@ -393,7 +393,7 @@ geo.mapInteractor = function (args) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._handleMouseWheel = function (evt) {
-    var zoomFactor;
+    var zoomFactor, direction;
 
     m_this._getMouseModifiers(evt);
     evt.deltaX = evt.deltaX * m_options.wheelScaleX * evt.deltaFactor / 120;
@@ -425,9 +425,11 @@ geo.mapInteractor = function (args) {
                eventMatch('wheel', m_options.zoomWheelModifiers)) {
 
       zoomFactor = evt.deltaY;
+      direction = m_mouse.map;
 
       m_this.map().zoom(
-        m_this.map().zoom() + zoomFactor
+        m_this.map().zoom() + zoomFactor,
+        direction
       );
     }
   };

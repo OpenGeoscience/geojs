@@ -410,7 +410,8 @@ ggl.vglRenderer = function (arg) {
         center,
         dir,
         focusPoint,
-        position;
+        position,
+        newZ;
 
     // only the base layer needs to respond
     if (layer.map().baseLayer() !== layer) {
@@ -426,8 +427,9 @@ ggl.vglRenderer = function (arg) {
     camera = vglRenderer.camera();
     focusPoint = camera.focalPoint();
     position = camera.position();
+    newZ = 360 * Math.pow(2, -evt.zoomLevel);
 
-    if (evt.screenPosition && false) {
+    if (evt.screenPosition) {
       center = renderWindow.displayToWorld(
         evt.screenPosition.x,
         evt.screenPosition.y,
@@ -435,7 +437,8 @@ ggl.vglRenderer = function (arg) {
         vglRenderer
       );
       dir = [center[0] - position[0], center[1] - position[1], center[2] - position[2]];
-      vec3.normalize(dir, dir);
+      position[0] += dir[0] * (1 - newZ / position[2]);
+      position[1] += dir[1] * (1 - newZ / position[2]);
     } else {
       dir = undefined;
       delta = -delta;
@@ -443,7 +446,7 @@ ggl.vglRenderer = function (arg) {
 
     camera.setPosition(position[0], position[1], 360 * Math.pow(2, -evt.zoomLevel));
     if (dir) {
-      camera.setFocalPoint(center[0], center[1], focusPoint[2]);
+      camera.setFocalPoint(position[0], position[1], focusPoint[2]);
     }
 
     updateRenderer();
