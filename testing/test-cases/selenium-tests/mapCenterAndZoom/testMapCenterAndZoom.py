@@ -5,7 +5,7 @@ from selenium_test import FirefoxTest, ChromeTest,\
 
 
 class mapCenter(object):
-    testCase = ('mapCenter',)
+    testCase = ('mapCenterAndZoom',)
 
     def loadPage(self):
         self.resizeWindow(640, 480)
@@ -53,12 +53,12 @@ window.gjsmap.onIdle(function () {
 
 class FirefoxMapCenter(mapCenter, FirefoxTest):
     testCase = mapCenter.testCase + ('firefox',)
-    testRevision = 4
+    testRevision = 1
 
 
 class ChromeMapCenter(mapCenter, ChromeTest):
     testCase = mapCenter.testCase + ('chrome',)
-    testRevision = 5
+    testRevision = 1
 
 
 if __name__ == '__main__':
