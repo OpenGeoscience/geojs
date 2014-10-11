@@ -173,7 +173,7 @@ describe('mapInteractor', function () {
     expect(map.info.pan).toBe(3);
   });
 
-  it('Test zoom event propagation', function () {
+  it('Test zoom wheel event propagation', function () {
     var map = mockedMap('#mapNode1');
 
     var interactor = geo.mapInteractor({
@@ -200,9 +200,57 @@ describe('mapInteractor', function () {
       }
     );
 
-    // check the pan event was called
+    // check the zoom event was called
     expect(map.info.zoom).toBe(1);
+    expect(map.info.zoomArgs).toBe(2 - 10 / 120);
+  });
 
-    // need to check the zoom level
+  it('Test zoom right click event propagation', function () {
+    var map = mockedMap('#mapNode1'), z;
+
+    var interactor = geo.mapInteractor({
+      map: map,
+      panMoveButton: null,
+      panWheelEnabled: false,
+      zoomMoveButton: 'right',
+      zoomWheelEnabled: false,
+    });
+
+    // initialize the zoom
+    interactor.simulateEvent(
+      'mousedown',
+      {
+        map: {x: 20, y: 20},
+        button: 'right'
+      }
+    );
+
+    // create a zoom event
+    interactor.simulateEvent(
+      'mousemove',
+      {
+        map: {x: 20, y: 10},
+        button: 'right'
+      }
+    );
+
+    // check the zoom event was called
+    expect(map.info.zoom).toBe(1);
+    expect(map.info.zoomArgs).toBe(2 + 10 / 120);
+
+    z = map.zoom();
+
+    // create a zoom event
+    interactor.simulateEvent(
+      'mousemove',
+      {
+        map: {x: 30, y: 25},
+        button: 'right'
+      }
+    );
+
+    // check the zoom event was called
+    expect(map.info.zoom).toBe(2);
+    expect(map.info.zoomArgs).toBe(z - 15 / 120);
   });
 });

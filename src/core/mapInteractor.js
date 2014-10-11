@@ -80,7 +80,8 @@ geo.mapInteractor = function (args) {
       zoomWheelEnabled: true,
       zoomWheelModifiers: {},
       wheelScaleX: 1,
-      wheelScaleY: 1
+      wheelScaleY: 1,
+      zoomScale: 1
     },
     m_options
   );
@@ -114,6 +115,9 @@ geo.mapInteractor = function (args) {
   //   // wheel scale factor to change the magnitude of wheel interactions
   //   wheelScaleX: 1
   //   wheelScaleY: 1
+  //
+  //   // zoom scale factor to change the magnitude of zoom move interactions
+  //   zoomScale: 1
   // }
 
   // default mouse object
@@ -346,7 +350,7 @@ geo.mapInteractor = function (args) {
       m_this.map().pan({x: dx, y: dy});
     } else if (m_state.action === 'zoom') {
       m_this.map().zoom(
-        m_this.map().zoom() + m_state.delta.y
+        m_this.map().zoom() - dy * m_options.zoomScale / 120
       );
     }
 
