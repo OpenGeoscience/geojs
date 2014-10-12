@@ -59,7 +59,8 @@ geo.lineFeature = function (arg) {
       {},
       {
         "strokeWidth": function () { return 1.0; },
-        "strokeColor": function () { return {r: 1.0, g: 1.0, b: 1.0}; },
+        // Default to gold color for lines
+        "strokeColor": function () { return {r: 1.0, g: 0.8431372549, b: 0.0}; },
         "strokeStyle": function () { return "solid"; },
         "strokeOpacity": function () { return 1.0; }
       },
