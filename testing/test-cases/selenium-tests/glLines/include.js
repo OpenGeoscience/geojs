@@ -70,7 +70,7 @@ window.startTest = function (done) {
   var layer = myMap.createLayer('feature');
   var style = {
     'strokeColor': function () { return { r: 1, g: 0, b: 0 }; },
-    'strokeWidth': function () { return 0.1; }
+    'strokeWidth': function () { return 10.0; }
   };
   layer.createFeature('line')
       .data([citieslatlon])

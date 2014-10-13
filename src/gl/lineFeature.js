@@ -43,6 +43,7 @@ ggl.lineFeature = function (arg) {
 
         "uniform mat4 modelViewMatrix;",
         "uniform mat4 projectionMatrix;",
+        "uniform float pixelWidth;",
 
         "varying vec3 strokeColorVar;",
         "varying float strokeWidthVar;",
@@ -50,21 +51,33 @@ ggl.lineFeature = function (arg) {
 
         "void main(void)",
         "{",
-        "  vec4 glPos = modelViewMatrix * vec4(pos.xyz, 1);",
+        "  vec4 worldPos = projectionMatrix * modelViewMatrix * vec4(pos.xyz, 1);",
+        "  if (worldPos.w != 0.0) {",
+        "    worldPos = worldPos/worldPos.w;",
+        "  }",
+        "  vec4 worldNext = projectionMatrix * modelViewMatrix * vec4(next.xyz, 1);",
+        "  if (worldNext.w != 0.0) {",
+        "    worldNext = worldNext/worldNext.w;",
+        "  }",
+        "  vec4 worldPrev = projectionMatrix* modelViewMatrix * vec4(prev.xyz, 1);",
+        "  if (worldPrev.w != 0.0) {",
+        "    worldPrev = worldPrev/worldPrev.w;",
+        "  }",
         "  strokeColorVar = strokeColor;",
         "  strokeWidthVar = strokeWidth;",
         "  strokeOpacityVar = strokeOpacity;",
-        "  vec2 deltaNext = next.xy - pos.xy;",
-        "  vec2 deltaPrev = pos.xy - prev.xy;",
+        "  vec2 deltaNext = worldNext.xy - worldPos.xy;",
+        "  vec2 deltaPrev = worldPos.xy - worldPrev.xy;",
         "  float angleNext = atan(deltaNext.y, deltaNext.x);",
         "  float anglePrev = atan(deltaPrev.y, deltaPrev.x);",
         "  if (deltaPrev.xy == vec2(0, 0)) anglePrev = angleNext;",
         "  if (deltaNext.xy == vec2(0, 0)) angleNext = anglePrev;",
         "  float angle = (anglePrev + angleNext) / 2.0;",
-        "  float distance = offset * (strokeWidth) / cos(anglePrev - angle);",
-        "  glPos.x += distance * sin(angle);",
-        "  glPos.y -= distance * cos(angle);",
-        "  gl_Position = projectionMatrix * glPos;",
+        "  float distance = (offset * strokeWidth * pixelWidth) / cos(anglePrev - angle);",
+        "  worldPos.x += distance * sin(angle);",
+        "  worldPos.y -= distance * cos(angle);",
+        "  vec4  p = worldPos;",
+        "  gl_Position = p;",
         "}"
       ].join("\n"),
       shader = new vgl.shader(gl.VERTEX_SHADER);
@@ -124,6 +137,8 @@ ggl.lineFeature = function (arg) {
         strokeOpacityAttr = vgl.vertexAttribute("strokeOpacity"),
         modelViewUniform = new vgl.modelViewUniform("modelViewMatrix"),
         projectionUniform = new vgl.projectionUniform("projectionMatrix"),
+        pixelWidthUniform = new vgl.floatUniform("pixelWidth",
+                              2.0 / m_this.renderer().width()),
         geom = vgl.geometryData(),
         mapper = vgl.mapper();
 
@@ -195,6 +210,7 @@ ggl.lineFeature = function (arg) {
 
     prog.addUniform(modelViewUniform);
     prog.addUniform(projectionUniform);
+    prog.addUniform(pixelWidthUniform);
 
     prog.addShader(fragmentShader);
     prog.addShader(vertexShader);
