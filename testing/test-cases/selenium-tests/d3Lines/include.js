@@ -1,91 +1,34 @@
-window.startTest = function (done) {
+window.startTest = function(done) {
   'use strict';
 
-  $('#map').width('100%');
-  $('#map').height('100%');
+  var mapOptions = { center : { y: 40, x: -105 } };
 
-  var mapOptions = {
-    node: '#map',
-    zoom : 2,
-    center : [40, -105]
-  };
+  var myMap = window.geoTests.createOsmMap(mapOptions);
 
-  var myMap = geo.map(mapOptions),
-      table = [],
-      citieslatlon = [],
-      width, height;
+  function draw(citieslatlon) {
+    var layer = myMap.createLayer('feature', {'renderer': 'd3Renderer'});
 
-  function resizeCanvas() {
-    width = $('#map').width();
-    height = $('#map').height();
-    updateAndDraw(width, height);
-  }
-
-  // Resize the canvas to fill browser window dynamically
-  window.addEventListener('resize', resizeCanvas, false);
-
-  function updateAndDraw(width, height) {
-    myMap.resize(0, 0, width, height);
-    myMap.draw();
-  }
-
-  resizeCanvas();
-  table = [
-    [ 'NEW YORK', 'NY', '40.757929', '-73.985506'],
-    ['LOS ANGELES', 'CA', '34.052187', '-118.243425'],
-    ['DENVER', 'CO', '39.755092', '-104.988123'],
-    ['PORTLAND', 'OR', '45.523104', '-122.670132'],
-    ['HONOLULU', 'HI', '21.291982', '-157.821856'],
-    ['ANCHORAGE', 'AK', '61.216583', '-149.899597'],
-    ['DALLAS', 'TX', '32.781078', '-96.797111'],
-    ['SALT LAKE CITY', 'UT', '40.771592', '-111.888189'],
-    ['MIAMI', 'FL', '25.774252', '-80.190262'],
-    ['PHOENIX', 'AZ', '33.448263', '-112.073821'],
-    ['CHICAGO', 'IL', '41.879535', '-87.624333'],
-    ['WASHINGTON', 'DC', '38.892091', '-77.024055'],
-    ['SEATTLE', 'WA', '47.620716', '-122.347533'],
-    ['NEW ORLEANS', 'LA', '30.042487', '-90.025126'],
-    ['SAN FRANCISCO', 'CA', '37.775196', '-122.419204'],
-    ['ATLANTA', 'GA', '33.754487', '-84.389663']
-  ];
-
-  if (table.length > 0) {
-    var i;
-    for (i = 0; i < table.length; i += 1) {
-      if (table[i][2] !== undefined) {
-        var lat = table[i][2];
-        lat = lat.replace(/(^\s+|\s+$|^\"|\"$)/g, '');
-        lat = parseFloat(lat);
-
-        var lon = table[i][3];
-        lon = lon.replace(/(^\s+|\s+$|^\"|\"$)/g, '');
-        lon = parseFloat(lon);
-        citieslatlon.push(geo.latlng(lat, lon));
-      }
-    }
-  }
-
-  citieslatlon.forEach(function (c, i) {
-      c.children = [
-        citieslatlon[(i + 1) % citieslatlon.length],
-        citieslatlon[(i + 2) % citieslatlon.length]
-      ];
-    }
-  );
-
-  // Load image to be used for drawing dots
-  myMap.createLayer('osm', {m_baseUrl: '/data/tiles/'});
-  var layer = myMap.createLayer('feature', {'renderer' : 'd3Renderer'});
-  var style = {
-    'strokeColor': function () { return { r: 1, g: 0, b: 0 }; },
-    'strokeWidth': function () { return 10; }
-  };
-  layer.createFeature('line')
+    citieslatlon.sort(function (d1, d2) {
+      return d1.lon < d2.lon ? 1 : -1;
+    });
+    layer.createFeature('line')
       .data([citieslatlon])
-      .style(style)
-      .position(function (d) { return d; });
+      .style('strokeColor', function () {
+        return {r: 1.0, g: 0.0, b: 0.0};
+      })
+      .style('strokeOpacity', function () {
+          return 0.5;
+        }
+      )
+      .style('strokeWidth', function () {
+        return 4;
+      })
+      .position(function (d) { return { x: d.lon, y: d.lat }; });
 
-  myMap.draw();
-  
-  myMap.onIdle(done);
+    myMap.draw();
+
+    myMap.onIdle(done);
+  }
+
+  window.geoTests.loadCitiesData(draw, 100);
 };

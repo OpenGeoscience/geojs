@@ -10,7 +10,7 @@ describe('osm projection', function () {
     map = geo.map({
       'node': '#map',
       'center': [0, 0],
-      'zoom': 1
+      'zoom': 3
     });
     map.createLayer('osm');
     map.resize(0, 0, width, height);

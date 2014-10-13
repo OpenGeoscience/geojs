@@ -395,7 +395,6 @@ geo.layer = function (arg) {
       m_renderer = geo.createRenderer(m_rendererName, m_this);
       m_canvas = m_renderer.canvas();
     }
-    m_this.addChild(m_renderer);
 
     m_initialized = true;
 

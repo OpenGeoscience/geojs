@@ -137,6 +137,11 @@ geo.sceneObject = function (arg) {
     geoArgs = args.geo || {};
     args.geo = geoArgs;
 
+    // stop propagation if requested by the handler
+    if (geoArgs.stopPropagation) {
+      return m_this;
+    }
+
     // If the event was not triggered by the parent, just propagate up the tree
     if (!childrenOnly && m_parent && geoArgs._triggeredBy !== m_parent) {
       geoArgs._triggeredBy = m_this;
