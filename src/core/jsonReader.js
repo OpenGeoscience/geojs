@@ -55,19 +55,19 @@ geo.jsonReader = function (arg) {
       // a URL.
       try {
         object = JSON.parse(fileString);
-         done(object);
+        done(object);
       } catch (e) {
         if (!object) {
           $.ajax({
             type : 'GET',
             url : fileString,
             dataType : 'text'
-          }).done(function(data) {
+          }).done(function (data) {
             object = JSON.parse(data);
             done(object);
-          }).fail(function() {
+          }).fail(function () {
             done(false);
-          })
+          });
         }
       }
     }
