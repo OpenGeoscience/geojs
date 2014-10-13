@@ -13,7 +13,10 @@
  * vlgRenderer and therefore layers.
  */
 //////////////////////////////////////////////////////////////////////////////
-ggl._vglViewerInstance = null;
+ggl._vglViewerInstances = {
+  viewers: [],
+  maps: []
+};
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -24,21 +27,55 @@ ggl._vglViewerInstance = null;
  */
 //////////////////////////////////////////////////////////////////////////////
 
-ggl.vglViewerInstance = function () {
+ggl.vglViewerInstance = function (map) {
   "use strict";
-  var canvas;
 
-  if (ggl._vglViewerInstance === null) {
-    canvas = $(document.createElement("canvas"));
+  var mapIdx,
+      maps = ggl._vglViewerInstances.maps,
+      viewers = ggl._vglViewerInstances.viewers;
+
+  function makeViewer() {
+    var canvas = $(document.createElement("canvas"));
     canvas.attr("class", ".webgl-canvas");
-    ggl._vglViewerInstance = vgl.viewer(canvas.get(0));
-    ggl._vglViewerInstance.renderWindow().removeRenderer(
-      ggl._vglViewerInstance.renderWindow().activeRenderer());
-    ggl._vglViewerInstance.setInteractorStyle(ggl.mapInteractorStyle());
-    ggl._vglViewerInstance.init();
+    var viewer = vgl.viewer(canvas.get(0));
+    viewer.renderWindow().removeRenderer(
+    viewer.renderWindow().activeRenderer());
+    viewer.setInteractorStyle(ggl.mapInteractorStyle());
+    viewer.init();
+    return viewer;
   }
 
-  return ggl._vglViewerInstance;
+  for (mapIdx = 0; mapIdx < maps.length; mapIdx += 1) {
+    if (map === maps[mapIdx]) {
+      break;
+    }
+  }
+
+  if (map !== maps[mapIdx]) {
+    maps[mapIdx] = map;
+    viewers[mapIdx] = makeViewer();
+  }
+
+  return viewers[mapIdx];
+};
+
+ggl.vglViewerInstance.deleteCache = function (viewer) {
+  "use strict";
+
+  var mapIdx,
+      maps = ggl._vglViewerInstances.maps,
+      viewers = ggl._vglViewerInstances.viewers;
+
+  for (mapIdx = 0; mapIdx < viewers.length; mapIdx += 1) {
+    if (viewer === viewers[mapIdx]) {
+      break;
+    }
+  }
+
+  if (viewer === viewers[mapIdx]) {
+    maps.splice(mapIdx, 1);
+    viewers.splice(mapIdx, 1);
+  }
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -58,7 +95,7 @@ ggl.vglRenderer = function (arg) {
   ggl.renderer.call(this, arg);
 
   var m_this = this,
-      m_viewer = ggl.vglViewerInstance(),
+      m_viewer = ggl.vglViewerInstance(this.layer().map()),
       m_contextRenderer = vgl.renderer(),
       m_width = 0,
       m_height = 0,
@@ -406,6 +443,7 @@ ggl.vglRenderer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
+    ggl.vglViewerInstance.deleteCache(m_viewer);
   };
 
   return this;
