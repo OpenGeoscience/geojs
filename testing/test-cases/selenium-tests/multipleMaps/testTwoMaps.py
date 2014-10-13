@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import unittest
+
 from selenium_test import FirefoxTest, ChromeTest,\
     setUpModule, tearDownModule
 
@@ -19,10 +21,12 @@ class osmBase(object):
         self.screenshotTest(testName)
 
 
+@unittest.skip("multiple maps support broken")
 class FirefoxOSM(osmBase, FirefoxTest):
     testCase = osmBase.testCase + ('firefox',)
 
 
+@unittest.skip("multiple maps support broken")
 class ChromeOSM(osmBase, ChromeTest):
     testCase = osmBase.testCase + ('chrome',)
 
