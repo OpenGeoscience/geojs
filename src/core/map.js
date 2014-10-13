@@ -45,7 +45,8 @@ geo.map = function (arg) {
       m_stop,
       m_fileReader = null,
       m_interactor = null,
-      m_validZoomRange = { min: 0, max: 16 };
+      m_validZoomRange = { min: 0, max: 16 },
+      m_transition = null;
 
   m_intervalMap.milliseconds = 1;
   m_intervalMap.seconds = m_intervalMap.milliseconds * 1000;
@@ -854,6 +855,84 @@ geo.map = function (arg) {
     }
     m_validZoomRange.min = arg.min;
     m_validZoomRange.max = arg.max;
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Start an animated zoom/pan.
+   *
+   * opts = {
+   *   center: { x: ... , y: ... } // the new center
+   *   zoom: ... // the new zoom level
+   *   duration: ... // the duration (in ms) of the transition
+   *   ease: ... // an easing function [0, 1] -> [0, 1]
+   * }
+   *
+   * @param {Object} opts
+   * @returns {geo.map}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.transition = function (opts) {
+    if (m_transition) {
+      console.log("Cannot start a transition until the current transition is finished");
+      return m_this;
+    }
+    var defaultOpts = {
+      center: m_this.center(),
+      zoom: m_this.zoom(),
+      duration: 1000,
+      ease: function (t) {
+        return t;
+      }
+    };
+
+    $.extend(defaultOpts, opts);
+
+    m_transition = {
+      start: {
+        center: m_this.center(),
+        zoom: m_this.zoom()
+      },
+      end: {
+        center: defaultOpts.center,
+        zoom: defaultOpts.zoom
+      },
+      ease: defaultOpts.ease
+    };
+
+    var deltaCenterX = m_transition.end.center.x - m_transition.start.center.x;
+    var deltaCenterY = m_transition.end.center.y - m_transition.start.center.y;
+    var deltaZoom = m_transition.end.zoom - m_transition.start.zoom;
+
+    function anim(time) {
+      if (!m_transition.start.time) {
+        m_transition.start.time = time;
+        m_transition.end.time = time + defaultOpts.duration;
+      }
+      if (time >= m_transition.end.time) {
+        m_this.center(m_transition.end.center);
+        m_this.zoom(m_transition.end.zoom);
+        m_transition = null;
+        return;
+      }
+
+      var z = m_transition.ease(
+        (time - m_transition.start.time) / defaultOpts.duration
+      );
+
+      m_this.center({
+        x: m_transition.start.center.x + z * deltaCenterX,
+        y: m_transition.start.center.y + z * deltaCenterY
+      });
+      m_this.zoom(
+        m_transition.start.zoom + z * deltaZoom
+      );
+
+      window.requestAnimationFrame(anim);
+    }
+
+    window.requestAnimationFrame(anim);
     return m_this;
   };
 
