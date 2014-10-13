@@ -69,8 +69,8 @@ window.startTest = function (done) {
   myMap.createLayer('osm', {m_baseUrl: '/data/tiles/'});
   var layer = myMap.createLayer('feature');
   var style = {
-    'strokeColor': function () { return { r: 1, g: 0, b: 0 }; },
-    'strokeWidth': function () { return 10.0; }
+    'strokeColor': function () { return { r: 1, g: 0.6, b: 0 }; },
+    'strokeWidth': function () { return 1.0; }
   };
   layer.createFeature('line')
       .data([citieslatlon])
