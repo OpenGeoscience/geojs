@@ -376,6 +376,10 @@ geo.mapInteractor = function (args) {
         delta: {x: 0, y: 0}
       };
 
+      if (action === 'select') {
+        m_this.map().geoTrigger(geo.event.brushstart, m_this._getSelection());
+      }
+
       // bind temporary handlers to document
       $(document).on('mousemove.geojs', m_this._handleMouseMoveDocument);
       $(document).on('mouseup.geojs', m_this._handleMouseUpDocument);
@@ -438,7 +442,7 @@ geo.mapInteractor = function (args) {
     } else if (m_state.action === 'select') {
       // Get the bounds of the current selection
       selectionObj = m_this._getSelection();
-      m_this.map().geoTrigger(geo.event.selecting, selectionObj);
+      m_this.map().geoTrigger(geo.event.brush, selectionObj);
     }
 
     // Prevent default to stop text selection in particular
@@ -463,7 +467,7 @@ geo.mapInteractor = function (args) {
 
     if (m_state.action === 'select') {
       selectionObj = m_this._getSelection();
-      m_this.map().geoTrigger(geo.event.selected, selectionObj);
+      m_this.map().geoTrigger(geo.event.brushend, selectionObj);
     }
 
     // reset the interactor state

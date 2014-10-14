@@ -51,3 +51,6 @@ geo.event.animationStop = "geo_animationStop";
 geo.event.animationComplete = "geo_animationComplete";
 geo.event.mousemove = "geo_mousemove";
 geo.event.mouseclick = "geo_mouseclick";
+geo.event.brush = "geo_brush"; // mousemove during a selection
+geo.event.brushend = "geo_brushend"; // mouseup after a selection has been made
+geo.event.brushstart = "geo_brushstart"; // mousedown starting a selection

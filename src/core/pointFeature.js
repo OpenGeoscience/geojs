@@ -152,6 +152,27 @@ geo.pointFeature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Returns an array of datum indices that are contained in the given box.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.boxSearch = function (lowerLeft, upperRight) {
+    var pos = m_this.position(),
+        idx = [];
+    m_this.data().forEach(function (d, i) {
+      var p = pos(d);
+      if (p.x >= lowerLeft.x &&
+          p.x <= upperRight.x &&
+          p.y >= lowerLeft.y &&
+          p.y <= upperRight.y
+      ) {
+        idx.push(i);
+      }
+    });
+    return idx;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Overloaded data method that updates the internal range tree on write.
    */
   ////////////////////////////////////////////////////////////////////////////
