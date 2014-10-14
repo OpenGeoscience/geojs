@@ -147,22 +147,43 @@ ggl.lineFeature = function (arg) {
     strokeColorFunc = m_this.style().strokeColor;
     strokeOpacityFunc = m_this.style().strokeOpacity;
 
+    var itemIndex = 0;
+    var lineItemIndex = 0;
+    var lineItem = null;
+    var p = null;
+    var prev = [];
+    var next = [];
+    var current = [];
+
     m_this.data().forEach(function (item) {
-      if (item instanceof Array) {
-        item.forEach(function (lineItem) {
-          var p = posFunc(lineItem);
-          if (p instanceof geo.latlng) {
-            position.push([p.x(), p.y(), 0.0]);
-          } else {
-            position.push([p.x, p.y, p.z || 0.0]);
-          }
-          strokeWidth.push(strokeWidthFunc(lineItem));
-          console.log(strokeWidthFunc(lineItem));
-          var sc = strokeColorFunc(lineItem);
-          strokeColor.push([sc.r, sc.g, sc.b]);
-          strokeOpacity.push(strokeOpacityFunc(lineItem));
-        });
-      }
+      lineItem = m_this.line()(item, itemIndex);
+      lineItem.forEach(function (lineItemData) {
+        p = posFunc(item, itemIndex, lineItemData, lineItemIndex);
+        console.log("p is ", p);
+        if (p instanceof geo.latlng) {
+          position.push([p.x(), p.y(), 0.0]);
+        } else {
+          position.push([p.x, p.y, p.z || 0.0]);
+        }
+        strokeWidth.push(strokeWidthFunc(item, itemIndex, lineItemData, lineItemIndex));
+        var sc = strokeColorFunc(item, itemIndex, lineItemData, lineItemIndex);
+        strokeColor.push([sc.r, sc.g, sc.b]);
+        strokeOpacity.push(strokeOpacityFunc(item, itemIndex, lineItemData, lineItemIndex));
+
+        // Assuming that we will have atleast two points
+        if (lineItemIndex == 0) {
+          prev.push(position[position.length - 1]);
+        }
+        else {
+          prev.push(position[lineItemIndex - 1]);
+          next.push(position[lineItemIndex]);
+        }
+
+        lineItemIndex++;
+      });
+      next.push(position[--lineItemIndex]);
+      lineItemIndex = 0
+      itemIndex++;
     });
 
     position = geo.transform.transformCoordinates(
@@ -178,23 +199,11 @@ ggl.lineFeature = function (arg) {
     buffers.create("strokeColor", 3);
     buffers.create("strokeOpacity", 1);
 
-    var prev = [];
-    var next = [];
-    var current = [];
-
     numPts = position.length;
 
-    prev.push(position[0]);
-    next.push(position[1]);
-    for (i = 1; i < (numPts - 1); ++i) {
-      prev.push(position[i - 1]);
-      next.push(position[i + 1]);
-    }
-    prev.push(position[numPts - 2]);
-    next.push(position[numPts - 1]);
-
     // TODO: Right now this is ugly but we will fix it.
-    prog.addVertexAttribute(posAttr, vgl.vertexAttributeKeys.Position);
+    prog.addVertexAttribute(posAttr,
+      vgl.vertexAttributeKeys.Position);
     prog.addVertexAttribute(stokeWidthAttr,
       vgl.vertexAttributeKeysIndexed.One);
     prog.addVertexAttribute(strokeColorAttr,
@@ -238,6 +247,7 @@ ggl.lineFeature = function (arg) {
         buffers.write ('offset', [offset], currentIndex, 1);
         buffers.write ('indices', [currentIndex], currentIndex, 1);
         currentIndex ++;
+        console.log(p, c, n);
     };
 
     for (var i = 1; i < position.length; i ++) {

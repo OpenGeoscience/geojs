@@ -11,7 +11,7 @@ window.startTest = function (done) {
   };
 
   var myMap = geo.map(mapOptions),
-      table = [],
+      data = [],
       citieslatlon = [],
       width, height;
 
@@ -30,40 +30,10 @@ window.startTest = function (done) {
   }
 
   resizeCanvas();
-  table = [
-    [ 'NEW YORK', 'NY', '40.757929', '-73.985506'],
-    ['LOS ANGELES', 'CA', '34.052187', '-118.243425'],
-    ['DENVER', 'CO', '39.755092', '-104.988123'],
-    ['PORTLAND', 'OR', '45.523104', '-122.670132'],
-    ['HONOLULU', 'HI', '21.291982', '-157.821856'],
-    ['ANCHORAGE', 'AK', '61.216583', '-149.899597'],
-    ['DALLAS', 'TX', '32.781078', '-96.797111'],
-    ['SALT LAKE CITY', 'UT', '40.771592', '-111.888189'],
-    ['MIAMI', 'FL', '25.774252', '-80.190262'],
-    ['PHOENIX', 'AZ', '33.448263', '-112.073821'],
-    ['CHICAGO', 'IL', '41.879535', '-87.624333'],
-    ['WASHINGTON', 'DC', '38.892091', '-77.024055'],
-    ['SEATTLE', 'WA', '47.620716', '-122.347533'],
-    ['NEW ORLEANS', 'LA', '30.042487', '-90.025126'],
-    ['SAN FRANCISCO', 'CA', '37.775196', '-122.419204'],
-    ['ATLANTA', 'GA', '33.754487', '-84.389663']
+  data = [
+    { "type": "Feature", "properties": { "LINEARID": "110685800599", "FULLNAME": "N Midway St", "RTTYP": "M", "MTFCC": "S1200" }, "geometry": { "type": "LineString", "coordinates": [ [ 0, 20 ], [ 100, 20 ] ] } },
+    { "type": "Feature", "properties": { "LINEARID": "110685800599", "FULLNAME": "N Midway St", "RTTYP": "M", "MTFCC": "S1200" }, "geometry": { "type": "LineString", "coordinates": [ [ 0, 40 ], [ 100, 40 ] ] } },
   ];
-
-  if (table.length > 0) {
-    var i;
-    for (i = 0; i < 8; i += 1) {
-      if (table[i][2] !== undefined) {
-        var lat = table[i][2];
-        lat = lat.replace(/(^\s+|\s+$|^\"|\"$)/g, '');
-        lat = parseFloat(lat);
-
-        var lon = table[i][3];
-        lon = lon.replace(/(^\s+|\s+$|^\"|\"$)/g, '');
-        lon = parseFloat(lon);
-        citieslatlon.push(geo.latlng(lat, lon));
-      }
-    }
-  }
 
   // Load image to be used for drawing dots
   myMap.createLayer('osm', {m_baseUrl: '/data/tiles/'});
@@ -73,9 +43,12 @@ window.startTest = function (done) {
     'strokeWidth': function () { return 1.0; }
   };
   layer.createFeature('line')
-      .data([citieslatlon])
+      .data(data)
+      .line(function (d) { return d.geometry.coordinates; })
+      .position(function (d, index, d2, index2) {
+        return {x: d2[0],
+                y: d2[1]} })
       .style(style)
-      .position(function (d) { return d; });
 
   myMap.draw();
 
