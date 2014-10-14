@@ -41,6 +41,8 @@ geo.feature = function (arg) {
       m_mouseout = null,
       m_mousemove = null,
       m_mouseclick = null,
+      m_brushend = null,
+      m_brush = null,
       m_selectedFeatures = [];
 
   ////////////////////////////////////////////////////////////////////////////
@@ -51,11 +53,20 @@ geo.feature = function (arg) {
   this._updateMouseHandlers = function () {
     m_this.geoOff(geo.event.mousemove, m_this._handleMousemove);
     m_this.geoOff(geo.event.mouseclick, m_this._handleMouseclick);
+    m_this.geoOff(geo.event.brushstart, m_this._handleBrush);
+    m_this.geoOff(geo.event.brushend, m_this._handleBrush);
+    m_this.geoOff(geo.event.brush, m_this._handleBrush);
     if (m_mouseout || m_mouseover || m_mousemove) {
       m_this.geoOn(geo.event.mousemove, m_this._handleMousemove);
     }
     if (m_mouseclick) {
       m_this.geoOn(geo.event.mouseclick, m_this._handleMouseclick);
+    }
+    if (m_brushend) {
+      m_this.geoOn(geo.event.brushend, m_this._handleBrushend);
+    }
+    if (m_brush) {
+      m_this.geoOn(geo.event.brush, m_this._handleBrush);
     }
   };
 
@@ -122,8 +133,7 @@ geo.feature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get/Set the click handler.  Fires continuously as the moves moves
-   * inside the feature.
+   * Get/Set the click handler.
    */
   ////////////////////////////////////////////////////////////////////////////
   this.click = function (func) {
@@ -131,6 +141,34 @@ geo.feature = function (arg) {
       return m_mouseclick;
     }
     m_mouseclick = func;
+    m_this._updateMouseHandlers();
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set the brush handler.  Fires continuously.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.brush = function (func) {
+    if (func === undefined) {
+      return m_brush;
+    }
+    m_brush = func;
+    m_this._updateMouseHandlers();
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set the brushend handler.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.brushend = function (func) {
+    if (func === undefined) {
+      return m_brushend;
+    }
+    m_brushend = func;
     m_this._updateMouseHandlers();
     return m_this;
   };
@@ -224,6 +262,44 @@ geo.feature = function (arg) {
         data[i],
         i,
         mouse
+      );
+    });
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Private brush handler.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._handleBrush = function (brush) {
+    var idx = m_this.boxSearch(brush.gcs.lowerLeft, brush.gcs.upperRight),
+        data = m_this.data();
+
+    idx.forEach(function (i) {
+      m_brush.call(
+        m_this,
+        data[i],
+        i,
+        brush
+      );
+    });
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Private brushend handler.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._handleBrushend = function (brush) {
+    var idx = m_this.boxSearch(brush.gcs.lowerLeft, brush.gcs.upperRight),
+        data = m_this.data();
+
+    idx.forEach(function (i) {
+      m_brushend.call(
+        m_this,
+        data[i],
+        i,
+        brush
       );
     });
   };
