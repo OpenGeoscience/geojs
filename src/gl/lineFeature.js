@@ -172,23 +172,40 @@ ggl.lineFeature = function (arg) {
 
         // Assuming that we will have atleast two points
         if (lineItemIndex == 0) {
-          prev.push(position[position.length - 1]);
+          var posxx = position[position.length - 1];
+          prev.push(posxx);
+          position.push(posxx);
+          prev.push(posxx);
+          next.push(posxx);
+          strokeWidth.push(strokeWidthFunc(item, itemIndex, lineItemData, lineItemIndex));
+          strokeOpacity.push(strokeOpacityFunc(item, itemIndex, lineItemData, lineItemIndex));
+          strokeColor.push([sc.r, sc.g, sc.b]);
         }
         else {
-          prev.push(position[lineItemIndex - 1]);
-          next.push(position[lineItemIndex]);
+          prev.push(position[position.length - 2]);
+          next.push(position[position.length - 1]);
         }
 
         lineItemIndex++;
       });
-      next.push(position[--lineItemIndex]);
+      next.push(position[position.length - 1]);
       lineItemIndex = 0
       itemIndex++;
     });
 
+    console.log(prev);
+    console.log(position);
+    console.log(next);
+
     position = geo.transform.transformCoordinates(
                   m_this.gcs(), m_this.layer().map().gcs(),
                   position, 3);
+    prev = geo.transform.transformCoordinates(
+                  m_this.gcs(), m_this.layer().map().gcs(),
+                  prev, 3);
+    next = geo.transform.transformCoordinates(
+                  m_this.gcs(), m_this.layer().map().gcs(),
+                  next, 3);
 
     buffers.create("pos", 3);
     buffers.create("next", 3);
@@ -269,12 +286,12 @@ ggl.lineFeature = function (arg) {
         // addVert (prev[i], [100.0, 0.0, 0.0], next[i], -1);
     }
 
-    console.log("pos",   buffers.get("pos"));
-    console.log("prev",  buffers.get("prev"));
-    console.log("next",  buffers.get("next"));
+    // console.log("pos",   buffers.get("pos"));
+    // console.log("prev",  buffers.get("prev"));
+    // console.log("next",  buffers.get("next"));
 
-    console.log("indices ", buffers.get("indices"));
-    console.log("offset ", buffers.get("offset"));
+    // console.log("indices ", buffers.get("indices"));
+    // console.log("offset ", buffers.get("offset"));
 
     sourcePositions.pushBack(buffers.get("pos"));
     geom.addSource(sourcePositions);
@@ -296,6 +313,9 @@ ggl.lineFeature = function (arg) {
 
     offsetSourcePositions.pushBack(buffers.get("offset"));
     geom.addSource(offsetSourcePositions);
+
+    console.log("indices ", buffers.get("indices"));
+    console.log("pos", buffers.get("pos"));
 
     trianglePrimitive.setIndices(buffers.get("indices"));
     geom.addPrimitive(trianglePrimitive);
