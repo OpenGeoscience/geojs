@@ -6,8 +6,8 @@ window.startTest = function (done) {
 
   var mapOptions = {
     node: '#map',
-    zoom : 2,
-    center : [40, -105]
+    zoom : 10,
+    center : [31.892981, -85.14074]
   };
 
   var myMap = geo.map(mapOptions),
@@ -62,7 +62,7 @@ window.startTest = function (done) {
   myMap.createLayer('osm', {m_baseUrl: '/data/tiles/'});
   var layer = myMap.createLayer('feature');
   var style = {
-    'strokeColor': function () { return { r: 1, g: 0.6, b: 0 }; },
+    'strokeColor': function () { return { r: 1, g: 0.2, b: 0 }; },
     'strokeWidth': function () { return 1.0; }
   };
   layer.createFeature('line')
