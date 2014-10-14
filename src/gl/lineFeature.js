@@ -73,7 +73,8 @@ ggl.lineFeature = function (arg) {
         "  if (deltaPrev.xy == vec2(0, 0)) anglePrev = angleNext;",
         "  if (deltaNext.xy == vec2(0, 0)) angleNext = anglePrev;",
         "  float angle = (anglePrev + angleNext) / 2.0;",
-        "  float distance = (offset * strokeWidth * pixelWidth) / cos(anglePrev - angle);",
+        "  float distance = (offset * strokeWidth * pixelWidth) /",
+        "                    cos(anglePrev - angle);",
         "  worldPos.x += distance * sin(angle);",
         "  worldPos.y -= distance * cos(angle);",
         "  vec4  p = worldPos;",
@@ -167,7 +168,7 @@ ggl.lineFeature = function (arg) {
           itemIndex, lineItemData, lineItemIndex));
 
         // Assuming that we will have atleast two points
-        if (lineItemIndex == 0) {
+        if (lineItemIndex === 0) {
           var posxx = position[position.length - 1];
           prev.push(posxx);
           position.push(posxx);
@@ -184,11 +185,11 @@ ggl.lineFeature = function (arg) {
           next.push(position[position.length - 1]);
         }
 
-        lineItemIndex++;
+        ++lineItemIndex;
       });
       next.push(position[position.length - 1]);
       lineItemIndex = 0
-      itemIndex++;
+      ++itemIndex;
     });
 
     position = geo.transform.transformCoordinates(
@@ -252,23 +253,23 @@ ggl.lineFeature = function (arg) {
     }
 
     var addVert = function (p, c, n, offset) {
-        buffers.write ('prev', p, currentIndex, 1);
-        buffers.write ('pos', c, currentIndex, 1);
-        buffers.write ('next', n, currentIndex, 1);
-        buffers.write ('offset', [offset], currentIndex, 1);
-        buffers.write ('indices', [currentIndex], currentIndex, 1);
-        currentIndex ++;
+      buffers.write('prev', p, currentIndex, 1);
+      buffers.write('pos', c, currentIndex, 1);
+      buffers.write('next', n, currentIndex, 1);
+      buffers.write('offset', [offset], currentIndex, 1);
+      buffers.write('indices', [currentIndex], currentIndex, 1);
+      ++currentIndex;
     };
 
     for (var i = 1; i < position.length; i ++) {
-        //buffers.write ('unit', unit_buffer, currentIndex, 6);
-        addVert (prev[i - 1], position[i - 1], next[i - 1], 1);
-        addVert (prev[i], position[i], next[i], -1);
-        addVert (prev[i - 1], position[i - 1], next[i - 1], -1);
+      //buffers.write ('unit', unit_buffer, currentIndex, 6);
+      addVert (prev[i - 1], position[i - 1], next[i - 1], 1);
+      addVert (prev[i], position[i], next[i], -1);
+      addVert (prev[i - 1], position[i - 1], next[i - 1], -1);
 
-        addVert (prev[i - 1], position[i - 1], next[i - 1], 1);
-        addVert (prev[i], position[i], next[i], 1);
-        addVert (prev[i], position[i], next[i], -1);
+      addVert (prev[i - 1], position[i - 1], next[i - 1], 1);
+      addVert (prev[i], position[i], next[i], 1);
+      addVert (prev[i], position[i], next[i], -1);
     }
 
     sourcePositions.pushBack(buffers.get("pos"));
