@@ -387,6 +387,9 @@ geo.mapInteractor = function (args) {
     m_this._getMousePosition(evt);
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
+
+    // fire a click event here
+    m_this.map().geoTrigger(geo.event.mouseclick, m_this.mouse());
   };
 
   ////////////////////////////////////////////////////////////////////////////

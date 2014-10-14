@@ -214,6 +214,18 @@ geo.feature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._handleMouseclick = function () {
+    var mouse = m_this.layer().map().interactor().mouse(),
+        data = m_this.data(),
+        over = m_this.pointSearch(mouse.geo);
+
+    over.index.forEach(function (i) {
+      m_mouseclick.call(
+        m_this,
+        data[i],
+        i,
+        mouse
+      );
+    });
   };
 
   ////////////////////////////////////////////////////////////////////////////
