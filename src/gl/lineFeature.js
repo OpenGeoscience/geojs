@@ -103,8 +103,10 @@ ggl.lineFeature = function (arg) {
   }
 
   function createGLLines() {
-    var i, prev = [], next = [],
+    var i, current = [], prev = [], next = [],
         numPts = m_this.data().length,
+        itemIndex = 0, lineItemIndex = 0,
+        lineItem = null, p = null,
         start, position = [], strokeWidth = [],
         strokeColor = [], strokeOpacity = [], posFunc, strokeWidthFunc,
         strokeColorFunc, strokeOpacityFunc,
@@ -147,28 +149,22 @@ ggl.lineFeature = function (arg) {
     strokeColorFunc = m_this.style().strokeColor;
     strokeOpacityFunc = m_this.style().strokeOpacity;
 
-    var itemIndex = 0;
-    var lineItemIndex = 0;
-    var lineItem = null;
-    var p = null;
-    var prev = [];
-    var next = [];
-    var current = [];
-
     m_this.data().forEach(function (item) {
       lineItem = m_this.line()(item, itemIndex);
       lineItem.forEach(function (lineItemData) {
         p = posFunc(item, itemIndex, lineItemData, lineItemIndex);
-        console.log("p is ", p);
         if (p instanceof geo.latlng) {
           position.push([p.x(), p.y(), 0.0]);
         } else {
           position.push([p.x, p.y, p.z || 0.0]);
         }
-        strokeWidth.push(strokeWidthFunc(item, itemIndex, lineItemData, lineItemIndex));
-        var sc = strokeColorFunc(item, itemIndex, lineItemData, lineItemIndex);
+        strokeWidth.push(strokeWidthFunc(item,
+          itemIndex, lineItemData, lineItemIndex));
+        var sc = strokeColorFunc(item,
+          itemIndex, lineItemData, lineItemIndex);
         strokeColor.push([sc.r, sc.g, sc.b]);
-        strokeOpacity.push(strokeOpacityFunc(item, itemIndex, lineItemData, lineItemIndex));
+        strokeOpacity.push(strokeOpacityFunc(item,
+          itemIndex, lineItemData, lineItemIndex));
 
         // Assuming that we will have atleast two points
         if (lineItemIndex == 0) {
@@ -177,8 +173,10 @@ ggl.lineFeature = function (arg) {
           position.push(posxx);
           prev.push(posxx);
           next.push(posxx);
-          strokeWidth.push(strokeWidthFunc(item, itemIndex, lineItemData, lineItemIndex));
-          strokeOpacity.push(strokeOpacityFunc(item, itemIndex, lineItemData, lineItemIndex));
+          strokeWidth.push(strokeWidthFunc(item,
+            itemIndex, lineItemData, lineItemIndex));
+          strokeOpacity.push(strokeOpacityFunc(item,
+            itemIndex, lineItemData, lineItemIndex));
           strokeColor.push([sc.r, sc.g, sc.b]);
         }
         else {
@@ -193,19 +191,15 @@ ggl.lineFeature = function (arg) {
       itemIndex++;
     });
 
-    console.log(prev);
-    console.log(position);
-    console.log(next);
-
     position = geo.transform.transformCoordinates(
-                  m_this.gcs(), m_this.layer().map().gcs(),
-                  position, 3);
+                 m_this.gcs(), m_this.layer().map().gcs(),
+                 position, 3);
     prev = geo.transform.transformCoordinates(
-                  m_this.gcs(), m_this.layer().map().gcs(),
-                  prev, 3);
+                 m_this.gcs(), m_this.layer().map().gcs(),
+                 prev, 3);
     next = geo.transform.transformCoordinates(
-                  m_this.gcs(), m_this.layer().map().gcs(),
-                  next, 3);
+                 m_this.gcs(), m_this.layer().map().gcs(),
+                 next, 3);
 
     buffers.create("pos", 3);
     buffers.create("next", 3);
@@ -264,11 +258,10 @@ ggl.lineFeature = function (arg) {
         buffers.write ('offset', [offset], currentIndex, 1);
         buffers.write ('indices', [currentIndex], currentIndex, 1);
         currentIndex ++;
-        console.log(p, c, n);
     };
 
     for (var i = 1; i < position.length; i ++) {
-        //stroke_buffers.write ('unit', unit_buffer, currentIndex, 6);
+        //buffers.write ('unit', unit_buffer, currentIndex, 6);
         addVert (prev[i - 1], position[i - 1], next[i - 1], 1);
         addVert (prev[i], position[i], next[i], -1);
         addVert (prev[i - 1], position[i - 1], next[i - 1], -1);
@@ -276,22 +269,7 @@ ggl.lineFeature = function (arg) {
         addVert (prev[i - 1], position[i - 1], next[i - 1], 1);
         addVert (prev[i], position[i], next[i], 1);
         addVert (prev[i], position[i], next[i], -1);
-
-        // addVert (prev[i - 1], [0.0, 0.0, 0.0], next[i - 1], 1);
-        // addVert (prev[i], [100.0, 0.0, 0.0], next[i], -1);
-        // addVert (prev[i - 1], [0.0, 0.0, 0.0], next[i - 1], -1);
-
-        // addVert (prev[i], [0.0, 0.0, 0.0], next[i - 1], 1);
-        // addVert (prev[i], [100.0, 0.0, 0.0], next[i], 1);
-        // addVert (prev[i], [100.0, 0.0, 0.0], next[i], -1);
     }
-
-    // console.log("pos",   buffers.get("pos"));
-    // console.log("prev",  buffers.get("prev"));
-    // console.log("next",  buffers.get("next"));
-
-    // console.log("indices ", buffers.get("indices"));
-    // console.log("offset ", buffers.get("offset"));
 
     sourcePositions.pushBack(buffers.get("pos"));
     geom.addSource(sourcePositions);
@@ -314,14 +292,10 @@ ggl.lineFeature = function (arg) {
     offsetSourcePositions.pushBack(buffers.get("offset"));
     geom.addSource(offsetSourcePositions);
 
-    console.log("indices ", buffers.get("indices"));
-    console.log("pos", buffers.get("pos"));
-
     trianglePrimitive.setIndices(buffers.get("indices"));
     geom.addPrimitive(trianglePrimitive);
 
     mapper.setGeometryData(geom);
-
     m_actor.setMapper(mapper);
   }
 
