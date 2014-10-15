@@ -44,6 +44,12 @@ geo.mapInteractor = function (args) {
     /* jshint +W018 */
   }
 
+  // Helper method to calculate the speed from a velocity
+  function calcSpeed(v) {
+    var x = v.x, y = v.y;
+    return Math.sqrt(x * x + y * y);
+  }
+
   // For throttling mouse events this is a function that
   // returns true if no actions are in progress and starts
   // a timer to block events for the next `m_throttleTime` ms.
@@ -83,7 +89,13 @@ geo.mapInteractor = function (args) {
       wheelScaleY: 1,
       zoomScale: 1,
       selectionButton: 'left',
-      selectionModifiers: {'shift': true}
+      selectionModifiers: {'shift': true},
+      momentum: {
+        enabled: true,
+        maxSpeed: 10,
+        minSpeed: 0.01,
+        drag: 0.005
+      }
     },
     m_options
   );
@@ -126,6 +138,14 @@ geo.mapInteractor = function (args) {
   //
   //   // keyboard modifiers that must be pressed to initiate a selection
   //   selectionModifiers: {...}
+  //
+  //   // enable momentum when panning
+  //   momentum: {
+  //     enabled: true | false,
+  //     drag: number, // drag coefficient
+  //     maxSpeed: number, // don't allow animation to pan faster than this
+  //     minSpeed: number  // stop animations if the speed is less than this
+  //   }
   // }
 
   // default mouse object
@@ -150,7 +170,13 @@ geo.mapInteractor = function (args) {
       ctrl: false,
       shift: false,
       meta: false
-    }
+    },
+    // time the event was captured
+    time: new Date(),
+    // time elapsed since the last mouse event
+    deltaTime: 1,
+    // pixels/ms
+    velocity: 0
   };
 
   // default keyboard object
@@ -178,7 +204,14 @@ geo.mapInteractor = function (args) {
   //    'acton': 'select',
   //    'origin': {...},
   //    'delta': {x: *, y: *}
-//  }
+  //  }
+  //
+  //  {
+  //    'action': 'momentum',
+  //    'origin': {...},
+  //    'handler': function () { }, // called in animation loop
+  //    'timer': animate loop timer
+  //  }
   m_state = {};
 
   ////////////////////////////////////////////////////////////////////////////
@@ -264,8 +297,16 @@ geo.mapInteractor = function (args) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._getMousePosition = function (evt) {
-    var offset = $node.offset();
+    var offset = $node.offset(), dt, t;
 
+    t = (new Date()).valueOf();
+    dt = t - m_mouse.time;
+    m_mouse.time = t;
+    m_mouse.deltaTime = dt;
+    m_mouse.velocity = {
+      x: (evt.pageX - m_mouse.page.x) / dt,
+      y: (evt.pageY - m_mouse.page.y) / dt
+    };
     m_mouse.page = {
       x: evt.pageX,
       y: evt.pageY
@@ -360,6 +401,11 @@ geo.mapInteractor = function (args) {
   ////////////////////////////////////////////////////////////////////////////
   this._handleMouseDown = function (evt) {
     var action = null;
+
+    if (m_state.action === 'momentum') {
+      // cancel momentum on click
+      m_state = {};
+    }
 
     m_this._getMousePosition(evt);
     m_this._getMouseButton(evt);
@@ -463,7 +509,6 @@ geo.mapInteractor = function (args) {
   this._handleMouseUpDocument = function (evt) {
     var selectionObj;
 
-    m_this._getMousePosition(evt);
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
 
@@ -481,6 +526,54 @@ geo.mapInteractor = function (args) {
 
     // reset the interactor state
     m_state = {};
+
+    // if momentum is enabled, start the action here
+    if (m_options.momentum.enabled) {
+      m_state.action = 'momentum';
+      m_state.origin = m_this.mouse();
+      m_state.handler = function () {
+        var vx, vy, speed, s;
+
+        if (m_state.action !== 'momentum' || !m_this.map()) {
+          // cancel if a new action was performed
+          return;
+        }
+
+        vx = m_mouse.velocity.x;
+        vy = m_mouse.velocity.y;
+
+        // get the current speed
+        speed = calcSpeed(m_mouse.velocity);
+        s = speed;
+
+        // normalize the velocity components
+        vx = vx / speed;
+        vy = vy / speed;
+
+        // modify current speed by constraints
+        speed = Math.min(speed, m_options.momentum.maxSpeed);
+
+        // calculate the new speed
+        speed = speed * Math.exp(-m_options.momentum.drag * m_mouse.deltaTime);
+
+        // stop panning when the speed is below the threshold
+        if (speed < m_options.momentum.minSpeed) {
+          m_state = {};
+          return;
+        }
+
+        m_mouse.velocity.x = speed * vx;
+        m_mouse.velocity.y = speed * vy;
+
+        m_this.map().pan({
+          x: m_mouse.velocity.x * m_mouse.deltaTime,
+          y: m_mouse.velocity.y * m_mouse.deltaTime
+        });
+
+        window.requestAnimationFrame(m_state.handler);
+      };
+      window.requestAnimationFrame(m_state.handler);
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -489,7 +582,6 @@ geo.mapInteractor = function (args) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._handleMouseUp = function (evt) {
-    m_this._getMousePosition(evt);
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
 
