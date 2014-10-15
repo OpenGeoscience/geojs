@@ -507,7 +507,7 @@ geo.mapInteractor = function (args) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._handleMouseUpDocument = function (evt) {
-    var selectionObj;
+    var selectionObj, oldAction;
 
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
@@ -525,10 +525,11 @@ geo.mapInteractor = function (args) {
     }
 
     // reset the interactor state
+    oldAction = m_state.action;
     m_state = {};
 
     // if momentum is enabled, start the action here
-    if (m_options.momentum.enabled) {
+    if (m_options.momentum.enabled && oldAction === 'pan') {
       m_state.action = 'momentum';
       m_state.origin = m_this.mouse();
       m_state.handler = function () {
