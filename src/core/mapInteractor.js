@@ -178,7 +178,7 @@ geo.mapInteractor = function (args) {
   //    'acton': 'select',
   //    'origin': {...},
   //    'delta': {x: *, y: *}
-  //  }
+//  }
   m_state = {};
 
   ////////////////////////////////////////////////////////////////////////////
@@ -198,11 +198,16 @@ geo.mapInteractor = function (args) {
     // store the connected element
     $node = $(m_options.map.node());
 
+
     // add event handlers
     $node.on('mousemove.geojs', m_this._handleMouseMove);
     $node.on('mousedown.geojs', m_this._handleMouseDown);
     $node.on('mouseup.geojs', m_this._handleMouseUp);
     $node.on('mousewheel.geojs', m_this._handleMouseWheel);
+    if (m_options.panMoveButton === 'right' ||
+        m_options.zoomMoveButton === 'right') {
+      $node.on('contextmenu.geojs', function () { return false; });
+    }
     return m_this;
   };
 
@@ -465,6 +470,10 @@ geo.mapInteractor = function (args) {
     // unbind temporary handlers on document
     $(document).off('.geojs');
 
+    if (m_mouse.buttons.right) {
+      evt.preventDefault();
+    }
+
     if (m_state.action === 'select') {
       selectionObj = m_this._getSelection();
       m_this.map().geoTrigger(geo.event.brushend, selectionObj);
@@ -500,6 +509,7 @@ geo.mapInteractor = function (args) {
     evt.deltaX = evt.deltaX * m_options.wheelScaleX * evt.deltaFactor / 120;
     evt.deltaY = evt.deltaY * m_options.wheelScaleY * evt.deltaFactor / 120;
 
+    evt.preventDefault();
     if (!doRespond()) {
       m_wheelQueue.x += evt.deltaX;
       m_wheelQueue.y += evt.deltaY;
