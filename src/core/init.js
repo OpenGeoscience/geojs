@@ -226,3 +226,12 @@ geo.createLayer = function (name, map, arg) {
     return null;
   }
 };
+
+// Add a polyfill for window.requestAnimationFrame.
+if (!window.requestAnimationFrame) {
+  window.requestAnimationFrame = function (func) {
+    "use strict";
+
+    window.setTimeout(func, 15);
+  };
+}
