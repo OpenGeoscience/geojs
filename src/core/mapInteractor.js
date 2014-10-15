@@ -505,6 +505,9 @@ geo.mapInteractor = function (args) {
   this._handleMouseWheel = function (evt) {
     var zoomFactor, direction;
 
+    // In case jquery-mousewheel isn't loaded for some reason
+    evt.deltaFactor = evt.deltaFactor || 1;
+
     m_this._getMouseModifiers(evt);
     evt.deltaX = evt.deltaX * m_options.wheelScaleX * evt.deltaFactor / 120;
     evt.deltaY = evt.deltaY * m_options.wheelScaleY * evt.deltaFactor / 120;
