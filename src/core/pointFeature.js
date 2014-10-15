@@ -29,7 +29,9 @@ geo.pointFeature = function (arg) {
       m_position = arg.position === undefined ? function (d) { return d; } : arg.position,
       s_init = this._init,
       m_rangeTree = null,
-      s_data = this.data;
+      s_data = this.data,
+      s_style = this.style,
+      m_maxRadius = 0;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -57,13 +59,26 @@ geo.pointFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._updateRangeTree = function () {
-    var pts, position;
+    var pts, position,
+        radius = m_this.style().radius,
+        stroke = m_this.style().stroke,
+        strokeWidth = m_this.style().strokeWidth;
+
     position = m_this.position();
+
+    m_maxRadius = 0;
 
     // create an array of positions in geo coordinates
     pts = m_this.data().map(function (d, i) {
       var pt = position(d);
       pt.idx = i;
+
+      // store the maximum point radius
+      m_maxRadius = Math.max(
+        m_maxRadius,
+        radius(d, i) + (stroke(d, i) ? strokeWidth(d, i) : 0)
+      );
+
       return pt;
     });
 
@@ -79,7 +94,10 @@ geo.pointFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.pointSearch = function (p) {
-    var min, max, radius, data, idx = [], box, found = [], ifound = [], map, pt;
+    var min, max, data, idx = [], box, found = [], ifound = [], map, pt,
+        stroke = m_this.style().stroke,
+        strokeWidth = m_this.style().strokeWidth,
+        radius = m_this.style().radius;
 
     data = m_this.data();
     if (!m_this.data || !m_this.data.length) {
@@ -92,53 +110,36 @@ geo.pointFeature = function (arg) {
     map = m_this.layer().map();
     pt = map.gcsToDisplay(p);
 
-    // Get the radius of the points
-    //   This is how wiggle maps implements the search, but it doesn't
-    //   work in general when the radius of each point may be different
-    //   Need to experiment to see if we can generalize the method without
-    //   sacrificing too much speed.
-    radius = m_this.style().radius(data[0]);
-
-    // add extra padding for the stroke
-    if (m_this.style().stroke(data[0])) {
-      radius += m_this.style().strokeWidth(data[0]);
-    }
-
     // Get the upper right corner in geo coordinates
     min = map.displayToGcs({
-      x: pt.x - radius,
-      y: pt.y + radius   // GCS coordinates are bottom to top
+      x: pt.x - m_maxRadius,
+      y: pt.y + m_maxRadius   // GCS coordinates are bottom to top
     });
 
     // Get the lower left corner in geo coordinates
     max = map.displayToGcs({
-      x: pt.x + radius,
-      y: pt.y - radius
+      x: pt.x + m_maxRadius,
+      y: pt.y - m_maxRadius
     });
 
     // Find points inside the bounding box
     box = new geo.util.Box(geo.util.vect(min.x, min.y), geo.util.vect(max.x, max.y));
     m_rangeTree.search(box).forEach(function (q) {
-      var dist, x, y, rad, i = q.idx;
-
-      rad = m_this.style().radius(data[i]);
-      x = p.x - q.x;
-      y = p.y - q.y;
-      dist = Math.sqrt(x * x + y * y);
-      if (dist < rad) {
-        idx.push(i);
-      }
+      idx.push(q.idx);
     });
 
     // Filter by circular region
     idx.forEach(function (i) {
-      var d = m_this.data()[i],
-          p = m_this.position()(d),
-          dx, dy;
+      var d = data[i],
+          p = m_this.position()(d, i),
+          dx, dy, rad;
+
+      rad = radius(data[i], i);
+      rad += stroke(data[i], i) ? strokeWidth(data[i], i) : 0;
       p = map.gcsToDisplay(p);
       dx = p.x - pt.x;
       dy = p.y - pt.y;
-      if (Math.sqrt(dx * dx + dy * dy) <= radius) {
+      if (Math.sqrt(dx * dx + dy * dy) <= rad) {
         found.push(d);
         ifound.push(i);
       }
@@ -158,6 +159,7 @@ geo.pointFeature = function (arg) {
   this.boxSearch = function (lowerLeft, upperRight) {
     var pos = m_this.position(),
         idx = [];
+    // TODO: use the range tree
     m_this.data().forEach(function (d, i) {
       var p = pos(d);
       if (p.x >= lowerLeft.x &&
@@ -181,6 +183,20 @@ geo.pointFeature = function (arg) {
       return s_data();
     }
     s_data(data);
+    m_this._updateRangeTree();
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Overloaded style method that updates the internal range tree on write.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.style = function (arg1, arg2) {
+    if (arg1 === undefined) {
+      return s_style();
+    }
+    s_style(arg1, arg2);
     m_this._updateRangeTree();
     return m_this;
   };
