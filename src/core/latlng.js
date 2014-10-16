@@ -13,10 +13,10 @@
  * @returns {geo.latlng}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.latlng = function (arg1, arg2) {
+geo.latlng = function (arg1, arg2, arg3) {
   "use strict";
   if (!(this instanceof geo.latlng)) {
-    return new geo.latlng(arg1, arg2);
+    return new geo.latlng(arg1, arg2, arg3);
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -25,8 +25,9 @@ geo.latlng = function (arg1, arg2) {
    */
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
-      m_lat = arg2 === undefined ? arg1.lat() : arg1,
-      m_lng = arg2 === undefined ? arg1.lng() : arg2;
+      m_lat = arg2 === undefined && arg3 === undefined ? arg1.lat() : arg1,
+      m_lng = arg2 === undefined && arg3 === undefined ? arg1.lng() : arg2,
+      m_elv = arg2 === undefined && arg3 === undefined ? arg1.elv() : arg3;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -56,7 +57,21 @@ geo.latlng = function (arg1, arg2) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Return x coodinate
+   * Return elevation
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  this.elv = function (val) {
+    if (val === undefined) {
+      return m_elv;
+    } else {
+      m_elv = val;
+    }
+  };
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return x coordinate
    */
   //////////////////////////////////////////////////////////////////////////////
   this.x = function (val) {
@@ -69,7 +84,7 @@ geo.latlng = function (arg1, arg2) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Return y coodinate
+   * Return y coordinate
    */
   //////////////////////////////////////////////////////////////////////////////
   this.y = function (val) {
@@ -79,6 +94,20 @@ geo.latlng = function (arg1, arg2) {
       m_lat = val;
     }
   };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return z coordinate
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  this.z = function (val) {
+    if (val === undefined) {
+      return m_this.elv();
+    } else {
+      m_elv = val;
+    }
+  };
+
 
   return this;
 };
