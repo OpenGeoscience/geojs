@@ -107,18 +107,23 @@ geo.jsonReader = function (arg) {
 
   this._getCoordinates = function (spec) {
     var geometry = spec.geometry || {},
-        coordinates = geometry.coordinates || [];
+        coordinates = geometry.coordinates || [], elv;
 
     if ((coordinates.length === 2 || coordinates.length === 3) &&
         (isFinite(coordinates[0]) && isFinite(coordinates[1]))) {
 
+        // Do we have a elevation component
+        if (isFinite(coordinates[2])) {
+          elv = coordinates[2];
+        }
+
       // special handling for single point coordinates
-      return [geo.latlng(coordinates[1], coordinates[0])];
+      return [geo.latlng(coordinates[1], coordinates[0], elv)];
     }
 
     // return an array of latlng's for LineString, MultiPoint, etc...
     return coordinates.map(function (c) {
-      return geo.latlng(c[1], c[0]);
+      return geo.latlng(c[1], c[0], c[2]);
     });
   };
 
@@ -166,7 +171,7 @@ geo.jsonReader = function (arg) {
         return {
           x: d.x(),
           y: d.y(),
-          z: 0
+          z: d.z()
         };
       })
       .style(_style);
