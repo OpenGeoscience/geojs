@@ -7,12 +7,12 @@ from selenium_test import FirefoxTest, ChromeTest,\
 
 
 class glPointsBase(object):
-    testCase = ('glPoints',)
+    testCase = ('glPointsNoFill',)
     testRevision = 4
 
     def loadPage(self):
         self.resizeWindow(640, 480)
-        self.loadURL('glPoints/index.html')
+        self.loadURL('glPointsNoFill/index.html')
         self.wait()
 
     def testGlPoints(self):
