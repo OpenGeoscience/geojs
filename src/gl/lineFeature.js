@@ -13,7 +13,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 ggl.lineFeature = function (arg) {
-  "use strict";
+  'use strict';
   if (!(this instanceof ggl.lineFeature)) {
     return new ggl.lineFeature(arg);
   }
@@ -32,27 +32,55 @@ ggl.lineFeature = function (arg) {
 
   function createVertexShader() {
       var vertexShaderSource = [
-        "attribute vec3 pos;",
-        "attribute vec3 strokeColor;",
-        "attribute float strokeOpacity;",
-        "attribute float strokeWidth;",
-        "uniform mat4 modelViewMatrix;",
-        "uniform mat4 projectionMatrix;",
-        "varying vec3 strokeColorVar;",
-        "varying float strokeWidthVar;",
-        "varying float strokeOpacityVar;",
-        "void main(void)",
-        "{",
-        "  strokeColorVar = strokeColor;",
-        "  strokeWidthVar = strokeWidth;",
-        "  strokeOpacityVar = strokeOpacity;",
-        "  vec4 p = (projectionMatrix * modelViewMatrix * vec4(pos, 1.0)).xyzw;",
-        "  if (p.w != 0.0) {",
-        "    p = p/p.w;",
-        "  }",
-        "  gl_Position = p;",
-        "}"
-      ].join("\n"),
+        'attribute vec3 pos;',
+        'attribute vec3 prev;',
+        'attribute vec3 next;',
+        'attribute float offset;',
+
+        'attribute vec3 strokeColor;',
+        'attribute float strokeOpacity;',
+        'attribute float strokeWidth;',
+
+        'uniform mat4 modelViewMatrix;',
+        'uniform mat4 projectionMatrix;',
+        'uniform float pixelWidth;',
+
+        'varying vec3 strokeColorVar;',
+        'varying float strokeWidthVar;',
+        'varying float strokeOpacityVar;',
+
+        'void main(void)',
+        '{',
+        '  vec4 worldPos = projectionMatrix * modelViewMatrix * vec4(pos.xyz, 1);',
+        '  if (worldPos.w != 0.0) {',
+        '    worldPos = worldPos/worldPos.w;',
+        '  }',
+        '  vec4 worldNext = projectionMatrix * modelViewMatrix * vec4(next.xyz, 1);',
+        '  if (worldNext.w != 0.0) {',
+        '    worldNext = worldNext/worldNext.w;',
+        '  }',
+        '  vec4 worldPrev = projectionMatrix* modelViewMatrix * vec4(prev.xyz, 1);',
+        '  if (worldPrev.w != 0.0) {',
+        '    worldPrev = worldPrev/worldPrev.w;',
+        '  }',
+        '  strokeColorVar = strokeColor;',
+        '  strokeWidthVar = strokeWidth;',
+        '  strokeOpacityVar = strokeOpacity;',
+        '  vec2 deltaNext = worldNext.xy - worldPos.xy;',
+        '  vec2 deltaPrev = worldPos.xy - worldPrev.xy;',
+        '  float angleNext = atan(deltaNext.y, deltaNext.x);',
+        '  float anglePrev = atan(deltaPrev.y, deltaPrev.x);',
+        '  if (deltaPrev.xy == vec2(0, 0)) anglePrev = angleNext;',
+        '  if (deltaNext.xy == vec2(0, 0)) angleNext = anglePrev;',
+        '  float angle = (anglePrev + angleNext) / 2.0;',
+        '  float distance = (offset * strokeWidth * pixelWidth) /',
+        '                    cos(anglePrev - angle);',
+        '  worldPos.x += distance * sin(angle);',
+        '  worldPos.y -= distance * cos(angle);',
+        '  vec4  p = worldPos;',
+        '  gl_Position = p;',
+        '}'
+      ].join('\n'),
       shader = new vgl.shader(gl.VERTEX_SHADER);
       shader.setShaderSource(vertexShaderSource);
       return shader;
@@ -60,46 +88,57 @@ ggl.lineFeature = function (arg) {
 
   function createFragmentShader() {
     var fragmentShaderSource = [
-      "#ifdef GL_ES",
-      "  precision highp float;",
-      "#endif",
-      "varying vec3 strokeColorVar;",
-      "varying float strokeWidthVar;",
-      "varying float strokeOpacityVar;",
-      "void main () {",
-      "  gl_FragColor = vec4 (strokeColorVar, strokeOpacityVar);",
-      "}"
-    ],
+      '#ifdef GL_ES',
+      '  precision highp float;',
+      '#endif',
+      'varying vec3 strokeColorVar;',
+      'varying float strokeWidthVar;',
+      'varying float strokeOpacityVar;',
+      'void main () {',
+      '  gl_FragColor = vec4 (strokeColorVar, strokeOpacityVar);',
+      '}'
+    ].join('\n'),
     shader = new vgl.shader(gl.FRAGMENT_SHADER);
     shader.setShaderSource(fragmentShaderSource);
     return shader;
   }
 
   function createGLLines() {
-    var i, numPts = m_this.data().length,
-        start, position = [], strokeWidth = [],
-        strokeColor = [], strokeOpacity = [], posFunc, strokeWidthFunc,
-        strokeColorFunc, strokeOpacityFunc,
-        buffers = vgl.DataBuffers(1024),
+    var i, prev = [], next = [], numPts = m_this.data().length,
+        itemIndex = 0, lineItemIndex = 0, lineItem = null, p = null,
+        start, position = [], strokeWidth = [], strokeColor = [],
+        strokeOpacity = [], posFunc, strokeWidthFunc, strokeColorFunc,
+        strokeOpacityFunc, buffers = vgl.DataBuffers(1024),
         sourcePositions = vgl.sourceDataP3fv(),
+        prevSourcePositions = vgl.sourceDataAnyfv(3,
+          vgl.vertexAttributeKeysIndexed.Four),
+        nextSourcePositions = vgl.sourceDataAnyfv(3,
+          vgl.vertexAttributeKeysIndexed.Five),
+        offsetSourcePositions = vgl.sourceDataAnyfv(1,
+          vgl.vertexAttributeKeysIndexed.Six),
         sourceStokeWidth = vgl.sourceDataAnyfv(1,
-          vgl.vertexAttributeKeys.CountAttributeIndex + 1),
+          vgl.vertexAttributeKeysIndexed.One),
         sourceStrokeColor = vgl.sourceDataAnyfv(3,
-          vgl.vertexAttributeKeys.CountAttributeIndex + 2),
+          vgl.vertexAttributeKeysIndexed.Two),
         sourceStrokeOpacity = vgl.sourceDataAnyfv(1,
-          vgl.vertexAttributeKeys.CountAttributeIndex + 3),
-        linesPrimitive = vgl.lines(),
+          vgl.vertexAttributeKeysIndexed.Three),
+        trianglePrimitive = vgl.triangles(),
         mat = vgl.material(),
         blend = vgl.blend(),
         prog = vgl.shaderProgram(),
         vertexShader = createVertexShader(),
         fragmentShader = createFragmentShader(),
-        posAttr = vgl.vertexAttribute("pos"),
-        stokeWidthAttr = vgl.vertexAttribute("strokeWidth"),
-        strokeColorAttr = vgl.vertexAttribute("strokeColor"),
-        strokeOpacityAttr = vgl.vertexAttribute("strokeOpacity"),
-        modelViewUniform = new vgl.modelViewUniform("modelViewMatrix"),
-        projectionUniform = new vgl.projectionUniform("projectionMatrix"),
+        posAttr = vgl.vertexAttribute('pos'),
+        prevAttr = vgl.vertexAttribute('prev'),
+        nextAttr = vgl.vertexAttribute('next'),
+        offsetAttr = vgl.vertexAttribute('offset'),
+        stokeWidthAttr = vgl.vertexAttribute('strokeWidth'),
+        strokeColorAttr = vgl.vertexAttribute('strokeColor'),
+        strokeOpacityAttr = vgl.vertexAttribute('strokeOpacity'),
+        modelViewUniform = new vgl.modelViewUniform('modelViewMatrix'),
+        projectionUniform = new vgl.projectionUniform('projectionMatrix'),
+        pixelWidthUniform = new vgl.floatUniform('pixelWidth',
+                              2.0 / m_this.renderer().width()),
         geom = vgl.geometryData(),
         mapper = vgl.mapper();
 
@@ -109,40 +148,87 @@ ggl.lineFeature = function (arg) {
     strokeOpacityFunc = m_this.style().strokeOpacity;
 
     m_this.data().forEach(function (item) {
-      var p = posFunc(item);
-      position.push([p.x, p.y, p.z || 0]);
-      strokeWidth.push(strokeWidthFunc(item));
-      strokeColor.push(strokeColorFunc(item));
-      strokeOpacity.push(strokeOpacityFunc(item));
+      lineItem = m_this.line()(item, itemIndex);
+      lineItem.forEach(function (lineItemData) {
+        p = posFunc(item, itemIndex, lineItemData, lineItemIndex);
+        if (p instanceof geo.latlng) {
+          position.push([p.x(), p.y(), 0.0]);
+        } else {
+          position.push([p.x, p.y, p.z || 0.0]);
+        }
+        strokeWidth.push(strokeWidthFunc(item,
+          itemIndex, lineItemData, lineItemIndex));
+        var sc = strokeColorFunc(item,
+          itemIndex, lineItemData, lineItemIndex);
+        strokeColor.push([sc.r, sc.g, sc.b]);
+        strokeOpacity.push(strokeOpacityFunc(item,
+          itemIndex, lineItemData, lineItemIndex));
+
+        // Assuming that we will have atleast two points
+        if (lineItemIndex === 0) {
+          var posxx = position[position.length - 1];
+          prev.push(posxx);
+          position.push(posxx);
+          prev.push(posxx);
+          next.push(posxx);
+          strokeWidth.push(strokeWidthFunc(item,
+            itemIndex, lineItemData, lineItemIndex));
+          strokeOpacity.push(strokeOpacityFunc(item,
+            itemIndex, lineItemData, lineItemIndex));
+          strokeColor.push([sc.r, sc.g, sc.b]);
+        }
+        else {
+          prev.push(position[position.length - 2]);
+          next.push(position[position.length - 1]);
+        }
+
+        lineItemIndex += 1;
+      });
+      next.push(position[position.length - 1]);
+      lineItemIndex = 0;
+      itemIndex += 1;
     });
 
     position = geo.transform.transformCoordinates(
-                  m_this.gcs(), m_this.layer().map().gcs(),
-                  position, 3);
+                 m_this.gcs(), m_this.layer().map().gcs(),
+                 position, 3);
+    prev = geo.transform.transformCoordinates(
+                 m_this.gcs(), m_this.layer().map().gcs(),
+                 prev, 3);
+    next = geo.transform.transformCoordinates(
+                 m_this.gcs(), m_this.layer().map().gcs(),
+                 next, 3);
 
-    buffers.create("pos", 3);
-    buffers.create("indices", 1);
-    buffers.create("strokeWidth", 1);
-    buffers.create("strokeColor", 3);
-    buffers.create("strokeOpacity", 1);
+    buffers.create('pos', 3);
+    buffers.create('next', 3);
+    buffers.create('prev', 3);
+    buffers.create('offset', 1);
+    buffers.create('indices', 1);
+    buffers.create('strokeWidth', 1);
+    buffers.create('strokeColor', 3);
+    buffers.create('strokeOpacity', 1);
+
+    numPts = position.length;
 
     // TODO: Right now this is ugly but we will fix it.
-    prog.addVertexAttribute(posAttr, vgl.vertexAttributeKeys.Position);
-    prog.addVertexAttribute(
-      stokeWidthAttr,
-      vgl.vertexAttributeKeys.CountAttributeIndex + 1
-    );
-    prog.addVertexAttribute(
-      strokeColorAttr,
-      vgl.vertexAttributeKeys.CountAttributeIndex + 2
-    );
-    prog.addVertexAttribute(
-      strokeOpacityAttr,
-      vgl.vertexAttributeKeys.CountAttributeIndex + 3
-    );
+    prog.addVertexAttribute(posAttr,
+      vgl.vertexAttributeKeys.Position);
+    prog.addVertexAttribute(stokeWidthAttr,
+      vgl.vertexAttributeKeysIndexed.One);
+    prog.addVertexAttribute(strokeColorAttr,
+      vgl.vertexAttributeKeysIndexed.Two);
+    prog.addVertexAttribute(strokeOpacityAttr,
+      vgl.vertexAttributeKeysIndexed.Three);
+    prog.addVertexAttribute(prevAttr,
+      vgl.vertexAttributeKeysIndexed.Four);
+    prog.addVertexAttribute(nextAttr,
+      vgl.vertexAttributeKeysIndexed.Five);
+    prog.addVertexAttribute(offsetAttr,
+      vgl.vertexAttributeKeysIndexed.Six);
 
     prog.addUniform(modelViewUniform);
     prog.addUniform(projectionUniform);
+    prog.addUniform(pixelWidthUniform);
 
     prog.addShader(fragmentShader);
     prog.addShader(vertexShader);
@@ -153,32 +239,61 @@ ggl.lineFeature = function (arg) {
     m_actor = vgl.actor();
     m_actor.setMaterial(mat);
 
-    start = buffers.alloc(numPts);
+    start = buffers.alloc(numPts * 6);
+    var currentIndex = start;
+
     for (i = 0; i < numPts; i += 1) {
-      buffers.write("pos", position[i], start + i, 1);
-      buffers.write("indices", [i], start + i, 1);
-      buffers.write("strokeWidth", [strokeWidth[i]], start + i * 1, 1);
-      buffers.write("strokeColor", strokeColor[i], start + i * 1, 1);
-      buffers.write("strokeOpacity", [strokeOpacity[i]], start + i * 1, 1);
+      //buffers.write('indices', [i], start + i, 1);
+      buffers.repeat('strokeWidth', [strokeWidth[i]], start + i * 6, 6);
+      buffers.repeat('strokeColor', strokeColor[i], start + i * 6, 6);
+      buffers.repeat('strokeOpacity', [strokeOpacity[i]], start + i * 6, 6);
     }
 
-    sourcePositions.pushBack(buffers.get("pos"));
+    var addVert = function (p, c, n, offset) {
+      buffers.write('prev', p, currentIndex, 1);
+      buffers.write('pos', c, currentIndex, 1);
+      buffers.write('next', n, currentIndex, 1);
+      buffers.write('offset', [offset], currentIndex, 1);
+      buffers.write('indices', [currentIndex], currentIndex, 1);
+      currentIndex += 1;
+    };
+
+    for (i = 1; i < position.length; i += 1) {
+      //buffers.write ('unit', unit_buffer, currentIndex, 6);
+      addVert(prev[i - 1], position[i - 1], next[i - 1], 1);
+      addVert(prev[i], position[i], next[i], -1);
+      addVert(prev[i - 1], position[i - 1], next[i - 1], -1);
+
+      addVert(prev[i - 1], position[i - 1], next[i - 1], 1);
+      addVert(prev[i], position[i], next[i], 1);
+      addVert(prev[i], position[i], next[i], -1);
+    }
+
+    sourcePositions.pushBack(buffers.get('pos'));
     geom.addSource(sourcePositions);
 
-    sourceStokeWidth.pushBack(buffers.get("strokeWidth"));
+    prevSourcePositions.pushBack(buffers.get('prev'));
+    geom.addSource(prevSourcePositions);
+
+    nextSourcePositions.pushBack(buffers.get('next'));
+    geom.addSource(nextSourcePositions);
+
+    sourceStokeWidth.pushBack(buffers.get('strokeWidth'));
     geom.addSource(sourceStokeWidth);
 
-    sourceStrokeColor.pushBack(buffers.get("strokeColor"));
+    sourceStrokeColor.pushBack(buffers.get('strokeColor'));
     geom.addSource(sourceStrokeColor);
 
-    sourceStrokeOpacity.pushBack(buffers.get("strokeOpacity"));
+    sourceStrokeOpacity.pushBack(buffers.get('strokeOpacity'));
     geom.addSource(sourceStrokeOpacity);
 
-    linesPrimitive.setIndices(buffers.get("indices"));
-    geom.addPrimitive(linesPrimitive);
+    offsetSourcePositions.pushBack(buffers.get('offset'));
+    geom.addSource(offsetSourcePositions);
+
+    trianglePrimitive.setIndices(buffers.get('indices'));
+    geom.addPrimitive(trianglePrimitive);
 
     mapper.setGeometryData(geom);
-
     m_actor.setMapper(mapper);
   }
 
@@ -245,4 +360,4 @@ ggl.lineFeature = function (arg) {
 inherit(ggl.lineFeature, geo.lineFeature);
 
 // Now register it
-geo.registerFeature("vgl", "line", ggl.lineFeature);
+geo.registerFeature('vgl', 'line', ggl.lineFeature);

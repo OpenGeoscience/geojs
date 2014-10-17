@@ -26,12 +26,31 @@ geo.lineFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
-      m_position = arg.position === undefined ? [] : arg.position,
+      m_position = arg.position === undefined ? null : arg.position,
+      m_line = arg.line === undefined ? null : arg.line,
       s_init = this._init;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get/Set position
+   * Get/Set line accessor
+   *
+   * @returns {geo.pointFeature}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.line = function (val) {
+    if (val === undefined) {
+      return m_line;
+    } else {
+      m_line = val;
+      m_this.dataTime().modified();
+      m_this.modified();
+    }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set position accessor
    *
    * @returns {geo.pointFeature}
    */
