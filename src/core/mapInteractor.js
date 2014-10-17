@@ -81,7 +81,9 @@ geo.mapInteractor = function (args) {
       zoomWheelModifiers: {},
       wheelScaleX: 1,
       wheelScaleY: 1,
-      zoomScale: 1
+      zoomScale: 1,
+      selectionButton: 'left',
+      selectionModifiers: {'shift': true}
     },
     m_options
   );
@@ -118,6 +120,12 @@ geo.mapInteractor = function (args) {
   //
   //   // zoom scale factor to change the magnitude of zoom move interactions
   //   zoomScale: 1
+  //
+  //   // button that must be pressed to enable drag selection
+  //    selectionButton: 'right' | 'left' | 'middle'
+  //
+  //   // keyboard modifiers that must be pressed to initiate a selection
+  //   selectionModifiers: {...}
   // }
 
   // default mouse object
@@ -165,6 +173,12 @@ geo.mapInteractor = function (args) {
   //    'action': 'zoom',  // an ongoing zoom event
   //    ...
   //  }
+  //
+  //  {
+  //    'acton': 'select',
+  //    'origin': {...},
+  //    'delta': {x: *, y: *}
+//  }
   m_state = {};
 
   ////////////////////////////////////////////////////////////////////////////
@@ -184,11 +198,16 @@ geo.mapInteractor = function (args) {
     // store the connected element
     $node = $(m_options.map.node());
 
+
     // add event handlers
     $node.on('mousemove.geojs', m_this._handleMouseMove);
     $node.on('mousedown.geojs', m_this._handleMouseDown);
     $node.on('mouseup.geojs', m_this._handleMouseUp);
     $node.on('mousewheel.geojs', m_this._handleMouseWheel);
+    if (m_options.panMoveButton === 'right' ||
+        m_options.zoomMoveButton === 'right') {
+      $node.on('contextmenu.geojs', function () { return false; });
+    }
     return m_this;
   };
 
@@ -211,7 +230,7 @@ geo.mapInteractor = function (args) {
    * Sets or gets map for this interactor, adds draw region layer if needed
    *
    * @param {geo.map} newMap optional
-   * @returns {geo.mapInteractorStyle|geo.map}
+   * @returns {geo.interactorStyle|geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.map = function (val) {
@@ -221,6 +240,22 @@ geo.mapInteractor = function (args) {
       return m_this;
     }
     return m_options.map;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Gets/sets the options object for the interactor.
+   *
+   * @param {Object} opts optional
+   * @returns {geo.interactorStyle|Object}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.options = function (opts) {
+    if (opts === undefined) {
+      return $.extend({}, m_options);
+    }
+    $.extend(m_options, opts);
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -239,6 +274,7 @@ geo.mapInteractor = function (args) {
       x: evt.pageX - offset.left,
       y: evt.pageY - offset.top
     };
+    m_mouse.geo = m_this.map().displayToGcs(m_mouse.map);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -270,6 +306,55 @@ geo.mapInteractor = function (args) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Compute a selection information object.
+   * @private
+   * @returns {Object}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._getSelection = function () {
+    var origin = m_state.origin,
+        mouse = m_this.mouse(),
+        map = m_this.map(),
+        display = {}, gcs = {};
+
+    // TODO: clamp to map bounds
+    // Get the display coordinates
+    display.upperLeft = {
+      x: Math.min(origin.map.x, mouse.map.x),
+      y: Math.min(origin.map.y, mouse.map.y)
+    };
+
+    display.lowerRight = {
+      x: Math.max(origin.map.x, mouse.map.x),
+      y: Math.max(origin.map.y, mouse.map.y)
+    };
+
+    display.upperRight = {
+      x: display.lowerRight.x,
+      y: display.upperLeft.y
+    };
+
+    display.lowerLeft = {
+      x: display.upperLeft.x,
+      y: display.lowerRight.y
+    };
+
+    // Get the gcs coordinates
+    gcs.upperLeft = map.displayToGcs(display.upperLeft);
+    gcs.lowerRight = map.displayToGcs(display.lowerRight);
+    gcs.upperRight = map.displayToGcs(display.upperRight);
+    gcs.lowerLeft = map.displayToGcs(display.lowerLeft);
+
+    return {
+      display: display,
+      gcs: gcs,
+      mouse: mouse,
+      origin: $.extend({}, m_state.origin)
+    };
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Handle event when a mouse button is pressed
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -284,6 +369,8 @@ geo.mapInteractor = function (args) {
       action = 'pan';
     } else if (eventMatch(m_options.zoomMoveButton, m_options.zoomMoveModifiers)) {
       action = 'zoom';
+    } else if (eventMatch(m_options.selectionButton, m_options.selectionModifiers)) {
+      action = 'select';
     }
 
     if (action) {
@@ -293,6 +380,10 @@ geo.mapInteractor = function (args) {
         origin: $.extend(true, {}, m_mouse),
         delta: {x: 0, y: 0}
       };
+
+      if (action === 'select') {
+        m_this.map().geoTrigger(geo.event.brushstart, m_this._getSelection());
+      }
 
       // bind temporary handlers to document
       $(document).on('mousemove.geojs', m_this._handleMouseMoveDocument);
@@ -315,6 +406,7 @@ geo.mapInteractor = function (args) {
     m_this._getMousePosition(evt);
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
+    m_this.map().geoTrigger(geo.event.mousemove, m_this.mouse());
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -323,7 +415,7 @@ geo.mapInteractor = function (args) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._handleMouseMoveDocument = function (evt) {
-    var dx, dy;
+    var dx, dy, selectionObj;
     m_this._getMousePosition(evt);
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
@@ -352,6 +444,10 @@ geo.mapInteractor = function (args) {
       m_this.map().zoom(
         m_this.map().zoom() - dy * m_options.zoomScale / 120
       );
+    } else if (m_state.action === 'select') {
+      // Get the bounds of the current selection
+      selectionObj = m_this._getSelection();
+      m_this.map().geoTrigger(geo.event.brush, selectionObj);
     }
 
     // Prevent default to stop text selection in particular
@@ -365,12 +461,23 @@ geo.mapInteractor = function (args) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._handleMouseUpDocument = function (evt) {
+    var selectionObj;
+
     m_this._getMousePosition(evt);
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
 
     // unbind temporary handlers on document
     $(document).off('.geojs');
+
+    if (m_mouse.buttons.right) {
+      evt.preventDefault();
+    }
+
+    if (m_state.action === 'select') {
+      selectionObj = m_this._getSelection();
+      m_this.map().geoTrigger(geo.event.brushend, selectionObj);
+    }
 
     // reset the interactor state
     m_state = {};
@@ -385,6 +492,9 @@ geo.mapInteractor = function (args) {
     m_this._getMousePosition(evt);
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
+
+    // fire a click event here
+    m_this.map().geoTrigger(geo.event.mouseclick, m_this.mouse());
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -395,10 +505,14 @@ geo.mapInteractor = function (args) {
   this._handleMouseWheel = function (evt) {
     var zoomFactor, direction;
 
+    // In case jquery-mousewheel isn't loaded for some reason
+    evt.deltaFactor = evt.deltaFactor || 1;
+
     m_this._getMouseModifiers(evt);
     evt.deltaX = evt.deltaX * m_options.wheelScaleX * evt.deltaFactor / 120;
     evt.deltaY = evt.deltaY * m_options.wheelScaleY * evt.deltaFactor / 120;
 
+    evt.preventDefault();
     if (!doRespond()) {
       m_wheelQueue.x += evt.deltaX;
       m_wheelQueue.y += evt.deltaY;
