@@ -27,6 +27,8 @@ ggl.pointFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       m_actor = null,
+      m_pixelWidthUniform = null,
+      m_aspectUniform = null,
       s_init = this._init,
       s_update = this._update;
 
@@ -181,14 +183,15 @@ ggl.pointFeature = function (arg) {
         strokeAttr = vgl.vertexAttribute("stroke"),
         fillOpacityAttr = vgl.vertexAttribute("fillOpacity"),
         strokeOpacityAttr = vgl.vertexAttribute("strokeOpacity"),
-        pixelWidthUniform = new vgl.floatUniform("pixelWidth",
-                              2.0 / m_this.renderer().width()),
-        aspectUniform = new vgl.floatUniform("aspect",
-                          m_this.renderer().width() / m_this.renderer().height()),
         modelViewUniform = new vgl.modelViewUniform("modelViewMatrix"),
         projectionUniform = new vgl.projectionUniform("projectionMatrix"),
         geom = vgl.geometryData(),
         mapper = vgl.mapper();
+
+    m_pixelWidthUniform = new vgl.floatUniform("pixelWidth",
+                            2.0 / m_this.renderer().width());
+    m_aspectUniform = new vgl.floatUniform("aspect",
+                        m_this.renderer().width() / m_this.renderer().height());
 
     posFunc = m_this.position();
     radFunc = m_this.style().radius;
@@ -247,8 +250,8 @@ ggl.pointFeature = function (arg) {
     prog.addVertexAttribute(fillOpacityAttr, vgl.vertexAttributeKeysIndexed.Eight);
     prog.addVertexAttribute(strokeOpacityAttr, vgl.vertexAttributeKeysIndexed.Nine);
 
-    prog.addUniform(pixelWidthUniform);
-    prog.addUniform(aspectUniform);
+    prog.addUniform(m_pixelWidthUniform);
+    prog.addUniform(m_aspectUniform);
     prog.addUniform(modelViewUniform);
     prog.addUniform(projectionUniform);
 
@@ -361,6 +364,11 @@ ggl.pointFeature = function (arg) {
         m_this.updateTime().getMTime() < m_this.getMTime()) {
       m_this._build();
     }
+
+    // Update uniforms
+    m_pixelWidthUniform.set(2.0 / m_this.renderer().width());
+    m_aspectUniform.set(m_this.renderer().width() /
+                        m_this.renderer().height());
 
     m_actor.setVisible(m_this.visible());
     m_actor.material().setBinNumber(m_this.bin());
