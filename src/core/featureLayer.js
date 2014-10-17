@@ -122,9 +122,6 @@ geo.featureLayer = function (arg) {
     });
 
     m_this.geoOn(geo.event.zoom, function (event) {
-      if (m_this.map()) {
-        m_this.map().zoom(event.curr_zoom);
-      }
       m_this._update({event: event});
       m_this.renderer()._render();
     });

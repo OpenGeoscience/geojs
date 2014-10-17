@@ -14,6 +14,7 @@
         "layer.js",
         "featureLayer.js",
         "event.js",
+        "mapInteractor.js",
         "time.js",
         "fileReader.js",
         "jsonReader.js",
@@ -40,7 +41,6 @@
         "pointFeature.js",
         "geomFeature.js",
         "planeFeature.js",
-        "mapInteractorStyle.js",
         "vglRenderer.js"
       ]
     },

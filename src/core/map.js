@@ -35,16 +35,18 @@ geo.map = function (arg) {
       m_height = arg.height || m_node.height(),
       m_gcs = arg.gcs === undefined ? "EPSG:4326" : arg.gcs,
       m_uigcs = arg.uigcs === undefined ? "EPSG:4326" : arg.uigcs,
-      m_center = arg.center === undefined ? [0.0, 0.0] :
-                 arg.center,
-      m_zoom = arg.zoom === undefined ? 10 : arg.zoom,
+      m_center = { x: 0, y: 0 },
+      m_zoom = arg.zoom === undefined ? 1 : arg.zoom,
       m_baseLayer = null,
       toMillis, calculateGlobalAnimationRange, cloneTimestep,
       m_animationState = {range: null, timestep: null, layers: null},
       m_intervalMap = {},
       m_pause,
       m_stop,
-      m_fileReader = null;
+      m_fileReader = null,
+      m_interactor = null,
+      m_validZoomRange = { min: 0, max: 16 },
+      m_transition = null;
 
   m_intervalMap.milliseconds = 1;
   m_intervalMap.seconds = m_intervalMap.milliseconds * 1000;
@@ -57,6 +59,15 @@ geo.map = function (arg) {
 
   this.geoOn(geo.event.animationPause, function () { m_pause = true; });
   this.geoOn(geo.event.animationStop, function () { m_stop = true; });
+
+  if (arg.center) {
+    if (Array.isArray(arg.center)) {
+      arg.center = {
+        x: arg.center[1],
+        y: arg.center[0]
+      };
+    }
+  }
 
   toMillis = function (delta) {
     var deltaLowercase = delta.toLowerCase();
@@ -162,36 +173,104 @@ geo.map = function (arg) {
    * @returns {Number|geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.zoom = function (val) {
+  this.zoom = function (val, direction) {
+    var base, evt;
     if (val === undefined) {
       return m_zoom;
     }
 
-    if (val !== m_zoom) {
-      m_zoom = val;
-      m_this.modified();
+    if (val === m_zoom || val > m_validZoomRange.max || val < m_validZoomRange.min) {
+      return m_this;
     }
 
-    // TODO Fix this
-    //      m_this.geoTrigger(geo.event.zoom);
+    base = m_this.baseLayer();
+
+    evt = {
+      geo: {},
+      zoomLevel: val,
+      screenPosition: direction,
+      eventType: geo.event.zoom
+    };
+    if (base) {
+      base.renderer().geoTrigger(geo.event.zoom, evt, true);
+    }
+
+    if (evt.geo.preventDefault) {
+      return;
+    }
+
+    m_zoom = val;
+    m_this.children().forEach(function (child) {
+      child.geoTrigger(geo.event.zoom, evt, true);
+    });
     return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get/Set center of the map
+   * Pan the map by (x: dx, y: dy) pixels.
    *
-   * @returns {Array|geo.map}
+   * @param {Object} delta
+   * @returns {geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.center = function (val) {
-    if (val === undefined) {
+  this.pan = function (delta) {
+    var base = m_this.baseLayer(),
+        evt;
+
+    evt = {
+      geo: {},
+      screenDelta: delta,
+      eventType: geo.event.pan
+    };
+    // first pan the base layer
+    if (base) {
+      base.renderer().geoTrigger(geo.event.pan, evt, true);
+    }
+
+    // If the base renderer says the pan is invalid, then cancel the action.
+    if (evt.geo.preventDefault) {
+      return;
+    }
+
+    m_center = m_this.displayToGcs({
+      x: m_width / 2,
+      y: m_height / 2
+    });
+    m_this.children().forEach(function (child) {
+      child.geoTrigger(geo.event.pan, evt, true);
+    });
+
+    m_this.modified();
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set center of the map to the given geographic coordinates, or get the
+   * current center.  Uses bare objects {x: 0, y: 0}.
+   *
+   * @param {Object} coordinates
+   * @returns {Object|geo.map}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.center = function (coordinates) {
+    var newCenter, currentCenter;
+
+    if (coordinates === undefined) {
       return m_center;
     }
-    m_center = val.slice;
-    // TODO Fix this
-    //      m_this.geoTrigger(geo.event.center);
-    m_this.modified();
+
+    // get the screen coordinates of the new center
+    newCenter = m_this.gcsToDisplay(coordinates);
+    currentCenter = m_this.gcsToDisplay(m_center);
+
+    // call the pan method
+    m_this.pan({
+      x: currentCenter.x - newCenter.x,
+      y: currentCenter.y - newCenter.y
+    });
+
     return m_this;
   };
 
@@ -219,6 +298,11 @@ geo.map = function (arg) {
     }
     m_this.addChild(newLayer);
     m_this.modified();
+
+    // TODO: need a better way to set the initial coordinates of a layer
+    if (!newLayer.referenceLayer()) {
+      m_this.center(m_this.center());
+    }
 
     m_this.geoTrigger(geo.event.layerAdd, {
       type: geo.event.layerAdd,
@@ -395,6 +479,17 @@ geo.map = function (arg) {
 
       // Set the layer as the reference layer
       m_baseLayer.referenceLayer(true);
+
+      if (arg.center) {
+        // This assumes that the base layer is initially centered at
+        // (0, 0).  May want to add an explicit call to the base layer
+        // to set a given center.
+        m_this.center(arg.center);
+      }
+      if (arg.zoom !== undefined) {
+        m_zoom = null;
+        m_this.zoom(arg.zoom);
+      }
 
       return m_this;
     }
@@ -688,6 +783,10 @@ geo.map = function (arg) {
     for (i = 0; i < layers.length; i += 1) {
       layers[i]._exit();
     }
+    if (m_this.interactor()) {
+      m_this.interactor().destroy();
+      m_this.interactor(null);
+    }
   };
 
   this._init(arg);
@@ -722,6 +821,122 @@ geo.map = function (arg) {
       }
     }
   });
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get or set the map interactor
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.interactor = function (arg) {
+    if (arg === undefined) {
+      return m_interactor;
+    }
+    m_interactor = arg;
+
+    // this makes it possible to set a null interactor
+    // i.e. map.interactor(null);
+    if (m_interactor) {
+      m_interactor.map(m_this);
+    }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get or set the min/max zoom range.
+   *
+   * @param {Object} arg {min: minimumzoom, max: maximumzom}
+   * @returns {Object|geo.map}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.zoomRange = function (arg) {
+    if (arg === undefined) {
+      return $.extend({}, m_validZoomRange);
+    }
+    m_validZoomRange.min = arg.min;
+    m_validZoomRange.max = arg.max;
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Start an animated zoom/pan.
+   *
+   * opts = {
+   *   center: { x: ... , y: ... } // the new center
+   *   zoom: ... // the new zoom level
+   *   duration: ... // the duration (in ms) of the transition
+   *   ease: ... // an easing function [0, 1] -> [0, 1]
+   * }
+   *
+   * @param {Object} opts
+   * @returns {geo.map}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.transition = function (opts) {
+    if (m_transition) {
+      console.log("Cannot start a transition until the current transition is finished");
+      return m_this;
+    }
+    var defaultOpts = {
+      center: m_this.center(),
+      zoom: m_this.zoom(),
+      duration: 1000,
+      ease: function (t) {
+        return t;
+      }
+    };
+
+    $.extend(defaultOpts, opts);
+
+    m_transition = {
+      start: {
+        center: m_this.center(),
+        zoom: m_this.zoom()
+      },
+      end: {
+        center: defaultOpts.center,
+        zoom: defaultOpts.zoom
+      },
+      ease: defaultOpts.ease
+    };
+
+    var deltaCenterX = m_transition.end.center.x - m_transition.start.center.x;
+    var deltaCenterY = m_transition.end.center.y - m_transition.start.center.y;
+    var deltaZoom = m_transition.end.zoom - m_transition.start.zoom;
+
+    function anim(time) {
+      if (!m_transition.start.time) {
+        m_transition.start.time = time;
+        m_transition.end.time = time + defaultOpts.duration;
+      }
+      if (time >= m_transition.end.time) {
+        m_this.center(m_transition.end.center);
+        m_this.zoom(m_transition.end.zoom);
+        m_transition = null;
+        return;
+      }
+
+      var z = m_transition.ease(
+        (time - m_transition.start.time) / defaultOpts.duration
+      );
+
+      m_this.center({
+        x: m_transition.start.center.x + z * deltaCenterX,
+        y: m_transition.start.center.y + z * deltaCenterY
+      });
+      m_this.zoom(
+        m_transition.start.zoom + z * deltaZoom
+      );
+
+      window.requestAnimationFrame(anim);
+    }
+
+    window.requestAnimationFrame(anim);
+    return m_this;
+  };
+
+  this.interactor(arg.interactor || geo.mapInteractor());
 
   return this;
 };

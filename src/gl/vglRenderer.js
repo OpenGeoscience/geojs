@@ -13,7 +13,10 @@
  * vlgRenderer and therefore layers.
  */
 //////////////////////////////////////////////////////////////////////////////
-ggl._vglViewerInstance = null;
+ggl._vglViewerInstances = {
+  viewers: [],
+  maps: []
+};
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -24,21 +27,54 @@ ggl._vglViewerInstance = null;
  */
 //////////////////////////////////////////////////////////////////////////////
 
-ggl.vglViewerInstance = function () {
+ggl.vglViewerInstance = function (map) {
   "use strict";
-  var canvas;
 
-  if (ggl._vglViewerInstance === null) {
-    canvas = $(document.createElement("canvas"));
+  var mapIdx,
+      maps = ggl._vglViewerInstances.maps,
+      viewers = ggl._vglViewerInstances.viewers;
+
+  function makeViewer() {
+    var canvas = $(document.createElement("canvas"));
     canvas.attr("class", ".webgl-canvas");
-    ggl._vglViewerInstance = vgl.viewer(canvas.get(0));
-    ggl._vglViewerInstance.renderWindow().removeRenderer(
-      ggl._vglViewerInstance.renderWindow().activeRenderer());
-    ggl._vglViewerInstance.setInteractorStyle(ggl.mapInteractorStyle());
-    ggl._vglViewerInstance.init();
+    var viewer = vgl.viewer(canvas.get(0));
+    viewer.renderWindow().removeRenderer(
+    viewer.renderWindow().activeRenderer());
+    viewer.init();
+    return viewer;
   }
 
-  return ggl._vglViewerInstance;
+  for (mapIdx = 0; mapIdx < maps.length; mapIdx += 1) {
+    if (map === maps[mapIdx]) {
+      break;
+    }
+  }
+
+  if (map !== maps[mapIdx]) {
+    maps[mapIdx] = map;
+    viewers[mapIdx] = makeViewer();
+  }
+
+  return viewers[mapIdx];
+};
+
+ggl.vglViewerInstance.deleteCache = function (viewer) {
+  "use strict";
+
+  var mapIdx,
+      maps = ggl._vglViewerInstances.maps,
+      viewers = ggl._vglViewerInstances.viewers;
+
+  for (mapIdx = 0; mapIdx < viewers.length; mapIdx += 1) {
+    if (viewer === viewers[mapIdx]) {
+      break;
+    }
+  }
+
+  if (viewer === viewers[mapIdx]) {
+    maps.splice(mapIdx, 1);
+    viewers.splice(mapIdx, 1);
+  }
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -58,7 +94,7 @@ ggl.vglRenderer = function (arg) {
   ggl.renderer.call(this, arg);
 
   var m_this = this,
-      m_viewer = ggl.vglViewerInstance(),
+      m_viewer = ggl.vglViewerInstance(this.layer().map()),
       m_contextRenderer = vgl.renderer(),
       m_width = 0,
       m_height = 0,
@@ -85,12 +121,6 @@ ggl.vglRenderer = function (arg) {
   this.height = function () {
     return m_height;
   };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Return width of the renderer
-   */
-  ////////////////////////////////////////////////////////////////////////////
 
 
   ////////////////////////////////////////////////////////////////////////////
@@ -267,15 +297,6 @@ ggl.vglRenderer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Reset to default
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.reset = function () {
-    m_viewer.interactorStyle().reset();
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
    * Initialize
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -295,85 +316,8 @@ ggl.vglRenderer = function (arg) {
 
     m_this.layer().node().append(m_this.canvas());
 
-    /// VGL uses jquery trigger on methods
-    $(m_viewer.interactorStyle()).on(geo.event.pan, function (event) {
-      m_this.geoTrigger(geo.event.pan, event);
-    });
-
-    $(m_viewer.interactorStyle()).on(geo.event.zoom, function (event) {
-      m_this.geoTrigger(geo.event.zoom, event);
-    });
-
     return m_this;
   };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Connect events to the map layer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._connectMapEvents = function () {
-
-    // Only connect up events if this renderer is associated with the
-    // reference/base layer.
-    if (m_this.layer().referenceLayer()) {
-
-      /// https://developer.mozilla.org/en-US/docs/Web/Events/wheel
-      var map = $(m_this.layer().map().node()),
-          wheel = "onwheel" in map.get(0) ? "wheel" :
-                  document.onmousewheel !== undefined ? "mousewheel" :
-                  "MozMousePixelScroll",
-          wheelDelta = (wheel === "wheel") ? function (evt) {
-            return evt.originalEvent.deltaY *
-              (evt.originalEvent.deltaMode ? 120 : 1);
-          } : wheel === "mousewheel" ? function (evt) {
-            return evt.originalEvent.wheelDelta;
-          } : function (evt) {
-            return -evt.originalEvent.detail;
-          };
-
-      m_viewer.unbindEventHandlers();
-
-      map.on(wheel, function (event) {
-        event.originalEvent.wheelDeltaY = wheelDelta(event);
-        event.originalEvent.wheelDelta = event.originalEvent.wheelDeltaY;
-        m_viewer.handleMouseWheel(event);
-      });
-
-      map.on("mousedown", function (event) {
-        m_viewer.handleMouseDown(event);
-      });
-
-      map.on("mousemove", function (event) {
-        m_viewer.handleMouseMove(event);
-      });
-
-      map.on("keypress", function (event) {
-        m_viewer.handleKeyPress(event);
-      });
-
-      map.on("contextmenu", function (event) {
-        m_viewer.handleContextMenu(event);
-      });
-
-      map.on("click", function (event) {
-        m_viewer.handleClick(event);
-      });
-
-      map.on("dblclick", function (event) {
-        m_viewer.handleDoubleClick(event);
-      });
-    }
-
-    m_viewer.interactorStyle().map(m_this.layer().map());
-    m_viewer.interactorStyle().reset();
-  };
-
-  this.geoOn(geo.event.layerAdd, function (event) {
-    if (event.layer === m_this.layer()) {
-      m_this._connectMapEvents();
-    }
-  });
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -406,7 +350,145 @@ ggl.vglRenderer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
+    ggl.vglViewerInstance.deleteCache(m_viewer);
   };
+
+  this._updateRendererCamera = function () {
+    var vglRenderer = m_this.contextRenderer(),
+        renderWindow = m_viewer.renderWindow(),
+        camera = vglRenderer.camera(),
+        pos, fp, cr;
+
+    vglRenderer.resetCameraClippingRange();
+    pos = camera.position();
+    fp = camera.focalPoint();
+    cr = camera.clippingRange();
+    renderWindow.renderers().forEach(function (renderer) {
+      var cam = renderer.camera();
+
+      if (cam !== camera) {
+        cam.setPosition(pos[0], pos[1], pos[2]);
+        cam.setFocalPoint(fp[0], fp[1], fp[2]);
+        cam.setClippingRange(cr[0], cr[1]);
+        renderer.render();
+      }
+    });
+  };
+
+  // connect to interactor events
+  this.geoOn(geo.event.pan, function (evt) {
+    var vglRenderer = m_this.contextRenderer(),
+        camera,
+        focusPoint,
+        centerDisplay,
+        centerGeo,
+        newCenterDisplay,
+        newCenterGeo,
+        renderWindow,
+        layer = m_this.layer();
+
+    // only the base layer needs to respond
+    if (layer.map().baseLayer() !== layer) {
+      return;
+    }
+
+    // skip handling if the renderer is unconnected
+    if (!vglRenderer || !vglRenderer.camera()) {
+      console.log("Pan event triggered on unconnected vgl renderer.");
+    }
+
+    renderWindow = m_viewer.renderWindow();
+    camera = vglRenderer.camera();
+    focusPoint = renderWindow.focusDisplayPoint();
+
+    // Calculate the center in display coordinates
+    centerDisplay = [ m_width / 2, m_height / 2, 0 ];
+
+    // Calculate the center in world coordinates
+    centerGeo = renderWindow.displayToWorld(
+      centerDisplay[0],
+      centerDisplay[1],
+      focusPoint,
+      vglRenderer
+    );
+
+    newCenterDisplay = [
+      centerDisplay[0] + evt.screenDelta.x,
+      centerDisplay[1] + evt.screenDelta.y
+    ];
+
+    newCenterGeo = renderWindow.displayToWorld(
+      newCenterDisplay[0],
+      newCenterDisplay[1],
+      focusPoint,
+      vglRenderer
+    );
+
+    camera.pan(
+      centerGeo[0] - newCenterGeo[0],
+      centerGeo[1] - newCenterGeo[1],
+      centerGeo[2] - newCenterGeo[2]
+    );
+
+    evt.center = {
+      x: newCenterGeo[0],
+      y: newCenterGeo[1],
+      z: newCenterGeo[2]
+    };
+
+    m_this._updateRendererCamera();
+  });
+
+  this.geoOn(geo.event.zoom, function (evt) {
+    var vglRenderer = m_this.contextRenderer(),
+        camera,
+        renderWindow,
+        layer = m_this.layer(),
+        delta,
+        center,
+        dir,
+        focusPoint,
+        position,
+        newZ;
+
+    // only the base layer needs to respond
+    if (layer.map().baseLayer() !== layer) {
+      return;
+    }
+
+    // skip handling if the renderer is unconnected
+    if (!vglRenderer || !vglRenderer.camera()) {
+      console.log("Zoom event triggered on unconnected vgl renderer.");
+    }
+
+    renderWindow = m_viewer.renderWindow();
+    camera = vglRenderer.camera();
+    focusPoint = camera.focalPoint();
+    position = camera.position();
+    newZ = 360 * Math.pow(2, -evt.zoomLevel);
+
+    if (evt.screenPosition) {
+      center = renderWindow.displayToWorld(
+        evt.screenPosition.x,
+        evt.screenPosition.y,
+        focusPoint,
+        vglRenderer
+      );
+      dir = [center[0] - position[0], center[1] - position[1], center[2] - position[2]];
+      position[0] += dir[0] * (1 - newZ / position[2]);
+      position[1] += dir[1] * (1 - newZ / position[2]);
+    } else {
+      dir = undefined;
+      delta = -delta;
+    }
+
+    camera.setPosition(position[0], position[1], 360 * Math.pow(2, -evt.zoomLevel));
+    if (dir) {
+      camera.setFocalPoint(position[0], position[1], focusPoint[2]);
+    }
+
+    m_this._updateRendererCamera();
+  });
 
   return this;
 };
