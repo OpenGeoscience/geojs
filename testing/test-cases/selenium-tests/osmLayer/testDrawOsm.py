@@ -6,6 +6,7 @@ from selenium_test import FirefoxTest, ChromeTest,\
 
 class osmBase(object):
     testCase = ('osmLayer',)
+    testRevision = 7
 
     def waitForIdle(self, timeout=5):
         self.runScript(
@@ -33,12 +34,10 @@ class osmBase(object):
 
 class FirefoxOSM(osmBase, FirefoxTest):
     testCase = osmBase.testCase + ('firefox',)
-    testRevision = 6
 
 
 class ChromeOSM(osmBase, ChromeTest):
     testCase = osmBase.testCase + ('chrome',)
-    testRevision = 7
 
 
 if __name__ == '__main__':

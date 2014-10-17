@@ -1,37 +1,9 @@
 window.startTest = function (done) {
   'use strict';
 
-  $('#map').width('100%');
-  $('#map').height('100%');
-
-  var mapOptions = {
-    node: '#map',
-    zoom : 2,
-    center : [40, -105]
-  };
-
-  var myMap = geo.map(mapOptions),
-      width, height;
-
-  window.gjsmap = myMap;
-  function resizeCanvas() {
-    width = $('#map').width();
-    height = $('#map').height();
-    updateAndDraw(width, height);
-  }
-
-  // Resize the canvas to fill browser window dynamically
-  window.addEventListener('resize', resizeCanvas, false);
-
-  function updateAndDraw(width, height) {
-    myMap.resize(0, 0, width, height);
-    myMap.draw();
-  }
-
-  resizeCanvas();
-
-  // create osm base layer
-  myMap.createLayer('osm', {m_baseUrl: '/data/tiles/'});
+  var mapOptions = { center : { y: 40.0, x: -105.0 } };
+  var myMap = window.geoTests.createOsmMap(mapOptions);
+  var width = myMap.node().width(), height = myMap.node().height();
 
   // create two layers
   var fixedLayer = myMap.createLayer('feature', {'renderer' : 'd3Renderer', 'sticky': false}),

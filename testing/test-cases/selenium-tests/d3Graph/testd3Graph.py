@@ -21,12 +21,12 @@ class d3GraphBase(object):
 
 class FirefoxOSM(d3GraphBase, FirefoxTest):
     testCase = d3GraphBase.testCase + ('firefox',)
-    testRevision = 3
+    testRevision = 4
 
 
 class ChromeOSM(d3GraphBase, ChromeTest):
     testCase = d3GraphBase.testCase + ('chrome',)
-    testRevision = 4
+    testRevision = 5
 
 
 if __name__ == '__main__':
