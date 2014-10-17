@@ -122,7 +122,7 @@ ggl.pointFeature = function (arg) {
         "  if (rad < (radiusWidth / (radiusWidth + strokeWidthVar))) {",
         "    float endStep = radiusWidth / (radiusWidth + strokeWidthVar);",
         "    float step = smoothstep (endStep - antialiasDist, endStep, rad);",
-        "    gl_FragColor = mix (fillColorVar, strokeColorVar, step);",
+        "    gl_FragColor = mix (fillColor, strokeColor, step);",
         "  }",
         "  else {",
         "    float step = smoothstep (1.0 - antialiasDist, 1.0, rad);",
