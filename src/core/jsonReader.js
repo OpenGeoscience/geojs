@@ -171,7 +171,7 @@ geo.jsonReader = function (arg) {
         return {
           x: d.x(),
           y: d.y(),
-          z: d.z()
+          z: d.z() || 0
         };
       })
       .style(_style);
