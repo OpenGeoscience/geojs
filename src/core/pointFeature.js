@@ -279,4 +279,6 @@ geo.pointFeature = function (arg) {
   return m_this;
 };
 
+geo.event.pointFeature = $.extend({}, geo.event.feature);
+
 inherit(geo.pointFeature, geo.feature);

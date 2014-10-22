@@ -27,6 +27,7 @@ geo.feature = function (arg) {
   arg = arg || {};
 
   var m_this = this,
+      m_selectionAPI = arg.selectionAPI === undefined ? false : arg.selectionAPI,
       m_style = {},
       m_layer = arg.layer === undefined ? null : arg.layer,
       m_gcs = arg.gcs === undefined ? "EPSG:4326" : arg.gcs,
@@ -37,141 +38,60 @@ geo.feature = function (arg) {
       m_dataTime = geo.timestamp(),
       m_buildTime = geo.timestamp(),
       m_updateTime = geo.timestamp(),
-      m_mouseover = null,
-      m_mouseout = null,
-      m_mousemove = null,
-      m_mouseclick = null,
-      m_brushend = null,
-      m_brush = null,
       m_selectedFeatures = [];
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Private method to bind or unbind mouse handlers on the map element.
+   * Private method to bind mouse handlers on the map element.
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._updateMouseHandlers = function () {
+  this._bindMouseHandlers = function () {
+
+    // Don't bind handlers for improved performance on features that don't
+    // require it.
+    if (!m_selectionAPI) {
+      return;
+    }
+
+    // First unbind to be sure that the handlers aren't bound twice.
+    m_this._unbindMouseHandlers();
+
+    m_this.geoOn(geo.event.mousemove, m_this._handleMousemove);
+    m_this.geoOn(geo.event.mouseclick, m_this._handleMouseclick);
+    m_this.geoOn(geo.event.brushend, m_this._handleBrushend);
+    m_this.geoOn(geo.event.brush, m_this._handleBrush);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Private method to unbind mouse handlers on the map element.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._unbindMouseHandlers = function () {
     m_this.geoOff(geo.event.mousemove, m_this._handleMousemove);
     m_this.geoOff(geo.event.mouseclick, m_this._handleMouseclick);
-    m_this.geoOff(geo.event.brushstart, m_this._handleBrush);
-    m_this.geoOff(geo.event.brushend, m_this._handleBrush);
+    m_this.geoOff(geo.event.brushend, m_this._handleBrushend);
     m_this.geoOff(geo.event.brush, m_this._handleBrush);
-    if (m_mouseout || m_mouseover || m_mousemove) {
-      m_this.geoOn(geo.event.mousemove, m_this._handleMousemove);
-    }
-    if (m_mouseclick) {
-      m_this.geoOn(geo.event.mouseclick, m_this._handleMouseclick);
-    }
-    if (m_brushend) {
-      m_this.geoOn(geo.event.brushend, m_this._handleBrushend);
-    }
-    if (m_brush) {
-      m_this.geoOn(geo.event.brush, m_this._handleBrush);
-    }
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Public methods for binding mouse events.  These accept functions with
+   * For binding mouse events, use functions with
    * the following call signatures:
    *
-   * function handler(data, index, mouse) {
-   *   // data - the data object of the feature
-   *   // index - the index inside the data array of the featue
-   *   // mouse - mouse information object (see src/core/mapInteractor.js)
-   *   // this - the current feature object
+   * function handler(arg) {
+   *   // arg.data - the data object of the feature
+   *   // arg.index - the index inside the data array of the featue
+   *   // arg.mouse - mouse information object (see src/core/mapInteractor.js)
    * }
    *
-   * Call with argument null to unbind.
+   * i.e.
+   *
+   * feature.geoOn(geo.event.feature.mousemove, function (arg) {
+   *   // do something with the feature marker.
+   * });
    */
   ////////////////////////////////////////////////////////////////////////////
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get/Set the mouseover handler.  Fires once when the mouse enters the
-   * feature.
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.mouseover = function (func) {
-    if (func === undefined) {
-      return m_mouseover;
-    }
-    m_mouseover = func;
-    m_this._updateMouseHandlers();
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get/Set the mouseout handler.  Fires once when the mouse exits the
-   * feature.
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.mouseout = function (func) {
-    if (func === undefined) {
-      return m_mouseout;
-    }
-    m_mouseout = func;
-    m_this._updateMouseHandlers();
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get/Set the mousemove handler.  Fires continuously as the moves moves
-   * inside the feature.
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.mousemove = function (func) {
-    if (func === undefined) {
-      return m_mousemove;
-    }
-    m_mousemove = func;
-    m_this._updateMouseHandlers();
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get/Set the click handler.
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.click = function (func) {
-    if (func === undefined) {
-      return m_mouseclick;
-    }
-    m_mouseclick = func;
-    m_this._updateMouseHandlers();
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get/Set the brush handler.  Fires continuously.
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.brush = function (func) {
-    if (func === undefined) {
-      return m_brush;
-    }
-    m_brush = func;
-    m_this._updateMouseHandlers();
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get/Set the brushend handler.
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.brushend = function (func) {
-    if (func === undefined) {
-      return m_brushend;
-    }
-    m_brushend = func;
-    m_this._updateMouseHandlers();
-    return m_this;
-  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -187,6 +107,14 @@ geo.feature = function (arg) {
    * @returns {Object}
    */
   ////////////////////////////////////////////////////////////////////////////
+  this.pointSearch = function () {
+    // base class method does nothing
+    return {
+      index: [],
+      found: []
+    };
+  };
+
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Private mousemove handler
@@ -207,40 +135,31 @@ geo.feature = function (arg) {
     });
 
     // Fire events for mouse in first.
-    if (m_mouseover) {
-      newFeatures.forEach(function (i) {
-        m_mouseover.call(
-          m_this,
-          data[i],
-          i,
-          mouse
-        );
-      });
-    }
+    newFeatures.forEach(function (i) {
+      m_this.geoTrigger(geo.event.feature.mouseover, {
+        data: data[i],
+        index: i,
+        mouse: mouse
+      }, true);
+    });
 
     // Fire events for mouse out next
-    if (m_mouseout) {
-      oldFeatures.forEach(function (i) {
-        m_mouseout.call(
-          m_this,
-          data[i],
-          i,
-          mouse
-        );
-      });
-    }
+    oldFeatures.forEach(function (i) {
+      m_this.geoTrigger(geo.event.feature.mouseout, {
+        data: data[i],
+        index: i,
+        mouse: mouse
+      }, true);
+    });
 
     // Fire events for mouse move last
-    if (m_mousemove) {
-      over.index.forEach(function (i) {
-        m_mousemove.call(
-          m_this,
-          data[i],
-          i,
-          mouse
-        );
-      });
-    }
+    over.index.forEach(function (i) {
+      m_this.geoTrigger(geo.event.feature.mousemove, {
+        data: data[i],
+        index: i,
+        mouse: mouse
+      }, true);
+    });
 
     // Replace the selected features array
     m_selectedFeatures = over.index;
@@ -257,12 +176,11 @@ geo.feature = function (arg) {
         over = m_this.pointSearch(mouse.geo);
 
     over.index.forEach(function (i) {
-      m_mouseclick.call(
-        m_this,
-        data[i],
-        i,
-        mouse
-      );
+      m_this.geoTrigger(geo.event.feature.mouseclick, {
+        data: data[i],
+        index: i,
+        mouse: mouse
+      }, true);
     });
   };
 
@@ -276,12 +194,12 @@ geo.feature = function (arg) {
         data = m_this.data();
 
     idx.forEach(function (i) {
-      m_brush.call(
-        m_this,
-        data[i],
-        i,
-        brush
-      );
+      m_this.geoTrigger(geo.event.feature.brush, {
+        data: data[i],
+        index: i,
+        mouse: brush.mouse,
+        brush: brush
+      }, true);
     });
   };
 
@@ -295,12 +213,12 @@ geo.feature = function (arg) {
         data = m_this.data();
 
     idx.forEach(function (i) {
-      m_brushend.call(
-        m_this,
-        data[i],
-        i,
-        brush
-      );
+      m_this.geoTrigger(geo.event.feature.brushend, {
+        data: data[i],
+        index: i,
+        mouse: brush.mouse,
+        brush: brush
+      }, true);
     });
   };
 
@@ -474,6 +392,7 @@ geo.feature = function (arg) {
     m_style = $.extend({},
                 {"opacity": 1.0}, arg.style === undefined ? {} :
                 arg.style);
+    m_this._bindMouseHandlers();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -514,15 +433,29 @@ geo.feature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
-    m_mouseover = null;
-    m_mouseout = null;
-    m_mousemove = null;
-    m_mouseclick = null;
-    m_this._updateMouseHandlers();
+    m_this._unbindMouseHandlers();
   };
 
   this._init(arg);
   return this;
+};
+
+
+////////////////////////////////////////////////////////////////////////////
+/**
+ * This event object provides mouse/keyboard events that can be handled
+ * by the features.  This provides a similar interface as core events,
+ * but with different names so the events don't interfere.  Subclasses
+ * can override this to provide custom events.
+ */
+////////////////////////////////////////////////////////////////////////////
+geo.event.feature = {
+  mousemove:  "geo_feature_mousemove",
+  mouseover:  "geo_feature_mouseover",
+  mouseout:   "geo_feature_mouseout",
+  mouseclick: "geo_feature_mouseclick",
+  brushend:   "geo_feature_brushend",
+  brush:      "geo_feature_brush"
 };
 
 inherit(geo.feature, geo.sceneObject);
