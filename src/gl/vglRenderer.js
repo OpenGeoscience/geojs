@@ -36,7 +36,7 @@ ggl.vglViewerInstance = function (map) {
 
   function makeViewer() {
     var canvas = $(document.createElement("canvas"));
-    canvas.attr("class", ".webgl-canvas");
+    canvas.attr("class", "webgl-canvas");
     var viewer = vgl.viewer(canvas.get(0));
     viewer.renderWindow().removeRenderer(
     viewer.renderWindow().activeRenderer());
