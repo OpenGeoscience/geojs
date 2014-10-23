@@ -23,7 +23,7 @@ window.geoTests = {
     $.extend(true, mapDefaults, mapOpts);
 
     var osmDefaults = {
-      m_baseUrl: '/data/tiles'
+      baseUrl: '/data/tiles/'
     };
     $.extend(true, osmDefaults, osmOpts);
 
