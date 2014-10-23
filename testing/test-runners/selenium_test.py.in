@@ -280,7 +280,7 @@ class BaseTest(TestCase):
         )
         self.driver.quit()
 
-    def wait(self, variable='window.testComplete', function=None, timeout=5):
+    def wait(self, variable='window.testComplete', function=None, timeout=30):
         '''
         Wait for a variable to be set to true, or a function to return true.
         Raise an error if timeout is exceeded.

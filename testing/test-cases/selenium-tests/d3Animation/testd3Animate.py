@@ -19,7 +19,14 @@ class d3AnimationBase(object):
         self.loadPage()
 
         testName = 'd3AnimateFrame15'
-        self.runScript('window.animateForward(15);')
+        self.runScript(
+            '''
+                window.animateForward(15, function () {
+                    window.animateForwardFinished = true;
+                });
+            '''
+        )
+        self.wait('window.animateForwardFinished')
         self.screenshotTest(testName)
 
     def testd3AnimateBackward(self):
@@ -27,7 +34,14 @@ class d3AnimationBase(object):
 
         testName = 'd3AnimateFrame75'
         self.runScript('window.animateForward(80);')
-        self.runScript('window.animateBackward(5);')
+        self.runScript(
+            '''
+                window.animateBackward(5, function () {
+                    window.animateBackwardFinished = true;
+                });
+            '''
+        )
+        self.wait('window.animateBackwardFinished')
         self.screenshotTest(testName)
 
     def testd3AnimateToEnd(self):

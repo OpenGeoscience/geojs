@@ -71,17 +71,23 @@ window.startTest = function(done) {
 
   window.geoTests.loadCitiesData(draw);
 
-  window.animateForward = function (nFrames) {
+  window.animateForward = function (nFrames, done) {
     var i;
     for (i = 0; i < nFrames; i += 1) {
       myMap.stepAnimationForward();
     }
+    if (done) {
+      myMap.onIdle(done);
+    }
   };
 
-  window.animateBackward = function (nFrames) {
+  window.animateBackward = function (nFrames, done) {
     var i;
     for (i = 0; i < nFrames; i += 1) {
       myMap.stepAnimationBackward();
+    }
+    if (done) {
+      myMap.onIdle(done);
     }
   };
 
