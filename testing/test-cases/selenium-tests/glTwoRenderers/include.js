@@ -10,6 +10,9 @@ window.startTest = function (done) {
     .lowerRight(geo.latlng(-90.0, 180.0))
     .style('image', '/data/land_shallow_topo_2048.png');
   layer2.name = 'layer2';
+  myMap.center({x: -40, y: 0});
+  myMap.zoom(0);
+  myMap.draw();
 
   window.geoTests.loadCitiesData(function (citieslatlon) {
       var layer = myMap.createLayer('feature');
@@ -30,8 +33,6 @@ window.startTest = function (done) {
         })
         .position(function (d) { return {x: d.lon, y: d.lat, z: d.elev}; });
       myMap.draw();
-      myMap.center({x: -40, y: 0});
-      myMap.zoom(0);
       myMap.onIdle(done);
     });
 };
