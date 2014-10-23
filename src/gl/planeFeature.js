@@ -119,7 +119,7 @@ ggl.planeFeature = function (arg) {
 
           if (m_this.drawOnAsyncResourceLoad()) {
             m_this._update();
-            m_this.layer()._draw();
+            m_this.layer().draw();
           }
         };
       }
