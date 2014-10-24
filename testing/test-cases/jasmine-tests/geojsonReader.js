@@ -31,19 +31,23 @@ describe("geojsonReader", function () {
             "coordinates": [
               [
                 102.0,
-                0.0
+                0.0,
+                0
               ],
               [
                 103.0,
-                1.0
+                1.0,
+                1
               ],
               [
                 104.0,
-                0.0
+                0.0,
+                2
               ],
               [
                 105.0,
-                1.0
+                1.0,
+                3
               ]
             ],
             "type": "LineString"
@@ -79,11 +83,19 @@ describe("geojsonReader", function () {
     };
   });
   it("read from object", function (done) {
-    var reader = geo.createFileReader("jsonReader", {"layer": layer});
+    var reader = geo.createFileReader("jsonReader", {"layer": layer}),
+        data, i;
 
     expect(reader.canRead(obj)).toBe(true);
     reader.read(obj, function (features) {
-      expect(features.length === 3).toBe(true);
+      expect(features.length).toEqual(3);
+
+      // Validate that we are getting the correct Z values
+      data = features[1].data()[0];
+      for(i=0; i<data.length; i++) {
+        expect(data[i].z()).toEqual(i);
+      }
+
       done();
     });
   });

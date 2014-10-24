@@ -9,7 +9,7 @@ class mapCenter(object):
 
     def loadPage(self):
         self.resizeWindow(640, 480)
-        self.loadURL('mapCenter/index.html')
+        self.loadURL('mapCenterAndZoom/index.html')
         self.wait()
 
     def test_map_initial_center(self):

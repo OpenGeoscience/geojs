@@ -1,10 +1,15 @@
 {
   "modules": {
-    "geo.core": {
+    "geo.init": {
       "prefix": "src/core",
       "files": [
         "init.js",
-        "version.js",
+        "version.js"
+      ]
+    },
+    "geo.core": {
+      "prefix": "src/core",
+      "files": [
         "object.js",
         "sceneObject.js",
         "timestamp.js",
@@ -30,6 +35,13 @@
         "transform.js",
         "renderer.js",
         "osmLayer.js"
+      ]
+    },
+    "geo.util": {
+      "prefix": "src/util",
+      "files": [
+        "init.js",
+        "wigglemaps.js"
       ]
     },
     "geo.gl": {
