@@ -60,9 +60,9 @@ geo.pointFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._updateRangeTree = function () {
     var pts, position,
-        radius = m_this.style().radius,
-        stroke = m_this.style().stroke,
-        strokeWidth = m_this.style().strokeWidth;
+        radius = m_this.style.get("radius"),
+        stroke = m_this.style.get("stroke"),
+        strokeWidth = m_this.style.get("strokeWidth");
 
     position = m_this.position();
 
@@ -95,9 +95,9 @@ geo.pointFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.pointSearch = function (p) {
     var min, max, data, idx = [], box, found = [], ifound = [], map, pt,
-        stroke = m_this.style().stroke,
-        strokeWidth = m_this.style().strokeWidth,
-        radius = m_this.style().radius;
+        stroke = m_this.style.get("stroke"),
+        strokeWidth = m_this.style.get("strokeWidth"),
+        radius = m_this.style.get("radius");
 
     data = m_this.data();
     if (!m_this.data || !m_this.data.length) {
@@ -200,6 +200,7 @@ geo.pointFeature = function (arg) {
     m_this._updateRangeTree();
     return m_this;
   };
+  this.style.get = s_style.get;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
