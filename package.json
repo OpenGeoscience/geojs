@@ -21,6 +21,7 @@
   },
   "devDependencies": {
     "grunt-contrib-watch": "~0.6",
+    "grunt-contrib-jade": "~0.13.0",
     "grunt-express": "~1.4",
     "blanket": "~1.1",
     "jshint": "~2.4",

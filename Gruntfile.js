@@ -1,4 +1,4 @@
-/* global module */
+/* global module, require */
 
 module.exports = function (grunt) {
   'use strict';
@@ -105,6 +105,15 @@ module.exports = function (grunt) {
             expand: true
           }
         ]
+      },
+      examples: {
+        files: [
+          {
+            src: ['examples/**/*'],
+            dest: 'dist/',
+            expand: true
+          }
+        ]
       }
     },
 
@@ -151,6 +160,12 @@ module.exports = function (grunt) {
           'sources.json'
         ],
         tasks: ['clean:source', 'template', 'copy', 'uglify:geojs']
+      },
+      examples: {
+        files: [
+          'examples/**/*'
+        ],
+        tasks: ['examples']
       }
     },
 
@@ -166,9 +181,16 @@ module.exports = function (grunt) {
           bases: ['dist']
         }
       }
+    },
+
+    jade: {
+      options: {
+        pretty: true,
+      }
     }
   });
 
+  grunt.loadNpmTasks('grunt-contrib-jade');
   grunt.loadNpmTasks('grunt-template');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-uglify');
@@ -176,10 +198,66 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-express');
 
-  grunt.registerTask('default', [
+  // create tasks for examples
+  var examples = grunt.file.expand('examples/*/example.json');
+  examples.forEach(function (ex) {
+    var path = require('path');
+    var dir = path.dirname(ex);
+    var exname = path.basename(dir);
+    var target = {
+      files: [
+        {
+          src: [
+            'examples/common/templates/index.jade',
+            path.join(dir, 'index.jade')
+          ],
+          dest: path.join('dist', dir, 'index.html'),
+          expand: false
+        }
+      ],
+      options: {
+        data: function () {
+          var data = grunt.file.readJSON(ex);
+          data.defaultCss = [
+            '//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css',
+            '//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css'
+          ];
+          data.defaultJs = [
+            '/built/geo.ext.min.js',
+            '/built/geo.min.js',
+            '//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js'
+          ];
+          return data;
+        }
+      }
+    };
+    grunt.config(['jade', exname], target);
+  });
+
+  grunt.registerTask('examples', [
+    'copy:examples',
+    'jade'
+  ]);
+
+  grunt.registerTask('library', [
     'template',
-    'copy',
-    'uglify'
+    'uglify:geojs'
+  ]);
+
+  grunt.registerTask('init', [
+    'uglify:ext'
+  ]);
+
+  grunt.registerTask('dev', [
+    'copy:geo',
+    'copy:vgl'
+  ]);
+
+  grunt.registerTask('default', [
+    'init',
+    'library',
+    'dev',
+    'examples'
   ]);
 
   grunt.registerTask(
