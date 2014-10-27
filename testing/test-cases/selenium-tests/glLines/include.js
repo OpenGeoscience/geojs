@@ -36,8 +36,8 @@ window.startTest = function(done) {
   // Load image to be used for drawing dots
   var layer = myMap.createLayer('feature');
   var style = {
-    'strokeColor': function () { return { r: 1, g: 0.2, b: 0 }; },
-    'strokeWidth': function () { return 1.0; }
+    'strokeColor': { r: 1, g: 0.2, b: 0 },
+    'strokeWidth': 1.0
   };
   layer.createFeature('line')
       .data(data)

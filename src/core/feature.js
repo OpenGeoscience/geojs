@@ -243,6 +243,29 @@ geo.feature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * A uniform getter that always returns a function even for constant styles.
+   * Maybe extend later to support accessor-like objects.  If undefined input,
+   * return all the styles as an object.
+   *
+   * @param {string|undefined} key
+   * @return function () { ... }
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.style.get = function (key) {
+    if (key === undefined) {
+      var all = {}, k;
+      for (k in m_style) {
+        if (m_style.hasOwnProperty(k)) {
+          all[k] = m_this.style.get(k);
+        }
+      }
+      return all;
+    }
+    return geo.util.ensureFunction(m_style[key]);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Get layer referenced by the feature
    */
   ////////////////////////////////////////////////////////////////////////////

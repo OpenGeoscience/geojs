@@ -143,9 +143,9 @@ ggl.lineFeature = function (arg) {
         mapper = vgl.mapper();
 
     posFunc = m_this.position();
-    strokeWidthFunc = m_this.style().strokeWidth;
-    strokeColorFunc = m_this.style().strokeColor;
-    strokeOpacityFunc = m_this.style().strokeOpacity;
+    strokeWidthFunc = m_this.style.get('strokeWidth');
+    strokeColorFunc = m_this.style.get('strokeColor');
+    strokeOpacityFunc = m_this.style.get('strokeOpacity');
 
     m_this.data().forEach(function (item) {
       lineItem = m_this.line()(item, itemIndex);

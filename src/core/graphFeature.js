@@ -48,13 +48,13 @@ geo.graphFeature = function (arg) {
     var defaultStyle = $.extend(true, {},
       {
         nodes: {
-          radius: function () { return 5.0; },
-          fill: function () { return true; },
-          fillColor: function () { return { r: 1.0, g: 0.0, b: 0.0 }; },
-          strokeColor: function () { return { r: 0, g: 0, b: 0 }; }
+          radius: 5.0,
+          fill: true,
+          fillColor: { r: 1.0, g: 0.0, b: 0.0 },
+          strokeColor: { r: 0, g: 0, b: 0 }
         },
         links: {
-          strokeColor: function () { return { r: 0.0, g: 0.0, b: 0.0 }; }
+          strokeColor: { r: 0.0, g: 0.0, b: 0.0 }
         },
         linkType: "path" /* 'path' || 'line' */
       },

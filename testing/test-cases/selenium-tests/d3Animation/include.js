@@ -44,9 +44,9 @@ window.startTest = function(done) {
         if (!m_pointFeature) {
           m_pointFeature = this.createFeature('point');
           m_pointFeature.style({
-            'radius': function () { return 5; },
-            'color': function () { return {r: 1, g: 0, b: 0}; },
-            'stroke': function () { return false; }
+            'radius': 5,
+            'color': {r: 1, g: 0, b: 0},
+            'stroke': false
           });
         }
 

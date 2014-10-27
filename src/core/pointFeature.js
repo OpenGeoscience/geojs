@@ -255,14 +255,14 @@ geo.pointFeature = function (arg) {
     var defaultStyle = $.extend(
       {},
       {
-        radius: function () { return 10.0; },
-        stroke: function () { return true; },
-        strokeColor: function () { return { r: 0.0, g: 1.0, b: 0.0 }; },
-        strokeWidth: function () { return 2.0; },
-        strokeOpacity: function () { return 1.0; },
-        fillColor: function () { return { r: 1.0, g: 0.0, b: 0.0 }; },
-        fill: function () { return true; },
-        fillOpacity: function () { return 1.0; },
+        radius: 10.0,
+        stroke: true,
+        strokeColor: { r: 0.0, g: 1.0, b: 0.0 },
+        strokeWidth: 2.0,
+        strokeOpacity: 1.0,
+        fillColor: { r: 1.0, g: 0.0, b: 0.0 },
+        fill: true,
+        fillOpacity: 1.0,
         sprites: false,
         sprites_image: null
       },

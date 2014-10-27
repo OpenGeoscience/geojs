@@ -194,14 +194,14 @@ ggl.pointFeature = function (arg) {
                         m_this.renderer().width() / m_this.renderer().height());
 
     posFunc = m_this.position();
-    radFunc = m_this.style().radius;
-    strokeWidthFunc = m_this.style().strokeWidth;
-    fillColorFunc = m_this.style().fillColor;
-    fillFunc = m_this.style().fill;
-    strokeColorFunc = m_this.style().strokeColor;
-    strokeFunc = m_this.style().stroke;
-    fillOpacityFunc = m_this.style().fillOpacity;
-    strokeOpactityFunc = m_this.style().strokeOpacity;
+    radFunc = m_this.style.get("radius");
+    strokeWidthFunc = m_this.style.get("strokeWidth");
+    fillColorFunc = m_this.style.get("fillColor");
+    fillFunc = m_this.style.get("fill");
+    strokeColorFunc = m_this.get("strokeColor");
+    strokeFunc = m_this.style.get("stroke");
+    fillOpacityFunc = m_this.style.get("fillOpacity");
+    strokeOpactityFunc = m_this.style.get("strokeOpacity");
 
     m_this.data().forEach(function (item) {
       var p = posFunc(item), c;
