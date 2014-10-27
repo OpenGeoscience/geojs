@@ -30,8 +30,11 @@ html(lang="en")
       .collapse.navbar-collapse#gj-navbar-collapse
         block headerButtons
         ul.nav.navbar-nav.navbar-right
+          block showSource
+            li
+              a.gj-show-source-link.glyphicon.glyphicon-file(href="#{docHTML}", target="gj-docco")
           li
-            a(href="#" data-toggle="modal" data-target="#about-modal") About
+            a.gj-show-about-link.glyphicon.glyphicon-question-sign(href="#" data-toggle="modal" data-target="#about-modal")
 
 
     // Add an about modal dialog

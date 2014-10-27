@@ -197,46 +197,65 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-express');
+  grunt.loadNpmTasks('grunt-docco');
 
-  // create tasks for examples
-  var examples = grunt.file.expand('examples/*/example.json');
-  examples.forEach(function (ex) {
-    var path = require('path');
-    var dir = path.dirname(ex);
-    var exname = path.basename(dir);
-    var target = {
-      files: [
-        {
-          src: [
-            'examples/common/templates/index.jade',
-            path.join(dir, 'index.jade')
-          ],
-          dest: path.join('dist', dir, 'index.html'),
-          expand: false
+  var findExamples = function () {
+    // create tasks for examples
+    var examples = grunt.file.expand('examples/*/example.json');
+    examples.forEach(function (ex) {
+      var path = require('path');
+      var dir = path.dirname(ex);
+      var exname = path.basename(dir);
+      var data = grunt.file.readJSON(ex);
+      data.docHTML = path.join(
+        'doc',
+        path.basename(data.exampleJs[0].replace('.js', '.html'))
+      );
+      var target = {
+        files: [
+          {
+            src: [
+              'examples/common/templates/index.jade',
+              path.join(dir, 'index.jade')
+            ],
+            dest: path.join('dist', dir, 'index.html'),
+            expand: false
+          }
+        ],
+        options: {
+          data: function () {
+            data.defaultCss = [
+              '//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css',
+              '//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css',
+              '/examples/common/css/examples.css'
+            ];
+            data.defaultJs = [
+              '/built/geo.ext.min.js',
+              '/built/geo.min.js',
+              '//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js',
+              '/examples/common/js/examples.js'
+            ];
+            return data;
+          }
         }
-      ],
-      options: {
-        data: function () {
-          var data = grunt.file.readJSON(ex);
-          data.defaultCss = [
-            '//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css',
-            '//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css'
-          ];
-          data.defaultJs = [
-            '/built/geo.ext.min.js',
-            '/built/geo.min.js',
-            '//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js'
-          ];
-          return data;
-        }
-      }
-    };
-    grunt.config(['jade', exname], target);
-  });
+      };
+      grunt.config(['jade', exname], target);
 
+      grunt.config(['docco', exname], {
+        src: data.exampleJs.map(function (p) { return 'examples/' + p; }),
+        options: {
+          output: path.join('dist', dir, 'doc'),
+          layout: 'linear'
+        }
+      });
+    });
+  };
+
+  findExamples();
   grunt.registerTask('examples', [
     'copy:examples',
-    'jade'
+    'jade',
+    'docco'
   ]);
 
   grunt.registerTask('library', [
