@@ -1,0 +1,25 @@
+extends ./common/templates/index.jade
+
+mixin thumbnail(ex)
+  .col-md-4
+    .thumbnail
+      a(href="#{ex.path}")
+        img(src="#{ex.thumbnail}")
+      .caption
+        h3= ex.title
+        p= ex.about.short || ex.about.text
+
+block mainContent
+  .jumbotron
+    h1 Welcome to GeoJS
+    p Interesting blurb...
+
+  .container-fluid
+    - var iExample = 0;
+    while iExample < examples.length
+      .row
+        - for (var i = 0 ; i < 3; i += 1)
+          if iExample < examples.length
+            +thumbnail(examples[iExample])
+            - iExample += 1
+

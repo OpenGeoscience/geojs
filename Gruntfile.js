@@ -202,20 +202,21 @@ module.exports = function (grunt) {
   var findExamples = function () {
     // create tasks for examples
     var examples = grunt.file.expand('examples/*/example.json');
-    examples.forEach(function (ex) {
+    var exlist = examples.map(function (ex) {
       var path = require('path');
       var dir = path.dirname(ex);
       var exname = path.basename(dir);
       var data = grunt.file.readJSON(ex);
-      data.docHTML = path.join(
-        'doc',
-        path.basename(data.exampleJs[0].replace('.js', '.html'))
-      );
+      if (data.exampleJs.length) {
+        data.docHTML = path.join(
+          'doc',
+          path.basename(data.exampleJs[0].replace('.js', '.html'))
+        );
+      }
       var target = {
         files: [
           {
             src: [
-              'examples/common/templates/index.jade',
               path.join(dir, 'index.jade')
             ],
             dest: path.join('dist', dir, 'index.html'),
@@ -241,13 +242,49 @@ module.exports = function (grunt) {
       };
       grunt.config(['jade', exname], target);
 
-      grunt.config(['docco', exname], {
-        src: data.exampleJs.map(function (p) { return 'examples/' + p; }),
-        options: {
-          output: path.join('dist', dir, 'doc'),
-          layout: 'linear'
+      if (data.docHTML) {
+        grunt.config(['docco', exname], {
+          src: data.exampleJs.map(function (p) { return 'examples/' + p; }),
+          options: {
+            output: path.join('dist', dir, 'doc'),
+            layout: 'linear'
+          }
+        });
+      }
+
+      return data;
+    });
+
+    // configure the main examples page
+    grunt.config(['jade', 'examples'], {
+      files: [
+        {
+          src: ['examples/index.jade'],
+          dest: 'dist/examples/index.html'
         }
-      });
+      ],
+      options: {
+        data: {
+          hideNavbar: true,
+          defaultCss: [
+            '//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css',
+            '//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css',
+            '/examples/common/css/examples.css'
+          ],
+          defaultJs: [
+            '/built/geo.ext.min.js',
+            '//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js',
+            '/examples/common/js/examples.js'
+          ],
+          exampleCss: [],
+          exampleJs: [],
+          examples: exlist,
+          title: 'GeoJS',
+          about: {
+            hidden: true
+          }
+        }
+      }
     });
   };
 

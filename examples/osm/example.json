@@ -1,4 +1,6 @@
 {
+  "path": "osm/index.html",
+  "thumbnail": "osm/osm.jpg",
   "title": "GeoJS open street map layer",
   "exampleCss": ["osm/main.css"],
   "exampleJs": ["osm/main.js"],
