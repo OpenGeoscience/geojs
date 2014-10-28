@@ -30,6 +30,10 @@ window.geoTests = {
     var map = geo.map(mapDefaults);
     map.createLayer('osm', osmDefaults);
 
+    map.interactor().options({
+      momentum: false
+    });
+
     if (osmDefaults.m_baseUrl) {
       // change the zoom range to represent the
       // tiles present in the local dataset

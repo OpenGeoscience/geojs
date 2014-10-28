@@ -875,7 +875,8 @@ geo.map = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.transition = function (opts) {
     if (m_transition) {
-      console.log("Cannot start a transition until the current transition is finished");
+      console.log("Cannot start a transition until the" +
+                  " current transition is finished");
       return m_this;
     }
     var defaultOpts = {
