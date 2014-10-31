@@ -443,7 +443,7 @@ geo.map = function (arg) {
       output = m_baseLayer.renderer().displayToWorld(input);
       output = m_baseLayer.fromLocal(output);
     } else {
-      throw "Conversion method latLonToDisplay does not handle " + input;
+      throw "Conversion method displayToGcs does not handle " + input;
     }
     return output;
   };
