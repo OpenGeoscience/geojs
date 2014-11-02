@@ -68,6 +68,14 @@
         "d3Renderer.js"
       ]
     },
+    "geo.ui": {
+      "prefix": "src/ui",
+      "files": [
+        "uiLayer.js",
+        "widget.js",
+        "sliderWidget.js"
+      ]
+    },
     "vgl": {
       "prefix": "vgl/src",
       "files": [
