@@ -19,7 +19,8 @@ geo.widget = function (arg) {
   }
   geo.sceneObject.call(this, arg);
 
-  var m_this = this;
+  var m_this = this,
+      m_layer = arg.layer;
 
   this._init = function () {
     m_this.modified();
@@ -57,6 +58,10 @@ geo.widget = function (arg) {
     m_this.removeChild(feature);
 
     return m_this;
+  };
+
+  this.layer = function () {
+    return m_layer;
   };
 };
 inherit(geo.widget, geo.sceneObject);
