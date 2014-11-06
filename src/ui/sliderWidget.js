@@ -32,7 +32,8 @@ geo.sliderWidget = function (arg) {
       m_height = 100,
       m_nubSize = 6,
       m_plusIcon,
-      m_minusIcon;
+      m_minusIcon,
+      m_group;
 
   /* http://icomoon.io */
   /* CC BY 3.0 http://creativecommons.org/licenses/by/3.0/ */
@@ -41,6 +42,20 @@ geo.sliderWidget = function (arg) {
   m_minusIcon = 'M512 81.92c-237.568 0-430.080 192.614-430.080 430.080 0 237.568 192.563 430.080 430.080 430.080s430.080-192.563 430.080-430.080c0-237.517-192.563-430.080-430.080-430.080zM770.56 459.674v104.704h-517.12v-104.704h517.12z';
   /* jshint +W101 */
 
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Add an icon from a path string.
+ *
+ * @function
+ * @argument {String} icon svg path string
+ * @argument {d3 selection} base where to append the element
+ * @argument {Number} cx Center x-coordinate
+ * @argument {Number} cy Center y-coordinate
+ * @argument {Number} size Icon size in pixels
+ * @returns {d3 group element}
+ * @private
+ */
+//////////////////////////////////////////////////////////////////////////////
   function put_icon(icon, base, cx, cy, size) {
     var g = base.append('g');
 
@@ -60,6 +75,15 @@ geo.sliderWidget = function (arg) {
     return g;
   }
 
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Initialize the slider widget in the map.
+ *
+ * @function
+ * @returns {geo.sliderWidget}
+ * @private
+ */
+//////////////////////////////////////////////////////////////////////////////
   this._init = function () {
     var svg = m_this.layer().renderer().canvas(),
         x0 = 40,
@@ -81,10 +105,14 @@ geo.sliderWidget = function (arg) {
         .style('fill-opacity', 1)
         .attr('filter', 'url(#geo-blur)');
 
-    svg = svg.append('g');
+    // Create the main group element
+    svg = svg.append('g').classed('geo-ui-slider', true);
+    m_group = svg;
 
+    // Create + zoom button
     m_plus = svg.append('g');
     m_plus.append('circle')
+      .classed('geo-zoom-in', true)
       .attr('cx', m_xscale(0))
       .attr('cy', m_yscale(0.0) - m_width + 2)
       .attr('r', m_width / 2)
@@ -110,8 +138,10 @@ geo.sliderWidget = function (arg) {
       .style('pointer-events', 'none');
 
 
+    // Create the - zoom button
     m_minus = svg.append('g');
     m_minus.append('circle')
+      .classed('geo-zoom-out', true)
       .attr('cx', m_xscale(0))
       .attr('cy', m_yscale(1.0) + m_width - 2)
       .attr('r', m_width / 2)
@@ -146,7 +176,9 @@ geo.sliderWidget = function (arg) {
       evt.stopPropagation();
     }
 
+    // Create the track
     m_track = svg.append('rect')
+      .classed('geo-zoom-track', true)
       .attr('x', m_xscale(0) - m_width / 10)
       .attr('y', m_yscale(0))
       .attr('rx', m_width / 10)
@@ -162,7 +194,9 @@ geo.sliderWidget = function (arg) {
         respond(d3.event);
       });
 
+    // Create the nub
     m_nub = svg.append('rect')
+      .classed('geo-zoom-nub', true)
       .attr('x', m_xscale(-4))
       .attr('y', m_yscale(0.5) - m_nubSize / 2)
       .attr('rx', 3)
@@ -184,6 +218,8 @@ geo.sliderWidget = function (arg) {
         d3.event.stopPropagation();
       });
 
+    // Get the bounding box to size a background
+    // rectangle for the widget.
     var bbox = svg.node().getBBox();
     back.attr('width', bbox.width + 20)
       .attr('height', bbox.height + 20)
@@ -199,6 +235,7 @@ geo.sliderWidget = function (arg) {
       });
 
 
+    // Apply a highlight effect
     svg.selectAll('*')
       .on('mouseover', function () {
         d3.select(this).attr('filter', 'url(#geo-highlight)');
@@ -207,7 +244,7 @@ geo.sliderWidget = function (arg) {
         d3.select(this).attr('filter', null);
       });
 
-
+    // Update the nub position on zoom
     m_this.layer().geoOn(geo.event.zoom, function () {
       m_this._update();
     });
@@ -215,11 +252,30 @@ geo.sliderWidget = function (arg) {
     m_this._update();
   };
 
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Removes the slider element from the map and unbinds all handlers.
+ *
+ * @function
+ * @returns {geo.sliderWidget}
+ * @private
+ */
+//////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
-    m_this.layer().renderer().canvas().remove();
+    m_group.remove();
     m_this.layer().geoOff(geo.event.zoom);
   };
 
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Update the slider widget state in reponse to map changes.  I.e. zoom
+ * range changes.
+ *
+ * @function
+ * @returns {geo.sliderWidget}
+ * @private
+ */
+//////////////////////////////////////////////////////////////////////////////
   this._update = function (obj) {
     var map = m_this.layer().map(),
         zoomRange = map.zoomRange(),
