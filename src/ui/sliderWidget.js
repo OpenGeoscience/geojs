@@ -88,22 +88,12 @@ geo.sliderWidget = function (arg) {
     var svg = m_this.layer().renderer().canvas(),
         x0 = 40,
         y0 = 40 + m_width,
-        map = m_this.layer().map(),
-        main = svg;
+        map = m_this.layer().map();
 
     // create d3 scales for positioning
     // TODO: make customizable and responsive
     m_xscale = d3.scale.linear().domain([-4, 4]).range([x0, x0 + m_width]);
     m_yscale = d3.scale.linear().domain([0, 1]).range([y0, y0 + m_height]);
-
-    // Add a background
-    var back = svg
-      .append('rect')
-        .attr('rx', 20)
-        .attr('ry', 20)
-        .style('fill', 'gray')
-        .style('fill-opacity', 1)
-        .attr('filter', 'url(#geo-blur)');
 
     // Create the main group element
     svg = svg.append('g').classed('geo-ui-slider', true);
@@ -216,22 +206,6 @@ geo.sliderWidget = function (arg) {
           d3.select(document).on('.geo.slider', null);
         });
         d3.event.stopPropagation();
-      });
-
-    // Get the bounding box to size a background
-    // rectangle for the widget.
-    var bbox = svg.node().getBBox();
-    back.attr('width', bbox.width + 20)
-      .attr('height', bbox.height + 20)
-      .attr('x', bbox.x - 10)
-      .attr('y', bbox.y - 10)
-      .style('opacity', 1e-6);
-    main
-      .on('mouseenter', function () {
-        back.style('opacity', 1);
-      })
-      .on('mouseleave', function () {
-        back.style('opacity', 1e-6);
       });
 
 
