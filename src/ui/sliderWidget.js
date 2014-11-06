@@ -136,6 +136,16 @@ geo.sliderWidget = function (arg) {
     ).style('cursor', 'pointer')
       .style('pointer-events', 'none');
 
+    // Respond to a mouse event on the widget
+    function respond(evt) {
+      var z = m_yscale.invert(d3.mouse(m_this.layer().node()[0])[1]),
+          zrange = map.zoomRange();
+      z = (1 - z) * (zrange.max - zrange.min) + zrange.min;
+      map.zoom(z);
+      m_this._update();
+      evt.stopPropagation();
+    }
+
     m_track = svg.append('rect')
       .attr('x', m_xscale(0) - m_width / 10)
       .attr('y', m_yscale(0))
@@ -147,6 +157,9 @@ geo.sliderWidget = function (arg) {
         'fill': 'white',
         'stroke': 'black',
         'cursor': 'pointer'
+      })
+      .on('click', function () {
+        respond(d3.event);
       });
 
     m_nub = svg.append('rect')
@@ -161,19 +174,11 @@ geo.sliderWidget = function (arg) {
         'cursor': 'pointer'
       })
       .on('mousedown', function () {
-        function respond() {
-          var z = m_yscale.invert(d3.mouse(m_this.layer().node()[0])[1]),
-              zrange = map.zoomRange(), evt = d3.event;
-          z = (1 - z) * (zrange.max - zrange.min) + zrange.min;
-          map.zoom(z);
-          m_this._update();
-          evt.stopPropagation();
-        }
         d3.select(document).on('mousemove.geo.slider', function () {
-          respond();
+          respond(d3.event);
         });
         d3.select(document).on('mouseup.geo.slider', function () {
-          respond(true);
+          respond(d3.event);
           d3.select(document).on('.geo.slider', null);
         });
         d3.event.stopPropagation();
