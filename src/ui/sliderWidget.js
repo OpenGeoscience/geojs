@@ -112,7 +112,11 @@ geo.sliderWidget = function (arg) {
       })
       .on('click', function () {
         var z = map.zoom();
-        map.zoom(z + 1);
+        map.transition({
+          zoom: z + 1,
+          ease: d3.ease('cubic-in-out'),
+          duration: 500
+        });
       })
       .on('mousedown', function () {
         d3.event.stopPropagation();
@@ -141,7 +145,11 @@ geo.sliderWidget = function (arg) {
       })
       .on('click', function () {
         var z = map.zoom();
-        map.zoom(z - 1);
+        map.transition({
+          zoom: z - 1,
+          ease: d3.ease('cubic-in-out'),
+          duration: 500
+        });
       })
       .on('mousedown', function () {
         d3.event.stopPropagation();
