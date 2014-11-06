@@ -30,7 +30,7 @@ geo.sliderWidget = function (arg) {
       m_nub,
       m_width = 20, // Approximate size of the widget in pixels
       m_height = 100,
-      m_nubSize = 6,
+      m_nubSize = 10,
       m_plusIcon,
       m_minusIcon,
       m_group;
@@ -169,11 +169,11 @@ geo.sliderWidget = function (arg) {
     // Create the track
     m_track = svg.append('rect')
       .classed('geo-zoom-track', true)
-      .attr('x', m_xscale(0) - m_width / 10)
+      .attr('x', m_xscale(0) - m_width / 6)
       .attr('y', m_yscale(0))
       .attr('rx', m_width / 10)
       .attr('ry', m_width / 10)
-      .attr('width', m_width / 5)
+      .attr('width', m_width / 3)
       .attr('height', m_height)
       .style({
         'fill': 'white',
