@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src=/js/047cfca2/geo.all.js></script>
+    <style>
+        html, body{
+            height: 100%;
+            width: 100%;
+            margin: 0px;
+            overflow: hidden;
+        }
+        #map {
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+        }
+        #info {
+            width: 100%;
+            height: 50px;
+            text-align: center;
+            font-size: x-large;
+        }
+    </style>
+
+</head>
+<body style="height: 100%;">
+<script>
+var myMap;
+$(function() {
+    var mapOptions = {
+        node: '#map',
+        zoom : 2,
+        center : [39.8, -98.6]
+    },
+        layer1, layer2;
+
+    // Create the map
+    myMap = geo.map(mapOptions);
+
+    // Create the background layer with locally served tiles
+    myMap.createLayer('osm');/*, {
+        baseUrl: 'data/tiles/'
+    });*/
+
+    // Create a gl feature layer
+    //layer1 = myMap.createLayer('feature'/*, {'renderer': 'd3Renderer'}*/);
+    ui = myMap.createLayer('ui');
+    ui.createWidget('slider');
+
+    /// Resize the canvas to fill browser window dynamically
+    window.addEventListener('resize', resizeCanvas, false);
+
+    function resizeCanvas() {
+        myMap.resize(0, 0, $('#map').width(), $('#map').height());
+        myMap.draw(); 
+    }
+    resizeCanvas();
+
+});
+</script>
+<div id='map'></div>
+</body>
