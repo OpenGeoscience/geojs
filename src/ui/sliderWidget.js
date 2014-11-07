@@ -165,12 +165,19 @@ geo.sliderWidget = function (arg) {
       .style('pointer-events', 'none');
 
     // Respond to a mouse event on the widget
-    function respond(evt) {
+    function respond(evt, trans) {
       var z = m_yscale.invert(d3.mouse(m_this.layer().node()[0])[1]),
           zrange = map.zoomRange();
       z = (1 - z) * (zrange.max - zrange.min) + zrange.min;
-      map.zoom(z);
-      m_this._update();
+      if (trans) {
+        map.transition({
+          zoom: z,
+          ease: d3.ease('cubic-in-out'),
+          duration: 500
+        });
+      } else {
+        map.zoom(z);
+      }
       evt.stopPropagation();
     }
 
@@ -189,7 +196,7 @@ geo.sliderWidget = function (arg) {
         'cursor': 'pointer'
       })
       .on('click', function () {
-        respond(d3.event);
+        respond(d3.event, true);
       });
 
     // Create the nub
