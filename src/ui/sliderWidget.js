@@ -197,10 +197,12 @@ geo.sliderWidget = function (arg) {
         map.transition({
           zoom: z,
           ease: d3.ease('cubic-in-out'),
-          duration: 500
+          duration: 500,
+          done: m_this._update()
         });
       } else {
         map.zoom(z);
+        m_this._update();
       }
       evt.stopPropagation();
     }
