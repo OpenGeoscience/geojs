@@ -879,13 +879,38 @@ geo.map = function (arg) {
                   " current transition is finished");
       return m_this;
     }
+
+    function interp1(p0, p1, t) {
+      return p0 + (p1 - p0) * t;
+    }
+    function defaultInterp(p0, p1) {
+      return function (t) {
+        return [
+          interp1(p0[0], p1[0], t),
+          interp1(p0[1], p1[1], t),
+          interp1(p0[2], p1[2], t)
+        ];
+      };
+    }
+
+    // Transform zoom level into z-coordinate and inverse
+    function zoom2z(z) {
+      return 360 * Math.pow(2, -1 - z);
+    }
+    function z2zoom(z) {
+      return -1 - Math.log2(z / 360);
+    }
+
     var defaultOpts = {
       center: m_this.center(),
       zoom: m_this.zoom(),
       duration: 1000,
       ease: function (t) {
         return t;
-      }
+      },
+      interp: defaultInterp,
+      done: null,
+      zCoord: true
     };
 
     $.extend(defaultOpts, opts);
@@ -899,14 +924,41 @@ geo.map = function (arg) {
         center: defaultOpts.center,
         zoom: defaultOpts.zoom
       },
-      ease: defaultOpts.ease
+      ease: defaultOpts.ease,
+      zCoord: defaultOpts.zCoord,
+      done: defaultOpts.done
     };
 
-    var deltaCenterX = m_transition.end.center.x - m_transition.start.center.x;
-    var deltaCenterY = m_transition.end.center.y - m_transition.start.center.y;
-    var deltaZoom = m_transition.end.zoom - m_transition.start.zoom;
+    if (defaultOpts.zCoord) {
+      m_transition.interp = defaultOpts.interp(
+        [
+          m_transition.start.center.x,
+          m_transition.start.center.y,
+          zoom2z(m_transition.start.zoom)
+        ],
+        [
+          m_transition.end.center.x,
+          m_transition.end.center.y,
+          zoom2z(m_transition.end.zoom)
+        ]
+      );
+    } else {
+      m_transition.interp = defaultOpts.interp(
+        [
+          m_transition.start.center.x,
+          m_transition.start.center.y,
+          m_transition.start.zoom
+        ],
+        [
+          m_transition.end.center.x,
+          m_transition.end.center.y,
+          m_transition.end.zoom
+        ]
+      );
+    }
 
     function anim(time) {
+      var done = m_transition.done;
       if (!m_transition.start.time) {
         m_transition.start.time = time;
         m_transition.end.time = time + defaultOpts.duration;
@@ -915,6 +967,9 @@ geo.map = function (arg) {
         m_this.center(m_transition.end.center);
         m_this.zoom(m_transition.end.zoom);
         m_transition = null;
+        if (done) {
+          done();
+        }
         return;
       }
 
@@ -922,13 +977,15 @@ geo.map = function (arg) {
         (time - m_transition.start.time) / defaultOpts.duration
       );
 
+      var p = m_transition.interp(z);
+      if (m_transition.zCoord) {
+        p[2] = z2zoom(p[2]);
+      }
       m_this.center({
-        x: m_transition.start.center.x + z * deltaCenterX,
-        y: m_transition.start.center.y + z * deltaCenterY
+        x: p[0],
+        y: p[1]
       });
-      m_this.zoom(
-        m_transition.start.zoom + z * deltaZoom
-      );
+      m_this.zoom(p[2]);
 
       window.requestAnimationFrame(anim);
     }
