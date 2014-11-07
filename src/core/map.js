@@ -200,6 +200,10 @@ geo.map = function (arg) {
     }
 
     m_zoom = val;
+    m_center = m_this.displayToGcs({
+      x: m_width / 2,
+      y: m_height / 2
+    });
     m_this.children().forEach(function (child) {
       child.geoTrigger(geo.event.zoom, evt, true);
     });
