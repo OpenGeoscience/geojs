@@ -114,6 +114,16 @@ module.exports = function (grunt) {
             expand: true
           }
         ]
+      },
+      bootstrap: {
+        files: [
+          {
+            src: ['**'],
+            dest: 'dist/examples/common/',
+            expand: true,
+            cwd: 'bower_components/bootstrap/dist/'
+          }
+        ]
       }
     },
 
@@ -226,14 +236,14 @@ module.exports = function (grunt) {
         options: {
           data: function () {
             data.defaultCss = [
-              '//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css',
-              '//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css',
+              '/examples/common/css/bootstrap.min.css',
+              '/examples/common/css/bootstrap-theme.min.css',
               '/examples/common/css/examples.css'
             ];
             data.defaultJs = [
               '/built/geo.ext.min.js',
               '/built/geo.min.js',
-              '//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js',
+              '/examples/common/js/bootstrap.min.js',
               '/examples/common/js/examples.js'
             ];
             return data;
@@ -267,13 +277,13 @@ module.exports = function (grunt) {
         data: {
           hideNavbar: true,
           defaultCss: [
-            '//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css',
-            '//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css',
+            '/examples/common/css/bootstrap.min.css',
+            '/examples/common/css/bootstrap-theme.min.css',
             '/examples/common/css/examples.css'
           ],
           defaultJs: [
             '/built/geo.ext.min.js',
-            '//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js',
+            '/examples/common/js/bootstrap.min.js',
             '/examples/common/js/examples.js'
           ],
           exampleCss: [],
@@ -290,6 +300,7 @@ module.exports = function (grunt) {
 
   findExamples();
   grunt.registerTask('examples', [
+    'copy:bootstrap',
     'copy:examples',
     'jade',
     'docco'
