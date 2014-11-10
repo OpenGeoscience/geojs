@@ -1,0 +1,10 @@
+{
+  "path": "layers/index.html",
+  "thumbnail": "layers/layers.jpg",
+  "title": "GeoJS layers",
+  "exampleCss": ["layers/main.css"],
+  "exampleJs": ["layers/main.js"],
+  "about": {
+    "text": "This example demonstrates drawing directly into GeoJS layers without using the feature API."
+  }
+}

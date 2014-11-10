@@ -12,13 +12,12 @@ $(function () {
     zoom: 1
   });
 
-  // Add the osm layer with a custom tile url
-  map.createLayer(
-    'osm',
-    {
-      baseUrl: 'http://otile1.mqcdn.com/tiles/1.0.0/map/'
-    }
-  );
+  // Add the osm layer
+  map.createLayer('osm');
+
+  // Add a layer for the ui elements and create a zoom slider
+  map.createLayer('ui')
+    .createWidget('slider');
 
   // Make the map resize with the browser window
   $(window).resize(function () {

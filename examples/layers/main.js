@@ -12,13 +12,8 @@ $(function () {
     zoom: 1
   });
 
-  // Add the osm layer with a custom tile url
-  map.createLayer(
-    'osm',
-    {
-      baseUrl: 'http://otile1.mqcdn.com/tiles/1.0.0/map/'
-    }
-  );
+  // Add a base layer
+  map.createLayer('osm');
 
   // Make the map resize with the browser window
   $(window).resize(function () {
