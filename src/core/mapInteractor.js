@@ -28,7 +28,9 @@ geo.mapInteractor = function (args) {
       m_wheelQueue = { x: 0, y: 0 },
       m_throttleTime = 10,
       m_wait = false,
-      m_disableThrottle = true;
+      m_disableThrottle = true,
+      m_selectionLayer = null,
+      m_selectionPlane = null;
 
   // Helper method to decide if the current button/modifiers match a set of
   // conditions.
@@ -386,6 +388,23 @@ geo.mapInteractor = function (args) {
     gcs.upperRight = map.displayToGcs(display.upperRight);
     gcs.lowerLeft = map.displayToGcs(display.lowerLeft);
 
+    m_selectionPlane.origin([
+      display.lowerLeft.x,
+      display.lowerLeft.y,
+      0
+    ]);
+    m_selectionPlane.upperLeft([
+      display.upperLeft.x,
+      display.upperLeft.y,
+      0
+    ]);
+    m_selectionPlane.lowerRight([
+      display.lowerRight.x,
+      display.lowerRight.y,
+      0
+    ]);
+    m_selectionPlane.draw();
+
     return {
       display: display,
       gcs: gcs,
@@ -428,6 +447,19 @@ geo.mapInteractor = function (args) {
       };
 
       if (action === 'select') {
+        // Make sure the old selection layer is gone.
+        if (m_selectionLayer) {
+          m_selectionLayer.clear();
+          m_this.map().deleteLayer(m_selectionLayer);
+          m_selectionLayer = null;
+        }
+        // Create a feature layer and plane feature to show the selection bounds
+        m_selectionLayer = m_this.map().createLayer('feature', {renderer: 'd3Renderer'});
+        m_selectionPlane = m_selectionLayer.createFeature('plane');
+        m_selectionPlane.style({
+          screenCoordinates: true,
+          fillOpacity: function () { return 0.25; }
+        });
         m_this.map().geoTrigger(geo.event.brushstart, m_this._getSelection());
       }
 
@@ -521,6 +553,12 @@ geo.mapInteractor = function (args) {
 
     if (m_state.action === 'select') {
       selectionObj = m_this._getSelection();
+
+      m_selectionLayer.clear();
+      m_this.map().deleteLayer(m_selectionLayer);
+      m_selectionLayer = null;
+      m_selectionPlane = null;
+
       m_this.map().geoTrigger(geo.event.brushend, selectionObj);
     }
 
