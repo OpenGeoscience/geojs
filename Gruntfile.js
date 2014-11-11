@@ -121,7 +121,16 @@ module.exports = function (grunt) {
             src: ['**'],
             dest: 'dist/examples/common/',
             expand: true,
-            cwd: 'bower_components/bootstrap/dist/'
+            cwd: 'bower_components/bootstrap/dist/',
+            filter: function (src) {
+              return !src.match(/.*\.css$/);
+            }
+          },
+          {
+            src: ['*'],
+            dest: 'dist/examples/common/css/',
+            expand: true,
+            cwd: 'bower_components/bootswatch/flatly'
           }
         ]
       }
@@ -237,7 +246,6 @@ module.exports = function (grunt) {
           data: function () {
             data.defaultCss = [
               '../common/css/bootstrap.min.css',
-              '../common/css/bootstrap-theme.min.css',
               '../common/css/examples.css'
             ];
             data.defaultJs = [
@@ -254,7 +262,9 @@ module.exports = function (grunt) {
 
       if (data.docHTML) {
         grunt.config(['docco', exname], {
-          src: data.exampleJs.map(function (p) { return 'examples/' + p; }),
+          src: data.exampleJs.map(function (p) {
+            return 'examples/' + exname + '/' + p;
+          }),
           options: {
             output: path.join('dist', dir, 'doc'),
             layout: 'linear'
@@ -275,10 +285,9 @@ module.exports = function (grunt) {
       ],
       options: {
         data: {
-          hideNavbar: true,
+          hideNavbar: false,
           defaultCss: [
             'common/css/bootstrap.min.css',
-            'common/css/bootstrap-theme.min.css',
             'common/css/examples.css'
           ],
           defaultJs: [

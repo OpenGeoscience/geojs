@@ -4,17 +4,34 @@ mixin thumbnail(ex)
   .col-md-4
     .thumbnail
       a(href="#{ex.path}")
-        img(src="#{ex.thumbnail|| 'thumb.jpg'}" onerror="this.src='osm/osm.jpg';")
+        img(src="#{ex.path}/thumb.jpg" onerror="this.src='osm/thumb.jpg';")
         .caption
           h3= ex.title
           if ex.about.text
             .description
               p= ex.about.text
 
+block prepend headerButtons
+  ul.nav.navbar-nav.navbar-right
+    li.dropdown
+      a.dropdown-toggle(href="#", data-toggle="dropdown") Resources
+        span.caret
+      ul.dropdown-menu(role="menu")
+        li
+          a(href="https://github.com/OpenGeoscience/geojs") Source
+          a(href="https://github.com/OpenGeoscience/geojs/issues") Bugs
+          a(href="http://geojs.readthedocs.org/en/latest/") Documentation
+          a(href="http://my.cdash.org/index.php?project=geojs") Testing
+
 block mainContent
   .jumbotron
-    h1 Welcome to GeoJS
-    p Interesting blurb...
+    .container
+      h1 Welcome to GeoJS
+      p   GeoJS is a javascript library for visualizing geospatial 
+        | data in a browser.  Its flexible API provides users with 
+        | the ability to combine multiple visualizations drawn 
+        | in WebGL, canvas, and SVG into a single dynamic map.
+      p   What can GeoJS do for you?  See the examples below.
 
   .container-fluid
     - var iExample = 0;

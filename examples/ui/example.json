@@ -1,9 +1,8 @@
 {
-  "path": "ui/index.html",
-  "thumbnail": "ui/ui.jpg",
+  "path": "ui",
   "title": "User interface widgets",
-  "exampleCss": ["ui/main.css"],
-  "exampleJs": ["ui/main.js"],
+  "exampleCss": ["main.css"],
+  "exampleJs": ["main.js"],
   "about": {
     "text": "A basic map with user interface widgets"
   }
