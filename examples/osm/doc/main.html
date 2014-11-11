@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>main.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="public/stylesheets/normalize.css" />
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="page">
+
+      <div class="header">
+        
+          <h1>main.js</h1>
+        
+
+        
+      </div>
+
+      
+        
+        <p>Run after the DOM loads</p>
+
+        
+          <div class='highlight'><pre>$(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+<span class="hljs-pi">  'use strict'</span>;</pre></div>
+        
+      
+        
+        <p>Create a map object</p>
+
+        
+          <div class='highlight'><pre>  <span class="hljs-keyword">var</span> map = geo.map({
+    node: <span class="hljs-string">'#map'</span>,
+    center: {
+      x: -<span class="hljs-number">98.0</span>,
+      y: <span class="hljs-number">39.5</span>
+    },
+    zoom: <span class="hljs-number">1</span>
+  });</pre></div>
+        
+      
+        
+        <p>Add the osm layer with a custom tile url</p>
+
+        
+          <div class='highlight'><pre>  map.createLayer(
+    <span class="hljs-string">'osm'</span>,
+    {
+      baseUrl: <span class="hljs-string">'http://otile1.mqcdn.com/tiles/1.0.0/map/'</span>
+    }
+  );</pre></div>
+        
+      
+        
+        <p>Make the map resize with the browser window</p>
+
+        
+          <div class='highlight'><pre>  $(<span class="hljs-built_in">window</span>).resize(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+    map.resize(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, map.node().width(), map.node().height());
+  });</pre></div>
+        
+      
+        
+        <p>Draw the map</p>
+
+        
+          <div class='highlight'><pre>  map.draw();
+});</pre></div>
+        
+      
+      <div class="fleur">h</div>
+    </div>
+  </div>
+</body>
+</html>

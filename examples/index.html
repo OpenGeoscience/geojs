@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>GeoJS</title>
+    <!-- Include common files-->
+    <link rel="stylesheet" href="common/css/bootstrap.min.css">
+    <link rel="stylesheet" href="common/css/examples.css">
+    <script type="text/javascript" src="../built/geo.ext.min.js"></script>
+    <script type="text/javascript" src="common/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="common/js/examples.js"></script>
+    <!-- Include example specific files-->
+    <link rel="stylesheet" href="main.css">
+    <script type="text/javascript" src="main.js"></script>
+  </head>
+  <body>
+    <!-- Add a navbar-->
+    <nav role="navigation" class="navbar navbar-default">
+      <div class="navbar-header">
+        <button type="button" data-toggle="collapse" data-target="gj-navbar-collapse" class="navbar-toggle"><span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button><a href="https://github.com/OpenGeoscience/geojs" target="gj-homepage" class="navbar-brand">GeoJS</a>
+      </div>
+      <div id="gj-navbar-collapse" class="collapse navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li class="dropdown"><a href="#" data-toggle="dropdown" class="dropdown-toggle">Resources<span class="caret"></span></a>
+            <ul role="menu" class="dropdown-menu">
+              <li><a href="https://github.com/OpenGeoscience/geojs">Source</a><a href="https://github.com/OpenGeoscience/geojs/issues">Bugs</a><a href="http://geojs.readthedocs.org/en/latest/">Documentation</a><a href="http://my.cdash.org/index.php?project=geojs">Testing</a></li>
+            </ul>
+          </li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+        </ul>
+      </div>
+    </nav>
+    <!-- Add the default main content element-->
+    <div class="jumbotron">
+      <div class="container">
+        <h1>Welcome to GeoJS</h1>
+        <p>
+            GeoJS is a javascript library for visualizing geospatial 
+          data in a browser.  Its flexible API provides users with 
+          the ability to combine multiple visualizations drawn 
+          in WebGL, canvas, and SVG into a single dynamic map.
+        </p>
+        <p>  What can GeoJS do for you?  See the examples below.</p>
+      </div>
+    </div>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-md-4">
+          <div class="thumbnail"><a href="layerEvents/index.html"><img src="layerEvents/index.html/thumb.jpg" onerror="this.src='osm/thumb.jpg';"/>
+              <div class="caption">
+                <h3>DOM events in layers</h3>
+              </div></a></div>
+        </div>
+        <div class="col-md-4">
+          <div class="thumbnail"><a href="layers"><img src="layers/thumb.jpg" onerror="this.src='osm/thumb.jpg';"/>
+              <div class="caption">
+                <h3>Raw layer interface</h3>
+                <div class="description">
+                  <p>This example demonstrates drawing directly into GeoJS layers without using the feature API.  Layers come in two flavors, fixed and moving.  Fixed layers remain in a fixed screen position, while moving layers remain fixed relative to the map.  In addition, you may choose to rescale one or more properties in moving layers.</p>
+                </div>
+              </div></a></div>
+        </div>
+        <div class="col-md-4">
+          <div class="thumbnail"><a href="osm"><img src="osm/thumb.jpg" onerror="this.src='osm/thumb.jpg';"/>
+              <div class="caption">
+                <h3>Open street map layer</h3>
+                <div class="description">
+                  <p>Basic map rendering tiles from an OpenStreetMap tile server.  The base url for the tile server is given at initialization to provide a custom appearance.</p>
+                </div>
+              </div></a></div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-4">
+          <div class="thumbnail"><a href="ui"><img src="ui/thumb.jpg" onerror="this.src='osm/thumb.jpg';"/>
+              <div class="caption">
+                <h3>User interface widgets</h3>
+                <div class="description">
+                  <p>A basic map with user interface widgets</p>
+                </div>
+              </div></a></div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,58 @@
+doctype html
+html(lang="en")
+  head
+    title= title
+
+    // Include common files
+    each css in defaultCss
+      link(rel="stylesheet" href="#{css}")
+    each src in defaultJs
+      script(type="text/javascript" src="#{src}")
+
+    block exampleHeader
+      // Include example specific files
+      each css in exampleCss
+        link(rel="stylesheet" href="#{css}")
+      each src in exampleJs
+        script(type="text/javascript" src="#{src}")
+
+  body
+    if !hideNavbar
+      // Add a navbar
+      nav.navbar.navbar-default(role="navigation")
+        .navbar-header
+          button.navbar-toggle(type="button", data-toggle="collapse", data-target="gj-navbar-collapse")
+            span.sr-only Toggle navigation
+            span.icon-bar
+            span.icon-bar
+            span.icon-bar
+          a.navbar-brand(href="https://github.com/OpenGeoscience/geojs", target="gj-homepage") GeoJS
+
+        .collapse.navbar-collapse#gj-navbar-collapse
+          block headerButtons
+          ul.nav.navbar-nav.navbar-right
+            block showSource
+              if docHTML
+                li
+                  a.gj-show-source-link.glyphicon.glyphicon-file(href="#{docHTML}", target="gj-docco")
+            if !about.hidden
+              li
+                a.gj-show-about-link.glyphicon.glyphicon-question-sign(href="#" data-toggle="modal" data-target="#about-modal")
+
+      if ! about.hidden
+        // Add an about modal dialog
+        .modal.fade#about-modal
+          .modal-dialog.modal-md
+            .modal-content
+              .modal-header
+                h4.modal-title !{about.title || title}
+              .modal-body
+                p.text-left !{about.text}
+                p.text-right © 2014, Kitware, Inc.
+              .modal-footer
+                button.btn.btn-primary(data-dismiss="modal" data-target="#about-modal") Close
+
+
+    // Add the default main content element
+    block mainContent
+      #map

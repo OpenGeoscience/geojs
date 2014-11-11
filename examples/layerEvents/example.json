@@ -1,0 +1,8 @@
+{
+  "path": "layerEvents/index.html",
+  "title": "DOM events in layers",
+  "exampleCss": ["main.css"],
+  "exampleJs": ["main.js"],
+  "about": {
+  }
+}
