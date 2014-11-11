@@ -1,16 +1,3 @@
-html, body {
-  height: 100%;
-  width: 100%;
-  overflow: hidden;
-}
-
-#map {
-  width: 100%;
-  height: calc(100% - 50px);
-  position: absolute;
-  top: 50px;
-}
-
 rect.description {
   stroke: black;
   stroke-width: 1px;
