@@ -236,15 +236,15 @@ module.exports = function (grunt) {
         options: {
           data: function () {
             data.defaultCss = [
-              '/examples/common/css/bootstrap.min.css',
-              '/examples/common/css/bootstrap-theme.min.css',
-              '/examples/common/css/examples.css'
+              '../common/css/bootstrap.min.css',
+              '../common/css/bootstrap-theme.min.css',
+              '../common/css/examples.css'
             ];
             data.defaultJs = [
-              '/built/geo.ext.min.js',
-              '/built/geo.min.js',
-              '/examples/common/js/bootstrap.min.js',
-              '/examples/common/js/examples.js'
+              '../../built/geo.ext.min.js',
+              '../../built/geo.min.js',
+              '../common/js/bootstrap.min.js',
+              '../common/js/examples.js'
             ];
             return data;
           }
@@ -277,14 +277,14 @@ module.exports = function (grunt) {
         data: {
           hideNavbar: true,
           defaultCss: [
-            '/examples/common/css/bootstrap.min.css',
-            '/examples/common/css/bootstrap-theme.min.css',
-            '/examples/common/css/examples.css'
+            'common/css/bootstrap.min.css',
+            'common/css/bootstrap-theme.min.css',
+            'common/css/examples.css'
           ],
           defaultJs: [
-            '/built/geo.ext.min.js',
-            '/examples/common/js/bootstrap.min.js',
-            '/examples/common/js/examples.js'
+            '../built/geo.ext.min.js',
+            'common/js/bootstrap.min.js',
+            'common/js/examples.js'
           ],
           exampleCss: ['main.css'],
           exampleJs: ['main.js'],

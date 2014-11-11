@@ -9,4 +9,4 @@ $(function () {
       $(this).find('.caption .description').slideUp(250);
     }
   );
-})();
+}());

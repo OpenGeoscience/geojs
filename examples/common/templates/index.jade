@@ -12,9 +12,9 @@ html(lang="en")
     block exampleHeader
       // Include example specific files
       each css in exampleCss
-        link(rel="stylesheet" href="/examples/#{css}")
+        link(rel="stylesheet" href="#{css}")
       each src in exampleJs
-        script(type="text/javascript" src="/examples/#{src}")
+        script(type="text/javascript" src="#{src}")
 
   body
     if !hideNavbar
