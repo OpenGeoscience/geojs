@@ -1,7 +1,7 @@
 {
   "path": "layers/index.html",
   "thumbnail": "layers/layers.jpg",
-  "title": "GeoJS layers",
+  "title": "Raw layer interface",
   "exampleCss": ["layers/main.css"],
   "exampleJs": ["layers/main.js"],
   "about": {

@@ -4,10 +4,12 @@ mixin thumbnail(ex)
   .col-md-4
     .thumbnail
       a(href="#{ex.path}")
-        img(src="#{ex.thumbnail}")
-      .caption
-        h3= ex.title
-        p= ex.about.short || ex.about.text
+        img(src="#{ex.thumbnail|| 'thumb.jpg'}" onerror="this.src='osm/osm.jpg';")
+        .caption
+          h3= ex.title
+          if ex.about.text
+            .description
+              p= ex.about.text
 
 block mainContent
   .jumbotron

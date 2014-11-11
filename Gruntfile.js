@@ -286,8 +286,8 @@ module.exports = function (grunt) {
             '/examples/common/js/bootstrap.min.js',
             '/examples/common/js/examples.js'
           ],
-          exampleCss: [],
-          exampleJs: [],
+          exampleCss: ['main.css'],
+          exampleJs: ['main.js'],
           examples: exlist,
           title: 'GeoJS',
           about: {

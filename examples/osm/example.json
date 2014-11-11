@@ -1,10 +1,10 @@
 {
   "path": "osm/index.html",
   "thumbnail": "osm/osm.jpg",
-  "title": "GeoJS open street map layer",
+  "title": "Open street map layer",
   "exampleCss": ["osm/main.css"],
   "exampleJs": ["osm/main.js"],
   "about": {
-    "text": "Basic map rendering tiles from an OpenStreetMap tile server."
+    "text": "Basic map rendering tiles from an OpenStreetMap tile server.  The base url for the tile server is given at initialization to provide a custom appearance."
   }
 }

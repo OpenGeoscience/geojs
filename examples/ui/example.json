@@ -1,7 +1,7 @@
 {
   "path": "ui/index.html",
   "thumbnail": "ui/ui.jpg",
-  "title": "GeoJS user interface widgets",
+  "title": "User interface widgets",
   "exampleCss": ["ui/main.css"],
   "exampleJs": ["ui/main.js"],
   "about": {
