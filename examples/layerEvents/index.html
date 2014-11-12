@@ -36,7 +36,7 @@
             <h4 class="modal-title">DOM events in layers</h4>
           </div>
           <div class="modal-body">
-            <p class="text-left"></p>
+            <p class="text-left">This example shows how native DOM events can be used within layers.  SVG elements placed inside the layer will only receive mouse events when they are inside the top layer.  The elements inside the current top layer can choose to block certain events to override the default mouse interaction.</p>
             <p class="text-right">© 2014, Kitware, Inc.</p>
           </div>
           <div class="modal-footer">
@@ -47,6 +47,6 @@
     </div>
     <!-- Add the default main content element-->
     <div id="map"></div>
-    <!-- Add some toggles for removing adding layers-->
+    <button type="button" data-toggle="button" class="btn btn-default layer-toggle"></button>
   </body>
 </html>

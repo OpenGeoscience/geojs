@@ -29,11 +29,6 @@
         
       
         
-        <p>First we define some helper functions to draw our layers.</p>
-
-        
-      
-        
         <p>Create an svg layer and return a reference to its dom element.</p>
 
         
@@ -51,152 +46,29 @@
       layer: layer,
       svg: layer.canvas()
     };
-  }
-
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">drawLayer</span><span class="hljs-params">(map, type, text, index, rescale)</span> </span>{
-    <span class="hljs-keyword">var</span> layer, svg, obj;</pre></div>
+  }</pre></div>
         
       
         
-        <p>The sticky option keeps the element fixed relative
-to the map, which is the default behavior.</p>
+        <p>This function creates a top layer that blocks mouse events.</p>
 
         
-          <div class='highlight'><pre>    <span class="hljs-keyword">var</span> sticky = (type !== <span class="hljs-string">'fixed'</span>);
-    obj = getSvgLayer(map, {<span class="hljs-string">'sticky'</span>: sticky});
-
-    layer = obj.layer;
-    svg = obj.svg;</pre></div>
+          <div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">topLayer</span><span class="hljs-params">(map)</span> </span>{
+    <span class="hljs-keyword">var</span> obj = getSvgLayer(map, {sticky: <span class="hljs-literal">false</span>});</pre></div>
         
       
         
-        <p>Put everything in a group with classes for styling
-in the css.</p>
+        <p>Give the layer a slight yellow tint.</p>
 
         
-          <div class='highlight'><pre>    <span class="hljs-keyword">var</span> g = svg.append(<span class="hljs-string">'g'</span>)
-      .classed(type + <span class="hljs-string">'-layer'</span>, <span class="hljs-literal">true</span>)
-      .classed(<span class="hljs-string">'layer'</span>, <span class="hljs-literal">true</span>);</pre></div>
-        
-      
-        
-        <p>Get the size of the map for the layout.</p>
+          <div class='highlight'><pre>    obj.svg.append(<span class="hljs-string">'rect'</span>)
+      .classed(<span class="hljs-string">'top-layer-overlay'</span>, <span class="hljs-literal">true</span>)
+      .attr(<span class="hljs-string">'x'</span>, -<span class="hljs-number">10000</span>)
+      .attr(<span class="hljs-string">'y'</span>, -<span class="hljs-number">10000</span>)
+      .attr(<span class="hljs-string">'width'</span>, <span class="hljs-number">20000</span>)
+      .attr(<span class="hljs-string">'height'</span>, <span class="hljs-number">20000</span>);
 
-        
-          <div class='highlight'><pre>    <span class="hljs-keyword">var</span> height = map.node().height() / <span class="hljs-number">4</span>;
-    <span class="hljs-keyword">var</span> width = map.node().width() / <span class="hljs-number">4</span>;</pre></div>
-        
-      
-        
-        <p>Translate the group to where we want it.</p>
-
-        
-          <div class='highlight'><pre>    g.attr(<span class="hljs-string">'transform'</span>, <span class="hljs-string">'translate(0,'</span> + (index * height) + <span class="hljs-string">')'</span>);</pre></div>
-        
-      
-        
-        <p>Attach a description.</p>
-
-        
-          <div class='highlight'><pre>    g.append(<span class="hljs-string">'text'</span>)
-      .attr(<span class="hljs-string">'x'</span>, <span class="hljs-number">30</span>)
-      .attr(<span class="hljs-string">'y'</span>, height / <span class="hljs-number">2</span>)
-      .style(<span class="hljs-string">'font-size'</span>, <span class="hljs-string">'20px'</span>)
-      .text(text);</pre></div>
-        
-      
-        
-        <p>Attach a rectangle</p>
-
-        
-          <div class='highlight'><pre>    g.append(<span class="hljs-string">'rect'</span>)
-      .attr(<span class="hljs-string">'x'</span>, <span class="hljs-number">2</span> * width)
-      .attr(<span class="hljs-string">'y'</span>, height / <span class="hljs-number">4</span>)
-      .attr(<span class="hljs-string">'rx'</span>, <span class="hljs-number">10</span>)
-      .attr(<span class="hljs-string">'ry'</span>, <span class="hljs-number">10</span>)
-      .attr(<span class="hljs-string">'width'</span>, width / <span class="hljs-number">2</span>)
-      .attr(<span class="hljs-string">'height'</span>, height / <span class="hljs-number">2</span>)
-      .style(<span class="hljs-string">'stroke-width'</span>, <span class="hljs-string">'2px'</span>);</pre></div>
-        
-      
-        
-        <p>Attach a circle.</p>
-
-        
-          <div class='highlight'><pre>    <span class="hljs-keyword">var</span> radius = <span class="hljs-number">5</span>;
-    g.append(<span class="hljs-string">'circle'</span>)
-      .attr(<span class="hljs-string">'cx'</span>, <span class="hljs-number">3</span> * width)
-      .attr(<span class="hljs-string">'cy'</span>, height / <span class="hljs-number">2</span>)
-      .attr(<span class="hljs-string">'r'</span>, radius)
-      .style(<span class="hljs-string">'stroke-width'</span>, <span class="hljs-string">'2px'</span>);</pre></div>
-        
-      
-        
-        <p>Attach a spiral using some d3 magic.</p>
-
-        
-          <div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">theta</span><span class="hljs-params">(d)</span> </span>{
-      <span class="hljs-keyword">return</span> <span class="hljs-number">9</span> * d * <span class="hljs-built_in">Math</span>.PI / <span class="hljs-number">100</span>;
-    }
-    <span class="hljs-keyword">var</span> alpha = <span class="hljs-number">0.1</span>;
-    <span class="hljs-keyword">var</span> xScale = d3.scale.linear()
-      .domain([-<span class="hljs-number">6</span>, <span class="hljs-number">6</span>])
-      .range([width * <span class="hljs-number">3.3</span>, width * <span class="hljs-number">4</span>]);
-    <span class="hljs-keyword">var</span> yScale = d3.scale.linear()
-      .domain([-<span class="hljs-number">6</span>, <span class="hljs-number">6</span>])
-      .range([width * <span class="hljs-number">0.7</span>, <span class="hljs-number">0</span>]);
-    <span class="hljs-keyword">var</span> spiral = d3.svg.line()
-      .x(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d)</span> </span>{
-        <span class="hljs-keyword">var</span> t = theta(d);
-        <span class="hljs-keyword">return</span> xScale(alpha * t * <span class="hljs-built_in">Math</span>.cos(t));
-      })
-      .y(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d)</span> </span>{
-        <span class="hljs-keyword">var</span> t = theta(d);
-        <span class="hljs-keyword">return</span> yScale(alpha * t * <span class="hljs-built_in">Math</span>.sin(t));
-      })
-      .interpolate(<span class="hljs-string">'basis'</span>);
-
-    g.append(<span class="hljs-string">'path'</span>)
-      .attr(<span class="hljs-string">'d'</span>, spiral(d3.range(<span class="hljs-number">100</span>)))
-      .attr(<span class="hljs-string">'transform'</span>, <span class="hljs-string">'translate(0,'</span> + (height - width * <span class="hljs-number">0.7</span>) / <span class="hljs-number">2</span> + <span class="hljs-string">')'</span>)
-      .style(<span class="hljs-string">'stroke-width'</span>, <span class="hljs-string">'3px'</span>);</pre></div>
-        
-      
-        
-        <p>Attach a scaling function</p>
-
-        
-          <div class='highlight'><pre>    <span class="hljs-keyword">if</span> (rescale) {
-      layer.geoOn([geo.event.zoom, geo.event.resize], <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{</pre></div>
-        
-      
-        
-        <p>Get the scaling factor from the renderer.</p>
-
-        
-          <div class='highlight'><pre>        <span class="hljs-keyword">var</span> scl = layer.renderer().scaleFactor();</pre></div>
-        
-      
-        
-        <p>Rescale all properties that require it.  In general, this depends
-on the design of the elements, but often one wants to rescale stroke
-widths and point radii.</p>
-
-        
-          <div class='highlight'><pre>        g.selectAll(<span class="hljs-string">'text'</span>)
-          .style(<span class="hljs-string">'font-size'</span>, (<span class="hljs-number">20</span> / scl) + <span class="hljs-string">'px'</span>);
-
-        g.selectAll(<span class="hljs-string">'rect'</span>)
-          .style(<span class="hljs-string">'stroke-width'</span>, (<span class="hljs-number">2</span> / scl) + <span class="hljs-string">'px'</span>);
-
-        g.selectAll(<span class="hljs-string">'circle'</span>)
-          .attr(<span class="hljs-string">'r'</span>, radius / scl)
-          .style(<span class="hljs-string">'stroke-width'</span>, <span class="hljs-number">2</span> / scl);
-
-        g.selectAll(<span class="hljs-string">'path'</span>)
-          .style(<span class="hljs-string">'stroke-width'</span>, (<span class="hljs-number">3</span> / scl) + <span class="hljs-string">'px'</span>);
-      });
-    }
+    <span class="hljs-keyword">return</span> obj.layer;
   }</pre></div>
         
       
@@ -222,12 +94,85 @@ widths and point radii.</p>
         
       
         
-        <p>Create the layers</p>
+        <p>Get the map size in pixels</p>
 
         
-          <div class='highlight'><pre>  drawLayer(map, <span class="hljs-string">'fixed'</span>, <span class="hljs-string">'This is a fixed layer'</span>, <span class="hljs-number">0</span>);
-  drawLayer(map, <span class="hljs-string">'unscaled-moving'</span>, <span class="hljs-string">'This is a moving layer without rescaling.'</span>, <span class="hljs-number">1</span>);
-  drawLayer(map, <span class="hljs-string">'scaled-moving'</span>, <span class="hljs-string">'This is a moving layer with rescaling.'</span>, <span class="hljs-number">2</span>, <span class="hljs-literal">true</span>);</pre></div>
+          <div class='highlight'><pre>  <span class="hljs-keyword">var</span> height = $(<span class="hljs-string">'#map'</span>).height();
+  <span class="hljs-keyword">var</span> width = $(<span class="hljs-string">'#map'</span>).width();</pre></div>
+        
+      
+        
+        <p>Create a fixed layer that contains some descriptive text.</p>
+
+        
+          <div class='highlight'><pre>  <span class="hljs-keyword">var</span> info = getSvgLayer(map, {sticky: <span class="hljs-literal">false</span>}).svg
+    .append(<span class="hljs-string">'text'</span>)
+      .attr(<span class="hljs-string">'x'</span>, <span class="hljs-number">30</span>)
+      .attr(<span class="hljs-string">'y'</span>, <span class="hljs-number">30</span>)
+      .attr(<span class="hljs-string">'dy'</span>, <span class="hljs-string">'1em'</span>)
+      .text(<span class="hljs-string">'Try panning and zooming the map over the boxes.'</span>);</pre></div>
+        
+      
+        
+        <p>Create the main svg layer.</p>
+
+        
+          <div class='highlight'><pre>  <span class="hljs-keyword">var</span> svg = getSvgLayer(map, {}).svg;</pre></div>
+        
+      
+        
+        <p>This is a helper function to create a box with a
+uniform style that receives mouse events.</p>
+
+        
+          <div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">addEventBox</span><span class="hljs-params">(x, y, str)</span> </span>{
+    <span class="hljs-keyword">var</span> width = <span class="hljs-number">300</span>, height = <span class="hljs-number">200</span>;
+    <span class="hljs-keyword">var</span> text = svg.append(<span class="hljs-string">'text'</span>)
+      .attr(<span class="hljs-string">'x'</span>, x - <span class="hljs-number">75</span>)
+      .attr(<span class="hljs-string">'y'</span>, y)
+      .style(<span class="hljs-string">'display'</span>, <span class="hljs-string">'none'</span>)
+      .style(<span class="hljs-string">'pointer-events'</span>, <span class="hljs-string">'none'</span>)
+      .text(str);
+
+    <span class="hljs-keyword">return</span> svg.insert(<span class="hljs-string">'rect'</span>, <span class="hljs-string">'text'</span>)
+      .classed(<span class="hljs-string">'evt-box'</span>, <span class="hljs-literal">true</span>)
+      .attr(<span class="hljs-string">'x'</span>, x - width / <span class="hljs-number">2</span>)
+      .attr(<span class="hljs-string">'y'</span>, y - height / <span class="hljs-number">2</span>)
+      .attr(<span class="hljs-string">'rx'</span>, <span class="hljs-number">10</span>)
+      .attr(<span class="hljs-string">'ry'</span>, <span class="hljs-number">10</span>)
+      .attr(<span class="hljs-string">'width'</span>, width)
+      .attr(<span class="hljs-string">'height'</span>, height)
+      .on(<span class="hljs-string">'mouseenter'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+        text.style(<span class="hljs-string">'display'</span>, <span class="hljs-literal">null</span>);
+        d3.select(<span class="hljs-keyword">this</span>).style(<span class="hljs-string">'fill-opacity'</span>, <span class="hljs-string">'75%'</span>);
+      })
+      .on(<span class="hljs-string">'mouseleave'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+        text.style(<span class="hljs-string">'display'</span>, <span class="hljs-string">'none'</span>);
+        d3.select(<span class="hljs-keyword">this</span>).style(<span class="hljs-string">'fill-opacity'</span>, <span class="hljs-literal">null</span>);
+      });
+  }</pre></div>
+        
+      
+        
+        <p>Add a red box that blocks mouse clicks.</p>
+
+        
+          <div class='highlight'><pre>  addEventBox(width / <span class="hljs-number">4</span>, height / <span class="hljs-number">2</span>, <span class="hljs-string">'Blocking click'</span>)
+    .style(<span class="hljs-string">'fill'</span>, <span class="hljs-string">'firebrick'</span>)
+    .on(<span class="hljs-string">'mousedown'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+      d3.event.stopPropagation();
+    });</pre></div>
+        
+      
+        
+        <p>Add a blue box that blocks the mouse wheel.</p>
+
+        
+          <div class='highlight'><pre>  addEventBox(<span class="hljs-number">3</span> * width / <span class="hljs-number">4</span>, height / <span class="hljs-number">2</span>, <span class="hljs-string">'Blocking wheel'</span>)
+    .style(<span class="hljs-string">'fill'</span>, <span class="hljs-string">'steelblue'</span>)
+    .on(<span class="hljs-string">'mousewheel'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+      d3.event.stopPropagation();
+    });</pre></div>
         
       
         
@@ -243,7 +188,31 @@ widths and point radii.</p>
         <p>Draw the map</p>
 
         
-          <div class='highlight'><pre>  map.draw();
+          <div class='highlight'><pre>  map.draw();</pre></div>
+        
+      
+        
+        <p>Connect the button that adds or removes the top layer.</p>
+
+        
+          <div class='highlight'><pre>  <span class="hljs-keyword">var</span> top = <span class="hljs-literal">null</span>;
+  $(<span class="hljs-string">'.layer-toggle '</span>).text(<span class="hljs-string">'Add top layer'</span>)
+    .click(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+      <span class="hljs-keyword">if</span> (top) {
+        $(<span class="hljs-keyword">this</span>).text(<span class="hljs-string">'Add top layer'</span>);
+        info.text(
+          <span class="hljs-string">'Try panning and zooming the map over the boxes.'</span>
+        );
+        map.deleteLayer(top);
+        top = <span class="hljs-literal">null</span>;
+      } <span class="hljs-keyword">else</span> {
+        top = topLayer(map);
+        $(<span class="hljs-keyword">this</span>).text(<span class="hljs-string">'Remove top layer'</span>);
+        info.text(
+          <span class="hljs-string">'Top layer active, no mouse events reach the boxes.'</span>
+        );
+      }
+    });
 });</pre></div>
         
       

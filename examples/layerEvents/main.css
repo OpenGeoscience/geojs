@@ -1,40 +1,30 @@
-rect.description {
-  stroke: black;
-  stroke-width: 1px;
-  fill: none;
+.layer-toggle {
+  position: absolute;
+  top: 90px;
+  right: 30px;
+  width: 200px;
+}
+
+.top-layer-overlay {
+  fill: yellow;
+  fill-opacity: 5%;
+}
+
+rect.background {
+  fill: white;
+  fill-opacity: 100%;
+  display: none;
 }
 
 svg text {
   font-family: source-sans-pro, Source Sans Pro, Helvetica, sans-serif;
   stroke: none;
+  font-size: 26px;
 }
 
-g.fixed-layer {
-  fill: seagreen;
-  stroke: seagreen;
-}
-
-g.scaled-moving-layer {
-  fill: firebrick;
-  stroke: firebrick;
-}
-
-g.unscaled-moving-layer {
-  fill: steelblue;
-  stroke: steelblue;
-}
-
-g.layer rect {
+rect.evt-box {
   stroke: black;
-  fill-opacity: 50%;
-}
-
-g.layer circle {
-  fill-opacity: 75%;
-  stroke: black;
-}
-
-g.layer path {
-  fill: none;
-  stroke-width: 3;
+  stroke-width: 2px;
+  stroke-opacity: 100%;
+  fill-opacity: 25%;
 }
