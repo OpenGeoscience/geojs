@@ -29,10 +29,7 @@ gd3.lineFeature = function (arg) {
   var m_this = this,
       s_init = this._init,
       m_buildTime = geo.timestamp(),
-      s_update = this._update,
-      m_style = {};
-
-  m_style.style = {};
+      s_update = this._update;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -59,23 +56,28 @@ gd3.lineFeature = function (arg) {
         line = d3.svg.line()
                 .x(function (d) { return m_renderer.worldToDisplay(pos_func(d)).x; })
                 .y(function (d) { return m_renderer.worldToDisplay(pos_func(d)).y; });
+
     s_update.call(m_this);
+    s_style.fill = function () { return false; };
 
-    // set the style object for the renderer
-    m_style.data = data;
-    m_style.attributes = {
-      d: line
-    };
+    data.forEach(function (item, idx) {
+      var m_style;
 
-    m_style.id = m_this._d3id();
-    m_style.append = 'path';
-    m_style.classes = [ 'd3LineFeature' ];
-    m_style.style = $.extend({
-      fill: function () { return false; },
-      fillColor: function () { return { r: 0, g: 0, b: 0 }; }
-    }, s_style);
+      // item is an object representing a single line
+      // m_this.line()(item) is an array of coordinates
+      m_style = {
+        data: [m_this.line()(item)],
+        append: 'path',
+        attributes: {
+          d: line
+        },
+        id: m_this._d3id(),
+        classes: [ 'd3LineFeature', 'd3SubLine-' + idx ],
+        style: s_style
+      };
 
-    m_renderer._drawFeatures(m_style);
+      m_renderer._drawFeatures(m_style);
+    });
 
     m_buildTime.modified();
     m_this.updateTime().modified();

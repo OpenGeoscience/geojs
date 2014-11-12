@@ -24,8 +24,8 @@ window.startTest = function (done) {
     var layer = myMap.createLayer('feature', {'renderer' : 'd3Renderer'}),
         style = {
         nodes: {
-          stroke: function () { return false; },
-          fillOpacity: function () { return 0.5; }
+          stroke: false,
+          fillOpacity: 0.5
         },
         linkType: 'path'
       };

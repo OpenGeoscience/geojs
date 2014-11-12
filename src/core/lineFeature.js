@@ -26,9 +26,25 @@ geo.lineFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
-      m_position = arg.position === undefined ? null : arg.position,
-      m_line = arg.line === undefined ? null : arg.line,
+      m_position,
+      m_line,
       s_init = this._init;
+
+  if (arg.line === undefined) {
+    m_line = function (d) {
+      return d;
+    };
+  } else {
+    m_line = arg.line;
+  }
+
+  if (arg.position === undefined) {
+    m_position = function (d) {
+      return d;
+    };
+  } else {
+    m_position = arg.position;
+  }
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -77,11 +93,11 @@ geo.lineFeature = function (arg) {
     var defaultStyle = $.extend(
       {},
       {
-        "strokeWidth": function () { return 1.0; },
+        "strokeWidth": 1.0,
         // Default to gold color for lines
-        "strokeColor": function () { return {r: 1.0, g: 0.8431372549, b: 0.0}; },
-        "strokeStyle": function () { return "solid"; },
-        "strokeOpacity": function () { return 1.0; }
+        "strokeColor": { r: 1.0, g: 0.8431372549, b: 0.0 },
+        "strokeStyle": "solid",
+        "strokeOpacity": 1.0
       },
       arg.style === undefined ? {} : arg.style
     );

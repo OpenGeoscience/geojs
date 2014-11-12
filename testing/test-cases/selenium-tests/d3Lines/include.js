@@ -13,16 +13,9 @@ window.startTest = function(done) {
     });
     layer.createFeature('line')
       .data([citieslatlon])
-      .style('strokeColor', function () {
-        return {r: 1.0, g: 0.0, b: 0.0};
-      })
-      .style('strokeOpacity', function () {
-          return 0.5;
-        }
-      )
-      .style('strokeWidth', function () {
-        return 4;
-      })
+      .style('strokeColor', {r: 1.0, g: 0.0, b: 0.0})
+      .style('strokeOpacity', 0.5)
+      .style('strokeWidth', 4)
       .position(function (d) { return { x: d.lon, y: d.lat }; });
 
     myMap.draw();

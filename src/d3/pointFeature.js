@@ -53,7 +53,7 @@ gd3.pointFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
     var data = m_this.data(),
-        s_style = m_this.style(),
+        s_style = m_this.style.get(),
         m_renderer = m_this.renderer(),
         pos_func = m_this.position();
 
