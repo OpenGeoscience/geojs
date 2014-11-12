@@ -65,6 +65,7 @@
         "lineFeature.js",
         "pathFeature.js",
         "graphFeature.js",
+        "planeFeature.js",
         "d3Renderer.js"
       ]
     },
