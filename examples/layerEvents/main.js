@@ -1,9 +1,7 @@
 // Run after the DOM loads
 $(function () {
   'use strict';
-
-  // First we define some helper functions to draw our layers.
-
+  
   // Create an svg layer and return a reference to its dom element.
   function getSvgLayer(map, opts) {
 
@@ -17,105 +15,19 @@ $(function () {
     };
   }
 
-  function drawLayer(map, type, text, index, rescale) {
-    var layer, svg, obj;
+  // This function creates a top layer that blocks mouse events.
+  function topLayer(map) {
+    var obj = getSvgLayer(map, {sticky: false});
 
-    // The sticky option keeps the element fixed relative
-    // to the map, which is the default behavior.
-    var sticky = (type !== 'fixed');
-    obj = getSvgLayer(map, {'sticky': sticky});
+    // Give the layer a slight yellow tint.
+    obj.svg.append('rect')
+      .classed('top-layer-overlay', true)
+      .attr('x', -10000)
+      .attr('y', -10000)
+      .attr('width', 20000)
+      .attr('height', 20000);
 
-    layer = obj.layer;
-    svg = obj.svg;
-
-    // Put everything in a group with classes for styling
-    // in the css.
-    var g = svg.append('g')
-      .classed(type + '-layer', true)
-      .classed('layer', true);
-
-    // Get the size of the map for the layout.
-    var height = map.node().height() / 4;
-    var width = map.node().width() / 4;
-
-    // Translate the group to where we want it.
-    g.attr('transform', 'translate(0,' + (index * height) + ')');
-
-    // Attach a description.
-    g.append('text')
-      .attr('x', 30)
-      .attr('y', height / 2)
-      .style('font-size', '20px')
-      .text(text);
-
-    // Attach a rectangle
-    g.append('rect')
-      .attr('x', 2 * width)
-      .attr('y', height / 4)
-      .attr('rx', 10)
-      .attr('ry', 10)
-      .attr('width', width / 2)
-      .attr('height', height / 2)
-      .style('stroke-width', '2px');
-
-    // Attach a circle.
-    var radius = 5;
-    g.append('circle')
-      .attr('cx', 3 * width)
-      .attr('cy', height / 2)
-      .attr('r', radius)
-      .style('stroke-width', '2px');
-
-    // Attach a spiral using some d3 magic.
-    function theta(d) {
-      return 9 * d * Math.PI / 100;
-    }
-    var alpha = 0.1;
-    var xScale = d3.scale.linear()
-      .domain([-6, 6])
-      .range([width * 3.3, width * 4]);
-    var yScale = d3.scale.linear()
-      .domain([-6, 6])
-      .range([width * 0.7, 0]);
-    var spiral = d3.svg.line()
-      .x(function (d) {
-        var t = theta(d);
-        return xScale(alpha * t * Math.cos(t));
-      })
-      .y(function (d) {
-        var t = theta(d);
-        return yScale(alpha * t * Math.sin(t));
-      })
-      .interpolate('basis');
-
-    g.append('path')
-      .attr('d', spiral(d3.range(100)))
-      .attr('transform', 'translate(0,' + (height - width * 0.7) / 2 + ')')
-      .style('stroke-width', '3px');
-
-    // Attach a scaling function
-    if (rescale) {
-      layer.geoOn([geo.event.zoom, geo.event.resize], function () {
-        // Get the scaling factor from the renderer.
-        var scl = layer.renderer().scaleFactor();
-
-        // Rescale all properties that require it.  In general, this depends
-        // on the design of the elements, but often one wants to rescale stroke
-        // widths and point radii.
-        g.selectAll('text')
-          .style('font-size', (20 / scl) + 'px');
-
-        g.selectAll('rect')
-          .style('stroke-width', (2 / scl) + 'px');
-
-        g.selectAll('circle')
-          .attr('r', radius / scl)
-          .style('stroke-width', 2 / scl);
-
-        g.selectAll('path')
-          .style('stroke-width', (3 / scl) + 'px');
-      });
-    }
+    return obj.layer;
   }
 
   // Create a map object
@@ -131,10 +43,63 @@ $(function () {
   // Add a base layer
   map.createLayer('osm');
 
-  // Create the layers
-  drawLayer(map, 'fixed', 'This is a fixed layer', 0);
-  drawLayer(map, 'unscaled-moving', 'This is a moving layer without rescaling.', 1);
-  drawLayer(map, 'scaled-moving', 'This is a moving layer with rescaling.', 2, true);
+  // Get the map size in pixels
+  var height = $('#map').height();
+  var width = $('#map').width();
+
+  // Create a fixed layer that contains some descriptive text.
+  var info = getSvgLayer(map, {sticky: false}).svg
+    .append('text')
+      .attr('x', 30)
+      .attr('y', 30)
+      .attr('dy', '1em')
+      .text('Try panning and zooming the map over the boxes.');
+
+  // Create the main svg layer.
+  var svg = getSvgLayer(map, {}).svg;
+ 
+  // This is a helper function to create a box with a
+  // uniform style that receives mouse events.
+  function addEventBox(x, y, str) {
+    var width = 300, height = 200;
+    var text = svg.append('text')
+      .attr('x', x - 75)
+      .attr('y', y)
+      .style('display', 'none')
+      .style('pointer-events', 'none')
+      .text(str);
+
+    return svg.insert('rect', 'text')
+      .classed('evt-box', true)
+      .attr('x', x - width / 2)
+      .attr('y', y - height / 2)
+      .attr('rx', 10)
+      .attr('ry', 10)
+      .attr('width', width)
+      .attr('height', height)
+      .on('mouseenter', function () {
+        text.style('display', null);
+        d3.select(this).style('fill-opacity', '75%');
+      })
+      .on('mouseleave', function () {
+        text.style('display', 'none');
+        d3.select(this).style('fill-opacity', null);
+      });
+  }
+
+  // Add a red box that blocks mouse clicks.
+  addEventBox(width / 4, height / 2, 'Blocking click')
+    .style('fill', 'firebrick')
+    .on('mousedown', function () {
+      d3.event.stopPropagation();
+    });
+
+  // Add a blue box that blocks the mouse wheel.
+  addEventBox(3 * width / 4, height / 2, 'Blocking wheel')
+    .style('fill', 'steelblue')
+    .on('mousewheel', function () {
+      d3.event.stopPropagation();
+    });
 
   // Make the map resize with the browser window
   $(window).resize(function () {
@@ -143,4 +108,24 @@ $(function () {
 
   // Draw the map
   map.draw();
+
+  // Connect the button that adds or removes the top layer.
+  var top = null;
+  $('.layer-toggle ').text('Add top layer')
+    .click(function () {
+      if (top) {
+        $(this).text('Add top layer');
+        info.text(
+          'Try panning and zooming the map over the boxes.'
+        );
+        map.deleteLayer(top);
+        top = null;
+      } else {
+        top = topLayer(map);
+        $(this).text('Remove top layer');
+        info.text(
+          'Top layer active, no mouse events reach the boxes.'
+        );
+      }
+    });
 });
