@@ -1,0 +1,21 @@
+{
+  "name": "geojs",
+  "version": "0.1.0",
+  "description": "JavaScript Geo visualization and Analysis Library",
+  "homepage": "https://github.com/OpenGeoscience/geojs",
+  "main": "dist/built/geo.min.js",
+  "bugs": {
+    "url": "https://github.com/OpenGeoscience/geojs/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OpenGeoscience/geojs"
+  },
+  "dependencies": {
+    "d3": "~3.3",
+    "gl-matrix": "~2.1",
+    "jquery": "~2.1",
+    "jquery-mousewheel": "^3.1.12",
+    "proj4": "~2.2"
+  }
+}
