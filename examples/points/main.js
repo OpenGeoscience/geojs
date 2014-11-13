@@ -51,7 +51,16 @@ $(function () {
     },
     zoom: 2
   });
-  map.createLayer('osm');
+
+  // Create an osm layer with custom tile url for a white background.
+  map.createLayer(
+    'osm',
+    {
+      tileUrl: function () {
+        return 'white.jpg';
+      }
+    }
+  );
 
   // Create a gl feature layer
   var vglLayer = map.createLayer(
