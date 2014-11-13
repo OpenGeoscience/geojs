@@ -267,7 +267,7 @@ module.exports = function (grunt) {
           }),
           options: {
             output: path.join('dist', dir, 'doc'),
-            layout: 'linear'
+            layout: 'classic'
           }
         });
       }

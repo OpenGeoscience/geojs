@@ -98,7 +98,7 @@ gd3.pointFeature = function (arg) {
   this._update = function () {
     s_update.call(m_this);
 
-    if (m_this.dataTime().getMTime() >= m_buildTime.getMTime()) {
+    if (m_this.getMTime() >= m_buildTime.getMTime()) {
       m_this._build();
     }
 
