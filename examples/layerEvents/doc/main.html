@@ -4,64 +4,103 @@
 <head>
   <title>main.js</title>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-  <link rel="stylesheet" media="all" href="public/stylesheets/normalize.css" />
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
   <link rel="stylesheet" media="all" href="docco.css" />
 </head>
 <body>
-  <div class="container">
-    <div class="page">
+  <div id="container">
+    <div id="background"></div>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>main.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              <p>Run after the DOM loads</p>
 
-      <div class="header">
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>$(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+<span class="hljs-pi">  'use strict'</span>;</pre></div></div>
+            
+        </li>
         
-          <h1>main.js</h1>
         
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>Create an svg layer and return a reference to its dom element.</p>
 
-        
-      </div>
-
-      
-        
-        <p>Run after the DOM loads</p>
-
-        
-          <div class='highlight'><pre>$(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
-<span class="hljs-pi">  'use strict'</span>;</pre></div>
-        
-      
-        
-        <p>Create an svg layer and return a reference to its dom element.</p>
-
-        
-          <div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getSvgLayer</span><span class="hljs-params">(map, opts)</span> </span>{
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getSvgLayer</span><span class="hljs-params">(map, opts)</span> </span>{
 
     opts.renderer = <span class="hljs-string">'d3Renderer'</span>;
-    <span class="hljs-keyword">var</span> layer = map.createLayer(<span class="hljs-string">'feature'</span>, opts);</pre></div>
+    <span class="hljs-keyword">var</span> layer = map.createLayer(<span class="hljs-string">'feature'</span>, opts);</pre></div></div>
+            
+        </li>
         
-      
         
-        <p>The canvas is a d3 context to geojs managed svg element.</p>
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>The canvas is a d3 context to geojs managed svg element.</p>
 
-        
-          <div class='highlight'><pre>    <span class="hljs-keyword">return</span> {
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">return</span> {
       layer: layer,
       svg: layer.canvas()
     };
-  }</pre></div>
+  }</pre></div></div>
+            
+        </li>
         
-      
         
-        <p>This function creates a top layer that blocks mouse events.</p>
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>This function creates a top layer that blocks mouse events.</p>
 
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">topLayer</span><span class="hljs-params">(map)</span> </span>{
+    <span class="hljs-keyword">var</span> obj = getSvgLayer(map, {sticky: <span class="hljs-literal">false</span>});</pre></div></div>
+            
+        </li>
         
-          <div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">topLayer</span><span class="hljs-params">(map)</span> </span>{
-    <span class="hljs-keyword">var</span> obj = getSvgLayer(map, {sticky: <span class="hljs-literal">false</span>});</pre></div>
         
-      
-        
-        <p>Give the layer a slight yellow tint.</p>
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>Give the layer a slight yellow tint.</p>
 
-        
-          <div class='highlight'><pre>    obj.svg.append(<span class="hljs-string">'rect'</span>)
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    obj.svg.append(<span class="hljs-string">'rect'</span>)
       .classed(<span class="hljs-string">'top-layer-overlay'</span>, <span class="hljs-literal">true</span>)
       .attr(<span class="hljs-string">'x'</span>, -<span class="hljs-number">10000</span>)
       .attr(<span class="hljs-string">'y'</span>, -<span class="hljs-number">10000</span>)
@@ -69,63 +108,111 @@
       .attr(<span class="hljs-string">'height'</span>, <span class="hljs-number">20000</span>);
 
     <span class="hljs-keyword">return</span> obj.layer;
-  }</pre></div>
+  }</pre></div></div>
+            
+        </li>
         
-      
         
-        <p>Create a map object</p>
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>Create a map object</p>
 
-        
-          <div class='highlight'><pre>  <span class="hljs-keyword">var</span> map = geo.map({
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> map = geo.map({
     node: <span class="hljs-string">'#map'</span>,
     center: {
       x: -<span class="hljs-number">98.0</span>,
       y: <span class="hljs-number">39.5</span>
     },
     zoom: <span class="hljs-number">1</span>
-  });</pre></div>
+  });</pre></div></div>
+            
+        </li>
         
-      
         
-        <p>Add a base layer</p>
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>Add a base layer</p>
 
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  map.createLayer(<span class="hljs-string">'osm'</span>);</pre></div></div>
+            
+        </li>
         
-          <div class='highlight'><pre>  map.createLayer(<span class="hljs-string">'osm'</span>);</pre></div>
         
-      
-        
-        <p>Get the map size in pixels</p>
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>Get the map size in pixels</p>
 
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> height = $(<span class="hljs-string">'#map'</span>).height();
+  <span class="hljs-keyword">var</span> width = $(<span class="hljs-string">'#map'</span>).width();</pre></div></div>
+            
+        </li>
         
-          <div class='highlight'><pre>  <span class="hljs-keyword">var</span> height = $(<span class="hljs-string">'#map'</span>).height();
-  <span class="hljs-keyword">var</span> width = $(<span class="hljs-string">'#map'</span>).width();</pre></div>
         
-      
-        
-        <p>Create a fixed layer that contains some descriptive text.</p>
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>Create a fixed layer that contains some descriptive text.</p>
 
-        
-          <div class='highlight'><pre>  <span class="hljs-keyword">var</span> info = getSvgLayer(map, {sticky: <span class="hljs-literal">false</span>}).svg
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> info = getSvgLayer(map, {sticky: <span class="hljs-literal">false</span>}).svg
     .append(<span class="hljs-string">'text'</span>)
       .attr(<span class="hljs-string">'x'</span>, <span class="hljs-number">30</span>)
       .attr(<span class="hljs-string">'y'</span>, <span class="hljs-number">30</span>)
       .attr(<span class="hljs-string">'dy'</span>, <span class="hljs-string">'1em'</span>)
-      .text(<span class="hljs-string">'Try panning and zooming the map over the boxes.'</span>);</pre></div>
+      .text(<span class="hljs-string">'Try panning and zooming the map over the boxes.'</span>);</pre></div></div>
+            
+        </li>
         
-      
         
-        <p>Create the main svg layer.</p>
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>Create the main svg layer.</p>
 
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> svg = getSvgLayer(map, {}).svg;</pre></div></div>
+            
+        </li>
         
-          <div class='highlight'><pre>  <span class="hljs-keyword">var</span> svg = getSvgLayer(map, {}).svg;</pre></div>
         
-      
-        
-        <p>This is a helper function to create a box with a
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p>This is a helper function to create a box with a
 uniform style that receives mouse events.</p>
 
-        
-          <div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">addEventBox</span><span class="hljs-params">(x, y, str)</span> </span>{
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">addEventBox</span><span class="hljs-params">(x, y, str)</span> </span>{
     <span class="hljs-keyword">var</span> width = <span class="hljs-number">300</span>, height = <span class="hljs-number">200</span>;
     <span class="hljs-keyword">var</span> text = svg.append(<span class="hljs-string">'text'</span>)
       .attr(<span class="hljs-string">'x'</span>, x - <span class="hljs-number">75</span>)
@@ -150,52 +237,92 @@ uniform style that receives mouse events.</p>
         text.style(<span class="hljs-string">'display'</span>, <span class="hljs-string">'none'</span>);
         d3.select(<span class="hljs-keyword">this</span>).style(<span class="hljs-string">'fill-opacity'</span>, <span class="hljs-literal">null</span>);
       });
-  }</pre></div>
+  }</pre></div></div>
+            
+        </li>
         
-      
         
-        <p>Add a red box that blocks mouse clicks.</p>
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p>Add a red box that blocks mouse clicks.</p>
 
-        
-          <div class='highlight'><pre>  addEventBox(width / <span class="hljs-number">4</span>, height / <span class="hljs-number">2</span>, <span class="hljs-string">'Blocking click'</span>)
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  addEventBox(width / <span class="hljs-number">4</span>, height / <span class="hljs-number">2</span>, <span class="hljs-string">'Blocking click'</span>)
     .style(<span class="hljs-string">'fill'</span>, <span class="hljs-string">'firebrick'</span>)
     .on(<span class="hljs-string">'mousedown'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
       d3.event.stopPropagation();
-    });</pre></div>
+    });</pre></div></div>
+            
+        </li>
         
-      
         
-        <p>Add a blue box that blocks the mouse wheel.</p>
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <p>Add a blue box that blocks the mouse wheel.</p>
 
-        
-          <div class='highlight'><pre>  addEventBox(<span class="hljs-number">3</span> * width / <span class="hljs-number">4</span>, height / <span class="hljs-number">2</span>, <span class="hljs-string">'Blocking wheel'</span>)
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  addEventBox(<span class="hljs-number">3</span> * width / <span class="hljs-number">4</span>, height / <span class="hljs-number">2</span>, <span class="hljs-string">'Blocking wheel'</span>)
     .style(<span class="hljs-string">'fill'</span>, <span class="hljs-string">'steelblue'</span>)
     .on(<span class="hljs-string">'mousewheel'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
       d3.event.stopPropagation();
-    });</pre></div>
+    });</pre></div></div>
+            
+        </li>
         
-      
         
-        <p>Make the map resize with the browser window</p>
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <p>Make the map resize with the browser window</p>
 
-        
-          <div class='highlight'><pre>  $(<span class="hljs-built_in">window</span>).resize(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  $(<span class="hljs-built_in">window</span>).resize(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
     map.resize(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, map.node().width(), map.node().height());
-  });</pre></div>
+  });</pre></div></div>
+            
+        </li>
         
-      
         
-        <p>Draw the map</p>
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <p>Draw the map</p>
 
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  map.draw();</pre></div></div>
+            
+        </li>
         
-          <div class='highlight'><pre>  map.draw();</pre></div>
         
-      
-        
-        <p>Connect the button that adds or removes the top layer.</p>
+        <li id="section-16">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <p>Connect the button that adds or removes the top layer.</p>
 
-        
-          <div class='highlight'><pre>  <span class="hljs-keyword">var</span> top = <span class="hljs-literal">null</span>;
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> top = <span class="hljs-literal">null</span>;
   $(<span class="hljs-string">'.layer-toggle '</span>).text(<span class="hljs-string">'Add top layer'</span>)
     .click(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
       <span class="hljs-keyword">if</span> (top) {
@@ -213,11 +340,11 @@ uniform style that receives mouse events.</p>
         );
       }
     });
-});</pre></div>
+});</pre></div></div>
+            
+        </li>
         
-      
-      <div class="fleur">h</div>
-    </div>
+    </ul>
   </div>
 </body>
 </html>
