@@ -207,7 +207,7 @@ geo.map = function (arg) {
       y: m_height / 2
     });
 
-    evt.delta = {
+    evt.gcsDelta = {
       x: m_center.x - previousCenter.x,
       y: m_center.y - previousCenter.y
     };
