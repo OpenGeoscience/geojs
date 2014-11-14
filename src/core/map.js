@@ -174,7 +174,7 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.zoom = function (val, direction) {
-    var base, evt;
+    var base, evt, previousCenter;
     if (val === undefined) {
       return m_zoom;
     }
@@ -200,10 +200,18 @@ geo.map = function (arg) {
     }
 
     m_zoom = val;
+
+    previousCenter = m_center;
     m_center = m_this.displayToGcs({
       x: m_width / 2,
       y: m_height / 2
     });
+
+    evt.delta = {
+      x: m_center.x - previousCenter.x,
+      y: m_center.y - previousCenter.y
+    };
+
     m_this.children().forEach(function (child) {
       child.geoTrigger(geo.event.zoom, evt, true);
     });
