@@ -42,7 +42,8 @@ geo.osmLayer = function (arg) {
     m_pendingNewTilesStat = {},
     s_update = this._update,
     m_updateDefer = null,
-    m_zoomLevelDelta = 2.5;
+    m_zoomLevelDelta = 2.5,
+    m_tileUrl;
 
   if (arg && arg.baseUrl !== undefined) {
     m_baseUrl = arg.baseUrl;
@@ -54,6 +55,27 @@ geo.osmLayer = function (arg) {
 
   if (arg && arg.imageFormat !== undefined) {
     m_imageFormat = arg.imageFormat;
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Returns a url string containing the requested tile.  This default
+   * version uses the open street map standard, but the user can
+   * change the default behavior.
+   *
+   * @param {integer} zoom The zoom level
+   * @param {integer} x The tile from the xth row
+   * @param {integer} y The tile from the yth column
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  m_tileUrl = function (zoom, x, y) {
+    return m_baseUrl + zoom + "/" + x +
+      "/" + y + "." + m_imageFormat;
+  };
+
+  if (arg && arg.tileUrl !== undefined) {
+    m_tileUrl = arg.tileUrl;
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -111,6 +133,20 @@ geo.osmLayer = function (arg) {
     }
     m_tileCacheSize = val;
     m_this.modified();
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set the tile url formatting function.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.tileUrl = function (val) {
+    if (val === undefined) {
+      return m_tileUrl;
+    }
+    m_tileUrl = val;
+    m_this.modified();
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -292,10 +328,7 @@ geo.osmLayer = function (arg) {
     tile.ury = ury;
     tile.lastused = new Date();
 
-    // tile.src = "http://tile.openstreetmap.org/" + zoom + "/" + (x)
-    //   + "/" + (Math.pow(2,zoom) - 1 - y) + ".png";
-    tile.src = m_baseUrl + zoom + "/" +
-      (x) + "/" + (Math.pow(2, zoom) - 1 - y) + "." + m_imageFormat;
+    tile.src = m_tileUrl(zoom, x, Math.pow(2, zoom) - 1 - y);
 
     m_tiles[zoom][x][y] = tile;
     m_pendingNewTiles.push(tile);
