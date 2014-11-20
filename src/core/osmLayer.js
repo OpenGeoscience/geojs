@@ -1,12 +1,14 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @module geo
+ * @namespace geo
  */
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of osmLayer
+ *
+ * @class
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.osmLayer = function (arg) {
@@ -154,11 +156,17 @@ geo.osmLayer = function (arg) {
    * Transform a point or array of points in latitude-longitude-altitude
    * space to local space of the layer
    *
-   * @param input Input can be of following types:
-   * geo.latlng, [geo.latlng], [x1,y1, x2, y2], [[x,y]], {x:val: y:val, z:val},
-   * [{x:val: y:val}]
+   * @param {*} input
+   * Input can be of following types:
    *
-   * @returns geo.latlng, [geo.latlng], or {x:lon, y:lat}, [{x:lon, y:lat}]
+   *   1. geo.latlng
+   *   2. [geo.latlng]
+   *   3. [x1,y1, x2, y2]
+   *   4. [[x,y]]
+   *   5. {x:val: y:val, z:val},
+   *   6. [{x:val: y:val}]
+   *
+   * returns geo.latlng, [geo.latlng], or {x:lon, y:lat}, [{x:lon, y:lat}]
    * [x1,y1, x2, y2], [[x,y]]
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -264,9 +272,9 @@ geo.osmLayer = function (arg) {
   /**
    * Check if a tile exists in the cache
    *
-   * @param zoom {number} The zoom value for the map [1-17]
-   * @param x {number} X axis tile index
-   * @param y {number} Y axis tile index
+   * @param {number} zoom The zoom value for the map [1-17]
+   * @param {number} x X axis tile index
+   * @param {number} y Y axis tile index
    */
   ////////////////////////////////////////////////////////////////////////////
   this._hasTile = function (zoom, x, y) {
@@ -285,8 +293,8 @@ geo.osmLayer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Create a new tile
-   * @param x {number} X axis tile index
-   * @param y {number} Y axis tile index
+   * @param {number} x X axis tile index
+   * @param {number} y Y axis tile index
    */
   ////////////////////////////////////////////////////////////////////////////
   this._addTile = function (request, zoom, x, y) {

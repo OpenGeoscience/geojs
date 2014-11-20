@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @module geo
+ * @namespace geo
  */
 //////////////////////////////////////////////////////////////////////////////
 
@@ -8,6 +8,8 @@
 /**
  * Transform geometric data of a feature from source projection to destination
  * projection.
+ *
+ * @namespace geo.transform
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.transform = {};
@@ -261,10 +263,10 @@ geo.transform.transformLayer = function (destGcs, layer, baseLayer) {
  * Transform position coordinates from source projection to destination
  * projection.
  *
- * @param srcGcs GCS of the coordinates
- * @param destGcs Desired GCS of the transformed coordinates
- * @param coordinates
- * @return {Array | geo.latlng} Transformed coordinates
+ * @param {string} srcGcs GCS of the coordinates
+ * @param {string} destGcs Desired GCS of the transformed coordinates
+ * @param {object} coordinates
+ * @return {geo.latlng|geo.latlng[]} Transformed coordinates
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.transform.transformCoordinates = function (srcGcs, destGcs, coordinates,

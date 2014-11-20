@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @module geo
+ * @namespace geo
  */
 //////////////////////////////////////////////////////////////////////////////
 
@@ -26,6 +26,9 @@ geo.object = function () {
   //////////////////////////////////////////////////////////////////////////////
   /**
    *  Bind a handler that will be called once when all deferreds are resolved.
+   *
+   *  @param {function} handler A function taking no arguments
+   *  @returns {geo.object[]|geo.object} this
    */
   //////////////////////////////////////////////////////////////////////////////
   this.onIdle = function (handler) {
@@ -34,12 +37,14 @@ geo.object = function () {
     } else {
       handler();
     }
+    return m_this;
   };
 
   //////////////////////////////////////////////////////////////////////////////
   /**
    *  Add a new deferred object preventing idle event handlers from being called.
-   *  Takes a $.Deferred object as an argument.
+   *
+   *  @param {$.defer} defer A jquery defered object
    */
   //////////////////////////////////////////////////////////////////////////////
   this.addDeferred = function (defer) {
@@ -53,11 +58,19 @@ geo.object = function () {
           });
       }
     });
+    return m_this;
   };
 
   //////////////////////////////////////////////////////////////////////////////
   /**
    *  Bind an event handler to this object
+   *
+   *  @param {String} event
+   *    An event from {geo.events}
+   *  @param {function} handler
+   *    A function that will be called when ``event`` is triggered.  The
+   *    function will be given an event object as a first parameter and
+   *    optionally a second argument provided by the triggerer.
    */
   //////////////////////////////////////////////////////////////////////////////
   this.geoOn = function (event, handler) {
@@ -77,6 +90,9 @@ geo.object = function () {
   //////////////////////////////////////////////////////////////////////////////
   /**
    *  Trigger an event (or events) on this object and call all handlers
+   *
+   *  @param {String} event An event from {geo.events}
+   *  @param {Object} args An optional argument to pass to handlers
    */
   //////////////////////////////////////////////////////////////////////////////
   this.geoTrigger = function (event, args) {
@@ -102,8 +118,9 @@ geo.object = function () {
   /**
    *  Remove handlers from an event (or an array of events).
    *
-   *  @param arg a function or array of functions to remove from the events
-   *             or if falsey remove all handlers from the events
+   *  @param {String} event An event from {geo.events}
+   *  @param {Object} arg A function or array of functions to remove from the events
+   *                      or if falsey remove all handlers from the events
    */
   //////////////////////////////////////////////////////////////////////////////
   this.geoOff = function (event, arg) {

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @module geo
+ * @namespace geo
  */
 //////////////////////////////////////////////////////////////////////////////
 
@@ -8,7 +8,7 @@
 /**
  * Create a new instance of class renderer
  *
- * @param canvas
+ * @class
  * @returns {geo.renderer}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -156,8 +156,8 @@ geo.renderer = function (arg) {
   /**
    * Get mouse coodinates related to canvas
    *
-   * @param event
-   * @returns {{x: number, y: number}}
+   * @param {object} event
+   * @returns {object}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.relMouseCoords = function (event) {

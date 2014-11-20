@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 /**
- * @module geo
+ * @namespace geo
  */
 //////////////////////////////////////////////////////////////////////////////
 
@@ -8,7 +8,8 @@
 /**
  * Create a new instance of class map
  *
- * @class Creates a new map inside of the given HTML layer (Typically DIV)
+ * Creates a new map inside of the given HTML layer (Typically DIV)
+ * @class
  * @returns {geo.map}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -57,7 +58,7 @@ geo.map = function (arg) {
   /**
    * Get map gcs
    *
-   * @returns {String EPSG format}
+   * @returns {string}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.gcs = function (arg) {
@@ -72,7 +73,7 @@ geo.map = function (arg) {
   /**
    * Get map user interface GCS
    *
-   * @returns {String EPSG format}
+   * @returns {string}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.uigcs = function () {
@@ -83,7 +84,7 @@ geo.map = function (arg) {
   /**
    * Get root node of the map
    *
-   * @returns {jquery object}
+   * @returns {object}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.node = function () {
@@ -343,8 +344,8 @@ geo.map = function (arg) {
   /**
    * Convert from gcs coordinates to display coordinates
    *
-   * @param input {[geo.latlng], [{x:_x, y: _y}], [x1,y1, x2, y2]}
-   * @return [x:x1, y:y1, ...], [x1, y1, x2, y2]
+   * @param {*} input {[geo.latlng], [{x:_x, y: _y}], [x1,y1, x2, y2]}
+   * @return {object}
    *
    * @note Currently only lat-lon inputs are supported
    */
@@ -387,8 +388,6 @@ geo.map = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Queries each layer for information at this location.
-   *
-   * @param location
    */
   ////////////////////////////////////////////////////////////////////////////
   this.query = function () {
@@ -629,12 +628,14 @@ geo.map = function (arg) {
   /**
    * Start an animated zoom/pan.
    *
-   * opts = {
-   *   center: { x: ... , y: ... } // the new center
-   *   zoom: ... // the new zoom level
-   *   duration: ... // the duration (in ms) of the transition
-   *   ease: ... // an easing function [0, 1] -> [0, 1]
-   * }
+   * Options: ::
+   *
+   *   opts = {
+   *     center: { x: ... , y: ... } // the new center
+   *     zoom: ... // the new zoom level
+   *     duration: ... // the duration (in ms) of the transition
+   *     ease: ... // an easing function [0, 1] -> [0, 1]
+   *   }
    *
    * @param {Object} opts
    * @returns {geo.map}

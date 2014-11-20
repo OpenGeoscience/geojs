@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @module geo
+ * @namespace geo
  */
 //////////////////////////////////////////////////////////////////////////////
 
@@ -8,7 +8,7 @@
 /**
  * Create a new instance of mapInteractor
  *
- * @class geo.mapInteractor
+ * @class
  * @returns {geo.mapInteractor}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -729,15 +729,15 @@ geo.mapInteractor = function (args) {
    * Simulate a DOM mouse event on connected map.
    *
    * The options for creating the events are as follows, not all
-   * options are required for every event type.
+   * options are required for every event type. ::
    *
-   * options = {
-   *   page: {x, y} // position on the page
-   *   map: {x, y}  // position on the map (overrides page)
-   *   button: 'left' | 'right' | 'middle'
-   *   modifiers: [ 'alt' | 'ctrl' | 'meta' | 'shift' ]
-   *   wheelDelta: {x, y}
-   * }
+   *   options = {
+   *     page: {x, y} // position on the page
+   *     map: {x, y}  // position on the map (overrides page)
+   *     button: 'left' | 'right' | 'middle'
+   *     modifiers: [ 'alt' | 'ctrl' | 'meta' | 'shift' ]
+   *     wheelDelta: {x, y}
+   *   }
    *
    * @param {string} type Event type 'mousemove', 'mousedown', 'mouseup', ...
    * @param {object} options
