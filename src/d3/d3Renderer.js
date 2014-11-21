@@ -32,7 +32,8 @@ gd3.d3Renderer = function (arg) {
       m_scale = 1,
       m_dx = 0,
       m_dy = 0,
-      m_svg = null;
+      m_svg = null,
+      m_defs = null;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -261,7 +262,51 @@ gd3.d3Renderer = function (arg) {
       var canvas;
       m_svg = d3.select(m_this.layer().node().get(0)).append('svg');
 
+      // create a global svg definitions element
+      m_defs = m_svg.append('defs');
+
+      var shadow = m_defs
+        .append('filter')
+          .attr('id', 'geo-highlight')
+          .attr('x', '-100%')
+          .attr('y', '-100%')
+          .attr('width', '300%')
+          .attr('height', '300%');
+      shadow
+        .append('feMorphology')
+          .attr('operator', 'dilate')
+          .attr('radius', 2)
+          .attr('in', 'SourceAlpha')
+          .attr('result', 'dilateOut');
+      shadow
+        .append('feGaussianBlur')
+          .attr('stdDeviation', 5)
+          .attr('in', 'dilateOut')
+          .attr('result', 'blurOut');
+      shadow
+        .append('feColorMatrix')
+          .attr('type', 'matrix')
+          .attr('values', '-1 0 0 0 1  0 -1 0 0 1  0 0 -1 0 1  0 0 0 1 0')
+          .attr('in', 'blurOut')
+          .attr('result', 'invertOut');
+      shadow
+        .append('feBlend')
+          .attr('in', 'SourceGraphic')
+          .attr('in2', 'invertOut')
+          .attr('mode', 'normal');
       canvas = m_svg.append('g');
+
+      shadow = m_defs.append('filter')
+          .attr('id', 'geo-blur')
+          .attr('x', '-100%')
+          .attr('y', '-100%')
+          .attr('width', '300%')
+          .attr('height', '300%');
+
+      shadow
+        .append('feGaussianBlur')
+          .attr('stdDeviation', 20)
+          .attr('in', 'SourceGraphic');
 
       m_sticky = m_this.layer().sticky();
       m_svg.attr('class', m_this._d3id());
