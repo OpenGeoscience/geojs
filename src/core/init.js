@@ -227,6 +227,45 @@ geo.createLayer = function (name, map, arg) {
   }
 };
 
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Register a new widget type
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.registerWidget = function (category, name, func) {
+  "use strict";
+
+  if (geo.widgets === undefined) {
+    geo.widgets = {};
+  }
+
+  if (!(category in geo.widgets)) {
+    geo.widgets[category] = {};
+  }
+
+  // TODO Add warning if the name already exists
+  geo.widgets[category][name] = func;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Create new instance of the widget
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.createWidget  = function (name, layer, renderer, arg) {
+  "use strict";
+
+  var category = renderer.api(),
+      options = {"layer": layer, "renderer": renderer};
+  if (category in geo.widgets && name in geo.widgets[category]) {
+    if (arg !== undefined) {
+      $.extend(true, options, arg);
+    }
+    return geo.widgets[category][name](options);
+  }
+  return null;
+};
+
 // Add a polyfill for window.requestAnimationFrame.
 if (!window.requestAnimationFrame) {
   window.requestAnimationFrame = function (func) {

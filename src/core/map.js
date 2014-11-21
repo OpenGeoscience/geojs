@@ -179,7 +179,8 @@ geo.map = function (arg) {
       return m_zoom;
     }
 
-    if (val === m_zoom || val > m_validZoomRange.max || val < m_validZoomRange.min) {
+    val = Math.min(m_validZoomRange.max, Math.max(val, m_validZoomRange.min));
+    if (val === m_zoom) {
       return m_this;
     }
 
@@ -200,7 +201,6 @@ geo.map = function (arg) {
     }
 
     m_zoom = val;
-
     previousCenter = m_center;
     m_center = m_this.displayToGcs({
       x: m_width / 2,
