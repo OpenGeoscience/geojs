@@ -1,5 +1,3 @@
-
-
 //////////////////////////////////////////////////////////////////////////////
 /**
  * @module geo
@@ -11,15 +9,15 @@
  * Create a new instance of class sliderWidget
  *
  * @class
- * @returns {geo.sliderWidget}
+ * @returns {geo.gui.sliderWidget}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.sliderWidget = function (arg) {
+geo.gui.sliderWidget = function (arg) {
   'use strict';
-  if (!(this instanceof geo.sliderWidget)) {
-    return new geo.sliderWidget(arg);
+  if (!(this instanceof geo.gui.sliderWidget)) {
+    return new geo.gui.sliderWidget(arg);
   }
-  geo.widget.call(this, arg);
+  geo.gui.widget.call(this, arg);
 
   var m_this = this,
       m_xscale,
@@ -88,7 +86,7 @@ geo.sliderWidget = function (arg) {
  * Initialize the slider widget in the map.
  *
  * @function
- * @returns {geo.sliderWidget}
+ * @returns {geo.gui.sliderWidget}
  * @private
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -297,7 +295,7 @@ geo.sliderWidget = function (arg) {
  * Removes the slider element from the map and unbinds all handlers.
  *
  * @function
- * @returns {geo.sliderWidget}
+ * @returns {geo.gui.sliderWidget}
  * @private
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -312,7 +310,7 @@ geo.sliderWidget = function (arg) {
  * range changes.
  *
  * @function
- * @returns {geo.sliderWidget}
+ * @returns {geo.gui.sliderWidget}
  * @private
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -332,6 +330,6 @@ geo.sliderWidget = function (arg) {
   };
 };
 
-inherit(geo.sliderWidget, geo.widget);
+inherit(geo.gui.sliderWidget, geo.gui.widget);
 
-geo.registerWidget('d3', 'slider', geo.sliderWidget);
+geo.registerWidget('d3', 'slider', geo.gui.sliderWidget);

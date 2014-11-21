@@ -9,18 +9,18 @@
  * Create a new instance of class uiLayer
  *
  * @class
- * @returns {geo.uiLayer}
+ * @returns {geo.gui.uiLayer}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.uiLayer = function (arg) {
+geo.gui.uiLayer = function (arg) {
   'use strict';
 
   // The widget stays fixed on the screen.  (only available in d3 at the moment)
   arg.renderer = 'd3Renderer';
   arg.sticky = false;
 
-  if (!(this instanceof geo.uiLayer)) {
-    return new geo.uiLayer(arg);
+  if (!(this instanceof geo.gui.uiLayer)) {
+    return new geo.gui.uiLayer(arg);
   }
   geo.layer.call(this, arg);
 
@@ -30,7 +30,7 @@ geo.uiLayer = function (arg) {
   /**
    * Create a new ui control
    *
-   * @returns {geo.Widget} Will return a new control widget
+   * @returns {geo.gui.Widget} Will return a new control widget
    */
   ////////////////////////////////////////////////////////////////////////////
   this.createWidget = function (widgetName, arg) {
@@ -57,6 +57,6 @@ geo.uiLayer = function (arg) {
   };
 };
 
-inherit(geo.uiLayer, geo.layer);
+inherit(geo.gui.uiLayer, geo.layer);
 
-geo.registerLayer('ui', geo.uiLayer);
+geo.registerLayer('ui', geo.gui.uiLayer);

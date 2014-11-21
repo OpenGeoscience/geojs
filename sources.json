@@ -71,6 +71,7 @@
     "geo.ui": {
       "prefix": "src/ui",
       "files": [
+        "init.js",
         "uiLayer.js",
         "widget.js",
         "sliderWidget.js"

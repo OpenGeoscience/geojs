@@ -9,13 +9,13 @@
  * Create a new instance of class widget
  *
  * @class
- * @returns {geo.widget}
+ * @returns {geo.gui.widget}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.widget = function (arg) {
+geo.gui.widget = function (arg) {
   'use strict';
-  if (!(this instanceof geo.widget)) {
-    return new geo.widget(arg);
+  if (!(this instanceof geo.gui.widget)) {
+    return new geo.gui.widget(arg);
   }
   geo.sceneObject.call(this, arg);
 
@@ -64,4 +64,4 @@ geo.widget = function (arg) {
     return m_layer;
   };
 };
-inherit(geo.widget, geo.sceneObject);
+inherit(geo.gui.widget, geo.sceneObject);
