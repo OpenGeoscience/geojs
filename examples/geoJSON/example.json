@@ -1,0 +1,9 @@
+{
+  "path": "geoJSON",
+  "title": "GeoJSON file reader",
+  "exampleCss": ["main.css", "../common/css/codemirror.css", "../common/css/lint.css"],
+  "exampleJs": ["main.js", "../common/js/codemirror.js"],
+  "about": {
+    "text": "Shows how to use the included geoJSON reader, and how to use the properties to adjust the style of the features."
+  }
+}

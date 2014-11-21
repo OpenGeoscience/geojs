@@ -150,7 +150,7 @@ ggl.lineFeature = function (arg) {
     m_this.data().forEach(function (item) {
       lineItem = m_this.line()(item, itemIndex);
       lineItem.forEach(function (lineItemData) {
-        p = posFunc(item, itemIndex, lineItemData, lineItemIndex);
+        p = posFunc(lineItemData, lineItemIndex, item, itemIndex);
         if (p instanceof geo.latlng) {
           position.push([p.x(), p.y(), 0.0]);
         } else {

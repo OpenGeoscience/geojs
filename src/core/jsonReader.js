@@ -127,10 +127,8 @@ geo.jsonReader = function (arg) {
     });
   };
 
-  this._getStyle = function () {
-    // TODO: convert json style object for features
-    //return spec.properties || {};
-    return {};
+  this._getStyle = function (spec) {
+    return spec.properties || {};
   };
 
   this.read = function (file, done, progress) {

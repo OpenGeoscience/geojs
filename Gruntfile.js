@@ -133,6 +133,22 @@ module.exports = function (grunt) {
             cwd: 'bower_components/bootswatch/flatly'
           }
         ]
+      },
+      codemirror: {
+        files: [
+          {
+            src: ['codemirror.css'],
+            dest: 'dist/examples/common/css/',
+            cwd: 'bower_components/codemirror/lib/',
+            expand: true
+          },
+          {
+            src: ['lint.css'],
+            dest: 'dist/examples/common/css/',
+            cwd: 'bower_components/codemirror/addon/lint/',
+            expand: true
+          }
+        ]
       }
     },
 
@@ -164,6 +180,21 @@ module.exports = function (grunt) {
             'bower_components/gl-matrix/dist/gl-matrix.js',
             'bower_components/proj4/dist/proj4-src.js',
             'bower_components/d3/d3.js'
+          ]
+        }
+      },
+
+      codemirror: {
+        files: {
+          'dist/examples/common/js/codemirror.js': [
+            'bower_components/jsonlint/lib/jsonlint.js',
+            'bower_components/codemirror/lib/codemirror.js',
+            'bower_components/codemirror/mode/javascript/javascript.js',
+            'bower_components/codemirror/mode/javascript/javascript.js',
+            'bower_components/codemirror/addon/lint/lint.js',
+            'bower_components/codemirror/addon/lint/json-lint.js',
+            'bower_components/codemirror/addon/fold/foldcode.js',
+            'bower_components/codemirror/addon/edit/matchbrackets.js'
           ]
         }
       }
@@ -310,7 +341,9 @@ module.exports = function (grunt) {
   findExamples();
   grunt.registerTask('examples', [
     'copy:bootstrap',
+    'copy:codemirror',
     'copy:examples',
+    'uglify:codemirror',
     'jade',
     'docco'
   ]);

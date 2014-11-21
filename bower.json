@@ -19,5 +19,9 @@
     "proj4": "~2.2",
     "bootstrap": "~3.3.0",
     "bootswatch": "~3.3"
+  },
+  "devDependencies": {
+    "codemirror": "~4.7.0",
+    "jsonlint": "~1.6.0"
   }
 }
