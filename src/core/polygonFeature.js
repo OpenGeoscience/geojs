@@ -93,11 +93,8 @@ geo.polygonFeature = function (arg) {
     var defaultStyle = $.extend(
       {},
       {
-        "strokeWidth": 1.0,
-        // Default to gold color for lines
-        "strokeColor": { r: 1.0, g: 0.8431372549, b: 0.0 },
-        "strokeStyle": "solid",
-        "strokeOpacity": 1.0
+        "fillColor": { r: 0.0,  g: 0.5, b: 0.5 },
+        "fillOpacity": 1.0
       },
       arg.style === undefined ? {} : arg.style
     );

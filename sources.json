@@ -41,7 +41,8 @@
       "prefix": "src/util",
       "files": [
         "init.js",
-        "wigglemaps.js"
+        "wigglemaps.js",
+        "polyk.js"
       ]
     },
     "geo.gl": {
@@ -53,6 +54,7 @@
         "pointFeature.js",
         "geomFeature.js",
         "planeFeature.js",
+        "polygonFeature.js",
         "vglRenderer.js"
       ]
     },
