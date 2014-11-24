@@ -1,11 +1,9 @@
-.text-editor {
-}
 .CodeMirror {
   position: absolute;
   left: 10px;
   top: 1px;
   width: calc(50% - 10px);
-  height: calc(50% - 10px);
+  height: calc(100% - 100px) !important;
   z-index: 50;
   border-radius: 5px;
   border: 1px solid grey;

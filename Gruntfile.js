@@ -147,6 +147,12 @@ module.exports = function (grunt) {
             dest: 'dist/examples/common/css/',
             cwd: 'bower_components/codemirror/addon/lint/',
             expand: true
+          },
+          {
+            src: ['foldgutter.css'],
+            dest: 'dist/examples/common/css/',
+            cwd: 'bower_components/codemirror/addon/fold/',
+            expand: true
           }
         ]
       }
@@ -193,7 +199,9 @@ module.exports = function (grunt) {
             'bower_components/codemirror/mode/javascript/javascript.js',
             'bower_components/codemirror/addon/lint/lint.js',
             'bower_components/codemirror/addon/lint/json-lint.js',
+            'bower_components/codemirror/addon/fold/brace-fold.js',
             'bower_components/codemirror/addon/fold/foldcode.js',
+            'bower_components/codemirror/addon/fold/foldgutter.js',
             'bower_components/codemirror/addon/edit/matchbrackets.js'
           ]
         }
