@@ -27,15 +27,15 @@ geo.polygonFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       m_position,
-      m_polygons,
+      m_polygon,
       s_init = this._init;
 
   if (arg.line === undefined) {
-    m_polygons = function (d) {
+    m_polygon = function (d) {
       return d;
     };
   } else {
-    m_polygons = arg.line;
+    m_polygon = arg.line;
   }
 
   if (arg.position === undefined) {
@@ -53,11 +53,11 @@ geo.polygonFeature = function (arg) {
    * @returns {geo.pointFeature}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.polygons = function (val) {
+  this.polygon = function (val) {
     if (val === undefined) {
-      return m_polygons;
+      return m_polygon;
     } else {
-      m_polygons = val;
+      m_polygon = val;
       m_this.dataTime().modified();
       m_this.modified();
     }

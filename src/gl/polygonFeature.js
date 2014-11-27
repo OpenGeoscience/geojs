@@ -78,7 +78,8 @@ ggl.polygonFeature = function (arg) {
 
   function createGLPolygons() {
     var i, numPolygons = m_this.data().length, p = null, numPts = null,
-        start = null, itemIndex = 0, polygonItemIndex = 0, position = [],
+        start = null, itemIndex = 0, polygonItemCoordIndex = 0,
+        position = [],
         fillColor = [], fillOpacity = [], posFunc, fillColorFunc,
         polygonItem, fillOpacityFunc, buffers = vgl.DataBuffers(1024),
         sourcePositions = vgl.sourceDataP3fv(),
@@ -100,35 +101,39 @@ ggl.polygonFeature = function (arg) {
     fillOpacityFunc = m_this.style.get('fillOpacity');
 
     m_this.data().forEach(function (item) {
-      polygonItem = m_this.polygons()(item, itemIndex);
-      console.log(polygonItem);
-      polygonItem.forEach(function (polygonItemData) {
+      polygonItem = m_this.polygon()(item, itemIndex);
+      polygonItemCoordIndex = 0;
+
+      var extRing = [];
+      polygonItem.forEach(function (extRingCoords) {
+        extRing = extRing.concat(extRingCoords);
+      });
+      console.log("extRing ", extRing);
+      console.log("result", PolyK.Triangulate(extRing));
+      var result = PolyK.Triangulate(extRing)
+
+      result.forEach(function (polygonIndex) {
+        polygonItemCoords = polygonItem[polygonIndex];
+        polygonItemCoordIndex = polygonIndex;
+
         // Exterior ring
-        console.log("polygonItemData ", polygonItemData);
+        console.log("polygonItemData ", polygonItemCoords);
+        console.log("polygonItemData ", polygonItemCoordIndex);
 
-        var extRing = [];
-        polygonItemData.forEach(function (extRingData) {
-           extRing = extRing.concat(extRingData);
-        });
-        console.log("extRing ", extRing);
-        console.log("result", PolyK.Triangulate(extRing));
-
-        extRing.forEach(function (polygonItemDataIndex) {
-          p = posFunc(item, itemIndex,
-                      polygonItemData, polygonItemDataIndex);
+        var p = posFunc(item, itemIndex,
+                        polygonItemCoords, polygonItemCoordIndex);
           if (p instanceof geo.latlng) {
             position.push([p.x(), p.y(), p.z()]);
           } else {
             position.push([p.x, p.y, p.z || 0.0]);
           }
           var sc = fillColorFunc(item, itemIndex,
-            polygonItemData, polygonItemDataIndex);
+            polygonItemCoords, polygonItemCoordIndex);
           fillColor.push([sc.r, sc.g, sc.b]);
           fillOpacity.push(fillOpacityFunc(item,
-            itemIndex, polygonItemData, polygonItemDataIndex));
-          polygonItemDataIndex += 1;
+            itemIndex, polygonItemCoords, polygonItemCoordIndex));
+          polygonItemCoordIndex += 1;
         });
-      });
       itemIndex += 1;
     });
 

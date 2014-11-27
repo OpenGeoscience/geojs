@@ -20,7 +20,7 @@ window.startTest = function(done) {
   };
   layer.createFeature('polygon')
       .data(data)
-      .polygons(function (d) { return d.geometry.coordinates; })
+      .polygon(function (d) { return d.geometry.coordinates[0]; })
       .position(function (d, index, d2, index2) {
         return {x: d2[0],
                 y: d2[1], z: 0.0} })
