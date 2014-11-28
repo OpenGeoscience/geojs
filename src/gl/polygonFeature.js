@@ -65,7 +65,7 @@ ggl.polygonFeature = function (arg) {
       'varying vec3 fillColorVar;',
       'varying float fillOpacityVar;',
       'void main () {',
-      '  gl_FragColor = vec4 (fillColorVar, 1.0);',
+      '  gl_FragColor = vec4 (fillColorVar, fillOpacityVar);',
       '}'
     ].join('\n'),
     shader = new vgl.shader(gl.FRAGMENT_SHADER);
