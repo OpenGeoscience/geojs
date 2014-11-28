@@ -115,13 +115,13 @@ ggl.polygonFeature = function (arg) {
         }
         ++extIndex;
       });
-      console.log("extRing ", extRing);
+      //console.log("extRing ", extRing);
       //console.log("result", PolyK.Triangulate(extRing));
       var myTriangulator = new PNLTRI.Triangulator();
       var triangList = myTriangulator.triangulate_polygon( extRing );
       var newTriangList = [];
       //var result = PolyK.Triangulate(extRing)
-      console.log(triangList);
+      //console.log(triangList);
 
       triangList.forEach(function (newIndices) {
         newTriangList = newTriangList.concat(newIndices);
@@ -131,8 +131,8 @@ ggl.polygonFeature = function (arg) {
         polygonItemCoordIndex = polygonIndex;
         polygonItemCoords = polygonItem[polygonItemCoordIndex];
 
-        console.log("polygonItemData ", polygonItemCoords);
-        console.log("polygonItemData ", polygonItemCoordIndex);
+        //console.log("polygonItemData ", polygonItemCoords);
+        //console.log("polygonItemData ", polygonItemCoordIndex);
 
         var p = posFunc(item, itemIndex,
                         polygonItemCoords, polygonItemCoordIndex);
@@ -185,7 +185,7 @@ ggl.polygonFeature = function (arg) {
     start = buffers.alloc(numPts);
     var currentIndex = start;
 
-    console.log("numPts ", numPts);
+    //console.log("numPts ", numPts);
     for (i = 0; i < numPts; i += 1) {
       buffers.write('pos', position[i], start + i, 1);
       buffers.write('indices', [i], start + i, 1);
@@ -193,7 +193,7 @@ ggl.polygonFeature = function (arg) {
       buffers.write('fillOpacity', [fillOpacity[i]], start + i, 1);
     }
 
-    console.log(buffers.get('fillColor'));
+    //console.log(buffers.get('fillColor'));
     sourcePositions.pushBack(buffers.get('pos'));
     geom.addSource(sourcePositions);
 
@@ -203,7 +203,7 @@ ggl.polygonFeature = function (arg) {
     sourceFillOpacity.pushBack(buffers.get('fillOpacity'));
     geom.addSource(sourceFillOpacity);
 
-    console.log(buffers.get('indices'));
+    //console.log(buffers.get('indices'));
     trianglePrimitive.setIndices(buffers.get('indices'));
     geom.addPrimitive(trianglePrimitive);
 
