@@ -42,7 +42,7 @@
       "files": [
         "init.js",
         "wigglemaps.js",
-        "polyk.js"
+        "pnltri.js"
       ]
     },
     "geo.gl": {

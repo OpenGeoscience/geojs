@@ -107,17 +107,27 @@ ggl.polygonFeature = function (arg) {
       polygonItemCoordIndex = 0;
 
       var extRing = [], extIndex = 0, extLength = polygonItem.length - 1;
+      extRing[0] = [];
       polygonItem.forEach(function (extRingCoords) {
         if (extIndex !== extLength) {
-         extRing = extRing.concat(extRingCoords);
+         //extRing = extRing.concat(extRingCoords);
+         extRing[0].push({x: extRingCoords[0], y: extRingCoords[1]});
         }
         ++extIndex;
       });
-      //console.log("extRing ", extRing);
+      console.log("extRing ", extRing);
       //console.log("result", PolyK.Triangulate(extRing));
-      var result = PolyK.Triangulate(extRing)
+      var myTriangulator = new PNLTRI.Triangulator();
+      var triangList = myTriangulator.triangulate_polygon( extRing );
+      var newTriangList = [];
+      //var result = PolyK.Triangulate(extRing)
+      console.log(triangList);
 
-      result.forEach(function (polygonIndex) {
+      triangList.forEach(function (newIndices) {
+        newTriangList = newTriangList.concat(newIndices);
+      });
+
+      newTriangList.forEach(function (polygonIndex) {
         polygonItemCoordIndex = polygonIndex;
         polygonItemCoords = polygonItem[polygonItemCoordIndex];
 
