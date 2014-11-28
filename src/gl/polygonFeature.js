@@ -102,7 +102,8 @@ ggl.polygonFeature = function (arg) {
     fillOpacityFunc = m_this.style.get('fillOpacity');
 
     m_this.data().forEach(function (item) {
-      polygonItem = m_this.polygon()(item, itemIndex);
+      var polygon = m_this.polygon()(item, itemIndex);
+      polygonItem = polygon.outer;
       polygonItemCoordIndex = 0;
 
       var extRing = [], extIndex = 0, extLength = polygonItem.length - 1;
@@ -112,16 +113,14 @@ ggl.polygonFeature = function (arg) {
         }
         ++extIndex;
       });
-      console.log("extRing ", extRing);
-      console.log("result", PolyK.Triangulate(extRing));
+      //console.log("extRing ", extRing);
+      //console.log("result", PolyK.Triangulate(extRing));
       var result = PolyK.Triangulate(extRing)
 
       result.forEach(function (polygonIndex) {
         polygonItemCoordIndex = polygonIndex;
         polygonItemCoords = polygonItem[polygonItemCoordIndex];
 
-
-        // Exterior ring
         console.log("polygonItemData ", polygonItemCoords);
         console.log("polygonItemData ", polygonItemCoordIndex);
 

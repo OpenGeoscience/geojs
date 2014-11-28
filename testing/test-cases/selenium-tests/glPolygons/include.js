@@ -16,7 +16,10 @@ window.startTest = function(done) {
   var layer = myMap.createLayer('feature');
   layer.createFeature('polygon')
       .data(data)
-      .polygon(function (d) { return d.geometry.coordinates[0]; })
+      .polygon(function (d) { return {
+        'outer': d.geometry.coordinates[0]
+        }
+      })
       .position(function (d, index, d2, index2) {
         return {x: d2[0],
                 y: d2[1], z: 0.0} })
