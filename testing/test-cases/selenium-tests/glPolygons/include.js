@@ -14,17 +14,13 @@ window.startTest = function(done) {
 
   // Load image to be used for drawing dots
   var layer = myMap.createLayer('feature');
-  var style = {
-    'strokeColor': { r: 1, g: 0.2, b: 0 },
-    'strokeWidth': 1.0
-  };
   layer.createFeature('polygon')
       .data(data)
       .polygon(function (d) { return d.geometry.coordinates[0]; })
       .position(function (d, index, d2, index2) {
         return {x: d2[0],
                 y: d2[1], z: 0.0} })
-      .style(style)
+      .style('fillColor', { r: 1, g: 0.8, b: 0 });
 
   myMap.draw();
   myMap.onIdle(done);

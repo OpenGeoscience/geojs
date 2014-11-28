@@ -33,14 +33,11 @@ ggl.polygonFeature = function (arg) {
   function createVertexShader() {
       var vertexShaderSource = [
         'attribute vec3 pos;',
-
         'attribute vec3 fillColor;',
         'attribute float fillOpacity;',
-
         'uniform mat4 modelViewMatrix;',
         'uniform mat4 projectionMatrix;',
         'uniform float pixelWidth;',
-
         'varying vec3 fillColorVar;',
         'varying float fillOpacityVar;',
 
@@ -68,7 +65,7 @@ ggl.polygonFeature = function (arg) {
       'varying vec3 fillColorVar;',
       'varying float fillOpacityVar;',
       'void main () {',
-      '  gl_FragColor = vec4 (fillColorVar, fillOpacityVar);',
+      '  gl_FragColor = vec4 (fillColorVar, 1.0);',
       '}'
     ].join('\n'),
     shader = new vgl.shader(gl.FRAGMENT_SHADER);
@@ -77,15 +74,19 @@ ggl.polygonFeature = function (arg) {
   }
 
   function createGLPolygons() {
-    var i, numPolygons = m_this.data().length, p = null, numPts = null,
-        start = null, itemIndex = 0, polygonItemCoordIndex = 0,
-        position = [],
-        fillColor = [], fillOpacity = [], posFunc, fillColorFunc,
+    var i, numPolygons = m_this.data().length, p = null,
+        numPts = null, start = null, itemIndex = 0,
+        polygonItemCoordIndex = 0, position = [],
+        polygonItemCoords = null, fillColor = [],
+        fillOpacity = [], posFunc, fillColorFunc,
         polygonItem, fillOpacityFunc, buffers = vgl.DataBuffers(1024),
         sourcePositions = vgl.sourceDataP3fv(),
-        sourceFillColor = vgl.sourceDataAnyfv(3, vgl.vertexAttributeKeysIndexed.Two),
-        sourceFillOpacity = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Three),
-        trianglePrimitive = vgl.triangles(), mat = vgl.material(), blend = vgl.blend(),
+        sourceFillColor =
+          vgl.sourceDataAnyfv(3, vgl.vertexAttributeKeysIndexed.Two),
+        sourceFillOpacity =
+          vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Three),
+        trianglePrimitive = vgl.triangles(),
+        mat = vgl.material(), blend = vgl.blend(),
         prog = vgl.shaderProgram(), vertexShader = createVertexShader(),
         fragmentShader = createFragmentShader(),
         posAttr = vgl.vertexAttribute('pos'),
@@ -104,17 +105,21 @@ ggl.polygonFeature = function (arg) {
       polygonItem = m_this.polygon()(item, itemIndex);
       polygonItemCoordIndex = 0;
 
-      var extRing = [];
+      var extRing = [], extIndex = 0, extLength = polygonItem.length - 1;
       polygonItem.forEach(function (extRingCoords) {
-        extRing = extRing.concat(extRingCoords);
+        if (extIndex !== extLength) {
+         extRing = extRing.concat(extRingCoords);
+        }
+        ++extIndex;
       });
       console.log("extRing ", extRing);
       console.log("result", PolyK.Triangulate(extRing));
       var result = PolyK.Triangulate(extRing)
 
       result.forEach(function (polygonIndex) {
-        polygonItemCoords = polygonItem[polygonIndex];
         polygonItemCoordIndex = polygonIndex;
+        polygonItemCoords = polygonItem[polygonItemCoordIndex];
+
 
         // Exterior ring
         console.log("polygonItemData ", polygonItemCoords);
@@ -142,7 +147,7 @@ ggl.polygonFeature = function (arg) {
                  position, 3);
 
     buffers.create('pos', 3);
-    buffers.create('indices', 3);
+    buffers.create('indices', 1);
     buffers.create('fillColor', 3);
     buffers.create('fillOpacity', 1);
 
@@ -152,9 +157,9 @@ ggl.polygonFeature = function (arg) {
     prog.addVertexAttribute(posAttr,
       vgl.vertexAttributeKeys.Position);
     prog.addVertexAttribute(fillColorAttr,
-      vgl.vertexAttributeKeysIndexed.One);
-    prog.addVertexAttribute(fillOpacityAttr,
       vgl.vertexAttributeKeysIndexed.Two);
+    prog.addVertexAttribute(fillOpacityAttr,
+      vgl.vertexAttributeKeysIndexed.Three);
 
     prog.addUniform(modelViewUniform);
     prog.addUniform(projectionUniform);
@@ -171,6 +176,7 @@ ggl.polygonFeature = function (arg) {
     start = buffers.alloc(numPts);
     var currentIndex = start;
 
+    console.log("numPts ", numPts);
     for (i = 0; i < numPts; i += 1) {
       buffers.write('pos', position[i], start + i, 1);
       buffers.write('indices', [i], start + i, 1);
@@ -178,7 +184,7 @@ ggl.polygonFeature = function (arg) {
       buffers.write('fillOpacity', [fillOpacity[i]], start + i, 1);
     }
 
-    console.log(buffers.get('pos'));
+    console.log(buffers.get('fillColor'));
     sourcePositions.pushBack(buffers.get('pos'));
     geom.addSource(sourcePositions);
 
