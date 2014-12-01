@@ -91,7 +91,7 @@ geo.object = function () {
 
     if (m_eventHandlers.hasOwnProperty(event)) {
       m_eventHandlers[event].forEach(function (handler) {
-        handler(args);
+        handler.call(m_this, args);
       });
     }
 

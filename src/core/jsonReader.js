@@ -102,6 +102,9 @@ geo.jsonReader = function (arg) {
     if (geometry.type === 'LineString') {
       return 'line';
     }
+    if (geometry.type === 'Polygon') {
+      return 'polygon';
+    }
     return null;
   };
 
@@ -121,16 +124,26 @@ geo.jsonReader = function (arg) {
       return [geo.latlng(coordinates[1], coordinates[0], elv)];
     }
 
+    // need better handling here, but we can plot simple polygons
+    // by taking just the outer linearring
+    if (Array.isArray(coordinates[0][0])) {
+      coordinates = coordinates[0];
+    }
+
     // return an array of latlng's for LineString, MultiPoint, etc...
     return coordinates.map(function (c) {
       return geo.latlng(c[1], c[0], c[2]);
     });
   };
 
-  this._getStyle = function () {
-    // TODO: convert json style object for features
-    //return spec.properties || {};
-    return {};
+  this._getStyle = function (spec) {
+    return $.extend({
+      'strokeWidth': 2,
+      'strokeColor': {r: 0, g: 0, b: 0},
+      'strokeOpacity': 1,
+      'fillColor': {r: 1, g: 0, b: 0},
+      'fillOpacity': 1
+    }, spec.properties);
   };
 
   this.read = function (file, done, progress) {
@@ -146,9 +159,18 @@ geo.jsonReader = function (arg) {
             style = m_this._getStyle(feature);
         if (type) {
           if (type === 'line') {
+            style.fill = style.fill || false;
             allFeatures.push(m_this._addFeature(type, [coordinates], style));
-          } else {
+          } else if (type === 'point') {
+            style.stroke = style.stroke || false;
             allFeatures.push(m_this._addFeature(type, coordinates, style));
+          } else if (type === 'polygon') {
+            style.fill = style.fill === undefined ? true : style.fill;
+            style.fillOpacity = (
+              style.fillOpacity === undefined ? 0.25 : style.fillOpacity
+            );
+            // polygons not yet supported
+            allFeatures.push(m_this._addFeature('line', [coordinates], style));
           }
         } else {
           console.log('unsupported feature type: ' + feature.geometry.type);

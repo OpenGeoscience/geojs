@@ -57,6 +57,7 @@ gd3.d3Renderer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._convertColor = function (f, g) {
+    f = geo.util.ensureFunction(f);
     g = g || function () { return true; };
     return function (d) {
       var c;
@@ -70,12 +71,14 @@ gd3.d3Renderer = function (arg) {
   };
 
   this._convertPosition = function (f) {
+    f = geo.util.ensureFunction(f);
     return function (d) {
       return m_this.worldToDisplay(f(d));
     };
   };
 
   this._convertScale = function (f) {
+    f = geo.util.ensureFunction(f);
     return function (d) {
       return f(d) / m_scale;
     };
