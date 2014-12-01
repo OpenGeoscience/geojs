@@ -167,12 +167,13 @@ geo.clock = function (opts) {
       m_this.now(m_this.start());
     }
 
-    m_state = arg;
-
     if (arg === 'play' && m_state !== 'play') {
       // Start a new animation.
+      m_state = arg;
       m_this._animate(step || 1);
     }
+
+    m_state = arg;
     return m_this;
   };
 
@@ -223,7 +224,7 @@ geo.clock = function (opts) {
    */
   //////////////////////////////////////////////////////////////////////////////
   this._setNextFrame = function (step) {
-    var next = m_this.now() + step * m_this.step();
+    var next = new Date(m_this.now().valueOf() + step * m_this.step());
 
     if (next >= m_this.end() || next <= m_this.start()) {
       if (m_this.loop() <= m_currentLoop) {
