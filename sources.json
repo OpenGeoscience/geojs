@@ -20,7 +20,7 @@
         "featureLayer.js",
         "event.js",
         "mapInteractor.js",
-        "time.js",
+        "clock.js",
         "fileReader.js",
         "jsonReader.js",
         "map.js",
