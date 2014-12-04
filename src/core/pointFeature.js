@@ -100,7 +100,7 @@ geo.pointFeature = function (arg) {
         radius = m_this.style.get("radius");
 
     data = m_this.data();
-    if (!m_this.data || !m_this.data.length) {
+    if (!data || !data.length) {
       return {
         found: [],
         index: []
