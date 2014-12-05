@@ -115,6 +115,12 @@ module.exports = function (grunt) {
           }
         ]
       },
+      redirect: {
+        files: [{
+          src: 'index.html',
+          dest: 'dist/index.html'
+        }]
+      },
       bootstrap: {
         files: [
           {
@@ -348,6 +354,7 @@ module.exports = function (grunt) {
 
   findExamples();
   grunt.registerTask('examples', [
+    'copy:redirect',
     'copy:bootstrap',
     'copy:codemirror',
     'copy:examples',
@@ -372,8 +379,8 @@ module.exports = function (grunt) {
 
   grunt.registerTask('default', [
     'init',
-    'library',
     'dev',
+    'library',
     'examples'
   ]);
 
