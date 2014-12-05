@@ -372,8 +372,8 @@ module.exports = function (grunt) {
 
   grunt.registerTask('default', [
     'init',
-    'library',
     'dev',
+    'library',
     'examples'
   ]);
 
