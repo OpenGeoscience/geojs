@@ -404,6 +404,7 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.baseLayer = function (baseLayer) {
+    var save;
     if (baseLayer !== undefined) {
 
       // The GCS of the layer must match the map
@@ -422,10 +423,9 @@ geo.map = function (arg) {
         // to set a given center.
         m_this.center(arg.center);
       }
-      if (arg.zoom !== undefined) {
-        m_zoom = null;
-        m_this.zoom(arg.zoom);
-      }
+      save = m_zoom;
+      m_zoom = null;
+      m_this.zoom(save);
 
       return m_this;
     }
