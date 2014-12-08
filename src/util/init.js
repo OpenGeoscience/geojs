@@ -55,7 +55,7 @@
         }
       }
       // jshint -W016
-      if (Number.isFinite(color)) {
+      if (isFinite(color)) {
         color = {
           r: ((color & 0xff0000) >> 16) / 255,
           g: ((color & 0xff00) >> 8) / 255,
