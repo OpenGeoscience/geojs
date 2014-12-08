@@ -274,3 +274,12 @@ if (!window.requestAnimationFrame) {
     window.setTimeout(func, 15);
   };
 }
+
+// Add a polyfill for Math.log2
+if (!Math.log2) {
+  Math.log2 = function () {
+    "use strict";
+
+    return Math.log.apply(Math, arguments) / Math.LN2;
+  };
+}
