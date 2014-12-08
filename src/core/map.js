@@ -38,27 +38,11 @@ geo.map = function (arg) {
       m_center = { x: 0, y: 0 },
       m_zoom = arg.zoom === undefined ? 1 : arg.zoom,
       m_baseLayer = null,
-      toMillis, calculateGlobalAnimationRange, cloneTimestep,
-      m_animationState = {range: null, timestep: null, layers: null},
-      m_intervalMap = {},
-      m_pause,
-      m_stop,
       m_fileReader = null,
       m_interactor = null,
       m_validZoomRange = { min: 0, max: 16 },
-      m_transition = null;
-
-  m_intervalMap.milliseconds = 1;
-  m_intervalMap.seconds = m_intervalMap.milliseconds * 1000;
-  m_intervalMap.minutes = m_intervalMap.seconds * 60;
-  m_intervalMap.hours = m_intervalMap.minutes * 60;
-  m_intervalMap.days = m_intervalMap.hours * 24;
-  m_intervalMap.weeks = m_intervalMap.days * 7;
-  m_intervalMap.months = m_intervalMap.weeks * 4;
-  m_intervalMap.years = m_intervalMap.months * 12;
-
-  this.geoOn(geo.event.animationPause, function () { m_pause = true; });
-  this.geoOn(geo.event.animationStop, function () { m_stop = true; });
+      m_transition = null,
+      m_clock = null;
 
   if (arg.center) {
     if (Array.isArray(arg.center)) {
@@ -68,66 +52,6 @@ geo.map = function (arg) {
       };
     }
   }
-
-  toMillis = function (delta) {
-    var deltaLowercase = delta.toLowerCase();
-    return m_intervalMap[deltaLowercase];
-  };
-
-  calculateGlobalAnimationRange = function (layers) {
-    var delta, deltaUnits, start = null, end = null, layerTimeRange, layerDelta,
-        indexTimestep = false, smallestDeltaInMillis = Number.MAX_VALUE, i;
-
-    for (i = 0; i < layers.length; i += 1) {
-      layerTimeRange = layers[i].timeRange();
-
-      if (!layerTimeRange) {
-        continue;
-      }
-
-      if (layerTimeRange.deltaUnits === "index") {
-        indexTimestep = true;
-        layerDelta = layerTimeRange.delta;
-      }
-      else {
-        if (indexTimestep) {
-          throw "Can't mix index timesteps with time based timesteps";
-        }
-
-        layerDelta = toMillis(layerTimeRange.deltaUnits) * layerTimeRange.delta;
-      }
-
-      if (layerDelta < smallestDeltaInMillis) {
-        delta = layerTimeRange.delta;
-        deltaUnits = layerTimeRange.deltaUnits;
-        smallestDeltaInMillis = layerDelta;
-      }
-
-      if (start === null || layerTimeRange.start < start) {
-        start = layerTimeRange.start;
-      }
-
-      if (end === null || layerTimeRange.end < end) {
-        end = layerTimeRange.end;
-      }
-    }
-
-    return {
-      "start": start,
-      "end": end,
-      "delta": delta,
-      "deltaUnits": deltaUnits
-    };
-  };
-
-  cloneTimestep = function (timestep) {
-
-    if (timestep instanceof Date) {
-      timestep = new Date(timestep.getTime());
-    }
-
-    return timestep;
-  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -537,192 +461,6 @@ geo.map = function (arg) {
     return m_this;
   };
 
-  // TODO: Add documentation headers:
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.animate = function (layers) {
-    var animationRange;
-    layers = layers === undefined ? m_this.children() : layers;
-
-    if (m_animationState.timestep === null) {
-      animationRange = calculateGlobalAnimationRange(layers);
-
-      if (!animationRange.start || !animationRange.end) {
-        throw "Animation range could not be calculated. " +
-              "Check that layers have ranges associated with them";
-      }
-
-      m_animationState = {
-        range: animationRange,
-        timestep: cloneTimestep(animationRange.start),
-        "layers": layers
-      };
-    }
-
-    m_this._animate();
-    return m_this;
-  };
-
-  this.pauseAnimation = function () {
-    m_this.geoTrigger(geo.event.animationPause);
-    return m_this;
-  };
-
-  this.stopAnimation = function () {
-    m_this.geoTrigger(geo.event.animationStop);
-    m_animationState.timestep = null;
-    return m_this;
-  };
-
-  this.stepAnimationForward = function (layers) {
-    var animationRange;
-    layers = layers === undefined ? m_animationState.layers: layers;
-
-    if (layers === null) {
-      layers = m_this.children();
-    }
-
-    if (m_animationState.timestep === null) {
-      animationRange = calculateGlobalAnimationRange(layers);
-
-      m_animationState = {
-        range: animationRange,
-        timestep: cloneTimestep(animationRange.start),
-        "layers": layers
-      };
-    }
-
-    m_this._stepAnimationForward();
-    return m_this;
-  };
-
-  this.stepAnimationBackward = function (layers) {
-    var animationRange;
-    layers = layers === undefined ? m_animationState.layers: layers;
-
-    if (layers === null) {
-      layers = m_this.children();
-    }
-
-    if (m_animationState.timestep === null) {
-      animationRange = calculateGlobalAnimationRange(layers);
-
-      m_animationState = {
-        range: animationRange,
-        timestep: cloneTimestep(animationRange.end),
-        "layers": layers
-      };
-    }
-
-    m_this._stepAnimationBackward();
-    return m_this;
-  };
-
-  this._animate = function () {
-    var animationRange, nextTimestep, id;
-
-    animationRange = m_animationState.range;
-    nextTimestep = cloneTimestep(animationRange.start);
-    m_stop = false;
-    m_pause = false;
-
-    nextTimestep = geo.time.incrementTime(nextTimestep, animationRange.deltaUnits,
-      animationRange.delta);
-
-    if (nextTimestep > animationRange.end) {
-      throw "Invalid time range";
-    }
-
-    function renderTimestep() {
-      if (m_animationState.timestep > animationRange.end || m_stop) {
-        clearInterval(id);
-        m_animationState.timestep = null;
-        m_this.geoTrigger(geo.event.animationComplete);
-      }
-      else if (m_pause) {
-        clearInterval(id);
-      }
-      else {
-        m_this._animateTimestep();
-        m_animationState.timestep = geo.time.incrementTime(m_animationState.timestep,
-            m_animationState.range.deltaUnits, m_animationState.range.delta);
-      }
-
-    }
-
-    id = setInterval(renderTimestep, 10);
-    return m_this;
-  };
-
-  this._animateTimestep = function () {
-
-    if (m_animationState) {
-
-      $.each(m_animationState.layers, function (i, layer) {
-        var timestep = m_animationState.timestep;
-
-        if (timestep instanceof Date) {
-          timestep = timestep.getTime();
-        }
-
-        layer._update({timestep: timestep});
-      });
-
-      m_this.geoTrigger(
-        geo.event.animate, {
-        timestep: m_animationState.timestep
-      });
-      m_this.draw();
-    }
-
-    return m_this;
-  };
-
-  this._stepAnimationForward = function () {
-    var nextTimestep;
-
-    if (m_animationState.timestep === null) {
-      m_animationState.timestep = cloneTimestep(m_animationState.range.start);
-    }
-
-    nextTimestep = cloneTimestep(m_animationState.timestep);
-    nextTimestep = geo.time.incrementTime(nextTimestep, m_animationState.range.deltaUnits,
-        m_animationState.range.delta);
-
-    if (nextTimestep <= m_animationState.range.end) {
-      m_animationState.timestep = nextTimestep;
-      m_this._animateTimestep();
-    }
-
-    return m_this;
-  };
-
-  this._stepAnimationBackward = function () {
-    var previousTimestep;
-
-    if (m_animationState.timestep === null) {
-      m_animationState.timestep = cloneTimestep(m_animationState.range.end);
-    }
-
-    previousTimestep = cloneTimestep(m_animationState.timestep);
-    previousTimestep = geo.time.incrementTime(
-      previousTimestep,
-      m_animationState.range.deltaUnits,
-      -m_animationState.range.delta
-    );
-
-    if (previousTimestep < m_animationState.range.start) {
-      return;
-    }
-
-    m_animationState.timestep = previousTimestep;
-    m_this._animateTimestep();
-
-    return m_this;
-  };
-
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Attach a file reader to a layer in the map to be used as a drop target.
@@ -849,6 +587,23 @@ geo.map = function (arg) {
     // i.e. map.interactor(null);
     if (m_interactor) {
       m_interactor.map(m_this);
+    }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get or set the map clock
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.clock = function (arg) {
+    if (arg === undefined) {
+      return m_clock;
+    }
+    m_clock = arg;
+
+    if (m_clock) {
+      m_clock.object(m_this);
     }
     return m_this;
   };
@@ -1007,6 +762,7 @@ geo.map = function (arg) {
   };
 
   this.interactor(arg.interactor || geo.mapInteractor());
+  this.clock(arg.clock || geo.clock());
 
   return this;
 };
