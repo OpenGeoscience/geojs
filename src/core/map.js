@@ -910,7 +910,7 @@ geo.map = function (arg) {
       return 360 * Math.pow(2, -1 - z);
     }
     function z2zoom(z) {
-      return -1 - Math.log(z / 360) / Math.LN2;
+      return -1 - Math.log2(z / 360);
     }
 
     var defaultOpts = {
