@@ -59,28 +59,31 @@ gd3.d3Renderer = function (arg) {
   this._convertColor = function (f, g) {
     f = geo.util.ensureFunction(f);
     g = g || function () { return true; };
-    return function (d) {
+    return function () {
       var c;
-      if (g(d)) {
-        c = f(d);
-        return d3.rgb(255 * c.r, 255 * c.g, 255 * c.b);
-      } else {
-        return 'none';
+      if (g.apply(this, arguments)) {
+        c = f.apply(this, arguments);
+        if (c.hasOwnProperty('r') &&
+            c.hasOwnProperty('g') &&
+            c.hasOwnProperty('b')) {
+          c = d3.rgb(255 * c.r, 255 * c.g, 255 * c.b);
+        }
       }
+      return c;
     };
   };
 
   this._convertPosition = function (f) {
     f = geo.util.ensureFunction(f);
-    return function (d) {
-      return m_this.worldToDisplay(f(d));
+    return function () {
+      return m_this.worldToDisplay(f.apply(this, arguments));
     };
   };
 
   this._convertScale = function (f) {
     f = geo.util.ensureFunction(f);
-    return function (d) {
-      return f(d) / m_scale;
+    return function () {
+      return f.apply(this, arguments) / m_scale;
     };
   };
 
@@ -91,16 +94,17 @@ gd3.d3Renderer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   function setStyles(select, styles) {
+    /* jshint validthis:true */
     var key, k, f;
-    function fillFunc(d) {
-      if (styles.fill(d)) {
+    function fillFunc() {
+      if (styles.fill.apply(this, arguments)) {
         return null;
       } else {
         return 'none';
       }
     }
-    function strokeFunc(d) {
-      if (styles.stroke(d)) {
+    function strokeFunc() {
+      if (styles.stroke.apply(this, arguments)) {
         return null;
       } else {
         return 'none';

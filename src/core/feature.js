@@ -252,6 +252,7 @@ geo.feature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.style.get = function (key) {
+    var tmp, out;
     if (key === undefined) {
       var all = {}, k;
       for (k in m_style) {
@@ -261,7 +262,16 @@ geo.feature = function (arg) {
       }
       return all;
     }
-    return geo.util.ensureFunction(m_style[key]);
+    out = geo.util.ensureFunction(m_style[key]);
+    if (key.toLowerCase().match(/color$/)) {
+      tmp = out;
+      out = function () {
+        return geo.util.convertColor(
+          tmp.apply(this, arguments)
+        );
+      };
+    }
+    return out;
   };
 
   ////////////////////////////////////////////////////////////////////////////

@@ -77,10 +77,10 @@ $(function () {
       renderer: 'd3Renderer'
     }
   );
-  
+
   // Define unique colors for each layer
-  var vglColor = {r: 1, g: 0, b: 0}; // red
-  var svgColor = {r: 0, g: 0, b: 1}; // blue
+  var vglColor = 'red';
+  var svgColor = 'blue';
 
   // Generate some data for vgl
   var data = d3.range(2).map(function (i) {
@@ -92,7 +92,7 @@ $(function () {
     };
   });
   makePoints(data, vglLayer, vglColor);
-  
+
   // Generate some data for svg
   data = d3.range(2).map(function (i) {
     return {
