@@ -12,6 +12,20 @@
   var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   var cssColors;
 
+  /**
+   * Takes a variable number of arguments and returns the first numeric value
+   * it finds.
+   * @private
+   */
+  function setNumeric() {
+    var i;
+    for (i = 0; i < arguments.length; i += 1) {
+      if (isFinite(arguments[i])) {
+        return arguments[i];
+      }
+    }
+  }
+
   geo.util = {
     isFunction: function (f) {
       return typeof f === "function";
@@ -64,6 +78,53 @@
       }
       // jshint +W016
       return color;
+    },
+
+    /**
+     * Normalize a coordinate object into {x: ..., y: ..., z: ... } form.
+     * Accepts 2-3d arrays,
+     * latlng objects
+     * latitude -> lat -> y
+     * longitude -> lon -> lng -> x
+     */
+    normalizeCoordinates: function (p) {
+      p = p || {};
+      if (Array.isArray(p)) {
+        return {
+          x: p[0],
+          y: p[1],
+          z: p[2] || 0
+        };
+      }
+      if (p instanceof geo.latlng) {
+        return {
+          x: p.lng(),
+          y: p.lat(),
+          z: 0
+        };
+      }
+      return {
+        x: setNumeric(
+          p.x,
+          p.longitude,
+          p.lng,
+          p.lon,
+          0
+        ),
+        y: setNumeric(
+          p.y,
+          p.latitude,
+          p.lat,
+          0
+        ),
+        z: setNumeric(
+          p.z,
+          p.elevation,
+          p.elev,
+          p.height,
+          0
+        )
+      };
     }
   };
 
