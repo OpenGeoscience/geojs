@@ -49,6 +49,10 @@ geo.osmLayer = function (arg) {
     m_baseUrl = arg.baseUrl;
   }
 
+  if (m_baseUrl.charAt(m_baseUrl.length - 1) !== "/") {
+    m_baseUrl += "/";
+  }
+
   if (arg && arg.zoomDelta !== undefined) {
     m_zoomLevelDelta = arg.zoomDelta;
   }
