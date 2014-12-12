@@ -85,7 +85,8 @@ geo.layer = function (arg) {
       m_dataTime = geo.timestamp(),
       m_updateTime = geo.timestamp(),
       m_drawTime = geo.timestamp(),
-      m_sticky = arg.sticky === undefined ? true : arg.sticky;
+      m_sticky = arg.sticky === undefined ? true : arg.sticky,
+      m_active = arg.active === undefined ? true : arg.active;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -96,6 +97,19 @@ geo.layer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.sticky = function () {
     return m_sticky;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get whether or not the layer is active.  An active layer will receive
+   * native mouse when the layer is on top.  Non-active layers will never
+   * receive native mouse events.
+   *
+   * @returns {Boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.active = function () {
+    return m_active;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -394,6 +408,10 @@ geo.layer = function (arg) {
     } else {
       m_renderer = geo.createRenderer(m_rendererName, m_this);
       m_canvas = m_renderer.canvas();
+    }
+
+    if (!m_this.active()) {
+      m_node.css("pointerEvents", "none");
     }
 
     m_initialized = true;
