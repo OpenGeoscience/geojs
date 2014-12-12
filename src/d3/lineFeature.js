@@ -63,6 +63,22 @@ gd3.lineFeature = function (arg) {
     data.forEach(function (item, idx) {
       var m_style;
 
+      var style = {}, key;
+      function wrapStyle(func) {
+        if (geo.util.isFunction(func)) {
+          return function (d, i) {
+            return func(d, i, item, idx);
+          };
+        } else {
+          return func;
+        }
+      }
+      for (key in s_style) {
+        if (s_style.hasOwnProperty(key)) {
+          style[key] = wrapStyle(s_style[key]);
+        }
+      }
+
       // item is an object representing a single line
       // m_this.line()(item) is an array of coordinates
       m_style = {
@@ -71,9 +87,9 @@ gd3.lineFeature = function (arg) {
         attributes: {
           d: line
         },
-        id: m_this._d3id(),
-        classes: [ 'd3LineFeature', 'd3SubLine-' + idx ],
-        style: s_style
+        id: m_this._d3id() + idx,
+        classes: ['d3LineFeature', 'd3SubLine-' + idx],
+        style: style
       };
 
       m_renderer._drawFeatures(m_style);
