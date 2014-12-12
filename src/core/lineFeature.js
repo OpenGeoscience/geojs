@@ -116,8 +116,8 @@ geo.lineFeature = function (arg) {
       }
 
       t = ((q.x - u.x) * (v.x - u.x) + (q.y - u.y) * (v.y - u.y)) / l2;
-      if (t < 0) return dist2(q, u);
-      if (t > 1) return dist2(q, v);
+      if (t < 0) { return dist2(q, u); }
+      if (t > 1) { return dist2(q, v); }
       return dist2(
         q,
         {
@@ -159,18 +159,54 @@ geo.lineFeature = function (arg) {
           last = s;
         });
       } catch (err) {
-          if (err !== "found") {
-            throw err;
-          }
-          found.push(d);
-          indices.push(index);
+        if (err !== "found") {
+          throw err;
         }
+        found.push(d);
+        indices.push(index);
+      }
     });
 
     return {
       data: found,
       index: indices
     };
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Returns an array of line indices that are contained in the given box.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.boxSearch = function (lowerLeft, upperRight, opts) {
+    var pos = m_this.position(),
+        idx = [],
+        line = m_this.line();
+
+    opts = opts || {};
+    opts.partial = opts.partial || false;
+    if (opts.partial) {
+      throw "Unimplemented query method.";
+    }
+
+    m_this.data().forEach(function (d, i) {
+      var inside = true;
+      line(d, i).forEach(function (e, j) {
+        if (!inside) { return; }
+        var p = pos(e, j, d, i);
+        if (!(p.x >= lowerLeft.x  &&
+              p.x <= upperRight.x &&
+              p.y >= lowerLeft.y  &&
+              p.y <= upperRight.y)
+        ) {
+          inside = false;
+        }
+      });
+      if (inside) {
+        idx.push(i);
+      }
+    });
+    return idx;
   };
 
   ////////////////////////////////////////////////////////////////////////////
