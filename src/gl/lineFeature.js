@@ -53,7 +53,7 @@ ggl.lineFeature = function (arg) {
 
         'void main(void)',
         '{',
-        ' float precThreshold = 0.00001;',
+        ' float precThreshold = 0.0001;',
         '  vec4 worldPos = projectionMatrix * modelViewMatrix * vec4(pos.xyz, 1);',
         '  if (worldPos.w != 0.0) {',
         '    worldPos = worldPos/worldPos.w;',
@@ -131,6 +131,7 @@ ggl.lineFeature = function (arg) {
         strkWidthArr = [],
         strkColorArr = [],
         strkOpacityArr = [],
+        geom = vgl.geometryData(),
         posFunc = m_this.position(),
         strkWidthFunc = m_this.style.get('strokeWidth'),
         strkColorFunc = m_this.style.get('strokeColor'),
@@ -145,7 +146,7 @@ ggl.lineFeature = function (arg) {
         strkColorData = vgl.sourceDataAnyfv(3, vgl.vertexAttributeKeysIndexed.Two),
         strkOpacityData = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Three),
         // Primitive indices
-        tringles = vgl.triangles();
+        triangles = vgl.triangles();
 
     m_this.data().forEach(function (item) {
       lineItem = m_this.line()(item, itemIndex);
@@ -175,7 +176,7 @@ ggl.lineFeature = function (arg) {
                                           lineItemData, lineItemIndex));
           strkOpacityArr.push(strkOpacityFunc(item, itemIndex,
                                               lineItemData, lineItemIndex));
-          strkColoraArr.push([strkColor.r, strkColor.g, strkColor.b]);
+          strkColorArr.push([strkColor.r, strkColor.g, strkColor.b]);
         }
         else {
           prev.push(position[position.length - 2]);
@@ -215,9 +216,9 @@ ggl.lineFeature = function (arg) {
 
     for (i = 0; i < numPts; i += 1) {
       //buffers.write('indices', [i], start + i, 1);
-      buffers.repeat('strokeWidth', [strokeWidth[i]], start + i * 6, 6);
-      buffers.repeat('strokeColor', strokeColor[i], start + i * 6, 6);
-      buffers.repeat('strokeOpacity', [strokeOpacity[i]], start + i * 6, 6);
+      buffers.repeat('strokeWidth', [strkWidthArr[i]], start + i * 6, 6);
+      buffers.repeat('strokeColor', strkColorArr[i], start + i * 6, 6);
+      buffers.repeat('strokeOpacity', [strkOpacityArr[i]], start + i * 6, 6);
     }
 
     var addVert = function (p, c, n, offset) {
@@ -300,7 +301,7 @@ ggl.lineFeature = function (arg) {
 
     prog.addVertexAttribute(posAttr, vgl.vertexAttributeKeys.Position);
     prog.addVertexAttribute(strkWidthAttr, vgl.vertexAttributeKeysIndexed.One);
-    prog.addVertexAttribute(strkOpacityAttr, vgl.vertexAttributeKeysIndexed.Two);
+    prog.addVertexAttribute(strkColorAttr, vgl.vertexAttributeKeysIndexed.Two);
     prog.addVertexAttribute(strkOpacityAttr, vgl.vertexAttributeKeysIndexed.Three);
     prog.addVertexAttribute(prvAttr, vgl.vertexAttributeKeysIndexed.Four);
     prog.addVertexAttribute(nxtAttr, vgl.vertexAttributeKeysIndexed.Five);
@@ -317,7 +318,7 @@ ggl.lineFeature = function (arg) {
     m_material.addAttribute(vgl.blend());
 
     m_actor = vgl.actor();
-    m_actor.setMaterial(mat);
+    m_actor.setMaterial(m_material);
     m_actor.setMapper(m_mapper);
   };
 

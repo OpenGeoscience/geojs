@@ -37,14 +37,14 @@ window.startTest = function(done) {
   var layer = myMap.createLayer('feature');
   var style = {
     'strokeColor': { r: 1, g: 0.2, b: 0 },
-    'strokeWidth': 1.0
+    'strokeWidth': 10.0
   };
   layer.createFeature('line')
       .data(data)
       .line(function (d) { return d.geometry.coordinates; })
       .position(function (d, index, d2, index2) {
-        return {x: d2[0],
-                y: d2[1]} })
+        return {x: d[0],
+                y: d[1]} })
       .style(style)
 
   myMap.draw();
