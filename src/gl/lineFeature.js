@@ -29,11 +29,15 @@ ggl.lineFeature = function (arg) {
       m_actor = null,
       m_mapper = null,
       m_material = null,
+      m_pixelWidthUnif = null,
       s_init = this._init,
       s_update = this._update;
 
   function createVertexShader() {
       var vertexShaderSource = [
+        '#ifdef GL_ES',
+        '  precision highp float;',
+        '#endif',
         'attribute vec3 pos;',
         'attribute vec3 prev;',
         'attribute vec3 next;',
@@ -53,7 +57,7 @@ ggl.lineFeature = function (arg) {
 
         'void main(void)',
         '{',
-        ' float precThreshold = 0.0001;',
+        '  const float PI = 3.14159265358979323846264;',
         '  vec4 worldPos = projectionMatrix * modelViewMatrix * vec4(pos.xyz, 1);',
         '  if (worldPos.w != 0.0) {',
         '    worldPos = worldPos/worldPos.w;',
@@ -71,25 +75,26 @@ ggl.lineFeature = function (arg) {
         '  strokeOpacityVar = strokeOpacity;',
         '  vec2 deltaNext = worldNext.xy - worldPos.xy;',
         '  vec2 deltaPrev = worldPos.xy - worldPrev.xy;',
-        '  float angleNext = 0.0;',
-        '  if (abs(deltaNext.x) > precThreshold)',
-        '  {',
+        '  float angleNext = PI * 0.5;',
+        '  if (deltaNext.y < 0.0) { angleNext = -angleNext; } ',
+        '  if (deltaNext.x != 0.0) {',
         '    angleNext = atan(deltaNext.y, deltaNext.x);',
         '  }',
-        '  float anglePrev = 0.0;',
-        '  if (abs(deltaPrev.x) > precThreshold)',
-        '  {',
+        '  float anglePrev = PI * 0.5;',
+        '  if (deltaPrev.y < 0.0) { anglePrev = -anglePrev; } ',
+        '  if (deltaPrev.x != 0.0) {',
         '    anglePrev = atan(deltaPrev.y, deltaPrev.x);',
         '  }',
-        '  if (deltaPrev.xy == vec2(0, 0)) anglePrev = angleNext;',
-        '  if (deltaNext.xy == vec2(0, 0)) angleNext = anglePrev;',
+        '  if (deltaPrev.xy == vec2(0.0, 0.0)) anglePrev = angleNext;',
+        '  if (deltaNext.xy == vec2(0.0, 0.0)) angleNext = anglePrev;',
         '  float angle = (anglePrev + angleNext) / 2.0;',
+        '  float cosAngle = cos(anglePrev - angle);',
+        '  if (cosAngle < 0.1) { cosAngle = sign(cosAngle) * 1.0; angle = 0.0; }',
         '  float distance = (offset * strokeWidth * pixelWidth) /',
-        '                    cos(anglePrev - angle);',
+        '                    cosAngle;',
         '  worldPos.x += distance * sin(angle);',
         '  worldPos.y -= distance * cos(angle);',
-        '  vec4  p = worldPos;',
-        '  gl_Position = p;',
+        '  gl_Position = worldPos;',
         '}'
       ].join('\n'),
       shader = new vgl.shader(gl.VERTEX_SHADER);
@@ -116,6 +121,8 @@ ggl.lineFeature = function (arg) {
 
   function createGLLines() {
     var i = null,
+        j = null,
+        k = null,
         prev = [],
         next = [],
         numPts = m_this.data().length,
@@ -123,6 +130,7 @@ ggl.lineFeature = function (arg) {
         lineItemIndex = 0,
         lineItem = null,
         currIndex = null,
+        lineSegments = [],
         pos = null,
         posTmp = null,
         strkColor = null,
@@ -150,33 +158,26 @@ ggl.lineFeature = function (arg) {
 
     m_this.data().forEach(function (item) {
       lineItem = m_this.line()(item, itemIndex);
+      lineSegments.push(lineItem.length);
       lineItem.forEach(function (lineItemData) {
-        pos = posFunc(item, itemIndex, lineItemData, lineItemIndex);
+        pos = posFunc(lineItemData, lineItemIndex, item, itemIndex);
         if (pos instanceof geo.latlng) {
           position.push([pos.x(), pos.y(), 0.0]);
         } else {
           position.push([pos.x, pos.y, pos.z || 0.0]);
         }
-        strkWidthArr.push(strkWidthFunc(item, itemIndex,
-                                        lineItemData, lineItemIndex));
-        strkColor = strkColorFunc(item, itemIndex,
-                                  lineItemData, lineItemIndex);
+        strkWidthArr.push(strkWidthFunc(lineItemData, lineItemIndex,
+                                        item, itemIndex));
+        strkColor = strkColorFunc(lineItemData, lineItemIndex,
+                                  item, itemIndex);
         strkColorArr.push([strkColor.r, strkColor.g, strkColor.b]);
-        strkOpacityArr.push(strkOpacityFunc(item, itemIndex,
-                                            lineItemData, lineItemIndex));
+        strkOpacityArr.push(strkOpacityFunc(lineItemData, lineItemIndex,
+                                            item, itemIndex));
 
         // Assuming that we will have atleast two points
         if (lineItemIndex === 0) {
           posTmp = position[position.length - 1];
           prev.push(posTmp);
-          position.push(posTmp);
-          prev.push(posTmp);
-          next.push(posTmp);
-          strkWidthArr.push(strkWidthFunc(item, itemIndex,
-                                          lineItemData, lineItemIndex));
-          strkOpacityArr.push(strkOpacityFunc(item, itemIndex,
-                                              lineItemData, lineItemIndex));
-          strkColorArr.push([strkColor.r, strkColor.g, strkColor.b]);
         }
         else {
           prev.push(position[position.length - 2]);
@@ -230,15 +231,20 @@ ggl.lineFeature = function (arg) {
       currIndex += 1;
     };
 
-    for (i = 1; i < position.length; i += 1) {
-      //buffers.write ('unit', unit_buffer, currentIndex, 6);
-      addVert(prev[i - 1], position[i - 1], next[i - 1], 1);
-      addVert(prev[i], position[i], next[i], -1);
-      addVert(prev[i - 1], position[i - 1], next[i - 1], -1);
+    i = 0;
+    k = 0;
+    for (j = 0; j < lineSegments.length; ++j) {
+      i += 1;
+      for (k = 0; k < lineSegments[j] - 1; k += 1) {
+        addVert(prev[i - 1], position[i - 1], next[i - 1], 1);
+        addVert(prev[i], position[i], next[i], -1);
+        addVert(prev[i - 1], position[i - 1], next[i - 1], -1);
 
-      addVert(prev[i - 1], position[i - 1], next[i - 1], 1);
-      addVert(prev[i], position[i], next[i], 1);
-      addVert(prev[i], position[i], next[i], -1);
+        addVert(prev[i - 1], position[i - 1], next[i - 1], 1);
+        addVert(prev[i], position[i], next[i], 1);
+        addVert(prev[i], position[i], next[i], -1);
+        i += 1;
+      }
     }
 
     posData.pushBack(buffers.get('pos'));
@@ -288,13 +294,13 @@ ggl.lineFeature = function (arg) {
         // Shader uniforms
         mviUnif = new vgl.modelViewUniform('modelViewMatrix'),
         prjUnif = new vgl.projectionUniform('projectionMatrix'),
-        pwiUnif = new vgl.floatUniform('pixelWidth',
-                    2.0 / m_this.renderer().width()),
         // Accessors
         swiFunc = m_this.style.get('strokeWidth'),
         scoFunc = m_this.style.get('strokeColor'),
         sopFunc = m_this.style.get('strokeOpacity');
 
+    m_pixelWidthUnif =  new vgl.floatUniform('pixelWidth',
+                          1.0 / m_this.renderer().width());
     s_init.call(m_this, arg);
     m_material = vgl.material();
     m_mapper = vgl.mapper();
@@ -309,7 +315,7 @@ ggl.lineFeature = function (arg) {
 
     prog.addUniform(mviUnif);
     prog.addUniform(prjUnif);
-    prog.addUniform(pwiUnif);
+    prog.addUniform(m_pixelWidthUnif);
 
     prog.addShader(fs);
     prog.addShader(vs);
@@ -355,6 +361,7 @@ ggl.lineFeature = function (arg) {
       m_this._build();
     }
 
+    m_pixelWidthUnif.set(1.0 / m_this.renderer().width());
     m_actor.setVisible(m_this.visible());
     m_actor.material().setBinNumber(m_this.bin());
     m_this.updateTime().modified();

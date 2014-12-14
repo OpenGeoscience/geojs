@@ -1,7 +1,7 @@
 window.startTest = function(done) {
   'use strict';
 
-  var mapOptions = { center : { y: 40, x: -105 } };
+  var mapOptions = { center : { y: 31.87798, x: -85.44956 }, zoom : 8 };
 
   var myMap = window.geoTests.createOsmMap(mapOptions);
 
@@ -37,7 +37,7 @@ window.startTest = function(done) {
   var layer = myMap.createLayer('feature');
   var style = {
     'strokeColor': { r: 1, g: 0.2, b: 0 },
-    'strokeWidth': 10.0
+    'strokeWidth': 2.0
   };
   layer.createFeature('line')
       .data(data)
