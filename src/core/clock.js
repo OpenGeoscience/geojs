@@ -84,7 +84,7 @@ geo.clock = function (opts) {
     }
     return m_this;
   };
-  
+
   //////////////////////////////////////////////////////////////////////////////
   /**
    * Get or set the animation start time.
@@ -97,7 +97,7 @@ geo.clock = function (opts) {
     m_start = arg;
     return m_this;
   };
-  
+
   //////////////////////////////////////////////////////////////////////////////
   /**
    * Get or set the animation end time.
@@ -110,7 +110,7 @@ geo.clock = function (opts) {
     m_end = arg;
     return m_this;
   };
-  
+
   //////////////////////////////////////////////////////////////////////////////
   /**
    * Get or set the animation time step.
@@ -123,7 +123,7 @@ geo.clock = function (opts) {
     m_step = arg;
     return m_this;
   };
-  
+
   //////////////////////////////////////////////////////////////////////////////
   /**
    * Get or set looping control of the clock.  This controls how many times the
@@ -138,7 +138,7 @@ geo.clock = function (opts) {
     m_loop = arg;
     return m_this;
   };
-  
+
   //////////////////////////////////////////////////////////////////////////////
   /**
    * Get or set the animation state.  Valid values are:
@@ -203,7 +203,7 @@ geo.clock = function (opts) {
     m_this._setNextFrame(1);
     return m_this;
   };
-  
+
   //////////////////////////////////////////////////////////////////////////////
   /**
    * Step to the previous frame in the animation.  Pauses the animation if it is
@@ -291,11 +291,5 @@ geo.clock = function (opts) {
       window.setTimeout(frame, 1000 / m_this.framerate());
     }
   };
-};
-geo.event.clock = {
-  play: 'geo_clock_play',
-  stop: 'geo_clock_stop',
-  pause: 'geo_clock_pause',
-  change: 'geo_clock_change'
 };
 inherit(geo.clock, geo.object);

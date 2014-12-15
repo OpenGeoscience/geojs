@@ -51,3 +51,10 @@ geo.event.mouseclick = "geo_mouseclick";
 geo.event.brush = "geo_brush"; // mousemove during a selection
 geo.event.brushend = "geo_brushend"; // mouseup after a selection has been made
 geo.event.brushstart = "geo_brushstart"; // mousedown starting a selection
+
+geo.event.clock = {
+  play: "geo_clock_play",
+  stop: "geo_clock_stop",
+  pause: "geo_clock_pause",
+  change: "geo_clock_change"
+};
