@@ -352,6 +352,27 @@ module.exports = function (grunt) {
     });
   };
 
+  grunt.registerTask('docs', 'Build documentation', function () {
+    var done = this.async();
+
+    grunt.util.spawn({
+      cmd: './node_modules/.bin/jsdoc',
+      args: [
+        '--pedantic',
+        '-d',
+        'dist/apidocs',
+        '-r',
+        'src'
+      ]
+    }, function (error, result, code) {
+      if (error) {
+        grunt.fail.warn('Could not build documentation:\n' + result.stderr);
+      }
+
+      done(code === 0);
+    });
+  });
+
   findExamples();
   grunt.registerTask('examples', [
     'copy:redirect',

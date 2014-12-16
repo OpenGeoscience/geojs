@@ -11,6 +11,7 @@ script:
     - git submodule init
     - git submodule update
     - npm install
+    - grunt docs
     - mkdir _build
     - cd _build
     - cmake ..
