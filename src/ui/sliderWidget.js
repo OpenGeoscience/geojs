@@ -50,15 +50,15 @@ geo.gui.sliderWidget = function (arg) {
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Add an icon from a path string.
+ * Add an icon from a path string.  Returns a d3 group element.
  *
  * @function
  * @argument {String} icon svg path string
- * @argument {d3 selection} base where to append the element
+ * @argument {Array} base where to append the element (d3 selection)
  * @argument {Number} cx Center x-coordinate
  * @argument {Number} cy Center y-coordinate
  * @argument {Number} size Icon size in pixels
- * @returns {d3 group element}
+ * @returns {object}
  * @private
  */
 //////////////////////////////////////////////////////////////////////////////

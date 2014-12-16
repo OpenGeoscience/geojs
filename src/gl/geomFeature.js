@@ -3,9 +3,9 @@
  * Create a new instance of geomFeature
  *
  * @class
- * Create a geometry feature given a geometry {vgl.geometryData}
+ * Create a geometry feature given a geometry
  *
- * @param arg {"geom": vgl.geometryData}
+ * @param {vgl.geometryData} arg
  * @returns {ggl.geomFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
