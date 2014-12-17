@@ -1,71 +1,33 @@
-/*global window, geo, inherit, $, d3*/
-window.startTest = function(done) {
-  var mapOptions = {center : { y: 40, x: -105}},
-      myMap = window.geoTests.createOsmMap(mapOptions);
+/*global window, geo*/
+window.startTest = function (done) {
+  "use strict";
+
+  var mapOptions = {center: {y: 40, x: -105}},
+      myMap = window.geoTests.createOsmMap(mapOptions),
+      layer = myMap.createLayer("feature", {"renderer": "d3Renderer"}),
+      points = layer.createFeature("point"),
+      clock = myMap.clock();
 
   function draw(data) {
-    var timeAnimatedLayer = function(arg) {
-      "use strict";
-      if (!(this instanceof timeAnimatedLayer)) {
-        return new timeAnimatedLayer(arg);
-      }
-      geo.featureLayer.call(this, arg);
 
-      var s_update = this._update, m_start, m_end, m_timesteps, i, time,
-          m_startIndex = 0, m_endIndex = 10, m_pointFeature = null;
+    points
+      .data(data.slice(0, 10))
+      .position(function (d) { return {x: d.lon, y: d.lat}; })
+      .style({
+        radius: 5,
+        color: "red",
+        stroke: false
+      })
+      .draw();
 
-      m_start = new Date();
-      m_end = new Date(m_start.getTime());
-      m_end.setDate(m_end.getDate() + 100);
-      m_timesteps = {};
-
-
-      // Generate some fake timesteps
-      for(i=0; i< 100; i++) {
-        time = new Date(m_start.getTime());
-        time.setDate(time.getDate() + i);
-        m_timesteps[time.getTime()]= (Math.random() * 100) + 1;
-      }
-
-      this.timeRange = function() {
-
-        return {'start': m_start, 'end': m_end, deltaUnits: 'days', delta: 1};
-      };
-
-      this._update = function(request) {
-        var latlons;
-
-        if (request === undefined || !request.hasOwnProperty('timestep')) {
-          return;
-        }
-
-        latlons = arg.data.slice(m_startIndex++, m_endIndex++);
-
-        if (!m_pointFeature) {
-          m_pointFeature = this.createFeature('point');
-          m_pointFeature.style({
-            'radius': 5,
-            'color': {r: 1, g: 0, b: 0},
-            'stroke': false
-          });
-        }
-
-        m_pointFeature.data(latlons)
-          .position(function (d) { return {x: d.lon, y: d.lat}; });
-
-        s_update.call(this, request);
-      };
-
-      return this;
-    };
-    inherit(timeAnimatedLayer, geo.featureLayer);
-
-    geo.registerLayer('timeAnimatedLayer', timeAnimatedLayer);
-
-    var layer = myMap.createLayer('timeAnimatedLayer', {
-      renderer: 'd3Renderer',
-      data: data
+    myMap.geoOn(geo.event.clock.change, function () {
+      var i = clock.now().valueOf();
+      var latlng = data.slice(i, i + 10);
+      points.data(latlng).draw();
     });
+
+    clock.start(0).end(100).step(1).now(0);
+
     myMap.onIdle(done);
   }
 
@@ -74,7 +36,7 @@ window.startTest = function(done) {
   window.animateForward = function (nFrames, done) {
     var i;
     for (i = 0; i < nFrames; i += 1) {
-      myMap.stepAnimationForward();
+      clock.stepForward();
     }
     if (done) {
       myMap.onIdle(done);
@@ -84,7 +46,7 @@ window.startTest = function(done) {
   window.animateBackward = function (nFrames, done) {
     var i;
     for (i = 0; i < nFrames; i += 1) {
-      myMap.stepAnimationBackward();
+      clock.stepBackward();
     }
     if (done) {
       myMap.onIdle(done);
@@ -92,8 +54,9 @@ window.startTest = function(done) {
   };
 
   window.animateToEnd = function (done) {
-    myMap.animate();
-    myMap.geoOn(geo.event.animationComplete, function () {
+    clock.loop(0);
+    clock.state("play");
+    myMap.geoOn(geo.event.clock.stop, function () {
       myMap.onIdle(done);
     });
   };
