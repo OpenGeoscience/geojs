@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @module geo
+ * @namespace geo
  */
 //////////////////////////////////////////////////////////////////////////////
 
@@ -205,18 +205,18 @@ geo.pointFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Returns the bounding box for a given datum in screen coordinates as an
-   * object:
+   * object: ::
    *
-   * {
-   *   min: {
-   *     x: value,
-   *     y: value
-   *   },
-   *   max: {
-   *     x: value,
-   *     y: value
+   *   {
+   *     min: {
+   *       x: value,
+   *       y: value
+   *     },
+   *     max: {
+   *       x: value,
+   *       y: value
+   *     }
    *   }
-   * }
    *
    * @returns {object}
    */

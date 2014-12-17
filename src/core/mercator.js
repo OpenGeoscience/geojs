@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @module geo
+ * @namespace geo
  */
 //////////////////////////////////////////////////////////////////////////////
 
@@ -13,7 +13,7 @@ geo.mercator = {
  * Returns the polar radius based on the projection.
  *
  * @method r_minor
- * @param {Boolean}
+ * @param {Boolean} sperical
  * @returns {Number}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -50,7 +50,8 @@ geo.mercator.f = function (spherical) {
  * Convert longitude (Degree) to Tile X
  *
  *  @method long2tilex
- *  @param {float, integer}
+ *  @param {float} lon
+ *  @param {integer} z
  *  @returns {integer}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -66,7 +67,8 @@ geo.mercator.long2tilex = function (lon, z) {
  * Convert latitude (Degree) to Tile Y
  *
  *  @method lat2tiley
- *  @param {float, integer}
+ *  @param {float} lat
+ *  @param {integer} z
  *  @returns {integer}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -81,8 +83,9 @@ geo.mercator.lat2tiley = function (lat, z) {
  * Convert Longitute (Degree) to Tile X and fraction.
  *
  *  @method long2tilex
- *  @param {float, integer}
- *  @returns {integer, float}
+ *  @param {float} lon
+ *  @param {integer} z
+ *  @returns {number[]}
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.mercator.long2tilex2 = function (lon, z) {
@@ -99,8 +102,9 @@ geo.mercator.long2tilex2 = function (lon, z) {
  * Convert Latitude (Degree) to Tile Y and fraction
  *
  *  @method lat2tiley
- *  @param {float, integer}
- *  @returns {integer, float}
+ *  @param {float} lat
+ *  @param {integer} z
+ *  @returns {number[]}
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.mercator.lat2tiley2 = function (lat, z) {
@@ -118,7 +122,8 @@ geo.mercator.lat2tiley2 = function (lat, z) {
  * Convert Tile X to Longitute (Degree)
  *
  *  @method tilex2long
- *  @param {integer, integer}
+ *  @param {integer} x
+ *  @param {integer} z
  *  @returns {float}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -132,7 +137,8 @@ geo.mercator.tilex2long = function (x, z) {
  * Convert Tile Y to Latitute (Degree)
  *
  *  @method tiley2lat
- *  @param {integer, integer}
+ *  @param {integer} y
+ *  @param {integer} z
  *  @returns {float}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -147,7 +153,7 @@ geo.mercator.tiley2lat = function (y, z) {
  * Convert spherical mercator Y to latitude
  *
  *  @method y2lat
- *  @param {float}
+ *  @param {float} a
  *  @returns {float}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -161,7 +167,7 @@ geo.mercator.y2lat = function (a) {
  * Convert latitude into Y position in spherical mercator
  *
  *  @method lat2y
- *  @param {float}
+ *  @param {float} a
  *  @returns {float}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -173,7 +179,7 @@ geo.mercator.lat2y = function (a) {
 //////////////////////////////////////////////////////////////////////////////
 /**
  *
- * @param d
+ * @param {float} d
  * @returns {number}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -187,7 +193,7 @@ geo.mercator.deg2rad = function (d) {
 /**
  * Convert radian to degree
  *
- * @param r
+ * @param {float} r
  * @returns {number}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -201,9 +207,9 @@ geo.mercator.rad2deg = function (r) {
 /**
  * Convert latlon to mercator
  *
- * @param lon
- * @param lat
- * @returns {{x: number, y: number}}
+ * @param {float} lon
+ * @param {float} lat
+ * @returns {object}
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.mercator.ll2m = function (lon, lat, spherical) {
@@ -237,8 +243,8 @@ geo.mercator.ll2m = function (lon, lat, spherical) {
 /**
  * Convert mercator to lat lon
  *
- * @param x
- * @param y
+ * @param {float} x
+ * @param {float} y
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.mercator.m2ll = function (x, y, spherical) {
@@ -256,8 +262,8 @@ geo.mercator.m2ll = function (x, y, spherical) {
 /**
  * pjPhi2
  *
- * @param ts
- * @param e
+ * @param {float} ts
+ * @param {float} e
  * @returns {number}
  */
 //////////////////////////////////////////////////////////////////////////////

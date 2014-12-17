@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @module geo
+ * @namespace geo
  */
 //////////////////////////////////////////////////////////////////////////////
 
@@ -97,11 +97,12 @@ geo.feature = function (arg) {
   /**
    * Search for features containing the given point.
    *
-   * Returns an object:
-   * {
-   *   data: [...] // an array of data objects for matching features
-   *   index: [...] // an array of indices of the matching features
-   * }
+   * Returns an object: ::
+   *
+   *   {
+   *     data: [...] // an array of data objects for matching features
+   *     index: [...] // an array of indices of the matching features
+   *   }
    *
    * @argument {Object} coordinate
    * @returns {Object}
@@ -248,7 +249,7 @@ geo.feature = function (arg) {
    * return all the styles as an object.
    *
    * @param {string|undefined} key
-   * @return function () { ... }
+   * @return {function}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.style.get = function (key) {

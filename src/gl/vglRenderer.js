@@ -127,10 +127,10 @@ ggl.vglRenderer = function (arg) {
   /**
    * Convert input data in display space to world space
    *
-   * @param input {x:val, y:val}, [{x:val, y:val}],
+   * @param {object} input {x:val, y:val}, [{x:val, y:val}],
    * [{x:val, y:val}], [x1,y1], [[x,y]]
    *
-   * @returns {x:val, y:val, z:val, w:val}, [{x:val, y:val, z:val, w:val}],
+   * @returns {object} {x:val, y:val, z:val, w:val}, [{x:val, y:val, z:val, w:val}],
               [[x, y, z, w]], [x1,y1,z1,w]
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -203,10 +203,10 @@ ggl.vglRenderer = function (arg) {
   /**
    * Convert input data in world space to display space
    *
-   * @param input {x:val, y:val} or {x:val, y:val, z:val} or [{x:val, y:val}]
+   * @param {object} input {x:val, y:val} or {x:val, y:val, z:val} or [{x:val, y:val}]
    * [{x:val, y:val, z:val}] or [[x,y]] or  [[x,y,z]] or [x1,y1,z1, x2, y2, z2]
    *
-   * @returns {x:val, y:val} or [{x:val, y:val}] or [[x,y]] or
+   * @returns {object} {x:val, y:val} or [{x:val, y:val}] or [[x,y]] or
    * [x1,y1, x2, y2]
    */
   ////////////////////////////////////////////////////////////////////////////
