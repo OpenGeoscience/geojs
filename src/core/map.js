@@ -44,14 +44,8 @@ geo.map = function (arg) {
       m_transition = null,
       m_clock = null;
 
-  if (arg.center) {
-    if (Array.isArray(arg.center)) {
-      arg.center = {
-        x: arg.center[1],
-        y: arg.center[0]
-      };
-    }
-  }
+
+  arg.center = geo.util.normalizeCoordinates(arg.center);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -198,6 +192,7 @@ geo.map = function (arg) {
     }
 
     // get the screen coordinates of the new center
+    coordinates = geo.util.normalizeCoordinates(coordinates);
     newCenter = m_this.gcsToDisplay(coordinates);
     currentCenter = m_this.gcsToDisplay(m_center);
 
@@ -680,6 +675,9 @@ geo.map = function (arg) {
       zCoord: true
     };
 
+    if (opts.center) {
+      opts.center = geo.util.normalizeCoordinates(opts.center);
+    }
     $.extend(defaultOpts, opts);
 
     m_transition = {
