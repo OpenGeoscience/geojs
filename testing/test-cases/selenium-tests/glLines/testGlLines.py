@@ -8,7 +8,7 @@ from selenium_test import FirefoxTest, ChromeTest,\
 
 class glLinesBase(object):
     testCase = ('glLines',)
-    testRevision = 4
+    testRevision = 5
 
     def loadPage(self):
         self.resizeWindow(640, 480)
@@ -22,12 +22,10 @@ class glLinesBase(object):
         self.screenshotTest(testName)
 
 
-@unittest.skip("glLines not updated to new api")
 class FirefoxOSM(glLinesBase, FirefoxTest):
     testCase = glLinesBase.testCase + ('firefox',)
 
 
-@unittest.skip("glLines not updated to new api")
 class ChromeOSM(glLinesBase, ChromeTest):
     testCase = glLinesBase.testCase + ('chrome',)
 

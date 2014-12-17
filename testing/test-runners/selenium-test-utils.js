@@ -2,7 +2,7 @@
 // General utilities that are made available to selenium tests.
 
 window.geoTests = {
-  createOsmMap: function (mapOpts, osmOpts) {
+  createOsmMap: function (mapOpts, osmOpts, notiles) {
     // Generate a default open street maps layer with optional
     // arguments.  If no options present, creates the map
     // in $('#map') with tiles served from the local server.
@@ -11,6 +11,7 @@ window.geoTests = {
 
     mapOpts = mapOpts || {};
     osmOpts = osmOpts || {};
+    notiles = !!notiles;
 
     var mapDefaults = {
       node: '#map',
@@ -25,6 +26,12 @@ window.geoTests = {
     var osmDefaults = {
       baseUrl: '/data/tiles/'
     };
+
+    if (notiles) {
+      osmDefaults.tileUrl = function () {
+        return '/data/white.jpg';
+      };
+    }
     $.extend(true, osmDefaults, osmOpts);
 
     var map = geo.map(mapDefaults);
