@@ -178,8 +178,7 @@ ggl.lineFeature = function (arg) {
         if (lineItemIndex === 0) {
           posTmp = position[position.length - 1];
           prev.push(posTmp);
-        }
-        else {
+        } else {
           prev.push(position[position.length - 2]);
           next.push(position[position.length - 1]);
         }
@@ -233,7 +232,7 @@ ggl.lineFeature = function (arg) {
 
     i = 0;
     k = 0;
-    for (j = 0; j < lineSegments.length; ++j) {
+    for (j = 0; j < lineSegments.length; j += 1) {
       i += 1;
       for (k = 0; k < lineSegments[j] - 1; k += 1) {
         addVert(prev[i - 1], position[i - 1], next[i - 1], 1);
@@ -293,11 +292,13 @@ ggl.lineFeature = function (arg) {
         strkOpacityAttr = vgl.vertexAttribute('strokeOpacity'),
         // Shader uniforms
         mviUnif = new vgl.modelViewUniform('modelViewMatrix'),
-        prjUnif = new vgl.projectionUniform('projectionMatrix'),
+        prjUnif = new vgl.projectionUniform('projectionMatrix');
         // Accessors
+        /*
         swiFunc = m_this.style.get('strokeWidth'),
         scoFunc = m_this.style.get('strokeColor'),
         sopFunc = m_this.style.get('strokeOpacity');
+        */
 
     m_pixelWidthUnif =  new vgl.floatUniform('pixelWidth',
                           1.0 / m_this.renderer().width());
