@@ -3,7 +3,7 @@ window.startTest = function(done) {
 
   var mapOptions = { center : { y: 31.87798, x: -85.44956 }, zoom : 8 };
 
-  var myMap = window.geoTests.createOsmMap(mapOptions);
+  var myMap = window.geoTests.createOsmMap(mapOptions, {}, true);
 
   var data = [
     { "type": "Feature", "properties": { "LINEARID": "110685800599", "FULLNAME": "N Midway St", "RTTYP": "M", "MTFCC": "S1200" }, "geometry": { "type": "LineString", "coordinates": [ [ -85.44966, 31.87798 ], [ -85.44965, 31.87835 ], [ -85.449649, 31.87841 ], [ -85.449649, 31.878528 ], [ -85.44965, 31.879264 ] ] } },
