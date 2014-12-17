@@ -32,7 +32,8 @@ module.exports = function (grunt) {
     core: moduleFiles('geo.core'),
     gl: moduleFiles('geo.gl'),
     d3: moduleFiles('geo.d3'),
-    ui: moduleFiles('geo.ui')
+    ui: moduleFiles('geo.ui'),
+    plugin: moduleFiles('geo.plugin')
   };
 
   sourceList = Array.prototype.concat(
@@ -42,7 +43,8 @@ module.exports = function (grunt) {
     geo.core,
     geo.gl,
     geo.d3,
-    geo.ui
+    geo.ui,
+    geo.plugin
   );
 
   templateData = {
@@ -87,7 +89,8 @@ module.exports = function (grunt) {
               geo.core,
               geo.gl,
               geo.d3,
-              geo.ui
+              geo.ui,
+              geo.plugin
             ),
             dest: 'dist/',
             filter: 'isFile',
