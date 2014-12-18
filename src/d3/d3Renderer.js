@@ -60,7 +60,7 @@ gd3.d3Renderer = function (arg) {
     f = geo.util.ensureFunction(f);
     g = g || function () { return true; };
     return function () {
-      var c;
+      var c = 'none';
       if (g.apply(this, arguments)) {
         c = f.apply(this, arguments);
         if (c.hasOwnProperty('r') &&
