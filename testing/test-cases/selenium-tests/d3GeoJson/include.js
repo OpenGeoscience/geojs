@@ -121,8 +121,9 @@ window.startTest = function (done) {
           ]
         },
         "properties": {
-          "color": [0, 1, 0],
-          "width": [3]
+          "strokeColor": {"r": 0, "g": 1, "b": 0},
+          "strokeWidth": 3,
+          "fill": false
         },
         "type": "Feature"
       },
