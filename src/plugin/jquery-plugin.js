@@ -1,5 +1,5 @@
 /*global window*/
-/*jshint: -W015*/
+/*jshint -W015*/
 /*jscs:disable validateIndentation*/
 (function ($, geo) {
   'use strict';
