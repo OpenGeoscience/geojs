@@ -18,23 +18,27 @@ describe('zoom slider', function () {
     map.draw();
   });
 
-  it('Zoom in button', function () {
+  it('Zoom in button', function (done) {
     var z = map.zoom(), eps;
     d3.select('.geo-ui-slider .geo-zoom-in').on('click')();
 
-    eps = Math.abs(z + 1 - map.zoom());
-
-    expect(eps).toBeLessThan(1e-2);
+    window.setTimeout(function () {
+      eps = Math.abs(z + 1 - map.zoom());
+      expect(eps).toBeLessThan(1e-2);
+      done();
+    }, 1000);
   });
   
-  it('Zoom out button', function () {
+  it('Zoom out button', function (done) {
     map.zoom(2);
     var z = map.zoom(), eps;
     d3.select('.geo-ui-slider .geo-zoom-out').on('click')();
 
-    eps = Math.abs(z - 1 - map.zoom());
-
-    expect(eps).toBeLessThan(1e-2);
+    window.setTimeout(function () {
+      eps = Math.abs(z - 1 - map.zoom());
+      expect(eps).toBeLessThan(1e-2);
+      done();
+    }, 1000);
   });
 
   it('Nub responds to map', function () {
