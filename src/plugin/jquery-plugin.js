@@ -47,6 +47,21 @@
    *    latitude: 35,
    *    zoom: 5
    * });
+   * @example <caption>Create a map with points</caption>
+   * $("#map").geojsMap({
+   *    zoom: 1,
+   *    points: {
+   *        data: data,
+   *        radius: 5,
+   *        fillColor: 'steelblue',
+   *        position: function (d) {
+   *            return {
+   *                x: d.coordinates[0],
+   *                y: d.coordinates[1]
+   *            };
+   *       }
+   *    }
+   * });
    */
   $.widget('geojs.geojsMap', /** @lends $.fn.geojsMap */{
     /**
@@ -110,7 +125,7 @@
     /**
      * @instance
      * @description
-     * Map options
+     * Map options (not fully implemented).
      * @example <caption>Get the current map center</caption>
      * var center=$("#map").geojsMap("center");
      * @example <caption>Pan the map to a new center</caption>
@@ -243,7 +258,7 @@
      * @instance
      * @param {object} options Point options (see {@link pointOptions})
      * @example <caption>Initializing point attributes</caption>
-     * $("#map").points({
+     * $("#map").geojsMap('points', {
      *     position: function (d) {
      *          return {x: d.geometry.lon, y: d.geometry.lat}
      *     },
@@ -252,7 +267,7 @@
      *     strokeColor: "#010a10"
      * });
      * @example <caption>Updating the point data</caption>
-     * $("#map").points({
+     * $("#map").geojsMap('points', {
      *     data: data
      * });
      */
