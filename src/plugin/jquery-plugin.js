@@ -1,6 +1,10 @@
 /*global window*/
+/*jshint: -W015*/
+/*jscs:disable validateIndentation*/
 (function ($, geo) {
   'use strict';
+
+  var load = function () {
 
   // This requires jquery ui, which we don't want to make a
   // hard requirement, so bail out here if the widget factory
@@ -93,6 +97,7 @@
      * @typedef pointOptions
      * @type {Object}
      * @property {Object[]} data Data array
+     * @property {coordinate} position Location of the point center
      * @property {number} radius Radius of the circle in pixels
      * @property {boolean} fill Presence or absence of the fill
      * @property {color} fillColor Interior color
@@ -120,6 +125,8 @@
      *   The renderer for map features (initialization only)
      * @property {boolean} [autoresize=true]
      *   Resize the map on <code>window.resize</code> (initialization only)
+     * @property {pointOptions} [points={}]
+     *   Set the points option property (initialization only)
      */
     options: {
       center: {latitude: 0, longitude: 0},
@@ -127,6 +134,7 @@
       width: null,
       height: null,
       renderer: 'vglRenderer',
+      points: {},
 
       // These options are for future use, but shouldn't
       // be changed at the moment, so they aren't documented.
@@ -191,6 +199,9 @@
 
       // trigger an initial draw
       this.redraw();
+
+      // add point options
+      this.points(this.options.points);
     },
 
     /**
@@ -268,4 +279,7 @@
       }
     }
   });
+  };
+
+  $(load);
 })($ || window.$, geo || window.geo);

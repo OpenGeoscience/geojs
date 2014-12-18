@@ -164,6 +164,16 @@ module.exports = function (grunt) {
             expand: true
           }
         ]
+      },
+      jqueryui: {
+        files: [
+          {
+            src: ['jquery-ui.min.js'],
+            dest: 'dist/examples/common/js',
+            cwd: 'bower_components/jquery-ui/',
+            expand: true
+          }
+        ]
       }
     },
 
@@ -397,6 +407,7 @@ module.exports = function (grunt) {
     'copy:bootstrap',
     'copy:codemirror',
     'copy:examples',
+    'copy:jqueryui',
     'uglify:codemirror',
     'jade',
     'docco'
