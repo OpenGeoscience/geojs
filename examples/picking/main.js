@@ -49,7 +49,12 @@ $(function () {
   function handleMouseClick(evt) {
     evt.data.clicked = !evt.data.clicked;
     this.modified();
-    this.draw();
+    map.draw();
+  }
+
+  function handleBrush(evt) {
+    evt.data.clicked = true;
+    this.modified();
     map.draw();
   }
 
@@ -63,7 +68,8 @@ $(function () {
     })
     .geoOn(geo.event.feature.mouseover, handleMouseOver)
     .geoOn(geo.event.feature.mouseout, handleMouseOut)
-    .geoOn(geo.event.feature.mouseclick, handleMouseClick);
+    .geoOn(geo.event.feature.mouseclick, handleMouseClick)
+    .geoOn(geo.event.feature.brushend, handleBrush);
 
   svgLayer.createFeature('line', {selectionAPI: true})
     .data([window.randomPath(1000, 0.1, -108, 30), window.randomPath(500, 0.05, -88, 40)])
@@ -74,7 +80,8 @@ $(function () {
     })
     .geoOn(geo.event.feature.mouseover, handleMouseOver)
     .geoOn(geo.event.feature.mouseout, handleMouseOut)
-    .geoOn(geo.event.feature.mouseclick, handleMouseClick);
+    .geoOn(geo.event.feature.mouseclick, handleMouseClick)
+    .geoOn(geo.event.feature.brushend, handleBrush);
 
   // Make the map resize with the browser window
   $(window).resize(function () {
