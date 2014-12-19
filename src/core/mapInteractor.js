@@ -326,9 +326,9 @@ geo.mapInteractor = function (args) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._getMouseButton = function (evt) {
-    if (evt.which === 1)
+    if (evt.which === 1) {
       m_mouse.buttons.left = evt.type !== 'mouseup';
-    else if (evt.which === 3) {
+    } else if (evt.which === 3) {
       m_mouse.buttons.right = evt.type !== 'mouseup';
     } else if (evt.which === 2) {
       m_mouse.buttons.middle = evt.type !== 'mouseup';

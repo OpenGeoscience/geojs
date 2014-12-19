@@ -402,7 +402,7 @@ ggl.vglRenderer = function (arg) {
     focusPoint = renderWindow.focusDisplayPoint();
 
     // Calculate the center in display coordinates
-    centerDisplay = [ m_width / 2, m_height / 2, 0 ];
+    centerDisplay = [m_width / 2, m_height / 2, 0];
 
     // Calculate the center in world coordinates
     centerGeo = renderWindow.displayToWorld(

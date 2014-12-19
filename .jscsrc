@@ -1,0 +1,13 @@
+{
+  "preset": "crockford",
+  "requireMultipleVarDecl": null,
+  "disallowQuotedKeysInObjects": null,
+  "validateQuoteMarks": true,
+  "validateIndentation": 2,
+  "requireCamelCaseOrUpperCaseIdentifiers": null,
+  "disallowDanglingUnderscores": null,
+  "excludeFiles": [
+    "src/vgl/**",
+    "src/util/wigglemaps.js"
+  ]
+}

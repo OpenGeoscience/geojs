@@ -62,10 +62,10 @@ geo.layer = function (arg) {
    */
   //////////////////////////////////////////////////////////////////////////////
   var m_this = this,
-      m_style = arg.style === undefined ? {"opacity" : 0.5,
-                                           "color" : [0.8, 0.8, 0.8],
-                                           "visible" : true,
-                                           "bin" : 100} : arg.style,
+      m_style = arg.style === undefined ? {"opacity": 0.5,
+                                           "color": [0.8, 0.8, 0.8],
+                                           "visible": true,
+                                           "bin": 100} : arg.style,
       m_id = arg.id === undefined ? geo.newLayerId() : arg.id,
       m_name = "",
       m_gcs = "EPSG:4326",

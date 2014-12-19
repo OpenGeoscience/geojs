@@ -214,10 +214,10 @@ ggl.pointFeature = function (arg) {
       fill.push(fillFunc(item) ? 1.0 : 0.0);
 
       c = fillColorFunc(item);
-      fillColor.push([ c.r, c.g, c.b ]);
+      fillColor.push([c.r, c.g, c.b]);
 
       c = strokeColorFunc(item);
-      strokeColor.push([ c.r, c.g, c.b ]);
+      strokeColor.push([c.r, c.g, c.b]);
 
       stroke.push(strokeFunc(item) ? 1.0 : 0.0);
       fillOpacity.push(fillOpacityFunc(item));
