@@ -29,7 +29,7 @@ $(function () {
       fillColor: function (d) { return d.fruits; },
       fillOpacity: function (d) { return 0.5 + d.unif / 2; },
       stroke: true,
-      strokeColor: 'black',
+      strokeColor: function (d) { return d.color; },
       strokeOpacity: 1,
       strokeWidth: 2
     }
