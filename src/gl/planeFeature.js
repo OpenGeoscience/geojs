@@ -1,19 +1,17 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Create a new instance of planeFeature
- *
- * @class
  * Create a plane feature given a lower left corner point geo.latlng
  * and and upper right corner point geo.latlng
+ * @class
  * @param lowerleft
  * @param upperright
  * @returns {geo.planeFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-ggl.planeFeature = function (arg) {
+geo.gl.planeFeature = function (arg) {
   "use strict";
-  if (!(this instanceof ggl.planeFeature)) {
-    return new ggl.planeFeature(arg);
+  if (!(this instanceof geo.gl.planeFeature)) {
+    return new geo.gl.planeFeature(arg);
   }
   geo.planeFeature.call(this, arg);
 
@@ -158,7 +156,7 @@ ggl.planeFeature = function (arg) {
   return this;
 };
 
-inherit(ggl.planeFeature, geo.planeFeature);
+inherit(geo.gl.planeFeature, geo.planeFeature);
 
 // Now register it
-geo.registerFeature("vgl", "plane", ggl.planeFeature);
+geo.registerFeature("vgl", "plane", geo.gl.planeFeature);

@@ -1,25 +1,19 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @module geo.d3
- */
-//////////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////////
-/**
  * Create a new instance of pointFeature
  *
  * @class
- * @returns {gd3.pointFeature}
+ * @returns {geo.d3.pointFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-gd3.pointFeature = function (arg) {
+geo.d3.pointFeature = function (arg) {
   'use strict';
-  if (!(this instanceof gd3.pointFeature)) {
-    return new gd3.pointFeature(arg);
+  if (!(this instanceof geo.d3.pointFeature)) {
+    return new geo.d3.pointFeature(arg);
   }
   arg = arg || {};
   geo.pointFeature.call(this, arg);
-  gd3.object.call(this);
+  geo.d3.object.call(this);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -109,7 +103,7 @@ gd3.pointFeature = function (arg) {
   return this;
 };
 
-inherit(gd3.pointFeature, geo.pointFeature);
+inherit(geo.d3.pointFeature, geo.pointFeature);
 
 // Now register it
-geo.registerFeature('d3', 'point', gd3.pointFeature);
+geo.registerFeature('d3', 'point', geo.d3.pointFeature);

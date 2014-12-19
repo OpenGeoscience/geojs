@@ -1,21 +1,15 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @module geo.gl
- */
-//////////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////////
-/**
  * Create a new instance of pointFeature
  *
  * @class
- * @returns {ggl.pointFeature}
+ * @returns {geo.gl.pointFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-ggl.pointFeature = function (arg) {
+geo.gl.pointFeature = function (arg) {
   "use strict";
-  if (!(this instanceof ggl.pointFeature)) {
-    return new ggl.pointFeature(arg);
+  if (!(this instanceof geo.gl.pointFeature)) {
+    return new geo.gl.pointFeature(arg);
   }
   arg = arg || {};
   geo.pointFeature.call(this, arg);
@@ -391,7 +385,7 @@ ggl.pointFeature = function (arg) {
   return this;
 };
 
-inherit(ggl.pointFeature, geo.pointFeature);
+inherit(geo.gl.pointFeature, geo.pointFeature);
 
 // Now register it
-geo.registerFeature("vgl", "point", ggl.pointFeature);
+geo.registerFeature("vgl", "point", geo.gl.pointFeature);
