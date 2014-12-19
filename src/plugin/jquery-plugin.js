@@ -1,7 +1,7 @@
 /*global window*/
 /*jshint -W015*/
 /*jscs:disable validateIndentation*/
-(function ($, geo) {
+(function ($, geo, d3) {
   'use strict';
 
   var load = function () {
@@ -29,6 +29,105 @@
 
   // for multiple initialization detection
   var initialized = false;
+
+  /**
+   * Takes an option key and returns true if it should
+   * return a color accessor.
+   * @private
+   */
+  function isColorKey(key) {
+    return key.slice(key.length - 5, key.length)
+      .toLowerCase() === 'color';
+  }
+
+  /**
+   * Take an array of data and an accessor for a color property
+   * and return a wrapped accessor mapping to actual color
+   * values.  This allows users to pass arbitrary strings
+   * or numbers as any color property and this will wrap
+   * a categorical scale or linear scale.
+   *
+   * Requires d3
+   * @private
+   * @param {Object[]} data A data array
+   * @param {(string|number|function)} acc A color accessor
+   * @return {function}
+   */
+  function makeColorScale(data, acc) {
+    if (!d3) {
+      warn('d3 is unavailable, cannot apply color scales.');
+      return acc;
+    }
+    var domain;
+    var cannotHandle = false;
+    var doNotHandle = true;
+    var categorical = false;
+    var min = Number.POSITIVE_INFINITY;
+    var max = Number.NEGATIVE_INFINITY;
+
+    function wrap(func) {
+      if (geo.util.isFunction(func)) {
+        return function () {
+          return func(acc.apply(this, arguments));
+        };
+      } else {
+        return func(acc);
+      }
+    }
+
+    if (geo.util.isFunction(acc)) {
+      domain = d3.set(data.map(acc)).values();
+    } else {
+      domain = [acc];
+    }
+    domain.forEach(function (v) {
+      if (!(typeof v === 'string' &&
+            typeof geo.util.convertColor(v) === 'object')) {
+        // This is to handle cases when values are css names or
+        // hex strings.  We don't want to apply a categorical
+        // scale.
+        doNotHandle = false;
+      }
+      if (typeof v === 'string') {
+        categorical = true;
+      } else if (!isFinite(v)) {
+        cannotHandle = true;
+      } else if (+v > max) {
+        max = +v;
+      } else if (+v < min) {
+        min = +v;
+      }
+    });
+    if (cannotHandle) {
+      warn('Unknown color value types.');
+      return acc;
+    }
+    if (doNotHandle) {
+      return acc;
+    }
+    if (categorical) {
+      if (domain.length <= 10) {
+        return wrap(d3.scale.category10().domain(domain));
+      } else if (domain.length <= 20) {
+        return wrap(d3.scale.category20().domain(domain));
+      } else {
+        // TODO: sort domain by most used and make an "other" category
+        return wrap(d3.scale.category20().domain(domain));
+      }
+    }
+    // http://colorbrewer2.org/?type=diverging&scheme=RdYlBu&n=3
+    return wrap(d3.scale.linear()
+      .range([
+        'rgb(252,141,89)',
+        'rgb(255,255,191)',
+        'rgb(145,191,219)'
+      ])
+      .domain([
+        min,
+        (min + max) / 2,
+        max
+      ]));
+  }
 
   /**
    * @class geojsMap
@@ -109,11 +208,16 @@
      *         // this - geo.pointFeature
      *     }
      * </pre>
+     * Pass null to remove saved options from previous calls.
      * @typedef pointOptions
      * @type {Object}
      * @property {Object[]} data Data array
      * @property {coordinate} position Location of the point center
-     * @property {number} radius Radius of the circle in pixels
+     * @property {number} radius
+     *  Radius of the circle in pixels (ignored when <code>size</code>
+     *  is present)
+     * @property {number} size
+     *   A numerical value mapped affinely to a radius in the range [5,20]
      * @property {boolean} fill Presence or absence of the fill
      * @property {color} fillColor Interior color
      * @property {float} fillOpacity Opacity of the interior <code>[0,1]</code>
@@ -272,12 +376,14 @@
      * });
      */
     points: function (options) {
-      var pt = this._points;
+      var pt = this._points, key, data, scl, that = this;
       options = options || {};
 
       if (options.data) {
         pt.data(options.data);
       }
+      data = pt.data();
+
       if (options.position) {
         pt.position(function () {
           // could use some optimization
@@ -285,6 +391,40 @@
           var d = f.apply(this, arguments);
           return geo.util.normalizeCoordinates(d);
         });
+      }
+
+      if (options.data && options.data.length) {
+        // force recompute the color scales with new data
+        options.fillColor = options.fillColor || pt.style().fillColor;
+        options.strokeColor = options.strokeColor || pt.style().strokeColor;
+      }
+
+      if (options.size) {
+        // save the size function to update the radius
+        // scale when new data is given
+        this._size = options.size;
+      } else if (options.size === null) {
+        delete this._size;
+      }
+
+      if (data.length && this._size) {
+        scl = d3.scale.linear()
+          .domain(
+            d3.extent(data, this._size)
+          )
+          .range([5, 20]);
+        options.radius = function () {
+          return scl(that._size.apply(this, arguments));
+        };
+        delete options.size;
+      }
+
+      // apply color scales if necessary
+      for (key in options) {
+        if (options.hasOwnProperty(key) &&
+            isColorKey(key)) {
+          options[key] = makeColorScale(data, options[key]);
+        }
       }
       pt.style(options).draw();
 
@@ -297,4 +437,4 @@
   };
 
   $(load);
-})($ || window.$, geo || window.geo);
+})($ || window.$, geo || window.geo, d3 || window.d3);
