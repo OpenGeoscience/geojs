@@ -91,7 +91,8 @@
       }
     });
     if (cannotHandle) {
-      console.warn('Unknown color value types.');
+      // At least one value is not a string or a numeric value.
+      // Pass the bare accessor back to geojs to handle it.
       return acc;
     }
     if (doNotHandle) {
@@ -245,7 +246,10 @@
       width: null,
       height: null,
       renderer: 'vglRenderer',
-      points: {},
+      points: {
+        stroke: false,
+        strokeColor: 'black'
+      },
 
       // These options are for future use, but shouldn't
       // be changed at the moment, so they aren't documented.
