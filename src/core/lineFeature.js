@@ -136,16 +136,16 @@ geo.lineFeature = function (arg) {
 
     // for each line
     data.forEach(function (d, index) {
-      var last = null, r;
-
-      r = Math.ceil(width(d, index) / 2);
-      r = r * r;
+      var last = null;
 
       try {
-        line(d).forEach(function (current, j) {
+        line(d, index).forEach(function (current, j) {
 
           // get the screen coordinates of the current point
-          var s = map.gcsToDisplay(pos(current, j, d, index));
+          var p = pos(current, j, d, index);
+          var s = map.gcsToDisplay(p);
+          var r = Math.ceil(width(p, j, d, index) / 2) + 2;
+          r = r * r;
 
           if (last) {
             // test the line segment s -> last
