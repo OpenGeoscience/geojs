@@ -187,8 +187,9 @@ geo.featureLayer = function (arg) {
   this.clear = function () {
     var i;
 
-    if (!m_features.length)
+    if (!m_features.length) {
       return m_this;
+    }
 
     for (i = 0; i < m_features.length; i += 1) {
       m_features[i]._exit();

@@ -84,7 +84,7 @@ gd3.pathFeature = function (arg) {
 
     m_style.id = m_this._d3id();
     m_style.append = 'path';
-    m_style.classes = [ 'd3PathFeature' ];
+    m_style.classes = ['d3PathFeature'];
     m_style.style = $.extend({
       'fill': function () { return false; },
       'fillColor': function () { return { r: 0, g: 0, b: 0 }; }

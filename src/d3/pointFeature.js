@@ -77,7 +77,7 @@ gd3.pointFeature = function (arg) {
       }
     };
     m_style.style = s_style;
-    m_style.classes = [ 'd3PointFeature' ];
+    m_style.classes = ['d3PointFeature'];
 
     // pass to renderer to draw
     m_this.renderer()._drawFeatures(m_style);

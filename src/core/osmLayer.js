@@ -262,8 +262,7 @@ geo.osmLayer = function (arg) {
           output[i + 1] = geo.mercator.y2lat(input[i + 1]);
         }
       }
-    }
-    else {
+    } else {
       output = {};
       output.x = input.x;
       output.y = geo.mercator.y2lat(input.y);
@@ -519,7 +518,7 @@ geo.osmLayer = function (arg) {
     for (i = tile1x; i <= tile2x; i += 1) {
       for (j = tile2y; j <= tile1y; j += 1) {
         invJ = (Math.pow(2, zoom) - 1 - j);
-        if  (!m_this._hasTile(zoom, i, invJ)) {
+        if (!m_this._hasTile(zoom, i, invJ)) {
           tile = m_this._addTile(request, zoom, i, invJ);
         } else {
           tile = m_tiles[zoom][i][invJ];

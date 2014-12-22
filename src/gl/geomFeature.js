@@ -52,8 +52,7 @@ ggl.geomFeature = function (arg) {
         m_geom.primitive(0).primitiveType() === gl.POINTS) {
       m_material = vgl.utils.createPointSpritesMaterial(
                      style.point_sprites_image);
-    }
-    else if (m_scalar) {
+    } else if (m_scalar) {
       if (m_color instanceof vgl.lookupTable) {
         m_color.updateRange(m_scalar.scalarRange());
         m_material = vgl.utils.createColorMappedMaterial(m_color);
@@ -84,9 +83,9 @@ ggl.geomFeature = function (arg) {
       if (m_color instanceof vgl.lookupTable) {
         vgl.utils.updateColorMappedMaterial(m_this.material(),
           m_this.style.color);
-      } else {
+      }/* else {
         // TODO
-      }
+      }*/
     } else {
       m_buildTime = vgl.timestamp();
       m_buildTime.modified();

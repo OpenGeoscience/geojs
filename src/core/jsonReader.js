@@ -59,9 +59,9 @@ geo.jsonReader = function (arg) {
       } catch (e) {
         if (!object) {
           $.ajax({
-            type : 'GET',
-            url : fileString,
-            dataType : 'text'
+            type: 'GET',
+            url: fileString,
+            dataType: 'text'
           }).done(function (data) {
             object = JSON.parse(data);
             done(object);

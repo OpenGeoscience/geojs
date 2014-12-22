@@ -59,7 +59,7 @@ geo.pathFeature = function (arg) {
       {},
       {
         "strokeWidth": function () { return 1; },
-        "strokeColor": function () { return { r: 1.0, g: 1.0, b: 1.0 }; },
+        "strokeColor": function () { return { r: 1.0, g: 1.0, b: 1.0 }; }
       },
       arg.style === undefined ? {} : arg.style
     );
