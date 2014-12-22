@@ -19,14 +19,6 @@
     return;
   }
 
-  // polyfill console.warn if necessary
-  var warn;
-  if (console && console.warn) {
-    warn = console.warn;
-  } else {
-    warn = $.noop;
-  }
-
   // for multiple initialization detection
   var initialized = false;
 
@@ -55,7 +47,7 @@
    */
   function makeColorScale(data, acc) {
     if (!d3) {
-      warn('d3 is unavailable, cannot apply color scales.');
+      console.warn('d3 is unavailable, cannot apply color scales.');
       return acc;
     }
     var domain;
@@ -99,7 +91,7 @@
       }
     });
     if (cannotHandle) {
-      warn('Unknown color value types.');
+      console.warn('Unknown color value types.');
       return acc;
     }
     if (doNotHandle) {
