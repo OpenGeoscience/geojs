@@ -1,19 +1,13 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @module ggl
- */
-//////////////////////////////////////////////////////////////////////////////
-
-
-//////////////////////////////////////////////////////////////////////////////
-/**
  * Single VGL viewer
  *
  * This singleton instance is used to share a single GL context across multiple
  * vlgRenderer and therefore layers.
+ * @private
  */
 //////////////////////////////////////////////////////////////////////////////
-ggl._vglViewerInstances = {
+geo.gl._vglViewerInstances = {
   viewers: [],
   maps: []
 };
@@ -27,12 +21,12 @@ ggl._vglViewerInstances = {
  */
 //////////////////////////////////////////////////////////////////////////////
 
-ggl.vglViewerInstance = function (map) {
+geo.gl.vglViewerInstance = function (map) {
   "use strict";
 
   var mapIdx,
-      maps = ggl._vglViewerInstances.maps,
-      viewers = ggl._vglViewerInstances.viewers;
+      maps = geo.gl._vglViewerInstances.maps,
+      viewers = geo.gl._vglViewerInstances.viewers;
 
   function makeViewer() {
     var canvas = $(document.createElement("canvas"));
@@ -58,12 +52,12 @@ ggl.vglViewerInstance = function (map) {
   return viewers[mapIdx];
 };
 
-ggl.vglViewerInstance.deleteCache = function (viewer) {
+geo.gl.vglViewerInstance.deleteCache = function (viewer) {
   "use strict";
 
   var mapIdx,
-      maps = ggl._vglViewerInstances.maps,
-      viewers = ggl._vglViewerInstances.viewers;
+      maps = geo.gl._vglViewerInstances.maps,
+      viewers = geo.gl._vglViewerInstances.viewers;
 
   for (mapIdx = 0; mapIdx < viewers.length; mapIdx += 1) {
     if (viewer === viewers[mapIdx]) {
@@ -82,19 +76,19 @@ ggl.vglViewerInstance.deleteCache = function (viewer) {
  * Create a new instance of class vglRenderer
  *
  * @param canvas
- * @returns {ggl.vglRenderer}
+ * @returns {geo.gl.vglRenderer}
  */
 //////////////////////////////////////////////////////////////////////////////
-ggl.vglRenderer = function (arg) {
+geo.gl.vglRenderer = function (arg) {
   "use strict";
 
-  if (!(this instanceof ggl.vglRenderer)) {
-    return new ggl.vglRenderer(arg);
+  if (!(this instanceof geo.gl.vglRenderer)) {
+    return new geo.gl.vglRenderer(arg);
   }
-  ggl.renderer.call(this, arg);
+  geo.gl.renderer.call(this, arg);
 
   var m_this = this,
-      m_viewer = ggl.vglViewerInstance(this.layer().map()),
+      m_viewer = geo.gl.vglViewerInstance(this.layer().map()),
       m_contextRenderer = vgl.renderer(),
       m_width = 0,
       m_height = 0,
@@ -350,7 +344,7 @@ ggl.vglRenderer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
-    ggl.vglViewerInstance.deleteCache(m_viewer);
+    geo.gl.vglViewerInstance.deleteCache(m_viewer);
   };
 
   this._updateRendererCamera = function () {
@@ -493,6 +487,6 @@ ggl.vglRenderer = function (arg) {
   return this;
 };
 
-inherit(ggl.vglRenderer, ggl.renderer);
+inherit(geo.gl.vglRenderer, geo.gl.renderer);
 
-geo.registerRenderer("vglRenderer", ggl.vglRenderer);
+geo.registerRenderer("vglRenderer", geo.gl.vglRenderer);

@@ -1,21 +1,15 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @module geo.gl
- */
-//////////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////////
-/**
  * Create a new instance of lineFeature
  *
  * @class
- * @returns {ggl.lineFeature}
+ * @returns {geo.gl.lineFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-ggl.lineFeature = function (arg) {
+geo.gl.lineFeature = function (arg) {
   'use strict';
-  if (!(this instanceof ggl.lineFeature)) {
-    return new ggl.lineFeature(arg);
+  if (!(this instanceof geo.gl.lineFeature)) {
+    return new geo.gl.lineFeature(arg);
   }
   arg = arg || {};
   geo.lineFeature.call(this, arg);
@@ -381,7 +375,7 @@ ggl.lineFeature = function (arg) {
   return this;
 };
 
-inherit(ggl.lineFeature, geo.lineFeature);
+inherit(geo.gl.lineFeature, geo.lineFeature);
 
 // Now register it
-geo.registerFeature('vgl', 'line', ggl.lineFeature);
+geo.registerFeature('vgl', 'line', geo.gl.lineFeature);

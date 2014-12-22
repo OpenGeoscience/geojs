@@ -1,25 +1,19 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @module geo
- */
-//////////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////////
-/**
  * Create a new instance of class lineFeature
  *
  * @class
- * @returns {gd3.lineFeature}
+ * @returns {geo.d3.lineFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-gd3.lineFeature = function (arg) {
+geo.d3.lineFeature = function (arg) {
   'use strict';
-  if (!(this instanceof gd3.lineFeature)) {
-    return new gd3.lineFeature(arg);
+  if (!(this instanceof geo.d3.lineFeature)) {
+    return new geo.d3.lineFeature(arg);
   }
   arg = arg || {};
   geo.lineFeature.call(this, arg);
-  gd3.object.call(this);
+  geo.d3.object.call(this);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -121,6 +115,6 @@ gd3.lineFeature = function (arg) {
   return this;
 };
 
-inherit(gd3.lineFeature, geo.lineFeature);
+inherit(geo.d3.lineFeature, geo.lineFeature);
 
-geo.registerFeature('d3', 'line', gd3.lineFeature);
+geo.registerFeature('d3', 'line', geo.d3.lineFeature);

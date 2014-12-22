@@ -1,26 +1,20 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @module geo.d3
- */
-//////////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////////
-/**
  * D3 specific subclass of object which adds an id property for d3 selections
  * on groups of objects by class id.
  */
 //////////////////////////////////////////////////////////////////////////////
 
-gd3.object = function (arg) {
+geo.d3.object = function (arg) {
   'use strict';
   // this is used to extend other geojs classes, so only generate
   // a new object when that is not the case... like if this === window
   if (!(this instanceof geo.object)) {
-    return new gd3.object(arg);
+    return new geo.d3.object(arg);
   }
   geo.sceneObject.call(this);
 
-  var m_id = 'd3-' + gd3.uniqueID(),
+  var m_id = 'd3-' + geo.d3.uniqueID(),
       m_this = this,
       s_draw = this.draw;
 
@@ -60,4 +54,4 @@ gd3.object = function (arg) {
   return this;
 };
 
-inherit(gd3.object, geo.sceneObject);
+inherit(geo.d3.object, geo.sceneObject);

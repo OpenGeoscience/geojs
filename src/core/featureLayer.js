@@ -1,17 +1,9 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @module geo
- */
-//////////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Create a new instance of class featureLayer
- *
+ * Layer to draw points, lines, and polygons on the map The polydata layer
+ * provide mechanisms to create and draw geometrical shapes such as points,
+ * lines, and polygons.
  * @class
- * @dec Layer to draw points, lines, and polygons on the map The polydata layer
- *      provide mechanisms to create and draw geometrical shapes such as points,
- *      lines, and polygons.
  * @returns {geo.featureLayer}
  */
 //////////////////////////////////////////////////////////////////////////////

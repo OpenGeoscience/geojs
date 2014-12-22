@@ -1,22 +1,21 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Create a new instance of planeFeature
- *
- * @class
  * Create a plane feature given a lower left corner point geo.latlng
  * and and upper right corner point geo.latlng
+ *
+ * @class
  * @param lowerleft
  * @param upperright
  * @returns {geo.planeFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-gd3.planeFeature = function (arg) {
+geo.d3.planeFeature = function (arg) {
   'use strict';
-  if (!(this instanceof gd3.planeFeature)) {
-    return new gd3.planeFeature(arg);
+  if (!(this instanceof geo.d3.planeFeature)) {
+    return new geo.d3.planeFeature(arg);
   }
   geo.planeFeature.call(this, arg);
-  gd3.object.call(this);
+  geo.d3.object.call(this);
 
   var m_this = this,
       m_style = {},
@@ -52,7 +51,7 @@ gd3.planeFeature = function (arg) {
    * Build the feature object and pass to the renderer for drawing.
    *
    * @private
-   * @returns {gd3.planeFeature}
+   * @returns {geo.d3.planeFeature}
    */
   //////////////////////////////////////////////////////////////////////////////
   this._build = function () {
@@ -92,7 +91,7 @@ gd3.planeFeature = function (arg) {
    * Redraw the plane feature if necessary.
    *
    * @private
-   * @returns {gd3.planeFeature}
+   * @returns {geo.d3.planeFeature}
    */
   //////////////////////////////////////////////////////////////////////////////
   this._update = function () {
@@ -109,7 +108,7 @@ gd3.planeFeature = function (arg) {
    * Initializes the plane feature style (over-riding the parent default).
    *
    * @private
-   * @returns {gd3.planeFeature}
+   * @returns {geo.d3.planeFeature}
    */
   //////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
@@ -127,6 +126,6 @@ gd3.planeFeature = function (arg) {
   return this;
 };
 
-inherit(gd3.planeFeature, geo.planeFeature);
+inherit(geo.d3.planeFeature, geo.planeFeature);
 
-geo.registerFeature('d3', 'plane', gd3.planeFeature);
+geo.registerFeature('d3', 'plane', geo.d3.planeFeature);
