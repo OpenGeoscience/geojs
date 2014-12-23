@@ -208,19 +208,16 @@ geo.gl.lineFeature = function (arg) {
     start = buffers.alloc(numPts * 6);
     currIndex = start;
 
-    for (i = 0; i < numPts; i += 1) {
-      //buffers.write('indices', [i], start + i, 1);
-      buffers.repeat('strokeWidth', [strkWidthArr[i]], start + i * 6, 6);
-      buffers.repeat('strokeColor', strkColorArr[i], start + i * 6, 6);
-      buffers.repeat('strokeOpacity', [strkOpacityArr[i]], start + i * 6, 6);
-    }
-
-    var addVert = function (p, c, n, offset) {
-      buffers.write('prev', p, currIndex, 1);
-      buffers.write('pos', c, currIndex, 1);
-      buffers.write('next', n, currIndex, 1);
+    var addVert = function (prevPos, currPos, nextPos, offset,
+                            width, color, opacity) {
+      buffers.write('prev', prevPos, currIndex, 1);
+      buffers.write('pos', currPos, currIndex, 1);
+      buffers.write('next', nextPos, currIndex, 1);
       buffers.write('offset', [offset], currIndex, 1);
       buffers.write('indices', [currIndex], currIndex, 1);
+      buffers.write('strokeWidth', [width], currIndex, 1);
+      buffers.write('strokeColor', color, currIndex, 1);
+      buffers.write('strokeOpacity', [opacity], currIndex, 1);
       currIndex += 1;
     };
 
@@ -229,13 +226,19 @@ geo.gl.lineFeature = function (arg) {
     for (j = 0; j < lineSegments.length; j += 1) {
       i += 1;
       for (k = 0; k < lineSegments[j] - 1; k += 1) {
-        addVert(prev[i - 1], position[i - 1], next[i - 1], 1);
-        addVert(prev[i], position[i], next[i], -1);
-        addVert(prev[i - 1], position[i - 1], next[i - 1], -1);
+        addVert(prev[i - 1], position[i - 1], next[i - 1], 1,
+                strkWidthArr[i - 1], strkColorArr[i - 1], strkOpacityArr[i - 1]);
+        addVert(prev[i], position[i], next[i], -1,
+                strkWidthArr[i], strkColorArr[i], strkOpacityArr[i]);
+        addVert(prev[i - 1], position[i - 1], next[i - 1], -1,
+                strkWidthArr[i - 1], strkColorArr[i - 1], strkOpacityArr[i - 1]);
 
-        addVert(prev[i - 1], position[i - 1], next[i - 1], 1);
-        addVert(prev[i], position[i], next[i], 1);
-        addVert(prev[i], position[i], next[i], -1);
+        addVert(prev[i - 1], position[i - 1], next[i - 1], 1,
+                strkWidthArr[i - 1], strkColorArr[i - 1], strkOpacityArr[i - 1]);
+        addVert(prev[i], position[i], next[i], 1,
+                strkWidthArr[i], strkColorArr[i], strkOpacityArr[i]);
+        addVert(prev[i], position[i], next[i], -1,
+                strkWidthArr[i], strkColorArr[i], strkOpacityArr[i]);
         i += 1;
       }
     }
@@ -287,12 +290,6 @@ geo.gl.lineFeature = function (arg) {
         // Shader uniforms
         mviUnif = new vgl.modelViewUniform('modelViewMatrix'),
         prjUnif = new vgl.projectionUniform('projectionMatrix');
-        // Accessors
-        /*
-        swiFunc = m_this.style.get('strokeWidth'),
-        scoFunc = m_this.style.get('strokeColor'),
-        sopFunc = m_this.style.get('strokeOpacity');
-        */
 
     m_pixelWidthUnif =  new vgl.floatUniform('pixelWidth',
                           1.0 / m_this.renderer().width());
