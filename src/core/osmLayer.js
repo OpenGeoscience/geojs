@@ -377,19 +377,19 @@ geo.osmLayer = function (arg) {
 
     /// Get rid of tiles if we have reached our threshold. However,
     /// If the tile is required for current zoom, then do nothing.
-    /// Also don"t delete the tile if its from the previous zoom
+    /// Also do not delete the tile if it is from the previous zoom
     while (m_numberOfCachedTiles > m_tileCacheSize &&
       i < m_pendingInactiveTiles.length) {
       tile = m_pendingInactiveTiles[i];
 
       if (isTileVisible(tile)) {
         i += 1;
-        continue;
+      } else {
+        m_this.deleteFeature(tile.feature);
+        delete m_tiles[tile.zoom][tile.index_x][tile.index_y];
+        m_pendingInactiveTiles.splice(i, 1);
+        m_numberOfCachedTiles -= 1;
       }
-      m_this.deleteFeature(tile.feature);
-      delete m_tiles[tile.zoom][tile.index_x][tile.index_y];
-      m_pendingInactiveTiles.splice(i, 1);
-      m_numberOfCachedTiles -= 1;
     }
 
     for (i = 0; i < m_pendingInactiveTiles.length; i += 1) {
