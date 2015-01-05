@@ -318,7 +318,7 @@ if(${JSCS_TESTS})
   )
   add_test(
     NAME "jscs"
-    WORKING_DIRECTORY "${GEOJS_DEPLOY_DIR}"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     COMMAND "${JSCS_EXECUTABLE}" "src"
   )
 

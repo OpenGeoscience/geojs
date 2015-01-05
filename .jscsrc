@@ -6,6 +6,7 @@
   "validateIndentation": 2,
   "requireCamelCaseOrUpperCaseIdentifiers": null,
   "disallowDanglingUnderscores": null,
+  "requireBlocksOnNewline": null,
   "excludeFiles": [
     "src/vgl/**",
     "src/util/wigglemaps.js"
