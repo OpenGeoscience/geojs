@@ -3,16 +3,14 @@
  * Create a new instance of geomFeature
  *
  * @class
- * Create a geometry feature given a geometry
- *
  * @param {vgl.geometryData} arg
- * @returns {ggl.geomFeature}
+ * @returns {geo.gl.geomFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-ggl.geomFeature = function (arg) {
+geo.gl.geomFeature = function (arg) {
   "use strict";
-  if (!(this instanceof ggl.geomFeature)) {
-    return new ggl.geomFeature(arg);
+  if (!(this instanceof geo.gl.geomFeature)) {
+    return new geo.gl.geomFeature(arg);
   }
   arg = arg || {};
   geo.geomFeature.call(this, arg);
@@ -52,8 +50,7 @@ ggl.geomFeature = function (arg) {
         m_geom.primitive(0).primitiveType() === gl.POINTS) {
       m_material = vgl.utils.createPointSpritesMaterial(
                      style.point_sprites_image);
-    }
-    else if (m_scalar) {
+    } else if (m_scalar) {
       if (m_color instanceof vgl.lookupTable) {
         m_color.updateRange(m_scalar.scalarRange());
         m_material = vgl.utils.createColorMappedMaterial(m_color);
@@ -84,9 +81,9 @@ ggl.geomFeature = function (arg) {
       if (m_color instanceof vgl.lookupTable) {
         vgl.utils.updateColorMappedMaterial(m_this.material(),
           m_this.style.color);
-      } else {
+      }/* else {
         // TODO
-      }
+      }*/
     } else {
       m_buildTime = vgl.timestamp();
       m_buildTime.modified();
@@ -97,7 +94,7 @@ ggl.geomFeature = function (arg) {
   /**
    * Get/Set geometry
    *
-   * @returns {ggl.geomFeature}
+   * @returns {geo.gl.geomFeature}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.geometry = function (val) {
@@ -113,4 +110,4 @@ ggl.geomFeature = function (arg) {
   return this;
 };
 
-inherit(ggl.geomFeature, geo.geomFeature);
+inherit(geo.gl.geomFeature, geo.geomFeature);

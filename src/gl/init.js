@@ -1,4 +1,4 @@
 /**
- * @module geo.gl
+ * @namespace
  */
-ggl = ogs.namespace('geo.gl'); // jshint ignore: line
+geo.gl = {};

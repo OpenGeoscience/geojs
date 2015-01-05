@@ -1,22 +1,16 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @module ggl
- */
-//////////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////////
-/**
  * Create a new instance of class vglRenderer
  *
  * @param canvas
- * @returns {ggl.vglRenderer}
+ * @returns {geo.gl.vglRenderer}
  */
 //////////////////////////////////////////////////////////////////////////////
-ggl.renderer = function (arg) {
+geo.gl.renderer = function (arg) {
   'use strict';
 
-  if (!(this instanceof ggl.renderer)) {
-    return new ggl.renderer(arg);
+  if (!(this instanceof geo.gl.renderer)) {
+    return new geo.gl.renderer(arg);
   }
   geo.renderer.call(this, arg);
 
@@ -32,6 +26,6 @@ ggl.renderer = function (arg) {
   return this;
 };
 
-inherit(ggl.renderer, geo.renderer);
+inherit(geo.gl.renderer, geo.renderer);
 
-geo.registerRenderer('vglRenderer', ggl.vglRenderer);
+geo.registerRenderer('vglRenderer', geo.gl.vglRenderer);

@@ -1,17 +1,9 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @module geo
- */
-//////////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Create a new instance of class featureLayer
- *
+ * Layer to draw points, lines, and polygons on the map The polydata layer
+ * provide mechanisms to create and draw geometrical shapes such as points,
+ * lines, and polygons.
  * @class
- * @dec Layer to draw points, lines, and polygons on the map The polydata layer
- *      provide mechanisms to create and draw geometrical shapes such as points,
- *      lines, and polygons.
  * @returns {geo.featureLayer}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -187,8 +179,9 @@ geo.featureLayer = function (arg) {
   this.clear = function () {
     var i;
 
-    if (!m_features.length)
+    if (!m_features.length) {
       return m_this;
+    }
 
     for (i = 0; i < m_features.length; i += 1) {
       m_features[i]._exit();

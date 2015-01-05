@@ -164,6 +164,19 @@ module.exports = function (grunt) {
       }
     },
 
+    concat: {
+      geojs: {
+        options: {
+          seperator: ''
+        },
+        files: {
+          'dist/built/geo.js': sourceList.map(function (f) {
+            return 'dist/' + f;
+          })
+        }
+      }
+    },
+
     uglify: {
       options: {
         sourceMap: true,
@@ -260,6 +273,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-clean');
+  grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-express');
   grunt.loadNpmTasks('grunt-docco');
 
@@ -386,6 +400,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('library', [
     'template',
+    'concat:geojs',
     'uglify:geojs'
   ]);
 

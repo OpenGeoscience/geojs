@@ -23,7 +23,7 @@
       if (opts.baseLayer === 'openStreetMaps') {
         baseLayer = new geo.osmLayer({'renderer': 'vglRenderer'}).referenceLayer(true);
       } else {
-        throw "Invalid base layer " + opts.baseLayer;
+        throw 'Invalid base layer ' + opts.baseLayer;
       }
       map.addLayer(baseLayer);
       function resize() {
@@ -31,8 +31,8 @@
             height = m_this.height();
         map.resize(0, 0, width, height);
       }
-      resize(); 
-      
+
+      resize();
       geodata = {
         options: opts,
         map: map,

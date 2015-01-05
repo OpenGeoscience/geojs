@@ -1,11 +1,5 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @namespace geo
- */
-//////////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////////
-/**
  * Layer options object specification
  *
  * @class
@@ -62,10 +56,10 @@ geo.layer = function (arg) {
    */
   //////////////////////////////////////////////////////////////////////////////
   var m_this = this,
-      m_style = arg.style === undefined ? {"opacity" : 0.5,
-                                           "color" : [0.8, 0.8, 0.8],
-                                           "visible" : true,
-                                           "bin" : 100} : arg.style,
+      m_style = arg.style === undefined ? {"opacity": 0.5,
+                                           "color": [0.8, 0.8, 0.8],
+                                           "visible": true,
+                                           "bin": 100} : arg.style,
       m_id = arg.id === undefined ? geo.newLayerId() : arg.id,
       m_name = "",
       m_gcs = "EPSG:4326",
@@ -85,7 +79,8 @@ geo.layer = function (arg) {
       m_dataTime = geo.timestamp(),
       m_updateTime = geo.timestamp(),
       m_drawTime = geo.timestamp(),
-      m_sticky = arg.sticky === undefined ? true : arg.sticky;
+      m_sticky = arg.sticky === undefined ? true : arg.sticky,
+      m_active = arg.active === undefined ? true : arg.active;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -96,6 +91,19 @@ geo.layer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.sticky = function () {
     return m_sticky;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get whether or not the layer is active.  An active layer will receive
+   * native mouse when the layer is on top.  Non-active layers will never
+   * receive native mouse events.
+   *
+   * @returns {Boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.active = function () {
+    return m_active;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -394,6 +402,10 @@ geo.layer = function (arg) {
     } else {
       m_renderer = geo.createRenderer(m_rendererName, m_this);
       m_canvas = m_renderer.canvas();
+    }
+
+    if (!m_this.active()) {
+      m_node.css("pointerEvents", "none");
     }
 
     m_initialized = true;

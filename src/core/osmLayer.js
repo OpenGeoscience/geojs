@@ -1,11 +1,5 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @namespace geo
- */
-//////////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////////
-/**
  * Create a new instance of osmLayer
  *
  * @class
@@ -262,8 +256,7 @@ geo.osmLayer = function (arg) {
           output[i + 1] = geo.mercator.y2lat(input[i + 1]);
         }
       }
-    }
-    else {
+    } else {
       output = {};
       output.x = input.x;
       output.y = geo.mercator.y2lat(input.y);
@@ -384,19 +377,19 @@ geo.osmLayer = function (arg) {
 
     /// Get rid of tiles if we have reached our threshold. However,
     /// If the tile is required for current zoom, then do nothing.
-    /// Also don"t delete the tile if its from the previous zoom
+    /// Also do not delete the tile if it is from the previous zoom
     while (m_numberOfCachedTiles > m_tileCacheSize &&
       i < m_pendingInactiveTiles.length) {
       tile = m_pendingInactiveTiles[i];
 
       if (isTileVisible(tile)) {
         i += 1;
-        continue;
+      } else {
+        m_this.deleteFeature(tile.feature);
+        delete m_tiles[tile.zoom][tile.index_x][tile.index_y];
+        m_pendingInactiveTiles.splice(i, 1);
+        m_numberOfCachedTiles -= 1;
       }
-      m_this.deleteFeature(tile.feature);
-      delete m_tiles[tile.zoom][tile.index_x][tile.index_y];
-      m_pendingInactiveTiles.splice(i, 1);
-      m_numberOfCachedTiles -= 1;
     }
 
     for (i = 0; i < m_pendingInactiveTiles.length; i += 1) {
@@ -519,7 +512,7 @@ geo.osmLayer = function (arg) {
     for (i = tile1x; i <= tile2x; i += 1) {
       for (j = tile2y; j <= tile1y; j += 1) {
         invJ = (Math.pow(2, zoom) - 1 - j);
-        if  (!m_this._hasTile(zoom, i, invJ)) {
+        if (!m_this._hasTile(zoom, i, invJ)) {
           tile = m_this._addTile(request, zoom, i, invJ);
         } else {
           tile = m_tiles[zoom][i][invJ];

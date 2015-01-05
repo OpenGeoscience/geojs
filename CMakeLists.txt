@@ -11,10 +11,12 @@ set(BUILD_DOCUMENTATION OFF CACHE BOOL "Build documentation")
 # set up targets for node programs
 set(NODE_MODULES_PATH "${CMAKE_CURRENT_SOURCE_DIR}/node_modules")
 set(JSHINT_EXECUTABLE "${NODE_MODULES_PATH}/.bin/jshint")
+set(JSCS_EXECUTABLE "${NODE_MODULES_PATH}/.bin/jscs")
 set(PHANTOMJS_EXECUTABLE "${NODE_MODULES_PATH}/.bin/phantomjs")
 set(GRUNT_EXECUTABLE "${NODE_MODULES_PATH}/.bin/grunt")
 
-set(JS_HINT_TESTS ON CACHE BOOL "Generate style tests for JS source files.")
+set(JS_HINT_TESTS ON CACHE BOOL "Generate jshint style tests for JS source files.")
+set(JSCS_TESTS ON CACHE BOOL "Generate jscs style tests for JS source files.")
 set(PHANTOMJS_TESTS ON CACHE BOOL "Generate phantomjs unit tests.")
 set(COVERAGE_TESTS OFF CACHE BOOL "Generate coverage reports.")
 set(SELENIUM_TESTS OFF CACHE BOOL "Generate selenium unit tests.")
@@ -307,6 +309,20 @@ if(${JS_HINT_TESTS})
 
 endif() # JS_HINT_TESTS
 
+if(${JSCS_TESTS})
+
+  add_custom_target(
+    jscs-binary
+    ALL
+    DEPENDS "${JSCS_EXECUTABLE}"
+  )
+  add_test(
+    NAME "jscs"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    COMMAND "${JSCS_EXECUTABLE}" "src"
+  )
+
+endif() # JSCS_TESTS
 
 if(BUILD_DOCUMENTATION)
   find_program(SPHINX_EXECUTABLE sphinx-build)

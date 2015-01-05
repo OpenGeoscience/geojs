@@ -1,25 +1,19 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @module geo
- */
-//////////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////////
-/**
  * Create a new instance of class pathFeature
  *
  * @class
- * @returns {gd3.pathFeature}
+ * @returns {geo.d3.pathFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-gd3.pathFeature = function (arg) {
+geo.d3.pathFeature = function (arg) {
   'use strict';
-  if (!(this instanceof gd3.pathFeature)) {
-    return new gd3.pathFeature(arg);
+  if (!(this instanceof geo.d3.pathFeature)) {
+    return new geo.d3.pathFeature(arg);
   }
   arg = arg || {};
   geo.pathFeature.call(this, arg);
-  gd3.object.call(this);
+  geo.d3.object.call(this);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -84,7 +78,7 @@ gd3.pathFeature = function (arg) {
 
     m_style.id = m_this._d3id();
     m_style.append = 'path';
-    m_style.classes = [ 'd3PathFeature' ];
+    m_style.classes = ['d3PathFeature'];
     m_style.style = $.extend({
       'fill': function () { return false; },
       'fillColor': function () { return { r: 0, g: 0, b: 0 }; }
@@ -118,6 +112,6 @@ gd3.pathFeature = function (arg) {
   return this;
 };
 
-inherit(gd3.pathFeature, geo.pathFeature);
+inherit(geo.d3.pathFeature, geo.pathFeature);
 
-geo.registerFeature('d3', 'path', gd3.pathFeature);
+geo.registerFeature('d3', 'path', geo.d3.pathFeature);

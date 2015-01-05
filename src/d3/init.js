@@ -1,22 +1,18 @@
-//////////////////////////////////////////////////////////////////////////////
-/**
- * @module geo.d3
- */
-//////////////////////////////////////////////////////////////////////////////
-gd3 = ogs.namespace('geo.d3'); // jshint ignore: line
+/** @namespace */
+geo.d3 = {};
 
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Get a random string to use as a div ID
- */
-//////////////////////////////////////////////////////////////////////////////
-(function (gd3) {
+(function () {
   'use strict';
 
   var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz',
     strLength = 8;
 
-  gd3.uniqueID = function () {
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get a random string to use as a div ID
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  geo.d3.uniqueID = function () {
     var strArray = [],
         i;
     strArray.length = strLength;
@@ -27,5 +23,5 @@ gd3 = ogs.namespace('geo.d3'); // jshint ignore: line
   };
 
   // event propagated when the d3 renderer rescales its group element
-  geo.event.d3Rescale = 'geo.d3.rescale';
-}(gd3));
+  geo.event.d3Rescale = 'geo_d3_rescale';
+}());

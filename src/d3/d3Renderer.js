@@ -1,25 +1,19 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @module gd3
- */
-//////////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////////
-/**
  * Create a new instance of class d3Renderer
  *
  * @param canvas
- * @returns {gd3.d3Renderer}
+ * @returns {geo.d3.d3Renderer}
  */
 //////////////////////////////////////////////////////////////////////////////
-gd3.d3Renderer = function (arg) {
+geo.d3.d3Renderer = function (arg) {
   'use strict';
 
-  if (!(this instanceof gd3.d3Renderer)) {
-    return new gd3.d3Renderer(arg);
+  if (!(this instanceof geo.d3.d3Renderer)) {
+    return new geo.d3.d3Renderer(arg);
   }
   geo.renderer.call(this, arg);
-  gd3.object.call(this, arg);
+  geo.d3.object.call(this, arg);
 
   arg = arg || {};
 
@@ -411,7 +405,7 @@ gd3.d3Renderer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Update noop for gd3.object api.
+   * Update noop for geo.d3.object api.
    */
   ////////////////////////////////////////////////////////////////////////////
   this._update = function () {
@@ -534,6 +528,6 @@ gd3.d3Renderer = function (arg) {
   return this;
 };
 
-inherit(gd3.d3Renderer, geo.renderer);
+inherit(geo.d3.d3Renderer, geo.renderer);
 
-geo.registerRenderer('d3Renderer', gd3.d3Renderer);
+geo.registerRenderer('d3Renderer', geo.d3.d3Renderer);

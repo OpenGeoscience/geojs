@@ -1,11 +1,6 @@
-//////////////////////////////////////////////////////////////////////////////
-/**
- * @namespace geo
- */
-//////////////////////////////////////////////////////////////////////////////
-
+/** @namespace */
 geo.mercator = {
-  r_major: 6378137.0,  //Equatorial Radius, WGS84
+  r_major: 6378137.0  //Equatorial Radius, WGS84
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -26,8 +21,7 @@ geo.mercator.r_minor = function (spherical) {
 
   if (spherical) {
     r_minor = 6378137.0;
-  }
-  else {
+  } else {
     r_minor = 6356752.314245179;
   }
 
@@ -277,8 +271,7 @@ geo.mercator.pjPhi2 = function (ts, e) {
       eccnth = 0.5 * e,
       Phi = HALFPI - 2.0 * Math.atan(ts);
 
-  do
-  {
+  do {
     con = e * Math.sin(Phi);
     dphi = HALFPI - 2.0 * Math.atan(ts * Math.pow(
             (1.0 - con) / (1.0 + con), eccnth)) - Phi;

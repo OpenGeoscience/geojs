@@ -1,47 +1,5 @@
-//////////////////////////////////////////////////////////////////////////////
-/**
- * @namespace geojs
- */
-//////////////////////////////////////////////////////////////////////////////
-
-/* jshint ignore: start */
-var ogs;
-if (!window || window.ogs === undefined) {
-  ogs = {};
-} else {
-  ogs = window.ogs;
-}
-/* jshint ignore: end */
-
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Create namespace for the given name
- *
- * @param {string} ns_string
- * @returns {*|{}}
- */
-//////////////////////////////////////////////////////////////////////////////
-ogs.namespace = function (ns_string) {
-  "use strict";
-
-  var parts = ns_string.split("."), parent = ogs, i;
-
-  // strip redundant leading global
-  if (parts[0] === "ogs") {
-    parts = parts.slice(1);
-  }
-  for (i = 0; i < parts.length; i += 1) {
-    // create a property if it doesn't exist
-    if (parent[parts[i]] === undefined) {
-      parent[parts[i]] = {};
-    }
-    parent = parent[parts[i]];
-  }
-  return parent;
-};
-
-/** geo namespace */
-var geo = ogs.namespace("geo"); // jshint ignore: line
+/** @namespace */
+var geo = {};     // jshint ignore: line
 window.geo = geo; // jshint ignore: line
 
 geo.renderers = {};
