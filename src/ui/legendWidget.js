@@ -16,9 +16,10 @@ geo.gui.legendWidget = function (arg) {
   /** @private */
   var m_this = this,
       m_categories = [],
+      m_top = null,
       m_group = null,
       m_border = null,
-      m_spacing = 16, // distance in pixels between lines
+      m_spacing = 20, // distance in pixels between lines
       m_padding = 12; // padding in pixels inside the border
 
   //////////////////////////////////////////////////////////////////////////////
@@ -65,21 +66,26 @@ geo.gui.legendWidget = function (arg) {
 
   //////////////////////////////////////////////////////////////////////////////
   /**
-   * Get or set the widget's size
-   * @param {{width: number, height: number}} size The size in pixels
+   * Get the widget's size
+   * @return {{width: number, height: number}} The size in pixels
    */
   //////////////////////////////////////////////////////////////////////////////
-  this.size = function (arg) {
-    var width, height;
-    if (arg === undefined) {
-      width = 100;
-      height = m_spacing * (m_categories.length + 1);
-      return {
-        width: width,
-        height: height
-      };
-    }
-    return m_this;
+  this.size = function () {
+    var width = 1, height;
+    var test =  m_this.layer().renderer().canvas().append('text')
+      .style('opacity', 1e-6);
+
+    m_categories.forEach(function (d) {
+      test.text(d.name);
+      width = Math.max(width, test.node().getBBox().width);
+    });
+    test.remove();
+
+    height = m_spacing * (m_categories.length + 1);
+    return {
+      width: width + 50,
+      height: height
+    };
   };
 
   //////////////////////////////////////////////////////////////////////////////
@@ -89,6 +95,7 @@ geo.gui.legendWidget = function (arg) {
   //////////////////////////////////////////////////////////////////////////////
   this.draw = function () {
 
+    m_this._init();
     function applyColor(selection) {
       selection.style('fill', function (d) {
           if (d.style.fill || d.style.fill === undefined) {
@@ -129,12 +136,11 @@ geo.gui.legendWidget = function (arg) {
 
     var scale = m_this._scale();
 
-    var labels = m_group.selectAll('g.label')
+    var labels = m_group.selectAll('g.geo-label')
       .data(m_categories, function (d) { return d.name; });
 
-    labels.exit().remove();
     var g = labels.enter().append('g')
-      .attr('class', 'label')
+      .attr('class', 'geo-label')
       .attr('transform', function (d, i) {
         return 'translate(0,' + scale.y(i) + ')';
       });
@@ -207,8 +213,12 @@ geo.gui.legendWidget = function (arg) {
         h = m_this.size().height + 2 * m_padding,
         nw = m_this.layer().map().node().width(),
         margin = 20;
-    m_group = m_this.layer().renderer().canvas().append('g')
-        .attr('transform', 'translate(' + (nw - w - margin) + ',' + margin + ')')
+    if (m_top) {
+      m_top.remove();
+    }
+    m_top = m_this.layer().renderer().canvas().append('g')
+        .attr('transform', 'translate(' + (nw - w - margin) + ',' + margin + ')');
+    m_group = m_top
       .append('g')
         .attr('transform', 'translate(' + [m_padding - 1.5, m_padding] + ')');
     m_border = m_group.append('rect')
@@ -216,15 +226,34 @@ geo.gui.legendWidget = function (arg) {
       .attr('y', -m_padding)
       .attr('width', w)
       .attr('height', h)
-      .attr('rx', 2)
-      .attr('ry', 2)
+      .attr('rx', 3)
+      .attr('ry', 3)
       .style({
         'stroke': 'black',
         'stroke-width': '1.5px',
-        'fill': 'none',
+        'fill': 'white',
+        'fill-opacity': 0.75,
         'display': 'none'
       });
+    m_group.on('mousedown', function () {
+      d3.event.stopPropagation();
+    });
+    m_group.on('mouseover', function () {
+      m_border.transition()
+        .duration(250)
+        .style('fill-opacity', 1);
+    });
+    m_group.on('mouseout', function () {
+      m_border.transition()
+        .duration(250)
+        .style('fill-opacity', 0.75);
+    });
   };
+
+  this.geoOn(geo.event.resize, function () {
+    this.draw();
+  });
+
 };
 
 inherit(geo.gui.legendWidget, geo.gui.widget);
