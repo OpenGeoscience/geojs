@@ -129,30 +129,39 @@ geo.feature = function (arg) {
       return over.index.indexOf(i) < 0;
     });
 
+    geo.feature.eventID += 1;
     // Fire events for mouse in first.
-    newFeatures.forEach(function (i) {
+    newFeatures.forEach(function (i, idx) {
       m_this.geoTrigger(geo.event.feature.mouseover, {
         data: data[i],
         index: i,
-        mouse: mouse
+        mouse: mouse,
+        eventID: geo.feature.eventID,
+        top: idx === newFeatures.length - 1
       }, true);
     });
 
+    geo.feature.eventID += 1;
     // Fire events for mouse out next
-    oldFeatures.forEach(function (i) {
+    oldFeatures.forEach(function (i, idx) {
       m_this.geoTrigger(geo.event.feature.mouseout, {
         data: data[i],
         index: i,
-        mouse: mouse
+        mouse: mouse,
+        eventID: geo.feature.eventID,
+        top: idx === oldFeatures.length - 1
       }, true);
     });
 
+    geo.feature.eventID += 1;
     // Fire events for mouse move last
-    over.index.forEach(function (i) {
+    over.index.forEach(function (i, idx) {
       m_this.geoTrigger(geo.event.feature.mousemove, {
         data: data[i],
         index: i,
-        mouse: mouse
+        mouse: mouse,
+        eventID: geo.feature.eventID,
+        top: idx === over.index.length - 1
       }, true);
     });
 
@@ -170,11 +179,14 @@ geo.feature = function (arg) {
         data = m_this.data(),
         over = m_this.pointSearch(mouse.geo);
 
-    over.index.forEach(function (i) {
+    geo.feature.eventID += 1;
+    over.index.forEach(function (i, idx) {
       m_this.geoTrigger(geo.event.feature.mouseclick, {
         data: data[i],
         index: i,
-        mouse: mouse
+        mouse: mouse,
+        eventID: geo.feature.eventID,
+        top: idx === over.index.length - 1
       }, true);
     });
   };
@@ -188,12 +200,15 @@ geo.feature = function (arg) {
     var idx = m_this.boxSearch(brush.gcs.lowerLeft, brush.gcs.upperRight),
         data = m_this.data();
 
-    idx.forEach(function (i) {
+    geo.feature.eventID += 1;
+    idx.forEach(function (i, idx) {
       m_this.geoTrigger(geo.event.feature.brush, {
         data: data[i],
         index: i,
         mouse: brush.mouse,
-        brush: brush
+        brush: brush,
+        eventID: geo.feature.eventID,
+        top: idx === idx.length - 1
       }, true);
     });
   };
@@ -207,12 +222,15 @@ geo.feature = function (arg) {
     var idx = m_this.boxSearch(brush.gcs.lowerLeft, brush.gcs.upperRight),
         data = m_this.data();
 
-    idx.forEach(function (i) {
+    geo.feature.eventID += 1;
+    idx.forEach(function (i, idx) {
       m_this.geoTrigger(geo.event.feature.brushend, {
         data: data[i],
         index: i,
         mouse: brush.mouse,
-        brush: brush
+        brush: brush,
+        eventID: geo.feature.eventID,
+        top: idx === idx.length - 1
       }, true);
     });
   };
@@ -485,5 +503,7 @@ geo.event.feature = {
   brushend:   "geo_feature_brushend",
   brush:      "geo_feature_brush"
 };
+
+geo.feature.eventID = 0;
 
 inherit(geo.feature, geo.sceneObject);
