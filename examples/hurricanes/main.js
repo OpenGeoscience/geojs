@@ -2,7 +2,7 @@
 $(function () {
   'use strict';
 
-  var map, layer, feature;
+  var map, layer, feature, ui, save;
 
   var cscale = d3.scale.ordinal()
     .range([
@@ -24,6 +24,9 @@ $(function () {
 
   var start = new Date('1980-01-01');
   var drange = (new Date('2015-01-01') - start);
+
+  function hoverInfo() {
+  }
 
   function any(a, f) {
     var v = false;
@@ -58,13 +61,220 @@ $(function () {
     if (p <= 979) {
       return 2;
     }
-    if (p <= 979) {
+    if (p >= 980 && p <= 994) {
       return 1;
     }
     return 0;
   }
 
+  function makeInfoBox(data) {
+    ui.canvas().selectAll('.app-info-box').remove();
+    var width = 300, height = 630;
+    var mapWidth = map.node().width();
+    var mapHeight = map.node().height();
+
+    var group = ui.canvas().append('g').attr('class', 'app-info-box');
+
+    group.attr(
+      'transform',
+      'translate(' + [mapWidth - width - 50, mapHeight - height - 240] + ')'
+    );
+
+    var name = data.name.toLowerCase();
+    name = name[0].toUpperCase() + name.slice(1);
+
+    group.append('rect')
+      .attr('class', 'app-background')
+      .attr('rx', 5)
+      .attr('ry', 5)
+      .attr('y', '-3.3em')
+      .attr('width', width + 20)
+      .attr('height', '2em');
+
+    group.append('text')
+      .attr('x', width / 2)
+      .attr('y', '-2em')
+      .attr('text-anchor', 'middle')
+      .text('Hurricane ' + name)
+      .style('font', '20px');
+
+    function makePlot(d) {
+      var group = d3.select(this); // jshint ignore:line
+      var t, f, i;
+
+      if (d === 0) {
+        i = 'wind';
+        t = 'Wind speed';
+        f = function (d, j) { return data[i][j]; };
+      } else if (d === 1) {
+        i = 'pressure';
+        t = 'Surface pressure';
+        f = function (d, j) { return data[i][j]; };
+      } else if (d === 2) {
+        i = 'pressure';
+        t = 'Category';
+        f = function (d, j) { return category(data[i][j]); };
+      }
+
+      group.attr('transform', 'translate(0,' + (d * height / 3) + ')');
+
+      group.append('rect')
+        .attr('class', 'app-background')
+        .attr('rx', 5)
+        .attr('ry', 5)
+        .attr('width', width + 20)
+        .attr('height', (height - 70) / 3);
+
+      data.time = data.time.map(function (t) { return new Date(t.valueOf()); });
+      var x = d3.time.scale().nice(4)
+        .domain(d3.extent(data.time))
+        .range([50, width]);
+      var y = d3.scale.linear().nice(5)
+        .domain(d3.extent(data.time, f))
+        .range([height / 3 - 50, 36]);
+
+      var xAxis = d3.svg.axis()
+        .scale(x)
+        .ticks(4)
+        .orient('bottom');
+
+      var yAxis = d3.svg.axis()
+        .scale(y)
+        .ticks(5)
+        .orient('left');
+
+      group.append('g')
+        .attr('class', 'x axis')
+        .attr('transform', 'translate(0,' + y.range()[0] + ')')
+        .call(xAxis);
+
+      group.append('g')
+        .attr('class', 'y axis')
+        .attr('transform', 'translate(' + x.range()[0] + ')')
+        .call(yAxis);
+
+      var line = d3.svg.line()
+        .x(function (d) { return x(d); })
+        .y(function (d, j) { return y(f(d, j)); });
+
+      group.append('path')
+        .attr('class', 'plot-line')
+        .attr('d', line(data.time));
+
+      group.append('text')
+        .attr('x', width / 2 + 10)
+        .attr('y', '1em')
+        .attr('text-anchor', 'middle')
+        .text(t);
+    }
+
+    group.selectAll('.app-plot').data(d3.range(3)).enter()
+      .append('g')
+        .attr('class', 'app-plot')
+        .each(makePlot);
+
+    return data;
+  }
+
+  function makeHistogram(data) {
+    var margin = {top: 45, right: 10, left: 10, bottom: 30};
+    var mapWidth = map.node().width() - 30;
+    var mapHeight = map.node().height() - 30;
+    var width = 300;
+    var height = 100;
+    ui.canvas().selectAll('.app-histogram').remove();
+    var group = ui.canvas().append('g').attr('class', 'app-histogram');
+
+    var x = d3.scale.linear()
+      .domain([-0.5, 5.5])
+      .range([mapWidth - width - margin.right, mapWidth - margin.right]);
+
+    var cats = [];
+    data.forEach(function (d) {
+      d.pressure.forEach(function (p) {
+        cats.push(category(p));
+      });
+    });
+
+    var hist = d3.layout.histogram()
+      .bins(d3.range(7))(cats);
+    /*
+        data.map(function (d) {
+          return Math.max.apply(window, d.pressure.map(function (p) {
+            return category(p);
+          }));
+        })
+      );
+    */
+
+    var y = d3.scale.linear()
+      .domain([0, d3.max(hist, function (d) { return d.y; })])
+      .range([mapHeight - margin.bottom, mapHeight - height - margin.bottom]);
+
+    var xAxis = d3.svg.axis()
+      .scale(x)
+      .orient('bottom')
+      .tickValues(d3.range(6))
+      .tickFormat(d3.format('.0f'));
+
+    group.append('rect')
+      .attr('class', 'app-background')
+      .attr('rx', 5)
+      .attr('ry', 5)
+      .attr('x', x.range()[0] - margin.left)
+      .attr('y', y.range()[1] - margin.top)
+      .attr('width', width + margin.left + margin.right)
+      .attr('height', height + margin.bottom + margin.top);
+
+    var bar = group.selectAll('.bar')
+        .data(hist)
+      .enter().append('g')
+        .attr('class', 'bar')
+        .attr('transform', function (d) {
+          return 'translate(' + [x(d.x - 0.5), 0] + ')';
+        });
+
+    bar.append('rect')
+      .attr('x', 1)
+      .attr('y', function (d) { return y(d.y); })
+      .attr('width', x(1) - x(0) - 2)
+      .attr('height', function (d) {
+        return y(0) - y(d.y);
+      })
+      .style('fill', function (d) {
+        return cscale(d.x);
+      });
+
+    bar.append('text')
+      .attr('dy', '0.75em')
+      .attr('y', function (d) {
+        return y(d.y) - 18;
+      })
+      .attr('x', (x(1 + hist[0].dx) - x(1)) / 2)
+      .attr('text-anchor', 'middle')
+      .text(function (d) {
+        return d.y;
+      });
+
+    group.append('g')
+      .attr('class', 'x axis')
+      .attr('transform', 'translate(' + [0, y(0)] + ')')
+      .call(xAxis);
+
+    group.append('text')
+      .attr('x', x(2.5))
+      .attr('y', y.range()[1] - margin.top)
+      .attr('dy', '1em')
+      .attr('text-anchor', 'middle')
+      .text('All observations');
+  }
+
   function draw(data) {
+    if (data) {
+      save = data;
+    } else {
+      data = save;
+    }
     data = data.filter(function (d) {
       if (any(d.pressure, function (d) { return d <= 0; })) {
         return false;
@@ -75,6 +285,9 @@ $(function () {
       }
       return d.basin === 'North Atlantic';
     });
+
+    makeHistogram(data);
+
     feature.data(data)
       .line(function (d) {
         return d3.range(d.time.length).map(function (i) {
@@ -98,7 +311,7 @@ $(function () {
         },
         'strokeWidth': function (d, i, l) {
           if (l.hover) {
-            return 3;
+            return 5;
           }
           return 1.5;
         },
@@ -119,12 +332,9 @@ $(function () {
         data.forEach(function (d) {
           d.hover = false;
         });
+        hoverInfo(evt.data);
         evt.data.hover = true;
-        this.modified();
-        map.draw();
-      })
-      .geoOn(geo.event.feature.mouseout, function (evt) {
-        evt.data.hover = false;
+        makeInfoBox(evt.data);
         this.modified();
         map.draw();
       });
@@ -164,7 +374,8 @@ $(function () {
   feature = layer.createFeature('line', {selectionAPI: true});
 
   // Create a legend
-  map.createLayer('ui').createWidget('legend')
+  ui = map.createLayer('ui');
+  ui.createWidget('legend')
     .categories([
       {
         name: 'Category 5',
@@ -221,4 +432,6 @@ $(function () {
     url: '/data/hurricanes.json',
     success: draw
   });
+
+  hoverInfo();
 });
