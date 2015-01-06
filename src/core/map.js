@@ -38,7 +38,8 @@ geo.map = function (arg) {
       m_validZoomRange = { min: 0, max: 16 },
       m_transition = null,
       m_queuedTransition = null,
-      m_clock = null;
+      m_clock = null,
+      m_bounds = {};
 
 
   arg.center = geo.util.normalizeCoordinates(arg.center);
@@ -126,10 +127,13 @@ geo.map = function (arg) {
       x: m_center.x - previousCenter.x,
       y: m_center.y - previousCenter.y
     };
+    m_this._updateBounds();
 
     m_this.children().forEach(function (child) {
       child.geoTrigger(geo.event.zoom, evt, true);
     });
+
+    m_this.modified();
     return m_this;
   };
 
@@ -138,12 +142,43 @@ geo.map = function (arg) {
    * Pan the map by (x: dx, y: dy) pixels.
    *
    * @param {Object} delta
+   * @param {bool?} force Disable bounds clamping
    * @returns {geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.pan = function (delta) {
+  this.pan = function (delta, force) {
     var base = m_this.baseLayer(),
-        evt;
+        evt,
+        pt, corner1, corner2;
+
+    if (!force) {
+      // clamp to the visible screen:
+      pt = m_this.displayToGcs({
+        x: delta.x,
+        y: delta.y
+      });
+
+      // TODO: This needs to be abstracted somehow with the projection
+      corner1 = m_this.gcsToDisplay({
+        x: -180,
+        y: 82
+      });
+      corner2 = m_this.gcsToDisplay({
+        x: 180,
+        y: -82
+      });
+
+      if ((delta.x > 0 && delta.x > -corner1.x) ||
+          (delta.x < 0 && delta.x < m_width - corner2.x)) {
+        delta.x = 0;
+        m_this.interactor().cancel("momentum");
+      }
+      if ((delta.y > 0 && delta.y > -corner1.y) ||
+          (delta.y < 0 && delta.y < m_height - corner2.y)) {
+        delta.y = 0;
+        m_this.interactor().cancel("momentum");
+      }
+    }
 
     evt = {
       geo: {},
@@ -164,6 +199,8 @@ geo.map = function (arg) {
       x: m_width / 2,
       y: m_height / 2
     });
+    m_this._updateBounds();
+
     m_this.children().forEach(function (child) {
       child.geoTrigger(geo.event.pan, evt, true);
     });
@@ -197,7 +234,7 @@ geo.map = function (arg) {
     m_this.pan({
       x: currentCenter.x - newCenter.x,
       y: currentCenter.y - newCenter.y
-    });
+    }, true);
 
     return m_this;
   };
@@ -327,6 +364,7 @@ geo.map = function (arg) {
       height: h
     });
 
+    m_this._updateBounds();
     m_this.modified();
     return m_this;
   };
@@ -417,6 +455,7 @@ geo.map = function (arg) {
       m_zoom = null;
       m_this.zoom(save);
 
+      m_this._updateBounds();
       return m_this;
     }
     return m_baseLayer;
@@ -789,6 +828,50 @@ geo.map = function (arg) {
       window.requestAnimationFrame(anim);
     }
     return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Update the internally cached map bounds.
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._updateBounds = function () {
+    m_bounds.lowerLeft = m_this.displayToGcs({
+      x: 0,
+      y: m_height
+    });
+    m_bounds.lowerRight = m_this.displayToGcs({
+      x: m_width,
+      y: m_height
+    });
+    m_bounds.upperLeft = m_this.displayToGcs({
+      x: 0,
+      y: 0
+    });
+    m_bounds.upperRight = m_this.displayToGcs({
+      x: m_width,
+      y: 0
+    });
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get the locations of the current map corners as latitudes/longitudes.
+   * The return value of this function is an object as follows: ::
+   *
+   *    {
+   *        lowerLeft: {x: ..., y: ...},
+   *        upperLeft: {x: ..., y: ...},
+   *        lowerRight: {x: ..., y: ...},
+   *        upperRight: {x: ..., y: ...}
+   *    }
+   *
+   * @todo Provide a setter
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.bounds = function () {
+    return m_bounds;
   };
 
   this.interactor(arg.interactor || geo.mapInteractor());

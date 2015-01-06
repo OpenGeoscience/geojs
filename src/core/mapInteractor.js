@@ -498,6 +498,27 @@ geo.mapInteractor = function (args) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Immediately cancel an ongoing action.
+   *
+   * @param {string?} action The action type, if null cancel any action
+   * @returns {bool} If an action was canceled
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.cancel = function (action) {
+    var out;
+    if (!action) {
+      out = !!m_state.action;
+    } else {
+      out = m_state.action === action;
+    }
+    if (out) {
+      m_state = {};
+    }
+    return out;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Handle event when a mouse button is pressed
    */
   ////////////////////////////////////////////////////////////////////////////
