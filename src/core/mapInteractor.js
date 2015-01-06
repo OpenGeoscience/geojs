@@ -631,9 +631,13 @@ geo.mapInteractor = function (args) {
           y: m_mouse.velocity.y * m_mouse.deltaTime
         });
 
-        window.requestAnimationFrame(m_state.handler);
+        if (m_state.handler) {
+          window.requestAnimationFrame(m_state.handler);
+        }
       };
-      window.requestAnimationFrame(m_state.handler);
+      if (m_state.handler) {
+        window.requestAnimationFrame(m_state.handler);
+      }
     }
   };
 
