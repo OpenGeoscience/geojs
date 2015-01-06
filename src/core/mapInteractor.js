@@ -311,7 +311,14 @@ geo.mapInteractor = function (args) {
       x: evt.pageX - offset.left,
       y: evt.pageY - offset.top
     };
-    m_mouse.geo = m_this.map().displayToGcs(m_mouse.map);
+    try {
+      m_mouse.geo = m_this.map().displayToGcs(m_mouse.map);
+    } catch (e) {
+      // catch georeferencing problems and move on
+      // needed for handling the map before the base layer
+      // is attached
+      m_mouse.geo = null;
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////

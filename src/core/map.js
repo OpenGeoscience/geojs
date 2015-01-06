@@ -800,6 +800,10 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._updateBounds = function () {
+    if (!m_this.baseLayer()) {
+      m_bounds = {};
+      return;
+    }
     m_bounds.lowerLeft = m_this.displayToGcs({
       x: 0,
       y: m_height
