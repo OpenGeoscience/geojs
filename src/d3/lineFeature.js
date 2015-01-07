@@ -56,12 +56,13 @@ geo.d3.lineFeature = function (arg) {
 
     data.forEach(function (item, idx) {
       var m_style;
+      var ln = m_this.line()(item, idx);
 
       var style = {}, key;
       function wrapStyle(func) {
         if (geo.util.isFunction(func)) {
-          return function (d, i) {
-            return func(d, i, item, idx);
+          return function () {
+            return func(ln[0], 0, item, idx);
           };
         } else {
           return func;
@@ -76,7 +77,7 @@ geo.d3.lineFeature = function (arg) {
       // item is an object representing a single line
       // m_this.line()(item) is an array of coordinates
       m_style = {
-        data: [m_this.line()(item)],
+        data: [ln.map(function (d, i) { return pos_func(d, i, item, idx);})],
         append: 'path',
         attributes: {
           d: line
@@ -104,7 +105,7 @@ geo.d3.lineFeature = function (arg) {
   this._update = function () {
     s_update.call(m_this);
 
-    if (m_this.dataTime().getMTime() >= m_buildTime.getMTime()) {
+    if (m_this.getMTime() >= m_buildTime.getMTime()) {
       m_this._build();
     }
 
