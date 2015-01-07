@@ -311,7 +311,14 @@ geo.mapInteractor = function (args) {
       x: evt.pageX - offset.left,
       y: evt.pageY - offset.top
     };
-    m_mouse.geo = m_this.map().displayToGcs(m_mouse.map);
+    try {
+      m_mouse.geo = m_this.map().displayToGcs(m_mouse.map);
+    } catch (e) {
+      // catch georeferencing problems and move on
+      // needed for handling the map before the base layer
+      // is attached
+      m_mouse.geo = null;
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -405,6 +412,27 @@ geo.mapInteractor = function (args) {
       mouse: mouse,
       origin: $.extend({}, m_state.origin)
     };
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Immediately cancel an ongoing action.
+   *
+   * @param {string?} action The action type, if null cancel any action
+   * @returns {bool} If an action was canceled
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.cancel = function (action) {
+    var out;
+    if (!action) {
+      out = !!m_state.action;
+    } else {
+      out = m_state.action === action;
+    }
+    if (out) {
+      m_state = {};
+    }
+    return out;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -603,9 +631,13 @@ geo.mapInteractor = function (args) {
           y: m_mouse.velocity.y * m_mouse.deltaTime
         });
 
-        window.requestAnimationFrame(m_state.handler);
+        if (m_state.handler) {
+          window.requestAnimationFrame(m_state.handler);
+        }
       };
-      window.requestAnimationFrame(m_state.handler);
+      if (m_state.handler) {
+        window.requestAnimationFrame(m_state.handler);
+      }
     }
   };
 
