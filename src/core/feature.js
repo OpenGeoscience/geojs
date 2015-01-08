@@ -486,24 +486,6 @@ geo.feature = function (arg) {
   return this;
 };
 
-
-////////////////////////////////////////////////////////////////////////////
-/**
- * This event object provides mouse/keyboard events that can be handled
- * by the features.  This provides a similar interface as core events,
- * but with different names so the events don't interfere.  Subclasses
- * can override this to provide custom events.
- */
-////////////////////////////////////////////////////////////////////////////
-geo.event.feature = {
-  mousemove:  "geo_feature_mousemove",
-  mouseover:  "geo_feature_mouseover",
-  mouseout:   "geo_feature_mouseout",
-  mouseclick: "geo_feature_mouseclick",
-  brushend:   "geo_feature_brushend",
-  brush:      "geo_feature_brush"
-};
-
 geo.feature.eventID = 0;
 
 inherit(geo.feature, geo.sceneObject);
