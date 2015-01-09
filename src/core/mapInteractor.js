@@ -157,7 +157,7 @@ geo.mapInteractor = function (args) {
 
   /**
    * General representation of rectangular bounds in pixel coordinates
-   * @typedef geo.geoBounds
+   * @typedef geo.screenBounds
    * @type {object}
    * @property {geo.screenPosition} upperLeft Upper left corner
    * @property {geo.screenPosition} upperRight Upper right corner
