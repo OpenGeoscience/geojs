@@ -155,6 +155,35 @@ geo.event.brushend = "geo_brushend";
 geo.event.brushstart = "geo_brushstart";
 
 
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered before a map navigation animation begins.  Set
+ * <code>event.geo.cancelAnimation</code> to cancel the animation
+ * of the navigation.  This will cause the map to navigate to the
+ * target location immediately.  Set <code>event.geo.cancelNavigation</code>
+ * to cancel the navigation completely.  The transition options can
+ * be modified in place.
+ *
+ * @property {geo.geoPosition} center The target center
+ * @property {Number} zoom The target zoom level
+ * @property {Number} duration The duration of the transition in milliseconds
+ * @property {function} ease The easing function
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.event.transitionstart = "geo_transitionstart";
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered after a map navigation animation ends.
+ *
+ * @property {geo.geoPosition} center The target center
+ * @property {Number} zoom The target zoom level
+ * @property {Number} duration The duration of the transition in milliseconds
+ * @property {function} ease The easing function
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.event.transitionend = "geo_transitionend";
+
 ////////////////////////////////////////////////////////////////////////////
 /**
  * @namespace
