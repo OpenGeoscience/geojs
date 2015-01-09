@@ -119,7 +119,12 @@ geo.feature = function (arg) {
     var mouse = m_this.layer().map().interactor().mouse(),
         data = m_this.data(),
         over = m_this.pointSearch(mouse.geo),
-        newFeatures = [], oldFeatures = [];
+        newFeatures = [], oldFeatures = [], lastTop = -1, top = -1;
+
+    // Get the index of the element that was previously on top
+    if (m_selectedFeatures.length) {
+      lastTop = m_selectedFeatures[m_selectedFeatures.length - 1];
+    }
 
     // There are probably faster ways of doing this:
     newFeatures = over.index.filter(function (i) {
@@ -167,6 +172,30 @@ geo.feature = function (arg) {
 
     // Replace the selected features array
     m_selectedFeatures = over.index;
+
+    // Get the index of the element that is now on top
+    if (m_selectedFeatures.length) {
+      top = m_selectedFeatures[m_selectedFeatures.length - 1];
+    }
+
+    if (lastTop !== top) {
+      // The element on top changed so we need to fire mouseon/mouseoff
+      if (lastTop !== -1) {
+        m_this.geoTrigger(geo.event.feature.mouseoff, {
+          data: data[lastTop],
+          index: lastTop,
+          mouse: mouse
+        }, true);
+      }
+
+      if (top !== -1) {
+        m_this.geoTrigger(geo.event.feature.mouseon, {
+          data: data[top],
+          index: top,
+          mouse: mouse
+        }, true);
+      }
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////
