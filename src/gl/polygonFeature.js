@@ -9,13 +9,13 @@
  * Create a new instance of polygonFeature
  *
  * @class
- * @returns {ggl.polygonFeature}
+ * @returns {geo.gl.polygonFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-ggl.polygonFeature = function (arg) {
+geo.gl.polygonFeature = function (arg) {
   'use strict';
-  if (!(this instanceof ggl.polygonFeature)) {
-    return new ggl.polygonFeature(arg);
+  if (!(this instanceof geo.gl.polygonFeature)) {
+    return new geo.gl.polygonFeature(arg);
   }
   arg = arg || {};
   geo.polygonFeature.call(this, arg);
@@ -271,7 +271,7 @@ ggl.polygonFeature = function (arg) {
   return this;
 };
 
-inherit(ggl.polygonFeature, geo.polygonFeature);
+inherit(geo.gl.polygonFeature, geo.polygonFeature);
 
 // Now register it
-geo.registerFeature('vgl', 'polygon', ggl.polygonFeature);
+geo.registerFeature('vgl', 'polygon', geo.gl.polygonFeature);
