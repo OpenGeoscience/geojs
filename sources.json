@@ -75,7 +75,8 @@
         "init.js",
         "uiLayer.js",
         "widget.js",
-        "sliderWidget.js"
+        "sliderWidget.js",
+        "legendWidget.js"
       ]
     },
     "vgl": {
