@@ -39,7 +39,8 @@ geo.map = function (arg) {
       m_transition = null,
       m_queuedTransition = null,
       m_clock = null,
-      m_bounds = {};
+      m_bounds = {},
+      m_zoomCallback = null;
 
 
   arg.center = geo.util.normalizeCoordinates(arg.center);
@@ -134,6 +135,9 @@ geo.map = function (arg) {
     });
 
     m_this.modified();
+    if (m_zoomCallback) {
+      m_zoomCallback();
+    }
     return m_this;
   };
 
@@ -146,39 +150,9 @@ geo.map = function (arg) {
    * @returns {geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.pan = function (delta, force) {
+  this.pan = function (delta) {
     var base = m_this.baseLayer(),
-        evt,
-        pt, corner1, corner2;
-
-    if (!force) {
-      // clamp to the visible screen:
-      pt = m_this.displayToGcs({
-        x: delta.x,
-        y: delta.y
-      });
-
-      // TODO: This needs to be abstracted somehow with the projection
-      corner1 = m_this.gcsToDisplay({
-        x: -180,
-        y: 82
-      });
-      corner2 = m_this.gcsToDisplay({
-        x: 180,
-        y: -82
-      });
-
-      if ((delta.x > 0 && delta.x > -corner1.x) ||
-          (delta.x < 0 && delta.x < m_width - corner2.x)) {
-        delta.x = 0;
-        m_this.interactor().cancel("momentum");
-      }
-      if ((delta.y > 0 && delta.y > -corner1.y) ||
-          (delta.y < 0 && delta.y < m_height - corner2.y)) {
-        delta.y = 0;
-        m_this.interactor().cancel("momentum");
-      }
-    }
+        evt;
 
     evt = {
       geo: {},
@@ -366,6 +340,11 @@ geo.map = function (arg) {
 
     m_this._updateBounds();
     m_this.modified();
+
+    if (m_zoomCallback) {
+      m_zoomCallback();
+    }
+
     return m_this;
   };
 
@@ -873,6 +852,18 @@ geo.map = function (arg) {
   this.bounds = function () {
     return m_bounds;
   };
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * @todo Move spring and momentum to map and avoid this abomination
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._zoomCallback = function (callback) {
+    m_zoomCallback = callback;
+  };
+
 
   this.interactor(arg.interactor || geo.mapInteractor());
   this.clock(arg.clock || geo.clock());
