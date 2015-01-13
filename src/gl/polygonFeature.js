@@ -77,7 +77,6 @@ geo.gl.polygonFeature = function (arg) {
 
   function createGLPolygons() {
     var i = null,
-        numPolygons = m_this.data().length,
         numPts = null,
         start = null,
         itemIndex = 0,
@@ -122,7 +121,9 @@ geo.gl.polygonFeature = function (arg) {
       polygonItem = polygon.outer;
       holes = polygon.inner;
       polygonItemCoordIndex = 0;
-      extRing = [], extIndex = 0, extLength = polygonItem.length - 1;
+      extRing = [];
+      extIndex = 0;
+      extLength = polygonItem.length - 1;
       extRing[0] = [];
       intIndex = 0;
 
@@ -137,14 +138,18 @@ geo.gl.polygonFeature = function (arg) {
             extRing[0].push({x: posInstance.x, y: posInstance.y});
           }
 
-          fillColorInstance = fillColorFunc(item, itemIndex, polygonItemCoords, polygonItemCoordIndex);
-          fillColor.push([fillColorInstance.r, fillColorInstance.g, fillColorInstance.b]);
+          fillColorInstance = fillColorFunc(item, itemIndex,
+                                            polygonItemCoords,
+                                            polygonItemCoordIndex);
+          fillColor.push([fillColorInstance.r,
+                          fillColorInstance.g,
+                          fillColorInstance.b]);
           fillOpacity.push(fillOpacityFunc(item, itemIndex,
                                            polygonItemCoords,
                                            polygonItemCoordIndex));
           polygonItemCoordIndex += 1;
         }
-        ++extIndex;
+        extIndex += 1;
       });
 
       polygonItemCoordIndex = 0;
@@ -162,7 +167,7 @@ geo.gl.polygonFeature = function (arg) {
           polygonItemCoordIndex += 1;
           extRing[intIndex + 1].push({x: intRingCoords[0], y: intRingCoords[1]});
         });
-        ++intIndex;
+        intIndex += 1;
       });
 
       //console.log("extRing ", extRing);
@@ -174,7 +179,7 @@ geo.gl.polygonFeature = function (arg) {
         newTriangList = newTriangList.concat(newIndices);
       });
 
-      for (i = 1; i < extRing.length; ++i) {
+      for (i = 1; i < extRing.length; i += 1) {
         extRing[0] = extRing[0].concat(extRing[i]);
       }
 
