@@ -805,8 +805,8 @@ window.startTest = function(done) {
         }
       })
       .position(function (d, index, d2, index2) {
-        return {x: d2[0],
-                y: d2[1], z: 0.0} })
+        return {x: d[0],
+                y: d[1], z: 0.0} })
       .style('fillOpacity', 0.5)
       .style('fillColor', { r: 1, g: 0.3, b: 0.1 });
 

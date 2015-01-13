@@ -130,23 +130,25 @@ geo.gl.polygonFeature = function (arg) {
       polygonItem.forEach(function (extRingCoords) {
         if (extIndex !== extLength) {
           //extRing = extRing.concat(extRingCoords);
-          posInstance = posFunc(item, itemIndex,
-                                extRingCoords, polygonItemCoordIndex);
+          posInstance = posFunc(extRingCoords,
+                                polygonItemCoordIndex,
+                                item, itemIndex);
           if (posInstance instanceof geo.latlng) {
             extRing[0].push({x: posInstance.x(), y: posInstance.y()});
           } else {
             extRing[0].push({x: posInstance.x, y: posInstance.y});
           }
 
-          fillColorInstance = fillColorFunc(item, itemIndex,
-                                            polygonItemCoords,
-                                            polygonItemCoordIndex);
+          fillColorInstance = fillColorFunc(polygonItemCoords,
+                                            polygonItemCoordIndex,
+                                            item, itemIndex);
           fillColor.push([fillColorInstance.r,
                           fillColorInstance.g,
                           fillColorInstance.b]);
-          fillOpacity.push(fillOpacityFunc(item, itemIndex,
-                                           polygonItemCoords,
-                                           polygonItemCoordIndex));
+          fillOpacity.push(fillOpacityFunc(polygonItemCoords,
+                                           polygonItemCoordIndex,
+                                           item,
+                                           itemIndex));
           polygonItemCoordIndex += 1;
         }
         extIndex += 1;
@@ -156,16 +158,23 @@ geo.gl.polygonFeature = function (arg) {
       holes.forEach(function (hole) {
         extRing[intIndex + 1] = [];
         hole.forEach(function (intRingCoords) {
-          posInstance = posFunc(item, itemIndex,
-                                intRingCoords, polygonItemCoordIndex);
-          fillColorInstance = fillColorFunc(item, itemIndex,
-                                            intRingCoords, polygonItemCoordIndex);
-          fillColor.push([fillColorInstance.r, fillColorInstance.g, fillColorInstance.b]);
-          fillOpacity.push(fillOpacityFunc(item, itemIndex,
-                           intRingCoords,
-                           polygonItemCoordIndex));
+          posInstance = posFunc(intRingCoords, polygonItemCoordIndex,
+                                item, itemIndex);
+          fillColorInstance = fillColorFunc(intRingCoords,
+                                            polygonItemCoordIndex,
+                                            item, itemIndex);
+          fillColor.push([fillColorInstance.r,
+                          fillColorInstance.g,
+                          fillColorInstance.b]);
+          fillOpacity.push(fillOpacityFunc(intRingCoords,
+                                           polygonItemCoordIndex,
+                                           item, itemIndex));
           polygonItemCoordIndex += 1;
-          extRing[intIndex + 1].push({x: intRingCoords[0], y: intRingCoords[1]});
+          if (posInstance instanceof geo.latlng) {
+            extRing[intIndex + 1].push({x: posInstance.x(), y: posInstance.y()});
+          } else {
+            extRing[intIndex + 1].push({x: posInstance.x, y: posInstance.y});
+          }
         });
         intIndex += 1;
       });
