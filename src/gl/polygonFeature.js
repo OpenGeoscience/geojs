@@ -176,14 +176,19 @@ geo.gl.polygonFeature = function (arg) {
         newTriangList = newTriangList.concat(newIndices);
       });
 
+      for (i = 1; i < extRing.length; ++i) {
+        extRing[0] = extRing[0].concat(extRing[i]);
+      }
+
 
       console.log("newTriangList length ", newTriangList.length);
       newTriangList.forEach(function (polygonIndex) {
-        if (polygonIndex < extRing[0].length) {
-          polygonItemCoords = extRing[0][polygonIndex];
-        } else {
-          polygonItemCoords = extRing[1][polygonIndex - extRing[0].length];
-        }
+        // if (polygonIndex < extRing[0].length) {
+        //   polygonItemCoords = extRing[0][polygonIndex];
+        // } else {
+        //   polygonItemCoords = extRing[1][polygonIndex - extRing[0].length];
+        // }
+        polygonItemCoords = extRing[0][polygonIndex];
         position.push([polygonItemCoords.x, polygonItemCoords.y, polygonItemCoords.z || 0.0]);
         fillColorNew.push(fillColor[polygonIndex]);
         fillOpacityNew.push(fillOpacity[polygonIndex]);
