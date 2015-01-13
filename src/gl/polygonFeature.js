@@ -26,7 +26,9 @@ geo.gl.polygonFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
-      m_actor = null,
+      m_actor = vgl.actor(),
+      m_mapper = vgl.mapper(),
+      m_material = vgl.material(),
       s_init = this._init,
       s_update = this._update;
 
@@ -76,7 +78,6 @@ geo.gl.polygonFeature = function (arg) {
   function createGLPolygons() {
     var i = null,
         numPolygons = m_this.data().length,
-        p = null,
         numPts = null,
         start = null,
         itemIndex = 0,
@@ -98,23 +99,19 @@ geo.gl.polygonFeature = function (arg) {
         sourceFillOpacity =
           vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Three),
         trianglePrimitive = vgl.triangles(),
-        mat = vgl.material(), blend = vgl.blend(),
-        prog = vgl.shaderProgram(), vertexShader = createVertexShader(),
-        fragmentShader = createFragmentShader(),
-        posAttr = vgl.vertexAttribute('pos'),
-        fillColorAttr = vgl.vertexAttribute('fillColor'),
-        fillOpacityAttr = vgl.vertexAttribute('fillOpacity'),
-        modelViewUniform = new vgl.modelViewUniform('modelViewMatrix'),
-        projectionUniform = new vgl.projectionUniform('projectionMatrix'),
         geom = vgl.geometryData(),
-        mapper = vgl.mapper(),
         polygon = null,
         holes = null,
         extRing = null,
         extIndex = 0,
         extLength = null,
         intIndex = 0,
-        posInstance = null;
+        posInstance = null,
+        triangulator = new PNLTRI.Triangulator(),
+        triangList = null,
+        newTriangList = null,
+        fillColorInstance = null,
+        currentIndex = null;
 
     posFunc = m_this.position();
     fillColorFunc = m_this.style.get('fillColor');
@@ -129,7 +126,6 @@ geo.gl.polygonFeature = function (arg) {
       extRing[0] = [];
       intIndex = 0;
 
-
       polygonItem.forEach(function (extRingCoords) {
         if (extIndex !== extLength) {
           //extRing = extRing.concat(extRingCoords);
@@ -141,9 +137,11 @@ geo.gl.polygonFeature = function (arg) {
             extRing[0].push({x: posInstance.x, y: posInstance.y});
           }
 
-          var sc = fillColorFunc(item, itemIndex, polygonItemCoords, polygonItemCoordIndex);
-          fillColor.push([sc.r, sc.g, sc.b]);
-          fillOpacity.push(fillOpacityFunc(item, itemIndex, polygonItemCoords, polygonItemCoordIndex));
+          fillColorInstance = fillColorFunc(item, itemIndex, polygonItemCoords, polygonItemCoordIndex);
+          fillColor.push([fillColorInstance.r, fillColorInstance.g, fillColorInstance.b]);
+          fillOpacity.push(fillOpacityFunc(item, itemIndex,
+                                           polygonItemCoords,
+                                           polygonItemCoordIndex));
           polygonItemCoordIndex += 1;
         }
         ++extIndex;
@@ -155,9 +153,12 @@ geo.gl.polygonFeature = function (arg) {
         hole.forEach(function (intRingCoords) {
           posInstance = posFunc(item, itemIndex,
                                 intRingCoords, polygonItemCoordIndex);
-          var sc = fillColorFunc(item, itemIndex, intRingCoords, polygonItemCoordIndex);
-          fillColor.push([sc.r, sc.g, sc.b]);
-          fillOpacity.push(fillOpacityFunc(item, itemIndex, intRingCoords, polygonItemCoordIndex));
+          fillColorInstance = fillColorFunc(item, itemIndex,
+                                            intRingCoords, polygonItemCoordIndex);
+          fillColor.push([fillColorInstance.r, fillColorInstance.g, fillColorInstance.b]);
+          fillOpacity.push(fillOpacityFunc(item, itemIndex,
+                           intRingCoords,
+                           polygonItemCoordIndex));
           polygonItemCoordIndex += 1;
           extRing[intIndex + 1].push({x: intRingCoords[0], y: intRingCoords[1]});
         });
@@ -166,11 +167,8 @@ geo.gl.polygonFeature = function (arg) {
 
       //console.log("extRing ", extRing);
       //console.log("result", PolyK.Triangulate(extRing));
-      var myTriangulator = new PNLTRI.Triangulator();
-      var triangList = myTriangulator.triangulate_polygon( extRing );
-      var newTriangList = [];
-      //var result = PolyK.Triangulate(extRing)
-      //console.log(triangList);
+      triangList = triangulator.triangulate_polygon( extRing );
+      newTriangList = [];
 
       triangList.forEach(function (newIndices) {
         newTriangList = newTriangList.concat(newIndices);
@@ -180,16 +178,11 @@ geo.gl.polygonFeature = function (arg) {
         extRing[0] = extRing[0].concat(extRing[i]);
       }
 
-
-      console.log("newTriangList length ", newTriangList.length);
       newTriangList.forEach(function (polygonIndex) {
-        // if (polygonIndex < extRing[0].length) {
-        //   polygonItemCoords = extRing[0][polygonIndex];
-        // } else {
-        //   polygonItemCoords = extRing[1][polygonIndex - extRing[0].length];
-        // }
         polygonItemCoords = extRing[0][polygonIndex];
-        position.push([polygonItemCoords.x, polygonItemCoords.y, polygonItemCoords.z || 0.0]);
+        position.push([polygonItemCoords.x,
+                       polygonItemCoords.y,
+                       polygonItemCoords.z || 0.0]);
         fillColorNew.push(fillColor[polygonIndex]);
         fillOpacityNew.push(fillOpacity[polygonIndex]);
       });
@@ -208,32 +201,11 @@ geo.gl.polygonFeature = function (arg) {
 
     numPts = position.length;
 
-    // TODO: Right now this is ugly but we will fix it.
-    prog.addVertexAttribute(posAttr,
-      vgl.vertexAttributeKeys.Position);
-    prog.addVertexAttribute(fillColorAttr,
-      vgl.vertexAttributeKeysIndexed.Two);
-    prog.addVertexAttribute(fillOpacityAttr,
-      vgl.vertexAttributeKeysIndexed.Three);
-
-    prog.addUniform(modelViewUniform);
-    prog.addUniform(projectionUniform);
-
-    prog.addShader(fragmentShader);
-    prog.addShader(vertexShader);
-
-    mat.addAttribute(prog);
-    mat.addAttribute(blend);
-
-    m_actor = vgl.actor();
-    m_actor.setMaterial(mat);
-
     start = buffers.alloc(numPts);
-    var currentIndex = start;
+    currentIndex = start;
 
     //console.log("numPts ", numPts);
     for (i = 0; i < numPts; i += 1) {
-      console.log("i is ", i);
       buffers.write('pos', position[i], start + i, 1);
       buffers.write('indices', [i], start + i, 1);
       buffers.write('fillColor', fillColorNew[i], start + i, 1);
@@ -254,8 +226,7 @@ geo.gl.polygonFeature = function (arg) {
     trianglePrimitive.setIndices(buffers.get('indices'));
     geom.addPrimitive(trianglePrimitive);
 
-    mapper.setGeometryData(geom);
-    m_actor.setMapper(mapper);
+    m_mapper.setGeometryData(geom);
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -264,7 +235,33 @@ geo.gl.polygonFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
+    var blend = vgl.blend(),
+        prog = vgl.shaderProgram(),
+        posAttr = vgl.vertexAttribute('pos'),
+        fillColorAttr = vgl.vertexAttribute('fillColor'),
+        fillOpacityAttr = vgl.vertexAttribute('fillOpacity'),
+        modelViewUniform = new vgl.modelViewUniform('modelViewMatrix'),
+        projectionUniform = new vgl.projectionUniform('projectionMatrix'),
+        vertexShader = createVertexShader(),
+        fragmentShader = createFragmentShader();
+
     s_init.call(m_this, arg);
+
+    prog.addVertexAttribute(posAttr, vgl.vertexAttributeKeys.Position);
+    prog.addVertexAttribute(fillColorAttr, vgl.vertexAttributeKeysIndexed.Two);
+    prog.addVertexAttribute(fillOpacityAttr, vgl.vertexAttributeKeysIndexed.Three);
+
+    prog.addUniform(modelViewUniform);
+    prog.addUniform(projectionUniform);
+
+    prog.addShader(fragmentShader);
+    prog.addShader(vertexShader);
+
+    m_material.addAttribute(prog);
+    m_material.addAttribute(blend);
+
+    m_actor.setMapper(m_mapper);
+    m_actor.setMaterial(m_material);
   };
 
   ////////////////////////////////////////////////////////////////////////////
