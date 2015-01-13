@@ -800,14 +800,15 @@ window.startTest = function(done) {
   layer.createFeature('polygon')
       .data(states)
       .polygon(function (d) { return {
-        'outer': d.coordinates[0]
+        'outer': d.coordinates[0],
+        'inner': [d.coordinates[1]]
         }
       })
       .position(function (d, index, d2, index2) {
         return {x: d2[0],
                 y: d2[1], z: 0.0} })
       .style('fillOpacity', 0.5)
-      .style('fillColor', { r: 1, g: 0.8, b: 0 });
+      .style('fillColor', { r: 1, g: 0.3, b: 0.1 });
 
   myMap.draw();
   myMap.onIdle(done);

@@ -74,12 +74,24 @@ geo.gl.polygonFeature = function (arg) {
   }
 
   function createGLPolygons() {
-    var i, numPolygons = m_this.data().length, p = null,
-        numPts = null, start = null, itemIndex = 0,
-        polygonItemCoordIndex = 0, position = [],
-        polygonItemCoords = null, fillColor = [],
-        fillOpacity = [], posFunc, fillColorFunc,
-        polygonItem, fillOpacityFunc, buffers = vgl.DataBuffers(1024),
+    var i = null,
+        numPolygons = m_this.data().length,
+        p = null,
+        numPts = null,
+        start = null,
+        itemIndex = 0,
+        polygonItemCoordIndex = 0,
+        position = [],
+        polygonItemCoords = null,
+        fillColor = [],
+        fillOpacity = [],
+        fillColorNew = [],
+        fillOpacityNew = [],
+        posFunc = null,
+        fillColorFunc = null,
+        polygonItem = null,
+        fillOpacityFunc = null,
+        buffers = vgl.DataBuffers(1024),
         sourcePositions = vgl.sourceDataP3fv(),
         sourceFillColor =
           vgl.sourceDataAnyfv(3, vgl.vertexAttributeKeysIndexed.Two),
@@ -95,26 +107,63 @@ geo.gl.polygonFeature = function (arg) {
         modelViewUniform = new vgl.modelViewUniform('modelViewMatrix'),
         projectionUniform = new vgl.projectionUniform('projectionMatrix'),
         geom = vgl.geometryData(),
-        mapper = vgl.mapper();
+        mapper = vgl.mapper(),
+        polygon = null,
+        holes = null,
+        extRing = null,
+        extIndex = 0,
+        extLength = null,
+        intIndex = 0,
+        posInstance = null;
 
     posFunc = m_this.position();
     fillColorFunc = m_this.style.get('fillColor');
     fillOpacityFunc = m_this.style.get('fillOpacity');
 
     m_this.data().forEach(function (item) {
-      var polygon = m_this.polygon()(item, itemIndex);
+      polygon = m_this.polygon()(item, itemIndex);
       polygonItem = polygon.outer;
+      holes = polygon.inner;
       polygonItemCoordIndex = 0;
-
-      var extRing = [], extIndex = 0, extLength = polygonItem.length - 1;
+      extRing = [], extIndex = 0, extLength = polygonItem.length - 1;
       extRing[0] = [];
+      intIndex = 0;
+
+
       polygonItem.forEach(function (extRingCoords) {
         if (extIndex !== extLength) {
-         //extRing = extRing.concat(extRingCoords);
-         extRing[0].push({x: extRingCoords[0], y: extRingCoords[1]});
+          //extRing = extRing.concat(extRingCoords);
+          posInstance = posFunc(item, itemIndex,
+                                extRingCoords, polygonItemCoordIndex);
+          if (posInstance instanceof geo.latlng) {
+            extRing[0].push({x: posInstance.x(), y: posInstance.y()});
+          } else {
+            extRing[0].push({x: posInstance.x, y: posInstance.y});
+          }
+
+          var sc = fillColorFunc(item, itemIndex, polygonItemCoords, polygonItemCoordIndex);
+          fillColor.push([sc.r, sc.g, sc.b]);
+          fillOpacity.push(fillOpacityFunc(item, itemIndex, polygonItemCoords, polygonItemCoordIndex));
+          polygonItemCoordIndex += 1;
         }
         ++extIndex;
       });
+
+      polygonItemCoordIndex = 0;
+      holes.forEach(function (hole) {
+        extRing[intIndex + 1] = [];
+        hole.forEach(function (intRingCoords) {
+          posInstance = posFunc(item, itemIndex,
+                                intRingCoords, polygonItemCoordIndex);
+          var sc = fillColorFunc(item, itemIndex, intRingCoords, polygonItemCoordIndex);
+          fillColor.push([sc.r, sc.g, sc.b]);
+          fillOpacity.push(fillOpacityFunc(item, itemIndex, intRingCoords, polygonItemCoordIndex));
+          polygonItemCoordIndex += 1;
+          extRing[intIndex + 1].push({x: intRingCoords[0], y: intRingCoords[1]});
+        });
+        ++intIndex;
+      });
+
       //console.log("extRing ", extRing);
       //console.log("result", PolyK.Triangulate(extRing));
       var myTriangulator = new PNLTRI.Triangulator();
@@ -127,27 +176,19 @@ geo.gl.polygonFeature = function (arg) {
         newTriangList = newTriangList.concat(newIndices);
       });
 
+
+      console.log("newTriangList length ", newTriangList.length);
       newTriangList.forEach(function (polygonIndex) {
-        polygonItemCoordIndex = polygonIndex;
-        polygonItemCoords = polygonItem[polygonItemCoordIndex];
+        if (polygonIndex < extRing[0].length) {
+          polygonItemCoords = extRing[0][polygonIndex];
+        } else {
+          polygonItemCoords = extRing[1][polygonIndex - extRing[0].length];
+        }
+        position.push([polygonItemCoords.x, polygonItemCoords.y, polygonItemCoords.z || 0.0]);
+        fillColorNew.push(fillColor[polygonIndex]);
+        fillOpacityNew.push(fillOpacity[polygonIndex]);
+      });
 
-        //console.log("polygonItemData ", polygonItemCoords);
-        //console.log("polygonItemData ", polygonItemCoordIndex);
-
-        var p = posFunc(item, itemIndex,
-                        polygonItemCoords, polygonItemCoordIndex);
-          if (p instanceof geo.latlng) {
-            position.push([p.x(), p.y(), p.z()]);
-          } else {
-            position.push([p.x, p.y, p.z || 0.0]);
-          }
-          var sc = fillColorFunc(item, itemIndex,
-            polygonItemCoords, polygonItemCoordIndex);
-          fillColor.push([sc.r, sc.g, sc.b]);
-          fillOpacity.push(fillOpacityFunc(item,
-            itemIndex, polygonItemCoords, polygonItemCoordIndex));
-          polygonItemCoordIndex += 1;
-        });
       itemIndex += 1;
     });
 
@@ -187,10 +228,11 @@ geo.gl.polygonFeature = function (arg) {
 
     //console.log("numPts ", numPts);
     for (i = 0; i < numPts; i += 1) {
+      console.log("i is ", i);
       buffers.write('pos', position[i], start + i, 1);
       buffers.write('indices', [i], start + i, 1);
-      buffers.write('fillColor', fillColor[i], start + i, 1);
-      buffers.write('fillOpacity', [fillOpacity[i]], start + i, 1);
+      buffers.write('fillColor', fillColorNew[i], start + i, 1);
+      buffers.write('fillOpacity', [fillOpacityNew[i]], start + i, 1);
     }
 
     //console.log(buffers.get('fillColor'));
