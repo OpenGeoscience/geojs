@@ -181,7 +181,7 @@ geo.gl.polygonFeature = function (arg) {
 
       //console.log("extRing ", extRing);
       //console.log("result", PolyK.Triangulate(extRing));
-      triangList = triangulator.triangulate_polygon( extRing );
+      triangList = triangulator.triangulate_polygon(extRing);
       newTriangList = [];
 
       triangList.forEach(function (newIndices) {

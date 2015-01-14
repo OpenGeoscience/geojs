@@ -18,7 +18,8 @@
     "grunt-contrib-concat": "^0.5.0",
     "grunt-contrib-copy": "~0.6",
     "grunt-contrib-uglify": "~0.6",
-    "grunt-template": "~0.2"
+    "grunt-template": "~0.2",
+    "pnltri": "^2.1.1"
   },
   "devDependencies": {
     "blanket": "~1.1",

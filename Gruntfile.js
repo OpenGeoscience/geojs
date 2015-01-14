@@ -204,7 +204,8 @@ module.exports = function (grunt) {
             'bower_components/jquery-mousewheel/jquery.mousewheel.js',
             'bower_components/gl-matrix/dist/gl-matrix.js',
             'bower_components/proj4/dist/proj4-src.js',
-            'bower_components/d3/d3.js'
+            'bower_components/d3/d3.js',
+            'node_modules/pnltri/pnltri.js'
           ]
         }
       },
