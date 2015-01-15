@@ -48,8 +48,8 @@ geo.d3.lineFeature = function (arg) {
         m_renderer = m_this.renderer(),
         pos_func = m_this.position(),
         line = d3.svg.line()
-                .x(function (d) { return m_renderer.worldToDisplay(pos_func(d)).x; })
-                .y(function (d) { return m_renderer.worldToDisplay(pos_func(d)).y; });
+                .x(function (d) { return m_renderer.worldToDisplay(d).x; })
+                .y(function (d) { return m_renderer.worldToDisplay(d).y; });
 
     s_update.call(m_this);
     s_style.fill = function () { return false; };
