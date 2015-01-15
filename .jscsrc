@@ -9,6 +9,7 @@
   "requireBlocksOnNewline": null,
   "excludeFiles": [
     "src/vgl/**",
-    "src/util/wigglemaps.js"
+    "src/util/wigglemaps.js",
+    "src/util/pnltri.js"
   ]
 }

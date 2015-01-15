@@ -235,7 +235,7 @@ geo.gl.vglRenderer = function (arg) {
       } else {
         /// Input is a flat array of 2 or 3 dimension
         delta = input.length % 3 === 0 ? 3 : 2;
-        if (delta === 2)  {
+        if (delta === 2) {
           for (i = 0; i < input.length; i += delta) {
             temp = ren.worldToDisplay(vec4.fromValues(
                      input[i], input[i + 1], fp[2], 1.0), cam.viewMatrix(),
