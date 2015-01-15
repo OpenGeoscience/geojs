@@ -29,7 +29,9 @@ window.startTest = function (done) {
       })
       .style('strokeOpacity', 0.5)
       .style('strokeWidth', 4)
-      .position(function (d) { return { x: d.lon, y: d.lat }; });
+      .position(function (d) {
+        return { x: d.lon, y: d.lat };
+      });
 
     myMap.draw();
 
