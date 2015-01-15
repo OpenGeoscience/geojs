@@ -101,11 +101,6 @@ $(function () {
       d3.event.stopPropagation();
     });
 
-  // Make the map resize with the browser window
-  $(window).resize(function () {
-    map.resize(0, 0, map.node().width(), map.node().height());
-  });
-
   // Draw the map
   map.draw();
 

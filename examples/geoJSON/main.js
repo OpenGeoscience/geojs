@@ -21,11 +21,6 @@ $(function () {
     }
   );
 
-  // Make the map resize with the browser window
-  $(window).resize(function () {
-    map.resize(0, 0, map.node().width(), map.node().height());
-  });
-
   // Create a gl layer to put the features in
   var layer = map.createLayer('feature');
   map.draw();

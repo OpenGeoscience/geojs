@@ -41,6 +41,7 @@ geo.map = function (arg) {
 
 
   arg.center = geo.util.normalizeCoordinates(arg.center);
+  arg.autoResize = arg.autoResize === undefined ? true : arg.autoResize;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -756,6 +757,12 @@ geo.map = function (arg) {
 
   this.interactor(arg.interactor || geo.mapInteractor());
   this.clock(arg.clock || geo.clock());
+
+  if (arg.autoResize) {
+    $(window).resize(function () {
+      m_this.resize(0, 0, m_node.width(), m_node.height());
+    });
+  }
 
   return this;
 };

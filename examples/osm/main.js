@@ -19,12 +19,4 @@ $(function () {
       baseUrl: 'http://otile1.mqcdn.com/tiles/1.0.0/map/'
     }
   );
-
-  // Make the map resize with the browser window
-  $(window).resize(function () {
-    map.resize(0, 0, map.node().width(), map.node().height());
-  });
-
-  // Draw the map
-  map.draw();
 });

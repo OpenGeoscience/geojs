@@ -18,12 +18,4 @@ $(function () {
   // Add a layer for the ui elements and create a zoom slider
   map.createLayer('ui')
     .createWidget('slider');
-
-  // Make the map resize with the browser window
-  $(window).resize(function () {
-    map.resize(0, 0, map.node().width(), map.node().height());
-  });
-
-  // Draw the map
-  map.draw();
 });
