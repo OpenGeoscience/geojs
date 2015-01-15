@@ -58,7 +58,6 @@ window.geoTests = {
       map.draw();
     }
 
-    $(window).resize(resizeMap);
     resizeMap();
 
     window.gjsmap = map;

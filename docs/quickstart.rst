@@ -63,8 +63,8 @@ and creating a basic full map using the `osmLayer` class.
 .. code-block:: html
 
     <head>
-        <script src="/dist/built/geo.ext.min.js"></script>
-        <script src="/dist/built/geo.min.js"></script>
+        <script src="/built/geo.ext.min.js"></script>
+        <script src="/built/geo.min.js"></script>
 
         <style>
             html, body, #map {
@@ -77,20 +77,7 @@ and creating a basic full map using the `osmLayer` class.
 
         <script>
         $(function () {
-            var map;
-
-            function resize() {
-                map.resize(0, 0, $('#map').width(), $('#map').height());
-            }
-
-            map = geo.map({
-                'node': '#map',
-                'zoom': 2
-            });
-            map.createLayer('osm');
-
-            $(window).resize(resize);
-            resize();
+            geo.map({'node': '#map'}).createLayer('osm');
         });
         </script>
     </head>
