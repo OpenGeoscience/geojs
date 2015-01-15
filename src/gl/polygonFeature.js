@@ -185,7 +185,7 @@ geo.gl.polygonFeature = function (arg) {
       newTriangList = [];
 
       triangList.forEach(function (newIndices) {
-        newTriangList = newTriangList.concat(newIndices);
+        Array.prototype.push.apply(newTriangList, newIndices);
       });
 
       for (i = 1; i < extRing.length; i += 1) {
