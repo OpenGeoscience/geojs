@@ -82,7 +82,6 @@ geo.gl.polygonFeature = function (arg) {
         itemIndex = 0,
         polygonItemCoordIndex = 0,
         position = [],
-        polygonItemCoords = null,
         fillColor = [],
         fillOpacity = [],
         fillColorNew = [],
@@ -139,13 +138,13 @@ geo.gl.polygonFeature = function (arg) {
             extRing[0].push({x: posInstance.x, y: posInstance.y});
           }
 
-          fillColorInstance = fillColorFunc(polygonItemCoords,
+          fillColorInstance = fillColorFunc(extRingCoords,
                                             polygonItemCoordIndex,
                                             item, itemIndex);
           fillColor.push([fillColorInstance.r,
                           fillColorInstance.g,
                           fillColorInstance.b]);
-          fillOpacity.push(fillOpacityFunc(polygonItemCoords,
+          fillOpacity.push(fillOpacityFunc(extRingCoords,
                                            polygonItemCoordIndex,
                                            item,
                                            itemIndex));
@@ -193,7 +192,7 @@ geo.gl.polygonFeature = function (arg) {
       }
 
       newTriangList.forEach(function (polygonIndex) {
-        polygonItemCoords = extRing[0][polygonIndex];
+        var polygonItemCoords = extRing[0][polygonIndex];
         position.push([polygonItemCoords.x,
                        polygonItemCoords.y,
                        polygonItemCoords.z || 0.0]);

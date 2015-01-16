@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import time
 from selenium_test import FirefoxTest, ChromeTest,\
     setUpModule, tearDownModule
 
@@ -13,11 +14,17 @@ class glPolygonsBase(object):
         self.loadURL('glPolygons/index.html')
         self.wait()
 
-    def testGlLines(self):
+    def testGlPolygons(self):
         self.loadPage()
 
         testName = 'drawGlPolygons'
         self.screenshotTest(testName)
+
+    def testHoverPolygon(self):
+        self.loadPage()
+        self.hover('#map', (355, 160))
+        
+        self.screenshotTest('hoverGlPolygons')
 
 
 class FirefoxOSM(glPolygonsBase, FirefoxTest):
