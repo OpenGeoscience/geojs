@@ -28,11 +28,11 @@ geo.feature = function (arg) {
       m_visible = arg.visible === undefined ? true : arg.visible,
       m_bin = arg.bin === undefined ? 0 : arg.bin,
       m_renderer = arg.renderer === undefined ? null : arg.renderer,
-      m_data = [],
       m_dataTime = geo.timestamp(),
       m_buildTime = geo.timestamp(),
       m_updateTime = geo.timestamp(),
-      m_selectedFeatures = [];
+      m_selectedFeatures = [],
+      m_properties = {data: []};
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -266,58 +266,6 @@ geo.feature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get/Set style used by the feature
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.style = function (arg1, arg2) {
-    if (arg1 === undefined) {
-      return m_style;
-    }  else if (arg2 === undefined) {
-      m_style = $.extend({}, m_style, arg1);
-      m_this.modified();
-      return m_this;
-    } else {
-      m_style[arg1] = arg2;
-      m_this.modified();
-      return m_this;
-    }
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * A uniform getter that always returns a function even for constant styles.
-   * Maybe extend later to support accessor-like objects.  If undefined input,
-   * return all the styles as an object.
-   *
-   * @param {string|undefined} key
-   * @return {function}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.style.get = function (key) {
-    var tmp, out;
-    if (key === undefined) {
-      var all = {}, k;
-      for (k in m_style) {
-        if (m_style.hasOwnProperty(k)) {
-          all[k] = m_this.style.get(k);
-        }
-      }
-      return all;
-    }
-    out = geo.util.ensureFunction(m_style[key]);
-    if (key.toLowerCase().match(/color$/)) {
-      tmp = out;
-      out = function () {
-        return geo.util.convertColor(
-          tmp.apply(this, arguments)
-        );
-      };
-    }
-    return out;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
    * Get layer referenced by the feature
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -444,13 +392,78 @@ geo.feature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.data = function (data) {
     if (data === undefined) {
-      return m_data;
+      return m_properties.data;
     } else {
-      m_data = data;
+      m_properties.data = data;
       m_this.dataTime().modified();
       m_this.modified();
       return m_this;
     }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Add a property API to the class instance.  This will provide a new
+   * property to the internal data representation derived from user provided
+   * accessors on the data object.  This method is designed only to be called
+   * from a class' constructor, calling it after construction will result in
+   * undefined behavior.
+   * @protected
+   *
+   * @param {string} name The method name added to the class
+   * @param {string} path The target path of the new property
+   * @param {string} type The property type
+   * @param {*} defaultValue The default value of the property
+   * @param {function?} getter A custom internal array getter (see gl features)
+   * @param {function?} setter A custom internal array setter (see gl features)
+   * @param {function?} creator A custom internal array creator (see gl features)
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._property = function (
+    name, path, type, defaultValue) {
+
+    if (m_this.hasOwnProperty(name)) {
+      console.warn("Property '" + name + "' overrides existing method.");
+    }
+
+    // The current accessor value/method.
+    var accessor = defaultValue;
+
+    // Get the property type from the static object.
+    var prop = geo.feature.property[type];
+
+    // Several sanity checks for the developer
+    if (prop === undefined) {
+      throw new Error(
+        "Invalid property type '" + type + "' " +
+        "given for '" + name + "'."
+      );
+    }
+    if (!prop.validate(defaultValue)) {
+      console.warn(
+        "The default '" + defaultValue + "' " +
+        "is not a valid '" + type + "' " +
+        "for '" + name + "'."
+      );
+    }
+
+    /**
+     * This will be the setter function for the property that is added to the
+     * class.  The argument is any constant valid for the property type (when
+     * the property value is data independent) or an accessor method with the
+     * following call signature:
+     * <pre>
+     *   accessor(datum, index, container_datum, container_index, ...)
+     * </pre>
+     * @private
+     */
+    var func = function (arg) {
+      if (geo.util.isFunction(arg)) {
+        accessor = arg;
+      }
+    };
+
+    m_this[name] = func;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -516,5 +529,142 @@ geo.feature = function (arg) {
 };
 
 geo.feature.eventID = 0;
+
+(function () {
+  "use strict";
+
+  /**
+   * Global definitions of possible property types that can be returned from
+   * accessor methods.  These are used internally by feature subclasses to
+   * generate property API methods.  Subclasses can add new property
+   * types to this object, but should take care not to override base
+   * types.
+   *
+   * Property definitions are objects containing the following methods:
+   * <dl>
+   *   <dt><code>validate</code></dt>
+   *   <dd>Returns true if the argument is a valid value for the property</dd>
+   * </dl>
+   * @namespace
+   */
+  geo.feature.property = {
+    /**
+     * Handles colors provided in any of the following forms:
+     * <ul>
+     *   <li>RGB object</li>
+     *   <li>RGB array</li>
+     *   <li>CSS color name</li>
+     *   <li>Hex value string</li>
+     *   <li>Hex value number</li>
+     * </ul>
+     */
+    color: {
+      validate: function (value) {
+        // To check if a value a number and is in the range [0, 255].
+        function rangeValid(v) {
+          return Number.isFinite(v) && v >= 0 && v <= 255;
+        }
+
+        var valid = false, tmp;
+
+        if (Array.isArray(value) && value.length === 3) {
+
+          // an array of numbers
+          value.forEach(function (v) {
+            valid = valid && rangeValid(v);
+          });
+
+        } else if (typeof value === "string") {
+
+          if (value[0] === "#") {
+
+            // a hex string
+            tmp = parseInt(value.slice(1));
+            valid = tmp >= 0 && tmp <= 0xffffff;
+
+          } else {
+
+            // a css name
+            valid = geo.util.cssColors.hasOwnProperty(value);
+
+          }
+        } else if (Number.isFinite(value)) {
+
+          // 24 bit value as a number
+          valid = value >= 0 && value <= 0xffffff;
+
+        } else {
+
+          // a bare object with rgb components
+          valid = rangeValid(value.r) &&
+            rangeValid(value.g) &&
+            rangeValid(value.b);
+
+        }
+        return valid;
+      }
+    },
+    /**
+     * Handles opacity values as numbers in [0, 1].
+     */
+    opacity: {
+      validate: function (value) {
+        return Number.isFinite(value) && value >= 0 && value <= 255;
+      }
+    },
+    /**
+     * Handles boolean values.
+     */
+    bool: {
+      validate: function (value) {
+        // for a boolean, just accept the truthiness of anything
+        // but undefined
+        return value !== undefined;
+      }
+    },
+    /**
+     * Handles generic container values usually defining subfeatures.  These
+     * are accessors that return objects defining properties of various
+     * subfeatures.  For example, a line feature contains an array of vertices
+     * each of which have properties of their own.
+     *
+     */
+    container: {
+      validate: function (value) {
+        return geo.util.toType(value) === "object";
+      }
+    },
+    /**
+     * Handles a position expressed in world coordinates.
+     *
+     */
+    position: {
+    },
+    /**
+     * Handles a size value (non-negative number).
+     *
+     */
+    size: {
+    }
+  };
+})();
+
+
+////////////////////////////////////////////////////////////////////////////
+/**
+ * This event object provides mouse/keyboard events that can be handled
+ * by the features.  This provides a similar interface as core events,
+ * but with different names so the events don't interfere.  Subclasses
+ * can override this to provide custom events.
+ */
+////////////////////////////////////////////////////////////////////////////
+geo.event.feature = {
+  mousemove:  "geo_feature_mousemove",
+  mouseover:  "geo_feature_mouseover",
+  mouseout:   "geo_feature_mouseout",
+  mouseclick: "geo_feature_mouseclick",
+  brushend:   "geo_feature_brushend",
+  brush:      "geo_feature_brush"
+};
 
 inherit(geo.feature, geo.sceneObject);
