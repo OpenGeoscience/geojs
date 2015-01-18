@@ -32,7 +32,7 @@ geo.feature = function (arg) {
       m_buildTime = geo.timestamp(),
       m_updateTime = geo.timestamp(),
       m_selectedFeatures = [],
-      m_properties = {data: [], spec: {}};
+      m_properties = {data: [], cache: {}, spec: {}};
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -420,7 +420,7 @@ geo.feature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._property = function (
-    name, path, type, defaultValue) {
+    name, path, type, defaultValue, setter) {
 
     if (m_this.hasOwnProperty(name)) {
       console.warn("Property '" + name + "' overrides existing method.");
@@ -431,6 +431,11 @@ geo.feature = function (arg) {
 
     // Get the property type from the static object.
     var prop = geo.feature.property[type];
+
+    // Make default setter when not provided
+    setter = setter || function (name, root, value) {
+      root[name] = value;
+    };
 
     // Several sanity checks for the developer
     if (prop === undefined) {
@@ -447,44 +452,22 @@ geo.feature = function (arg) {
       );
     }
 
-    var parent = m_properties.spec;
-    path = path.split(".");
-    path.forEach(function (p, i) {
-      if (!parent) {
-        return;
-      }
-      if (i === path.length - 1) {
-        if (parent.hasOwnProperty(p)) {
-          console.warn(
-            "Overriding existing local path '" + path + "' " +
-            "for property '" + name + "'."
-          );
-        }
-        parent[p] = type;
-      } else {
-        if (!parent.hasOwnProperty(p)) {
-          console.warn(
-            "Unknown container '" + p + "' " +
-            "in path '" + path.join(".") + "' " +
-            "for property '" + name + "'."
-          );
-          parent = null;
-        } else if (geo.util.typeOf(parent[p]) !== "object") {
-          console.warn(
-            "Container '" + p + "' " +
-            "in path '" + path.join(".") + "' " +
-            "for property '" + name + "' " +
-            "overrides a value."
-          );
-          parent = null;
-        } else {
-          parent = parent.properties[p];
-        }
-      }
-    });
-    if (!parent) {
-      console.error("Failed to add property '" + name + "'.");
+    var plist = path.split(".");
+    var parent = path.split(".").slice(0, plist.length - 1).join(".");
+    var localName = plist[plist.length - 1];
+    if (parent !== "" && (m_properties.spec[parent] || {}).type !== "container") {
+      console.error(
+        "Unknown parent container " +
+        "in path '" + path + "' " +
+        "for property '" + name + "'."
+      );
       return m_this;
+    }
+    if (m_properties.spec.hasOwnProperty(path)) {
+      console.warn(
+        "Overriding existing local path '" + path + "' " +
+        "for property '" + name + "'."
+      );
     }
 
     /**
@@ -511,6 +494,48 @@ geo.feature = function (arg) {
       accessor = arg.bind(m_this);
       // (re)build cache for the property
       return m_this;
+    };
+
+    /**
+     * This will be the function that builds the internal cache for the
+     * property values.
+     * @private
+     */
+    var build = function () {
+      var root = m_properties.cache;
+      var cdata = m_properties.data;
+      var args = [];
+      if (parent.split(".").length > 1) {
+        // TODO:
+        throw "Containers not yet implemented";
+      }
+      setter(localName, root, cdata.map(function (d, i) {
+        var largs = [d, i].concat(args), val;
+        if (geo.util.isFunction(accessor)) {
+          largs = [d, i].concat(args);
+          val = prop.normalize(accessor.apply(m_this, args));
+          if (val === null) {
+            console.warn(
+              "Invalid value returned by accessor for property '" +
+              name + "'."
+            );
+            val = defaultValue;
+          }
+          return val;
+        } else {
+          return accessor;
+        }
+      }));
+    };
+
+    parent = m_properties.spec[parent];
+    m_properties.spec[path] = {
+      type: type,
+      name: name,
+      defaultValue: defaultValue,
+      property: prop,
+      build: build,
+      setter: setter
     };
 
     m_this[name] = func;
