@@ -13,9 +13,10 @@
     var i;
     for (i = 0; i < arguments.length; i += 1) {
       if (isFinite(arguments[i])) {
-        return arguments[i];
+        return +arguments[i];
       }
     }
+    return null;
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -103,26 +104,28 @@
     },
 
     /**
-     * Normalize a coordinate object into {x: ..., y: ..., z: ... } form.
-     * Accepts 2-3d arrays,
-     * latlng objects
-     * latitude -> lat -> y
-     * longitude -> lon -> lng -> x
+     * Normalize a coordinate object into {x: ..., y: ..., z: ... } form.<br>
+     * Accepts:
+     * <ul>
+     * <li>2d or 3d arrays</li>
+     * <li>objects with keys:</li>
+     * <ul>
+     * <li>x-coordinate: <code>x, longitude, lon, lng</code></li>
+     * <li>y-coordinate: <code>y, latitude, lat</code></li>
+     * <li>z-coordinate: <code>z, elev, elevation, height</code></li>
+     * </ul>
+     * </ul>
+     *
+     * @param {*} p A coordinate object or array
+     * @returns {geo.geoPosition}
      */
     normalizeCoordinates: function (p) {
       p = p || {};
       if (Array.isArray(p)) {
         return {
-          x: p[0],
-          y: p[1],
-          z: p[2] || 0
-        };
-      }
-      if (p instanceof geo.latlng) {
-        return {
-          x: p.lng(),
-          y: p.lat(),
-          z: 0
+          x: setNumeric(p[0]),
+          y: setNumeric(p[1]),
+          z: setNumeric(p[2]) || 0
         };
       }
       return {
@@ -130,14 +133,12 @@
           p.x,
           p.longitude,
           p.lng,
-          p.lon,
-          0
+          p.lon
         ),
         y: setNumeric(
           p.y,
           p.latitude,
-          p.lat,
-          0
+          p.lat
         ),
         z: setNumeric(
           p.z,

@@ -19,6 +19,7 @@
         "layer.js",
         "featureLayer.js",
         "event.js",
+        "property.js",
         "mapInteractor.js",
         "clock.js",
         "fileReader.js",
