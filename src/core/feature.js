@@ -32,7 +32,7 @@ geo.feature = function (arg) {
       m_buildTime = geo.timestamp(),
       m_updateTime = geo.timestamp(),
       m_selectedFeatures = [],
-      m_properties = {data: []};
+      m_properties = {data: [], spec: {}};
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -439,7 +439,7 @@ geo.feature = function (arg) {
         "given for '" + name + "'."
       );
     }
-    if (!prop.validate(defaultValue)) {
+    if (prop.normalize(defaultValue) === null) {
       console.warn(
         "The default '" + defaultValue + "' " +
         "is not a valid '" + type + "' " +
@@ -447,8 +447,48 @@ geo.feature = function (arg) {
       );
     }
 
+    var parent = m_properties.spec;
+    path = path.split(".");
+    path.forEach(function (p, i) {
+      if (!parent) {
+        return;
+      }
+      if (i === path.length - 1) {
+        if (parent.hasOwnProperty(p)) {
+          console.warn(
+            "Overriding existing local path '" + path + "' " +
+            "for property '" + name + "'."
+          );
+        }
+        parent[p] = type;
+      } else {
+        if (!parent.hasOwnProperty(p)) {
+          console.warn(
+            "Unknown container '" + p + "' " +
+            "in path '" + path.join(".") + "' " +
+            "for property '" + name + "'."
+          );
+          parent = null;
+        } else if (geo.util.typeOf(parent[p]) !== "object") {
+          console.warn(
+            "Container '" + p + "' " +
+            "in path '" + path.join(".") + "' " +
+            "for property '" + name + "' " +
+            "overrides a value."
+          );
+          parent = null;
+        } else {
+          parent = parent.properties[p];
+        }
+      }
+    });
+    if (!parent) {
+      console.error("Failed to add property '" + name + "'.");
+      return m_this;
+    }
+
     /**
-     * This will be the setter function for the property that is added to the
+     * This will be the (g|s)etter function for the property that is added to the
      * class.  The argument is any constant valid for the property type (when
      * the property value is data independent) or an accessor method with the
      * following call signature:
@@ -458,9 +498,19 @@ geo.feature = function (arg) {
      * @private
      */
     var func = function (arg) {
-      if (geo.util.isFunction(arg)) {
-        accessor = arg;
+      if (arg === undefined) {
+        return accessor;
       }
+      // Check that non function values are valid for the type
+      if (!geo.util.isFunction(arg) && prop.normalize(arg) === null) {
+        console.warn(
+          "Setting '" + name + "' " +
+          "to an invalid value '" + arg + "'."
+        );
+      }
+      accessor = arg.bind(m_this);
+      // (re)build cache for the property
+      return m_this;
     };
 
     m_this[name] = func;
