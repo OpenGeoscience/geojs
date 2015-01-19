@@ -21,8 +21,9 @@ window.startTest = function (done) {
   }];
 
   // Load image to be used for drawing dots
+  var hover = false;
   var layer = myMap.createLayer('feature');
-  layer.createFeature('polygon')
+  layer.createFeature('polygon', {selectionAPI: true})
       .data(states)
       .polygon(function (d) { return {
         'outer': d.coordinates[0],
@@ -34,7 +35,19 @@ window.startTest = function (done) {
                 y: d[1], z: 0.0};
       })
       .style('fillOpacity', 0.5)
-      .style('fillColor', { r: 1, g: 0.3, b: 0.1 });
+      .style('fillColor', function () {
+        return hover ? 'firebrick' : { r: 1, g: 0.3, b: 0.1 };
+      })
+      .geoOn(geo.event.feature.mouseover, function () {
+        hover = true;
+        this.modified();
+        myMap.draw();
+      })
+      .geoOn(geo.event.feature.mouseout, function () {
+        hover = false;
+        this.modified();
+        myMap.draw();
+      });
 
   myMap.draw();
   myMap.onIdle(done);

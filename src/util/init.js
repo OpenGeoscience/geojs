@@ -26,6 +26,45 @@
    */
   //////////////////////////////////////////////////////////////////////////////
   geo.util = {
+    /**
+     * Returns true if the given point lies in the given polygon.
+     * Algorithm description:
+     *   http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
+     * @param {geo.screenPosition} point The test point
+     * @param {geo.screenPosition[]} outer The outer boundary of the polygon
+     * @param {geo.screenPosition[][]?} inner Inner boundaries (holes)
+     */
+    pointInPolygon: function (point, outer, inner) {
+      var inside = false, n = outer.length;
+
+      if (n < 3) {
+        // we need 3 coordinates for this to make sense
+        return false;
+      }
+
+      outer.forEach(function (vert, i) {
+        var j = (n + i - 1) % n;
+        var intersect = (
+          ((outer[i].y > point.y) !== (outer[j].y > point.y)) &&
+          (point.x < (outer[j].x - outer[i].x) *
+                     (point.y - outer[i].y) /
+                     (outer[j].y - outer[i].y) + outer[i].x)
+        );
+        if (intersect) {
+          inside = !inside;
+        }
+      });
+
+      (inner || []).forEach(function (hole) {
+        inside = inside && !geo.util.pointInPolygon(point, hole);
+      });
+
+      return inside;
+    },
+
+    /**
+     * Returns true if the argument is a function.
+     */
     isFunction: function (f) {
       return typeof f === "function";
     },
