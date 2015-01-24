@@ -3,6 +3,7 @@
  * Create a new instance of class lineFeature
  *
  * @class
+ * @extends geo.feature
  * @returns {geo.lineFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -223,6 +224,19 @@ geo.lineFeature = function (arg) {
 
   this._init(arg);
   return this;
+};
+
+/**
+ * Create a lineFeature from an object.
+ * @see {@link geo.feature.fromObject}
+ * @param {geo.layer} layer The layer to add the feature to
+ * @param {string} renderer The renderer to use
+ * @param {geo.lineFeature.spec} spec The object specification
+ * @returns {geo.lineFeature|null}
+ */
+geo.lineFeature.fromObject = function (layer, renderer, spec) {
+  "use strict";
+  return geo.feature.fromObject("line", layer, renderer, spec);
 };
 
 inherit(geo.lineFeature, geo.feature);
