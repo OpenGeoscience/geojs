@@ -207,7 +207,6 @@ geo.map = function (arg) {
   /**
    * Add layer to the map
    *
-   * @method addLayer
    * @param {geo.layer} layer to be added to the map
    * @return {geom.map}
    */
@@ -246,7 +245,6 @@ geo.map = function (arg) {
   /**
    * Remove layer from the map
    *
-   * @method removeLayer
    * @param {geo.layer} layer that should be removed from the map
    * @return {geo.map}
    */
@@ -278,7 +276,6 @@ geo.map = function (arg) {
   /**
    * Toggle visibility of a layer
    *
-   *  @method toggleLayer
    *  @param {geo.layer} layer
    *  @returns {Boolean}
    */

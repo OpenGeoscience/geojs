@@ -2,6 +2,8 @@
 /**
  * D3 specific subclass of object which adds an id property for d3 selections
  * on groups of objects by class id.
+ * @class
+ * @extends geo.sceneObject
  */
 //////////////////////////////////////////////////////////////////////////////
 

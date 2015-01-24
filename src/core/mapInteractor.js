@@ -3,6 +3,7 @@
  * Create a new instance of mapInteractor
  *
  * @class
+ * @extends geo.object
  * @returns {geo.mapInteractor}
  */
 //////////////////////////////////////////////////////////////////////////////

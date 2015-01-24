@@ -3,7 +3,7 @@
  * Create a new instance of latlng
  *
  * A latlng encapsulates geodesy coordinates defined by latitude and
- * longitude
+ * longitude (depreciated)
  *
  * @class
  * @returns {geo.latlng}

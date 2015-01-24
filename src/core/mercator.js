@@ -7,7 +7,6 @@ geo.mercator = {
 /**
  * Returns the polar radius based on the projection.
  *
- * @method r_minor
  * @param {Boolean} sperical
  * @returns {Number}
  */
@@ -43,7 +42,6 @@ geo.mercator.f = function (spherical) {
 /**
  * Convert longitude (Degree) to Tile X
  *
- *  @method long2tilex
  *  @param {float} lon
  *  @param {integer} z
  *  @returns {integer}
@@ -60,7 +58,6 @@ geo.mercator.long2tilex = function (lon, z) {
 /**
  * Convert latitude (Degree) to Tile Y
  *
- *  @method lat2tiley
  *  @param {float} lat
  *  @param {integer} z
  *  @returns {integer}
@@ -76,7 +73,6 @@ geo.mercator.lat2tiley = function (lat, z) {
 /**
  * Convert Longitute (Degree) to Tile X and fraction.
  *
- *  @method long2tilex
  *  @param {float} lon
  *  @param {integer} z
  *  @returns {number[]}
@@ -95,7 +91,6 @@ geo.mercator.long2tilex2 = function (lon, z) {
 /**
  * Convert Latitude (Degree) to Tile Y and fraction
  *
- *  @method lat2tiley
  *  @param {float} lat
  *  @param {integer} z
  *  @returns {number[]}
@@ -115,7 +110,6 @@ geo.mercator.lat2tiley2 = function (lat, z) {
 /**
  * Convert Tile X to Longitute (Degree)
  *
- *  @method tilex2long
  *  @param {integer} x
  *  @param {integer} z
  *  @returns {float}
@@ -130,7 +124,6 @@ geo.mercator.tilex2long = function (x, z) {
 /**
  * Convert Tile Y to Latitute (Degree)
  *
- *  @method tiley2lat
  *  @param {integer} y
  *  @param {integer} z
  *  @returns {float}
@@ -146,7 +139,6 @@ geo.mercator.tiley2lat = function (y, z) {
 /**
  * Convert spherical mercator Y to latitude
  *
- *  @method y2lat
  *  @param {float} a
  *  @returns {float}
  */
@@ -160,7 +152,6 @@ geo.mercator.y2lat = function (a) {
 /**
  * Convert latitude into Y position in spherical mercator
  *
- *  @method lat2y
  *  @param {float} a
  *  @returns {float}
  */

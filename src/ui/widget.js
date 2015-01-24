@@ -3,6 +3,7 @@
  * Create a new instance of class widget
  *
  * @class
+ * @extends {geo.sceneObject}
  * @returns {geo.gui.widget}
  */
 //////////////////////////////////////////////////////////////////////////////

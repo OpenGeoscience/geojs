@@ -3,6 +3,7 @@
  * Create a new instance of class feature
  *
  * @class
+ * @extends geo.sceneObject
  * @returns {geo.feature}
  */
 //////////////////////////////////////////////////////////////////////////////

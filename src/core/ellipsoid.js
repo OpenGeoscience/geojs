@@ -5,7 +5,7 @@
  * <code>(x / a)^2 + (y / b)^2 + (z / c)^2 = 1</code>. Used
  * primarily to create planetary bodies
  *
- * @constructor
+ * @class
  * @param {Number} [x=0]  Radius in X direction
  * @param {Number} [y=0]  Radius in Y direction
  * @param {Number} [z=0]  Radius in Z direction

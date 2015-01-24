@@ -3,6 +3,7 @@
  * Create a plane feature given a lower left corner point geo.latlng
  * and and upper right corner point geo.latlng
  * @class
+ * @extends geo.planeFeature
  * @param lowerleft
  * @param upperright
  * @returns {geo.planeFeature}

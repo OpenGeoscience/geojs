@@ -3,6 +3,7 @@
  * Create a new instance of class fileReader
  *
  * @class
+ * @extends geo.object
  * @returns {geo.fileReader}
  */
 //////////////////////////////////////////////////////////////////////////////

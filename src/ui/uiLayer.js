@@ -3,6 +3,7 @@
  * Create a new instance of class uiLayer
  *
  * @class
+ * @extends {geo.layer}
  * @returns {geo.gui.uiLayer}
  */
 //////////////////////////////////////////////////////////////////////////////
