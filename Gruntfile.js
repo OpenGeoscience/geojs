@@ -250,7 +250,7 @@ module.exports = function (grunt) {
           'Gruntfile.js',
           'sources.json'
         ],
-        tasks: ['clean:source', 'template', 'copy', 'uglify:geojs']
+        tasks: ['clean:source', 'template', 'copy', 'docs', 'uglify:geojs']
       },
       examples: {
         files: [

@@ -124,13 +124,16 @@
 
   /**
    * @class geojsMap
-   * @memberOf $.fn
+   * @memberOf jQuery.fn
    *
-   * @description Generates a geojs map inside an element.  Due to
-   * current limitations in geojs, only a single map can be instantiated
+   * @description Generates a geojs map inside an element.
+   *
+   *
+   * Due to current limitations in geojs, only a single map can be instantiated
    * on a page.  Trying to create a second map will throw an error
    * (see issue
    * <a href="https://github.com/OpenGeoscience/geojs/issues/154">#154</a>).
+   *
    * @example <caption>Create a map with the default options.</caption>
    * $("#map").geojsMap();
    * @example <caption>Create a map with a given initial center and zoom</caption>
@@ -141,21 +144,20 @@
    * });
    * @example <caption>Create a map with points</caption>
    * $("#map").geojsMap({
-   *    zoom: 1,
-   *    points: {
-   *        data: data,
-   *        radius: 5,
-   *        fillColor: 'steelblue',
-   *        position: function (d) {
-   *            return {
-   *                x: d.coordinates[0],
-   *                y: d.coordinates[1]
-   *            };
-   *       }
-   *    }
-   * });
+   *   data: [...],
+   *   layers: [{
+   *     renderer: 'vgl',
+   *     features: [{
+   *       type: 'point',
+   *       size: 5,
+   *       position: function (d) { return {x: d.geometry.x, y: d.geometry.y} },
+   *       fillColor: function (d, i) { return i < 5 ? 'red' : 'blue },
+   *       stroke: false
+   *     }]
+   *   }]
+   * };
    */
-  $.widget('geojs.geojsMap', /** @lends $.fn.geojsMap */{
+  $.widget('geojs.geojsMap', /** @lends jQuery.fn.geojsMap */{
     /**
      * A coordinate object as accepted by geojs to express positions in an
      * arbitrary coordinate system (geographic, screen, etc).  Coordinates returned by
@@ -166,16 +168,6 @@
      * @property {number} longitude Alias: "x", "lng", or "lon"
      * @property {number} latitude Alias: "y" or "lat"
      * @property {number} [elevation=0] Alias: "z", "elev", or "height"
-     */
-
-    /**
-     * A geojs renderer is one of the following:
-     * <ul>
-     *   <li><code>"vglRenderer"</code>: Uses webGL</li>
-     *   <li><code>"d3Renderer"</code>: Uses svg</li>
-     * </ul>
-     * @typedef renderer
-     * @type {string}
      */
 
     /**
@@ -233,7 +225,7 @@
      *   The width of the map in pixels or null for 100%
      * @property {(number|null)} [height=null]
      *   The height of the map in pixels or null for 100%
-     * @property {renderer} [renderer="vglRenderer"]
+     * @property {renderer} [renderer="vgl"]
      *   The renderer for map features (initialization only)
      * @property {boolean} [autoresize=true]
      *   Resize the map on <code>window.resize</code> (initialization only)
@@ -245,7 +237,7 @@
       zoom: 0,
       width: null,
       height: null,
-      renderer: 'vglRenderer',
+      renderer: 'vgl',
       points: {
         stroke: false,
         strokeColor: 'black'
@@ -254,7 +246,7 @@
       // These options are for future use, but shouldn't
       // be changed at the moment, so they aren't documented.
       baseLayer: 'osm',
-      baseRenderer: 'vglRenderer'
+      baseRenderer: 'vgl'
     },
 
     /**
@@ -424,12 +416,25 @@
       }
       pt.style(options).draw();
 
-      // handle vglRenderer bug where feature.draw() doesn't cause a redraw
-      if (this._renderer === 'vglRenderer') {
+      // handle vgl bug where feature.draw() doesn't cause a redraw
+      if (this._renderer === 'vgl') {
         this._map.draw();
       }
     }
   });
+
+  // Some argument type definitions used only by this plugin:
+  /**
+   * A geojs renderer is one of the following:
+   * <ul>
+   *   <li><code>"vgl"</code>: Uses webGL</li>
+   *   <li><code>"d3"</code>: Uses svg</li>
+   * </ul>
+   * @typedef renderer
+   * @type {string}
+   */
+
+
   };
 
   $(load);
