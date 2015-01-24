@@ -276,16 +276,25 @@ geo.pointFeature = function (arg) {
 geo.event.pointFeature = $.extend({}, geo.event.feature);
 
 /**
+ * Object specification for a point feature.
+ *
+ * @extends geo.feature.spec // need to make a jsdoc plugin for this to work
+ * @typedef geo.pointFeature.spec
+ * @type {object}
+ */
+
+/**
  * Create a pointFeature from an object.
- * @see {@link geo.feature.fromObject}
+ * @see {@link geo.feature.create}
  * @param {geo.layer} layer The layer to add the feature to
- * @param {string} renderer The renderer to use
  * @param {geo.pointFeature.spec} spec The object specification
  * @returns {geo.pointFeature|null}
  */
-geo.pointFeature.fromObject = function (layer, renderer, spec) {
+geo.pointFeature.create = function (layer, renderer, spec) {
   "use strict";
-  return geo.feature.fromObject("point", layer, renderer, spec);
+
+  spec.type = "point";
+  return geo.feature.create(layer, spec);
 };
 
 inherit(geo.pointFeature, geo.feature);

@@ -526,7 +526,8 @@ geo.feature.eventID = 0;
  * General object specification for feature types.
  * @typedef geo.feature.spec
  * @type {object}
- * @property {object[]} data An array of arbitrary objects used to
+ * @property {string} type A supported feature type.
+ * @property {object[]} [data=[]] An array of arbitrary objects used to
  * construct the feature.  These objects (and their associated
  * indices in the array) will be passed back to style and attribute
  * accessors provided by the user.  In general the number of
@@ -539,41 +540,32 @@ geo.feature.eventID = 0;
  * from a javascript object.  See documentation from individual
  * feature types for specific details.  In case of an error in
  * the arguments this method will return null;
- * @param {string} type A supported feature type
  * @param {geo.layer} layer The layer to add the feature to
- * @param {string} renderer The renderer to use
- * @param {geo.feature.spec} spec The object specification
+ * @param {geo.feature.spec} [spec={}] The object specification
  * @returns {geo.feature|null}
  */
-geo.feature.fromObject = function (type, layer, renderer, spec) {
+geo.feature.create = function (layer, spec) {
   "use strict";
 
+  var type = spec.type;
+
   // Check arguments
-
-  if (type instanceof geo.layer) {
-    // This is most likely to occur if the feature implementation
-    // didn't override this method.
-    console.error("Invalid call to an abstract method");
-  }
-
   if (!layer instanceof geo.layer) {
     console.warn("Invalid layer");
-    return null;
-  }
-  if (renderer !== "d3" || renderer !== "vgl") {
-    console.warn("Invalid renderer");
     return null;
   }
   if (typeof spec !== "object") {
     console.warn("Invalid spec");
     return null;
   }
-  var feature = layer.createFeature(type, { renderer: renderer + "Renderer" });
+  var feature = layer.createFeature(type);
   if (!feature) {
     console.warn("Could not create feature type '" + type + "'");
     return null;
   }
 
+  spec = spec = {};
+  spec.data = spec.data || [];
   return feature.style(spec);
 };
 

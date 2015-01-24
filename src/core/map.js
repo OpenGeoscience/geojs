@@ -4,6 +4,7 @@
  *
  * Creates a new map inside of the given HTML layer (Typically DIV)
  * @class
+ * @extends geo.sceneObject
  * @returns {geo.map}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -801,6 +802,43 @@ geo.map = function (arg) {
   }
 
   return this;
+};
+
+/**
+ * General object specification for map types.  Any additional
+ * values in the object are passed to the map constructor.
+ * @typedef geo.map.spec
+ * @type {object}
+ * @property {object[]} [data=[]] The default data array to
+ * apply to each feature if none exists
+ * @property {geo.layer.spec[]} [layers=[]] Layers to create
+ */
+
+/**
+ * Create a map from an object.  Any errors in the creation
+ * of the map will result in returning null.
+ * @param {geo.map.spec} spec The object specification
+ * @returns {geo.map|null}
+ */
+geo.map.create = function (spec) {
+  "use strict";
+
+  var map = geo.map(spec);
+
+  if (!map) {
+    console.warn("Could not create map.");
+    return null;
+  }
+
+  spec.data = spec.data || [];
+  spec.layers = spec.layers || [];
+
+  spec.layers.forEach(function (l) {
+    l.data = l.data || spec.data;
+    l.layer = geo.layer.create(map, l);
+  });
+
+  return map;
 };
 
 inherit(geo.map, geo.sceneObject);

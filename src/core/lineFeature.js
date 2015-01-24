@@ -228,15 +228,16 @@ geo.lineFeature = function (arg) {
 
 /**
  * Create a lineFeature from an object.
- * @see {@link geo.feature.fromObject}
+ * @see {@link geo.feature.create}
  * @param {geo.layer} layer The layer to add the feature to
- * @param {string} renderer The renderer to use
  * @param {geo.lineFeature.spec} spec The object specification
  * @returns {geo.lineFeature|null}
  */
-geo.lineFeature.fromObject = function (layer, renderer, spec) {
+geo.lineFeature.create = function (layer, spec) {
   "use strict";
-  return geo.feature.fromObject("line", layer, renderer, spec);
+
+  spec.type = "line";
+  return geo.feature.create(layer, spec);
 };
 
 inherit(geo.lineFeature, geo.feature);
