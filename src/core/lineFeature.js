@@ -20,25 +20,7 @@ geo.lineFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
-      m_position,
-      m_line,
       s_init = this._init;
-
-  if (arg.line === undefined) {
-    m_line = function (d) {
-      return d;
-    };
-  } else {
-    m_line = arg.line;
-  }
-
-  if (arg.position === undefined) {
-    m_position = function (d) {
-      return d;
-    };
-  } else {
-    m_position = arg.position;
-  }
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -49,9 +31,9 @@ geo.lineFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.line = function (val) {
     if (val === undefined) {
-      return m_line;
+      return m_this.style("line");
     } else {
-      m_line = val;
+      m_this.style("line", val);
       m_this.dataTime().modified();
       m_this.modified();
     }
@@ -67,9 +49,9 @@ geo.lineFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.position = function (val) {
     if (val === undefined) {
-      return m_position;
+      return m_this.style("position");
     } else {
-      m_position = val;
+      m_this.style("position", val);
       m_this.dataTime().modified();
       m_this.modified();
     }
@@ -218,16 +200,25 @@ geo.lineFeature = function (arg) {
         // Default to gold color for lines
         "strokeColor": { r: 1.0, g: 0.8431372549, b: 0.0 },
         "strokeStyle": "solid",
-        "strokeOpacity": 1.0
+        "strokeOpacity": 1.0,
+        "line": function (d) { return d; },
+        "position": function (d) { return d; }
       },
       arg.style === undefined ? {} : arg.style
     );
 
+    if (arg.line !== undefined) {
+      defaultStyle.line = arg.line;
+    }
+
+    if (arg.position !== undefined) {
+      defaultStyle.position = arg.position;
+    }
+
+
     m_this.style(defaultStyle);
 
-    if (m_position) {
-      m_this.dataTime().modified();
-    }
+    m_this.dataTime().modified();
   };
 
   this._init(arg);
