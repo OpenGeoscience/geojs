@@ -1,5 +1,5 @@
 /*global window*/
-/*jshint -W015*/
+/*jshint -W015, -W098*/
 /*jscs:disable validateIndentation*/
 (function ($, geo, d3) {
   'use strict';
@@ -164,7 +164,7 @@
      * geojs methods are always expressed with "x" and "y" properties, but
      * it will accept any of the aliased properties.
      * @typedef coordinate
-     * @type {Object}
+     * @type {object}
      * @property {number} longitude Alias: "x", "lng", or "lon"
      * @property {number} latitude Alias: "y" or "lat"
      * @property {number} [elevation=0] Alias: "z", "elev", or "height"
@@ -225,23 +225,16 @@
      *   The width of the map in pixels or null for 100%
      * @property {(number|null)} [height=null]
      *   The height of the map in pixels or null for 100%
-     * @property {renderer} [renderer="vgl"]
-     *   The renderer for map features (initialization only)
+     * @property {geo.layer.spec[]} [layers=[]]
+     *   Describes layers added to the map
      * @property {boolean} [autoresize=true]
      *   Resize the map on <code>window.resize</code> (initialization only)
-     * @property {pointOptions} [points={}]
-     *   Set the points option property (initialization only)
      */
     options: {
       center: {latitude: 0, longitude: 0},
       zoom: 0,
       width: null,
       height: null,
-      renderer: 'vgl',
-      points: {
-        stroke: false,
-        strokeColor: 'black'
-      },
 
       // These options are for future use, but shouldn't
       // be changed at the moment, so they aren't documented.
@@ -293,22 +286,12 @@
       // store the renderer, because it can't be changed
       this._renderer = this.options.renderer;
 
-      // create the feature layer
-      this._featureLayer = this._map.createLayer('feature', {
-        renderer: this._renderer
+      this._layers = this.options.layers.map(function (layer) {
+        return geo.layer.create(this._map, layer);
       });
-
-      // create a point feature
-      this._points = this._featureLayer.createFeature('point').data([]);
-
-      // create a line feature
-      this._lines = this._featureLayer.createFeature('line').data([]);
 
       // trigger an initial draw
       this.redraw();
-
-      // add point options
-      this.points(this.options.points);
     },
 
     /**
@@ -341,85 +324,6 @@
      */
     redraw: function () {
       this._resize();
-    },
-
-    /**
-     * Set point feature data and styles.  Only the properties provided
-     * will be applied to the map.  For example, if options.data is
-     * undefined, then the data previously given will be used.
-     * @instance
-     * @param {object} options Point options (see {@link pointOptions})
-     * @example <caption>Initializing point attributes</caption>
-     * $("#map").geojsMap('points', {
-     *     position: function (d) {
-     *          return {x: d.geometry.lon, y: d.geometry.lat}
-     *     },
-     *     radius: function (d) { return d.size; },
-     *     fillColor: "red",
-     *     strokeColor: "#010a10"
-     * });
-     * @example <caption>Updating the point data</caption>
-     * $("#map").geojsMap('points', {
-     *     data: data
-     * });
-     */
-    points: function (options) {
-      var pt = this._points, key, data, scl, that = this;
-      options = options || {};
-
-      if (options.data) {
-        pt.data(options.data);
-      }
-      data = pt.data();
-
-      if (options.position) {
-        pt.position(function () {
-          // could use some optimization
-          var f = geo.util.ensureFunction(options.position);
-          var d = f.apply(this, arguments);
-          return geo.util.normalizeCoordinates(d);
-        });
-      }
-
-      if (options.data && options.data.length) {
-        // force recompute the color scales with new data
-        options.fillColor = options.fillColor || pt.style().fillColor;
-        options.strokeColor = options.strokeColor || pt.style().strokeColor;
-      }
-
-      if (options.size) {
-        // save the size function to update the radius
-        // scale when new data is given
-        this._size = options.size;
-      } else if (options.size === null) {
-        delete this._size;
-      }
-
-      if (data.length && this._size) {
-        scl = d3.scale.linear()
-          .domain(
-            d3.extent(data, this._size)
-          )
-          .range([5, 20]);
-        options.radius = function () {
-          return scl(that._size.apply(this, arguments));
-        };
-        delete options.size;
-      }
-
-      // apply color scales if necessary
-      for (key in options) {
-        if (options.hasOwnProperty(key) &&
-            isColorKey(key)) {
-          options[key] = makeColorScale(data, options[key]);
-        }
-      }
-      pt.style(options).draw();
-
-      // handle vgl bug where feature.draw() doesn't cause a redraw
-      if (this._renderer === 'vgl') {
-        this._map.draw();
-      }
     }
   });
 
