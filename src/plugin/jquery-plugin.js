@@ -235,6 +235,7 @@
       zoom: 0,
       width: null,
       height: null,
+      layers: [],
 
       // These options are for future use, but shouldn't
       // be changed at the moment, so they aren't documented.
@@ -248,6 +249,7 @@
      * @protected
      */
     _create: function () {
+      var m_this = this;
       if (this._map || !this.element.length) {
         // when called multiple times on a single element, do nothing
         return;
@@ -287,7 +289,8 @@
       this._renderer = this.options.renderer;
 
       this._layers = this.options.layers.map(function (layer) {
-        return geo.layer.create(this._map, layer);
+        layer.data = layer.data || m_this.options.data;
+        return geo.layer.create(m_this._map, layer);
       });
 
       // trigger an initial draw

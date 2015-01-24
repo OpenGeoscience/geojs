@@ -14,34 +14,38 @@ $(function () {
    * }
    */
 
-  // Create a map object
-  $('#map').geojsMap({
+  // Create a map description
+  var spec = {
     center: {
       x: -100,
       y: 40
     },
     zoom: 1,
-    renderer: 'd3Renderer',
-    points: {
-      size: function (d) { return d.exp; },
-      position: function (d) { return {x: d.position.x, y: d.position.y}; },
-      fill: true,
-      fillColor: function (d) { return d.fruits; },
-      fillOpacity: function (d) { return 0.5 + d.unif / 2; },
-      stroke: true,
-      strokeColor: function (d) { return d.color; },
-      strokeOpacity: 1,
-      strokeWidth: 2
-    }
-  });
+    layers: [{
+      renderer: 'd3',
+      features: [{
+        type: 'point',
+        size: function (d) { return d.exp; },
+        position: function (d) { return {x: d.position.x, y: d.position.y}; },
+        fill: true,
+        fillColor: function (d) { return d.fruits; },
+        fillOpacity: function (d) { return 0.5 + d.unif / 2; },
+        stroke: true,
+        strokeColor: function (d) { return d.color; },
+        strokeOpacity: 1,
+        strokeWidth: 2
+      }]
+    }]
+  };
 
   // Load a data file
   $.ajax({
     dataType: 'json',
     url: 'data.json',
     success: function (data) {
-      // Draw the points in the map
-      $('#map').geojsMap('points', {data: data});
+      spec.data = data;
+      // Draw the points in a map
+      $('#map').geojsMap(spec);
     }
   });
 });

@@ -24,7 +24,7 @@ geo.layer = function (arg) {
                                            "color": [0.8, 0.8, 0.8],
                                            "visible": true,
                                            "bin": 100} : arg.style,
-      m_id = arg.id === undefined ? geo.newLayerId() : arg.id,
+      m_id = arg.id === undefined ? geo.layer.newLayerId() : arg.id,
       m_name = "",
       m_gcs = "EPSG:4326",
       m_timeRange = null,
@@ -487,7 +487,7 @@ geo.layer.create = function (map, spec) {
   }
 
   spec.renderer = spec.renderer || "vgl";
-  if (spec.renderer !== "d3" || spec.renderer !== "vgl") {
+  if (spec.renderer !== "d3" && spec.renderer !== "vgl") {
     console.warn("Invalid renderer");
     return null;
   }
@@ -501,7 +501,7 @@ geo.layer.create = function (map, spec) {
   // probably move this down to featureLayer eventually
   spec.features.forEach(function (f) {
     f.data = f.data || spec.data;
-    f.feature = geo.feature.create(layer, spec);
+    f.feature = geo.feature.create(layer, f);
   });
 
   return layer;

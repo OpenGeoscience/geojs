@@ -2,7 +2,8 @@
 /**
  * Create a new instance of class d3Renderer
  *
- * @param canvas
+ * @class
+ * @extends geo.renderer
  * @returns {geo.d3.d3Renderer}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -530,4 +531,4 @@ geo.d3.d3Renderer = function (arg) {
 
 inherit(geo.d3.d3Renderer, geo.renderer);
 
-geo.registerRenderer('d3Renderer', geo.d3.d3Renderer);
+geo.registerRenderer('d3', geo.d3.d3Renderer);

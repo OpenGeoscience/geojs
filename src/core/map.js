@@ -467,7 +467,7 @@ geo.map = function (arg) {
     if (!layer) {
       renderer = opts.renderer;
       if (!renderer) {
-        renderer = "d3Renderer";
+        renderer = "d3";
       }
       layer = m_this.createLayer("feature", {renderer: renderer});
     }

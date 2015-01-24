@@ -537,7 +537,7 @@ geo.mapInteractor = function (args) {
           m_selectionLayer = null;
         }
         // Create a feature layer and plane feature to show the selection bounds
-        m_selectionLayer = m_this.map().createLayer('feature', {renderer: 'd3Renderer'});
+        m_selectionLayer = m_this.map().createLayer('feature', {renderer: 'd3'});
         m_selectionPlane = m_selectionLayer.createFeature('plane');
         m_selectionPlane.style({
           screenCoordinates: true,

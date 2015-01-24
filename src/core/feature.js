@@ -564,7 +564,7 @@ geo.feature.create = function (layer, spec) {
     return null;
   }
 
-  spec = spec = {};
+  spec = spec || {};
   spec.data = spec.data || [];
   return feature.style(spec);
 };

@@ -75,6 +75,8 @@ geo.gl.vglViewerInstance.deleteCache = function (viewer) {
 /**
  * Create a new instance of class vglRenderer
  *
+ * @class
+ * @extends geo.gl.renderer
  * @param canvas
  * @returns {geo.gl.vglRenderer}
  */
@@ -489,4 +491,4 @@ geo.gl.vglRenderer = function (arg) {
 
 inherit(geo.gl.vglRenderer, geo.gl.renderer);
 
-geo.registerRenderer("vglRenderer", geo.gl.vglRenderer);
+geo.registerRenderer("vgl", geo.gl.vglRenderer);
