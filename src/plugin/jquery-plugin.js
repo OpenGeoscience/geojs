@@ -1,5 +1,5 @@
 /*global window*/
-/*jshint -W015, -W098*/
+/*jshint -W015*/
 /*jscs:disable validateIndentation*/
 (function ($, geo, d3) {
   'use strict';
@@ -249,7 +249,6 @@
      * @protected
      */
     _create: function () {
-      var m_this = this;
       if (this._map || !this.element.length) {
         // when called multiple times on a single element, do nothing
         return;
@@ -310,11 +309,48 @@
       // create new layers
       this._layers = this.options.layers.map(function (layer) {
         layer.data = layer.data || m_this.options.data;
+
+        // Until auto color scaling gets moved into geojs core, we will
+        // mutate the spec and replace the color and radius options.
+        (layer.features || []).forEach(function (feature) {
+          var data = feature.data || layer.data || [];
+          var scl;
+          if (feature.type === 'point') {
+            if (feature.size) {
+              feature._size = feature.size;
+            } else if (feature.size === null) {
+              delete feature._size;
+            }
+
+            if (data.length && feature._size) {
+              scl = d3.scale.linear()
+                .domain(
+                  d3.extent(data, feature._size)
+                )
+                .range([5, 20]);
+              feature.radius = function () {
+                // TODO: wrong `this` (wait for style refactor)
+                return scl(feature._size.apply(this, arguments));
+              };
+            }
+            delete feature.size;
+          }
+
+          var key;
+          for (key in feature) {
+            if (feature.hasOwnProperty(key) &&
+                isColorKey(key)) {
+              feature[key] = makeColorScale(data, feature[key]);
+            }
+          }
+        });
         return geo.layer.create(m_this._map, layer);
       });
 
       // trigger an initial draw
       this.redraw();
+
+      return this;
     },
 
     /**
@@ -347,6 +383,7 @@
      */
     redraw: function () {
       this._resize();
+      return this;
     }
   });
 
