@@ -285,9 +285,29 @@
       // occur when initializing onto a node of size 0.
       this._resize({width: 800, height: 600});
 
-      // store the renderer, because it can't be changed
-      this._renderer = this.options.renderer;
+      this._layers = [];
+      this.update();
+    },
 
+    /**
+     * Update the layers and features using a new array of
+     * {@link geo.layer.spec} objects.  All existing layers
+     * and features are deleted.  If only the data has changed,
+     * you can usually just call {@link jQuery.fn.geojsMap#redraw redraw}.
+     * @instance
+     * @param {geo.layer.spec[]} [layers] New map layers
+     */
+    update: function (layers) {
+      var m_this = this;
+      this.options.layers = layers || this.options.layers || [];
+
+      // delete existing layers
+      this._layers.forEach(function (layer) {
+        layer.clear();
+        this._map.deleteLayer(layer);
+      });
+
+      // create new layers
       this._layers = this.options.layers.map(function (layer) {
         layer.data = layer.data || m_this.options.data;
         return geo.layer.create(m_this._map, layer);
@@ -340,7 +360,6 @@
    * @typedef renderer
    * @type {string}
    */
-
 
   };
 
