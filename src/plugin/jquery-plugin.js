@@ -1,5 +1,3 @@
-/*global window*/
-/*jshint -W015*/
 /*jscs:disable validateIndentation*/
 (function ($, geo, d3) {
   'use strict';
@@ -151,9 +149,37 @@
    *       type: 'point',
    *       size: 5,
    *       position: function (d) { return {x: d.geometry.x, y: d.geometry.y} },
-   *       fillColor: function (d, i) { return i < 5 ? 'red' : 'blue },
+   *       fillColor: function (d, i) { return i < 5 ? 'red' : 'blue' },
    *       stroke: false
    *     }]
+   *   }]
+   * };
+   * @example <caption>Create a map with points, lines and multiple layers</caption>
+   * $("#map").geojsMap({
+   *   center: { x: -130, y: 40 },
+   *   zoom: 3,
+   *   layers: [{
+   *     renderer: 'vgl',
+   *     features: [{
+   *       data: [...],
+   *       type: 'point',
+   *       size: 5,
+   *       position: function (d) { return {x: d.geometry.x, y: d.geometry.y} },
+   *       fillColor: function (d, i) { return i < 5 ? 'red' : 'blue' },
+   *       stroke: false
+   *     }]
+   *   },
+   *   {
+   *      renderer: 'd3',
+   *      features[{
+   *        data: [...],
+   *        type: 'line',
+   *        position: function (d) { return { x: d[0], y: d[1] } },
+   *        line: function (d) { return d.coordinates; },
+   *        strokeWidth: 3,
+   *        strokeColor: 'black',
+   *        strokeOpacity: 0.5
+   *      }]
    *   }]
    * };
    */
@@ -219,6 +245,8 @@
      * var center=$("#map").geojsMap("center");
      * @example <caption>Pan the map to a new center</caption>
      * $("#map").geojsMap("center", {lat: 10, lng: -100});
+     * @property {object[]} [data=[]] The default data array used for
+     * features/layers not already containing data.
      * @property {coordinate} [center={lat: 0, lng: 0}] The map center
      * @property {number} [zoom=0] The zoom level (floating point >= 0)
      * @property {(number|null)} [width=null]
@@ -236,6 +264,7 @@
       width: null,
       height: null,
       layers: [],
+      data: [],
 
       // These options are for future use, but shouldn't
       // be changed at the moment, so they aren't documented.
@@ -295,6 +324,10 @@
      * you can usually just call {@link jQuery.fn.geojsMap#redraw redraw}.
      * @instance
      * @param {geo.layer.spec[]} [layers] New map layers
+     * @example <caption>Delete and recreate all existing layers</caption>
+     * $("#map").geojsMap("update");
+     * @example <caption>Remove all existing feature layers.</caption>
+     * $("#map").geojsMap("update", []);
      */
     update: function (layers) {
       var m_this = this;
@@ -303,7 +336,7 @@
       // delete existing layers
       this._layers.forEach(function (layer) {
         layer.clear();
-        this._map.deleteLayer(layer);
+        m_this._map.deleteLayer(layer);
       });
 
       // create new layers
@@ -379,6 +412,8 @@
      * Do a full redraw of the map.  In general, users shouldn't need to
      * call this method, but it could be useful when accessing lower
      * level features of the mapping api.
+     * @todo This function may need to go through each feature and call
+     * {@link geo.feature#modified} to properly update.
      * @instance
      */
     redraw: function () {
