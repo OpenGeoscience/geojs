@@ -283,10 +283,12 @@
         return;
       }
       if (initialized) {
-        // when called multiple times on different elements, die
-        throw new Error(
-          'Only one map per page is allowed.'
+        // warn when called multiple times on different elements
+        console.warn(
+          'Geojs already initialized in this window.'
         );
+        // Try to clean up the old gl context, but this doesn't usually work
+        delete window.gl;
       }
       // set global initialization state
       initialized = true;
