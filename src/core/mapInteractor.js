@@ -93,7 +93,7 @@ geo.mapInteractor = function (args) {
         drag: 0.01
       },
       spring: {
-        enabled: true,
+        enabled: false,
         springConstant: 0.00005
       }
     },
@@ -332,15 +332,8 @@ geo.mapInteractor = function (args) {
         m_options.zoomMoveButton === 'right') {
       $node.on('contextmenu.geojs', function () { return false; });
     }
-    m_options.map.geoOn(geo.event.transitionend, mapHandler);
-    m_options.map._zoomCallback(mapHandler);
     return m_this;
   };
-
-  function mapHandler() {
-    m_state.action = {};
-    m_this.springBack(false);
-  }
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -352,10 +345,6 @@ geo.mapInteractor = function (args) {
     if ($node) {
       $node.off('.geojs');
       $node = null;
-    }
-    if (m_options.map) {
-      m_options.map.geoOff(geo.event.transitionend, mapHandler);
-      m_options.map._zoomCallback(null);
     }
     return m_this;
   };
@@ -714,6 +703,9 @@ geo.mapInteractor = function (args) {
         yplus,  // force to the top
         yminus; // force to the bottom
 
+    if (!m_options.spring.enabled) {
+      return {x: 0, y: 0};
+    }
     // get screen coordinates of corners
     var ul = m_this.map().gcsToDisplay({
       x: -180,

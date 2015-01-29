@@ -39,12 +39,12 @@ geo.map = function (arg) {
       m_transition = null,
       m_queuedTransition = null,
       m_clock = null,
-      m_bounds = {},
-      m_zoomCallback = null;
+      m_bounds = {};
 
 
   arg.center = geo.util.normalizeCoordinates(arg.center);
   arg.autoResize = arg.autoResize === undefined ? true : arg.autoResize;
+  arg.clampBounds = arg.clampBounds === undefined ? true : arg.clampBounds;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -91,7 +91,7 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.zoom = function (val, direction) {
-    var base, evt, previousCenter;
+    var base, evt;
     if (val === undefined) {
       return m_zoom;
     }
@@ -118,16 +118,6 @@ geo.map = function (arg) {
     }
 
     m_zoom = val;
-    previousCenter = m_center;
-    m_center = m_this.displayToGcs({
-      x: m_width / 2,
-      y: m_height / 2
-    });
-
-    evt.gcsDelta = {
-      x: m_center.x - previousCenter.x,
-      y: m_center.y - previousCenter.y
-    };
     m_this._updateBounds();
 
     m_this.children().forEach(function (child) {
@@ -135,8 +125,9 @@ geo.map = function (arg) {
     });
 
     m_this.modified();
-    if (m_zoomCallback) {
-      m_zoomCallback();
+
+    if (evt.center) {
+      m_this.center(evt.center);
     }
     return m_this;
   };
@@ -150,9 +141,33 @@ geo.map = function (arg) {
    * @returns {geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.pan = function (delta) {
+  this.pan = function (delta, force) {
     var base = m_this.baseLayer(),
-        evt;
+        evt, pt, corner1, corner2;
+
+    if (arg.clampBounds && !force && m_width && m_height) {
+      pt = m_this.displayToGcs({
+        x: delta.x,
+        y: delta.y
+      });
+
+      corner1 = m_this.gcsToDisplay({
+        x: -180,
+        y: 82
+      });
+      corner2 = m_this.gcsToDisplay({
+        x: 180,
+        y: -82
+      });
+
+      if (corner1.x > 0 && corner2.x < m_width) {
+        // if the map is too small horizontally
+        delta.x = (-corner1.x + m_width - corner2.x) / 2;
+      } else {
+        delta.x = Math.max(Math.min(delta.x, -corner1.x), m_width - corner2.x);
+      }
+      delta.y = Math.max(Math.min(delta.y, -corner1.y), m_height - corner2.y);
+    }
 
     evt = {
       geo: {},
@@ -192,7 +207,7 @@ geo.map = function (arg) {
    * @returns {Object|geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.center = function (coordinates) {
+  this.center = function (coordinates, force) {
     var newCenter, currentCenter;
 
     if (coordinates === undefined) {
@@ -208,7 +223,7 @@ geo.map = function (arg) {
     m_this.pan({
       x: currentCenter.x - newCenter.x,
       y: currentCenter.y - newCenter.y
-    }, true);
+    }, force);
 
     return m_this;
   };
@@ -339,11 +354,8 @@ geo.map = function (arg) {
     });
 
     m_this._updateBounds();
+    m_this.pan({x: 0, y: 0});
     m_this.modified();
-
-    if (m_zoomCallback) {
-      m_zoomCallback();
-    }
 
     return m_this;
   };
@@ -428,7 +440,7 @@ geo.map = function (arg) {
         // This assumes that the base layer is initially centered at
         // (0, 0).  May want to add an explicit call to the base layer
         // to set a given center.
-        m_this.center(arg.center);
+        m_this.center(arg.center, true);
       }
       save = m_zoom;
       m_zoom = null;
@@ -851,17 +863,6 @@ geo.map = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.bounds = function () {
     return m_bounds;
-  };
-
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * @todo Move spring and momentum to map and avoid this abomination
-   * @private
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._zoomCallback = function (callback) {
-    m_zoomCallback = callback;
   };
 
 
