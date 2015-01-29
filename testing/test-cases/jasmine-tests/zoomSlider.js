@@ -5,40 +5,40 @@ describe('zoom slider', function () {
 
   var map, width = 800, height = 800;
 
-  it('Setup map', function () {
-    // create an osm map layer
-    map = geo.map({
-      'node': '#map',
-      'center': [0, 0],
-      'zoom': 3
-    });
-    map.createLayer('osm');
-    map.resize(0, 0, width, height);
-    map.createLayer('ui').createWidget('slider');
-    map.draw();
+  // create an osm map layer
+  map = geo.map({
+    'node': '#map',
+    'center': [0, 0],
+    'zoom': 3
   });
+  map.createLayer('osm');
+  map.resize(0, 0, width, height);
+  map.createLayer('ui').createWidget('slider');
+  map.draw();
 
   it('Zoom in button', function (done) {
-    var z = map.zoom(), eps;
+    var eps;
     d3.select('.geo-ui-slider .geo-zoom-in').on('click')();
 
-    window.setTimeout(function () {
-      eps = Math.abs(z + 1 - map.zoom());
-      expect(eps).toBeLessThan(1e-2);
-      done();
-    }, 1000);
+    map.geoOff(geo.event.transitionend)
+      .geoOn(geo.event.transitionend, function (evt) {
+        eps = Math.abs(evt.zoom - map.zoom());
+        expect(eps).toBeLessThan(1e-2);
+        done();
+      });
   });
   
   it('Zoom out button', function (done) {
     map.zoom(2);
-    var z = map.zoom(), eps;
+    var eps;
     d3.select('.geo-ui-slider .geo-zoom-out').on('click')();
 
-    window.setTimeout(function () {
-      eps = Math.abs(z - 1 - map.zoom());
-      expect(eps).toBeLessThan(1e-2);
-      done();
-    }, 1000);
+    map.geoOff(geo.event.transitionend)
+      .geoOn(geo.event.transitionend, function (evt) {
+        eps = Math.abs(evt.zoom - map.zoom());
+        expect(eps).toBeLessThan(1e-2);
+        done();
+      });
   });
 
   it('Nub responds to map', function () {

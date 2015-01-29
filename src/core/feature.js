@@ -119,7 +119,12 @@ geo.feature = function (arg) {
     var mouse = m_this.layer().map().interactor().mouse(),
         data = m_this.data(),
         over = m_this.pointSearch(mouse.geo),
-        newFeatures = [], oldFeatures = [];
+        newFeatures = [], oldFeatures = [], lastTop = -1, top = -1;
+
+    // Get the index of the element that was previously on top
+    if (m_selectedFeatures.length) {
+      lastTop = m_selectedFeatures[m_selectedFeatures.length - 1];
+    }
 
     // There are probably faster ways of doing this:
     newFeatures = over.index.filter(function (i) {
@@ -129,35 +134,68 @@ geo.feature = function (arg) {
       return over.index.indexOf(i) < 0;
     });
 
+    geo.feature.eventID += 1;
     // Fire events for mouse in first.
-    newFeatures.forEach(function (i) {
+    newFeatures.forEach(function (i, idx) {
       m_this.geoTrigger(geo.event.feature.mouseover, {
         data: data[i],
         index: i,
-        mouse: mouse
+        mouse: mouse,
+        eventID: geo.feature.eventID,
+        top: idx === newFeatures.length - 1
       }, true);
     });
 
+    geo.feature.eventID += 1;
     // Fire events for mouse out next
-    oldFeatures.forEach(function (i) {
+    oldFeatures.forEach(function (i, idx) {
       m_this.geoTrigger(geo.event.feature.mouseout, {
         data: data[i],
         index: i,
-        mouse: mouse
+        mouse: mouse,
+        eventID: geo.feature.eventID,
+        top: idx === oldFeatures.length - 1
       }, true);
     });
 
+    geo.feature.eventID += 1;
     // Fire events for mouse move last
-    over.index.forEach(function (i) {
+    over.index.forEach(function (i, idx) {
       m_this.geoTrigger(geo.event.feature.mousemove, {
         data: data[i],
         index: i,
-        mouse: mouse
+        mouse: mouse,
+        eventID: geo.feature.eventID,
+        top: idx === over.index.length - 1
       }, true);
     });
 
     // Replace the selected features array
     m_selectedFeatures = over.index;
+
+    // Get the index of the element that is now on top
+    if (m_selectedFeatures.length) {
+      top = m_selectedFeatures[m_selectedFeatures.length - 1];
+    }
+
+    if (lastTop !== top) {
+      // The element on top changed so we need to fire mouseon/mouseoff
+      if (lastTop !== -1) {
+        m_this.geoTrigger(geo.event.feature.mouseoff, {
+          data: data[lastTop],
+          index: lastTop,
+          mouse: mouse
+        }, true);
+      }
+
+      if (top !== -1) {
+        m_this.geoTrigger(geo.event.feature.mouseon, {
+          data: data[top],
+          index: top,
+          mouse: mouse
+        }, true);
+      }
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -170,11 +208,14 @@ geo.feature = function (arg) {
         data = m_this.data(),
         over = m_this.pointSearch(mouse.geo);
 
-    over.index.forEach(function (i) {
+    geo.feature.eventID += 1;
+    over.index.forEach(function (i, idx) {
       m_this.geoTrigger(geo.event.feature.mouseclick, {
         data: data[i],
         index: i,
-        mouse: mouse
+        mouse: mouse,
+        eventID: geo.feature.eventID,
+        top: idx === over.index.length - 1
       }, true);
     });
   };
@@ -188,12 +229,15 @@ geo.feature = function (arg) {
     var idx = m_this.boxSearch(brush.gcs.lowerLeft, brush.gcs.upperRight),
         data = m_this.data();
 
-    idx.forEach(function (i) {
+    geo.feature.eventID += 1;
+    idx.forEach(function (i, idx) {
       m_this.geoTrigger(geo.event.feature.brush, {
         data: data[i],
         index: i,
         mouse: brush.mouse,
-        brush: brush
+        brush: brush,
+        eventID: geo.feature.eventID,
+        top: idx === idx.length - 1
       }, true);
     });
   };
@@ -207,12 +251,15 @@ geo.feature = function (arg) {
     var idx = m_this.boxSearch(brush.gcs.lowerLeft, brush.gcs.upperRight),
         data = m_this.data();
 
-    idx.forEach(function (i) {
+    geo.feature.eventID += 1;
+    idx.forEach(function (i, idx) {
       m_this.geoTrigger(geo.event.feature.brushend, {
         data: data[i],
         index: i,
         mouse: brush.mouse,
-        brush: brush
+        brush: brush,
+        eventID: geo.feature.eventID,
+        top: idx === idx.length - 1
       }, true);
     });
   };
@@ -468,22 +515,6 @@ geo.feature = function (arg) {
   return this;
 };
 
-
-////////////////////////////////////////////////////////////////////////////
-/**
- * This event object provides mouse/keyboard events that can be handled
- * by the features.  This provides a similar interface as core events,
- * but with different names so the events don't interfere.  Subclasses
- * can override this to provide custom events.
- */
-////////////////////////////////////////////////////////////////////////////
-geo.event.feature = {
-  mousemove:  "geo_feature_mousemove",
-  mouseover:  "geo_feature_mouseover",
-  mouseout:   "geo_feature_mouseout",
-  mouseclick: "geo_feature_mouseclick",
-  brushend:   "geo_feature_brushend",
-  brush:      "geo_feature_brush"
-};
+geo.feature.eventID = 0;
 
 inherit(geo.feature, geo.sceneObject);
