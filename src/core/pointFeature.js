@@ -23,28 +23,7 @@ geo.pointFeature = function (arg) {
       m_position = arg.position === undefined ? function (d) { return d; } : arg.position,
       s_init = this._init,
       m_rangeTree = null,
-      s_data = this.data,
-      s_style = this.style,
       m_maxRadius = 0;
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get/Set position
-   *
-   * @returns {geo.pointFeature}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.position = function (val) {
-    if (val === undefined) {
-      return m_position;
-    } else {
-      m_position = val;
-      m_this.dataTime().modified();
-      m_this._updateRangeTree();
-      m_this.modified();
-    }
-    return m_this;
-  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -169,35 +148,6 @@ geo.pointFeature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Overloaded data method that updates the internal range tree on write.
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.data = function (data) {
-    if (data === undefined) {
-      return s_data();
-    }
-    s_data(data);
-    m_this._updateRangeTree();
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Overloaded style method that updates the internal range tree on write.
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.style = function (arg1, arg2) {
-    if (arg1 === undefined) {
-      return s_style();
-    }
-    s_style(arg1, arg2);
-    m_this._updateRangeTree();
-    return m_this;
-  };
-  this.style.get = s_style.get;
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
    * Returns the bounding box for a given datum in screen coordinates as an
    * object: ::
    *
@@ -270,6 +220,8 @@ geo.pointFeature = function (arg) {
       m_this.dataTime().modified();
     }
   };
+
+  this._property("position", "position", "position", function (d) { return d; });
 
   return m_this;
 };

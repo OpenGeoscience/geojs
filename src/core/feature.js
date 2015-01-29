@@ -22,7 +22,6 @@ geo.feature = function (arg) {
 
   var m_this = this,
       m_selectionAPI = arg.selectionAPI === undefined ? false : arg.selectionAPI,
-      m_style = {},
       m_layer = arg.layer === undefined ? null : arg.layer,
       m_gcs = arg.gcs === undefined ? "EPSG:4326" : arg.gcs,
       m_visible = arg.visible === undefined ? true : arg.visible,
@@ -32,7 +31,7 @@ geo.feature = function (arg) {
       m_buildTime = geo.timestamp(),
       m_updateTime = geo.timestamp(),
       m_selectedFeatures = [],
-      m_properties = {data: [], cache: {}, spec: {}};
+      m_properties = {data: [], cache: {}, spec: {}, paths: {}};
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -403,6 +402,37 @@ geo.feature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * A style interface compatible with the old style API for compatibility.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.style = function (arg1, arg2) {
+    var property, output, spec;
+    if (arg1 === undefined) {
+      output = {};
+      for (property in m_properties.paths) {
+        if (m_properties.paths.hasOwnProperty(property)) {
+          spec = m_properties.spec[property];
+          output[spec.name] = m_this.style(spec.name);
+        }
+      }
+      return output;
+    } else if (typeof arg1 === "string") {
+      return m_this[arg1](arg2);
+    } else if (arg2 === undefined) {
+      for (property in arg1) {
+        if (arg1.hasOwnProperty(property)) {
+          m_this.style(property, arg1[property]);
+        }
+      }
+      return m_this;
+    } else {
+      console.warn("Unknown style call method.");
+      return m_this;
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Add a property API to the class instance.  This will provide a new
    * property to the internal data representation derived from user provided
    * accessors on the data object.  This method is designed only to be called
@@ -414,13 +444,10 @@ geo.feature = function (arg) {
    * @param {string} path The target path of the new property
    * @param {string} type The property type
    * @param {*} defaultValue The default value of the property
-   * @param {function?} getter A custom internal array getter (see gl features)
    * @param {function?} setter A custom internal array setter (see gl features)
-   * @param {function?} creator A custom internal array creator (see gl features)
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._property = function (
-    name, path, type, defaultValue, setter) {
+  this._property = function (name, path, type, defaultValue, setter) {
 
     if (m_this.hasOwnProperty(name)) {
       console.warn("Property '" + name + "' overrides existing method.");
@@ -469,6 +496,12 @@ geo.feature = function (arg) {
         "for property '" + name + "'."
       );
     }
+    if (m_properties.paths[name]) {
+      console.warn(
+        "Overriding existing property '" + name + "'."
+      );
+    }
+    m_properties.paths[name] = path;
 
     /**
      * This will be the (g|s)etter function for the property that is added to the
@@ -552,9 +585,7 @@ geo.feature = function (arg) {
     if (!m_layer) {
       throw "Feature requires a valid layer";
     }
-    m_style = $.extend({},
-                {"opacity": 1.0}, arg.style === undefined ? {} :
-                arg.style);
+    m_this.style(arg.style);
     m_this._bindMouseHandlers();
   };
 
