@@ -91,7 +91,7 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.zoom = function (val, direction) {
-    var base, evt;
+    var base, evt, recenter = false;
     if (val === undefined) {
       return m_zoom;
     }
@@ -113,21 +113,23 @@ geo.map = function (arg) {
       base.renderer().geoTrigger(geo.event.zoom, evt, true);
     }
 
-    if (evt.geo.preventDefault) {
-      return;
+    recenter = evt.center;
+    if (!evt.geo.preventDefault) {
+
+      m_zoom = val;
+      m_this._updateBounds();
+
+      m_this.children().forEach(function (child) {
+        child.geoTrigger(geo.event.zoom, evt, true);
+      });
+
+      m_this.modified();
     }
 
-    m_zoom = val;
-    m_this._updateBounds();
-
-    m_this.children().forEach(function (child) {
-      child.geoTrigger(geo.event.zoom, evt, true);
-    });
-
-    m_this.modified();
-
     if (evt.center) {
-      m_this.center(evt.center);
+      m_this.center(recenter);
+    } else {
+      m_this.pan({x: 0, y: 0});
     }
     return m_this;
   };
@@ -166,7 +168,12 @@ geo.map = function (arg) {
       } else {
         delta.x = Math.max(Math.min(delta.x, -corner1.x), m_width - corner2.x);
       }
-      delta.y = Math.max(Math.min(delta.y, -corner1.y), m_height - corner2.y);
+      if (corner1.y > 0 && corner2.y < m_height) {
+        // if the map is too small horizontally
+        delta.y = (-corner1.y + m_height - corner2.y) / 2;
+      } else {
+        delta.y = Math.max(Math.min(delta.y, -corner1.y), m_height - corner2.y);
+      }
     }
 
     evt = {
@@ -183,7 +190,6 @@ geo.map = function (arg) {
     if (evt.geo.preventDefault) {
       return;
     }
-
     m_center = m_this.displayToGcs({
       x: m_width / 2,
       y: m_height / 2
@@ -447,6 +453,12 @@ geo.map = function (arg) {
       m_this.zoom(save);
 
       m_this._updateBounds();
+
+      // This forces the map into a state with valid bounds
+      // when clamping is on.  The original call to center
+      // is forced to initialize the camera position in the
+      // base layer so no adjustment is done there.
+      m_this.pan({x: 0, y: 0});
       return m_this;
     }
     return m_baseLayer;
@@ -781,7 +793,6 @@ geo.map = function (arg) {
         }
 
         if (next) {
-          console.log(next);
           m_queuedTransition = null;
           m_this.transition(next);
         }
