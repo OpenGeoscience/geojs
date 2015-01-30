@@ -20,8 +20,6 @@ geo.pointFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
-      m_position = arg.position === undefined ? function (d) { return d; } : arg.position,
-      s_init = this._init,
       m_rangeTree = null,
       m_maxRadius = 0;
 
@@ -189,39 +187,15 @@ geo.pointFeature = function (arg) {
     };
   };
 
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Initialize
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._init = function (arg) {
-    s_init.call(m_this, arg);
-
-    var defaultStyle = $.extend(
-      {},
-      {
-        radius: 10.0,
-        stroke: true,
-        strokeColor: { r: 0.0, g: 1.0, b: 0.0 },
-        strokeWidth: 2.0,
-        strokeOpacity: 1.0,
-        fillColor: { r: 1.0, g: 0.0, b: 0.0 },
-        fill: true,
-        fillOpacity: 1.0,
-        sprites: false,
-        sprites_image: null
-      },
-      arg.style === undefined ? {} : arg.style
-    );
-
-    m_this.style(defaultStyle);
-
-    if (m_position) {
-      m_this.dataTime().modified();
-    }
-  };
-
   this._property("position", "position", "position", function (d) { return d; });
+  this._property("radius", "radius", "size", 10);
+  this._property("stroke", "stroke", "bool", true);
+  this._property("strokeColor", "strokeColor", "color", "black");
+  this._property("strokeWidth", "strokeWidth", "size", 2);
+  this._property("strokeOpacity", "strokeOpacity", "opacity", 1);
+  this._property("fill", "fill", "bool", true);
+  this._property("fillColor", "fillColor", "color", "red");
+  this._property("fillOpacity", "fillOpacity", "opacity", 1);
 
   return m_this;
 };

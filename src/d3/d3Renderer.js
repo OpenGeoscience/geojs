@@ -50,34 +50,24 @@ geo.d3.d3Renderer = function (arg) {
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._convertColor = function (f, g) {
-    f = geo.util.ensureFunction(f);
-    g = g || function () { return true; };
-    return function () {
-      var c = 'none';
-      if (g.apply(this, arguments)) {
-        c = f.apply(this, arguments);
-        if (c.hasOwnProperty('r') &&
-            c.hasOwnProperty('g') &&
-            c.hasOwnProperty('b')) {
-          c = d3.rgb(255 * c.r, 255 * c.g, 255 * c.b);
-        }
+  this._convertColor = function (color, iscolor) {
+    return function (d, i) {
+      if (iscolor[i]) {
+        return d3.rgb(255 * color[i].r, 255 * color[i].g, 255 * color[i].b);
       }
-      return c;
+      return 'none';
     };
   };
 
-  this._convertPosition = function (f) {
-    f = geo.util.ensureFunction(f);
-    return function () {
-      return m_this.worldToDisplay(f.apply(this, arguments));
+  this._convertPosition = function (positions) {
+    return function (d, i) {
+      return m_this.worldToDisplay(positions[i]);
     };
   };
 
-  this._convertScale = function (f) {
-    f = geo.util.ensureFunction(f);
-    return function () {
-      return f.apply(this, arguments) / m_scale;
+  this._convertScale = function (size) {
+    return function (d, i) {
+      return size[i] / m_scale;
     };
   };
 
@@ -89,21 +79,13 @@ geo.d3.d3Renderer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   function setStyles(select, styles) {
     /* jshint validthis:true */
+
+    function defaultAccessor(key) {
+      return function (d, i) {
+        return styles[key][i];
+      };
+    }
     var key, k, f;
-    function fillFunc() {
-      if (styles.fill.apply(this, arguments)) {
-        return null;
-      } else {
-        return 'none';
-      }
-    }
-    function strokeFunc() {
-      if (styles.stroke.apply(this, arguments)) {
-        return null;
-      } else {
-        return 'none';
-      }
-    }
     for (key in styles) {
       if (styles.hasOwnProperty(key)) {
         f = null;
@@ -111,24 +93,18 @@ geo.d3.d3Renderer = function (arg) {
         if (key === 'strokeColor') {
           k = 'stroke';
           f = m_this._convertColor(styles[key], styles.stroke);
-        } else if (key === 'stroke' && styles[key]) {
-          k = 'stroke';
-          f = strokeFunc;
         } else if (key === 'strokeWidth') {
           k = 'stroke-width';
           f = m_this._convertScale(styles[key]);
         } else if (key === 'strokeOpacity') {
           k = 'stroke-opacity';
-          f = styles[key];
+          f = defaultAccessor(key);
         } else if (key === 'fillColor') {
           k = 'fill';
           f = m_this._convertColor(styles[key], styles.fill);
-        } else if (key === 'fill' && !styles.hasOwnProperty('fillColor')) {
-          k = 'fill';
-          f = fillFunc;
         } else if (key === 'fillOpacity') {
           k = 'fill-opacity';
-          f = styles[key];
+          f = defaultAccessor(key);
         }
         if (k) {
           select.style(k, f);

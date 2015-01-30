@@ -457,7 +457,7 @@ geo.feature = function (arg) {
     var accessor = defaultValue;
 
     // Get the property type from the static object.
-    var prop = geo.feature.property[type];
+    var prop = geo.property[type];
 
     // Make default setter when not provided
     setter = setter || function (name, root, value) {
@@ -471,7 +471,7 @@ geo.feature = function (arg) {
         "given for '" + name + "'."
       );
     }
-    if (prop.normalize(defaultValue) === null) {
+    if (!geo.util.isFunction(defaultValue) && prop.normalize(defaultValue) === null) {
       console.warn(
         "The default '" + defaultValue + "' " +
         "is not a valid '" + type + "' " +
@@ -524,7 +524,12 @@ geo.feature = function (arg) {
           "to an invalid value '" + arg + "'."
         );
       }
-      accessor = arg.bind(m_this);
+      if (geo.util.isFunction(arg)) {
+        accessor = arg.bind(m_this);
+      } else {
+        accessor = arg;
+      }
+
       // (re)build cache for the property
       return m_this;
     };
@@ -538,15 +543,15 @@ geo.feature = function (arg) {
       var root = m_properties.cache;
       var cdata = m_properties.data;
       var args = [];
-      if (parent.split(".").length > 1) {
+      if (parent && parent.split(".").length > 1) {
         // TODO:
         throw "Containers not yet implemented";
       }
       setter(localName, root, cdata.map(function (d, i) {
-        var largs = [d, i].concat(args), val;
+        var largs, val;
         if (geo.util.isFunction(accessor)) {
           largs = [d, i].concat(args);
-          val = prop.normalize(accessor.apply(m_this, args));
+          val = prop.normalize(accessor.apply(m_this, largs));
           if (val === null) {
             console.warn(
               "Invalid value returned by accessor for property '" +
@@ -572,6 +577,27 @@ geo.feature = function (arg) {
     };
 
     m_this[name] = func;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return the current property cache content and optionally
+   * rebuild the cache.
+   * @param {bool} rebuild Force rebuilding the cache
+   * @returns {object}
+   * @protected
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._cache = function (rebuild) {
+    var prop;
+    if (rebuild) {
+      for (prop in m_properties.spec) {
+        if (m_properties.spec.hasOwnProperty(prop)) {
+          m_properties.spec[prop].build();
+        }
+      }
+    }
+    return m_properties.cache;
   };
 
   ////////////////////////////////////////////////////////////////////////////

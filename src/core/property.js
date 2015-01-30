@@ -171,6 +171,16 @@
         }
         return null;
       }
+    },
+
+    /**
+     * Handles a size value (non-negative number).
+     *
+     */
+    image: {
+      normalize: function (value) {
+        return value;
+      }
     }
   };
 

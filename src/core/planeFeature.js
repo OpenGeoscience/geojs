@@ -26,8 +26,7 @@ geo.planeFeature = function (arg) {
       m_lowerRight = [arg.lr.x, arg.lr.y, arg.depth],
       m_defaultDepth = arg.depth,
       m_drawOnAsyncResourceLoad = arg.drawOnAsyncResourceLoad === undefined ?
-                                    true : false,
-      s_init = this._init;
+                                    true : false;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -122,21 +121,7 @@ geo.planeFeature = function (arg) {
     }
   };
 
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Initialize
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._init = function (arg) {
-    var style = null;
-    s_init.call(m_this, arg);
-    style = m_this.style();
-    if (style.image === undefined) {
-      style.image = null;
-    }
-    m_this.style(style);
-  };
-
+  this._property("image", "image", "image", false);
   this._init(arg);
   return this;
 };
