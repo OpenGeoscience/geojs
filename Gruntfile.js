@@ -401,6 +401,7 @@ module.exports = function (grunt) {
     'clean',
     'template',
     'copy:geo',
+    'copy:vgl',
     'concat:geojs',
     'uglify:geojs'
   ]);
