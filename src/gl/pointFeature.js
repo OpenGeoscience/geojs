@@ -24,7 +24,9 @@ geo.gl.pointFeature = function (arg) {
       m_pixelWidthUniform = null,
       m_aspectUniform = null,
       s_init = this._init,
-      s_update = this._update;
+      s_update = this._update,
+      s_setter = this._propertySetter,
+      m_cache = {positions: []};
 
   var vertexShaderSource = [
       "attribute vec3 pos;",
@@ -148,11 +150,8 @@ geo.gl.pointFeature = function (arg) {
   function createGLPoints() {
     var i, numPts = m_this.data().length,
         start, unit = rect(0, 0, 1, 1),
-        position = [], radius = [], strokeWidth = [],
-        fillColor = [], fill = [], strokeColor = [], stroke = [],
-        fillOpacity = [], strokeOpacity = [], posFunc, radFunc, strokeWidthFunc,
-        fillColorFunc, fillFunc, strokeColorFunc, strokeFunc, fillOpacityFunc,
-        strokeOpactityFunc, buffers = vgl.DataBuffers(1024),
+        s_cache = m_this._cache(true),
+        buffers = vgl.DataBuffers(1024),
         sourcePositions = vgl.sourceDataP3fv(),
         sourceUnits = vgl.sourceDataAnyfv(2, vgl.vertexAttributeKeysIndexed.One),
         sourceRadius = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Two),
@@ -188,35 +187,6 @@ geo.gl.pointFeature = function (arg) {
                             2.0 / m_this.renderer().width());
     m_aspectUniform = new vgl.floatUniform("aspect",
                         m_this.renderer().width() / m_this.renderer().height());
-
-    posFunc = m_this.position();
-    radFunc = m_this.style.get("radius");
-    strokeWidthFunc = m_this.style.get("strokeWidth");
-    fillColorFunc = m_this.style.get("fillColor");
-    fillFunc = m_this.style.get("fill");
-    strokeColorFunc = m_this.style.get("strokeColor");
-    strokeFunc = m_this.style.get("stroke");
-    fillOpacityFunc = m_this.style.get("fillOpacity");
-    strokeOpactityFunc = m_this.style.get("strokeOpacity");
-
-    m_this.data().forEach(function (item) {
-      var p = posFunc(item), c;
-
-      position.push([p.x, p.y, p.z || 0]);
-      radius.push(radFunc(item));
-      strokeWidth.push(strokeWidthFunc(item));
-      fill.push(fillFunc(item) ? 1.0 : 0.0);
-
-      c = fillColorFunc(item);
-      fillColor.push([c.r, c.g, c.b]);
-
-      c = strokeColorFunc(item);
-      strokeColor.push([c.r, c.g, c.b]);
-
-      stroke.push(strokeFunc(item) ? 1.0 : 0.0);
-      fillOpacity.push(fillOpacityFunc(item));
-      strokeOpacity.push(strokeOpactityFunc(item));
-    });
 
     position = geo.transform.transformCoordinates(
                   m_this.gcs(), m_this.layer().map().gcs(),
@@ -313,6 +283,27 @@ geo.gl.pointFeature = function (arg) {
 
     m_actor.setMapper(mapper);
   }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Generate a local cache of the data stored as arrays to speed up renders.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._propertySetter = function (name, root, data) {
+    s_setter.call(m_this, name, root, data);
+    if (name === "positions") {
+      m_cache.positions = geo.transform.transformCoordinates(
+        m_this.gcs(),
+        m_this.layer().map().gcs(),
+        geo.gl.positionsToArray(data, 2),
+        2
+      );
+    } else if (name === "strokeColor" || name === "fillColor") {
+      m_cache[name] = geo.gl.colorsToArray(data);
+    } else if (name === "stroke" || name === "fill") {
+      m_cache[name] = geo.gl.boolsToArray(data);
+    }
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**

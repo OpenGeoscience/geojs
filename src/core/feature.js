@@ -444,14 +444,15 @@ geo.feature = function (arg) {
    * @param {string} path The target path of the new property
    * @param {string} type The property type
    * @param {*} defaultValue The default value of the property
-   * @param {function?} setter A custom internal array setter (see gl features)
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._property = function (name, path, type, defaultValue, setter) {
+  this._property = function (name, path, type, defaultValue) {
 
     if (m_this.hasOwnProperty(name)) {
       console.warn("Property '" + name + "' overrides existing method.");
     }
+
+    var setter = m_this._propertySetter.bind(m_this);
 
     // The current accessor value/method.
     var accessor = defaultValue;
@@ -476,6 +477,12 @@ geo.feature = function (arg) {
         "The default '" + defaultValue + "' " +
         "is not a valid '" + type + "' " +
         "for '" + name + "'."
+      );
+    }
+    // Property names must start with a lower case letter
+    if (name.match(/^[^a-z]/)) {
+      throw new Error(
+        "Invalid property name."
       );
     }
 
@@ -572,11 +579,43 @@ geo.feature = function (arg) {
       name: name,
       defaultValue: defaultValue,
       property: prop,
-      build: build,
-      setter: setter
+      build: build
     };
 
     m_this[name] = func;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * A renderer specific handler for property caching.  This function is
+   * on every property during every cache rebuild allowing the renderer
+   * to do caching of its own.
+   * @protected
+   * @param {string} name The feature name
+   * @param {object} root The object root in the cache
+   * @param {array} data The data to be added to root as
+   *    <code>root[name] = data</code>
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._propertySetter = function (name, root, data) {
+    root[name] = data;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * A renderer specific handler for property caching.  This function
+   * is provided by feature subclasses that change the default
+   * property setter to convert the cached values from local to normal form.
+   *
+   * @todo
+   * The interface for this isn't defined yet.  It is assumed for the moment
+   * that property setters don't do anything incompatible with standard
+   * getters.  In the future, the function could be used to improve the
+   * caching performance while maintaining renderer agnostic methods.
+   * @protected
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._propertyGetter = function () {
   };
 
   ////////////////////////////////////////////////////////////////////////////
