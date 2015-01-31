@@ -18,7 +18,8 @@ geo.gui.uiLayer = function (arg) {
   }
   geo.layer.call(this, arg);
 
-  var m_this = this;
+  var m_this = this,
+      s_exit = this._exit;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -48,6 +49,18 @@ geo.gui.uiLayer = function (arg) {
     m_this.removeChild(widget);
     m_this.modified();
     return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Free memory and destroy the layer.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._exit = function () {
+    m_this.children().forEach(function (child) {
+      m_this.deleteWidget(child);
+    });
+    s_exit();
   };
 };
 

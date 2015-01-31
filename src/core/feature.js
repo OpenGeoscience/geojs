@@ -21,6 +21,7 @@ geo.feature = function (arg) {
   arg = arg || {};
 
   var m_this = this,
+      s_exit = this._exit,
       m_selectionAPI = arg.selectionAPI === undefined ? false : arg.selectionAPI,
       m_style = {},
       m_layer = arg.layer === undefined ? null : arg.layer,
@@ -509,6 +510,11 @@ geo.feature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
     m_this._unbindMouseHandlers();
+    m_selectedFeatures = [];
+    m_data = [];
+    m_style = {};
+    arg = {};
+    s_exit();
   };
 
   this._init(arg);

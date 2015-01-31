@@ -23,6 +23,7 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
+      s_exit = this._exit,
       m_x = 0,
       m_y = 0,
       m_node = $(arg.node),
@@ -39,7 +40,6 @@ geo.map = function (arg) {
       m_transition = null,
       m_queuedTransition = null,
       m_clock = null;
-
 
   arg.center = geo.util.normalizeCoordinates(arg.center);
   arg.autoResize = arg.autoResize === undefined ? true : arg.autoResize;
@@ -271,7 +271,6 @@ geo.map = function (arg) {
     /// layer using id or some sort.
     return layer;
   };
-
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -527,6 +526,7 @@ geo.map = function (arg) {
       m_this.interactor().destroy();
       m_this.interactor(null);
     }
+    s_exit();
   };
 
   this._init(arg);

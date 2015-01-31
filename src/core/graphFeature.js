@@ -30,7 +30,6 @@ geo.graphFeature = function (arg) {
       s_init = this._init,
       s_exit = this._exit;
 
-
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
@@ -90,6 +89,7 @@ geo.graphFeature = function (arg) {
     m_this.data([]);
     m_points._exit();
     m_this.removeChild(m_points);
+    m_links = [];
     s_exit();
     return m_this;
   };

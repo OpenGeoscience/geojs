@@ -56,6 +56,7 @@ geo.layer = function (arg) {
    */
   //////////////////////////////////////////////////////////////////////////////
   var m_this = this,
+      s_exit = this._exit,
       m_style = arg.style === undefined ? {"opacity": 0.5,
                                            "color": [0.8, 0.8, 0.8],
                                            "visible": true,
@@ -339,7 +340,6 @@ geo.layer = function (arg) {
     return m_isReference;
   };
 
-
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set if the layer has been initialized
@@ -421,6 +421,7 @@ geo.layer = function (arg) {
   this._exit = function () {
     m_node.remove();
     m_node = null;
+    s_exit();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -450,7 +451,6 @@ geo.layer = function (arg) {
 
     return m_this;
   };
-
 
   ////////////////////////////////////////////////////////////////////////////
   /**

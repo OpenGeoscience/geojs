@@ -12,7 +12,6 @@ geo.gl._vglViewerInstances = {
   maps: []
 };
 
-
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Retrives the singleton, lazily constructs as necessary.
@@ -88,6 +87,7 @@ geo.gl.vglRenderer = function (arg) {
   geo.gl.renderer.call(this, arg);
 
   var m_this = this,
+      s_exit = this._exit,
       m_viewer = geo.gl.vglViewerInstance(this.layer().map()),
       m_contextRenderer = vgl.renderer(),
       m_width = 0,
@@ -106,7 +106,6 @@ geo.gl.vglRenderer = function (arg) {
     return m_width;
   };
 
-
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Return height of the renderer
@@ -115,7 +114,6 @@ geo.gl.vglRenderer = function (arg) {
   this.height = function () {
     return m_height;
   };
-
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -341,10 +339,12 @@ geo.gl.vglRenderer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Exit
+   * @todo remove all vgl objects
    */
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
     geo.gl.vglViewerInstance.deleteCache(m_viewer);
+    s_exit();
   };
 
   this._updateRendererCamera = function () {

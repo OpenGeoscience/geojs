@@ -16,6 +16,7 @@ geo.gl.planeFeature = function (arg) {
   geo.planeFeature.call(this, arg);
 
   var m_this = this,
+      s_exit = this._exit,
       m_actor = null,
       m_onloadCallback = arg.onload === undefined ? null : arg.onload;
 
@@ -151,6 +152,7 @@ geo.gl.planeFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
     m_this.renderer().contextRenderer().removeActor(m_actor);
+    s_exit();
   };
 
   return this;
