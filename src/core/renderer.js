@@ -3,6 +3,7 @@
  * Create a new instance of class renderer
  *
  * @class
+ * @extends geo.object
  * @returns {geo.renderer}
  */
 //////////////////////////////////////////////////////////////////////////////

@@ -1,12 +1,12 @@
 window.startTest = function (done) {
-  'use strict';
+  "use strict";
 
   var myMap = window.geoTests.createOsmMap({
     center: { y: 40, x: -105 }
   });
 
   // Load image to be used for drawing dots
-  var layer = myMap.createLayer('feature', {'renderer' : 'd3Renderer'});
+  var layer = myMap.createLayer("feature", {"renderer" : "d3"});
 
   var obj = {
     "features": [
@@ -140,13 +140,13 @@ window.startTest = function (done) {
             "name": "DOUBLE OAKS CENTER",
             "address": "1326 WOODWARD AV"
         }
-      },
+      }
     ],
     "type": "FeatureCollection"
   };
 
   var reader = geo.createFileReader("jsonReader", {"layer": layer});
-  reader.read(obj, function (features) {
+  reader.read(obj, function () {
     myMap.draw();
     myMap.onIdle(done);
   });

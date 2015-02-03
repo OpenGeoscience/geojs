@@ -6,8 +6,8 @@ window.startTest = function (done) {
   var width = myMap.node().width(), height = myMap.node().height();
 
   // create two layers
-  var fixedLayer = myMap.createLayer('feature', {'renderer' : 'd3Renderer', 'sticky': false}),
-      movingLayer = myMap.createLayer('feature', {'renderer': 'd3Renderer', 'sticky': true}),
+  var fixedLayer = myMap.createLayer('feature', {'renderer' : 'd3', 'sticky': false}),
+      movingLayer = myMap.createLayer('feature', {'renderer': 'd3', 'sticky': true}),
       fixedSvg = fixedLayer.canvas(),
       movingSvg = movingLayer.canvas();
 
@@ -30,12 +30,12 @@ window.startTest = function (done) {
     .attr('cy', height / 2)
     .attr('r', 10)
     .style('fill', 'blue');
-  
+
   movingLayer.geoOn(geo.event.d3Rescale, function (arg) {
     scaledCircle.attr('r', 10 / arg.scale);
   });
 
   myMap.draw();
-  
+
   myMap.onIdle(done);
 };

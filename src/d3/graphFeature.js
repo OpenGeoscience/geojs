@@ -1,3 +1,7 @@
+/**
+ * @class
+ * @extends geo.graphFeature
+ */
 geo.d3.graphFeature = function (arg) {
   'use strict';
 

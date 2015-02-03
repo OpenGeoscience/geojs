@@ -74,7 +74,7 @@ $(function () {
   var svgLayer = map.createLayer(
     'feature',
     {
-      renderer: 'd3Renderer'
+      renderer: 'd3'
     }
   );
 

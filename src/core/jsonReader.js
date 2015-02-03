@@ -4,7 +4,8 @@
  * Create a new instance of class jsonReader
  *
  * @class
- * @returns {geo.fileReader}
+ * @extends geo.fileReader
+ * @returns {geo.jsonReader}
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.jsonReader = function (arg) {

@@ -3,6 +3,7 @@
  * Create a new instance of class polygonFeature
  *
  * @class
+ * @extends geo.feature
  * @returns {geo.polygonFeature}
  */
 //////////////////////////////////////////////////////////////////////////////

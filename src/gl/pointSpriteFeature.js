@@ -3,6 +3,7 @@
  * Create a new instance of pointSpritesGeomFeature
  *
  * @class
+ * @extends geo.feature
  * @param positions
  * @param colors
  * @returns {geo.pointFeature}

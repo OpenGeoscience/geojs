@@ -24,26 +24,6 @@ inherit = function (C, P) { // jshint ignore: line
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Convenient function to get size of an object
- *
- * @param {object} obj
- * @returns {number} *
- */
-//////////////////////////////////////////////////////////////////////////////
-Object.size = function (obj) { // jshint ignore: line
-  "use strict";
-
-  var size = 0, key = null;
-  for (key in obj) {
-    if (obj.hasOwnProperty(key)) {
-      size += 1;
-    }
-  }
-  return size;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-/**
  * Register a new file reader type
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -167,7 +147,7 @@ geo.createLayer = function (name, map, arg) {
   "use strict";
 
   /// Default renderer is vgl
-  var options = {"map": map, "renderer": "vglRenderer"},
+  var options = {"map": map, "renderer": "vgl"},
       layer = null;
 
   if (name in geo.layers) {

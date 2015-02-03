@@ -3,6 +3,7 @@
  * Create a new instance of lineFeature
  *
  * @class
+ * @extends geo.lineFeature
  * @returns {geo.gl.lineFeature}
  */
 //////////////////////////////////////////////////////////////////////////////

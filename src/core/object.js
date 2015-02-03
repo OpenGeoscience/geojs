@@ -3,6 +3,7 @@
  * Create a new instance of class object
  *
  * @class
+ * @extends vgl.object
  * @returns {geo.object}
  */
 //////////////////////////////////////////////////////////////////////////////

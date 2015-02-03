@@ -20,7 +20,7 @@ $(function () {
   var vglLayer = map.createLayer(
     'feature',
     {
-      renderer: 'vglRenderer'
+      renderer: 'vgl'
     }
   );
 
@@ -28,7 +28,7 @@ $(function () {
   var svgLayer = map.createLayer(
     'feature',
     {
-      renderer: 'd3Renderer'
+      renderer: 'd3'
     }
   );
 

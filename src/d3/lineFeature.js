@@ -3,6 +3,8 @@
  * Create a new instance of class lineFeature
  *
  * @class
+ * @extends geo.lineFeature
+ * @extends geo.d3.object
  * @returns {geo.d3.lineFeature}
  */
 //////////////////////////////////////////////////////////////////////////////

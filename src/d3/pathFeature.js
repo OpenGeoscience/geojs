@@ -3,6 +3,8 @@
  * Create a new instance of class pathFeature
  *
  * @class
+ * @extends geo.pathFeature
+ * @extends geo.d3.object
  * @returns {geo.d3.pathFeature}
  */
 //////////////////////////////////////////////////////////////////////////////

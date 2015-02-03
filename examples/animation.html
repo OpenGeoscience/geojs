@@ -168,7 +168,7 @@ $(function() {
 
         // Load image to be used for drawing dots
         var layer = animatedLayer({
-            'renderer' : 'vglRenderer',
+            'renderer' : 'vgl',
             data: citieslatlon});
         myMap.addLayer(layer);
 
@@ -305,7 +305,7 @@ $(function() {
           // Add time layer
           myMap.removeLayer(layer);
           myMap.addLayer(timeAnimatedLayer({
-            'renderer' : 'vglRenderer',
+            'renderer' : 'vgl',
             data: citieslatlon}));
 
           defer = new $.Deferred();

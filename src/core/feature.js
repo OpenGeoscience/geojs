@@ -3,6 +3,7 @@
  * Create a new instance of class feature
  *
  * @class
+ * @extends geo.sceneObject
  * @returns {geo.feature}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -28,7 +29,6 @@ geo.feature = function (arg) {
       m_visible = arg.visible === undefined ? true : arg.visible,
       m_bin = arg.bin === undefined ? 0 : arg.bin,
       m_renderer = arg.renderer === undefined ? null : arg.renderer,
-      m_data = [],
       m_dataTime = geo.timestamp(),
       m_buildTime = geo.timestamp(),
       m_updateTime = geo.timestamp(),
@@ -272,7 +272,9 @@ geo.feature = function (arg) {
   this.style = function (arg1, arg2) {
     if (arg1 === undefined) {
       return m_style;
-    }  else if (arg2 === undefined) {
+    } else if (typeof arg1 === "string" && arg2 === undefined) {
+      return m_style[arg1];
+    } else if (arg2 === undefined) {
       m_style = $.extend({}, m_style, arg1);
       m_this.modified();
       return m_this;
@@ -444,9 +446,9 @@ geo.feature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.data = function (data) {
     if (data === undefined) {
-      return m_data;
+      return m_this.style("data") || [];
     } else {
-      m_data = data;
+      m_this.style("data", data);
       m_this.dataTime().modified();
       m_this.modified();
       return m_this;
@@ -515,6 +517,57 @@ geo.feature = function (arg) {
   return this;
 };
 
+/**
+ * The most recent feature event triggered.
+ * @type {number}
+ */
 geo.feature.eventID = 0;
+
+/**
+ * General object specification for feature types.
+ * @typedef geo.feature.spec
+ * @type {object}
+ * @property {string} type A supported feature type.
+ * @property {object[]} [data=[]] An array of arbitrary objects used to
+ * construct the feature.  These objects (and their associated
+ * indices in the array) will be passed back to style and attribute
+ * accessors provided by the user.  In general the number of
+ * "markers" drawn will be equal to the length of this array.
+ */
+
+/**
+ * Create a feature from an object.  The implementation here is
+ * meant to define the general interface of creating features
+ * from a javascript object.  See documentation from individual
+ * feature types for specific details.  In case of an error in
+ * the arguments this method will return null;
+ * @param {geo.layer} layer The layer to add the feature to
+ * @param {geo.feature.spec} [spec={}] The object specification
+ * @returns {geo.feature|null}
+ */
+geo.feature.create = function (layer, spec) {
+  "use strict";
+
+  var type = spec.type;
+
+  // Check arguments
+  if (!layer instanceof geo.layer) {
+    console.warn("Invalid layer");
+    return null;
+  }
+  if (typeof spec !== "object") {
+    console.warn("Invalid spec");
+    return null;
+  }
+  var feature = layer.createFeature(type);
+  if (!feature) {
+    console.warn("Could not create feature type '" + type + "'");
+    return null;
+  }
+
+  spec = spec || {};
+  spec.data = spec.data || [];
+  return feature.style(spec);
+};
 
 inherit(geo.feature, geo.sceneObject);
