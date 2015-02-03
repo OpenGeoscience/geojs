@@ -36,8 +36,8 @@ module.exports = function (grunt) {
   };
 
   sourceList = Array.prototype.concat(
-    vgl.files.map(function (f) { return 'src/vgl/' + f; }),
     geo.init,
+    vgl.files.map(function (f) { return 'src/vgl/' + f; }),
     geo.util,
     geo.core,
     geo.gl,

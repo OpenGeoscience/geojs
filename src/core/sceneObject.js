@@ -166,7 +166,7 @@ geo.sceneObject = function (arg) {
   //////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
     m_this.children = [];
-    m_this.parent = null;
+    delete m_this.parent;
     s_exit();
   };
 

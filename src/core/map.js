@@ -517,7 +517,7 @@ geo.map = function (arg) {
    * Exit this map
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._exit = function () {
+  this.exit = function () {
     var i, layers = m_this.children();
     for (i = 0; i < layers.length; i += 1) {
       layers[i]._exit();
@@ -526,13 +526,15 @@ geo.map = function (arg) {
       m_this.interactor().destroy();
       m_this.interactor(null);
     }
+    m_this.node().off(".geo");
+    $(window).off("resize", resizeSelf);
     s_exit();
   };
 
   this._init(arg);
 
   // set up drag/drop handling
-  this.node().on("dragover", function (e) {
+  this.node().on("dragover.geo", function (e) {
     var evt = e.originalEvent;
 
     if (m_this.fileReader()) {
@@ -541,7 +543,7 @@ geo.map = function (arg) {
       evt.dataTransfer.dropEffect = "copy";
     }
   })
-  .on("drop", function (e) {
+  .on("drop.geo", function (e) {
     var evt = e.originalEvent, reader = m_this.fileReader(),
         i, file;
 
@@ -794,10 +796,12 @@ geo.map = function (arg) {
   this.interactor(arg.interactor || geo.mapInteractor());
   this.clock(arg.clock || geo.clock());
 
+  function resizeSelf() {
+    m_this.resize(0, 0, m_node.width(), m_node.height());
+  }
+
   if (arg.autoResize) {
-    $(window).resize(function () {
-      m_this.resize(0, 0, m_node.width(), m_node.height());
-    });
+    $(window).resize(resizeSelf);
   }
 
   return this;

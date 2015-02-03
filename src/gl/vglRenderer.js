@@ -25,10 +25,11 @@ geo.gl.vglViewerInstance = function (map) {
 
   var mapIdx,
       maps = geo.gl._vglViewerInstances.maps,
-      viewers = geo.gl._vglViewerInstances.viewers;
+      viewers = geo.gl._vglViewerInstances.viewers,
+      canvas;
 
   function makeViewer() {
-    var canvas = $(document.createElement("canvas"));
+    canvas = $(document.createElement("canvas"));
     canvas.attr("class", "webgl-canvas");
     var viewer = vgl.viewer(canvas.get(0));
     viewer.renderWindow().removeRenderer(
@@ -48,6 +49,13 @@ geo.gl.vglViewerInstance = function (map) {
     viewers[mapIdx] = makeViewer();
   }
 
+  viewers[mapIdx]._exit = function () {
+    if (canvas) {
+      canvas.off();
+      canvas.remove();
+    }
+  };
+
   return viewers[mapIdx];
 };
 
@@ -59,14 +67,11 @@ geo.gl.vglViewerInstance.deleteCache = function (viewer) {
       viewers = geo.gl._vglViewerInstances.viewers;
 
   for (mapIdx = 0; mapIdx < viewers.length; mapIdx += 1) {
-    if (viewer === viewers[mapIdx]) {
-      break;
+    if (viewer === undefined || viewer === viewers[mapIdx]) {
+      viewer._exit();
+      maps.splice(mapIdx, 1);
+      viewers.splice(mapIdx, 1);
     }
-  }
-
-  if (viewer === viewers[mapIdx]) {
-    maps.splice(mapIdx, 1);
-    viewers.splice(mapIdx, 1);
   }
 };
 

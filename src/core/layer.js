@@ -419,8 +419,13 @@ geo.layer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
+    m_renderer._exit();
+    m_node.off();
     m_node.remove();
     m_node = null;
+    arg = {};
+    m_canvas = null;
+    m_renderer = null;
     s_exit();
   };
 
