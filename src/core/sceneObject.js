@@ -4,7 +4,7 @@
  * event handling with a tree-based event propagation.
  *
  * @class
- * @extends {geo.object}
+ * @extends geo.object
  * @returns {geo.sceneObject}
  */
 //////////////////////////////////////////////////////////////////////////////

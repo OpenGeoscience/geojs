@@ -3,6 +3,7 @@
  * Create a new instance of class graphFeature
  *
  * @class
+ * @extends geo.feature
  * @returns {geo.graphFeature}
  */
 //////////////////////////////////////////////////////////////////////////////

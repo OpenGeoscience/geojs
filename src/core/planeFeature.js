@@ -3,6 +3,7 @@
  * Create a new instance of class planeFeature
  *
  * @class
+ * @extends geo.polygonFeature
  * @returns {geo.planeFeature}
  */
 //////////////////////////////////////////////////////////////////////////////

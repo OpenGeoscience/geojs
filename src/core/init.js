@@ -152,7 +152,7 @@ geo.createLayer = function (name, map, arg) {
   "use strict";
 
   /// Default renderer is vgl
-  var options = {"map": map, "renderer": "vglRenderer"},
+  var options = {"map": map, "renderer": "vgl"},
       layer = null;
 
   if (name in geo.layers) {

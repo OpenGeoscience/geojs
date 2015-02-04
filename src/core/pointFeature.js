@@ -3,6 +3,7 @@
  * Create a new instance of class pointFeature
  *
  * @class
+ * @extends geo.feature
  * @returns {geo.pointFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -20,7 +21,6 @@ geo.pointFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
-      m_position = arg.position === undefined ? function (d) { return d; } : arg.position,
       s_init = this._init,
       m_rangeTree = null,
       s_data = this.data,
@@ -36,11 +36,10 @@ geo.pointFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.position = function (val) {
     if (val === undefined) {
-      return m_position;
+      return m_this.style("position");
     } else {
-      m_position = val;
+      m_this.style("position", val);
       m_this.dataTime().modified();
-      m_this._updateRangeTree();
       m_this.modified();
     }
     return m_this;
@@ -177,7 +176,6 @@ geo.pointFeature = function (arg) {
       return s_data();
     }
     s_data(data);
-    m_this._updateRangeTree();
     return m_this;
   };
 
@@ -187,12 +185,11 @@ geo.pointFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.style = function (arg1, arg2) {
-    if (arg1 === undefined) {
-      return s_style();
+    var val = s_style(arg1, arg2);
+    if (val === m_this) {
+      m_this._updateRangeTree();
     }
-    s_style(arg1, arg2);
-    m_this._updateRangeTree();
-    return m_this;
+    return val;
   };
   this.style.get = s_style.get;
 
@@ -259,21 +256,45 @@ geo.pointFeature = function (arg) {
         fill: true,
         fillOpacity: 1.0,
         sprites: false,
-        sprites_image: null
+        sprites_image: null,
+        position: function (d) { return d; }
       },
       arg.style === undefined ? {} : arg.style
     );
 
-    m_this.style(defaultStyle);
-
-    if (m_position) {
-      m_this.dataTime().modified();
+    if (arg.position !== undefined) {
+      defaultStyle.position = arg.position;
     }
+
+    m_this.style(defaultStyle);
+    m_this.dataTime().modified();
   };
 
   return m_this;
 };
 
 geo.event.pointFeature = $.extend({}, geo.event.feature);
+
+/**
+ * Object specification for a point feature.
+ *
+ * @extends geo.feature.spec // need to make a jsdoc plugin for this to work
+ * @typedef geo.pointFeature.spec
+ * @type {object}
+ */
+
+/**
+ * Create a pointFeature from an object.
+ * @see {@link geo.feature.create}
+ * @param {geo.layer} layer The layer to add the feature to
+ * @param {geo.pointFeature.spec} spec The object specification
+ * @returns {geo.pointFeature|null}
+ */
+geo.pointFeature.create = function (layer, renderer, spec) {
+  "use strict";
+
+  spec.type = "point";
+  return geo.feature.create(layer, spec);
+};
 
 inherit(geo.pointFeature, geo.feature);

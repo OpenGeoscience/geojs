@@ -32,7 +32,8 @@ module.exports = function (grunt) {
     core: moduleFiles('geo.core'),
     gl: moduleFiles('geo.gl'),
     d3: moduleFiles('geo.d3'),
-    ui: moduleFiles('geo.ui')
+    ui: moduleFiles('geo.ui'),
+    plugin: moduleFiles('geo.plugin')
   };
 
   sourceList = Array.prototype.concat(
@@ -42,7 +43,8 @@ module.exports = function (grunt) {
     geo.core,
     geo.gl,
     geo.d3,
-    geo.ui
+    geo.ui,
+    geo.plugin
   );
 
   templateData = {
@@ -87,7 +89,8 @@ module.exports = function (grunt) {
               geo.core,
               geo.gl,
               geo.d3,
-              geo.ui
+              geo.ui,
+              geo.plugin
             ),
             dest: 'dist/',
             filter: 'isFile',
@@ -158,6 +161,16 @@ module.exports = function (grunt) {
             src: ['foldgutter.css'],
             dest: 'dist/examples/common/css/',
             cwd: 'bower_components/codemirror/addon/fold/',
+            expand: true
+          }
+        ]
+      },
+      jqueryui: {
+        files: [
+          {
+            src: ['jquery-ui.min.js'],
+            dest: 'dist/examples/common/js',
+            cwd: 'bower_components/jquery-ui/',
             expand: true
           }
         ]
@@ -237,7 +250,7 @@ module.exports = function (grunt) {
           'Gruntfile.js',
           'sources.json'
         ],
-        tasks: ['clean:source', 'template', 'copy', 'uglify:geojs']
+        tasks: ['clean:source', 'template', 'copy', 'docs', 'uglify:geojs']
       },
       examples: {
         files: [
@@ -394,6 +407,7 @@ module.exports = function (grunt) {
     'copy:bootstrap',
     'copy:codemirror',
     'copy:examples',
+    'copy:jqueryui',
     'uglify:codemirror',
     'jade',
     'docco'

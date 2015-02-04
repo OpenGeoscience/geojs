@@ -4,6 +4,7 @@
  * provide mechanisms to create and draw geometrical shapes such as points,
  * lines, and polygons.
  * @class
+ * @extends geo.layer
  * @returns {geo.featureLayer}
  */
 //////////////////////////////////////////////////////////////////////////////

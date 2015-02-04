@@ -3,6 +3,7 @@
  * Create a new instance of class sliderWidget
  *
  * @class
+ * @extends {geo.gui.widget}
  * @returns {geo.gui.sliderWidget}
  */
 //////////////////////////////////////////////////////////////////////////////

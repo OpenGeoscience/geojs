@@ -4,6 +4,7 @@
  * handles the animation state and interaction.
  *
  * @class geo.clock
+ * @extends geo.object
  * @returns {geo.clock}
  */
 //////////////////////////////////////////////////////////////////////////////

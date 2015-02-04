@@ -6,7 +6,7 @@ window.startTest = function (done) {
   var myMap = window.geoTests.createOsmMap(mapOptions);
 
   function draw(citieslatlon) {
-    var layer = myMap.createLayer('feature', {'renderer': 'd3Renderer'});
+    var layer = myMap.createLayer('feature', {'renderer': 'd3'});
     var n = citieslatlon.length / 2;
     var group1 = citieslatlon.filter(function (d, i) { return i < n; })
       .sort(function (d1, d2) {

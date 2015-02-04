@@ -8,14 +8,14 @@ describe("d3 graph feature", function () {
   it("Setup map", function () {
     map = geo.map({node: "#map", center: [0, 0], zoom: 3});
     map.createLayer("osm");
-    layer = map.createLayer("feature", {"renderer": "d3Renderer"});
+    layer = map.createLayer("feature", {"renderer": "d3"});
 
     map.resize(0, 0, width, height);
   });
 
   it("Add features to a layer", function () {
     var selection, nodes;
-    
+
     nodes = [
       geo.latlng(0, 0),
       geo.latlng(10, 0),
@@ -25,7 +25,7 @@ describe("d3 graph feature", function () {
 
     nodes[0].children = [nodes[1], nodes[2]];
     nodes[1].children = [nodes[3]];
-        
+
     feature = layer.createFeature("graph")
       .data(nodes)
       .draw();

@@ -3,6 +3,7 @@
  * Create a new instance of pointFeature
  *
  * @class
+ * @extends geo.pointFeature
  * @returns {geo.gl.pointFeature}
  */
 //////////////////////////////////////////////////////////////////////////////

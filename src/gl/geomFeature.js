@@ -3,6 +3,7 @@
  * Create a new instance of geomFeature
  *
  * @class
+ * @extends geo.geomFeature
  * @param {vgl.geometryData} arg
  * @returns {geo.gl.geomFeature}
  */

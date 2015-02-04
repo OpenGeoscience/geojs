@@ -3,6 +3,7 @@
  * Create a new instance of osmLayer
  *
  * @class
+ * @extends geo.featureLayer
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.osmLayer = function (arg) {

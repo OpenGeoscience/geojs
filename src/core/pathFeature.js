@@ -3,6 +3,7 @@
  * Create a new instance of class pathFeature
  *
  * @class
+ * @extends geo.feature
  * @returns {geo.pathFeature}
  */
 //////////////////////////////////////////////////////////////////////////////

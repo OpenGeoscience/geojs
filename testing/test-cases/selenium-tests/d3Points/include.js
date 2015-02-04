@@ -6,7 +6,7 @@ window.startTest = function (done) {
   var myMap = window.geoTests.createOsmMap(mapOptions);
 
   function draw(citieslatlon) {
-    var layer = myMap.createLayer('feature', {'renderer' : 'd3Renderer'});
+    var layer = myMap.createLayer('feature', {'renderer' : 'd3'});
 
     layer.createFeature('point')
       .data(citieslatlon)

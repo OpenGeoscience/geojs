@@ -4,7 +4,7 @@ window.startTest = function (done) {
 
   var mapOptions = {center: {y: 40, x: -105}},
       myMap = window.geoTests.createOsmMap(mapOptions),
-      layer = myMap.createLayer("feature", {"renderer": "d3Renderer"}),
+      layer = myMap.createLayer("feature", {"renderer": "d3"}),
       points = layer.createFeature("point"),
       clock = myMap.clock();
 
