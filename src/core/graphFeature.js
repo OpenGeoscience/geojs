@@ -100,8 +100,8 @@ geo.graphFeature = function (arg) {
    * Get/Set style
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.style = function (arg) {
-    var out = s_style.call(m_this, arg);
+  this.style = function (arg, arg2) {
+    var out = s_style.call(m_this, arg, arg2);
     if (out !== m_this) {
       return out;
     }
