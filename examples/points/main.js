@@ -66,7 +66,7 @@ $(function () {
   var vglLayer = map.createLayer(
     'feature',
     {
-      renderer: 'vglRenderer'
+      renderer: 'vgl'
     }
   );
 

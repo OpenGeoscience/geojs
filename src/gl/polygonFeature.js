@@ -21,6 +21,7 @@ geo.gl.polygonFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
+      s_exit = this._exit,
       m_actor = vgl.actor(),
       m_mapper = vgl.mapper(),
       m_material = vgl.material(),
@@ -317,6 +318,7 @@ geo.gl.polygonFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
     m_this.renderer().contextRenderer().removeActor(m_actor);
+    s_exit();
   };
 
   this._init(arg);

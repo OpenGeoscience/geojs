@@ -23,9 +23,9 @@ geo.featureLayer = function (arg) {
   var m_this = this,
       m_features = [],
       s_init = this._init,
+      s_exit = this._exit,
       s_update = this._update,
       s_draw = this.draw;
-
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -61,7 +61,6 @@ geo.featureLayer = function (arg) {
         m_this.dataTime().modified();
         m_this.modified();
         m_features.splice(i, 1);
-        return m_this;
       }
     }
     m_this.removeChild(feature);
@@ -159,6 +158,16 @@ geo.featureLayer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Free all resources
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._exit = function () {
+    m_this.clear();
+    s_exit();
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Draw
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -186,6 +195,7 @@ geo.featureLayer = function (arg) {
 
     for (i = 0; i < m_features.length; i += 1) {
       m_features[i]._exit();
+      m_this.removeChild(m_features[i]);
     }
 
     m_this.dataTime().modified();

@@ -22,6 +22,7 @@ geo.osmLayer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
+    s_exit = this._exit,
     m_tiles = {},
     m_hiddenBinNumber = 0,
     m_lastVisibleBinNumber = 999,
@@ -676,6 +677,21 @@ geo.osmLayer = function (arg) {
 
     /// Now call base class update
     s_update.call(m_this, request);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Exit
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._exit = function () {
+    m_tiles = {};
+    m_pendingNewTiles = [];
+    m_pendingInactiveTiles = [];
+    m_numberOfCachedTiles = 0;
+    m_visibleTilesRange = {};
+    m_pendingNewTilesStat = {};
+    s_exit();
   };
 
   return this;

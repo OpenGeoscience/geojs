@@ -11,16 +11,21 @@ geo.fileReaders = {};
  * Convenient function to define JS inheritance
  */
 //////////////////////////////////////////////////////////////////////////////
-inherit = function (C, P) { // jshint ignore: line
+geo.inherit = function (C, P) { // jshint ignore: line
   "use strict";
 
-  var F = function () {
-  };
+  var F = inherit.func();
   F.prototype = P.prototype;
   C.prototype = new F();
-  C.uber = P.prototype;
   C.prototype.constructor = C;
 };
+geo.inherit.func = function () {
+  "use strict";
+  return function () {};
+};
+
+// Should get rid of this at some point.
+window.inherit = geo.inherit;
 
 //////////////////////////////////////////////////////////////////////////////
 /**

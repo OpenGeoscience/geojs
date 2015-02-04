@@ -19,6 +19,7 @@ geo.d3.d3Renderer = function (arg) {
   arg = arg || {};
 
   var m_this = this,
+      s_exit = this._exit,
       m_sticky = null,
       m_features = {},
       m_corners = null,
@@ -225,7 +226,6 @@ geo.d3.d3Renderer = function (arg) {
     m_dy = dy;
   }
 
-
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Convert from screen pixel coordinates to the local coordinate system
@@ -420,8 +420,8 @@ geo.d3.d3Renderer = function (arg) {
   this._exit = function () {
     m_features = {};
     m_this.canvas().remove();
+    s_exit();
   };
-
 
   ////////////////////////////////////////////////////////////////////////////
   /**

@@ -17,6 +17,7 @@ geo.d3.object = function (arg) {
   geo.sceneObject.call(this);
 
   var m_id = 'd3-' + geo.d3.uniqueID(),
+      s_exit = this._exit,
       m_this = this,
       s_draw = this.draw;
 
@@ -50,7 +51,8 @@ geo.d3.object = function (arg) {
   */
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
-    return m_this.renderer()._removeFeature(m_this._d3id());
+    m_this.renderer()._removeFeature(m_this._d3id());
+    s_exit();
   };
 
   return this;

@@ -111,14 +111,20 @@ geo.object = function () {
 
   //////////////////////////////////////////////////////////////////////////////
   /**
-   *  Remove handlers from an event (or an array of events).
+   *  Remove handlers from an event (or an array of events).  If no event is
+   *  provided all hanlders will be removed.
    *
-   *  @param {String} event An event from {geo.events}
-   *  @param {Object} arg A function or array of functions to remove from the events
+   *  @param {string?} event An event from {geo.events}
+   *  @param {object?} arg A function or array of functions to remove from the events
    *                      or if falsey remove all handlers from the events
    */
   //////////////////////////////////////////////////////////////////////////////
   this.geoOff = function (event, arg) {
+    if (event === undefined) {
+      m_eventHandlers = {};
+      m_idleHandlers = [];
+      m_deferredCount = 0;
+    }
     if (Array.isArray(event)) {
       event.forEach(function (e) {
         m_this.geoOff(e, arg);
@@ -142,6 +148,15 @@ geo.object = function () {
       );
     }
     return m_this;
+  };
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * Free all resources and destroy the object.
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  this._exit = function () {
+    m_this.geoOff();
   };
 
   vgl.object.call(this);

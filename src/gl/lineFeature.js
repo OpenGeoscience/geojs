@@ -21,6 +21,7 @@ geo.gl.lineFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
+      s_exit = this._exit,
       m_actor = null,
       m_mapper = null,
       m_material = null,
@@ -367,6 +368,7 @@ geo.gl.lineFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
     m_this.renderer().contextRenderer().removeActor(m_actor);
+    s_exit();
   };
 
   this._init(arg);

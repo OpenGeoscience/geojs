@@ -18,6 +18,7 @@ geo.sceneObject = function (arg) {
   var m_this = this,
       m_parent = null,
       m_children = [],
+      s_exit = this._exit,
       s_trigger = this.geoTrigger,
       s_addDeferred = this.addDeferred,
       s_onIdle = this.onIdle;
@@ -156,6 +157,17 @@ geo.sceneObject = function (arg) {
     });
 
     return m_this;
+  };
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * Free all resources and destroy the object.
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  this._exit = function () {
+    m_this.children = [];
+    delete m_this.parent;
+    s_exit();
   };
 
   return this;
