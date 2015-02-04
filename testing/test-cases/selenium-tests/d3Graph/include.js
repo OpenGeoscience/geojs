@@ -21,7 +21,7 @@ window.startTest = function (done) {
     );
 
     // Load image to be used for drawing dots
-    var layer = myMap.createLayer('feature', {'renderer' : 'd3Renderer'}),
+    var layer = myMap.createLayer('feature', {'renderer' : 'd3'}),
         style = {
         nodes: {
           stroke: false,

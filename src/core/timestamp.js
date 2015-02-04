@@ -3,6 +3,7 @@
  * Create a new instance of class timestamp
  *
  * @class
+ * @extends vgl.timestamp
  * @returns {geo.timestamp}
  */
 //////////////////////////////////////////////////////////////////////////////

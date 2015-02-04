@@ -2,7 +2,8 @@
 /**
  * Create a new instance of class d3Renderer
  *
- * @param canvas
+ * @class
+ * @extends geo.renderer
  * @returns {geo.d3.d3Renderer}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -18,6 +19,7 @@ geo.d3.d3Renderer = function (arg) {
   arg = arg || {};
 
   var m_this = this,
+      s_exit = this._exit,
       m_sticky = null,
       m_features = {},
       m_corners = null,
@@ -199,7 +201,6 @@ geo.d3.d3Renderer = function (arg) {
     m_dx = dx;
     m_dy = dy;
   }
-
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -395,8 +396,8 @@ geo.d3.d3Renderer = function (arg) {
   this._exit = function () {
     m_features = {};
     m_this.canvas().remove();
+    s_exit();
   };
-
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -506,4 +507,4 @@ geo.d3.d3Renderer = function (arg) {
 
 inherit(geo.d3.d3Renderer, geo.renderer);
 
-geo.registerRenderer('d3Renderer', geo.d3.d3Renderer);
+geo.registerRenderer('d3', geo.d3.d3Renderer);

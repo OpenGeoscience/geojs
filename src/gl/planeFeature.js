@@ -3,6 +3,7 @@
  * Create a plane feature given a lower left corner point geo.latlng
  * and and upper right corner point geo.latlng
  * @class
+ * @extends geo.planeFeature
  * @param lowerleft
  * @param upperright
  * @returns {geo.planeFeature}
@@ -16,6 +17,7 @@ geo.gl.planeFeature = function (arg) {
   geo.planeFeature.call(this, arg);
 
   var m_this = this,
+      s_exit = this._exit,
       m_actor = null,
       m_onloadCallback = arg.onload === undefined ? null : arg.onload;
 
@@ -151,6 +153,7 @@ geo.gl.planeFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
     m_this.renderer().contextRenderer().removeActor(m_actor);
+    s_exit();
   };
 
   return this;

@@ -8,7 +8,7 @@ describe("d3 point feature", function () {
   it("Setup map", function () {
     map = geo.map({node: "#map", center: [0, 0], zoom: 3});
     map.createLayer("osm");
-    layer = map.createLayer("feature", {"renderer": "d3Renderer"});
+    layer = map.createLayer("feature", {"renderer": "d3"});
 
     map.resize(0, 0, width, height);
   });
@@ -25,14 +25,14 @@ describe("d3 point feature", function () {
     feature2 = layer.createFeature("point")
       .data([geo.latlng(-10, -10), geo.latlng(10, -10)])
       .draw();
-    
+
     selection = d3.select("#map svg").selectAll("circle");
     expect(selection[0].length).toBe(5);
 
     feature3 = layer.createFeature("point")
       .data([geo.latlng(-10, 10)])
       .draw();
-    
+
     selection = d3.select("#map svg").selectAll("circle");
     expect(selection[0].length).toBe(6);
   });

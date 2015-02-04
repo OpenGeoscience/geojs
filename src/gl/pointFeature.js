@@ -3,6 +3,7 @@
  * Create a new instance of pointFeature
  *
  * @class
+ * @extends geo.pointFeature
  * @returns {geo.gl.pointFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -20,6 +21,7 @@ geo.gl.pointFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
+      s_exit = this._exit,
       m_actor = null,
       m_pixelWidthUniform = null,
       m_aspectUniform = null,
@@ -370,6 +372,7 @@ geo.gl.pointFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
     m_this.renderer().contextRenderer().removeActor(m_actor);
+    s_exit();
   };
 
   m_this._init();

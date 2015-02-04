@@ -3,6 +3,7 @@
  * Create a new instance of class geomFeature
  *
  * @class
+ * @extends geo.feature
  * @returns {geo.geomFeature}
  */
 //////////////////////////////////////////////////////////////////////////////

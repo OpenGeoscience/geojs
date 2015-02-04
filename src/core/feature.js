@@ -3,6 +3,7 @@
  * Create a new instance of class feature
  *
  * @class
+ * @extends geo.sceneObject
  * @returns {geo.feature}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -21,6 +22,7 @@ geo.feature = function (arg) {
   arg = arg || {};
 
   var m_this = this,
+      s_exit = this._exit,
       m_selectionAPI = arg.selectionAPI === undefined ? false : arg.selectionAPI,
       m_layer = arg.layer === undefined ? null : arg.layer,
       m_gcs = arg.gcs === undefined ? "EPSG:4326" : arg.gcs,
@@ -693,27 +695,67 @@ geo.feature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
     m_this._unbindMouseHandlers();
+    m_selectedFeatures = [];
+    m_style = {};
+    arg = {};
+    s_exit();
   };
 
   this._init(arg);
   return this;
 };
 
-////////////////////////////////////////////////////////////////////////////
 /**
- * This event object provides mouse/keyboard events that can be handled
- * by the features.  This provides a similar interface as core events,
- * but with different names so the events don't interfere.  Subclasses
- * can override this to provide custom events.
+ * The most recent feature event triggered.
+ * @type {number}
  */
-////////////////////////////////////////////////////////////////////////////
-geo.event.feature = {
-  mousemove:  "geo_feature_mousemove",
-  mouseover:  "geo_feature_mouseover",
-  mouseout:   "geo_feature_mouseout",
-  mouseclick: "geo_feature_mouseclick",
-  brushend:   "geo_feature_brushend",
-  brush:      "geo_feature_brush"
+geo.feature.eventID = 0;
+
+/**
+ * General object specification for feature types.
+ * @typedef geo.feature.spec
+ * @type {object}
+ * @property {string} type A supported feature type.
+ * @property {object[]} [data=[]] An array of arbitrary objects used to
+ * construct the feature.  These objects (and their associated
+ * indices in the array) will be passed back to style and attribute
+ * accessors provided by the user.  In general the number of
+ * "markers" drawn will be equal to the length of this array.
+ */
+
+/**
+ * Create a feature from an object.  The implementation here is
+ * meant to define the general interface of creating features
+ * from a javascript object.  See documentation from individual
+ * feature types for specific details.  In case of an error in
+ * the arguments this method will return null;
+ * @param {geo.layer} layer The layer to add the feature to
+ * @param {geo.feature.spec} [spec={}] The object specification
+ * @returns {geo.feature|null}
+ */
+geo.feature.create = function (layer, spec) {
+  "use strict";
+
+  var type = spec.type;
+
+  // Check arguments
+  if (!layer instanceof geo.layer) {
+    console.warn("Invalid layer");
+    return null;
+  }
+  if (typeof spec !== "object") {
+    console.warn("Invalid spec");
+    return null;
+  }
+  var feature = layer.createFeature(type);
+  if (!feature) {
+    console.warn("Could not create feature type '" + type + "'");
+    return null;
+  }
+
+  spec = spec || {};
+  spec.data = spec.data || [];
+  return feature.style(spec);
 };
 
 inherit(geo.feature, geo.sceneObject);

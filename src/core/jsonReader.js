@@ -4,7 +4,8 @@
  * Create a new instance of class jsonReader
  *
  * @class
- * @returns {geo.fileReader}
+ * @extends geo.fileReader
+ * @returns {geo.jsonReader}
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.jsonReader = function (arg) {
@@ -223,10 +224,16 @@ geo.jsonReader = function (arg) {
 
   this._addFeature = function (type, coordinates, style, properties) {
     var _style = $.extend({}, m_style, style);
-    return m_this.layer().createFeature(type)
+    var feature = m_this.layer().createFeature(type)
       .data(m_this._buildData(coordinates, properties, style))
-      .position(function (d) { return d.coordinates; })
       .style(_style);
+
+    if (type === 'line') {
+      feature.line(function (d) { return d.coordinates; });
+    } else {
+      feature.position(function (d) { return d.coordinates; });
+    }
+    return feature;
   };
 
 };

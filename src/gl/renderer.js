@@ -2,8 +2,10 @@
 /**
  * Create a new instance of class vglRenderer
  *
+ * @class
+ * @extends geo.renderer
  * @param canvas
- * @returns {geo.gl.vglRenderer}
+ * @returns {geo.gl.renderer}
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.gl.renderer = function (arg) {
@@ -27,5 +29,3 @@ geo.gl.renderer = function (arg) {
 };
 
 inherit(geo.gl.renderer, geo.renderer);
-
-geo.registerRenderer('vglRenderer', geo.gl.vglRenderer);

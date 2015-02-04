@@ -81,6 +81,12 @@
         "legendWidget.js"
       ]
     },
+    "geo.plugin": {
+      "prefix": "src/plugin",
+      "files": [
+        "jquery-plugin.js"
+      ]
+    },
     "vgl": {
       "prefix": "vgl/src",
       "files": [

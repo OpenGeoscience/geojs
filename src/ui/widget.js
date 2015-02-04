@@ -3,6 +3,7 @@
  * Create a new instance of class widget
  *
  * @class
+ * @extends {geo.sceneObject}
  * @returns {geo.gui.widget}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -14,6 +15,7 @@ geo.gui.widget = function (arg) {
   geo.sceneObject.call(this, arg);
 
   var m_this = this,
+      s_exit = this._exit,
       m_layer = arg.layer;
 
   this._init = function () {
@@ -22,8 +24,9 @@ geo.gui.widget = function (arg) {
 
   this._exit = function () {
     m_this.children().forEach(function (child) {
-      child._exit();
+      m_this._deleteFeature(child);
     });
+    s_exit();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -50,7 +53,7 @@ geo.gui.widget = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._deleteFeature = function (feature) {
     m_this.removeChild(feature);
-
+    feature._exit();
     return m_this;
   };
 

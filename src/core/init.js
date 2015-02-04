@@ -11,36 +11,21 @@ geo.fileReaders = {};
  * Convenient function to define JS inheritance
  */
 //////////////////////////////////////////////////////////////////////////////
-inherit = function (C, P) { // jshint ignore: line
+geo.inherit = function (C, P) { // jshint ignore: line
   "use strict";
 
-  var F = function () {
-  };
+  var F = inherit.func();
   F.prototype = P.prototype;
   C.prototype = new F();
-  C.uber = P.prototype;
   C.prototype.constructor = C;
 };
-
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Convenient function to get size of an object
- *
- * @param {object} obj
- * @returns {number} *
- */
-//////////////////////////////////////////////////////////////////////////////
-Object.size = function (obj) { // jshint ignore: line
+geo.inherit.func = function () {
   "use strict";
-
-  var size = 0, key = null;
-  for (key in obj) {
-    if (obj.hasOwnProperty(key)) {
-      size += 1;
-    }
-  }
-  return size;
+  return function () {};
 };
+
+// Should get rid of this at some point.
+window.inherit = geo.inherit;
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -167,7 +152,7 @@ geo.createLayer = function (name, map, arg) {
   "use strict";
 
   /// Default renderer is vgl
-  var options = {"map": map, "renderer": "vglRenderer"},
+  var options = {"map": map, "renderer": "vgl"},
       layer = null;
 
   if (name in geo.layers) {

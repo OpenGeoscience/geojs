@@ -3,6 +3,8 @@
  * Create a new instance of pointFeature
  *
  * @class
+ * @extends geo.pointFeature
+ * @extends geo.d3.object
  * @returns {geo.d3.pointFeature}
  */
 //////////////////////////////////////////////////////////////////////////////

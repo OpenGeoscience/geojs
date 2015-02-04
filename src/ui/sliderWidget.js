@@ -3,6 +3,7 @@
  * Create a new instance of class sliderWidget
  *
  * @class
+ * @extends {geo.gui.widget}
  * @returns {geo.gui.sliderWidget}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -14,6 +15,7 @@ geo.gui.sliderWidget = function (arg) {
   geo.gui.widget.call(this, arg);
 
   var m_this = this,
+      s_exit = this._exit,
       m_xscale,
       m_yscale,
       m_plus,
@@ -138,7 +140,6 @@ geo.gui.sliderWidget = function (arg) {
         fill: 'black',
         stroke: null
       });
-
 
     // Create the - zoom button
     m_minus = svg.append('g');
@@ -296,6 +297,7 @@ geo.gui.sliderWidget = function (arg) {
   this._exit = function () {
     m_group.remove();
     m_this.layer().geoOff(geo.event.zoom);
+    s_exit();
   };
 
 //////////////////////////////////////////////////////////////////////////////

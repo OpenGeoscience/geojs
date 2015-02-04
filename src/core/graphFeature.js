@@ -3,6 +3,7 @@
  * Create a new instance of class graphFeature
  *
  * @class
+ * @extends geo.feature
  * @returns {geo.graphFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -29,7 +30,6 @@ geo.graphFeature = function (arg) {
       m_links = [],
       s_init = this._init,
       s_exit = this._exit;
-
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -90,6 +90,7 @@ geo.graphFeature = function (arg) {
     m_this.data([]);
     m_points._exit();
     m_this.removeChild(m_points);
+    m_links = [];
     s_exit();
     return m_this;
   };
@@ -99,8 +100,8 @@ geo.graphFeature = function (arg) {
    * Get/Set style
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.style = function (arg) {
-    var out = s_style.call(m_this, arg);
+  this.style = function (arg, arg2) {
+    var out = s_style.call(m_this, arg, arg2);
     if (out !== m_this) {
       return out;
     }

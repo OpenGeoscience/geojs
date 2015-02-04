@@ -1,43 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Layer options object specification
- *
  * @class
- */
-//////////////////////////////////////////////////////////////////////////////
-geo.layerOptions = function () {
-  "use strict";
-
-  if (!(this instanceof geo.layerOptions)) {
-    return new geo.layerOptions();
-  }
-
-  this.opacity = 0.5;
-  this.showAttribution = true;
-  this.visible = true;
-  this.binNumber = vgl.material.RenderBin.Default;
-
-  return this;
-};
-
-geo.newLayerId = (function () {
-    "use strict";
-    var currentId = 1;
-    return function () {
-      var id = currentId;
-      currentId += 1;
-      return id;
-    };
-  }()
-);
-
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Base class for all layer types geo.layer represents any object that be
- * rendered on top of the map base. This could include image, points, line, and
- * polygons.
- *
- * @class
+ * @extends geo.sceneObject
  * @returns {geo.layer}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -56,11 +20,12 @@ geo.layer = function (arg) {
    */
   //////////////////////////////////////////////////////////////////////////////
   var m_this = this,
+      s_exit = this._exit,
       m_style = arg.style === undefined ? {"opacity": 0.5,
                                            "color": [0.8, 0.8, 0.8],
                                            "visible": true,
                                            "bin": 100} : arg.style,
-      m_id = arg.id === undefined ? geo.newLayerId() : arg.id,
+      m_id = arg.id === undefined ? geo.layer.newLayerId() : arg.id,
       m_name = "",
       m_gcs = "EPSG:4326",
       m_timeRange = null,
@@ -75,7 +40,7 @@ geo.layer = function (arg) {
       m_canvas = null,
       m_renderer = null,
       m_initialized = false,
-      m_rendererName = arg.renderer  === undefined ? "vglRenderer" : arg.renderer,
+      m_rendererName = arg.renderer  === undefined ? "vgl" : arg.renderer,
       m_dataTime = geo.timestamp(),
       m_updateTime = geo.timestamp(),
       m_drawTime = geo.timestamp(),
@@ -339,7 +304,6 @@ geo.layer = function (arg) {
     return m_isReference;
   };
 
-
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set if the layer has been initialized
@@ -419,8 +383,14 @@ geo.layer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
+    m_renderer._exit();
+    m_node.off();
     m_node.remove();
     m_node = null;
+    arg = {};
+    m_canvas = null;
+    m_renderer = null;
+    s_exit();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -451,7 +421,6 @@ geo.layer = function (arg) {
     return m_this;
   };
 
-
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Return the width of the layer in pixels
@@ -471,6 +440,76 @@ geo.layer = function (arg) {
   };
 
   return this;
+};
+
+/**
+ * Gets a new id number for a layer.
+ * @protected
+ * @instance
+ * @returns {number}
+ */
+geo.layer.newLayerId = (function () {
+    "use strict";
+    var currentId = 1;
+    return function () {
+      var id = currentId;
+      currentId += 1;
+      return id;
+    };
+  }()
+);
+
+/**
+ * General object specification for feature types.
+ * @typedef geo.layer.spec
+ * @type {object}
+ * @property {string} [type="feature"] For feature compatibility
+ * with more than one kind of creatable layer
+ * @property {object[]} [data=[]] The default data array to
+ * apply to each feature if none exists
+ * @property {string} [renderer="vgl"] The renderer to use
+ * @property {geo.feature.spec[]} [features=[]] Features
+ * to add to the layer
+ */
+
+/**
+ * Create a layer from an object.  Any errors in the creation
+ * of the layer will result in returning null.
+ * @param {geo.map} map The map to add the layer to
+ * @param {geo.layer.spec} spec The object specification
+ * @returns {geo.layer|null}
+ */
+geo.layer.create = function (map, spec) {
+  "use strict";
+
+  spec = spec || {};
+
+  // add osmLayer later
+  spec.type = "feature";
+  if (spec.type !== "feature") {
+    console.warn("Unsupported layer type");
+    return null;
+  }
+
+  spec.renderer = spec.renderer || "vgl";
+  if (spec.renderer !== "d3" && spec.renderer !== "vgl") {
+    console.warn("Invalid renderer");
+    return null;
+  }
+
+  var layer = map.createLayer(spec.type, spec);
+  if (!layer) {
+    console.warn("Unable to create a layer");
+    return null;
+  }
+
+  // probably move this down to featureLayer eventually
+  spec.features.forEach(function (f) {
+    f.data = f.data || spec.data;
+    f.feature = geo.feature.create(layer, f);
+  });
+
+  return layer;
 };
 
 inherit(geo.layer, geo.sceneObject);

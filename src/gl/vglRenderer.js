@@ -12,7 +12,6 @@ geo.gl._vglViewerInstances = {
   maps: []
 };
 
-
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Retrives the singleton, lazily constructs as necessary.
@@ -26,10 +25,11 @@ geo.gl.vglViewerInstance = function (map) {
 
   var mapIdx,
       maps = geo.gl._vglViewerInstances.maps,
-      viewers = geo.gl._vglViewerInstances.viewers;
+      viewers = geo.gl._vglViewerInstances.viewers,
+      canvas;
 
   function makeViewer() {
-    var canvas = $(document.createElement("canvas"));
+    canvas = $(document.createElement("canvas"));
     canvas.attr("class", "webgl-canvas");
     var viewer = vgl.viewer(canvas.get(0));
     viewer.renderWindow().removeRenderer(
@@ -49,6 +49,13 @@ geo.gl.vglViewerInstance = function (map) {
     viewers[mapIdx] = makeViewer();
   }
 
+  viewers[mapIdx]._exit = function () {
+    if (canvas) {
+      canvas.off();
+      canvas.remove();
+    }
+  };
+
   return viewers[mapIdx];
 };
 
@@ -60,14 +67,11 @@ geo.gl.vglViewerInstance.deleteCache = function (viewer) {
       viewers = geo.gl._vglViewerInstances.viewers;
 
   for (mapIdx = 0; mapIdx < viewers.length; mapIdx += 1) {
-    if (viewer === viewers[mapIdx]) {
-      break;
+    if (viewer === undefined || viewer === viewers[mapIdx]) {
+      viewer._exit();
+      maps.splice(mapIdx, 1);
+      viewers.splice(mapIdx, 1);
     }
-  }
-
-  if (viewer === viewers[mapIdx]) {
-    maps.splice(mapIdx, 1);
-    viewers.splice(mapIdx, 1);
   }
 };
 
@@ -75,6 +79,8 @@ geo.gl.vglViewerInstance.deleteCache = function (viewer) {
 /**
  * Create a new instance of class vglRenderer
  *
+ * @class
+ * @extends geo.gl.renderer
  * @param canvas
  * @returns {geo.gl.vglRenderer}
  */
@@ -88,6 +94,7 @@ geo.gl.vglRenderer = function (arg) {
   geo.gl.renderer.call(this, arg);
 
   var m_this = this,
+      s_exit = this._exit,
       m_viewer = geo.gl.vglViewerInstance(this.layer().map()),
       m_contextRenderer = vgl.renderer(),
       m_width = 0,
@@ -106,7 +113,6 @@ geo.gl.vglRenderer = function (arg) {
     return m_width;
   };
 
-
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Return height of the renderer
@@ -115,7 +121,6 @@ geo.gl.vglRenderer = function (arg) {
   this.height = function () {
     return m_height;
   };
-
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -341,10 +346,12 @@ geo.gl.vglRenderer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Exit
+   * @todo remove all vgl objects
    */
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
     geo.gl.vglViewerInstance.deleteCache(m_viewer);
+    s_exit();
   };
 
   this._updateRendererCamera = function () {
@@ -489,4 +496,4 @@ geo.gl.vglRenderer = function (arg) {
 
 inherit(geo.gl.vglRenderer, geo.gl.renderer);
 
-geo.registerRenderer("vglRenderer", geo.gl.vglRenderer);
+geo.registerRenderer("vgl", geo.gl.vglRenderer);

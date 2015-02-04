@@ -3,10 +3,13 @@
  * Create a plane feature given a lower left corner point geo.latlng
  * and and upper right corner point geo.latlng
  *
+ * *CURRENTLY BROKEN*
+ *
  * @class
+ * @extends geo.planeFeature
  * @param lowerleft
  * @param upperright
- * @returns {geo.planeFeature}
+ * @returns {geo.d3.planeFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.d3.planeFeature = function (arg) {

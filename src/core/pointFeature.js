@@ -3,6 +3,7 @@
  * Create a new instance of class pointFeature
  *
  * @class
+ * @extends geo.feature
  * @returns {geo.pointFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -20,6 +21,7 @@ geo.pointFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
+      s_init = this._init,
       m_rangeTree = null,
       m_maxRadius = 0;
 
@@ -201,5 +203,27 @@ geo.pointFeature = function (arg) {
 };
 
 geo.event.pointFeature = $.extend({}, geo.event.feature);
+
+/**
+ * Object specification for a point feature.
+ *
+ * @extends geo.feature.spec // need to make a jsdoc plugin for this to work
+ * @typedef geo.pointFeature.spec
+ * @type {object}
+ */
+
+/**
+ * Create a pointFeature from an object.
+ * @see {@link geo.feature.create}
+ * @param {geo.layer} layer The layer to add the feature to
+ * @param {geo.pointFeature.spec} spec The object specification
+ * @returns {geo.pointFeature|null}
+ */
+geo.pointFeature.create = function (layer, renderer, spec) {
+  "use strict";
+
+  spec.type = "point";
+  return geo.feature.create(layer, spec);
+};
 
 inherit(geo.pointFeature, geo.feature);

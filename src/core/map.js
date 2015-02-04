@@ -4,6 +4,7 @@
  *
  * Creates a new map inside of the given HTML layer (Typically DIV)
  * @class
+ * @extends geo.sceneObject
  * @returns {geo.map}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -23,6 +24,7 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
+      s_exit = this._exit,
       m_x = 0,
       m_y = 0,
       m_node = $(arg.node),
@@ -39,7 +41,6 @@ geo.map = function (arg) {
       m_transition = null,
       m_queuedTransition = null,
       m_clock = null;
-
 
   arg.center = geo.util.normalizeCoordinates(arg.center);
   arg.autoResize = arg.autoResize === undefined ? true : arg.autoResize;
@@ -206,7 +207,6 @@ geo.map = function (arg) {
   /**
    * Add layer to the map
    *
-   * @method addLayer
    * @param {geo.layer} layer to be added to the map
    * @return {geom.map}
    */
@@ -245,7 +245,6 @@ geo.map = function (arg) {
   /**
    * Remove layer from the map
    *
-   * @method removeLayer
    * @param {geo.layer} layer that should be removed from the map
    * @return {geo.map}
    */
@@ -272,12 +271,10 @@ geo.map = function (arg) {
     return layer;
   };
 
-
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Toggle visibility of a layer
    *
-   *  @method toggleLayer
    *  @param {geo.layer} layer
    *  @returns {Boolean}
    */
@@ -466,7 +463,7 @@ geo.map = function (arg) {
     if (!layer) {
       renderer = opts.renderer;
       if (!renderer) {
-        renderer = "d3Renderer";
+        renderer = "d3";
       }
       layer = m_this.createLayer("feature", {renderer: renderer});
     }
@@ -518,7 +515,7 @@ geo.map = function (arg) {
    * Exit this map
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._exit = function () {
+  this.exit = function () {
     var i, layers = m_this.children();
     for (i = 0; i < layers.length; i += 1) {
       layers[i]._exit();
@@ -527,12 +524,15 @@ geo.map = function (arg) {
       m_this.interactor().destroy();
       m_this.interactor(null);
     }
+    m_this.node().off(".geo");
+    $(window).off("resize", resizeSelf);
+    s_exit();
   };
 
   this._init(arg);
 
   // set up drag/drop handling
-  this.node().on("dragover", function (e) {
+  this.node().on("dragover.geo", function (e) {
     var evt = e.originalEvent;
 
     if (m_this.fileReader()) {
@@ -541,7 +541,7 @@ geo.map = function (arg) {
       evt.dataTransfer.dropEffect = "copy";
     }
   })
-  .on("drop", function (e) {
+  .on("drop.geo", function (e) {
     var evt = e.originalEvent, reader = m_this.fileReader(),
         i, file;
 
@@ -794,13 +794,52 @@ geo.map = function (arg) {
   this.interactor(arg.interactor || geo.mapInteractor());
   this.clock(arg.clock || geo.clock());
 
+  function resizeSelf() {
+    m_this.resize(0, 0, m_node.width(), m_node.height());
+  }
+
   if (arg.autoResize) {
-    $(window).resize(function () {
-      m_this.resize(0, 0, m_node.width(), m_node.height());
-    });
+    $(window).resize(resizeSelf);
   }
 
   return this;
+};
+
+/**
+ * General object specification for map types.  Any additional
+ * values in the object are passed to the map constructor.
+ * @typedef geo.map.spec
+ * @type {object}
+ * @property {object[]} [data=[]] The default data array to
+ * apply to each feature if none exists
+ * @property {geo.layer.spec[]} [layers=[]] Layers to create
+ */
+
+/**
+ * Create a map from an object.  Any errors in the creation
+ * of the map will result in returning null.
+ * @param {geo.map.spec} spec The object specification
+ * @returns {geo.map|null}
+ */
+geo.map.create = function (spec) {
+  "use strict";
+
+  var map = geo.map(spec);
+
+  if (!map) {
+    console.warn("Could not create map.");
+    return null;
+  }
+
+  spec.data = spec.data || [];
+  spec.layers = spec.layers || [];
+
+  spec.layers.forEach(function (l) {
+    l.data = l.data || spec.data;
+    l.layer = geo.layer.create(map, l);
+  });
+
+  return map;
 };
 
 inherit(geo.map, geo.sceneObject);
