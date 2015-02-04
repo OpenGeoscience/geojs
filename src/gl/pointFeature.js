@@ -25,6 +25,7 @@ geo.gl.pointFeature = function (arg) {
       m_actor = null,
       m_pixelWidthUniform = null,
       m_aspectUniform = null,
+      m_dynamicDraw = arg.dynamicDraw === undefined ? false : arg.dynamicDraw,
       s_init = this._init,
       s_update = this._update;
 
@@ -184,7 +185,7 @@ geo.gl.pointFeature = function (arg) {
         modelViewUniform = new vgl.modelViewUniform("modelViewMatrix"),
         projectionUniform = new vgl.projectionUniform("projectionMatrix"),
         geom = vgl.geometryData(),
-        mapper = vgl.mapper();
+        mapper = vgl.mapper({dynamicDraw: m_dynamicDraw});
 
     m_pixelWidthUniform = new vgl.floatUniform("pixelWidth",
                             2.0 / m_this.renderer().width());
@@ -279,34 +280,34 @@ geo.gl.pointFeature = function (arg) {
     }
 
     sourcePositions.pushBack(buffers.get("pos"));
-    geom.addSource(sourcePositions);
+    geom.addSource(sourcePositions, "pos");
 
     sourceUnits.pushBack(buffers.get("unit"));
-    geom.addSource(sourceUnits);
+    geom.addSource(sourceUnits, "unit");
 
     sourceRadius.pushBack(buffers.get("rad"));
-    geom.addSource(sourceRadius);
+    geom.addSource(sourceRadius, "rad");
 
     sourceStokeWidth.pushBack(buffers.get("strokeWidth"));
-    geom.addSource(sourceStokeWidth);
+    geom.addSource(sourceStokeWidth, "strokeWidth");
 
     sourceFillColor.pushBack(buffers.get("fillColor"));
-    geom.addSource(sourceFillColor);
+    geom.addSource(sourceFillColor, "fillColor");
 
     sourceFill.pushBack(buffers.get("fill"));
-    geom.addSource(sourceFill);
+    geom.addSource(sourceFill, "fill");
 
     sourceStrokeColor.pushBack(buffers.get("strokeColor"));
-    geom.addSource(sourceStrokeColor);
+    geom.addSource(sourceStrokeColor, "strokeColor");
 
     sourceStroke.pushBack(buffers.get("stroke"));
-    geom.addSource(sourceStroke);
+    geom.addSource(sourceStroke, "stroke");
 
     sourceAlpha.pushBack(buffers.get("fillOpacity"));
-    geom.addSource(sourceAlpha);
+    geom.addSource(sourceAlpha, "fillOpacity");
 
     sourceStrokeOpacity.pushBack(buffers.get("strokeOpacity"));
-    geom.addSource(sourceStrokeOpacity);
+    geom.addSource(sourceStrokeOpacity, "strokeOpacity");
 
     trianglesPrimitive.setIndices(buffers.get("indices"));
     geom.addPrimitive(trianglesPrimitive);
@@ -314,6 +315,20 @@ geo.gl.pointFeature = function (arg) {
     mapper.setGeometryData(geom);
 
     m_actor.setMapper(mapper);
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return mapper where actor gets it behavior and data
+   *
+   * @returns {vgl.mapper}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.mapper = function () {
+    if (!m_actor) {
+        return null;
+    }
+    return m_actor.mapper();
   }
 
   ////////////////////////////////////////////////////////////////////////////
