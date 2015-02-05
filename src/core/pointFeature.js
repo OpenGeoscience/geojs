@@ -27,6 +27,25 @@ geo.pointFeature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Initialize the feature
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._init = function (arg) {
+    s_init(arg);
+
+    this._property("position", "position", "position", function (d) { return d; });
+    this._property("radius", "radius", "size", 10);
+    this._property("stroke", "stroke", "bool", true);
+    this._property("strokeColor", "strokeColor", "color", "black");
+    this._property("strokeWidth", "strokeWidth", "size", 2);
+    this._property("strokeOpacity", "strokeOpacity", "opacity", 1);
+    this._property("fill", "fill", "bool", true);
+    this._property("fillColor", "fillColor", "color", "red");
+    this._property("fillOpacity", "fillOpacity", "opacity", 1);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Update the current range tree object.  Should be called whenever the
    * data changes.
    */
@@ -188,16 +207,6 @@ geo.pointFeature = function (arg) {
       }
     };
   };
-
-  this._property("position", "position", "position", function (d) { return d; });
-  this._property("radius", "radius", "size", 10);
-  this._property("stroke", "stroke", "bool", true);
-  this._property("strokeColor", "strokeColor", "color", "black");
-  this._property("strokeWidth", "strokeWidth", "size", 2);
-  this._property("strokeOpacity", "strokeOpacity", "opacity", 1);
-  this._property("fill", "fill", "bool", true);
-  this._property("fillColor", "fillColor", "color", "red");
-  this._property("fillOpacity", "fillOpacity", "opacity", 1);
 
   return m_this;
 };

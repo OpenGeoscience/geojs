@@ -155,7 +155,7 @@
         var valid = Number.isFinite(x) && // Allow for periodic longitudes
                     Number.isFinite(y) && Math.abs(y) <= 90;
         if (valid) {
-          return value;
+          return c;
         }
         return null;
       }

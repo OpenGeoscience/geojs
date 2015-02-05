@@ -398,6 +398,7 @@ geo.feature = function (arg) {
       m_properties.data = data;
       m_this.dataTime().modified();
       m_this.modified();
+      m_this._cache(true);
       return m_this;
     }
   };
@@ -454,7 +455,7 @@ geo.feature = function (arg) {
       console.warn("Property '" + name + "' overrides existing method.");
     }
 
-    var setter = m_this._propertySetter.bind(m_this);
+    var setter = m_this._propertySetter;
 
     // The current accessor value/method.
     var accessor = defaultValue;

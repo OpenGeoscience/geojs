@@ -14,6 +14,7 @@ geo.gl.pointFeature = function (arg) {
   }
   arg = arg || {};
   geo.pointFeature.call(this, arg);
+  geo.gl.feature.call(this, arg);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -36,7 +37,7 @@ geo.gl.pointFeature = function (arg) {
   var vertexShaderSource = [
       "attribute vec3 pos;",
       "attribute vec2 unit;",
-      "attribute float rad;",
+      "attribute float radius;",
       "attribute vec3 fillColor;",
       "attribute vec3 strokeColor;",
       "attribute float fillOpacity;",
@@ -63,12 +64,12 @@ geo.gl.pointFeature = function (arg) {
       "  strokeWidthVar = strokeWidth;",
       "  fillVar = fill;",
       "  strokeVar = stroke;",
-      "  radiusVar = rad;",
+      "  radiusVar = radius;",
       "  vec4 p = (projectionMatrix * modelViewMatrix * vec4(pos, 1.0)).xyzw;",
       "  if (p.w != 0.0) {",
       "    p = p/p.w;",
       "  }",
-      "  p += (rad + strokeWidth) * ",
+      "  p += (radius + strokeWidth) * ",
       "vec4 (unit.x * pixelWidth, unit.y * pixelWidth * aspect, 0.0, 1.0);",
       "  gl_Position = vec4(p.xyz, 1.0);",
       "}"
@@ -161,7 +162,7 @@ geo.gl.pointFeature = function (arg) {
     var prog = vgl.shaderProgram(),
         posAttr = vgl.vertexAttribute("pos"),
         unitAttr = vgl.vertexAttribute("unit"),
-        radAttr = vgl.vertexAttribute("rad"),
+        radAttr = vgl.vertexAttribute("radius"),
         stokeWidthAttr = vgl.vertexAttribute("strokeWidth"),
         fillColorAttr = vgl.vertexAttribute("fillColor"),
         fillAttr = vgl.vertexAttribute("fill"),
@@ -239,12 +240,12 @@ geo.gl.pointFeature = function (arg) {
             source: vgl.sourceDataP3fv({"name": "pos"})
           },
           {
-            name: "rad",
+            name: "radius",
             size: 1,
             source: vgl.sourceDataAnyfv(
               1,
               vgl.vertexAttributeKeysIndexed.Two,
-              {"name": "rad"}
+              {"name": "radius"}
             )
           },
           {
@@ -313,7 +314,7 @@ geo.gl.pointFeature = function (arg) {
         [
           {
             "indices": "indices",
-            "primative": vgl.triangles()
+            "primitive": vgl.triangles()
           }
         ]
       );
@@ -332,6 +333,11 @@ geo.gl.pointFeature = function (arg) {
           dynamicDraw: m_dynamicDraw
         });
 
+    m_pixelWidthUniform = new vgl.floatUniform("pixelWidth",
+                            2.0 / m_this.renderer().width());
+    m_aspectUniform = new vgl.floatUniform("aspect",
+                        m_this.renderer().width() / m_this.renderer().height());
+
     if (m_actor) {
       m_this.renderer().contextRenderer().removeActor(m_actor);
       m_actor = null;
@@ -342,11 +348,6 @@ geo.gl.pointFeature = function (arg) {
     }
 
     m_actor = createActor();
-
-    m_pixelWidthUniform = new vgl.floatUniform("pixelWidth",
-                            2.0 / m_this.renderer().width());
-    m_aspectUniform = new vgl.floatUniform("aspect",
-                        m_this.renderer().width() / m_this.renderer().height());
 
     mapper.setGeometryData(geom);
     m_actor.setMapper(mapper);
@@ -364,13 +365,13 @@ geo.gl.pointFeature = function (arg) {
 
     // maybe move this elsewhere (also use dataModified, etc)
     allocateBuffer(data.length);
-    if (name === "positions") {
+    if (name === "position") {
       m_this._writePositions("pos", data, 6);
     } else if (name === "strokeColor" || name === "fillColor") {
       m_this._writeColors(name, data, 6);
     } else if (name === "stroke" || name === "fill") {
       m_this._writeBools(name, data, 6);
-    } else if (name === "strokeOpacity" || name === "fillOpacity" || "rad") {
+    } else if (name === "strokeOpacity" || name === "fillOpacity" || name === "radius") {
       m_this._writeBuffer(name, data, 6);
     }
   };
@@ -441,8 +442,10 @@ geo.gl.pointFeature = function (arg) {
     m_aspectUniform.set(m_this.renderer().width() /
                         m_this.renderer().height());
 
-    m_actor.setVisible(m_this.visible());
-    m_actor.material().setBinNumber(m_this.bin());
+    if (m_actor) {
+      m_actor.setVisible(m_this.visible());
+      m_actor.material().setBinNumber(m_this.bin());
+    }
 
     m_this.updateTime().modified();
   };

@@ -3,16 +3,11 @@
  * Create a new instance of class gl.feature
  *
  * @class
- * @extends geo.feature
  * @returns {geo.gl.feature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.gl.feature = function (arg) {
+geo.gl.feature = function () {
   "use strict";
-  if (!(this instanceof geo.gl.feature)) {
-    return new geo.gl.feature(arg);
-  }
-  geo.feature.call(this);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -196,5 +191,3 @@ geo.gl.feature = function (arg) {
     return geom;
   };
 };
-
-inherit(geo.gl.feature, geo.feature);
