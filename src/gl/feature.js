@@ -60,7 +60,7 @@ geo.gl.feature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._writeBuffer = function (attr, data, repeat, accessor) {
     repeat = repeat || 1;
-    accessor = accessor || function (d) { return d; };
+    accessor = accessor || function (d) { return [d]; };
 
     data.forEach(function (d, i) {
       m_buffer.repeat(
@@ -130,6 +130,18 @@ geo.gl.feature = function (arg) {
       repeat,
       function (d) { return [d ? 1 : 0]; }
     );
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get an attribute from the internal buffer.
+   * @protected
+   * @param {string} name The attribute name
+   * @returns {number[]}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._readBuffer = function (attr) {
+    return m_buffer.get(attr);
   };
 };
 
