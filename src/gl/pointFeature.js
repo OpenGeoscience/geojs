@@ -156,16 +156,16 @@ geo.gl.pointFeature = function (arg) {
         fillOpacity = [], strokeOpacity = [], posFunc, radFunc, strokeWidthFunc,
         fillColorFunc, fillFunc, strokeColorFunc, strokeFunc, fillOpacityFunc,
         strokeOpactityFunc, buffers = vgl.DataBuffers(1024),
-        sourcePositions = vgl.sourceDataP3fv(),
-        sourceUnits = vgl.sourceDataAnyfv(2, vgl.vertexAttributeKeysIndexed.One),
-        sourceRadius = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Two),
-        sourceStokeWidth = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Three),
-        sourceFillColor = vgl.sourceDataAnyfv(3, vgl.vertexAttributeKeysIndexed.Four),
-        sourceFill = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Five),
-        sourceStrokeColor = vgl.sourceDataAnyfv(3, vgl.vertexAttributeKeysIndexed.Six),
-        sourceStroke = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Seven),
-        sourceAlpha = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Eight),
-        sourceStrokeOpacity = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Nine),
+        sourcePositions = vgl.sourceDataP3fv({"name": "pos"}),
+        sourceUnits = vgl.sourceDataAnyfv(2, vgl.vertexAttributeKeysIndexed.One, {"name": "unit"}),
+        sourceRadius = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Two, {"name": "rad"}),
+        sourceStokeWidth = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Three, {"name": "strokeWidth"}),
+        sourceFillColor = vgl.sourceDataAnyfv(3, vgl.vertexAttributeKeysIndexed.Four, {"name": "fillColor"}),
+        sourceFill = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Five, {"name": "fill"}),
+        sourceStrokeColor = vgl.sourceDataAnyfv(3, vgl.vertexAttributeKeysIndexed.Six, {"name": "strokeColor"}),
+        sourceStroke = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Seven, {"name": "stroke"}),
+        sourceAlpha = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Eight, {"name": "fillOpacity"}),
+        sourceStrokeOpacity = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Nine, {"name": "strokeOpacity"}),
         trianglesPrimitive = vgl.triangles(),
         mat = vgl.material(),
         blend = vgl.blend(),
@@ -280,34 +280,34 @@ geo.gl.pointFeature = function (arg) {
     }
 
     sourcePositions.pushBack(buffers.get("pos"));
-    geom.addSource(sourcePositions, "pos");
+    geom.addSource(sourcePositions);
 
     sourceUnits.pushBack(buffers.get("unit"));
-    geom.addSource(sourceUnits, "unit");
+    geom.addSource(sourceUnits);
 
     sourceRadius.pushBack(buffers.get("rad"));
-    geom.addSource(sourceRadius, "rad");
+    geom.addSource(sourceRadius);
 
     sourceStokeWidth.pushBack(buffers.get("strokeWidth"));
-    geom.addSource(sourceStokeWidth, "strokeWidth");
+    geom.addSource(sourceStokeWidth);
 
     sourceFillColor.pushBack(buffers.get("fillColor"));
-    geom.addSource(sourceFillColor, "fillColor");
+    geom.addSource(sourceFillColor);
 
     sourceFill.pushBack(buffers.get("fill"));
-    geom.addSource(sourceFill, "fill");
+    geom.addSource(sourceFill);
 
     sourceStrokeColor.pushBack(buffers.get("strokeColor"));
-    geom.addSource(sourceStrokeColor, "strokeColor");
+    geom.addSource(sourceStrokeColor);
 
     sourceStroke.pushBack(buffers.get("stroke"));
-    geom.addSource(sourceStroke, "stroke");
+    geom.addSource(sourceStroke);
 
     sourceAlpha.pushBack(buffers.get("fillOpacity"));
-    geom.addSource(sourceAlpha, "fillOpacity");
+    geom.addSource(sourceAlpha);
 
     sourceStrokeOpacity.pushBack(buffers.get("strokeOpacity"));
-    geom.addSource(sourceStrokeOpacity, "strokeOpacity");
+    geom.addSource(sourceStrokeOpacity);
 
     trianglesPrimitive.setIndices(buffers.get("indices"));
     geom.addPrimitive(trianglesPrimitive);
@@ -319,16 +319,16 @@ geo.gl.pointFeature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Return mapper where actor gets it behavior and data
+   * Return list of actors
    *
-   * @returns {vgl.mapper}
+   * @returns {vgl.actor[]}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.mapper = function () {
+  this.actors = function () {
     if (!m_actor) {
-      return null;
+      return [];
     }
-    return m_actor.mapper();
+    return [m_actor];
   };
 
   ////////////////////////////////////////////////////////////////////////////
