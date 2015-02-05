@@ -157,15 +157,24 @@ geo.gl.pointFeature = function (arg) {
         fillColorFunc, fillFunc, strokeColorFunc, strokeFunc, fillOpacityFunc,
         strokeOpactityFunc, buffers = vgl.DataBuffers(1024),
         sourcePositions = vgl.sourceDataP3fv({"name": "pos"}),
-        sourceUnits = vgl.sourceDataAnyfv(2, vgl.vertexAttributeKeysIndexed.One, {"name": "unit"}),
-        sourceRadius = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Two, {"name": "rad"}),
-        sourceStokeWidth = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Three, {"name": "strokeWidth"}),
-        sourceFillColor = vgl.sourceDataAnyfv(3, vgl.vertexAttributeKeysIndexed.Four, {"name": "fillColor"}),
-        sourceFill = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Five, {"name": "fill"}),
-        sourceStrokeColor = vgl.sourceDataAnyfv(3, vgl.vertexAttributeKeysIndexed.Six, {"name": "strokeColor"}),
-        sourceStroke = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Seven, {"name": "stroke"}),
-        sourceAlpha = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Eight, {"name": "fillOpacity"}),
-        sourceStrokeOpacity = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Nine, {"name": "strokeOpacity"}),
+        sourceUnits = vgl.sourceDataAnyfv(
+            2, vgl.vertexAttributeKeysIndexed.One, {"name": "unit"}),
+        sourceRadius = vgl.sourceDataAnyfv(
+            1, vgl.vertexAttributeKeysIndexed.Two, {"name": "rad"}),
+        sourceStokeWidth = vgl.sourceDataAnyfv(
+            1, vgl.vertexAttributeKeysIndexed.Three, {"name": "strokeWidth"}),
+        sourceFillColor = vgl.sourceDataAnyfv(
+            3, vgl.vertexAttributeKeysIndexed.Four, {"name": "fillColor"}),
+        sourceFill = vgl.sourceDataAnyfv(
+            1, vgl.vertexAttributeKeysIndexed.Five, {"name": "fill"}),
+        sourceStrokeColor = vgl.sourceDataAnyfv(
+            3, vgl.vertexAttributeKeysIndexed.Six, {"name": "strokeColor"}),
+        sourceStroke = vgl.sourceDataAnyfv(
+            1, vgl.vertexAttributeKeysIndexed.Seven, {"name": "stroke"}),
+        sourceAlpha = vgl.sourceDataAnyfv(
+            1, vgl.vertexAttributeKeysIndexed.Eight, {"name": "fillOpacity"}),
+        sourceStrokeOpacity = vgl.sourceDataAnyfv(
+            1, vgl.vertexAttributeKeysIndexed.Nine, {"name": "strokeOpacity"}),
         trianglesPrimitive = vgl.triangles(),
         mat = vgl.material(),
         blend = vgl.blend(),
