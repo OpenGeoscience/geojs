@@ -50,6 +50,7 @@
       "files": [
         "init.js",
         "renderer.js",
+        "feature.js",
         "lineFeature.js",
         "pointFeature.js",
         "geomFeature.js",

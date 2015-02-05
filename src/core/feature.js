@@ -462,11 +462,6 @@ geo.feature = function (arg) {
     // Get the property type from the static object.
     var prop = geo.property[type];
 
-    // Make default setter when not provided
-    setter = setter || function (name, root, value) {
-      root[name] = value;
-    };
-
     // Several sanity checks for the developer
     if (prop === undefined) {
       throw new Error(
@@ -696,7 +691,6 @@ geo.feature = function (arg) {
   this._exit = function () {
     m_this._unbindMouseHandlers();
     m_selectedFeatures = [];
-    m_style = {};
     arg = {};
     s_exit();
   };

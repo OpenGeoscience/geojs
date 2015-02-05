@@ -28,7 +28,11 @@ geo.gl.pointFeature = function (arg) {
       s_init = this._init,
       s_update = this._update,
       s_setter = this._propertySetter,
-      m_cache = {positions: []};
+      m_buffers = null,
+      m_sizeAlloc = 0,
+      m_start = 0,
+      m_program = null;
+
 
   var vertexShaderSource = [
       "attribute vec3 pos;",
@@ -149,10 +153,105 @@ geo.gl.pointFeature = function (arg) {
     return verts;
   };
 
+  /*
+   * Construct the shader program and store in the private
+   * variable m_program.  Called on construction.
+   * @private
+   */
+  (function createShaderProg() {
+    var prog = vgl.shaderProgram(),
+        posAttr = vgl.vertexAttribute("pos"),
+        unitAttr = vgl.vertexAttribute("unit"),
+        radAttr = vgl.vertexAttribute("rad"),
+        stokeWidthAttr = vgl.vertexAttribute("strokeWidth"),
+        fillColorAttr = vgl.vertexAttribute("fillColor"),
+        fillAttr = vgl.vertexAttribute("fill"),
+        strokeColorAttr = vgl.vertexAttribute("strokeColor"),
+        strokeAttr = vgl.vertexAttribute("stroke"),
+        fillOpacityAttr = vgl.vertexAttribute("fillOpacity"),
+        strokeOpacityAttr = vgl.vertexAttribute("strokeOpacity"),
+        modelViewUniform = new vgl.modelViewUniform("modelViewMatrix"),
+        projectionUniform = new vgl.projectionUniform("projectionMatrix"),
+        fragmentShader = createFragmentShader(),
+        vertexShader = createVertexShader();
+
+    prog.addVertexAttribute(posAttr, vgl.vertexAttributeKeys.Position);
+    prog.addVertexAttribute(unitAttr, vgl.vertexAttributeKeysIndexed.One);
+    prog.addVertexAttribute(radAttr, vgl.vertexAttributeKeysIndexed.Two);
+    prog.addVertexAttribute(stokeWidthAttr, vgl.vertexAttributeKeysIndexed.Three);
+    prog.addVertexAttribute(fillColorAttr, vgl.vertexAttributeKeysIndexed.Four);
+    prog.addVertexAttribute(fillAttr, vgl.vertexAttributeKeysIndexed.Five);
+    prog.addVertexAttribute(strokeColorAttr, vgl.vertexAttributeKeysIndexed.Six);
+    prog.addVertexAttribute(strokeAttr, vgl.vertexAttributeKeysIndexed.Seven);
+    prog.addVertexAttribute(fillOpacityAttr, vgl.vertexAttributeKeysIndexed.Eight);
+    prog.addVertexAttribute(strokeOpacityAttr, vgl.vertexAttributeKeysIndexed.Nine);
+
+    prog.addUniform(m_pixelWidthUniform);
+    prog.addUniform(m_aspectUniform);
+    prog.addUniform(modelViewUniform);
+    prog.addUniform(projectionUniform);
+
+    prog.addShader(fragmentShader);
+    prog.addShader(vertexShader);
+
+    m_program = prog;
+  })();
+  
+  /*
+   * Construct the material.  Sets the private variable m_material.
+   * @private
+   */
+  (function createShaderProg() {
+  })();
+  
+  /**
+   * Create a vgl actor.
+   * @private
+   */
+  function createActor() {
+    var blend = vgl.blend(),
+        actor = vgl.actor(),
+        material = vgl.material();
+
+    material.addAttribute(m_program);
+    material.addAttribute(blend);
+    actor.setMaterial(material);
+  }
+
+  /**
+   * Allocate the gl buffer with the given size.  Clears
+   * any current content.
+   * @private
+   * @param {number} n Number of points
+   */
+  function allocateBuffer(n) {
+    var unit, tmp;
+    if (m_sizeAlloc !== n) {
+      m_this._allocateBuffer(n * 6, {
+        "indices": 1,
+        "unit": 2,
+        "pos": 3,
+        "rad": 1,
+        "strokeWidth": 1,
+        "fillColor": 3,
+        "fill": 1,
+        "strokeColor": 3,
+        "stroke": 1,
+        "fillOpacity": 1,
+        "strokeOpacity": 1
+      });
+      unit = rect(0, 0, 1, 1);
+
+      tmp = [];
+      tmp.length = n;
+      m_this._writeBuffer("indices", tmp, 1, function (d, i) { return i; });
+      m_this._writeBuffer("unit", tmp, 6, function () { return unit; });
+    }
+  }
+
   function createGLPoints() {
     var i, numPts = m_this.data().length,
         start, unit = rect(0, 0, 1, 1),
-        s_cache = m_this._cache(true),
         buffers = vgl.DataBuffers(1024),
         sourcePositions = vgl.sourceDataP3fv(),
         sourceUnits = vgl.sourceDataAnyfv(2, vgl.vertexAttributeKeysIndexed.One),
@@ -183,16 +282,13 @@ geo.gl.pointFeature = function (arg) {
         modelViewUniform = new vgl.modelViewUniform("modelViewMatrix"),
         projectionUniform = new vgl.projectionUniform("projectionMatrix"),
         geom = vgl.geometryData(),
-        mapper = vgl.mapper();
+        mapper = vgl.mapper(),
+        position;
 
     m_pixelWidthUniform = new vgl.floatUniform("pixelWidth",
                             2.0 / m_this.renderer().width());
     m_aspectUniform = new vgl.floatUniform("aspect",
                         m_this.renderer().width() / m_this.renderer().height());
-
-    position = geo.transform.transformCoordinates(
-                  m_this.gcs(), m_this.layer().map().gcs(),
-                  position, 3);
 
     buffers.create("pos", 3);
     buffers.create("indices", 1);
@@ -292,18 +388,18 @@ geo.gl.pointFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._propertySetter = function (name, root, data) {
+    // Call parent method to keep base class functionality
+    // (mouse handlers, etc)
     s_setter.call(m_this, name, root, data);
+
     if (name === "positions") {
-      m_cache.positions = geo.transform.transformCoordinates(
-        m_this.gcs(),
-        m_this.layer().map().gcs(),
-        geo.gl.positionsToArray(data, 2),
-        2
-      );
+      m_this._writePositions("pos", data, 6);
     } else if (name === "strokeColor" || name === "fillColor") {
-      m_cache[name] = geo.gl.colorsToArray(data);
+      m_this._writeColors(name, data, 6);
     } else if (name === "stroke" || name === "fill") {
-      m_cache[name] = geo.gl.boolsToArray(data);
+      m_this._writeBools(name, data, 6);
+    } else if (name === "strokeOpacity" || name === "fillOpacity") {
+      m_this._writeBuffer(name, data, 6);
     }
   };
 
