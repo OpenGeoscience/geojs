@@ -25,6 +25,7 @@ geo.gl.pointFeature = function (arg) {
       m_actor = null,
       m_pixelWidthUniform = null,
       m_aspectUniform = null,
+      m_dynamicDraw = arg.dynamicDraw === undefined ? false : arg.dynamicDraw,
       s_init = this._init,
       s_update = this._update,
       s_setter = this._propertySetter,
@@ -220,19 +221,102 @@ geo.gl.pointFeature = function (arg) {
   function allocateBuffer(n) {
     var unit, tmp;
     if (m_sizeAlloc !== n) {
-      m_this._allocateBuffer(n * 6, {
-        "indices": 1,
-        "unit": 2,
-        "pos": 3,
-        "rad": 1,
-        "strokeWidth": 1,
-        "fillColor": 3,
-        "fill": 1,
-        "strokeColor": 3,
-        "stroke": 1,
-        "fillOpacity": 1,
-        "strokeOpacity": 1
-      });
+      m_this._allocateBuffer(
+        n * 6,
+        [
+          {
+            name: "unit",
+            size: 2,
+            source: vgl.sourceDataAnyfv(
+              2,
+              vgl.vertexAttributeKeysIndexed.One,
+              {"name": "unit"}
+            )
+          },
+          {
+            name: "pos",
+            size: 3,
+            source: vgl.sourceDataP3fv({"name": "pos"})
+          },
+          {
+            name: "rad",
+            size: 1,
+            source: vgl.sourceDataAnyfv(
+              1,
+              vgl.vertexAttributeKeysIndexed.Two,
+              {"name": "rad"}
+            )
+          },
+          {
+            name: "strokeWidth",
+            size: 1,
+            source: vgl.sourceDataAnyfv(
+              1,
+              vgl.vertexAttributeKeysIndexed.Three,
+              {"name": "strokeWidth"})
+          },
+          {
+            name: "fillColor",
+            size: 3,
+            source: vgl.sourceDataAnyfv(
+              3,
+              vgl.vertexAttributeKeysIndexed.Four,
+              {"name": "fillColor"}
+            )
+          },
+          {
+            name: "fill",
+            size: 1,
+            source: vgl.sourceDataAnyfv(
+              1,
+              vgl.vertexAttributeKeysIndexed.Five,
+              {"name": "fill"}
+            )
+          },
+          {
+            name: "strokeColor",
+            size: 3,
+            source: vgl.sourceDataAnyfv(
+              3,
+              vgl.vertexAttributeKeysIndexed.Six,
+              {"name": "strokeColor"}
+            )
+          },
+          {
+            name: "stroke",
+            size: 1,
+            source: vgl.sourceDataAnyfv(
+              1,
+              vgl.vertexAttributeKeysIndexed.Seven,
+              {"name": "stroke"}
+            )
+          },
+          {
+            name: "fillOpacity",
+            size: 1,
+            source: vgl.sourceDataAnyfv(
+              1,
+              vgl.vertexAttributeKeysIndexed.Eight,
+              {"name": "fillOpacity"}
+            )
+          },
+          {
+            name: "strokeOpacity",
+            size: 1,
+            source: vgl.sourceDataAnyfv(
+              1,
+              vgl.vertexAttributeKeysIndexed.Nine,
+              {"name": "strokeOpacity"}
+            )
+          }
+        ],
+        [
+          {
+            "indices": "indices",
+            "primative": vgl.triangles()
+          }
+        ]
+      );
       unit = rect(0, 0, 1, 1);
 
       tmp = [];
@@ -243,19 +327,10 @@ geo.gl.pointFeature = function (arg) {
   }
 
   function createGLPoints() {
-    var sourcePositions = vgl.sourceDataP3fv(),
-        sourceUnits = vgl.sourceDataAnyfv(2, vgl.vertexAttributeKeysIndexed.One),
-        sourceRadius = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Two),
-        sourceStokeWidth = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Three),
-        sourceFillColor = vgl.sourceDataAnyfv(3, vgl.vertexAttributeKeysIndexed.Four),
-        sourceFill = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Five),
-        sourceStrokeColor = vgl.sourceDataAnyfv(3, vgl.vertexAttributeKeysIndexed.Six),
-        sourceStroke = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Seven),
-        sourceAlpha = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Eight),
-        sourceStrokeOpacity = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Nine),
-        trianglesPrimitive = vgl.triangles(),
-        geom = vgl.geometryData(),
-        mapper = vgl.mapper();
+    var geom = m_this._buildGeometry(),
+        mapper = vgl.mapper({
+          dynamicDraw: m_dynamicDraw
+        });
 
     if (m_actor) {
       m_this.renderer().contextRenderer().removeActor(m_actor);
@@ -273,41 +348,7 @@ geo.gl.pointFeature = function (arg) {
     m_aspectUniform = new vgl.floatUniform("aspect",
                         m_this.renderer().width() / m_this.renderer().height());
 
-    sourcePositions.pushBack(m_this._readBuffer("pos"));
-    geom.addSource(sourcePositions);
-
-    sourceUnits.pushBack(m_this._readBuffer("unit"));
-    geom.addSource(sourceUnits);
-
-    sourceRadius.pushBack(m_this._readBuffer("rad"));
-    geom.addSource(sourceRadius);
-
-    sourceStokeWidth.pushBack(m_this._readBuffer("strokeWidth"));
-    geom.addSource(sourceStokeWidth);
-
-    sourceFillColor.pushBack(m_this._readBuffer("fillColor"));
-    geom.addSource(sourceFillColor);
-
-    sourceFill.pushBack(m_this._readBuffer("fill"));
-    geom.addSource(sourceFill);
-
-    sourceStrokeColor.pushBack(m_this._readBuffer("strokeColor"));
-    geom.addSource(sourceStrokeColor);
-
-    sourceStroke.pushBack(m_this._readBuffer("stroke"));
-    geom.addSource(sourceStroke);
-
-    sourceAlpha.pushBack(m_this._readBuffer("fillOpacity"));
-    geom.addSource(sourceAlpha);
-
-    sourceStrokeOpacity.pushBack(m_this._readBuffer("strokeOpacity"));
-    geom.addSource(sourceStrokeOpacity);
-
-    trianglesPrimitive.setIndices(m_this._readBuffer("indices"));
-    geom.addPrimitive(trianglesPrimitive);
-
     mapper.setGeometryData(geom);
-
     m_actor.setMapper(mapper);
   }
 
@@ -332,6 +373,20 @@ geo.gl.pointFeature = function (arg) {
     } else if (name === "strokeOpacity" || name === "fillOpacity" || "rad") {
       m_this._writeBuffer(name, data, 6);
     }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return list of actors
+   *
+   * @returns {vgl.actor[]}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.actors = function () {
+    if (!m_actor) {
+      return [];
+    }
+    return [m_actor];
   };
 
   ////////////////////////////////////////////////////////////////////////////

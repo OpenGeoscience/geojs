@@ -22,27 +22,49 @@ geo.gl.feature = function (arg) {
   var m_this = this,
       m_buffer = null,
       m_bufferStart = null,
-      m_bufferSize = 0;
+      m_bufferSize = 0,
+      m_sources = [],
+      m_primitives = [];
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * @typedef geo.gl.source
+   * @protected
+   * @type {object}
+   * @property {string} name Unique attribute name
+   * @property {number} size The number of 4 byte words allocated in cache
+   * @property {vgl.sourceData} source The vgl data source object
+   */
+  /**
+   * @typedef geo.gl.primitive
+   * @protected
+   * @type {object}
+   * @property {string} indices Buffer name for the indices
+   * @property {vgl.primitive} primitive The vgl primitive
+   */
+  /**
    * Allocate the buffer with the given size and attributes.
    * @param {number} size The size of each attribute data array
-   * @param {object} attrs Mapping from attribute name -> attribute length
+   * @param {geo.gl.source[]} sources Mapping from source name -> sourceData type
+   * @param {geo.gl.primitive[]} primitives Mapping from primitive name -> primitive type
    * @protected
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._allocateBuffer = function (size, attrs) {
-    var key;
+  this._allocateBuffer = function (size, sources, primitives) {
 
     m_buffer = vgl.DataBuffers();
     m_bufferSize = size;
 
-    for (key in attrs) {
-      if (attrs.hasOwnProperty(key)) {
-        m_buffer.create(key, attrs[key]);
+    m_sources = sources.map(function (s) {
+      m_buffer.create(s.name, s.size);
+      return s;
+    });
+    m_primitives = primitives.map(function (p) {
+      if (p.indices) {
+        m_buffer.create(p.indices, 1);
       }
-    }
+      return p;
+    });
 
     m_bufferStart = m_buffer.alloc(size);
     return m_this;
@@ -142,6 +164,36 @@ geo.gl.feature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._readBuffer = function (attr) {
     return m_buffer.get(attr);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Create geometry data from the source buffers.
+   * @todo Generalize this for features with multiple geometries.
+   * @protected
+   * @returns {vgl.geometryData}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._buildGeometry = function () {
+    var geom = vgl.geometryData();
+
+    m_sources.forEach(function (spec) {
+      spec.source.pushBack(
+        m_this._readBuffer(spec.name)
+      );
+      geom.addSource(spec.source);
+    });
+
+    m_primitives.forEach(function (spec) {
+      if (spec.indices) {
+        spec.primitive.setIndices(
+          m_this._readBuffer(spec.indices)
+        );
+      }
+      geom.addPrimitive(spec.primitive);
+    });
+
+    return geom;
   };
 };
 

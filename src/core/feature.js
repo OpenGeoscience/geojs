@@ -649,6 +649,9 @@ geo.feature = function (arg) {
     }
     m_this.style(arg.style);
     m_this._bindMouseHandlers();
+
+    // build the cache with defaults
+    m_this._cache(true);
   };
 
   ////////////////////////////////////////////////////////////////////////////
