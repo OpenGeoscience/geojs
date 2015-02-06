@@ -432,14 +432,14 @@ geo.osmLayer = function (arg) {
         worldPt2 = ren.displayToWorld([urx, ury]);
 
     worldPt1[0] = Math.max(worldPt1[0], -180.0);
-    worldPt1[0] = Math.min(worldPt1[0],  180.0);
+    worldPt1[0] = Math.min(worldPt1[0], 180.0);
     worldPt1[1] = Math.max(worldPt1[1], -180.0);
-    worldPt1[1] = Math.min(worldPt1[1],  180.0);
+    worldPt1[1] = Math.min(worldPt1[1], 180.0);
 
     worldPt2[0] = Math.max(worldPt2[0], -180.0);
-    worldPt2[0] = Math.min(worldPt2[0],  180.0);
+    worldPt2[0] = Math.min(worldPt2[0], 180.0);
     worldPt2[1] = Math.max(worldPt2[1], -180.0);
-    worldPt2[1] = Math.min(worldPt2[1],  180.0);
+    worldPt2[1] = Math.min(worldPt2[1], 180.0);
 
     /// Compute tilex and tiley
     tile1x = geo.mercator.long2tilex(worldPt1[0], zoom);
