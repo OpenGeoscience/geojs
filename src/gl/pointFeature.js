@@ -31,7 +31,8 @@ geo.gl.pointFeature = function (arg) {
       s_update = this._update,
       s_setter = this._propertySetter,
       m_sizeAlloc = 0,
-      m_program = null;
+      m_program = null,
+      m_material = null;
 
 
   var vertexShaderSource = [
@@ -155,10 +156,10 @@ geo.gl.pointFeature = function (arg) {
 
   /*
    * Construct the shader program and store in the private
-   * variable m_program.  Called on construction.
+   * variable m_program.
    * @private
    */
-  (function createShaderProg() {
+  function createShaderProg() {
     var prog = vgl.shaderProgram(),
         posAttr = vgl.vertexAttribute("pos"),
         unitAttr = vgl.vertexAttribute("unit"),
@@ -195,22 +196,11 @@ geo.gl.pointFeature = function (arg) {
     prog.addShader(vertexShader);
 
     m_program = prog;
-  })();
-
-  /**
-   * Create a vgl actor.
-   * @returns {
-   * @private
-   */
-  function createActor() {
-    var blend = vgl.blend(),
-        actor = vgl.actor(),
-        material = vgl.material();
-
-    material.addAttribute(m_program);
-    material.addAttribute(blend);
-    actor.setMaterial(material);
-    return actor;
+    m_material = vgl.material();
+    m_material.addAttribute(prog);
+    m_material.addAttribute(vgl.blend());
+    m_actor = vgl.actor();
+    m_actor.setMaterial(m_material);
   }
 
   /**
@@ -220,11 +210,16 @@ geo.gl.pointFeature = function (arg) {
    * @param {number} n Number of points
    */
   function allocateBuffer(n) {
-    var unit, tmp;
+    var unit;
     if (m_sizeAlloc !== n) {
       m_this._allocateBuffer(
         n * 6,
         [
+          {
+            name: "pos",
+            size: 3,
+            source: vgl.sourceDataP3fv({"name": "pos"})
+          },
           {
             name: "unit",
             size: 2,
@@ -233,11 +228,6 @@ geo.gl.pointFeature = function (arg) {
               vgl.vertexAttributeKeysIndexed.One,
               {"name": "unit"}
             )
-          },
-          {
-            name: "pos",
-            size: 3,
-            source: vgl.sourceDataP3fv({"name": "pos"})
           },
           {
             name: "radius",
@@ -318,12 +308,17 @@ geo.gl.pointFeature = function (arg) {
           }
         ]
       );
+      m_sizeAlloc = n;
       unit = rect(0, 0, 1, 1);
 
-      tmp = [];
-      tmp.length = n;
-      m_this._writeBuffer("indices", tmp, 1, function (d, i) { return i; });
-      m_this._writeBuffer("unit", tmp, 6, function () { return unit; });
+      m_pixelWidthUniform = new vgl.floatUniform("pixelWidth",
+                              2.0 / m_this.renderer().width());
+      m_aspectUniform = new vgl.floatUniform("aspect",
+                          m_this.renderer().width() / m_this.renderer().height());
+
+      createShaderProg();
+      m_this._writeBuffer("indices", n, 1, function (d, i) { return [i]; });
+      m_this._writeBuffer("unit", n, 6, function () { return unit; });
     }
   }
 
@@ -332,11 +327,6 @@ geo.gl.pointFeature = function (arg) {
         mapper = vgl.mapper({
           dynamicDraw: m_dynamicDraw
         });
-
-    m_pixelWidthUniform = new vgl.floatUniform("pixelWidth",
-                            2.0 / m_this.renderer().width());
-    m_aspectUniform = new vgl.floatUniform("aspect",
-                        m_this.renderer().width() / m_this.renderer().height());
 
     if (m_actor) {
       m_this.renderer().contextRenderer().removeActor(m_actor);
@@ -347,8 +337,7 @@ geo.gl.pointFeature = function (arg) {
       return;
     }
 
-    m_actor = createActor();
-
+    createShaderProg();
     mapper.setGeometryData(geom);
     m_actor.setMapper(mapper);
   }
@@ -371,7 +360,7 @@ geo.gl.pointFeature = function (arg) {
       m_this._writeColors(name, data, 6);
     } else if (name === "stroke" || name === "fill") {
       m_this._writeBools(name, data, 6);
-    } else if (name === "strokeOpacity" || name === "fillOpacity" || name === "radius") {
+    } else {
       m_this._writeBuffer(name, data, 6);
     }
   };

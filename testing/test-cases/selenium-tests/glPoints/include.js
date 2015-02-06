@@ -11,10 +11,11 @@ window.startTest = function (done) {
         .data(citieslatlon)
         .style('fillColor', function (d) {
           if (d.lon < -100) {
-            return {r: 1.0, g: 0.0, b: 0.0};
+            return 'red';
           }
-          return {r: 0.0, g: 0.0, b: 1.0};
+          return 'blue';
         })
+        .style('strokeColor', {r: 0, g: 255, b: 0})
         .style('fillOpacity', function (d) {
           if (d.lon < -100) {
             return 0.5;

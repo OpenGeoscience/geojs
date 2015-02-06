@@ -70,23 +70,35 @@ geo.gl.feature = function () {
    * Write data into the buffer.
    * @protected
    * @param {string} attr The buffer name to write into
-   * @param {object[]} data The data array to write
+   * @param {object[]|number} data The data array to write
    * @param {number} [repeat=1] The number of times to repeat each datum
    * @param {function} [accessor] A function returning an array of numbers
    */
   ////////////////////////////////////////////////////////////////////////////
   this._writeBuffer = function (attr, data, repeat, accessor) {
+    var i;
     repeat = repeat || 1;
     accessor = accessor || function (d) { return [d]; };
 
-    data.forEach(function (d, i) {
-      m_buffer.repeat(
-        attr,
-        accessor(d, i),
-        m_bufferStart + i * repeat,
-        repeat
-      );
-    });
+    if (Array.isArray(data)) {
+      data.forEach(function (d, i) {
+        m_buffer.repeat(
+          attr,
+          accessor(d, i),
+          m_bufferStart + i * repeat,
+          repeat
+        );
+      });
+    } else {
+      for (i = 0; i < data; i += 1) {
+        m_buffer.write(
+          attr,
+          accessor(null, i),
+          m_bufferStart + i * repeat,
+          repeat
+        );
+      }
+    }
 
     return m_this;
   };
@@ -172,6 +184,7 @@ geo.gl.feature = function () {
   this._buildGeometry = function () {
     var geom = vgl.geometryData();
 
+    m_this._cache(true);
     m_sources.forEach(function (spec) {
       spec.source.pushBack(
         m_this._readBuffer(spec.name)

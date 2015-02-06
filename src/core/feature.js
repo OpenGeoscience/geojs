@@ -566,7 +566,7 @@ geo.feature = function (arg) {
           }
           return val;
         } else {
-          return accessor;
+          return prop.normalize(accessor);
         }
       }));
     };
