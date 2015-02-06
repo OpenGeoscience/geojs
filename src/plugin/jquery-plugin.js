@@ -183,7 +183,9 @@
    *   }]
    * };
    */
+  // jscs:disable requireSpaceBetweenArguments
   $.widget('geojs.geojsMap', /** @lends jQuery.fn.geojsMap */{
+  // jscs:enable requireSpaceBetweenArguments
     /**
      * A coordinate object as accepted by geojs to express positions in an
      * arbitrary coordinate system (geographic, screen, etc).  Coordinates returned by
