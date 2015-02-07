@@ -316,7 +316,6 @@ geo.gl.pointFeature = function (arg) {
       m_aspectUniform = new vgl.floatUniform("aspect",
                           m_this.renderer().width() / m_this.renderer().height());
 
-      createShaderProg();
       m_this._writeBuffer("indices", n, 1, function (d, i) { return [i]; });
       m_this._writeBuffer("unit", n, 6, function () { return unit; });
     }
@@ -436,11 +435,6 @@ geo.gl.pointFeature = function (arg) {
         m_this.updateTime().getMTime() < m_this.getMTime()) {
       m_this._build();
     }
-
-    // Update uniforms
-    m_pixelWidthUniform.set(2.0 / m_this.renderer().width());
-    m_aspectUniform.set(m_this.renderer().width() /
-                        m_this.renderer().height());
 
     if (m_actor) {
       m_actor.setVisible(m_this.visible());

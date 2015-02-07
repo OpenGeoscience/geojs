@@ -587,7 +587,10 @@ geo.feature = function (arg) {
   /**
    * A renderer specific handler for property caching.  This function is
    * on every property during every cache rebuild allowing the renderer
-   * to do caching of its own.
+   * to do caching of its own.  Classes overriding this should call
+   * the superclass method or perform the assignment by themselves,
+   * otherwise base class methods such as the mouse handling api
+   * won't work.
    * @protected
    * @param {string} name The feature name
    * @param {object} root The object root in the cache

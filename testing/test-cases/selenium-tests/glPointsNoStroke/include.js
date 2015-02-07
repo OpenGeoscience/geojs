@@ -12,9 +12,9 @@ window.startTest = function (done) {
         .style('stroke', false)
         .style('fillColor', function (d) {
           if (d.lon < -100) {
-            return {r: 1.0, g: 0.0, b: 0.0};
+            return {r: 255.0, g: 0.0, b: 0.0};
           }
-          return {r: 0.0, g: 0.0, b: 1.0};
+          return {r: 0.0, g: 0.0, b: 255.0};
         })
         .style('fillOpacity', function (d) {
           if (d.lon < -100) {

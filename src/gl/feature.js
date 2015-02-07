@@ -39,6 +39,9 @@ geo.gl.feature = function () {
    */
   /**
    * Allocate the buffer with the given size and attributes.
+   * @todo This function currently caches the data in a temporary
+   * buffer object.  It should be rewritten to write directly to a
+   * dynamic gl buffer to save on memory allocations and copies.
    * @param {number} size The size of each attribute data array
    * @param {geo.gl.source[]} sources Mapping from source name -> sourceData type
    * @param {geo.gl.primitive[]} primitives Mapping from primitive name -> primitive type
