@@ -544,16 +544,14 @@ geo.feature = function (arg) {
      * property values.
      * @private
      */
+    // add context as arguments data, index, data, index, ....
     var build = function () {
       var root = m_properties.cache;
       var cdata = m_properties.data;
       var args = [];
-      if (parent && parent.split(".").length > 1) {
-        // TODO:
-        throw "Containers not yet implemented";
-      }
       setter(localName, root, cdata.map(function (d, i) {
         var largs, val;
+
         if (geo.util.isFunction(accessor)) {
           largs = [d, i].concat(args);
           val = prop.normalize(accessor.apply(m_this, largs));
@@ -564,12 +562,36 @@ geo.feature = function (arg) {
             );
             val = defaultValue;
           }
-          return val;
         } else {
-          return prop.normalize(accessor);
+          val = prop.normalize(accessor);
         }
+        return val;
       }));
     };
+
+
+    if (parent) {
+      // TODO
+      // Add a method to containers that wraps the builder with
+      // the parent context.  Something like this:
+      // build = parent.addProperty(
+      //   name,
+      //   build,
+      //   ...
+      // );
+      //
+      // Parent containers call build on all their children,
+      // children call just the wrapped builder.  So, either of these
+      // will work:
+      //
+      // feature.data(...).line(...).position(...)
+      //
+      //   or
+      //
+      // feature.data(...).position(...).line(...)
+      throw new Error("Unimplemented");
+    }
+
 
     parent = m_properties.spec[parent];
     m_properties.spec[path] = {

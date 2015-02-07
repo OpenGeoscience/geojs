@@ -25,42 +25,6 @@ geo.lineFeature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get/Set line accessor
-   *
-   * @returns {geo.pointFeature}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.line = function (val) {
-    if (val === undefined) {
-      return m_this.style("line");
-    } else {
-      m_this.style("line", val);
-      m_this.dataTime().modified();
-      m_this.modified();
-    }
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get/Set position accessor
-   *
-   * @returns {geo.pointFeature}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.position = function (val) {
-    if (val === undefined) {
-      return m_this.style("position");
-    } else {
-      m_this.style("position", val);
-      m_this.dataTime().modified();
-      m_this.modified();
-    }
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
    * Returns an array of datum indices that contain the given point.
    * This is a slow implementation with runtime order of the number of
    * vertices.
@@ -194,35 +158,14 @@ geo.lineFeature = function (arg) {
   this._init = function (arg) {
     s_init.call(m_this, arg);
 
-    var defaultStyle = $.extend(
-      {},
-      {
-        "strokeWidth": 1.0,
-        // Default to gold color for lines
-        "strokeColor": { r: 1.0, g: 0.8431372549, b: 0.0 },
-        "strokeStyle": "solid",
-        "strokeOpacity": 1.0,
-        "line": function (d) { return d; },
-        "position": function (d) { return d; }
-      },
-      arg.style === undefined ? {} : arg.style
-    );
-
-    if (arg.line !== undefined) {
-      defaultStyle.line = arg.line;
-    }
-
-    if (arg.position !== undefined) {
-      defaultStyle.position = arg.position;
-    }
-
-
-    m_this.style(defaultStyle);
-
-    m_this.dataTime().modified();
+    this._property("line", "line", "container", function (d) { return d; });
+    this._property("position", "line.position", "position", function (d) { return d; });
+    this._property("stroke", "line.stroke", "bool", true);
+    this._property("strokeColor", "line.strokeColor", "color", "black");
+    this._property("strokeWidth", "line.strokeWidth", "size", 2);
+    this._property("strokeOpacity", "line.strokeOpacity", "opacity", 1);
   };
 
-  this._init(arg);
   return this;
 };
 
