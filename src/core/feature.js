@@ -463,6 +463,9 @@ geo.feature = function (arg) {
     // Get the property type from the static object.
     var prop = geo.property[type];
 
+    // Children object populated when the property is a container
+    var children = {};
+
     // Several sanity checks for the developer
     if (prop === undefined) {
       throw new Error(
@@ -540,15 +543,48 @@ geo.feature = function (arg) {
     };
 
     /**
+     * Return the container inside the cache for the given context.
+     * This function in particular is the default
+     * used for accessors at the root level.
+     * @private
+     */
+    var getContainer = function () {
+      return m_properties.cache;
+    };
+
+    /**
+     * This function returns arguments required to call a properties
+     * accessor.  It transforms an array of indices to an array:
+     *   args = [ d_n, i_n, ... , d_0, i_0 ]
+     * The child method calls:
+     *   value = accessor.apply(m_this, args)
+     * @private
+     */
+    var getContext = function () {
+      return [];
+    };
+
+    /**
+     * This function returns the data object for the given context.
+     * @private
+     */
+    var getData = function () {
+      return m_properties.data;
+    };
+
+    parent = m_properties.spec[parent];
+    /**
      * This will be the function that builds the internal cache for the
      * property values.
      * @private
      */
     // add context as arguments data, index, data, index, ....
     var build = function () {
-      var root = m_properties.cache;
-      var cdata = m_properties.data;
-      var args = [];
+      var root = getContainer.apply(m_this, arguments);
+      var ctx = getContext.apply(m_this, arguments);
+      var cdata = getData.apply(m_this, ctx);
+      var args = Array.prototype.slice.call(arguments);
+
       setter(localName, root, cdata.map(function (d, i) {
         var largs, val;
 
@@ -565,11 +601,22 @@ geo.feature = function (arg) {
         } else {
           val = prop.normalize(accessor);
         }
+
         return val;
       }));
+
+      // Update the cache for children
+      root[localName].forEach(function (d, i) {
+        var key, largs = [d, i].concat(args);
+        for (key in children) {
+          if (children.hasOwnProperty(key)) {
+            children[key].build.apply(m_this, largs);
+          }
+        }
+      });
     };
 
-
+    var parentUtils;
     if (parent) {
       // TODO
       // Add a method to containers that wraps the builder with
@@ -589,17 +636,68 @@ geo.feature = function (arg) {
       //   or
       //
       // feature.data(...).position(...).line(...)
-      throw new Error("Unimplemented");
+      parentUtils = parent.addChild(localName, build);
+
+      // set the context and container methods
+      getContainer = parentUtils.container;
+      getContext = parentUtils.context;
     }
 
+    /**
+     * This function is called by children of a container to register
+     * themselves to container's build method.  This ensures that
+     * when the datum for any container changes, the contained properties
+     * will be updated as well.
+     *
+     * Returns a builder utilities that take the place of the root level
+     * methods.
+     * @private
+     * @argument {string} childName The local name of the child property
+     * @returns {function}
+     */
+    var addChild = function (childName, childBuilder) {
+      children[childName] = childBuilder;
+      return {
+        // Return the cache root.
+        container: function () {
+          var args = Array.prototype.slice.call(arguments);
+          var i = args.shift();
+          var cache = getContainer.apply(m_this, args);
+          // add an empty array to the cache if it doesn't exist
+          if (!cache[localName]) {
+            cache[localName] = [];
+          }
+          return cache[localName][i];
+        },
 
-    parent = m_properties.spec[parent];
+        // Return to the child the data context.
+        context: function () {
+          // maybe add some sanity checks/warnings here
+          var args = Array.prototype.slice.call(arguments);
+          var i = args.shift();
+          var ctx = getContext.apply(m_this, args);
+          var d = func.apply(m_this, ctx);
+          return [d, i].concat(args);
+        },
+
+        // Return the data object for a context... relies on the cache
+        // being current.
+        data: function () {
+          return getContainer.apply(m_this, arguments)[localName];
+        }
+      };
+    };
+
     m_properties.spec[path] = {
       type: type,
       name: name,
       defaultValue: defaultValue,
       property: prop,
-      build: build
+      build: build,
+      addChildren: addChild,
+      children: children,
+      context: getContext,
+      container: getContainer
     };
 
     m_this[name] = func;
