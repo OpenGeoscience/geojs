@@ -45,41 +45,30 @@ geo.d3.lineFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
-    var data = m_this.data() || [],
-        s_style = m_this.style(),
-        m_renderer = m_this.renderer(),
-        pos_func = m_this.position(),
+    var m_renderer = m_this.renderer(),
+        s_style = m_this._cache(true),
         line = d3.svg.line()
                 .x(function (d) { return m_renderer.worldToDisplay(d).x; })
                 .y(function (d) { return m_renderer.worldToDisplay(d).y; });
 
     s_update.call(m_this);
-    s_style.fill = function () { return false; };
 
-    data.forEach(function (item, idx) {
+    s_style.line.forEach(function (item, idx) {
       var m_style;
-      var ln = m_this.line()(item, idx);
 
-      var style = {}, key;
-      function wrapStyle(func) {
-        if (geo.util.isFunction(func)) {
-          return function () {
-            return func(ln[0], 0, item, idx);
-          };
-        } else {
-          return func;
-        }
-      }
-      for (key in s_style) {
-        if (s_style.hasOwnProperty(key)) {
-          style[key] = wrapStyle(s_style[key]);
-        }
-      }
+      var style = {
+        stroke: item.stroke,
+        strokeColor: item.strokeColor,
+        strokeWidth: item.strokeWidth,
+        strokeOpacity: item.strokeOpacity
+      };
+      style.fill = item.stroke.map(function () { return false; });
+      style.fillColor = item.stroke.map(function () { return 'none'; });
 
       // item is an object representing a single line
       // m_this.line()(item) is an array of coordinates
       m_style = {
-        data: [ln.map(function (d, i) { return pos_func(d, i, item, idx);})],
+        data: [item.position],
         append: 'path',
         attributes: {
           d: line

@@ -414,6 +414,7 @@ geo.feature = function (arg) {
       output = {};
       for (property in m_properties.paths) {
         if (m_properties.paths.hasOwnProperty(property)) {
+          property = m_properties.paths[property];
           spec = m_properties.spec[property];
           output[spec.name] = m_this.style(spec.name);
         }
@@ -582,14 +583,14 @@ geo.feature = function (arg) {
     var build = function () {
       var root = getContainer.apply(m_this, arguments);
       var ctx = getContext.apply(m_this, arguments);
-      var cdata = getData.apply(m_this, ctx);
+      var cdata = getData.apply(m_this, arguments);
       var args = Array.prototype.slice.call(arguments);
 
       setter(localName, root, cdata.map(function (d, i) {
         var largs, val;
 
         if (geo.util.isFunction(accessor)) {
-          largs = [d, i].concat(args);
+          largs = [d, i].concat(ctx);
           val = prop.normalize(accessor.apply(m_this, largs));
           if (val === null) {
             console.warn(
@@ -607,10 +608,10 @@ geo.feature = function (arg) {
 
       // Update the cache for children
       root[localName].forEach(function (d, i) {
-        var key, largs = [d, i].concat(args);
+        var key, largs = [i].concat(args);
         for (key in children) {
           if (children.hasOwnProperty(key)) {
-            children[key].build.apply(m_this, largs);
+            children[key].apply(m_this, largs);
           }
         }
       });
@@ -641,6 +642,7 @@ geo.feature = function (arg) {
       // set the context and container methods
       getContainer = parentUtils.container;
       getContext = parentUtils.context;
+      getData = parentUtils.data;
     }
 
     /**
@@ -676,14 +678,16 @@ geo.feature = function (arg) {
           var args = Array.prototype.slice.call(arguments);
           var i = args.shift();
           var ctx = getContext.apply(m_this, args);
-          var d = func.apply(m_this, ctx);
-          return [d, i].concat(args);
+          var d = getContainer.apply(m_this, args);
+          return [d, i].concat(ctx);
         },
 
         // Return the data object for a context... relies on the cache
         // being current.
         data: function () {
-          return getContainer.apply(m_this, arguments)[localName];
+          var args = Array.prototype.slice.call(arguments);
+          var i = args.shift();
+          return getContainer.apply(m_this, args)[localName][i];
         }
       };
     };
@@ -694,7 +698,7 @@ geo.feature = function (arg) {
       defaultValue: defaultValue,
       property: prop,
       build: build,
-      addChildren: addChild,
+      addChild: addChild,
       children: children,
       context: getContext,
       container: getContainer
@@ -752,7 +756,8 @@ geo.feature = function (arg) {
     var prop;
     if (rebuild) {
       for (prop in m_properties.spec) {
-        if (m_properties.spec.hasOwnProperty(prop)) {
+        if (m_properties.spec.hasOwnProperty(prop) &&
+            prop.split(".").length < 2) {
           m_properties.spec[prop].build();
         }
       }

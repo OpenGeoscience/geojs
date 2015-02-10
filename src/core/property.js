@@ -136,7 +136,7 @@
      */
     container: {
       normalize: function (value) {
-        if (geo.util.toType(value) === "object") {
+        if (typeof value === "object") {
           return value;
         }
         return null;
