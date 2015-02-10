@@ -53,6 +53,7 @@ describe('mapInteractor', function () {
     };
     map.displayToGcs = base.displayToGcs;
     map.info = info;
+    map._zoomCallback = function () {};
     return map;
   }
 

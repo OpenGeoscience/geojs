@@ -445,7 +445,6 @@ geo.gl.vglRenderer = function (arg) {
         camera,
         renderWindow,
         layer = m_this.layer(),
-        delta,
         center,
         dir,
         focusPoint,
@@ -468,6 +467,7 @@ geo.gl.vglRenderer = function (arg) {
     position = camera.position();
     newZ = 360 * Math.pow(2, -evt.zoomLevel);
 
+    evt.pan = null;
     if (evt.screenPosition) {
       center = renderWindow.displayToWorld(
         evt.screenPosition.x,
@@ -476,17 +476,13 @@ geo.gl.vglRenderer = function (arg) {
         vglRenderer
       );
       dir = [center[0] - position[0], center[1] - position[1], center[2] - position[2]];
-      position[0] += dir[0] * (1 - newZ / position[2]);
-      position[1] += dir[1] * (1 - newZ / position[2]);
-    } else {
-      dir = undefined;
-      delta = -delta;
+      evt.center = layer.fromLocal({
+        x: position[0] + dir[0] * (1 - newZ / position[2]),
+        y: position[1] + dir[1] * (1 - newZ / position[2])
+      });
     }
 
     camera.setPosition(position[0], position[1], 360 * Math.pow(2, -evt.zoomLevel));
-    if (dir) {
-      camera.setFocalPoint(position[0], position[1], focusPoint[2]);
-    }
 
     m_this._updateRendererCamera();
   });

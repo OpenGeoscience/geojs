@@ -40,10 +40,12 @@ geo.map = function (arg) {
       m_validZoomRange = { min: 0, max: 16 },
       m_transition = null,
       m_queuedTransition = null,
-      m_clock = null;
+      m_clock = null,
+      m_bounds = {};
 
   arg.center = geo.util.normalizeCoordinates(arg.center);
   arg.autoResize = arg.autoResize === undefined ? true : arg.autoResize;
+  arg.clampBounds = arg.clampBounds === undefined ? true : arg.clampBounds;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -90,7 +92,7 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.zoom = function (val, direction) {
-    var base, evt, previousCenter;
+    var base, evt, recenter = false;
     if (val === undefined) {
       return m_zoom;
     }
@@ -112,25 +114,24 @@ geo.map = function (arg) {
       base.renderer().geoTrigger(geo.event.zoom, evt, true);
     }
 
-    if (evt.geo.preventDefault) {
-      return;
+    recenter = evt.center;
+    if (!evt.geo.preventDefault) {
+
+      m_zoom = val;
+      m_this._updateBounds();
+
+      m_this.children().forEach(function (child) {
+        child.geoTrigger(geo.event.zoom, evt, true);
+      });
+
+      m_this.modified();
     }
 
-    m_zoom = val;
-    previousCenter = m_center;
-    m_center = m_this.displayToGcs({
-      x: m_width / 2,
-      y: m_height / 2
-    });
-
-    evt.gcsDelta = {
-      x: m_center.x - previousCenter.x,
-      y: m_center.y - previousCenter.y
-    };
-
-    m_this.children().forEach(function (child) {
-      child.geoTrigger(geo.event.zoom, evt, true);
-    });
+    if (evt.center) {
+      m_this.center(recenter);
+    } else {
+      m_this.pan({x: 0, y: 0});
+    }
     return m_this;
   };
 
@@ -139,12 +140,42 @@ geo.map = function (arg) {
    * Pan the map by (x: dx, y: dy) pixels.
    *
    * @param {Object} delta
+   * @param {bool?} force Disable bounds clamping
    * @returns {geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.pan = function (delta) {
+  this.pan = function (delta, force) {
     var base = m_this.baseLayer(),
-        evt;
+        evt, pt, corner1, corner2;
+
+    if (arg.clampBounds && !force && m_width && m_height) {
+      pt = m_this.displayToGcs({
+        x: delta.x,
+        y: delta.y
+      });
+
+      corner1 = m_this.gcsToDisplay({
+        x: -180,
+        y: 82
+      });
+      corner2 = m_this.gcsToDisplay({
+        x: 180,
+        y: -82
+      });
+
+      if (corner1.x > 0 && corner2.x < m_width) {
+        // if the map is too small horizontally
+        delta.x = (-corner1.x + m_width - corner2.x) / 2;
+      } else {
+        delta.x = Math.max(Math.min(delta.x, -corner1.x), m_width - corner2.x);
+      }
+      if (corner1.y > 0 && corner2.y < m_height) {
+        // if the map is too small horizontally
+        delta.y = (-corner1.y + m_height - corner2.y) / 2;
+      } else {
+        delta.y = Math.max(Math.min(delta.y, -corner1.y), m_height - corner2.y);
+      }
+    }
 
     evt = {
       geo: {},
@@ -160,11 +191,12 @@ geo.map = function (arg) {
     if (evt.geo.preventDefault) {
       return;
     }
-
     m_center = m_this.displayToGcs({
       x: m_width / 2,
       y: m_height / 2
     });
+    m_this._updateBounds();
+
     m_this.children().forEach(function (child) {
       child.geoTrigger(geo.event.pan, evt, true);
     });
@@ -182,7 +214,7 @@ geo.map = function (arg) {
    * @returns {Object|geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.center = function (coordinates) {
+  this.center = function (coordinates, force) {
     var newCenter, currentCenter;
 
     if (coordinates === undefined) {
@@ -198,7 +230,7 @@ geo.map = function (arg) {
     m_this.pan({
       x: currentCenter.x - newCenter.x,
       y: currentCenter.y - newCenter.y
-    });
+    }, force);
 
     return m_this;
   };
@@ -324,7 +356,10 @@ geo.map = function (arg) {
       height: h
     });
 
+    m_this._updateBounds();
+    m_this.pan({x: 0, y: 0});
     m_this.modified();
+
     return m_this;
   };
 
@@ -408,12 +443,19 @@ geo.map = function (arg) {
         // This assumes that the base layer is initially centered at
         // (0, 0).  May want to add an explicit call to the base layer
         // to set a given center.
-        m_this.center(arg.center);
+        m_this.center(arg.center, true);
       }
       save = m_zoom;
       m_zoom = null;
       m_this.zoom(save);
 
+      m_this._updateBounds();
+
+      // This forces the map into a state with valid bounds
+      // when clamping is on.  The original call to center
+      // is forced to initialize the camera position in the
+      // base layer so no adjustment is done there.
+      m_this.pan({x: 0, y: 0});
       return m_this;
     }
     return m_baseLayer;
@@ -751,7 +793,6 @@ geo.map = function (arg) {
         }
 
         if (next) {
-          console.log(next);
           m_queuedTransition = null;
           m_this.transition(next);
         }
@@ -790,6 +831,51 @@ geo.map = function (arg) {
     }
     return m_this;
   };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Update the internally cached map bounds.
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._updateBounds = function () {
+    m_bounds.lowerLeft = m_this.displayToGcs({
+      x: 0,
+      y: m_height
+    });
+    m_bounds.lowerRight = m_this.displayToGcs({
+      x: m_width,
+      y: m_height
+    });
+    m_bounds.upperLeft = m_this.displayToGcs({
+      x: 0,
+      y: 0
+    });
+    m_bounds.upperRight = m_this.displayToGcs({
+      x: m_width,
+      y: 0
+    });
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get the locations of the current map corners as latitudes/longitudes.
+   * The return value of this function is an object as follows: ::
+   *
+   *    {
+   *        lowerLeft: {x: ..., y: ...},
+   *        upperLeft: {x: ..., y: ...},
+   *        lowerRight: {x: ..., y: ...},
+   *        upperRight: {x: ..., y: ...}
+   *    }
+   *
+   * @todo Provide a setter
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.bounds = function () {
+    return m_bounds;
+  };
+
 
   this.interactor(arg.interactor || geo.mapInteractor());
   this.clock(arg.clock || geo.clock());

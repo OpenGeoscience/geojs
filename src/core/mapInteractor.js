@@ -89,9 +89,13 @@ geo.mapInteractor = function (args) {
       selectionModifiers: {'shift': true},
       momentum: {
         enabled: true,
-        maxSpeed: 10,
+        maxSpeed: 2.5,
         minSpeed: 0.01,
-        drag: 0.005
+        drag: 0.01
+      },
+      spring: {
+        enabled: false,
+        springConstant: 0.00005
       }
     },
     m_options
@@ -142,6 +146,12 @@ geo.mapInteractor = function (args) {
   //     drag: number, // drag coefficient
   //     maxSpeed: number, // don't allow animation to pan faster than this
   //     minSpeed: number  // stop animations if the speed is less than this
+  //   }
+  //
+  //   // enable spring clamping to screen edges to enforce clamping
+  //   spring: {
+  //     enabled: true | false,
+  //     springConstant: number,
   //   }
   // }
 
@@ -255,7 +265,10 @@ geo.mapInteractor = function (args) {
     // time elapsed since the last mouse event
     deltaTime: 1,
     // pixels/ms
-    velocity: 0
+    velocity: {
+      x: 0,
+      y: 0
+    }
   };
 
   // default keyboard object
@@ -499,6 +512,27 @@ geo.mapInteractor = function (args) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Immediately cancel an ongoing action.
+   *
+   * @param {string?} action The action type, if null cancel any action
+   * @returns {bool} If an action was canceled
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.cancel = function (action) {
+    var out;
+    if (!action) {
+      out = !!m_state.action;
+    } else {
+      out = m_state.action === action;
+    }
+    if (out) {
+      m_state = {};
+    }
+    return out;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Handle event when a mouse button is pressed
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -521,6 +555,11 @@ geo.mapInteractor = function (args) {
     } else if (eventMatch(m_options.selectionButton, m_options.selectionModifiers)) {
       action = 'select';
     }
+
+    m_mouse.velocity = {
+      x: 0,
+      y: 0
+    };
 
     if (action) {
       // store the state object
@@ -616,6 +655,84 @@ geo.mapInteractor = function (args) {
     evt.preventDefault();
   };
 
+  /**
+   * Use interactor options to modify the mouse velocity by momentum
+   * or spring equations depending on the current map state.
+   * @private
+   * @param {object} v Current velocity in pixels / ms
+   * @param {number} deltaT The time delta
+   * @returns {object} New velocity
+   */
+  function modifyVelocity(v, deltaT) {
+    deltaT = deltaT <= 0 ? 30 : deltaT;
+    var sf = springForce();
+    var speed = calcSpeed(v);
+    var vx = v.x / speed;
+    var vy = v.y / speed;
+
+    speed = speed * Math.exp(-m_options.momentum.drag * deltaT);
+
+    // |force| + |velocity| < c <- stopping condition
+    if (calcSpeed(sf) * deltaT + speed < m_options.momentum.minSpeed) {
+      return null;
+    }
+
+    if (speed > 0) {
+      vx = vx * speed;
+      vy = vy * speed;
+    } else {
+      vx = 0;
+      vy = 0;
+    }
+
+    return {
+      x: vx - sf.x * deltaT,
+      y: vy - sf.y * deltaT
+    };
+  }
+
+  /**
+   * Get the spring force for the current map bounds
+   * (This method might need to move elsewhere to deal
+   * with different projections)
+   * @private
+   * @returns {object} The spring force
+   */
+  function springForce() {
+    var xplus,  // force to the right
+        xminus, // force to the left
+        yplus,  // force to the top
+        yminus; // force to the bottom
+
+    if (!m_options.spring.enabled) {
+      return {x: 0, y: 0};
+    }
+    // get screen coordinates of corners
+    var ul = m_this.map().gcsToDisplay({
+      x: -180,
+      y: 82
+    });
+    var lr = m_this.map().gcsToDisplay({
+      x: 180,
+      y: -82
+    });
+
+    var c = m_options.spring.springConstant;
+    // Arg... map needs to expose the canvas size
+    var width = m_this.map().node().width();
+    var height = m_this.map().node().height();
+
+    xplus = c * Math.max(0, ul.x);
+    xminus = c * Math.max(0, width - lr.x);
+    yplus = c * Math.max(0, ul.y) / 2;
+    yminus = c * Math.max(0, height - lr.y) / 2;
+
+    return {
+      x: xplus - xminus,
+      y: yplus - yminus
+    };
+  }
+
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Handle event when a mouse button is unpressed on the document.
@@ -652,54 +769,7 @@ geo.mapInteractor = function (args) {
 
     // if momentum is enabled, start the action here
     if (m_options.momentum.enabled && oldAction === 'pan') {
-      m_state.action = 'momentum';
-      m_state.origin = m_this.mouse();
-      m_state.handler = function () {
-        var vx, vy, speed, s;
-
-        if (m_state.action !== 'momentum' || !m_this.map()) {
-          // cancel if a new action was performed
-          return;
-        }
-
-        vx = m_mouse.velocity.x;
-        vy = m_mouse.velocity.y;
-
-        // get the current speed
-        speed = calcSpeed(m_mouse.velocity);
-        s = speed;
-
-        // normalize the velocity components
-        vx = vx / speed;
-        vy = vy / speed;
-
-        // modify current speed by constraints
-        speed = Math.min(speed, m_options.momentum.maxSpeed);
-
-        // calculate the new speed
-        speed = speed * Math.exp(-m_options.momentum.drag * m_mouse.deltaTime);
-
-        // stop panning when the speed is below the threshold
-        if (speed < m_options.momentum.minSpeed) {
-          m_state = {};
-          return;
-        }
-
-        m_mouse.velocity.x = speed * vx;
-        m_mouse.velocity.y = speed * vy;
-
-        m_this.map().pan({
-          x: m_mouse.velocity.x * m_mouse.deltaTime,
-          y: m_mouse.velocity.y * m_mouse.deltaTime
-        });
-
-        if (m_state.handler) {
-          window.requestAnimationFrame(m_state.handler);
-        }
-      };
-      if (m_state.handler) {
-        window.requestAnimationFrame(m_state.handler);
-      }
+      m_this.springBack(true);
     }
   };
 
@@ -764,6 +834,82 @@ geo.mapInteractor = function (args) {
         m_this.map().zoom() + zoomFactor,
         direction
       );
+    }
+  };
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Start up a spring back action when the map bounds are out of range.
+   * Not to be user callable.
+   * @todo Move this and momentum handling to the map class
+   * @protected
+   *
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.springBack = function (initialVelocity) {
+    if (m_state.action === 'momentum') {
+      return;
+    }
+    if (!initialVelocity) {
+      m_mouse.velocity = {
+        x: 0,
+        y: 0
+      };
+    }
+    m_state.action = 'momentum';
+    m_state.origin = m_this.mouse();
+    m_state.start = new Date();
+    m_state.handler = function () {
+      var v, s, last, dt;
+
+      // Not sure the correct way to do this.  We need the delta t for the
+      // next time step...  Maybe use a better interpolator and the time
+      // parameter from requestAnimationFrame.
+      dt = Math.min(m_mouse.deltaTime, 30);
+      if (m_state.action !== 'momentum' ||
+          !m_this.map() ||
+          m_this.map().transition()) {
+        // cancel if a new action was performed
+        return;
+      }
+
+      last = m_state.start.valueOf();
+      m_state.start = new Date();
+
+      v = modifyVelocity(m_mouse.velocity, m_state.start - last);
+
+      // stop panning when the speed is below the threshold
+      if (!v) {
+        m_state = {};
+        return;
+      }
+
+      s = calcSpeed(v);
+      if (s > m_options.momentum.maxSpeed) {
+        s = m_options.momentum.maxSpeed / s;
+        v.x = v.x * s;
+        v.y = v.y * s;
+      }
+
+      if (!isFinite(v.x) || !isFinite(v.y)) {
+        v.x = 0;
+        v.y = 0;
+      }
+      m_mouse.velocity.x = v.x;
+      m_mouse.velocity.y = v.y;
+
+      m_this.map().pan({
+        x: m_mouse.velocity.x * dt,
+        y: m_mouse.velocity.y * dt
+      });
+
+      if (m_state.handler) {
+        window.requestAnimationFrame(m_state.handler);
+      }
+    };
+    if (m_state.handler) {
+      window.requestAnimationFrame(m_state.handler);
     }
   };
 
