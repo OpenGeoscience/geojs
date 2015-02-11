@@ -72,7 +72,7 @@ geo.d3.vectorFeature = function (arg) {
         x1: origin.x,
         y1: origin.y,
         dx: delta.x,
-        dy: delta.y
+        dy: -delta.y
       };
     });
 
@@ -101,7 +101,8 @@ geo.d3.vectorFeature = function (arg) {
       },
       y2: function (d, i) {
         return cache[i].y1 + getScale() * cache[i].dy;
-      }
+      },
+      'marker-end': 'url(#geo-arrow)'
     };
     m_style.style = {
       stroke: function () { return true; },
