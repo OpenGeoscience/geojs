@@ -604,7 +604,7 @@ geo.feature = function (arg) {
         }
 
         return val;
-      }));
+      }), ctx);
 
       // Update the cache for children
       root[localName].forEach(function (d, i) {

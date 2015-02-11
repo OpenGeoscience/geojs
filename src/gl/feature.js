@@ -108,6 +108,27 @@ geo.gl.feature = function () {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Return the buffer object.  This method is a temporary measure to support
+   * feature types that have not been updated for the new gl utilities.
+   * Generic functions should be added here to support buffering new gl
+   * features.
+   * @protected
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._buffer = function () {
+    return m_buffer;
+  };
+
+  this._bufferStart = function () {
+    return m_bufferStart;
+  };
+
+  this._bufferSize = function () {
+    return m_bufferSize;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Write position data into the buffer.
    * @protected
    * @param {string} attr The buffer name to write into
