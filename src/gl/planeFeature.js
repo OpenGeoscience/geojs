@@ -44,7 +44,7 @@ geo.gl.planeFeature = function (arg) {
         ul = m_this.upperLeft(),
         lr = m_this.lowerRight(),
         /// img could be a source or an Image
-        img = m_this.style().image,
+        img = m_this.style("image"),
         image = null,
         texture = null;
 

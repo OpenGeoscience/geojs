@@ -23,7 +23,6 @@ geo.polygonFeature = function (arg) {
   var m_this = this,
       m_position,
       m_polygon,
-      s_init = this._init,
       s_data = this.data,
       m_coordinates = {outer: [], inner: []};
 
@@ -151,30 +150,6 @@ geo.polygonFeature = function (arg) {
       index: indices,
       found: found
     };
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Initialize
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._init = function (arg) {
-    s_init.call(m_this, arg);
-
-    var defaultStyle = $.extend(
-      {},
-      {
-        "fillColor": { r: 0.0,  g: 0.5, b: 0.5 },
-        "fillOpacity": 1.0
-      },
-      arg.style === undefined ? {} : arg.style
-    );
-
-    m_this.style(defaultStyle);
-
-    if (m_position) {
-      m_this.dataTime().modified();
-    }
   };
 
   this._init(arg);

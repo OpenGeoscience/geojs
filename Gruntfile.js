@@ -247,10 +247,9 @@ module.exports = function (grunt) {
           'src/**/*.js',
           'vgl/src/**/*.js',
           'src/core/version.js.in',
-          'Gruntfile.js',
           'sources.json'
         ],
-        tasks: ['clean:source', 'template', 'copy', 'docs', 'uglify:geojs']
+        tasks: ['library', 'docs']
       },
       examples: {
         files: [
@@ -261,8 +260,7 @@ module.exports = function (grunt) {
     },
 
     clean: {
-      source: [ 'dist/src', 'src/core/version.js' ],
-      all: [ 'dist', 'src/core/version.js' ]
+      source: ['dist/src', 'src/core/version.js']
     },
 
     express: {
@@ -276,7 +274,7 @@ module.exports = function (grunt) {
 
     jade: {
       options: {
-        pretty: true,
+        pretty: true
       }
     }
   });
@@ -414,7 +412,10 @@ module.exports = function (grunt) {
   ]);
 
   grunt.registerTask('library', [
+    'clean',
     'template',
+    'copy:geo',
+    'copy:vgl',
     'concat:geojs',
     'uglify:geojs'
   ]);
@@ -432,7 +433,8 @@ module.exports = function (grunt) {
     'init',
     'dev',
     'library',
-    'examples'
+    'examples',
+    'docs'
   ]);
 
   grunt.registerTask(

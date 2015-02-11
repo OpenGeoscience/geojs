@@ -23,26 +23,25 @@ geo.pointFeature = function (arg) {
   var m_this = this,
       s_init = this._init,
       m_rangeTree = null,
-      s_data = this.data,
-      s_style = this.style,
       m_maxRadius = 0;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get/Set position
-   *
-   * @returns {geo.pointFeature}
+   * Initialize the feature
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.position = function (val) {
-    if (val === undefined) {
-      return m_this.style("position");
-    } else {
-      m_this.style("position", val);
-      m_this.dataTime().modified();
-      m_this.modified();
-    }
-    return m_this;
+  this._init = function (arg) {
+    s_init(arg);
+
+    this._property("position", "position", "position", function (d) { return d; });
+    this._property("radius", "radius", "size", 10);
+    this._property("stroke", "stroke", "bool", true);
+    this._property("strokeColor", "strokeColor", "color", "black");
+    this._property("strokeWidth", "strokeWidth", "size", 2);
+    this._property("strokeOpacity", "strokeOpacity", "opacity", 1);
+    this._property("fill", "fill", "bool", true);
+    this._property("fillColor", "fillColor", "color", "red");
+    this._property("fillOpacity", "fillOpacity", "opacity", 1);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -168,33 +167,6 @@ geo.pointFeature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Overloaded data method that updates the internal range tree on write.
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.data = function (data) {
-    if (data === undefined) {
-      return s_data();
-    }
-    s_data(data);
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Overloaded style method that updates the internal range tree on write.
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.style = function (arg1, arg2) {
-    var val = s_style(arg1, arg2);
-    if (val === m_this) {
-      m_this._updateRangeTree();
-    }
-    return val;
-  };
-  this.style.get = s_style.get;
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
    * Returns the bounding box for a given datum in screen coordinates as an
    * object: ::
    *
@@ -234,40 +206,6 @@ geo.pointFeature = function (arg) {
         y: pt.y + radius
       }
     };
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Initialize
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._init = function (arg) {
-    s_init.call(m_this, arg);
-
-    var defaultStyle = $.extend(
-      {},
-      {
-        radius: 10.0,
-        stroke: true,
-        strokeColor: { r: 0.0, g: 1.0, b: 0.0 },
-        strokeWidth: 2.0,
-        strokeOpacity: 1.0,
-        fillColor: { r: 1.0, g: 0.0, b: 0.0 },
-        fill: true,
-        fillOpacity: 1.0,
-        sprites: false,
-        sprites_image: null,
-        position: function (d) { return d; }
-      },
-      arg.style === undefined ? {} : arg.style
-    );
-
-    if (arg.position !== undefined) {
-      defaultStyle.position = arg.position;
-    }
-
-    m_this.style(defaultStyle);
-    m_this.dataTime().modified();
   };
 
   return m_this;

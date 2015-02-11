@@ -14,6 +14,7 @@ geo.gl.lineFeature = function (arg) {
   }
   arg = arg || {};
   geo.lineFeature.call(this, arg);
+  geo.gl.feature.call(this, arg);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -27,7 +28,8 @@ geo.gl.lineFeature = function (arg) {
       m_material = null,
       m_pixelWidthUnif = null,
       s_init = this._init,
-      s_update = this._update;
+      s_update = this._update,
+      s_setter = this._property_setter;
 
   function createVertexShader() {
       var vertexShaderSource = [
@@ -113,6 +115,70 @@ geo.gl.lineFeature = function (arg) {
     shader = new vgl.shader(gl.FRAGMENT_SHADER);
     shader.setShaderSource(fragmentShaderSource);
     return shader;
+  }
+
+  /**
+   * Allocate the gl buffer with the given size.  Clears
+   * any current content.
+   * @private
+   * @param {number} n Number of points
+   */
+  function allocateBuffer(n) {
+    if (m_this._bufferSize() !== n) {
+      m_this._allocateBuffer(
+        n * 6,
+        [
+          {
+            name: 'pos',
+            size: 3,
+            source: vgl.sourceDataP3fv({'name': 'pos'})
+          },
+          {
+            name: 'strokeWidth',
+            size: 1,
+            source: vgl.sourceDataAnyfv(
+              1,
+              vgl.vertexAttributeKeysIndexed.Three,
+              {'name': 'strokeWidth'})
+          },
+          {
+            name: 'strokeColor',
+            size: 3,
+            source: vgl.sourceDataAnyfv(
+              3,
+              vgl.vertexAttributeKeysIndexed.Six,
+              {'name': 'strokeColor'}
+            )
+          },
+          {
+            name: 'stroke',
+            size: 1,
+            source: vgl.sourceDataAnyfv(
+              1,
+              vgl.vertexAttributeKeysIndexed.Seven,
+              {'name': 'stroke'}
+            )
+          },
+          {
+            name: 'strokeOpacity',
+            size: 1,
+            source: vgl.sourceDataAnyfv(
+              1,
+              vgl.vertexAttributeKeysIndexed.Nine,
+              {'name': 'strokeOpacity'}
+            )
+          }
+        ],
+        [
+          {
+            'indices': 'indices',
+            'primitive': vgl.triangles()
+          }
+        ]
+      );
+
+      m_this._writeBuffer('indices', n, 1, function (d, i) { return [i]; });
+    }
   }
 
   function createGLLines() {
@@ -320,6 +386,32 @@ geo.gl.lineFeature = function (arg) {
     m_actor = vgl.actor();
     m_actor.setMaterial(m_material);
     m_actor.setMapper(m_mapper);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Generate a local cache of the data stored as arrays to speed up renders.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._propertySetter = function (name, root, data, args) {
+    // Call parent method to keep base class functionality
+    // (mouse handlers, etc)
+    var i = args[1];
+    s_setter.call(m_this, name, root, data);
+
+    // maybe move this elsewhere (also use dataModified, etc)
+    allocateBuffer(data.length);
+    if (name === 'position') {
+      m_this._writePositions('pos', data, 6); // add vertex position
+    } else if (name === 'strokeColor') {
+      m_this._writeColors(name, data, 6);
+    } else if (name === 'stroke') {
+      m_this._writeBools(name, data, 6);
+    } else if (name === 'line') {
+      $.noop();  // ?
+    } else {
+      m_this._writeBuffer(name, data, 6);
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////

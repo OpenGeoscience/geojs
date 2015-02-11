@@ -24,7 +24,6 @@ geo.feature = function (arg) {
   var m_this = this,
       s_exit = this._exit,
       m_selectionAPI = arg.selectionAPI === undefined ? false : arg.selectionAPI,
-      m_style = {},
       m_layer = arg.layer === undefined ? null : arg.layer,
       m_gcs = arg.gcs === undefined ? "EPSG:4326" : arg.gcs,
       m_visible = arg.visible === undefined ? true : arg.visible,
@@ -33,7 +32,8 @@ geo.feature = function (arg) {
       m_dataTime = geo.timestamp(),
       m_buildTime = geo.timestamp(),
       m_updateTime = geo.timestamp(),
-      m_selectedFeatures = [];
+      m_selectedFeatures = [],
+      m_properties = {data: [], cache: {}, spec: {}, paths: {}};
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -267,60 +267,6 @@ geo.feature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get/Set style used by the feature
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.style = function (arg1, arg2) {
-    if (arg1 === undefined) {
-      return m_style;
-    } else if (typeof arg1 === "string" && arg2 === undefined) {
-      return m_style[arg1];
-    } else if (arg2 === undefined) {
-      m_style = $.extend({}, m_style, arg1);
-      m_this.modified();
-      return m_this;
-    } else {
-      m_style[arg1] = arg2;
-      m_this.modified();
-      return m_this;
-    }
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * A uniform getter that always returns a function even for constant styles.
-   * Maybe extend later to support accessor-like objects.  If undefined input,
-   * return all the styles as an object.
-   *
-   * @param {string|undefined} key
-   * @return {function}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.style.get = function (key) {
-    var tmp, out;
-    if (key === undefined) {
-      var all = {}, k;
-      for (k in m_style) {
-        if (m_style.hasOwnProperty(k)) {
-          all[k] = m_this.style.get(k);
-        }
-      }
-      return all;
-    }
-    out = geo.util.ensureFunction(m_style[key]);
-    if (key.toLowerCase().match(/color$/)) {
-      tmp = out;
-      out = function () {
-        return geo.util.convertColor(
-          tmp.apply(this, arguments)
-        );
-      };
-    }
-    return out;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
    * Get layer referenced by the feature
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -447,13 +393,376 @@ geo.feature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.data = function (data) {
     if (data === undefined) {
-      return m_this.style("data") || [];
+      return m_properties.data;
     } else {
-      m_this.style("data", data);
+      m_properties.data = data;
       m_this.dataTime().modified();
       m_this.modified();
+      m_this._cache(true);
       return m_this;
     }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * A style interface compatible with the old style API for compatibility.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.style = function (arg1, arg2) {
+    var property, output, spec;
+    if (arg1 === undefined) {
+      output = {};
+      for (property in m_properties.paths) {
+        if (m_properties.paths.hasOwnProperty(property)) {
+          property = m_properties.paths[property];
+          spec = m_properties.spec[property];
+          output[spec.name] = m_this.style(spec.name);
+        }
+      }
+      return output;
+    } else if (typeof arg1 === "string") {
+      return m_this[arg1](arg2);
+    } else if (arg2 === undefined) {
+      for (property in arg1) {
+        if (arg1.hasOwnProperty(property)) {
+          m_this.style(property, arg1[property]);
+        }
+      }
+      return m_this;
+    } else {
+      console.warn("Unknown style call method.");
+      return m_this;
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Add a property API to the class instance.  This will provide a new
+   * property to the internal data representation derived from user provided
+   * accessors on the data object.  This method is designed only to be called
+   * from a class' constructor, calling it after construction will result in
+   * undefined behavior.
+   * @protected
+   *
+   * @param {string} name The method name added to the class
+   * @param {string} path The target path of the new property
+   * @param {string} type The property type
+   * @param {*} defaultValue The default value of the property
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._property = function (name, path, type, defaultValue) {
+
+    if (m_this.hasOwnProperty(name)) {
+      console.warn("Property '" + name + "' overrides existing method.");
+    }
+
+    var setter = m_this._propertySetter;
+
+    // The current accessor value/method.
+    var accessor = defaultValue;
+
+    // Get the property type from the static object.
+    var prop = geo.property[type];
+
+    // Children object populated when the property is a container
+    var children = {};
+
+    // Several sanity checks for the developer
+    if (prop === undefined) {
+      throw new Error(
+        "Invalid property type '" + type + "' " +
+        "given for '" + name + "'."
+      );
+    }
+    if (!geo.util.isFunction(defaultValue) && prop.normalize(defaultValue) === null) {
+      console.warn(
+        "The default '" + defaultValue + "' " +
+        "is not a valid '" + type + "' " +
+        "for '" + name + "'."
+      );
+    }
+    // Property names must start with a lower case letter
+    if (name.match(/^[^a-z]/)) {
+      throw new Error(
+        "Invalid property name."
+      );
+    }
+
+    var plist = path.split(".");
+    var parent = path.split(".").slice(0, plist.length - 1).join(".");
+    var localName = plist[plist.length - 1];
+    if (parent !== "" && (m_properties.spec[parent] || {}).type !== "container") {
+      console.error(
+        "Unknown parent container " +
+        "in path '" + path + "' " +
+        "for property '" + name + "'."
+      );
+      return m_this;
+    }
+    if (m_properties.spec.hasOwnProperty(path)) {
+      console.warn(
+        "Overriding existing local path '" + path + "' " +
+        "for property '" + name + "'."
+      );
+    }
+    if (m_properties.paths[name]) {
+      console.warn(
+        "Overriding existing property '" + name + "'."
+      );
+    }
+    m_properties.paths[name] = path;
+
+    /**
+     * This will be the (g|s)etter function for the property that is added to the
+     * class.  The argument is any constant valid for the property type (when
+     * the property value is data independent) or an accessor method with the
+     * following call signature:
+     * <pre>
+     *   accessor(datum, index, container_datum, container_index, ...)
+     * </pre>
+     * @private
+     */
+    var func = function (arg) {
+      if (arg === undefined) {
+        return accessor;
+      }
+      // Check that non function values are valid for the type
+      if (!geo.util.isFunction(arg) && prop.normalize(arg) === null) {
+        console.warn(
+          "Setting '" + name + "' " +
+          "to an invalid value '" + arg + "'."
+        );
+      }
+      if (geo.util.isFunction(arg)) {
+        accessor = arg.bind(m_this);
+      } else {
+        accessor = arg;
+      }
+
+      // (re)build cache for the property
+      return m_this;
+    };
+
+    /**
+     * Return the container inside the cache for the given context.
+     * This function in particular is the default
+     * used for accessors at the root level.
+     * @private
+     */
+    var getContainer = function () {
+      return m_properties.cache;
+    };
+
+    /**
+     * This function returns arguments required to call a properties
+     * accessor.  It transforms an array of indices to an array:
+     *   args = [ d_n, i_n, ... , d_0, i_0 ]
+     * The child method calls:
+     *   value = accessor.apply(m_this, args)
+     * @private
+     */
+    var getContext = function () {
+      return [];
+    };
+
+    /**
+     * This function returns the data object for the given context.
+     * @private
+     */
+    var getData = function () {
+      return m_properties.data;
+    };
+
+    parent = m_properties.spec[parent];
+    /**
+     * This will be the function that builds the internal cache for the
+     * property values.
+     * @private
+     */
+    // add context as arguments data, index, data, index, ....
+    var build = function () {
+      var root = getContainer.apply(m_this, arguments);
+      var ctx = getContext.apply(m_this, arguments);
+      var cdata = getData.apply(m_this, arguments);
+      var args = Array.prototype.slice.call(arguments);
+
+      setter(localName, root, cdata.map(function (d, i) {
+        var largs, val;
+
+        if (geo.util.isFunction(accessor)) {
+          largs = [d, i].concat(ctx);
+          val = prop.normalize(accessor.apply(m_this, largs));
+          if (val === null) {
+            console.warn(
+              "Invalid value returned by accessor for property '" +
+              name + "'."
+            );
+            val = defaultValue;
+          }
+        } else {
+          val = prop.normalize(accessor);
+        }
+
+        return val;
+      }), ctx);
+
+      // Update the cache for children
+      root[localName].forEach(function (d, i) {
+        var key, largs = [i].concat(args);
+        for (key in children) {
+          if (children.hasOwnProperty(key)) {
+            children[key].apply(m_this, largs);
+          }
+        }
+      });
+    };
+
+    var parentUtils;
+    if (parent) {
+      // TODO
+      // Add a method to containers that wraps the builder with
+      // the parent context.  Something like this:
+      // build = parent.addProperty(
+      //   name,
+      //   build,
+      //   ...
+      // );
+      //
+      // Parent containers call build on all their children,
+      // children call just the wrapped builder.  So, either of these
+      // will work:
+      //
+      // feature.data(...).line(...).position(...)
+      //
+      //   or
+      //
+      // feature.data(...).position(...).line(...)
+      parentUtils = parent.addChild(localName, build);
+
+      // set the context and container methods
+      getContainer = parentUtils.container;
+      getContext = parentUtils.context;
+      getData = parentUtils.data;
+    }
+
+    /**
+     * This function is called by children of a container to register
+     * themselves to container's build method.  This ensures that
+     * when the datum for any container changes, the contained properties
+     * will be updated as well.
+     *
+     * Returns a builder utilities that take the place of the root level
+     * methods.
+     * @private
+     * @argument {string} childName The local name of the child property
+     * @returns {function}
+     */
+    var addChild = function (childName, childBuilder) {
+      children[childName] = childBuilder;
+      return {
+        // Return the cache root.
+        container: function () {
+          var args = Array.prototype.slice.call(arguments);
+          var i = args.shift();
+          var cache = getContainer.apply(m_this, args);
+          // add an empty array to the cache if it doesn't exist
+          if (!cache[localName]) {
+            cache[localName] = [];
+          }
+          return cache[localName][i];
+        },
+
+        // Return to the child the data context.
+        context: function () {
+          // maybe add some sanity checks/warnings here
+          var args = Array.prototype.slice.call(arguments);
+          var i = args.shift();
+          var ctx = getContext.apply(m_this, args);
+          var d = getContainer.apply(m_this, args);
+          return [d, i].concat(ctx);
+        },
+
+        // Return the data object for a context... relies on the cache
+        // being current.
+        data: function () {
+          var args = Array.prototype.slice.call(arguments);
+          var i = args.shift();
+          return getContainer.apply(m_this, args)[localName][i];
+        }
+      };
+    };
+
+    m_properties.spec[path] = {
+      type: type,
+      name: name,
+      defaultValue: defaultValue,
+      property: prop,
+      build: build,
+      addChild: addChild,
+      children: children,
+      context: getContext,
+      container: getContainer
+    };
+
+    m_this[name] = func;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * A renderer specific handler for property caching.  This function is
+   * on every property during every cache rebuild allowing the renderer
+   * to do caching of its own.  Classes overriding this should call
+   * the superclass method or perform the assignment by themselves,
+   * otherwise base class methods such as the mouse handling api
+   * won't work.
+   * @protected
+   * @param {string} name The feature name
+   * @param {object} root The object root in the cache
+   * @param {array} data The data to be added to root as
+   *    <code>root[name] = data</code>
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._propertySetter = function (name, root, data) {
+    root[name] = data;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * A renderer specific handler for property caching.  This function
+   * is provided by feature subclasses that change the default
+   * property setter to convert the cached values from local to normal form.
+   *
+   * @todo
+   * The interface for this isn't defined yet.  It is assumed for the moment
+   * that property setters don't do anything incompatible with standard
+   * getters.  In the future, the function could be used to improve the
+   * caching performance while maintaining renderer agnostic methods.
+   * @protected
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._propertyGetter = function () {
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return the current property cache content and optionally
+   * rebuild the cache.
+   * @param {bool} rebuild Force rebuilding the cache
+   * @returns {object}
+   * @protected
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._cache = function (rebuild) {
+    var prop;
+    if (rebuild) {
+      for (prop in m_properties.spec) {
+        if (m_properties.spec.hasOwnProperty(prop) &&
+            prop.split(".").length < 2) {
+          m_properties.spec[prop].build();
+        }
+      }
+    }
+    return m_properties.cache;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -467,10 +776,11 @@ geo.feature = function (arg) {
     if (!m_layer) {
       throw "Feature requires a valid layer";
     }
-    m_style = $.extend({},
-                {"opacity": 1.0}, arg.style === undefined ? {} :
-                arg.style);
+    m_this.style(arg.style);
     m_this._bindMouseHandlers();
+
+    // build the cache with defaults
+    m_this._cache(true);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -513,7 +823,6 @@ geo.feature = function (arg) {
   this._exit = function () {
     m_this._unbindMouseHandlers();
     m_selectedFeatures = [];
-    m_style = {};
     arg = {};
     s_exit();
   };

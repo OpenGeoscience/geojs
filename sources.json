@@ -19,6 +19,7 @@
         "layer.js",
         "featureLayer.js",
         "event.js",
+        "property.js",
         "mapInteractor.js",
         "clock.js",
         "fileReader.js",
@@ -49,6 +50,7 @@
       "files": [
         "init.js",
         "renderer.js",
+        "feature.js",
         "lineFeature.js",
         "pointFeature.js",
         "geomFeature.js",

@@ -49,9 +49,8 @@ geo.d3.pointFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
     var data = m_this.data(),
-        s_style = m_this.style.get(),
-        m_renderer = m_this.renderer(),
-        pos_func = m_this.position();
+        s_style = m_this._cache(true),
+        m_renderer = m_this.renderer();
 
     // call super-method
     s_update.call(m_this);
@@ -65,13 +64,14 @@ geo.d3.pointFeature = function (arg) {
     m_style.append = 'circle';
     m_style.attributes = {
       r: m_renderer._convertScale(s_style.radius),
-      cx: function (d) {
-        return m_renderer.worldToDisplay(pos_func(d)).x;
+      cx: function (d, i) {
+        return m_renderer.worldToDisplay(s_style.position[i]).x;
       },
-      cy: function (d) {
-        return m_renderer.worldToDisplay(pos_func(d)).y;
+      cy: function (d, i) {
+        return m_renderer.worldToDisplay(s_style.position[i]).y;
       }
     };
+
     m_style.style = s_style;
     m_style.classes = ['d3PointFeature'];
 
