@@ -2,7 +2,7 @@
 $(function () {
   'use strict';
 
-  var map, layer, feature, ui, save;
+  var map, layer, feature, ui, save, infoData = null;
 
   var cscale = d3.scale.ordinal()
     .range([
@@ -68,8 +68,17 @@ $(function () {
   }
 
   function makeInfoBox(data) {
+    if (data) {
+      infoData = data;
+    } else {
+      data = infoData;
+    }
+    if (!data) {
+      return;
+    }
+
     ui.canvas().selectAll('.app-info-box').remove();
-    var width = 300, height = 630;
+    var width = 300, height = 600;
     var mapWidth = map.node().width();
     var mapHeight = map.node().height();
 
@@ -77,7 +86,7 @@ $(function () {
 
     group.attr(
       'transform',
-      'translate(' + [mapWidth - width - 50, mapHeight - height - 240] + ')'
+      'translate(' + [mapWidth - width - 35, mapHeight - height + 10] + ')'
     );
 
     var name = data.name.toLowerCase();
@@ -178,8 +187,7 @@ $(function () {
 
   function makeHistogram(data) {
     var margin = {top: 45, right: 10, left: 10, bottom: 30};
-    var mapWidth = map.node().width() - 30;
-    var mapHeight = map.node().height() - 30;
+    var mapHeight = map.node().height() - 15;
     var width = 300;
     var height = 100;
     ui.canvas().selectAll('.app-histogram').remove();
@@ -187,7 +195,7 @@ $(function () {
 
     var x = d3.scale.linear()
       .domain([-0.5, 5.5])
-      .range([mapWidth - width - margin.right, mapWidth - margin.right]);
+      .range([15 + margin.left, 15 + margin.left + width]);
 
     var cats = [];
     data.forEach(function (d) {
@@ -198,14 +206,6 @@ $(function () {
 
     var hist = d3.layout.histogram()
       .bins(d3.range(7))(cats);
-    /*
-        data.map(function (d) {
-          return Math.max.apply(window, d.pressure.map(function (p) {
-            return category(p);
-          }));
-        })
-      );
-    */
 
     var y = d3.scale.linear()
       .domain([0, d3.max(hist, function (d) { return d.y; })])
@@ -359,11 +359,6 @@ $(function () {
     }
   );
 
-  // Make the map resize with the browser window
-  $(window).resize(function () {
-    map.resize(0, 0, map.node().width(), map.node().height());
-  });
-
   // Draw the map
   map.draw();
 
@@ -431,6 +426,11 @@ $(function () {
   $.ajax({
     url: '/data/hurricanes.json',
     success: draw
+  });
+
+  $(window).resize(function () {
+    draw();
+    makeInfoBox();
   });
 
   hoverInfo();

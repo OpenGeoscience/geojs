@@ -2,7 +2,6 @@
   position: absolute;
   bottom: 10px;
   left: 10px;
-  pointer-events: none;
 }
 
 .bar rect {
@@ -12,6 +11,7 @@
 .bar text {
   fill: black;
   font: 16px sans-serif;
+  pointer-events: none;
 }
 
 .axis path, .axis line {
@@ -25,6 +25,7 @@
   stroke: black;
   stroke-width: 1.5;
   transition: fill 250ms;
+  pointer-events: visible !important;
 }
 
 .app-info-box .axis text {
@@ -37,8 +38,10 @@ path.plot-line {
   stroke-width: 2px;
 }
 
-/*
-.app-background:hover {
-  fill: rgba(255, 255, 255, 0.5);
+.app-histogram *,.app-info-box text {
+  pointer-events: none;
 }
-*/
+.app-background:hover {
+  fill: rgba(255, 255, 255, 1);
+}
+
