@@ -114,7 +114,7 @@ if (COVERAGE_TESTS)
   file(COPY "${GEOJS_DEPLOY_DIR}/src" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 else()
 
-  set(SOURCES_INCLUDE <script src=/built/geo.all.js></script>)
+  set(SOURCES_INCLUDE <script src=/built/geo.all.dev.js></script>)
   set(BLANKET_INCLUDE "")
 
 endif()
