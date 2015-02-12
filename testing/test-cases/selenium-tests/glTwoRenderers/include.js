@@ -1,7 +1,7 @@
 window.startTest = function (done) {
   'use strict';
 
-  var myMap = geo.map({node: '#map'});
+  var myMap = geo.map({node: '#map', clampBounds: false});
   window.gjsmap = myMap;
   var layer2 = myMap.createLayer('feature');
   layer2.createFeature('plane')
