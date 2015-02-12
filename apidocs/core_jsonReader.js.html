@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: core/jsonReader.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: core/jsonReader.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*global File*/
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Create a new instance of class jsonReader
+ *
+ * @class
+ * @extends geo.fileReader
+ * @returns {geo.jsonReader}
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.jsonReader = function (arg) {
+  'use strict';
+  if (!(this instanceof geo.jsonReader)) {
+    return new geo.jsonReader(arg);
+  }
+
+  var m_this = this, m_style = arg.style || {};
+  m_style = $.extend({
+      'strokeWidth': 2,
+      'strokeColor': {r: 0, g: 0, b: 0},
+      'strokeOpacity': 1,
+      'fillColor': {r: 1, g: 0, b: 0},
+      'fillOpacity': 1
+    }, m_style);
+
+  geo.fileReader.call(this, arg);
+
+  this.canRead = function (file) {
+    if (file instanceof File) {
+      return (file.type === 'application/json' || file.name.match(/\.json$/));
+    } else if (typeof file === 'string') {
+      try {
+        JSON.parse(file);
+      } catch (e) {
+        return false;
+      }
+      return true;
+    }
+    try {
+      if (Array.isArray(m_this._featureArray(file))) {
+        return true;
+      }
+    } catch (e) {}
+    return false;
+  };
+
+  this._readObject = function (file, done, progress) {
+    var object;
+    function onDone(fileString) {
+      if (typeof fileString !== 'string') {
+        done(false);
+      }
+
+      // We have two possibilities here:
+      // 1) fileString is a JSON string or is
+      // a URL.
+      try {
+        object = JSON.parse(fileString);
+        done(object);
+      } catch (e) {
+        if (!object) {
+          $.ajax({
+            type: 'GET',
+            url: fileString,
+            dataType: 'text'
+          }).done(function (data) {
+            object = JSON.parse(data);
+            done(object);
+          }).fail(function () {
+            done(false);
+          });
+        }
+      }
+    }
+
+    if (file instanceof File) {
+      m_this._getString(file, onDone, progress);
+    } else if (typeof file === 'string') {
+      onDone(file);
+    } else {
+      done(file);
+    }
+  };
+
+  this._featureArray = function (spec) {
+    if (spec.type === 'FeatureCollection') {
+      return spec.features || [];
+    }
+    if (spec.type === 'GeometryCollection') {
+      throw 'GeometryCollection not yet implemented.';
+    }
+    if (Array.isArray(spec.coordinates)) {
+      return spec;
+    }
+    throw 'Unsupported collection type: ' + spec.type;
+  };
+
+  this._featureType = function (spec) {
+    var geometry = spec.geometry || {};
+    if (geometry.type === 'Point' || geometry.type === 'MultiPoint') {
+      return 'point';
+    }
+    if (geometry.type === 'LineString') {
+      return 'line';
+    }
+    if (geometry.type === 'Polygon') {
+      return 'polygon';
+    }
+    return null;
+  };
+
+  this._getCoordinates = function (spec) {
+    var geometry = spec.geometry || {},
+        coordinates = geometry.coordinates || [], elv;
+
+    if ((coordinates.length === 2 || coordinates.length === 3) &amp;&amp;
+        (isFinite(coordinates[0]) &amp;&amp; isFinite(coordinates[1]))) {
+
+      // Do we have a elevation component
+      if (isFinite(coordinates[2])) {
+        elv = coordinates[2];
+      }
+
+      // special handling for single point coordinates
+      return [{x: coordinates[0], y: coordinates[1], z: elv}];
+    }
+
+    // need better handling here, but we can plot simple polygons
+    // by taking just the outer linearring
+    if (Array.isArray(coordinates[0][0])) {
+      coordinates = coordinates[0];
+    }
+
+    // return an array of latlng's for LineString, MultiPoint, etc...
+    return coordinates.map(function (c) {
+      return {
+        x: c[0],
+        y: c[1],
+        z: c[2]
+      };
+    });
+  };
+
+  this._getStyle = function (spec) {
+    return spec.properties;
+  };
+
+  this.read = function (file, done, progress) {
+
+    function _done(object) {
+      var features, allFeatures = [];
+
+      features = m_this._featureArray(object);
+
+      features.forEach(function (feature) {
+        var type = m_this._featureType(feature),
+            coordinates = m_this._getCoordinates(feature),
+            style = m_this._getStyle(feature);
+        if (type) {
+          if (type === 'line') {
+            style.fill = style.fill || false;
+            allFeatures.push(m_this._addFeature(
+              type,
+              [coordinates],
+              style,
+              feature.properties
+            ));
+          } else if (type === 'point') {
+            style.stroke = style.stroke || false;
+            allFeatures.push(m_this._addFeature(
+              type,
+              coordinates,
+              style,
+              feature.properties
+            ));
+          } else if (type === 'polygon') {
+            style.fill = style.fill === undefined ? true : style.fill;
+            style.fillOpacity = (
+              style.fillOpacity === undefined ? 0.25 : style.fillOpacity
+            );
+            // polygons not yet supported
+            allFeatures.push(m_this._addFeature(
+              'line',
+              [coordinates],
+              style,
+              feature.properties
+            ));
+          }
+        } else {
+          console.log('unsupported feature type: ' + feature.geometry.type);
+        }
+      });
+
+      if (done) {
+        done(allFeatures);
+      }
+    }
+
+    m_this._readObject(file, _done, progress);
+  };
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Build the data array for a feature given the coordinates and properties
+   * from the geojson.
+   *
+   * @private
+   * @param {Object[]} coordinates Coordinate data array
+   * @param {Object} properties Geojson properties object
+   * @param {Object} style Global style defaults
+   * @returns {Object[]}
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  this._buildData = function (coordinates, properties, style) {
+    return coordinates.map(function (coord) {
+      return {
+        coordinates: coord,
+        properties: properties,
+        style: style
+      };
+    });
+  };
+
+  this._addFeature = function (type, coordinates, style, properties) {
+    var _style = $.extend({}, m_style, style);
+    var feature = m_this.layer().createFeature(type)
+      .data(m_this._buildData(coordinates, properties, style))
+      .style(_style);
+
+    if (type === 'line') {
+      feature.line(function (d) { return d.coordinates; });
+    } else {
+      feature.position(function (d) { return d.coordinates; });
+    }
+    return feature;
+  };
+
+};
+
+inherit(geo.jsonReader, geo.fileReader);
+
+geo.registerFileReader('jsonReader', geo.jsonReader);
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.clock.html">clock</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.renderer.html">renderer</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.latlng.html">latlng</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.mercator.html">mercator</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<br clear="both">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha11</a> on Thu Feb 12 2015 10:09:36 GMT-0500 (EST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

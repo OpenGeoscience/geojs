@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: d3/planeFeature.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: d3/planeFeature.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>//////////////////////////////////////////////////////////////////////////////
+/**
+ * Create a plane feature given a lower left corner point geo.latlng
+ * and and upper right corner point geo.latlng
+ *
+ * *CURRENTLY BROKEN*
+ *
+ * @class
+ * @extends geo.planeFeature
+ * @param lowerleft
+ * @param upperright
+ * @returns {geo.d3.planeFeature}
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.d3.planeFeature = function (arg) {
+  'use strict';
+  if (!(this instanceof geo.d3.planeFeature)) {
+    return new geo.d3.planeFeature(arg);
+  }
+  geo.planeFeature.call(this, arg);
+  geo.d3.object.call(this);
+
+  var m_this = this,
+      m_style = {},
+      s_update = this._update,
+      s_init = this._init,
+      m_buildTime = geo.timestamp();
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * Normalize a coordinate as an object {x: ..., y: ...}
+   *
+   * @private
+   * @returns {Object}
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  function normalize(pt) {
+    if (Array.isArray(pt)) {
+      return {
+        x: pt[0],
+        y: pt[1]
+      };
+    } else if (pt instanceof geo.latlng) {
+      return {
+        x: pt.x(),
+        y: pt.y()
+      };
+    }
+    return pt;
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * Build the feature object and pass to the renderer for drawing.
+   *
+   * @private
+   * @returns {geo.d3.planeFeature}
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  this._build = function () {
+    var origin = normalize(m_this.origin()),
+        ul = normalize(m_this.upperLeft()),
+        lr = normalize(m_this.lowerRight()),
+        renderer = m_this.renderer(),
+        s = m_this.style();
+
+    delete s.fill_color;
+    delete s.color;
+    delete s.opacity;
+    if (!s.screenCoordinates) {
+      origin = renderer.worldToDisplay(origin);
+      ul = renderer.worldToDisplay(ul);
+      lr = renderer.worldToDisplay(lr);
+    }
+    m_style.id = m_this._d3id();
+    m_style.style = s;
+    m_style.attributes = {
+      x: ul.x,
+      y: ul.y,
+      width: lr.x - origin.x,
+      height: origin.y - ul.y
+    };
+    m_style.append = 'rect';
+    m_style.data = [0];
+    m_style.classes = ['d3PlaneFeature'];
+
+    renderer._drawFeatures(m_style);
+    m_buildTime.modified();
+    return m_this;
+  };
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * Redraw the plane feature if necessary.
+   *
+   * @private
+   * @returns {geo.d3.planeFeature}
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  this._update = function () {
+    s_update.call(m_this);
+
+    if (m_this.dataTime().getMTime() >= m_buildTime.getMTime()) {
+      m_this._build();
+    }
+    return m_this;
+  };
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * Initializes the plane feature style (over-riding the parent default).
+   *
+   * @private
+   * @returns {geo.d3.planeFeature}
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  this._init = function (arg) {
+    s_init.call(m_this, arg || {});
+    m_this.style({
+      stroke: function () { return false; },
+      fill: function () { return true; },
+      fillColor: function () { return {r: 0.3, g: 0.3, b: 0.3}; },
+      fillOpacity: function () { return 0.5; }
+    });
+    return m_this;
+  };
+
+  this._init();
+  return this;
+};
+
+inherit(geo.d3.planeFeature, geo.planeFeature);
+
+geo.registerFeature('d3', 'plane', geo.d3.planeFeature);
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.clock.html">clock</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.renderer.html">renderer</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.latlng.html">latlng</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.mercator.html">mercator</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<br clear="both">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha11</a> on Thu Feb 12 2015 10:09:36 GMT-0500 (EST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -181,7 +181,7 @@ properties.</p>
             <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> vglLayer = map.createLayer(
     <span class="hljs-string">'feature'</span>,
     {
-      renderer: <span class="hljs-string">'vglRenderer'</span>
+      renderer: <span class="hljs-string">'vgl'</span>
     }
   );</pre></div></div>
             
@@ -201,7 +201,7 @@ properties.</p>
             <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> svgLayer = map.createLayer(
     <span class="hljs-string">'feature'</span>,
     {
-      renderer: <span class="hljs-string">'d3Renderer'</span>
+      renderer: <span class="hljs-string">'d3'</span>
     }
   );</pre></div></div>
             
@@ -275,23 +275,6 @@ properties.</p>
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-13">&#182;</a>
-              </div>
-              <p>Make the map resize with the browser window</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  $(<span class="hljs-built_in">window</span>).resize(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
-    map.resize(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, map.node().width(), map.node().height());
-  });</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-14">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-14">&#182;</a>
               </div>
               <p>Draw the map</p>
 

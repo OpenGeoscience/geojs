@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: core/vectorFeature.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: core/vectorFeature.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>//////////////////////////////////////////////////////////////////////////////
+/**
+ * Create a new instance of class vectorFeature
+ *
+ * @class
+ * @extends geo.feature
+ * @returns {geo.vectorFeature}
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.vectorFeature = function (arg) {
+  'use strict';
+  if (!(this instanceof geo.vectorFeature)) {
+    return new geo.vectorFeature(arg);
+  }
+  arg = arg || {};
+  geo.feature.call(this, arg);
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  var m_this = this,
+      s_init = this._init,
+      s_style = this.style;
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get or set the accessor for the origin of the vector.  This is the point
+   * that the vector base resides at.  Defaults to (0, 0, 0).
+   * @param {geo.accessor|geo.geoPosition} [accessor] The origin accessor
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.origin = function (val) {
+    if (val === undefined) {
+      return s_style('origin');
+    } else {
+      s_style('origin', val);
+      m_this.dataTime().modified();
+      m_this.modified();
+    }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get or set the accessor for the displacement (coordinates) of the vector.
+   * @param {geo.accessor|geo.geoPosition} [accessor] The accessor
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.delta = function (val) {
+    if (val === undefined) {
+      return s_style('delta');
+    } else {
+      s_style('delta', val);
+      m_this.dataTime().modified();
+      m_this.modified();
+    }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Initialize
+   * @protected
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._init = function (arg) {
+    s_init.call(m_this, arg);
+
+    var defaultStyle = $.extend(
+      {},
+      {
+        strokeColor: 'black',
+        strokeWidth: 2.0,
+        strokeOpacity: 1.0,
+        // TODO: define styles for the end markers
+        // originStyle: 'none',
+        // endStyle: 'arrow',
+        origin: {x: 0, y: 0, z: 0},
+        delta: function (d) { return d; },
+        scale: null // size scaling factor (null -> renderer decides)
+      },
+      arg.style === undefined ? {} : arg.style
+    );
+
+    if (arg.origin !== undefined) {
+      defaultStyle.origin = arg.origin;
+    }
+
+    m_this.style(defaultStyle);
+    m_this.dataTime().modified();
+  };
+};
+
+inherit(geo.vectorFeature, geo.feature);
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.clock.html">clock</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.renderer.html">renderer</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.latlng.html">latlng</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.mercator.html">mercator</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<br clear="both">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha11</a> on Thu Feb 12 2015 10:09:36 GMT-0500 (EST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

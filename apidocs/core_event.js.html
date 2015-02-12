@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: core/event.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: core/event.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>//////////////////////////////////////////////////////////////////////////////
+/**
+ * Common object containing all event types that are provided by the GeoJS
+ * API.  Each property contained here is a valid target for event handling
+ * via {@link geo.object#geoOn}.  The event object provided to handlers is
+ * different for each event type.  Each handler will generally be called
+ * with a the &lt;code>this&lt;/code> context being the class that caused the event.&lt;br>
+ * &lt;br>
+ * The following properties are common to all event objects:
+ *
+ * @namespace
+ * @property type {string} The event type that was triggered
+ * @property geo {object} A universal event object for controlling propagation
+ *
+ * @example
+ * map.geoOn(geo.event.layerAdd, function (event) {
+ *   // event is an object with type: {@link geo.event.layerAdd}
+ * });
+ *
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.event = {};
+
+//////////////////////////////////////////////////////////////////////////////
+/*
+ * Event types
+ */
+//////////////////////////////////////////////////////////////////////////////
+
+// The following were not triggered nor used anywhere.  Removing until their
+// purpose is defined more clearly.
+//
+// geo.event.update = "geo_update";
+// geo.event.opacityUpdate = "geo_opacityUpdate";
+// geo.event.layerToggle = "geo_layerToggle";
+// geo.event.layerSelect = "geo_layerSelect";
+// geo.event.layerUnselect = "geo_layerUnselect";
+// geo.event.rotate = "geo_rotate";
+// geo.event.query = "geo_query";
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered when a layer is added to the map.
+ *
+ * @property target {geo.map} The current map
+ * @property layer {geo.layer} The new layer
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.event.layerAdd = "geo_layerAdd";
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered when a layer is removed from the map.
+ *
+ * @property target {geo.map} The current map
+ * @property layer {geo.layer} The old layer
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.event.layerRemove = "geo_layerRemove";
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered when the map's zoom level is changed.  Note that zoom is never
+ * triggered on the map itself.  Instead it is triggered individually on
+ * layers, starting with the base layer.
+ *
+ * @property zoomLevel {Number} New zoom level
+ * @property screenPosition {object} The screen position of mouse pointer
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.event.zoom = "geo_zoom";
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered when the map is panned either by user interaction or map
+ * transition.
+ *
+ * @property screenDelta {object} The number of pixels to pan the map by
+ * @property center {object} The new map center
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.event.pan = "geo_pan";
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered when the map's canvas is resized.
+ *
+ * @property width {Number} The new width in pixels
+ * @property height {Number} The new height in pixels
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.event.resize = "geo_resize";
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered on every call to {@link geo.map#draw} before the map is rendered.
+ *
+ * @property target {geo.map} The current map
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.event.draw = "geo_draw";
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered on every call to {@link geo.map#draw} after the map is rendered.
+ *
+ * @property target {geo.map} The current map
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.event.drawEnd = "geo_drawEnd";
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered on every "mousemove" over the map's DOM element.  The event
+ * object extends {@link geo.mouseState}.
+ * @mixes geo.mouseState
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.event.mousemove = "geo_mousemove";
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered on every "mousedown" over the map's DOM element.  The event
+ * object extends {@link geo.mouseState}.
+ * @mixes geo.mouseState
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.event.mouseclick = "geo_mouseclick";
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered on every "mousemove" during a brushing selection.
+ * The event object extends {@link geo.brushSelection}.
+ * @mixes geo.brushSelection
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.event.brush = "geo_brush";
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered after a brush selection ends.
+ * The event object extends {@link geo.brushSelection}.
+ * @mixes geo.brushSelection
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.event.brushend = "geo_brushend";
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered when a brush selection starts.
+ * The event object extends {@link geo.brushSelection}.
+ * @mixes geo.brushSelection
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.event.brushstart = "geo_brushstart";
+
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered before a map navigation animation begins.  Set
+ * &lt;code>event.geo.cancelAnimation&lt;/code> to cancel the animation
+ * of the navigation.  This will cause the map to navigate to the
+ * target location immediately.  Set &lt;code>event.geo.cancelNavigation&lt;/code>
+ * to cancel the navigation completely.  The transition options can
+ * be modified in place.
+ *
+ * @property {geo.geoPosition} center The target center
+ * @property {Number} zoom The target zoom level
+ * @property {Number} duration The duration of the transition in milliseconds
+ * @property {function} ease The easing function
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.event.transitionstart = "geo_transitionstart";
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered after a map navigation animation ends.
+ *
+ * @property {geo.geoPosition} center The target center
+ * @property {Number} zoom The target zoom level
+ * @property {Number} duration The duration of the transition in milliseconds
+ * @property {function} ease The easing function
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.event.transitionend = "geo_transitionend";
+
+////////////////////////////////////////////////////////////////////////////
+/**
+ * @namespace
+ */
+////////////////////////////////////////////////////////////////////////////
+geo.event.clock = {
+  play: "geo_clock_play",
+  stop: "geo_clock_stop",
+  pause: "geo_clock_pause",
+  change: "geo_clock_change"
+};
+
+////////////////////////////////////////////////////////////////////////////
+/**
+ * This event object provides mouse/keyboard events that can be handled
+ * by the features.  This provides a similar interface as core events,
+ * but with different names so the events don't interfere.  Subclasses
+ * can override this to provide custom events.
+ *
+ * These events will only be triggered on features which were instantiated
+ * with the option "selectionAPI".
+ * @namespace
+ */
+////////////////////////////////////////////////////////////////////////////
+geo.event.feature = {
+  mousemove:  "geo_feature_mousemove",
+  mouseover:  "geo_feature_mouseover",
+  mouseout:   "geo_feature_mouseout",
+  mouseon:    "geo_feature_mouseon",
+  mouseoff:   "geo_feature_mouseoff",
+  mouseclick: "geo_feature_mouseclick",
+  brushend:   "geo_feature_brushend",
+  brush:      "geo_feature_brush"
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.clock.html">clock</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.renderer.html">renderer</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.latlng.html">latlng</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.mercator.html">mercator</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<br clear="both">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha11</a> on Thu Feb 12 2015 10:09:36 GMT-0500 (EST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

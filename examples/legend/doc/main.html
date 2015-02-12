@@ -80,13 +80,11 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-4">&#182;</a>
               </div>
-              <p>Make the map resize with the browser window</p>
+              <p>Create a ui layer</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  $(<span class="hljs-built_in">window</span>).resize(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
-    map.resize(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, map.node().width(), map.node().height());
-  });</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> ui = map.createLayer(<span class="hljs-string">'ui'</span>);</pre></div></div>
             
         </li>
         
@@ -97,21 +95,6 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-5">&#182;</a>
               </div>
-              <p>Create a ui layer</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> ui = map.createLayer(<span class="hljs-string">'ui'</span>);</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-6">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-6">&#182;</a>
-              </div>
               <p>Create a legend widget</p>
 
             </div>
@@ -121,11 +104,11 @@
         </li>
         
         
-        <li id="section-7">
+        <li id="section-6">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-7">&#182;</a>
+                <a class="pilcrow" href="#section-6">&#182;</a>
               </div>
               <p>Add rows to the legend</p>
 <p>The categories are displayed in the order passed as
@@ -218,11 +201,11 @@ properties as feature styles (fill is ignored for lines):</p>
         </li>
         
         
-        <li id="section-8">
+        <li id="section-7">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-8">&#182;</a>
+                <a class="pilcrow" href="#section-7">&#182;</a>
               </div>
               <p>Draw the map</p>
 

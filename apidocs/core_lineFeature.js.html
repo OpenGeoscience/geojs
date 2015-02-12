@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: core/lineFeature.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: core/lineFeature.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>//////////////////////////////////////////////////////////////////////////////
+/**
+ * Create a new instance of class lineFeature
+ *
+ * @class
+ * @extends geo.feature
+ * @returns {geo.lineFeature}
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.lineFeature = function (arg) {
+  "use strict";
+  if (!(this instanceof geo.lineFeature)) {
+    return new geo.lineFeature(arg);
+  }
+  arg = arg || {};
+  geo.feature.call(this, arg);
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  var m_this = this,
+      s_init = this._init;
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set line accessor
+   *
+   * @returns {geo.pointFeature}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.line = function (val) {
+    if (val === undefined) {
+      return m_this.style("line");
+    } else {
+      m_this.style("line", val);
+      m_this.dataTime().modified();
+      m_this.modified();
+    }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set position accessor
+   *
+   * @returns {geo.pointFeature}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.position = function (val) {
+    if (val === undefined) {
+      return m_this.style("position");
+    } else {
+      m_this.style("position", val);
+      m_this.dataTime().modified();
+      m_this.modified();
+    }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Returns an array of datum indices that contain the given point.
+   * This is a slow implementation with runtime order of the number of
+   * vertices.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.pointSearch = function (p) {
+    var data, pt, map, line, width, indices = [], found = [], pos;
+    data = m_this.data();
+    if (!data || !data.length) {
+      return {
+        found: [],
+        index: []
+      };
+    }
+
+    map = m_this.layer().map();
+    line = m_this.line();
+    width = m_this.style.get("strokeWidth");
+    pos = m_this.position();
+    pt = map.gcsToDisplay(p);
+
+    // minimum l2 distance squared from
+    // q -> line(u, v)
+    function lineDist2(q, u, v) {
+      var t, l2 = dist2(u, v);
+
+      if (l2 &lt; 1) {
+        // u, v are within 1 pixel
+        return dist2(q, u);
+      }
+
+      t = ((q.x - u.x) * (v.x - u.x) + (q.y - u.y) * (v.y - u.y)) / l2;
+      if (t &lt; 0) { return dist2(q, u); }
+      if (t > 1) { return dist2(q, v); }
+      return dist2(
+        q,
+        {
+          x: u.x + t * (v.x - u.x),
+          y: u.y + t * (v.y - u.y)
+        }
+      );
+    }
+
+    // l2 distance squared from u to v
+    function dist2(u, v) {
+      var dx = u.x - v.x,
+          dy = u.y - v.y;
+      return dx * dx + dy * dy;
+    }
+
+    // for each line
+    data.forEach(function (d, index) {
+      var last = null;
+
+      try {
+        line(d, index).forEach(function (current, j) {
+
+          // get the screen coordinates of the current point
+          var p = pos(current, j, d, index);
+          var s = map.gcsToDisplay(p);
+          var r = Math.ceil(width(p, j, d, index) / 2) + 2;
+          r = r * r;
+
+          if (last) {
+            // test the line segment s -> last
+            if (lineDist2(pt, s, last) &lt;= r) {
+
+              // short circuit the loop here
+              throw "found";
+            }
+          }
+
+          last = s;
+        });
+      } catch (err) {
+        if (err !== "found") {
+          throw err;
+        }
+        found.push(d);
+        indices.push(index);
+      }
+    });
+
+    return {
+      data: found,
+      index: indices
+    };
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Returns an array of line indices that are contained in the given box.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.boxSearch = function (lowerLeft, upperRight, opts) {
+    var pos = m_this.position(),
+        idx = [],
+        line = m_this.line();
+
+    opts = opts || {};
+    opts.partial = opts.partial || false;
+    if (opts.partial) {
+      throw "Unimplemented query method.";
+    }
+
+    m_this.data().forEach(function (d, i) {
+      var inside = true;
+      line(d, i).forEach(function (e, j) {
+        if (!inside) { return; }
+        var p = pos(e, j, d, i);
+        if (!(p.x >= lowerLeft.x  &amp;&amp;
+              p.x &lt;= upperRight.x &amp;&amp;
+              p.y >= lowerLeft.y  &amp;&amp;
+              p.y &lt;= upperRight.y)
+        ) {
+          inside = false;
+        }
+      });
+      if (inside) {
+        idx.push(i);
+      }
+    });
+    return idx;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Initialize
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._init = function (arg) {
+    s_init.call(m_this, arg);
+
+    var defaultStyle = $.extend(
+      {},
+      {
+        "strokeWidth": 1.0,
+        // Default to gold color for lines
+        "strokeColor": { r: 1.0, g: 0.8431372549, b: 0.0 },
+        "strokeStyle": "solid",
+        "strokeOpacity": 1.0,
+        "line": function (d) { return d; },
+        "position": function (d) { return d; }
+      },
+      arg.style === undefined ? {} : arg.style
+    );
+
+    if (arg.line !== undefined) {
+      defaultStyle.line = arg.line;
+    }
+
+    if (arg.position !== undefined) {
+      defaultStyle.position = arg.position;
+    }
+
+
+    m_this.style(defaultStyle);
+
+    m_this.dataTime().modified();
+  };
+
+  this._init(arg);
+  return this;
+};
+
+/**
+ * Create a lineFeature from an object.
+ * @see {@link geo.feature.create}
+ * @param {geo.layer} layer The layer to add the feature to
+ * @param {geo.lineFeature.spec} spec The object specification
+ * @returns {geo.lineFeature|null}
+ */
+geo.lineFeature.create = function (layer, spec) {
+  "use strict";
+
+  spec.type = "line";
+  return geo.feature.create(layer, spec);
+};
+
+inherit(geo.lineFeature, geo.feature);
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.clock.html">clock</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.renderer.html">renderer</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.latlng.html">latlng</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.mercator.html">mercator</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<br clear="both">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha11</a> on Thu Feb 12 2015 10:09:36 GMT-0500 (EST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

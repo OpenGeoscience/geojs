@@ -62,7 +62,7 @@
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getSvgLayer</span><span class="hljs-params">(map, opts)</span> </span>{
 
-    opts.renderer = <span class="hljs-string">'d3Renderer'</span>;
+    opts.renderer = <span class="hljs-string">'d3'</span>;
     <span class="hljs-keyword">var</span> layer = map.createLayer(<span class="hljs-string">'feature'</span>, opts);</pre></div></div>
             
         </li>
@@ -380,23 +380,6 @@ widths and point radii.</p>
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-19">&#182;</a>
-              </div>
-              <p>Make the map resize with the browser window</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  $(<span class="hljs-built_in">window</span>).resize(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
-    map.resize(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, map.node().width(), map.node().height());
-  });</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-20">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-20">&#182;</a>
               </div>
               <p>Draw the map</p>
 

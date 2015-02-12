@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: core/transform.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: core/transform.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>//////////////////////////////////////////////////////////////////////////////
+/**
+ * Transform geometric data of a feature from source projection to destination
+ * projection.
+ *
+ * @namespace
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.transform = {};
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Custom transform for a feature used for OpenStreetMap
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.transform.osmTransformFeature = function (destGcs, feature, inplace) {
+  /// TODO
+  /// Currently we make assumption that incoming feature is in 4326
+  /// which may not be true.
+
+  "use strict";
+
+  if (!feature) {
+    console.log("[warning] Invalid (null) feature");
+    return;
+  }
+
+  if (feature.gcs() === destGcs) {
+    return;
+  }
+
+  if (!(feature instanceof geo.pointFeature ||
+        feature instanceof geo.lineFeature)) {
+    throw "Supports only point or line feature";
+  }
+
+  var noOfComponents = null,
+      pointOffset = 0,
+      count = null,
+      inPos = null,
+      outPos = null,
+      srcGcs = feature.gcs(),
+      i,
+      yCoord;
+
+  inplace = !!inplace;
+  if (feature instanceof geo.pointFeature ||
+      feature instanceof geo.lineFeature) {
+
+    ///  If source GCS is not in 4326, transform it first into 4326
+    /// before we transform it for OSM.
+    if (srcGcs !== "EPSG:4326") {
+      geo.transform.transformFeature("EPSG:4326", feature, true);
+    }
+
+    inPos = feature.positions();
+    count = inPos.length;
+
+    if (!(inPos instanceof Array)) {
+      throw "Supports Array of 2D and 3D points";
+    }
+
+    if (inPos.length > 0 &amp;&amp; inPos[0] instanceof geo.latlng) {
+      noOfComponents = 2;
+      pointOffset = 1;
+    } else {
+      noOfComponents = (count % 2 === 0 ? 2 :
+                       (count % 3 === 0 ? 3 : null));
+      pointOffset = noOfComponents;
+    }
+
+    if (noOfComponents !== 2 &amp;&amp; noOfComponents !== 3) {
+      throw "Transform points require points in 2D or 3D";
+    }
+
+    if (inplace) {
+      outPos = inPos;
+    } else {
+      outPos = inPos.slice(0);
+    }
+
+    for (i = 0; i &lt; count; i += pointOffset) {
+
+      /// Y goes from 0 (top edge is 85.0511 °N) to 2zoom − 1
+      /// (bottom edge is 85.0511 °S) in a Mercator projection.
+      if (inPos[i] instanceof geo.latlng) {
+        yCoord = inPos[i].lat();
+      } else {
+        yCoord = inPos[i + 1];
+      }
+
+      if (yCoord > 85.0511) {
+        yCoord = 85.0511;
+      }
+      if (yCoord &lt; -85.0511) {
+        yCoord = -85.0511;
+      }
+      if (inPos[i] instanceof geo.latlng) {
+        outPos[i] = geo.latlng(geo.mercator.lat2y(yCoord), outPos[i].lng());
+      } else {
+        outPos[i + 1] = geo.mercator.lat2y(yCoord);
+      }
+    }
+
+    if (inplace) {
+      feature.positions(outPos);
+      feature.gcs(destGcs);
+    }
+    return outPos;
+  }
+
+  return null;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Transform a feature to destination GCS
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.transform.transformFeature = function (destGcs, feature, inplace) {
+  "use strict";
+
+  if (!feature) {
+    throw "Invalid (null) feature";
+  }
+
+  if (!(feature instanceof geo.pointFeature ||
+        feature instanceof geo.lineFeature)) {
+    throw "Supports only point or line feature";
+  }
+
+  if (feature.gcs() === destGcs) {
+    return feature.positions();
+  }
+
+  if (destGcs === "EPSG:3857") {
+    return geo.transform.osmTransformFeature(destGcs, feature, inplace);
+  }
+
+  var noOfComponents = null,
+      pointOffset = 0,
+      count = null,
+      inPos = null,
+      outPos = null,
+      projPoint = null,
+      srcGcs = feature.gcs(),
+      i,
+      projSrcGcs = new proj4.Proj(srcGcs),
+      projDestGcs = new proj4.Proj(destGcs);
+
+  inplace = !!inplace;
+  if (feature instanceof geo.pointFeature ||
+      feature instanceof geo.lineFeature) {
+    inPos = feature.positions();
+    count = inPos.length;
+
+    if (!(inPos instanceof Array)) {
+      throw "Supports Array of 2D and 3D points";
+    }
+
+    if (inPos.length > 0 &amp;&amp; inPos[0] instanceof geo.latlng) {
+      noOfComponents = 2;
+      pointOffset = 1;
+    } else {
+      noOfComponents = (count % 2 === 0 ? 2 :
+                       (count % 3 === 0 ? 3 : null));
+      pointOffset = noOfComponents;
+    }
+
+    if (noOfComponents !== 2 &amp;&amp; noOfComponents !== 3) {
+      throw "Transform points require points in 2D or 3D";
+    }
+
+    if (inplace) {
+      outPos = inPos;
+    } else {
+      outPos = [];
+      outPos.length = inPos.length;
+    }
+
+    for (i = 0; i &lt; count; i += pointOffset) {
+      if (noOfComponents === 2) {
+        projPoint = new proj4.Point(inPos[i], inPos[i + 1], 0.0);
+      } else {
+        projPoint = new proj4.Point(inPos[i], inPos[i + 1], inPos[i + 2]);
+      }
+
+      proj4.transform(projSrcGcs, projDestGcs, projPoint);
+
+      if (noOfComponents === 2) {
+        outPos[i] =  projPoint.x;
+        outPos[i + 1] = projPoint.y;
+      } else {
+        outPos[i] = projPoint.x;
+        outPos[i + 1] = projPoint.y;
+        outPos[i + 2] = projPoint.z;
+      }
+    }
+
+    if (inplace) {
+      feature.positions(outPos);
+      feature.gcs(destGcs);
+    }
+
+    return outPos;
+  }
+
+  return null;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Transform geometric data of a layer from source projection to destination
+ * projection.
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.transform.transformLayer = function (destGcs, layer, baseLayer) {
+  "use strict";
+
+  var features, count, i;
+
+  if (!layer) {
+    throw "Requires valid layer for tranformation";
+  }
+
+  if (!baseLayer) {
+    throw "Requires baseLayer used by the map";
+  }
+
+  if (layer === baseLayer) {
+    return;
+  }
+
+  if (layer instanceof geo.featureLayer) {
+    features = layer.features();
+    count = features.length;
+    i = 0;
+
+    for (i = 0; i &lt; count; i += 1) {
+      if (destGcs === "EPSG:3857" &amp;&amp; baseLayer instanceof geo.osmLayer) {
+        geo.transform.osmTransformFeature(
+          destGcs, features[i], true);
+      } else {
+        geo.transform.transformFeature(
+          destGcs, features[i], true);
+      }
+    }
+
+    layer.gcs(destGcs);
+  } else {
+    throw "Only feature layer transformation is supported";
+  }
+};
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Transform position coordinates from source projection to destination
+ * projection.
+ *
+ * @param {string} srcGcs GCS of the coordinates
+ * @param {string} destGcs Desired GCS of the transformed coordinates
+ * @param {object} coordinates
+ * @return {geo.latlng|geo.latlng[]} Transformed coordinates
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.transform.transformCoordinates = function (srcGcs, destGcs, coordinates,
+                                               numberOfComponents) {
+  "use strict";
+
+  var i, count, offset, xCoord, yCoord, zCoord, xAcc,
+      yAcc, zAcc, writer, output, projPoint,
+      projSrcGcs = new proj4.Proj(srcGcs),
+      projDestGcs = new proj4.Proj(destGcs);
+
+  /// Default Z accessor
+  zAcc = function () {
+    return 0.0;
+  };
+
+  if (destGcs === srcGcs) {
+    return coordinates;
+  }
+
+  /// TODO: Can we check for EPSG code?
+  if (!destGcs || !srcGcs) {
+    throw "Invalid source or destination GCS";
+  }
+
+  /// Helper methods
+  function handleLatLngCoordinates() {
+    if (coordinates[0] &amp;&amp; coordinates[0] instanceof geo.latlng) {
+      xAcc = function (index) {
+        return coordinates[index].x();
+      };
+      yAcc = function (index) {
+        return coordinates[index].y();
+      };
+      writer = function (index, x, y) {
+        output[index] = geo.latlng(y, x);
+      };
+    } else {
+      xAcc = function () {
+        return coordinates.x();
+      };
+      yAcc = function () {
+        return coordinates.y();
+      };
+      writer = function (index, x, y) {
+        output = geo.latlng(y, x);
+      };
+    }
+  }
+
+  /// Helper methods
+  function handleArrayCoordinates() {
+    if (coordinates[0] instanceof Array) {
+      if (coordinates[0].length === 2) {
+        xAcc = function (index) {
+          return coordinates[index][0];
+        };
+        yAcc = function (index) {
+          return coordinates[index][1];
+        };
+        writer = function (index, x, y) {
+          output[index] = [x, y];
+        };
+      } else if (coordinates[0].length === 3) {
+        xAcc = function (index) {
+          return coordinates[index][0];
+        };
+        yAcc = function (index) {
+          return coordinates[index][1];
+        };
+        zAcc = function (index) {
+          return coordinates[index][2];
+        };
+        writer = function (index, x, y, z) {
+          output[index] = [x, y, z];
+        };
+      } else {
+        throw "Invalid coordinates. Requires two or three components per array";
+      }
+    } else {
+      if (coordinates.length === 2) {
+        offset = 2;
+
+        xAcc = function (index) {
+          return coordinates[index * offset];
+        };
+        yAcc = function (index) {
+          return coordinates[index * offset + 1];
+        };
+        writer = function (index, x, y) {
+          output[index] = x;
+          output[index + 1] = y;
+        };
+      } else if (coordinates.length === 3) {
+        offset = 3;
+
+        xAcc = function (index) {
+          return coordinates[index * offset];
+        };
+        yAcc = function (index) {
+          return coordinates[index * offset + 1];
+        };
+        zAcc = function (index) {
+          return coordinates[index * offset + 2];
+        };
+        writer = function (index, x, y, z) {
+          output[index] = x;
+          output[index + 1] = y;
+          output[index + 2] = z;
+        };
+      } else if (numberOfComponents) {
+        if (numberOfComponents === 2 || numberOfComponents || 3) {
+          offset = numberOfComponents;
+
+          xAcc = function (index) {
+            return coordinates[index];
+          };
+          yAcc = function (index) {
+            return coordinates[index + 1];
+          };
+          if (numberOfComponents === 2) {
+            writer = function (index, x, y) {
+              output[index] = x;
+              output[index + 1] = y;
+            };
+          } else {
+            zAcc = function (index) {
+              return coordinates[index + 2];
+            };
+            writer = function (index, x, y, z) {
+              output[index] = x;
+              output[index + 1] = y;
+              output[index + 2] = z;
+            };
+          }
+        } else {
+          throw "Number of components should be two or three";
+        }
+      } else {
+        throw "Invalid coordinates";
+      }
+    }
+  }
+
+  /// Helper methods
+  function handleObjectCoordinates() {
+    if (coordinates[0] &amp;&amp;
+        "x" in coordinates[0] &amp;&amp;
+        "y" in coordinates[0]) {
+      xAcc = function (index) {
+        return coordinates[index].x;
+      };
+      yAcc = function (index) {
+        return coordinates[index].y;
+      };
+
+      if ("z" in coordinates[0]) {
+        zAcc = function (index) {
+          return coordinates[index].z;
+        };
+        writer = function (index, x, y, z) {
+          output[i] = {x: x, y: y, z: z};
+        };
+      } else {
+        writer = function (index, x, y) {
+          output[index] = {x: x, y: y};
+        };
+      }
+    } else if (coordinates &amp;&amp;
+        "x" in coordinates &amp;&amp; "y" in coordinates) {
+      xAcc = function () {
+        return coordinates.x;
+      };
+      yAcc = function () {
+        return coordinates.y;
+      };
+
+      if ("z" in coordinates) {
+        zAcc = function () {
+          return coordinates.z;
+        };
+        writer = function (index, x, y, z) {
+          output = {x: x, y: y, z: z};
+        };
+      } else {
+        writer = function (index, x, y) {
+          output = {x: x, y: y};
+        };
+      }
+    } else {
+      throw "Invalid coordinates";
+    }
+  }
+
+  if (coordinates instanceof Array) {
+    output = [];
+    output.length = coordinates.length;
+    count = coordinates.length;
+
+    if (coordinates[0] instanceof Array ||
+        coordinates[0] instanceof geo.latlng ||
+        coordinates[0] instanceof Object) {
+      offset = 1;
+
+      if (coordinates[0] instanceof Array) {
+        handleArrayCoordinates();
+      } else if (coordinates[0] instanceof geo.latlng) {
+        handleLatLngCoordinates();
+      } else if (coordinates[0] instanceof Object) {
+        handleObjectCoordinates();
+      }
+    } else {
+      handleArrayCoordinates();
+    }
+  } else if (coordinates &amp;&amp; coordinates instanceof Object) {
+    count = 1;
+    offset = 1;
+    if (coordinates instanceof geo.latlng) {
+      handleLatLngCoordinates();
+    } else if (coordinates &amp;&amp; "x" in coordinates &amp;&amp; "y" in coordinates) {
+      handleObjectCoordinates();
+    } else {
+      throw "Coordinates are not valid";
+    }
+  }
+
+  if (destGcs === "EPSG:3857" &amp;&amp; srcGcs === "EPSG:4326") {
+    for (i = 0; i &lt; count; i += offset) {
+      /// Y goes from 0 (top edge is 85.0511 °N) to 2zoom − 1
+      /// (bottom edge is 85.0511 °S) in a Mercator projection.
+      xCoord = xAcc(i);
+      yCoord = yAcc(i);
+      zCoord = zAcc(i);
+
+      if (yCoord > 85.0511) {
+        yCoord = 85.0511;
+      }
+      if (yCoord &lt; -85.0511) {
+        yCoord = -85.0511;
+      }
+
+      writer(i, xCoord, geo.mercator.lat2y(yCoord), zCoord);
+    }
+
+    return output;
+  } else {
+    for (i = 0; i &lt; count; i += offset) {
+      projPoint = new proj4.Point(xAcc(i), yAcc(i), zAcc(i));
+      proj4.transform(projSrcGcs, projDestGcs, projPoint);
+      writer(i, projPoint.x, projPoint.y, projPoint.z);
+      return output;
+    }
+  }
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.clock.html">clock</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.renderer.html">renderer</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.latlng.html">latlng</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.mercator.html">mercator</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<br clear="both">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha11</a> on Thu Feb 12 2015 10:09:36 GMT-0500 (EST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

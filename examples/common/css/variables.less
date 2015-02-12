@@ -1,4 +1,4 @@
-// Flatly 3.3.0
+// Flatly 3.3.1
 // Variables
 // --------------------------------------------------
 
@@ -8,7 +8,7 @@
 //## Gray and brand colors for use across Bootstrap.
 
 @gray-base:              #000;
-@gray-darker:            lighten(#000, 13.5%); // #222
+@gray-darker:            lighten(@gray-base, 13.5%); // #222
 @gray-dark:              #7b8a8b;   // #333
 @gray:                   #95a5a6; // #555
 @gray-light:             #b4bcc2;   // #999
@@ -236,7 +236,7 @@
 //** Hover color for dropdown links.
 @dropdown-link-hover-color:      #fff;
 //** Hover background for dropdown links.
-@dropdown-link-hover-bg:         @dropdown-link-active-bg;
+@dropdown-link-hover-bg:         @component-active-bg;
 
 //** Active dropdown menu item text color.
 @dropdown-link-active-color:     #fff;
@@ -244,10 +244,10 @@
 @dropdown-link-active-bg:        @component-active-bg;
 
 //** Disabled dropdown menu item background color.
-@dropdown-link-disabled-color:   @text-muted;
+@dropdown-link-disabled-color:   @gray-light;
 
 //** Text color for headers within dropdown menus.
-@dropdown-header-color:          @text-muted;
+@dropdown-header-color:          @gray-light;
 
 //** Deprecated `@dropdown-caret-color` as of v3.1.0
 @dropdown-caret-color:           #000;

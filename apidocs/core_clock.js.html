@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: core/clock.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: core/clock.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>//////////////////////////////////////////////////////////////////////////////
+/**
+ * Stores the current time for a map, triggers time keeping events, and
+ * handles the animation state and interaction.
+ *
+ * @class geo.clock
+ * @extends geo.object
+ * @returns {geo.clock}
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.clock = function (opts) {
+  'use strict';
+
+  if (!(this instanceof geo.clock)) {
+    return new geo.clock(opts);
+  }
+  opts = opts || {};
+  geo.object.call(this, opts);
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * @private
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  var m_this = this,
+      m_now = new Date(0),
+      m_start = null,
+      m_end = null,
+      m_step = null,
+      m_rate = null,
+      m_loop = Number.POSITIVE_INFINITY,
+      m_currentLoop = 0,
+      m_state = 'stop',
+      m_currentAnimation = null,
+      m_object = null;
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get or set the geo.object to trigger events on.
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  this.object = function (arg) {
+    if (arg === undefined) {
+      return m_object;
+    }
+    m_object = arg;
+    return m_this;
+  };
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * Returns true if attached to a valid geo.object.
+   * @private
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  this._attached = function () {
+    return (m_object instanceof geo.object);
+  };
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get or set the current time.
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  this.now = function (arg) {
+    var previous = m_now;
+    if (arg === undefined) {
+      return m_now;
+    }
+    m_now = arg;
+
+    if (m_now !== previous &amp;&amp;
+        m_this._attached()) {
+      m_this.object().geoTrigger(geo.event.clock.change, {
+        previous: previous,
+        current: m_now,
+        clock: m_this
+      });
+    }
+    return m_this;
+  };
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get or set the animation start time.
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  this.start = function (arg) {
+    if (arg === undefined) {
+      return m_start;
+    }
+    m_start = arg;
+    return m_this;
+  };
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get or set the animation end time.
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  this.end = function (arg) {
+    if (arg === undefined) {
+      return m_end;
+    }
+    m_end = arg;
+    return m_this;
+  };
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get or set the animation time step.
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  this.step = function (arg) {
+    if (arg === undefined) {
+      return m_step;
+    }
+    m_step = arg;
+    return m_this;
+  };
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get or set looping control of the clock.  This controls how many times the
+   * animation will repeat before stopping.  Default
+   * ``Number.POSITIVE_INFINITY``, the animation repeats forever.
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  this.loop = function (arg) {
+    if (arg === undefined) {
+      return m_loop;
+    }
+    m_loop = arg;
+    return m_this;
+  };
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get or set the animation state.  Valid values are:
+   *
+   *   * 'stop'
+   *   * 'play'
+   *   * 'pause'
+   *
+   * This will also trigger relevant events, but they may be fired
+   * asynchronously.
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  this.state = function (arg, step) {
+
+    if (arg === undefined) {
+      return m_state;
+    }
+    if (['stop', 'play', 'pause'].indexOf(arg) &lt; 0) {
+      console.log('WARNING: Ignored invalid state: ' + arg);
+      return m_this;
+    }
+
+    if (arg === 'play' &amp;&amp; m_state === 'stop') {
+      // reset animation parameters
+      m_currentLoop = 0;
+      m_this.now(m_this.start());
+    }
+
+    if (arg === 'play' &amp;&amp; m_state !== 'play') {
+      // Start a new animation.
+      m_state = arg;
+      m_this._animate(step || 1);
+    }
+
+    m_state = arg;
+    return m_this;
+  };
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get or set the animation frame rate.  This is approximately the number
+   * of frames displayed per second.  A null value will use the browser's
+   * native requestAnimationFrame to draw new frames.
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  this.framerate = function (arg) {
+    if (arg === undefined) {
+      return m_rate;
+    }
+    m_rate = arg;
+    return m_this;
+  };
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * Step to the next frame in the animation.  Pauses the animation if it is
+   * playing.
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  this.stepForward = function () {
+    m_this.state('pause');
+    m_this._setNextFrame(1);
+    return m_this;
+  };
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * Step to the previous frame in the animation.  Pauses the animation if it is
+   * playing.
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  this.stepBackward = function () {
+    m_this.state('pause');
+    m_this._setNextFrame(-1);
+    return m_this;
+  };
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * Step to the next frame in the animation.  Will set the state to stop
+   * if the animation has reached the end and there are no more loops.
+   * @private
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  this._setNextFrame = function (step) {
+    var next = new Date(m_this.now().valueOf() + step * m_this.step());
+
+    if (next >= m_this.end() || next &lt;= m_this.start()) {
+      if (m_this.loop() &lt;= m_currentLoop) {
+        m_this.state('stop');
+        return;
+      }
+      m_currentLoop += 1;
+      if (step >= 0) {
+        m_this.now(m_this.start());
+      } else {
+        m_this.now(m_this.end());
+      }
+      return;
+    }
+    m_this.now(next);
+  };
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * Start an animation.
+   * @param {integer} step The animation frame step (+1 for forward -1 for
+   *                       reverse, etc).
+   * @private
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  this._animate = function (step) {
+    var myAnimation = {};
+    m_currentAnimation = myAnimation;
+
+    function frame() {
+      if (myAnimation !== m_currentAnimation) {
+        // A new animation has started, so kill this one.
+        return;
+      }
+      m_this._setNextFrame(step);
+      if (m_this.state() === 'play') {
+
+        // Queue the next frame
+        if (!m_this.framerate()) {
+          window.requestAnimationFrame(frame);
+        } else {
+          window.setTimeout(frame, 1000 / m_this.framerate());
+        }
+      } else if (m_this._attached()) {
+        m_this.object().geoTrigger(geo.event.clock[m_this.state()], {
+          current: m_this.now(),
+          clock: m_this
+        });
+      }
+    }
+
+    // trigger the play event
+    if (m_this._attached()) {
+      m_this.object().geoTrigger(geo.event.clock.play, {
+        current: m_this.now(),
+        clock: m_this
+      });
+    }
+
+    // Queue the first frame
+    if (!m_this.framerate()) {
+      window.requestAnimationFrame(frame);
+    } else {
+      window.setTimeout(frame, 1000 / m_this.framerate());
+    }
+  };
+};
+inherit(geo.clock, geo.object);
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.clock.html">clock</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.renderer.html">renderer</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.latlng.html">latlng</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.mercator.html">mercator</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<br clear="both">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha11</a> on Thu Feb 12 2015 10:09:36 GMT-0500 (EST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

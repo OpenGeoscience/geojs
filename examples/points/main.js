@@ -66,7 +66,7 @@ $(function () {
   var vglLayer = map.createLayer(
     'feature',
     {
-      renderer: 'vglRenderer'
+      renderer: 'vgl'
     }
   );
 
@@ -74,7 +74,7 @@ $(function () {
   var svgLayer = map.createLayer(
     'feature',
     {
-      renderer: 'd3Renderer'
+      renderer: 'd3'
     }
   );
 
@@ -103,11 +103,6 @@ $(function () {
     };
   });
   makePoints(data, svgLayer, svgColor);
-
-  // Make the map resize with the browser window
-  $(window).resize(function () {
-    map.resize(0, 0, map.node().width(), map.node().height());
-  });
 
   // Draw the map
   map.draw();

@@ -7,7 +7,7 @@ $(function () {
   // Create an svg layer and return a reference to its dom element.
   function getSvgLayer(map, opts) {
 
-    opts.renderer = 'd3Renderer';
+    opts.renderer = 'd3';
     var layer = map.createLayer('feature', opts);
 
     // The canvas is a d3 context to geojs managed svg element.
@@ -135,11 +135,6 @@ $(function () {
   drawLayer(map, 'fixed', 'This is a fixed layer', 0);
   drawLayer(map, 'unscaled-moving', 'This is a moving layer without rescaling.', 1);
   drawLayer(map, 'scaled-moving', 'This is a moving layer with rescaling.', 2, true);
-
-  // Make the map resize with the browser window
-  $(window).resize(function () {
-    map.resize(0, 0, map.node().width(), map.node().height());
-  });
 
   // Draw the map
   map.draw();

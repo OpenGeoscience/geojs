@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: core/ellipsoid.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: core/ellipsoid.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>//////////////////////////////////////////////////////////////////////////////
+/**
+ * Create an instance of quadratic surface generator
+ * in Cartesian coordinates by the equation
+ * &lt;code>(x / a)^2 + (y / b)^2 + (z / c)^2 = 1&lt;/code>. Used
+ * primarily to create planetary bodies
+ *
+ * @class
+ * @param {Number} [x=0]  Radius in X direction
+ * @param {Number} [y=0]  Radius in Y direction
+ * @param {Number} [z=0]  Radius in Z direction
+ *
+ * @returns {geo.ellipsoid}
+ */
+ //////////////////////////////////////////////////////////////////////////////
+geo.ellipsoid = function (x, y, z) {
+  'use strict';
+  if (!(this instanceof geo.ellipsoid)) {
+    return new geo.ellipsoid(x, y, z);
+  }
+
+  x = vgl.defaultValue(x, 0.0);
+  y = vgl.defaultValue(y, 0.0);
+  z = vgl.defaultValue(z, 0.0);
+
+  if (x &lt; 0.0 || y &lt; 0.0 || z &lt; 0.0) {
+    return console.log('[error] Al radii components must be greater than zero');
+  }
+
+  var m_this = this,
+      m_radii = new vec3.fromValues(x, y, z),
+      m_radiiSquared = new vec3.fromValues(
+        x * x, y * y, z * z),
+      m_minimumRadius = Math.min(x, y, z),
+      m_maximumRadius = Math.max(x, y, z);
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return radii of ellipsoid
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.radii = function () {
+    return m_radii;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return squared radii of the ellipsoid
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.radiiSquared = function () {
+    return m_radiiSquared;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return maximum radius of the ellipsoid
+   *
+   * @return {Number} The maximum radius of the ellipsoid
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.maximumRadius = function () {
+    return m_maximumRadius;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return minimum radius of the ellipsoid
+   *
+   * @return {Number} The maximum radius of the ellipsoid
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.minimumRadius = function () {
+    return m_minimumRadius;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Computes the normal of the plane tangent to the surface of
+   * the ellipsoid at the provided position
+   *
+   * @param {Number} lat The cartographic latitude for which
+   *  to to determine the geodetic normal
+   * @param {Number} lon The cartographic longitude for which
+   *  to to determine the geodetic normal
+   *
+   * @return {vec3}
+   *
+   * @exception {DeveloperError} cartographic is required.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.computeGeodeticSurfaceNormal = function (lat, lon) {
+    if (typeof lat === 'undefined' || typeof lon === 'undefined') {
+      throw '[error] Valid latitude and longitude is required';
+    }
+
+    var cosLatitude = Math.cos(lat),
+        result = vec3.create();
+
+    result[0] = cosLatitude * Math.cos(lon);
+    result[1] = cosLatitude * Math.sin(lon);
+    result[2] = Math.sin(lat);
+
+    vec3.normalize(result, result);
+    return result;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Converts the provided geographic latitude, longitude,
+   * and height to WGS84 coordinate system
+   *
+   * @param {Number} lat Latitude in radians
+   * @param {Number} lon Longitude in radians
+   * @param {Number} elev Elevation
+   * @return {vec3} Position in the WGS84 coordinate system
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.transformPoint = function (lat, lon, elev) {
+    lat = lat *  (Math.PI / 180.0);
+    lon = lon * (Math.PI / 180.0);
+
+    var n = m_this.computeGeodeticSurfaceNormal(lat, lon),
+        k = vec3.create(),
+        gamma  = Math.sqrt(vec3.dot(n, k)),
+        result = vec3.create();
+
+    vec3.multiply(k, m_radiiSquared, n);
+    vec3.scale(k, k, 1 / gamma);
+    vec3.scale(n, n, elev);
+    vec3.add(result, n, k);
+    return result;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Converts the provided geographic latitude, longitude,
+   * and height to WGS84 coordinate system
+   *
+   * @param {vgl.geometryData} geom
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.transformGeometry = function (geom) {
+    if (!geom) {
+      throw '[error] Failed to transform to cartesian. Invalid geometry.';
+    }
+
+    var sourceData = geom.sourceData(vgl.vertexAttributeKeys.Position),
+        sourceDataArray = sourceData.data(),
+        noOfComponents =  sourceData.attributeNumberOfComponents(
+          vgl.vertexAttributeKeys.Position),
+        stride = sourceData.attributeStride(
+          vgl.vertexAttributeKeys.Position),
+        offset = sourceData.attributeOffset(
+          vgl.vertexAttributeKeys.Position),
+        sizeOfDataType = sourceData.sizeOfAttributeDataType(
+          vgl.vertexAttributeKeys.Position),
+        index = null,
+        count = sourceDataArray.length * (1.0 / noOfComponents),
+        gamma = null,
+        n = null,
+        j = 0,
+        k = vec3.create(),
+        result = vec3.create();
+
+    stride /= sizeOfDataType;
+    offset /= sizeOfDataType;
+
+    if (noOfComponents !== 3) {
+      throw ('[error] Requires positions with three components');
+    }
+
+    for (j = 0; j &lt; count; j += 1) {
+      index = j * stride + offset;
+
+      sourceDataArray[index] = sourceDataArray[index] * (Math.PI / 180.0);
+      sourceDataArray[index + 1] = sourceDataArray[index + 1] * (Math.PI / 180.0);
+
+      n = m_this.computeGeodeticSurfaceNormal(sourceDataArray[index + 1],
+                                            sourceDataArray[index]);
+      vec3.multiply(k, m_radiiSquared, n);
+      gamma = Math.sqrt(vec3.dot(n, k));
+      vec3.scale(k, k, 1 / gamma);
+      vec3.scale(n, n, sourceDataArray[index + 2]);
+      vec3.add(result, n, k);
+
+      sourceDataArray[index] = result[0];
+      sourceDataArray[index + 1] = result[1];
+      sourceDataArray[index + 2] = result[2];
+    }
+  };
+
+  return m_this;
+};
+
+////////////////////////////////////////////////////////////////////////////
+/**
+ * An Ellipsoid instance initialized to the WGS84 standard.
+ * @memberof ellipsoid
+ *
+ */
+////////////////////////////////////////////////////////////////////////////
+geo.ellipsoid.WGS84 = vgl.freezeObject(
+  geo.ellipsoid(6378137.0, 6378137.0, 6356752.3142451793));
+
+////////////////////////////////////////////////////////////////////////////
+/**
+ * An Ellipsoid instance initialized to radii of (1.0, 1.0, 1.0).
+ * @memberof ellipsoid
+ */
+////////////////////////////////////////////////////////////////////////////
+geo.ellipsoid.UNIT_SPHERE = vgl.freezeObject(
+  geo.ellipsoid(1.0, 1.0, 1.0));
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.clock.html">clock</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.renderer.html">renderer</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.latlng.html">latlng</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.mercator.html">mercator</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<br clear="both">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha11</a> on Thu Feb 12 2015 10:09:36 GMT-0500 (EST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

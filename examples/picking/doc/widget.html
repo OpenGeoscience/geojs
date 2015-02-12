@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>widget.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page">
+            
+              
+              <a class="source" href="main.html">
+                main.js
+              </a>
+            
+              
+              <a class="source" href="widget.html">
+                widget.js
+              </a>
+            
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>widget.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+<span class="hljs-pi">  'use strict'</span>;
+
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">smoothFunction</span><span class="hljs-params">(n, sigma)</span> </span>{
+    <span class="hljs-keyword">var</span> p = [], q = [];
+    <span class="hljs-keyword">var</span> i, j, dx, ss = sigma * sigma * <span class="hljs-number">2</span> * n * n;
+    <span class="hljs-keyword">var</span> c = <span class="hljs-number">1</span> / (<span class="hljs-number">2</span> * sigma * <span class="hljs-built_in">Math</span>.PI);
+    <span class="hljs-keyword">var</span> rnd = d3.random.normal();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>preallocate</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    p.length = n;
+    q.length = n;
+
+    <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; n; i += <span class="hljs-number">1</span>) {
+      p[i] = rnd() / <span class="hljs-number">50</span>;
+    }
+
+    <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; n; i += <span class="hljs-number">1</span>) {
+      q[i] = <span class="hljs-number">0</span>;
+      <span class="hljs-keyword">for</span> (j = <span class="hljs-number">0</span>; j &lt; n; j += <span class="hljs-number">1</span>) {
+        dx = j - i;
+        q[i] += c * p[j] * <span class="hljs-built_in">Math</span>.exp(-dx * dx / ss);
+      }
+    }
+    <span class="hljs-keyword">return</span> q;
+  }
+
+  <span class="hljs-comment">/**
+   * Create a differential random path in R^2.
+   *
+   * @param {int} n Number of points
+   * @param {float} sigma Smoothness of the line (&gt;0)
+   */</span>
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">randomPath</span><span class="hljs-params">(n, sigma, cx, cy)</span> </span>{
+    <span class="hljs-keyword">var</span> x = smoothFunction(n, sigma);
+    <span class="hljs-keyword">var</span> y = smoothFunction(n, sigma);
+
+    <span class="hljs-keyword">return</span> x.map(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d, i)</span> </span>{
+      <span class="hljs-keyword">return</span> {
+        x: cx + (d - <span class="hljs-number">0.5</span>) * <span class="hljs-number">15</span>,
+        y: cy + (y[i] - <span class="hljs-number">0.5</span>) * <span class="hljs-number">10</span>
+      };
+    });
+  }
+
+  <span class="hljs-built_in">window</span>.randomPath = randomPath;
+})();</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

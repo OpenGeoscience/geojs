@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: gl/lineFeature.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: gl/lineFeature.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>//////////////////////////////////////////////////////////////////////////////
+/**
+ * Create a new instance of lineFeature
+ *
+ * @class
+ * @extends geo.lineFeature
+ * @returns {geo.gl.lineFeature}
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.gl.lineFeature = function (arg) {
+  'use strict';
+  if (!(this instanceof geo.gl.lineFeature)) {
+    return new geo.gl.lineFeature(arg);
+  }
+  arg = arg || {};
+  geo.lineFeature.call(this, arg);
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  var m_this = this,
+      s_exit = this._exit,
+      m_actor = null,
+      m_mapper = null,
+      m_material = null,
+      m_pixelWidthUnif = null,
+      s_init = this._init,
+      s_update = this._update;
+
+  function createVertexShader() {
+      var vertexShaderSource = [
+        '#ifdef GL_ES',
+        '  precision highp float;',
+        '#endif',
+        'attribute vec3 pos;',
+        'attribute vec3 prev;',
+        'attribute vec3 next;',
+        'attribute float offset;',
+
+        'attribute vec3 strokeColor;',
+        'attribute float strokeOpacity;',
+        'attribute float strokeWidth;',
+
+        'uniform mat4 modelViewMatrix;',
+        'uniform mat4 projectionMatrix;',
+        'uniform float pixelWidth;',
+
+        'varying vec3 strokeColorVar;',
+        'varying float strokeWidthVar;',
+        'varying float strokeOpacityVar;',
+
+        'void main(void)',
+        '{',
+        '  const float PI = 3.14159265358979323846264;',
+        '  vec4 worldPos = projectionMatrix * modelViewMatrix * vec4(pos.xyz, 1);',
+        '  if (worldPos.w != 0.0) {',
+        '    worldPos = worldPos/worldPos.w;',
+        '  }',
+        '  vec4 worldNext = projectionMatrix * modelViewMatrix * vec4(next.xyz, 1);',
+        '  if (worldNext.w != 0.0) {',
+        '    worldNext = worldNext/worldNext.w;',
+        '  }',
+        '  vec4 worldPrev = projectionMatrix* modelViewMatrix * vec4(prev.xyz, 1);',
+        '  if (worldPrev.w != 0.0) {',
+        '    worldPrev = worldPrev/worldPrev.w;',
+        '  }',
+        '  strokeColorVar = strokeColor;',
+        '  strokeWidthVar = strokeWidth;',
+        '  strokeOpacityVar = strokeOpacity;',
+        '  vec2 deltaNext = worldNext.xy - worldPos.xy;',
+        '  vec2 deltaPrev = worldPos.xy - worldPrev.xy;',
+        '  float angleNext = PI * 0.5;',
+        '  if (deltaNext.y &lt; 0.0) { angleNext = -angleNext; } ',
+        '  if (deltaNext.x != 0.0) {',
+        '    angleNext = atan(deltaNext.y, deltaNext.x);',
+        '  }',
+        '  float anglePrev = PI * 0.5;',
+        '  if (deltaPrev.y &lt; 0.0) { anglePrev = -anglePrev; } ',
+        '  if (deltaPrev.x != 0.0) {',
+        '    anglePrev = atan(deltaPrev.y, deltaPrev.x);',
+        '  }',
+        '  if (deltaPrev.xy == vec2(0.0, 0.0)) anglePrev = angleNext;',
+        '  if (deltaNext.xy == vec2(0.0, 0.0)) angleNext = anglePrev;',
+        '  float angle = (anglePrev + angleNext) / 2.0;',
+        '  float cosAngle = cos(anglePrev - angle);',
+        '  if (cosAngle &lt; 0.1) { cosAngle = sign(cosAngle) * 1.0; angle = 0.0; }',
+        '  float distance = (offset * strokeWidth * pixelWidth) /',
+        '                    cosAngle;',
+        '  worldPos.x += distance * sin(angle);',
+        '  worldPos.y -= distance * cos(angle);',
+        '  gl_Position = worldPos;',
+        '}'
+      ].join('\n'),
+      shader = new vgl.shader(gl.VERTEX_SHADER);
+      shader.setShaderSource(vertexShaderSource);
+      return shader;
+    }
+
+  function createFragmentShader() {
+    var fragmentShaderSource = [
+      '#ifdef GL_ES',
+      '  precision highp float;',
+      '#endif',
+      'varying vec3 strokeColorVar;',
+      'varying float strokeWidthVar;',
+      'varying float strokeOpacityVar;',
+      'void main () {',
+      '  gl_FragColor = vec4 (strokeColorVar, strokeOpacityVar);',
+      '}'
+    ].join('\n'),
+    shader = new vgl.shader(gl.FRAGMENT_SHADER);
+    shader.setShaderSource(fragmentShaderSource);
+    return shader;
+  }
+
+  function createGLLines() {
+    var i = null,
+        j = null,
+        k = null,
+        prev = [],
+        next = [],
+        numPts = m_this.data().length,
+        itemIndex = 0,
+        lineItemIndex = 0,
+        lineItem = null,
+        currIndex = null,
+        lineSegments = [],
+        pos = null,
+        posTmp = null,
+        strkColor = null,
+        start = null,
+        position = [],
+        strkWidthArr = [],
+        strkColorArr = [],
+        strkOpacityArr = [],
+        geom = vgl.geometryData(),
+        posFunc = m_this.position(),
+        strkWidthFunc = m_this.style.get('strokeWidth'),
+        strkColorFunc = m_this.style.get('strokeColor'),
+        strkOpacityFunc = m_this.style.get('strokeOpacity'),
+        buffers = vgl.DataBuffers(1024),
+        // Sources
+        posData = vgl.sourceDataP3fv(),
+        prvPosData = vgl.sourceDataAnyfv(3, vgl.vertexAttributeKeysIndexed.Four),
+        nxtPosData = vgl.sourceDataAnyfv(3, vgl.vertexAttributeKeysIndexed.Five),
+        offPosData = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Six),
+        strkWidthData = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.One),
+        strkColorData = vgl.sourceDataAnyfv(3, vgl.vertexAttributeKeysIndexed.Two),
+        strkOpacityData = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Three),
+        // Primitive indices
+        triangles = vgl.triangles();
+
+    m_this.data().forEach(function (item) {
+      lineItem = m_this.line()(item, itemIndex);
+      lineSegments.push(lineItem.length);
+      lineItem.forEach(function (lineItemData) {
+        pos = posFunc(lineItemData, lineItemIndex, item, itemIndex);
+        if (pos instanceof geo.latlng) {
+          position.push([pos.x(), pos.y(), 0.0]);
+        } else {
+          position.push([pos.x, pos.y, pos.z || 0.0]);
+        }
+        strkWidthArr.push(strkWidthFunc(lineItemData, lineItemIndex,
+                                        item, itemIndex));
+        strkColor = strkColorFunc(lineItemData, lineItemIndex,
+                                  item, itemIndex);
+        strkColorArr.push([strkColor.r, strkColor.g, strkColor.b]);
+        strkOpacityArr.push(strkOpacityFunc(lineItemData, lineItemIndex,
+                                            item, itemIndex));
+
+        // Assuming that we will have atleast two points
+        if (lineItemIndex === 0) {
+          posTmp = position[position.length - 1];
+          prev.push(posTmp);
+        } else {
+          prev.push(position[position.length - 2]);
+          next.push(position[position.length - 1]);
+        }
+
+        lineItemIndex += 1;
+      });
+      next.push(position[position.length - 1]);
+      lineItemIndex = 0;
+      itemIndex += 1;
+    });
+
+    position = geo.transform.transformCoordinates(
+                 m_this.gcs(), m_this.layer().map().gcs(),
+                 position, 3);
+    prev = geo.transform.transformCoordinates(
+                 m_this.gcs(), m_this.layer().map().gcs(),
+                 prev, 3);
+    next = geo.transform.transformCoordinates(
+                 m_this.gcs(), m_this.layer().map().gcs(),
+                 next, 3);
+
+    buffers.create('pos', 3);
+    buffers.create('next', 3);
+    buffers.create('prev', 3);
+    buffers.create('offset', 1);
+    buffers.create('indices', 1);
+    buffers.create('strokeWidth', 1);
+    buffers.create('strokeColor', 3);
+    buffers.create('strokeOpacity', 1);
+
+    numPts = position.length;
+
+    start = buffers.alloc(numPts * 6);
+    currIndex = start;
+
+    var addVert = function (prevPos, currPos, nextPos, offset,
+                            width, color, opacity) {
+      buffers.write('prev', prevPos, currIndex, 1);
+      buffers.write('pos', currPos, currIndex, 1);
+      buffers.write('next', nextPos, currIndex, 1);
+      buffers.write('offset', [offset], currIndex, 1);
+      buffers.write('indices', [currIndex], currIndex, 1);
+      buffers.write('strokeWidth', [width], currIndex, 1);
+      buffers.write('strokeColor', color, currIndex, 1);
+      buffers.write('strokeOpacity', [opacity], currIndex, 1);
+      currIndex += 1;
+    };
+
+    i = 0;
+    k = 0;
+    for (j = 0; j &lt; lineSegments.length; j += 1) {
+      i += 1;
+      for (k = 0; k &lt; lineSegments[j] - 1; k += 1) {
+        addVert(prev[i - 1], position[i - 1], next[i - 1], 1,
+                strkWidthArr[i - 1], strkColorArr[i - 1], strkOpacityArr[i - 1]);
+        addVert(prev[i], position[i], next[i], -1,
+                strkWidthArr[i], strkColorArr[i], strkOpacityArr[i]);
+        addVert(prev[i - 1], position[i - 1], next[i - 1], -1,
+                strkWidthArr[i - 1], strkColorArr[i - 1], strkOpacityArr[i - 1]);
+
+        addVert(prev[i - 1], position[i - 1], next[i - 1], 1,
+                strkWidthArr[i - 1], strkColorArr[i - 1], strkOpacityArr[i - 1]);
+        addVert(prev[i], position[i], next[i], 1,
+                strkWidthArr[i], strkColorArr[i], strkOpacityArr[i]);
+        addVert(prev[i], position[i], next[i], -1,
+                strkWidthArr[i], strkColorArr[i], strkOpacityArr[i]);
+        i += 1;
+      }
+    }
+
+    posData.pushBack(buffers.get('pos'));
+    geom.addSource(posData);
+
+    prvPosData.pushBack(buffers.get('prev'));
+    geom.addSource(prvPosData);
+
+    nxtPosData.pushBack(buffers.get('next'));
+    geom.addSource(nxtPosData);
+
+    strkWidthData.pushBack(buffers.get('strokeWidth'));
+    geom.addSource(strkWidthData);
+
+    strkColorData.pushBack(buffers.get('strokeColor'));
+    geom.addSource(strkColorData);
+
+    strkOpacityData.pushBack(buffers.get('strokeOpacity'));
+    geom.addSource(strkOpacityData);
+
+    offPosData.pushBack(buffers.get('offset'));
+    geom.addSource(offPosData);
+
+    triangles.setIndices(buffers.get('indices'));
+    geom.addPrimitive(triangles);
+
+    m_mapper.setGeometryData(geom);
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Initialize
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._init = function (arg) {
+    var prog = vgl.shaderProgram(),
+        vs = createVertexShader(),
+        fs = createFragmentShader(),
+        // Vertex attributes
+        posAttr = vgl.vertexAttribute('pos'),
+        prvAttr = vgl.vertexAttribute('prev'),
+        nxtAttr = vgl.vertexAttribute('next'),
+        offAttr = vgl.vertexAttribute('offset'),
+        strkWidthAttr = vgl.vertexAttribute('strokeWidth'),
+        strkColorAttr = vgl.vertexAttribute('strokeColor'),
+        strkOpacityAttr = vgl.vertexAttribute('strokeOpacity'),
+        // Shader uniforms
+        mviUnif = new vgl.modelViewUniform('modelViewMatrix'),
+        prjUnif = new vgl.projectionUniform('projectionMatrix');
+
+    m_pixelWidthUnif =  new vgl.floatUniform('pixelWidth',
+                          1.0 / m_this.renderer().width());
+    s_init.call(m_this, arg);
+    m_material = vgl.material();
+    m_mapper = vgl.mapper();
+
+    prog.addVertexAttribute(posAttr, vgl.vertexAttributeKeys.Position);
+    prog.addVertexAttribute(strkWidthAttr, vgl.vertexAttributeKeysIndexed.One);
+    prog.addVertexAttribute(strkColorAttr, vgl.vertexAttributeKeysIndexed.Two);
+    prog.addVertexAttribute(strkOpacityAttr, vgl.vertexAttributeKeysIndexed.Three);
+    prog.addVertexAttribute(prvAttr, vgl.vertexAttributeKeysIndexed.Four);
+    prog.addVertexAttribute(nxtAttr, vgl.vertexAttributeKeysIndexed.Five);
+    prog.addVertexAttribute(offAttr, vgl.vertexAttributeKeysIndexed.Six);
+
+    prog.addUniform(mviUnif);
+    prog.addUniform(prjUnif);
+    prog.addUniform(m_pixelWidthUnif);
+
+    prog.addShader(fs);
+    prog.addShader(vs);
+
+    m_material.addAttribute(prog);
+    m_material.addAttribute(vgl.blend());
+
+    m_actor = vgl.actor();
+    m_actor.setMaterial(m_material);
+    m_actor.setMapper(m_mapper);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Build
+   *
+   * @override
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._build = function () {
+    if (m_actor) {
+      m_this.renderer().contextRenderer().removeActor(m_actor);
+    }
+
+    createGLLines();
+
+    m_this.renderer().contextRenderer().addActor(m_actor);
+    m_this.buildTime().modified();
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Update
+   *
+   * @override
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._update = function () {
+    s_update.call(m_this);
+
+    if (m_this.dataTime().getMTime() >= m_this.buildTime().getMTime() ||
+        m_this.updateTime().getMTime() &lt;= m_this.getMTime()) {
+      m_this._build();
+    }
+
+    m_pixelWidthUnif.set(1.0 / m_this.renderer().width());
+    m_actor.setVisible(m_this.visible());
+    m_actor.material().setBinNumber(m_this.bin());
+    m_this.updateTime().modified();
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Destroy
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._exit = function () {
+    m_this.renderer().contextRenderer().removeActor(m_actor);
+    s_exit();
+  };
+
+  this._init(arg);
+  return this;
+};
+
+inherit(geo.gl.lineFeature, geo.lineFeature);
+
+// Now register it
+geo.registerFeature('vgl', 'line', geo.gl.lineFeature);
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.clock.html">clock</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.renderer.html">renderer</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.latlng.html">latlng</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.mercator.html">mercator</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<br clear="both">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha11</a> on Thu Feb 12 2015 10:09:36 GMT-0500 (EST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

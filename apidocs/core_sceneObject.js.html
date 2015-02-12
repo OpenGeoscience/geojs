@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: core/sceneObject.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: core/sceneObject.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>//////////////////////////////////////////////////////////////////////////////
+/**
+ * Create a new instance of class sceneObject, which extends the object's
+ * event handling with a tree-based event propagation.
+ *
+ * @class
+ * @extends geo.object
+ * @returns {geo.sceneObject}
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.sceneObject = function (arg) {
+  "use strict";
+  if (!(this instanceof geo.sceneObject)) {
+    return new geo.sceneObject();
+  }
+  geo.object.call(this, arg);
+
+  var m_this = this,
+      m_parent = null,
+      m_children = [],
+      s_exit = this._exit,
+      s_trigger = this.geoTrigger,
+      s_addDeferred = this.addDeferred,
+      s_onIdle = this.onIdle;
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   *  Override object.addDeferred to propagate up the scene tree.
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  this.addDeferred = function (defer) {
+    if (m_parent) {
+      m_parent.addDeferred(defer);
+    } else {
+      s_addDeferred(defer);
+    }
+  };
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   *  Override object.onIdle to propagate up the scene tree.
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  this.onIdle = function (handler) {
+    if (m_parent) {
+      m_parent.onIdle(handler);
+    } else {
+      s_onIdle(handler);
+    }
+  };
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   *  Get/set parent of the object
+   *  @param {?geo.sceneObject} parent
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  this.parent = function (arg) {
+    if (arg === undefined) {
+      return m_parent;
+    }
+    m_parent = arg;
+    return m_this;
+  };
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   *  Add a child (or an array of children) to the object
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  this.addChild = function (child) {
+    if (Array.isArray(child)) {
+      child.forEach(m_this.addChild);
+      return m_this;
+    }
+    child.parent(m_this);
+    m_children.push(child);
+    return m_this;
+  };
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   *  Remove a child (or array of children) from the object
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  this.removeChild = function (child) {
+    if (Array.isArray(child)) {
+      child.forEach(m_this.removeChild);
+      return m_this;
+    }
+    m_children = m_children.filter(function (c) { return c !== child; });
+    return m_this;
+  };
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   *  Get an array of child objects
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  this.children = function () {
+    return m_children.slice();
+  };
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   *  Force redraw of a scene object, to be implemented by subclasses.
+   *  Base class just calls draw of child objects.
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  this.draw = function (arg) {
+    m_this.children().forEach(function (child) {
+      child.draw(arg);
+    });
+    return m_this;
+  };
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   *  Trigger an event (or events) on this object and call all handlers.
+   *  @param {String} event the event to trigger
+   *  @param {Object} args arbitrary argument to pass to the handler
+   *  @param {Boolean} childrenOnly if true, only propagate down the tree
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  this.geoTrigger = function (event, args, childrenOnly) {
+
+    var geoArgs;
+
+    args = args || {};
+    geoArgs = args.geo || {};
+    args.geo = geoArgs;
+
+    // stop propagation if requested by the handler
+    if (geoArgs.stopPropagation) {
+      return m_this;
+    }
+
+    // If the event was not triggered by the parent, just propagate up the tree
+    if (!childrenOnly &amp;&amp; m_parent &amp;&amp; geoArgs._triggeredBy !== m_parent) {
+      geoArgs._triggeredBy = m_this;
+      m_parent.geoTrigger(event, args);
+      return m_this;
+    }
+
+    // call the object's own handlers
+    s_trigger.call(m_this, event, args);
+
+    // stop propagation if requested by the handler
+    if (geoArgs.stopPropagation) {
+      return m_this;
+    }
+
+    // trigger the event on the children
+    m_children.forEach(function (child) {
+      geoArgs._triggeredBy = m_this;
+      child.geoTrigger(event, args);
+    });
+
+    return m_this;
+  };
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * Free all resources and destroy the object.
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  this._exit = function () {
+    m_this.children = [];
+    delete m_this.parent;
+    s_exit();
+  };
+
+  return this;
+};
+
+inherit(geo.sceneObject, geo.object);
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.clock.html">clock</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.renderer.html">renderer</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.latlng.html">latlng</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.mercator.html">mercator</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<br clear="both">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha11</a> on Thu Feb 12 2015 10:09:36 GMT-0500 (EST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
