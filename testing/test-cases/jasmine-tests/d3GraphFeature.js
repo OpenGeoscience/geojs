@@ -30,10 +30,10 @@ describe("d3 graph feature", function () {
       .data(nodes)
       .draw();
 
-    selection = d3.select("#map svg").selectAll("circle");
+    selection = layer.canvas().selectAll("circle");
     expect(selection[0].length).toBe(4);
 
-    selection = d3.select("#map svg").selectAll("path");
+    selection = layer.canvas().selectAll("path");
     expect(selection[0].length).toBe(3);
   });
 
@@ -42,10 +42,10 @@ describe("d3 graph feature", function () {
 
     layer.deleteFeature(feature).draw();
 
-    selection = d3.select("#map svg").selectAll("circle");
+    selection = layer.canvas().selectAll("circle");
     expect(selection[0].length).toBe(0);
 
-    selection = d3.select("#map svg").selectAll("path");
+    selection = layer.canvas().selectAll("path");
     expect(selection[0].length).toBe(0);
   });
 });
