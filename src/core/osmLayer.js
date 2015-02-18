@@ -40,7 +40,7 @@ geo.osmLayer = function (arg) {
     m_pendingNewTilesStat = {},
     s_update = this._update,
     m_updateDefer = null,
-    m_zoomLevelDelta = 2.5,
+    m_zoom = null,
     m_tileUrl;
 
   if (arg && arg.baseUrl !== undefined) {
@@ -49,10 +49,6 @@ geo.osmLayer = function (arg) {
 
   if (m_baseUrl.charAt(m_baseUrl.length - 1) !== "/") {
     m_baseUrl += "/";
-  }
-
-  if (arg && arg.zoomDelta !== undefined) {
-    m_zoomLevelDelta = arg.zoomDelta;
   }
 
   if (arg && arg.imageFormat !== undefined) {
@@ -78,17 +74,6 @@ geo.osmLayer = function (arg) {
 
   if (arg && arg.tileUrl !== undefined) {
     m_tileUrl = arg.tileUrl;
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Return zoom to be used for fetching the tiles
-   *
-   * @private
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  function getModifiedMapZoom() {
-    return Math.floor(m_this.map().zoom() + m_zoomLevelDelta);
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -351,7 +336,7 @@ geo.osmLayer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   /* jshint -W089 */
   this._removeTiles = function () {
-    var i, x, y, tile, zoom, currZoom = getModifiedMapZoom(),
+    var i, x, y, tile, zoom, currZoom = m_zoom,
         lastZoom = m_lastVisibleZoom;
 
     if (!m_tiles) {
@@ -421,7 +406,6 @@ geo.osmLayer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._addTiles = function (request) {
     var feature, ren = m_this.renderer(),
-        zoom = getModifiedMapZoom(),
         /// First get corner points
         /// In display coordinates the origin is on top left corner (0, 0)
         llx = 0.0, lly = m_this.height(), urx = m_this.width(), ury = 0.0,
@@ -429,7 +413,11 @@ geo.osmLayer = function (arg) {
         tile2y = null, invJ = null, i = 0, j = 0, lastStartX, lastStartY,
         lastEndX, lastEndY, currStartX, currStartY, currEndX, currEndY,
         worldPt1 = ren.displayToWorld([llx, lly]),
-        worldPt2 = ren.displayToWorld([urx, ury]);
+        worldPt2 = ren.displayToWorld([urx, ury]),
+        worldDeltaY = null, displayDeltaY = null,
+        worldDelta = null, displayDelta = null,
+        noOfTilesRequired = null, worldDeltaPerTile = null,
+        minDistWorldDeltaPerTile = null, distWorldDeltaPerTile;
 
     worldPt1[0] = Math.max(worldPt1[0], -180.0);
     worldPt1[0] = Math.min(worldPt1[0], 180.0);
@@ -441,23 +429,54 @@ geo.osmLayer = function (arg) {
     worldPt2[1] = Math.max(worldPt2[1], -180.0);
     worldPt2[1] = Math.min(worldPt2[1], 180.0);
 
-    /// Compute tilex and tiley
-    tile1x = geo.mercator.long2tilex(worldPt1[0], zoom);
-    tile1y = geo.mercator.lat2tiley(worldPt1[1], zoom);
+    /// Compute tile zoom
+    worldDelta = Math.abs(worldPt2[0] - worldPt1[0]);
+    worldDeltaY = Math.abs(worldPt2[1] - worldPt1[1]);
 
-    tile2x = geo.mercator.long2tilex(worldPt2[0], zoom);
-    tile2y = geo.mercator.lat2tiley(worldPt2[1], zoom);
+    displayDelta = urx - llx;
+    displayDeltaY = lly - ury;
+
+    /// Reuse variables
+    if (displayDeltaY > displayDelta) {
+      displayDelta = displayDeltaY;
+      worldDelta = worldDeltaY;
+    }
+
+    noOfTilesRequired = Math.pow(2, Math.floor(
+      Math.log2(Math.round(displayDelta / 256.0))));
+    worldDeltaPerTile = worldDelta / noOfTilesRequired;
+
+    /// Minimize per pixel distortion
+    for (i = 20; i > 2; i = i - 1) {
+      distWorldDeltaPerTile = Math.abs(360.0 / Math.pow(2, i) - worldDeltaPerTile);
+      if (!minDistWorldDeltaPerTile ||
+          distWorldDeltaPerTile < minDistWorldDeltaPerTile) {
+        minDistWorldDeltaPerTile = distWorldDeltaPerTile;
+        m_zoom = i;
+      }
+    }
+
+    if (m_zoom < 2) {
+      m_zoom = 2;
+    }
+
+    /// Compute tilex and tiley
+    tile1x = geo.mercator.long2tilex(worldPt1[0], m_zoom);
+    tile1y = geo.mercator.lat2tiley(worldPt1[1], m_zoom);
+
+    tile2x = geo.mercator.long2tilex(worldPt2[0], m_zoom);
+    tile2y = geo.mercator.lat2tiley(worldPt2[1], m_zoom);
 
     /// Clamp tilex and tiley
     tile1x = Math.max(tile1x, 0);
-    tile1x = Math.min(Math.pow(2, zoom) - 1, tile1x);
+    tile1x = Math.min(Math.pow(2, m_zoom) - 1, tile1x);
     tile1y = Math.max(tile1y, 0);
-    tile1y = Math.min(Math.pow(2, zoom) - 1, tile1y);
+    tile1y = Math.min(Math.pow(2, m_zoom) - 1, tile1y);
 
     tile2x = Math.max(tile2x, 0);
-    tile2x = Math.min(Math.pow(2, zoom) - 1, tile2x);
+    tile2x = Math.min(Math.pow(2, m_zoom) - 1, tile2x);
     tile2y = Math.max(tile2y, 0);
-    tile2y = Math.min(Math.pow(2, zoom) - 1, tile2y);
+    tile2y = Math.min(Math.pow(2, m_zoom) - 1, tile2y);
 
     /// Check and update variables appropriately if view
     /// direction is flipped. This should not happen but
@@ -476,8 +495,8 @@ geo.osmLayer = function (arg) {
     /// Compute current tile indices
     currStartX = tile1x;
     currEndX = tile2x;
-    currStartY = (Math.pow(2, zoom) - 1 - tile1y);
-    currEndY = (Math.pow(2, zoom) - 1 - tile2y);
+    currStartY = (Math.pow(2, m_zoom) - 1 - tile1y);
+    currEndY = (Math.pow(2, m_zoom) - 1 - tile2y);
     if (currEndY < currStartY) {
       temp = currStartY;
       currStartY = currEndY;
@@ -495,6 +514,7 @@ geo.osmLayer = function (arg) {
                    m_lastVisibleZoom);
     lastStartY = Math.pow(2, m_lastVisibleZoom) - 1 - lastStartY;
     lastEndY   = Math.pow(2, m_lastVisibleZoom) - 1 - lastEndY;
+
     if (lastEndY < lastStartY) {
       temp = lastStartY;
       lastStartY = lastEndY;
@@ -502,7 +522,7 @@ geo.osmLayer = function (arg) {
     }
 
     m_visibleTilesRange = {};
-    m_visibleTilesRange[zoom] = { startX: currStartX, endX: currEndX,
+    m_visibleTilesRange[m_zoom] = { startX: currStartX, endX: currEndX,
                                   startY: currStartY, endY: currEndY };
 
     m_visibleTilesRange[m_lastVisibleZoom] =
@@ -513,11 +533,11 @@ geo.osmLayer = function (arg) {
 
     for (i = tile1x; i <= tile2x; i += 1) {
       for (j = tile2y; j <= tile1y; j += 1) {
-        invJ = (Math.pow(2, zoom) - 1 - j);
-        if (!m_this._hasTile(zoom, i, invJ)) {
-          tile = m_this._addTile(request, zoom, i, invJ);
+        invJ = (Math.pow(2, m_zoom) - 1 - j);
+        if (!m_this._hasTile(m_zoom, i, invJ)) {
+          tile = m_this._addTile(request, m_zoom, i, invJ);
         } else {
-          tile = m_tiles[zoom][i][invJ];
+          tile = m_tiles[m_zoom][i][invJ];
           tile.feature.bin(m_visibleBinNumber);
           if (tile.LOADED && m_updateTimerId in m_pendingNewTilesStat) {
             m_pendingNewTilesStat[m_updateTimerId].count += 1;
@@ -539,7 +559,7 @@ geo.osmLayer = function (arg) {
         tile.LOADED = true;
         if ((tile.REMOVING || tile.REMOVED) &&
           tile.feature &&
-          tile.zoom !== getModifiedMapZoom()) {
+          tile.zoom !== m_zoom) {
           tile.feature.bin(m_hiddenBinNumber);
           tile.REMOVING = false;
           tile.REMOVED = true;
@@ -600,18 +620,20 @@ geo.osmLayer = function (arg) {
       request = {};
     }
 
-    var zoom = getModifiedMapZoom();
+    if (!m_zoom) {
+      m_zoom = m_this.map().zoom();
+    }
 
     if (!m_lastVisibleZoom) {
-      m_lastVisibleZoom = zoom;
+      m_lastVisibleZoom = m_zoom;
     }
 
     /// Add tiles that are currently visible
     m_this._addTiles(request);
 
     /// Update the zoom
-    if (m_lastVisibleZoom !== zoom) {
-      m_lastVisibleZoom = zoom;
+    if (m_lastVisibleZoom !== m_zoom) {
+      m_lastVisibleZoom = m_zoom;
     }
 
     m_this.updateTime().modified();
@@ -661,7 +683,7 @@ geo.osmLayer = function (arg) {
     m_this.gcs("EPSG:3857");
     m_this.map().zoomRange({
       min: 0,
-      max: 18 - m_zoomLevelDelta
+      max: 18
     });
     return m_this;
   };
