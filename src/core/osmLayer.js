@@ -446,17 +446,13 @@ geo.osmLayer = function (arg) {
     worldDeltaPerTile = worldDelta / noOfTilesRequired;
 
     /// Minimize per pixel distortion
+    minDistWorldDeltaPerTile = Number.POSITIVE_INFINITY;
     for (i = 20; i >= 2; i = i - 1) {
       distWorldDeltaPerTile = Math.abs(360.0 / Math.pow(2, i) - worldDeltaPerTile);
-      if (!minDistWorldDeltaPerTile ||
-          distWorldDeltaPerTile < minDistWorldDeltaPerTile) {
+      if (distWorldDeltaPerTile < minDistWorldDeltaPerTile) {
         minDistWorldDeltaPerTile = distWorldDeltaPerTile;
         m_zoom = i;
       }
-    }
-
-    if (m_zoom < 2) {
-      m_zoom = 2;
     }
 
     /// Compute tilex and tiley
