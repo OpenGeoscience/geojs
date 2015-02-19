@@ -8,7 +8,7 @@ from selenium_test import FirefoxTest, ChromeTest,\
 
 class glPointsBase(object):
     testCase = ('glPoints',)
-    testRevision = 4
+    testRevision = 5
 
     def loadPage(self):
         self.resizeWindow(640, 480)
@@ -22,12 +22,10 @@ class glPointsBase(object):
         self.screenshotTest(testName)
 
 
-@unittest.skip("Initial zoom currently not working")
 class FirefoxOSM(glPointsBase, FirefoxTest):
     testCase = glPointsBase.testCase + ('firefox',)
 
 
-@unittest.skip("Initial zoom currently not working")
 class ChromeOSM(glPointsBase, ChromeTest):
     testCase = glPointsBase.testCase + ('chrome',)
 

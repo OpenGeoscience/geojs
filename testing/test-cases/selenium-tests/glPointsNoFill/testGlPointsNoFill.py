@@ -15,7 +15,7 @@ class glPointsNoFillBase(object):
         self.loadURL('glPointsNoFill/index.html')
         self.wait()
 
-    def testGlPointsNoFill(self):
+    def testGlPoints(self):
         self.loadPage()
 
         testName = 'drawGlPointsNoFill'

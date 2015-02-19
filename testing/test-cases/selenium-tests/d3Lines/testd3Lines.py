@@ -21,12 +21,12 @@ class d3LinesBase(object):
 
 class FirefoxOSM(d3LinesBase, FirefoxTest):
     testCase = d3LinesBase.testCase + ('firefox',)
-    testRevision = 5
+    testRevision = 6
 
 
 class ChromeOSM(d3LinesBase, ChromeTest):
     testCase = d3LinesBase.testCase + ('chrome',)
-    testRevision = 6
+    testRevision = 7
 
 
 if __name__ == '__main__':

@@ -8,7 +8,7 @@ from selenium_test import FirefoxTest, ChromeTest,\
 
 class glLinesBase(object):
     testCase = ('glLines',)
-    testRevision = 5
+    testRevision = 6
 
     def loadPage(self):
         self.resizeWindow(640, 480)
