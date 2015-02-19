@@ -22,12 +22,10 @@ class glPlaneBase(object):
         self.screenshotTest(testName)
 
 
-@unittest.skip("Initial zoom currently not working")
 class FirefoxOSM(glPlaneBase, FirefoxTest):
     testCase = glPlaneBase.testCase + ('firefox',)
 
 
-@unittest.skip("Initial zoom currently not working")
 class ChromeOSM(glPlaneBase, ChromeTest):
     testCase = glPlaneBase.testCase + ('chrome',)
 

@@ -29,12 +29,12 @@ class d3StickyBase(object):
 
 class FirefoxOSM(d3StickyBase, FirefoxTest):
     testCase = d3StickyBase.testCase + ('firefox',)
-    testRevision = 4
+    testRevision = 5
 
 
 class ChromeOSM(d3StickyBase, ChromeTest):
     testCase = d3StickyBase.testCase + ('chrome',)
-    testRevision = 5
+    testRevision = 6
 
 
 if __name__ == '__main__':

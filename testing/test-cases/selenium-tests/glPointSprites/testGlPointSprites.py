@@ -22,12 +22,12 @@ class glPointSpritesBase(object):
         self.screenshotTest(testName)
 
 
-@unittest.skip("Initial zoom currently not working")
+@unittest.skip("Point sprites are not working")
 class FirefoxOSM(glPointSpritesBase, FirefoxTest):
     testCase = glPointSpritesBase.testCase + ('firefox',)
 
 
-@unittest.skip("Initial zoom currently not working")
+@unittest.skip("Point sprites are not working")
 class ChromeOSM(glPointSpritesBase, ChromeTest):
     testCase = glPointSpritesBase.testCase + ('chrome',)
 
