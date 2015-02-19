@@ -442,8 +442,7 @@ geo.osmLayer = function (arg) {
       worldDelta = worldDeltaY;
     }
 
-    noOfTilesRequired = Math.pow(2, Math.floor(
-      Math.log2(Math.round(displayDelta / 256.0))));
+    noOfTilesRequired = Math.round(displayDelta / 256.0);
     worldDeltaPerTile = worldDelta / noOfTilesRequired;
 
     /// Minimize per pixel distortion
