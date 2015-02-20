@@ -1,13 +1,11 @@
 
-Test case utilities (``selenium_test.py``)
-==========================================
+======================
+Testing infrastructure
+======================
 
-.. automodule:: selenium_test
-    :members:
+.. toctree::
+    :maxdepth: 2
 
-MIDAS utilities (``midas_handler.py``)
-======================================
-
-.. autoclass:: midas_handler.MidasHandler
-    :members:
-
+    selenium_test
+    midas_handler
+    upload_test_cases

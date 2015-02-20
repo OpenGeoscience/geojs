@@ -1,6 +1,6 @@
-========================
-Geojs testing frameworks
-========================
+=================
+Developer's guide
+=================
 
 Geojs employs several different frameworks for unit testing.  These
 frameworks have been designed to make it easy for developers to
@@ -184,3 +184,4 @@ Code coverage information is accumulated automatically through custom
 are enabled in CMake.  As long as the recommendations in this guide have
 been followed, all phantomjs and selenium unit tests will be instrumented
 for coverage reporting.
+
