@@ -14,12 +14,14 @@ geo.d3.d3Renderer = function (arg) {
     return new geo.d3.d3Renderer(arg);
   }
   geo.renderer.call(this, arg);
+
+  var s_exit = this._exit;
+
   geo.d3.object.call(this, arg);
 
   arg = arg || {};
 
   var m_this = this,
-      s_exit = this._exit,
       m_sticky = null,
       m_features = {},
       m_corners = null,
