@@ -1,0 +1,19 @@
+digraph {
+	geo_feature [label="geo.feature"]
+	geo_geomFeature [label="geo.geomFeature"]
+		geo_feature -> geo_geomFeature
+	geo_graphFeature [label="geo.graphFeature"]
+		geo_feature -> geo_graphFeature
+	geo_lineFeature [label="geo.lineFeature"]
+		geo_feature -> geo_lineFeature
+	geo_pathFeature [label="geo.pathFeature"]
+		geo_feature -> geo_pathFeature
+	geo_planeFeature [label="geo.planeFeature"]
+		geo_polygonFeature -> geo_planeFeature
+	geo_pointFeature [label="geo.pointFeature"]
+		geo_feature -> geo_pointFeature
+	geo_polygonFeature [label="geo.polygonFeature"]
+		geo_feature -> geo_polygonFeature
+	geo_vectorFeature [label="geo.vectorFeature"]
+		geo_feature -> geo_vectorFeature
+}

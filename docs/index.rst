@@ -14,6 +14,10 @@ WebGL features and even through active layers.
 See the growing list of `examples <http://opengeoscience.github.io/geojs/examples/index.html>`_
 for a live demonstration of GeoJS's features or go to our Github
 `repository <https://github.com/OpenGeoscience/geojs>`_ to start hacking.
+GeoJS is in active development and many components are still being refactored
+in preparation for a stable release.
+If you have any questions or comments, feel free to join us on our
+`mailing list <http://public.kitware.com/mailman/listinfo/geojs-users>`_.
 
 .. toctree::
     :maxdepth: 2

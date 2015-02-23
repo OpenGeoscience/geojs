@@ -17,6 +17,9 @@ import os
 import shutil
 import re
 from glob import glob
+from subprocess import check_output
+
+# import graphviz
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -29,7 +32,7 @@ for fname in glob(os.path.join(toppath, 'testing', 'test-runners', '*.py*')):
         with open(os.path.join(basepath, basename), 'w') as g:
             r = re.compile(r'([^"])(@[\w]*@)([^"])')
             for line in f.readlines():
-                g.write(r.subn(r'\1"\2"\3', line)[0]) 
+                g.write(r.subn(r'\1"\2"\3', line)[0])
 sys.path.append(basepath)
 
 # -- General configuration ------------------------------------------------
@@ -42,9 +45,11 @@ sys.path.append(basepath)
 # ones.
 extensions = [
     'sphinx.ext.mathjax',
-    'sphinx.ext.autodoc'
+    'sphinx.ext.autodoc',
+    'sphinx.ext.graphviz'
 ]
 
+graphviz_output_format = 'svg'
 autodoc_default_flags = ['show-inheritance']
 
 # Add any paths that contain templates here, relative to this directory.
@@ -277,3 +282,67 @@ texinfo_documents = [
 
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
+
+# generate graphviz class hierarchy
+# def gen_graphviz():
+#     lines = check_output(
+#         ['git', 'grep', '-E', 'inherit\([^,)]+, [^,)]+\)'],
+#         cwd=os.path.join(
+#             os.path.abspath(os.path.dirname(__file__)),
+#             '..',
+#             'src'
+#         )
+#     ).split('\n')
+#
+#     dotc = graphviz.Digraph(filename='classes.dot')
+#     dotf = graphviz.Digraph(filename='features.dot')
+#     r = re.compile(
+#         'inherit\((?P<this>[^,)]+), (?P<super>[^,)]+)\)'
+#     )
+#     f = re.compile(
+#         '[fF]eature$'
+#     )
+#
+#     for line in lines:
+#         m = r.search(line)
+#
+#         if m is None:
+#             continue
+#
+#         m = m.groupdict()
+#
+#         if m['this'] == 'geo.timestamp' or \
+#            m['this'][:6] == 'geo.d3' or \
+#            m['this'][:6] == 'geo.gl' or \
+#            m['this'] == 'geo.pointSpritesGeomFeature' or \
+#            m['this'] == 'geo.geomFeature':
+#             continue
+#
+#         if f.search(m['super']):
+#             dot = dotf
+#         else:
+#             dot = dotc
+#
+#         dot.node(
+#             m['this'].replace('.', '_'),
+#             label=m['this']
+#         )
+#
+#         if m['this'] == 'geo.feature':
+#             dotf.node(
+#                 m['this'].replace('.', '_'),
+#                 label=m['this']
+#             )
+#
+#         if (m['super'][:3] != 'vgl'):
+#             dot.edge(
+#                 m['super'].replace('.', '_'),
+#                 m['this'].replace('.', '_')
+#             )
+#
+#
+#
+#     dotc.save()
+#     dotf.save()
+#
+# gen_graphviz()
