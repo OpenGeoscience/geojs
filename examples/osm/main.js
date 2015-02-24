@@ -16,7 +16,7 @@ $(function () {
   map.createLayer(
     'osm',
     {
-      baseUrl: 'http://tile.stamen.com/toner-lite/'
+      baseUrl: 'http://otile1.mqcdn.com/tiles/1.0.0/map/'
     }
   );
 });

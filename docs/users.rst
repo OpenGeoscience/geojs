@@ -124,16 +124,90 @@ class definition inside GeoJS.
             * Super class methods are saved with the prefix ``s_``.
             * Private variables are prefixed with ``m_``.
 
+        * Methods beginning with ``_`` are meant to be protected so they should
+          only be called from within the class itself or by an inherited class.
         * Use ``m_this`` to reference the instantiation inside public methods.
         * Constructor options are passed inside a single object argument.  Defaults
           should be used whenever possible.
         * When possible, functions should return the class instance to support method
           chaining.  This is particularly true for class property setters.
+        * In many cases, class methods return ``null`` to indicate an error.
 
-Class hierarchy
+Class overview
 ---------------
 
-.. graphviz:: core.dot
+GeoJS is made up of the following core classes.  Click on the link to go to the
+documentation for each of the classes.
 
-API documentation
------------------
+`geo.map <http://opengeoscience.github.io/geojs/apidocs/geo.map.html>`_
+    The map object is attached to a DOM element and contains all visible layers and
+    features.
+
+`geo.renderer <http://opengeoscience.github.io/geojs/apidocs/geo.renderer.html>`_
+    A renderer is responsible for drawing geometries and images on the map.  This is an
+    abstract class which serves to define the minimal interface for a renderer.  Renderers
+    can provide an extended interface so that they can be used as a *base renderer*.  The
+    base renderer provides support methods for conversion between world and screen coordinates
+    and must respond to the map's request for navigation commands. Every map must have exactly
+    one layer attached to a base renderer.  Currently,
+    `geo.gl.vglRenderer <http://opengeoscience.github.io/geojs/apidocs/geo.gl.vglRenderer.html>`_
+    is the only available base renderer.
+    `geo.d3.d3Renderer <http://opengeoscience.github.io/geojs/apidocs/geo.d3.d3Renderer.html>`_
+    is also availabe for renderering features as SVG elements.
+
+`geo.layer <http://opengeoscience.github.io/geojs/apidocs/geo.layer.html>`_
+    Layer objects are created by the map's ``createLayer`` method.  This is an abstract
+    class defining the interfaces required for all layers.  Every layer must have a
+    specific renderer.  The following are useful layer implementations.
+
+    `geo.featureLayer <http://opengeoscience.github.io/geojs/apidocs/geo.featureLayer.html>`_
+        This is the primary container for features such as lines, points, etc.
+    
+    `geo.osmLayer <http://opengeoscience.github.io/geojs/apidocs/geo.osmLayer.html>`_
+        This layer displays tiled imagery from an openstreetmaps compatible tile server.
+
+    `geo.gui.uiLayer <http://opengeoscience.github.io/geojs/apidocs/geo.gui.uiLayer.html>`_
+        This layer contains user interface widgets that should generally be placed on
+        top of all other layers.
+
+`geo.feature <http://opengeoscience.github.io/geojs/apidocs/geo.feature.html>`_
+    Feature objects are created by the featureLayers's ``createFeature`` method.  Features
+    are created from an arbitrary array of objects given by the ``feature.data`` method.
+    Properties of the features can be given as constant values or as functional accessors
+    into the provided data object.  The styles provided are largely independent of the
+    renderer used; however, some differences are necessary due to internal limitations.
+    The following are feature types currently available.
+
+        * `geo.pointFeature <http://opengeoscience.github.io/geojs/apidocs/geo.pointFeature.html>`_
+        * `geo.lineFeature <http://opengeoscience.github.io/geojs/apidocs/geo.lineFeature.html>`_
+        * `geo.pathFeature <http://opengeoscience.github.io/geojs/apidocs/geo.pathFeature.html>`_
+        * `geo.graphFeature <http://opengeoscience.github.io/geojs/apidocs/geo.graphFeature.html>`_
+        * `geo.vectorFeature <http://opengeoscience.github.io/geojs/apidocs/geo.vectorFeature.html>`_
+
+.. note::
+
+    Some features types are only available for specific renderers.
+
+`geo.gui.widget <http://opengeoscience.github.io/geojs/apidocs/geo.gui.widget.html>`_
+    This is an abstract interface for creating widgets that the user can interact with.
+
+        * `geo.gui.sliderWidget <http://opengeoscience.github.io/geojs/apidocs/geo.gui.sliderWidget.html>`_
+        * `geo.gui.legendWidget <http://opengeoscience.github.io/geojs/apidocs/geo.gui.legendWidget.html>`_
+
+`geo.mapInteractor <http://opengeoscience.github.io/geojs/apidocs/geo.mapInteractor.html>`_
+    This class handles all mouse and keyboard events for the map.  Users can customize
+    the mouse and keyboard bindings through this class.
+
+`geo.fileReaer <http://opengeoscience.github.io/geojs/apidocs/geo.fileReader.html>`_
+    This is an abstract class defining the interface for file readers.  Currently,
+    the only implemented reader is
+    `geo.jsonReader <http://opengeoscience.github.io/geojs/apidocs/geo.jsonReader.html>`_,
+    which is an extendable geojson reader.
+
+`geo.clock <http://opengeoscience.github.io/geojs/apidocs/geo.clock.html>`_
+    The clock object is attached to the map and is resposible for maintaining a user
+    definable concept of time.  The clock can run, paused, and restarted.  The
+    clock triggers events on the map to synchronize animations.
+
+The API documentation is in the process of being updated.  You can always find the latest version
+at `http://opengeoscience.github.io/geojs/apidocs/geo.html <http://opengeoscience.github.io/geojs/apidocs/geo.html>`_.

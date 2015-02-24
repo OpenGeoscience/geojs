@@ -17,7 +17,7 @@ import os
 import shutil
 import re
 from glob import glob
-from subprocess import check_output
+# from subprocess import check_output
 
 # import graphviz
 
@@ -282,67 +282,3 @@ texinfo_documents = [
 
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
-
-# generate graphviz class hierarchy
-# def gen_graphviz():
-#     lines = check_output(
-#         ['git', 'grep', '-E', 'inherit\([^,)]+, [^,)]+\)'],
-#         cwd=os.path.join(
-#             os.path.abspath(os.path.dirname(__file__)),
-#             '..',
-#             'src'
-#         )
-#     ).split('\n')
-#
-#     dotc = graphviz.Digraph(filename='classes.dot')
-#     dotf = graphviz.Digraph(filename='features.dot')
-#     r = re.compile(
-#         'inherit\((?P<this>[^,)]+), (?P<super>[^,)]+)\)'
-#     )
-#     f = re.compile(
-#         '[fF]eature$'
-#     )
-#
-#     for line in lines:
-#         m = r.search(line)
-#
-#         if m is None:
-#             continue
-#
-#         m = m.groupdict()
-#
-#         if m['this'] == 'geo.timestamp' or \
-#            m['this'][:6] == 'geo.d3' or \
-#            m['this'][:6] == 'geo.gl' or \
-#            m['this'] == 'geo.pointSpritesGeomFeature' or \
-#            m['this'] == 'geo.geomFeature':
-#             continue
-#
-#         if f.search(m['super']):
-#             dot = dotf
-#         else:
-#             dot = dotc
-#
-#         dot.node(
-#             m['this'].replace('.', '_'),
-#             label=m['this']
-#         )
-#
-#         if m['this'] == 'geo.feature':
-#             dotf.node(
-#                 m['this'].replace('.', '_'),
-#                 label=m['this']
-#             )
-#
-#         if (m['super'][:3] != 'vgl'):
-#             dot.edge(
-#                 m['super'].replace('.', '_'),
-#                 m['this'].replace('.', '_')
-#             )
-#
-#
-#
-#     dotc.save()
-#     dotf.save()
-#
-# gen_graphviz()
