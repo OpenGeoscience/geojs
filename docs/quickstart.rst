@@ -54,6 +54,8 @@ The first file contains geojs and vgl bundled together.  The second file contain
 of the dependent libraries.  The bundled libraries are minified, but source maps
 are provided
 
+.. _quick-start-guide:
+
 Using the library
 -----------------
 

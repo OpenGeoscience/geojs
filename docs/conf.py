@@ -17,6 +17,9 @@ import os
 import shutil
 import re
 from glob import glob
+# from subprocess import check_output
+
+# import graphviz
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -29,7 +32,7 @@ for fname in glob(os.path.join(toppath, 'testing', 'test-runners', '*.py*')):
         with open(os.path.join(basepath, basename), 'w') as g:
             r = re.compile(r'([^"])(@[\w]*@)([^"])')
             for line in f.readlines():
-                g.write(r.subn(r'\1"\2"\3', line)[0]) 
+                g.write(r.subn(r'\1"\2"\3', line)[0])
 sys.path.append(basepath)
 
 # -- General configuration ------------------------------------------------
@@ -42,8 +45,12 @@ sys.path.append(basepath)
 # ones.
 extensions = [
     'sphinx.ext.mathjax',
-    'sphinx.ext.autodoc'
+    'sphinx.ext.autodoc',
+    'sphinx.ext.graphviz'
 ]
+
+graphviz_output_format = 'svg'
+autodoc_default_flags = ['show-inheritance']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -114,6 +121,10 @@ pygments_style = 'sphinx'
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 html_theme = 'default'
+if not os.environ.get('READTHEDOCS', None):
+  import sphinx_rtd_theme
+  html_theme = 'sphinx_rtd_theme'
+  html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
