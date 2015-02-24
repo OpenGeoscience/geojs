@@ -95,7 +95,6 @@ geo.osmLayer = function (arg) {
     return false;
   }
 
-
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Draw new tiles and remove the old ones
@@ -328,7 +327,6 @@ geo.osmLayer = function (arg) {
     return tile;
   };
 
-
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Clear tiles that are no longer required
@@ -518,7 +516,7 @@ geo.osmLayer = function (arg) {
 
     m_visibleTilesRange = {};
     m_visibleTilesRange[m_zoom] = { startX: currStartX, endX: currEndX,
-                                  startY: currStartY, endY: currEndY };
+                                    startY: currStartY, endY: currEndY };
 
     m_visibleTilesRange[m_lastVisibleZoom] =
                                 { startX: lastStartX, endX: lastEndX,
@@ -694,6 +692,44 @@ geo.osmLayer = function (arg) {
 
     /// Now call base class update
     s_update.call(m_this, request);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Update baseUrl for map tiles.  Map all tiles as needing to be refreshed.
+   *
+   * @param baseUrl: the new baseUrl for the map.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.updateBaseUrl = function (baseUrl) {
+    if (baseUrl.charAt(m_baseUrl.length - 1) !== "/") {
+      baseUrl += "/";
+    }
+    if (baseUrl != m_baseUrl) {
+      m_baseUrl = baseUrl;
+      /* Move all current tiles to a 'zoom' of 'old' so that they will not be
+       * used and will eventually be discarded.  It places them at an index
+       * of (0, y) so that each is in a distinct key within the m_tiles
+       object. */
+      var tile, x, y, zoom, i, old_tiles = [];
+
+      for (zoom in m_tiles) {
+        for (x in m_tiles[zoom]) {
+          for (y in m_tiles[zoom][x]) {
+            tile = m_tiles[zoom][x][y];
+            tile.zoom = "old";
+            tile.index_x = 0;
+            tile.index_y = old_tiles.length;
+            old_tiles.push(tile);
+          }
+        }
+      }
+      m_tiles = {"old": {0: {}}};
+      for (i = 0; i < old_tiles.length; i += 1) {
+        m_tiles.old[0][i] = old_tiles[i];
+      }
+      this._update();
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////
