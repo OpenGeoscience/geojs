@@ -701,11 +701,12 @@ geo.osmLayer = function (arg) {
    * @param baseUrl: the new baseUrl for the map.
    */
   ////////////////////////////////////////////////////////////////////////////
+  /* jshint -W089 */
   this.updateBaseUrl = function (baseUrl) {
     if (baseUrl.charAt(m_baseUrl.length - 1) !== "/") {
       baseUrl += "/";
     }
-    if (baseUrl != m_baseUrl) {
+    if (baseUrl !== m_baseUrl) {
       m_baseUrl = baseUrl;
       /* Move all current tiles to a 'zoom' of 'old' so that they will not be
        * used and will eventually be discarded.  It places them at an index
