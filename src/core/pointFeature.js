@@ -92,6 +92,10 @@ geo.pointFeature = function (arg) {
         strokeWidth = m_this.style.get("strokeWidth"),
         radius = m_this.style.get("radius");
 
+    if (!m_this.selectionAPI()) {
+      return [];
+    }
+
     data = m_this.data();
     if (!data || !data.length) {
       return {
@@ -186,7 +190,7 @@ geo.pointFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.style = function (arg1, arg2) {
     var val = s_style(arg1, arg2);
-    if (val === m_this) {
+    if (val === m_this && m_this.selectionAPI()) {
       m_this._updateRangeTree();
     }
     return val;

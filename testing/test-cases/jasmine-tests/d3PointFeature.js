@@ -15,7 +15,7 @@ describe("d3 point feature", function () {
 
   it("Add features to a layer", function () {
     var selection;
-    feature1 = layer.createFeature("point")
+    feature1 = layer.createFeature("point", {selectionAPI: true})
       .data([geo.latlng(0, 0), geo.latlng(10, 0), geo.latlng(0, 10)])
       .draw();
 
@@ -35,6 +35,11 @@ describe("d3 point feature", function () {
 
     selection = d3.select("#map svg").selectAll("circle");
     expect(selection[0].length).toBe(6);
+  });
+
+  it("Validate selection API option", function () {
+    expect(feature1.selectionAPI()).toBe(true);
+    expect(feature2.selectionAPI()).toBe(false);
   });
 
   it("Remove a feature from a layer", function () {
