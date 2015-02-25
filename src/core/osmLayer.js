@@ -308,6 +308,7 @@ geo.osmLayer = function (arg) {
     tile.LOADED = false;
     tile.REMOVED = false;
     tile.REMOVING = false;
+    tile.INVALID = false;
 
     tile.crossOrigin = "anonymous";
     tile.zoom = zoom;
@@ -548,6 +549,9 @@ geo.osmLayer = function (arg) {
       m_this.addDeferred(defer);
 
       return function () {
+        if (tile.INVALID) {
+          return;
+        }
         tile.LOADING = false;
         tile.LOADED = true;
         if ((tile.REMOVING || tile.REMOVED) &&
@@ -714,6 +718,7 @@ geo.osmLayer = function (arg) {
         for (x in m_tiles[zoom]) {
           for (y in m_tiles[zoom][x]) {
             tile = m_tiles[zoom][x][y];
+            tile.INVALID = true;
             m_this.deleteFeature(tile.feature);
           }
         }
