@@ -95,7 +95,6 @@ geo.osmLayer = function (arg) {
     return false;
   }
 
-
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Draw new tiles and remove the old ones
@@ -309,6 +308,7 @@ geo.osmLayer = function (arg) {
     tile.LOADED = false;
     tile.REMOVED = false;
     tile.REMOVING = false;
+    tile.INVALID = false;
 
     tile.crossOrigin = "anonymous";
     tile.zoom = zoom;
@@ -327,7 +327,6 @@ geo.osmLayer = function (arg) {
     m_numberOfCachedTiles += 1;
     return tile;
   };
-
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -518,7 +517,7 @@ geo.osmLayer = function (arg) {
 
     m_visibleTilesRange = {};
     m_visibleTilesRange[m_zoom] = { startX: currStartX, endX: currEndX,
-                                  startY: currStartY, endY: currEndY };
+                                    startY: currStartY, endY: currEndY };
 
     m_visibleTilesRange[m_lastVisibleZoom] =
                                 { startX: lastStartX, endX: lastEndX,
@@ -550,6 +549,9 @@ geo.osmLayer = function (arg) {
       m_this.addDeferred(defer);
 
       return function () {
+        if (tile.INVALID) {
+          return;
+        }
         tile.LOADING = false;
         tile.LOADED = true;
         if ((tile.REMOVING || tile.REMOVED) &&
@@ -694,6 +696,46 @@ geo.osmLayer = function (arg) {
 
     /// Now call base class update
     s_update.call(m_this, request);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Update baseUrl for map tiles.  Map all tiles as needing to be refreshed.
+   *
+   * @param baseUrl: the new baseUrl for the map.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  /* jshint -W089 */
+  this.updateBaseUrl = function (baseUrl) {
+    if (baseUrl.charAt(m_baseUrl.length - 1) !== "/") {
+      baseUrl += "/";
+    }
+    if (baseUrl !== m_baseUrl) {
+      m_baseUrl = baseUrl;
+
+      var tile, x, y, zoom;
+      for (zoom in m_tiles) {
+        for (x in m_tiles[zoom]) {
+          for (y in m_tiles[zoom][x]) {
+            tile = m_tiles[zoom][x][y];
+            tile.INVALID = true;
+            m_this.deleteFeature(tile.feature);
+          }
+        }
+      }
+      m_tiles = {};
+      m_pendingNewTiles = [];
+      m_pendingInactiveTiles = [];
+      m_numberOfCachedTiles = 0;
+      m_visibleTilesRange = {};
+      m_pendingNewTilesStat = {};
+
+      if (m_updateTimerId !== null) {
+        clearTimeout(m_updateTimerId);
+        m_updateTimerId = null;
+      }
+      this._update();
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////
