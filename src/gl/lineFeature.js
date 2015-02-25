@@ -26,6 +26,7 @@ geo.gl.lineFeature = function (arg) {
       m_mapper = null,
       m_material = null,
       m_pixelWidthUnif = null,
+      m_dynamicDraw = arg.dynamicDraw === undefined ? false : arg.dynamicDraw,
       s_init = this._init,
       s_update = this._update;
 
@@ -119,6 +120,7 @@ geo.gl.lineFeature = function (arg) {
     var i = null,
         j = null,
         k = null,
+        v,
         prev = [],
         next = [],
         numPts = m_this.data().length,
@@ -142,13 +144,20 @@ geo.gl.lineFeature = function (arg) {
         strkOpacityFunc = m_this.style.get('strokeOpacity'),
         buffers = vgl.DataBuffers(1024),
         // Sources
-        posData = vgl.sourceDataP3fv(),
-        prvPosData = vgl.sourceDataAnyfv(3, vgl.vertexAttributeKeysIndexed.Four),
-        nxtPosData = vgl.sourceDataAnyfv(3, vgl.vertexAttributeKeysIndexed.Five),
-        offPosData = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Six),
-        strkWidthData = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.One),
-        strkColorData = vgl.sourceDataAnyfv(3, vgl.vertexAttributeKeysIndexed.Two),
-        strkOpacityData = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Three),
+        posData = vgl.sourceDataP3fv({'name': 'pos'}),
+        prvPosData = vgl.sourceDataAnyfv(
+            3, vgl.vertexAttributeKeysIndexed.Four, {'name': 'prev'}),
+        nxtPosData = vgl.sourceDataAnyfv(
+            3, vgl.vertexAttributeKeysIndexed.Five, {'name': 'next'}),
+        offPosData = vgl.sourceDataAnyfv(
+            1, vgl.vertexAttributeKeysIndexed.Six, {'name': 'offset'}),
+        strkWidthData = vgl.sourceDataAnyfv(
+            1, vgl.vertexAttributeKeysIndexed.One, {'name': 'strokeWidth'}),
+        strkColorData = vgl.sourceDataAnyfv(
+            3, vgl.vertexAttributeKeysIndexed.Two, {'name': 'strokeColor'}),
+        strkOpacityData = vgl.sourceDataAnyfv(
+            1, vgl.vertexAttributeKeysIndexed.Three,
+            {'name': 'strokeOpacity'}),
         // Primitive indices
         triangles = vgl.triangles();
 
@@ -225,22 +234,17 @@ geo.gl.lineFeature = function (arg) {
 
     i = 0;
     k = 0;
+    var order = m_this.featureVertices();
     for (j = 0; j < lineSegments.length; j += 1) {
       i += 1;
       for (k = 0; k < lineSegments[j] - 1; k += 1) {
-        addVert(prev[i - 1], position[i - 1], next[i - 1], 1,
-                strkWidthArr[i - 1], strkColorArr[i - 1], strkOpacityArr[i - 1]);
-        addVert(prev[i], position[i], next[i], -1,
-                strkWidthArr[i], strkColorArr[i], strkOpacityArr[i]);
-        addVert(prev[i - 1], position[i - 1], next[i - 1], -1,
-                strkWidthArr[i - 1], strkColorArr[i - 1], strkOpacityArr[i - 1]);
-
-        addVert(prev[i - 1], position[i - 1], next[i - 1], 1,
-                strkWidthArr[i - 1], strkColorArr[i - 1], strkOpacityArr[i - 1]);
-        addVert(prev[i], position[i], next[i], 1,
-                strkWidthArr[i], strkColorArr[i], strkOpacityArr[i]);
-        addVert(prev[i], position[i], next[i], -1,
-                strkWidthArr[i], strkColorArr[i], strkOpacityArr[i]);
+        for (v = 0; v < order.length; v += 1) {
+          addVert(prev[i + order[v][0]], position[i + order[v][0]],
+                  next[i + order[v][0]], order[v][1],
+                  strkWidthArr[i + order[v][0]],
+                  strkColorArr[i + order[v][0]],
+                  strkOpacityArr[i + order[v][0]]);
+        }
         i += 1;
       }
     }
@@ -274,6 +278,28 @@ geo.gl.lineFeature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Return the arrangement of vertices used for each line segment.
+   *
+   * @returns {Number}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.featureVertices = function () {
+    return [[-1, 1], [0, -1], [-1, -1], [-1, 1], [0, 1], [0, -1]];
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return the number of vertices used for each line segment.
+   *
+   * @returns {Number}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.verticesPerFeature = function () {
+    return this.featureVertices().length;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Initialize
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -297,7 +323,7 @@ geo.gl.lineFeature = function (arg) {
                           1.0 / m_this.renderer().width());
     s_init.call(m_this, arg);
     m_material = vgl.material();
-    m_mapper = vgl.mapper();
+    m_mapper = vgl.mapper({dynamicDraw: m_dynamicDraw});
 
     prog.addVertexAttribute(posAttr, vgl.vertexAttributeKeys.Position);
     prog.addVertexAttribute(strkWidthAttr, vgl.vertexAttributeKeysIndexed.One);
@@ -320,6 +346,20 @@ geo.gl.lineFeature = function (arg) {
     m_actor = vgl.actor();
     m_actor.setMaterial(m_material);
     m_actor.setMapper(m_mapper);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return list of actors
+   *
+   * @returns {vgl.actor[]}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.actors = function () {
+    if (!m_actor) {
+      return [];
+    }
+    return [m_actor];
   };
 
   ////////////////////////////////////////////////////////////////////////////
