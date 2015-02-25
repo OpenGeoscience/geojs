@@ -708,26 +708,26 @@ geo.osmLayer = function (arg) {
     }
     if (baseUrl !== m_baseUrl) {
       m_baseUrl = baseUrl;
-      /* Move all current tiles to a 'zoom' of 'old' so that they will not be
-       * used and will eventually be discarded.  It places them at an index
-       * of (0, y) so that each is in a distinct key within the m_tiles
-       object. */
-      var tile, x, y, zoom, i, old_tiles = [];
 
+      var tile, x, y, zoom;
       for (zoom in m_tiles) {
         for (x in m_tiles[zoom]) {
           for (y in m_tiles[zoom][x]) {
             tile = m_tiles[zoom][x][y];
-            tile.zoom = "old";
-            tile.index_x = 0;
-            tile.index_y = old_tiles.length;
-            old_tiles.push(tile);
+            m_this.deleteFeature(tile.feature);
           }
         }
       }
-      m_tiles = {"old": {0: {}}};
-      for (i = 0; i < old_tiles.length; i += 1) {
-        m_tiles.old[0][i] = old_tiles[i];
+      m_tiles = {};
+      m_pendingNewTiles = [];
+      m_pendingInactiveTiles = [];
+      m_numberOfCachedTiles = 0;
+      m_visibleTilesRange = {};
+      m_pendingNewTilesStat = {};
+
+      if (m_updateTimerId !== null) {
+        clearTimeout(m_updateTimerId);
+        m_updateTimerId = null;
       }
       this._update();
     }
