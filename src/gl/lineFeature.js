@@ -54,6 +54,12 @@ geo.gl.lineFeature = function (arg) {
 
         'void main(void)',
         '{',
+        /* If any vertex has been deliberately set to a negative opacity,
+         * skip doing computations on it. */
+        '  if (strokeOpacity < 0.0) {',
+        '    gl_Position = vec4(2, 2, 0, 1);',
+        '    return;',
+        '  }',
         '  const float PI = 3.14159265358979323846264;',
         '  vec4 worldPos = projectionMatrix * modelViewMatrix * vec4(pos.xyz, 1);',
         '  if (worldPos.w != 0.0) {',
