@@ -165,7 +165,20 @@ geo.gl.lineFeature = function (arg) {
             1, vgl.vertexAttributeKeysIndexed.Three,
             {'name': 'strokeOpacity'}),
         // Primitive indices
-        triangles = vgl.triangles();
+        triangles = vgl.triangles(),
+        order = m_this.featureVertices(),
+        addVert = function (prevPos, currPos, nextPos, offset,
+                            width, color, opacity) {
+          buffers.write('prev', prevPos, currIndex, 1);
+          buffers.write('pos', currPos, currIndex, 1);
+          buffers.write('next', nextPos, currIndex, 1);
+          buffers.write('offset', [offset], currIndex, 1);
+          buffers.write('indices', [currIndex], currIndex, 1);
+          buffers.write('strokeWidth', [width], currIndex, 1);
+          buffers.write('strokeColor', color, currIndex, 1);
+          buffers.write('strokeOpacity', [opacity], currIndex, 1);
+          currIndex += 1;
+        };
 
     m_this.data().forEach(function (item) {
       lineItem = m_this.line()(item, itemIndex);
@@ -225,22 +238,8 @@ geo.gl.lineFeature = function (arg) {
     start = buffers.alloc(numPts * 6);
     currIndex = start;
 
-    var addVert = function (prevPos, currPos, nextPos, offset,
-                            width, color, opacity) {
-      buffers.write('prev', prevPos, currIndex, 1);
-      buffers.write('pos', currPos, currIndex, 1);
-      buffers.write('next', nextPos, currIndex, 1);
-      buffers.write('offset', [offset], currIndex, 1);
-      buffers.write('indices', [currIndex], currIndex, 1);
-      buffers.write('strokeWidth', [width], currIndex, 1);
-      buffers.write('strokeColor', color, currIndex, 1);
-      buffers.write('strokeOpacity', [opacity], currIndex, 1);
-      currIndex += 1;
-    };
-
     i = 0;
     k = 0;
-    var order = m_this.featureVertices();
     for (j = 0; j < lineSegments.length; j += 1) {
       i += 1;
       for (k = 0; k < lineSegments[j] - 1; k += 1) {
