@@ -59,7 +59,7 @@ geo.osmLayer = function (arg) {
     m_imageFormat = arg.imageFormat;
   }
 
-  if (arg && arg.displayLast !== undefined) {
+  if (arg && arg.displayLast !== undefined && arg.displayLast) {
     m_lastVisibleBinNumber = 999;
   }
 
