@@ -122,6 +122,7 @@
     );
 
     <span class="hljs-keyword">var</span> name = data.name.toLowerCase();
+    <span class="hljs-keyword">var</span> year = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>(data.time[<span class="hljs-number">0</span>]).getFullYear();
     name = name[<span class="hljs-number">0</span>].toUpperCase() + name.slice(<span class="hljs-number">1</span>);
 
     group.append(<span class="hljs-string">'rect'</span>)
@@ -136,7 +137,7 @@
       .attr(<span class="hljs-string">'x'</span>, width / <span class="hljs-number">2</span>)
       .attr(<span class="hljs-string">'y'</span>, <span class="hljs-string">'-2em'</span>)
       .attr(<span class="hljs-string">'text-anchor'</span>, <span class="hljs-string">'middle'</span>)
-      .text(<span class="hljs-string">'Hurricane '</span> + name)
+      .text(<span class="hljs-string">'Hurricane '</span> + name + <span class="hljs-string">' of '</span> + year)
       .style(<span class="hljs-string">'font'</span>, <span class="hljs-string">'20px'</span>);
 
     <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">makePlot</span><span class="hljs-params">(d)</span> </span>{

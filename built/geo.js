@@ -17394,6 +17394,16 @@ geo.feature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Query if the selection API is enabled for this feature.
+   * @returns {bool}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.selectionAPI = function () {
+    return m_selectionAPI;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Initialize
    *
    * Derived class should implement this
@@ -17607,6 +17617,10 @@ geo.pointFeature = function (arg) {
         strokeWidth = m_this.style.get("strokeWidth"),
         radius = m_this.style.get("radius");
 
+    if (!m_this.selectionAPI()) {
+      return [];
+    }
+
     data = m_this.data();
     if (!data || !data.length) {
       return {
@@ -17701,7 +17715,7 @@ geo.pointFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.style = function (arg1, arg2) {
     var val = s_style(arg1, arg2);
-    if (val === m_this) {
+    if (val === m_this && m_this.selectionAPI()) {
       m_this._updateRangeTree();
     }
     return val;
@@ -23076,12 +23090,14 @@ geo.d3.d3Renderer = function (arg) {
     return new geo.d3.d3Renderer(arg);
   }
   geo.renderer.call(this, arg);
+
+  var s_exit = this._exit;
+
   geo.d3.object.call(this, arg);
 
   arg = arg || {};
 
   var m_this = this,
-      s_exit = this._exit,
       m_sticky = null,
       m_features = {},
       m_corners = null,
