@@ -4,6 +4,10 @@
  *
  * @class
  * @extends geo.featureLayer
+ *
+ * @param {Object} arg - arg can contain following keys: baseUrl,
+ *        imageFormat (such as png or jpeg), and displayLast
+ *        (to decide whether or not render tiles from last zoom level).
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.osmLayer = function (arg) {
@@ -24,8 +28,8 @@ geo.osmLayer = function (arg) {
   var m_this = this,
     s_exit = this._exit,
     m_tiles = {},
-    m_hiddenBinNumber = 0,
-    m_lastVisibleBinNumber = 999,
+    m_hiddenBinNumber = -1,
+    m_lastVisibleBinNumber = -1,
     m_visibleBinNumber = 1000,
     m_pendingNewTiles = [],
     m_pendingInactiveTiles = [],
@@ -53,6 +57,10 @@ geo.osmLayer = function (arg) {
 
   if (arg && arg.imageFormat !== undefined) {
     m_imageFormat = arg.imageFormat;
+  }
+
+  if (arg && arg.displayLast !== undefined) {
+    m_lastVisibleBinNumber = 999;
   }
 
   ////////////////////////////////////////////////////////////////////////////
