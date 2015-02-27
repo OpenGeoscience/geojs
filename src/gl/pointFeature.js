@@ -26,6 +26,7 @@ geo.gl.pointFeature = function (arg) {
       m_pixelWidthUniform = null,
       m_aspectUniform = null,
       m_dynamicDraw = arg.dynamicDraw === undefined ? false : arg.dynamicDraw,
+      m_primitiveShape = arg.primitiveShape || "triangle",
       s_init = this._init,
       s_update = this._update;
 
@@ -145,23 +146,30 @@ geo.gl.pointFeature = function (arg) {
   }
 
   var pointPolygon = function (x, y, w, h) {
-    var verts = [
-        /* Originally we used a surrounding square split diagonally into two
-         * triangles.
-        x - w, y + h,
-        x - w, y - h,
-        x + w, y + h,
-        x - w, y - h,
-        x + w, y - h,
-        x + w, y + h
-         */
-        /* Instead, we can use an equilateral triangle.  While this has 30%
-         * more area than the square, and therefore will process more
-         * fragments, the savings in vertex processing is worth it. */
-        x, y - h * 2,
-        x - w * Math.sqrt(3.0), y + h,
-        x + w * Math.sqrt(3.0), y + h
-      ];
+    var verts;
+    switch (m_primitiveShape) {
+      case "triangle":
+        /* Use an equilateral triangle.  While this has 30% more area than a
+         * square, the reduction in vertices should help more than the
+         * processing the additional fragments. */
+        verts = [
+          x, y - h * 2,
+          x - w * Math.sqrt(3.0), y + h,
+          x + w * Math.sqrt(3.0), y + h
+        ];
+        break;
+      default:
+        /* Use a surrounding square split diagonally into two triangles. */
+        verts = [
+          x - w, y + h,
+          x - w, y - h,
+          x + w, y + h,
+          x - w, y - h,
+          x + w, y - h,
+          x + w, y + h
+        ];
+        break;
+    }
     return verts;
   };
 
