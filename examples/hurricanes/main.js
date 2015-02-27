@@ -90,6 +90,7 @@ $(function () {
     );
 
     var name = data.name.toLowerCase();
+    var year = new Date(data.time[0]).getFullYear();
     name = name[0].toUpperCase() + name.slice(1);
 
     group.append('rect')
@@ -104,7 +105,7 @@ $(function () {
       .attr('x', width / 2)
       .attr('y', '-2em')
       .attr('text-anchor', 'middle')
-      .text('Hurricane ' + name)
+      .text('Hurricane ' + name + ' of ' + year)
       .style('font', '20px');
 
     function makePlot(d) {
