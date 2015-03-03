@@ -26,8 +26,12 @@ geo.gl.pointFeature = function (arg) {
       m_pixelWidthUniform = null,
       m_aspectUniform = null,
       m_dynamicDraw = arg.dynamicDraw === undefined ? false : arg.dynamicDraw,
+      m_primitiveShape = "triangle", // arg can change this, below
       s_init = this._init,
       s_update = this._update;
+  if (arg.primitiveShape === "triangle" || arg.primitiveShape === "square") {
+    m_primitiveShape = arg.primitiveShape;
+  }
 
   var vertexShaderSource = [
       "attribute vec3 pos;",
@@ -53,18 +57,32 @@ geo.gl.pointFeature = function (arg) {
       "varying float strokeVar;",
       "void main(void)",
       "{",
-      "  unitVar = vec3 (unit, 1.0);",
+      "  strokeWidthVar = strokeWidth;",
+      "  // No stroke or fill implies nothing to draw",
+      "  if (stroke < 1.0 || strokeWidth <= 0.0 || strokeOpacity <= 0.0) {",
+      "    strokeVar = 0.0;",
+      "    strokeWidthVar = 0.0;",
+      "  }",
+      "  else",
+      "    strokeVar = 1.0;",
+      "  if (fill < 1.0 || rad <= 0.0 || fillOpacity <= 0.0)",
+      "    fillVar = 0.0;",
+      "  else",
+      "    fillVar = 1.0;",
+      /* If the point has no visible pixels, skip doing computations on it. */
+      "  if (fillVar == 0.0 && strokeVar == 0.0) {",
+      "    gl_Position = vec4(2, 2, 0, 1);",
+      "    return;",
+      "  }",
       "  fillColorVar = vec4 (fillColor, fillOpacity);",
       "  strokeColorVar = vec4 (strokeColor, strokeOpacity);",
-      "  strokeWidthVar = strokeWidth;",
-      "  fillVar = fill;",
-      "  strokeVar = stroke;",
+      "  unitVar = vec3 (unit, 1.0);",
       "  radiusVar = rad;",
       "  vec4 p = (projectionMatrix * modelViewMatrix * vec4(pos, 1.0)).xyzw;",
       "  if (p.w != 0.0) {",
-      "    p = p/p.w;",
+      "    p = p / p.w;",
       "  }",
-      "  p += (rad + strokeWidth) * ",
+      "  p += (rad + strokeWidthVar) * ",
       "vec4 (unit.x * pixelWidth, unit.y * pixelWidth * aspect, 0.0, 1.0);",
       "  gl_Position = vec4(p.xyz, 1.0);",
       "}"
@@ -89,41 +107,35 @@ geo.gl.pointFeature = function (arg) {
       "varying float strokeWidthVar;",
       "varying float fillVar;",
       "varying float strokeVar;",
-      "bool to_bool (in float value) {",
-      "  if (value < 1.0)",
-      "    return false;",
-      "  else",
-      "    return true;",
-      "}",
       "void main () {",
-      "  bool fill = to_bool (fillVar);",
-      "  bool stroke = to_bool (strokeVar);",
       "  vec4 strokeColor, fillColor;",
+      "  float endStep;",
       "  // No stroke or fill implies nothing to draw",
-      "  if (!fill && !stroke)",
+      "  if (fillVar == 0.0 && strokeVar == 0.0)",
       "    discard;",
       "  // Get normalized texture coordinates and polar r coordinate",
-      "  vec2 tex = (unitVar.xy + 1.0) / 2.0;",
       "  float rad = length (unitVar.xy);",
+      "  if (rad > 1.0)",
+      "    discard;",
       "  // If there is no stroke, the fill region should transition to nothing",
-      "  if (!stroke)",
+      "  if (strokeVar == 0.0) {",
       "    strokeColor = vec4 (fillColorVar.rgb, 0.0);",
-      "  else",
+      "    endStep = 1.0;",
+      "  } else {",
       "    strokeColor = strokeColorVar;",
+      "    endStep = radiusVar / (radiusVar + strokeWidthVar);",
+      "  }",
       "  // Likewise, if there is no fill, the stroke should transition to nothing",
-      "  if (!fill)",
+      "  if (fillVar == 0.0)",
       "    fillColor = vec4 (strokeColor.rgb, 0.0);",
       "  else",
       "    fillColor = fillColorVar;",
-      "  float radiusWidth = radiusVar;",
       "  // Distance to antialias over",
       "  float antialiasDist = 3.0 / (2.0 * radiusVar);",
-      "  if (rad < (radiusWidth / (radiusWidth + strokeWidthVar))) {",
-      "    float endStep = radiusWidth / (radiusWidth + strokeWidthVar);",
+      "  if (rad < endStep) {",
       "    float step = smoothstep (endStep - antialiasDist, endStep, rad);",
       "    gl_FragColor = mix (fillColor, strokeColor, step);",
-      "  }",
-      "  else {",
+      "  } else {",
       "    float step = smoothstep (1.0 - antialiasDist, 1.0, rad);",
       "    gl_FragColor = mix (strokeColor, vec4 (strokeColor.rgb, 0.0), step);",
       "  }",
@@ -136,21 +148,37 @@ geo.gl.pointFeature = function (arg) {
     return shader;
   }
 
-  var rect = function (x, y, w, h) {
-    var verts = [
-        x - w, y + h,
-        x - w, y - h,
-        x + w, y + h,
-        x - w, y - h,
-        x + w, y - h,
-        x + w, y + h
-      ];
+  var pointPolygon = function (x, y, w, h) {
+    var verts;
+    switch (m_primitiveShape) {
+      case "triangle":
+        /* Use an equilateral triangle.  While this has 30% more area than a
+         * square, the reduction in vertices should help more than the
+         * processing the additional fragments. */
+        verts = [
+          x, y - h * 2,
+          x - w * Math.sqrt(3.0), y + h,
+          x + w * Math.sqrt(3.0), y + h
+        ];
+        break;
+      default: // "square"
+        /* Use a surrounding square split diagonally into two triangles. */
+        verts = [
+          x - w, y + h,
+          x - w, y - h,
+          x + w, y + h,
+          x - w, y - h,
+          x + w, y - h,
+          x + w, y + h
+        ];
+        break;
+    }
     return verts;
   };
 
   function createGLPoints() {
     var i, numPts = m_this.data().length,
-        start, unit = rect(0, 0, 1, 1),
+        start, unit = pointPolygon(0, 0, 1, 1),
         position = [], radius = [], strokeWidth = [],
         fillColor = [], fill = [], strokeColor = [], stroke = [],
         fillOpacity = [], strokeOpacity = [], posFunc, radFunc, strokeWidthFunc,
@@ -272,20 +300,22 @@ geo.gl.pointFeature = function (arg) {
     m_actor = vgl.actor();
     m_actor.setMaterial(mat);
 
-    start = buffers.alloc(6 * numPts);
+    var vpf = m_this.verticesPerFeature();
+
+    start = buffers.alloc(vpf * numPts);
     for (i = 0; i < numPts; i += 1) {
       buffers.repeat("pos", position[i],
-                      start + i * 6, 6);
-      buffers.write("unit", unit, start + i * 6, 6);
+                      start + i * vpf, vpf);
+      buffers.write("unit", unit, start + i * vpf, vpf);
       buffers.write("indices", [i], start + i, 1);
-      buffers.repeat("rad", [radius[i]], start + i * 6, 6);
-      buffers.repeat("strokeWidth", [strokeWidth[i]], start + i * 6, 6);
-      buffers.repeat("fillColor", fillColor[i], start + i * 6, 6);
-      buffers.repeat("fill", [fill[i]], start + i * 6, 6);
-      buffers.repeat("strokeColor", strokeColor[i], start + i * 6, 6);
-      buffers.repeat("stroke", [stroke[i]], start + i * 6, 6);
-      buffers.repeat("fillOpacity", [fillOpacity[i]], start + i * 6, 6);
-      buffers.repeat("strokeOpacity", [strokeOpacity[i]], start + i * 6, 6);
+      buffers.repeat("rad", [radius[i]], start + i * vpf, vpf);
+      buffers.repeat("strokeWidth", [strokeWidth[i]], start + i * vpf, vpf);
+      buffers.repeat("fillColor", fillColor[i], start + i * vpf, vpf);
+      buffers.repeat("fill", [fill[i]], start + i * vpf, vpf);
+      buffers.repeat("strokeColor", strokeColor[i], start + i * vpf, vpf);
+      buffers.repeat("stroke", [stroke[i]], start + i * vpf, vpf);
+      buffers.repeat("fillOpacity", [fillOpacity[i]], start + i * vpf, vpf);
+      buffers.repeat("strokeOpacity", [strokeOpacity[i]], start + i * vpf, vpf);
     }
 
     sourcePositions.pushBack(buffers.get("pos"));
@@ -348,7 +378,8 @@ geo.gl.pointFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.verticesPerFeature = function () {
-    return 6;
+    var unit = pointPolygon(0, 0, 1, 1);
+    return unit.length / 2;
   };
 
   ////////////////////////////////////////////////////////////////////////////
