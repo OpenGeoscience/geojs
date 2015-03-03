@@ -23,6 +23,7 @@ geo.gl.pointFeature = function (arg) {
   var m_this = this,
       s_exit = this._exit,
       m_actor = null,
+      m_mapper = null,
       m_pixelWidthUniform = null,
       m_aspectUniform = null,
       m_dynamicDraw = arg.dynamicDraw === undefined ? false : arg.dynamicDraw,
@@ -34,6 +35,9 @@ geo.gl.pointFeature = function (arg) {
   }
 
   var vertexShaderSource = [
+      "#ifdef GL_ES",
+      "  precision highp float;",
+      "#endif",
       "attribute vec3 pos;",
       "attribute vec2 unit;",
       "attribute float rad;",
@@ -177,183 +181,105 @@ geo.gl.pointFeature = function (arg) {
   };
 
   function createGLPoints() {
-    var i, numPts = m_this.data().length,
-        start, unit = pointPolygon(0, 0, 1, 1),
-        position = [], radius = [], strokeWidth = [],
-        fillColor = [], fill = [], strokeColor = [], stroke = [],
-        fillOpacity = [], strokeOpacity = [], posFunc, radFunc, strokeWidthFunc,
-        fillColorFunc, fillFunc, strokeColorFunc, strokeFunc, fillOpacityFunc,
-        strokeOpactityFunc, buffers = vgl.DataBuffers(1024),
-        sourcePositions = vgl.sourceDataP3fv({"name": "pos"}),
-        sourceUnits = vgl.sourceDataAnyfv(
-            2, vgl.vertexAttributeKeysIndexed.One, {"name": "unit"}),
-        sourceRadius = vgl.sourceDataAnyfv(
-            1, vgl.vertexAttributeKeysIndexed.Two, {"name": "rad"}),
-        sourceStokeWidth = vgl.sourceDataAnyfv(
-            1, vgl.vertexAttributeKeysIndexed.Three, {"name": "strokeWidth"}),
-        sourceFillColor = vgl.sourceDataAnyfv(
-            3, vgl.vertexAttributeKeysIndexed.Four, {"name": "fillColor"}),
-        sourceFill = vgl.sourceDataAnyfv(
-            1, vgl.vertexAttributeKeysIndexed.Five, {"name": "fill"}),
-        sourceStrokeColor = vgl.sourceDataAnyfv(
-            3, vgl.vertexAttributeKeysIndexed.Six, {"name": "strokeColor"}),
-        sourceStroke = vgl.sourceDataAnyfv(
-            1, vgl.vertexAttributeKeysIndexed.Seven, {"name": "stroke"}),
-        sourceAlpha = vgl.sourceDataAnyfv(
-            1, vgl.vertexAttributeKeysIndexed.Eight, {"name": "fillOpacity"}),
-        sourceStrokeOpacity = vgl.sourceDataAnyfv(
-            1, vgl.vertexAttributeKeysIndexed.Nine, {"name": "strokeOpacity"}),
-        trianglesPrimitive = vgl.triangles(),
-        mat = vgl.material(),
-        blend = vgl.blend(),
-        prog = vgl.shaderProgram(),
-        vertexShader = createVertexShader(),
-        fragmentShader = createFragmentShader(),
-        posAttr = vgl.vertexAttribute("pos"),
-        unitAttr = vgl.vertexAttribute("unit"),
-        radAttr = vgl.vertexAttribute("rad"),
-        stokeWidthAttr = vgl.vertexAttribute("strokeWidth"),
-        fillColorAttr = vgl.vertexAttribute("fillColor"),
-        fillAttr = vgl.vertexAttribute("fill"),
-        strokeColorAttr = vgl.vertexAttribute("strokeColor"),
-        strokeAttr = vgl.vertexAttribute("stroke"),
-        fillOpacityAttr = vgl.vertexAttribute("fillOpacity"),
-        strokeOpacityAttr = vgl.vertexAttribute("strokeOpacity"),
-        modelViewUniform = new vgl.modelViewUniform("modelViewMatrix"),
-        projectionUniform = new vgl.projectionUniform("projectionMatrix"),
-        geom = vgl.geometryData(),
-        mapper = vgl.mapper({dynamicDraw: m_dynamicDraw});
-
-    m_pixelWidthUniform = new vgl.floatUniform("pixelWidth",
-                            2.0 / m_this.renderer().width());
-    m_aspectUniform = new vgl.floatUniform("aspect",
-                        m_this.renderer().width() / m_this.renderer().height());
+    var i, j, numPts = m_this.data().length,
+        unit = pointPolygon(0, 0, 1, 1),
+        position = new Array(numPts * 3), posBuf, posVal, posFunc,
+        unitBuf, indices,
+        radius, radiusVal, radFunc,
+        stroke, strokeVal, strokeFunc,
+        strokeWidth, strokeWidthVal, strokeWidthFunc,
+        strokeOpacity, strokeOpacityVal, strokeOpactityFunc,
+        strokeColor, strokeColorVal, strokeColorFunc,
+        fill, fillVal, fillFunc,
+        fillOpacity, fillOpacityVal, fillOpacityFunc,
+        fillColor, fillColorVal, fillColorFunc,
+        vpf = m_this.verticesPerFeature(),
+        buffers = vgl.DataBuffers(vpf * numPts),
+        data = m_this.data(),
+        item, ivpf, ivpf3, iunit, i3,
+        geom = m_mapper.geometryData();
 
     posFunc = m_this.position();
     radFunc = m_this.style.get("radius");
-    strokeWidthFunc = m_this.style.get("strokeWidth");
-    fillColorFunc = m_this.style.get("fillColor");
-    fillFunc = m_this.style.get("fill");
-    strokeColorFunc = m_this.style.get("strokeColor");
     strokeFunc = m_this.style.get("stroke");
-    fillOpacityFunc = m_this.style.get("fillOpacity");
+    strokeWidthFunc = m_this.style.get("strokeWidth");
     strokeOpactityFunc = m_this.style.get("strokeOpacity");
+    strokeColorFunc = m_this.style.get("strokeColor");
+    fillFunc = m_this.style.get("fill");
+    fillOpacityFunc = m_this.style.get("fillOpacity");
+    fillColorFunc = m_this.style.get("fillColor");
 
-    m_this.data().forEach(function (item) {
-      var p = posFunc(item), c;
-
-      position.push([p.x, p.y, p.z || 0]);
-      radius.push(radFunc(item));
-      strokeWidth.push(strokeWidthFunc(item));
-      fill.push(fillFunc(item) ? 1.0 : 0.0);
-
-      c = fillColorFunc(item);
-      fillColor.push([c.r, c.g, c.b]);
-
-      c = strokeColorFunc(item);
-      strokeColor.push([c.r, c.g, c.b]);
-
-      stroke.push(strokeFunc(item) ? 1.0 : 0.0);
-      fillOpacity.push(fillOpacityFunc(item));
-      strokeOpacity.push(strokeOpactityFunc(item));
-    });
-
+    /* It is more efficient to do a transform on a single array rather than on
+     * an array of arrays or an array of objects. */
+    for (i = i3 = 0; i < numPts; i += 1, i3 += 3) {
+      posVal = posFunc(data[i]);
+      position[i3]     = posVal.x;
+      position[i3 + 1] = posVal.y;
+      position[i3 + 2] = posVal.z || 0;
+    }
     position = geo.transform.transformCoordinates(
                   m_this.gcs(), m_this.layer().map().gcs(),
                   position, 3);
 
-    buffers.create("pos", 3);
-    buffers.create("indices", 1);
-    buffers.create("unit", 2);
-    buffers.create("rad", 1);
-    buffers.create("strokeWidth", 1);
-    buffers.create("fillColor", 3);
-    buffers.create("fill", 1);
-    buffers.create("strokeColor", 3);
-    buffers.create("stroke", 1);
-    buffers.create("fillOpacity", 1);
-    buffers.create("strokeOpacity", 1);
+    posBuf        = buffers.create("pos", 3);
+    indices       = buffers.create("indices", 1);
+    unitBuf       = buffers.create("unit", 2);
+    radius        = buffers.create("rad", 1);
+    stroke        = buffers.create("stroke", 1);
+    strokeWidth   = buffers.create("strokeWidth", 1);
+    strokeOpacity = buffers.create("strokeOpacity", 1);
+    strokeColor   = buffers.create("strokeColor", 3);
+    fill          = buffers.create("fill", 1);
+    fillOpacity   = buffers.create("fillOpacity", 1);
+    fillColor     = buffers.create("fillColor", 3);
 
-    // TODO: Right now this is ugly but we will fix it.
-    prog.addVertexAttribute(posAttr, vgl.vertexAttributeKeys.Position);
-    prog.addVertexAttribute(unitAttr, vgl.vertexAttributeKeysIndexed.One);
-    prog.addVertexAttribute(radAttr, vgl.vertexAttributeKeysIndexed.Two);
-    prog.addVertexAttribute(stokeWidthAttr, vgl.vertexAttributeKeysIndexed.Three);
-    prog.addVertexAttribute(fillColorAttr, vgl.vertexAttributeKeysIndexed.Four);
-    prog.addVertexAttribute(fillAttr, vgl.vertexAttributeKeysIndexed.Five);
-    prog.addVertexAttribute(strokeColorAttr, vgl.vertexAttributeKeysIndexed.Six);
-    prog.addVertexAttribute(strokeAttr, vgl.vertexAttributeKeysIndexed.Seven);
-    prog.addVertexAttribute(fillOpacityAttr, vgl.vertexAttributeKeysIndexed.Eight);
-    prog.addVertexAttribute(strokeOpacityAttr, vgl.vertexAttributeKeysIndexed.Nine);
-
-    prog.addUniform(m_pixelWidthUniform);
-    prog.addUniform(m_aspectUniform);
-    prog.addUniform(modelViewUniform);
-    prog.addUniform(projectionUniform);
-
-    prog.addShader(fragmentShader);
-    prog.addShader(vertexShader);
-
-    mat.addAttribute(prog);
-    mat.addAttribute(blend);
-
-    m_actor = vgl.actor();
-    m_actor.setMaterial(mat);
-
-    var vpf = m_this.verticesPerFeature();
-
-    start = buffers.alloc(vpf * numPts);
-    for (i = 0; i < numPts; i += 1) {
-      buffers.repeat("pos", position[i],
-                      start + i * vpf, vpf);
-      buffers.write("unit", unit, start + i * vpf, vpf);
-      buffers.write("indices", [i], start + i, 1);
-      buffers.repeat("rad", [radius[i]], start + i * vpf, vpf);
-      buffers.repeat("strokeWidth", [strokeWidth[i]], start + i * vpf, vpf);
-      buffers.repeat("fillColor", fillColor[i], start + i * vpf, vpf);
-      buffers.repeat("fill", [fill[i]], start + i * vpf, vpf);
-      buffers.repeat("strokeColor", strokeColor[i], start + i * vpf, vpf);
-      buffers.repeat("stroke", [stroke[i]], start + i * vpf, vpf);
-      buffers.repeat("fillOpacity", [fillOpacity[i]], start + i * vpf, vpf);
-      buffers.repeat("strokeOpacity", [strokeOpacity[i]], start + i * vpf, vpf);
+    for (i = ivpf = ivpf3 = iunit = i3 = 0; i < numPts; i += 1, i3 += 3) {
+      item = data[i];
+      for (j = 0; j < unit.length; j += 1, iunit += 1) {
+        unitBuf[iunit] = unit[j];
+      }
+      indices[i] = i;
+      radiusVal = radFunc(item);
+      strokeVal = strokeFunc(item) ? 1.0 : 0.0;
+      strokeWidthVal = strokeWidthFunc(item);
+      strokeOpacityVal = strokeOpactityFunc(item);
+      strokeColorVal = strokeColorFunc(item);
+      fillVal = fillFunc(item) ? 1.0 : 0.0;
+      fillOpacityVal = fillOpacityFunc(item);
+      fillColorVal = fillColorFunc(item);
+      for (j = 0; j < vpf; j += 1, ivpf += 1, ivpf3 += 3) {
+        posBuf[ivpf3]     = position[i3];
+        posBuf[ivpf3 + 1] = position[i3 + 1];
+        posBuf[ivpf3 + 2] = position[i3 + 2];
+        radius[ivpf] = radiusVal;
+        stroke[ivpf] = strokeVal;
+        strokeWidth[ivpf] = strokeWidthVal;
+        strokeOpacity[ivpf] = strokeOpacityVal;
+        strokeColor[ivpf3]     = strokeColorVal.r;
+        strokeColor[ivpf3 + 1] = strokeColorVal.g;
+        strokeColor[ivpf3 + 2] = strokeColorVal.b;
+        fill[ivpf] = fillVal;
+        fillOpacity[ivpf] = fillOpacityVal;
+        fillColor[ivpf3]     = fillColorVal.r;
+        fillColor[ivpf3 + 1] = fillColorVal.g;
+        fillColor[ivpf3 + 2] = fillColorVal.b;
+      }
     }
 
-    sourcePositions.pushBack(buffers.get("pos"));
-    geom.addSource(sourcePositions);
-
-    sourceUnits.pushBack(buffers.get("unit"));
-    geom.addSource(sourceUnits);
-
-    sourceRadius.pushBack(buffers.get("rad"));
-    geom.addSource(sourceRadius);
-
-    sourceStokeWidth.pushBack(buffers.get("strokeWidth"));
-    geom.addSource(sourceStokeWidth);
-
-    sourceFillColor.pushBack(buffers.get("fillColor"));
-    geom.addSource(sourceFillColor);
-
-    sourceFill.pushBack(buffers.get("fill"));
-    geom.addSource(sourceFill);
-
-    sourceStrokeColor.pushBack(buffers.get("strokeColor"));
-    geom.addSource(sourceStrokeColor);
-
-    sourceStroke.pushBack(buffers.get("stroke"));
-    geom.addSource(sourceStroke);
-
-    sourceAlpha.pushBack(buffers.get("fillOpacity"));
-    geom.addSource(sourceAlpha);
-
-    sourceStrokeOpacity.pushBack(buffers.get("strokeOpacity"));
-    geom.addSource(sourceStrokeOpacity);
-
-    trianglesPrimitive.setIndices(buffers.get("indices"));
-    geom.addPrimitive(trianglesPrimitive);
-
-    mapper.setGeometryData(geom);
-
-    m_actor.setMapper(mapper);
+    geom.sourceByName("pos").setData(buffers.get("pos"));
+    geom.sourceByName("unit").setData(buffers.get("unit"));
+    geom.sourceByName("rad").setData(buffers.get("rad"));
+    geom.sourceByName("strokeWidth").setData(buffers.get("strokeWidth"));
+    geom.sourceByName("fillColor").setData(buffers.get("fillColor"));
+    geom.sourceByName("fill").setData(buffers.get("fill"));
+    geom.sourceByName("strokeColor").setData(buffers.get("strokeColor"));
+    geom.sourceByName("stroke").setData(buffers.get("stroke"));
+    geom.sourceByName("fillOpacity").setData(buffers.get("fillOpacity"));
+    geom.sourceByName("strokeOpacity").setData(buffers.get("strokeOpacity"));
+    geom.primitive(0).setIndices(buffers.get("indices"));
+    geom.boundsDirty(true);
+    m_mapper.modified();
+    m_mapper.boundsDirtyTimestamp().modified();
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -388,7 +314,92 @@ geo.gl.pointFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function () {
+    var prog = vgl.shaderProgram(),
+        vertexShader = createVertexShader(),
+        fragmentShader = createFragmentShader(),
+        posAttr = vgl.vertexAttribute("pos"),
+        unitAttr = vgl.vertexAttribute("unit"),
+        radAttr = vgl.vertexAttribute("rad"),
+        stokeWidthAttr = vgl.vertexAttribute("strokeWidth"),
+        fillColorAttr = vgl.vertexAttribute("fillColor"),
+        fillAttr = vgl.vertexAttribute("fill"),
+        strokeColorAttr = vgl.vertexAttribute("strokeColor"),
+        strokeAttr = vgl.vertexAttribute("stroke"),
+        fillOpacityAttr = vgl.vertexAttribute("fillOpacity"),
+        strokeOpacityAttr = vgl.vertexAttribute("strokeOpacity"),
+        modelViewUniform = new vgl.modelViewUniform("modelViewMatrix"),
+        projectionUniform = new vgl.projectionUniform("projectionMatrix"),
+        mat = vgl.material(),
+        blend = vgl.blend(),
+        geom = vgl.geometryData(),
+        sourcePositions = vgl.sourceDataP3fv({"name": "pos"}),
+        sourceUnits = vgl.sourceDataAnyfv(
+            2, vgl.vertexAttributeKeysIndexed.One, {"name": "unit"}),
+        sourceRadius = vgl.sourceDataAnyfv(
+            1, vgl.vertexAttributeKeysIndexed.Two, {"name": "rad"}),
+        sourceStokeWidth = vgl.sourceDataAnyfv(
+            1, vgl.vertexAttributeKeysIndexed.Three, {"name": "strokeWidth"}),
+        sourceFillColor = vgl.sourceDataAnyfv(
+            3, vgl.vertexAttributeKeysIndexed.Four, {"name": "fillColor"}),
+        sourceFill = vgl.sourceDataAnyfv(
+            1, vgl.vertexAttributeKeysIndexed.Five, {"name": "fill"}),
+        sourceStrokeColor = vgl.sourceDataAnyfv(
+            3, vgl.vertexAttributeKeysIndexed.Six, {"name": "strokeColor"}),
+        sourceStroke = vgl.sourceDataAnyfv(
+            1, vgl.vertexAttributeKeysIndexed.Seven, {"name": "stroke"}),
+        sourceAlpha = vgl.sourceDataAnyfv(
+            1, vgl.vertexAttributeKeysIndexed.Eight, {"name": "fillOpacity"}),
+        sourceStrokeOpacity = vgl.sourceDataAnyfv(
+            1, vgl.vertexAttributeKeysIndexed.Nine, {"name": "strokeOpacity"}),
+        trianglesPrimitive = vgl.triangles();
+
+    m_pixelWidthUniform = new vgl.floatUniform("pixelWidth",
+                            2.0 / m_this.renderer().width());
+    m_aspectUniform = new vgl.floatUniform("aspect",
+                        m_this.renderer().width() / m_this.renderer().height());
+
     s_init.call(m_this, arg);
+    m_mapper = vgl.mapper({dynamicDraw: m_dynamicDraw});
+
+    // TODO: Right now this is ugly but we will fix it.
+    prog.addVertexAttribute(posAttr, vgl.vertexAttributeKeys.Position);
+    prog.addVertexAttribute(unitAttr, vgl.vertexAttributeKeysIndexed.One);
+    prog.addVertexAttribute(radAttr, vgl.vertexAttributeKeysIndexed.Two);
+    prog.addVertexAttribute(stokeWidthAttr, vgl.vertexAttributeKeysIndexed.Three);
+    prog.addVertexAttribute(fillColorAttr, vgl.vertexAttributeKeysIndexed.Four);
+    prog.addVertexAttribute(fillAttr, vgl.vertexAttributeKeysIndexed.Five);
+    prog.addVertexAttribute(strokeColorAttr, vgl.vertexAttributeKeysIndexed.Six);
+    prog.addVertexAttribute(strokeAttr, vgl.vertexAttributeKeysIndexed.Seven);
+    prog.addVertexAttribute(fillOpacityAttr, vgl.vertexAttributeKeysIndexed.Eight);
+    prog.addVertexAttribute(strokeOpacityAttr, vgl.vertexAttributeKeysIndexed.Nine);
+
+    prog.addUniform(m_pixelWidthUniform);
+    prog.addUniform(m_aspectUniform);
+    prog.addUniform(modelViewUniform);
+    prog.addUniform(projectionUniform);
+
+    prog.addShader(fragmentShader);
+    prog.addShader(vertexShader);
+
+    mat.addAttribute(prog);
+    mat.addAttribute(blend);
+
+    m_actor = vgl.actor();
+    m_actor.setMaterial(mat);
+    m_actor.setMapper(m_mapper);
+
+    geom.addSource(sourcePositions);
+    geom.addSource(sourceUnits);
+    geom.addSource(sourceRadius);
+    geom.addSource(sourceStokeWidth);
+    geom.addSource(sourceFillColor);
+    geom.addSource(sourceFill);
+    geom.addSource(sourceStrokeColor);
+    geom.addSource(sourceStroke);
+    geom.addSource(sourceAlpha);
+    geom.addSource(sourceStrokeOpacity);
+    geom.addPrimitive(trianglesPrimitive);
+    m_mapper.setGeometryData(geom);
   };
 
   ////////////////////////////////////////////////////////////////////////////
