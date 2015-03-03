@@ -26,9 +26,12 @@ geo.gl.pointFeature = function (arg) {
       m_pixelWidthUniform = null,
       m_aspectUniform = null,
       m_dynamicDraw = arg.dynamicDraw === undefined ? false : arg.dynamicDraw,
-      m_primitiveShape = arg.primitiveShape || "triangle",
+      m_primitiveShape = "triangle", // arg can change this, below
       s_init = this._init,
       s_update = this._update;
+  if (arg.primitiveShape === "triangle" || arg.primitiveShape === "square") {
+    m_primitiveShape = arg.primitiveShape;
+  }
 
   var vertexShaderSource = [
       "attribute vec3 pos;",
@@ -158,7 +161,7 @@ geo.gl.pointFeature = function (arg) {
           x + w * Math.sqrt(3.0), y + h
         ];
         break;
-      default:
+      default: // "square"
         /* Use a surrounding square split diagonally into two triangles. */
         verts = [
           x - w, y + h,
