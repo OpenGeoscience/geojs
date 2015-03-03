@@ -307,14 +307,20 @@ geo.feature = function (arg) {
       }
       return all;
     }
-    out = geo.util.ensureFunction(m_style[key]);
     if (key.toLowerCase().match(/color$/)) {
-      tmp = out;
-      out = function () {
-        return geo.util.convertColor(
-          tmp.apply(this, arguments)
-        );
-      };
+      if (geo.util.isFunction(m_style[key])) {
+        tmp = geo.util.ensureFunction(m_style[key]);
+        out = function () {
+          return geo.util.convertColor(
+            tmp.apply(this, arguments)
+          );
+        };
+      } else {
+        // if the color is not a function, only convert it once
+        out = geo.util.ensureFunction(geo.util.convertColor(m_style[key]));
+      }
+    } else {
+      out = geo.util.ensureFunction(m_style[key]);
     }
     return out;
   };
