@@ -4,8 +4,12 @@ node_js:
     - "0.10"
 
 before_install:
-    - sudo apt-get update -qq
-    - sudo apt-get install -y cmake
+  - pushd "${HOME}"
+  - curl "http://www.cmake.org/files/v3.2/cmake-3.2.0-rc2-Linux-x86_64.tar.gz" | gunzip -c | tar x
+  - cd cmake-*/bin && export PATH="${PWD}:${PATH}"
+  - popd
+  - cmake --version
+  - env
 
 script:
     - git submodule init
@@ -15,5 +19,8 @@ script:
     - mkdir _build
     - cd _build
     - cmake ..
-    - ctest -VV -S ../cmake/travis_build.cmake
+    - ctest -VV -S ../cmake/travis_build.cmake || true
     - ctest -VV -S ../cmake/travis_submit.cmake
+    - if [ -f test_failed ] ; then false ; fi
+
+sudo: False
