@@ -102,6 +102,7 @@ describe('mapInteractor', function () {
 
     var interactor = geo.mapInteractor({
       map: map,
+      momentum: {enabled: false},
       panMoveButton: 'left',
       panWheelEnabled: false,
       zoomMoveButton: null,
@@ -179,6 +180,7 @@ describe('mapInteractor', function () {
 
     var interactor = geo.mapInteractor({
       map: map,
+      momentum: {enabled: false},
       panMoveButton: null,
       panWheelEnabled: false,
       zoomMoveButton: null,

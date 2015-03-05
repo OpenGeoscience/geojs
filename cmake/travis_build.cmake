@@ -13,6 +13,8 @@ ctest_test(PARALLEL_LEVEL 1 RETURN_VALUE res)
 ctest_coverage()
 file(REMOVE ${CTEST_BINARY_DIRECTORY}/coverage.xml)
 
+file(REMOVE "${CTEST_BINARY_DIRECTORY}/test_failed")
 if(NOT res EQUAL 0)
+  file(WRITE "${CTEST_BINARY_DIRECTORY}/test_failed" "error")
   message(FATAL_ERROR "Test failures occurred.")
 endif()
