@@ -189,27 +189,26 @@ geo.gl.lineFeature = function (arg) {
         vert[1].strokeWidth = strkWidthFunc(lineItemData, j, lineItem, i);
         vert[1].strokeColor = strkColorFunc(lineItemData, j, lineItem, i);
         vert[1].strokeOpacity = strkOpacityFunc(lineItemData, j, lineItem, i);
-        if (!j) {
-          continue;
-        }
-        for (k = 0; k < order.length; k += 1, dest += 1, dest3 += 3) {
-          v = vert[order[k][0]];
-          posBuf[dest3]     = position[v.pos];
-          posBuf[dest3 + 1] = position[v.pos + 1];
-          posBuf[dest3 + 2] = position[v.pos + 2];
-          prevBuf[dest3]     = position[v.prev];
-          prevBuf[dest3 + 1] = position[v.prev + 1];
-          prevBuf[dest3 + 2] = position[v.prev + 2];
-          nextBuf[dest3]     = position[v.next];
-          nextBuf[dest3 + 1] = position[v.next + 1];
-          nextBuf[dest3 + 2] = position[v.next + 2];
-          offsetBuf[dest] = order[k][1];
-          indicesBuf[dest] = dest;
-          strokeWidthBuf[dest] = v.strokeWidth;
-          strokeColorBuf[dest3]     = v.strokeColor.r;
-          strokeColorBuf[dest3 + 1] = v.strokeColor.g;
-          strokeColorBuf[dest3 + 2] = v.strokeColor.b;
-          strokeOpacityBuf[dest] = v.strokeOpacity;
+        if (j) {
+          for (k = 0; k < order.length; k += 1, dest += 1, dest3 += 3) {
+            v = vert[order[k][0]];
+            posBuf[dest3]     = position[v.pos];
+            posBuf[dest3 + 1] = position[v.pos + 1];
+            posBuf[dest3 + 2] = position[v.pos + 2];
+            prevBuf[dest3]     = position[v.prev];
+            prevBuf[dest3 + 1] = position[v.prev + 1];
+            prevBuf[dest3 + 2] = position[v.prev + 2];
+            nextBuf[dest3]     = position[v.next];
+            nextBuf[dest3 + 1] = position[v.next + 1];
+            nextBuf[dest3 + 2] = position[v.next + 2];
+            offsetBuf[dest] = order[k][1];
+            indicesBuf[dest] = dest;
+            strokeWidthBuf[dest] = v.strokeWidth;
+            strokeColorBuf[dest3]     = v.strokeColor.r;
+            strokeColorBuf[dest3 + 1] = v.strokeColor.g;
+            strokeColorBuf[dest3 + 2] = v.strokeColor.b;
+            strokeOpacityBuf[dest] = v.strokeOpacity;
+          }
         }
       }
     }
