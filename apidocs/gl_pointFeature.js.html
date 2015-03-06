@@ -54,8 +54,12 @@ geo.gl.pointFeature = function (arg) {
       m_pixelWidthUniform = null,
       m_aspectUniform = null,
       m_dynamicDraw = arg.dynamicDraw === undefined ? false : arg.dynamicDraw,
+      m_primitiveShape = "triangle", // arg can change this, below
       s_init = this._init,
       s_update = this._update;
+  if (arg.primitiveShape === "triangle" || arg.primitiveShape === "square") {
+    m_primitiveShape = arg.primitiveShape;
+  }
 
   var vertexShaderSource = [
       "attribute vec3 pos;",
@@ -81,18 +85,32 @@ geo.gl.pointFeature = function (arg) {
       "varying float strokeVar;",
       "void main(void)",
       "{",
-      "  unitVar = vec3 (unit, 1.0);",
+      "  strokeWidthVar = strokeWidth;",
+      "  // No stroke or fill implies nothing to draw",
+      "  if (stroke &lt; 1.0 || strokeWidth &lt;= 0.0 || strokeOpacity &lt;= 0.0) {",
+      "    strokeVar = 0.0;",
+      "    strokeWidthVar = 0.0;",
+      "  }",
+      "  else",
+      "    strokeVar = 1.0;",
+      "  if (fill &lt; 1.0 || rad &lt;= 0.0 || fillOpacity &lt;= 0.0)",
+      "    fillVar = 0.0;",
+      "  else",
+      "    fillVar = 1.0;",
+      /* If the point has no visible pixels, skip doing computations on it. */
+      "  if (fillVar == 0.0 &amp;&amp; strokeVar == 0.0) {",
+      "    gl_Position = vec4(2, 2, 0, 1);",
+      "    return;",
+      "  }",
       "  fillColorVar = vec4 (fillColor, fillOpacity);",
       "  strokeColorVar = vec4 (strokeColor, strokeOpacity);",
-      "  strokeWidthVar = strokeWidth;",
-      "  fillVar = fill;",
-      "  strokeVar = stroke;",
+      "  unitVar = vec3 (unit, 1.0);",
       "  radiusVar = rad;",
       "  vec4 p = (projectionMatrix * modelViewMatrix * vec4(pos, 1.0)).xyzw;",
       "  if (p.w != 0.0) {",
-      "    p = p/p.w;",
+      "    p = p / p.w;",
       "  }",
-      "  p += (rad + strokeWidth) * ",
+      "  p += (rad + strokeWidthVar) * ",
       "vec4 (unit.x * pixelWidth, unit.y * pixelWidth * aspect, 0.0, 1.0);",
       "  gl_Position = vec4(p.xyz, 1.0);",
       "}"
@@ -117,41 +135,35 @@ geo.gl.pointFeature = function (arg) {
       "varying float strokeWidthVar;",
       "varying float fillVar;",
       "varying float strokeVar;",
-      "bool to_bool (in float value) {",
-      "  if (value &lt; 1.0)",
-      "    return false;",
-      "  else",
-      "    return true;",
-      "}",
       "void main () {",
-      "  bool fill = to_bool (fillVar);",
-      "  bool stroke = to_bool (strokeVar);",
       "  vec4 strokeColor, fillColor;",
+      "  float endStep;",
       "  // No stroke or fill implies nothing to draw",
-      "  if (!fill &amp;&amp; !stroke)",
+      "  if (fillVar == 0.0 &amp;&amp; strokeVar == 0.0)",
       "    discard;",
       "  // Get normalized texture coordinates and polar r coordinate",
-      "  vec2 tex = (unitVar.xy + 1.0) / 2.0;",
       "  float rad = length (unitVar.xy);",
+      "  if (rad > 1.0)",
+      "    discard;",
       "  // If there is no stroke, the fill region should transition to nothing",
-      "  if (!stroke)",
+      "  if (strokeVar == 0.0) {",
       "    strokeColor = vec4 (fillColorVar.rgb, 0.0);",
-      "  else",
+      "    endStep = 1.0;",
+      "  } else {",
       "    strokeColor = strokeColorVar;",
+      "    endStep = radiusVar / (radiusVar + strokeWidthVar);",
+      "  }",
       "  // Likewise, if there is no fill, the stroke should transition to nothing",
-      "  if (!fill)",
+      "  if (fillVar == 0.0)",
       "    fillColor = vec4 (strokeColor.rgb, 0.0);",
       "  else",
       "    fillColor = fillColorVar;",
-      "  float radiusWidth = radiusVar;",
       "  // Distance to antialias over",
       "  float antialiasDist = 3.0 / (2.0 * radiusVar);",
-      "  if (rad &lt; (radiusWidth / (radiusWidth + strokeWidthVar))) {",
-      "    float endStep = radiusWidth / (radiusWidth + strokeWidthVar);",
+      "  if (rad &lt; endStep) {",
       "    float step = smoothstep (endStep - antialiasDist, endStep, rad);",
       "    gl_FragColor = mix (fillColor, strokeColor, step);",
-      "  }",
-      "  else {",
+      "  } else {",
       "    float step = smoothstep (1.0 - antialiasDist, 1.0, rad);",
       "    gl_FragColor = mix (strokeColor, vec4 (strokeColor.rgb, 0.0), step);",
       "  }",
@@ -164,21 +176,37 @@ geo.gl.pointFeature = function (arg) {
     return shader;
   }
 
-  var rect = function (x, y, w, h) {
-    var verts = [
-        x - w, y + h,
-        x - w, y - h,
-        x + w, y + h,
-        x - w, y - h,
-        x + w, y - h,
-        x + w, y + h
-      ];
+  var pointPolygon = function (x, y, w, h) {
+    var verts;
+    switch (m_primitiveShape) {
+      case "triangle":
+        /* Use an equilateral triangle.  While this has 30% more area than a
+         * square, the reduction in vertices should help more than the
+         * processing the additional fragments. */
+        verts = [
+          x, y - h * 2,
+          x - w * Math.sqrt(3.0), y + h,
+          x + w * Math.sqrt(3.0), y + h
+        ];
+        break;
+      default: // "square"
+        /* Use a surrounding square split diagonally into two triangles. */
+        verts = [
+          x - w, y + h,
+          x - w, y - h,
+          x + w, y + h,
+          x - w, y - h,
+          x + w, y - h,
+          x + w, y + h
+        ];
+        break;
+    }
     return verts;
   };
 
   function createGLPoints() {
     var i, numPts = m_this.data().length,
-        start, unit = rect(0, 0, 1, 1),
+        start, unit = pointPolygon(0, 0, 1, 1),
         position = [], radius = [], strokeWidth = [],
         fillColor = [], fill = [], strokeColor = [], stroke = [],
         fillOpacity = [], strokeOpacity = [], posFunc, radFunc, strokeWidthFunc,
@@ -300,20 +328,22 @@ geo.gl.pointFeature = function (arg) {
     m_actor = vgl.actor();
     m_actor.setMaterial(mat);
 
-    start = buffers.alloc(6 * numPts);
+    var vpf = m_this.verticesPerFeature();
+
+    start = buffers.alloc(vpf * numPts);
     for (i = 0; i &lt; numPts; i += 1) {
       buffers.repeat("pos", position[i],
-                      start + i * 6, 6);
-      buffers.write("unit", unit, start + i * 6, 6);
+                      start + i * vpf, vpf);
+      buffers.write("unit", unit, start + i * vpf, vpf);
       buffers.write("indices", [i], start + i, 1);
-      buffers.repeat("rad", [radius[i]], start + i * 6, 6);
-      buffers.repeat("strokeWidth", [strokeWidth[i]], start + i * 6, 6);
-      buffers.repeat("fillColor", fillColor[i], start + i * 6, 6);
-      buffers.repeat("fill", [fill[i]], start + i * 6, 6);
-      buffers.repeat("strokeColor", strokeColor[i], start + i * 6, 6);
-      buffers.repeat("stroke", [stroke[i]], start + i * 6, 6);
-      buffers.repeat("fillOpacity", [fillOpacity[i]], start + i * 6, 6);
-      buffers.repeat("strokeOpacity", [strokeOpacity[i]], start + i * 6, 6);
+      buffers.repeat("rad", [radius[i]], start + i * vpf, vpf);
+      buffers.repeat("strokeWidth", [strokeWidth[i]], start + i * vpf, vpf);
+      buffers.repeat("fillColor", fillColor[i], start + i * vpf, vpf);
+      buffers.repeat("fill", [fill[i]], start + i * vpf, vpf);
+      buffers.repeat("strokeColor", strokeColor[i], start + i * vpf, vpf);
+      buffers.repeat("stroke", [stroke[i]], start + i * vpf, vpf);
+      buffers.repeat("fillOpacity", [fillOpacity[i]], start + i * vpf, vpf);
+      buffers.repeat("strokeOpacity", [strokeOpacity[i]], start + i * vpf, vpf);
     }
 
     sourcePositions.pushBack(buffers.get("pos"));
@@ -376,7 +406,8 @@ geo.gl.pointFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.verticesPerFeature = function () {
-    return 6;
+    var unit = pointPolygon(0, 0, 1, 1);
+    return unit.length / 2;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -468,10 +499,10 @@ geo.registerFeature("vgl", "point", geo.gl.pointFeature);
     <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.clock.html">clock</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.renderer.html">renderer</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.latlng.html">latlng</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.mercator.html">mercator</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
-<br clear="both">
+<br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha11</a> on Thu Feb 12 2015 10:09:36 GMT-0500 (EST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta1</a> on Fri Mar 06 2015 10:06:36 GMT-0500 (EST)
 </footer>
 
 <script> prettyPrint(); </script>

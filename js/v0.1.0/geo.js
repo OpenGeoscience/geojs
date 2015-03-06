@@ -2423,7 +2423,7 @@ vgl.sourceData = function(arg) {
   /**
    * Return raw data for this source
    *
-   * @returns {Array}
+   * @returns {Array or Float32Array}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.data = function() {
@@ -2434,11 +2434,26 @@ vgl.sourceData = function(arg) {
  /**
    * Return raw data for this source
    *
-   * @returns {Array}
+   * @returns {Array or Float32Array}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.getData = function() {
     return data();
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * If the raw data is not a Float32Array, convert it to one.  Then, return
+   * raw data for this source
+   *
+   * @returns {Float32Array}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.dataToFloat32Array = function () {
+    if (!(m_data instanceof Float32Array)) {
+      m_data = new Float32Array(m_data);
+    }
+    return m_data;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -2648,11 +2663,29 @@ vgl.sourceData = function(arg) {
     var i;
 
     //m_data = m_data.concat(data); //no, slow on Safari
+    /* If we will are given a Float32Array and don't have any other data, use
+     * it directly. */
+    if (!m_data.length && data.length && data instanceof Float32Array) {
+      m_data = data;
+      return;
+    }
+    /* If our internal array is immutable and we will need to change it, create
+     * a regular mutable array from it. */
+    if (!m_data.slice && (m_data.length || !data.slice)) {
+      m_data = Array.prototype.slice.call(m_data);
+    }
     if (!data.length) {
+      /* data is a singular value, so append it to our array */
       m_data[m_data.length] = data;
     } else {
-      for (i = 0; i < data.length; i++) {
-        m_data[m_data.length] = data[i];
+      /* We don't have any data currently, so it is faster to copy the data
+       * using slice. */
+      if (!m_data.length && data.slice) {
+        m_data = data.slice(0);
+      } else {
+        for (i = 0; i < data.length; i++) {
+          m_data[m_data.length] = data[i];
+        }
       }
     }
   };
@@ -3328,7 +3361,7 @@ vgl.mapper = function(arg) {
   'use strict';
 
   if (!(this instanceof vgl.mapper)) {
-    return new vgl.mapper();
+    return new vgl.mapper(arg);
   }
   vgl.boundingObject.call(this);
 
@@ -3367,14 +3400,17 @@ vgl.mapper = function(arg) {
   function createVertexBufferObjects() {
     if (m_geomData) {
       var numberOfSources = m_geomData.numberOfSources(),
-          i, j, k, bufferId = null, keys, ks, numberOfPrimitives;
+          i, j, k, bufferId = null, keys, ks, numberOfPrimitives, data;
 
       for (i = 0; i < numberOfSources; ++i) {
         bufferId = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, bufferId);
-        gl.bufferData(gl.ARRAY_BUFFER,
-          new Float32Array(m_geomData.source(i).data()),
-                           m_dynamicDraw ? gl.DYNAMIC_DRAW : gl.STATIC_DRAW);
+        data = m_geomData.source(i).data();
+        if (!(data instanceof Float32Array)) {
+          data = new Float32Array(data);
+        }
+        gl.bufferData(gl.ARRAY_BUFFER, data,
+                      m_dynamicDraw ? gl.DYNAMIC_DRAW : gl.STATIC_DRAW);
 
         keys = m_geomData.source(i).keys();
         ks = [];
@@ -3511,7 +3547,8 @@ vgl.mapper = function(arg) {
    * Update the buffer used for a named source.
    *
    * @param {String} sourceName The name of the source to update.
-   * @param {Object[] or Float32Array} vakues The values to use for the source.
+   * @param {Object[] or Float32Array} values The values to use for the source.
+   *    If not specified, use the source's own buffer.
    */
   ////////////////////////////////////////////////////////////////////////////
   this.updateSourceBuffer = function (sourceName, values) {
@@ -3522,16 +3559,44 @@ vgl.mapper = function(arg) {
         break;
       }
     }
-    if (bufferIndex < 0 || bufferIndex >= m_buffers.lengh) {
-        return false;
+    if (bufferIndex < 0 || bufferIndex >= m_buffers.length) {
+      return false;
+    }
+    if (!values) {
+      values = m_geomData.source(i).dataToFloat32Array();
     }
     gl.bindBuffer(gl.ARRAY_BUFFER, m_buffers[bufferIndex]);
-    if (Object.prototype.toString.call(values) === "[object Float32Array]") {
-        gl.bufferSubData(gl.ARRAY_BUFFER, 0, values);
+    if (values instanceof Float32Array) {
+      gl.bufferSubData(gl.ARRAY_BUFFER, 0, values);
     } else {
-        gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(values));
+      gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(values));
     }
     return true;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get the buffer used for a named source.  If the current buffer isn't a
+   * Float32Array, it is converted to one.  This array can then be modified
+   * directly, after which updateSourceBuffer can be called to update the
+   * GL array.
+   *
+   * @param {String} sourceName The name of the source to update.
+   * @returns {Float32Array} An array used for this source.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.getSourceBuffer = function (sourceName) {
+    var bufferIndex = -1;
+    for (var i = 0; i < m_geomData.numberOfSources(); i += 1) {
+      if (m_geomData.source(i).name() === sourceName) {
+        bufferIndex = i;
+        break;
+      }
+    }
+    if (bufferIndex < 0 || bufferIndex >= m_buffers.length) {
+      return new Float32Array();
+    }
+    return m_geomData.source(i).dataToFloat32Array();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -4512,8 +4577,13 @@ vgl.renderer = function() {
 
     for ( i = 0; i < children.length; ++i) {
       actor = children[i];
+
+      // Compute the bounds even if the actor is not visible
       actor.computeBounds();
-      if (!actor.visible()) {
+
+      // If bin number is < 0, then don't even bother
+      // rendering the data
+      if (!actor.visible() || actor.material().binNumber() < 0) {
         continue;
       }
 
@@ -4525,7 +4595,6 @@ vgl.renderer = function() {
 
     for ( i = 0; i < sortedActors.length; ++i) {
       actor = sortedActors[i][1];
-
       if (actor.referenceFrame() ===
           vgl.boundingObject.ReferenceFrame.Relative) {
         mat4.multiply(renSt.m_modelViewMatrix, m_camera.viewMatrix(),
@@ -11641,6 +11710,12 @@ vgl.DataBuffers = function (initialSize) {
 
     var resize = function (min_expand) {
         var new_size = size;
+        /* If the array would increase substantially, don't just double its
+         * size.  If the array has been increasing gradually, double it as the
+         * expectation is that it will increase again. */
+        if (new_size * 2 < min_expand) {
+            new_size = min_expand;
+        }
         while (new_size < min_expand)
             new_size *= 2;
         size = new_size;
@@ -17243,14 +17318,20 @@ geo.feature = function (arg) {
       }
       return all;
     }
-    out = geo.util.ensureFunction(m_style[key]);
     if (key.toLowerCase().match(/color$/)) {
-      tmp = out;
-      out = function () {
-        return geo.util.convertColor(
-          tmp.apply(this, arguments)
-        );
-      };
+      if (geo.util.isFunction(m_style[key])) {
+        tmp = geo.util.ensureFunction(m_style[key]);
+        out = function () {
+          return geo.util.convertColor(
+            tmp.apply(this, arguments)
+          );
+        };
+      } else {
+        // if the color is not a function, only convert it once
+        out = geo.util.ensureFunction(geo.util.convertColor(m_style[key]));
+      }
+    } else {
+      out = geo.util.ensureFunction(m_style[key]);
     }
     return out;
   };
@@ -17390,6 +17471,16 @@ geo.feature = function (arg) {
       m_this.modified();
       return m_this;
     }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Query if the selection API is enabled for this feature.
+   * @returns {bool}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.selectionAPI = function () {
+    return m_selectionAPI;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -17607,6 +17698,10 @@ geo.pointFeature = function (arg) {
         strokeWidth = m_this.style.get("strokeWidth"),
         radius = m_this.style.get("radius");
 
+    if (!m_this.selectionAPI()) {
+      return [];
+    }
+
     data = m_this.data();
     if (!data || !data.length) {
       return {
@@ -17701,7 +17796,7 @@ geo.pointFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.style = function (arg1, arg2) {
     var val = s_style(arg1, arg2);
-    if (val === m_this) {
+    if (val === m_this && m_this.selectionAPI()) {
       m_this._updateRangeTree();
     }
     return val;
@@ -19549,6 +19644,10 @@ inherit(geo.renderer, geo.object);
  *
  * @class
  * @extends geo.featureLayer
+ *
+ * @param {Object} arg - arg can contain following keys: baseUrl,
+ *        imageFormat (such as png or jpeg), and displayLast
+ *        (to decide whether or not render tiles from last zoom level).
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.osmLayer = function (arg) {
@@ -19569,8 +19668,8 @@ geo.osmLayer = function (arg) {
   var m_this = this,
     s_exit = this._exit,
     m_tiles = {},
-    m_hiddenBinNumber = 0,
-    m_lastVisibleBinNumber = 999,
+    m_hiddenBinNumber = -1,
+    m_lastVisibleBinNumber = -1,
     m_visibleBinNumber = 1000,
     m_pendingNewTiles = [],
     m_pendingInactiveTiles = [],
@@ -19585,7 +19684,7 @@ geo.osmLayer = function (arg) {
     m_pendingNewTilesStat = {},
     s_update = this._update,
     m_updateDefer = null,
-    m_zoomLevelDelta = 2.5,
+    m_zoom = null,
     m_tileUrl;
 
   if (arg && arg.baseUrl !== undefined) {
@@ -19596,12 +19695,12 @@ geo.osmLayer = function (arg) {
     m_baseUrl += "/";
   }
 
-  if (arg && arg.zoomDelta !== undefined) {
-    m_zoomLevelDelta = arg.zoomDelta;
-  }
-
   if (arg && arg.imageFormat !== undefined) {
     m_imageFormat = arg.imageFormat;
+  }
+
+  if (arg && arg.displayLast !== undefined && arg.displayLast) {
+    m_lastVisibleBinNumber = 999;
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -19627,17 +19726,6 @@ geo.osmLayer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Return zoom to be used for fetching the tiles
-   *
-   * @private
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  function getModifiedMapZoom() {
-    return Math.floor(m_this.map().zoom() + m_zoomLevelDelta);
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
    * Check if a tile is visible in current view
    *
    * @private
@@ -19654,7 +19742,6 @@ geo.osmLayer = function (arg) {
     }
     return false;
   }
-
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -19869,6 +19956,7 @@ geo.osmLayer = function (arg) {
     tile.LOADED = false;
     tile.REMOVED = false;
     tile.REMOVING = false;
+    tile.INVALID = false;
 
     tile.crossOrigin = "anonymous";
     tile.zoom = zoom;
@@ -19888,7 +19976,6 @@ geo.osmLayer = function (arg) {
     return tile;
   };
 
-
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Clear tiles that are no longer required
@@ -19896,7 +19983,7 @@ geo.osmLayer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   /* jshint -W089 */
   this._removeTiles = function () {
-    var i, x, y, tile, zoom, currZoom = getModifiedMapZoom(),
+    var i, x, y, tile, zoom, currZoom = m_zoom,
         lastZoom = m_lastVisibleZoom;
 
     if (!m_tiles) {
@@ -19966,7 +20053,6 @@ geo.osmLayer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._addTiles = function (request) {
     var feature, ren = m_this.renderer(),
-        zoom = getModifiedMapZoom(),
         /// First get corner points
         /// In display coordinates the origin is on top left corner (0, 0)
         llx = 0.0, lly = m_this.height(), urx = m_this.width(), ury = 0.0,
@@ -19974,7 +20060,11 @@ geo.osmLayer = function (arg) {
         tile2y = null, invJ = null, i = 0, j = 0, lastStartX, lastStartY,
         lastEndX, lastEndY, currStartX, currStartY, currEndX, currEndY,
         worldPt1 = ren.displayToWorld([llx, lly]),
-        worldPt2 = ren.displayToWorld([urx, ury]);
+        worldPt2 = ren.displayToWorld([urx, ury]),
+        worldDeltaY = null, displayDeltaY = null,
+        worldDelta = null, displayDelta = null,
+        noOfTilesRequired = null, worldDeltaPerTile = null,
+        minDistWorldDeltaPerTile = null, distWorldDeltaPerTile;
 
     worldPt1[0] = Math.max(worldPt1[0], -180.0);
     worldPt1[0] = Math.min(worldPt1[0], 180.0);
@@ -19986,23 +20076,49 @@ geo.osmLayer = function (arg) {
     worldPt2[1] = Math.max(worldPt2[1], -180.0);
     worldPt2[1] = Math.min(worldPt2[1], 180.0);
 
-    /// Compute tilex and tiley
-    tile1x = geo.mercator.long2tilex(worldPt1[0], zoom);
-    tile1y = geo.mercator.lat2tiley(worldPt1[1], zoom);
+    /// Compute tile zoom
+    worldDelta = Math.abs(worldPt2[0] - worldPt1[0]);
+    worldDeltaY = Math.abs(worldPt2[1] - worldPt1[1]);
 
-    tile2x = geo.mercator.long2tilex(worldPt2[0], zoom);
-    tile2y = geo.mercator.lat2tiley(worldPt2[1], zoom);
+    displayDelta = urx - llx;
+    displayDeltaY = lly - ury;
+
+    /// Reuse variables
+    if (displayDeltaY > displayDelta) {
+      displayDelta = displayDeltaY;
+      worldDelta = worldDeltaY;
+    }
+
+    noOfTilesRequired = Math.round(displayDelta / 256.0);
+    worldDeltaPerTile = worldDelta / noOfTilesRequired;
+
+    /// Minimize per pixel distortion
+    minDistWorldDeltaPerTile = Number.POSITIVE_INFINITY;
+    for (i = 20; i >= 2; i = i - 1) {
+      distWorldDeltaPerTile = Math.abs(360.0 / Math.pow(2, i) - worldDeltaPerTile);
+      if (distWorldDeltaPerTile < minDistWorldDeltaPerTile) {
+        minDistWorldDeltaPerTile = distWorldDeltaPerTile;
+        m_zoom = i;
+      }
+    }
+
+    /// Compute tilex and tiley
+    tile1x = geo.mercator.long2tilex(worldPt1[0], m_zoom);
+    tile1y = geo.mercator.lat2tiley(worldPt1[1], m_zoom);
+
+    tile2x = geo.mercator.long2tilex(worldPt2[0], m_zoom);
+    tile2y = geo.mercator.lat2tiley(worldPt2[1], m_zoom);
 
     /// Clamp tilex and tiley
     tile1x = Math.max(tile1x, 0);
-    tile1x = Math.min(Math.pow(2, zoom) - 1, tile1x);
+    tile1x = Math.min(Math.pow(2, m_zoom) - 1, tile1x);
     tile1y = Math.max(tile1y, 0);
-    tile1y = Math.min(Math.pow(2, zoom) - 1, tile1y);
+    tile1y = Math.min(Math.pow(2, m_zoom) - 1, tile1y);
 
     tile2x = Math.max(tile2x, 0);
-    tile2x = Math.min(Math.pow(2, zoom) - 1, tile2x);
+    tile2x = Math.min(Math.pow(2, m_zoom) - 1, tile2x);
     tile2y = Math.max(tile2y, 0);
-    tile2y = Math.min(Math.pow(2, zoom) - 1, tile2y);
+    tile2y = Math.min(Math.pow(2, m_zoom) - 1, tile2y);
 
     /// Check and update variables appropriately if view
     /// direction is flipped. This should not happen but
@@ -20021,8 +20137,8 @@ geo.osmLayer = function (arg) {
     /// Compute current tile indices
     currStartX = tile1x;
     currEndX = tile2x;
-    currStartY = (Math.pow(2, zoom) - 1 - tile1y);
-    currEndY = (Math.pow(2, zoom) - 1 - tile2y);
+    currStartY = (Math.pow(2, m_zoom) - 1 - tile1y);
+    currEndY = (Math.pow(2, m_zoom) - 1 - tile2y);
     if (currEndY < currStartY) {
       temp = currStartY;
       currStartY = currEndY;
@@ -20040,6 +20156,7 @@ geo.osmLayer = function (arg) {
                    m_lastVisibleZoom);
     lastStartY = Math.pow(2, m_lastVisibleZoom) - 1 - lastStartY;
     lastEndY   = Math.pow(2, m_lastVisibleZoom) - 1 - lastEndY;
+
     if (lastEndY < lastStartY) {
       temp = lastStartY;
       lastStartY = lastEndY;
@@ -20047,8 +20164,8 @@ geo.osmLayer = function (arg) {
     }
 
     m_visibleTilesRange = {};
-    m_visibleTilesRange[zoom] = { startX: currStartX, endX: currEndX,
-                                  startY: currStartY, endY: currEndY };
+    m_visibleTilesRange[m_zoom] = { startX: currStartX, endX: currEndX,
+                                    startY: currStartY, endY: currEndY };
 
     m_visibleTilesRange[m_lastVisibleZoom] =
                                 { startX: lastStartX, endX: lastEndX,
@@ -20058,11 +20175,11 @@ geo.osmLayer = function (arg) {
 
     for (i = tile1x; i <= tile2x; i += 1) {
       for (j = tile2y; j <= tile1y; j += 1) {
-        invJ = (Math.pow(2, zoom) - 1 - j);
-        if (!m_this._hasTile(zoom, i, invJ)) {
-          tile = m_this._addTile(request, zoom, i, invJ);
+        invJ = (Math.pow(2, m_zoom) - 1 - j);
+        if (!m_this._hasTile(m_zoom, i, invJ)) {
+          tile = m_this._addTile(request, m_zoom, i, invJ);
         } else {
-          tile = m_tiles[zoom][i][invJ];
+          tile = m_tiles[m_zoom][i][invJ];
           tile.feature.bin(m_visibleBinNumber);
           if (tile.LOADED && m_updateTimerId in m_pendingNewTilesStat) {
             m_pendingNewTilesStat[m_updateTimerId].count += 1;
@@ -20080,11 +20197,14 @@ geo.osmLayer = function (arg) {
       m_this.addDeferred(defer);
 
       return function () {
+        if (tile.INVALID) {
+          return;
+        }
         tile.LOADING = false;
         tile.LOADED = true;
         if ((tile.REMOVING || tile.REMOVED) &&
           tile.feature &&
-          tile.zoom !== getModifiedMapZoom()) {
+          tile.zoom !== m_zoom) {
           tile.feature.bin(m_hiddenBinNumber);
           tile.REMOVING = false;
           tile.REMOVED = true;
@@ -20145,18 +20265,20 @@ geo.osmLayer = function (arg) {
       request = {};
     }
 
-    var zoom = getModifiedMapZoom();
+    if (!m_zoom) {
+      m_zoom = m_this.map().zoom();
+    }
 
     if (!m_lastVisibleZoom) {
-      m_lastVisibleZoom = zoom;
+      m_lastVisibleZoom = m_zoom;
     }
 
     /// Add tiles that are currently visible
     m_this._addTiles(request);
 
     /// Update the zoom
-    if (m_lastVisibleZoom !== zoom) {
-      m_lastVisibleZoom = zoom;
+    if (m_lastVisibleZoom !== m_zoom) {
+      m_lastVisibleZoom = m_zoom;
     }
 
     m_this.updateTime().modified();
@@ -20206,7 +20328,7 @@ geo.osmLayer = function (arg) {
     m_this.gcs("EPSG:3857");
     m_this.map().zoomRange({
       min: 0,
-      max: 18 - m_zoomLevelDelta
+      max: 18
     });
     return m_this;
   };
@@ -20222,6 +20344,46 @@ geo.osmLayer = function (arg) {
 
     /// Now call base class update
     s_update.call(m_this, request);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Update baseUrl for map tiles.  Map all tiles as needing to be refreshed.
+   *
+   * @param baseUrl: the new baseUrl for the map.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  /* jshint -W089 */
+  this.updateBaseUrl = function (baseUrl) {
+    if (baseUrl.charAt(m_baseUrl.length - 1) !== "/") {
+      baseUrl += "/";
+    }
+    if (baseUrl !== m_baseUrl) {
+      m_baseUrl = baseUrl;
+
+      var tile, x, y, zoom;
+      for (zoom in m_tiles) {
+        for (x in m_tiles[zoom]) {
+          for (y in m_tiles[zoom][x]) {
+            tile = m_tiles[zoom][x][y];
+            tile.INVALID = true;
+            m_this.deleteFeature(tile.feature);
+          }
+        }
+      }
+      m_tiles = {};
+      m_pendingNewTiles = [];
+      m_pendingInactiveTiles = [];
+      m_numberOfCachedTiles = 0;
+      m_visibleTilesRange = {};
+      m_pendingNewTilesStat = {};
+
+      if (m_updateTimerId !== null) {
+        clearTimeout(m_updateTimerId);
+        m_updateTimerId = null;
+      }
+      this._update();
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -20311,6 +20473,7 @@ geo.gl.lineFeature = function (arg) {
       m_mapper = null,
       m_material = null,
       m_pixelWidthUnif = null,
+      m_dynamicDraw = arg.dynamicDraw === undefined ? false : arg.dynamicDraw,
       s_init = this._init,
       s_update = this._update;
 
@@ -20338,6 +20501,12 @@ geo.gl.lineFeature = function (arg) {
 
         'void main(void)',
         '{',
+        /* If any vertex has been deliberately set to a negative opacity,
+         * skip doing computations on it. */
+        '  if (strokeOpacity < 0.0) {',
+        '    gl_Position = vec4(2, 2, 0, 1);',
+        '    return;',
+        '  }',
         '  const float PI = 3.14159265358979323846264;',
         '  vec4 worldPos = projectionMatrix * modelViewMatrix * vec4(pos.xyz, 1);',
         '  if (worldPos.w != 0.0) {',
@@ -20404,6 +20573,7 @@ geo.gl.lineFeature = function (arg) {
     var i = null,
         j = null,
         k = null,
+        v,
         prev = [],
         next = [],
         numPts = m_this.data().length,
@@ -20427,15 +20597,35 @@ geo.gl.lineFeature = function (arg) {
         strkOpacityFunc = m_this.style.get('strokeOpacity'),
         buffers = vgl.DataBuffers(1024),
         // Sources
-        posData = vgl.sourceDataP3fv(),
-        prvPosData = vgl.sourceDataAnyfv(3, vgl.vertexAttributeKeysIndexed.Four),
-        nxtPosData = vgl.sourceDataAnyfv(3, vgl.vertexAttributeKeysIndexed.Five),
-        offPosData = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Six),
-        strkWidthData = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.One),
-        strkColorData = vgl.sourceDataAnyfv(3, vgl.vertexAttributeKeysIndexed.Two),
-        strkOpacityData = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Three),
+        posData = vgl.sourceDataP3fv({'name': 'pos'}),
+        prvPosData = vgl.sourceDataAnyfv(
+            3, vgl.vertexAttributeKeysIndexed.Four, {'name': 'prev'}),
+        nxtPosData = vgl.sourceDataAnyfv(
+            3, vgl.vertexAttributeKeysIndexed.Five, {'name': 'next'}),
+        offPosData = vgl.sourceDataAnyfv(
+            1, vgl.vertexAttributeKeysIndexed.Six, {'name': 'offset'}),
+        strkWidthData = vgl.sourceDataAnyfv(
+            1, vgl.vertexAttributeKeysIndexed.One, {'name': 'strokeWidth'}),
+        strkColorData = vgl.sourceDataAnyfv(
+            3, vgl.vertexAttributeKeysIndexed.Two, {'name': 'strokeColor'}),
+        strkOpacityData = vgl.sourceDataAnyfv(
+            1, vgl.vertexAttributeKeysIndexed.Three,
+            {'name': 'strokeOpacity'}),
         // Primitive indices
-        triangles = vgl.triangles();
+        triangles = vgl.triangles(),
+        order = m_this.featureVertices(),
+        addVert = function (prevPos, currPos, nextPos, offset,
+                            width, color, opacity) {
+          buffers.write('prev', prevPos, currIndex, 1);
+          buffers.write('pos', currPos, currIndex, 1);
+          buffers.write('next', nextPos, currIndex, 1);
+          buffers.write('offset', [offset], currIndex, 1);
+          buffers.write('indices', [currIndex], currIndex, 1);
+          buffers.write('strokeWidth', [width], currIndex, 1);
+          buffers.write('strokeColor', color, currIndex, 1);
+          buffers.write('strokeOpacity', [opacity], currIndex, 1);
+          currIndex += 1;
+        };
 
     m_this.data().forEach(function (item) {
       lineItem = m_this.line()(item, itemIndex);
@@ -20495,37 +20685,18 @@ geo.gl.lineFeature = function (arg) {
     start = buffers.alloc(numPts * 6);
     currIndex = start;
 
-    var addVert = function (prevPos, currPos, nextPos, offset,
-                            width, color, opacity) {
-      buffers.write('prev', prevPos, currIndex, 1);
-      buffers.write('pos', currPos, currIndex, 1);
-      buffers.write('next', nextPos, currIndex, 1);
-      buffers.write('offset', [offset], currIndex, 1);
-      buffers.write('indices', [currIndex], currIndex, 1);
-      buffers.write('strokeWidth', [width], currIndex, 1);
-      buffers.write('strokeColor', color, currIndex, 1);
-      buffers.write('strokeOpacity', [opacity], currIndex, 1);
-      currIndex += 1;
-    };
-
     i = 0;
     k = 0;
     for (j = 0; j < lineSegments.length; j += 1) {
       i += 1;
       for (k = 0; k < lineSegments[j] - 1; k += 1) {
-        addVert(prev[i - 1], position[i - 1], next[i - 1], 1,
-                strkWidthArr[i - 1], strkColorArr[i - 1], strkOpacityArr[i - 1]);
-        addVert(prev[i], position[i], next[i], -1,
-                strkWidthArr[i], strkColorArr[i], strkOpacityArr[i]);
-        addVert(prev[i - 1], position[i - 1], next[i - 1], -1,
-                strkWidthArr[i - 1], strkColorArr[i - 1], strkOpacityArr[i - 1]);
-
-        addVert(prev[i - 1], position[i - 1], next[i - 1], 1,
-                strkWidthArr[i - 1], strkColorArr[i - 1], strkOpacityArr[i - 1]);
-        addVert(prev[i], position[i], next[i], 1,
-                strkWidthArr[i], strkColorArr[i], strkOpacityArr[i]);
-        addVert(prev[i], position[i], next[i], -1,
-                strkWidthArr[i], strkColorArr[i], strkOpacityArr[i]);
+        for (v = 0; v < order.length; v += 1) {
+          addVert(prev[i + order[v][0]], position[i + order[v][0]],
+                  next[i + order[v][0]], order[v][1],
+                  strkWidthArr[i + order[v][0]],
+                  strkColorArr[i + order[v][0]],
+                  strkOpacityArr[i + order[v][0]]);
+        }
         i += 1;
       }
     }
@@ -20559,6 +20730,28 @@ geo.gl.lineFeature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Return the arrangement of vertices used for each line segment.
+   *
+   * @returns {Number}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.featureVertices = function () {
+    return [[-1, 1], [0, -1], [-1, -1], [-1, 1], [0, 1], [0, -1]];
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return the number of vertices used for each line segment.
+   *
+   * @returns {Number}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.verticesPerFeature = function () {
+    return this.featureVertices().length;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Initialize
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -20582,7 +20775,7 @@ geo.gl.lineFeature = function (arg) {
                           1.0 / m_this.renderer().width());
     s_init.call(m_this, arg);
     m_material = vgl.material();
-    m_mapper = vgl.mapper();
+    m_mapper = vgl.mapper({dynamicDraw: m_dynamicDraw});
 
     prog.addVertexAttribute(posAttr, vgl.vertexAttributeKeys.Position);
     prog.addVertexAttribute(strkWidthAttr, vgl.vertexAttributeKeysIndexed.One);
@@ -20605,6 +20798,20 @@ geo.gl.lineFeature = function (arg) {
     m_actor = vgl.actor();
     m_actor.setMaterial(m_material);
     m_actor.setMapper(m_mapper);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return list of actors
+   *
+   * @returns {vgl.actor[]}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.actors = function () {
+    if (!m_actor) {
+      return [];
+    }
+    return [m_actor];
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -20693,8 +20900,12 @@ geo.gl.pointFeature = function (arg) {
       m_pixelWidthUniform = null,
       m_aspectUniform = null,
       m_dynamicDraw = arg.dynamicDraw === undefined ? false : arg.dynamicDraw,
+      m_primitiveShape = "triangle", // arg can change this, below
       s_init = this._init,
       s_update = this._update;
+  if (arg.primitiveShape === "triangle" || arg.primitiveShape === "square") {
+    m_primitiveShape = arg.primitiveShape;
+  }
 
   var vertexShaderSource = [
       "attribute vec3 pos;",
@@ -20720,18 +20931,32 @@ geo.gl.pointFeature = function (arg) {
       "varying float strokeVar;",
       "void main(void)",
       "{",
-      "  unitVar = vec3 (unit, 1.0);",
+      "  strokeWidthVar = strokeWidth;",
+      "  // No stroke or fill implies nothing to draw",
+      "  if (stroke < 1.0 || strokeWidth <= 0.0 || strokeOpacity <= 0.0) {",
+      "    strokeVar = 0.0;",
+      "    strokeWidthVar = 0.0;",
+      "  }",
+      "  else",
+      "    strokeVar = 1.0;",
+      "  if (fill < 1.0 || rad <= 0.0 || fillOpacity <= 0.0)",
+      "    fillVar = 0.0;",
+      "  else",
+      "    fillVar = 1.0;",
+      /* If the point has no visible pixels, skip doing computations on it. */
+      "  if (fillVar == 0.0 && strokeVar == 0.0) {",
+      "    gl_Position = vec4(2, 2, 0, 1);",
+      "    return;",
+      "  }",
       "  fillColorVar = vec4 (fillColor, fillOpacity);",
       "  strokeColorVar = vec4 (strokeColor, strokeOpacity);",
-      "  strokeWidthVar = strokeWidth;",
-      "  fillVar = fill;",
-      "  strokeVar = stroke;",
+      "  unitVar = vec3 (unit, 1.0);",
       "  radiusVar = rad;",
       "  vec4 p = (projectionMatrix * modelViewMatrix * vec4(pos, 1.0)).xyzw;",
       "  if (p.w != 0.0) {",
-      "    p = p/p.w;",
+      "    p = p / p.w;",
       "  }",
-      "  p += (rad + strokeWidth) * ",
+      "  p += (rad + strokeWidthVar) * ",
       "vec4 (unit.x * pixelWidth, unit.y * pixelWidth * aspect, 0.0, 1.0);",
       "  gl_Position = vec4(p.xyz, 1.0);",
       "}"
@@ -20756,41 +20981,35 @@ geo.gl.pointFeature = function (arg) {
       "varying float strokeWidthVar;",
       "varying float fillVar;",
       "varying float strokeVar;",
-      "bool to_bool (in float value) {",
-      "  if (value < 1.0)",
-      "    return false;",
-      "  else",
-      "    return true;",
-      "}",
       "void main () {",
-      "  bool fill = to_bool (fillVar);",
-      "  bool stroke = to_bool (strokeVar);",
       "  vec4 strokeColor, fillColor;",
+      "  float endStep;",
       "  // No stroke or fill implies nothing to draw",
-      "  if (!fill && !stroke)",
+      "  if (fillVar == 0.0 && strokeVar == 0.0)",
       "    discard;",
       "  // Get normalized texture coordinates and polar r coordinate",
-      "  vec2 tex = (unitVar.xy + 1.0) / 2.0;",
       "  float rad = length (unitVar.xy);",
+      "  if (rad > 1.0)",
+      "    discard;",
       "  // If there is no stroke, the fill region should transition to nothing",
-      "  if (!stroke)",
+      "  if (strokeVar == 0.0) {",
       "    strokeColor = vec4 (fillColorVar.rgb, 0.0);",
-      "  else",
+      "    endStep = 1.0;",
+      "  } else {",
       "    strokeColor = strokeColorVar;",
+      "    endStep = radiusVar / (radiusVar + strokeWidthVar);",
+      "  }",
       "  // Likewise, if there is no fill, the stroke should transition to nothing",
-      "  if (!fill)",
+      "  if (fillVar == 0.0)",
       "    fillColor = vec4 (strokeColor.rgb, 0.0);",
       "  else",
       "    fillColor = fillColorVar;",
-      "  float radiusWidth = radiusVar;",
       "  // Distance to antialias over",
       "  float antialiasDist = 3.0 / (2.0 * radiusVar);",
-      "  if (rad < (radiusWidth / (radiusWidth + strokeWidthVar))) {",
-      "    float endStep = radiusWidth / (radiusWidth + strokeWidthVar);",
+      "  if (rad < endStep) {",
       "    float step = smoothstep (endStep - antialiasDist, endStep, rad);",
       "    gl_FragColor = mix (fillColor, strokeColor, step);",
-      "  }",
-      "  else {",
+      "  } else {",
       "    float step = smoothstep (1.0 - antialiasDist, 1.0, rad);",
       "    gl_FragColor = mix (strokeColor, vec4 (strokeColor.rgb, 0.0), step);",
       "  }",
@@ -20803,21 +21022,37 @@ geo.gl.pointFeature = function (arg) {
     return shader;
   }
 
-  var rect = function (x, y, w, h) {
-    var verts = [
-        x - w, y + h,
-        x - w, y - h,
-        x + w, y + h,
-        x - w, y - h,
-        x + w, y - h,
-        x + w, y + h
-      ];
+  var pointPolygon = function (x, y, w, h) {
+    var verts;
+    switch (m_primitiveShape) {
+      case "triangle":
+        /* Use an equilateral triangle.  While this has 30% more area than a
+         * square, the reduction in vertices should help more than the
+         * processing the additional fragments. */
+        verts = [
+          x, y - h * 2,
+          x - w * Math.sqrt(3.0), y + h,
+          x + w * Math.sqrt(3.0), y + h
+        ];
+        break;
+      default: // "square"
+        /* Use a surrounding square split diagonally into two triangles. */
+        verts = [
+          x - w, y + h,
+          x - w, y - h,
+          x + w, y + h,
+          x - w, y - h,
+          x + w, y - h,
+          x + w, y + h
+        ];
+        break;
+    }
     return verts;
   };
 
   function createGLPoints() {
     var i, numPts = m_this.data().length,
-        start, unit = rect(0, 0, 1, 1),
+        start, unit = pointPolygon(0, 0, 1, 1),
         position = [], radius = [], strokeWidth = [],
         fillColor = [], fill = [], strokeColor = [], stroke = [],
         fillOpacity = [], strokeOpacity = [], posFunc, radFunc, strokeWidthFunc,
@@ -20939,20 +21174,22 @@ geo.gl.pointFeature = function (arg) {
     m_actor = vgl.actor();
     m_actor.setMaterial(mat);
 
-    start = buffers.alloc(6 * numPts);
+    var vpf = m_this.verticesPerFeature();
+
+    start = buffers.alloc(vpf * numPts);
     for (i = 0; i < numPts; i += 1) {
       buffers.repeat("pos", position[i],
-                      start + i * 6, 6);
-      buffers.write("unit", unit, start + i * 6, 6);
+                      start + i * vpf, vpf);
+      buffers.write("unit", unit, start + i * vpf, vpf);
       buffers.write("indices", [i], start + i, 1);
-      buffers.repeat("rad", [radius[i]], start + i * 6, 6);
-      buffers.repeat("strokeWidth", [strokeWidth[i]], start + i * 6, 6);
-      buffers.repeat("fillColor", fillColor[i], start + i * 6, 6);
-      buffers.repeat("fill", [fill[i]], start + i * 6, 6);
-      buffers.repeat("strokeColor", strokeColor[i], start + i * 6, 6);
-      buffers.repeat("stroke", [stroke[i]], start + i * 6, 6);
-      buffers.repeat("fillOpacity", [fillOpacity[i]], start + i * 6, 6);
-      buffers.repeat("strokeOpacity", [strokeOpacity[i]], start + i * 6, 6);
+      buffers.repeat("rad", [radius[i]], start + i * vpf, vpf);
+      buffers.repeat("strokeWidth", [strokeWidth[i]], start + i * vpf, vpf);
+      buffers.repeat("fillColor", fillColor[i], start + i * vpf, vpf);
+      buffers.repeat("fill", [fill[i]], start + i * vpf, vpf);
+      buffers.repeat("strokeColor", strokeColor[i], start + i * vpf, vpf);
+      buffers.repeat("stroke", [stroke[i]], start + i * vpf, vpf);
+      buffers.repeat("fillOpacity", [fillOpacity[i]], start + i * vpf, vpf);
+      buffers.repeat("strokeOpacity", [strokeOpacity[i]], start + i * vpf, vpf);
     }
 
     sourcePositions.pushBack(buffers.get("pos"));
@@ -21015,7 +21252,8 @@ geo.gl.pointFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.verticesPerFeature = function () {
-    return 6;
+    var unit = pointPolygon(0, 0, 1, 1);
+    return unit.length / 2;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -23059,12 +23297,14 @@ geo.d3.d3Renderer = function (arg) {
     return new geo.d3.d3Renderer(arg);
   }
   geo.renderer.call(this, arg);
+
+  var s_exit = this._exit;
+
   geo.d3.object.call(this, arg);
 
   arg = arg || {};
 
   var m_this = this,
-      s_exit = this._exit,
       m_sticky = null,
       m_features = {},
       m_corners = null,

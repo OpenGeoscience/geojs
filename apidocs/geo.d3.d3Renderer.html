@@ -41,34 +41,29 @@
     <div class="container-overview">
     
         
-<dt>
-    
-        
-        <h2>Constructor</h2>
-        
-
-        <h4 class="name" id="d3Renderer"><span class="type-signature"></span>new d3Renderer<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="geo.d3.d3Renderer.html">geo.d3.d3Renderer</a>}</span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Create a new instance of class d3Renderer
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="d3Renderer"><span class="type-signature"></span>new d3Renderer<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="geo.d3.d3Renderer.html">geo.d3.d3Renderer</a>}</span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Create a new instance of class d3Renderer
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -112,20 +107,20 @@
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-    <h5>Returns:</h5>
-    
-            
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
 
 
 <dl>
@@ -140,10 +135,9 @@
     </dd>
 </dl>
 
-        
-
     
-</dd>
+
+
 
     
     </div>
@@ -174,121 +168,32 @@
     
         <h3 class="subsection-title">Methods</h3>
 
-        <dl>
+        
             
-<dt>
-    
-        
-
-        <h4 class="name" id="__render"><span class="type-signature"></span>__render<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
 
     
-    <div class="description">
-        Updates a feature by performing a d3 data join.  If no input id is
+
+    <h4 class="name" id="__render"><span class="type-signature"></span>__render<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Updates a feature by performing a d3 data join.  If no input id is
  provided then this method will update all features.
-    </div>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
+</div>
 
 
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="d3_d3Renderer.js.html">d3/d3Renderer.js</a>, <a href="d3_d3Renderer.js.html#line471">line 471</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
 
-        
-            
-<dt>
-    
-        
-
-        <h4 class="name" id="_definitions"><span class="type-signature">(protected) </span>_definitions<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get the definitions dom element for the layer
-    </div>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
 
 
 <dl class="details">
@@ -320,7 +225,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="d3_d3Renderer.js.html">d3/d3Renderer.js</a>, <a href="d3_d3Renderer.js.html#line432">line 432</a>
+        <a href="d3_d3Renderer.js.html">d3/d3Renderer.js</a>, <a href="d3_d3Renderer.js.html#line473">line 473</a>
     </li></ul></dd>
     
 
@@ -332,37 +237,115 @@
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
+
     
+
+    <h4 class="name" id="_definitions"><span class="type-signature">(protected) </span>_definitions<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Get the definitions dom element for the layer
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="d3_d3Renderer.js.html">d3/d3Renderer.js</a>, <a href="d3_d3Renderer.js.html#line434">line 434</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         
-
-        <h4 class="name" id="_drawFeatures"><span class="type-signature"></span>_drawFeatures<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
+            
 
     
-    <div class="description">
-        Create a new feature element from an object that describes the feature
+
+    <h4 class="name" id="_drawFeatures"><span class="type-signature"></span>_drawFeatures<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Create a new feature element from an object that describes the feature
 attributes.  To be called from feature classes only.
 
 Input:
@@ -375,18 +358,18 @@ Input:
    classes:    An array of classes to add to the elements.
    append:     The element type as used in d3 append methods.
  }
-    </div>
-    
+</div>
 
-    
 
-    
 
-    
 
-    
 
-    
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -418,7 +401,7 @@ Input:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="d3_d3Renderer.js.html">d3/d3Renderer.js</a>, <a href="d3_d3Renderer.js.html#line453">line 453</a>
+        <a href="d3_d3Renderer.js.html">d3/d3Renderer.js</a>, <a href="d3_d3Renderer.js.html#line455">line 455</a>
     </li></ul></dd>
     
 
@@ -430,49 +413,45 @@ Input:
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="_exit"><span class="type-signature"></span>_exit<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Exit
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="_exit"><span class="type-signature"></span>_exit<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Exit
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -487,7 +466,7 @@ Input:
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
         <a href="geo.renderer.html#_exit">geo.renderer#_exit</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -509,7 +488,7 @@ Input:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="d3_d3Renderer.js.html">d3/d3Renderer.js</a>, <a href="d3_d3Renderer.js.html#line420">line 420</a>
+        <a href="d3_d3Renderer.js.html">d3/d3Renderer.js</a>, <a href="d3_d3Renderer.js.html#line422">line 422</a>
     </li></ul></dd>
     
 
@@ -521,49 +500,45 @@ Input:
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="_init"><span class="type-signature"></span>_init<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Initialize
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="_init"><span class="type-signature"></span>_init<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Initialize
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -578,7 +553,7 @@ Input:
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
         <a href="geo.renderer.html#_init">geo.renderer#_init</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -600,7 +575,7 @@ Input:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="d3_d3Renderer.js.html">d3/d3Renderer.js</a>, <a href="d3_d3Renderer.js.html#line262">line 262</a>
+        <a href="d3_d3Renderer.js.html">d3/d3Renderer.js</a>, <a href="d3_d3Renderer.js.html#line264">line 264</a>
     </li></ul></dd>
     
 
@@ -612,49 +587,45 @@ Input:
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="_removeFeature"><span class="type-signature"></span>_removeFeature<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Removes a feature from the layer.
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="_removeFeature"><span class="type-signature"></span>_removeFeature<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Removes a feature from the layer.
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -686,7 +657,7 @@ Input:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="d3_d3Renderer.js.html">d3/d3Renderer.js</a>, <a href="d3_d3Renderer.js.html#line510">line 510</a>
+        <a href="d3_d3Renderer.js.html">d3/d3Renderer.js</a>, <a href="d3_d3Renderer.js.html#line512">line 512</a>
     </li></ul></dd>
     
 
@@ -698,49 +669,45 @@ Input:
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="_render"><span class="type-signature"></span>_render<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Render
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="_render"><span class="type-signature"></span>_render<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Render
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -753,7 +720,7 @@ Input:
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.renderer.html#_render">geo.renderer#_render</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -789,49 +756,45 @@ Input:
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="_resize"><span class="type-signature"></span>_resize<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Handle resize event
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="_resize"><span class="type-signature"></span>_resize<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Handle resize event
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -846,7 +809,7 @@ Input:
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
         <a href="geo.renderer.html#_resize">geo.renderer#_resize</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -868,7 +831,7 @@ Input:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="d3_d3Renderer.js.html">d3/d3Renderer.js</a>, <a href="d3_d3Renderer.js.html#line397">line 397</a>
+        <a href="d3_d3Renderer.js.html">d3/d3Renderer.js</a>, <a href="d3_d3Renderer.js.html#line399">line 399</a>
     </li></ul></dd>
     
 
@@ -880,49 +843,45 @@ Input:
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="_update"><span class="type-signature"></span>_update<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Update noop for geo.d3.object api.
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="_update"><span class="type-signature"></span>_update<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Update noop for geo.d3.object api.
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -954,7 +913,7 @@ Input:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="d3_d3Renderer.js.html">d3/d3Renderer.js</a>, <a href="d3_d3Renderer.js.html#line412">line 412</a>
+        <a href="d3_d3Renderer.js.html">d3/d3Renderer.js</a>, <a href="d3_d3Renderer.js.html#line414">line 414</a>
     </li></ul></dd>
     
 
@@ -966,49 +925,45 @@ Input:
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="addDeferred"><span class="type-signature"></span>addDeferred<span class="signature">(defer)</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Add a new deferred object preventing idle event handlers from being called.
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="addDeferred"><span class="type-signature"></span>addDeferred<span class="signature">(defer)</span><span class="type-signature"></span></h4>
 
     
 
+
+
+<div class="description">
+    Add a new deferred object preventing idle event handlers from being called.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
     
-        <h5>Parameters:</h5>
-        
 
 <table class="params">
     <thead>
@@ -1054,9 +1009,10 @@ Input:
     
     </tbody>
 </table>
-    
 
-    
+
+
+
 
 
 <dl class="details">
@@ -1069,7 +1025,7 @@ Input:
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.object.html#addDeferred">geo.object#addDeferred</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -1105,49 +1061,45 @@ Input:
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="api"><span class="type-signature"></span>api<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get API used by the renderer
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="api"><span class="type-signature"></span>api<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Get API used by the renderer
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -1162,7 +1114,7 @@ Input:
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
         <a href="geo.renderer.html#api">geo.renderer#api</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -1184,7 +1136,7 @@ Input:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="d3_d3Renderer.js.html">d3/d3Renderer.js</a>, <a href="d3_d3Renderer.js.html#line372">line 372</a>
+        <a href="d3_d3Renderer.js.html">d3/d3Renderer.js</a>, <a href="d3_d3Renderer.js.html#line374">line 374</a>
     </li></ul></dd>
     
 
@@ -1196,49 +1148,45 @@ Input:
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="baseLayer"><span class="type-signature"></span>baseLayer<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get base layer that belongs to this renderer
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="baseLayer"><span class="type-signature"></span>baseLayer<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Get base layer that belongs to this renderer
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -1251,7 +1199,7 @@ Input:
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.renderer.html#baseLayer">geo.renderer#baseLayer</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -1287,49 +1235,45 @@ Input:
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="canvas"><span class="type-signature"></span>canvas<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get canvas for the renderer
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="canvas"><span class="type-signature"></span>canvas<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Get canvas for the renderer
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -1342,7 +1286,7 @@ Input:
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.renderer.html#canvas">geo.renderer#canvas</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -1378,49 +1322,45 @@ Input:
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="displayToGcs"><span class="type-signature"></span>displayToGcs<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Convert array of points from display to GCS space
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="displayToGcs"><span class="type-signature"></span>displayToGcs<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Convert array of points from display to GCS space
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -1433,7 +1373,7 @@ Input:
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.renderer.html#displayToGcs">geo.renderer#displayToGcs</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -1469,50 +1409,46 @@ Input:
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="displayToWorld"><span class="type-signature"></span>displayToWorld<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
 
     
-    <div class="description">
-        Convert from coordinates in the svg group element to lat/lon.
+
+    <h4 class="name" id="displayToWorld"><span class="type-signature"></span>displayToWorld<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Convert from coordinates in the svg group element to lat/lon.
 Supports objects or arrays of objects.
-    </div>
-    
+</div>
 
-    
 
-    
 
-    
 
-    
 
-    
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -1527,7 +1463,7 @@ Supports objects or arrays of objects.
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
         <a href="geo.renderer.html#displayToWorld">geo.renderer#displayToWorld</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -1549,7 +1485,7 @@ Supports objects or arrays of objects.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="d3_d3Renderer.js.html">d3/d3Renderer.js</a>, <a href="d3_d3Renderer.js.html#line330">line 330</a>
+        <a href="d3_d3Renderer.js.html">d3/d3Renderer.js</a>, <a href="d3_d3Renderer.js.html#line332">line 332</a>
     </li></ul></dd>
     
 
@@ -1561,49 +1497,45 @@ Supports objects or arrays of objects.
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="draw"><span class="type-signature"></span>draw<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Override draw method to do nothing.
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="draw"><span class="type-signature"></span>draw<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Override draw method to do nothing.
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -1635,7 +1567,7 @@ Supports objects or arrays of objects.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="d3_d3Renderer.js.html">d3/d3Renderer.js</a>, <a href="d3_d3Renderer.js.html#line521">line 521</a>
+        <a href="d3_d3Renderer.js.html">d3/d3Renderer.js</a>, <a href="d3_d3Renderer.js.html#line523">line 523</a>
     </li></ul></dd>
     
 
@@ -1647,49 +1579,45 @@ Supports objects or arrays of objects.
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="gcsToDisplay"><span class="type-signature"></span>gcsToDisplay<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Convert array of points from display to GCS space
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="gcsToDisplay"><span class="type-signature"></span>gcsToDisplay<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Convert array of points from display to GCS space
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -1702,7 +1630,7 @@ Supports objects or arrays of objects.
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.renderer.html#gcsToDisplay">geo.renderer#gcsToDisplay</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -1738,50 +1666,46 @@ Supports objects or arrays of objects.
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="geoOff"><span class="type-signature"></span>geoOff<span class="signature">(event<span class="signature-attributes">nullable</span>, arg<span class="signature-attributes">nullable</span>)</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
 
     
-    <div class="description">
-        Remove handlers from an event (or an array of events).  If no event is
+
+    <h4 class="name" id="geoOff"><span class="type-signature"></span>geoOff<span class="signature">(event<span class="signature-attributes">nullable</span>, arg<span class="signature-attributes">nullable</span>)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Remove handlers from an event (or an array of events).  If no event is
  provided all hanlders will be removed.
-    </div>
-    
+</div>
 
-    
 
-    
 
-    
 
+
+
+
+
+
+    <h5>Parameters:</h5>
     
-        <h5>Parameters:</h5>
-        
 
 <table class="params">
     <thead>
@@ -1873,9 +1797,10 @@ Supports objects or arrays of objects.
     
     </tbody>
 </table>
-    
 
-    
+
+
+
 
 
 <dl class="details">
@@ -1888,7 +1813,7 @@ Supports objects or arrays of objects.
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.object.html#geoOff">geo.object#geoOff</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -1924,49 +1849,45 @@ Supports objects or arrays of objects.
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="geoOn"><span class="type-signature"></span>geoOn<span class="signature">(event, handler)</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Bind an event handler to this object
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="geoOn"><span class="type-signature"></span>geoOn<span class="signature">(event, handler)</span><span class="type-signature"></span></h4>
 
     
 
+
+
+<div class="description">
+    Bind an event handler to this object
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
     
-        <h5>Parameters:</h5>
-        
 
 <table class="params">
     <thead>
@@ -2037,9 +1958,10 @@ Supports objects or arrays of objects.
     
     </tbody>
 </table>
-    
 
-    
+
+
+
 
 
 <dl class="details">
@@ -2052,7 +1974,7 @@ Supports objects or arrays of objects.
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.object.html#geoOn">geo.object#geoOn</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -2088,49 +2010,45 @@ Supports objects or arrays of objects.
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="geoTrigger"><span class="type-signature"></span>geoTrigger<span class="signature">(event, args)</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Trigger an event (or events) on this object and call all handlers
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="geoTrigger"><span class="type-signature"></span>geoTrigger<span class="signature">(event, args)</span><span class="type-signature"></span></h4>
 
     
 
+
+
+<div class="description">
+    Trigger an event (or events) on this object and call all handlers
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
     
-        <h5>Parameters:</h5>
-        
 
 <table class="params">
     <thead>
@@ -2199,9 +2117,10 @@ Supports objects or arrays of objects.
     
     </tbody>
 </table>
-    
 
-    
+
+
+
 
 
 <dl class="details">
@@ -2214,7 +2133,7 @@ Supports objects or arrays of objects.
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.object.html#geoTrigger">geo.object#geoTrigger</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -2250,49 +2169,45 @@ Supports objects or arrays of objects.
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="initialized"><span class="type-signature"></span>initialized<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get/Set if renderer has been initialized
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="initialized"><span class="type-signature"></span>initialized<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Get/Set if renderer has been initialized
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -2305,7 +2220,7 @@ Supports objects or arrays of objects.
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.renderer.html#initialized">geo.renderer#initialized</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -2341,49 +2256,45 @@ Supports objects or arrays of objects.
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="layer"><span class="type-signature"></span>layer<span class="signature">()</span><span class="type-signature"> &rarr; {*}</span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get layer of the renderer
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="layer"><span class="type-signature"></span>layer<span class="signature">()</span><span class="type-signature"> &rarr; {*}</span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Get layer of the renderer
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -2396,7 +2307,7 @@ Supports objects or arrays of objects.
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.renderer.html#layer">geo.renderer#layer</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -2432,20 +2343,20 @@ Supports objects or arrays of objects.
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-    <h5>Returns:</h5>
-    
-            
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
 
 
 <dl>
@@ -2460,39 +2371,35 @@ Supports objects or arrays of objects.
     </dd>
 </dl>
 
-        
-
     
-</dd>
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="map"><span class="type-signature"></span>map<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get map that this renderer belongs to
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="map"><span class="type-signature"></span>map<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Get map that this renderer belongs to
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -2505,7 +2412,7 @@ Supports objects or arrays of objects.
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.renderer.html#map">geo.renderer#map</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -2541,49 +2448,45 @@ Supports objects or arrays of objects.
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="onIdle"><span class="type-signature"></span>onIdle<span class="signature">(handler)</span><span class="type-signature"> &rarr; {Array.&lt;<a href="geo.object.html">geo.object</a>>|<a href="geo.object.html">geo.object</a>}</span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Bind a handler that will be called once when all deferreds are resolved.
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="onIdle"><span class="type-signature"></span>onIdle<span class="signature">(handler)</span><span class="type-signature"> &rarr; {Array.&lt;<a href="geo.object.html">geo.object</a>>|<a href="geo.object.html">geo.object</a>}</span></h4>
 
     
 
+
+
+<div class="description">
+    Bind a handler that will be called once when all deferreds are resolved.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
     
-        <h5>Parameters:</h5>
-        
 
 <table class="params">
     <thead>
@@ -2629,9 +2532,10 @@ Supports objects or arrays of objects.
     
     </tbody>
 </table>
-    
 
-    
+
+
+
 
 
 <dl class="details">
@@ -2644,7 +2548,7 @@ Supports objects or arrays of objects.
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.object.html#onIdle">geo.object#onIdle</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -2680,20 +2584,20 @@ Supports objects or arrays of objects.
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-    <h5>Returns:</h5>
-    
-            
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
 <div class="param-desc">
     this
 </div>
@@ -2715,39 +2619,35 @@ Supports objects or arrays of objects.
     </dd>
 </dl>
 
-        
-
     
-</dd>
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="relMouseCoords"><span class="type-signature"></span>relMouseCoords<span class="signature">(event)</span><span class="type-signature"> &rarr; {object}</span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get mouse coodinates related to canvas
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="relMouseCoords"><span class="type-signature"></span>relMouseCoords<span class="signature">(event)</span><span class="type-signature"> &rarr; {object}</span></h4>
 
     
 
+
+
+<div class="description">
+    Get mouse coodinates related to canvas
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
     
-        <h5>Parameters:</h5>
-        
 
 <table class="params">
     <thead>
@@ -2793,9 +2693,10 @@ Supports objects or arrays of objects.
     
     </tbody>
 </table>
-    
 
-    
+
+
+
 
 
 <dl class="details">
@@ -2808,7 +2709,7 @@ Supports objects or arrays of objects.
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.renderer.html#relMouseCoords">geo.renderer#relMouseCoords</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -2844,20 +2745,20 @@ Supports objects or arrays of objects.
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-    <h5>Returns:</h5>
-    
-            
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
 
 
 <dl>
@@ -2872,39 +2773,35 @@ Supports objects or arrays of objects.
     </dd>
 </dl>
 
-        
-
     
-</dd>
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="reset"><span class="type-signature"></span>reset<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Reset to default
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="reset"><span class="type-signature"></span>reset<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Reset to default
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -2917,7 +2814,7 @@ Supports objects or arrays of objects.
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.renderer.html#reset">geo.renderer#reset</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -2953,37 +2850,33 @@ Supports objects or arrays of objects.
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="scaleFactor"><span class="type-signature"></span>scaleFactor<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
 
     
-    <div class="description">
-        Return the current scaling factor to build features that shouldn't
+
+    <h4 class="name" id="scaleFactor"><span class="type-signature"></span>scaleFactor<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Return the current scaling factor to build features that shouldn't
 change size during zooms.  For example:
 
  selection.append('circle')
@@ -2991,104 +2884,18 @@ change size during zooms.  For example:
 
 This will create a circle element with radius r0 independent of the
 current zoom level.
-    </div>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
+</div>
 
 
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="d3_d3Renderer.js.html">d3/d3Renderer.js</a>, <a href="d3_d3Renderer.js.html#line388">line 388</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
 
-        
-            
-<dt>
-    
-        
-
-        <h4 class="name" id="select"><span class="type-signature"></span>select<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Returns a d3 selection for the given feature id.
-    </div>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
 
 
 <dl class="details">
@@ -3120,7 +2927,7 @@ current zoom level.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="d3_d3Renderer.js.html">d3/d3Renderer.js</a>, <a href="d3_d3Renderer.js.html#line501">line 501</a>
+        <a href="d3_d3Renderer.js.html">d3/d3Renderer.js</a>, <a href="d3_d3Renderer.js.html#line390">line 390</a>
     </li></ul></dd>
     
 
@@ -3132,50 +2939,128 @@ current zoom level.
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
+
     
+
+    <h4 class="name" id="select"><span class="type-signature"></span>select<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Returns a d3 selection for the given feature id.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="d3_d3Renderer.js.html">d3/d3Renderer.js</a>, <a href="d3_d3Renderer.js.html#line503">line 503</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         
-
-        <h4 class="name" id="worldToDisplay"><span class="type-signature"></span>worldToDisplay<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
+            
 
     
-    <div class="description">
-        Convert from lat/lon to pixel coordinates in the svg group element.
+
+    <h4 class="name" id="worldToDisplay"><span class="type-signature"></span>worldToDisplay<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Convert from lat/lon to pixel coordinates in the svg group element.
 Supports objects or arrays of objects.
-    </div>
-    
+</div>
 
-    
 
-    
 
-    
 
-    
 
-    
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -3190,7 +3075,7 @@ Supports objects or arrays of objects.
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
         <a href="geo.renderer.html#worldToDisplay">geo.renderer#worldToDisplay</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -3212,7 +3097,7 @@ Supports objects or arrays of objects.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="d3_d3Renderer.js.html">d3/d3Renderer.js</a>, <a href="d3_d3Renderer.js.html#line351">line 351</a>
+        <a href="d3_d3Renderer.js.html">d3/d3Renderer.js</a>, <a href="d3_d3Renderer.js.html#line353">line 353</a>
     </li></ul></dd>
     
 
@@ -3224,49 +3109,45 @@ Supports objects or arrays of objects.
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="worldToGcs"><span class="type-signature"></span>worldToGcs<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Convert array of points from world to GCS coordinate space
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="worldToGcs"><span class="type-signature"></span>worldToGcs<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Convert array of points from world to GCS coordinate space
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -3279,7 +3160,7 @@ Supports objects or arrays of objects.
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.renderer.html#worldToGcs">geo.renderer#worldToGcs</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -3315,22 +3196,21 @@ Supports objects or arrays of objects.
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
 
-        </dl>
+
+
+
+
+
+
+
+        
     
 
     
@@ -3349,10 +3229,10 @@ Supports objects or arrays of objects.
     <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.clock.html">clock</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.renderer.html">renderer</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.latlng.html">latlng</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.mercator.html">mercator</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
-<br clear="both">
+<br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha11</a> on Thu Feb 12 2015 10:09:36 GMT-0500 (EST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta1</a> on Fri Mar 06 2015 10:06:36 GMT-0500 (EST)
 </footer>
 
 <script> prettyPrint(); </script>

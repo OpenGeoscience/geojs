@@ -54,6 +54,7 @@ geo.gl.lineFeature = function (arg) {
       m_mapper = null,
       m_material = null,
       m_pixelWidthUnif = null,
+      m_dynamicDraw = arg.dynamicDraw === undefined ? false : arg.dynamicDraw,
       s_init = this._init,
       s_update = this._update;
 
@@ -81,6 +82,12 @@ geo.gl.lineFeature = function (arg) {
 
         'void main(void)',
         '{',
+        /* If any vertex has been deliberately set to a negative opacity,
+         * skip doing computations on it. */
+        '  if (strokeOpacity &lt; 0.0) {',
+        '    gl_Position = vec4(2, 2, 0, 1);',
+        '    return;',
+        '  }',
         '  const float PI = 3.14159265358979323846264;',
         '  vec4 worldPos = projectionMatrix * modelViewMatrix * vec4(pos.xyz, 1);',
         '  if (worldPos.w != 0.0) {',
@@ -147,6 +154,7 @@ geo.gl.lineFeature = function (arg) {
     var i = null,
         j = null,
         k = null,
+        v,
         prev = [],
         next = [],
         numPts = m_this.data().length,
@@ -170,15 +178,35 @@ geo.gl.lineFeature = function (arg) {
         strkOpacityFunc = m_this.style.get('strokeOpacity'),
         buffers = vgl.DataBuffers(1024),
         // Sources
-        posData = vgl.sourceDataP3fv(),
-        prvPosData = vgl.sourceDataAnyfv(3, vgl.vertexAttributeKeysIndexed.Four),
-        nxtPosData = vgl.sourceDataAnyfv(3, vgl.vertexAttributeKeysIndexed.Five),
-        offPosData = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Six),
-        strkWidthData = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.One),
-        strkColorData = vgl.sourceDataAnyfv(3, vgl.vertexAttributeKeysIndexed.Two),
-        strkOpacityData = vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Three),
+        posData = vgl.sourceDataP3fv({'name': 'pos'}),
+        prvPosData = vgl.sourceDataAnyfv(
+            3, vgl.vertexAttributeKeysIndexed.Four, {'name': 'prev'}),
+        nxtPosData = vgl.sourceDataAnyfv(
+            3, vgl.vertexAttributeKeysIndexed.Five, {'name': 'next'}),
+        offPosData = vgl.sourceDataAnyfv(
+            1, vgl.vertexAttributeKeysIndexed.Six, {'name': 'offset'}),
+        strkWidthData = vgl.sourceDataAnyfv(
+            1, vgl.vertexAttributeKeysIndexed.One, {'name': 'strokeWidth'}),
+        strkColorData = vgl.sourceDataAnyfv(
+            3, vgl.vertexAttributeKeysIndexed.Two, {'name': 'strokeColor'}),
+        strkOpacityData = vgl.sourceDataAnyfv(
+            1, vgl.vertexAttributeKeysIndexed.Three,
+            {'name': 'strokeOpacity'}),
         // Primitive indices
-        triangles = vgl.triangles();
+        triangles = vgl.triangles(),
+        order = m_this.featureVertices(),
+        addVert = function (prevPos, currPos, nextPos, offset,
+                            width, color, opacity) {
+          buffers.write('prev', prevPos, currIndex, 1);
+          buffers.write('pos', currPos, currIndex, 1);
+          buffers.write('next', nextPos, currIndex, 1);
+          buffers.write('offset', [offset], currIndex, 1);
+          buffers.write('indices', [currIndex], currIndex, 1);
+          buffers.write('strokeWidth', [width], currIndex, 1);
+          buffers.write('strokeColor', color, currIndex, 1);
+          buffers.write('strokeOpacity', [opacity], currIndex, 1);
+          currIndex += 1;
+        };
 
     m_this.data().forEach(function (item) {
       lineItem = m_this.line()(item, itemIndex);
@@ -238,37 +266,18 @@ geo.gl.lineFeature = function (arg) {
     start = buffers.alloc(numPts * 6);
     currIndex = start;
 
-    var addVert = function (prevPos, currPos, nextPos, offset,
-                            width, color, opacity) {
-      buffers.write('prev', prevPos, currIndex, 1);
-      buffers.write('pos', currPos, currIndex, 1);
-      buffers.write('next', nextPos, currIndex, 1);
-      buffers.write('offset', [offset], currIndex, 1);
-      buffers.write('indices', [currIndex], currIndex, 1);
-      buffers.write('strokeWidth', [width], currIndex, 1);
-      buffers.write('strokeColor', color, currIndex, 1);
-      buffers.write('strokeOpacity', [opacity], currIndex, 1);
-      currIndex += 1;
-    };
-
     i = 0;
     k = 0;
     for (j = 0; j &lt; lineSegments.length; j += 1) {
       i += 1;
       for (k = 0; k &lt; lineSegments[j] - 1; k += 1) {
-        addVert(prev[i - 1], position[i - 1], next[i - 1], 1,
-                strkWidthArr[i - 1], strkColorArr[i - 1], strkOpacityArr[i - 1]);
-        addVert(prev[i], position[i], next[i], -1,
-                strkWidthArr[i], strkColorArr[i], strkOpacityArr[i]);
-        addVert(prev[i - 1], position[i - 1], next[i - 1], -1,
-                strkWidthArr[i - 1], strkColorArr[i - 1], strkOpacityArr[i - 1]);
-
-        addVert(prev[i - 1], position[i - 1], next[i - 1], 1,
-                strkWidthArr[i - 1], strkColorArr[i - 1], strkOpacityArr[i - 1]);
-        addVert(prev[i], position[i], next[i], 1,
-                strkWidthArr[i], strkColorArr[i], strkOpacityArr[i]);
-        addVert(prev[i], position[i], next[i], -1,
-                strkWidthArr[i], strkColorArr[i], strkOpacityArr[i]);
+        for (v = 0; v &lt; order.length; v += 1) {
+          addVert(prev[i + order[v][0]], position[i + order[v][0]],
+                  next[i + order[v][0]], order[v][1],
+                  strkWidthArr[i + order[v][0]],
+                  strkColorArr[i + order[v][0]],
+                  strkOpacityArr[i + order[v][0]]);
+        }
         i += 1;
       }
     }
@@ -302,6 +311,28 @@ geo.gl.lineFeature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Return the arrangement of vertices used for each line segment.
+   *
+   * @returns {Number}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.featureVertices = function () {
+    return [[-1, 1], [0, -1], [-1, -1], [-1, 1], [0, 1], [0, -1]];
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return the number of vertices used for each line segment.
+   *
+   * @returns {Number}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.verticesPerFeature = function () {
+    return this.featureVertices().length;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Initialize
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -325,7 +356,7 @@ geo.gl.lineFeature = function (arg) {
                           1.0 / m_this.renderer().width());
     s_init.call(m_this, arg);
     m_material = vgl.material();
-    m_mapper = vgl.mapper();
+    m_mapper = vgl.mapper({dynamicDraw: m_dynamicDraw});
 
     prog.addVertexAttribute(posAttr, vgl.vertexAttributeKeys.Position);
     prog.addVertexAttribute(strkWidthAttr, vgl.vertexAttributeKeysIndexed.One);
@@ -348,6 +379,20 @@ geo.gl.lineFeature = function (arg) {
     m_actor = vgl.actor();
     m_actor.setMaterial(m_material);
     m_actor.setMapper(m_mapper);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return list of actors
+   *
+   * @returns {vgl.actor[]}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.actors = function () {
+    if (!m_actor) {
+      return [];
+    }
+    return [m_actor];
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -420,10 +465,10 @@ geo.registerFeature('vgl', 'line', geo.gl.lineFeature);
     <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.clock.html">clock</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.renderer.html">renderer</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.latlng.html">latlng</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.mercator.html">mercator</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
-<br clear="both">
+<br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha11</a> on Thu Feb 12 2015 10:09:36 GMT-0500 (EST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta1</a> on Fri Mar 06 2015 10:06:36 GMT-0500 (EST)
 </footer>
 
 <script> prettyPrint(); </script>

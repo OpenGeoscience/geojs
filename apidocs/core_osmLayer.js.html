@@ -32,6 +32,10 @@
  *
  * @class
  * @extends geo.featureLayer
+ *
+ * @param {Object} arg - arg can contain following keys: baseUrl,
+ *        imageFormat (such as png or jpeg), and displayLast
+ *        (to decide whether or not render tiles from last zoom level).
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.osmLayer = function (arg) {
@@ -52,8 +56,8 @@ geo.osmLayer = function (arg) {
   var m_this = this,
     s_exit = this._exit,
     m_tiles = {},
-    m_hiddenBinNumber = 0,
-    m_lastVisibleBinNumber = 999,
+    m_hiddenBinNumber = -1,
+    m_lastVisibleBinNumber = -1,
     m_visibleBinNumber = 1000,
     m_pendingNewTiles = [],
     m_pendingInactiveTiles = [],
@@ -68,7 +72,7 @@ geo.osmLayer = function (arg) {
     m_pendingNewTilesStat = {},
     s_update = this._update,
     m_updateDefer = null,
-    m_zoomLevelDelta = 2.5,
+    m_zoom = null,
     m_tileUrl;
 
   if (arg &amp;&amp; arg.baseUrl !== undefined) {
@@ -79,12 +83,12 @@ geo.osmLayer = function (arg) {
     m_baseUrl += "/";
   }
 
-  if (arg &amp;&amp; arg.zoomDelta !== undefined) {
-    m_zoomLevelDelta = arg.zoomDelta;
-  }
-
   if (arg &amp;&amp; arg.imageFormat !== undefined) {
     m_imageFormat = arg.imageFormat;
+  }
+
+  if (arg &amp;&amp; arg.displayLast !== undefined &amp;&amp; arg.displayLast) {
+    m_lastVisibleBinNumber = 999;
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -110,17 +114,6 @@ geo.osmLayer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Return zoom to be used for fetching the tiles
-   *
-   * @private
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  function getModifiedMapZoom() {
-    return Math.floor(m_this.map().zoom() + m_zoomLevelDelta);
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
    * Check if a tile is visible in current view
    *
    * @private
@@ -137,7 +130,6 @@ geo.osmLayer = function (arg) {
     }
     return false;
   }
-
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -352,6 +344,7 @@ geo.osmLayer = function (arg) {
     tile.LOADED = false;
     tile.REMOVED = false;
     tile.REMOVING = false;
+    tile.INVALID = false;
 
     tile.crossOrigin = "anonymous";
     tile.zoom = zoom;
@@ -371,7 +364,6 @@ geo.osmLayer = function (arg) {
     return tile;
   };
 
-
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Clear tiles that are no longer required
@@ -379,7 +371,7 @@ geo.osmLayer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   /* jshint -W089 */
   this._removeTiles = function () {
-    var i, x, y, tile, zoom, currZoom = getModifiedMapZoom(),
+    var i, x, y, tile, zoom, currZoom = m_zoom,
         lastZoom = m_lastVisibleZoom;
 
     if (!m_tiles) {
@@ -449,7 +441,6 @@ geo.osmLayer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._addTiles = function (request) {
     var feature, ren = m_this.renderer(),
-        zoom = getModifiedMapZoom(),
         /// First get corner points
         /// In display coordinates the origin is on top left corner (0, 0)
         llx = 0.0, lly = m_this.height(), urx = m_this.width(), ury = 0.0,
@@ -457,7 +448,11 @@ geo.osmLayer = function (arg) {
         tile2y = null, invJ = null, i = 0, j = 0, lastStartX, lastStartY,
         lastEndX, lastEndY, currStartX, currStartY, currEndX, currEndY,
         worldPt1 = ren.displayToWorld([llx, lly]),
-        worldPt2 = ren.displayToWorld([urx, ury]);
+        worldPt2 = ren.displayToWorld([urx, ury]),
+        worldDeltaY = null, displayDeltaY = null,
+        worldDelta = null, displayDelta = null,
+        noOfTilesRequired = null, worldDeltaPerTile = null,
+        minDistWorldDeltaPerTile = null, distWorldDeltaPerTile;
 
     worldPt1[0] = Math.max(worldPt1[0], -180.0);
     worldPt1[0] = Math.min(worldPt1[0], 180.0);
@@ -469,23 +464,49 @@ geo.osmLayer = function (arg) {
     worldPt2[1] = Math.max(worldPt2[1], -180.0);
     worldPt2[1] = Math.min(worldPt2[1], 180.0);
 
-    /// Compute tilex and tiley
-    tile1x = geo.mercator.long2tilex(worldPt1[0], zoom);
-    tile1y = geo.mercator.lat2tiley(worldPt1[1], zoom);
+    /// Compute tile zoom
+    worldDelta = Math.abs(worldPt2[0] - worldPt1[0]);
+    worldDeltaY = Math.abs(worldPt2[1] - worldPt1[1]);
 
-    tile2x = geo.mercator.long2tilex(worldPt2[0], zoom);
-    tile2y = geo.mercator.lat2tiley(worldPt2[1], zoom);
+    displayDelta = urx - llx;
+    displayDeltaY = lly - ury;
+
+    /// Reuse variables
+    if (displayDeltaY > displayDelta) {
+      displayDelta = displayDeltaY;
+      worldDelta = worldDeltaY;
+    }
+
+    noOfTilesRequired = Math.round(displayDelta / 256.0);
+    worldDeltaPerTile = worldDelta / noOfTilesRequired;
+
+    /// Minimize per pixel distortion
+    minDistWorldDeltaPerTile = Number.POSITIVE_INFINITY;
+    for (i = 20; i >= 2; i = i - 1) {
+      distWorldDeltaPerTile = Math.abs(360.0 / Math.pow(2, i) - worldDeltaPerTile);
+      if (distWorldDeltaPerTile &lt; minDistWorldDeltaPerTile) {
+        minDistWorldDeltaPerTile = distWorldDeltaPerTile;
+        m_zoom = i;
+      }
+    }
+
+    /// Compute tilex and tiley
+    tile1x = geo.mercator.long2tilex(worldPt1[0], m_zoom);
+    tile1y = geo.mercator.lat2tiley(worldPt1[1], m_zoom);
+
+    tile2x = geo.mercator.long2tilex(worldPt2[0], m_zoom);
+    tile2y = geo.mercator.lat2tiley(worldPt2[1], m_zoom);
 
     /// Clamp tilex and tiley
     tile1x = Math.max(tile1x, 0);
-    tile1x = Math.min(Math.pow(2, zoom) - 1, tile1x);
+    tile1x = Math.min(Math.pow(2, m_zoom) - 1, tile1x);
     tile1y = Math.max(tile1y, 0);
-    tile1y = Math.min(Math.pow(2, zoom) - 1, tile1y);
+    tile1y = Math.min(Math.pow(2, m_zoom) - 1, tile1y);
 
     tile2x = Math.max(tile2x, 0);
-    tile2x = Math.min(Math.pow(2, zoom) - 1, tile2x);
+    tile2x = Math.min(Math.pow(2, m_zoom) - 1, tile2x);
     tile2y = Math.max(tile2y, 0);
-    tile2y = Math.min(Math.pow(2, zoom) - 1, tile2y);
+    tile2y = Math.min(Math.pow(2, m_zoom) - 1, tile2y);
 
     /// Check and update variables appropriately if view
     /// direction is flipped. This should not happen but
@@ -504,8 +525,8 @@ geo.osmLayer = function (arg) {
     /// Compute current tile indices
     currStartX = tile1x;
     currEndX = tile2x;
-    currStartY = (Math.pow(2, zoom) - 1 - tile1y);
-    currEndY = (Math.pow(2, zoom) - 1 - tile2y);
+    currStartY = (Math.pow(2, m_zoom) - 1 - tile1y);
+    currEndY = (Math.pow(2, m_zoom) - 1 - tile2y);
     if (currEndY &lt; currStartY) {
       temp = currStartY;
       currStartY = currEndY;
@@ -523,6 +544,7 @@ geo.osmLayer = function (arg) {
                    m_lastVisibleZoom);
     lastStartY = Math.pow(2, m_lastVisibleZoom) - 1 - lastStartY;
     lastEndY   = Math.pow(2, m_lastVisibleZoom) - 1 - lastEndY;
+
     if (lastEndY &lt; lastStartY) {
       temp = lastStartY;
       lastStartY = lastEndY;
@@ -530,8 +552,8 @@ geo.osmLayer = function (arg) {
     }
 
     m_visibleTilesRange = {};
-    m_visibleTilesRange[zoom] = { startX: currStartX, endX: currEndX,
-                                  startY: currStartY, endY: currEndY };
+    m_visibleTilesRange[m_zoom] = { startX: currStartX, endX: currEndX,
+                                    startY: currStartY, endY: currEndY };
 
     m_visibleTilesRange[m_lastVisibleZoom] =
                                 { startX: lastStartX, endX: lastEndX,
@@ -541,11 +563,11 @@ geo.osmLayer = function (arg) {
 
     for (i = tile1x; i &lt;= tile2x; i += 1) {
       for (j = tile2y; j &lt;= tile1y; j += 1) {
-        invJ = (Math.pow(2, zoom) - 1 - j);
-        if (!m_this._hasTile(zoom, i, invJ)) {
-          tile = m_this._addTile(request, zoom, i, invJ);
+        invJ = (Math.pow(2, m_zoom) - 1 - j);
+        if (!m_this._hasTile(m_zoom, i, invJ)) {
+          tile = m_this._addTile(request, m_zoom, i, invJ);
         } else {
-          tile = m_tiles[zoom][i][invJ];
+          tile = m_tiles[m_zoom][i][invJ];
           tile.feature.bin(m_visibleBinNumber);
           if (tile.LOADED &amp;&amp; m_updateTimerId in m_pendingNewTilesStat) {
             m_pendingNewTilesStat[m_updateTimerId].count += 1;
@@ -563,11 +585,14 @@ geo.osmLayer = function (arg) {
       m_this.addDeferred(defer);
 
       return function () {
+        if (tile.INVALID) {
+          return;
+        }
         tile.LOADING = false;
         tile.LOADED = true;
         if ((tile.REMOVING || tile.REMOVED) &amp;&amp;
           tile.feature &amp;&amp;
-          tile.zoom !== getModifiedMapZoom()) {
+          tile.zoom !== m_zoom) {
           tile.feature.bin(m_hiddenBinNumber);
           tile.REMOVING = false;
           tile.REMOVED = true;
@@ -628,18 +653,20 @@ geo.osmLayer = function (arg) {
       request = {};
     }
 
-    var zoom = getModifiedMapZoom();
+    if (!m_zoom) {
+      m_zoom = m_this.map().zoom();
+    }
 
     if (!m_lastVisibleZoom) {
-      m_lastVisibleZoom = zoom;
+      m_lastVisibleZoom = m_zoom;
     }
 
     /// Add tiles that are currently visible
     m_this._addTiles(request);
 
     /// Update the zoom
-    if (m_lastVisibleZoom !== zoom) {
-      m_lastVisibleZoom = zoom;
+    if (m_lastVisibleZoom !== m_zoom) {
+      m_lastVisibleZoom = m_zoom;
     }
 
     m_this.updateTime().modified();
@@ -689,7 +716,7 @@ geo.osmLayer = function (arg) {
     m_this.gcs("EPSG:3857");
     m_this.map().zoomRange({
       min: 0,
-      max: 18 - m_zoomLevelDelta
+      max: 18
     });
     return m_this;
   };
@@ -705,6 +732,46 @@ geo.osmLayer = function (arg) {
 
     /// Now call base class update
     s_update.call(m_this, request);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Update baseUrl for map tiles.  Map all tiles as needing to be refreshed.
+   *
+   * @param baseUrl: the new baseUrl for the map.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  /* jshint -W089 */
+  this.updateBaseUrl = function (baseUrl) {
+    if (baseUrl.charAt(m_baseUrl.length - 1) !== "/") {
+      baseUrl += "/";
+    }
+    if (baseUrl !== m_baseUrl) {
+      m_baseUrl = baseUrl;
+
+      var tile, x, y, zoom;
+      for (zoom in m_tiles) {
+        for (x in m_tiles[zoom]) {
+          for (y in m_tiles[zoom][x]) {
+            tile = m_tiles[zoom][x][y];
+            tile.INVALID = true;
+            m_this.deleteFeature(tile.feature);
+          }
+        }
+      }
+      m_tiles = {};
+      m_pendingNewTiles = [];
+      m_pendingInactiveTiles = [];
+      m_numberOfCachedTiles = 0;
+      m_visibleTilesRange = {};
+      m_pendingNewTilesStat = {};
+
+      if (m_updateTimerId !== null) {
+        clearTimeout(m_updateTimerId);
+        m_updateTimerId = null;
+      }
+      this._update();
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -741,10 +808,10 @@ geo.registerLayer("osm", geo.osmLayer);
     <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.clock.html">clock</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.renderer.html">renderer</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.latlng.html">latlng</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.mercator.html">mercator</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
-<br clear="both">
+<br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha11</a> on Thu Feb 12 2015 10:09:36 GMT-0500 (EST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta1</a> on Fri Mar 06 2015 10:06:36 GMT-0500 (EST)
 </footer>
 
 <script> prettyPrint(); </script>

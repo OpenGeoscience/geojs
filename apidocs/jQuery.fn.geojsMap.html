@@ -39,40 +39,35 @@
     <div class="container-overview">
     
         
-<dt>
-    
-        
-        <h2>Constructor</h2>
-        
-
-        <h4 class="name" id="geojsMap"><span class="type-signature"></span>new geojsMap<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
 
     
-    <div class="description">
-        Generates a geojs map inside an element.
+
+    <h4 class="name" id="geojsMap"><span class="type-signature"></span>new geojsMap<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Generates a geojs map inside an element.
 
 
 Due to current limitations in geojs, only a single map can be instantiated
 on a page.  Trying to create a second map will throw an error
 (see issue
 <a href="https://github.com/OpenGeoscience/geojs/issues/154">#154</a>).
-    </div>
-    
+</div>
 
-    
 
-    
 
-    
 
-    
 
-    
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -116,21 +111,21 @@ on a page.  Trying to create a second map will throw an error
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
+
+
+
+
+
+
+
+    <h5>Examples</h5>
     
-        <h5>Examples</h5>
-        
         <p class="code-caption">Create a map with the default options.</p>
     
     <pre class="prettyprint"><code>$("#map").geojsMap();</code></pre>
@@ -138,59 +133,58 @@ on a page.  Trying to create a second map will throw an error
         <p class="code-caption">Create a map with a given initial center and zoom</p>
     
     <pre class="prettyprint"><code>$("#map").geojsMap({
-  longitude: -125,
-  latitude: 35,
-  zoom: 5
+   longitude: -125,
+   latitude: 35,
+   zoom: 5
 });</code></pre>
 
         <p class="code-caption">Create a map with points</p>
     
     <pre class="prettyprint"><code>$("#map").geojsMap({
- data: [...],
- layers: [{
-   renderer: 'vgl',
-   features: [{
-     type: 'point',
-     size: 5,
-     position: function (d) { return {x: d.geometry.x, y: d.geometry.y} },
-     fillColor: function (d, i) { return i &lt; 5 ? 'red' : 'blue' },
-     stroke: false
-   }]
- }]
+  data: [...],
+  layers: [{
+    renderer: 'vgl',
+    features: [{
+      type: 'point',
+      size: 5,
+      position: function (d) { return {x: d.geometry.x, y: d.geometry.y} },
+      fillColor: function (d, i) { return i &lt; 5 ? 'red' : 'blue' },
+      stroke: false
+    }]
+  }]
 };</code></pre>
 
         <p class="code-caption">Create a map with points, lines and multiple layers</p>
     
     <pre class="prettyprint"><code>$("#map").geojsMap({
- center: { x: -130, y: 40 },
- zoom: 3,
- layers: [{
-   renderer: 'vgl',
-   features: [{
-     data: [...],
-     type: 'point',
-     size: 5,
-     position: function (d) { return {x: d.geometry.x, y: d.geometry.y} },
-     fillColor: function (d, i) { return i &lt; 5 ? 'red' : 'blue' },
-     stroke: false
-   }]
- },
- {
-    renderer: 'd3',
-    features[{
+  center: { x: -130, y: 40 },
+  zoom: 3,
+  layers: [{
+    renderer: 'vgl',
+    features: [{
       data: [...],
-      type: 'line',
-      position: function (d) { return { x: d[0], y: d[1] } },
-      line: function (d) { return d.coordinates; },
-      strokeWidth: 3,
-      strokeColor: 'black',
-      strokeOpacity: 0.5
+      type: 'point',
+      size: 5,
+      position: function (d) { return {x: d.geometry.x, y: d.geometry.y} },
+      fillColor: function (d, i) { return i &lt; 5 ? 'red' : 'blue' },
+      stroke: false
     }]
- }]
+  },
+  {
+     renderer: 'd3',
+     features[{
+       data: [...],
+       type: 'line',
+       position: function (d) { return { x: d[0], y: d[1] } },
+       line: function (d) { return d.coordinates; },
+       strokeWidth: 3,
+       strokeColor: 'black',
+       strokeOpacity: 0.5
+     }]
+  }]
 };</code></pre>
 
-    
-</dd>
+
 
     
     </div>
@@ -208,28 +202,26 @@ on a page.  Trying to create a second map will throw an error
     
         <h3 class="subsection-title">Members</h3>
 
-        <dl>
+        
             
-<dt>
-    <h4 class="name" id="options"><span class="type-signature"></span>options<span class="type-signature"></span></h4>
+<h4 class="name" id="options"><span class="type-signature"></span>options<span class="type-signature"></span></h4>
 
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        Map options (not fully implemented).
-    </div>
-    
 
-    
 
-    
+
+<div class="description">
+    Map options (not fully implemented).
+</div>
+
+
+
+
+
 
 
     <h5 class="subsection-title">Properties:</h5>
 
-    <dl>
+    
 
 <table class="props">
     <thead>
@@ -455,7 +447,7 @@ features/layers not already containing data.</td>
             <td class="type">
             
                 
-<span class="param-type">Array.&lt;<a href="geo.layer.html#spec">geo.layer.spec</a>></span>
+<span class="param-type">Array.&lt;<a href="geo.layer.html#.spec">geo.layer.spec</a>></span>
 
 
             
@@ -522,7 +514,7 @@ features/layers not already containing data.</td>
     
     </tbody>
 </table>
-</dl>
+
 
 
 
@@ -567,11 +559,11 @@ features/layers not already containing data.</td>
 </dl>
 
 
-    
 
+
+
+    <h5>Examples</h5>
     
-        <h5>Examples</h5>
-        
         <p class="code-caption">Get the current map center</p>
     
     <pre class="prettyprint"><code>var center=$("#map").geojsMap("center");</code></pre>
@@ -580,43 +572,39 @@ features/layers not already containing data.</td>
     
     <pre class="prettyprint"><code>$("#map").geojsMap("center", {lat: 10, lng: -100});</code></pre>
 
-    
-</dd>
 
-        </dl>
+
+        
     
 
     
         <h3 class="subsection-title">Methods</h3>
 
-        <dl>
+        
             
-<dt>
-    
-        
-
-        <h4 class="name" id="_create"><span class="type-signature">(protected) </span>_create<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Internal constructor
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="_create"><span class="type-signature">(protected) </span>_create<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Internal constructor
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -660,49 +648,45 @@ features/layers not already containing data.</td>
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="_resize"><span class="type-signature">(protected) </span>_resize<span class="signature">(size<span class="signature-attributes">nullable</span>)</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Resize the map canvas.
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="_resize"><span class="type-signature">(protected) </span>_resize<span class="signature">(size<span class="signature-attributes">nullable</span>)</span><span class="type-signature"></span></h4>
 
     
 
+
+
+<div class="description">
+    Resize the map canvas.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
     
-        <h5>Parameters:</h5>
-        
 
 <table class="params">
     <thead>
@@ -760,9 +744,10 @@ features/layers not already containing data.</td>
     
     </tbody>
 </table>
-    
 
-    
+
+
+
 
 
 <dl class="details">
@@ -806,51 +791,47 @@ features/layers not already containing data.</td>
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="redraw"><span class="type-signature"></span>redraw<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
 
     
-    <div class="description">
-        Do a full redraw of the map.  In general, users shouldn't need to
+
+    <h4 class="name" id="redraw"><span class="type-signature"></span>redraw<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Do a full redraw of the map.  In general, users shouldn't need to
 call this method, but it could be useful when accessing lower
 level features of the mapping api.
-    </div>
-    
+</div>
 
-    
 
-    
 
-    
 
-    
 
-    
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -902,52 +883,48 @@ geo.feature#modified to properly update.</li>
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="update"><span class="type-signature"></span>update<span class="signature">(layers<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
 
     
-    <div class="description">
-        Update the layers and features using a new array of
-<a href="geo.layer.html#spec">geo.layer.spec</a> objects.  All existing layers
+
+    <h4 class="name" id="update"><span class="type-signature"></span>update<span class="signature">(layers<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Update the layers and features using a new array of
+<a href="geo.layer.html#.spec">geo.layer.spec</a> objects.  All existing layers
 and features are deleted.  If only the data has changed,
 you can usually just call <a href="jQuery.fn.geojsMap.html#redraw">redraw</a>.
-    </div>
-    
+</div>
 
-    
 
-    
 
-    
 
+
+
+
+
+
+    <h5>Parameters:</h5>
     
-        <h5>Parameters:</h5>
-        
 
 <table class="params">
     <thead>
@@ -979,7 +956,7 @@ you can usually just call <a href="jQuery.fn.geojsMap.html#redraw">redraw</a>.
             <td class="type">
             
                 
-<span class="param-type">Array.&lt;<a href="geo.layer.html#spec">geo.layer.spec</a>></span>
+<span class="param-type">Array.&lt;<a href="geo.layer.html#.spec">geo.layer.spec</a>></span>
 
 
             
@@ -1005,9 +982,10 @@ you can usually just call <a href="jQuery.fn.geojsMap.html#redraw">redraw</a>.
     
     </tbody>
 </table>
-    
 
-    
+
+
+
 
 
 <dl class="details">
@@ -1051,21 +1029,21 @@ you can usually just call <a href="jQuery.fn.geojsMap.html#redraw">redraw</a>.
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
+
+
+
+
+
+
+
+    <h5>Examples</h5>
     
-        <h5>Examples</h5>
-        
         <p class="code-caption">Delete and recreate all existing layers</p>
     
     <pre class="prettyprint"><code>$("#map").geojsMap("update");</code></pre>
@@ -1074,10 +1052,9 @@ you can usually just call <a href="jQuery.fn.geojsMap.html#redraw">redraw</a>.
     
     <pre class="prettyprint"><code>$("#map").geojsMap("update", []);</code></pre>
 
-    
-</dd>
 
-        </dl>
+
+        
     
 
     
@@ -1096,10 +1073,10 @@ you can usually just call <a href="jQuery.fn.geojsMap.html#redraw">redraw</a>.
     <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.clock.html">clock</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.renderer.html">renderer</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.latlng.html">latlng</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.mercator.html">mercator</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
-<br clear="both">
+<br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha11</a> on Thu Feb 12 2015 10:09:37 GMT-0500 (EST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta1</a> on Fri Mar 06 2015 10:06:37 GMT-0500 (EST)
 </footer>
 
 <script> prettyPrint(); </script>

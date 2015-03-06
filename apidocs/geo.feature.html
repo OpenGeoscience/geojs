@@ -41,34 +41,29 @@
     <div class="container-overview">
     
         
-<dt>
-    
-        
-        <h2>Constructor</h2>
-        
-
-        <h4 class="name" id="feature"><span class="type-signature"></span>new feature<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="geo.feature.html">geo.feature</a>}</span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Create a new instance of class feature
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="feature"><span class="type-signature"></span>new feature<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="geo.feature.html">geo.feature</a>}</span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Create a new instance of class feature
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -112,20 +107,20 @@
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-    <h5>Returns:</h5>
-    
-            
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
 
 
 <dl>
@@ -140,10 +135,9 @@
     </dd>
 </dl>
 
-        
-
     
-</dd>
+
+
 
     
     </div>
@@ -172,33 +166,31 @@
     
         <h3 class="subsection-title">Members</h3>
 
-        <dl>
+        
             
-<dt>
-    <h4 class="name" id="eventID"><span class="type-signature">(static) </span>eventID<span class="type-signature"> :number</span></h4>
+<h4 class="name" id=".eventID"><span class="type-signature">(static) </span>eventID<span class="type-signature"> :number</span></h4>
 
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        The most recent feature event triggered.
-    </div>
-    
 
-    
-        <h5>Type:</h5>
-        <ul>
-            <li>
-                
+
+
+<div class="description">
+    The most recent feature event triggered.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
 <span class="param-type">number</span>
 
 
-            </li>
-        </ul>
-    
+        </li>
+    </ul>
 
-    
+
+
 
 
 <dl class="details">
@@ -230,7 +222,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_feature.js.html">core/feature.js</a>, <a href="core_feature.js.html#line529">line 529</a>
+        <a href="core_feature.js.html">core/feature.js</a>, <a href="core_feature.js.html#line545">line 545</a>
     </li></ul></dd>
     
 
@@ -242,49 +234,45 @@
 </dl>
 
 
-    
 
-    
-</dd>
 
-        </dl>
+
+
+        
     
 
     
         <h3 class="subsection-title">Methods</h3>
 
-        <dl>
+        
             
-<dt>
-    
-        
-
-        <h4 class="name" id="create"><span class="type-signature">(static) </span>create<span class="signature">(layer, spec<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="geo.feature.html">geo.feature</a>|null}</span></h4>
-
-        
-    
-</dt>
-<dd>
 
     
-    <div class="description">
-        Create a feature from an object.  The implementation here is
+
+    <h4 class="name" id=".create"><span class="type-signature">(static) </span>create<span class="signature">(layer, spec<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="geo.feature.html">geo.feature</a>|null}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Create a feature from an object.  The implementation here is
 meant to define the general interface of creating features
 from a javascript object.  See documentation from individual
 feature types for specific details.  In case of an error in
 the arguments this method will return null;
-    </div>
-    
+</div>
 
-    
 
-    
 
-    
 
+
+
+
+
+
+    <h5>Parameters:</h5>
     
-        <h5>Parameters:</h5>
-        
 
 <table class="params">
     <thead>
@@ -353,7 +341,7 @@ the arguments this method will return null;
             <td class="type">
             
                 
-<span class="param-type"><a href="geo.feature.html#spec">geo.feature.spec</a></span>
+<span class="param-type"><a href="geo.feature.html#.spec">geo.feature.spec</a></span>
 
 
             
@@ -385,9 +373,10 @@ the arguments this method will return null;
     
     </tbody>
 </table>
-    
 
-    
+
+
+
 
 
 <dl class="details">
@@ -419,7 +408,7 @@ the arguments this method will return null;
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_feature.js.html">core/feature.js</a>, <a href="core_feature.js.html#line553">line 553</a>
+        <a href="core_feature.js.html">core/feature.js</a>, <a href="core_feature.js.html#line569">line 569</a>
     </li></ul></dd>
     
 
@@ -431,20 +420,20 @@ the arguments this method will return null;
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-    <h5>Returns:</h5>
-    
-            
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
 
 
 <dl>
@@ -462,39 +451,35 @@ the arguments this method will return null;
     </dd>
 </dl>
 
-        
-
     
-</dd>
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="_bindMouseHandlers"><span class="type-signature"></span>_bindMouseHandlers<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Private method to bind mouse handlers on the map element.
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="_bindMouseHandlers"><span class="type-signature"></span>_bindMouseHandlers<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Private method to bind mouse handlers on the map element.
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -538,51 +523,47 @@ the arguments this method will return null;
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="_build"><span class="type-signature"></span>_build<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
 
     
-    <div class="description">
-        Build
+
+    <h4 class="name" id="_build"><span class="type-signature"></span>_build<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Build
 
 Derived class should implement this
-    </div>
-    
+</div>
 
-    
 
-    
 
-    
 
-    
 
-    
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -614,7 +595,7 @@ Derived class should implement this
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_feature.js.html">core/feature.js</a>, <a href="core_feature.js.html#line483">line 483</a>
+        <a href="core_feature.js.html">core/feature.js</a>, <a href="core_feature.js.html#line499">line 499</a>
     </li></ul></dd>
     
 
@@ -626,51 +607,47 @@ Derived class should implement this
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="_drawables"><span class="type-signature"></span>_drawables<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
 
     
-    <div class="description">
-        Get context specific drawables
+
+    <h4 class="name" id="_drawables"><span class="type-signature"></span>_drawables<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Get context specific drawables
 
 Derived class should implement this
-    </div>
-    
+</div>
 
-    
 
-    
 
-    
 
-    
 
-    
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -702,7 +679,7 @@ Derived class should implement this
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_feature.js.html">core/feature.js</a>, <a href="core_feature.js.html#line493">line 493</a>
+        <a href="core_feature.js.html">core/feature.js</a>, <a href="core_feature.js.html#line509">line 509</a>
     </li></ul></dd>
     
 
@@ -714,51 +691,47 @@ Derived class should implement this
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="_exit"><span class="type-signature"></span>_exit<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
 
     
-    <div class="description">
-        Destroy
+
+    <h4 class="name" id="_exit"><span class="type-signature"></span>_exit<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Destroy
 
 Derived class should implement this
-    </div>
-    
+</div>
 
-    
 
-    
 
-    
 
-    
 
-    
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -773,7 +746,7 @@ Derived class should implement this
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
         <a href="geo.sceneObject.html#_exit">geo.sceneObject#_exit</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -795,7 +768,7 @@ Derived class should implement this
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_feature.js.html">core/feature.js</a>, <a href="core_feature.js.html#line513">line 513</a>
+        <a href="core_feature.js.html">core/feature.js</a>, <a href="core_feature.js.html#line529">line 529</a>
     </li></ul></dd>
     
 
@@ -807,49 +780,45 @@ Derived class should implement this
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="_handleBrush"><span class="type-signature"></span>_handleBrush<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Private brush handler.
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="_handleBrush"><span class="type-signature"></span>_handleBrush<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Private brush handler.
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -893,49 +862,45 @@ Derived class should implement this
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="_handleBrushend"><span class="type-signature"></span>_handleBrushend<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Private brushend handler.
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="_handleBrushend"><span class="type-signature"></span>_handleBrushend<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Private brushend handler.
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -979,49 +944,45 @@ Derived class should implement this
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="_handleMouseclick"><span class="type-signature"></span>_handleMouseclick<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Private mouseclick handler
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="_handleMouseclick"><span class="type-signature"></span>_handleMouseclick<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Private mouseclick handler
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -1065,49 +1026,45 @@ Derived class should implement this
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="_handleMousemove"><span class="type-signature"></span>_handleMousemove<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Private mousemove handler
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="_handleMousemove"><span class="type-signature"></span>_handleMousemove<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Private mousemove handler
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -1151,51 +1108,47 @@ Derived class should implement this
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="_init"><span class="type-signature"></span>_init<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
 
     
-    <div class="description">
-        Initialize
+
+    <h4 class="name" id="_init"><span class="type-signature"></span>_init<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Initialize
 
 Derived class should implement this
-    </div>
-    
+</div>
 
-    
 
-    
 
-    
 
-    
 
-    
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -1227,7 +1180,7 @@ Derived class should implement this
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_feature.js.html">core/feature.js</a>, <a href="core_feature.js.html#line466">line 466</a>
+        <a href="core_feature.js.html">core/feature.js</a>, <a href="core_feature.js.html#line482">line 482</a>
     </li></ul></dd>
     
 
@@ -1239,49 +1192,45 @@ Derived class should implement this
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="_unbindMouseHandlers"><span class="type-signature"></span>_unbindMouseHandlers<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Private method to unbind mouse handlers on the map element.
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="_unbindMouseHandlers"><span class="type-signature"></span>_unbindMouseHandlers<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Private method to unbind mouse handlers on the map element.
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -1325,51 +1274,47 @@ Derived class should implement this
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="_update"><span class="type-signature"></span>_update<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
 
     
-    <div class="description">
-        Update
+
+    <h4 class="name" id="_update"><span class="type-signature"></span>_update<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Update
 
 Derived class should implement this
-    </div>
-    
+</div>
 
-    
 
-    
 
-    
 
-    
 
-    
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -1401,7 +1346,7 @@ Derived class should implement this
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_feature.js.html">core/feature.js</a>, <a href="core_feature.js.html#line503">line 503</a>
+        <a href="core_feature.js.html">core/feature.js</a>, <a href="core_feature.js.html#line519">line 519</a>
     </li></ul></dd>
     
 
@@ -1413,49 +1358,45 @@ Derived class should implement this
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="addChild"><span class="type-signature"></span>addChild<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Add a child (or an array of children) to the object
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="addChild"><span class="type-signature"></span>addChild<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Add a child (or an array of children) to the object
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -1468,7 +1409,7 @@ Derived class should implement this
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.sceneObject.html#addChild">geo.sceneObject#addChild</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -1504,49 +1445,45 @@ Derived class should implement this
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="addDeferred"><span class="type-signature"></span>addDeferred<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Override object.addDeferred to propagate up the scene tree.
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="addDeferred"><span class="type-signature"></span>addDeferred<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Override object.addDeferred to propagate up the scene tree.
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -1559,7 +1496,7 @@ Derived class should implement this
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.sceneObject.html#addDeferred">geo.sceneObject#addDeferred</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -1595,137 +1532,47 @@ Derived class should implement this
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="bin"><span class="type-signature"></span>bin<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
 
     
-    <div class="description">
-        Get/Set bin of the feature
+
+    <h4 class="name" id="bin"><span class="type-signature"></span>bin<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Get/Set bin of the feature
 
 Bin number is typically used for sorting the order of rendering
-    </div>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
+</div>
 
 
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_feature.js.html">core/feature.js</a>, <a href="core_feature.js.html#line386">line 386</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
 
-        
-            
-<dt>
-    
-        
-
-        <h4 class="name" id="buildTime"><span class="type-signature"></span>buildTime<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get/Set timestamp of last time build happened
-    </div>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
 
 
 <dl class="details">
@@ -1757,7 +1604,7 @@ Bin number is typically used for sorting the order of rendering
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_feature.js.html">core/feature.js</a>, <a href="core_feature.js.html#line416">line 416</a>
+        <a href="core_feature.js.html">core/feature.js</a>, <a href="core_feature.js.html#line392">line 392</a>
     </li></ul></dd>
     
 
@@ -1769,49 +1616,127 @@ Bin number is typically used for sorting the order of rendering
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
+
     
+
+    <h4 class="name" id="buildTime"><span class="type-signature"></span>buildTime<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Get/Set timestamp of last time build happened
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="core_feature.js.html">core/feature.js</a>, <a href="core_feature.js.html#line422">line 422</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         
-
-        <h4 class="name" id="children"><span class="type-signature"></span>children<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get an array of child objects
-    </div>
-    
+            
 
     
 
-    
+    <h4 class="name" id="children"><span class="type-signature"></span>children<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Get an array of child objects
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -1824,7 +1749,7 @@ Bin number is typically used for sorting the order of rendering
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.sceneObject.html#children">geo.sceneObject#children</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -1860,49 +1785,45 @@ Bin number is typically used for sorting the order of rendering
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="data"><span class="type-signature"></span>data<span class="signature">()</span><span class="type-signature"> &rarr; {Array}</span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get/Set data
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="data"><span class="type-signature"></span>data<span class="signature">()</span><span class="type-signature"> &rarr; {Array}</span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Get/Set data
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -1934,7 +1855,7 @@ Bin number is typically used for sorting the order of rendering
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_feature.js.html">core/feature.js</a>, <a href="core_feature.js.html#line448">line 448</a>
+        <a href="core_feature.js.html">core/feature.js</a>, <a href="core_feature.js.html#line454">line 454</a>
     </li></ul></dd>
     
 
@@ -1946,20 +1867,20 @@ Bin number is typically used for sorting the order of rendering
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-    <h5>Returns:</h5>
-    
-            
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
 
 
 <dl>
@@ -1974,39 +1895,35 @@ Bin number is typically used for sorting the order of rendering
     </dd>
 </dl>
 
-        
-
     
-</dd>
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="dataTime"><span class="type-signature"></span>dataTime<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get/Set timestamp of data change
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="dataTime"><span class="type-signature"></span>dataTime<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Get/Set timestamp of data change
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -2038,7 +1955,7 @@ Bin number is typically used for sorting the order of rendering
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_feature.js.html">core/feature.js</a>, <a href="core_feature.js.html#line401">line 401</a>
+        <a href="core_feature.js.html">core/feature.js</a>, <a href="core_feature.js.html#line407">line 407</a>
     </li></ul></dd>
     
 
@@ -2050,50 +1967,46 @@ Bin number is typically used for sorting the order of rendering
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="draw"><span class="type-signature"></span>draw<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
 
     
-    <div class="description">
-        Force redraw of a scene object, to be implemented by subclasses.
+
+    <h4 class="name" id="draw"><span class="type-signature"></span>draw<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Force redraw of a scene object, to be implemented by subclasses.
  Base class just calls draw of child objects.
-    </div>
-    
+</div>
 
-    
 
-    
 
-    
 
-    
 
-    
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -2106,7 +2019,7 @@ Bin number is typically used for sorting the order of rendering
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.sceneObject.html#draw">geo.sceneObject#draw</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -2142,49 +2055,45 @@ Bin number is typically used for sorting the order of rendering
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="drawables"><span class="type-signature"></span>drawables<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get list of drawables or nodes that are context/api specific.
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="drawables"><span class="type-signature"></span>drawables<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Get list of drawables or nodes that are context/api specific.
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -2216,7 +2125,7 @@ Bin number is typically used for sorting the order of rendering
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_feature.js.html">core/feature.js</a>, <a href="core_feature.js.html#line345">line 345</a>
+        <a href="core_feature.js.html">core/feature.js</a>, <a href="core_feature.js.html#line351">line 351</a>
     </li></ul></dd>
     
 
@@ -2228,49 +2137,45 @@ Bin number is typically used for sorting the order of rendering
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="gcs"><span class="type-signature"></span>gcs<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get/Set projection of the feature
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="gcs"><span class="type-signature"></span>gcs<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Get/Set projection of the feature
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -2302,7 +2207,7 @@ Bin number is typically used for sorting the order of rendering
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_feature.js.html">core/feature.js</a>, <a href="core_feature.js.html#line354">line 354</a>
+        <a href="core_feature.js.html">core/feature.js</a>, <a href="core_feature.js.html#line360">line 360</a>
     </li></ul></dd>
     
 
@@ -2314,50 +2219,46 @@ Bin number is typically used for sorting the order of rendering
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="geoOff"><span class="type-signature"></span>geoOff<span class="signature">(event<span class="signature-attributes">nullable</span>, arg<span class="signature-attributes">nullable</span>)</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
 
     
-    <div class="description">
-        Remove handlers from an event (or an array of events).  If no event is
+
+    <h4 class="name" id="geoOff"><span class="type-signature"></span>geoOff<span class="signature">(event<span class="signature-attributes">nullable</span>, arg<span class="signature-attributes">nullable</span>)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Remove handlers from an event (or an array of events).  If no event is
  provided all hanlders will be removed.
-    </div>
-    
+</div>
 
-    
 
-    
 
-    
 
+
+
+
+
+
+    <h5>Parameters:</h5>
     
-        <h5>Parameters:</h5>
-        
 
 <table class="params">
     <thead>
@@ -2449,9 +2350,10 @@ Bin number is typically used for sorting the order of rendering
     
     </tbody>
 </table>
-    
 
-    
+
+
+
 
 
 <dl class="details">
@@ -2464,7 +2366,7 @@ Bin number is typically used for sorting the order of rendering
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.object.html#geoOff">geo.object#geoOff</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -2500,49 +2402,45 @@ Bin number is typically used for sorting the order of rendering
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="geoOn"><span class="type-signature"></span>geoOn<span class="signature">(event, handler)</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Bind an event handler to this object
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="geoOn"><span class="type-signature"></span>geoOn<span class="signature">(event, handler)</span><span class="type-signature"></span></h4>
 
     
 
+
+
+<div class="description">
+    Bind an event handler to this object
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
     
-        <h5>Parameters:</h5>
-        
 
 <table class="params">
     <thead>
@@ -2613,9 +2511,10 @@ Bin number is typically used for sorting the order of rendering
     
     </tbody>
 </table>
-    
 
-    
+
+
+
 
 
 <dl class="details">
@@ -2628,7 +2527,7 @@ Bin number is typically used for sorting the order of rendering
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.object.html#geoOn">geo.object#geoOn</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -2664,49 +2563,45 @@ Bin number is typically used for sorting the order of rendering
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="geoTrigger"><span class="type-signature"></span>geoTrigger<span class="signature">(event, args, childrenOnly)</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Trigger an event (or events) on this object and call all handlers.
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="geoTrigger"><span class="type-signature"></span>geoTrigger<span class="signature">(event, args, childrenOnly)</span><span class="type-signature"></span></h4>
 
     
 
+
+
+<div class="description">
+    Trigger an event (or events) on this object and call all handlers.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
     
-        <h5>Parameters:</h5>
-        
 
 <table class="params">
     <thead>
@@ -2798,9 +2693,10 @@ Bin number is typically used for sorting the order of rendering
     
     </tbody>
 </table>
-    
 
-    
+
+
+
 
 
 <dl class="details">
@@ -2813,7 +2709,7 @@ Bin number is typically used for sorting the order of rendering
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.sceneObject.html#geoTrigger">geo.sceneObject#geoTrigger</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -2849,49 +2745,45 @@ Bin number is typically used for sorting the order of rendering
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="layer"><span class="type-signature"></span>layer<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get layer referenced by the feature
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="layer"><span class="type-signature"></span>layer<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Get layer referenced by the feature
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -2923,7 +2815,7 @@ Bin number is typically used for sorting the order of rendering
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_feature.js.html">core/feature.js</a>, <a href="core_feature.js.html#line327">line 327</a>
+        <a href="core_feature.js.html">core/feature.js</a>, <a href="core_feature.js.html#line333">line 333</a>
     </li></ul></dd>
     
 
@@ -2935,49 +2827,45 @@ Bin number is typically used for sorting the order of rendering
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="onIdle"><span class="type-signature"></span>onIdle<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Override object.onIdle to propagate up the scene tree.
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="onIdle"><span class="type-signature"></span>onIdle<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Override object.onIdle to propagate up the scene tree.
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -2990,7 +2878,7 @@ Bin number is typically used for sorting the order of rendering
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.sceneObject.html#onIdle">geo.sceneObject#onIdle</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -3026,49 +2914,45 @@ Bin number is typically used for sorting the order of rendering
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="parent"><span class="type-signature"></span>parent<span class="signature">(parent<span class="signature-attributes">nullable</span>)</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get/set parent of the object
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="parent"><span class="type-signature"></span>parent<span class="signature">(parent<span class="signature-attributes">nullable</span>)</span><span class="type-signature"></span></h4>
 
     
 
+
+
+<div class="description">
+    Get/set parent of the object
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
     
-        <h5>Parameters:</h5>
-        
 
 <table class="params">
     <thead>
@@ -3126,9 +3010,10 @@ Bin number is typically used for sorting the order of rendering
     
     </tbody>
 </table>
-    
 
-    
+
+
+
 
 
 <dl class="details">
@@ -3141,7 +3026,7 @@ Bin number is typically used for sorting the order of rendering
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.sceneObject.html#parent">geo.sceneObject#parent</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -3177,37 +3062,33 @@ Bin number is typically used for sorting the order of rendering
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="pointSearch"><span class="type-signature"></span>pointSearch<span class="signature">(coordinate)</span><span class="type-signature"> &rarr; {Object}</span></h4>
-
-        
-    
-</dt>
-<dd>
 
     
-    <div class="description">
-        Search for features containing the given point.
+
+    <h4 class="name" id="pointSearch"><span class="type-signature"></span>pointSearch<span class="signature">(coordinate)</span><span class="type-signature"> &rarr; {Object}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Search for features containing the given point.
 
 Returns an object: ::
 
@@ -3215,18 +3096,18 @@ Returns an object: ::
     data: [...] // an array of data objects for matching features
     index: [...] // an array of indices of the matching features
   }
-    </div>
-    
+</div>
 
-    
 
-    
 
-    
 
+
+
+
+
+
+    <h5>Parameters:</h5>
     
-        <h5>Parameters:</h5>
-        
 
 <table class="params">
     <thead>
@@ -3272,9 +3153,10 @@ Returns an object: ::
     
     </tbody>
 </table>
-    
 
-    
+
+
+
 
 
 <dl class="details">
@@ -3318,20 +3200,20 @@ Returns an object: ::
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-    <h5>Returns:</h5>
-    
-            
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
 
 
 <dl>
@@ -3346,39 +3228,35 @@ Returns an object: ::
     </dd>
 </dl>
 
-        
-
     
-</dd>
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="removeChild"><span class="type-signature"></span>removeChild<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Remove a child (or array of children) from the object
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="removeChild"><span class="type-signature"></span>removeChild<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Remove a child (or array of children) from the object
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -3391,7 +3269,7 @@ Returns an object: ::
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.sceneObject.html#removeChild">geo.sceneObject#removeChild</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -3427,49 +3305,45 @@ Returns an object: ::
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="renderer"><span class="type-signature"></span>renderer<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get renderer used by the feature
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="renderer"><span class="type-signature"></span>renderer<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Get renderer used by the feature
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -3501,7 +3375,7 @@ Returns an object: ::
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_feature.js.html">core/feature.js</a>, <a href="core_feature.js.html#line336">line 336</a>
+        <a href="core_feature.js.html">core/feature.js</a>, <a href="core_feature.js.html#line342">line 342</a>
     </li></ul></dd>
     
 
@@ -3513,49 +3387,145 @@ Returns an object: ::
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
+
     
+
+    <h4 class="name" id="selectionAPI"><span class="type-signature"></span>selectionAPI<span class="signature">()</span><span class="type-signature"> &rarr; {bool}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Query if the selection API is enabled for this feature.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="core_feature.js.html">core/feature.js</a>, <a href="core_feature.js.html#line471">line 471</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
         
 
-        <h4 class="name" id="style"><span class="type-signature"></span>style<span class="signature">()</span><span class="type-signature"></span></h4>
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">bool</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
 
         
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get/Set style used by the feature
-    </div>
-    
+            
 
     
 
-    
+    <h4 class="name" id="style"><span class="type-signature"></span>style<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Get/Set style used by the feature
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -3599,49 +3569,45 @@ Returns an object: ::
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="updateTime"><span class="type-signature"></span>updateTime<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get/Set timestamp of last time update happened
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="updateTime"><span class="type-signature"></span>updateTime<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Get/Set timestamp of last time update happened
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -3673,7 +3639,7 @@ Returns an object: ::
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_feature.js.html">core/feature.js</a>, <a href="core_feature.js.html#line431">line 431</a>
+        <a href="core_feature.js.html">core/feature.js</a>, <a href="core_feature.js.html#line437">line 437</a>
     </li></ul></dd>
     
 
@@ -3685,49 +3651,45 @@ Returns an object: ::
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="visible"><span class="type-signature"></span>visible<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get/Set visibility of the feature
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="visible"><span class="type-signature"></span>visible<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Get/Set visibility of the feature
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -3759,7 +3721,7 @@ Returns an object: ::
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_feature.js.html">core/feature.js</a>, <a href="core_feature.js.html#line369">line 369</a>
+        <a href="core_feature.js.html">core/feature.js</a>, <a href="core_feature.js.html#line375">line 375</a>
     </li></ul></dd>
     
 
@@ -3771,59 +3733,56 @@ Returns an object: ::
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
 
-        </dl>
+
+
+
+
+
+
+
+        
     
 
     
         <h3 class="subsection-title">Type Definitions</h3>
 
-        <dl>
+        
                 
-<dt>
-    <h4 class="name" id="spec">spec</h4>
+<h4 class="name" id=".spec">spec</h4>
 
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        General object specification for feature types.
-    </div>
-    
 
-    
-        <h5>Type:</h5>
-        <ul>
-            <li>
-                
+
+
+<div class="description">
+    General object specification for feature types.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
 <span class="param-type">object</span>
 
 
-            </li>
-        </ul>
-    
+        </li>
+    </ul>
 
-    
+
+
 
 
     <h5 class="subsection-title">Properties:</h5>
 
-    <dl>
+    
 
 <table class="props">
     <thead>
@@ -3924,7 +3883,7 @@ accessors provided by the user.  In general the number of
     
     </tbody>
 </table>
-</dl>
+
 
 
 
@@ -3957,7 +3916,7 @@ accessors provided by the user.  In general the number of
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_feature.js.html">core/feature.js</a>, <a href="core_feature.js.html#line531">line 531</a>
+        <a href="core_feature.js.html">core/feature.js</a>, <a href="core_feature.js.html#line547">line 547</a>
     </li></ul></dd>
     
 
@@ -3969,12 +3928,11 @@ accessors provided by the user.  In general the number of
 </dl>
 
 
-    
 
-    
-</dd>
 
-            </dl>
+
+
+            
     
 
     
@@ -3991,10 +3949,10 @@ accessors provided by the user.  In general the number of
     <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.clock.html">clock</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.renderer.html">renderer</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.latlng.html">latlng</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.mercator.html">mercator</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
-<br clear="both">
+<br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha11</a> on Thu Feb 12 2015 10:09:36 GMT-0500 (EST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta1</a> on Fri Mar 06 2015 10:06:37 GMT-0500 (EST)
 </footer>
 
 <script> prettyPrint(); </script>

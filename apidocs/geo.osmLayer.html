@@ -41,34 +41,80 @@
     <div class="container-overview">
     
         
-<dt>
+
     
+
+    <h4 class="name" id="osmLayer"><span class="type-signature"></span>new osmLayer<span class="signature">(arg)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Create a new instance of osmLayer
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
         
-        <h2>Constructor</h2>
+        <th>Name</th>
         
 
-        <h4 class="name" id="osmLayer"><span class="type-signature"></span>new osmLayer<span class="signature">()</span><span class="type-signature"></span></h4>
+        <th>Type</th>
 
         
-    
-</dt>
-<dd>
 
-    
-    <div class="description">
-        Create a new instance of osmLayer
-    </div>
-    
+        
 
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
     
 
-    
+        <tr>
+            
+                <td class="name"><code>arg</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">arg can contain following keys: baseUrl,
+       imageFormat (such as png or jpeg), and displayLast
+       (to decide whether or not render tiles from last zoom level).</td>
+        </tr>
 
     
+    </tbody>
+</table>
 
-    
 
-    
+
+
 
 
 <dl class="details">
@@ -100,7 +146,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_osmLayer.js.html">core/osmLayer.js</a>, <a href="core_osmLayer.js.html#line9">line 9</a>
+        <a href="core_osmLayer.js.html">core/osmLayer.js</a>, <a href="core_osmLayer.js.html#line13">line 13</a>
     </li></ul></dd>
     
 
@@ -112,20 +158,19 @@
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
     
     </div>
@@ -156,34 +201,31 @@
     
         <h3 class="subsection-title">Methods</h3>
 
-        <dl>
+        
             
-<dt>
-    
-        
-
-        <h4 class="name" id="_addTile"><span class="type-signature"></span>_addTile<span class="signature">(x, y)</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Create a new tile
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="_addTile"><span class="type-signature"></span>_addTile<span class="signature">(x, y)</span><span class="type-signature"></span></h4>
 
     
 
+
+
+<div class="description">
+    Create a new tile
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
     
-        <h5>Parameters:</h5>
-        
 
 <table class="params">
     <thead>
@@ -252,95 +294,10 @@
     
     </tbody>
 </table>
-    
-
-    
 
 
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_osmLayer.js.html">core/osmLayer.js</a>, <a href="core_osmLayer.js.html#line299">line 299</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
 
 
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-        
-            
-<dt>
-    
-        
-
-        <h4 class="name" id="_addTiles"><span class="type-signature"></span>_addTiles<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Create / delete tiles as necessary
-    </div>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
 
 
 <dl class="details">
@@ -372,7 +329,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_osmLayer.js.html">core/osmLayer.js</a>, <a href="core_osmLayer.js.html#line422">line 422</a>
+        <a href="core_osmLayer.js.html">core/osmLayer.js</a>, <a href="core_osmLayer.js.html#line291">line 291</a>
     </li></ul></dd>
     
 
@@ -384,49 +341,127 @@
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
+
     
+
+    <h4 class="name" id="_addTiles"><span class="type-signature"></span>_addTiles<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Create / delete tiles as necessary
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="core_osmLayer.js.html">core/osmLayer.js</a>, <a href="core_osmLayer.js.html#line414">line 414</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         
-
-        <h4 class="name" id="_exit"><span class="type-signature"></span>_exit<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Exit
-    </div>
-    
+            
 
     
 
-    
+    <h4 class="name" id="_exit"><span class="type-signature"></span>_exit<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Exit
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -441,7 +476,7 @@
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
         <a href="geo.featureLayer.html#_exit">geo.featureLayer#_exit</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -463,7 +498,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_osmLayer.js.html">core/osmLayer.js</a>, <a href="core_osmLayer.js.html#line687">line 687</a>
+        <a href="core_osmLayer.js.html">core/osmLayer.js</a>, <a href="core_osmLayer.js.html#line754">line 754</a>
     </li></ul></dd>
     
 
@@ -475,49 +510,45 @@
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="_hasTile"><span class="type-signature"></span>_hasTile<span class="signature">(zoom, x, y)</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Check if a tile exists in the cache
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="_hasTile"><span class="type-signature"></span>_hasTile<span class="signature">(zoom, x, y)</span><span class="type-signature"></span></h4>
 
     
 
+
+
+<div class="description">
+    Check if a tile exists in the cache
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
     
-        <h5>Parameters:</h5>
-        
 
 <table class="params">
     <thead>
@@ -609,9 +640,10 @@
     
     </tbody>
 </table>
-    
 
-    
+
+
+
 
 
 <dl class="details">
@@ -643,7 +675,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_osmLayer.js.html">core/osmLayer.js</a>, <a href="core_osmLayer.js.html#line279">line 279</a>
+        <a href="core_osmLayer.js.html">core/osmLayer.js</a>, <a href="core_osmLayer.js.html#line271">line 271</a>
     </li></ul></dd>
     
 
@@ -655,51 +687,47 @@
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="_init"><span class="type-signature"></span>_init<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
 
     
-    <div class="description">
-        Initialize
+
+    <h4 class="name" id="_init"><span class="type-signature"></span>_init<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Initialize
 
 Do not call parent _init method as its already been executed
-    </div>
-    
+</div>
 
-    
 
-    
 
-    
 
-    
 
-    
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -714,7 +742,7 @@ Do not call parent _init method as its already been executed
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
         <a href="geo.featureLayer.html#_init">geo.featureLayer#_init</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -736,7 +764,7 @@ Do not call parent _init method as its already been executed
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_osmLayer.js.html">core/osmLayer.js</a>, <a href="core_osmLayer.js.html#line659">line 659</a>
+        <a href="core_osmLayer.js.html">core/osmLayer.js</a>, <a href="core_osmLayer.js.html#line686">line 686</a>
     </li></ul></dd>
     
 
@@ -748,49 +776,45 @@ Do not call parent _init method as its already been executed
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="_removeTiles"><span class="type-signature"></span>_removeTiles<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Clear tiles that are no longer required
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="_removeTiles"><span class="type-signature"></span>_removeTiles<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Clear tiles that are no longer required
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -822,7 +846,7 @@ Do not call parent _init method as its already been executed
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_osmLayer.js.html">core/osmLayer.js</a>, <a href="core_osmLayer.js.html#line353">line 353</a>
+        <a href="core_osmLayer.js.html">core/osmLayer.js</a>, <a href="core_osmLayer.js.html#line345">line 345</a>
     </li></ul></dd>
     
 
@@ -834,49 +858,45 @@ Do not call parent _init method as its already been executed
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="_resize"><span class="type-signature"></span>_resize<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Respond to resize event
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="_resize"><span class="type-signature"></span>_resize<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Respond to resize event
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -889,7 +909,7 @@ Do not call parent _init method as its already been executed
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.layer.html#_resize">geo.layer#_resize</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -925,49 +945,45 @@ Do not call parent _init method as its already been executed
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="_update"><span class="type-signature"></span>_update<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Update layer
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="_update"><span class="type-signature"></span>_update<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Update layer
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -982,7 +998,7 @@ Do not call parent _init method as its already been executed
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
         <a href="geo.featureLayer.html#_update">geo.featureLayer#_update</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -1004,7 +1020,7 @@ Do not call parent _init method as its already been executed
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_osmLayer.js.html">core/osmLayer.js</a>, <a href="core_osmLayer.js.html#line674">line 674</a>
+        <a href="core_osmLayer.js.html">core/osmLayer.js</a>, <a href="core_osmLayer.js.html#line701">line 701</a>
     </li></ul></dd>
     
 
@@ -1016,49 +1032,45 @@ Do not call parent _init method as its already been executed
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="_updateTiles"><span class="type-signature"></span>_updateTiles<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Create / delete tiles as necessary
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="_updateTiles"><span class="type-signature"></span>_updateTiles<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Create / delete tiles as necessary
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -1090,7 +1102,7 @@ Do not call parent _init method as its already been executed
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_osmLayer.js.html">core/osmLayer.js</a>, <a href="core_osmLayer.js.html#line625">line 625</a>
+        <a href="core_osmLayer.js.html">core/osmLayer.js</a>, <a href="core_osmLayer.js.html#line652">line 652</a>
     </li></ul></dd>
     
 
@@ -1102,51 +1114,47 @@ Do not call parent _init method as its already been executed
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="active"><span class="type-signature"></span>active<span class="signature">()</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
-
-        
-    
-</dt>
-<dd>
 
     
-    <div class="description">
-        Get whether or not the layer is active.  An active layer will receive
+
+    <h4 class="name" id="active"><span class="type-signature"></span>active<span class="signature">()</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Get whether or not the layer is active.  An active layer will receive
 native mouse when the layer is on top.  Non-active layers will never
 receive native mouse events.
-    </div>
-    
+</div>
 
-    
 
-    
 
-    
 
-    
 
-    
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -1159,7 +1167,7 @@ receive native mouse events.
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.layer.html#active">geo.layer#active</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -1195,20 +1203,20 @@ receive native mouse events.
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-    <h5>Returns:</h5>
-    
-            
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
 
 
 <dl>
@@ -1223,39 +1231,35 @@ receive native mouse events.
     </dd>
 </dl>
 
-        
-
     
-</dd>
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="addChild"><span class="type-signature"></span>addChild<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Add a child (or an array of children) to the object
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="addChild"><span class="type-signature"></span>addChild<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Add a child (or an array of children) to the object
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -1268,7 +1272,7 @@ receive native mouse events.
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.sceneObject.html#addChild">geo.sceneObject#addChild</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -1304,49 +1308,45 @@ receive native mouse events.
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="addDeferred"><span class="type-signature"></span>addDeferred<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Override object.addDeferred to propagate up the scene tree.
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="addDeferred"><span class="type-signature"></span>addDeferred<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Override object.addDeferred to propagate up the scene tree.
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -1359,7 +1359,7 @@ receive native mouse events.
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.sceneObject.html#addDeferred">geo.sceneObject#addDeferred</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -1395,49 +1395,45 @@ receive native mouse events.
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="bin"><span class="type-signature"></span>bin<span class="signature">()</span><span class="type-signature"> &rarr; {Number}</span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get/Set bin of the layer
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="bin"><span class="type-signature"></span>bin<span class="signature">()</span><span class="type-signature"> &rarr; {Number}</span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Get/Set bin of the layer
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -1450,7 +1446,7 @@ receive native mouse events.
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.layer.html#bin">geo.layer#bin</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -1486,20 +1482,20 @@ receive native mouse events.
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-    <h5>Returns:</h5>
-    
-            
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
 
 
 <dl>
@@ -1514,39 +1510,35 @@ receive native mouse events.
     </dd>
 </dl>
 
-        
-
     
-</dd>
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="canvas"><span class="type-signature"></span>canvas<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get canvas of the layer
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="canvas"><span class="type-signature"></span>canvas<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Get canvas of the layer
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -1559,7 +1551,7 @@ receive native mouse events.
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.layer.html#canvas">geo.layer#canvas</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -1595,49 +1587,45 @@ receive native mouse events.
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="children"><span class="type-signature"></span>children<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get an array of child objects
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="children"><span class="type-signature"></span>children<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Get an array of child objects
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -1650,7 +1638,7 @@ receive native mouse events.
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.sceneObject.html#children">geo.sceneObject#children</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -1686,49 +1674,45 @@ receive native mouse events.
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="clear"><span class="type-signature"></span>clear<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Clear all features in layer
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="clear"><span class="type-signature"></span>clear<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Clear all features in layer
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -1741,7 +1725,7 @@ receive native mouse events.
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.featureLayer.html#clear">geo.featureLayer#clear</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -1777,49 +1761,45 @@ receive native mouse events.
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="createFeature"><span class="type-signature"></span>createFeature<span class="signature">()</span><span class="type-signature"> &rarr; {geo.Feature}</span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Create feature give a name
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="createFeature"><span class="type-signature"></span>createFeature<span class="signature">()</span><span class="type-signature"> &rarr; {geo.Feature}</span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Create feature give a name
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -1832,7 +1812,7 @@ receive native mouse events.
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.featureLayer.html#createFeature">geo.featureLayer#createFeature</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -1868,20 +1848,20 @@ receive native mouse events.
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-    <h5>Returns:</h5>
-    
-            
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
 <div class="param-desc">
     Will return a new feature
 </div>
@@ -1900,39 +1880,35 @@ receive native mouse events.
     </dd>
 </dl>
 
-        
-
     
-</dd>
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="dataTime"><span class="type-signature"></span>dataTime<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Return last time data got changed
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="dataTime"><span class="type-signature"></span>dataTime<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Return last time data got changed
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -1945,7 +1921,7 @@ receive native mouse events.
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.layer.html#dataTime">geo.layer#dataTime</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -1981,49 +1957,45 @@ receive native mouse events.
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="deleteFeature"><span class="type-signature"></span>deleteFeature<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Delete feature
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="deleteFeature"><span class="type-signature"></span>deleteFeature<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Delete feature
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -2036,7 +2008,7 @@ receive native mouse events.
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.featureLayer.html#deleteFeature">geo.featureLayer#deleteFeature</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -2072,49 +2044,45 @@ receive native mouse events.
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="draw"><span class="type-signature"></span>draw<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Draw
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="draw"><span class="type-signature"></span>draw<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Draw
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -2127,7 +2095,7 @@ receive native mouse events.
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.featureLayer.html#draw">geo.featureLayer#draw</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -2163,49 +2131,45 @@ receive native mouse events.
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="drawTime"><span class="type-signature"></span>drawTime<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Return the modified time for the last draw call that did something
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="drawTime"><span class="type-signature"></span>drawTime<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Return the modified time for the last draw call that did something
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -2218,7 +2182,7 @@ receive native mouse events.
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.layer.html#drawTime">geo.layer#drawTime</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -2254,49 +2218,45 @@ receive native mouse events.
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="features"><span class="type-signature"></span>features<span class="signature">()</span><span class="type-signature"> &rarr; {Array}</span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get/Set drawables
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="features"><span class="type-signature"></span>features<span class="signature">()</span><span class="type-signature"> &rarr; {Array}</span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Get/Set drawables
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -2309,7 +2269,7 @@ receive native mouse events.
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.featureLayer.html#features">geo.featureLayer#features</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -2345,20 +2305,20 @@ receive native mouse events.
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-    <h5>Returns:</h5>
-    
-            
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
 
 
 <dl>
@@ -2373,40 +2333,36 @@ receive native mouse events.
     </dd>
 </dl>
 
-        
-
     
-</dd>
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="fromLocal"><span class="type-signature"></span>fromLocal<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
 
     
-    <div class="description">
-        Transform a point or array of points in local space to
+
+    <h4 class="name" id="fromLocal"><span class="type-signature"></span>fromLocal<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Transform a point or array of points in local space to
 latitude-longitude space
-    </div>
-    
+</div>
 
-    
 
-    
 
-    
 
-    
 
-    
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -2421,7 +2377,7 @@ latitude-longitude space
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
         <a href="geo.featureLayer.html#fromLocal">geo.featureLayer#fromLocal</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -2443,7 +2399,7 @@ latitude-longitude space
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_osmLayer.js.html">core/osmLayer.js</a>, <a href="core_osmLayer.js.html#line237">line 237</a>
+        <a href="core_osmLayer.js.html">core/osmLayer.js</a>, <a href="core_osmLayer.js.html#line229">line 229</a>
     </li></ul></dd>
     
 
@@ -2455,49 +2411,45 @@ latitude-longitude space
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="gcs"><span class="type-signature"></span>gcs<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get/Set projection of the layer
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="gcs"><span class="type-signature"></span>gcs<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Get/Set projection of the layer
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -2510,7 +2462,7 @@ latitude-longitude space
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.layer.html#gcs">geo.layer#gcs</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -2546,50 +2498,46 @@ latitude-longitude space
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="geoOff"><span class="type-signature"></span>geoOff<span class="signature">(event<span class="signature-attributes">nullable</span>, arg<span class="signature-attributes">nullable</span>)</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
 
     
-    <div class="description">
-        Remove handlers from an event (or an array of events).  If no event is
+
+    <h4 class="name" id="geoOff"><span class="type-signature"></span>geoOff<span class="signature">(event<span class="signature-attributes">nullable</span>, arg<span class="signature-attributes">nullable</span>)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Remove handlers from an event (or an array of events).  If no event is
  provided all hanlders will be removed.
-    </div>
-    
+</div>
 
-    
 
-    
 
-    
 
+
+
+
+
+
+    <h5>Parameters:</h5>
     
-        <h5>Parameters:</h5>
-        
 
 <table class="params">
     <thead>
@@ -2681,9 +2629,10 @@ latitude-longitude space
     
     </tbody>
 </table>
-    
 
-    
+
+
+
 
 
 <dl class="details">
@@ -2696,7 +2645,7 @@ latitude-longitude space
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.object.html#geoOff">geo.object#geoOff</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -2732,49 +2681,45 @@ latitude-longitude space
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="geoOn"><span class="type-signature"></span>geoOn<span class="signature">(event, handler)</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Bind an event handler to this object
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="geoOn"><span class="type-signature"></span>geoOn<span class="signature">(event, handler)</span><span class="type-signature"></span></h4>
 
     
 
+
+
+<div class="description">
+    Bind an event handler to this object
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
     
-        <h5>Parameters:</h5>
-        
 
 <table class="params">
     <thead>
@@ -2845,9 +2790,10 @@ latitude-longitude space
     
     </tbody>
 </table>
-    
 
-    
+
+
+
 
 
 <dl class="details">
@@ -2860,7 +2806,7 @@ latitude-longitude space
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.object.html#geoOn">geo.object#geoOn</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -2896,49 +2842,45 @@ latitude-longitude space
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="geoTrigger"><span class="type-signature"></span>geoTrigger<span class="signature">(event, args, childrenOnly)</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Trigger an event (or events) on this object and call all handlers.
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="geoTrigger"><span class="type-signature"></span>geoTrigger<span class="signature">(event, args, childrenOnly)</span><span class="type-signature"></span></h4>
 
     
 
+
+
+<div class="description">
+    Trigger an event (or events) on this object and call all handlers.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
     
-        <h5>Parameters:</h5>
-        
 
 <table class="params">
     <thead>
@@ -3030,9 +2972,10 @@ latitude-longitude space
     
     </tbody>
 </table>
-    
 
-    
+
+
+
 
 
 <dl class="details">
@@ -3045,7 +2988,7 @@ latitude-longitude space
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.sceneObject.html#geoTrigger">geo.sceneObject#geoTrigger</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -3081,49 +3024,45 @@ latitude-longitude space
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="height"><span class="type-signature"></span>height<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Return the height of the layer in pixels
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="height"><span class="type-signature"></span>height<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Return the height of the layer in pixels
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -3136,7 +3075,7 @@ latitude-longitude space
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.layer.html#height">geo.layer#height</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -3172,49 +3111,45 @@ latitude-longitude space
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="id"><span class="type-signature"></span>id<span class="signature">()</span><span class="type-signature"> &rarr; {String}</span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get/Set id of the layer
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="id"><span class="type-signature"></span>id<span class="signature">()</span><span class="type-signature"> &rarr; {String}</span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Get/Set id of the layer
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -3227,7 +3162,7 @@ latitude-longitude space
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.layer.html#id">geo.layer#id</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -3263,20 +3198,20 @@ latitude-longitude space
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-    <h5>Returns:</h5>
-    
-            
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
 
 
 <dl>
@@ -3291,39 +3226,35 @@ latitude-longitude space
     </dd>
 </dl>
 
-        
-
     
-</dd>
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="initialized"><span class="type-signature"></span>initialized<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get/Set if the layer has been initialized
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="initialized"><span class="type-signature"></span>initialized<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Get/Set if the layer has been initialized
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -3336,7 +3267,7 @@ latitude-longitude space
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.layer.html#initialized">geo.layer#initialized</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -3372,49 +3303,45 @@ latitude-longitude space
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="map"><span class="type-signature"></span>map<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get/Set map of the layer
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="map"><span class="type-signature"></span>map<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Get/Set map of the layer
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -3427,7 +3354,7 @@ latitude-longitude space
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.layer.html#map">geo.layer#map</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -3463,49 +3390,45 @@ latitude-longitude space
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="name"><span class="type-signature"></span>name<span class="signature">()</span><span class="type-signature"> &rarr; {String}</span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get/Set name of the layer
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="name"><span class="type-signature"></span>name<span class="signature">()</span><span class="type-signature"> &rarr; {String}</span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Get/Set name of the layer
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -3518,7 +3441,7 @@ latitude-longitude space
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.layer.html#name">geo.layer#name</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -3554,20 +3477,20 @@ latitude-longitude space
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-    <h5>Returns:</h5>
-    
-            
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
 
 
 <dl>
@@ -3582,39 +3505,35 @@ latitude-longitude space
     </dd>
 </dl>
 
-        
-
     
-</dd>
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="node"><span class="type-signature"></span>node<span class="signature">()</span><span class="type-signature"> &rarr; {div}</span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get/Set root node of the layer
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="node"><span class="type-signature"></span>node<span class="signature">()</span><span class="type-signature"> &rarr; {div}</span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Get/Set root node of the layer
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -3627,7 +3546,7 @@ latitude-longitude space
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.layer.html#node">geo.layer#node</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -3663,20 +3582,20 @@ latitude-longitude space
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-    <h5>Returns:</h5>
-    
-            
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
 
 
 <dl>
@@ -3691,39 +3610,35 @@ latitude-longitude space
     </dd>
 </dl>
 
-        
-
     
-</dd>
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="onIdle"><span class="type-signature"></span>onIdle<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Override object.onIdle to propagate up the scene tree.
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="onIdle"><span class="type-signature"></span>onIdle<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Override object.onIdle to propagate up the scene tree.
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -3736,7 +3651,7 @@ latitude-longitude space
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.sceneObject.html#onIdle">geo.sceneObject#onIdle</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -3772,49 +3687,45 @@ latitude-longitude space
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="opacity"><span class="type-signature"></span>opacity<span class="signature">()</span><span class="type-signature"> &rarr; {Number}</span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get/Set opacity of the layer
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="opacity"><span class="type-signature"></span>opacity<span class="signature">()</span><span class="type-signature"> &rarr; {Number}</span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Get/Set opacity of the layer
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -3827,7 +3738,7 @@ latitude-longitude space
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.layer.html#opacity">geo.layer#opacity</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -3863,20 +3774,20 @@ latitude-longitude space
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-    <h5>Returns:</h5>
-    
-            
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
 
 
 <dl>
@@ -3891,39 +3802,35 @@ latitude-longitude space
     </dd>
 </dl>
 
-        
-
     
-</dd>
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="parent"><span class="type-signature"></span>parent<span class="signature">(parent<span class="signature-attributes">nullable</span>)</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get/set parent of the object
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="parent"><span class="type-signature"></span>parent<span class="signature">(parent<span class="signature-attributes">nullable</span>)</span><span class="type-signature"></span></h4>
 
     
 
+
+
+<div class="description">
+    Get/set parent of the object
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
     
-        <h5>Parameters:</h5>
-        
 
 <table class="params">
     <thead>
@@ -3981,9 +3888,10 @@ latitude-longitude space
     
     </tbody>
 </table>
-    
 
-    
+
+
+
 
 
 <dl class="details">
@@ -3996,7 +3904,7 @@ latitude-longitude space
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.sceneObject.html#parent">geo.sceneObject#parent</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -4032,49 +3940,45 @@ latitude-longitude space
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="query"><span class="type-signature"></span>query<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Run query and return results for it
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="query"><span class="type-signature"></span>query<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Run query and return results for it
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -4087,7 +3991,7 @@ latitude-longitude space
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.layer.html#query">geo.layer#query</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -4123,49 +4027,45 @@ latitude-longitude space
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="referenceLayer"><span class="type-signature"></span>referenceLayer<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get/Set layer as the reference layer
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="referenceLayer"><span class="type-signature"></span>referenceLayer<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Get/Set layer as the reference layer
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -4178,7 +4078,7 @@ latitude-longitude space
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.layer.html#referenceLayer">geo.layer#referenceLayer</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -4214,49 +4114,45 @@ latitude-longitude space
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="removeChild"><span class="type-signature"></span>removeChild<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Remove a child (or array of children) from the object
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="removeChild"><span class="type-signature"></span>removeChild<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Remove a child (or array of children) from the object
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -4269,7 +4165,7 @@ latitude-longitude space
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.sceneObject.html#removeChild">geo.sceneObject#removeChild</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -4305,49 +4201,45 @@ latitude-longitude space
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="renderer"><span class="type-signature"></span>renderer<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get renderer for the layer if any
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="renderer"><span class="type-signature"></span>renderer<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Get renderer for the layer if any
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -4360,7 +4252,7 @@ latitude-longitude space
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.layer.html#renderer">geo.layer#renderer</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -4396,49 +4288,45 @@ latitude-longitude space
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="source"><span class="type-signature"></span>source<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get/Set source of the layer
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="source"><span class="type-signature"></span>source<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Get/Set source of the layer
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -4451,7 +4339,7 @@ latitude-longitude space
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.layer.html#source">geo.layer#source</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -4487,49 +4375,45 @@ latitude-longitude space
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="sticky"><span class="type-signature"></span>sticky<span class="signature">()</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get whether or not the layer is sticky (navigates with the map).
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="sticky"><span class="type-signature"></span>sticky<span class="signature">()</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Get whether or not the layer is sticky (navigates with the map).
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -4542,7 +4426,7 @@ latitude-longitude space
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.layer.html#sticky">geo.layer#sticky</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -4578,20 +4462,20 @@ latitude-longitude space
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-    <h5>Returns:</h5>
-    
-            
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
 
 
 <dl>
@@ -4606,39 +4490,35 @@ latitude-longitude space
     </dd>
 </dl>
 
-        
-
     
-</dd>
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="tileCacheSize"><span class="type-signature"></span>tileCacheSize<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get/Set tile cache size
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="tileCacheSize"><span class="type-signature"></span>tileCacheSize<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Get/Set tile cache size
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -4670,7 +4550,7 @@ latitude-longitude space
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_osmLayer.js.html">core/osmLayer.js</a>, <a href="core_osmLayer.js.html#line132">line 132</a>
+        <a href="core_osmLayer.js.html">core/osmLayer.js</a>, <a href="core_osmLayer.js.html#line124">line 124</a>
     </li></ul></dd>
     
 
@@ -4682,49 +4562,45 @@ latitude-longitude space
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="tileUrl"><span class="type-signature"></span>tileUrl<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get/Set the tile url formatting function.
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="tileUrl"><span class="type-signature"></span>tileUrl<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Get/Set the tile url formatting function.
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -4756,7 +4632,7 @@ latitude-longitude space
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_osmLayer.js.html">core/osmLayer.js</a>, <a href="core_osmLayer.js.html#line145">line 145</a>
+        <a href="core_osmLayer.js.html">core/osmLayer.js</a>, <a href="core_osmLayer.js.html#line137">line 137</a>
     </li></ul></dd>
     
 
@@ -4768,49 +4644,45 @@ latitude-longitude space
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="timeRange"><span class="type-signature"></span>timeRange<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get/Set time range of the layer
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="timeRange"><span class="type-signature"></span>timeRange<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Get/Set time range of the layer
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -4823,7 +4695,7 @@ latitude-longitude space
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.layer.html#timeRange">geo.layer#timeRange</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -4859,50 +4731,46 @@ latitude-longitude space
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="toLocal"><span class="type-signature"></span>toLocal<span class="signature">(input)</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
 
     
-    <div class="description">
-        Transform a point or array of points in latitude-longitude-altitude
+
+    <h4 class="name" id="toLocal"><span class="type-signature"></span>toLocal<span class="signature">(input)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Transform a point or array of points in latitude-longitude-altitude
 space to local space of the layer
-    </div>
-    
+</div>
 
-    
 
-    
 
-    
 
+
+
+
+
+
+    <h5>Parameters:</h5>
     
-        <h5>Parameters:</h5>
-        
 
 <table class="params">
     <thead>
@@ -4958,9 +4826,10 @@ returns geo.latlng, [geo.latlng], or {x:lon, y:lat}, [{x:lon, y:lat}]
     
     </tbody>
 </table>
-    
 
-    
+
+
+
 
 
 <dl class="details">
@@ -4975,7 +4844,7 @@ returns geo.latlng, [geo.latlng], or {x:lon, y:lat}, [{x:lon, y:lat}]
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
         <a href="geo.featureLayer.html#toLocal">geo.featureLayer#toLocal</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -4997,7 +4866,7 @@ returns geo.latlng, [geo.latlng], or {x:lon, y:lat}, [{x:lon, y:lat}]
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_osmLayer.js.html">core/osmLayer.js</a>, <a href="core_osmLayer.js.html#line173">line 173</a>
+        <a href="core_osmLayer.js.html">core/osmLayer.js</a>, <a href="core_osmLayer.js.html#line165">line 165</a>
     </li></ul></dd>
     
 
@@ -5009,49 +4878,45 @@ returns geo.latlng, [geo.latlng], or {x:lon, y:lat}, [{x:lon, y:lat}]
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="transform"><span class="type-signature"></span>transform<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Transform layer to the reference layer gcs
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="transform"><span class="type-signature"></span>transform<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Transform layer to the reference layer gcs
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -5064,7 +4929,7 @@ returns geo.latlng, [geo.latlng], or {x:lon, y:lat}, [{x:lon, y:lat}]
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.layer.html#transform">geo.layer#transform</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -5100,42 +4965,97 @@ returns geo.latlng, [geo.latlng], or {x:lon, y:lat}, [{x:lon, y:lat}]
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
+
     
+
+    <h4 class="name" id="updateBaseUrl"><span class="type-signature"></span>updateBaseUrl<span class="signature">(baseUrl:)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Update baseUrl for map tiles.  Map all tiles as needing to be refreshed.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
         
 
-        <h4 class="name" id="updateTime"><span class="type-signature"></span>updateTime<span class="signature">()</span><span class="type-signature"></span></h4>
+        <th>Type</th>
 
         
-    
-</dt>
-<dd>
 
-    
-    <div class="description">
-        Return the modified time for the last update that did something
-    </div>
-    
+        
 
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
     
 
+        <tr>
+            
+                <td class="name"><code>baseUrl:</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the new baseUrl for the map.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
     
 
     
@@ -5143,6 +5063,73 @@ returns geo.latlng, [geo.latlng], or {x:lon, y:lat}, [{x:lon, y:lat}]
     
 
     
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="core_osmLayer.js.html">core/osmLayer.js</a>, <a href="core_osmLayer.js.html#line717">line 717</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="updateTime"><span class="type-signature"></span>updateTime<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Return the modified time for the last update that did something
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -5155,7 +5142,7 @@ returns geo.latlng, [geo.latlng], or {x:lon, y:lat}, [{x:lon, y:lat}]
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.layer.html#updateTime">geo.layer#updateTime</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -5191,49 +5178,45 @@ returns geo.latlng, [geo.latlng], or {x:lon, y:lat}, [{x:lon, y:lat}]
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="viewport"><span class="type-signature"></span>viewport<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get viewport of the layer
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="viewport"><span class="type-signature"></span>viewport<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Get viewport of the layer
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -5246,7 +5229,7 @@ returns geo.latlng, [geo.latlng], or {x:lon, y:lat}, [{x:lon, y:lat}]
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.layer.html#viewport">geo.layer#viewport</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -5282,49 +5265,45 @@ returns geo.latlng, [geo.latlng], or {x:lon, y:lat}, [{x:lon, y:lat}]
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="visible"><span class="type-signature"></span>visible<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get/Set visibility of the layer
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="visible"><span class="type-signature"></span>visible<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Get/Set visibility of the layer
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -5337,7 +5316,7 @@ returns geo.latlng, [geo.latlng], or {x:lon, y:lat}, [{x:lon, y:lat}]
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.layer.html#visible">geo.layer#visible</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -5373,49 +5352,45 @@ returns geo.latlng, [geo.latlng], or {x:lon, y:lat}, [{x:lon, y:lat}]
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="width"><span class="type-signature"></span>width<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Return the width of the layer in pixels
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="width"><span class="type-signature"></span>width<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Return the width of the layer in pixels
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -5428,7 +5403,7 @@ returns geo.latlng, [geo.latlng], or {x:lon, y:lat}, [{x:lon, y:lat}]
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
         <a href="geo.layer.html#width">geo.layer#width</a>
-    </li></dd>
+    </li></ul></dd>
     
 
     
@@ -5464,49 +5439,45 @@ returns geo.latlng, [geo.latlng], or {x:lon, y:lat}, [{x:lon, y:lat}]
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
+
+
+
+
+
+
+
 
         
             
-<dt>
-    
-        
-
-        <h4 class="name" id="updateOSMTiles"><span class="type-signature">(inner) </span>updateOSMTiles<span class="signature">()</span><span class="type-signature"></span></h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Update OSM tiles as needed
-    </div>
-    
 
     
 
-    
+    <h4 class="name" id="~updateOSMTiles"><span class="type-signature">(inner) </span>updateOSMTiles<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
-    
 
-    
+
+<div class="description">
+    Update OSM tiles as needed
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -5538,7 +5509,7 @@ returns geo.latlng, [geo.latlng], or {x:lon, y:lat}, [{x:lon, y:lat}]
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_osmLayer.js.html">core/osmLayer.js</a>, <a href="core_osmLayer.js.html#line598">line 598</a>
+        <a href="core_osmLayer.js.html">core/osmLayer.js</a>, <a href="core_osmLayer.js.html#line623">line 623</a>
     </li></ul></dd>
     
 
@@ -5550,22 +5521,21 @@ returns geo.latlng, [geo.latlng], or {x:lon, y:lat}, [{x:lon, y:lat}]
 </dl>
 
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
 
-    
-</dd>
 
-        </dl>
+
+
+
+
+
+
+
+        
     
 
     
@@ -5584,10 +5554,10 @@ returns geo.latlng, [geo.latlng], or {x:lon, y:lat}, [{x:lon, y:lat}]
     <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.clock.html">clock</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.renderer.html">renderer</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.latlng.html">latlng</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.mercator.html">mercator</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
-<br clear="both">
+<br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha11</a> on Thu Feb 12 2015 10:09:37 GMT-0500 (EST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta1</a> on Fri Mar 06 2015 10:06:37 GMT-0500 (EST)
 </footer>
 
 <script> prettyPrint(); </script>
