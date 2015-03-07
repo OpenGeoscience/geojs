@@ -1,0 +1,7 @@
+examples/
+cmake/
+testing/
+doc/
+dashboard/
+scripts/
+.git/

@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "JavaScript Geo visualization and Analysis Library",
   "homepage": "https://github.com/OpenGeoscience/geojs",
+  "license": "BSD-3-Clause",
   "bugs": {
     "url": "https://github.com/OpenGeoscience/geojs/issues"
   },
@@ -34,5 +35,11 @@
   },
   "scripts": {
     "postinstall": "./node_modules/.bin/bower install && ./node_modules/.bin/grunt"
-  }
+  },
+  "keywords": [
+    "map",
+    "gis",
+    "webgl",
+    "svg"
+  ]
 }
