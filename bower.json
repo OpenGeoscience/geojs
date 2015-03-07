@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "JavaScript Geo visualization and Analysis Library",
   "homepage": "https://github.com/OpenGeoscience/geojs",
-  "main": "dist/built/geo.min.js",
+  "main": "geo.js",
   "bugs": {
     "url": "https://github.com/OpenGeoscience/geojs/issues"
   },
@@ -24,5 +24,16 @@
     "codemirror": "~4.7.0",
     "jsonlint": "~1.6.0",
     "jquery-ui": "~1.11.2"
-  }
+  },
+  "ignore": [
+    ".git",
+    ".gitignore",
+    ".travis.yml",
+    "dist",
+    "test",
+    "cmake",
+    "testing",
+    "scripts",
+    "dashboard"
+  ]
 }
