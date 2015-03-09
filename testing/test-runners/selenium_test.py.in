@@ -92,6 +92,32 @@ class ImageDifferenceException(BaseException):
         return '\n'.join(s)
 
 
+class ThresholdException(BaseException):
+    '''
+    Exception to be raised when a test doesn't meet a threshold value.
+    '''
+    def __init__(self, **kw):
+        self.stats = kw
+        s = 'Value %f doesn\'t meet threshold.' % kw.get('value', float('inf'))
+        super(ThresholdException, self).__init__(s)
+
+    def __str__(self):
+        s = [BaseException.__str__(self)]
+        if 'threshold' in self.stats:
+            s.append(
+                '<ThresholdValue value="' +
+                self.stats['threshold'] +
+                '</ThresholdValue>'
+            )
+        if 'value' in self.stats:
+            s.append(
+                '<ActualValue value="' +
+                self.stats['value'] +
+                '</ActualValue>'
+            )
+        return '\n'.join(s)
+
+
 def _chromeOptions():
     opts = webdriver.ChromeOptions()
     opts.add_argument('--test-type')
@@ -101,7 +127,19 @@ def _chromeOptions():
 
 drivers = {
     'firefox': (webdriver.Firefox, {}),
+    'firefoxRemote': (webdriver.Remote, {
+        'command_executor': 'http://%s:%d/wd/hub' % (SELENIUM_HOST,
+                                                     SELENIUM_PORT),
+        'desired_capabilities': webdriver.common.desired_capabilities.
+            DesiredCapabilities.FIREFOX
+    }),
     'chrome': (webdriver.Chrome, _chromeOptions()),
+    'chromeRemote': (webdriver.Remote, {
+        'command_executor': 'http://%s:%d/wd/hub' % (SELENIUM_HOST,
+                                                     SELENIUM_PORT),
+        'desired_capabilities': webdriver.common.desired_capabilities.
+            DesiredCapabilities.CHROME
+    }),
     'opera': (webdriver.Opera, {}),
     'phantomjs': (webdriver.PhantomJS, {}),
     'safari': (webdriver.Safari, {}),
@@ -192,6 +230,8 @@ class BaseTest(TestCase):
 
     #: The root URL of the test webserver.
     testBaseURL = 'http://' + testHost + ':' + str(testPort)
+    if testHost == '0.0.0.0':
+        testBaseURL = 'http://127.0.0.1:' + str(testPort)
 
     #: A tuple giving the selenium test root relative to both
     #: :py:attr:`testBaseURL` and :py:attr:`deploy_path`.
@@ -715,6 +755,8 @@ class FirefoxTest(BaseTest):
     turn off all tests derived from here.
     '''
     driverName = 'firefox'
+    if SELENIUM_HOST not in ('localhost', '127.0.0.1'):
+        driverName = 'firefoxRemote'
 
 
 @unittest.skipIf(
@@ -731,6 +773,8 @@ class ChromeTest(BaseTest):
     enable them.
     '''
     driverName = 'chrome'
+    if SELENIUM_HOST not in ('localhost', '127.0.0.1'):
+        driverName = 'chromeRemote'
 
 
 def setUpModule():
