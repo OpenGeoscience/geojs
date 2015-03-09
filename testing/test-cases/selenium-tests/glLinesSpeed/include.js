@@ -6,15 +6,15 @@ window.startTest = function (done) {
   var myMap = window.geoTests.createOsmMap(mapOptions);
 
   var layer = myMap.createLayer('feature');
-  var feature = layer.createFeature('point', {
+  var feature = layer.createFeature('line', {
     selectionAPI: false,
     dynamicDraw: true
   });
 
   window.geoTests.loadCitiesData(function (citieslatlon) {
-    var numPoints = 250000,
-        points = [], i, times = [], starttime, stoptime, totaltime = 0,
-        frames = 0, pass = 0, dx = 0, dy = 0, animTimes = [];
+    var numLines = 100000,
+        lines = [], i, j, times = [], starttime, stoptime, totaltime = 0,
+        frames = 0, animTimes = [];
 
     function postLoadTest() {
       times.sort(function (a, b) { return a - b; });
@@ -42,13 +42,13 @@ window.startTest = function (done) {
         (frames * 1000.0 / (stoptime - starttime)));
 
       vpf = feature.verticesPerFeature();
-      opac = feature.actors()[0].mapper().getSourceBuffer('fillOpacity');
-      for (i = v = 0; i < numPoints; i += 1) {
+      opac = feature.actors()[0].mapper().getSourceBuffer('strokeOpacity');
+      for (i = v = 0; i < numLines; i += 1) {
         for (j = 0; j < vpf; j += 1, v += 1) {
           opac[v] = 0.05;
         }
       }
-      feature.actors()[0].mapper().updateSourceBuffer('fillOpacity');
+      feature.actors()[0].mapper().updateSourceBuffer('strokeOpacity');
       myMap.draw();
 
       for (i = animTimes.length - 1; i > 0; i -= 1) {
@@ -69,12 +69,13 @@ window.startTest = function (done) {
 
     function loadTest() {
       starttime = new Date().getTime();
-      feature.data(points)
+      feature.data(lines)
         .style({
-          fillColor: 'black',
-          fillOpacity: 0.05,
-          stroke: false,
-          radius: 5
+          strokeColor: function (d) {
+            return d.strokeColor;
+          },
+          strokeWidth: 5,
+          strokeOpacity: 0.05
         });
       myMap.draw();
       stoptime = new Date().getTime();
@@ -90,15 +91,15 @@ window.startTest = function (done) {
       var vpf, opac, vis, i, j, v;
 
       vpf = feature.verticesPerFeature();
-      opac = feature.actors()[0].mapper().getSourceBuffer('fillOpacity');
-      for (i = v = 0; i < numPoints; i += 1) {
-        /* show 20% of the points each frame */
-        vis = (i % 5) === (frames % 5) ? 0.1 : 0.0;
+      opac = feature.actors()[0].mapper().getSourceBuffer('strokeOpacity');
+      for (i = v = 0; i < numLines; i += 1) {
+        /* show 20% of the lines each frame */
+        vis = (i % 10) === (frames % 10) ? 0.1 : -1.0;
         for (j = 0; j < vpf; j += 1, v += 1) {
           opac[v] = vis;
         }
       }
-      feature.actors()[0].mapper().updateSourceBuffer('fillOpacity');
+      feature.actors()[0].mapper().updateSourceBuffer('strokeOpacity');
       myMap.draw();
       frames += 1;
       stoptime = new Date().getTime();
@@ -111,19 +112,22 @@ window.startTest = function (done) {
       }
     }
 
-    /* Duplicate the data, offsetting the additional points */
-    while (points.length < numPoints) {
-      for (i = 0; i < citieslatlon.length && points.length < numPoints;
-           i += 1) {
-        points.push({
-          x: citieslatlon[i].lon + dx,
-          y: citieslatlon[i].lat + dy,
-          z: citieslatlon[i].elev
-        });
+    /* Connect various cities with lines */
+    for (j = 1; lines.length < numLines; j += 1) {
+      for (i = 0; i < citieslatlon.length - j && lines.length < numLines;
+           i += j + 1) {
+        lines.push([{
+          x: citieslatlon[i].lon,
+          y: citieslatlon[i].lat,
+          z: citieslatlon[i].elev,
+          strokeColor: {r: 0, g: 0, b: 1}
+        }, {
+          x: citieslatlon[i + j].lon,
+          y: citieslatlon[i + j].lat,
+          z: citieslatlon[i + j].elev,
+          strokeColor: {r: 1, g: 1, b: 0}
+        }]);
       }
-      pass += 1;
-      dx = Math.cos(pass) * 0.2;
-      dy = Math.sin(pass) * 0.2;
     }
 
     loadTest();
