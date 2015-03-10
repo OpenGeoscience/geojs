@@ -125,7 +125,7 @@ geo.gl.lineFeature = function (arg) {
   function createGLLines() {
     var data = m_this.data(),
         i, j, k, v,
-        numSegments = 0,
+        numSegments = 0, len,
         lineItem, lineItemData,
         vert = [{}, {}], vertTemp,
         pos, posIdx3,
@@ -135,7 +135,6 @@ geo.gl.lineFeature = function (arg) {
         strkColorFunc = m_this.style.get('strokeColor'),
         strkOpacityFunc = m_this.style.get('strokeOpacity'),
         order = m_this.featureVertices(),
-        buffers,
         posBuf, nextBuf, prevBuf, offsetBuf, indicesBuf,
         strokeWidthBuf, strokeColorBuf, strokeOpacityBuf,
         dest, dest3,
@@ -162,15 +161,19 @@ geo.gl.lineFeature = function (arg) {
                  m_this.gcs(), m_this.layer().map().gcs(),
                  position, 3);
 
-    buffers = vgl.DataBuffers(numSegments * order.length);
-    posBuf           = buffers.create('pos', 3);
-    nextBuf          = buffers.create('next', 3);
-    prevBuf          = buffers.create('prev', 3);
-    offsetBuf        = buffers.create('offset', 1);
-    indicesBuf       = buffers.create('indices', 1);
-    strokeWidthBuf   = buffers.create('strokeWidth', 1);
-    strokeColorBuf   = buffers.create('strokeColor', 3);
-    strokeOpacityBuf = buffers.create('strokeOpacity', 1);
+    len = numSegments * order.length;
+    posBuf           = getBuffer(geom, 'pos', len * 3);
+    nextBuf          = getBuffer(geom, 'next', len * 3);
+    prevBuf          = getBuffer(geom, 'prev', len * 3);
+    offsetBuf        = getBuffer(geom, 'offset', len * 1);
+    strokeWidthBuf   = getBuffer(geom, 'strokeWidth', len * 1);
+    strokeColorBuf   = getBuffer(geom, 'strokeColor', len * 3);
+    strokeOpacityBuf = getBuffer(geom, 'strokeOpacity', len * 1);
+    indicesBuf = geom.primitive(0).indices();
+    if (!(indicesBuf instanceof Uint16Array) || indicesBuf.length !== len) {
+      indicesBuf = new Uint16Array(len);
+      geom.primitive(0).setIndices(indicesBuf);
+    }
 
     for (i = posIdx3 = dest = dest3 = 0; i < data.length; i += 1) {
       lineItem = m_this.line()(data[i], i);
@@ -202,7 +205,7 @@ geo.gl.lineFeature = function (arg) {
             nextBuf[dest3 + 1] = position[v.next + 1];
             nextBuf[dest3 + 2] = position[v.next + 2];
             offsetBuf[dest] = order[k][1];
-            indicesBuf[dest] = dest;
+            /* We can ignore the indicies (they will all be zero) */
             strokeWidthBuf[dest] = v.strokeWidth;
             strokeColorBuf[dest3]     = v.strokeColor.r;
             strokeColorBuf[dest3 + 1] = v.strokeColor.g;
@@ -213,17 +216,33 @@ geo.gl.lineFeature = function (arg) {
       }
     }
 
-    geom.sourceByName('pos').setData(buffers.get('pos'));
-    geom.sourceByName('prev').setData(buffers.get('prev'));
-    geom.sourceByName('next').setData(buffers.get('next'));
-    geom.sourceByName('strokeWidth').setData(buffers.get('strokeWidth'));
-    geom.sourceByName('strokeColor').setData(buffers.get('strokeColor'));
-    geom.sourceByName('strokeOpacity').setData(buffers.get('strokeOpacity'));
-    geom.sourceByName('offset').setData(buffers.get('offset'));
-    geom.primitive(0).setIndices(buffers.get('indices'));
     geom.boundsDirty(true);
     m_mapper.modified();
     m_mapper.boundsDirtyTimestamp().modified();
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get a buffer for a geometry source.  If a buffer already exists and is
+   * the correct size, return it.  Otherwise, allocate a new buffer; any data
+   * in an old buffer is discarded.
+   *
+   * @param geom: the geometry to reference and modify.
+   * @param srcName: the name of the source.
+   * @param len: the number of elements for the array.
+   * @returns {Float32Array}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  function getBuffer(geom, srcName, len) {
+    var src = geom.sourceByName(srcName), data;
+
+    data = src.data();
+    if (data instanceof Float32Array && data.length === len) {
+      return data;
+    }
+    data = new Float32Array(len);
+    src.setData(data);
+    return data;
   }
 
   ////////////////////////////////////////////////////////////////////////////

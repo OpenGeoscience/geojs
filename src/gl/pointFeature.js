@@ -194,7 +194,6 @@ geo.gl.pointFeature = function (arg) {
         fillOpacity, fillOpacityVal, fillOpacityFunc,
         fillColor, fillColorVal, fillColorFunc,
         vpf = m_this.verticesPerFeature(),
-        buffers = vgl.DataBuffers(vpf * numPts),
         data = m_this.data(),
         item, ivpf, ivpf3, iunit, i3,
         geom = m_mapper.geometryData();
@@ -221,24 +220,28 @@ geo.gl.pointFeature = function (arg) {
                   m_this.gcs(), m_this.layer().map().gcs(),
                   position, 3);
 
-    posBuf        = buffers.create("pos", 3);
-    indices       = buffers.create("indices", 1);
-    unitBuf       = buffers.create("unit", 2);
-    radius        = buffers.create("rad", 1);
-    stroke        = buffers.create("stroke", 1);
-    strokeWidth   = buffers.create("strokeWidth", 1);
-    strokeOpacity = buffers.create("strokeOpacity", 1);
-    strokeColor   = buffers.create("strokeColor", 3);
-    fill          = buffers.create("fill", 1);
-    fillOpacity   = buffers.create("fillOpacity", 1);
-    fillColor     = buffers.create("fillColor", 3);
+    posBuf        = getBuffer(geom, "pos", vpf * numPts * 3);
+    unitBuf       = getBuffer(geom, "unit", vpf * numPts * 2);
+    radius        = getBuffer(geom, "rad", vpf * numPts * 1);
+    stroke        = getBuffer(geom, "stroke", vpf * numPts * 1);
+    strokeWidth   = getBuffer(geom, "strokeWidth", vpf * numPts * 1);
+    strokeOpacity = getBuffer(geom, "strokeOpacity", vpf * numPts * 1);
+    strokeColor   = getBuffer(geom, "strokeColor", vpf * numPts * 3);
+    fill          = getBuffer(geom, "fill", vpf * numPts * 1);
+    fillOpacity   = getBuffer(geom, "fillOpacity", vpf * numPts * 1);
+    fillColor     = getBuffer(geom, "fillColor", vpf * numPts * 3);
+    indices = geom.primitive(0).indices();
+    if (!(indices instanceof Uint16Array) || indices.length !== vpf * numPts) {
+      indices = new Uint16Array(vpf * numPts);
+      geom.primitive(0).setIndices(indices);
+    }
 
     for (i = ivpf = ivpf3 = iunit = i3 = 0; i < numPts; i += 1, i3 += 3) {
       item = data[i];
       for (j = 0; j < unit.length; j += 1, iunit += 1) {
         unitBuf[iunit] = unit[j];
       }
-      indices[i] = i;
+      /* We can ignore the indicies (they will all be zero) */
       radiusVal = radFunc(item);
       strokeVal = strokeFunc(item) ? 1.0 : 0.0;
       strokeWidthVal = strokeWidthFunc(item);
@@ -266,20 +269,33 @@ geo.gl.pointFeature = function (arg) {
       }
     }
 
-    geom.sourceByName("pos").setData(buffers.get("pos"));
-    geom.sourceByName("unit").setData(buffers.get("unit"));
-    geom.sourceByName("rad").setData(buffers.get("rad"));
-    geom.sourceByName("strokeWidth").setData(buffers.get("strokeWidth"));
-    geom.sourceByName("fillColor").setData(buffers.get("fillColor"));
-    geom.sourceByName("fill").setData(buffers.get("fill"));
-    geom.sourceByName("strokeColor").setData(buffers.get("strokeColor"));
-    geom.sourceByName("stroke").setData(buffers.get("stroke"));
-    geom.sourceByName("fillOpacity").setData(buffers.get("fillOpacity"));
-    geom.sourceByName("strokeOpacity").setData(buffers.get("strokeOpacity"));
-    geom.primitive(0).setIndices(buffers.get("indices"));
     geom.boundsDirty(true);
     m_mapper.modified();
     m_mapper.boundsDirtyTimestamp().modified();
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get a buffer for a geometry source.  If a buffer already exists and is
+   * the correct size, return it.  Otherwise, allocate a new buffer; any data
+   * in an old buffer is discarded.
+   *
+   * @param geom: the geometry to reference and modify.
+   * @param srcName: the name of the source.
+   * @param len: the number of elements for the array.
+   * @returns {Float32Array}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  function getBuffer(geom, srcName, len) {
+    var src = geom.sourceByName(srcName), data;
+
+    data = src.data();
+    if (data instanceof Float32Array && data.length === len) {
+      return data;
+    }
+    data = new Float32Array(len);
+    src.setData(data);
+    return data;
   }
 
   ////////////////////////////////////////////////////////////////////////////
