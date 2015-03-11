@@ -35,7 +35,7 @@ class glPointsSpeedBase(object):
         el = self.getElement('#loadResults')
         value = float(el.get_attribute('results'))
         threshold = float(os.environ.get('LOAD_SPEED_THRESHOLD', '1000'))
-        print 'Average load time %1.0f ms (must be at least %1.0f ms)' % (
+        print 'Average load time %1.0f ms (must be less than %1.0f ms)' % (
             value, threshold)
         if value > threshold or math.isnan(value):
             raise ThresholdException({'value': value, 'threshold': threshold})
@@ -46,7 +46,7 @@ class glPointsSpeedBase(object):
         el = self.getElement('#framerateResults')
         value = float(el.get_attribute('results'))  # in milliseconds
         threshold = float(os.environ.get('FRAMERATE_THRESHOLD', '10'))
-        print 'Average framerate %4.2f fps (must be less than %4.2f fps)' % (
+        print 'Average framerate %4.2f fps (must be at least %4.2f fps)' % (
             value, threshold)
         if value < threshold or math.isnan(value):
             raise ThresholdException({'value': value, 'threshold': threshold})
