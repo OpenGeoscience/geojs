@@ -336,7 +336,7 @@ geo.gl.pointFeature = function (arg) {
         posAttr = vgl.vertexAttribute("pos"),
         unitAttr = vgl.vertexAttribute("unit"),
         radAttr = vgl.vertexAttribute("rad"),
-        stokeWidthAttr = vgl.vertexAttribute("strokeWidth"),
+        strokeWidthAttr = vgl.vertexAttribute("strokeWidth"),
         fillColorAttr = vgl.vertexAttribute("fillColor"),
         fillAttr = vgl.vertexAttribute("fill"),
         strokeColorAttr = vgl.vertexAttribute("strokeColor"),
@@ -353,7 +353,7 @@ geo.gl.pointFeature = function (arg) {
             2, vgl.vertexAttributeKeysIndexed.One, {"name": "unit"}),
         sourceRadius = vgl.sourceDataAnyfv(
             1, vgl.vertexAttributeKeysIndexed.Two, {"name": "rad"}),
-        sourceStokeWidth = vgl.sourceDataAnyfv(
+        sourceStrokeWidth = vgl.sourceDataAnyfv(
             1, vgl.vertexAttributeKeysIndexed.Three, {"name": "strokeWidth"}),
         sourceFillColor = vgl.sourceDataAnyfv(
             3, vgl.vertexAttributeKeysIndexed.Four, {"name": "fillColor"}),
@@ -381,7 +381,7 @@ geo.gl.pointFeature = function (arg) {
     prog.addVertexAttribute(posAttr, vgl.vertexAttributeKeys.Position);
     prog.addVertexAttribute(unitAttr, vgl.vertexAttributeKeysIndexed.One);
     prog.addVertexAttribute(radAttr, vgl.vertexAttributeKeysIndexed.Two);
-    prog.addVertexAttribute(stokeWidthAttr, vgl.vertexAttributeKeysIndexed.Three);
+    prog.addVertexAttribute(strokeWidthAttr, vgl.vertexAttributeKeysIndexed.Three);
     prog.addVertexAttribute(fillColorAttr, vgl.vertexAttributeKeysIndexed.Four);
     prog.addVertexAttribute(fillAttr, vgl.vertexAttributeKeysIndexed.Five);
     prog.addVertexAttribute(strokeColorAttr, vgl.vertexAttributeKeysIndexed.Six);
@@ -407,7 +407,7 @@ geo.gl.pointFeature = function (arg) {
     geom.addSource(sourcePositions);
     geom.addSource(sourceUnits);
     geom.addSource(sourceRadius);
-    geom.addSource(sourceStokeWidth);
+    geom.addSource(sourceStrokeWidth);
     geom.addSource(sourceFillColor);
     geom.addSource(sourceFill);
     geom.addSource(sourceStrokeColor);
