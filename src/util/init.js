@@ -98,6 +98,10 @@
      * Convert a color from hex value or css name to rgb objects
      */
     convertColor: function (color) {
+      if (color.r !== undefined && color.g !== undefined &&
+          color.b !== undefined) {
+        return color;
+      }
       if (typeof color === "string") {
         if (geo.util.cssColors.hasOwnProperty(color)) {
           color = geo.util.cssColors[color];

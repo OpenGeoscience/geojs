@@ -241,6 +241,12 @@ if(SELENIUM_TESTS)
     endif()
   endforeach()
 
+  set_property(TEST "selenium:glPointsSpeed" APPEND PROPERTY ENVIRONMENT "LOAD_SPEED_THRESHOLD=1000")
+  set_property(TEST "selenium:glPointsSpeed" APPEND PROPERTY ENVIRONMENT "FRAMERATE_THRESHOLD=10")
+  
+  set_property(TEST "selenium:glLinesSpeed" APPEND PROPERTY ENVIRONMENT "LOAD_SPEED_THRESHOLD=1000")
+  set_property(TEST "selenium:glLinesSpeed" APPEND PROPERTY ENVIRONMENT "FRAMERATE_THRESHOLD=10")
+
   set(jasmine_runner ${CMAKE_CURRENT_BINARY_DIR}/test/selenium_jasmine_runner.py)
   set(JASMINE_DEPLOY_URL /test/jasmine)
 
