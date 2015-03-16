@@ -38,7 +38,7 @@ class glLinesSpeedBase(object):
         print 'Average load time %1.0f ms (must be less than %1.0f ms)' % (
             value, threshold)
         if value > threshold or math.isnan(value):
-            raise ThresholdException({'value': value, 'threshold': threshold})
+            raise ThresholdException(value=value, threshold=threshold)
 
     def framerateTest(self, testName, revision=None):
         # Threshold is in frames-per-second.  We need the value to be greater
@@ -49,7 +49,7 @@ class glLinesSpeedBase(object):
         print 'Average framerate %4.2f fps (must be at least %4.2f fps)' % (
             value, threshold)
         if value < threshold or math.isnan(value):
-            raise ThresholdException({'value': value, 'threshold': threshold})
+            raise ThresholdException(value=value, threshold=threshold)
 
 
 class FirefoxOSM(glLinesSpeedBase, FirefoxTest):
