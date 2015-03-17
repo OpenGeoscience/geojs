@@ -29,31 +29,31 @@ geo.gl.polygonFeature = function (arg) {
       s_update = this._update;
 
   function createVertexShader() {
-      var vertexShaderSource = [
-        'attribute vec3 pos;',
-        'attribute vec3 fillColor;',
-        'attribute float fillOpacity;',
-        'uniform mat4 modelViewMatrix;',
-        'uniform mat4 projectionMatrix;',
-        'uniform float pixelWidth;',
-        'varying vec3 fillColorVar;',
-        'varying float fillOpacityVar;',
+    var vertexShaderSource = [
+      'attribute vec3 pos;',
+      'attribute vec3 fillColor;',
+      'attribute float fillOpacity;',
+      'uniform mat4 modelViewMatrix;',
+      'uniform mat4 projectionMatrix;',
+      'uniform float pixelWidth;',
+      'varying vec3 fillColorVar;',
+      'varying float fillOpacityVar;',
 
-        'void main(void)',
-        '{',
-        '  vec4 clipPos = projectionMatrix * modelViewMatrix * vec4(pos.xyz, 1);',
-        '  if (clipPos.w != 0.0) {',
-        '    clipPos = clipPos/clipPos.w;',
-        '  }',
-        '  fillColorVar = fillColor;',
-        '  fillOpacityVar = fillOpacity;',
-        '  gl_Position = clipPos;',
-        '}'
-      ].join('\n'),
-      shader = new vgl.shader(gl.VERTEX_SHADER);
-      shader.setShaderSource(vertexShaderSource);
-      return shader;
-    }
+      'void main(void)',
+      '{',
+      '  vec4 clipPos = projectionMatrix * modelViewMatrix * vec4(pos.xyz, 1);',
+      '  if (clipPos.w != 0.0) {',
+      '    clipPos = clipPos/clipPos.w;',
+      '  }',
+      '  fillColorVar = fillColor;',
+      '  fillOpacityVar = fillOpacity;',
+      '  gl_Position = clipPos;',
+      '}'
+    ].join('\n'),
+    shader = new vgl.shader(gl.VERTEX_SHADER);
+    shader.setShaderSource(vertexShaderSource);
+    return shader;
+  }
 
   function createFragmentShader() {
     var fragmentShaderSource = [
@@ -113,8 +113,8 @@ geo.gl.polygonFeature = function (arg) {
 
     m_this.data().forEach(function (item) {
       polygon = m_this.polygon()(item, itemIndex);
-      polygonItem = polygon.outer;
-      holes = polygon.inner;
+      polygonItem = polygon.outer || [];
+      holes = polygon.inner || [];
       polygonItemCoordIndex = 0;
       extRing = [];
       extIndex = 0;
@@ -129,9 +129,13 @@ geo.gl.polygonFeature = function (arg) {
                                 polygonItemCoordIndex,
                                 item, itemIndex);
           if (posInstance instanceof geo.latlng) {
-            extRing[0].push({x: posInstance.x(), y: posInstance.y()});
+            extRing[0].push({
+              x: posInstance.x(), y: posInstance.y(), i: fillColor.length
+            });
           } else {
-            extRing[0].push({x: posInstance.x, y: posInstance.y});
+            extRing[0].push({
+              x: posInstance.x, y: posInstance.y, i: fillColor.length
+            });
           }
 
           fillColorInstance = fillColorFunc(extRingCoords,
@@ -155,6 +159,15 @@ geo.gl.polygonFeature = function (arg) {
         hole.forEach(function (intRingCoords) {
           posInstance = posFunc(intRingCoords, polygonItemCoordIndex,
                                 item, itemIndex);
+          if (posInstance instanceof geo.latlng) {
+            extRing[intIndex + 1].push({
+              x: posInstance.x(), y: posInstance.y(), i: fillColor.length
+            });
+          } else {
+            extRing[intIndex + 1].push({
+              x: posInstance.x, y: posInstance.y, i: fillColor.length
+            });
+          }
           fillColorInstance = fillColorFunc(intRingCoords,
                                             polygonItemCoordIndex,
                                             item, itemIndex);
@@ -165,11 +178,6 @@ geo.gl.polygonFeature = function (arg) {
                                            polygonItemCoordIndex,
                                            item, itemIndex));
           polygonItemCoordIndex += 1;
-          if (posInstance instanceof geo.latlng) {
-            extRing[intIndex + 1].push({x: posInstance.x(), y: posInstance.y()});
-          } else {
-            extRing[intIndex + 1].push({x: posInstance.x, y: posInstance.y});
-          }
         });
         intIndex += 1;
       });
@@ -192,8 +200,8 @@ geo.gl.polygonFeature = function (arg) {
         position.push([polygonItemCoords.x,
                        polygonItemCoords.y,
                        polygonItemCoords.z || 0.0]);
-        fillColorNew.push(fillColor[polygonIndex]);
-        fillOpacityNew.push(fillOpacity[polygonIndex]);
+        fillColorNew.push(fillColor[polygonItemCoords.i]);
+        fillOpacityNew.push(fillOpacity[polygonItemCoords.i]);
       });
 
       itemIndex += 1;
