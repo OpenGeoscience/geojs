@@ -26,6 +26,7 @@ geo.gl.lineFeature = function (arg) {
       m_mapper = null,
       m_material = null,
       m_pixelWidthUnif = null,
+      m_aspectUniform = null,
       m_dynamicDraw = arg.dynamicDraw === undefined ? false : arg.dynamicDraw,
       s_init = this._init,
       s_update = this._update;
@@ -47,6 +48,7 @@ geo.gl.lineFeature = function (arg) {
       'uniform mat4 modelViewMatrix;',
       'uniform mat4 projectionMatrix;',
       'uniform float pixelWidth;',
+      'uniform float aspect;',
 
       'varying vec3 strokeColorVar;',
       'varying float strokeWidthVar;',
@@ -78,17 +80,11 @@ geo.gl.lineFeature = function (arg) {
       '  strokeOpacityVar = strokeOpacity;',
       '  vec2 deltaNext = worldNext.xy - worldPos.xy;',
       '  vec2 deltaPrev = worldPos.xy - worldPrev.xy;',
-      '  float angleNext = PI * 0.5;',
-      '  if (deltaNext.y < 0.0) { angleNext = -angleNext; } ',
-      '  if (deltaNext.x != 0.0) {',
-      '    angleNext = atan(deltaNext.y, deltaNext.x);',
-      '  }',
-      '  float anglePrev = PI * 0.5;',
-      '  if (deltaPrev.y < 0.0) { anglePrev = -anglePrev; } ',
-      '  if (deltaPrev.x != 0.0) {',
-      '    anglePrev = atan(deltaPrev.y, deltaPrev.x);',
-      '  }',
+      '  float angleNext = 0.0, anglePrev = 0.0;',
+      '  if (deltaNext.xy != vec2(0.0, 0.0))',
+      '    angleNext = atan(deltaNext.y / aspect, deltaNext.x);',
       '  if (deltaPrev.xy == vec2(0.0, 0.0)) anglePrev = angleNext;',
+      '  else  anglePrev = atan(deltaPrev.y / aspect, deltaPrev.x);',
       '  if (deltaNext.xy == vec2(0.0, 0.0)) angleNext = anglePrev;',
       '  float angle = (anglePrev + angleNext) / 2.0;',
       '  float cosAngle = cos(anglePrev - angle);',
@@ -96,7 +92,7 @@ geo.gl.lineFeature = function (arg) {
       '  float distance = (offset * strokeWidth * pixelWidth) /',
       '                    cosAngle;',
       '  worldPos.x += distance * sin(angle);',
-      '  worldPos.y -= distance * cos(angle);',
+      '  worldPos.y -= distance * cos(angle) * aspect;',
       '  gl_Position = worldPos;',
       '}'
     ].join('\n'),
@@ -308,6 +304,9 @@ geo.gl.lineFeature = function (arg) {
 
     m_pixelWidthUnif =  new vgl.floatUniform('pixelWidth',
                           1.0 / m_this.renderer().width());
+    m_aspectUniform = new vgl.floatUniform('aspect',
+        m_this.renderer().width() / m_this.renderer().height());
+
     s_init.call(m_this, arg);
     m_material = vgl.material();
     m_mapper = vgl.mapper({dynamicDraw: m_dynamicDraw});
@@ -323,6 +322,7 @@ geo.gl.lineFeature = function (arg) {
     prog.addUniform(mviUnif);
     prog.addUniform(prjUnif);
     prog.addUniform(m_pixelWidthUnif);
+    prog.addUniform(m_aspectUniform);
 
     prog.addShader(fs);
     prog.addShader(vs);
@@ -393,6 +393,8 @@ geo.gl.lineFeature = function (arg) {
     }
 
     m_pixelWidthUnif.set(1.0 / m_this.renderer().width());
+    m_aspectUniform.set(m_this.renderer().width() /
+                        m_this.renderer().height());
     m_actor.setVisible(m_this.visible());
     m_actor.material().setBinNumber(m_this.bin());
     m_this.updateTime().modified();
