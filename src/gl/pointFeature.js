@@ -39,7 +39,7 @@ geo.gl.pointFeature = function (arg) {
     m_primitiveShape = arg.primitiveShape;
   }
 
-  if (arg.primitiveShape === "sprites") {
+  if (m_primitiveShape === "sprites") {
     vertexShaderSource = [
       "#ifdef GL_ES",
       "  precision highp float;",
@@ -57,7 +57,6 @@ geo.gl.pointFeature = function (arg) {
       "uniform float aspect;",
       "uniform mat4 modelViewMatrix;",
       "uniform mat4 projectionMatrix;",
-      "varying vec3 unitVar;",
       "varying vec4 fillColorVar;",
       "varying vec4 strokeColorVar;",
       "varying float radiusVar;",
@@ -85,14 +84,10 @@ geo.gl.pointFeature = function (arg) {
       "  }",
       "  fillColorVar = vec4 (fillColor, fillOpacity);",
       "  strokeColorVar = vec4 (strokeColor, strokeOpacity);",
-      "  unitVar = vec3 (unit, 1.0);",
       "  radiusVar = rad;",
       "  vec4 p = (projectionMatrix * modelViewMatrix * vec4(pos, 1.0)).xyzw;",
-      "  if (p.w != 0.0) {",
-      "    p = p / p.w;",
-      "  }",
-      "  gl_PointSize = 2.0 * (rad + strokeWidthVar);",
-      "  gl_Position = vec4(p.xyz, 1.0);",
+      "  gl_PointSize = 2.0 * (rad + strokeWidthVar); ",
+      "  gl_Position = p;",
       "}"
     ].join("\n");
   } else {
@@ -162,52 +157,98 @@ geo.gl.pointFeature = function (arg) {
     return shader;
   }
 
-  fragmentShaderSource = [
-    "#ifdef GL_ES",
-    "  precision highp float;",
-    "#endif",
-    "uniform float aspect;",
-    "varying vec3 unitVar;",
-    "varying vec4 fillColorVar;",
-    "varying vec4 strokeColorVar;",
-    "varying float radiusVar;",
-    "varying float strokeWidthVar;",
-    "varying float fillVar;",
-    "varying float strokeVar;",
-    "void main () {",
-    "  vec4 strokeColor, fillColor;",
-    "  float endStep;",
-    "  // No stroke or fill implies nothing to draw",
-    "  if (fillVar == 0.0 && strokeVar == 0.0)",
-    "    discard;",
-    "  // Get normalized texture coordinates and polar r coordinate",
-    "  float rad = length (unitVar.xy);",
-    "  if (rad > 1.0)",
-    "    discard;",
-    "  // If there is no stroke, the fill region should transition to nothing",
-    "  if (strokeVar == 0.0) {",
-    "    strokeColor = vec4 (fillColorVar.rgb, 0.0);",
-    "    endStep = 1.0;",
-    "  } else {",
-    "    strokeColor = strokeColorVar;",
-    "    endStep = radiusVar / (radiusVar + strokeWidthVar);",
-    "  }",
-    "  // Likewise, if there is no fill, the stroke should transition to nothing",
-    "  if (fillVar == 0.0)",
-    "    fillColor = vec4 (strokeColor.rgb, 0.0);",
-    "  else",
-    "    fillColor = fillColorVar;",
-    "  // Distance to antialias over",
-    "  float antialiasDist = 3.0 / (2.0 * radiusVar);",
-    "  if (rad < endStep) {",
-    "    float step = smoothstep (endStep - antialiasDist, endStep, rad);",
-    "    gl_FragColor = mix (fillColor, strokeColor, step);",
-    "  } else {",
-    "    float step = smoothstep (1.0 - antialiasDist, 1.0, rad);",
-    "    gl_FragColor = mix (strokeColor, vec4 (strokeColor.rgb, 0.0), step);",
-    "  }",
-    "}"
-  ].join("\n");
+  if (arg.primitiveShape === "sprites") {
+    fragmentShaderSource = [
+      "#ifdef GL_ES",
+      "  precision highp float;",
+      "#endif",
+      "uniform float aspect;",
+      "varying vec4 fillColorVar;",
+      "varying vec4 strokeColorVar;",
+      "varying float radiusVar;",
+      "varying float strokeWidthVar;",
+      "varying float fillVar;",
+      "varying float strokeVar;",
+      "void main () {",
+      "  vec4 strokeColor, fillColor;",
+      "  float endStep;",
+      "  // No stroke or fill implies nothing to draw",
+      "  if (fillVar == 0.0 && strokeVar == 0.0)",
+      "    discard;",
+      "  // Get normalized texture coordinates and polar r coordinate",
+      "  float rad = 2.0 * length (gl_PointCoord - vec2(0.5));",
+      "  // If there is no stroke, the fill region should transition to nothing",
+      "  if (strokeVar == 0.0) {",
+      "    strokeColor = vec4 (fillColorVar.rgb, 0.0);",
+      "    endStep = 1.0;",
+      "  } else {",
+      "    strokeColor = strokeColorVar;",
+      "    endStep = radiusVar / (radiusVar + strokeWidthVar);",
+      "  }",
+      "  // Likewise, if there is no fill, the stroke should transition to nothing",
+      "  if (fillVar == 0.0)",
+      "    fillColor = vec4 (strokeColor.rgb, 0.0);",
+      "  else",
+      "    fillColor = fillColorVar;",
+      "  // Distance to antialias over",
+      "  float antialiasDist = 3.0 / (2.0 * radiusVar);",
+      "  if (rad < endStep) {",
+      "    float step = smoothstep (endStep - antialiasDist, endStep, rad);",
+      "    gl_FragColor = mix (fillColor, strokeColor, step);",
+      "  } else {",
+      "    float step = smoothstep (1.0 - antialiasDist, 1.0, rad);",
+      "    gl_FragColor = mix (strokeColor, vec4 (strokeColor.rgb, 0.1), step);",
+      "  }",
+      "}"
+    ].join("\n");
+  } else {
+    fragmentShaderSource = [
+      "#ifdef GL_ES",
+      "  precision highp float;",
+      "#endif",
+      "uniform float aspect;",
+      "varying vec3 unitVar;",
+      "varying vec4 fillColorVar;",
+      "varying vec4 strokeColorVar;",
+      "varying float radiusVar;",
+      "varying float strokeWidthVar;",
+      "varying float fillVar;",
+      "varying float strokeVar;",
+      "void main () {",
+      "  vec4 strokeColor, fillColor;",
+      "  float endStep;",
+      "  // No stroke or fill implies nothing to draw",
+      "  if (fillVar == 0.0 && strokeVar == 0.0)",
+      "    discard;",
+      "  // Get normalized texture coordinates and polar r coordinate",
+      "  float rad = length (unitVar.xy);",
+      "  if (rad > 1.0)",
+      "    discard;",
+      "  // If there is no stroke, the fill region should transition to nothing",
+      "  if (strokeVar == 0.0) {",
+      "    strokeColor = vec4 (fillColorVar.rgb, 0.0);",
+      "    endStep = 1.0;",
+      "  } else {",
+      "    strokeColor = strokeColorVar;",
+      "    endStep = radiusVar / (radiusVar + strokeWidthVar);",
+      "  }",
+      "  // Likewise, if there is no fill, the stroke should transition to nothing",
+      "  if (fillVar == 0.0)",
+      "    fillColor = vec4 (strokeColor.rgb, 0.0);",
+      "  else",
+      "    fillColor = fillColorVar;",
+      "  // Distance to antialias over",
+      "  float antialiasDist = 3.0 / (2.0 * radiusVar);",
+      "  if (rad < endStep) {",
+      "    float step = smoothstep (endStep - antialiasDist, endStep, rad);",
+      "    gl_FragColor = mix (fillColor, strokeColor, step);",
+      "  } else {",
+      "    float step = smoothstep (1.0 - antialiasDist, 1.0, rad);",
+      "    gl_FragColor = mix (strokeColor, vec4 (strokeColor.rgb, 0.0), step);",
+      "  }",
+      "}"
+    ].join("\n");
+  }
 
   function createFragmentShader() {
     var shader = new vgl.shader(gl.FRAGMENT_SHADER);
@@ -322,6 +363,7 @@ geo.gl.pointFeature = function (arg) {
         posBuf[ivpf3 + 1] = position[i3 + 1];
         posBuf[ivpf3 + 2] = position[i3 + 2];
         radius[ivpf] = radiusVal;
+        console.log(radiusVal);
         stroke[ivpf] = strokeVal;
         strokeWidth[ivpf] = strokeWidthVal;
         strokeOpacity[ivpf] = strokeOpacityVal;
@@ -388,6 +430,7 @@ geo.gl.pointFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.verticesPerFeature = function () {
     var unit = pointPolygon(0, 0, 1, 1);
+    console.log(unit.length/2);
     return unit.length / 2;
   };
 
@@ -434,7 +477,11 @@ geo.gl.pointFeature = function (arg) {
             1, vgl.vertexAttributeKeysIndexed.Eight, {"name": "fillOpacity"}),
         sourceStrokeOpacity = vgl.sourceDataAnyfv(
             1, vgl.vertexAttributeKeysIndexed.Nine, {"name": "strokeOpacity"}),
-        trianglesPrimitive = vgl.triangles();
+        primitive = new vgl.triangles();
+
+    if (m_primitiveShape === "sprites") {
+      primitive = new vgl.points();
+    }
 
     m_pixelWidthUniform = new vgl.floatUniform("pixelWidth",
                             2.0 / m_this.renderer().width());
@@ -481,7 +528,7 @@ geo.gl.pointFeature = function (arg) {
     geom.addSource(sourceStroke);
     geom.addSource(sourceAlpha);
     geom.addSource(sourceStrokeOpacity);
-    geom.addPrimitive(trianglesPrimitive);
+    geom.addPrimitive(primitive);
     m_mapper.setGeometryData(geom);
   };
 
