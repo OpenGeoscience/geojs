@@ -35,7 +35,7 @@ geo.gl.pointFeature = function (arg) {
 
   if (arg.primitiveShape === "triangle" ||
       arg.primitiveShape === "square" ||
-      arg.primitiveShape === "sprites") {
+      arg.primitiveShape === "sprite") {
     m_primitiveShape = arg.primitiveShape;
   }
 
@@ -61,13 +61,13 @@ geo.gl.pointFeature = function (arg) {
     "varying float radiusVar;",
     "varying float strokeWidthVar;",
     "varying float fillVar;",
-    "varying float strokeVar;",
+    "varying float strokeVar;"
   ];
 
-  if (m_primitiveShape !== "sprites") {
+  if (m_primitiveShape !== "sprite") {
     vertexShaderSource = vertexShaderSource.concat([
       "attribute vec2 unit;",
-      "varying vec3 unitVar;",
+      "varying vec3 unitVar;"
     ]);
   }
 
@@ -96,7 +96,7 @@ geo.gl.pointFeature = function (arg) {
     "  radiusVar = rad;"
   ]);
 
-  if (m_primitiveShape === "sprites") {
+  if (m_primitiveShape === "sprite") {
     vertexShaderSource.push.apply(vertexShaderSource, [
       "  gl_Position = (projectionMatrix * modelViewMatrix * vec4(pos, 1.0)).xyzw;",
       "  gl_PointSize = 2.0 * (rad + strokeWidthVar); ",
@@ -127,10 +127,10 @@ geo.gl.pointFeature = function (arg) {
     "varying float radiusVar;",
     "varying float strokeWidthVar;",
     "varying float fillVar;",
-    "varying float strokeVar;",
+    "varying float strokeVar;"
   ];
 
-  if (m_primitiveShape !== "sprites") {
+  if (m_primitiveShape !== "sprite") {
     fragmentShaderSource.push("varying vec3 unitVar;");
   }
 
@@ -140,10 +140,10 @@ geo.gl.pointFeature = function (arg) {
     "  float endStep;",
     "  // No stroke or fill implies nothing to draw",
     "  if (fillVar == 0.0 && strokeVar == 0.0)",
-    "    discard;",
+    "    discard;"
   ]);
 
-  if (m_primitiveShape === "sprites") {
+  if (m_primitiveShape === "sprite") {
     fragmentShaderSource.push(
       "  float rad = 2.0 * length (gl_PointCoord - vec2(0.5));");
   } else {
@@ -204,8 +204,8 @@ geo.gl.pointFeature = function (arg) {
           x + w * Math.sqrt(3.0), y + h
         ];
         break;
-      case "sprites":
-        /* Point sprites uses only one vertex per point. */
+      case "sprite":
+        /* Point sprite uses only one vertex per point. */
         verts = [x, y];
         break;
       default: // "square"
@@ -221,10 +221,10 @@ geo.gl.pointFeature = function (arg) {
         break;
     }
     return verts;
-  };
+  }
 
   function createGLPoints() {
-    // unit and associated data is not used when drawing sprites
+    // unit and associated data is not used when drawing sprite
     var i, j, numPts = m_this.data().length,
         unit = pointPolygon(0, 0, 1, 1),
         position = new Array(numPts * 3), posBuf, posVal, posFunc,
@@ -266,7 +266,7 @@ geo.gl.pointFeature = function (arg) {
 
     posBuf        = getBuffer(geom, "pos", vpf * numPts * 3);
 
-    if (m_primitiveShape !== "sprites") {
+    if (m_primitiveShape !== "sprite") {
       unitBuf       = getBuffer(geom, "unit", vpf * numPts * 2);
     }
 
@@ -286,7 +286,7 @@ geo.gl.pointFeature = function (arg) {
 
     for (i = ivpf = ivpf3 = iunit = i3 = 0; i < numPts; i += 1, i3 += 3) {
       item = data[i];
-      if (m_primitiveShape !== "sprites") {
+      if (m_primitiveShape !== "sprite") {
         for (j = 0; j < unit.length; j += 1, iunit += 1) {
           unitBuf[iunit] = unit[j];
         }
@@ -419,7 +419,7 @@ geo.gl.pointFeature = function (arg) {
             1, vgl.vertexAttributeKeysIndexed.Nine, {"name": "strokeOpacity"}),
         primitive = new vgl.triangles();
 
-    if (m_primitiveShape === "sprites") {
+    if (m_primitiveShape === "sprite") {
       primitive = new vgl.points();
     }
 
@@ -433,7 +433,7 @@ geo.gl.pointFeature = function (arg) {
 
     // TODO: Right now this is ugly but we will fix it.
     prog.addVertexAttribute(posAttr, vgl.vertexAttributeKeys.Position);
-    if (m_primitiveShape !== "sprites") {
+    if (m_primitiveShape !== "sprite") {
       prog.addVertexAttribute(unitAttr, vgl.vertexAttributeKeysIndexed.One);
     }
 
