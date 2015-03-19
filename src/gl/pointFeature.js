@@ -71,7 +71,7 @@ geo.gl.pointFeature = function (arg) {
     ]);
   }
 
-  vertexShaderSource = vertexShaderSource.concat([
+  vertexShaderSource.push.apply(vertexShaderSource, [
     "void main(void)",
     "{",
     "  strokeWidthVar = strokeWidth;",
@@ -97,13 +97,13 @@ geo.gl.pointFeature = function (arg) {
   ]);
 
   if (m_primitiveShape === "sprites") {
-    vertexShaderSource = vertexShaderSource.concat([
+    vertexShaderSource.push.apply(vertexShaderSource, [
       "  gl_Position = (projectionMatrix * modelViewMatrix * vec4(pos, 1.0)).xyzw;",
       "  gl_PointSize = 2.0 * (rad + strokeWidthVar); ",
       "}"
     ]);
   } else {
-    vertexShaderSource = vertexShaderSource.concat([
+    vertexShaderSource.push.apply(vertexShaderSource, [
         "  unitVar = vec3 (unit, 1.0);",
         "  vec4 p = (projectionMatrix * modelViewMatrix * vec4(pos, 1.0)).xyzw;",
         "  if (p.w != 0.0) {",
@@ -134,8 +134,7 @@ geo.gl.pointFeature = function (arg) {
     fragmentShaderSource.push("varying vec3 unitVar;");
   }
 
-
-  fragmentShaderSource = fragmentShaderSource.concat([
+  fragmentShaderSource.push.apply(fragmentShaderSource, [
     "void main () {",
     "  vec4 strokeColor, fillColor;",
     "  float endStep;",
@@ -152,7 +151,7 @@ geo.gl.pointFeature = function (arg) {
       "  float rad = length (unitVar.xy);");
   }
 
-  fragmentShaderSource = fragmentShaderSource.concat([
+  fragmentShaderSource.push.apply(fragmentShaderSource, [
     "  // If there is no stroke, the fill region should transition to nothing",
     "  if (strokeVar == 0.0) {",
     "    strokeColor = vec4 (fillColorVar.rgb, 0.0);",
@@ -176,7 +175,9 @@ geo.gl.pointFeature = function (arg) {
     "    gl_FragColor = mix (strokeColor, vec4 (strokeColor.rgb, 0.0), step);",
     "  }",
     "}"
-  ]).join("\n");
+  ]);
+
+  fragmentShaderSource = fragmentShaderSource.join("\n");
 
   function createVertexShader() {
     var shader = new vgl.shader(gl.VERTEX_SHADER);
