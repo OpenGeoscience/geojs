@@ -17,5 +17,7 @@ Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 
 Get Involved
 ============
-GeoJS is developed to meet needs of developers and domain-specific researchers and we always open for collaboration. We have been doing open source development for the last 17 years and understand and appreciate what it takes to develop open source
-software. So fork GeoJS, do great things and let us know if we can help.
+GeoJS is developed to meet needs of developers and domain-specific researchers,
+and we are always open for collaboration. We have been doing open source development
+for the last 17 year and understand and appreciate what it takes to develop open
+source software. So fork GeoJS, do great things and let us know if we can help.
