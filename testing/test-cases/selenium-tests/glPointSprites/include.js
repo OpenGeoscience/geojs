@@ -12,12 +12,8 @@ window.startTest = function (done) {
   image.onload = function () {
       window.geoTests.loadCitiesData(function (citieslatlon) {
           var layer = myMap.createLayer('feature');
-          layer.createFeature('point')
+          layer.createFeature('point', {primitiveShape: 'sprites'})
             .data(citieslatlon)
-            .style('point_sprites', true)
-            .style('point_sprites_image', image)
-            .style('width', 20)
-            .style('height', 20)
             .position(function (d) { return {x: d.lon, y: d.lat, z: d.elev}; });
           myMap.draw();
           myMap.onIdle(done);
