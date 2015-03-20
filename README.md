@@ -19,5 +19,5 @@ Get Involved
 ============
 GeoJS is developed to meet needs of developers and domain-specific researchers,
 and we are always open for collaboration. We have been doing open source development
-for the last 17 years. We understand and appreciate what it takes to develop open
+for the last 17 year and understand and appreciate what it takes to develop open
 source software. So fork GeoJS, do great things and let us know if we can help.
