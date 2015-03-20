@@ -27,7 +27,7 @@ geo.gl.pointFeature = function (arg) {
       m_pixelWidthUniform = null,
       m_aspectUniform = null,
       m_dynamicDraw = arg.dynamicDraw === undefined ? false : arg.dynamicDraw,
-      m_primitiveShape = "triangle", // arg can change this, below
+      m_primitiveShape = "sprite", // arg can change this, below
       s_init = this._init,
       s_update = this._update,
       vertexShaderSource = null,
