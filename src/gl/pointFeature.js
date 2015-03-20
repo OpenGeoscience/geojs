@@ -152,6 +152,8 @@ geo.gl.pointFeature = function (arg) {
   }
 
   fragmentShaderSource.push.apply(fragmentShaderSource, [
+    "  if (rad > 1.0)",
+    "    discard;",
     "  // If there is no stroke, the fill region should transition to nothing",
     "  if (strokeVar == 0.0) {",
     "    strokeColor = vec4 (fillColorVar.rgb, 0.0);",
