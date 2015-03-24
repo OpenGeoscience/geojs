@@ -78,12 +78,19 @@ geo.gl.planeFeature = function (arg) {
         ul[0], ul[1], ul[2],
         lr[0], lr[1], lr[2]);
 
+      m_actor.material().shaderProgram().uniform("opacity").set(
+        m_this.style().opacity !== undefined ? m_this.style().opacity : 1);
+
       m_this.renderer().contextRenderer().addActor(m_actor);
 
     } else {
       m_actor = vgl.utils.createTexturePlane(or[0], or[1], or[2],
         lr[0], lr[1], lr[2],
         ul[0], ul[1], ul[2], true);
+
+      m_actor.material().shaderProgram().uniform("opacity").set(
+        m_this.style().opacity !== undefined ? m_this.style().opacity : 1);
+
       texture = vgl.texture();
       m_this.visible(false);
 
@@ -141,6 +148,8 @@ geo.gl.planeFeature = function (arg) {
     if (m_this.updateTime().getMTime() <= m_this.getMTime()) {
       m_actor.setVisible(m_this.visible());
       m_actor.material().setBinNumber(m_this.bin());
+      m_actor.material().shaderProgram().uniform("opacity").set(
+        m_this.style().opacity !== undefined ? m_this.style().opacity : 1);
     }
 
     m_this.updateTime().modified();
