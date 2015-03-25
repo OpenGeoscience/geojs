@@ -415,6 +415,8 @@ module.exports = function (grunt) {
 
   grunt.registerTask('library', [
     'template',
+    'copy:geo',
+    'copy:vgl',
     'concat:geojs',
     'uglify:geojs'
   ]);
@@ -423,14 +425,8 @@ module.exports = function (grunt) {
     'uglify:ext'
   ]);
 
-  grunt.registerTask('dev', [
-    'copy:geo',
-    'copy:vgl'
-  ]);
-
   grunt.registerTask('default', [
     'init',
-    'dev',
     'library',
     'examples'
   ]);
