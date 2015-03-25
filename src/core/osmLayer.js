@@ -36,6 +36,7 @@ geo.osmLayer = function (arg) {
     m_numberOfCachedTiles = 0,
     m_tileCacheSize = 100,
     m_baseUrl = "http://tile.openstreetmap.org/",
+    m_mapOpacity = 1.0,
     m_imageFormat = "png",
     m_updateTimerId = null,
     m_lastVisibleZoom = null,
@@ -55,6 +56,9 @@ geo.osmLayer = function (arg) {
     m_baseUrl += "/";
   }
 
+  if (arg && arg.mapOpacity !== undefined) {
+    m_mapOpacity = arg.mapOpacity;
+  }
   if (arg && arg.imageFormat !== undefined) {
     m_imageFormat = arg.imageFormat;
   }
@@ -596,13 +600,13 @@ geo.osmLayer = function (arg) {
     /// And now finally add them
     for (i = 0; i < m_pendingNewTiles.length; i += 1) {
       tile = m_pendingNewTiles[i];
-      feature = m_this.createFeature("plane", {drawOnAsyncResourceLoad: false,
-                    onload: tileOnLoad(tile)})
-                  .origin([tile.llx, tile.lly])
-                  .upperLeft([tile.llx, tile.ury])
-                  .lowerRight([tile.urx, tile.lly])
-                  .gcs("EPSG:3857")
-                  .style("image", tile);
+      feature = m_this.createFeature(
+        "plane", {drawOnAsyncResourceLoad: false, onload: tileOnLoad(tile)})
+        .origin([tile.llx, tile.lly])
+        .upperLeft([tile.llx, tile.ury])
+        .lowerRight([tile.urx, tile.lly])
+        .gcs("EPSG:3857")
+        .style({image: tile, opacity: m_mapOpacity});
       tile.feature = feature;
       tile.feature._update();
     }
@@ -744,6 +748,33 @@ geo.osmLayer = function (arg) {
       }
       this._update();
     }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set map opacity
+   *
+   * @returns {geo.osmLayer}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.mapOpacity = function (val) {
+    if (val === undefined) {
+      return m_mapOpacity;
+    } else if (val !== m_mapOpacity) {
+      m_mapOpacity = val;
+      var zoom, x, y, tile;
+      for (zoom in m_tiles) {
+        for (x in m_tiles[zoom]) {
+          for (y in m_tiles[zoom][x]) {
+            tile = m_tiles[zoom][x][y];
+            tile.feature.style().opacity = val;
+            tile.feature._update();
+          }
+        }
+      }
+      m_this.modified();
+    }
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
