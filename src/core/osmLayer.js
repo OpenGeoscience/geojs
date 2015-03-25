@@ -760,7 +760,7 @@ geo.osmLayer = function (arg) {
   this.mapOpacity = function (val) {
     if (val === undefined) {
       return m_mapOpacity;
-    } else if (val != m_mapOpacity) {
+    } else if (val !== m_mapOpacity) {
       m_mapOpacity = val;
       var zoom, x, y, tile;
       for (zoom in m_tiles) {

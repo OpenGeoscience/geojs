@@ -10,15 +10,24 @@ class glPlaneBase(object):
     testCase = ('glPlane',)
     testRevision = 1
 
-    def loadPage(self):
+    def loadPage(self, opacity=None):
         self.resizeWindow(640, 480)
-        self.loadURL('glPlane/index.html')
+        if opacity is None:
+            self.loadURL('glPlane/index.html')
+        else:
+            self.loadURL('glPlane/index.html?opacity=' + str(opacity))
         self.wait()
 
     def testGlPlane(self):
         self.loadPage()
 
         testName = 'drawGlPlane'
+        self.screenshotTest(testName)
+
+    def testGlPlaneOpacity(self):
+        self.loadPage(0.4)
+
+        testName = 'drawGlPlaneOpacity'
         self.screenshotTest(testName)
 
 
