@@ -1,6 +1,6 @@
 {
   "name": "geojs",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "JavaScript Geo visualization and Analysis Library",
   "homepage": "https://github.com/OpenGeoscience/geojs",
   "license": "BSD-3-Clause",
@@ -34,7 +34,7 @@
     "phantomjs": "~1.9"
   },
   "scripts": {
-    "postinstall": "./node_modules/.bin/bower install && ./node_modules/.bin/grunt"
+    "postinstall": "./node_modules/.bin/bower install && ./node_modules/.bin/grunt library"
   },
   "keywords": [
     "map",
