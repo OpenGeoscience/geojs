@@ -1035,7 +1035,7 @@ function(mod) {
         last && last.ranges ? (done[done.length - 1] = sel, setSelectionNoUndo(doc, sel, options)) : setSelection(doc, sel, options);
     }
     function setSelection(doc, sel, options) {
-        setSelectionNoUndo(doc, sel, options), addSelectionToHistory(doc, doc.sel, doc.cm ? doc.cm.curOp.id : 0/0, options);
+        setSelectionNoUndo(doc, sel, options), addSelectionToHistory(doc, doc.sel, doc.cm ? doc.cm.curOp.id : 0 / 0, options);
     }
     function setSelectionNoUndo(doc, sel, options) {
         (hasHandler(doc, "beforeSelectionChange") || doc.cm && hasHandler(doc.cm, "beforeSelectionChange")) && (sel = filterSelectionChange(doc, sel));
@@ -1991,7 +1991,7 @@ function(mod) {
             }
         }
         function done(e) {
-            counter = 1/0, e_preventDefault(e), focusInput(cm), off(document, "mousemove", move), 
+            counter = 1 / 0, e_preventDefault(e), focusInput(cm), off(document, "mousemove", move), 
             off(document, "mouseup", up), doc.history.lastSelOrigin = null;
         }
         var display = cm.display, doc = cm.doc;
@@ -2324,7 +2324,7 @@ function(mod) {
     function makeChangeInner(doc, change) {
         if (1 != change.text.length || "" != change.text[0] || 0 != cmp(change.from, change.to)) {
             var selAfter = computeSelAfterChange(doc, change);
-            addChangeToHistory(doc, change, selAfter, doc.cm ? doc.cm.curOp.id : 0/0), makeChangeSingleDoc(doc, change, selAfter, stretchSpansOverChange(doc, change));
+            addChangeToHistory(doc, change, selAfter, doc.cm ? doc.cm.curOp.id : 0 / 0), makeChangeSingleDoc(doc, change, selAfter, stretchSpansOverChange(doc, change));
             var rebased = [];
             linkedDocs(doc, function(doc, sharedHist) {
                 sharedHist || -1 != indexOf(rebased, doc.history) || (rebaseHist(doc.history, change), 
@@ -2611,7 +2611,7 @@ function(mod) {
             from: from,
             to: to,
             origin: "markText"
-        }, doc.sel, 0/0);
+        }, doc.sel, 0 / 0);
         var updateMaxLine, curLine = from.line, cm = doc.cm;
         if (doc.iter(curLine, to.line + 1, function(line) {
             cm && marker.collapsed && !cm.options.lineWrapping && visualLine(line) == cm.display.maxLine && (updateMaxLine = !0), 
@@ -3069,7 +3069,7 @@ function(mod) {
         var spans = line.markedSpans, allText = line.text, at = 0;
         if (spans) for (var style, spanStyle, spanEndStyle, spanStartStyle, title, collapsed, len = allText.length, pos = 0, i = 1, text = "", nextChange = 0; ;) {
             if (nextChange == pos) {
-                spanStyle = spanEndStyle = spanStartStyle = title = "", collapsed = null, nextChange = 1/0;
+                spanStyle = spanEndStyle = spanStartStyle = title = "", collapsed = null, nextChange = 1 / 0;
                 for (var foundBookmarks = [], j = 0; j < spans.length; ++j) {
                     var sp = spans[j], m = sp.marker;
                     sp.from <= pos && (null == sp.to || sp.to > pos) ? (null != sp.to && nextChange > sp.to && (nextChange = sp.to, 
@@ -3232,7 +3232,7 @@ function(mod) {
         return null == order && (order = line.order = bidiOrdering(line.text)), order;
     }
     function History(startGen) {
-        this.done = [], this.undone = [], this.undoDepth = 1/0, this.lastModTime = this.lastSelTime = 0, 
+        this.done = [], this.undone = [], this.undoDepth = 1 / 0, this.lastModTime = this.lastSelTime = 0, 
         this.lastOp = this.lastSelOp = null, this.lastOrigin = this.lastSelOrigin = null, 
         this.generation = this.maxGeneration = startGen || 1;
     }
