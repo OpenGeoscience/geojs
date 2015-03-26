@@ -192,12 +192,11 @@ module.exports = function (grunt) {
 
     uglify: {
       options: {
-        sourceMap: true,
-        sourceMapIncludeSources: true,
+        sourceMap: false,
         report: 'min',
         beautify: {
           ascii_only: true,
-          beautify: true
+          beautify: false
         },
         mangle: false
       },

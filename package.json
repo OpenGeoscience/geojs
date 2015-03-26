@@ -1,6 +1,6 @@
 {
   "name": "geojs",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "JavaScript Geo visualization and Analysis Library",
   "homepage": "https://github.com/OpenGeoscience/geojs",
   "license": "BSD-3-Clause",
@@ -28,7 +28,7 @@
     "grunt-contrib-watch": "~0.6",
     "grunt-docco": "^0.3.3",
     "grunt-express": "~1.4",
-    "jscs": "^1.11",
+    "jscs": "1.11.2",
     "jsdoc": "3.3.0-beta1",
     "jshint": "~2.5",
     "phantomjs": "~1.9"
