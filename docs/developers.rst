@@ -2,6 +2,22 @@
 Developer's guide
 =================
 
+The testing infrastructure of Geojs is run via CTest, it assumes
+that the testing "server" is started prior to execution.  To start the
+server, just run ::
+
+    grunt serve-test
+
+This will start a server on the default port of ``50100``.  The port
+and selenium host names are configurable with cmake.  For example inside
+the Kitware firewall, you can run the following to test on the selenium
+node on ``garant`` ::
+
+    cmake -DSELENIUM_TESTS=ON -DCHROME_TESTS=ON -DSELENIUM_HOST=garant ..
+
+You may need to also set the variable ``TESTING_HOST`` to your computer's
+IP address reachable by the selenium node.
+
 Geojs employs several different frameworks for unit testing.  These
 frameworks have been designed to make it easy for developers to
 add more tests as new features are added to the api.
@@ -35,7 +51,7 @@ test runner, which sets it's return status to ``0`` if (and only if)
 all tests passed.  You can run these tests manually in the browser by
 starting up a test server ::
 
-    python test/geojs_test_runner.py
+    grunt serve-test
 
 and navigating to `<http://localhost:50100/test/phantomjs>`_ in your
 browser.
