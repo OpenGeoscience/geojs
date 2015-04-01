@@ -16,6 +16,7 @@ script:
     - git submodule update
     - npm install
     - grunt default docs
+    - grunt serve-test &
     - mkdir _build
     - cd _build
     - cmake ..
