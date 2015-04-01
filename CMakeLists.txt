@@ -32,8 +32,6 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 # set the path where grunt builds the sources
 set(GEOJS_DEPLOY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dist")
 
-
-# add a test with a resource lock for the web server
 function(add_geojs_test test_name)
   add_test(
     NAME "${test_name}"
@@ -42,7 +40,6 @@ function(add_geojs_test test_name)
             ${CMAKE_CURRENT_BINARY_DIR}/test/geojs_test_runner.py
             ${ARGN}
   )
-  set_property(TEST "${test_name}" APPEND PROPERTY RESOURCE_LOCK webserver)
   if (COVERAGE_TESTS)
     set_property(TEST "${test_name}" APPEND PROPERTY DEPENDS "coverage-reset")
     set_property(TEST "coverage-report" APPEND PROPERTY DEPENDS "${test_name}")
@@ -229,7 +226,6 @@ if(SELENIUM_TESTS)
         WORKING_DIRECTORY "${GEOJS_DEPLOY_DIR}"
         COMMAND ${PYTHON_EXECUTABLE} -m unittest discover -v -s "${dir}"
       )
-      set_property(TEST "selenium:${f}" APPEND PROPERTY RESOURCE_LOCK webserver)
 
       if (COVERAGE_TESTS)
         set_property(TEST "selenium:${f}" APPEND PROPERTY DEPENDS "coverage-reset")
@@ -242,10 +238,10 @@ if(SELENIUM_TESTS)
   endforeach()
 
   set_property(TEST "selenium:glPointsSpeed" APPEND PROPERTY ENVIRONMENT "LOAD_SPEED_THRESHOLD=1000")
-  set_property(TEST "selenium:glPointsSpeed" APPEND PROPERTY ENVIRONMENT "FRAMERATE_THRESHOLD=10")
+  set_property(TEST "selenium:glPointsSpeed" APPEND PROPERTY ENVIRONMENT "FRAMERATE_THRESHOLD=5")
   
   set_property(TEST "selenium:glLinesSpeed" APPEND PROPERTY ENVIRONMENT "LOAD_SPEED_THRESHOLD=1000")
-  set_property(TEST "selenium:glLinesSpeed" APPEND PROPERTY ENVIRONMENT "FRAMERATE_THRESHOLD=10")
+  set_property(TEST "selenium:glLinesSpeed" APPEND PROPERTY ENVIRONMENT "FRAMERATE_THRESHOLD=2")
 
   set(jasmine_runner ${CMAKE_CURRENT_BINARY_DIR}/test/selenium_jasmine_runner.py)
   set(JASMINE_DEPLOY_URL /test/jasmine)
@@ -282,7 +278,6 @@ if(SELENIUM_TESTS)
       NAME "selenium:jasmine:${base}"
       COMMAND ${PYTHON_EXECUTABLE} ${jasmine_runner} ${base}
     )
-    set_property(TEST "selenium:jasmine:${base}" APPEND PROPERTY RESOURCE_LOCK webserver)
     if(COVERAGE_TESTS)
       set_property(TEST "selenium:jasmine:${base}" APPEND PROPERTY DEPENDS "coverage-reset")
       set_property(TEST "coverage-report" APPEND PROPERTY DEPENDS "selenium:jasmine:${base}")

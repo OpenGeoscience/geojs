@@ -30,7 +30,6 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.action_chains import ActionChains
 from PIL import Image, ImageStat, ImageChops
 
-from geojs_test_runner import TestServer
 from midas_handler import MidasHandler
 
 # to be set by cmake:
@@ -291,17 +290,16 @@ class BaseTest(TestCase):
     @classmethod
     def startServer(cls):
         '''
-        Start a local web server.
+        Start a local web server. (depreciated)
         '''
-        cls.server = TestServer()
-        cls.server.start(cls.testHost, cls.testPort)
+        pass
 
     @classmethod
     def stopServer(cls):
         '''
-        Stop the local webserver.
+        Stop the local webserver. (depreciated)
         '''
-        cls.server.stop()
+        pass
 
     def setUp(self):
         '''

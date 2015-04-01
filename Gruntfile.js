@@ -431,9 +431,30 @@ module.exports = function (grunt) {
   ]);
 
   grunt.registerTask(
-      'serve',
-      'Serve the content at http://localhost:8082, ' +
-      'use the --port option to override the default port',
-      ['express', 'watch']
+    'serve',
+    'Serve the content at http://localhost:8082, ' +
+    'use the --port option to override the default port',
+    ['express', 'watch']
+  );
+
+  grunt.registerTask(
+    'serve-test',
+    'Serve the content for testing.  This starts on port 50100 by ' +
+    'default and does not rebuild sources automatically.',
+    function () {
+      grunt.config.set('express.server.options.hostname', '0.0.0.0');
+      if (!grunt.option('port')) {
+        grunt.config.set('express.server.options.port', 50100);
+      }
+      // make sure express doesn't change the port
+      var test_port = grunt.config.get('express.server.options.port');
+      grunt.event.on('express:server:started', function () {
+        if (grunt.config.get('express.server.options.port') !== test_port) {
+          grunt.fail.fatal('Port ' + test_port + ' unavailable.');
+        }
+      });
+
+      grunt.task.run(['express', 'express-keepalive']);
+    }
   );
 };
