@@ -17,6 +17,7 @@ script:
     - npm install
     - grunt default docs
     - grunt serve-test &
+    - sleep 1
     - mkdir _build
     - cd _build
     - cmake ..
