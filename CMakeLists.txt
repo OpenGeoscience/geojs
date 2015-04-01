@@ -22,10 +22,11 @@ set(COVERAGE_TESTS OFF CACHE BOOL "Generate coverage reports.")
 set(SELENIUM_TESTS OFF CACHE BOOL "Generate selenium unit tests.")
 
 find_package(PythonInterp REQUIRED)
+site_name(HOSTNAME)
 
-set(TESTING_HOST localhost CACHE STRING "The host to connect to for unit tests")
-mark_as_advanced(TESTING_HOST)
+set(TESTING_HOST "${HOSTNAME}" CACHE STRING "The host to connect to for unit tests")
 set(TESTING_PORT 50100 CACHE STRING "The port number to use for the testing web server")
+mark_as_advanced(TESTING_PORT)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
