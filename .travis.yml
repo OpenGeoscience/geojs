@@ -5,7 +5,7 @@ node_js:
 
 before_install:
   - pushd "${HOME}"
-  - curl "http://www.cmake.org/files/v3.2/cmake-3.2.0-rc2-Linux-x86_64.tar.gz" | gunzip -c | tar x
+  - curl "http://www.cmake.org/files/v3.2/cmake-3.2.1-Linux-x86_64.tar.gz" | gunzip -c | tar x
   - cd cmake-*/bin && export PATH="${PWD}:${PATH}"
   - popd
   - cmake --version
@@ -16,6 +16,8 @@ script:
     - git submodule update
     - npm install
     - grunt default docs
+    - grunt serve-test &
+    - sleep 1
     - mkdir _build
     - cd _build
     - cmake ..
