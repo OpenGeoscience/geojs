@@ -1,5 +1,7 @@
-geojs [![Build Status](https://travis-ci.org/OpenGeoscience/geojs.svg?branch=master)](https://travis-ci.org/OpenGeoscience/geojs) [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.15459.svg)](http://dx.doi.org/10.5281/zenodo.15459) ![repo size](https://reposs.herokuapp.com/?path=OpenGeoscience/GeoJS)
-=====
+![GeoJS](http://opengeoscience.github.io/geojs/images/logo_256.png)
+
+[![Build Status](https://travis-ci.org/OpenGeoscience/geojs.svg?branch=master)](https://travis-ci.org/OpenGeoscience/geojs) [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.15459.svg)](http://dx.doi.org/10.5281/zenodo.15459) ![repo size](https://reposs.herokuapp.com/?path=OpenGeoscience/GeoJS)
+=======
 
 Primarily developed at Kitware, GeoJS is a high performance visualization and analysis library targeted for GeoInformatics.
 
