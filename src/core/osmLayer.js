@@ -46,7 +46,8 @@ geo.osmLayer = function (arg) {
     s_update = this._update,
     m_updateDefer = null,
     m_zoom = null,
-    m_tileUrl;
+    m_tileUrl,
+    m_tileUrlFromTemplate;
 
   if (arg && arg.baseUrl !== undefined) {
     m_baseUrl = arg.baseUrl;
@@ -84,9 +85,22 @@ geo.osmLayer = function (arg) {
       "/" + y + "." + m_imageFormat;
   };
 
-  if (arg && arg.tileUrl !== undefined) {
-    m_tileUrl = arg.tileUrl;
-  }
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Returns an OSM tile server formatting function from a standard format
+   * string: replaces <zoom>, <x>, and <y>.
+   *
+   * @param {string} base The tile format string
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  m_tileUrlFromTemplate = function (base) {
+    return function (zoom, x, y) {
+      return base.replace("<zoom>", zoom)
+        .replace("<x>", x)
+        .replace("<y>", y);
+    };
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -141,8 +155,11 @@ geo.osmLayer = function (arg) {
   this.tileUrl = function (val) {
     if (val === undefined) {
       return m_tileUrl;
+    } else if (typeof val === "string") {
+      m_tileUrl = m_tileUrlFromTemplate(val);
+    } else {
+      m_tileUrl = val;
     }
-    m_tileUrl = val;
     m_this.modified();
     return m_this;
   };
@@ -713,17 +730,21 @@ geo.osmLayer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Update baseUrl for map tiles.  Map all tiles as needing to be refreshed.
+   * If no argument is given the tiles will be forced refreshed.
    *
    * @param baseUrl: the new baseUrl for the map.
    */
   ////////////////////////////////////////////////////////////////////////////
   /* jshint -W089 */
   this.updateBaseUrl = function (baseUrl) {
-    if (baseUrl.charAt(m_baseUrl.length - 1) !== "/") {
+    if (baseUrl && baseUrl.charAt(m_baseUrl.length - 1) !== "/") {
       baseUrl += "/";
     }
     if (baseUrl !== m_baseUrl) {
-      m_baseUrl = baseUrl;
+
+      if (baseUrl !== undefined) {
+        m_baseUrl = baseUrl;
+      }
 
       var tile, x, y, zoom;
       for (zoom in m_tiles) {
@@ -791,6 +812,11 @@ geo.osmLayer = function (arg) {
     m_pendingNewTilesStat = {};
     s_exit();
   };
+
+  if (arg && arg.tileUrl !== undefined) {
+    this.tileUrl(arg.tileUrl);
+  }
+
 
   return this;
 };
