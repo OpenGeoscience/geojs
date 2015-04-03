@@ -312,7 +312,8 @@
       this._baseLayer = this._map.createLayer(
         this.options.baseLayer,
         {
-          renderer: this.options.baseRenderer
+          renderer: this.options.baseRenderer,
+          tileUrl: this.options.tileUrl
         }
       );
 
