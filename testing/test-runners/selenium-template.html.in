@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
 @BLANKET_INCLUDE@
 @SOURCES_INCLUDE@
+    <script src=/examples/common/js/jquery-ui.min.js></script>
     <script src=/test/lib/aggregate-json-reporter.js></script>
     <script src=/test/lib/selenium-test-utils.js></script>
     <style>
