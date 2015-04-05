@@ -259,6 +259,9 @@
      *   Describes layers added to the map
      * @property {boolean} [autoresize=true]
      *   Resize the map on <code>window.resize</code> (initialization only)
+     * @property {string} [tileServer]
+     *   The open street map tile server spec default:
+     *   <code>http://tile.openstreetmap.org/<zoom>/<x>/<y>.png</code>
      */
     options: {
       center: {latitude: 0, longitude: 0},
@@ -267,6 +270,7 @@
       height: null,
       layers: [],
       data: [],
+      tileUrl: 'http://tile.openstreetmap.org/<zoom>/<x>/<y>.png',
 
       // These options are for future use, but shouldn't
       // be changed at the moment, so they aren't documented.
@@ -308,7 +312,8 @@
       this._baseLayer = this._map.createLayer(
         this.options.baseLayer,
         {
-          renderer: this.options.baseRenderer
+          renderer: this.options.baseRenderer,
+          tileUrl: this.options.tileUrl
         }
       );
 
@@ -387,6 +392,26 @@
       // trigger an initial draw
       this.redraw();
 
+      return this;
+    },
+
+    /**
+     * Return the geojs map object.
+     * @instance
+     * @returns {geo.map}
+     */
+    map: function () {
+      return this._map;
+    },
+
+    /**
+     * Set the tile server URL.
+     * @instance
+     * @param {string} url The url format string of an OSM tile server.
+     */
+    tileUrl: function (url) {
+      this._baseLayer.tileUrl(url);
+      this._baseLayer.updateBaseUrl();
       return this;
     },
 
