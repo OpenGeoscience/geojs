@@ -4,4 +4,6 @@ testing/
 doc/
 dashboard/
 scripts/
+built/
+*build*/
 .git/
