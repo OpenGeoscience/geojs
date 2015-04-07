@@ -104,16 +104,16 @@ geo.gl.pointFeature = function (arg) {
     ]);
   } else {
     vertexShaderSource.push.apply(vertexShaderSource, [
-        "  unitVar = vec3 (unit, 1.0);",
-        "  vec4 p = (projectionMatrix * modelViewMatrix * vec4(pos, 1.0)).xyzw;",
-        "  if (p.w != 0.0) {",
-        "    p = p / p.w;",
-        "  }",
-        "  p += (rad + strokeWidthVar) * ",
-        "       vec4 (unit.x * pixelWidth, unit.y * pixelWidth * aspect, 0.0, 1.0);",
-        "  gl_Position = vec4(p.xyz, 1.0);",
-        "}"
-      ]);
+      "  unitVar = vec3 (unit, 1.0);",
+      "  vec4 p = (projectionMatrix * modelViewMatrix * vec4(pos, 1.0)).xyzw;",
+      "  if (p.w != 0.0) {",
+      "    p = p / p.w;",
+      "  }",
+      "  p += (rad + strokeWidthVar) * ",
+      "       vec4 (unit.x * pixelWidth, unit.y * pixelWidth * aspect, 0.0, 1.0);",
+      "  gl_Position = vec4(p.xyz, 1.0);",
+      "}"
+    ]);
   }
   vertexShaderSource = vertexShaderSource.join("\n");
 
@@ -169,13 +169,15 @@ geo.gl.pointFeature = function (arg) {
     "    fillColor = fillColorVar;",
     "  // Distance to antialias over",
     "  float antialiasDist = 3.0 / (2.0 * radiusVar);",
+    "  vec4 color;",
     "  if (rad < endStep) {",
     "    float step = smoothstep (endStep - antialiasDist, endStep, rad);",
-    "    gl_FragColor = mix (fillColor, strokeColor, step);",
+    "    color = mix (fillColor, strokeColor, step);",
     "  } else {",
     "    float step = smoothstep (1.0 - antialiasDist, 1.0, rad);",
-    "    gl_FragColor = mix (strokeColor, vec4 (strokeColor.rgb, 0.0), step);",
+    "    color = mix (strokeColor, vec4 (strokeColor.rgb, 0.0), step);",
     "  }",
+    "  gl_FragColor = vec4(color.rgb * color.a, color.a);",
     "}"
   ]);
 
