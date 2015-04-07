@@ -127,15 +127,15 @@ def _chromeOptions():
 drivers = {
     'firefox': (webdriver.Firefox, {}),
     'firefoxRemote': (webdriver.Remote, {
-        'command_executor': 'http://%s:%d/wd/hub' % (SELENIUM_HOST,
-                                                     SELENIUM_PORT),
+        'command_executor': 'http://{}:{}/wd/hub'.format(SELENIUM_HOST,
+                                                         SELENIUM_PORT),
         'desired_capabilities': webdriver.common.desired_capabilities.
             DesiredCapabilities.FIREFOX
     }),
     'chrome': (webdriver.Chrome, _chromeOptions()),
     'chromeRemote': (webdriver.Remote, {
-        'command_executor': 'http://%s:%d/wd/hub' % (SELENIUM_HOST,
-                                                     SELENIUM_PORT),
+        'command_executor': 'http://{}:{}/wd/hub'.format(SELENIUM_HOST,
+                                                         SELENIUM_PORT),
         'desired_capabilities': webdriver.common.desired_capabilities.
             DesiredCapabilities.CHROME
     }),
