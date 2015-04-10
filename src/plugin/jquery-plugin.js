@@ -17,9 +17,6 @@
     return;
   }
 
-  // for multiple initialization detection
-  var initialized = false;
-
   /**
    * Takes an option key and returns true if it should
    * return a color accessor.
