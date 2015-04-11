@@ -17,9 +17,6 @@
     return;
   }
 
-  // for multiple initialization detection
-  var initialized = false;
-
   /**
    * Takes an option key and returns true if it should
    * return a color accessor.
@@ -288,16 +285,6 @@
         // when called multiple times on a single element, do nothing
         return;
       }
-      if (initialized) {
-        // warn when called multiple times on different elements
-        console.warn(
-          'Geojs already initialized in this window.'
-        );
-        // Try to clean up the old gl context, but this doesn't usually work
-        delete window.gl;
-      }
-      // set global initialization state
-      initialized = true;
 
       // create the map
       this._map = geo.map({
