@@ -110,7 +110,7 @@ geo.gl.lineFeature = function (arg) {
       'varying float strokeWidthVar;',
       'varying float strokeOpacityVar;',
       'void main () {',
-      '  gl_FragColor = vec4 (strokeColorVar, strokeOpacityVar);',
+      '  gl_FragColor = vec4 (strokeColorVar * strokeOpacityVar, strokeOpacityVar);',
       '}'
     ].join('\n'),
     shader = new vgl.shader(gl.FRAGMENT_SHADER);

@@ -63,7 +63,7 @@ geo.gl.polygonFeature = function (arg) {
       'varying vec3 fillColorVar;',
       'varying float fillOpacityVar;',
       'void main () {',
-      '  gl_FragColor = vec4 (fillColorVar, fillOpacityVar);',
+      '  gl_FragColor = vec4 (fillColorVar * fillOpacityVar, fillOpacityVar);',
       '}'
     ].join('\n'),
     shader = new vgl.shader(gl.FRAGMENT_SHADER);
