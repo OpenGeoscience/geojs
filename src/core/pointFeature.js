@@ -23,8 +23,8 @@ geo.pointFeature = function (arg) {
   var m_this = this,
       s_init = this._init,
       m_rangeTree = null,
+      m_rangeTreeTime = geo.timestamp(),
       s_data = this.data,
-      s_style = this.style,
       m_maxRadius = 0;
 
   ////////////////////////////////////////////////////////////////////////////
@@ -52,6 +52,9 @@ geo.pointFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._updateRangeTree = function () {
+    if (m_rangeTreeTime.getMTime() >= m_this.dataTime().getMTime()) {
+      return;
+    }
     var pts, position,
         radius = m_this.style.get("radius"),
         stroke = m_this.style.get("stroke"),
@@ -76,6 +79,7 @@ geo.pointFeature = function (arg) {
     });
 
     m_rangeTree = new geo.util.RangeTree(pts);
+    m_rangeTreeTime.modified();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -121,6 +125,7 @@ geo.pointFeature = function (arg) {
 
     // Find points inside the bounding box
     box = new geo.util.Box(geo.util.vect(min.x, min.y), geo.util.vect(max.x, max.y));
+    m_this._updateRangeTree();
     m_rangeTree.search(box).forEach(function (q) {
       idx.push(q.idx);
     });
@@ -182,20 +187,6 @@ geo.pointFeature = function (arg) {
     s_data(data);
     return m_this;
   };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Overloaded style method that updates the internal range tree on write.
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.style = function (arg1, arg2) {
-    var val = s_style(arg1, arg2);
-    if (val === m_this && m_this.selectionAPI()) {
-      m_this._updateRangeTree();
-    }
-    return val;
-  };
-  this.style.get = s_style.get;
 
   ////////////////////////////////////////////////////////////////////////////
   /**

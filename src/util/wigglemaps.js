@@ -28,83 +28,86 @@
         this.data = elem[current];
         this.left = null;
         this.right = null;
-        if (start != current)
-            this.left = new RangeNode (elem, start, current - 1, parseInt ((start + (current - 1)) / 2, 10));
-        if (end != current)
-            this.right = new RangeNode (elem, current + 1, end, parseInt ((end + (current + 1)) / 2, 10));
-        this.subtree = [];
-        for (var i = start; i <= end; i ++) {
-            this.subtree.push (elem[i]);
-        }
-        this.subtree.sort (function (a, b) {
-            return a.y - b.y;
-        });
+        if (start !== current)
+            this.left = new RangeNode(elem, start, current - 1, parseInt((start + (current - 1)) / 2, 10));
+        if (end !== current)
+            this.right = new RangeNode(elem, current + 1, end, parseInt((end + (current + 1)) / 2, 10));
+        this.elem = elem;
+        this.start = start;
+        this.end = end;
+        this.subtree = null; /* This is populated as needed */
+        this.search = rangeNodeSearch;
+    };
+
+    var rangeNodeSearch = function (result, box) {
+        var m_this = this;
 
         var xrange = function (b) {
-            return (b.x_in (elem[start]) && b.x_in (elem[end]));
+            return (b.x_in(m_this.elem[m_this.start]) &&
+                    b.x_in(m_this.elem[m_this.end]));
         };
 
-        this.yrange = function (b, start, end) {
-            return (b.y_in (this.subtree[start]) && b.y_in (this.subtree[end]));
+        var yrange = function (b, start, end) {
+            return (b.y_in(m_this.subtree[start]) &&
+                    b.y_in(m_this.subtree[end]));
         };
 
-        this.subquery = function (result, box, start, end, current) {
-            if (this.yrange (box, start, end)) {
+        var subquery = function (result, box, start, end, current) {
+            if (yrange(box, start, end)) {
                 for (var i = start; i <= end; i ++) {
-                    result.push (this.subtree[i]);
+                    result.push(m_this.subtree[i]);
                 }
                 return;
             }
-            if (box.y_in (this.subtree[current]))
-                result.push (this.subtree[current]);
-            if (box.y_left (this.subtree[current])){
-                if (current != end)
-                    this.subquery (result, box, current + 1, end, parseInt ((end + (current + 1)) / 2, 10));
-            }
-            else if (box.x_right (this.subtree[current])) {
-                if (current != start)
-                    this.subquery (result, box, start, current - 1, parseInt ((start + (current - 1)) / 2, 10));
-            }
-            else {
-                if (current != end)
-                    this.subquery (result, box, current + 1, end, parseInt ((end + (current + 1)) / 2, 10));
-                if (current != start)
-                    this.subquery (result, box, start, current - 1, parseInt ((start + (current - 1)) / 2, 10));
+            if (box.y_in(m_this.subtree[current]))
+                result.push(m_this.subtree[current]);
+            if (box.y_left(m_this.subtree[current])){
+                if (current !== end)
+                    subquery(result, box, current + 1, end, parseInt((end + (current + 1)) / 2, 10));
+            } else if (box.x_right(m_this.subtree[current])) {
+                if (current !== start)
+                    subquery(result, box, start, current - 1, parseInt((start + (current - 1)) / 2, 10));
+            } else {
+                if (current !== end)
+                    subquery(result, box, current + 1, end, parseInt((end + (current + 1)) / 2, 10));
+                if (current !== start)
+                    subquery(result, box, start, current - 1, parseInt((start + (current - 1)) / 2, 10));
             }
         };
-        
-        this.search = function (result, box) {
-            if (xrange (box)) {
-                this.subquery (result, box, 0, this.subtree.length - 1, parseInt ((this.subtree.length - 1) / 2, 10));
-                return;
+
+        if (xrange(box)) {
+            if (!this.subtree) {
+                this.subtree = this.elem.slice(this.start, this.end + 1);
+                this.subtree.sort(function (a, b) {
+                    return a.y - b.y;
+                });
             }
-            else {
-                if (box.contains (this.data))
-                    result.push (this.data);
-                if (box.x_left (this.data)) {
-                    if (this.right)
-                        this.right.search (result, box);
-                }
-                else if (box.x_right (this.data)) {
-                    if (this.left)
-                        this.left.search (result, box);
-                }
-                else {
-                    if (this.left)
-                        this.left.search (result, box);
-                    if (this.right)
-                        this.right.search (result, box);
-                }
+            subquery(result, box, 0, this.subtree.length - 1, parseInt((this.subtree.length - 1) / 2, 10));
+            return;
+        } else {
+            if (box.contains(this.data))
+                result.push(this.data);
+            if (box.x_left(this.data)) {
+                if (this.right)
+                    this.right.search(result, box);
+            } else if (box.x_right(this.data)) {
+                if (this.left)
+                    this.left.search(result, box);
+            } else {
+                if (this.left)
+                    this.left.search(result, box);
+                if (this.right)
+                    this.right.search(result, box);
             }
-        };
+        }
     };
 
     var RangeTree = function (elem) {
-        elem.sort (function (a, b) {
+        elem.sort(function (a, b) {
             return a.x - b.x;
         });
         if (elem.length > 0)
-            this.root = new RangeNode (elem, 0, elem.length - 1, parseInt ((elem.length - 1) / 2, 10));
+            this.root = new RangeNode(elem, 0, elem.length - 1, parseInt((elem.length - 1) / 2, 10));
         else
             this.root = null;
 
@@ -161,7 +164,7 @@
         this.width = function () {
             return this.max.x - this.min.x;
         };
-        
+
         this.vertex = function (index) {
             switch (index) {
             case 0:
@@ -276,7 +279,7 @@
             return this;
         };
         this.clone = function () {
-            return new Vector2D (this.x, this.y); 
+            return new Vector2D (this.x, this.y);
         };
 
         this.array = function () {
@@ -342,7 +345,7 @@
 
         if (denom === 0)
             return Infinity;
-        
+
         var num_s = a.x * (d.y - c.y) +
             c.x * (a.y - d.y) +
             d.x * (c.y - a.y);
@@ -352,7 +355,7 @@
                       b.x * (a.y - c.y) +
                       c.x * (b.y - a.y));
         var t = num_t / denom;
-        
+
         return t;
     };
 
@@ -364,7 +367,7 @@
 
         if (denom === 0)
             return Infinity;
-        
+
         var num_s = a.x * (d.y - c.y) +
             c.x * (a.y - d.y) +
             d.x * (c.y - a.y);
@@ -374,7 +377,7 @@
                       b.x * (a.y - c.y) +
                       c.x * (b.y - a.y));
         var t = num_t / denom;*/
-        
+
         var dir = vect.sub (b, a);
         dir.scale (s);
         return vect.add (a, dir);
