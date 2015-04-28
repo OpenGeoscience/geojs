@@ -31,8 +31,6 @@ list of libraries used by GeoJS.
     +---------------------------+------------+---------------------------+
     | `pnltri`_                 | 2.1        | GL renderer               |
     +---------------------------+------------+---------------------------+
-    | `jQuery mousewheel`_      | 3.1        | Mouse interactor          |
-    +---------------------------+------------+---------------------------+
     | `d3`_                     | 3.3        | D3 renderer, UI widgets   |
     +---------------------------+------------+---------------------------+
 
@@ -45,7 +43,6 @@ list of libraries used by GeoJS.
 .. _proj4: http://proj4js.org/
 .. _GL matrix: http://glmatrix.net/
 .. _pnltri: https://github.com/jahting/pnltri.js/
-.. _jQuery mousewheel: https://github.com/jquery/jquery-mousewheel/
 .. _d3: http://d3js.org/
 
 
