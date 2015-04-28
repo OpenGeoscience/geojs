@@ -12,7 +12,7 @@ window.startTest = function (done) {
         features: [{
           type: 'point',
           data: [{x: 10, y: -10}],
-          size: 50,
+          radius: 50,
           fill: true,
           fillColor: 'brown',
           fillOpacity: 0.5,
@@ -42,6 +42,13 @@ window.startTest = function (done) {
           strokeColor: 'midnightblue',
           strokeWidth: 5,
           strokeOpacity: 0.5
+        }, {
+          type: 'point',
+          data: [{x: 10, y: 15}],
+          size: 10000,
+          fillColor: 'black',
+          strokeColor: 'lightgrey',
+          strokeWidth: 2
         }]
       }]
     });
