@@ -12,7 +12,7 @@ window.startTest = function (done) {
         features: [{
           type: 'point',
           data: [{x: 10, y: -10}],
-          radius: 50,
+          size: 50,
           fill: true,
           fillColor: 'brown',
           fillOpacity: 0.5,
