@@ -6,7 +6,7 @@ from selenium_test import FirefoxTest, ChromeTest,\
 
 class base(object):
     testCase = ('jqueryPlugin',)
-    testRevision = 1
+    testRevision = 2
 
     def loadPage(self):
         self.resizeWindow(800, 600)

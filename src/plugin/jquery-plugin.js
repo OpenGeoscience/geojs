@@ -144,7 +144,7 @@
    *     renderer: 'vgl',
    *     features: [{
    *       type: 'point',
-   *       size: 5,
+   *       radius: 5,
    *       position: function (d) { return {x: d.geometry.x, y: d.geometry.y} },
    *       fillColor: function (d, i) { return i < 5 ? 'red' : 'blue' },
    *       stroke: false
@@ -160,7 +160,7 @@
    *     features: [{
    *       data: [...],
    *       type: 'point',
-   *       size: 5,
+   *       radius: 5,
    *       position: function (d) { return {x: d.geometry.x, y: d.geometry.y} },
    *       fillColor: function (d, i) { return i < 5 ? 'red' : 'blue' },
    *       stroke: false
@@ -226,8 +226,8 @@
      * @property {number} radius
      *  Radius of the circle in pixels (ignored when <code>size</code>
      *  is present)
-     * @property {number} size
-     *   A numerical value mapped affinely to a radius in the range [5,20]
+     * @property {function} size
+     *   A function returning a numerical value
      * @property {boolean} fill Presence or absence of the fill
      * @property {color} fillColor Interior color
      * @property {float} fillOpacity Opacity of the interior <code>[0,1]</code>
@@ -346,7 +346,7 @@
           var scl;
           if (feature.type === 'point') {
             if (feature.size) {
-              feature._size = feature.size;
+              feature._size = geo.util.ensureFunction(feature.size);
             } else if (feature.size === null) {
               delete feature._size;
             }
