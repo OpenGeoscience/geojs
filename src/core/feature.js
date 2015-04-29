@@ -378,6 +378,14 @@ geo.feature = function (arg) {
     } else {
       m_visible = val;
       m_this.modified();
+
+      // bind or unbind mouse handlers on visibility change
+      if (m_visible) {
+        m_this._bindMouseHandlers();
+      } else {
+        m_this._unbindMouseHandlers();
+      }
+
       return m_this;
     }
   };
