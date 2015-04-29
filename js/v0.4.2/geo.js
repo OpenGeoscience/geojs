@@ -12156,83 +12156,86 @@ vgl.DataBuffers = function (initialSize) {
         this.data = elem[current];
         this.left = null;
         this.right = null;
-        if (start != current)
-            this.left = new RangeNode (elem, start, current - 1, parseInt ((start + (current - 1)) / 2, 10));
-        if (end != current)
-            this.right = new RangeNode (elem, current + 1, end, parseInt ((end + (current + 1)) / 2, 10));
-        this.subtree = [];
-        for (var i = start; i <= end; i ++) {
-            this.subtree.push (elem[i]);
-        }
-        this.subtree.sort (function (a, b) {
-            return a.y - b.y;
-        });
+        if (start !== current)
+            this.left = new RangeNode(elem, start, current - 1, parseInt((start + (current - 1)) / 2, 10));
+        if (end !== current)
+            this.right = new RangeNode(elem, current + 1, end, parseInt((end + (current + 1)) / 2, 10));
+        this.elem = elem;
+        this.start = start;
+        this.end = end;
+        this.subtree = null; /* This is populated as needed */
+        this.search = rangeNodeSearch;
+    };
+
+    var rangeNodeSearch = function (result, box) {
+        var m_this = this;
 
         var xrange = function (b) {
-            return (b.x_in (elem[start]) && b.x_in (elem[end]));
+            return (b.x_in(m_this.elem[m_this.start]) &&
+                    b.x_in(m_this.elem[m_this.end]));
         };
 
-        this.yrange = function (b, start, end) {
-            return (b.y_in (this.subtree[start]) && b.y_in (this.subtree[end]));
+        var yrange = function (b, start, end) {
+            return (b.y_in(m_this.subtree[start]) &&
+                    b.y_in(m_this.subtree[end]));
         };
 
-        this.subquery = function (result, box, start, end, current) {
-            if (this.yrange (box, start, end)) {
+        var subquery = function (result, box, start, end, current) {
+            if (yrange(box, start, end)) {
                 for (var i = start; i <= end; i ++) {
-                    result.push (this.subtree[i]);
+                    result.push(m_this.subtree[i]);
                 }
                 return;
             }
-            if (box.y_in (this.subtree[current]))
-                result.push (this.subtree[current]);
-            if (box.y_left (this.subtree[current])){
-                if (current != end)
-                    this.subquery (result, box, current + 1, end, parseInt ((end + (current + 1)) / 2, 10));
-            }
-            else if (box.x_right (this.subtree[current])) {
-                if (current != start)
-                    this.subquery (result, box, start, current - 1, parseInt ((start + (current - 1)) / 2, 10));
-            }
-            else {
-                if (current != end)
-                    this.subquery (result, box, current + 1, end, parseInt ((end + (current + 1)) / 2, 10));
-                if (current != start)
-                    this.subquery (result, box, start, current - 1, parseInt ((start + (current - 1)) / 2, 10));
+            if (box.y_in(m_this.subtree[current]))
+                result.push(m_this.subtree[current]);
+            if (box.y_left(m_this.subtree[current])){
+                if (current !== end)
+                    subquery(result, box, current + 1, end, parseInt((end + (current + 1)) / 2, 10));
+            } else if (box.x_right(m_this.subtree[current])) {
+                if (current !== start)
+                    subquery(result, box, start, current - 1, parseInt((start + (current - 1)) / 2, 10));
+            } else {
+                if (current !== end)
+                    subquery(result, box, current + 1, end, parseInt((end + (current + 1)) / 2, 10));
+                if (current !== start)
+                    subquery(result, box, start, current - 1, parseInt((start + (current - 1)) / 2, 10));
             }
         };
-        
-        this.search = function (result, box) {
-            if (xrange (box)) {
-                this.subquery (result, box, 0, this.subtree.length - 1, parseInt ((this.subtree.length - 1) / 2, 10));
-                return;
+
+        if (xrange(box)) {
+            if (!this.subtree) {
+                this.subtree = this.elem.slice(this.start, this.end + 1);
+                this.subtree.sort(function (a, b) {
+                    return a.y - b.y;
+                });
             }
-            else {
-                if (box.contains (this.data))
-                    result.push (this.data);
-                if (box.x_left (this.data)) {
-                    if (this.right)
-                        this.right.search (result, box);
-                }
-                else if (box.x_right (this.data)) {
-                    if (this.left)
-                        this.left.search (result, box);
-                }
-                else {
-                    if (this.left)
-                        this.left.search (result, box);
-                    if (this.right)
-                        this.right.search (result, box);
-                }
+            subquery(result, box, 0, this.subtree.length - 1, parseInt((this.subtree.length - 1) / 2, 10));
+            return;
+        } else {
+            if (box.contains(this.data))
+                result.push(this.data);
+            if (box.x_left(this.data)) {
+                if (this.right)
+                    this.right.search(result, box);
+            } else if (box.x_right(this.data)) {
+                if (this.left)
+                    this.left.search(result, box);
+            } else {
+                if (this.left)
+                    this.left.search(result, box);
+                if (this.right)
+                    this.right.search(result, box);
             }
-        };
+        }
     };
 
     var RangeTree = function (elem) {
-        elem.sort (function (a, b) {
+        elem.sort(function (a, b) {
             return a.x - b.x;
         });
         if (elem.length > 0)
-            this.root = new RangeNode (elem, 0, elem.length - 1, parseInt ((elem.length - 1) / 2, 10));
+            this.root = new RangeNode(elem, 0, elem.length - 1, parseInt((elem.length - 1) / 2, 10));
         else
             this.root = null;
 
@@ -12289,7 +12292,7 @@ vgl.DataBuffers = function (initialSize) {
         this.width = function () {
             return this.max.x - this.min.x;
         };
-        
+
         this.vertex = function (index) {
             switch (index) {
             case 0:
@@ -12404,7 +12407,7 @@ vgl.DataBuffers = function (initialSize) {
             return this;
         };
         this.clone = function () {
-            return new Vector2D (this.x, this.y); 
+            return new Vector2D (this.x, this.y);
         };
 
         this.array = function () {
@@ -12470,7 +12473,7 @@ vgl.DataBuffers = function (initialSize) {
 
         if (denom === 0)
             return Infinity;
-        
+
         var num_s = a.x * (d.y - c.y) +
             c.x * (a.y - d.y) +
             d.x * (c.y - a.y);
@@ -12480,7 +12483,7 @@ vgl.DataBuffers = function (initialSize) {
                       b.x * (a.y - c.y) +
                       c.x * (b.y - a.y));
         var t = num_t / denom;
-        
+
         return t;
     };
 
@@ -12492,7 +12495,7 @@ vgl.DataBuffers = function (initialSize) {
 
         if (denom === 0)
             return Infinity;
-        
+
         var num_s = a.x * (d.y - c.y) +
             c.x * (a.y - d.y) +
             d.x * (c.y - a.y);
@@ -12502,7 +12505,7 @@ vgl.DataBuffers = function (initialSize) {
                       b.x * (a.y - c.y) +
                       c.x * (b.y - a.y));
         var t = num_t / denom;*/
-        
+
         var dir = vect.sub (b, a);
         dir.scale (s);
         return vect.add (a, dir);
@@ -14772,7 +14775,7 @@ geo.mapInteractor = function (args) {
     $node.on('mousemove.geojs', m_this._handleMouseMove);
     $node.on('mousedown.geojs', m_this._handleMouseDown);
     $node.on('mouseup.geojs', m_this._handleMouseUp);
-    $node.on('mousewheel.geojs', m_this._handleMouseWheel);
+    $node.on('wheel.geojs', m_this._handleMouseWheel);
     if (m_options.panMoveButton === 'right' ||
         m_options.zoomMoveButton === 'right') {
       $node.on('contextmenu.geojs', function () { return false; });
@@ -15238,8 +15241,21 @@ geo.mapInteractor = function (args) {
   this._handleMouseWheel = function (evt) {
     var zoomFactor, direction;
 
-    // In case jquery-mousewheel isn't loaded for some reason
-    evt.deltaFactor = evt.deltaFactor || 1;
+    // try to normalize deltas using the wheel event standard:
+    //   https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent
+    evt.deltaFactor = 1;
+    if (evt.originalEvent.deltaMode === 1) {
+      // DOM_DELTA_LINE -- estimate line height
+      evt.deltaFactor = 12;
+    } else if (evt.originalEvent.deltaMode === 2) {
+      // DOM_DELTA_PAGE -- get window height
+      evt.deltaFactor = $(window).height();
+    }
+
+    // If the browser doesn't support the standard then
+    // just set the delta's to zero.
+    evt.deltaX = evt.originalEvent.deltaX || 0;
+    evt.deltaY = evt.originalEvent.deltaY || 0;
 
     m_this._getMouseModifiers(evt);
     evt.deltaX = evt.deltaX * m_options.wheelScaleX * evt.deltaFactor / 120;
@@ -15265,13 +15281,13 @@ geo.mapInteractor = function (args) {
 
       m_this.map().pan({
         x: evt.deltaX,
-        y: evt.deltaY
+        y: -evt.deltaY
       });
 
     } else if (m_options.zoomWheelEnabled &&
                eventMatch('wheel', m_options.zoomWheelModifiers)) {
 
-      zoomFactor = evt.deltaY;
+      zoomFactor = -evt.deltaY;
       direction = m_mouse.map;
 
       m_this.map().zoom(
@@ -15458,9 +15474,11 @@ geo.mapInteractor = function (args) {
         ctrlKey: options.modifiers.indexOf('ctrl') >= 0,
         metaKey: options.modifiers.indexOf('meta') >= 0,
         shiftKey: options.modifiers.indexOf('shift') >= 0,
-        deltaX: options.wheelDelta.x,
-        deltaY: options.wheelDelta.y,
-        deltaFactor: 1
+        originalEvent: {
+          deltaX: options.wheelDelta.x,
+          deltaY: options.wheelDelta.y,
+          deltaMode: options.wheelMode
+        }
       }
     );
     $node.trigger(evt);
@@ -16973,23 +16991,71 @@ geo.map = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get the locations of the current map corners as latitudes/longitudes.
-   * The return value of this function is an object as follows: ::
+   * Get/set the locations of the current map corners as latitudes/longitudes.
+   * When provided the argument should be an object containing the keys
+   * lowerLeft and upperRight declaring the desired new map bounds.  The
+   * new bounds will contain at least the min/max lat/lngs provided.  In any
+   * case, the actual new bounds will be returned by this function.
    *
-   *    {
-   *        lowerLeft: {x: ..., y: ...},
-   *        upperLeft: {x: ..., y: ...},
-   *        lowerRight: {x: ..., y: ...},
-   *        upperRight: {x: ..., y: ...}
-   *    }
-   *
-   * @todo Provide a setter
+   * @param {geo.geoBounds} [bds] The requested map bounds
+   * @return {geo.geoBounds} The actual new map bounds
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.bounds = function () {
+  this.bounds = function (bds) {
+    var nav;
+
+    if (bds === undefined) {
+      return m_bounds;
+    }
+
+    nav = m_this.zoomAndCenterFromBounds(bds);
+    m_this.zoom(nav.zoom);
+    m_this.center(nav.center);
     return m_bounds;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get the center zoom level necessary to display the given lat/lon bounds.
+   *
+   * @param {geo.geoBounds} [bds] The requested map bounds
+   * @return {object} Object containing keys "center" and "zoom"
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.zoomAndCenterFromBounds = function (bds) {
+    var ll, ur, dx, dy, zx, zy, center;
+
+    // Caveat:
+    // Much of the following is invalid for alternative map projections.  These
+    // computations should really be defered to the base layer, but there is
+    // no clear path for doing that with the current base layer api.
+
+    // extract bounds info and check for validity
+    ll = geo.util.normalizeCoordinates(bds.lowerLeft || {});
+    ur = geo.util.normalizeCoordinates(bds.upperRight || {});
+
+    if (ll.x >= ur.x || ll.y >= ur.y) {
+      throw new Error("Invalid bounds provided");
+    }
+
+    center = {
+      x: (ll.x + ur.x) / 2,
+      y: (ll.y + ur.y) / 2
+    };
+
+    // calculate the current extend
+    dx = m_bounds.upperRight.x - m_bounds.lowerLeft.x;
+    dy = m_bounds.upperRight.y - m_bounds.lowerLeft.y;
+
+    // calculate the zoom levels necessary to fit x and y bounds
+    zx = m_zoom - Math.log2((ur.x - ll.x) / dx);
+    zy = m_zoom - Math.log2((ur.y - ll.y) / dy);
+
+    return {
+      zoom: Math.min(zx, zy),
+      center: center
+    };
+  };
 
   this.interactor(arg.interactor || geo.mapInteractor());
   this.clock(arg.clock || geo.clock());
@@ -17424,6 +17490,14 @@ geo.feature = function (arg) {
     } else {
       m_visible = val;
       m_this.modified();
+
+      // bind or unbind mouse handlers on visibility change
+      if (m_visible) {
+        m_this._bindMouseHandlers();
+      } else {
+        m_this._unbindMouseHandlers();
+      }
+
       return m_this;
     }
   };
@@ -17664,8 +17738,8 @@ geo.pointFeature = function (arg) {
   var m_this = this,
       s_init = this._init,
       m_rangeTree = null,
+      m_rangeTreeTime = geo.timestamp(),
       s_data = this.data,
-      s_style = this.style,
       m_maxRadius = 0;
 
   ////////////////////////////////////////////////////////////////////////////
@@ -17693,6 +17767,9 @@ geo.pointFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._updateRangeTree = function () {
+    if (m_rangeTreeTime.getMTime() >= m_this.dataTime().getMTime()) {
+      return;
+    }
     var pts, position,
         radius = m_this.style.get("radius"),
         stroke = m_this.style.get("stroke"),
@@ -17717,6 +17794,7 @@ geo.pointFeature = function (arg) {
     });
 
     m_rangeTree = new geo.util.RangeTree(pts);
+    m_rangeTreeTime.modified();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -17762,6 +17840,7 @@ geo.pointFeature = function (arg) {
 
     // Find points inside the bounding box
     box = new geo.util.Box(geo.util.vect(min.x, min.y), geo.util.vect(max.x, max.y));
+    m_this._updateRangeTree();
     m_rangeTree.search(box).forEach(function (q) {
       idx.push(q.idx);
     });
@@ -17823,20 +17902,6 @@ geo.pointFeature = function (arg) {
     s_data(data);
     return m_this;
   };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Overloaded style method that updates the internal range tree on write.
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.style = function (arg1, arg2) {
-    var val = s_style(arg1, arg2);
-    if (val === m_this && m_this.selectionAPI()) {
-      m_this._updateRangeTree();
-    }
-    return val;
-  };
-  this.style.get = s_style.get;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -24779,9 +24844,6 @@ geo.registerWidget('d3', 'legend', geo.gui.legendWidget);
     return;
   }
 
-  // for multiple initialization detection
-  var initialized = false;
-
   /**
    * Takes an option key and returns true if it should
    * return a color accessor.
@@ -24909,7 +24971,7 @@ geo.registerWidget('d3', 'legend', geo.gui.legendWidget);
    *     renderer: 'vgl',
    *     features: [{
    *       type: 'point',
-   *       size: 5,
+   *       radius: 5,
    *       position: function (d) { return {x: d.geometry.x, y: d.geometry.y} },
    *       fillColor: function (d, i) { return i < 5 ? 'red' : 'blue' },
    *       stroke: false
@@ -24925,7 +24987,7 @@ geo.registerWidget('d3', 'legend', geo.gui.legendWidget);
    *     features: [{
    *       data: [...],
    *       type: 'point',
-   *       size: 5,
+   *       radius: 5,
    *       position: function (d) { return {x: d.geometry.x, y: d.geometry.y} },
    *       fillColor: function (d, i) { return i < 5 ? 'red' : 'blue' },
    *       stroke: false
@@ -24991,8 +25053,8 @@ geo.registerWidget('d3', 'legend', geo.gui.legendWidget);
      * @property {number} radius
      *  Radius of the circle in pixels (ignored when <code>size</code>
      *  is present)
-     * @property {number} size
-     *   A numerical value mapped affinely to a radius in the range [5,20]
+     * @property {function} size
+     *   A function returning a numerical value
      * @property {boolean} fill Presence or absence of the fill
      * @property {color} fillColor Interior color
      * @property {float} fillOpacity Opacity of the interior <code>[0,1]</code>
@@ -25050,16 +25112,6 @@ geo.registerWidget('d3', 'legend', geo.gui.legendWidget);
         // when called multiple times on a single element, do nothing
         return;
       }
-      if (initialized) {
-        // warn when called multiple times on different elements
-        console.warn(
-          'Geojs already initialized in this window.'
-        );
-        // Try to clean up the old gl context, but this doesn't usually work
-        delete window.gl;
-      }
-      // set global initialization state
-      initialized = true;
 
       // create the map
       this._map = geo.map({
@@ -25121,7 +25173,7 @@ geo.registerWidget('d3', 'legend', geo.gui.legendWidget);
           var scl;
           if (feature.type === 'point') {
             if (feature.size) {
-              feature._size = feature.size;
+              feature._size = geo.util.ensureFunction(feature.size);
             } else if (feature.size === null) {
               delete feature._size;
             }

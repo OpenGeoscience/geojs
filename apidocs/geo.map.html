@@ -276,7 +276,7 @@ of the map will result in returning null.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line910">line 910</a>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line958">line 958</a>
     </li></ul></dd>
     
 
@@ -905,22 +905,18 @@ of the map will result in returning null.
 
     
 
-    <h4 class="name" id="bounds"><span class="type-signature"></span>bounds<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="bounds"><span class="type-signature"></span>bounds<span class="signature">(bds<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="geo.html#.geoBounds">geo.geoBounds</a>}</span></h4>
 
     
 
 
 
 <div class="description">
-    Get the locations of the current map corners as latitudes/longitudes.
-The return value of this function is an object as follows: ::
-
-   {
-       lowerLeft: {x: ..., y: ...},
-       upperLeft: {x: ..., y: ...},
-       lowerRight: {x: ..., y: ...},
-       upperRight: {x: ..., y: ...}
-   }
+    Get/set the locations of the current map corners as latitudes/longitudes.
+When provided the argument should be an object containing the keys
+lowerLeft and upperRight declaring the desired new map bounds.  The
+new bounds will contain at least the min/max lat/lngs provided.  In any
+case, the actual new bounds will be returned by this function.
 </div>
 
 
@@ -929,6 +925,67 @@ The return value of this function is an object as follows: ::
 
 
 
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>bds</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="geo.html#.geoBounds">geo.geoBounds</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The requested map bounds</td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -964,7 +1021,7 @@ The return value of this function is an object as follows: ::
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line875">line 875</a>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line872">line 872</a>
     </li></ul></dd>
     
 
@@ -972,13 +1029,6 @@ The return value of this function is an object as follows: ::
 
     
 
-    
-    <dt class="tag-todo">To Do:</dt>
-    <dd class="tag-todo">
-        <ul>
-            <li>Provide a setter</li>
-        </ul>
-    </dd>
     
 </dl>
 
@@ -994,6 +1044,28 @@ The return value of this function is an object as follows: ::
 
 
 
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The actual new map bounds
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="geo.html#.geoBounds">geo.geoBounds</a></span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 
@@ -4233,6 +4305,171 @@ Call with no arguments to return the current transition information.
 
     
 
+    <h4 class="name" id="zoomAndCenterFromBounds"><span class="type-signature"></span>zoomAndCenterFromBounds<span class="signature">(bds<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {object}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Get the center zoom level necessary to display the given lat/lon bounds.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>bds</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="geo.html#.geoBounds">geo.geoBounds</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The requested map bounds</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line893">line 893</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    Object containing keys "center" and "zoom"
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
     <h4 class="name" id="zoomRange"><span class="type-signature"></span>zoomRange<span class="signature">(arg)</span><span class="type-signature"> &rarr; {Object|<a href="geo.map.html">geo.map</a>}</span></h4>
 
     
@@ -4551,7 +4788,7 @@ apply to each feature if none exists</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line894">line 894</a>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line942">line 942</a>
     </li></ul></dd>
     
 
@@ -4587,7 +4824,7 @@ apply to each feature if none exists</td>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta1</a> on Thu Mar 26 2015 13:26:43 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta1</a> on Wed Apr 29 2015 09:40:48 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

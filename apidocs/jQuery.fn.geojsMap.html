@@ -99,7 +99,7 @@ on a page.  Trying to create a second map will throw an error
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="plugin_jquery-plugin.js.html">plugin/jquery-plugin.js</a>, <a href="plugin_jquery-plugin.js.html#line123">line 123</a>
+        <a href="plugin_jquery-plugin.js.html">plugin/jquery-plugin.js</a>, <a href="plugin_jquery-plugin.js.html#line120">line 120</a>
     </li></ul></dd>
     
 
@@ -146,7 +146,7 @@ on a page.  Trying to create a second map will throw an error
     renderer: 'vgl',
     features: [{
       type: 'point',
-      size: 5,
+      radius: 5,
       position: function (d) { return {x: d.geometry.x, y: d.geometry.y} },
       fillColor: function (d, i) { return i &lt; 5 ? 'red' : 'blue' },
       stroke: false
@@ -164,7 +164,7 @@ on a page.  Trying to create a second map will throw an error
     features: [{
       data: [...],
       type: 'point',
-      size: 5,
+      radius: 5,
       position: function (d) { return {x: d.geometry.x, y: d.geometry.y} },
       fillColor: function (d, i) { return i &lt; 5 ? 'red' : 'blue' },
       stroke: false
@@ -512,6 +512,42 @@ features/layers not already containing data.</td>
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>tileServer</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">The open street map tile server spec default:
+  <code>http://tile.openstreetmap.org/<zoom>/<x>/<y>.png</code></td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -636,7 +672,7 @@ features/layers not already containing data.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="plugin_jquery-plugin.js.html">plugin/jquery-plugin.js</a>, <a href="plugin_jquery-plugin.js.html#line282">line 282</a>
+        <a href="plugin_jquery-plugin.js.html">plugin/jquery-plugin.js</a>, <a href="plugin_jquery-plugin.js.html#line283">line 283</a>
     </li></ul></dd>
     
 
@@ -779,7 +815,7 @@ features/layers not already containing data.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="plugin_jquery-plugin.js.html">plugin/jquery-plugin.js</a>, <a href="plugin_jquery-plugin.js.html#line399">line 399</a>
+        <a href="plugin_jquery-plugin.js.html">plugin/jquery-plugin.js</a>, <a href="plugin_jquery-plugin.js.html#line411">line 411</a>
     </li></ul></dd>
     
 
@@ -802,6 +838,106 @@ features/layers not already containing data.</td>
 
 
 
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="map"><span class="type-signature"></span>map<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="geo.map.html">geo.map</a>}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Return the geojs map object.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="plugin_jquery-plugin.js.html">plugin/jquery-plugin.js</a>, <a href="plugin_jquery-plugin.js.html#line390">line 390</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="geo.map.html">geo.map</a></span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 
@@ -863,7 +999,7 @@ level features of the mapping api.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="plugin_jquery-plugin.js.html">plugin/jquery-plugin.js</a>, <a href="plugin_jquery-plugin.js.html#line423">line 423</a>
+        <a href="plugin_jquery-plugin.js.html">plugin/jquery-plugin.js</a>, <a href="plugin_jquery-plugin.js.html#line435">line 435</a>
     </li></ul></dd>
     
 
@@ -879,6 +1015,137 @@ level features of the mapping api.
 geo.feature#modified to properly update.</li>
         </ul>
     </dd>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="tileUrl"><span class="type-signature"></span>tileUrl<span class="signature">(url)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Set the tile server URL.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>url</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The url format string of an OSM tile server.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="plugin_jquery-plugin.js.html">plugin/jquery-plugin.js</a>, <a href="plugin_jquery-plugin.js.html#line399">line 399</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
     
 </dl>
 
@@ -1017,7 +1284,7 @@ you can usually just call <a href="jQuery.fn.geojsMap.html#redraw">redraw</a>.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="plugin_jquery-plugin.js.html">plugin/jquery-plugin.js</a>, <a href="plugin_jquery-plugin.js.html#line336">line 336</a>
+        <a href="plugin_jquery-plugin.js.html">plugin/jquery-plugin.js</a>, <a href="plugin_jquery-plugin.js.html#line328">line 328</a>
     </li></ul></dd>
     
 
@@ -1076,7 +1343,7 @@ you can usually just call <a href="jQuery.fn.geojsMap.html#redraw">redraw</a>.
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta1</a> on Thu Mar 26 2015 13:26:43 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta1</a> on Wed Apr 29 2015 09:40:48 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

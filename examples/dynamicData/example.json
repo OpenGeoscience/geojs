@@ -1,0 +1,9 @@
+{
+  "path": "dynamicData",
+  "title": "Dynamic Data",
+  "exampleCss": ["main.css"],
+  "exampleJs": ["main.js"],
+  "about": {
+    "text": "Rendering data that changes with time."
+  }
+}
