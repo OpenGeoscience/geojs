@@ -97,7 +97,7 @@ $(function () {
   // Add a blue box that blocks the mouse wheel.
   addEventBox(3 * width / 4, height / 2, 'Blocking wheel')
     .style('fill', 'steelblue')
-    .on('mousewheel', function () {
+    .on('wheel', function () {
       d3.event.stopPropagation();
     });
 

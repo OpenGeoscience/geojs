@@ -328,7 +328,7 @@ geo.mapInteractor = function (args) {
     $node.on('mousemove.geojs', m_this._handleMouseMove);
     $node.on('mousedown.geojs', m_this._handleMouseDown);
     $node.on('mouseup.geojs', m_this._handleMouseUp);
-    $node.on('mousewheel.geojs', m_this._handleMouseWheel);
+    $node.on('wheel.geojs', m_this._handleMouseWheel);
     if (m_options.panMoveButton === 'right' ||
         m_options.zoomMoveButton === 'right') {
       $node.on('contextmenu.geojs', function () { return false; });
@@ -794,8 +794,21 @@ geo.mapInteractor = function (args) {
   this._handleMouseWheel = function (evt) {
     var zoomFactor, direction;
 
-    // In case jquery-mousewheel isn't loaded for some reason
-    evt.deltaFactor = evt.deltaFactor || 1;
+    // try to normalize deltas using the wheel event standard:
+    //   https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent
+    evt.deltaFactor = 1;
+    if (evt.originalEvent.deltaMode === 1) {
+      // DOM_DELTA_LINE -- estimate line height
+      evt.deltaFactor = 12;
+    } else if (evt.originalEvent.deltaMode === 2) {
+      // DOM_DELTA_PAGE -- get window height
+      evt.deltaFactor = $(window).height();
+    }
+
+    // If the browser doesn't support the standard then
+    // just set the delta's to zero.
+    evt.deltaX = evt.originalEvent.deltaX || 0;
+    evt.deltaY = evt.originalEvent.deltaY || 0;
 
     m_this._getMouseModifiers(evt);
     evt.deltaX = evt.deltaX * m_options.wheelScaleX * evt.deltaFactor / 120;
@@ -821,13 +834,13 @@ geo.mapInteractor = function (args) {
 
       m_this.map().pan({
         x: evt.deltaX,
-        y: evt.deltaY
+        y: -evt.deltaY
       });
 
     } else if (m_options.zoomWheelEnabled &&
                eventMatch('wheel', m_options.zoomWheelModifiers)) {
 
-      zoomFactor = evt.deltaY;
+      zoomFactor = -evt.deltaY;
       direction = m_mouse.map;
 
       m_this.map().zoom(
@@ -1014,9 +1027,11 @@ geo.mapInteractor = function (args) {
         ctrlKey: options.modifiers.indexOf('ctrl') >= 0,
         metaKey: options.modifiers.indexOf('meta') >= 0,
         shiftKey: options.modifiers.indexOf('shift') >= 0,
-        deltaX: options.wheelDelta.x,
-        deltaY: options.wheelDelta.y,
-        deltaFactor: 1
+        originalEvent: {
+          deltaX: options.wheelDelta.x,
+          deltaY: options.wheelDelta.y,
+          deltaMode: options.wheelMode
+        }
       }
     );
     $node.trigger(evt);

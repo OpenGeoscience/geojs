@@ -213,7 +213,6 @@ module.exports = function (grunt) {
         files: {
           'dist/built/geo.ext.min.js': [
             'bower_components/jquery/dist/jquery.js',
-            'bower_components/jquery-mousewheel/jquery.mousewheel.js',
             'bower_components/gl-matrix/dist/gl-matrix.js',
             'bower_components/proj4/dist/proj4-src.js',
             'bower_components/d3/d3.js',
