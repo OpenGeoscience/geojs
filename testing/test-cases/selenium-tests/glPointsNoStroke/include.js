@@ -9,6 +9,7 @@ window.startTest = function (done) {
       var layer = myMap.createLayer('feature');
       layer.createFeature('point')
         .data(citieslatlon)
+        .style('radius', 10.0)
         .style('stroke', false)
         .style('fillColor', function (d) {
           if (d.lon < -100) {

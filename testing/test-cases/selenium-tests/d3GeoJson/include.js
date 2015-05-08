@@ -123,6 +123,7 @@ window.startTest = function (done) {
         "properties": {
           "strokeColor": {"r": 0, "g": 1, "b": 0},
           "strokeWidth": 3,
+          "radius": 10,
           "fill": false
         },
         "type": "Feature"
