@@ -15,7 +15,7 @@ window.startTest = function (done) {
       .position(function (d) { return {x: d.lon, y: d.lat}; })
       .style({
         radius: 5,
-        color: "red",
+        fillColor: "red",
         stroke: false
       })
       .draw();
