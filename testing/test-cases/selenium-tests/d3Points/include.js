@@ -12,6 +12,7 @@ window.startTest = function (done) {
       .data(citieslatlon)
       .style('radius', 10.0)
       .style('strokeColor', { r: 0.0, g: 1.0, b: 0.0 })
+      .style('strokeWidth', 2)
       .style('fillColor', function (d) {
         if (d.lon < -100) {
           return {r: 1.0, g: 0.0, b: 0.0};
