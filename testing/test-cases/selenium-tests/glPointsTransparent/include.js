@@ -9,8 +9,10 @@ window.startTest = function (done) {
       var layer = myMap.createLayer('feature');
       layer.createFeature('point')
         .data(citieslatlon)
+        .style('radius', 10.0)
         .style('fillColor', {r: 0.0, g: 0.0, b: 1.0})
         .style('strokeColor', {r: 1.0, g: 0.0, b: 0.0})
+        .style('strokeWidth', 2)
         .style('fillOpacity', 0.2)
         .style('strokeOpacity', 0.2)
         .position(function (d) { return {x: d.lon, y: d.lat, z: d.elev}; });

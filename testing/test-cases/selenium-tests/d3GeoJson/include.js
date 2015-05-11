@@ -138,7 +138,10 @@ window.startTest = function (done) {
         },
         "properties": {
             "name": "DOUBLE OAKS CENTER",
-            "address": "1326 WOODWARD AV"
+            "address": "1326 WOODWARD AV",
+            "radius": 10,
+            "fillColor": "red",
+            "stroke": false
         }
       }
     ],
