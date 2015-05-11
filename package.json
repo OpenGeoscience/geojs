@@ -29,7 +29,7 @@
     "grunt-docco": "^0.3.3",
     "grunt-express": "~1.4",
     "jscs": "1.11.2",
-    "jsdoc": "3.3.0-beta1",
+    "jsdoc": "^3.3",
     "jshint": "~2.5",
     "phantomjs": "~1.9"
   },
