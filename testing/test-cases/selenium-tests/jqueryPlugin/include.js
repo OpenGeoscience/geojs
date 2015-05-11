@@ -39,6 +39,7 @@ window.startTest = function (done) {
           size: function (d, i) { return [0.1, 0.11, 0.111, 0.1111][i]; },
           radius: 100,
           fillColor: function (d, i) { return 'a' + i.toString(); },
+          fillOpacity: 1,
           strokeColor: 'midnightblue',
           strokeWidth: 5,
           strokeOpacity: 0.5
@@ -47,6 +48,7 @@ window.startTest = function (done) {
           data: [{x: 10, y: 15}],
           size: 10000,
           fillColor: 'black',
+          fillOpacity: 1,
           strokeColor: 'lightgrey',
           strokeWidth: 2
         }]
