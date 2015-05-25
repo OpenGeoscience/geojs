@@ -27,7 +27,7 @@ geo.polygonFeature = function (arg) {
       s_data = this.data,
       m_coordinates = {outer: [], inner: []};
 
-  if (arg.line === undefined) {
+  if (arg.polygon === undefined) {
     m_polygon = function (d) {
       return d;
     };
@@ -90,7 +90,7 @@ geo.polygonFeature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get/Set line accessor
+   * Get/Set polygon accessor
    *
    * @returns {geo.pointFeature}
    */
