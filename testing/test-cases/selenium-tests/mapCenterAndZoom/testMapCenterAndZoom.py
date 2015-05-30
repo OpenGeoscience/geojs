@@ -53,12 +53,12 @@ window.gjsmap.onIdle(function () {
 
 class FirefoxMapCenter(mapCenter, FirefoxTest):
     testCase = mapCenter.testCase + ('firefox',)
-    testRevision = 2
+    testRevision = 3
 
 
 class ChromeMapCenter(mapCenter, ChromeTest):
     testCase = mapCenter.testCase + ('chrome',)
-    testRevision = 2
+    testRevision = 3
 
 
 if __name__ == '__main__':
