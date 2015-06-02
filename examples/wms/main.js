@@ -17,8 +17,9 @@ $(function () {
   // Add an OSM layer with a WMS server as the source of its titles
   var wms = map.createLayer('osm');
 
-  // Set the geographic coordinate system for the layer
-  wms.gcs('EPSG:4326');
+  // Set the geographic coordinate system for the layer to web mercator (EPSG:3857)
+  var projection = 'EPSG:3857';
+  wms.gcs(projection);
 
   wms.tileUrl(
     function (zoom, x, y) {
@@ -28,6 +29,10 @@ $(function () {
       var xUpperRight = geo.mercator.tilex2long(x + 1, zoom);
       var yUpperRight = geo.mercator.tiley2lat(y, zoom);
 
+      var sw = geo.mercator.ll2m(xLowerLeft, yLowerLeft, true);
+      var ne = geo.mercator.ll2m(xUpperRight, yUpperRight, true);
+      var bbox_mercator = sw.x + ',' + sw.y + ',' + ne.x + ',' + ne.y;
+
       // Set the WMS server parameters
       var params = {
         'SERVICE': 'WMS',
@@ -35,11 +40,12 @@ $(function () {
         'REQUEST': 'GetMap',
         'LAYERS': 'topp:states',  // US Population
         'STYLES': '',
-        'BBOX': xLowerLeft + ',' + yLowerLeft + ',' + xUpperRight + ',' + yUpperRight,
-        'WIDTH': wms.width(),
-        'HEIGHT': wms.height(),
+        'BBOX': bbox_mercator,
+        'WIDTH': 256, //Use 256x256 tiles
+        'HEIGHT': 256,
         'FORMAT': 'image/png',
         'TRANSPARENT': true,
+        'SRS': projection,
         'TILED': true
       };
 
