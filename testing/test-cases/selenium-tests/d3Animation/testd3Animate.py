@@ -60,12 +60,12 @@ class d3AnimationBase(object):
 
 class FirefoxOSM(d3AnimationBase, FirefoxTest):
     testCase = d3AnimationBase.testCase + ('firefox',)
-    testRevision = 8
+    testRevision = 9
 
 
 class ChromeOSM(d3AnimationBase, ChromeTest):
     testCase = d3AnimationBase.testCase + ('chrome',)
-    testRevision = 9
+    testRevision = 10
 
 
 if __name__ == '__main__':

@@ -7,7 +7,7 @@ from selenium_test import FirefoxTest, ChromeTest,\
 
 class glPolygonsBase(object):
     testCase = ('glPolygons',)
-    testRevision = 2
+    testRevision = 3
 
     def loadPage(self):
         self.resizeWindow(640, 480)
