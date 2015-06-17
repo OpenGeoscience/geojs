@@ -236,7 +236,26 @@
     // otherwise add to the top
     this._topClusterLevel._add(point);
     point._parent = this._topClusterLevel;  // Should all points have a parent?
+  };
 
+  /**
+   * Return the unclustered points contained at a given zoom level.
+   * @param {number} zoom The zoom level
+   * @return {object[]} The array of unclustered points
+   */
+  C.prototype.points = function (zoom) {
+    zoom = Math.min(Math.max(Math.floor(zoom), 0), this._opts.maxZoom - 1);
+    return this._points[Math.floor(zoom)].contents();
+  };
+
+  /**
+   * Return the clusters contained at a given zoom level.
+   * @param {number} zoom The zoom level
+   * @return {ClusterTree[]} The array of clusters
+   */
+  C.prototype.clusters = function (zoom) {
+    zoom = Math.min(Math.max(Math.floor(zoom), 0), this._opts.maxZoom - 1);
+    return this._clusters[Math.floor(zoom)].contents();
   };
 
   geo.util.ClusterGroup = C;

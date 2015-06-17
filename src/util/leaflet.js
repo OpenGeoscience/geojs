@@ -180,6 +180,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             return closest;
         },
 
+        /* return the values contained */
+        contents: function () {
+            return $.map(this._objectPoint, function (val) { return val; });
+        },
+
         _getCoord: function (x) {
             return Math.floor(x / this._cellSize);
         },
