@@ -30,9 +30,12 @@
     this._count = 0;       // Total number of points
     this._parent = null;
     this._coord = null;    // The cached coordinates
+    var that = this;
 
     // add the children provided in the constructor call
-    (children || []).forEach(this._add.bind(this));
+    (children || []).forEach(function (c) {
+      that._add(c);
+    });
   }
 
   /**
