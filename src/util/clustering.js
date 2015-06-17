@@ -27,8 +27,9 @@
     this._zoom = zoom;
     this._points = [];     // Unclustered points
     this._clusters = [];   // Child clusters
-    this._childCount = 0;  // Total number of points
+    this._count = 0;       // Total number of points
     this._parent = null;
+    this._coord = null;    // The cached coordinates
 
     // add the children provided in the constructor call
     (children || []).forEach(this._add.bind(this));
@@ -60,6 +61,7 @@
    * @private
    */
   ClusterTree.prototype._increment = function (inc) {
+    this._coord = null;
     this._count += inc;
     if (this._parent) {
       this._parent._increment(inc);
@@ -85,6 +87,39 @@
     for (i = 0; i <= this._points.length; i += 1) {
       func.call(this, this._points[i], this._zoom);
     }
+    for (i = 0; i <= this._clusters.length; i += 1) {
+      this._clusters[i].each.call(
+        this._clusters[i],
+        func
+      );
+    }
+  };
+
+  /**
+   * Get the coordinates of the cluster (the mean position of all the points
+   * contained).  This is lazily calculated and cached.
+   */
+  ClusterTree.prototype.coords = function () {
+    var i, center = {x: 0, y: 0};
+    if (this._coord) {
+      return this._coord;
+    }
+    // first add up the points at the node
+    for (i = 0; i < this._points.length; i += 1) {
+      center.x += this._points[i].x;
+      center.y += this._points[i].y;
+    }
+
+    // add up the contribution from the clusters
+    for (i = 0; i < this._clusters.length; i += 1) {
+      center.x += this._clusters[i].coords().x * this._clusters[i]._points.length;
+      center.y += this._clusters[i].coords().y * this._clusters[i]._points.length;
+    }
+
+    return {
+      x: center.x / this.count(),
+      y: center.y / this.count()
+    };
   };
 
   /**
@@ -96,36 +131,46 @@
    *
    * @param {object} opts An options object
    * @param {number} maxZoom The maximimum zoom level to calculate
-   * Others, scale factor (pixels/cluster), ...
+   * @param {number} radius Proportional to the clustering radius in pixels
    */
   function C(opts) {
 
     // store the options
     this._opts = $.extend({
-      maxZoom: 18
+      maxZoom: 18,
+      radius: 0.05
     }, opts);
 
     // generate the initial datastructures
-    this._clusters = []; // clusters at each zoom level
-    this._points = [];   // unclustered points at each zoom level
+    this._clusters = {}; // clusters at each zoom level
+    this._points = {};   // unclustered points at each zoom level
 
-    var zoom;
+    var zoom, scl;
     for (zoom = this._opts.maxZoom; zoom >= 0; zoom -= 1) {
-      this._clusters.push(
-        new geo.util.DistanceGrid()
-      );
-      this._points.push(
-        new geo.util.DistanceGrid()
-      );
+      scl = this._scaleAtLevel(zoom);
+      this._clusters[zoom] = new geo.util.DistanceGrid(scl);
+      this._points[zoom] = new geo.util.DistanceGrid(scl);
     }
+    this._topClusterLevel = new ClusterTree(this, -1);
   }
+
+  /**
+   * Returns a characteristic distance scale at a particular zoom level.  This
+   * scale is used to control the clustering radius.  When the renderer supports
+   * it, this call should be replaced by a calculation involving the view port
+   * size in point coordinates at a particular zoom level.
+   * @private
+   */
+  C.prototype._scaleAtLevel = function (zoom) {
+    return Math.pow(2, -zoom) * this._opts.radius * 360;
+  };
 
   /**
    * Add a position to the cluster group.
    * @protected
    */
-  C.prototype._addPoint = function (point) {
-    var zoom, closest;
+  C.prototype.addPoint = function (point) {
+    var zoom, closest, parent, newCluster, lastParent, z;
 
     // start at the maximum zoom level and search for nearby
     //
@@ -133,10 +178,62 @@
     // 2.  unclustered points
     //
     // otherwise add the point as a new unclustered point
+
     for (zoom = this._opts.maxZoom; zoom >= 0; zoom -= 1) {
-      closest = this._gridClusters[zoom].getNearObject(point);
+
+      // find near cluster
+      closest = this._clusters[zoom].getNearObject(point);
+      if (closest) {
+        // add the point to the cluster and return
+        closest._add(point);
+        return;
+      }
+
+      // find near point
+      closest = this._points[zoom].getNearObject(point);
+      if (closest) {
+        parent = closest._parent;
+        if (parent) {
+          // remove the point from the parent
+          for (z = parent._points.length - 1; z >= 0; z -= 1) {
+            if (parent._points[z] === closest) {
+              parent._points.splice(z, 1);
+              parent._increment(-1);
+              break;
+            }
+          }
+        }
+
+        // create a new cluster with these two points
+        newCluster = new ClusterTree(this, zoom, [closest, point]);
+        this._clusters[zoom].addObject(newCluster, newCluster.coords());
+
+        // create intermediate parent clusters that don't exist
+        lastParent = newCluster;
+        for (z = zoom - 1; z > parent._zoom; z -= 1) {
+          lastParent = new ClusterTree(this, z, [lastParent]);
+          this._clusters[z].addObject(lastParent, closest);
+        }
+        parent._add(lastParent);
+
+        // remove closest from this zoom level and any above (replace with newCluster)
+        for (z = zoom; z >= 0; z -= 1) {
+          if (!this._points[z].removeObject(closest, closest)) {
+            break;
+          }
+        }
+
+        return;
+      }
+
+      // add an unclustered point
+      this._points[zoom].addObject(point, point);
     }
-    
+
+    // otherwise add to the top
+    this._topClusterLevel._add(point);
+    point._parent = this._topClusterLevel;  // Should all points have a parent?
+
   };
 
   geo.util.ClusterGroup = C;

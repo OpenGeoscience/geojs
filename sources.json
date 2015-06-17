@@ -44,7 +44,8 @@
       "files": [
         "init.js",
         "wigglemaps.js",
-        "leaflet.js"
+        "leaflet.js",
+        "clustering.js"
       ]
     },
     "geo.gl": {
