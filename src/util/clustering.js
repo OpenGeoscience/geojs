@@ -127,12 +127,12 @@
   };
 
   /**
-   * @class geo.util.ClusterGroup
    *
    * This class manages clustering of an array of positions hierarchically.
    * The algorithm and code was adapted from the Leaflet marker cluster
    * plugin by David Leaver: https://github.com/Leaflet/Leaflet.markercluster
    *
+   * @class geo.util.ClusterGroup
    * @param {object} opts An options object
    * @param {number} maxZoom The maximimum zoom level to calculate
    * @param {number} radius Proportional to the clustering radius in pixels

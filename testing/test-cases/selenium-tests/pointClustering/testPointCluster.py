@@ -6,7 +6,7 @@ from selenium_test import FirefoxTest, ChromeTest,\
 
 class glPointsBase(object):
     testCase = ('pointClustering',)
-    testRevision = 6
+    testRevision = 1
 
     def loadPage(self):
         self.resizeWindow(640, 480)
