@@ -67,7 +67,45 @@ describe('geo.util.clustering', function () {
     expect(cl.clusters(0).length).toBe(1);
     expect(cl.points(0).length).toBe(0);
 
+    expect(cl.clusters(5).length).toBe(2);
+    expect(cl.points(5).length).toBe(0);
+
     expect(cl.clusters(17).length).toBe(0);
     expect(cl.points(17).length).toBe(6);
+  });
+  it('point cluster tree', function () {
+    var cl = new ClusterGroup();
+
+    cl.addPoint({x: 0, y: 0});
+    cl.addPoint({x: 50, y: 50});
+
+    expect(cl.clusters(0).length).toBe(0);
+    expect(cl.points(0).length).toBe(2);
+
+    cl.addPoint({x: 1, y: 0});
+    expect(cl.clusters(0).length).toBe(1);
+    expect(cl.points(0).length).toBe(1);
+
+    cl.addPoint({x: 1.1, y: 0.1});
+    expect(cl.clusters(0).length).toBe(1);
+    expect(cl.points(0).length).toBe(1);
+    expect(cl.clusters(5).length).toBe(1);
+    expect(cl.points(5).length).toBe(2);
+
+    cl.addPoint({x: -50, y: 50});
+    expect(cl.clusters(0).length).toBe(1);
+    expect(cl.points(0).length).toBe(2);
+    expect(cl.clusters(5).length).toBe(1);
+    expect(cl.points(5).length).toBe(3);
+
+    cl.addPoint({x: -50.001, y: 50});
+    expect(cl.clusters(0).length).toBe(2);
+    expect(cl.points(0).length).toBe(1);
+    expect(cl.clusters(5).length).toBe(2);
+    expect(cl.points(5).length).toBe(2);
+    expect(cl.clusters(10).length).toBe(1);
+    expect(cl.points(10).length).toBe(4);
+    expect(cl.clusters(15).length).toBe(0);
+    expect(cl.points(15).length).toBe(6);
   });
 });
