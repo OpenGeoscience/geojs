@@ -210,6 +210,8 @@
         // create a new cluster with these two points
         newCluster = new ClusterTree(this, zoom, [closest, point]);
         this._clusters[zoom].addObject(newCluster, newCluster.coords());
+        closest._parent = newCluster;
+        point._parent = newCluster;
 
         // create intermediate parent clusters that don't exist
         lastParent = newCluster;

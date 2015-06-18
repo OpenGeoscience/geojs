@@ -51,4 +51,23 @@ describe('geo.util.clustering', function () {
     expect(cl.clusters(17).length).toBe(0);
     expect(cl.points(17).length).toBe(9);
   });
+  it('three cluster levels', function () {
+    var cl = new ClusterGroup();
+
+    cl.addPoint({x: 0, y: 0});
+    cl.addPoint({x: 1, y: 0});
+
+    cl.addPoint({x: 0, y: 0.1});
+    cl.addPoint({x: 1, y: -0.1});
+
+    cl.addPoint({x: 0.01, y: 0.11});
+    cl.addPoint({x: 1.01, y: -0.105});
+
+    expect(cl._topClusterLevel.count()).toBe(6);
+    expect(cl.clusters(0).length).toBe(1);
+    expect(cl.points(0).length).toBe(0);
+
+    expect(cl.clusters(17).length).toBe(0);
+    expect(cl.points(17).length).toBe(6);
+  });
 });
