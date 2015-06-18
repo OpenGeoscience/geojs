@@ -1,4 +1,4 @@
-/*global describe, it, expect, geo, jasmine*/
+/*global describe, it, expect, geo, jasmine, beforeEach, afterEach*/
 describe('geo.util.clustering', function () {
   'use strict';
 
@@ -108,13 +108,16 @@ describe('geo.util.clustering', function () {
     expect(cl.clusters(15).length).toBe(0);
     expect(cl.points(15).length).toBe(6);
   });
+  var timeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
+  beforeEach(function () {
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000; // 10 s
+  });
+  afterEach(function () {
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = timeout;
+  });
   it('clustering cities data set', function (done) {
-    // save the default timeout
-    var timeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 10;
 
     var cl = new ClusterGroup();
-    var start = new Date();
     $.ajax('/data/cities.csv').then(function (data) {
       function processCSVData(csvdata) {
         var table = [];
@@ -129,6 +132,7 @@ describe('geo.util.clustering', function () {
       }
 
       var table = processCSVData(data);
+      var start = new Date();
       var i;
       for (i = 0; i < table.length; i += 1) {
         if (table[i][2] !== undefined) {
@@ -143,10 +147,10 @@ describe('geo.util.clustering', function () {
           cl.addPoint({x: lon, y: lat});
         }
       }
+
       // a basic performance test, should log somewhere
       expect(new Date() - start).toBeLessThan(5000);
       done();
-      jasmine.DEFAULT_TIMEOUT_INTERVAL = timeout;
     });
   });
 });
