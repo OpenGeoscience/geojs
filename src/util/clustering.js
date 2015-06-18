@@ -49,11 +49,12 @@
     if (pt instanceof ClusterTree) {
       // add a child cluster
       this._clusters.push(pt);
-      pt._parent = this;
       inc = pt._count;
     } else {
       this._points.push(pt);
     }
+    pt._parent = this;
+
     // increment the counter
     this._increment(inc);
   };
@@ -205,8 +206,14 @@
               break;
             }
           }
+          if (parent._points.length === 1) {
+            $.noop();
+          }
         }
 
+        if (!parent) {
+          $.noop();
+        }
         // create a new cluster with these two points
         newCluster = new ClusterTree(this, zoom, [closest, point]);
         this._clusters[zoom].addObject(newCluster, newCluster.coords());
@@ -237,7 +244,7 @@
 
     // otherwise add to the top
     this._topClusterLevel._add(point);
-    point._parent = this._topClusterLevel;  // Should all points have a parent?
+    // point._parent = this._topClusterLevel;  // Should all points have a parent?
   };
 
   /**
