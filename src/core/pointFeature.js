@@ -275,7 +275,7 @@ geo.pointFeature = function (arg) {
     if (data === undefined) {
       return s_data();
     }
-    if (!m_ignoreData) {
+    if (m_clustering && !m_ignoreData) {
       m_allData = data;
       m_this._clusterData();
     } else {
