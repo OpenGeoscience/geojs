@@ -146,7 +146,7 @@ if(PHANTOMJS_TESTS)
                                -DBLANKET_INCLUDE="${BLANKET_INCLUDE}"
                                -P ${CMAKE_SOURCE_DIR}/cmake/configure-js-unit-test.cmake
       COMMAND ${CMAKE_COMMAND} -E touch ${html}
-      DEPENDS ${js} ${CMAKE_SOURCE_DIR}/testing/test-runners/jasmine-runner.html.in
+      DEPENDS ${js} ${MIDAS_DOWNLOAD_FILES} ${CMAKE_SOURCE_DIR}/testing/test-runners/jasmine-runner.html.in
       COMMENT "Generating phantomjs unit test ${f}"
     )
     list(APPEND JS_UNIT_TEST_FILES ${html})
