@@ -96,7 +96,7 @@ geo.gl.lineFeature = function (arg) {
       '  gl_Position = worldPos;',
       '}'
     ].join('\n'),
-    shader = new vgl.shader(gl.VERTEX_SHADER);
+    shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
     shader.setShaderSource(vertexShaderSource);
     return shader;
   }
@@ -113,7 +113,7 @@ geo.gl.lineFeature = function (arg) {
       '  gl_FragColor = vec4 (strokeColorVar, strokeOpacityVar);',
       '}'
     ].join('\n'),
-    shader = new vgl.shader(gl.FRAGMENT_SHADER);
+    shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
     shader.setShaderSource(fragmentShaderSource);
     return shader;
   }

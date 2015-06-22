@@ -565,9 +565,9 @@ geo.osmLayer = function (arg) {
           if (tile.LOADED && m_updateTimerId in m_pendingNewTilesStat) {
             m_pendingNewTilesStat[m_updateTimerId].count += 1;
           }
-          tile.lastused = new Date();
           tile.feature._update();
         }
+        tile.lastused = new Date();
         tile.updateTimerId = m_updateTimerId;
       }
     }

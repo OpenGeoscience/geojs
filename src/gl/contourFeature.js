@@ -61,7 +61,7 @@ geo.gl.contourFeature = function (arg) {
       '  gl_Position = scrPos;',
       '}'
     ].join('\n'),
-    shader = new vgl.shader(gl.VERTEX_SHADER);
+    shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
     shader.setShaderSource(vertexShaderSource);
     return shader;
   }
@@ -99,7 +99,7 @@ geo.gl.contourFeature = function (arg) {
       '  gl_FragColor = vec4(clr.rgb, clr.a * opacityVar);',
       '}'
     ].join('\n'),
-    shader = new vgl.shader(gl.FRAGMENT_SHADER);
+    shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
     shader.setShaderSource(fragmentShaderSource);
     return shader;
   }
@@ -190,7 +190,7 @@ geo.gl.contourFeature = function (arg) {
         geom = vgl.geometryData(),
         modelViewUniform = new vgl.modelViewUniform('modelViewMatrix'),
         projectionUniform = new vgl.projectionUniform('projectionMatrix'),
-        samplerUniform = new vgl.uniform(gl.INT, 'sampler2d'),
+        samplerUniform = new vgl.uniform(vgl.GL.INT, 'sampler2d'),
         vertexShader = createVertexShader(),
         fragmentShader = createFragmentShader(),
         posAttr = vgl.vertexAttribute('pos'),
@@ -212,15 +212,15 @@ geo.gl.contourFeature = function (arg) {
 
     prog.addUniform(modelViewUniform);
     prog.addUniform(projectionUniform);
-    m_minColorUniform = new vgl.uniform(gl.FLOAT_VEC4, 'minColor');
+    m_minColorUniform = new vgl.uniform(vgl.GL.FLOAT_VEC4, 'minColor');
     prog.addUniform(m_minColorUniform);
-    m_maxColorUniform = new vgl.uniform(gl.FLOAT_VEC4, 'maxColor');
+    m_maxColorUniform = new vgl.uniform(vgl.GL.FLOAT_VEC4, 'maxColor');
     prog.addUniform(m_maxColorUniform);
     /* steps is always an integer, but it is more efficient if we use a float
      */
-    m_stepsUniform = new vgl.uniform(gl.FLOAT, 'steps');
+    m_stepsUniform = new vgl.uniform(vgl.GL.FLOAT, 'steps');
     prog.addUniform(m_stepsUniform);
-    m_steppedUniform = new vgl.uniform(gl.BOOL, 'stepped');
+    m_steppedUniform = new vgl.uniform(vgl.GL.BOOL, 'stepped');
     prog.addUniform(m_steppedUniform);
 
     prog.addShader(fragmentShader);
