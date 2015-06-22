@@ -1,82 +1,5 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Single VGL viewer
- *
- * This singleton instance is used to share a single GL context across multiple
- * vlgRenderer and therefore layers.
- * @private
- */
-//////////////////////////////////////////////////////////////////////////////
-geo.gl._vglViewerInstances = {
-  viewers: [],
-  maps: []
-};
-
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Retrives the singleton, lazily constructs as necessary.
- *
- * @return {vgl.viewer} the single viewer instance.
- */
-//////////////////////////////////////////////////////////////////////////////
-
-geo.gl.vglViewerInstance = function (map) {
-  "use strict";
-
-  var mapIdx,
-      maps = geo.gl._vglViewerInstances.maps,
-      viewers = geo.gl._vglViewerInstances.viewers,
-      canvas;
-
-  function makeViewer() {
-    canvas = $(document.createElement("canvas"));
-    canvas.attr("class", "webgl-canvas");
-    var viewer = vgl.viewer(canvas.get(0));
-    viewer.renderWindow().removeRenderer(
-    viewer.renderWindow().activeRenderer());
-    viewer.init();
-    return viewer;
-  }
-
-  for (mapIdx = 0; mapIdx < maps.length; mapIdx += 1) {
-    if (map === maps[mapIdx]) {
-      break;
-    }
-  }
-
-  if (map !== maps[mapIdx]) {
-    maps[mapIdx] = map;
-    viewers[mapIdx] = makeViewer();
-  }
-
-  viewers[mapIdx]._exit = function () {
-    if (canvas) {
-      canvas.off();
-      canvas.remove();
-    }
-  };
-
-  return viewers[mapIdx];
-};
-
-geo.gl.vglViewerInstance.deleteCache = function (viewer) {
-  "use strict";
-
-  var mapIdx,
-      maps = geo.gl._vglViewerInstances.maps,
-      viewers = geo.gl._vglViewerInstances.viewers;
-
-  for (mapIdx = 0; mapIdx < viewers.length; mapIdx += 1) {
-    if (viewer === undefined || viewer === viewers[mapIdx]) {
-      viewer._exit();
-      maps.splice(mapIdx, 1);
-      viewers.splice(mapIdx, 1);
-    }
-  }
-};
-
-//////////////////////////////////////////////////////////////////////////////
-/**
  * Create a new instance of class vglRenderer
  *
  * @class
@@ -95,12 +18,16 @@ geo.gl.vglRenderer = function (arg) {
 
   var m_this = this,
       s_exit = this._exit,
-      m_viewer = geo.gl.vglViewerInstance(this.layer().map()),
-      m_contextRenderer = vgl.renderer(),
+      m_contextRenderer = null,
+      m_canvas = $(document.createElement("canvas")),
+      m_viewer = vgl.viewer(m_canvas.get(0)),
       m_width = 0,
       m_height = 0,
       s_init = this._init;
 
+  m_viewer.init();
+  m_contextRenderer = m_viewer.renderWindow().activeRenderer();
+  m_canvas.attr("class", "webgl-canvas");
   m_contextRenderer.setResetScene(false);
 
   /// TODO: Move this API to the base class
@@ -311,7 +238,6 @@ geo.gl.vglRenderer = function (arg) {
       m_contextRenderer.setLayer(m_viewer.renderWindow().renderers().length);
       m_contextRenderer.setResetScene(false);
     }
-    m_viewer.renderWindow().addRenderer(m_contextRenderer);
 
     m_this.layer().node().append(m_this.canvas());
 
