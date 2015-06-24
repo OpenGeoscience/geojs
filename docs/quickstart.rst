@@ -20,6 +20,11 @@ and testing of geojs.
 * `Requests <http://docs.python-requests.org/en/latest/>`_
 * `Selenium <http://docs.seleniumhq.org/>`_
 
+These docs assume that the `Grunt <http://gruntjs.com/>`_ command line interface
+has been installed globally, which can be done with the following command: ::
+
+    npm install -g grunt-cli
+
 Getting the source code
 -----------------------
 
@@ -98,3 +103,6 @@ browser, you should see a map like the following:
 
 .. image:: images/osmmap.png
     :align: center
+
+Additionally, you will be able to see all of the built-in examples at
+`<http://localhost:8082/examples>`_.
