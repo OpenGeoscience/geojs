@@ -435,7 +435,7 @@ geo.gl.vglRenderer = function (arg) {
   });
 
 // Connect to zoom event
-m_this.layer().geoOn(geo.event.zoom, function (evt) {
+  m_this.layer().geoOn(geo.event.zoom, function (evt) {
     var vglRenderer = m_this.contextRenderer(),
       camera,
       renderWindow,
