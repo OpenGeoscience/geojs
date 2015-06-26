@@ -47,7 +47,8 @@ geo.osmLayer = function (arg) {
     m_updateDefer = null,
     m_zoom = null,
     m_tileUrl,
-    m_tileUrlFromTemplate;
+    m_tileUrlFromTemplate,
+    m_crossOrigin = "anonymous";
 
   if (arg && arg.baseUrl !== undefined) {
     m_baseUrl = arg.baseUrl;
@@ -66,6 +67,10 @@ geo.osmLayer = function (arg) {
 
   if (arg && arg.displayLast !== undefined && arg.displayLast) {
     m_lastVisibleBinNumber = 999;
+  }
+
+  if (arg && arg.useCredentials !== undefined && arg.useCredentials) {
+    m_crossOrigin = "use-credentials";
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -339,7 +344,7 @@ geo.osmLayer = function (arg) {
     tile.REMOVING = false;
     tile.INVALID = false;
 
-    tile.crossOrigin = "anonymous";
+    tile.crossOrigin = m_crossOrigin;
     tile.zoom = zoom;
     tile.index_x = x;
     tile.index_y = y;
