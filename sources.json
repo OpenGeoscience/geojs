@@ -133,7 +133,7 @@
         "picker.js",
         "shapefileReader.js",
         "vtkReader.js",
-        "DataBuffers.js"
+        "dataBuffers.js"
       ]
     }
   }
