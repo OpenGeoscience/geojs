@@ -16,21 +16,21 @@ describe("d3 point feature", function () {
   it("Add features to a layer", function () {
     var selection;
     feature1 = layer.createFeature("point", {selectionAPI: true})
-      .data([geo.latlng(0, 0), geo.latlng(10, 0), geo.latlng(0, 10)])
+      .data([{y: 0, x: 0}, {y: 10, x: 0}, {y: 0, x: 10}])
       .draw();
 
     selection = d3.select("#map svg").selectAll("circle");
     expect(selection[0].length).toBe(3);
 
     feature2 = layer.createFeature("point")
-      .data([geo.latlng(-10, -10), geo.latlng(10, -10)])
+      .data([{y: -10, x: -10}, {y: 10, x: -10}])
       .draw();
 
     selection = d3.select("#map svg").selectAll("circle");
     expect(selection[0].length).toBe(5);
 
     feature3 = layer.createFeature("point")
-      .data([geo.latlng(-10, 10)])
+      .data([{y: -10, x: 10}])
       .draw();
 
     selection = d3.select("#map svg").selectAll("circle");

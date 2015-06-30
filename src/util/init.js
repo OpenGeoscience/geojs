@@ -124,7 +124,6 @@
     /**
      * Normalize a coordinate object into {x: ..., y: ..., z: ... } form.
      * Accepts 2-3d arrays,
-     * latlng objects
      * latitude -> lat -> y
      * longitude -> lon -> lng -> x
      */
@@ -135,13 +134,6 @@
           x: p[0],
           y: p[1],
           z: p[2] || 0
-        };
-      }
-      if (p instanceof geo.latlng) {
-        return {
-          x: p.lng(),
-          y: p.lat(),
-          z: 0
         };
       }
       return {

@@ -365,7 +365,7 @@ geo.map = function (arg) {
   /**
    * Convert from gcs coordinates to display coordinates
    *
-   * @param {*} input {[geo.latlng], [{x:_x, y: _y}], [x1,y1, x2, y2]}
+   * @param {*} input {[[{x:_x, y: _y}], [x1,y1, x2, y2]}
    * @return {object}
    *
    * @note Currently only lat-lon inputs are supported

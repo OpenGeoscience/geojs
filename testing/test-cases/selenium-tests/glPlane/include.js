@@ -30,9 +30,9 @@ window.startTest = function (done) {
     opacity = decodeURIComponent(opacity[1].replace(/\+/g, ' '));
   }
   layer.createFeature('plane')
-    .origin(geo.latlng(0.0, 0.0))
-    .upperLeft(geo.latlng(1.0, 0.0))
-    .lowerRight(geo.latlng(0.0, 2.0))
+    .origin([0.0, 0.0])
+    .upperLeft([0.0, 1.0])
+    .lowerRight([2.0, 0.0])
     .style({
       image: '/data/land_shallow_topo_2048.png',
       opacity: opacity ? opacity : undefined

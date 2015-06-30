@@ -48,8 +48,6 @@ geo.planeFeature = function (arg) {
       if (m_origin.length === 2) {
         m_origin[2] = m_defaultDepth;
       }
-    } else if (val instanceof geo.latlng) {
-      m_origin = [val.x(), val.y(), m_defaultDepth];
     }
     m_this.dataTime().modified();
     m_this.modified();
@@ -74,8 +72,6 @@ geo.planeFeature = function (arg) {
       if (m_upperLeft.length === 2) {
         m_upperLeft[2] = m_defaultDepth;
       }
-    } else if (val instanceof geo.latlng) {
-      m_upperLeft = [val.x(), val.y(), m_defaultDepth];
     }
     m_this.dataTime().modified();
     m_this.modified();
@@ -101,8 +97,6 @@ geo.planeFeature = function (arg) {
         m_lowerRight[2] = m_defaultDepth;
       }
       m_this.dataTime().modified();
-    } else if (val instanceof geo.latlng) {
-      m_lowerRight = [val.x(), val.y(), m_defaultDepth];
     }
     m_this.dataTime().modified();
     m_this.modified();
