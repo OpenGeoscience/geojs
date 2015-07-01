@@ -1,469 +1,150 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Transform geometric data of a feature from source projection to destination
- * projection.
+ * This purpose of this class is to provide a generic interface for computing
+ * coordinate transformationss.  The interface is taken from the proj4js,
+ * which also provides the geospatial projection implementation.  The
+ * interface is intentionally simple to allow for custom, non-geospatial use
+ * cases. For further details, see http://proj4js.org/
  *
- * @namespace
- */
-//////////////////////////////////////////////////////////////////////////////
-geo.transform = {};
-
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Custom transform for a feature used for OpenStreetMap
- */
-//////////////////////////////////////////////////////////////////////////////
-geo.transform.osmTransformFeature = function (destGcs, feature, inplace) {
-  /// TODO
-  /// Currently we make assumption that incoming feature is in 4326
-  /// which may not be true.
-
-  "use strict";
-
-  if (!feature) {
-    console.log("[warning] Invalid (null) feature");
-    return;
-  }
-
-  if (feature.gcs() === destGcs) {
-    return;
-  }
-
-  if (!(feature instanceof geo.pointFeature ||
-        feature instanceof geo.lineFeature)) {
-    throw "Supports only point or line feature";
-  }
-
-  var noOfComponents = null,
-      pointOffset = 0,
-      count = null,
-      inPos = null,
-      outPos = null,
-      srcGcs = feature.gcs(),
-      i,
-      yCoord;
-
-  inplace = !!inplace;
-  if (feature instanceof geo.pointFeature ||
-      feature instanceof geo.lineFeature) {
-
-    ///  If source GCS is not in 4326, transform it first into 4326
-    /// before we transform it for OSM.
-    if (srcGcs !== "EPSG:4326") {
-      geo.transform.transformFeature("EPSG:4326", feature, true);
-    }
-
-    inPos = feature.positions();
-    count = inPos.length;
-
-    if (!(inPos instanceof Array)) {
-      throw "Supports Array of 2D and 3D points";
-    }
-
-    noOfComponents = (count % 2 === 0 ? 2 :
-                     (count % 3 === 0 ? 3 : null));
-    pointOffset = noOfComponents;
-
-    if (noOfComponents !== 2 && noOfComponents !== 3) {
-      throw "Transform points require points in 2D or 3D";
-    }
-
-    if (inplace) {
-      outPos = inPos;
-    } else {
-      outPos = inPos.slice(0);
-    }
-
-    for (i = 0; i < count; i += pointOffset) {
-
-      /// Y goes from 0 (top edge is 85.0511 °N) to 2zoom − 1
-      /// (bottom edge is 85.0511 °S) in a Mercator projection.
-      yCoord = inPos[i + 1];
-
-      if (yCoord > 85.0511) {
-        yCoord = 85.0511;
-      }
-      if (yCoord < -85.0511) {
-        yCoord = -85.0511;
-      }
-      outPos[i + 1] = geo.mercator.lat2y(yCoord);
-    }
-
-    if (inplace) {
-      feature.positions(outPos);
-      feature.gcs(destGcs);
-    }
-    return outPos;
-  }
-
-  return null;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Transform a feature to destination GCS
- */
-//////////////////////////////////////////////////////////////////////////////
-geo.transform.transformFeature = function (destGcs, feature, inplace) {
-  "use strict";
-
-  if (!feature) {
-    throw "Invalid (null) feature";
-  }
-
-  if (!(feature instanceof geo.pointFeature ||
-        feature instanceof geo.lineFeature)) {
-    throw "Supports only point or line feature";
-  }
-
-  if (feature.gcs() === destGcs) {
-    return feature.positions();
-  }
-
-  if (destGcs === "EPSG:3857") {
-    return geo.transform.osmTransformFeature(destGcs, feature, inplace);
-  }
-
-  var noOfComponents = null,
-      pointOffset = 0,
-      count = null,
-      inPos = null,
-      outPos = null,
-      projPoint = null,
-      srcGcs = feature.gcs(),
-      i,
-      projSrcGcs = new proj4.Proj(srcGcs),
-      projDestGcs = new proj4.Proj(destGcs);
-
-  inplace = !!inplace;
-  if (feature instanceof geo.pointFeature ||
-      feature instanceof geo.lineFeature) {
-    inPos = feature.positions();
-    count = inPos.length;
-
-    if (!(inPos instanceof Array)) {
-      throw "Supports Array of 2D and 3D points";
-    }
-
-    noOfComponents = (count % 2 === 0 ? 2 :
-                     (count % 3 === 0 ? 3 : null));
-    pointOffset = noOfComponents;
-
-    if (noOfComponents !== 2 && noOfComponents !== 3) {
-      throw "Transform points require points in 2D or 3D";
-    }
-
-    if (inplace) {
-      outPos = inPos;
-    } else {
-      outPos = [];
-      outPos.length = inPos.length;
-    }
-
-    for (i = 0; i < count; i += pointOffset) {
-      if (noOfComponents === 2) {
-        projPoint = new proj4.Point(inPos[i], inPos[i + 1], 0.0);
-      } else {
-        projPoint = new proj4.Point(inPos[i], inPos[i + 1], inPos[i + 2]);
-      }
-
-      proj4.transform(projSrcGcs, projDestGcs, projPoint);
-
-      if (noOfComponents === 2) {
-        outPos[i] =  projPoint.x;
-        outPos[i + 1] = projPoint.y;
-      } else {
-        outPos[i] = projPoint.x;
-        outPos[i + 1] = projPoint.y;
-        outPos[i + 2] = projPoint.z;
-      }
-    }
-
-    if (inplace) {
-      feature.positions(outPos);
-      feature.gcs(destGcs);
-    }
-
-    return outPos;
-  }
-
-  return null;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Transform geometric data of a layer from source projection to destination
- * projection.
- */
-//////////////////////////////////////////////////////////////////////////////
-geo.transform.transformLayer = function (destGcs, layer, baseLayer) {
-  "use strict";
-
-  var features, count, i;
-
-  if (!layer) {
-    throw "Requires valid layer for tranformation";
-  }
-
-  if (!baseLayer) {
-    throw "Requires baseLayer used by the map";
-  }
-
-  if (layer === baseLayer) {
-    return;
-  }
-
-  if (layer instanceof geo.featureLayer) {
-    features = layer.features();
-    count = features.length;
-    i = 0;
-
-    for (i = 0; i < count; i += 1) {
-      if (destGcs === "EPSG:3857" && baseLayer instanceof geo.osmLayer) {
-        geo.transform.osmTransformFeature(
-          destGcs, features[i], true);
-      } else {
-        geo.transform.transformFeature(
-          destGcs, features[i], true);
-      }
-    }
-
-    layer.gcs(destGcs);
-  } else {
-    throw "Only feature layer transformation is supported";
-  }
-};
-
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Transform position coordinates from source projection to destination
- * projection.
+ * The default transforms lat/long coordinates into web mercator
+ * for use with standard tile sets.
  *
- * @param {string} srcGcs GCS of the coordinates
- * @param {string} destGcs Desired GCS of the transformed coordinates
- * @param {object} coordinates
- * @return {object|object[]} Transformed coordinates
+ * This class is intended to be extended in the future to support 2.5 and 3
+ * dimensional transformations.  The forward/inverse methods take optional
+ * z values that are ignored in current mapping context, but will in the
+ * future perform more general 3D transformations.
+ *
+ * @class
+ * @extends geo.object
+ * @param {object} options Constructor options
+ * @param {string} options.source A proj4 string for the source projection
+ * @param {string} options.target A proj4 string for the target projection
+ * @returns {geo.transform}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.transform.transformCoordinates = function (srcGcs, destGcs, coordinates,
-                                               numberOfComponents) {
+
+geo.transform = function (options) {
   "use strict";
+  if (!(this instanceof geo.transform)) {
+    return new geo.transform(options);
+  }
 
-  var i, count, offset, xCoord, yCoord, zCoord, xAcc,
-      yAcc, zAcc, writer, output, projPoint,
-      projSrcGcs = new proj4.Proj(srcGcs),
-      projDestGcs = new proj4.Proj(destGcs);
+  var m_this = this,
+      m_proj,   // The raw proj4js object
+      m_source, // The source projection
+      m_target; // The target projection
 
-  /// Default Z accessor
-  zAcc = function () {
-    return 0.0;
+  /**
+   * Generate the internal proj4 object.
+   * @private
+   */
+  function generate_proj4() {
+    m_proj = new proj4(
+      m_this.source(),
+      m_this.target()
+    );
+  }
+
+  /**
+   * Get/Set the source projection
+   */
+  this.source = function (arg) {
+    if (arg === undefined) {
+      return m_source || 'EPSG:4326';
+    }
+    m_source = arg;
+    generate_proj4();
+    return m_this;
   };
 
-  if (destGcs === srcGcs) {
-    return coordinates;
-  }
-
-  /// TODO: Can we check for EPSG code?
-  if (!destGcs || !srcGcs) {
-    throw "Invalid source or destination GCS";
-  }
-
-  /// Helper methods
-  function handleArrayCoordinates() {
-    if (coordinates[0] instanceof Array) {
-      if (coordinates[0].length === 2) {
-        xAcc = function (index) {
-          return coordinates[index][0];
-        };
-        yAcc = function (index) {
-          return coordinates[index][1];
-        };
-        writer = function (index, x, y) {
-          output[index] = [x, y];
-        };
-      } else if (coordinates[0].length === 3) {
-        xAcc = function (index) {
-          return coordinates[index][0];
-        };
-        yAcc = function (index) {
-          return coordinates[index][1];
-        };
-        zAcc = function (index) {
-          return coordinates[index][2];
-        };
-        writer = function (index, x, y, z) {
-          output[index] = [x, y, z];
-        };
-      } else {
-        throw "Invalid coordinates. Requires two or three components per array";
-      }
-    } else {
-      if (coordinates.length === 2) {
-        offset = 2;
-
-        xAcc = function (index) {
-          return coordinates[index * offset];
-        };
-        yAcc = function (index) {
-          return coordinates[index * offset + 1];
-        };
-        writer = function (index, x, y) {
-          output[index] = x;
-          output[index + 1] = y;
-        };
-      } else if (coordinates.length === 3) {
-        offset = 3;
-
-        xAcc = function (index) {
-          return coordinates[index * offset];
-        };
-        yAcc = function (index) {
-          return coordinates[index * offset + 1];
-        };
-        zAcc = function (index) {
-          return coordinates[index * offset + 2];
-        };
-        writer = function (index, x, y, z) {
-          output[index] = x;
-          output[index + 1] = y;
-          output[index + 2] = z;
-        };
-      } else if (numberOfComponents) {
-        if (numberOfComponents === 2 || numberOfComponents || 3) {
-          offset = numberOfComponents;
-
-          xAcc = function (index) {
-            return coordinates[index];
-          };
-          yAcc = function (index) {
-            return coordinates[index + 1];
-          };
-          if (numberOfComponents === 2) {
-            writer = function (index, x, y) {
-              output[index] = x;
-              output[index + 1] = y;
-            };
-          } else {
-            zAcc = function (index) {
-              return coordinates[index + 2];
-            };
-            writer = function (index, x, y, z) {
-              output[index] = x;
-              output[index + 1] = y;
-              output[index + 2] = z;
-            };
-          }
-        } else {
-          throw "Number of components should be two or three";
-        }
-      } else {
-        throw "Invalid coordinates";
-      }
+  /**
+   * Get/Set the target projection
+   */
+  this.target = function (arg) {
+    if (arg === undefined) {
+      return m_target || 'EPSG:3857';
     }
-  }
+    m_target = arg;
+    generate_proj4();
+    return m_this;
+  };
 
-  /// Helper methods
-  function handleObjectCoordinates() {
-    if (coordinates[0] &&
-        "x" in coordinates[0] &&
-        "y" in coordinates[0]) {
-      xAcc = function (index) {
-        return coordinates[index].x;
-      };
-      yAcc = function (index) {
-        return coordinates[index].y;
-      };
+  /**
+   * Perform a forward transformation (source -> target)
+   * @protected
+   *
+   * @param {object}   point   The point coordinates
+   * @param {number}   point.x The x-coordinate (i.e. longitude)
+   * @param {number}   point.y The y-coordinate (i.e. latitude)
+   * @param {number=0} point.z The z-coordinate (i.e. elevation)
+   *
+   * @returns {object} A point object in the target coordinates
+   */
+  this._forward = function (point) {
+    var pt = m_proj.forward(point);
+    pt.z = point.z || 0;
+    return pt;
+  };
 
-      if ("z" in coordinates[0]) {
-        zAcc = function (index) {
-          return coordinates[index].z;
-        };
-        writer = function (index, x, y, z) {
-          output[i] = {x: x, y: y, z: z};
-        };
-      } else {
-        writer = function (index, x, y) {
-          output[index] = {x: x, y: y};
-        };
-      }
-    } else if (coordinates &&
-        "x" in coordinates && "y" in coordinates) {
-      xAcc = function () {
-        return coordinates.x;
-      };
-      yAcc = function () {
-        return coordinates.y;
-      };
+  /**
+   * Perform an inverse transformation (target -> source)
+   * @protected
+   *
+   * @param {object}   point   The point coordinates
+   * @param {number}   point.x The x-coordinate (i.e. longitude)
+   * @param {number}   point.y The y-coordinate (i.e. latitude)
+   * @param {number=0} point.z The z-coordinate (i.e. elevation)
+   *
+   * @returns {object} A point object in the source coordinates
+   */
+  this._inverse = function (point) {
+    var pt = m_proj.inverse(point);
+    pt.z = point.z || 0;
+    return pt;
+  };
 
-      if ("z" in coordinates) {
-        zAcc = function () {
-          return coordinates.z;
-        };
-        writer = function (index, x, y, z) {
-          output = {x: x, y: y, z: z};
-        };
-      } else {
-        writer = function (index, x, y) {
-          output = {x: x, y: y};
-        };
-      }
-    } else {
-      throw "Invalid coordinates";
+  /**
+   * Perform a forward transformation (source -> target) in place
+   *
+   * @param {object[]}   point   The point coordinates or array of points
+   * @param {number}   point.x The x-coordinate (i.e. longitude)
+   * @param {number}   point.y The y-coordinate (i.e. latitude)
+   * @param {number=0} point.z The z-coordinate (i.e. elevation)
+   *
+   * @returns {object} A point object or array in the target coordinates
+   */
+  this.forward = function (point) {
+    if (Array.isArray(point)) {
+      return point.map(this._forward);
     }
-  }
+    return this._forward(point);
+  };
 
-  if (coordinates instanceof Array) {
-    output = [];
-    output.length = coordinates.length;
-    count = coordinates.length;
-
-    if (coordinates[0] instanceof Array ||
-        coordinates[0] instanceof Object) {
-      offset = 1;
-
-      if (coordinates[0] instanceof Array) {
-        handleArrayCoordinates();
-      } else if (coordinates[0] instanceof Object) {
-        handleObjectCoordinates();
-      }
-    } else {
-      handleArrayCoordinates();
+  /**
+   * Perform an inverse transformation (target -> source) in place
+   * @protected
+   *
+   * @param {object[]}   point   The point coordinates or array of points
+   * @param {number}   point.x The x-coordinate (i.e. longitude)
+   * @param {number}   point.y The y-coordinate (i.e. latitude)
+   * @param {number=0} point.z The z-coordinate (i.e. elevation)
+   *
+   * @returns {object} A point object in the source coordinates
+   */
+  this.inverse = function (point) {
+    if (Array.isArray(point)) {
+      return point.map(this._inverse);
     }
-  } else if (coordinates && coordinates instanceof Object) {
-    count = 1;
-    offset = 1;
-    if (coordinates && "x" in coordinates && "y" in coordinates) {
-      handleObjectCoordinates();
-    } else {
-      throw "Coordinates are not valid";
-    }
-  }
+    return this._inverse(point);
+  };
 
-  if (destGcs === "EPSG:3857" && srcGcs === "EPSG:4326") {
-    for (i = 0; i < count; i += offset) {
-      /// Y goes from 0 (top edge is 85.0511 °N) to 2zoom − 1
-      /// (bottom edge is 85.0511 °S) in a Mercator projection.
-      xCoord = xAcc(i);
-      yCoord = yAcc(i);
-      zCoord = zAcc(i);
+  // Set defaults given by the constructor
+  options = options || {};
+  this.source(options.source);
+  this.target(options.target);
 
-      if (yCoord > 85.0511) {
-        yCoord = 85.0511;
-      }
-      if (yCoord < -85.0511) {
-        yCoord = -85.0511;
-      }
-
-      writer(i, xCoord, geo.mercator.lat2y(yCoord), zCoord);
-    }
-
-    return output;
-  } else {
-    for (i = 0; i < count; i += offset) {
-      projPoint = new proj4.Point(xAcc(i), yAcc(i), zAcc(i));
-      proj4.transform(projSrcGcs, projDestGcs, projPoint);
-      writer(i, projPoint.x, projPoint.y, projPoint.z);
-      return output;
-    }
-  }
+  geo.object.call(this);
+  return this;
 };
+
+inherit(geo.transform, geo.object);
