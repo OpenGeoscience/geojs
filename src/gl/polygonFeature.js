@@ -50,7 +50,7 @@ geo.gl.polygonFeature = function (arg) {
       '  gl_Position = clipPos;',
       '}'
     ].join('\n'),
-    shader = new vgl.shader(gl.VERTEX_SHADER);
+    shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
     shader.setShaderSource(vertexShaderSource);
     return shader;
   }
@@ -66,7 +66,7 @@ geo.gl.polygonFeature = function (arg) {
       '  gl_FragColor = vec4 (fillColorVar, fillOpacityVar);',
       '}'
     ].join('\n'),
-    shader = new vgl.shader(gl.FRAGMENT_SHADER);
+    shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
     shader.setShaderSource(fragmentShaderSource);
     return shader;
   }

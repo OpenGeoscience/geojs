@@ -1,17 +1,15 @@
 #!/usr/bin/env python
 
-import unittest
-
 from selenium_test import FirefoxTest, ChromeTest,\
     setUpModule, tearDownModule
 
 
 class osmBase(object):
     testCase = ('multipleMaps',)
-    testRevision = 1
+    testRevision = 2
 
     def loadPage(self):
-        self.resizeWindow(640, 960)
+        self.resizeWindow(320, 480)
         self.loadURL('multipleMaps/index.html')
         self.wait()
 
@@ -21,12 +19,10 @@ class osmBase(object):
         self.screenshotTest(testName)
 
 
-@unittest.skip("multiple maps support broken")
 class FirefoxOSM(osmBase, FirefoxTest):
     testCase = osmBase.testCase + ('firefox',)
 
 
-@unittest.skip("multiple maps support broken")
 class ChromeOSM(osmBase, ChromeTest):
     testCase = osmBase.testCase + ('chrome',)
 

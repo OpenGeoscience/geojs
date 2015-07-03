@@ -182,13 +182,13 @@ geo.gl.pointFeature = function (arg) {
   fragmentShaderSource = fragmentShaderSource.join("\n");
 
   function createVertexShader() {
-    var shader = new vgl.shader(gl.VERTEX_SHADER);
+    var shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
     shader.setShaderSource(vertexShaderSource);
     return shader;
   }
 
   function createFragmentShader() {
-    var shader = new vgl.shader(gl.FRAGMENT_SHADER);
+    var shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
     shader.setShaderSource(fragmentShaderSource);
     return shader;
   }

@@ -106,6 +106,7 @@
         "actor.js",
         "freezeObject.js",
         "defaultValue.js",
+        "graphicsObject.js",
         "geojsonReader.js",
         "data.js",
         "geomData.js",
@@ -134,7 +135,7 @@
         "picker.js",
         "shapefileReader.js",
         "vtkReader.js",
-        "DataBuffers.js"
+        "dataBuffers.js"
       ]
     }
   }

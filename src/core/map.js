@@ -110,8 +110,9 @@ geo.map = function (arg) {
       screenPosition: direction,
       eventType: geo.event.zoom
     };
+
     if (base) {
-      base.renderer().geoTrigger(geo.event.zoom, evt, true);
+      base.geoTrigger(geo.event.zoom, evt, true);
     }
 
     recenter = evt.center;
@@ -145,6 +146,7 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.pan = function (delta, force) {
+
     var base = m_this.baseLayer(),
         evt, pt, corner1, corner2;
 
@@ -184,7 +186,7 @@ geo.map = function (arg) {
     };
     // first pan the base layer
     if (base) {
-      base.renderer().geoTrigger(geo.event.pan, evt, true);
+      base.geoTrigger(geo.event.pan, evt, true);
     }
 
     // If the base renderer says the pan is invalid, then cancel the action.
@@ -256,13 +258,9 @@ geo.map = function (arg) {
     if (newLayer.referenceLayer() || m_this.children().length === 0) {
       m_this.baseLayer(newLayer);
     }
+
     m_this.addChild(newLayer);
     m_this.modified();
-
-    // TODO: need a better way to set the initial coordinates of a layer
-    if (!newLayer.referenceLayer()) {
-      m_this.center(m_this.center());
-    }
 
     m_this.geoTrigger(geo.event.layerAdd, {
       type: geo.event.layerAdd,
