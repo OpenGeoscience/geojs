@@ -149,7 +149,7 @@ describe('geo.util.clustering', function () {
       }
 
       // a basic performance test, should log somewhere
-      expect(new Date() - start).toBeLessThan(5000);
+      expect(new Date() - start).toBeLessThan(10000);
       done();
     });
   });
