@@ -104,6 +104,10 @@ geo.pointFeature = function (arg) {
     });
     m_clusterTree.clusters(z).forEach(function (d) {
       d.__cluster = true;
+      d.__data = [];
+      d.obj.each(function (e) {
+        d.__data.push(e);
+      });
       data.push(d);
     });
     m_ignoreData = true;

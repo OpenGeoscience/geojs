@@ -76,7 +76,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         this._cellSize = cellSize;
         this._sqCellSize = cellSize * cellSize;
         this._grid = {};
-        this._objectPoint = { };
+        this._objectPoint = {};
     };
 
     geo.util.DistanceGrid.prototype = {
@@ -89,6 +89,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 cell = row[x] = row[x] || [],
                 stamp = L.Util.stamp(obj);
 
+            point.obj = obj;
             this._objectPoint[stamp] = point;
 
             cell.push(obj);
@@ -180,7 +181,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             return closest;
         },
 
-        /* return the values contained */
+        /* return the point coordinates contained in the structure */
         contents: function () {
             return $.map(this._objectPoint, function (val) { return val; });
         },

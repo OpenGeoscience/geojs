@@ -88,10 +88,10 @@
    */
   ClusterTree.prototype.each = function (func) {
     var i;
-    for (i = 0; i <= this._points.length; i += 1) {
+    for (i = 0; i < this._points.length; i += 1) {
       func.call(this, this._points[i], this._zoom);
     }
-    for (i = 0; i <= this._clusters.length; i += 1) {
+    for (i = 0; i < this._clusters.length; i += 1) {
       this._clusters[i].each.call(
         this._clusters[i],
         func
@@ -116,8 +116,8 @@
 
     // add up the contribution from the clusters
     for (i = 0; i < this._clusters.length; i += 1) {
-      center.x += this._clusters[i].coords().x * this._clusters[i]._points.length;
-      center.y += this._clusters[i].coords().y * this._clusters[i]._points.length;
+      center.x += this._clusters[i].coords().x * this._clusters[i].count();
+      center.y += this._clusters[i].coords().y * this._clusters[i].count();
     }
 
     return {
@@ -206,9 +206,6 @@
               break;
             }
           }
-          if (parent._points.length === 1) {
-            $.noop();
-          }
         }
 
         if (!parent) {
@@ -217,14 +214,12 @@
         // create a new cluster with these two points
         newCluster = new ClusterTree(this, zoom, [closest, point]);
         this._clusters[zoom].addObject(newCluster, newCluster.coords());
-        closest._parent = newCluster;
-        point._parent = newCluster;
 
         // create intermediate parent clusters that don't exist
         lastParent = newCluster;
         for (z = zoom - 1; z > parent._zoom; z -= 1) {
           lastParent = new ClusterTree(this, z, [lastParent]);
-          this._clusters[z].addObject(lastParent, closest);
+          this._clusters[z].addObject(lastParent, lastParent.coords());
         }
         parent._add(lastParent);
 
@@ -244,7 +239,6 @@
 
     // otherwise add to the top
     this._topClusterLevel._add(point);
-    // point._parent = this._topClusterLevel;  // Should all points have a parent?
   };
 
   /**
