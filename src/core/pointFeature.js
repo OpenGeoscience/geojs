@@ -71,9 +71,12 @@ geo.pointFeature = function (arg) {
       return;
     }
 
+    // set clustering options to default if an options argument wasn't supplied
+    var opts = m_clustering === true ? {radius: 0.01} : m_clustering;
+
     // generate the cluster tree
     var position = m_this.position();
-    m_clusterTree = new geo.util.ClusterGroup({radius: 0.01});
+    m_clusterTree = new geo.util.ClusterGroup(opts);
     m_allData.forEach(function (d, i) {
       var pt = geo.util.normalizeCoordinates(position(d, i));
       pt.index = i;
