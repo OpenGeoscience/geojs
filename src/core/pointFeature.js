@@ -109,7 +109,7 @@ geo.pointFeature = function (arg) {
       d.__cluster = true;
       d.__data = [];
       d.obj.each(function (e) {
-        d.__data.push(e);
+        d.__data.push(m_allData[e.index]);
       });
       data.push(d);
     });
