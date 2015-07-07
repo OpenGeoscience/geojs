@@ -131,7 +131,7 @@ geo.jsonReader = function (arg) {
       coordinates = coordinates[0];
     }
 
-    // return an array of latlng's for LineString, MultiPoint, etc...
+    // return an array of points for LineString, MultiPoint, etc...
     return coordinates.map(function (c) {
       return {
         x: c[0],

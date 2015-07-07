@@ -46,49 +46,13 @@ describe('osm projection', function () {
   describe('Call and return types', function () {
 
     var obj1, obj2;
-
-    it('gcsToDisplay ( geo.latlng )', function () {
-      obj1 = map.gcsToDisplay(geo.latlng(0, 0));
+    it('gcsToDisplay ( object )', function () {
+      obj1 = map.gcsToDisplay({x: 0, y: 0});
       expect(typeof obj1).toBe('object');
       expect(Number.isFinite(obj1.x)).toBe(true);
       expect(Number.isFinite(obj1.y)).toBe(true);
     });
- 
-    it('gcsToDisplay ( object )', function () {
-      var obj;
-      obj = map.gcsToDisplay({x: 0, y: 0});
-      expect(obj).toEqual(obj1);
-    });
     
-    // currently doesn't work
-    xit('gcsToDisplay ( [geo.latlng] )', function () {
-      var arr;
-      arr = map.gcsToDisplay([geo.latlng(0, 0)]);
-      expect(Array.isArray(arr)).toBe(true);
-      expect(typeof arr[0]).toBe('object');
-      expect(arr[0].x).toBeCloseTo(obj1.x, 6);
-      expect(arr[0].y).toBeCloseTo(obj1.y, 6);
-    });
-    
-    // currently doesn't work
-    xit('gcsToDisplay ( [geo.latlng, ... , geo.latlng] )', function () {
-      var arr = [], N = 10, i;
-
-      for (i = 0; i < N; i += 1) {
-        arr.push(geo.latlng(0, 0));
-      }
-
-      arr = map.gcsToDisplay(arr);
-
-      expect(Array.isArray(arr)).toBe(true);
-
-      for (i = 0; i < N; i += 1) {
-        expect(typeof arr[i]).toBe('object');
-        expect(arr[i].x).toBeCloseTo(obj1.x, 6);
-        expect(arr[i].y).toBeCloseTo(obj1.y, 6);
-      }
-    });
-
     // currently doesn't work
     xit('gcsToDisplay ( [object] )', function () {
       var arr;

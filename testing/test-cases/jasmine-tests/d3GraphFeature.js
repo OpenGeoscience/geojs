@@ -17,10 +17,10 @@ describe("d3 graph feature", function () {
     var selection, nodes;
 
     nodes = [
-      geo.latlng(0, 0),
-      geo.latlng(10, 0),
-      geo.latlng(-10, 0),
-      geo.latlng(10, 10)
+      {y: 0, x: 0},
+      {y: 10, x: 0},
+      {y: -10, x: 0},
+      {y: 10, x: 10}
     ];
 
     nodes[0].children = [nodes[1], nodes[2]];

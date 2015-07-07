@@ -128,15 +128,9 @@ geo.gl.polygonFeature = function (arg) {
           posInstance = posFunc(extRingCoords,
                                 polygonItemCoordIndex,
                                 item, itemIndex);
-          if (posInstance instanceof geo.latlng) {
-            extRing[0].push({
-              x: posInstance.x(), y: posInstance.y(), i: fillColor.length
-            });
-          } else {
-            extRing[0].push({
-              x: posInstance.x, y: posInstance.y, i: fillColor.length
-            });
-          }
+          extRing[0].push({
+            x: posInstance.x, y: posInstance.y, i: fillColor.length
+          });
 
           fillColorInstance = fillColorFunc(extRingCoords,
                                             polygonItemCoordIndex,
@@ -159,15 +153,9 @@ geo.gl.polygonFeature = function (arg) {
         hole.forEach(function (intRingCoords) {
           posInstance = posFunc(intRingCoords, polygonItemCoordIndex,
                                 item, itemIndex);
-          if (posInstance instanceof geo.latlng) {
-            extRing[intIndex + 1].push({
-              x: posInstance.x(), y: posInstance.y(), i: fillColor.length
-            });
-          } else {
-            extRing[intIndex + 1].push({
-              x: posInstance.x, y: posInstance.y, i: fillColor.length
-            });
-          }
+          extRing[intIndex + 1].push({
+            x: posInstance.x, y: posInstance.y, i: fillColor.length
+          });
           fillColorInstance = fillColorFunc(intRingCoords,
                                             polygonItemCoordIndex,
                                             item, itemIndex);

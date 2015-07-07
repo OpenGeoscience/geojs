@@ -15,7 +15,6 @@
         "timestamp.js",
         "ellipsoid.js",
         "mercator.js",
-        "latlng.js",
         "layer.js",
         "featureLayer.js",
         "event.js",

@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Create a plane feature given a lower left corner point geo.latlng
- * and and upper right corner point geo.latlng
+ * Create a plane feature given a lower left corner point
+ * and and upper right corner point
  *
  * *CURRENTLY BROKEN*
  *
@@ -39,11 +39,6 @@ geo.d3.planeFeature = function (arg) {
       return {
         x: pt[0],
         y: pt[1]
-      };
-    } else if (pt instanceof geo.latlng) {
-      return {
-        x: pt.x(),
-        y: pt.y()
       };
     }
     return pt;

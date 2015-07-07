@@ -141,15 +141,9 @@ geo.gl.lineFeature = function (arg) {
       numSegments += lineItem.length - 1;
       for (j = 0; j < lineItem.length; j += 1) {
         pos = posFunc(lineItem[j], j, lineItem, i);
-        if (pos instanceof geo.latlng) {
-          position.push(pos.x());
-          position.push(pos.y());
-          position.push(0.0);
-        } else {
-          position.push(pos.x);
-          position.push(pos.y);
-          position.push(pos.z || 0.0);
-        }
+        position.push(pos.x);
+        position.push(pos.y);
+        position.push(pos.z || 0.0);
       }
     }
 

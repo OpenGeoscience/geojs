@@ -60,14 +60,9 @@ geo.transform.osmTransformFeature = function (destGcs, feature, inplace) {
       throw "Supports Array of 2D and 3D points";
     }
 
-    if (inPos.length > 0 && inPos[0] instanceof geo.latlng) {
-      noOfComponents = 2;
-      pointOffset = 1;
-    } else {
-      noOfComponents = (count % 2 === 0 ? 2 :
-                       (count % 3 === 0 ? 3 : null));
-      pointOffset = noOfComponents;
-    }
+    noOfComponents = (count % 2 === 0 ? 2 :
+                     (count % 3 === 0 ? 3 : null));
+    pointOffset = noOfComponents;
 
     if (noOfComponents !== 2 && noOfComponents !== 3) {
       throw "Transform points require points in 2D or 3D";
@@ -83,11 +78,7 @@ geo.transform.osmTransformFeature = function (destGcs, feature, inplace) {
 
       /// Y goes from 0 (top edge is 85.0511 °N) to 2zoom − 1
       /// (bottom edge is 85.0511 °S) in a Mercator projection.
-      if (inPos[i] instanceof geo.latlng) {
-        yCoord = inPos[i].lat();
-      } else {
-        yCoord = inPos[i + 1];
-      }
+      yCoord = inPos[i + 1];
 
       if (yCoord > 85.0511) {
         yCoord = 85.0511;
@@ -95,11 +86,7 @@ geo.transform.osmTransformFeature = function (destGcs, feature, inplace) {
       if (yCoord < -85.0511) {
         yCoord = -85.0511;
       }
-      if (inPos[i] instanceof geo.latlng) {
-        outPos[i] = geo.latlng(geo.mercator.lat2y(yCoord), outPos[i].lng());
-      } else {
-        outPos[i + 1] = geo.mercator.lat2y(yCoord);
-      }
+      outPos[i + 1] = geo.mercator.lat2y(yCoord);
     }
 
     if (inplace) {
@@ -158,14 +145,9 @@ geo.transform.transformFeature = function (destGcs, feature, inplace) {
       throw "Supports Array of 2D and 3D points";
     }
 
-    if (inPos.length > 0 && inPos[0] instanceof geo.latlng) {
-      noOfComponents = 2;
-      pointOffset = 1;
-    } else {
-      noOfComponents = (count % 2 === 0 ? 2 :
-                       (count % 3 === 0 ? 3 : null));
-      pointOffset = noOfComponents;
-    }
+    noOfComponents = (count % 2 === 0 ? 2 :
+                     (count % 3 === 0 ? 3 : null));
+    pointOffset = noOfComponents;
 
     if (noOfComponents !== 2 && noOfComponents !== 3) {
       throw "Transform points require points in 2D or 3D";
@@ -260,7 +242,7 @@ geo.transform.transformLayer = function (destGcs, layer, baseLayer) {
  * @param {string} srcGcs GCS of the coordinates
  * @param {string} destGcs Desired GCS of the transformed coordinates
  * @param {object} coordinates
- * @return {geo.latlng|geo.latlng[]} Transformed coordinates
+ * @return {object|object[]} Transformed coordinates
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.transform.transformCoordinates = function (srcGcs, destGcs, coordinates,
@@ -284,31 +266,6 @@ geo.transform.transformCoordinates = function (srcGcs, destGcs, coordinates,
   /// TODO: Can we check for EPSG code?
   if (!destGcs || !srcGcs) {
     throw "Invalid source or destination GCS";
-  }
-
-  /// Helper methods
-  function handleLatLngCoordinates() {
-    if (coordinates[0] && coordinates[0] instanceof geo.latlng) {
-      xAcc = function (index) {
-        return coordinates[index].x();
-      };
-      yAcc = function (index) {
-        return coordinates[index].y();
-      };
-      writer = function (index, x, y) {
-        output[index] = geo.latlng(y, x);
-      };
-    } else {
-      xAcc = function () {
-        return coordinates.x();
-      };
-      yAcc = function () {
-        return coordinates.y();
-      };
-      writer = function (index, x, y) {
-        output = geo.latlng(y, x);
-      };
-    }
   }
 
   /// Helper methods
@@ -461,14 +418,11 @@ geo.transform.transformCoordinates = function (srcGcs, destGcs, coordinates,
     count = coordinates.length;
 
     if (coordinates[0] instanceof Array ||
-        coordinates[0] instanceof geo.latlng ||
         coordinates[0] instanceof Object) {
       offset = 1;
 
       if (coordinates[0] instanceof Array) {
         handleArrayCoordinates();
-      } else if (coordinates[0] instanceof geo.latlng) {
-        handleLatLngCoordinates();
       } else if (coordinates[0] instanceof Object) {
         handleObjectCoordinates();
       }
@@ -478,9 +432,7 @@ geo.transform.transformCoordinates = function (srcGcs, destGcs, coordinates,
   } else if (coordinates && coordinates instanceof Object) {
     count = 1;
     offset = 1;
-    if (coordinates instanceof geo.latlng) {
-      handleLatLngCoordinates();
-    } else if (coordinates && "x" in coordinates && "y" in coordinates) {
+    if (coordinates && "x" in coordinates && "y" in coordinates) {
       handleObjectCoordinates();
     } else {
       throw "Coordinates are not valid";

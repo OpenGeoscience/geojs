@@ -177,15 +177,12 @@ geo.osmLayer = function (arg) {
    * @param {*} input
    * Input can be of following types:
    *
-   *   1. geo.latlng
-   *   2. [geo.latlng]
    *   3. [x1,y1, x2, y2]
    *   4. [[x,y]]
    *   5. {x:val: y:val, z:val},
    *   6. [{x:val: y:val}]
    *
-   * returns geo.latlng, [geo.latlng], or {x:lon, y:lat}, [{x:lon, y:lat}]
-   * [x1,y1, x2, y2], [[x,y]]
+   * returns {x:lon, y:lat}, [{x:lon, y:lat}], [x1,y1, x2, y2], [[x,y]]
    */
   ////////////////////////////////////////////////////////////////////////////
   this.toLocal = function (input) {
@@ -196,13 +193,7 @@ geo.osmLayer = function (arg) {
       output = [];
       output.length = input.length;
 
-      /// Input is array of geo.latlng
-      if (input[0] instanceof geo.latlng) {
-        for (i = 0; i < input.length; i += 1) {
-          output[i] = geo.latlng(input[i]);
-          output[i].lat(geo.mercator.lat2y(output[i].lat()));
-        }
-      } else if (input[0] instanceof Array) {
+      if (input[0] instanceof Array) {
         delta = input % 3 === 0 ? 3 : 2;
 
         if (delta === 2) {
@@ -230,10 +221,6 @@ geo.osmLayer = function (arg) {
         output = input.slice(0);
         output[1] = geo.mercator.lat2y(input[1]);
       }
-    } else if (input instanceof geo.latlng) {
-      output = {};
-      output.x = input.x();
-      output.y = geo.mercator.lat2y(input.y());
     } else {
       output = {};
       output.x = input.x;
