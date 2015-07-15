@@ -9,7 +9,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.map = function (arg) {
-  "use strict";
+  'use strict';
   if (!(this instanceof geo.map)) {
     return new geo.map(arg);
   }
@@ -30,8 +30,8 @@ geo.map = function (arg) {
       m_node = $(arg.node),
       m_width = arg.width || m_node.width(),
       m_height = arg.height || m_node.height(),
-      m_gcs = arg.gcs === undefined ? "EPSG:4326" : arg.gcs,
-      m_uigcs = arg.uigcs === undefined ? "EPSG:4326" : arg.uigcs,
+      m_gcs = arg.gcs === undefined ? 'EPSG:4326' : arg.gcs,
+      m_uigcs = arg.uigcs === undefined ? 'EPSG:4326' : arg.uigcs,
       m_center = { x: 0, y: 0 },
       m_zoom = arg.zoom === undefined ? 1 : arg.zoom,
       m_baseLayer = null,
@@ -41,6 +41,8 @@ geo.map = function (arg) {
       m_transition = null,
       m_queuedTransition = null,
       m_clock = null,
+      m_parallelProjection = arg.parallelProjection ? true : false,
+      m_discreteZoom = arg.discreteZoom ? true : false,
       m_bounds = {};
 
   arg.center = geo.util.normalizeCoordinates(arg.center);
@@ -91,12 +93,27 @@ geo.map = function (arg) {
    * @returns {Number|geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.zoom = function (val, direction) {
+  this.zoom = function (val, direction, ignoreDiscreteZoom) {
     var base, evt, recenter = false;
     if (val === undefined) {
       return m_zoom;
     }
 
+    /* The ignoreDiscreteZoom flag is intended to allow non-integer zoom values
+     * during animation. */
+    if (m_discreteZoom && val !== Math.round(val) && !ignoreDiscreteZoom) {
+      /* If we are using discrete zoom levels and the value we were given is
+       * not an integer, then try to detect if we are enlarging or shrinking
+       * and perform the expected behavior.  Otherwise, make sure we are at an
+       * integer level.  We may need to revisit for touch zoom events. */
+      if (m_zoom !== Math.round(m_zoom) || Math.abs(val - m_zoom) < 0.01) {
+        val = Math.round(m_zoom);
+      } else if (val < m_zoom) {
+        val = Math.min(Math.round(val), m_zoom - 1);
+      } else if (val > m_zoom) {
+        val = Math.max(Math.round(val), m_zoom + 1);
+      }
+    }
     val = Math.min(m_validZoomRange.max, Math.max(val, m_validZoomRange.min));
     if (val === m_zoom) {
       return m_this;
@@ -239,6 +256,35 @@ geo.map = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Get/Set parallel projection setting of the map
+   *
+   * @returns {Boolean|geo.map}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.parallelProjection = function (val) {
+    if (val === undefined) {
+      return m_parallelProjection;
+    }
+    val = val ? true : false;
+    if (m_parallelProjection !== val) {
+      var base, evt = {
+        eventType: geo.event.parallelprojection,
+        parallelProjection: val
+      };
+
+      m_parallelProjection = val;
+      base = m_this.baseLayer();
+      base.geoTrigger(geo.event.parallelprojection, evt, true);
+      m_this.children().forEach(function (child) {
+        child.geoTrigger(geo.event.parallelprojection, evt, true);
+      });
+      m_this.modified();
+    }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Add layer to the map
    *
    * @param {geo.layer} layer to be added to the map
@@ -246,6 +292,8 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.createLayer = function (layerName, arg) {
+    arg = arg || {};
+    arg.parallelProjection = m_parallelProjection;
     var newLayer = geo.createLayer(
       layerName, m_this, arg);
 
@@ -381,7 +429,7 @@ geo.map = function (arg) {
       output = m_baseLayer.renderer().worldToDisplay(world);
     } else {
       /// Everything else
-      throw "Conversion method latLonToDisplay does not handle " + input;
+      throw 'Conversion method latLonToDisplay does not handle ' + input;
     }
 
     return output;
@@ -401,7 +449,7 @@ geo.map = function (arg) {
       output = m_baseLayer.renderer().displayToWorld(input);
       output = m_baseLayer.fromLocal(output);
     } else {
-      throw "Conversion method displayToGcs does not handle " + input;
+      throw 'Conversion method displayToGcs does not handle ' + input;
     }
     return output;
   };
@@ -503,9 +551,9 @@ geo.map = function (arg) {
     if (!layer) {
       renderer = opts.renderer;
       if (!renderer) {
-        renderer = "d3";
+        renderer = 'd3';
       }
-      layer = m_this.createLayer("feature", {renderer: renderer});
+      layer = m_this.createLayer('feature', {renderer: renderer});
     }
     opts.layer = layer;
     opts.renderer = renderer;
@@ -522,7 +570,7 @@ geo.map = function (arg) {
     var i;
 
     if (m_node === undefined || m_node === null) {
-      throw "Map require DIV node";
+      throw 'Map require DIV node';
     }
 
     if (arg !== undefined && arg.layers !== undefined) {
@@ -564,24 +612,24 @@ geo.map = function (arg) {
       m_this.interactor().destroy();
       m_this.interactor(null);
     }
-    m_this.node().off(".geo");
-    $(window).off("resize", resizeSelf);
+    m_this.node().off('.geo');
+    $(window).off('resize', resizeSelf);
     s_exit();
   };
 
   this._init(arg);
 
   // set up drag/drop handling
-  this.node().on("dragover.geo", function (e) {
+  this.node().on('dragover.geo', function (e) {
     var evt = e.originalEvent;
 
     if (m_this.fileReader()) {
       evt.stopPropagation();
       evt.preventDefault();
-      evt.dataTransfer.dropEffect = "copy";
+      evt.dataTransfer.dropEffect = 'copy';
     }
   })
-  .on("drop.geo", function (e) {
+  .on('drop.geo', function (e) {
     var evt = e.originalEvent, reader = m_this.fileReader(),
         i, file;
 
@@ -701,10 +749,10 @@ geo.map = function (arg) {
 
     // Transform zoom level into z-coordinate and inverse
     function zoom2z(z) {
-      return 360 * Math.pow(2, -1 - z);
+      return vgl.zoomToHeight(z + 1, m_width, m_height);
     }
     function z2zoom(z) {
-      return -1 - Math.log2(z / 360);
+      return vgl.heightToZoom(z, m_width, m_height) - 1;
     }
 
     var defaultOpts = {
@@ -731,7 +779,7 @@ geo.map = function (arg) {
       },
       end: {
         center: defaultOpts.center,
-        zoom: defaultOpts.zoom
+        zoom: m_discreteZoom ? Math.round(defaultOpts.zoom) : defaultOpts.zoom
       },
       ease: defaultOpts.ease,
       zCoord: defaultOpts.zCoord,
@@ -810,7 +858,7 @@ geo.map = function (arg) {
         x: p[0],
         y: p[1]
       });
-      m_this.zoom(p[2]);
+      m_this.zoom(p[2], undefined, true);
 
       window.requestAnimationFrame(anim);
     }
@@ -885,11 +933,11 @@ geo.map = function (arg) {
    * Get the center zoom level necessary to display the given lat/lon bounds.
    *
    * @param {geo.geoBounds} [bds] The requested map bounds
-   * @return {object} Object containing keys "center" and "zoom"
+   * @return {object} Object containing keys 'center' and 'zoom'
    */
   ////////////////////////////////////////////////////////////////////////////
   this.zoomAndCenterFromBounds = function (bds) {
-    var ll, ur, dx, dy, zx, zy, center;
+    var ll, ur, dx, dy, zx, zy, center, zoom;
 
     // Caveat:
     // Much of the following is invalid for alternative map projections.  These
@@ -901,7 +949,7 @@ geo.map = function (arg) {
     ur = geo.util.normalizeCoordinates(bds.upperRight || {});
 
     if (ll.x >= ur.x || ll.y >= ur.y) {
-      throw new Error("Invalid bounds provided");
+      throw new Error('Invalid bounds provided');
     }
 
     center = {
@@ -916,11 +964,38 @@ geo.map = function (arg) {
     // calculate the zoom levels necessary to fit x and y bounds
     zx = m_zoom - Math.log2((ur.x - ll.x) / dx);
     zy = m_zoom - Math.log2((ur.y - ll.y) / dy);
+    zoom = Math.min(zx, zy);
+    if (m_discreteZoom) {
+      zoom = Math.floor(zoom);
+    }
 
     return {
-      zoom: Math.min(zx, zy),
+      zoom: zoom,
       center: center
     };
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/set the discrete zoom flag.
+   *
+   * @param {bool} If specified, the discrete zoom flag.
+   * @return {bool} The current discrete zoom flag if no parameter is
+   *                specified, otherwise the map object.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.discreteZoom = function (discreteZoom) {
+    if (discreteZoom === undefined) {
+      return m_discreteZoom;
+    }
+    discreteZoom = discreteZoom ? true : false;
+    if (m_discreteZoom !== discreteZoom) {
+      m_discreteZoom = discreteZoom;
+      if (m_discreteZoom) {
+        m_this.zoom(Math.round(m_this.zoom()));
+      }
+    }
+    return m_this;
   };
 
   this.interactor(arg.interactor || geo.mapInteractor());
@@ -954,12 +1029,12 @@ geo.map = function (arg) {
  * @returns {geo.map|null}
  */
 geo.map.create = function (spec) {
-  "use strict";
+  'use strict';
 
   var map = geo.map(spec);
 
   if (!map) {
-    console.warn("Could not create map.");
+    console.warn('Could not create map.');
     return null;
   }
 
