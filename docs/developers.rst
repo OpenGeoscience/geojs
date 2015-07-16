@@ -2,6 +2,11 @@
 Developer's guide
 =================
 
+.. note::
+
+    This guide assumes you have cloned and built the geojs repository
+    according to the :ref:`Quick start guide <project-setup-guide>`.
+
 The testing infrastructure of Geojs is run via CTest, it assumes
 that the testing "server" is started prior to execution.  To start the
 server, just run ::
@@ -53,8 +58,9 @@ starting up a test server ::
 
     grunt serve-test
 
-and navigating to `<http://localhost:50100/test/phantomjs>`_ in your
-browser.
+and navigating to a test case in your browser.  For example, the test defined at
+``testing/test-cases/phantomjs-tests/object.js`` can be run by browsing to
+`<http://localhost:50100/test/phantomjs/object.html>`_.
 
 For tests that require webgl, there is a similar framework for running
 Jasmine unittests inside selenium.  For these cases, you can add your
