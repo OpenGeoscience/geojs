@@ -11,17 +11,28 @@ The testing infrastructure of Geojs is run via CTest, it assumes
 that the testing "server" is started prior to execution.  To start the
 server, just run ::
 
-    grunt serve-test
+    grunt default serve-test
 
 This will start a server on the default port of ``50100``.  The port
 and selenium host names are configurable with cmake.  For example inside
 the Kitware firewall, you can run the following to test on the selenium
 node on ``garant`` ::
 
-    cmake -DSELENIUM_TESTS=ON -DCHROME_TESTS=ON -DSELENIUM_HOST=garant ..
+    cmake -DSELENIUM_TESTS=ON -DSELENIUM_HOST=garant /path/to/geojs
+    make
+    ctest -VV
 
 You may need to also set the variable ``TESTING_HOST`` to your computer's
 IP address reachable by the selenium node.
+
+.. note::
+
+    Typically, CMake is used to build outside of the source tree.  This
+    means you would create a new directory somewhare and point cmake
+    to the geojs source directory.  You may need to rerun ``cmake``, ``make``,
+    and ``grunt`` after making changes to your code for everything to
+    build correctly.  Try running ``ccmake /path/to/geojs`` for a full
+    list of configuration options.
 
 Geojs employs several different frameworks for unit testing.  These
 frameworks have been designed to make it easy for developers to
