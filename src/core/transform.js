@@ -24,7 +24,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 geo.transform = function (options) {
-  "use strict";
+  'use strict';
   if (!(this instanceof geo.transform)) {
     return new geo.transform(options);
   }
@@ -73,10 +73,10 @@ geo.transform = function (options) {
    * Perform a forward transformation (source -> target)
    * @protected
    *
-   * @param {object}   point   The point coordinates
-   * @param {number}   point.x The x-coordinate (i.e. longitude)
-   * @param {number}   point.y The y-coordinate (i.e. latitude)
-   * @param {number=0} point.z The z-coordinate (i.e. elevation)
+   * @param {object}   point      The point coordinates
+   * @param {number}   point.x    The x-coordinate (i.e. longitude)
+   * @param {number}   point.y    The y-coordinate (i.e. latitude)
+   * @param {number}  [point.z=0] The z-coordinate (i.e. elevation)
    *
    * @returns {object} A point object in the target coordinates
    */
@@ -90,10 +90,10 @@ geo.transform = function (options) {
    * Perform an inverse transformation (target -> source)
    * @protected
    *
-   * @param {object}   point   The point coordinates
-   * @param {number}   point.x The x-coordinate (i.e. longitude)
-   * @param {number}   point.y The y-coordinate (i.e. latitude)
-   * @param {number=0} point.z The z-coordinate (i.e. elevation)
+   * @param {object}   point     The point coordinates
+   * @param {number}   point.x   The x-coordinate (i.e. longitude)
+   * @param {number}   point.y   The y-coordinate (i.e. latitude)
+   * @param {number}  [point.z=] The z-coordinate (i.e. elevation)
    *
    * @returns {object} A point object in the source coordinates
    */
@@ -106,10 +106,10 @@ geo.transform = function (options) {
   /**
    * Perform a forward transformation (source -> target) in place
    *
-   * @param {object[]}   point   The point coordinates or array of points
-   * @param {number}   point.x The x-coordinate (i.e. longitude)
-   * @param {number}   point.y The y-coordinate (i.e. latitude)
-   * @param {number=0} point.z The z-coordinate (i.e. elevation)
+   * @param {object[]} point      The point coordinates or array of points
+   * @param {number}   point.x    The x-coordinate (i.e. longitude)
+   * @param {number}   point.y    The y-coordinate (i.e. latitude)
+   * @param {number}  [point.z=0] The z-coordinate (i.e. elevation)
    *
    * @returns {object} A point object or array in the target coordinates
    */
@@ -124,10 +124,10 @@ geo.transform = function (options) {
    * Perform an inverse transformation (target -> source) in place
    * @protected
    *
-   * @param {object[]}   point   The point coordinates or array of points
-   * @param {number}   point.x The x-coordinate (i.e. longitude)
-   * @param {number}   point.y The y-coordinate (i.e. latitude)
-   * @param {number=0} point.z The z-coordinate (i.e. elevation)
+   * @param {object[]} point      The point coordinates or array of points
+   * @param {number}   point.x    The x-coordinate (i.e. longitude)
+   * @param {number}   point.y    The y-coordinate (i.e. latitude)
+   * @param {number}  [point.z=0] The z-coordinate (i.e. elevation)
    *
    * @returns {object} A point object in the source coordinates
    */

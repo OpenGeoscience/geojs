@@ -2,6 +2,8 @@
 
 /*global describe, it, expect, geo*/
 describe('geo.transform', function () {
+  'use strict';
+
   function r2(pt1, pt2) {
     // euclidean norm
     var dx = pt1.x - pt2.x,
@@ -53,11 +55,11 @@ describe('geo.transform', function () {
           expect(r2(d[0], c[i])).toBeLessThan(src_unit);
         });
       });
-    })
+    });
   }
 
   test_transform(
-    'EPSG:4326', 1e-4, 'EPSG:3857', 10, 
+    'EPSG:4326', 1e-4, 'EPSG:3857', 10,
     [
       [{x: 0, y: 0}, {x: 0, y: 0}],
       [{x: 90, y: 45}, {x: 10018754, y: 5621521}],
@@ -66,9 +68,9 @@ describe('geo.transform', function () {
       [{x: 15, y: -85}, {x: 1669792, y: -19971868}]
     ]
   );
-  
+
   test_transform(
-    'EPSG:4326', 1e-6, 'EPSG:4326', 1e-6, 
+    'EPSG:4326', 1e-6, 'EPSG:4326', 1e-6,
     [
       [{x: 0, y: 0}, {x: 0, y: 0}],
       [{x: 90, y: 45}, {x: 90, y: 45}],
@@ -77,9 +79,9 @@ describe('geo.transform', function () {
       [{x: 15, y: -85}, {x: 15, y: -85}]
     ]
   );
-  
+
   test_transform(
-    'EPSG:3857', 1, 'EPSG:3857', 1, 
+    'EPSG:3857', 1, 'EPSG:3857', 1,
     [
       [{x: 0, y: 0}, {x: 0, y: 0}],
       [{x: 10018754, y: 5621521}, {x: 10018754, y: 5621521}],
