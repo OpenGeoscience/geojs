@@ -1,3 +1,5 @@
+.. _project-setup-guide:
+
 =================
 Quick start guide
 =================
