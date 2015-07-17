@@ -248,7 +248,13 @@ module.exports = function (grunt) {
           'Gruntfile.js',
           'sources.json'
         ],
-        tasks: ['clean:source', 'template', 'copy', 'docs', 'uglify:geojs']
+        tasks: [
+          'clean:source',
+          'template',
+          'copy',
+          'concat:geojs',
+          'uglify:geojs'
+        ]
       },
       examples: {
         files: [
