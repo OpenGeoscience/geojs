@@ -1,4 +1,4 @@
-/* global module, require */
+/* global module, require, process */
 
 module.exports = function (grunt) {
   'use strict';
@@ -56,6 +56,8 @@ module.exports = function (grunt) {
   };
 
   grunt.config.init({
+    env: grunt.option('env') || process.env.GRUNT_ENV || 'development',
+
     pkg: pkg,
 
     template: {
@@ -297,6 +299,13 @@ module.exports = function (grunt) {
       var dir = path.dirname(ex);
       var exname = path.basename(dir);
       var data = grunt.file.readJSON(ex);
+
+      // Use geo.js unless using the production environment.
+      var geolib = '../../built/geo.js';
+      if (grunt.config('env') === 'production') {
+        geolib = '../../built/geo.min.js';
+      }
+
       if (data.exampleJs.length) {
         data.docHTML = path.join(
           'doc',
@@ -321,7 +330,7 @@ module.exports = function (grunt) {
             ];
             data.defaultJs = [
               '../../built/geo.ext.min.js',
-              '../../built/geo.min.js',
+              geolib,
               '../common/js/bootstrap.min.js',
               '../common/js/examples.js'
             ];
