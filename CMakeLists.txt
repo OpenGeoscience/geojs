@@ -308,7 +308,11 @@ if(${JS_HINT_TESTS})
     WORKING_DIRECTORY "${GEOJS_DEPLOY_DIR}"
     COMMAND "${JSHINT_EXECUTABLE}" "--exclude" "src/vgl" "src"
   )
-
+  add_test(
+    NAME "jshint-gruntfile"
+    WORKING_DIRECTORY "${GEOJS_DEPLOY_DIR}"
+    COMMAND "${JSHINT_EXECUTABLE}" "Gruntfile.js"
+  )
 endif() # JS_HINT_TESTS
 
 if(${JSCS_TESTS})
@@ -322,6 +326,11 @@ if(${JSCS_TESTS})
     NAME "jscs"
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     COMMAND "${JSCS_EXECUTABLE}" "src"
+  )
+  add_test(
+    NAME "jscs-gruntfile"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    COMMAND "${JSCS_EXECUTABLE}" "Gruntfile.js"
   )
 
 endif() # JSCS_TESTS

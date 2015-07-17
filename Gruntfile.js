@@ -259,8 +259,8 @@ module.exports = function (grunt) {
     },
 
     clean: {
-      source: [ 'dist/src', 'src/core/version.js' ],
-      all: [ 'dist', 'src/core/version.js' ]
+      source: ['dist/src', 'src/core/version.js'],
+      all: ['dist', 'src/core/version.js']
     },
 
     express: {
@@ -274,7 +274,7 @@ module.exports = function (grunt) {
 
     jade: {
       options: {
-        pretty: true,
+        pretty: true
       }
     }
   });
