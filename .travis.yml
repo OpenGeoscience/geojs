@@ -15,8 +15,8 @@ script:
     - git submodule init
     - git submodule update
     - npm install
-    - grunt default docs
-    - grunt serve-test &
+    - ./node_modules/.bin/grunt default docs
+    - ./node_modules/.bin/grunt serve-test &
     - sleep 1
     - mkdir _build
     - cd _build

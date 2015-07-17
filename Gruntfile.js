@@ -3,6 +3,14 @@
 module.exports = function (grunt) {
   'use strict';
 
+  /* first check that vgl is checked out */
+  if (!grunt.file.exists('vgl/package.json')) {
+    grunt.fail.fatal(
+      'The vgl submodule not checked out.\n'  +
+      'Please run "git submodule update --init" first.'
+    );
+  }
+
   var sources, geojsVersion, vgl, geo, port, sourceList, templateData, pkg;
 
   pkg = grunt.file.readJSON('package.json');
