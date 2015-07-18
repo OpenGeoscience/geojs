@@ -93,7 +93,7 @@ geo.transform = function (options) {
    * @param {object}   point     The point coordinates
    * @param {number}   point.x   The x-coordinate (i.e. longitude)
    * @param {number}   point.y   The y-coordinate (i.e. latitude)
-   * @param {number}  [point.z=] The z-coordinate (i.e. elevation)
+   * @param {number}  [point.z=0] The z-coordinate (i.e. elevation)
    *
    * @returns {object} A point object in the source coordinates
    */
@@ -145,6 +145,27 @@ geo.transform = function (options) {
 
   geo.object.call(this);
   return this;
+};
+
+/**
+ * Transform an array of coordinates from one projection into
+ * another.  The transformation will occur in place (modifying
+ * the input coordinate array).
+ *
+ * @param {string}        srcPrj  The source projection
+ * @param {string}        tgtPrj The destination projection
+ * @param {geoPosition[]} coords   An array of coordinate objects
+ *
+ * @returns {geoPosition[]} The transformed coordinates
+ */
+geo.transform.transformCoordinates = function (srcPrj, tgtPrj, coords) {
+  'use strict';
+
+  var i, trans = geo.transform({source: srcPrj, target: tgtPrj});
+  for (i = 0; i < coords.length; i += 1) {
+    coords[i] = trans.forward(coords[i]);
+  }
+  return coords;
 };
 
 inherit(geo.transform, geo.object);
