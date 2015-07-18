@@ -1,7 +1,15 @@
-/* global module, require */
+/* global module, require, process */
 
 module.exports = function (grunt) {
   'use strict';
+
+  /* first check that vgl is checked out */
+  if (!grunt.file.exists('vgl/package.json')) {
+    grunt.fail.fatal(
+      'The vgl submodule not checked out.\n'  +
+      'Please run "git submodule update --init" first.'
+    );
+  }
 
   var sources, geojsVersion, vgl, geo, port, sourceList, templateData, pkg;
 
@@ -56,6 +64,8 @@ module.exports = function (grunt) {
   };
 
   grunt.config.init({
+    env: grunt.option('env') || process.env.GRUNT_ENV || 'development',
+
     pkg: pkg,
 
     template: {
@@ -259,8 +269,8 @@ module.exports = function (grunt) {
     },
 
     clean: {
-      source: [ 'dist/src', 'src/core/version.js' ],
-      all: [ 'dist', 'src/core/version.js' ]
+      source: ['dist/src', 'src/core/version.js'],
+      all: ['dist', 'src/core/version.js']
     },
 
     express: {
@@ -274,7 +284,7 @@ module.exports = function (grunt) {
 
     jade: {
       options: {
-        pretty: true,
+        pretty: true
       }
     }
   });
@@ -297,6 +307,13 @@ module.exports = function (grunt) {
       var dir = path.dirname(ex);
       var exname = path.basename(dir);
       var data = grunt.file.readJSON(ex);
+
+      // Use geo.js unless using the production environment.
+      var geolib = '../../built/geo.js';
+      if (grunt.config('env') === 'production') {
+        geolib = '../../built/geo.min.js';
+      }
+
       if (data.exampleJs.length) {
         data.docHTML = path.join(
           'doc',
@@ -321,7 +338,7 @@ module.exports = function (grunt) {
             ];
             data.defaultJs = [
               '../../built/geo.ext.min.js',
-              '../../built/geo.min.js',
+              geolib,
               '../common/js/bootstrap.min.js',
               '../common/js/examples.js'
             ];
