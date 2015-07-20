@@ -42,7 +42,9 @@
       "prefix": "src/util",
       "files": [
         "init.js",
-        "wigglemaps.js"
+        "wigglemaps.js",
+        "leaflet.js",
+        "clustering.js"
       ]
     },
     "geo.gl": {
