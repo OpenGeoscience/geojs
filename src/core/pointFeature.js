@@ -67,21 +67,27 @@ geo.pointFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._clusterData = function () {
     if (!m_clustering) {
-      // no op
+      // clustering is not enabled, so this is a no-op
       return;
     }
 
     // set clustering options to default if an options argument wasn't supplied
     var opts = m_clustering === true ? {radius: 0.01} : m_clustering;
 
-    // generate the cluster tree
+    // generate the cluster tree from the raw data
     var position = m_this.position();
     m_clusterTree = new geo.util.ClusterGroup(opts);
+
     m_allData.forEach(function (d, i) {
+
+      // for each point in the data set normalize the coordinate
+      // representation and add the point to the cluster treee
       var pt = geo.util.normalizeCoordinates(position(d, i));
       pt.index = i;
       m_clusterTree.addPoint(pt);
     });
+
+    // reset the last zoom state and trigger a redraw at the current zoom level
     m_lastZoom = null;
     m_this._handleZoom(m_this.layer().map().zoom());
   };
@@ -94,25 +100,36 @@ geo.pointFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._handleZoom = function (zoom) {
-    var z = Math.floor(zoom); // get the integer level
+    // get the current zoom level rounded down
+    var z = Math.floor(zoom);
+
     if (!m_clustering || z === m_lastZoom) {
       // short cut when there is nothing to do
       return;
     }
 
+    // store the current zoom level privately
     m_lastZoom = z;
 
+    // get the raw data elements for the points at the current level
     var data = m_clusterTree.points(z).map(function (d) {
       return m_allData[d.index];
     });
+
+    // append the clusters at the current level
     m_clusterTree.clusters(z).forEach(function (d) {
+      // mark the datum as a cluster for accessor methods
       d.__cluster = true;
+
+      // store all of the data objects for each point in the cluster as __data
       d.__data = [];
       d.obj.each(function (e) {
         d.__data.push(m_allData[e.index]);
       });
       data.push(d);
     });
+
+    // prevent recomputing the clustering and set the new data array
     m_ignoreData = true;
     m_this.data(data);
     m_this.layer().map().draw(); // replace with m_this.draw() when gl is fixed
