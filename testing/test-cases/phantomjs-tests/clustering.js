@@ -134,7 +134,8 @@ describe('geo.util.clustering', function () {
       var table = processCSVData(data);
       var start = new Date();
       var i;
-      for (i = 0; i < table.length; i += 1) {
+      // only parse the first 10000 entries
+      for (i = 0; i < 10000; i += 1) {
         if (table[i][2] !== undefined) {
           var lat = table[i][2];
           lat = lat.replace(/(^\s+|\s+$|^\"|\"$)/g, '');
