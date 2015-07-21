@@ -106,6 +106,9 @@ geo.jsonReader = function (arg) {
     if (geometry.type === 'Polygon') {
       return 'polygon';
     }
+    if (geometry.type === 'MultiPolygon') {
+      return 'multipolygon';
+    }
     return null;
   };
 
@@ -184,6 +187,28 @@ geo.jsonReader = function (arg) {
               [coordinates],
               style,
               feature.properties
+            ));
+          } else if (type === 'multipolygon') {
+            style.fill = style.fill === undefined ? true : style.fill;
+            style.fillOpacity = (
+              style.fillOpacity === undefined ? 0.25 : style.fillOpacity
+            );
+
+            coordinates = feature.geometry.coordinates.map(function (c) {
+              return c[0].map(function (el) {
+                return {
+                  x: el[0],
+                  y: el[1],
+                  z: el[2]
+                };
+              });
+            });
+
+            allFeatures.push(m_this._addFeature(
+                'line',
+                coordinates,
+                style,
+                feature.properties
             ));
           }
         } else {
