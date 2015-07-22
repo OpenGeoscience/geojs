@@ -253,10 +253,14 @@ geo.gl.vglRenderer = function (arg) {
     var vglRenderer = m_this.contextRenderer(),
         map = m_this.layer().map(),
         camera = vglRenderer.camera(),
+        baseLayer = null,
+        baseContextRenderer = null,
+        baseCamera = null,
         renderWindow = m_viewer.renderWindow(),
         layer = m_this.layer(),
         focusPoint = null,
         position = null,
+        focalPoint = null,
         newZ = null,
         centerDisplay = null,
         centerGeo = null,
@@ -292,20 +296,22 @@ geo.gl.vglRenderer = function (arg) {
     // Assuming that baselayer will be a GL layer
     var baseLayer = m_this.layer().map().baseLayer();
     if (baseLayer && baseLayer !== m_this.layer() && typeof baseLayer !== "undefined") {
-      var contextRenderer = baseLayer.renderer().contextRenderer();
-      var camera2 = contextRenderer.camera();
-      position = camera2.position();
-      var focalPoint = camera2.focalPoint();
-      console.log("base layer is defined");
-      console.log("new position ", position);
+      baseContextRenderer = baseLayer.renderer().contextRenderer();
+      baseCamera = baseContextRenderer.camera();
+      position = baseCamera.position();
+      focalPoint = baseCamera.focalPoint();
+      // console.log("map center ", geo.util.normalizeCoordinates(m_this.layer().map().center()));
+      // console.log("base layer is defined");
+      // console.log("new position ", position);
       camera.setPosition(position[0], position[1], position[2]);
       camera.setFocalPoint(focalPoint[0], focalPoint[1], focalPoint[2]);
     }
     else {
       mapCenter = geo.util.normalizeCoordinates(m_this.layer().map().center());
-      console.log("map center", mapCenter);
-      camera.setPosition(mapCenter.x, mapCenter.y, 360 * Math.pow(2, -map.zoom()));
-      camera.setFocalPoint(mapCenter.x, mapCenter.y, 0.0);
+      // console.log("map center", mapCenter);
+      focalPoint = camera.focalPoint();
+      camera.setPosition(mapCenter.x, mapCenter.y, newZ);
+      camera.setFocalPoint(mapCenter.x, mapCenter.y, focalPoint[2]);
     }
 
 
