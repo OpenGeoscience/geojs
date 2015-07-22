@@ -200,7 +200,9 @@ geo.map = function (arg) {
     m_this._updateBounds();
 
     m_this.children().forEach(function (child) {
-      child.geoTrigger(geo.event.pan, evt, true);
+      if (child !== base) {
+        child.geoTrigger(geo.event.pan, evt, true);
+      }
     });
 
     m_this.modified();
@@ -853,6 +855,8 @@ geo.map = function (arg) {
       x: m_width,
       y: 0
     });
+
+    console.log("bounds ", m_bounds);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -868,6 +872,8 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.bounds = function (bds) {
+    console.log("Calling bounds");
+
     var nav;
 
     if (bds === undefined) {
@@ -877,6 +883,8 @@ geo.map = function (arg) {
     nav = m_this.zoomAndCenterFromBounds(bds);
     m_this.zoom(nav.zoom);
     m_this.center(nav.center);
+
+    console.log("bounds center is ", nav.center);
     return m_bounds;
   };
 

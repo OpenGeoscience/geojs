@@ -288,41 +288,60 @@ geo.gl.vglRenderer = function (arg) {
 
     position = camera.position();
     newZ = 360 * Math.pow(2, -map.zoom());
-    camera.setPosition(position[0], position[1], 360 * Math.pow(2, -map.zoom()));
 
-    // Calculate the center in display coordinates
-    centerDisplay = [m_width / 2, m_height / 2, 0];
+    // Assuming that baselayer will be a GL layer
+    var baseLayer = m_this.layer().map().baseLayer();
+    if (baseLayer && baseLayer !== m_this.layer() && typeof baseLayer !== "undefined") {
+      var contextRenderer = baseLayer.renderer().contextRenderer();
+      var camera2 = contextRenderer.camera();
+      position = camera2.position();
+      var focalPoint = camera2.focalPoint();
+      console.log("base layer is defined");
+      console.log("new position ", position);
+      camera.setPosition(position[0], position[1], position[2]);
+      camera.setFocalPoint(focalPoint[0], focalPoint[1], focalPoint[2]);
+    }
+    else {
+      mapCenter = geo.util.normalizeCoordinates(m_this.layer().map().center());
+      console.log("map center", mapCenter);
+      camera.setPosition(mapCenter.x, mapCenter.y, 360 * Math.pow(2, -map.zoom()));
+      camera.setFocalPoint(mapCenter.x, mapCenter.y, 0.0);
+    }
 
-    // Calculate the center in world coordinates
-    centerGeo = renderWindow.displayToWorld(
-      centerDisplay[0],
-      centerDisplay[1],
-      focusPoint,
-      vglRenderer
-    );
 
-    // get the screen coordinates of the new center
-    mapCenter = geo.util.normalizeCoordinates(m_this.layer().map().center());
-    newCenter = map.gcsToDisplay(mapCenter);
-    currentCenter = map.gcsToDisplay({x:0, y:0});
+    // // Calculate the center in display coordinates
+    // centerDisplay = [m_width / 2, m_height / 2, 0];
 
-    newCenterDisplay = [
-      centerDisplay[0] + currentCenter.x - newCenter.x,
-      centerDisplay[1] + currentCenter.y - newCenter.y
-    ];
+    // // Calculate the center in world coordinates
+    // centerGeo = renderWindow.displayToWorld(
+    //   centerDisplay[0],
+    //   centerDisplay[1],
+    //   focusPoint,
+    //   vglRenderer
+    // );
 
-    newCenterGeo = renderWindow.displayToWorld(
-      newCenterDisplay[0],
-      newCenterDisplay[1],
-      focusPoint,
-      vglRenderer
-    );
+    // // get the screen coordinates of the new center
+    // mapCenter = geo.util.normalizeCoordinates(m_this.layer().map().center());
+    // newCenter = map.gcsToDisplay(mapCenter);
+    // currentCenter = map.gcsToDisplay({x:0, y:0});
 
-    camera.pan(
-      centerGeo[0] - newCenterGeo[0],
-      centerGeo[1] - newCenterGeo[1],
-      centerGeo[2] - newCenterGeo[2]
-    );
+    // newCenterDisplay = [
+    //   centerDisplay[0] + currentCenter.x - newCenter.x,
+    //   centerDisplay[1] + currentCenter.y - newCenter.y
+    // ];
+
+    // newCenterGeo = renderWindow.displayToWorld(
+    //   newCenterDisplay[0],
+    //   newCenterDisplay[1],
+    //   focusPoint,
+    //   vglRenderer
+    // );
+
+    // camera.pan(
+    //   centerGeo[0] - newCenterGeo[0],
+    //   centerGeo[1] - newCenterGeo[1],
+    //   centerGeo[2] - newCenterGeo[2]
+    // );
 
     m_this._updateRendererCamera();
 
@@ -406,6 +425,10 @@ geo.gl.vglRenderer = function (arg) {
         vglRenderer
       );
 
+      console.log("centerGeo is ", centerGeo);
+      console.log("position is ", camera.position());
+
+
       newCenterDisplay = [
         centerDisplay[0] + evt.screenDelta.x,
         centerDisplay[1] + evt.screenDelta.y
@@ -417,12 +440,27 @@ geo.gl.vglRenderer = function (arg) {
         focusPoint,
         vglRenderer
       );
+      console.log("layer ", m_this.layer());
+      console.log("diff1 ", centerGeo[0] - newCenterGeo[0]);
+      console.log("diff2 ", centerGeo[1] - newCenterGeo[1]);
+      console.log("diff3 ", centerGeo[2] - newCenterGeo[2]);
+
 
       camera.pan(
         centerGeo[0] - newCenterGeo[0],
         centerGeo[1] - newCenterGeo[1],
         centerGeo[2] - newCenterGeo[2]
       );
+
+      // Assuming that baselayer will be a GL layer
+      var baseLayer = m_this.layer().map().baseLayer();
+      if (baseLayer && baseLayer !== m_this.layer() && typeof baseLayer !== "undefined") {
+        var bcamera = baseLayer.renderer().contextRenderer().camera();
+        console.log("bcamera pos ", bcamera.position());
+        console.log("camera pos", camera.position());
+      }
+
+
 
       evt.center = {
         x: newCenterGeo[0],
