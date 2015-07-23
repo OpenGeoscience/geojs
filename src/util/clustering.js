@@ -145,8 +145,8 @@
       maxZoom: 18,
       radius: 0.05
     }, opts);
-    this._opts.width = this._opts.width || width;
-    this._opts.height = this._opts.height || height;
+    this._opts.width = this._opts.width || width || 256;
+    this._opts.height = this._opts.height || height || 256;
 
     // generate the initial datastructures
     this._clusters = {}; // clusters at each zoom level
@@ -154,7 +154,7 @@
 
     var zoom, scl;
     for (zoom = this._opts.maxZoom; zoom >= 0; zoom -= 1) {
-      scl = this._scaleAtLevel(zoom, width, height);
+      scl = this._scaleAtLevel(zoom, this._opts.width, this._opts.height);
       this._clusters[zoom] = new geo.util.DistanceGrid(scl);
       this._points[zoom] = new geo.util.DistanceGrid(scl);
     }
