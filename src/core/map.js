@@ -1,6 +1,26 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Create a new instance of class map
+ * Create a new instance of class map.
+ *
+ * Creation tags a dictionary of arguments, which can include:
+ *  center: {x: (center x value), y: (center y value)}
+ *  gcs:
+ *  uigcs:
+ *  node:
+ *  layers:
+ *  zoom: (number) - initial zoom level
+ *  min: (number) - minimum zoom level
+ *  max: (number) - maximum zoom level
+ *  width:
+ *  height:
+ *  parallelProjection: (bool) - true to use parallel projection, false to use
+ *      perspective.
+ *  discreteZoom: (bool) - true to only allow integer zoom levels, false to
+ *      allow any zoom level.
+ *  autoResize:
+ *  clampBounds:
+ *  interactor:
+ *  clock:
  *
  * Creates a new map inside of the given HTML layer (Typically DIV)
  * @class
