@@ -14,6 +14,7 @@ class glPointsNoStrokeBase(object):
         self.resizeWindow(640, 480)
         self.loadURL('glPointsNoStroke/index.html')
         self.wait()
+        self.resizeWindow(640, 480)
 
     def testGlPoints(self):
         self.loadPage()

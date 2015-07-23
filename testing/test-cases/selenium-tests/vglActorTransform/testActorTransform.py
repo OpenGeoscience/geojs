@@ -15,6 +15,7 @@ class actorTransform(object):
         self.resizeWindow(1024, 768)
         self.loadURL('vglActorTransform/index.html')
         self.wait()
+        self.resizeWindow(1024, 768)
 
     def testDraw(self):
         self.loadPage()

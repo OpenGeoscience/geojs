@@ -365,13 +365,17 @@ class BaseTest(TestCase):
         :param int width: The width of the view in pixels.
         :param in height: The height of the view in pixels.
         '''
+        testImage = self.screenshot()
+        if width == testImage.size[0] and height == testImage.size[1]:
+            return
         self.driver.set_window_size(width, height)
         # Check the actual size of the viewport of the window we requested
         testImage = self.screenshot()
         dw = width - testImage.size[0]
         dh = height - testImage.size[1]
         # Rescale the window so the viewport is actually our target size
-        self.driver.set_window_size(width + dw, height + dh)
+        if dw or dh:
+            self.driver.set_window_size(width + dw, height + dh)
 
     def getElement(self, selector):
         '''

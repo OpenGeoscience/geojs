@@ -11,6 +11,7 @@ class d3LinesBase(object):
         self.resizeWindow(640, 480)
         self.loadURL('d3Lines/index.html')
         self.wait()
+        self.resizeWindow(640, 480)
 
     def testd3DrawLines(self):
         self.loadPage()

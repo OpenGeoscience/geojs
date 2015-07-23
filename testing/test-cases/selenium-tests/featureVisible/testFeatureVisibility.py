@@ -15,6 +15,7 @@ class Visibility(object):
         self.resizeWindow(640, 480)
         self.loadURL('featureVisible/index.html')
         self.wait()
+        self.resizeWindow(640, 480)
 
     def test_visibility_toggle(self):
         self.loadPage()

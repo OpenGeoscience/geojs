@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from selenium_test import FirefoxTest, ChromeTest
 
+
 class glMultiPolygonsBase(object):
     testCase = ('glMultiPolygons',)
     testRevision = 1
@@ -9,6 +10,7 @@ class glMultiPolygonsBase(object):
         self.resizeWindow(640, 480)
         self.loadURL('glMultiPolygons/index.html')
         self.wait()
+        self.resizeWindow(640, 480)
 
     def testGlMultiPolygons(self):
         self.loadPage()

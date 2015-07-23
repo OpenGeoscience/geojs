@@ -14,6 +14,7 @@ class testDrawCountries(object):
         self.resizeWindow(1024, 768)
         self.loadURL('vglDrawCountries/index.html')
         self.wait()
+        self.resizeWindow(1024, 768)
 
     def testDraw(self):
         self.loadPage()

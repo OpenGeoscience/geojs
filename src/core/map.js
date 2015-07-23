@@ -33,7 +33,7 @@ geo.map = function (arg) {
       m_gcs = arg.gcs === undefined ? 'EPSG:4326' : arg.gcs,
       m_uigcs = arg.uigcs === undefined ? 'EPSG:4326' : arg.uigcs,
       m_center = { x: 0, y: 0 },
-      m_zoom = arg.zoom === undefined ? 1 : arg.zoom,
+      m_zoom = arg.zoom === undefined ? 4 : arg.zoom,
       m_baseLayer = null,
       m_fileReader = null,
       m_interactor = null,

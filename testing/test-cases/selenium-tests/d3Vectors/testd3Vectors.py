@@ -12,6 +12,7 @@ class d3VectorsBase(object):
         self.resizeWindow(640, 480)
         self.loadURL('d3Vectors/index.html')
         self.wait()
+        self.resizeWindow(640, 480)
 
     def testd3DrawVectors(self):
         self.loadPage()

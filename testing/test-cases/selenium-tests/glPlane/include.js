@@ -3,7 +3,7 @@ window.startTest = function (done) {
 
   var mapOptions = {
     node: '#map',
-    zoom: 6,
+    zoom: 8,
     center: [0.0, 0.0]
   },
   myMap = geo.map(mapOptions),
