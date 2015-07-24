@@ -292,7 +292,7 @@ geo.gl.vglRenderer = function (arg) {
     zoom = map.zoom();
     newZ = camera.zoomToHeight(zoom, w, h);
     camera.setPosition(position[0], position[1], newZ);
-    camera.setParallelExtents(undefined, undefined, zoom);
+    camera.setParallelExtents({zoom: zoom});
 
     // Calculate the center in display coordinates
     centerDisplay = [m_width / 2, m_height / 2, 0];
@@ -372,7 +372,7 @@ geo.gl.vglRenderer = function (arg) {
         cam.setPosition(pos[0], pos[1], pos[2]);
         cam.setFocalPoint(fp[0], fp[1], fp[2]);
         cam.setClippingRange(cr[0], cr[1]);
-        cam.setParallelExtents(pe[0], pe[1], pe[2]);
+        cam.setParallelExtents(pe);
         renderer.render();
       }
     });
@@ -481,7 +481,7 @@ geo.gl.vglRenderer = function (arg) {
       }
 
       camera.setPosition(position[0], position[1], newZ);
-      camera.setParallelExtents(undefined, undefined, evt.zoomLevel);
+      camera.setParallelExtents({zoom: evt.zoomLevel});
 
       m_this._updateRendererCamera();
     }
