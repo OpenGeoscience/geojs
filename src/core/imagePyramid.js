@@ -34,6 +34,10 @@
    */
   //////////////////////////////////////////////////////////////////////////////
   geo.imagePyramid = function (spec) {
+    if (!(this instanceof geo.imagePyramid)) {
+      return new geo.imagePyramid(spec);
+    }
+
     spec.size = spec.size || {x: 256, y: 256};
     this._image = null;
 

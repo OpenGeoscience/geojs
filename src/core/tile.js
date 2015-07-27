@@ -30,6 +30,10 @@
    */
   //////////////////////////////////////////////////////////////////////////////
   geo.tile = function (spec) {
+    if (!(this instanceof geo.tile)) {
+      return new geo.tile(spec);
+    }
+
     this._index = spec.index;
     this._size = spec.size;
     this._overlap = spec.overlap || {x: 0, y: 0};
@@ -59,7 +63,7 @@
      */
     fetch: function () {
       if (!this._jqXHR) {
-        this._jqXHR = $.ajax(this.url);
+        this._jqXHR = $.ajax(this._url);
       }
       return this;
     },
@@ -73,7 +77,8 @@
      *
      */
     then: function (method) {
-      return this.fetch()._jqXHR.success(method.bind(this));
+      this.fetch()._jqXHR.success(method.bind(this));
+      return this;
     },
 
     /**
@@ -83,8 +88,9 @@
      * @returns {this} Supports chained calling
      *
      */
-    'catch': function (method) {
-      return this.fetch()._jqXHR.fail(method.bind(this));
+    catch: function (method) {
+      this.fetch()._jqXHR.fail(method.bind(this));
+      return this;
     },
 
     /**
