@@ -11,7 +11,7 @@ geo.gui.uiLayer = function (arg) {
   'use strict';
 
   // The widget stays fixed on the screen.  (only available in d3 at the moment)
-  arg.renderer = 'd3';
+  arg.renderer = arg.renderer || 'd3'; // default to d3, remove this later @todo
   arg.sticky = false;
 
   if (!(this instanceof geo.gui.uiLayer)) {

@@ -35,7 +35,8 @@
         "contourFeature.js",
         "transform.js",
         "renderer.js",
-        "osmLayer.js"
+        "osmLayer.js",
+        "domRenderer.js"
       ]
     },
     "geo.util": {
