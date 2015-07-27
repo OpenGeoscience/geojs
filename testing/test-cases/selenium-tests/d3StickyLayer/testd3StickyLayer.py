@@ -17,6 +17,7 @@ class d3StickyBase(object):
         self.resizeWindow(640, 480)
         self.loadURL('d3StickyLayer/index.html')
         self.wait()
+        self.resizeWindow(640, 480)
 
     def testDrag(self):
         testName = 'dragPoints'

@@ -14,6 +14,7 @@ class glLinesBase(object):
         self.resizeWindow(640, 480)
         self.loadURL('glLines/index.html')
         self.wait()
+        self.resizeWindow(640, 480)
 
     def testGlLines(self):
         self.loadPage()

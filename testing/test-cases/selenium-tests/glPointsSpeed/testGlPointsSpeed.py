@@ -21,6 +21,7 @@ class glPointsSpeedBase(object):
         self.resizeWindow(640, 480)
         self.loadURL('glPointsSpeed/index.html')
         self.wait()
+        self.resizeWindow(640, 480)
 
     def testGlPointsSpeed(self):
         self.loadPage()

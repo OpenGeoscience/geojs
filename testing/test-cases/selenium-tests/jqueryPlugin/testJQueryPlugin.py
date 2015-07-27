@@ -12,6 +12,7 @@ class base(object):
         self.resizeWindow(800, 600)
         self.loadURL('jqueryPlugin/index.html')
         self.wait()
+        self.resizeWindow(800, 600)
 
     def test_jquery_draw(self):
         self.loadPage()

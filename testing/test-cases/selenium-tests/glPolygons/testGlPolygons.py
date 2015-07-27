@@ -13,6 +13,7 @@ class glPolygonsBase(object):
         self.resizeWindow(640, 480)
         self.loadURL('glPolygons/index.html')
         self.wait()
+        self.resizeWindow(640, 480)
 
     def testGlPolygons(self):
         self.loadPage()
@@ -23,7 +24,7 @@ class glPolygonsBase(object):
     def testHoverPolygon(self):
         self.loadPage()
         self.hover('#map', (355, 160))
-        
+
         self.screenshotTest('hoverGlPolygons')
 
 

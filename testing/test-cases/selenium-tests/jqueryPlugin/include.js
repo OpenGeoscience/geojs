@@ -5,7 +5,7 @@ window.startTest = function (done) {
   $(function () {
     $('#map').geojsMap({
       center: {latitude: 10, longitude: -10},
-      zoom: 1,
+      zoom: 4,
       tileUrl: '/data/grid.jpg',
       layers: [{
         renderer: 'vgl',

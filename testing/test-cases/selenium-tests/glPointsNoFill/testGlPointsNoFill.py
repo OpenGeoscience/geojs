@@ -14,6 +14,7 @@ class glPointsNoFillBase(object):
         self.resizeWindow(640, 480)
         self.loadURL('glPointsNoFill/index.html')
         self.wait()
+        self.resizeWindow(640, 480)
 
     def testGlPoints(self):
         self.loadPage()

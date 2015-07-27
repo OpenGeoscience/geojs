@@ -76,12 +76,12 @@ geo.registerRenderer = function (name, func) {
  * Create new instance of the renderer
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.createRenderer  = function (name, layer, canvas) {
+geo.createRenderer  = function (name, layer, canvas, options) {
   "use strict";
 
   if (geo.renderers.hasOwnProperty(name)) {
     var ren = geo.renderers[name](
-      {"layer": layer, "canvas": canvas}
+      {layer: layer, canvas: canvas, options: options}
     );
     ren._init();
     return ren;

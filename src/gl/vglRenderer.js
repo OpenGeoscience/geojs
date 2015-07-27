@@ -14,6 +14,7 @@ geo.gl.vglRenderer = function (arg) {
   if (!(this instanceof geo.gl.vglRenderer)) {
     return new geo.gl.vglRenderer(arg);
   }
+  arg = arg || {};
   geo.gl.renderer.call(this, arg);
 
   var m_this = this,
@@ -232,7 +233,7 @@ geo.gl.vglRenderer = function (arg) {
     canvas.attr('class', 'webgl-canvas');
     m_this.canvas(canvas);
     $(m_this.layer().node().get(0)).append(canvas);
-    m_viewer = vgl.viewer(canvas.get(0));
+    m_viewer = vgl.viewer(canvas.get(0), arg.options);
     m_viewer.init();
     m_contextRenderer = m_viewer.renderWindow().activeRenderer();
     m_contextRenderer.setResetScene(false);
@@ -253,15 +254,16 @@ geo.gl.vglRenderer = function (arg) {
     var vglRenderer = m_this.contextRenderer(),
         map = m_this.layer().map(),
         camera = vglRenderer.camera(),
-        baseLayer = null,
-        baseContextRenderer = null,
-        baseCamera = null,
+        baseContextRenderer,
+        baseCamera,
         renderWindow = m_viewer.renderWindow(),
         layer = m_this.layer(),
-        position = null,
-        focalPoint = null,
-        newZ = null,
-        mapCenter = null;
+        baseLayer = layer.map().baseLayer(),
+        focalPoint,
+        position,
+        zoom,
+        newZ,
+        mapCenter;
 
     m_width = w;
     m_height = h;
@@ -270,10 +272,8 @@ geo.gl.vglRenderer = function (arg) {
     renderWindow.positionAndResize(x, y, w, h);
     m_this._render();
 
-    // Ignore if this renderer is part of base layer or base layer is
-    // not set yet
-    if (layer.map().baseLayer() === layer || !layer.map().baseLayer() ||
-        m_initialized) {
+    // Ignore if the base layer is not set yet
+    if (!baseLayer || m_initialized) {
       return;
     }
     m_initialized = true;
@@ -284,61 +284,24 @@ geo.gl.vglRenderer = function (arg) {
     }
 
     position = camera.position();
-    newZ = 360 * Math.pow(2, -map.zoom());
+    zoom = map.zoom();
+    newZ = camera.zoomToHeight(zoom, w, h);
 
     // Assuming that baselayer will be a GL layer
-    baseLayer = m_this.layer().map().baseLayer();
-    if (baseLayer && baseLayer !== m_this.layer() && typeof baseLayer !== 'undefined') {
+    if (layer !== baseLayer) {
       baseContextRenderer = baseLayer.renderer().contextRenderer();
       baseCamera = baseContextRenderer.camera();
       position = baseCamera.position();
       focalPoint = baseCamera.focalPoint();
-      // console.log('base layer is defined');
-      // console.log('new position ', position);
       camera.setPosition(position[0], position[1], position[2]);
       camera.setFocalPoint(focalPoint[0], focalPoint[1], focalPoint[2]);
     } else {
-      mapCenter = geo.util.normalizeCoordinates(m_this.layer().map().center());
-      // console.log('map center', mapCenter);
+      mapCenter = layer.toLocal(layer.map().center());
       focalPoint = camera.focalPoint();
       camera.setPosition(mapCenter.x, mapCenter.y, newZ);
       camera.setFocalPoint(mapCenter.x, mapCenter.y, focalPoint[2]);
     }
-
-
-    // // Calculate the center in display coordinates
-    // centerDisplay = [m_width / 2, m_height / 2, 0];
-
-    // // Calculate the center in world coordinates
-    // centerGeo = renderWindow.displayToWorld(
-    //   centerDisplay[0],
-    //   centerDisplay[1],
-    //   focusPoint,
-    //   vglRenderer
-    // );
-
-    // // get the screen coordinates of the new center
-    // mapCenter = geo.util.normalizeCoordinates(m_this.layer().map().center());
-    // newCenter = map.gcsToDisplay(mapCenter);
-    // currentCenter = map.gcsToDisplay({x:0, y:0});
-
-    // newCenterDisplay = [
-    //   centerDisplay[0] + currentCenter.x - newCenter.x,
-    //   centerDisplay[1] + currentCenter.y - newCenter.y
-    // ];
-
-    // newCenterGeo = renderWindow.displayToWorld(
-    //   newCenterDisplay[0],
-    //   newCenterDisplay[1],
-    //   focusPoint,
-    //   vglRenderer
-    // );
-
-    // camera.pan(
-    //   centerGeo[0] - newCenterGeo[0],
-    //   centerGeo[1] - newCenterGeo[1],
-    //   centerGeo[2] - newCenterGeo[2]
-    // );
+    camera.setParallelExtents({zoom: zoom});
 
     m_this._updateRendererCamera();
 
@@ -370,12 +333,13 @@ geo.gl.vglRenderer = function (arg) {
     var vglRenderer = m_this.contextRenderer(),
         renderWindow = m_viewer.renderWindow(),
         camera = vglRenderer.camera(),
-        pos, fp, cr;
+        pos, fp, cr, pe;
 
     vglRenderer.resetCameraClippingRange();
     pos = camera.position();
     fp = camera.focalPoint();
     cr = camera.clippingRange();
+    pe = camera.parallelExtents();
     renderWindow.renderers().forEach(function (renderer) {
       var cam = renderer.camera();
 
@@ -383,6 +347,7 @@ geo.gl.vglRenderer = function (arg) {
         cam.setPosition(pos[0], pos[1], pos[2]);
         cam.setFocalPoint(fp[0], fp[1], fp[2]);
         cam.setClippingRange(cr[0], cr[1]);
+        cam.setParallelExtents(pe);
         renderer.render();
       }
     });
@@ -422,10 +387,6 @@ geo.gl.vglRenderer = function (arg) {
         vglRenderer
       );
 
-      console.log('centerGeo is ', centerGeo);
-      console.log('position is ', camera.position());
-
-
       newCenterDisplay = [
         centerDisplay[0] + evt.screenDelta.x,
         centerDisplay[1] + evt.screenDelta.y
@@ -437,27 +398,12 @@ geo.gl.vglRenderer = function (arg) {
         focusPoint,
         vglRenderer
       );
-      console.log('layer ', m_this.layer());
-      console.log('diff1 ', centerGeo[0] - newCenterGeo[0]);
-      console.log('diff2 ', centerGeo[1] - newCenterGeo[1]);
-      console.log('diff3 ', centerGeo[2] - newCenterGeo[2]);
-
 
       camera.pan(
         centerGeo[0] - newCenterGeo[0],
         centerGeo[1] - newCenterGeo[1],
         centerGeo[2] - newCenterGeo[2]
       );
-
-      // Assuming that baselayer will be a GL layer
-      var baseLayer = m_this.layer().map().baseLayer();
-      if (baseLayer && baseLayer !== m_this.layer() && typeof baseLayer !== 'undefined') {
-        var bcamera = baseLayer.renderer().contextRenderer().camera();
-        console.log('bcamera pos ', bcamera.position());
-        console.log('camera pos', camera.position());
-      }
-
-
 
       evt.center = {
         x: newCenterGeo[0],
@@ -491,7 +437,8 @@ geo.gl.vglRenderer = function (arg) {
       camera = vglRenderer.camera();
       focusPoint = camera.focalPoint();
       position = camera.position();
-      newZ = 360 * Math.pow(2, -evt.zoomLevel);
+      var windowSize = renderWindow.windowSize();
+      newZ = camera.zoomToHeight(evt.zoomLevel, windowSize[0], windowSize[1]);
 
       evt.pan = null;
       if (evt.screenPosition) {
@@ -508,8 +455,26 @@ geo.gl.vglRenderer = function (arg) {
         });
       }
 
-      camera.setPosition(position[0], position[1], 360 * Math.pow(2, -evt.zoomLevel));
+      camera.setPosition(position[0], position[1], newZ);
+      camera.setParallelExtents({zoom: evt.zoomLevel});
 
+      m_this._updateRendererCamera();
+    }
+  });
+
+  // Connect to parallelprojection event
+  m_this.layer().geoOn(geo.event.parallelprojection, function (evt) {
+    var vglRenderer = m_this.contextRenderer(),
+        camera,
+        layer = m_this.layer();
+
+    if (evt.geo && evt.geo._triggeredBy !== layer) {
+      if (!vglRenderer || !vglRenderer.camera()) {
+        console.log('Parallel projection event triggered on unconnected VGL ' +
+                    'renderer.');
+      }
+      camera = vglRenderer.camera();
+      camera.setEnableParallelProjection(evt.parallelProjection);
       m_this._updateRendererCamera();
     }
   });

@@ -16,6 +16,7 @@ class glContourBase(object):
             url += '?' + urllib.urlencode(params)
         self.loadURL(url)
         self.wait()
+        self.resizeWindow(640, 480)
 
     def testGlContour(self):
         self.loadPage()

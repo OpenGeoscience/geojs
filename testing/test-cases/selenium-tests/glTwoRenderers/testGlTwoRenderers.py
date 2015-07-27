@@ -14,6 +14,7 @@ class glTwoRenderersBase(object):
         self.resizeWindow(1600, 900)
         self.loadURL('glTwoRenderers/index.html')
         self.wait()
+        self.resizeWindow(1600, 900)
 
     def testGlTwoRenderers(self):
         self.loadPage()

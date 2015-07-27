@@ -12,6 +12,7 @@ class Base(object):
         self.resizeWindow(1024, 600)
         self.loadURL('mapBounds/index.html')
         self.wait()
+        self.resizeWindow(1024, 600)
 
     def test_set_bounds(self):
         testName = 'set_new_bounds'

@@ -127,23 +127,26 @@
   };
 
   /**
-   *
    * This class manages clustering of an array of positions hierarchically.
    * The algorithm and code was adapted from the Leaflet marker cluster
    * plugin by David Leaver: https://github.com/Leaflet/Leaflet.markercluster
    *
    * @class geo.util.ClusterGroup
    * @param {object} opts An options object
+   * @param {number} width The width of the window; used for scaling.
+   * @param {number} height The height of the window; used for scaling.
    * @param {number} maxZoom The maximimum zoom level to calculate
    * @param {number} radius Proportional to the clustering radius in pixels
    */
-  function C(opts) {
+  function C(opts, width, height) {
 
     // store the options
     this._opts = $.extend({
       maxZoom: 18,
       radius: 0.05
     }, opts);
+    this._opts.width = this._opts.width || width || 256;
+    this._opts.height = this._opts.height || height || 256;
 
     // generate the initial datastructures
     this._clusters = {}; // clusters at each zoom level
@@ -151,7 +154,7 @@
 
     var zoom, scl;
     for (zoom = this._opts.maxZoom; zoom >= 0; zoom -= 1) {
-      scl = this._scaleAtLevel(zoom);
+      scl = this._scaleAtLevel(zoom, this._opts.width, this._opts.height);
       this._clusters[zoom] = new geo.util.DistanceGrid(scl);
       this._points[zoom] = new geo.util.DistanceGrid(scl);
     }
@@ -165,8 +168,8 @@
    * size in point coordinates at a particular zoom level.
    * @private
    */
-  C.prototype._scaleAtLevel = function (zoom) {
-    return Math.pow(2, -zoom) * this._opts.radius * 360;
+  C.prototype._scaleAtLevel = function (zoom, width, height) {
+    return vgl.zoomToHeight(zoom, width, height) / 2 * this._opts.radius;
   };
 
   /**
