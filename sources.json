@@ -83,7 +83,8 @@
         "uiLayer.js",
         "widget.js",
         "sliderWidget.js",
-        "legendWidget.js"
+        "legendWidget.js",
+        "divWidget.js"
       ]
     },
     "geo.plugin": {
