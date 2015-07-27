@@ -13,6 +13,7 @@ class d3AnimationBase(object):
         self.resizeWindow(640, 480)
         self.loadURL('d3Animation/index.html')
         self.wait()
+        self.resizeWindow(640, 480)
         time.sleep(1)
 
     def testd3AnimateForward(self):

@@ -10,17 +10,17 @@ describe('osm projection', function () {
     map = geo.map({
       'node': '#map',
       'center': [0, 0],
-      'zoom': 3
+      'zoom': 5
     });
     map.createLayer('osm');
     map.resize(0, 0, width, height);
     map.draw();
   });
 
-  // make sure georeferencing operators are 
+  // make sure georeferencing operators are
   // inverses of each other for several points
   describe('Invert georeference', function () {
-  
+
     var pts = [
       [0, 0], [200, 0], [-300, 0],
       [0, 400], [0, -500], [100, 600],
@@ -32,7 +32,7 @@ describe('osm projection', function () {
 
       it('(' + pt.join() + ')', function () {
         var g, d0;
-        
+
         g = map.displayToGcs(d);
         d0 = map.gcsToDisplay(g);
 
@@ -52,7 +52,7 @@ describe('osm projection', function () {
       expect(Number.isFinite(obj1.x)).toBe(true);
       expect(Number.isFinite(obj1.y)).toBe(true);
     });
-    
+
     // currently doesn't work
     xit('gcsToDisplay ( [object] )', function () {
       var arr;
@@ -62,7 +62,7 @@ describe('osm projection', function () {
       expect(arr[0].x).toBeCloseTo(obj1.x, 6);
       expect(arr[0].y).toBeCloseTo(obj1.y, 6);
     });
- 
+
     // currently doesn't work
     xit('gcsToDisplay ( [object, ... , object] )', function () {
       var arr = [], N = 10, i;
@@ -88,7 +88,7 @@ describe('osm projection', function () {
       expect(Number.isFinite(obj2.x)).toBe(true);
       expect(Number.isFinite(obj2.y)).toBe(true);
     });
-    
+
     it('displayToGcs ( [object] )', function () {
       var arr;
       arr = map.displayToGcs([{x: 400, y: 400}]);
@@ -97,7 +97,7 @@ describe('osm projection', function () {
       expect(arr[0].x).toBeCloseTo(obj2.x, 6);
       expect(arr[0].y).toBeCloseTo(obj2.y, 6);
     });
-    
+
     it('displayToGcs ( [object, ... , object] )', function () {
       var arr = [], N = 10, i;
 

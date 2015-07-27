@@ -18,6 +18,7 @@ class osmBase(object):
         self.resizeWindow(640, 480)
         self.loadURL('osmLayer/index.html')
         self.wait()
+        self.resizeWindow(640, 480)
 
     def test_osm_draw(self):
         testName = 'osmDraw'

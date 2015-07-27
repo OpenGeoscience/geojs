@@ -21,6 +21,7 @@ class glLinesSpeedBase(object):
         self.resizeWindow(640, 480)
         self.loadURL('glLinesSpeed/index.html')
         self.wait()
+        self.resizeWindow(640, 480)
 
     def testGlLinesSpeed(self):
         self.loadPage()

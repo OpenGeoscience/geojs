@@ -15,7 +15,7 @@ window.geoTests = {
 
     var mapDefaults = {
       node: '#map',
-      zoom: 1.5,
+      zoom: 3.5,
       center: {
         x: 0,
         y: 0

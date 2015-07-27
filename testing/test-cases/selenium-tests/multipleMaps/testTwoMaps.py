@@ -12,6 +12,7 @@ class osmBase(object):
         self.resizeWindow(320, 480)
         self.loadURL('multipleMaps/index.html')
         self.wait()
+        self.resizeWindow(320, 480)
 
     def test_2map_draw(self):
         testName = 'twoMapDraw'

@@ -14,6 +14,7 @@ class glPointsTransparentBase(object):
         self.resizeWindow(640, 480)
         self.loadURL('glPointsTransparent/index.html')
         self.wait()
+        self.resizeWindow(640, 480)
 
     def testGlPoints(self):
         self.loadPage()

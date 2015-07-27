@@ -14,6 +14,7 @@ geo.gl.vglRenderer = function (arg) {
   if (!(this instanceof geo.gl.vglRenderer)) {
     return new geo.gl.vglRenderer(arg);
   }
+  arg = arg || {};
   geo.gl.renderer.call(this, arg);
 
   var m_this = this,
@@ -232,7 +233,7 @@ geo.gl.vglRenderer = function (arg) {
     canvas.attr('class', 'webgl-canvas');
     m_this.canvas(canvas);
     $(m_this.layer().node().get(0)).append(canvas);
-    m_viewer = vgl.viewer(canvas.get(0));
+    m_viewer = vgl.viewer(canvas.get(0), arg.options);
     m_viewer.init();
     m_contextRenderer = m_viewer.renderWindow().activeRenderer();
     m_contextRenderer.setResetScene(false);
@@ -259,7 +260,14 @@ geo.gl.vglRenderer = function (arg) {
         renderWindow = m_viewer.renderWindow(),
         layer = m_this.layer(),
         position = null,
-        focalPoint = null,
+        focalPoint,
+        centerGeo,
+        centerDisplay,
+        newCenter,
+        currentCenter,
+        newCenterDisplay,
+        newCenterGeo,
+        zoom,
         newZ = null,
         mapCenter = null;
 
@@ -284,7 +292,10 @@ geo.gl.vglRenderer = function (arg) {
     }
 
     position = camera.position();
-    newZ = 360 * Math.pow(2, -map.zoom());
+    zoom = map.zoom();
+    newZ = camera.zoomToHeight(zoom, w, h);
+    camera.setPosition(position[0], position[1], newZ);
+    camera.setParallelExtents({zoom: zoom});
 
     // Assuming that baselayer will be a GL layer
     baseLayer = m_this.layer().map().baseLayer();
@@ -305,6 +316,30 @@ geo.gl.vglRenderer = function (arg) {
       camera.setFocalPoint(mapCenter.x, mapCenter.y, focalPoint[2]);
     }
 
+    // Calculate the center in world coordinates
+    centerGeo = renderWindow.displayToWorld(
+      centerDisplay[0],
+      centerDisplay[1],
+      focalPoint,
+      vglRenderer
+    );
+
+    // get the screen coordinates of the new center
+    mapCenter = geo.util.normalizeCoordinates(m_this.layer().map().center());
+    newCenter = map.gcsToDisplay(mapCenter);
+    currentCenter = map.gcsToDisplay({x: 0, y: 0});
+
+    newCenterDisplay = [
+      centerDisplay[0] + currentCenter.x - newCenter.x,
+      centerDisplay[1] + currentCenter.y - newCenter.y
+    ];
+
+    newCenterGeo = renderWindow.displayToWorld(
+      newCenterDisplay[0],
+      newCenterDisplay[1],
+      focalPoint,
+      vglRenderer
+    );
 
     // // Calculate the center in display coordinates
     // centerDisplay = [m_width / 2, m_height / 2, 0];
@@ -313,7 +348,7 @@ geo.gl.vglRenderer = function (arg) {
     // centerGeo = renderWindow.displayToWorld(
     //   centerDisplay[0],
     //   centerDisplay[1],
-    //   focusPoint,
+    //   focalPoint,
     //   vglRenderer
     // );
 
@@ -330,7 +365,7 @@ geo.gl.vglRenderer = function (arg) {
     // newCenterGeo = renderWindow.displayToWorld(
     //   newCenterDisplay[0],
     //   newCenterDisplay[1],
-    //   focusPoint,
+    //   focalPoint,
     //   vglRenderer
     // );
 
@@ -370,12 +405,13 @@ geo.gl.vglRenderer = function (arg) {
     var vglRenderer = m_this.contextRenderer(),
         renderWindow = m_viewer.renderWindow(),
         camera = vglRenderer.camera(),
-        pos, fp, cr;
+        pos, fp, cr, pe;
 
     vglRenderer.resetCameraClippingRange();
     pos = camera.position();
     fp = camera.focalPoint();
     cr = camera.clippingRange();
+    pe = camera.parallelExtents();
     renderWindow.renderers().forEach(function (renderer) {
       var cam = renderer.camera();
 
@@ -383,6 +419,7 @@ geo.gl.vglRenderer = function (arg) {
         cam.setPosition(pos[0], pos[1], pos[2]);
         cam.setFocalPoint(fp[0], fp[1], fp[2]);
         cam.setClippingRange(cr[0], cr[1]);
+        cam.setParallelExtents(pe);
         renderer.render();
       }
     });
@@ -491,7 +528,8 @@ geo.gl.vglRenderer = function (arg) {
       camera = vglRenderer.camera();
       focusPoint = camera.focalPoint();
       position = camera.position();
-      newZ = 360 * Math.pow(2, -evt.zoomLevel);
+      var windowSize = renderWindow.windowSize();
+      newZ = camera.zoomToHeight(evt.zoomLevel, windowSize[0], windowSize[1]);
 
       evt.pan = null;
       if (evt.screenPosition) {
@@ -508,8 +546,26 @@ geo.gl.vglRenderer = function (arg) {
         });
       }
 
-      camera.setPosition(position[0], position[1], 360 * Math.pow(2, -evt.zoomLevel));
+      camera.setPosition(position[0], position[1], newZ);
+      camera.setParallelExtents({zoom: evt.zoomLevel});
 
+      m_this._updateRendererCamera();
+    }
+  });
+
+  // Connect to parallelprojection event
+  m_this.layer().geoOn(geo.event.parallelprojection, function (evt) {
+    var vglRenderer = m_this.contextRenderer(),
+        camera,
+        layer = m_this.layer();
+
+    if (evt.geo && evt.geo._triggeredBy !== layer) {
+      if (!vglRenderer || !vglRenderer.camera()) {
+        console.log('Parallel projection event triggered on unconnected VGL ' +
+                    'renderer.');
+      }
+      camera = vglRenderer.camera();
+      camera.setEnableParallelProjection(evt.parallelProjection);
       m_this._updateRendererCamera();
     }
   });

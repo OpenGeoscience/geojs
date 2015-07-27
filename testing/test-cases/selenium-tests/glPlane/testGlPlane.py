@@ -17,6 +17,7 @@ class glPlaneBase(object):
         else:
             self.loadURL('glPlane/index.html?opacity=' + str(opacity))
         self.wait()
+        self.resizeWindow(640, 480)
 
     def testGlPlane(self):
         self.loadPage()

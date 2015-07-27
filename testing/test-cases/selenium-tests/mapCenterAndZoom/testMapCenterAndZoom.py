@@ -11,6 +11,7 @@ class mapCenter(object):
         self.resizeWindow(640, 480)
         self.loadURL('mapCenterAndZoom/index.html')
         self.wait()
+        self.resizeWindow(640, 480)
 
     def test_map_initial_center(self):
         testName = 'mapInitialCenter'
