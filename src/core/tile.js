@@ -77,7 +77,7 @@
      *
      */
     then: function (method) {
-      this.fetch()._jqXHR.success(method.bind(this));
+      this.fetch()._jqXHR.success(method);
       return this;
     },
 
@@ -89,7 +89,7 @@
      *
      */
     catch: function (method) {
-      this.fetch()._jqXHR.fail(method.bind(this));
+      this.fetch()._jqXHR.fail(method);
       return this;
     },
 
