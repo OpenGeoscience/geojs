@@ -19,6 +19,8 @@
         "event.js",
         "mapInteractor.js",
         "clock.js",
+        "tile.js",
+        "imagePyramid.js",
         "fileReader.js",
         "jsonReader.js",
         "map.js",
