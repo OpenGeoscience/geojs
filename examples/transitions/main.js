@@ -1,117 +1,66 @@
+// Run after the DOM loads
 $(function () {
   'use strict';
 
-  function draw_map() {
-
-  var map;
-
-  $(function () {
-
-    map = geo.map({node: '#map', center: {x: -70, y: 30}, zoom: 10});
-    map.createLayer('osm');
-    var ui = map.createLayer('ui');
-    var legend = ui.createWidget('legend');
-
-
-    var data = [{x: -70, y: 30}];
-
-    var point_gl0 = map.createLayer('feature', {'render': 'vgl'}).createFeature('point');
-        // ,
-        // point_d30 = map.createLayer('feature', {'render': 'd3'}).createFeature('point'),
-        // point_gl1 = null,
-        // point_d31 = null;
-
-    // Reove this line to watch the points get offset
-    // map.bounds(
-    //   { lowerLeft:
-    //       {x:-100, y:0 },
-    //     upperRight:
-    //       {x:-60, y:40} }
-    // );
-
-    var gl0_style = {
-      'radius': 12,
-      'strokeColor': 'steelblue',
-      'strokeWidth': 2,
-      'fillColor': 'steelblue',
-      'fillOpacity': 0.25
-    };
-
-   //  var d30_style = {
-   //    'radius': 12,
-   //    'strokeColor': 'firebrick',
-   //    'strokeWidth': 2,
-   //    'fillColor': 'firebrick',
-   //    'fillOpacity': 0.25
-   //  };
-
-   // var gl1_style = {
-   //    'radius': 6,
-   //    'stroke': false,
-   //    'fillColor': 'blue',
-   //    'fillOpacity': 1
-   //  };
-
-   //  var d31_style = {
-   //    'radius': 6,
-   //    'stroke': false,
-   //    'fillColor': 'red',
-   //    'fillOpacity': 1
-   //  };
-
-    legend.categories([
-      {name: 'gl reference', style: gl0_style, type: 'point'},
-      // {name: 'd3 reference', style: d30_style, type: 'point'},
-      // {name: 'gl delayed', style: gl1_style, type: 'point'},
-      // {name: 'd3 delayed', style: d31_style, type: 'point'}
-    ]);
-
-    point_gl0
-      .style(gl0_style)
-      .data([{x: -70, y: 30}]);
-
-    // point_d30
-    //   .style(d30_style)
-    //   .data([{x: -65, y: 30}]);
-
-    map.draw();
-
-    // draw points
-    function draw_points() {
-      point_gl1 = map.createLayer('feature', {'render': 'vgl'}).createFeature('point');
-      point_d31 = map.createLayer('feature', {'render': 'd3'}).createFeature('point');
-
-      point_gl1
-        .style(gl1_style)
-        .data([{x: -75, y: 30}]);
-
-      point_d31
-        .style(d31_style)
-        .data([{x: -65, y: 30}]);
-
-      map.draw();
-    }
-
-    function draw_points_after_2seconds() {
-
-      var i = 0;
-      function tick() {
-        i += 1;
-        $('#time-left').val((2 - i / 100).toFixed(2));
-        if (i < 200) {
-          window.setTimeout(tick, 10);
-        } else {
-          draw_points();
-        }
-      }
-      tick();
-    }
-
-    $('#add-point').click(draw_points_after_2seconds);
+  // Create a map object
+  var map = geo.map({
+    node: '#map',
+    zoom: 6,
+    center: {x: 28.9550, y: 41.0136}
   });
-}
 
-draw_map();
+  // Add an OSM layer
+  var osm = map.createLayer('osm',{
+    baseUrl: 'http://otile1.mqcdn.com/tiles/1.0.0/map'
+  });
+
+  // Bind button clicks to map transitions
+  $('#pan-to-london').click(function () {
+    map.transition({
+      center: {x: -0.1275, y: 51.5072},
+      duration: 2000
+    });
+  });
+
+  $('#elastic-to-moscow').click(function () {
+    map.transition({
+      center: {x: 37.6167, y: 55.7500},
+      duration: 2000,
+      ease: function (t) {
+        return Math.pow(2.0, -10.0 * t) * Math.sin((t - 0.075) * (2.0 * Math.PI) / 0.3) + 1.0;
+      }
+    });
+  });
+
+  $('#bounce-to-istanbul').click(function () {
+    map.transition({
+      center: {x: 28.9550, y: 41.0136},
+      duration: 2000,
+      ease: function (t) {
+        var r = 2.75;
+        var s = 7.5625;
+        if (t < 1.0 / r) {
+          return s * t * t;
+        }
+        if (t < 2.0 / r) {
+          t -= 1.5 / r;
+          return s * t * t + 0.75;
+        }
+        if (t < 2.5 / r) {
+          t -= 2.25 / r;
+          return s * t * t + 0.9375;
+        }
+        t -= 2.625 / r;
+        return s * t * t + 0.984375;
+      }
+    });
+  });
+
+  $('#fly-to-bern').click(function () {
+    map.transition({
+      center: {x: 7.4500, y: 46.9500},
+      duration: 2000,
+      interp: d3.interpolateZoom
+    });
+  });
 });
-
-
