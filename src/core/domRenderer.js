@@ -6,8 +6,6 @@ geo.domRenderer = function (arg) {
   }
   geo.renderer.call(this, arg);
 
-  var s_exit = this._exit;
-
   arg = arg || {};
 
   var m_this = this;
