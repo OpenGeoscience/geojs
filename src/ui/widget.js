@@ -70,9 +70,15 @@ geo.gui.widget = function (arg) {
     return m_layer;
   };
 
+  // A little convoluted at the moment, a widgets parent
+  // is the uiLayer by default.
   this.parentCanvas = function () {
     if (this.parent !== undefined) {
-      return this.parent().canvas();
+      if (this.parent() instanceof geo.gui.uiLayer) {
+        return this.parent().canvas();
+      } else {
+        return this.parent().$el;
+      }
     } else {
       return this.layer().canvas();
     }
@@ -109,7 +115,8 @@ geo.gui.widget = function (arg) {
     m_this.$el.css($.extend({position: 'relative'}, m_this.position()));
   };
 
-  // @todo doesn't detect if its partially in the viewport.. would need to look at width/height of widget
+  // @todo doesn't detect if its partially in the viewport.. would need to look at
+  // width/height of widget
   this.isInViewport = function () {
     var position = m_this.position();
     var map = m_this.layer().map().node();

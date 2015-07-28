@@ -13,7 +13,11 @@ geo.gui.divWidget = function (arg) {
   this._init = function (arg) {
     m_this.args = arg;
 
-    m_this.$el.appendTo(m_this.layer().canvas());
+    if (arg.hasOwnProperty('parent') && arg.parent instanceof geo.gui.widget) {
+      arg.parent.addChild(m_this);
+    }
+
+    m_this.$el.appendTo(m_this.parentCanvas());
     if (arg.hasOwnProperty('attrs')) {
       m_this.$el.attr(arg.attrs);
     }
