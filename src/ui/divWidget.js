@@ -6,20 +6,22 @@ geo.gui.divWidget = function (arg) {
 
   geo.gui.widget.call(this, arg);
 
-  var m_this = this,
-      s_exit = this._exit;
+  var m_this = this;
 
-  this._init = function () {
-    console.log('div widget loaded');
+  this.$el = $('<div></div>');
+
+  this._init = function (arg) {
+    m_this.args = arg;
+
+    m_this.$el.appendTo(m_this.layer().canvas());
+    if (arg.hasOwnProperty('attrs')) {
+      m_this.$el.attr(arg.attrs);
+    }
+
+    this.positionMaybe();
   };
 
-  this._exit = function () {
-    // remove div
-
-    // undo event listeners
-
-    s_exit();
-  };
+  return this;
 };
 
 inherit(geo.gui.divWidget, geo.gui.widget);
