@@ -18,13 +18,14 @@ geo.domRenderer = function (arg) {
 
   this._init = function () {
     if (!m_this.canvas()) {
-      var el = $('<div class="foobar"></div>');
+      var el = $('<div id="dom-renderer"></div>');
       el.appendTo(m_this.layer().node().get(0));
 
       m_this.canvas(el);
     }
   };
 
+  this._init(arg);
   return this;
 };
 
