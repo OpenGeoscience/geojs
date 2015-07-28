@@ -10,8 +10,8 @@
 geo.gui.uiLayer = function (arg) {
   'use strict';
 
-  // The widget stays fixed on the screen.  (only available in d3 at the moment)
-  arg.renderer = arg.renderer || 'd3'; // default to d3, remove this later @todo
+  // The widget stays fixed on the screen.
+  arg.renderer = 'dom';
   arg.sticky = false;
 
   if (!(this instanceof geo.gui.uiLayer)) {
@@ -30,7 +30,6 @@ geo.gui.uiLayer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.createWidget = function (widgetName, arg) {
-
     var newWidget = geo.createWidget(
       widgetName, m_this, m_this.renderer(), arg);
 

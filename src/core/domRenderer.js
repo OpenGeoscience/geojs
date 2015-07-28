@@ -16,9 +16,10 @@ geo.domRenderer = function (arg) {
 
   this._init = function () {
     if (!m_this.canvas()) {
-      var el = $('<div id="dom-renderer"></div>');
-      el.appendTo(m_this.layer().node().get(0));
-      m_this.canvas(el);
+      // The renderer and the UI Layer share the same canvas
+      // at least for now. This renderer is essentially a noop renderer
+      // designed for backwards compatibility
+      m_this.canvas(m_this.layer().node());
     }
   };
 
