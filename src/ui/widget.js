@@ -26,6 +26,10 @@ geo.gui.widget = function (arg) {
     m_this.children().forEach(function (child) {
       m_this._deleteFeature(child);
     });
+
+    this.layer().geoOff(geo.event.pan, this.positionMaybe);
+    m_this.$el.remove();
+
     s_exit();
   };
 
@@ -65,5 +69,47 @@ geo.gui.widget = function (arg) {
   this.layer = function () {
     return m_layer;
   };
+
+  // returns {top: m, left: n}
+  this.position = function () {
+    var position;
+
+    if (m_this.args &&
+        m_this.args.hasOwnProperty('position') &&
+        m_this.args.hasOwnProperty('positionType') &&
+        m_this.args.hasOwnProperty(m_this.args.position)) {
+
+      if (m_this.args.positionType === 'gcs') {
+        position = m_this.layer().map().gcsToDisplay(m_this.args[m_this.args.position]);
+      } else if (m_this.args.positionType === 'viewport') {
+        position = m_this.args[m_this.args.position];
+      }
+
+      return {
+        left: position.x,
+        top: position.y
+      };
+    }
+
+    return {
+      left: 0,
+      top: 0
+    };
+  };
+
+  this.positionMaybe = function () {
+    m_this.$el.css($.extend({position: 'relative'}, m_this.position()));
+  };
+
+  // @todo doesn't detect if its partially in the viewport.. would need to look at width/height of widget
+  this.isInViewport = function () {
+    var position = m_this.position();
+    var map = m_this.layer().map().node();
+
+    return ((position.left >= 0 && position.top >= 0) &&
+            (position.left <= map.width() && position.top <= map.height()));
+  };
+
+  this.layer().geoOn(geo.event.pan, this.positionMaybe);
 };
 inherit(geo.gui.widget, geo.sceneObject);

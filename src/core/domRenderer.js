@@ -20,7 +20,6 @@ geo.domRenderer = function (arg) {
     if (!m_this.canvas()) {
       var el = $('<div id="dom-renderer"></div>');
       el.appendTo(m_this.layer().node().get(0));
-
       m_this.canvas(el);
     }
   };
