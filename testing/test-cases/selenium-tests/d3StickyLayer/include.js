@@ -2,7 +2,7 @@ window.startTest = function (done) {
   'use strict';
 
   var mapOptions = { center : { y: 40.0, x: -105.0 } };
-  var myMap = window.geoTests.createOsmMap(mapOptions);
+  var myMap = window.geoTests.createOsmMap(mapOptions, {}, true);
   var width = myMap.node().width(), height = myMap.node().height();
 
   // create two layers
