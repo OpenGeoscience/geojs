@@ -23,6 +23,10 @@ geo.gui.divWidget = function (arg) {
     }
 
     this.positionMaybe();
+
+    m_this.$el.on('mousedown', function (e) {
+      e.stopPropagation();
+    });
   };
 
   return this;
