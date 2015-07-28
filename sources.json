@@ -21,6 +21,7 @@
         "clock.js",
         "tile.js",
         "imagePyramid.js",
+        "tileCache.js",
         "fileReader.js",
         "jsonReader.js",
         "map.js",
