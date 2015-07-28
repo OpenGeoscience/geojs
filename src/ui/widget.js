@@ -70,6 +70,14 @@ geo.gui.widget = function (arg) {
     return m_layer;
   };
 
+  this.parentCanvas = function () {
+    if (this.parent !== undefined) {
+      return this.parent().canvas();
+    } else {
+      return this.layer().canvas();
+    }
+  };
+
   // returns {top: m, left: n}
   this.position = function () {
     var position;
