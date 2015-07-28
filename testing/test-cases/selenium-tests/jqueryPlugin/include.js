@@ -5,7 +5,7 @@ window.startTest = function (done) {
   $(function () {
     $('#map').geojsMap({
       center: {latitude: 10, longitude: -10},
-      zoom: 4,
+      zoom: 4.1,
       tileUrl: '/data/grid.jpg',
       layers: [{
         renderer: 'vgl',
@@ -56,7 +56,8 @@ window.startTest = function (done) {
     });
 
     window.swapTiles = function (_) {
-      $('#map').geojsMap('tileUrl', '/data/white.jpg').geojsMap('map').onIdle(_);
+      $('#map').geojsMap('tileUrl', '/data/white.jpg').geojsMap('map');
+      window.setTimeout(_, 1000);
     };
 
     $('#map').geojsMap('map').onIdle(done);
