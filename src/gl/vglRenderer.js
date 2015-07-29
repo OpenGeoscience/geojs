@@ -254,19 +254,16 @@ geo.gl.vglRenderer = function (arg) {
     var vglRenderer = m_this.contextRenderer(),
         map = m_this.layer().map(),
         camera = vglRenderer.camera(),
+        baseContextRenderer,
+        baseCamera,
         renderWindow = m_viewer.renderWindow(),
         layer = m_this.layer(),
-        focusPoint = null,
-        position = null,
+        baseLayer = layer.map().baseLayer(),
+        focalPoint,
+        position,
         zoom,
-        newZ = null,
-        centerDisplay = null,
-        centerGeo = null,
-        mapCenter = null,
-        newCenter = null,
-        currentCenter = null,
-        newCenterDisplay = null,
-        newCenterGeo = null;
+        newZ,
+        mapCenter;
 
     m_width = w;
     m_height = h;
@@ -275,10 +272,8 @@ geo.gl.vglRenderer = function (arg) {
     renderWindow.positionAndResize(x, y, w, h);
     m_this._render();
 
-    // Ignore if this renderer is part of base layer or base layer is
-    // not set yet
-    if (layer.map().baseLayer() === layer || !layer.map().baseLayer() ||
-        m_initialized) {
+    // Ignore if the base layer is not set yet
+    if (!baseLayer || m_initialized) {
       return;
     }
     m_initialized = true;
@@ -291,42 +286,22 @@ geo.gl.vglRenderer = function (arg) {
     position = camera.position();
     zoom = map.zoom();
     newZ = camera.zoomToHeight(zoom, w, h);
-    camera.setPosition(position[0], position[1], newZ);
+
+    // Assuming that baselayer will be a GL layer
+    if (layer !== baseLayer) {
+      baseContextRenderer = baseLayer.renderer().contextRenderer();
+      baseCamera = baseContextRenderer.camera();
+      position = baseCamera.position();
+      focalPoint = baseCamera.focalPoint();
+      camera.setPosition(position[0], position[1], position[2]);
+      camera.setFocalPoint(focalPoint[0], focalPoint[1], focalPoint[2]);
+    } else {
+      mapCenter = layer.toLocal(layer.map().center());
+      focalPoint = camera.focalPoint();
+      camera.setPosition(mapCenter.x, mapCenter.y, newZ);
+      camera.setFocalPoint(mapCenter.x, mapCenter.y, focalPoint[2]);
+    }
     camera.setParallelExtents({zoom: zoom});
-
-    // Calculate the center in display coordinates
-    centerDisplay = [m_width / 2, m_height / 2, 0];
-
-    // Calculate the center in world coordinates
-    centerGeo = renderWindow.displayToWorld(
-      centerDisplay[0],
-      centerDisplay[1],
-      focusPoint,
-      vglRenderer
-    );
-
-    // get the screen coordinates of the new center
-    mapCenter = geo.util.normalizeCoordinates(m_this.layer().map().center());
-    newCenter = map.gcsToDisplay(mapCenter);
-    currentCenter = map.gcsToDisplay({x: 0, y: 0});
-
-    newCenterDisplay = [
-      centerDisplay[0] + currentCenter.x - newCenter.x,
-      centerDisplay[1] + currentCenter.y - newCenter.y
-    ];
-
-    newCenterGeo = renderWindow.displayToWorld(
-      newCenterDisplay[0],
-      newCenterDisplay[1],
-      focusPoint,
-      vglRenderer
-    );
-
-    camera.pan(
-      centerGeo[0] - newCenterGeo[0],
-      centerGeo[1] - newCenterGeo[1],
-      centerGeo[2] - newCenterGeo[2]
-    );
 
     m_this._updateRendererCamera();
 

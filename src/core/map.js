@@ -237,7 +237,9 @@ geo.map = function (arg) {
     m_this._updateBounds();
 
     m_this.children().forEach(function (child) {
-      child.geoTrigger(geo.event.pan, evt, true);
+      if (child !== base) {
+        child.geoTrigger(geo.event.pan, evt, true);
+      }
     });
 
     m_this.modified();
