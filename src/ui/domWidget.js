@@ -17,9 +17,6 @@ geo.gui.domWidget = function (arg) {
     }
 
     m_this.$el.appendTo(m_this.parentCanvas());
-    if (arg.hasOwnProperty('attrs')) {
-      m_this.$el.attr(arg.attrs);
-    }
 
     this.positionMaybe();
 

@@ -17,9 +17,6 @@ geo.gui.svgWidget = function (arg) {
 
     // @todo error handling has to be done here, dealing with d3/jquery interop
     m_this.$el = $(d3.select(m_this.parentCanvas()[0]).append('svg')[0]);
-    if (arg.hasOwnProperty('attrs')) {
-      m_this.$el.attr(arg.attrs);
-    }
 
     this.positionMaybe();
 
