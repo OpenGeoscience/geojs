@@ -296,7 +296,7 @@ geo.gl.vglRenderer = function (arg) {
       camera.setPosition(position[0], position[1], position[2]);
       camera.setFocalPoint(focalPoint[0], focalPoint[1], focalPoint[2]);
     } else {
-      mapCenter = geo.util.normalizeCoordinates(layer.map().center());
+      mapCenter = layer.toLocal(layer.map().center());
       focalPoint = camera.focalPoint();
       camera.setPosition(mapCenter.x, mapCenter.y, newZ);
       camera.setFocalPoint(mapCenter.x, mapCenter.y, focalPoint[2]);
