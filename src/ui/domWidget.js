@@ -8,21 +8,28 @@ geo.gui.domWidget = function (arg) {
 
   var m_this = this;
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Initializes DOM Widget.
+   * Sets the canvas for the widget, does parent/child relationship management,
+   * appends it to it's parent and handles any positioning logic.
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
     m_this.args = arg;
-    m_this.$el = $(arg.el || '<div></div>');
+    m_this.canvas($(arg.el || '<div></div>'));
 
     if (arg.hasOwnProperty('parent') && arg.parent instanceof geo.gui.widget) {
       arg.parent.addChild(m_this);
     }
 
-    m_this.$el.appendTo(m_this.parentCanvas());
+    m_this.canvas().appendTo(m_this.parentCanvas());
 
-    this.positionMaybe();
-
-    m_this.$el.on('mousedown', function (e) {
+    m_this.canvas().on('mousedown', function (e) {
       e.stopPropagation();
     });
+
+    this.positionMaybe();
   };
 
   return this;

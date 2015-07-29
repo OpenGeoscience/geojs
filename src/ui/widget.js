@@ -70,17 +70,29 @@ geo.gui.widget = function (arg) {
     return m_layer;
   };
 
-  // A little convoluted at the moment, a widgets parent
-  // is the uiLayer by default.
-  this.parentCanvas = function () {
-    if (this.parent !== undefined) {
-      if (this.parent() instanceof geo.gui.uiLayer) {
-        return this.parent().canvas();
-      } else {
-        return this.parent().$el;
-      }
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set the canvas for the widget
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.canvas = function (val) {
+    if (val === undefined) {
+      return m_this.$el;
     } else {
+      m_this.$el = val;
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get the parent canvas (top level widgets define their layer as their parent canvas)
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.parentCanvas = function () {
+    if (this.parent === undefined) {
       return this.layer().canvas();
+    } else {
+      return this.parent().canvas();
     }
   };
 
