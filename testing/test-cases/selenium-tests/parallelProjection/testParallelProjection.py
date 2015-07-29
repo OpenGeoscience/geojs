@@ -1,14 +1,12 @@
 #!/usr/bin/env python
 
-import unittest
-
 from selenium_test import FirefoxTest, ChromeTest,\
     setUpModule, tearDownModule
 
 
 class parallelProjectionBase(object):
     testCase = ('parallelProjection',)
-    testRevision = 0
+    testRevision = 1
 
     def loadPage(self):
         self.resizeWindow(640, 480)
