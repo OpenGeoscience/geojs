@@ -84,7 +84,7 @@
         "widget.js",
         "sliderWidget.js",
         "legendWidget.js",
-        "divWidget.js"
+        "domWidget.js"
       ]
     },
     "geo.plugin": {

@@ -1,17 +1,16 @@
-geo.gui.divWidget = function (arg) {
+geo.gui.domWidget = function (arg) {
   'use strict';
-  if (!(this instanceof geo.gui.divWidget)) {
-    return new geo.gui.divWidget(arg);
+  if (!(this instanceof geo.gui.domWidget)) {
+    return new geo.gui.domWidget(arg);
   }
 
   geo.gui.widget.call(this, arg);
 
   var m_this = this;
 
-  this.$el = $('<div></div>');
-
   this._init = function (arg) {
     m_this.args = arg;
+    m_this.$el = $(arg.el || '<div></div>');
 
     if (arg.hasOwnProperty('parent') && arg.parent instanceof geo.gui.widget) {
       arg.parent.addChild(m_this);
@@ -32,6 +31,6 @@ geo.gui.divWidget = function (arg) {
   return this;
 };
 
-inherit(geo.gui.divWidget, geo.gui.widget);
+inherit(geo.gui.domWidget, geo.gui.widget);
 
-geo.registerWidget('dom', 'div', geo.gui.divWidget);
+geo.registerWidget('dom', 'dom', geo.gui.domWidget);
