@@ -112,7 +112,7 @@ geo.gui.widget = function (arg) {
   };
 
   this.positionMaybe = function () {
-    m_this.$el.css($.extend({position: 'relative'}, m_this.position()));
+    m_this.$el.css($.extend({position: 'absolute'}, m_this.position()));
   };
 
   // @todo doesn't detect if its partially in the viewport.. would need to look at

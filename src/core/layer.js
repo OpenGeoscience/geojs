@@ -373,7 +373,15 @@ geo.layer = function (arg) {
     // Create top level div for the layer
     m_node = $(document.createElement("div"));
     m_node.attr("id", m_name);
-    m_node.css("position", "absolute");
+    // TODO: need to position according to offsets from the map element
+    //       and maybe respond to events in case the map element moves
+    //       around the page.
+    if (m_this instanceof geo.gui.uiLayer) {
+      // @todo what does this break?
+      m_node.css("position", "relative");
+    } else {
+      m_node.css("position", "absolute");
+    }
 
     if (m_map) {
       m_map.node().append(m_node);
