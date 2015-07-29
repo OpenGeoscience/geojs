@@ -1,14 +1,12 @@
 #!/usr/bin/env python
 
-import unittest
-
 from selenium_test import FirefoxTest, ChromeTest,\
     setUpModule, tearDownModule
 
 
 class glPointsBase(object):
     testCase = ('glPoints',)
-    testRevision = 6
+    testRevision = 7
 
     def loadPage(self):
         self.resizeWindow(640, 480)

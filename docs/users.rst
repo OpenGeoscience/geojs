@@ -90,7 +90,7 @@ class definition inside GeoJS.
         // Call the parent class's constructor.
         geo.A.call(this, args);
 
-        // Declare private variables and save overriden superclass methods.
+        // Declare private variables and save overridden superclass methods.
         var m_this = this,
             s_func = this.func,
             m_var = 1;
@@ -195,7 +195,7 @@ documentation for each of the classes.
     This class handles all mouse and keyboard events for the map.  Users can customize
     the mouse and keyboard bindings through this class.
 
-`geo.fileReaer <http://opengeoscience.github.io/geojs/apidocs/geo.fileReader.html>`_
+`geo.fileReader <http://opengeoscience.github.io/geojs/apidocs/geo.fileReader.html>`_
     This is an abstract class defining the interface for file readers.  Currently,
     the only implemented reader is
     `geo.jsonReader <http://opengeoscience.github.io/geojs/apidocs/geo.jsonReader.html>`_,
