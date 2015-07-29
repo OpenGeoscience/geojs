@@ -6,12 +6,13 @@ from selenium_test import FirefoxTest, ChromeTest,\
 
 class d3GeoJsonBase(object):
     testCase = ('d3GeoJson',)
-    testRevision = 4
+    testRevision = 5
 
     def loadPage(self):
         self.resizeWindow(640, 480)
         self.loadURL('d3GeoJson/index.html')
         self.wait()
+        self.resizeWindow(640, 480)
 
     def testd3DrawGeoJson(self):
         self.loadPage()

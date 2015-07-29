@@ -3,7 +3,7 @@ window.startTest = function (done) {
   'use strict';
 
   var mapOptions = {
-    zoom: 3,
+    zoom: 5.5,
     center : {
       y: 33.60,
       x: -80.83

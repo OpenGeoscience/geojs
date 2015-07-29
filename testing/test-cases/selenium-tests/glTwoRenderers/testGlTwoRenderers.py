@@ -8,12 +8,13 @@ from selenium_test import FirefoxTest, ChromeTest,\
 
 class glTwoRenderersBase(object):
     testCase = ('glTwoRenderers',)
-    testRevision = 2
+    testRevision = 3
 
     def loadPage(self):
         self.resizeWindow(1600, 900)
         self.loadURL('glTwoRenderers/index.html')
         self.wait()
+        self.resizeWindow(1600, 900)
 
     def testGlTwoRenderers(self):
         self.loadPage()

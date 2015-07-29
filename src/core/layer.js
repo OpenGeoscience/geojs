@@ -40,7 +40,7 @@ geo.layer = function (arg) {
       m_canvas = null,
       m_renderer = null,
       m_initialized = false,
-      m_rendererName = arg.renderer  === undefined ? "vgl" : arg.renderer,
+      m_rendererName = arg.renderer === undefined ? "vgl" : arg.renderer,
       m_dataTime = geo.timestamp(),
       m_updateTime = geo.timestamp(),
       m_drawTime = geo.timestamp(),
@@ -360,11 +360,16 @@ geo.layer = function (arg) {
 
     }
 
+    /* Pass along the arguments, but not the map reference */
+    var options = $.extend({}, arg);
+    delete options.map;
     // Share context if have valid one
     if (m_canvas) {
-      m_renderer = geo.createRenderer(m_rendererName, m_this, m_canvas);
+      m_renderer = geo.createRenderer(m_rendererName, m_this, m_canvas,
+                                      options);
     } else {
-      m_renderer = geo.createRenderer(m_rendererName, m_this);
+      m_renderer = geo.createRenderer(m_rendererName, m_this, undefined,
+                                      options);
       m_canvas = m_renderer.canvas();
     }
 

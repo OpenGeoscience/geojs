@@ -6,12 +6,13 @@ from selenium_test import FirefoxTest, ChromeTest,\
 
 class glPointsBase(object):
     testCase = ('pointClustering',)
-    testRevision = 1
+    testRevision = 2
 
     def loadPage(self):
         self.resizeWindow(640, 480)
         self.loadURL('pointClustering/index.html')
         self.wait()
+        self.resizeWindow(640, 480)
 
     def testClustering0(self):
         self.loadPage()
@@ -20,7 +21,7 @@ class glPointsBase(object):
     def testClustering2(self):
         self.loadPage()
         self.runScript(
-            'myMap.zoom(3); myMap.center({x: -99, y: 40});'
+            'myMap.zoom(5); myMap.center({x: -99, y: 40});'
         )
         self.screenshotTest('zoom2')
 

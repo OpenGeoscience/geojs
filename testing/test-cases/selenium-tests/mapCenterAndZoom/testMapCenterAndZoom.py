@@ -11,6 +11,7 @@ class mapCenter(object):
         self.resizeWindow(640, 480)
         self.loadURL('mapCenterAndZoom/index.html')
         self.wait()
+        self.resizeWindow(640, 480)
 
     def test_map_initial_center(self):
         testName = 'mapInitialCenter'
@@ -53,12 +54,12 @@ window.gjsmap.onIdle(function () {
 
 class FirefoxMapCenter(mapCenter, FirefoxTest):
     testCase = mapCenter.testCase + ('firefox',)
-    testRevision = 3
+    testRevision = 4
 
 
 class ChromeMapCenter(mapCenter, ChromeTest):
     testCase = mapCenter.testCase + ('chrome',)
-    testRevision = 3
+    testRevision = 4
 
 
 if __name__ == '__main__':

@@ -13,6 +13,7 @@ class d3AnimationBase(object):
         self.resizeWindow(640, 480)
         self.loadURL('d3Animation/index.html')
         self.wait()
+        self.resizeWindow(640, 480)
         time.sleep(1)
 
     def testd3AnimateForward(self):
@@ -60,12 +61,12 @@ class d3AnimationBase(object):
 
 class FirefoxOSM(d3AnimationBase, FirefoxTest):
     testCase = d3AnimationBase.testCase + ('firefox',)
-    testRevision = 9
+    testRevision = 10
 
 
 class ChromeOSM(d3AnimationBase, ChromeTest):
     testCase = d3AnimationBase.testCase + ('chrome',)
-    testRevision = 10
+    testRevision = 11
 
 
 if __name__ == '__main__':

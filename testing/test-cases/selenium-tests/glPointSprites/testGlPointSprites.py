@@ -14,6 +14,7 @@ class glPointSpritesBase(object):
         self.resizeWindow(640, 480)
         self.loadURL('glPointSprites/index.html')
         self.wait()
+        self.resizeWindow(640, 480)
 
     def testGlPointSprites(self):
         self.loadPage()

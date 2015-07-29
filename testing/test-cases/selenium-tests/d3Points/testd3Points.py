@@ -6,12 +6,13 @@ from selenium_test import FirefoxTest, ChromeTest,\
 
 class d3PointsBase(object):
     testCase = ('d3Points',)
-    testRevision = 7
+    testRevision = 8
 
     def loadPage(self):
         self.resizeWindow(640, 480)
         self.loadURL('d3Points/index.html')
         self.wait()
+        self.resizeWindow(640, 480)
 
     def testd3DrawPoints(self):
         self.loadPage()

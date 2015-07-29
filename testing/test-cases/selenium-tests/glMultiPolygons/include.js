@@ -18,7 +18,7 @@ window.startTest = function (done) {
 
   var myMap = geo.map({
       node: "#map",
-        zoom: 9,
+        zoom: 11,
         center: {
           x: -84.5,
           y: 35.65
