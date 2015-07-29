@@ -101,14 +101,12 @@ geo.gui.widget = function (arg) {
     var position;
 
     if (m_this.args &&
-        m_this.args.hasOwnProperty('position') &&
-        m_this.args.hasOwnProperty('positionType') &&
-        m_this.args.hasOwnProperty(m_this.args.position)) {
+        m_this.args.hasOwnProperty('position')) {
+      position = m_this.args.position;
 
-      if (m_this.args.positionType === 'gcs') {
-        position = m_this.layer().map().gcsToDisplay(m_this.args[m_this.args.position]);
-      } else if (m_this.args.positionType === 'viewport') {
-        position = m_this.args[m_this.args.position];
+      if (m_this.args.hasOwnProperty('positionType') &&
+          m_this.args.positionType === 'gcs') {
+        position = m_this.layer().map().gcsToDisplay(m_this.args.position);
       }
 
       return {

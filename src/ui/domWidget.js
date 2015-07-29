@@ -17,6 +17,8 @@ geo.gui.domWidget = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
     m_this.args = arg;
+    m_this.args.sticky = arg.sticky || false;
+    m_this.args.positionType = arg.positionType || 'viewport';
     m_this.canvas($(arg.el || '<div></div>'));
 
     if (arg.hasOwnProperty('parent') && arg.parent instanceof geo.gui.widget) {
