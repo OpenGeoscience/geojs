@@ -58,7 +58,6 @@ geo.featureLayer = function (arg) {
     for (i = 0; i < m_features.length; i += 1) {
       if (m_features[i] === feature) {
         m_features[i]._exit();
-        m_this.dataTime().modified();
         m_this.modified();
         m_features.splice(i, 1);
       }
@@ -80,7 +79,6 @@ geo.featureLayer = function (arg) {
       return m_features;
     } else {
       m_features = val.slice(0);
-      m_this.dataTime().modified();
       m_this.modified();
       return m_this;
     }
@@ -151,7 +149,7 @@ geo.featureLayer = function (arg) {
       m_features[i]._update();
     }
 
-    m_this.updateTime().modified();
+    m_this.modified();
 
     return m_this;
   };
@@ -198,7 +196,6 @@ geo.featureLayer = function (arg) {
       m_this.removeChild(m_features[i]);
     }
 
-    m_this.dataTime().modified();
     m_this.modified();
     m_features = [];
 
