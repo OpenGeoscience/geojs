@@ -5,7 +5,6 @@
  * Creation tags a dictionary of arguments, which can include:
  *  center: {x: (center x value), y: (center y value)}
  *  gcs:
- *  uigcs:
  *  node:
  *  layers:
  *  zoom: (number) - initial zoom level
@@ -51,7 +50,6 @@ geo.map = function (arg) {
       m_width = arg.width || m_node.width(),
       m_height = arg.height || m_node.height(),
       m_gcs = arg.gcs === undefined ? 'EPSG:4326' : arg.gcs,
-      m_uigcs = arg.uigcs === undefined ? 'EPSG:4326' : arg.uigcs,
       m_center = { x: 0, y: 0 },
       m_zoom = arg.zoom === undefined ? 4 : arg.zoom,
       m_baseLayer = null,
@@ -82,17 +80,6 @@ geo.map = function (arg) {
     }
     m_gcs = arg;
     return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get map user interface GCS
-   *
-   * @returns {string}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.uigcs = function () {
-    return m_uigcs;
   };
 
   ////////////////////////////////////////////////////////////////////////////
