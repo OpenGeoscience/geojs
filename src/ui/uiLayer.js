@@ -34,7 +34,7 @@ geo.gui.uiLayer = function (arg) {
       widgetName, m_this, m_this.renderer(), arg);
 
     // We only want top level widgets to be a child of the uiLayer
-    if (!('parent' in arg)) {
+    if (!(arg && 'parent' in arg)) {
       m_this.addChild(newWidget);
     }
 

@@ -12,10 +12,12 @@ geo.gui.sliderWidget = function (arg) {
   if (!(this instanceof geo.gui.sliderWidget)) {
     return new geo.gui.sliderWidget(arg);
   }
-  geo.gui.widget.call(this, arg);
+  geo.gui.svgWidget.call(this, arg);
 
   var m_this = this,
       s_exit = this._exit,
+      s_createCanvas = this._createCanvas,
+      s_appendChild = this._appendChild,
       m_xscale,
       m_yscale,
       m_plus,
@@ -86,8 +88,16 @@ geo.gui.sliderWidget = function (arg) {
  * @private
  */
 //////////////////////////////////////////////////////////////////////////////
-  this._init = function () {
-    var svg = m_this.layer().renderer().canvas(),
+  this._init = function (arg) {
+    m_this.args = arg;
+    m_this.args.sticky = arg.sticky || false;
+    m_this.args.positionType = arg.positionType || 'viewport';
+    s_createCanvas();
+    s_appendChild();
+
+    this.positionMaybe();
+
+    var svg = d3.select(m_this.canvas()),
         x0 = 40,
         y0 = 40 + m_width,
         map = m_this.layer().map();
@@ -326,6 +336,6 @@ geo.gui.sliderWidget = function (arg) {
   };
 };
 
-inherit(geo.gui.sliderWidget, geo.gui.widget);
+inherit(geo.gui.sliderWidget, geo.gui.svgWidget);
 
-geo.registerWidget('d3', 'slider', geo.gui.sliderWidget);
+geo.registerWidget('dom', 'slider', geo.gui.sliderWidget);

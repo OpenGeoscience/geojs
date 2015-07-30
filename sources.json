@@ -82,10 +82,10 @@
         "init.js",
         "uiLayer.js",
         "widget.js",
-        "sliderWidget.js",
         "legendWidget.js",
         "domWidget.js",
-        "svgWidget.js"
+        "svgWidget.js",
+        "sliderWidget.js"
       ]
     },
     "geo.plugin": {
