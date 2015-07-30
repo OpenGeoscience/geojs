@@ -28,8 +28,8 @@ geo.gui.widget = function (arg) {
       m_this._deleteFeature(child);
     });
 
-    this.layer().geoOff(geo.event.pan, this.positionMaybe);
-    m_this.$el.remove();
+    this.layer().geoOff(geo.event.pan, this.maybeReposition);
+    m_this.parentCanvas().removeChild(m_this.canvas());
 
     s_exit();
   };
@@ -122,7 +122,7 @@ geo.gui.widget = function (arg) {
     };
   };
 
-  this.positionMaybe = function () {
+  this.maybeReposition = function () {
     var position = m_this.position();
     m_this.canvas().style.position = 'absolute';
 
@@ -143,6 +143,6 @@ geo.gui.widget = function (arg) {
             (position.left <= map.width() && position.top <= map.height()));
   };
 
-  this.layer().geoOn(geo.event.pan, this.positionMaybe);
+  this.layer().geoOn(geo.event.pan, this.maybeReposition);
 };
 inherit(geo.gui.widget, geo.sceneObject);

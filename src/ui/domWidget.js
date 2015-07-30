@@ -47,7 +47,7 @@ geo.gui.domWidget = function (arg) {
       e.stopPropagation();
     });
 
-    this.positionMaybe();
+    this.maybeReposition();
   };
 
   return this;
