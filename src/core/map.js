@@ -34,7 +34,6 @@ geo.map = function (arg) {
   }
   arg = arg || {};
   geo.sceneObject.call(this, arg);
-  arg.layers = arg.layers === undefined ? [] : arg.layers;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -475,11 +474,6 @@ geo.map = function (arg) {
   this.baseLayer = function (baseLayer) {
     var save;
     if (baseLayer !== undefined) {
-
-      // The GCS of the layer must match the map
-      if (m_gcs !== baseLayer.gcs()) {
-        m_this.gcs(baseLayer.gcs());
-      }
 
       m_baseLayer = baseLayer;
 

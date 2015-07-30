@@ -610,7 +610,7 @@ geo.osmLayer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._init = function () {
     s_init.call(m_this);
-    m_this.gcs('EPSG:3857');
+    m_this.map().gcs('EPSG:3857');
     m_this.map().zoomRange({
       min: 0,
       max: 18
