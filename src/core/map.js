@@ -329,6 +329,7 @@ geo.map = function (arg) {
       m_this.baseLayer(newLayer);
     }
 
+    newLayer._resize(m_x, m_y, m_width, m_height); // this call initializes the camera
     m_this.addChild(newLayer);
     m_this.modified();
 
