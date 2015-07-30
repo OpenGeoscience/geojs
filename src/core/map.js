@@ -319,7 +319,7 @@ geo.map = function (arg) {
     var newLayer = geo.createLayer(
       layerName, m_this, arg);
 
-    if (newLayer !== null || newLayer !== undefined) {
+    if (newLayer) {
       newLayer._resize(m_x, m_y, m_width, m_height);
     } else {
       return null;
