@@ -16,7 +16,8 @@ geo.gui.widget = function (arg) {
 
   var m_this = this,
       s_exit = this._exit,
-      m_layer = arg.layer;
+      m_layer = arg.layer,
+      m_canvas = null;
 
   this._init = function () {
     m_this.modified();
@@ -77,9 +78,9 @@ geo.gui.widget = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.canvas = function (val) {
     if (val === undefined) {
-      return m_this.$el;
+      return m_canvas;
     } else {
-      m_this.$el = val;
+      m_canvas = val;
     }
   };
 
@@ -90,9 +91,9 @@ geo.gui.widget = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.parentCanvas = function () {
     if (this.parent === undefined) {
-      return this.layer().canvas();
+      return this.layer().canvas()[0];
     } else {
-      return this.parent().canvas();
+      return this.parent().canvas()[0];
     }
   };
 
@@ -122,7 +123,14 @@ geo.gui.widget = function (arg) {
   };
 
   this.positionMaybe = function () {
-    m_this.$el.css($.extend({position: 'absolute'}, m_this.position()));
+    var position = m_this.position();
+    m_this.canvas().style.position = 'absolute';
+
+    for (var cssAttr in position) {
+      if (position.hasOwnProperty(cssAttr)) {
+        m_this.canvas().style[cssAttr] = position[cssAttr];
+      }
+    }
   };
 
   // @todo doesn't detect if its partially in the viewport.. would need to look at

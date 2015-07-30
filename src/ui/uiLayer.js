@@ -38,7 +38,7 @@ geo.gui.uiLayer = function (arg) {
       m_this.addChild(newWidget);
     }
 
-    newWidget._init(arg); // @todo shouldn't this be maintained in the object?
+    newWidget._init(arg);
     m_this.modified();
     return newWidget;
   };
