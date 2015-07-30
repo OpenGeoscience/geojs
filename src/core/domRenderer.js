@@ -15,11 +15,13 @@ geo.domRenderer = function (arg) {
   };
 
   this._init = function () {
-    if (!m_this.canvas()) {
+    var layer = m_this.layer().node();
+
+    if (!m_this.canvas() && layer && layer.length) {
       // The renderer and the UI Layer share the same canvas
       // at least for now. This renderer is essentially a noop renderer
       // designed for backwards compatibility
-      m_this.canvas(m_this.layer().node());
+      m_this.canvas(layer[0]);
     }
   };
 

@@ -15,6 +15,17 @@ geo.gui.domWidget = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Appends a child to the widget
+   * The widget determines how to append itself to a parent, the parent can either
+   * be another widget, or the UI Layer.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._appendChild = function () {
+    m_this.parentCanvas().appendChild(m_this.canvas());
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Initializes DOM Widget.
    * Sets the canvas for the widget, does parent/child relationship management,
    * appends it to it's parent and handles any positioning logic.
@@ -24,13 +35,13 @@ geo.gui.domWidget = function (arg) {
     m_this.args = arg;
     m_this.args.sticky = arg.sticky || false;
     m_this.args.positionType = arg.positionType || 'viewport';
-    m_this._createCanvas();
 
     if (arg.hasOwnProperty('parent') && arg.parent instanceof geo.gui.widget) {
       arg.parent.addChild(m_this);
     }
 
-    m_this.parentCanvas().appendChild(m_this.canvas());
+    m_this._createCanvas();
+    m_this._appendChild();
 
     m_this.canvas().addEventListener('mousedown', function (e) {
       e.stopPropagation();

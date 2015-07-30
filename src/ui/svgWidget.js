@@ -4,31 +4,26 @@ geo.gui.svgWidget = function (arg) {
     return new geo.gui.svgWidget(arg);
   }
 
-  geo.gui.widget.call(this, arg);
+  geo.gui.domWidget.call(this, arg);
 
   var m_this = this;
 
-  this._init = function (arg) {
-    m_this.args = arg;
+  this._createCanvas = function () {
+    m_this.canvas(d3.select(m_this.parentCanvas()).append('svg')[0][0]);
+  };
 
-    if (arg.hasOwnProperty('parent') && arg.parent instanceof geo.gui.widget) {
-      arg.parent.addChild(m_this);
+  this._appendChild = function () {
+    if (m_this.parent() instanceof geo.gui.svgWidget) {
+      throw 'Nested svgWidgets not yet supported.';
+    } else {
+      // The parent is another type of widget, or the UI Layer
+      m_this.parentCanvas().appendChild(m_this.canvas());
     }
-
-    // @todo error handling has to be done here, dealing with d3/jquery interop
-    m_this.canvas($(d3.select(m_this.parentCanvas()[0]).append('svg')[0]));
-
-    this.positionMaybe();
-
-    m_this.canvas().on('mousedown', function (e) {
-      e.stopPropagation();
-    });
   };
 
   return this;
 };
 
-// @todo this should inherit domWidget
-inherit(geo.gui.svgWidget, geo.gui.widget);
+inherit(geo.gui.svgWidget, geo.gui.domWidget);
 
 geo.registerWidget('dom', 'svg', geo.gui.svgWidget);

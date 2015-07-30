@@ -91,9 +91,9 @@ geo.gui.widget = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.parentCanvas = function () {
     if (this.parent === undefined) {
-      return this.layer().canvas()[0];
+      return this.layer().canvas();
     } else {
-      return this.parent().canvas()[0];
+      return this.parent().canvas();
     }
   };
 
