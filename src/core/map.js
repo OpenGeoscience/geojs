@@ -237,7 +237,9 @@ geo.map = function (arg) {
     m_this._updateBounds();
 
     m_this.children().forEach(function (child) {
-      child.geoTrigger(geo.event.pan, evt, true);
+      if (child !== base) {
+        child.geoTrigger(geo.event.pan, evt, true);
+      }
     });
 
     m_this.modified();
@@ -317,7 +319,7 @@ geo.map = function (arg) {
     var newLayer = geo.createLayer(
       layerName, m_this, arg);
 
-    if (newLayer !== null || newLayer !== undefined) {
+    if (newLayer) {
       newLayer._resize(m_x, m_y, m_width, m_height);
     } else {
       return null;
@@ -327,6 +329,7 @@ geo.map = function (arg) {
       m_this.baseLayer(newLayer);
     }
 
+    newLayer._resize(m_x, m_y, m_width, m_height); // this call initializes the camera
     m_this.addChild(newLayer);
     m_this.modified();
 
