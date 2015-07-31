@@ -151,8 +151,14 @@ geo.gui.widget = function (arg) {
             (position.left <= map.width() && position.top <= map.height()));
   };
 
-  this.layer().geoOn(geo.event.pan, function () {
-    return m_this.reposition();
-  });
+  if (arg &&
+      arg.hasOwnProperty('sticky') &&
+      arg.sticky &&
+      arg.hasOwnProperty('positionType') &&
+      arg.positionType === 'gcs') {
+    this.layer().geoOn(geo.event.pan, function () {
+      return m_this.reposition();
+    });
+  }
 };
 inherit(geo.gui.widget, geo.sceneObject);
