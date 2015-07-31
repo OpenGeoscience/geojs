@@ -143,20 +143,6 @@ geo.d3.d3Renderer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get the map instance or return null if not connected to a map.
-   * @private
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  function getMap() {
-    var layer = m_this.layer();
-    if (!layer) {
-      return null;
-    }
-    return layer.map();
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
    * Get the svg group element associated with this renderer instance.
    * @private
    */
@@ -226,34 +212,6 @@ geo.d3.d3Renderer = function (arg) {
     m_scale = scale;
     m_dx = dx;
     m_dy = dy;
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Convert from screen pixel coordinates to the local coordinate system
-   * in the SVG group element taking into account the transform.
-   * @private
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  function baseToLocal(pt) {
-    return {
-      x: (pt.x - m_dx) / m_scale,
-      y: (pt.y - m_dy) / m_scale
-    };
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Convert from the local coordinate system in the SVG group element
-   * to screen pixel coordinates.
-   * @private
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  function localToBase(pt) {
-    return {
-      x: pt.x * m_scale + m_dx,
-      y: pt.y * m_scale + m_dy
-    };
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -334,49 +292,6 @@ geo.d3.d3Renderer = function (arg) {
         m_this.canvas(m_svg);
       }
     }
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Convert from coordinates in the svg group element to lat/lon.
-   * Supports objects or arrays of objects.
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.displayToWorld = function (pt) {
-    var map = getMap();
-    if (!map) {
-      throw 'Cannot project until this layer is connected to a map.';
-    }
-    if (Array.isArray(pt)) {
-      pt = pt.map(function (x) {
-        return map.displayToGcs(localToBase(x));
-      });
-    } else {
-      pt = map.displayToGcs(localToBase(pt));
-    }
-    return pt;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Convert from lat/lon to pixel coordinates in the svg group element.
-   * Supports objects or arrays of objects.
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.worldToDisplay = function (pt) {
-    var map = getMap();
-    if (!map) {
-      throw 'Cannot project until this layer is connected to a map.';
-    }
-    var v;
-    if (Array.isArray(pt)) {
-      v = pt.map(function (x) {
-        return baseToLocal(map.gcsToDisplay(x));
-      });
-    } else {
-      v = baseToLocal(map.gcsToDisplay(pt));
-    }
-    return v;
   };
 
   ////////////////////////////////////////////////////////////////////////////
