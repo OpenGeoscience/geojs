@@ -32,6 +32,7 @@ geo.gui.domWidget = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
+    arg = arg || {};
     m_this.args = arg;
     m_this.args.sticky = arg.sticky || false;
     m_this.args.positionType = arg.positionType || 'viewport';
