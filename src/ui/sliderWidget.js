@@ -95,7 +95,7 @@ geo.gui.sliderWidget = function (arg) {
     s_createCanvas();
     s_appendChild();
 
-    this.maybeReposition();
+    this.reposition();
 
     var svg = d3.select(m_this.canvas()),
         x0 = 40,
