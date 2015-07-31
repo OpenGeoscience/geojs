@@ -12,7 +12,7 @@ geo.gui.legendWidget = function (arg) {
   if (!(this instanceof geo.gui.legendWidget)) {
     return new geo.gui.legendWidget(arg);
   }
-  geo.gui.widget.call(this, arg);
+  geo.gui.svgWidget.call(this, arg);
 
   /** @private */
   var m_this = this,
@@ -21,7 +21,9 @@ geo.gui.legendWidget = function (arg) {
       m_group = null,
       m_border = null,
       m_spacing = 20, // distance in pixels between lines
-      m_padding = 12; // padding in pixels inside the border
+      m_padding = 12, // padding in pixels inside the border
+      s_createCanvas = this._createCanvas,
+      s_appendChild = this._appendChild;
 
   //////////////////////////////////////////////////////////////////////////////
   /**
@@ -73,8 +75,8 @@ geo.gui.legendWidget = function (arg) {
   //////////////////////////////////////////////////////////////////////////////
   this.size = function () {
     var width = 1, height;
-    var test =  m_this.layer().renderer().canvas().append('text')
-      .style('opacity', 1e-6);
+    var test =  d3.select(m_this.canvas()).append('text')
+          .style('opacity', 1e-6);
 
     m_categories.forEach(function (d) {
       test.text(d.name);
@@ -99,12 +101,12 @@ geo.gui.legendWidget = function (arg) {
     m_this._init();
     function applyColor(selection) {
       selection.style('fill', function (d) {
-          if (d.style.fill || d.style.fill === undefined) {
-            return d.style.fillColor;
-          } else {
-            return 'none';
-          }
-        })
+        if (d.style.fill || d.style.fill === undefined) {
+          return d.style.fillColor;
+        } else {
+          return 'none';
+        }
+      })
         .style('fill-opacity', function (d) {
           if (d.style.fillOpacity === undefined) {
             return 1;
@@ -138,41 +140,41 @@ geo.gui.legendWidget = function (arg) {
     var scale = m_this._scale();
 
     var labels = m_group.selectAll('g.geo-label')
-      .data(m_categories, function (d) { return d.name; });
+          .data(m_categories, function (d) { return d.name; });
 
     var g = labels.enter().append('g')
-      .attr('class', 'geo-label')
-      .attr('transform', function (d, i) {
-        return 'translate(0,' + scale.y(i) + ')';
-      });
+          .attr('class', 'geo-label')
+          .attr('transform', function (d, i) {
+            return 'translate(0,' + scale.y(i) + ')';
+          });
 
     applyColor(g.filter(function (d) {
-        return d.type !== 'point' && d.type !== 'line';
-      }).append('rect')
-        .attr('x', 0)
-        .attr('y', -6)
-        .attr('rx', 5)
-        .attr('ry', 5)
-        .attr('width', 40)
-        .attr('height', 12)
-    );
+      return d.type !== 'point' && d.type !== 'line';
+    }).append('rect')
+               .attr('x', 0)
+               .attr('y', -6)
+               .attr('rx', 5)
+               .attr('ry', 5)
+               .attr('width', 40)
+               .attr('height', 12)
+              );
 
     applyColor(g.filter(function (d) {
-        return d.type === 'point';
-      }).append('circle')
-        .attr('cx', 20)
-        .attr('cy', 0)
-        .attr('r', 6)
-    );
+      return d.type === 'point';
+    }).append('circle')
+               .attr('cx', 20)
+               .attr('cy', 0)
+               .attr('r', 6)
+              );
 
     applyColor(g.filter(function (d) {
-        return d.type === 'line';
-      }).append('line')
-        .attr('x1', 0)
-        .attr('y1', 0)
-        .attr('x2', 40)
-        .attr('y2', 0)
-    );
+      return d.type === 'line';
+    }).append('line')
+               .attr('x1', 0)
+               .attr('y1', 0)
+               .attr('x2', 40)
+               .attr('y2', 0)
+              );
 
     g.append('text')
       .attr('x', '50px')
@@ -181,6 +183,8 @@ geo.gui.legendWidget = function (arg) {
       .text(function (d) {
         return d.name;
       });
+
+    m_this.reposition();
 
     return m_this;
   };
@@ -210,18 +214,34 @@ geo.gui.legendWidget = function (arg) {
    */
   //////////////////////////////////////////////////////////////////////////////
   this._init = function () {
+    // adding categories redraws the entire thing by calling _init, see
+    // the m_top.remove() line below
+    if (!m_top) {
+      m_this.args = arg;
+      m_this.args.sticky = arg.sticky || false;
+      m_this.args.positionType = arg.positionType || 'viewport';
+      s_createCanvas();
+      s_appendChild();
+    }
+
     var w = m_this.size().width + 2 * m_padding,
         h = m_this.size().height + 2 * m_padding,
         nw = m_this.layer().map().node().width(),
         margin = 20;
+
+    // @todo - removing after creating to maintain the appendChild structure
     if (m_top) {
       m_top.remove();
     }
-    m_top = m_this.layer().renderer().canvas().append('g')
-        .attr('transform', 'translate(' + (nw - w - margin) + ',' + margin + ')');
+
+    d3.select(m_this.canvas()).attr('width', w).attr('height', h);
+
+    // @todo position is hardcoded
+    m_top = d3.select(m_this.canvas()).append('g')
+      .attr('transform', 'translate(0,0)');
     m_group = m_top
       .append('g')
-        .attr('transform', 'translate(' + [m_padding - 1.5, m_padding] + ')');
+      .attr('transform', 'translate(' + [m_padding - 1.5, m_padding] + ')');
     m_border = m_group.append('rect')
       .attr('x', -m_padding)
       .attr('y', -m_padding)
@@ -249,6 +269,8 @@ geo.gui.legendWidget = function (arg) {
         .duration(250)
         .style('fill-opacity', 0.75);
     });
+
+    this.reposition();
   };
 
   this.geoOn(geo.event.resize, function () {
@@ -257,6 +279,6 @@ geo.gui.legendWidget = function (arg) {
 
 };
 
-inherit(geo.gui.legendWidget, geo.gui.widget);
+inherit(geo.gui.legendWidget, geo.gui.svgWidget);
 
-geo.registerWidget('d3', 'legend', geo.gui.legendWidget);
+geo.registerWidget('dom', 'legend', geo.gui.legendWidget);
