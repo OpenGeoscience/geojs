@@ -23,7 +23,7 @@
     this._size = options.size || 64;
 
     /*
-     * The default hashing function is sufficient for imagePyramid tiles.
+     * The default hashing function is sufficient for image tiles.
      */
     this._hash = options.hash || function (tile) {
       var i = tile.index;

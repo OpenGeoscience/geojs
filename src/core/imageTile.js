@@ -33,9 +33,9 @@
    * @param {Number} [spec.overlap.y=0]
    */
   //////////////////////////////////////////////////////////////////////////////
-  geo.imagePyramid = function (spec) {
-    if (!(this instanceof geo.imagePyramid)) {
-      return new geo.imagePyramid(spec);
+  geo.imageTile = function (spec) {
+    if (!(this instanceof geo.imageTile)) {
+      return new geo.imageTile(spec);
     }
 
     spec.size = spec.size || {x: 256, y: 256};
@@ -57,7 +57,7 @@
     return geo.tile.call(this, spec);
   };
 
-  geo.imagePyramid.prototype = {
+  geo.imageTile.prototype = {
     /**
      * Initiate the image request.
      * @returns {this} Supports chained calling
@@ -96,5 +96,5 @@
     }
   };
 
-  inherit(geo.imagePyramid, geo.tile);
+  inherit(geo.imageTile, geo.tile);
 })();

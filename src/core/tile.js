@@ -94,6 +94,17 @@
     },
 
     /**
+     * Return the raw Deferred object.
+     * Not sure this is a good idea, but it makes using
+     * $.when convenient.
+     *
+     * @returns {$.Deferred} Supports chained calling
+     */
+    get defer() {
+      return this._jqXHR;
+    },
+
+    /**
      * Computes the global coordinates of the bottom left corner relative to
      * some given offset.  The offset can be provided to handle precision loss
      * due to global dimensions as commonly occurs in pyramid tiling schemes.
@@ -131,6 +142,13 @@
         x: this.size.x * x + this.overlap.x,
         y: this.size.y * y + this.overlap.y
       };
+    },
+
+    /**
+     * Render the tile on the viewport.  To be implemented in subclasses.
+     */
+    render: function () {
+      throw new Error('Unimplemented base class method.');
     }
   };
 })();

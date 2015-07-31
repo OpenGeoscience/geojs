@@ -20,7 +20,7 @@
         "mapInteractor.js",
         "clock.js",
         "tile.js",
-        "imagePyramid.js",
+        "imageTile.js",
         "tileCache.js",
         "tileLayer.js",
         "fileReader.js",
