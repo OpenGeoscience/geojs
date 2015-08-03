@@ -9,21 +9,6 @@ geo.gui.domWidget = function (arg) {
   var m_this = this,
       m_default_canvas = 'div';
 
-  this._createCanvas = function () {
-    m_this.canvas(document.createElement(m_this.args.el || m_default_canvas));
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Appends a child to the widget
-   * The widget determines how to append itself to a parent, the parent can either
-   * be another widget, or the UI Layer.
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._appendChild = function () {
-    m_this.parentCanvas().appendChild(m_this.canvas());
-  };
-
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Initializes DOM Widget.
@@ -49,6 +34,16 @@ geo.gui.domWidget = function (arg) {
     });
 
     this.reposition();
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Creates the widget canvas.
+   * This is just a simple DOM element (based on args.el, or defaults to a div)
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._createCanvas = function () {
+    m_this.canvas(document.createElement(m_this.args.el || m_default_canvas));
   };
 
   return this;

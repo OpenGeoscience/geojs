@@ -377,7 +377,6 @@ geo.layer = function (arg) {
     //       and maybe respond to events in case the map element moves
     //       around the page.
     if (m_this instanceof geo.gui.uiLayer) {
-      // @todo what does this break?
       m_node.css("position", "relative");
     } else {
       m_node.css("position", "absolute");

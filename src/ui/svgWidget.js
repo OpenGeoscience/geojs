@@ -1,3 +1,20 @@
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Create a new instance of class geo.gui.svgWidget
+ *
+ * Due to the nature of d3 creating DOM elements as it inserts them, calls to appendChild
+ * don't appear in this widget.
+ *
+ * The canvas of an svgWidget always refers to the actual <svg> element.
+ * The parentCanvas can refer to another widgets svg element, dom element, or the
+ * UI layers dom element. See {geo.gui.widget.parentCanvas}.
+ *
+ * @class
+ * @extends geo.gui.domWidget
+ * @returns {geo.gui.svgWidget}
+ *
+ */
+//////////////////////////////////////////////////////////////////////////////
 geo.gui.svgWidget = function (arg) {
   'use strict';
   if (!(this instanceof geo.gui.svgWidget)) {
@@ -9,21 +26,7 @@ geo.gui.svgWidget = function (arg) {
   var m_this = this,
       m_renderer = geo.d3.d3Renderer;
 
-  this._createCanvas = function (d3Parent) {
-    var rendererOpts = {
-      layer: m_this.layer()
-    };
-
-    if (d3Parent) {
-      rendererOpts.d3Parent = d3Parent;
-    }
-
-    var renderer = m_renderer(rendererOpts);
-
-    m_this.canvas(renderer.canvas()[0][0].parentNode);
-  };
-
-  this._init = function () {
+  this._init = function (arg) {
     arg = arg || {};
     m_this.args = arg;
     m_this.args.sticky = arg.sticky || false;
@@ -43,6 +46,26 @@ geo.gui.svgWidget = function (arg) {
     });
 
     this.reposition();
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Creates the canvas for the svg widget.
+   * This directly uses the d3 Renderer as a helper to do all of the heavy lifting.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._createCanvas = function (d3Parent) {
+    var rendererOpts = {
+      layer: m_this.layer()
+    };
+
+    if (d3Parent) {
+      rendererOpts.d3Parent = d3Parent;
+    }
+
+    var renderer = m_renderer(rendererOpts);
+
+    m_this.canvas(renderer.canvas()[0][0].parentNode);
   };
 
   return this;
