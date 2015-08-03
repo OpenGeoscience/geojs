@@ -67,6 +67,7 @@
       "files": [
         "init.js",
         "object.js",
+        "d3Renderer.js",
         "pointFeature.js",
         "lineFeature.js",
         "pathFeature.js",
