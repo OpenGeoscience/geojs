@@ -9,12 +9,18 @@ geo.gui.svgWidget = function (arg) {
   var m_this = this,
       m_renderer = geo.d3.d3Renderer;
 
-  this._createCanvas = function () {
-    m_renderer.call(m_this);
-  };
+  this._createCanvas = function (d3Parent) {
+    var rendererOpts = {
+      layer: m_this.layer()
+    };
 
-  this._appendChild = function () {
-    m_this.parentCanvas().appendChild(m_this.canvas());
+    if (d3Parent) {
+      rendererOpts.d3Parent = d3Parent;
+    }
+
+    var renderer = m_renderer(rendererOpts);
+
+    m_this.canvas(renderer.canvas()[0][0].parentNode);
   };
 
   this._init = function () {
@@ -22,13 +28,15 @@ geo.gui.svgWidget = function (arg) {
     m_this.args = arg;
     m_this.args.sticky = arg.sticky || false;
     m_this.args.positionType = arg.positionType || 'viewport';
+    var d3Parent;
 
     if (arg.hasOwnProperty('parent') && arg.parent instanceof geo.gui.widget) {
       arg.parent.addChild(m_this);
+
+      d3Parent = arg.parent.canvas();
     }
 
-    m_this._createCanvas();
-    m_this._appendChild();
+    m_this._createCanvas(d3Parent);
 
     m_this.canvas().addEventListener('mousedown', function (e) {
       e.stopPropagation();

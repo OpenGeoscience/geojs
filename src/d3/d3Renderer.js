@@ -261,10 +261,14 @@ geo.d3.d3Renderer = function (arg) {
    * Initialize
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._init = function () {
+  this._init = function (arg) {
     if (!m_this.canvas()) {
       var canvas;
-      m_svg = d3.select(m_this.layer().node().get(0)).append('svg');
+      if ('d3Parent' in arg) {
+        m_svg = d3.select(arg.d3Parent).append('svg');
+      } else {
+        m_svg = d3.select(m_this.layer().node().get(0)).append('svg');
+      }
 
       // create a global svg definitions element
       m_defs = m_svg.append('defs');
