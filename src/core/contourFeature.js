@@ -173,10 +173,14 @@ geo.contourFeature = function (arg) {
         rangeValues = contour.get('rangeValues')(),
         valueFunc = m_this.style.get('value'), values = [],
         stepped = contour.get('stepped')(),
+        wrapLong = contour.get('wrapLongitude')(),
+        calcX, skipColumn, x, origI, /* used for wrapping */
+        gridWorig = gridW,  /* can be different when wrapping */
         result = {
           minValue: contour.get('min')(),
           maxValue: contour.get('max')(),
           stepped: stepped === undefined || stepped ? true : false,
+          wrapLongitude: wrapLong === undefined || wrapLong ? true : false,
           colorMap: [],
           elements: []
         };
@@ -194,9 +198,55 @@ geo.contourFeature = function (arg) {
     if (gridW * gridH > data.length) {
       gridH = Math.floor(data.length) / gridW;
     }
+    /* If we are not using the position values (we are using x0, y0, dx, dy),
+     * and wrapLongitude is turned on, and the position spans 180 degrees,
+     * duplicate one or two columns of points at opposite ends of the map. */
+    usePos = (x0 === null || x0 === undefined || y0 === null ||
+        y0 === undefined || !dx || !dy);
+    if (!usePos && result.wrapLongitude && (x0 < -180 || x0 > 180 ||
+        x0 + dx * (gridW - 1) < -180 || x0 + dx * (gridW - 1) > 180) &&
+        dx > -180 && dx < 180) {
+      calcX = [];
+      for (i = 0; i < gridW; i += 1) {
+        x = x0 + i * dx;
+        while (x < -180) { x += 360; }
+        while (x > 180) { x -= 360; }
+        if (i && Math.abs(x - calcX[calcX.length - 1]) > 180) {
+          if (x > calcX[calcX.length - 1]) {
+            calcX.push(x - 360);
+            calcX.push(calcX[calcX.length - 2] + 360);
+          } else {
+            calcX.push(x + 360);
+            calcX.push(calcX[calcX.length - 2] - 360);
+          }
+          skipColumn = i;
+        }
+        calcX.push(x);
+      }
+      gridW += 2;
+      if (Math.abs(Math.abs(gridWorig * dx) - 360) < 0.01) {
+        gridW += 1;
+        x = x0 + gridWorig * dx;
+        while (x < -180) { x += 360; }
+        while (x > 180) { x -= 360; }
+        calcX.push(x);
+      }
+    }
+    /* Calculate the value for point */
     numPts = gridW * gridH;
     for (i = 0; i < numPts; i += 1) {
-      val = parseFloat(valueFunc(data[i]));
+      if (skipColumn === undefined) {
+        val = parseFloat(valueFunc(data[i]));
+      } else {
+        j = parseInt(Math.floor(i / gridW));
+        origI = i - j * gridW;
+        origI += (origI > skipColumn ? -2 : 0);
+        if (origI >= gridWorig) {
+          origI -= gridWorig;
+        }
+        origI += j * gridWorig;
+        val = parseFloat(valueFunc(data[origI]));
+      }
       values[i] = isNaN(val) ? null : val;
       if (values[i] !== null) {
         idxMap[i] = usedPts;
@@ -248,7 +298,8 @@ geo.contourFeature = function (arg) {
     for (j = idx = 0; j < gridH - 1; j += 1, idx += 1) {
       for (i = 0; i < gridW - 1; i += 1, idx += 1) {
         if (values[idx] !== null && values[idx + 1] !== null &&
-            values[idx + gridW] !== null && values[idx + gridW + 1] !== null) {
+            values[idx + gridW] !== null &&
+            values[idx + gridW + 1] !== null && i !== skipColumn) {
           result.elements.push(idxMap[idx]);
           result.elements.push(idxMap[idx + 1]);
           result.elements.push(idxMap[idx + gridW]);
@@ -262,8 +313,6 @@ geo.contourFeature = function (arg) {
     result.pos = new Array(usedPts * 3);
     result.value = new Array(usedPts);
     result.opacity = new Array(usedPts);
-    usePos = (x0 === null || x0 === undefined || y0 === null ||
-        y0 === undefined || !dx || !dy);
     for (j = i = i3 = 0; j < numPts; j += 1) {
       val = values[j];
       if (val !== null) {
@@ -274,7 +323,11 @@ geo.contourFeature = function (arg) {
           result.pos[i3 + 1] = posVal.y;
           result.pos[i3 + 2] = posVal.z || 0;
         } else {
-          result.pos[i3]     = x0 + dx * (j % gridW);
+          if (skipColumn === undefined) {
+            result.pos[i3]   = x0 + dx * (j % gridW);
+          } else {
+            result.pos[i3]   = calcX[j % gridW];
+          }
           result.pos[i3 + 1] = y0 + dy * Math.floor(j / gridW);
           result.pos[i3 + 2] = 0;
         }
@@ -357,6 +410,12 @@ layer.createFeature('contour', {
     value array>,
   dy: <the distance in the y direction between the 0th and (gridWidth)th point
     in the value array>,
+  wrapLongitude: <boolean (default true).  If true, AND the position array is
+    not used, assume the x coordinates is longitude and should be adjusted to
+    be within -180 to 180.  If the data spans 180 dgrees, the points or squares
+    will be duplicated to ensure that the map is covered from -180 to 180 as
+    appropriate.  Set this to false if using a non longitude x coordinate.
+    This is ignored if the position array is used.>,
   min: <optional minimum contour value, otherwise taken from style.value>,
   max: <optional maximum contour value, otherwise taken from style.value>,
   minColor: <color for any value below the minimum>,
