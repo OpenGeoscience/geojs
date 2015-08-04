@@ -43,9 +43,8 @@ geo.gui.widget = function (arg) {
       m_this._deleteFeature(child);
     });
 
-    this.layer().geoOff(geo.event.pan, this.reposition);
+    m_this.layer().geoOff(geo.event.pan, m_this.repositionEvent);
     m_this.parentCanvas().removeChild(m_this.canvas());
-
     s_exit();
   };
 
@@ -161,12 +160,12 @@ geo.gui.widget = function (arg) {
   /**
    * Repositions a widget based on the argument passed, or calling position on
    * the widget itself.
-   * @param {object} newPosition A new position with the form:
+   * @param {object} position A position with the form:
    * { top: m, left: n }
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.reposition = function (newPosition) {
-    var position = newPosition || m_this.position();
+  this.reposition = function (position) {
+    position = position || m_this.position();
     m_this.canvas().style.position = 'absolute';
 
     for (var cssAttr in position) {
@@ -174,6 +173,10 @@ geo.gui.widget = function (arg) {
         m_this.canvas().style[cssAttr] = position[cssAttr];
       }
     }
+  };
+
+  this.repositionEvent = function () {
+    return m_this.reposition();
   };
 
   // @todo doesn't detect if its partially in the viewport.. would need to look at
@@ -191,9 +194,7 @@ geo.gui.widget = function (arg) {
       arg.sticky &&
       arg.hasOwnProperty('positionType') &&
       arg.positionType === 'gcs') {
-    this.layer().geoOn(geo.event.pan, function () {
-      return m_this.reposition();
-    });
+    this.layer().geoOn(geo.event.pan, m_this.repositionEvent);
   }
 };
 inherit(geo.gui.widget, geo.sceneObject);
