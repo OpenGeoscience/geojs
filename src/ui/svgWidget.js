@@ -55,7 +55,8 @@ geo.gui.svgWidget = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._createCanvas = function (d3Parent) {
     var rendererOpts = {
-      layer: m_this.layer()
+      layer: m_this.layer(),
+      widget: true
     };
 
     if (d3Parent) {

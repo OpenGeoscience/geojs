@@ -263,6 +263,9 @@ geo.d3.d3Renderer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
     if (!m_this.canvas()) {
+      var canvas;
+      arg.widget = arg.widget || false;
+
       if ('d3Parent' in arg) {
         m_svg = d3.select(arg.d3Parent).append('svg');
       } else {
@@ -302,6 +305,10 @@ geo.d3.d3Renderer = function (arg) {
           .attr('in2', 'invertOut')
           .attr('mode', 'normal');
 
+      if (!arg.widget) {
+        canvas = m_svg.append('g');
+      }
+
       shadow = m_defs.append('filter')
           .attr('id', 'geo-blur')
           .attr('x', '-100%')
@@ -319,7 +326,13 @@ geo.d3.d3Renderer = function (arg) {
       m_svg.attr('width', m_this.layer().node().width());
       m_svg.attr('height', m_this.layer().node().height());
 
-      m_this.canvas(m_svg);
+      if (!arg.widget) {
+        canvas.attr('class', 'group-' + m_this._d3id());
+
+        m_this.canvas(canvas);
+      } else {
+        m_this.canvas(m_svg);
+      }
     }
   };
 
