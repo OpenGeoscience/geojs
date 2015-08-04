@@ -17,12 +17,10 @@ geo.gui.domWidget = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
-    arg = arg || {};
+    arg = m_this.parseArgs(arg);
     m_this.args = arg;
-    m_this.args.sticky = arg.sticky || false;
-    m_this.args.positionType = arg.positionType || 'viewport';
 
-    if (arg.hasOwnProperty('parent') && arg.parent instanceof geo.gui.widget) {
+    if (arg.hasOwnProperty('parent')) {
       arg.parent.addChild(m_this);
     }
 

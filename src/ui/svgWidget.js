@@ -27,15 +27,14 @@ geo.gui.svgWidget = function (arg) {
       m_renderer = geo.d3.d3Renderer;
 
   this._init = function (arg) {
-    arg = arg || {};
-    m_this.args = arg;
-    m_this.args.sticky = arg.sticky || false;
-    m_this.args.positionType = arg.positionType || 'viewport';
     var d3Parent;
+    arg = m_this.parseArgs(arg);
+    m_this.args = arg;
 
-    if (arg.hasOwnProperty('parent') && arg.parent instanceof geo.gui.widget) {
+    if (arg.hasOwnProperty('parent')) {
       arg.parent.addChild(m_this);
 
+      // Tell the renderer there is an SVG element as a parent
       d3Parent = arg.parent.canvas();
     }
 

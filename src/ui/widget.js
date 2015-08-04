@@ -19,6 +19,21 @@ geo.gui.widget = function (arg) {
       m_layer = arg.layer,
       m_canvas = null;
 
+  this.parseArgs = function (args) {
+    var defaults = {
+      sticky: false,
+      positionType: 'viewport'
+    };
+
+    args = $.extend(defaults, args || {});
+
+    if ('parent' in args && !(args.parent instanceof geo.gui.widget)) {
+      throw 'Parent must be of type geo.gui.widget';
+    }
+
+    return args;
+  };
+
   this._init = function () {
     m_this.modified();
   };
