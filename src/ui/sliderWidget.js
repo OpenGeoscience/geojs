@@ -89,9 +89,8 @@ geo.gui.sliderWidget = function (arg) {
  */
 //////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
+    arg = m_this.parseArgs(arg);
     m_this.args = arg;
-    m_this.args.sticky = arg.sticky || false;
-    m_this.args.positionType = arg.positionType || 'viewport';
     s_createCanvas();
     s_appendChild();
 
