@@ -4,6 +4,32 @@
 describe('geo.tile', function () {
   'use strict';
 
+  // test tile hash values
+  it('hashing', function () {
+    var t1 = geo.tile({
+      index: {x: 13, y: 14},
+      size: {x: 116, y: 117}
+    });
+    var t2 = geo.tile({
+      index: {x: 12, y: 14},
+      size: {x: 116, y: 117}
+    });
+    var t3 = geo.tile({
+      index: {x: 13, y: 14, level: 1},
+      size: {x: 116, y: 117}
+    });
+
+    // stability, hopefully...
+    expect(t1.toString()).toEqual(t1.toString());
+    expect(t2.toString()).toEqual(t2.toString());
+    expect(t3.toString()).toEqual(t3.toString());
+
+    // uniqueness
+    expect(t1.toString()).not.toEqual(t2.toString());
+    expect(t1.toString()).not.toEqual(t3.toString());
+    expect(t2.toString()).not.toEqual(t3.toString());
+  });
+
   // test the all of the accessors work as expected
   it('accessors', function () {
     var t = geo.tile({

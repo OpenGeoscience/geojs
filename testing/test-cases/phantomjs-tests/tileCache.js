@@ -4,30 +4,10 @@
 describe('geo.tileCache', function () {
   'use strict';
 
-  // test tile hashing
-  describe('tile hashing', function () {
-    it('default hash', function () {
-      var cache = geo.tileCache();
-
-      var t = geo.tile({
-        index: {x: 10, y: 15},
-        size: {x: 100, y: 100},
-        url: '/data/sample.json'
-      });
-
-      expect(cache.hash(t)).toBe('0/15/10');
-    });
-
-    it('custom hash', function () {
-      var cache = geo.tileCache({hash: function (i) { return i.toString();}});
-      expect(cache.hash(7)).toBe('7');
-    });
-  });
-
   // test cache size settings
   describe('cache size', function () {
     it('cache reaches the correct size', function () {
-      var cache = geo.tileCache({size: 2, hash: function (i) { return i.toString();}});
+      var cache = geo.tileCache({size: 2});
 
       expect(cache.length).toBe(0);
 
@@ -50,7 +30,7 @@ describe('geo.tileCache', function () {
       expect(cache.length).toBe(2);
     });
     it('cache expands correctly', function () {
-      var cache = geo.tileCache({size: 2, hash: function (i) { return i.toString();}});
+      var cache = geo.tileCache({size: 2});
 
       cache.add(1);
       cache.add(2);
@@ -63,7 +43,7 @@ describe('geo.tileCache', function () {
       expect(cache.length).toBe(3);
     });
     it('cache contracts correctly', function () {
-      var cache = geo.tileCache({size: 2, hash: function (i) { return i.toString();}});
+      var cache = geo.tileCache({size: 2});
 
       cache.add(1);
       cache.add(2);
@@ -80,7 +60,7 @@ describe('geo.tileCache', function () {
   // test cache removal priority
   describe('cache access queue', function () {
     it('simple case (no gets)', function () {
-      var cache = geo.tileCache({size: 2, hash: function (i) { return i.toString();}});
+      var cache = geo.tileCache({size: 2});
 
       cache.add(-1);
       cache.add(-2);
@@ -91,7 +71,7 @@ describe('geo.tileCache', function () {
       expect(cache.get('not a number')).toBe('not a number');
     });
     it('access queue with gets', function () {
-      var cache = geo.tileCache({size: 2, hash: function (i) { return i.toString();}});
+      var cache = geo.tileCache({size: 2});
 
       cache.add(-1);
       cache.add(-2);
@@ -117,7 +97,7 @@ describe('geo.tileCache', function () {
   });
 
   it('cache.clear', function () {
-    var cache = geo.tileCache({size: 2, hash: function (i) { return i.toString();}});
+    var cache = geo.tileCache({size: 2});
 
     cache.add(1);
     cache.add(2);
@@ -136,7 +116,7 @@ describe('geo.tileCache', function () {
   });
 
   it('cache.remove', function () {
-    var cache = geo.tileCache({size: 2, hash: function (i) { return i.toString();}});
+    var cache = geo.tileCache({size: 2});
 
     cache.add(1);
     cache.add(2);

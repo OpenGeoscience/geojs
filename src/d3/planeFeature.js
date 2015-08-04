@@ -3,8 +3,6 @@
  * Create a plane feature given a lower left corner point
  * and and upper right corner point
  *
- * *CURRENTLY BROKEN*
- *
  * @class
  * @extends geo.planeFeature
  * @param lowerleft
@@ -28,24 +26,6 @@ geo.d3.planeFeature = function (arg) {
 
   //////////////////////////////////////////////////////////////////////////////
   /**
-   * Normalize a coordinate as an object {x: ..., y: ...}
-   *
-   * @private
-   * @returns {Object}
-   */
-  //////////////////////////////////////////////////////////////////////////////
-  function normalize(pt) {
-    if (Array.isArray(pt)) {
-      return {
-        x: pt[0],
-        y: pt[1]
-      };
-    }
-    return pt;
-  }
-
-  //////////////////////////////////////////////////////////////////////////////
-  /**
    * Build the feature object and pass to the renderer for drawing.
    *
    * @private
@@ -53,22 +33,34 @@ geo.d3.planeFeature = function (arg) {
    */
   //////////////////////////////////////////////////////////////////////////////
   this._build = function () {
-    var origin = normalize(m_this.origin()),
-        ul = normalize(m_this.upperLeft()),
-        lr = normalize(m_this.lowerRight()),
-        renderer = m_this.renderer(),
-        s = m_this.style();
+    var data = m_this.data(),
+        lowerLeft = m_this.style('lowerLeft'),
+        upperRight = m_this.style('upperRight'),
+        opacity = m_this.style('opacity'),
+        fill = m_this.style('fill');
 
-    delete s.fill_color;
-    delete s.color;
-    delete s.opacity;
+    data.forEach(function (d, i) {
+      var ll = lowerLeft(d, i),
+          ur = upperRight(d, i),
+          op = opacity(d, i),
+          fi = fill(d, i);
+
+          if (fi instanceof geo.tile) {
+            m_this.renderer().drawImage(
+              ll, ur, fi, {
+                opacity: op
+              }
+            );
+          }
+    });
     if (!s.screenCoordinates) {
-      origin = renderer.worldToDisplay(origin);
-      ul = renderer.worldToDisplay(ul);
-      lr = renderer.worldToDisplay(lr);
+      ll = renderer.worldToDisplay(ul);
+      ur = renderer.worldToDisplay(lr);
     }
+
     m_style.id = m_this._d3id();
-    m_style.style = s;
+    m_style.style = {
+    };
     m_style.attributes = {
       x: ul.x,
       y: ul.y,

@@ -53,7 +53,10 @@
     // copy the options into a private variable
     this._options = $.extend(true, {}, options);
 
-    // initialize the tile cache
+    // initialize the object that keeps track of actively drawn tiles
+    this._active = {};
+
+    // initialize the in memory tile cache
     this._cache = new geo.tileCache({size: options.cacheSize});
     return this;
   };
@@ -71,6 +74,14 @@
      */
     get cache() {
       return this._cache;
+    },
+
+    /**
+     * Readonly accessor to the active tile mapping.  This is an object containing
+     * all currently drawn tiles (hash(tile) => tile).
+     */
+    get active() {
+      return $.extend({}, this._active); // copy on output
     },
 
     /**
@@ -295,8 +306,62 @@
         x: this.tileWidth * coord.x / (this.maxX - this.minX),
         y: this.tileHeight * coord.y / (this.maxY - this.minY)
       };
-    }
+    },
 
+    /**
+     * Draw the given tile on the active canvas.  Can be overridden in derived classes
+     * to draw the tile within a renderer's context.
+     * @param {geo.tile} tile The tile to draw
+     */
+    draw: function (tile) {
+      var hash = tile.toString();
+
+      if (hash.hasOwnProperty(this._active)) {
+        // the tile is already drawn, remove it
+        this.remove(tile);
+      }
+
+      // add the tile to the active cache
+      this._active[tile.toString()] = tile;
+    },
+
+    /**
+     * Remove the given tile from the canvas.
+     * @param {geo.tile|string} tile The tile (or hash) to remove
+     * @returns {geo.tile} the tile removed from the active layer
+     */
+    remove: function (tile) {
+      tile = tile.toString();
+      var value = this._active[tile];
+      delete this._active[tile];
+      return value;
+    },
+
+    /**
+     * Remove all active tiles from the canvas.
+     * @returns {geo.tile[]} The array of tiles removed
+     */
+    clear: function () {
+      var tiles = [], tile;
+
+      // ignoring the warning here because this is a privately
+      // controlled object with simple keys
+      for (tile in this._active) {  // jshint ignore: line
+        tiles.push(this.remove(tile));
+      }
+
+      return tiles;
+    },
+
+    /**
+     * Reset the layer to the initial state, clearing the canvas
+     * and resetting the tile cache.
+     * @returns {this} Chainable
+     */
+    reset: function () {
+      this.clear();
+      this._cache.clear();
+    }
   };
 
   /**

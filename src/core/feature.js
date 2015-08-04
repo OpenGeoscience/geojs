@@ -445,9 +445,9 @@ geo.feature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get/Set data
+   * Get/Set the data array for the feature.
    *
-   * @returns {Array}
+   * @returns {Array|this}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.data = function (data) {

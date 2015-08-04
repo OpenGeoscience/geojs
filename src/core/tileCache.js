@@ -12,7 +12,6 @@
    *
    * @param {Object?} [options] A configuratoin object for the cache
    * @param {Number} [options.size=64] The maximum number of tiles to store
-   * @param {function?} options.hash A string valued hashing function
    */
   //////////////////////////////////////////////////////////////////////////////
   geo.tileCache = function (options) {
@@ -22,29 +21,10 @@
     options = options || {};
     this._size = options.size || 64;
 
-    /*
-     * The default hashing function is sufficient for image tiles.
-     */
-    this._hash = options.hash || function (tile) {
-      var i = tile.index;
-      return [(i.level || 0), i.y, i.x].join('/');
-    };
-
     this.clear();
     return this;
   };
   geo.tileCache.prototype = {
-    /**
-     * Get/set the current tile hashing function.
-     */
-    get hash() {
-      return this._hash;
-    },
-    set hash(h) {
-      this._hash = h;
-      this.clear();
-    },
-
     /**
      * Get/set the maximum cache size.
      */
@@ -82,7 +62,7 @@
      */
     remove: function (tile) {
       if (typeof tile !== 'string') {
-        tile = this.hash(tile);
+        tile = tile.toString();
       }
 
       // if the tile is not in the cache
@@ -135,7 +115,7 @@
       this.remove(tile);
 
       // add the tile
-      this._cache[this.hash(tile)] = tile;
+      this._cache[tile.toString()] = tile;
       this._atime.unshift(tile);
 
       // purge a tile from the cache if necessary

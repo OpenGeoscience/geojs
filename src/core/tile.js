@@ -105,6 +105,16 @@
     },
 
     /**
+     * Return a unique string representation of the given tile useable
+     * as a hash key.  Possibly extend later to include url information
+     * to make caches aware of the tile source.
+     * @returns {string}
+     */
+    toString: function () {
+      return [this._index.level || 0, this._index.y, this._index.x].join('_');
+    },
+
+    /**
      * Computes the global coordinates of the bottom left corner relative to
      * some given offset.  The offset can be provided to handle precision loss
      * due to global dimensions as commonly occurs in pyramid tiling schemes.
@@ -142,13 +152,6 @@
         x: this.size.x * x + this.overlap.x,
         y: this.size.y * y + this.overlap.y
       };
-    },
-
-    /**
-     * Render the tile on the viewport.  To be implemented in subclasses.
-     */
-    render: function () {
-      throw new Error('Unimplemented base class method.');
     }
   };
 })();
