@@ -263,7 +263,6 @@ geo.d3.d3Renderer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
     if (!m_this.canvas()) {
-      var canvas;
       if ('d3Parent' in arg) {
         m_svg = d3.select(arg.d3Parent).append('svg');
       } else {
@@ -302,7 +301,6 @@ geo.d3.d3Renderer = function (arg) {
           .attr('in', 'SourceGraphic')
           .attr('in2', 'invertOut')
           .attr('mode', 'normal');
-      canvas = m_svg.append('g');
 
       shadow = m_defs.append('filter')
           .attr('id', 'geo-blur')
@@ -321,9 +319,7 @@ geo.d3.d3Renderer = function (arg) {
       m_svg.attr('width', m_this.layer().node().width());
       m_svg.attr('height', m_this.layer().node().height());
 
-      canvas.attr('class', 'group-' + m_this._d3id());
-
-      m_this.canvas(canvas);
+      m_this.canvas(m_svg);
     }
   };
 

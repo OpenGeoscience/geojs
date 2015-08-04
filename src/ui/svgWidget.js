@@ -24,7 +24,7 @@ geo.gui.svgWidget = function (arg) {
   geo.gui.domWidget.call(this, arg);
 
   var m_this = this,
-      m_renderer = geo.d3.d3Renderer;
+      m_renderer = null;
 
   this._init = function (arg) {
     var d3Parent;
@@ -62,9 +62,9 @@ geo.gui.svgWidget = function (arg) {
       rendererOpts.d3Parent = d3Parent;
     }
 
-    var renderer = m_renderer(rendererOpts);
+    m_renderer = geo.d3.d3Renderer(rendererOpts);
 
-    m_this.canvas(renderer.canvas()[0][0].parentNode);
+    m_this.canvas(m_renderer.canvas()[0][0]);
   };
 
   return this;
