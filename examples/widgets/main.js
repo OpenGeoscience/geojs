@@ -36,7 +36,7 @@ $(function () {
       x: -114.1180,
       y: 35.6364
     },
-    zoom: 2
+    zoom: 4
   });
 
   // Add the osm layer with a custom tile url
@@ -63,7 +63,7 @@ $(function () {
   var widget = ui.createWidget('dom', {
     position: {
       x: 20,
-      y: 430
+      y: map.node().height() - 410 - 20
     }
   });
   var $widget = $(widget.canvas());
