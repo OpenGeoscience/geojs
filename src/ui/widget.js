@@ -19,6 +19,14 @@ geo.gui.widget = function (arg) {
       m_layer = arg.layer,
       m_canvas = null;
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Parses the arguments a widget can take, merges them with the defaults and
+   * then validates the resulting arguments.
+   * @param {object} args
+   * @returns {object} The arguments as a result of adding defaults and validating
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.parseArgs = function (args) {
     var defaults = {
       sticky: false,
@@ -131,7 +139,13 @@ geo.gui.widget = function (arg) {
     }
   };
 
-  // returns {top: m, left: n}
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Gets the CSS positioning that a widget should be placed at. This is based on
+   * the positionType of the widget, but returns
+   * { top: 0, left: 0 } by default.
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.position = function () {
     var position;
 
@@ -179,8 +193,11 @@ geo.gui.widget = function (arg) {
     return m_this.reposition();
   };
 
-  // @todo doesn't detect if its partially in the viewport.. would need to look at
-  // width/height of widget
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Determines whether or not the widget is completely within the viewport.
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.isInViewport = function () {
     var position = m_this.position();
     var map = m_this.layer().map().node();

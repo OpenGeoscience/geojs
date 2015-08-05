@@ -5,9 +5,10 @@
  * Due to the nature of d3 creating DOM elements as it inserts them, calls to appendChild
  * don't appear in this widget.
  *
- * The canvas of an svgWidget always refers to the actual <svg> element.
+ * The canvas of an svgWidget always refers to the actual svg element.
  * The parentCanvas can refer to another widgets svg element, dom element, or the
- * UI layers dom element. See {geo.gui.widget.parentCanvas}.
+ * UI layers dom element.
+ * See {@link geo.gui.widget#parentCanvas}.
  *
  * @class
  * @extends geo.gui.domWidget
@@ -50,7 +51,8 @@ geo.gui.svgWidget = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Creates the canvas for the svg widget.
-   * This directly uses the d3 Renderer as a helper to do all of the heavy lifting.
+   * This directly uses the {@link geo.d3.d3Renderer} as a helper to do all of the heavy
+   * lifting.
    */
   ////////////////////////////////////////////////////////////////////////////
   this._createCanvas = function (d3Parent) {

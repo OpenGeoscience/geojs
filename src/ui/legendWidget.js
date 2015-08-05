@@ -3,7 +3,7 @@
  * Create a new instance of class legendWidget
  *
  * @class
- * @extends geo.gui.widget
+ * @extends geo.gui.svgWidget
  * @returns {geo.gui.legendWidget}
  */
 //////////////////////////////////////////////////////////////////////////////
