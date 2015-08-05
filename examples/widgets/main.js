@@ -30,7 +30,7 @@ $(function () {
   }
 
   // Create a map object
-  window.map = geo.map({
+  var map = geo.map({
     node: '#map',
     center: {
       x: -114.1180,
@@ -53,14 +53,14 @@ $(function () {
   layer.createFeature('point')
     .data(coordinates)
     .style('radius', 5)
-    .style('fillColor', function (d) { return 'red'; })
+    .style('fillColor', function () { return 'red'; })
     .position(function (d) { return d; });
 
   // Create a ui layer
   var ui = map.createLayer('ui');
 
   // Create a time series plot widget
-  window.widget = ui.createWidget('dom', {
+  var widget = ui.createWidget('dom', {
     position: {
       x: 20,
       y: 430
@@ -71,7 +71,7 @@ $(function () {
 
   // When the map pans - hide the widget if none of the cities are in the viewport anymore
   ui.geoOn(geo.event.pan, function () {
-    for (var i=0; i<coordinates.length; i++) {
+    for (var i = 0; i < coordinates.length; i += 1) {
       if (coordinatesInViewport(coordinates[i], map)) {
         $widget.show();
         return;
