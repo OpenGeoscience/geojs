@@ -8,14 +8,20 @@ html(lang="en")
     each css in defaultCss
       link(rel="stylesheet" href="#{css}")
     each src in defaultJs
-      script(type="text/javascript" src="#{src}")
+      if(typeof src == "string")
+        script(type="text/javascript" src="#{src}")
+      else
+        script&attributes(src)
 
     block exampleHeader
       // Include example specific files
       each css in exampleCss
         link(rel="stylesheet" href="#{css}")
       each src in exampleJs
-        script(type="text/javascript" src="#{src}")
+        if(typeof src == "string")
+          script(type="text/javascript" src="#{src}")
+        else
+          script&attributes(src)
 
   body
     if !hideNavbar
