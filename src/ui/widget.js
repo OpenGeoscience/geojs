@@ -33,7 +33,7 @@ geo.gui.widget = function (arg) {
       positionType: 'viewport'
     };
 
-    args = $.extend(defaults, args || {});
+    args = $.extend({}, defaults, args || {});
 
     if ('parent' in args && !(args.parent instanceof geo.gui.widget)) {
       throw 'Parent must be of type geo.gui.widget';
