@@ -238,7 +238,7 @@ geo.contourFeature = function (arg) {
       if (skipColumn === undefined) {
         val = parseFloat(valueFunc(data[i]));
       } else {
-        j = parseInt(Math.floor(i / gridW));
+        j = Math.floor(i / gridW);
         origI = i - j * gridW;
         origI += (origI > skipColumn ? -2 : 0);
         if (origI >= gridWorig) {
@@ -412,10 +412,10 @@ layer.createFeature('contour', {
     in the value array>,
   wrapLongitude: <boolean (default true).  If true, AND the position array is
     not used, assume the x coordinates is longitude and should be adjusted to
-    be within -180 to 180.  If the data spans 180 dgrees, the points or squares
-    will be duplicated to ensure that the map is covered from -180 to 180 as
-    appropriate.  Set this to false if using a non longitude x coordinate.
-    This is ignored if the position array is used.>,
+    be within -180 to 180.  If the data spans 180 degrees, the points or
+    squares will be duplicated to ensure that the map is covered from -180 to
+    180 as appropriate.  Set this to false if using a non longitude x
+    coordinate.  This is ignored if the position array is used.>,
   min: <optional minimum contour value, otherwise taken from style.value>,
   max: <optional maximum contour value, otherwise taken from style.value>,
   minColor: <color for any value below the minimum>,
