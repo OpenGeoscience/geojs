@@ -184,7 +184,7 @@ geo.gui.widget = function (arg) {
 
     for (var cssAttr in position) {
       if (position.hasOwnProperty(cssAttr)) {
-        m_this.canvas().style[cssAttr] = position[cssAttr];
+        m_this.canvas().style[cssAttr] = position[cssAttr] + 'px';
       }
     }
   };
