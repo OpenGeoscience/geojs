@@ -376,11 +376,7 @@ geo.layer = function (arg) {
     // TODO: need to position according to offsets from the map element
     //       and maybe respond to events in case the map element moves
     //       around the page.
-    if (m_this instanceof geo.gui.uiLayer) {
-      m_node.css("position", "relative");
-    } else {
-      m_node.css("position", "absolute");
-    }
+    m_node.css("position", "absolute");
 
     if (m_map) {
       m_map.node().append(m_node);
