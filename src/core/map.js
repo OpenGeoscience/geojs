@@ -596,6 +596,7 @@ geo.map = function (arg) {
       throw 'Map require DIV node';
     }
 
+    m_node.css('position', 'relative');
     if (arg !== undefined && arg.layers !== undefined) {
       for (i = 0; i < arg.layers.length; i += 1) {
         if (i === 0) {
@@ -1049,7 +1050,6 @@ geo.map = function (arg) {
         right: '0px',
         bottom: '0px',
         'padding-right': '5px',
-        'padding-left': '5px',
         cursor: 'auto',
         font: '11px/1.5 "Helvetica Neue", Arial, Helvetica, sans-serif',
         'z-index': '1001',
@@ -1067,6 +1067,9 @@ geo.map = function (arg) {
       if (content) {
         $('<span/>')
           .addClass('geo-attribution-layer')
+          .css({
+            'padding-left': '5px',
+          })
           .html(content)
           .appendTo($a);
       }
