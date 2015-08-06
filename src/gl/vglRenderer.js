@@ -318,17 +318,6 @@ geo.gl.vglRenderer = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Exit
-   * @todo remove all vgl objects
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._exit = function () {
-    geo.gl.vglViewerInstance.deleteCache(m_viewer);
-    s_exit();
-  };
-
   this._updateRendererCamera = function () {
     var vglRenderer = m_this.contextRenderer(),
         renderWindow = m_viewer.renderWindow(),
