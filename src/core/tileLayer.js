@@ -48,7 +48,7 @@
       return new geo.tileLayer(options);
     }
     geo.featureLayer.call(this, options);
-    $.extend(options || {}, geo.tileLayer.defaults);
+    options = $.extend(options || {}, geo.tileLayer.defaults);
 
     // copy the options into a private variable
     this._options = $.extend(true, {}, options);
@@ -127,7 +127,7 @@
      * @returns {geo.tile}
      */
     _getTile: function (index) {
-      return new geo.tile({
+      return geo.tile({
         index: index,
         size: {x: this._options.tileWidth, y: this._options.tileHeight},
         url: this._options.url(index)
