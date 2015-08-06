@@ -1068,7 +1068,7 @@ geo.map = function (arg) {
         $('<span/>')
           .addClass('geo-attribution-layer')
           .css({
-            'padding-left': '5px',
+            'padding-left': '5px'
           })
           .html(content)
           .appendTo($a);
