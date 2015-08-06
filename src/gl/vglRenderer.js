@@ -3,7 +3,7 @@
  * Create a new instance of class vglRenderer
  *
  * @class
- * @extends geo.core.renderer
+ * @extends geo.renderer
  * @param canvas
  * @returns {geo.gl.vglRenderer}
  */
@@ -15,7 +15,7 @@ geo.gl.vglRenderer = function (arg) {
     return new geo.gl.vglRenderer(arg);
   }
   arg = arg || {};
-  geo.core.renderer.call(this, arg);
+  geo.renderer.call(this, arg);
 
   var m_this = this,
       m_contextRenderer = null,
@@ -316,6 +316,6 @@ geo.gl.vglRenderer = function (arg) {
   return this;
 };
 
-inherit(geo.gl.vglRenderer, geo.core.renderer);
+inherit(geo.gl.vglRenderer, geo.renderer);
 
 geo.registerRenderer('vgl', geo.gl.vglRenderer);
