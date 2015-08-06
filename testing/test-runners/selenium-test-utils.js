@@ -24,7 +24,8 @@ window.geoTests = {
     $.extend(true, mapDefaults, mapOpts);
 
     var osmDefaults = {
-      baseUrl: '/data/tiles/'
+      baseUrl: '/data/tiles/',
+      attribution: null
     };
 
     if (notiles) {

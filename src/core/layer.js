@@ -2,6 +2,8 @@
 /**
  * @class
  * @extends geo.sceneObject
+ * @param {Object?} arg An options argument
+ * @param {string} arg.attribution An attribution string to display
  * @returns {geo.layer}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -45,7 +47,8 @@ geo.layer = function (arg) {
       m_updateTime = geo.timestamp(),
       m_drawTime = geo.timestamp(),
       m_sticky = arg.sticky === undefined ? true : arg.sticky,
-      m_active = arg.active === undefined ? true : arg.active;
+      m_active = arg.active === undefined ? true : arg.active,
+      m_attribution = arg.attribution || null;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -336,6 +339,26 @@ geo.layer = function (arg) {
   this.fromLocal = function (input) {
     return input;
   };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get or set the attribution html content that will displayed with the
+   * layer.  By default, nothing will be displayed.  Note, this content
+   * is **not** html escaped, so care should be taken when renderering
+   * user provided content.
+   * @param {string?} arg An html fragment
+   * @returns {string|this} Chainable as a setter
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.attribution = function (arg) {
+    if (arg !== undefined) {
+      m_attribution = arg;
+      m_this.map().updateAttribution();
+      return m_this;
+    }
+    return m_attribution;
+  };
+
 
   ////////////////////////////////////////////////////////////////////////////
   /**

@@ -11,10 +11,17 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.osmLayer = function (arg) {
-  "use strict";
+  'use strict';
 
   if (!(this instanceof geo.osmLayer)) {
     return new geo.osmLayer(arg);
+  }
+
+  // set a default attribution if no other is provided
+  arg = arg || {};
+  if (arg && arg.attribution === undefined) {
+    arg.attribution =
+      '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors';
   }
   geo.featureLayer.call(this, arg);
 
@@ -35,9 +42,9 @@ geo.osmLayer = function (arg) {
     m_pendingInactiveTiles = [],
     m_numberOfCachedTiles = 0,
     m_tileCacheSize = 100,
-    m_baseUrl = "http://tile.openstreetmap.org/",
+    m_baseUrl = 'http://tile.openstreetmap.org/',
     m_mapOpacity = 1.0,
-    m_imageFormat = "png",
+    m_imageFormat = 'png',
     m_updateTimerId = null,
     m_lastVisibleZoom = null,
     m_visibleTilesRange = {},
@@ -48,14 +55,14 @@ geo.osmLayer = function (arg) {
     m_zoom = null,
     m_tileUrl,
     m_tileUrlFromTemplate,
-    m_crossOrigin = "anonymous";
+    m_crossOrigin = 'anonymous';
 
   if (arg && arg.baseUrl !== undefined) {
     m_baseUrl = arg.baseUrl;
   }
 
-  if (m_baseUrl.charAt(m_baseUrl.length - 1) !== "/") {
-    m_baseUrl += "/";
+  if (m_baseUrl.charAt(m_baseUrl.length - 1) !== '/') {
+    m_baseUrl += '/';
   }
 
   if (arg && arg.mapOpacity !== undefined) {
@@ -70,7 +77,7 @@ geo.osmLayer = function (arg) {
   }
 
   if (arg && arg.useCredentials !== undefined && arg.useCredentials) {
-    m_crossOrigin = "use-credentials";
+    m_crossOrigin = 'use-credentials';
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -86,8 +93,8 @@ geo.osmLayer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   m_tileUrl = function (zoom, x, y) {
-    return m_baseUrl + zoom + "/" + x +
-      "/" + y + "." + m_imageFormat;
+    return m_baseUrl + zoom + '/' + x +
+      '/' + y + '.' + m_imageFormat;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -101,9 +108,9 @@ geo.osmLayer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   m_tileUrlFromTemplate = function (base) {
     return function (zoom, x, y) {
-      return base.replace("<zoom>", zoom)
-        .replace("<x>", x)
-        .replace("<y>", y);
+      return base.replace('<zoom>', zoom)
+        .replace('<x>', x)
+        .replace('<y>', y);
     };
   };
 
@@ -160,7 +167,7 @@ geo.osmLayer = function (arg) {
   this.tileUrl = function (val) {
     if (val === undefined) {
       return m_tileUrl;
-    } else if (typeof val === "string") {
+    } else if (typeof val === 'string') {
       m_tileUrl = m_tileUrlFromTemplate(val);
     } else {
       m_tileUrl = val;
@@ -209,12 +216,12 @@ geo.osmLayer = function (arg) {
           }
         }
       } else if (input[0] instanceof Object &&
-                 "x" in input[0] && "y" in input[0] && "z" in input[0]) {
+                 'x' in input[0] && 'y' in input[0] && 'z' in input[0]) {
         /// Input is array of object
         output[i] = { x: input[i].x, y: geo.mercator.lat2y(input[i].y),
                       z: input[i].z };
       } else if (input[0] instanceof Object &&
-                 "x" in input[0] && "y" in input[0] && "z" in input[0]) {
+                 'x' in input[0] && 'y' in input[0] && 'z' in input[0]) {
         /// Input is array of object
         output[i] = { x: input[i].x, y: geo.mercator.lat2y(input[i].y)};
       } else if (input.length >= 2) {
@@ -610,11 +617,11 @@ geo.osmLayer = function (arg) {
     for (i = 0; i < m_pendingNewTiles.length; i += 1) {
       tile = m_pendingNewTiles[i];
       feature = m_this.createFeature(
-        "plane", {drawOnAsyncResourceLoad: false, onload: tileOnLoad(tile)})
+        'plane', {drawOnAsyncResourceLoad: false, onload: tileOnLoad(tile)})
         .origin([tile.llx, tile.lly])
         .upperLeft([tile.llx, tile.ury])
         .lowerRight([tile.urx, tile.lly])
-        .gcs("EPSG:3857")
+        .gcs('EPSG:3857')
         .style({image: tile, opacity: m_mapOpacity});
       tile.feature = feature;
       tile.feature._update();
@@ -692,13 +699,11 @@ geo.osmLayer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
-   *
-   * Do not call parent _init method as its already been executed
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function () {
     s_init.call(m_this);
-    m_this.gcs("EPSG:3857");
+    m_this.gcs('EPSG:3857');
     m_this.map().zoomRange({
       min: 0,
       max: 18
@@ -729,8 +734,8 @@ geo.osmLayer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   /* jshint -W089 */
   this.updateBaseUrl = function (baseUrl) {
-    if (baseUrl && baseUrl.charAt(m_baseUrl.length - 1) !== "/") {
-      baseUrl += "/";
+    if (baseUrl && baseUrl.charAt(m_baseUrl.length - 1) !== '/') {
+      baseUrl += '/';
     }
     if (baseUrl !== m_baseUrl) {
 
@@ -815,4 +820,4 @@ geo.osmLayer = function (arg) {
 
 inherit(geo.osmLayer, geo.featureLayer);
 
-geo.registerLayer("osm", geo.osmLayer);
+geo.registerLayer('osm', geo.osmLayer);
