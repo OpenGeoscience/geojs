@@ -18,7 +18,6 @@ geo.gl.vglRenderer = function (arg) {
   geo.gl.renderer.call(this, arg);
 
   var m_this = this,
-      s_exit = this._exit,
       m_contextRenderer = null,
       m_viewer = null,
       m_width = 0,
