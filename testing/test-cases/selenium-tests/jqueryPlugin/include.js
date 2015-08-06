@@ -7,6 +7,7 @@ window.startTest = function (done) {
       center: {latitude: 10, longitude: -10},
       zoom: 4.1,
       tileUrl: '/data/grid.jpg',
+      attribution: null,
       layers: [{
         renderer: 'vgl',
         features: [{
