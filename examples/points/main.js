@@ -49,7 +49,7 @@ $(function () {
       x: -98.0,
       y: 39.5
     },
-    zoom: 2
+    zoom: 4.9
   });
 
   // Create an osm layer with custom tile url for a white background.

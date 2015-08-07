@@ -58,7 +58,7 @@ $(function () {
       x: -157.965,
       y: 21.482
     },
-    zoom: 8
+    zoom: 10
   });
 
   // Add the osm layer

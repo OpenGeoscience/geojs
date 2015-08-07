@@ -9,7 +9,7 @@ $(function () {
       x: -98.0,
       y: 39.5
     },
-    zoom: 2
+    zoom: 4
   }),
   over = 0;
 
