@@ -180,12 +180,12 @@
 
       // get the tile range to fetch
       start = this.tileAtPoint({
-        x: center.x - size.x / 2,
-        y: center.y - size.y / 2
+        x: center.x - size.width / 2,
+        y: center.y - size.height / 2
       }, level);
       end = this.tileAtPoint({
-        x: center.x + size.x / 2,
-        y: center.y + size.y / 2
+        x: center.x + size.width / 2,
+        y: center.y + size.height / 2
       }, level);
 
       // total number of tiles existing at this level
@@ -235,7 +235,7 @@
       for (l = this._options.minLevel; l <= level; l += 1) {
         scale = Math.pow(2, l - level);
         c = {x: center.x * scale, y: center.y * scale};
-        s = {x: size.x * scale, y: size.y * scale};
+        s = {x: size.width * scale, y: size.height * scale};
         Array.prototype.push.apply(tiles, this._getTiles(l, c, s, false));
       }
       return $.when.prototype.apply($,
