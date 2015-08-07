@@ -20,7 +20,7 @@ $(function () {
       x: -100,
       y: 40
     },
-    zoom: 1,
+    zoom: 4,
     layers: [{
       renderer: 'd3',
       features: [{

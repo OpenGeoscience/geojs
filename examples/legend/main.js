@@ -4,7 +4,8 @@ $(function () {
 
   // Create a map object
   var map = geo.map({
-    node: '#map'
+    node: '#map',
+    zoom: 3
   });
 
   // Add the osm layer with a custom tile url

@@ -5,7 +5,7 @@ $(function () {
   // Create a map object
   var map = geo.map({
     node: '#map',
-    zoom: 2,
+    zoom: 4,
     center: {x: -98.0, y: 39.5}
   });
 
