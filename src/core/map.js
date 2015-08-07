@@ -596,6 +596,7 @@ geo.map = function (arg) {
       throw 'Map require DIV node';
     }
 
+    m_node.css('position', 'relative');
     if (arg !== undefined && arg.layers !== undefined) {
       for (i = 0; i < arg.layers.length; i += 1) {
         if (i === 0) {
@@ -1021,6 +1022,63 @@ geo.map = function (arg) {
     return m_this;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Update the attribution notice displayed on the bottom right corner of
+   * the map.  The content of this notice is managed by individual layers.
+   * This method queries all of the visible layers and joins the individual
+   * attribution notices into a single element.  By default, this method
+   * is called on each of the following events:
+   *
+   *   * geo.event.layerAdd
+   *   * geo.event.layerRemove
+   *
+   * In addition, layers should call this method when their own attribution
+   * notices has changed.  Users, in general, should not need to call this.
+   * @returns {this} Chainable
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.updateAttribution = function () {
+    // clear any existing attribution content
+    m_this.node().find('.geo-attribution').remove();
+
+    // generate a new attribution node
+    var $a = $('<div/>')
+      .addClass('geo-attribution')
+      .css({
+        position: 'absolute',
+        right: '0px',
+        bottom: '0px',
+        'padding-right': '5px',
+        cursor: 'auto',
+        font: '11px/1.5 "Helvetica Neue", Arial, Helvetica, sans-serif',
+        'z-index': '1001',
+        background: 'rgba(255,255,255,0.7)',
+        clear: 'both',
+        display: 'block',
+        'pointer-events': 'auto'
+      }).on('mousedown', function (evt) {
+        evt.stopPropagation();
+      });
+
+    // append content from each layer
+    m_this.children().forEach(function (layer) {
+      var content = layer.attribution();
+      if (content) {
+        $('<span/>')
+          .addClass('geo-attribution-layer')
+          .css({
+            'padding-left': '5px'
+          })
+          .html(content)
+          .appendTo($a);
+      }
+    });
+
+    $a.appendTo(m_this.node());
+    return m_this;
+  };
+
   this.interactor(arg.interactor || geo.mapInteractor());
   this.clock(arg.clock || geo.clock());
 
@@ -1031,6 +1089,12 @@ geo.map = function (arg) {
   if (arg.autoResize) {
     $(window).resize(resizeSelf);
   }
+
+  // attach attribution updates to layer events
+  m_this.geoOn([
+    geo.event.layerAdd,
+    geo.event.layerRemove
+  ], m_this.updateAttribution);
 
   return this;
 };

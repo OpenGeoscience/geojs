@@ -2,6 +2,8 @@
 /**
  * @class
  * @extends geo.sceneObject
+ * @param {Object?} arg An options argument
+ * @param {string} arg.attribution An attribution string to display
  * @returns {geo.layer}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -45,7 +47,8 @@ geo.layer = function (arg) {
       m_updateTime = geo.timestamp(),
       m_drawTime = geo.timestamp(),
       m_sticky = arg.sticky === undefined ? true : arg.sticky,
-      m_active = arg.active === undefined ? true : arg.active;
+      m_active = arg.active === undefined ? true : arg.active,
+      m_attribution = arg.attribution || null;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -339,6 +342,26 @@ geo.layer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Get or set the attribution html content that will displayed with the
+   * layer.  By default, nothing will be displayed.  Note, this content
+   * is **not** html escaped, so care should be taken when renderering
+   * user provided content.
+   * @param {string?} arg An html fragment
+   * @returns {string|this} Chainable as a setter
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.attribution = function (arg) {
+    if (arg !== undefined) {
+      m_attribution = arg;
+      m_this.map().updateAttribution();
+      return m_this;
+    }
+    return m_attribution;
+  };
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Init layer
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -350,9 +373,6 @@ geo.layer = function (arg) {
     // Create top level div for the layer
     m_node = $(document.createElement("div"));
     m_node.attr("id", m_name);
-    // TODO: need to position according to offsets from the map element
-    //       and maybe respond to events in case the map element moves
-    //       around the page.
     m_node.css("position", "absolute");
 
     if (m_map) {
