@@ -450,13 +450,13 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.gcsToDisplay = function (input) {
-    var world, output;
+    var output;
 
     /// Now handle different data types
     if ((input instanceof Array &&
          input.length > 0) || input instanceof Object) {
-      world = m_baseLayer.toLocal(input);
-      output = m_baseLayer.renderer().worldToDisplay(world);
+      // FIX:
+      output = m_baseLayer.toLocal(input);
     } else {
       /// Everything else
       throw 'Conversion method latLonToDisplay does not handle ' + input;
@@ -476,8 +476,7 @@ geo.map = function (arg) {
     /// Now handle different data types
     if ((input instanceof Array && input.length > 0) ||
          input instanceof Object) {
-      output = m_baseLayer.renderer().displayToWorld(input);
-      output = m_baseLayer.fromLocal(output);
+      output = m_baseLayer.fromLocal(input);
     } else {
       throw 'Conversion method displayToGcs does not handle ' + input;
     }

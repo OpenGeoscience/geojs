@@ -315,7 +315,7 @@
      * Draw the given tile on the active canvas.
      * @param {geo.tile} tile The tile to draw
      */
-    draw: function (tile) {
+    drawTile: function (tile) {
       var hash = tile.toString();
 
       if (hash.hasOwnProperty(this._activeTiles)) {
@@ -324,7 +324,7 @@
       }
 
       // pass to the rendering implementation
-      this._draw(tile);
+      this._drawTile(tile);
 
       // add the tile to the active cache
       this._activeTiles[tile.toString()] = tile;
@@ -337,7 +337,7 @@
      * @protected
      * @param {geo.tile} tile The tile to draw
      */
-    _draw: function (tile) {
+    _drawTile: function (tile) {
       // Make sure this method is not called when there is
       // a renderer attached.
       if (this.renderer() !== null) {
@@ -428,7 +428,7 @@
 
       tiles.forEach(function (tile) {
         tile.then(function () {
-          this.draw(tile);
+          this.drawTile(tile);
         }.bind(this));
       }.bind(this));
     }
