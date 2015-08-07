@@ -52,7 +52,7 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>$(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+            <div class="content"><div class='highlight'><pre>$(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
 <span class="hljs-pi">  'use strict'</span>;</pre></div></div>
             
         </li>
@@ -74,7 +74,7 @@
       x: -<span class="hljs-number">98.0</span>,
       y: <span class="hljs-number">39.5</span>
     },
-    zoom: <span class="hljs-number">2</span>
+    zoom: <span class="hljs-number">4</span>
   }),
   over = <span class="hljs-number">0</span>;</pre></div></div>
             
@@ -133,12 +133,12 @@
     }
   );
 
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">handleMouseOver</span><span class="hljs-params">()</span> </span>{
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">handleMouseOver</span>(<span class="hljs-params"></span>) </span>{
     over += <span class="hljs-number">1</span>;
     $(<span class="hljs-string">'#map'</span>).css(<span class="hljs-string">'cursor'</span>, <span class="hljs-string">'pointer'</span>);
   }
 
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">handleMouseOut</span><span class="hljs-params">()</span> </span>{
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">handleMouseOut</span>(<span class="hljs-params"></span>) </span>{
     <span class="hljs-keyword">if</span> (over &gt; <span class="hljs-number">0</span>) {
       over -= <span class="hljs-number">1</span>;
     }
@@ -147,13 +147,13 @@
     }
   }
 
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">handleMouseClick</span><span class="hljs-params">(evt)</span> </span>{
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">handleMouseClick</span>(<span class="hljs-params">evt</span>) </span>{
     evt.data.clicked = !evt.data.clicked;
     <span class="hljs-keyword">this</span>.modified();
     map.draw();
   }
 
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">handleBrush</span><span class="hljs-params">(evt)</span> </span>{
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">handleBrush</span>(<span class="hljs-params">evt</span>) </span>{
     evt.data.clicked = <span class="hljs-literal">true</span>;
     <span class="hljs-keyword">this</span>.modified();
     map.draw();
@@ -163,9 +163,9 @@
   vglLayer.createFeature(<span class="hljs-string">'line'</span>, {selectionAPI: <span class="hljs-literal">true</span>})
     .data([<span class="hljs-built_in">window</span>.randomPath(<span class="hljs-number">1000</span>, <span class="hljs-number">0.1</span>, -<span class="hljs-number">88</span>, <span class="hljs-number">30</span>), <span class="hljs-built_in">window</span>.randomPath(<span class="hljs-number">500</span>, <span class="hljs-number">0.05</span>, -<span class="hljs-number">110</span>, <span class="hljs-number">40</span>)])
     .style({
-      <span class="hljs-string">'strokeColor'</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d, i, e, j)</span> </span>{ <span class="hljs-keyword">return</span> (j % <span class="hljs-number">2</span>) ? color(<span class="hljs-number">0</span>) : color(<span class="hljs-number">1</span>); },
+      <span class="hljs-string">'strokeColor'</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d, i, e, j</span>) </span>{ <span class="hljs-keyword">return</span> (j % <span class="hljs-number">2</span>) ? color(<span class="hljs-number">0</span>) : color(<span class="hljs-number">1</span>); },
       <span class="hljs-string">'strokeWidth'</span>: <span class="hljs-number">5</span>,
-      <span class="hljs-string">'strokeOpacity'</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d, i, e)</span> </span>{ <span class="hljs-keyword">return</span> e.clicked ? <span class="hljs-number">1</span> : <span class="hljs-number">0.5</span>; }
+      <span class="hljs-string">'strokeOpacity'</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d, i, e</span>) </span>{ <span class="hljs-keyword">return</span> e.clicked ? <span class="hljs-number">1</span> : <span class="hljs-number">0.5</span>; }
     })
     .geoOn(geo.event.feature.mouseover, handleMouseOver)
     .geoOn(geo.event.feature.mouseout, handleMouseOut)
@@ -175,9 +175,9 @@
   svgLayer.createFeature(<span class="hljs-string">'line'</span>, {selectionAPI: <span class="hljs-literal">true</span>})
     .data([<span class="hljs-built_in">window</span>.randomPath(<span class="hljs-number">1000</span>, <span class="hljs-number">0.1</span>, -<span class="hljs-number">108</span>, <span class="hljs-number">30</span>), <span class="hljs-built_in">window</span>.randomPath(<span class="hljs-number">500</span>, <span class="hljs-number">0.05</span>, -<span class="hljs-number">88</span>, <span class="hljs-number">40</span>)])
     .style({
-      <span class="hljs-string">'strokeColor'</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d, i, l, j)</span> </span>{ <span class="hljs-keyword">return</span> (j % <span class="hljs-number">2</span>) ? color(<span class="hljs-number">2</span>) : color(<span class="hljs-number">3</span>); },
+      <span class="hljs-string">'strokeColor'</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d, i, l, j</span>) </span>{ <span class="hljs-keyword">return</span> (j % <span class="hljs-number">2</span>) ? color(<span class="hljs-number">2</span>) : color(<span class="hljs-number">3</span>); },
       <span class="hljs-string">'strokeWidth'</span>: <span class="hljs-number">5</span>,
-      <span class="hljs-string">'strokeOpacity'</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d, i, e)</span> </span>{ <span class="hljs-keyword">return</span> e.clicked ? <span class="hljs-number">1</span> : <span class="hljs-number">0.5</span>; }
+      <span class="hljs-string">'strokeOpacity'</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d, i, e</span>) </span>{ <span class="hljs-keyword">return</span> e.clicked ? <span class="hljs-number">1</span> : <span class="hljs-number">0.5</span>; }
     })
     .geoOn(geo.event.feature.mouseover, handleMouseOver)
     .geoOn(geo.event.feature.mouseout, handleMouseOut)

@@ -31,7 +31,7 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>$(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+            <div class="content"><div class='highlight'><pre>$(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
 <span class="hljs-pi">  'use strict'</span>;</pre></div></div>
             
         </li>
@@ -60,7 +60,7 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getSvgLayer</span><span class="hljs-params">(map, opts)</span> </span>{
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getSvgLayer</span>(<span class="hljs-params">map, opts</span>) </span>{
 
     opts.renderer = <span class="hljs-string">'d3'</span>;
     <span class="hljs-keyword">var</span> layer = map.createLayer(<span class="hljs-string">'feature'</span>, opts);</pre></div></div>
@@ -84,7 +84,7 @@
     };
   }
 
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">drawLayer</span><span class="hljs-params">(map, type, text, index, rescale)</span> </span>{
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">drawLayer</span>(<span class="hljs-params">map, type, text, index, rescale</span>) </span>{
     <span class="hljs-keyword">var</span> layer, svg, obj;</pre></div></div>
             
         </li>
@@ -230,7 +230,7 @@ in the css.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">theta</span><span class="hljs-params">(d)</span> </span>{
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">theta</span>(<span class="hljs-params">d</span>) </span>{
       <span class="hljs-keyword">return</span> <span class="hljs-number">9</span> * d * <span class="hljs-built_in">Math</span>.PI / <span class="hljs-number">100</span>;
     }
     <span class="hljs-keyword">var</span> alpha = <span class="hljs-number">0.1</span>;
@@ -241,11 +241,11 @@ in the css.</p>
       .domain([-<span class="hljs-number">6</span>, <span class="hljs-number">6</span>])
       .range([width * <span class="hljs-number">0.7</span>, <span class="hljs-number">0</span>]);
     <span class="hljs-keyword">var</span> spiral = d3.svg.line()
-      .x(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d)</span> </span>{
+      .x(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{
         <span class="hljs-keyword">var</span> t = theta(d);
         <span class="hljs-keyword">return</span> xScale(alpha * t * <span class="hljs-built_in">Math</span>.cos(t));
       })
-      .y(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d)</span> </span>{
+      .y(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{
         <span class="hljs-keyword">var</span> t = theta(d);
         <span class="hljs-keyword">return</span> yScale(alpha * t * <span class="hljs-built_in">Math</span>.sin(t));
       })
@@ -270,7 +270,7 @@ in the css.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span> (rescale) {
-      layer.geoOn([geo.event.zoom, geo.event.resize], <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{</pre></div></div>
+      layer.geoOn([geo.event.zoom, geo.event.resize], <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{</pre></div></div>
             
         </li>
         
@@ -337,7 +337,7 @@ widths and point radii.</p>
       x: -<span class="hljs-number">98.0</span>,
       y: <span class="hljs-number">39.5</span>
     },
-    zoom: <span class="hljs-number">1</span>
+    zoom: <span class="hljs-number">4</span>
   });</pre></div></div>
             
         </li>

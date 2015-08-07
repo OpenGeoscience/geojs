@@ -9,7 +9,7 @@ $(function () {
       x: -98.0,
       y: 39.5
     },
-    zoom: 1
+    zoom: 3
   });
 
   // Add the osm layer with a custom tile url

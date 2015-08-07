@@ -39,10 +39,17 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.osmLayer = function (arg) {
-  "use strict";
+  'use strict';
 
   if (!(this instanceof geo.osmLayer)) {
     return new geo.osmLayer(arg);
+  }
+
+  // set a default attribution if no other is provided
+  arg = arg || {};
+  if (arg &amp;&amp; arg.attribution === undefined) {
+    arg.attribution =
+      '&amp;copy; &lt;a href="http://osm.org/copyright">OpenStreetMap&lt;/a> contributors';
   }
   geo.featureLayer.call(this, arg);
 
@@ -63,9 +70,9 @@ geo.osmLayer = function (arg) {
     m_pendingInactiveTiles = [],
     m_numberOfCachedTiles = 0,
     m_tileCacheSize = 100,
-    m_baseUrl = "http://tile.openstreetmap.org/",
+    m_baseUrl = 'http://tile.openstreetmap.org/',
     m_mapOpacity = 1.0,
-    m_imageFormat = "png",
+    m_imageFormat = 'png',
     m_updateTimerId = null,
     m_lastVisibleZoom = null,
     m_visibleTilesRange = {},
@@ -75,14 +82,15 @@ geo.osmLayer = function (arg) {
     m_updateDefer = null,
     m_zoom = null,
     m_tileUrl,
-    m_tileUrlFromTemplate;
+    m_tileUrlFromTemplate,
+    m_crossOrigin = 'anonymous';
 
   if (arg &amp;&amp; arg.baseUrl !== undefined) {
     m_baseUrl = arg.baseUrl;
   }
 
-  if (m_baseUrl.charAt(m_baseUrl.length - 1) !== "/") {
-    m_baseUrl += "/";
+  if (m_baseUrl.charAt(m_baseUrl.length - 1) !== '/') {
+    m_baseUrl += '/';
   }
 
   if (arg &amp;&amp; arg.mapOpacity !== undefined) {
@@ -94,6 +102,10 @@ geo.osmLayer = function (arg) {
 
   if (arg &amp;&amp; arg.displayLast !== undefined &amp;&amp; arg.displayLast) {
     m_lastVisibleBinNumber = 999;
+  }
+
+  if (arg &amp;&amp; arg.useCredentials !== undefined &amp;&amp; arg.useCredentials) {
+    m_crossOrigin = 'use-credentials';
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -109,8 +121,8 @@ geo.osmLayer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   m_tileUrl = function (zoom, x, y) {
-    return m_baseUrl + zoom + "/" + x +
-      "/" + y + "." + m_imageFormat;
+    return m_baseUrl + zoom + '/' + x +
+      '/' + y + '.' + m_imageFormat;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -124,9 +136,9 @@ geo.osmLayer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   m_tileUrlFromTemplate = function (base) {
     return function (zoom, x, y) {
-      return base.replace("&lt;zoom>", zoom)
-        .replace("&lt;x>", x)
-        .replace("&lt;y>", y);
+      return base.replace('&lt;zoom>', zoom)
+        .replace('&lt;x>', x)
+        .replace('&lt;y>', y);
     };
   };
 
@@ -183,7 +195,7 @@ geo.osmLayer = function (arg) {
   this.tileUrl = function (val) {
     if (val === undefined) {
       return m_tileUrl;
-    } else if (typeof val === "string") {
+    } else if (typeof val === 'string') {
       m_tileUrl = m_tileUrlFromTemplate(val);
     } else {
       m_tileUrl = val;
@@ -200,15 +212,12 @@ geo.osmLayer = function (arg) {
    * @param {*} input
    * Input can be of following types:
    *
-   *   1. geo.latlng
-   *   2. [geo.latlng]
    *   3. [x1,y1, x2, y2]
    *   4. [[x,y]]
    *   5. {x:val: y:val, z:val},
    *   6. [{x:val: y:val}]
    *
-   * returns geo.latlng, [geo.latlng], or {x:lon, y:lat}, [{x:lon, y:lat}]
-   * [x1,y1, x2, y2], [[x,y]]
+   * returns {x:lon, y:lat}, [{x:lon, y:lat}], [x1,y1, x2, y2], [[x,y]]
    */
   ////////////////////////////////////////////////////////////////////////////
   this.toLocal = function (input) {
@@ -219,13 +228,7 @@ geo.osmLayer = function (arg) {
       output = [];
       output.length = input.length;
 
-      /// Input is array of geo.latlng
-      if (input[0] instanceof geo.latlng) {
-        for (i = 0; i &lt; input.length; i += 1) {
-          output[i] = geo.latlng(input[i]);
-          output[i].lat(geo.mercator.lat2y(output[i].lat()));
-        }
-      } else if (input[0] instanceof Array) {
+      if (input[0] instanceof Array) {
         delta = input % 3 === 0 ? 3 : 2;
 
         if (delta === 2) {
@@ -241,22 +244,18 @@ geo.osmLayer = function (arg) {
           }
         }
       } else if (input[0] instanceof Object &amp;&amp;
-                 "x" in input[0] &amp;&amp; "y" in input[0] &amp;&amp; "z" in input[0]) {
+                 'x' in input[0] &amp;&amp; 'y' in input[0] &amp;&amp; 'z' in input[0]) {
         /// Input is array of object
         output[i] = { x: input[i].x, y: geo.mercator.lat2y(input[i].y),
                       z: input[i].z };
       } else if (input[0] instanceof Object &amp;&amp;
-                 "x" in input[0] &amp;&amp; "y" in input[0] &amp;&amp; "z" in input[0]) {
+                 'x' in input[0] &amp;&amp; 'y' in input[0] &amp;&amp; 'z' in input[0]) {
         /// Input is array of object
         output[i] = { x: input[i].x, y: geo.mercator.lat2y(input[i].y)};
       } else if (input.length >= 2) {
         output = input.slice(0);
         output[1] = geo.mercator.lat2y(input[1]);
       }
-    } else if (input instanceof geo.latlng) {
-      output = {};
-      output.x = input.x();
-      output.y = geo.mercator.lat2y(input.y());
     } else {
       output = {};
       output.x = input.x;
@@ -367,7 +366,7 @@ geo.osmLayer = function (arg) {
     tile.REMOVING = false;
     tile.INVALID = false;
 
-    tile.crossOrigin = "anonymous";
+    tile.crossOrigin = m_crossOrigin;
     tile.zoom = zoom;
     tile.index_x = x;
     tile.index_y = y;
@@ -593,9 +592,9 @@ geo.osmLayer = function (arg) {
           if (tile.LOADED &amp;&amp; m_updateTimerId in m_pendingNewTilesStat) {
             m_pendingNewTilesStat[m_updateTimerId].count += 1;
           }
-          tile.lastused = new Date();
           tile.feature._update();
         }
+        tile.lastused = new Date();
         tile.updateTimerId = m_updateTimerId;
       }
     }
@@ -646,11 +645,11 @@ geo.osmLayer = function (arg) {
     for (i = 0; i &lt; m_pendingNewTiles.length; i += 1) {
       tile = m_pendingNewTiles[i];
       feature = m_this.createFeature(
-        "plane", {drawOnAsyncResourceLoad: false, onload: tileOnLoad(tile)})
+        'plane', {drawOnAsyncResourceLoad: false, onload: tileOnLoad(tile)})
         .origin([tile.llx, tile.lly])
         .upperLeft([tile.llx, tile.ury])
         .lowerRight([tile.urx, tile.lly])
-        .gcs("EPSG:3857")
+        .gcs('EPSG:3857')
         .style({image: tile, opacity: m_mapOpacity});
       tile.feature = feature;
       tile.feature._update();
@@ -728,13 +727,11 @@ geo.osmLayer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
-   *
-   * Do not call parent _init method as its already been executed
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function () {
     s_init.call(m_this);
-    m_this.gcs("EPSG:3857");
+    m_this.gcs('EPSG:3857');
     m_this.map().zoomRange({
       min: 0,
       max: 18
@@ -765,8 +762,8 @@ geo.osmLayer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   /* jshint -W089 */
   this.updateBaseUrl = function (baseUrl) {
-    if (baseUrl &amp;&amp; baseUrl.charAt(m_baseUrl.length - 1) !== "/") {
-      baseUrl += "/";
+    if (baseUrl &amp;&amp; baseUrl.charAt(m_baseUrl.length - 1) !== '/') {
+      baseUrl += '/';
     }
     if (baseUrl !== m_baseUrl) {
 
@@ -851,7 +848,7 @@ geo.osmLayer = function (arg) {
 
 inherit(geo.osmLayer, geo.featureLayer);
 
-geo.registerLayer("osm", geo.osmLayer);
+geo.registerLayer('osm', geo.osmLayer);
 </code></pre>
         </article>
     </section>
@@ -862,13 +859,13 @@ geo.registerLayer("osm", geo.osmLayer);
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.clock.html">clock</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.renderer.html">renderer</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.latlng.html">latlng</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.mercator.html">mercator</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.clock.html">clock</a></li><li><a href="geo.contourFeature.html">contourFeature</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.contourFeature.html">contourFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.renderer.html">renderer</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.util.ClusterGroup.html">ClusterGroup</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.mercator.html">mercator</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta1</a> on Wed Apr 29 2015 09:40:47 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.2</a> on Fri Aug 07 2015 10:52:03 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

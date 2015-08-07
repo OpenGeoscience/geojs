@@ -31,7 +31,7 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>$(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+            <div class="content"><div class='highlight'><pre>$(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
 <span class="hljs-pi">  'use strict'</span>;</pre></div></div>
             
         </li>
@@ -47,7 +47,7 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> map = geo.map({node: <span class="hljs-string">'#map'</span>});</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> map = geo.map({node: <span class="hljs-string">'#map'</span>, zoom: <span class="hljs-number">3</span>});</pre></div></div>
             
         </li>
         
@@ -121,7 +121,7 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  map.geoOn(geo.event.clock.change, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(evt)</span> </span>{
+            <div class="content"><div class='highlight'><pre>  map.geoOn(geo.event.clock.change, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">evt</span>) </span>{
     features.clear();</pre></div></div>
             
         </li>
@@ -167,7 +167,7 @@
 
     features.createFeature(<span class="hljs-string">'point'</span>)
       .data(positions)
-      .position(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(data)</span> </span>{
+      .position(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">data</span>) </span>{
         <span class="hljs-keyword">return</span> {x: data.x, y: data.y};
       })
       .style(<span class="hljs-string">'radius'</span>, <span class="hljs-number">5</span>)

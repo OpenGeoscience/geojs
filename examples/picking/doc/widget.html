@@ -51,10 +51,10 @@
               
             </div>
             
-            <div class="content"><div class='highlight'><pre>(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+            <div class="content"><div class='highlight'><pre>(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
 <span class="hljs-pi">  'use strict'</span>;
 
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">smoothFunction</span><span class="hljs-params">(n, sigma)</span> </span>{
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">smoothFunction</span>(<span class="hljs-params">n, sigma</span>) </span>{
     <span class="hljs-keyword">var</span> p = [], q = [];
     <span class="hljs-keyword">var</span> i, j, dx, ss = sigma * sigma * <span class="hljs-number">2</span> * n * n;
     <span class="hljs-keyword">var</span> c = <span class="hljs-number">1</span> / (<span class="hljs-number">2</span> * sigma * <span class="hljs-built_in">Math</span>.PI);
@@ -96,11 +96,11 @@
    * @param {int} n Number of points
    * @param {float} sigma Smoothness of the line (&gt;0)
    */</span>
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">randomPath</span><span class="hljs-params">(n, sigma, cx, cy)</span> </span>{
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">randomPath</span>(<span class="hljs-params">n, sigma, cx, cy</span>) </span>{
     <span class="hljs-keyword">var</span> x = smoothFunction(n, sigma);
     <span class="hljs-keyword">var</span> y = smoothFunction(n, sigma);
 
-    <span class="hljs-keyword">return</span> x.map(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d, i)</span> </span>{
+    <span class="hljs-keyword">return</span> x.map(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d, i</span>) </span>{
       <span class="hljs-keyword">return</span> {
         x: cx + (d - <span class="hljs-number">0.5</span>) * <span class="hljs-number">15</span>,
         y: cy + (y[i] - <span class="hljs-number">0.5</span>) * <span class="hljs-number">10</span>

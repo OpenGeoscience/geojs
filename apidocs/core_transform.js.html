@@ -88,14 +88,9 @@ geo.transform.osmTransformFeature = function (destGcs, feature, inplace) {
       throw "Supports Array of 2D and 3D points";
     }
 
-    if (inPos.length > 0 &amp;&amp; inPos[0] instanceof geo.latlng) {
-      noOfComponents = 2;
-      pointOffset = 1;
-    } else {
-      noOfComponents = (count % 2 === 0 ? 2 :
-                       (count % 3 === 0 ? 3 : null));
-      pointOffset = noOfComponents;
-    }
+    noOfComponents = (count % 2 === 0 ? 2 :
+                     (count % 3 === 0 ? 3 : null));
+    pointOffset = noOfComponents;
 
     if (noOfComponents !== 2 &amp;&amp; noOfComponents !== 3) {
       throw "Transform points require points in 2D or 3D";
@@ -111,11 +106,7 @@ geo.transform.osmTransformFeature = function (destGcs, feature, inplace) {
 
       /// Y goes from 0 (top edge is 85.0511 °N) to 2zoom − 1
       /// (bottom edge is 85.0511 °S) in a Mercator projection.
-      if (inPos[i] instanceof geo.latlng) {
-        yCoord = inPos[i].lat();
-      } else {
-        yCoord = inPos[i + 1];
-      }
+      yCoord = inPos[i + 1];
 
       if (yCoord > 85.0511) {
         yCoord = 85.0511;
@@ -123,11 +114,7 @@ geo.transform.osmTransformFeature = function (destGcs, feature, inplace) {
       if (yCoord &lt; -85.0511) {
         yCoord = -85.0511;
       }
-      if (inPos[i] instanceof geo.latlng) {
-        outPos[i] = geo.latlng(geo.mercator.lat2y(yCoord), outPos[i].lng());
-      } else {
-        outPos[i + 1] = geo.mercator.lat2y(yCoord);
-      }
+      outPos[i + 1] = geo.mercator.lat2y(yCoord);
     }
 
     if (inplace) {
@@ -186,14 +173,9 @@ geo.transform.transformFeature = function (destGcs, feature, inplace) {
       throw "Supports Array of 2D and 3D points";
     }
 
-    if (inPos.length > 0 &amp;&amp; inPos[0] instanceof geo.latlng) {
-      noOfComponents = 2;
-      pointOffset = 1;
-    } else {
-      noOfComponents = (count % 2 === 0 ? 2 :
-                       (count % 3 === 0 ? 3 : null));
-      pointOffset = noOfComponents;
-    }
+    noOfComponents = (count % 2 === 0 ? 2 :
+                     (count % 3 === 0 ? 3 : null));
+    pointOffset = noOfComponents;
 
     if (noOfComponents !== 2 &amp;&amp; noOfComponents !== 3) {
       throw "Transform points require points in 2D or 3D";
@@ -288,7 +270,7 @@ geo.transform.transformLayer = function (destGcs, layer, baseLayer) {
  * @param {string} srcGcs GCS of the coordinates
  * @param {string} destGcs Desired GCS of the transformed coordinates
  * @param {object} coordinates
- * @return {geo.latlng|geo.latlng[]} Transformed coordinates
+ * @return {object|object[]} Transformed coordinates
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.transform.transformCoordinates = function (srcGcs, destGcs, coordinates,
@@ -312,31 +294,6 @@ geo.transform.transformCoordinates = function (srcGcs, destGcs, coordinates,
   /// TODO: Can we check for EPSG code?
   if (!destGcs || !srcGcs) {
     throw "Invalid source or destination GCS";
-  }
-
-  /// Helper methods
-  function handleLatLngCoordinates() {
-    if (coordinates[0] &amp;&amp; coordinates[0] instanceof geo.latlng) {
-      xAcc = function (index) {
-        return coordinates[index].x();
-      };
-      yAcc = function (index) {
-        return coordinates[index].y();
-      };
-      writer = function (index, x, y) {
-        output[index] = geo.latlng(y, x);
-      };
-    } else {
-      xAcc = function () {
-        return coordinates.x();
-      };
-      yAcc = function () {
-        return coordinates.y();
-      };
-      writer = function (index, x, y) {
-        output = geo.latlng(y, x);
-      };
-    }
   }
 
   /// Helper methods
@@ -489,14 +446,11 @@ geo.transform.transformCoordinates = function (srcGcs, destGcs, coordinates,
     count = coordinates.length;
 
     if (coordinates[0] instanceof Array ||
-        coordinates[0] instanceof geo.latlng ||
         coordinates[0] instanceof Object) {
       offset = 1;
 
       if (coordinates[0] instanceof Array) {
         handleArrayCoordinates();
-      } else if (coordinates[0] instanceof geo.latlng) {
-        handleLatLngCoordinates();
       } else if (coordinates[0] instanceof Object) {
         handleObjectCoordinates();
       }
@@ -506,9 +460,7 @@ geo.transform.transformCoordinates = function (srcGcs, destGcs, coordinates,
   } else if (coordinates &amp;&amp; coordinates instanceof Object) {
     count = 1;
     offset = 1;
-    if (coordinates instanceof geo.latlng) {
-      handleLatLngCoordinates();
-    } else if (coordinates &amp;&amp; "x" in coordinates &amp;&amp; "y" in coordinates) {
+    if (coordinates &amp;&amp; "x" in coordinates &amp;&amp; "y" in coordinates) {
       handleObjectCoordinates();
     } else {
       throw "Coordinates are not valid";
@@ -553,13 +505,13 @@ geo.transform.transformCoordinates = function (srcGcs, destGcs, coordinates,
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.clock.html">clock</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.renderer.html">renderer</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.latlng.html">latlng</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.mercator.html">mercator</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.clock.html">clock</a></li><li><a href="geo.contourFeature.html">contourFeature</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.contourFeature.html">contourFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.renderer.html">renderer</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.util.ClusterGroup.html">ClusterGroup</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.mercator.html">mercator</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta1</a> on Wed Apr 29 2015 09:40:47 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.2</a> on Fri Aug 07 2015 10:52:03 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

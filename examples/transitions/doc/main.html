@@ -31,7 +31,7 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>$(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+            <div class="content"><div class='highlight'><pre>$(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
 <span class="hljs-pi">  'use strict'</span>;</pre></div></div>
             
         </li>
@@ -83,28 +83,28 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  $(<span class="hljs-string">'#pan-to-london'</span>).click(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+            <div class="content"><div class='highlight'><pre>  $(<span class="hljs-string">'#pan-to-london'</span>).click(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
     map.transition({
       center: {x: -<span class="hljs-number">0.1275</span>, y: <span class="hljs-number">51.5072</span>},
       duration: <span class="hljs-number">2000</span>
     });
   });
 
-  $(<span class="hljs-string">'#elastic-to-moscow'</span>).click(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+  $(<span class="hljs-string">'#elastic-to-moscow'</span>).click(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
     map.transition({
       center: {x: <span class="hljs-number">37.6167</span>, y: <span class="hljs-number">55.7500</span>},
       duration: <span class="hljs-number">2000</span>,
-      ease: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(t)</span> </span>{
+      ease: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">t</span>) </span>{
         <span class="hljs-keyword">return</span> <span class="hljs-built_in">Math</span>.pow(<span class="hljs-number">2.0</span>, -<span class="hljs-number">10.0</span> * t) * <span class="hljs-built_in">Math</span>.sin((t - <span class="hljs-number">0.075</span>) * (<span class="hljs-number">2.0</span> * <span class="hljs-built_in">Math</span>.PI) / <span class="hljs-number">0.3</span>) + <span class="hljs-number">1.0</span>;
       }
     });
   });
 
-  $(<span class="hljs-string">'#bounce-to-istanbul'</span>).click(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+  $(<span class="hljs-string">'#bounce-to-istanbul'</span>).click(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
     map.transition({
       center: {x: <span class="hljs-number">28.9550</span>, y: <span class="hljs-number">41.0136</span>},
       duration: <span class="hljs-number">2000</span>,
-      ease: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(t)</span> </span>{
+      ease: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">t</span>) </span>{
         <span class="hljs-keyword">var</span> r = <span class="hljs-number">2.75</span>;
         <span class="hljs-keyword">var</span> s = <span class="hljs-number">7.5625</span>;
         <span class="hljs-keyword">if</span> (t &lt; <span class="hljs-number">1.0</span> / r) {
@@ -124,7 +124,7 @@
     });
   });
 
-  $(<span class="hljs-string">'#fly-to-bern'</span>).click(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+  $(<span class="hljs-string">'#fly-to-bern'</span>).click(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
     map.transition({
       center: {x: <span class="hljs-number">7.4500</span>, y: <span class="hljs-number">46.9500</span>},
       duration: <span class="hljs-number">2000</span>,

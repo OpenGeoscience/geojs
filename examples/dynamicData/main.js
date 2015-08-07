@@ -3,7 +3,7 @@ $(function () {
   'use strict';
 
   // Create a map object
-  var map = geo.map({node: '#map'});
+  var map = geo.map({node: '#map', zoom: 3});
 
   // Add and start a clock
   var clock = map.clock();

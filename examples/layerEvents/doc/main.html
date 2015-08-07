@@ -31,7 +31,7 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>$(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+            <div class="content"><div class='highlight'><pre>$(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
 <span class="hljs-pi">  'use strict'</span>;</pre></div></div>
             
         </li>
@@ -47,7 +47,7 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getSvgLayer</span><span class="hljs-params">(map, opts)</span> </span>{
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getSvgLayer</span>(<span class="hljs-params">map, opts</span>) </span>{
 
     opts.renderer = <span class="hljs-string">'d3'</span>;
     <span class="hljs-keyword">var</span> layer = map.createLayer(<span class="hljs-string">'feature'</span>, opts);</pre></div></div>
@@ -84,7 +84,7 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">topLayer</span><span class="hljs-params">(map)</span> </span>{
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">topLayer</span>(<span class="hljs-params">map</span>) </span>{
     <span class="hljs-keyword">var</span> obj = getSvgLayer(map, {sticky: <span class="hljs-literal">false</span>});</pre></div></div>
             
         </li>
@@ -129,7 +129,7 @@
       x: -<span class="hljs-number">98.0</span>,
       y: <span class="hljs-number">39.5</span>
     },
-    zoom: <span class="hljs-number">1</span>
+    zoom: <span class="hljs-number">4</span>
   });</pre></div></div>
             
         </li>
@@ -212,7 +212,7 @@ uniform style that receives mouse events.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">addEventBox</span><span class="hljs-params">(x, y, str)</span> </span>{
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">addEventBox</span>(<span class="hljs-params">x, y, str</span>) </span>{
     <span class="hljs-keyword">var</span> width = <span class="hljs-number">300</span>, height = <span class="hljs-number">200</span>;
     <span class="hljs-keyword">var</span> text = svg.append(<span class="hljs-string">'text'</span>)
       .attr(<span class="hljs-string">'x'</span>, x - <span class="hljs-number">75</span>)
@@ -229,11 +229,11 @@ uniform style that receives mouse events.</p>
       .attr(<span class="hljs-string">'ry'</span>, <span class="hljs-number">10</span>)
       .attr(<span class="hljs-string">'width'</span>, width)
       .attr(<span class="hljs-string">'height'</span>, height)
-      .on(<span class="hljs-string">'mouseenter'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+      .on(<span class="hljs-string">'mouseenter'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
         text.style(<span class="hljs-string">'display'</span>, <span class="hljs-literal">null</span>);
         d3.select(<span class="hljs-keyword">this</span>).style(<span class="hljs-string">'fill-opacity'</span>, <span class="hljs-string">'75%'</span>);
       })
-      .on(<span class="hljs-string">'mouseleave'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+      .on(<span class="hljs-string">'mouseleave'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
         text.style(<span class="hljs-string">'display'</span>, <span class="hljs-string">'none'</span>);
         d3.select(<span class="hljs-keyword">this</span>).style(<span class="hljs-string">'fill-opacity'</span>, <span class="hljs-literal">null</span>);
       });
@@ -254,7 +254,7 @@ uniform style that receives mouse events.</p>
             
             <div class="content"><div class='highlight'><pre>  addEventBox(width / <span class="hljs-number">4</span>, height / <span class="hljs-number">2</span>, <span class="hljs-string">'Blocking click'</span>)
     .style(<span class="hljs-string">'fill'</span>, <span class="hljs-string">'firebrick'</span>)
-    .on(<span class="hljs-string">'mousedown'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+    .on(<span class="hljs-string">'mousedown'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
       d3.event.stopPropagation();
     });</pre></div></div>
             
@@ -273,7 +273,7 @@ uniform style that receives mouse events.</p>
             
             <div class="content"><div class='highlight'><pre>  addEventBox(<span class="hljs-number">3</span> * width / <span class="hljs-number">4</span>, height / <span class="hljs-number">2</span>, <span class="hljs-string">'Blocking wheel'</span>)
     .style(<span class="hljs-string">'fill'</span>, <span class="hljs-string">'steelblue'</span>)
-    .on(<span class="hljs-string">'wheel'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+    .on(<span class="hljs-string">'wheel'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
       d3.event.stopPropagation();
     });</pre></div></div>
             
@@ -307,7 +307,7 @@ uniform style that receives mouse events.</p>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> top = <span class="hljs-literal">null</span>;
   $(<span class="hljs-string">'.layer-toggle '</span>).text(<span class="hljs-string">'Add top layer'</span>)
-    .click(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+    .click(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
       <span class="hljs-keyword">if</span> (top) {
         $(<span class="hljs-keyword">this</span>).text(<span class="hljs-string">'Add top layer'</span>);
         info.text(

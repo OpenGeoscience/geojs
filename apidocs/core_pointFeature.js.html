@@ -31,6 +31,8 @@
  * Create a new instance of class pointFeature
  *
  * @class
+ * @param {object} arg Options object
+ * @param {boolean} arg.clustering Enable point clustering
  * @extends geo.feature
  * @returns {geo.pointFeature}
  */
@@ -53,7 +55,114 @@ geo.pointFeature = function (arg) {
       m_rangeTree = null,
       m_rangeTreeTime = geo.timestamp(),
       s_data = this.data,
-      m_maxRadius = 0;
+      m_maxRadius = 0,
+      m_clustering = arg.clustering,
+      m_clusterTree = null,
+      m_allData = [],
+      m_lastZoom = null,
+      m_ignoreData = false; // flag to ignore data() calls made locally
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set clustering option
+   *
+   * @returns {geo.pointFeature|boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.clustering = function (val) {
+    if (val === undefined) {
+      return m_clustering;
+    }
+    if (m_clustering &amp;&amp; !val) {
+      // Throw out the cluster tree and reset the data
+      m_clusterTree = null;
+      m_clustering = false;
+      s_data(m_allData);
+      m_allData = null;
+    } else if (!m_clustering &amp;&amp; val) {
+      // Generate the cluster tree
+      m_clustering = true;
+      m_this._clusterData();
+    }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Generate the clustering tree from positions.  This might be async in the
+   * future.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._clusterData = function () {
+    if (!m_clustering) {
+      // clustering is not enabled, so this is a no-op
+      return;
+    }
+
+    // set clustering options to default if an options argument wasn't supplied
+    var opts = m_clustering === true ? {radius: 0.01} : m_clustering;
+
+    // generate the cluster tree from the raw data
+    var position = m_this.position();
+    m_clusterTree = new geo.util.ClusterGroup(
+        opts, this.layer().width(), this.layer().height());
+
+    m_allData.forEach(function (d, i) {
+
+      // for each point in the data set normalize the coordinate
+      // representation and add the point to the cluster treee
+      var pt = geo.util.normalizeCoordinates(position(d, i));
+      pt.index = i;
+      m_clusterTree.addPoint(pt);
+    });
+
+    // reset the last zoom state and trigger a redraw at the current zoom level
+    m_lastZoom = null;
+    m_this._handleZoom(m_this.layer().map().zoom());
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Handle zoom events for clustering.  This keeps track of the last
+   * clustering level, and only regenerates the displayed points when the
+   * zoom level changes.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._handleZoom = function (zoom) {
+    // get the current zoom level rounded down
+    var z = Math.floor(zoom);
+
+    if (!m_clustering || z === m_lastZoom) {
+      // short cut when there is nothing to do
+      return;
+    }
+
+    // store the current zoom level privately
+    m_lastZoom = z;
+
+    // get the raw data elements for the points at the current level
+    var data = m_clusterTree.points(z).map(function (d) {
+      return m_allData[d.index];
+    });
+
+    // append the clusters at the current level
+    m_clusterTree.clusters(z).forEach(function (d) {
+      // mark the datum as a cluster for accessor methods
+      d.__cluster = true;
+
+      // store all of the data objects for each point in the cluster as __data
+      d.__data = [];
+      d.obj.each(function (e) {
+        d.__data.push(m_allData[e.index]);
+      });
+      data.push(d);
+    });
+
+    // prevent recomputing the clustering and set the new data array
+    m_ignoreData = true;
+    m_this.data(data);
+    m_this.layer().map().draw(); // replace with m_this.draw() when gl is fixed
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -66,7 +175,14 @@ geo.pointFeature = function (arg) {
     if (val === undefined) {
       return m_this.style("position");
     } else {
-      m_this.style("position", val);
+      val = geo.util.ensureFunction(val);
+      m_this.style("position", function (d, i) {
+        if (d.__cluster) {
+          return d;
+        } else {
+          return val(d, i);
+        }
+      });
       m_this.dataTime().modified();
       m_this.modified();
     }
@@ -212,7 +328,13 @@ geo.pointFeature = function (arg) {
     if (data === undefined) {
       return s_data();
     }
-    s_data(data);
+    if (m_clustering &amp;&amp; !m_ignoreData) {
+      m_allData = data;
+      m_this._clusterData();
+    } else {
+      s_data(data);
+    }
+    m_ignoreData = false;
     return m_this;
   };
 
@@ -270,14 +392,14 @@ geo.pointFeature = function (arg) {
     var defaultStyle = $.extend(
       {},
       {
-        radius: 10.0,
+        radius: 5.0,
         stroke: true,
-        strokeColor: { r: 0.0, g: 1.0, b: 0.0 },
-        strokeWidth: 2.0,
+        strokeColor: { r: 0.851, g: 0.604, b: 0.0 },
+        strokeWidth: 1.25,
         strokeOpacity: 1.0,
-        fillColor: { r: 1.0, g: 0.0, b: 0.0 },
+        fillColor: { r: 1.0, g: 0.839, b: 0.439 },
         fill: true,
-        fillOpacity: 1.0,
+        fillOpacity: 0.8,
         sprites: false,
         sprites_image: null,
         position: function (d) { return d; }
@@ -291,6 +413,11 @@ geo.pointFeature = function (arg) {
 
     m_this.style(defaultStyle);
     m_this.dataTime().modified();
+
+    // bind to the zoom handler for point clustering
+    m_this.geoOn(geo.event.zoom, function (evt) {
+      m_this._handleZoom(evt.zoomLevel);
+    });
   };
 
   return m_this;
@@ -331,13 +458,13 @@ inherit(geo.pointFeature, geo.feature);
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.clock.html">clock</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.renderer.html">renderer</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.latlng.html">latlng</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.mercator.html">mercator</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.clock.html">clock</a></li><li><a href="geo.contourFeature.html">contourFeature</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.contourFeature.html">contourFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.renderer.html">renderer</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.util.ClusterGroup.html">ClusterGroup</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.mercator.html">mercator</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta1</a> on Wed Apr 29 2015 09:40:47 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.2</a> on Fri Aug 07 2015 10:52:03 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

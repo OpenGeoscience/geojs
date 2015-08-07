@@ -31,7 +31,7 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>$(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+            <div class="content"><div class='highlight'><pre>$(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
 <span class="hljs-pi">  'use strict'</span>;
 
   <span class="hljs-comment">/*
@@ -64,18 +64,18 @@
       x: -<span class="hljs-number">100</span>,
       y: <span class="hljs-number">40</span>
     },
-    zoom: <span class="hljs-number">1</span>,
+    zoom: <span class="hljs-number">4</span>,
     layers: [{
       renderer: <span class="hljs-string">'d3'</span>,
       features: [{
         type: <span class="hljs-string">'point'</span>,
-        size: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d)</span> </span>{ <span class="hljs-keyword">return</span> d.exp; },
-        position: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d)</span> </span>{ <span class="hljs-keyword">return</span> {x: d.position.x, y: d.position.y}; },
+        size: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{ <span class="hljs-keyword">return</span> d.exp; },
+        position: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{ <span class="hljs-keyword">return</span> {x: d.position.x, y: d.position.y}; },
         fill: <span class="hljs-literal">true</span>,
-        fillColor: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d)</span> </span>{ <span class="hljs-keyword">return</span> d.fruits; },
-        fillOpacity: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d)</span> </span>{ <span class="hljs-keyword">return</span> <span class="hljs-number">0.5</span> + d.unif / <span class="hljs-number">2</span>; },
+        fillColor: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{ <span class="hljs-keyword">return</span> d.fruits; },
+        fillOpacity: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{ <span class="hljs-keyword">return</span> <span class="hljs-number">0.5</span> + d.unif / <span class="hljs-number">2</span>; },
         stroke: <span class="hljs-literal">true</span>,
-        strokeColor: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d)</span> </span>{ <span class="hljs-keyword">return</span> d.color; },
+        strokeColor: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{ <span class="hljs-keyword">return</span> d.color; },
         strokeOpacity: <span class="hljs-number">1</span>,
         strokeWidth: <span class="hljs-number">2</span>
       }]
@@ -98,7 +98,7 @@
             <div class="content"><div class='highlight'><pre>  $.ajax({
     dataType: <span class="hljs-string">'json'</span>,
     url: <span class="hljs-string">'data.json'</span>,
-    success: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(data)</span> </span>{
+    success: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">data</span>) </span>{
       spec.data = data;</pre></div></div>
             
         </li>

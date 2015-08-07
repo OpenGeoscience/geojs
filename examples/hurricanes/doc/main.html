@@ -31,7 +31,7 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>$(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+            <div class="content"><div class='highlight'><pre>$(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
 <span class="hljs-pi">  'use strict'</span>;
 
   <span class="hljs-keyword">var</span> map, layer, feature, ui, save, infoData = <span class="hljs-literal">null</span>;
@@ -57,26 +57,26 @@
   <span class="hljs-keyword">var</span> start = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>(<span class="hljs-string">'1980-01-01'</span>);
   <span class="hljs-keyword">var</span> drange = (<span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>(<span class="hljs-string">'2015-01-01'</span>) - start);
 
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">hoverInfo</span><span class="hljs-params">()</span> </span>{
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">hoverInfo</span>(<span class="hljs-params"></span>) </span>{
   }
 
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">any</span><span class="hljs-params">(a, f)</span> </span>{
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">any</span>(<span class="hljs-params">a, f</span>) </span>{
     <span class="hljs-keyword">var</span> v = <span class="hljs-literal">false</span>;
-    a.forEach(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d)</span> </span>{
+    a.forEach(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{
       v = v || f(d);
     });
     <span class="hljs-keyword">return</span> v;
   }
 
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">all</span><span class="hljs-params">(a, f)</span> </span>{
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">all</span>(<span class="hljs-params">a, f</span>) </span>{
     <span class="hljs-keyword">var</span> v = <span class="hljs-literal">true</span>;
-    a.forEach(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d)</span> </span>{
+    a.forEach(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{
       v = v &amp;&amp; f(d);
     });
     <span class="hljs-keyword">return</span> v;
   }
 
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">category</span><span class="hljs-params">(d)</span> </span>{
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">category</span>(<span class="hljs-params">d</span>) </span>{
     <span class="hljs-keyword">var</span> p = d;
     <span class="hljs-keyword">if</span> (p &lt;= <span class="hljs-number">0</span>) {
       <span class="hljs-keyword">return</span> -<span class="hljs-number">1</span>; <span class="hljs-comment">// invalid data</span>
@@ -99,7 +99,7 @@
     <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
   }
 
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">makeInfoBox</span><span class="hljs-params">(data)</span> </span>{
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">makeInfoBox</span>(<span class="hljs-params">data</span>) </span>{
     <span class="hljs-keyword">if</span> (data) {
       infoData = data;
     } <span class="hljs-keyword">else</span> {
@@ -140,22 +140,22 @@
       .text(<span class="hljs-string">'Hurricane '</span> + name + <span class="hljs-string">' of '</span> + year)
       .style(<span class="hljs-string">'font'</span>, <span class="hljs-string">'20px'</span>);
 
-    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">makePlot</span><span class="hljs-params">(d)</span> </span>{
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">makePlot</span>(<span class="hljs-params">d</span>) </span>{
       <span class="hljs-keyword">var</span> group = d3.select(<span class="hljs-keyword">this</span>); <span class="hljs-comment">// jshint ignore:line</span>
       <span class="hljs-keyword">var</span> t, f, i;
 
       <span class="hljs-keyword">if</span> (d === <span class="hljs-number">0</span>) {
         i = <span class="hljs-string">'wind'</span>;
         t = <span class="hljs-string">'Wind speed'</span>;
-        f = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d, j)</span> </span>{ <span class="hljs-keyword">return</span> data[i][j]; };
+        f = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d, j</span>) </span>{ <span class="hljs-keyword">return</span> data[i][j]; };
       } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (d === <span class="hljs-number">1</span>) {
         i = <span class="hljs-string">'pressure'</span>;
         t = <span class="hljs-string">'Surface pressure'</span>;
-        f = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d, j)</span> </span>{ <span class="hljs-keyword">return</span> data[i][j]; };
+        f = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d, j</span>) </span>{ <span class="hljs-keyword">return</span> data[i][j]; };
       } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (d === <span class="hljs-number">2</span>) {
         i = <span class="hljs-string">'pressure'</span>;
         t = <span class="hljs-string">'Category'</span>;
-        f = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d, j)</span> </span>{ <span class="hljs-keyword">return</span> category(data[i][j]); };
+        f = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d, j</span>) </span>{ <span class="hljs-keyword">return</span> category(data[i][j]); };
       }
 
       group.attr(<span class="hljs-string">'transform'</span>, <span class="hljs-string">'translate(0,'</span> + (d * height / <span class="hljs-number">3</span>) + <span class="hljs-string">')'</span>);
@@ -167,7 +167,7 @@
         .attr(<span class="hljs-string">'width'</span>, width + <span class="hljs-number">20</span>)
         .attr(<span class="hljs-string">'height'</span>, (height - <span class="hljs-number">70</span>) / <span class="hljs-number">3</span>);
 
-      data.time = data.time.map(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(t)</span> </span>{ <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>(t.valueOf()); });
+      data.time = data.time.map(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">t</span>) </span>{ <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>(t.valueOf()); });
       <span class="hljs-keyword">var</span> x = d3.time.scale().nice(<span class="hljs-number">4</span>)
         .domain(d3.extent(data.time))
         .range([<span class="hljs-number">50</span>, width]);
@@ -196,8 +196,8 @@
         .call(yAxis);
 
       <span class="hljs-keyword">var</span> line = d3.svg.line()
-        .x(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d)</span> </span>{ <span class="hljs-keyword">return</span> x(d); })
-        .y(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d, j)</span> </span>{ <span class="hljs-keyword">return</span> y(f(d, j)); });
+        .x(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{ <span class="hljs-keyword">return</span> x(d); })
+        .y(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d, j</span>) </span>{ <span class="hljs-keyword">return</span> y(f(d, j)); });
 
       group.append(<span class="hljs-string">'path'</span>)
         .attr(<span class="hljs-string">'class'</span>, <span class="hljs-string">'plot-line'</span>)
@@ -218,7 +218,7 @@
     <span class="hljs-keyword">return</span> data;
   }
 
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">makeHistogram</span><span class="hljs-params">(data)</span> </span>{
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">makeHistogram</span>(<span class="hljs-params">data</span>) </span>{
     <span class="hljs-keyword">var</span> margin = {top: <span class="hljs-number">45</span>, right: <span class="hljs-number">10</span>, left: <span class="hljs-number">10</span>, bottom: <span class="hljs-number">30</span>};
     <span class="hljs-keyword">var</span> mapHeight = map.node().height() - <span class="hljs-number">15</span>;
     <span class="hljs-keyword">var</span> width = <span class="hljs-number">300</span>;
@@ -231,8 +231,8 @@
       .range([<span class="hljs-number">15</span> + margin.left, <span class="hljs-number">15</span> + margin.left + width]);
 
     <span class="hljs-keyword">var</span> cats = [];
-    data.forEach(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d)</span> </span>{
-      d.pressure.forEach(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(p)</span> </span>{
+    data.forEach(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{
+      d.pressure.forEach(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">p</span>) </span>{
         cats.push(category(p));
       });
     });
@@ -241,7 +241,7 @@
       .bins(d3.range(<span class="hljs-number">7</span>))(cats);
 
     <span class="hljs-keyword">var</span> y = d3.scale.linear()
-      .domain([<span class="hljs-number">0</span>, d3.max(hist, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d)</span> </span>{ <span class="hljs-keyword">return</span> d.y; })])
+      .domain([<span class="hljs-number">0</span>, d3.max(hist, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{ <span class="hljs-keyword">return</span> d.y; })])
       .range([mapHeight - margin.bottom, mapHeight - height - margin.bottom]);
 
     <span class="hljs-keyword">var</span> xAxis = d3.svg.axis()
@@ -263,29 +263,29 @@
         .data(hist)
       .enter().append(<span class="hljs-string">'g'</span>)
         .attr(<span class="hljs-string">'class'</span>, <span class="hljs-string">'bar'</span>)
-        .attr(<span class="hljs-string">'transform'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d)</span> </span>{
+        .attr(<span class="hljs-string">'transform'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{
           <span class="hljs-keyword">return</span> <span class="hljs-string">'translate('</span> + [x(d.x - <span class="hljs-number">0.5</span>), <span class="hljs-number">0</span>] + <span class="hljs-string">')'</span>;
         });
 
     bar.append(<span class="hljs-string">'rect'</span>)
       .attr(<span class="hljs-string">'x'</span>, <span class="hljs-number">1</span>)
-      .attr(<span class="hljs-string">'y'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d)</span> </span>{ <span class="hljs-keyword">return</span> y(d.y); })
+      .attr(<span class="hljs-string">'y'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{ <span class="hljs-keyword">return</span> y(d.y); })
       .attr(<span class="hljs-string">'width'</span>, x(<span class="hljs-number">1</span>) - x(<span class="hljs-number">0</span>) - <span class="hljs-number">2</span>)
-      .attr(<span class="hljs-string">'height'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d)</span> </span>{
+      .attr(<span class="hljs-string">'height'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{
         <span class="hljs-keyword">return</span> y(<span class="hljs-number">0</span>) - y(d.y);
       })
-      .style(<span class="hljs-string">'fill'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d)</span> </span>{
+      .style(<span class="hljs-string">'fill'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{
         <span class="hljs-keyword">return</span> cscale(d.x);
       });
 
     bar.append(<span class="hljs-string">'text'</span>)
       .attr(<span class="hljs-string">'dy'</span>, <span class="hljs-string">'0.75em'</span>)
-      .attr(<span class="hljs-string">'y'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d)</span> </span>{
+      .attr(<span class="hljs-string">'y'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{
         <span class="hljs-keyword">return</span> y(d.y) - <span class="hljs-number">18</span>;
       })
       .attr(<span class="hljs-string">'x'</span>, (x(<span class="hljs-number">1</span> + hist[<span class="hljs-number">0</span>].dx) - x(<span class="hljs-number">1</span>)) / <span class="hljs-number">2</span>)
       .attr(<span class="hljs-string">'text-anchor'</span>, <span class="hljs-string">'middle'</span>)
-      .text(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d)</span> </span>{
+      .text(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{
         <span class="hljs-keyword">return</span> d.y;
       });
 
@@ -302,18 +302,18 @@
       .text(<span class="hljs-string">'All observations'</span>);
   }
 
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">draw</span><span class="hljs-params">(data)</span> </span>{
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">draw</span>(<span class="hljs-params">data</span>) </span>{
     <span class="hljs-keyword">if</span> (data) {
       save = data;
     } <span class="hljs-keyword">else</span> {
       data = save;
     }
-    data = data.filter(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d)</span> </span>{
-      <span class="hljs-keyword">if</span> (any(d.pressure, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d)</span> </span>{ <span class="hljs-keyword">return</span> d &lt;= <span class="hljs-number">0</span>; })) {
+    data = data.filter(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{
+      <span class="hljs-keyword">if</span> (any(d.pressure, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{ <span class="hljs-keyword">return</span> d &lt;= <span class="hljs-number">0</span>; })) {
         <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
       }
 
-      <span class="hljs-keyword">if</span> (all(d.pressure, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d)</span> </span>{ <span class="hljs-keyword">return</span> category(d) === <span class="hljs-number">0</span>; })) {
+      <span class="hljs-keyword">if</span> (all(d.pressure, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{ <span class="hljs-keyword">return</span> category(d) === <span class="hljs-number">0</span>; })) {
         <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
       }
       <span class="hljs-keyword">return</span> d.basin === <span class="hljs-string">'North Atlantic'</span>;
@@ -322,8 +322,8 @@
     makeHistogram(data);
 
     feature.data(data)
-      .line(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d)</span> </span>{
-        <span class="hljs-keyword">return</span> d3.range(d.time.length).map(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(i)</span> </span>{
+      .line(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{
+        <span class="hljs-keyword">return</span> d3.range(d.time.length).map(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">i</span>) </span>{
           <span class="hljs-keyword">return</span> {
             x: d.longitude[i],
             y: d.latitude[i],
@@ -335,20 +335,20 @@
           };
         });
       })
-      .position(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d)</span> </span>{
+      .position(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{
         <span class="hljs-keyword">return</span> d;
       })
       .style({
-        <span class="hljs-string">'strokeColor'</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d)</span> </span>{
+        <span class="hljs-string">'strokeColor'</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{
           <span class="hljs-keyword">return</span> cscale(d.c);
         },
-        <span class="hljs-string">'strokeWidth'</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d, i, l)</span> </span>{
+        <span class="hljs-string">'strokeWidth'</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d, i, l</span>) </span>{
           <span class="hljs-keyword">if</span> (l.hover) {
             <span class="hljs-keyword">return</span> <span class="hljs-number">5</span>;
           }
           <span class="hljs-keyword">return</span> <span class="hljs-number">1.5</span>;
         },
-        <span class="hljs-string">'strokeOpacity'</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d, i, l)</span> </span>{
+        <span class="hljs-string">'strokeOpacity'</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d, i, l</span>) </span>{
           <span class="hljs-keyword">if</span> (l.hover) {
             <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;
           }
@@ -360,9 +360,9 @@
       })
       .geoOff(geo.event.feature.mouseover)
       .geoOff(geo.event.feature.mouseout)
-      .geoOn(geo.event.feature.mouseover, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(evt)</span> </span>{
+      .geoOn(geo.event.feature.mouseover, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">evt</span>) </span>{
         <span class="hljs-keyword">if</span> (!evt.top) { <span class="hljs-keyword">return</span>; }
-        data.forEach(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(d)</span> </span>{
+        data.forEach(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{
           d.hover = <span class="hljs-literal">false</span>;
         });
         hoverInfo(evt.data);
@@ -393,7 +393,7 @@
       x: <span class="hljs-number">0</span>,
       y: <span class="hljs-number">0</span>
     },
-    zoom: <span class="hljs-number">0</span>
+    zoom: <span class="hljs-number">3</span>
   });</pre></div></div>
             
         </li>
@@ -545,7 +545,7 @@
     success: draw
   });
 
-  $(<span class="hljs-built_in">window</span>).resize(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+  $(<span class="hljs-built_in">window</span>).resize(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
     draw();
     makeInfoBox();
   });
