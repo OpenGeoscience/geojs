@@ -19,11 +19,7 @@
       return new geo.osmLayer(arg);
     }
     geo.tileLayer.call(this, arg);
-    $.extend(this, pr);
-    return this;
-  };
 
-  var pr  = {
     /**
      * Returns an instantiated imageTile object with the given indices.  This
      * method always returns a new tile object.  Use `_getTileCached`
@@ -34,13 +30,13 @@
      * @param {Number} index.level
      * @returns {geo.tile}
      */
-    _getTile: function (index) {
+    this._getTile = function (index) {
       return geo.imageTile({
         index: index,
         size: {x: this._options.tileWidth, y: this._options.tileHeight},
         url: this._options.url(index)
       });
-    }
+    };
   };
 
   /**

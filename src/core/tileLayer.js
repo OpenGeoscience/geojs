@@ -48,7 +48,6 @@
       return new geo.tileLayer(options);
     }
     geo.featureLayer.call(this, options);
-    $.extend(this, pr);
 
     options = $.extend(options || {}, geo.tileLayer.defaults);
 
@@ -59,32 +58,29 @@
     this._activeTiles = {};
 
     // initialize the in memory tile cache
-    this._cache = new geo.tileCache({size: options.cacheSize});
-    return this;
-  };
+    this._cache = geo.tileCache({size: options.cacheSize});
 
-  var pr = {
     /**
      * Readonly accessor to the options object
      */
-    get options() {
+    Object.defineProperty(this, 'options', {get: function () {
       return $.extend(true, {}, this._options);
-    },
+    }});
 
     /**
      * Readonly accessor to the tile cache object.
      */
-    get cache() {
+    Object.defineProperty(this, 'cache', {get: function () {
       return this._cache;
-    },
+    }});
 
     /**
      * Readonly accessor to the active tile mapping.  This is an object containing
      * all currently drawn tiles (hash(tile) => tile).
      */
-    get activeTiles() {
+    Object.defineProperty(this, 'activeTiles', {get: function () {
       return $.extend({}, this._activeTiles); // copy on output
-    },
+    }});
 
     /**
      * Tile scaling factor relative to zoom level 0.
@@ -93,7 +89,7 @@
      * @param {Number} level A zoom level
      * @returns {Number} The size of a pixel at level z relative to level 0
      */
-    scaleAtZoom: function (level) {
+    this.scaleAtZoom = function (level) {
       var scale = [], i;
       for (i = 0; i < this._options.maxLevel; i += 1) {
         scale.push[i] = 1 / Math.pow(2, i - 1);
@@ -102,7 +98,7 @@
         return scale[z];
       };
       return this.scaleAtZoom(level);
-    },
+    };
 
     /**
      * Returns the tile indices at the given point for the given zoom level.
@@ -111,12 +107,12 @@
      * @param {Number} point.y
      * @returns {Object} The tile indices
      */
-    tileAtPoint: function (point) {
+    this.tileAtPoint = function (point) {
       return {
         x: Math.floor(point.x / this._options.tileWidth),
         y: Math.floor(point.y / this._options.tileHeight)
       };
-    },
+    };
 
     /**
      * Returns an instantiated tile object with the given indices.  This
@@ -128,13 +124,13 @@
      * @param {Number} index.level
      * @returns {geo.tile}
      */
-    _getTile: function (index) {
+    this._getTile = function (index) {
       return geo.tile({
         index: index,
         size: {x: this._options.tileWidth, y: this._options.tileHeight},
         url: this._options.url(index)
       });
-    },
+    };
 
     /**
      * Returns an instantiated tile object with the given indices.  This
@@ -146,14 +142,14 @@
      * @param {Number} index.level
      * @returns {geo.tile}
      */
-    _getTileCached: function (index) {
+    this._getTileCached = function (index) {
       var tile = this.cache.get(this.cache.hash(index));
       if (tile === null) {
         tile = this._getTile(index);
         this.cache.add(tile);
       }
       return tile;
-    },
+    };
 
     /**
      * Returns a list of tiles necessary to fill the screen at the given
@@ -171,7 +167,7 @@
      * @param {Boolean} sorted Return a sorted list
      * @returns {geo.tile[]} An array of tile objects
      */
-    _getTiles: function (level, center, size, sorted) {
+    this._getTiles = function (level, center, size, sorted) {
       var iCenter, i, j, tiles = [], index, nTilesLevel,
           start, end;
 
@@ -216,7 +212,7 @@
         tiles.sort(this._loadMetric(iCenter));
       }
       return tiles;
-    },
+    };
 
     /**
      * Prefetches tiles up to a given zoom level around a given bounding box.
@@ -230,7 +226,7 @@
      * @param {Number} size.height
      * @returns {$.Deferred} resolves when all of the tiles are fetched
      */
-    prefetch: function (level, center, size) {
+    this.prefetch = function (level, center, size) {
       var tiles = [], l, c, s, scale;
       for (l = this._options.minLevel; l <= level; l += 1) {
         scale = Math.pow(2, l - level);
@@ -244,7 +240,7 @@
             return tile.fetch().defer;
           })
       );
-    },
+    };
 
     /**
      * This method returns a metric that determines tile loading order.  The
@@ -256,7 +252,7 @@
      * @param {Number} center.y
      * @returns {function} A function accepted by Array.prototype.sort
      */
-    _loadMetric: function (center) {
+    this._loadMetric = function (center) {
       return function (a, b) {
         var a0, b0, dx, dy, cx, cy, scale;
 
@@ -282,7 +278,7 @@
         // return negative if a < b, or positive if a > b
         return a - b;
       };
-    },
+    };
 
     /**
      * Convert a coordinate from layer to map coordinate systems.
@@ -290,12 +286,12 @@
      * @param {Number} coord.x The offset in pixels (level 0) from the left edge
      * @param {Number} coord.y The offset in pixels (level 0) from the bottom edge
      */
-    fromLocal: function (coord) {
+    this.fromLocal = function (coord) {
       return {
         x: (this._options.maxX - this._options.minX) * coord.x / this._options.tileWidth,
         y: (this._options.maxY - this._options.minY) * coord.y / this._options.tileHeight
       };
-    },
+    };
 
     /**
      * Convert a coordinate from map to layer coordinate systems.
@@ -303,19 +299,19 @@
      * @param {Number} coord.x The offset in map units from the left edge
      * @param {Number} coord.y The offset in map units from the bottom edge
      */
-    toLocal: function (coord) {
+    this.toLocal = function (coord) {
       var o = this._options;
       return {
         x: o.tileWidth * coord.x / (o.maxX - o.minX),
         y: o.tileHeight * coord.y / (o.maxY - o.minY)
       };
-    },
+    };
 
     /**
      * Draw the given tile on the active canvas.
      * @param {geo.tile} tile The tile to draw
      */
-    drawTile: function (tile) {
+    this.drawTile = function (tile) {
       var hash = tile.toString();
 
       if (hash.hasOwnProperty(this._activeTiles)) {
@@ -328,7 +324,7 @@
 
       // add the tile to the active cache
       this._activeTiles[tile.toString()] = tile;
-    },
+    };
 
     /**
      * Render the tile on the canvas.  This implementation draws the tiles directly
@@ -337,7 +333,7 @@
      * @protected
      * @param {geo.tile} tile The tile to draw
      */
-    _drawTile: function (tile) {
+    this._drawTile = function (tile) {
       // Make sure this method is not called when there is
       // a renderer attached.
       if (this.renderer() !== null) {
@@ -360,14 +356,14 @@
         err.appendTo(this.image.parentNode);
         tile.image.remove();
       });
-    },
+    };
 
     /**
      * Remove the given tile from the canvas and the active cache.
      * @param {geo.tile|string} tile The tile (or hash) to remove
      * @returns {geo.tile} the tile removed from the active layer
      */
-    remove: function (tile) {
+    this.remove = function (tile) {
       tile = tile.toString();
       var value = this._activeTiles[tile];
 
@@ -377,22 +373,22 @@
 
       delete this._activeTiles[tile];
       return value;
-    },
+    };
 
     /**
      * Remove the given tile from the canvas.  This implementation just
      * finds and removes the <img> element created for the tile.
      * @param {geo.tile|string} tile The tile object to remove
      */
-    _remove: function (tile) {
+    this._remove = function (tile) {
       tile.image.remove();
-    },
+    };
 
     /**
      * Remove all active tiles from the canvas.
      * @returns {geo.tile[]} The array of tiles removed
      */
-    clear: function () {
+    this.clear = function () {
       var tiles = [], tile;
 
       // ignoring the warning here because this is a privately
@@ -402,23 +398,23 @@
       }
 
       return tiles;
-    },
+    };
 
     /**
      * Reset the layer to the initial state, clearing the canvas
      * and resetting the tile cache.
      * @returns {this} Chainable
      */
-    reset: function () {
+    this.reset = function () {
       this.clear();
       this._cache.clear();
-    },
+    };
 
     /**
      * Update the view according to the map/camera.
      * @returns {this} Chainable
      */
-    _update: function () {
+    this._update = function () {
       var zoom = Math.floor(this.map().zoom()),
           center = this.toLocal(this.map().center()),
           size = this.map().size(),
@@ -431,7 +427,9 @@
           this.drawTile(tile);
         }.bind(this));
       }.bind(this));
-    }
+    };
+
+    return this;
   };
 
   /**
