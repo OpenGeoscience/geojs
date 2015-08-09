@@ -32,7 +32,7 @@
     "grunt-express": "~1.4",
     "jscs": "~2.0",
     "jsdoc": "^3.3",
-    "jshint": "~2.5",
+    "jshint": "~2.8",
     "phantomjs": "~1.9",
     "xmlbuilder": "^3.1.0"
   },
