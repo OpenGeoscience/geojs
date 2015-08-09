@@ -19,11 +19,11 @@
       return new geo.osmLayer(arg);
     }
     geo.tileLayer.call(this, arg);
-
+    $.extend(this, pr);
     return this;
   };
 
-  geo.osmLayer.prototype  = {
+  var pr  = {
     /**
      * Returns an instantiated imageTile object with the given indices.  This
      * method always returns a new tile object.  Use `_getTileCached`
@@ -54,7 +54,12 @@
     tileHeight: 256,
     wrapX: true,
     wrapY: false,
-    url: null
+    url: function (index) {
+      return 'http://tile.openstreetmap.org/' +
+        index.level + '/' + index.y + '/' + index.x + '.png';
+    },
+    attribution: 'Tile data &copy; <a href="http://osm.org/copyright">' +
+      'OpenStreetMap</a> contributors'
   });
 
   inherit(geo.osmLayer, geo.tileLayer);

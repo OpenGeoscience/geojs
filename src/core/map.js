@@ -382,7 +382,28 @@ geo.map = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Resize map
+   * Get or set the size of the map.
+   *
+   * @param {Object?} arg
+   * @param {Number} arg.width width in pixels
+   * @param {Number} arg.height height in pixels
+   * @returns {Object} An object containing width and height as keys
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.size = function (arg) {
+    if (arg === undefined) {
+      return {
+        width: m_width,
+        height: m_height
+      };
+    }
+    m_this.resize(0, 0, arg.width, arg.height);
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Resize map (depreciated)
    *
    * @param {Number} x x-offset in display space
    * @param {Number} y y-offset in display space

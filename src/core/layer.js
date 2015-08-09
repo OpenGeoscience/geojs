@@ -342,8 +342,13 @@ geo.layer = function (arg) {
     /* Pass along the arguments, but not the map reference */
     var options = $.extend({}, arg);
     delete options.map;
-    // Share context if have valid one
-    if (m_canvas) {
+
+    if (m_rendererName === null) {
+      // if given a "null" renderer, then pass the map element as the
+      // canvas
+      m_renderer = null;
+      m_canvas = m_node.get(0);
+    } else if (m_canvas) { // Share context if have valid one
       m_renderer = geo.createRenderer(m_rendererName, m_this, m_canvas,
                                       options);
     } else {

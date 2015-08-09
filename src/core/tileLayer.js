@@ -48,20 +48,22 @@
       return new geo.tileLayer(options);
     }
     geo.featureLayer.call(this, options);
+    $.extend(this, pr);
+
     options = $.extend(options || {}, geo.tileLayer.defaults);
 
     // copy the options into a private variable
     this._options = $.extend(true, {}, options);
 
     // initialize the object that keeps track of actively drawn tiles
-    this._active = {};
+    this._activeTiles = {};
 
     // initialize the in memory tile cache
     this._cache = new geo.tileCache({size: options.cacheSize});
     return this;
   };
 
-  geo.tileLayer.prototype = {
+  var pr = {
     /**
      * Readonly accessor to the options object
      */
@@ -80,8 +82,8 @@
      * Readonly accessor to the active tile mapping.  This is an object containing
      * all currently drawn tiles (hash(tile) => tile).
      */
-    get active() {
-      return $.extend({}, this._active); // copy on output
+    get activeTiles() {
+      return $.extend({}, this._activeTiles); // copy on output
     },
 
     /**
@@ -302,39 +304,88 @@
      * @param {Number} coord.y The offset in map units from the bottom edge
      */
     toLocal: function (coord) {
+      var o = this._options;
       return {
-        x: this.tileWidth * coord.x / (this.maxX - this.minX),
-        y: this.tileHeight * coord.y / (this.maxY - this.minY)
+        x: o.tileWidth * coord.x / (o.maxX - o.minX),
+        y: o.tileHeight * coord.y / (o.maxY - o.minY)
       };
     },
 
     /**
-     * Draw the given tile on the active canvas.  Can be overridden in derived classes
-     * to draw the tile within a renderer's context.
+     * Draw the given tile on the active canvas.
      * @param {geo.tile} tile The tile to draw
      */
     draw: function (tile) {
       var hash = tile.toString();
 
-      if (hash.hasOwnProperty(this._active)) {
+      if (hash.hasOwnProperty(this._activeTiles)) {
         // the tile is already drawn, remove it
         this.remove(tile);
       }
 
+      // pass to the rendering implementation
+      this._draw(tile);
+
       // add the tile to the active cache
-      this._active[tile.toString()] = tile;
+      this._activeTiles[tile.toString()] = tile;
     },
 
     /**
-     * Remove the given tile from the canvas.
+     * Render the tile on the canvas.  This implementation draws the tiles directly
+     * on the DOM using <img> tags.  Derived classes should override this method
+     * to draw the tile on a renderer specific context.
+     * @protected
+     * @param {geo.tile} tile The tile to draw
+     */
+    _draw: function (tile) {
+      // Make sure this method is not called when there is
+      // a renderer attached.
+      if (this.renderer() !== null) {
+        throw new Error('This draw method is not valid on renderer managed layers.');
+      }
+
+      // get the layer node
+      var div = this.canvas();
+
+      // append the image element
+      div.append(tile.image);
+
+      // apply a transform to place the image correctly
+      tile.image.css.transform = 'translate(' +
+        [tile.bottomLeft().x, tile.topRight().y] + ')';
+
+      // add an error handler
+      tile.catch(function () {
+        var err = $(geo.tileLayer.errorTile);
+        err.appendTo(this.image.parentNode);
+        tile.image.remove();
+      });
+    },
+
+    /**
+     * Remove the given tile from the canvas and the active cache.
      * @param {geo.tile|string} tile The tile (or hash) to remove
      * @returns {geo.tile} the tile removed from the active layer
      */
     remove: function (tile) {
       tile = tile.toString();
-      var value = this._active[tile];
-      delete this._active[tile];
+      var value = this._activeTiles[tile];
+
+      if (value instanceof geo.tile) {
+        this._remove(value);
+      }
+
+      delete this._activeTiles[tile];
       return value;
+    },
+
+    /**
+     * Remove the given tile from the canvas.  This implementation just
+     * finds and removes the <img> element created for the tile.
+     * @param {geo.tile|string} tile The tile object to remove
+     */
+    _remove: function (tile) {
+      tile.image.remove();
     },
 
     /**
@@ -346,7 +397,7 @@
 
       // ignoring the warning here because this is a privately
       // controlled object with simple keys
-      for (tile in this._active) {  // jshint ignore: line
+      for (tile in this._activeTiles) {  // jshint ignore: line
         tiles.push(this.remove(tile));
       }
 
@@ -361,6 +412,25 @@
     reset: function () {
       this.clear();
       this._cache.clear();
+    },
+
+    /**
+     * Update the view according to the map/camera.
+     * @returns {this} Chainable
+     */
+    _update: function () {
+      var zoom = Math.floor(this.map().zoom()),
+          center = this.toLocal(this.map().center()),
+          size = this.map().size(),
+          tiles;
+
+      tiles = this._getTiles(zoom, center, size, true);
+
+      tiles.forEach(function (tile) {
+        tile.then(function () {
+          this.draw(tile);
+        }.bind(this));
+      }.bind(this));
     }
   };
 
@@ -380,8 +450,23 @@
     maxX: 255,
     minY: 0,
     maxY: 255,
-    cacheSize: 200
+    cacheSize: 200,
+    attribution: 'No data attribution provided.'
   };
+
+  // This is html content displayed when there is an error loading a tile
+  geo.featureLayer.errorTile = [
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 255 255"',
+    ' width="256px" height="256px">',
+    '<rect style="stroke:black;stroke-width:1;fill:none" x="1" y="1"',
+    ' width="252" height="252"/>',
+    '<g style="fill-opacity:0.5;stroke-linecap:round">',
+    '<rect style="stroke:grey;stroke-width:3px;fill:#ffffff;" height="200"',
+    ' width="200" y="25" x="25"/>',
+    '<line x1="76" x2="178" y1="76" y2="178" style="stroke:#ff0000;stroke-width:5px"/>',
+    '<line x2="76" x1="178" y1="76" y2="178" style="stroke:#ff0000;stroke-width:5px"/>',
+    '</g></svg>'
+  ].join('');
 
   inherit(geo.tileLayer, geo.featureLayer);
 })();

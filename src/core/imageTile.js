@@ -59,6 +59,17 @@
 
   geo.imageTile.prototype = {
     /**
+     * Read only accessor to the Image object used by the
+     * tile.  Note, this method does not gaurantee that the
+     * image data is available.  Use the promise interface
+     * to add asyncronous handlers.
+     * @returns {Image}
+     */
+    get image() {
+      return this._image;
+    },
+
+    /**
      * Initiate the image request.
      * @returns {this} Supports chained calling
      */
