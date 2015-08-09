@@ -37,6 +37,45 @@
         url: this._options.url(index)
       });
     };
+
+    /**
+     * Returns content that will be inserted in place of a tile that has
+     * failed to load.
+     * @protected
+     * @param {Object} index The tile's index
+     * @returns {string|DOM} The html content to insert onto the page
+     */
+    this._errorTile = function (/* index */) {
+      return [
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 255 255"',
+        ' width="' + this.options.tileWidth + 'px"',
+        ' height="' + this.options.tileHeight + '256px">',
+        '<rect style="stroke:black;stroke-width:1;fill:none" x="1" y="1"',
+        ' width="252" height="252"/>',
+        '<g style="fill-opacity:0.5;stroke-linecap:round">',
+        '<rect style="stroke:grey;stroke-width:3px;fill:#ffffff;" height="200"',
+        ' width="200" y="25" x="25"/>',
+        '<line x1="76" x2="178" y1="76" y2="178"',
+        ' style="stroke:#ff0000;stroke-width:5px"/>',
+        '<line x2="76" x1="178" y1="76" y2="178"',
+        ' style="stroke:#ff0000;stroke-width:5px"/>',
+        '</g></svg>'
+      ].join('');
+    };
+
+    /**
+     * Returns content that will be inserted in place of a tile with
+     * invalid indices.
+     * @protected
+     * @param {Object} index The tile's index
+     * @returns {string|DOM} The html content to insert onto the page
+     */
+    this._invalidTile = function (/* index */) {
+      return [
+        '<div style="width: ' + this.options.tileWidth + 'px;',
+        'height:"' + this.options.tileHeight + 'px"></div>'
+      ];
+    };
   };
 
   /**

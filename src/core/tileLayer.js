@@ -49,7 +49,7 @@
     }
     geo.featureLayer.call(this, options);
 
-    options = $.extend(options || {}, geo.tileLayer.defaults);
+    options = $.extend(options || {}, this.constructor.defaults);
 
     // copy the options into a private variable
     this._options = $.extend(true, {}, options);
@@ -64,7 +64,7 @@
      * Readonly accessor to the options object
      */
     Object.defineProperty(this, 'options', {get: function () {
-      return $.extend(true, {}, this._options);
+      return $.extend({}, this._options);
     }});
 
     /**
@@ -84,20 +84,42 @@
 
     /**
      * Tile scaling factor relative to zoom level 0.
-     * The default implementation just returns a memoized
-     * version of `1 / Math.pow(2, z - 1)`.
+     * The default implementation just returns `1 / Math.pow(2, z)`.
      * @param {Number} level A zoom level
      * @returns {Number} The size of a pixel at level z relative to level 0
      */
     this.scaleAtZoom = function (level) {
-      var scale = [], i;
-      for (i = 0; i < this._options.maxLevel; i += 1) {
-        scale.push[i] = 1 / Math.pow(2, i - 1);
-      }
-      this.scaleAtZoom = function (z) {
-        return scale[z];
-      };
-      return this.scaleAtZoom(level);
+      return Math.pow(2, -level);
+    };
+
+    /**
+     * The number of tiles at the given zoom level
+     * The default implementation just returns `Math.pow(2, z)`.
+     * @param {Number} level A zoom level
+     * @returns {{x: nx, y: ny}} The number of tiles in each axis
+     */
+    this.tilesAtZoom = function (level) {
+      var s = Math.pow(2, level);
+      return {x: s, y: s};
+    };
+
+
+    /**
+     * Returns true if the given tile index is valid:
+     *   * min level <= level <= max level
+     *   * 0 <= x <= 2^level - 1
+     *   * 0 <= y <= 2^level - 1
+     * @param {Object} index The tile index
+     * @param {Number} index.x
+     * @param {Number} index.y
+     * @param {Number} index.level
+     * @returns {geo.tile}
+     */
+    this.isValid = function (index) {
+      return this._options.minLevel <= index.level &&
+        index.level <= this._options.maxLevel &&
+        0 <= index.x && index.x <= this.tilesAtZoom(index.level).x - 1 &&
+        0 <= index.y && index.y <= this.tilesAtZoom(index.level).y - 1;
     };
 
     /**
@@ -143,12 +165,30 @@
      * @returns {geo.tile}
      */
     this._getTileCached = function (index) {
-      var tile = this.cache.get(this.cache.hash(index));
+      var tile = this.cache.get(this._tileHash(index));
       if (tile === null) {
         tile = this._getTile(index);
         this.cache.add(tile);
       }
       return tile;
+    };
+
+    /**
+     * Returns a string representation of the tile at the given index.
+     * This method is used as a hashing function for the caching layer.
+     *
+     * Note: This method _must_ return the same string as:
+     *
+     *   tile({index: index}).toString();
+     *
+     * @param {Object} index The tile index
+     * @param {Number} index.x
+     * @param {Number} index.y
+     * @param {Number} index.level
+     * @returns {string}
+     */
+    this._tileHash = function (index) {
+      return [index.level || 0, index.y, index.x].join('_');
     };
 
     /**
@@ -185,26 +225,28 @@
       }, level);
 
       // total number of tiles existing at this level
-      nTilesLevel = Math.pow(2, level);
+      nTilesLevel = this.tilesAtZoom(level);
 
       // loop over the tile range
       index = {level: level};
       for (i = start.x; i < end.x; i += 1) {
         if (this._options.wrapX && i < 0) {
-          // mod(i, nTilesLevel)
-          index.x = ((i % nTilesLevel) + nTilesLevel) % nTilesLevel;
+          // mod(i, nTilesLevel.x)
+          index.x = ((i % nTilesLevel.x) + nTilesLevel.x) % nTilesLevel.x;
         } else {
           index.x = i;
         }
-        for (j = start.y; i < end.y; j += 1) {
+        for (j = start.y; j < end.y; j += 1) {
           if (this._options.wrapY && j < 0) {
-            // mod(j, nTilesLevel)
-            index.y = ((j % nTilesLevel) + nTilesLevel) % nTilesLevel;
+            // mod(j, nTilesLevel.y)
+            index.y = ((j % nTilesLevel.y) + nTilesLevel.y) % nTilesLevel.y;
           } else {
             index.y = j;
           }
 
-          tiles.push(this._getTileCached(index));
+          if (this.isValid(index)) {
+            tiles.push(this._getTileCached(index));
+          }
         }
       }
 
@@ -229,7 +271,7 @@
     this.prefetch = function (level, center, size) {
       var tiles = [], l, c, s, scale;
       for (l = this._options.minLevel; l <= level; l += 1) {
-        scale = Math.pow(2, l - level);
+        scale = this.scaleAtZoom(l - level);
         c = {x: center.x * scale, y: center.y * scale};
         s = {x: size.width * scale, y: size.height * scale};
         Array.prototype.push.apply(tiles, this._getTiles(l, c, s, false));
@@ -336,9 +378,11 @@
     this._drawTile = function (tile) {
       // Make sure this method is not called when there is
       // a renderer attached.
+      /*
       if (this.renderer() !== null) {
         throw new Error('This draw method is not valid on renderer managed layers.');
       }
+      */
 
       // get the layer node
       var div = this.canvas();
@@ -352,7 +396,7 @@
 
       // add an error handler
       tile.catch(function () {
-        var err = $(geo.tileLayer.errorTile);
+        var err = $(this.errorTile(tile));
         err.appendTo(this.image.parentNode);
         tile.image.remove();
       });
@@ -423,7 +467,8 @@
       tiles = this._getTiles(zoom, center, size, true);
 
       tiles.forEach(function (tile) {
-        tile.then(function () {
+        tile.then(function (image) {
+          tile.image = image;
           this.drawTile(tile);
         }.bind(this));
       }.bind(this));
@@ -451,20 +496,6 @@
     cacheSize: 200,
     attribution: 'No data attribution provided.'
   };
-
-  // This is html content displayed when there is an error loading a tile
-  geo.featureLayer.errorTile = [
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 255 255"',
-    ' width="256px" height="256px">',
-    '<rect style="stroke:black;stroke-width:1;fill:none" x="1" y="1"',
-    ' width="252" height="252"/>',
-    '<g style="fill-opacity:0.5;stroke-linecap:round">',
-    '<rect style="stroke:grey;stroke-width:3px;fill:#ffffff;" height="200"',
-    ' width="200" y="25" x="25"/>',
-    '<line x1="76" x2="178" y1="76" y2="178" style="stroke:#ff0000;stroke-width:5px"/>',
-    '<line x2="76" x1="178" y1="76" y2="178" style="stroke:#ff0000;stroke-width:5px"/>',
-    '</g></svg>'
-  ].join('');
 
   inherit(geo.tileLayer, geo.featureLayer);
 })();

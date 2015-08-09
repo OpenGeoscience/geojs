@@ -41,17 +41,8 @@
     spec.size = spec.size || {x: 256, y: 256};
     this._image = null;
 
-    var index = spec.index;
-
     // Cache the coordinate scaling
-    this._scale = Math.pow(2, spec.index.level);
     this._cors = spec.crossDomain || 'anonymous';
-
-    // Check that the tile indices are valid at the given zoom level
-    if (index.x < 0 || index.x >= this._scale ||
-        index.y < 0 || index.y >= this._scale) {
-      throw new Error('Invalid tile index provided.');
-    }
 
     // Call superclass constructor
     return geo.tile.call(this, spec);

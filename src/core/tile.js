@@ -39,6 +39,7 @@
     this._overlap = spec.overlap || {x: 0, y: 0};
     this._url = spec.url;
     this._jqXHR = null;
+
     return this;
   };
   geo.tile.prototype = {
