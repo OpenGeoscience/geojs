@@ -40,34 +40,49 @@
     this._url = spec.url;
     this._jqXHR = null;
 
-    return this;
-  };
-  geo.tile.prototype = {
     /**
      * Return the index coordinates.
      */
-    get index() { return this._index; },
+    Object.defineProperty(this, 'index', {
+      get:
+        function () { return this._index; }
+    });
 
     /**
      * Return the tile sizes.
      */
-    get size() { return this._size; },
+    Object.defineProperty(this, 'size', {
+      get: function () { return this._size; }
+    });
 
     /**
      * Return the tile overlap sizes.
      */
-    get overlap() { return this._overlap; },
+    Object.defineProperty(this, 'overlap', {
+      get: function () { return this._overlap; }
+    });
+
+    /**
+     * Return the raw Deferred object.
+     * Not sure this is a good idea, but it makes using
+     * $.when convenient.
+     *
+     * @returns {$.Deferred} Supports chained calling
+     */
+    Object.defineProperty(this, 'defer', {
+      get: function () { return this._jqXHR; }
+    });
 
     /**
      * Initiate the ajax request.
      * @returns {this} Supports chained calling
      */
-    fetch: function () {
+    this.fetch = function () {
       if (!this._jqXHR) {
         this._jqXHR = $.ajax(this._url);
       }
       return this;
-    },
+    };
 
     /**
      * Add a method to be called with the data when the ajax request is
@@ -77,10 +92,10 @@
      * @returns {this} Supports chained calling
      *
      */
-    then: function (method) {
+    this.then = function (method) {
       this.fetch()._jqXHR.success(method);
       return this;
-    },
+    };
 
     /**
      * Add a method to be called with the data when the ajax fails.
@@ -89,21 +104,10 @@
      * @returns {this} Supports chained calling
      *
      */
-    catch: function (method) {
+    this.catch = function (method) {
       this.fetch()._jqXHR.fail(method);
       return this;
-    },
-
-    /**
-     * Return the raw Deferred object.
-     * Not sure this is a good idea, but it makes using
-     * $.when convenient.
-     *
-     * @returns {$.Deferred} Supports chained calling
-     */
-    get defer() {
-      return this._jqXHR;
-    },
+    };
 
     /**
      * Return a unique string representation of the given tile useable
@@ -111,9 +115,9 @@
      * to make caches aware of the tile source.
      * @returns {string}
      */
-    toString: function () {
+    this.toString = function () {
       return [this._index.level || 0, this._index.y, this._index.x].join('_');
-    },
+    };
 
     /**
      * Computes the global coordinates of the bottom left corner relative to
@@ -125,7 +129,7 @@
      * @param {Number} [offset.y=0]
      * @returns {Object}
      */
-    bottomLeft: function (offset) {
+    this.bottomLeft = function (offset) {
       offset = offset || {};
       var x = this.index.x - (offset.x || 0),
           y = this.index.y - (offset.y || 0);
@@ -133,7 +137,7 @@
         x: this.size.x * x - this.overlap.x,
         y: this.size.y * y - this.overlap.y
       };
-    },
+    };
 
     /**
      * Computes the global coordinates of the top right corner relative to
@@ -145,7 +149,7 @@
      * @param {Number} [offset.y=0]
      * @returns {Object}
      */
-    topRight: function (offset) {
+    this.topRight = function (offset) {
       offset = offset || {};
       var x = this.index.x - (offset.x || 0) + 1,
           y = this.index.y - (offset.y || 0) + 1;
@@ -153,6 +157,7 @@
         x: this.size.x * x + this.overlap.x,
         y: this.size.y * y + this.overlap.y
       };
-    }
+    };
+    return this;
   };
 })();

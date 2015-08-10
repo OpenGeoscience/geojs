@@ -45,10 +45,8 @@
     this._cors = spec.crossDomain || 'anonymous';
 
     // Call superclass constructor
-    return geo.tile.call(this, spec);
-  };
+    geo.tile.call(this, spec);
 
-  geo.imageTile.prototype = {
     /**
      * Read only accessor to the Image object used by the
      * tile.  Note, this method does not gaurantee that the
@@ -56,15 +54,15 @@
      * to add asyncronous handlers.
      * @returns {Image}
      */
-    get image() {
-      return this._image;
-    },
+    Object.defineProperty(this, 'image', {
+      get: function () { return this._image; }
+    });
 
     /**
      * Initiate the image request.
      * @returns {this} Supports chained calling
      */
-    fetch: function () {
+    this.fetch = function () {
       if (!this._image) {
         this._image = new Image();
         this._image.crossOrigin = this._cors;
@@ -72,7 +70,7 @@
         this._image.src = this._url;
       }
       return this;
-    },
+    };
 
     /**
      * Add a method to be called with the data when the ajax request is
@@ -82,9 +80,9 @@
      * @returns {this} Supports chained calling
      *
      */
-    then: function (method) {
+    this.then = function (method) {
       return this.fetch()._promise.then(method.bind(this));
-    },
+    };
 
     /**
      * Add a method to be called with the data when the ajax fails.
@@ -93,9 +91,11 @@
      * @returns {this} Supports chained calling
      *
      */
-    'catch': function (method) {
+    this.catch = function (method) {
       return this.fetch()._promise.catch(method.bind(this));
-    }
+    };
+
+    return this;
   };
 
   inherit(geo.imageTile, geo.tile);

@@ -21,46 +21,42 @@
     options = options || {};
     this._size = options.size || 64;
 
-    this.clear();
-    return this;
-  };
-  geo.tileCache.prototype = {
     /**
      * Get/set the maximum cache size.
      */
-    get size() {
-      return this._size;
-    },
-    set size(n) {
-      var i;
-      for (i = n; i < this.length; i += 1) {
-        this.remove(this._atime[i]);
+    Object.defineProperty(this, 'size', {
+      get: function () { return this._size; },
+      set: function (n) {
+        var i;
+        for (i = n; i < this.length; i += 1) {
+          this.remove(this._atime[i]);
+        }
+        this._size = n;
       }
-      this._size = n;
-    },
+    });
 
     /**
      * Get the current cache size.
      */
-    get length() {
-      return this._atime.length;
-    },
+    Object.defineProperty(this, 'length', {
+      get: function () { return this._atime.length; }
+    });
 
     /**
      * Get the position of the tile in the access queue.
      * @param {string} hash The tile's hash value
      * @returns {Number} The position in the queue or -1
      */
-    _access: function (tile) {
+    this._access = function (tile) {
       return this._atime.indexOf(tile);
-    },
+    };
 
     /**
      * Remove a tile from the cache.
      * @param {string|geo.tile} tile The tile or its hash
      * @returns {bool} true if a tile was removed
      */
-    remove: function (tile) {
+    this.remove = function (tile) {
       if (typeof tile !== 'string') {
         tile = tile.toString();
       }
@@ -76,16 +72,16 @@
       // Remove the tile from the cache
       delete this._cache[tile];
       return true;
-    },
+    };
 
     /**
      * Remove all tiles from the cache.
      */
-    clear: function () {
+    this.clear = function () {
       this._cache = {};  // The hash -> tile mapping
       this._atime = [];  // The access queue
       return this;
-    },
+    };
 
     /**
      * Get a tile from the cache if it exists, otherwise
@@ -95,7 +91,7 @@
      * @param {string} hash The tile hash value
      * @returns {geo.tile|null}
      */
-    get: function (hash) {
+    this.get = function (hash) {
       if (!(hash in this._cache)) {
         return null;
       }
@@ -104,13 +100,13 @@
         this._atime.splice(this._access(hash), 1)
       );
       return this._cache[hash];
-    },
+    };
 
     /**
      * Add a tile to the cache.
      * @param {geo.tile} tile
      */
-    add: function (tile) {
+    this.add = function (tile) {
       // remove any existing tiles with the same hash
       this.remove(tile);
 
@@ -123,6 +119,9 @@
         tile = this._atime.pop();
         delete this._cache[tile];
       }
-    }
+    };
+
+    this.clear();
+    return this;
   };
 })();
