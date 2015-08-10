@@ -229,15 +229,15 @@
 
       // loop over the tile range
       index = {level: level};
-      for (i = start.x; i < end.x; i += 1) {
-        if (this._options.wrapX && i < 0) {
+      for (i = start.x; i <= end.x; i += 1) {
+        if (this._options.wrapX) {
           // mod(i, nTilesLevel.x)
           index.x = ((i % nTilesLevel.x) + nTilesLevel.x) % nTilesLevel.x;
         } else {
           index.x = i;
         }
-        for (j = start.y; j < end.y; j += 1) {
-          if (this._options.wrapY && j < 0) {
+        for (j = start.y; j <= end.y; j += 1) {
+          if (this._options.wrapY) {
             // mod(j, nTilesLevel.y)
             index.y = ((j % nTilesLevel.y) + nTilesLevel.y) % nTilesLevel.y;
           } else {
@@ -245,7 +245,7 @@
           }
 
           if (this.isValid(index)) {
-            tiles.push(this._getTileCached(index));
+            tiles.push(this._getTileCached($.extend({}, index)));
           }
         }
       }
@@ -378,21 +378,24 @@
     this._drawTile = function (tile) {
       // Make sure this method is not called when there is
       // a renderer attached.
+      //
+      // For the moment, just get something to draw:
       /*
       if (this.renderer() !== null) {
         throw new Error('This draw method is not valid on renderer managed layers.');
       }
       */
-
       // get the layer node
-      var div = this.canvas();
+      this.canvas().css({height: 0});
+      var div = this.canvas().parent();
 
       // append the image element
       div.append(tile.image);
 
       // apply a transform to place the image correctly
-      tile.image.css.transform = 'translate(' +
-        [tile.bottomLeft().x, tile.topRight().y] + ')';
+      tile.image.style.position = 'absolute';
+      tile.image.style.left = tile.bottomLeft().x + 'px';
+      tile.image.style.top = tile.topRight().y + 'px';
 
       // add an error handler
       tile.catch(function () {
@@ -467,8 +470,7 @@
       tiles = this._getTiles(zoom, center, size, true);
 
       tiles.forEach(function (tile) {
-        tile.then(function (image) {
-          tile.image = image;
+        tile.then(function () {
           this.drawTile(tile);
         }.bind(this));
       }.bind(this));

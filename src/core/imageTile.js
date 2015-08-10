@@ -64,9 +64,12 @@
      */
     this.fetch = function () {
       if (!this._image) {
-        this._image = new Image();
+        this._image = new Image(this.size.x, this.size.y);
         this._image.crossOrigin = this._cors;
-        this._promise = new Promise(this._image.onload, this._image.onerror);
+        this._promise = new Promise(function (resolve, reject) {
+          this._image.onload = resolve;
+          this._image.onerror = reject;
+        }.bind(this));
         this._image.src = this._url;
       }
       return this;

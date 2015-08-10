@@ -91,7 +91,7 @@
     wrapY: false,
     url: function (index) {
       return 'http://tile.openstreetmap.org/' +
-        index.level + '/' + index.y + '/' + index.x + '.png';
+        index.level + '/' + index.x + '/' + index.y + '.png';
     },
     attribution: 'Tile data &copy; <a href="http://osm.org/copyright">' +
       'OpenStreetMap</a> contributors'

@@ -132,7 +132,7 @@
     this.bottomLeft = function (offset) {
       offset = offset || {};
       var x = this.index.x - (offset.x || 0),
-          y = this.index.y - (offset.y || 0);
+          y = this.index.y - (offset.y || 0) + 1;
       return {
         x: this.size.x * x - this.overlap.x,
         y: this.size.y * y - this.overlap.y
@@ -152,7 +152,7 @@
     this.topRight = function (offset) {
       offset = offset || {};
       var x = this.index.x - (offset.x || 0) + 1,
-          y = this.index.y - (offset.y || 0) + 1;
+          y = this.index.y - (offset.y || 0);
       return {
         x: this.size.x * x + this.overlap.x,
         y: this.size.y * y + this.overlap.y
