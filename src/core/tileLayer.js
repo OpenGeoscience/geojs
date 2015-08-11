@@ -432,6 +432,20 @@
     };
 
     /**
+     * Remove all inactive tiles from the display.  An inactive tile
+     * is one that is no longer visible either because it was panned
+     * out of the active view or the zoom has changed.
+     */
+    this._purge = function (start, end) {
+      var i, active = this.activeTiles, tile;
+      for (i = 0; i < active.length; i += 1) {
+        tile = active[i];
+
+        if (tile.index.level !==
+      }
+    };
+
+    /**
      * Remove all active tiles from the canvas.
      * @returns {geo.tile[]} The array of tiles removed
      */
@@ -475,6 +489,12 @@
         }.bind(this));
       }.bind(this));
     };
+
+    // purge all old tiles when the new tiles are loaded
+    $.when.prototype.apply($, tiles)
+      .done( // called on success and failure
+
+      );
 
     return this;
   };
