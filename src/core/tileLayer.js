@@ -57,6 +57,11 @@
     // initialize the object that keeps track of actively drawn tiles
     this._activeTiles = {};
 
+    // initialize the object that stores active tile regions in a
+    // tree-like structure providing quick queries to determine
+    // if tiles are completely obscured or not.
+    this._tileTree = {};
+
     // initialize the in memory tile cache
     this._cache = geo.tileCache({size: options.cacheSize});
 
@@ -123,7 +128,7 @@
     };
 
     /**
-     * Returns the tile indices at the given point for the given zoom level.
+     * Returns the tile indices at the given point.
      * @param {Object} point The coordinates in pixels
      * @param {Number} point.x
      * @param {Number} point.y
@@ -192,6 +197,26 @@
     };
 
     /**
+     * Returns the optimal starting and ending tile indices
+     * (inclusive) necessary to fill the given viewport.
+     * @param {Number} level The zoom level
+     * @param {Object} center The coordinates of the center (pixels)
+     * @param {Object} size The size of the viewport in pixels
+     */
+    this._getTileRange = function (level, center, size) {
+      return {
+        start: this.tileAtPoint({
+          x: center.x - size.width / 2,
+          y: center.y - size.height / 2
+        }, level),
+        end: this.tileAtPoint({
+          x: center.x + size.width / 2,
+          y: center.y + size.height / 2
+        }, level)
+      };
+    };
+
+    /**
      * Returns a list of tiles necessary to fill the screen at the given
      * zoom level, center point, and viewport size.  The list is optionally
      * ordered by loading priority (center tiles first).
@@ -209,20 +234,15 @@
      */
     this._getTiles = function (level, center, size, sorted) {
       var iCenter, i, j, tiles = [], index, nTilesLevel,
-          start, end;
+          start, end, indexRange;
 
       // indices of the center tile
       iCenter = this.tileAtPoint(center, level);
 
       // get the tile range to fetch
-      start = this.tileAtPoint({
-        x: center.x - size.width / 2,
-        y: center.y - size.height / 2
-      }, level);
-      end = this.tileAtPoint({
-        x: center.x + size.width / 2,
-        y: center.y + size.height / 2
-      }, level);
+      indexRange = this._getTileRange(level, center, size);
+      start = indexRange.start;
+      end = indexRange.end;
 
       // total number of tiles existing at this level
       nTilesLevel = this.tilesAtZoom(level);
@@ -276,7 +296,7 @@
         s = {x: size.width * scale, y: size.height * scale};
         Array.prototype.push.apply(tiles, this._getTiles(l, c, s, false));
       }
-      return $.when.prototype.apply($,
+      return $.when.apply($,
         tiles.sort(this._loadMetric(center))
           .map(function (tile) {
             return tile.fetch().defer;
@@ -356,13 +376,13 @@
     this.drawTile = function (tile) {
       var hash = tile.toString();
 
-      if (hash.hasOwnProperty(this._activeTiles)) {
-        // the tile is already drawn, remove it
-        this.remove(tile);
+      if (this._activeTiles.hasOwnProperty(hash)) {
+        // the tile is already drawn, move it to the top
+        this._moveToTop(tile);
+      } else {
+        // pass to the rendering implementation
+        this._drawTile(tile);
       }
-
-      // pass to the rendering implementation
-      this._drawTile(tile);
 
       // add the tile to the active cache
       this._activeTiles[tile.toString()] = tile;
@@ -432,17 +452,33 @@
     };
 
     /**
+     * Move the given tile to the top on the canvas.  The default
+     * implementation deletes the tile and re-adds it.  This is
+     * exposed to make it possible to optimize drawing when possible.
+     * @param {geo.tile} tile The tile object to move
+     */
+    this._moveToTop = function (tile) {
+      this._remove(tile);
+      this._drawTile(tile);
+    };
+
+    /**
      * Remove all inactive tiles from the display.  An inactive tile
      * is one that is no longer visible either because it was panned
      * out of the active view or the zoom has changed.
+     * @protected
      */
-    this._purge = function (start, end) {
-      var i, active = this.activeTiles, tile;
-      for (i = 0; i < active.length; i += 1) {
-        tile = active[i];
+    this._purge = function () {
+      var tile, hash;
+      for (hash in this._activeTiles) {// jshint ignore: line
 
-        if (tile.index.level !==
+        tile = this._activeTiles[hash];
+        if (this._canPurge(tile)) {
+          console.log('purging ' + hash);
+          this.remove(tile);
+        }
       }
+      return this;
     };
 
     /**
@@ -457,6 +493,9 @@
       for (tile in this._activeTiles) {  // jshint ignore: line
         tiles.push(this.remove(tile));
       }
+
+      // clear out the tile coverage tree
+      this._tileTree = {};
 
       return tiles;
     };
@@ -483,18 +522,148 @@
 
       tiles = this._getTiles(zoom, center, size, true);
 
+      // reset the tile coverage tree
+      this._tileTree = {};
+
       tiles.forEach(function (tile) {
         tile.then(function () {
           this.drawTile(tile);
+
+          // mark the tile as covered
+          this._setTileTree(tile);
         }.bind(this));
       }.bind(this));
+
+      // purge all old tiles when the new tiles are loaded (successfully or not)
+      $.when.apply($, tiles)
+        .done(// called on success and failure
+          function () {
+            this._purge();
+          }.bind(this)
+        );
     };
 
-    // purge all old tiles when the new tiles are loaded
-    $.when.prototype.apply($, tiles)
-      .done( // called on success and failure
+    /**
+     * Set a value in the tile tree object indicating that the given area of
+     * the canvas is covered by the tile.
+     * @protected
+     * @param {geo.tile} tile
+     */
+    this._setTileTree = function (tile) {
+      var index = tile.index;
+      this._tileTree[index.level] = this._tileTree[index.level] || {};
+      this._tileTree[index.level][index.x] = this._tileTree[index.level][index.x] || {};
+      this._tileTree[index.level][index.x][index.y] = tile;
+    };
 
-      );
+    /**
+     * Get a value in the tile tree object if it exists or return null.
+     * @protected
+     * @param {object} index A tile index object
+     * @param {object} index.level
+     * @param {object} index.x
+     * @param {object} index.y
+     * @returns {geo.tile|null}
+     */
+    this._getTileTree = function (index) {
+      if (this._tileTree[index.level] &&
+          this._tileTree[index.level][index.x] &&
+          this._tileTree[index.level][index.x][index.y]) {
+        return (
+            (
+              this._tileTree[index.level] || {}
+            )[index.x] || {}
+          )[index.y] || null;
+      }
+    };
+
+    /**
+     * Returns true if the tile is completely covered by other tiles on the canvas.
+     * Currently this method only checks layers +/- 1 away from `tile`.  If the
+     * zoom level is allowed to change by 2 or more in a single update step, this
+     * method will need to be refactored to make a more robust check.  Returns
+     * an array of tiles covering it or null if any part of the tile is exposed.
+     * @protected
+     * @param {geo.tile} tile
+     * @returns {geo.tile[]|null}
+     */
+    this._isCovered = function (tile) {
+      var level = tile.index.level,
+          x = tile.index.x,
+          y = tile.index.y,
+          tiles = [];
+
+
+      // Short cut to null if the tile was directly added
+      // at the previous update step.  In this case, the
+      // tile is on top by definition.
+      if (this._getTileTree(tile.index)) {
+        return null;
+      }
+
+      // Check one level up
+      tiles = this._getTileTree({
+        level: level - 1,
+        x: Math.floor(x / 2),
+        y: Math.floor(y / 2)
+      });
+      if (tiles) {
+        return [tiles];
+      }
+
+      // Check one level down
+      tiles = [
+        this._getTileTree({
+          level: level + 1,
+          x: 2 * x,
+          y: 2 * y
+        }),
+        this._getTileTree({
+          level: level + 1,
+          x: 2 * x + 1,
+          y: 2 * y
+        }),
+        this._getTileTree({
+          level: level + 1,
+          x: 2 * x,
+          y: 2 * y + 1
+        }),
+        this._getTileTree({
+          level: level + 1,
+          x: 2 * x + 1,
+          y: 2 * y + 1
+        })
+      ];
+      if (tiles.every(function (t) { return t !== null; })) {
+        return tiles;
+      }
+
+      return null;
+    };
+
+    /**
+     * Returns true if the provided tile is outside of the current view bounds
+     * and can be removed from the canvas.
+     * @protected
+     * @param {geo.tile} tile
+     * @returns {boolean}
+     */
+    this._outOfBounds = function (/* tile */) {
+      return false;
+    };
+
+    /**
+     * Returns true if the provided tile can be purged from the canvas.  This method
+     * will return `true` if the tile is completely covered by one or more other tiles
+     * or it is outside of the active view bounds.  This method returns the logical and
+     * of `_isCovered` and `_outOfBounds`.
+     * @protected
+     * @param {geo.tile} tile
+     * @returns {boolean}
+     */
+    this._canPurge = function (tile) {
+      return this._isCovered(tile) && this._outOfBounds(tile);
+    };
 
     return this;
   };
