@@ -1,4 +1,3 @@
-/* global Promise */
 (function () {
   'use strict';
 
@@ -60,42 +59,20 @@
 
     /**
      * Initiate the image request.
-     * @returns {this} Supports chained calling
      */
     this.fetch = function () {
+      var defer;
       if (!this._image) {
         this._image = new Image(this.size.x, this.size.y);
         this._image.crossOrigin = this._cors;
-        this._promise = new Promise(function (resolve, reject) {
-          this._image.onload = resolve;
-          this._image.onerror = reject;
-        }.bind(this));
+        defer = new $.Deferred();
+        this._image.onload = function () { defer.resolve(); };
+        this._image.onerror = function () { defer.reject(); };
         this._image.src = this._url;
+
+        // attach a promise interface to `this`
+        defer.promise(this);
       }
-      return this;
-    };
-
-    /**
-     * Add a method to be called with the data when the ajax request is
-     * successfully resolved.
-     *
-     * @param {function} method The success handler
-     * @returns {this} Supports chained calling
-     *
-     */
-    this.then = function (method) {
-      return this.fetch()._promise.then(method.bind(this));
-    };
-
-    /**
-     * Add a method to be called with the data when the ajax fails.
-     *
-     * @param {function} method The rejection handler
-     * @returns {this} Supports chained calling
-     *
-     */
-    this.catch = function (method) {
-      return this.fetch()._promise.catch(method.bind(this));
     };
 
     return this;

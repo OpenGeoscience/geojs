@@ -38,7 +38,6 @@
     this._size = spec.size;
     this._overlap = spec.overlap || {x: 0, y: 0};
     this._url = spec.url;
-    this._jqXHR = null;
 
     /**
      * Return the index coordinates.
@@ -63,37 +62,32 @@
     });
 
     /**
-     * Return the raw Deferred object.
-     * Not sure this is a good idea, but it makes using
-     * $.when convenient.
-     *
-     * @returns {$.Deferred} Supports chained calling
-     */
-    Object.defineProperty(this, 'defer', {
-      get: function () { return this._jqXHR; }
-    });
-
-    /**
-     * Initiate the ajax request.
-     * @returns {this} Supports chained calling
+     * Initiate the ajax request and add a promise interface
+     * to the tile object.  This method exists to allow
+     * derived classes the ability to override how the tile
+     * is obtained.  For example, imageTile uses an Image
+     * element rather than $.get.
      */
     this.fetch = function () {
-      if (!this._jqXHR) {
-        this._jqXHR = $.ajax(this._url);
+      if (!this._) {
+        this._promise = $.get(this._url).promise();
       }
-      return this;
     };
 
     /**
      * Add a method to be called with the data when the ajax request is
      * successfully resolved.
      *
-     * @param {function} method The success handler
+     * @param {function?} onSuccess The success handler
+     * @param {function?} onFailure The failure handler
      * @returns {this} Supports chained calling
      *
      */
-    this.then = function (method) {
-      this.fetch()._jqXHR.success(method);
+    this.then = function (onSuccess, onFailure) {
+      this.fetch(); // This will replace the current then method
+
+      // Call then on the new promise
+      this.then(onSuccess, onFailure);
       return this;
     };
 
@@ -105,7 +99,7 @@
      *
      */
     this.catch = function (method) {
-      this.fetch()._jqXHR.fail(method);
+      this.then(undefined, method);
       return this;
     };
 
