@@ -38,6 +38,7 @@
     this._size = spec.size;
     this._overlap = spec.overlap || {x: 0, y: 0};
     this._url = spec.url;
+    this._fetched = false;
 
     /**
      * Return the index coordinates.
@@ -69,9 +70,10 @@
      * element rather than $.get.
      */
     this.fetch = function () {
-      if (!this._) {
-        this._promise = $.get(this._url).promise();
+      if (!this._fetched) {
+        $.get(this._url).promise(this);
       }
+      return this;
     };
 
     /**

@@ -51,6 +51,7 @@
 
     options = $.extend(options || {}, this.constructor.defaults);
 
+    var lastZoom = null, lastX = null, lastY = null;
     // copy the options into a private variable
     this._options = $.extend(true, {}, options);
 
@@ -299,7 +300,7 @@
       return $.when.apply($,
         tiles.sort(this._loadMetric(center))
           .map(function (tile) {
-            return tile.fetch().defer;
+            return tile.fetch();
           })
       );
     };
@@ -474,7 +475,6 @@
 
         tile = this._activeTiles[hash];
         if (this._canPurge(tile)) {
-          console.log('purging ' + hash);
           this.remove(tile);
         }
       }
@@ -519,6 +519,15 @@
           center = this.toLocal(this.map().center()),
           size = this.map().size(),
           tiles;
+
+      if (zoom === lastZoom &&
+          center.x === lastX &&
+          center.y === lastY) {
+        return;
+      }
+      lastZoom = zoom;
+      lastX = center.x;
+      lastY = center.y;
 
       tiles = this._getTiles(zoom, center, size, true);
 
@@ -566,15 +575,11 @@
      * @returns {geo.tile|null}
      */
     this._getTileTree = function (index) {
-      if (this._tileTree[index.level] &&
-          this._tileTree[index.level][index.x] &&
-          this._tileTree[index.level][index.x][index.y]) {
-        return (
-            (
-              this._tileTree[index.level] || {}
-            )[index.x] || {}
-          )[index.y] || null;
-      }
+      return (
+          (
+            this._tileTree[index.level] || {}
+          )[index.x] || {}
+        )[index.y] || null;
     };
 
     /**
@@ -662,7 +667,7 @@
      * @returns {boolean}
      */
     this._canPurge = function (tile) {
-      return this._isCovered(tile) && this._outOfBounds(tile);
+      return this._isCovered(tile) || this._outOfBounds(tile);
     };
 
     return this;

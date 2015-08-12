@@ -87,7 +87,7 @@
     tileOverlap: 0,
     tileWidth: 256,
     tileHeight: 256,
-    wrapX: true,
+    wrapX: false,
     wrapY: false,
     url: function (index) {
       return 'http://tile.openstreetmap.org/' +
