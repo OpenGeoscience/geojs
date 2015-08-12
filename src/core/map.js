@@ -173,6 +173,7 @@ geo.map = function (arg) {
     var base = m_this.baseLayer(),
         evt, pt, corner1, corner2;
 
+    return;
     if (arg.clampBounds && !force && m_width && m_height) {
       pt = m_this.displayToGcs({
         x: delta.x,
@@ -241,24 +242,31 @@ geo.map = function (arg) {
    * @returns {Object|geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.center = function (coordinates, force) {
+  this.center = function (coordinates/*, force */) {
     var newCenter, currentCenter;
 
     if (coordinates === undefined) {
       return m_center;
     }
 
+    // UGH... deal with this later
+
     // get the screen coordinates of the new center
     coordinates = geo.util.normalizeCoordinates(coordinates);
     newCenter = m_this.gcsToDisplay(coordinates);
     currentCenter = m_this.gcsToDisplay(m_center);
 
-    // call the pan method
-    m_this.pan({
-      x: currentCenter.x - newCenter.x,
-      y: currentCenter.y - newCenter.y
-    }, force);
+    m_center = coordinates;
 
+    // trigger a pan event
+    m_this.geoTrigger(
+      geo.event.pan,
+      {
+        geo: coordinates,
+        screenDelta: null,
+        eventType: geo.event.pan
+      }
+    );
     return m_this;
   };
 

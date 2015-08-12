@@ -89,16 +89,6 @@
     }});
 
     /**
-     * Tile scaling factor relative to zoom level 0.
-     * The default implementation just returns `1 / Math.pow(2, z)`.
-     * @param {Number} level A zoom level
-     * @returns {Number} The size of a pixel at level z relative to level 0
-     */
-    this.scaleAtZoom = function (level) {
-      return Math.pow(2, -level);
-    };
-
-    /**
      * The number of tiles at the given zoom level
      * The default implementation just returns `Math.pow(2, z)`.
      * @param {Number} level A zoom level
@@ -108,7 +98,6 @@
       var s = Math.pow(2, level);
       return {x: s, y: s};
     };
-
 
     /**
      * Returns true if the given tile index is valid:
@@ -235,11 +224,7 @@
      */
     this._getTiles = function (level, center, size, sorted) {
       var iCenter, i, j, tiles = [], index, nTilesLevel,
-          start, end, indexRange, scale;
-
-      // convert to pixels at the given level
-      scale = this.tilesAtZoom(level);
-      center = {x: center.x * scale.x, y: center.y * scale.y};
+          start, end, indexRange;
 
       // indices of the center tile
       iCenter = this.tileAtPoint(center, level);
@@ -285,7 +270,7 @@
      * Prefetches tiles up to a given zoom level around a given bounding box.
      *
      * @param {Number} level The zoom level
-     * @param {Object} center The center point in pixels
+     * @param {Object} center The center point in GCS coordinates
      * @param {Number} center.x
      * @param {Number} center.y
      * @param {Object} size The viewport size in pixels
@@ -294,13 +279,9 @@
      * @returns {$.Deferred} resolves when all of the tiles are fetched
      */
     this.prefetch = function (level, center, size) {
-      var tiles = [], l, c, s, scale;
-      for (l = this._options.minLevel; l <= level; l += 1) {
-        scale = this.scaleAtZoom(l - level);
-        c = {x: center.x * scale, y: center.y * scale};
-        s = {x: size.width * scale, y: size.height * scale};
-        Array.prototype.push.apply(tiles, this._getTiles(l, c, s, false));
-      }
+      var tiles;
+      center = this.toLevel(this.toLocal(center), level);
+      tiles = [this._getTiles(level, center, size, false)];
       return $.when.apply($,
         tiles.sort(this._loadMetric(center))
           .map(function (tile) {
@@ -356,8 +337,8 @@
     this.fromLocal = function (coord) {
       var o = this._options;
       return {
-        x: (o.maxX - o.minX) * coord.x / o.tileWidth + o.minX,
-        y: (o.maxY - o.minY) * coord.y / o.tileHeight + o.minY
+        x: (o.maxX - o.minX) * coord.x + o.minX,
+        y: (o.maxY - o.minY) * coord.y + o.minY
       };
     };
 
@@ -370,11 +351,44 @@
     this.toLocal = function (coord) {
       var o = this._options;
       return {
-        x: o.tileWidth * (coord.x - o.minX) / (o.maxX - o.minX),
-        y: o.tileHeight * (coord.y - o.minY) / (o.maxY - o.minY)
+        x: (coord.x - o.minX) / (o.maxX - o.minX),
+        y: (coord.y - o.minY) / (o.maxY - o.minY)
       };
     };
 
+    /**
+     * Convert a coordinate from pixel coordinates at the given zoom
+     * level to layer coordinates.
+     * @param {Object} coord
+     * @param {Number} coord.x The offset in pixels (level 0) from the left edge
+     * @param {Number} coord.y The offset in pixels (level 0) from the bottom edge
+     * @param {Number} level   The zoom level of the source coordinates
+     */
+    this.fromLevel = function (coord, level) {
+      var scl = this.tilesAtZoom(level),
+          o = this._options;
+      return {
+        x: coord.x / (scl.x * o.tileWidth),
+        y: coord.y / (scl.y * o.tileHeight)
+      };
+    };
+
+    /**
+     * Convert a coordinate from layer coordinates to pixel coordinates at the
+     * given zoom level.
+     * @param {Object} coord
+     * @param {Number} coord.x The offset in pixels (level 0) from the left edge
+     * @param {Number} coord.y The offset in pixels (level 0) from the bottom edge
+     * @param {Number} level   The zoom level of the new coordinates
+     */
+    this.toLevel = function (coord, level) {
+      var scl = this.tilesAtZoom(level),
+          o = this._options;
+      return {
+        x: coord.x * scl.x * o.tileWidth,
+        y: coord.y * scl.y * o.tileHeight
+      };
+    };
     /**
      * Draw the given tile on the active canvas.
      * @param {geo.tile} tile The tile to draw
@@ -405,28 +419,25 @@
       // Make sure this method is not called when there is
       // a renderer attached.
       //
-      // For the moment, just get something to draw:
-      /*
       if (this.renderer() !== null) {
         throw new Error('This draw method is not valid on renderer managed layers.');
       }
-      */
+
       // get the layer node
-      this.canvas().css({height: 0});
-      var div = this.canvas().parent();
+      var div = this.canvas();
 
       // append the image element
       div.append(tile.image);
 
       // apply a transform to place the image correctly
       tile.image.style.position = 'absolute';
-      tile.image.style.left = tile.bottomLeft().x + 'px';
-      tile.image.style.top = tile.topRight().y + 'px';
+      tile.image.style.left = tile.left() + 'px';
+      tile.image.style.top = tile.bottom() + 'px';
 
       // add an error handler
       tile.catch(function () {
-        var err = $(this.errorTile(tile));
-        err.appendTo(this.image.parentNode);
+        // May want to do something special here later
+        console.warn('Could not load tile at ' + tile.index);
         tile.image.remove();
       });
     };
@@ -469,17 +480,42 @@
     };
 
     /**
+     * Query the attached map for the current bounds and return them
+     * as pixels at the current zoom level.
+     * @returns {Object}
+     *  Bounds object with left, right, top, bottom keys
+     * @protected
+     */
+    this._getViewBounds = function () {
+      var map = this.map(),
+          zoom = Math.floor(map.zoom()),
+          center = this.toLevel(this.toLocal(map.center()), zoom),
+          size = map.size();
+      return {
+        level: zoom,
+        left: center.x - size.width / 2,
+        right: center.x + size.width / 2,
+        bottom: center.y - size.height / 2,
+        top: center.y + size.height / 2
+      };
+    };
+
+    /**
      * Remove all inactive tiles from the display.  An inactive tile
      * is one that is no longer visible either because it was panned
      * out of the active view or the zoom has changed.
      * @protected
      */
     this._purge = function () {
-      var tile, hash;
+      var tile, hash, bounds = {};
+
+      // get the view bounds
+      bounds = this._getViewBounds();
+
       for (hash in this._activeTiles) {// jshint ignore: line
 
         tile = this._activeTiles[hash];
-        if (this._canPurge(tile)) {
+        if (this._canPurge(tile, bounds)) {
           this.remove(tile);
         }
       }
@@ -521,9 +557,21 @@
      */
     this._update = function () {
       var zoom = Math.floor(this.map().zoom()),
-          center = this.toLocal(this.map().center()),
+          center = this.toLevel(this.toLocal(this.map().center()), zoom),
           size = this.map().size(),
           tiles;
+
+      tiles = this._getTiles(zoom, center, size, true);
+
+      // Update the transform for the local layer coordinates
+      this.canvas().css(
+        'transform',
+        'translate(' +
+          (size.width / 2 - center.x) + 'px,' +
+          (size.height / 2 - center.y) + 'px' +
+        ')'
+      );
+
 
       if (zoom === lastZoom &&
           center.x === lastX &&
@@ -533,8 +581,6 @@
       lastZoom = zoom;
       lastX = center.x;
       lastY = center.y;
-
-      tiles = this._getTiles(zoom, center, size, true);
 
       // reset the tile coverage tree
       this._tileTree = {};
@@ -656,10 +702,18 @@
      * and can be removed from the canvas.
      * @protected
      * @param {geo.tile} tile
+     * @param {Object?} bounds The view bounds
+     * @param {Object?} bounds.left
+     * @param {Object?} bounds.right
+     * @param {Object?} bounds.top
+     * @param {Object?} bounds.bottom
      * @returns {boolean}
      */
-    this._outOfBounds = function (/* tile */) {
-      return false;
+    this._outOfBounds = function (tile, bounds) {
+      return tile.bottom() > bounds.top ||
+             tile.left()   > bounds.right ||
+             tile.top()    < bounds.bottom ||
+             tile.right()  < bounds.left;
     };
 
     /**
@@ -669,10 +723,28 @@
      * of `_isCovered` and `_outOfBounds`.
      * @protected
      * @param {geo.tile} tile
+     * @param {Object?} bounds The view bounds (if empty, assume global bounds)
+     * @param {Number} bounds.left
+     * @param {Number} bounds.right
+     * @param {Number} bounds.top
+     * @param {Number} bounds.bottom
+     * @param {Number} bounds.level The zoom level the bounds are given as
      * @returns {boolean}
      */
-    this._canPurge = function (tile) {
-      return this._isCovered(tile) || this._outOfBounds(tile);
+    this._canPurge = function (tile, bounds) {
+      /*  Get fancy laterj
+      if (this._isCovered(tile)) {
+        return true;
+      }
+      */
+      // for now purge all tiles at different zoom levels
+      if (tile.index.level !== bounds.level) {
+        return true;
+      }
+      if (bounds) {
+        return this._outOfBounds(tile, bounds);
+      }
+      return false;
     };
 
     return this;

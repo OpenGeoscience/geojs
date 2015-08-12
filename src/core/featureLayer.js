@@ -22,7 +22,6 @@ geo.featureLayer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       m_features = [],
-      s_init = this._init,
       s_exit = this._exit,
       s_update = this._update,
       s_draw = this.draw;
@@ -82,45 +81,6 @@ geo.featureLayer = function (arg) {
       m_this.modified();
       return m_this;
     }
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Initialize
-   *
-   * Do not call parent _init method as its already been executed
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._init = function () {
-    /// Call super class init
-    s_init.call(m_this);
-
-    /// Bind events to handlers
-    m_this.geoOn(geo.event.resize, function (event) {
-      if (m_this.renderer()) {
-        m_this.renderer()._resize(event.x, event.y, event.width, event.height);
-      }
-      m_this._update({});
-      if (m_this.renderer()) {
-        m_this.renderer()._render();
-      }
-    });
-
-    m_this.geoOn(geo.event.pan, function (event) {
-      m_this._update({event: event});
-      if (m_this.renderer()) {
-        m_this.renderer()._render();
-      }
-    });
-
-    m_this.geoOn(geo.event.zoom, function (event) {
-      m_this._update({event: event});
-      if (m_this.renderer()) {
-        m_this.renderer()._render();
-      }
-    });
-
-    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
