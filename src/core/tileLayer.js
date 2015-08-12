@@ -235,7 +235,11 @@
      */
     this._getTiles = function (level, center, size, sorted) {
       var iCenter, i, j, tiles = [], index, nTilesLevel,
-          start, end, indexRange;
+          start, end, indexRange, scale;
+
+      // convert to pixels at the given level
+      scale = this.tilesAtZoom(level);
+      center = {x: center.x * scale.x, y: center.y * scale.y};
 
       // indices of the center tile
       iCenter = this.tileAtPoint(center, level);
@@ -350,9 +354,10 @@
      * @param {Number} coord.y The offset in pixels (level 0) from the bottom edge
      */
     this.fromLocal = function (coord) {
+      var o = this._options;
       return {
-        x: (this._options.maxX - this._options.minX) * coord.x / this._options.tileWidth,
-        y: (this._options.maxY - this._options.minY) * coord.y / this._options.tileHeight
+        x: (o.maxX - o.minX) * coord.x / o.tileWidth + o.minX,
+        y: (o.maxY - o.minY) * coord.y / o.tileHeight + o.minY
       };
     };
 
@@ -365,8 +370,8 @@
     this.toLocal = function (coord) {
       var o = this._options;
       return {
-        x: o.tileWidth * coord.x / (o.maxX - o.minX),
-        y: o.tileHeight * coord.y / (o.maxY - o.minY)
+        x: o.tileWidth * (coord.x - o.minX) / (o.maxX - o.minX),
+        y: o.tileHeight * (coord.y - o.minY) / (o.maxY - o.minY)
       };
     };
 

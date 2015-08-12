@@ -78,10 +78,17 @@
     };
   };
 
+  // Compute the circumference of the earth / 2 in meters for osm layer image bounds
+  var cEarth = Math.PI * 6378137;
+
   /**
    * This object contains the default options used to initialize the osmLayer.
    */
   geo.osmLayer.defaults = $.extend({}, geo.tileLayer.defaults, {
+    minX: -cEarth,
+    maxX: cEarth,
+    minY: -cEarth,
+    maxY: cEarth,
     minLevel: 0,
     maxLevel: 18,
     tileOverlap: 0,

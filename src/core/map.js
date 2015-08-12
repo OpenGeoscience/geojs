@@ -441,28 +441,12 @@ geo.map = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Convert from gcs coordinates to display coordinates
-   *
-   * @param {*} input {[[{x:_x, y: _y}], [x1,y1, x2, y2]}
+   * Convert from source coordinates to display coordinates
    * @return {object}
-   *
-   * @note Currently only lat-lon inputs are supported
    */
   ////////////////////////////////////////////////////////////////////////////
   this.gcsToDisplay = function (input) {
-    var output;
-
-    /// Now handle different data types
-    if ((input instanceof Array &&
-         input.length > 0) || input instanceof Object) {
-      // FIX:
-      output = m_baseLayer.toLocal(input);
-    } else {
-      /// Everything else
-      throw 'Conversion method latLonToDisplay does not handle ' + input;
-    }
-
-    return output;
+    return input;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -471,16 +455,7 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.displayToGcs = function (input) {
-    var output;
-
-    /// Now handle different data types
-    if ((input instanceof Array && input.length > 0) ||
-         input instanceof Object) {
-      output = m_baseLayer.fromLocal(input);
-    } else {
-      throw 'Conversion method displayToGcs does not handle ' + input;
-    }
-    return output;
+    return input;
   };
 
   ////////////////////////////////////////////////////////////////////////////
