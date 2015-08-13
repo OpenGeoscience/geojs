@@ -97,19 +97,27 @@ geo.featureLayer = function (arg) {
 
     /// Bind events to handlers
     m_this.geoOn(geo.event.resize, function (event) {
-      m_this.renderer()._resize(event.x, event.y, event.width, event.height);
+      if (m_this.renderer()) {
+        m_this.renderer()._resize(event.x, event.y, event.width, event.height);
+      }
       m_this._update({});
-      m_this.renderer()._render();
+      if (m_this.renderer()) {
+        m_this.renderer()._render();
+      }
     });
 
     m_this.geoOn(geo.event.pan, function (event) {
       m_this._update({event: event});
-      m_this.renderer()._render();
+      if (m_this.renderer()) {
+        m_this.renderer()._render();
+      }
     });
 
     m_this.geoOn(geo.event.zoom, function (event) {
       m_this._update({event: event});
-      m_this.renderer()._render();
+      if (m_this.renderer()) {
+        m_this.renderer()._render();
+      }
     });
 
     return m_this;

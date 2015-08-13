@@ -347,7 +347,7 @@ geo.layer = function (arg) {
       // if given a "null" renderer, then pass the map element as the
       // canvas
       m_renderer = null;
-      m_canvas = m_node.get(0);
+      m_canvas = m_node;
     } else if (m_canvas) { // Share context if have valid one
       m_renderer = geo.createRenderer(m_rendererName, m_this, m_canvas,
                                       options);
