@@ -28,13 +28,17 @@
      * @param {Number} index.x
      * @param {Number} index.y
      * @param {Number} index.level
+     * @param {Object} source The tile index used for constructing the url
+     * @param {Number} source.x
+     * @param {Number} source.y
+     * @param {Number} source.level
      * @returns {geo.tile}
      */
-    this._getTile = function (index) {
+    this._getTile = function (index, source) {
       return geo.imageTile({
         index: index,
         size: {x: this._options.tileWidth, y: this._options.tileHeight},
-        url: this._options.url(index)
+        url: this._options.url(source || index)
       });
     };
   };
@@ -55,7 +59,7 @@
     tileOverlap: 0,
     tileWidth: 256,
     tileHeight: 256,
-    wrapX: false,
+    wrapX: true,
     wrapY: false,
     url: function (index) {
       return 'http://tile.openstreetmap.org/' +

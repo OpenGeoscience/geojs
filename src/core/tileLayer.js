@@ -1,6 +1,15 @@
 (function () {
   'use strict';
 
+  /**
+   * Standard modulo operator where the output
+   * is in [0, a - 1] for all inputs.
+   * @private
+   */
+  function modulo(a, b) {
+    return ((a % b) + b) % b;
+  }
+
   //////////////////////////////////////////////////////////////////////////////
   /**
    * This method defines a tileLayer, which is an abstract class defining a
@@ -111,10 +120,21 @@
      * @returns {geo.tile}
      */
     this.isValid = function (index) {
-      return this._options.minLevel <= index.level &&
-        index.level <= this._options.maxLevel &&
-        0 <= index.x && index.x <= this.tilesAtZoom(index.level).x - 1 &&
-        0 <= index.y && index.y <= this.tilesAtZoom(index.level).y - 1;
+      if (!(this._options.minLevel <= index.level &&
+           index.level <= this._options.maxLevel)) {
+        return false;
+      }
+      if (!(this._options.wrapX ||
+            0 <= index.x &&
+            index.x <= this.tilesAtZoom(index.level).x - 1)) {
+        return false;
+      }
+      if (!(this._options.wrapY ||
+            0 <= index.y &&
+            index.y <= this.tilesAtZoom(index.level).y - 1)) {
+        return false;
+      }
+      return true;
     };
 
     /**
@@ -139,13 +159,17 @@
      * @param {Number} index.x
      * @param {Number} index.y
      * @param {Number} index.level
+     * @param {Object} source The tile index used for constructing the url
+     * @param {Number} source.x
+     * @param {Number} source.y
+     * @param {Number} source.level
      * @returns {geo.tile}
      */
-    this._getTile = function (index) {
+    this._getTile = function (index, source) {
       return geo.tile({
         index: index,
         size: {x: this._options.tileWidth, y: this._options.tileHeight},
-        url: this._options.url(index)
+        url: this._options.url(source || index)
       });
     };
 
@@ -157,12 +181,16 @@
      * @param {Number} index.x
      * @param {Number} index.y
      * @param {Number} index.level
+     * @param {Object} source The tile index used for constructing the url
+     * @param {Number} source.x
+     * @param {Number} source.y
+     * @param {Number} source.level
      * @returns {geo.tile}
      */
-    this._getTileCached = function (index) {
+    this._getTileCached = function (index, source) {
       var tile = this.cache.get(this._tileHash(index));
       if (tile === null) {
-        tile = this._getTile(index);
+        tile = this._getTile(index, source);
         this.cache.add(tile);
       }
       return tile;
@@ -224,7 +252,7 @@
      */
     this._getTiles = function (level, center, size, sorted) {
       var iCenter, i, j, tiles = [], index, nTilesLevel,
-          start, end, indexRange;
+          start, end, indexRange, source;
 
       // indices of the center tile
       iCenter = this.tileAtPoint(center, level);
@@ -239,23 +267,25 @@
 
       // loop over the tile range
       index = {level: level};
+      index.nx = nTilesLevel.x;
+      index.ny = nTilesLevel.y;
+
       for (i = start.x; i <= end.x; i += 1) {
-        if (this._options.wrapX) {
-          // mod(i, nTilesLevel.x)
-          index.x = ((i % nTilesLevel.x) + nTilesLevel.x) % nTilesLevel.x;
-        } else {
-          index.x = i;
-        }
+        index.x = i;
         for (j = start.y; j <= end.y; j += 1) {
+          index.y = j;
+
+
+          source = $.extend({}, index);
+          if (this._options.wrapX) {
+            source.x = modulo(index.x, index.nx);
+          }
           if (this._options.wrapY) {
-            // mod(j, nTilesLevel.y)
-            index.y = ((j % nTilesLevel.y) + nTilesLevel.y) % nTilesLevel.y;
-          } else {
-            index.y = j;
+            source.y = modulo(index.y, index.ny);
           }
 
-          if (this.isValid(index)) {
-            tiles.push(this._getTileCached($.extend({}, index)));
+          if (this.isValid(source)) {
+            tiles.push(this._getTileCached($.extend({}, index), source));
           }
         }
       }

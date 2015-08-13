@@ -37,6 +37,7 @@
     this._index = spec.index;
     this._size = spec.size;
     this._overlap = spec.overlap || {x: 0, y: 0};
+    this._wrap = spec.wrap || {x: 1, y: 1};
     this._url = spec.url;
     this._fetched = false;
 
