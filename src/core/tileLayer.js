@@ -61,8 +61,12 @@
     options = $.extend(options || {}, this.constructor.defaults);
 
     var lastZoom = null, lastX = null, lastY = null;
+
     // copy the options into a private variable
     this._options = $.extend(true, {}, options);
+
+    // set the layer attribution text
+    this.attribution(options.attribution);
 
     // initialize the object that keeps track of actively drawn tiles
     this._activeTiles = {};
