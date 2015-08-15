@@ -71,6 +71,16 @@ geo.event.zoom = 'geo_zoom';
 
 //////////////////////////////////////////////////////////////////////////////
 /**
+ * Triggered when the map is rotated around the map center (pointing downward
+ * so that positive angles are clockwise rotations).
+ *
+ * @property angle {Number} The angle of the rotation in radians
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.event.rotate = 'geo_rotate';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
  * Triggered when the map is panned either by user interaction or map
  * transition.
  *
@@ -227,3 +237,31 @@ geo.event.feature = {
   brushend:   'geo_feature_brushend',
   brush:      'geo_feature_brush'
 };
+
+////////////////////////////////////////////////////////////////////////////
+/**
+ * These events are triggered by the camera when it's internal state is
+ * mutated.
+ * @namespace
+ */
+////////////////////////////////////////////////////////////////////////////
+geo.event.camera = {};
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered after a view matrix change.
+ *
+ * @property {geo.camera} camera The camera instance
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.event.camera.view = 'geo_camera_view';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered after a projection change.
+ *
+ * @property {geo.camera} camera The camera instance
+ * @property {string} type The projection type ('perspective'|'parallel')
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.event.camera.projection = 'geo_camera_projection';
