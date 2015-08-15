@@ -17,8 +17,16 @@
    *
    * The camera emits the following events when the view changes:
    *
-   *   * {@link geo.event.camera.view} when the camera's view matrix changes
-   *   * {@link geo.event.camera.projection} when the projection changs
+   *   * {@link geo.event.camera.view} when the camera's view changes for any
+   *        reason including projection type changes
+   *   * {@link geo.event.camera.projection} when the projection type changes
+   *
+   * By convention, protected methods do not update the internal matrix state,
+   * public methods do.  For now, there are two primary methods that are
+   * inteded to be used by external classes to mutate the internal state:
+   *
+   *   * bounds: Set the visible bounds (for initialization and zooming)
+   *   * pan: Translate the camera in x/y by an offset (for panning)
    *
    * @class
    * @extends geo.object
@@ -50,7 +58,7 @@
      * The projection type (one of `this.constructor.projection`)
      * @protected
      */
-    this._projection = spec.projection || 'parallel';
+    this._projection = null;
 
     /**
      * The transform matrix (view * proj)
@@ -65,6 +73,35 @@
     this._inverse = mat4.create();
 
     /**
+     * Set up the projection matrix for the current projection type.
+     * @protected
+     */
+    this._createProj = function () {
+      // call mat4.frustum or mat4.ortho here
+      if (this._projection === 'perspective') {
+        mat4.frustum(
+          this._proj,
+          this.constructor.left,
+          this.constructor.right,
+          this.constructor.bottom,
+          this.constructor.top,
+          this.constructor.near,
+          this.constructor.far
+        );
+      } else if (this._projection === 'parallel') {
+        mat4.ortho(
+          this._proj,
+          this.constructor.left,
+          this.constructor.right,
+          this.constructor.bottom,
+          this.constructor.top,
+          this.constructor.near,
+          this.constructor.far
+        );
+      }
+    };
+
+    /**
      * Update the internal state of the camera on change to camera
      * parameters.
      * @protected
@@ -72,6 +109,9 @@
     this._update = function () {
       mat4.multiply(this._transform, this._view, this._proj);
       mat4.invert(this._inverse, this._transform);
+      this.geoTrigger(geo.event.camera.view, {
+        camera: this
+      });
     };
 
     /**
@@ -85,9 +125,6 @@
       set: function (view) {
         mat4.copy(this._view, view);
         this._update();
-        this.geoTrigger(geo.event.camera.view, {
-          camera: this
-        });
       }
     });
 
@@ -96,7 +133,7 @@
      */
     Object.defineProperty(this, 'projection', {
       get: function () {
-        return this._proj;
+        return this._projection;
       },
       set: function (type) {
         if (!this.constructor.projection[type]) {
@@ -104,6 +141,7 @@
         }
         if (type !== this._projection) {
           this._projection = type;
+          this._createProj();
           this._update();
           this.geoTrigger(geo.event.camera.projection, {
             camera: this,
@@ -115,10 +153,17 @@
 
     /**
      * Getter for the projection matrix (when applicable).
+     * This generally shouldn't be modified directly because
+     * the rest of the code assumes that the clipping bounds
+     * are [-1, -1, -1] to [1, 1, 1] in camera coordinates.
      */
     Object.defineProperty(this, 'projectionMatrix', {
       get: function () {
         return this._proj;
+      },
+      set: function (proj) {
+        this._proj = proj;
+        this._update();
       }
     });
 
@@ -143,36 +188,36 @@
     /**
      * Proxy to `mat4.lookAt` to modify the view matrix by pointing the
      * camera at the given location.
+     * @protected
      * @param {vec3} eye Position of the viewer
      * @param {vec3} center Point the viewer is looking at
      * @param {vec3} up Normal vector pointing up
      * @returns {this} Chainable
      */
-    this.lookAt = function (eye, center, up) {
+    this._lookAt = function (eye, center, up) {
       mat4.lookAt(this._view, eye, center, up);
-      this._update();
     };
 
     /**
      * Uses `mat4.translate` to translate the camera by the given vector amount.
+     * @protected
      * @param {vecs} offset The camera translation vector
      * @returns {this} Chainable
      */
-    this.translate = function (offset) {
+    this._translate = function (offset) {
       // mat4.translate translates the coordinate system, not the camera
       vec3.negate(offset, offset);
       mat4.translate(this._view, this._view, offset);
-      this._update();
     };
 
     /**
      * Uses `mat4.rotateZ` to translate the camera by the given angle around the Z-axis.
+     * @protected
      * @param {Number} angle The angle in radians
      * @returns {this} Chainable
      */
-    this.rotateZ = function (angle) {
+    this._rotateZ = function (angle) {
       mat4.rotateZ(this._view, this._view, -angle);
-      this._update();
     };
 
     /**
@@ -213,7 +258,10 @@
      */
     this.worldToDisplay = function (point, width, height) {
       this._worldToClip4(point);
-      var w = 1 / point[3];
+      var w = 1;
+      if (this._projection === 'perspective') {
+        w = 1 / point[3];
+      }
       point[0] = width * (1 + w * point[0]) / 2.0;
       point[1] = height * (1 - w * point[1]) / 2.0;
       point[2] = (1 + w * point[2]) / 2.0;
@@ -233,7 +281,10 @@
      *   * depth range [0, 1]
      */
     this.displayToWorld = function (point, width, height) {
-      var w = 1 / point[3];
+      var w = 1;
+      if (this._projection === 'perspective') {
+        w = 1 / point[3];
+      }
       point[0] = (2.0 * point[0] / width - 1) * w;
       point[1] = (-2.0 * point[1] / height + 1) * w;
       point[2] = (2.0 * point[2] - 1) * w;
@@ -241,6 +292,63 @@
       this._clipToWorld4(point);
       return point;
     };
+
+    /**
+     * Sets the view matrix to the given world space bounds.
+     *
+     * @param {Object} bounds
+     * @param {Number} bounds.left
+     * @param {Number} bounds.right
+     * @param {Number} bounds.bottom
+     * @param {Number} bounds.top
+     * @param {Number?} bounds.near
+     * @param {Number?} bounds.far
+     *
+     * @note The camera does not know about the viewport size or
+     * aspect ratio.  It is up to the caller to ensure the viewport
+     * has the correct aspect ratio to avoid non-homogenious scaling.
+     *
+     * If not provided, near and far bounds will be set to [-1, 1] by
+     * default.  We will probably want to change this to a unit specific
+     * value initialized by the map when drawing true 3D objects or
+     * tilting the camera.
+     */
+    this.bounds = function (bounds) {
+
+      bounds.near = bounds.near || -1;
+      bounds.far = bounds.far || 1;
+
+      mat4.ortho(
+        this._view,
+        bounds.left,
+        bounds.right,
+        bounds.bottom,
+        bounds.top,
+        bounds.near,
+        bounds.far
+      );
+      this._update();
+    };
+
+    /**
+     * Pans the view matrix by the given amount.
+     *
+     * @param {Object} offset The delta in world space coordinates.
+     * @param {Number} offset.x
+     * @param {Number} offset.y
+     * @param {Number} [offset.z=0]
+     */
+    this.pan = function (offset) {
+      this._translate(vec3.fromValues(
+        offset.x,
+        offset.y,
+        offset.z || 0
+      ));
+      this._update();
+    };
+
+    // set up the projection matrix
+    this.projection = spec.projection || 'parallel';
   };
 
   /**
@@ -249,6 +357,18 @@
   geo.camera.projection = {
     perspective: true,
     parallel: true
+  };
+
+  /**
+   * Camera clipping bounds, probably shouldn't be modified.
+   */
+  geo.camera.bounds = {
+    left: -1,
+    right: 1,
+    bottom: -1,
+    top: 1,
+    near: -1,
+    far: 1
   };
 
   inherit(geo.camera, geo.object);
