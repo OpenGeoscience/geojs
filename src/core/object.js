@@ -86,7 +86,7 @@ geo.object = function () {
   /**
    *  Trigger an event (or events) on this object and call all handlers
    *
-   *  @param {String} event An event from {geo.events}
+   *  @param {String} event An event from {geo.event}
    *  @param {Object} args An optional argument to pass to handlers
    */
   //////////////////////////////////////////////////////////////////////////////
@@ -99,6 +99,10 @@ geo.object = function () {
       });
       return m_this;
     }
+
+    // append the event type to the argument object
+    args = args || {};
+    args.event = event;
 
     if (m_eventHandlers.hasOwnProperty(event)) {
       m_eventHandlers[event].forEach(function (handler) {
