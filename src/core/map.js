@@ -12,8 +12,8 @@
  *  max: (number) - maximum zoom level
  *  width:
  *  height:
- *  parallelProjection: (bool) - true to use parallel projection, false to use
- *      perspective.
+ *  camera: (geo.camera) - if provided it will use the given camera, otherwise
+ *      a new camera will be created for the map.
  *  discreteZoom: (bool) - true to only allow integer zoom levels, false to
  *      allow any zoom level.
  *  autoResize:
@@ -58,13 +58,24 @@ geo.map = function (arg) {
       m_transition = null,
       m_queuedTransition = null,
       m_clock = null,
-      m_parallelProjection = arg.parallelProjection ? true : false,
       m_discreteZoom = arg.discreteZoom ? true : false,
-      m_bounds = {};
+      m_bounds = {},
+      m_camera = arg.camera || geo.camera();
 
   arg.center = geo.util.normalizeCoordinates(arg.center);
   arg.autoResize = arg.autoResize === undefined ? true : arg.autoResize;
   arg.clampBounds = arg.clampBounds === undefined ? true : arg.clampBounds;
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get the camera
+   *
+   * @returns {geo.camera}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.camera = function () {
+    return m_camera;
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
