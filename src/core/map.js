@@ -20,6 +20,9 @@
  *  clampBounds:
  *  interactor:
  *  clock:
+ *  unitsPerPixel: (number) the width of a pixel in GCS coordinates at zoom
+ *      level 0.  For OSM tile sources this is:
+ *        (2 * PI * 6378137) / 256 (meters).
  *
  * Creates a new map inside of the given HTML layer (Typically DIV)
  * @class
@@ -59,11 +62,36 @@ geo.map = function (arg) {
       m_clock = null,
       m_discreteZoom = arg.discreteZoom ? true : false,
       m_bounds = {},
-      m_camera = arg.camera || geo.camera();
+      m_camera = arg.camera || geo.camera(),
+      m_unitsPerPixel = arg.unitsPerPixel || 2 * Math.PI * 6378137 / 256;
 
   arg.center = geo.util.normalizeCoordinates(arg.center);
   arg.autoResize = arg.autoResize === undefined ? true : arg.autoResize;
   arg.clampBounds = arg.clampBounds === undefined ? true : arg.clampBounds;
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/set the number of world space units per display pixel at the given
+   * zoom level.
+   *
+   * @param {Number} [zoom=0] The target zoom level
+   * @param {Number?} unit If present, set the unitsPerPixel otherwise return
+   *   the current value.
+   * @returns {Number|this}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.unitsPerPixel = function (zoom, unit) {
+    zoom = zoom || 0;
+    if (unit) {
+      // get the units at level 0
+      m_unitsPerPixel = Math.pow(2, zoom) * unit;
+
+      // redraw all the things
+      m_this.draw();
+      return m_this;
+    }
+    return Math.pow(2, -zoom) * m_unitsPerPixel;
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
