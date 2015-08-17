@@ -249,12 +249,33 @@ geo.event.camera = {};
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Triggered after a view matrix change.
+ * Triggered after a general view matrix change (any change in the visible
+ * bounds).  This is equivalent to the union of pan and zoom.
  *
  * @property {geo.camera} camera The camera instance
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.event.camera.view = 'geo_camera_view';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered after a pan in the x/y plane (no zoom level change).
+ *
+ * @property {geo.camera} camera The camera instance
+ * @property {Object} delta The translation delta in world coordinates.
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.event.camera.pan = 'geo_camera_pan';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered after a view matrix change that is not a simple pan.  This
+ * includes, but is not limited to, pure zooms.
+ *
+ * @property {geo.camera} camera The camera instance
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.event.camera.zoom = 'geo_camera_zoom';
 
 //////////////////////////////////////////////////////////////////////////////
 /**

@@ -1,6 +1,9 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Create a new instance of mapInteractor
+ * The mapInteractor class is responsible for handling raw events from the
+ * browser and interpreting them as map navigation interactions.  This class
+ * will call the navigation methods on the connected map, which will make
+ * modifications to the camera directly.
  *
  * @class
  * @extends geo.object

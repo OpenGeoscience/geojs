@@ -17,8 +17,12 @@
    *
    * The camera emits the following events when the view changes:
    *
-   *   * {@link geo.event.camera.view} when the camera's view changes for any
-   *        reason including projection type changes
+   *   * {@link geo.event.camera.pan} when the camera is translated in the
+   *       x/y plane
+   *   * {@link geo.event.camera.zoom} when the camera is changed in a way
+   *       that modifies the current zoom level
+   *   * {@link geo.event.camera.view} when the visible bounds change for
+   *       any reason
    *   * {@link geo.event.camera.projection} when the projection type changes
    *
    * By convention, protected methods do not update the internal matrix state,
