@@ -25,15 +25,9 @@ geo.layer = function (arg) {
   //////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       s_exit = this._exit,
-      m_style = arg.style === undefined ? {'visible': true} : arg.style,
       m_id = arg.id === undefined ? geo.layer.newLayerId() : arg.id,
       m_name = '',
       m_map = arg.map === undefined ? null : arg.map,
-      m_isReference = false,
-      m_x = 0,
-      m_y = 0,
-      m_width = 0,
-      m_height = 0,
       m_node = null,
       m_canvas = null,
       m_renderer = null,
@@ -222,20 +216,6 @@ geo.layer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get/Set visibility of the layer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.visible = function (val) {
-    if (val === undefined) {
-      return m_style.visible;
-    }
-    m_style.visible = val;
-    m_this.modified();
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
    * Get/Set map of the layer
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -260,29 +240,6 @@ geo.layer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.canvas = function () {
     return m_canvas;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get viewport of the layer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.viewport = function () {
-    return [m_x, m_y, m_width, m_height];
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get/Set layer as the reference layer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.referenceLayer = function (val) {
-    if (val !== undefined) {
-      m_isReference = val;
-      m_this.modified();
-      return m_this;
-    }
-    return m_isReference;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -407,40 +364,22 @@ geo.layer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Respond to resize event
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._resize = function (x, y, w, h) {
-    m_x = x;
-    m_y = y;
-    m_width = w;
-    m_height = h;
-    m_node.width(w);
-    m_node.height(h);
-
-    m_this.modified();
-    m_this.geoTrigger(geo.event.resize,
-      {x: x, y: y, width: m_width, height: m_height});
-
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Return the width of the layer in pixels
+   * Return the width of the layer in pixels.
+   * **DEPRECIATED: use map.size instead.
    */
   ////////////////////////////////////////////////////////////////////////////
   this.width = function () {
-    return m_width;
+    return m_this.map().width;
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Return the height of the layer in pixels
+   * **DEPRECIATED: use map.size instead.
    */
   ////////////////////////////////////////////////////////////////////////////
   this.height = function () {
-    return m_height;
+    return m_this.map().height;
   };
 
   if (arg.zIndex === undefined) {

@@ -51,7 +51,6 @@ geo.map = function (arg) {
       m_gcs = arg.gcs === undefined ? 'EPSG:4326' : arg.gcs,
       m_center = { x: 0, y: 0 },
       m_zoom = arg.zoom === undefined ? 4 : arg.zoom,
-      m_baseLayer = null,
       m_fileReader = null,
       m_interactor = null,
       m_validZoomRange = { min: 0, max: 16 },
@@ -111,7 +110,7 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.zoom = function (val, direction, ignoreDiscreteZoom) {
-    var base, evt, recenter = false;
+    var evt, recenter = false;
     if (val === undefined) {
       return m_zoom;
     }
@@ -136,18 +135,12 @@ geo.map = function (arg) {
       return m_this;
     }
 
-    base = m_this.baseLayer();
-
     evt = {
       geo: {},
       zoomLevel: val,
       screenPosition: direction,
       eventType: geo.event.zoom
     };
-
-    if (base) {
-      base.geoTrigger(geo.event.zoom, evt, true);
-    }
 
     recenter = evt.center;
     if (!evt.geo.preventDefault) {
@@ -181,8 +174,7 @@ geo.map = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.pan = function (delta, force) {
 
-    var base = m_this.baseLayer(),
-        evt, pt, corner1, corner2;
+    var evt, pt, corner1, corner2;
 
     return;
     if (arg.clampBounds && !force && m_width && m_height) {
@@ -219,12 +211,7 @@ geo.map = function (arg) {
       screenDelta: delta,
       eventType: geo.event.pan
     };
-    // first pan the base layer
-    if (base) {
-      base.geoTrigger(geo.event.pan, evt, true);
-    }
 
-    // If the base renderer says the pan is invalid, then cancel the action.
     if (evt.geo.preventDefault) {
       return;
     }
@@ -234,11 +221,7 @@ geo.map = function (arg) {
     });
     m_this._updateBounds();
 
-    m_this.children().forEach(function (child) {
-      if (child !== base) {
-        child.geoTrigger(geo.event.pan, evt, true);
-      }
-    });
+    // m_this.children().forEach(function (child) {});
 
     m_this.modified();
     return m_this;
@@ -283,35 +266,6 @@ geo.map = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get/Set parallel projection setting of the map
-   *
-   * @returns {Boolean|geo.map}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.parallelProjection = function (val) {
-    if (val === undefined) {
-      return m_parallelProjection;
-    }
-    val = val ? true : false;
-    if (m_parallelProjection !== val) {
-      var base, evt = {
-        eventType: geo.event.parallelprojection,
-        parallelProjection: val
-      };
-
-      m_parallelProjection = val;
-      base = m_this.baseLayer();
-      base.geoTrigger(geo.event.parallelprojection, evt, true);
-      m_this.children().forEach(function (child) {
-        child.geoTrigger(geo.event.parallelprojection, evt, true);
-      });
-      m_this.modified();
-    }
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
    * Add layer to the map
    *
    * @param {geo.layer} layer to be added to the map
@@ -320,29 +274,20 @@ geo.map = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.createLayer = function (layerName, arg) {
     arg = arg || {};
-    arg.parallelProjection = m_parallelProjection;
     var newLayer = geo.createLayer(
       layerName, m_this, arg);
 
     if (newLayer) {
-      newLayer._resize(m_x, m_y, m_width, m_height);
-    } else {
-      return null;
+
+      m_this.addChild(newLayer);
+      m_this.modified();
+
+      m_this.geoTrigger(geo.event.layerAdd, {
+        type: geo.event.layerAdd,
+        target: m_this,
+        layer: newLayer
+      });
     }
-
-    if (newLayer.referenceLayer() || m_this.children().length === 0) {
-      m_this.baseLayer(newLayer);
-    }
-
-    newLayer._resize(m_x, m_y, m_width, m_height); // this call initializes the camera
-    m_this.addChild(newLayer);
-    m_this.modified();
-
-    m_this.geoTrigger(geo.event.layerAdd, {
-      type: geo.event.layerAdd,
-      target: m_this,
-      layer: newLayer
-    });
 
     return newLayer;
   };
@@ -479,45 +424,6 @@ geo.map = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Sets or gets base layer for this map
-   *
-   * @param {geo.layer} baseLayer optional
-   * @returns {geo.map|geo.layer}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.baseLayer = function (baseLayer) {
-    var save;
-    if (baseLayer !== undefined) {
-
-      m_baseLayer = baseLayer;
-
-      // Set the layer as the reference layer
-      m_baseLayer.referenceLayer(true);
-
-      if (arg.center) {
-        // This assumes that the base layer is initially centered at
-        // (0, 0).  May want to add an explicit call to the base layer
-        // to set a given center.
-        m_this.center(arg.center, true);
-      }
-      save = m_zoom;
-      m_zoom = null;
-      m_this.zoom(save);
-
-      m_this._updateBounds();
-
-      // This forces the map into a state with valid bounds
-      // when clamping is on.  The original call to center
-      // is forced to initialize the camera position in the
-      // base layer so no adjustment is done there.
-      m_this.pan({x: 0, y: 0});
-      return m_this;
-    }
-    return m_baseLayer;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
    * Manually force to render map
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -575,23 +481,13 @@ geo.map = function (arg) {
    * Initialize the map
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._init = function (arg) {
-    var i;
+  this._init = function () {
 
     if (m_node === undefined || m_node === null) {
       throw 'Map require DIV node';
     }
 
     m_node.css('position', 'relative');
-    if (arg !== undefined && arg.layers !== undefined) {
-      for (i = 0; i < arg.layers.length; i += 1) {
-        if (i === 0) {
-          m_this.baseLayer(arg.layers[i]);
-        }
-
-        m_this.addLayer(arg.layers[i]);
-      }
-    }
     return m_this;
   };
 
