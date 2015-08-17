@@ -20,7 +20,20 @@ $(function () {
   var ui = map.createLayer('ui');
 
   // Create a legend widget
-  var legend = ui.createWidget('legend');
+  var legend = ui.createWidget('legend', {
+    sticky: true,
+    position: {
+      x: ui.node().width() - 300,
+      y: 20
+    }
+  });
+
+  ui.geoOn(geo.event.pan, function () {
+    legend.reposition({
+      left: ui.node().width() - 300,
+      top: 20
+    });
+  });
 
   // Add rows to the legend
   //
