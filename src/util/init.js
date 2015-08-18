@@ -158,7 +158,12 @@
           0
         )
       };
-    }
+    },
+
+    /**
+     * Radius of the earth in meters.
+     */
+    radiusEarth: 6378137
   };
 
   geo.util.cssColors = {

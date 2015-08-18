@@ -44,7 +44,7 @@
   };
 
   // Compute the circumference of the earth / 2 in meters for osm layer image bounds
-  var cEarth = Math.PI * 6378137;
+  var cEarth = Math.PI * geo.util.radiusEarth;
 
   /**
    * This object contains the default options used to initialize the osmLayer.

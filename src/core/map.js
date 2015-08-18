@@ -1,32 +1,41 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Create a new instance of class map.
- *
- * Creation tags a dictionary of arguments, which can include:
- *  center: {x: (center x value), y: (center y value)}
- *  gcs:
- *  node:
- *  layers:
- *  zoom: (number) - initial zoom level
- *  min: (number) - minimum zoom level
- *  max: (number) - maximum zoom level
- *  width:
- *  height:
- *  camera: (geo.camera) - if provided it will use the given camera, otherwise
- *      a new camera will be created for the map.
- *  discreteZoom: (bool) - true to only allow integer zoom levels, false to
- *      allow any zoom level.
- *  autoResize:
- *  clampBounds:
- *  interactor:
- *  clock:
- *  unitsPerPixel: (number) the width of a pixel in GCS coordinates at zoom
- *      level 0.  For OSM tile sources this is:
- *        (2 * PI * 6378137) / 256 (meters).
- *
- * Creates a new map inside of the given HTML layer (Typically DIV)
+ * Creates a new map object
  * @class
  * @extends geo.sceneObject
+ *
+ * *** Always required ***
+ * @param {string} node DOM selector for the map container
+ *
+ * *** Required when using a domain/CS different from OSM ***
+ * @param {string|geo.transform} [gcs='EPSG:3857']
+ *   The main coordinate system of the map
+ * @param {number} [minZoom=0] The minimum zoom level
+ * @param {number} [maxZoom=16] The maximum zoom level (precision issues
+ *   exist in GL for values larger than 16)
+ * @param {number} [unitsPerPixel=156543] GCS to pixel unit scaling at zoom 0
+ *   (i.e. meters per pixel or degrees per pixel).
+ * @param {object?} maxBounds The maximum visable map bounds
+ * @param {number} [maxBounds.left=-20037508] The left bound
+ * @param {number} [maxBounds.right=20037508] The right bound
+ * @param {number} [maxBounds.bottom=-20037508] The bottom bound
+ * @param {number} [maxBounds.top=20037508] The top bound
+ *
+ * *** Initial view ***
+ * @param {number} [zoom=4] Initial zoom
+ * @param {object?} center Map center
+ * @param {number} [center.x=0]
+ * @param {number} [center.y=0]
+ * @param {number?} width The map width (default node width)
+ * @param {number?} height The map height (default node height)
+ *
+ * *** Advanced parameters ***
+ * @param {geo.camera?} camera The camera to control the view
+ * @param {geo.mapInteractor?} interactor The UI event handler
+ * @param {geo.clock?} clock The clock used to syncronize time events
+ * @param {boolean} [clampBounds=true] Prevent panning outside of the
+ *   maximum bounds
+ *
  * @returns {geo.map}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -46,6 +55,8 @@ geo.map = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       s_exit = this._exit,
+      // See https://en.wikipedia.org/wiki/Web_Mercator
+      phiMax = 180 / Math.PI * (2 * Math.atan(Math.exp(Math.PI)) - Math.PI / 2),
       m_x = 0,
       m_y = 0,
       m_node = $(arg.node),
@@ -56,14 +67,21 @@ geo.map = function (arg) {
       m_zoom = arg.zoom === undefined ? 4 : arg.zoom,
       m_fileReader = null,
       m_interactor = null,
-      m_validZoomRange = { min: 0, max: 16 },
+      m_validZoomRange = { minZoom: 0, maxZoom: 16 },
       m_transition = null,
       m_queuedTransition = null,
       m_clock = null,
       m_discreteZoom = arg.discreteZoom ? true : false,
       m_bounds = {},
+      m_maxBounds = {
+        left: -phiMax, right: phiMax,
+        bottom: -phiMax, top: phiMax
+      },
       m_camera = arg.camera || geo.camera(),
-      m_unitsPerPixel = arg.unitsPerPixel || 2 * Math.PI * 6378137 / 256;
+      m_unitsPerPixel = (
+        arg.unitsPerPixel ||
+        2 * Math.PI * geo.util.radiusEarth / 256
+      );
 
   arg.center = geo.util.normalizeCoordinates(arg.center);
   arg.autoResize = arg.autoResize === undefined ? true : arg.autoResize;
