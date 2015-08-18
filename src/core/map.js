@@ -10,7 +10,6 @@
  * *** Required when using a domain/CS different from OSM ***
  * @param {string|geo.transform} [gcs='EPSG:3857']
  *   The main coordinate system of the map
- * @param {number} [minZoom=0] The minimum zoom level
  * @param {number} [maxZoom=16] The maximum zoom level (precision issues
  *   exist in GL for values larger than 16)
  * @param {number} [unitsPerPixel=156543] GCS to pixel unit scaling at zoom 0
@@ -60,14 +59,14 @@ geo.map = function (arg) {
       m_x = 0,
       m_y = 0,
       m_node = $(arg.node),
-      m_width = arg.width || m_node.width(),
-      m_height = arg.height || m_node.height(),
+      m_width = arg.width || m_node.width() || 512,
+      m_height = arg.height || m_node.height() || 512,
       m_gcs = arg.gcs === undefined ? 'EPSG:4326' : arg.gcs,
       m_center = { x: 0, y: 0 },
       m_zoom = arg.zoom === undefined ? 4 : arg.zoom,
       m_fileReader = null,
       m_interactor = null,
-      m_validZoomRange = { minZoom: 0, maxZoom: 16 },
+      m_validZoomRange = { min: null, max: 16 },
       m_transition = null,
       m_queuedTransition = null,
       m_clock = null,
@@ -889,14 +888,10 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.zoomAndCenterFromBounds = function (bds) {
-    var ll, ur, dx, dy, zx, zy, center, zoom;
-
-    // Caveat:
-    // Much of the following is invalid for alternative map projections.  These
-    // computations should really be defered to the base layer, but there is
-    // no clear path for doing that with the current base layer api.
+    var ll, ur, center, zoom, bounds;
 
     // extract bounds info and check for validity
+    // also handle GIS projection conversions
     ll = geo.util.normalizeCoordinates(bds.lowerLeft || {});
     ur = geo.util.normalizeCoordinates(bds.upperRight || {});
 
@@ -904,19 +899,21 @@ geo.map = function (arg) {
       throw new Error('Invalid bounds provided');
     }
 
+    bounds = {
+      left: ll.x,
+      right: ur.x,
+      bottom: ll.y,
+      top: ur.y
+    };
+
     center = {
       x: (ll.x + ur.x) / 2,
       y: (ll.y + ur.y) / 2
     };
 
-    // calculate the current extend
-    dx = m_bounds.upperRight.x - m_bounds.lowerLeft.x;
-    dy = m_bounds.upperRight.y - m_bounds.lowerLeft.y;
+    // calculate the zoom to fit the bounds
+    zoom = calculate_zoom(bounds);
 
-    // calculate the zoom levels necessary to fit x and y bounds
-    zx = m_zoom - Math.log2((ur.x - ll.x) / dx);
-    zy = m_zoom - Math.log2((ur.y - ll.y) / dy);
-    zoom = Math.min(zx, zy);
     if (m_discreteZoom) {
       zoom = Math.floor(zoom);
     }
@@ -1014,6 +1011,128 @@ geo.map = function (arg) {
     $a.appendTo(m_this.node());
     return m_this;
   };
+
+  ////////////////////////////////////////////////////////////////////////////
+  //
+  // The following are some private methods for interacting with the camera.
+  // In order to hide the complexity of dealing with map aspect ratios,
+  // clamping behavior, reseting zoom levels on resize, etc. from the
+  // layers, the map handles camera movements directly.  This requires
+  // passing all camera movement events through the map initially.  The
+  // map uses these methods to fix up the events according to the constraints
+  // of the display and passes the event to the layers.
+  //
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Calculate the scaling factor to fit the given map bounds
+   * into the viewport with the correct aspect ratio.
+   * @param {object} bounds A desired bounds
+   * @return {object} Multiplicative aspect ratio correction
+   * @private
+   */
+  function camera_scaling(bounds) {
+    var width = bounds.right - bounds.left,
+        height = bounds.top - bounds.bottom,
+        ar_bds = Math.abs(width / height),
+        ar_vp = m_width / m_height,
+        sclx, scly;
+
+    if (ar_bds > ar_vp) {
+      // fit left and right
+      sclx = 1;
+
+      // grow top and bottom
+      scly = ar_bds / ar_vp;
+    } else {
+      // fit top and bottom
+      scly = 1;
+
+      // grow left and right
+      sclx = ar_vp / ar_bds;
+    }
+    return {x: sclx, y: scly}
+  }
+
+  /**
+   * Calculate the minimum zoom level to fit the given
+   * bounds inside the view port using the view port size,
+   * the given bounds, and the number of units per
+   * pixel.  The method sets the valid zoom bounds as well
+   * as the current zoom level to be within that range.
+   * @private
+   */
+  function calculate_zoom(bounds) {
+    // compare the aspect ratios of the viewport and bounds
+    var scl = camera_scaling(), z;
+
+    if (scl.y > scl.x) {
+      // left to right matches exactly
+      // center map vertically and have blank borders on the
+      // top and bottom (or repeat tiles)
+      z = Math.log2(
+        Math.abs(bounds.right - bounds.left) * scl.x /
+        (m_width * m_unitsPerPixel)
+      );
+    } else {
+      // top to bottom matches exactly, blank border on the
+      // left and right (or repeat tiles)
+      z = Math.log2(
+        Math.abs(bounds.top - bounds.bottom) * scl.y /
+        (m_height * m_unitsPerPixel)
+      );
+    }
+
+  /**
+   * Uses the calculate_zoom method on the maximum bounds to
+   * generate the minimum possible zoom for the current viewport.
+   * @private
+   */
+  function fix_zoom() {
+    m_validZoomRange.min = calculate_zoom(m_maxBounds);
+    m_zoom = Math.max(
+      Math.min(
+        m_validZoomRange.max,
+        m_zoom
+      ),
+      m_validZoomRange.min
+    );
+  }
+
+  /**
+   * Call the camera bounds method with the given bounds, but
+   * correct for the viewport aspect ratio.
+   * @private
+   */
+  function camera_bounds(bounds) {
+    var scl = camera_scaling(),
+        width = (bounds.right - bounds.left),
+        height = (bounds.top - bounds.bottom),
+        centerx = (bounds.left + bounds.right) / 2,
+        centery = (bounds.top + bounds.bottom) / 2,
+        bds = {
+          left: centerx - width * scl.x,
+          right: centerx + width * scl.x,
+          bottom: centery - height * scl.y,
+          top: centery + height * scl.y
+      };
+    m_camera.bounds(bds);
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  //
+  // All the methods are now defined.  From here, we are initializing all
+  // internal variables and event handlers.
+  //
+  ////////////////////////////////////////////////////////////////////////////
+
+  // Fix the zoom level (minimum and initial)
+  fix_zoom();
+
+  // Initialize the camera to show the maximum available bounds
+  camera_bounds(m_maxBounds);
+
+  // Now update to the correct center and zoom level
+
 
   this.interactor(arg.interactor || geo.mapInteractor());
   this.clock(arg.clock || geo.clock());
