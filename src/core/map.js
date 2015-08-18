@@ -56,35 +56,38 @@ geo.map = function (arg) {
       s_exit = this._exit,
       // See https://en.wikipedia.org/wiki/Web_Mercator
       phiMax = 180 / Math.PI * (2 * Math.atan(Math.exp(Math.PI)) - Math.PI / 2),
+      merc = geo.transform().source('EPSG:4326').target('EPSG:3857'),
       m_x = 0,
       m_y = 0,
       m_node = $(arg.node),
       m_width = arg.width || m_node.width() || 512,
       m_height = arg.height || m_node.height() || 512,
-      m_gcs = arg.gcs === undefined ? 'EPSG:4326' : arg.gcs,
+      m_gcs = arg.gcs === undefined ? 'EPSG:3857' : arg.gcs,
       m_center = { x: 0, y: 0 },
       m_zoom = arg.zoom === undefined ? 4 : arg.zoom,
       m_fileReader = null,
       m_interactor = null,
-      m_validZoomRange = { min: null, max: 16 },
+      m_validZoomRange = { min: 0, max: 16 },
       m_transition = null,
       m_queuedTransition = null,
       m_clock = null,
       m_discreteZoom = arg.discreteZoom ? true : false,
-      m_bounds = {},
       m_maxBounds = {
-        left: -phiMax, right: phiMax,
-        bottom: -phiMax, top: phiMax
+        left: merc.forward({x: -phiMax, y: 0}).x,
+        right: merc.forward({x: phiMax, y: 0}).x,
+        bottom: merc.forward({x: 0, y: -phiMax}).y,
+        top: merc.forward({x: 0, y: phiMax}).y
       },
       m_camera = arg.camera || geo.camera(),
       m_unitsPerPixel = (
         arg.unitsPerPixel ||
         2 * Math.PI * geo.util.radiusEarth / 256
-      );
+      ),
+      m_clampBounds;
 
   arg.center = geo.util.normalizeCoordinates(arg.center);
   arg.autoResize = arg.autoResize === undefined ? true : arg.autoResize;
-  arg.clampBounds = arg.clampBounds === undefined ? true : arg.clampBounds;
+  m_clampBounds = arg.clampBounds === undefined ? true : arg.clampBounds;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -154,28 +157,13 @@ geo.map = function (arg) {
    * @returns {Number|geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.zoom = function (val, direction, ignoreDiscreteZoom) {
+  this.zoom = function (val, direction) {
     var evt, recenter = false;
     if (val === undefined) {
       return m_zoom;
     }
 
-    /* The ignoreDiscreteZoom flag is intended to allow non-integer zoom values
-     * during animation. */
-    if (m_discreteZoom && val !== Math.round(val) && !ignoreDiscreteZoom) {
-      /* If we are using discrete zoom levels and the value we were given is
-       * not an integer, then try to detect if we are enlarging or shrinking
-       * and perform the expected behavior.  Otherwise, make sure we are at an
-       * integer level.  We may need to revisit for touch zoom events. */
-      if (m_zoom !== Math.round(m_zoom) || Math.abs(val - m_zoom) < 0.01) {
-        val = Math.round(m_zoom);
-      } else if (val < m_zoom) {
-        val = Math.min(Math.round(val), m_zoom - 1);
-      } else if (val > m_zoom) {
-        val = Math.max(Math.round(val), m_zoom + 1);
-      }
-    }
-    val = Math.min(m_validZoomRange.max, Math.max(val, m_validZoomRange.min));
+    val = fix_zoom(val);
     if (val === m_zoom) {
       return m_this;
     }
@@ -188,10 +176,9 @@ geo.map = function (arg) {
     };
 
     recenter = evt.center;
-    if (!evt.geo.preventDefault) {
+    if (false) {
 
       m_zoom = val;
-      m_this._updateBounds();
 
       m_this.children().forEach(function (child) {
         child.geoTrigger(geo.event.zoom, evt, true);
@@ -213,60 +200,24 @@ geo.map = function (arg) {
    * Pan the map by (x: dx, y: dy) pixels.
    *
    * @param {Object} delta
-   * @param {bool?} force Disable bounds clamping
    * @returns {geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.pan = function (delta, force) {
-
-    var evt, pt, corner1, corner2;
-
+  this.pan = function (delta) {
     return;
-    if (arg.clampBounds && !force && m_width && m_height) {
-      pt = m_this.displayToGcs({
-        x: delta.x,
-        y: delta.y
-      });
-
-      corner1 = m_this.gcsToDisplay({
-        x: -180,
-        y: 82
-      });
-      corner2 = m_this.gcsToDisplay({
-        x: 180,
-        y: -82
-      });
-
-      if (corner1.x > 0 && corner2.x < m_width) {
-        // if the map is too small horizontally
-        delta.x = (-corner1.x + m_width - corner2.x) / 2;
-      } else {
-        delta.x = Math.max(Math.min(delta.x, -corner1.x), m_width - corner2.x);
-      }
-      if (corner1.y > 0 && corner2.y < m_height) {
-        // if the map is too small horizontally
-        delta.y = (-corner1.y + m_height - corner2.y) / 2;
-      } else {
-        delta.y = Math.max(Math.min(delta.y, -corner1.y), m_height - corner2.y);
-      }
-    }
-
-    evt = {
+    // TODO: FIX THIS
+    var evt = {
       geo: {},
       screenDelta: delta,
       eventType: geo.event.pan
     };
 
-    if (evt.geo.preventDefault) {
-      return;
-    }
     m_center = m_this.displayToGcs({
       x: m_width / 2,
       y: m_height / 2
     });
-    m_this._updateBounds();
 
-    // m_this.children().forEach(function (child) {});
+    m_this.geoTrigger(geo.event.pan, evt);
 
     m_this.modified();
     return m_this;
@@ -281,21 +232,13 @@ geo.map = function (arg) {
    * @returns {Object|geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.center = function (coordinates/*, force */) {
-    var newCenter, currentCenter;
-
+  this.center = function (coordinates) {
     if (coordinates === undefined) {
       return m_center;
     }
 
-    // UGH... deal with this later
-
     // get the screen coordinates of the new center
-    coordinates = geo.util.normalizeCoordinates(coordinates);
-    newCenter = m_this.gcsToDisplay(coordinates);
-    currentCenter = m_this.gcsToDisplay(m_center);
-
-    m_center = coordinates;
+    m_center = geo.util.normalizeCoordinates(coordinates);
 
     // trigger a pan event
     m_this.geoTrigger(
@@ -441,7 +384,6 @@ geo.map = function (arg) {
       height: h
     });
 
-    m_this._updateBounds();
     m_this.pan({x: 0, y: 0});
     m_this.modified();
 
@@ -649,8 +591,11 @@ geo.map = function (arg) {
     if (arg === undefined) {
       return $.extend({}, m_validZoomRange);
     }
-    m_validZoomRange.min = arg.min;
     m_validZoomRange.max = arg.max;
+
+    // don't allow the minimum zoom to go below what will
+    // fit in the view port
+    m_validZoomRange.min = fix_zoom(arg.min);
     return m_this;
   };
 
@@ -831,31 +776,6 @@ geo.map = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Update the internally cached map bounds.
-   * @private
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._updateBounds = function () {
-    m_bounds.lowerLeft = m_this.displayToGcs({
-      x: 0,
-      y: m_height
-    });
-    m_bounds.lowerRight = m_this.displayToGcs({
-      x: m_width,
-      y: m_height
-    });
-    m_bounds.upperLeft = m_this.displayToGcs({
-      x: 0,
-      y: 0
-    });
-    m_bounds.upperRight = m_this.displayToGcs({
-      x: m_width,
-      y: 0
-    });
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
    * Get/set the locations of the current map corners as latitudes/longitudes.
    * When provided the argument should be an object containing the keys
    * lowerLeft and upperRight declaring the desired new map bounds.  The
@@ -869,14 +789,15 @@ geo.map = function (arg) {
   this.bounds = function (bds) {
     var nav;
 
-    if (bds === undefined) {
-      return m_bounds;
+    if (bds !== undefined) {
+      bds = fix_bounds(bds);
+      nav = m_this.zoomAndCenterFromBounds(bds);
+      m_zoom = nav.zoom;
+      m_center = nav.center;
+      camera_bounds(bds);
     }
 
-    nav = m_this.zoomAndCenterFromBounds(bds);
-    m_this.zoom(nav.zoom);
-    m_this.center(nav.center);
-    return m_bounds;
+    return m_this.boundsFromZoomAndCenter(m_zoom, m_center);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -887,41 +808,63 @@ geo.map = function (arg) {
    * @return {object} Object containing keys 'center' and 'zoom'
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.zoomAndCenterFromBounds = function (bds) {
-    var ll, ur, center, zoom, bounds;
+  this.zoomAndCenterFromBounds = function (bounds) {
+    var center, zoom;
 
-    // extract bounds info and check for validity
-    // also handle GIS projection conversions
-    ll = geo.util.normalizeCoordinates(bds.lowerLeft || {});
-    ur = geo.util.normalizeCoordinates(bds.upperRight || {});
-
-    if (ll.x >= ur.x || ll.y >= ur.y) {
+    if (bounds.left >= bounds.right || bounds.bottom >= bounds.top) {
       throw new Error('Invalid bounds provided');
     }
 
-    bounds = {
-      left: ll.x,
-      right: ur.x,
-      bottom: ll.y,
-      top: ur.y
-    };
+    bounds = fix_bounds($.extend({}, bounds));
 
     center = {
-      x: (ll.x + ur.x) / 2,
-      y: (ll.y + ur.y) / 2
+      x: (bounds.left + bounds.right) / 2,
+      y: (bounds.top + bounds.bottom) / 2
     };
 
     // calculate the zoom to fit the bounds
-    zoom = calculate_zoom(bounds);
-
-    if (m_discreteZoom) {
-      zoom = Math.floor(zoom);
-    }
+    zoom = fix_zoom(calculate_zoom(bounds));
 
     return {
       zoom: zoom,
       center: center
     };
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get the bounds that will be displayed with the given zoom and center.
+   *
+   * Note: the bounds may not have the requested zoom and center due to map
+   * restrictions.
+   *
+   * @param {number} zoom The requested zoom level
+   * @param {geo.geoPosition} center The requested center
+   * @return {geo.geoBounds}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.boundsFromZoomAndCenter = function (zoom, center) {
+    var width, height, bounds, units;
+
+    // preprocess the arguments
+    zoom = fix_zoom(zoom);
+    units = m_this.unitsPerPixel(zoom);
+    center = geo.util.normalizeCoordinates(center);
+
+    // get half the width and height in world coordinates
+    width = m_width * units / 2;
+    height = m_height * units / 2;
+
+    // calculate the bounds
+    bounds = {
+      left: center.x - width,
+      right: center.x + width,
+      bottom: center.y - height,
+      top: center.y + height
+    };
+
+    // correct the bounds when clamping is enabled
+    return fix_bounds(bounds);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -1050,7 +993,7 @@ geo.map = function (arg) {
       // grow left and right
       sclx = ar_vp / ar_bds;
     }
-    return {x: sclx, y: scly}
+    return {x: sclx, y: scly};
   }
 
   /**
@@ -1063,39 +1006,77 @@ geo.map = function (arg) {
    */
   function calculate_zoom(bounds) {
     // compare the aspect ratios of the viewport and bounds
-    var scl = camera_scaling(), z;
+    var scl = camera_scaling(bounds), z;
 
     if (scl.y > scl.x) {
       // left to right matches exactly
       // center map vertically and have blank borders on the
       // top and bottom (or repeat tiles)
-      z = Math.log2(
+      z = -Math.log2(
         Math.abs(bounds.right - bounds.left) * scl.x /
         (m_width * m_unitsPerPixel)
       );
     } else {
       // top to bottom matches exactly, blank border on the
       // left and right (or repeat tiles)
-      z = Math.log2(
+      z = -Math.log2(
         Math.abs(bounds.top - bounds.bottom) * scl.y /
         (m_height * m_unitsPerPixel)
       );
     }
+    return z;
+  }
 
   /**
-   * Uses the calculate_zoom method on the maximum bounds to
-   * generate the minimum possible zoom for the current viewport.
+   * Return the nearest valid zoom level to the requested zoom.
    * @private
    */
-  function fix_zoom() {
-    m_validZoomRange.min = calculate_zoom(m_maxBounds);
-    m_zoom = Math.max(
+  function fix_zoom(zoom) {
+    zoom = Math.max(
       Math.min(
         m_validZoomRange.max,
-        m_zoom
+        zoom
       ),
       m_validZoomRange.min
     );
+    if (m_discreteZoom) {
+      zoom = Math.round(zoom);
+    }
+    return zoom;
+  }
+
+  /**
+   * Return the nearest valid bounds maintaining the
+   * width and height. Does nothing if m_clampBounds is
+   * false.  The bounds this method receives are assumed
+   * to fit within the viewport so only a translation
+   * is necessary.
+   * @private
+   */
+  function fix_bounds(bounds) {
+    var dx = 0, dy = 0;
+    if (!m_clampBounds) {
+      return bounds;
+    }
+
+    // get the amount to translate the bounds
+    if (bounds.left < m_maxBounds.left) {
+      dx = m_maxBounds.left - bounds.left; // move right
+    } else if (bounds.right > m_maxBounds.right) {
+      dx = m_maxBounds.right - bounds.right; // move left
+    }
+    if (bounds.bottom < m_maxBounds.bottom) {
+      dy = m_maxBounds.bottom - bounds.bottom; // move up
+    } else if (bounds.top > m_maxBounds.top) {
+      dx = m_maxBounds.top - bounds.top; // move down
+    }
+
+    return {
+      left: bounds.left + dx,
+      right: bounds.right + dx,
+      bottom: bounds.bottom + dy,
+      top: bounds.top + dy
+    };
   }
 
   /**
@@ -1104,7 +1085,7 @@ geo.map = function (arg) {
    * @private
    */
   function camera_bounds(bounds) {
-    var scl = camera_scaling(),
+    var scl = camera_scaling(bounds),
         width = (bounds.right - bounds.left),
         height = (bounds.top - bounds.bottom),
         centerx = (bounds.left + bounds.right) / 2,
@@ -1114,7 +1095,7 @@ geo.map = function (arg) {
           right: centerx + width * scl.x,
           bottom: centery - height * scl.y,
           top: centery + height * scl.y
-      };
+        };
     m_camera.bounds(bds);
   }
 
@@ -1126,13 +1107,14 @@ geo.map = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
 
   // Fix the zoom level (minimum and initial)
-  fix_zoom();
+  m_validZoomRange.min = this.zoomAndCenterFromBounds(m_maxBounds).zoom;
+  m_zoom = m_validZoomRange.min;
+  m_center = this.zoomAndCenterFromBounds(m_maxBounds).center;
 
   // Initialize the camera to show the maximum available bounds
   camera_bounds(m_maxBounds);
 
   // Now update to the correct center and zoom level
-
 
   this.interactor(arg.interactor || geo.mapInteractor());
   this.clock(arg.clock || geo.clock());
