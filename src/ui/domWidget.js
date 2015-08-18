@@ -16,10 +16,7 @@ geo.gui.domWidget = function (arg) {
    * appends it to it's parent and handles any positioning logic.
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._init = function (arg) {
-    arg = m_this.parseArgs(arg);
-    m_this.args = arg;
-
+  this._init = function () {
     if (arg.hasOwnProperty('parent')) {
       arg.parent.addChild(m_this);
     }
@@ -31,7 +28,7 @@ geo.gui.domWidget = function (arg) {
       e.stopPropagation();
     });
 
-    this.reposition();
+    m_this.reposition();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -41,7 +38,7 @@ geo.gui.domWidget = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._createCanvas = function () {
-    m_this.canvas(document.createElement(m_this.args.el || m_default_canvas));
+    m_this.canvas(document.createElement(arg.el || m_default_canvas));
   };
 
   return this;

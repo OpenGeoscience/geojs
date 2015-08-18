@@ -89,12 +89,10 @@ geo.gui.sliderWidget = function (arg) {
  */
 //////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
-    arg = m_this.parseArgs(arg);
-    m_this.args = arg;
     s_createCanvas();
     s_appendChild();
 
-    this.reposition();
+    m_this.reposition();
 
     var svg = d3.select(m_this.canvas()),
         x0 = 40,

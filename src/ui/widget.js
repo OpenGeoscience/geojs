@@ -19,28 +19,12 @@ geo.gui.widget = function (arg) {
       m_layer = arg.layer,
       m_canvas = null;
 
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Parses the arguments a widget can take, merges them with the defaults and
-   * then validates the resulting arguments.
-   * @param {object} args
-   * @returns {object} The arguments as a result of adding defaults and validating
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.parseArgs = function (args) {
-    var defaults = {
-      sticky: false,
-      positionType: 'viewport'
-    };
+  arg.positionType = arg.positionType === undefined ? 'viewport' : arg.positionType;
+  arg.sticky = arg.sticky === undefined ? false : true;
 
-    args = $.extend({}, defaults, args || {});
-
-    if ('parent' in args && !(args.parent instanceof geo.gui.widget)) {
-      throw 'Parent must be of type geo.gui.widget';
-    }
-
-    return args;
-  };
+  if (arg.parent !== undefined && !(arg.parent instanceof geo.gui.widget)) {
+    throw 'Parent must be of type geo.gui.widget';
+  }
 
   this._init = function () {
     m_this.modified();
@@ -132,10 +116,10 @@ geo.gui.widget = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.parentCanvas = function () {
-    if (this.parent === undefined) {
-      return this.layer().canvas();
+    if (m_this.parent === undefined) {
+      return m_this.layer().canvas();
     } else {
-      return this.parent().canvas();
+      return m_this.parent().canvas();
     }
   };
 
@@ -149,13 +133,13 @@ geo.gui.widget = function (arg) {
   this.position = function () {
     var position;
 
-    if (m_this.args &&
-        m_this.args.hasOwnProperty('position')) {
-      position = m_this.args.position;
+    if (arg &&
+        arg.hasOwnProperty('position')) {
+      position = arg.position;
 
-      if (m_this.args.hasOwnProperty('positionType') &&
-          m_this.args.positionType === 'gcs') {
-        position = m_this.layer().map().gcsToDisplay(m_this.args.position);
+      if (arg.hasOwnProperty('positionType') &&
+          arg.positionType === 'gcs') {
+        position = m_this.layer().map().gcsToDisplay(arg.position);
       }
 
       return {

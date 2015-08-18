@@ -217,8 +217,6 @@ geo.gui.legendWidget = function (arg) {
     // adding categories redraws the entire thing by calling _init, see
     // the m_top.remove() line below
     if (!m_top) {
-      arg = m_this.parseArgs(arg);
-      m_this.args = arg;
       s_createCanvas();
       s_appendChild();
     }
@@ -265,11 +263,11 @@ geo.gui.legendWidget = function (arg) {
         .style('fill-opacity', 0.75);
     });
 
-    this.reposition();
+    m_this.reposition();
   };
 
   this.geoOn(geo.event.resize, function () {
-    this.draw();
+    m_this.draw();
   });
 
 };

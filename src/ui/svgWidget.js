@@ -29,9 +29,6 @@ geo.gui.svgWidget = function (arg) {
 
   this._init = function (arg) {
     var d3Parent;
-    arg = m_this.parseArgs(arg);
-    m_this.args = arg;
-
     if (arg.hasOwnProperty('parent')) {
       arg.parent.addChild(m_this);
 
@@ -45,7 +42,7 @@ geo.gui.svgWidget = function (arg) {
       e.stopPropagation();
     });
 
-    this.reposition();
+    m_this.reposition();
   };
 
   ////////////////////////////////////////////////////////////////////////////
