@@ -168,6 +168,7 @@ geo.map = function (arg) {
       return m_this;
     }
 
+    m_zoom = val;
     evt = {
       geo: {},
       zoomLevel: val,
@@ -175,23 +176,14 @@ geo.map = function (arg) {
       eventType: geo.event.zoom
     };
 
-    recenter = evt.center;
-    if (false) {
-
-      m_zoom = val;
-
-      m_this.children().forEach(function (child) {
-        child.geoTrigger(geo.event.zoom, evt, true);
-      });
-
-      m_this.modified();
-    }
+    m_this.geoTrigger(geo.event.zoom, evt);
 
     if (evt.center) {
       m_this.center(recenter);
     } else {
       m_this.pan({x: 0, y: 0});
     }
+    m_this.modified();
     return m_this;
   };
 
@@ -204,7 +196,6 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.pan = function (delta) {
-    return;
     // TODO: FIX THIS
     var evt = {
       geo: {},
@@ -268,6 +259,7 @@ geo.map = function (arg) {
     if (newLayer) {
 
       m_this.addChild(newLayer);
+      newLayer._update();
       m_this.modified();
 
       m_this.geoTrigger(geo.event.layerAdd, {
@@ -364,16 +356,14 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.resize = function (x, y, w, h) {
-    var i, layers = m_this.children();
+    var bounds = m_this.bounds();
 
     m_x = x;
     m_y  = y;
     m_width = w;
     m_height = h;
 
-    for (i = 0; i < layers.length; i += 1) {
-      layers[i]._resize(x, y, w, h);
-    }
+    m_this.bounds(bounds);
 
     m_this.geoTrigger(geo.event.resize, {
       type: geo.event.resize,
@@ -384,9 +374,7 @@ geo.map = function (arg) {
       height: h
     });
 
-    m_this.pan({x: 0, y: 0});
     m_this.modified();
-
     return m_this;
   };
 
