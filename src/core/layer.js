@@ -391,6 +391,8 @@ geo.layer = function (arg) {
   m_node = $(document.createElement('div'));
   m_node.attr('id', m_name);
   m_node.css('position', 'absolute');
+  m_node.css('width', '100%');
+  m_node.css('height', '100%');
 
   // set the z-index
   m_this.zIndex(m_zIndex);

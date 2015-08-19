@@ -590,7 +590,8 @@
      * @returns {this} Chainable
      */
     this._update = function () {
-      var zoom = Math.floor(this.map().zoom()),
+      var mapZoom = this.map().zoom(),
+          zoom = Math.floor(mapZoom),
           center = this.toLevel(this.toLocal(this.map().center()), zoom),
           size = this.map().size(),
           tiles;
@@ -599,11 +600,16 @@
 
       // Update the transform for the local layer coordinates
       this.canvas().css(
+        'transform-origin',
+        'center center'
+      );
+
+      this.canvas().css(
         'transform',
-        'translate(' +
-          (size.width / 2 - center.x) + 'px,' +
-          (size.height / 2 - center.y) + 'px' +
-        ')'
+        'scale(' + Math.pow(2, mapZoom - zoom).toFixed(20) +
+        ') translate(' +
+          (size.width / 2 - center.x).toFixed(20) + 'px,' +
+          (size.height / 2 - center.y).toFixed(20) + 'px' + ')'
       );
 
 

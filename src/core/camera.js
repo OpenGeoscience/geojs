@@ -156,6 +156,37 @@
     });
 
     /**
+     * The css transform describing the current camera.
+     */
+    Object.defineProperty(this, 'css', {
+      get: function () {
+        var t = this.transform;
+        return (
+          'matrix3d(' +
+          [
+            t[0].toFixed(20),
+            t[1].toFixed(20),
+            t[2].toFixed(20),
+            t[3].toFixed(20),
+            t[4].toFixed(20),
+            t[5].toFixed(20),
+            t[6].toFixed(20),
+            t[7].toFixed(20),
+            t[8].toFixed(20),
+            t[9].toFixed(20),
+            t[10].toFixed(20),
+            t[11].toFixed(20),
+            t[12].toFixed(20),
+            t[13].toFixed(20),
+            t[14].toFixed(20),
+            t[15].toFixed(20)
+          ].join(',') +
+          ')'
+        );
+      }
+    });
+
+    /**
      * Getter for the projection matrix (when applicable).
      * This generally shouldn't be modified directly because
      * the rest of the code assumes that the clipping bounds
