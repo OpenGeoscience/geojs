@@ -364,14 +364,12 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.resize = function (x, y, w, h) {
-    var bounds = m_this.bounds();
-
     m_x = x;
     m_y  = y;
     m_width = w;
     m_height = h;
 
-    m_this.bounds(bounds);
+    reset_minimum_zoom();
 
     m_this.geoTrigger(geo.event.resize, {
       type: geo.event.resize,
@@ -811,15 +809,18 @@ geo.map = function (arg) {
       throw new Error('Invalid bounds provided');
     }
 
-    bounds = fix_bounds($.extend({}, bounds));
+    // calculate the zoom to fit the bounds
+    zoom = fix_zoom(calculate_zoom(bounds));
 
+    // clamp bounds if necessary
+    bounds = fix_bounds(bounds);
+
+    // calculate new center
     center = {
       x: (bounds.left + bounds.right) / 2,
       y: (bounds.top + bounds.bottom) / 2
     };
 
-    // calculate the zoom to fit the bounds
-    zoom = fix_zoom(calculate_zoom(bounds));
 
     return {
       zoom: zoom,
@@ -1024,6 +1025,14 @@ geo.map = function (arg) {
   }
 
   /**
+   * Reset the minimum zoom level given the current window size.
+   * @private
+   */
+  function reset_minimum_zoom() {
+    m_validZoomRange.min = Math.max(0, calculate_zoom(m_maxBounds));
+  }
+
+  /**
    * Return the nearest valid zoom level to the requested zoom.
    * @private
    */
@@ -1044,9 +1053,7 @@ geo.map = function (arg) {
   /**
    * Return the nearest valid bounds maintaining the
    * width and height. Does nothing if m_clampBounds is
-   * false.  The bounds this method receives are assumed
-   * to fit within the viewport so only a translation
-   * is necessary.
+   * false.
    * @private
    */
   function fix_bounds(bounds) {
@@ -1056,12 +1063,18 @@ geo.map = function (arg) {
     }
 
     // get the amount to translate the bounds
-    if (bounds.left < m_maxBounds.left) {
+    if (bounds.left < m_maxBounds.left &&
+        bounds.right > m_maxBounds.right) {
+      dx = 0;
+    } else if (bounds.left < m_maxBounds.left) {
       dx = m_maxBounds.left - bounds.left; // move right
     } else if (bounds.right > m_maxBounds.right) {
       dx = m_maxBounds.right - bounds.right; // move left
     }
-    if (bounds.bottom < m_maxBounds.bottom) {
+    if (bounds.bottom < m_maxBounds.bottom &&
+       bounds.top > m_maxBounds.top) {
+      dy = 0;
+    } else if (bounds.bottom < m_maxBounds.bottom) {
       dy = m_maxBounds.bottom - bounds.bottom; // move up
     } else if (bounds.top > m_maxBounds.top) {
       dx = m_maxBounds.top - bounds.top; // move down
@@ -1103,7 +1116,7 @@ geo.map = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
 
   // Fix the zoom level (minimum and initial)
-  m_validZoomRange.min = this.zoomAndCenterFromBounds(m_maxBounds).zoom;
+  reset_minimum_zoom();
   m_zoom = m_validZoomRange.min;
   m_center = this.zoomAndCenterFromBounds(m_maxBounds).center;
 
