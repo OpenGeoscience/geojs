@@ -158,7 +158,7 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.zoom = function (val, direction) {
-    var evt, recenter = false;
+    var evt; //, recenter = false;
     if (val === undefined) {
       return m_zoom;
     }
@@ -178,11 +178,13 @@ geo.map = function (arg) {
 
     m_this.geoTrigger(geo.event.zoom, evt);
 
+    /*
     if (evt.center) {
       m_this.center(recenter);
     } else {
       m_this.pan({x: 0, y: 0});
     }
+    */
     m_this.modified();
     return m_this;
   };
@@ -196,17 +198,23 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.pan = function (delta) {
-    // TODO: FIX THIS
-    var evt = {
+    var evt, unit;
+    evt = {
       geo: {},
       screenDelta: delta,
       eventType: geo.event.pan
     };
 
-    m_center = m_this.displayToGcs({
+    unit = m_this.unitsPerPixel(m_zoom);
+
+    m_camera.pan({
+      x: delta.x * unit,
+      y: delta.y * unit
+    });
+    m_center = m_camera.displayToWorld({
       x: m_width / 2,
       y: m_height / 2
-    });
+    }, m_width, m_height);
 
     m_this.geoTrigger(geo.event.pan, evt);
 

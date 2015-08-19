@@ -209,8 +209,6 @@
      * @returns {this} Chainable
      */
     this._translate = function (offset) {
-      // mat4.translate translates the coordinate system, not the camera
-      vec3.negate(offset, offset);
       mat4.translate(this._view, this._view, offset);
     };
 
@@ -302,13 +300,14 @@
      * @param {object} point The point in world coordinates
      * @param {number} point.x
      * @param {number} point.y
+     * @param {number} [point.z=0]
      * @param {number} width The viewport width
      * @param {number} height The viewport height
      * @returns {object} The point in display coordinates
      */
     this.worldToDisplay = function (point, width, height) {
       point = this.worldToDisplay4(
-        [point.x, point.y, point.z, 1],
+        [point.x, point.y, point.z || 0, 1],
         width,
         height
       );
@@ -320,13 +319,14 @@
      * @param {object} point The point in display coordinates
      * @param {number} point.x
      * @param {number} point.y
+     * @param {number} [point.z=0]
      * @param {number} width The viewport width
      * @param {number} height The viewport height
      * @returns {object} The point in world coordinates
      */
     this.displayToWorld = function (point, width, height) {
       point = this.displayToWorld4(
-        [point.x, point.y, point.z, 1],
+        [point.x, point.y, point.z || 0, 1],
         width,
         height
       );
