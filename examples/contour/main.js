@@ -76,7 +76,7 @@ $(function () {
 
   // Load the data
   $.ajax({
-    url: '../../data/oahu.json',
+    url: 'oahu.json',
     success: function (data) {
       var contour = makeContour(data, vglLayer);
       // Draw the map
@@ -84,7 +84,7 @@ $(function () {
       /* After 10 second, load a denser data set */
       window.setTimeout(function () {
         $.ajax({
-          url: '../../data/oahu-dense.json',
+          url: 'oahu-dense.json',
           success: function (data) {
             vglLayer.deleteFeature(contour);
             contour = makeContour(data, vglLayer, contour);
