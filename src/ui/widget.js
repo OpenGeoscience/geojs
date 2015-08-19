@@ -20,7 +20,6 @@ geo.gui.widget = function (arg) {
       m_canvas = null;
 
   arg.positionType = arg.positionType === undefined ? 'viewport' : arg.positionType;
-  arg.sticky = arg.sticky === undefined ? false : true;
 
   if (arg.parent !== undefined && !(arg.parent instanceof geo.gui.widget)) {
     throw 'Parent must be of type geo.gui.widget';
@@ -191,8 +190,6 @@ geo.gui.widget = function (arg) {
   };
 
   if (arg &&
-      arg.hasOwnProperty('sticky') &&
-      arg.sticky &&
       arg.hasOwnProperty('positionType') &&
       arg.positionType === 'gcs') {
     this.layer().geoOn(geo.event.pan, m_this.repositionEvent);

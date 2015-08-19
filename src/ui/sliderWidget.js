@@ -88,7 +88,7 @@ geo.gui.sliderWidget = function (arg) {
  * @private
  */
 //////////////////////////////////////////////////////////////////////////////
-  this._init = function (arg) {
+  this._init = function () {
     s_createCanvas();
     s_appendChild();
 
