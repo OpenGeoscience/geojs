@@ -212,3 +212,48 @@ documentation for each of the classes.
 
 The API documentation is in the process of being updated.  You can always find the latest version
 at `http://opengeoscience.github.io/geojs/apidocs/geo.html <http://opengeoscience.github.io/geojs/apidocs/geo.html>`_.
+
+Coordinate systems and conversions
+----------------------------------
+
+A major component of GeoJS's core library involves managing several coordinate systems that
+are used to keep layers aligned on the screen.  The following conventions are used in GeoJS's
+documentation and codebase when refering to coordinates:
+
+Latitude/longitude coordinates
+    Expressed in degrees relative to the WGS84 datum as objects using keys ``x`` for longitude and ``y``
+    for latitude.  Longitudes are assumed to be in the range ``[-180, 180]``.  Some map projections
+    (such as the default ``EPSG:3857``) are periodic in ``x`` and handle automatic wrapping of
+    longitudes.
+
+GCS coordinates
+    Expressed in standard units (usually meters) as defined by Proj.4, which is used to perform coordinate
+    transformations internally.  The coordinate system ``EPSG:4326`` is equivalent to latitude/longitude
+    coordinates described above.  Points in these coordinate systems are given as an object with keys
+    x and y providing the horizontal (left to right) and vertical (bottom to top) positions respectively.
+    GCS coordinates have an optional ``z`` value that is ``0`` by default.  The units of ``z`` should
+    be expressed in the same units as ``x`` and ``y``.
+
+Display coordinates
+    Expressed in units of pixels relative to the top-left corner of the current viewport from top to bottom.
+
+World coordinates
+    These are the coordinates used internally as coordinates of the 3D scene in much the sense as defined
+    in 3D graphics.  The world coordinates are a rescaled and translated version of the GCS coordinates so
+    that the world coordinates of the current viewport is near ``1`` in each axis.  This is done to
+    provide well conditioned transformation matrices that can be used acurately in contexts of limited precision
+    such as GL or CSS.  In order to achieve this, the world coordinate system is dynamic at run time
+    and will change as the user pans and zooms the map.  By convention, the world coordinates are given
+    relative to a dynamic "scale" and "origin".  Changes to these values trigger events on the map that
+    allow layers and features to respond and update their views as necessary.
+
+Layer coordinates
+    To allow flexibility for layer/renderer implementation, layers are allowed to use their own custom
+    coordinate system via the functions ``toLocal`` and ``fromLocal``.  Features inside a layer should
+    always pass coordinates through these methods to access the coordinates inside the layer's context.
+
+Feature coordinates
+    Features have a GCS property attached to them that should be taken to mean a geographic coordinate
+    system for the data passed into the feature.  For features such as points, coordinates are automatically
+    transformed into the map's GCS by Proj.4, then transformed into world coordinates, and finally into
+    layer coordinates before being passed to the layer's rendering methods.
