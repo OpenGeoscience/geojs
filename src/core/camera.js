@@ -34,7 +34,7 @@
    *
    * @class
    * @extends geo.object
-   * @param {Object?} spec Options argument
+   * @param {object?} spec Options argument
    * @param {string} spec.projection One of the supported geo.camera.projection
    * @returns {geo.camera}
    */
@@ -85,22 +85,22 @@
       if (this._projection === 'perspective') {
         mat4.frustum(
           this._proj,
-          this.constructor.left,
-          this.constructor.right,
-          this.constructor.bottom,
-          this.constructor.top,
-          this.constructor.near,
-          this.constructor.far
+          this.constructor.bounds.left,
+          this.constructor.bounds.right,
+          this.constructor.bounds.bottom,
+          this.constructor.bounds.top,
+          this.constructor.bounds.near,
+          this.constructor.bounds.far
         );
       } else if (this._projection === 'parallel') {
         mat4.ortho(
           this._proj,
-          this.constructor.left,
-          this.constructor.right,
-          this.constructor.bottom,
-          this.constructor.top,
-          this.constructor.near,
-          this.constructor.far
+          this.constructor.bounds.left,
+          this.constructor.bounds.right,
+          this.constructor.bounds.bottom,
+          this.constructor.bounds.top,
+          this.constructor.bounds.near,
+          this.constructor.bounds.far
         );
       }
     };
@@ -217,7 +217,7 @@
     /**
      * Uses `mat4.rotateZ` to translate the camera by the given angle around the Z-axis.
      * @protected
-     * @param {Number} angle The angle in radians
+     * @param {number} angle The angle in radians
      * @returns {this} Chainable
      */
     this._rotateZ = function (angle) {
@@ -249,8 +249,8 @@
     /**
      * Project a vec4 from world space into viewport space.
      * @param {vec4} point The point in world coordinates (mutated)
-     * @param {Number} width The viewport width
-     * @param {Number} height The viewport height
+     * @param {number} width The viewport width
+     * @param {number} height The viewport height
      * @returns {vec4} The point in display coordinates
      *
      * @note For the moment, this computation assumes the following:
@@ -260,7 +260,7 @@
      * The clip space z and w coordinates are returned with the window
      * x/y coordinates.
      */
-    this.worldToDisplay = function (point, width, height) {
+    this.worldToDisplay4 = function (point, width, height) {
       this._worldToClip4(point);
       var w = 1;
       if (this._projection === 'perspective') {
@@ -276,15 +276,15 @@
     /**
      * Project a vec4 from display space into world space in place.
      * @param {vec4} point The point in display coordinates (mutated)
-     * @param {Number} width The viewport width
-     * @param {Number} height The viewport height
+     * @param {number} width The viewport width
+     * @param {number} height The viewport height
      * @returns {vec4} The point in world space coordinates
      *
      * @note For the moment, this computation assumes the following:
      *   * point[3] > 0
      *   * depth range [0, 1]
      */
-    this.displayToWorld = function (point, width, height) {
+    this.displayToWorld4 = function (point, width, height) {
       var w = 1;
       if (this._projection === 'perspective') {
         w = 1 / point[3];
@@ -298,15 +298,51 @@
     };
 
     /**
+     * Project a point object from world space into viewport space.
+     * @param {object} point The point in world coordinates
+     * @param {number} point.x
+     * @param {number} point.y
+     * @param {number} width The viewport width
+     * @param {number} height The viewport height
+     * @returns {object} The point in display coordinates
+     */
+    this.worldToDisplay = function (point, width, height) {
+      point = this.worldToDisplay4(
+        [point.x, point.y, point.z, 1],
+        width,
+        height
+      );
+      return {x: point[0], y: point[1], z: point[2]};
+    };
+
+    /**
+     * Project a point object from viewport space into world space.
+     * @param {object} point The point in display coordinates
+     * @param {number} point.x
+     * @param {number} point.y
+     * @param {number} width The viewport width
+     * @param {number} height The viewport height
+     * @returns {object} The point in world coordinates
+     */
+    this.displayToWorld = function (point, width, height) {
+      point = this.displayToWorld4(
+        [point.x, point.y, point.z, 1],
+        width,
+        height
+      );
+      return {x: point[0], y: point[1], z: point[2]};
+    };
+
+    /**
      * Sets the view matrix to the given world space bounds.
      *
-     * @param {Object} bounds
-     * @param {Number} bounds.left
-     * @param {Number} bounds.right
-     * @param {Number} bounds.bottom
-     * @param {Number} bounds.top
-     * @param {Number?} bounds.near
-     * @param {Number?} bounds.far
+     * @param {object} bounds
+     * @param {number} bounds.left
+     * @param {number} bounds.right
+     * @param {number} bounds.bottom
+     * @param {number} bounds.top
+     * @param {number?} bounds.near
+     * @param {number?} bounds.far
      *
      * @note The camera does not know about the viewport size or
      * aspect ratio.  It is up to the caller to ensure the viewport
@@ -337,10 +373,10 @@
     /**
      * Pans the view matrix by the given amount.
      *
-     * @param {Object} offset The delta in world space coordinates.
-     * @param {Number} offset.x
-     * @param {Number} offset.y
-     * @param {Number} [offset.z=0]
+     * @param {object} offset The delta in world space coordinates.
+     * @param {number} offset.x
+     * @param {number} offset.y
+     * @param {number} [offset.z=0]
      */
     this.pan = function (offset) {
       this._translate(vec3.fromValues(
