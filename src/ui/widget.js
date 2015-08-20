@@ -183,11 +183,11 @@ geo.gui.widget = function (arg) {
             (position.left <= map.width() && position.top <= map.height()));
   };
 
-if (arg &&
-    arg.hasOwnProperty('position') &&
-    arg.position.hasOwnProperty('x') &&
-    arg.position.hasOwnProperty('y')) {
-  this.layer().geoOn(geo.event.pan, m_this.repositionEvent);
-}
+  if (arg &&
+      arg.hasOwnProperty('position') &&
+      arg.position.hasOwnProperty('x') &&
+      arg.position.hasOwnProperty('y')) {
+    this.layer().geoOn(geo.event.pan, m_this.repositionEvent);
+  }
 };
 inherit(geo.gui.widget, geo.sceneObject);
