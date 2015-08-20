@@ -36,8 +36,6 @@ describe('widget api', function () {
   it('a widget stuck to albany shouldn\'t be in the viewport ' +
      'if we pan to moscow', function (done) {
        var widget = uiLayer.createWidget('dom', {
-         sticky: true,
-         positionType: 'gcs',
          position: {
            x: -73.7572,
            y: 42.6525
@@ -57,8 +55,6 @@ describe('widget api', function () {
 
   it('a widget stuck to albany should be in the viewport if albany is', function (done) {
     var widget = uiLayer.createWidget('dom', {
-      sticky: true,
-      positionType: 'gcs',
       position: {
         x: -73.7572,
         y: 42.6525
@@ -77,9 +73,7 @@ describe('widget api', function () {
   });
 
   it('a widget stuck to the top left should always be in the viewport', function (done) {
-    var widget = uiLayer.createWidget('dom', {
-      sticky: true
-    });
+    var widget = uiLayer.createWidget('dom');
 
     expect($(widget.canvas()).position()).toEqual({top: 0, left: 0});
 

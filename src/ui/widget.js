@@ -19,7 +19,7 @@ geo.gui.widget = function (arg) {
       m_layer = arg.layer,
       m_canvas = null;
 
-  arg.positionType = arg.positionType === undefined ? 'viewport' : arg.positionType;
+  arg.position = arg.position === undefined ? { left: 0, top: 0 } : arg.position;
 
   if (arg.parent !== undefined && !(arg.parent instanceof geo.gui.widget)) {
     throw 'Parent must be of type geo.gui.widget';
@@ -124,8 +124,7 @@ geo.gui.widget = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Gets the CSS positioning that a widget should be placed at. This is based on
-   * the positionType of the widget, but returns
+   * Gets the CSS positioning that a widget should be placed at.
    * { top: 0, left: 0 } by default.
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -133,13 +132,11 @@ geo.gui.widget = function (arg) {
     var position;
 
     if (arg &&
-        arg.hasOwnProperty('position')) {
-      position = arg.position;
+        arg.hasOwnProperty('position') &&
+        arg.position.hasOwnProperty('x') &&
+        arg.position.hasOwnProperty('y')) {
 
-      if (arg.hasOwnProperty('positionType') &&
-          arg.positionType === 'gcs') {
-        position = m_this.layer().map().gcsToDisplay(arg.position);
-      }
+      position = m_this.layer().map().gcsToDisplay(arg.position);
 
       return {
         left: position.x,
@@ -147,10 +144,7 @@ geo.gui.widget = function (arg) {
       };
     }
 
-    return {
-      left: 0,
-      top: 0
-    };
+    return arg.position;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -189,10 +183,11 @@ geo.gui.widget = function (arg) {
             (position.left <= map.width() && position.top <= map.height()));
   };
 
-  if (arg &&
-      arg.hasOwnProperty('positionType') &&
-      arg.positionType === 'gcs') {
-    this.layer().geoOn(geo.event.pan, m_this.repositionEvent);
-  }
+if (arg &&
+    arg.hasOwnProperty('position') &&
+    arg.position.hasOwnProperty('x') &&
+    arg.position.hasOwnProperty('y')) {
+  this.layer().geoOn(geo.event.pan, m_this.repositionEvent);
+}
 };
 inherit(geo.gui.widget, geo.sceneObject);

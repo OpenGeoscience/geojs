@@ -20,7 +20,12 @@ $(function () {
   var ui = map.createLayer('ui');
 
   // Create a legend widget
-  var legend = ui.createWidget('legend');
+  var legend = ui.createWidget('legend', {
+    position: {
+      right: 20,
+      top: 10
+    }
+  });
 
 
   // Add rows to the legend
