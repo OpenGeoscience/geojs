@@ -213,8 +213,8 @@ documentation for each of the classes.
 The API documentation is in the process of being updated.  You can always find the latest version
 at `http://opengeoscience.github.io/geojs/apidocs/geo.html <http://opengeoscience.github.io/geojs/apidocs/geo.html>`_.
 
-Coordinate systems and conversions
-----------------------------------
+Coordinate systems
+------------------
 
 A major component of GeoJS's core library involves managing several coordinate systems that
 are used to keep layers aligned on the screen.  The following conventions are used in GeoJS's
@@ -257,3 +257,37 @@ Feature coordinates
     system for the data passed into the feature.  For features such as points, coordinates are automatically
     transformed into the map's GCS by Proj.4, then transformed into world coordinates, and finally into
     layer coordinates before being passed to the layer's rendering methods.
+
+Coordinate transformation methods
+---------------------------------
+
+To facilitate uniform tranformation between the many coordinate systems used inside a map object,
+there are many available transformation methods provided in the core API.  These methods vary
+from being useful to all users of the library to methods that are only relevant to developers
+interacting with low level renderers or wishing to optimize performance.  The following is a list
+of transform methods present in the library as well as example uses for them.
+
+``geo.map.gcsToDisplay/displayToGcs(c, gcs)``
+    This is the most common tranformation method that converts from a geographic coordinate system into
+    pixel coordinates on the map.  If no GCS is given, the method will assume the coordinate system of
+    the map.  For example, to get the lat/lon of the point under the mouse you would get the pixel
+    coordinates relative to the map's container and pass them to this method as ``c`` in
+    ``map.displayToGcs(c, 'EPSG:4326')``.
+
+``geo.map.gcsToWorld/worldToGcs(c, gcs)``
+    This performs the conversion to internal world coordinates that are scaled and translated to deal
+    with round off errors.  This method is made available so that layers can use a consistent base
+    coordinate system from which the camera transforms are derived.
+
+``geo.layer.fromLocal/toLocal(c)``
+    This converts between world space and a custom coordinates system defined by each layer.  The
+    default implementation of these methods returns the original coordinate unmodified, but layers
+    can choose to override this behavior as needed.  Users generally do not need to call this method
+    unless they are interacting with the low level context of the layer.
+
+``geo.camera.worldToDisplay/displayToWorld(c, width, height)``
+    This converts between world space coordinates and display pixel coordinates given a viewport
+    size.  In addition to thse methods, the camera class provides access to the raw transformation
+    matrices for layers that can make use of them directly.  For layers supporting CSS
+    there is also a ``camera.css`` property that returns a CSS transform representing the current
+    camera state.

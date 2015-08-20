@@ -484,30 +484,34 @@ geo.map = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Convert from display to latitude longitude coordinates
+   * Convert from gcs coordinates to display coordinates.
+   * @param {object} c The input coordinate to convert
+   * @param {object} c.x
+   * @param {object} c.y
+   * @param {object} [c.z=0]
+   * @param {string?} gcs The gcs of the input (map.gcs() by default)
+   * @return {object} Display space coordinates
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.displayToGcs = function (input) {
-    return input;
+  this.gcsToDisplay = function (c, gcs) {
+    c = this.gcsToWorld(c, gcs);
+    return this.worldToDisplay(c);
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Convert from source coordinates to display coordinates
-   * @return {object}
+   * Convert from display to gcs coordinates
+   * @param {object} c The input display coordinate to convert
+   * @param {object} c.x
+   * @param {object} c.y
+   * @param {object} [c.z=0]
+   * @param {string?} gcs The gcs of the output (map.gcs() by default)
+   * @return {object} GCS space coordinates
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.gcsToDisplay = function (input) {
-    return input;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Convert from display to latitude longitude coordinates
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.displayToGcs = function (input) {
-    return input;
+  this.displayToGcs = function (c, gcs) {
+    c = this.displayToWorld(c); // done via camera
+    return this.worldToGcs(c, gcs);
   };
 
   ////////////////////////////////////////////////////////////////////////////
