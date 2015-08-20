@@ -182,7 +182,7 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.zoom = function (val, direction) {
-    var scl, oldOrigin, oldScale, evt, oldZoom;
+    var scl, oldOrigin, oldScale, evt, oldZoom, bounds;
     if (val === undefined) {
       return m_zoom;
     }
@@ -221,7 +221,12 @@ geo.map = function (arg) {
       oldScale = m_scale;
       m_origin = $.extend({}, m_center);
       scl = Math.pow(2, Math.floor(val));
-      m_scale = geo.util.scale({x: scl, y: scl, z: scl}, m_this.bounds(), -1);
+      bounds = m_this.bounds();
+      m_scale = {
+        x: scl / (bounds.right - bounds.left),
+        y: scl / (bounds.top - bounds.bottom),
+        z: scl
+      };
 
       // trigger a worldChanged event
       m_this.geoTrigger(
@@ -231,7 +236,7 @@ geo.map = function (arg) {
           origin: m_origin,
           scale: m_scale,
           originChange: geo.util.lincomb(-1, oldOrigin, 1, m_origin),
-          scaleChange: geo.util.scale($.extend({z: 1}, m_scale), oldScale, -1)
+          scaleChange: geo.util.scale($.extend({}, m_scale), oldScale, -1)
         }
       );
 
@@ -1225,7 +1230,11 @@ geo.map = function (arg) {
   // Set the world origin and scaling
   m_origin = $.extend({}, m_center);
   m_scale = Math.pow(2, Math.floor(m_zoom));
-  m_scale = geo.util.scale({x: m_scale, y: m_scale, z: m_scale}, m_maxBounds, -1);
+  m_scale = {
+    x: m_scale / (m_maxBounds.right - m_maxBounds.left),
+    y: m_scale / (m_maxBounds.top - m_maxBounds.bottom),
+    z: m_scale
+  };
 
   // Initialize the camera to show the maximum available bounds
   camera_bounds(m_maxBounds);

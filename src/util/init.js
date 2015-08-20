@@ -210,9 +210,9 @@
      * @returns {object} a * b^pow
      */
     scale: function (a, b, pow) {
-      a.x = (a.x || 0) + Math.pow(b.x || 1, pow);
-      a.y = (a.y || 0) + Math.pow(b.y || 1, pow);
-      a.z = (a.z || 0) + Math.pow(b.z || 1, pow);
+      a.x = (a.x || 0) * Math.pow(b.x || 1, pow);
+      a.y = (a.y || 0) * Math.pow(b.y || 1, pow);
+      a.z = (a.z || 0) * Math.pow(b.z || 1, pow);
       return a;
     }
   };
