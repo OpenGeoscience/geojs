@@ -83,7 +83,9 @@ geo.map = function (arg) {
         arg.unitsPerPixel ||
         2 * Math.PI * geo.util.radiusEarth / 256
       ),
-      m_clampBounds;
+      m_clampBounds,
+      m_origin,
+      m_scale;
 
   arg.center = geo.util.normalizeCoordinates(arg.center);
   arg.autoResize = arg.autoResize === undefined ? true : arg.autoResize;
@@ -111,6 +113,28 @@ geo.map = function (arg) {
       return m_this;
     }
     return Math.pow(2, -zoom) * m_unitsPerPixel;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get the map's world coordinate origin in gcs coordinates
+   *
+   * @returns {object}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.origin = function () {
+    return m_origin;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get the map's world coordinate scaling relative gcs units
+   *
+   * @returns {object}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.scale = function () {
+    return m_scale;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -382,6 +406,58 @@ geo.map = function (arg) {
 
     m_this.modified();
     return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Convert from gcs coordinates to map world coordinates.
+   * @param {object} c The input coordinate to convert
+   * @param {object} c.x
+   * @param {object} c.y
+   * @param {object} [c.z=0]
+   * @param {string?} gcs The gcs of the input (map.gcs() by default)
+   * @return {object} World space coordinates
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.gcsToWorld = function (c, gcs) {
+    if (gcs !== undefined && gcs !== m_gcs) {
+      c = geo.transform.transformCoordinates(gcs, m_gcs, [c])[0];
+    }
+    return geo.transform.affineForward(
+      {origin: m_origin, scale: m_scale},
+      [c]
+    )[0];
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Convert from map world coordinates to gcs coordinates.
+   * @param {object} c The input coordinate to convert
+   * @param {object} c.x
+   * @param {object} c.y
+   * @param {object} [c.z=0]
+   * @param {string?} gcs The gcs of the output (map.gcs() by default)
+   * @return {object} GCS space coordinates
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.gcsToWorld = function (c, gcs) {
+    c = geo.transform.affineInverse(
+      {origin: m_origin, scale: m_scale},
+      [c]
+    )[0];
+    if (gcs !== undefined && gcs !== m_gcs) {
+      c = geo.transform.transformCoordinates(m_gcs, gcs, [c])[0];
+    }
+    return c;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Convert from display to latitude longitude coordinates
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.displayToGcs = function (input) {
+    return input;
   };
 
   ////////////////////////////////////////////////////////////////////////////

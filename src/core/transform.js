@@ -168,4 +168,55 @@ geo.transform.transformCoordinates = function (srcPrj, tgtPrj, coords) {
   return coords;
 };
 
+/**
+ * Apply an affine transformation consisting of a translation
+ * then a scaling to the given coordinate array.  Note, the
+ * transformation occurs in place so the input coordinate
+ * object are mutated.
+ *
+ * (Possibly extend to support rotations as well)
+ *
+ * @param {object} def
+ * @param {object} def.origin The transformed origin
+ * @param {object} def.scale The transformed scale factor
+ * @param {object[]} coords An array of coordinate objects
+ *
+ * @returns {object[]} The transformed coordinates
+ */
+geo.transform.affineForward = function (def, coords) {
+  'use strict';
+  var i, origin = def.origin, scale = def.scale;
+  for (i = 0; i < coords.length; i += 1) {
+    coords[i].x = (coords[i].x - origin.x) * scale.x;
+    coords[i].y = (coords[i].y - origin.y) * scale.y;
+    coords[i].z = ((coords[i].z || 0) - origin.z) * scale.z;
+  }
+  return coords;
+};
+
+/**
+ * Apply an inverse affine transformation which is the
+ * inverse to {@link geo.transform.affineForward}.  Note, the
+ * transformation occurs in place so the input coordinate
+ * object are mutated.
+ *
+ * (Possibly extend to support rotations as well)
+ *
+ * @param {object} def
+ * @param {object} def.origin The transformed origin
+ * @param {object} def.scale The transformed scale factor
+ * @param {object[]} coords An array of coordinate objects
+ *
+ * @returns {object[]} The transformed coordinates
+ */
+geo.transform.affineInverse = function (def, coords) {
+  'use strict';
+  var i, origin = def.origin, scale = def.scale;
+  for (i = 0; i < coords.length; i += 1) {
+    coords[i].x = coords[i].x / scale.x + origin.x;
+    coords[i].y = coords[i].y / scale.y + origin.y;
+    coords[i].z = (coords[i].z || 0) / scale.z + origin.z;
+  }
+  return coords;
+};
 inherit(geo.transform, geo.object);
