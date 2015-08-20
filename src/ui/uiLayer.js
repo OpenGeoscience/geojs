@@ -10,8 +10,8 @@
 geo.gui.uiLayer = function (arg) {
   'use strict';
 
-  // The widget stays fixed on the screen.  (only available in d3 at the moment)
-  arg.renderer = 'd3';
+  // The widget stays fixed on the screen.
+  arg.renderer = 'dom';
   arg.sticky = false;
 
   if (!(this instanceof geo.gui.uiLayer)) {
@@ -20,7 +20,13 @@ geo.gui.uiLayer = function (arg) {
   geo.layer.call(this, arg);
 
   var m_this = this,
+      s_init = this._init,
       s_exit = this._exit;
+
+  this._init = function () {
+    s_init();
+    m_this.node().css('position', 'relative');
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -30,12 +36,14 @@ geo.gui.uiLayer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.createWidget = function (widgetName, arg) {
+    var newWidget = geo.createWidget(widgetName, m_this, arg);
 
-    var newWidget = geo.createWidget(
-      widgetName, m_this, m_this.renderer(), arg);
+    // We only want top level widgets to be a child of the uiLayer
+    if (!(arg && 'parent' in arg)) {
+      m_this.addChild(newWidget);
+    }
 
-    m_this.addChild(newWidget);
-    newWidget._init();
+    newWidget._init(arg);
     m_this.modified();
     return newWidget;
   };

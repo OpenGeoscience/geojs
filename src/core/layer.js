@@ -373,6 +373,9 @@ geo.layer = function (arg) {
     // Create top level div for the layer
     m_node = $(document.createElement("div"));
     m_node.attr("id", m_name);
+    // TODO: need to position according to offsets from the map element
+    //       and maybe respond to events in case the map element moves
+    //       around the page.
     m_node.css("position", "absolute");
 
     if (m_map) {
