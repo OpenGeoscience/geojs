@@ -182,20 +182,22 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.zoom = function (val, direction) {
-    var evt; //, recenter = false;
+    var scl, oldOrigin, oldScale, evt, oldZoom;
     if (val === undefined) {
       return m_zoom;
     }
 
+    oldZoom = m_zoom;
     val = fix_zoom(val);
     if (val === m_zoom) {
       return m_this;
     }
 
     m_zoom = val;
+
     evt = {
       geo: {},
-      zoomLevel: val,
+      zoomLevel: m_zoom,
       screenPosition: direction,
       eventType: geo.event.zoom
     };
@@ -209,7 +211,31 @@ geo.map = function (arg) {
       m_this.pan({x: 0, y: 0});
     }
     */
+
     m_this.modified();
+
+    // Check if this a new integer level
+    if (Math.floor(val) !== Math.floor(oldZoom)) {
+      // update world coordinate reference
+      oldOrigin = m_origin;
+      oldScale = m_scale;
+      m_origin = $.extend({}, m_center);
+      scl = Math.pow(2, Math.floor(val));
+      m_scale = geo.util.scale({x: scl, y: scl, z: scl}, m_this.bounds(), -1);
+
+      // trigger a worldChanged event
+      m_this.geoTrigger(
+        geo.event.worldChanged,
+        {
+          map: m_this,
+          origin: m_origin,
+          scale: m_scale,
+          originChange: geo.util.lincomb(-1, oldOrigin, 1, m_origin),
+          scaleChange: geo.util.scale($.extend({z: 1}, m_scale), oldScale, -1)
+        }
+      );
+
+    }
     return m_this;
   };
 
@@ -440,7 +466,7 @@ geo.map = function (arg) {
    * @return {object} GCS space coordinates
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.gcsToWorld = function (c, gcs) {
+  this.worldToGcs = function (c, gcs) {
     c = geo.transform.affineInverse(
       {origin: m_origin, scale: m_scale},
       [c]
@@ -1195,6 +1221,11 @@ geo.map = function (arg) {
   reset_minimum_zoom();
   m_zoom = m_validZoomRange.min;
   m_center = this.zoomAndCenterFromBounds(m_maxBounds).center;
+
+  // Set the world origin and scaling
+  m_origin = $.extend({}, m_center);
+  m_scale = Math.pow(2, Math.floor(m_zoom));
+  m_scale = geo.util.scale({x: m_scale, y: m_scale, z: m_scale}, m_maxBounds, -1);
 
   // Initialize the camera to show the maximum available bounds
   camera_bounds(m_maxBounds);
