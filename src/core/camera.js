@@ -418,6 +418,22 @@
       this._update();
     };
 
+    /**
+     * Zooms the view matrix by the given amount.
+     *
+     * @param {number} zoom The zoom scale to apply
+     */
+    this.zoom = function (zoom) {
+      mat4.scale(this._view, this._view,
+        vec3.fromValues(
+          zoom,
+          zoom,
+          zoom
+        )
+      );
+      this._update();
+    };
+
     // set up the projection matrix
     this.projection = spec.projection || 'parallel';
   };

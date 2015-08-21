@@ -31,7 +31,8 @@
    * tiles at the next level.  The tiles are assumed to be rectangular,
    * identically sized, and aligned with x/y axis of the underlying
    * coordinate system.  The local coordinate system is in pixels relative
-   * to zoom level 0.
+   * to the current zoom level and changes when the zoom level crosses an
+   * integer threshold.
    *
    * @class
    * @extends geo.featureLayer
@@ -143,15 +144,23 @@
 
     /**
      * Returns the tile indices at the given point.
-     * @param {Object} point The coordinates in pixels
+     * @param {Object} point The coordinates in pixels relative to the map origin.
      * @param {Number} point.x
      * @param {Number} point.y
+     * @param {Number} level The target zoom level
      * @returns {Object} The tile indices
      */
-    this.tileAtPoint = function (point) {
+    this.tileAtPoint = function (point, level) {
+      var map = this.map(),
+          upp = map.unitsPerPixel(level),
+          origin = map.origin();
       return {
-        x: Math.floor(point.x / this._options.tileWidth),
-        y: Math.floor(point.y / this._options.tileHeight)
+        x: Math.floor(
+          (point.x + origin.x / upp) / this._options.tileWidth
+        ),
+        y: Math.floor(
+          (point.y + origin.y / upp) / this._options.tileHeight
+        )
       };
     };
 
@@ -245,7 +254,7 @@
      *
      * @protected
      * @param {Number} level The zoom level
-     * @param {Object} center The center point in pixels
+     * @param {Object} center The center point in pixels relative to the map origin
      * @param {Number} center.x
      * @param {Number} center.y
      * @param {Object} size The viewport size in pixels
@@ -313,8 +322,8 @@
      * @returns {$.Deferred} resolves when all of the tiles are fetched
      */
     this.prefetch = function (level, center, size) {
-      var tiles;
-      center = this.toLevel(this.toLocal(center), level);
+      var tiles, map = this.map();
+      center = this.toLevel(map.gcsToWorld(center), level);
       tiles = [this._getTiles(level, center, size, false)];
       return $.when.apply($,
         tiles.sort(this._loadMetric(center))
@@ -363,47 +372,20 @@
     };
 
     /**
-     * Convert a coordinate from layer to map coordinate systems.
-     * @param {Object} coord
-     * @param {Number} coord.x The offset in pixels (level 0) from the left edge
-     * @param {Number} coord.y The offset in pixels (level 0) from the bottom edge
-     */
-    this.fromLocal = function (coord) {
-      var o = this._options;
-      return {
-        x: (o.maxX - o.minX) * coord.x + o.minX,
-        y: (o.maxY - o.minY) * coord.y + o.minY
-      };
-    };
-
-    /**
-     * Convert a coordinate from map to layer coordinate systems.
-     * @param {Object} coord
-     * @param {Number} coord.x The offset in map units from the left edge
-     * @param {Number} coord.y The offset in map units from the bottom edge
-     */
-    this.toLocal = function (coord) {
-      var o = this._options;
-      return {
-        x: (coord.x - o.minX) / (o.maxX - o.minX),
-        y: (coord.y - o.minY) / (o.maxY - o.minY)
-      };
-    };
-
-    /**
      * Convert a coordinate from pixel coordinates at the given zoom
-     * level to layer coordinates.
+     * level to world coordinates.
      * @param {Object} coord
      * @param {Number} coord.x The offset in pixels (level 0) from the left edge
      * @param {Number} coord.y The offset in pixels (level 0) from the bottom edge
      * @param {Number} level   The zoom level of the source coordinates
      */
     this.fromLevel = function (coord, level) {
-      var scl = this.tilesAtZoom(level),
-          o = this._options;
+      var map = this.map(),
+          scale = map.scale(),
+          upp = map.unitsPerPixel(level);
       return {
-        x: coord.x / (scl.x * o.tileWidth),
-        y: coord.y / (scl.y * o.tileHeight)
+        x: coord.x * upp * scale.x,
+        y: coord.y * upp * scale.y
       };
     };
 
@@ -416,13 +398,15 @@
      * @param {Number} level   The zoom level of the new coordinates
      */
     this.toLevel = function (coord, level) {
-      var scl = this.tilesAtZoom(level),
-          o = this._options;
+      var map = this.map(),
+          scale = map.scale(),
+          upp = map.unitsPerPixel(level);
       return {
-        x: coord.x * scl.x * o.tileWidth,
-        y: coord.y * scl.y * o.tileHeight
+        x: coord.x / (upp * scale.x),
+        y: coord.y / (upp * scale.y)
       };
     };
+
     /**
      * Draw the given tile on the active canvas.
      * @param {geo.tile} tile The tile to draw
@@ -523,7 +507,7 @@
     this._getViewBounds = function () {
       var map = this.map(),
           zoom = Math.floor(map.zoom()),
-          center = this.toLevel(this.toLocal(map.center()), zoom),
+          center = this.toLevel(map.gcsToWorld(map.center()), zoom),
           size = map.size();
       return {
         level: zoom,
@@ -590,11 +574,13 @@
      * @returns {this} Chainable
      */
     this._update = function () {
-      var mapZoom = this.map().zoom(),
+      var map = this.map(),
+          mapZoom = map.zoom(),
           zoom = Math.floor(mapZoom),
-          center = this.toLevel(this.toLocal(this.map().center()), zoom),
-          size = this.map().size(),
-          tiles;
+          center = this.toLevel(map.gcsToWorld(map.center()), zoom),
+          size = map.size(),
+          tiles,
+          camera = map.camera();
 
       tiles = this._getTiles(zoom, center, size, true);
 
@@ -606,12 +592,8 @@
 
       this.canvas().css(
         'transform',
-        'scale(' + Math.pow(2, mapZoom - zoom).toFixed(20) +
-        ') translate(' +
-          (size.width / 2 - center.x).toFixed(20) + 'px,' +
-          (size.height / 2 - center.y).toFixed(20) + 'px' + ')'
+        camera.css
       );
-
 
       if (zoom === lastZoom &&
           center.x === lastX &&
