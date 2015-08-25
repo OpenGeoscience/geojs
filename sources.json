@@ -33,6 +33,7 @@
         "geomFeature.js",
         "graphFeature.js",
         "contourFeature.js",
+		"choroplethFeature.js",  
         "transform.js",
         "renderer.js",
         "osmLayer.js"
@@ -57,7 +58,8 @@
         "geomFeature.js",
         "planeFeature.js",
         "polygonFeature.js",
-        "contourFeature.js",
+          "contourFeature.js",
+		  "choroplethFeature.js",
         "vglRenderer.js"
       ]
     },
