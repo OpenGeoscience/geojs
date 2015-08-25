@@ -8,6 +8,9 @@ $(function () {
 		 * consists of objects each with x, y, z values.  The other has a values
 		 * array which just has our contour values. */
 		var choropleth = layer.createFeature('choropleth')
+			.choropleth({
+				
+			})
 			.data(data);
 
 		return choropleth;

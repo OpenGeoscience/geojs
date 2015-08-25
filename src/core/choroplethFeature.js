@@ -78,7 +78,8 @@ geo.choroplethFeature = function (arg) {
 						{r: 1, g: 0.6289553, b: 0.568237474},
 						{r: 1, g: 0.472800903, b: 0.404551679},
 						{r: 0.916482116, g: 0.236630659, b: 0.209939162}
-					]
+					],
+					scale: geo.util.Scale.quantize()
 				},
 				m_choropleth,
 				arg1
@@ -114,7 +115,7 @@ geo.choroplethFeature = function (arg) {
 	};
 
 
-	this._addPolygonFeature = function(coordinateArray){
+	this._addPolygonFeature = function(coordinateArray, fillColor){
 		return m_this.layer()
 			.createFeature('polygon', {
 			})
@@ -133,21 +134,40 @@ geo.choroplethFeature = function (arg) {
 					x: d[0],
 					y: d[1]
 				};
+			})
+			.style({
+				'fillColor': fillColor
 			});
 	};
 	
 	this._featureToPolygons = function (feature) {
+		var colorValue = m_this.choropleth.scale()(valueFunc(feature));
 		if (feature.geometry.type === "Polygon"){
-			return m_this._addPolygonFeature(feature.geometry.coordinates);
+			return m_this._addPolygonFeature(feature.geometry.coordinates, colorValue);
 		} else if (feature.geometry.type === "MultiPolygon") {
 			return feature.geometry.coordinates.map(function(polygonCoordinates){
-				return m_this._addPolygonFeature(polygonCoordinates);
+				return m_this._addPolygonFeature(polygonCoordinates, colorValue);
 			});
 		}
 	};
 
-	this._generateScale = function () {
-		
+	this._generateScale = function (valueAccessor) {
+		var max, min;
+		m_this.data().features.forEach(function(feature){
+			var value = valueAccessor(feature);
+			if (!max) {
+				max = min = value;
+			}
+			if (max < value) {
+				max = value;
+			}
+			if (min > value) {
+				min = value;
+			}
+		});
+		m_this.choropleth.get('scale')().domain([min, max]);
+		m_this.choropleth.get('scale')().range(m_this.choropleth.get('colorRange') || ([m_this.choropleth.get('minColor'), m_this.choropleth.get('maxColor')]));
+		return m_this;
 	};
 	
 	////////////////////////////////////////////////////////////////////////////
@@ -171,6 +191,9 @@ geo.choroplethFeature = function (arg) {
 			valueFunc = m_this.style.get('value'), values = [],
 			stepped = choropleth.get('stepped')();
 
+
+		m_this._generateScale(valueFunc);
+		
 		return data.features.map(function(feature){
 			return m_this
 				._featureToPolygons(feature, valueFunc(feature));
@@ -189,9 +212,8 @@ geo.choroplethFeature = function (arg) {
 		var defaultStyle = $.extend(
 			{},
 			{
-				opacity: 1.0,
-				value: function (geoJsonPolygon) {
-					return geoJsonPolygon.properties.value;
+				value: function (geoJsonFeature) {
+					return geoJsonFeature.properties.value;
 				}
 			},
 			arg.style === undefined ? {} : arg.style

@@ -45,7 +45,8 @@
         "init.js",
         "wigglemaps.js",
         "leaflet.js",
-        "clustering.js"
+        "clustering.js",
+		"scales.js"
       ]
     },
     "geo.gl": {
