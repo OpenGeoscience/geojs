@@ -152,7 +152,7 @@ geo.choroplethFeature = function (arg) {
 		 *
 		 * @param {} geoJsonFeature
 		 * @param geo.color
-		 * @return {[geo.feature, ...]} 
+		 * @return [{geo.feature}] 
 		 */
 		////////////////////////////////////////////////////////////////////////////		
 		this._featureToPolygons = function (feature, fillValue) {
@@ -166,7 +166,7 @@ geo.choroplethFeature = function (arg) {
 						];
 						
 				}
-				if (feature.geometry.type === "MultiPolygon") {
+				if (feature.geometry.type === "MultiiPolygon") {
 						arrayOfPolygonFeatures = feature.geometry
 								.coordinates
 								.map(function(polygonCoordinates){
@@ -219,7 +219,6 @@ geo.choroplethFeature = function (arg) {
 								m_this.choropleth()
 								.scale(valueFunc(feature));
 
-						console.log(fillColor);
 						return m_this
 								._featureToPolygons(feature, fillColor);
 				});
