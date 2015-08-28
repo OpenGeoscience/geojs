@@ -50,7 +50,7 @@ geo.gl.polygonFeature = function (arg) {
       '  gl_Position = clipPos;',
       '}'
     ].join('\n'),
-    shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
+	shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
     shader.setShaderSource(vertexShaderSource);
     return shader;
   }
@@ -66,46 +66,46 @@ geo.gl.polygonFeature = function (arg) {
       '  gl_FragColor = vec4 (fillColorVar, fillOpacityVar);',
       '}'
     ].join('\n'),
-    shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
+	shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
     shader.setShaderSource(fragmentShaderSource);
     return shader;
   }
 
   function createGLPolygons() {
     var i = null,
-        numPts = null,
-        start = null,
-        itemIndex = 0,
-        polygonItemCoordIndex = 0,
-        position = [],
-        fillColor = [],
-        fillOpacity = [],
-        fillColorNew = [],
-        fillOpacityNew = [],
-        posFunc = null,
-        fillColorFunc = null,
-        polygonItem = null,
-        fillOpacityFunc = null,
-        buffers = vgl.DataBuffers(1024),
-        sourcePositions = vgl.sourceDataP3fv(),
-        sourceFillColor =
-          vgl.sourceDataAnyfv(3, vgl.vertexAttributeKeysIndexed.Two),
-        sourceFillOpacity =
-          vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Three),
-        trianglePrimitive = vgl.triangles(),
-        geom = vgl.geometryData(),
-        polygon = null,
-        holes = null,
-        extRing = null,
-        extIndex = 0,
-        extLength = null,
-        intIndex = 0,
-        posInstance = null,
-        triangulator = new PNLTRI.Triangulator(),
-        triangList = null,
-        newTriangList = null,
-        fillColorInstance = null,
-        currentIndex = null;
+	numPts = null,
+	start = null,
+	itemIndex = 0,
+	polygonItemCoordIndex = 0,
+	position = [],
+	fillColor = [],
+	fillOpacity = [],
+	fillColorNew = [],
+	fillOpacityNew = [],
+	posFunc = null,
+	fillColorFunc = null,
+	polygonItem = null,
+	fillOpacityFunc = null,
+	buffers = vgl.DataBuffers(1024),
+	sourcePositions = vgl.sourceDataP3fv(),
+	sourceFillColor =
+	vgl.sourceDataAnyfv(3, vgl.vertexAttributeKeysIndexed.Two),
+	sourceFillOpacity =
+	vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Three),
+	trianglePrimitive = vgl.triangles(),
+	geom = vgl.geometryData(),
+	polygon = null,
+	holes = null,
+	extRing = null,
+	extIndex = 0,
+	extLength = null,
+	intIndex = 0,
+	posInstance = null,
+	triangulator = new PNLTRI.Triangulator(),
+	triangList = null,
+	newTriangList = null,
+	fillColorInstance = null,
+	currentIndex = null;
 
     posFunc = m_this.position();
     fillColorFunc = m_this.style.get('fillColor');
@@ -123,51 +123,51 @@ geo.gl.polygonFeature = function (arg) {
       intIndex = 0;
 
       polygonItem.forEach(function (extRingCoords) {
-        if (extIndex !== extLength) {
-          //extRing = extRing.concat(extRingCoords);
-          posInstance = posFunc(extRingCoords,
-                                polygonItemCoordIndex,
-                                item, itemIndex);
-          extRing[0].push({
-            x: posInstance.x, y: posInstance.y, i: fillColor.length
-          });
+	if (extIndex !== extLength) {
+	  //extRing = extRing.concat(extRingCoords);
+	  posInstance = posFunc(extRingCoords,
+				polygonItemCoordIndex,
+				item, itemIndex);
+	  extRing[0].push({
+	    x: posInstance.x, y: posInstance.y, i: fillColor.length
+	  });
 
-          fillColorInstance = fillColorFunc(extRingCoords,
-                                            polygonItemCoordIndex,
-                                            item, itemIndex);
-          fillColor.push([fillColorInstance.r,
-                          fillColorInstance.g,
-                          fillColorInstance.b]);
-          fillOpacity.push(fillOpacityFunc(extRingCoords,
-                                           polygonItemCoordIndex,
-                                           item,
-                                           itemIndex));
-          polygonItemCoordIndex += 1;
-        }
-        extIndex += 1;
+	  fillColorInstance = fillColorFunc(extRingCoords,
+					    polygonItemCoordIndex,
+					    item, itemIndex);
+	  fillColor.push([fillColorInstance.r,
+			  fillColorInstance.g,
+			  fillColorInstance.b]);
+	  fillOpacity.push(fillOpacityFunc(extRingCoords,
+					   polygonItemCoordIndex,
+					   item,
+					   itemIndex));
+	  polygonItemCoordIndex += 1;
+	}
+	extIndex += 1;
       });
 
       polygonItemCoordIndex = 0;
       holes.forEach(function (hole) {
-        extRing[intIndex + 1] = [];
-        hole.forEach(function (intRingCoords) {
-          posInstance = posFunc(intRingCoords, polygonItemCoordIndex,
-                                item, itemIndex);
-          extRing[intIndex + 1].push({
-            x: posInstance.x, y: posInstance.y, i: fillColor.length
-          });
-          fillColorInstance = fillColorFunc(intRingCoords,
-                                            polygonItemCoordIndex,
-                                            item, itemIndex);
-          fillColor.push([fillColorInstance.r,
-                          fillColorInstance.g,
-                          fillColorInstance.b]);
-          fillOpacity.push(fillOpacityFunc(intRingCoords,
-                                           polygonItemCoordIndex,
-                                           item, itemIndex));
-          polygonItemCoordIndex += 1;
-        });
-        intIndex += 1;
+	extRing[intIndex + 1] = [];
+	hole.forEach(function (intRingCoords) {
+	  posInstance = posFunc(intRingCoords, polygonItemCoordIndex,
+				item, itemIndex);
+	  extRing[intIndex + 1].push({
+	    x: posInstance.x, y: posInstance.y, i: fillColor.length
+	  });
+	  fillColorInstance = fillColorFunc(intRingCoords,
+					    polygonItemCoordIndex,
+					    item, itemIndex);
+	  fillColor.push([fillColorInstance.r,
+			  fillColorInstance.g,
+			  fillColorInstance.b]);
+	  fillOpacity.push(fillOpacityFunc(intRingCoords,
+					   polygonItemCoordIndex,
+					   item, itemIndex));
+	  polygonItemCoordIndex += 1;
+	});
+	intIndex += 1;
       });
 
       //console.log("extRing ", extRing);
@@ -176,28 +176,28 @@ geo.gl.polygonFeature = function (arg) {
       newTriangList = [];
 
       triangList.forEach(function (newIndices) {
-        Array.prototype.push.apply(newTriangList, newIndices);
+	Array.prototype.push.apply(newTriangList, newIndices);
       });
 
       for (i = 1; i < extRing.length; i += 1) {
-        extRing[0] = extRing[0].concat(extRing[i]);
+	extRing[0] = extRing[0].concat(extRing[i]);
       }
 
       newTriangList.forEach(function (polygonIndex) {
-        var polygonItemCoords = extRing[0][polygonIndex];
-        position.push([polygonItemCoords.x,
-                       polygonItemCoords.y,
-                       polygonItemCoords.z || 0.0]);
-        fillColorNew.push(fillColor[polygonItemCoords.i]);
-        fillOpacityNew.push(fillOpacity[polygonItemCoords.i]);
+	var polygonItemCoords = extRing[0][polygonIndex];
+	position.push([polygonItemCoords.x,
+		       polygonItemCoords.y,
+		       polygonItemCoords.z || 0.0]);
+	fillColorNew.push(fillColor[polygonItemCoords.i]);
+	fillOpacityNew.push(fillOpacity[polygonItemCoords.i]);
       });
 
       itemIndex += 1;
     });
 
     position = geo.transform.transformCoordinates(
-                 m_this.gcs(), m_this.layer().map().gcs(),
-                 position, 3);
+      m_this.gcs(), m_this.layer().map().gcs(),
+      position, 3);
 
     buffers.create('pos', 3);
     buffers.create('indices', 1);
@@ -241,14 +241,14 @@ geo.gl.polygonFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
     var blend = vgl.blend(),
-        prog = vgl.shaderProgram(),
-        posAttr = vgl.vertexAttribute('pos'),
-        fillColorAttr = vgl.vertexAttribute('fillColor'),
-        fillOpacityAttr = vgl.vertexAttribute('fillOpacity'),
-        modelViewUniform = new vgl.modelViewUniform('modelViewMatrix'),
-        projectionUniform = new vgl.projectionUniform('projectionMatrix'),
-        vertexShader = createVertexShader(),
-        fragmentShader = createFragmentShader();
+	prog = vgl.shaderProgram(),
+	posAttr = vgl.vertexAttribute('pos'),
+	fillColorAttr = vgl.vertexAttribute('fillColor'),
+	fillOpacityAttr = vgl.vertexAttribute('fillOpacity'),
+	modelViewUniform = new vgl.modelViewUniform('modelViewMatrix'),
+	projectionUniform = new vgl.projectionUniform('projectionMatrix'),
+	vertexShader = createVertexShader(),
+	fragmentShader = createFragmentShader();
 
     s_init.call(m_this, arg);
 
@@ -298,7 +298,7 @@ geo.gl.polygonFeature = function (arg) {
     s_update.call(m_this);
 
     if (m_this.dataTime().getMTime() >= m_this.buildTime().getMTime() ||
-        m_this.updateTime().getMTime() <= m_this.getMTime()) {
+	m_this.updateTime().getMTime() <= m_this.getMTime()) {
       m_this._build();
     }
 

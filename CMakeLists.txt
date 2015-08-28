@@ -305,12 +305,12 @@ if(${JS_HINT_TESTS})
   )
   add_test(
     NAME "jshint"
-    WORKING_DIRECTORY "${GEOJS_DEPLOY_DIR}"
-    COMMAND "${JSHINT_EXECUTABLE}" "--exclude" "src/vgl" "src"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    COMMAND "${JSHINT_EXECUTABLE}" "src"
   )
   add_test(
     NAME "jshint-gruntfile"
-    WORKING_DIRECTORY "${GEOJS_DEPLOY_DIR}"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     COMMAND "${JSHINT_EXECUTABLE}" "Gruntfile.js"
   )
 endif() # JS_HINT_TESTS

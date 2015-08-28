@@ -7,7 +7,7 @@ from selenium_test import FirefoxTest, ChromeTest,\
 
 class glContourBase(object):
     testCase = ('glContour',)
-    testRevision = 1
+    testRevision = 3
 
     def loadPage(self, params=None):
         self.resizeWindow(640, 480)
@@ -16,6 +16,7 @@ class glContourBase(object):
             url += '?' + urllib.urlencode(params)
         self.loadURL(url)
         self.wait()
+        self.resizeWindow(640, 480)
 
     def testGlContour(self):
         self.loadPage()

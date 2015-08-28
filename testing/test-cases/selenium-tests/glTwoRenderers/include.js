@@ -11,7 +11,7 @@ window.startTest = function (done) {
     .style('image', '/data/land_shallow_topo_2048.png');
   layer2.name = 'layer2';
   myMap.center({x: -40, y: 0});
-  myMap.zoom(0);
+  myMap.zoom(3.5);
 
   myMap.draw();
   myMap.onIdle(function () {

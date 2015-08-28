@@ -6,12 +6,13 @@ from selenium_test import FirefoxTest, ChromeTest,\
 
 class base(object):
     testCase = ('jqueryPlugin',)
-    testRevision = 3
+    testRevision = 4
 
     def loadPage(self):
         self.resizeWindow(800, 600)
         self.loadURL('jqueryPlugin/index.html')
         self.wait()
+        self.resizeWindow(800, 600)
 
     def test_jquery_draw(self):
         self.loadPage()

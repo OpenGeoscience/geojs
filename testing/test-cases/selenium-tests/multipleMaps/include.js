@@ -2,8 +2,8 @@
 window.startTest = function (done) {
   'use strict';
 
-  var map1 = geo.map({node: '#map1', zoom: 1, center: {x: -70, y: 40}}),
-      map2 = geo.map({node: '#map2', zoom: 1, center: {x: 70, y: 40}}),
+  var map1 = geo.map({node: '#map1', zoom: 3, center: {x: -70, y: 40}}),
+      map2 = geo.map({node: '#map2', zoom: 3, center: {x: 70, y: 40}}),
       done1, done2;
 
   map1.createLayer('osm', {baseUrl: '/data/tiles/'});

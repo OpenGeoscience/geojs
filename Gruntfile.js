@@ -337,7 +337,11 @@ module.exports = function (grunt) {
               '../common/css/examples.css'
             ];
             data.defaultJs = [
-              '../../built/geo.ext.min.js',
+              {
+                src: '../../built/geo.ext.min.js',
+                charset: 'UTF-8',
+                type: 'text/javascript'
+              },
               geolib,
               '../common/js/bootstrap.min.js',
               '../common/js/examples.js'
@@ -379,7 +383,7 @@ module.exports = function (grunt) {
             'common/css/examples.css'
           ],
           defaultJs: [
-            '../built/geo.ext.min.js',
+            {src: '../built/geo.ext.min.js', charset: 'UTF-8', type: 'text/javascript'},
             'common/js/bootstrap.min.js',
             'common/js/examples.js'
           ],

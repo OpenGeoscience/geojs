@@ -1,18 +1,18 @@
 #!/usr/bin/env python
 
-import time
 from selenium_test import FirefoxTest, ChromeTest,\
     setUpModule, tearDownModule
 
 
 class glPolygonsBase(object):
     testCase = ('glPolygons',)
-    testRevision = 3
+    testRevision = 4
 
     def loadPage(self):
         self.resizeWindow(640, 480)
         self.loadURL('glPolygons/index.html')
         self.wait()
+        self.resizeWindow(640, 480)
 
     def testGlPolygons(self):
         self.loadPage()
@@ -22,8 +22,8 @@ class glPolygonsBase(object):
 
     def testHoverPolygon(self):
         self.loadPage()
-        self.hover('#map', (355, 160))
-        
+        self.hover('#map', (365, 180))
+
         self.screenshotTest('hoverGlPolygons')
 
 
