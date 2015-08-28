@@ -58,7 +58,7 @@ $(function () {
       x: -157.965,
       y: 21.482
     },
-    zoom: 12
+    zoom: 8
   });
 
   // Add the osm layer
@@ -76,7 +76,7 @@ $(function () {
 
   // Load the data
   $.ajax({
-    url: 'oahu.json',
+    url: '../../data/oahu.json',
     success: function (data) {
       var contour = makeContour(data, vglLayer);
       // Draw the map
@@ -84,7 +84,7 @@ $(function () {
       /* After 10 second, load a denser data set */
       window.setTimeout(function () {
         $.ajax({
-          url: 'oahu-dense.json',
+          url: '../../data/oahu-dense.json',
           success: function (data) {
             vglLayer.deleteFeature(contour);
             contour = makeContour(data, vglLayer, contour);
