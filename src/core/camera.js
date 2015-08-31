@@ -260,7 +260,7 @@
      * @returns {vec4} The point in clip space coordinates
      */
     this._worldToClip4 = function (point) {
-      vec4.transformMat4(point, point, this._transform);
+      vec3.transformMat4(point, point, this._transform);
       return point;
     };
 
@@ -271,7 +271,7 @@
      * @returns {vec4} The point in world space coordinates
      */
     this._clipToWorld4 = function (point) {
-      vec4.transformMat4(point, point, this._inverse);
+      vec3.transformMat4(point, point, this._inverse);
       return point;
     };
 
@@ -432,6 +432,58 @@
         )
       );
       this._update();
+    };
+
+    /**
+     * Represent a glmatrix as a pretty-printed string.
+     * @param {mat4} mat A 4 x 4 matrix
+     * @param {number} prec The number of decimal places
+     * @returns {string}
+     */
+    this.ppMatrix = function (mat, prec) {
+      var t = mat;
+      prec = prec || 2;
+      function f(i) {
+        var d = t[i], s = d.toExponential(prec);
+        if (d >= 0) {
+          s = ' ' + s;
+        }
+        return s;
+      }
+      return [
+        [f(0), f(4), f(8), f(12)].join(' '),
+        [f(1), f(5), f(9), f(13)].join(' '),
+        [f(2), f(6), f(10), f(14)].join(' '),
+        [f(3), f(7), f(11), f(15)].join(' ')
+      ].join('\n');
+    };
+
+    /**
+     * Pretty print the transform matrix.
+     */
+    this.toString = function () {
+      return this.ppMatrix(this._transform);
+    };
+
+    /**
+     * Return a debugging string of the current camera state.
+     */
+    this.debug = function () {
+      return [
+        'view:',
+        this.ppMatrix(this._view),
+        'projection:',
+        this.ppMatrix(this._proj),
+        'transform:',
+        this.ppMatrix(this._transform)
+      ].join('\n');
+    };
+
+    /**
+     * Represent the value of the camera as its transform matrix.
+     */
+    this.valueOf = function () {
+      return this._transform;
     };
 
     // set up the projection matrix
