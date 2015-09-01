@@ -33,6 +33,7 @@
         "geomFeature.js",
         "graphFeature.js",
         "contourFeature.js",
+	"choroplethFeature.js",
         "transform.js",
         "renderer.js",
         "osmLayer.js",
@@ -45,7 +46,8 @@
         "init.js",
         "wigglemaps.js",
         "leaflet.js",
-        "clustering.js"
+        "clustering.js",
+	"scales.js"
       ]
     },
     "geo.gl": {
@@ -59,6 +61,7 @@
         "planeFeature.js",
         "polygonFeature.js",
         "contourFeature.js",
+	"choroplethFeature.js",
         "vglRenderer.js"
       ]
     },
