@@ -26,30 +26,30 @@ geo.choroplethFeature = function (arg) {
       s_data = this.data,
       m_choropleth = $
       .extend({},
-	      {
-		minColor: 'black',
-		minOpacity: 0,
-		maxColor: 'white',
-		maxOpacity: 1,
-		/* 9-step based on paraview bwr colortable */
-		colorRange: [
-		  {r: 0.07514311, g: 0.468049805, b: 1},
-		  {r: 0.468487184, g: 0.588057293, b: 1},
-		  {r: 0.656658579, g: 0.707001303, b: 1},
-		  {r: 0.821573924, g: 0.837809045, b: 1},
-		  {r: 0.943467973, g: 0.943498599, b: 0.943398095},
-		  {r: 1, g: 0.788626485, b: 0.750707739},
-		  {r: 1, g: 0.6289553, b: 0.568237474},
-		  {r: 1, g: 0.472800903, b: 0.404551679},
-		  {r: 0.916482116, g: 0.236630659, b: 0.209939162}
-		],
-		scale: d3.scale.quantize(),
-		value: function (geoJsonFeature) {
-		  return geoJsonFeature
-		    .properties.value;
-		}
-	      },
-	      arg.choropleth);
+              {
+                minColor: 'black',
+                minOpacity: 0,
+                maxColor: 'white',
+                maxOpacity: 1,
+                /* 9-step based on paraview bwr colortable */
+                colorRange: [
+                  {r: 0.07514311, g: 0.468049805, b: 1},
+                  {r: 0.468487184, g: 0.588057293, b: 1},
+                  {r: 0.656658579, g: 0.707001303, b: 1},
+                  {r: 0.821573924, g: 0.837809045, b: 1},
+                  {r: 0.943467973, g: 0.943498599, b: 0.943398095},
+                  {r: 1, g: 0.788626485, b: 0.750707739},
+                  {r: 1, g: 0.6289553, b: 0.568237474},
+                  {r: 1, g: 0.472800903, b: 0.404551679},
+                  {r: 0.916482116, g: 0.236630659, b: 0.209939162}
+                ],
+                scale: d3.scale.quantize(),
+                value: function (geoJsonFeature) {
+                  return geoJsonFeature
+                    .properties.value;
+                }
+              },
+              arg.choropleth);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -78,9 +78,9 @@ geo.choroplethFeature = function (arg) {
     }
     if (arg2 === undefined) {
       var choropleth = $.extend(
-	{},
-	m_choropleth,
-	arg1
+        {},
+        m_choropleth,
+        arg1
       );
       m_choropleth = choropleth;
     } else {
@@ -103,9 +103,9 @@ geo.choroplethFeature = function (arg) {
     if (key === undefined) {
       var all = {}, k;
       for (k in m_choropleth) {
-	if (m_choropleth.hasOwnProperty(k)) {
-	  all[k] = m_this.choropleth.get(k);
-	}
+        if (m_choropleth.hasOwnProperty(k)) {
+          all[k] = m_this.choropleth.get(k);
+        }
       }
       return all;
     }
@@ -126,23 +126,23 @@ geo.choroplethFeature = function (arg) {
       .createFeature('polygon', {
       })
       .data([{
-	type: "Polygon",
-	coordinates: coordinateArray
+        type: 'Polygon',
+        coordinates: coordinateArray
       }])
       .polygon(function (d) {
-	return {
-	  'outer': d.coordinates[0],
-	  'inner': d.coordinates[1] // undefined but ok
-	};				
+        return {
+          'outer': d.coordinates[0],
+          'inner': d.coordinates[1] // undefined but ok
+        };                              
       })
       .position(function(d){
-	return {
-	  x: d[0],
-	  y: d[1]
-	};
+        return {
+          x: d[0],
+          y: d[1]
+        };
       })
       .style({
-	'fillColor': fillColor
+        'fillColor': fillColor
       });
   };
 
@@ -154,24 +154,24 @@ geo.choroplethFeature = function (arg) {
    * @param geo.color
    * @return [{geo.feature}] 
    */
-  ////////////////////////////////////////////////////////////////////////////		
+  ////////////////////////////////////////////////////////////////////////////          
   this._featureToPolygons = function (feature, fillValue) {
 
     var arrayOfPolygonFeatures = [];
     
-    if (feature.geometry.type === "Polygon"){
+    if (feature.geometry.type === 'Polygon'){
       arrayOfPolygonFeatures = [
-	m_this
-	  ._addPolygonFeature(feature.geometry.coordinates, fillValue)
+        m_this
+          ._addPolygonFeature(feature.geometry.coordinates, fillValue)
       ];
       
     }
-    if (feature.geometry.type === "MultiiPolygon") {
+    if (feature.geometry.type === 'MultiPolygon') {
       arrayOfPolygonFeatures = feature.geometry
-	.coordinates
-	.map(function(polygonCoordinates){
-	  return m_this._addPolygonFeature(polygonCoordinates, fillValue);
-	});
+        .coordinates
+        .map(function(polygonCoordinates){
+          return m_this._addPolygonFeature(polygonCoordinates, fillValue);
+        });
     }
 
     return arrayOfPolygonFeatures;
@@ -187,7 +187,7 @@ geo.choroplethFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._generateScale = function (valueAccessor) {
     var extent =
-	d3.extent(m_this.data().features, valueAccessor || undefined);
+        d3.extent(m_this.data().features, valueAccessor || undefined);
 
     m_this.choropleth()
       .scale
@@ -205,22 +205,21 @@ geo.choroplethFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.createChoropleth = function () {
     var choropleth = m_this.choropleth,
-	data = m_this.data(),
-	opacityRange = choropleth.get('opacityRange')(),
-	rangeValues = choropleth.get('rangeValues')(),
-	valueFunc = choropleth.get('value'),
-	stepped = choropleth.get('stepped')();
-
+        data = m_this.data(),
+        opacityRange = choropleth.get('opacityRange')(),
+        rangeValues = choropleth.get('rangeValues')(),
+        valueFunc = choropleth.get('value'),
+        stepped = choropleth.get('stepped')();
 
     m_this._generateScale(valueFunc);
 
     return data.features.map(function(feature){
       var fillColor =
-	  m_this.choropleth()
-	  .scale(valueFunc(feature));
+          m_this.choropleth()
+          .scale(valueFunc(feature));
 
       return m_this
-	._featureToPolygons(feature, fillColor);
+        ._featureToPolygons(feature, fillColor);
     });
 
   };

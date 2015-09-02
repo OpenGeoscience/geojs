@@ -25,7 +25,7 @@ geo.gl.choroplethFeature = function (arg) {
       m_gl_polygons = null,
       s_exit = this._exit,
       s_init = this._init,
-      s_update = this._update;	
+      s_update = this._update;  
 
   /* Create the choropleth.  This calls the base class to generate the contours,
    * into the various gl uniforms and buffers.
@@ -56,7 +56,7 @@ geo.gl.choroplethFeature = function (arg) {
       return m_gl_polygons;
     } else {
       //call build on all polygons
-      return m_gl_polygons = createGLChoropleth();
+      return (m_gl_polygons = createGLChoropleth());
     }
   };
 
@@ -70,7 +70,7 @@ geo.gl.choroplethFeature = function (arg) {
   this._update = function () {
     s_update.call(m_this);
     if (m_this.dataTime().getMTime() >= m_this.buildTime().getMTime() ||
-	m_this.updateTime().getMTime() <= m_this.getMTime()) {
+        m_this.updateTime().getMTime() <= m_this.getMTime()) {
       m_this._build();
     }
   };
@@ -85,7 +85,7 @@ geo.gl.choroplethFeature = function (arg) {
     // somehow destroy subfeatures
     if (m_gl_polygons) {
       m_gl_polygons.map(function(polygon){
-	if (polygon) return polygon._exit();
+        if (polygon) return polygon._exit();
       });
     }
     m_this.renderer().contextRenderer().removeActor(m_actor);
