@@ -21,7 +21,7 @@ describe('geo.camera', function () {
     expect(dy).toBeLessThan(tol);
   }
 
-  function generateBoundsTest(xs, xe, ys, ye) {
+  function generateBoundsTest(xs, xe, ys, ye, projection) {
     return function () {
       var c = geo.camera(), w = 1, h = 1;
 
@@ -32,14 +32,17 @@ describe('geo.camera', function () {
       }
 
       c = new geo.camera();
-      c.projection = 'parallel';
-      c.bounds({
+      if (projection) {
+        c.projection = projection;
+      }
+      c.bounds = {
         left: xs,
         right: xe,
         bottom: ys,
         top: ye
-      });
-      it('bottom left', w2d({x: xs, y: ys}, {x: 0, y: 1}));
+      };
+      console.log(c.debug());
+      it('bottom left ', w2d({x: xs, y: ys}, {x: 0, y: 1}));
       it('top left', w2d({x: xs, y: ye}, {x: 0, y: 0}));
       it('bottom right', w2d({x: xe, y: ys}, {x: 1, y: 1}));
       it('top right', w2d({x: xe, y: ye}, {x: 1, y: 0}));
@@ -48,9 +51,59 @@ describe('geo.camera', function () {
   }
 
   describe('Initialization', function () {
-    describe('bounds [-1, 1] x [-1, 1]', generateBoundsTest(-1, 1, -1, 1));
-    describe('bounds [-10, 10] x [-1, 1]', generateBoundsTest(-10, 10, -1, 1));
-    describe('bounds [-1, 0] x [0, 1000]', generateBoundsTest(-1, 0, 0, 1000));
-    describe('bounds [-1, 10] x [-51, 1000]', generateBoundsTest(-1, 10, -51, 1000));
+    describe('default projection', function () {
+      describe(
+        'bounds [-1, 1] x [-1, 1]',
+        generateBoundsTest(-1, 1, -1, 1)
+      );
+      describe(
+        'bounds [-10, 10] x [-1, 1]',
+        generateBoundsTest(-10, 10, -1, 1)
+      );
+      describe(
+        'bounds [-1, 0] x [0, 1000]',
+        generateBoundsTest(-1, 0, 0, 1000)
+      );
+      describe(
+        'bounds [-1, 10] x [-51, 1000]',
+        generateBoundsTest(-1, 10, -51, 1000)
+      );
+    });
+    describe('parallel', function () {
+      describe(
+        'bounds [-1, 1] x [-1, 1]',
+        generateBoundsTest(-1, 1, -1, 1, 'parallel')
+      );
+      describe(
+        'bounds [-10, 10] x [-1, 1]',
+        generateBoundsTest(-10, 10, -1, 1, 'parallel')
+      );
+      describe(
+        'bounds [-1, 0] x [0, 1000]',
+        generateBoundsTest(-1, 0, 0, 1000, 'parallel')
+      );
+      describe(
+        'bounds [-1, 10] x [-51, 1000]',
+        generateBoundsTest(-1, 10, -51, 1000, 'parallel')
+      );
+    });
+    describe('perspective', function () {
+      describe(
+        'bounds [-1, 1] x [-1, 1]',
+        generateBoundsTest(-1, 1, -1, 1, 'perspective')
+      );
+      describe(
+        'bounds [-10, 10] x [-10, 10]',
+        generateBoundsTest(-10, 10, -10, 10, 'perspective')
+      );
+      describe(
+        'bounds [-1000, 0] x [0, 1000]',
+        generateBoundsTest(-1000, 0, 0, 1000, 'perspective')
+      );
+      describe(
+        'bounds [-1, 10] x [-10, 1]',
+        generateBoundsTest(-1, 10, -10, 1, 'perspective')
+      );
+    });
   });
 });

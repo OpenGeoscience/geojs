@@ -77,20 +77,28 @@
     this._inverse = mat4.create();
 
     /**
+     * Cached bounds object recomputed on demand.
+     * @protected
+     */
+    this._bounds = null;
+
+    /**
      * Set up the projection matrix for the current projection type.
      * @protected
      */
     this._createProj = function () {
+      var s = this.constructor.bounds.near / this.constructor.bounds.far;
+
       // call mat4.frustum or mat4.ortho here
       if (this._projection === 'perspective') {
         mat4.frustum(
           this._proj,
-          this.constructor.bounds.left,
-          this.constructor.bounds.right,
-          this.constructor.bounds.bottom,
-          this.constructor.bounds.top,
-          this.constructor.bounds.near,
-          this.constructor.bounds.far
+          this.constructor.bounds.left * s,
+          this.constructor.bounds.right * s,
+          this.constructor.bounds.bottom * s,
+          this.constructor.bounds.top * s,
+          -this.constructor.bounds.near,
+          -this.constructor.bounds.far
         );
       } else if (this._projection === 'parallel') {
         mat4.ortho(
@@ -111,6 +119,7 @@
      * @protected
      */
     this._update = function () {
+      this._bounds = null;
       mat4.multiply(this._transform, this._view, this._proj);
       mat4.invert(this._inverse, this._transform);
       this.geoTrigger(geo.event.camera.view, {
@@ -128,6 +137,33 @@
       },
       set: function (view) {
         mat4.copy(this._view, view);
+        this._update();
+      }
+    });
+
+    /**
+     * Getter/setter for the view bounds.
+     *
+     * @note The camera does not know about the viewport size or
+     * aspect ratio.  It is up to the caller to ensure the viewport
+     * has the correct aspect ratio to avoid non-homogenious scaling.
+     *
+     * If not provided, near and far bounds will be set to [-1, 1] by
+     * default.  We will probably want to change this to a unit specific
+     * value initialized by the map when drawing true 3D objects or
+     * tilting the camera.
+     *
+     * Returned near/far bounds are also -1, 1 for the moment.
+     */
+    Object.defineProperty(this, 'bounds', {
+      get: function () {
+        if (this._bounds === null) {
+          this._bounds = this._getBounds();
+        }
+        return this._bounds;
+      },
+      set: function (bounds) {
+        this._setBounds(bounds);
         this._update();
       }
     });
@@ -234,13 +270,33 @@
     };
 
     /**
+     * Reset the view matrix to its initial (identity) state.
+     * @protected
+     * @returns {this} Chainable
+     */
+    this._resetView = function () {
+      mat4.identity(this._view);
+      return this;
+    };
+
+    /**
      * Uses `mat4.translate` to translate the camera by the given vector amount.
      * @protected
-     * @param {vecs} offset The camera translation vector
+     * @param {vec3} offset The camera translation vector
      * @returns {this} Chainable
      */
     this._translate = function (offset) {
       mat4.translate(this._view, this._view, offset);
+    };
+
+    /**
+     * Uses `mat4.scale` to scale the camera by the given vector amount.
+     * @protected
+     * @param {vec3} scale The scaling vector
+     * @returns {this} Chainable
+     */
+    this._scale = function (scale) {
+      mat4.scale(this._view, this._view, scale);
     };
 
     /**
@@ -260,7 +316,8 @@
      * @returns {vec4} The point in clip space coordinates
      */
     this._worldToClip4 = function (point) {
-      vec3.transformMat4(point, point, this._transform);
+      point[2] -= 2;
+      vec4.transformMat4(point, point, this._transform);
       return point;
     };
 
@@ -271,7 +328,8 @@
      * @returns {vec4} The point in world space coordinates
      */
     this._clipToWorld4 = function (point) {
-      vec3.transformMat4(point, point, this._inverse);
+      vec4.transformMat4(point, point, this._inverse);
+      point[2] += 2;
       return point;
     };
 
@@ -292,7 +350,7 @@
     this.worldToDisplay4 = function (point, width, height) {
       this._worldToClip4(point);
       var w = 1;
-      if (this._projection === 'perspective') {
+      if (this._projection === 'perspective' && point[3]) {
         w = 1 / point[3];
       }
       point[0] = width * (1 + w * point[0]) / 2.0;
@@ -315,7 +373,7 @@
      */
     this.displayToWorld4 = function (point, width, height) {
       var w = 1;
-      if (this._projection === 'perspective') {
+      if (this._projection === 'perspective' && point[3]) {
         w = 1 / point[3];
       }
       point[0] = (2.0 * point[0] / width - 1) * w;
@@ -365,8 +423,35 @@
     };
 
     /**
+     * Calculate the current bounds in world coordinates from the
+     * current view matrix.  This computes a matrix vector multiplication
+     * so the result is cached for public facing methods.
+     *
+     * @protected
+     * @returns {object} bounds object
+     */
+    this._getBounds = function () {
+      var pt, bds = {};
+
+      // get lower bounds
+      pt = vec4.fromValues(-1, -1, 1, 1);
+      this._clipToWorld4(pt);
+      bds.left = pt[0] / pt[3];
+      bds.bottom = pt[1] / pt[3];
+
+      // get upper bounds
+      pt = vec4.fromValues(1, 1, 1, 1);
+      this._clipToWorld4(pt);
+      bds.right = pt[0] / pt[3];
+      bds.top = pt[1] / pt[3];
+
+      return bds;
+    };
+
+    /**
      * Sets the view matrix to the given world space bounds.
      *
+     * @protected
      * @param {object} bounds
      * @param {number} bounds.left
      * @param {number} bounds.right
@@ -374,31 +459,32 @@
      * @param {number} bounds.top
      * @param {number?} bounds.near
      * @param {number?} bounds.far
-     *
-     * @note The camera does not know about the viewport size or
-     * aspect ratio.  It is up to the caller to ensure the viewport
-     * has the correct aspect ratio to avoid non-homogenious scaling.
-     *
-     * If not provided, near and far bounds will be set to [-1, 1] by
-     * default.  We will probably want to change this to a unit specific
-     * value initialized by the map when drawing true 3D objects or
-     * tilting the camera.
+     * @return {this} Chainable
      */
-    this.bounds = function (bounds) {
+    this._setBounds = function (bounds) {
 
-      bounds.near = bounds.near || -1;
-      bounds.far = bounds.far || 1;
+      var translate = vec3.create(),
+          scale = vec3.create();
 
-      mat4.ortho(
-        this._view,
-        bounds.left,
-        bounds.right,
-        bounds.bottom,
-        bounds.top,
-        bounds.near,
-        bounds.far
-      );
-      this._update();
+      bounds.near = bounds.near || 1;
+      bounds.far = bounds.far || 0;
+
+      // reset view to the identity
+      this._resetView();
+
+      // scale to the new coordinate units
+      scale[0] = 2 / (bounds.right - bounds.left);
+      scale[1] = 2 / (bounds.top - bounds.bottom);
+      scale[2] = 1; // / (bounds.near - bounds.far);
+      this._scale(scale);
+
+      // translate to the new center
+      translate[0] = (bounds.left + bounds.right) / -2;
+      translate[1] = (bounds.bottom + bounds.top) / -2;
+      translate[2] = 0;
+      this._translate(translate);
+
+      return this;
     };
 
     /**
@@ -470,6 +556,8 @@
      */
     this.debug = function () {
       return [
+        'bounds',
+        JSON.stringify(this.bounds),
         'view:',
         this.ppMatrix(this._view),
         'projection:',
@@ -486,8 +574,16 @@
       return this._transform;
     };
 
+    // initialize the view matrix
+    this._resetView();
+
     // set up the projection matrix
     this.projection = spec.projection || 'parallel';
+
+    // trigger an initial update to set up the camera state
+    this._update();
+
+    return this;
   };
 
   /**
@@ -504,10 +600,10 @@
   geo.camera.bounds = {
     left: -1,
     right: 1,
-    bottom: -1,
     top: 1,
-    near: -1,
-    far: 1
+    bottom: -1,
+    far: -2,
+    near: -1
   };
 
   inherit(geo.camera, geo.object);
