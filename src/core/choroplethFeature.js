@@ -27,9 +27,7 @@ geo.choroplethFeature = function (arg) {
       m_choropleth = $
       .extend({},
               {
-                minColor: 'black',
                 minOpacity: 0,
-                maxColor: 'white',
                 maxOpacity: 1,
                 /* 9-step based on paraview bwr colortable */
                 colorRange: [

@@ -18,10 +18,10 @@ $(function () {
   var map = geo.map({
     node: '#map',
     center: {
-      x: -65.965,
+      x: -75.965,
       y: 39.482
     },
-    zoom: 4
+    zoom: 1
   });
 
   // Add the osm layer
