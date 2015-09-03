@@ -316,7 +316,6 @@
      * @returns {vec4} The point in clip space coordinates
      */
     this._worldToClip4 = function (point) {
-      point[2] -= 2;
       vec4.transformMat4(point, point, this._transform);
       return point;
     };
@@ -329,7 +328,6 @@
      */
     this._clipToWorld4 = function (point) {
       vec4.transformMat4(point, point, this._inverse);
-      point[2] += 2;
       return point;
     };
 
@@ -348,6 +346,7 @@
      * x/y coordinates.
      */
     this.worldToDisplay4 = function (point, width, height) {
+      point[2] -= 2;
       this._worldToClip4(point);
       var w = 1;
       if (this._projection === 'perspective' && point[3]) {
@@ -373,8 +372,11 @@
      */
     this.displayToWorld4 = function (point, width, height) {
       var w = 1;
-      if (this._projection === 'perspective' && point[3]) {
-        w = 1 / point[3];
+      if (this._projection === 'perspective') {
+        w = 2; // from default camera near and far clipping
+        if (point[3]) {
+          w = point[3];
+        }
       }
       point[0] = (2.0 * point[0] / width - 1) * w;
       point[1] = (-2.0 * point[1] / height + 1) * w;
@@ -389,14 +391,13 @@
      * @param {object} point The point in world coordinates
      * @param {number} point.x
      * @param {number} point.y
-     * @param {number} [point.z=0]
      * @param {number} width The viewport width
      * @param {number} height The viewport height
      * @returns {object} The point in display coordinates
      */
     this.worldToDisplay = function (point, width, height) {
       point = this.worldToDisplay4(
-        [point.x, point.y, point.z || 0, 1],
+        [point.x, point.y, 0, 1],
         width,
         height
       );
@@ -408,18 +409,17 @@
      * @param {object} point The point in display coordinates
      * @param {number} point.x
      * @param {number} point.y
-     * @param {number} [point.z=0]
      * @param {number} width The viewport width
      * @param {number} height The viewport height
      * @returns {object} The point in world coordinates
      */
     this.displayToWorld = function (point, width, height) {
       point = this.displayToWorld4(
-        [point.x, point.y, point.z || 0, 1],
+        [point.x, point.y, 0, 2],
         width,
         height
       );
-      return {x: point[0], y: point[1], z: point[2]};
+      return {x: point[0], y: point[1]};
     };
 
     /**
