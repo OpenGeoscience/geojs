@@ -151,15 +151,16 @@
      * @returns {Object} The tile indices
      */
     this.tileAtPoint = function (point, level) {
-      var map = this.map(),
-          upp = map.unitsPerPixel(level),
-          origin = map.origin();
+      var origin = this.map().origin();
+      point.x += origin.x;
+      point.y += origin.y;
+      point = this.toLevel(point, level);
       return {
         x: Math.floor(
-          (point.x + origin.x / upp) / this._options.tileWidth
+          point.x / this._options.tileWidth
         ),
         y: Math.floor(
-          (point.y + origin.y / upp) / this._options.tileHeight
+          point.y / this._options.tileHeight
         )
       };
     };
@@ -322,8 +323,8 @@
      * @returns {$.Deferred} resolves when all of the tiles are fetched
      */
     this.prefetch = function (level, center, size) {
-      var tiles, map = this.map();
-      center = this.toLevel(map.gcsToWorld(center), level);
+      var tiles;
+      center = this.toLevel(center, level);
       tiles = [this._getTiles(level, center, size, false)];
       return $.when.apply($,
         tiles.sort(this._loadMetric(center))
@@ -382,10 +383,10 @@
     this.fromLevel = function (coord, level) {
       var map = this.map(),
           scale = map.scale(),
-          upp = map.unitsPerPixel(level);
+          upp = Math.pow(2, -level);
       return {
-        x: coord.x * upp * scale.x,
-        y: coord.y * upp * scale.y
+        x: coord.x * scale.x / upp,
+        y: coord.y * scale.y / upp
       };
     };
 
@@ -400,10 +401,10 @@
     this.toLevel = function (coord, level) {
       var map = this.map(),
           scale = map.scale(),
-          upp = map.unitsPerPixel(level);
+          upp = Math.pow(2, level);
       return {
-        x: coord.x / (upp * scale.x),
-        y: coord.y / (upp * scale.y)
+        x: coord.x * upp / scale.x,
+        y: coord.y * upp / scale.y
       };
     };
 
@@ -507,7 +508,7 @@
     this._getViewBounds = function () {
       var map = this.map(),
           zoom = Math.floor(map.zoom()),
-          center = this.toLevel(map.gcsToWorld(map.center()), zoom),
+          center = _center(),
           size = map.size();
       return {
         level: zoom,
@@ -577,7 +578,30 @@
      * @returns {object} Local coordinates
      */
     this.toLocal = function (pt) {
-      return pt;
+      var map = this.map(),
+          origin = map.origin(),
+          scale = map.scale(),
+          unit = map.unitsPerPixel();
+      scale.x /= unit;
+      scale.y /= unit;
+      return geo.transform.affineForward({origin: origin, scale: scale}, [pt])[0];
+    };
+
+    /**
+     * Compute world coordinates from the given local coordinates.  The
+     * tile layer uses units of pixels relative to the world space
+     * coordinate origin.
+     * @param {object} pt A point in world space coordinates
+     * @returns {object} Local coordinates
+     */
+    this.fromLocal = function (pt) {
+      var map = this.map(),
+          origin = map.origin(),
+          scale = map.scale(),
+          unit = map.unitsPerPixel();
+      scale.x *= unit;
+      scale.y *= unit;
+      return geo.transform.affineInverse({origin: origin, scale: scale}, [pt])[0];
     };
 
     /**
@@ -588,23 +612,28 @@
       var map = this.map(),
           mapZoom = map.zoom(),
           zoom = Math.floor(mapZoom),
-          center = this.toLevel(map.gcsToWorld(map.center()), zoom),
+          center = _center(),
           size = map.size(),
           tiles;
 
-      tiles = this._getTiles(zoom, center, size, true);
+      tiles = this._getTiles(
+        zoom,
+        center,
+        size, true
+      );
 
       // Update the transform for the local layer coordinates
       this.canvas().css(
         'transform-origin',
         'center center'
       );
-/*
       this.canvas().css(
         'transform',
-        'translate(' + ')'
+        'translate(' +
+        (-center.x + size.width / 2) + 'px' + ',' +
+        (-center.y + size.height / 2) + 'px' + ')'
       );
-*/
+
       if (zoom === lastZoom &&
           center.x === lastX &&
           center.y === lastY) {
@@ -778,6 +807,20 @@
       }
       return false;
     };
+
+    /**
+     * Get the center of the map in layer coordinates.
+     * @private
+     */
+    var _center = function () {
+      var map = this.map(),
+          c = map.gcsToWorld(map.center()),
+          o = map.origin();
+      return this.toLevel(this.toLocal({
+        x: c.x + o.x,
+        y: c.y + o.y
+      }), Math.floor(map.zoom()));
+    }.bind(this);
 
     return this;
   };
