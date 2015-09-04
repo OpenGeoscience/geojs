@@ -449,8 +449,8 @@
 
       // apply a transform to place the image correctly
       tile.image.style.position = 'absolute';
-      tile.image.style.left = tile.left() + 'px';
-      tile.image.style.top = tile.bottom() + 'px';
+      tile.image.style.left = tile.left + 'px';
+      tile.image.style.top = tile.bottom + 'px';
 
       // add an error handler
       tile.catch(function () {
@@ -732,10 +732,10 @@
      * @returns {boolean}
      */
     this._outOfBounds = function (tile, bounds) {
-      return tile.bottom() > bounds.top ||
-             tile.left()   > bounds.right ||
-             tile.top()    < bounds.bottom ||
-             tile.right()  < bounds.left;
+      return tile.bottom > bounds.top ||
+             tile.left   > bounds.right ||
+             tile.top    < bounds.bottom ||
+             tile.right  < bounds.left;
     };
 
     /**

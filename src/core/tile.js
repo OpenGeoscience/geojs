@@ -117,56 +117,43 @@
     };
 
     /**
-     * Computes the global coordinates of the bottom edge relative to
-     * some given offset.  The offset can be provided to handle precision loss
-     * due to global dimensions as commonly occurs in pyramid tiling schemes.
-     *
-     * @param {Number?} offset The index to compute the coordinates relative to
-     * @returns {Object}
+     * Computes the global coordinates of the bottom edge.
+     * @returns {number}
      */
-    this.bottom = function (offset) {
-      var y = this.index.y - (offset || 0);
-      return this.size.y * y - this.overlap.y;
-    };
+    Object.defineProperty(this, 'bottom', {
+      get: function () {
+        return this.size.y * this.index.y - this.overlap.y;
+      }
+    });
 
     /**
-     * Computes the global coordinates of the left edge relative to
-     * some given offset.  The offset can be provided to handle precision loss
-     * due to global dimensions as commonly occurs in pyramid tiling schemes.
-     *
-     * @param {Number?} offset The index to compute the coordinates relative to
-     * @returns {Object}
+     * Computes the global coordinates of the top edge.
+     * @returns {number}
      */
-    this.left = function (offset) {
-      var x = this.index.x - (offset || 0);
-      return this.size.x * x - this.overlap.x;
-    };
+    Object.defineProperty(this, 'top', {
+      get: function () {
+        return this.size.y * (this.index.y + 1) - this.overlap.y;
+      }
+    });
 
     /**
-     * Computes the global coordinates of the top edge relative to
-     * some given offset.  The offset can be provided to handle precision loss
-     * due to global dimensions as commonly occurs in pyramid tiling schemes.
-     *
-     * @param {Number?} offset The index to compute the coordinates relative to
-     * @returns {Object}
+     * Computes the global coordinates of the left edge.
+     * @returns {number}
      */
-    this.top = function (offset) {
-      var y = this.index.y - (offset || 0) + 1;
-      return this.size.y * y + this.overlap.y;
-    };
+    Object.defineProperty(this, 'left', {
+      get: function () {
+        return this.size.x * this.index.x - this.overlap.x;
+      }
+    });
 
     /**
-     * Computes the global coordinates of the right edge relative to
-     * some given offset.  The offset can be provided to handle precision loss
-     * due to global dimensions as commonly occurs in pyramid tiling schemes.
-     *
-     * @param {Number?} offset The index to compute the coordinates relative to
-     * @returns {Object}
+     * Computes the global coordinates of the right edge.
+     * @returns {number}
      */
-    this.right = function (offset) {
-      var x = this.index.x - (offset || 0) + 1;
-      return this.size.x * x + this.overlap.x;
-    };
-    return this;
+    Object.defineProperty(this, 'right', {
+      get: function () {
+        return this.size.x * (this.index.x + 1) - this.overlap.x;
+      }
+    });
   };
 })();
