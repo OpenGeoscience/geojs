@@ -185,11 +185,11 @@ geo.transform.transformCoordinates = function (srcPrj, tgtPrj, coords) {
  */
 geo.transform.affineForward = function (def, coords) {
   'use strict';
-  var i, origin = def.origin, scale = def.scale;
+  var i, origin = def.origin, scale = def.scale || {x: 1, y: 1, z: 1};
   for (i = 0; i < coords.length; i += 1) {
     coords[i].x = (coords[i].x - origin.x) * scale.x;
     coords[i].y = (coords[i].y - origin.y) * scale.y;
-    coords[i].z = ((coords[i].z || 0) - origin.z) * scale.z;
+    coords[i].z = ((coords[i].z || 0) - (origin.z || 0)) * scale.z;
   }
   return coords;
 };
@@ -211,11 +211,11 @@ geo.transform.affineForward = function (def, coords) {
  */
 geo.transform.affineInverse = function (def, coords) {
   'use strict';
-  var i, origin = def.origin, scale = def.scale;
+  var i, origin = def.origin, scale = def.scale || {x: 1, y: 1, z: 1};
   for (i = 0; i < coords.length; i += 1) {
     coords[i].x = coords[i].x / scale.x + origin.x;
     coords[i].y = coords[i].y / scale.y + origin.y;
-    coords[i].z = (coords[i].z || 0) / scale.z + origin.z;
+    coords[i].z = (coords[i].z || 0) / scale.z + (origin.z || 0);
   }
   return coords;
 };

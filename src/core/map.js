@@ -85,7 +85,7 @@ geo.map = function (arg) {
       ),
       m_clampBounds,
       m_origin,
-      m_scale;
+      m_scale = {x: 1, y: 1, z: 1}; // constant for the moment
 
   arg.center = geo.util.normalizeCoordinates(arg.center);
   arg.autoResize = arg.autoResize === undefined ? true : arg.autoResize;
@@ -182,7 +182,7 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.zoom = function (val, direction) {
-    var scl, oldOrigin, oldScale, evt, oldZoom, bounds;
+    var oldOrigin, evt, oldZoom, bounds;
     if (val === undefined) {
       return m_zoom;
     }
@@ -207,17 +207,10 @@ geo.map = function (arg) {
     m_this.modified();
 
     // Check if this a new integer level
-    // if (Math.floor(val) !== Math.floor(oldZoom)) {
+    if (Math.floor(val) !== Math.floor(oldZoom)) {
       // update world coordinate reference
       oldOrigin = m_origin;
-      oldScale = m_scale;
       m_origin = $.extend({}, m_center);
-      scl = Math.pow(2, Math.floor(val));
-      m_scale = {
-        x: scl / (bounds.right - bounds.left),
-        y: scl / (bounds.top - bounds.bottom),
-        z: 1
-      };
 
       // trigger a worldChanged event
       m_this.geoTrigger(
@@ -225,12 +218,10 @@ geo.map = function (arg) {
         {
           map: m_this,
           origin: m_origin,
-          scale: m_scale,
-          originChange: geo.util.lincomb(-1, oldOrigin, 1, m_origin),
-          scaleChange: geo.util.scale($.extend({}, m_scale), oldScale, -1)
+          originChange: geo.util.lincomb(-1, oldOrigin, 1, m_origin)
         }
       );
-    // }
+    }
 
     camera_bounds(bounds);
     evt = {
@@ -263,8 +254,8 @@ geo.map = function (arg) {
     unit = m_this.unitsPerPixel(m_zoom);
 
     m_camera.pan({
-      x: delta.x * unit * m_scale.x,
-      y: delta.y * unit * m_scale.y
+      x: delta.x * unit,
+      y: delta.y * unit
     });
     m_center = m_camera.displayToWorld({
       x: m_width / 2,
@@ -455,7 +446,7 @@ geo.map = function (arg) {
       c = geo.transform.transformCoordinates(gcs, m_gcs, [c])[0];
     }
     return geo.transform.affineForward(
-      {origin: m_origin, scale: m_scale},
+      {origin: m_origin},
       [c]
     )[0];
   };
@@ -473,7 +464,7 @@ geo.map = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.worldToGcs = function (c, gcs) {
     c = geo.transform.affineInverse(
-      {origin: m_origin, scale: m_scale},
+      {origin: m_origin},
       [c]
     )[0];
     if (gcs !== undefined && gcs !== m_gcs) {
@@ -1211,12 +1202,12 @@ geo.map = function (arg) {
         centerx = (bounds.left + bounds.right) / 2,
         centery = (bounds.top + bounds.bottom) / 2,
         bds = {
-          left: (centerx - width * scl.x) * m_scale.x,
-          right: (centerx + width * scl.x) * m_scale.x,
-          bottom: (centery - height * scl.y) * m_scale.y,
-          top: (centery + height * scl.y) * m_scale.y
+          left: (centerx - width * scl.x),
+          right: (centerx + width * scl.x),
+          bottom: (centery - height * scl.y),
+          top: (centery + height * scl.y)
         };
-    m_camera.bounds(bds);
+    m_camera.bounds = bds;
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -1226,14 +1217,8 @@ geo.map = function (arg) {
   //
   ////////////////////////////////////////////////////////////////////////////
 
-  // Set the world origin and scaling
+  // Set the world origin
   m_origin = $.extend({}, m_center);
-  m_scale = Math.pow(2, Math.floor(m_zoom));
-  m_scale = {
-    x: m_scale / (m_maxBounds.right - m_maxBounds.left),
-    y: m_scale / (m_maxBounds.top - m_maxBounds.bottom),
-    z: 1
-  };
 
   // Fix the zoom level (minimum and initial)
   reset_minimum_zoom();

@@ -570,6 +570,17 @@
     };
 
     /**
+     * Compute local coordinates from the given world coordinates.  The
+     * tile layer uses units of pixels relative to the world space
+     * coordinate origin.
+     * @param {object} pt A point in world space coordinates
+     * @returns {object} Local coordinates
+     */
+    this.toLocal = function (pt) {
+      return pt;
+    };
+
+    /**
      * Update the view according to the map/camera.
      * @returns {this} Chainable
      */
@@ -579,8 +590,7 @@
           zoom = Math.floor(mapZoom),
           center = this.toLevel(map.gcsToWorld(map.center()), zoom),
           size = map.size(),
-          tiles,
-          camera = map.camera();
+          tiles;
 
       tiles = this._getTiles(zoom, center, size, true);
 
@@ -589,12 +599,12 @@
         'transform-origin',
         'center center'
       );
-
+/*
       this.canvas().css(
         'transform',
-        camera.css
+        'translate(' + ')'
       );
-
+*/
       if (zoom === lastZoom &&
           center.x === lastX &&
           center.y === lastY) {
