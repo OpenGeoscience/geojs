@@ -279,7 +279,7 @@ geo.map = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.center = function (coordinates) {
     if (coordinates === undefined) {
-      return m_center;
+      return $.extend({}, m_center);
     }
 
     // get the screen coordinates of the new center
@@ -919,8 +919,8 @@ geo.map = function (arg) {
 
     // calculate new center
     center = {
-      x: (bounds.left + bounds.right) / 2,
-      y: (bounds.top + bounds.bottom) / 2
+      x: (bounds.left + bounds.right) / 2 - m_origin.x,
+      y: (bounds.top + bounds.bottom) / 2 - m_origin.y
     };
 
 
@@ -1174,7 +1174,7 @@ geo.map = function (arg) {
       dx = m_maxBounds.right - bounds.right; // move left
     }
     if (bounds.bottom < m_maxBounds.bottom &&
-       bounds.top > m_maxBounds.top) {
+        bounds.top > m_maxBounds.top) {
       dy = 0;
     } else if (bounds.bottom < m_maxBounds.bottom) {
       dy = m_maxBounds.bottom - bounds.bottom; // move up
@@ -1197,8 +1197,8 @@ geo.map = function (arg) {
    */
   function camera_bounds(bounds) {
     var scl = camera_scaling(bounds),
-        width = (bounds.right - bounds.left),
-        height = (bounds.top - bounds.bottom),
+        width = (bounds.right - bounds.left) / 2,
+        height = (bounds.top - bounds.bottom) / 2,
         centerx = (bounds.left + bounds.right) / 2,
         centery = (bounds.top + bounds.bottom) / 2,
         bds = {
@@ -1218,7 +1218,7 @@ geo.map = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
 
   // Set the world origin
-  m_origin = $.extend({}, m_center);
+  m_origin = {x: 100000, y: 0};// $.extend({}, m_center);
 
   // Fix the zoom level (minimum and initial)
   reset_minimum_zoom();

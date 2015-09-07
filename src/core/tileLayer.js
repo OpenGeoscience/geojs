@@ -143,6 +143,36 @@
     };
 
     /**
+     * Returns the current origin tile and offset at the given zoom level.
+     * This is intended to be cached in the future to optimize coordinate
+     * transformations.
+     * @protected
+     * @param {number} level The target zoom level
+     * @returns {object} {index: {x, y}, offset: {x, y}}
+     */
+    this._origin = function (level) {
+      var origin = this.toLevel(this.toLocal(this.map().origin()), level),
+          o = this._options,
+          index, offset;
+
+      // get the tile index
+      index = {
+        x: Math.floor(origin.x / o.tileWidth),
+        y: Math.floor(origin.y / o.tileHeight)
+      };
+
+      // get the offset inside the tile (in pixels)
+      // This computation should contain the only numerically unstable
+      // subtraction in this class.  All other methods will assume
+      // coordinates are given relative to the map origin.
+      offset = {
+        x: origin.x - o.tileWidth * index.x,
+        y: origin.y - o.tileHeight * index.y
+      };
+      return {index: index, offset: offset};
+    };
+
+    /**
      * Returns the tile indices at the given point.
      * @param {Object} point The coordinates in pixels relative to the map origin.
      * @param {Number} point.x
@@ -151,16 +181,16 @@
      * @returns {Object} The tile indices
      */
     this.tileAtPoint = function (point, level) {
-      var origin = this.map().origin();
-      point.x += origin.x;
-      point.y += origin.y;
-      point = this.toLevel(point, level);
+      var o = this._origin(level);
+      point = this.toLevel(
+        this.toLocal(point), level
+      );
       return {
         x: Math.floor(
-          point.x / this._options.tileWidth
+          o.index.x + (o.offset.x + point.x) / this._options.tileWidth
         ),
         y: Math.floor(
-          point.y / this._options.tileHeight
+          o.index.y + (o.offset.y + point.y) / this._options.tileHeight
         )
       };
     };
@@ -231,19 +261,18 @@
     /**
      * Returns the optimal starting and ending tile indices
      * (inclusive) necessary to fill the given viewport.
-     * @param {Number} level The zoom level
-     * @param {Object} center The coordinates of the center (pixels)
-     * @param {Object} size The size of the viewport in pixels
+     * @param {number} level The zoom level
+     * @param {object} bounds The map bounds in world coordinates
      */
-    this._getTileRange = function (level, center, size) {
+    this._getTileRange = function (level, bounds) {
       return {
         start: this.tileAtPoint({
-          x: center.x - size.width / 2,
-          y: center.y - size.height / 2
+          x: bounds.left,
+          y: bounds.bottom
         }, level),
         end: this.tileAtPoint({
-          x: center.x + size.width / 2,
-          y: center.y + size.height / 2
+          x: bounds.right,
+          y: bounds.top
         }, level)
       };
     };
@@ -254,25 +283,17 @@
      * ordered by loading priority (center tiles first).
      *
      * @protected
-     * @param {Number} level The zoom level
-     * @param {Object} center The center point in pixels relative to the map origin
-     * @param {Number} center.x
-     * @param {Number} center.y
-     * @param {Object} size The viewport size in pixels
-     * @param {Number} size.width
-     * @param {Number} size.height
-     * @param {Boolean} sorted Return a sorted list
+     * @param {number} level The zoom level
+     * @param {object} bounds The map bounds
+     * @param {boolean} sorted Return a sorted list
      * @returns {geo.tile[]} An array of tile objects
      */
-    this._getTiles = function (level, center, size, sorted) {
-      var iCenter, i, j, tiles = [], index, nTilesLevel,
-          start, end, indexRange, source;
-
-      // indices of the center tile
-      iCenter = this.tileAtPoint(center, level);
+    this._getTiles = function (level, bounds, sorted) {
+      var i, j, tiles = [], index, nTilesLevel,
+          start, end, indexRange, source, center;
 
       // get the tile range to fetch
-      indexRange = this._getTileRange(level, center, size);
+      indexRange = this._getTileRange(level, bounds);
       start = indexRange.start;
       end = indexRange.end;
 
@@ -305,7 +326,11 @@
       }
 
       if (sorted) {
-        tiles.sort(this._loadMetric(iCenter));
+        center = {
+          x: (start.x + end.x) / 2,
+          y: (start.y + end.y) / 2
+        };
+        tiles.sort(this._loadMetric(center));
       }
       return tiles;
     };
@@ -313,24 +338,17 @@
     /**
      * Prefetches tiles up to a given zoom level around a given bounding box.
      *
-     * @param {Number} level The zoom level
-     * @param {Object} center The center point in GCS coordinates
-     * @param {Number} center.x
-     * @param {Number} center.y
-     * @param {Object} size The viewport size in pixels
-     * @param {Number} size.width
-     * @param {Number} size.height
+     * @param {number} level The zoom level
+     * @param {object} bounds The map bounds
      * @returns {$.Deferred} resolves when all of the tiles are fetched
      */
-    this.prefetch = function (level, center, size) {
+    this.prefetch = function (level, bounds) {
       var tiles;
-      center = this.toLevel(center, level);
-      tiles = [this._getTiles(level, center, size, false)];
+      tiles = [this._getTiles(level, bounds, true)];
       return $.when.apply($,
-        tiles.sort(this._loadMetric(center))
-          .map(function (tile) {
-            return tile.fetch();
-          })
+        tiles.map(function (tile) {
+          return tile.fetch();
+        })
       );
     };
 
@@ -381,12 +399,10 @@
      * @param {Number} level   The zoom level of the source coordinates
      */
     this.fromLevel = function (coord, level) {
-      var map = this.map(),
-          scale = map.scale(),
-          upp = Math.pow(2, -level);
+      var s = Math.pow(2, -level);
       return {
-        x: coord.x * scale.x / upp,
-        y: coord.y * scale.y / upp
+        x: coord.x * s,
+        y: coord.y * s
       };
     };
 
@@ -399,12 +415,10 @@
      * @param {Number} level   The zoom level of the new coordinates
      */
     this.toLevel = function (coord, level) {
-      var map = this.map(),
-          scale = map.scale(),
-          upp = Math.pow(2, level);
+      var s = Math.pow(2, level);
       return {
-        x: coord.x * upp / scale.x,
-        y: coord.y * upp / scale.y
+        x: coord.x * s,
+        y: coord.y * s
       };
     };
 
@@ -579,12 +593,11 @@
      */
     this.toLocal = function (pt) {
       var map = this.map(),
-          origin = map.origin(),
-          scale = map.scale(),
           unit = map.unitsPerPixel();
-      scale.x /= unit;
-      scale.y /= unit;
-      return geo.transform.affineForward({origin: origin, scale: scale}, [pt])[0];
+      return {
+        x: pt.x / unit,
+        y: pt.y / unit
+      };
     };
 
     /**
@@ -596,12 +609,11 @@
      */
     this.fromLocal = function (pt) {
       var map = this.map(),
-          origin = map.origin(),
-          scale = map.scale(),
           unit = map.unitsPerPixel();
-      scale.x *= unit;
-      scale.y *= unit;
-      return geo.transform.affineInverse({origin: origin, scale: scale}, [pt])[0];
+      return {
+        x: pt * unit,
+        y: pt * unit
+      };
     };
 
     /**
@@ -612,14 +624,12 @@
       var map = this.map(),
           mapZoom = map.zoom(),
           zoom = Math.floor(mapZoom),
-          center = _center(),
-          size = map.size(),
+          center = this.toLevel(this.toLocal(map.center()), zoom),
+          bounds = map.bounds(),
           tiles;
 
       tiles = this._getTiles(
-        zoom,
-        center,
-        size, true
+        zoom, bounds, true
       );
 
       // Update the transform for the local layer coordinates
@@ -630,8 +640,8 @@
       this.canvas().css(
         'transform',
         'translate(' +
-        (-center.x + size.width / 2) + 'px' + ',' +
-        (-center.y + size.height / 2) + 'px' + ')'
+        (-center.x) + 'px' + ',' +
+        (-center.y) + 'px' + ')'
       );
 
       if (zoom === lastZoom &&
@@ -814,11 +824,10 @@
      */
     var _center = function () {
       var map = this.map(),
-          c = map.gcsToWorld(map.center()),
-          o = map.origin();
+          c = map.gcsToWorld(map.center());
       return this.toLevel(this.toLocal({
-        x: c.x + o.x,
-        y: c.y + o.y
+        x: c.x,
+        y: c.y
       }), Math.floor(map.zoom()));
     }.bind(this);
 

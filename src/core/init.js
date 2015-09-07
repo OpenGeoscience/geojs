@@ -227,7 +227,7 @@ geo.createWidget  = function (name, layer, arg) {
     return geo.widgets.dom[name](options);
   }
 
-  throw "Cannot create unknown widget " + name;
+  throw new Error('Cannot create unknown widget ' + name);
 };
 
 // Add a polyfill for window.requestAnimationFrame.
