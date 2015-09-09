@@ -42,7 +42,7 @@ geo.planeFeature = function (arg) {
       return m_origin;
     } else if (val instanceof Array) {
       if (val.length > 3 || val.length < 2) {
-        throw "Upper left point requires point in 2 or 3 dimension";
+        throw "Origin point requires point in 2 or 3 dimension";
       }
       m_origin = val.slice(0);
       if (m_origin.length === 2) {
@@ -90,7 +90,7 @@ geo.planeFeature = function (arg) {
       return m_lowerRight;
     } else if (val instanceof Array) {
       if (val.length > 3 || val.length < 2) {
-        throw "Upper left point requires point in 2 or 3 dimension";
+        throw "Lower right point requires point in 2 or 3 dimension";
       }
       m_lowerRight = val.slice(0);
       if (m_lowerRight.length === 2) {

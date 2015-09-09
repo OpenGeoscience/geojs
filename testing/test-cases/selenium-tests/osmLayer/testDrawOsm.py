@@ -6,7 +6,7 @@ from selenium_test import FirefoxTest, ChromeTest,\
 
 class osmBase(object):
     testCase = ('osmLayer',)
-    testRevision = 9
+    testRevision = 11
 
     def waitForIdle(self, timeout=5):
         self.runScript(
@@ -18,6 +18,7 @@ class osmBase(object):
         self.resizeWindow(640, 480)
         self.loadURL('osmLayer/index.html')
         self.wait()
+        self.resizeWindow(640, 480)
 
     def test_osm_draw(self):
         testName = 'osmDraw'

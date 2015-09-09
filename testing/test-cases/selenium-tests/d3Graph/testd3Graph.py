@@ -11,6 +11,7 @@ class d3GraphBase(object):
         self.resizeWindow(640, 480)
         self.loadURL('d3Graph/index.html')
         self.wait()
+        self.resizeWindow(640, 480)
 
     def testd3DrawGraph(self):
         self.loadPage()
@@ -21,12 +22,12 @@ class d3GraphBase(object):
 
 class FirefoxOSM(d3GraphBase, FirefoxTest):
     testCase = d3GraphBase.testCase + ('firefox',)
-    testRevision = 6
+    testRevision = 8
 
 
 class ChromeOSM(d3GraphBase, ChromeTest):
     testCase = d3GraphBase.testCase + ('chrome',)
-    testRevision = 7
+    testRevision = 9
 
 
 if __name__ == '__main__':

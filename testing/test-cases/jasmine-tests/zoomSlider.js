@@ -27,7 +27,7 @@ describe('zoom slider', function () {
         done();
       });
   });
-  
+
   it('Zoom out button', function (done) {
     map.zoom(2);
     var eps;

@@ -11,6 +11,7 @@ class d3LinesBase(object):
         self.resizeWindow(640, 480)
         self.loadURL('d3Lines/index.html')
         self.wait()
+        self.resizeWindow(640, 480)
 
     def testd3DrawLines(self):
         self.loadPage()
@@ -21,12 +22,12 @@ class d3LinesBase(object):
 
 class FirefoxOSM(d3LinesBase, FirefoxTest):
     testCase = d3LinesBase.testCase + ('firefox',)
-    testRevision = 7
+    testRevision = 8
 
 
 class ChromeOSM(d3LinesBase, ChromeTest):
     testCase = d3LinesBase.testCase + ('chrome',)
-    testRevision = 8
+    testRevision = 9
 
 
 if __name__ == '__main__':

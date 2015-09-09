@@ -188,8 +188,12 @@ documentation for each of the classes.
 `geo.gui.widget <http://opengeoscience.github.io/geojs/apidocs/geo.gui.widget.html>`_
     This is an abstract interface for creating widgets that the user can interact with.
 
-        * `geo.gui.sliderWidget <http://opengeoscience.github.io/geojs/apidocs/geo.gui.sliderWidget.html>`_
-        * `geo.gui.legendWidget <http://opengeoscience.github.io/geojs/apidocs/geo.gui.legendWidget.html>`_
+        * `geo.gui.domWidget <http://opengeoscience.github.io/geojs/apidocs/geo.gui.domWidget.html>`_
+        * `geo.gui.svgWidget <http://opengeoscience.github.io/geojs/apidocs/geo.gui.svgWidget.html>`_
+
+         * `geo.gui.sliderWidget <http://opengeoscience.github.io/geojs/apidocs/geo.gui.sliderWidget.html>`_
+         * `geo.gui.legendWidget <http://opengeoscience.github.io/geojs/apidocs/geo.gui.legendWidget.html>`_
+
 
 `geo.mapInteractor <http://opengeoscience.github.io/geojs/apidocs/geo.mapInteractor.html>`_
     This class handles all mouse and keyboard events for the map.  Users can customize

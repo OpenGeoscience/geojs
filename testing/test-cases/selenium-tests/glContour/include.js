@@ -18,7 +18,7 @@ window.startTest = function (done) {
       x: -157.965,
       y: 21.482
     },
-    zoom: 8
+    zoom: 10
   };
 
   var myMap = window.geoTests.createOsmMap(mapOptions, {}, true);

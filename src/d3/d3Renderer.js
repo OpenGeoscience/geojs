@@ -261,10 +261,16 @@ geo.d3.d3Renderer = function (arg) {
    * Initialize
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._init = function () {
+  this._init = function (arg) {
     if (!m_this.canvas()) {
       var canvas;
-      m_svg = d3.select(m_this.layer().node().get(0)).append('svg');
+      arg.widget = arg.widget || false;
+
+      if ('d3Parent' in arg) {
+        m_svg = d3.select(arg.d3Parent).append('svg');
+      } else {
+        m_svg = d3.select(m_this.layer().node().get(0)).append('svg');
+      }
 
       // create a global svg definitions element
       m_defs = m_svg.append('defs');
@@ -298,7 +304,10 @@ geo.d3.d3Renderer = function (arg) {
           .attr('in', 'SourceGraphic')
           .attr('in2', 'invertOut')
           .attr('mode', 'normal');
-      canvas = m_svg.append('g');
+
+      if (!arg.widget) {
+        canvas = m_svg.append('g');
+      }
 
       shadow = m_defs.append('filter')
           .attr('id', 'geo-blur')
@@ -317,9 +326,13 @@ geo.d3.d3Renderer = function (arg) {
       m_svg.attr('width', m_this.layer().node().width());
       m_svg.attr('height', m_this.layer().node().height());
 
-      canvas.attr('class', 'group-' + m_this._d3id());
+      if (!arg.widget) {
+        canvas.attr('class', 'group-' + m_this._d3id());
 
-      m_this.canvas(canvas);
+        m_this.canvas(canvas);
+      } else {
+        m_this.canvas(m_svg);
+      }
     }
   };
 

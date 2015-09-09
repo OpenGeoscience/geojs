@@ -76,7 +76,8 @@ geo.pointFeature = function (arg) {
 
     // generate the cluster tree from the raw data
     var position = m_this.position();
-    m_clusterTree = new geo.util.ClusterGroup(opts);
+    m_clusterTree = new geo.util.ClusterGroup(
+        opts, this.layer().width(), this.layer().height());
 
     m_allData.forEach(function (d, i) {
 

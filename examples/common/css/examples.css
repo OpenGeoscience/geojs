@@ -4,8 +4,9 @@ html, body {
 }
 
 #map {
+  top: -21px;
   width: 100%;
   height: calc(100% - 60px);
-  position: absolute;
-  top: 60px;
+  position: relative;
+  overflow: hidden;
 }

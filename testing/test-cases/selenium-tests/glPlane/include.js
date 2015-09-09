@@ -3,8 +3,7 @@ window.startTest = function (done) {
 
   var mapOptions = {
     node: '#map',
-    zoom: 6,
-    center: [0.0, 0.0]
+    clampBounds: false
   },
   myMap = geo.map(mapOptions),
   layer = myMap.createLayer('feature');
@@ -31,12 +30,13 @@ window.startTest = function (done) {
   }
   layer.createFeature('plane')
     .origin([0.0, 0.0])
-    .upperLeft([0.0, 1.0])
-    .lowerRight([2.0, 0.0])
+    .upperLeft([0, 90])
+    .lowerRight([180, 0])
     .style({
       image: '/data/land_shallow_topo_2048.png',
       opacity: opacity ? opacity : undefined
     });
+  myMap.bounds({lowerLeft: {x: 0, y: 0}, upperRight: {x: 180, y: 90}});
   myMap.draw();
 
   myMap.onIdle(done);

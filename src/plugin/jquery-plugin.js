@@ -268,6 +268,7 @@
       layers: [],
       data: [],
       tileUrl: 'http://tile.openstreetmap.org/<zoom>/<x>/<y>.png',
+      attribution: undefined,
 
       // These options are for future use, but shouldn't
       // be changed at the moment, so they aren't documented.
@@ -300,7 +301,8 @@
         this.options.baseLayer,
         {
           renderer: this.options.baseRenderer,
-          tileUrl: this.options.tileUrl
+          tileUrl: this.options.tileUrl,
+          attribution: this.options.attribution
         }
       );
 

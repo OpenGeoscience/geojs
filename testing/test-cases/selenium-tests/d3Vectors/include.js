@@ -1,7 +1,7 @@
 window.startTest = function (done) {
   'use strict';
 
-  var mapOptions = { center : { y: 40, x: -105 } };
+  var mapOptions = { zoom: 3.5, center : { y: 40, x: -105 } };
 
   var myMap = window.geoTests.createOsmMap(mapOptions);
 

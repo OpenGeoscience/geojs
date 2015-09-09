@@ -6,12 +6,13 @@ from selenium_test import FirefoxTest, ChromeTest,\
 
 class osmBase(object):
     testCase = ('multipleMaps',)
-    testRevision = 2
+    testRevision = 4
 
     def loadPage(self):
         self.resizeWindow(320, 480)
         self.loadURL('multipleMaps/index.html')
         self.wait()
+        self.resizeWindow(320, 480)
 
     def test_2map_draw(self):
         testName = 'twoMapDraw'

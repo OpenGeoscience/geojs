@@ -76,12 +76,12 @@ geo.registerRenderer = function (name, func) {
  * Create new instance of the renderer
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.createRenderer  = function (name, layer, canvas) {
+geo.createRenderer  = function (name, layer, canvas, options) {
   "use strict";
 
   if (geo.renderers.hasOwnProperty(name)) {
     var ren = geo.renderers[name](
-      {"layer": layer, "canvas": canvas}
+      {layer: layer, canvas: canvas, options: options}
     );
     ren._init();
     return ren;
@@ -226,20 +226,18 @@ if (!Math.log2) {
 
 /*global geo*/
 
-geo.version = "0.4.2";
+geo.version = "0.5.0";
 
 //////////////////////////////////////////////////////////////////////////////
 /**
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global vgl, ogs, vec4, inherit, $*/
+/*global vgl: true, ogs: true, inherit*/
+/*exported vgl, inherit*/
 //////////////////////////////////////////////////////////////////////////////
 
-if(typeof ogs === 'undefined') {
+if (typeof ogs === 'undefined') {
   var ogs = {};
 }
 
@@ -251,18 +249,18 @@ if(typeof ogs === 'undefined') {
  * @returns {*|{}}
  */
 //////////////////////////////////////////////////////////////////////////////
-ogs.namespace = function(ns_string) {
+ogs.namespace = function (ns_string) {
   'use strict';
 
   var parts = ns_string.split('.'), parent = ogs, i;
 
   // strip redundant leading global
-  if (parts[0] === "ogs") {
+  if (parts[0] === 'ogs') {
     parts = parts.slice(1);
   }
   for (i = 0; i < parts.length; i += 1) {
     // create a property if it doesn't exist
-    if (typeof parent[parts[i]] === "undefined") {
+    if (typeof parent[parts[i]] === 'undefined') {
       parent[parts[i]] = {};
     }
     parent = parent[parts[i]];
@@ -271,7 +269,7 @@ ogs.namespace = function(ns_string) {
 };
 
 /** vgl namespace */
-var vgl = ogs.namespace("gl");
+var vgl = ogs.namespace('gl');
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -282,9 +280,9 @@ var vgl = ogs.namespace("gl");
  */
 //////////////////////////////////////////////////////////////////////////////
 function inherit(C, P) {
-  "use strict";
+  'use strict';
 
-  var F = function() {
+  var F = function () {
   };
   F.prototype = P.prototype;
   C.prototype = new F();
@@ -300,13 +298,13 @@ function inherit(C, P) {
  * @returns {number} *
  */
 //////////////////////////////////////////////////////////////////////////////
-Object.size = function(obj) {
-  "use strict";
+Object.size = function (obj) {
+  'use strict';
 
   var size = 0, key = null;
   for (key in obj) {
     if (obj.hasOwnProperty(key)) {
-      size++;
+      size += 1;
     }
   }
   return size;
@@ -317,10 +315,7 @@ Object.size = function(obj) {
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2, bitwise: true*/
-
-/*global vgl, gl, ogs, vec3, vec4, mat4, inherit, $*/
+/*global vgl*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -335,18 +330,309 @@ Object.size = function(obj) {
  */
 //////////////////////////////////////////////////////////////////////////////
 vgl.GL = {
-   ColorBufferBit : 0x00004000,
-   DepthBufferBit : 0x00000100
+  ACTIVE_ATTRIBUTES : 0x8B89,
+  ACTIVE_TEXTURE : 0x84E0,
+  ACTIVE_UNIFORMS : 0x8B86,
+  ALIASED_LINE_WIDTH_RANGE : 0x846E,
+  ALIASED_POINT_SIZE_RANGE : 0x846D,
+  ALPHA : 0x1906,
+  ALPHA_BITS : 0x0D55,
+  ALWAYS : 0x0207,
+  ARRAY_BUFFER : 0x8892,
+  ARRAY_BUFFER_BINDING : 0x8894,
+  ATTACHED_SHADERS : 0x8B85,
+  BACK : 0x0405,
+  BLEND : 0x0BE2,
+  BLEND_COLOR : 0x8005,
+  BLEND_DST_ALPHA : 0x80CA,
+  BLEND_DST_RGB : 0x80C8,
+  BLEND_EQUATION : 0x8009,
+  BLEND_EQUATION_ALPHA : 0x883D,
+  BLEND_EQUATION_RGB : 0x8009,
+  BLEND_SRC_ALPHA : 0x80CB,
+  BLEND_SRC_RGB : 0x80C9,
+  BLUE_BITS : 0x0D54,
+  BOOL : 0x8B56,
+  BOOL_VEC2 : 0x8B57,
+  BOOL_VEC3 : 0x8B58,
+  BOOL_VEC4 : 0x8B59,
+  BROWSER_DEFAULT_WEBGL : 0x9244,
+  BUFFER_SIZE : 0x8764,
+  BUFFER_USAGE : 0x8765,
+  BYTE : 0x1400,
+  CCW : 0x0901,
+  CLAMP_TO_EDGE : 0x812F,
+  COLOR_ATTACHMENT0 : 0x8CE0,
+  COLOR_BUFFER_BIT : 0x00004000,
+  COLOR_CLEAR_VALUE : 0x0C22,
+  COLOR_WRITEMASK : 0x0C23,
+  COMPILE_STATUS : 0x8B81,
+  COMPRESSED_TEXTURE_FORMATS : 0x86A3,
+  CONSTANT_ALPHA : 0x8003,
+  CONSTANT_COLOR : 0x8001,
+  CONTEXT_LOST_WEBGL : 0x9242,
+  CULL_FACE : 0x0B44,
+  CULL_FACE_MODE : 0x0B45,
+  CURRENT_PROGRAM : 0x8B8D,
+  CURRENT_VERTEX_ATTRIB : 0x8626,
+  CW : 0x0900,
+  DECR : 0x1E03,
+  DECR_WRAP : 0x8508,
+  DELETE_STATUS : 0x8B80,
+  DEPTH_ATTACHMENT : 0x8D00,
+  DEPTH_BITS : 0x0D56,
+  DEPTH_BUFFER_BIT : 0x00000100,
+  DEPTH_CLEAR_VALUE : 0x0B73,
+  DEPTH_COMPONENT : 0x1902,
+  DEPTH_COMPONENT16 : 0x81A5,
+  DEPTH_FUNC : 0x0B74,
+  DEPTH_RANGE : 0x0B70,
+  DEPTH_STENCIL : 0x84F9,
+  DEPTH_STENCIL_ATTACHMENT : 0x821A,
+  DEPTH_TEST : 0x0B71,
+  DEPTH_WRITEMASK : 0x0B72,
+  DITHER : 0x0BD0,
+  DONT_CARE : 0x1100,
+  DST_ALPHA : 0x0304,
+  DST_COLOR : 0x0306,
+  DYNAMIC_DRAW : 0x88E8,
+  ELEMENT_ARRAY_BUFFER : 0x8893,
+  ELEMENT_ARRAY_BUFFER_BINDING : 0x8895,
+  EQUAL : 0x0202,
+  FASTEST : 0x1101,
+  FLOAT : 0x1406,
+  FLOAT_MAT2 : 0x8B5A,
+  FLOAT_MAT3 : 0x8B5B,
+  FLOAT_MAT4 : 0x8B5C,
+  FLOAT_VEC2 : 0x8B50,
+  FLOAT_VEC3 : 0x8B51,
+  FLOAT_VEC4 : 0x8B52,
+  FRAGMENT_SHADER : 0x8B30,
+  FRAMEBUFFER : 0x8D40,
+  FRAMEBUFFER_ATTACHMENT_OBJECT_NAME : 0x8CD1,
+  FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE : 0x8CD0,
+  FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE : 0x8CD3,
+  FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL : 0x8CD2,
+  FRAMEBUFFER_BINDING : 0x8CA6,
+  FRAMEBUFFER_COMPLETE : 0x8CD5,
+  FRAMEBUFFER_INCOMPLETE_ATTACHMENT : 0x8CD6,
+  FRAMEBUFFER_INCOMPLETE_DIMENSIONS : 0x8CD9,
+  FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT : 0x8CD7,
+  FRAMEBUFFER_UNSUPPORTED : 0x8CDD,
+  FRONT : 0x0404,
+  FRONT_AND_BACK : 0x0408,
+  FRONT_FACE : 0x0B46,
+  FUNC_ADD : 0x8006,
+  FUNC_REVERSE_SUBTRACT : 0x800B,
+  FUNC_SUBTRACT : 0x800A,
+  GENERATE_MIPMAP_HINT : 0x8192,
+  GEQUAL : 0x0206,
+  GREATER : 0x0204,
+  GREEN_BITS : 0x0D53,
+  HIGH_FLOAT : 0x8DF2,
+  HIGH_INT : 0x8DF5,
+  INCR : 0x1E02,
+  INCR_WRAP : 0x8507,
+  INT : 0x1404,
+  INT_VEC2 : 0x8B53,
+  INT_VEC3 : 0x8B54,
+  INT_VEC4 : 0x8B55,
+  INVALID_ENUM : 0x0500,
+  INVALID_FRAMEBUFFER_OPERATION : 0x0506,
+  INVALID_OPERATION : 0x0502,
+  INVALID_VALUE : 0x0501,
+  INVERT : 0x150A,
+  KEEP : 0x1E00,
+  LEQUAL : 0x0203,
+  LESS : 0x0201,
+  LINEAR : 0x2601,
+  LINEAR_MIPMAP_LINEAR : 0x2703,
+  LINEAR_MIPMAP_NEAREST : 0x2701,
+  LINES : 0x0001,
+  LINE_LOOP : 0x0002,
+  LINE_STRIP : 0x0003,
+  LINE_WIDTH : 0x0B21,
+  LINK_STATUS : 0x8B82,
+  LOW_FLOAT : 0x8DF0,
+  LOW_INT : 0x8DF3,
+  LUMINANCE : 0x1909,
+  LUMINANCE_ALPHA : 0x190A,
+  MAX_COMBINED_TEXTURE_IMAGE_UNITS : 0x8B4D,
+  MAX_CUBE_MAP_TEXTURE_SIZE : 0x851C,
+  MAX_FRAGMENT_UNIFORM_VECTORS : 0x8DFD,
+  MAX_RENDERBUFFER_SIZE : 0x84E8,
+  MAX_TEXTURE_IMAGE_UNITS : 0x8872,
+  MAX_TEXTURE_SIZE : 0x0D33,
+  MAX_VARYING_VECTORS : 0x8DFC,
+  MAX_VERTEX_ATTRIBS : 0x8869,
+  MAX_VERTEX_TEXTURE_IMAGE_UNITS : 0x8B4C,
+  MAX_VERTEX_UNIFORM_VECTORS : 0x8DFB,
+  MAX_VIEWPORT_DIMS : 0x0D3A,
+  MEDIUM_FLOAT : 0x8DF1,
+  MEDIUM_INT : 0x8DF4,
+  MIRRORED_REPEAT : 0x8370,
+  NEAREST : 0x2600,
+  NEAREST_MIPMAP_LINEAR : 0x2702,
+  NEAREST_MIPMAP_NEAREST : 0x2700,
+  NEVER : 0x0200,
+  NICEST : 0x1102,
+  NONE : 0,
+  NOTEQUAL : 0x0205,
+  NO_ERROR : 0,
+  ONE : 1,
+  ONE_MINUS_CONSTANT_ALPHA : 0x8004,
+  ONE_MINUS_CONSTANT_COLOR : 0x8002,
+  ONE_MINUS_DST_ALPHA : 0x0305,
+  ONE_MINUS_DST_COLOR : 0x0307,
+  ONE_MINUS_SRC_ALPHA : 0x0303,
+  ONE_MINUS_SRC_COLOR : 0x0301,
+  OUT_OF_MEMORY : 0x0505,
+  PACK_ALIGNMENT : 0x0D05,
+  POINTS : 0x0000,
+  POLYGON_OFFSET_FACTOR : 0x8038,
+  POLYGON_OFFSET_FILL : 0x8037,
+  POLYGON_OFFSET_UNITS : 0x2A00,
+  RED_BITS : 0x0D52,
+  RENDERBUFFER : 0x8D41,
+  RENDERBUFFER_ALPHA_SIZE : 0x8D53,
+  RENDERBUFFER_BINDING : 0x8CA7,
+  RENDERBUFFER_BLUE_SIZE : 0x8D52,
+  RENDERBUFFER_DEPTH_SIZE : 0x8D54,
+  RENDERBUFFER_GREEN_SIZE : 0x8D51,
+  RENDERBUFFER_HEIGHT : 0x8D43,
+  RENDERBUFFER_INTERNAL_FORMAT : 0x8D44,
+  RENDERBUFFER_RED_SIZE : 0x8D50,
+  RENDERBUFFER_STENCIL_SIZE : 0x8D55,
+  RENDERBUFFER_WIDTH : 0x8D42,
+  RENDERER : 0x1F01,
+  REPEAT : 0x2901,
+  REPLACE : 0x1E01,
+  RGB : 0x1907,
+  RGB565 : 0x8D62,
+  RGB5_A1 : 0x8057,
+  RGBA : 0x1908,
+  RGBA4 : 0x8056,
+  SAMPLER_2D : 0x8B5E,
+  SAMPLER_CUBE : 0x8B60,
+  SAMPLES : 0x80A9,
+  SAMPLE_ALPHA_TO_COVERAGE : 0x809E,
+  SAMPLE_BUFFERS : 0x80A8,
+  SAMPLE_COVERAGE : 0x80A0,
+  SAMPLE_COVERAGE_INVERT : 0x80AB,
+  SAMPLE_COVERAGE_VALUE : 0x80AA,
+  SCISSOR_BOX : 0x0C10,
+  SCISSOR_TEST : 0x0C11,
+  SHADER_TYPE : 0x8B4F,
+  SHADING_LANGUAGE_VERSION : 0x8B8C,
+  SHORT : 0x1402,
+  SRC_ALPHA : 0x0302,
+  SRC_ALPHA_SATURATE : 0x0308,
+  SRC_COLOR : 0x0300,
+  STATIC_DRAW : 0x88E4,
+  STENCIL_ATTACHMENT : 0x8D20,
+  STENCIL_BACK_FAIL : 0x8801,
+  STENCIL_BACK_FUNC : 0x8800,
+  STENCIL_BACK_PASS_DEPTH_FAIL : 0x8802,
+  STENCIL_BACK_PASS_DEPTH_PASS : 0x8803,
+  STENCIL_BACK_REF : 0x8CA3,
+  STENCIL_BACK_VALUE_MASK : 0x8CA4,
+  STENCIL_BACK_WRITEMASK : 0x8CA5,
+  STENCIL_BITS : 0x0D57,
+  STENCIL_BUFFER_BIT : 0x00000400,
+  STENCIL_CLEAR_VALUE : 0x0B91,
+  STENCIL_FAIL : 0x0B94,
+  STENCIL_FUNC : 0x0B92,
+  STENCIL_INDEX : 0x1901,
+  STENCIL_INDEX8 : 0x8D48,
+  STENCIL_PASS_DEPTH_FAIL : 0x0B95,
+  STENCIL_PASS_DEPTH_PASS : 0x0B96,
+  STENCIL_REF : 0x0B97,
+  STENCIL_TEST : 0x0B90,
+  STENCIL_VALUE_MASK : 0x0B93,
+  STENCIL_WRITEMASK : 0x0B98,
+  STREAM_DRAW : 0x88E0,
+  SUBPIXEL_BITS : 0x0D50,
+  TEXTURE : 0x1702,
+  TEXTURE0 : 0x84C0,
+  TEXTURE1 : 0x84C1,
+  TEXTURE10 : 0x84CA,
+  TEXTURE11 : 0x84CB,
+  TEXTURE12 : 0x84CC,
+  TEXTURE13 : 0x84CD,
+  TEXTURE14 : 0x84CE,
+  TEXTURE15 : 0x84CF,
+  TEXTURE16 : 0x84D0,
+  TEXTURE17 : 0x84D1,
+  TEXTURE18 : 0x84D2,
+  TEXTURE19 : 0x84D3,
+  TEXTURE2 : 0x84C2,
+  TEXTURE20 : 0x84D4,
+  TEXTURE21 : 0x84D5,
+  TEXTURE22 : 0x84D6,
+  TEXTURE23 : 0x84D7,
+  TEXTURE24 : 0x84D8,
+  TEXTURE25 : 0x84D9,
+  TEXTURE26 : 0x84DA,
+  TEXTURE27 : 0x84DB,
+  TEXTURE28 : 0x84DC,
+  TEXTURE29 : 0x84DD,
+  TEXTURE3 : 0x84C3,
+  TEXTURE30 : 0x84DE,
+  TEXTURE31 : 0x84DF,
+  TEXTURE4 : 0x84C4,
+  TEXTURE5 : 0x84C5,
+  TEXTURE6 : 0x84C6,
+  TEXTURE7 : 0x84C7,
+  TEXTURE8 : 0x84C8,
+  TEXTURE9 : 0x84C9,
+  TEXTURE_2D : 0x0DE1,
+  TEXTURE_BINDING_2D : 0x8069,
+  TEXTURE_BINDING_CUBE_MAP : 0x8514,
+  TEXTURE_CUBE_MAP : 0x8513,
+  TEXTURE_CUBE_MAP_NEGATIVE_X : 0x8516,
+  TEXTURE_CUBE_MAP_NEGATIVE_Y : 0x8518,
+  TEXTURE_CUBE_MAP_NEGATIVE_Z : 0x851A,
+  TEXTURE_CUBE_MAP_POSITIVE_X : 0x8515,
+  TEXTURE_CUBE_MAP_POSITIVE_Y : 0x8517,
+  TEXTURE_CUBE_MAP_POSITIVE_Z : 0x8519,
+  TEXTURE_MAG_FILTER : 0x2800,
+  TEXTURE_MIN_FILTER : 0x2801,
+  TEXTURE_WRAP_S : 0x2802,
+  TEXTURE_WRAP_T : 0x2803,
+  TRIANGLES : 0x0004,
+  TRIANGLE_FAN : 0x0006,
+  TRIANGLE_STRIP : 0x0005,
+  UNPACK_ALIGNMENT : 0x0CF5,
+  UNPACK_COLORSPACE_CONVERSION_WEBGL : 0x9243,
+  UNPACK_FLIP_Y_WEBGL : 0x9240,
+  UNPACK_PREMULTIPLY_ALPHA_WEBGL : 0x9241,
+  UNSIGNED_BYTE : 0x1401,
+  UNSIGNED_INT : 0x1405,
+  UNSIGNED_SHORT : 0x1403,
+  UNSIGNED_SHORT_4_4_4_4 : 0x8033,
+  UNSIGNED_SHORT_5_5_5_1 : 0x8034,
+  UNSIGNED_SHORT_5_6_5 : 0x8363,
+  VALIDATE_STATUS : 0x8B83,
+  VENDOR : 0x1F00,
+  VERSION : 0x1F02,
+  VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 0x889F,
+  VERTEX_ATTRIB_ARRAY_ENABLED : 0x8622,
+  VERTEX_ATTRIB_ARRAY_NORMALIZED : 0x886A,
+  VERTEX_ATTRIB_ARRAY_POINTER : 0x8645,
+  VERTEX_ATTRIB_ARRAY_SIZE : 0x8623,
+  VERTEX_ATTRIB_ARRAY_STRIDE : 0x8624,
+  VERTEX_ATTRIB_ARRAY_TYPE : 0x8625,
+  VERTEX_SHADER : 0x8B31,
+  VIEWPORT : 0x0BA2,
+  ZERO : 0
 };
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global vgl, ogs, vec4, inherit, $*/
+/*global vgl*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -359,7 +645,7 @@ vgl.GL = {
 //////////////////////////////////////////////////////////////////////////////
 var m_globalModifiedTime = 0;
 
-vgl.timestamp = function() {
+vgl.timestamp = function () {
   'use strict';
 
   if (!(this instanceof vgl.timestamp)) {
@@ -373,8 +659,8 @@ vgl.timestamp = function() {
    * Update modified time
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.modified = function() {
-    ++m_globalModifiedTime;
+  this.modified = function () {
+    m_globalModifiedTime += 1;
     m_modifiedTime = m_globalModifiedTime;
   };
 
@@ -385,7 +671,7 @@ vgl.timestamp = function() {
    * @returns {number}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.getMTime = function() {
+  this.getMTime = function () {
     return m_modifiedTime;
   };
 };
@@ -395,10 +681,7 @@ vgl.timestamp = function() {
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global vgl, ogs, vec4, inherit, $*/
+/*global vgl*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -409,7 +692,7 @@ vgl.timestamp = function() {
  * @returns {vgl.object}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.object = function() {
+vgl.object = function () {
   'use strict';
 
   if (!(this instanceof vgl.object)) {
@@ -425,7 +708,7 @@ vgl.object = function() {
    * Mark the object modified
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.modified = function() {
+  this.modified = function () {
     m_modifiedTime.modified();
   };
 
@@ -436,21 +719,19 @@ vgl.object = function() {
    * @returns {*}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.getMTime = function() {
+  this.getMTime = function () {
     return m_modifiedTime.getMTime();
   };
 
   return this;
 };
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global vgl, ogs, vec4, inherit, $*/
+/*global vgl, inherit*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -461,7 +742,7 @@ vgl.object = function() {
  * @returns {vgl.event}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.event = function() {
+vgl.event = function () {
   'use strict';
 
   if (!(this instanceof vgl.event)) {
@@ -479,42 +760,39 @@ inherit(vgl.event, vgl.object);
  *  types
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.event.keyPress = "vgl.event.keyPress";
-vgl.event.mousePress = "vgl.event.mousePress";
-vgl.event.mouseRelease = "vgl.event.mouseRelease";
-vgl.event.contextMenu = "vgl.event.contextMenu";
-vgl.event.configure = "vgl.event.configure";
-vgl.event.enable = "vgl.event.enable";
-vgl.event.mouseWheel = "vgl.event.mouseWheel";
-vgl.event.keyRelease = "vgl.event.keyRelease";
-vgl.event.middleButtonPress = "vgl.event.middleButtonPress";
-vgl.event.startInteraction = "vgl.event.startInteraction";
-vgl.event.enter = "vgl.event.enter";
-vgl.event.rightButtonPress = "vgl.event.rightButtonPress";
-vgl.event.middleButtonRelease = "vgl.event.middleButtonRelease";
-vgl.event.char = "vgl.event.char";
-vgl.event.disable = "vgl.event.disable";
-vgl.event.endInteraction = "vgl.event.endInteraction";
-vgl.event.mouseMove = "vgl.event.mouseMove";
-vgl.event.mouseOut = "vgl.event.mouseOut";
-vgl.event.expose = "vgl.event.expose";
-vgl.event.timer = "vgl.event.timer";
-vgl.event.leftButtonPress = "vgl.event.leftButtonPress";
-vgl.event.leave = "vgl.event.leave";
-vgl.event.rightButtonRelease = "vgl.event.rightButtonRelease";
-vgl.event.leftButtonRelease = "vgl.event.leftButtonRelease";
-vgl.event.click = "vgl.event.click";
-vgl.event.dblClick = "vgl.event.dblClick";
+vgl.event.keyPress = 'vgl.event.keyPress';
+vgl.event.mousePress = 'vgl.event.mousePress';
+vgl.event.mouseRelease = 'vgl.event.mouseRelease';
+vgl.event.contextMenu = 'vgl.event.contextMenu';
+vgl.event.configure = 'vgl.event.configure';
+vgl.event.enable = 'vgl.event.enable';
+vgl.event.mouseWheel = 'vgl.event.mouseWheel';
+vgl.event.keyRelease = 'vgl.event.keyRelease';
+vgl.event.middleButtonPress = 'vgl.event.middleButtonPress';
+vgl.event.startInteraction = 'vgl.event.startInteraction';
+vgl.event.enter = 'vgl.event.enter';
+vgl.event.rightButtonPress = 'vgl.event.rightButtonPress';
+vgl.event.middleButtonRelease = 'vgl.event.middleButtonRelease';
+vgl.event.char = 'vgl.event.char';
+vgl.event.disable = 'vgl.event.disable';
+vgl.event.endInteraction = 'vgl.event.endInteraction';
+vgl.event.mouseMove = 'vgl.event.mouseMove';
+vgl.event.mouseOut = 'vgl.event.mouseOut';
+vgl.event.expose = 'vgl.event.expose';
+vgl.event.timer = 'vgl.event.timer';
+vgl.event.leftButtonPress = 'vgl.event.leftButtonPress';
+vgl.event.leave = 'vgl.event.leave';
+vgl.event.rightButtonRelease = 'vgl.event.rightButtonRelease';
+vgl.event.leftButtonRelease = 'vgl.event.leftButtonRelease';
+vgl.event.click = 'vgl.event.click';
+vgl.event.dblClick = 'vgl.event.dblClick';
 
 //////////////////////////////////////////////////////////////////////////////
 /**
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global vgl, ogs, vec4, inherit, $*/
+/*global vgl, inherit*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -525,7 +803,7 @@ vgl.event.dblClick = "vgl.event.dblClick";
  * @return {vgl.boundingObject}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.boundingObject = function() {
+vgl.boundingObject = function () {
   'use strict';
 
   if (!(this instanceof vgl.boundingObject)) {
@@ -546,7 +824,7 @@ vgl.boundingObject = function() {
    * Get current bounds of the object
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.bounds = function() {
+  this.bounds = function () {
     return m_bounds;
   };
 
@@ -555,25 +833,25 @@ vgl.boundingObject = function() {
    * Check if bounds are valid
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.hasValidBounds = function(bounds) {
-    if (bounds[0] == Number.MAX_VALUE ||
-        bounds[1] == -Number.MAX_VALUE ||
-        bounds[2] == Number.MAX_VALUE ||
-        bounds[3] == -Number.MAX_VALUE ||
-        bounds[4] == Number.MAX_VALUE ||
-        bounds[5] == -Number.MAX_VALUE)  {
+  this.hasValidBounds = function (bounds) {
+    if (bounds[0] === Number.MAX_VALUE ||
+        bounds[1] === -Number.MAX_VALUE ||
+        bounds[2] === Number.MAX_VALUE ||
+        bounds[3] === -Number.MAX_VALUE ||
+        bounds[4] === Number.MAX_VALUE ||
+        bounds[5] === -Number.MAX_VALUE) {
       return false;
     }
 
     return true;
-  }
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Set current bounds of the object
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setBounds = function(minX, maxX, minY, maxY, minZ, maxZ) {
+  this.setBounds = function (minX, maxX, minY, maxY, minZ, maxZ) {
     if (!this.hasValidBounds([minX, maxX, minY, maxY, minZ, maxZ])) {
       return;
     }
@@ -596,7 +874,7 @@ vgl.boundingObject = function() {
    * Reset bounds to default values
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.resetBounds = function() {
+  this.resetBounds = function () {
     m_bounds[0] = Number.MAX_VALUE;
     m_bounds[1] = -Number.MAX_VALUE;
     m_bounds[2] = Number.MAX_VALUE;
@@ -614,7 +892,7 @@ vgl.boundingObject = function() {
    * Should be implemented by the concrete class
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.computeBounds = function() {
+  this.computeBounds = function () {
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -624,7 +902,7 @@ vgl.boundingObject = function() {
    * @returns {vgl.timestamp}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.computeBoundsTimestamp = function() {
+  this.computeBoundsTimestamp = function () {
     return m_computeBoundsTimestamp;
   };
 
@@ -635,7 +913,7 @@ vgl.boundingObject = function() {
    * @returns {vgl.timestamp}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.boundsDirtyTimestamp = function() {
+  this.boundsDirtyTimestamp = function () {
     return m_boundsDirtyTimestamp;
   };
 
@@ -645,8 +923,8 @@ vgl.boundingObject = function() {
 };
 
 vgl.boundingObject.ReferenceFrame = {
-  "Relative" : 0,
-  "Absolute" : 1
+  'Relative' : 0,
+  'Absolute' : 1
 };
 
 inherit(vgl.boundingObject, vgl.object);
@@ -656,10 +934,7 @@ inherit(vgl.boundingObject, vgl.object);
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global vgl, ogs, vec4, inherit, $*/
+/*global vgl, inherit*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -670,7 +945,7 @@ inherit(vgl.boundingObject, vgl.object);
  * @returns {vgl.node}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.node = function() {
+vgl.node = function () {
   'use strict';
 
   if (!(this instanceof vgl.node)) {
@@ -689,7 +964,7 @@ vgl.node = function() {
    * Accept visitor for scene traversal
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.accept = function(visitor) {
+  this.accept = function (visitor) {
     visitor.visit(this);
   };
 
@@ -698,7 +973,7 @@ vgl.node = function() {
    * Return active material used by the node
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.material = function() {
+  this.material = function () {
     return m_material;
   };
 
@@ -710,7 +985,7 @@ vgl.node = function() {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setMaterial = function(material) {
+  this.setMaterial = function (material) {
     if (material !== m_material) {
       m_material = material;
       this.modified();
@@ -727,7 +1002,7 @@ vgl.node = function() {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.visible = function() {
+  this.visible = function () {
     return m_visible;
   };
 
@@ -739,7 +1014,7 @@ vgl.node = function() {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setVisible = function(flag) {
+  this.setVisible = function (flag) {
     if (flag !== m_visible) {
       m_visible = flag;
       this.modified();
@@ -756,7 +1031,7 @@ vgl.node = function() {
    * @returns {null}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.parent = function() {
+  this.parent = function () {
     return m_parent;
   };
 
@@ -768,7 +1043,7 @@ vgl.node = function() {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setParent = function(parent) {
+  this.setParent = function (parent) {
     if (parent !== m_parent) {
       if (m_parent !== null) {
         m_parent.removeChild(this);
@@ -788,7 +1063,7 @@ vgl.node = function() {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.overlay = function() {
+  this.overlay = function () {
     return m_overlay;
   };
 
@@ -800,7 +1075,7 @@ vgl.node = function() {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setOverlay = function(flag) {
+  this.setOverlay = function (flag) {
     if (m_overlay !== flag) {
       m_overlay = flag;
       this.modified();
@@ -815,7 +1090,8 @@ vgl.node = function() {
    * Traverse parent and their parent and so on
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.ascend = function(visitor) {
+  this.ascend = function (visitor) {
+    visitor = visitor; /* unused parameter */
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -823,7 +1099,8 @@ vgl.node = function() {
    * Traverse children
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.traverse = function(visitor) {
+  this.traverse = function (visitor) {
+    visitor = visitor; /* unused parameter */
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -832,7 +1109,7 @@ vgl.node = function() {
    *
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.boundsModified = function() {
+  this.boundsModified = function () {
     // @todo Implement this
     this.boundsDirtyTimestamp().modified();
 
@@ -851,10 +1128,7 @@ inherit(vgl.node, vgl.boundingObject);
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global vgl, ogs, vec4, inherit, $*/
+/*global vgl, inherit*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -865,7 +1139,7 @@ inherit(vgl.node, vgl.boundingObject);
  * @returns {vgl.groupNode}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.groupNode = function() {
+vgl.groupNode = function () {
   'use strict';
 
   if (!(this instanceof vgl.groupNode)) {
@@ -886,14 +1160,14 @@ vgl.groupNode = function() {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setVisible = function(flag) {
+  this.setVisible = function (flag) {
     var i;
 
     if (this.b_setVisible(flag) !== true) {
       return false;
     }
 
-    for (i = 0; i < m_children.length; ++i) {
+    for (i = 0; i < m_children.length; i += 1) {
       m_children[i].setVisible(flag);
     }
 
@@ -908,7 +1182,7 @@ vgl.groupNode = function() {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.addChild = function(childNode) {
+  this.addChild = function (childNode) {
     if (childNode instanceof vgl.node) {
       if (m_children.indexOf(childNode) === -1) {
         childNode.setParent(this);
@@ -930,7 +1204,7 @@ vgl.groupNode = function() {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.removeChild = function(childNode) {
+  this.removeChild = function (childNode) {
     if (childNode.parent() === this) {
       var index = m_children.indexOf(childNode);
       m_children.splice(index, 1);
@@ -944,9 +1218,9 @@ vgl.groupNode = function() {
    * Remove parent-child relationship between child nodes and the group node
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.removeChildren = function() {
+  this.removeChildren = function () {
     var i;
-    for (i = 0; i < m_children.length; ++i) {
+    for (i = 0; i < m_children.length; i += 1) {
       this.removeChild(m_children[i]);
     }
 
@@ -960,7 +1234,7 @@ vgl.groupNode = function() {
    * @returns {Array}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.children = function() {
+  this.children = function () {
     return m_children;
   };
 
@@ -972,10 +1246,10 @@ vgl.groupNode = function() {
    * @returns {bool}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.hasChild = function(node) {
+  this.hasChild = function (node) {
     var i = 0, child = false;
 
-    for (i = 0; i < m_children.length; i++) {
+    for (i = 0; i < m_children.length; i += 1) {
       if (m_children[i] === node) {
         child = true;
         break;
@@ -992,7 +1266,7 @@ vgl.groupNode = function() {
    * @param visitor
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.accept = function(visitor) {
+  this.accept = function (visitor) {
     visitor.visit(this);
   };
 
@@ -1003,7 +1277,7 @@ vgl.groupNode = function() {
    * @param visitor
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.traverse = function(visitor) {
+  this.traverse = function (visitor) {
     switch (visitor.type()) {
       case visitor.UpdateVisitor:
         this.traverseChildrenAndUpdateBounds(visitor);
@@ -1023,7 +1297,7 @@ vgl.groupNode = function() {
    * @param visitor
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.traverseChildrenAndUpdateBounds = function(visitor) {
+  this.traverseChildrenAndUpdateBounds = function (visitor) {
     var i;
 
     if (this.m_parent && this.boundsDirtyTimestamp().getMTime() >
@@ -1035,7 +1309,7 @@ vgl.groupNode = function() {
     this.computeBounds();
 
     if (visitor.mode() === visitor.TraverseAllChildren) {
-      for (i = 0; i < m_children.length(); ++i) {
+      for (i = 0; i < m_children.length(); i += 1) {
         m_children[i].accept(visitor);
         this.updateBounds(m_children[i]);
       }
@@ -1051,11 +1325,11 @@ vgl.groupNode = function() {
    * @param visitor
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.traverseChildren = function(visitor) {
+  this.traverseChildren = function (visitor) {
     var i;
 
     if (visitor.mode() === vgl.vesVisitor.TraverseAllChildren) {
-      for (i = 0; i < m_children.length(); ++i) {
+      for (i = 0; i < m_children.length(); i += 1) {
         m_children[i].accept(visitor);
       }
     }
@@ -1066,7 +1340,7 @@ vgl.groupNode = function() {
    * Compute bounds for the group node
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.computeBounds = function() {
+  this.computeBounds = function () {
     var i = 0;
 
     if (this.computeBoundsTimestamp().getMTime() >
@@ -1074,7 +1348,7 @@ vgl.groupNode = function() {
       return;
     }
 
-    for (i = 0; i < m_children.length; ++i) {
+    for (i = 0; i < m_children.length; i += 1) {
       this.updateBounds(m_children[i]);
     }
   };
@@ -1089,7 +1363,7 @@ vgl.groupNode = function() {
    * @param child
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.updateBounds = function(child) {
+  this.updateBounds = function (child) {
     // FIXME: This check should not be required and possibly is incorrect
     if (child.overlay()) {
       return;
@@ -1104,7 +1378,7 @@ vgl.groupNode = function() {
         jstep = 0,
         i;
 
-    for (i = 0; i < 3; ++i) {
+    for (i = 0; i < 3; i += 1) {
       istep = i * 2;
       jstep = i * 2 + 1;
       if (childBounds[istep] < bounds[istep]) {
@@ -1129,10 +1403,7 @@ inherit(vgl.groupNode, vgl.node);
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global vgl, ogs, vec3, vec4, mat4, inherit, $*/
+/*global vgl, vec3, mat4, inherit*/
 //////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////
@@ -1143,7 +1414,7 @@ inherit(vgl.groupNode, vgl.node);
  * @returns {vgl.actor}
  */
 ////////////////////////////////////////////////////////////////////////////
-vgl.actor = function() {
+vgl.actor = function () {
   'use strict';
 
   if (!(this instanceof vgl.actor)) {
@@ -1152,7 +1423,8 @@ vgl.actor = function() {
   vgl.node.call(this);
 
   /** @private */
-  var m_transformMatrix = mat4.create(),
+  var m_this = this,
+      m_transformMatrix = mat4.create(),
       m_referenceFrame = vgl.boundingObject.ReferenceFrame.Relative,
       m_mapper = null;
 
@@ -1163,7 +1435,7 @@ vgl.actor = function() {
    * @returns {mat4}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.matrix = function() {
+  this.matrix = function () {
     return m_transformMatrix;
   };
 
@@ -1174,10 +1446,10 @@ vgl.actor = function() {
    * @param {mat4} 4X4 transformation matrix
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setMatrix = function(tmatrix) {
+  this.setMatrix = function (tmatrix) {
     if (tmatrix !== m_transformMatrix) {
       m_transformMatrix = tmatrix;
-      this.modified();
+      m_this.modified();
     }
   };
 
@@ -1188,7 +1460,7 @@ vgl.actor = function() {
    * @returns {String} Possible values are Absolute or Relative
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.referenceFrame = function() {
+  this.referenceFrame = function () {
     return m_referenceFrame;
   };
 
@@ -1200,10 +1472,10 @@ vgl.actor = function() {
    * referenceFrame Possible values are (Absolute | Relative)
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setReferenceFrame = function(referenceFrame) {
+  this.setReferenceFrame = function (referenceFrame) {
     if (referenceFrame !== m_referenceFrame) {
       m_referenceFrame = referenceFrame;
-      this.modified();
+      m_this.modified();
       return true;
     }
     return false;
@@ -1216,7 +1488,7 @@ vgl.actor = function() {
    * @returns {vgl.mapper}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.mapper = function() {
+  this.mapper = function () {
     return m_mapper;
   };
 
@@ -1227,10 +1499,10 @@ vgl.actor = function() {
    * @param {vgl.mapper}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setMapper = function(mapper) {
+  this.setMapper = function (mapper) {
     if (mapper !== m_mapper) {
       m_mapper = mapper;
-      this.boundsModified();
+      m_this.boundsModified();
     }
   };
 
@@ -1239,7 +1511,8 @@ vgl.actor = function() {
    * @todo
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.accept = function(visitor) {
+  this.accept = function (visitor) {
+    visitor = visitor; /* ignore this parameter */
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -1247,7 +1520,8 @@ vgl.actor = function() {
    * @todo
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.ascend = function(visitor) {
+  this.ascend = function (visitor) {
+    visitor = visitor; /* ignore this parameter */
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -1256,7 +1530,9 @@ vgl.actor = function() {
    * @todo
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.computeLocalToWorldMatrix = function(matrix, visitor) {
+  this.computeLocalToWorldMatrix = function (matrix, visitor) {
+    matrix = matrix; /* ignore this parameter */
+    visitor = visitor; /* ignore this parameter */
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -1265,7 +1541,9 @@ vgl.actor = function() {
    * @todo
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.computeWorldToLocalMatrix = function(matrix, visitor) {
+  this.computeWorldToLocalMatrix = function (matrix, visitor) {
+    matrix = matrix; /* ignore this parameter */
+    visitor = visitor; /* ignore this parameter */
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -1273,16 +1551,16 @@ vgl.actor = function() {
    * Compute actor bounds
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.computeBounds = function() {
+  this.computeBounds = function () {
     if (m_mapper === null || m_mapper === undefined) {
-      this.resetBounds();
+      m_this.resetBounds();
       return;
     }
 
-    var computeBoundsTimestamp = this.computeBoundsTimestamp(),
-        mapperBounds, minPt, maxPt, actorMatrix, newBounds;
+    var computeBoundsTimestamp = m_this.computeBoundsTimestamp(),
+        mapperBounds, minPt, maxPt, newBounds;
 
-    if (this.boundsDirtyTimestamp().getMTime() > computeBoundsTimestamp.getMTime() ||
+    if (m_this.boundsDirtyTimestamp().getMTime() > computeBoundsTimestamp.getMTime() ||
       m_mapper.boundsDirtyTimestamp().getMTime() > computeBoundsTimestamp.getMTime()) {
 
       m_mapper.computeBounds();
@@ -1303,7 +1581,7 @@ vgl.actor = function() {
         minPt[2] > maxPt[2] ? minPt[2] : maxPt[2]
       ];
 
-      this.setBounds(newBounds[0], newBounds[1],
+      m_this.setBounds(newBounds[0], newBounds[1],
                      newBounds[2], newBounds[3],
                      newBounds[4], newBounds[5]);
 
@@ -1311,7 +1589,7 @@ vgl.actor = function() {
     }
   };
 
-  return this;
+  return m_this;
 };
 
 inherit(vgl.actor, vgl.node);
@@ -1321,10 +1599,7 @@ inherit(vgl.actor, vgl.node);
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global vgl, ogs, vec4, inherit, $*/
+/*global vgl*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1334,7 +1609,7 @@ inherit(vgl.actor, vgl.node);
  * @param obj
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.freezeObject = function(obj) {
+vgl.freezeObject = function (obj) {
   'use strict';
 
   /**
@@ -1346,7 +1621,7 @@ vgl.freezeObject = function(obj) {
    */
   var freezedObject = Object.freeze(obj);
   if (typeof freezedObject === 'undefined') {
-    freezedObject = function(o) {
+    freezedObject = function (o) {
       return o;
     };
   }
@@ -1359,10 +1634,7 @@ vgl.freezeObject = function(obj) {
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global vgl, ogs, vec4, inherit, $*/
+/*global vgl*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1374,7 +1646,7 @@ vgl.freezeObject = function(obj) {
  * @returns {vgl.defaultValue}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.defaultValue = function(a, b) {
+vgl.defaultValue = function (a, b) {
   'use strict';
 
   if (typeof a !== 'undefined') {
@@ -1387,13 +1659,108 @@ vgl.defaultValue.EMPTY_OBJECT = vgl.freezeObject({});
 
 //////////////////////////////////////////////////////////////////////////////
 /**
+ * Create a new instance of class graphicsObject
+ *
+ * @class
+ * @param type
+ * @returns {vgl.graphicsObject}
+ */
+//////////////////////////////////////////////////////////////////////////////
+vgl.graphicsObject = function (type) {
+  'use strict';
+
+  type = type; /* unused parameter */
+  if (!(this instanceof vgl.graphicsObject)) {
+    return new vgl.graphicsObject();
+  }
+  vgl.object.call(this);
+
+  var m_this = this;
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Setup (initialize) the object
+   *
+   * @param renderState
+   * @returns {boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._setup = function (renderState) {
+    renderState = renderState; /* unused parameter */
+    return false;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Remove any resources acquired before deletion
+   *
+   * @param renderState
+   * @returns {boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._cleanup = function (renderState) {
+    renderState = renderState; /* unused parameter */
+    return false;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Bind and activate
+   *
+   * @param renderState
+   * @returns {boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.bind = function (renderState) {
+    renderState = renderState; /* unused parameter */
+    return false;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Undo bind and deactivate
+   *
+   * @param renderState
+   * @returns {boolean}
+   *
+   * TODO: Change it to unbind (simple)
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.undoBind = function (renderState) {
+    renderState = renderState; /* unused parameter */
+    return false;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Render the object
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.render = function (renderState) {
+    renderState = renderState; /* unused parameter */
+    return false;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Remove the object and release its graphics resources
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.remove = function (renderState) {
+    m_this._cleanup(renderState);
+  };
+
+  return m_this;
+};
+
+inherit(vgl.graphicsObject, vgl.object);
+
+//////////////////////////////////////////////////////////////////////////////
+/**
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global vgl, ogs, vec4, inherit, $, Uint16Array*/
+/*global vgl, Uint16Array*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1407,15 +1774,12 @@ vgl.defaultValue.EMPTY_OBJECT = vgl.freezeObject({});
  * @returns {vgl.geojsonReader}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.geojsonReader = function() {
+vgl.geojsonReader = function () {
   'use strict';
 
   if (!(this instanceof vgl.geojsonReader)) {
     return new vgl.geojsonReader();
   }
-
-  var m_scalarFormat = "none",
-      m_scalarRange = null;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -1427,22 +1791,21 @@ vgl.geojsonReader = function() {
    * @param idx
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.readScalars = function(coordinates, geom, size_estimate, idx) {
+  this.readScalars = function (coordinates, geom, size_estimate, idx) {
     var array = null,
         s = null,
         r  = null,
         g = null,
         b = null;
 
-    if (this.m_scalarFormat === "values" && coordinates.length === 4)
-    {
+    if (this.m_scalarFormat === 'values' && coordinates.length === 4) {
       s = coordinates[3];
       array = geom.sourceData(vgl.vertexAttributeKeys.Scalar);
 
       if (!array) {
         array = new vgl.sourceDataSf();
         if (this.m_scalarRange) {
-          array.setScalarRange(this.m_scalarRange[0],this.m_scalarRange[1]);
+          array.setScalarRange(this.m_scalarRange[0], this.m_scalarRange[1]);
         }
         if (size_estimate !== undefined) {
           //array.length = size_estimate; //no, slow on Safari
@@ -1455,12 +1818,12 @@ vgl.geojsonReader = function() {
       } else {
         array.insertAt(idx, s);
       }
-    } else if (this.m_scalarFormat === "rgb" && coordinates.length === 6) {
+    } else if (this.m_scalarFormat === 'rgb' && coordinates.length === 6) {
       array = geom.sourceData(vgl.vertexAttributeKeys.Color);
       if (!array) {
         array = new vgl.sourceDataC3fv();
         if (size_estimate !== undefined) {
-          array.length = size_estimate*3;
+          array.length = size_estimate * 3;
         }
         geom.addSource(array);
       }
@@ -1468,9 +1831,9 @@ vgl.geojsonReader = function() {
       g = coordinates[4];
       b = coordinates[5];
       if (size_estimate === undefined) {
-        array.pushBack([r,g,b]);
+        array.pushBack([r, g, b]);
       } else {
-        array.insertAt(idx, [r,g,b]);
+        array.insertAt(idx, [r, g, b]);
       }
     }
   };
@@ -1483,7 +1846,7 @@ vgl.geojsonReader = function() {
    * @returns {vgl.geometryData}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.readPoint = function(coordinates) {
+  this.readPoint = function (coordinates) {
     var geom = new vgl.geometryData(),
         vglpoints = new vgl.points(),
         vglcoords = new vgl.sourceDataP3fv(),
@@ -1494,18 +1857,18 @@ vgl.geojsonReader = function() {
         i = null;
 
     geom.addSource(vglcoords);
-    for (i = 0; i < 1; i++) {
+    for (i = 0; i < 1; i += 1) {
       indices[i] = i;
 
       x = coordinates[0];
       y = coordinates[1];
       z = 0.0;
-      if (coordinates.length>2) {
+      if (coordinates.length > 2) {
         z = coordinates[2];
       }
 
-      //console.log("read " + x + "," + y + "," + z);
-      vglcoords.pushBack([x,y,z]);
+      //console.log('read ' + x + ',' + y + ',' + z);
+      vglcoords.pushBack([x, y, z]);
 
       //attributes
       this.readScalars(coordinates, geom);
@@ -1513,7 +1876,7 @@ vgl.geojsonReader = function() {
 
     vglpoints.setIndices(indices);
     geom.addPrimitive(vglpoints);
-    geom.setName("aPoint");
+    geom.setName('aPoint');
     return geom;
   };
 
@@ -1525,7 +1888,7 @@ vgl.geojsonReader = function() {
    * @returns {vgl.geometryData}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.readMultiPoint = function(coordinates) {
+  this.readMultiPoint = function (coordinates) {
     var geom = new vgl.geometryData(),
         vglpoints = new vgl.points(),
         vglcoords = new vgl.sourceDataP3fv(),
@@ -1540,28 +1903,28 @@ vgl.geojsonReader = function() {
     //preallocate with size estimate
     vglcoords.data().length = estpntcnt * 3; //x,y,z
 
-    for (i = 0; i < coordinates.length; i++) {
+    for (i = 0; i < coordinates.length; i += 1) {
       indices[i] = i;
       x = coordinates[i][0];
       y = coordinates[i][1];
       z = 0.0;
-      if (coordinates[i].length>2) {
+      if (coordinates[i].length > 2) {
         z = coordinates[i][2];
       }
 
-      //console.log("read " + x + "," + y + "," + z);
-      vglcoords.insertAt(pntcnt, [x,y,z]);
+      //console.log('read ' + x + ',' + y + ',' + z);
+      vglcoords.insertAt(pntcnt, [x, y, z]);
 
       //attributes
       this.readScalars(coordinates[i], geom, estpntcnt, pntcnt);
 
-      pntcnt++;
+      pntcnt += 1;
     }
 
     vglpoints.setIndices(indices);
     geom.addPrimitive(vglpoints);
     geom.addSource(vglcoords);
-    geom.setName("manyPoints");
+    geom.setName('manyPoints');
     return geom;
   };
 
@@ -1573,7 +1936,7 @@ vgl.geojsonReader = function() {
    * @returns {vgl.geometryData}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.readLineString = function(coordinates) {
+  this.readLineString = function (coordinates) {
     var geom = new vgl.geometryData(),
         vglline = new vgl.lineStrip(),
         vglcoords = new vgl.sourceDataP3fv(),
@@ -1585,17 +1948,17 @@ vgl.geojsonReader = function() {
 
     vglline.setIndicesPerPrimitive(coordinates.length);
 
-    for (i = 0; i < coordinates.length; i++) {
+    for (i = 0; i < coordinates.length; i += 1) {
       indices.push(i);
       x = coordinates[i][0];
       y = coordinates[i][1];
       z = 0.0;
-      if (coordinates[i].length>2) {
+      if (coordinates[i].length > 2) {
         z = coordinates[i][2];
       }
 
-      //console.log("read " + x + "," + y + "," + z);
-      vglcoords.pushBack([x,y,z]);
+      //console.log('read ' + x + ',' + y + ',' + z);
+      vglcoords.pushBack([x, y, z]);
 
       //attributes
       this.readScalars(coordinates[i], geom);
@@ -1604,7 +1967,7 @@ vgl.geojsonReader = function() {
     vglline.setIndices(indices);
     geom.addPrimitive(vglline);
     geom.addSource(vglcoords);
-    geom.setName("aLineString");
+    geom.setName('aLineString');
     return geom;
   };
 
@@ -1616,7 +1979,7 @@ vgl.geojsonReader = function() {
    * @returns {vgl.geometryData}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.readMultiLineString = function(coordinates) {
+  this.readMultiLineString = function (coordinates) {
     var geom = new vgl.geometryData(),
         vglcoords = new vgl.sourceDataP3fv(),
         pntcnt = 0,
@@ -1632,37 +1995,37 @@ vgl.geojsonReader = function() {
         thisLineLength = null;
 
     // Preallocate with size estimate
-    vglcoords.data().length = estpntcnt*3; //x,y,z
+    vglcoords.data().length = estpntcnt * 3; //x,y,z
 
-    for (j = 0; j < coordinates.length; j++) {
+    for (j = 0; j < coordinates.length; j += 1) {
       indices = [];
-      //console.log("getting line " + j);
+      //console.log('getting line ' + j);
       vglline = new vgl.lineStrip();
       thisLineLength = coordinates[j].length;
       vglline.setIndicesPerPrimitive(thisLineLength);
-      for (i = 0; i < thisLineLength; i++) {
+      for (i = 0; i < thisLineLength; i += 1) {
         indices.push(pntcnt);
         x = coordinates[j][i][0];
         y = coordinates[j][i][1];
         z = 0.0;
-        if (coordinates[j][i].length>2) {
+        if (coordinates[j][i].length > 2) {
           z = coordinates[j][i][2];
         }
 
-        //console.log("read " + x + "," + y + "," + z);
-        vglcoords.insertAt(pntcnt, [x,y,z]);
+        //console.log('read ' + x + ',' + y + ',' + z);
+        vglcoords.insertAt(pntcnt, [x, y, z]);
 
         //attributes
-        this.readScalars(coordinates[j][i], geom, estpntcnt*2, pntcnt);
+        this.readScalars(coordinates[j][i], geom, estpntcnt * 2, pntcnt);
 
-        pntcnt++;
+        pntcnt += 1;
       }
 
       vglline.setIndices(indices);
       geom.addPrimitive(vglline);
     }
 
-    geom.setName("aMultiLineString");
+    geom.setName('aMultiLineString');
     geom.addSource(vglcoords);
     return geom;
   };
@@ -1675,7 +2038,7 @@ vgl.geojsonReader = function() {
    * @returns {vgl.geometryData}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.readPolygon = function(coordinates) {
+  this.readPolygon = function (coordinates) {
     //TODO: ignoring holes given in coordinates[1...]
     //TODO: ignoring convex
     //TODO: implement ear clipping in VGL instead of this to handle both
@@ -1691,23 +2054,23 @@ vgl.geojsonReader = function() {
         vgltriangle = null;
 
 
-    for (i = 0; i < thisPolyLength; i++) {
+    for (i = 0; i < thisPolyLength; i += 1) {
       x = coordinates[0][i][0];
       y = coordinates[0][i][1];
       z = 0.0;
-      if (coordinates[0][i].length>2) {
+      if (coordinates[0][i].length > 2) {
         z = coordinates[0][i][2];
       }
 
-      //console.log("read " + x + "," + y + "," + z);
-      vglcoords.pushBack([x,y,z]);
+      //console.log('read ' + x + ',' + y + ',' + z);
+      vglcoords.pushBack([x, y, z]);
 
       //attributes
       this.readScalars(coordinates[0][i], geom);
 
       if (i > 1) {
-        //console.log("Cutting new triangle 0,"+ vl+ ","+ i);
-        indices = new Uint16Array([0,vl,i]);
+        //console.log('Cutting new triangle 0,'+ vl+ ','+ i);
+        indices = new Uint16Array([0, vl, i]);
         vgltriangle = new vgl.triangles();
         vgltriangle.setIndices(indices);
         geom.addPrimitive(vgltriangle);
@@ -1715,7 +2078,7 @@ vgl.geojsonReader = function() {
       }
     }
 
-    geom.setName("POLY");
+    geom.setName('POLY');
     geom.addSource(vglcoords);
     return geom;
   };
@@ -1728,13 +2091,13 @@ vgl.geojsonReader = function() {
    * @returns {vgl.geometryData}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.readMultiPolygon = function(coordinates) {
+  this.readMultiPolygon = function (coordinates) {
     var geom = new vgl.geometryData(),
         vglcoords = new vgl.sourceDataP3fv(),
         ccount = 0,
         numPolys = coordinates.length,
         pntcnt = 0,
-        estpntcnt = numPolys* 3, // assume triangles, underest is fine
+        estpntcnt = numPolys * 3, // assume triangles, underest is fine
         vgltriangle = new vgl.triangles(),
         indexes = [],
         i = null,
@@ -1757,21 +2120,21 @@ vgl.geojsonReader = function() {
     //var d = 0;
 
     //preallocate with size estimate
-    vglcoords.data().length = numPolys*3; //x,y,z
-    for (j = 0; j < numPolys; j++) {
-      //console.log("getting poly " + j);
+    vglcoords.data().length = numPolys * 3; //x,y,z
+    for (j = 0; j < numPolys; j += 1) {
+      //console.log('getting poly ' + j);
 
       thisPolyLength = coordinates[j][0].length;
       vf = ccount;
-      vl = ccount+1;
-      flip = [false,false,false];
-      for (i = 0; i < thisPolyLength; i++) {
+      vl = ccount + 1;
+      flip = [false, false, false];
+      for (i = 0; i < thisPolyLength; i += 1) {
         //var timea = new Date().getTime()
 
         x = coordinates[j][0][i][0];
         y = coordinates[j][0][i][1];
         z = 0.0;
-        if (coordinates[j][0][i].length>2) {
+        if (coordinates[j][0][i].length > 2) {
           z = coordinates[j][0][i][2];
         }
         flipped = false;
@@ -1782,30 +2145,31 @@ vgl.geojsonReader = function() {
         if (i === 0) {
           flip[0] = flipped;
         } else {
-          flip[1+(i-1)%2] = flipped;
+          flip[1 + (i - 1) % 2] = flipped;
         }
         //var timeb = new Date().getTime();
-        //console.log("read " + x + "," + y + "," + z);
+        //console.log('read ' + x + ',' + y + ',' + z);
 
-        vglcoords.insertAt(pntcnt, [x,y,z]);
+        vglcoords.insertAt(pntcnt, [x, y, z]);
         //var timec = new Date().getTime();
 
         //attributes
         this.readScalars(coordinates[j][0][i], geom, estpntcnt, pntcnt);
-        pntcnt++;
+        pntcnt += 1;
         //var timed = new Date().getTime()
 
         if (i > 1) {
           //if (vl < 50) {
-            //console.log("Cutting new triangle " + tcount + ":" + vf + "," + vl + "," + ccount);
-            //console.log(indexes);
+          //console.log('Cutting new triangle ' + tcount + ':' + vf + ',' +
+          //            vl + ',' + ccount);
+          //console.log(indexes);
           //}
           if (flip[0] === flip[1] && flip[1] === flip[2]) {
-              //indexes = indexes.concat([vf,vl,ccount]); //no, very slow in Safari
-              indexes[tcount*3+0] = vf
-              indexes[tcount*3+1] = vl
-              indexes[tcount*3+2] = ccount
-              tcount++;
+            //indexes = indexes.concat([vf,vl,ccount]); //no, very slow in Safari
+            indexes[tcount * 3 + 0] = vf;
+            indexes[tcount * 3 + 1] = vl;
+            indexes[tcount * 3 + 2] = ccount;
+            tcount += 1;
           }
           //else {
           //  //TODO: duplicate triangles that straddle boundary on either side
@@ -1813,7 +2177,7 @@ vgl.geojsonReader = function() {
 
           vl = ccount;
         }
-        ccount++;
+        ccount += 1;
         //var timee = new Date().getTime()
         //a = a + (timeb-timea)
         //b = b + (timec-timeb)
@@ -1824,14 +2188,14 @@ vgl.geojsonReader = function() {
     vgltriangle.setIndices(indexes);
     geom.addPrimitive(vgltriangle);
 
-    //console.log("NUMPOLYS " + pntcnt);
-    //console.log("RMP: ", a, ",", b, ",", c, ",", d)
+    //console.log('NUMPOLYS ' + pntcnt);
+    //console.log('RMP: ', a, ',', b, ',', c, ',', d)
     //var time2 = new Date().getTime()
 
-    geom.setName("aMultiPoly");
+    geom.setName('aMultiPoly');
     geom.addSource(vglcoords);
     //var time3 = new Date().getTime()
-    //console.log("RMP: ", time2-time1, ",", time3-time2)
+    //console.log('RMP: ', time2-time1, ',', time3-time2)
 
     return geom;
   };
@@ -1842,28 +2206,28 @@ vgl.geojsonReader = function() {
    * @returns {*}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.readGJObjectInt = function(object) {
+  this.readGJObjectInt = function (object) {
     if (!object.hasOwnProperty('type')) {
-      //console.log("uh oh, not a geojson object");
+      //console.log('uh oh, not a geojson object');
       return null;
     }
 
     //look for properties type annotation
     if (object.properties &&
         object.properties.ScalarFormat &&
-        object.properties.ScalarFormat === "values") {
-      this.m_scalarFormat = "values";
+        object.properties.ScalarFormat === 'values') {
+      this.m_scalarFormat = 'values';
       if (object.properties.ScalarRange) {
         this.m_scalarRange = object.properties.ScalarRange;
       }
     }
     if (object.properties &&
         object.properties.ScalarFormat &&
-        object.properties.ScalarFormat === "rgb") {
-      this.m_scalarFormat = "rgb";
+        object.properties.ScalarFormat === 'rgb') {
+      this.m_scalarFormat = 'rgb';
     }
 
-    //TODO: ignoring "crs" and "bbox" and misc meta data on all of these,
+    //TODO: ignoring 'crs' and 'bbox' and misc meta data on all of these,
     //best to handle as references into original probably
     var ret,
         type = object.type,
@@ -1872,57 +2236,57 @@ vgl.geojsonReader = function() {
         i = null;
 
     switch (type) {
-      case "Point":
-        //console.log("parsed Point");
+      case 'Point':
+        //console.log('parsed Point');
         ret = this.readPoint(object.coordinates);
         break;
-      case "MultiPoint":
-        //console.log("parsed MultiPoint");
+      case 'MultiPoint':
+        //console.log('parsed MultiPoint');
         ret = this.readMultiPoint(object.coordinates);
         break;
-      case "LineString":
-        //console.log("parsed LineString");
+      case 'LineString':
+        //console.log('parsed LineString');
         ret = this.readLineString(object.coordinates);
         break;
-      case "MultiLineString":
-        //console.log("parsed MultiLineString");
+      case 'MultiLineString':
+        //console.log('parsed MultiLineString');
         ret = this.readMultiLineString(object.coordinates);
         break;
-      case "Polygon":
-        //console.log("parsed Polygon");
+      case 'Polygon':
+        //console.log('parsed Polygon');
         ret = this.readPolygon(object.coordinates);
         break;
-      case "MultiPolygon":
-        //console.log("parsed MultiPolygon");
+      case 'MultiPolygon':
+        //console.log('parsed MultiPolygon');
         ret = this.readMultiPolygon(object.coordinates);
         break;
-      case "GeometryCollection":
-        //console.log("parsed GeometryCollection");
+      case 'GeometryCollection':
+        //console.log('parsed GeometryCollection');
         nextset = [];
-        for (i = 0; i < object.geometries.length; i++) {
+        for (i = 0; i < object.geometries.length; i += 1) {
           next = this.readGJObject(object.geometries[i]);
           nextset.push(next);
         }
         ret = nextset;
         break;
-      case "Feature":
-        //console.log("parsed Feature");
+      case 'Feature':
+        //console.log('parsed Feature');
         next = this.readGJObject(object.geometry);
         ret = next;
         break;
-      case "FeatureCollection":
-        //console.log("parsed FeatureCollection");
+      case 'FeatureCollection':
+        //console.log('parsed FeatureCollection');
         nextset = [];
-        for (i = 0; i < object.features.length; i++) {
+        for (i = 0; i < object.features.length; i += 1) {
           next = this.readGJObject(object.features[i]);
           nextset.push(next);
         }
         ret = nextset;
         break;
       default:
-        console.log("Don't understand type " + type);
+        console.log('Don\'t understand type ' + type);
         ret = null;
-      break;
+        break;
     }
     return ret;
   };
@@ -1933,13 +2297,13 @@ vgl.geojsonReader = function() {
    * @returns {*}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.readGJObject = function(object) {
+  this.readGJObject = function (object) {
     //var time1, time2;
     var ret;
     //time1 = new Date().getTime()
     ret = this.readGJObjectInt(object);
     //time2 = new Date().getTime()
-    //console.log("ELAPSED: ", time2-time1)
+    //console.log('ELAPSED: ', time2-time1)
     return ret;
   };
 
@@ -1949,18 +2313,17 @@ vgl.geojsonReader = function() {
    * @param geoms
    * @param geom
    */
-  this.linearizeGeoms = function(geoms, geom) {
+  this.linearizeGeoms = function (geoms, geom) {
     var i = null;
 
-    if( Object.prototype.toString.call( geom ) === '[object Array]' ) {
-      for (i = 0; i < geom.length; i++) {
+    if (Object.prototype.toString.call(geom) === '[object Array]') {
+      for (i = 0; i < geom.length; i += 1) {
         this.linearizeGeoms(geoms, geom[i]);
       }
+    } else {
+      geoms.push(geom);
     }
-    else {
-     geoms.push(geom);
-   }
- };
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -1969,15 +2332,15 @@ vgl.geojsonReader = function() {
    * @param object
    * @returns {Array}
    */
- ////////////////////////////////////////////////////////////////////////////
- this.readGeomObject = function(object) {
+  ////////////////////////////////////////////////////////////////////////////
+  this.readGeomObject = function (object) {
     var geom,
         geoms = [];
 
     geom = this.readGJObject(object);
     this.linearizeGeoms(geoms, geom);
     return geoms;
- };
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -1987,8 +2350,8 @@ vgl.geojsonReader = function() {
    * @returns {*}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.getPrimitives = function(buffer) {
-    //console.log("Parsing geoJSON");
+  this.getPrimitives = function (buffer) {
+    //console.log('Parsing geoJSON');
     if (!buffer) {
       return [];
     }
@@ -1997,14 +2360,14 @@ vgl.geojsonReader = function() {
       geom = this.readGJObject(obj),
       geoms = [];
 
-    this.m_scalarFormat = "none";
+    this.m_scalarFormat = 'none';
     this.m_scalarRange = null;
 
     this.linearizeGeoms(geoms, geom);
 
-    return { "geoms":geoms,
-             "scalarFormat":this.m_scalarFormat,
-             "scalarRange":this.m_scalarRange };
+    return { 'geoms': geoms,
+             'scalarFormat': this.m_scalarFormat,
+             'scalarRange': this.m_scalarRange };
   };
 
   return this;
@@ -2015,13 +2378,10 @@ vgl.geojsonReader = function() {
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global vgl, ogs, vec4, inherit, $*/
+/*global vgl*/
 //////////////////////////////////////////////////////////////////////////////
 
-vgl.data = function() {
+vgl.data = function () {
   'use strict';
 
   if (!(this instanceof vgl.data)) {
@@ -2033,7 +2393,7 @@ vgl.data = function() {
    * Return data type. Should be implemented by the derived class
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.type = function() {
+  this.type = function () {
   };
 };
 
@@ -2042,32 +2402,14 @@ vgl.data.point = 1;
 vgl.data.lineString = 2;
 vgl.data.polygon = 3;
 vgl.data.geometry = 10;
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global vgl, ogs, vec4, Uint16Array, gl, inherit, $*/
+/*global vgl, Uint16Array, inherit*/
 //////////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Vertex attribute keys
- *
- * @type {{Position: number, Normal: number, TextureCoordinate: number,
- *         Color: number, Scalar: number}}
- */
-//////////////////////////////////////////////////////////////////////////////
-var vertexAttributeKeys = {
-  "Position" : 0,
-  "Normal" : 1,
-  "TextureCoordinate" : 2,
-  "Color" : 3,
-  "Scalar" : 4
-};
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -2077,7 +2419,7 @@ var vertexAttributeKeys = {
  * @return {vgl.primitive}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.primitive = function() {
+vgl.primitive = function () {
   'use strict';
 
   if (!(this instanceof vgl.primitive)) {
@@ -2097,7 +2439,7 @@ vgl.primitive = function() {
    * @returns {null}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.indices = function() {
+  this.indices = function () {
     return m_indices;
   };
 
@@ -2107,7 +2449,8 @@ vgl.primitive = function() {
    * @param type
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.createIndices = function(type) {
+  this.createIndices = function (type) {
+    type = type; /* unused parameters */
     // TODO Check for the type
     m_indices = new Uint16Array();
   };
@@ -2117,7 +2460,7 @@ vgl.primitive = function() {
    * Return the number of indices
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.numberOfIndices = function() {
+  this.numberOfIndices = function () {
     return m_indices.length;
   };
 
@@ -2126,7 +2469,7 @@ vgl.primitive = function() {
    * Return size of indices in bytes
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.sizeInBytes = function() {
+  this.sizeInBytes = function () {
     return m_indices.length * Uint16Array.BYTES_PER_ELEMENT;
   };
 
@@ -2135,7 +2478,7 @@ vgl.primitive = function() {
    * Return primitive type g
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.primitiveType = function() {
+  this.primitiveType = function () {
     return m_primitiveType;
   };
 
@@ -2144,7 +2487,7 @@ vgl.primitive = function() {
    * Set primitive type
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setPrimitiveType = function(type) {
+  this.setPrimitiveType = function (type) {
     m_primitiveType = type;
   };
 
@@ -2153,7 +2496,7 @@ vgl.primitive = function() {
    * Return count of indices that form a primitives
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.indicesPerPrimitive = function() {
+  this.indicesPerPrimitive = function () {
     return m_indicesPerPrimitive;
   };
 
@@ -2162,7 +2505,7 @@ vgl.primitive = function() {
    * Set count of indices that form a primitive
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setIndicesPerPrimitive = function(count) {
+  this.setIndicesPerPrimitive = function (count) {
     m_indicesPerPrimitive = count;
   };
 
@@ -2171,7 +2514,7 @@ vgl.primitive = function() {
    * Return indices value type
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.indicesValueType = function() {
+  this.indicesValueType = function () {
     return m_indicesValueType;
   };
 
@@ -2180,7 +2523,7 @@ vgl.primitive = function() {
    * Set indices value type
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setIndicesValueType = function(type) {
+  this.setIndicesValueType = function (type) {
     m_indicesValueType = type;
   };
 
@@ -2189,7 +2532,7 @@ vgl.primitive = function() {
    * Set indices from a array
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setIndices = function(indicesArray) {
+  this.setIndices = function (indicesArray) {
     // TODO Check for the type
     m_indices = new Uint16Array(indicesArray);
   };
@@ -2204,7 +2547,7 @@ vgl.primitive = function() {
  * @returns {vgl.triangleStrip}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.triangleStrip = function() {
+vgl.triangleStrip = function () {
   'use strict';
 
   if (!(this instanceof vgl.triangleStrip)) {
@@ -2213,8 +2556,8 @@ vgl.triangleStrip = function() {
 
   vgl.primitive.call(this);
 
-  this.setPrimitiveType(gl.TRIANGLE_STRIP);
-  this.setIndicesValueType(gl.UNSIGNED_SHORT);
+  this.setPrimitiveType(vgl.GL.TRIANGLE_STRIP);
+  this.setIndicesValueType(vgl.GL.UNSIGNED_SHORT);
   this.setIndicesPerPrimitive(3);
 
   return this;
@@ -2229,7 +2572,7 @@ inherit(vgl.triangleStrip, vgl.primitive);
  * @returns {vgl.triangles}
  */
 ////////////////////////////////////////////////////////////////////////////
-vgl.triangles = function() {
+vgl.triangles = function () {
   'use strict';
 
   if (!(this instanceof vgl.triangles)) {
@@ -2237,8 +2580,8 @@ vgl.triangles = function() {
   }
   vgl.primitive.call(this);
 
-  this.setPrimitiveType(gl.TRIANGLES);
-  this.setIndicesValueType(gl.UNSIGNED_SHORT);
+  this.setPrimitiveType(vgl.GL.TRIANGLES);
+  this.setIndicesValueType(vgl.GL.UNSIGNED_SHORT);
   this.setIndicesPerPrimitive(3);
 
   return this;
@@ -2253,7 +2596,7 @@ inherit(vgl.triangles, vgl.primitive);
  * @returns {vgl.lines}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.lines = function() {
+vgl.lines = function () {
   'use strict';
 
   if (!(this instanceof vgl.lines)) {
@@ -2261,8 +2604,8 @@ vgl.lines = function() {
   }
   vgl.primitive.call(this);
 
-  this.setPrimitiveType(gl.LINES);
-  this.setIndicesValueType(gl.UNSIGNED_SHORT);
+  this.setPrimitiveType(vgl.GL.LINES);
+  this.setIndicesValueType(vgl.GL.UNSIGNED_SHORT);
   this.setIndicesPerPrimitive(2);
 
   return this;
@@ -2276,7 +2619,7 @@ inherit(vgl.lines, vgl.primitive);
  * @returns {vgl.lineStrip}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.lineStrip = function() {
+vgl.lineStrip = function () {
   'use strict';
 
   if (!(this instanceof vgl.lineStrip)) {
@@ -2284,8 +2627,8 @@ vgl.lineStrip = function() {
   }
   vgl.primitive.call(this);
 
-  this.setPrimitiveType(gl.LINE_STRIP);
-  this.setIndicesValueType(gl.UNSIGNED_SHORT);
+  this.setPrimitiveType(vgl.GL.LINE_STRIP);
+  this.setIndicesValueType(vgl.GL.UNSIGNED_SHORT);
   this.setIndicesPerPrimitive(2);
 
   return this;
@@ -2299,7 +2642,7 @@ inherit(vgl.lineStrip, vgl.primitive);
  * @returns {vgl.points}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.points = function() {
+vgl.points = function () {
   'use strict';
 
   if (!(this instanceof vgl.points)) {
@@ -2307,8 +2650,8 @@ vgl.points = function() {
   }
   vgl.primitive.call(this);
 
-  this.setPrimitiveType(gl.POINTS);
-  this.setIndicesValueType(gl.UNSIGNED_SHORT);
+  this.setPrimitiveType(vgl.GL.POINTS);
+  this.setIndicesValueType(vgl.GL.UNSIGNED_SHORT);
   this.setIndicesPerPrimitive(1);
 
   return this;
@@ -2323,7 +2666,7 @@ inherit(vgl.points, vgl.primitive);
  * @returns {vgl.vertexDataP3f}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.vertexDataP3f = function() {
+vgl.vertexDataP3f = function () {
   'use strict';
 
   if (!(this instanceof vgl.vertexDataP3f)) {
@@ -2344,7 +2687,7 @@ vgl.vertexDataP3f = function() {
  * @returns {vgl.vertexDataP3N3f}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.vertexDataP3N3f = function() {
+vgl.vertexDataP3N3f = function () {
   'use strict';
 
   if (!(this instanceof vgl.vertexDataP3N3f)) {
@@ -2365,7 +2708,7 @@ vgl.vertexDataP3N3f = function() {
  * @returns {vgl.vertexDataP3T3f}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.vertexDataP3T3f = function() {
+vgl.vertexDataP3T3f = function () {
   'use strict';
 
   if (!(this instanceof vgl.vertexDataP3T3f)) {
@@ -2385,7 +2728,7 @@ vgl.vertexDataP3T3f = function() {
  * @returns {vgl.sourceData}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.sourceData = function(arg) {
+vgl.sourceData = function (arg) {
   'use strict';
 
   if (!(this instanceof vgl.sourceData)) {
@@ -2395,18 +2738,18 @@ vgl.sourceData = function(arg) {
   arg = arg || {};
   var m_attributesMap = {},
       m_data = [],
-      m_name = arg.name || "Source " + new Date().toISOString(),
+      m_name = arg.name || 'Source ' + new Date().toISOString(),
 
       ////////////////////////////////////////////////////////////////////////////
       /**
        * Attribute data for the source
        */
       ////////////////////////////////////////////////////////////////////////////
-      vglAttributeData = function() {
+      vglAttributeData = function () {
         // Number of components per group
         // Type of data type (GL_FLOAT etc)
         this.m_numberOfComponents = 0;
-            // Size of data type
+        // Size of data type
         this.m_dataType = 0;
         this.m_dataTypeSize = 0;
         // Specifies whether fixed-point data values should be normalized
@@ -2426,19 +2769,19 @@ vgl.sourceData = function(arg) {
    * @returns {Array or Float32Array}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.data = function() {
+  this.data = function () {
     return m_data;
   };
 
   ////////////////////////////////////////////////////////////////////////////
- /**
+  /**
    * Return raw data for this source
    *
    * @returns {Array or Float32Array}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.getData = function() {
-    return data();
+  this.getData = function () {
+    return this.data();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -2464,7 +2807,7 @@ vgl.sourceData = function(arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.setData = function (data) {
     if (!(data instanceof Array) && !(data instanceof Float32Array)) {
-      console.log("[error] Requires array");
+      console.log('[error] Requires array');
       return;
     }
     if (data instanceof Float32Array) {
@@ -2479,11 +2822,15 @@ vgl.sourceData = function(arg) {
    * Add new attribute data to the source
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.addAttribute = function(key, dataType, sizeOfDataType, offset, stride,
+  this.addAttribute = function (key, dataType, sizeOfDataType, offset, stride,
                                noOfComponents, normalized) {
 
     if (!m_attributesMap.hasOwnProperty(key)) {
+      /* jshint newcap: false */
+      //jscs:disable requireCapitalizedConstructors
       var newAttr = new vglAttributeData();
+      //jscs:enable requireCapitalizedConstructors
+      /* jshint newcap: true */
       newAttr.m_dataType = dataType;
       newAttr.m_dataTypeSize = sizeOfDataType;
       newAttr.m_offset = offset;
@@ -2499,7 +2846,7 @@ vgl.sourceData = function(arg) {
    * Return size of the source data
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.sizeOfArray = function() {
+  this.sizeOfArray = function () {
     return Object.size(m_data);
   };
 
@@ -2508,7 +2855,7 @@ vgl.sourceData = function(arg) {
    * Return length of array
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.lengthOfArray = function() {
+  this.lengthOfArray = function () {
     return m_data.length;
   };
 
@@ -2521,7 +2868,8 @@ vgl.sourceData = function(arg) {
     * TODO: code below is probably wrong.
     *   Example:
     *            format P3N3f
-    *            m_data = [ 1, 2, 3, 4, 5, 6 ]; // contains one vertex, one normal, m_data.length == 6
+    *            m_data = [ 1, 2, 3, 4, 5, 6 ]; // contains one vertex,
+    *                                    // one normal, m_data.length == 6
     *
     *       The inner loop computes:
     *             sizeInBytes += 3 * 4; // for position
@@ -2530,13 +2878,13 @@ vgl.sourceData = function(arg) {
     *        Then sizeInBytes *= 6; // m_data.length == 6
     *        which gives sizeInBytes == 144 bytes when it should have been 4*6 = 24
     */
-  this.sizeInBytes = function() {
+  this.sizeInBytes = function () {
     var sizeInBytes = 0,
         keys = this.keys(), i;
 
-    for (i = 0; i < keys.length(); ++i) {
-      sizeInBytes += this.numberOfComponents(keys[i])
-                     * this.sizeOfAttributeDataType(keys[i]);
+    for (i = 0; i < keys.length(); i += 1) {
+      sizeInBytes += this.numberOfComponents(keys[i]) *
+                     this.sizeOfAttributeDataType(keys[i]);
     }
 
     sizeInBytes *= this.sizeOfArray();
@@ -2549,7 +2897,7 @@ vgl.sourceData = function(arg) {
    * Check if there is attribute exists of a given key type
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.hasKey = function(key) {
+  this.hasKey = function (key) {
     return m_attributesMap.hasOwnProperty(key);
   };
 
@@ -2558,7 +2906,7 @@ vgl.sourceData = function(arg) {
    * Return keys of all attributes
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.keys = function() {
+  this.keys = function () {
     return Object.keys(m_attributesMap);
   };
 
@@ -2567,7 +2915,7 @@ vgl.sourceData = function(arg) {
    * Return number of attributes of source data
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.numberOfAttributes = function() {
+  this.numberOfAttributes = function () {
     return Object.size(m_attributesMap);
   };
 
@@ -2576,7 +2924,7 @@ vgl.sourceData = function(arg) {
    * Return number of components of the attribute data
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.attributeNumberOfComponents = function(key) {
+  this.attributeNumberOfComponents = function (key) {
     if (m_attributesMap.hasOwnProperty(key)) {
       return m_attributesMap[key].m_numberOfComponents;
     }
@@ -2589,7 +2937,7 @@ vgl.sourceData = function(arg) {
    * Return if the attribute data is normalized
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.normalized = function(key) {
+  this.normalized = function (key) {
     if (m_attributesMap.hasOwnProperty(key)) {
       return m_attributesMap[key].m_normalized;
     }
@@ -2602,7 +2950,7 @@ vgl.sourceData = function(arg) {
    * Return size of the attribute data type
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.sizeOfAttributeDataType = function(key) {
+  this.sizeOfAttributeDataType = function (key) {
     if (m_attributesMap.hasOwnProperty(key)) {
       return m_attributesMap[key].m_dataTypeSize;
     }
@@ -2615,7 +2963,7 @@ vgl.sourceData = function(arg) {
    * Return attribute data type
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.attributeDataType = function(key) {
+  this.attributeDataType = function (key) {
     if (m_attributesMap.hasOwnProperty(key)) {
       return m_attributesMap[key].m_dataType;
     }
@@ -2628,7 +2976,7 @@ vgl.sourceData = function(arg) {
    * Return attribute offset
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.attributeOffset = function(key) {
+  this.attributeOffset = function (key) {
     if (m_attributesMap.hasOwnProperty(key)) {
       return m_attributesMap[key].m_offset;
     }
@@ -2641,7 +2989,7 @@ vgl.sourceData = function(arg) {
    * Return attribute stride
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.attributeStride = function(key) {
+  this.attributeStride = function (key) {
     if (m_attributesMap.hasOwnProperty(key)) {
       return m_attributesMap[key].m_stride;
     }
@@ -2654,7 +3002,8 @@ vgl.sourceData = function(arg) {
    * Virtual function to insert new vertex data at the end
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.pushBack = function(vertexData) {
+  this.pushBack = function (vertexData) {
+    vertexData = vertexData; /* unused parameter */
     // Should be implemented by the base class
   };
 
@@ -2663,7 +3012,7 @@ vgl.sourceData = function(arg) {
    * Insert new data block to the raw data
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.insert = function(data) {
+  this.insert = function (data) {
     var i;
 
     //m_data = m_data.concat(data); //no, slow on Safari
@@ -2687,21 +3036,21 @@ vgl.sourceData = function(arg) {
       if (!m_data.length && data.slice) {
         m_data = data.slice(0);
       } else {
-        for (i = 0; i < data.length; i++) {
+        for (i = 0; i < data.length; i += 1) {
           m_data[m_data.length] = data[i];
         }
       }
     }
   };
 
-  this.insertAt = function(index, data) {
+  this.insertAt = function (index, data) {
     var i;
 
     if (!data.length) {
       m_data[index] = data;
     } else {
-      for (i = 0; i < data.length; i++) {
-        m_data[index*data.length+i] = data[i];
+      for (i = 0; i < data.length; i += 1) {
+        m_data[index * data.length + i] = data[i];
       }
     }
   };
@@ -2711,7 +3060,7 @@ vgl.sourceData = function(arg) {
    * Return name of the source data
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.name = function() {
+  this.name = function () {
     return m_name;
   };
 
@@ -2720,7 +3069,7 @@ vgl.sourceData = function(arg) {
    * Set name of the source data
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setName = function(name) {
+  this.setName = function (name) {
     m_name = name;
   };
 
@@ -2729,20 +3078,21 @@ vgl.sourceData = function(arg) {
 };
 
 
-vgl.sourceDataAnyfv = function(size, key, arg) {
+vgl.sourceDataAnyfv = function (size, key, arg) {
+  'use strict';
   if (!(this instanceof vgl.sourceDataAnyfv)) {
-      return new vgl.sourceDataAnyfv(size, key, arg);
-    }
+    return new vgl.sourceDataAnyfv(size, key, arg);
+  }
 
-    vgl.sourceData.call(this, arg);
-    this.addAttribute(key, gl.FLOAT,
-                      4, 0, size * 4, size, false);
+  vgl.sourceData.call(this, arg);
+  this.addAttribute(key, vgl.GL.FLOAT,
+                    4, 0, size * 4, size, false);
 
-    this.pushBack = function(value) {
-      this.insert(value);
-    };
+  this.pushBack = function (value) {
+    this.insert(value);
+  };
 
-    return this;
+  return this;
 };
 inherit(vgl.sourceDataAnyfv, vgl.sourceData);
 
@@ -2753,7 +3103,7 @@ inherit(vgl.sourceDataAnyfv, vgl.sourceData);
  * @returns {vgl.sourceDataP3T3f}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.sourceDataP3T3f = function(arg) {
+vgl.sourceDataP3T3f = function (arg) {
   'use strict';
 
   if (!(this instanceof vgl.sourceDataP3T3f)) {
@@ -2761,12 +3111,12 @@ vgl.sourceDataP3T3f = function(arg) {
   }
   vgl.sourceData.call(this, arg);
 
-  this.addAttribute(vgl.vertexAttributeKeys.Position, gl.FLOAT, 4, 0, 6 * 4, 3,
+  this.addAttribute(vgl.vertexAttributeKeys.Position, vgl.GL.FLOAT, 4, 0, 6 * 4, 3,
                     false);
-  this.addAttribute(vgl.vertexAttributeKeys.TextureCoordinate, gl.FLOAT, 4, 12,
+  this.addAttribute(vgl.vertexAttributeKeys.TextureCoordinate, vgl.GL.FLOAT, 4, 12,
                     6 * 4, 3, false);
 
-  this.pushBack = function(value) {
+  this.pushBack = function (value) {
     this.insert(value.m_position);
     this.insert(value.m_texCoordinate);
   };
@@ -2783,7 +3133,7 @@ inherit(vgl.sourceDataP3T3f, vgl.sourceData);
  * @returns {vgl.sourceDataP3N3f}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.sourceDataP3N3f = function(arg) {
+vgl.sourceDataP3N3f = function (arg) {
   'use strict';
 
   if (!(this instanceof vgl.sourceDataP3N3f)) {
@@ -2792,12 +3142,12 @@ vgl.sourceDataP3N3f = function(arg) {
 
   vgl.sourceData.call(this, arg);
 
-  this.addAttribute(vgl.vertexAttributeKeys.Position, gl.FLOAT, 4, 0, 6 * 4, 3,
+  this.addAttribute(vgl.vertexAttributeKeys.Position, vgl.GL.FLOAT, 4, 0, 6 * 4, 3,
                     false);
-  this.addAttribute(vgl.vertexAttributeKeys.Normal, gl.FLOAT, 4, 12, 6 * 4, 3,
+  this.addAttribute(vgl.vertexAttributeKeys.Normal, vgl.GL.FLOAT, 4, 12, 6 * 4, 3,
                     false);
 
-  this.pushBack = function(value) {
+  this.pushBack = function (value) {
     this.insert(value.m_position);
     this.insert(value.m_normal);
   };
@@ -2814,7 +3164,7 @@ inherit(vgl.sourceDataP3N3f, vgl.sourceData);
  * @returns {vgl.sourceDataP3fv}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.sourceDataP3fv = function(arg) {
+vgl.sourceDataP3fv = function (arg) {
   'use strict';
 
   if (!(this instanceof vgl.sourceDataP3fv)) {
@@ -2823,10 +3173,10 @@ vgl.sourceDataP3fv = function(arg) {
 
   vgl.sourceData.call(this, arg);
 
-  this.addAttribute(vgl.vertexAttributeKeys.Position, gl.FLOAT, 4, 0, 3 * 4, 3,
+  this.addAttribute(vgl.vertexAttributeKeys.Position, vgl.GL.FLOAT, 4, 0, 3 * 4, 3,
                     false);
 
-  this.pushBack = function(value) {
+  this.pushBack = function (value) {
     this.insert(value);
   };
 
@@ -2842,7 +3192,7 @@ inherit(vgl.sourceDataP3fv, vgl.sourceData);
  * @returns {vgl.sourceDataT2fv}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.sourceDataT2fv = function(arg) {
+vgl.sourceDataT2fv = function (arg) {
   'use strict';
 
   if (!(this instanceof vgl.sourceDataT2fv)) {
@@ -2851,10 +3201,10 @@ vgl.sourceDataT2fv = function(arg) {
 
   vgl.sourceData.call(this, arg);
 
-  this.addAttribute(vgl.vertexAttributeKeys.TextureCoordinate, gl.FLOAT, 4, 0,
+  this.addAttribute(vgl.vertexAttributeKeys.TextureCoordinate, vgl.GL.FLOAT, 4, 0,
                     2 * 4, 2, false);
 
-  this.pushBack = function(value) {
+  this.pushBack = function (value) {
     this.insert(value);
   };
 
@@ -2870,7 +3220,7 @@ inherit(vgl.sourceDataT2fv, vgl.sourceData);
  * @returns {vgl.sourceDataC3fv}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.sourceDataC3fv = function(arg) {
+vgl.sourceDataC3fv = function (arg) {
   'use strict';
 
   if (!(this instanceof vgl.sourceDataC3fv)) {
@@ -2879,9 +3229,9 @@ vgl.sourceDataC3fv = function(arg) {
 
   vgl.sourceData.call(this, arg);
 
-  this.addAttribute(vgl.vertexAttributeKeys.Color, gl.FLOAT, 4, 0, 3 * 4, 3, false);
+  this.addAttribute(vgl.vertexAttributeKeys.Color, vgl.GL.FLOAT, 4, 0, 3 * 4, 3, false);
 
-  this.pushBack = function(value) {
+  this.pushBack = function (value) {
     this.insert(value);
   };
 
@@ -2898,7 +3248,7 @@ inherit(vgl.sourceDataC3fv, vgl.sourceData);
  * @returns {vgl.sourceDataSf}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.sourceDataSf = function(arg) {
+vgl.sourceDataSf = function (arg) {
   'use strict';
 
   if (!(this instanceof vgl.sourceDataSf)) {
@@ -2912,9 +3262,9 @@ vgl.sourceDataSf = function(arg) {
 
   vgl.sourceData.call(this, arg);
 
-  this.addAttribute(vgl.vertexAttributeKeys.Scalar, gl.FLOAT, 4, 0, 4, 1, false);
+  this.addAttribute(vgl.vertexAttributeKeys.Scalar, vgl.GL.FLOAT, 4, 0, 4, 1, false);
 
-  this.pushBack = function(value) {
+  this.pushBack = function (value) {
     if (m_max === null || value > m_max) {
       m_max = value;
     }
@@ -2925,7 +3275,7 @@ vgl.sourceDataSf = function(arg) {
     this.data()[this.data().length] = value;
   };
 
-  this.insertAt = function(index, value) {
+  this.insertAt = function (index, value) {
     if (m_max === null || value > m_max) {
       m_max = value;
     }
@@ -2937,7 +3287,7 @@ vgl.sourceDataSf = function(arg) {
     this.data()[index] = value;
   };
 
-  this.scalarRange = function() {
+  this.scalarRange = function () {
     if (m_fixedmin === null || m_fixedmax === null) {
       return [m_min, m_max];
     }
@@ -2945,7 +3295,7 @@ vgl.sourceDataSf = function(arg) {
     return [m_fixedmin, m_fixedmax];
   };
 
-  this.setScalarRange = function(min, max) {
+  this.setScalarRange = function (min, max) {
     m_fixedmin = min;
     m_fixedmax = max;
   };
@@ -2966,28 +3316,23 @@ inherit(vgl.sourceDataSf, vgl.sourceData);
  * @returns {vgl.sourceDataDf}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.sourceDataDf = function(arg) {
+vgl.sourceDataDf = function (arg) {
   'use strict';
 
   if (!(this instanceof vgl.sourceDataDf)) {
     return new vgl.sourceDataDf(arg);
   }
 
-  var m_min = null,
-      m_max = null,
-      m_fixedmin = null,
-      m_fixedmax = null;
-
   vgl.sourceData.call(this, arg);
 
-  this.addAttribute(vgl.vertexAttributeKeys.Scalar, gl.FLOAT,
+  this.addAttribute(vgl.vertexAttributeKeys.Scalar, vgl.GL.FLOAT,
                     4, 0, 4, 1, false);
 
-  this.pushBack = function(value) {
+  this.pushBack = function (value) {
     this.data()[this.data().length] = value;
   };
 
-  this.insertAt = function(index, value) {
+  this.insertAt = function (index, value) {
     this.data()[index] = value;
   };
 
@@ -3003,8 +3348,8 @@ inherit(vgl.sourceDataDf, vgl.sourceData);
  * @class
  * @returns {vgl.geometryData}
  */
- /////////////////////////////////////////////////////////////////////////////
-vgl.geometryData = function() {
+/////////////////////////////////////////////////////////////////////////////
+vgl.geometryData = function () {
   'use strict';
 
   if (!(this instanceof vgl.geometryData)) {
@@ -3013,7 +3358,7 @@ vgl.geometryData = function() {
   vgl.data.call(this);
 
   /** @private */
-  var m_name = "",
+  var m_name = '',
       m_primitives = [],
       m_sources = [],
       m_bounds = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
@@ -3025,7 +3370,7 @@ vgl.geometryData = function() {
    * Return type
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.type = function() {
+  this.type = function () {
     return vgl.data.geometry;
   };
 
@@ -3034,7 +3379,7 @@ vgl.geometryData = function() {
    * Return ID of the geometry data
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.name = function() {
+  this.name = function () {
     return m_name;
   };
 
@@ -3043,7 +3388,7 @@ vgl.geometryData = function() {
    * Set name of the geometry data
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setName = function(name) {
+  this.setName = function (name) {
     m_name = name;
   };
 
@@ -3052,11 +3397,11 @@ vgl.geometryData = function() {
    * Add new source
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.addSource = function(source, sourceName) {
+  this.addSource = function (source, sourceName) {
     // @todo Check if the incoming source has duplicate keys
 
     if (sourceName !== undefined) {
-        source.setName(sourceName);
+      source.setName(sourceName);
     }
     // NOTE This might not work on IE8 or lower
     if (m_sources.indexOf(source) === -1) {
@@ -3076,7 +3421,7 @@ vgl.geometryData = function() {
    * Return source for a given index. Returns 0 if not found.
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.source = function(index) {
+  this.source = function (index) {
     if (index < m_sources.length) {
       return m_sources[index];
     }
@@ -3096,24 +3441,24 @@ vgl.geometryData = function() {
       }
     }
     return 0;
-  }
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Return number of sources
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.numberOfSources = function() {
+  this.numberOfSources = function () {
     return m_sources.length;
   };
 
   /**
    * Return source data given a key
    */
-  this.sourceData = function(key) {
+  this.sourceData = function (key) {
     var i;
 
-    for (i = 0; i < m_sources.length; ++i) {
+    for (i = 0; i < m_sources.length; i += 1) {
       if (m_sources[i].hasKey(key)) {
         return m_sources[i];
       }
@@ -3127,7 +3472,7 @@ vgl.geometryData = function() {
    * Add new primitive
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.addPrimitive = function(primitive) {
+  this.addPrimitive = function (primitive) {
     m_primitives.push(primitive);
     return true;
   };
@@ -3137,7 +3482,7 @@ vgl.geometryData = function() {
    * Return primitive for a given index. Returns null if not found.
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.primitive = function(index) {
+  this.primitive = function (index) {
     if (index < m_primitives.length) {
       return m_primitives[index];
     }
@@ -3150,7 +3495,7 @@ vgl.geometryData = function() {
    * Return number of primitives
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.numberOfPrimitives = function() {
+  this.numberOfPrimitives = function () {
     return m_primitives.length;
   };
 
@@ -3159,7 +3504,7 @@ vgl.geometryData = function() {
    * Return bounds [minX, maxX, minY, maxY, minZ, maxZ]
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.bounds = function() {
+  this.bounds = function () {
     if (m_boundsDirtyTimestamp.getMTime() > m_computeBoundsTimestamp.getMTime()) {
       this.computeBounds();
     }
@@ -3186,7 +3531,7 @@ vgl.geometryData = function() {
    * Reset bounds
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.resetBounds = function() {
+  this.resetBounds = function () {
     m_bounds[0] = 0.0;
     m_bounds[1] = 0.0;
     m_bounds[2] = 0.0;
@@ -3200,7 +3545,7 @@ vgl.geometryData = function() {
    * Set bounds
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setBounds = function(minX, maxX, minY, maxY, minZ, maxZ) {
+  this.setBounds = function (minX, maxX, minY, maxY, minZ, maxZ) {
     m_bounds[0] = minX;
     m_bounds[1] = maxX;
     m_bounds[2] = minY;
@@ -3218,7 +3563,7 @@ vgl.geometryData = function() {
    * Compute bounds
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.computeBounds = function() {
+  this.computeBounds = function () {
     if (m_boundsDirtyTimestamp.getMTime() > m_computeBoundsTimestamp.getMTime()) {
       var attr = vgl.vertexAttributeKeys.Position,
           sourceData = this.sourceData(attr),
@@ -3238,7 +3583,7 @@ vgl.geometryData = function() {
 
       this.resetBounds();
 
-      for (j = 0; j < numberOfComponents; ++j) {
+      for (j = 0; j < numberOfComponents; j += 1) {
         ib = j * 2;
         jb = j * 2 + 1;
         if (count) {
@@ -3269,7 +3614,7 @@ vgl.geometryData = function() {
    * Returns the vertex closest to a given position
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.findClosestVertex = function(point) {
+  this.findClosestVertex = function (point) {
     var attr = vgl.vertexAttributeKeys.Position,
         sourceData = this.sourceData(attr),
         sizeOfDataType = sourceData.sizeOfAttributeDataType(attr),
@@ -3288,10 +3633,10 @@ vgl.geometryData = function() {
     }
 
     if (!point.z) {
-      point = {x:point.x, y:point.y, z:0};
+      point = {x: point.x, y: point.y, z: 0};
     }
 
-    for (vi = offset, i = 0; vi < data.length; vi += stride, i++) {
+    for (vi = offset, i = 0; vi < data.length; vi += stride, i += 1) {
       vPos = [data[vi],
               data[vi + 1],
               data[vi + 2]];
@@ -3299,7 +3644,7 @@ vgl.geometryData = function() {
       dx = vPos[0] - point.x;
       dy = vPos[1] - point.y;
       dz = vPos[2] - point.z;
-      dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
+      dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
       if (dist < minDist) {
         minDist = dist;
         minIndex = i;
@@ -3313,7 +3658,7 @@ vgl.geometryData = function() {
    * Returns the requested vertex position
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.getPosition = function(index) {
+  this.getPosition = function (index) {
     var attr = vgl.vertexAttributeKeys.Position,
         sourceData = this.sourceData(attr),
         sizeOfDataType = sourceData.sizeOfAttributeDataType(attr),
@@ -3324,12 +3669,12 @@ vgl.geometryData = function() {
 
     // assume positions are always triplets
     if (numberOfComponents !== 3) {
-      console.log("[warning] getPosition assumes three component data");
+      console.log('[warning] getPosition assumes three component data');
     }
 
-    return [ data[offset + index*stride],
-             data[offset + index*stride + 1],
-             data[offset + index*stride + 2] ];
+    return [data[offset + index * stride],
+            data[offset + index * stride + 1],
+            data[offset + index * stride + 2]];
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -3337,7 +3682,7 @@ vgl.geometryData = function() {
    * Returns the scalar corresponding to a given vertex index
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.getScalar = function(index) {
+  this.getScalar = function (index) {
     var attr = vgl.vertexAttributeKeys.Scalar,
         sourceData = this.sourceData(attr),
         numberOfComponents, sizeOfDataType, data, stride, offset;
@@ -3352,14 +3697,14 @@ vgl.geometryData = function() {
     stride = sourceData.attributeStride(attr) / sizeOfDataType;
     offset = sourceData.attributeOffset(attr) / sizeOfDataType;
 
-    //console.log("index for scalar is " + index);
-    //console.log("offset for scalar is " + offset);
-    //console.log("stride for scalar is " + stride);
+    //console.log('index for scalar is ' + index);
+    //console.log('offset for scalar is ' + offset);
+    //console.log('stride for scalar is ' + stride);
 
-    //console.log("have " + data.length + " scalars");
+    //console.log('have ' + data.length + ' scalars');
 
     if (index * stride + offset >= data.length) {
-      console.log("access out of bounds in getScalar");
+      console.log('access out of bounds in getScalar');
     }
 
     return data[index * stride + offset];
@@ -3375,10 +3720,7 @@ inherit(vgl.geometryData, vgl.data);
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global vgl, gl, ogs, vec4, Float32Array, inherit, $*/
+/*global vgl, Float32Array, inherit*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -3389,7 +3731,7 @@ inherit(vgl.geometryData, vgl.data);
  * @returns {vgl.mapper}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.mapper = function(arg) {
+vgl.mapper = function (arg) {
   'use strict';
 
   if (!(this instanceof vgl.mapper)) {
@@ -3401,12 +3743,13 @@ vgl.mapper = function(arg) {
   arg = arg || {};
 
   var m_dirty = true,
-      m_color = [ 0.0, 1.0, 1.0 ],
+      m_color = [0.0, 1.0, 1.0],
       m_geomData = null,
       m_buffers = [],
       m_bufferVertexAttributeMap = {},
       m_dynamicDraw = arg.dynamicDraw === undefined ? false : arg.dynamicDraw,
-      m_glCompileTimestamp = vgl.timestamp();
+      m_glCompileTimestamp = vgl.timestamp(),
+      m_context = null;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -3415,10 +3758,10 @@ vgl.mapper = function(arg) {
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
-  function deleteVertexBufferObjects() {
+  function deleteVertexBufferObjects(renderState) {
     var i;
-    for (i = 0; i < m_buffers.length; ++i) {
-      gl.deleteBuffer(m_buffers[i]);
+    for (i = 0; i < m_buffers.length; i += 1) {
+      renderState.m_context.deleteBuffer(m_buffers[i]);
     }
   }
 
@@ -3429,25 +3772,29 @@ vgl.mapper = function(arg) {
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
-  function createVertexBufferObjects() {
+  function createVertexBufferObjects(renderState) {
     if (m_geomData) {
+      if (renderState) {
+        m_context = renderState.m_context;
+      }
       var numberOfSources = m_geomData.numberOfSources(),
           i, j, k, bufferId = null, keys, ks, numberOfPrimitives, data;
 
-      for (i = 0; i < numberOfSources; ++i) {
-        bufferId = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, bufferId);
+      for (i = 0; i < numberOfSources; i += 1) {
+        bufferId = m_context.createBuffer();
+        m_context.bindBuffer(vgl.GL.ARRAY_BUFFER, bufferId);
         data = m_geomData.source(i).data();
         if (!(data instanceof Float32Array)) {
           data = new Float32Array(data);
         }
-        gl.bufferData(gl.ARRAY_BUFFER, data,
-                      m_dynamicDraw ? gl.DYNAMIC_DRAW : gl.STATIC_DRAW);
+        m_context.bufferData(vgl.GL.ARRAY_BUFFER, data,
+                      m_dynamicDraw ? vgl.GL.DYNAMIC_DRAW :
+                      vgl.GL.STATIC_DRAW);
 
         keys = m_geomData.source(i).keys();
         ks = [];
 
-        for (j = 0; j < keys.length; ++j) {
+        for (j = 0; j < keys.length; j += 1) {
           ks.push(keys[j]);
         }
 
@@ -3456,12 +3803,13 @@ vgl.mapper = function(arg) {
       }
 
       numberOfPrimitives = m_geomData.numberOfPrimitives();
-      for (k = 0; k < numberOfPrimitives; ++k) {
-        bufferId = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, bufferId);
-        gl.bufferData(gl.ARRAY_BUFFER, m_geomData.primitive(k)
-            .indices(), gl.STATIC_DRAW);
-        m_buffers[i++] = bufferId;
+      for (k = 0; k < numberOfPrimitives; k += 1) {
+        bufferId = m_context.createBuffer();
+        m_context.bindBuffer(vgl.GL.ARRAY_BUFFER, bufferId);
+        m_context.bufferData(vgl.GL.ARRAY_BUFFER,
+          m_geomData.primitive(k).indices(), vgl.GL.STATIC_DRAW);
+        m_buffers[i] = bufferId;
+        i += 1;
       }
 
       m_glCompileTimestamp.modified();
@@ -3475,7 +3823,8 @@ vgl.mapper = function(arg) {
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
-  function cleanUpDrawObjects() {
+  function cleanUpDrawObjects(renderState) {
+    renderState = renderState; /* avoid unused warning */
     m_bufferVertexAttributeMap = {};
     m_buffers = [];
   }
@@ -3487,15 +3836,15 @@ vgl.mapper = function(arg) {
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
-  function setupDrawObjects() {
+  function setupDrawObjects(renderState) {
     // Delete buffer objects from past if any.
-    deleteVertexBufferObjects();
+    deleteVertexBufferObjects(renderState);
 
     // Clear any cache related to buffers
-    cleanUpDrawObjects();
+    cleanUpDrawObjects(renderState);
 
     // Now construct the new ones.
-    createVertexBufferObjects();
+    createVertexBufferObjects(renderState);
 
     m_dirty = false;
   }
@@ -3505,7 +3854,7 @@ vgl.mapper = function(arg) {
    * Compute bounds of the data
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.computeBounds = function() {
+  this.computeBounds = function () {
     if (m_geomData === null || typeof m_geomData === 'undefined') {
       this.resetBounds();
       return;
@@ -3530,7 +3879,7 @@ vgl.mapper = function(arg) {
    * Get solid color of the geometry
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.color = function() {
+  this.color = function () {
     return m_color;
   };
 
@@ -3543,7 +3892,7 @@ vgl.mapper = function(arg) {
    * @param b Blue component of the color [0.0 - 1.0]
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setColor = function(r, g, b) {
+  this.setColor = function (r, g, b) {
     m_color[0] = r;
     m_color[1] = g;
     m_color[2] = b;
@@ -3556,7 +3905,7 @@ vgl.mapper = function(arg) {
    * Return stored geometry data if any
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.geometryData = function() {
+  this.geometryData = function () {
     return m_geomData;
   };
 
@@ -3565,7 +3914,7 @@ vgl.mapper = function(arg) {
    * Connect mapper to its geometry data
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setGeometryData = function(geom) {
+  this.setGeometryData = function (geom) {
     if (m_geomData !== geom) {
       m_geomData = geom;
 
@@ -3583,7 +3932,13 @@ vgl.mapper = function(arg) {
    *    If not specified, use the source's own buffer.
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.updateSourceBuffer = function (sourceName, values) {
+  this.updateSourceBuffer = function (sourceName, values, renderState) {
+    if (renderState) {
+      m_context = renderState.m_context;
+    }
+    if (!m_context) {
+      return false;
+    }
     var bufferIndex = -1;
     for (var i = 0; i < m_geomData.numberOfSources(); i += 1) {
       if (m_geomData.source(i).name() === sourceName) {
@@ -3597,11 +3952,12 @@ vgl.mapper = function(arg) {
     if (!values) {
       values = m_geomData.source(i).dataToFloat32Array();
     }
-    gl.bindBuffer(gl.ARRAY_BUFFER, m_buffers[bufferIndex]);
+    m_context.bindBuffer(vgl.GL.ARRAY_BUFFER, m_buffers[bufferIndex]);
     if (values instanceof Float32Array) {
-      gl.bufferSubData(gl.ARRAY_BUFFER, 0, values);
+      m_context.bufferSubData(vgl.GL.ARRAY_BUFFER, 0, values);
     } else {
-      gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(values));
+      m_context.bufferSubData(vgl.GL.ARRAY_BUFFER, 0,
+                              new Float32Array(values));
     }
     return true;
   };
@@ -3630,13 +3986,15 @@ vgl.mapper = function(arg) {
    * Render the mapper
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.render = function(renderState) {
-    if (this.getMTime() > m_glCompileTimestamp.getMTime()) {
+  this.render = function (renderState) {
+    if (this.getMTime() > m_glCompileTimestamp.getMTime() ||
+        renderState.m_contextChanged) {
       setupDrawObjects(renderState);
     }
+    m_context = renderState.m_context;
 
     // Fixed vertex color
-    gl.vertexAttrib3fv(vgl.vertexAttributeKeys.Color, this.color());
+    m_context.vertexAttrib3fv(vgl.vertexAttributeKeys.Color, this.color());
 
     // TODO Use renderState
     var bufferIndex = 0,
@@ -3644,37 +4002,39 @@ vgl.mapper = function(arg) {
 
     for (i in m_bufferVertexAttributeMap) {
       if (m_bufferVertexAttributeMap.hasOwnProperty(i)) {
-        gl.bindBuffer(gl.ARRAY_BUFFER, m_buffers[bufferIndex]);
-        for (j = 0; j < m_bufferVertexAttributeMap[i].length; ++j) {
+        m_context.bindBuffer(vgl.GL.ARRAY_BUFFER,
+                                         m_buffers[bufferIndex]);
+        for (j = 0; j < m_bufferVertexAttributeMap[i].length; j += 1) {
           renderState.m_material
               .bindVertexData(renderState, m_bufferVertexAttributeMap[i][j]);
         }
-        ++bufferIndex;
+        bufferIndex += 1;
       }
     }
 
     noOfPrimitives = m_geomData.numberOfPrimitives();
-    for (j = 0; j < noOfPrimitives; ++j) {
-      gl.bindBuffer(gl.ARRAY_BUFFER, m_buffers[bufferIndex++]);
+    for (j = 0; j < noOfPrimitives; j += 1) {
+      m_context.bindBuffer(vgl.GL.ARRAY_BUFFER, m_buffers[bufferIndex]);
+      bufferIndex += 1;
       primitive = m_geomData.primitive(j);
-      switch(primitive.primitiveType()) {
-        case gl.POINTS:
-          gl.drawArrays (gl.POINTS, 0, primitive.numberOfIndices());
+      switch (primitive.primitiveType()) {
+        case vgl.GL.POINTS:
+          m_context.drawArrays(vgl.GL.POINTS, 0, primitive.numberOfIndices());
           break;
-        case gl.LINES:
-          gl.drawArrays (gl.LINES, 0, primitive.numberOfIndices());
+        case vgl.GL.LINES:
+          m_context.drawArrays(vgl.GL.LINES, 0, primitive.numberOfIndices());
           break;
-        case gl.LINE_STRIP:
-          gl.drawArrays (gl.LINE_STRIP, 0, primitive.numberOfIndices());
+        case vgl.GL.LINE_STRIP:
+          m_context.drawArrays(vgl.GL.LINE_STRIP, 0, primitive.numberOfIndices());
           break;
-        case gl.TRIANGLES:
-          gl.drawArrays (gl.TRIANGLES, 0, primitive.numberOfIndices());
+        case vgl.GL.TRIANGLES:
+          m_context.drawArrays(vgl.GL.TRIANGLES, 0, primitive.numberOfIndices());
           break;
-        case gl.TRIANGLE_STRIP:
-          gl.drawArrays (gl.TRIANGLE_STRIP, 0, primitive.numberOfIndices());
+        case vgl.GL.TRIANGLE_STRIP:
+          m_context.drawArrays(vgl.GL.TRIANGLE_STRIP, 0, primitive.numberOfIndices());
           break;
       }
-      gl.bindBuffer (gl.ARRAY_BUFFER, null);
+      m_context.bindBuffer (vgl.GL.ARRAY_BUFFER, null);
     }
   };
 
@@ -3688,13 +4048,10 @@ inherit(vgl.mapper, vgl.boundingObject);
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global vgl, ogs, vec4, inherit, $*/
+/*global vgl, inherit*/
 //////////////////////////////////////////////////////////////////////////////
 
-vgl.groupMapper = function() {
+vgl.groupMapper = function () {
   'use strict';
 
   if (!(this instanceof vgl.groupMapper)) {
@@ -3714,8 +4071,8 @@ vgl.groupMapper = function() {
    * @param index optional
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.geometryData = function(index) {
-    if (index !== undefined && index < m_geomDataArray.length ) {
+  this.geometryData = function (index) {
+    if (index !== undefined && index < m_geomDataArray.length) {
       return m_geomDataArray[index];
     }
 
@@ -3733,7 +4090,7 @@ vgl.groupMapper = function() {
    * @param geom {vgl.geomData}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setGeometryData = function(geom) {
+  this.setGeometryData = function (geom) {
     if (m_geomDataArray.length === 1) {
       if (m_geomDataArray[0] === geom) {
         return;
@@ -3749,7 +4106,7 @@ vgl.groupMapper = function() {
    * Return stored geometry data array if any
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.geometryDataArray = function() {
+  this.geometryDataArray = function () {
     return m_geomDataArray;
   };
 
@@ -3760,7 +4117,7 @@ vgl.groupMapper = function() {
    * @param geoms {Array}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setGeometryDataArray = function(geoms) {
+  this.setGeometryDataArray = function (geoms) {
     if (geoms instanceof Array) {
       if (m_geomDataArray !== geoms) {
         m_geomDataArray = [];
@@ -3780,7 +4137,7 @@ vgl.groupMapper = function() {
    * Compute bounds of the data
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.computeBounds = function() {
+  this.computeBounds = function () {
     if (m_geomDataArray === null ||
         m_geomDataArray === undefined) {
       this.resetBounds();
@@ -3796,7 +4153,7 @@ vgl.groupMapper = function() {
     if (boundsDirtyTimestamp.getMTime() >
         computeBoundsTimestamp.getMTime()) {
 
-      for (i = 0; i < m_geomDataArray.length; ++i) {
+      for (i = 0; i < m_geomDataArray.length; i += 1) {
         geomBounds = m_geomDataArray[i].bounds();
 
         if (m_bounds[0] > geomBounds[0]) {
@@ -3829,19 +4186,19 @@ vgl.groupMapper = function() {
    * Render the mapper
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.render = function(renderState) {
+  this.render = function (renderState) {
     var i = null;
 
     if (this.getMTime() > m_createMappersTimestamp.getMTime()) {
       // NOTE Hoping that it will release the graphics resources
-      for (i = 0; i < m_geomDataArray.length; ++i) {
+      for (i = 0; i < m_geomDataArray.length; i += 1) {
         m_mappers.push(vgl.mapper());
         m_mappers[i].setGeometryData(m_geomDataArray[i]);
       }
-        m_createMappersTimestamp.modified();
+      m_createMappersTimestamp.modified();
     }
 
-    for (i = 0; i < m_mappers.length; ++i) {
+    for (i = 0; i < m_mappers.length; i += 1) {
       m_mappers[i].render(renderState);
     }
   };
@@ -3856,18 +4213,15 @@ inherit(vgl.groupMapper, vgl.mapper);
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global vgl, ogs, vec4, inherit, $*/
+/*global vgl, inherit*/
 //////////////////////////////////////////////////////////////////////////////
 
 vgl.materialAttributeType = {
-  "Undefined" : 0x0,
-  "ShaderProgram" : 0x1,
-  "Texture" : 0x2,
-  "Blend" : 0x3,
-  "Depth" : 0x4
+  'Undefined' : 0x0,
+  'ShaderProgram' : 0x1,
+  'Texture' : 0x2,
+  'Blend' : 0x3,
+  'Depth' : 0x4
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -3879,16 +4233,17 @@ vgl.materialAttributeType = {
  * @returns {vgl.materialAttribute}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.materialAttribute = function(type) {
+vgl.materialAttribute = function (type) {
   'use strict';
 
   if (!(this instanceof vgl.materialAttribute)) {
     return new vgl.materialAttribute();
   }
-  vgl.object.call(this);
+  vgl.graphicsObject.call(this);
 
   /** @private */
-  var m_type = type,
+  var m_this = this,
+      m_type = type,
       m_enabled = true;
 
   ////////////////////////////////////////////////////////////////////////////
@@ -3898,7 +4253,7 @@ vgl.materialAttribute = function(type) {
    * @returns {*}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.type = function() {
+  this.type = function () {
     return m_type;
   };
 
@@ -3909,57 +4264,8 @@ vgl.materialAttribute = function(type) {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.enabled = function() {
+  this.enabled = function () {
     return m_enabled;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Setup (initialize) the material attribute
-   *
-   * @param renderState
-   * @returns {boolean}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.setup = function(renderState) {
-    return false;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Bind and activate the material attribute
-   *
-   * @param renderState
-   * @returns {boolean}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.bind = function(renderState) {
-    return false;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Undo bind and deactivate the material
-   *
-   * @param renderState
-   * @returns {boolean}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.undoBind = function(renderState) {
-    return false;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Initialize vertex data for the material attribute
-   *
-   * @param renderState
-   * @param key
-   * @returns {boolean}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.setupVertexData = function(renderState, key) {
-    return false;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -3971,7 +4277,9 @@ vgl.materialAttribute = function(type) {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.bindVertexData = function(renderState, key) {
+  this.bindVertexData = function (renderState, key) {
+    renderState = renderState; /* unused parameter */
+    key = key /* unused parameter */;
     return false;
   };
 
@@ -3984,24 +4292,23 @@ vgl.materialAttribute = function(type) {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.undoBindVertexData = function(renderState, key) {
+  this.undoBindVertexData = function (renderState, key) {
+    renderState = renderState; /* unused parameter */
+    key = key /* unused parameter */;
     return false;
   };
 
-  return this;
+  return m_this;
 };
 
-inherit(vgl.materialAttribute, vgl.object);
+inherit(vgl.materialAttribute, vgl.graphicsObject);
 
 //////////////////////////////////////////////////////////////////////////////
 /**
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global vgl, gl, ogs, vec4, inherit, $*/
+/*global vgl, inherit*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -4014,7 +4321,7 @@ inherit(vgl.materialAttribute, vgl.object);
  * @returns {vgl.blendFunction}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.blendFunction = function(source, destination) {
+vgl.blendFunction = function (source, destination) {
   'use strict';
 
   if (!(this instanceof vgl.blendFunction)) {
@@ -4032,8 +4339,9 @@ vgl.blendFunction = function(source, destination) {
    * @param {vgl.renderState}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.apply = function(renderState) {
-    gl.blendFuncSeparate(m_source, m_destination, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+  this.apply = function (renderState) {
+    renderState.m_context.blendFuncSeparate(m_source, m_destination,
+                         vgl.GL.ONE, vgl.GL.ONE_MINUS_SRC_ALPHA);
   };
 
   return this;
@@ -4046,7 +4354,7 @@ vgl.blendFunction = function(source, destination) {
  * @returns {vgl.blend}
  */
 ////////////////////////////////////////////////////////////////////////////
-vgl.blend = function() {
+vgl.blend = function () {
   'use strict';
 
   if (!(this instanceof vgl.blend)) {
@@ -4057,8 +4365,8 @@ vgl.blend = function() {
 
   /** @private */
   var m_wasEnabled = false,
-      m_blendFunction = vgl.blendFunction(gl.SRC_ALPHA,
-                                                gl.ONE_MINUS_SRC_ALPHA);
+      m_blendFunction = vgl.blendFunction(vgl.GL.SRC_ALPHA,
+                                          vgl.GL.ONE_MINUS_SRC_ALPHA);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -4067,15 +4375,14 @@ vgl.blend = function() {
    * @param {vgl.renderState}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.bind = function(renderState) {
-    m_wasEnabled = gl.isEnabled(gl.BLEND);
+  this.bind = function (renderState) {
+    m_wasEnabled = renderState.m_context.isEnabled(vgl.GL.BLEND);
 
     if (this.enabled()) {
-      gl.enable(gl.BLEND);
+      renderState.m_context.enable(vgl.GL.BLEND);
       m_blendFunction.apply(renderState);
-    }
-    else {
-      gl.disable(gl.BLEND);
+    } else {
+      renderState.m_context.disable(vgl.GL.BLEND);
     }
 
     return true;
@@ -4088,12 +4395,11 @@ vgl.blend = function() {
    * @param {vgl.renderState}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.undoBind = function(renderState) {
+  this.undoBind = function (renderState) {
     if (m_wasEnabled) {
-      gl.enable(gl.BLEND);
-    }
-    else {
-      gl.disable(gl.BLEND);
+      renderState.m_context.enable(vgl.GL.BLEND);
+    } else {
+      renderState.m_context.disable(vgl.GL.BLEND);
     }
 
     return true;
@@ -4109,10 +4415,7 @@ inherit(vgl.blend, vgl.materialAttribute);
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global vgl, ogs, vec4, inherit, $*/
+/*global vgl, inherit*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -4123,16 +4426,17 @@ inherit(vgl.blend, vgl.materialAttribute);
  * @returns {vgl.material}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.material = function() {
+vgl.material = function () {
   'use strict';
 
   if (!(this instanceof vgl.material)) {
     return new vgl.material();
   }
-  vgl.object.call(this);
+  vgl.graphicsObject.call(this);
 
   // / Private member variables
-  var m_shaderProgram = new vgl.shaderProgram(),
+  var m_this = this,
+      m_shaderProgram = new vgl.shaderProgram(),
       m_binNumber = 100,
       m_textureAttributes = {},
       m_attributes = {};
@@ -4145,7 +4449,7 @@ vgl.material = function() {
    * @returns {number}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.binNumber = function() {
+  this.binNumber = function () {
     return m_binNumber;
   };
 
@@ -4156,9 +4460,9 @@ vgl.material = function() {
    * @param binNo
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setBinNumber = function(binNo) {
+  this.setBinNumber = function (binNo) {
     m_binNumber = binNo;
-    this.modified();
+    m_this.modified();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -4169,7 +4473,7 @@ vgl.material = function() {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.exists = function(attr) {
+  this.exists = function (attr) {
     if (attr.type() === vgl.materialAttribute.Texture) {
       return m_textureAttributes.hasOwnProperty(attr);
     }
@@ -4185,13 +4489,13 @@ vgl.material = function() {
    * @returns {vgl.uniform}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.uniform = function(name) {
+  this.uniform = function (name) {
     if (m_shaderProgram) {
       return m_shaderProgram.uniform(name);
     }
 
     return null;
-  }
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -4201,7 +4505,7 @@ vgl.material = function() {
    * @returns {vgl.materialAttribute}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.attribute = function(name) {
+  this.attribute = function (name) {
     if (m_attributes.hasOwnProperty(name)) {
       return m_attributes[name];
     }
@@ -4224,11 +4528,11 @@ vgl.material = function() {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setAttribute = function(attr) {
+  this.setAttribute = function (attr) {
     if (attr.type() === vgl.materialAttributeType.Texture &&
         m_textureAttributes[attr.textureUnit()] !== attr) {
       m_textureAttributes[attr.textureUnit()] = attr;
-      this.modified();
+      m_this.modified();
       return true;
     }
 
@@ -4242,7 +4546,7 @@ vgl.material = function() {
     }
 
     m_attributes[attr.type()] = attr;
-    this.modified();
+    m_this.modified();
     return true;
   };
 
@@ -4254,8 +4558,8 @@ vgl.material = function() {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.addAttribute = function(attr) {
-    if (this.exists(attr)) {
+  this.addAttribute = function (attr) {
+    if (m_this.exists(attr)) {
       return false;
     }
 
@@ -4263,7 +4567,7 @@ vgl.material = function() {
       // TODO Currently we don't check if we are replacing or not.
       // It would be nice to have a flag for it.
       m_textureAttributes[attr.textureUnit()] = attr;
-      this.modified();
+      m_this.modified();
       return true;
     }
 
@@ -4273,7 +4577,7 @@ vgl.material = function() {
     }
 
     m_attributes[attr.type()] = attr;
-    this.modified();
+    m_this.modified();
     return true;
   };
 
@@ -4284,30 +4588,43 @@ vgl.material = function() {
    * @returns {vgl.shaderProgram}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.shaderProgram = function() {
+  this.shaderProgram = function () {
     return m_shaderProgram;
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Activate the material
+   * Setup (initialize) the material attribute
    *
    * @param renderState
+   * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.render = function(renderState) {
-    this.bind(renderState);
+  this._setup = function (renderState) {
+    renderState = renderState; /* unused parameter */
+    return false;
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Deactivate the material
+   * Remove any resources acquired before deletion
    *
    * @param renderState
+   * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.remove = function(renderState) {
-    this.undoBind(renderState);
+  this._cleanup = function (renderState) {
+    for (var key in m_attributes) {
+      if (m_attributes.hasOwnProperty(key)) {
+        m_attributes[key]._cleanup(renderState);
+      }
+    }
+
+    for (key in m_textureAttributes) {
+      if (m_textureAttributes.hasOwnProperty(key)) {
+        m_textureAttributes[key]._cleanup(renderState);
+      }
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -4317,12 +4634,16 @@ vgl.material = function() {
    * @param renderState
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.bind = function(renderState) {
+  this.bind = function (renderState) {
     var key = null;
+
+    m_shaderProgram.bind(renderState);
 
     for (key in m_attributes) {
       if (m_attributes.hasOwnProperty(key)) {
-        m_attributes[key].bind(renderState);
+        if (m_attributes[key] !== m_shaderProgram) {
+          m_attributes[key].bind(renderState);
+        }
       }
     }
 
@@ -4340,7 +4661,7 @@ vgl.material = function() {
    * @param renderState
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.undoBind = function(renderState) {
+  this.undoBind = function (renderState) {
     var key = null;
     for (key in m_attributes) {
       if (m_attributes.hasOwnProperty(key)) {
@@ -4363,7 +4684,7 @@ vgl.material = function() {
    * @param key
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.bindVertexData = function(renderState, key) {
+  this.bindVertexData = function (renderState, key) {
     var i = null;
 
     for (i in m_attributes) {
@@ -4381,7 +4702,7 @@ vgl.material = function() {
    * @param key
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.undoBindVertexData = function(renderState, key) {
+  this.undoBindVertexData = function (renderState, key) {
     var i = null;
 
     for (i in m_attributes) {
@@ -4391,28 +4712,25 @@ vgl.material = function() {
     }
   };
 
-  return this;
+  return m_this;
 };
 
 vgl.material.RenderBin = {
-  "Base" : 0,
-  "Default" : 100,
-  "Opaque" : 100,
-  "Transparent" : 1000,
-  "Overlay" : 10000
+  'Base' : 0,
+  'Default' : 100,
+  'Opaque' : 100,
+  'Transparent' : 1000,
+  'Overlay' : 10000
 };
 
-inherit(vgl.material, vgl.object);
+inherit(vgl.material, vgl.graphicsObject);
 
 //////////////////////////////////////////////////////////////////////////////
 /**
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, bitwise:true, indent: 2*/
-
-/*global vgl, gl, ogs, vec2, vec3, vec4, mat4, inherit, $*/
+/*global vgl, vec2, vec3, vec4, mat4, inherit*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -4422,9 +4740,10 @@ inherit(vgl.material, vgl.object);
  * @returns {vgl.renderState}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.renderState = function() {
+vgl.renderState = function () {
   'use strict';
 
+  this.m_context = null;
   this.m_modelViewMatrix = mat4.create();
   this.m_normalMatrix = mat4.create();
   this.m_projectionMatrix = null;
@@ -4439,36 +4758,42 @@ vgl.renderState = function() {
  * @returns {vgl.renderer}
  */
 ////////////////////////////////////////////////////////////////////////////
-vgl.renderer = function() {
+vgl.renderer = function (arg) {
   'use strict';
 
   if (!(this instanceof vgl.renderer)) {
-    return new vgl.renderer();
+    return new vgl.renderer(arg);
   }
-  vgl.object.call(this);
+  vgl.graphicsObject.call(this);
+  arg = arg || {};
 
   /** @private */
-  var m_sceneRoot = new vgl.groupNode(),
-      m_camera = new vgl.camera(),
-      m_nearClippingPlaneTolerance = null,
-      m_x = 0,
-      m_y = 0,
-      m_width = 0,
-      m_height = 0,
-      m_resizable = true,
-      m_resetScene = true,
-      m_layer = 0,
-      m_resetClippingRange = true;
+  var m_this = this;
+  m_this.m_renderWindow = null;
+  m_this.m_contextChanged = false;
+  m_this.m_sceneRoot = new vgl.groupNode();
+  m_this.m_camera = new vgl.camera(arg);
+  m_this.m_nearClippingPlaneTolerance = null;
+  m_this.m_x = 0;
+  m_this.m_y = 0;
+  m_this.m_width = 0;
+  m_this.m_height = 0;
+  m_this.m_resizable = true;
+  m_this.m_resetScene = true;
+  m_this.m_layer = 0;
+  m_this.m_renderPasses = null;
+  m_this.m_resetClippingRange = true;
+  m_this.m_depthBits = null;
 
-  m_camera.addChild(m_sceneRoot);
+  m_this.m_camera.addChild(m_this.m_sceneRoot);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Get width of the renderer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.width = function() {
-    return m_width;
+  this.width = function () {
+    return m_this.m_width;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -4476,8 +4801,8 @@ vgl.renderer = function() {
    * Get height of the renderer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.height = function() {
-    return m_height;
+  this.height = function () {
+    return m_this.m_height;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -4488,7 +4813,7 @@ vgl.renderer = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.layer = function () {
-     return m_layer;
+    return m_this.m_layer;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -4498,9 +4823,9 @@ vgl.renderer = function() {
    * @param layerNo
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setLayer = function(layerNo) {
-    m_layer = layerNo;
-    this.modified();
+  this.setLayer = function (layerNo) {
+    m_this.m_layer = layerNo;
+    m_this.modified();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -4508,8 +4833,8 @@ vgl.renderer = function() {
    *
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.isResizable = function() {
-    return m_resizable;
+  this.isResizable = function () {
+    return m_this.m_resizable;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -4517,8 +4842,34 @@ vgl.renderer = function() {
    *
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setResizable = function(r) {
-    m_resizable = r;
+  this.setResizable = function (r) {
+    m_this.m_resizable = r;
+  };
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return render window (owner) of the renderer
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.renderWindow = function () {
+    return m_this.m_renderWindow;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set render window for the renderer
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.setRenderWindow = function (renWin) {
+    if (m_this.m_renderWindow !== renWin) {
+      if (m_this.m_renderWindow) {
+        m_this.m_renderWindow.removeRenderer(this);
+      }
+      m_this.m_renderWindow = renWin;
+      m_this.m_contextChanged = true;
+      m_this.modified();
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -4526,8 +4877,8 @@ vgl.renderer = function() {
    * Get background color
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.backgroundColor = function() {
-    return m_camera.clearColor();
+  this.backgroundColor = function () {
+    return m_this.m_camera.clearColor();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -4540,9 +4891,9 @@ vgl.renderer = function() {
    * @param a
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setBackgroundColor = function(r, g, b, a) {
-    m_camera.setClearColor(r, g, b, a);
-    this.modified();
+  this.setBackgroundColor = function (r, g, b, a) {
+    m_this.m_camera.setClearColor(r, g, b, a);
+    m_this.modified();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -4552,8 +4903,8 @@ vgl.renderer = function() {
    * @returns {vgl.groupNode}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.sceneRoot = function() {
-    return m_sceneRoot;
+  this.sceneRoot = function () {
+    return m_this.m_sceneRoot;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -4563,8 +4914,8 @@ vgl.renderer = function() {
    * @returns {vgl.camera}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.camera = function() {
-    return m_camera;
+  this.camera = function () {
+    return m_this.m_camera;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -4572,36 +4923,57 @@ vgl.renderer = function() {
    * Render the scene
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.render = function() {
+  this.render = function () {
     var i, renSt, children, actor = null, sortedActors = [],
         mvMatrixInv = mat4.create(), clearColor = null;
 
-    gl.enable(gl.DEPTH_TEST);
-    gl.depthFunc(gl.LEQUAL);
+    renSt = new vgl.renderState();
+    renSt.m_renderer = m_this;
+    renSt.m_context = m_this.renderWindow().context();
+    m_this.m_depthBits = renSt.m_context.getParameter(vgl.GL.DEPTH_BITS);
+    renSt.m_contextChanged = m_this.m_contextChanged;
 
-    if (m_camera.clearMask() & vgl.GL.ColorBufferBit) {
-      clearColor = m_camera.clearColor();
-      gl.clearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3]);
+    if (m_this.m_renderPasses) {
+      for (i = 0; i < m_this.m_renderPasses.length; i += 1) {
+        if (m_this.m_renderPasses[i].render(renSt)) {
+          // Stop the rendering if render pass returns false
+          console.log('returning');
+          m_this.m_renderPasses[i].remove(renSt);
+          return;
+        }
+        m_this.m_renderPasses[i].remove(renSt);
+      }
     }
 
-    if (m_camera.clearMask() & vgl.GL.DepthBufferBit) {
-      gl.clearDepth(m_camera.clearDepth());
+    renSt.m_context.enable(vgl.GL.DEPTH_TEST);
+    renSt.m_context.depthFunc(vgl.GL.LEQUAL);
+
+    /*jshint bitwise: false */
+    if (m_this.m_camera.clearMask() & vgl.GL.COLOR_BUFFER_BIT) {
+      clearColor = m_this.m_camera.clearColor();
+      renSt.m_context.clearColor(clearColor[0], clearColor[1],
+                                 clearColor[2], clearColor[3]);
     }
 
-    gl.clear(m_camera.clearMask());
+    if (m_this.m_camera.clearMask() & vgl.GL.DEPTH_BUFFER_BIT) {
+      renSt.m_context.clearDepth(m_this.m_camera.clearDepth());
+    }
+    /*jshint bitwise: true */
+
+    renSt.m_context.clear(m_this.m_camera.clearMask());
 
     // Set the viewport for this renderer
-    gl.viewport(m_x, m_y, m_width, m_height);
+    renSt.m_context.viewport(m_this.m_x, m_this.m_y,
+                             m_this.m_width, m_this.m_height);
 
-    renSt = new vgl.renderState();
-    children = m_sceneRoot.children();
+    children = m_this.m_sceneRoot.children();
 
-    if (children.length > 0 && m_resetScene) {
-      this.resetCamera();
-      m_resetScene = false;
+    if (children.length > 0 && m_this.m_resetScene) {
+      m_this.resetCamera();
+      m_this.m_resetScene = false;
     }
 
-    for ( i = 0; i < children.length; ++i) {
+    for (i = 0; i < children.length; i += 1) {
       actor = children[i];
 
       // Compute the bounds even if the actor is not visible
@@ -4609,27 +4981,28 @@ vgl.renderer = function() {
 
       // If bin number is < 0, then don't even bother
       // rendering the data
-      if (!actor.visible() || actor.material().binNumber() < 0) {
-        continue;
+      if (actor.visible() && actor.material().binNumber() >= 0) {
+        sortedActors.push([actor.material().binNumber(), actor]);
       }
-
-      sortedActors.push([actor.material().binNumber(), actor]);
     }
 
     // Now perform sorting
-    sortedActors.sort(function(a, b) {return a[0] - b[0];});
+    sortedActors.sort(function (a, b) {return a[0] - b[0];});
 
-    for ( i = 0; i < sortedActors.length; ++i) {
+    for (i = 0; i < sortedActors.length; i += 1) {
       actor = sortedActors[i][1];
       if (actor.referenceFrame() ===
           vgl.boundingObject.ReferenceFrame.Relative) {
-        mat4.multiply(renSt.m_modelViewMatrix, m_camera.viewMatrix(),
+        mat4.multiply(renSt.m_modelViewMatrix, m_this.m_camera.viewMatrix(),
           actor.matrix());
-        renSt.m_projectionMatrix = m_camera.projectionMatrix();
+        renSt.m_projectionMatrix = m_this.m_camera.projectionMatrix();
+        renSt.m_modelViewAlignment = m_this.m_camera.viewAlignment();
       } else {
         renSt.m_modelViewMatrix = actor.matrix();
+        renSt.m_modelViewAlignment = null;
         renSt.m_projectionMatrix = mat4.create();
-        mat4.ortho(renSt.m_projectionMatrix, 0, m_width, 0, m_height, -1, 1);
+        mat4.ortho(renSt.m_projectionMatrix,
+                   0, m_this.m_width, 0, m_this.m_height, -1, 1);
       }
 
       mat4.invert(mvMatrixInv, renSt.m_modelViewMatrix);
@@ -4638,10 +5011,13 @@ vgl.renderer = function() {
       renSt.m_mapper = actor.mapper();
 
       // TODO Fix this shortcut
-      renSt.m_material.render(renSt);
+      renSt.m_material.bind(renSt);
       renSt.m_mapper.render(renSt);
-      renSt.m_material.remove(renSt);
+      renSt.m_material.undoBind(renSt);
     }
+
+    renSt.m_context.finish();
+    m_this.m_contextChanged = false;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -4649,11 +5025,11 @@ vgl.renderer = function() {
    * Automatically set up the camera based on visible actors
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.resetCamera = function() {
-    m_camera.computeBounds();
+  this.resetCamera = function () {
+    m_this.m_camera.computeBounds();
 
-    var vn = m_camera.directionOfProjection(),
-        visibleBounds = m_camera.bounds(),
+    var vn = m_this.m_camera.directionOfProjection(),
+        visibleBounds = m_this.m_camera.bounds(),
         center = [
           (visibleBounds[0] + visibleBounds[1]) / 2.0,
           (visibleBounds[2] + visibleBounds[3]) / 2.0,
@@ -4665,8 +5041,8 @@ vgl.renderer = function() {
           visibleBounds[5] - visibleBounds[4]
         ],
         radius = 0.0,
-        aspect = m_camera.viewAspect(),
-        angle = m_camera.viewAngle(),
+        aspect = m_this.m_camera.viewAspect(),
+        angle = m_this.m_camera.viewAngle(),
         distance = null,
         vup = null;
 
@@ -4692,61 +5068,66 @@ vgl.renderer = function() {
     }
 
     distance = radius / Math.sin(angle * 0.5);
-    vup = m_camera.viewUpDirection();
+    vup = m_this.m_camera.viewUpDirection();
 
     if (Math.abs(vec3.dot(vup, vn)) > 0.999) {
-      m_camera.setViewUpDirection(-vup[2], vup[0], vup[1]);
+      m_this.m_camera.setViewUpDirection(-vup[2], vup[0], vup[1]);
     }
 
-    m_camera.setFocalPoint(center[0], center[1], center[2]);
-    m_camera.setPosition(center[0] + distance * -vn[0],
+    m_this.m_camera.setFocalPoint(center[0], center[1], center[2]);
+    m_this.m_camera.setPosition(center[0] + distance * -vn[0],
       center[1] + distance * -vn[1], center[2] + distance * -vn[2]);
 
-    this.resetCameraClippingRange(visibleBounds);
+    m_this.resetCameraClippingRange(visibleBounds);
   };
 
-  this.hasValidBounds = function(bounds) {
-    if (bounds[0] == Number.MAX_VALUE ||
-        bounds[1] == -Number.MAX_VALUE ||
-        bounds[2] == Number.MAX_VALUE ||
-        bounds[3] == -Number.MAX_VALUE ||
-        bounds[4] == Number.MAX_VALUE ||
-        bounds[5] == -Number.MAX_VALUE)  {
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+  * Check whether or not whether or not the bounds are valid
+  */
+  ////////////////////////////////////////////////////////////////////////////
+  this.hasValidBounds = function (bounds) {
+    if (bounds[0] === Number.MAX_VALUE ||
+        bounds[1] === -Number.MAX_VALUE ||
+        bounds[2] === Number.MAX_VALUE ||
+        bounds[3] === -Number.MAX_VALUE ||
+        bounds[4] === Number.MAX_VALUE ||
+        bounds[5] === -Number.MAX_VALUE) {
       return false;
     }
 
     return true;
-  }
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Recalculate camera's clipping range
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.resetCameraClippingRange = function(bounds) {
+  this.resetCameraClippingRange = function (bounds) {
     if (typeof bounds === 'undefined') {
-      m_camera.computeBounds();
-      bounds = m_camera.bounds();
+      m_this.m_camera.computeBounds();
+      bounds = m_this.m_camera.bounds();
     }
 
-    if (!this.hasValidBounds(bounds)) {
+    if (!m_this.hasValidBounds(bounds)) {
       return;
     }
 
-    var vn = m_camera.viewPlaneNormal(),
-        position = m_camera.position(),
+    var vn = m_this.m_camera.viewPlaneNormal(),
+        position = m_this.m_camera.position(),
         a = -vn[0],
         b = -vn[1],
         c = -vn[2],
-        d = -(a*position[0] + b*position[1] + c*position[2]),
+        d = -(a * position[0] + b * position[1] + c * position[2]),
         range = vec2.create(),
         dist = null,
         i = null,
         j = null,
         k = null;
 
-    if (!m_resetClippingRange) {
-        return;
+    if (!m_this.m_resetClippingRange) {
+      return;
     }
 
     // Set the max near clipping plane and the min far clipping plane
@@ -4754,9 +5135,9 @@ vgl.renderer = function() {
     range[1] = 1e-18;
 
     // Find the closest / farthest bounding box vertex
-    for (k = 0; k < 2; k++ ) {
-      for (j = 0; j < 2; j++) {
-        for (i = 0; i < 2; i++) {
+    for (k = 0; k < 2; k += 1) {
+      for (j = 0; j < 2; j += 1) {
+        for (i = 0; i < 2; i += 1) {
           dist = a * bounds[i] + b * bounds[2 + j] + c * bounds[4 + k] + d;
           range[0] = (dist < range[0]) ? (dist) : (range[0]);
           range[1] = (dist > range[1]) ? (dist) : (range[1]);
@@ -4779,22 +5160,22 @@ vgl.renderer = function() {
     // Make sure near is at least some fraction of far - this prevents near
     // from being behind the camera or too close in front. How close is too
     // close depends on the resolution of the depth buffer.
-    if (!m_nearClippingPlaneTolerance) {
-      m_nearClippingPlaneTolerance = 0.01;
+    if (!m_this.m_nearClippingPlaneTolerance) {
+      m_this.m_nearClippingPlaneTolerance = 0.01;
 
-      if (gl !== null && gl.getParameter(gl.DEPTH_BITS) > 16) {
-        m_nearClippingPlaneTolerance = 0.001;
+      if (m_this.m_depthBits && m_this.m_depthBits > 16) {
+        m_this.m_nearClippingPlaneTolerance = 0.001;
       }
     }
 
     // make sure the front clipping range is not too far from the far clippnig
     // range, this is to make sure that the zbuffer resolution is effectively
     // used.
-    if (range[0] < m_nearClippingPlaneTolerance*range[1]) {
-       range[0] = m_nearClippingPlaneTolerance*range[1];
+    if (range[0] < m_this.m_nearClippingPlaneTolerance * range[1]) {
+      range[0] = m_this.m_nearClippingPlaneTolerance * range[1];
     }
 
-    m_camera.setClippingRange(range[0], range[1]);
+    m_this.m_camera.setClippingRange(range[0], range[1]);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -4802,9 +5183,12 @@ vgl.renderer = function() {
    * Resize viewport given a width and height
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.resize = function(width, height) {
-    // @note: where do m_x and m_y come from?
-    this.positionAndResize(m_x, m_y, width, height);
+  this.resize = function (width, height) {
+    if (!width || !height) {
+      return;
+    }
+    // @note: where do m_this.m_x and m_this.m_y come from?
+    m_this.positionAndResize(m_this.m_x, m_this.m_y, width, height);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -4812,20 +5196,31 @@ vgl.renderer = function() {
    * Resize viewport given a position, width and height
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.positionAndResize = function(x, y, width, height) {
+  this.positionAndResize = function (x, y, width, height) {
+    var i;
+
     // TODO move this code to camera
-    if (x < 0 || y < 0 || width < 0 || height < 0) {
+    if (x < 0 || y < 0 || width <= 0 || height <= 0) {
       console.log('[error] Invalid position and resize values',
         x, y, width, height);
+      return;
     }
 
     //If we're allowing this renderer to resize ...
-    if (m_resizable) {
-      m_width = width;
-      m_height = height;
+    if (m_this.m_resizable) {
+      m_this.m_width = width;
+      m_this.m_height = height;
 
-      m_camera.setViewAspect(m_width / m_height);
-      this.modified();
+      m_this.m_camera.setViewAspect(width / height);
+      m_this.m_camera.setParallelExtents({width: width, height: height});
+      m_this.modified();
+    }
+
+    if (m_this.m_renderPasses) {
+      for (i = 0; i < m_this.m_renderPasses.length; i += 1) {
+        m_this.m_renderPasses[i].resize(width, height);
+        m_this.m_renderPasses[i].renderer().positionAndResize(x, y, width, height);
+      }
     }
   };
 
@@ -4837,10 +5232,10 @@ vgl.renderer = function() {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.addActor = function(actor) {
+  this.addActor = function (actor) {
     if (actor instanceof vgl.actor) {
-      m_sceneRoot.addChild(actor);
-      this.modified();
+      m_this.m_sceneRoot.addChild(actor);
+      m_this.modified();
       return true;
     }
 
@@ -4855,8 +5250,8 @@ vgl.renderer = function() {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.hasActor = function(actor) {
-      return m_sceneRoot.hasChild(actor);
+  this.hasActor = function (actor) {
+    return m_this.m_sceneRoot.hasChild(actor);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -4864,13 +5259,13 @@ vgl.renderer = function() {
    * Add an array of actors to the collection
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.addActors = function(actors) {
+  this.addActors = function (actors) {
     var i = null;
     if (actors instanceof Array) {
-      for (i = 0; i < actors.length; ++i) {
-        m_sceneRoot.addChild(actors[i]);
+      for (i = 0; i < actors.length; i += 1) {
+        m_this.m_sceneRoot.addChild(actors[i]);
       }
-      this.modified();
+      m_this.modified();
     }
   };
 
@@ -4882,10 +5277,10 @@ vgl.renderer = function() {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.removeActor = function(actor) {
-    if (m_sceneRoot.children().indexOf(actor) !== -1) {
-      m_sceneRoot.removeChild(actor);
-      this.modified();
+  this.removeActor = function (actor) {
+    if (m_this.m_sceneRoot.children().indexOf(actor) !== -1) {
+      m_this.m_sceneRoot.removeChild(actor);
+      m_this.modified();
       return true;
     }
 
@@ -4900,16 +5295,16 @@ vgl.renderer = function() {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.removeActors = function(actors) {
+  this.removeActors = function (actors) {
     if (!(actors instanceof Array)) {
       return false;
     }
 
     var i;
-    for (i = 0; i < actors.length; ++i) {
-      m_sceneRoot.removeChild(actors[i]);
+    for (i = 0; i < actors.length; i += 1) {
+      m_this.m_sceneRoot.removeChild(actors[i]);
     }
-    this.modified();
+    m_this.modified();
     return true;
   };
 
@@ -4920,8 +5315,8 @@ vgl.renderer = function() {
    * @returns {*}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.removeAllActors = function() {
-    return m_sceneRoot.removeChildren();
+  this.removeAllActors = function () {
+    return m_this.m_sceneRoot.removeChildren();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -4929,7 +5324,7 @@ vgl.renderer = function() {
    * Transform a point in the world space to display space
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.worldToDisplay = function(worldPt, viewMatrix, projectionMatrix, width,
+  this.worldToDisplay = function (worldPt, viewMatrix, projectionMatrix, width,
                                  height) {
     var viewProjectionMatrix = mat4.create(),
         winX = null,
@@ -4973,7 +5368,7 @@ vgl.renderer = function() {
    * @returns {vec4}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.displayToWorld = function(displayPt, viewMatrix, projectionMatrix,
+  this.displayToWorld = function (displayPt, viewMatrix, projectionMatrix,
                                  width, height) {
     var x = (2.0 * displayPt[0] / width) - 1,
         y = -(2.0 * displayPt[1] / height) + 1,
@@ -5002,14 +5397,14 @@ vgl.renderer = function() {
    * @returns {vec4}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.focusDisplayPoint = function() {
-    var focalPoint = m_camera.focalPoint(),
+  this.focusDisplayPoint = function () {
+    var focalPoint = m_this.m_camera.focalPoint(),
       focusWorldPt = vec4.fromValues(
         focalPoint[0], focalPoint[1], focalPoint[2], 1);
 
-    return this.worldToDisplay(
-      focusWorldPt, m_camera.viewMatrix(),
-      m_camera.projectionMatrix(), m_width, m_height);
+    return m_this.worldToDisplay(
+      focusWorldPt, m_this.m_camera.viewMatrix(),
+      m_this.m_camera.projectionMatrix(), m_this.m_width, m_this.m_height);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -5018,8 +5413,8 @@ vgl.renderer = function() {
    * @returns {bool}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.resetScene = function() {
-    return m_resetScene;
+  this.resetScene = function () {
+    return m_this.m_resetScene;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -5030,11 +5425,11 @@ vgl.renderer = function() {
    * @param reset
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setResetScene = function(reset) {
-     if (m_resetScene !== reset) {
-       m_resetScene = reset;
-       this.modified()
-     }
+  this.setResetScene = function (reset) {
+    if (m_this.m_resetScene !== reset) {
+      m_this.m_resetScene = reset;
+      m_this.modified();
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -5043,8 +5438,8 @@ vgl.renderer = function() {
    * @returns {bool}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.resetClippingRange = function() {
-    return m_resetClippingRange;
+  this.resetClippingRange = function () {
+    return m_this.m_resetClippingRange;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -5055,31 +5450,70 @@ vgl.renderer = function() {
    * @param reset
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setResetClippingRange = function(reset) {
-     if (m_resetClippingRange !== reset) {
-       m_resetClippingRange = reset;
-       this.modified()
-     }
+  this.setResetClippingRange = function (reset) {
+    if (m_this.m_resetClippingRange !== reset) {
+      m_this.m_resetClippingRange = reset;
+      m_this.modified();
+    }
   };
 
-  return this;
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   *
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.addRenderPass = function (renPass) {
+    var i;
+
+    if (m_this.m_renderPasses) {
+      for (i = 0; i < m_this.m_renderPasses.length; i += 1) {
+        if (renPass === m_this.m_renderPasses[i]) {
+          return;
+        }
+      }
+    }
+
+    m_this.m_renderPasses = [];
+    m_this.m_renderPasses.push(renPass);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   *
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.removeRenderPass = function (renPass) {
+    renPass = renPass; // TODO Implement this
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   *
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._cleanup = function (renderState) {
+    var children = m_this.m_sceneRoot.children();
+    for (var i = 0; i < children.length; i += 1) {
+      var actor = children[i];
+      actor.material()._cleanup(renderState);
+      actor.mapper()._cleanup(renderState);
+    }
+
+    m_this.m_sceneRoot.removeChildren();
+  };
+
+  return m_this;
 };
 
-inherit(vgl.renderer, vgl.object);
+inherit(vgl.renderer, vgl.graphicsObject);
 
 //////////////////////////////////////////////////////////////////////////////
 /**
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global vgl, ogs, vec4, inherit, $*/
+/*global vgl, vec4, inherit*/
 //////////////////////////////////////////////////////////////////////////////
-
-// TODO Current we support only one context
-var gl = null;
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -5089,22 +5523,24 @@ var gl = null;
  * @returns {vgl.renderWindow}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.renderWindow = function(canvas) {
+vgl.renderWindow = function (canvas) {
   'use strict';
 
   if (!(this instanceof vgl.renderWindow)) {
     return new vgl.renderWindow(canvas);
   }
-  vgl.object.call(this);
+  vgl.graphicsObject.call(this);
 
   /** @private */
-  var m_x = 0,
+  var m_this = this,
+      m_x = 0,
       m_y = 0,
       m_width = 400,
       m_height = 400,
       m_canvas = canvas,
       m_activeRender = null,
-      m_renderers = [];
+      m_renderers = [],
+      m_context = null;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -5113,8 +5549,8 @@ vgl.renderWindow = function(canvas) {
    * @returns {Array}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.windowSize = function() {
-    return [ m_width, m_height ];
+  this.windowSize = function () {
+    return [m_width, m_height];
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -5126,13 +5562,13 @@ vgl.renderWindow = function(canvas) {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setWindowSize = function(width, height) {
+  this.setWindowSize = function (width, height) {
 
     if (m_width !== width || m_height !== height) {
       m_width = width;
       m_height = height;
 
-      this.modified();
+      m_this.modified();
 
       return true;
     }
@@ -5147,8 +5583,8 @@ vgl.renderWindow = function(canvas) {
    * @returns {Array}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.windowPosition = function() {
-    return [ m_x, m_y ];
+  this.windowPosition = function () {
+    return [m_x, m_y];
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -5160,11 +5596,11 @@ vgl.renderWindow = function(canvas) {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setWindowPosition = function(x, y) {
+  this.setWindowPosition = function (x, y) {
     if ((m_x !== x) || (m_y !== y)) {
       m_x = x;
       m_y = y;
-      this.modified();
+      m_this.modified();
       return true;
     }
     return false;
@@ -5176,7 +5612,7 @@ vgl.renderWindow = function(canvas) {
    * @returns {Array}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.renderers = function() {
+  this.renderers = function () {
     return m_renderers;
   };
 
@@ -5187,7 +5623,7 @@ vgl.renderWindow = function(canvas) {
    * @returns vgl.renderer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.activeRenderer = function() {
+  this.activeRenderer = function () {
     return m_activeRender;
   };
 
@@ -5199,16 +5635,17 @@ vgl.renderWindow = function(canvas) {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.addRenderer = function(ren) {
-    if (this.hasRenderer(ren) === false) {
+  this.addRenderer = function (ren) {
+    if (m_this.hasRenderer(ren) === false) {
       m_renderers.push(ren);
+      ren.setRenderWindow(m_this);
       if (m_activeRender === null) {
         m_activeRender = ren;
       }
       if (ren.layer() !== 0) {
         ren.camera().setClearMask(vgl.GL.DepthBufferBit);
       }
-      this.modified();
+      m_this.modified();
       return true;
     }
     return false;
@@ -5222,14 +5659,14 @@ vgl.renderWindow = function(canvas) {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.removeRenderer = function(ren) {
+  this.removeRenderer = function (ren) {
     var index = m_renderers.indexOf(ren);
     if (index !== -1) {
       if (m_activeRender === ren) {
         m_activeRender = null;
       }
       m_renderers.splice(index, 1);
-      this.modified();
+      m_this.modified();
       return true;
     }
     return false;
@@ -5243,12 +5680,12 @@ vgl.renderWindow = function(canvas) {
    * @returns {vgl.renderer}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.getRenderer = function(index) {
+  this.getRenderer = function (index) {
     if (index < m_renderers.length) {
       return m_renderers[index];
     }
 
-    console.log("[WARNING] Out of index array");
+    console.log('[WARNING] Out of index array');
     return null;
   };
 
@@ -5260,9 +5697,9 @@ vgl.renderWindow = function(canvas) {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.hasRenderer = function(ren) {
+  this.hasRenderer = function (ren) {
     var i;
-    for (i = 0; i < m_renderers.length; ++i) {
+    for (i = 0; i < m_renderers.length; i += 1) {
       if (ren === m_renderers[i]) {
         return true;
       }
@@ -5279,9 +5716,9 @@ vgl.renderWindow = function(canvas) {
    * @param height
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.resize = function(width, height) {
-    this.positionAndResize(m_x, m_y, width, height);
-    this.modified();
+  this.resize = function (width, height) {
+    m_this.positionAndResize(m_x, m_y, width, height);
+    m_this.modified();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -5294,16 +5731,16 @@ vgl.renderWindow = function(canvas) {
    * @param height
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.positionAndResize = function(x, y, width, height) {
+  this.positionAndResize = function (x, y, width, height) {
     m_x = x;
     m_y = y;
     m_width = width;
     m_height = height;
     var i;
-    for (i = 0; i < m_renderers.length; ++i) {
+    for (i = 0; i < m_renderers.length; i += 1) {
       m_renderers[i].positionAndResize(m_x, m_y, m_width, m_height);
     }
-    this.modified();
+    m_this.modified();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -5313,22 +5750,23 @@ vgl.renderWindow = function(canvas) {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.createWindow = function() {
-    // Initialize the global variable gl to null.
-    gl = null;
+  this._setup = function (renderState) {
+    renderState = renderState; /* unused parameter */
+    m_context = null;
 
     try {
       // Try to grab the standard context. If it fails, fallback to
       // experimental.
-      gl = m_canvas.getContext("webgl")
-           || m_canvas.getContext("experimental-webgl");
+      m_context = m_canvas.getContext('webgl') ||
+            m_canvas.getContext('experimental-webgl');
 
       // Set width and height of renderers if not set already
       var i;
-      for (i = 0; i < m_renderers.length; ++i) {
-        if ((m_renderers[i].width() > m_width) || m_renderers[i].width() === 0
-            || (m_renderers[i].height() > m_height)
-            || m_renderers[i].height() === 0) {
+      for (i = 0; i < m_renderers.length; i += 1) {
+        if ((m_renderers[i].width() > m_width) ||
+            m_renderers[i].width() === 0 ||
+            (m_renderers[i].height() > m_height) ||
+            m_renderers[i].height() === 0) {
           m_renderers[i].resize(m_x, m_y, m_width, m_height);
         }
       }
@@ -5339,8 +5777,8 @@ vgl.renderWindow = function(canvas) {
     }
 
     // If we don't have a GL context, give up now
-    if (!gl) {
-      console("[ERROR] Unable to initialize WebGL. Your browser may not support it.");
+    if (!m_context) {
+      console('[ERROR] Unable to initialize WebGL. Your browser may not support it.');
     }
 
     return false;
@@ -5348,11 +5786,23 @@ vgl.renderWindow = function(canvas) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Return current GL context
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.context = function () {
+    return m_context;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Delete this window and release any graphics resources
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.deleteWindow = function() {
-    // TODO
+  this._cleanup = function (renderState) {
+    var i;
+    for (i = 0; i < m_renderers.length; i += 1) {
+      m_renderers[i]._cleanup(renderState);
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -5360,10 +5810,10 @@ vgl.renderWindow = function(canvas) {
    * Render the scene
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.render = function() {
+  this.render = function () {
     var i;
-    m_renderers.sort(function(a, b) {return a.layer() - b.layer();});
-    for (i = 0; i < m_renderers.length; ++i) {
+    m_renderers.sort(function (a, b) {return a.layer() - b.layer();});
+    for (i = 0; i < m_renderers.length; i += 1) {
       m_renderers[i].render();
     }
   };
@@ -5374,7 +5824,7 @@ vgl.renderWindow = function(canvas) {
    * @returns {vec4}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.focusDisplayPoint = function() {
+  this.focusDisplayPoint = function () {
     return m_activeRender.focusDisplayPoint();
   };
 
@@ -5387,11 +5837,11 @@ vgl.renderWindow = function(canvas) {
    * @returns {vec4}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.displayToWorld = function(x, y, focusDisplayPoint, ren) {
+  this.displayToWorld = function (x, y, focusDisplayPoint, ren) {
     ren = ren === undefined ? ren = m_activeRender : ren;
 
     var camera = ren.camera();
-    if(!focusDisplayPoint) {
+    if (!focusDisplayPoint) {
       focusDisplayPoint = ren.focusDisplayPoint();
     }
 
@@ -5409,30 +5859,25 @@ vgl.renderWindow = function(canvas) {
    * @returns {vec4}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.worldToDisplay = function(x, y, z, ren) {
+  this.worldToDisplay = function (x, y, z, ren) {
     ren = ren === undefined ? ren = m_activeRender : ren;
-
     var camera = ren.camera();
-
     return ren.worldToDisplay(
       vec4.fromValues(x, y, z, 1.0), camera.viewMatrix(),
       camera.projectionMatrix(), m_width, m_height);
   };
 
-  return this;
+  return m_this;
 };
 
-inherit(vgl.renderWindow, vgl.object);
+inherit(vgl.renderWindow, vgl.graphicsObject);
 
 //////////////////////////////////////////////////////////////////////////////
 /**
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2, bitwise: true*/
-
-/*global vgl, gl, ogs, vec3, vec4, mat4, inherit, $*/
+/*global vgl, vec3, vec4, mat4, inherit*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -5443,13 +5888,14 @@ inherit(vgl.renderWindow, vgl.object);
  * @returns {vgl.camera}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.camera = function() {
+vgl.camera = function (arg) {
   'use strict';
 
   if (!(this instanceof vgl.camera)) {
-    return new vgl.camera();
+    return new vgl.camera(arg);
   }
   vgl.groupNode.call(this);
+  arg = arg || {};
 
   /** @private */
   var m_viewAngle = (Math.PI * 30) / 180.0,
@@ -5471,21 +5917,28 @@ vgl.camera = function() {
       m_right = 1.0,
       m_top = +1.0,
       m_bottom = -1.0,
+      m_parallelExtents = {zoom: 1, tilesize: 256},
       m_enableTranslation = true,
       m_enableRotation = true,
       m_enableScale = true,
       m_enableParallelProjection = false,
-      m_clearColor = [1.0, 1.0, 1.0, 1.0],
+      m_clearColor = [0.0, 0.0, 0.0, 0.0],
       m_clearDepth = 1.0,
-      m_clearMask = vgl.GL.ColorBufferBit |
-                    vgl.GL.DepthBufferBit;
+      /*jshint bitwise: false */
+      m_clearMask = vgl.GL.COLOR_BUFFER_BIT |
+                    vgl.GL.DEPTH_BUFFER_BIT;
+  /*jshint bitwise: true */
+
+  if (arg.parallelProjection !== undefined) {
+    m_enableParallelProjection = arg.parallelProjection ? true : false;
+  }
 
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Get view angle of the camera
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.viewAngle = function() {
+  this.viewAngle = function () {
     return m_viewAngle;
   };
 
@@ -5494,7 +5947,7 @@ vgl.camera = function() {
    * Set view angle of the camera in degrees, which is converted to radians.
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setViewAngleDegrees = function(a) {
+  this.setViewAngleDegrees = function (a) {
     m_viewAngle = (Math.PI * a) / 180.0;
     this.modified();
   };
@@ -5504,7 +5957,7 @@ vgl.camera = function() {
    * Set view angle of the camera in degrees, which is converted to radians.
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setViewAngle = function(a) {
+  this.setViewAngle = function (a) {
     if (m_enableScale) {
       m_viewAngle = a;
       this.modified();
@@ -5516,7 +5969,7 @@ vgl.camera = function() {
    * Get position of the camera
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.position = function() {
+  this.position = function () {
     return m_position;
   };
 
@@ -5525,7 +5978,7 @@ vgl.camera = function() {
    * Set position of the camera
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setPosition = function(x, y, z) {
+  this.setPosition = function (x, y, z) {
     if (m_enableTranslation) {
       m_position = vec4.fromValues(x, y, z, 1.0);
       this.modified();
@@ -5537,7 +5990,7 @@ vgl.camera = function() {
    * Get focal point of the camera
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.focalPoint = function() {
+  this.focalPoint = function () {
     return m_focalPoint;
   };
 
@@ -5546,7 +5999,7 @@ vgl.camera = function() {
    * Set focal point of the camera
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setFocalPoint = function(x, y, z) {
+  this.setFocalPoint = function (x, y, z) {
     if (m_enableRotation && m_enableTranslation) {
       m_focalPoint = vec4.fromValues(x, y, z, 1.0);
       this.modified();
@@ -5558,7 +6011,7 @@ vgl.camera = function() {
    * Get view-up direction of camera
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.viewUpDirection = function() {
+  this.viewUpDirection = function () {
     return m_viewUp;
   };
 
@@ -5567,7 +6020,7 @@ vgl.camera = function() {
    * Set view-up direction of the camera
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setViewUpDirection = function(x, y, z) {
+  this.setViewUpDirection = function (x, y, z) {
     m_viewUp = vec4.fromValues(x, y, z, 0);
     this.modified();
   };
@@ -5577,7 +6030,7 @@ vgl.camera = function() {
    * Get center of rotation for camera
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.centerOfRotation = function() {
+  this.centerOfRotation = function () {
     return m_centerOfRotation;
   };
 
@@ -5586,7 +6039,7 @@ vgl.camera = function() {
    * Set center of rotation for camera
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setCenterOfRotation = function(centerOfRotation) {
+  this.setCenterOfRotation = function (centerOfRotation) {
     m_centerOfRotation = centerOfRotation;
     this.modified();
   };
@@ -5596,7 +6049,7 @@ vgl.camera = function() {
    * Get clipping range of the camera
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.clippingRange = function() {
+  this.clippingRange = function () {
     return [m_near, m_far];
   };
 
@@ -5605,7 +6058,7 @@ vgl.camera = function() {
    * Set clipping range of the camera
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setClippingRange = function(near, far) {
+  this.setClippingRange = function (near, far) {
     m_near = near;
     m_far = far;
     this.modified();
@@ -5616,7 +6069,7 @@ vgl.camera = function() {
    * Get view aspect
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.viewAspect = function() {
+  this.viewAspect = function () {
     return m_viewAspect;
   };
 
@@ -5625,7 +6078,7 @@ vgl.camera = function() {
    * Set view aspect
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setViewAspect = function(aspect) {
+  this.setViewAspect = function (aspect) {
     m_viewAspect = aspect;
     this.modified();
   };
@@ -5635,7 +6088,7 @@ vgl.camera = function() {
    * Return active mode for scaling (enabled / disabled)
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.enableScale = function(flag) {
+  this.enableScale = function () {
     return m_enableScale;
   };
 
@@ -5644,7 +6097,7 @@ vgl.camera = function() {
    * Enable/disable scaling
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setEnableScale = function(flag) {
+  this.setEnableScale = function (flag) {
     if (flag !== m_enableScale) {
       m_enableScale = flag;
       this.modified();
@@ -5659,7 +6112,7 @@ vgl.camera = function() {
    * Return active mode for rotation (enabled / disabled)
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.enableRotation = function(f) {
+  this.enableRotation = function () {
     return m_enableRotation;
   };
 
@@ -5668,7 +6121,7 @@ vgl.camera = function() {
    * Enable / disable rotation
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setEnableRotation = function(flag) {
+  this.setEnableRotation = function (flag) {
     if (flag !== m_enableRotation) {
       m_enableRotation = flag;
       this.modified();
@@ -5683,7 +6136,7 @@ vgl.camera = function() {
    * Return active mode for translation (enabled/disabled)
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.enableTranslation = function(flag) {
+  this.enableTranslation = function () {
     return m_enableTranslation;
   };
 
@@ -5692,7 +6145,7 @@ vgl.camera = function() {
    * Enable / disable translation
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setEnableTranslation = function(flag) {
+  this.setEnableTranslation = function (flag) {
     if (flag !== m_enableTranslation) {
       m_enableTranslation = flag;
       this.modified();
@@ -5707,7 +6160,7 @@ vgl.camera = function() {
    * Return if parallel projection is enabled
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.isEnabledParallelProjection = function() {
+  this.isEnabledParallelProjection = function () {
     return m_enableParallelProjection;
   };
 
@@ -5716,7 +6169,7 @@ vgl.camera = function() {
    * Enable / disable parallel projection
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.enableParallelProjection = function(flag) {
+  this.enableParallelProjection = function (flag) {
     if (flag !== m_enableParallelProjection) {
       m_enableParallelProjection = flag;
       this.modified();
@@ -5731,8 +6184,17 @@ vgl.camera = function() {
    * Enable / disable parallel projection
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setEnnableParallelProjection = function(flag) {
-    return enableParallelProjection();
+  this.setEnableParallelProjection = function (flag) {
+    return this.enableParallelProjection(flag);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get parallel projection parameters
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.parallelProjection = function () {
+    return {left: m_left, right: m_right, top: m_top, bottom: m_bottom};
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -5740,7 +6202,7 @@ vgl.camera = function() {
    * Set parallel projection parameters
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setParallelProjection = function(left, right, top, bottom) {
+  this.setParallelProjection = function (left, right, top, bottom) {
     m_left = left;
     m_right = right;
     m_top = top;
@@ -5750,10 +6212,60 @@ vgl.camera = function() {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Get parallel projection extents parameters
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.parallelExtents = function () {
+    return m_parallelExtents;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set parallel projection extents parameters
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.setParallelExtents = function (extents) {
+    var prop = ['width', 'height', 'zoom', 'tilesize'], mod = false, i, key;
+    for (i = 0; i < prop.length; i += 1) {
+      key = prop[i];
+      if (extents[key] !== undefined &&
+          extents[key] !== m_parallelExtents[key]) {
+        m_parallelExtents[key] = extents[key];
+        mod = true;
+      }
+    }
+    if (mod && m_parallelExtents.width && m_parallelExtents.height &&
+        m_parallelExtents.zoom !== undefined && m_parallelExtents.tilesize) {
+      var unitsPerPixel = this.unitsPerPixel(m_parallelExtents.zoom,
+                                             m_parallelExtents.tilesize);
+      m_right = unitsPerPixel * m_parallelExtents.width / 2;
+      m_left = -m_right;
+      m_top = unitsPerPixel * m_parallelExtents.height / 2;
+      m_bottom = -m_top;
+      this.modified();
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Compute the units per pixel.
+   *
+   * @param zoom: tile zoom level.
+   * @param tilesize: number of pixels per tile (defaults to 256).
+   * @returns: unitsPerPixel.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.unitsPerPixel = function (zoom, tilesize) {
+    tilesize = tilesize || 256;
+    return 360.0 * Math.pow(2, -zoom) / tilesize;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Return direction of projection
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.directionOfProjection = function() {
+  this.directionOfProjection = function () {
     this.computeDirectionOfProjection();
     return m_directionOfProjection;
   };
@@ -5763,7 +6275,7 @@ vgl.camera = function() {
    * Return view plane normal direction
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.viewPlaneNormal = function() {
+  this.viewPlaneNormal = function () {
     this.computeViewPlaneNormal();
     return m_viewPlaneNormal;
   };
@@ -5777,7 +6289,7 @@ vgl.camera = function() {
    * @returns {mat4}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.viewMatrix = function() {
+  this.viewMatrix = function () {
     return this.computeViewMatrix();
   };
 
@@ -5790,7 +6302,7 @@ vgl.camera = function() {
    * @returns {mat4}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.projectionMatrix = function() {
+  this.projectionMatrix = function () {
     return this.computeProjectionMatrix();
   };
 
@@ -5801,7 +6313,7 @@ vgl.camera = function() {
    * @returns {number}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.clearMask = function() {
+  this.clearMask = function () {
     return m_clearMask;
   };
 
@@ -5812,7 +6324,7 @@ vgl.camera = function() {
    * @param mask
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setClearMask = function(mask) {
+  this.setClearMask = function (mask) {
     m_clearMask = mask;
     this.modified();
   };
@@ -5824,7 +6336,7 @@ vgl.camera = function() {
    * @returns {Array}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.clearColor = function() {
+  this.clearColor = function () {
     return m_clearColor;
   };
 
@@ -5835,7 +6347,7 @@ vgl.camera = function() {
    * @param color RGBA
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setClearColor = function(r, g, b, a) {
+  this.setClearColor = function (r, g, b, a) {
     m_clearColor[0] = r;
     m_clearColor[1] = g;
     m_clearColor[2] = b;
@@ -5850,7 +6362,7 @@ vgl.camera = function() {
    * @returns {{1.0: null}}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.clearDepth = function() {
+  this.clearDepth = function () {
     return m_clearDepth;
   };
 
@@ -5860,7 +6372,7 @@ vgl.camera = function() {
    * @param depth
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setClearDepth = function(depth) {
+  this.setClearDepth = function (depth) {
     m_clearDepth = depth;
     this.modified();
   };
@@ -5870,7 +6382,7 @@ vgl.camera = function() {
    * Compute direction of projection
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.computeDirectionOfProjection = function() {
+  this.computeDirectionOfProjection = function () {
     vec3.subtract(m_directionOfProjection, m_focalPoint, m_position);
     vec3.normalize(m_directionOfProjection, m_directionOfProjection);
     this.modified();
@@ -5881,7 +6393,7 @@ vgl.camera = function() {
    * Compute view plane normal
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.computeViewPlaneNormal = function() {
+  this.computeViewPlaneNormal = function () {
     m_viewPlaneNormal[0] = -m_directionOfProjection[0];
     m_viewPlaneNormal[1] = -m_directionOfProjection[1];
     m_viewPlaneNormal[2] = -m_directionOfProjection[2];
@@ -5892,7 +6404,7 @@ vgl.camera = function() {
    * Move camera closer or further away from the scene
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.zoom = function(d, dir) {
+  this.zoom = function (d, dir) {
     if (d === 0) {
       return;
     }
@@ -5921,7 +6433,7 @@ vgl.camera = function() {
    * Move camera sideways
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.pan = function(dx, dy, dz) {
+  this.pan = function (dx, dy, dz) {
     if (!m_enableTranslation) {
       return;
     }
@@ -5942,7 +6454,7 @@ vgl.camera = function() {
    * Compute camera coordinate axes
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.computeOrthogonalAxes = function() {
+  this.computeOrthogonalAxes = function () {
     this.computeDirectionOfProjection();
     vec3.cross(m_rightDir, m_directionOfProjection, m_viewUp);
     vec3.normalize(m_rightDir, m_rightDir);
@@ -5956,7 +6468,7 @@ vgl.camera = function() {
    * @param dy Rotation around horizontal axis in degrees
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.rotate = function(dx, dy) {
+  this.rotate = function (dx, dy) {
     if (!m_enableRotation) {
       return;
     }
@@ -5998,7 +6510,7 @@ vgl.camera = function() {
    * Compute camera view matrix
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.computeViewMatrix = function() {
+  this.computeViewMatrix = function () {
     if (m_computeModelViewMatrixTime.getMTime() < this.getMTime()) {
       mat4.lookAt(m_viewMatrix, m_position, m_focalPoint, m_viewUp);
       m_computeModelViewMatrixTime.modified();
@@ -6008,15 +6520,64 @@ vgl.camera = function() {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Check if the texture should be aligned to the screen.  Alignment only
+   * occurs if the parallel extents contain width, height, and a
+   * close-to-integer zoom level, and if the units-per-pixel value has been
+   * computed.  The camera must either be in parallel projection mode OR must
+   * have a perspective camera which is oriented along the z-axis without any
+   * rotation.
+   *
+   * @returns: either null if no alignment should occur, or an alignment object
+   *           with the rounding value and offsets.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.viewAlignment = function () {
+    if (!m_enableParallelProjection) {
+      /* If we aren't in parallel projection mode, ensure that the projection
+       * matrix meets strict specifications */
+      var proj = this.projectionMatrix();
+      if (proj[1] || proj[2] || proj[3] || proj[4] || proj[6] || proj[7] ||
+          proj[8] || proj[9] || proj[12] || proj[13] || proj[15]) {
+        return null;
+      }
+    }
+    var unitsPerPixel = this.unitsPerPixel(m_parallelExtents.zoom,
+                                           m_parallelExtents.tilesize);
+    /* If we don't have screen dimensions, we can't know how to align pixels */
+    if (!m_parallelExtents.width || !m_parallelExtents.height ||
+        !unitsPerPixel) {
+      return null;
+    }
+    /* If we aren't at an integer zoom level, we shouldn't align pixels.  If
+     * we are really close to an integer zoom level, that is good enough. */
+    if (parseFloat(m_parallelExtents.zoom.toFixed(6)) !==
+        parseFloat(m_parallelExtents.zoom.toFixed(0))) {
+      return null;
+    }
+    var align = {round: unitsPerPixel, dx: 0, dy: 0};
+    /* If the screen is an odd number of pixels, shift the view center to the
+     * center of a pixel so that the pixels fit discretely across the screen.
+     * If an even number of pixels, align the view center between pixels for
+     * the same reason. */
+    if (m_parallelExtents.width % 2) {
+      align.dx = unitsPerPixel * 0.5;
+    }
+    if (m_parallelExtents.height % 2) {
+      align.dy = unitsPerPixel * 0.5;
+    }
+    return align;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Compute camera projection matrix
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.computeProjectionMatrix = function() {
+  this.computeProjectionMatrix = function () {
     if (m_computeProjectMatrixTime.getMTime() < this.getMTime()) {
       if (!m_enableParallelProjection) {
         mat4.perspective(m_projectionMatrix, m_viewAngle, m_viewAspect, m_near, m_far);
       } else {
-        console.log('paralle projection');
         mat4.ortho(m_projectionMatrix,
           m_left, m_right, m_bottom, m_top, m_near, m_far);
       }
@@ -6027,6 +6588,15 @@ vgl.camera = function() {
     return m_projectionMatrix;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Convert a zoom level and window size to a camera height.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.zoomToHeight = function (zoom, width, height) {
+    return vgl.zoomToHeight(zoom, width, height, m_viewAngle);
+  };
+
   this.computeDirectionOfProjection();
 
   return this;
@@ -6034,15 +6604,48 @@ vgl.camera = function() {
 
 inherit(vgl.camera, vgl.groupNode);
 
+////////////////////////////////////////////////////////////////////////////
+/**
+ * Convert a zoom level and window size to a camera height.
+ *
+ * @param zoom: Zoom level, as used in OSM maps.
+ * @param width: width of the window.
+ * @param height: height of the window.
+ * @returns: perspective camera height.
+ */
+////////////////////////////////////////////////////////////////////////////
+vgl.zoomToHeight = function (zoom, width, height, viewAngle) {
+  'use strict';
+  viewAngle = viewAngle || (30 * Math.PI / 180.0);
+  var newZ = 360 * Math.pow(2, -zoom);
+  newZ /= Math.tan(viewAngle / 2) * 2 * 256 / height;
+  return newZ;
+};
+
+////////////////////////////////////////////////////////////////////////////
+/**
+ * Convert a camera height and window size to a zoom level.
+ *
+ * @param z: perspective camera height.
+ * @param width: width of the window.
+ * @param height: height of the window.
+ * @returns: zoom level.
+ */
+////////////////////////////////////////////////////////////////////////////
+vgl.heightToZoom = function (z, width, height, viewAngle) {
+  'use strict';
+  viewAngle = viewAngle || (30 * Math.PI / 180.0);
+  z *= Math.tan(viewAngle / 2) * 2 * 256 / height;
+  var zoom = -Math.log2(z / 360);
+  return zoom;
+};
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global vgl, ogs, vec4, inherit, $*/
+/*global vgl, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////
@@ -6054,7 +6657,7 @@ inherit(vgl.camera, vgl.groupNode);
  * @returns {vgl.interactorStyle}
  */
 ////////////////////////////////////////////////////////////////////////////
-vgl.interactorStyle = function() {
+vgl.interactorStyle = function () {
   'use strict';
 
   if (!(this instanceof vgl.interactorStyle)) {
@@ -6073,7 +6676,7 @@ vgl.interactorStyle = function() {
    * @returns {null}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.viewer = function() {
+  this.viewer = function () {
     return m_viewer;
   };
 
@@ -6084,7 +6687,7 @@ vgl.interactorStyle = function() {
    * @param viewer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setViewer = function(viewer) {
+  this.setViewer = function (viewer) {
     if (viewer !== m_viewer) {
       m_viewer = viewer;
       $(m_viewer).on(vgl.event.mousePress, m_that.handleMouseDown);
@@ -6108,7 +6711,8 @@ vgl.interactorStyle = function() {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.handleMouseDown = function(event) {
+  this.handleMouseDown = function (event) {
+    event = event; /* unused parameter */
     return true;
   };
 
@@ -6120,7 +6724,8 @@ vgl.interactorStyle = function() {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.handleMouseUp = function(event) {
+  this.handleMouseUp = function (event) {
+    event = event; /* unused parameter */
     return true;
   };
 
@@ -6132,7 +6737,8 @@ vgl.interactorStyle = function() {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.handleMouseMove = function(event) {
+  this.handleMouseMove = function (event) {
+    event = event; /* unused parameter */
     return true;
   };
 
@@ -6144,9 +6750,10 @@ vgl.interactorStyle = function() {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.handleMouseOut = function(event) {
+  this.handleMouseOut = function (event) {
+    event = event; /* unused parameter */
     return true;
-  }
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -6156,7 +6763,8 @@ vgl.interactorStyle = function() {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.handleMouseWheel = function(event) {
+  this.handleMouseWheel = function (event) {
+    event = event; /* unused parameter */
     return true;
   };
 
@@ -6168,7 +6776,8 @@ vgl.interactorStyle = function() {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.handleClick = function(event) {
+  this.handleClick = function (event) {
+    event = event; /* unused parameter */
     return true;
   };
 
@@ -6180,7 +6789,8 @@ vgl.interactorStyle = function() {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.handleDoubleClick = function(event) {
+  this.handleDoubleClick = function (event) {
+    event = event; /* unused parameter */
     return true;
   };
 
@@ -6192,7 +6802,8 @@ vgl.interactorStyle = function() {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.handleKeyPress = function(event) {
+  this.handleKeyPress = function (event) {
+    event = event; /* unused parameter */
     return true;
   };
 
@@ -6204,7 +6815,8 @@ vgl.interactorStyle = function() {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.handleContextMenu = function(event) {
+  this.handleContextMenu = function (event) {
+    event = event; /* unused parameter */
     return true;
   };
 
@@ -6213,7 +6825,7 @@ vgl.interactorStyle = function() {
    * Reset to default
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.reset = function() {
+  this.reset = function () {
     return true;
   };
 
@@ -6227,10 +6839,7 @@ inherit(vgl.interactorStyle, vgl.object);
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global vgl, ogs, vec4, inherit, $*/
+/*global vgl, vec4, inherit*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -6241,7 +6850,7 @@ inherit(vgl.interactorStyle, vgl.object);
  * @returns {vgl.trackballInteractorStyle}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.trackballInteractorStyle = function() {
+vgl.trackballInteractorStyle = function () {
   'use strict';
 
   if (!(this instanceof vgl.trackballInteractorStyle)) {
@@ -6265,14 +6874,12 @@ vgl.trackballInteractorStyle = function() {
    * @returns {boolean}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.handleMouseMove = function(event) {
-    var canvas = m_that.viewer().canvas(),
-        width = m_that.viewer().renderWindow().windowSize()[0],
+  this.handleMouseMove = function (event) {
+    var width = m_that.viewer().renderWindow().windowSize()[0],
         height = m_that.viewer().renderWindow().windowSize()[1],
         ren = m_that.viewer().renderWindow().activeRenderer(),
         cam = ren.camera(), coords = m_that.viewer().relMouseCoords(event),
-        fp, fdp, fwp, dp1, dp2, wp1, wp2, coords, dx, dy, dz,
-        coords, m_zTrans;
+        fp, fdp, fwp, dp1, dp2, wp1, wp2, dx, dy, dz, m_zTrans;
 
     m_outsideCanvas = false;
     m_currPos = {x: 0, y: 0};
@@ -6346,7 +6953,7 @@ vgl.trackballInteractorStyle = function() {
    * @returns {boolean}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.handleMouseDown = function(event) {
+  this.handleMouseDown = function (event) {
     var coords;
 
     if (event.button === 0) {
@@ -6358,7 +6965,7 @@ vgl.trackballInteractorStyle = function() {
     if (event.button === 2) {
       m_rightMouseBtnDown = true;
     }
-    coords = m_that.view.relMouseCoords(event);
+    coords = m_that.viewer().relMouseCoords(event);
     if (coords.x < 0) {
       m_lastPos.x = 0;
     } else {
@@ -6382,7 +6989,7 @@ vgl.trackballInteractorStyle = function() {
    * @returns {boolean}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.handleMouseUp = function(event) {
+  this.handleMouseUp = function (event) {
     if (event.button === 0) {
       m_leftMouseBtnDown = false;
     }
@@ -6403,7 +7010,7 @@ vgl.trackballInteractorStyle = function() {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.handleMouseWheel = function(event) {
+  this.handleMouseWheel = function (event) {
     var ren = m_that.viewer().renderWindow().activeRenderer(),
         cam = ren.camera();
 
@@ -6427,10 +7034,7 @@ inherit(vgl.trackballInteractorStyle, vgl.interactorStyle);
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global vgl, ogs, vec4, inherit, $*/
+/*global vgl, vec4, inherit*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -6441,7 +7045,7 @@ inherit(vgl.trackballInteractorStyle, vgl.interactorStyle);
  * @returns {vgl.pvwInteractorStyle}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.pvwInteractorStyle = function() {
+vgl.pvwInteractorStyle = function () {
   'use strict';
 
   if (!(this instanceof vgl.pvwInteractorStyle)) {
@@ -6488,22 +7092,22 @@ vgl.pvwInteractorStyle = function() {
    * @returns {boolean}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.handleMouseMove = function(event) {
+  this.handleMouseMove = function (event) {
     var rens = [], i = null, secCameras = [], deltaxy = null;
-        m_width = m_that.viewer().renderWindow().windowSize()[0];
-        m_height = m_that.viewer().renderWindow().windowSize()[1];
-        m_renderer = m_that.viewer().renderWindow().activeRenderer();
-        m_camera = m_renderer.camera();
-        m_outsideCanvas = false;
-        m_coords = m_that.viewer().relMouseCoords(event);
-        m_currentMousePos = {
-          x: 0,
-          y: 0
-        };
+    m_width = m_that.viewer().renderWindow().windowSize()[0];
+    m_height = m_that.viewer().renderWindow().windowSize()[1];
+    m_renderer = m_that.viewer().renderWindow().activeRenderer();
+    m_camera = m_renderer.camera();
+    m_outsideCanvas = false;
+    m_coords = m_that.viewer().relMouseCoords(event);
+    m_currentMousePos = {
+      x: 0,
+      y: 0
+    };
 
     // Get secondary cameras
     rens = m_that.viewer().renderWindow().renderers();
-    for (i = 0; i < rens.length; ++i) {
+    for (i = 0; i < rens.length; i += 1) {
       if (m_renderer !== rens[i]) {
         secCameras.push(rens[i].camera());
       }
@@ -6525,17 +7129,20 @@ vgl.pvwInteractorStyle = function() {
       return;
     }
     m_focalPoint = m_camera.focalPoint();
-    m_focusWorldPt = vec4.fromValues(m_focalPoint[0], m_focalPoint[1], m_focalPoint[2], 1);
-    m_focusDisplayPt = m_renderer.worldToDisplay(m_focusWorldPt, m_camera.viewMatrix(),
-      m_camera.projectionMatrix(), m_width, m_height);
+    m_focusWorldPt = vec4.fromValues(m_focalPoint[0], m_focalPoint[1],
+                                     m_focalPoint[2], 1);
+    m_focusDisplayPt = m_renderer.worldToDisplay(m_focusWorldPt,
+        m_camera.viewMatrix(), m_camera.projectionMatrix(), m_width, m_height);
     m_displayPt1 = vec4.fromValues(
       m_currentMousePos.x, m_currentMousePos.y, m_focusDisplayPt[2], 1.0);
     m_displayPt2 = vec4.fromValues(
       m_mouseLastPos.x, m_mouseLastPos.y, m_focusDisplayPt[2], 1.0);
     m_worldPt1 = m_renderer.displayToWorld(
-      m_displayPt1, m_camera.viewMatrix(), m_camera.projectionMatrix(), m_width, m_height);
+      m_displayPt1, m_camera.viewMatrix(), m_camera.projectionMatrix(),
+      m_width, m_height);
     m_worldPt2 = m_renderer.displayToWorld(
-      m_displayPt2, m_camera.viewMatrix(), m_camera.projectionMatrix(), m_width, m_height);
+      m_displayPt2, m_camera.viewMatrix(), m_camera.projectionMatrix(),
+      m_width, m_height);
 
     m_dx = m_worldPt1[0] - m_worldPt2[0];
     m_dy = m_worldPt1[1] - m_worldPt2[1];
@@ -6551,12 +7158,12 @@ vgl.pvwInteractorStyle = function() {
       m_camera.rotate(deltaxy[0], deltaxy[1]);
 
       // Apply rotation to all other cameras
-      for (i = 0; i < secCameras.length; ++i) {
+      for (i = 0; i < secCameras.length; i += 1) {
         secCameras[i].rotate(deltaxy[0], deltaxy[1]);
       }
 
       // Apply rotation to all other cameras
-      for (i = 0; i < rens.length; ++i) {
+      for (i = 0; i < rens.length; i += 1) {
         rens[i].resetCameraClippingRange();
       }
       render();
@@ -6586,7 +7193,7 @@ vgl.pvwInteractorStyle = function() {
    * @returns {boolean}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.handleMouseDown = function(event) {
+  this.handleMouseDown = function (event) {
     if (event.button === 0) {
       m_leftMouseButtonDown = true;
     }
@@ -6620,8 +7227,7 @@ vgl.pvwInteractorStyle = function() {
    * @returns {boolean}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.handleMouseUp = function(event) {
-    var canvas = m_that.viewer().canvas();
+  this.handleMouseUp = function (event) {
     if (event.button === 0) {
       m_leftMouseButtonDown = false;
     }
@@ -6643,10 +7249,7 @@ inherit(vgl.pvwInteractorStyle, vgl.trackballInteractorStyle);
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global window, vgl, ogs, vec4, inherit, $*/
+/*global window, vgl, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -6657,11 +7260,11 @@ inherit(vgl.pvwInteractorStyle, vgl.trackballInteractorStyle);
  * @returns {vgl.viewer}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.viewer = function(canvas) {
+vgl.viewer = function (canvas, options) {
   'use strict';
 
   if (!(this instanceof vgl.viewer)) {
-    return new vgl.viewer(canvas);
+    return new vgl.viewer(canvas, options);
   }
 
   vgl.object.call(this);
@@ -6670,7 +7273,7 @@ vgl.viewer = function(canvas) {
       m_canvas = canvas,
       m_ready = true,
       m_interactorStyle = null,
-      m_renderer = vgl.renderer(),
+      m_renderer = vgl.renderer(options),
       m_renderWindow = vgl.renderWindow(m_canvas);
 
   ////////////////////////////////////////////////////////////////////////////
@@ -6680,7 +7283,7 @@ vgl.viewer = function(canvas) {
    * @returns {*}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.canvas = function() {
+  this.canvas = function () {
     return m_canvas;
   };
 
@@ -6691,7 +7294,7 @@ vgl.viewer = function(canvas) {
    * @returns {vgl.renderWindow}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.renderWindow = function() {
+  this.renderWindow = function () {
     return m_renderWindow;
   };
 
@@ -6703,12 +7306,24 @@ vgl.viewer = function(canvas) {
    * properly.
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.init = function() {
+  this.init = function () {
     if (m_renderWindow !== null) {
-      m_renderWindow.createWindow();
+      m_renderWindow._setup();
+    } else {
+      console.log('[ERROR] No render window attached');
     }
-    else {
-      console.log("[ERROR] No render window attached");
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   *  Remove the viewer
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.exit = function (renderState) {
+    if (m_renderWindow !== null) {
+      m_renderWindow._cleanup(renderState);
+    } else {
+      console.log('[ERROR] No render window attached');
     }
   };
 
@@ -6719,7 +7334,7 @@ vgl.viewer = function(canvas) {
    * @returns {vgl.interactorStyle}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.interactorStyle = function() {
+  this.interactorStyle = function () {
     return m_interactorStyle;
   };
 
@@ -6730,7 +7345,7 @@ vgl.viewer = function(canvas) {
    * @param {vgl.interactorStyle} style
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setInteractorStyle = function(style) {
+  this.setInteractorStyle = function (style) {
     if (style !== m_interactorStyle) {
       m_interactorStyle = style;
       m_interactorStyle.setViewer(this);
@@ -6746,7 +7361,7 @@ vgl.viewer = function(canvas) {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.handleMouseDown = function(event) {
+  this.handleMouseDown = function (event) {
     if (m_ready === true) {
       var fixedEvent = $.event.fix(event || window.event);
       // Only prevent default action for right mouse button
@@ -6769,7 +7384,7 @@ vgl.viewer = function(canvas) {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.handleMouseUp = function(event) {
+  this.handleMouseUp = function (event) {
     if (m_ready === true) {
       var fixedEvent = $.event.fix(event || window.event);
       fixedEvent.preventDefault();
@@ -6789,7 +7404,7 @@ vgl.viewer = function(canvas) {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.handleMouseMove = function(event) {
+  this.handleMouseMove = function (event) {
     if (m_ready === true) {
       var fixedEvent = $.event.fix(event || window.event);
       fixedEvent.preventDefault();
@@ -6808,7 +7423,7 @@ vgl.viewer = function(canvas) {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.handleMouseWheel = function(event) {
+  this.handleMouseWheel = function (event) {
     if (m_ready === true) {
       var fixedEvent = $.event.fix(event || window.event);
       fixedEvent.preventDefault();
@@ -6827,7 +7442,7 @@ vgl.viewer = function(canvas) {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.handleMouseOut = function(event) {
+  this.handleMouseOut = function (event) {
     if (m_ready === true) {
       var fixedEvent = $.event.fix(event || window.event);
       fixedEvent.preventDefault();
@@ -6846,7 +7461,7 @@ vgl.viewer = function(canvas) {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.handleKeyPress = function(event) {
+  this.handleKeyPress = function (event) {
     if (m_ready === true) {
       var fixedEvent = $.event.fix(event || window.event);
       fixedEvent.preventDefault();
@@ -6865,7 +7480,7 @@ vgl.viewer = function(canvas) {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.handleContextMenu = function(event) {
+  this.handleContextMenu = function (event) {
     if (m_ready === true) {
       var fixedEvent = $.event.fix(event || window.event);
       fixedEvent.preventDefault();
@@ -6884,8 +7499,8 @@ vgl.viewer = function(canvas) {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.handleClick = function(event) {
-   if (m_ready === true) {
+  this.handleClick = function (event) {
+    if (m_ready === true) {
       var fixedEvent = $.event.fix(event || window.event);
       fixedEvent.preventDefault();
       fixedEvent.type = vgl.event.click;
@@ -6903,7 +7518,7 @@ vgl.viewer = function(canvas) {
    * @returns {boolean}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.handleDoubleClick = function(event) {
+  this.handleDoubleClick = function (event) {
     if (m_ready === true) {
       var fixedEvent = $.event.fix(event || window.event);
       fixedEvent.preventDefault();
@@ -6922,9 +7537,9 @@ vgl.viewer = function(canvas) {
    * @returns {{x: number, y: number}}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.relMouseCoords = function(event) {
+  this.relMouseCoords = function (event) {
     if (event.pageX === undefined || event.pageY === undefined) {
-      throw "Missing attributes pageX and pageY on the event";
+      throw 'Missing attributes pageX and pageY on the event';
     }
 
     var totalOffsetX = 0,
@@ -6936,7 +7551,8 @@ vgl.viewer = function(canvas) {
     do {
       totalOffsetX += currentElement.offsetLeft - currentElement.scrollLeft;
       totalOffsetY += currentElement.offsetTop - currentElement.scrollTop;
-    } while (currentElement = currentElement.offsetParent);
+      currentElement = currentElement.offsetParent;
+    } while (currentElement);
 
     canvasX = event.pageX - totalOffsetX;
     canvasY = event.pageY - totalOffsetY;
@@ -6952,7 +7568,7 @@ vgl.viewer = function(canvas) {
    * Render
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.render = function() {
+  this.render = function () {
     m_renderWindow.render();
   };
 
@@ -6961,36 +7577,36 @@ vgl.viewer = function(canvas) {
    * Bind canvas mouse events to their default handlers
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.bindEventHandlers = function() {
+  this.bindEventHandlers = function () {
     $(m_canvas).on('mousedown', this.handleMouseDown);
     $(m_canvas).on('mouseup', this.handleMouseUp);
     $(m_canvas).on('mousemove', this.handleMouseMove);
     $(m_canvas).on('mousewheel', this.handleMouseWheel);
     $(m_canvas).on('contextmenu', this.handleContextMenu);
-  }
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Undo earlier binded  handlers for canvas mouse events
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.unbindEventHandlers = function() {
+  this.unbindEventHandlers = function () {
     $(m_canvas).off('mousedown', this.handleMouseDown);
     $(m_canvas).off('mouseup', this.handleMouseUp);
     $(m_canvas).off('mousemove', this.handleMouseMove);
     $(m_canvas).off('mousewheel', this.handleMouseWheel);
     $(m_canvas).off('contextmenu', this.handleContextMenu);
-  }
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._init = function() {
+  this._init = function () {
     this.bindEventHandlers();
     m_renderWindow.addRenderer(m_renderer);
-  }
+  };
 
   this._init();
   return this;
@@ -7003,10 +7619,7 @@ inherit(vgl.viewer, vgl.object);
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global gl, vgl, ogs, vec4, inherit, $*/
+/*global vgl, inherit*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -7017,7 +7630,7 @@ inherit(vgl.viewer, vgl.object);
  * @returns {vgl.shader}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.shader = function(type) {
+vgl.shader = function (type) {
   'use strict';
 
   if (!(this instanceof vgl.shader)) {
@@ -7028,14 +7641,14 @@ vgl.shader = function(type) {
   var m_shaderHandle = null,
       m_compileTimestamp = vgl.timestamp(),
       m_shaderType = type,
-      m_shaderSource = "";
+      m_shaderSource = '';
 
   /////////////////////////////////////////////////////////////////////////////
   /**
    * Get shader handle
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.shaderHandle = function() {
+  this.shaderHandle = function () {
     return m_shaderHandle;
   };
 
@@ -7046,7 +7659,7 @@ vgl.shader = function(type) {
    * @returns {*}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.shaderType = function() {
+  this.shaderType = function () {
     return m_shaderType;
   };
 
@@ -7057,7 +7670,7 @@ vgl.shader = function(type) {
    * @returns {string}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.shaderSource = function() {
+  this.shaderSource = function () {
     return m_shaderSource;
   };
 
@@ -7068,7 +7681,7 @@ vgl.shader = function(type) {
    * @param {string} source
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.setShaderSource = function(source) {
+  this.setShaderSource = function (source) {
     m_shaderSource = source;
     this.modified();
   };
@@ -7080,22 +7693,23 @@ vgl.shader = function(type) {
    * @returns {null}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.compile = function() {
+  this.compile = function (renderState) {
     if (this.getMTime() < m_compileTimestamp.getMTime()) {
       return m_shaderHandle;
     }
 
-    gl.deleteShader(m_shaderHandle);
-    m_shaderHandle = gl.createShader(m_shaderType);
-    gl.shaderSource(m_shaderHandle, m_shaderSource);
-    gl.compileShader(m_shaderHandle);
+    renderState.m_context.deleteShader(m_shaderHandle);
+    m_shaderHandle = renderState.m_context.createShader(m_shaderType);
+    renderState.m_context.shaderSource(m_shaderHandle, m_shaderSource);
+    renderState.m_context.compileShader(m_shaderHandle);
 
     // See if it compiled successfully
-    if (!gl.getShaderParameter(m_shaderHandle, gl.COMPILE_STATUS)) {
-      console.log("[ERROR] An error occurred compiling the shaders: "
-                  + gl.getShaderInfoLog(m_shaderHandle));
+    if (!renderState.m_context.getShaderParameter(m_shaderHandle,
+        vgl.GL.COMPILE_STATUS)) {
+      console.log('[ERROR] An error occurred compiling the shaders: ' +
+                  renderState.m_context.getShaderInfoLog(m_shaderHandle));
       console.log(m_shaderSource);
-      gl.deleteShader(m_shaderHandle);
+      renderState.m_context.deleteShader(m_shaderHandle);
       return null;
     }
 
@@ -7111,8 +7725,8 @@ vgl.shader = function(type) {
    * @param programHandle
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.attachShader = function(programHandle) {
-    gl.attachShader(programHandle, m_shaderHandle);
+  this.attachShader = function (renderState, programHandle) {
+    renderState.m_context.attachShader(programHandle, m_shaderHandle);
   };
 };
 
@@ -7123,10 +7737,7 @@ inherit(vgl.shader, vgl.object);
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global vgl, gl, ogs, vec4, inherit, $*/
+/*global vgl, inherit, $*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -7137,7 +7748,20 @@ inherit(vgl.shader, vgl.object);
  * @returns {vgl.shaderProgram}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.shaderProgram = function() {
+
+var getBaseUrl = (function () {
+  'use strict';
+  var scripts = document.getElementsByTagName('script');
+  var index = scripts.length - 1;
+  var vglScript = scripts[index];
+  index = vglScript.src.lastIndexOf('/');
+  var baseUrl = vglScript.src.substring(0, index);
+
+  return function () { return baseUrl; };
+})();
+
+
+vgl.shaderProgram = function () {
   'use strict';
 
   if (!(this instanceof vgl.shaderProgram)) {
@@ -7147,13 +7771,45 @@ vgl.shaderProgram = function() {
     this, vgl.materialAttributeType.ShaderProgram);
 
   /** @private */
-  var m_programHandle = 0,
+  var m_this = this,
+      m_programHandle = 0,
       m_compileTimestamp = vgl.timestamp(),
+      m_bindTimestamp = vgl.timestamp(),
       m_shaders = [],
       m_uniforms = [],
       m_vertexAttributes = {},
       m_uniformNameToLocation = {},
       m_vertexAttributeNameToLocation = {};
+
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Create a particular shader type using GLSL shader strings from a file
+   */
+  /////////////////////////////////////////////////////////////////////////////
+  this.loadFromFile = function (type, sourceUrl) {
+    var shader;
+    $.ajax({
+      url: sourceUrl,
+      type: 'GET',
+      async: false,
+      success: function (result) {
+        //console.log(result);
+        shader = vgl.shader(type);
+        shader.setShaderSource(result);
+        m_this.addShader(shader);
+      }
+    });
+  };
+
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Create a particular shader type using GLSL shader strings from a file
+   * relative to VGL load URL.
+   */
+  /////////////////////////////////////////////////////////////////////////////
+  this.loadShader = function (type, file) {
+    this.loadFromFile(type, getBaseUrl() + '/shaders/' + file);
+  };
 
   /////////////////////////////////////////////////////////////////////////////
   /**
@@ -7163,8 +7819,8 @@ vgl.shaderProgram = function() {
    * @returns {*}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.queryUniformLocation = function(name) {
-    return gl.getUniformLocation(m_programHandle, name);
+  this.queryUniformLocation = function (renderState, name) {
+    return renderState.m_context.getUniformLocation(m_programHandle, name);
   };
 
   /////////////////////////////////////////////////////////////////////////////
@@ -7175,8 +7831,8 @@ vgl.shaderProgram = function() {
    * @returns {*}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.queryAttributeLocation = function(name) {
-    return gl.getAttribLocation(m_programHandle, name);
+  this.queryAttributeLocation = function (renderState, name) {
+    return renderState.m_context.getAttribLocation(m_programHandle, name);
   };
 
   /////////////////////////////////////////////////////////////////////////////
@@ -7187,21 +7843,20 @@ vgl.shaderProgram = function() {
    * @returns {boolean}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.addShader = function(shader) {
+  this.addShader = function (shader) {
     if (m_shaders.indexOf(shader) > -1) {
       return false;
     }
 
     var i;
-    for (i = 0; i < m_shaders.length; ++i) {
+    for (i = 0; i < m_shaders.length; i += 1) {
       if (m_shaders[i].shaderType() === shader.shaderType()) {
         m_shaders.splice(m_shaders.indexOf(shader), 1);
       }
     }
 
     m_shaders.push(shader);
-
-    this.modified();
+    m_this.modified();
     return true;
   };
 
@@ -7213,13 +7868,13 @@ vgl.shaderProgram = function() {
    * @returns {boolean}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.addUniform = function(uniform) {
+  this.addUniform = function (uniform) {
     if (m_uniforms.indexOf(uniform) > -1) {
       return false;
     }
 
     m_uniforms.push(uniform);
-    this.modified();
+    m_this.modified();
   };
 
   /////////////////////////////////////////////////////////////////////////////
@@ -7230,10 +7885,9 @@ vgl.shaderProgram = function() {
    * @param key
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.addVertexAttribute = function(attr, key) {
+  this.addVertexAttribute = function (attr, key) {
     m_vertexAttributes[key] = attr;
-
-    this.modified();
+    m_this.modified();
   };
 
   /////////////////////////////////////////////////////////////////////////////
@@ -7247,7 +7901,7 @@ vgl.shaderProgram = function() {
    * @returns {number}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.uniformLocation = function(name) {
+  this.uniformLocation = function (name) {
     return m_uniformNameToLocation[name];
   };
 
@@ -7262,7 +7916,7 @@ vgl.shaderProgram = function() {
    * @returns {number}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.attributeLocation = function(name) {
+  this.attributeLocation = function (name) {
     return m_vertexAttributeNameToLocation[name];
   };
 
@@ -7274,9 +7928,9 @@ vgl.shaderProgram = function() {
    * @returns {*}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.uniform = function(name) {
+  this.uniform = function (name) {
     var i;
-    for (i = 0; i < m_uniforms.length; ++i) {
+    for (i = 0; i < m_uniforms.length; i += 1) {
       if (m_uniforms[i].name() === name) {
         return m_uniforms[i];
       }
@@ -7292,11 +7946,12 @@ vgl.shaderProgram = function() {
    * This method should be used directly unless required
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.updateUniforms = function() {
+  this.updateUniforms = function (renderState) {
     var i;
 
-    for (i = 0; i < m_uniforms.length; ++i) {
-      m_uniforms[i].callGL(m_uniformNameToLocation[m_uniforms[i].name()]);
+    for (i = 0; i < m_uniforms.length; i += 1) {
+      m_uniforms[i].callGL(renderState,
+        m_uniformNameToLocation[m_uniforms[i].name()]);
     }
   };
 
@@ -7307,12 +7962,13 @@ vgl.shaderProgram = function() {
    * @returns {boolean}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.link = function() {
-    gl.linkProgram(m_programHandle);
+  this.link = function (renderState) {
+    renderState.m_context.linkProgram(m_programHandle);
 
     // If creating the shader program failed, alert
-    if (!gl.getProgramParameter(m_programHandle, gl.LINK_STATUS)) {
-      console.log("[ERROR] Unable to initialize the shader program.");
+    if (!renderState.m_context.getProgramParameter(m_programHandle,
+        vgl.GL.LINK_STATUS)) {
+      console.log('[ERROR] Unable to initialize the shader program.');
       return false;
     }
 
@@ -7324,8 +7980,19 @@ vgl.shaderProgram = function() {
    * Use the shader program
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.use = function() {
-    gl.useProgram(m_programHandle);
+  this.use = function (renderState) {
+    renderState.m_context.useProgram(m_programHandle);
+  };
+
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Peform any initialization required
+   */
+  /////////////////////////////////////////////////////////////////////////////
+  this._setup = function (renderState) {
+    if (m_programHandle === 0) {
+      m_programHandle = renderState.m_context.createProgram();
+    }
   };
 
   /////////////////////////////////////////////////////////////////////////////
@@ -7333,9 +8000,9 @@ vgl.shaderProgram = function() {
    * Peform any clean up required when the program gets deleted
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.cleanUp = function() {
-    this.deleteVertexAndFragment();
-    this.deleteProgram();
+  this._cleanup = function (renderState) {
+    m_this.deleteVertexAndFragment(renderState);
+    m_this.deleteProgram(renderState);
   };
 
   /////////////////////////////////////////////////////////////////////////////
@@ -7343,8 +8010,8 @@ vgl.shaderProgram = function() {
    * Delete the shader program
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.deleteProgram = function() {
-    gl.deleteProgram(m_programHandle);
+  this.deleteProgram = function (renderState) {
+    renderState.m_context.deleteProgram(m_programHandle);
   };
 
   /////////////////////////////////////////////////////////////////////////////
@@ -7352,11 +8019,43 @@ vgl.shaderProgram = function() {
    * Delete vertex and fragment shaders
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.deleteVertexAndFragment = function() {
+  this.deleteVertexAndFragment = function (renderState) {
     var i;
-    for (i = 0; i < m_shaders.length; ++i) {
-      gl.deleteShader(m_shaders[i].shaderHandle());
+    for (i = 0; i < m_shaders.length; i += 1) {
+      renderState.m_context.detachShader(m_shaders[i].shaderHandle());
+      renderState.m_context.deleteShader(m_shaders[i].shaderHandle());
     }
+  };
+
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Compile and link a shader
+   */
+  /////////////////////////////////////////////////////////////////////////////
+  this.compileAndLink = function (renderState) {
+    var i;
+
+    if (m_compileTimestamp.getMTime() >= this.getMTime()) {
+      return;
+    }
+
+    m_this._setup(renderState);
+
+    // Compile shaders
+    for (i = 0; i < m_shaders.length; i += 1) {
+      m_shaders[i].compile(renderState);
+      m_shaders[i].attachShader(renderState, m_programHandle);
+    }
+
+    m_this.bindAttributes(renderState);
+
+    // link program
+    if (!m_this.link(renderState)) {
+      console.log('[ERROR] Failed to link Program');
+      m_this._cleanup(renderState);
+    }
+
+    m_compileTimestamp.modified();
   };
 
   /////////////////////////////////////////////////////////////////////////////
@@ -7367,47 +8066,28 @@ vgl.shaderProgram = function() {
    * @returns {boolean}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.bind = function(renderState) {
+  this.bind = function (renderState) {
     var i = 0;
 
-    if (m_programHandle === 0
-        || (m_compileTimestamp.getMTime() < this.getMTime())) {
-      m_programHandle = gl.createProgram();
-
-      if (m_programHandle === 0) {
-        console.log("[ERROR] Cannot create Program Object");
-        return false;
-      }
+    if (m_bindTimestamp.getMTime() < m_this.getMTime()) {
 
       // Compile shaders
-      for (i = 0; i < m_shaders.length; ++i) {
-        m_shaders[i].compile();
-        m_shaders[i].attachShader(m_programHandle);
-      }
+      m_this.compileAndLink(renderState);
 
-      this.bindAttributes();
-
-      // link program
-      if (!this.link()) {
-        console.log("[ERROR] Failed to link Program");
-        this.cleanUp();
-      }
-
-      this.use();
-      this.bindUniforms();
-      m_compileTimestamp.modified();
-    }
-    else {
-      this.use();
+      m_this.use(renderState);
+      m_this.bindUniforms(renderState);
+      m_bindTimestamp.modified();
+    } else {
+      m_this.use(renderState);
     }
 
     // Call update callback.
-    for (i = 0; i < m_uniforms.length; ++i) {
-      m_uniforms[i].update(renderState, this);
+    for (i = 0; i < m_uniforms.length; i += 1) {
+      m_uniforms[i].update(renderState, m_this);
     }
 
     // Now update values to GL.
-    this.updateUniforms();
+    m_this.updateUniforms(renderState);
   };
 
   /////////////////////////////////////////////////////////////////////////////
@@ -7417,8 +8097,12 @@ vgl.shaderProgram = function() {
    * @param renderState
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.undoBind = function(renderState) {
-    // Do nothing
+  this.undoBind = function (renderState) {
+    // REF https://www.khronos.org/opengles/sdk/docs/man/xhtml/glUseProgram.xml
+    // If program is 0, then the current rendering state refers to an invalid
+    // program object, and the results of vertex and fragment shader execution
+    // due to any glDrawArrays or glDrawElements commands are undefined
+    renderState.m_context.useProgram(null);
   };
 
   /////////////////////////////////////////////////////////////////////////////
@@ -7429,7 +8113,7 @@ vgl.shaderProgram = function() {
    * @param key
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.bindVertexData = function(renderState, key) {
+  this.bindVertexData = function (renderState, key) {
     if (m_vertexAttributes.hasOwnProperty(key)) {
       m_vertexAttributes[key].bindVertexData(renderState, key);
     }
@@ -7443,7 +8127,7 @@ vgl.shaderProgram = function() {
    * @param key
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.undoBindVertexData = function(renderState, key) {
+  this.undoBindVertexData = function (renderState, key) {
     if (m_vertexAttributes.hasOwnProperty(key)) {
       m_vertexAttributes[key].undoBindVertexData(renderState, key);
     }
@@ -7454,11 +8138,11 @@ vgl.shaderProgram = function() {
    * Bind uniforms
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.bindUniforms = function() {
+  this.bindUniforms = function (renderState) {
     var i;
-    for (i = 0; i < m_uniforms.length; ++i) {
+    for (i = 0; i < m_uniforms.length; i += 1) {
       m_uniformNameToLocation[m_uniforms[i].name()] = this
-          .queryUniformLocation(m_uniforms[i].name());
+          .queryUniformLocation(renderState, m_uniforms[i].name());
     }
   };
 
@@ -7467,16 +8151,18 @@ vgl.shaderProgram = function() {
    * Bind vertex attributes
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.bindAttributes = function() {
+  this.bindAttributes = function (renderState) {
     var key, name;
     for (key in m_vertexAttributes) {
-      name = m_vertexAttributes[key].name();
-      gl.bindAttribLocation(m_programHandle, key, name);
-      m_vertexAttributeNameToLocation[name] = key;
+      if (m_vertexAttributes.hasOwnProperty(key)) {
+        name = m_vertexAttributes[key].name();
+        renderState.m_context.bindAttribLocation(m_programHandle, key, name);
+        m_vertexAttributeNameToLocation[name] = key;
+      }
     }
   };
 
-  return this;
+  return m_this;
 };
 
 inherit(vgl.shaderProgram, vgl.materialAttribute);
@@ -7486,10 +8172,7 @@ inherit(vgl.shaderProgram, vgl.materialAttribute);
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global Uint8Array, vgl, gl, ogs, vec4, inherit, $*/
+/*global Uint8Array, vgl, inherit*/
 //////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -7500,7 +8183,7 @@ inherit(vgl.shaderProgram, vgl.materialAttribute);
  * @returns {vgl.texture}
  */
 ///////////////////////////////////////////////////////////////////////////////
-vgl.texture = function() {
+vgl.texture = function () {
   'use strict';
 
   if (!(this instanceof vgl.texture)) {
@@ -7516,69 +8199,69 @@ vgl.texture = function() {
   this.m_textureHandle = null;
   this.m_textureUnit = 0;
 
-  this.m_pixelFormat = null;
-  this.m_pixelDataType = null;
-
-  this.m_internalFormat = null;
+  this.m_pixelFormat = vgl.GL.RGBA;
+  this.m_pixelDataType = vgl.GL.UNSIGNED_BYTE;
+  this.m_internalFormat = vgl.GL.RGBA;
+  this.m_nearestPixel = false;
 
   this.m_image = null;
 
   var m_setupTimestamp = vgl.timestamp(),
       m_that = this;
 
-  function activateTextureUnit() {
+  function activateTextureUnit(renderState) {
     switch (m_that.m_textureUnit) {
       case 0:
-        gl.activeTexture(gl.TEXTURE0);
+        renderState.m_context.activeTexture(vgl.GL.TEXTURE0);
         break;
       case 1:
-        gl.activeTexture(gl.TEXTURE1);
+        renderState.m_context.activeTexture(vgl.GL.TEXTURE1);
         break;
       case 2:
-        gl.activeTexture(gl.TEXTURE2);
+        renderState.m_context.activeTexture(vgl.GL.TEXTURE2);
         break;
       case 3:
-        gl.activeTexture(gl.TEXTURE3);
+        renderState.m_context.activeTexture(vgl.GL.TEXTURE3);
         break;
       case 4:
-        gl.activeTexture(gl.TEXTURE4);
+        renderState.m_context.activeTexture(vgl.GL.TEXTURE4);
         break;
       case 5:
-        gl.activeTexture(gl.TEXTURE5);
+        renderState.m_context.activeTexture(vgl.GL.TEXTURE5);
         break;
       case 6:
-        gl.activeTexture(gl.TEXTURE6);
+        renderState.m_context.activeTexture(vgl.GL.TEXTURE6);
         break;
       case 7:
-        gl.activeTexture(gl.TEXTURE7);
+        renderState.m_context.activeTexture(vgl.GL.TEXTURE7);
         break;
       case 8:
-        gl.activeTexture(gl.TEXTURE8);
+        renderState.m_context.activeTexture(vgl.GL.TEXTURE8);
         break;
       case 9:
-        gl.activeTexture(gl.TEXTURE9);
+        renderState.m_context.activeTexture(vgl.GL.TEXTURE9);
         break;
       case 10:
-        gl.activeTexture(gl.TEXTURE10);
+        renderState.m_context.activeTexture(vgl.GL.TEXTURE10);
         break;
       case 11:
-        gl.activeTexture(gl.TEXTURE11);
+        renderState.m_context.activeTexture(vgl.GL.TEXTURE11);
         break;
       case 12:
-        gl.activeTexture(gl.TEXTURE12);
+        renderState.m_context.activeTexture(vgl.GL.TEXTURE12);
         break;
       case 13:
-        gl.activeTexture(gl.TEXTURE13);
+        renderState.m_context.activeTexture(vgl.GL.TEXTURE13);
         break;
       case 14:
-        gl.activeTexture(gl.TEXTURE14);
+        renderState.m_context.activeTexture(vgl.GL.TEXTURE14);
         break;
       case 15:
-        gl.activeTexture(gl.TEXTURE15);
+        renderState.m_context.activeTexture(vgl.GL.TEXTURE15);
         break;
       default:
-        throw "[error] Texture unit "  + this.m_textureUnit +
-              " is not supported";
+        throw '[error] Texture unit '  + m_that.m_textureUnit +
+              ' is not supported';
     }
   }
 
@@ -7589,37 +8272,44 @@ vgl.texture = function() {
    * @param renderState
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.setup = function(renderState) {
-    activateTextureUnit();
+  this.setup = function (renderState) {
+    // Activate the texture unit first
+    activateTextureUnit(renderState);
 
-    gl.deleteTexture(this.m_textureHandle);
-    this.m_textureHandle = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, this.m_textureHandle);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    renderState.m_context.deleteTexture(this.m_textureHandle);
+    this.m_textureHandle = renderState.m_context.createTexture();
+    renderState.m_context.bindTexture(vgl.GL.TEXTURE_2D, this.m_textureHandle);
+    renderState.m_context.texParameteri(vgl.GL.TEXTURE_2D,
+        vgl.GL.TEXTURE_MIN_FILTER,
+        this.m_nearestPixel ? vgl.GL.NEAREST : vgl.GL.LINEAR);
+    renderState.m_context.texParameteri(vgl.GL.TEXTURE_2D,
+        vgl.GL.TEXTURE_MAG_FILTER,
+        this.m_nearestPixel ? vgl.GL.NEAREST : vgl.GL.LINEAR);
+    renderState.m_context.texParameteri(vgl.GL.TEXTURE_2D,
+        vgl.GL.TEXTURE_WRAP_S, vgl.GL.CLAMP_TO_EDGE);
+    renderState.m_context.texParameteri(vgl.GL.TEXTURE_2D,
+        vgl.GL.TEXTURE_WRAP_T, vgl.GL.CLAMP_TO_EDGE);
 
     if (this.m_image !== null) {
+      renderState.m_context.pixelStorei(vgl.GL.UNPACK_ALIGNMENT, 1);
+      renderState.m_context.pixelStorei(vgl.GL.UNPACK_FLIP_Y_WEBGL, true);
+
       this.updateDimensions();
       this.computeInternalFormatUsingImage();
 
-      // console.log("m_internalFormat " + this.m_internalFormat);
-      // console.log("m_pixelFormat " + this.m_pixelFormat);
-      // console.log("m_pixelDataType " + this.m_pixelDataType);
+      // console.log('m_internalFormat ' + this.m_internalFormat);
+      // console.log('m_pixelFormat ' + this.m_pixelFormat);
+      // console.log('m_pixelDataType ' + this.m_pixelDataType);
 
       // FOR now support only 2D textures
-      gl.texImage2D(gl.TEXTURE_2D, 0, this.m_internalFormat,
-                    this.m_pixelFormat, this.m_pixelDataType, this.m_image);
-    }
-    else {
-      gl.texImage2D(gl.TEXTURE_2D, 0, this.m_internalFormat,
-                    this.m_pixelFormat, this.m_pixelDataType, null);
+      renderState.m_context.texImage2D(vgl.GL.TEXTURE_2D, 0, this.m_internalFormat,
+        this.m_pixelFormat, this.m_pixelDataType, this.m_image);
+    } else {
+      renderState.m_context.texImage2D(vgl.GL.TEXTURE_2D, 0, this.m_internalFormat,
+        this.m_width, this.m_height, 0, this.m_pixelFormat, this.m_pixelDataType, null);
     }
 
-    gl.bindTexture(gl.TEXTURE_2D, null);
+    renderState.m_context.bindTexture(vgl.GL.TEXTURE_2D, null);
     m_setupTimestamp.modified();
   };
 
@@ -7630,14 +8320,14 @@ vgl.texture = function() {
    * @param renderState
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.bind = function(renderState) {
+  this.bind = function (renderState) {
     // TODO Call setup via material setup
     if (this.getMTime() > m_setupTimestamp.getMTime()) {
       this.setup(renderState);
     }
 
-    activateTextureUnit();
-    gl.bindTexture(gl.TEXTURE_2D, this.m_textureHandle);
+    activateTextureUnit(renderState);
+    renderState.m_context.bindTexture(vgl.GL.TEXTURE_2D, this.m_textureHandle);
   };
 
   /////////////////////////////////////////////////////////////////////////////
@@ -7647,8 +8337,8 @@ vgl.texture = function() {
    * @param renderState
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.undoBind = function(renderState) {
-    gl.bindTexture(gl.TEXTURE_2D, null);
+  this.undoBind = function (renderState) {
+    renderState.m_context.bindTexture(vgl.GL.TEXTURE_2D, null);
   };
 
   /////////////////////////////////////////////////////////////////////////////
@@ -7658,7 +8348,7 @@ vgl.texture = function() {
    * @returns {vgl.image}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.image = function() {
+  this.image = function () {
     return this.m_image;
   };
 
@@ -7670,7 +8360,7 @@ vgl.texture = function() {
    * @returns {boolean}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.setImage = function(image) {
+  this.setImage = function (image) {
     if (image !== null) {
       this.m_image = image;
       this.updateDimensions();
@@ -7683,12 +8373,41 @@ vgl.texture = function() {
 
   /////////////////////////////////////////////////////////////////////////////
   /**
+   * Get nearest pixel flag for the texture
+   *
+   * @returns boolean
+   */
+  /////////////////////////////////////////////////////////////////////////////
+  this.nearestPixel = function () {
+    return this.m_nearestPixel;
+  };
+
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set nearest pixel flag for the texture
+   *
+   * @param {boolean} nearest pixel flag
+   * @returns {boolean}
+   */
+  /////////////////////////////////////////////////////////////////////////////
+  this.setNearestPixel = function (nearest) {
+    nearest = nearest ? true : false;
+    if (nearest !== this.m_nearestPixel) {
+      this.m_nearestPixel = nearest;
+      this.modified();
+      return true;
+    }
+    return false;
+  };
+
+  /////////////////////////////////////////////////////////////////////////////
+  /**
    * Get texture unit of the texture
    *
    * @returns {number}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.textureUnit = function() {
+  this.textureUnit = function () {
     return this.m_textureUnit;
   };
 
@@ -7700,7 +8419,7 @@ vgl.texture = function() {
    * @returns {boolean}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.setTextureUnit = function(unit) {
+  this.setTextureUnit = function (unit) {
     if (this.m_textureUnit === unit) {
       return false;
     }
@@ -7717,7 +8436,7 @@ vgl.texture = function() {
    * @returns {*}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.width = function() {
+  this.width = function () {
     return this.m_width;
   };
 
@@ -7729,15 +8448,43 @@ vgl.texture = function() {
    * @returns {boolean}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.setWidth = function(width) {
-    if (this.m_image === null) {
-      return false;
+  this.setWidth = function (width) {
+    if (m_that.m_width !== width) {
+      m_that.m_width = width;
+      m_that.modified();
+      return true;
     }
 
-    this.m_width = width;
-    this.modified();
+    return false;
+  };
 
-    return true;
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get width of the texture
+   *
+   * @returns {*}
+   */
+  /////////////////////////////////////////////////////////////////////////////
+  this.height = function () {
+    return m_that.m_height;
+  };
+
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set height of the texture
+   *
+   * @param {number} height
+   * @returns {vgl.texture}
+   */
+  /////////////////////////////////////////////////////////////////////////////
+  this.setHeight = function (height) {
+    if (m_that.m_height !== height) {
+      m_that.m_height = height;
+      m_that.modified();
+      return true;
+    }
+
+    return false;
   };
 
   /////////////////////////////////////////////////////////////////////////////
@@ -7747,7 +8494,7 @@ vgl.texture = function() {
    * @returns {number}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.depth = function() {
+  this.depth = function () {
     return this.m_depth;
   };
 
@@ -7759,7 +8506,7 @@ vgl.texture = function() {
    * @returns {boolean}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.setDepth = function(depth) {
+  this.setDepth = function (depth) {
     if (this.m_image === null) {
       return false;
     }
@@ -7776,7 +8523,7 @@ vgl.texture = function() {
    * @returns {*}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.textureHandle = function() {
+  this.textureHandle = function () {
     return this.m_textureHandle;
   };
 
@@ -7787,7 +8534,7 @@ vgl.texture = function() {
    * @returns {*}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.internalFormat = function() {
+  this.internalFormat = function () {
     return this.m_internalFormat;
   };
 
@@ -7799,7 +8546,7 @@ vgl.texture = function() {
    * @returns {boolean}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.setInternalFormat = function(internalFormat) {
+  this.setInternalFormat = function (internalFormat) {
     if (this.m_internalFormat !== internalFormat) {
       this.m_internalFormat = internalFormat;
       this.modified();
@@ -7816,7 +8563,7 @@ vgl.texture = function() {
    * @returns {*}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.pixelFormat = function() {
+  this.pixelFormat = function () {
     return this.m_pixelFormat;
   };
 
@@ -7828,7 +8575,7 @@ vgl.texture = function() {
    * @returns {boolean}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.setPixelFormat = function(pixelFormat) {
+  this.setPixelFormat = function (pixelFormat) {
     if (this.m_image === null) {
       return false;
     }
@@ -7845,7 +8592,7 @@ vgl.texture = function() {
    * @returns {*}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.pixelDataType = function() {
+  this.pixelDataType = function () {
     return this.m_pixelDataType;
   };
 
@@ -7857,7 +8604,7 @@ vgl.texture = function() {
    * @returns {boolean}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.setPixelDataType = function(pixelDataType) {
+  this.setPixelDataType = function (pixelDataType) {
     if (this.m_image === null) {
       return false;
     }
@@ -7874,22 +8621,22 @@ vgl.texture = function() {
    * Compute internal format of the texture
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.computeInternalFormatUsingImage = function() {
+  this.computeInternalFormatUsingImage = function () {
     // Currently image does not define internal format
     // and hence it's pixel format is the only way to query
     // information on how color has been stored.
     // switch (this.m_image.pixelFormat()) {
-    // case gl.RGB:
-    // this.m_internalFormat = gl.RGB;
+    // case vgl.GL.RGB:
+    // this.m_internalFormat = vgl.GL.RGB;
     // break;
-    // case gl.RGBA:
-    // this.m_internalFormat = gl.RGBA;
+    // case vgl.GL.RGBA:
+    // this.m_internalFormat = vgl.GL.RGBA;
     // break;
-    // case gl.Luminance:
-    // this.m_internalFormat = gl.Luminance;
+    // case vgl.GL.Luminance:
+    // this.m_internalFormat = vgl.GL.Luminance;
     // break;
-    // case gl.LuminanceAlpha:
-    // this.m_internalFormat = gl.LuminanceAlpha;
+    // case vgl.GL.LuminanceAlpha:
+    // this.m_internalFormat = vgl.GL.LuminanceAlpha;
     // break;
     // // Do nothing when image pixel format is none or undefined.
     // default:
@@ -7897,9 +8644,9 @@ vgl.texture = function() {
     // };
 
     // TODO Fix this
-    this.m_internalFormat = gl.RGBA;
-    this.m_pixelFormat = gl.RGBA;
-    this.m_pixelDataType = gl.UNSIGNED_BYTE;
+    this.m_internalFormat = vgl.GL.RGBA;
+    this.m_pixelFormat = vgl.GL.RGBA;
+    this.m_pixelDataType = vgl.GL.UNSIGNED_BYTE;
   };
 
   /////////////////////////////////////////////////////////////////////////////
@@ -7907,7 +8654,7 @@ vgl.texture = function() {
    * Update texture dimensions
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.updateDimensions = function() {
+  this.updateDimensions = function () {
     if (this.m_image !== null) {
       this.m_width = this.m_image.width;
       this.m_height = this.m_image.height;
@@ -7928,7 +8675,7 @@ inherit(vgl.texture, vgl.materialAttribute);
  * @returns {vgl.lookupTable}
  */
 ///////////////////////////////////////////////////////////////////////////////
-vgl.lookupTable = function() {
+vgl.lookupTable = function () {
   'use strict';
 
   if (!(this instanceof vgl.lookupTable)) {
@@ -7937,43 +8684,43 @@ vgl.lookupTable = function() {
   vgl.texture.call(this);
 
   var m_setupTimestamp = vgl.timestamp(),
-      m_range = [0,0];
+      m_range = [0, 0];
 
   this.m_colorTable = //paraview bwr colortable
-    [0.07514311,0.468049805,1,1,
-     0.247872569,0.498782363,1,1,
-     0.339526309,0.528909511,1,1,
-     0.409505078,0.558608486,1,1,
-     0.468487184,0.588057293,1,1,
-     0.520796675,0.617435078,1,1,
-     0.568724526,0.646924167,1,1,
-     0.613686735,0.676713218,1,1,
-     0.656658579,0.707001303,1,1,
-     0.698372844,0.738002964,1,1,
-     0.739424025,0.769954435,1,1,
-     0.780330104,0.803121429,1,1,
-     0.821573924,0.837809045,1,1,
-     0.863634967,0.874374691,1,1,
-     0.907017747,0.913245283,1,1,
-     0.936129275,0.938743558,0.983038586,1,
-     0.943467973,0.943498599,0.943398095,1,
-     0.990146732,0.928791426,0.917447482,1,
-     1,0.88332677,0.861943246,1,
-     1,0.833985467,0.803839606,1,
-     1,0.788626485,0.750707739,1,
-     1,0.746206642,0.701389973,1,
-     1,0.70590052,0.654994046,1,
-     1,0.667019783,0.610806959,1,
-     1,0.6289553,0.568237474,1,
-     1,0.591130233,0.526775617,1,
-     1,0.552955184,0.485962266,1,
-     1,0.513776083,0.445364274,1,
-     1,0.472800903,0.404551679,1,
-     1,0.428977855,0.363073592,1,
-     1,0.380759558,0.320428137,1,
-     0.961891484,0.313155629,0.265499262,1,
-     0.916482116,0.236630659,0.209939162,1].map(
-             function(x) {return x*255;});
+    [0.07514311, 0.468049805, 1, 1,
+     0.247872569, 0.498782363, 1, 1,
+     0.339526309, 0.528909511, 1, 1,
+     0.409505078, 0.558608486, 1, 1,
+     0.468487184, 0.588057293, 1, 1,
+     0.520796675, 0.617435078, 1, 1,
+     0.568724526, 0.646924167, 1, 1,
+     0.613686735, 0.676713218, 1, 1,
+     0.656658579, 0.707001303, 1, 1,
+     0.698372844, 0.738002964, 1, 1,
+     0.739424025, 0.769954435, 1, 1,
+     0.780330104, 0.803121429, 1, 1,
+     0.821573924, 0.837809045, 1, 1,
+     0.863634967, 0.874374691, 1, 1,
+     0.907017747, 0.913245283, 1, 1,
+     0.936129275, 0.938743558, 0.983038586, 1,
+     0.943467973, 0.943498599, 0.943398095, 1,
+     0.990146732, 0.928791426, 0.917447482, 1,
+     1, 0.88332677, 0.861943246, 1,
+     1, 0.833985467, 0.803839606, 1,
+     1, 0.788626485, 0.750707739, 1,
+     1, 0.746206642, 0.701389973, 1,
+     1, 0.70590052, 0.654994046, 1,
+     1, 0.667019783, 0.610806959, 1,
+     1, 0.6289553, 0.568237474, 1,
+     1, 0.591130233, 0.526775617, 1,
+     1, 0.552955184, 0.485962266, 1,
+     1, 0.513776083, 0.445364274, 1,
+     1, 0.472800903, 0.404551679, 1,
+     1, 0.428977855, 0.363073592, 1,
+     1, 0.380759558, 0.320428137, 1,
+     0.961891484, 0.313155629, 0.265499262, 1,
+     0.916482116, 0.236630659, 0.209939162, 1].map(
+             function (x) {return x * 255;});
 
   /////////////////////////////////////////////////////////////////////////////
   /**
@@ -7982,30 +8729,34 @@ vgl.lookupTable = function() {
    * @param {vgl.renderState} renderState
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.setup = function(renderState) {
+  this.setup = function (renderState) {
     if (this.textureUnit() === 0) {
-      gl.activeTexture(gl.TEXTURE0);
+      renderState.m_context.activeTexture(vgl.GL.TEXTURE0);
     } else if (this.textureUnit() === 1) {
-      gl.activeTexture(gl.TEXTURE1);
+      renderState.m_context.activeTexture(vgl.GL.TEXTURE1);
     }
 
-    gl.deleteTexture(this.m_textureHandle);
-    this.m_textureHandle = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, this.m_textureHandle);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+    renderState.m_context.deleteTexture(this.m_textureHandle);
+    this.m_textureHandle = renderState.m_context.createTexture();
+    renderState.m_context.bindTexture(vgl.GL.TEXTURE_2D, this.m_textureHandle);
+    renderState.m_context.texParameteri(vgl.GL.TEXTURE_2D,
+        vgl.GL.TEXTURE_MIN_FILTER, vgl.GL.LINEAR);
+    renderState.m_context.texParameteri(vgl.GL.TEXTURE_2D,
+        vgl.GL.TEXTURE_MAG_FILTER, vgl.GL.LINEAR);
+    renderState.m_context.texParameteri(vgl.GL.TEXTURE_2D,
+        vgl.GL.TEXTURE_WRAP_S, vgl.GL.CLAMP_TO_EDGE);
+    renderState.m_context.texParameteri(vgl.GL.TEXTURE_2D,
+        vgl.GL.TEXTURE_WRAP_T, vgl.GL.CLAMP_TO_EDGE);
+    renderState.m_context.pixelStorei(vgl.GL.UNPACK_ALIGNMENT, 1);
 
-    this.m_width = this.m_colorTable.length/4;
+    this.m_width = this.m_colorTable.length / 4;
     this.m_height = 1;
     this.m_depth = 0;
-    gl.texImage2D(gl.TEXTURE_2D,
-                  0, gl.RGBA, this.m_width, this.m_height, this.m_depth,
-                  gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(this.m_colorTable));
+    renderState.m_context.texImage2D(vgl.GL.TEXTURE_2D,
+        0, vgl.GL.RGBA, this.m_width, this.m_height, this.m_depth,
+        vgl.GL.RGBA, vgl.GL.UNSIGNED_BYTE, new Uint8Array(this.m_colorTable));
 
-    gl.bindTexture(gl.TEXTURE_2D, null);
+    renderState.m_context.bindTexture(vgl.GL.TEXTURE_2D, null);
     m_setupTimestamp.modified();
   };
 
@@ -8016,7 +8767,7 @@ vgl.lookupTable = function() {
    * @returns {*}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.colorTable = function() {
+  this.colorTable = function () {
     return this.m_colorTable;
   };
 
@@ -8028,7 +8779,7 @@ vgl.lookupTable = function() {
    * @returns {boolean}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.setColorTable = function(colors) {
+  this.setColorTable = function (colors) {
     if (this.m_colorTable === colors) {
       return false;
     }
@@ -8045,7 +8796,7 @@ vgl.lookupTable = function() {
    * @returns {Array}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.range = function() {
+  this.range = function () {
     return m_range;
   };
 
@@ -8057,7 +8808,7 @@ vgl.lookupTable = function() {
    * @returns {boolean}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.setRange = function(range) {
+  this.setRange = function (range) {
     if (m_range === range) {
       return false;
     }
@@ -8073,7 +8824,7 @@ vgl.lookupTable = function() {
    * @param range
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.updateRange = function(range) {
+  this.updateRange = function (range) {
     if (!(range instanceof Array)) {
       console.log('[error] Invalid data type for range. Requires array [min,max]');
     }
@@ -8099,10 +8850,7 @@ inherit(vgl.lookupTable, vgl.texture);
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global vgl, gl, ogs, vec2, vec3, vec4, mat3, mat4, inherit, $*/
+/*global vgl, mat4, vec3, inherit*/
 //////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -8114,39 +8862,39 @@ inherit(vgl.lookupTable, vgl.texture);
  * @returns {vgl.uniform} OpenGL uniform encapsulation
  */
 ///////////////////////////////////////////////////////////////////////////////
-vgl.uniform = function(type, name) {
+vgl.uniform = function (type, name) {
   'use strict';
 
   if (!(this instanceof vgl.uniform)) {
     return new vgl.uniform();
   }
 
-  this.getTypeNumberOfComponents = function(type) {
+  this.getTypeNumberOfComponents = function (type) {
     switch (type) {
-      case gl.FLOAT:
-      case gl.INT:
-      case gl.BOOL:
+      case vgl.GL.FLOAT:
+      case vgl.GL.INT:
+      case vgl.GL.BOOL:
         return 1;
 
-      case gl.FLOAT_VEC2:
-      case gl.INT_VEC2:
-      case gl.BOOL_VEC2:
+      case vgl.GL.FLOAT_VEC2:
+      case vgl.GL.INT_VEC2:
+      case vgl.GL.BOOL_VEC2:
         return 2;
 
-      case gl.FLOAT_VEC3:
-      case gl.INT_VEC3:
-      case gl.BOOLT_VEC3:
+      case vgl.GL.FLOAT_VEC3:
+      case vgl.GL.INT_VEC3:
+      case vgl.GL.BOOL_VEC3:
         return 3;
 
-      case gl.FLOAT_VEC4:
-      case gl.INT_VEC4:
-      case gl.BOOL_VEC4:
+      case vgl.GL.FLOAT_VEC4:
+      case vgl.GL.INT_VEC4:
+      case vgl.GL.BOOL_VEC4:
         return 4;
 
-      case gl.FLOAT_MAT3:
+      case vgl.GL.FLOAT_MAT3:
         return 9;
 
-      case gl.FLOAT_MAT4:
+      case vgl.GL.FLOAT_MAT4:
         return 16;
 
       default:
@@ -8156,8 +8904,7 @@ vgl.uniform = function(type, name) {
 
   var m_type = type,
       m_name = name,
-      m_dataArray = [],
-      m_numberOfElements = 1;
+      m_dataArray = [];
 
   m_dataArray.length = this.getTypeNumberOfComponents(m_type);
 
@@ -8168,7 +8915,7 @@ vgl.uniform = function(type, name) {
    * @returns {*}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.name = function() {
+  this.name = function () {
     return m_name;
   };
 
@@ -8179,7 +8926,7 @@ vgl.uniform = function(type, name) {
    * @returns {*}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.type = function() {
+  this.type = function () {
     return m_type;
   };
 
@@ -8190,7 +8937,7 @@ vgl.uniform = function(type, name) {
    * @returns {Array}
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.get = function() {
+  this.get = function () {
     return m_dataArray;
   };
 
@@ -8201,34 +8948,29 @@ vgl.uniform = function(type, name) {
    * @param value
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.set = function(value) {
+  this.set = function (value) {
     var i = 0;
     if (m_dataArray.length === 16) {
-      for (i = 0; i < 16; ++i) {
+      for (i = 0; i < 16; i += 1) {
         m_dataArray[i] = value[i];
       }
-    }
-    else if (m_dataArray.length === 9) {
-      for (i = 0; i < 9; ++i) {
+    } else if (m_dataArray.length === 9) {
+      for (i = 0; i < 9; i += 1) {
         m_dataArray[i] = value[i];
       }
-    }
-    else if (m_dataArray.length === 4) {
-      for (i = 0; i < 4; ++i) {
+    } else if (m_dataArray.length === 4) {
+      for (i = 0; i < 4; i += 1) {
         m_dataArray[i] = value[i];
       }
-    }
-    else if (m_dataArray.length === 3) {
-      for (i = 0; i < 3; ++i) {
+    } else if (m_dataArray.length === 3) {
+      for (i = 0; i < 3; i += 1) {
         m_dataArray[i] = value[i];
       }
-    }
-    else if (m_dataArray.length === 2) {
-      for (i = 0; i < 2; ++i) {
+    } else if (m_dataArray.length === 2) {
+      for (i = 0; i < 2; i += 1) {
         m_dataArray[i] = value[i];
       }
-    }
-    else {
+    } else {
       m_dataArray[0] = value;
     }
   };
@@ -8240,33 +8982,33 @@ vgl.uniform = function(type, name) {
    * @param location
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.callGL = function(location) {
+  this.callGL = function (renderState, location) {
     if (this.m_numberElements < 1) {
       return;
     }
 
     switch (m_type) {
-      case gl.BOOL:
-      case gl.INT:
-        gl.uniform1iv(location, m_dataArray);
+      case vgl.GL.BOOL:
+      case vgl.GL.INT:
+        renderState.m_context.uniform1iv(location, m_dataArray);
         break;
-      case gl.FLOAT:
-        gl.uniform1fv(location, m_dataArray);
+      case vgl.GL.FLOAT:
+        renderState.m_context.uniform1fv(location, m_dataArray);
         break;
-      case gl.FLOAT_VEC2:
-        gl.uniform2fv(location, m_dataArray);
+      case vgl.GL.FLOAT_VEC2:
+        renderState.m_context.uniform2fv(location, m_dataArray);
         break;
-      case gl.FLOAT_VEC3:
-        gl.uniform3fv(location, m_dataArray);
+      case vgl.GL.FLOAT_VEC3:
+        renderState.m_context.uniform3fv(location, m_dataArray);
         break;
-      case gl.FLOAT_VEC4:
-        gl.uniform4fv(location, m_dataArray);
+      case vgl.GL.FLOAT_VEC4:
+        renderState.m_context.uniform4fv(location, m_dataArray);
         break;
-      case gl.FLOAT_MAT3:
-        gl.uniformMatrix3fv(location, gl.FALSE, m_dataArray);
+      case vgl.GL.FLOAT_MAT3:
+        renderState.m_context.uniformMatrix3fv(location, vgl.GL.FALSE, m_dataArray);
         break;
-      case gl.FLOAT_MAT4:
-        gl.uniformMatrix4fv(location, gl.FALSE, m_dataArray);
+      case vgl.GL.FLOAT_MAT4:
+        renderState.m_context.uniformMatrix4fv(location, vgl.GL.FALSE, m_dataArray);
         break;
       default:
         break;
@@ -8283,7 +9025,9 @@ vgl.uniform = function(type, name) {
    * @param program
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.update = function(renderState, program) {
+  this.update = function (renderState, program) {
+    renderState = renderState; /* unused parameter */
+    program = program; /* unused parameter */
     // Should be implemented by the derived class
   };
 
@@ -8298,7 +9042,7 @@ vgl.uniform = function(type, name) {
  * @returns {vgl.modelViewUniform}
  */
 ///////////////////////////////////////////////////////////////////////////////
-vgl.modelViewUniform = function(name) {
+vgl.modelViewUniform = function (name) {
   'use strict';
 
   if (!(this instanceof vgl.modelViewUniform)) {
@@ -8306,10 +9050,10 @@ vgl.modelViewUniform = function(name) {
   }
 
   if (name.length === 0) {
-    name = "modelViewMatrix";
+    name = 'modelViewMatrix';
   }
 
-  vgl.uniform.call(this, gl.FLOAT_MAT4, name);
+  vgl.uniform.call(this, vgl.GL.FLOAT_MAT4, name);
 
   this.set(mat4.create());
 
@@ -8321,7 +9065,8 @@ vgl.modelViewUniform = function(name) {
    * @param {vgl.shaderProgram} program
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.update = function(renderState, program) {
+  this.update = function (renderState, program) {
+    program = program; /* unused parameter */
     this.set(renderState.m_modelViewMatrix);
   };
 
@@ -8329,6 +9074,64 @@ vgl.modelViewUniform = function(name) {
 };
 
 inherit(vgl.modelViewUniform, vgl.uniform);
+
+///////////////////////////////////////////////////////////////////////////////
+/**
+ * Create new instance of class modelViewOriginUniform.
+ *
+ * @param name
+ * @param uniform: a triplet of floats.
+ * @returns {vgl.modelViewUniform}
+ */
+///////////////////////////////////////////////////////////////////////////////
+vgl.modelViewOriginUniform = function (name, origin) {
+  'use strict';
+
+  if (!(this instanceof vgl.modelViewOriginUniform)) {
+    return new vgl.modelViewOriginUniform(name, origin);
+  }
+
+  if (name.length === 0) {
+    name = 'modelViewMatrix';
+  }
+
+  var m_origin = vec3.fromValues(origin[0], origin[1], origin[2]);
+
+  vgl.uniform.call(this, vgl.GL.FLOAT_MAT4, name);
+
+  this.set(mat4.create());
+
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Update the uniform given a render state and shader program.  This offsets
+   * the modelViewMatrix by the origin, and, if the model view should be
+   * aligned, aligns it appropriately.  The alignment must be done after the
+   * origin offset to maintain precision.
+   *
+   * @param {vgl.renderState} renderState
+   * @param {vgl.shaderProgram} program
+   */
+  /////////////////////////////////////////////////////////////////////////////
+  this.update = function (renderState, program) {
+    program = program; /* unused parameter */
+    var view = mat4.create();
+    mat4.translate(view, renderState.m_modelViewMatrix, m_origin);
+    if (renderState.m_modelViewAlignment) {
+      var align = renderState.m_modelViewAlignment;
+      /* view[12] and view[13] are the x and y offsets.  align.round is the
+       * units-per-pixel, and align.dx and .dy are either 0 or half the size of
+       * a unit-per-pixel.  The alignment guarantees that the texels are
+       * aligned with screen pixels. */
+      view[12] = Math.round(view[12] / align.round) * align.round + align.dx;
+      view[13] = Math.round(view[13] / align.round) * align.round + align.dy;
+    }
+    this.set(view);
+  };
+
+  return this;
+};
+
+inherit(vgl.modelViewOriginUniform, vgl.uniform);
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -8338,7 +9141,7 @@ inherit(vgl.modelViewUniform, vgl.uniform);
  * @returns {vgl.projectionUniform}
  */
 ///////////////////////////////////////////////////////////////////////////////
-vgl.projectionUniform = function(name) {
+vgl.projectionUniform = function (name) {
   'use strict';
 
   if (!(this instanceof vgl.projectionUniform)) {
@@ -8346,10 +9149,10 @@ vgl.projectionUniform = function(name) {
   }
 
   if (name.length === 0) {
-    name = "projectionMatrix";
+    name = 'projectionMatrix';
   }
 
-  vgl.uniform.call(this, gl.FLOAT_MAT4, name);
+  vgl.uniform.call(this, vgl.GL.FLOAT_MAT4, name);
 
   this.set(mat4.create());
 
@@ -8361,7 +9164,8 @@ vgl.projectionUniform = function(name) {
    * @param program
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.update = function(renderState, program) {
+  this.update = function (renderState, program) {
+    program = program; /* unused parameter */
     this.set(renderState.m_projectionMatrix);
   };
 
@@ -8379,7 +9183,7 @@ inherit(vgl.projectionUniform, vgl.uniform);
  * @returns {vgl.floatUniform}
  */
 ///////////////////////////////////////////////////////////////////////////////
-vgl.floatUniform = function(name, value) {
+vgl.floatUniform = function (name, value) {
   'use strict';
 
   if (!(this instanceof vgl.floatUniform)) {
@@ -8387,12 +9191,12 @@ vgl.floatUniform = function(name, value) {
   }
 
   if (name.length === 0) {
-    name = "floatUniform";
+    name = 'floatUniform';
   }
 
   value = value === undefined ? 1.0 : value;
 
-  vgl.uniform.call(this, gl.FLOAT, name);
+  vgl.uniform.call(this, vgl.GL.FLOAT, name);
 
   this.set(value);
 };
@@ -8408,7 +9212,7 @@ inherit(vgl.floatUniform, vgl.uniform);
  * @returns {vgl.normalMatrixUniform}
  */
 ///////////////////////////////////////////////////////////////////////////////
-vgl.normalMatrixUniform = function(name) {
+vgl.normalMatrixUniform = function (name) {
   'use strict';
 
   if (!(this instanceof vgl.normalMatrixUniform)) {
@@ -8416,10 +9220,10 @@ vgl.normalMatrixUniform = function(name) {
   }
 
   if (name.length === 0) {
-    name = "normalMatrix";
+    name = 'normalMatrix';
   }
 
-  vgl.uniform.call(this, gl.FLOAT_MAT4, name);
+  vgl.uniform.call(this, vgl.GL.FLOAT_MAT4, name);
 
   this.set(mat4.create());
 
@@ -8431,7 +9235,8 @@ vgl.normalMatrixUniform = function(name) {
    * @param {vgl.shaderProgram} program
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.update = function(renderState, program) {
+  this.update = function (renderState, program) {
+    program = program; /* unused parameter */
     this.set(renderState.m_normalMatrix);
   };
 
@@ -8445,10 +9250,7 @@ inherit(vgl.normalMatrixUniform, vgl.uniform);
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global vgl, gl, ogs, vec4, inherit, $*/
+/*global vgl*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -8462,24 +9264,25 @@ inherit(vgl.normalMatrixUniform, vgl.uniform);
  */
 //////////////////////////////////////////////////////////////////////////////
 vgl.vertexAttributeKeys = {
-  "Position" : 0,
-  "Normal" : 1,
-  "TextureCoordinate" : 2,
-  "Color" : 3,
-  "CountAttributeIndex" : 4
+  'Position' : 0,
+  'Normal' : 1,
+  'TextureCoordinate' : 2,
+  'Color' : 3,
+  'Scalar': 4,
+  'CountAttributeIndex' : 5
 };
 
 vgl.vertexAttributeKeysIndexed = {
-  "Zero" : 0,
-  "One" : 1,
-  "Two" : 2,
-  "Three" : 3,
-  "Four" : 4,
-  "Five" : 5,
-  "Six" : 6,
-  "Seven" : 7,
-  "Eight" : 8,
-  "Nine" : 9
+  'Zero' : 0,
+  'One' : 1,
+  'Two' : 2,
+  'Three' : 3,
+  'Four' : 4,
+  'Five' : 5,
+  'Six' : 6,
+  'Seven' : 7,
+  'Eight' : 8,
+  'Nine' : 9
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -8490,7 +9293,7 @@ vgl.vertexAttributeKeysIndexed = {
  * @returns {vgl.vertexAttribute}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.vertexAttribute = function(name) {
+vgl.vertexAttribute = function (name) {
   'use strict';
 
   if (!(this instanceof vgl.vertexAttribute)) {
@@ -8506,7 +9309,7 @@ vgl.vertexAttribute = function(name) {
    * @returns {string}
    */
   //////////////////////////////////////////////////////////////////////////////
-  this.name = function() {
+  this.name = function () {
     return m_name;
   };
 
@@ -8518,18 +9321,19 @@ vgl.vertexAttribute = function(name) {
    * @param {vgl.vertexAttributeKeys} key
    */
   //////////////////////////////////////////////////////////////////////////////
-  this.bindVertexData = function(renderState, key) {
+  this.bindVertexData = function (renderState, key) {
     var geometryData = renderState.m_mapper.geometryData(),
         sourceData = geometryData.sourceData(key),
         program = renderState.m_material.shaderProgram();
 
-    gl.vertexAttribPointer(program.attributeLocation(m_name), sourceData
+    renderState.m_context.vertexAttribPointer(program.attributeLocation(
+        m_name), sourceData
         .attributeNumberOfComponents(key), sourceData.attributeDataType(key),
                            sourceData.normalized(key), sourceData
                                .attributeStride(key), sourceData
                                .attributeOffset(key));
 
-    gl.enableVertexAttribArray(program.attributeLocation(m_name));
+    renderState.m_context.enableVertexAttribArray(program.attributeLocation(m_name));
   };
 
   //////////////////////////////////////////////////////////////////////////////
@@ -8540,10 +9344,12 @@ vgl.vertexAttribute = function(name) {
    * @param {vgl.vertexAttributeKeys} key
    */
   //////////////////////////////////////////////////////////////////////////////
-  this.undoBindVertexData = function(renderState, key) {
+  this.undoBindVertexData = function (renderState, key) {
+    key = key; /* unused parameter */
+
     var program = renderState.m_material.shaderProgram();
 
-    gl.disableVertexAttribArray(program.attributeLocation(m_name));
+    renderState.m_context.disableVertexAttribArray(program.attributeLocation(m_name));
   };
 };
 
@@ -8552,10 +9358,7 @@ vgl.vertexAttribute = function(name) {
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global vgl, ogs, vec4, inherit, $*/
+/*global vgl, inherit*/
 //////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -8565,7 +9368,7 @@ vgl.vertexAttribute = function(name) {
  * @returns {vgl.source}
  */
 ///////////////////////////////////////////////////////////////////////////////
-vgl.source = function() {
+vgl.source = function () {
   'use strict';
 
   if (!(this instanceof vgl.source)) {
@@ -8579,7 +9382,7 @@ vgl.source = function() {
    * Virtual function to create a source instance
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.create = function() {
+  this.create = function () {
   };
 
   return this;
@@ -8592,10 +9395,7 @@ inherit(vgl.source, vgl.object);
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global vgl, ogs, vec4, inherit, $*/
+/*global vgl, inherit*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -8606,7 +9406,7 @@ inherit(vgl.source, vgl.object);
  * @returns {vgl.planeSource}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.planeSource = function() {
+vgl.planeSource = function () {
   'use strict';
 
   if (!(this instanceof vgl.planeSource)) {
@@ -8614,10 +9414,10 @@ vgl.planeSource = function() {
   }
   vgl.source.call(this);
 
-  var m_origin = [ 0.0, 0.0, 0.0 ],
-      m_point1 = [ 1.0, 0.0, 0.0 ],
-      m_point2 = [ 0.0, 1.0, 0.0 ],
-      m_normal = [ 0.0, 0.0, 1.0 ],
+  var m_origin = [0.0, 0.0, 0.0],
+      m_point1 = [1.0, 0.0, 0.0],
+      m_point2 = [0.0, 1.0, 0.0],
+      m_normal = [0.0, 0.0, 1.0],
       m_xresolution = 1,
       m_yresolution = 1,
       m_geom = null;
@@ -8631,7 +9431,7 @@ vgl.planeSource = function() {
    * @param z
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setOrigin = function(x, y, z) {
+  this.setOrigin = function (x, y, z) {
     m_origin[0] = x;
     m_origin[1] = y;
     m_origin[2] = z;
@@ -8646,7 +9446,7 @@ vgl.planeSource = function() {
    * @param z
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setPoint1 = function(x, y, z) {
+  this.setPoint1 = function (x, y, z) {
     m_point1[0] = x;
     m_point1[1] = y;
     m_point1[2] = z;
@@ -8661,7 +9461,7 @@ vgl.planeSource = function() {
    * @param z
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setPoint2 = function(x, y, z) {
+  this.setPoint2 = function (x, y, z) {
     m_point2[0] = x;
     m_point2[1] = y;
     m_point2[2] = z;
@@ -8674,7 +9474,7 @@ vgl.planeSource = function() {
    * @returns {null}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.create = function() {
+  this.create = function () {
     m_geom = new vgl.geometryData();
 
     var x = [], tc = [], v1 = [], v2 = [],
@@ -8691,7 +9491,7 @@ vgl.planeSource = function() {
     pts.length = 3;
 
     // Check input
-    for (i = 0; i < 3; i++) {
+    for (i = 0; i < 3; i += 1) {
       v1[i] = m_point1[i] - m_origin[i];
       v2[i] = m_point2[i] - m_origin[i];
     }
@@ -8705,16 +9505,17 @@ vgl.planeSource = function() {
     texCoords.length = 2 * numPts;
     indices.length = numPts;
 
-    for (k = 0, i = 0; i < (m_yresolution + 1); i++) {
+    for (k = 0, i = 0; i < (m_yresolution + 1); i += 1) {
       tc[1] = i / m_yresolution;
 
-      for (j = 0; j < (m_xresolution + 1); j++) {
+      for (j = 0; j < (m_xresolution + 1); j += 1) {
         tc[0] = j / m_xresolution;
 
-        for (ii = 0; ii < 3; ii++) {
+        for (ii = 0; ii < 3; ii += 1) {
           x[ii] = m_origin[ii] + tc[0] * v1[ii] + tc[1] * v2[ii];
         }
 
+        //jshint plusplus: false
         positions[posIndex++] = x[0];
         positions[posIndex++] = x[1];
         positions[posIndex++] = x[2];
@@ -8729,12 +9530,13 @@ vgl.planeSource = function() {
 
         texCoords[texCoordIndex++] = tc[0];
         texCoords[texCoordIndex++] = tc[1];
+        //jshint plusplus: true
       }
     }
 
     /// Generate polygon connectivity
-    for (i = 0; i < m_yresolution; i++) {
-      for (j = 0; j < m_xresolution; j++) {
+    for (i = 0; i < m_yresolution; i += 1) {
+      for (j = 0; j < m_xresolution; j += 1) {
         pts[0] = j + i * (m_xresolution + 1);
         pts[1] = pts[0] + 1;
         pts[2] = pts[0] + m_xresolution + 2;
@@ -8742,7 +9544,7 @@ vgl.planeSource = function() {
       }
     }
 
-    for (i = 0; i < numPts; ++i) {
+    for (i = 0; i < numPts; i += 1) {
       indices[i] = i;
     }
 
@@ -8774,10 +9576,7 @@ inherit(vgl.planeSource, vgl.source);
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global vgl, ogs, vec4, inherit, $*/
+/*global vgl, inherit*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -8788,7 +9587,7 @@ inherit(vgl.planeSource, vgl.source);
  * @returns {vgl.pointSource}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.pointSource = function() {
+vgl.pointSource = function () {
   'use strict';
 
   if (!(this instanceof vgl.pointSource)) {
@@ -8806,11 +9605,9 @@ vgl.pointSource = function() {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Get positions for the points
-   *
-   * @param positions
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.getPositions = function(positions) {
+  this.getPositions = function () {
     return m_positions;
   };
 
@@ -8821,13 +9618,12 @@ vgl.pointSource = function() {
    * @param positions
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setPositions = function(positions) {
+  this.setPositions = function (positions) {
     if (positions instanceof Array) {
       m_positions = positions;
-    }
-    else {
+    } else {
       console
-          .log("[ERROR] Invalid data type for positions. Array is required.");
+          .log('[ERROR] Invalid data type for positions. Array is required.');
     }
     m_this.modified();
   };
@@ -8835,11 +9631,9 @@ vgl.pointSource = function() {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Get colors for the points
-   *
-   * @param positions
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.getColors = function(positions) {
+  this.getColors = function () {
     return m_colors;
   };
 
@@ -8850,12 +9644,11 @@ vgl.pointSource = function() {
    * @param colors
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setColors = function(colors) {
+  this.setColors = function (colors) {
     if (colors instanceof Array) {
       m_colors = colors;
-    }
-    else {
-      console.log("[ERROR] Invalid data type for colors. Array is required.");
+    } else {
+      console.log('[ERROR] Invalid data type for colors. Array is required.');
     }
 
     m_this.modified();
@@ -8863,12 +9656,10 @@ vgl.pointSource = function() {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get colors for the points
-   *
-   * @param positions
+   * Get size for the points
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.getSize = function(positions) {
+  this.getSize = function () {
     return m_size;
   };
 
@@ -8879,7 +9670,7 @@ vgl.pointSource = function() {
    * @param colors
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setSize = function(size) {
+  this.setSize = function (size) {
     m_size = size;
     this.modified();
   };
@@ -8891,13 +9682,12 @@ vgl.pointSource = function() {
    * @param texcoords
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setTextureCoordinates = function(texcoords) {
+  this.setTextureCoordinates = function (texcoords) {
     if (texcoords instanceof Array) {
       m_textureCoords = texcoords;
-    }
-    else {
-      console.log("[ERROR] Invalid data type for "
-                  + "texture coordinates. Array is required.");
+    } else {
+      console.log('[ERROR] Invalid data type for ' +
+                  'texture coordinates. Array is required.');
     }
     m_this.modified();
   };
@@ -8907,11 +9697,11 @@ vgl.pointSource = function() {
    * Create a point geometry given input parameters
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.create = function() {
+  this.create = function () {
     m_geom = new vgl.geometryData();
 
     if (m_positions.length % 3 !== 0) {
-      console.log("[ERROR] Invalid length of the points array");
+      console.log('[ERROR] Invalid length of the points array');
       return;
     }
 
@@ -8925,15 +9715,15 @@ vgl.pointSource = function() {
         sourceSize;
 
     indices.length = numPts;
-    for (i = 0; i < numPts; ++i) {
+    for (i = 0; i < numPts; i += 1) {
       indices[i] = i;
     }
 
     /// Generate array of size if needed
     sourceSize = vgl.sourceDataDf();
     if (numPts !== m_size.length) {
-      for (i = 0; i < numPts; ++i) {
-       sourceSize.pushBack(m_size);
+      for (i = 0; i < numPts; i += 1) {
+        sourceSize.pushBack(m_size);
       }
     } else {
       sourceSize.setData(m_size);
@@ -8951,22 +9741,21 @@ vgl.pointSource = function() {
       sourceColors = vgl.sourceDataC3fv();
       sourceColors.pushBack(m_colors);
       m_geom.addSource(sourceColors);
-    }
-    else if ((m_colors.length > 0) && m_colors.length !== m_positions.length) {
+    } else if ((m_colors.length > 0) && m_colors.length !== m_positions.length) {
       console
-          .log("[ERROR] Number of colors are different than number of points");
+          .log('[ERROR] Number of colors are different than number of points');
     }
 
-    if ((m_textureCoords.length > 0)
-        && m_textureCoords.length === m_positions.length) {
+    if (m_textureCoords.length > 0 &&
+        m_textureCoords.length === m_positions.length) {
       sourceTexCoords = vgl.sourceDataT2fv();
       sourceTexCoords.pushBack(m_textureCoords);
       m_geom.addSource(sourceTexCoords);
-    }
-    else if ((m_textureCoords.length > 0)
-             && (m_textureCoords.length / 2) !== (m_positions.length / 3)) {
+    } else if (m_textureCoords.length > 0 &&
+        (m_textureCoords.length / 2) !== (m_positions.length / 3)) {
       console
-          .log("[ERROR] Number of texture coordinates are different than number of points");
+          .log('[ERROR] Number of texture coordinates are different than ' +
+               'number of points');
     }
 
 
@@ -8983,10 +9772,7 @@ inherit(vgl.pointSource, vgl.source);
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global vgl, ogs, vec4, inherit, $*/
+/*global vgl, inherit*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -8997,7 +9783,7 @@ inherit(vgl.pointSource, vgl.source);
  * @returns {vgl.lineSource}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.lineSource = function(positions, colors) {
+vgl.lineSource = function (positions, colors) {
   'use strict';
 
   if (!(this instanceof vgl.lineSource)) {
@@ -9006,9 +9792,7 @@ vgl.lineSource = function(positions, colors) {
   vgl.source.call(this);
 
   var m_positions = positions,
-      m_colors = colors,
-      m_height = null,
-      m_geom = null;
+      m_colors = colors;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -9017,7 +9801,7 @@ vgl.lineSource = function(positions, colors) {
    * @param positions
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setPositions = function(positions) {
+  this.setPositions = function (positions) {
     if (positions instanceof Array) {
       m_positions = positions;
       this.modified();
@@ -9025,7 +9809,7 @@ vgl.lineSource = function(positions, colors) {
     }
 
     console
-      .log("[ERROR] Invalid data type for positions. Array is required.");
+      .log('[ERROR] Invalid data type for positions. Array is required.');
     return false;
   };
 
@@ -9036,14 +9820,14 @@ vgl.lineSource = function(positions, colors) {
    * @param colors
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setColors = function(colors) {
+  this.setColors = function (colors) {
     if (colors instanceof Array) {
       m_colors = colors;
       this.modified();
       return true;
     }
 
-    console.log("[ERROR] Invalid data type for colors. Array is required.");
+    console.log('[ERROR] Invalid data type for colors. Array is required.');
     return false;
   };
 
@@ -9052,19 +9836,19 @@ vgl.lineSource = function(positions, colors) {
    * Create a point geometry given input parameters
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.create = function() {
+  this.create = function () {
     if (!m_positions) {
-      console.log("[error] Invalid positions");
+      console.log('[error] Invalid positions');
       return;
     }
 
     if (m_positions.length % 3 !== 0) {
-      console.log("[error] Line source requires 3d points");
+      console.log('[error] Line source requires 3d points');
       return;
     }
 
     if (m_positions.length % 3 !== 0) {
-      console.log("[ERROR] Invalid length of the points array");
+      console.log('[ERROR] Invalid length of the points array');
       return;
     }
 
@@ -9078,7 +9862,7 @@ vgl.lineSource = function(positions, colors) {
 
     indices.length = numPts;
 
-    for (i = 0; i < numPts; ++i) {
+    for (i = 0; i < numPts; i += 1) {
       indices[i] = i;
     }
 
@@ -9089,16 +9873,15 @@ vgl.lineSource = function(positions, colors) {
     sourcePositions.pushBack(m_positions);
     m_geom.addSource(sourcePositions);
 
-    if ( m_colors && (m_colors.length > 0) &&
+    if (m_colors && (m_colors.length > 0) &&
          m_colors.length === m_positions.length) {
       sourceColors = vgl.sourceDataC3fv();
       sourceColors.pushBack(m_colors);
       m_geom.addSource(sourceColors);
-    }
-    else if (m_colors && (m_colors.length > 0) &&
+    } else if (m_colors && (m_colors.length > 0) &&
              m_colors.length !== m_positions.length) {
       console
-        .log("[error] Number of colors are different than number of points");
+        .log('[error] Number of colors are different than number of points');
     }
 
     m_geom.addPrimitive(linesPrimitive);
@@ -9114,10 +9897,7 @@ inherit(vgl.lineSource, vgl.source);
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global document, vgl, gl, ogs, vec4, inherit, $*/
+/*global document, vgl, inherit*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -9130,7 +9910,7 @@ inherit(vgl.lineSource, vgl.source);
  * @returns {vgl.utils}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.utils = function() {
+vgl.utils = function () {
   'use strict';
 
   if (!(this instanceof vgl.utils)) {
@@ -9153,7 +9933,7 @@ inherit(vgl.utils, vgl.object);
  * @returns {number}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.utils.computePowerOfTwo = function(value, pow) {
+vgl.utils.computePowerOfTwo = function (value, pow) {
   'use strict';
   pow = pow || 1;
   while (pow < value) {
@@ -9172,8 +9952,9 @@ vgl.utils.computePowerOfTwo = function(value, pow) {
  * @returns {vgl.shader}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.utils.createTextureVertexShader = function(context) {
+vgl.utils.createTextureVertexShader = function (context) {
   'use strict';
+  context = context; /* unused parameter */
   var vertexShaderSource = [
         'attribute vec3 vertexPosition;',
         'attribute vec3 textureCoord;',
@@ -9185,8 +9966,8 @@ vgl.utils.createTextureVertexShader = function(context) {
         '{',
         'gl_PointSize = pointSize;',
         'gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
-        ' iTextureCoord = textureCoord;', '}' ].join('\n'),
-      shader = new vgl.shader(gl.VERTEX_SHADER);
+        ' iTextureCoord = textureCoord;', '}'].join('\n'),
+      shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
   shader.setShaderSource(vertexShaderSource);
   return shader;
 };
@@ -9201,16 +9982,18 @@ vgl.utils.createTextureVertexShader = function(context) {
  * @returns {vgl.shader}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.utils.createTextureFragmentShader = function(context) {
+vgl.utils.createTextureFragmentShader = function (context) {
   'use strict';
+  context = context; /* unused parameter */
   var fragmentShaderSource = [
         'varying highp vec3 iTextureCoord;',
         'uniform sampler2D sampler2d;',
         'uniform mediump float opacity;',
         'void main(void) {',
-        'gl_FragColor = vec4(texture2D(sampler2d, vec2(iTextureCoord.s, iTextureCoord.t)).xyz, opacity);',
-        '}' ].join('\n'),
-      shader = new vgl.shader(gl.FRAGMENT_SHADER);
+        'gl_FragColor = vec4(texture2D(sampler2d, vec2(iTextureCoord.s, ' +
+                        'iTextureCoord.t)).xyz, opacity);',
+        '}'].join('\n'),
+      shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
 
   shader.setShaderSource(fragmentShaderSource);
   return shader;
@@ -9228,17 +10011,19 @@ vgl.utils.createTextureFragmentShader = function(context) {
 //////////////////////////////////////////////////////////////////////////////
 vgl.utils.createRgbaTextureFragmentShader = function (context) {
   'use strict';
+  context = context; /* unused parameter */
   var fragmentShaderSource = [
         'varying highp vec3 iTextureCoord;',
         'uniform sampler2D sampler2d;',
         'uniform mediump float opacity;',
         'void main(void) {',
-        '  mediump vec4 color = vec4(texture2D(sampler2d, vec2(iTextureCoord.s, iTextureCoord.t)).xyzw);',
+        '  mediump vec4 color = vec4(texture2D(sampler2d, vec2(' +
+                                'iTextureCoord.s, iTextureCoord.t)).xyzw);',
         '  color.w *= opacity;',
         '  gl_FragColor = color;',
         '}'
       ].join('\n'),
-      shader = new vgl.shader(gl.FRAGMENT_SHADER);
+      shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
 
   shader.setShaderSource(fragmentShaderSource);
   return shader;
@@ -9254,8 +10039,9 @@ vgl.utils.createRgbaTextureFragmentShader = function (context) {
  * @returns {vgl.shader}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.utils.createVertexShader = function(context) {
+vgl.utils.createVertexShader = function (context) {
   'use strict';
+  context = context; /* unused parameter */
   var vertexShaderSource = [
         'attribute vec3 vertexPosition;',
         'attribute vec3 vertexColor;',
@@ -9268,8 +10054,8 @@ vgl.utils.createVertexShader = function(context) {
         '{',
         'gl_PointSize = pointSize;',
         'gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
-        ' iVertexColor = vertexColor;', '}' ].join('\n'),
-      shader = new vgl.shader(gl.VERTEX_SHADER);
+        ' iVertexColor = vertexColor;', '}'].join('\n'),
+      shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
 
   shader.setShaderSource(vertexShaderSource);
   return shader;
@@ -9285,8 +10071,9 @@ vgl.utils.createVertexShader = function(context) {
  * @returns {vgl.shader}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.utils.createPointVertexShader = function(context) {
+vgl.utils.createPointVertexShader = function (context) {
   'use strict';
+  context = context; /* unused parameter */
   var vertexShaderSource = [
         'attribute vec3 vertexPosition;',
         'attribute vec3 vertexColor;',
@@ -9299,8 +10086,8 @@ vgl.utils.createPointVertexShader = function(context) {
         '{',
         'gl_PointSize =  vertexSize;',
         'gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
-        ' iVertexColor = vertexColor;', '}' ].join('\n'),
-      shader = new vgl.shader(gl.VERTEX_SHADER);
+        ' iVertexColor = vertexColor;', '}'].join('\n'),
+      shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
 
   shader.setShaderSource(vertexShaderSource);
   return shader;
@@ -9316,8 +10103,9 @@ vgl.utils.createPointVertexShader = function(context) {
  * @returns {vgl.shader}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.utils.createVertexShaderSolidColor = function(context) {
+vgl.utils.createVertexShaderSolidColor = function (context) {
   'use strict';
+  context = context; /* unused parameter */
   var vertexShaderSource = [
         'attribute vec3 vertexPosition;',
         'uniform mediump float pointSize;',
@@ -9327,8 +10115,8 @@ vgl.utils.createVertexShaderSolidColor = function(context) {
         '{',
         'gl_PointSize = pointSize;',
         'gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
-        '}' ].join('\n'),
-    shader = new vgl.shader(gl.VERTEX_SHADER);
+        '}'].join('\n'),
+    shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
 
   shader.setShaderSource(vertexShaderSource);
   return shader;
@@ -9345,8 +10133,11 @@ vgl.utils.createVertexShaderSolidColor = function(context) {
  * @returns {vgl.shader}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.utils.createVertexShaderColorMap = function(context, min, max) {
+vgl.utils.createVertexShaderColorMap = function (context, min, max) {
   'use strict';
+  context = context; /* unused parameter */
+  min = min; /* unused parameter */
+  max = max; /* unused parameter */
   var vertexShaderSource = [
         'attribute vec3 vertexPosition;',
         'attribute float vertexScalar;',
@@ -9361,8 +10152,8 @@ vgl.utils.createVertexShaderColorMap = function(context, min, max) {
         'gl_PointSize = pointSize;',
         'gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
         'iVertexScalar = (vertexScalar-lutMin)/(lutMax-lutMin);',
-        '}' ].join('\n'),
-      shader = new vgl.shader(gl.VERTEX_SHADER);
+        '}'].join('\n'),
+      shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
 
   shader.setShaderSource(vertexShaderSource);
   return shader;
@@ -9378,14 +10169,15 @@ vgl.utils.createVertexShaderColorMap = function(context, min, max) {
  * @returns {vgl.shader}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.utils.createFragmentShader = function(context) {
+vgl.utils.createFragmentShader = function (context) {
   'use strict';
-  var fragmentShaderSource = [ 'varying mediump vec3 iVertexColor;',
+  context = context; /* unused parameter */
+  var fragmentShaderSource = ['varying mediump vec3 iVertexColor;',
                               'uniform mediump float opacity;',
                               'void main(void) {',
                               'gl_FragColor = vec4(iVertexColor, opacity);',
-                              '}' ].join('\n'),
-      shader = new vgl.shader(gl.FRAGMENT_SHADER);
+                              '}'].join('\n'),
+      shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
 
   shader.setShaderSource(fragmentShaderSource);
   return shader;
@@ -9401,8 +10193,9 @@ vgl.utils.createFragmentShader = function(context) {
  * @returns {vgl.shader}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.utils.createPhongVertexShader = function(context) {
+vgl.utils.createPhongVertexShader = function (context) {
   'use strict';
+  context = context; /* unused parameter */
 
   var vertexShaderSource = [
       'attribute highp vec3 vertexPosition;',
@@ -9415,17 +10208,17 @@ vgl.utils.createPhongVertexShader = function(context) {
 
       'varying highp vec4 varPosition;',
       'varying mediump vec3 varNormal;',
-      'varying mediump vec3 iVertexColor;',
+      'varying mediump vec3 varVertexColor;',
 
       'void main(void)',
       '{',
       'varPosition = modelViewMatrix * vec4(vertexPosition, 1.0);',
       'gl_Position = projectionMatrix * varPosition;',
       'varNormal = vec3(normalMatrix * vec4(vertexNormal, 0.0));',
-      'iVertexColor = vertexColor;',
-      '}' ].join('\n'),
+      'varVertexColor = vertexColor;',
+      '}'].join('\n'),
 
-      shader = new vgl.shader(gl.VERTEX_SHADER);
+      shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
 
   shader.setShaderSource(vertexShaderSource);
 
@@ -9444,16 +10237,18 @@ vgl.utils.createPhongVertexShader = function(context) {
  * @returns {vgl.shader}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.utils.createPhongFragmentShader = function(context) {
+vgl.utils.createPhongFragmentShader = function (context) {
   'use strict';
+  context = context; /* unused parameter */
   var fragmentShaderSource = [
+    'uniform mediump float opacity;',
     'precision mediump float;',
     'varying vec3 varNormal;',
     'varying vec4 varPosition;',
-    'varying mediump vec3 iVertexColor;',
+    'varying mediump vec3 varVertexColor;',
     'const vec3 lightPos = vec3(0.0, 0.0,10000.0);',
     'const vec3 ambientColor = vec3(0.01, 0.01, 0.01);',
-    'const vec3 specColor = vec3(1.0, 1.0, 1.0);',
+    'const vec3 specColor = vec3(0.0, 0.0, 0.0);',
 
     'void main() {',
     'vec3 normal = normalize(varNormal);',
@@ -9461,18 +10256,14 @@ vgl.utils.createPhongFragmentShader = function(context) {
     'vec3 reflectDir = -reflect(lightDir, normal);',
     'vec3 viewDir = normalize(-varPosition.xyz);',
 
-    'float lambertian = max(dot(lightDir,normal), 0.0);',
-    'float specular = 0.0;',
-
+    'float lambertian = max(dot(lightDir, normal), 0.0);',
+    'vec3 color = vec3(0.0);',
     'if(lambertian > 0.0) {',
-    'float specAngle = max(dot(reflectDir, viewDir), 0.0);',
-    'specular = pow(specAngle, 64.0);',
+    '  color = lambertian * varVertexColor;',
     '}',
-    'gl_FragColor = vec4(ambientColor +',
-    'lambertian*iVertexColor +',
-    'specular*specColor, 1.0);',
-    '}' ].join('\n'),
-    shader = new vgl.shader(gl.FRAGMENT_SHADER);
+    'gl_FragColor = vec4(color * opacity, 1.0 - opacity);',
+    '}'].join('\n'),
+    shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
 
   shader.setShaderSource(fragmentShaderSource);
   return shader;
@@ -9489,13 +10280,14 @@ vgl.utils.createPhongFragmentShader = function(context) {
  * @returns {vgl.shader}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.utils.createFragmentShaderSolidColor = function(context, color) {
+vgl.utils.createFragmentShaderSolidColor = function (context, color) {
   'use strict';
-  var fragmentShaderSource = ['uniform mediump float opacity;',
-                              'void main(void) {',
-                              'gl_FragColor = vec4(' + color[0] + ',' + color[1] + ',' + color[2] + ', opacity);',
-                              '}' ].join('\n'),
-      shader = new vgl.shader(gl.FRAGMENT_SHADER);
+  var fragmentShaderSource = [
+      'uniform mediump float opacity;',
+      'void main(void) {',
+      'gl_FragColor = vec4(' + color[0] + ',' + color[1] + ',' + color[2] + ', opacity);',
+      '}'].join('\n'),
+    shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
 
   shader.setShaderSource(fragmentShaderSource);
   return shader;
@@ -9511,16 +10303,18 @@ vgl.utils.createFragmentShaderSolidColor = function(context, color) {
  * @returns {vgl.shader}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.utils.createFragmentShaderColorMap = function(context) {
+vgl.utils.createFragmentShaderColorMap = function (context) {
   'use strict';
+  context = context; /* unused parameter */
   var fragmentShaderSource = [
         'varying mediump float iVertexScalar;',
         'uniform sampler2D sampler2d;',
         'uniform mediump float opacity;',
         'void main(void) {',
-        'gl_FragColor = vec4(texture2D(sampler2d, vec2(iVertexScalar, 0.0)).xyz, opacity);',
-        '}' ].join('\n'),
-      shader = new vgl.shader(gl.FRAGMENT_SHADER);
+        'gl_FragColor = vec4(texture2D(sampler2d, vec2(iVertexScalar, ' +
+            '0.0)).xyz, opacity);',
+        '}'].join('\n'),
+      shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
 
   shader.setShaderSource(fragmentShaderSource);
   return shader;
@@ -9536,8 +10330,9 @@ vgl.utils.createFragmentShaderColorMap = function(context) {
  * @returns {vgl.shader}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.utils.createPointSpritesVertexShader = function(context) {
+vgl.utils.createPointSpritesVertexShader = function (context) {
   'use strict';
+  context = context; /* unused parameter */
   var vertexShaderSource = [
         'attribute vec3 vertexPosition;',
         'attribute vec3 vertexColor;',
@@ -9554,9 +10349,10 @@ vgl.utils.createPointSpritesVertexShader = function(context) {
         '  realPointSize = pointSize.x;}',
         'gl_PointSize = realPointSize ;',
         'iVertexScalar = vertexPosition.z;',
-        'gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition.xy, height, 1.0);',
-        ' iVertexColor = vertexColor;', '}' ].join('\n'),
-      shader = new vgl.shader(gl.VERTEX_SHADER);
+        'gl_Position = projectionMatrix * modelViewMatrix * ' +
+            'vec4(vertexPosition.xy, height, 1.0);',
+        ' iVertexColor = vertexColor;', '}'].join('\n'),
+      shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
   shader.setShaderSource(vertexShaderSource);
   return shader;
 };
@@ -9571,8 +10367,9 @@ vgl.utils.createPointSpritesVertexShader = function(context) {
  * @returns {vgl.shader}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.utils.createPointSpritesFragmentShader = function(context) {
+vgl.utils.createPointSpritesFragmentShader = function (context) {
   'use strict';
+  context = context; /* unused parameter */
   var fragmentShaderSource = [
         'varying mediump vec3 iVertexColor;',
         'varying highp float iVertexScalar;',
@@ -9593,14 +10390,16 @@ vgl.utils.createPointSpritesFragmentShader = function(context) {
         '}',
         'highp float texOpacity = texture2D(opacityLookup, realTexCoord).w;',
         'if (useScalarsToColors == 1) {',
-        '  gl_FragColor = vec4(texture2D(scalarsToColors, vec2((iVertexScalar - lutMin)/(lutMax - lutMin), 0.0)).xyz, texOpacity);',
+        '  gl_FragColor = vec4(texture2D(scalarsToColors, vec2((' +
+            'iVertexScalar - lutMin)/(lutMax - lutMin), 0.0)).xyz, ' +
+            'texOpacity);',
         '} else if (useVertexColors == 1) {',
         '  gl_FragColor = vec4(iVertexColor, texOpacity);',
         '} else {',
         '  gl_FragColor = vec4(texture2D(opacityLookup, realTexCoord).xyz, texOpacity);',
         '}}'
     ].join('\n'),
-    shader = new vgl.shader(gl.FRAGMENT_SHADER);
+    shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
 
   shader.setShaderSource(fragmentShaderSource);
   return shader;
@@ -9615,20 +10414,26 @@ vgl.utils.createPointSpritesFragmentShader = function(context) {
  * @returns {vgl.material}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.utils.createTextureMaterial = function(isRgba) {
+vgl.utils.createTextureMaterial = function (isRgba, origin) {
   'use strict';
   var mat = new vgl.material(),
     blend = new vgl.blend(),
     prog = new vgl.shaderProgram(),
-    vertexShader = vgl.utils.createTextureVertexShader(gl),
+    vertexShader = vgl.utils.createTextureVertexShader(vgl.GL),
     fragmentShader = null,
-    posVertAttr = new vgl.vertexAttribute("vertexPosition"),
-    texCoordVertAttr = new vgl.vertexAttribute("textureCoord"),
-    pointsizeUniform = new vgl.floatUniform("pointSize", 5.0),
-    modelViewUniform = new vgl.modelViewUniform("modelViewMatrix"),
-    projectionUniform = new vgl.projectionUniform("projectionMatrix"),
-    samplerUniform = new vgl.uniform(gl.INT, "sampler2d"),
+    posVertAttr = new vgl.vertexAttribute('vertexPosition'),
+    texCoordVertAttr = new vgl.vertexAttribute('textureCoord'),
+    pointsizeUniform = new vgl.floatUniform('pointSize', 5.0),
+    modelViewUniform,
+    projectionUniform = new vgl.projectionUniform('projectionMatrix'),
+    samplerUniform = new vgl.uniform(vgl.GL.INT, 'sampler2d'),
     opacityUniform = null;
+  if (origin !== undefined) {
+    modelViewUniform = new vgl.modelViewOriginUniform('modelViewMatrix',
+                                                      origin);
+  } else {
+    modelViewUniform = new vgl.modelViewUniform('modelViewMatrix');
+  }
 
   samplerUniform.set(0);
 
@@ -9640,9 +10445,9 @@ vgl.utils.createTextureMaterial = function(isRgba) {
   prog.addUniform(projectionUniform);
 
   if (isRgba) {
-    fragmentShader = vgl.utils.createRgbaTextureFragmentShader(gl);
+    fragmentShader = vgl.utils.createRgbaTextureFragmentShader(vgl.GL);
   } else {
-    fragmentShader = vgl.utils.createTextureFragmentShader(gl);
+    fragmentShader = vgl.utils.createTextureFragmentShader(vgl.GL);
   }
   opacityUniform = new vgl.floatUniform('opacity', 1.0);
   prog.addUniform(opacityUniform);
@@ -9664,21 +10469,20 @@ vgl.utils.createTextureMaterial = function(isRgba) {
  * @returns {vgl.material}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.utils.createGeometryMaterial = function() {
+vgl.utils.createGeometryMaterial = function () {
   'use strict';
-   var mat = new vgl.material(),
-       blend = new vgl.blend(),
-       prog = new vgl.shaderProgram(),
-       pointSize = 5.0,
-       opacity = 0.5,
-       vertexShader = vgl.utils.createVertexShader(gl),
-       fragmentShader = vgl.utils.createFragmentShader(gl),
-       posVertAttr = new vgl.vertexAttribute("vertexPosition"),
-       colorVertAttr = new vgl.vertexAttribute("vertexColor"),
-       pointsizeUniform = new vgl.floatUniform("pointSize", pointSize),
-       opacityUniform = new vgl.floatUniform("opacity", opacity),
-       modelViewUniform = new vgl.modelViewUniform("modelViewMatrix"),
-       projectionUniform = new vgl.projectionUniform("projectionMatrix");
+  var mat = new vgl.material(),
+      prog = new vgl.shaderProgram(),
+      pointSize = 5.0,
+      opacity = 1.0,
+      vertexShader = vgl.utils.createVertexShader(vgl.GL),
+      fragmentShader = vgl.utils.createFragmentShader(vgl.GL),
+      posVertAttr = new vgl.vertexAttribute('vertexPosition'),
+      colorVertAttr = new vgl.vertexAttribute('vertexColor'),
+      pointsizeUniform = new vgl.floatUniform('pointSize', pointSize),
+      opacityUniform = new vgl.floatUniform('opacity', opacity),
+      modelViewUniform = new vgl.modelViewUniform('modelViewMatrix'),
+      projectionUniform = new vgl.projectionUniform('projectionMatrix');
 
   prog.addVertexAttribute(posVertAttr, vgl.vertexAttributeKeys.Position);
   prog.addVertexAttribute(colorVertAttr, vgl.vertexAttributeKeys.Color);
@@ -9689,7 +10493,6 @@ vgl.utils.createGeometryMaterial = function() {
   prog.addShader(fragmentShader);
   prog.addShader(vertexShader);
   mat.addAttribute(prog);
-  mat.addAttribute(blend);
 
   return mat;
 };
@@ -9703,20 +10506,20 @@ vgl.utils.createGeometryMaterial = function() {
  * @returns {vgl.material}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.utils.createPointGeometryMaterial = function(opacity) {
+vgl.utils.createPointGeometryMaterial = function (opacity) {
   'use strict';
-   var mat = new vgl.material(),
-       blend = new vgl.blend(),
-       prog = new vgl.shaderProgram(),
-       opacity = opacity === undefined ? 1.0 : opacity,
-       vertexShader = vgl.utils.createPointVertexShader(gl),
-       fragmentShader = vgl.utils.createFragmentShader(gl),
-       posVertAttr = new vgl.vertexAttribute("vertexPosition"),
-       colorVertAttr = new vgl.vertexAttribute("vertexColor"),
-       sizeVertAttr = new vgl.vertexAttribute("vertexSize"),
-       opacityUniform = new vgl.floatUniform("opacity", opacity),
-       modelViewUniform = new vgl.modelViewUniform("modelViewMatrix"),
-       projectionUniform = new vgl.projectionUniform("projectionMatrix");
+  opacity = opacity === undefined ? 1.0 : opacity;
+  var mat = new vgl.material(),
+      blend = new vgl.blend(),
+      prog = new vgl.shaderProgram(),
+      vertexShader = vgl.utils.createPointVertexShader(vgl.GL),
+      fragmentShader = vgl.utils.createFragmentShader(vgl.GL),
+      posVertAttr = new vgl.vertexAttribute('vertexPosition'),
+      colorVertAttr = new vgl.vertexAttribute('vertexColor'),
+      sizeVertAttr = new vgl.vertexAttribute('vertexSize'),
+      opacityUniform = new vgl.floatUniform('opacity', opacity),
+      modelViewUniform = new vgl.modelViewUniform('modelViewMatrix'),
+      projectionUniform = new vgl.projectionUniform('projectionMatrix');
 
   prog.addVertexAttribute(posVertAttr, vgl.vertexAttributeKeys.Position);
   prog.addVertexAttribute(colorVertAttr, vgl.vertexAttributeKeys.Color);
@@ -9742,20 +10545,19 @@ vgl.utils.createPointGeometryMaterial = function(opacity) {
  * @returns {vgl.material}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.utils.createPhongMaterial = function() {
+vgl.utils.createPhongMaterial = function () {
   'use strict';
-   var mat = new vgl.material(),
-       blend = new vgl.blend(),
-       prog = new vgl.shaderProgram(),
-       vertexShader = vgl.utils.createPhongVertexShader(gl),
-       fragmentShader = vgl.utils.createPhongFragmentShader(gl),
-       posVertAttr = new vgl.vertexAttribute("vertexPosition"),
-       normalVertAttr = new vgl.vertexAttribute("vertexNormal"),
-       colorVertAttr = new vgl.vertexAttribute("vertexColor"),
-       opacityUniform = new vgl.floatUniform("opacity", 1.0),
-       modelViewUniform = new vgl.modelViewUniform("modelViewMatrix"),
-       normalUniform = new vgl.normalMatrixUniform("normalMatrix"),
-       projectionUniform = new vgl.projectionUniform("projectionMatrix");
+  var mat = new vgl.material(),
+      prog = new vgl.shaderProgram(),
+      vertexShader = vgl.utils.createPhongVertexShader(vgl.GL),
+      fragmentShader = vgl.utils.createPhongFragmentShader(vgl.GL),
+      posVertAttr = new vgl.vertexAttribute('vertexPosition'),
+      normalVertAttr = new vgl.vertexAttribute('vertexNormal'),
+      colorVertAttr = new vgl.vertexAttribute('vertexColor'),
+      opacityUniform = new vgl.floatUniform('opacity', 1.0),
+      modelViewUniform = new vgl.modelViewUniform('modelViewMatrix'),
+      normalUniform = new vgl.normalMatrixUniform('normalMatrix'),
+      projectionUniform = new vgl.projectionUniform('projectionMatrix');
 
   prog.addVertexAttribute(posVertAttr, vgl.vertexAttributeKeys.Position);
   prog.addVertexAttribute(normalVertAttr, vgl.vertexAttributeKeys.Normal);
@@ -9766,8 +10568,8 @@ vgl.utils.createPhongMaterial = function() {
   prog.addUniform(normalUniform);
   prog.addShader(fragmentShader);
   prog.addShader(vertexShader);
+  //mat.addAttribute(blend);
   mat.addAttribute(prog);
-  mat.addAttribute(blend);
 
   return mat;
 };
@@ -9781,20 +10583,20 @@ vgl.utils.createPhongMaterial = function() {
  * @returns {vgl.material}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.utils.createColorMaterial = function() {
+vgl.utils.createColorMaterial = function () {
   'use strict';
   var mat = new vgl.material(),
       blend = new vgl.blend(),
       prog = new vgl.shaderProgram(),
-      vertexShader = vgl.utils.createVertexShader(gl),
-      fragmentShader = vgl.utils.createFragmentShader(gl),
-      posVertAttr = new vgl.vertexAttribute("vertexPosition"),
-      texCoordVertAttr = new vgl.vertexAttribute("textureCoord"),
-      colorVertAttr = new vgl.vertexAttribute("vertexColor"),
-      pointsizeUniform = new vgl.floatUniform("pointSize", 5.0),
-      opacityUniform = new vgl.floatUniform("opacity", 0.5),
-      modelViewUniform = new vgl.modelViewUniform("modelViewMatrix"),
-      projectionUniform = new vgl.projectionUniform("projectionMatrix");
+      vertexShader = vgl.utils.createVertexShader(vgl.GL),
+      fragmentShader = vgl.utils.createFragmentShader(vgl.GL),
+      posVertAttr = new vgl.vertexAttribute('vertexPosition'),
+      texCoordVertAttr = new vgl.vertexAttribute('textureCoord'),
+      colorVertAttr = new vgl.vertexAttribute('vertexColor'),
+      pointsizeUniform = new vgl.floatUniform('pointSize', 5.0),
+      opacityUniform = new vgl.floatUniform('opacity', 1.0),
+      modelViewUniform = new vgl.modelViewUniform('modelViewMatrix'),
+      projectionUniform = new vgl.projectionUniform('projectionMatrix');
 
   prog.addVertexAttribute(posVertAttr, vgl.vertexAttributeKeys.Position);
   prog.addVertexAttribute(colorVertAttr, vgl.vertexAttributeKeys.Color);
@@ -9821,7 +10623,7 @@ vgl.utils.createColorMaterial = function() {
  * @returns {vgl.material}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.utils.createColorMappedMaterial = function(lut) {
+vgl.utils.createColorMappedMaterial = function (lut) {
   'use strict';
   if (!lut) {
     lut = new vgl.lookupTable();
@@ -9832,17 +10634,17 @@ vgl.utils.createColorMappedMaterial = function(lut) {
       blend = new vgl.blend(),
       prog = new vgl.shaderProgram(),
       vertexShader = vgl.utils.createVertexShaderColorMap(
-        gl,scalarRange[0],scalarRange[1]),
-      fragmentShader = vgl.utils.createFragmentShaderColorMap(gl),
-      posVertAttr = new vgl.vertexAttribute("vertexPosition"),
-      scalarVertAttr = new vgl.vertexAttribute("vertexScalar"),
-      pointsizeUniform = new vgl.floatUniform("pointSize", 5.0),
-      opacityUniform = new vgl.floatUniform("opacity", 0.5),
-      lutMinUniform = new vgl.floatUniform("lutMin", scalarRange[0]),
-      lutMaxUniform = new vgl.floatUniform("lutMax", scalarRange[1]),
-      modelViewUniform = new vgl.modelViewUniform("modelViewMatrix"),
-      projectionUniform = new vgl.projectionUniform("projectionMatrix"),
-      samplerUniform = new vgl.uniform(gl.FLOAT, "sampler2d"),
+        vgl.GL, scalarRange[0], scalarRange[1]),
+      fragmentShader = vgl.utils.createFragmentShaderColorMap(vgl.GL),
+      posVertAttr = new vgl.vertexAttribute('vertexPosition'),
+      scalarVertAttr = new vgl.vertexAttribute('vertexScalar'),
+      pointsizeUniform = new vgl.floatUniform('pointSize', 5.0),
+      opacityUniform = new vgl.floatUniform('opacity', 1.0),
+      lutMinUniform = new vgl.floatUniform('lutMin', scalarRange[0]),
+      lutMaxUniform = new vgl.floatUniform('lutMax', scalarRange[1]),
+      modelViewUniform = new vgl.modelViewUniform('modelViewMatrix'),
+      projectionUniform = new vgl.projectionUniform('projectionMatrix'),
+      samplerUniform = new vgl.uniform(vgl.GL.FLOAT, 'sampler2d'),
       lookupTable = lut;
 
   samplerUniform.set(0);
@@ -9873,7 +10675,7 @@ vgl.utils.createColorMappedMaterial = function(lut) {
  * @param lut
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.utils.updateColorMappedMaterial = function(mat, lut) {
+vgl.utils.updateColorMappedMaterial = function (mat, lut) {
   'use strict';
   if (!mat) {
     console.log('[warning] Invalid material. Nothing to update.');
@@ -9905,22 +10707,22 @@ vgl.utils.updateColorMappedMaterial = function(mat, lut) {
  * @returns {vgl.material}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.utils.createSolidColorMaterial = function(color) {
+vgl.utils.createSolidColorMaterial = function (color) {
   'use strict';
   if (!color) {
-    color = [1.0,1.0,1.0];
+    color = [1.0, 1.0, 1.0];
   }
 
   var mat = new vgl.material(),
       blend = new vgl.blend(),
       prog = new vgl.shaderProgram(),
-      vertexShader = vgl.utils.createVertexShaderSolidColor(gl),
-      fragmentShader = vgl.utils.createFragmentShaderSolidColor(gl, color),
-      posVertAttr = new vgl.vertexAttribute("vertexPosition"),
-      pointsizeUniform = new vgl.floatUniform("pointSize", 5.0),
-      opacityUniform = new vgl.floatUniform("opacity", 1.0),
-      modelViewUniform = new vgl.modelViewUniform("modelViewMatrix"),
-      projectionUniform = new vgl.projectionUniform("projectionMatrix");
+      vertexShader = vgl.utils.createVertexShaderSolidColor(vgl.GL),
+      fragmentShader = vgl.utils.createFragmentShaderSolidColor(vgl.GL, color),
+      posVertAttr = new vgl.vertexAttribute('vertexPosition'),
+      pointsizeUniform = new vgl.floatUniform('pointSize', 5.0),
+      opacityUniform = new vgl.floatUniform('opacity', 1.0),
+      modelViewUniform = new vgl.modelViewUniform('modelViewMatrix'),
+      projectionUniform = new vgl.projectionUniform('projectionMatrix');
 
   prog.addVertexAttribute(posVertAttr, vgl.vertexAttributeKeys.Position);
   prog.addUniform(pointsizeUniform);
@@ -9944,28 +10746,28 @@ vgl.utils.createSolidColorMaterial = function(color) {
  * @returns {vgl.material}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.utils.createPointSpritesMaterial = function(image, lut) {
+vgl.utils.createPointSpritesMaterial = function (image, lut) {
   'use strict';
   var scalarRange = lut === undefined ? [0, 1] : lut.range(),
       mat = new vgl.material(),
       blend = new vgl.blend(),
       prog = new vgl.shaderProgram(),
-      vertexShader = vgl.utils.createPointSpritesVertexShader(gl),
-      fragmentShader = vgl.utils.createPointSpritesFragmentShader(gl),
-      posVertAttr = new vgl.vertexAttribute("vertexPosition"),
-      colorVertAttr = new vgl.vertexAttribute("vertexColor"),
-      heightUniform = new vgl.floatUniform("height", 0.0),
+      vertexShader = vgl.utils.createPointSpritesVertexShader(vgl.GL),
+      fragmentShader = vgl.utils.createPointSpritesFragmentShader(vgl.GL),
+      posVertAttr = new vgl.vertexAttribute('vertexPosition'),
+      colorVertAttr = new vgl.vertexAttribute('vertexColor'),
+      heightUniform = new vgl.floatUniform('height', 0.0),
       vertexColorWeightUniform =
-        new vgl.floatUniform("vertexColorWeight", 0.0),
-      lutMinUniform = new vgl.floatUniform("lutMin", scalarRange[0]),
-      lutMaxUniform = new vgl.floatUniform("lutMax", scalarRange[1]),
-      modelViewUniform = new vgl.modelViewUniform("modelViewMatrix"),
-      projectionUniform = new vgl.projectionUniform("projectionMatrix"),
-      samplerUniform = new vgl.uniform(gl.INT, "opacityLookup"),
-      scalarsToColors = new vgl.uniform(gl.INT, "scalarsToColors"),
-      useScalarsToColors = new vgl.uniform(gl.INT, "useScalarsToColors"),
-      useVertexColors = new vgl.uniform(gl.INT, "useVertexColors"),
-      pointSize = new vgl.uniform(gl.FLOAT_VEC2, "pointSize"),
+        new vgl.floatUniform('vertexColorWeight', 0.0),
+      lutMinUniform = new vgl.floatUniform('lutMin', scalarRange[0]),
+      lutMaxUniform = new vgl.floatUniform('lutMax', scalarRange[1]),
+      modelViewUniform = new vgl.modelViewUniform('modelViewMatrix'),
+      projectionUniform = new vgl.projectionUniform('projectionMatrix'),
+      samplerUniform = new vgl.uniform(vgl.GL.INT, 'opacityLookup'),
+      scalarsToColors = new vgl.uniform(vgl.GL.INT, 'scalarsToColors'),
+      useScalarsToColors = new vgl.uniform(vgl.GL.INT, 'useScalarsToColors'),
+      useVertexColors = new vgl.uniform(vgl.GL.INT, 'useVertexColors'),
+      pointSize = new vgl.uniform(vgl.GL.FLOAT_VEC2, 'pointSize'),
       texture = new vgl.texture();
 
   samplerUniform.set(0);
@@ -10014,9 +10816,9 @@ vgl.utils.createPointSpritesMaterial = function(image, lut) {
  * @returns {vgl.actor}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.utils.createPlane = function(originX, originY, originZ,
-                                       point1X, point1Y, point1Z,
-                                       point2X, point2Y, point2Z) {
+vgl.utils.createPlane = function (originX, originY, originZ,
+                                 point1X, point1Y, point1Z,
+                                 point2X, point2Y, point2Z) {
   'use strict';
   var mapper = new vgl.mapper(),
       planeSource = new vgl.planeSource(),
@@ -10045,19 +10847,19 @@ vgl.utils.createPlane = function(originX, originY, originZ,
  * @returns {vgl.actor}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.utils.createTexturePlane = function(originX, originY, originZ,
-                                              point1X, point1Y, point1Z,
-                                              point2X, point2Y, point2Z,
-                                              isRgba) {
+vgl.utils.createTexturePlane = function (originX, originY, originZ,
+                                        point1X, point1Y, point1Z,
+                                        point2X, point2Y, point2Z,
+                                        isRgba) {
   'use strict';
   var mapper = new vgl.mapper(),
       planeSource = new vgl.planeSource(),
-      mat = vgl.utils.createTextureMaterial(isRgba),
+      mat = vgl.utils.createTextureMaterial(isRgba,
+                                            [originX, originY, originZ]),
       actor = new vgl.actor();
 
-  planeSource.setOrigin(originX, originY, originZ);
-  planeSource.setPoint1(point1X, point1Y, point1Z);
-  planeSource.setPoint2(point2X, point2Y, point2Z);
+  planeSource.setPoint1(point1X - originX, point1Y - originY, point1Z - originZ);
+  planeSource.setPoint2(point2X - originX, point2Y - originY, point2Z - originZ);
   mapper.setGeometryData(planeSource.create());
 
   actor.setMapper(mapper);
@@ -10076,15 +10878,15 @@ vgl.utils.createTexturePlane = function(originX, originY, originZ,
  * @returns {vgl.actor}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.utils.createPoints = function(positions, size, colors, texcoords, opacity) {
+vgl.utils.createPoints = function (positions, size, colors, texcoords, opacity) {
   'use strict';
   if (!positions) {
-    console.log("[ERROR] Cannot create points without positions");
+    console.log('[ERROR] Cannot create points without positions');
     return null;
   }
 
-  var opacity = opacity === undefined ? 1.0 : opacity,
-      mapper = new vgl.mapper(),
+  opacity = opacity === undefined ? 1.0 : opacity;
+  var mapper = new vgl.mapper(),
       pointSource = new vgl.pointSource(),
       mat = vgl.utils.createPointGeometryMaterial(opacity),
       actor = new vgl.actor();
@@ -10099,7 +10901,7 @@ vgl.utils.createPoints = function(positions, size, colors, texcoords, opacity) {
   }
 
   if (size) {
-    pointSource.setSize(size)
+    pointSource.setSize(size);
   } else {
     pointSource.setSize(1.0);
   }
@@ -10122,16 +10924,16 @@ vgl.utils.createPoints = function(positions, size, colors, texcoords, opacity) {
  * @returns {vgl.actor}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.utils.createPointSprites = function(image, positions, colors,
+vgl.utils.createPointSprites = function (image, positions, colors,
                                               texcoords) {
   'use strict';
   if (!image) {
-    console.log("[ERROR] Point sprites requires an image");
+    console.log('[ERROR] Point sprites requires an image');
     return null;
   }
 
   if (!positions) {
-    console.log("[ERROR] Cannot create points without positions");
+    console.log('[ERROR] Cannot create points without positions');
     return null;
   }
 
@@ -10164,10 +10966,10 @@ vgl.utils.createPointSprites = function(image, positions, colors,
  * @param colors
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.utils.createLines = function(positions, colors) {
+vgl.utils.createLines = function (positions, colors) {
   'use strict';
   if (!positions) {
-    console.log("[ERROR] Cannot create points without positions");
+    console.log('[ERROR] Cannot create points without positions');
     return null;
   }
 
@@ -10200,7 +11002,7 @@ vgl.utils.createLines = function(positions, colors) {
  * @returns {Array}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.utils.createColorLegend = function(varname, lookupTable, origin,
+vgl.utils.createColorLegend = function (varname, lookupTable, origin,
                                              width, height, countMajor,
                                              countMinor) {
   'use strict';
@@ -10250,7 +11052,7 @@ vgl.utils.createColorLegend = function(varname, lookupTable, origin,
     pt2.length = 3;
 
     // For now just create labels for end points
-    for (i = 0; i < 2; ++i) {
+    for (i = 0; i < 2; i += 1) {
       index = i * (positions.length - 3);
 
       origin[0] = positions[index] - delta;
@@ -10331,14 +11133,14 @@ vgl.utils.createColorLegend = function(varname, lookupTable, origin,
                         pt2X, pt2Y, pt2Z,
                         countMajor, countMinor,
                         heightMajor, heightMinor) {
+    heightMinor = heightMinor; /* unused parameter */
     var width = pt2X - pt1X,
         index = null,
         delta = width / countMajor,
         positions = [],
-        actor = null,
         actors = [];
 
-    for (index = 0; index <= countMajor; ++index) {
+    for (index = 0; index <= countMajor; index += 1) {
       positions.push(pt1X + delta * index);
       positions.push(pt1Y);
       positions.push(pt1Z);
@@ -10367,7 +11169,6 @@ vgl.utils.createColorLegend = function(varname, lookupTable, origin,
       pt2Z = 0.0,
       actors = [],
       actor = null,
-      mapper = null,
       mat = null,
       group = vgl.groupNode();
 
@@ -10407,7 +11208,7 @@ vgl.utils.createColorLegend = function(varname, lookupTable, origin,
  * @returns {vgl.texture}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.utils.create2DTexture = function(textToWrite, textSize,
+vgl.utils.create2DTexture = function (textToWrite, textSize,
   color, font, alignment, baseline, bold) {
   'use strict';
 
@@ -10438,7 +11239,8 @@ vgl.utils.create2DTexture = function(textToWrite, textSize,
   ctx.fillStyle = 'rgba(0, 0, 0, 0)';
   ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-  // This determines the text colour, it can take a hex value or rgba value (e.g. rgba(255,0,0,0.5))
+  // This determines the text colour, it can take a hex value or rgba value
+  // (e.g. rgba(255,0,0,0.5))
   ctx.fillStyle = 'rgba(200, 85, 10, 1.0)';
 
   // This determines the alignment of text, e.g. left, center, right
@@ -10448,12 +11250,12 @@ vgl.utils.create2DTexture = function(textToWrite, textSize,
   ctx.textBaseline = baseline;
 
   // This determines the size of the text and the font family used
-  ctx.font = 4 * textSize + "px " + font;
+  ctx.font = 4 * textSize + 'px ' + font;
   if (bold) {
-    ctx.font = "bold " + ctx.font;
+    ctx.font = 'bold ' + ctx.font;
   }
 
-  ctx.fillText(textToWrite, canvas.width/2, canvas.height/2, canvas.width);
+  ctx.fillText(textToWrite, canvas.width / 2, canvas.height / 2, canvas.width);
 
   texture.setImage(canvas);
   texture.updateDimensions();
@@ -10466,10 +11268,7 @@ vgl.utils.create2DTexture = function(textToWrite, textSize,
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global vgl, ogs, vec4, inherit, $*/
+/*global vgl, vec4, inherit*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -10480,7 +11279,7 @@ vgl.utils.create2DTexture = function(textToWrite, textSize,
  * @returns {vgl.picker}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.picker = function() {
+vgl.picker = function () {
   'use strict';
 
   if (!(this instanceof vgl.picker)) {
@@ -10489,16 +11288,14 @@ vgl.picker = function() {
   vgl.object.call(this);
 
   /** @private */
-  var m_that = this,
-      m_tolerance = 0.025,
-      m_actors = [];
+  var m_actors = [];
 
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Get actors intersected
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.getActors = function() {
+  this.getActors = function () {
     return m_actors;
   };
 
@@ -10507,15 +11304,15 @@ vgl.picker = function() {
    * Perform pick operation
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.pick = function(selectionX, selectionY, renderer) {
+  this.pick = function (selectionX, selectionY, renderer) {
     // Check if variables are acceptable
-    if (typeof(selectionX) === "undefined"){
+    if (selectionX === undefined) {
       return 0;
     }
-    if (typeof(selectionY) === "undefined"){
+    if (selectionY === undefined) {
       return 0;
     }
-    if (typeof(renderer) === "undefined"){
+    if (renderer === undefined) {
       return 0;
     }
 
@@ -10539,7 +11336,7 @@ vgl.picker = function() {
         cameraPos = camera.position(), ray = [], actors, count, i, bb,
         tmin, tmax, tymin, tymax, tzmin, tzmax, actor;
 
-    for (i = 0; i < 3; ++i){
+    for (i = 0; i < 3; i += 1) {
       ray[i] = worldPt[i] - cameraPos[i];
     }
 
@@ -10547,27 +11344,29 @@ vgl.picker = function() {
     actors = renderer.sceneRoot().children();
     count = 0;
 
-    for (i = 0; i < actors.length; ++i) {
+    for (i = 0; i < actors.length; i += 1) {
       actor = actors[i];
       if (actor.visible() === true) {
         bb = actor.bounds();
         // Ray-aabb intersection - Smits' method
-        if (ray[0] >= 0){
-          tmin = (bb[0] - cameraPos[0])/ray[0];
-          tmax = (bb[1] - cameraPos[0])/ray[0];
+        if (ray[0] >= 0) {
+          tmin = (bb[0] - cameraPos[0]) / ray[0];
+          tmax = (bb[1] - cameraPos[0]) / ray[0];
         } else {
-          tmin = (bb[1] - cameraPos[0])/ray[0];
-          tmax = (bb[0] - cameraPos[0])/ray[0];
+          tmin = (bb[1] - cameraPos[0]) / ray[0];
+          tmax = (bb[0] - cameraPos[0]) / ray[0];
         }
-        if (ray[1] >= 0){
-          tymin = (bb[2] - cameraPos[1])/ray[1];
-          tymax = (bb[3] - cameraPos[1])/ray[1];
+        if (ray[1] >= 0) {
+          tymin = (bb[2] - cameraPos[1]) / ray[1];
+          tymax = (bb[3] - cameraPos[1]) / ray[1];
         } else {
-          tymin = (bb[3] - cameraPos[1])/ray[1];
-          tymax = (bb[2] - cameraPos[1])/ray[1];
+          tymin = (bb[3] - cameraPos[1]) / ray[1];
+          tymax = (bb[2] - cameraPos[1]) / ray[1];
         }
         if ((tmin > tymax) || (tymin > tmax)) {
+          //jscs:disable disallowKeywords
           continue;
+          //jscs:enable disallowKeywords
         }
 
 
@@ -10578,14 +11377,16 @@ vgl.picker = function() {
           tmax = tymax;
         }
         if (ray[2] >= 0) {
-          tzmin = (bb[4] - cameraPos[2])/ray[2];
-          tzmax = (bb[5] - cameraPos[2])/ray[2];
+          tzmin = (bb[4] - cameraPos[2]) / ray[2];
+          tzmax = (bb[5] - cameraPos[2]) / ray[2];
         } else {
-          tzmin = (bb[5] - cameraPos[2])/ray[2];
-          tzmax = (bb[4] - cameraPos[2])/ray[2];
+          tzmin = (bb[5] - cameraPos[2]) / ray[2];
+          tzmax = (bb[4] - cameraPos[2]) / ray[2];
         }
         if ((tmin > tzmax) || (tzmin > tmax)) {
+          //jscs:disable disallowKeywords
           continue;
+          //jscs:enable disallowKeywords
         }
         if (tzmin > tmin) {
           tmin = tzmin;
@@ -10594,7 +11395,8 @@ vgl.picker = function() {
           tmax = tzmax;
         }
 
-        m_actors[count++] = actor;
+        m_actors[count] = actor;
+        count += 1;
       }
     }
     return count;
@@ -10610,10 +11412,7 @@ inherit(vgl.picker, vgl.object);
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2*/
-
-/*global vgl, ogs, vec4, inherit, $, Uint16Array*/
+/*global vgl, $*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -10626,7 +11425,7 @@ inherit(vgl.picker, vgl.object);
  * @returns {vgl.shapefileReader}
  */
 //////////////////////////////////////////////////////////////////////////////
-vgl.shapefileReader = function() {
+vgl.shapefileReader = function () {
   'use strict';
 
   if (!(this instanceof vgl.shapefileReader)) {
@@ -10634,16 +11433,16 @@ vgl.shapefileReader = function() {
   }
 
   var m_that = this;
-  var SHP_HEADER_LEN = 8;
   var SHP_NULL = 0;
   var SHP_POINT = 1;
   var SHP_POLYGON = 5;
   var SHP_POLYLINE = 3;
 
   this.int8 = function (data, offset) {
-      return data.charCodeAt (offset);
+    return data.charCodeAt (offset);
   };
 
+  /*jshint bitwise: false */
   this.bint32 = function (data, offset) {
     return (
       ((data.charCodeAt (offset) & 0xff) << 24) +
@@ -10712,18 +11511,19 @@ vgl.shapefileReader = function() {
 
     return sign * (1 + frac * Math.pow (2, -23)) * Math.pow (2, exp);
   };
+  /*jshint bitwise: true */
 
   this.str = function (data, offset, length) {
     var chars = [];
     var index = offset;
     while (index < offset + length) {
       var c = data[index];
-      if (c.charCodeAt (0) !== 0)
+      if (c.charCodeAt (0) !== 0) {
         chars.push (c);
-      else {
+      } else {
         break;
       }
-      index ++;
+      index += 1;
     }
     return chars.join ('');
   };
@@ -10734,16 +11534,18 @@ vgl.shapefileReader = function() {
     var version = this.lint32(data, 28);
     var shapetype = this.lint32(data, 32);
 
+    /*
     var xmin = this.ldbl64(data, 36);
     var ymin = this.ldbl64(data, 44);
     var xmax = this.ldbl64(data, 52);
     var ymax = this.ldbl64(data, 60);
+    */
     return {
       code: code,
       length: length,
       version: version,
-      shapetype: shapetype,
-      bounds: new Box (vect (xmin, ymin), vect (xmax, ymax))
+      shapetype: shapetype
+      // bounds: new Box (vect (xmin, ymin), vect (xmax, ymax))
     };
   };
 
@@ -10785,20 +11587,20 @@ vgl.shapefileReader = function() {
     });
   };
 
-  this.localShapefile = function(options) {
+  this.localShapefile = function (options) {
     var shxFile = options.shx;
     var shpFile = options.shp;
     var dbfFile = options.dbf;
     var shxReader = new FileReader();
-    shxReader.onloadend = function() {
+    shxReader.onloadend = function () {
       var indices = m_that.loadShx(shxReader.result);
       var shpReader = new FileReader();
 
-      shpReader.onloadend = function() {
+      shpReader.onloadend = function () {
         var shpData = shpReader.result;
 
         var dbfReader = new FileReader();
-        dbfReader.onloadend = function() {
+        dbfReader.onloadend = function () {
           var dbfData = dbfReader.result;
           var layer = m_that.loadShp(shpData, dbfData, indices, options);
           options.success(layer);
@@ -10824,14 +11626,16 @@ vgl.shapefileReader = function() {
 
     // Level of the dBASE file
     var level = m_that.int8(data, 0);
-    if (level == 4) {
-      throw "Level 7 dBASE not supported";
+    if (level === 4) {
+      throw 'Level 7 dBASE not supported';
     }
 
     // Date of last update
+    /*
     var year = m_that.int8(data, 1);
     var month = m_that.int8(data, 2);
     var day = m_that.int8(data, 3);
+    */
 
     var num_entries = m_that.lint32(data, 4);
     var header_size = m_that.lint16(data, 8);
@@ -10851,22 +11655,20 @@ vgl.shapefileReader = function() {
     var record_offset = header_size;
     while (record_offset < header_size + num_entries * record_size) {
       var declare = m_that.str(data, record_offset, 1);
-      if (declare == '*') {
+      if (declare === '*') {
         // Record size in the header include the size of the delete indicator
         record_offset += record_size;
-      }
-      else {
+      } else {
         // Move offset to the start of the actual data
-        record_offset ++;
+        record_offset += 1;
         var record = {};
-        for (var i = 0; i < headers.length; i ++) {
+        for (var i = 0; i < headers.length; i  += 1) {
           var header = headers[i];
           var value;
-          if (header.type == 'C') {
-              value = m_that.str(data, record_offset, header.length).trim ();
-          }
-          else if (header.type == 'N') {
-              value = parseFloat (m_that.str (data, record_offset, header.length));
+          if (header.type === 'C') {
+            value = m_that.str(data, record_offset, header.length).trim ();
+          } else if (header.type === 'N') {
+            value = parseFloat (m_that.str (data, record_offset, header.length));
           }
           record_offset += header.length;
           record[header.name] = value;
@@ -10878,10 +11680,11 @@ vgl.shapefileReader = function() {
   };
 
   this.loadShp = function (data, dbf_data, indices, options) {
+    options = options; /* unused parameter */
     var features = [];
     var readRing = function (offset, start, end) {
       var ring = [];
-      for (var i = end - 1; i >= start; i --) {
+      for (var i = end - 1; i >= start; i -= 1) {
         var x = m_that.ldbl64(data, offset + 16 * i);
         var y = m_that.ldbl64(data, offset + 16 * i + 8);
         ring.push ([x, y]);
@@ -10892,16 +11695,17 @@ vgl.shapefileReader = function() {
     };
 
     var readRecord = function (offset) {
-      var index = m_that.bint32(data, offset);
-      var record_length = m_that.bint32(data, offset + 4);
+      // var index = m_that.bint32(data, offset);
+      // var record_length = m_that.bint32(data, offset + 4);
       var record_offset = offset + 8;
       var geom_type = m_that.lint32(data, record_offset);
+      var num_parts, num_points, parts_start, points_start, i,
+          start, end, ring, rings;
 
-      if (geom_type == SHP_NULL) {
-        console.log ("NULL Shape");
+      if (geom_type === SHP_NULL) {
+        console.log ('NULL Shape');
         //return offset + 12;
-      }
-      else if (geom_type == SHP_POINT) {
+      } else if (geom_type === SHP_POINT) {
         var x = m_that.ldbl64(data, record_offset + 4);
         var y = m_that.ldbl64(data, record_offset + 12);
 
@@ -10910,25 +11714,22 @@ vgl.shapefileReader = function() {
           attr: {},
           geom: [[x, y]]
         });
-      }
-      else if (geom_type == SHP_POLYGON) {
-        var num_parts = m_that.lint32(data, record_offset + 36);
-        var num_points = m_that.lint32(data, record_offset + 40);
+      } else if (geom_type === SHP_POLYGON) {
+        num_parts = m_that.lint32(data, record_offset + 36);
+        num_points = m_that.lint32(data, record_offset + 40);
 
-        var parts_start = offset + 52;
-        var points_start = offset + 52 + 4 * num_parts;
+        parts_start = offset + 52;
+        points_start = offset + 52 + 4 * num_parts;
 
-        var rings = [];
-        for (var i = 0; i < num_parts; i ++) {
-          var start = m_that.lint32(data, parts_start + i * 4);
-          var end;
+        rings = [];
+        for (i = 0; i < num_parts; i  += 1) {
+          start = m_that.lint32(data, parts_start + i * 4);
           if (i + 1 < num_parts) {
             end = m_that.lint32(data, parts_start + (i + 1) * 4);
-          }
-          else {
+          } else {
             end = num_points;
           }
-          var ring = readRing (points_start, start, end);
+          ring = readRing (points_start, start, end);
           rings.push (ring);
         }
         features.push ({
@@ -10936,25 +11737,22 @@ vgl.shapefileReader = function() {
           attr: {},
           geom: [rings]
         });
-      }
-      else if (geom_type == SHP_POLYLINE) {
-        var num_parts = m_that.lint32(data, record_offset + 36);
-        var num_points = m_that.lint32(data, record_offset + 40);
+      } else if (geom_type === SHP_POLYLINE) {
+        num_parts = m_that.lint32(data, record_offset + 36);
+        num_points = m_that.lint32(data, record_offset + 40);
 
-        var parts_start = offset + 52;
-        var points_start = offset + 52 + 4 * num_parts;
+        parts_start = offset + 52;
+        points_start = offset + 52 + 4 * num_parts;
 
-        var rings = [];
-        for (var i = 0; i < num_parts; i ++) {
-          var start = m_that.lint32(data, parts_start + i * 4);
-          var end;
+        rings = [];
+        for (i = 0; i < num_parts; i  += 1) {
+          start = m_that.lint32(data, parts_start + i * 4);
           if (i + 1 < num_parts) {
-              end = m_that.lint32(data, parts_start + (i + 1) * 4);
+            end = m_that.lint32(data, parts_start + (i + 1) * 4);
+          } else {
+            end = num_points;
           }
-          else {
-              end = num_points;
-          }
-          var ring = readRing (points_start, start, end);
+          ring = readRing (points_start, start, end);
           rings.push (ring);
         }
         features.push ({
@@ -10962,27 +11760,26 @@ vgl.shapefileReader = function() {
           attr: {},
           geom: [rings]
         });
-      }
-      else {
-        throw "Not Implemented: " + geom_type;
+      } else {
+        throw 'Not Implemented: ' + geom_type;
       }
       //return offset + 2 * record_length + SHP_HEADER_LEN;
     };
 
-    var attr = this.loadDBF(dbf_data);
+    var attr = this.loadDBF(dbf_data), i;
 
     //var offset = 100;
     //while (offset < length * 2) {
     // offset = readRecord (offset);
     //}
-    for (var i = 0; i < indices.length; i ++) {
+    for (i = 0; i < indices.length; i  += 1) {
       var offset = indices[i];
       readRecord (offset);
     }
 
     var layer = []; //new Layer ();
 
-    for (var i = 0; i < features.length; i ++) {
+    for (i = 0; i < features.length; i  += 1) {
       var feature = features[i];
       feature.attr = attr[i];
       layer.push (feature);
@@ -10992,17 +11789,13 @@ vgl.shapefileReader = function() {
 
   return this;
 };
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * @module vgl
  */
 
-/*jslint devel: true, forin: true, newcap: true, plusplus: true*/
-/*jslint white: true, continue:true, indent: 2, bitwise: true*/
-
-
-/*global vgl, vec4, mat4, inherit, unescape*/
-/*global Float32Array, Int8Array, gl, Uint16Array, $*/
+/*global vgl, mat4, unescape, Float32Array, Int8Array, Uint16Array*/
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -11014,7 +11807,7 @@ vgl.shapefileReader = function() {
 //
 //////////////////////////////////////////////////////////////////////////////
 
-vgl.vtkReader = function() {
+vgl.vtkReader = function () {
   'use strict';
 
   if (!(this instanceof vgl.vtkReader)) {
@@ -11022,21 +11815,18 @@ vgl.vtkReader = function() {
   }
 
   var m_base64Chars =
-    ['A','B','C','D','E','F','G','H','I','J','K','L','M',
-     'N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
-     'a','b','c','d','e','f','g','h','i','j','k','l','m',
-     'n','o','p','q','r','s','t','u','v','w','x','y','z',
-     '0','1','2','3','4','5','6','7','8','9','+','/'],
+    ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+     'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+     'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+     'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'],
   m_reverseBase64Chars = [],
-  m_vtkObjectList = {},
-  m_vglObjects = {},
   m_vtkRenderedList = {},
-  m_vtkObjHashList = {},
   m_vtkObjectCount = 0,
   m_vtkScene = null,
   m_node = null,
   END_OF_INPUT = -1,
-  m_base64Str = "",
+  m_base64Str = '',
   m_base64Count = 0,
   m_pos = 0,
   m_viewer = null,
@@ -11044,7 +11834,7 @@ vgl.vtkReader = function() {
 
   //initialize the array here if not already done.
   if (m_reverseBase64Chars.length === 0) {
-    for ( i = 0; i < m_base64Chars.length; i++) {
+    for (i = 0; i < m_base64Chars.length; i += 1) {
       m_reverseBase64Chars[m_base64Chars[i]] = i;
     }
   }
@@ -11090,7 +11880,7 @@ vgl.vtkReader = function() {
         return END_OF_INPUT;
       }
       nextCharacter = m_base64Str.charAt(m_base64Count);
-      m_base64Count++;
+      m_base64Count += 1;
 
       if (m_reverseBase64Chars[nextCharacter]) {
         return m_reverseBase64Chars[nextCharacter];
@@ -11111,7 +11901,7 @@ vgl.vtkReader = function() {
    * @returns result
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.decode64 = function(str) {
+  this.decode64 = function (str) {
     var result = '',
         inBuffer = new Array(4),
         done = false;
@@ -11124,6 +11914,7 @@ vgl.vtkReader = function() {
            (inBuffer[1] = this.readReverseBase64()) !== END_OF_INPUT) {
       inBuffer[2] = this.readReverseBase64();
       inBuffer[3] = this.readReverseBase64();
+      /*jshint bitwise: false */
       result += this.ntos((((inBuffer[0] << 2) & 0xff) | inBuffer[1] >> 4));
       if (inBuffer[2] !== END_OF_INPUT) {
         result +=  this.ntos((((inBuffer[1] << 4) & 0xff) | inBuffer[2] >> 2));
@@ -11135,6 +11926,7 @@ vgl.vtkReader = function() {
       } else {
         done = true;
       }
+      /*jshint bitwise: true */
     }
 
     return result;
@@ -11148,11 +11940,13 @@ vgl.vtkReader = function() {
    * @returns v
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.readNumber = function(ss) {
+  this.readNumber = function (ss) {
+    //jshint plusplus: false, bitwise: false
     var v = ((ss[m_pos++]) +
              (ss[m_pos++] << 8) +
              (ss[m_pos++] << 16) +
              (ss[m_pos++] << 24));
+    //jshint plusplus: true, bitwise: true
     return v;
   };
 
@@ -11165,12 +11959,13 @@ vgl.vtkReader = function() {
    * @returns points
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.readF3Array = function(numberOfPoints, ss) {
-    var size = numberOfPoints*4*3, test = new Int8Array(size),
+  this.readF3Array = function (numberOfPoints, ss) {
+    var size = numberOfPoints * 4 * 3, test = new Int8Array(size),
         points = null, i;
 
-    for(i = 0; i < size; i++) {
-      test[i] = ss[m_pos++];
+    for (i = 0; i < size; i += 1) {
+      test[i] = ss[m_pos];
+      m_pos += 1;
     }
 
     points = new Float32Array(test.buffer);
@@ -11189,13 +11984,15 @@ vgl.vtkReader = function() {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.readColorArray = function (numberOfPoints, ss, vglcolors) {
-    var i,r,g,b,idx = 0, tmp = new Array(numberOfPoints*3);
-    for(i = 0; i < numberOfPoints; i++) {
-      tmp[idx++] = ss[m_pos++]/255.0;
-      tmp[idx++] = ss[m_pos++]/255.0;
-      tmp[idx++] = ss[m_pos++]/255.0;
+    var i, idx = 0, tmp = new Array(numberOfPoints * 3);
+    //jshint plusplus: false
+    for (i = 0; i < numberOfPoints; i += 1) {
+      tmp[idx++] = ss[m_pos++] / 255.0;
+      tmp[idx++] = ss[m_pos++] / 255.0;
+      tmp[idx++] = ss[m_pos++] / 255.0;
       m_pos++;
     }
+    //jshint plusplus: true
     vglcolors.insert(tmp);
   };
 
@@ -11206,72 +12003,71 @@ vgl.vtkReader = function() {
    * @param buffer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.parseObject = function(vtkObject) {
+  this.parseObject = function (vtkObject) {
     var geom = new vgl.geometryData(), mapper = vgl.mapper(), ss = [],
         type = null, data = null, size, matrix = null, material = null,
         actor, colorMapData, shaderProg, opacityUniform, lookupTable,
         colorTable, windowSize, width, height, position;
 
     //dehexlify
-//    data = this.decode64(vtkObject.data);
+    //data = this.decode64(vtkObject.data);
     data = atob(vtkObject.data);
-    for(i = 0; i < data.length; i++) {
+    //jshint bitwise: false
+    for (i = 0; i < data.length; i += 1) {
       ss[i] = data.charCodeAt(i) & 0xff;
     }
+    //jshint bitwise: true
 
     //Determine the Object type
     m_pos = 0;
     size = this.readNumber(ss);
-    type = String.fromCharCode(ss[m_pos++]);
+    type = String.fromCharCode(ss[m_pos]);
+    m_pos += 1;
     geom.setName(type);
 
     // Lines
     if (type === 'L') {
       matrix = this.parseLineData(geom, ss);
       material = vgl.utils.createGeometryMaterial();
-    }
     // Mesh
-    else if (type === 'M') {
+    } else if (type === 'M') {
       matrix = this.parseMeshData(geom, ss);
       material = vgl.utils.createPhongMaterial();
-    }
     // Points
-    else if (type === 'P'){
+    } else if (type === 'P') {
       matrix = this.parsePointData(geom, ss);
       material = vgl.utils.createGeometryMaterial();
-    }
     // ColorMap
-    else if (type === 'C') {
+    } else if (type === 'C') {
       colorMapData = this.parseColorMapData(geom, ss, size);
       colorTable = [];
 
-      for (i = 0; i < colorMapData.colors.length; i++) {
-          colorTable.push(colorMapData.colors[i][1])
-          colorTable.push(colorMapData.colors[i][2])
-          colorTable.push(colorMapData.colors[i][3])
-          colorTable.push(colorMapData.colors[i][0] * 255)
+      for (i = 0; i < colorMapData.colors.length; i += 1) {
+        colorTable.push(colorMapData.colors[i][1]);
+        colorTable.push(colorMapData.colors[i][2]);
+        colorTable.push(colorMapData.colors[i][3]);
+        colorTable.push(colorMapData.colors[i][0] * 255);
       }
 
       lookupTable = new vgl.lookupTable();
       lookupTable.setColorTable(colorTable);
 
       windowSize = m_viewer.renderWindow().windowSize();
-      width = colorMapData.size[0]*windowSize[0];
-      height = colorMapData.size[1]*windowSize[1];
+      width = colorMapData.size[0] * windowSize[0];
+      height = colorMapData.size[1] * windowSize[1];
 
-      position = [colorMapData.position[0]*windowSize[0],
-                  (1-colorMapData.position[1])*windowSize[1], 0];
-      position[1] = position[1]-height;
+      position = [colorMapData.position[0] * windowSize[0],
+                  (1 - colorMapData.position[1]) * windowSize[1], 0];
+      position[1] = position[1] - height;
 
       // For now hardcode the height
       height = 30;
 
       return vgl.utils.createColorLegend(colorMapData.title,
           lookupTable, position, width, height, 3, 0);
-    }
     // Unknown
-    else {
-      console.log("Ignoring unrecognized encoded data type " + type);
+    } else {
+      console.log('Ignoring unrecognized encoded data type ' + type);
     }
 
     mapper.setGeometryData(geom);
@@ -11279,8 +12075,9 @@ vgl.vtkReader = function() {
     //default opacity === solid. If were transparent, set it lower.
     if (vtkObject.hasTransparency) {
       shaderProg = material.shaderProgram();
-      opacityUniform = shaderProg.uniform("opacity");
-      shaderProg.addUniform(new vgl.floatUniform("opacity", 0.5));
+      opacityUniform = shaderProg.uniform('opacity');
+      console.log('opacity ', vtkObject.opacity);
+      opacityUniform.set(vtkObject.opacity);
       material.setBinNumber(1000);
     }
 
@@ -11300,7 +12097,7 @@ vgl.vtkReader = function() {
    * @returns matrix
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.parseLineData = function(geom, ss) {
+  this.parseLineData = function (geom, ss) {
     var vglpoints = null, vglcolors = null, vgllines = null,
         matrix = mat4.create(),
         numberOfIndex, numberOfPoints, points,
@@ -11308,17 +12105,19 @@ vgl.vtkReader = function() {
         p = null, idx = 0;
 
     numberOfPoints = this.readNumber(ss);
-    p = new Array(numberOfPoints*3);
+    p = new Array(numberOfPoints * 3);
 
     //Getting Points
     vglpoints = new vgl.sourceDataP3fv();
     points = this.readF3Array(numberOfPoints, ss);
 
-    for(i = 0; i < numberOfPoints; i++) {
-      p[idx++] = points[i*3/*+0*/];
-      p[idx++] = points[i*3+1];
-      p[idx++] =  points[i*3+2];
+    //jshint plusplus: false
+    for (i = 0; i < numberOfPoints; i += 1) {
+      p[idx++] = points[i * 3/*+0*/];
+      p[idx++] = points[i * 3 + 1];
+      p[idx++] =  points[i * 3 + 2];
     }
+    //jshint plusplus: true
     vglpoints.insert(p);
     geom.addSource(vglpoints);
 
@@ -11332,20 +12131,22 @@ vgl.vtkReader = function() {
     geom.addPrimitive(vgllines);
     numberOfIndex = this.readNumber(ss);
 
-    temp = new Int8Array(numberOfIndex*2);
-    for(i = 0; i < numberOfIndex*2; i++) {
-      temp[i] = ss[m_pos++];
+    temp = new Int8Array(numberOfIndex * 2);
+    for (i = 0; i < numberOfIndex * 2; i += 1) {
+      temp[i] = ss[m_pos];
+      m_pos += 1;
     }
 
     index = new Uint16Array(temp.buffer);
     vgllines.setIndices(index);
-    vgllines.setPrimitiveType(gl.LINES);
+    vgllines.setPrimitiveType(vgl.GL.LINES);
 
     //Getting Matrix
-    size = 16*4;
+    size = 16 * 4;
     temp = new Int8Array(size);
-    for(i=0; i<size; i++) {
-      temp[i] = ss[m_pos++];
+    for (i = 0; i < size; i += 1) {
+      temp[i] = ss[m_pos];
+      m_pos += 1;
     }
 
     m = new Float32Array(temp.buffer);
@@ -11362,29 +12163,31 @@ vgl.vtkReader = function() {
    * @returns matrix
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.parseMeshData = function(geom, ss) {
-    var vglpoints = null, vglcolors = null, vgllines = null,
-        normals = null, matrix = mat4.create(), v1 = null,
+  this.parseMeshData = function (geom, ss) {
+    var vglpoints = null, vglcolors = null,
+        normals = null, matrix = mat4.create(),
         vgltriangles = null, numberOfIndex, numberOfPoints,
         points, temp, index, size, m, i, tcoord,
         pn = null, idx = 0;
 
     numberOfPoints = this.readNumber(ss);
-    pn = new Array(numberOfPoints*6);
+    pn = new Array(numberOfPoints * 6);
     //Getting Points
     vglpoints = new vgl.sourceDataP3N3f();
     points = this.readF3Array(numberOfPoints, ss);
 
     //Getting Normals
     normals = this.readF3Array(numberOfPoints, ss);
-    for(i = 0; i < numberOfPoints; i++) {
-      pn[idx++] = points[i*3/*+0*/];
-      pn[idx++] = points[i*3+1];
-      pn[idx++] = points[i*3+2];
-      pn[idx++] = normals[i*3/*+0*/];
-      pn[idx++] = normals[i*3+1];
-      pn[idx++] = normals[i*3+2];
+    //jshint plusplus: false
+    for (i = 0; i < numberOfPoints; i += 1) {
+      pn[idx++] = points[i * 3/*+0*/];
+      pn[idx++] = points[i * 3 + 1];
+      pn[idx++] = points[i * 3 + 2];
+      pn[idx++] = normals[i * 3/*+0*/];
+      pn[idx++] = normals[i * 3 + 1];
+      pn[idx++] = normals[i * 3 + 2];
     }
+    //jshint plusplus: true
     vglpoints.insert(pn);
     geom.addSource(vglpoints);
 
@@ -11398,9 +12201,10 @@ vgl.vtkReader = function() {
     vgltriangles = new vgl.triangles();
     numberOfIndex = this.readNumber(ss);
 
-    temp = new Int8Array(numberOfIndex*2);
-    for(i = 0; i < numberOfIndex*2; i++) {
-      temp[i] = ss[m_pos++];
+    temp = new Int8Array(numberOfIndex * 2);
+    for (i = 0; i < numberOfIndex * 2; i += 1) {
+      temp[i] = ss[m_pos];
+      m_pos += 1;
     }
 
     index = new Uint16Array(temp.buffer);
@@ -11408,10 +12212,11 @@ vgl.vtkReader = function() {
     geom.addPrimitive(vgltriangles);
 
     //Getting Matrix
-    size = 16*4;
+    size = 16 * 4;
     temp = new Int8Array(size);
-    for(i = 0; i < size; i++) {
-      temp[i] = ss[m_pos++];
+    for (i = 0; i < size; i += 1) {
+      temp[i] = ss[m_pos];
+      m_pos += 1;
     }
 
     m = new Float32Array(temp.buffer);
@@ -11432,14 +12237,14 @@ vgl.vtkReader = function() {
    * @returns matrix
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.parsePointData = function(geom, ss) {
+  this.parsePointData = function (geom, ss) {
     var numberOfPoints, points, indices, temp, size,
         matrix = mat4.create(), vglpoints = null,
         vglcolors = null, vglVertexes = null, m,
         p = null, idx = 0;
 
     numberOfPoints = this.readNumber(ss);
-    p = new Array(numberOfPoints*3);
+    p = new Array(numberOfPoints * 3);
 
     //Getting Points and creating 1:1 connectivity
     vglpoints = new vgl.sourceDataP3fv();
@@ -11447,12 +12252,14 @@ vgl.vtkReader = function() {
 
     indices = new Uint16Array(numberOfPoints);
 
-    for (i = 0; i < numberOfPoints; i++) {
+    //jshint plusplus: false
+    for (i = 0; i < numberOfPoints; i += 1) {
       indices[i] = i;
-      p[idx++] = points[i*3/*+0*/];
-      p[idx++] = points[i*3+1];
-      p[idx++] = points[i*3+2];
+      p[idx++] = points[i * 3/*+0*/];
+      p[idx++] = points[i * 3 + 1];
+      p[idx++] = points[i * 3 + 2];
     }
+    //jshint plusplus: true
     vglpoints.insert(p);
     geom.addSource(vglpoints);
 
@@ -11467,10 +12274,11 @@ vgl.vtkReader = function() {
     geom.addPrimitive(vglVertexes);
 
     //Getting matrix
-    size = 16*4;
+    size = 16 * 4;
     temp = new Int8Array(size);
-    for(i = 0; i < size; i++) {
-      temp[i] = ss[m_pos++];
+    for (i = 0; i < size; i += 1) {
+      temp[i] = ss[m_pos];
+      m_pos += 1;
     }
 
     m = new Float32Array(temp.buffer);
@@ -11487,7 +12295,7 @@ vgl.vtkReader = function() {
    * @returns matrix
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.parseColorMapData = function(geom, ss, numColors) {
+  this.parseColorMapData = function (geom, ss, numColors) {
 
     var tmpArray, size, xrgb, i, c, obj = {};
 
@@ -11497,25 +12305,29 @@ vgl.vtkReader = function() {
     // Getting Position
     size = 8;
     tmpArray = new Int8Array(size);
-    for(i=0; i < size; i++) {
-        tmpArray[i] = ss[m_pos++];
+    for (i = 0; i < size; i += 1) {
+      tmpArray[i] = ss[m_pos];
+      m_pos += 1;
     }
     obj.position = new Float32Array(tmpArray.buffer);
 
     // Getting Size
     size = 8;
     tmpArray = new Int8Array(size);
-    for(i=0; i < size; i++) {
-        tmpArray[i] = ss[m_pos++];
+    for (i = 0; i < size; i += 1) {
+      tmpArray[i] = ss[m_pos];
+      m_pos += 1;
     }
     obj.size = new Float32Array(tmpArray.buffer);
 
     //Getting Colors
     obj.colors = [];
-    for(c=0; c < obj.numOfColors; c++){
+    //jshint plusplus: false
+    for (c = 0; c < obj.numOfColors; c += 1) {
       tmpArray = new Int8Array(4);
-      for(i=0; i < 4; i++) {
-        tmpArray[i] = ss[m_pos++];
+      for (i = 0; i < 4; i += 1) {
+        tmpArray[i] = ss[m_pos];
+        m_pos += 1;
       }
 
       xrgb = [
@@ -11529,10 +12341,11 @@ vgl.vtkReader = function() {
 
     obj.orientation = ss[m_pos++];
     obj.numOfLabels = ss[m_pos++];
-    obj.title = "";
-    while(m_pos < ss.length) {
+    obj.title = '';
+    while (m_pos < ss.length) {
       obj.title += String.fromCharCode(ss[m_pos++]);
     }
+    //jshint plusplus: true
 
     return obj;
   };
@@ -11545,13 +12358,13 @@ vgl.vtkReader = function() {
    * @returns renderer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.parseSceneMetadata = function(renderer, layer) {
+  this.parseSceneMetadata = function (renderer, layer) {
 
     var sceneRenderer = m_vtkScene.Renderers[layer],
         camera = renderer.camera(), bgc, localWidth, localHeight;
 
-    localWidth = (sceneRenderer.size[0] - sceneRenderer.origin[0])*m_node.width;
-    localHeight = (sceneRenderer.size[1] - sceneRenderer.origin[1])*m_node.height;
+    localWidth = (sceneRenderer.size[0] - sceneRenderer.origin[0]) * m_node.width;
+    localHeight = (sceneRenderer.size[1] - sceneRenderer.origin[1]) * m_node.height;
     renderer.resize(localWidth, localHeight);
 
     /// We are setting the center to the focal point because of
@@ -11571,12 +12384,11 @@ vgl.vtkReader = function() {
       sceneRenderer.LookAt[4], sceneRenderer.LookAt[5],
       sceneRenderer.LookAt[6]);
 
-    if (layer === 0)
-    {
+    if (layer === 0) {
       bgc = sceneRenderer.Background1;
       renderer.setBackgroundColor(bgc[0], bgc[1], bgc[2], 1);
     } else {
-        renderer.setResizable(false);
+      renderer.setResizable(false);
     }
     renderer.setLayer(layer);
   };
@@ -11588,13 +12400,13 @@ vgl.vtkReader = function() {
    * @returns viewer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.initScene = function() {
+  this.initScene = function () {
     var renderer, layer;
 
-    if ( m_vtkScene === null ) {
+    if (m_vtkScene === null) {
       return m_viewer;
     }
-    for(layer = m_vtkScene.Renderers.length - 1; layer >= 0; layer--) {
+    for (layer = m_vtkScene.Renderers.length - 1; layer >= 0; layer -= 1) {
 
       renderer = this.getRenderer(layer);
       this.parseSceneMetadata(renderer, layer);
@@ -11612,13 +12424,15 @@ vgl.vtkReader = function() {
    * @returns viewer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.createViewer = function(node) {
+  this.createViewer = function (node) {
     var interactorStyle;
 
-    if(m_viewer === null) {
+    if (m_viewer === null) {
       m_node = node;
       m_viewer = vgl.viewer(node);
       m_viewer.init();
+      m_viewer.renderWindow().removeRenderer(m_viewer.renderWindow().activeRenderer());
+      m_viewer.renderWindow().addRenderer(new vgl.depthPeelRenderer());
       m_vtkRenderedList[0] = m_viewer.renderWindow().activeRenderer();
       m_viewer.renderWindow().resize(node.width, node.height);
       interactorStyle = vgl.pvwInteractorStyle();
@@ -11635,9 +12449,9 @@ vgl.vtkReader = function() {
    * @returns void
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.deleteViewer = function() {
-      m_vtkRenderedList = {};
-      m_viewer = null;
+  this.deleteViewer = function () {
+    m_vtkRenderedList = {};
+    m_viewer = null;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -11649,7 +12463,7 @@ vgl.vtkReader = function() {
    * @returns void
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.updateCanvas = function(node) {
+  this.updateCanvas = function (node) {
     m_node = node;
     m_viewer.renderWindow().resize(node.width, node.height);
 
@@ -11664,7 +12478,7 @@ vgl.vtkReader = function() {
    * @returns void
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.numObjects = function() {
+  this.numObjects = function () {
     return m_vtkObjectCount;
   };
 
@@ -11676,7 +12490,7 @@ vgl.vtkReader = function() {
    * @returns renderer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.getRenderer = function(layer) {
+  this.getRenderer = function (layer) {
     var renderer;
 
     renderer = m_vtkRenderedList[layer];
@@ -11687,7 +12501,7 @@ vgl.vtkReader = function() {
       m_viewer.renderWindow().addRenderer(renderer);
 
       if (layer !== 0) {
-          renderer.camera().setClearMask(vgl.GL.DepthBufferBit);
+        renderer.camera().setClearMask(vgl.GL.DepthBufferBit);
       }
 
       m_vtkRenderedList[layer] = renderer;
@@ -11704,7 +12518,7 @@ vgl.vtkReader = function() {
    * @returns void
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setVtkScene = function(scene) {
+  this.setVtkScene = function (scene) {
     m_vtkScene = scene;
   };
 
@@ -11712,96 +12526,106 @@ vgl.vtkReader = function() {
 };
 
 vgl.DataBuffers = function (initialSize) {
-    if (!(this instanceof vgl.DataBuffers)) {
-      return new vgl.DataBuffers(initialSize);
+  'use strict';
+  if (!(this instanceof vgl.DataBuffers)) {
+    return new vgl.DataBuffers(initialSize);
+  }
+
+  var data = {};
+
+  var size;
+  if (!initialSize && initialSize !== 0) {
+    size = 256;
+  } else {
+    size = initialSize;
+  }
+
+  var current = 0;
+
+  var copyArray = function (dst, src, start, count) {
+    if (!dst) {
+      console.log ('ack');
     }
+    if (!start) {
+      start = 0;
+    }
+    if (!count) {
+      count = src.length;
+    }
+    for (var i = 0; i < count; i += 1) {
+      dst[start + i] = src[i];
+    }
+  };
 
-    var data = {};
-
-    var size;
-    if (!initialSize && initialSize !== 0)
-        size = 256;
-    else
-        size = initialSize;
-
-    var current = 0;
-
-    var copyArray = function (dst, src, start, count) {
-        if (!dst)
-            console.log ('ack');
-        if (!start)
-            start = 0;
-        if (!count)
-            count = src.length;
-        for (var i = 0; i < count; i ++) {
-            dst[start + i] = src[i];
-        }
-    };
-
-    var resize = function (min_expand) {
-        var new_size = size;
-        /* If the array would increase substantially, don't just double its
-         * size.  If the array has been increasing gradually, double it as the
-         * expectation is that it will increase again. */
-        if (new_size * 2 < min_expand) {
-            new_size = min_expand;
-        }
-        while (new_size < min_expand)
-            new_size *= 2;
-        size = new_size;
-        for (var name in data) {
-            var newArray = new Float32Array (new_size * data[name].len);
-            var oldArray = data[name].array;
-            copyArray (newArray, oldArray);
-            data[name].array = newArray;
-            data[name].dirty = true;
-        }
-    };
-
-    this.create = function (name, len) {
-        if (!len)
-            throw "Length of buffer must be a positive integer";
-        var array = new Float32Array (size * len);
-        data[name] = {
-            array: array,
-            len: len,
-            dirty: false
-        };
-        return data[name].array;
-    };
-
-    this.alloc = function (num) {
-        if ((current + num) >= size)
-            resize (current + num);
-        var start = current;
-        current += num;
-        return start;
-    };
-
-    this.get = function (name) {
-        return data[name].array;
-    };
-
-    this.write = function (name, array, start, count) {
-        copyArray (data[name].array, array, start * data[name].len, count * data[name].len);
+  var resize = function (min_expand) {
+    var new_size = size;
+    /* If the array would increase substantially, don't just double its
+     * size.  If the array has been increasing gradually, double it as the
+     * expectation is that it will increase again. */
+    if (new_size * 2 < min_expand) {
+      new_size = min_expand;
+    }
+    while (new_size < min_expand) {
+      new_size *= 2;
+    }
+    size = new_size;
+    for (var name in data) {
+      if (data.hasOwnProperty(name)) {
+        var newArray = new Float32Array (new_size * data[name].len);
+        var oldArray = data[name].array;
+        copyArray (newArray, oldArray);
+        data[name].array = newArray;
         data[name].dirty = true;
-    };
+      }
+    }
+  };
 
-    this.repeat = function (name, elem, start, count) {
-        for (var i = 0; i < count; i ++) {
-            copyArray (data[name].array, elem,
-                       (start + i) * data[name].len, data[name].len);
-        }
-        data[name].dirty = true;
+  this.create = function (name, len) {
+    if (!len) {
+      throw 'Length of buffer must be a positive integer';
+    }
+    var array = new Float32Array (size * len);
+    data[name] = {
+      array: array,
+      len: len,
+      dirty: false
     };
+    return data[name].array;
+  };
 
-    this.count = function () {
-        return current;
-    };
+  this.alloc = function (num) {
+    if ((current + num) >= size) {
+      resize (current + num);
+    }
+    var start = current;
+    current += num;
+    return start;
+  };
 
-    this.data = function (name) {
-        return data[name].array;
-    };
+  this.get = function (name) {
+    return data[name].array;
+  };
+
+  this.write = function (name, array, start, count) {
+    copyArray (data[name].array, array, start * data[name].len, count * data[name].len);
+    data[name].dirty = true;
+  };
+
+  this.repeat = function (name, elem, start, count) {
+    for (var i = 0; i < count; i += 1) {
+      copyArray (data[name].array, elem,
+                 (start + i) * data[name].len, data[name].len);
+    }
+    data[name].dirty = true;
+  };
+
+  this.count = function () {
+    return current;
+  };
+
+  this.data = function (name) {
+    return data[name].array;
+  };
 };
 
 
@@ -11930,7 +12754,6 @@ vgl.DataBuffers = function (initialSize) {
     /**
      * Normalize a coordinate object into {x: ..., y: ..., z: ... } form.
      * Accepts 2-3d arrays,
-     * latlng objects
      * latitude -> lat -> y
      * longitude -> lon -> lng -> x
      */
@@ -11941,13 +12764,6 @@ vgl.DataBuffers = function (initialSize) {
           x: p[0],
           y: p[1],
           z: p[2] || 0
-        };
-      }
-      if (p instanceof geo.latlng) {
-        return {
-          x: p.lng(),
-          y: p.lat(),
-          z: 0
         };
       }
       return {
@@ -12530,6 +13346,476 @@ vgl.DataBuffers = function (initialSize) {
     geo.util.vect = vect;
 }());
 /* jshint ignore: end */
+
+/*
+markercluster plugin:
+
+Copyright 2012 David Leaver
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Leaflet utilities:
+
+Copyright (c) 2010-2015, Vladimir Agafonkin
+Copyright (c) 2010-2011, CloudMade
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are
+permitted provided that the following conditions are met:
+
+   1. Redistributions of source code must retain the above copyright notice, this list of
+      conditions and the following disclaimer.
+
+   2. Redistributions in binary form must reproduce the above copyright notice, this list
+      of conditions and the following disclaimer in the documentation and/or other
+      materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
+TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+/**
+ * @file
+ * Code taken from https://github.com/Leaflet/Leaflet.markercluster
+ * to support faster hierarchical clustering of features.
+ * @copyright 2012, David Leaver
+ */
+
+/* jshint -W016 */
+/* jshint -W089 */
+// jscs:disable validateIndentation
+(function () {
+    "use strict";
+
+    var L = {};
+    L.Util = {
+        // return unique ID of an object
+        stamp: function (obj) {
+            obj._leaflet_id = obj._leaflet_id || ++L.Util.lastId;
+            return obj._leaflet_id;
+        },
+        lastId: 0
+    };
+
+    geo.util.DistanceGrid = function (cellSize) {
+        this._cellSize = cellSize;
+        this._sqCellSize = cellSize * cellSize;
+        this._grid = {};
+        this._objectPoint = {};
+    };
+
+    geo.util.DistanceGrid.prototype = {
+
+        addObject: function (obj, point) {
+            var x = this._getCoord(point.x),
+                y = this._getCoord(point.y),
+                grid = this._grid,
+                row = grid[y] = grid[y] || {},
+                cell = row[x] = row[x] || [],
+                stamp = L.Util.stamp(obj);
+
+            point.obj = obj;
+            this._objectPoint[stamp] = point;
+
+            cell.push(obj);
+        },
+
+        updateObject: function (obj, point) {
+            this.removeObject(obj);
+            this.addObject(obj, point);
+        },
+
+        //Returns true if the object was found
+        removeObject: function (obj, point) {
+            var x = this._getCoord(point.x),
+                y = this._getCoord(point.y),
+                grid = this._grid,
+                row = grid[y] = grid[y] || {},
+                cell = row[x] = row[x] || [],
+                i, len;
+
+            delete this._objectPoint[L.Util.stamp(obj)];
+
+            for (i = 0, len = cell.length; i < len; i++) {
+                if (cell[i] === obj) {
+
+                    cell.splice(i, 1);
+
+                    if (len === 1) {
+                        delete row[x];
+                    }
+
+                    return true;
+                }
+            }
+
+        },
+
+        eachObject: function (fn, context) {
+            var i, j, k, len, row, cell, removed,
+                grid = this._grid;
+
+            for (i in grid) {
+                row = grid[i];
+
+                for (j in row) {
+                    cell = row[j];
+
+                    for (k = 0, len = cell.length; k < len; k++) {
+                        removed = fn.call(context, cell[k]);
+                        if (removed) {
+                            k--;
+                            len--;
+                        }
+                    }
+                }
+            }
+        },
+
+        getNearObject: function (point) {
+            var x = this._getCoord(point.x),
+                y = this._getCoord(point.y),
+                i, j, k, row, cell, len, obj, dist,
+                objectPoint = this._objectPoint,
+                closestDistSq = this._sqCellSize,
+                closest = null;
+
+            for (i = y - 1; i <= y + 1; i++) {
+                row = this._grid[i];
+                if (row) {
+
+                    for (j = x - 1; j <= x + 1; j++) {
+                        cell = row[j];
+                        if (cell) {
+
+                            for (k = 0, len = cell.length; k < len; k++) {
+                                obj = cell[k];
+                                dist = this._sqDist(
+                                    objectPoint[L.Util.stamp(obj)],
+                                    point
+                                );
+                                if (dist < closestDistSq) {
+                                    closestDistSq = dist;
+                                    closest = obj;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return closest;
+        },
+
+        /* return the point coordinates contained in the structure */
+        contents: function () {
+            return $.map(this._objectPoint, function (val) { return val; });
+        },
+
+        _getCoord: function (x) {
+            return Math.floor(x / this._cellSize);
+        },
+
+        _sqDist: function (p, p2) {
+            var dx = p2.x - p.x,
+                dy = p2.y - p.y;
+            return dx * dx + dy * dy;
+        }
+    };
+})();
+// jscs:enable validateIndentation
+
+/**
+ * @file
+ * Using methods adapted from leaflet to cluster an array of positions
+ * hierarchically given an array of length scales (zoom levels).
+ */
+
+(function () {
+  'use strict';
+
+  /**
+   * This class manages a group of nearby points that are clustered as a
+   * single object for display purposes.  The class constructor is private
+   * and only meant to be created by the ClusterGroup object.
+   *
+   * This is a tree-like data structure.  Each node in the tree is a
+   * cluster containing child clusters and unclustered points.
+   *
+   * @class
+   * @private
+   *
+   * @param {geo.util.ClusterGroup} group The source cluster group
+   * @param {number} zoom The zoom level of the current node
+   * @param {object[]} children An array of ClusterTrees or point objects
+   */
+  function ClusterTree(group, zoom, children) {
+    this._group = group;
+    this._zoom = zoom;
+    this._points = [];     // Unclustered points
+    this._clusters = [];   // Child clusters
+    this._count = 0;       // Total number of points
+    this._parent = null;
+    this._coord = null;    // The cached coordinates
+    var that = this;
+
+    // add the children provided in the constructor call
+    (children || []).forEach(function (c) {
+      that._add(c);
+    });
+  }
+
+  /**
+   * Add a point or cluster as a child to the current cluster.
+   * @param {object} pt A ClusterTree or point object
+   * @private
+   */
+  ClusterTree.prototype._add = function (pt) {
+    var inc = 1;
+
+    if (pt instanceof ClusterTree) {
+      // add a child cluster
+      this._clusters.push(pt);
+      inc = pt._count;
+    } else {
+      this._points.push(pt);
+    }
+    pt._parent = this;
+
+    // increment the counter
+    this._increment(inc);
+  };
+
+  /**
+   * Increment the child counter for this and the parent.
+   * @param {number} inc The value to increment by
+   * @private
+   */
+  ClusterTree.prototype._increment = function (inc) {
+    this._coord = null;
+    this._count += inc;
+    if (this._parent) {
+      this._parent._increment(inc);
+    }
+  };
+
+  /**
+   * Return the total number of child points contained in the cluster.
+   * @returns {number} Total points contained
+   */
+  ClusterTree.prototype.count = function () {
+    return this._count;
+  };
+
+  /**
+   * Recursively call a function on all points contained in the cluster.
+   * Calls the function with `this` as the current ClusterTree object, and
+   * arguments to arguments the point object and the zoom level:
+   *   func.call(this, point, zoom)
+   */
+  ClusterTree.prototype.each = function (func) {
+    var i;
+    for (i = 0; i < this._points.length; i += 1) {
+      func.call(this, this._points[i], this._zoom);
+    }
+    for (i = 0; i < this._clusters.length; i += 1) {
+      this._clusters[i].each.call(
+        this._clusters[i],
+        func
+      );
+    }
+  };
+
+  /**
+   * Get the coordinates of the cluster (the mean position of all the points
+   * contained).  This is lazily calculated and cached.
+   */
+  ClusterTree.prototype.coords = function () {
+    var i, center = {x: 0, y: 0};
+    if (this._coord) {
+      return this._coord;
+    }
+    // first add up the points at the node
+    for (i = 0; i < this._points.length; i += 1) {
+      center.x += this._points[i].x;
+      center.y += this._points[i].y;
+    }
+
+    // add up the contribution from the clusters
+    for (i = 0; i < this._clusters.length; i += 1) {
+      center.x += this._clusters[i].coords().x * this._clusters[i].count();
+      center.y += this._clusters[i].coords().y * this._clusters[i].count();
+    }
+
+    return {
+      x: center.x / this.count(),
+      y: center.y / this.count()
+    };
+  };
+
+  /**
+   * This class manages clustering of an array of positions hierarchically.
+   * The algorithm and code was adapted from the Leaflet marker cluster
+   * plugin by David Leaver: https://github.com/Leaflet/Leaflet.markercluster
+   *
+   * @class geo.util.ClusterGroup
+   * @param {object} opts An options object
+   * @param {number} width The width of the window; used for scaling.
+   * @param {number} height The height of the window; used for scaling.
+   * @param {number} maxZoom The maximimum zoom level to calculate
+   * @param {number} radius Proportional to the clustering radius in pixels
+   */
+  function C(opts, width, height) {
+
+    // store the options
+    this._opts = $.extend({
+      maxZoom: 18,
+      radius: 0.05
+    }, opts);
+    this._opts.width = this._opts.width || width || 256;
+    this._opts.height = this._opts.height || height || 256;
+
+    // generate the initial datastructures
+    this._clusters = {}; // clusters at each zoom level
+    this._points = {};   // unclustered points at each zoom level
+
+    var zoom, scl;
+    for (zoom = this._opts.maxZoom; zoom >= 0; zoom -= 1) {
+      scl = this._scaleAtLevel(zoom, this._opts.width, this._opts.height);
+      this._clusters[zoom] = new geo.util.DistanceGrid(scl);
+      this._points[zoom] = new geo.util.DistanceGrid(scl);
+    }
+    this._topClusterLevel = new ClusterTree(this, -1);
+  }
+
+  /**
+   * Returns a characteristic distance scale at a particular zoom level.  This
+   * scale is used to control the clustering radius.  When the renderer supports
+   * it, this call should be replaced by a calculation involving the view port
+   * size in point coordinates at a particular zoom level.
+   * @private
+   */
+  C.prototype._scaleAtLevel = function (zoom, width, height) {
+    return vgl.zoomToHeight(zoom, width, height) / 2 * this._opts.radius;
+  };
+
+  /**
+   * Add a position to the cluster group.
+   * @protected
+   */
+  C.prototype.addPoint = function (point) {
+    var zoom, closest, parent, newCluster, lastParent, z;
+
+    // start at the maximum zoom level and search for nearby
+    //
+    // 1.  existing clusters
+    // 2.  unclustered points
+    //
+    // otherwise add the point as a new unclustered point
+
+    for (zoom = this._opts.maxZoom; zoom >= 0; zoom -= 1) {
+
+      // find near cluster
+      closest = this._clusters[zoom].getNearObject(point);
+      if (closest) {
+        // add the point to the cluster and return
+        closest._add(point);
+        return;
+      }
+
+      // find near point
+      closest = this._points[zoom].getNearObject(point);
+      if (closest) {
+        parent = closest._parent;
+        if (parent) {
+          // remove the point from the parent
+          for (z = parent._points.length - 1; z >= 0; z -= 1) {
+            if (parent._points[z] === closest) {
+              parent._points.splice(z, 1);
+              parent._increment(-1);
+              break;
+            }
+          }
+        }
+
+        if (!parent) {
+          $.noop();
+        }
+        // create a new cluster with these two points
+        newCluster = new ClusterTree(this, zoom, [closest, point]);
+        this._clusters[zoom].addObject(newCluster, newCluster.coords());
+
+        // create intermediate parent clusters that don't exist
+        lastParent = newCluster;
+        for (z = zoom - 1; z > parent._zoom; z -= 1) {
+          lastParent = new ClusterTree(this, z, [lastParent]);
+          this._clusters[z].addObject(lastParent, lastParent.coords());
+        }
+        parent._add(lastParent);
+
+        // remove closest from this zoom level and any above (replace with newCluster)
+        for (z = zoom; z >= 0; z -= 1) {
+          if (!this._points[z].removeObject(closest, closest)) {
+            break;
+          }
+        }
+
+        return;
+      }
+
+      // add an unclustered point
+      this._points[zoom].addObject(point, point);
+    }
+
+    // otherwise add to the top
+    this._topClusterLevel._add(point);
+  };
+
+  /**
+   * Return the unclustered points contained at a given zoom level.
+   * @param {number} zoom The zoom level
+   * @return {object[]} The array of unclustered points
+   */
+  C.prototype.points = function (zoom) {
+    zoom = Math.min(Math.max(Math.floor(zoom), 0), this._opts.maxZoom - 1);
+    return this._points[Math.floor(zoom)].contents();
+  };
+
+  /**
+   * Return the clusters contained at a given zoom level.
+   * @param {number} zoom The zoom level
+   * @return {ClusterTree[]} The array of clusters
+   */
+  C.prototype.clusters = function (zoom) {
+    zoom = Math.min(Math.max(Math.floor(zoom), 0), this._opts.maxZoom - 1);
+    return this._clusters[Math.floor(zoom)].contents();
+  };
+
+  geo.util.ClusterGroup = C;
+})();
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -13385,118 +14671,10 @@ geo.mercator.pjPhi2 = function (ts, e) {
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Create a new instance of latlng
- *
- * A latlng encapsulates geodesy coordinates defined by latitude and
- * longitude (depreciated)
- *
- * @class
- * @returns {geo.latlng}
- */
-//////////////////////////////////////////////////////////////////////////////
-geo.latlng = function (arg1, arg2, arg3) {
-  "use strict";
-  if (!(this instanceof geo.latlng)) {
-    return new geo.latlng(arg1, arg2, arg3);
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * @private
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  var m_this = this,
-      m_lat = arg2 === undefined && arg3 === undefined ? arg1.lat() : arg1,
-      m_lng = arg2 === undefined && arg3 === undefined ? arg1.lng() : arg2,
-      m_elv = arg2 === undefined && arg3 === undefined ? arg1.elv() : arg3;
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Return latitude
-   */
-  //////////////////////////////////////////////////////////////////////////////
-  this.lat = function (val) {
-    if (val === undefined) {
-      return m_lat;
-    } else {
-      m_lat = val;
-    }
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Return longitude
-   */
-  //////////////////////////////////////////////////////////////////////////////
-  this.lng = function (val) {
-    if (val === undefined) {
-      return m_lng;
-    } else {
-      m_lng = val;
-    }
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Return elevation
-   */
-  //////////////////////////////////////////////////////////////////////////////
-  this.elv = function (val) {
-    if (val === undefined) {
-      return m_elv;
-    } else {
-      m_elv = val;
-    }
-  };
-
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Return x coordinate
-   */
-  //////////////////////////////////////////////////////////////////////////////
-  this.x = function (val) {
-    if (val === undefined) {
-      return m_this.lng();
-    } else {
-      m_lng = val;
-    }
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Return y coordinate
-   */
-  //////////////////////////////////////////////////////////////////////////////
-  this.y = function (val) {
-    if (val === undefined) {
-      return m_this.lat();
-    } else {
-      m_lat = val;
-    }
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Return z coordinate
-   */
-  //////////////////////////////////////////////////////////////////////////////
-  this.z = function (val) {
-    if (val === undefined) {
-      return m_this.elv();
-    } else {
-      m_elv = val;
-    }
-  };
-
-
-  return this;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-/**
  * @class
  * @extends geo.sceneObject
+ * @param {Object?} arg An options argument
+ * @param {string} arg.attribution An attribution string to display
  * @returns {geo.layer}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -13535,12 +14713,13 @@ geo.layer = function (arg) {
       m_canvas = null,
       m_renderer = null,
       m_initialized = false,
-      m_rendererName = arg.renderer  === undefined ? "vgl" : arg.renderer,
+      m_rendererName = arg.renderer === undefined ? "vgl" : arg.renderer,
       m_dataTime = geo.timestamp(),
       m_updateTime = geo.timestamp(),
       m_drawTime = geo.timestamp(),
       m_sticky = arg.sticky === undefined ? true : arg.sticky,
-      m_active = arg.active === undefined ? true : arg.active;
+      m_active = arg.active === undefined ? true : arg.active,
+      m_attribution = arg.attribution || null;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -13834,6 +15013,26 @@ geo.layer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Get or set the attribution html content that will displayed with the
+   * layer.  By default, nothing will be displayed.  Note, this content
+   * is **not** html escaped, so care should be taken when renderering
+   * user provided content.
+   * @param {string?} arg An html fragment
+   * @returns {string|this} Chainable as a setter
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.attribution = function (arg) {
+    if (arg !== undefined) {
+      m_attribution = arg;
+      m_this.map().updateAttribution();
+      return m_this;
+    }
+    return m_attribution;
+  };
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Init layer
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -13845,9 +15044,6 @@ geo.layer = function (arg) {
     // Create top level div for the layer
     m_node = $(document.createElement("div"));
     m_node.attr("id", m_name);
-    // TODO: need to position according to offsets from the map element
-    //       and maybe respond to events in case the map element moves
-    //       around the page.
     m_node.css("position", "absolute");
 
     if (m_map) {
@@ -13855,11 +15051,16 @@ geo.layer = function (arg) {
 
     }
 
+    /* Pass along the arguments, but not the map reference */
+    var options = $.extend({}, arg);
+    delete options.map;
     // Share context if have valid one
     if (m_canvas) {
-      m_renderer = geo.createRenderer(m_rendererName, m_this, m_canvas);
+      m_renderer = geo.createRenderer(m_rendererName, m_this, m_canvas,
+                                      options);
     } else {
-      m_renderer = geo.createRenderer(m_rendererName, m_this);
+      m_renderer = geo.createRenderer(m_rendererName, m_this, undefined,
+                                      options);
       m_canvas = m_renderer.canvas();
     }
 
@@ -14409,6 +15610,16 @@ geo.event.transitionstart = "geo_transitionstart";
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.event.transitionend = "geo_transitionend";
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered when the parallel projection mode is changes.
+ *
+ * @property paralellProjection {boolean} True if parallel projection is turned
+ *                                        on.
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.event.parallelprojection = "geo_parallelprojection";
 
 ////////////////////////////////////////////////////////////////////////////
 /**
@@ -15994,6 +17205,9 @@ geo.jsonReader = function (arg) {
     if (geometry.type === 'Polygon') {
       return 'polygon';
     }
+    if (geometry.type === 'MultiPolygon') {
+      return 'multipolygon';
+    }
     return null;
   };
 
@@ -16019,7 +17233,7 @@ geo.jsonReader = function (arg) {
       coordinates = coordinates[0];
     }
 
-    // return an array of latlng's for LineString, MultiPoint, etc...
+    // return an array of points for LineString, MultiPoint, etc...
     return coordinates.map(function (c) {
       return {
         x: c[0],
@@ -16072,6 +17286,28 @@ geo.jsonReader = function (arg) {
               [coordinates],
               style,
               feature.properties
+            ));
+          } else if (type === 'multipolygon') {
+            style.fill = style.fill === undefined ? true : style.fill;
+            style.fillOpacity = (
+              style.fillOpacity === undefined ? 0.25 : style.fillOpacity
+            );
+
+            coordinates = feature.geometry.coordinates.map(function (c) {
+              return c[0].map(function (el) {
+                return {
+                  x: el[0],
+                  y: el[1],
+                  z: el[2]
+                };
+              });
+            });
+
+            allFeatures.push(m_this._addFeature(
+                'line',
+                coordinates,
+                style,
+                feature.properties
             ));
           }
         } else {
@@ -16132,7 +17368,27 @@ geo.registerFileReader('jsonReader', geo.jsonReader);
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Create a new instance of class map
+ * Create a new instance of class map.
+ *
+ * Creation tags a dictionary of arguments, which can include:
+ *  center: {x: (center x value), y: (center y value)}
+ *  gcs:
+ *  uigcs:
+ *  node:
+ *  layers:
+ *  zoom: (number) - initial zoom level
+ *  min: (number) - minimum zoom level
+ *  max: (number) - maximum zoom level
+ *  width:
+ *  height:
+ *  parallelProjection: (bool) - true to use parallel projection, false to use
+ *      perspective.
+ *  discreteZoom: (bool) - true to only allow integer zoom levels, false to
+ *      allow any zoom level.
+ *  autoResize:
+ *  clampBounds:
+ *  interactor:
+ *  clock:
  *
  * Creates a new map inside of the given HTML layer (Typically DIV)
  * @class
@@ -16141,7 +17397,7 @@ geo.registerFileReader('jsonReader', geo.jsonReader);
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.map = function (arg) {
-  "use strict";
+  'use strict';
   if (!(this instanceof geo.map)) {
     return new geo.map(arg);
   }
@@ -16162,10 +17418,10 @@ geo.map = function (arg) {
       m_node = $(arg.node),
       m_width = arg.width || m_node.width(),
       m_height = arg.height || m_node.height(),
-      m_gcs = arg.gcs === undefined ? "EPSG:4326" : arg.gcs,
-      m_uigcs = arg.uigcs === undefined ? "EPSG:4326" : arg.uigcs,
+      m_gcs = arg.gcs === undefined ? 'EPSG:4326' : arg.gcs,
+      m_uigcs = arg.uigcs === undefined ? 'EPSG:4326' : arg.uigcs,
       m_center = { x: 0, y: 0 },
-      m_zoom = arg.zoom === undefined ? 1 : arg.zoom,
+      m_zoom = arg.zoom === undefined ? 4 : arg.zoom,
       m_baseLayer = null,
       m_fileReader = null,
       m_interactor = null,
@@ -16173,6 +17429,8 @@ geo.map = function (arg) {
       m_transition = null,
       m_queuedTransition = null,
       m_clock = null,
+      m_parallelProjection = arg.parallelProjection ? true : false,
+      m_discreteZoom = arg.discreteZoom ? true : false,
       m_bounds = {};
 
   arg.center = geo.util.normalizeCoordinates(arg.center);
@@ -16223,12 +17481,27 @@ geo.map = function (arg) {
    * @returns {Number|geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.zoom = function (val, direction) {
+  this.zoom = function (val, direction, ignoreDiscreteZoom) {
     var base, evt, recenter = false;
     if (val === undefined) {
       return m_zoom;
     }
 
+    /* The ignoreDiscreteZoom flag is intended to allow non-integer zoom values
+     * during animation. */
+    if (m_discreteZoom && val !== Math.round(val) && !ignoreDiscreteZoom) {
+      /* If we are using discrete zoom levels and the value we were given is
+       * not an integer, then try to detect if we are enlarging or shrinking
+       * and perform the expected behavior.  Otherwise, make sure we are at an
+       * integer level.  We may need to revisit for touch zoom events. */
+      if (m_zoom !== Math.round(m_zoom) || Math.abs(val - m_zoom) < 0.01) {
+        val = Math.round(m_zoom);
+      } else if (val < m_zoom) {
+        val = Math.min(Math.round(val), m_zoom - 1);
+      } else if (val > m_zoom) {
+        val = Math.max(Math.round(val), m_zoom + 1);
+      }
+    }
     val = Math.min(m_validZoomRange.max, Math.max(val, m_validZoomRange.min));
     if (val === m_zoom) {
       return m_this;
@@ -16242,8 +17515,9 @@ geo.map = function (arg) {
       screenPosition: direction,
       eventType: geo.event.zoom
     };
+
     if (base) {
-      base.renderer().geoTrigger(geo.event.zoom, evt, true);
+      base.geoTrigger(geo.event.zoom, evt, true);
     }
 
     recenter = evt.center;
@@ -16277,6 +17551,7 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.pan = function (delta, force) {
+
     var base = m_this.baseLayer(),
         evt, pt, corner1, corner2;
 
@@ -16316,7 +17591,7 @@ geo.map = function (arg) {
     };
     // first pan the base layer
     if (base) {
-      base.renderer().geoTrigger(geo.event.pan, evt, true);
+      base.geoTrigger(geo.event.pan, evt, true);
     }
 
     // If the base renderer says the pan is invalid, then cancel the action.
@@ -16330,7 +17605,9 @@ geo.map = function (arg) {
     m_this._updateBounds();
 
     m_this.children().forEach(function (child) {
-      child.geoTrigger(geo.event.pan, evt, true);
+      if (child !== base) {
+        child.geoTrigger(geo.event.pan, evt, true);
+      }
     });
 
     m_this.modified();
@@ -16369,6 +17646,35 @@ geo.map = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Get/Set parallel projection setting of the map
+   *
+   * @returns {Boolean|geo.map}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.parallelProjection = function (val) {
+    if (val === undefined) {
+      return m_parallelProjection;
+    }
+    val = val ? true : false;
+    if (m_parallelProjection !== val) {
+      var base, evt = {
+        eventType: geo.event.parallelprojection,
+        parallelProjection: val
+      };
+
+      m_parallelProjection = val;
+      base = m_this.baseLayer();
+      base.geoTrigger(geo.event.parallelprojection, evt, true);
+      m_this.children().forEach(function (child) {
+        child.geoTrigger(geo.event.parallelprojection, evt, true);
+      });
+      m_this.modified();
+    }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Add layer to the map
    *
    * @param {geo.layer} layer to be added to the map
@@ -16376,10 +17682,12 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.createLayer = function (layerName, arg) {
+    arg = arg || {};
+    arg.parallelProjection = m_parallelProjection;
     var newLayer = geo.createLayer(
       layerName, m_this, arg);
 
-    if (newLayer !== null || newLayer !== undefined) {
+    if (newLayer) {
       newLayer._resize(m_x, m_y, m_width, m_height);
     } else {
       return null;
@@ -16388,13 +17696,10 @@ geo.map = function (arg) {
     if (newLayer.referenceLayer() || m_this.children().length === 0) {
       m_this.baseLayer(newLayer);
     }
+
+    newLayer._resize(m_x, m_y, m_width, m_height); // this call initializes the camera
     m_this.addChild(newLayer);
     m_this.modified();
-
-    // TODO: need a better way to set the initial coordinates of a layer
-    if (!newLayer.referenceLayer()) {
-      m_this.center(m_this.center());
-    }
 
     m_this.geoTrigger(geo.event.layerAdd, {
       type: geo.event.layerAdd,
@@ -16499,7 +17804,7 @@ geo.map = function (arg) {
   /**
    * Convert from gcs coordinates to display coordinates
    *
-   * @param {*} input {[geo.latlng], [{x:_x, y: _y}], [x1,y1, x2, y2]}
+   * @param {*} input {[[{x:_x, y: _y}], [x1,y1, x2, y2]}
    * @return {object}
    *
    * @note Currently only lat-lon inputs are supported
@@ -16515,7 +17820,7 @@ geo.map = function (arg) {
       output = m_baseLayer.renderer().worldToDisplay(world);
     } else {
       /// Everything else
-      throw "Conversion method latLonToDisplay does not handle " + input;
+      throw 'Conversion method latLonToDisplay does not handle ' + input;
     }
 
     return output;
@@ -16535,7 +17840,7 @@ geo.map = function (arg) {
       output = m_baseLayer.renderer().displayToWorld(input);
       output = m_baseLayer.fromLocal(output);
     } else {
-      throw "Conversion method displayToGcs does not handle " + input;
+      throw 'Conversion method displayToGcs does not handle ' + input;
     }
     return output;
   };
@@ -16637,9 +17942,9 @@ geo.map = function (arg) {
     if (!layer) {
       renderer = opts.renderer;
       if (!renderer) {
-        renderer = "d3";
+        renderer = 'd3';
       }
-      layer = m_this.createLayer("feature", {renderer: renderer});
+      layer = m_this.createLayer('feature', {renderer: renderer});
     }
     opts.layer = layer;
     opts.renderer = renderer;
@@ -16656,9 +17961,10 @@ geo.map = function (arg) {
     var i;
 
     if (m_node === undefined || m_node === null) {
-      throw "Map require DIV node";
+      throw 'Map require DIV node';
     }
 
+    m_node.css('position', 'relative');
     if (arg !== undefined && arg.layers !== undefined) {
       for (i = 0; i < arg.layers.length; i += 1) {
         if (i === 0) {
@@ -16698,24 +18004,24 @@ geo.map = function (arg) {
       m_this.interactor().destroy();
       m_this.interactor(null);
     }
-    m_this.node().off(".geo");
-    $(window).off("resize", resizeSelf);
+    m_this.node().off('.geo');
+    $(window).off('resize', resizeSelf);
     s_exit();
   };
 
   this._init(arg);
 
   // set up drag/drop handling
-  this.node().on("dragover.geo", function (e) {
+  this.node().on('dragover.geo', function (e) {
     var evt = e.originalEvent;
 
     if (m_this.fileReader()) {
       evt.stopPropagation();
       evt.preventDefault();
-      evt.dataTransfer.dropEffect = "copy";
+      evt.dataTransfer.dropEffect = 'copy';
     }
   })
-  .on("drop.geo", function (e) {
+  .on('drop.geo', function (e) {
     var evt = e.originalEvent, reader = m_this.fileReader(),
         i, file;
 
@@ -16835,10 +18141,10 @@ geo.map = function (arg) {
 
     // Transform zoom level into z-coordinate and inverse
     function zoom2z(z) {
-      return 360 * Math.pow(2, -1 - z);
+      return vgl.zoomToHeight(z + 1, m_width, m_height);
     }
     function z2zoom(z) {
-      return -1 - Math.log2(z / 360);
+      return vgl.heightToZoom(z, m_width, m_height) - 1;
     }
 
     var defaultOpts = {
@@ -16865,7 +18171,7 @@ geo.map = function (arg) {
       },
       end: {
         center: defaultOpts.center,
-        zoom: defaultOpts.zoom
+        zoom: m_discreteZoom ? Math.round(defaultOpts.zoom) : defaultOpts.zoom
       },
       ease: defaultOpts.ease,
       zCoord: defaultOpts.zCoord,
@@ -16944,7 +18250,7 @@ geo.map = function (arg) {
         x: p[0],
         y: p[1]
       });
-      m_this.zoom(p[2]);
+      m_this.zoom(p[2], undefined, true);
 
       window.requestAnimationFrame(anim);
     }
@@ -17019,11 +18325,11 @@ geo.map = function (arg) {
    * Get the center zoom level necessary to display the given lat/lon bounds.
    *
    * @param {geo.geoBounds} [bds] The requested map bounds
-   * @return {object} Object containing keys "center" and "zoom"
+   * @return {object} Object containing keys 'center' and 'zoom'
    */
   ////////////////////////////////////////////////////////////////////////////
   this.zoomAndCenterFromBounds = function (bds) {
-    var ll, ur, dx, dy, zx, zy, center;
+    var ll, ur, dx, dy, zx, zy, center, zoom;
 
     // Caveat:
     // Much of the following is invalid for alternative map projections.  These
@@ -17035,7 +18341,7 @@ geo.map = function (arg) {
     ur = geo.util.normalizeCoordinates(bds.upperRight || {});
 
     if (ll.x >= ur.x || ll.y >= ur.y) {
-      throw new Error("Invalid bounds provided");
+      throw new Error('Invalid bounds provided');
     }
 
     center = {
@@ -17050,11 +18356,95 @@ geo.map = function (arg) {
     // calculate the zoom levels necessary to fit x and y bounds
     zx = m_zoom - Math.log2((ur.x - ll.x) / dx);
     zy = m_zoom - Math.log2((ur.y - ll.y) / dy);
+    zoom = Math.min(zx, zy);
+    if (m_discreteZoom) {
+      zoom = Math.floor(zoom);
+    }
 
     return {
-      zoom: Math.min(zx, zy),
+      zoom: zoom,
       center: center
     };
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/set the discrete zoom flag.
+   *
+   * @param {bool} If specified, the discrete zoom flag.
+   * @return {bool} The current discrete zoom flag if no parameter is
+   *                specified, otherwise the map object.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.discreteZoom = function (discreteZoom) {
+    if (discreteZoom === undefined) {
+      return m_discreteZoom;
+    }
+    discreteZoom = discreteZoom ? true : false;
+    if (m_discreteZoom !== discreteZoom) {
+      m_discreteZoom = discreteZoom;
+      if (m_discreteZoom) {
+        m_this.zoom(Math.round(m_this.zoom()));
+      }
+    }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Update the attribution notice displayed on the bottom right corner of
+   * the map.  The content of this notice is managed by individual layers.
+   * This method queries all of the visible layers and joins the individual
+   * attribution notices into a single element.  By default, this method
+   * is called on each of the following events:
+   *
+   *   * geo.event.layerAdd
+   *   * geo.event.layerRemove
+   *
+   * In addition, layers should call this method when their own attribution
+   * notices has changed.  Users, in general, should not need to call this.
+   * @returns {this} Chainable
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.updateAttribution = function () {
+    // clear any existing attribution content
+    m_this.node().find('.geo-attribution').remove();
+
+    // generate a new attribution node
+    var $a = $('<div/>')
+      .addClass('geo-attribution')
+      .css({
+        position: 'absolute',
+        right: '0px',
+        bottom: '0px',
+        'padding-right': '5px',
+        cursor: 'auto',
+        font: '11px/1.5 "Helvetica Neue", Arial, Helvetica, sans-serif',
+        'z-index': '1001',
+        background: 'rgba(255,255,255,0.7)',
+        clear: 'both',
+        display: 'block',
+        'pointer-events': 'auto'
+      }).on('mousedown', function (evt) {
+        evt.stopPropagation();
+      });
+
+    // append content from each layer
+    m_this.children().forEach(function (layer) {
+      var content = layer.attribution();
+      if (content) {
+        $('<span/>')
+          .addClass('geo-attribution-layer')
+          .css({
+            'padding-left': '5px'
+          })
+          .html(content)
+          .appendTo($a);
+      }
+    });
+
+    $a.appendTo(m_this.node());
+    return m_this;
   };
 
   this.interactor(arg.interactor || geo.mapInteractor());
@@ -17067,6 +18457,12 @@ geo.map = function (arg) {
   if (arg.autoResize) {
     $(window).resize(resizeSelf);
   }
+
+  // attach attribution updates to layer events
+  m_this.geoOn([
+    geo.event.layerAdd,
+    geo.event.layerRemove
+  ], m_this.updateAttribution);
 
   return this;
 };
@@ -17088,12 +18484,12 @@ geo.map = function (arg) {
  * @returns {geo.map|null}
  */
 geo.map.create = function (spec) {
-  "use strict";
+  'use strict';
 
   var map = geo.map(spec);
 
   if (!map) {
-    console.warn("Could not create map.");
+    console.warn('Could not create map.');
     return null;
   }
 
@@ -17718,6 +19114,8 @@ inherit(geo.feature, geo.sceneObject);
  * Create a new instance of class pointFeature
  *
  * @class
+ * @param {object} arg Options object
+ * @param {boolean} arg.clustering Enable point clustering
  * @extends geo.feature
  * @returns {geo.pointFeature}
  */
@@ -17740,7 +19138,114 @@ geo.pointFeature = function (arg) {
       m_rangeTree = null,
       m_rangeTreeTime = geo.timestamp(),
       s_data = this.data,
-      m_maxRadius = 0;
+      m_maxRadius = 0,
+      m_clustering = arg.clustering,
+      m_clusterTree = null,
+      m_allData = [],
+      m_lastZoom = null,
+      m_ignoreData = false; // flag to ignore data() calls made locally
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set clustering option
+   *
+   * @returns {geo.pointFeature|boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.clustering = function (val) {
+    if (val === undefined) {
+      return m_clustering;
+    }
+    if (m_clustering && !val) {
+      // Throw out the cluster tree and reset the data
+      m_clusterTree = null;
+      m_clustering = false;
+      s_data(m_allData);
+      m_allData = null;
+    } else if (!m_clustering && val) {
+      // Generate the cluster tree
+      m_clustering = true;
+      m_this._clusterData();
+    }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Generate the clustering tree from positions.  This might be async in the
+   * future.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._clusterData = function () {
+    if (!m_clustering) {
+      // clustering is not enabled, so this is a no-op
+      return;
+    }
+
+    // set clustering options to default if an options argument wasn't supplied
+    var opts = m_clustering === true ? {radius: 0.01} : m_clustering;
+
+    // generate the cluster tree from the raw data
+    var position = m_this.position();
+    m_clusterTree = new geo.util.ClusterGroup(
+        opts, this.layer().width(), this.layer().height());
+
+    m_allData.forEach(function (d, i) {
+
+      // for each point in the data set normalize the coordinate
+      // representation and add the point to the cluster treee
+      var pt = geo.util.normalizeCoordinates(position(d, i));
+      pt.index = i;
+      m_clusterTree.addPoint(pt);
+    });
+
+    // reset the last zoom state and trigger a redraw at the current zoom level
+    m_lastZoom = null;
+    m_this._handleZoom(m_this.layer().map().zoom());
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Handle zoom events for clustering.  This keeps track of the last
+   * clustering level, and only regenerates the displayed points when the
+   * zoom level changes.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._handleZoom = function (zoom) {
+    // get the current zoom level rounded down
+    var z = Math.floor(zoom);
+
+    if (!m_clustering || z === m_lastZoom) {
+      // short cut when there is nothing to do
+      return;
+    }
+
+    // store the current zoom level privately
+    m_lastZoom = z;
+
+    // get the raw data elements for the points at the current level
+    var data = m_clusterTree.points(z).map(function (d) {
+      return m_allData[d.index];
+    });
+
+    // append the clusters at the current level
+    m_clusterTree.clusters(z).forEach(function (d) {
+      // mark the datum as a cluster for accessor methods
+      d.__cluster = true;
+
+      // store all of the data objects for each point in the cluster as __data
+      d.__data = [];
+      d.obj.each(function (e) {
+        d.__data.push(m_allData[e.index]);
+      });
+      data.push(d);
+    });
+
+    // prevent recomputing the clustering and set the new data array
+    m_ignoreData = true;
+    m_this.data(data);
+    m_this.layer().map().draw(); // replace with m_this.draw() when gl is fixed
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -17753,7 +19258,14 @@ geo.pointFeature = function (arg) {
     if (val === undefined) {
       return m_this.style("position");
     } else {
-      m_this.style("position", val);
+      val = geo.util.ensureFunction(val);
+      m_this.style("position", function (d, i) {
+        if (d.__cluster) {
+          return d;
+        } else {
+          return val(d, i);
+        }
+      });
       m_this.dataTime().modified();
       m_this.modified();
     }
@@ -17899,7 +19411,13 @@ geo.pointFeature = function (arg) {
     if (data === undefined) {
       return s_data();
     }
-    s_data(data);
+    if (m_clustering && !m_ignoreData) {
+      m_allData = data;
+      m_this._clusterData();
+    } else {
+      s_data(data);
+    }
+    m_ignoreData = false;
     return m_this;
   };
 
@@ -17957,14 +19475,14 @@ geo.pointFeature = function (arg) {
     var defaultStyle = $.extend(
       {},
       {
-        radius: 10.0,
+        radius: 5.0,
         stroke: true,
-        strokeColor: { r: 0.0, g: 1.0, b: 0.0 },
-        strokeWidth: 2.0,
+        strokeColor: { r: 0.851, g: 0.604, b: 0.0 },
+        strokeWidth: 1.25,
         strokeOpacity: 1.0,
-        fillColor: { r: 1.0, g: 0.0, b: 0.0 },
+        fillColor: { r: 1.0, g: 0.839, b: 0.439 },
         fill: true,
-        fillOpacity: 1.0,
+        fillOpacity: 0.8,
         sprites: false,
         sprites_image: null,
         position: function (d) { return d; }
@@ -17978,6 +19496,11 @@ geo.pointFeature = function (arg) {
 
     m_this.style(defaultStyle);
     m_this.dataTime().modified();
+
+    // bind to the zoom handler for point clustering
+    m_this.geoOn(geo.event.zoom, function (evt) {
+      m_this._handleZoom(evt.zoomLevel);
+    });
   };
 
   return m_this;
@@ -18356,7 +19879,7 @@ geo.polygonFeature = function (arg) {
       s_data = this.data,
       m_coordinates = {outer: [], inner: []};
 
-  if (arg.line === undefined) {
+  if (arg.polygon === undefined) {
     m_polygon = function (d) {
       return d;
     };
@@ -18419,7 +19942,7 @@ geo.polygonFeature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get/Set line accessor
+   * Get/Set polygon accessor
    *
    * @returns {geo.pointFeature}
    */
@@ -18556,14 +20079,12 @@ geo.planeFeature = function (arg) {
       return m_origin;
     } else if (val instanceof Array) {
       if (val.length > 3 || val.length < 2) {
-        throw "Upper left point requires point in 2 or 3 dimension";
+        throw "Origin point requires point in 2 or 3 dimension";
       }
       m_origin = val.slice(0);
       if (m_origin.length === 2) {
         m_origin[2] = m_defaultDepth;
       }
-    } else if (val instanceof geo.latlng) {
-      m_origin = [val.x(), val.y(), m_defaultDepth];
     }
     m_this.dataTime().modified();
     m_this.modified();
@@ -18588,8 +20109,6 @@ geo.planeFeature = function (arg) {
       if (m_upperLeft.length === 2) {
         m_upperLeft[2] = m_defaultDepth;
       }
-    } else if (val instanceof geo.latlng) {
-      m_upperLeft = [val.x(), val.y(), m_defaultDepth];
     }
     m_this.dataTime().modified();
     m_this.modified();
@@ -18608,15 +20127,13 @@ geo.planeFeature = function (arg) {
       return m_lowerRight;
     } else if (val instanceof Array) {
       if (val.length > 3 || val.length < 2) {
-        throw "Upper left point requires point in 2 or 3 dimension";
+        throw "Lower right point requires point in 2 or 3 dimension";
       }
       m_lowerRight = val.slice(0);
       if (m_lowerRight.length === 2) {
         m_lowerRight[2] = m_defaultDepth;
       }
       m_this.dataTime().modified();
-    } else if (val instanceof geo.latlng) {
-      m_lowerRight = [val.x(), val.y(), m_defaultDepth];
     }
     m_this.dataTime().modified();
     m_this.modified();
@@ -19014,6 +20531,453 @@ inherit(geo.graphFeature, geo.feature);
 
 //////////////////////////////////////////////////////////////////////////////
 /**
+ * Create a new instance of class contourFeature
+ *
+ * @class
+ * @extends geo.feature
+ * @returns {geo.contourFeature}
+ *
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.contourFeature = function (arg) {
+  'use strict';
+  if (!(this instanceof geo.contourFeature)) {
+    return new geo.contourFeature(arg);
+  }
+  arg = arg || {};
+  geo.feature.call(this, arg);
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  var m_this = this,
+      m_contour = {},
+      s_init = this._init,
+      s_data = this.data;
+
+  if (arg.contour === undefined) {
+    m_contour = function (d) {
+      return d;
+    };
+  } else {
+    m_contour = arg.contour;
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Override the parent data method to keep track of changes to the
+   * internal coordinates.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.data = function (arg) {
+    var ret = s_data(arg);
+    return ret;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set contour accessor
+   *
+   * @returns {geo.pointFeature}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.contour = function (arg1, arg2) {
+    if (arg1 === undefined) {
+      return m_contour;
+    }
+    if (typeof arg1 === 'string' && arg2 === undefined) {
+      return m_contour[arg1];
+    }
+    if (arg2 === undefined) {
+      var contour = $.extend(
+        {},
+        {
+          gridWidth: function () {
+            if (arg1.gridHeight) {
+              return Math.floor(m_this.data().length / arg1.gridHeight);
+            }
+            return Math.floor(Math.sqrt(m_this.data().length));
+          },
+          gridHeight: function () {
+            if (arg1.gridWidth) {
+              return Math.floor(m_this.data().length / arg1.gridWidth);
+            }
+            return Math.floor(Math.sqrt(m_this.data().length));
+          },
+          minColor: 'black',
+          minOpacity: 0,
+          maxColor: 'black',
+          maxOpacity: 0,
+          /* 9-step based on paraview bwr colortable */
+          colorRange: [
+            {r: 0.07514311, g: 0.468049805, b: 1},
+            {r: 0.468487184, g: 0.588057293, b: 1},
+            {r: 0.656658579, g: 0.707001303, b: 1},
+            {r: 0.821573924, g: 0.837809045, b: 1},
+            {r: 0.943467973, g: 0.943498599, b: 0.943398095},
+            {r: 1, g: 0.788626485, b: 0.750707739},
+            {r: 1, g: 0.6289553, b: 0.568237474},
+            {r: 1, g: 0.472800903, b: 0.404551679},
+            {r: 0.916482116, g: 0.236630659, b: 0.209939162}
+          ]
+        },
+        m_contour,
+        arg1
+      );
+      m_contour = contour;
+    } else {
+      m_contour[arg1] = arg2;
+    }
+    m_this.modified();
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * A uniform getter that always returns a function even for constant values.
+   * If undefined input, return all the contour values as an object.
+   *
+   * @param {string|undefined} key
+   * @return {function}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.contour.get = function (key) {
+    if (key === undefined) {
+      var all = {}, k;
+      for (k in m_contour) {
+        if (m_contour.hasOwnProperty(k)) {
+          all[k] = m_this.contour.get(k);
+        }
+      }
+      return all;
+    }
+    return geo.util.ensureFunction(m_contour[key]);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set position accessor
+   *
+   * @returns {geo.pointFeature}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.position = function (val) {
+    if (val === undefined) {
+      return m_this.style('position');
+    } else {
+      m_this.style('position', val);
+      m_this.dataTime().modified();
+      m_this.modified();
+    }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Create a set of vertices, values at the vertices, and opacities at the
+   * vertices.  Create a set of triangles of indices into the vertex array.
+   * Create a color and opacity map corresponding to the values.
+   *
+   * @returns: an object with pos, value, opacity, elements, minValue,
+   *           maxValue, minColor, maxColor, colorMap, factor.  If there is no
+   *           contour data that can be used, only elements is guaranteed to
+   *           exist, and it will be a zero-length array.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.createContours = function () {
+    var i, i3, j, idx, k, val, numPts, usedPts = 0, usePos, item,
+        idxMap = {},
+        minval, maxval, range,
+        contour = m_this.contour,
+        data = m_this.data(),
+        posFunc = m_this.position(), posVal,
+        gridW = contour.get('gridWidth')(),
+        gridH = contour.get('gridHeight')(),
+        x0 = contour.get('x0')(),
+        y0 = contour.get('y0')(),
+        dx = contour.get('dx')(),
+        dy = contour.get('dy')(),
+        opacityFunc = m_this.style.get('opacity'),
+        opacityRange = contour.get('opacityRange')(),
+        rangeValues = contour.get('rangeValues')(),
+        valueFunc = m_this.style.get('value'), values = [],
+        stepped = contour.get('stepped')(),
+        wrapLong = contour.get('wrapLongitude')(),
+        calcX, skipColumn, x, origI, /* used for wrapping */
+        gridWorig = gridW,  /* can be different when wrapping */
+        result = {
+          minValue: contour.get('min')(),
+          maxValue: contour.get('max')(),
+          stepped: stepped === undefined || stepped ? true : false,
+          wrapLongitude: wrapLong === undefined || wrapLong ? true : false,
+          colorMap: [],
+          elements: []
+        };
+    /* Create the min/max colors and the color array */
+    result.minColor = $.extend({a: contour.get('minOpacity')() || 0},
+        geo.util.convertColor(contour.get('minColor')()));
+    result.maxColor = $.extend({a: contour.get('maxOpacity')() || 0},
+        geo.util.convertColor(contour.get('maxColor')()));
+    contour.get('colorRange')().forEach(function (clr, idx) {
+      result.colorMap.push($.extend(
+          {a: opacityRange && opacityRange[idx] !== undefined ?
+          opacityRange[idx] : 1}, geo.util.convertColor(clr)));
+    });
+    /* Determine which values are usable */
+    if (gridW * gridH > data.length) {
+      gridH = Math.floor(data.length) / gridW;
+    }
+    /* If we are not using the position values (we are using x0, y0, dx, dy),
+     * and wrapLongitude is turned on, and the position spans 180 degrees,
+     * duplicate one or two columns of points at opposite ends of the map. */
+    usePos = (x0 === null || x0 === undefined || y0 === null ||
+        y0 === undefined || !dx || !dy);
+    if (!usePos && result.wrapLongitude && (x0 < -180 || x0 > 180 ||
+        x0 + dx * (gridW - 1) < -180 || x0 + dx * (gridW - 1) > 180) &&
+        dx > -180 && dx < 180) {
+      calcX = [];
+      for (i = 0; i < gridW; i += 1) {
+        x = x0 + i * dx;
+        while (x < -180) { x += 360; }
+        while (x > 180) { x -= 360; }
+        if (i && Math.abs(x - calcX[calcX.length - 1]) > 180) {
+          if (x > calcX[calcX.length - 1]) {
+            calcX.push(x - 360);
+            calcX.push(calcX[calcX.length - 2] + 360);
+          } else {
+            calcX.push(x + 360);
+            calcX.push(calcX[calcX.length - 2] - 360);
+          }
+          skipColumn = i;
+        }
+        calcX.push(x);
+      }
+      gridW += 2;
+      if (Math.abs(Math.abs(gridWorig * dx) - 360) < 0.01) {
+        gridW += 1;
+        x = x0 + gridWorig * dx;
+        while (x < -180) { x += 360; }
+        while (x > 180) { x -= 360; }
+        calcX.push(x);
+      }
+    }
+    /* Calculate the value for point */
+    numPts = gridW * gridH;
+    for (i = 0; i < numPts; i += 1) {
+      if (skipColumn === undefined) {
+        val = parseFloat(valueFunc(data[i]));
+      } else {
+        j = Math.floor(i / gridW);
+        origI = i - j * gridW;
+        origI += (origI > skipColumn ? -2 : 0);
+        if (origI >= gridWorig) {
+          origI -= gridWorig;
+        }
+        origI += j * gridWorig;
+        val = parseFloat(valueFunc(data[origI]));
+      }
+      values[i] = isNaN(val) ? null : val;
+      if (values[i] !== null) {
+        idxMap[i] = usedPts;
+        usedPts += 1;
+        if (minval === undefined) {
+          minval = maxval = values[i];
+        }
+        if (values[i] < minval) {
+          minval = values[i];
+        }
+        if (values[i] > maxval) {
+          maxval = values[i];
+        }
+      }
+    }
+    if (!usedPts) {
+      return result;
+    }
+    if (!$.isNumeric(result.minValue)) {
+      result.minValue = minval;
+    }
+    if (!$.isNumeric(result.maxValue)) {
+      result.maxValue = maxval;
+    }
+    if (!rangeValues || rangeValues.length !== result.colorMap.length + 1) {
+      rangeValues = null;
+    }
+    if (rangeValues) {  /* ensure increasing monotonicity */
+      for (k = 1; k < rangeValues.length; k += 1) {
+        if (rangeValues[k] > rangeValues[k + 1]) {
+          rangeValues = null;
+          break;
+        }
+      }
+    }
+    if (rangeValues) {
+      result.minValue = rangeValues[0];
+      result.maxValue = rangeValues[rangeValues.length - 1];
+    }
+    range = result.maxValue - result.minValue;
+    if (!range) {
+      result.colorMap = result.colorMap.slice(0, 1);
+      range = 1;
+      rangeValues = null;
+    }
+    result.rangeValues = rangeValues;
+    result.factor = result.colorMap.length / range;
+    /* Create triangles */
+    for (j = idx = 0; j < gridH - 1; j += 1, idx += 1) {
+      for (i = 0; i < gridW - 1; i += 1, idx += 1) {
+        if (values[idx] !== null && values[idx + 1] !== null &&
+            values[idx + gridW] !== null &&
+            values[idx + gridW + 1] !== null && i !== skipColumn) {
+          result.elements.push(idxMap[idx]);
+          result.elements.push(idxMap[idx + 1]);
+          result.elements.push(idxMap[idx + gridW]);
+          result.elements.push(idxMap[idx + gridW + 1]);
+          result.elements.push(idxMap[idx + gridW]);
+          result.elements.push(idxMap[idx + 1]);
+        }
+      }
+    }
+    /* Only locate the points that are in use. */
+    result.pos = new Array(usedPts * 3);
+    result.value = new Array(usedPts);
+    result.opacity = new Array(usedPts);
+    for (j = i = i3 = 0; j < numPts; j += 1) {
+      val = values[j];
+      if (val !== null) {
+        item = data[j];
+        if (usePos) {
+          posVal = posFunc(item);
+          result.pos[i3]     = posVal.x;
+          result.pos[i3 + 1] = posVal.y;
+          result.pos[i3 + 2] = posVal.z || 0;
+        } else {
+          if (skipColumn === undefined) {
+            result.pos[i3]   = x0 + dx * (j % gridW);
+          } else {
+            result.pos[i3]   = calcX[j % gridW];
+          }
+          result.pos[i3 + 1] = y0 + dy * Math.floor(j / gridW);
+          result.pos[i3 + 2] = 0;
+        }
+        result.opacity[i] = opacityFunc(item);
+        if (rangeValues && val >= result.minValue && val <= result.maxValue) {
+          for (k = 1; k < rangeValues.length; k += 1) {
+            if (val <= rangeValues[k]) {
+              result.value[i] = k - 1 + (val - rangeValues[k - 1]) /
+                  (rangeValues[k] - rangeValues[k - 1]);
+              break;
+            }
+          }
+        } else {
+          result.value[i] = (val - result.minValue) * result.factor;
+        }
+        i += 1;
+        i3 += 3;
+      }
+    }
+    return result;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Initialize
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._init = function (arg) {
+    s_init.call(m_this, arg);
+
+    var defaultStyle = $.extend(
+      {},
+      {
+        opacity: 1.0,
+        position: function (d) {
+          return {x: d.x, y: d.y, z: d.z};
+        },
+        value: function (d) {
+          return m_this.position()(d).z;
+        }
+      },
+      arg.style === undefined ? {} : arg.style
+    );
+
+    m_this.style(defaultStyle);
+
+    if (m_contour) {
+      m_this.dataTime().modified();
+    }
+  };
+
+  this._init(arg);
+  return this;
+};
+
+inherit(geo.contourFeature, geo.feature);
+
+/* Example:
+
+layer.createFeature('contour', {
+})
+.data(<array with w x h elements>)
+.position(function (d) {
+  return { x: <longitude>, y: <latitude>, z: <altitude>};
+})
+.style({
+  opacity: function (d) {
+    return <opacity of grid point>;
+  },
+  value: function (d) {            // defaults to position().z
+    return <contour value>;
+  }
+})
+.contour({
+  gridWidth: <width of grid>,
+  gridHeight: <height of grid>,
+  x0: <the x coordinate of the 0th point in the value array>,
+  y0: <the y coordinate of the 0th point in the value array>,
+  dx: <the distance in the x direction between the 0th and 1st point in the
+    value array>,
+  dy: <the distance in the y direction between the 0th and (gridWidth)th point
+    in the value array>,
+  wrapLongitude: <boolean (default true).  If true, AND the position array is
+    not used, assume the x coordinates is longitude and should be adjusted to
+    be within -180 to 180.  If the data spans 180 degrees, the points or
+    squares will be duplicated to ensure that the map is covered from -180 to
+    180 as appropriate.  Set this to false if using a non longitude x
+    coordinate.  This is ignored if the position array is used.>,
+  min: <optional minimum contour value, otherwise taken from style.value>,
+  max: <optional maximum contour value, otherwise taken from style.value>,
+  minColor: <color for any value below the minimum>,
+  minOpacity: <opacity for any value below the minimum>,
+  maxColor: <color for any value above the maximum>,
+  maxOpacity: <opacity for any value above the maximum>,
+  stepped: <boolean (default true).  If false, smooth transitions between
+    colors>,
+  colorRange: [<array of colors used for the contour>],
+  opacityRange: [<optional array of opacities used for the contour, expected to
+    be the same length as colorRange>],
+  rangeValues: [<if specified, instead of spacing the colors linearly, use this
+    spacing.  Must be increasing monotonic and one value longer than the length
+    of colorRange>]
+})
+
+Notes:
+* The position array is only used for position if not all of x0, y0, dx, and dy
+    are specified (not null or undefined).  If a value array is not specified,
+    the position array could still be used for the value.
+* If the value() of a grid point is null or undefined, that point will not be
+    included in the contour display.  Since the values are on a grid, if this
+    point is in the interior of the grid, this can remove up to four squares.
+* Only one of gridWidth and gridHeight needs to be specified.  If both are
+    specified and gridWidth * gridHeight < data().length, not all the data will
+    be used.  If neither are specified, floor(sqrt(data().length)) is used for
+    both.
+ */
+
+//////////////////////////////////////////////////////////////////////////////
+/**
  * Transform geometric data of a feature from source projection to destination
  * projection.
  *
@@ -19074,14 +21038,9 @@ geo.transform.osmTransformFeature = function (destGcs, feature, inplace) {
       throw "Supports Array of 2D and 3D points";
     }
 
-    if (inPos.length > 0 && inPos[0] instanceof geo.latlng) {
-      noOfComponents = 2;
-      pointOffset = 1;
-    } else {
-      noOfComponents = (count % 2 === 0 ? 2 :
-                       (count % 3 === 0 ? 3 : null));
-      pointOffset = noOfComponents;
-    }
+    noOfComponents = (count % 2 === 0 ? 2 :
+                     (count % 3 === 0 ? 3 : null));
+    pointOffset = noOfComponents;
 
     if (noOfComponents !== 2 && noOfComponents !== 3) {
       throw "Transform points require points in 2D or 3D";
@@ -19097,11 +21056,7 @@ geo.transform.osmTransformFeature = function (destGcs, feature, inplace) {
 
       /// Y goes from 0 (top edge is 85.0511 °N) to 2zoom − 1
       /// (bottom edge is 85.0511 °S) in a Mercator projection.
-      if (inPos[i] instanceof geo.latlng) {
-        yCoord = inPos[i].lat();
-      } else {
-        yCoord = inPos[i + 1];
-      }
+      yCoord = inPos[i + 1];
 
       if (yCoord > 85.0511) {
         yCoord = 85.0511;
@@ -19109,11 +21064,7 @@ geo.transform.osmTransformFeature = function (destGcs, feature, inplace) {
       if (yCoord < -85.0511) {
         yCoord = -85.0511;
       }
-      if (inPos[i] instanceof geo.latlng) {
-        outPos[i] = geo.latlng(geo.mercator.lat2y(yCoord), outPos[i].lng());
-      } else {
-        outPos[i + 1] = geo.mercator.lat2y(yCoord);
-      }
+      outPos[i + 1] = geo.mercator.lat2y(yCoord);
     }
 
     if (inplace) {
@@ -19172,14 +21123,9 @@ geo.transform.transformFeature = function (destGcs, feature, inplace) {
       throw "Supports Array of 2D and 3D points";
     }
 
-    if (inPos.length > 0 && inPos[0] instanceof geo.latlng) {
-      noOfComponents = 2;
-      pointOffset = 1;
-    } else {
-      noOfComponents = (count % 2 === 0 ? 2 :
-                       (count % 3 === 0 ? 3 : null));
-      pointOffset = noOfComponents;
-    }
+    noOfComponents = (count % 2 === 0 ? 2 :
+                     (count % 3 === 0 ? 3 : null));
+    pointOffset = noOfComponents;
 
     if (noOfComponents !== 2 && noOfComponents !== 3) {
       throw "Transform points require points in 2D or 3D";
@@ -19274,7 +21220,7 @@ geo.transform.transformLayer = function (destGcs, layer, baseLayer) {
  * @param {string} srcGcs GCS of the coordinates
  * @param {string} destGcs Desired GCS of the transformed coordinates
  * @param {object} coordinates
- * @return {geo.latlng|geo.latlng[]} Transformed coordinates
+ * @return {object|object[]} Transformed coordinates
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.transform.transformCoordinates = function (srcGcs, destGcs, coordinates,
@@ -19298,31 +21244,6 @@ geo.transform.transformCoordinates = function (srcGcs, destGcs, coordinates,
   /// TODO: Can we check for EPSG code?
   if (!destGcs || !srcGcs) {
     throw "Invalid source or destination GCS";
-  }
-
-  /// Helper methods
-  function handleLatLngCoordinates() {
-    if (coordinates[0] && coordinates[0] instanceof geo.latlng) {
-      xAcc = function (index) {
-        return coordinates[index].x();
-      };
-      yAcc = function (index) {
-        return coordinates[index].y();
-      };
-      writer = function (index, x, y) {
-        output[index] = geo.latlng(y, x);
-      };
-    } else {
-      xAcc = function () {
-        return coordinates.x();
-      };
-      yAcc = function () {
-        return coordinates.y();
-      };
-      writer = function (index, x, y) {
-        output = geo.latlng(y, x);
-      };
-    }
   }
 
   /// Helper methods
@@ -19475,14 +21396,11 @@ geo.transform.transformCoordinates = function (srcGcs, destGcs, coordinates,
     count = coordinates.length;
 
     if (coordinates[0] instanceof Array ||
-        coordinates[0] instanceof geo.latlng ||
         coordinates[0] instanceof Object) {
       offset = 1;
 
       if (coordinates[0] instanceof Array) {
         handleArrayCoordinates();
-      } else if (coordinates[0] instanceof geo.latlng) {
-        handleLatLngCoordinates();
       } else if (coordinates[0] instanceof Object) {
         handleObjectCoordinates();
       }
@@ -19492,9 +21410,7 @@ geo.transform.transformCoordinates = function (srcGcs, destGcs, coordinates,
   } else if (coordinates && coordinates instanceof Object) {
     count = 1;
     offset = 1;
-    if (coordinates instanceof geo.latlng) {
-      handleLatLngCoordinates();
-    } else if (coordinates && "x" in coordinates && "y" in coordinates) {
+    if (coordinates && "x" in coordinates && "y" in coordinates) {
       handleObjectCoordinates();
     } else {
       throw "Coordinates are not valid";
@@ -19751,10 +21667,17 @@ inherit(geo.renderer, geo.object);
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.osmLayer = function (arg) {
-  "use strict";
+  'use strict';
 
   if (!(this instanceof geo.osmLayer)) {
     return new geo.osmLayer(arg);
+  }
+
+  // set a default attribution if no other is provided
+  arg = arg || {};
+  if (arg && arg.attribution === undefined) {
+    arg.attribution =
+      '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors';
   }
   geo.featureLayer.call(this, arg);
 
@@ -19775,9 +21698,9 @@ geo.osmLayer = function (arg) {
     m_pendingInactiveTiles = [],
     m_numberOfCachedTiles = 0,
     m_tileCacheSize = 100,
-    m_baseUrl = "http://tile.openstreetmap.org/",
+    m_baseUrl = 'http://tile.openstreetmap.org/',
     m_mapOpacity = 1.0,
-    m_imageFormat = "png",
+    m_imageFormat = 'png',
     m_updateTimerId = null,
     m_lastVisibleZoom = null,
     m_visibleTilesRange = {},
@@ -19787,14 +21710,15 @@ geo.osmLayer = function (arg) {
     m_updateDefer = null,
     m_zoom = null,
     m_tileUrl,
-    m_tileUrlFromTemplate;
+    m_tileUrlFromTemplate,
+    m_crossOrigin = 'anonymous';
 
   if (arg && arg.baseUrl !== undefined) {
     m_baseUrl = arg.baseUrl;
   }
 
-  if (m_baseUrl.charAt(m_baseUrl.length - 1) !== "/") {
-    m_baseUrl += "/";
+  if (m_baseUrl.charAt(m_baseUrl.length - 1) !== '/') {
+    m_baseUrl += '/';
   }
 
   if (arg && arg.mapOpacity !== undefined) {
@@ -19806,6 +21730,10 @@ geo.osmLayer = function (arg) {
 
   if (arg && arg.displayLast !== undefined && arg.displayLast) {
     m_lastVisibleBinNumber = 999;
+  }
+
+  if (arg && arg.useCredentials !== undefined && arg.useCredentials) {
+    m_crossOrigin = 'use-credentials';
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -19821,8 +21749,8 @@ geo.osmLayer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   m_tileUrl = function (zoom, x, y) {
-    return m_baseUrl + zoom + "/" + x +
-      "/" + y + "." + m_imageFormat;
+    return m_baseUrl + zoom + '/' + x +
+      '/' + y + '.' + m_imageFormat;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -19836,9 +21764,9 @@ geo.osmLayer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   m_tileUrlFromTemplate = function (base) {
     return function (zoom, x, y) {
-      return base.replace("<zoom>", zoom)
-        .replace("<x>", x)
-        .replace("<y>", y);
+      return base.replace('<zoom>', zoom)
+        .replace('<x>', x)
+        .replace('<y>', y);
     };
   };
 
@@ -19895,7 +21823,7 @@ geo.osmLayer = function (arg) {
   this.tileUrl = function (val) {
     if (val === undefined) {
       return m_tileUrl;
-    } else if (typeof val === "string") {
+    } else if (typeof val === 'string') {
       m_tileUrl = m_tileUrlFromTemplate(val);
     } else {
       m_tileUrl = val;
@@ -19912,15 +21840,12 @@ geo.osmLayer = function (arg) {
    * @param {*} input
    * Input can be of following types:
    *
-   *   1. geo.latlng
-   *   2. [geo.latlng]
    *   3. [x1,y1, x2, y2]
    *   4. [[x,y]]
    *   5. {x:val: y:val, z:val},
    *   6. [{x:val: y:val}]
    *
-   * returns geo.latlng, [geo.latlng], or {x:lon, y:lat}, [{x:lon, y:lat}]
-   * [x1,y1, x2, y2], [[x,y]]
+   * returns {x:lon, y:lat}, [{x:lon, y:lat}], [x1,y1, x2, y2], [[x,y]]
    */
   ////////////////////////////////////////////////////////////////////////////
   this.toLocal = function (input) {
@@ -19931,13 +21856,7 @@ geo.osmLayer = function (arg) {
       output = [];
       output.length = input.length;
 
-      /// Input is array of geo.latlng
-      if (input[0] instanceof geo.latlng) {
-        for (i = 0; i < input.length; i += 1) {
-          output[i] = geo.latlng(input[i]);
-          output[i].lat(geo.mercator.lat2y(output[i].lat()));
-        }
-      } else if (input[0] instanceof Array) {
+      if (input[0] instanceof Array) {
         delta = input % 3 === 0 ? 3 : 2;
 
         if (delta === 2) {
@@ -19953,22 +21872,18 @@ geo.osmLayer = function (arg) {
           }
         }
       } else if (input[0] instanceof Object &&
-                 "x" in input[0] && "y" in input[0] && "z" in input[0]) {
+                 'x' in input[0] && 'y' in input[0] && 'z' in input[0]) {
         /// Input is array of object
         output[i] = { x: input[i].x, y: geo.mercator.lat2y(input[i].y),
                       z: input[i].z };
       } else if (input[0] instanceof Object &&
-                 "x" in input[0] && "y" in input[0] && "z" in input[0]) {
+                 'x' in input[0] && 'y' in input[0] && 'z' in input[0]) {
         /// Input is array of object
         output[i] = { x: input[i].x, y: geo.mercator.lat2y(input[i].y)};
       } else if (input.length >= 2) {
         output = input.slice(0);
         output[1] = geo.mercator.lat2y(input[1]);
       }
-    } else if (input instanceof geo.latlng) {
-      output = {};
-      output.x = input.x();
-      output.y = geo.mercator.lat2y(input.y());
     } else {
       output = {};
       output.x = input.x;
@@ -20079,7 +21994,7 @@ geo.osmLayer = function (arg) {
     tile.REMOVING = false;
     tile.INVALID = false;
 
-    tile.crossOrigin = "anonymous";
+    tile.crossOrigin = m_crossOrigin;
     tile.zoom = zoom;
     tile.index_x = x;
     tile.index_y = y;
@@ -20305,9 +22220,9 @@ geo.osmLayer = function (arg) {
           if (tile.LOADED && m_updateTimerId in m_pendingNewTilesStat) {
             m_pendingNewTilesStat[m_updateTimerId].count += 1;
           }
-          tile.lastused = new Date();
           tile.feature._update();
         }
+        tile.lastused = new Date();
         tile.updateTimerId = m_updateTimerId;
       }
     }
@@ -20358,11 +22273,11 @@ geo.osmLayer = function (arg) {
     for (i = 0; i < m_pendingNewTiles.length; i += 1) {
       tile = m_pendingNewTiles[i];
       feature = m_this.createFeature(
-        "plane", {drawOnAsyncResourceLoad: false, onload: tileOnLoad(tile)})
+        'plane', {drawOnAsyncResourceLoad: false, onload: tileOnLoad(tile)})
         .origin([tile.llx, tile.lly])
         .upperLeft([tile.llx, tile.ury])
         .lowerRight([tile.urx, tile.lly])
-        .gcs("EPSG:3857")
+        .gcs('EPSG:3857')
         .style({image: tile, opacity: m_mapOpacity});
       tile.feature = feature;
       tile.feature._update();
@@ -20440,13 +22355,11 @@ geo.osmLayer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
-   *
-   * Do not call parent _init method as its already been executed
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function () {
     s_init.call(m_this);
-    m_this.gcs("EPSG:3857");
+    m_this.gcs('EPSG:3857');
     m_this.map().zoomRange({
       min: 0,
       max: 18
@@ -20477,8 +22390,8 @@ geo.osmLayer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   /* jshint -W089 */
   this.updateBaseUrl = function (baseUrl) {
-    if (baseUrl && baseUrl.charAt(m_baseUrl.length - 1) !== "/") {
-      baseUrl += "/";
+    if (baseUrl && baseUrl.charAt(m_baseUrl.length - 1) !== '/') {
+      baseUrl += '/';
     }
     if (baseUrl !== m_baseUrl) {
 
@@ -20563,7 +22476,7 @@ geo.osmLayer = function (arg) {
 
 inherit(geo.osmLayer, geo.featureLayer);
 
-geo.registerLayer("osm", geo.osmLayer);
+geo.registerLayer('osm', geo.osmLayer);
 
 /**
  * @namespace
@@ -20700,7 +22613,7 @@ geo.gl.lineFeature = function (arg) {
       '  gl_Position = worldPos;',
       '}'
     ].join('\n'),
-    shader = new vgl.shader(gl.VERTEX_SHADER);
+    shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
     shader.setShaderSource(vertexShaderSource);
     return shader;
   }
@@ -20717,7 +22630,7 @@ geo.gl.lineFeature = function (arg) {
       '  gl_FragColor = vec4 (strokeColorVar, strokeOpacityVar);',
       '}'
     ].join('\n'),
-    shader = new vgl.shader(gl.FRAGMENT_SHADER);
+    shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
     shader.setShaderSource(fragmentShaderSource);
     return shader;
   }
@@ -20745,15 +22658,9 @@ geo.gl.lineFeature = function (arg) {
       numSegments += lineItem.length - 1;
       for (j = 0; j < lineItem.length; j += 1) {
         pos = posFunc(lineItem[j], j, lineItem, i);
-        if (pos instanceof geo.latlng) {
-          position.push(pos.x());
-          position.push(pos.y());
-          position.push(0.0);
-        } else {
-          position.push(pos.x);
-          position.push(pos.y);
-          position.push(pos.z || 0.0);
-        }
+        position.push(pos.x);
+        position.push(pos.y);
+        position.push(pos.z || 0.0);
       }
     }
 
@@ -21207,13 +23114,13 @@ geo.gl.pointFeature = function (arg) {
   fragmentShaderSource = fragmentShaderSource.join("\n");
 
   function createVertexShader() {
-    var shader = new vgl.shader(gl.VERTEX_SHADER);
+    var shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
     shader.setShaderSource(vertexShaderSource);
     return shader;
   }
 
   function createFragmentShader() {
-    var shader = new vgl.shader(gl.FRAGMENT_SHADER);
+    var shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
     shader.setShaderSource(fragmentShaderSource);
     return shader;
   }
@@ -21687,8 +23594,8 @@ inherit(geo.gl.geomFeature, geo.geomFeature);
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Create a plane feature given a lower left corner point geo.latlng
- * and and upper right corner point geo.latlng
+ * Create a plane feature given a lower left corner point
+ * and and upper right corner point
  * @class
  * @extends geo.planeFeature
  * @param lowerleft
@@ -21912,7 +23819,7 @@ geo.gl.polygonFeature = function (arg) {
       '  gl_Position = clipPos;',
       '}'
     ].join('\n'),
-    shader = new vgl.shader(gl.VERTEX_SHADER);
+    shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
     shader.setShaderSource(vertexShaderSource);
     return shader;
   }
@@ -21928,7 +23835,7 @@ geo.gl.polygonFeature = function (arg) {
       '  gl_FragColor = vec4 (fillColorVar, fillOpacityVar);',
       '}'
     ].join('\n'),
-    shader = new vgl.shader(gl.FRAGMENT_SHADER);
+    shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
     shader.setShaderSource(fragmentShaderSource);
     return shader;
   }
@@ -21990,15 +23897,9 @@ geo.gl.polygonFeature = function (arg) {
           posInstance = posFunc(extRingCoords,
                                 polygonItemCoordIndex,
                                 item, itemIndex);
-          if (posInstance instanceof geo.latlng) {
-            extRing[0].push({
-              x: posInstance.x(), y: posInstance.y(), i: fillColor.length
-            });
-          } else {
-            extRing[0].push({
-              x: posInstance.x, y: posInstance.y, i: fillColor.length
-            });
-          }
+          extRing[0].push({
+            x: posInstance.x, y: posInstance.y, i: fillColor.length
+          });
 
           fillColorInstance = fillColorFunc(extRingCoords,
                                             polygonItemCoordIndex,
@@ -22021,15 +23922,9 @@ geo.gl.polygonFeature = function (arg) {
         hole.forEach(function (intRingCoords) {
           posInstance = posFunc(intRingCoords, polygonItemCoordIndex,
                                 item, itemIndex);
-          if (posInstance instanceof geo.latlng) {
-            extRing[intIndex + 1].push({
-              x: posInstance.x(), y: posInstance.y(), i: fillColor.length
-            });
-          } else {
-            extRing[intIndex + 1].push({
-              x: posInstance.x, y: posInstance.y, i: fillColor.length
-            });
-          }
+          extRing[intIndex + 1].push({
+            x: posInstance.x, y: posInstance.y, i: fillColor.length
+          });
           fillColorInstance = fillColorFunc(intRingCoords,
                                             polygonItemCoordIndex,
                                             item, itemIndex);
@@ -22202,80 +24097,309 @@ geo.registerFeature('vgl', 'polygon', geo.gl.polygonFeature);
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Single VGL viewer
+ * Create a new instance of contourFeature
  *
- * This singleton instance is used to share a single GL context across multiple
- * vlgRenderer and therefore layers.
- * @private
+ * @class
+ * @extends geo.contourFeature
+ * @returns {geo.gl.contourFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.gl._vglViewerInstances = {
-  viewers: [],
-  maps: []
-};
+geo.gl.contourFeature = function (arg) {
+  'use strict';
 
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Retrives the singleton, lazily constructs as necessary.
- *
- * @return {vgl.viewer} the single viewer instance.
- */
-//////////////////////////////////////////////////////////////////////////////
+  if (!(this instanceof geo.gl.contourFeature)) {
+    return new geo.gl.contourFeature(arg);
+  }
+  arg = arg || {};
+  geo.contourFeature.call(this, arg);
 
-geo.gl.vglViewerInstance = function (map) {
-  "use strict";
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  var m_this = this,
+      s_exit = this._exit,
+      m_textureUnit = 7,
+      m_actor = null,
+      m_mapper = null,
+      m_material = null,
+      m_texture = null,
+      m_minColorUniform = null,
+      m_maxColorUniform = null,
+      m_stepsUniform = null,
+      m_steppedUniform = null,
+      m_dynamicDraw = arg.dynamicDraw === undefined ? false : arg.dynamicDraw,
+      s_init = this._init,
+      s_update = this._update;
 
-  var mapIdx,
-      maps = geo.gl._vglViewerInstances.maps,
-      viewers = geo.gl._vglViewerInstances.viewers,
-      canvas;
+  function createVertexShader() {
+    var vertexShaderSource = [
+      '#ifdef GL_ES',
+      '  precision highp float;',
+      '#endif',
+      'attribute vec3 pos;',
+      'attribute float value;',
+      'attribute float opacity;',
+      'uniform mat4 modelViewMatrix;',
+      'uniform mat4 projectionMatrix;',
+      'varying float valueVar;',
+      'varying float opacityVar;',
 
-  function makeViewer() {
-    canvas = $(document.createElement("canvas"));
-    canvas.attr("class", "webgl-canvas");
-    var viewer = vgl.viewer(canvas.get(0));
-    viewer.renderWindow().removeRenderer(
-    viewer.renderWindow().activeRenderer());
-    viewer.init();
-    return viewer;
+      'void main(void)',
+      '{',
+      /* Don't use z values; something is rotten in one of our matrices */
+      '  vec4 scrPos = projectionMatrix * modelViewMatrix * vec4(pos.xy, 0, 1);',
+      '  if (scrPos.w != 0.0) {',
+      '    scrPos = scrPos / scrPos.w;',
+      '  }',
+      '  valueVar = value;',
+      '  opacityVar = opacity;',
+      '  gl_Position = scrPos;',
+      '}'
+    ].join('\n'),
+    shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
+    shader.setShaderSource(vertexShaderSource);
+    return shader;
   }
 
-  for (mapIdx = 0; mapIdx < maps.length; mapIdx += 1) {
-    if (map === maps[mapIdx]) {
-      break;
+  function createFragmentShader() {
+    var fragmentShaderSource = [
+      '#ifdef GL_ES',
+      '  precision highp float;',
+      '#endif',
+      'uniform vec4 minColor;',
+      'uniform vec4 maxColor;',
+      'uniform float steps;',
+      'uniform bool stepped;',
+      'uniform sampler2D sampler2d;',
+      'varying float valueVar;',
+      'varying float opacityVar;',
+      'void main () {',
+      '  vec4 clr;',
+      '  if (valueVar < 0.0) {',
+      '    clr = minColor;',
+      '  } else if (valueVar > steps) {',
+      '    clr = maxColor;',
+      '  } else {',
+      '    float step;',
+      '    if (stepped) {',
+      '      step = floor(valueVar) + 0.5;',
+      '      if (step > steps) {',
+      '        step = steps - 0.5;',
+      '      }',
+      '    } else {',
+      '      step = valueVar;',
+      '    }',
+      '    clr = texture2D(sampler2d, vec2(step / steps, 0.0));',
+      '  }',
+      '  gl_FragColor = vec4(clr.rgb, clr.a * opacityVar);',
+      '}'
+    ].join('\n'),
+    shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
+    shader.setShaderSource(fragmentShaderSource);
+    return shader;
+  }
+
+  /* Create the contours.  This calls the base class to generate the geometry,
+   * color map, and other parameters.  The generated geoemtry is then loaded
+   * into the various gl uniforms and buffers.
+   */
+  function createGLContours() {
+    var contour = m_this.createContours(),
+        numPts = contour.elements.length,
+        colorTable = [],
+        i, i3, j, j3,
+        posBuf, opacityBuf, valueBuf, indicesBuf,
+        geom = m_mapper.geometryData();
+
+    m_minColorUniform.set([contour.minColor.r, contour.minColor.g,
+                           contour.minColor.b, contour.minColor.a]);
+    m_maxColorUniform.set([contour.maxColor.r, contour.maxColor.g,
+                           contour.maxColor.b, contour.maxColor.a]);
+    m_stepsUniform.set(contour.colorMap.length);
+    m_steppedUniform.set(contour.stepped);
+    for (i = 0; i < contour.colorMap.length; i += 1) {
+      colorTable.push(contour.colorMap[i].r * 255);
+      colorTable.push(contour.colorMap[i].g * 255);
+      colorTable.push(contour.colorMap[i].b * 255);
+      colorTable.push(contour.colorMap[i].a * 255);
     }
-  }
-
-  if (map !== maps[mapIdx]) {
-    maps[mapIdx] = map;
-    viewers[mapIdx] = makeViewer();
-  }
-
-  viewers[mapIdx]._exit = function () {
-    if (canvas) {
-      canvas.off();
-      canvas.remove();
+    m_texture.setColorTable(colorTable);
+    contour.pos = geo.transform.transformCoordinates(
+        m_this.gcs(), m_this.layer().map().gcs(), contour.pos, 3);
+    posBuf     = getBuffer(geom, 'pos',     numPts * 3);
+    opacityBuf = getBuffer(geom, 'opacity', numPts);
+    valueBuf   = getBuffer(geom, 'value',   numPts);
+    for (i = i3 = 0; i < numPts; i += 1, i3 += 3) {
+      j = contour.elements[i];
+      j3 = j * 3;
+      posBuf[i3]     = contour.pos[j3];
+      posBuf[i3 + 1] = contour.pos[j3 + 1];
+      posBuf[i3 + 2] = contour.pos[j3 + 2];
+      opacityBuf[i]  = contour.opacity[j];
+      valueBuf[i]    = contour.value[j];
     }
+    indicesBuf = geom.primitive(0).indices();
+    if (!(indicesBuf instanceof Uint16Array) || indicesBuf.length !== numPts) {
+      indicesBuf = new Uint16Array(numPts);
+      geom.primitive(0).setIndices(indicesBuf);
+    }
+    geom.boundsDirty(true);
+    m_mapper.modified();
+    m_mapper.boundsDirtyTimestamp().modified();
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get a buffer for a geometry source.  If a buffer already exists and is
+   * the correct size, return it.  Otherwise, allocate a new buffer; any data
+   * in an old buffer is discarded.
+   *
+   * @param geom: the geometry to reference and modify.
+   * @param srcName: the name of the source.
+   * @param len: the number of elements for the array.
+   * @returns {Float32Array}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  function getBuffer(geom, srcName, len) {
+    var src = geom.sourceByName(srcName), data;
+
+    data = src.data();
+    if (data instanceof Float32Array && data.length === len) {
+      return data;
+    }
+    data = new Float32Array(len);
+    src.setData(data);
+    return data;
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Initialize
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._init = function (arg) {
+    var blend = vgl.blend(),
+        prog = vgl.shaderProgram(),
+        mat = vgl.material(),
+        tex = vgl.lookupTable(),
+        geom = vgl.geometryData(),
+        modelViewUniform = new vgl.modelViewUniform('modelViewMatrix'),
+        projectionUniform = new vgl.projectionUniform('projectionMatrix'),
+        samplerUniform = new vgl.uniform(vgl.GL.INT, 'sampler2d'),
+        vertexShader = createVertexShader(),
+        fragmentShader = createFragmentShader(),
+        posAttr = vgl.vertexAttribute('pos'),
+        valueAttr = vgl.vertexAttribute('value'),
+        opacityAttr = vgl.vertexAttribute('opacity'),
+        sourcePositions = vgl.sourceDataP3fv({'name': 'pos'}),
+        sourceValues = vgl.sourceDataAnyfv(
+            1, vgl.vertexAttributeKeysIndexed.One, {'name': 'value'}),
+        sourceOpacity = vgl.sourceDataAnyfv(
+            1, vgl.vertexAttributeKeysIndexed.Two, {'name': 'opacity'}),
+        primitive = new vgl.triangles();
+
+    s_init.call(m_this, arg);
+    m_mapper = vgl.mapper({dynamicDraw: m_dynamicDraw});
+
+    prog.addVertexAttribute(posAttr, vgl.vertexAttributeKeys.Position);
+    prog.addVertexAttribute(valueAttr, vgl.vertexAttributeKeysIndexed.One);
+    prog.addVertexAttribute(opacityAttr, vgl.vertexAttributeKeysIndexed.Two);
+
+    prog.addUniform(modelViewUniform);
+    prog.addUniform(projectionUniform);
+    m_minColorUniform = new vgl.uniform(vgl.GL.FLOAT_VEC4, 'minColor');
+    prog.addUniform(m_minColorUniform);
+    m_maxColorUniform = new vgl.uniform(vgl.GL.FLOAT_VEC4, 'maxColor');
+    prog.addUniform(m_maxColorUniform);
+    /* steps is always an integer, but it is more efficient if we use a float
+     */
+    m_stepsUniform = new vgl.uniform(vgl.GL.FLOAT, 'steps');
+    prog.addUniform(m_stepsUniform);
+    m_steppedUniform = new vgl.uniform(vgl.GL.BOOL, 'stepped');
+    prog.addUniform(m_steppedUniform);
+
+    prog.addShader(fragmentShader);
+    prog.addShader(vertexShader);
+
+    prog.addUniform(samplerUniform);
+    tex.setTextureUnit(m_textureUnit);
+    samplerUniform.set(m_textureUnit);
+
+    m_material = mat;
+    m_material.addAttribute(prog);
+    m_material.addAttribute(blend);
+    m_texture = tex;
+    m_material.addAttribute(m_texture);
+
+    m_actor = vgl.actor();
+    m_actor.setMaterial(m_material);
+    m_actor.setMapper(m_mapper);
+
+    geom.addSource(sourcePositions);
+    geom.addSource(sourceValues);
+    geom.addSource(sourceOpacity);
+    geom.addPrimitive(primitive);
+    m_mapper.setGeometryData(geom);
   };
 
-  return viewers[mapIdx];
-};
-
-geo.gl.vglViewerInstance.deleteCache = function (viewer) {
-  "use strict";
-
-  var mapIdx,
-      maps = geo.gl._vglViewerInstances.maps,
-      viewers = geo.gl._vglViewerInstances.viewers;
-
-  for (mapIdx = 0; mapIdx < viewers.length; mapIdx += 1) {
-    if (viewer === undefined || viewer === viewers[mapIdx]) {
-      viewer._exit();
-      maps.splice(mapIdx, 1);
-      viewers.splice(mapIdx, 1);
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Build
+   *
+   * @override
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._build = function () {
+    if (m_actor) {
+      m_this.renderer().contextRenderer().removeActor(m_actor);
     }
-  }
+
+    createGLContours();
+
+    m_this.renderer().contextRenderer().addActor(m_actor);
+    m_this.buildTime().modified();
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Update
+   *
+   * @override
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._update = function () {
+    s_update.call(m_this);
+
+    if (m_this.dataTime().getMTime() >= m_this.buildTime().getMTime() ||
+        m_this.updateTime().getMTime() <= m_this.getMTime()) {
+      m_this._build();
+    }
+
+    m_actor.setVisible(m_this.visible());
+    m_actor.material().setBinNumber(m_this.bin());
+    m_this.updateTime().modified();
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Destroy
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._exit = function () {
+    m_this.renderer().contextRenderer().removeActor(m_actor);
+    s_exit();
+  };
+
+  this._init(arg);
+  return this;
 };
+
+inherit(geo.gl.contourFeature, geo.contourFeature);
+
+// Now register it
+geo.registerFeature('vgl', 'contour', geo.gl.contourFeature);
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -22288,22 +24412,21 @@ geo.gl.vglViewerInstance.deleteCache = function (viewer) {
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.gl.vglRenderer = function (arg) {
-  "use strict";
+  'use strict';
 
   if (!(this instanceof geo.gl.vglRenderer)) {
     return new geo.gl.vglRenderer(arg);
   }
+  arg = arg || {};
   geo.gl.renderer.call(this, arg);
 
   var m_this = this,
-      s_exit = this._exit,
-      m_viewer = geo.gl.vglViewerInstance(this.layer().map()),
-      m_contextRenderer = vgl.renderer(),
+      m_contextRenderer = null,
+      m_viewer = null,
       m_width = 0,
       m_height = 0,
+      m_initialized = false,
       s_init = this._init;
-
-  m_contextRenderer.setResetScene(false);
 
   /// TODO: Move this API to the base class
   ////////////////////////////////////////////////////////////////////////////
@@ -22348,7 +24471,7 @@ geo.gl.vglRenderer = function (arg) {
     /// Handle if the input is an array [...]
     if (input instanceof Array && input.length > 0) {
       output = [];
-    /// Input is array of object {x:val, y:val}
+      /// Input is array of object {x:val, y:val}
       if (input[0] instanceof Object) {
         delta = 1;
         for (i = 0; i < input.length; i += delta) {
@@ -22395,7 +24518,7 @@ geo.gl.vglRenderer = function (arg) {
                m_width, m_height);
       output = {x: temp[0], y: temp[1], z: temp[2], w: temp[3]};
     } else {
-      throw "Display to world conversion requires array of 2D/3D points";
+      throw 'Display to world conversion requires array of 2D/3D points';
     }
     return output;
   };
@@ -22472,7 +24595,7 @@ geo.gl.vglRenderer = function (arg) {
 
       output = {x: temp[0], y: temp[1], z: temp[2]};
     } else {
-      throw "World to display conversion requires array of 2D/3D points";
+      throw 'World to display conversion requires array of 2D/3D points';
     }
 
     return output;
@@ -22493,7 +24616,7 @@ geo.gl.vglRenderer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.api = function () {
-    return "vgl";
+    return 'vgl';
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -22508,14 +24631,18 @@ geo.gl.vglRenderer = function (arg) {
 
     s_init.call(m_this);
 
-    m_this.canvas($(m_viewer.canvas()));
+    var canvas = $(document.createElement('canvas'));
+    canvas.attr('class', 'webgl-canvas');
+    m_this.canvas(canvas);
+    $(m_this.layer().node().get(0)).append(canvas);
+    m_viewer = vgl.viewer(canvas.get(0), arg.options);
+    m_viewer.init();
+    m_contextRenderer = m_viewer.renderWindow().activeRenderer();
+    m_contextRenderer.setResetScene(false);
+
     if (m_viewer.renderWindow().renderers().length > 0) {
       m_contextRenderer.setLayer(m_viewer.renderWindow().renderers().length);
-      m_contextRenderer.setResetScene(false);
     }
-    m_viewer.renderWindow().addRenderer(m_contextRenderer);
-
-    m_this.layer().node().append(m_this.canvas());
 
     return m_this;
   };
@@ -22526,12 +24653,60 @@ geo.gl.vglRenderer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._resize = function (x, y, w, h) {
+    var vglRenderer = m_this.contextRenderer(),
+        map = m_this.layer().map(),
+        camera = vglRenderer.camera(),
+        baseContextRenderer,
+        baseCamera,
+        renderWindow = m_viewer.renderWindow(),
+        layer = m_this.layer(),
+        baseLayer = layer.map().baseLayer(),
+        focalPoint,
+        position,
+        zoom,
+        newZ,
+        mapCenter;
+
     m_width = w;
     m_height = h;
-    m_this.canvas().attr("width", w);
-    m_this.canvas().attr("height", h);
-    m_viewer.renderWindow().positionAndResize(x, y, w, h);
+    m_this.canvas().attr('width', w);
+    m_this.canvas().attr('height', h);
+    renderWindow.positionAndResize(x, y, w, h);
     m_this._render();
+
+    // Ignore if the base layer is not set yet
+    if (!baseLayer || m_initialized) {
+      return;
+    }
+    m_initialized = true;
+
+    // skip handling if the renderer is unconnected
+    if (!vglRenderer || !vglRenderer.camera()) {
+      console.log('Zoom event triggered on unconnected vgl renderer.');
+    }
+
+    position = camera.position();
+    zoom = map.zoom();
+    newZ = camera.zoomToHeight(zoom, w, h);
+
+    // Assuming that baselayer will be a GL layer
+    if (layer !== baseLayer) {
+      baseContextRenderer = baseLayer.renderer().contextRenderer();
+      baseCamera = baseContextRenderer.camera();
+      position = baseCamera.position();
+      focalPoint = baseCamera.focalPoint();
+      camera.setPosition(position[0], position[1], position[2]);
+      camera.setFocalPoint(focalPoint[0], focalPoint[1], focalPoint[2]);
+    } else {
+      mapCenter = layer.toLocal(layer.map().center());
+      focalPoint = camera.focalPoint();
+      camera.setPosition(mapCenter.x, mapCenter.y, newZ);
+      camera.setFocalPoint(mapCenter.x, mapCenter.y, focalPoint[2]);
+    }
+    camera.setParallelExtents({zoom: zoom});
+
+    m_this._updateRendererCamera();
+
     return m_this;
   };
 
@@ -22545,27 +24720,17 @@ geo.gl.vglRenderer = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Exit
-   * @todo remove all vgl objects
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._exit = function () {
-    geo.gl.vglViewerInstance.deleteCache(m_viewer);
-    s_exit();
-  };
-
   this._updateRendererCamera = function () {
     var vglRenderer = m_this.contextRenderer(),
         renderWindow = m_viewer.renderWindow(),
         camera = vglRenderer.camera(),
-        pos, fp, cr;
+        pos, fp, cr, pe;
 
     vglRenderer.resetCameraClippingRange();
     pos = camera.position();
     fp = camera.focalPoint();
     cr = camera.clippingRange();
+    pe = camera.parallelExtents();
     renderWindow.renderers().forEach(function (renderer) {
       var cam = renderer.camera();
 
@@ -22573,13 +24738,15 @@ geo.gl.vglRenderer = function (arg) {
         cam.setPosition(pos[0], pos[1], pos[2]);
         cam.setFocalPoint(fp[0], fp[1], fp[2]);
         cam.setClippingRange(cr[0], cr[1]);
+        cam.setParallelExtents(pe);
         renderer.render();
       }
     });
   };
 
-  // connect to interactor events
-  this.geoOn(geo.event.pan, function (evt) {
+  // Connect to interactor events
+  // Connect to pan event
+  m_this.layer().geoOn(geo.event.pan, function (evt) {
     var vglRenderer = m_this.contextRenderer(),
         camera,
         focusPoint,
@@ -22590,103 +24757,117 @@ geo.gl.vglRenderer = function (arg) {
         renderWindow,
         layer = m_this.layer();
 
-    // only the base layer needs to respond
-    if (layer.map().baseLayer() !== layer) {
-      return;
-    }
+    if (evt.geo && evt.geo._triggeredBy !== layer) {
+      // skip handling if the renderer is unconnected
+      if (!vglRenderer || !vglRenderer.camera()) {
+        console.log('Pan event triggered on unconnected VGL renderer.');
+      }
 
-    // skip handling if the renderer is unconnected
-    if (!vglRenderer || !vglRenderer.camera()) {
-      console.log("Pan event triggered on unconnected vgl renderer.");
-    }
+      renderWindow = m_viewer.renderWindow();
+      camera = vglRenderer.camera();
+      focusPoint = renderWindow.focusDisplayPoint();
 
-    renderWindow = m_viewer.renderWindow();
-    camera = vglRenderer.camera();
-    focusPoint = renderWindow.focusDisplayPoint();
+      // Calculate the center in display coordinates
+      centerDisplay = [m_width / 2, m_height / 2, 0];
 
-    // Calculate the center in display coordinates
-    centerDisplay = [m_width / 2, m_height / 2, 0];
-
-    // Calculate the center in world coordinates
-    centerGeo = renderWindow.displayToWorld(
-      centerDisplay[0],
-      centerDisplay[1],
-      focusPoint,
-      vglRenderer
-    );
-
-    newCenterDisplay = [
-      centerDisplay[0] + evt.screenDelta.x,
-      centerDisplay[1] + evt.screenDelta.y
-    ];
-
-    newCenterGeo = renderWindow.displayToWorld(
-      newCenterDisplay[0],
-      newCenterDisplay[1],
-      focusPoint,
-      vglRenderer
-    );
-
-    camera.pan(
-      centerGeo[0] - newCenterGeo[0],
-      centerGeo[1] - newCenterGeo[1],
-      centerGeo[2] - newCenterGeo[2]
-    );
-
-    evt.center = {
-      x: newCenterGeo[0],
-      y: newCenterGeo[1],
-      z: newCenterGeo[2]
-    };
-
-    m_this._updateRendererCamera();
-  });
-
-  this.geoOn(geo.event.zoom, function (evt) {
-    var vglRenderer = m_this.contextRenderer(),
-        camera,
-        renderWindow,
-        layer = m_this.layer(),
-        center,
-        dir,
-        focusPoint,
-        position,
-        newZ;
-
-    // only the base layer needs to respond
-    if (layer.map().baseLayer() !== layer) {
-      return;
-    }
-
-    // skip handling if the renderer is unconnected
-    if (!vglRenderer || !vglRenderer.camera()) {
-      console.log("Zoom event triggered on unconnected vgl renderer.");
-    }
-
-    renderWindow = m_viewer.renderWindow();
-    camera = vglRenderer.camera();
-    focusPoint = camera.focalPoint();
-    position = camera.position();
-    newZ = 360 * Math.pow(2, -evt.zoomLevel);
-
-    evt.pan = null;
-    if (evt.screenPosition) {
-      center = renderWindow.displayToWorld(
-        evt.screenPosition.x,
-        evt.screenPosition.y,
+      // Calculate the center in world coordinates
+      centerGeo = renderWindow.displayToWorld(
+        centerDisplay[0],
+        centerDisplay[1],
         focusPoint,
         vglRenderer
       );
-      dir = [center[0] - position[0], center[1] - position[1], center[2] - position[2]];
-      evt.center = layer.fromLocal({
-        x: position[0] + dir[0] * (1 - newZ / position[2]),
-        y: position[1] + dir[1] * (1 - newZ / position[2])
-      });
+
+      newCenterDisplay = [
+        centerDisplay[0] + evt.screenDelta.x,
+        centerDisplay[1] + evt.screenDelta.y
+      ];
+
+      newCenterGeo = renderWindow.displayToWorld(
+        newCenterDisplay[0],
+        newCenterDisplay[1],
+        focusPoint,
+        vglRenderer
+      );
+
+      camera.pan(
+        centerGeo[0] - newCenterGeo[0],
+        centerGeo[1] - newCenterGeo[1],
+        centerGeo[2] - newCenterGeo[2]
+      );
+
+      evt.center = {
+        x: newCenterGeo[0],
+        y: newCenterGeo[1],
+        z: newCenterGeo[2]
+      };
+
+      m_this._updateRendererCamera();
     }
+  });
 
-    camera.setPosition(position[0], position[1], 360 * Math.pow(2, -evt.zoomLevel));
+  // Connect to zoom event
+  m_this.layer().geoOn(geo.event.zoom, function (evt) {
+    var vglRenderer = m_this.contextRenderer(),
+      camera,
+      renderWindow,
+      layer = m_this.layer(),
+      center,
+      dir,
+      focusPoint,
+      position,
+      newZ;
 
-    m_this._updateRendererCamera();
+    if (evt.geo && evt.geo._triggeredBy !== layer) {
+      // skip handling if the renderer is unconnected
+      if (!vglRenderer || !vglRenderer.camera()) {
+        console.log('Zoom event triggered on unconnected vgl renderer.');
+      }
+
+      renderWindow = m_viewer.renderWindow();
+      camera = vglRenderer.camera();
+      focusPoint = camera.focalPoint();
+      position = camera.position();
+      var windowSize = renderWindow.windowSize();
+      newZ = camera.zoomToHeight(evt.zoomLevel, windowSize[0], windowSize[1]);
+
+      evt.pan = null;
+      if (evt.screenPosition) {
+        center = renderWindow.displayToWorld(
+          evt.screenPosition.x,
+          evt.screenPosition.y,
+          focusPoint,
+          vglRenderer
+        );
+        dir = [center[0] - position[0], center[1] - position[1], center[2] - position[2]];
+        evt.center = layer.fromLocal({
+          x: position[0] + dir[0] * (1 - newZ / position[2]),
+          y: position[1] + dir[1] * (1 - newZ / position[2])
+        });
+      }
+
+      camera.setPosition(position[0], position[1], newZ);
+      camera.setParallelExtents({zoom: evt.zoomLevel});
+
+      m_this._updateRendererCamera();
+    }
+  });
+
+  // Connect to parallelprojection event
+  m_this.layer().geoOn(geo.event.parallelprojection, function (evt) {
+    var vglRenderer = m_this.contextRenderer(),
+        camera,
+        layer = m_this.layer();
+
+    if (evt.geo && evt.geo._triggeredBy !== layer) {
+      if (!vglRenderer || !vglRenderer.camera()) {
+        console.log('Parallel projection event triggered on unconnected VGL ' +
+                    'renderer.');
+      }
+      camera = vglRenderer.camera();
+      camera.setEnableParallelProjection(evt.parallelProjection);
+      m_this._updateRendererCamera();
+    }
   });
 
   return this;
@@ -22694,7 +24875,7 @@ geo.gl.vglRenderer = function (arg) {
 
 inherit(geo.gl.vglRenderer, geo.gl.renderer);
 
-geo.registerRenderer("vgl", geo.gl.vglRenderer);
+geo.registerRenderer('vgl', geo.gl.vglRenderer);
 
 /** @namespace */
 geo.d3 = {};
@@ -23183,8 +25364,8 @@ geo.registerFeature('d3', 'graph', geo.d3.graphFeature);
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Create a plane feature given a lower left corner point geo.latlng
- * and and upper right corner point geo.latlng
+ * Create a plane feature given a lower left corner point
+ * and and upper right corner point
  *
  * *CURRENTLY BROKEN*
  *
@@ -23222,11 +25403,6 @@ geo.d3.planeFeature = function (arg) {
       return {
         x: pt[0],
         y: pt[1]
-      };
-    } else if (pt instanceof geo.latlng) {
-      return {
-        x: pt.x(),
-        y: pt.y()
       };
     }
     return pt;
@@ -25083,9 +27259,9 @@ geo.registerWidget('d3', 'legend', geo.gui.legendWidget);
      *   Describes layers added to the map
      * @property {boolean} [autoresize=true]
      *   Resize the map on <code>window.resize</code> (initialization only)
-     * @property {string} [tileServer]
+     * @property {string} [tileUrl]
      *   The open street map tile server spec default:
-     *   <code>http://tile.openstreetmap.org/<zoom>/<x>/<y>.png</code>
+     *   <code>http://tile.openstreetmap.org/&lt;zoom>/&lt;x>/&lt;y>.png</code>
      */
     options: {
       center: {latitude: 0, longitude: 0},
@@ -25095,6 +27271,7 @@ geo.registerWidget('d3', 'legend', geo.gui.legendWidget);
       layers: [],
       data: [],
       tileUrl: 'http://tile.openstreetmap.org/<zoom>/<x>/<y>.png',
+      attribution: undefined,
 
       // These options are for future use, but shouldn't
       // be changed at the moment, so they aren't documented.
@@ -25127,7 +27304,8 @@ geo.registerWidget('d3', 'legend', geo.gui.legendWidget);
         this.options.baseLayer,
         {
           renderer: this.options.baseRenderer,
-          tileUrl: this.options.tileUrl
+          tileUrl: this.options.tileUrl,
+          attribution: this.options.attribution
         }
       );
 
