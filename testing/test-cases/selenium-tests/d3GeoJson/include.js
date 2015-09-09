@@ -2,7 +2,8 @@ window.startTest = function (done) {
   "use strict";
 
   var myMap = window.geoTests.createOsmMap({
-    center: { y: 40, x: -105 }
+    center: { y: 40, x: -105 },
+    zoom: 3.5
   });
 
   // Load image to be used for drawing dots

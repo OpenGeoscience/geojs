@@ -36,6 +36,7 @@
         "transform.js",
         "renderer.js",
         "osmLayer.js",
+        "domRenderer.js",
         "choroplethFeature.js"
       ]
     },
@@ -68,13 +69,13 @@
       "files": [
         "init.js",
         "object.js",
+        "d3Renderer.js",
         "pointFeature.js",
         "lineFeature.js",
         "pathFeature.js",
         "graphFeature.js",
         "planeFeature.js",
-        "vectorFeature.js",
-        "d3Renderer.js"
+        "vectorFeature.js"
       ]
     },
     "geo.ui": {
@@ -83,6 +84,8 @@
         "init.js",
         "uiLayer.js",
         "widget.js",
+        "domWidget.js",
+        "svgWidget.js",
         "sliderWidget.js",
         "legendWidget.js"
       ]

@@ -8,7 +8,7 @@ from selenium_test import FirefoxTest, ChromeTest,\
 
 class glPlaneBase(object):
     testCase = ('glPlane',)
-    testRevision = 2
+    testRevision = 3
 
     def loadPage(self, opacity=None):
         self.resizeWindow(640, 480)
@@ -17,6 +17,7 @@ class glPlaneBase(object):
         else:
             self.loadURL('glPlane/index.html?opacity=' + str(opacity))
         self.wait()
+        self.resizeWindow(640, 480)
 
     def testGlPlane(self):
         self.loadPage()
@@ -40,5 +41,4 @@ class ChromeOSM(glPlaneBase, ChromeTest):
 
 
 if __name__ == '__main__':
-    import unittest
     unittest.main()

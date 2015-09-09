@@ -96,12 +96,12 @@ geo.registerRenderer = function (name, func) {
  * Create new instance of the renderer
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.createRenderer  = function (name, layer, canvas) {
+geo.createRenderer  = function (name, layer, canvas, options) {
   "use strict";
 
   if (geo.renderers.hasOwnProperty(name)) {
     var ren = geo.renderers[name](
-      {"layer": layer, "canvas": canvas}
+      {layer: layer, canvas: canvas, options: options}
     );
     ren._init();
     return ren;
@@ -212,18 +212,22 @@ geo.registerWidget = function (category, name, func) {
  * Create new instance of the widget
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.createWidget  = function (name, layer, renderer, arg) {
+geo.createWidget  = function (name, layer, arg) {
   "use strict";
 
-  var category = renderer.api(),
-      options = {"layer": layer, "renderer": renderer};
-  if (category in geo.widgets && name in geo.widgets[category]) {
+  var options = {
+    layer: layer
+  };
+
+  if (name in geo.widgets.dom) {
     if (arg !== undefined) {
       $.extend(true, options, arg);
     }
-    return geo.widgets[category][name](options);
+
+    return geo.widgets.dom[name](options);
   }
-  return null;
+
+  throw "Cannot create unknown widget " + name;
 };
 
 // Add a polyfill for window.requestAnimationFrame.
