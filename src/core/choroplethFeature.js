@@ -43,21 +43,11 @@ geo.choroplethFeature = function (arg) {
                 value: function (geoJsonFeature) {
                   return geoJsonFeature
                     .properties.value;
-                }
+                },
               },
               arg.choropleth);
 
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Override the parent data method to keep track of changes to the
-   * internal coordinates.
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.data = function (arg) {
-    var ret = s_data(arg);
-    return ret;
-  };
-
+  
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set choropleth accessor
@@ -165,7 +155,6 @@ geo.choroplethFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////          
   this._featureToPolygons = function (feature, fillValue) {
-
     return m_this
       ._addPolygonFeature(feature, fillValue);
   };
