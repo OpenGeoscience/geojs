@@ -27,8 +27,6 @@ geo.choroplethFeature = function (arg) {
       m_choropleth = $
       .extend({},
               {
-                minOpacity: 0,
-                maxOpacity: 1,
                 /* 9-step based on paraview bwr colortable */
                 colorRange: [
                   {r: 0.07514311, g: 0.468049805, b: 1},
@@ -119,14 +117,25 @@ geo.choroplethFeature = function (arg) {
    * @return {geo.feature}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._addPolygonFeature = function(coordinateArray, fillColor){
-    return m_this.layer()
-      .createFeature('polygon', {
-      })
-      .data([{
+  this._addPolygonFeature = function(feature, fillColor){
+    var newFeature = m_this.layer()
+        .createFeature('polygon', {});
+
+    if (feature.geometry.type === "Polygon") {
+      newFeature.data([{
         type: 'Polygon',
-        coordinates: coordinateArray
-      }])
+        coordinates: feature.geometry.coordinates
+      }]);
+    } else if (feature.geometry.type === "MultiPolygon"){
+      newFeature.data(feature.geometry.coordinates.map(function(coordinateMap){
+        return {
+          type: "Polygon",
+          coordinates: coordinateMap
+        };
+      }));
+    }
+
+    newFeature
       .polygon(function (d) {
         return {
           'outer': d.coordinates[0],
@@ -142,8 +151,10 @@ geo.choroplethFeature = function (arg) {
       .style({
         'fillColor': fillColor
       });
+    
+    return newFeature;
   };
-
+  
   ////////////////////////////////////////////////////////////////////////////
   /**
    * A method that adds polygons from a given feature to the current layer.
@@ -155,24 +166,8 @@ geo.choroplethFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////          
   this._featureToPolygons = function (feature, fillValue) {
 
-    var arrayOfPolygonFeatures = [];
-    
-    if (feature.geometry.type === 'Polygon'){
-      arrayOfPolygonFeatures = [
-        m_this
-          ._addPolygonFeature(feature.geometry.coordinates, fillValue)
-      ];
-      
-    }
-    if (feature.geometry.type === 'MultiPolygon') {
-      arrayOfPolygonFeatures = feature.geometry
-        .coordinates
-        .map(function(polygonCoordinates){
-          return m_this._addPolygonFeature(polygonCoordinates, fillValue);
-        });
-    }
-
-    return arrayOfPolygonFeatures;
+    return m_this
+      ._addPolygonFeature(feature, fillValue);
   };
 
   ////////////////////////////////////////////////////////////////////////////
