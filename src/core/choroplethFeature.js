@@ -23,7 +23,6 @@ geo.choroplethFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       s_init = this._init,
-      s_data = this.data,
       m_choropleth = $
       .extend({},
               {
