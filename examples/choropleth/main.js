@@ -3,12 +3,14 @@ $(function () {
   'use strict';
   
   // Define a function we will use to generate contours.
-  function makeChoropleth(data, layer) {
+  function makeChoropleth(geoData, scalarData, layer) {
     /* There are two example data sets.  One has a position array which
      * consists of objects each with x, y, z values.  The other has a values
      * array which just has our contour values. */
-    var choropleth = layer.createFeature('choropleth')
-	.data(data)
+    var choropleth = layer
+        .createFeature('choropleth')
+	.data(geoData)
+        .scalar(scalarData)
 	.choropleth({});
 
     return choropleth;
@@ -21,7 +23,7 @@ $(function () {
       x: -75.965,
       y: 39.482
     },
-    zoom: 1
+    zoom: 4
   });
 
   // Add the osm layer
@@ -41,14 +43,19 @@ $(function () {
   $.ajax({
     url: 'states.json',
     dataType: "json",
-    success: function (data) {
+    success: function (geoData) {
 
-      data.features.forEach(function(feature){
-	//create some mock value for each state
-	feature.properties.value = Math.random()*10;
-      });
+      var mockScalarData = geoData
+          .features
+          .map(function(feature){
+	    //create some mock value for each state
+	    return {
+              value: Math.random()*10,
+              id: feature.properties.GEO_ID
+            };
+          });
 
-      makeChoropleth(data, vglLayer);
+      makeChoropleth(geoData, mockScalarData, vglLayer);
       // Draw the map
       map.draw();
     }

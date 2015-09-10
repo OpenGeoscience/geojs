@@ -39,13 +39,55 @@ geo.choroplethFeature = function (arg) {
                   {r: 0.916482116, g: 0.236630659, b: 0.209939162}
                 ],
                 scale: d3.scale.quantize(),
-                value: function (geoJsonFeature) {
-                  return geoJsonFeature
-                    .properties.value;
+                accessors: {
+                  //accessor for ID on geodata feature
+                  geoId: function (geoFeature) {
+                    return geoFeature.properties.GEO_ID;
+                  },
+                  //accessor for ID on scalar element
+                  scalarId: function (scalarElement) {
+                    return scalarElement.id;
+                  },
+                  //accessor for value on scalar element
+                  scalarValue: function (scalarElement) {
+                    return scalarElement.value;
+                  }
                 },
               },
               arg.choropleth);
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set choropleth scalar data
+   *
+   * @returns {geo.feature.choropleth}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.scalar = function (data) {
+    if (data === undefined) {
+      return m_this.choropleth.get('scalar')();
+    } else {
+      var scalarId = m_this.choropleth.get('accessors')().scalarId;
+      var scalarValue = m_this.choropleth.get('accessors')().scalarValue;
+      m_choropleth.scalar = data;
+      // we make internal dictionary from array for faster lookup
+      // when matching geojson features to scalar values,
+      // note that we also allow for multiple scalar elements
+      // for the same geo feature
+      m_choropleth.scalar._dictionary = data
+        .reduce(function(accumeDictionary, scalarElement){
+          var id = scalarId(scalarElement);
+          var value = scalarValue(scalarElement);
+          
+          accumeDictionary[id] =
+            accumeDictionary[id] ?
+            accumeDictionary[id].push(value) : [value];
+
+          return accumeDictionary;
+        }, {});
+    }
+    return m_this;
+  }
   
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -110,15 +152,15 @@ geo.choroplethFeature = function (arg) {
     var newFeature = m_this.layer()
         .createFeature('polygon', {});
 
-    if (feature.geometry.type === "Polygon") {
+    if (feature.geometry.type === 'Polygon') {
       newFeature.data([{
         type: 'Polygon',
         coordinates: feature.geometry.coordinates
       }]);
-    } else if (feature.geometry.type === "MultiPolygon"){
+    } else if (feature.geometry.type === 'MultiPolygon'){
       newFeature.data(feature.geometry.coordinates.map(function(coordinateMap){
         return {
-          type: "Polygon",
+          type: 'Polygon',
           coordinates: coordinateMap
         };
       }));
@@ -168,7 +210,7 @@ geo.choroplethFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._generateScale = function (valueAccessor) {
     var extent =
-        d3.extent(m_this.data().features, valueAccessor || undefined);
+        d3.extent(m_this.scalar(), valueAccessor || undefined);
 
     m_this.choropleth()
       .scale
@@ -187,21 +229,29 @@ geo.choroplethFeature = function (arg) {
   this.createChoropleth = function () {
     var choropleth = m_this.choropleth,
         data = m_this.data(),
-        opacityRange = choropleth.get('opacityRange')(),
-        rangeValues = choropleth.get('rangeValues')(),
-        valueFunc = choropleth.get('value'),
-        stepped = choropleth.get('stepped')();
+        scalars = m_this.scalar(), 
+        valueFunc = choropleth.get('accessors')().scalarValue,
+        getFeatureId = choropleth.get('accessors')().geoId;
 
     m_this._generateScale(valueFunc);
 
-    return data.features.map(function(feature){
-      var fillColor =
-          m_this.choropleth()
-          .scale(valueFunc(feature));
-
-      return m_this
-        ._featureToPolygons(feature, fillColor);
-    });
+    return data
+      .features
+      .map(function(feature){
+        var id = getFeatureId(feature);
+        var valueArray = scalars._dictionary[id];
+        var accumulatedScalarValue = d3.mean(valueArray);
+        // take average of this array of values
+        // which allows for non-bijective correspondance
+        // between geo data and scalar data
+        var fillColor =
+            m_this
+            .choropleth()
+            .scale(accumulatedScalarValue);
+        
+        return m_this
+          ._featureToPolygons(feature, fillColor);
+      });
 
   };
 
