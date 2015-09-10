@@ -117,6 +117,27 @@
     };
 
     /**
+     * Return the bounds of the tile given an index offset and
+     * a translation.
+     *
+     * @param {object} index The tile index containing (0, 0)
+     * @param {object} shift The coordinates of (0, 0) inside the tile
+     */
+    this.bounds = function (index, shift) {
+      var left, right, bottom, top;
+      left = this.size.x * (this.index.x - index.x) - this.overlap.x - shift.x;
+      right = left + this.size.x + this.overlap.x * 2;
+      top = this.size.y * (this.index.y - index.y) - this.overlap.y - shift.y;
+      bottom = top + this.size.y + this.overlap.y * 2;
+      return {
+        left: left,
+        right: right,
+        bottom: bottom,
+        top: top
+      };
+    };
+
+    /**
      * Computes the global coordinates of the bottom edge.
      * @returns {number}
      */

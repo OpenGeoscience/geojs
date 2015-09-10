@@ -182,7 +182,7 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.zoom = function (val, direction) {
-    var oldOrigin, evt, oldZoom, bounds;
+    var evt, oldZoom, bounds;
     if (val === undefined) {
       return m_zoom;
     }
@@ -207,6 +207,7 @@ geo.map = function (arg) {
     m_this.modified();
 
     // Check if this a new integer level
+    /*
     if (Math.floor(val) !== Math.floor(oldZoom)) {
       // update world coordinate reference
       oldOrigin = m_origin;
@@ -222,6 +223,7 @@ geo.map = function (arg) {
         }
       );
     }
+    */
 
     camera_bounds(bounds);
     evt = {
@@ -254,8 +256,8 @@ geo.map = function (arg) {
     unit = m_this.unitsPerPixel(m_zoom);
 
     m_camera.pan({
-      x: delta.x * unit,
-      y: delta.y * unit
+      x: -delta.x * unit,
+      y: -delta.y * unit
     });
     m_center = m_camera.displayToWorld({
       x: m_width / 2,
@@ -279,11 +281,11 @@ geo.map = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.center = function (coordinates) {
     if (coordinates === undefined) {
-      return $.extend({}, m_center);
+      return $.extend({}, m_this.worldToGcs(m_center));
     }
 
     // get the screen coordinates of the new center
-    m_center = geo.util.normalizeCoordinates(coordinates);
+    m_center = $.extend({}, m_this.gcsToWorld(coordinates));
 
     // trigger a pan event
     m_this.geoTrigger(
@@ -503,6 +505,10 @@ geo.map = function (arg) {
   this.displayToGcs = function (c, gcs) {
     c = this.displayToWorld(c); // done via camera
     return this.worldToGcs(c, gcs);
+  };
+
+  this.displayToWorld = function (c) {
+    return m_camera.displayToWorld(c, m_width, m_height);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -948,7 +954,7 @@ geo.map = function (arg) {
     // preprocess the arguments
     zoom = fix_zoom(zoom);
     units = m_this.unitsPerPixel(zoom);
-    center = geo.util.normalizeCoordinates(center);
+    center = m_this.gcsToWorld(center);
 
     // get half the width and height in world coordinates
     width = m_width * units / 2;
@@ -956,10 +962,10 @@ geo.map = function (arg) {
 
     // calculate the bounds
     bounds = {
-      left: center.x - width,
-      right: center.x + width,
-      bottom: center.y - height,
-      top: center.y + height
+      left: center.x - width + m_origin.x,
+      right: center.x + width + m_origin.x,
+      bottom: center.y - height + m_origin.y,
+      top: center.y + height + m_origin.y
     };
 
     // correct the bounds when clamping is enabled
@@ -1202,10 +1208,10 @@ geo.map = function (arg) {
         centerx = (bounds.left + bounds.right) / 2,
         centery = (bounds.top + bounds.bottom) / 2,
         bds = {
-          left: (centerx - width * scl.x),
-          right: (centerx + width * scl.x),
-          bottom: (centery - height * scl.y),
-          top: (centery + height * scl.y)
+          left: (centerx - width * scl.x - m_origin.x),
+          right: (centerx + width * scl.x - m_origin.x),
+          bottom: (centery - height * scl.y - m_origin.y),
+          top: (centery + height * scl.y - m_origin.y)
         };
     m_camera.bounds = bds;
   }
@@ -1218,7 +1224,7 @@ geo.map = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
 
   // Set the world origin
-  m_origin = {x: 100000, y: 0};// $.extend({}, m_center);
+  m_origin = {x: 0, y: 0};// $.extend({}, m_center);
 
   // Fix the zoom level (minimum and initial)
   reset_minimum_zoom();

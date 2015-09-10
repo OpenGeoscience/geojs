@@ -173,6 +173,17 @@
     };
 
     /**
+     * Returns a tile's bounds in layer coordinates.
+     * @param {geo.tile} tile
+     * @param {number} zoom
+     * @returns {object} bounds
+     */
+    this._tileBounds = function (tile) {
+      var origin = this._origin(tile.index.level);
+      return tile.bounds(origin.index, origin.offset);
+    };
+
+    /**
      * Returns the tile indices at the given point.
      * @param {Object} point The coordinates in pixels relative to the map origin.
      * @param {Number} point.x
@@ -296,6 +307,14 @@
       indexRange = this._getTileRange(level, bounds);
       start = indexRange.start;
       end = indexRange.end;
+      console.log(
+        JSON.stringify({
+          bounds: this._getViewBounds(),
+          range: indexRange,
+          origin: this.map().origin(),
+          center: this.map().center()
+        })
+      );
 
       // total number of tiles existing at this level
       nTilesLevel = this.tilesAtZoom(level);
@@ -457,15 +476,16 @@
       }
 
       // get the layer node
-      var div = this.canvas();
+      var div = this.canvas(),
+          bounds = this._tileBounds(tile);
 
       // append the image element
       div.append(tile.image);
 
       // apply a transform to place the image correctly
       tile.image.style.position = 'absolute';
-      tile.image.style.left = tile.left + 'px';
-      tile.image.style.top = tile.bottom + 'px';
+      tile.image.style.left = bounds.left + 'px';
+      tile.image.style.top = (bounds.top) + 'px';
 
       // add an error handler
       tile.catch(function () {
@@ -549,6 +569,7 @@
 
         tile = this._activeTiles[hash];
         if (this._canPurge(tile, bounds)) {
+          console.log('Purging: ' + tile.toString());
           this.remove(tile);
         }
       }
@@ -595,8 +616,8 @@
       var map = this.map(),
           unit = map.unitsPerPixel();
       return {
-        x: pt.x / unit,
-        y: pt.y / unit
+        x: (pt.x - this.constructor.defaults.minX) / unit,
+        y: (pt.y - this.constructor.defaults.minY) / unit
       };
     };
 
@@ -611,8 +632,8 @@
       var map = this.map(),
           unit = map.unitsPerPixel();
       return {
-        x: pt * unit,
-        y: pt * unit
+        x: pt * unit + this.constructor.defaults.minX,
+        y: pt * unit + this.constructor.defaults.minY
       };
     };
 
@@ -626,7 +647,7 @@
           zoom = Math.floor(mapZoom),
           center = this.toLevel(this.toLocal(map.center()), zoom),
           bounds = map.bounds(),
-          tiles;
+          tiles, view = this._getViewBounds();
 
       tiles = this._getTiles(
         zoom, bounds, true
@@ -639,9 +660,11 @@
       );
       this.canvas().css(
         'transform',
-        'translate(' +
-        (-center.x) + 'px' + ',' +
-        (-center.y) + 'px' + ')'
+        'scale(' +
+        (Math.pow(2, mapZoom - zoom)) +
+        ')translate(' +
+        (view.left) + 'px' + ',' +
+        (view.bottom) + 'px' + ')'
       );
 
       if (zoom === lastZoom &&
