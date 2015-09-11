@@ -185,4 +185,40 @@ describe('geo.tileLayer', function () {
       });
     });
   });
+
+  function norm(p, q) {
+    var x, y;
+    x = p.x - q.x;
+    y = p.y - q.y;
+    return Math.sqrt(x * x + y * y);
+  }
+
+  describe('toLocal/fromLocal', function () {
+    var opts = {},
+        m = map(opts),
+        l = geo.tileLayer({map: m});
+
+    it('Should not depend on map origin', function () {
+      function check(p) {
+        var p1, p2, q1, q2;
+        m.origin({x: 0, y: 0});
+        p1 = l.toLocal(p);
+        q1 = l.fromLocal(p);
+
+        m.origin({x: 11.993, y: -10001});
+        p2 = l.toLocal(p);
+        q2 = l.fromLocal(p);
+
+        expect(norm(p1, p2)).toBeLessThan(1e-6);
+        expect(norm(q1, q2)).toBeLessThan(1e-6);
+      }
+
+      check({x: 0, y: 0});
+      check({x: 1, y: -1});
+      check({x: 100000, y: -0.551});
+    });
+
+    it('', function () {
+    });
+  });
 });

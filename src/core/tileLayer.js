@@ -632,8 +632,8 @@
       var map = this.map(),
           unit = map.unitsPerPixel();
       return {
-        x: pt * unit + this.constructor.defaults.minX,
-        y: pt * unit + this.constructor.defaults.minY
+        x: pt.x * unit + this.constructor.defaults.minX,
+        y: pt.y * unit + this.constructor.defaults.minY
       };
     };
 
