@@ -51,13 +51,12 @@ geo.gl.choroplethFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
-    // we need to drop these polygons
+    console.log("building");
     if (m_gl_polygons) {
       return m_gl_polygons;
-    } else {
-      //call build on all polygons
-      return (m_gl_polygons = createGLChoropleth());
     }
+    m_this.buildTime().modified();
+    return (m_gl_polygons = createGLChoropleth());
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -68,11 +67,16 @@ geo.gl.choroplethFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._update = function () {
+    console.log("Updating", m_this.dataTime().getMTime(),
+                m_this.updateTime().getMTime(), m_this.getMTime(), m_this.buildTime().getMTime());
     s_update.call(m_this);
     if (m_this.dataTime().getMTime() >= m_this.buildTime().getMTime() ||
         m_this.updateTime().getMTime() <= m_this.getMTime()) {
       m_this._build();
     }
+    m_this.updateTime().modified();
+    console.log(m_this);
+    // if data !== dataOld || scslar !== scalr OLd destroy, otherwise do nothing
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -81,14 +85,13 @@ geo.gl.choroplethFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
-    console.log('firing exit');
+    console.log("exiting");
     // somehow destroy subfeatures
     if (m_gl_polygons) {
       m_gl_polygons.map(function(polygon){
-        if (polygon) return polygon._exit();
+        return polygon._exit();
       });
     }
-    m_this.renderer().contextRenderer().removeActor(m_actor);
     s_exit();
   };
 

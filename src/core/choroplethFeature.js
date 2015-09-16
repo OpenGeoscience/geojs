@@ -86,9 +86,10 @@ geo.choroplethFeature = function (arg) {
 
           return accumeDictionary;
         }, {});
+      m_this.dataTime().modified();
     }
     return m_this;
-  }
+  };
   
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -233,7 +234,7 @@ geo.choroplethFeature = function (arg) {
         scalars = m_this.scalar(), 
         valueFunc = choropleth.get('accessors')().scalarValue,
         getFeatureId = choropleth.get('accessors')().geoId;
-
+    
     m_this._generateScale(valueFunc);
 
     return data
@@ -253,7 +254,6 @@ geo.choroplethFeature = function (arg) {
         return m_this
           ._featureToPolygons(feature, fillColor);
       });
-
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -263,7 +263,7 @@ geo.choroplethFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
     s_init.call(m_this, arg);
-    
+
     if (m_choropleth) {
       m_this.dataTime().modified();
     } 
