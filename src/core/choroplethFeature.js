@@ -63,13 +63,14 @@ geo.choroplethFeature = function (arg) {
    * @returns {geo.feature.choropleth}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.scalar = function (data) {
+  this.scalar = function (data, aggregator) {
     if (data === undefined) {
       return m_this.choropleth.get('scalar')();
     } else {
       var scalarId = m_this.choropleth.get('accessors')().scalarId;
       var scalarValue = m_this.choropleth.get('accessors')().scalarValue;
       m_choropleth.scalar = data;
+      m_choropleth.scalarAggregator = aggregator || d3.mean;
       // we make internal dictionary from array for faster lookup
       // when matching geojson features to scalar values,
       // note that we also allow for multiple scalar elements
@@ -240,7 +241,7 @@ geo.choroplethFeature = function (arg) {
       .map(function(feature){
         var id = getFeatureId(feature);
         var valueArray = scalars._dictionary[id];
-        var accumulatedScalarValue = d3.mean(valueArray);
+        var accumulatedScalarValue = choropleth().scalarAggregator(valueArray);
         // take average of this array of values
         // which allows for non-bijective correspondance
         // between geo data and scalar data
