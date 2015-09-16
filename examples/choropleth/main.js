@@ -58,6 +58,16 @@ $(function () {
       var choropleth =
           makeChoropleth(geoData.features, mockScalarData, vglLayer);
 
+      var legendContainer =
+          d3
+          .select("#map")
+          .append('g')
+          .attr({
+            "class": "color-legend"
+          });
+
+      console.log(choropleth);
+      
       setTimeout(function(){
         var mockScalarData2 = geoData
             .features

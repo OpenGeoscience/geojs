@@ -1,6 +1,6 @@
 {
   "path": "choropleth",
-  "title": "choropleth plot",
+  "title": "Choropleth plot",
   "exampleCss": ["main.css"],
   "exampleJs": ["main.js"],
   "about": {

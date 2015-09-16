@@ -56,6 +56,7 @@ geo.choroplethFeature = function (arg) {
               },
               arg.choropleth);
 
+
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set choropleth scalar data
