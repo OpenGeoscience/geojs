@@ -42,7 +42,7 @@ $(function () {
   // Load the data
   $.ajax({
     url: 'states.json',
-    dataType: "json",
+    dataType: 'json',
     success: function (geoData) {
 
       var mockScalarData = geoData
