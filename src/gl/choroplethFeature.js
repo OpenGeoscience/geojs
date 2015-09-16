@@ -67,7 +67,6 @@ geo.gl.choroplethFeature = function (arg) {
     if (m_this.dataTime().getMTime() >= m_this.buildTime().getMTime() ||
         m_this.updateTime().getMTime() <= m_this.getMTime()) {
       m_this._wipePolygons();
-      console.log("rebuilding");
       m_this._build();
     }
     m_this.updateTime().modified();
