@@ -67,16 +67,13 @@ geo.gl.choroplethFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._update = function () {
-    console.log("Updating", m_this.dataTime().getMTime(),
-                m_this.updateTime().getMTime(), m_this.getMTime(), m_this.buildTime().getMTime());
     s_update.call(m_this);
     if (m_this.dataTime().getMTime() >= m_this.buildTime().getMTime() ||
         m_this.updateTime().getMTime() <= m_this.getMTime()) {
+      m_this._exit();
       m_this._build();
     }
     m_this.updateTime().modified();
-    console.log(m_this);
-    // if data !== dataOld || scslar !== scalr OLd destroy, otherwise do nothing
   };
 
   ////////////////////////////////////////////////////////////////////////////

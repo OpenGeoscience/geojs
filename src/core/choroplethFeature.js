@@ -238,7 +238,6 @@ geo.choroplethFeature = function (arg) {
     m_this._generateScale(valueFunc);
 
     return data
-      .features
       .map(function(feature){
         var id = getFeatureId(feature);
         var valueArray = scalars._dictionary[id];

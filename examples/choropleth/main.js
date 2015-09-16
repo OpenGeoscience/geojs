@@ -9,7 +9,7 @@ $(function () {
      * array which just has our contour values. */
     var choropleth = layer
         .createFeature('choropleth')
-	.data(geoData)
+	.data(geoData.features)
         .scalar(scalarData)
 	.choropleth({});
 
