@@ -9,7 +9,7 @@ $(function () {
      * array which just has our contour values. */
     var choropleth = layer
         .createFeature('choropleth')
-	.data(geoData.features)
+	.data(geoData)
         .scalar(scalarData)
 	.choropleth({});
 
@@ -55,7 +55,26 @@ $(function () {
             };
           });
 
-      makeChoropleth(geoData, mockScalarData, vglLayer);
+      var choropleth =
+          makeChoropleth(geoData.features, mockScalarData, vglLayer);
+
+      setTimeout(function(){
+        var mockScalarData2 = geoData
+            .features
+            .map(function(feature){
+              return {
+                value: Math.random()*10,
+                id: feature.properties.GEO_ID
+              };
+            });
+        
+        choropleth
+          .data(geoData.features)
+          .scalar(mockScalarData2);
+
+        map.draw();
+        
+      }, 5000);
       // Draw the map
       map.draw();
     }

@@ -51,10 +51,6 @@ geo.gl.choroplethFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
-    console.log("building");
-    if (m_gl_polygons) {
-      return m_gl_polygons;
-    }
     m_this.buildTime().modified();
     return (m_gl_polygons = createGLChoropleth());
   };
@@ -70,10 +66,24 @@ geo.gl.choroplethFeature = function (arg) {
     s_update.call(m_this);
     if (m_this.dataTime().getMTime() >= m_this.buildTime().getMTime() ||
         m_this.updateTime().getMTime() <= m_this.getMTime()) {
-      m_this._exit();
+      m_this._wipePolygons();
       m_this._build();
     }
     m_this.updateTime().modified();
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Destroy Polygon Sub-Features
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._wipePolygons = function () {
+    if (m_gl_polygons) {
+      m_gl_polygons.map(function(polygon){
+        return polygon._exit();
+      });
+    }
+    m_gl_polygons = null;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -82,13 +92,7 @@ geo.gl.choroplethFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
-    console.log("exiting");
-    // somehow destroy subfeatures
-    if (m_gl_polygons) {
-      m_gl_polygons.map(function(polygon){
-        return polygon._exit();
-      });
-    }
+    m_this._wipePolygons();
     s_exit();
   };
 
