@@ -1208,10 +1208,10 @@ geo.map = function (arg) {
         centerx = (bounds.left + bounds.right) / 2,
         centery = (bounds.top + bounds.bottom) / 2,
         bds = {
-          left: (centerx - width * scl.x - m_origin.x),
-          right: (centerx + width * scl.x - m_origin.x),
-          bottom: (centery - height * scl.y - m_origin.y),
-          top: (centery + height * scl.y - m_origin.y)
+          left: (centerx - width * scl.x + m_origin.x),
+          right: (centerx + width * scl.x + m_origin.x),
+          bottom: (centery - height * scl.y + m_origin.y),
+          top: (centery + height * scl.y + m_origin.y)
         };
     m_camera.bounds = bds;
   }
