@@ -5,7 +5,7 @@ window.startTest = function (done) {
     zoom: 4,
     center: {
       y: 33.60,
-      x: -80.83
+      x: -95.00
     }
   };
 
