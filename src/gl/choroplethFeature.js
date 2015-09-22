@@ -25,7 +25,7 @@ geo.gl.choroplethFeature = function (arg) {
       m_gl_polygons = null,
       s_exit = this._exit,
       s_init = this._init,
-      s_update = this._update;  
+      s_update = this._update;
 
   /* Create the choropleth.  This calls the base class to generate the contours,
    * into the various gl uniforms and buffers.
@@ -79,7 +79,7 @@ geo.gl.choroplethFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._wipePolygons = function () {
     if (m_gl_polygons) {
-      m_gl_polygons.map(function(polygon){
+      m_gl_polygons.map(function (polygon) {
         return polygon._exit();
       });
     }

@@ -52,7 +52,7 @@ geo.choroplethFeature = function (arg) {
                   scalarValue: function (scalarElement) {
                     return scalarElement.value;
                   }
-                },
+                }
               },
               arg.choropleth);
 
@@ -65,11 +65,13 @@ geo.choroplethFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.scalar = function (data, aggregator) {
+    var scalarId, scalarValue;
+
     if (data === undefined) {
       return m_this.choropleth.get('scalar')();
     } else {
-      var scalarId = m_this.choropleth.get('accessors')().scalarId;
-      var scalarValue = m_this.choropleth.get('accessors')().scalarValue;
+      scalarId = m_this.choropleth.get('accessors')().scalarId;
+      scalarValue = m_this.choropleth.get('accessors')().scalarValue;
       m_choropleth.scalar = data;
       m_choropleth.scalarAggregator = aggregator || d3.mean;
       // we make internal dictionary from array for faster lookup
@@ -77,10 +79,12 @@ geo.choroplethFeature = function (arg) {
       // note that we also allow for multiple scalar elements
       // for the same geo feature
       m_choropleth.scalar._dictionary = data
-        .reduce(function(accumeDictionary, scalarElement){
-          var id = scalarId(scalarElement);
-          var value = scalarValue(scalarElement);
-          
+        .reduce(function (accumeDictionary, scalarElement) {
+          var id, value;
+
+          id = scalarId(scalarElement);
+          value = scalarValue(scalarElement);
+
           accumeDictionary[id] =
             accumeDictionary[id] ?
             accumeDictionary[id].push(value) : [value];
@@ -91,7 +95,7 @@ geo.choroplethFeature = function (arg) {
     }
     return m_this;
   };
-  
+
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set choropleth accessor
@@ -100,6 +104,8 @@ geo.choroplethFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.choropleth = function (arg1, arg2) {
+    var choropleth;
+
     if (arg1 === undefined) {
       return m_choropleth;
     }
@@ -107,7 +113,7 @@ geo.choroplethFeature = function (arg) {
       return m_choropleth[arg1];
     }
     if (arg2 === undefined) {
-      var choropleth = $.extend(
+      choropleth = $.extend(
         {},
         m_choropleth,
         arg1
@@ -130,8 +136,8 @@ geo.choroplethFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.choropleth.get = function (key) {
+    var all = {}, k;
     if (key === undefined) {
-      var all = {}, k;
       for (k in m_choropleth) {
         if (m_choropleth.hasOwnProperty(k)) {
           all[k] = m_this.choropleth.get(k);
@@ -151,7 +157,7 @@ geo.choroplethFeature = function (arg) {
    * @return {geo.feature}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._addPolygonFeature = function(feature, fillColor){
+  this._addPolygonFeature = function (feature, fillColor) {
     var newFeature = m_this.layer()
         .createFeature('polygon', {});
 
@@ -160,8 +166,8 @@ geo.choroplethFeature = function (arg) {
         type: 'Polygon',
         coordinates: feature.geometry.coordinates
       }]);
-    } else if (feature.geometry.type === 'MultiPolygon'){
-      newFeature.data(feature.geometry.coordinates.map(function(coordinateMap){
+    } else if (feature.geometry.type === 'MultiPolygon') {
+      newFeature.data(feature.geometry.coordinates.map(function (coordinateMap) {
         return {
           type: 'Polygon',
           coordinates: coordinateMap
@@ -174,9 +180,9 @@ geo.choroplethFeature = function (arg) {
         return {
           'outer': d.coordinates[0],
           'inner': d.coordinates[1] // undefined but ok
-        };                              
+        };
       })
-      .position(function(d){
+      .position(function (d) {
         return {
           x: d[0],
           y: d[1]
@@ -185,19 +191,19 @@ geo.choroplethFeature = function (arg) {
       .style({
         'fillColor': fillColor
       });
-    
+
     return newFeature;
   };
-  
+
   ////////////////////////////////////////////////////////////////////////////
   /**
    * A method that adds polygons from a given feature to the current layer.
    *
    * @param {} geoJsonFeature
    * @param geo.color
-   * @return [{geo.feature}] 
+   * @return [{geo.feature}]
    */
-  ////////////////////////////////////////////////////////////////////////////          
+  ////////////////////////////////////////////////////////////////////////////
   this._featureToPolygons = function (feature, fillValue) {
     return m_this
       ._addPolygonFeature(feature, fillValue);
@@ -222,7 +228,7 @@ geo.choroplethFeature = function (arg) {
 
     return m_this;
   };
-  
+
   ////////////////////////////////////////////////////////////////////////////
   /**sr
    * Generate scale for choropleth.data(), make polygons from features.
@@ -232,14 +238,14 @@ geo.choroplethFeature = function (arg) {
   this.createChoropleth = function () {
     var choropleth = m_this.choropleth,
         data = m_this.data(),
-        scalars = m_this.scalar(), 
+        scalars = m_this.scalar(),
         valueFunc = choropleth.get('accessors')().scalarValue,
         getFeatureId = choropleth.get('accessors')().geoId;
-    
+
     m_this._generateScale(valueFunc);
 
     return data
-      .map(function(feature){
+      .map(function (feature) {
         var id = getFeatureId(feature);
         var valueArray = scalars._dictionary[id];
         var accumulatedScalarValue = choropleth().scalarAggregator(valueArray);
@@ -250,7 +256,7 @@ geo.choroplethFeature = function (arg) {
             m_this
             .choropleth()
             .scale(accumulatedScalarValue);
-        
+
         return m_this
           ._featureToPolygons(feature, fillColor);
       });
@@ -266,7 +272,7 @@ geo.choroplethFeature = function (arg) {
 
     if (m_choropleth) {
       m_this.dataTime().modified();
-    } 
+    }
   };
 
   this._init(arg);
