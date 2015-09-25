@@ -24,6 +24,7 @@
    *   * {@link geo.event.camera.view} when the visible bounds change for
    *       any reason
    *   * {@link geo.event.camera.projection} when the projection type changes
+   *   * {@link geo.event.camera.viewport} when the viewport changes
    *
    * By convention, protected methods do not update the internal matrix state,
    * public methods do.  For now, there are two primary methods that are
@@ -36,6 +37,9 @@
    * @extends geo.object
    * @param {object?} spec Options argument
    * @param {string} spec.projection One of the supported geo.camera.projection
+   * @param {object} spec.viewport The initial camera viewport
+   * @param {object} spec.viewport.width
+   * @param {object} spec.viewport.height
    * @returns {geo.camera}
    */
   //////////////////////////////////////////////////////////////////////////////
@@ -81,6 +85,14 @@
      * @protected
      */
     this._bounds = null;
+
+    /**
+     * The viewport parameters size and offset.
+     * @property {number} height Viewport height in pixels
+     * @property {number} width Viewport width in pixels
+     * @protected
+     */
+    this._viewport = {};
 
     /**
      * Set up the projection matrix for the current projection type.
@@ -143,10 +155,6 @@
 
     /**
      * Getter/setter for the view bounds.
-     *
-     * @note The camera does not know about the viewport size or
-     * aspect ratio.  It is up to the caller to ensure the viewport
-     * has the correct aspect ratio to avoid non-homogenious scaling.
      *
      * If not provided, near and far bounds will be set to [-1, 1] by
      * default.  We will probably want to change this to a unit specific
@@ -222,6 +230,31 @@
     Object.defineProperty(this, 'inverse', {
       get: function () {
         return this._inverse;
+      }
+    });
+
+    /**
+     * Getter/setter for the viewport.
+     */
+    Object.defineProperty(this, 'viewport', {
+      get: function () {
+        return {width: this._viewport.width, height: this._viewport.height};
+      },
+      set: function (viewport) {
+        if (!(viewport.width > 0 &&
+              viewport.height > 0)) {
+          throw new Error('Invalid viewport dimensions');
+        }
+        if (viewport.width === this._viewport.width ||
+            viewport.height === this._viewport.height) {
+          return;
+        }
+        this._viewport = {width: viewport.width, height: viewport.height};
+        this._update();
+        this.geoTrigger(geo.event.camera.viewport, {
+          camera: this,
+          viewport: this.viewport
+        });
       }
     });
 
@@ -303,8 +336,6 @@
     /**
      * Project a vec4 from world space into viewport space.
      * @param {vec4} point The point in world coordinates (mutated)
-     * @param {number} width The viewport width
-     * @param {number} height The viewport height
      * @returns {vec4} The point in display coordinates
      *
      * @note For the moment, this computation assumes the following:
@@ -314,15 +345,15 @@
      * The clip space z and w coordinates are returned with the window
      * x/y coordinates.
      */
-    this.worldToDisplay4 = function (point, width, height) {
+    this.worldToDisplay4 = function (point) {
       point[2] -= 2;
       this._worldToClip4(point);
       var w = 1;
       if (this._projection === 'perspective' && point[3]) {
         w = 1 / point[3];
       }
-      point[0] = width * (1 + w * point[0]) / 2.0;
-      point[1] = height * (1 - w * point[1]) / 2.0;
+      point[0] = this._viewport.width * (1 + w * point[0]) / 2.0;
+      point[1] = this._viewport.height * (1 - w * point[1]) / 2.0;
       point[2] = (1 + w * point[2]) / 2.0;
       point[3] = w; // as in gl_FragCoord
       return point;
@@ -331,15 +362,13 @@
     /**
      * Project a vec4 from display space into world space in place.
      * @param {vec4} point The point in display coordinates (mutated)
-     * @param {number} width The viewport width
-     * @param {number} height The viewport height
      * @returns {vec4} The point in world space coordinates
      *
      * @note For the moment, this computation assumes the following:
      *   * point[3] > 0
      *   * depth range [0, 1]
      */
-    this.displayToWorld4 = function (point, width, height) {
+    this.displayToWorld4 = function (point) {
       var w = 1;
       if (this._projection === 'perspective') {
         w = 2; // from default camera near and far clipping
@@ -347,8 +376,8 @@
           w = point[3];
         }
       }
-      point[0] = (2.0 * point[0] / width - 1) * w;
-      point[1] = (-2.0 * point[1] / height + 1) * w;
+      point[0] = (2.0 * point[0] / this._viewport.width - 1) * w;
+      point[1] = (-2.0 * point[1] / this._viewport.height + 1) * w;
       point[2] = (2.0 * point[2] - 1) * w;
       point[3] = w;
       this._clipToWorld4(point);
@@ -360,15 +389,11 @@
      * @param {object} point The point in world coordinates
      * @param {number} point.x
      * @param {number} point.y
-     * @param {number} width The viewport width
-     * @param {number} height The viewport height
      * @returns {object} The point in display coordinates
      */
-    this.worldToDisplay = function (point, width, height) {
+    this.worldToDisplay = function (point) {
       point = this.worldToDisplay4(
-        [point.x, point.y, 0, 1],
-        width,
-        height
+        [point.x, point.y, 0, 1]
       );
       return {x: point[0], y: point[1], z: point[2]};
     };
@@ -378,15 +403,11 @@
      * @param {object} point The point in display coordinates
      * @param {number} point.x
      * @param {number} point.y
-     * @param {number} width The viewport width
-     * @param {number} height The viewport height
      * @returns {object} The point in world coordinates
      */
-    this.displayToWorld = function (point, width, height) {
+    this.displayToWorld = function (point) {
       point = this.displayToWorld4(
-        [point.x, point.y, 0, 2],
-        width,
-        height
+        [point.x, point.y, 0, 2]
       );
       return {x: point[0], y: point[1]};
     };
@@ -418,7 +439,10 @@
     };
 
     /**
-     * Sets the view matrix to the given world space bounds.
+     * Sets the view matrix so that the given world bounds
+     * are in view.  To account for the viewport aspect ratio,
+     * the resulting bounds may be larger in width or height than
+     * the requested bound, but should be centered in the frame.
      *
      * @protected
      * @param {object} bounds
@@ -426,14 +450,15 @@
      * @param {number} bounds.right
      * @param {number} bounds.bottom
      * @param {number} bounds.top
-     * @param {number?} bounds.near
-     * @param {number?} bounds.far
+     * @param {number?} bounds.near Currently ignored
+     * @param {number?} bounds.far Currently ignored
      * @return {this} Chainable
      */
     this._setBounds = function (bounds) {
 
       var translate = vec3.create(),
-          scale = vec3.create();
+          scale = vec3.create(),
+          c_ar, v_ar, w, h;
 
       bounds.near = bounds.near || 1;
       bounds.far = bounds.far || 0;
@@ -441,9 +466,23 @@
       // reset view to the identity
       this._resetView();
 
-      // scale to the new coordinate units
-      scale[0] = 2 / (bounds.right - bounds.left);
-      scale[1] = 2 / (bounds.top - bounds.bottom);
+      w = Math.abs(bounds.right - bounds.left);
+      h = Math.abs(bounds.top - bounds.bottom);
+      c_ar = w / h;
+      v_ar = this._viewport.width / this._viewport.height;
+
+      if (c_ar >= v_ar) {
+        // grow camera bounds vertically
+        h = w / v_ar;
+        scale[0] = 2 / w;
+        scale[1] = 2 / h;
+      } else {
+        // grow bounds horizontally
+        w = h * v_ar;
+        scale[0] = 2 / w;
+        scale[1] = 2 / h;
+      }
+
       scale[2] = 1; // / (bounds.near - bounds.far);
       this._scale(scale);
 
@@ -452,7 +491,6 @@
       translate[1] = (bounds.bottom + bounds.top) / -2;
       translate[2] = 0;
       this._translate(translate);
-
       return this;
     };
 
@@ -548,6 +586,9 @@
 
     // set up the projection matrix
     this.projection = spec.projection || 'parallel';
+
+    // initialize the viewport
+    this.viewport = spec.viewport || {width: 1, height: 1};
 
     // trigger an initial update to set up the camera state
     this._update();

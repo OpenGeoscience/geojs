@@ -321,3 +321,15 @@ geo.event.camera.zoom = 'geo_camera_zoom';
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.event.camera.projection = 'geo_camera_projection';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered after a viewport change.
+ *
+ * @property {geo.camera} camera The camera instance
+ * @property {object} viewport The new viewport
+ * @property {number} viewport.width The new width
+ * @property {number} viewport.height The new height
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.event.camera.viewport = 'geo_camera_viewport';

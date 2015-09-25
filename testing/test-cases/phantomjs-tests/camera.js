@@ -26,16 +26,18 @@ describe('geo.camera', function () {
   }
 
   function generateBoundsTest(xs, xe, ys, ye, projection) {
+    var viewport = {width: 1, height: 1};
+
     return function () {
-      var c = geo.camera(), w = 1, h = 1;
+      var c;
 
       function w2d(p, q) {
         return function () {
-          near(c.worldToDisplay(p, w, h), q);
+          near(c.worldToDisplay(p), q);
         };
       }
 
-      c = new geo.camera();
+      c = new geo.camera({viewport: viewport});
       if (projection) {
         c.projection = projection;
       }
@@ -59,12 +61,14 @@ describe('geo.camera', function () {
   function roundTrip(camera, size, pt, tol) {
     return function () {
       var copy = $.extend({}, pt);
-      pt = camera.worldToDisplay(pt, size.width, size.height);
+      camera.viewport = size;
+      pt = camera.worldToDisplay(pt);
       expect(
         pt.x >= 0 && pt.x <= size.width &&
         pt.y >= 0 && pt.y <= size.height
       ).toBe(true);
-      pt = camera.displayToWorld(pt, size.width, size.height);
+      camera.viewport = size;
+      pt = camera.displayToWorld(pt);
       near(pt, copy, tol);
     };
   }
@@ -74,7 +78,8 @@ describe('geo.camera', function () {
    */
   function outOfBounds(camera, size, pt) {
     return function () {
-      pt = camera.worldToDisplay(pt, size.width, size.height);
+      camera.viewport = size;
+      pt = camera.worldToDisplay(pt);
       expect(pt.x < 0 || pt.x > size.width || pt.y < 0 || pt.y > size.height).toBe(true);
     };
   }
@@ -123,15 +128,15 @@ describe('geo.camera', function () {
       );
       describe(
         'bounds [-10, 10] x [-1, 1]',
-        generateBoundsTest(-10, 10, -1, 1)
+        generateBoundsTest(-10, 10, -10, 10)
       );
       describe(
         'bounds [-1, 0] x [0, 1000]',
-        generateBoundsTest(-1, 0, 0, 1000)
+        generateBoundsTest(-1, 0, 0, 1)
       );
       describe(
         'bounds [-1, 10] x [-51, 1000]',
-        generateBoundsTest(-1, 10, -51, 1000)
+        generateBoundsTest(-1, 10, -51, -40)
       );
     });
     describe('parallel', function () {
@@ -141,15 +146,15 @@ describe('geo.camera', function () {
       );
       describe(
         'bounds [-10, 10] x [-1, 1]',
-        generateBoundsTest(-10, 10, -1, 1, 'parallel')
+        generateBoundsTest(-10, 10, -10, 10, 'parallel')
       );
       describe(
         'bounds [-1, 0] x [0, 1000]',
-        generateBoundsTest(-1, 0, 0, 1000, 'parallel')
+        generateBoundsTest(-1, 0, 0, 1, 'parallel')
       );
       describe(
         'bounds [-1, 10] x [-51, 1000]',
-        generateBoundsTest(-1, 10, -51, 1000, 'parallel')
+        generateBoundsTest(-1, 10, -51, -40, 'parallel')
       );
     });
     describe('perspective', function () {
@@ -179,5 +184,29 @@ describe('geo.camera', function () {
     perspective.projection = 'perspective';
     describe('parallel projection', roundTripTest(parallel));
     describe('perspective projection', roundTripTest(perspective));
+  });
+
+  describe('Setting bounds with different aspect ratios', function () {
+    it('(1, 1) -> (2, 1)', function () {
+      var c = geo.camera({viewport: {width: 1, height: 1}});
+
+      c.bounds = {left: 0, right: 2, bottom: 0, top: 1};
+
+      expect(c.bounds.left).toEqual(0);
+      expect(c.bounds.right).toEqual(2);
+      expect(c.bounds.bottom).toEqual(-0.5);
+      expect(c.bounds.top).toEqual(1.5);
+    });
+
+    it('(1, 1) -> (1, 2)', function () {
+      var c = geo.camera({viewport: {width: 1, height: 1}});
+
+      c.bounds = {left: 0, right: 1, bottom: 0, top: 2};
+
+      expect(c.bounds.left).toEqual(-0.5);
+      expect(c.bounds.right).toEqual(1.5);
+      expect(c.bounds.bottom).toEqual(0);
+      expect(c.bounds.top).toEqual(2);
+    });
   });
 });
