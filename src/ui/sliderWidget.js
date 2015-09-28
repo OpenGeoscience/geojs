@@ -46,20 +46,20 @@ geo.gui.sliderWidget = function (arg) {
     black: '#505050'
   };
 
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Add an icon from a path string.  Returns a d3 group element.
- *
- * @function
- * @argument {String} icon svg path string
- * @argument {Array} base where to append the element (d3 selection)
- * @argument {Number} cx Center x-coordinate
- * @argument {Number} cy Center y-coordinate
- * @argument {Number} size Icon size in pixels
- * @returns {object}
- * @private
- */
-//////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * Add an icon from a path string.  Returns a d3 group element.
+   *
+   * @function
+   * @argument {String} icon svg path string
+   * @argument {Array} base where to append the element (d3 selection)
+   * @argument {Number} cx Center x-coordinate
+   * @argument {Number} cy Center y-coordinate
+   * @argument {Number} size Icon size in pixels
+   * @returns {object}
+   * @private
+   */
+  //////////////////////////////////////////////////////////////////////////////
   function put_icon(icon, base, cx, cy, size) {
     var g = base.append('g');
 
@@ -79,15 +79,15 @@ geo.gui.sliderWidget = function (arg) {
     return g;
   }
 
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Initialize the slider widget in the map.
- *
- * @function
- * @returns {geo.gui.sliderWidget}
- * @private
- */
-//////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * Initialize the slider widget in the map.
+   *
+   * @function
+   * @returns {geo.gui.sliderWidget}
+   * @private
+   */
+  //////////////////////////////////////////////////////////////////////////////
   this._init = function () {
     s_createCanvas();
     s_appendChild();
@@ -292,31 +292,31 @@ geo.gui.sliderWidget = function (arg) {
     m_this._update();
   };
 
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Removes the slider element from the map and unbinds all handlers.
- *
- * @function
- * @returns {geo.gui.sliderWidget}
- * @private
- */
-//////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * Removes the slider element from the map and unbinds all handlers.
+   *
+   * @function
+   * @returns {geo.gui.sliderWidget}
+   * @private
+   */
+  //////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
     m_group.remove();
     m_this.layer().geoOff(geo.event.zoom);
     s_exit();
   };
 
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Update the slider widget state in reponse to map changes.  I.e. zoom
- * range changes.
- *
- * @function
- * @returns {geo.gui.sliderWidget}
- * @private
- */
-//////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * Update the slider widget state in reponse to map changes.  I.e. zoom
+   * range changes.
+   *
+   * @function
+   * @returns {geo.gui.sliderWidget}
+   * @private
+   */
+  //////////////////////////////////////////////////////////////////////////////
   this._update = function (obj) {
     var map = m_this.layer().map(),
         zoomRange = map.zoomRange(),
