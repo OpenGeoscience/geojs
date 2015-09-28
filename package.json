@@ -28,7 +28,7 @@
     "grunt-contrib-watch": "~0.6",
     "grunt-docco": "^0.3.3",
     "grunt-express": "~1.4",
-    "jscs": "1.11.2",
+    "jscs": "~2.0",
     "jsdoc": "^3.3",
     "jshint": "~2.5",
     "phantomjs": "~1.9"
