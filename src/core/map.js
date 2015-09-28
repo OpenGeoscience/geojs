@@ -1,6 +1,13 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Creates a new map object
+ *
+ * Map coordinates for default world map, where c = half circumference at
+ * equator in meters, o = origin:
+ *   (-c, c) + o                   (c, c) + o
+ *            (center.x, center.y) + o            <-- center of viewport
+ *   (-c, -c) + o                  (c, -c) + o
+ *
  * @class
  * @extends geo.sceneObject
  *
@@ -31,7 +38,7 @@
  * *** Advanced parameters ***
  * @param {geo.camera?} camera The camera to control the view
  * @param {geo.mapInteractor?} interactor The UI event handler
- * @param {geo.clock?} clock The clock used to syncronize time events
+ * @param {geo.clock?} clock The clock used to synchronize time events
  * @param {boolean} [clampBounds=true] Prevent panning outside of the
  *   maximum bounds
  *
@@ -73,8 +80,8 @@ geo.map = function (arg) {
       m_clock = null,
       m_discreteZoom = arg.discreteZoom ? true : false,
       m_maxBounds = {
-        left: merc.forward({x: -phiMax, y: 0}).x,
-        right: merc.forward({x: phiMax, y: 0}).x,
+        left: merc.forward({x: -180, y: 0}).x,
+        right: merc.forward({x: 180, y: 0}).x,
         bottom: merc.forward({x: 0, y: -phiMax}).y,
         top: merc.forward({x: 0, y: phiMax}).y
       },
@@ -256,9 +263,10 @@ geo.map = function (arg) {
     unit = m_this.unitsPerPixel(m_zoom);
 
     m_camera.pan({
-      x: -delta.x * unit,
-      y: -delta.y * unit
+      x: delta.x * unit,
+      y: delta.y * unit
     });
+    /* If m_clampBounds is true, clamp the pan, too - DWM:: */
     m_center = m_camera.displayToWorld({
       x: m_width / 2,
       y: m_height / 2
@@ -489,6 +497,10 @@ geo.map = function (arg) {
   this.gcsToDisplay = function (c, gcs) {
     c = this.gcsToWorld(c, gcs);
     return this.worldToDisplay(c);
+  };
+
+  this.worldToDisplay = function (c) {
+    return m_camera.worldToDisplay(c, m_width, m_height);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -929,7 +941,6 @@ geo.map = function (arg) {
       y: (bounds.top + bounds.bottom) / 2 - m_origin.y
     };
 
-
     return {
       zoom: zoom,
       center: center
@@ -1185,7 +1196,7 @@ geo.map = function (arg) {
     } else if (bounds.bottom < m_maxBounds.bottom) {
       dy = m_maxBounds.bottom - bounds.bottom; // move up
     } else if (bounds.top > m_maxBounds.top) {
-      dx = m_maxBounds.top - bounds.top; // move down
+      dy = m_maxBounds.top - bounds.top; // move down
     }
 
     return {

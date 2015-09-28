@@ -161,7 +161,7 @@
     },
 
     /**
-     * Radius of the earth in meters.
+     * Radius of the earth in meters, from the equatorial radius of SRID 4326.
      */
     radiusEarth: 6378137,
 

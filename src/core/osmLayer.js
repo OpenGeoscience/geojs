@@ -59,6 +59,10 @@
     tileOverlap: 0,
     tileWidth: 256,
     tileHeight: 256,
+    tileOffset : function (level) {
+      var s = Math.pow(2, level - 1) * 256;
+      return {x: s, y: s};
+    },
     wrapX: true,
     wrapY: false,
     url: function (index) {

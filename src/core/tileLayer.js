@@ -2,8 +2,7 @@
   'use strict';
 
   /**
-   * Standard modulo operator where the output
-   * is in [0, a - 1] for all inputs.
+   * Standard modulo operator where the outputa is in [0, b) for all inputs.
    * @private
    */
   function modulo(a, b) {
@@ -193,10 +192,14 @@
      */
     this.tileAtPoint = function (point, level) {
       var o = this._origin(level);
-      point = this.toLevel(
-        this.toLocal(point), level
-      );
-      return {
+      var map = this.map();
+      point = this.displayToLevel(map.gcsToDisplay(point), level);
+      var to = this._options.tileOffset(level);
+      if (to) {
+        point.x += to.x;
+        point.y += to.y;
+      }
+      var tile = {
         x: Math.floor(
           o.index.x + (o.offset.x + point.x) / this._options.tileWidth
         ),
@@ -204,6 +207,7 @@
           o.index.y + (o.offset.y + point.y) / this._options.tileHeight
         )
       };
+      return tile;
     };
 
     /**
@@ -307,14 +311,18 @@
       indexRange = this._getTileRange(level, bounds);
       start = indexRange.start;
       end = indexRange.end;
+      /*
       console.log(
         JSON.stringify({
           bounds: this._getViewBounds(),
+          passedBounds: bounds,
+          level: level,
           range: indexRange,
           origin: this.map().origin(),
           center: this.map().center()
         })
       );
+      */
 
       // total number of tiles existing at this level
       nTilesLevel = this.tilesAtZoom(level);
@@ -541,15 +549,19 @@
      */
     this._getViewBounds = function () {
       var map = this.map(),
-          zoom = Math.floor(map.zoom()),
-          center = _center(),
+          mapZoom = map.zoom(),
+          zoom = this._options.tileRounding(mapZoom),
+          scale = Math.pow(2, mapZoom - zoom),
           size = map.size();
+      var ul = this.displayToLevel({x: 0, y: 0});
+      var lr = this.displayToLevel({x: size.width, y: size.height});
       return {
         level: zoom,
-        left: center.x - size.width / 2,
-        right: center.x + size.width / 2,
-        bottom: center.y - size.height / 2,
-        top: center.y + size.height / 2
+        scale: scale,
+        left: ul.x,
+        right: lr.x,
+        bottom: lr.y,
+        top: ul.y
       };
     };
 
@@ -614,10 +626,10 @@
      */
     this.toLocal = function (pt) {
       var map = this.map(),
-          unit = map.unitsPerPixel();
+          unit = map.unitsPerPixel(map.zoom());
       return {
-        x: (pt.x - this.constructor.defaults.minX) / unit,
-        y: (pt.y - this.constructor.defaults.minY) / unit
+        x: pt.x / unit,
+        y: pt.y / unit
       };
     };
 
@@ -630,10 +642,10 @@
      */
     this.fromLocal = function (pt) {
       var map = this.map(),
-          unit = map.unitsPerPixel();
+          unit = map.unitsPerPixel(map.zoom());
       return {
-        x: pt.x * unit + this.constructor.defaults.minX,
-        y: pt.y * unit + this.constructor.defaults.minY
+        x: pt.x * unit,
+        y: pt.y * unit
       };
     };
 
@@ -644,8 +656,8 @@
     this._update = function () {
       var map = this.map(),
           mapZoom = map.zoom(),
-          zoom = Math.floor(mapZoom),
-          center = this.toLevel(this.toLocal(map.center()), zoom),
+          zoom = this._options.tileRounding(mapZoom),
+          center = this.displayToLevel(undefined, zoom),
           bounds = map.bounds(),
           tiles, view = this._getViewBounds();
 
@@ -658,13 +670,20 @@
         'transform-origin',
         'center center'
       );
+      var to = this._options.tileOffset(zoom);
       this.canvas().css(
         'transform',
-        'scale(' +
-        (Math.pow(2, mapZoom - zoom)) +
-        ')translate(' +
-        (view.left) + 'px' + ',' +
-        (view.bottom) + 'px' + ')'
+        'scale(' + (Math.pow(2, mapZoom - zoom)) + ')' +
+        'translate(' +
+        (-to.x) + 'px' + ',' +
+        (-to.y) + 'px' + ')' +
+        'translate(' +
+        (map.size().width / 2) + 'px' + ',' +
+        (map.size().height / 2) + 'px' + ')' +
+        'translate(' +
+        (-(view.left + view.right) / 2) + 'px' + ',' +
+        (-(view.bottom + view.top) / 2) + 'px' + ')' +
+        ''
       );
 
       if (zoom === lastZoom &&
@@ -804,10 +823,13 @@
      * @returns {boolean}
      */
     this._outOfBounds = function (tile, bounds) {
-      return tile.bottom > bounds.top ||
-             tile.left   > bounds.right ||
-             tile.top    < bounds.bottom ||
-             tile.right  < bounds.left;
+      /* this needs to take into account wrapping.  We may want to add an (n)
+       * tile edge buffer so we appear more responsive - DWM:: */
+      var to = this._options.tileOffset(tile.index.level);
+      return tile.bottom - to.y > bounds.top ||
+             tile.left - to.x   > bounds.right ||
+             tile.top - to.y    < bounds.bottom ||
+             tile.right - to.x  < bounds.left;
     };
 
     /**
@@ -826,7 +848,7 @@
      * @returns {boolean}
      */
     this._canPurge = function (tile, bounds) {
-      /*  Get fancy laterj
+      /*  Get fancy later
       if (this._isCovered(tile)) {
         return true;
       }
@@ -842,17 +864,27 @@
     };
 
     /**
-     * Get the center of the map in layer coordinates.
-     * @private
+     * Convert actual pixel coordinates (where (0,0) is the upper left) to
+     * layer pixel coordinates (typically (0,0) is the center of the map).
+     * By default, this is done at the current base zoom level.
+     *
+     * @param pt: the point to convert.  If undefined, user the center of the
+     *            display.
+     * @param zoom: if specified, the zoom level to use.
+     * @returns: the point in level coordinates.
      */
-    var _center = function () {
+    this.displayToLevel = function (pt, zoom) {
       var map = this.map(),
-          c = map.gcsToWorld(map.center());
-      return this.toLevel(this.toLocal({
-        x: c.x,
-        y: c.y
-      }), Math.floor(map.zoom()));
-    }.bind(this);
+          mapzoom = map.zoom(),
+          roundzoom = this._options.tileRounding(mapzoom),
+          unit = map.unitsPerPixel(zoom === undefined ? roundzoom : zoom);
+      if (pt === undefined) {
+        var size = map.size();
+        pt = {x: size.width / 2, y: size.height / 2};
+      }
+      var gcsPt = map.displayToGcs(pt);
+      return {x: gcsPt.x / unit, y: gcsPt.y / unit};
+    };
 
     return this;
   };
@@ -873,7 +905,15 @@
     maxX: 255,
     minY: 0,
     maxY: 255,
+    tileOffset: function (level) {
+      void(level);
+      return {x: 0, y: 0};
+    },
     cacheSize: 200,
+    /* if tileRounding is Math.floor, tiles will be their native size or
+     * larger, if Math.ceil, they will be their native size or smaller.  A
+     * custom function could be used instead. */
+    tileRounding: Math.floor,
     attribution: 'No data attribution provided.'
   };
 
