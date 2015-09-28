@@ -108,7 +108,7 @@ function cobertura() {
         'branch-rate': 0,
         'complexity': 0,
         'line-rate': lineRate,
-        'filename': f,
+        'filename': f.replace(/^src\/vgl/, 'vgl/src'),
         'name': f
       });
 
