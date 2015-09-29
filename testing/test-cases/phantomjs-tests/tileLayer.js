@@ -38,7 +38,10 @@ describe('geo.tileLayer', function () {
       zoom: get_set('zoom'),
       center: get_set('center'),
       origin: get_set('origin'),
-      unitsPerPixel: get_set('unitsPerPixel'),
+      unitsPerPixel: function (zoom) {
+        var u = get_set('unitsPerPixel')();
+        return Math.pow(2, -(zoom || 0)) * u;
+      },
       gcsToWorld: function (p) {
         return {
           x: (p.x + 1) * 1000,
@@ -49,6 +52,18 @@ describe('geo.tileLayer', function () {
         return {
           x: (p.x / 1000) - 1,
           y: (p.y / 2000) + 1
+        };
+      },
+      gcsToDisplay: function (p) {
+        return {
+          x: p.x,
+          y: p.y
+        };
+      },
+      displayToGcs: function (p) {
+        return {
+          x: p.x,
+          y: p.y
         };
       },
       updateAttribution: function () {
