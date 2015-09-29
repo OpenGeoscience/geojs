@@ -153,7 +153,7 @@
      */
     Object.defineProperty(this, 'top', {
       get: function () {
-        return this.size.y * (this.index.y + 1) - this.overlap.y;
+        return this.size.y * (this.index.y + 1) + this.overlap.y;
       }
     });
 
@@ -173,7 +173,7 @@
      */
     Object.defineProperty(this, 'right', {
       get: function () {
-        return this.size.x * (this.index.x + 1) - this.overlap.x;
+        return this.size.x * (this.index.x + 1) + this.overlap.x;
       }
     });
   };

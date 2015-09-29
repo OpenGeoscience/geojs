@@ -54,16 +54,20 @@ describe('geo.tile', function () {
         url: '/data/sample.json'
       });
 
-      expect(t.bottomLeft()).toEqual({x: 0, y: 0});
-      expect(t.topRight()).toEqual({x: 10, y: 10});
+      expect(t.bottom).toEqual(0);
+      expect(t.left).toEqual(0);
+      expect(t.top).toEqual(10);
+      expect(t.right).toEqual(10);
 
       t = geo.tile({
         index: {x: 5, y: 6},
         size: {x: 10, y: 10},
         url: '/data/sample.json'
       });
-      expect(t.bottomLeft()).toEqual({x: 50, y: 60});
-      expect(t.topRight()).toEqual({x: 60, y: 70});
+      expect(t.bottom).toEqual(60);
+      expect(t.left).toEqual(50);
+      expect(t.top).toEqual(70);
+      expect(t.right).toEqual(60);
     });
 
     it('7 x 11 tile', function () {
@@ -73,8 +77,10 @@ describe('geo.tile', function () {
         url: '/data/sample.json'
       });
 
-      expect(t.bottomLeft()).toEqual({x: 7, y: 22});
-      expect(t.topRight()).toEqual({x: 14, y: 33});
+      expect(t.bottom).toEqual(22);
+      expect(t.left).toEqual(7);
+      expect(t.top).toEqual(33);
+      expect(t.right).toEqual(14);
     });
   });
 
@@ -88,8 +94,10 @@ describe('geo.tile', function () {
         overlap: {x: 1, y: 2}
       });
 
-      expect(t.bottomLeft()).toEqual({x: -1, y: -2});
-      expect(t.topRight()).toEqual({x: 11, y: 12});
+      expect(t.bottom).toEqual(-2);
+      expect(t.left).toEqual(-1);
+      expect(t.top).toEqual(12);
+      expect(t.right).toEqual(11);
 
       t = geo.tile({
         index: {x: 5, y: 6},
@@ -97,8 +105,10 @@ describe('geo.tile', function () {
         url: '/data/sample.json',
         overlap: {x: 1, y: 2}
       });
-      expect(t.bottomLeft()).toEqual({x: 49, y: 58});
-      expect(t.topRight()).toEqual({x: 61, y: 72});
+      expect(t.bottom).toEqual(58);
+      expect(t.left).toEqual(49);
+      expect(t.top).toEqual(72);
+      expect(t.right).toEqual(61);
     });
 
     it('7 x 11 tile', function () {
@@ -109,8 +119,10 @@ describe('geo.tile', function () {
         overlap: {x: 1, y: 2}
       });
 
-      expect(t.bottomLeft()).toEqual({x: 6, y: 20});
-      expect(t.topRight()).toEqual({x: 15, y: 35});
+      expect(t.bottom).toEqual(20);
+      expect(t.left).toEqual(6);
+      expect(t.top).toEqual(35);
+      expect(t.right).toEqual(15);
     });
   });
 
