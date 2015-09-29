@@ -52,11 +52,10 @@ mark_as_advanced(MIDAS_BASE_URL)
 set(MIDAS_COMMUNITY "GeoJS" CACHE STRING "MIDAS community hosting test images.")
 mark_as_advanced(MIDAS_COMMUNITY)
 
-# set variables for MIDAS3.cmake
-set(MIDAS_REST_URL "${MIDAS_BASE_URL}/api/json")
-set(MIDAS_KEY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-data")
-set(MIDAS_DATA_DIR "${GEOJS_DEPLOY_DIR}/data")
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/MIDAS3.cmake)
+# set variables for girder.cmake
+set(Girder_KEY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-data")
+set(Girder_DATA_DIR "${GEOJS_DEPLOY_DIR}/data")
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/girder.cmake)
 
 add_download_target()
 
@@ -140,7 +139,7 @@ if(PHANTOMJS_TESTS)
                                -DBLANKET_INCLUDE="${BLANKET_INCLUDE}"
                                -P ${CMAKE_SOURCE_DIR}/cmake/configure-js-unit-test.cmake
       COMMAND ${CMAKE_COMMAND} -E touch ${html}
-      DEPENDS ${js} ${MIDAS_DOWNLOAD_FILES} ${CMAKE_SOURCE_DIR}/testing/test-runners/jasmine-runner.html.in
+      DEPENDS ${js} ${Girder_DOWNLOAD_FILES} ${CMAKE_SOURCE_DIR}/testing/test-runners/jasmine-runner.html.in
       COMMENT "Generating phantomjs unit test ${f}"
     )
     list(APPEND JS_UNIT_TEST_FILES ${html})
@@ -285,7 +284,7 @@ if(SELENIUM_TESTS)
   add_custom_target(
     selenium_tests
     ALL
-    DEPENDS ${SELENIUM_TEST_FILES} ${MIDAS_DOWNLOAD_FILES} ${JASMINE_TEST_FILES}
+    DEPENDS ${SELENIUM_TEST_FILES} ${Girder_DOWNLOAD_FILES} ${JASMINE_TEST_FILES}
   )
 
 endif()
