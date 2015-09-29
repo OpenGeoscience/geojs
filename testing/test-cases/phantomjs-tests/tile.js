@@ -164,4 +164,53 @@ describe('geo.tile', function () {
       });
     });
   });
+
+  describe('bounds', function () {
+    var t;
+
+    it('setup', function () {
+      t = geo.tile({
+        index: {x: 1, y: 2},
+        size: {x: 10, y: 10},
+        url: '/data/sample.json'
+      });
+    });
+
+    describe('no offset', function () {
+      it('bounds.left === left', function () {
+        expect(t.left).toBe(t.bounds({x: 0, y: 0}, {x: 0, y: 0}).left);
+      });
+      it('bounds.right === right', function () {
+        expect(t.right).toBe(t.bounds({x: 0, y: 0}, {x: 0, y: 0}).right);
+      });
+      it('bounds.bottom === bottom', function () {
+        expect(t.bottom).toBe(t.bounds({x: 0, y: 0}, {x: 0, y: 0}).bottom);
+      });
+      it('bounds.top === top', function () {
+        expect(t.top).toBe(t.bounds({x: 0, y: 0}, {x: 0, y: 0}).top);
+      });
+    });
+
+    describe('index: (1, -2) offset: (10, 50)', function () {
+      var bds;
+      it('compute bounds', function () {
+        bds = t.bounds(
+          {x: 1, y: -2},
+          {x: 10, y: 55}
+        );
+      });
+      it('bounds.left', function () {
+        expect(bds.left).toBe(-10);
+      });
+      it('bounds.right', function () {
+        expect(bds.right).toBe(0);
+      });
+      it('bounds.bottom', function () {
+        expect(bds.bottom).toBe(-15);
+      });
+      it('bounds.top', function () {
+        expect(bds.top).toBe(-5);
+      });
+    });
+  });
 });

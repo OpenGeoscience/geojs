@@ -127,8 +127,8 @@
       var left, right, bottom, top;
       left = this.size.x * (this.index.x - index.x) - this.overlap.x - shift.x;
       right = left + this.size.x + this.overlap.x * 2;
-      top = this.size.y * (this.index.y - index.y) - this.overlap.y - shift.y;
-      bottom = top + this.size.y + this.overlap.y * 2;
+      bottom = this.size.y * (this.index.y - index.y) - this.overlap.y - shift.y;
+      top = bottom + this.size.y + this.overlap.y * 2;
       return {
         left: left,
         right: right,
