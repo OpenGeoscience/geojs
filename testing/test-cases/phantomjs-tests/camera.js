@@ -40,16 +40,18 @@ describe('geo.camera', function () {
         };
       }
 
-      c = new geo.camera({viewport: viewport});
-      if (projection) {
-        c.projection = projection;
-      }
-      c.bounds = {
-        left: xs,
-        right: xe,
-        bottom: ys,
-        top: ye
-      };
+      it('setup', function () {
+        c = new geo.camera({viewport: viewport});
+        if (projection) {
+          c.projection = projection;
+        }
+        c.bounds = {
+          left: xs,
+          right: xe,
+          bottom: ys,
+          top: ye
+        };
+      });
       it('bottom left ', w2d({x: xs, y: ys}, {x: 0, y: 1}));
       it('top left', w2d({x: xs, y: ye}, {x: 0, y: 0}));
       it('bottom right', w2d({x: xe, y: ys}, {x: 1, y: 1}));
@@ -63,6 +65,7 @@ describe('geo.camera', function () {
    */
   function roundTrip(camera, size, pt, tol) {
     return function () {
+      camera = camera();
       var copy = $.extend({}, pt);
       camera.viewport = size;
       pt = camera.worldToDisplay(pt);
@@ -81,6 +84,7 @@ describe('geo.camera', function () {
    */
   function outOfBounds(camera, size, pt) {
     return function () {
+      camera = camera();
       camera.viewport = size;
       pt = camera.worldToDisplay(pt);
       expect(pt.x < 0 || pt.x > size.width || pt.y < 0 || pt.y > size.height).toBe(true);
@@ -90,36 +94,47 @@ describe('geo.camera', function () {
   /**
    * Use the roundTrip method to run various tests on the given camera.
    */
-  function roundTripTest(camera) {
+  function roundTripTest(projection) {
     return function () {
       var size = {}, pt = {};
 
-      camera.bounds = {
-        left: -990,
-        right: 10,
-        bottom: 100,
-        top: 600
-      };
+      function setup1() {
+        var camera = geo.camera();
+        camera.projection = projection;
+        camera.bounds = {
+          left: -990,
+          right: 10,
+          bottom: 100,
+          top: 600
+        };
 
-      size.width = 1000;
-      size.height = 500;
-      pt.x = -500;
-      pt.y = 500;
-      it('Round trip case 1', roundTrip(camera, size, pt, 1e-2));
-      it('Out of window case 1', outOfBounds(camera, size, {x: -1000, y: 500}));
+        size.width = 1000;
+        size.height = 500;
+        pt.x = -500;
+        pt.y = 500;
+        return camera;
+      }
 
-      camera.bounds = {
-        left: -990,
-        right: 10,
-        bottom: -800,
-        top: -900
-      };
+      it('Round trip case 1', roundTrip(setup1, size, pt, 1e-2));
+      it('Out of window case 1', outOfBounds(setup1, size, {x: -1000, y: 500}));
 
-      size.width = 10;
-      size.height = 1;
-      pt.x = -100;
-      pt.y = -810;
-      it('Round trip case 2', roundTrip(camera, size, pt, 1e-2));
+      function setup2() {
+        var camera = geo.camera();
+        camera.projection = projection;
+        camera.bounds = {
+          left: -990,
+          right: 10,
+          bottom: -800,
+          top: -900
+        };
+
+        size.width = 10;
+        size.height = 1;
+        pt.x = -100;
+        pt.y = -810;
+        return camera;
+      }
+      it('Round trip case 2', roundTrip(setup2, size, pt, 1e-2));
     };
   }
 
@@ -181,12 +196,8 @@ describe('geo.camera', function () {
   });
 
   describe('Coordinate conversion', function () {
-    var parallel = geo.camera(),
-        perspective = geo.camera();
-    parallel.projection = 'parallel';
-    perspective.projection = 'perspective';
-    describe('parallel projection', roundTripTest(parallel));
-    describe('perspective projection', roundTripTest(perspective));
+    describe('parallel projection', roundTripTest('parallel'));
+    describe('perspective projection', roundTripTest('perspective'));
   });
 
   describe('Setting bounds with different aspect ratios', function () {
@@ -316,5 +327,27 @@ describe('geo.camera', function () {
       expect(node.position().left).toBe(0);
       expect(node.position().top).toBe(0);
     });
+  });
+
+  it('View setter', function (done) {
+    var c = geo.camera(),
+        view;
+
+    view = mat4.clone([
+      0, 1, 2, 3,
+      4, 5, 6, 7,
+      8, 9, 10, 11,
+      12, 13, 14, 15
+    ]);
+
+    c.geoOn(geo.event.camera.view, function (evt) {
+      var i;
+      for (i = 0; i < 16; i += 1) {
+        expect(evt.camera.view[i]).toBe(i);
+      }
+      done();
+    });
+
+    c.view = view;
   });
 });
