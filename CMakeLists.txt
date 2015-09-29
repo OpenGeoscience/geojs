@@ -79,10 +79,6 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/geojs_test_runne
                ${CMAKE_CURRENT_BINARY_DIR}/test/geojs_test_runner.py
 )
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/blanket_server.py
-               ${CMAKE_CURRENT_BINARY_DIR}/test/blanket_server.py
-               COPYONLY
-)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/selenium-test-utils.js
                ${GEOJS_DEPLOY_DIR}/test/lib/selenium-test-utils.js
                COPYONLY
@@ -91,20 +87,18 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/selenium-test-ut
 if (COVERAGE_TESTS)
   set(SOURCES_INCLUDE <script src=/built/geo.all.dev.js data-cover></script>)
   set(BLANKET_INCLUDE <script src=/test/lib/blanket.min.js></script>)
+  find_program(CURL_EXECUTABLE curl)
   add_test(
     NAME "coverage-reset"
-    WORKING_DIRECTORY "${GEOJS_DEPLOY_DIR}"
-    COMMAND "${PYTHON_EXECUTABLE}"
-            "${CMAKE_CURRENT_BINARY_DIR}/test/blanket_server.py"
-            "reset"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    COMMAND "${CURL_EXECUTABLE}" -X DELETE "http://${TESTING_HOST}:${TESTING_PORT}/coverage"
   )
 
   add_test(
     NAME "coverage-report"
-    WORKING_DIRECTORY "${GEOJS_DEPLOY_DIR}"
-    COMMAND "${PYTHON_EXECUTABLE}"
-            "${CMAKE_CURRENT_BINARY_DIR}/test/blanket_server.py"
-            "report" "${CMAKE_CURRENT_BINARY_DIR}/coverage.xml"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    COMMAND "${CURL_EXECUTABLE}" -X POST "http://${TESTING_HOST}:${TESTING_PORT}/coverage"
+      --data "path=${CMAKE_CURRENT_BINARY_DIR}/coverage.xml" -G
   )
   set_property(TEST "coverage-report" APPEND PROPERTY DEPENDS "coverage-reset")
 
@@ -342,7 +336,6 @@ if(BUILD_DOCUMENTATION)
   endif()
 
   set(docs_sources
-    "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/blanket_server.py"
     "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/geojs_test_runner.py.in"
     "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/midas_handler.py"
     "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/selenium_test.py.in"
