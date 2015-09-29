@@ -208,10 +208,6 @@
     Object.defineProperty(this, 'projectionMatrix', {
       get: function () {
         return this._proj;
-      },
-      set: function (proj) {
-        this._proj = proj;
-        this._update();
       }
     });
 

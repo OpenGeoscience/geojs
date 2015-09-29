@@ -329,9 +329,9 @@ describe('geo.camera', function () {
     });
   });
 
-  it('View setter', function (done) {
+  it('View getter/setter', function (done) {
     var c = geo.camera(),
-        view;
+        view, proj;
 
     view = mat4.clone([
       0, 1, 2, 3,
@@ -339,15 +339,126 @@ describe('geo.camera', function () {
       8, 9, 10, 11,
       12, 13, 14, 15
     ]);
+    proj = c.projectionMatrix;
 
     c.geoOn(geo.event.camera.view, function (evt) {
       var i;
       for (i = 0; i < 16; i += 1) {
         expect(evt.camera.view[i]).toBe(i);
       }
+      expect(evt.camera.projectionMatrix).toBe(proj);
       done();
     });
 
     c.view = view;
+  });
+
+  it('Projection getter/setter', function (done) {
+    var c = geo.camera(), caught = false;
+
+    c.projection = 'parallel';
+    expect(c.projection).toBe('parallel');
+
+    c.geoOn(geo.event.camera.projection, function (evt) {
+      expect(evt.camera.projection).toBe('perspective');
+      done();
+    });
+
+    try {
+      c.projection = 'not valid';
+    } catch (e) {
+      caught = true;
+    }
+    expect(caught).toBe(true);
+
+    c.projection = 'perspective';
+  });
+
+  /**
+   * 4 x 4 version of
+   * v^T * A * v
+   */
+  function vTAv(v, A) {
+    var t = vec4.create();
+    // t <- A * v
+    vec4.transformMat4(t, v, A);
+
+    // v^T * t
+    return vec4.dot(v, t);
+  }
+
+  /**
+   * 4 x 4 matrix norm
+   */
+  function mat4_norm(m) {
+    var norm = 0;
+
+    norm += Math.abs(vTAv(
+      vec4.fromValues(1, 0, 0, 0),
+      m
+    ));
+    norm += Math.abs(vTAv(
+      vec4.fromValues(0, 1, 0, 0),
+      m
+    ));
+    norm += Math.abs(vTAv(
+      vec4.fromValues(0, 0, 1, 0),
+      m
+    ));
+    norm += Math.abs(vTAv(
+      vec4.fromValues(0, 0, 0, 1),
+      m
+    ));
+    return norm;
+  }
+
+  /**
+   * A distance metric for 4 x 4 matrices
+   */
+  function mat4_dist(A, B) {
+    var T = mat4.clone(A), i;
+    for (i = 0; i < 16; i += 1) {
+      T[i] -= B[i];
+    }
+    return mat4_norm(T);
+  }
+
+
+  it('Transform and inverse getters', function () {
+    var c = geo.camera(), eye;
+
+    c.pan({x: 11, y: -50});
+    c.zoom(1.5);
+    c.pan({x: -5, y: 1});
+
+    eye = mat4.multiply(mat4.create(), c.transform, c.inverse);
+    expect(mat4_dist(eye, mat4.create())).toBeLessThan(10e-10);
+  });
+
+  it('Camera debugging methods', function () {
+    var c = geo.camera(), s = c.debug();
+    expect(s.indexOf('{"left":-1,"bottom":-1,"right":1,"top":1}')).toBeGreaterThan(-1);
+    expect(s.indexOf('view:')).toBeGreaterThan(-1);
+    expect(s.indexOf('projection:')).toBeGreaterThan(-1);
+    expect(s.indexOf('transform:')).toBeGreaterThan(-1);
+
+    c.pan({x: 1, y: -1});
+    expect(s !== c.debug()).toBe(true);
+  });
+
+  it('Camera value is its transform', function () {
+    var c = geo.camera();
+    c.pan({x: 100, y: 5});
+    c.zoom(5);
+
+    expect(c.valueOf()).toBe(c.transform);
+  });
+
+  it('Camera string repesentation is its transform', function () {
+    var c = geo.camera();
+    c.pan({x: 100, y: 5});
+    c.zoom(5);
+
+    expect(c.toString()).toEqual(c.ppMatrix(c.transform));
   });
 });
