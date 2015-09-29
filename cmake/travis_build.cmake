@@ -12,6 +12,7 @@ ctest_build()
 ctest_test(PARALLEL_LEVEL 1 RETURN_VALUE res)
 ctest_coverage()
 file(REMOVE ${CTEST_BINARY_DIRECTORY}/coverage.xml)
+ctest_submit()
 
 file(REMOVE "${CTEST_BINARY_DIRECTORY}/test_failed")
 if(NOT res EQUAL 0)

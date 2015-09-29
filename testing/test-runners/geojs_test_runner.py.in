@@ -17,8 +17,6 @@ else:
 
 HTTPHandler = SimpleHTTPServer.SimpleHTTPRequestHandler
 
-from blanket_server import Handler as BlanketHandler
-
 
 DEPLOY_PATH = "@GEOJS_DEPLOY_DIR@"
 HOST = "@TESTING_HOST@"
