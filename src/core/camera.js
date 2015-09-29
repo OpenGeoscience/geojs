@@ -487,8 +487,8 @@
       this._scale(scale);
 
       // translate to the new center
-      translate[0] = (bounds.left + bounds.right) / -2;
-      translate[1] = (bounds.bottom + bounds.top) / -2;
+      translate[0] = -(bounds.left + bounds.right) / 2;
+      translate[1] = -(bounds.bottom + bounds.top) / 2;
       translate[2] = 0;
       this._translate(translate);
       return this;

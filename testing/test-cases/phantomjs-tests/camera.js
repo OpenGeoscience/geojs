@@ -12,11 +12,14 @@ describe('geo.camera', function () {
    * Test that two points are close to each other.
    * (l^\infty norm)
    */
-  function near(a, b, tol) {
+  function near(a, b, tol, c) {
     var dx = Math.abs(a.x - b.x),
         dy = Math.abs(a.y - b.y);
     tol = tol || 1e-6;
     if (dx > tol || dy > tol) {
+      if (c) {
+        console.log(c.debug());
+      }
       console.log(
         JSON.stringify(a) + ' != ' + JSON.stringify(b)
       );
@@ -33,7 +36,7 @@ describe('geo.camera', function () {
 
       function w2d(p, q) {
         return function () {
-          near(c.worldToDisplay(p), q);
+          near(c.worldToDisplay(p), q, undefined, c);
         };
       }
 
@@ -127,15 +130,15 @@ describe('geo.camera', function () {
         generateBoundsTest(-1, 1, -1, 1)
       );
       describe(
-        'bounds [-10, 10] x [-1, 1]',
+        'bounds [-10, 10] x [-10, 10]',
         generateBoundsTest(-10, 10, -10, 10)
       );
       describe(
-        'bounds [-1, 0] x [0, 1000]',
+        'bounds [-1, 0] x [0, 1]',
         generateBoundsTest(-1, 0, 0, 1)
       );
       describe(
-        'bounds [-1, 10] x [-51, 1000]',
+        'bounds [-1, 10] x [-51, -40]',
         generateBoundsTest(-1, 10, -51, -40)
       );
     });
@@ -145,15 +148,15 @@ describe('geo.camera', function () {
         generateBoundsTest(-1, 1, -1, 1, 'parallel')
       );
       describe(
-        'bounds [-10, 10] x [-1, 1]',
+        'bounds [-10, 10] x [-10, 10]',
         generateBoundsTest(-10, 10, -10, 10, 'parallel')
       );
       describe(
-        'bounds [-1, 0] x [0, 1000]',
+        'bounds [-1, 0] x [0, 1]',
         generateBoundsTest(-1, 0, 0, 1, 'parallel')
       );
       describe(
-        'bounds [-1, 10] x [-51, 1000]',
+        'bounds [-1, 10] x [-51, -40]',
         generateBoundsTest(-1, 10, -51, -40, 'parallel')
       );
     });
@@ -207,6 +210,111 @@ describe('geo.camera', function () {
       expect(c.bounds.right).toEqual(1.5);
       expect(c.bounds.bottom).toEqual(0);
       expect(c.bounds.top).toEqual(2);
+    });
+  });
+
+  describe('Camera CSS', function () {
+    var idparent = 'geo-test-parent',
+        idnode = 'geo-test-node';
+
+    /**
+     * Generate a node on the current page with known transforms.
+     */
+    function make_node() {
+      var parent, node;
+
+      $('#' + idparent).remove();
+      $('#' + idnode).remove();
+
+      parent = $('<div id=' + idparent + '/>');
+      node = $('<div id=' + idnode + '/>');
+
+      parent.css({
+        position: 'relative',
+        width: '100px',
+        height: '100px'
+      });
+
+      node.css({
+        position: 'absolute',
+        width: '100px',
+        height: '100px',
+        transform: 'none'
+      });
+
+      $('body').append(parent);
+      parent.append(node);
+      return node;
+    }
+    it('Simple panning', function () {
+      var node = make_node(),
+          camera = geo.camera();
+
+      camera.viewport = {width: 100, height: 100};
+      camera.bounds = geo.camera.bounds;
+      camera.pan({x: 10, y: 0});
+
+      node.css('transform', geo.camera.css(camera.view));
+      expect(node.position().left).toBe(10);
+      expect(node.position().top).toBe(0);
+
+      camera.pan({x: 0, y: -5});
+
+      node.css('transform', geo.camera.css(camera.view));
+      expect(node.position().left).toBe(10);
+      expect(node.position().top).toBe(-5);
+
+      camera.pan({x: -10, y: 5});
+
+      node.css('transform', geo.camera.css(camera.view));
+      expect(node.position().left).toBe(0);
+      expect(node.position().top).toBe(0);
+    });
+    it('Simple zooming', function () {
+      var node = make_node(),
+          camera = geo.camera();
+
+      camera.viewport = {width: 100, height: 100};
+      camera.bounds = geo.camera.bounds;
+
+      camera.zoom(0.5);
+
+      node.css('transform', geo.camera.css(camera.view));
+      expect(node.position().left).toBe(25);
+      expect(node.position().top).toBe(25);
+
+      camera.zoom(6);
+
+      node.css('transform', geo.camera.css(camera.view));
+      expect(node.position().left).toBe(-100);
+      expect(node.position().top).toBe(-100);
+
+      camera.zoom(1 / 3);
+
+      node.css('transform', geo.camera.css(camera.view));
+      expect(node.position().left).toBe(0);
+      expect(node.position().top).toBe(0);
+    });
+    it('Zooming + panning', function () {
+      var node = make_node(),
+          camera = geo.camera();
+
+      camera.viewport = {width: 100, height: 100};
+      camera.bounds = geo.camera.bounds;
+
+      camera.pan({x: -25, y: -25});
+      camera.zoom(0.5);
+
+      node.css('transform', geo.camera.css(camera.view));
+      expect(node.position().left).toBe(0);
+      expect(node.position().top).toBe(0);
+
+      camera.pan({x: 50, y: 50});
+      camera.zoom(2);
+
+      node.css('transform', geo.camera.css(camera.view));
+      expect(node.position().left).toBe(0);
+      expect(node.position().top).toBe(0);
     });
   });
 });
