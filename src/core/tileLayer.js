@@ -674,20 +674,22 @@
       // Update the transform for the local layer coordinates
       this.canvas().css(
         'transform-origin',
-        'center center'
+        '50% 50%'
       );
-      var to = this._options.tileOffset(zoom),
-          scl = Math.pow(2, mapZoom - zoom),
-          tran = {
-        x: (-to.x + (map.size().width - view.left - view.right) / 2) / scl,
-        y: (-to.y + (map.size().height - view.top - view.bottom) / 2) / scl
-      };
+      var to = this._options.tileOffset(zoom);
       this.canvas().css(
         'transform',
+        'scale(' + (Math.pow(2, mapZoom - zoom)) + ')' +
         'translate(' +
-        tran.x + 'px' + ',' +
-        tran.y + 'px' + ')' +
-        'scale(' + scl + ')'
+        (-to.x) + 'px' + ',' +
+        (-to.y) + 'px' + ')' +
+        'translate(' +
+        (map.size().width / 2) + 'px' + ',' +
+        (map.size().height / 2) + 'px' + ')' +
+        'translate(' +
+        (-(view.left + view.right) / 2) + 'px' + ',' +
+        (-(view.bottom + view.top) / 2) + 'px' + ')' +
+        ''
       );
 
       if (zoom === lastZoom &&

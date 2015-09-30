@@ -1207,35 +1207,7 @@ geo.map = function (arg) {
    * @private
    */
   function fix_bounds(bounds) {
-    var dx = 0, dy = 0;
-    if (!m_clampBounds) {
-      return bounds;
-    }
-
-    // get the amount to translate the bounds
-    if (bounds.left < m_maxBounds.left &&
-        bounds.right > m_maxBounds.right) {
-      dx = 0;
-    } else if (bounds.left < m_maxBounds.left) {
-      dx = m_maxBounds.left - bounds.left; // move right
-    } else if (bounds.right > m_maxBounds.right) {
-      dx = m_maxBounds.right - bounds.right; // move left
-    }
-    if (bounds.bottom < m_maxBounds.bottom &&
-        bounds.top > m_maxBounds.top) {
-      dy = 0;
-    } else if (bounds.bottom < m_maxBounds.bottom) {
-      dy = m_maxBounds.bottom - bounds.bottom; // move up
-    } else if (bounds.top > m_maxBounds.top) {
-      dy = m_maxBounds.top - bounds.top; // move down
-    }
-
-    return {
-      left: bounds.left + dx,
-      right: bounds.right + dx,
-      bottom: bounds.bottom + dy,
-      top: bounds.top + dy
-    };
+    return bounds;
   }
 
   /**
@@ -1244,18 +1216,7 @@ geo.map = function (arg) {
    * @private
    */
   function camera_bounds(bounds) {
-    var scl = camera_scaling(bounds),
-        width = (bounds.right - bounds.left) / 2,
-        height = (bounds.top - bounds.bottom) / 2,
-        centerx = (bounds.left + bounds.right) / 2,
-        centery = (bounds.top + bounds.bottom) / 2,
-        bds = {
-          left: (centerx - width * scl.x + m_origin.x),
-          right: (centerx + width * scl.x + m_origin.x),
-          bottom: (centery - height * scl.y + m_origin.y),
-          top: (centery + height * scl.y + m_origin.y)
-        };
-    m_camera.bounds = bds;
+    m_camera.bounds = bounds;
   }
 
   ////////////////////////////////////////////////////////////////////////////
