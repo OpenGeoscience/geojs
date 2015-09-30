@@ -493,7 +493,13 @@
       // apply a transform to place the image correctly
       tile.image.style.position = 'absolute';
       tile.image.style.left = bounds.left + 'px';
-      tile.image.style.top = (bounds.top) + 'px';
+
+      /**
+       * This is confusing because layer coordinates go from bottom to top, but
+       * css coordinates go from top to bottom.  Using the bottom coordinate works
+       * due to symmetry that is general assuming all tiles have the same size.
+       */
+      tile.image.style.top = bounds.bottom + 'px';
 
       // add an error handler
       tile.catch(function () {
@@ -670,20 +676,18 @@
         'transform-origin',
         'center center'
       );
-      var to = this._options.tileOffset(zoom);
+      var to = this._options.tileOffset(zoom),
+          scl = Math.pow(2, mapZoom - zoom),
+          tran = {
+        x: (-to.x + (map.size().width - view.left - view.right) / 2) / scl,
+        y: (-to.y + (map.size().height - view.top - view.bottom) / 2) / scl
+      };
       this.canvas().css(
         'transform',
-        'scale(' + (Math.pow(2, mapZoom - zoom)) + ')' +
         'translate(' +
-        (-to.x) + 'px' + ',' +
-        (-to.y) + 'px' + ')' +
-        'translate(' +
-        (map.size().width / 2) + 'px' + ',' +
-        (map.size().height / 2) + 'px' + ')' +
-        'translate(' +
-        (-(view.left + view.right) / 2) + 'px' + ',' +
-        (-(view.bottom + view.top) / 2) + 'px' + ')' +
-        ''
+        tran.x + 'px' + ',' +
+        tran.y + 'px' + ')' +
+        'scale(' + scl + ')'
       );
 
       if (zoom === lastZoom &&

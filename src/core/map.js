@@ -62,8 +62,8 @@ geo.map = function (arg) {
   var m_this = this,
       s_exit = this._exit,
       // See https://en.wikipedia.org/wiki/Web_Mercator
-      phiMax = 180 / Math.PI * (2 * Math.atan(Math.exp(Math.PI)) - Math.PI / 2),
-      merc = geo.transform().source('EPSG:4326').target('EPSG:3857'),
+      // phiMax = 180 / Math.PI * (2 * Math.atan(Math.exp(Math.PI)) - Math.PI / 2),
+      extent = Math.PI * geo.util.radiusEarth,
       m_x = 0,
       m_y = 0,
       m_node = $(arg.node),
@@ -79,11 +79,11 @@ geo.map = function (arg) {
       m_queuedTransition = null,
       m_clock = null,
       m_discreteZoom = arg.discreteZoom ? true : false,
-      m_maxBounds = {
-        left: merc.forward({x: -180, y: 0}).x,
-        right: merc.forward({x: 180, y: 0}).x,
-        bottom: merc.forward({x: 0, y: -phiMax}).y,
-        top: merc.forward({x: 0, y: phiMax}).y
+      m_maxBounds = { // TODO: generalize this
+        left: -extent,
+        right: extent,
+        bottom: -extent,
+        top: extent
       },
       m_camera = arg.camera || geo.camera(),
       m_unitsPerPixel = (
@@ -94,6 +94,7 @@ geo.map = function (arg) {
       m_origin,
       m_scale = {x: 1, y: 1, z: 1}; // constant for the moment
 
+  m_camera.viewport = {width: m_width, height: m_height};
   arg.center = geo.util.normalizeCoordinates(arg.center);
   arg.autoResize = arg.autoResize === undefined ? true : arg.autoResize;
   m_clampBounds = arg.clampBounds === undefined ? true : arg.clampBounds;
@@ -270,7 +271,7 @@ geo.map = function (arg) {
     m_center = m_camera.displayToWorld({
       x: m_width / 2,
       y: m_height / 2
-    }, m_width, m_height);
+    });
 
     m_this.geoTrigger(geo.event.pan, evt);
 
@@ -425,6 +426,8 @@ geo.map = function (arg) {
     m_width = w;
     m_height = h;
 
+    m_this.camera().viewport = {width: w, height: h};
+
     reset_minimum_zoom();
 
     m_this.geoTrigger(geo.event.resize, {
@@ -486,6 +489,9 @@ geo.map = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Convert from gcs coordinates to display coordinates.
+   *
+   *    gcsToWorld | worldToDisplay
+   *
    * @param {object} c The input coordinate to convert
    * @param {object} c.x
    * @param {object} c.y
@@ -499,13 +505,27 @@ geo.map = function (arg) {
     return this.worldToDisplay(c);
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Convert from world coordinates to display coordinates using the attached
+   * camera.
+   * @param {object} c The input coordinate to convert
+   * @param {object} c.x
+   * @param {object} c.y
+   * @param {object} [c.z=0]
+   * @return {object} Display space coordinates
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.worldToDisplay = function (c) {
-    return m_camera.worldToDisplay(c, m_width, m_height);
+    return m_camera.worldToDisplay(c);
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Convert from display to gcs coordinates
+   *
+   *    displayToWorld | worldToGcs
+   *
    * @param {object} c The input display coordinate to convert
    * @param {object} c.x
    * @param {object} c.y
@@ -519,8 +539,19 @@ geo.map = function (arg) {
     return this.worldToGcs(c, gcs);
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Convert from display coordinates to world coordinates using the attached
+   * camera.
+   * @param {object} c The input coordinate to convert
+   * @param {object} c.x
+   * @param {object} c.y
+   * @param {object} [c.z=0]
+   * @return {object} World space coordinates
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this.displayToWorld = function (c) {
-    return m_camera.displayToWorld(c, m_width, m_height);
+    return m_camera.displayToWorld(c);
   };
 
   ////////////////////////////////////////////////////////////////////////////

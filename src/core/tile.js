@@ -176,5 +176,16 @@
         return this.size.x * (this.index.x + 1) + this.overlap.x;
       }
     });
+
+    /**
+     * Returns the global image size at this level.
+     * @returns {number}
+     */
+    Object.defineProperty(this, 'levelSize', {
+      value: {
+        width: Math.pow(2, this.index.level || 0) * this.size.x,
+        height: Math.pow(2, this.index.level || 0) * this.size.y
+      }
+    });
   };
 })();
