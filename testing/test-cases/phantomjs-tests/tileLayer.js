@@ -72,14 +72,23 @@ describe('geo.tileLayer', function () {
   };
 
   describe('tileAtPoint', function () {
-    describe('center: (0, 0)', function () {
+
+    function get_layer(origin) {
       var opts = {},
           m = map(opts),
           l = geo.tileLayer({map: m}),
           s = m.unitsPerPixel();
+      m.origin({
+        x: origin.x * s,
+        y: origin.y * s
+      });
+      return l;
+    }
 
+    describe('center: (0, 0)', function () {
       it('origin: (0, 0), zoom level: 0', function () {
-        m.origin({x: 0, y: 0});
+        var l = get_layer({x: 0, y: 0}),
+            s = l.map().unitsPerPixel();
         expect(l.tileAtPoint({x: 128 * s, y: 128 * s}, 0)).toEqual({x: 0, y: 0});
         expect(l.tileAtPoint({x: 64 * s, y: 64 * s}, 0)).toEqual({x: 0, y: 0});
         expect(l.tileAtPoint({x: 64 * s, y: 192 * s}, 0)).toEqual({x: 0, y: 0});
@@ -88,7 +97,8 @@ describe('geo.tileLayer', function () {
       });
 
       it('origin: (0, 0), zoom level: 1', function () {
-        m.origin({x: 0, y: 0});
+        var l = get_layer({x: 0, y: 0}),
+            s = l.map().unitsPerPixel();
         expect(l.tileAtPoint({x: 64 * s, y: 64 * s}, 1)).toEqual({x: 0, y: 0});
         expect(l.tileAtPoint({x: 64 * s, y: 192 * s}, 1)).toEqual({x: 0, y: 1});
         expect(l.tileAtPoint({x: 192 * s, y: 64 * s}, 1)).toEqual({x: 1, y: 0});
@@ -96,8 +106,9 @@ describe('geo.tileLayer', function () {
       });
 
       it('origin: (0, 0), zoom level: 18', function () {
-        var t = Math.pow(2, -19) * 256;
-        m.origin({x: 0, y: 0});
+        var t = Math.pow(2, -19) * 256,
+            l = get_layer({x: 0, y: 0}),
+            s = l.map().unitsPerPixel();
         expect(l.tileAtPoint({x: t * s, y: t * s}, 18)).toEqual({x: 0, y: 0});
         expect(l.tileAtPoint({x: t * s, y: 3 * t * s}, 18)).toEqual({x: 0, y: 1});
         expect(l.tileAtPoint({x: 3 * t * s, y: t * s}, 18)).toEqual({x: 1, y: 0});
@@ -106,7 +117,8 @@ describe('geo.tileLayer', function () {
       });
 
       it('origin: (128, 128), zoom level: 0', function () {
-        m.origin({x: 128 * s, y: 128 * s});
+        var l = get_layer({x: 128, y: 128}),
+            s = l.map().unitsPerPixel();
         expect(l.tileAtPoint({x: 0 * s, y: 0 * s}, 0)).toEqual({x: 0, y: 0});
         expect(l.tileAtPoint({x: 64 * s, y: 64 * s}, 0)).toEqual({x: 0, y: 0});
         expect(l.tileAtPoint({x: 64 * s, y: -64 * s}, 0)).toEqual({x: 0, y: 0});
@@ -115,7 +127,8 @@ describe('geo.tileLayer', function () {
       });
 
       it('origin: (128, 128), zoom level: 1', function () {
-        m.origin({x: 128 * s, y: 128 * s});
+        var l = get_layer({x: 128, y: 128}),
+            s = l.map().unitsPerPixel();
         expect(l.tileAtPoint({x: 64 * s, y: 64 * s}, 1)).toEqual({x: 1, y: 1});
         expect(l.tileAtPoint({x: 64 * s, y: -64 * s}, 1)).toEqual({x: 1, y: 0});
         expect(l.tileAtPoint({x: -64 * s, y: 64 * s}, 1)).toEqual({x: 0, y: 1});
@@ -124,8 +137,9 @@ describe('geo.tileLayer', function () {
 
       it('origin: (128, 128), zoom level: 18', function () {
         var t = Math.pow(2, -19) * 256,
-            c = Math.pow(2, 17);
-        m.origin({x: 128 * s, y: 128 * s});
+            c = Math.pow(2, 17),
+            l = get_layer({x: 128, y: 128}),
+            s = l.map().unitsPerPixel();
         expect(l.tileAtPoint({x: t * s, y: t * s}, 18)).toEqual({x: c, y: c});
         expect(l.tileAtPoint({x: t * s, y: 3 * t * s}, 18)).toEqual({x: c, y: c + 1});
         expect(l.tileAtPoint({x: 3 * t * s, y: t * s}, 18)).toEqual({x: c + 1, y: c});
@@ -136,14 +150,10 @@ describe('geo.tileLayer', function () {
       });
     });
     describe('center: (1, -2)', function () {
-      var opts = {},
-          m = map(opts),
-          l = geo.tileLayer({map: m}),
-          s = m.unitsPerPixel();
-
-      m.center({x: 1 * s, y: -2 * s});
       it('origin: (0, 0), zoom level: 0', function () {
-        m.origin({x: 0, y: 0});
+        var l = get_layer({x: 0, y: 0}),
+            s = l.map().unitsPerPixel();
+        l.map().center({x: 1 * s, y: -2 * s});
         expect(l.tileAtPoint({x: 128 * s, y: 128 * s}, 0)).toEqual({x: 0, y: 0});
         expect(l.tileAtPoint({x: 64 * s, y: 64 * s}, 0)).toEqual({x: 0, y: 0});
         expect(l.tileAtPoint({x: 64 * s, y: 192 * s}, 0)).toEqual({x: 0, y: 0});
@@ -152,7 +162,9 @@ describe('geo.tileLayer', function () {
       });
 
       it('origin: (0, 0), zoom level: 1', function () {
-        m.origin({x: 0, y: 0});
+        var l = get_layer({x: 0, y: 0}),
+            s = l.map().unitsPerPixel();
+        l.map().center({x: 1 * s, y: -2 * s});
         expect(l.tileAtPoint({x: 64 * s, y: 64 * s}, 1)).toEqual({x: 0, y: 0});
         expect(l.tileAtPoint({x: 64 * s, y: 192 * s}, 1)).toEqual({x: 0, y: 1});
         expect(l.tileAtPoint({x: 192 * s, y: 64 * s}, 1)).toEqual({x: 1, y: 0});
@@ -160,8 +172,10 @@ describe('geo.tileLayer', function () {
       });
 
       it('origin: (0, 0), zoom level: 18', function () {
-        var t = Math.pow(2, -19) * 256;
-        m.origin({x: 0, y: 0});
+        var t = Math.pow(2, -19) * 256,
+            l = get_layer({x: 0, y: 0}),
+            s = l.map().unitsPerPixel();
+        l.map().center({x: 1 * s, y: -2 * s});
         expect(l.tileAtPoint({x: t * s, y: t * s}, 18)).toEqual({x: 0, y: 0});
         expect(l.tileAtPoint({x: t * s, y: 3 * t * s}, 18)).toEqual({x: 0, y: 1});
         expect(l.tileAtPoint({x: 3 * t * s, y: t * s}, 18)).toEqual({x: 1, y: 0});
@@ -170,7 +184,9 @@ describe('geo.tileLayer', function () {
       });
 
       it('origin: (128, 128), zoom level: 0', function () {
-        m.origin({x: 128 * s, y: 128 * s});
+        var l = get_layer({x: 128, y: 128}),
+            s = l.map().unitsPerPixel();
+        l.map().center({x: 1 * s, y: -2 * s});
         expect(l.tileAtPoint({x: 0 * s, y: 0 * s}, 0)).toEqual({x: 0, y: 0});
         expect(l.tileAtPoint({x: 64 * s, y: 64 * s}, 0)).toEqual({x: 0, y: 0});
         expect(l.tileAtPoint({x: 64 * s, y: -64 * s}, 0)).toEqual({x: 0, y: 0});
@@ -179,7 +195,9 @@ describe('geo.tileLayer', function () {
       });
 
       it('origin: (128, 128), zoom level: 1', function () {
-        m.origin({x: 128 * s, y: 128 * s});
+        var l = get_layer({x: 128, y: 128}),
+            s = l.map().unitsPerPixel();
+        l.map().center({x: 1 * s, y: -2 * s});
         expect(l.tileAtPoint({x: 64 * s, y: 64 * s}, 1)).toEqual({x: 1, y: 1});
         expect(l.tileAtPoint({x: 64 * s, y: -64 * s}, 1)).toEqual({x: 1, y: 0});
         expect(l.tileAtPoint({x: -64 * s, y: 64 * s}, 1)).toEqual({x: 0, y: 1});
@@ -188,8 +206,10 @@ describe('geo.tileLayer', function () {
 
       it('origin: (128, 128), zoom level: 18', function () {
         var t = Math.pow(2, -19) * 256,
-            c = Math.pow(2, 17);
-        m.origin({x: 128 * s, y: 128 * s});
+            c = Math.pow(2, 17),
+            l = get_layer({x: 128, y: 128}),
+            s = l.map().unitsPerPixel();
+        l.map().center({x: 1 * s, y: -2 * s});
         expect(l.tileAtPoint({x: t * s, y: t * s}, 18)).toEqual({x: c, y: c});
         expect(l.tileAtPoint({x: t * s, y: 3 * t * s}, 18)).toEqual({x: c, y: c + 1});
         expect(l.tileAtPoint({x: 3 * t * s, y: t * s}, 18)).toEqual({x: c + 1, y: c});
