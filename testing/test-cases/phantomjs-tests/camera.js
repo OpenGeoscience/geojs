@@ -349,19 +349,45 @@ describe('geo.camera', function () {
         position: 'relative',
         width: '100px',
         height: '100px'
+        /*,border: '1px solid red'*/
       });
-
       node.css({
         position: 'absolute',
         width: '100px',
         height: '100px',
         transform: 'none'
+        /*,border: '1px solid black'*/
       });
 
       $('body').append(parent);
       parent.append(node);
       return node;
     }
+
+    function get_node_position() {
+      var node = $('#' + idnode),
+          box = node.get(0).getBoundingClientRect();
+      return {
+        bottom: node.position().top + box.height,
+        top: node.position().top,
+        left: node.position().left,
+        right: node.position().left + box.width,
+        height: box.height,
+        width: box.width
+      };
+    }
+
+    function assert_position(position) {
+      var _ = get_node_position(), k, actual = {};
+      for (k in position) {
+        if (position.hasOwnProperty(k)) {
+          position[k] = position[k].toFixed(2);
+          actual[k] = _[k].toFixed(2);
+        }
+      }
+      expect(actual).toEqual(position);
+    }
+
     it('Simple panning', function () {
       var node = make_node(),
           camera = geo.camera();
@@ -431,6 +457,102 @@ describe('geo.camera', function () {
       node.css('transform', geo.camera.css(camera.view));
       expect(node.position().left).toBe(0);
       expect(node.position().top).toBe(0);
+    });
+
+    describe('World to display', function () {
+      it('identity', function () {
+        var node = make_node(),
+            camera = geo.camera();
+
+        camera.viewport = {width: 100, height: 100};
+        camera.bounds = {left: 0, right: 100, bottom: 0, top: 100};
+
+        node.css('transform', camera.css());
+        assert_position({
+          left: 0,
+          right: 100,
+          top: 0,
+          bottom: 100
+        });
+      });
+
+      it('zoom', function () {
+        var node = make_node(),
+            camera = geo.camera();
+
+        camera.viewport = {width: 100, height: 100};
+        camera.bounds = {left: 0, right: 100, bottom: 0, top: 100};
+
+        camera.zoom(2);
+        node.css('transform', camera.css());
+        assert_position({
+          left: -50,
+          top: -50,
+          right: 150,
+          bottom: 150
+        });
+
+        camera.zoom(1 / 4);
+        node.css('transform', camera.css());
+        assert_position({
+          left: 25,
+          top: 25,
+          right: 75,
+          bottom: 75
+        });
+      });
+
+      it('pan', function () {
+        var node = make_node(),
+            camera = geo.camera();
+
+        camera.viewport = {width: 100, height: 100};
+        camera.bounds = {left: 0, right: 100, bottom: 0, top: 100};
+
+        camera.pan({x: 50, y: 0});
+        node.css('transform', camera.css());
+        assert_position({
+          left: 50,
+          top: 0,
+          right: 150,
+          bottom: 100
+        });
+
+        camera.pan({x: -25, y: 10});
+        node.css('transform', camera.css());
+        assert_position({
+          left: 25,
+          top: -10,
+          right: 125,
+          bottom: 90
+        });
+      });
+      it('pan + zoom', function () {
+        var node = make_node(),
+            camera = geo.camera();
+
+        camera.viewport = {width: 100, height: 100};
+        camera.bounds = {left: 0, right: 100, bottom: 0, top: 100};
+
+        camera.zoom(2);
+        camera.pan({x: 10, y: -5});
+        node.css('transform', camera.css());
+        assert_position({
+          left: -30,
+          top: -40,
+          right: 170,
+          bottom: 160
+        });
+
+        camera.zoom(0.5);
+        node.css('transform', camera.css());
+        assert_position({
+          left: 20,
+          top: 10,
+          right: 120,
+          bottom: 110
+        });
+      });
     });
   });
 

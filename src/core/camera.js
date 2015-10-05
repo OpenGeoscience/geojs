@@ -203,19 +203,18 @@
         var mat;
         if (this._display === null) {
           mat = geo.camera.affine(
-            {x: 1, y: -1}, // translate to: [0, 2] x [-2, 0]
+            {x: 1, y: 1}, // translate to: [0, 2] x [0, 2]
             {
               x: this.viewport.width / 2,
               y: this.viewport.height / -2
-            },            // scale to: [0, width] x [-height, 0]
-            {x: 0, y: this.viewport.height} // -> [0, width] x [0, height]
+            }             // scale to: [0, width] x [-height, 0]
           );
 
-          // applies mat to the inverse transform (world -> normalized)
+          // applies mat to the transform (world -> normalized)
           this._display = mat4.mul(
             mat,
             mat,
-            this._inverse
+            this._transform
           );
         }
         return this._display;
@@ -661,6 +660,38 @@
     };
 
     /**
+     * Returns a CSS transform that converts (by default) from world coordinates
+     * into display coordinates.  This allows users of this module to
+     * position elements using world coordinates directly inside DOM
+     * elements.
+     *
+     * @note This transform will not take into account projection specific
+     * transforms.  For perspective projections, one can use the properties
+     * `perspective` and `perspective-origin` to apply the projection
+     * in css directly.
+     *
+     * @param {string} transform The transform to return
+     *   * display
+     *   * world
+     * @returns {string} The css transform string
+     */
+    this.css = function (transform) {
+      var m;
+      switch ((transform || '').toLowerCase()) {
+        case 'display':
+        case '':
+          m = this.display;
+          break;
+        case 'world':
+          m = this.world;
+          break;
+        default:
+          throw new Error('Unknown transform ' + transform);
+      }
+      return geo.camera.css(m);
+    };
+
+    /**
      * Represent a glmatrix as a pretty-printed string.
      * @param {mat4} mat A 4 x 4 matrix
      * @param {number} prec The number of decimal places
@@ -804,13 +835,13 @@
     // transform, so the first applied here is the last applied to the
     // coordinate.
     if (post) {
-      mat4.translate(mat, mat, [pre.x || 0, pre.y || 0, pre.z || 0]);
+      mat4.translate(mat, mat, [post.x || 0, post.y || 0, post.z || 0]);
     }
     if (scale) {
       mat4.scale(mat, mat, [scale.x || 1, scale.y || 1, scale.z || 1]);
     }
     if (pre) {
-      mat4.translate(mat, mat, [post.x || 0, post.y || 0, post.z || 0]);
+      mat4.translate(mat, mat, [pre.x || 0, pre.y || 0, pre.z || 0]);
     }
     return mat;
   };
