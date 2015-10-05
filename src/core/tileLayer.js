@@ -636,7 +636,7 @@
       for (hash in this._activeTiles) {// jshint ignore: line
 
         tile = this._activeTiles[hash];
-        if (false && this._canPurge(tile, bounds)) {
+        if (this._canPurge(tile, bounds)) {
           console.log('Purging: ' + tile.toString());
           this.remove(tile);
         }

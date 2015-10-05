@@ -506,8 +506,11 @@
      * @returns {object} The point in display coordinates
      */
     this.worldToDisplay = function (point) {
+      // define some magic numbers:
+      var z = 0, // z coordinate of the surface in world coordinates
+          w = 1; // enables perspective divide (i.e. for point conversion)
       point = this.worldToDisplay4(
-        [point.x, point.y, 0, 1]
+        [point.x, point.y, z, w]
       );
       return {x: point[0], y: point[1], z: point[2]};
     };
@@ -520,8 +523,11 @@
      * @returns {object} The point in world coordinates
      */
     this.displayToWorld = function (point) {
+      // define some magic numbers:
+      var z = 1, // the z coordinate of the surface
+          w = 2; // perspective divide at z = 1
       point = this.displayToWorld4(
-        [point.x, point.y, 1, 2]
+        [point.x, point.y, z, w]
       );
       return {x: point[0], y: point[1]};
     };
