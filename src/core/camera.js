@@ -425,6 +425,8 @@
         pt[1] = w * pt[1];
         pt[2] = w * pt[2];
         pt[3] = w;
+      } else {
+        pt[3] = 1;
       }
       return pt;
     };
@@ -442,6 +444,8 @@
         pt[1] = w * pt[1];
         pt[2] = w * pt[2];
         pt[3] = w;
+      } else {
+        pt[3] = 1;
       }
       return pt;
     };
@@ -463,15 +467,17 @@
       // This is because z = 0 is the far plane exposed to the user, but
       // internally the far plane is at -2.
       point[2] -= 2;
+
+      // convert to clip space
       this._worldToClip4(point);
-      var w = 1;
-      if (this._projection === 'perspective') {
-        w = 1 / point[3];
-      }
-      point[0] = this._viewport.width * (1 + w * point[0]) / 2.0;
-      point[1] = this._viewport.height * (1 - w * point[1]) / 2.0;
-      point[2] = (1 + w * point[2]) / 2.0;
-      point[3] = w; // as in gl_FragCoord
+
+      // apply projection specific transformation
+      point = this.applyProjection(point);
+
+      // convert to display space
+      point[0] = this._viewport.width * (1 + point[0]) / 2.0;
+      point[1] = this._viewport.height * (1 - point[1]) / 2.0;
+      point[2] = (1 + point[2]) / 2.0;
       return point;
     };
 
@@ -485,15 +491,18 @@
      *   * depth range [0, 1]
      */
     this.displayToWorld4 = function (point) {
-      var w = 1;
-      if (this._projection === 'perspective') {
-        w = point[3];
-      }
-      point[0] = (2 * point[0] / this._viewport.width - 1) * w;
-      point[1] = (-2 * point[1] / this._viewport.height + 1) * w;
-      point[2] = (2 * point[2] - 1) * w;
-      point[3] = w;
+      // convert to clip space
+      point[0] = 2 * point[0] / this._viewport.width - 1;
+      point[1] = -2 * point[1] / this._viewport.height + 1;
+      point[2] = 2 * point[2] - 1;
+
+      // invert projection transform
+      point = this.unapplyProjection(point);
+
+      // convert to world coordinates
       this._clipToWorld4(point);
+
+      // move far surface to z = 0
       point[2] += 2;
       return point;
     };
