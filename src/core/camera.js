@@ -87,12 +87,26 @@
     this._bounds = null;
 
     /**
+     * Cached "display" matrix recomputed on demand.
+     * @see {@link geo.camera.display}
+     * @protected
+     */
+    this._display = null;
+
+    /**
+     * Cached "world" matrix recomputed on demand.
+     * @see {@link geo.camera.world}
+     * @protected
+     */
+    this._world = null;
+
+    /**
      * The viewport parameters size and offset.
      * @property {number} height Viewport height in pixels
      * @property {number} width Viewport width in pixels
      * @protected
      */
-    this._viewport = {};
+    this._viewport = {width: 1, height: 1};
 
     /**
      * Set up the projection matrix for the current projection type.
@@ -132,7 +146,9 @@
      */
     this._update = function () {
       this._bounds = null;
-      mat4.multiply(this._transform, this._view, this._proj);
+      this._display = null;
+      this._world = null;
+      mat4.multiply(this._transform, this._proj, this._view);
       mat4.invert(this._inverse, this._transform);
       this.geoTrigger(geo.event.camera.view, {
         camera: this
@@ -173,6 +189,53 @@
       set: function (bounds) {
         this._setBounds(bounds);
         this._update();
+      }
+    });
+
+    /**
+     * Getter for the "display" matrix.  This matrix converts from
+     * world coordinates into display coordinates.  This matrix exists to
+     * generate matrix3d css transforms that can be used in layers that
+     * render on the DOM.
+     */
+    Object.defineProperty(this, 'display', {
+      get: function () {
+        var mat;
+        if (this._display === null) {
+          mat = geo.camera.affine(
+            {x: 1, y: -1}, // translate to: [0, 2] x [-2, 0]
+            {
+              x: this.viewport.width / 2,
+              y: this.viewport.height / -2
+            },            // scale to: [0, width] x [-height, 0]
+            {x: 0, y: this.viewport.height} // -> [0, width] x [0, height]
+          );
+
+          // applies mat to the inverse transform (world -> normalized)
+          this._display = mat4.mul(
+            mat,
+            mat,
+            this._inverse
+          );
+        }
+        return this._display;
+      }
+    });
+
+    /**
+     * Getter for the "world" matrix.  This matrix converts from
+     * display coordinates into world coordinates.  This is constructed
+     * by inverting the "display" matrix.
+     */
+    Object.defineProperty(this, 'world', {
+      get: function () {
+        if (this._world === null) {
+          this._world = mat4.invert(
+            mat4.create(),
+            this.display
+          );
+        }
+        return this._world;
       }
     });
 
@@ -241,10 +304,32 @@
               viewport.height > 0)) {
           throw new Error('Invalid viewport dimensions');
         }
-        if (viewport.width === this._viewport.width ||
+        if (viewport.width === this._viewport.width &&
             viewport.height === this._viewport.height) {
           return;
         }
+
+        // apply scaling to the view matrix to account for the new aspect ratio
+        // without changing the apparent zoom level
+        if (this._viewport.width && this._viewport.height) {
+          this._scale(
+            vec3.fromValues(
+              this._viewport.width / viewport.width,
+              this._viewport.height / viewport.height,
+              1
+            )
+          );
+
+          // translate by half the difference to keep the center the same
+          this._translate(
+            vec3.fromValues(
+              (viewport.width - this._viewport.width) / 2,
+              (viewport.height - this._viewport.height) / 2,
+              0
+            )
+          );
+        }
+
         this._viewport = {width: viewport.width, height: viewport.height};
         this._update();
         this.geoTrigger(geo.event.camera.viewport, {
@@ -314,8 +399,7 @@
      * @returns {vec4} The point in clip space coordinates
      */
     this._worldToClip4 = function (point) {
-      vec4.transformMat4(point, point, this._transform);
-      return point;
+      return geo.camera.applyTransform(this._transform, point);
     };
 
     /**
@@ -325,9 +409,43 @@
      * @returns {vec4} The point in world space coordinates
      */
     this._clipToWorld4 = function (point) {
-      vec4.transformMat4(point, point, this._inverse);
-      return point;
+      return geo.camera.applyTransform(this._inverse, point);
     };
+
+    /**
+     * Apply the camera's projection transform to the given point.
+     * @param {vec4} pt a point in clipped coordinates
+     * @returns {vec4} the point in normalized coordinates
+     */
+    this.applyProjection = function (pt) {
+      var w;
+      if (this._projection === 'perspective') {
+        w = 1 / (pt[3] || 1);
+        pt[0] = w * pt[0];
+        pt[1] = w * pt[1];
+        pt[2] = w * pt[2];
+        pt[3] = w;
+      }
+      return pt;
+    };
+
+    /**
+     * Unapply the camera's projection transform from the given point.
+     * @param {vec4} pt a point in normalized coordinates
+     * @returns {vec4} the point in clipped coordinates
+     */
+    this.unapplyProjection = function (pt) {
+      var w;
+      if (this._projection === 'perspective') {
+        w = pt[3] || 1;
+        pt[0] = w * pt[0];
+        pt[1] = w * pt[1];
+        pt[2] = w * pt[2];
+        pt[3] = w;
+      }
+      return pt;
+    };
+
 
     /**
      * Project a vec4 from world space into viewport space.
@@ -342,10 +460,12 @@
      * x/y coordinates.
      */
     this.worldToDisplay4 = function (point) {
+      // This is because z = 0 is the far plane exposed to the user, but
+      // internally the far plane is at -2.
       point[2] -= 2;
       this._worldToClip4(point);
       var w = 1;
-      if (this._projection === 'perspective' && point[3]) {
+      if (this._projection === 'perspective') {
         w = 1 / point[3];
       }
       point[0] = this._viewport.width * (1 + w * point[0]) / 2.0;
@@ -367,16 +487,14 @@
     this.displayToWorld4 = function (point) {
       var w = 1;
       if (this._projection === 'perspective') {
-        w = 2; // from default camera near and far clipping
-        if (point[3]) {
-          w = point[3];
-        }
+        w = point[3];
       }
-      point[0] = (2.0 * point[0] / this._viewport.width - 1) * w;
-      point[1] = (-2.0 * point[1] / this._viewport.height + 1) * w;
-      point[2] = (2.0 * point[2] - 1) * w;
+      point[0] = (2 * point[0] / this._viewport.width - 1) * w;
+      point[1] = (-2 * point[1] / this._viewport.height + 1) * w;
+      point[2] = (2 * point[2] - 1) * w;
       point[3] = w;
       this._clipToWorld4(point);
+      point[2] += 2;
       return point;
     };
 
@@ -403,7 +521,7 @@
      */
     this.displayToWorld = function (point) {
       point = this.displayToWorld4(
-        [point.x, point.y, 0, 2]
+        [point.x, point.y, 1, 2]
       );
       return {x: point[0], y: point[1]};
     };
@@ -419,17 +537,20 @@
     this._getBounds = function () {
       var pt, bds = {};
 
+
       // get lower bounds
-      pt = vec4.fromValues(-1, -1, 1, 1);
-      this._clipToWorld4(pt);
-      bds.left = pt[0] / pt[3];
-      bds.bottom = pt[1] / pt[3];
+      pt = this.displayToWorld({
+        x: 0, y: this._viewport.height
+      });
+      bds.left = pt.x;
+      bds.bottom = pt.y;
 
       // get upper bounds
-      pt = vec4.fromValues(1, 1, 1, 1);
-      this._clipToWorld4(pt);
-      bds.right = pt[0] / pt[3];
-      bds.top = pt[1] / pt[3];
+      pt = this.displayToWorld({
+        x: this._viewport.width, y: 0
+      });
+      bds.right = pt.x;
+      bds.top = pt.y;
 
       return bds;
     };
@@ -456,8 +577,8 @@
           scale = vec3.create(),
           c_ar, v_ar, w, h;
 
-      bounds.near = bounds.near || 1;
-      bounds.far = bounds.far || 0;
+      bounds.near = bounds.near || 0;
+      bounds.far = bounds.far || 1;
 
       // reset view to the identity
       this._resetView();
@@ -479,13 +600,14 @@
         scale[1] = 2 / h;
       }
 
-      scale[2] = 1; // / (bounds.near - bounds.far);
+      scale[2] = 1;
       this._scale(scale);
 
-      // translate to the new center
+      // translate to the new center.
       translate[0] = -(bounds.left + bounds.right) / 2;
       translate[1] = -(bounds.bottom + bounds.top) / 2;
       translate[2] = 0;
+
       this._translate(translate);
       return this;
     };
@@ -584,7 +706,9 @@
     this.projection = spec.projection || 'parallel';
 
     // initialize the viewport
-    this.viewport = spec.viewport || {width: 1, height: 1};
+    if (spec.viewport) {
+      this.viewport = spec.viewport;
+    }
 
     // trigger an initial update to set up the camera state
     this._update();
@@ -640,6 +764,50 @@
       ].join(',') +
       ')'
     );
+  };
+
+  /**
+   * Generate a mat4 representing an affine coordinate transformation.
+   *
+   * For the following affine transform:
+   *
+   *    x |-> m * (x + a) + b
+   *
+   * applies the css transform:
+   *
+   *    translate(b) scale(m) translate(a)
+   *
+   * @param {object?} pre Coordinate offset **before** scaling
+   * @param {object?} scale Coordinate scaling
+   * @param {object?} post Coordinate offset **after** scaling
+   * @returns {mat4} The new transform matrix
+   */
+  geo.camera.affine = function (pre, scale, post) {
+    var mat = mat4.create();
+
+    // Note: mat4 operations are applied to the right side of the current
+    // transform, so the first applied here is the last applied to the
+    // coordinate.
+    if (post) {
+      mat4.translate(mat, mat, [pre.x || 0, pre.y || 0, pre.z || 0]);
+    }
+    if (scale) {
+      mat4.scale(mat, mat, [scale.x || 1, scale.y || 1, scale.z || 1]);
+    }
+    if (pre) {
+      mat4.translate(mat, mat, [post.x || 0, post.y || 0, post.z || 0]);
+    }
+    return mat;
+  };
+
+  /**
+   * Apply the given transform matrix to a point in place.
+   * @param {mat4} t
+   * @param {vec4} pt
+   * @returns {vec4}
+   */
+  geo.camera.applyTransform = function (t, pt) {
+    return vec4.transformMat4(pt, pt, t);
   };
 
   inherit(geo.camera, geo.object);

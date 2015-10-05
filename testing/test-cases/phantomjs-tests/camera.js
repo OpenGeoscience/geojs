@@ -8,6 +8,112 @@
 describe('geo.camera', function () {
   'use strict';
 
+  describe('setBounds -> getBounds', function () {
+    function setGetBounds(b, vp, proj) {
+      return function () {
+        var c = geo.camera(), b1;
+        c.projection = proj;
+        c.viewport = vp || {width: 100, height: 100};
+        c.bounds = b;
+        b1 = c.bounds;
+
+        expect(b.left).toBe(b1.left);
+        expect(b.right).toBe(b1.right);
+        expect(b.top).toBe(b1.top);
+        expect(b.bottom).toBe(b1.bottom);
+      };
+    }
+    function testcase(proj) {
+      return function () {
+        it('[-1, 1] x [-1, 1]',
+           setGetBounds({left: -1, right: 1, bottom: -1, top: 1}, null, proj));
+        it('[0, 1] x [0, 1]',
+           setGetBounds({left: 0, right: 1, bottom: 0, top: 1}, null, proj));
+        it('[0, 1] x [-1, 1]',
+           setGetBounds({left: 0, right: 1, bottom: -1, top: 1},
+                        {width: 1, height: 2}, proj));
+        it('[-1, 1] x [0, 1]',
+           setGetBounds({left: -1, right: 1, bottom: 0, top: 1},
+                        {width: 2, height: 1}, proj));
+      };
+    }
+
+    describe('parallel', testcase('parallel'));
+    describe('perspective', testcase('perspective'));
+  });
+
+  describe('resize viewport', function () {
+    function number_near(n1, n2, tol) {
+      return Math.abs(n1 - n2) < tol;
+    }
+    function bounds_near(b1, b2, tol) {
+      tol = tol || 1e-4;
+      var n = number_near(b1.left, b2.left, tol) &&
+              number_near(b1.right, b2.right, tol) &&
+              number_near(b1.bottom, b2.bottom, tol) &&
+              number_near(b1.top, b2.top, tol);
+      if (!n) {
+        console.log(JSON.stringify(b1) + ' != ' + JSON.stringify(b2));
+      }
+      return n;
+    }
+
+    it('100 x 100 -> 90 x 90', function () {
+      var c = geo.camera({viewport: {width: 100, height: 100}});
+
+      c.bounds = {left: 0, right: 100, bottom: 0, top: 100};
+      c.viewport = {width: 90, height: 90};
+
+      expect(bounds_near(c.bounds, {left: 5, right: 95, bottom: 5, top: 95}))
+        .toBe(true);
+    });
+    it('100 x 100 -> 100 x 90', function () {
+      var c = geo.camera({viewport: {width: 100, height: 100}});
+
+      c.bounds = {left: 0, right: 100, bottom: 0, top: 100};
+      c.viewport = {width: 100, height: 90};
+
+      expect(bounds_near(c.bounds, {left: 0, right: 100, bottom: 5, top: 95}))
+        .toBe(true);
+    });
+    it('100 x 100 -> 20 x 10', function () {
+      var c = geo.camera({viewport: {width: 100, height: 100}});
+
+      c.bounds = {left: 0, right: 100, bottom: 0, top: 100};
+      c.viewport = {width: 20, height: 10};
+
+      expect(bounds_near(c.bounds, {left: 40, right: 60, bottom: 45, top: 55}))
+        .toBe(true);
+    });
+    it('100 x 100 -> 140 x 120', function () {
+      var c = geo.camera({viewport: {width: 100, height: 100}});
+
+      c.bounds = {left: 0, right: 100, bottom: 0, top: 100};
+      c.viewport = {width: 140, height: 120};
+
+      expect(bounds_near(c.bounds, {left: -20, right: 120, bottom: -10, top: 110}))
+        .toBe(true);
+    });
+    it('50 x 100 -> 100 x 100', function () {
+      var c = geo.camera({viewport: {width: 50, height: 100}});
+
+      c.bounds = {left: 0, right: 50, bottom: 0, top: 100};
+      c.viewport = {width: 100, height: 100};
+
+      expect(bounds_near(c.bounds, {left: -25, right: 75, bottom: 0, top: 100}))
+        .toBe(true);
+    });
+    it('50 x 50 -> 100 x 100', function () {
+      var c = geo.camera({viewport: {width: 50, height: 50}});
+
+      c.bounds = {left: 0, right: 50, bottom: 0, top: 50};
+      c.viewport = {width: 100, height: 100};
+
+      expect(bounds_near(c.bounds, {left: -25, right: 75, bottom: -25, top: 75}))
+        .toBe(true);
+    });
+  });
+
   /**
    * Test that two points are close to each other.
    * (l^\infty norm)
@@ -32,26 +138,22 @@ describe('geo.camera', function () {
     var viewport = {width: 1, height: 1};
 
     return function () {
-      var c;
-
       function w2d(p, q) {
         return function () {
+          var c = new geo.camera({viewport: viewport});
+          if (projection) {
+            c.projection = projection;
+          }
+          c.bounds = {
+            left: xs,
+            right: xe,
+            bottom: ys,
+            top: ye
+          };
           near(c.worldToDisplay(p), q, undefined, c);
         };
       }
 
-      it('setup', function () {
-        c = new geo.camera({viewport: viewport});
-        if (projection) {
-          c.projection = projection;
-        }
-        c.bounds = {
-          left: xs,
-          right: xe,
-          bottom: ys,
-          top: ye
-        };
-      });
       it('bottom left ', w2d({x: xs, y: ys}, {x: 0, y: 1}));
       it('top left', w2d({x: xs, y: ye}, {x: 0, y: 0}));
       it('bottom right', w2d({x: xe, y: ys}, {x: 1, y: 1}));
@@ -67,15 +169,13 @@ describe('geo.camera', function () {
     return function () {
       camera = camera();
       var copy = $.extend({}, pt);
-      camera.viewport = size;
       pt = camera.worldToDisplay(pt);
       expect(
         pt.x >= 0 && pt.x <= size.width &&
         pt.y >= 0 && pt.y <= size.height
       ).toBe(true);
-      camera.viewport = size;
       pt = camera.displayToWorld(pt);
-      near(pt, copy, tol);
+      near(pt, copy, tol, camera);
     };
   }
 
@@ -85,7 +185,6 @@ describe('geo.camera', function () {
   function outOfBounds(camera, size, pt) {
     return function () {
       camera = camera();
-      camera.viewport = size;
       pt = camera.worldToDisplay(pt);
       expect(pt.x < 0 || pt.x > size.width || pt.y < 0 || pt.y > size.height).toBe(true);
     };
@@ -99,7 +198,14 @@ describe('geo.camera', function () {
       var size = {}, pt = {};
 
       function setup1() {
-        var camera = geo.camera();
+        var camera;
+
+        size.width = 1000;
+        size.height = 500;
+        pt.x = -500;
+        pt.y = 500;
+
+        camera = geo.camera({viewport: size});
         camera.projection = projection;
         camera.bounds = {
           left: -990,
@@ -108,10 +214,6 @@ describe('geo.camera', function () {
           top: 600
         };
 
-        size.width = 1000;
-        size.height = 500;
-        pt.x = -500;
-        pt.y = 500;
         return camera;
       }
 
@@ -119,7 +221,14 @@ describe('geo.camera', function () {
       it('Out of window case 1', outOfBounds(setup1, size, {x: -1000, y: 500}));
 
       function setup2() {
-        var camera = geo.camera();
+        var camera;
+
+        size.width = 10;
+        size.height = 1;
+        pt.x = -100;
+        pt.y = -810;
+
+        camera = geo.camera({viewport: size});
         camera.projection = projection;
         camera.bounds = {
           left: -990,
@@ -128,10 +237,6 @@ describe('geo.camera', function () {
           top: -900
         };
 
-        size.width = 10;
-        size.height = 1;
-        pt.x = -100;
-        pt.y = -810;
         return camera;
       }
       it('Round trip case 2', roundTrip(setup2, size, pt, 1e-2));

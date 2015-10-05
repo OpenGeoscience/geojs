@@ -469,6 +469,56 @@
     };
 
     /**
+     * Get a sublayer container.  When requested, this method will create the sublayer
+     * if it doesn't already exist.
+     * @param {number} level The sublayer level
+     * @param {boolean} create Whether to create the sublayer when missing
+     * @return {DOM} A DOM element
+     */
+    this._subLayer = function (level, create) {
+      var node;
+
+      level = level.toFixed();
+      node = this.canvas().find('[data-tile-sublayer=' + level + ']');
+
+      if (!node.get(0) && create) {
+        node = $(
+          '<div class="geo-tile-sublayer" data-tile-sublayer="' + level + '"/>'
+        ).appendTo(this.canvas());
+        node.css({
+          width: '100%',
+          height: '100%',
+          'transform-origin': '0% 0%'
+        });
+      }
+      return node;
+    };
+
+    /**
+     * Reorder and update scales for all sublayers.  This should be called
+     * whenever the target zoom level for the map changes.  i.e. when map
+     * transitions between integral zoom level (2.9 -> 3.1).
+     * @param {number} zoom The target zoom level
+     */
+    this._updateSubLayers = function (zoom) {
+      var slayers = $('.geo-tile-sublayer'), size = this.map().size();
+      zoom = this._options.tileRounding(zoom);
+
+      slayers.each(function (i, layer) {
+        var level;
+        layer = $(layer);
+        level = parseInt(layer.data('tile-sublayer'));
+        layer.css(
+          'transform',
+          'translate(' +
+            (size.width / 2) + 'px' + ',' +
+            (size.height / 2) + 'px' + ')' +
+          'scale(' + Math.pow(2, zoom - level) + ') '
+          );
+      });
+    };
+
+    /**
      * Render the tile on the canvas.  This implementation draws the tiles directly
      * on the DOM using <img> tags.  Derived classes should override this method
      * to draw the tile on a renderer specific context.
@@ -484,7 +534,7 @@
       }
 
       // get the layer node
-      var div = this.canvas(),
+      var div = this._subLayer(tile.index.level, true),
           bounds = this._tileBounds(tile);
 
       // append the image element
@@ -586,7 +636,7 @@
       for (hash in this._activeTiles) {// jshint ignore: line
 
         tile = this._activeTiles[hash];
-        if (this._canPurge(tile, bounds)) {
+        if (false && this._canPurge(tile, bounds)) {
           console.log('Purging: ' + tile.toString());
           this.remove(tile);
         }
@@ -684,9 +734,6 @@
         (-to.x) + 'px' + ',' +
         (-to.y) + 'px' + ')' +
         'translate(' +
-        (map.size().width / 2) + 'px' + ',' +
-        (map.size().height / 2) + 'px' + ')' +
-        'translate(' +
         (-(view.left + view.right) / 2) + 'px' + ',' +
         (-(view.bottom + view.top) / 2) + 'px' + ')' +
         ''
@@ -697,6 +744,12 @@
           center.y === lastY) {
         return;
       }
+
+      if (zoom !== lastZoom) {
+        // rescale active tiles so they don't jump around during zoom transitions
+        this._updateSubLayers(zoom);
+      }
+
       lastZoom = zoom;
       lastX = center.x;
       lastY = center.y;
