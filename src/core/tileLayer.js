@@ -60,7 +60,7 @@
 
     options = $.extend(options || {}, this.constructor.defaults);
 
-    var lastZoom = null, lastX = null, lastY = null;
+    var lastZoom = null, lastX = null, lastY = null, unit;
 
     // copy the options into a private variable
     this._options = $.extend(true, {}, options);
@@ -78,6 +78,20 @@
 
     // initialize the in memory tile cache
     this._cache = geo.tileCache({size: options.cacheSize});
+
+    unit = this.map().unitsPerPixel(this._options.maxLevel);
+
+    // initialize to/FromLocal transform matrices
+    this._toLocalMatrix = geo.camera.affine(
+      {},
+      {x: 1 / unit, y: -1 / unit}
+    );
+    this._toLocalTransform = geo.camera.css(this._toLocalMatrix);
+    this._fromLocalMatrix = geo.camera.affine(
+      {},
+      {x: unit, y: -unit}
+    );
+    this._fromLocalTransform = geo.camera.css(this._fromLocalMatrix);
 
     /**
      * Readonly accessor to the options object
@@ -488,7 +502,10 @@
         node.css({
           width: '100%',
           height: '100%',
-          'transform-origin': '0% 0%'
+          /*
+          'transform-origin': '0% 0%',
+          'transform': 'scale(' + Math.pow(2, this._options.maxLevel - level) + ')'
+          */
         });
       }
       return node;
@@ -501,6 +518,7 @@
      * @param {number} zoom The target zoom level
      */
     this._updateSubLayers = function (zoom) {
+      /*
       var slayers = $('.geo-tile-sublayer'), size = this.map().size();
       zoom = this._options.tileRounding(zoom);
 
@@ -510,12 +528,10 @@
         level = parseInt(layer.data('tile-sublayer'));
         layer.css(
           'transform',
-          'translate(' +
-            (size.width / 2) + 'px' + ',' +
-            (size.height / 2) + 'px' + ')' +
-          'scale(' + Math.pow(2, zoom - level) + ') '
+          'scale(' + Math.pow(2, level) + ') '
           );
       });
+      */
     };
 
     /**
@@ -543,12 +559,6 @@
       // apply a transform to place the image correctly
       tile.image.style.position = 'absolute';
       tile.image.style.left = bounds.left + 'px';
-
-      /**
-       * This is confusing because layer coordinates go from bottom to top, but
-       * css coordinates go from top to bottom.  Using the bottom coordinate works
-       * due to symmetry that is general assuming all tiles have the same size.
-       */
       tile.image.style.top = bounds.bottom + 'px';
 
       // add an error handler
@@ -674,38 +684,6 @@
     };
 
     /**
-     * Compute local coordinates from the given world coordinates.  The
-     * tile layer uses units of pixels relative to the world space
-     * coordinate origin.
-     * @param {object} pt A point in world space coordinates
-     * @returns {object} Local coordinates
-     */
-    this.toLocal = function (pt) {
-      var map = this.map(),
-          unit = map.unitsPerPixel(map.zoom());
-      return {
-        x: pt.x / unit,
-        y: pt.y / unit
-      };
-    };
-
-    /**
-     * Compute world coordinates from the given local coordinates.  The
-     * tile layer uses units of pixels relative to the world space
-     * coordinate origin.
-     * @param {object} pt A point in world space coordinates
-     * @returns {object} Local coordinates
-     */
-    this.fromLocal = function (pt) {
-      var map = this.map(),
-          unit = map.unitsPerPixel(map.zoom());
-      return {
-        x: pt.x * unit,
-        y: pt.y * unit
-      };
-    };
-
-    /**
      * Update the view according to the map/camera.
      * @returns {this} Chainable
      */
@@ -715,28 +693,15 @@
           zoom = this._options.tileRounding(mapZoom),
           center = this.displayToLevel(undefined, zoom),
           bounds = map.bounds(),
-          tiles, view = this._getViewBounds();
-
-      tiles = this._getTiles(
-        zoom, bounds, true
-      );
+          tiles, t, c = map.camera(), m;
 
       // Update the transform for the local layer coordinates
       this.canvas().css(
-        'transform-origin',
-        '50% 50%'
-      );
-      var to = this._options.tileOffset(zoom);
-      this.canvas().css(
         'transform',
-        'scale(' + (Math.pow(2, mapZoom - zoom)) + ')' +
-        'translate(' +
-        (-to.x) + 'px' + ',' +
-        (-to.y) + 'px' + ')' +
-        'translate(' +
-        (-(view.left + view.right) / 2) + 'px' + ',' +
-        (-(view.bottom + view.top) / 2) + 'px' + ')' +
-        ''
+        'translate(-' + (map.size().width / 2) + 'px,' + (map.size().height / 2) + 'px)' +
+        map.camera().css() + ' ' +
+        this._fromLocalTransform +
+        ' scale(' + Math.pow(2, this._options.maxLevel - zoom) + ')'
       );
 
       if (zoom === lastZoom &&
@@ -744,6 +709,10 @@
           center.y === lastY) {
         return;
       }
+
+      tiles = this._getTiles(
+        zoom, bounds, true
+      );
 
       if (zoom !== lastZoom) {
         // rescale active tiles so they don't jump around during zoom transitions

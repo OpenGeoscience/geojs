@@ -244,7 +244,7 @@ geo.layer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Transform coordinates from GCS coordinates into a local coordinate
+   * Transform coordinates from world coordinates into a local coordinate
    * system specific to the underlying renderer.  This method is exposed
    * to allow direct access the rendering context, but otherwise should
    * not be called directly.  The default implementation is the identity
@@ -252,15 +252,21 @@ geo.layer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.toLocal = function (input) {
+    if (this._toLocalMatrix) {
+      geo.camera.applyTransform(this._toLocalMatrix, input);
+    }
     return input;
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Transform coordinates from a local coordinate system to GCS coordinates.
+   * Transform coordinates from a local coordinate system to world coordinates.
    */
   ////////////////////////////////////////////////////////////////////////////
   this.fromLocal = function (input) {
+    if (this._fromLocalMatrix) {
+      geo.camera.applyTransform(this._fromLocalMatrix, input);
+    }
     return input;
   };
 
