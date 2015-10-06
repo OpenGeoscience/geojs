@@ -339,19 +339,6 @@
     });
 
     /**
-     * Proxy to `mat4.lookAt` to modify the view matrix by pointing the
-     * camera at the given location.
-     * @protected
-     * @param {vec3} eye Position of the viewer
-     * @param {vec3} center Point the viewer is looking at
-     * @param {vec3} up Normal vector pointing up
-     * @returns {this} Chainable
-     */
-    this._lookAt = function (eye, center, up) {
-      mat4.lookAt(this._view, eye, center, up);
-    };
-
-    /**
      * Reset the view matrix to its initial (identity) state.
      * @protected
      * @returns {this} Chainable
@@ -379,16 +366,6 @@
      */
     this._scale = function (scale) {
       mat4.scale(this._view, this._view, scale);
-    };
-
-    /**
-     * Uses `mat4.rotateZ` to translate the camera by the given angle around the Z-axis.
-     * @protected
-     * @param {number} angle The angle in radians
-     * @returns {this} Chainable
-     */
-    this._rotateZ = function (angle) {
-      mat4.rotateZ(this._view, this._view, -angle);
     };
 
     /**

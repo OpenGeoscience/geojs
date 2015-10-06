@@ -688,4 +688,46 @@ describe('geo.camera', function () {
 
     expect(c.toString()).toEqual(c.ppMatrix(c.transform));
   });
+
+  it('Affine transform generator', function () {
+    var t, v;
+
+    t = geo.camera.affine(
+      {x: 10, y: 20, z: 30},
+      {x: 2, y: 3, z: 4},
+      {x: -10, y: -20, z: -30}
+    );
+
+    v = vec3.transformMat4(
+      vec3.create(),
+      vec3.fromValues(1, 0, 0),
+      t
+    );
+    expect(v).toEqual(vec3.fromValues(12, 40, 90));
+
+    v = vec3.transformMat4(
+      vec3.create(),
+      vec3.fromValues(0, 1, 0),
+      t
+    );
+    expect(v).toEqual(vec3.fromValues(10, 43, 90));
+
+    v = vec3.transformMat4(
+      vec3.create(),
+      vec3.fromValues(0, 0, 1),
+      t
+    );
+    expect(v).toEqual(vec3.fromValues(10, 40, 94));
+  });
+
+  it('Unknown transform error', function () {
+    var c = geo.camera();
+    expect(function () {c.css('not-valid');}).toThrow();
+  });
+
+  it('Invalid viewport error', function () {
+    var c = geo.camera();
+    expect(function () {c.viewport = {width: 0, height: 100};}).toThrow();
+    expect(function () {c.viewport = {width: 100, height: -100};}).toThrow();
+  });
 });
