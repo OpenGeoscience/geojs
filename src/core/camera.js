@@ -148,7 +148,7 @@
       this._bounds = null;
       this._display = null;
       this._world = null;
-      mat4.multiply(this._transform, this._proj, this._view);
+      this._transform = geo.camera.combine(this._proj, this._view);
       mat4.invert(this._inverse, this._transform);
       this.geoTrigger(geo.event.camera.view, {
         camera: this
@@ -211,8 +211,7 @@
           );
 
           // applies mat to the transform (world -> normalized)
-          this._display = mat4.mul(
-            mat,
+          this._display = geo.camera.combine(
             mat,
             this._transform
           );
@@ -831,6 +830,18 @@
    */
   geo.camera.applyTransform = function (t, pt) {
     return vec4.transformMat4(pt, pt, t);
+  };
+
+  /**
+   * Combine two transforms by multiplying their matrix representations.
+   * @note The second transform provided will be the first applied in the
+   * coordinate transform.
+   * @param {mat4} A
+   * @param {mat4} B
+   * @returns {mat4} A * B
+   */
+  geo.camera.combine = function (A, B) {
+    return mat4.mul(mat4.create(), A, B);
   };
 
   inherit(geo.camera, geo.object);
