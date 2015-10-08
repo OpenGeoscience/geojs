@@ -60,7 +60,7 @@
 
     options = $.extend(options || {}, this.constructor.defaults);
 
-    var lastZoom = null, lastX = null, lastY = null, unit;
+    var lastZoom = null, lastX = null, lastY = null;
 
     // copy the options into a private variable
     this._options = $.extend(true, {}, options);
@@ -78,20 +78,6 @@
 
     // initialize the in memory tile cache
     this._cache = geo.tileCache({size: options.cacheSize});
-
-    unit = this.map().unitsPerPixel(this._options.maxLevel);
-
-    // initialize to/FromLocal transform matrices
-    this._toLocalMatrix = geo.camera.affine(
-      {},
-      {x: 1 / unit, y: -1 / unit}
-    );
-    this._toLocalTransform = geo.camera.css(this._toLocalMatrix);
-    this._fromLocalMatrix = geo.camera.affine(
-      {},
-      {x: unit, y: -unit}
-    );
-    this._fromLocalTransform = geo.camera.css(this._fromLocalMatrix);
 
     /**
      * Readonly accessor to the options object
@@ -483,58 +469,6 @@
     };
 
     /**
-     * Get a sublayer container.  When requested, this method will create the sublayer
-     * if it doesn't already exist.
-     * @param {number} level The sublayer level
-     * @param {boolean} create Whether to create the sublayer when missing
-     * @return {DOM} A DOM element
-     */
-    this._subLayer = function (level, create) {
-      var node;
-
-      level = level.toFixed();
-      node = this.canvas().find('[data-tile-sublayer=' + level + ']');
-
-      if (!node.get(0) && create) {
-        node = $(
-          '<div class="geo-tile-sublayer" data-tile-sublayer="' + level + '"/>'
-        ).appendTo(this.canvas());
-        node.css({
-          width: '100%',
-          height: '100%',
-          /*
-          'transform-origin': '0% 0%',
-          'transform': 'scale(' + Math.pow(2, this._options.maxLevel - level) + ')'
-          */
-        });
-      }
-      return node;
-    };
-
-    /**
-     * Reorder and update scales for all sublayers.  This should be called
-     * whenever the target zoom level for the map changes.  i.e. when map
-     * transitions between integral zoom level (2.9 -> 3.1).
-     * @param {number} zoom The target zoom level
-     */
-    this._updateSubLayers = function (zoom) {
-      /*
-      var slayers = $('.geo-tile-sublayer'), size = this.map().size();
-      zoom = this._options.tileRounding(zoom);
-
-      slayers.each(function (i, layer) {
-        var level;
-        layer = $(layer);
-        level = parseInt(layer.data('tile-sublayer'));
-        layer.css(
-          'transform',
-          'scale(' + Math.pow(2, level) + ') '
-          );
-      });
-      */
-    };
-
-    /**
      * Render the tile on the canvas.  This implementation draws the tiles directly
      * on the DOM using <img> tags.  Derived classes should override this method
      * to draw the tile on a renderer specific context.
@@ -550,7 +484,7 @@
       }
 
       // get the layer node
-      var div = this._subLayer(tile.index.level, true),
+      var div = this.canvas(),
           bounds = this._tileBounds(tile);
 
       // append the image element
@@ -559,7 +493,7 @@
       // apply a transform to place the image correctly
       tile.image.style.position = 'absolute';
       tile.image.style.left = bounds.left + 'px';
-      tile.image.style.top = bounds.bottom + 'px';
+      tile.image.style.top = (bounds.bottom) + 'px';
 
       // add an error handler
       tile.catch(function () {
@@ -684,6 +618,38 @@
     };
 
     /**
+     * Compute local coordinates from the given world coordinates.  The
+     * tile layer uses units of pixels relative to the world space
+     * coordinate origin.
+     * @param {object} pt A point in world space coordinates
+     * @returns {object} Local coordinates
+     */
+    this.toLocal = function (pt) {
+      var map = this.map(),
+          unit = map.unitsPerPixel(map.zoom());
+      return {
+        x: pt.x / unit,
+        y: pt.y / unit
+      };
+    };
+
+    /**
+     * Compute world coordinates from the given local coordinates.  The
+     * tile layer uses units of pixels relative to the world space
+     * coordinate origin.
+     * @param {object} pt A point in world space coordinates
+     * @returns {object} Local coordinates
+     */
+    this.fromLocal = function (pt) {
+      var map = this.map(),
+          unit = map.unitsPerPixel(map.zoom());
+      return {
+        x: pt.x * unit,
+        y: pt.y * unit
+      };
+    };
+
+    /**
      * Update the view according to the map/camera.
      * @returns {this} Chainable
      */
@@ -693,15 +659,31 @@
           zoom = this._options.tileRounding(mapZoom),
           center = this.displayToLevel(undefined, zoom),
           bounds = map.bounds(),
-          tiles, t, c = map.camera(), m;
+          tiles, view = this._getViewBounds();
+
+      tiles = this._getTiles(
+        zoom, bounds, true
+      );
 
       // Update the transform for the local layer coordinates
       this.canvas().css(
+        'transform-origin',
+        'center center'
+      );
+      var to = this._options.tileOffset(zoom);
+      this.canvas().css(
         'transform',
-        'translate(-' + (map.size().width / 2) + 'px,' + (map.size().height / 2) + 'px)' +
-        map.camera().css() + ' ' +
-        this._fromLocalTransform +
-        ' scale(' + Math.pow(2, this._options.maxLevel - zoom) + ')'
+        'scale(' + (Math.pow(2, mapZoom - zoom)) + ')' +
+        'translate(' +
+        (-to.x) + 'px' + ',' +
+        (-to.y) + 'px' + ')' +
+        'translate(' +
+        (map.size().width / 2) + 'px' + ',' +
+        (map.size().height / 2) + 'px' + ')' +
+        'translate(' +
+        (-(view.left + view.right) / 2) + 'px' + ',' +
+        (-(view.bottom + view.top) / 2) + 'px' + ')' +
+        ''
       );
 
       if (zoom === lastZoom &&
@@ -709,16 +691,6 @@
           center.y === lastY) {
         return;
       }
-
-      tiles = this._getTiles(
-        zoom, bounds, true
-      );
-
-      if (zoom !== lastZoom) {
-        // rescale active tiles so they don't jump around during zoom transitions
-        this._updateSubLayers(zoom);
-      }
-
       lastZoom = zoom;
       lastX = center.x;
       lastY = center.y;
