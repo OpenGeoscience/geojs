@@ -277,6 +277,7 @@ module.exports = function (grunt) {
       server: {
         options: {
           port: port,
+          server: 'testing/test-runners/server.js',
           bases: ['dist']
         }
       }
