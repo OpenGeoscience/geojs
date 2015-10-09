@@ -184,7 +184,7 @@ geo.jsonReader = function (arg) {
             // polygons not yet supported
             allFeatures.push(m_this._addFeature(
               type,
-              [[coordinates]],
+              [[coordinates]], //double wrap for the data method below to return properly formatted coord array
               style,
               feature.properties
             ));
@@ -193,19 +193,16 @@ geo.jsonReader = function (arg) {
             style.fillOpacity = (
               style.fillOpacity === undefined ? 0.25 : style.fillOpacity
             );
-
-            coordinates = feature.geometry.coordinates.map(function (c) {
-              return c[0].map(function (el) {
-                return {
-                  x: el[0],
-                  y: el[1],
-                  z: el[2]
-                };
-              });
+            coordinates = feature.geometry.coordinates.map(function(c){
+                return [m_this._getCoordinates({
+                  geometry: {
+                    type: "Polygon",
+                    coordinates: c
+                  }
+                })];
             });
-
             allFeatures.push(m_this._addFeature(
-              'line',
+              'polygon', //there is no multipolygon feature class
               coordinates,
               style,
               feature.properties
