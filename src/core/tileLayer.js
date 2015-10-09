@@ -60,7 +60,7 @@
 
     options = $.extend(options || {}, this.constructor.defaults);
 
-    var lastZoom = null, lastX = null, lastY = null;
+    var lastZoom = null, lastX = null, lastY = null, s_init = this._init;
 
     // copy the options into a private variable
     this._options = $.extend(true, {}, options);
@@ -484,11 +484,27 @@
       }
 
       // get the layer node
-      var div = this.canvas(),
-          bounds = this._tileBounds(tile);
+      var div = $(this._getSubLayer(tile.index.level)),
+          bounds = this._tileBounds(tile),
+          duration = this._options.animationDuration, tick = null;
 
       // append the image element
+      tile.image.style.opacity = '0';
       div.append(tile.image);
+
+      // fade in animation
+      // (this will be much easier and better with css)
+      function fadeIn(t) {
+        if (!tick) {
+          tick = t;
+        }
+        var o = Math.min(1, (t - tick) / duration);
+        tile.image.style.opacity = o.toFixed(2);
+        if (t - tick < duration) {
+          window.requestAnimationFrame(fadeIn);
+        }
+      }
+      window.requestAnimationFrame(fadeIn);
 
       // apply a transform to place the image correctly
       tile.image.style.position = 'absolute';
@@ -530,14 +546,11 @@
     };
 
     /**
-     * Move the given tile to the top on the canvas.  The default
-     * implementation deletes the tile and re-adds it.  This is
-     * exposed to make it possible to optimize drawing when possible.
+     * Move the given tile to the top on the canvas.
      * @param {geo.tile} tile The tile object to move
      */
     this._moveToTop = function (tile) {
-      this._remove(tile);
-      this._drawTile(tile);
+      $.noop(tile);
     };
 
     /**
@@ -581,7 +594,6 @@
 
         tile = this._activeTiles[hash];
         if (this._canPurge(tile, bounds)) {
-          console.log('Purging: ' + tile.toString());
           this.remove(tile);
         }
       }
@@ -650,6 +662,40 @@
     };
 
     /**
+     * Return the DOM eleement containing a level specific
+     * layer.  This will create the element if it doesn't
+     * already exist.
+     * @param {number} level The zoom level of the layer to fetch
+     * @return {DOM}
+     */
+    this._getSubLayer = function (level) {
+      var node = this.canvas()
+        .find('div[data-tile-layer=' + level.toFixed() + ']').get(0);
+      if (!node) {
+        node = $(
+          '<div class=geo-tile-layer data-tile-layer="' + level.toFixed() + '"/>'
+        ).css('transform-origin', '0px').get(0);
+        this.canvas().append(node);
+      }
+      return node;
+    };
+
+    /**
+     * Set sublayer transforms to align them with the given zoom level.
+     * @param {number} level The target zoom level
+     */
+    this._updateSubLayers = function (level) {
+      this.canvas().find('.geo-tile-layer').each(function (idx, el) {
+        var $el = $(el),
+            layer = parseInt($el.data('tileLayer'));
+        $el.css(
+          'transform',
+          'scale(' + Math.pow(2, level - layer) + ')'
+        );
+      }.bind(this));
+    };
+
+    /**
      * Update the view according to the map/camera.
      * @returns {this} Chainable
      */
@@ -670,6 +716,8 @@
         'transform-origin',
         'center center'
       );
+      this._updateSubLayers(zoom);
+
       var to = this._options.tileOffset(zoom);
       this.canvas().css(
         'transform',
@@ -711,7 +759,10 @@
       $.when.apply($, tiles)
         .done(// called on success and failure
           function () {
-            this._purge();
+            window.setTimeout(
+              this._purge.bind(this),
+              this._options.animationDuration * 2
+            );
           }.bind(this)
         );
     };
@@ -886,6 +937,20 @@
       return {x: gcsPt.x / unit, y: gcsPt.y / unit};
     };
 
+    /**
+     * Initialize after the layer is added to the map.
+     */
+    this._init = function () {
+      // call super method
+      s_init.apply(this, arguments);
+
+      // Initialize sublayers in the correct order
+      var sublayer;
+      for (sublayer = this._options.maxLevel; sublayer >= 0; sublayer -= 1) {
+        this._getSubLayer(sublayer);
+      }
+    };
+
     return this;
   };
 
@@ -914,7 +979,8 @@
      * larger, if Math.ceil, they will be their native size or smaller.  A
      * custom function could be used instead. */
     tileRounding: Math.floor,
-    attribution: 'No data attribution provided.'
+    attribution: 'No data attribution provided.',
+    animationDuration: 250
   };
 
   inherit(geo.tileLayer, geo.featureLayer);
