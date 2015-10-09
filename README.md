@@ -1,13 +1,21 @@
 ![GeoJS](http://opengeoscience.github.io/geojs/images/logo_256.png)
 [![Build Status](https://travis-ci.org/OpenGeoscience/geojs.svg?branch=master)](https://travis-ci.org/OpenGeoscience/geojs) [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.15459.svg)](http://dx.doi.org/10.5281/zenodo.15459) ![repo size](https://reposs.herokuapp.com/?path=OpenGeoscience/GeoJS)
 =======
-Primarily developed at Kitware, GeoJS is a high performance visualization and analysis library targeted for GeoInformatics.
+Primarily developed by ![Kitware](http://www.kitware.com) and
+Epidemico ![Epidemico](http://epidemico.com/), GeoJS is a high
+performance visualization and analysis library targeted for GeoInformatics.
 
-![Historical hurricane data Visualization in GeoJS](http://opengeoscience.github.io/geojs/examples/hurricanes/thumb.jpg "")
+![Historical hurricane data Visualization in GeoJS]
+(http://opengeoscience.github.io/geojs/examples/hurricanes/thumb.jpg "")
 
 Documentation
 ==============
-You can find more information on GeoJS installation and usage in our [Documentation](http://geojs.readthedocs.org/en/latest/index.html). For live examples visit [Github.io](http://opengeoscience.github.io/geojs/examples/index.html).
+You can find more information on GeoJS installation and usage in our [Documentation](http://geojs.readthedocs.org/en/latest/index.html).
+For live examples visit [Github.io](http://opengeoscience.github.io/geojs/examples/index.html).
+
+Support
+==============
+We would love to get your feedback and bug reports. Please send us an email at geojs-developers@kitware.com for questions related to feature requests, roadmap or in-depth technical discussions. Use geojs-users@kitware.com if you are using GeoJS as a library for your project.
 
 License
 ============
@@ -24,4 +32,3 @@ source software. So fork GeoJS, do great things and let us know if we can help.
 
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/OpenGeoscience/geojs/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
-
