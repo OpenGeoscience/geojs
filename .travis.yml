@@ -1,11 +1,11 @@
 language: node_js
 
 node_js:
-    - "0.10"
+    - "0.12"
 
 before_install:
   - pushd "${HOME}"
-  - curl "http://www.cmake.org/files/v3.2/cmake-3.2.1-Linux-x86_64.tar.gz" | gunzip -c | tar x
+  - curl -L "https://cmake.org/files/v3.3/cmake-3.3.2-Linux-x86_64.tar.gz" | gunzip -c | tar x
   - cd cmake-*/bin && export PATH="${PWD}:${PATH}"
   - popd
   - cmake --version
@@ -20,9 +20,8 @@ script:
     - sleep 1
     - mkdir _build
     - cd _build
-    - cmake ..
+    - cmake -DCOVERAGE_TESTS=ON ..
     - ctest -VV -S ../cmake/travis_build.cmake || true
-    - ctest -VV -S ../cmake/travis_submit.cmake
     - if [ -f test_failed ] ; then false ; fi
 
 sudo: False

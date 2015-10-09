@@ -52,11 +52,10 @@ mark_as_advanced(MIDAS_BASE_URL)
 set(MIDAS_COMMUNITY "GeoJS" CACHE STRING "MIDAS community hosting test images.")
 mark_as_advanced(MIDAS_COMMUNITY)
 
-# set variables for MIDAS3.cmake
-set(MIDAS_REST_URL "${MIDAS_BASE_URL}/api/json")
-set(MIDAS_KEY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-data")
-set(MIDAS_DATA_DIR "${GEOJS_DEPLOY_DIR}/data")
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/MIDAS3.cmake)
+# set variables for girder.cmake
+set(Girder_KEY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-data")
+set(Girder_DATA_DIR "${GEOJS_DEPLOY_DIR}/data")
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/girder.cmake)
 
 add_download_target()
 
@@ -79,10 +78,6 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/geojs_test_runne
                ${CMAKE_CURRENT_BINARY_DIR}/test/geojs_test_runner.py
 )
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/blanket_server.py
-               ${CMAKE_CURRENT_BINARY_DIR}/test/blanket_server.py
-               COPYONLY
-)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/selenium-test-utils.js
                ${GEOJS_DEPLOY_DIR}/test/lib/selenium-test-utils.js
                COPYONLY
@@ -91,20 +86,18 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/selenium-test-ut
 if (COVERAGE_TESTS)
   set(SOURCES_INCLUDE <script src=/built/geo.all.dev.js data-cover></script>)
   set(BLANKET_INCLUDE <script src=/test/lib/blanket.min.js></script>)
+  find_program(CURL_EXECUTABLE curl)
   add_test(
     NAME "coverage-reset"
-    WORKING_DIRECTORY "${GEOJS_DEPLOY_DIR}"
-    COMMAND "${PYTHON_EXECUTABLE}"
-            "${CMAKE_CURRENT_BINARY_DIR}/test/blanket_server.py"
-            "reset"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    COMMAND "${CURL_EXECUTABLE}" -X DELETE "http://${TESTING_HOST}:${TESTING_PORT}/coverage"
   )
 
   add_test(
     NAME "coverage-report"
-    WORKING_DIRECTORY "${GEOJS_DEPLOY_DIR}"
-    COMMAND "${PYTHON_EXECUTABLE}"
-            "${CMAKE_CURRENT_BINARY_DIR}/test/blanket_server.py"
-            "report" "${CMAKE_CURRENT_BINARY_DIR}/coverage.xml"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    COMMAND "${CURL_EXECUTABLE}" -X POST "http://${TESTING_HOST}:${TESTING_PORT}/coverage"
+      --data "path=${CMAKE_CURRENT_BINARY_DIR}/coverage.xml" -G
   )
   set_property(TEST "coverage-report" APPEND PROPERTY DEPENDS "coverage-reset")
 
@@ -146,7 +139,7 @@ if(PHANTOMJS_TESTS)
                                -DBLANKET_INCLUDE="${BLANKET_INCLUDE}"
                                -P ${CMAKE_SOURCE_DIR}/cmake/configure-js-unit-test.cmake
       COMMAND ${CMAKE_COMMAND} -E touch ${html}
-      DEPENDS ${js} ${MIDAS_DOWNLOAD_FILES} ${CMAKE_SOURCE_DIR}/testing/test-runners/jasmine-runner.html.in
+      DEPENDS ${js} ${Girder_DOWNLOAD_FILES} ${CMAKE_SOURCE_DIR}/testing/test-runners/jasmine-runner.html.in
       COMMENT "Generating phantomjs unit test ${f}"
     )
     list(APPEND JS_UNIT_TEST_FILES ${html})
@@ -291,7 +284,7 @@ if(SELENIUM_TESTS)
   add_custom_target(
     selenium_tests
     ALL
-    DEPENDS ${SELENIUM_TEST_FILES} ${MIDAS_DOWNLOAD_FILES} ${JASMINE_TEST_FILES}
+    DEPENDS ${SELENIUM_TEST_FILES} ${Girder_DOWNLOAD_FILES} ${JASMINE_TEST_FILES}
   )
 
 endif()
@@ -342,7 +335,6 @@ if(BUILD_DOCUMENTATION)
   endif()
 
   set(docs_sources
-    "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/blanket_server.py"
     "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/geojs_test_runner.py.in"
     "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/midas_handler.py"
     "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/selenium_test.py.in"

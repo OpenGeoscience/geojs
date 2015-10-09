@@ -37,7 +37,8 @@
         "transform.js",
         "renderer.js",
         "osmLayer.js",
-        "domRenderer.js"
+        "domRenderer.js",
+        "choroplethFeature.js"
       ]
     },
     "geo.util": {
@@ -61,8 +62,8 @@
         "planeFeature.js",
         "polygonFeature.js",
         "contourFeature.js",
-	"choroplethFeature.js",
-        "vglRenderer.js"
+        "vglRenderer.js",
+        "choroplethFeature.js"
       ]
     },
     "geo.d3": {

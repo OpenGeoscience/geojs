@@ -29,6 +29,26 @@ window.inherit = geo.inherit;
 
 //////////////////////////////////////////////////////////////////////////////
 /**
+ * This is a helper method for generating new-style subclasses as an
+ * alternative to the older `inherit` classes.  Note: these classes
+ * intentionally don't support constructors for the moment.  We may
+ * consider alternate semantics such as ES6 classes or stampit
+ * (https://github.com/stampit-org/stampit) as an alternative to handling
+ * private variables.
+ *
+ * @param {object?} props Instance methods and properties to add/override
+ * @returns {object} The inherited object
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.extend = function (props) {
+  "use strict";
+  var child = Object.create(this.prototype);
+  $.extend(child.prototype, props || {});
+  return child;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+/**
  * Register a new file reader type
  */
 //////////////////////////////////////////////////////////////////////////////
