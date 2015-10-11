@@ -73,6 +73,25 @@
         // attach a promise interface to `this`
         defer.promise(this);
       }
+      return this;
+    };
+
+    /**
+     * Set the opacity of the tile to 0 and gradually fade in
+     * over the given number of milliseconds.  This will also
+     * resolve the embedded promise interface.
+     * @param {number} duration the duration of the animation in ms
+     * @returns {this} chainable
+     */
+    this.fadeIn = function (duration) {
+      var promise = this.fetch(), defer = new $.Deferred();
+      $(this._image).css('display', 'none');
+      promise.then(function () {
+        $(this._image).fadeIn(duration, function () {
+          defer.resolve();
+        });
+      }.bind(this));
+      return defer.promise(this);
     };
 
     return this;

@@ -187,5 +187,17 @@
         height: Math.pow(2, this.index.level || 0) * this.size.y
       }
     });
+
+    /**
+     * Set the opacity of the tile to 0 and gradually fade in
+     * over the given number of milliseconds.  This will also
+     * resolve the embedded promise interface.
+     * @param {number} duration the duration of the animation in ms
+     * @returns {this} chainable
+     */
+    this.fadeIn = function (duration) {
+      $.noop(duration);
+      return this;
+    };
   };
 })();

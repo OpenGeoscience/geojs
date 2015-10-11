@@ -60,7 +60,8 @@
 
     options = $.extend(options || {}, this.constructor.defaults);
 
-    var lastZoom = null, lastX = null, lastY = null, s_init = this._init;
+    var lastZoom = null, lastX = null, lastY = null, s_init = this._init,
+        _deferredPurge = null;
 
     // copy the options into a private variable
     this._options = $.extend(true, {}, options);
@@ -486,37 +487,31 @@
       // get the layer node
       var div = $(this._getSubLayer(tile.index.level)),
           bounds = this._tileBounds(tile),
-          duration = this._options.animationDuration, tick = null;
-
-      // append the image element
-      tile.image.style.opacity = '0';
-      div.append(tile.image);
-
-      // fade in animation
-      // (this will be much easier and better with css)
-      function fadeIn(t) {
-        if (!tick) {
-          tick = t;
-        }
-        var o = Math.min(1, (t - tick) / duration);
-        tile.image.style.opacity = o.toFixed(2);
-        if (t - tick < duration) {
-          window.requestAnimationFrame(fadeIn);
-        }
-      }
-      window.requestAnimationFrame(fadeIn);
+          duration = this._options.animationDuration,
+          container = $('<div class="geo-tile-container"/>');
 
       // apply a transform to place the image correctly
-      tile.image.style.position = 'absolute';
-      tile.image.style.left = bounds.left + 'px';
-      tile.image.style.top = (bounds.bottom) + 'px';
+      container.append(tile.image);
+      container.css({
+        'position': 'absolute',
+        'left': bounds.left + 'px',
+        'top': bounds.bottom + 'px'
+      });
+
+      // apply fade in animation
+      if (duration > 0) {
+        tile.fadeIn(duration);
+      }
+
+      // append the image element
+      div.append(container);
 
       // add an error handler
       tile.catch(function () {
         // May want to do something special here later
         console.warn('Could not load tile at ' + tile.index);
-        tile.image.remove();
-      });
+        this._remove(tile);
+      }.bind(this));
     };
 
     /**
@@ -542,7 +537,12 @@
      * @param {geo.tile|string} tile The tile object to remove
      */
     this._remove = function (tile) {
-      tile.image.remove();
+      if (tile.image) {
+        if (tile.image.parentElement) {
+          tile.image.parentElement.remove();
+        }
+        tile.image.remove();
+      }
     };
 
     /**
@@ -586,6 +586,11 @@
      */
     this._purge = function () {
       var tile, hash, bounds = {};
+
+      // Don't purge tiles in an active update
+      if (this._updating) {
+        return;
+      }
 
       // get the view bounds
       bounds = this._getViewBounds();
@@ -705,8 +710,9 @@
           zoom = this._options.tileRounding(mapZoom),
           center = this.displayToLevel(undefined, zoom),
           bounds = map.bounds(),
-          tiles, view = this._getViewBounds();
+          tiles, view = this._getViewBounds(), myPurge = {};
 
+      _deferredPurge = myPurge;
       tiles = this._getTiles(
         zoom, bounds, true
       );
@@ -734,12 +740,7 @@
         ''
       );
 
-      if (zoom === lastZoom &&
-          center.x === lastX &&
-          center.y === lastY) {
-        return;
-      }
-      lastZoom = zoom;
+      lastZoom = mapZoom;
       lastX = center.x;
       lastY = center.y;
 
@@ -759,10 +760,9 @@
       $.when.apply($, tiles)
         .done(// called on success and failure
           function () {
-            window.setTimeout(
-              this._purge.bind(this),
-              this._options.animationDuration * 2
-            );
+            if (_deferredPurge === myPurge) {
+              this._purge();
+            }
           }.bind(this)
         );
     };
@@ -899,13 +899,7 @@
      * @returns {boolean}
      */
     this._canPurge = function (tile, bounds) {
-      /*  Get fancy later
       if (this._isCovered(tile)) {
-        return true;
-      }
-      */
-      // for now purge all tiles at different zoom levels
-      if (tile.index.level !== bounds.level) {
         return true;
       }
       if (bounds) {
@@ -946,7 +940,7 @@
 
       // Initialize sublayers in the correct order
       var sublayer;
-      for (sublayer = this._options.maxLevel; sublayer >= 0; sublayer -= 1) {
+      for (sublayer = 0; sublayer <= this._options.maxLevel; sublayer += 1) {
         this._getSubLayer(sublayer);
       }
     };
@@ -980,7 +974,7 @@
      * custom function could be used instead. */
     tileRounding: Math.floor,
     attribution: 'No data attribution provided.',
-    animationDuration: 250
+    animationDuration: 0
   };
 
   inherit(geo.tileLayer, geo.featureLayer);
