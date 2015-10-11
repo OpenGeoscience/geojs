@@ -35,20 +35,24 @@
    *
    * @class
    * @extends geo.featureLayer
-   * @param {Object?} options
-   * @param {Number} [options.minLevel=0]    The minimum zoom level available
-   * @param {Number} [options.maxLevel=18]   The maximum zoom level available
-   * @param {Number} [options.tileOverlap=0] Number of pixels of overlap between tiles
-   * @param {Number} [options.tileWidth=256] The tile width as displayed without overlap
-   * @param {Number} [options.tileHeigh=256] The tile height as displayed without overlap
-   * @param {Number} [options.cacheSize=200] The maximum number of tiles to cache
-   * @param {Bool}   [options.wrapX=true]    Wrap in the x-direction
-   * @param {Bool}   [options.wrapY=false]   Wrap in the y-direction
+   * @param {object?} options
+   * @param {number} [options.minLevel=0]    The minimum zoom level available
+   * @param {number} [options.maxLevel=18]   The maximum zoom level available
+   * @param {number} [options.tileOverlap=0] Number of pixels of overlap between tiles
+   * @param {number} [options.tileWidth=256] The tile width as displayed without overlap
+   * @param {number} [options.tileHeigh=256] The tile height as displayed without overlap
+   * @param {number} [options.cacheSize=200] The maximum number of tiles to cache
+   * @param {bool}   [options.wrapX=true]    Wrap in the x-direction
+   * @param {bool}   [options.wrapY=false]   Wrap in the y-direction
    * @param {function} [options.url=null]
    *   A function taking the current tile indices and returning a URL or jquery
    *   ajax config to be passed to the {geo.tile} constructor.
    *   Example:
    *     (x, y, z) => "http://example.com/z/y/x.png"
+   * @param {number} [options.animationDuration=0]
+   *   The number of milliseconds for the tile loading animation to occur.  **This
+   *   option is currently buggy because old tiles will purge before the animation
+   *   is complete.**
    * @returns {geo.tileLayer}
    */
   //////////////////////////////////////////////////////////////////////////////
