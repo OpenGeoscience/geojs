@@ -255,10 +255,8 @@ describe('geo.tileLayer', function () {
     });
 
   });
-  it('Check tileLayer options', function () {
-    var m = map(), l, opts;
-    opts = {
-      map: m,
+  describe('Check class accessors', function () {
+    var opts = {
       minLevel: 2,
       maxLevel: 10,
       tileOverlap: 1,
@@ -277,10 +275,184 @@ describe('geo.tileLayer', function () {
       maxY: 1000,
       tileOffset: function () {}
     };
-    l = geo.tileLayer(opts);
+    it('Check tileLayer options', function () {
+      var m = map(), l;
+      opts.map = m;
+      l = geo.tileLayer(opts);
+      expect(l.options).toEqual(opts);
+    });
+    it('Cache object', function () {
+      var m = map(), l;
+      opts.map = m;
+      l = geo.tileLayer(opts);
+      expect(l.cache.constructor).toBe(geo.tileCache);
+      expect(l.cache.size).toBe(opts.cacheSize);
+    });
+    it('Active tiles', function () {
+      var m = map(), l;
+      opts.map = m;
+      l = geo.tileLayer(opts);
+      expect(l.activeTiles).toEqual({});
+    });
+  });
+  describe('Public utility methods', function () {
+    describe('isValid', function () {
+      function checkValidTile(opts, index, valid, desc) {
+        return [
+          desc || JSON.stringify(index) + ' -> ' + (valid ? '' : 'not ') + 'valid',
+          function () {
+            var m = map(), l;
+            opts.map = m;
+            l = geo.tileLayer(opts);
+            expect(l.isValid(index)).toBe(valid);
+          }
+        ];
+      }
 
-    console.log(JSON.stringify(l.options, null, '  '));
-    console.log(JSON.stringify(opts, null, '  '));
-    expect(l.options).toEqual(opts);
+      var opts = {wrapX: false, wrapY: false, minLevel: 0, maxLevel: 10};
+      describe(JSON.stringify(opts), function () {
+        it.apply(it, checkValidTile(
+          opts,
+          {x: 0, y: 0, level: 0},
+          true
+        ));
+        it.apply(it, checkValidTile(
+          opts,
+          {x: 1, y: 0, level: 0},
+          false
+        ));
+        it.apply(it, checkValidTile(
+          opts,
+          {x: 0, y: 1, level: 0},
+          false
+        ));
+        it.apply(it, checkValidTile(
+          opts,
+          {x: 0, y: 0, level: -1},
+          false
+        ));
+        it.apply(it, checkValidTile(
+          opts,
+          {x: 0, y: 0, level: 11},
+          false
+        ));
+      });
+
+      opts = {wrapX: false, wrapY: false, minLevel: 1, maxLevel: 10};
+      describe(JSON.stringify(opts), function () {
+        it.apply(it, checkValidTile(
+          opts,
+          {x: 0, y: 0, level: 0},
+          false
+        ));
+        it.apply(it, checkValidTile(
+          opts,
+          {x: 0, y: 0, level: 1},
+          true
+        ));
+        it.apply(it, checkValidTile(
+          opts,
+          {x: 1, y: 1, level: 1},
+          true
+        ));
+        it.apply(it, checkValidTile(
+          opts,
+          {x: 0, y: 15, level: 4},
+          true
+        ));
+        it.apply(it, checkValidTile(
+          opts,
+          {x: 31, y: 15, level: 5},
+          true
+        ));
+      });
+
+      opts = {wrapX: true, wrapY: false, minLevel: 1, maxLevel: 1};
+      describe(JSON.stringify(opts), function () {
+        it.apply(it, checkValidTile(
+          opts,
+          {x: 10, y: 0, level: 1},
+          true
+        ));
+        it.apply(it, checkValidTile(
+          opts,
+          {x: -1, y: 0, level: 1},
+          true
+        ));
+        it.apply(it, checkValidTile(
+          opts,
+          {x: 0, y: 3, level: 1},
+          false
+        ));
+      });
+
+      opts = {wrapX: false, wrapY: true, minLevel: 1, maxLevel: 1};
+      describe(JSON.stringify(opts), function () {
+        it.apply(it, checkValidTile(
+          opts,
+          {x: 0, y: 10, level: 1},
+          true
+        ));
+        it.apply(it, checkValidTile(
+          opts,
+          {x: 0, y: -1, level: 1},
+          true
+        ));
+        it.apply(it, checkValidTile(
+          opts,
+          {x: 3, y: 0, level: 1},
+          false
+        ));
+      });
+
+      opts = {wrapX: true, wrapY: true, minLevel: 1, maxLevel: 1};
+      describe(JSON.stringify(opts), function () {
+        it.apply(it, checkValidTile(
+          opts,
+          {x: 0, y: 0, level: 1},
+          true
+        ));
+        it.apply(it, checkValidTile(
+          opts,
+          {x: 0, y: -1, level: 1},
+          true
+        ));
+        it.apply(it, checkValidTile(
+          opts,
+          {x: 3, y: 0, level: 1},
+          true
+        ));
+        it.apply(it, checkValidTile(
+          opts,
+          {x: 3, y: 0, level: 1},
+          true
+        ));
+        it.apply(it, checkValidTile(
+          opts,
+          {x: -1, y: 0, level: 1},
+          true
+        ));
+        it.apply(it, checkValidTile(
+          opts,
+          {x: -1, y: 3, level: 1},
+          true
+        ));
+        it.apply(it, checkValidTile(
+          opts,
+          {x: 3, y: -1, level: 1},
+          true
+        ));
+        it.apply(it, checkValidTile(
+          opts,
+          {x: 3, y: -1, level: 0},
+          false
+        ));
+        it.apply(it, checkValidTile(
+          opts,
+          {x: 3, y: -1, level: 2},
+          false
+        ));
+      });
+    });
   });
 });
