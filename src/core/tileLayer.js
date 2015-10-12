@@ -33,6 +33,12 @@
    * to the current zoom level and changes when the zoom level crosses an
    * integer threshold.
    *
+   * The constructor takes a number of optional parameters that customize
+   * the display of the tiles.  The default values of these options are
+   * stored as the `defaults` attribution on the constructor.  Supporting
+   * alternate tiling protocols often only requires adjusting these
+   * defaults.
+   *
    * @class
    * @extends geo.featureLayer
    * @param {object?} options
@@ -44,6 +50,10 @@
    * @param {number} [options.cacheSize=200] The maximum number of tiles to cache
    * @param {bool}   [options.wrapX=true]    Wrap in the x-direction
    * @param {bool}   [options.wrapY=false]   Wrap in the y-direction
+   * @param {number} [options.minX=0]        The minimum world coordinate in X
+   * @param {number} [options.maxX=255]      The maximum world coordinate in X
+   * @param {number} [options.minY=0]        The minimum world coordinate in Y
+   * @param {number} [options.maxY=255]      The maximum world coordinate in Y
    * @param {function} [options.url=null]
    *   A function taking the current tile indices and returning a URL or jquery
    *   ajax config to be passed to the {geo.tile} constructor.
@@ -53,6 +63,16 @@
    *   The number of milliseconds for the tile loading animation to occur.  **This
    *   option is currently buggy because old tiles will purge before the animation
    *   is complete.**
+   * @param {string} [options.attribution]
+   *   An attribution to display with the layer (accepts HTML)
+   * @param {function} [options.tileRounding=floor]
+   *   This function determines which tiles will be loaded when the map is at
+   *   a non-integer zoom.  For example the default, `Math.floor`, will use
+   *   tile level 2 when the map is at zoom 2.9.
+   * @param {function} [options.tileOffset]
+   *   This function takes a zoom level argument and returns, in units of pixels,
+   *   the coordinates of the point (0, 0) at the given zoom level relative to
+   *   the bottom right corner of the domain.
    * @returns {geo.tileLayer}
    */
   //////////////////////////////////////////////////////////////////////////////
@@ -62,7 +82,7 @@
     }
     geo.featureLayer.call(this, options);
 
-    options = $.extend(options || {}, this.constructor.defaults);
+    options = $.extend(true, {}, this.constructor.defaults, options || {});
 
     var lastZoom = null, lastX = null, lastY = null, s_init = this._init,
         _deferredPurge = null;
@@ -973,11 +993,8 @@
       return {x: 0, y: 0};
     },
     cacheSize: 200,
-    /* if tileRounding is Math.floor, tiles will be their native size or
-     * larger, if Math.ceil, they will be their native size or smaller.  A
-     * custom function could be used instead. */
     tileRounding: Math.floor,
-    attribution: 'No data attribution provided.',
+    attribution: '',
     animationDuration: 0
   };
 

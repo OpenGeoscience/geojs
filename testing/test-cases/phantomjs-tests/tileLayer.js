@@ -267,11 +267,20 @@ describe('geo.tileLayer', function () {
       cacheSize: 100,
       wrapX: false,
       wrapY: true,
-      url: function () {return 'tile';},
-      animationDuration: 10
+      url: function () {},
+      animationDuration: 10,
+      tileRounding: function () {},
+      attribution: 'My awesome layer',
+      minX: -10,
+      maxX: 5,
+      minY: 100,
+      maxY: 1000,
+      tileOffset: function () {}
     };
     l = geo.tileLayer(opts);
 
+    console.log(JSON.stringify(l.options, null, '  '));
+    console.log(JSON.stringify(opts, null, '  '));
     expect(l.options).toEqual(opts);
   });
 });
