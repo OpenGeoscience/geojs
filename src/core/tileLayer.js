@@ -197,9 +197,8 @@
     };
 
     /**
-     * Returns a tile's bounds in layer coordinates.
+     * Returns a tile's bounds in its level coordinates.
      * @param {geo.tile} tile
-     * @param {number} zoom
      * @returns {object} bounds
      */
     this._tileBounds = function (tile) {
@@ -396,7 +395,7 @@
      */
     this.prefetch = function (level, bounds) {
       var tiles;
-      tiles = [this._getTiles(level, bounds, true)];
+      tiles = this._getTiles(level, bounds, true);
       return $.when.apply($,
         tiles.map(function (tile) {
           return tile.fetch();
@@ -438,7 +437,7 @@
         b0 = dx * dx + dy * dy;
 
         // return negative if a < b, or positive if a > b
-        return a - b;
+        return a0 - b0;
       };
     };
 
