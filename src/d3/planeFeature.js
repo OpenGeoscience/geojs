@@ -19,7 +19,6 @@ geo.d3.planeFeature = function (arg) {
   geo.d3.object.call(this);
 
   var m_this = this,
-      m_style = {},
       s_update = this._update,
       s_init = this._init,
       m_buildTime = geo.timestamp();
@@ -33,47 +32,6 @@ geo.d3.planeFeature = function (arg) {
    */
   //////////////////////////////////////////////////////////////////////////////
   this._build = function () {
-    var data = m_this.data(),
-        lowerLeft = m_this.style('lowerLeft'),
-        upperRight = m_this.style('upperRight'),
-        opacity = m_this.style('opacity'),
-        fill = m_this.style('fill');
-
-    data.forEach(function (d, i) {
-      var ll = lowerLeft(d, i),
-          ur = upperRight(d, i),
-          op = opacity(d, i),
-          fi = fill(d, i);
-
-          if (fi instanceof geo.tile) {
-            m_this.renderer().drawImage(
-              ll, ur, fi, {
-                opacity: op
-              }
-            );
-          }
-    });
-    if (!s.screenCoordinates) {
-      ll = renderer.worldToDisplay(ul);
-      ur = renderer.worldToDisplay(lr);
-    }
-
-    m_style.id = m_this._d3id();
-    m_style.style = {
-    };
-    m_style.attributes = {
-      x: ul.x,
-      y: ul.y,
-      width: lr.x - origin.x,
-      height: origin.y - ul.y
-    };
-    m_style.append = 'rect';
-    m_style.data = [0];
-    m_style.classes = ['d3PlaneFeature'];
-
-    renderer._drawFeatures(m_style);
-    m_buildTime.modified();
-    return m_this;
   };
 
   //////////////////////////////////////////////////////////////////////////////

@@ -561,7 +561,7 @@ geo.feature.create = function (layer, spec) {
   var type = spec.type;
 
   // Check arguments
-  if (!layer instanceof geo.layer) {
+  if (!(layer instanceof geo.layer)) {
     console.warn("Invalid layer");
     return null;
   }
