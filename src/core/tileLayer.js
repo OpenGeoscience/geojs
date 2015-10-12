@@ -129,7 +129,7 @@
     /**
      * The number of tiles at the given zoom level
      * The default implementation just returns `Math.pow(2, z)`.
-     * @param {Number} level A zoom level
+     * @param {number} level A zoom level
      * @returns {{x: nx, y: ny}} The number of tiles in each axis
      */
     this.tilesAtZoom = function (level) {
@@ -142,10 +142,10 @@
      *   * min level <= level <= max level
      *   * 0 <= x <= 2^level - 1
      *   * 0 <= y <= 2^level - 1
-     * @param {Object} index The tile index
-     * @param {Number} index.x
-     * @param {Number} index.y
-     * @param {Number} index.level
+     * @param {object} index The tile index
+     * @param {number} index.x
+     * @param {number} index.y
+     * @param {number} index.level
      * @returns {geo.tile}
      */
     this.isValid = function (index) {
@@ -209,11 +209,11 @@
 
     /**
      * Returns the tile indices at the given point.
-     * @param {Object} point The coordinates in pixels relative to the map origin.
-     * @param {Number} point.x
-     * @param {Number} point.y
-     * @param {Number} level The target zoom level
-     * @returns {Object} The tile indices
+     * @param {object} point The coordinates in pixels relative to the map origin.
+     * @param {number} point.x
+     * @param {number} point.y
+     * @param {number} level The target zoom level
+     * @returns {object} The tile indices
      */
     this.tileAtPoint = function (point, level) {
       var o = this._origin(level);
@@ -239,14 +239,14 @@
      * Returns an instantiated tile object with the given indices.  This
      * method always returns a new tile object.  Use `_getTileCached`
      * to use the caching layer.
-     * @param {Object} index The tile index
-     * @param {Number} index.x
-     * @param {Number} index.y
-     * @param {Number} index.level
-     * @param {Object} source The tile index used for constructing the url
-     * @param {Number} source.x
-     * @param {Number} source.y
-     * @param {Number} source.level
+     * @param {object} index The tile index
+     * @param {number} index.x
+     * @param {number} index.y
+     * @param {number} index.level
+     * @param {object} source The tile index used for constructing the url
+     * @param {number} source.x
+     * @param {number} source.y
+     * @param {number} source.level
      * @returns {geo.tile}
      */
     this._getTile = function (index, source) {
@@ -261,14 +261,14 @@
      * Returns an instantiated tile object with the given indices.  This
      * method is similar to `_getTile`, but checks the cache before
      * generating a new tile.
-     * @param {Object} index The tile index
-     * @param {Number} index.x
-     * @param {Number} index.y
-     * @param {Number} index.level
-     * @param {Object} source The tile index used for constructing the url
-     * @param {Number} source.x
-     * @param {Number} source.y
-     * @param {Number} source.level
+     * @param {object} index The tile index
+     * @param {number} index.x
+     * @param {number} index.y
+     * @param {number} index.level
+     * @param {object} source The tile index used for constructing the url
+     * @param {number} source.x
+     * @param {number} source.y
+     * @param {number} source.level
      * @returns {geo.tile}
      */
     this._getTileCached = function (index, source) {
@@ -288,10 +288,10 @@
      *
      *   tile({index: index}).toString();
      *
-     * @param {Object} index The tile index
-     * @param {Number} index.x
-     * @param {Number} index.y
-     * @param {Number} index.level
+     * @param {object} index The tile index
+     * @param {number} index.x
+     * @param {number} index.y
+     * @param {number} index.level
      * @returns {string}
      */
     this._tileHash = function (index) {
@@ -410,8 +410,8 @@
      * or at a lower zoom level.
      * @protected
      * @param {index1} center   The center tile
-     * @param {Number} center.x
-     * @param {Number} center.y
+     * @param {number} center.x
+     * @param {number} center.y
      * @returns {function} A function accepted by Array.prototype.sort
      */
     this._loadMetric = function (center) {
@@ -445,10 +445,10 @@
     /**
      * Convert a coordinate from pixel coordinates at the given zoom
      * level to world coordinates.
-     * @param {Object} coord
-     * @param {Number} coord.x The offset in pixels (level 0) from the left edge
-     * @param {Number} coord.y The offset in pixels (level 0) from the bottom edge
-     * @param {Number} level   The zoom level of the source coordinates
+     * @param {object} coord
+     * @param {number} coord.x The offset in pixels (level 0) from the left edge
+     * @param {number} coord.y The offset in pixels (level 0) from the bottom edge
+     * @param {number} level   The zoom level of the source coordinates
      */
     this.fromLevel = function (coord, level) {
       var s = Math.pow(2, -level);
@@ -461,10 +461,10 @@
     /**
      * Convert a coordinate from layer coordinates to pixel coordinates at the
      * given zoom level.
-     * @param {Object} coord
-     * @param {Number} coord.x The offset in pixels (level 0) from the left edge
-     * @param {Number} coord.y The offset in pixels (level 0) from the bottom edge
-     * @param {Number} level   The zoom level of the new coordinates
+     * @param {object} coord
+     * @param {number} coord.x The offset in pixels (level 0) from the left edge
+     * @param {number} coord.y The offset in pixels (level 0) from the bottom edge
+     * @param {number} level   The zoom level of the new coordinates
      */
     this.toLevel = function (coord, level) {
       var s = Math.pow(2, level);
@@ -580,7 +580,7 @@
     /**
      * Query the attached map for the current bounds and return them
      * as pixels at the current zoom level.
-     * @returns {Object}
+     * @returns {object}
      *  Bounds object with left, right, top, bottom keys
      * @protected
      */
@@ -890,11 +890,11 @@
      * and can be removed from the canvas.
      * @protected
      * @param {geo.tile} tile
-     * @param {Object?} bounds The view bounds
-     * @param {Object?} bounds.left
-     * @param {Object?} bounds.right
-     * @param {Object?} bounds.top
-     * @param {Object?} bounds.bottom
+     * @param {object?} bounds The view bounds
+     * @param {object?} bounds.left
+     * @param {object?} bounds.right
+     * @param {object?} bounds.top
+     * @param {object?} bounds.bottom
      * @returns {boolean}
      */
     this._outOfBounds = function (tile, bounds) {
@@ -914,12 +914,12 @@
      * of `_isCovered` and `_outOfBounds`.
      * @protected
      * @param {geo.tile} tile
-     * @param {Object?} bounds The view bounds (if empty, assume global bounds)
-     * @param {Number} bounds.left
-     * @param {Number} bounds.right
-     * @param {Number} bounds.top
-     * @param {Number} bounds.bottom
-     * @param {Number} bounds.level The zoom level the bounds are given as
+     * @param {object?} bounds The view bounds (if empty, assume global bounds)
+     * @param {number} bounds.left
+     * @param {number} bounds.right
+     * @param {number} bounds.top
+     * @param {number} bounds.bottom
+     * @param {number} bounds.level The zoom level the bounds are given as
      * @returns {boolean}
      */
     this._canPurge = function (tile, bounds) {
