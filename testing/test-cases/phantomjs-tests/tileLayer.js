@@ -6,6 +6,7 @@ describe('geo.tileLayer', function () {
 
   // create a map-like object suitable for testing the tileLayer
   var map = function (o) {
+    o = o || {};
     var _p = {
       size: o.size || {width: 100, height: 100},
       zoom: o.zoom || 0,
@@ -253,7 +254,24 @@ describe('geo.tileLayer', function () {
       check({x: 100000, y: -0.551});
     });
 
-    it('', function () {
-    });
+  });
+  it('Check tileLayer options', function () {
+    var m = map(), l, opts;
+    opts = {
+      map: m,
+      minLevel: 2,
+      maxLevel: 10,
+      tileOverlap: 1,
+      tileWidth: 128,
+      tileHeight: 1024,
+      cacheSize: 100,
+      wrapX: false,
+      wrapY: true,
+      url: function () {return 'tile';},
+      animationDuration: 10
+    };
+    l = geo.tileLayer(opts);
+
+    expect(l.options).toEqual(opts);
   });
 });
