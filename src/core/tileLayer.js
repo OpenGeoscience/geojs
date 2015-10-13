@@ -958,14 +958,18 @@
      * Initialize after the layer is added to the map.
      */
     this._init = function () {
+      var sublayer;
+
       // call super method
       s_init.apply(this, arguments);
 
-      // Initialize sublayers in the correct order
-      var sublayer;
-      for (sublayer = 0; sublayer <= this._options.maxLevel; sublayer += 1) {
-        this._getSubLayer(sublayer);
+      if (this.renderer() === null) {
+        // Initialize sublayers in the correct order
+        for (sublayer = 0; sublayer <= this._options.maxLevel; sublayer += 1) {
+          this._getSubLayer(sublayer);
+        }
       }
+      return this;
     };
 
     return this;

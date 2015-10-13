@@ -13,7 +13,8 @@ describe('geo.tileLayer', function () {
       center: o.center || {x: 0, y: 0},
       scale: o.scale || {x: 1, y: 1, z: 1},
       origin: o.origin || {x: 0, y: 0, z: 0},
-      unitsPerPixel: o.unitsPerPixel || 10000
+      unitsPerPixel: o.unitsPerPixel || 10000,
+      node: o.node || null
     };
 
     function copy(o) {
@@ -68,7 +69,8 @@ describe('geo.tileLayer', function () {
         };
       },
       updateAttribution: function () {
-      }
+      },
+      node: get_set('node')
     };
   };
 
@@ -889,6 +891,80 @@ describe('geo.tileLayer', function () {
         t2 = l._getTile({x: 1, y: 0, level: 0});
         expect(l._isCovered(t2)).toBe(null);
       });
+    });
+  });
+
+  describe('_outOfBounds', function () {
+    function layer() {
+      return geo.tileLayer({map: map(), url: function () {return '';}});
+    }
+    var bounds = {
+      left: 384,
+      right: 896,
+      bottom: 128,
+      top: 512
+    };
+    it('tile above bounds', function () {
+      var l = layer(), t;
+      t = l._getTile({x: 2, y: 4});
+      expect(l._outOfBounds(t, bounds)).toBe(true);
+    });
+    it('tile below bounds', function () {
+      var l = layer(), t;
+      t = l._getTile({x: 2, y: -2});
+      expect(l._outOfBounds(t, bounds)).toBe(true);
+    });
+    it('tile left of bounds', function () {
+      var l = layer(), t;
+      t = l._getTile({x: -1, y: 1});
+      expect(l._outOfBounds(t, bounds)).toBe(true);
+    });
+    it('tile right of bounds', function () {
+      var l = layer(), t;
+      t = l._getTile({x: 5, y: 1});
+      expect(l._outOfBounds(t, bounds)).toBe(true);
+    });
+    it('tile completely inside bounds', function () {
+      var l = layer(), t;
+      t = l._getTile({x: 2, y: 1});
+      expect(l._outOfBounds(t, bounds)).toBe(false);
+    });
+    it('tile partially inside bounds', function () {
+      var l = layer(), t;
+      t = l._getTile({x: 1, y: 0});
+      expect(l._outOfBounds(t, bounds)).toBe(false);
+    });
+  });
+
+  describe('HTML renderering', function () {
+    function layer_html(opts) {
+      var node = $('<div class=".geo-test-container" style="display: none"/>'), m, l;
+      opts = opts || {};
+      $('body').remove('.geo-test-container').append(node);
+      m = map({node: node});
+      opts.map = m;
+      opts.renderer = null;
+      l = geo.tileLayer(opts);
+      l._init();
+      return l;
+    }
+
+    it('tileLayer initialization', function () {
+      var l = layer_html({maxLevel: 2}), node = l.canvas();
+
+      expect(node.find('[data-tile-layer="0"]').length).toBe(1);
+      expect(node.find('[data-tile-layer="1"]').length).toBe(1);
+      expect(node.find('[data-tile-layer="2"]').length).toBe(1);
+      expect(node.find('.geo-tile-layer').length).toBe(3);
+    });
+
+    it('_getSubLayer', function () {
+      var l = layer_html(), node = l.canvas(), s;
+
+      s = l._getSubLayer(0);
+      expect(node.find(s).get(0)).toBe(s);
+      expect(l._getSubLayer(0)).toBe(s);
+      expect($(s).data('tile-layer')).toBe(0);
     });
   });
 });
