@@ -892,6 +892,33 @@ describe('geo.tileLayer', function () {
         expect(l._isCovered(t2)).toBe(null);
       });
     });
+
+    describe('_canPurge', function () {
+      it('covered tile', function () {
+        var l = geo.tileLayer({map: map()});
+        l._isCovered = function () {return true;};
+        l._outOfBounds = function () {return false;};
+        expect(l._canPurge({index: {level: 0}}, {}, 1)).toBe(true);
+      });
+      it('covered tile at current zoom', function () {
+        var l = geo.tileLayer({map: map()});
+        l._isCovered = function () {return true;};
+        l._outOfBounds = function () {return false;};
+        expect(l._canPurge({index: {level: 1}}, {}, 1)).toBe(false);
+      });
+      it('out of bounds tile', function () {
+        var l = geo.tileLayer({map: map()});
+        l._isCovered = function () {return false;};
+        l._outOfBounds = function () {return true;};
+        expect(l._canPurge({}, {})).toBe(true);
+      });
+      it('non-purgeable tile', function () {
+        var l = geo.tileLayer({map: map()});
+        l._isCovered = function () {return false;};
+        l._outOfBounds = function () {return false;};
+        expect(l._canPurge({}, {})).toBe(false);
+      });
+    });
   });
 
   describe('_outOfBounds', function () {
@@ -938,9 +965,10 @@ describe('geo.tileLayer', function () {
 
   describe('HTML renderering', function () {
     function layer_html(opts) {
-      var node = $('<div class=".geo-test-container" style="display: none"/>'), m, l;
+      var node = $('<div class="geo-test-container" style="display: none"/>'), m, l;
       opts = opts || {};
-      $('body').remove('.geo-test-container').append(node);
+      $('.geo-test-container').remove();
+      $('body').append(node);
       m = map({node: node});
       opts.map = m;
       opts.renderer = null;
@@ -966,5 +994,181 @@ describe('geo.tileLayer', function () {
       expect(l._getSubLayer(0)).toBe(s);
       expect($(s).data('tile-layer')).toBe(0);
     });
+
+    describe('drawTile', function () {
+      function test_draw(tile) {
+        var l = layer_html({url: function () {return '/data/white.jpg';}});
+        l.drawTile(l._getTileCached(tile));
+        l.drawTile(l._getTileCached(tile)); // draw it twice, but should only add one
+        return l;
+      }
+
+      function check_position(n, pos) {
+        expect(n.css('left')).toBe(pos.left + 'px');
+        expect(n.css('top')).toBe(pos.top + 'px');
+      }
+
+      it('{x: 0, y: 0, level: 0}', function () {
+        var l = test_draw({x: 0, y: 0, level: 0}),
+            c = l.canvas().find('.geo-tile-container');
+        expect(c.length).toBe(1);
+        expect(c.parent().data('tile-layer')).toBe(0);
+        check_position(c, {left: 0, top: 0});
+      });
+
+      it('{x: 0, y: 0, level: 1}', function () {
+        var l = test_draw({x: 0, y: 0, level: 1}),
+            c = l.canvas().find('.geo-tile-container');
+        expect(c.length).toBe(1);
+        expect(c.parent().data('tile-layer')).toBe(1);
+        check_position(c, {left: 0, top: 0});
+      });
+
+      it('{x: 1, y: 1, level: 1}', function () {
+        var l = test_draw({x: 1, y: 1, level: 1}),
+            c = l.canvas().find('.geo-tile-container');
+        expect(c.length).toBe(1);
+        expect(c.parent().data('tile-layer')).toBe(1);
+        check_position(c, {left: 256, top: 256});
+      });
+
+      it('{x: 3, y: 2, level: 2}', function () {
+        var l = test_draw({x: 3, y: 2, level: 2}),
+            c = l.canvas().find('.geo-tile-container');
+        expect(c.length).toBe(1);
+        expect(c.parent().data('tile-layer')).toBe(2);
+        check_position(c, {left: 768, top: 512});
+      });
+
+      it('remove', function () {
+        var l = test_draw({x: 0, y: 0, level: 0}),
+            c = l.canvas().find('.geo-tile-container'),
+            t = l._getTileCached({x: 0, y: 0, level: 0});
+        t.image = $('<img/>').get(0);
+        c.append(t.image);
+        l.remove(t);
+
+        expect(l.canvas().find('.geo-tile-container').length).toBe(0);
+        expect(Object.keys(l.activeTiles).length).toBe(0);
+      });
+
+      it('invalid tile url', function (done) {
+        var l = layer_html({url: function () {return 'not a valid url';}}), t;
+        t = l._getTileCached({x: 0, y: 0, level: 0});
+        t.image = $('<img/>').get(0);
+        l.drawTile(t);
+        t.catch(function () {
+          expect(l.canvas().find('.geo-tile-container').length).toBe(0);
+          done();
+        });
+      });
+    });
+
+    describe('purging inactive tiles', function () {
+      function setup(bds) {
+        var l = layer_html({url: function () {return '/data/white.jpg';}});
+        l._getViewBounds = function () {
+          return bds || {
+            left: -50,
+            right: 290,
+            bottom: 150,
+            top: 300
+          };
+        };
+        return l;
+      }
+      it('noop', function () {
+        var l = setup(), active;
+        l.drawTile(l._getTile({x: 0, y: 0, level: 0}));
+        active = $.extend(true, {}, l.activeTiles);
+        l._purge();
+        expect(l.activeTiles).toEqual(active);
+      });
+      it('skip during update', function () {
+        var l = setup(), active;
+        l.drawTile(l._getTile({x: 2, y: 0, level: 1}));
+        l._updating = true;
+        active = $.extend(true, {}, l.activeTiles);
+        l._purge();
+        expect(l.activeTiles).toEqual(active);
+      });
+      it('out of bounds', function () {
+        var l = setup(), active;
+        l.drawTile(l._getTile({x: 2, y: 0, level: 1}));
+        active = $.extend(true, {}, l.activeTiles);
+        l._purge();
+        expect(l.activeTiles).toEqual({});
+      });
+      it('covered', function () {
+        var l = setup(), tiles, active;
+
+        tiles = [
+          l._getTileCached({x: 0, y: 0, level: 0}),
+          l._getTileCached({x: 0, y: 0, level: 1}),
+          l._getTileCached({x: 0, y: 1, level: 1}),
+          l._getTileCached({x: 1, y: 0, level: 1}),
+          l._getTileCached({x: 1, y: 1, level: 1})
+        ];
+        tiles.forEach(function (t) {
+          l.drawTile(t);
+          l._setTileTree(t);
+        });
+        l._purge(1);
+        active = {};
+        tiles.forEach(function (t) {
+          if (t.index.level !== 0) {
+            active[t.toString()] = t;
+          }
+        });
+
+        expect(l.activeTiles).toEqual(active);
+      });
+    });
+    it('clear all tiles', function () {
+      var l = layer_html({url: function () {return '/data/white.jpg';}}), tiles;
+
+      tiles = [
+        l._getTileCached({x: 0, y: 0, level: 0}),
+        l._getTileCached({x: 0, y: 0, level: 1}),
+        l._getTileCached({x: 0, y: 1, level: 1}),
+        l._getTileCached({x: 1, y: 0, level: 1}),
+        l._getTileCached({x: 1, y: 1, level: 1})
+      ];
+      tiles.forEach(function (t) {
+        l.drawTile(t);
+        l._setTileTree(t);
+      });
+
+      l.clear();
+      expect(l.activeTiles).toEqual({});
+      expect(l.cache.length).toBe(5);
+    });
+    it('reset the layer', function () {
+      var l = layer_html({url: function () {return '/data/white.jpg';}}), tiles;
+
+      tiles = [
+        l._getTileCached({x: 0, y: 0, level: 0}),
+        l._getTileCached({x: 0, y: 0, level: 1}),
+        l._getTileCached({x: 0, y: 1, level: 1}),
+        l._getTileCached({x: 1, y: 0, level: 1}),
+        l._getTileCached({x: 1, y: 1, level: 1})
+      ];
+      tiles.forEach(function (t) {
+        l.drawTile(t);
+        l._setTileTree(t);
+      });
+
+      l.reset();
+      expect(l.activeTiles).toEqual({});
+      expect(l.cache.length).toBe(0);
+    });
+  });
+
+  it('Overloading draw method', function () {
+    var l = geo.tileLayer({map: map(), url: function () {return '/data/white.jpg';}}),
+        called = 0;
+    l._drawTile = function () {called += 1;};
+    l.drawTile(l._getTile({x: 0, y: 0, level: 0}));
+    expect(called).toBe(1);
   });
 });

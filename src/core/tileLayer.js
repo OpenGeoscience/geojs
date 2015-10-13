@@ -606,8 +606,9 @@
      * is one that is no longer visible either because it was panned
      * out of the active view or the zoom has changed.
      * @protected
+     * @param {number} zoom Tiles (in bounds) at this zoom level will be kept
      */
-    this._purge = function () {
+    this._purge = function (zoom) {
       var tile, hash, bounds = {};
 
       // Don't purge tiles in an active update
@@ -621,7 +622,7 @@
       for (hash in this._activeTiles) {// jshint ignore: line
 
         tile = this._activeTiles[hash];
-        if (this._canPurge(tile, bounds)) {
+        if (this._canPurge(tile, bounds, zoom)) {
           this.remove(tile);
         }
       }
@@ -784,7 +785,7 @@
         .done(// called on success and failure
           function () {
             if (_deferredPurge === myPurge) {
-              this._purge();
+              this._purge(zoom);
             }
           }.bind(this)
         );
@@ -835,14 +836,6 @@
           x = tile.index.x,
           y = tile.index.y,
           tiles = [];
-
-
-      // Short cut to null if the tile was directly added
-      // at the previous update step.  In this case, the
-      // tile is on top by definition.
-      if (this._getTileTree(tile.index)) {
-        return null;
-      }
 
       // Check one level up
       tiles = this._getTileTree({
@@ -919,10 +912,11 @@
      * @param {number} bounds.top
      * @param {number} bounds.bottom
      * @param {number} bounds.level The zoom level the bounds are given as
+     * @param {number} zoom Keep in bound tile at this zoom level
      * @returns {boolean}
      */
-    this._canPurge = function (tile, bounds) {
-      if (this._isCovered(tile)) {
+    this._canPurge = function (tile, bounds, zoom) {
+      if (this._isCovered(tile) && zoom !== tile.index.level) {
         return true;
       }
       if (bounds) {
