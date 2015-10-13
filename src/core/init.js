@@ -41,7 +41,7 @@ window.inherit = geo.inherit;
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.extend = function (props) {
-  "use strict";
+  'use strict';
   var child = Object.create(this.prototype);
   $.extend(child.prototype, props || {});
   return child;
