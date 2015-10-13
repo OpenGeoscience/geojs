@@ -562,9 +562,9 @@
     this._remove = function (tile) {
       if (tile.image) {
         if (tile.image.parentElement) {
-          tile.image.parentElement.remove();
+          $(tile.image.parentElement).remove();
         }
-        tile.image.remove();
+        $(tile.image).remove();
       }
     };
 

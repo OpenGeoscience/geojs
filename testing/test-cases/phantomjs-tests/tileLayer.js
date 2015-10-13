@@ -1055,7 +1055,7 @@ describe('geo.tileLayer', function () {
       it('invalid tile url', function (done) {
         var l = layer_html({url: function () {return 'not a valid url';}}), t;
         t = l._getTileCached({x: 0, y: 0, level: 0});
-        t.image = $('<img/>').get(0);
+        t.image = $('<img src="/data/white.jpg"/>').get(0);
         l.drawTile(t);
         t.catch(function () {
           expect(l.canvas().find('.geo-tile-container').length).toBe(0);
