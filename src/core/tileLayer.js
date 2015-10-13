@@ -335,18 +335,6 @@
       indexRange = this._getTileRange(level, bounds);
       start = indexRange.start;
       end = indexRange.end;
-      /*
-      console.log(
-        JSON.stringify({
-          bounds: this._getViewBounds(),
-          passedBounds: bounds,
-          level: level,
-          range: indexRange,
-          origin: this.map().origin(),
-          center: this.map().center()
-        })
-      );
-      */
 
       // total number of tiles existing at this level
       nTilesLevel = this.tilesAtZoom(level);
@@ -360,7 +348,6 @@
         index.x = i;
         for (j = start.y; j <= end.y; j += 1) {
           index.y = j;
-
 
           source = $.extend({}, index);
           if (this._options.wrapX) {

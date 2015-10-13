@@ -919,47 +919,122 @@ describe('geo.tileLayer', function () {
         expect(l._canPurge({}, {})).toBe(false);
       });
     });
-  });
 
-  describe('_outOfBounds', function () {
-    function layer() {
-      return geo.tileLayer({map: map(), url: function () {return '';}});
-    }
-    var bounds = {
-      left: 384,
-      right: 896,
-      bottom: 128,
-      top: 512
-    };
-    it('tile above bounds', function () {
-      var l = layer(), t;
-      t = l._getTile({x: 2, y: 4});
-      expect(l._outOfBounds(t, bounds)).toBe(true);
+    describe('_outOfBounds', function () {
+      function layer() {
+        return geo.tileLayer({map: map(), url: function () {return '';}});
+      }
+      var bounds = {
+        left: 384,
+        right: 896,
+        bottom: 128,
+        top: 512
+      };
+      it('tile above bounds', function () {
+        var l = layer(), t;
+        t = l._getTile({x: 2, y: 4});
+        expect(l._outOfBounds(t, bounds)).toBe(true);
+      });
+      it('tile below bounds', function () {
+        var l = layer(), t;
+        t = l._getTile({x: 2, y: -2});
+        expect(l._outOfBounds(t, bounds)).toBe(true);
+      });
+      it('tile left of bounds', function () {
+        var l = layer(), t;
+        t = l._getTile({x: -1, y: 1});
+        expect(l._outOfBounds(t, bounds)).toBe(true);
+      });
+      it('tile right of bounds', function () {
+        var l = layer(), t;
+        t = l._getTile({x: 5, y: 1});
+        expect(l._outOfBounds(t, bounds)).toBe(true);
+      });
+      it('tile completely inside bounds', function () {
+        var l = layer(), t;
+        t = l._getTile({x: 2, y: 1});
+        expect(l._outOfBounds(t, bounds)).toBe(false);
+      });
+      it('tile partially inside bounds', function () {
+        var l = layer(), t;
+        t = l._getTile({x: 1, y: 0});
+        expect(l._outOfBounds(t, bounds)).toBe(false);
+      });
     });
-    it('tile below bounds', function () {
-      var l = layer(), t;
-      t = l._getTile({x: 2, y: -2});
-      expect(l._outOfBounds(t, bounds)).toBe(true);
-    });
-    it('tile left of bounds', function () {
-      var l = layer(), t;
-      t = l._getTile({x: -1, y: 1});
-      expect(l._outOfBounds(t, bounds)).toBe(true);
-    });
-    it('tile right of bounds', function () {
-      var l = layer(), t;
-      t = l._getTile({x: 5, y: 1});
-      expect(l._outOfBounds(t, bounds)).toBe(true);
-    });
-    it('tile completely inside bounds', function () {
-      var l = layer(), t;
-      t = l._getTile({x: 2, y: 1});
-      expect(l._outOfBounds(t, bounds)).toBe(false);
-    });
-    it('tile partially inside bounds', function () {
-      var l = layer(), t;
-      t = l._getTile({x: 1, y: 0});
-      expect(l._outOfBounds(t, bounds)).toBe(false);
+
+    describe('_getTiles', function () {
+      it('basic range query', function () {
+        var tiles, l = geo.tileLayer({
+          map: map({unitsPerPixel: 1}),
+          wrapX: false,
+          wrapY: false,
+          url: function () {return '/data/white.jpg';}
+        });
+
+        tiles = l._getTiles(1, {left: 50, right: 500, bottom: 50, top: 500});
+        expect(tiles.length).toBe(4);
+        tiles.forEach(function (tile) {
+          expect(l.isValid(tile.index)).toBe(true);
+        });
+      });
+      it('basic range query with invalid tiles', function () {
+        var tiles, l = geo.tileLayer({
+          map: map({unitsPerPixel: 1}),
+          wrapX: false,
+          wrapY: false,
+          url: function () {return '/data/white.jpg';}
+        });
+
+        tiles = l._getTiles(0, {left: 50, right: 500, bottom: 50, top: 500});
+        expect(tiles.length).toBe(1);
+        expect(tiles[0].index.x).toEqual(0);
+        expect(tiles[0].index.y).toEqual(0);
+        expect(tiles[0].index.level).toEqual(0);
+      });
+      it('basic range query with wrapping in X', function () {
+        var tiles, l = geo.tileLayer({
+          map: map({unitsPerPixel: 1}),
+          wrapX: true,
+          wrapY: false,
+          url: function () {return '/data/white.jpg';}
+        });
+
+        tiles = l._getTiles(0, {left: 50, right: 500, bottom: 50, top: 500});
+        expect(tiles.length).toBe(2);
+        tiles.forEach(function (tile) {
+          expect(tile.index.y).toBe(0);
+          expect(tile.index.level).toBe(0);
+        });
+      });
+      it('basic range query with wrapping in Y', function () {
+        var tiles, l = geo.tileLayer({
+          map: map({unitsPerPixel: 1}),
+          wrapX: false,
+          wrapY: true,
+          url: function () {return '/data/white.jpg';}
+        });
+
+        tiles = l._getTiles(0, {left: 50, right: 500, bottom: 50, top: 500});
+        expect(tiles.length).toBe(2);
+        tiles.forEach(function (tile) {
+          expect(tile.index.x).toBe(0);
+          expect(tile.index.level).toBe(0);
+        });
+      });
+      it('basic range query with wrapping in X and Y', function () {
+        var tiles, l = geo.tileLayer({
+          map: map({unitsPerPixel: 1}),
+          wrapX: true,
+          wrapY: true,
+          url: function () {return '/data/white.jpg';}
+        });
+
+        tiles = l._getTiles(0, {left: 50, right: 500, bottom: 50, top: 500});
+        expect(tiles.length).toBe(4);
+        tiles.forEach(function (tile) {
+          expect(tile.index.level).toBe(0);
+        });
+      });
     });
   });
 
