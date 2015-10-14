@@ -4,7 +4,7 @@ from selenium_test import FirefoxTest, ChromeTest
 
 class glMultiPolygonsBase(object):
     testCase = ('glMultiPolygons',)
-    testRevision = 3
+    testRevision = 4
 
     def loadPage(self):
         self.resizeWindow(640, 480)
