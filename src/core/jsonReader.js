@@ -1,12 +1,12 @@
 /*global File*/
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Create a new instance of class jsonReader
- *
- * @class
- * @extends geo.fileReader
- * @returns {geo.jsonReader}
- */
+* Create a new instance of class jsonReader
+*
+* @class
+* @extends geo.fileReader
+* @returns {geo.jsonReader}
+*/
 //////////////////////////////////////////////////////////////////////////////
 geo.jsonReader = function (arg) {
   'use strict';
@@ -16,12 +16,12 @@ geo.jsonReader = function (arg) {
 
   var m_this = this, m_style = arg.style || {};
   m_style = $.extend({
-      'strokeWidth': 2,
-      'strokeColor': {r: 0, g: 0, b: 0},
-      'strokeOpacity': 1,
-      'fillColor': {r: 1, g: 0, b: 0},
-      'fillOpacity': 1
-    }, m_style);
+    'strokeWidth': 2,
+    'strokeColor': {r: 0, g: 0, b: 0},
+    'strokeOpacity': 1,
+    'fillColor': {r: 1, g: 0, b: 0},
+    'fillOpacity': 1
+  }, m_style);
 
   geo.fileReader.call(this, arg);
 
@@ -114,10 +114,10 @@ geo.jsonReader = function (arg) {
 
   this._getCoordinates = function (spec) {
     var geometry = spec.geometry || {},
-        coordinates = geometry.coordinates || [], elv;
+    coordinates = geometry.coordinates || [], elv;
 
     if ((coordinates.length === 2 || coordinates.length === 3) &&
-        (isFinite(coordinates[0]) && isFinite(coordinates[1]))) {
+    (isFinite(coordinates[0]) && isFinite(coordinates[1]))) {
 
       // Do we have a elevation component
       if (isFinite(coordinates[2])) {
@@ -157,8 +157,8 @@ geo.jsonReader = function (arg) {
 
       features.forEach(function (feature) {
         var type = m_this._featureType(feature),
-            coordinates = m_this._getCoordinates(feature),
-            style = m_this._getStyle(feature);
+        coordinates = m_this._getCoordinates(feature),
+        style = m_this._getStyle(feature);
         if (type) {
           if (type === 'line') {
             style.fill = style.fill || false;
@@ -183,8 +183,8 @@ geo.jsonReader = function (arg) {
             );
             // polygons not yet supported
             allFeatures.push(m_this._addFeature(
-              'line',
-              [coordinates],
+              type,
+              [[coordinates]], //double wrap for the data method below
               style,
               feature.properties
             ));
@@ -193,22 +193,19 @@ geo.jsonReader = function (arg) {
             style.fillOpacity = (
               style.fillOpacity === undefined ? 0.25 : style.fillOpacity
             );
-
             coordinates = feature.geometry.coordinates.map(function (c) {
-              return c[0].map(function (el) {
-                return {
-                  x: el[0],
-                  y: el[1],
-                  z: el[2]
-                };
-              });
+              return [m_this._getCoordinates({
+                geometry: {
+                  type: 'Polygon',
+                  coordinates: c
+                }
+              })];
             });
-
             allFeatures.push(m_this._addFeature(
-                'line',
-                coordinates,
-                style,
-                feature.properties
+              'polygon', //there is no multipolygon feature class
+              coordinates,
+              style,
+              feature.properties
             ));
           }
         } else {
@@ -227,15 +224,15 @@ geo.jsonReader = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Build the data array for a feature given the coordinates and properties
-   * from the geojson.
-   *
-   * @private
-   * @param {Object[]} coordinates Coordinate data array
-   * @param {Object} properties Geojson properties object
-   * @param {Object} style Global style defaults
-   * @returns {Object[]}
-   */
+  * Build the data array for a feature given the coordinates and properties
+  * from the geojson.
+  *
+  * @private
+  * @param {Object[]} coordinates Coordinate data array
+  * @param {Object} properties Geojson properties object
+  * @param {Object} style Global style defaults
+  * @returns {Object[]}
+  */
   //////////////////////////////////////////////////////////////////////////////
   this._buildData = function (coordinates, properties, style) {
     return coordinates.map(function (coord) {
@@ -250,13 +247,28 @@ geo.jsonReader = function (arg) {
   this._addFeature = function (type, coordinates, style, properties) {
     var _style = $.extend({}, m_style, style);
     var feature = m_this.layer().createFeature(type)
-      .data(m_this._buildData(coordinates, properties, style))
-      .style(_style);
+    .data(m_this._buildData(coordinates, properties, style))
+    .style(_style);
 
     if (type === 'line') {
       feature.line(function (d) { return d.coordinates; });
+    } else if (type === 'polygon') {
+      feature.position(function (d) {
+        return {
+          x: d.x,
+          y: d.y,
+          z: d.z
+        };
+      }).polygon(function (d) {
+        return {
+          'outer': d.coordinates[0],
+          'inner': d.coordinates[1]
+        };
+      });
     } else {
-      feature.position(function (d) { return d.coordinates; });
+      feature.position(function (d) {
+        return d.coordinates;
+      });
     }
     return feature;
   };
