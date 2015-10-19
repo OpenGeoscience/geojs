@@ -774,6 +774,15 @@
              * have been used. */
             return;
           }
+          /* Check if a tile is still desired.  Don't draw it if it isn't. */
+          var mapZoom = map.zoom(),
+              zoom = this._options.tileRounding(mapZoom),
+              bounds = this._getViewBounds();
+          if (this._canPurge(tile, bounds, zoom)) {
+            this.remove(tile);
+            return;
+          }
+
           this.drawTile(tile);
 
           // mark the tile as covered
