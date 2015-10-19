@@ -27,9 +27,8 @@
     Object.defineProperty(this, 'size', {
       get: function () { return this._size; },
       set: function (n) {
-        var i;
-        for (i = n; i < this.length; i += 1) {
-          this.remove(this._atime[i]);
+        while (this._atime.length > n) {
+          this.remove(this._atime[this._atime.length - 1]);
         }
         this._size = n;
       }
@@ -45,10 +44,10 @@
     /**
      * Get the position of the tile in the access queue.
      * @param {string} hash The tile's hash value
-     * @returns {Number} The position in the queue or -1
+     * @returns {number} The position in the queue or -1
      */
-    this._access = function (tile) {
-      return this._atime.indexOf(tile);
+    this._access = function (hash) {
+      return this._atime.indexOf(hash);
     };
 
     /**
@@ -57,20 +56,18 @@
      * @returns {bool} true if a tile was removed
      */
     this.remove = function (tile) {
-      if (typeof tile !== 'string') {
-        tile = tile.toString();
-      }
+      var hash = typeof tile === 'string' ? tile : tile.toString();
 
       // if the tile is not in the cache
-      if (!(tile in this._cache)) {
+      if (!(hash in this._cache)) {
         return false;
       }
 
       // Remove the tile from the access queue
-      this._atime.splice(this._access(tile), 1);
+      this._atime.splice(this._access(hash), 1);
 
       // Remove the tile from the cache
-      delete this._cache[tile];
+      delete this._cache[hash];
       return true;
     };
 
@@ -79,7 +76,7 @@
      */
     this.clear = function () {
       this._cache = {};  // The hash -> tile mapping
-      this._atime = [];  // The access queue
+      this._atime = [];  // The access queue (the hashes are stored)
       return this;
     };
 
@@ -88,17 +85,17 @@
      * return null.  This method also moves the tile to the
      * front of the access queue.
      *
-     * @param {string} hash The tile hash value
+     * @param {string|geo.tile} hash The tile or the tile hash value
      * @returns {geo.tile|null}
      */
     this.get = function (hash) {
+      hash = typeof hash === 'string' ? hash : hash.toString();
       if (!(hash in this._cache)) {
         return null;
       }
 
-      this._atime.unshift(
-        this._atime.splice(this._access(hash), 1)
-      );
+      this._atime.splice(this._access(hash), 1);
+      this._atime.unshift(hash);
       return this._cache[hash];
     };
 
@@ -109,15 +106,16 @@
     this.add = function (tile) {
       // remove any existing tiles with the same hash
       this.remove(tile);
+      var hash = tile.toString();
 
       // add the tile
-      this._cache[tile.toString()] = tile;
-      this._atime.unshift(tile);
+      this._cache[hash] = tile;
+      this._atime.unshift(hash);
 
       // purge a tile from the cache if necessary
-      if (this._atime.length > this.size) {
-        tile = this._atime.pop();
-        delete this._cache[tile];
+      while (this._atime.length > this.size) {
+        hash = this._atime.pop();
+        delete this._cache[hash];
       }
     };
 

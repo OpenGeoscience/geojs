@@ -476,7 +476,7 @@
       }
 
       // add the tile to the active cache
-      this._activeTiles[tile.toString()] = tile;
+      this._activeTiles[hash] = tile;
     };
 
     /**
@@ -498,7 +498,8 @@
       var div = $(this._getSubLayer(tile.index.level)),
           bounds = this._tileBounds(tile),
           duration = this._options.animationDuration,
-          container = $('<div class="geo-tile-container"/>');
+          container = $('<div class="geo-tile-container"/>').attr(
+            'tile-reference', tile.toString());
 
       // apply a transform to place the image correctly
       container.append(tile.image);
@@ -530,14 +531,14 @@
      * @returns {geo.tile} the tile removed from the active layer
      */
     this.remove = function (tile) {
-      tile = tile.toString();
-      var value = this._activeTiles[tile];
+      var hash = tile.toString();
+      var value = this._activeTiles[hash];
 
       if (value instanceof geo.tile) {
         this._remove(value);
       }
 
-      delete this._activeTiles[tile];
+      delete this._activeTiles[hash];
       return value;
     };
 
@@ -550,6 +551,13 @@
       if (tile.image) {
         if (tile.image.parentElement) {
           $(tile.image.parentElement).remove();
+        } else {
+          /* This shouldn't happen, but sometimes does.  Originally it happened
+           * when a tile was removed from the cache before it was finished
+           * being used; there is still some much rarer condition that can
+           * cause it.  Log that it happened until we can figure out how to fix
+           * the issue. */
+          console.log('No parent element to remove ' + tile.toString(), tile);
         }
         $(tile.image).remove();
       }
@@ -760,6 +768,12 @@
 
       tiles.forEach(function (tile) {
         tile.then(function () {
+          if (tile !== this.cache.get(tile.toString())) {
+            /* If the tile has fallen out of the cache, don't draw it -- it is
+             * untracked.  This may be an indication that a larger cache should
+             * have been used. */
+            return;
+          }
           this.drawTile(tile);
 
           // mark the tile as covered
@@ -877,8 +891,8 @@
      * @returns {boolean}
      */
     this._outOfBounds = function (tile, bounds) {
-      /* this needs to take into account wrapping.  We may want to add an (n)
-       * tile edge buffer so we appear more responsive - DWM:: */
+      /* We may want to add an (n) tile edge buffer so we appear more
+       * responsive */
       var to = this._options.tileOffset(tile.index.level);
       return tile.bottom - to.y > bounds.top ||
              tile.left - to.x   > bounds.right ||
