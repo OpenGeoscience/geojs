@@ -77,6 +77,71 @@ geo.layer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Bring the layer above the given number of layers.  This will rotate the
+   * current z-indices for this and the next `n` layers.
+   *
+   * @param {number} [n=1] The number of positions to move
+   * @returns {this}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.moveUp = function (n) {
+    var order, i, me = null, tmp, sign;
+
+    // set the default
+    if (n === undefined) {
+      n = 1;
+    }
+
+    // set the sort direction that controls if we are moving up
+    // or down the z-index
+    sign = 1;
+    if (n < 0) {
+      sign = -1;
+      n = -n;
+    }
+
+    // get a sorted list of layers
+    order = m_this.map().layers().sort(
+      function (a, b) { return sign * (a.zIndex() - b.zIndex()); }
+    );
+
+    for (i = 0; i < order.length; i += 1) {
+      if (me === null) {
+        // loop until we get to the current layer
+        if (order[i] === m_this) {
+          me = i;
+        }
+      } else if (i - me <= n) {
+        // swap the next n layers
+        tmp = m_this.zIndex();
+        m_this.zIndex(order[i].zIndex());
+        order[i].zIndex(tmp);
+      } else {
+        // all the swaps are done now
+        break;
+      }
+    }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Bring the layer below the given number of layers.  This will rotate the
+   * current z-indices for this and the previous `n` layers.
+   *
+   * @param {number} [n=1] The number of positions to move
+   * @returns {this}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.moveDown = function (n) {
+    if (n === undefined) {
+      n = 1;
+    }
+    return m_this.moveUp(-n);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Get whether or not the layer is sticky (navigates with the map).
    *
    * @returns {Boolean}

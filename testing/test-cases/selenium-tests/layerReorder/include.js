@@ -7,7 +7,9 @@ window.startTest = function (done) {
 
   var l1 = map.children()[0],
       l2 = map.createLayer('feature'),
-      l3 = map.createLayer('feature', {renderer: 'd3'});
+      l3 = map.createLayer('feature', {renderer: 'd3'}),
+      layers = [l1, l2, l3];
+
 
   l2.createFeature('point')
     .data([{x: -20, y: 0}, {x: 0, y: 0}])
@@ -32,6 +34,14 @@ window.startTest = function (done) {
     l1.zIndex(z1);
     l2.zIndex(z2);
     l3.zIndex(z3);
+  };
+
+  window.moveUp = function (layer, n) {
+    layers[layer].moveUp(n);
+  };
+
+  window.moveDown = function (layer, n) {
+    layers[layer].moveDown(n);
   };
 
   map.draw();

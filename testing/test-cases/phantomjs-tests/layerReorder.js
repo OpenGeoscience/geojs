@@ -70,4 +70,129 @@ describe('Test the zIndex property of layers', function () {
     expect(getZIndex(l2)).toBe(12);
     expect(getZIndex(l3)).toBe(10);
   });
+
+  describe('Test moveUp|Down', function () {
+    /**
+     * Setup the map for each test individually to make sure
+     * it is executed in an `it` context.
+     */
+    function setup() {
+      var map = createMap(),
+          layers = [
+            map.createLayer('feature', {zIndex: 10}),
+            map.createLayer('feature', {zIndex: 100}),
+            map.createLayer('feature', {zIndex: 0}),
+            map.createLayer('feature', {zIndex: 5}),
+            map.createLayer('feature', {zIndex: 11}),
+            map.createLayer('feature', {zIndex: 15})
+          ];
+      return layers;
+    }
+
+    /**
+     * Do a moveUp/moveDown operation on the given layer.
+     */
+    function doAction(layer, action) {
+      if (action.method === 'up') {
+        layer.moveUp(action.n);
+      } else if (action.method === 'down') {
+        layer.moveDown(action.n);
+      } else {
+        // let's avoid silent errors in the tests
+        throw new Error('Invalid action');
+      }
+    }
+
+    /**
+     * Perform an array of actions.
+     */
+    function doActions(actions, layers) {
+      var original;
+      layers = layers || setup();
+      original = layers.map(function (l) {return l.zIndex();});
+      actions.forEach(function (action) {
+        doAction(layers[action.layer], action);
+      });
+      return {
+        original: original,
+        result: layers.map(function (l) {return l.zIndex();}),
+        layers: layers
+      };
+    }
+
+    /**
+     * Make a test that runs a sequence of actions
+     * and validates that the zIndices are as expectd.
+     *
+     * Also generates a test that asserts that the negative
+     * actions performed backwards results in the inverse
+     * operation.
+     */
+    function makeTests(actions, result) {
+      return function () {
+        var test = doActions(actions);
+        expect(test.result).toEqual(result);
+      };
+    }
+
+    it('move layer 2 up one', makeTests(
+      [
+        {method: 'up', layer: 2}
+      ],
+      [10, 100, 5, 0, 11, 15]
+    ));
+
+    it('move layer 2 down one', makeTests(
+      [
+        {method: 'down', layer: 2}
+      ],
+      [10, 100, 0, 5, 11, 15]
+    ));
+
+    it('move top layer up one', makeTests(
+      [
+        {method: 'up', layer: 1}
+      ],
+      [10, 100, 0, 5, 11, 15]
+    ));
+
+    it('move first layer up one', makeTests(
+      [
+        {method: 'up', layer: 0}
+      ],
+      [11, 100, 0, 5, 10, 15]
+    ));
+
+    it('move fourth layer up and back down 2', makeTests(
+      [
+        {method: 'up', layer: 4, n: 2},
+        {method: 'down', layer: 4, n: 2}
+      ],
+      [10, 100, 0, 5, 11, 15]
+    ));
+
+    it('cycle all the layers up', makeTests(
+      [
+        {method: 'up', layer: 2, n: 5},
+        {method: 'up', layer: 3, n: 5},
+        {method: 'up', layer: 0, n: 5},
+        {method: 'up', layer: 4, n: 5},
+        {method: 'up', layer: 5, n: 5},
+        {method: 'up', layer: 1, n: 5}
+      ],
+      [10, 100, 0, 5, 11, 15]
+    ));
+
+    it('cycle all the layers down', makeTests(
+      [
+        {method: 'down', layer: 1, n: 5},
+        {method: 'down', layer: 5, n: 5},
+        {method: 'down', layer: 4, n: 5},
+        {method: 'down', layer: 0, n: 5},
+        {method: 'down', layer: 3, n: 5},
+        {method: 'down', layer: 2, n: 5}
+      ],
+      [10, 100, 0, 5, 11, 15]
+    ));
+  });
 });
