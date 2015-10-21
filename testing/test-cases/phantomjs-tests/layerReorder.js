@@ -9,6 +9,7 @@ describe('Test the zIndex property of layers', function () {
         cl = map.createLayer;
     // inject d3 renderer to let this work in phantom
     map.createLayer = function (type, opts) {
+      opts = opts || {};
       opts.renderer = 'd3';
       return cl.call(map, type, opts);
     };
@@ -31,9 +32,9 @@ describe('Test the zIndex property of layers', function () {
 
   it('defaults', function () {
     var map = createMap(),
-        l1 = map.createLayer('feature', {map: map}),
-        l2 = map.createLayer('feature', {map: map}),
-        l3 = map.createLayer('feature', {map: map});
+        l1 = map.createLayer('feature'),
+        l2 = map.createLayer('feature'),
+        l3 = map.createLayer('feature');
 
     // check that the display order is the added order
     expect(l1.zIndex()).toBeLessThan(l2.zIndex());
@@ -42,9 +43,9 @@ describe('Test the zIndex property of layers', function () {
 
   it('set via the constructor', function () {
     var map = createMap(),
-        l1 = map.createLayer('feature', {map: map, zIndex: 10}),
-        l2 = map.createLayer('feature', {map: map}),
-        l3 = map.createLayer('feature', {map: map, zIndex: 0});
+        l1 = map.createLayer('feature', {zIndex: 10}),
+        l2 = map.createLayer('feature'),
+        l3 = map.createLayer('feature', {zIndex: 0});
 
     expect(getZIndex(l1)).toBe(10);
     expect(getZIndex(l2)).toBe(1);
@@ -53,9 +54,9 @@ describe('Test the zIndex property of layers', function () {
 
   it('get/set via the zIndex method', function () {
     var map = createMap(),
-        l1 = map.createLayer('feature', {map: map, zIndex: 10}),
-        l2 = map.createLayer('feature', {map: map}),
-        l3 = map.createLayer('feature', {map: map, zIndex: 0});
+        l1 = map.createLayer('feature', {zIndex: 10}),
+        l2 = map.createLayer('feature'),
+        l3 = map.createLayer('feature', {zIndex: 0});
 
     expect(l1.zIndex()).toBe(10);
     expect(l2.zIndex()).toBe(1);

@@ -10,7 +10,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.layer = function (arg) {
-  "use strict";
+  'use strict';
 
   if (!(this instanceof geo.layer)) {
     return new geo.layer(arg);
@@ -25,13 +25,13 @@ geo.layer = function (arg) {
   //////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       s_exit = this._exit,
-      m_style = arg.style === undefined ? {"opacity": 0.5,
-                                           "color": [0.8, 0.8, 0.8],
-                                           "visible": true,
-                                           "bin": 100} : arg.style,
+      m_style = arg.style === undefined ? {'opacity': 0.5,
+                                           'color': [0.8, 0.8, 0.8],
+                                           'visible': true,
+                                           'bin': 100} : arg.style,
       m_id = arg.id === undefined ? geo.layer.newLayerId() : arg.id,
-      m_name = "",
-      m_gcs = "EPSG:4326",
+      m_name = '',
+      m_gcs = 'EPSG:4326',
       m_timeRange = null,
       m_source = arg.source || null,
       m_map = arg.map === undefined ? null : arg.map,
@@ -44,7 +44,7 @@ geo.layer = function (arg) {
       m_canvas = null,
       m_renderer = null,
       m_initialized = false,
-      m_rendererName = arg.renderer === undefined ? "vgl" : arg.renderer,
+      m_rendererName = arg.renderer === undefined ? 'vgl' : arg.renderer,
       m_dataTime = geo.timestamp(),
       m_updateTime = geo.timestamp(),
       m_drawTime = geo.timestamp(),
@@ -54,7 +54,7 @@ geo.layer = function (arg) {
       m_zIndex;
 
   if (!m_map) {
-    throw new Error('Layers must be initialized on a map.')
+    throw new Error('Layers must be initialized on a map.');
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -66,7 +66,7 @@ geo.layer = function (arg) {
    * @returns {number|this}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.zIndex= function (zIndex) {
+  this.zIndex = function (zIndex) {
     if (zIndex === undefined) {
       return m_zIndex;
     }
@@ -406,7 +406,7 @@ geo.layer = function (arg) {
     }
 
     if (!m_this.active()) {
-      m_node.css("pointerEvents", "none");
+      m_node.css('pointerEvents', 'none');
     }
 
     m_initialized = true;
@@ -481,9 +481,9 @@ geo.layer = function (arg) {
   m_zIndex = arg.zIndex;
 
   // Create top level div for the layer
-  m_node = $(document.createElement("div"));
-  m_node.attr("id", m_name);
-  m_node.css("position", "absolute");
+  m_node = $(document.createElement('div'));
+  m_node.attr('id', m_name);
+  m_node.css('position', 'absolute');
 
   // set the z-index
   m_this.zIndex(m_zIndex);
@@ -498,7 +498,7 @@ geo.layer = function (arg) {
  * @returns {number}
  */
 geo.layer.newLayerId = (function () {
-    "use strict";
+    'use strict';
     var currentId = 1;
     return function () {
       var id = currentId;
@@ -512,11 +512,11 @@ geo.layer.newLayerId = (function () {
  * General object specification for feature types.
  * @typedef geo.layer.spec
  * @type {object}
- * @property {string} [type="feature"] For feature compatibility
+ * @property {string} [type='feature'] For feature compatibility
  * with more than one kind of creatable layer
  * @property {object[]} [data=[]] The default data array to
  * apply to each feature if none exists
- * @property {string} [renderer="vgl"] The renderer to use
+ * @property {string} [renderer='vgl'] The renderer to use
  * @property {geo.feature.spec[]} [features=[]] Features
  * to add to the layer
  */
@@ -529,26 +529,26 @@ geo.layer.newLayerId = (function () {
  * @returns {geo.layer|null}
  */
 geo.layer.create = function (map, spec) {
-  "use strict";
+  'use strict';
 
   spec = spec || {};
 
   // add osmLayer later
-  spec.type = "feature";
-  if (spec.type !== "feature") {
-    console.warn("Unsupported layer type");
+  spec.type = 'feature';
+  if (spec.type !== 'feature') {
+    console.warn('Unsupported layer type');
     return null;
   }
 
-  spec.renderer = spec.renderer || "vgl";
-  if (spec.renderer !== "d3" && spec.renderer !== "vgl") {
-    console.warn("Invalid renderer");
+  spec.renderer = spec.renderer || 'vgl';
+  if (spec.renderer !== 'd3' && spec.renderer !== 'vgl') {
+    console.warn('Invalid renderer');
     return null;
   }
 
   var layer = map.createLayer(spec.type, spec);
   if (!layer) {
-    console.warn("Unable to create a layer");
+    console.warn('Unable to create a layer');
     return null;
   }
 
