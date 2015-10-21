@@ -4,6 +4,8 @@
  * @extends geo.sceneObject
  * @param {Object?} arg An options argument
  * @param {string} arg.attribution An attribution string to display
+ * @param {number} arg.zIndex The z-index to assign to the layer (defaults
+ *   to the index of the layer inside the map)
  * @returns {geo.layer}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -48,7 +50,30 @@ geo.layer = function (arg) {
       m_drawTime = geo.timestamp(),
       m_sticky = arg.sticky === undefined ? true : arg.sticky,
       m_active = arg.active === undefined ? true : arg.active,
-      m_attribution = arg.attribution || null;
+      m_attribution = arg.attribution || null,
+      m_zIndex;
+
+  if (!m_map) {
+    throw new Error('Layers must be initialized on a map.')
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get or set the z-index of the layer.  The z-index controls the display
+   * order of the layers in much the same way as the CSS z-index property.
+   *
+   * @param {number} [zIndex] The new z-index
+   * @returns {number|this}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.zIndex= function (zIndex) {
+    if (zIndex === undefined) {
+      return m_zIndex;
+    }
+    m_zIndex = zIndex;
+    m_node.css('z-index', m_zIndex);
+    return m_this;
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -217,17 +242,12 @@ geo.layer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get/Set map of the layer
+   * Get the map that the layer is connected to
+   * @returns {geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.map = function (val) {
-    if (val === undefined) {
-      return m_map;
-    }
-    m_map = val;
-    m_map.node().append(m_node);
-    m_this.modified();
-    return m_this;
+  this.map = function () {
+    return m_map;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -370,18 +390,7 @@ geo.layer = function (arg) {
       return m_this;
     }
 
-    // Create top level div for the layer
-    m_node = $(document.createElement("div"));
-    m_node.attr("id", m_name);
-    // TODO: need to position according to offsets from the map element
-    //       and maybe respond to events in case the map element moves
-    //       around the page.
-    m_node.css("position", "absolute");
-
-    if (m_map) {
-      m_map.node().append(m_node);
-
-    }
+    m_map.node().append(m_node);
 
     /* Pass along the arguments, but not the map reference */
     var options = $.extend({}, arg);
@@ -414,7 +423,6 @@ geo.layer = function (arg) {
     m_renderer._exit();
     m_node.off();
     m_node.remove();
-    m_node = null;
     arg = {};
     m_canvas = null;
     m_renderer = null;
@@ -466,6 +474,19 @@ geo.layer = function (arg) {
   this.height = function () {
     return m_height;
   };
+
+  if (arg.zIndex === undefined) {
+    arg.zIndex = m_map.children().length;
+  }
+  m_zIndex = arg.zIndex;
+
+  // Create top level div for the layer
+  m_node = $(document.createElement("div"));
+  m_node.attr("id", m_name);
+  m_node.css("position", "absolute");
+
+  // set the z-index
+  m_this.zIndex(m_zIndex);
 
   return this;
 };
