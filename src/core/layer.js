@@ -142,6 +142,28 @@ geo.layer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Bring the layer to the top of the map layers.
+   *
+   * @returns {this}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.moveToTop = function () {
+    return m_this.moveUp(m_this.map().children().length - 1);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Bring the layer to the bottom of the map layers.
+   *
+   * @returns {this}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.moveToBottom = function () {
+    return m_this.moveDown(m_this.map().children().length - 1);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Get whether or not the layer is sticky (navigates with the map).
    *
    * @returns {Boolean}
