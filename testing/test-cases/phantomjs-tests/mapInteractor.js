@@ -54,6 +54,7 @@ describe('mapInteractor', function () {
     map.displayToGcs = base.displayToGcs;
     map.info = info;
     map._zoomCallback = function () {};
+    map.transition = function () {};
     return map;
   }
 
@@ -384,6 +385,247 @@ describe('mapInteractor', function () {
         }
       );
       expect(map.info.zoom).toBe(0);
+    });
+  });
+
+  describe('click events', function () {
+    it('not triggered when disabled', function () {
+      var map = mockedMap('#mapNode1'),
+          interactor = geo.mapInteractor({
+            map: map,
+            click: {
+              enabled: false
+            }
+          }), triggered = false;
+
+      map.geoOn(geo.event.mouseclick, function () {
+        triggered = true;
+      });
+      interactor.simulateEvent('mousedown', {
+        map: {x: 20, y: 20},
+        button: 'left'
+      });
+      interactor.simulateEvent('mouseup', {
+        map: {x: 20, y: 20},
+        button: 'left'
+      });
+      expect(triggered).toBe(false);
+    });
+    it('triggered by fast click', function () {
+      var map = mockedMap('#mapNode1'),
+          interactor = geo.mapInteractor({
+            map: map,
+            click: {
+              enabled: true
+            }
+          }), triggered = 0;
+
+      map.geoOn(geo.event.mouseclick, function () {
+        triggered += 1;
+      });
+      interactor.simulateEvent('mousedown', {
+        map: {x: 20, y: 20},
+        button: 'left'
+      });
+      interactor.simulateEvent('mouseup', {
+        map: {x: 20, y: 20},
+        button: 'left'
+      });
+      expect(triggered).toBe(1);
+    });
+    it('triggered by fast async click', function (done) {
+      var map = mockedMap('#mapNode1'),
+          interactor = geo.mapInteractor({
+            map: map,
+            click: {
+              enabled: true,
+              cancelOnMove: false,
+              duration: 1000
+            }
+          }), triggered = 0;
+
+      map.geoOn(geo.event.mouseclick, function () {
+        triggered += 1;
+      });
+      interactor.simulateEvent('mousedown', {
+        map: {x: 20, y: 20},
+        button: 'left'
+      });
+      window.setTimeout(function () {
+        interactor.simulateEvent('mouseup', {
+          map: {x: 20, y: 20},
+          button: 'left'
+        });
+        expect(triggered).toBe(1);
+        done();
+      }, 50);
+    });
+    it('not triggered by slow click', function (done) {
+      var map = mockedMap('#mapNode1'),
+          interactor = geo.mapInteractor({
+            map: map,
+            click: {
+              enabled: true,
+              cancelOnMove: false,
+              duration: 10
+            }
+          }), triggered = 0;
+
+      map.geoOn(geo.event.mouseclick, function () {
+        triggered += 1;
+      });
+      interactor.simulateEvent('mousedown', {
+        map: {x: 20, y: 20},
+        button: 'left'
+      });
+      window.setTimeout(function () {
+        interactor.simulateEvent('mouseup', {
+          map: {x: 20, y: 20},
+          button: 'left'
+        });
+        expect(triggered).toBe(0);
+        done();
+      }, 50);
+    });
+    it('triggered by move then click', function () {
+      var map = mockedMap('#mapNode1'),
+          interactor = geo.mapInteractor({
+            map: map,
+            click: {
+              enabled: true,
+              cancelOnMove: false,
+              duration: 500
+            }
+          }), triggered = 0;
+
+      map.geoOn(geo.event.mouseclick, function () {
+        triggered += 1;
+      });
+      interactor.simulateEvent('mousedown', {
+        map: {x: 20, y: 20},
+        button: 'left'
+      });
+      interactor.simulateEvent('mousemove', {
+        map: {x: 30, y: 30},
+        button: 'left'
+      });
+      interactor.simulateEvent('mouseup', {
+        map: {x: 30, y: 30},
+        button: 'left'
+      });
+      expect(triggered).toBe(1);
+    });
+    it('not triggered by move then click', function () {
+      var map = mockedMap('#mapNode1'),
+          interactor = geo.mapInteractor({
+            map: map,
+            click: {
+              enabled: true,
+              cancelOnMove: true,
+              duration: 500
+            }
+          }), triggered = 0;
+
+      map.geoOn(geo.event.mouseclick, function () {
+        triggered += 1;
+      });
+      interactor.simulateEvent('mousedown', {
+        map: {x: 20, y: 20},
+        button: 'left'
+      });
+      interactor.simulateEvent('mousemove', {
+        map: {x: 30, y: 30},
+        button: 'left'
+      });
+      interactor.simulateEvent('mouseup', {
+        map: {x: 30, y: 30},
+        button: 'left'
+      });
+      expect(triggered).toBe(0);
+    });
+    it('not triggered by disabled button', function () {
+      var map = mockedMap('#mapNode1'),
+          interactor = geo.mapInteractor({
+            map: map,
+            click: {
+              enabled: true,
+              cancelOnMove: true,
+              duration: 500,
+              buttons: {left: false}
+            }
+          }), triggered = 0;
+
+      map.geoOn(geo.event.mouseclick, function () {
+        triggered += 1;
+      });
+      interactor.simulateEvent('mousedown', {
+        map: {x: 20, y: 20},
+        button: 'left'
+      });
+      interactor.simulateEvent('mouseup', {
+        map: {x: 20, y: 20},
+        button: 'left'
+      });
+      expect(triggered).toBe(0);
+      interactor.simulateEvent('mousedown', {
+        map: {x: 20, y: 20},
+        button: 'right'
+      });
+      interactor.simulateEvent('mouseup', {
+        map: {x: 20, y: 20},
+        button: 'right'
+      });
+      expect(triggered).toBe(1);
+    });
+    it('does not trigger a pan', function () {
+      var map = mockedMap('#mapNode1'),
+          interactor = geo.mapInteractor({
+            map: map,
+            click: {
+              enabled: true,
+              cancelOnMove: false
+            }
+          });
+      interactor.simulateEvent('mousedown', {
+        map: {x: 20, y: 20},
+        button: 'left'
+      });
+      interactor.simulateEvent('mousemove', {
+        map: {x: 30, y: 30},
+        button: 'left'
+      });
+      interactor.simulateEvent('mouseup', {
+        map: {x: 30, y: 30},
+        button: 'left'
+      });
+      expect(map.info.pan).toBe(0);
+    });
+    it('detaches document level handlers', function () {
+      var map = mockedMap('#mapNode1'),
+          interactor = geo.mapInteractor({
+            map: map,
+            click: {
+              enabled: true,
+              cancelOnMove: false
+            }
+          }), ncalls = 0;
+      interactor.simulateEvent('mousedown', {
+        map: {x: 20, y: 20},
+        button: 'left'
+      });
+      interactor.simulateEvent('mousemove', {
+        map: {x: 30, y: 30},
+        button: 'left'
+      });
+      $(document).on('testevent.geojs', function () {
+        ncalls += 1;
+      });
+      interactor.simulateEvent('mouseup', {
+        map: {x: 30, y: 30},
+        button: 'left'
+      });
+      $(document).trigger('testevent');
+      expect(ncalls).toBe(0);
     });
   });
 });

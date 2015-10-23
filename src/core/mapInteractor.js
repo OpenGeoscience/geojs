@@ -26,7 +26,8 @@ geo.mapInteractor = function (args) {
       m_disableThrottle = true,
       m_selectionLayer = null,
       m_selectionPlane = null,
-      m_paused = false;
+      m_paused = false,
+      m_clickMaybe = false;
 
   // Helper method to decide if the current button/modifiers match a set of
   // conditions.
@@ -97,6 +98,12 @@ geo.mapInteractor = function (args) {
       spring: {
         enabled: false,
         springConstant: 0.00005
+      },
+      click: {
+        enabled: true,
+        buttons: {left: true, right: true, middle: true},
+        duration: 0,
+        cancelOnMove: true
       }
     },
     m_options
@@ -153,6 +160,19 @@ geo.mapInteractor = function (args) {
   //   spring: {
   //     enabled: true | false,
   //     springConstant: number,
+  //   }
+  //
+  //   // enable the "click" event
+  //   // A click will be registered when a mouse down is followed
+  //   // by a mouse up in less than the given number of milliseconds
+  //   // and the standard handler will *not* be called
+  //   // If the duration is <= 0, then clicks will only be canceled by
+  //   // a mousemove.
+  //   click: {
+  //     enabled: true | false,
+  //     buttons: {'left': true, 'right': true, 'middle': true}
+  //     duration: 0,
+  //     cancelOnMove: true // cancels click if the mouse is moved before release
   //   }
   // }
 
@@ -553,6 +573,17 @@ geo.mapInteractor = function (args) {
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
 
+    if (m_options.click.enabled &&
+        (!m_mouse.buttons.left || m_options.click.buttons.left) &&
+        (!m_mouse.buttons.right || m_options.click.buttons.right) &&
+        (!m_mouse.buttons.middle || m_options.click.buttons.middle)) {
+      m_clickMaybe = true;
+      if (m_options.click.duration > 0) {
+        window.setTimeout(function () {
+          m_clickMaybe = false;
+        }, m_options.click.duration);
+      }
+    }
     if (eventMatch(m_options.panMoveButton, m_options.panMoveModifiers)) {
       action = 'pan';
     } else if (eventMatch(m_options.zoomMoveButton, m_options.zoomMoveModifiers)) {
@@ -614,6 +645,14 @@ geo.mapInteractor = function (args) {
       // coordinates will be captured by the document handler.
       return;
     }
+
+    if (m_options.click.cancelOnMove) {
+      m_clickMaybe = false;
+    }
+    if (m_clickMaybe) {
+      return;
+    }
+
     m_this._getMousePosition(evt);
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
@@ -635,6 +674,13 @@ geo.mapInteractor = function (args) {
     m_this._getMousePosition(evt);
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
+
+    if (m_options.click.cancelOnMove) {
+      m_clickMaybe = false;
+    }
+    if (m_clickMaybe) {
+      return;
+    }
 
     if (!m_state.action) {
       // This shouldn't happen
@@ -761,6 +807,7 @@ geo.mapInteractor = function (args) {
       return;
     }
 
+    m_clickMaybe = false;
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
 
@@ -803,10 +850,34 @@ geo.mapInteractor = function (args) {
       return;
     }
 
+    if (m_clickMaybe) {
+      m_this._handleMouseClick(evt);
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Handle event when a mouse click is detected.  A mouse click is a simulated
+   * event that occurs when the time between a mouse down and mouse up
+   * is less than the configured duration and (optionally) if no mousemove
+   * events were triggered in the interim.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._handleMouseClick = function (evt) {
+
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
 
-    // fire a click event here
+    // cancel any ongoing pan action
+    m_this.cancel('pan');
+
+    // unbind temporary handlers on document
+    $(document).off('.geojs');
+
+    // reset click detector variable
+    m_clickMaybe = false;
+
+    // fire a click event
     m_this.map().geoTrigger(geo.event.mouseclick, m_this.mouse());
   };
 
