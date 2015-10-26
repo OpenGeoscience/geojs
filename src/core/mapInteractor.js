@@ -25,7 +25,8 @@ geo.mapInteractor = function (args) {
       m_wait = false,
       m_disableThrottle = true,
       m_selectionLayer = null,
-      m_selectionPlane = null;
+      m_selectionPlane = null,
+      m_paused = false;
 
   // Helper method to decide if the current button/modifiers match a set of
   // conditions.
@@ -539,6 +540,10 @@ geo.mapInteractor = function (args) {
   this._handleMouseDown = function (evt) {
     var action = null;
 
+    if (m_paused) {
+      return;
+    }
+
     if (m_state.action === 'momentum') {
       // cancel momentum on click
       m_state = {};
@@ -599,6 +604,11 @@ geo.mapInteractor = function (args) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._handleMouseMove = function (evt) {
+
+    if (m_paused) {
+      return;
+    }
+
     if (m_state.action) {
       // If currently performing a navigation action, the mouse
       // coordinates will be captured by the document handler.
@@ -617,6 +627,11 @@ geo.mapInteractor = function (args) {
   ////////////////////////////////////////////////////////////////////////////
   this._handleMouseMoveDocument = function (evt) {
     var dx, dy, selectionObj;
+
+    if (m_paused) {
+      return;
+    }
+
     m_this._getMousePosition(evt);
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
@@ -742,6 +757,10 @@ geo.mapInteractor = function (args) {
   this._handleMouseUpDocument = function (evt) {
     var selectionObj, oldAction;
 
+    if (m_paused) {
+      return;
+    }
+
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
 
@@ -779,6 +798,11 @@ geo.mapInteractor = function (args) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._handleMouseUp = function (evt) {
+
+    if (m_paused) {
+      return;
+    }
+
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
 
@@ -793,6 +817,10 @@ geo.mapInteractor = function (args) {
   ////////////////////////////////////////////////////////////////////////////
   this._handleMouseWheel = function (evt) {
     var zoomFactor, direction;
+
+    if (m_paused) {
+      return;
+    }
 
     // try to normalize deltas using the wheel event standard:
     //   https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent
@@ -969,6 +997,24 @@ geo.mapInteractor = function (args) {
   ////////////////////////////////////////////////////////////////////////////
   this.state = function () {
     return $.extend(true, {}, m_state);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get or set the pause state of the interactor, which
+   * ignores all native mouse and keyboard events.
+   *
+   * @param {bool} [value] The pause state to set or undefined to return the
+   *                        current state.
+   * @returns {bool|this}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.pause = function (value) {
+    if (value === undefined) {
+      return m_paused;
+    }
+    m_paused = !!value;
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////

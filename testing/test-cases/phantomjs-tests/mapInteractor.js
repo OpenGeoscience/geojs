@@ -106,7 +106,7 @@ describe('mapInteractor', function () {
       panMoveButton: 'left',
       panWheelEnabled: false,
       zoomMoveButton: null,
-      zoomWheelEnabled: false,
+      zoomWheelEnabled: false
     });
 
     // initiate a pan
@@ -184,14 +184,14 @@ describe('mapInteractor', function () {
       panMoveButton: null,
       panWheelEnabled: false,
       zoomMoveButton: null,
-      zoomWheelEnabled: true,
+      zoomWheelEnabled: true
     });
 
     // initialize the mouse position
     interactor.simulateEvent(
       'mousemove',
       {
-        map: {x: 20, y: 20},
+        map: {x: 20, y: 20}
       }
     );
 
@@ -217,7 +217,7 @@ describe('mapInteractor', function () {
       panMoveButton: null,
       panWheelEnabled: false,
       zoomMoveButton: 'right',
-      zoomWheelEnabled: false,
+      zoomWheelEnabled: false
     });
 
     // initialize the zoom
@@ -256,5 +256,134 @@ describe('mapInteractor', function () {
     // check the zoom event was called
     expect(map.info.zoom).toBe(2);
     expect(map.info.zoomArgs).toBe(z - 15 / 120);
+  });
+
+  describe('pause state', function () {
+    it('defaults', function () {
+      expect(geo.mapInteractor().pause()).toBe(false);
+    });
+    it('getter/setter', function () {
+      var interactor = geo.mapInteractor();
+      expect(interactor.pause(true)).toBe(interactor);
+      expect(interactor.pause()).toBe(true);
+      expect(interactor.pause(true)).toBe(interactor);
+      expect(interactor.pause()).toBe(true);
+      expect(interactor.pause(false)).toBe(interactor);
+      expect(interactor.pause()).toBe(false);
+      expect(interactor.pause(false)).toBe(interactor);
+      expect(interactor.pause()).toBe(false);
+      expect(interactor.pause(true)).toBe(interactor);
+      expect(interactor.pause()).toBe(true);
+    });
+    it('ignores mouse down', function () {
+      var map = mockedMap('#mapNode1'),
+          interactor = geo.mapInteractor({map: map});
+
+      interactor.pause(true);
+      interactor.simulateEvent(
+        'mousedown',
+        {
+          map: {x: 20, y: 20},
+          button: 'left'
+        }
+      );
+      interactor.pause(false);
+      interactor.simulateEvent(
+        'mousemove',
+        {
+          map: {x: 25, y: 25},
+          button: 'left'
+        }
+      );
+      interactor.simulateEvent(
+        'mouseup',
+        {
+          map: {x: 25, y: 25},
+          button: 'left'
+        }
+      );
+      expect(map.info.pan).toBe(0);
+    });
+    it('ignores mouse move', function () {
+      var map = mockedMap('#mapNode1'),
+          interactor = geo.mapInteractor({map: map});
+
+      interactor.simulateEvent(
+        'mousedown',
+        {
+          map: {x: 20, y: 20},
+          button: 'left'
+        }
+      );
+      interactor.pause(true);
+      interactor.simulateEvent(
+        'mousemove',
+        {
+          map: {x: 25, y: 25},
+          button: 'left'
+        }
+      );
+      interactor.pause(false);
+      interactor.simulateEvent(
+        'mouseup',
+        {
+          map: {x: 20, y: 20},
+          button: 'left'
+        }
+      );
+      expect(map.info.pan).toBe(0);
+    });
+    it('ignores mouse up', function () {
+      var map = mockedMap('#mapNode1'),
+          interactor = geo.mapInteractor({map: map});
+
+      interactor.simulateEvent(
+        'mousedown',
+        {
+          map: {x: 20, y: 20},
+          button: 'left'
+        }
+      );
+      interactor.simulateEvent(
+        'mousemove',
+        {
+          map: {x: 25, y: 25},
+          button: 'left'
+        }
+      );
+      interactor.pause(true);
+      interactor.simulateEvent(
+        'mouseup',
+        {
+          map: {x: 20, y: 20},
+          button: 'left'
+        }
+      );
+      interactor.pause(false);
+      interactor.simulateEvent(
+        'mousemove',
+        {
+          map: {x: 35, y: 35},
+          button: 'left'
+        }
+      );
+      expect(map.info.pan).toBe(2);
+      expect(map.info.panArgs).toEqual({x: 10, y: 10});
+    });
+    it('ignores mouse wheel', function () {
+      var map = mockedMap('#mapNode1'),
+          interactor = geo.mapInteractor({map: map});
+
+      interactor.pause(true);
+      interactor.simulateEvent(
+        'wheel',
+        {
+          map: {x: 20, y: 20},
+          wheelDelta: {x: 20, y: -10},
+          wheelMode: 0
+        }
+      );
+      expect(map.info.zoom).toBe(0);
+    });
   });
 });
