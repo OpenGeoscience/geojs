@@ -17,7 +17,8 @@
     "jquery": "~2.1",
     "proj4": "~2.2",
     "bootstrap": "~3.3.0",
-    "bootswatch": "~3.3"
+    "bootswatch": "~3.3",
+    "vgl": "~0.2"
   },
   "devDependencies": {
     "codemirror": "~4.7.0",
