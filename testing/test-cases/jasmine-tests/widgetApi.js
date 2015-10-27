@@ -11,7 +11,7 @@ describe('widget api', function () {
       x: -98.0,
       y: 39.5
     },
-    zoom: 1
+    zoom: 5
   });
 
   map.createLayer('osm');
@@ -34,7 +34,7 @@ describe('widget api', function () {
   });
 
   it('a widget stuck to albany shouldn\'t be in the viewport ' +
-     'if we pan to moscow', function (done) {
+     'if we pan to moscow', function () {
        var widget = uiLayer.createWidget('dom', {
          position: {
            x: -73.7572,
@@ -42,18 +42,11 @@ describe('widget api', function () {
          }
        });
 
-       map.transition({
-         center: {x: 37.6167, y: 55.7500}
-       });
-
-       map.geoOff(geo.event.transitionend)
-         .geoOn(geo.event.transitionend, function () {
-           expect(widget.isInViewport()).toBe(false);
-           done();
-         });
+       map.center({x: 37.6167, y: 55.7500});
+       expect(widget.isInViewport()).toBe(false);
      });
 
-  it('a widget stuck to albany should be in the viewport if albany is', function (done) {
+  it('a widget stuck to albany should be in the viewport if albany is', function () {
     var widget = uiLayer.createWidget('dom', {
       position: {
         x: -73.7572,
@@ -61,32 +54,19 @@ describe('widget api', function () {
       }
     });
 
-    map.transition({
-      center: {x: -73.7572, y: 42.6525}
-    });
+    map.center({x: -73.7572, y: 42.6525});
+    expect(widget.isInViewport()).toBe(true);
 
-    map.geoOff(geo.event.transitionend)
-      .geoOn(geo.event.transitionend, function () {
-        expect(widget.isInViewport()).toBe(true);
-        done();
-      });
   });
 
-  it('a widget stuck to the top left should always be in the viewport', function (done) {
+  it('a widget stuck to the top left should always be in the viewport', function () {
     var widget = uiLayer.createWidget('dom');
 
     expect($(widget.canvas()).position()).toEqual({top: 0, left: 0});
 
-    map.transition({
-      center: {x: 37.6167, y: 55.7500}
-    });
-
-    map.geoOff(geo.event.transitionend)
-      .geoOn(geo.event.transitionend, function () {
-        expect(widget.isInViewport()).toBe(true);
-        expect($(widget.canvas()).position()).toEqual({top: 0, left: 0});
-        done();
-      });
+    map.center({x: 37.6167, y: 55.7500});
+    expect(widget.isInViewport()).toBe(true);
+    expect($(widget.canvas()).position()).toEqual({top: 0, left: 0});
   });
 
   it('nested widgets should be properly structured', function () {
