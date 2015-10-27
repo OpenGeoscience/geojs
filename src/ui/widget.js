@@ -177,10 +177,10 @@ geo.gui.widget = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.isInViewport = function () {
     var position = m_this.position();
-    var map = m_this.layer().map().node();
+    var layer = m_this.layer();
 
     return ((position.left >= 0 && position.top >= 0) &&
-            (position.left <= map.width() && position.top <= map.height()));
+            (position.left <= layer.width() && position.top <= layer.height()));
   };
 
   if (arg &&

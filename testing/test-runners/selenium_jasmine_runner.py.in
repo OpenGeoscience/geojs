@@ -10,7 +10,6 @@ _baseurl = "@JASMINE_DEPLOY_URL@"
 # query for jasmine to be finished (from run-jasmine.js)
 _done = ' '.join([
     'return',
-    'document.body.querySelector(".symbolSummary .pending") === null &&',
     'document.body.className === "reporter-done";'
 ])
 
