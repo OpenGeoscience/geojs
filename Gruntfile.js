@@ -3,15 +3,7 @@
 module.exports = function (grunt) {
   'use strict';
 
-  /* first check that vgl is checked out */
-  if (!grunt.file.exists('vgl/package.json')) {
-    grunt.fail.fatal(
-      'The vgl submodule not checked out.\n'  +
-      'Please run "git submodule update --init" first.'
-    );
-  }
-
-  var sources, geojsVersion, vgl, geo, port, sourceList, templateData, pkg;
+  var sources, geojsVersion, geo, port, sourceList, templateData, pkg;
 
   pkg = grunt.file.readJSON('package.json');
   geojsVersion = pkg.version;
@@ -33,7 +25,6 @@ module.exports = function (grunt) {
     return files;
   }
 
-  vgl = sources.modules.vgl;
   geo = {
     init: moduleFiles('geo.init'),
     util: moduleFiles('geo.util'),
@@ -46,7 +37,7 @@ module.exports = function (grunt) {
 
   sourceList = Array.prototype.concat(
     geo.init,
-    vgl.files.map(function (f) { return 'src/vgl/' + f; }),
+    ['src/vgl/vgl.js'],
     geo.util,
     geo.core,
     geo.gl,
@@ -111,10 +102,10 @@ module.exports = function (grunt) {
       vgl: {
         files: [
           {
-            src: vgl.files,
+            src: 'vgl.js',
             dest: 'dist/src/vgl/',
             filter: 'isFile',
-            cwd: 'vgl/src/',
+            cwd: 'bower_components/vgl',
             expand: true
           }
         ]
@@ -253,7 +244,6 @@ module.exports = function (grunt) {
       uglify: {
         files: [
           'src/**/*.js',
-          'vgl/src/**/*.js',
           'src/core/version.js.in',
           'Gruntfile.js',
           'sources.json'

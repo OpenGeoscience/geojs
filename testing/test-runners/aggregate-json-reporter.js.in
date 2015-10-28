@@ -3,8 +3,25 @@
 (function () {
     'use strict';
 
+    var ncalls = 0;
+
     function setStatus() {
         $('body').attr('class', 'reporter-done');
+    }
+
+    /**
+     * Wait for jasmine to be done, then do the setStatus
+     */
+    function wait() {
+        ncalls += 1;
+        if (!window.jsApiReporter || window.jsApiReporter.finished === true) {
+            setStatus();
+            return;
+        }
+        if (ncalls > 15) {
+            throw new Error('Jasmine test did not complete in time.');
+        }
+        window.setTimeout(wait, 1000);
     }
 
     function reporter(cov) {
@@ -33,11 +50,11 @@
                 console.log('status:' + status);
                 console.log('error:' + error);
                 console.log('Failed to post coverage data to the server');
-                setStatus();
+                wait();
             },
             success: function () {
                 console.log('Posted data to server successfully.');
-                setStatus();
+                wait();
             }
         });
     }
@@ -46,7 +63,7 @@
     if (blanket) {
         blanket.options('reporter', reporter);
     } else {
-        $(setStatus);
+        $(wait);
     }
 
 }());

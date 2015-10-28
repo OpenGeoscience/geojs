@@ -20,13 +20,7 @@ geo.gui.uiLayer = function (arg) {
   geo.layer.call(this, arg);
 
   var m_this = this,
-      s_init = this._init,
       s_exit = this._exit;
-
-  this._init = function () {
-    s_init();
-    m_this.node().css('position', 'relative');
-  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
