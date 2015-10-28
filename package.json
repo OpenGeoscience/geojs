@@ -37,7 +37,8 @@
     "xmlbuilder": "^3.1.0"
   },
   "scripts": {
-    "postinstall": "bower --quiet install && grunt"
+    "postinstall": "bower --quiet install",
+    "build": "grunt init library"
   },
   "keywords": [
     "map",

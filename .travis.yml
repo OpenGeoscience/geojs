@@ -13,7 +13,8 @@ before_install:
 
 script:
     - npm install
-    - ./node_modules/.bin/grunt default docs
+    - npm run build
+    - ./node_modules/.bin/grunt docs
     - ./node_modules/.bin/grunt serve-test &
     - sleep 1
     - mkdir _build
