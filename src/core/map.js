@@ -1024,6 +1024,14 @@ geo.map = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Get the layers contained in the map.
+   * Alias of {@linkcode geo.sceneObject.children}.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.layers = this.children;
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Update the attribution notice displayed on the bottom right corner of
    * the map.  The content of this notice is managed by individual layers.
    * This method queries all of the visible layers and joins the individual

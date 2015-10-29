@@ -4,11 +4,13 @@
  * @extends geo.sceneObject
  * @param {Object?} arg An options argument
  * @param {string} arg.attribution An attribution string to display
+ * @param {number} arg.zIndex The z-index to assign to the layer (defaults
+ *   to the index of the layer inside the map)
  * @returns {geo.layer}
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.layer = function (arg) {
-  "use strict";
+  'use strict';
 
   if (!(this instanceof geo.layer)) {
     return new geo.layer(arg);
@@ -23,13 +25,13 @@ geo.layer = function (arg) {
   //////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       s_exit = this._exit,
-      m_style = arg.style === undefined ? {"opacity": 0.5,
-                                           "color": [0.8, 0.8, 0.8],
-                                           "visible": true,
-                                           "bin": 100} : arg.style,
+      m_style = arg.style === undefined ? {'opacity': 0.5,
+                                           'color': [0.8, 0.8, 0.8],
+                                           'visible': true,
+                                           'bin': 100} : arg.style,
       m_id = arg.id === undefined ? geo.layer.newLayerId() : arg.id,
-      m_name = "",
-      m_gcs = "EPSG:4326",
+      m_name = '',
+      m_gcs = 'EPSG:4326',
       m_timeRange = null,
       m_source = arg.source || null,
       m_map = arg.map === undefined ? null : arg.map,
@@ -42,13 +44,123 @@ geo.layer = function (arg) {
       m_canvas = null,
       m_renderer = null,
       m_initialized = false,
-      m_rendererName = arg.renderer === undefined ? "vgl" : arg.renderer,
+      m_rendererName = arg.renderer === undefined ? 'vgl' : arg.renderer,
       m_dataTime = geo.timestamp(),
       m_updateTime = geo.timestamp(),
       m_drawTime = geo.timestamp(),
       m_sticky = arg.sticky === undefined ? true : arg.sticky,
       m_active = arg.active === undefined ? true : arg.active,
-      m_attribution = arg.attribution || null;
+      m_attribution = arg.attribution || null,
+      m_zIndex;
+
+  if (!m_map) {
+    throw new Error('Layers must be initialized on a map.');
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get or set the z-index of the layer.  The z-index controls the display
+   * order of the layers in much the same way as the CSS z-index property.
+   *
+   * @param {number} [zIndex] The new z-index
+   * @returns {number|this}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.zIndex = function (zIndex) {
+    if (zIndex === undefined) {
+      return m_zIndex;
+    }
+    m_zIndex = zIndex;
+    m_node.css('z-index', m_zIndex);
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Bring the layer above the given number of layers.  This will rotate the
+   * current z-indices for this and the next `n` layers.
+   *
+   * @param {number} [n=1] The number of positions to move
+   * @returns {this}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.moveUp = function (n) {
+    var order, i, me = null, tmp, sign;
+
+    // set the default
+    if (n === undefined) {
+      n = 1;
+    }
+
+    // set the sort direction that controls if we are moving up
+    // or down the z-index
+    sign = 1;
+    if (n < 0) {
+      sign = -1;
+      n = -n;
+    }
+
+    // get a sorted list of layers
+    order = m_this.map().layers().sort(
+      function (a, b) { return sign * (a.zIndex() - b.zIndex()); }
+    );
+
+    for (i = 0; i < order.length; i += 1) {
+      if (me === null) {
+        // loop until we get to the current layer
+        if (order[i] === m_this) {
+          me = i;
+        }
+      } else if (i - me <= n) {
+        // swap the next n layers
+        tmp = m_this.zIndex();
+        m_this.zIndex(order[i].zIndex());
+        order[i].zIndex(tmp);
+      } else {
+        // all the swaps are done now
+        break;
+      }
+    }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Bring the layer below the given number of layers.  This will rotate the
+   * current z-indices for this and the previous `n` layers.
+   *
+   * @param {number} [n=1] The number of positions to move
+   * @returns {this}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.moveDown = function (n) {
+    if (n === undefined) {
+      n = 1;
+    }
+    return m_this.moveUp(-n);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Bring the layer to the top of the map layers.
+   *
+   * @returns {this}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.moveToTop = function () {
+    return m_this.moveUp(m_this.map().children().length - 1);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Bring the layer to the bottom of the map layers.
+   *
+   * @returns {this}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.moveToBottom = function () {
+    return m_this.moveDown(m_this.map().children().length - 1);
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -217,17 +329,12 @@ geo.layer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get/Set map of the layer
+   * Get the map that the layer is connected to
+   * @returns {geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.map = function (val) {
-    if (val === undefined) {
-      return m_map;
-    }
-    m_map = val;
-    m_map.node().append(m_node);
-    m_this.modified();
-    return m_this;
+  this.map = function () {
+    return m_map;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -370,18 +477,7 @@ geo.layer = function (arg) {
       return m_this;
     }
 
-    // Create top level div for the layer
-    m_node = $(document.createElement("div"));
-    m_node.attr("id", m_name);
-    // TODO: need to position according to offsets from the map element
-    //       and maybe respond to events in case the map element moves
-    //       around the page.
-    m_node.css("position", "absolute");
-
-    if (m_map) {
-      m_map.node().append(m_node);
-
-    }
+    m_map.node().append(m_node);
 
     /* Pass along the arguments, but not the map reference */
     var options = $.extend({}, arg);
@@ -397,7 +493,7 @@ geo.layer = function (arg) {
     }
 
     if (!m_this.active()) {
-      m_node.css("pointerEvents", "none");
+      m_node.css('pointerEvents', 'none');
     }
 
     m_initialized = true;
@@ -414,7 +510,6 @@ geo.layer = function (arg) {
     m_renderer._exit();
     m_node.off();
     m_node.remove();
-    m_node = null;
     arg = {};
     m_canvas = null;
     m_renderer = null;
@@ -467,6 +562,19 @@ geo.layer = function (arg) {
     return m_height;
   };
 
+  if (arg.zIndex === undefined) {
+    arg.zIndex = m_map.children().length;
+  }
+  m_zIndex = arg.zIndex;
+
+  // Create top level div for the layer
+  m_node = $(document.createElement('div'));
+  m_node.attr('id', m_name);
+  m_node.css('position', 'absolute');
+
+  // set the z-index
+  m_this.zIndex(m_zIndex);
+
   return this;
 };
 
@@ -477,7 +585,7 @@ geo.layer = function (arg) {
  * @returns {number}
  */
 geo.layer.newLayerId = (function () {
-    "use strict";
+    'use strict';
     var currentId = 1;
     return function () {
       var id = currentId;
@@ -491,11 +599,11 @@ geo.layer.newLayerId = (function () {
  * General object specification for feature types.
  * @typedef geo.layer.spec
  * @type {object}
- * @property {string} [type="feature"] For feature compatibility
+ * @property {string} [type='feature'] For feature compatibility
  * with more than one kind of creatable layer
  * @property {object[]} [data=[]] The default data array to
  * apply to each feature if none exists
- * @property {string} [renderer="vgl"] The renderer to use
+ * @property {string} [renderer='vgl'] The renderer to use
  * @property {geo.feature.spec[]} [features=[]] Features
  * to add to the layer
  */
@@ -508,26 +616,26 @@ geo.layer.newLayerId = (function () {
  * @returns {geo.layer|null}
  */
 geo.layer.create = function (map, spec) {
-  "use strict";
+  'use strict';
 
   spec = spec || {};
 
   // add osmLayer later
-  spec.type = "feature";
-  if (spec.type !== "feature") {
-    console.warn("Unsupported layer type");
+  spec.type = 'feature';
+  if (spec.type !== 'feature') {
+    console.warn('Unsupported layer type');
     return null;
   }
 
-  spec.renderer = spec.renderer || "vgl";
-  if (spec.renderer !== "d3" && spec.renderer !== "vgl") {
-    console.warn("Invalid renderer");
+  spec.renderer = spec.renderer || 'vgl';
+  if (spec.renderer !== 'd3' && spec.renderer !== 'vgl') {
+    console.warn('Invalid renderer');
     return null;
   }
 
   var layer = map.createLayer(spec.type, spec);
   if (!layer) {
-    console.warn("Unable to create a layer");
+    console.warn('Unable to create a layer');
     return null;
   }
 
