@@ -109,18 +109,18 @@ geo.osmLayer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Returns an OSM tile server formatting function from a standard format
-   * string: replaces <zoom>, <x>, and <y>.
+   * string: replaces {s}, {z}, {x}, and {y}.
    *
    * @param {string} base The tile format string
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
   m_tileUrlFromTemplate = function (base) {
-    return function (zoom, x, y) {
-      return base.replace('<s>', m_this._getSubdomain(x, y))
-        .replace('<zoom>', zoom)
-        .replace('<x>', x)
-        .replace('<y>', y);
+    return function (z, x, y) {
+      return base.replace('{s}', m_this._getSubdomain(x, y))
+        .replace('{z}', z)
+        .replace('{x}', x)
+        .replace('{y}', y);
     };
   };
 
