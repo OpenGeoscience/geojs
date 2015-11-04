@@ -306,6 +306,7 @@ describe('geo.tileLayer', function () {
       tileWidth: 128,
       tileHeight: 1024,
       cacheSize: 100,
+      keepLower: true,
       wrapX: false,
       wrapY: true,
       url: function () {},
@@ -895,7 +896,7 @@ describe('geo.tileLayer', function () {
 
     describe('_canPurge', function () {
       it('covered tile', function () {
-        var l = geo.tileLayer({map: map()});
+        var l = geo.tileLayer({map: map(), keepLower: false});
         l._isCovered = function () {return true;};
         l._outOfBounds = function () {return false;};
         expect(l._canPurge({index: {level: 0}}, {}, 1)).toBe(true);
@@ -907,13 +908,13 @@ describe('geo.tileLayer', function () {
         expect(l._canPurge({index: {level: 1}}, {}, 1)).toBe(false);
       });
       it('out of bounds tile', function () {
-        var l = geo.tileLayer({map: map()});
+        var l = geo.tileLayer({map: map(), keepLower: false});
         l._isCovered = function () {return false;};
         l._outOfBounds = function () {return true;};
         expect(l._canPurge({}, {})).toBe(true);
       });
       it('non-purgeable tile', function () {
-        var l = geo.tileLayer({map: map()});
+        var l = geo.tileLayer({map: map(), keepLower: false});
         l._isCovered = function () {return false;};
         l._outOfBounds = function () {return false;};
         expect(l._canPurge({}, {})).toBe(false);
@@ -972,7 +973,7 @@ describe('geo.tileLayer', function () {
         });
 
         tiles = l._getTiles(1, {left: 50, right: 500, bottom: 50, top: 500});
-        expect(tiles.length).toBe(4);
+        expect(tiles.length).toBe(5);
         tiles.forEach(function (tile) {
           expect(l.isValid(tile.index)).toBe(true);
         });
@@ -1140,8 +1141,9 @@ describe('geo.tileLayer', function () {
     });
 
     describe('purging inactive tiles', function () {
-      function setup(bds) {
-        var l = layer_html({url: function () {return '/data/white.jpg';}});
+      function setup(bds, opts) {
+        var l = layer_html($.extend(
+            true, {url: function () {return '/data/white.jpg';}}, opts || {}));
         l._getViewBounds = function () {
           return bds || {
             left: -50,
@@ -1175,7 +1177,14 @@ describe('geo.tileLayer', function () {
         expect(l.activeTiles).toEqual({});
       });
       it('covered', function () {
-        var l = setup(), tiles, active;
+        var bds = {
+          left: -50,
+          right: 290,
+          bottom: 150,
+          top: 300,
+          level: 1
+        };
+        var l = setup(bds, {keepLower: false}), tiles, active;
 
         tiles = [
           l._getTileCached({x: 0, y: 0, level: 0}),

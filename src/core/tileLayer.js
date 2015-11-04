@@ -46,8 +46,12 @@
    * @param {number} [options.maxLevel=18]   The maximum zoom level available
    * @param {number} [options.tileOverlap=0] Number of pixels of overlap between tiles
    * @param {number} [options.tileWidth=256] The tile width as displayed without overlap
-   * @param {number} [options.tileHeigh=256] The tile height as displayed without overlap
-   * @param {number} [options.cacheSize=200] The maximum number of tiles to cache
+   * @param {number} [options.tileHeight=256] The tile height as displayed without overlap
+   * @param {number} [options.cacheSize=400] The maximum number of tiles to
+   *            cache.  The default is 200 if keepLower is false.
+   * @param {bool}   [options.keepLower=true] Keep lower zoom level tiles when
+   *            showing high zoom level tiles.  This uses more memory but
+   *            results in smoother transitions.
    * @param {bool}   [options.wrapX=true]    Wrap in the x-direction
    * @param {bool}   [options.wrapY=false]   Wrap in the y-direction
    * @param {number} [options.minX=0]        The minimum world coordinate in X
@@ -83,6 +87,10 @@
     geo.featureLayer.call(this, options);
 
     options = $.extend(true, {}, this.constructor.defaults, options || {});
+    if (!options.cacheSize) {
+      // this size should be sufficient for a 4k display
+      options.cacheSize = options.keepLower ? 400 : 200;
+    }
 
     var lastZoom = null, lastX = null, lastY = null, s_init = this._init,
         _deferredPurge = null;
@@ -322,43 +330,46 @@
      * ordered by loading priority (center tiles first).
      *
      * @protected
-     * @param {number} level The zoom level
+     * @param {number} maxLevel The zoom level
      * @param {object} bounds The map bounds
      * @param {boolean} sorted Return a sorted list
      * @returns {geo.tile[]} An array of tile objects
      */
-    this._getTiles = function (level, bounds, sorted) {
+    this._getTiles = function (maxLevel, bounds, sorted) {
       var i, j, tiles = [], index, nTilesLevel,
-          start, end, indexRange, source, center;
+          start, end, indexRange, source, center,
+          level, minLevel = this._options.keepLower ? 0 : maxLevel;
 
-      // get the tile range to fetch
-      indexRange = this._getTileRange(level, bounds);
-      start = indexRange.start;
-      end = indexRange.end;
+      for (level = minLevel; level <= maxLevel; level += 1) {
+        // get the tile range to fetch
+        indexRange = this._getTileRange(level, bounds);
+        start = indexRange.start;
+        end = indexRange.end;
 
-      // total number of tiles existing at this level
-      nTilesLevel = this.tilesAtZoom(level);
+        // total number of tiles existing at this level
+        nTilesLevel = this.tilesAtZoom(level);
 
-      // loop over the tile range
-      index = {level: level};
-      index.nx = nTilesLevel.x;
-      index.ny = nTilesLevel.y;
+        // loop over the tile range
+        index = {level: level};
+        index.nx = nTilesLevel.x;
+        index.ny = nTilesLevel.y;
 
-      for (i = start.x; i <= end.x; i += 1) {
-        index.x = i;
-        for (j = start.y; j <= end.y; j += 1) {
-          index.y = j;
+        for (i = start.x; i <= end.x; i += 1) {
+          index.x = i;
+          for (j = start.y; j <= end.y; j += 1) {
+            index.y = j;
 
-          source = $.extend({}, index);
-          if (this._options.wrapX) {
-            source.x = modulo(index.x, index.nx);
-          }
-          if (this._options.wrapY) {
-            source.y = modulo(index.y, index.ny);
-          }
+            source = $.extend({}, index);
+            if (this._options.wrapX) {
+              source.x = modulo(index.x, index.nx);
+            }
+            if (this._options.wrapY) {
+              source.y = modulo(index.y, index.ny);
+            }
 
-          if (this.isValid(source)) {
-            tiles.push(this._getTileCached($.extend({}, index), source));
+            if (this.isValid(source)) {
+              tiles.push(this._getTileCached($.extend({}, index), source));
+            }
           }
         }
       }
@@ -903,10 +914,14 @@
       /* We may want to add an (n) tile edge buffer so we appear more
        * responsive */
       var to = this._options.tileOffset(tile.index.level);
-      return tile.bottom - to.y > bounds.top ||
-             tile.left - to.x   > bounds.right ||
-             tile.top - to.y    < bounds.bottom ||
-             tile.right - to.x  < bounds.left;
+      var scale = 1;
+      if (tile.index.level !== bounds.level) {
+        scale = Math.pow(2, (bounds.level || 0) - (tile.index.level || 0));
+      }
+      return (tile.bottom - to.y) * scale > bounds.top ||
+             (tile.left - to.x) * scale   > bounds.right ||
+             (tile.top - to.y) * scale    < bounds.bottom ||
+             (tile.right - to.x) * scale  < bounds.left;
     };
 
     /**
@@ -926,8 +941,15 @@
      * @returns {boolean}
      */
     this._canPurge = function (tile, bounds, zoom) {
-      if (this._isCovered(tile) && zoom !== tile.index.level) {
-        return true;
+      if (this._options.keepLower) {
+        zoom = zoom || 0;
+        if (zoom < tile.index.level) {
+          return true;
+        }
+      } else {
+        if (this._isCovered(tile) && zoom !== tile.index.level) {
+          return true;
+        }
       }
       if (bounds) {
         return this._outOfBounds(tile, bounds);
@@ -999,7 +1021,8 @@
       void(level);
       return {x: 0, y: 0};
     },
-    cacheSize: 200,
+    keepLower: true,
+    // cacheSize: 400,  // set depending on based on keepLower
     tileRounding: Math.floor,
     attribution: '',
     animationDuration: 0

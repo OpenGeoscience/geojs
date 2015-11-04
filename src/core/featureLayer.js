@@ -106,12 +106,16 @@ geo.featureLayer = function (arg) {
 
     m_this.geoOn(geo.event.pan, function (event) {
       m_this._update({event: event});
-      m_this.renderer()._render();
+      if (m_this.renderer()) {
+        m_this.renderer()._render();
+      }
     });
 
     m_this.geoOn(geo.event.zoom, function (event) {
       m_this._update({event: event});
-      m_this.renderer()._render();
+      if (m_this.renderer()) {
+        m_this.renderer()._render();
+      }
     });
 
     return m_this;
