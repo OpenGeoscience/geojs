@@ -43,6 +43,7 @@ geo.osmLayer = function (arg) {
     m_numberOfCachedTiles = 0,
     m_tileCacheSize = 100,
     m_baseUrl = 'http://tile.openstreetmap.org/',
+    m_subdomains = 'abc',
     m_mapOpacity = 1.0,
     m_imageFormat = 'png',
     m_updateTimerId = null,
@@ -80,6 +81,14 @@ geo.osmLayer = function (arg) {
     m_crossOrigin = 'use-credentials';
   }
 
+  if (arg && arg.subdomains !== undefined) {
+    m_subdomains = arg.subdomains;
+  }
+
+  if (typeof m_subdomains === 'string') {
+    m_subdomains = m_subdomains.split('');
+  }
+
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Returns a url string containing the requested tile.  This default
@@ -100,17 +109,18 @@ geo.osmLayer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Returns an OSM tile server formatting function from a standard format
-   * string: replaces <zoom>, <x>, and <y>.
+   * string: replaces {s}, {z}, {x}, and {y}.
    *
    * @param {string} base The tile format string
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
   m_tileUrlFromTemplate = function (base) {
-    return function (zoom, x, y) {
-      return base.replace('<zoom>', zoom)
-        .replace('<x>', x)
-        .replace('<y>', y);
+    return function (z, x, y) {
+      return base.replace('{s}', m_this._getSubdomain(x, y))
+        .replace('{z}', z)
+        .replace('{x}', x)
+        .replace('{y}', y);
     };
   };
 
@@ -814,6 +824,16 @@ geo.osmLayer = function (arg) {
     this.tileUrl(arg.tileUrl);
   }
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get tile subdomain
+   *
+   * @returns {String}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._getSubdomain = function (x, y) {
+    return m_subdomains[Math.abs(x + y) % m_subdomains.length];
+  };
 
   return this;
 };
