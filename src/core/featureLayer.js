@@ -94,6 +94,10 @@ geo.featureLayer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function () {
+    if (m_this.initialized()) {
+      return m_this;
+    }
+
     /// Call super class init
     s_init.call(m_this);
 

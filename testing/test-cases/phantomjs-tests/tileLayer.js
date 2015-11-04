@@ -310,6 +310,7 @@ describe('geo.tileLayer', function () {
       wrapX: false,
       wrapY: true,
       url: function () {},
+      subdomains: ['1', '2', '3'],
       animationDuration: 10,
       tileRounding: function () {},
       attribution: 'My awesome layer',
@@ -719,7 +720,7 @@ describe('geo.tileLayer', function () {
         map: map(),
         tileWidth: 110,
         tileHeight: 120,
-        url: function (i) {return i;}
+        url: function (x, y, z) {return {x: x, y: y, level: z};}
       });
 
       t = l._getTile({x: 1, y: 1, level: 0}, {x: 0, y: 0, level: 0});

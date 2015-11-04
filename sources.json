@@ -73,6 +73,7 @@
         "init.js",
         "object.js",
         "d3Renderer.js",
+        "tileLayer.js",
         "pointFeature.js",
         "lineFeature.js",
         "pathFeature.js",

@@ -33,6 +33,7 @@ geo.layer = function (arg) {
       m_renderer = null,
       m_initialized = false,
       m_rendererName = arg.renderer === undefined ? 'vgl' : arg.renderer,
+      m_dataTime = geo.timestamp(),
       m_sticky = arg.sticky === undefined ? true : arg.sticky,
       m_active = arg.active === undefined ? true : arg.active,
       m_attribution = arg.attribution || null,
@@ -41,6 +42,17 @@ geo.layer = function (arg) {
   if (!m_map) {
     throw new Error('Layers must be initialized on a map.');
   }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get the name of the renderer.
+   *
+   * @returns {string}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.rendererName = function () {
+    return m_rendererName;
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -240,6 +252,40 @@ geo.layer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.canvas = function () {
     return m_canvas;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get the canvas as a jquery element.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.canvasElement = function () {
+    if (m_renderer && m_renderer.canvasElement) {
+      return m_renderer.canvasElement();
+    }
+    return m_canvas;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return last time data got changed
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.dataTime = function () {
+    return m_dataTime;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set if the layer has been initialized
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.initialized = function (val) {
+    if (val !== undefined) {
+      m_initialized = val;
+      return m_this;
+    }
+    return m_initialized;
   };
 
   ////////////////////////////////////////////////////////////////////////////

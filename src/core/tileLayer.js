@@ -2,11 +2,39 @@
   'use strict';
 
   /**
-   * Standard modulo operator where the outputa is in [0, b) for all inputs.
+   * Standard modulo operator where the output is in [0, b) for all inputs.
    * @private
    */
   function modulo(a, b) {
     return ((a % b) + b) % b;
+  }
+
+  /**
+   * Pick a subdomain from a list of subdomains based on a the tile location.
+   *
+   * @param {number} x: the x tile coordinate.
+   * @param {number} y: the y tile coordinate.
+   * @param {list} subdomains: the list of known subdomains.
+   */
+  function m_getTileSubdomain(x, y, subdomains) {
+    return subdomains[modulo(x + y, subdomains.length)];
+  }
+
+  /**
+   * Returns an OSM tile server formatting function from a standard format
+   * string. Replaces {s}, {z}, {x}, and {y}.
+   *
+   * @param {string} base The tile format string
+   * @returns: a conversion function.
+   * @private.
+   */
+  function m_tileUrlFromTemplate(base) {
+    return function (x, y, z, subdomains) {
+      return base.replace('{s}', m_getTileSubdomain(x, y, subdomains))
+        .replace('{z}', z)
+        .replace('{x}', x)
+        .replace('{y}', y);
+    };
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -58,18 +86,23 @@
    * @param {number} [options.maxX=255]      The maximum world coordinate in X
    * @param {number} [options.minY=0]        The minimum world coordinate in Y
    * @param {number} [options.maxY=255]      The maximum world coordinate in Y
-   * @param {function} [options.url=null]
+   * @param {function|string} [options.url=null]
    *   A function taking the current tile indices and returning a URL or jquery
    *   ajax config to be passed to the {geo.tile} constructor.
    *   Example:
-   *     (x, y, z) => "http://example.com/z/y/x.png"
+   *     (x, y, z, subdomains) => "http://example.com/z/y/x.png"
+   *   If this is a string, a template url with {x}, {y}, {z}, and {s} as
+   *   template variables.  {s} picks one of the subdomains parameter.
+   * @param {string|list} [options.subdomain="abc"]  Subdomains to use in
+   *   template url strings.  If a string, this is converted to a list before
+   *   being passed to a url function.
    * @param {number} [options.animationDuration=0]
    *   The number of milliseconds for the tile loading animation to occur.  **This
    *   option is currently buggy because old tiles will purge before the animation
    *   is complete.**
    * @param {string} [options.attribution]
    *   An attribution to display with the layer (accepts HTML)
-   * @param {function} [options.tileRounding=floor]
+   * @param {function} [options.tileRounding=Math.floor]
    *   This function determines which tiles will be loaded when the map is at
    *   a non-integer zoom.  For example the default, `Math.floor`, will use
    *   tile level 2 when the map is at zoom 2.9.
@@ -90,6 +123,12 @@
     if (!options.cacheSize) {
       // this size should be sufficient for a 4k display
       options.cacheSize = options.keepLower ? 400 : 200;
+    }
+    if ($.type(options.subdomains) === 'string') {
+      options.subdomains = options.subdomains.split('');
+    }
+    if ($.type(options.url) === 'string') {
+      options.url = m_tileUrlFromTemplate(options.url);
     }
 
     var lastZoom = null, lastX = null, lastY = null, s_init = this._init,
@@ -257,10 +296,12 @@
      * @returns {geo.tile}
      */
     this._getTile = function (index, source) {
+      var urlParams = source || index;
       return geo.tile({
         index: index,
         size: {x: this._options.tileWidth, y: this._options.tileHeight},
-        url: this._options.url(source || index)
+        url: this._options.url(urlParams.x, urlParams.y, urlParams.level || 0,
+                               this._options.subdomains)
       });
     };
 
@@ -704,13 +745,13 @@
      * @return {DOM}
      */
     this._getSubLayer = function (level) {
-      var node = this.canvas()
+      var node = this.canvasElement()
         .find('div[data-tile-layer=' + level.toFixed() + ']').get(0);
       if (!node) {
         node = $(
           '<div class=geo-tile-layer data-tile-layer="' + level.toFixed() + '"/>'
         ).css('transform-origin', '0px').get(0);
-        this.canvas().append(node);
+        this.canvasElement().append(node);
       }
       return node;
     };
@@ -720,7 +761,7 @@
      * @param {number} level The target zoom level
      */
     this._updateSubLayers = function (level) {
-      this.canvas().find('.geo-tile-layer').each(function (idx, el) {
+      this.canvasElement().find('.geo-tile-layer').each(function (idx, el) {
         var $el = $(el),
             layer = parseInt($el.data('tileLayer'));
         $el.css(
@@ -748,14 +789,14 @@
       );
 
       // Update the transform for the local layer coordinates
-      this.canvas().css(
+      this.canvasElement().css(
         'transform-origin',
         'center center'
       );
       this._updateSubLayers(zoom);
 
       var to = this._options.tileOffset(zoom);
-      this.canvas().css(
+      this.canvasElement().css(
         'transform',
         'scale(' + (Math.pow(2, mapZoom - zoom)) + ')' +
         'translate(' +
@@ -769,6 +810,14 @@
         (-(view.bottom + view.top) / 2) + 'px' + ')' +
         ''
       );
+      /* Set some attributes that can be used by non-css based viewers.  This
+       * doesn't include the map center, as that may need to be handled
+       * differently from the tile offset and view center. */
+      this.canvasElement().attr({
+        scale: Math.pow(2, mapZoom - zoom),
+        dx: -to.x + -(view.left + view.right) / 2,
+        dy: -to.y + -(view.bottom + view.top) / 2
+      });
 
       lastZoom = mapZoom;
       lastX = center.x;
@@ -998,6 +1047,8 @@
       return this;
     };
 
+    geo.adjustLayerForRenderer('tile', this);
+
     return this;
   };
 
@@ -1013,6 +1064,7 @@
     wrapX: true,
     wrapY: false,
     url: null,
+    subdomains: 'abc',
     minX: 0,
     maxX: 255,
     minY: 0,
@@ -1022,7 +1074,7 @@
       return {x: 0, y: 0};
     },
     keepLower: true,
-    // cacheSize: 400,  // set depending on based on keepLower
+    // cacheSize: 400,  // set depending on keepLower
     tileRounding: Math.floor,
     attribution: '',
     animationDuration: 0

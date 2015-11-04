@@ -35,10 +35,12 @@
      * @returns {geo.tile}
      */
     this._getTile = function (index, source) {
+      var urlParams = source || index;
       return geo.imageTile({
         index: index,
         size: {x: this._options.tileWidth, y: this._options.tileHeight},
-        url: this._options.url(source || index)
+        url: this._options.url(urlParams.x, urlParams.y, urlParams.level || 0,
+                               this._options.subdomains)
       });
     };
   };
@@ -65,10 +67,7 @@
     },
     wrapX: true,
     wrapY: false,
-    url: function (index) {
-      return 'http://tile.openstreetmap.org/' +
-        index.level + '/' + index.x + '/' + index.y + '.png';
-    },
+    url: 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     attribution: 'Tile data &copy; <a href="http://osm.org/copyright">' +
       'OpenStreetMap</a> contributors'
   });

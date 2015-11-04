@@ -19,9 +19,28 @@ geo.d3.planeFeature = function (arg) {
   geo.d3.object.call(this);
 
   var m_this = this,
+      m_style = {},
       s_update = this._update,
       s_init = this._init,
       m_buildTime = geo.timestamp();
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * Normalize a coordinate as an object {x: ..., y: ...}
+   *
+   * @private
+   * @returns {Object}
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  function normalize(pt) {
+    if (Array.isArray(pt)) {
+      return {
+        x: pt[0],
+        y: pt[1]
+      };
+    }
+    return pt;
+  }
 
   //////////////////////////////////////////////////////////////////////////////
   /**
@@ -32,6 +51,44 @@ geo.d3.planeFeature = function (arg) {
    */
   //////////////////////////////////////////////////////////////////////////////
   this._build = function () {
+    var ul = normalize(m_this.upperLeft()),
+        lr = normalize(m_this.lowerRight()),
+        renderer = m_this.renderer(),
+        s = m_this.style();
+
+    delete s.fill_color;
+    delete s.color;
+    delete s.opacity;
+    /*
+    if (!s.screenCoordinates) {
+      origin = renderer.layer().map().worldToDisplay(origin);
+      ul = renderer.layer().map().worldToDisplay(ul);
+      lr = renderer.layer().map().worldToDisplay(lr);
+    }
+    */
+    m_style.id = m_this._d3id();
+    m_style.style = s;
+    m_style.attributes = {
+      x: ul.x,
+      y: lr.y,
+      width: Math.abs(lr.x - ul.x),
+      height: Math.abs(lr.y - ul.y)
+    };
+    if (s.image) {
+      m_style.append = 'image';
+      m_style.attributes['xlink:href'] = s.image;
+    } else {
+      m_style.append = 'rect';
+    }
+    m_style.data = [0];
+    m_style.classes = ['d3PlaneFeature'];
+    if (s.parentId) {
+      m_style.parentId = s.parentId;
+    }
+
+    renderer._drawFeatures(m_style);
+    m_buildTime.modified();
+    return m_this;
   };
 
   //////////////////////////////////////////////////////////////////////////////

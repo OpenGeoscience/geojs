@@ -5,6 +5,7 @@ window.geo = geo; // jshint ignore: line
 geo.renderers = {};
 geo.features = {};
 geo.fileReaders = {};
+geo.rendererLayerAdjustments = {};
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -143,9 +144,54 @@ geo.createFeature  = function (name, layer, renderer, arg) {
     if (arg !== undefined) {
       $.extend(true, options, arg);
     }
-    return geo.features[category][name](options);
+    var feature = geo.features[category][name](options);
+    layer.gcs = function () {
+      return layer.map().gcs();
+    };
+    return feature;
   }
   return null;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Register a layer adjustment.
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.registerLayerAdjustment = function (category, name, func) {
+  'use strict';
+
+  if (geo.rendererLayerAdjustments === undefined) {
+    geo.rendererLayerAdjustments = {};
+  }
+
+  if (!(category in geo.rendererLayerAdjustments)) {
+    geo.rendererLayerAdjustments[category] = {};
+  }
+
+  // TODO Add warning if the name already exists
+  geo.rendererLayerAdjustments[category][name] = func;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * If a layer needs to be adjusted based on the renderer, call the function
+ * that adjusts it.
+ *
+ * @param {string} name Name of the layer.
+ * @param {object} layer Instantiated layer object.
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.adjustLayerForRenderer = function (name, layer) {
+  'use strict';
+  var rendererName = layer.rendererName();
+  if (rendererName) {
+    if (geo.rendererLayerAdjustments &&
+        geo.rendererLayerAdjustments[rendererName] &&
+        geo.rendererLayerAdjustments[rendererName][name]) {
+      geo.rendererLayerAdjustments[rendererName][name].apply(layer);
+    }
+  }
 };
 
 //////////////////////////////////////////////////////////////////////////////
