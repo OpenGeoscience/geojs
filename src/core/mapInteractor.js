@@ -353,6 +353,8 @@ geo.mapInteractor = function (args) {
     $node.on('mousedown.geojs', m_this._handleMouseDown);
     $node.on('mouseup.geojs', m_this._handleMouseUp);
     $node.on('wheel.geojs', m_this._handleMouseWheel);
+    // Disable dragging images and such
+    $node.on('dragstart', function () { return false; });
     if (m_options.panMoveButton === 'right' ||
         m_options.zoomMoveButton === 'right') {
       $node.on('contextmenu.geojs', function () { return false; });
