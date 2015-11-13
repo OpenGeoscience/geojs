@@ -74,7 +74,7 @@ geo.d3.tileLayer = function () {
     this.renderer()._setTransform();
   };
 
-  /* Remvoe both the tile feature and an internal image element. */
+  /* Remove both the tile feature and an internal image element. */
   this._remove = function (tile) {
     if (tile.feature) {
       m_this.deleteFeature(tile.feature);

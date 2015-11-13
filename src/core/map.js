@@ -412,7 +412,7 @@ geo.map = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Resize map (depreciated)
+   * Resize map (deprecated)
    *
    * @param {Number} x x-offset in display space
    * @param {Number} y y-offset in display space
@@ -422,7 +422,7 @@ geo.map = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.resize = function (x, y, w, h) {
     m_x = x;
-    m_y  = y;
+    m_y = y;
     m_width = w;
     m_height = h;
 

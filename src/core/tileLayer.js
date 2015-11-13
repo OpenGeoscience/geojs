@@ -726,11 +726,12 @@
      * tile layer uses units of pixels relative to the world space
      * coordinate origin.
      * @param {object} pt A point in world space coordinates
+     * @param {number|undefined} zoom If unspecified, use the map zoom.
      * @returns {object} Local coordinates
      */
-    this.toLocal = function (pt) {
+    this.toLocal = function (pt, zoom) {
       var map = this.map(),
-          unit = map.unitsPerPixel(map.zoom());
+          unit = map.unitsPerPixel(zoom === undefined ? map.zoom() : zoom);
       return {
         x: pt.x / unit,
         y: pt.y / unit
@@ -742,11 +743,12 @@
      * tile layer uses units of pixels relative to the world space
      * coordinate origin.
      * @param {object} pt A point in world space coordinates
+     * @param {number|undefined} zoom If unspecified, use the map zoom.
      * @returns {object} Local coordinates
      */
-    this.fromLocal = function (pt) {
+    this.fromLocal = function (pt, zoom) {
       var map = this.map(),
-          unit = map.unitsPerPixel(map.zoom());
+          unit = map.unitsPerPixel(zoom === undefined ? map.zoom() : zoom);
       return {
         x: pt.x * unit,
         y: pt.y * unit

@@ -64,6 +64,7 @@
         "polygonFeature.js",
         "contourFeature.js",
         "vglRenderer.js",
+        "tileLayer.js",
         "choroplethFeature.js"
       ]
     },

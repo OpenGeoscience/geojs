@@ -22,8 +22,11 @@ geo.gl.vglRenderer = function (arg) {
       m_viewer = null,
       m_width = 0,
       m_height = 0,
-      m_initialized = false,
-      s_init = this._init;
+      s_init = this._init,
+      /* This is an internal item so that the tileLayer can adjust something
+       * without complaint or effect.  It would be better to refactor the
+       * tileLayer so that this isn't needed. */
+      m_canvasElement = $('<div/>');
 
   /// TODO: Move this API to the base class
   ////////////////////////////////////////////////////////////////////////////
@@ -42,6 +45,15 @@ geo.gl.vglRenderer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.height = function () {
     return m_height;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get the canvas as a jquery element.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.canvasElement = function () {
+    return m_canvasElement;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -76,7 +88,6 @@ geo.gl.vglRenderer = function (arg) {
 
     var canvas = $(document.createElement('canvas'));
     canvas.attr('class', 'webgl-canvas');
-    m_this.canvas(canvas);
     $(m_this.layer().node().get(0)).append(canvas);
     m_viewer = vgl.viewer(canvas.get(0), arg.options);
     m_viewer.init();
@@ -86,6 +97,11 @@ geo.gl.vglRenderer = function (arg) {
     if (m_viewer.renderWindow().renderers().length > 0) {
       m_contextRenderer.setLayer(m_viewer.renderWindow().renderers().length);
     }
+    m_this.canvas(canvas);
+    /* Initialize the size of the renderer */
+    var map = m_this.layer().map(),
+        mapSize = map.size();
+    m_this._resize(0, 0, mapSize.width, mapSize.height);
 
     return m_this;
   };
@@ -96,59 +112,16 @@ geo.gl.vglRenderer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._resize = function (x, y, w, h) {
-    var vglRenderer = m_this.contextRenderer(),
-        map = m_this.layer().map(),
-        camera = vglRenderer.camera(),
-        baseContextRenderer,
-        baseCamera,
-        renderWindow = m_viewer.renderWindow(),
-        layer = m_this.layer(),
-        baseLayer = layer.map().baseLayer(),
-        focalPoint,
-        position,
-        zoom,
-        newZ,
-        mapCenter;
+    var renderWindow = m_viewer.renderWindow();
 
     m_width = w;
     m_height = h;
     m_this.canvas().attr('width', w);
     m_this.canvas().attr('height', h);
     renderWindow.positionAndResize(x, y, w, h);
-    m_this._render();
-
-    // Ignore if the base layer is not set yet
-    if (!baseLayer || m_initialized) {
-      return;
-    }
-    m_initialized = true;
-
-    // skip handling if the renderer is unconnected
-    if (!vglRenderer || !vglRenderer.camera()) {
-      console.log('Zoom event triggered on unconnected vgl renderer.');
-    }
-
-    position = camera.position();
-    zoom = map.zoom();
-    newZ = camera.zoomToHeight(zoom, w, h);
-
-    // Assuming that baselayer will be a GL layer
-    if (layer !== baseLayer) {
-      baseContextRenderer = baseLayer.renderer().contextRenderer();
-      baseCamera = baseContextRenderer.camera();
-      position = baseCamera.position();
-      focalPoint = baseCamera.focalPoint();
-      camera.setPosition(position[0], position[1], position[2]);
-      camera.setFocalPoint(focalPoint[0], focalPoint[1], focalPoint[2]);
-    } else {
-      mapCenter = layer.toLocal(layer.map().center());
-      focalPoint = camera.focalPoint();
-      camera.setPosition(mapCenter.x, mapCenter.y, newZ);
-      camera.setFocalPoint(mapCenter.x, mapCenter.y, focalPoint[2]);
-    }
-    camera.setParallelExtents({zoom: zoom});
 
     m_this._updateRendererCamera();
+    m_this._render();
 
     return m_this;
   };
@@ -164,136 +137,34 @@ geo.gl.vglRenderer = function (arg) {
   };
 
   this._updateRendererCamera = function () {
-    var vglRenderer = m_this.contextRenderer(),
-        renderWindow = m_viewer.renderWindow(),
-        camera = vglRenderer.camera(),
-        pos, fp, cr, pe;
-
-    vglRenderer.resetCameraClippingRange();
-    pos = camera.position();
-    fp = camera.focalPoint();
-    cr = camera.clippingRange();
-    pe = camera.parallelExtents();
+    var renderWindow = m_viewer.renderWindow(),
+        camera = m_this.layer().map().camera(),
+        view = camera.view, proj = camera.projectionMatrix;
+    /* webGL is a left-handed coordinate system, and we want positive z to be
+     * closer to the camera. */
+    proj = mat4.scale(mat4.create(), proj, [1, -1, -1]);
+    /* Same kluge as in the base camera class worldToDisplay4.  With this, we
+     * are currently showing z values from 0 to 1. */
+    proj = mat4.translate(mat4.create(), proj, [0, 0, -2]);
     renderWindow.renderers().forEach(function (renderer) {
       var cam = renderer.camera();
-
-      if (cam !== camera) {
-        cam.setPosition(pos[0], pos[1], pos[2]);
-        cam.setFocalPoint(fp[0], fp[1], fp[2]);
-        cam.setClippingRange(cr[0], cr[1]);
-        cam.setParallelExtents(pe);
-        renderer.render();
-      }
+      cam.setViewMatrix(view);
+      cam.setProjectionMatrix(proj);
+      //DWM:: send information (possibly) for tile alignment
     });
   };
 
   // Connect to interactor events
   // Connect to pan event
   m_this.layer().geoOn(geo.event.pan, function (evt) {
-    var vglRenderer = m_this.contextRenderer(),
-        camera,
-        focusPoint,
-        centerDisplay,
-        centerGeo,
-        newCenterDisplay,
-        newCenterGeo,
-        renderWindow,
-        layer = m_this.layer();
-
-    if (evt.geo && evt.geo._triggeredBy !== layer) {
-      // skip handling if the renderer is unconnected
-      if (!vglRenderer || !vglRenderer.camera()) {
-        console.log('Pan event triggered on unconnected VGL renderer.');
-      }
-
-      renderWindow = m_viewer.renderWindow();
-      camera = vglRenderer.camera();
-      focusPoint = renderWindow.focusDisplayPoint();
-
-      // Calculate the center in display coordinates
-      centerDisplay = [m_width / 2, m_height / 2, 0];
-
-      // Calculate the center in world coordinates
-      centerGeo = renderWindow.displayToWorld(
-        centerDisplay[0],
-        centerDisplay[1],
-        focusPoint,
-        vglRenderer
-      );
-
-      newCenterDisplay = [
-        centerDisplay[0] + evt.screenDelta.x,
-        centerDisplay[1] + evt.screenDelta.y
-      ];
-
-      newCenterGeo = renderWindow.displayToWorld(
-        newCenterDisplay[0],
-        newCenterDisplay[1],
-        focusPoint,
-        vglRenderer
-      );
-
-      camera.pan(
-        centerGeo[0] - newCenterGeo[0],
-        centerGeo[1] - newCenterGeo[1],
-        centerGeo[2] - newCenterGeo[2]
-      );
-
-      evt.center = {
-        x: newCenterGeo[0],
-        y: newCenterGeo[1],
-        z: newCenterGeo[2]
-      };
-
-      m_this._updateRendererCamera();
-    }
+    void(evt);
+    m_this._updateRendererCamera();
   });
 
   // Connect to zoom event
   m_this.layer().geoOn(geo.event.zoom, function (evt) {
-    var vglRenderer = m_this.contextRenderer(),
-      camera,
-      renderWindow,
-      layer = m_this.layer(),
-      center,
-      dir,
-      focusPoint,
-      position,
-      newZ;
-
-    if (evt.geo && evt.geo._triggeredBy !== layer) {
-      // skip handling if the renderer is unconnected
-      if (!vglRenderer || !vglRenderer.camera()) {
-        console.log('Zoom event triggered on unconnected vgl renderer.');
-      }
-
-      renderWindow = m_viewer.renderWindow();
-      camera = vglRenderer.camera();
-      focusPoint = camera.focalPoint();
-      position = camera.position();
-      var windowSize = renderWindow.windowSize();
-      newZ = camera.zoomToHeight(evt.zoomLevel, windowSize[0], windowSize[1]);
-
-      evt.pan = null;
-      if (evt.screenPosition) {
-        center = renderWindow.displayToWorld(
-          evt.screenPosition.x,
-          evt.screenPosition.y,
-          focusPoint,
-          vglRenderer
-        );
-        dir = [center[0] - position[0], center[1] - position[1], center[2] - position[2]];
-        evt.center = layer.fromLocal({
-          x: position[0] + dir[0] * (1 - newZ / position[2]),
-          y: position[1] + dir[1] * (1 - newZ / position[2])
-        });
-      }
-
-      camera.setPosition(position[0], position[1], newZ);
-      camera.setParallelExtents({zoom: evt.zoomLevel});
-
-      m_this._updateRendererCamera();
-    }
+    void(evt);
+    m_this._updateRendererCamera();
   });
 
   // Connect to parallelprojection event
