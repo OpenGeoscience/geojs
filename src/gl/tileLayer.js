@@ -24,12 +24,17 @@ geo.gl.tileLayer = function () {
     m_this.draw();
   };
 
+  /* Remove the tile feature. */
   this._remove = function (tile) {
     if (tile.feature) {
       m_this.deleteFeature(tile.feature);
       tile.feature = null;
     }
   };
+
+  /* These functions don't need to do anythin. */
+  this._getSubLayer = function () {};
+  this._updateSubLayer = function () {};
 };
 
 geo.registerLayerAdjustment('vgl', 'tile', geo.gl.tileLayer);

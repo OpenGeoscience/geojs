@@ -763,13 +763,13 @@
      * @return {DOM}
      */
     this._getSubLayer = function (level) {
-      var node = this.canvasElement()
+      var node = this.canvas()
         .find('div[data-tile-layer=' + level.toFixed() + ']').get(0);
       if (!node) {
         node = $(
           '<div class=geo-tile-layer data-tile-layer="' + level.toFixed() + '"/>'
         ).css('transform-origin', '0px').get(0);
-        this.canvasElement().append(node);
+        this.canvas().append(node);
       }
       return node;
     };
@@ -779,7 +779,7 @@
      * @param {number} level The target zoom level
      */
     this._updateSubLayers = function (level) {
-      this.canvasElement().find('.geo-tile-layer').each(function (idx, el) {
+      this.canvas().find('.geo-tile-layer').each(function (idx, el) {
         var $el = $(el),
             layer = parseInt($el.data('tileLayer'));
         $el.css(
@@ -807,31 +807,33 @@
       );
 
       // Update the transform for the local layer coordinates
-      this.canvasElement().css(
-        'transform-origin',
-        'center center'
-      );
       this._updateSubLayers(zoom);
 
       var to = this._options.tileOffset(zoom);
-      this.canvasElement().css(
-        'transform',
-        'scale(' + (Math.pow(2, mapZoom - zoom)) + ')' +
-        'translate(' +
-        (-to.x) + 'px' + ',' +
-        (-to.y) + 'px' + ')' +
-        'translate(' +
-        (map.size().width / 2) + 'px' + ',' +
-        (map.size().height / 2) + 'px' + ')' +
-        'translate(' +
-        (-(view.left + view.right) / 2) + 'px' + ',' +
-        (-(view.bottom + view.top) / 2) + 'px' + ')' +
-        ''
-      );
+      if (this.renderer() === null) {
+        this.canvas().css(
+          'transform-origin',
+          'center center'
+        );
+        this.canvas().css(
+          'transform',
+          'scale(' + (Math.pow(2, mapZoom - zoom)) + ')' +
+          'translate(' +
+          (-to.x) + 'px' + ',' +
+          (-to.y) + 'px' + ')' +
+          'translate(' +
+          (map.size().width / 2) + 'px' + ',' +
+          (map.size().height / 2) + 'px' + ')' +
+          'translate(' +
+          (-(view.left + view.right) / 2) + 'px' + ',' +
+          (-(view.bottom + view.top) / 2) + 'px' + ')' +
+          ''
+        );
+      }
       /* Set some attributes that can be used by non-css based viewers.  This
        * doesn't include the map center, as that may need to be handled
        * differently from the tile offset and view center. */
-      this.canvasElement().attr({
+      this.canvas().attr({
         scale: Math.pow(2, mapZoom - zoom),
         dx: -to.x + -(view.left + view.right) / 2,
         dy: -to.y + -(view.bottom + view.top) / 2

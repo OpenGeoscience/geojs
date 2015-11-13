@@ -31,8 +31,7 @@ geo.d3.d3Renderer = function (arg) {
       m_dx = 0,
       m_dy = 0,
       m_svg = null,
-      m_defs = null,
-      m_canvasElement = $('<div/>');
+      m_defs = null;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -210,9 +209,9 @@ geo.d3.d3Renderer = function (arg) {
     // calculate the scale
     scale = (lowerRight.y - upperLeft.y) / m_height;
 
-    scale = m_canvasElement.attr('scale') || 1;
-    dx = (m_canvasElement.attr('dx') || 0) * scale;
-    dy = (m_canvasElement.attr('dy') || 0) * scale;
+    scale = this.canvas().attr('scale') || 1;
+    dx = (this.canvas().attr('dx') || 0) * scale;
+    dy = (this.canvas().attr('dy') || 0) * scale;
     dx += map.size().width / 2;
     dy += map.size().height / 2;
 
@@ -462,15 +461,6 @@ geo.d3.d3Renderer = function (arg) {
   */
   ////////////////////////////////////////////////////////////////////////////
   this.draw = function () {
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get the canvas as a jquery element.
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.canvasElement = function () {
-    return m_canvasElement;
   };
 
   // connect to pan event

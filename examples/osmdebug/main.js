@@ -40,7 +40,7 @@ $(function () {
   }
   var url = (location.search.match(/[?&]url=([^&]+)(&|$)/) || [])[1];
   if (url) {
-    params.url = url;
+    params.url = decodeURIComponent(url);
   } else {
     params.baseUrl = 'http://otile1.mqcdn.com/tiles/1.0.0/map/';
   }

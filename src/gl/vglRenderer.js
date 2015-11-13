@@ -22,11 +22,7 @@ geo.gl.vglRenderer = function (arg) {
       m_viewer = null,
       m_width = 0,
       m_height = 0,
-      s_init = this._init,
-      /* This is an internal item so that the tileLayer can adjust something
-       * without complaint or effect.  It would be better to refactor the
-       * tileLayer so that this isn't needed. */
-      m_canvasElement = $('<div/>');
+      s_init = this._init;
 
   /// TODO: Move this API to the base class
   ////////////////////////////////////////////////////////////////////////////
@@ -45,15 +41,6 @@ geo.gl.vglRenderer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.height = function () {
     return m_height;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get the canvas as a jquery element.
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.canvasElement = function () {
-    return m_canvasElement;
   };
 
   ////////////////////////////////////////////////////////////////////////////
