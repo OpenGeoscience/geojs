@@ -96,6 +96,13 @@
    * @param {string|list} [options.subdomain="abc"]  Subdomains to use in
    *   template url strings.  If a string, this is converted to a list before
    *   being passed to a url function.
+   * @param {string} [options.baseUrl=null]  If defined, use the old-style base
+   *   url instead of the options.url parameter.  This is functionally the same
+   *   as using a url of baseUrl/{z}/{x}/{y}.(options.imageFormat || png).  If
+   *   the specified string does not end in a slash, one is added.
+   * @param {string} [options.imageFormat='png']
+   *   This is only used if a baseUrl is specified, in which case it determines
+   *   the image name extension used in the url.
    * @param {number} [options.animationDuration=0]
    *   The number of milliseconds for the tile loading animation to occur.  **This
    *   option is currently buggy because old tiles will purge before the animation
@@ -126,6 +133,15 @@
     }
     if ($.type(options.subdomains) === 'string') {
       options.subdomains = options.subdomains.split('');
+    }
+    /* We used to call the url option baseUrl.  If a baseUrl is specified, use
+     * it instead of url, interpretting it as before. */
+    if (options.baseUrl) {
+      var url = options.baseUrl;
+      if (url && url.charAt(url.length - 1) !== '/') {
+        url += '/';
+      }
+      options.url = url + '{z}/{x}/{y}.' + (options.imageFormat || 'png');
     }
     if ($.type(options.url) === 'string') {
       options.url = m_tileUrlFromTemplate(options.url);
