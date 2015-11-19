@@ -60,13 +60,13 @@ describe('mapInteractor', function () {
 
   beforeEach(function () {
     // create a new div
-    $('body').append('<div id="mapNode1" class="mapNode"></div>');
-    $('body').append('<div id="mapNode2" class="mapNode"></div>');
+    $('body').append('<div id="mapNode1" class="mapNode testNode"></div>');
+    $('body').append('<div id="mapNode2" class="mapNode testNode"></div>');
   });
 
   afterEach(function () {
     // delete the div
-    $('.mapNode').remove();
+    $('.testNode').remove();
   });
 
   it('Test initialization with given node.', function () {
@@ -107,7 +107,8 @@ describe('mapInteractor', function () {
       panMoveButton: 'left',
       panWheelEnabled: false,
       zoomMoveButton: null,
-      zoomWheelEnabled: false
+      zoomWheelEnabled: false,
+      throttle: false
     });
 
     // initiate a pan
@@ -185,7 +186,8 @@ describe('mapInteractor', function () {
       panMoveButton: null,
       panWheelEnabled: false,
       zoomMoveButton: null,
-      zoomWheelEnabled: true
+      zoomWheelEnabled: true,
+      throttle: false
     });
 
     // initialize the mouse position
@@ -218,7 +220,8 @@ describe('mapInteractor', function () {
       panMoveButton: null,
       panWheelEnabled: false,
       zoomMoveButton: 'right',
-      zoomWheelEnabled: false
+      zoomWheelEnabled: false,
+      throttle: false
     });
 
     // initialize the zoom
@@ -278,7 +281,7 @@ describe('mapInteractor', function () {
     });
     it('ignores mouse down', function () {
       var map = mockedMap('#mapNode1'),
-          interactor = geo.mapInteractor({map: map});
+          interactor = geo.mapInteractor({map: map, throttle: false});
 
       interactor.pause(true);
       interactor.simulateEvent(
@@ -307,7 +310,7 @@ describe('mapInteractor', function () {
     });
     it('ignores mouse move', function () {
       var map = mockedMap('#mapNode1'),
-          interactor = geo.mapInteractor({map: map});
+          interactor = geo.mapInteractor({map: map, throttle: false});
 
       interactor.simulateEvent(
         'mousedown',
@@ -336,7 +339,7 @@ describe('mapInteractor', function () {
     });
     it('ignores mouse up', function () {
       var map = mockedMap('#mapNode1'),
-          interactor = geo.mapInteractor({map: map});
+          interactor = geo.mapInteractor({map: map, throttle: false});
 
       interactor.simulateEvent(
         'mousedown',
@@ -373,7 +376,7 @@ describe('mapInteractor', function () {
     });
     it('ignores mouse wheel', function () {
       var map = mockedMap('#mapNode1'),
-          interactor = geo.mapInteractor({map: map});
+          interactor = geo.mapInteractor({map: map, throttle: false});
 
       interactor.pause(true);
       interactor.simulateEvent(
@@ -395,7 +398,8 @@ describe('mapInteractor', function () {
             map: map,
             click: {
               enabled: false
-            }
+            },
+            throttle: false
           }), triggered = false;
 
       map.geoOn(geo.event.mouseclick, function () {
@@ -417,7 +421,8 @@ describe('mapInteractor', function () {
             map: map,
             click: {
               enabled: true
-            }
+            },
+            throttle: false
           }), triggered = 0;
 
       map.geoOn(geo.event.mouseclick, function () {
@@ -441,7 +446,8 @@ describe('mapInteractor', function () {
               enabled: true,
               cancelOnMove: false,
               duration: 1000
-            }
+            },
+            throttle: false
           }), triggered = 0;
 
       map.geoOn(geo.event.mouseclick, function () {
@@ -468,7 +474,8 @@ describe('mapInteractor', function () {
               enabled: true,
               cancelOnMove: false,
               duration: 10
-            }
+            },
+            throttle: false
           }), triggered = 0;
 
       map.geoOn(geo.event.mouseclick, function () {
@@ -495,7 +502,8 @@ describe('mapInteractor', function () {
               enabled: true,
               cancelOnMove: false,
               duration: 500
-            }
+            },
+            throttle: false
           }), triggered = 0;
 
       map.geoOn(geo.event.mouseclick, function () {
@@ -523,7 +531,8 @@ describe('mapInteractor', function () {
               enabled: true,
               cancelOnMove: true,
               duration: 500
-            }
+            },
+            throttle: false
           }), triggered = 0;
 
       map.geoOn(geo.event.mouseclick, function () {
@@ -552,7 +561,8 @@ describe('mapInteractor', function () {
               cancelOnMove: true,
               duration: 500,
               buttons: {left: false}
-            }
+            },
+            throttle: false
           }), triggered = 0;
 
       map.geoOn(geo.event.mouseclick, function () {
@@ -584,7 +594,8 @@ describe('mapInteractor', function () {
             click: {
               enabled: true,
               cancelOnMove: false
-            }
+            },
+            throttle: false
           });
       interactor.simulateEvent('mousedown', {
         map: {x: 20, y: 20},
@@ -607,7 +618,8 @@ describe('mapInteractor', function () {
             click: {
               enabled: true,
               cancelOnMove: false
-            }
+            },
+            throttle: false
           }), ncalls = 0;
       interactor.simulateEvent('mousedown', {
         map: {x: 20, y: 20},
@@ -626,6 +638,132 @@ describe('mapInteractor', function () {
       });
       $(document).trigger('testevent');
       expect(ncalls).toBe(0);
+    });
+  });
+  describe('throttled map interactions', function () {
+    it('pan', function (done) {
+      var map = mockedMap('#mapNode1'),
+          interactor = geo.mapInteractor({
+            map: map,
+            throttle: 100,
+            click: {
+              enabled: false
+            },
+            momentum: {
+              enabled: false
+            }
+          });
+
+      interactor.simulateEvent(
+        'mousedown',
+        {
+          map: {x: 20, y: 20},
+          button: 'left'
+        }
+      );
+      interactor.simulateEvent(
+        'mousemove',
+        {
+          map: {x: 25, y: 25},
+          button: 'left'
+        }
+      );
+      interactor.simulateEvent(
+        'mousemove',
+        {
+          map: {x: 20, y: 30},
+          button: 'left'
+        }
+      );
+
+      window.setTimeout(function () {
+        interactor.simulateEvent(
+          'mousemove',
+          {
+            map: {x: 100, y: 100},
+            button: 'left'
+          }
+        );
+        interactor.simulateEvent(
+          'mousemove',
+          {
+            map: {x: 25, y: 25},
+            button: 'left'
+          }
+        );
+
+        window.setTimeout(function () {
+          expect(map.info.pan).toBe(2);
+          expect(map.info.panArgs).toEqual({x: 0, y: 0});
+
+          interactor.simulateEvent(
+            'mouseup',
+            {
+              map: {x: 25, y: 25},
+              button: 'left'
+            }
+          );
+
+          done();
+        }, 100);
+      }, 50);
+
+      // the first event is syncronous all others will be async
+      expect(map.info.pan).toBe(1);
+      expect(map.info.panArgs).toEqual({x: 5, y: 5});
+    });
+    it('zoom', function (done) {
+      var map = mockedMap('#mapNode1'),
+          interactor = geo.mapInteractor({
+            map: map,
+            throttle: 100,
+            momentum: {
+              enabled: false
+            }
+          });
+
+      interactor.simulateEvent(
+        'wheel',
+        {
+          wheelDelta: {x: 20, y: -10},
+          wheelMode: 0
+        }
+      );
+      interactor.simulateEvent(
+        'wheel',
+        {
+          wheelDelta: {x: 20, y: -10},
+          wheelMode: 0
+        }
+      );
+
+      window.setTimeout(function () {
+        interactor.simulateEvent(
+          'wheel',
+          {
+            wheelDelta: {x: 20, y: -10},
+            wheelMode: 0
+          }
+        );
+        interactor.simulateEvent(
+          'wheel',
+          {
+            wheelDelta: {x: 20, y: -10},
+            wheelMode: 0
+          }
+        );
+
+        window.setTimeout(function () {
+          expect(map.info.zoom).toBe(2);
+          expect(map.info.zoomArgs).toBe(2 + 30 / 120);
+
+          done();
+        }, 100);
+      }, 50);
+
+      // the first event is syncronous all others will be async
+      expect(map.info.zoom).toBe(1);
+      expect(map.info.zoomArgs).toBe(2 + 10 / 120);
     });
   });
 });

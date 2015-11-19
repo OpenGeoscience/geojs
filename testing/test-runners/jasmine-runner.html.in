@@ -14,6 +14,10 @@
         width: 100%;
         height: 100%;
   }
+
+  .mapNode {
+        pointer-events: none;
+  }
 </style>
 <link href=http://jasmine.github.io/css/docco.css rel=stylesheet>
 <link href=http://jasmine.github.io/css/jasmine_docco.css rel=stylesheet>
@@ -28,35 +32,8 @@
 <script src=/test/lib/aggregate-json-reporter.js></script>
 </head>
 <body>
-<div id=map-container><div id=map></div></div>
+<div id=map-container><div id=map class=mapNode></div></div>
 <script>
-if (!Function.prototype.bind) {
-  Function.prototype.bind = function(oThis) {
-    if (typeof this !== 'function') {
-      // closest thing possible to the ECMAScript 5
-      // internal IsCallable function
-      throw new TypeError('Function.prototype.bind - what is trying to be bound is not callable');
-    }
-
-    var aArgs   = Array.prototype.slice.call(arguments, 1),
-        fToBind = this,
-        fNOP    = function() {},
-        fBound  = function() {
-          return fToBind.apply(this instanceof fNOP
-                 ? this
-                 : oThis,
-                 aArgs.concat(Array.prototype.slice.call(arguments)));
-        };
-
-    if (this.prototype) {
-      // native functions don't have a prototype
-      fNOP.prototype = this.prototype;
-    }
-    fBound.prototype = new fNOP();
-
-    return fBound;
-  };
-}
 @TEST_SOURCE@
 
 </script>
