@@ -37,7 +37,7 @@
     "xmlbuilder": "^3.1.0"
   },
   "scripts": {
-    "postinstall": "bower --quiet install",
+    "postinstall": "bower --quiet --allow-root install",
     "build": "grunt init library"
   },
   "keywords": [
