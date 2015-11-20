@@ -23,12 +23,12 @@ geo.mapInteractor = function (args) {
       m_keyboard,
       m_state,
       m_queue,
-      m_throttle,
       $node,
       m_selectionLayer = null,
       m_selectionPlane = null,
       m_paused = false,
-      m_clickMaybe = false;
+      m_clickMaybe = false,
+      m_callZoom = function () {};
 
   // Helper method to decide if the current button/modifiers match a set of
   // conditions.
@@ -55,6 +55,7 @@ geo.mapInteractor = function (args) {
     true,
     {
       throttle: 30,
+      discreteZoom: false,
       panMoveButton: 'left',
       panMoveModifiers: {},
       zoomMoveButton: 'right',
@@ -91,8 +92,12 @@ geo.mapInteractor = function (args) {
   // options supported:
   // {
   //   // throttle mouse events to at most this many milliseconds each (default 200)
-  //   // Note: this value is immutable for a given instantiation of this class.
   //   throttle: number
+  //
+  //   // Clamp zoom events to discrete (integer) zoom levels.  If a number is
+  //   // provided then zoom events will be debounced (and accumulated)
+  //   // with the given delay.  The default debounce interval is 400 ms.
+  //   discreteZoom: boolean | number > 0
   //
   //   // button that must be pressed to initiate a pan on mousedown
   //   panMoveButton: 'right' | 'left' | 'middle'
@@ -158,10 +163,6 @@ geo.mapInteractor = function (args) {
   //     cancelOnMove: true // cancels click if the mouse is moved before release
   //   }
   // }
-
-  // set the value now to avoid rebinding all kinds of handlers whenever
-  // settings change.
-  m_throttle = m_options.throttle;
 
   // A bunch of type definitions for api documentation:
   /**
@@ -341,6 +342,9 @@ geo.mapInteractor = function (args) {
     // store the connected element
     $node = $(m_options.map.node());
 
+    // set methods related to asyncronous event handling
+    m_this._handleMouseWheel = throttled_wheel();
+    m_callZoom = debounced_zoom();
 
     // add event handlers
     if (m_options.throttle > 0) {
@@ -405,6 +409,9 @@ geo.mapInteractor = function (args) {
       return $.extend({}, m_options);
     }
     $.extend(m_options, opts);
+
+    // reset event handlers for new options
+    this._connectEvents();
     return m_this;
   };
 
@@ -632,7 +639,7 @@ geo.mapInteractor = function (args) {
       }
 
       // bind temporary handlers to document
-      if (m_throttle > 0) {
+      if (m_options.throttle > 0) {
         $(document).on(
           'mousemove.geojs',
           geo.util.throttle(
@@ -720,10 +727,7 @@ geo.mapInteractor = function (args) {
     if (m_state.action === 'pan') {
       m_this.map().pan({x: dx, y: dy});
     } else if (m_state.action === 'zoom') {
-      m_this.map().zoom(
-        m_this.map().zoom() - dy * m_options.zoomScale / 120,
-        m_state
-      );
+      m_callZoom(-dy * m_options.zoomScale / 120, m_state);
     } else if (m_state.action === 'select') {
       // Get the bounds of the current selection
       selectionObj = m_this._getSelection();
@@ -904,6 +908,65 @@ geo.mapInteractor = function (args) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Private wrapper around the map zoom method that is debounced to support
+   * discrete zoom interactions.
+   * @param {number} deltaZ The zoom increment
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  function debounced_zoom() {
+    var deltaZ = 0, delay = 400, direction;
+
+    function accum(dz, dir) {
+      var map = m_this.map(), zoom;
+
+      direction = dir;
+      deltaZ += dz;
+
+      // Respond to debounced events when they add up to a change in the
+      // discrete zoom level.
+      if (map && Math.abs(deltaZ) >= 1 && m_options.discreteZoom) {
+
+        zoom = Math.round(deltaZ + map.zoom());
+
+        // delta is what is left over from the zoom delta after the new zoom value
+        deltaZ = deltaZ + map.zoom() - zoom;
+
+        map.zoom(zoom, direction);
+      }
+    }
+
+    function apply() {
+      var map = m_this.map(), zoom;
+      if (map) {
+
+        zoom = deltaZ + map.zoom();
+
+        if (m_options.discreteZoom) {
+          // round off the zoom to an integer and throw away the rest
+          zoom = Math.round(zoom);
+        }
+        map.zoom(zoom, direction);
+      }
+
+      deltaZ = 0;
+    }
+
+
+    if (m_options.discreteZoom !== true && m_options.discreteZoom > 0) {
+      delay = m_options.discreteZoom;
+    }
+    if (m_options.discreteZoom === true || m_options.discreteZoom > 0) {
+      return geo.util.debounce(delay, false, apply, accum);
+    } else {
+      return function (dz, dir) {
+        accum(dz, dir);
+        apply(dz, dir);
+      };
+    }
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Attaches wrapped methods for accumulating fast mouse wheel events and
    * throttling map interactions.
    * @private
@@ -934,7 +997,7 @@ geo.mapInteractor = function (args) {
       evt.deltaFactor = 1;
       if (evt.originalEvent.deltaMode === 1) {
         // DOM_DELTA_LINE -- estimate line height
-        evt.deltaFactor = 12;
+        evt.deltaFactor = 40;
       } else if (evt.originalEvent.deltaMode === 2) {
         // DOM_DELTA_PAGE -- get window height
         evt.deltaFactor = $(window).height();
@@ -976,18 +1039,15 @@ geo.mapInteractor = function (args) {
 
         zoomFactor = -m_queue.scroll.y;
 
-        m_this.map().zoom(
-          m_this.map().zoom() + zoomFactor,
-          m_mouse
-        );
+        m_callZoom(zoomFactor, m_mouse);
       }
 
       // reset the queue
       m_queue = {};
     }
 
-    if (m_throttle > 0) {
-      return geo.util.throttle(m_throttle, false, wheel, accum);
+    if (m_options.throttle > 0) {
+      return geo.util.throttle(m_options.throttle, false, wheel, accum);
     } else {
       return function (evt) {
         accum(evt);
@@ -998,10 +1058,10 @@ geo.mapInteractor = function (args) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Handle mouse wheel event
+   * Handle mouse wheel event.  (Defined inside _connectEvents).
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._handleMouseWheel = throttled_wheel();
+  this._handleMouseWheel = function () {};
 
   ////////////////////////////////////////////////////////////////////////////
   /**

@@ -22,6 +22,8 @@ describe('mapInteractor', function () {
     return new $.Event(type, args);
   };
 
+  var zoomFactor = 120;
+
   function mockedMap(node) {
 
     var map = geo.object();
@@ -209,7 +211,7 @@ describe('mapInteractor', function () {
 
     // check the zoom event was called
     expect(map.info.zoom).toBe(1);
-    expect(map.info.zoomArgs).toBe(2 + 10 / 120);
+    expect(map.info.zoomArgs).toBe(2 + 10 / zoomFactor);
   });
 
   it('Test zoom right click event propagation', function () {
@@ -244,7 +246,7 @@ describe('mapInteractor', function () {
 
     // check the zoom event was called
     expect(map.info.zoom).toBe(1);
-    expect(map.info.zoomArgs).toBe(2 + 10 / 120);
+    expect(map.info.zoomArgs).toBe(2 + 10 / zoomFactor / 3);
 
     z = map.zoom();
 
@@ -259,7 +261,7 @@ describe('mapInteractor', function () {
 
     // check the zoom event was called
     expect(map.info.zoom).toBe(2);
-    expect(map.info.zoomArgs).toBe(z - 15 / 120);
+    expect(map.info.zoomArgs).toBe(z - 15 / zoomFactor / 3);
   });
 
   describe('pause state', function () {
@@ -755,7 +757,7 @@ describe('mapInteractor', function () {
 
         window.setTimeout(function () {
           expect(map.info.zoom).toBe(2);
-          expect(map.info.zoomArgs).toBe(2 + 30 / 120);
+          expect(map.info.zoomArgs).toBe(2 + 30 / zoomFactor);
 
           done();
         }, 100);
@@ -763,7 +765,7 @@ describe('mapInteractor', function () {
 
       // the first event is syncronous all others will be async
       expect(map.info.zoom).toBe(1);
-      expect(map.info.zoomArgs).toBe(2 + 10 / 120);
+      expect(map.info.zoomArgs).toBe(2 + 10 / zoomFactor);
     });
   });
 });
