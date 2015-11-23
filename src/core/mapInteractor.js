@@ -91,7 +91,7 @@ geo.mapInteractor = function (args) {
 
   // options supported:
   // {
-  //   // throttle mouse events to at most this many milliseconds each (default 200)
+  //   // throttle mouse events to at most this many milliseconds each (default 30)
   //   throttle: number
   //
   //   // Clamp zoom events to discrete (integer) zoom levels.  If a number is
