@@ -347,12 +347,7 @@ geo.mapInteractor = function (args) {
     m_callZoom = debounced_zoom();
 
     // add event handlers
-    if (m_options.throttle > 0) {
-      $node.on('wheel.geojs', m_this._handleMouseWheel);
-    } else {
-      $node.on('wheel.geojs', m_this._handleMouseWheel);
-    }
-
+    $node.on('wheel.geojs', m_this._handleMouseWheel);
     $node.on('mousemove.geojs', m_this._handleMouseMove);
     $node.on('mousedown.geojs', m_this._handleMouseDown);
     $node.on('mouseup.geojs', m_this._handleMouseUp);
