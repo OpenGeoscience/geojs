@@ -371,6 +371,8 @@ geo.mapInteractor = function (args) {
       $node.off('.geojs');
       $node = null;
     }
+    m_this._handleMouseWheel = function () {};
+    m_callZoom = function () {};
     return m_this;
   };
 
