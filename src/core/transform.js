@@ -174,6 +174,11 @@ geo.transform.transformCoordinates = function (
   var i, count, offset, xAcc, yAcc, zAcc, writer, output, projPoint,
       trans = geo.transform({source: srcPrj, target: tgtPrj});
 
+  /// Default Z accessor
+  zAcc = function () {
+    return 0.0;
+  };
+
   /// Helper methods
   function handleArrayCoordinates() {
     if (coordinates[0] instanceof Array) {

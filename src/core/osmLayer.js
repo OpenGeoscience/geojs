@@ -18,7 +18,12 @@
     if (!(this instanceof geo.osmLayer)) {
       return new geo.osmLayer(arg);
     }
+    if (arg.mapOpacity !== undefined && arg.opacity === undefined) {
+      arg.opacity = arg.mapOpacity;
+    }
     geo.tileLayer.call(this, arg);
+
+    this.mapOpacity = this.opacity;
 
     /**
      * Returns an instantiated imageTile object with the given indices.  This

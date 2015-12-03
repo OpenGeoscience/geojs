@@ -36,6 +36,7 @@ geo.layer = function (arg) {
       m_dataTime = geo.timestamp(),
       m_sticky = arg.sticky === undefined ? true : arg.sticky,
       m_active = arg.active === undefined ? true : arg.active,
+      m_opacity = arg.opacity === undefined ? 1 : arg.opacity,
       m_attribution = arg.attribution || null,
       m_zIndex;
 
@@ -422,6 +423,20 @@ geo.layer = function (arg) {
     return m_this.map().height;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get or set the current layer opacity.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.opacity = function (opac) {
+    if (opac !== undefined) {
+      m_opacity = opac;
+      m_node.css('opacity', m_opacity);
+      return m_this;
+    }
+    return m_opacity;
+  };
+
   if (arg.zIndex === undefined) {
     arg.zIndex = m_map.children().length;
   }
@@ -433,6 +448,7 @@ geo.layer = function (arg) {
   m_node.css('position', 'absolute');
   m_node.css('width', '100%');
   m_node.css('height', '100%');
+  m_this.opacity(m_opacity);
 
   // set the z-index
   m_this.zIndex(m_zIndex);

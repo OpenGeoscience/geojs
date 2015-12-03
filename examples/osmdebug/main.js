@@ -12,6 +12,8 @@
  *      http://otile1.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.png
  */
 
+var osmDebug = {};
+
 // Run after the DOM loads
 $(function () {
   'use strict';
@@ -33,7 +35,9 @@ $(function () {
     renderer: (location.search.match(/[?&]renderer=([^&]+)(&|$)/
       ) || [])[1] || 'vgl',
     keepLower: (location.search.match(/[?&]lower=([^&]+)(&|$)/
-      ) || [])[1] === 'false' ? false : true
+      ) || [])[1] === 'false' ? false : true,
+    opacity: (location.search.match(/[?&]opacity=([^&]+)(&|$)/
+      ) || [])[1] || '1'
   };
   if (params.renderer === 'null' || params.renderer === 'html') {
     params.renderer = null;
@@ -45,5 +49,9 @@ $(function () {
     params.baseUrl = 'http://otile1.mqcdn.com/tiles/1.0.0/map/';
   }
   // Add the osm layer with a custom tile url
-  map.createLayer('osm', params);
+  var osmLayer = map.createLayer('osm', params);
+  // Make variables available as a global for easier debug
+  osmDebug.map = map;
+  osmDebug.params = params;
+  osmDebug.osmLayer = osmLayer;
 });
