@@ -798,7 +798,7 @@
           mapZoom = map.zoom(),
           zoom = this._options.tileRounding(mapZoom),
           center = this.displayToLevel(undefined, zoom),
-          bounds = map.bounds(),
+          bounds = map.bounds(undefined, null),
           tiles, view = this._getViewBounds(), myPurge = {};
 
       _deferredPurge = myPurge;

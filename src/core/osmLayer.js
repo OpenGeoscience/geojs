@@ -23,6 +23,7 @@
     }
     geo.tileLayer.call(this, arg);
 
+    /* mapOpacity is just another name for the layer opacity. */
     this.mapOpacity = this.opacity;
 
     /**

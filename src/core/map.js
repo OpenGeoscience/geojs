@@ -19,6 +19,8 @@
  *   The main coordinate system of the map
  * @param {number} [maxZoom=16] The maximum zoom level (precision issues
  *   exist in GL for values larger than 16)
+ * @param {string|geo.transform} [ingcs='EPSG:4326']
+ *   The default coordinate system of interface calls.
  * @param {number} [unitsPerPixel=156543] GCS to pixel unit scaling at zoom 0
  *   (i.e. meters per pixel or degrees per pixel).
  * @param {object?} maxBounds The maximum visable map bounds
@@ -63,14 +65,14 @@ geo.map = function (arg) {
       s_exit = this._exit,
       // See https://en.wikipedia.org/wiki/Web_Mercator
       // phiMax = 180 / Math.PI * (2 * Math.atan(Math.exp(Math.PI)) - Math.PI / 2),
-      extent = Math.PI * geo.util.radiusEarth,
       m_x = 0,
       m_y = 0,
       m_node = $(arg.node),
       m_width = arg.width || m_node.width() || 512,
       m_height = arg.height || m_node.height() || 512,
       m_gcs = arg.gcs === undefined ? 'EPSG:3857' : arg.gcs,
-      m_center = { x: 0, y: 0 },
+      m_ingcs = arg.ingcs === undefined ? 'EPSG:4326' : arg.ingcs,
+      m_center = {x: 0, y: 0},
       m_zoom = arg.zoom === undefined ? 4 : arg.zoom,
       m_fileReader = null,
       m_interactor = null,
@@ -79,20 +81,29 @@ geo.map = function (arg) {
       m_queuedTransition = null,
       m_clock = null,
       m_discreteZoom = arg.discreteZoom ? true : false,
-      m_maxBounds = { // TODO: generalize this
-        left: -extent,
-        right: extent,
-        bottom: -extent,
-        top: extent
-      },
+      m_maxBounds = arg.maxBounds || {},
       m_camera = arg.camera || geo.camera(),
-      m_unitsPerPixel = (
-        arg.unitsPerPixel ||
-        2 * Math.PI * geo.util.radiusEarth / 256
-      ),
+      m_unitsPerPixel,
       m_clampBounds,
       m_origin,
       m_scale = {x: 1, y: 1, z: 1}; // constant for the moment
+
+  /* Compute the maximum bounds on our map projection.  By default, x ranges
+   * from [-180, 180] in the interface projection, and y matches the x range in
+   * the map (not the interface) projection.  For images, this might be
+   * [0, width] and [0, height] instead. */
+  m_maxBounds.left = geo.transform.transformCoordinates(m_ingcs, m_gcs, [{
+    x: m_maxBounds.left !== undefined ? m_maxBounds.left : -180, y: 0}])[0].x;
+  m_maxBounds.right = geo.transform.transformCoordinates(m_ingcs, m_gcs, [{
+    x: m_maxBounds.right !== undefined ? m_maxBounds.right : 180, y: 0}])[0].x;
+  m_maxBounds.top = (m_maxBounds.top !== undefined ?
+    geo.transform.transformCoordinates(m_ingcs, m_gcs, [{
+    x: 0, y: m_maxBounds.top}])[0].y : m_maxBounds.right);
+  m_maxBounds.bottom = (m_maxBounds.bottom !== undefined ?
+    geo.transform.transformCoordinates(m_ingcs, m_gcs, [{
+    x: 0, y: m_maxBounds.bottom}])[0].y : m_maxBounds.left);
+  m_unitsPerPixel = (arg.unitsPerPixel || (
+    m_maxBounds.right - m_maxBounds.left) / 256);
 
   m_camera.viewport = {width: m_width, height: m_height};
   arg.center = geo.util.normalizeCoordinates(arg.center);
@@ -173,6 +184,21 @@ geo.map = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Get map interface gcs
+   *
+   * @returns {string}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.ingcs = function (arg) {
+    if (arg === undefined) {
+      return m_ingcs;
+    }
+    m_ingcs = arg;
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Get root node of the map
    *
    * @returns {object}
@@ -211,7 +237,7 @@ geo.map = function (arg) {
     }
     */
 
-    bounds = m_this.boundsFromZoomAndCenter(val, m_center);
+    bounds = m_this.boundsFromZoomAndCenter(val, m_center, null);
     m_this.modified();
 
     // Check if this a new integer level
@@ -285,17 +311,32 @@ geo.map = function (arg) {
    * current center.  Uses bare objects {x: 0, y: 0}.
    *
    * @param {Object} coordinates
+   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
+   *    null to use the map gcs, or any other transform.  If setting the
+   *    center, they are converted from this gcs to the map projection.  The
+   *    returned center are converted from the map projection to this gcs.
    * @returns {Object|geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.center = function (coordinates) {
+  this.center = function (coordinates, gcs) {
+    gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
+    var center;
     if (coordinates === undefined) {
-      return $.extend({}, m_this.worldToGcs(m_center));
+      center = $.extend({}, m_this.worldToGcs(m_center));
+      if (gcs !== m_gcs) {
+        center = geo.transform.transformCoordinates(m_gcs, gcs, [center])[0];
+      }
+      return center;
     }
 
+    center = coordinates;
+    if (gcs !== m_gcs) {
+      center = geo.transform.transformCoordinates(gcs, m_gcs, [center])[0];
+    }
     // get the screen coordinates of the new center
-    m_center = $.extend({}, m_this.gcsToWorld(coordinates));
+    m_center = $.extend({}, m_this.gcsToWorld(center));
 
+    camera_bounds(m_this.boundsFromZoomAndCenter(m_zoom, m_center, null));
     // trigger a pan event
     m_this.geoTrigger(
       geo.event.pan,
@@ -797,7 +838,7 @@ geo.map = function (arg) {
     }
 
     var defaultOpts = {
-      center: m_this.center(),
+      center: m_this.center(undefined, null),
       zoom: m_this.zoom(),
       duration: 1000,
       ease: function (t) {
@@ -815,7 +856,7 @@ geo.map = function (arg) {
 
     m_transition = {
       start: {
-        center: m_this.center(),
+        center: m_this.center(undefined, null),
         zoom: m_this.zoom()
       },
       end: {
@@ -867,7 +908,7 @@ geo.map = function (arg) {
       m_transition.time = time - m_transition.start.time;
       if (time >= m_transition.end.time || next) {
         if (!next) {
-          m_this.center(m_transition.end.center);
+          m_this.center(m_transition.end.center, null);
           m_this.zoom(m_transition.end.zoom);
         }
 
@@ -898,7 +939,7 @@ geo.map = function (arg) {
       m_this.center({
         x: p[0],
         y: p[1]
-      });
+      }, null);
       m_this.zoom(p[2], undefined, true);
 
       window.requestAnimationFrame(anim);
@@ -928,21 +969,36 @@ geo.map = function (arg) {
    * case, the actual new bounds will be returned by this function.
    *
    * @param {geo.geoBounds} [bds] The requested map bounds
+   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
+   *    null to use the map gcs, or any other transform.  If setting the
+   *    bounds, they are converted from this gcs to the map projection.  The
+   *    returned bounds are converted from the map projection to this gcs.
    * @return {geo.geoBounds} The actual new map bounds
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.bounds = function (bds) {
+  this.bounds = function (bds, gcs) {
     var nav;
 
+    gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
     if (bds !== undefined) {
+      if (gcs !== m_gcs) {
+        var trans = geo.transform.transformCoordinates(gcs, m_gcs, [{
+            x: bds.left, y: bds.top}, {x: bds.right, y: bds.bottom}]);
+        bds = {
+          left: trans[0].x,
+          top: trans[0].y,
+          right: trans[1].x,
+          bottom: trans[1].y
+        };
+      }
       bds = fix_bounds(bds);
-      nav = m_this.zoomAndCenterFromBounds(bds);
+      nav = m_this.zoomAndCenterFromBounds(bds, null);
       m_zoom = nav.zoom;
       m_center = nav.center;
       camera_bounds(bds);
     }
 
-    return m_this.boundsFromZoomAndCenter(m_zoom, m_center);
+    return m_this.boundsFromZoomAndCenter(m_zoom, m_center, gcs);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -950,12 +1006,25 @@ geo.map = function (arg) {
    * Get the center zoom level necessary to display the given lat/lon bounds.
    *
    * @param {geo.geoBounds} [bds] The requested map bounds
+   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
+   *    null to use the map gcs, or any other transform.
    * @return {object} Object containing keys 'center' and 'zoom'
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.zoomAndCenterFromBounds = function (bounds) {
+  this.zoomAndCenterFromBounds = function (bounds, gcs) {
     var center, zoom;
 
+    gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
+    if (gcs !== m_gcs) {
+      var trans = geo.transform.transformCoordinates(gcs, m_gcs, [{
+          x: bounds.left, y: bounds.top}, {x: bounds.right, y: bounds.bottom}]);
+      bounds = {
+        left: trans[0].x,
+        top: trans[0].y,
+        right: trans[1].x,
+        bottom: trans[1].y
+      };
+    }
     if (bounds.left >= bounds.right || bounds.bottom >= bounds.top) {
       throw new Error('Invalid bounds provided');
     }
@@ -966,6 +1035,8 @@ geo.map = function (arg) {
     // clamp bounds if necessary
     bounds = fix_bounds(bounds);
 
+    /* This relies on having the map projection coordinates be uniform
+     * regardless of location.  If not, the center will not be correct. */
     // calculate new center
     center = {
       x: (bounds.left + bounds.right) / 2 - m_origin.x,
@@ -987,22 +1058,27 @@ geo.map = function (arg) {
    *
    * @param {number} zoom The requested zoom level
    * @param {geo.geoPosition} center The requested center
+   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
+   *    null to use the map gcs, or any other transform.
    * @return {geo.geoBounds}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.boundsFromZoomAndCenter = function (zoom, center) {
+  this.boundsFromZoomAndCenter = function (zoom, center, gcs) {
     var width, height, bounds, units;
 
+    gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
     // preprocess the arguments
     zoom = fix_zoom(zoom);
     units = m_this.unitsPerPixel(zoom);
-    center = m_this.gcsToWorld(center);
+    center = m_this.gcsToWorld(center, gcs);
 
     // get half the width and height in world coordinates
     width = m_width * units / 2;
     height = m_height * units / 2;
 
-    // calculate the bounds
+    // calculate the bounds.  This is only valid if the map projection has
+    // uniform units in each direction.  If not, then worldToGcs should be
+    // used.
     bounds = {
       left: center.x - width + m_origin.x,
       right: center.x + width + m_origin.x,
@@ -1227,17 +1303,13 @@ geo.map = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
 
   // Set the world origin
-  m_origin = {x: 0, y: 0};// $.extend({}, m_center);
+  m_origin = {x: 0, y: 0};
 
   // Fix the zoom level (minimum and initial)
   reset_minimum_zoom();
-  m_zoom = m_validZoomRange.min;
-  m_center = m_this.zoomAndCenterFromBounds(m_maxBounds).center;
-
-  // Initialize the camera to show the maximum available bounds
-  camera_bounds(m_maxBounds);
-
   // Now update to the correct center and zoom level
+  this.center($.extend({}, arg.center || m_center), m_ingcs);
+
 
   this.interactor(arg.interactor || geo.mapInteractor());
   this.clock(arg.clock || geo.clock());
