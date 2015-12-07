@@ -803,10 +803,14 @@ geo.map = function (arg) {
    * Call with no arguments to return the current transition information.
    *
    * @param {object?} opts
+   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
+   *    null to use the map gcs, or any other transform.  Applies only to the
+   *    center coordinate of the opts and to converting zoom values to height,
+   *    if specified.
    * @returns {geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.transition = function (opts) {
+  this.transition = function (opts, gcs) {
 
     if (opts === undefined) {
       return m_transition;
@@ -830,12 +834,14 @@ geo.map = function (arg) {
       };
     }
 
+    var units = m_this.unitsPerPixel(0);
+
     // Transform zoom level into z-coordinate and inverse
     function zoom2z(z) {
-      return vgl.zoomToHeight(z + 1, m_width, m_height);
+      return vgl.zoomToHeight(z + 1, m_width, m_height) * units;
     }
     function z2zoom(z) {
-      return vgl.heightToZoom(z, m_width, m_height) - 1;
+      return vgl.heightToZoom(z / units, m_width, m_height) - 1;
     }
 
     var defaultOpts = {
@@ -851,7 +857,12 @@ geo.map = function (arg) {
     };
 
     if (opts.center) {
+      gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
       opts.center = geo.util.normalizeCoordinates(opts.center);
+      if (gcs !== m_gcs) {
+        opts.center = geo.transform.transformCoordinates(gcs, m_gcs, [
+            opts.center])[0];
+      }
     }
     $.extend(defaultOpts, opts);
 
