@@ -709,7 +709,8 @@ geo.mapInteractor = function (args) {
       m_this.map().pan({x: dx, y: dy});
     } else if (m_state.action === 'zoom') {
       m_this.map().zoom(
-        m_this.map().zoom() - dy * m_options.zoomScale / 120
+        m_this.map().zoom() - dy * m_options.zoomScale / 120,
+        m_state
       );
     } else if (m_state.action === 'select') {
       // Get the bounds of the current selection
@@ -892,7 +893,7 @@ geo.mapInteractor = function (args) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._handleMouseWheel = function (evt) {
-    var zoomFactor, direction;
+    var zoomFactor;
 
     if (m_paused) {
       return;
@@ -945,11 +946,10 @@ geo.mapInteractor = function (args) {
                eventMatch('wheel', m_options.zoomWheelModifiers)) {
 
       zoomFactor = -evt.deltaY;
-      direction = m_mouse.map;
 
       m_this.map().zoom(
         m_this.map().zoom() + zoomFactor,
-        direction
+        m_mouse
       );
     }
   };

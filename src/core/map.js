@@ -215,30 +215,25 @@ geo.map = function (arg) {
    * @returns {Number|geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.zoom = function (val, direction) {
+  this.zoom = function (val, origin, ignoreDiscreteZoom) {
     var evt, oldZoom, bounds;
     if (val === undefined) {
       return m_zoom;
     }
 
     oldZoom = m_zoom;
-    val = fix_zoom(val);
+    /* The ignoreDiscreteZoom flag is intended to allow non-integer zoom values
+     * during animation. */
+    val = fix_zoom(val, ignoreDiscreteZoom);
     if (val === m_zoom) {
       return m_this;
     }
 
     m_zoom = val;
 
-    /*
-    if (evt.center) {
-      m_this.center(recenter);
-    } else {
-      m_this.pan({x: 0, y: 0});
-    }
-    */
-
     bounds = m_this.boundsFromZoomAndCenter(val, m_center, null);
     m_this.modified();
+
 
     // Check if this a new integer level
     /*
@@ -263,11 +258,17 @@ geo.map = function (arg) {
     evt = {
       geo: {},
       zoomLevel: m_zoom,
-      screenPosition: direction,
+      screenPosition: origin ? origin.map : undefined,
       eventType: geo.event.zoom
     };
-
     m_this.geoTrigger(geo.event.zoom, evt);
+
+    if (origin && origin.geo && origin.map) {
+      var shifted = m_this.gcsToDisplay(origin.geo);
+      m_this.pan({x: origin.map.x - shifted.x, y: origin.map.y - shifted.y});
+    } else {
+      m_this.pan({x: 0, y: 0});
+    }
     return m_this;
   };
 
@@ -1262,7 +1263,7 @@ geo.map = function (arg) {
    * Return the nearest valid zoom level to the requested zoom.
    * @private
    */
-  function fix_zoom(zoom) {
+  function fix_zoom(zoom, ignoreDiscreteZoom) {
     zoom = Math.max(
       Math.min(
         m_validZoomRange.max,
@@ -1270,7 +1271,7 @@ geo.map = function (arg) {
       ),
       m_validZoomRange.min
     );
-    if (m_discreteZoom) {
+    if (m_discreteZoom && !ignoreDiscreteZoom) {
       zoom = Math.round(zoom);
     }
     return zoom;
