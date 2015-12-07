@@ -70,9 +70,10 @@ geo.d3.planeFeature = function (arg) {
     m_style.style = s;
     m_style.attributes = {
       x: ul.x,
-      y: lr.y,
+      y: ul.y,
       width: Math.abs(lr.x - ul.x),
-      height: Math.abs(lr.y - ul.y)
+      height: Math.abs(lr.y - ul.y),
+      reference: s.reference
     };
     if (s.image) {
       m_style.append = 'image';

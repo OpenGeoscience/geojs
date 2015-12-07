@@ -1,7 +1,6 @@
 geo.gl.tileLayer = function () {
   'use strict';
-  var m_this = this,
-      m_mapOpacity = 1.0;  //DWM:: we need to reimplement map opacity.
+  var m_this = this;
 
   this._drawTile = function (tile) {
     var bounds = this._tileBounds(tile),
@@ -16,10 +15,10 @@ geo.gl.tileLayer = function () {
     /* Use a small z-value for layering the tile levels. */
     tile.feature = m_this.createFeature(
       'plane', {drawOnAsyncResourceLoad: true})
-      .origin([ul.x, ul.y, level / 1000])
-      .upperLeft([ul.x, lr.y, level / 1000])
-      .lowerRight([lr.x, ul.y, level / 1000])
-      .style({image: tile._image, opacity: m_mapOpacity});
+      .origin([ul.x, lr.y, level / 1000])
+      .upperLeft([ul.x, ul.y, level / 1000])
+      .lowerRight([lr.x, lr.y, level / 1000])
+      .style({image: tile._image});
     tile.feature._update();
     m_this.draw();
   };

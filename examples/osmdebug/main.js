@@ -39,10 +39,9 @@ $(function () {
     },
     zoom: query.zoom !== undefined ? parseFloat(query.zoom) : 3
   });
-
-  $('#map').toggleClass('query.debug-label', (
+  $('#map').toggleClass('debug-label', (
       query.debug === 'true' || query.debug === 'all'))
-    .toggleClass('query.debug-border', (
+    .toggleClass('debug-border', (
       query.debug === 'border' || query.debug === 'all'));
   var params = {
     renderer: query.renderer || 'vgl',

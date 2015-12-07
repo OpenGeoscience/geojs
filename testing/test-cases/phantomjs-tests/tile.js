@@ -54,9 +54,9 @@ describe('geo.tile', function () {
         url: '/data/sample.json'
       });
 
-      expect(t.bottom).toEqual(0);
+      expect(t.bottom).toEqual(10);
       expect(t.left).toEqual(0);
-      expect(t.top).toEqual(10);
+      expect(t.top).toEqual(0);
       expect(t.right).toEqual(10);
 
       t = geo.tile({
@@ -64,9 +64,9 @@ describe('geo.tile', function () {
         size: {x: 10, y: 10},
         url: '/data/sample.json'
       });
-      expect(t.bottom).toEqual(60);
+      expect(t.bottom).toEqual(70);
       expect(t.left).toEqual(50);
-      expect(t.top).toEqual(70);
+      expect(t.top).toEqual(60);
       expect(t.right).toEqual(60);
     });
 
@@ -77,9 +77,9 @@ describe('geo.tile', function () {
         url: '/data/sample.json'
       });
 
-      expect(t.bottom).toEqual(22);
+      expect(t.bottom).toEqual(33);
       expect(t.left).toEqual(7);
-      expect(t.top).toEqual(33);
+      expect(t.top).toEqual(22);
       expect(t.right).toEqual(14);
     });
   });
@@ -94,9 +94,9 @@ describe('geo.tile', function () {
         overlap: {x: 1, y: 2}
       });
 
-      expect(t.bottom).toEqual(-2);
+      expect(t.bottom).toEqual(12);
       expect(t.left).toEqual(-1);
-      expect(t.top).toEqual(12);
+      expect(t.top).toEqual(-2);
       expect(t.right).toEqual(11);
 
       t = geo.tile({
@@ -105,9 +105,9 @@ describe('geo.tile', function () {
         url: '/data/sample.json',
         overlap: {x: 1, y: 2}
       });
-      expect(t.bottom).toEqual(58);
+      expect(t.bottom).toEqual(72);
       expect(t.left).toEqual(49);
-      expect(t.top).toEqual(72);
+      expect(t.top).toEqual(58);
       expect(t.right).toEqual(61);
     });
 
@@ -119,9 +119,9 @@ describe('geo.tile', function () {
         overlap: {x: 1, y: 2}
       });
 
-      expect(t.bottom).toEqual(20);
+      expect(t.bottom).toEqual(35);
       expect(t.left).toEqual(6);
-      expect(t.top).toEqual(35);
+      expect(t.top).toEqual(20);
       expect(t.right).toEqual(15);
     });
   });
@@ -206,10 +206,10 @@ describe('geo.tile', function () {
         expect(bds.right).toBe(0);
       });
       it('bounds.bottom', function () {
-        expect(bds.bottom).toBe(-15);
+        expect(bds.bottom).toBe(-5);
       });
       it('bounds.top', function () {
-        expect(bds.top).toBe(-5);
+        expect(bds.top).toBe(-15);
       });
     });
   });

@@ -291,7 +291,7 @@ geo.map = function (arg) {
 
     m_camera.pan({
       x: delta.x * unit,
-      y: delta.y * unit
+      y: -delta.y * unit
     });
     /* If m_clampBounds is true, clamp the pan, too - DWM:: */
     m_center = m_camera.displayToWorld({

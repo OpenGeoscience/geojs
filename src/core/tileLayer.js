@@ -72,14 +72,17 @@
    * @param {object?} options
    * @param {number} [options.minLevel=0]    The minimum zoom level available
    * @param {number} [options.maxLevel=18]   The maximum zoom level available
-   * @param {number} [options.tileOverlap=0] Number of pixels of overlap between tiles
-   * @param {number} [options.tileWidth=256] The tile width as displayed without overlap
-   * @param {number} [options.tileHeight=256] The tile height as displayed without overlap
+   * @param {number} [options.tileOverlap=0]
+   *    Number of pixels of overlap between tiles
+   * @param {number} [options.tileWidth=256]
+   *    The tile width as displayed without overlap
+   * @param {number} [options.tileHeight=256]
+   *    The tile height as displayed without overlap
    * @param {number} [options.cacheSize=400] The maximum number of tiles to
-   *            cache.  The default is 200 if keepLower is false.
-   * @param {bool}   [options.keepLower=true] Keep lower zoom level tiles when
-   *            showing high zoom level tiles.  This uses more memory but
-   *            results in smoother transitions.
+   *    cache.  The default is 200 if keepLower is false.
+   * @param {bool}   [options.keepLower=true]
+   *    Keep lower zoom level tiles when showing high zoom level tiles.  This
+   *    uses more memory but results in smoother transitions.
    * @param {bool}   [options.wrapX=true]    Wrap in the x-direction
    * @param {bool}   [options.wrapY=false]   Wrap in the y-direction
    * @param {number} [options.minX=0]        The minimum world coordinate in X
@@ -109,14 +112,17 @@
    *   is complete.**
    * @param {string} [options.attribution]
    *   An attribution to display with the layer (accepts HTML)
-   * @param {function} [options.tileRounding=Math.floor]
+   * @param {function} [options.tileRounding=Math.round]
    *   This function determines which tiles will be loaded when the map is at
-   *   a non-integer zoom.  For example the default, `Math.floor`, will use
-   *   tile level 2 when the map is at zoom 2.9.
+   *   a non-integer zoom.  For example, `Math.floor`, will use tile level 2
+   *   when the map is at zoom 2.9.
    * @param {function} [options.tileOffset]
-   *   This function takes a zoom level argument and returns, in units of pixels,
-   *   the coordinates of the point (0, 0) at the given zoom level relative to
-   *   the bottom right corner of the domain.
+   *   This function takes a zoom level argument and returns, in units of
+   *   pixels, the coordinates of the point (0, 0) at the given zoom level
+   *   relative to the bottom left corner of the domain.
+   * @param {bool}   [options.topDown=false]  True if the gcs is top-down (as
+   *   in a plain image), false if bottom-up (as in most maps).  When false,
+   *   this inverts the gcs y-coordinate when calculating local coordinates.
    * @returns {geo.tileLayer}
    */
   //////////////////////////////////////////////////////////////////////////////
@@ -372,11 +378,11 @@
       return {
         start: this.tileAtPoint({
           x: bounds.left,
-          y: bounds.bottom
+          y: bounds.top
         }, level),
         end: this.tileAtPoint({
           x: bounds.right,
-          y: bounds.top
+          y: bounds.bottom
         }, level)
       };
     };
@@ -574,7 +580,7 @@
       container.css({
         'position': 'absolute',
         'left': bounds.left + 'px',
-        'top': bounds.bottom + 'px'
+        'top': bounds.top + 'px'
       });
 
       // apply fade in animation
@@ -734,7 +740,7 @@
           unit = map.unitsPerPixel(zoom === undefined ? map.zoom() : zoom);
       return {
         x: pt.x / unit,
-        y: pt.y / unit
+        y: this._topDown() * pt.y / unit
       };
     };
 
@@ -751,14 +757,21 @@
           unit = map.unitsPerPixel(zoom === undefined ? map.zoom() : zoom);
       return {
         x: pt.x * unit,
-        y: pt.y * unit
+        y: this._topDown() * pt.y * unit
       };
     };
 
     /**
-     * Return the DOM eleement containing a level specific
-     * layer.  This will create the element if it doesn't
-     * already exist.
+     * Return a factor for invertin the y units as appropriate.
+     * @return {number}
+     */
+    this._topDown = function () {
+      return this._options.topDown ? 1 : -1;
+    };
+
+    /**
+     * Return the DOM element containing a level specific layer.  This will
+     * create the element if it doesn't already exist.
      * @param {number} level The zoom level of the layer to fetch
      * @return {DOM}
      */
@@ -832,7 +845,7 @@
       }
       /* Set some attributes that can be used by non-css based viewers.  This
        * doesn't include the map center, as that may need to be handled
-       * differently from the tile offset and view center. */
+       * differently from the view center. */
       this.canvas().attr({
         scale: Math.pow(2, mapZoom - zoom),
         dx: -to.x + -(view.left + view.right) / 2,
@@ -987,9 +1000,9 @@
       if (tile.index.level !== bounds.level) {
         scale = Math.pow(2, (bounds.level || 0) - (tile.index.level || 0));
       }
-      return (tile.bottom - to.y) * scale > bounds.top ||
+      return (tile.bottom - to.y) * scale < bounds.top ||
              (tile.left - to.x) * scale   > bounds.right ||
-             (tile.top - to.y) * scale    < bounds.bottom ||
+             (tile.top - to.y) * scale    > bounds.bottom ||
              (tile.right - to.x) * scale  < bounds.left;
     };
 
@@ -1027,11 +1040,12 @@
     };
 
     /**
-     * Convert actual pixel coordinates (where (0,0) is the upper left) to
-     * layer pixel coordinates (typically (0,0) is the center of the map).
+     * Convert display pixel coordinates (where (0,0) is the upper left) to
+     * layer pixel coordinates (typically (0,0) is the center of the map and
+     * the upper-left has the most negative values).
      * By default, this is done at the current base zoom level.
      *
-     * @param pt: the point to convert.  If undefined, user the center of the
+     * @param pt: the point to convert.  If undefined, use the center of the
      *            display.
      * @param zoom: if specified, the zoom level to use.
      * @returns: the point in level coordinates.
@@ -1045,8 +1059,12 @@
         var size = map.size();
         pt = {x: size.width / 2, y: size.height / 2};
       }
-      var gcsPt = map.displayToGcs(pt);
-      return {x: gcsPt.x / unit, y: gcsPt.y / unit};
+      /* Reverse the y coordinate, since we expect the gcs coordinate system
+       * to be right-handed and the level coordinate system to be
+       * left-handed. */
+      var gcsPt = map.displayToGcs(pt),
+          lvlPt = {x: gcsPt.x / unit, y: this._topDown() * gcsPt.y / unit};
+      return lvlPt;
     };
 
     /**
@@ -1093,9 +1111,10 @@
       void(level);
       return {x: 0, y: 0};
     },
+    topDown: false,
     keepLower: true,
     // cacheSize: 400,  // set depending on keepLower
-    tileRounding: Math.floor,
+    tileRounding: Math.round,
     attribution: '',
     animationDuration: 0
   };

@@ -1,7 +1,6 @@
 geo.d3.tileLayer = function () {
   'use strict';
   var m_this = this,
-      m_mapOpacity = 1.0,  //DWM:: we need to reimplement map opacity.
       s_update = this._update,
       s_init = this._init;
 
@@ -15,7 +14,8 @@ geo.d3.tileLayer = function () {
       .lowerRight([bounds.right, bounds.bottom])
       .style({
         image: tile._url,
-        opacity: m_mapOpacity,
+        opacity: 1,
+        reference: tile.toString(),
         parentId: parentNode.attr('data-tile-layer-id')
       });
     tile.feature._update();
