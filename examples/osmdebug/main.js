@@ -3,6 +3,7 @@
  *      to draw borders on each tile when using the html renderer.  'all' to
  *      show both labels and borders.  These options just add a class to the
  *      #map element to invoke special css rules.
+ *  discrete: 'true' to use discrete zoom.
  *  h: height of a tiled image (at max zoom).
  *  lower: 'true' (default) or 'false'.  Keep all lower-level tiles if true.
  *      'false' was the old behavior where fewer tiles are rendered, and
@@ -43,7 +44,8 @@ $(function () {
       x: query.x !== undefined ? parseFloat(query.x) : -98.0,
       y: query.y !== undefined ? parseFloat(query.y) : 39.5
     },
-    zoom: query.zoom !== undefined ? parseFloat(query.zoom) : 3
+    zoom: query.zoom !== undefined ? parseFloat(query.zoom) : 3,
+    discreteZoom: query.discrete === 'true' ? true : false
   };
   var layerParams = {
     renderer: query.renderer || 'vgl',

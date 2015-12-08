@@ -35,9 +35,13 @@
  * @param {number} [center.y=0]
  * @param {number?} width The map width (default node width)
  * @param {number?} height The map height (default node height)
+ *
+ * *** Navigation ***
  * @param {number} [min=0]  Minimum zoom level (though fitting to the viewport
  *   may make it so this is smaller than the smallest possible value)
  * @param {number} [max=16]  Maximum zoom level
+ * @param {boolean} [discreteZoom=false]  True to only allow integer zoom
+ *   levels.  False for any zoom level.
  *
  * *** Advanced parameters ***
  * @param {geo.camera?} camera The camera to control the view
@@ -880,7 +884,7 @@ geo.map = function (arg) {
       },
       end: {
         center: defaultOpts.center,
-        zoom: m_discreteZoom ? Math.round(defaultOpts.zoom) : defaultOpts.zoom
+        zoom: fix_zoom(defaultOpts.zoom)
       },
       ease: defaultOpts.ease,
       zCoord: defaultOpts.zCoord,
@@ -1291,6 +1295,9 @@ geo.map = function (arg) {
     );
     if (m_discreteZoom && !ignoreDiscreteZoom) {
       zoom = Math.round(zoom);
+      if (zoom < m_validZoomRange.min) {
+        zoom = Math.ceil(m_validZoomRange.min);
+      }
     }
     return zoom;
   }
