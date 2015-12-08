@@ -125,7 +125,8 @@ geo.gl.vglRenderer = function (arg) {
 
   this._updateRendererCamera = function () {
     var renderWindow = m_viewer.renderWindow(),
-        camera = m_this.layer().map().camera(),
+        map = m_this.layer().map(),
+        camera = map.camera(),
         view = camera.view, proj = camera.projectionMatrix;
     /* we want positive z to be closer to the camera. */
     proj = mat4.scale(mat4.create(), proj, [1, 1, -1]);
@@ -136,7 +137,25 @@ geo.gl.vglRenderer = function (arg) {
       var cam = renderer.camera();
       cam.setViewMatrix(view);
       cam.setProjectionMatrix(proj);
-      //DWM:: send information (possibly) for tile alignment
+      if (proj[1] || proj[2] || proj[3] || proj[4] || proj[6] || proj[7] ||
+          proj[8] || proj[9] || proj[11] || proj[15] !== 1) {
+        /* Don't align texels */
+        cam.viewAlignment = function () {
+          return null;
+        };
+      } else {
+        /* Set information for texel alignment.  The rounding factors should
+         * probably be divided by window.devicePixelRatio. */
+        cam.viewAlignment = function () {
+          var align = {
+            roundx: 2.0 / camera.viewport.width,
+            roundy: 2.0 / camera.viewport.height
+          };
+          align.dx = (camera.viewport.width % 2) ? align.roundx * 0.5 : 0;
+          align.dy = (camera.viewport.height % 2) ? align.roundy * 0.5 : 0;
+          return align;
+        };
+      }
     });
   };
 

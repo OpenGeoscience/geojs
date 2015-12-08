@@ -10,7 +10,9 @@
  *  renderer: 'vgl' (default), 'd3', 'null', or 'html'.  This picks the
  *      renderer for map tiles.  null or html uses the html renderer.
  *  url: url to use for the map files.  Placeholders are allowed.  Default is
- *      http://otile1.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.png
+ *      http://otile1.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.png .  Other useful
+ *      urls are are: /data/tilefancy.png
+ *      http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png
  *  x: map center x
  *  y: map center y
  *  zoom: starting zoom level

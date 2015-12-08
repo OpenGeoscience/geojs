@@ -41,6 +41,7 @@
  * @param {geo.camera?} camera The camera to control the view
  * @param {geo.mapInteractor?} interactor The UI event handler
  * @param {geo.clock?} clock The clock used to synchronize time events
+ * @param {boolean} [autoResize=true] Adjust map size on window resize
  * @param {boolean} [clampBounds=true] Prevent panning outside of the
  *   maximum bounds
  *
