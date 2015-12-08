@@ -17,8 +17,7 @@
  * *** Required when using a domain/CS different from OSM ***
  * @param {string|geo.transform} [gcs='EPSG:3857']
  *   The main coordinate system of the map
- * @param {number} [maxZoom=16] The maximum zoom level (precision issues
- *   exist in GL for values larger than 16)
+ * @param {number} [maxZoom=16] The maximum zoom level
  * @param {string|geo.transform} [ingcs='EPSG:4326']
  *   The default coordinate system of interface calls.
  * @param {number} [unitsPerPixel=156543] GCS to pixel unit scaling at zoom 0
@@ -36,6 +35,9 @@
  * @param {number} [center.y=0]
  * @param {number?} width The map width (default node width)
  * @param {number?} height The map height (default node height)
+ * @param {number} [min=0]  Minimum zoom level (though fitting to the viewport
+ *   may make it so this is smaller than the smallest possible value)
+ * @param {number} [max=16]  Maximum zoom level
  *
  * *** Advanced parameters ***
  * @param {geo.camera?} camera The camera to control the view
@@ -779,11 +781,15 @@ geo.map = function (arg) {
     if (arg === undefined) {
       return $.extend({}, m_validZoomRange);
     }
-    m_validZoomRange.max = arg.max;
+    if (arg.max !== undefined) {
+      m_validZoomRange.max = arg.max;
+    }
 
     // don't allow the minimum zoom to go below what will
     // fit in the view port
-    m_validZoomRange.min = fix_zoom(arg.min);
+    if (arg.min !== undefined) {
+      m_validZoomRange.min = fix_zoom(arg.min);
+    }
     return m_this;
   };
 
@@ -1319,10 +1325,10 @@ geo.map = function (arg) {
   m_origin = {x: 0, y: 0};
 
   // Fix the zoom level (minimum and initial)
+  this.zoomRange(arg);
   reset_minimum_zoom();
   // Now update to the correct center and zoom level
   this.center($.extend({}, arg.center || m_center), m_ingcs);
-
 
   this.interactor(arg.interactor || geo.mapInteractor());
   this.clock(arg.clock || geo.clock());

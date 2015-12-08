@@ -120,9 +120,10 @@
    *   This function takes a zoom level argument and returns, in units of
    *   pixels, the coordinates of the point (0, 0) at the given zoom level
    *   relative to the bottom left corner of the domain.
-   * @param {bool}   [options.topDown=false]  True if the gcs is top-down (as
-   *   in a plain image), false if bottom-up (as in most maps).  When false,
-   *   this inverts the gcs y-coordinate when calculating local coordinates.
+   * @param {bool}   [options.topDown=false]  True if the gcs is top-down,
+   *   false if bottom-up (the ingcs does not matter, only the gcs coordinate
+   *   system).  When false, this inverts the gcs y-coordinate when calculating
+   *   local coordinates.
    * @returns {geo.tileLayer}
    */
   //////////////////////////////////////////////////////////////////////////////
