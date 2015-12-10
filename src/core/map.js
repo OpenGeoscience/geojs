@@ -1338,7 +1338,7 @@ geo.map = function (arg) {
       }
     }
     if (m_clampBoundsY) {
-      if (bounds.top - bounds.bottom > m_maxBounds.right - m_maxBounds.bottom) {
+      if (bounds.top - bounds.bottom > m_maxBounds.top - m_maxBounds.bottom) {
         dy = m_maxBounds.bottom - ((bounds.top - bounds.bottom - (
           m_maxBounds.top - m_maxBounds.bottom)) / 2) - bounds.bottom;
       } else if (bounds.top > m_maxBounds.top) {
