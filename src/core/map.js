@@ -249,26 +249,6 @@ geo.map = function (arg) {
     bounds = m_this.boundsFromZoomAndCenter(val, m_center, null);
     m_this.modified();
 
-
-    // Check if this a new integer level
-    /*
-    if (Math.floor(val) !== Math.floor(oldZoom)) {
-      // update world coordinate reference
-      oldOrigin = m_origin;
-      m_origin = $.extend({}, m_center);
-
-      // trigger a worldChanged event
-      m_this.geoTrigger(
-        geo.event.worldChanged,
-        {
-          map: m_this,
-          origin: m_origin,
-          originChange: geo.util.lincomb(-1, oldOrigin, 1, m_origin)
-        }
-      );
-    }
-    */
-
     camera_bounds(bounds);
     evt = {
       geo: {},
@@ -1338,14 +1318,15 @@ geo.map = function (arg) {
    * @private
    */
   function fix_bounds(bounds) {
+    var dx, dy;
     if (m_clampBoundsX) {
-      var dx, dx2;
-      if (bounds.left < m_maxBounds.left) {
+      if (bounds.right - bounds.left > m_maxBounds.right - m_maxBounds.left) {
+        dx = m_maxBounds.left - ((bounds.right - bounds.left - (
+          m_maxBounds.right - m_maxBounds.left)) / 2) - bounds.left;
+      } else if (bounds.left < m_maxBounds.left) {
         dx = m_maxBounds.left - bounds.left;
-      }
-      if (bounds.right > m_maxBounds.right) {
-        dx2 = m_maxBounds.right - bounds.right;
-        dx = (dx === undefined ? dx2 : (dx + dx2) / 2);
+      } else if (bounds.right > m_maxBounds.right) {
+        dx = m_maxBounds.right - bounds.right;
       }
       if (dx) {
         bounds = {
@@ -1357,13 +1338,13 @@ geo.map = function (arg) {
       }
     }
     if (m_clampBoundsY) {
-      var dy, dy2;
-      if (bounds.top > m_maxBounds.top) {
+      if (bounds.top - bounds.bottom > m_maxBounds.right - m_maxBounds.bottom) {
+        dy = m_maxBounds.bottom - ((bounds.top - bounds.bottom - (
+          m_maxBounds.top - m_maxBounds.bottom)) / 2) - bounds.bottom;
+      } else if (bounds.top > m_maxBounds.top) {
         dy = m_maxBounds.top - bounds.top;
-      }
-      if (bounds.bottom < m_maxBounds.bottom) {
-        dy2 = m_maxBounds.bottom - bounds.bottom;
-        dy = (dy === undefined ? dy2 : (dy + dy2) / 2);
+      } else if (bounds.bottom < m_maxBounds.bottom) {
+        dy = m_maxBounds.bottom - bounds.bottom;
       }
       if (dy) {
         bounds = {

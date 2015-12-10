@@ -1,3 +1,5 @@
+// This example should be tried with different query strings.
+
 /* Many parameters can be adjusted via url query parameters:
  *  clampBoundsX: 'true' to clamp movement in the horizontal direction.
  *  clampBoundsY: 'true' to clamp movement in the vertical direction.
@@ -41,7 +43,7 @@ var tileDebug = {};
 $(function () {
   'use strict';
 
-  // parse query parameters into an object for ease of access
+  // Parse query parameters into an object for ease of access
   var query = document.location.search.replace(/(^\?)/, '').split(
     '&').map(function (n) {
       n = n.split('=');
@@ -49,7 +51,8 @@ $(function () {
       return this;
     }.bind({}))[0];
 
-  // Create a map object
+  // Set map defaults to use our named node and have a reasonable center and
+  // zoom level
   var mapParams = {
     node: '#map',
     center: {
@@ -58,6 +61,7 @@ $(function () {
     },
     zoom: query.zoom !== undefined ? parseFloat(query.zoom) : 3
   };
+  // Set the tile layer defaults to use the specified renderer and opacity
   var layerParams = {
     renderer: query.renderer || 'vgl',
     opacity: query.opacity || '1'
@@ -65,6 +69,7 @@ $(function () {
   if (layerParams.renderer === 'null' || layerParams.renderer === 'html') {
     layerParams.renderer = null;
   }
+  // Allow a custom tile url, including subdomains.
   if (query.url) {
     layerParams.url = query.url;
   } else {
@@ -77,10 +82,12 @@ $(function () {
       layerParams.subdomains = query.subdomains;
     }
   }
-  /* For image tile servers, where we know the maximum width and height, use
-   * a pixel coordinate system. */
+  // For image tile servers, where we know the maximum width and height, use
+  // a pixel coordinate system.
   if (query.w && query.h) {
     var w = parseInt(query.w), h = parseInt(query.h);
+    // Set a pixel coordinate system where 0, 0 is the upper left and w, h is
+    // the lower-right.
     /* If both ingcs and gcs are set to an empty string '', the coordinates
      * will stay at pixel values, but the y values will from from [0, -h).  If
      * '+proj=longlat +axis=esu', '+proj=longlat +axis=enu' are used instead,
@@ -89,13 +96,13 @@ $(function () {
      * The 'longlat' projection functionally is a no-op in this case. */
     mapParams.ingcs = '+proj=longlat +axis=esu';
     mapParams.gcs = '+proj=longlat +axis=enu';
-    // mapParams.ingcs = mapParams.gcs = '';
+    /* mapParams.ingcs = mapParams.gcs = ''; */
     mapParams.maxBounds = {left: 0, top: 0, right: w, bottom: h};
     mapParams.center = {x: w / 2, y: h / 2};
     mapParams.max = Math.ceil(Math.log(Math.max(w, h) / 256) / Math.log(2));
     mapParams.clampBoundsY = true;
-    /* unitsPerPixel is at zoom level 0.  We want each pixel to be 1 at the
-     * maximum zoom */
+    // unitsPerPixel is at zoom level 0.  We want each pixel to be 1 at the
+    // maximum zoom
     mapParams.unitsPerPixel = Math.pow(2, mapParams.max);
     layerParams.maxLevel = mapParams.max;
     layerParams.wrapX = layerParams.wrapY = false;
@@ -104,6 +111,7 @@ $(function () {
     };
     layerParams.attribution = '';
   }
+  // Parse additional query options
   if (query.x !== undefined) {
     mapParams.center.x = parseFloat(query.x);
   }
@@ -119,7 +127,7 @@ $(function () {
       layerParams.maxLevel = mapParams.max;
     }
   }
-  /* populate boolean flags */
+  // Populate boolean flags for the map
   $.each({
       clampBoundsX: 'clampBoundsX',
       clampBoundsY: 'clampBoundsY',
@@ -130,6 +138,7 @@ $(function () {
         mapParams[mkey] = query[qkey] === 'true';
       }
     });
+  // Populate boolean flags for the tile layer
   $.each({
       clampBoundsX: 'clampBoundsX',
       lower: 'keepLower',
@@ -140,15 +149,19 @@ $(function () {
         layerParams[lkey] = query[qkey] === 'true';
       }
     });
+  // Create a map object
   var map = geo.map(mapParams);
+  // Set the projection.  This has to be set on the camera, not in the map
+  // parameters
   if (query.projection) {
     map.camera().projection = query.projection;
   }
+  // Enable debug classes, if requested.
   $('#map').toggleClass('debug-label', (
       query.debug === 'true' || query.debug === 'all'))
     .toggleClass('debug-border', (
       query.debug === 'border' || query.debug === 'all'));
-  // Add the osm layer with a custom tile url
+  // Add the tile layer with the specified parameters
   var osmLayer = map.createLayer('osm', layerParams);
   // Make variables available as a global for easier debug
   tileDebug.map = map;
