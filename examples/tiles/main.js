@@ -1,4 +1,7 @@
 /* Many parameters can be adjusted via url query parameters:
+ *  clampBoundsX: 'true' to clamp movement in the horizontal direction.
+ *  clampBoundsY: 'true' to clamp movement in the vertical direction.
+ *  clampZoom: 'true' to clamp zooming out smaller than the window.
  *  debug: 'true' to show tile labels when using the html renderer.  'border'
  *      to draw borders on each tile when using the html renderer.  'all' to
  *      show both labels and borders.  These options just add a class to the
@@ -8,9 +11,16 @@
  *  lower: 'true' (default) or 'false'.  Keep all lower-level tiles if true.
  *      'false' was the old behavior where fewer tiles are rendered, and
  *      panning shows blank areas.
+ *  min: minimum zoom level (default is 0).
+ *  max: maximum zoom level (default is 16 for maps, or the entire image for
+ *      images).
  *  opacity: a css opacity value (typically a float from 0 to 1).
+ *  projection: 'parallel' or 'projection' for the camera projection.
  *  renderer: 'vgl' (default), 'd3', 'null', or 'html'.  This picks the
  *      renderer for map tiles.  null or html uses the html renderer.
+ *  subdomains: a comma-separated string of subdomains to use in the {s} part
+ *      of the url parameter.  If there are no commas in the string, each letter
+ *      is used by itself (e.g., 'abc' is the same as 'a,b,c').
  *  url: url to use for the map files.  Placeholders are allowed.  Default is
  *      http://otile1.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.png .  Other useful
  *      urls are are: /data/tilefancy.png
@@ -18,12 +28,14 @@
  *  w: width of a tiled image (at max zoom).  If iw and h are specified, a
  *      variety of other changes are made to make this served in image
  *      coordinates.
+ *  wrapX: 'true' to wrap the tiles in the horizontal direction.
+ *  wrapY: 'true' to wrap the tiles in the vertical direction.
  *  x: map center x
  *  y: map center y
  *  zoom: starting zoom level
  */
 
-var osmDebug = {};
+var tileDebug = {};
 
 // Run after the DOM loads
 $(function () {
@@ -41,15 +53,13 @@ $(function () {
   var mapParams = {
     node: '#map',
     center: {
-      x: query.x !== undefined ? parseFloat(query.x) : -98.0,
-      y: query.y !== undefined ? parseFloat(query.y) : 39.5
+      x: -98.0,
+      y: 39.5
     },
-    zoom: query.zoom !== undefined ? parseFloat(query.zoom) : 3,
-    discreteZoom: query.discrete === 'true' ? true : false
+    zoom: query.zoom !== undefined ? parseFloat(query.zoom) : 3
   };
   var layerParams = {
     renderer: query.renderer || 'vgl',
-    keepLower: query.lower === 'false' ? false : true,
     opacity: query.opacity || '1'
   };
   if (layerParams.renderer === 'null' || layerParams.renderer === 'html') {
@@ -59,6 +69,13 @@ $(function () {
     layerParams.url = query.url;
   } else {
     layerParams.baseUrl = 'http://otile1.mqcdn.com/tiles/1.0.0/map/';
+  }
+  if (query.subdomains) {
+    if (query.subdomains.indexOf(',') >= 0) {
+      layerParams.subdomains = query.subdomains.split(',');
+    } else {
+      layerParams.subdomains = query.subdomains;
+    }
   }
   /* For image tile servers, where we know the maximum width and height, use
    * a pixel coordinate system. */
@@ -72,10 +89,11 @@ $(function () {
      * The 'longlat' projection functionally is a no-op in this case. */
     mapParams.ingcs = '+proj=longlat +axis=esu';
     mapParams.gcs = '+proj=longlat +axis=enu';
-    //mapParams.ingcs = mapParams.gcs = '';
+    // mapParams.ingcs = mapParams.gcs = '';
     mapParams.maxBounds = {left: 0, top: 0, right: w, bottom: h};
     mapParams.center = {x: w / 2, y: h / 2};
     mapParams.max = Math.ceil(Math.log(Math.max(w, h) / 256) / Math.log(2));
+    mapParams.clampBoundsY = true;
     /* unitsPerPixel is at zoom level 0.  We want each pixel to be 1 at the
      * maximum zoom */
     mapParams.unitsPerPixel = Math.pow(2, mapParams.max);
@@ -86,7 +104,46 @@ $(function () {
     };
     layerParams.attribution = '';
   }
+  if (query.x !== undefined) {
+    mapParams.center.x = parseFloat(query.x);
+  }
+  if (query.y !== undefined) {
+    mapParams.center.y = parseFloat(query.y);
+  }
+  if (query.min !== undefined) {
+    mapParams.min = parseFloat(query.min);
+  }
+  if (query.max !== undefined) {
+    mapParams.max = parseFloat(query.max);
+    if (!layerParams.maxLevel) {
+      layerParams.maxLevel = mapParams.max;
+    }
+  }
+  /* populate boolean flags */
+  $.each({
+      clampBoundsX: 'clampBoundsX',
+      clampBoundsY: 'clampBoundsY',
+      clampZoom: 'clampZoom',
+      discrete: 'discreteZoom'
+    }, function (qkey, mkey) {
+      if (query[qkey] !== undefined) {
+        mapParams[mkey] = query[qkey] === 'true';
+      }
+    });
+  $.each({
+      clampBoundsX: 'clampBoundsX',
+      lower: 'keepLower',
+      wrapX: 'wrapX',
+      wrapY: 'wrapY'
+    }, function (qkey, lkey) {
+      if (query[qkey] !== undefined) {
+        layerParams[lkey] = query[qkey] === 'true';
+      }
+    });
   var map = geo.map(mapParams);
+  if (query.projection) {
+    map.camera().projection = query.projection;
+  }
   $('#map').toggleClass('debug-label', (
       query.debug === 'true' || query.debug === 'all'))
     .toggleClass('debug-border', (
@@ -94,8 +151,8 @@ $(function () {
   // Add the osm layer with a custom tile url
   var osmLayer = map.createLayer('osm', layerParams);
   // Make variables available as a global for easier debug
-  osmDebug.map = map;
-  osmDebug.mapParams = mapParams;
-  osmDebug.layerParams = layerParams;
-  osmDebug.osmLayer = osmLayer;
+  tileDebug.map = map;
+  tileDebug.mapParams = mapParams;
+  tileDebug.layerParams = layerParams;
+  tileDebug.osmLayer = osmLayer;
 });

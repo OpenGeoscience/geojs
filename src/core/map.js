@@ -48,8 +48,12 @@
  * @param {geo.mapInteractor?} interactor The UI event handler
  * @param {geo.clock?} clock The clock used to synchronize time events
  * @param {boolean} [autoResize=true] Adjust map size on window resize
- * @param {boolean} [clampBounds=true] Prevent panning outside of the
- *   maximum bounds
+ * @param {boolean} [clampBoundsX=false] Prevent panning outside of the
+ *   maximum bounds in the horizontal direction.
+ * @param {boolean} [clampBoundsY=true] Prevent panning outside of the
+ *   maximum bounds in the vertical direction.
+ * @param {boolean} [clampZoom=true] Prevent zooming out so that the map area
+ *   is smaller than the window.
  *
  * @returns {geo.map}
  */
@@ -83,7 +87,7 @@ geo.map = function (arg) {
       m_zoom = arg.zoom === undefined ? 4 : arg.zoom,
       m_fileReader = null,
       m_interactor = null,
-      m_validZoomRange = { min: 0, max: 16 },
+      m_validZoomRange = {min: 0, max: 16, origMin: 0},
       m_transition = null,
       m_queuedTransition = null,
       m_clock = null,
@@ -91,7 +95,9 @@ geo.map = function (arg) {
       m_maxBounds = arg.maxBounds || {},
       m_camera = arg.camera || geo.camera(),
       m_unitsPerPixel,
-      m_clampBounds,
+      m_clampBoundsX,
+      m_clampBoundsY,
+      m_clampZoom,
       m_origin,
       m_scale = {x: 1, y: 1, z: 1}; // constant for the moment
 
@@ -115,7 +121,9 @@ geo.map = function (arg) {
   m_camera.viewport = {width: m_width, height: m_height};
   arg.center = geo.util.normalizeCoordinates(arg.center);
   arg.autoResize = arg.autoResize === undefined ? true : arg.autoResize;
-  m_clampBounds = arg.clampBounds === undefined ? true : arg.clampBounds;
+  m_clampBoundsX = arg.clampBoundsX === undefined ? false : arg.clampBoundsX;
+  m_clampBoundsY = arg.clampBoundsY === undefined ? true : arg.clampBoundsY;
+  m_clampZoom = arg.clampZoom === undefined ? true : arg.clampZoom;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -301,7 +309,18 @@ geo.map = function (arg) {
       x: delta.x * unit,
       y: -delta.y * unit
     });
-    /* If m_clampBounds is true, clamp the pan, too - DWM:: */
+    /* If m_clampBounds* is true, clamp the pan */
+    var bounds = fix_bounds(m_camera.bounds);
+    if (bounds !== m_camera.bounds) {
+      var panPos = this.gcsToDisplay({
+            x: m_camera.bounds.left, y: m_camera.bounds.top});
+      camera_bounds(bounds);
+      var clampPos = this.gcsToDisplay({
+            x: m_camera.bounds.left, y: m_camera.bounds.top});
+      evt.screenDelta.x += clampPos.x - panPos.x;
+      evt.screenDelta.y += clampPos.y - panPos.y;
+    }
+
     m_center = m_camera.displayToWorld({
       x: m_width / 2,
       y: m_height / 2
@@ -478,6 +497,10 @@ geo.map = function (arg) {
     m_this.camera().viewport = {width: w, height: h};
 
     reset_minimum_zoom();
+    var newZoom = fix_zoom(m_zoom);
+    if (newZoom !== m_zoom) {
+      this.zoom(newZoom);
+    }
 
     m_this.geoTrigger(geo.event.resize, {
       type: geo.event.resize,
@@ -792,8 +815,9 @@ geo.map = function (arg) {
     // don't allow the minimum zoom to go below what will
     // fit in the view port
     if (arg.min !== undefined) {
-      m_validZoomRange.min = fix_zoom(arg.min);
+      m_validZoomRange.min = m_validZoomRange.origMin = fix_zoom(arg.min);
     }
+    reset_minimum_zoom();
     return m_this;
   };
 
@@ -1278,7 +1302,12 @@ geo.map = function (arg) {
    * @private
    */
   function reset_minimum_zoom() {
-    m_validZoomRange.min = Math.max(0, calculate_zoom(m_maxBounds));
+    if (m_clampZoom) {
+      m_validZoomRange.min = Math.max(
+          m_validZoomRange.origMin, calculate_zoom(m_maxBounds));
+    } else {
+      m_validZoomRange.min = m_validZoomRange.origMin;
+    }
   }
 
   /**
@@ -1304,11 +1333,47 @@ geo.map = function (arg) {
 
   /**
    * Return the nearest valid bounds maintaining the
-   * width and height. Does nothing if m_clampBounds is
+   * width and height. Does nothing if m_clampBounds* is
    * false.
    * @private
    */
   function fix_bounds(bounds) {
+    if (m_clampBoundsX) {
+      var dx, dx2;
+      if (bounds.left < m_maxBounds.left) {
+        dx = m_maxBounds.left - bounds.left;
+      }
+      if (bounds.right > m_maxBounds.right) {
+        dx2 = m_maxBounds.right - bounds.right;
+        dx = (dx === undefined ? dx2 : (dx + dx2) / 2);
+      }
+      if (dx) {
+        bounds = {
+          left: bounds.left += dx,
+          right: bounds.right += dx,
+          top: bounds.top,
+          bottom: bounds.bottom
+        };
+      }
+    }
+    if (m_clampBoundsY) {
+      var dy, dy2;
+      if (bounds.top > m_maxBounds.top) {
+        dy = m_maxBounds.top - bounds.top;
+      }
+      if (bounds.bottom < m_maxBounds.bottom) {
+        dy2 = m_maxBounds.bottom - bounds.bottom;
+        dy = (dy === undefined ? dy2 : (dy + dy2) / 2);
+      }
+      if (dy) {
+        bounds = {
+          top: bounds.top += dy,
+          bottom: bounds.bottom += dy,
+          left: bounds.left,
+          right: bounds.right
+        };
+      }
+    }
     return bounds;
   }
 
@@ -1333,7 +1398,7 @@ geo.map = function (arg) {
 
   // Fix the zoom level (minimum and initial)
   this.zoomRange(arg);
-  reset_minimum_zoom();
+  m_zoom = fix_zoom(m_zoom);
   // Now update to the correct center and zoom level
   this.center($.extend({}, arg.center || m_center), m_ingcs);
 

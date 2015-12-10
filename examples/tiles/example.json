@@ -1,0 +1,9 @@
+{
+  "path": "tiles",
+  "title": "Tile layer with query options",
+  "exampleCss": ["main.css"],
+  "exampleJs": ["main.js"],
+  "about": {
+    "text": "Basic rendering tiles from a map or image tile server, with many options adjustable via url query parameters."
+  }
+}
