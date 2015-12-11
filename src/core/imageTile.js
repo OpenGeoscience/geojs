@@ -64,7 +64,11 @@
       var defer;
       if (!this._image) {
         this._image = new Image(this.size.x, this.size.y);
-        this._image.crossOrigin = this._cors;
+        // Only set the crossOrigin parameter if this is going across origins.
+        if (this._url.indexOf(':') >= 0 && this._url.indexOf('/') >= 0 &&
+            this._url.indexOf(':') < this._url.indexOf('/')) {
+          this._image.crossOrigin = this._cors;
+        }
         defer = new $.Deferred();
         this._image.onload = function () { defer.resolve(); };
         this._image.onerror = function () { defer.reject(); };
