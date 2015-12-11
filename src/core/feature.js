@@ -26,7 +26,7 @@ geo.feature = function (arg) {
       m_selectionAPI = arg.selectionAPI === undefined ? false : arg.selectionAPI,
       m_style = {},
       m_layer = arg.layer === undefined ? null : arg.layer,
-      m_gcs = arg.gcs === undefined ? "EPSG:4326" : arg.gcs,
+      m_gcs = arg.gcs,
       m_visible = arg.visible === undefined ? true : arg.visible,
       m_bin = arg.bin === undefined ? 0 : arg.bin,
       m_renderer = arg.renderer === undefined ? null : arg.renderer,
@@ -350,12 +350,31 @@ geo.feature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.gcs = function (val) {
     if (val === undefined) {
+      if (m_gcs === undefined && m_renderer) {
+        return m_renderer.layer().map().ingcs();
+      }
       return m_gcs;
     } else {
       m_gcs = val;
       m_this.modified();
       return m_this;
     }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Convert from the renderer's input gcs coordinates to display coordinates.
+   *
+   * @param {object} c The input coordinate to convert
+   * @param {object} c.x
+   * @param {object} c.y
+   * @param {object} [c.z=0]
+   * @return {object} Display space coordinates
+   */
+  this.featureGcsToDisplay = function (c) {
+    var map = m_renderer.layer().map();
+    c = map.gcsToWorld(c, map.ingcs());
+    return map.worldToDisplay(c);
   };
 
   ////////////////////////////////////////////////////////////////////////////

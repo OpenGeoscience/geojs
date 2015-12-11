@@ -66,10 +66,10 @@ geo.d3.pointFeature = function (arg) {
     m_style.attributes = {
       r: m_renderer._convertScale(s_style.radius),
       cx: function (d) {
-        return m_renderer.worldToDisplay(pos_func(d)).x;
+        return m_this.featureGcsToDisplay(pos_func(d)).x;
       },
       cy: function (d) {
-        return m_renderer.worldToDisplay(pos_func(d)).y;
+        return m_this.featureGcsToDisplay(pos_func(d)).y;
       }
     };
     m_style.style = s_style;

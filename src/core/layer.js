@@ -34,6 +34,7 @@ geo.layer = function (arg) {
       m_initialized = false,
       m_rendererName = arg.renderer === undefined ? 'vgl' : arg.renderer,
       m_dataTime = geo.timestamp(),
+      m_updateTime = geo.timestamp(),
       m_sticky = arg.sticky === undefined ? true : arg.sticky,
       m_active = arg.active === undefined ? true : arg.active,
       m_opacity = arg.opacity === undefined ? 1 : arg.opacity,
@@ -266,6 +267,15 @@ geo.layer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Return the modified time for the last update that did something
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.updateTime = function () {
+    return m_updateTime;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Get/Set if the layer has been initialized
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -410,7 +420,7 @@ geo.layer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.width = function () {
-    return m_this.map().width;
+    return m_this.map().size().width;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -420,7 +430,7 @@ geo.layer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.height = function () {
-    return m_this.map().height;
+    return m_this.map().size().height;
   };
 
   ////////////////////////////////////////////////////////////////////////////

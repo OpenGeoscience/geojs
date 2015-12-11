@@ -138,7 +138,7 @@ geo.featureLayer = function (arg) {
     /// Call base class update
     s_update.call(m_this, request);
 
-    if (!m_this.source() && m_features && m_features.length === 0) {
+    if (m_features && m_features.length === 0) {
       console.log("[info] No valid data source found.");
       return;
     }
@@ -179,7 +179,9 @@ geo.featureLayer = function (arg) {
 
     // Now call render on the renderer. In certain cases it may not do
     // anything if the if the child objects are drawn on the screen already.
-    m_this.renderer()._render();
+    if (m_this.renderer()) {
+      m_this.renderer()._render();
+    }
     return m_this;
   };
 

@@ -50,7 +50,6 @@ geo.d3.pathFeature = function (arg) {
   this._build = function () {
     var data = m_this.data() || [],
         s_style = m_this.style(),
-        m_renderer = m_this.renderer(),
         tmp, diag;
     s_update.call(m_this);
 
@@ -68,8 +67,8 @@ geo.d3.pathFeature = function (arg) {
         src = d;
         trg = data[i + 1];
         tmp.push({
-          source: m_renderer.worldToDisplay(src),
-          target: m_renderer.worldToDisplay(trg)
+          source: this.featureGcsToDisplay(src),
+          target: this.featureGcsToDisplay(trg)
         });
       }
     });
