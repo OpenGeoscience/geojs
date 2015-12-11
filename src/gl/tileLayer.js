@@ -15,9 +15,9 @@ geo.gl.tileLayer = function () {
     /* Use a small z-value for layering the tile levels. */
     tile.feature = m_this.createFeature(
       'plane', {drawOnAsyncResourceLoad: true})
-      .origin([ul.x, lr.y, level / 1000])
-      .upperLeft([ul.x, ul.y, level / 1000])
-      .lowerRight([lr.x, lr.y, level / 1000])
+      .origin([ul.x, lr.y, level * 1e-7])
+      .upperLeft([ul.x, ul.y, level * 1e-7])
+      .lowerRight([lr.x, lr.y, level * 1e-7])
       .style({image: tile._image});
     tile.feature._update();
     m_this.draw();
@@ -31,7 +31,7 @@ geo.gl.tileLayer = function () {
     }
   };
 
-  /* These functions don't need to do anythin. */
+  /* These functions don't need to do anything. */
   this._getSubLayer = function () {};
   this._updateSubLayer = function () {};
 };

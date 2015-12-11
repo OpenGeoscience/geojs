@@ -100,7 +100,7 @@ $(function () {
     mapParams.maxBounds = {left: 0, top: 0, right: w, bottom: h};
     mapParams.center = {x: w / 2, y: h / 2};
     mapParams.max = Math.ceil(Math.log(Math.max(w, h) / 256) / Math.log(2));
-    mapParams.clampBoundsY = true;
+    mapParams.clampBoundsX = mapParams.clampBoundsY = true;
     // unitsPerPixel is at zoom level 0.  We want each pixel to be 1 at the
     // maximum zoom
     mapParams.unitsPerPixel = Math.pow(2, mapParams.max);
