@@ -70,7 +70,10 @@ describe('geo.tileLayer', function () {
       },
       updateAttribution: function () {
       },
-      node: get_set('node')
+      node: get_set('node'),
+      children: function () {
+        return [];
+      }
     };
   };
 
