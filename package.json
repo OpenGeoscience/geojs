@@ -12,29 +12,30 @@
     "url": "https://github.com/OpenGeoscience/geojs"
   },
   "dependencies": {
-    "bower": "~1.4",
+    "bower": "~1.7",
     "grunt": "~0.4",
     "grunt-cli": "~0.1",
-    "grunt-contrib-clean": "~0.6",
-    "grunt-contrib-concat": "^0.5.0",
-    "grunt-contrib-copy": "~0.6",
-    "grunt-contrib-uglify": "~0.6",
+    "grunt-contrib-clean": "~0.7",
+    "grunt-contrib-concat": "^0.5.1",
+    "grunt-contrib-copy": "~0.8",
+    "grunt-contrib-uglify": "~0.11",
     "grunt-template": "~0.2",
     "pnltri": "^2.1.1"
   },
   "devDependencies": {
-    "blanket": "~1.1",
+    "blanket": "~1.2",
     "body-parser": "^1.14.1",
     "express": "^4.13.3",
-    "grunt-contrib-jade": "~0.13.0",
+    "grunt-contrib-jade": "~0.15.0",
     "grunt-contrib-watch": "~0.6",
-    "grunt-docco": "^0.3.3",
+    "grunt-docco": "^0.4.0",
+    "grunt-parallel": "^0.3.1",
     "grunt-express": "~1.4",
-    "jscs": "~2.0",
-    "jsdoc": "^3.3",
+    "jscs": "~2.7",
+    "jsdoc": "^3.4",
     "jshint": "~2.8",
     "phantomjs": "~1.9",
-    "xmlbuilder": "^3.1.0"
+    "xmlbuilder": "^4.1.0"
   },
   "scripts": {
     "postinstall": "bower --quiet --allow-root install",
