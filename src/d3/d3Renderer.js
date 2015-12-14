@@ -200,20 +200,21 @@ geo.d3.d3Renderer = function (arg) {
         upperLeft = map.gcsToDisplay(m_corners.upperLeft),
         lowerRight = map.gcsToDisplay(m_corners.lowerRight),
         group = getGroup(),
+        canvas = m_this.canvas(),
         dx, dy, scale;
 
-    // calculate the translation
-    dx = upperLeft.x;
-    dy = upperLeft.y;
-
-    // calculate the scale
-    scale = (lowerRight.y - upperLeft.y) / m_height;
-
-    scale = this.canvas().attr('scale') || 1;
-    dx = (this.canvas().attr('dx') || 0) * scale;
-    dy = (this.canvas().attr('dy') || 0) * scale;
-    dx += map.size().width / 2;
-    dy += map.size().height / 2;
+    if (canvas.attr('scale') !== null) {
+      scale = canvas.attr('scale') || 1;
+      dx = (canvas.attr('dx') || 0) * scale;
+      dy = (canvas.attr('dy') || 0) * scale;
+      dx += map.size().width / 2;
+      dy += map.size().height / 2;
+    } else {
+      // calculate the translation
+      dx = upperLeft.x;
+      dy = upperLeft.y;
+      scale = (lowerRight.y - upperLeft.y) / m_height;
+    }
 
     // set the group transform property
     group.attr('transform', 'matrix(' + [scale, 0, 0, scale, dx, dy].join() + ')');
