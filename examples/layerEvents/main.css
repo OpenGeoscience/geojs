@@ -3,6 +3,7 @@
   top: 90px;
   right: 30px;
   width: 200px;
+  z-index: 1002;
 }
 
 .top-layer-overlay {
