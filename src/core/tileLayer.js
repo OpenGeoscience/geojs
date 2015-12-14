@@ -287,7 +287,7 @@
     this.tileAtPoint = function (point, level) {
       var o = this._origin(level);
       var map = this.map();
-      point = this.displayToLevel(map.gcsToDisplay(point), level);
+      point = this.displayToLevel(map.gcsToDisplay(point, null), level);
       var to = this._options.tileOffset(level);
       if (to) {
         point.x += to.x;
@@ -1063,7 +1063,7 @@
       /* Reverse the y coordinate, since we expect the gcs coordinate system
        * to be right-handed and the level coordinate system to be
        * left-handed. */
-      var gcsPt = map.displayToGcs(pt),
+      var gcsPt = map.displayToGcs(pt, null),
           lvlPt = {x: gcsPt.x / unit, y: this._topDown() * gcsPt.y / unit};
       return lvlPt;
     };

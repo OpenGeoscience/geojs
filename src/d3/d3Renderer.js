@@ -174,8 +174,8 @@ geo.d3.d3Renderer = function (arg) {
       throw 'Map layer has size 0';
     }
     m_corners = {
-      upperLeft: map.displayToGcs({'x': 0, 'y': 0}),
-      lowerRight: map.displayToGcs({'x': width, 'y': height})
+      upperLeft: map.displayToGcs({'x': 0, 'y': 0}, null),
+      lowerRight: map.displayToGcs({'x': width, 'y': height}, null)
     };
   }
 
@@ -197,8 +197,8 @@ geo.d3.d3Renderer = function (arg) {
 
     var layer = m_this.layer(),
         map = layer.map(),
-        upperLeft = map.gcsToDisplay(m_corners.upperLeft),
-        lowerRight = map.gcsToDisplay(m_corners.lowerRight),
+        upperLeft = map.gcsToDisplay(m_corners.upperLeft, null),
+        lowerRight = map.gcsToDisplay(m_corners.lowerRight, null),
         group = getGroup(),
         canvas = m_this.canvas(),
         dx, dy, scale;

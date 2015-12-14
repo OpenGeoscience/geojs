@@ -293,10 +293,10 @@ geo.map = function (arg) {
     var bounds = fix_bounds(m_camera.bounds);
     if (bounds !== m_camera.bounds) {
       var panPos = this.gcsToDisplay({
-            x: m_camera.bounds.left, y: m_camera.bounds.top});
+            x: m_camera.bounds.left, y: m_camera.bounds.top}, null);
       camera_bounds(bounds);
       var clampPos = this.gcsToDisplay({
-            x: m_camera.bounds.left, y: m_camera.bounds.top});
+            x: m_camera.bounds.left, y: m_camera.bounds.top}, null);
       evt.screenDelta.x += clampPos.x - panPos.x;
       evt.screenDelta.y += clampPos.y - panPos.y;
     }
@@ -326,22 +326,14 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.center = function (coordinates, gcs) {
-    gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
     var center;
     if (coordinates === undefined) {
-      center = $.extend({}, m_this.worldToGcs(m_center));
-      if (gcs !== m_gcs) {
-        center = geo.transform.transformCoordinates(m_gcs, gcs, [center])[0];
-      }
+      center = $.extend({}, m_this.worldToGcs(m_center, gcs));
       return center;
     }
 
-    center = coordinates;
-    if (gcs !== m_gcs) {
-      center = geo.transform.transformCoordinates(gcs, m_gcs, [center])[0];
-    }
     // get the screen coordinates of the new center
-    m_center = $.extend({}, m_this.gcsToWorld(center));
+    m_center = $.extend({}, m_this.gcsToWorld(coordinates, gcs));
 
     camera_bounds(m_this.boundsFromZoomAndCenter(m_zoom, m_center, null));
     // trigger a pan event
@@ -507,7 +499,8 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.gcsToWorld = function (c, gcs) {
-    if (gcs !== undefined && gcs !== m_gcs) {
+    gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
+    if (gcs !== m_gcs) {
       c = geo.transform.transformCoordinates(gcs, m_gcs, [c])[0];
     }
     return geo.transform.affineForward(
@@ -523,7 +516,8 @@ geo.map = function (arg) {
    * @param {object} c.x
    * @param {object} c.y
    * @param {object} [c.z=0]
-   * @param {string?} gcs The gcs of the output (map.gcs() by default)
+   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
+   *    null to use the map gcs, or any other transform.
    * @return {object} GCS space coordinates
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -532,7 +526,8 @@ geo.map = function (arg) {
       {origin: m_origin},
       [c]
     )[0];
-    if (gcs !== undefined && gcs !== m_gcs) {
+    gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
+    if (gcs !== m_gcs) {
       c = geo.transform.transformCoordinates(m_gcs, gcs, [c])[0];
     }
     return c;
@@ -548,7 +543,8 @@ geo.map = function (arg) {
    * @param {object} c.x
    * @param {object} c.y
    * @param {object} [c.z=0]
-   * @param {string?} gcs The gcs of the input (map.gcs() by default)
+   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
+   *    null to use the map gcs, or any other transform.
    * @return {object} Display space coordinates
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -582,7 +578,8 @@ geo.map = function (arg) {
    * @param {object} c.x
    * @param {object} c.y
    * @param {object} [c.z=0]
-   * @param {string?} gcs The gcs of the output (map.gcs() by default)
+   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
+   *    null to use the map gcs, or any other transform.
    * @return {object} GCS space coordinates
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -1381,7 +1378,7 @@ geo.map = function (arg) {
   this.zoomRange(arg);
   m_zoom = fix_zoom(m_zoom);
   // Now update to the correct center and zoom level
-  this.center($.extend({}, arg.center || m_center), m_ingcs);
+  this.center($.extend({}, arg.center || m_center), undefined);
 
   this.interactor(arg.interactor || geo.mapInteractor());
   this.clock(arg.clock || geo.clock());
