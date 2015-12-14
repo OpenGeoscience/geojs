@@ -227,6 +227,34 @@ geo.d3.d3Renderer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Convert from screen pixel coordinates to the local coordinate system
+   * in the SVG group element taking into account the transform.
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.baseToLocal = function (pt) {
+    return {
+      x: (pt.x - m_dx) / m_scale,
+      y: (pt.y - m_dy) / m_scale
+    };
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Convert from the local coordinate system in the SVG group element
+   * to screen pixel coordinates.
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.localToBase = function (pt) {
+    return {
+      x: pt.x * m_scale + m_dx,
+      y: pt.y * m_scale + m_dy
+    };
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Initialize
    */
   ////////////////////////////////////////////////////////////////////////////

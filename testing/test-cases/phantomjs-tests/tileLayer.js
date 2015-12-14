@@ -324,6 +324,7 @@ describe('geo.tileLayer', function () {
       tileOffset: function () {},
       topDown: true
     };
+    opts.originalUrl = opts.url;
     it('Check tileLayer options', function () {
       var m = map(), l;
       opts.map = m;

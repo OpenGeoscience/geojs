@@ -150,6 +150,8 @@
       }
       options.url = url + '{z}/{x}/{y}.' + (options.imageFormat || 'png');
     }
+    /* Save the original url so that we can return it if asked */
+    options.originalUrl = options.url;
     if ($.type(options.url) === 'string') {
       options.url = m_tileUrlFromTemplate(options.url);
     }
@@ -1066,6 +1068,30 @@
       var gcsPt = map.displayToGcs(pt, null),
           lvlPt = {x: gcsPt.x / unit, y: this._topDown() * gcsPt.y / unit};
       return lvlPt;
+    };
+
+    /**
+     * Get or set the tile url string or function.  If changed, load the new
+     * tiles.
+     *
+     * @param {string|function} [url] The new tile url.
+     * @returns {string|function|this}
+     */
+    this.url = function (url) {
+      if (url === undefined) {
+        return this._options.originalUrl;
+      }
+      if (url === this._options.originalUrl) {
+        return this;
+      }
+      this._options.originalUrl = url;
+      if ($.type(url) === 'string') {
+        url = m_tileUrlFromTemplate(url);
+      }
+      this._options.url = url;
+      this.reset();
+      this.map().draw();
+      return this;
     };
 
     /**

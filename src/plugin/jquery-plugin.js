@@ -267,7 +267,7 @@
       height: null,
       layers: [],
       data: [],
-      tileUrl: 'http://tile.openstreetmap.org/<zoom>/<x>/<y>.png',
+      url: 'http://tile.openstreetmap.org/{z}/{x}/{y}.png',
       attribution: undefined,
 
       // These options are for future use, but shouldn't
@@ -398,9 +398,8 @@
      * @instance
      * @param {string} url The url format string of an OSM tile server.
      */
-    tileUrl: function (url) {
-      this._baseLayer.tileUrl(url);
-      this._baseLayer.updateBaseUrl();
+    url: function (url) {
+      this._baseLayer.url(url);
       return this;
     },
 

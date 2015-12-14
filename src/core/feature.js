@@ -374,7 +374,11 @@ geo.feature = function (arg) {
   this.featureGcsToDisplay = function (c) {
     var map = m_renderer.layer().map();
     c = map.gcsToWorld(c, map.ingcs());
-    return map.worldToDisplay(c);
+    c = map.worldToDisplay(c);
+    if (m_renderer.baseToLocal) {
+      c = m_renderer.baseToLocal(c);
+    }
+    return c;
   };
 
   ////////////////////////////////////////////////////////////////////////////
