@@ -77,7 +77,10 @@ $(function () {
       return;
     }
 
-    canvas = d3.select(ui.canvas());
+    canvas = d3.select(ui.canvas()).select('svg.dynamic-content')
+      .attr('width', $(window).width())
+      .attr('height', $(window).height());
+
     canvas.selectAll('.app-info-box').remove();
     var width = 300, height = 600;
     var mapWidth = map.node().width();
@@ -192,7 +195,11 @@ $(function () {
     var mapHeight = map.node().height() - 15;
     var width = 300;
     var height = 100;
-    canvas = d3.select(ui.canvas());
+
+    canvas = d3.select(ui.canvas()).select('svg.dynamic-content')
+      .attr('width', $(window).width())
+      .attr('height', $(window).height());
+
     canvas.selectAll('.app-histogram').remove();
     var group = canvas.append('g').attr('class', 'app-histogram');
 
@@ -373,7 +380,7 @@ $(function () {
 
   // Create a legend
   ui = map.createLayer('ui');
-  ui.createWidget('legend')
+  ui.createWidget('legend', {position: {right: 20, top: 10}})
     .categories([
       {
         name: 'Category 5',
@@ -424,6 +431,9 @@ $(function () {
         type: 'line'
       }
     ]);
+
+  canvas = d3.select(ui.canvas()).append('svg')
+    .attr('class', 'dynamic-content');
 
   // Load the data
   $.ajax({
