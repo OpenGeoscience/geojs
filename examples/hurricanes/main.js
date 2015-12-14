@@ -2,7 +2,7 @@
 $(function () {
   'use strict';
 
-  var map, layer, feature, ui, save, infoData = null;
+  var map, layer, feature, ui, save, infoData = null, canvas;
 
   var cscale = d3.scale.ordinal()
     .range([
@@ -77,12 +77,13 @@ $(function () {
       return;
     }
 
-    ui.canvas().selectAll('.app-info-box').remove();
+    canvas = d3.select(ui.canvas());
+    canvas.selectAll('.app-info-box').remove();
     var width = 300, height = 600;
     var mapWidth = map.node().width();
     var mapHeight = map.node().height();
 
-    var group = ui.canvas().append('g').attr('class', 'app-info-box');
+    var group = canvas.append('g').attr('class', 'app-info-box');
 
     group.attr(
       'transform',
@@ -191,8 +192,9 @@ $(function () {
     var mapHeight = map.node().height() - 15;
     var width = 300;
     var height = 100;
-    ui.canvas().selectAll('.app-histogram').remove();
-    var group = ui.canvas().append('g').attr('class', 'app-histogram');
+    canvas = d3.select(ui.canvas());
+    canvas.selectAll('.app-histogram').remove();
+    var group = canvas.append('g').attr('class', 'app-histogram');
 
     var x = d3.scale.linear()
       .domain([-0.5, 5.5])
