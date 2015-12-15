@@ -6,16 +6,16 @@ window.startTest = function (done) {
 
   map.createLayer(
     'osm',
-    {tileUrl: function () { return '/data/white.jpg'; }}
+    {url: function () { return '/data/white.jpg'; }}
   );
   map.createLayer(
     'osm',
-    {attribution: '', tileUrl: function () { return '/data/red.jpg'; }}
+    {attribution: '', url: function () { return '/data/red.jpg'; }}
   );
   map.createLayer('ui').createWidget('slider');
   map.createLayer(
     'osm',
-    {attribution: '', tileUrl: function () { return '/data/blue.jpg'; }}
+    {attribution: '', url: function () { return '/data/blue.jpg'; }}
   );
   map.createLayer('ui').createWidget('slider');
 

@@ -8,7 +8,7 @@ window.startTest = function (done) {
     zoom: 8
   };
   var osmOpts = {
-    tileUrl: '/data/tilefancy.png'
+    url: '/data/tilefancy.png'
   };
 
   var myMap = window.geoTests.createOsmMap(mapOptions, osmOpts);

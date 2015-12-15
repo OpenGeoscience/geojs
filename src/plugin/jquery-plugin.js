@@ -256,7 +256,7 @@
      *   Describes layers added to the map
      * @property {boolean} [autoresize=true]
      *   Resize the map on <code>window.resize</code> (initialization only)
-     * @property {string} [tileUrl]
+     * @property {string} [url]
      *   The open street map tile server spec default:
      *   <code>http://tile.openstreetmap.org/&lt;zoom>/&lt;x>/&lt;y>.png</code>
      */

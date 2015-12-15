@@ -57,7 +57,7 @@ window.startTest = function (done) {
     });
 
     window.swapTiles = function (_) {
-      $('#map').geojsMap('tileUrl', '/data/white.jpg').geojsMap('map');
+      $('#map').geojsMap('url', '/data/white.jpg').geojsMap('map');
       window.setTimeout(_, 1000);
     };
 

@@ -11,7 +11,7 @@ describe('Contour Feature', function () {
     'center': [0, 0],
     'zoom': 3
   });
-  map.createLayer('osm', {'tileUrl': function () {
+  map.createLayer('osm', {'url': function () {
     return '/data/white.jpg';
   }});
   layer = map.createLayer('feature', {'renderer': 'vgl'});

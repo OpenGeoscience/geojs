@@ -10,7 +10,7 @@ $(function () {
   });
 
   // Add an OSM layer
-  var osm = map.createLayer('osm',{
+  map.createLayer('osm', {
     baseUrl: 'http://otile1.mqcdn.com/tiles/1.0.0/sat'
   });
 
@@ -21,7 +21,7 @@ $(function () {
   var projection = 'EPSG:3857';
   wms.gcs(projection);
 
-  wms.tileUrl(
+  wms.url(
     function (zoom, x, y) {
       // Compute the bounding box
       var xLowerLeft = geo.mercator.tilex2long(x, zoom);
@@ -49,7 +49,8 @@ $(function () {
         'TILED': true
       };
 
-      var baseUrl = 'http://demo.boundlessgeo.com/geoserver/ows';  // OpenGeo Demo Web Map Service
+      // OpenGeo Demo Web Map Service
+      var baseUrl = 'http://demo.boundlessgeo.com/geoserver/ows';
       return baseUrl + '?' + $.param(params);
     }
   );

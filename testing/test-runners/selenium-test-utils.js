@@ -37,8 +37,7 @@ window.geoTests = {
     }
     $.extend(true, osmDefaults, osmOpts);
 
-    if (osmDefaults.tileUrl) {
-      osmDefaults.url = osmDefaults.tileUrl;
+    if (osmDefaults.url) {
       delete osmDefaults.baseUrl;
     }
 
