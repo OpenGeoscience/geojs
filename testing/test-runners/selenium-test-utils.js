@@ -29,11 +29,17 @@ window.geoTests = {
     };
 
     if (notiles) {
-      osmDefaults.tileUrl = function () {
+      osmDefaults.url = function () {
         return '/data/white.jpg';
       };
+      delete osmDefaults.baseUrl;
     }
     $.extend(true, osmDefaults, osmOpts);
+
+    if (osmDefaults.tileUrl) {
+      osmDefaults.url = osmDefaults.tileUrl;
+      delete osmDefaults.baseUrl;
+    }
 
     var map = geo.map(mapDefaults);
     map.createLayer('osm', osmDefaults);
