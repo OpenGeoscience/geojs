@@ -301,7 +301,7 @@
         this.options.baseLayer,
         {
           renderer: this.options.baseRenderer,
-          tileUrl: this.options.tileUrl,
+          url: this.options.url,
           attribution: this.options.attribution
         }
       );
