@@ -25,7 +25,8 @@ window.geoTests = {
 
     var osmDefaults = {
       baseUrl: '/data/tiles/',
-      attribution: null
+      attribution: null,
+      wrapX: false
     };
 
     if (notiles) {
