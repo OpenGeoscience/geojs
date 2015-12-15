@@ -17,7 +17,7 @@ describe('Testing onIdle event handling', function () {
     it('resolved deferred', function (done) {
       var obj = geo.object(), defer = $.Deferred();
 
-      obj.addDeferred(defer);
+      obj.addPromise(defer);
       window.setTimeout(function () {
         var called = false;
         defer.resolve();
@@ -36,7 +36,7 @@ describe('Testing onIdle event handling', function () {
     it('single deferred', function (done) {
       var obj = geo.object(), defer = $.Deferred();
 
-      obj.addDeferred(defer);
+      obj.addPromise(defer);
       obj.onIdle(function () {
         done();
       });
@@ -44,17 +44,17 @@ describe('Testing onIdle event handling', function () {
         defer.resolve();
       }, 10);
     });
-    
+
     it('resolved defer', function (done) {
       var obj = geo.object(), defer = $.Deferred();
 
       defer.resolve();
-      obj.addDeferred(defer);
+      obj.addPromise(defer);
       obj.onIdle(function () {
         done();
       });
     });
-    
+
     it('two defers', function (done) {
       var obj = geo.object(), defer1, defer2, count = 0;
 
@@ -64,12 +64,12 @@ describe('Testing onIdle event handling', function () {
 
       defer1 = $.Deferred();
       defer2 = $.Deferred();
-      obj.addDeferred(defer1);
-      obj.addDeferred(defer2);
+      obj.addPromise(defer1);
+      obj.addPromise(defer2);
       obj.onIdle(callCounter);
 
       defer2.resolve();
-      
+
       expect(count).toBe(0);
 
       window.setTimeout(function () {
@@ -79,7 +79,7 @@ describe('Testing onIdle event handling', function () {
       }, 10);
 
     });
-    
+
     it('duplicate defers', function (done) {
       var obj = geo.object(), defer1, count = 0;
 
@@ -88,8 +88,8 @@ describe('Testing onIdle event handling', function () {
       }
 
       defer1 = $.Deferred();
-      obj.addDeferred(defer1);
-      obj.addDeferred(defer1);
+      obj.addPromise(defer1);
+      obj.addPromise(defer1);
       obj.onIdle(callCounter);
 
       expect(count).toBe(0);
@@ -98,7 +98,7 @@ describe('Testing onIdle event handling', function () {
         defer1.resolve();
         expect(count).toBe(1);
       }, 10);
-      
+
       window.setTimeout(function () {
         defer1.resolve();
         expect(count).toBe(1);
@@ -136,12 +136,12 @@ describe('Testing onIdle event handling', function () {
       f3 = callCounter();
       f4 = callCounter();
 
-      obj.addDeferred(defer1);
+      obj.addPromise(defer1);
       obj.onIdle(f1);
       obj.onIdle(f2);
 
       window.setTimeout(function () {
-        obj.addDeferred(defer2);
+        obj.addPromise(defer2);
         expect(f1.nCalls()).toBe(0);
         expect(f2.nCalls()).toBe(0);
         expect(f3.nCalls()).toBe(0);
@@ -155,7 +155,7 @@ describe('Testing onIdle event handling', function () {
         expect(f4.nCalls()).toBe(0);
       }, 40);
       window.setTimeout(function () {
-        obj.addDeferred(defer3);
+        obj.addPromise(defer3);
         expect(f1.nCalls()).toBe(0);
         expect(f2.nCalls()).toBe(0);
         expect(f3.nCalls()).toBe(0);
@@ -177,7 +177,7 @@ describe('Testing onIdle event handling', function () {
         expect(f4.nCalls()).toBe(0);
       }, 100);
       window.setTimeout(function () {
-        obj.addDeferred(defer4);
+        obj.addPromise(defer4);
         obj.onIdle(f4);
         expect(f1.nCalls()).toBe(1);
         expect(f2.nCalls()).toBe(1);

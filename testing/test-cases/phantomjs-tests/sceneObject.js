@@ -1,5 +1,6 @@
 /*global describe, it, expect, geo*/
-describe('geo.sceneObject', function() {
+// jshint -W016
+describe('geo.sceneObject', function () {
   'use strict';
 
   function CallCounter(extraData) {
@@ -194,7 +195,8 @@ describe('geo.sceneObject', function() {
     });
 
     it('Children only', function () {
-      var root, child1, child2, child1Called = false, child2Called = false, rootCalled = false;
+      var root, child1, child2, child1Called = false,
+          child2Called = false, rootCalled = false;
       root = geo.sceneObject();
       child1 = geo.sceneObject();
       child2 = geo.sceneObject();
@@ -242,7 +244,7 @@ describe('geo.sceneObject', function() {
         expect(handler3.ncalls).toBe(count);
       }
 
-      child3.addDeferred(defer);
+      child3.addPromise(defer);
       root.onIdle(handlerRoot.call);
       child1.onIdle(handler1.call);
       child2.onIdle(handler2.call);
@@ -255,7 +257,7 @@ describe('geo.sceneObject', function() {
       checkCallCount(1);
 
       defer = $.Deferred();
-      child3.addDeferred(defer);
+      child3.addPromise(defer);
 
       checkCallCount(1);
 
@@ -274,7 +276,7 @@ describe('geo.sceneObject', function() {
     it('aysnchronous events from multiple children', function (done) {
       window.setTimeout(function () {
         var defer = $.Deferred();
-        child1.addDeferred(defer);
+        child1.addPromise(defer);
 
         window.setTimeout(function () {
           defer.resolve();
@@ -282,7 +284,7 @@ describe('geo.sceneObject', function() {
       }, 0);
       window.setTimeout(function () {
         var defer = $.Deferred();
-        child2.addDeferred(defer);
+        child2.addPromise(defer);
 
         window.setTimeout(function () {
           defer.resolve();
@@ -290,7 +292,7 @@ describe('geo.sceneObject', function() {
       }, 0);
       window.setTimeout(function () {
         var defer = $.Deferred();
-        child3.addDeferred(defer);
+        child3.addPromise(defer);
 
         window.setTimeout(function () {
           defer.resolve();

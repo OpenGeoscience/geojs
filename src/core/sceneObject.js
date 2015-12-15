@@ -20,19 +20,19 @@ geo.sceneObject = function (arg) {
       m_children = [],
       s_exit = this._exit,
       s_trigger = this.geoTrigger,
-      s_addDeferred = this.addDeferred,
+      s_addPromise = this.addPromise,
       s_onIdle = this.onIdle;
 
   //////////////////////////////////////////////////////////////////////////////
   /**
-   *  Override object.addDeferred to propagate up the scene tree.
+   *  Override object.addPromise to propagate up the scene tree.
    */
   //////////////////////////////////////////////////////////////////////////////
-  this.addDeferred = function (defer) {
+  this.addPromise = function (promise) {
     if (m_parent) {
-      m_parent.addDeferred(defer);
+      m_parent.addPromise(promise);
     } else {
-      s_addDeferred(defer);
+      s_addPromise(promise);
     }
   };
 

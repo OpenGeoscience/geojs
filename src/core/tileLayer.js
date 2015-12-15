@@ -884,6 +884,8 @@
           // mark the tile as covered
           this._setTileTree(tile);
         }.bind(this));
+
+        this.addPromise(tile);
       }.bind(this));
 
       // purge all old tiles when the new tiles are loaded (successfully or not)
