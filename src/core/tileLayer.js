@@ -715,8 +715,9 @@
      * out of the active view or the zoom has changed.
      * @protected
      * @param {number} zoom Tiles (in bounds) at this zoom level will be kept
+     * @param {boolean} doneLoading If true, allow purging additional tiles.
      */
-    this._purge = function (zoom) {
+    this._purge = function (zoom, doneLoading) {
       var tile, hash, bounds = {};
 
       // Don't purge tiles in an active update
@@ -730,7 +731,7 @@
       for (hash in this._activeTiles) {// jshint ignore: line
 
         tile = this._activeTiles[hash];
-        if (this._canPurge(tile, bounds, zoom)) {
+        if (this._canPurge(tile, bounds, zoom, doneLoading)) {
           this.remove(tile);
         }
       }
@@ -929,7 +930,7 @@
         .done(// called on success and failure
           function () {
             if (_deferredPurge === myPurge) {
-              this._purge(zoom);
+              this._purge(zoom, true);
             }
           }.bind(this)
         );
@@ -1061,16 +1062,21 @@
      * @param {number} bounds.bottom
      * @param {number} bounds.level The zoom level the bounds are given as
      * @param {number} zoom Keep in bound tile at this zoom level
+     * @param {boolean} doneLoading If true, allow purging additional tiles.
      * @returns {boolean}
      */
-    this._canPurge = function (tile, bounds, zoom) {
+    this._canPurge = function (tile, bounds, zoom, doneLoading) {
       if (this._options.keepLower) {
         zoom = zoom || 0;
         if (zoom < tile.index.level) {
           return true;
         }
       } else {
-        if (this._isCovered(tile) && zoom !== tile.index.level) {
+        /* For tile layers that should only keep one layer, if loading is
+         * finished, purge all but the current layer.  This is important for
+         * semi-transparanet layers. */
+        if ((doneLoading || this._isCovered(tile)) &&
+            zoom !== tile.index.level) {
           return true;
         }
       }
