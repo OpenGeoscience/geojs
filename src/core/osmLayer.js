@@ -48,7 +48,7 @@
         url: this._options.url(urlParams.x, urlParams.y, urlParams.level || 0,
                                this._options.subdomains)
       });
-    };
+    }.bind(this);
   };
 
   // Compute the circumference of the earth / 2 in meters for osm layer image bounds

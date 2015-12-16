@@ -5,8 +5,8 @@ geo.d3.tileLayer = function () {
       s_init = this._init;
 
   this._drawTile = function (tile) {
-    var bounds = this._tileBounds(tile),
-        parentNode = this._getSubLayer(tile.index.level);
+    var bounds = m_this._tileBounds(tile),
+        parentNode = m_this._getSubLayer(tile.index.level);
     tile.feature = m_this.createFeature(
       'plane', {drawOnAsyncResourceLoad: true})
       .origin([bounds.left, bounds.top])
@@ -30,10 +30,10 @@ geo.d3.tileLayer = function () {
    * @return {DOM}
    */
   this._getSubLayer = function (level) {
-    var node = this.canvas().select(
+    var node = m_this.canvas().select(
         'g[data-tile-layer="' + level.toFixed() + '"]');
     if (node.empty()) {
-      node = this.canvas().append('g');
+      node = m_this.canvas().append('g');
       var id = geo.d3.uniqueID();
       node.classed('group-' + id, true);
       node.classed('geo-tile-layer', true);
@@ -48,12 +48,12 @@ geo.d3.tileLayer = function () {
    * @param {number} level The target zoom level
    */
   this._updateSubLayers = function (level) {
-    $.each(this.canvas().selectAll('.geo-tile-layer')[0], function (idx, el) {
+    $.each(m_this.canvas().selectAll('.geo-tile-layer')[0], function (idx, el) {
       var layer = parseInt($(el).attr('data-tile-layer'));
-      el = this._getSubLayer(layer);
+      el = m_this._getSubLayer(layer);
       var scale = Math.pow(2, level - layer);
       el.attr('transform', 'matrix(' + [scale, 0, 0, scale, 0, 0].join() + ')');
-    }.bind(this));
+    });
   };
 
   /* Initialize the tile layer.  This creates a series of sublayers so that
@@ -62,16 +62,16 @@ geo.d3.tileLayer = function () {
   this._init = function () {
     var sublayer;
 
-    s_init.apply(this, arguments);
-    for (sublayer = 0; sublayer <= this._options.maxLevel; sublayer += 1) {
-      this._getSubLayer(sublayer);
+    s_init.apply(m_this, arguments);
+    for (sublayer = 0; sublayer <= m_this._options.maxLevel; sublayer += 1) {
+      m_this._getSubLayer(sublayer);
     }
   };
 
   /* When update is called, apply the transform to our renderer. */
   this._update = function () {
-    s_update.apply(this, arguments);
-    this.renderer()._setTransform();
+    s_update.apply(m_this, arguments);
+    m_this.renderer()._setTransform();
   };
 
   /* Remove both the tile feature and an internal image element. */

@@ -297,8 +297,8 @@ geo.layer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.toLocal = function (input) {
-    if (this._toLocalMatrix) {
-      geo.camera.applyTransform(this._toLocalMatrix, input);
+    if (m_this._toLocalMatrix) {
+      geo.camera.applyTransform(m_this._toLocalMatrix, input);
     }
     return input;
   };
@@ -309,8 +309,8 @@ geo.layer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.fromLocal = function (input) {
-    if (this._fromLocalMatrix) {
-      geo.camera.applyTransform(this._fromLocalMatrix, input);
+    if (m_this._fromLocalMatrix) {
+      geo.camera.applyTransform(m_this._fromLocalMatrix, input);
     }
     return input;
   };
@@ -463,7 +463,7 @@ geo.layer = function (arg) {
   // set the z-index
   m_this.zIndex(m_zIndex);
 
-  return this;
+  return m_this;
 };
 
 /**

@@ -115,9 +115,9 @@ geo.transform = function (options) {
    */
   this.forward = function (point) {
     if (Array.isArray(point)) {
-      return point.map(this._forward);
+      return point.map(m_this._forward);
     }
-    return this._forward(point);
+    return m_this._forward(point);
   };
 
   /**
@@ -133,9 +133,9 @@ geo.transform = function (options) {
    */
   this.inverse = function (point) {
     if (Array.isArray(point)) {
-      return point.map(this._inverse);
+      return point.map(m_this._inverse);
     }
-    return this._inverse(point);
+    return m_this._inverse(point);
   };
 
   // Set defaults given by the constructor

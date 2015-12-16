@@ -59,8 +59,8 @@ geo.d3.d3Renderer = function (arg) {
     g = g || function () { return true; };
     return function () {
       var c = 'none';
-      if (g.apply(this, arguments)) {
-        c = f.apply(this, arguments);
+      if (g.apply(m_this, arguments)) {
+        c = f.apply(m_this, arguments);
         if (c.hasOwnProperty('r') &&
             c.hasOwnProperty('g') &&
             c.hasOwnProperty('b')) {
@@ -74,14 +74,14 @@ geo.d3.d3Renderer = function (arg) {
   this._convertPosition = function (f) {
     f = geo.util.ensureFunction(f);
     return function () {
-      return m_this.layer().map().worldToDisplay(f.apply(this, arguments));
+      return m_this.layer().map().worldToDisplay(f.apply(m_this, arguments));
     };
   };
 
   this._convertScale = function (f) {
     f = geo.util.ensureFunction(f);
     return function () {
-      return f.apply(this, arguments) / m_scale;
+      return f.apply(m_this, arguments) / m_scale;
     };
   };
 
@@ -95,14 +95,14 @@ geo.d3.d3Renderer = function (arg) {
     /* jshint validthis:true */
     var key, k, f;
     function fillFunc() {
-      if (styles.fill.apply(this, arguments)) {
+      if (styles.fill.apply(m_this, arguments)) {
         return null;
       } else {
         return 'none';
       }
     }
     function strokeFunc() {
-      if (styles.stroke.apply(this, arguments)) {
+      if (styles.stroke.apply(m_this, arguments)) {
         return null;
       } else {
         return 'none';

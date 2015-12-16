@@ -292,10 +292,10 @@ geo.map = function (arg) {
     /* If m_clampBounds* is true, clamp the pan */
     var bounds = fix_bounds(m_camera.bounds);
     if (bounds !== m_camera.bounds) {
-      var panPos = this.gcsToDisplay({
+      var panPos = m_this.gcsToDisplay({
             x: m_camera.bounds.left, y: m_camera.bounds.top}, null);
       camera_bounds(bounds);
-      var clampPos = this.gcsToDisplay({
+      var clampPos = m_this.gcsToDisplay({
             x: m_camera.bounds.left, y: m_camera.bounds.top}, null);
       evt.screenDelta.x += clampPos.x - panPos.x;
       evt.screenDelta.y += clampPos.y - panPos.y;
@@ -471,7 +471,7 @@ geo.map = function (arg) {
     reset_minimum_zoom();
     var newZoom = fix_zoom(m_zoom);
     if (newZoom !== m_zoom) {
-      this.zoom(newZoom);
+      m_this.zoom(newZoom);
     }
 
     m_this.geoTrigger(geo.event.resize, {
@@ -549,8 +549,8 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.gcsToDisplay = function (c, gcs) {
-    c = this.gcsToWorld(c, gcs);
-    return this.worldToDisplay(c);
+    c = m_this.gcsToWorld(c, gcs);
+    return m_this.worldToDisplay(c);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -584,8 +584,8 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.displayToGcs = function (c, gcs) {
-    c = this.displayToWorld(c); // done via camera
-    return this.worldToGcs(c, gcs);
+    c = m_this.displayToWorld(c); // done via camera
+    return m_this.worldToGcs(c, gcs);
   };
 
   ////////////////////////////////////////////////////////////////////////////

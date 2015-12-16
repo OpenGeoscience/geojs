@@ -67,8 +67,8 @@ geo.d3.pathFeature = function (arg) {
         src = d;
         trg = data[i + 1];
         tmp.push({
-          source: this.featureGcsToDisplay(src),
-          target: this.featureGcsToDisplay(trg)
+          source: m_this.featureGcsToDisplay(src),
+          target: m_this.featureGcsToDisplay(trg)
         });
       }
     });
