@@ -19,14 +19,15 @@ window.geoTests = {
       center: {
         x: 0,
         y: 0
-      }
+      },
+      wrapX: false,
+      clampBoundsX: true
     };
     $.extend(true, mapDefaults, mapOpts);
 
     var osmDefaults = {
       baseUrl: '/data/tiles/',
-      attribution: null,
-      wrapX: false
+      attribution: null
     };
 
     if (notiles) {
