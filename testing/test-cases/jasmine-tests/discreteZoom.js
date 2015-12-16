@@ -47,22 +47,23 @@ describe('DiscreteZoom and ParallelProjection', function () {
     expect(map.zoom()).toBe(6);
   });
 
-  it('Turn on parallel projection', function () {
+  it('Turn on perspective projection', function () {
     var map = makeMap();
-    var cam = map.baseLayer().renderer().contextRenderer().camera();
-    var proj = cam.projectionMatrix();
-    expect(proj[1] === 0 && proj[2] === 0 && proj[3] === 0 && proj[4] === 0 &&
-           proj[6] === 0 && proj[7] === 0 && proj[8] === 0 && proj[9] === 0 &&
-           proj[11] === 0 && proj[15] === 1).toBe(false);
-
-    expect(map.parallelProjection()).toBe(false);
-    map.parallelProjection(true).draw();
-
-    expect(map.parallelProjection()).toBe(true);
-    proj = cam.projectionMatrix();
+    var cam = map.camera();
+    var proj = cam.projectionMatrix;
     expect(proj[1] === 0 && proj[2] === 0 && proj[3] === 0 &&
            proj[4] === 0 && proj[6] === 0 && proj[7] === 0 &&
            proj[8] === 0 && proj[9] === 0 && proj[11] === 0 &&
            proj[15] === 1).toBe(true);
+    expect(cam.projection).toBe('parallel');
+
+    cam.projection = 'perspective';
+    map.draw();
+
+    proj = cam.projectionMatrix;
+    expect(cam.projection).toBe('perspective');
+    expect(proj[1] === 0 && proj[2] === 0 && proj[3] === 0 && proj[4] === 0 &&
+           proj[6] === 0 && proj[7] === 0 && proj[8] === 0 && proj[9] === 0 &&
+           proj[11] === 0 && proj[15] === 1).toBe(false);
   });
 });
