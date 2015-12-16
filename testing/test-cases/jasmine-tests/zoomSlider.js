@@ -14,7 +14,7 @@ describe('zoom slider', function () {
     'clampBoundsX': false,
     'clampBoundsY': false
   });
-  map.createLayer('osm');
+  // map.createLayer('osm');
   map.resize(0, 0, width, height);
   map.createLayer('ui').createWidget('slider');
   map.draw();
