@@ -461,6 +461,9 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.resize = function (x, y, w, h) {
+
+    // store the original center and restore it after the resize
+    var oldCenter = m_this.center();
     m_x = x;
     m_y = y;
     m_width = w;
@@ -483,6 +486,7 @@ geo.map = function (arg) {
       height: h
     });
 
+    m_this.center(oldCenter);
     m_this.modified();
     return m_this;
   };
