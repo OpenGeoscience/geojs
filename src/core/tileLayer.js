@@ -307,6 +307,42 @@
     };
 
     /**
+     * Returns a tile's bounds in a gcs.
+     * @param {object|tile} either a tile or an object with {x, y, level}
+     *                      specifying a tile.
+     * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
+     *    null to use the map gcs, or any other transform.
+     * @returns {object} The tile bounds in the specified gcs.
+     */
+    this.gcsTileBounds = function (indexOrTile, gcs) {
+      var tile = (indexOrTile.index ? indexOrTile : geo.tile({
+            index: indexOrTile,
+            size: {x: this._options.tileWidth, y: this._options.tileHeight},
+            url: ''
+          }));
+      var to = this._options.tileOffset(tile.index.level),
+          bounds = tile.bounds({x: 0, y: 0}, to),
+          map = this.map(),
+          unit = map.unitsPerPixel(tile.index.level);
+      var coord = [{
+            x: bounds.left * unit, y: this._topDown() * bounds.top * unit
+          }, {
+            x: bounds.right * unit, y: this._topDown() * bounds.bottom * unit
+          }];
+      gcs = (gcs === null ? map.gcs() : (
+          gcs === undefined ? map.ingcs() : gcs));
+      if (gcs !== map.gcs()) {
+        coord = geo.transform.transformCoordinates(gcs, map.gcs(), coord);
+      }
+      return {
+        left: coord[0].x,
+        top: coord[0].y,
+        right: coord[1].x,
+        bottom: coord[1].y
+      };
+    };
+
+    /**
      * Returns an instantiated tile object with the given indices.  This
      * method always returns a new tile object.  Use `_getTileCached`
      * to use the caching layer.
