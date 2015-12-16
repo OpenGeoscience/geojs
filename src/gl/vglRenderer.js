@@ -144,7 +144,9 @@ geo.gl.vglRenderer = function (arg) {
       cam.setViewMatrix(view);
       cam.setProjectionMatrix(proj);
       if (proj[1] || proj[2] || proj[3] || proj[4] || proj[6] || proj[7] ||
-          proj[8] || proj[9] || proj[11] || proj[15] !== 1) {
+          proj[8] || proj[9] || proj[11] || proj[15] !== 1 ||
+          (parseFloat(map.zoom().toFixed(6)) !==
+           parseFloat(map.zoom().toFixed(0)))) {
         /* Don't align texels */
         cam.viewAlignment = function () {
           return null;

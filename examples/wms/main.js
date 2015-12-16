@@ -15,7 +15,7 @@ $(function () {
   });
 
   // Add an OSM layer with a WMS server as the source of its titles
-  var wms = map.createLayer('osm', {keepLower: false});
+  var wms = map.createLayer('osm', {keepLower: false, attribution: null});
 
   var projection = 'EPSG:3857';
 
