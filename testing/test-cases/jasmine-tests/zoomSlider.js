@@ -1,4 +1,4 @@
-/*global describe, it, expect, geo, xit*/
+/*global describe, it, expect, geo*/
 
 describe('zoom slider', function () {
   'use strict';
@@ -9,7 +9,10 @@ describe('zoom slider', function () {
   map = geo.map({
     'node': '#map',
     'center': [0, 0],
-    'zoom': 3
+    'zoom': 2,
+    'clampZoom': false,
+    'clampBoundsX': false,
+    'clampBoundsY': false
   });
   map.createLayer('osm');
   map.resize(0, 0, width, height);
@@ -18,11 +21,11 @@ describe('zoom slider', function () {
 
   it('Zoom in button', function (done) {
     var eps;
+    map.zoom(1);
     d3.select('.geo-ui-slider .geo-zoom-in').on('click')();
-
     map.geoOff(geo.event.transitionend)
-      .geoOn(geo.event.transitionend, function (evt) {
-        eps = Math.abs(evt.zoom - map.zoom());
+      .geoOn(geo.event.transitionend, function () {
+        eps = Math.abs(2 - map.zoom());
         expect(eps).toBeLessThan(1e-2);
         done();
       });
@@ -34,8 +37,8 @@ describe('zoom slider', function () {
     d3.select('.geo-ui-slider .geo-zoom-out').on('click')();
 
     map.geoOff(geo.event.transitionend)
-      .geoOn(geo.event.transitionend, function (evt) {
-        eps = Math.abs(evt.zoom - map.zoom());
+      .geoOn(geo.event.transitionend, function () {
+        eps = Math.abs(1 - map.zoom());
         expect(eps).toBeLessThan(1e-2);
         done();
       });
