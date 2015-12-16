@@ -331,6 +331,7 @@ geo.d3.d3Renderer = function (arg) {
         m_this.canvas(m_svg);
       }
     }
+    m_this._setTransform();
   };
 
   ////////////////////////////////////////////////////////////////////////////
