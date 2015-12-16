@@ -28,6 +28,7 @@ geo.gl.tileLayer = function () {
     if (tile.feature) {
       m_this.deleteFeature(tile.feature);
       tile.feature = null;
+      m_this.draw();
     }
   };
 
