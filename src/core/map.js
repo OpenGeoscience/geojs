@@ -1021,9 +1021,9 @@ geo.map = function (arg) {
       }
       bds = fix_bounds(bds);
       nav = m_this.zoomAndCenterFromBounds(bds, null);
-      m_zoom = nav.zoom;
-      m_center = nav.center;
-      camera_bounds(bds);
+
+      m_this.center(nav.center);
+      m_this.zoom(nav.zoom);
     }
 
     return m_this.boundsFromZoomAndCenter(m_zoom, m_center, gcs);
