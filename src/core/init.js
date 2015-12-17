@@ -5,6 +5,7 @@ window.geo = geo; // jshint ignore: line
 geo.renderers = {};
 geo.features = {};
 geo.fileReaders = {};
+geo.rendererLayerAdjustments = {};
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -12,7 +13,7 @@ geo.fileReaders = {};
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.inherit = function (C, P) { // jshint ignore: line
-  "use strict";
+  'use strict';
 
   var F = inherit.func();
   F.prototype = P.prototype;
@@ -20,7 +21,7 @@ geo.inherit = function (C, P) { // jshint ignore: line
   C.prototype.constructor = C;
 };
 geo.inherit.func = function () {
-  "use strict";
+  'use strict';
   return function () {};
 };
 
@@ -41,7 +42,7 @@ window.inherit = geo.inherit;
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.extend = function (props) {
-  "use strict";
+  'use strict';
   var child = Object.create(this.prototype);
   $.extend(child.prototype, props || {});
   return child;
@@ -53,7 +54,7 @@ geo.extend = function (props) {
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.registerFileReader = function (name, func) {
-  "use strict";
+  'use strict';
 
   if (geo.fileReaders === undefined) {
     geo.fileReaders = {};
@@ -68,7 +69,7 @@ geo.registerFileReader = function (name, func) {
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.createFileReader = function (name, opts) {
-  "use strict";
+  'use strict';
 
   if (geo.fileReaders.hasOwnProperty(name)) {
     return geo.fileReaders[name](opts);
@@ -82,7 +83,7 @@ geo.createFileReader = function (name, opts) {
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.registerRenderer = function (name, func) {
-  "use strict";
+  'use strict';
 
   if (geo.renderers === undefined) {
     geo.renderers = {};
@@ -97,7 +98,7 @@ geo.registerRenderer = function (name, func) {
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.createRenderer  = function (name, layer, canvas, options) {
-  "use strict";
+  'use strict';
 
   if (geo.renderers.hasOwnProperty(name)) {
     var ren = geo.renderers[name](
@@ -115,7 +116,7 @@ geo.createRenderer  = function (name, layer, canvas, options) {
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.registerFeature = function (category, name, func) {
-  "use strict";
+  'use strict';
 
   if (geo.features === undefined) {
     geo.features = {};
@@ -135,17 +136,62 @@ geo.registerFeature = function (category, name, func) {
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.createFeature  = function (name, layer, renderer, arg) {
-  "use strict";
+  'use strict';
 
   var category = renderer.api(),
-      options = {"layer": layer, "renderer": renderer};
+      options = {'layer': layer, 'renderer': renderer};
   if (category in geo.features && name in geo.features[category]) {
     if (arg !== undefined) {
       $.extend(true, options, arg);
     }
-    return geo.features[category][name](options);
+    var feature = geo.features[category][name](options);
+    layer.gcs = function () {
+      return layer.map().gcs();
+    };
+    return feature;
   }
   return null;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Register a layer adjustment.
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.registerLayerAdjustment = function (category, name, func) {
+  'use strict';
+
+  if (geo.rendererLayerAdjustments === undefined) {
+    geo.rendererLayerAdjustments = {};
+  }
+
+  if (!(category in geo.rendererLayerAdjustments)) {
+    geo.rendererLayerAdjustments[category] = {};
+  }
+
+  // TODO Add warning if the name already exists
+  geo.rendererLayerAdjustments[category][name] = func;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * If a layer needs to be adjusted based on the renderer, call the function
+ * that adjusts it.
+ *
+ * @param {string} name Name of the layer.
+ * @param {object} layer Instantiated layer object.
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.adjustLayerForRenderer = function (name, layer) {
+  'use strict';
+  var rendererName = layer.rendererName();
+  if (rendererName) {
+    if (geo.rendererLayerAdjustments &&
+        geo.rendererLayerAdjustments[rendererName] &&
+        geo.rendererLayerAdjustments[rendererName][name]) {
+      geo.rendererLayerAdjustments[rendererName][name].apply(layer);
+    }
+  }
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -154,7 +200,7 @@ geo.createFeature  = function (name, layer, renderer, arg) {
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.registerLayer = function (name, func) {
-  "use strict";
+  'use strict';
 
   if (geo.layers === undefined) {
     geo.layers = {};
@@ -169,10 +215,10 @@ geo.registerLayer = function (name, func) {
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.createLayer = function (name, map, arg) {
-  "use strict";
+  'use strict';
 
   /// Default renderer is vgl
-  var options = {"map": map, "renderer": "vgl"},
+  var options = {'map': map, 'renderer': 'vgl'},
       layer = null;
 
   if (name in geo.layers) {
@@ -193,7 +239,7 @@ geo.createLayer = function (name, map, arg) {
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.registerWidget = function (category, name, func) {
-  "use strict";
+  'use strict';
 
   if (geo.widgets === undefined) {
     geo.widgets = {};
@@ -213,7 +259,7 @@ geo.registerWidget = function (category, name, func) {
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.createWidget  = function (name, layer, arg) {
-  "use strict";
+  'use strict';
 
   var options = {
     layer: layer
@@ -227,13 +273,13 @@ geo.createWidget  = function (name, layer, arg) {
     return geo.widgets.dom[name](options);
   }
 
-  throw "Cannot create unknown widget " + name;
+  throw new Error('Cannot create unknown widget ' + name);
 };
 
 // Add a polyfill for window.requestAnimationFrame.
 if (!window.requestAnimationFrame) {
   window.requestAnimationFrame = function (func) {
-    "use strict";
+    'use strict';
 
     window.setTimeout(func, 15);
   };
@@ -242,8 +288,15 @@ if (!window.requestAnimationFrame) {
 // Add a polyfill for Math.log2
 if (!Math.log2) {
   Math.log2 = function () {
-    "use strict";
+    'use strict';
 
     return Math.log.apply(Math, arguments) / Math.LN2;
   };
 }
+
+// Add a polyfill for Math.sinh
+Math.sinh = Math.sinh || function (x) {
+  'use strict';
+  var y = Math.exp(x);
+  return (y - 1 / y) / 2;
+};

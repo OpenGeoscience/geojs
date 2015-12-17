@@ -42,7 +42,7 @@ geo.gl.geomFeature = function (arg) {
       m_mapper.setGeometryData(m_geom);
     }
 
-    this.setMapper(m_mapper);
+    m_this.setMapper(m_mapper);
 
     if (style.point_sprites !== undefined && style.point_sprites &&
         style.point_sprites_image !== undefined &&

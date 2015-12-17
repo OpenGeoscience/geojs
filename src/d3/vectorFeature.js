@@ -113,7 +113,7 @@ geo.d3.vectorFeature = function (arg) {
 
     // cache the georeferencing
     cache = data.map(function (d, i) {
-      var origin = m_renderer.worldToDisplay(orig_func(d, i)),
+      var origin = m_this.featureGcsToDisplay(orig_func(d, i)),
           delta = size_func(d, i);
       max = Math.max(max, delta.x * delta.x + delta.y * delta.y);
       return {

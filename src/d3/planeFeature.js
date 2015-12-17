@@ -3,8 +3,6 @@
  * Create a plane feature given a lower left corner point
  * and and upper right corner point
  *
- * *CURRENTLY BROKEN*
- *
  * @class
  * @extends geo.planeFeature
  * @param lowerleft
@@ -53,8 +51,7 @@ geo.d3.planeFeature = function (arg) {
    */
   //////////////////////////////////////////////////////////////////////////////
   this._build = function () {
-    var origin = normalize(m_this.origin()),
-        ul = normalize(m_this.upperLeft()),
+    var ul = normalize(m_this.upperLeft()),
         lr = normalize(m_this.lowerRight()),
         renderer = m_this.renderer(),
         s = m_this.style();
@@ -62,22 +59,33 @@ geo.d3.planeFeature = function (arg) {
     delete s.fill_color;
     delete s.color;
     delete s.opacity;
+    /*
     if (!s.screenCoordinates) {
-      origin = renderer.worldToDisplay(origin);
-      ul = renderer.worldToDisplay(ul);
-      lr = renderer.worldToDisplay(lr);
+      origin = renderer.layer().map().worldToDisplay(origin);
+      ul = renderer.layer().map().worldToDisplay(ul);
+      lr = renderer.layer().map().worldToDisplay(lr);
     }
+    */
     m_style.id = m_this._d3id();
     m_style.style = s;
     m_style.attributes = {
       x: ul.x,
       y: ul.y,
-      width: lr.x - origin.x,
-      height: origin.y - ul.y
+      width: Math.abs(lr.x - ul.x),
+      height: Math.abs(lr.y - ul.y),
+      reference: s.reference
     };
-    m_style.append = 'rect';
+    if (s.image) {
+      m_style.append = 'image';
+      m_style.attributes['xlink:href'] = s.image;
+    } else {
+      m_style.append = 'rect';
+    }
     m_style.data = [0];
     m_style.classes = ['d3PlaneFeature'];
+    if (s.parentId) {
+      m_style.parentId = s.parentId;
+    }
 
     renderer._drawFeatures(m_style);
     m_buildTime.modified();

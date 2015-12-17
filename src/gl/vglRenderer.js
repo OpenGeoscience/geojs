@@ -3,7 +3,7 @@
  * Create a new instance of class vglRenderer
  *
  * @class
- * @extends geo.gl.renderer
+ * @extends geo.renderer
  * @param canvas
  * @returns {geo.gl.vglRenderer}
  */
@@ -15,14 +15,14 @@ geo.gl.vglRenderer = function (arg) {
     return new geo.gl.vglRenderer(arg);
   }
   arg = arg || {};
-  geo.gl.renderer.call(this, arg);
+  geo.renderer.call(this, arg);
 
   var m_this = this,
       m_contextRenderer = null,
       m_viewer = null,
       m_width = 0,
       m_height = 0,
-      m_initialized = false,
+      m_renderAnimFrameRef = null,
       s_init = this._init;
 
   /// TODO: Move this API to the base class
@@ -42,160 +42,6 @@ geo.gl.vglRenderer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.height = function () {
     return m_height;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Convert input data in display space to world space
-   *
-   * @param {object} input {x:val, y:val}, [{x:val, y:val}],
-   * [{x:val, y:val}], [x1,y1], [[x,y]]
-   *
-   * @returns {object} {x:val, y:val, z:val, w:val}, [{x:val, y:val, z:val, w:val}],
-              [[x, y, z, w]], [x1,y1,z1,w]
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.displayToWorld = function (input) {
-    var i,
-        delta,
-        ren = m_this.contextRenderer(),
-        cam = ren.camera(),
-        fdp = ren.focusDisplayPoint(),
-        output,
-        temp,
-        point;
-
-    /// Handle if the input is an array [...]
-    if (input instanceof Array && input.length > 0) {
-      output = [];
-      /// Input is array of object {x:val, y:val}
-      if (input[0] instanceof Object) {
-        delta = 1;
-        for (i = 0; i < input.length; i += delta) {
-          point = input[i];
-          temp = ren.displayToWorld(vec4.fromValues(
-                   point.x, point.y, fdp[2], 1.0),
-                   cam.viewMatrix(), cam.projectionMatrix(),
-                   m_width, m_height);
-          output.push({x: temp[0], y: temp[1], z: temp[2], w: temp[3]});
-        }
-    /// Input is array of 2d array [[x,y], [x,y]]
-      } else if (input[0] instanceof Array) {
-        delta = 1;
-        for (i = 0; i < input.length; i += delta) {
-          point = input[i];
-          temp = ren.displayToWorld(vec4.fromValues(
-                   point[0], point[1], fdp[2], 1.0),
-                   cam.viewMatrix(), cam.projectionMatrix(),
-                   m_width, m_height);
-          output.push(temp);
-        }
-    /// Input is flat array [x1,y1,x2,y2]
-      } else {
-        delta = input.length % 3 === 0 ? 3 : 2;
-        for (i = 0; i < input.length; i += delta) {
-          temp = ren.displayToWorld(vec4.fromValues(
-            input[i],
-            input[i + 1],
-            fdp[2],
-            1.0), cam.viewMatrix(), cam.projectionMatrix(),
-            m_width, m_height);
-          output.push(temp[0]);
-          output.push(temp[1]);
-          output.push(temp[2]);
-          output.push(temp[3]);
-        }
-      }
-    /// Input is object {x:val, y:val}
-    } else if (input instanceof Object) {
-      output = {};
-      temp = ren.displayToWorld(vec4.fromValues(
-               input.x, input.y, fdp[2], 1.0),
-               cam.viewMatrix(), cam.projectionMatrix(),
-               m_width, m_height);
-      output = {x: temp[0], y: temp[1], z: temp[2], w: temp[3]};
-    } else {
-      throw 'Display to world conversion requires array of 2D/3D points';
-    }
-    return output;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Convert input data in world space to display space
-   *
-   * @param {object} input {x:val, y:val} or {x:val, y:val, z:val} or [{x:val, y:val}]
-   * [{x:val, y:val, z:val}] or [[x,y]] or  [[x,y,z]] or [x1,y1,z1, x2, y2, z2]
-   *
-   * @returns {object} {x:val, y:val} or [{x:val, y:val}] or [[x,y]] or
-   * [x1,y1, x2, y2]
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.worldToDisplay = function (input) {
-    var i, temp, delta,
-        ren = m_this.contextRenderer(), cam = ren.camera(),
-        fp = cam.focalPoint(), output = [];
-
-    /// Input is an array
-    if (input instanceof Array && input.length > 0) {
-      output = [];
-
-      /// Input is an array of objects
-      if (input[0] instanceof Object) {
-        delta = 1;
-        for (i = 0; i < input.length; i += delta) {
-          temp = ren.worldToDisplay(vec4.fromValues(
-                   input[i].x, input[i].y, fp[2], 1.0), cam.viewMatrix(),
-                   cam.projectionMatrix(),
-                   m_width, m_height);
-          output[i] = { x: temp[0], y: temp[1], z: temp[2] };
-        }
-      } else if (input[0] instanceof Array) {
-        /// Input is an array of array
-        delta = 1;
-        for (i = 0; i < input.length; i += delta) {
-          temp = ren.worldToDisplay(
-                   vec4.fromValues(input[i][0], input[i][1], fp[2], 1.0),
-                   cam.viewMatrix(), cam.projectionMatrix(), m_width, m_height);
-          output[i].push(temp);
-        }
-      } else {
-        /// Input is a flat array of 2 or 3 dimension
-        delta = input.length % 3 === 0 ? 3 : 2;
-        if (delta === 2) {
-          for (i = 0; i < input.length; i += delta) {
-            temp = ren.worldToDisplay(vec4.fromValues(
-                     input[i], input[i + 1], fp[2], 1.0), cam.viewMatrix(),
-                     cam.projectionMatrix(),
-                     m_width, m_height);
-            output.push(temp[0]);
-            output.push(temp[1]);
-            output.push(temp[2]);
-          }
-        } else {
-          for (i = 0; i < input.length; i += delta) {
-            temp = ren.worldToDisplay(vec4.fromValues(
-                         input[i], input[i + 1], input[i + 2], 1.0), cam.viewMatrix(),
-                         cam.projectionMatrix(),
-                         m_width, m_height);
-            output.push(temp[0]);
-            output.push(temp[1]);
-            output.push(temp[2]);
-          }
-        }
-      }
-    } else if (input instanceof Object) {
-      temp = ren.worldToDisplay(vec4.fromValues(
-               input.x, input.y, fp[2], 1.0), cam.viewMatrix(),
-               cam.projectionMatrix(),
-               m_width, m_height);
-
-      output = {x: temp[0], y: temp[1], z: temp[2]};
-    } else {
-      throw 'World to display conversion requires array of 2D/3D points';
-    }
-
-    return output;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -230,7 +76,6 @@ geo.gl.vglRenderer = function (arg) {
 
     var canvas = $(document.createElement('canvas'));
     canvas.attr('class', 'webgl-canvas');
-    m_this.canvas(canvas);
     $(m_this.layer().node().get(0)).append(canvas);
     m_viewer = vgl.viewer(canvas.get(0), arg.options);
     m_viewer.init();
@@ -240,6 +85,11 @@ geo.gl.vglRenderer = function (arg) {
     if (m_viewer.renderWindow().renderers().length > 0) {
       m_contextRenderer.setLayer(m_viewer.renderWindow().renderers().length);
     }
+    m_this.canvas(canvas);
+    /* Initialize the size of the renderer */
+    var map = m_this.layer().map(),
+        mapSize = map.size();
+    m_this._resize(0, 0, mapSize.width, mapSize.height);
 
     return m_this;
   };
@@ -250,59 +100,16 @@ geo.gl.vglRenderer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._resize = function (x, y, w, h) {
-    var vglRenderer = m_this.contextRenderer(),
-        map = m_this.layer().map(),
-        camera = vglRenderer.camera(),
-        baseContextRenderer,
-        baseCamera,
-        renderWindow = m_viewer.renderWindow(),
-        layer = m_this.layer(),
-        baseLayer = layer.map().baseLayer(),
-        focalPoint,
-        position,
-        zoom,
-        newZ,
-        mapCenter;
+    var renderWindow = m_viewer.renderWindow();
 
     m_width = w;
     m_height = h;
     m_this.canvas().attr('width', w);
     m_this.canvas().attr('height', h);
     renderWindow.positionAndResize(x, y, w, h);
-    m_this._render();
-
-    // Ignore if the base layer is not set yet
-    if (!baseLayer || m_initialized) {
-      return;
-    }
-    m_initialized = true;
-
-    // skip handling if the renderer is unconnected
-    if (!vglRenderer || !vglRenderer.camera()) {
-      console.log('Zoom event triggered on unconnected vgl renderer.');
-    }
-
-    position = camera.position();
-    zoom = map.zoom();
-    newZ = camera.zoomToHeight(zoom, w, h);
-
-    // Assuming that baselayer will be a GL layer
-    if (layer !== baseLayer) {
-      baseContextRenderer = baseLayer.renderer().contextRenderer();
-      baseCamera = baseContextRenderer.camera();
-      position = baseCamera.position();
-      focalPoint = baseCamera.focalPoint();
-      camera.setPosition(position[0], position[1], position[2]);
-      camera.setFocalPoint(focalPoint[0], focalPoint[1], focalPoint[2]);
-    } else {
-      mapCenter = layer.toLocal(layer.map().center());
-      focalPoint = camera.focalPoint();
-      camera.setPosition(mapCenter.x, mapCenter.y, newZ);
-      camera.setFocalPoint(mapCenter.x, mapCenter.y, focalPoint[2]);
-    }
-    camera.setParallelExtents({zoom: zoom});
 
     m_this._updateRendererCamera();
+    m_this._render();
 
     return m_this;
   };
@@ -313,30 +120,55 @@ geo.gl.vglRenderer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._render = function () {
-    m_viewer.render();
+    if (m_renderAnimFrameRef === null) {
+      m_renderAnimFrameRef = window.requestAnimationFrame(function () {
+        m_viewer.render();
+        m_renderAnimFrameRef = null;
+      });
+    }
     return m_this;
   };
 
   this._updateRendererCamera = function () {
-    var vglRenderer = m_this.contextRenderer(),
-        renderWindow = m_viewer.renderWindow(),
-        camera = vglRenderer.camera(),
-        pos, fp, cr, pe;
+    var renderWindow = m_viewer.renderWindow(),
+        map = m_this.layer().map(),
+        camera = map.camera(),
+        view = camera.view,
+        proj = camera.projectionMatrix;
+    if (proj[15]) {
+      /* we want positive z to be closer to the camera, but webGL does the
+       * converse, so reverse the z coordinates. */
+      proj = mat4.scale(mat4.create(), proj, [1, 1, -1]);
+    }
+    /* A similar kluge as in the base camera class worldToDisplay4.  With this,
+     * we can show z values from 0 to 1. */
+    proj = mat4.translate(mat4.create(), proj,
+                          [0, 0, camera.constructor.bounds.far]);
 
-    vglRenderer.resetCameraClippingRange();
-    pos = camera.position();
-    fp = camera.focalPoint();
-    cr = camera.clippingRange();
-    pe = camera.parallelExtents();
     renderWindow.renderers().forEach(function (renderer) {
       var cam = renderer.camera();
-
-      if (cam !== camera) {
-        cam.setPosition(pos[0], pos[1], pos[2]);
-        cam.setFocalPoint(fp[0], fp[1], fp[2]);
-        cam.setClippingRange(cr[0], cr[1]);
-        cam.setParallelExtents(pe);
-        renderer.render();
+      cam.setViewMatrix(view);
+      cam.setProjectionMatrix(proj);
+      if (proj[1] || proj[2] || proj[3] || proj[4] || proj[6] || proj[7] ||
+          proj[8] || proj[9] || proj[11] || proj[15] !== 1 ||
+          (parseFloat(map.zoom().toFixed(6)) !==
+           parseFloat(map.zoom().toFixed(0)))) {
+        /* Don't align texels */
+        cam.viewAlignment = function () {
+          return null;
+        };
+      } else {
+        /* Set information for texel alignment.  The rounding factors should
+         * probably be divided by window.devicePixelRatio. */
+        cam.viewAlignment = function () {
+          var align = {
+            roundx: 2.0 / camera.viewport.width,
+            roundy: 2.0 / camera.viewport.height
+          };
+          align.dx = (camera.viewport.width % 2) ? align.roundx * 0.5 : 0;
+          align.dy = (camera.viewport.height % 2) ? align.roundy * 0.5 : 0;
+          return align;
+        };
       }
     });
   };
@@ -344,110 +176,14 @@ geo.gl.vglRenderer = function (arg) {
   // Connect to interactor events
   // Connect to pan event
   m_this.layer().geoOn(geo.event.pan, function (evt) {
-    var vglRenderer = m_this.contextRenderer(),
-        camera,
-        focusPoint,
-        centerDisplay,
-        centerGeo,
-        newCenterDisplay,
-        newCenterGeo,
-        renderWindow,
-        layer = m_this.layer();
-
-    if (evt.geo && evt.geo._triggeredBy !== layer) {
-      // skip handling if the renderer is unconnected
-      if (!vglRenderer || !vglRenderer.camera()) {
-        console.log('Pan event triggered on unconnected VGL renderer.');
-      }
-
-      renderWindow = m_viewer.renderWindow();
-      camera = vglRenderer.camera();
-      focusPoint = renderWindow.focusDisplayPoint();
-
-      // Calculate the center in display coordinates
-      centerDisplay = [m_width / 2, m_height / 2, 0];
-
-      // Calculate the center in world coordinates
-      centerGeo = renderWindow.displayToWorld(
-        centerDisplay[0],
-        centerDisplay[1],
-        focusPoint,
-        vglRenderer
-      );
-
-      newCenterDisplay = [
-        centerDisplay[0] + evt.screenDelta.x,
-        centerDisplay[1] + evt.screenDelta.y
-      ];
-
-      newCenterGeo = renderWindow.displayToWorld(
-        newCenterDisplay[0],
-        newCenterDisplay[1],
-        focusPoint,
-        vglRenderer
-      );
-
-      camera.pan(
-        centerGeo[0] - newCenterGeo[0],
-        centerGeo[1] - newCenterGeo[1],
-        centerGeo[2] - newCenterGeo[2]
-      );
-
-      evt.center = {
-        x: newCenterGeo[0],
-        y: newCenterGeo[1],
-        z: newCenterGeo[2]
-      };
-
-      m_this._updateRendererCamera();
-    }
+    void(evt);
+    m_this._updateRendererCamera();
   });
 
   // Connect to zoom event
   m_this.layer().geoOn(geo.event.zoom, function (evt) {
-    var vglRenderer = m_this.contextRenderer(),
-      camera,
-      renderWindow,
-      layer = m_this.layer(),
-      center,
-      dir,
-      focusPoint,
-      position,
-      newZ;
-
-    if (evt.geo && evt.geo._triggeredBy !== layer) {
-      // skip handling if the renderer is unconnected
-      if (!vglRenderer || !vglRenderer.camera()) {
-        console.log('Zoom event triggered on unconnected vgl renderer.');
-      }
-
-      renderWindow = m_viewer.renderWindow();
-      camera = vglRenderer.camera();
-      focusPoint = camera.focalPoint();
-      position = camera.position();
-      var windowSize = renderWindow.windowSize();
-      newZ = camera.zoomToHeight(evt.zoomLevel, windowSize[0], windowSize[1]);
-
-      evt.pan = null;
-      if (evt.screenPosition) {
-        center = renderWindow.displayToWorld(
-          evt.screenPosition.x,
-          evt.screenPosition.y,
-          focusPoint,
-          vglRenderer
-        );
-        dir = [center[0] - position[0], center[1] - position[1], center[2] - position[2]];
-        evt.center = layer.fromLocal({
-          x: position[0] + dir[0] * (1 - newZ / position[2]),
-          y: position[1] + dir[1] * (1 - newZ / position[2])
-        });
-      }
-
-      camera.setPosition(position[0], position[1], newZ);
-      camera.setParallelExtents({zoom: evt.zoomLevel});
-
-      m_this._updateRendererCamera();
-    }
+    void(evt);
+    m_this._updateRendererCamera();
   });
 
   // Connect to parallelprojection event
@@ -470,6 +206,6 @@ geo.gl.vglRenderer = function (arg) {
   return this;
 };
 
-inherit(geo.gl.vglRenderer, geo.gl.renderer);
+inherit(geo.gl.vglRenderer, geo.renderer);
 
 geo.registerRenderer('vgl', geo.gl.vglRenderer);

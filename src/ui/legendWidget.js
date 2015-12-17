@@ -221,8 +221,9 @@ geo.gui.legendWidget = function (arg) {
       s_appendChild();
     }
 
-    var w = m_this.size().width + 2 * m_padding,
-        h = m_this.size().height + 2 * m_padding;
+    // total size = interior size + 2 * padding + 2 * width of the border
+    var w = m_this.size().width + 2 * m_padding + 4,
+        h = m_this.size().height + 2 * m_padding + 4;
 
     // @todo - removing after creating to maintain the appendChild structure
     if (m_top) {
@@ -234,12 +235,12 @@ geo.gui.legendWidget = function (arg) {
     m_top = d3.select(m_this.canvas()).append('g');
     m_group = m_top
       .append('g')
-      .attr('transform', 'translate(' + [m_padding - 1.5, m_padding] + ')');
+      .attr('transform', 'translate(' + [m_padding + 2, m_padding + 2] + ')');
     m_border = m_group.append('rect')
       .attr('x', -m_padding)
       .attr('y', -m_padding)
-      .attr('width', w)
-      .attr('height', h)
+      .attr('width', w - 4)
+      .attr('height', h - 4)
       .attr('rx', 3)
       .attr('ry', 3)
       .style({

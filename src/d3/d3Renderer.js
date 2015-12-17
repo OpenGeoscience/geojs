@@ -59,8 +59,8 @@ geo.d3.d3Renderer = function (arg) {
     g = g || function () { return true; };
     return function () {
       var c = 'none';
-      if (g.apply(this, arguments)) {
-        c = f.apply(this, arguments);
+      if (g.apply(m_this, arguments)) {
+        c = f.apply(m_this, arguments);
         if (c.hasOwnProperty('r') &&
             c.hasOwnProperty('g') &&
             c.hasOwnProperty('b')) {
@@ -74,14 +74,14 @@ geo.d3.d3Renderer = function (arg) {
   this._convertPosition = function (f) {
     f = geo.util.ensureFunction(f);
     return function () {
-      return m_this.worldToDisplay(f.apply(this, arguments));
+      return m_this.layer().map().worldToDisplay(f.apply(m_this, arguments));
     };
   };
 
   this._convertScale = function (f) {
     f = geo.util.ensureFunction(f);
     return function () {
-      return f.apply(this, arguments) / m_scale;
+      return f.apply(m_this, arguments) / m_scale;
     };
   };
 
@@ -95,14 +95,14 @@ geo.d3.d3Renderer = function (arg) {
     /* jshint validthis:true */
     var key, k, f;
     function fillFunc() {
-      if (styles.fill.apply(this, arguments)) {
+      if (styles.fill.apply(m_this, arguments)) {
         return null;
       } else {
         return 'none';
       }
     }
     function strokeFunc() {
-      if (styles.stroke.apply(this, arguments)) {
+      if (styles.stroke.apply(m_this, arguments)) {
         return null;
       } else {
         return 'none';
@@ -143,25 +143,16 @@ geo.d3.d3Renderer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get the map instance or return null if not connected to a map.
+   * Get the svg group element associated with this renderer instance, or of a
+   * group within the render instance.
+   *
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
-  function getMap() {
-    var layer = m_this.layer();
-    if (!layer) {
-      return null;
+  function getGroup(parentId) {
+    if (parentId) {
+      return m_svg.select('.group-' + parentId);
     }
-    return layer.map();
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get the svg group element associated with this renderer instance.
-   * @private
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  function getGroup() {
     return m_svg.select('.group-' + m_this._d3id());
   }
 
@@ -174,8 +165,8 @@ geo.d3.d3Renderer = function (arg) {
   function initCorners() {
     var layer = m_this.layer(),
         map = layer.map(),
-        width = m_this.layer().width(),
-        height = m_this.layer().height();
+        width = m_this.layer().map().size().width,
+        height = m_this.layer().map().size().height;
 
     m_width = width;
     m_height = height;
@@ -183,8 +174,8 @@ geo.d3.d3Renderer = function (arg) {
       throw 'Map layer has size 0';
     }
     m_corners = {
-      'upperLeft': map.displayToGcs({'x': 0, 'y': 0}),
-      'lowerRight': map.displayToGcs({'x': width, 'y': height})
+      upperLeft: map.displayToGcs({'x': 0, 'y': 0}, null),
+      lowerRight: map.displayToGcs({'x': width, 'y': height}, null)
     };
   }
 
@@ -195,8 +186,7 @@ geo.d3.d3Renderer = function (arg) {
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
-  function setTransform() {
-
+  this._setTransform = function () {
     if (!m_corners) {
       initCorners();
     }
@@ -207,17 +197,24 @@ geo.d3.d3Renderer = function (arg) {
 
     var layer = m_this.layer(),
         map = layer.map(),
-        upperLeft = map.gcsToDisplay(m_corners.upperLeft),
-        lowerRight = map.gcsToDisplay(m_corners.lowerRight),
+        upperLeft = map.gcsToDisplay(m_corners.upperLeft, null),
+        lowerRight = map.gcsToDisplay(m_corners.lowerRight, null),
         group = getGroup(),
+        canvas = m_this.canvas(),
         dx, dy, scale;
 
-    // calculate the translation
-    dx = upperLeft.x;
-    dy = upperLeft.y;
-
-    // calculate the scale
-    scale = (lowerRight.y - upperLeft.y) / m_height;
+    if (canvas.attr('scale') !== null) {
+      scale = canvas.attr('scale') || 1;
+      dx = (canvas.attr('dx') || 0) * scale;
+      dy = (canvas.attr('dy') || 0) * scale;
+      dx += map.size().width / 2;
+      dy += map.size().height / 2;
+    } else {
+      // calculate the translation
+      dx = upperLeft.x;
+      dy = upperLeft.y;
+      scale = (lowerRight.y - upperLeft.y) / m_height;
+    }
 
     // set the group transform property
     group.attr('transform', 'matrix(' + [scale, 0, 0, scale, dx, dy].join() + ')');
@@ -226,7 +223,7 @@ geo.d3.d3Renderer = function (arg) {
     m_scale = scale;
     m_dx = dx;
     m_dy = dy;
-  }
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -235,12 +232,12 @@ geo.d3.d3Renderer = function (arg) {
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
-  function baseToLocal(pt) {
+  this.baseToLocal = function (pt) {
     return {
       x: (pt.x - m_dx) / m_scale,
       y: (pt.y - m_dy) / m_scale
     };
-  }
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -249,12 +246,12 @@ geo.d3.d3Renderer = function (arg) {
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
-  function localToBase(pt) {
+  this.localToBase = function (pt) {
     return {
       x: pt.x * m_scale + m_dx,
       y: pt.y * m_scale + m_dy
     };
-  }
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -334,49 +331,7 @@ geo.d3.d3Renderer = function (arg) {
         m_this.canvas(m_svg);
       }
     }
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Convert from coordinates in the svg group element to lat/lon.
-   * Supports objects or arrays of objects.
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.displayToWorld = function (pt) {
-    var map = getMap();
-    if (!map) {
-      throw 'Cannot project until this layer is connected to a map.';
-    }
-    if (Array.isArray(pt)) {
-      pt = pt.map(function (x) {
-        return map.displayToGcs(localToBase(x));
-      });
-    } else {
-      pt = map.displayToGcs(localToBase(pt));
-    }
-    return pt;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Convert from lat/lon to pixel coordinates in the svg group element.
-   * Supports objects or arrays of objects.
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.worldToDisplay = function (pt) {
-    var map = getMap();
-    if (!map) {
-      throw 'Cannot project until this layer is connected to a map.';
-    }
-    var v;
-    if (Array.isArray(pt)) {
-      v = pt.map(function (x) {
-        return baseToLocal(map.gcsToDisplay(x));
-      });
-    } else {
-      v = baseToLocal(map.gcsToDisplay(pt));
-    }
-    return v;
+    m_this._setTransform();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -415,7 +370,7 @@ geo.d3.d3Renderer = function (arg) {
     }
     m_svg.attr('width', w);
     m_svg.attr('height', h);
-    setTransform();
+    m_this._setTransform();
     m_this.layer().geoTrigger(geo.event.d3Rescale, { scale: m_scale }, true);
   };
 
@@ -462,6 +417,7 @@ geo.d3.d3Renderer = function (arg) {
    *    attributes: An object containing element attributes.
    *    classes:    An array of classes to add to the elements.
    *    append:     The element type as used in d3 append methods.
+   *    parentId:   If set, the group ID of the parent element.
    *  }
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -472,9 +428,10 @@ geo.d3.d3Renderer = function (arg) {
       style: arg.style,
       attributes: arg.attributes,
       classes: arg.classes,
-      append: arg.append
+      append: arg.append,
+      parentId: arg.parentId
     };
-    return m_this.__render(arg.id);
+    return m_this.__render(arg.id, arg.parentId);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -483,7 +440,7 @@ geo.d3.d3Renderer = function (arg) {
   *  provided then this method will update all features.
   */
   ////////////////////////////////////////////////////////////////////////////
-  this.__render = function (id) {
+  this.__render = function (id, parentId) {
     var key;
     if (id === undefined) {
       for (key in m_features) {
@@ -499,7 +456,7 @@ geo.d3.d3Renderer = function (arg) {
         attributes = m_features[id].attributes,
         classes = m_features[id].classes,
         append = m_features[id].append,
-        selection = m_this.select(id).data(data, index);
+        selection = m_this.select(id, parentId).data(data, index);
     selection.enter().append(append);
     selection.exit().remove();
     setAttrs(selection, attributes);
@@ -513,8 +470,8 @@ geo.d3.d3Renderer = function (arg) {
   *  Returns a d3 selection for the given feature id.
   */
   ////////////////////////////////////////////////////////////////////////////
-  this.select = function (id) {
-    return getGroup().selectAll('.' + id);
+  this.select = function (id, parentId) {
+    return getGroup(parentId).selectAll('.' + id);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -537,11 +494,11 @@ geo.d3.d3Renderer = function (arg) {
   };
 
   // connect to pan event
-  this.layer().geoOn(geo.event.pan, setTransform);
+  this.layer().geoOn(geo.event.pan, m_this._setTransform);
 
   // connect to zoom event
   this.layer().geoOn(geo.event.zoom, function () {
-    setTransform();
+    m_this._setTransform();
     m_this.__render();
     m_this.layer().geoTrigger(geo.event.d3Rescale, { scale: m_scale }, true);
   });

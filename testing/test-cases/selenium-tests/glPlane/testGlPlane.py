@@ -8,7 +8,7 @@ from selenium_test import FirefoxTest, ChromeTest,\
 
 class glPlaneBase(object):
     testCase = ('glPlane',)
-    testRevision = 3
+    testRevision = 4
 
     def loadPage(self, opacity=None):
         self.resizeWindow(640, 480)

@@ -25,21 +25,9 @@ geo.layer = function (arg) {
   //////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       s_exit = this._exit,
-      m_style = arg.style === undefined ? {'opacity': 0.5,
-                                           'color': [0.8, 0.8, 0.8],
-                                           'visible': true,
-                                           'bin': 100} : arg.style,
       m_id = arg.id === undefined ? geo.layer.newLayerId() : arg.id,
       m_name = '',
-      m_gcs = 'EPSG:4326',
-      m_timeRange = null,
-      m_source = arg.source || null,
       m_map = arg.map === undefined ? null : arg.map,
-      m_isReference = false,
-      m_x = 0,
-      m_y = 0,
-      m_width = 0,
-      m_height = 0,
       m_node = null,
       m_canvas = null,
       m_renderer = null,
@@ -47,15 +35,26 @@ geo.layer = function (arg) {
       m_rendererName = arg.renderer === undefined ? 'vgl' : arg.renderer,
       m_dataTime = geo.timestamp(),
       m_updateTime = geo.timestamp(),
-      m_drawTime = geo.timestamp(),
       m_sticky = arg.sticky === undefined ? true : arg.sticky,
       m_active = arg.active === undefined ? true : arg.active,
+      m_opacity = arg.opacity === undefined ? 1 : arg.opacity,
       m_attribution = arg.attribution || null,
       m_zIndex;
 
   if (!m_map) {
     throw new Error('Layers must be initialized on a map.');
   }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get the name of the renderer.
+   *
+   * @returns {string}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.rendererName = function () {
+    return m_rendererName;
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -231,106 +230,7 @@ geo.layer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get/Set opacity of the layer
-   *
-   * @returns {Number}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.opacity = function (val) {
-    if (val === undefined) {
-      return m_style.opacity;
-    }
-    m_style.opacity = val;
-    m_this.modified();
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get/Set visibility of the layer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.visible = function (val) {
-    if (val === undefined) {
-      return m_style.visible;
-    }
-    m_style.visible = val;
-    m_this.modified();
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get/Set bin of the layer
-   *
-   * @returns {Number}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.bin = function (val) {
-    if (val === undefined) {
-      return m_style.bin;
-    }
-    m_style.bin = val;
-    m_this.modified();
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get/Set projection of the layer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.gcs = function (val) {
-    if (val === undefined) {
-      return m_gcs;
-    }
-    m_gcs = val;
-    m_this.modified();
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Transform layer to the reference layer gcs
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.transform = function (val) {
-    geo.transform.transformLayer(val, m_this, m_map.baseLayer());
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get/Set time range of the layer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.timeRange = function (val) {
-    if (val === undefined) {
-      return m_timeRange;
-    }
-    m_timeRange = val;
-    m_this.modified();
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get/Set source of the layer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.source = function (val) {
-    if (val === undefined) {
-      return m_source;
-    }
-    m_source = val;
-    m_this.modified();
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get the map that the layer is connected to
-   * @returns {geo.map}
+   * Get/Set map of the layer
    */
   ////////////////////////////////////////////////////////////////////////////
   this.map = function () {
@@ -358,15 +258,6 @@ geo.layer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get viewport of the layer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.viewport = function () {
-    return [m_x, m_y, m_width, m_height];
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
    * Return last time data got changed
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -385,37 +276,6 @@ geo.layer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Return the modified time for the last draw call that did something
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.drawTime = function () {
-    return m_drawTime;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Run query and return results for it
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.query = function () {
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get/Set layer as the reference layer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.referenceLayer = function (val) {
-    if (val !== undefined) {
-      m_isReference = val;
-      m_this.modified();
-      return m_this;
-    }
-    return m_isReference;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
    * Get/Set if the layer has been initialized
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -429,21 +289,29 @@ geo.layer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Transform a point or array of points in GCS space to
-   * local space of the layer
+   * Transform coordinates from world coordinates into a local coordinate
+   * system specific to the underlying renderer.  This method is exposed
+   * to allow direct access the rendering context, but otherwise should
+   * not be called directly.  The default implementation is the identity
+   * operator.
    */
   ////////////////////////////////////////////////////////////////////////////
   this.toLocal = function (input) {
+    if (m_this._toLocalMatrix) {
+      geo.camera.applyTransform(m_this._toLocalMatrix, input);
+    }
     return input;
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Transform a point or array of points in local space to
-   * latitude-longitude space
+   * Transform coordinates from a local coordinate system to world coordinates.
    */
   ////////////////////////////////////////////////////////////////////////////
   this.fromLocal = function (input) {
+    if (m_this._fromLocalMatrix) {
+      geo.camera.applyTransform(m_this._fromLocalMatrix, input);
+    }
     return input;
   };
 
@@ -482,8 +350,13 @@ geo.layer = function (arg) {
     /* Pass along the arguments, but not the map reference */
     var options = $.extend({}, arg);
     delete options.map;
-    // Share context if have valid one
-    if (m_canvas) {
+
+    if (m_rendererName === null) {
+      // if given a "null" renderer, then pass the map element as the
+      // canvas
+      m_renderer = null;
+      m_canvas = m_node;
+    } else if (m_canvas) { // Share context if have valid one
       m_renderer = geo.createRenderer(m_rendererName, m_this, m_canvas,
                                       options);
     } else {
@@ -498,6 +371,19 @@ geo.layer = function (arg) {
 
     m_initialized = true;
 
+    /// Bind events to handlers
+    m_this.geoOn(geo.event.resize, function (event) {
+      m_this._update({event: event});
+    });
+
+    m_this.geoOn(geo.event.pan, function (event) {
+      m_this._update({event: event});
+    });
+
+    m_this.geoOn(geo.event.zoom, function (event) {
+      m_this._update({event: event});
+    });
+
     return m_this;
   };
 
@@ -507,7 +393,10 @@ geo.layer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
-    m_renderer._exit();
+    m_this.geoOff();
+    if (m_renderer) {
+      m_renderer._exit();
+    }
     m_node.off();
     m_node.remove();
     arg = {};
@@ -526,40 +415,36 @@ geo.layer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Respond to resize event
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._resize = function (x, y, w, h) {
-    m_x = x;
-    m_y = y;
-    m_width = w;
-    m_height = h;
-    m_node.width(w);
-    m_node.height(h);
-
-    m_this.modified();
-    m_this.geoTrigger(geo.event.resize,
-      {x: x, y: y, width: m_width, height: m_height});
-
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Return the width of the layer in pixels
+   * Return the width of the layer in pixels.
+   * **DEPRECIATED: use map.size instead.
    */
   ////////////////////////////////////////////////////////////////////////////
   this.width = function () {
-    return m_width;
+    return m_this.map().size().width;
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Return the height of the layer in pixels
+   * **DEPRECIATED: use map.size instead.
    */
   ////////////////////////////////////////////////////////////////////////////
   this.height = function () {
-    return m_height;
+    return m_this.map().size().height;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get or set the current layer opacity.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.opacity = function (opac) {
+    if (opac !== undefined) {
+      m_opacity = opac;
+      m_node.css('opacity', m_opacity);
+      return m_this;
+    }
+    return m_opacity;
   };
 
   if (arg.zIndex === undefined) {
@@ -571,11 +456,14 @@ geo.layer = function (arg) {
   m_node = $(document.createElement('div'));
   m_node.attr('id', m_name);
   m_node.css('position', 'absolute');
+  m_node.css('width', '100%');
+  m_node.css('height', '100%');
+  m_this.opacity(m_opacity);
 
   // set the z-index
   m_this.zIndex(m_zIndex);
 
-  return this;
+  return m_this;
 };
 
 /**

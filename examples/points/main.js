@@ -56,7 +56,7 @@ $(function () {
   map.createLayer(
     'osm',
     {
-      tileUrl: function () {
+      url: function () {
         return 'white.jpg';
       }
     }

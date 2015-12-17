@@ -3,7 +3,8 @@ window.startTest = function (done) {
 
   var mapOptions = {
     node: '#map',
-    clampBounds: false
+    clampBounds: false,
+    gcs: 'EPSG:4326'
   },
   myMap = geo.map(mapOptions),
   layer = myMap.createLayer('feature');
@@ -36,7 +37,7 @@ window.startTest = function (done) {
       image: '/data/land_shallow_topo_2048.png',
       opacity: opacity ? opacity : undefined
     });
-  myMap.bounds({lowerLeft: {x: 0, y: 0}, upperRight: {x: 180, y: 90}});
+  myMap.bounds({left: 0, right: 180, bottom: 0, top: 90});
   myMap.draw();
 
   myMap.onIdle(done);

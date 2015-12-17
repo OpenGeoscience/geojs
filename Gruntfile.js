@@ -10,6 +10,10 @@ module.exports = function (grunt) {
   sources = grunt.file.readJSON('sources.json');
   port = Number(grunt.option('port') || '8082');
 
+  /* Pass a "--env=<value>" argument to grunt. Default value is "production"
+   * --env=dev enables making source maps. */
+  var environment = grunt.option('env') || 'production';
+
   function moduleFiles(module) {
     var obj, files;
 
@@ -181,7 +185,8 @@ module.exports = function (grunt) {
     concat: {
       geojs: {
         options: {
-          seperator: ''
+          seperator: '',
+          sourceMap: environment === 'dev'
         },
         files: {
           'dist/built/geo.js': sourceList.map(function (f) {
@@ -193,7 +198,8 @@ module.exports = function (grunt) {
 
     uglify: {
       options: {
-        sourceMap: false,
+        sourceMap: environment === 'dev',
+        sourceMapIncludeSources: true,
         report: 'min',
         beautify: {
           ascii_only: true,
@@ -248,7 +254,13 @@ module.exports = function (grunt) {
           'Gruntfile.js',
           'sources.json'
         ],
-        tasks: ['clean:source', 'template', 'copy', 'docs', 'uglify:geojs']
+        tasks: [
+          'clean:source',
+          'template',
+          'copy',
+          'concat:geojs',
+          'uglify:geojs'
+        ]
       },
       examples: {
         files: [
@@ -287,6 +299,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-concat');
+  grunt.loadNpmTasks('grunt-parallel');
   grunt.loadNpmTasks('grunt-express');
   grunt.loadNpmTasks('grunt-docco');
 

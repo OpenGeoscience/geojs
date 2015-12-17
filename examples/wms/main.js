@@ -10,28 +10,20 @@ $(function () {
   });
 
   // Add an OSM layer
-  var osm = map.createLayer('osm',{
+  map.createLayer('osm', {
     baseUrl: 'http://otile1.mqcdn.com/tiles/1.0.0/sat'
   });
 
   // Add an OSM layer with a WMS server as the source of its titles
-  var wms = map.createLayer('osm');
+  var wms = map.createLayer('osm', {keepLower: false, attribution: null});
 
-  // Set the geographic coordinate system for the layer to web mercator (EPSG:3857)
   var projection = 'EPSG:3857';
-  wms.gcs(projection);
 
-  wms.tileUrl(
-    function (zoom, x, y) {
+  wms.url(
+    function (x, y, zoom) {
       // Compute the bounding box
-      var xLowerLeft = geo.mercator.tilex2long(x, zoom);
-      var yLowerLeft = geo.mercator.tiley2lat(y + 1, zoom);
-      var xUpperRight = geo.mercator.tilex2long(x + 1, zoom);
-      var yUpperRight = geo.mercator.tiley2lat(y, zoom);
-
-      var sw = geo.mercator.ll2m(xLowerLeft, yLowerLeft, true);
-      var ne = geo.mercator.ll2m(xUpperRight, yUpperRight, true);
-      var bbox_mercator = sw.x + ',' + sw.y + ',' + ne.x + ',' + ne.y;
+      var bb = wms.gcsTileBounds({x: x, y: y, level: zoom}, projection);
+      var bbox_mercator = bb.left + ',' + bb.bottom + ',' + bb.right + ',' + bb.top;
 
       // Set the WMS server parameters
       var params = {
@@ -49,7 +41,8 @@ $(function () {
         'TILED': true
       };
 
-      var baseUrl = 'http://demo.boundlessgeo.com/geoserver/ows';  // OpenGeo Demo Web Map Service
+      // OpenGeo Demo Web Map Service
+      var baseUrl = 'http://demo.boundlessgeo.com/geoserver/ows';
       return baseUrl + '?' + $.param(params);
     }
   );

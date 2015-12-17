@@ -8,7 +8,7 @@ from selenium_test import FirefoxTest, ChromeTest,\
 
 class glPointsTransparentBase(object):
     testCase = ('glPointsTransparent',)
-    testRevision = 6
+    testRevision = 7
 
     def loadPage(self):
         self.resizeWindow(640, 480)

@@ -19,7 +19,9 @@ window.geoTests = {
       center: {
         x: 0,
         y: 0
-      }
+      },
+      wrapX: false,
+      clampBoundsX: true
     };
     $.extend(true, mapDefaults, mapOpts);
 
@@ -29,11 +31,16 @@ window.geoTests = {
     };
 
     if (notiles) {
-      osmDefaults.tileUrl = function () {
+      osmDefaults.url = function () {
         return '/data/white.jpg';
       };
+      delete osmDefaults.baseUrl;
     }
     $.extend(true, osmDefaults, osmOpts);
+
+    if (osmDefaults.url) {
+      delete osmDefaults.baseUrl;
+    }
 
     var map = geo.map(mapDefaults);
     map.createLayer('osm', osmDefaults);

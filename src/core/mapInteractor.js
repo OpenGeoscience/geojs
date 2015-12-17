@@ -1,6 +1,9 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Create a new instance of mapInteractor
+ * The mapInteractor class is responsible for handling raw events from the
+ * browser and interpreting them as map navigation interactions.  This class
+ * will call the navigation methods on the connected map, which will make
+ * modifications to the camera directly.
  *
  * @class
  * @extends geo.object
@@ -350,6 +353,8 @@ geo.mapInteractor = function (args) {
     $node.on('mousedown.geojs', m_this._handleMouseDown);
     $node.on('mouseup.geojs', m_this._handleMouseUp);
     $node.on('wheel.geojs', m_this._handleMouseWheel);
+    // Disable dragging images and such
+    $node.on('dragstart', function () { return false; });
     if (m_options.panMoveButton === 'right' ||
         m_options.zoomMoveButton === 'right') {
       $node.on('contextmenu.geojs', function () { return false; });
@@ -704,7 +709,8 @@ geo.mapInteractor = function (args) {
       m_this.map().pan({x: dx, y: dy});
     } else if (m_state.action === 'zoom') {
       m_this.map().zoom(
-        m_this.map().zoom() - dy * m_options.zoomScale / 120
+        m_this.map().zoom() - dy * m_options.zoomScale / 120,
+        m_state
       );
     } else if (m_state.action === 'select') {
       // Get the bounds of the current selection
@@ -887,7 +893,7 @@ geo.mapInteractor = function (args) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._handleMouseWheel = function (evt) {
-    var zoomFactor, direction;
+    var zoomFactor;
 
     if (m_paused) {
       return;
@@ -940,11 +946,10 @@ geo.mapInteractor = function (args) {
                eventMatch('wheel', m_options.zoomWheelModifiers)) {
 
       zoomFactor = -evt.deltaY;
-      direction = m_mouse.map;
 
       m_this.map().zoom(
         m_this.map().zoom() + zoomFactor,
-        direction
+        m_mouse
       );
     }
   };

@@ -48,8 +48,11 @@ geo.gl.planeFeature = function (arg) {
         image = null,
         texture = null;
 
+    //DWM:: we are expecting the features to be in the same coordinate system
+    //DWM:: as the camera -- should it be otherwise?
     /// TODO If for some reason base layer changes its gcs at run time
     /// then we need to trigger an event to rebuild every feature
+    /*
     or = geo.transform.transformCoordinates(m_this.gcs(),
                                             m_this.layer().map().gcs(),
                                             or);
@@ -59,6 +62,7 @@ geo.gl.planeFeature = function (arg) {
     lr = geo.transform.transformCoordinates(m_this.gcs(),
                                             m_this.layer().map().gcs(),
                                             lr);
+    */
 
     m_this.buildTime().modified();
 

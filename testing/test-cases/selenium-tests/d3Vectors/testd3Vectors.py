@@ -6,7 +6,7 @@ from selenium_test import FirefoxTest, ChromeTest,\
 
 class d3VectorsBase(object):
     testCase = ('d3Vectors',)
-    testRevision = 2
+    testRevision = 3
 
     def loadPage(self):
         self.resizeWindow(640, 480)

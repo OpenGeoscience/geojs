@@ -20,5 +20,6 @@
     "maxlen": 90,
     "browser": true,
     "jquery": true,
-    "white": true
+    "white": true,
+    "esnext": true
 }

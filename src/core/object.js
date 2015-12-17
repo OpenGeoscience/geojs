@@ -16,18 +16,19 @@ geo.object = function () {
   var m_this = this,
       m_eventHandlers = {},
       m_idleHandlers = [],
-      m_deferredCount = 0;
+      m_promiseCount = 0;
 
   //////////////////////////////////////////////////////////////////////////////
   /**
-   *  Bind a handler that will be called once when all deferreds are resolved.
+   *  Bind a handler that will be called once when all internal promises are
+   *  resolved.
    *
    *  @param {function} handler A function taking no arguments
    *  @returns {geo.object[]|geo.object} this
    */
   //////////////////////////////////////////////////////////////////////////////
   this.onIdle = function (handler) {
-    if (m_deferredCount) {
+    if (m_promiseCount) {
       m_idleHandlers.push(handler);
     } else {
       handler();
@@ -37,22 +38,25 @@ geo.object = function () {
 
   //////////////////////////////////////////////////////////////////////////////
   /**
-   *  Add a new deferred object preventing idle event handlers from being called.
+   *  Add a new promise object preventing idle event handlers from being called
+   *  until it is resolved.
    *
-   *  @param {$.defer} defer A jquery defered object
+   *  @param {Promise} promise A promise object
    */
   //////////////////////////////////////////////////////////////////////////////
-  this.addDeferred = function (defer) {
-    m_deferredCount += 1;
-    defer.done(function () {
-      m_deferredCount -= 1;
-      if (!m_deferredCount) {
+  this.addPromise = function (promise) {
+    // called on any resolution of the promise
+    function onDone() {
+      m_promiseCount -= 1;
+      if (!m_promiseCount) {
         m_idleHandlers.splice(0, m_idleHandlers.length)
           .forEach(function (handler) {
             handler();
           });
       }
-    });
+    }
+    m_promiseCount += 1;
+    promise.then(onDone, onDone);
     return m_this;
   };
 
@@ -86,7 +90,7 @@ geo.object = function () {
   /**
    *  Trigger an event (or events) on this object and call all handlers
    *
-   *  @param {String} event An event from {geo.events}
+   *  @param {String} event An event from {geo.event}
    *  @param {Object} args An optional argument to pass to handlers
    */
   //////////////////////////////////////////////////////////////////////////////
@@ -99,6 +103,10 @@ geo.object = function () {
       });
       return m_this;
     }
+
+    // append the event type to the argument object
+    args = args || {};
+    args.event = event;
 
     if (m_eventHandlers.hasOwnProperty(event)) {
       m_eventHandlers[event].forEach(function (handler) {
@@ -123,7 +131,7 @@ geo.object = function () {
     if (event === undefined) {
       m_eventHandlers = {};
       m_idleHandlers = [];
-      m_deferredCount = 0;
+      m_promiseCount = 0;
     }
     if (Array.isArray(event)) {
       event.forEach(function (e) {

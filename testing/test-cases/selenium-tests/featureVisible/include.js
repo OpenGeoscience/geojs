@@ -4,7 +4,7 @@ window.startTest = function (done) {
 
   window.geo_mouse_moves = 0;
   $('#map').attr('geo-moves', window.geo_mouse_moves);
-  var map = window.geoTests.createOsmMap({}, {}, true);
+  var map = window.geoTests.createOsmMap({zoom: 8}, {}, true);
   var feature = map.createLayer('feature').createFeature('point', {selectionAPI: true});
 
   feature.data([0])
@@ -16,6 +16,21 @@ window.startTest = function (done) {
         $('#map').attr('geo-moves', window.geo_mouse_moves);
       });
   window.geo_feature = feature;
+  window.geo_wait_count = 0;
+
+  // Used to block the python process waiting for an action to finish
+  window.geo_is_done = function (i) {
+    return window.geo_wait_count >= i;
+  };
+  window.geo_wait = function () {
+    var c = window.geo_wait_count + 1;
+    map.draw();
+    map.onIdle(function () {
+      window.geo_wait_count += 1;
+    });
+    return c;
+  };
+
   map.draw();
-  done();
+  map.onIdle(done);
 };

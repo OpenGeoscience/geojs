@@ -80,7 +80,7 @@ geo.lineFeature = function (arg) {
     line = m_this.line();
     width = m_this.style.get("strokeWidth");
     pos = m_this.position();
-    pt = map.gcsToDisplay(p);
+    pt = m_this.featureGcsToDisplay(p);
 
     // minimum l2 distance squared from
     // q -> line(u, v)
@@ -120,7 +120,7 @@ geo.lineFeature = function (arg) {
 
           // get the screen coordinates of the current point
           var p = pos(current, j, d, index);
-          var s = map.gcsToDisplay(p);
+          var s = m_this.featureGcsToDisplay(p);
           var r = Math.ceil(width(p, j, d, index) / 2) + 2;
           r = r * r;
 
