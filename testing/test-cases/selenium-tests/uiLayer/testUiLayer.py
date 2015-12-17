@@ -6,7 +6,7 @@ from selenium_test import FirefoxTest,\
 
 class uiLayer(FirefoxTest):
     testCase = ('uiLayer',)
-    testRevision = 1
+    testRevision = 2
 
     def test_ui_position(self):
         self.resizeWindow(1024, 768)

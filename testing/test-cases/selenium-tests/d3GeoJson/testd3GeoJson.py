@@ -6,7 +6,7 @@ from selenium_test import FirefoxTest, ChromeTest,\
 
 class d3GeoJsonBase(object):
     testCase = ('d3GeoJson',)
-    testRevision = 5
+    testRevision = 6
 
     def loadPage(self):
         self.resizeWindow(640, 480)

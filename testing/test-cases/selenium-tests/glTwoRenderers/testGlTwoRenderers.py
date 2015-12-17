@@ -8,7 +8,7 @@ from selenium_test import FirefoxTest, ChromeTest,\
 
 class glTwoRenderersBase(object):
     testCase = ('glTwoRenderers',)
-    testRevision = 4
+    testRevision = 5
 
     def loadPage(self):
         self.resizeWindow(1600, 900)

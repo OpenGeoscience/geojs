@@ -6,7 +6,7 @@ from selenium_test import FirefoxTest, ChromeTest,\
 
 class osmBase(object):
     testCase = ('multipleMaps',)
-    testRevision = 4
+    testRevision = 5
 
     def loadPage(self):
         self.resizeWindow(320, 480)

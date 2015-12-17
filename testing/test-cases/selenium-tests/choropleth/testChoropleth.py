@@ -3,9 +3,10 @@
 from selenium_test import FirefoxTest, ChromeTest,\
     setUpModule, tearDownModule
 
+
 class choroplethBase(object):
     testCase = ('choropleth',)
-    testRevision = 1
+    testRevision = 2
 
     def loadPage(self):
         self.resizeWindow(640, 480)
@@ -16,6 +17,7 @@ class choroplethBase(object):
     def testChoroplethRender(self):
         self.loadPage()
         self.screenshotTest('renderChoropleth')
+
 
 class FirefoxOSM(choroplethBase, FirefoxTest):
     testCase = choroplethBase.testCase + ('firefox',)

@@ -6,7 +6,7 @@ from selenium_test import FirefoxTest, ChromeTest,\
 
 class Base(object):
     testCase = ('mapBounds',)
-    testRevision = 3
+    testRevision = 4
 
     def loadPage(self):
         self.resizeWindow(1024, 600)
