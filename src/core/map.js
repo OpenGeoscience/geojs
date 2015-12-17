@@ -1022,8 +1022,10 @@ geo.map = function (arg) {
       bds = fix_bounds(bds);
       nav = m_this.zoomAndCenterFromBounds(bds, null);
 
-      m_this.center(nav.center);
+      // This might have concequences in terms of bounds/zoom clamping.
+      // What behavior do we expect from this method in that case?
       m_this.zoom(nav.zoom);
+      m_this.center(nav.center, null);
     }
 
     return m_this.boundsFromZoomAndCenter(m_zoom, m_center, gcs);
