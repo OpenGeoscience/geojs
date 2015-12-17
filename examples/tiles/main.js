@@ -9,6 +9,7 @@
  *      show both labels and borders.  These options just add a class to the
  *      #map element to invoke special css rules.
  *  discrete: 'true' to use discrete zoom.
+ *  fade: 'true' to enable image fade in on the html renderer.
  *  h: height of a tiled image (at max zoom).
  *  lower: 'true' (default) or 'false'.  Keep all lower-level tiles if true.
  *      'false' was the old behavior where fewer tiles are rendered, and
@@ -20,6 +21,7 @@
  *  projection: 'parallel' or 'projection' for the camera projection.
  *  renderer: 'vgl' (default), 'd3', 'null', or 'html'.  This picks the
  *      renderer for map tiles.  null or html uses the html renderer.
+ *  round: 'round' (default), 'floor', 'ceil'.
  *  subdomains: a comma-separated string of subdomains to use in the {s} part
  *      of the url parameter.  If there are no commas in the string, each letter
  *      is used by itself (e.g., 'abc' is the same as 'a,b,c').
@@ -27,7 +29,7 @@
  *      http://otile1.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.png .  Other useful
  *      urls are are: /data/tilefancy.png
  *      http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png
- *  w: width of a tiled image (at max zoom).  If iw and h are specified, a
+ *  w: width of a tiled image (at max zoom).  If w and h are specified, a
  *      variety of other changes are made to make this served in image
  *      coordinates.
  *  wrapX: 'true' to wrap the tiles in the horizontal direction.
@@ -110,6 +112,7 @@ $(function () {
       return {x: 0, y: 0};
     };
     layerParams.attribution = '';
+    layerParams.tileRounding = Math.ceil;
   }
   // Parse additional query options
   if (query.x !== undefined) {
@@ -126,6 +129,9 @@ $(function () {
     if (!layerParams.maxLevel) {
       layerParams.maxLevel = mapParams.max;
     }
+  }
+  if (query.round) {
+    layerParams.tileRounding = Math[query.round];
   }
   // Populate boolean flags for the map
   $.each({
@@ -160,7 +166,8 @@ $(function () {
   $('#map').toggleClass('debug-label', (
       query.debug === 'true' || query.debug === 'all'))
     .toggleClass('debug-border', (
-      query.debug === 'border' || query.debug === 'all'));
+      query.debug === 'border' || query.debug === 'all'))
+    .toggleClass('fade-image', (query.fade === 'true'));
   // Add the tile layer with the specified parameters
   var osmLayer = map.createLayer('osm', layerParams);
   // Make variables available as a global for easier debug

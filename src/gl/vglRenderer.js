@@ -22,6 +22,7 @@ geo.gl.vglRenderer = function (arg) {
       m_viewer = null,
       m_width = 0,
       m_height = 0,
+      m_renderAnimFrameRef = null,
       s_init = this._init;
 
   /// TODO: Move this API to the base class
@@ -119,7 +120,12 @@ geo.gl.vglRenderer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._render = function () {
-    m_viewer.render();
+    if (m_renderAnimFrameRef === null) {
+      m_renderAnimFrameRef = window.requestAnimationFrame(function () {
+        m_viewer.render();
+        m_renderAnimFrameRef = null;
+      });
+    }
     return m_this;
   };
 

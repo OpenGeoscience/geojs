@@ -10,3 +10,10 @@
     font-size: 30px;
     color: black;
 }
+@keyframes imgfadein {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+#map.fade-image .geo-tile-container img {
+    animation: imgfadein 2s forwards;
+}
