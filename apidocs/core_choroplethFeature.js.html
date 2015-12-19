@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: core/choroplethFeature.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: core/choroplethFeature.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>//////////////////////////////////////////////////////////////////////////////
+/**
+ * Create a new instance of class choroplethFeature
+ *
+ * @class
+ * @extends geo.feature
+ * @returns {geo.choroplethFeature}
+ *
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.choroplethFeature = function (arg) {
+  'use strict';
+  if (!(this instanceof geo.choroplethFeature)) {
+    return new geo.choroplethFeature(arg);
+  }
+  arg = arg || {};
+  geo.feature.call(this, arg);
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  var m_this = this,
+      s_init = this._init,
+      m_choropleth = $
+      .extend({},
+              {
+                /* 9-step based on paraview bwr colortable */
+                colorRange: [
+                  {r: 0.07514311, g: 0.468049805, b: 1},
+                  {r: 0.468487184, g: 0.588057293, b: 1},
+                  {r: 0.656658579, g: 0.707001303, b: 1},
+                  {r: 0.821573924, g: 0.837809045, b: 1},
+                  {r: 0.943467973, g: 0.943498599, b: 0.943398095},
+                  {r: 1, g: 0.788626485, b: 0.750707739},
+                  {r: 1, g: 0.6289553, b: 0.568237474},
+                  {r: 1, g: 0.472800903, b: 0.404551679},
+                  {r: 0.916482116, g: 0.236630659, b: 0.209939162}
+                ],
+                scale: d3.scale.quantize(),
+                accessors: {
+                  //accessor for ID on geodata feature
+                  geoId: function (geoFeature) {
+                    return geoFeature.properties.GEO_ID;
+                  },
+                  //accessor for ID on scalar element
+                  scalarId: function (scalarElement) {
+                    return scalarElement.id;
+                  },
+                  //accessor for value on scalar element
+                  scalarValue: function (scalarElement) {
+                    return scalarElement.value;
+                  }
+                }
+              },
+              arg.choropleth);
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set choropleth scalar data
+   *
+   * @returns {geo.feature.choropleth}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.scalar = function (data, aggregator) {
+    var scalarId, scalarValue;
+
+    if (data === undefined) {
+      return m_this.choropleth.get('scalar')();
+    } else {
+      scalarId = m_this.choropleth.get('accessors')().scalarId;
+      scalarValue = m_this.choropleth.get('accessors')().scalarValue;
+      m_choropleth.scalar = data;
+      m_choropleth.scalarAggregator = aggregator || d3.mean;
+      // we make internal dictionary from array for faster lookup
+      // when matching geojson features to scalar values,
+      // note that we also allow for multiple scalar elements
+      // for the same geo feature
+      m_choropleth.scalar._dictionary = data
+        .reduce(function (accumeDictionary, scalarElement) {
+          var id, value;
+
+          id = scalarId(scalarElement);
+          value = scalarValue(scalarElement);
+
+          accumeDictionary[id] =
+            accumeDictionary[id] ?
+            accumeDictionary[id].push(value) : [value];
+
+          return accumeDictionary;
+        }, {});
+      m_this.dataTime().modified();
+    }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set choropleth accessor
+   *
+   * @returns {geo.feature.choropleth}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.choropleth = function (arg1, arg2) {
+    var choropleth;
+
+    if (arg1 === undefined) {
+      return m_choropleth;
+    }
+    if (typeof arg1 === 'string' &amp;&amp; arg2 === undefined) {
+      return m_choropleth[arg1];
+    }
+    if (arg2 === undefined) {
+      choropleth = $.extend(
+        {},
+        m_choropleth,
+        arg1
+      );
+      m_choropleth = choropleth;
+    } else {
+      m_choropleth[arg1] = arg2; //if you pass in accessor for prop
+    }
+    m_this.modified();
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * A uniform getter that always returns a function even for constant values.
+   * If undefined input, return all the choropleth values as an object.
+   *
+   * @param {string|undefined} key
+   * @return {function}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.choropleth.get = function (key) {
+    var all = {}, k;
+    if (key === undefined) {
+      for (k in m_choropleth) {
+        if (m_choropleth.hasOwnProperty(k)) {
+          all[k] = m_this.choropleth.get(k);
+        }
+      }
+      return all;
+    }
+    return geo.util.ensureFunction(m_choropleth[key]);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * A method that adds a polygon feature to the current layer.
+   *
+   * @param {array} coordinateArray
+   * @param {geo.color} fillColor
+   * @return {geo.feature}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._addPolygonFeature = function (feature, fillColor) {
+    var newFeature = m_this.layer()
+        .createFeature('polygon', {});
+
+    if (feature.geometry.type === 'Polygon') {
+      newFeature.data([{
+        type: 'Polygon',
+        coordinates: feature.geometry.coordinates
+      }]);
+    } else if (feature.geometry.type === 'MultiPolygon') {
+      newFeature.data(feature.geometry.coordinates.map(function (coordinateMap) {
+        return {
+          type: 'Polygon',
+          coordinates: coordinateMap
+        };
+      }));
+    }
+
+    newFeature
+      .polygon(function (d) {
+        return {
+          'outer': d.coordinates[0],
+          'inner': d.coordinates[1] // undefined but ok
+        };
+      })
+      .position(function (d) {
+        return {
+          x: d[0],
+          y: d[1]
+        };
+      })
+      .style({
+        'fillColor': fillColor
+      });
+
+    return newFeature;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * A method that adds polygons from a given feature to the current layer.
+   *
+   * @param {} geoJsonFeature
+   * @param geo.color
+   * @return [{geo.feature}]
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._featureToPolygons = function (feature, fillValue) {
+    return m_this
+      ._addPolygonFeature(feature, fillValue);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * A method that sets a choropleth scale's domain and range.
+   *
+   * @param {undefined | function({})} valueAccessor
+   * @return {geo.feature.choropleth}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._generateScale = function (valueAccessor) {
+    var extent =
+        d3.extent(m_this.scalar(), valueAccessor || undefined);
+
+    m_this.choropleth()
+      .scale
+      .domain(extent)
+      .range(m_this.choropleth().colorRange);
+
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**sr
+   * Generate scale for choropleth.data(), make polygons from features.
+   * @returns: [ [geo.feature.polygon, ...] , ... ]
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.createChoropleth = function () {
+    var choropleth = m_this.choropleth,
+        data = m_this.data(),
+        scalars = m_this.scalar(),
+        valueFunc = choropleth.get('accessors')().scalarValue,
+        getFeatureId = choropleth.get('accessors')().geoId;
+
+    m_this._generateScale(valueFunc);
+
+    return data
+      .map(function (feature) {
+        var id = getFeatureId(feature);
+        var valueArray = scalars._dictionary[id];
+        var accumulatedScalarValue = choropleth().scalarAggregator(valueArray);
+        // take average of this array of values
+        // which allows for non-bijective correspondance
+        // between geo data and scalar data
+        var fillColor =
+            m_this
+            .choropleth()
+            .scale(accumulatedScalarValue);
+
+        return m_this
+          ._featureToPolygons(feature, fillColor);
+      });
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Initialize
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._init = function (arg) {
+    s_init.call(m_this, arg);
+
+    if (m_choropleth) {
+      m_this.dataTime().modified();
+    }
+  };
+
+  this._init(arg);
+  return this;
+};
+
+inherit(geo.choroplethFeature, geo.feature);
+
+/* Example:
+ */
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.camera.html">camera</a></li><li><a href="geo.choroplethFeature.html">choroplethFeature</a></li><li><a href="geo.clock.html">clock</a></li><li><a href="geo.contourFeature.html">contourFeature</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.choroplethFeature.html">choroplethFeature</a></li><li><a href="geo.gl.contourFeature.html">contourFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.svgWidget.html">svgWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.imageTile.html">imageTile</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.tile.html">tile</a></li><li><a href="geo.tileCache.html">tileCache</a></li><li><a href="geo.tileLayer.html">tileLayer</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.ClusterGroup.html">ClusterGroup</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.camera.html">camera</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Sat Dec 19 2015 14:27:22 GMT-0500 (EST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

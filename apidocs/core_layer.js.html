@@ -32,11 +32,13 @@
  * @extends geo.sceneObject
  * @param {Object?} arg An options argument
  * @param {string} arg.attribution An attribution string to display
+ * @param {number} arg.zIndex The z-index to assign to the layer (defaults
+ *   to the index of the layer inside the map)
  * @returns {geo.layer}
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.layer = function (arg) {
-  "use strict";
+  'use strict';
 
   if (!(this instanceof geo.layer)) {
     return new geo.layer(arg);
@@ -51,32 +53,141 @@ geo.layer = function (arg) {
   //////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       s_exit = this._exit,
-      m_style = arg.style === undefined ? {"opacity": 0.5,
-                                           "color": [0.8, 0.8, 0.8],
-                                           "visible": true,
-                                           "bin": 100} : arg.style,
       m_id = arg.id === undefined ? geo.layer.newLayerId() : arg.id,
-      m_name = "",
-      m_gcs = "EPSG:4326",
-      m_timeRange = null,
-      m_source = arg.source || null,
+      m_name = '',
       m_map = arg.map === undefined ? null : arg.map,
-      m_isReference = false,
-      m_x = 0,
-      m_y = 0,
-      m_width = 0,
-      m_height = 0,
       m_node = null,
       m_canvas = null,
       m_renderer = null,
       m_initialized = false,
-      m_rendererName = arg.renderer === undefined ? "vgl" : arg.renderer,
+      m_rendererName = arg.renderer === undefined ? 'vgl' : arg.renderer,
       m_dataTime = geo.timestamp(),
       m_updateTime = geo.timestamp(),
-      m_drawTime = geo.timestamp(),
       m_sticky = arg.sticky === undefined ? true : arg.sticky,
       m_active = arg.active === undefined ? true : arg.active,
-      m_attribution = arg.attribution || null;
+      m_opacity = arg.opacity === undefined ? 1 : arg.opacity,
+      m_attribution = arg.attribution || null,
+      m_zIndex;
+
+  if (!m_map) {
+    throw new Error('Layers must be initialized on a map.');
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get the name of the renderer.
+   *
+   * @returns {string}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.rendererName = function () {
+    return m_rendererName;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get or set the z-index of the layer.  The z-index controls the display
+   * order of the layers in much the same way as the CSS z-index property.
+   *
+   * @param {number} [zIndex] The new z-index
+   * @returns {number|this}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.zIndex = function (zIndex) {
+    if (zIndex === undefined) {
+      return m_zIndex;
+    }
+    m_zIndex = zIndex;
+    m_node.css('z-index', m_zIndex);
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Bring the layer above the given number of layers.  This will rotate the
+   * current z-indices for this and the next `n` layers.
+   *
+   * @param {number} [n=1] The number of positions to move
+   * @returns {this}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.moveUp = function (n) {
+    var order, i, me = null, tmp, sign;
+
+    // set the default
+    if (n === undefined) {
+      n = 1;
+    }
+
+    // set the sort direction that controls if we are moving up
+    // or down the z-index
+    sign = 1;
+    if (n &lt; 0) {
+      sign = -1;
+      n = -n;
+    }
+
+    // get a sorted list of layers
+    order = m_this.map().layers().sort(
+      function (a, b) { return sign * (a.zIndex() - b.zIndex()); }
+    );
+
+    for (i = 0; i &lt; order.length; i += 1) {
+      if (me === null) {
+        // loop until we get to the current layer
+        if (order[i] === m_this) {
+          me = i;
+        }
+      } else if (i - me &lt;= n) {
+        // swap the next n layers
+        tmp = m_this.zIndex();
+        m_this.zIndex(order[i].zIndex());
+        order[i].zIndex(tmp);
+      } else {
+        // all the swaps are done now
+        break;
+      }
+    }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Bring the layer below the given number of layers.  This will rotate the
+   * current z-indices for this and the previous `n` layers.
+   *
+   * @param {number} [n=1] The number of positions to move
+   * @returns {this}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.moveDown = function (n) {
+    if (n === undefined) {
+      n = 1;
+    }
+    return m_this.moveUp(-n);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Bring the layer to the top of the map layers.
+   *
+   * @returns {this}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.moveToTop = function () {
+    return m_this.moveUp(m_this.map().children().length - 1);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Bring the layer to the bottom of the map layers.
+   *
+   * @returns {this}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.moveToBottom = function () {
+    return m_this.moveDown(m_this.map().children().length - 1);
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -147,115 +258,11 @@ geo.layer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get/Set opacity of the layer
-   *
-   * @returns {Number}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.opacity = function (val) {
-    if (val === undefined) {
-      return m_style.opacity;
-    }
-    m_style.opacity = val;
-    m_this.modified();
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get/Set visibility of the layer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.visible = function (val) {
-    if (val === undefined) {
-      return m_style.visible;
-    }
-    m_style.visible = val;
-    m_this.modified();
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get/Set bin of the layer
-   *
-   * @returns {Number}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.bin = function (val) {
-    if (val === undefined) {
-      return m_style.bin;
-    }
-    m_style.bin = val;
-    m_this.modified();
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get/Set projection of the layer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.gcs = function (val) {
-    if (val === undefined) {
-      return m_gcs;
-    }
-    m_gcs = val;
-    m_this.modified();
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Transform layer to the reference layer gcs
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.transform = function (val) {
-    geo.transform.transformLayer(val, m_this, m_map.baseLayer());
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get/Set time range of the layer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.timeRange = function (val) {
-    if (val === undefined) {
-      return m_timeRange;
-    }
-    m_timeRange = val;
-    m_this.modified();
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get/Set source of the layer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.source = function (val) {
-    if (val === undefined) {
-      return m_source;
-    }
-    m_source = val;
-    m_this.modified();
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
    * Get/Set map of the layer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.map = function (val) {
-    if (val === undefined) {
-      return m_map;
-    }
-    m_map = val;
-    m_map.node().append(m_node);
-    m_this.modified();
-    return m_this;
+  this.map = function () {
+    return m_map;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -279,15 +286,6 @@ geo.layer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get viewport of the layer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.viewport = function () {
-    return [m_x, m_y, m_width, m_height];
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
    * Return last time data got changed
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -306,37 +304,6 @@ geo.layer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Return the modified time for the last draw call that did something
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.drawTime = function () {
-    return m_drawTime;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Run query and return results for it
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.query = function () {
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get/Set layer as the reference layer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.referenceLayer = function (val) {
-    if (val !== undefined) {
-      m_isReference = val;
-      m_this.modified();
-      return m_this;
-    }
-    return m_isReference;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
    * Get/Set if the layer has been initialized
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -350,21 +317,29 @@ geo.layer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Transform a point or array of points in GCS space to
-   * local space of the layer
+   * Transform coordinates from world coordinates into a local coordinate
+   * system specific to the underlying renderer.  This method is exposed
+   * to allow direct access the rendering context, but otherwise should
+   * not be called directly.  The default implementation is the identity
+   * operator.
    */
   ////////////////////////////////////////////////////////////////////////////
   this.toLocal = function (input) {
+    if (m_this._toLocalMatrix) {
+      geo.camera.applyTransform(m_this._toLocalMatrix, input);
+    }
     return input;
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Transform a point or array of points in local space to
-   * latitude-longitude space
+   * Transform coordinates from a local coordinate system to world coordinates.
    */
   ////////////////////////////////////////////////////////////////////////////
   this.fromLocal = function (input) {
+    if (m_this._fromLocalMatrix) {
+      geo.camera.applyTransform(m_this._fromLocalMatrix, input);
+    }
     return input;
   };
 
@@ -398,21 +373,18 @@ geo.layer = function (arg) {
       return m_this;
     }
 
-    // Create top level div for the layer
-    m_node = $(document.createElement("div"));
-    m_node.attr("id", m_name);
-    m_node.css("position", "absolute");
-
-    if (m_map) {
-      m_map.node().append(m_node);
-
-    }
+    m_map.node().append(m_node);
 
     /* Pass along the arguments, but not the map reference */
     var options = $.extend({}, arg);
     delete options.map;
-    // Share context if have valid one
-    if (m_canvas) {
+
+    if (m_rendererName === null) {
+      // if given a "null" renderer, then pass the map element as the
+      // canvas
+      m_renderer = null;
+      m_canvas = m_node;
+    } else if (m_canvas) { // Share context if have valid one
       m_renderer = geo.createRenderer(m_rendererName, m_this, m_canvas,
                                       options);
     } else {
@@ -422,10 +394,23 @@ geo.layer = function (arg) {
     }
 
     if (!m_this.active()) {
-      m_node.css("pointerEvents", "none");
+      m_node.css('pointerEvents', 'none');
     }
 
     m_initialized = true;
+
+    /// Bind events to handlers
+    m_this.geoOn(geo.event.resize, function (event) {
+      m_this._update({event: event});
+    });
+
+    m_this.geoOn(geo.event.pan, function (event) {
+      m_this._update({event: event});
+    });
+
+    m_this.geoOn(geo.event.zoom, function (event) {
+      m_this._update({event: event});
+    });
 
     return m_this;
   };
@@ -436,10 +421,12 @@ geo.layer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
-    m_renderer._exit();
+    m_this.geoOff();
+    if (m_renderer) {
+      m_renderer._exit();
+    }
     m_node.off();
     m_node.remove();
-    m_node = null;
     arg = {};
     m_canvas = null;
     m_renderer = null;
@@ -456,43 +443,55 @@ geo.layer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Respond to resize event
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._resize = function (x, y, w, h) {
-    m_x = x;
-    m_y = y;
-    m_width = w;
-    m_height = h;
-    m_node.width(w);
-    m_node.height(h);
-
-    m_this.modified();
-    m_this.geoTrigger(geo.event.resize,
-      {x: x, y: y, width: m_width, height: m_height});
-
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Return the width of the layer in pixels
+   * Return the width of the layer in pixels.
+   * **DEPRECIATED: use map.size instead.
    */
   ////////////////////////////////////////////////////////////////////////////
   this.width = function () {
-    return m_width;
+    return m_this.map().size().width;
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Return the height of the layer in pixels
+   * **DEPRECIATED: use map.size instead.
    */
   ////////////////////////////////////////////////////////////////////////////
   this.height = function () {
-    return m_height;
+    return m_this.map().size().height;
   };
 
-  return this;
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get or set the current layer opacity.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.opacity = function (opac) {
+    if (opac !== undefined) {
+      m_opacity = opac;
+      m_node.css('opacity', m_opacity);
+      return m_this;
+    }
+    return m_opacity;
+  };
+
+  if (arg.zIndex === undefined) {
+    arg.zIndex = m_map.children().length;
+  }
+  m_zIndex = arg.zIndex;
+
+  // Create top level div for the layer
+  m_node = $(document.createElement('div'));
+  m_node.attr('id', m_name);
+  m_node.css('position', 'absolute');
+  m_node.css('width', '100%');
+  m_node.css('height', '100%');
+  m_this.opacity(m_opacity);
+
+  // set the z-index
+  m_this.zIndex(m_zIndex);
+
+  return m_this;
 };
 
 /**
@@ -502,7 +501,7 @@ geo.layer = function (arg) {
  * @returns {number}
  */
 geo.layer.newLayerId = (function () {
-    "use strict";
+    'use strict';
     var currentId = 1;
     return function () {
       var id = currentId;
@@ -516,11 +515,11 @@ geo.layer.newLayerId = (function () {
  * General object specification for feature types.
  * @typedef geo.layer.spec
  * @type {object}
- * @property {string} [type="feature"] For feature compatibility
+ * @property {string} [type='feature'] For feature compatibility
  * with more than one kind of creatable layer
  * @property {object[]} [data=[]] The default data array to
  * apply to each feature if none exists
- * @property {string} [renderer="vgl"] The renderer to use
+ * @property {string} [renderer='vgl'] The renderer to use
  * @property {geo.feature.spec[]} [features=[]] Features
  * to add to the layer
  */
@@ -533,26 +532,26 @@ geo.layer.newLayerId = (function () {
  * @returns {geo.layer|null}
  */
 geo.layer.create = function (map, spec) {
-  "use strict";
+  'use strict';
 
   spec = spec || {};
 
   // add osmLayer later
-  spec.type = "feature";
-  if (spec.type !== "feature") {
-    console.warn("Unsupported layer type");
+  spec.type = 'feature';
+  if (spec.type !== 'feature') {
+    console.warn('Unsupported layer type');
     return null;
   }
 
-  spec.renderer = spec.renderer || "vgl";
-  if (spec.renderer !== "d3" &amp;&amp; spec.renderer !== "vgl") {
-    console.warn("Invalid renderer");
+  spec.renderer = spec.renderer || 'vgl';
+  if (spec.renderer !== 'd3' &amp;&amp; spec.renderer !== 'vgl') {
+    console.warn('Invalid renderer');
     return null;
   }
 
   var layer = map.createLayer(spec.type, spec);
   if (!layer) {
-    console.warn("Unable to create a layer");
+    console.warn('Unable to create a layer');
     return null;
   }
 
@@ -576,13 +575,13 @@ inherit(geo.layer, geo.sceneObject);
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.clock.html">clock</a></li><li><a href="geo.contourFeature.html">contourFeature</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.contourFeature.html">contourFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.renderer.html">renderer</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.util.ClusterGroup.html">ClusterGroup</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.mercator.html">mercator</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.camera.html">camera</a></li><li><a href="geo.choroplethFeature.html">choroplethFeature</a></li><li><a href="geo.clock.html">clock</a></li><li><a href="geo.contourFeature.html">contourFeature</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.choroplethFeature.html">choroplethFeature</a></li><li><a href="geo.gl.contourFeature.html">contourFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.svgWidget.html">svgWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.imageTile.html">imageTile</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.tile.html">tile</a></li><li><a href="geo.tileCache.html">tileCache</a></li><li><a href="geo.tileLayer.html">tileLayer</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.ClusterGroup.html">ClusterGroup</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.camera.html">camera</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.2</a> on Fri Aug 07 2015 10:52:03 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Sat Dec 19 2015 14:27:22 GMT-0500 (EST)
 </footer>
 
 <script> prettyPrint(); </script>

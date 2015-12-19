@@ -1,0 +1,19 @@
+#map.debug-border .geo-tile-container img {
+    box-sizing: inherit;
+    border: 4px solid rgba(0,0,0,0.25);
+}
+#map.debug-label .geo-tile-container:after {
+    content: attr(tile-reference);
+    position: absolute;
+    top: 5px;
+    left: 10px;
+    font-size: 30px;
+    color: black;
+}
+@keyframes imgfadein {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+#map.fade-image .geo-tile-container img {
+    animation: imgfadein 2s forwards;
+}

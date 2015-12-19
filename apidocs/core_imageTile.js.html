@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: core/imageTile.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: core/imageTile.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>(function () {
+  'use strict';
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * This class defines a tile that is part of a standard "image pyramid", such
+   * as an open street map tile set.  Every tile is uniquely indexed by a row,
+   * column, and zoom level.  The number of rows/columns at zoom level z is
+   * `2^z`, the number of pixels per tile is configurable.
+   *
+   * By default, this class assumes that images are fetch from the url, but
+   * subclasses may define additional rendering steps to produce the images
+   * before passing them off to the handlers.
+   *
+   * @class
+   * @param {Object} spec The tile specification object
+   *
+   * @param {Object} spec.index The global position of the tile
+   * @param {Number} spec.index.x The x-coordinate (usually the column number)
+   * @param {Number} spec.index.y The y-coordinate (usually the row number)
+   * @param {Number} spec.index.level The zoom level
+   *
+   * @param {Object?} spec.size The size of each tile
+   * @param {Number} [spec.size.x=256] Width in pixels
+   * @param {Number} [spec.size.y=256] Height in pixels
+   *
+   * @param {String} spec.url A url to the image
+   * @param {String} [spec.crossDomain='anonymous'] Image CORS attribute
+   *
+   * @param {Object} spec.overlap The size of overlap with neighboring tiles
+   * @param {Number} [spec.overlap.x=0]
+   * @param {Number} [spec.overlap.y=0]
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  geo.imageTile = function (spec) {
+    if (!(this instanceof geo.imageTile)) {
+      return new geo.imageTile(spec);
+    }
+
+    spec.size = spec.size || {x: 256, y: 256};
+    this._image = null;
+
+    // Cache the coordinate scaling
+    this._cors = spec.crossDomain || 'anonymous';
+
+    // Call superclass constructor
+    geo.tile.call(this, spec);
+
+    /**
+     * Read only accessor to the Image object used by the
+     * tile.  Note, this method does not gaurantee that the
+     * image data is available.  Use the promise interface
+     * to add asyncronous handlers.
+     * @returns {Image}
+     */
+    Object.defineProperty(this, 'image', {
+      get: function () { return this._image; }
+    });
+
+    /**
+     * Initiate the image request.
+     */
+    this.fetch = function () {
+      var defer;
+      if (!this._image) {
+        this._image = new Image(this.size.x, this.size.y);
+        // Only set the crossOrigin parameter if this is going across origins.
+        if (this._url.indexOf(':') >= 0 &amp;&amp; this._url.indexOf('/') >= 0 &amp;&amp;
+            this._url.indexOf(':') &lt; this._url.indexOf('/')) {
+          this._image.crossOrigin = this._cors;
+        }
+        defer = new $.Deferred();
+        this._image.onload = function () { defer.resolve(); };
+        this._image.onerror = function () { defer.reject(); };
+        this._image.src = this._url;
+
+        // attach a promise interface to `this`
+        defer.promise(this);
+      }
+      return this;
+    };
+
+    /**
+     * Set the opacity of the tile to 0 and gradually fade in
+     * over the given number of milliseconds.  This will also
+     * resolve the embedded promise interface.
+     * @param {number} duration the duration of the animation in ms
+     * @returns {this} chainable
+     */
+    this.fadeIn = function (duration) {
+      var promise = this.fetch(), defer = new $.Deferred();
+      $(this._image).css('display', 'none');
+      promise.then(function () {
+        $(this._image).fadeIn(duration, function () {
+          defer.resolve();
+        });
+      }.bind(this));
+      return defer.promise(this);
+    };
+
+    return this;
+  };
+
+  inherit(geo.imageTile, geo.tile);
+})();
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.camera.html">camera</a></li><li><a href="geo.choroplethFeature.html">choroplethFeature</a></li><li><a href="geo.clock.html">clock</a></li><li><a href="geo.contourFeature.html">contourFeature</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.choroplethFeature.html">choroplethFeature</a></li><li><a href="geo.gl.contourFeature.html">contourFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.svgWidget.html">svgWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.imageTile.html">imageTile</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.tile.html">tile</a></li><li><a href="geo.tileCache.html">tileCache</a></li><li><a href="geo.tileLayer.html">tileLayer</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.ClusterGroup.html">ClusterGroup</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.camera.html">camera</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Sat Dec 19 2015 14:27:22 GMT-0500 (EST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -29,10 +29,7 @@
 <header>
     
         <h2>
-            <span class="ancestors"><a href="geo.html">geo</a>.</span>
-        
-        mapInteractor
-        </h2>
+            <span class="ancestors"><a href="geo.html">geo</a>.</span>mapInteractor</h2>
         
     
 </header>
@@ -51,7 +48,10 @@
 
 
 <div class="description">
-    Create a new instance of mapInteractor
+    The mapInteractor class is responsible for handling raw events from the
+browser and interpreting them as map navigation interactions.  This class
+will call the navigation methods on the connected map, which will make
+modifications to the camera directly.
 </div>
 
 
@@ -95,7 +95,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line10">line 10</a>
+        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line13">line 13</a>
     </li></ul></dd>
     
 
@@ -224,7 +224,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line315">line 315</a>
+        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line339">line 339</a>
     </li></ul></dd>
     
 
@@ -324,7 +324,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line345">line 345</a>
+        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line371">line 371</a>
     </li></ul></dd>
     
 
@@ -429,7 +429,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_object.js.html">core/object.js</a>, <a href="core_object.js.html#line158">line 158</a>
+        <a href="core_object.js.html">core/object.js</a>, <a href="core_object.js.html#line166">line 166</a>
     </li></ul></dd>
     
 
@@ -511,7 +511,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line425">line 425</a>
+        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line451">line 451</a>
     </li></ul></dd>
     
 
@@ -593,7 +593,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line440">line 440</a>
+        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line466">line 466</a>
     </li></ul></dd>
     
 
@@ -675,7 +675,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line391">line 391</a>
+        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line417">line 417</a>
     </li></ul></dd>
     
 
@@ -757,7 +757,92 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line934">line 934</a>
+        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line1038">line 1038</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="_handleMouseClick"><span class="type-signature"></span>_handleMouseClick<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Handle event when a mouse click is detected.  A mouse click is a simulated
+event that occurs when the time between a mouse down and mouse up
+is less than the configured duration and (optionally) if no mousemove
+events were triggered in the interim.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line872">line 872</a>
     </li></ul></dd>
     
 
@@ -839,7 +924,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line539">line 539</a>
+        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line565">line 565</a>
     </li></ul></dd>
     
 
@@ -921,7 +1006,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line601">line 601</a>
+        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line642">line 642</a>
     </li></ul></dd>
     
 
@@ -1003,7 +1088,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line618">line 618</a>
+        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line672">line 672</a>
     </li></ul></dd>
     
 
@@ -1085,7 +1170,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line781">line 781</a>
+        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line853">line 853</a>
     </li></ul></dd>
     
 
@@ -1168,7 +1253,7 @@ Removes temporary bindings.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line742">line 742</a>
+        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line809">line 809</a>
     </li></ul></dd>
     
 
@@ -1250,7 +1335,7 @@ Removes temporary bindings.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line794">line 794</a>
+        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line895">line 895</a>
     </li></ul></dd>
     
 
@@ -1281,14 +1366,15 @@ Removes temporary bindings.
 
     
 
-    <h4 class="name" id="addDeferred"><span class="type-signature"></span>addDeferred<span class="signature">(defer)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="addPromise"><span class="type-signature"></span>addPromise<span class="signature">(promise)</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    Add a new deferred object preventing idle event handlers from being called.
+    Add a new promise object preventing idle event handlers from being called
+ until it is resolved.
 </div>
 
 
@@ -1324,13 +1410,13 @@ Removes temporary bindings.
 
         <tr>
             
-                <td class="name"><code>defer</code></td>
+                <td class="name"><code>promise</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">$.defer</span>
+<span class="param-type">Promise</span>
 
 
             
@@ -1340,7 +1426,7 @@ Removes temporary bindings.
 
             
 
-            <td class="description last">A jquery defered object</td>
+            <td class="description last">A promise object</td>
         </tr>
 
     
@@ -1361,7 +1447,7 @@ Removes temporary bindings.
     
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="geo.object.html#addDeferred">geo.object#addDeferred</a>
+        <a href="geo.object.html#addPromise">geo.object#addPromise</a>
     </li></ul></dd>
     
 
@@ -1386,7 +1472,7 @@ Removes temporary bindings.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_object.js.html">core/object.js</a>, <a href="core_object.js.html#line45">line 45</a>
+        <a href="core_object.js.html">core/object.js</a>, <a href="core_object.js.html#line47">line 47</a>
     </li></ul></dd>
     
 
@@ -1529,7 +1615,7 @@ Removes temporary bindings.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line521">line 521</a>
+        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line547">line 547</a>
     </li></ul></dd>
     
 
@@ -1633,7 +1719,7 @@ Removes temporary bindings.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line942">line 942</a>
+        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line1046">line 1046</a>
     </li></ul></dd>
     
 
@@ -1816,7 +1902,7 @@ Removes temporary bindings.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_object.js.html">core/object.js</a>, <a href="core_object.js.html#line122">line 122</a>
+        <a href="core_object.js.html">core/object.js</a>, <a href="core_object.js.html#line130">line 130</a>
     </li></ul></dd>
     
 
@@ -1977,7 +2063,7 @@ Removes temporary bindings.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_object.js.html">core/object.js</a>, <a href="core_object.js.html#line71">line 71</a>
+        <a href="core_object.js.html">core/object.js</a>, <a href="core_object.js.html#line75">line 75</a>
     </li></ul></dd>
     
 
@@ -2067,7 +2153,7 @@ Removes temporary bindings.
 
             
 
-            <td class="description last">An event from {geo.events}</td>
+            <td class="description last">An event from {geo.event}</td>
         </tr>
 
     
@@ -2136,7 +2222,7 @@ Removes temporary bindings.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_object.js.html">core/object.js</a>, <a href="core_object.js.html#line93">line 93</a>
+        <a href="core_object.js.html">core/object.js</a>, <a href="core_object.js.html#line97">line 97</a>
     </li></ul></dd>
     
 
@@ -2218,7 +2304,7 @@ Removes temporary bindings.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line961">line 961</a>
+        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line1065">line 1065</a>
     </li></ul></dd>
     
 
@@ -2349,7 +2435,7 @@ Removes temporary bindings.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line361">line 361</a>
+        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line387">line 387</a>
     </li></ul></dd>
     
 
@@ -2452,7 +2538,7 @@ Removes temporary bindings.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line952">line 952</a>
+        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line1056">line 1056</a>
     </li></ul></dd>
     
 
@@ -2490,7 +2576,8 @@ Removes temporary bindings.
 
 
 <div class="description">
-    Bind a handler that will be called once when all deferreds are resolved.
+    Bind a handler that will be called once when all internal promises are
+ resolved.
 </div>
 
 
@@ -2588,7 +2675,7 @@ Removes temporary bindings.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_object.js.html">core/object.js</a>, <a href="core_object.js.html#line29">line 29</a>
+        <a href="core_object.js.html">core/object.js</a>, <a href="core_object.js.html#line30">line 30</a>
     </li></ul></dd>
     
 
@@ -2744,7 +2831,7 @@ Removes temporary bindings.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line378">line 378</a>
+        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line404">line 404</a>
     </li></ul></dd>
     
 
@@ -2782,6 +2869,172 @@ Removes temporary bindings.
 |
 
 <span class="param-type">Object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="pause"><span class="type-signature"></span>pause<span class="signature">(value<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {bool|this}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Get or set the pause state of the interactor, which
+ignores all native mouse and keyboard events.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>value</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">bool</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The pause state to set or undefined to return the
+                       current state.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line1088">line 1088</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">bool</span>
+|
+
+<span class="param-type">this</span>
 
 
     </dd>
@@ -2930,7 +3183,7 @@ options are required for every event type. ::
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line994">line 994</a>
+        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line1116">line 1116</a>
     </li></ul></dd>
     
 
@@ -3031,7 +3284,7 @@ Not to be user callable.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line863">line 863</a>
+        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line967">line 967</a>
     </li></ul></dd>
     
 
@@ -3120,7 +3373,7 @@ Not to be user callable.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line970">line 970</a>
+        <a href="core_mapInteractor.js.html">core/mapInteractor.js</a>, <a href="core_mapInteractor.js.html#line1074">line 1074</a>
     </li></ul></dd>
     
 
@@ -3162,13 +3415,13 @@ Not to be user callable.
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.clock.html">clock</a></li><li><a href="geo.contourFeature.html">contourFeature</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.contourFeature.html">contourFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.renderer.html">renderer</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.util.ClusterGroup.html">ClusterGroup</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.mercator.html">mercator</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.camera.html">camera</a></li><li><a href="geo.choroplethFeature.html">choroplethFeature</a></li><li><a href="geo.clock.html">clock</a></li><li><a href="geo.contourFeature.html">contourFeature</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.choroplethFeature.html">choroplethFeature</a></li><li><a href="geo.gl.contourFeature.html">contourFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.svgWidget.html">svgWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.imageTile.html">imageTile</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.tile.html">tile</a></li><li><a href="geo.tileCache.html">tileCache</a></li><li><a href="geo.tileLayer.html">tileLayer</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.ClusterGroup.html">ClusterGroup</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.camera.html">camera</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.2</a> on Fri Aug 07 2015 10:52:03 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Sat Dec 19 2015 14:27:24 GMT-0500 (EST)
 </footer>
 
 <script> prettyPrint(); </script>

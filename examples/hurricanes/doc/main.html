@@ -4,7 +4,7 @@
 <head>
   <title>main.js</title>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
   <link rel="stylesheet" media="all" href="docco.css" />
 </head>
 <body>
@@ -32,9 +32,9 @@
             </div>
             
             <div class="content"><div class='highlight'><pre>$(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
-<span class="hljs-pi">  'use strict'</span>;
+<span class="hljs-meta">  'use strict'</span>;
 
-  <span class="hljs-keyword">var</span> map, layer, feature, ui, save, infoData = <span class="hljs-literal">null</span>;
+  <span class="hljs-keyword">var</span> map, layer, feature, ui, save, infoData = <span class="hljs-literal">null</span>, canvas;
 
   <span class="hljs-keyword">var</span> cscale = d3.scale.ordinal()
     .range([
@@ -79,7 +79,7 @@
   <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">category</span>(<span class="hljs-params">d</span>) </span>{
     <span class="hljs-keyword">var</span> p = d;
     <span class="hljs-keyword">if</span> (p &lt;= <span class="hljs-number">0</span>) {
-      <span class="hljs-keyword">return</span> -<span class="hljs-number">1</span>; <span class="hljs-comment">// invalid data</span>
+      <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>; <span class="hljs-comment">// invalid data</span>
     }
     <span class="hljs-keyword">if</span> (p &lt; <span class="hljs-number">920</span>) {
       <span class="hljs-keyword">return</span> <span class="hljs-number">5</span>;
@@ -109,12 +109,16 @@
       <span class="hljs-keyword">return</span>;
     }
 
-    ui.canvas().selectAll(<span class="hljs-string">'.app-info-box'</span>).remove();
+    canvas = d3.select(ui.canvas()).select(<span class="hljs-string">'svg.dynamic-content'</span>)
+      .attr(<span class="hljs-string">'width'</span>, $(<span class="hljs-built_in">window</span>).width())
+      .attr(<span class="hljs-string">'height'</span>, $(<span class="hljs-built_in">window</span>).height());
+
+    canvas.selectAll(<span class="hljs-string">'.app-info-box'</span>).remove();
     <span class="hljs-keyword">var</span> width = <span class="hljs-number">300</span>, height = <span class="hljs-number">600</span>;
     <span class="hljs-keyword">var</span> mapWidth = map.node().width();
     <span class="hljs-keyword">var</span> mapHeight = map.node().height();
 
-    <span class="hljs-keyword">var</span> group = ui.canvas().append(<span class="hljs-string">'g'</span>).attr(<span class="hljs-string">'class'</span>, <span class="hljs-string">'app-info-box'</span>);
+    <span class="hljs-keyword">var</span> group = canvas.append(<span class="hljs-string">'g'</span>).attr(<span class="hljs-string">'class'</span>, <span class="hljs-string">'app-info-box'</span>);
 
     group.attr(
       <span class="hljs-string">'transform'</span>,
@@ -223,11 +227,16 @@
     <span class="hljs-keyword">var</span> mapHeight = map.node().height() - <span class="hljs-number">15</span>;
     <span class="hljs-keyword">var</span> width = <span class="hljs-number">300</span>;
     <span class="hljs-keyword">var</span> height = <span class="hljs-number">100</span>;
-    ui.canvas().selectAll(<span class="hljs-string">'.app-histogram'</span>).remove();
-    <span class="hljs-keyword">var</span> group = ui.canvas().append(<span class="hljs-string">'g'</span>).attr(<span class="hljs-string">'class'</span>, <span class="hljs-string">'app-histogram'</span>);
+
+    canvas = d3.select(ui.canvas()).select(<span class="hljs-string">'svg.dynamic-content'</span>)
+      .attr(<span class="hljs-string">'width'</span>, $(<span class="hljs-built_in">window</span>).width())
+      .attr(<span class="hljs-string">'height'</span>, $(<span class="hljs-built_in">window</span>).height());
+
+    canvas.selectAll(<span class="hljs-string">'.app-histogram'</span>).remove();
+    <span class="hljs-keyword">var</span> group = canvas.append(<span class="hljs-string">'g'</span>).attr(<span class="hljs-string">'class'</span>, <span class="hljs-string">'app-histogram'</span>);
 
     <span class="hljs-keyword">var</span> x = d3.scale.linear()
-      .domain([-<span class="hljs-number">0.5</span>, <span class="hljs-number">5.5</span>])
+      .domain([<span class="hljs-number">-0.5</span>, <span class="hljs-number">5.5</span>])
       .range([<span class="hljs-number">15</span> + margin.left, <span class="hljs-number">15</span> + margin.left + width]);
 
     <span class="hljs-keyword">var</span> cats = [];
@@ -475,7 +484,7 @@
             </div>
             
             <div class="content"><div class='highlight'><pre>  ui = map.createLayer(<span class="hljs-string">'ui'</span>);
-  ui.createWidget(<span class="hljs-string">'legend'</span>)
+  ui.createWidget(<span class="hljs-string">'legend'</span>, {position: {right: <span class="hljs-number">20</span>, top: <span class="hljs-number">10</span>}})
     .categories([
       {
         name: <span class="hljs-string">'Category 5'</span>,
@@ -525,7 +534,10 @@
         },
         type: <span class="hljs-string">'line'</span>
       }
-    ]);</pre></div></div>
+    ]);
+
+  canvas = d3.select(ui.canvas()).append(<span class="hljs-string">'svg'</span>)
+    .attr(<span class="hljs-string">'class'</span>, <span class="hljs-string">'dynamic-content'</span>);</pre></div></div>
             
         </li>
         

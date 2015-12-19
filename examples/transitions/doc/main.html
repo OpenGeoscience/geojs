@@ -4,7 +4,7 @@
 <head>
   <title>main.js</title>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
   <link rel="stylesheet" media="all" href="docco.css" />
 </head>
 <body>
@@ -32,7 +32,7 @@
             </div>
             
             <div class="content"><div class='highlight'><pre>$(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
-<span class="hljs-pi">  'use strict'</span>;</pre></div></div>
+<span class="hljs-meta">  'use strict'</span>;</pre></div></div>
             
         </li>
         
@@ -85,7 +85,7 @@
             
             <div class="content"><div class='highlight'><pre>  $(<span class="hljs-string">'#pan-to-london'</span>).click(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
     map.transition({
-      center: {x: -<span class="hljs-number">0.1275</span>, y: <span class="hljs-number">51.5072</span>},
+      center: {x: <span class="hljs-number">-0.1275</span>, y: <span class="hljs-number">51.5072</span>},
       duration: <span class="hljs-number">2000</span>
     });
   });
@@ -95,7 +95,7 @@
       center: {x: <span class="hljs-number">37.6167</span>, y: <span class="hljs-number">55.7500</span>},
       duration: <span class="hljs-number">2000</span>,
       ease: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">t</span>) </span>{
-        <span class="hljs-keyword">return</span> <span class="hljs-built_in">Math</span>.pow(<span class="hljs-number">2.0</span>, -<span class="hljs-number">10.0</span> * t) * <span class="hljs-built_in">Math</span>.sin((t - <span class="hljs-number">0.075</span>) * (<span class="hljs-number">2.0</span> * <span class="hljs-built_in">Math</span>.PI) / <span class="hljs-number">0.3</span>) + <span class="hljs-number">1.0</span>;
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">Math</span>.pow(<span class="hljs-number">2.0</span>, <span class="hljs-number">-10.0</span> * t) * <span class="hljs-built_in">Math</span>.sin((t - <span class="hljs-number">0.075</span>) * (<span class="hljs-number">2.0</span> * <span class="hljs-built_in">Math</span>.PI) / <span class="hljs-number">0.3</span>) + <span class="hljs-number">1.0</span>;
       }
     });
   });

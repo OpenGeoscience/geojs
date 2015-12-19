@@ -4,7 +4,7 @@
 <head>
   <title>main.js</title>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
   <link rel="stylesheet" media="all" href="docco.css" />
 </head>
 <body>
@@ -32,7 +32,7 @@
             </div>
             
             <div class="content"><div class='highlight'><pre>$(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
-<span class="hljs-pi">  'use strict'</span>;</pre></div></div>
+<span class="hljs-meta">  'use strict'</span>;</pre></div></div>
             
         </li>
         
@@ -137,7 +137,7 @@ properties.</p>
             <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> map = geo.map({
     node: <span class="hljs-string">'#map'</span>,
     center: {
-      x: -<span class="hljs-number">98.0</span>,
+      x: <span class="hljs-number">-98.0</span>,
       y: <span class="hljs-number">39.5</span>
     },
     zoom: <span class="hljs-number">4.9</span>
@@ -159,7 +159,7 @@ properties.</p>
             <div class="content"><div class='highlight'><pre>  map.createLayer(
     <span class="hljs-string">'osm'</span>,
     {
-      tileUrl: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+      url: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
         <span class="hljs-keyword">return</span> <span class="hljs-string">'white.jpg'</span>;
       }
     }
@@ -236,7 +236,7 @@ properties.</p>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> data = d3.range(<span class="hljs-number">2</span>).map(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">i</span>) </span>{
     <span class="hljs-keyword">return</span> {
-      x: -<span class="hljs-number">95</span>,             <span class="hljs-comment">// longitude</span>
+      x: <span class="hljs-number">-95</span>,             <span class="hljs-comment">// longitude</span>
       y: <span class="hljs-number">39.5</span> + <span class="hljs-number">4.5</span> * i,  <span class="hljs-comment">// latitude</span>
       c: vglColor,        <span class="hljs-comment">// fill color</span>
       opacity: <span class="hljs-number">0.1</span>        <span class="hljs-comment">// fill opacity</span>
@@ -259,7 +259,7 @@ properties.</p>
             
             <div class="content"><div class='highlight'><pre>  data = d3.range(<span class="hljs-number">2</span>).map(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">i</span>) </span>{
     <span class="hljs-keyword">return</span> {
-      x: -<span class="hljs-number">101</span>,            <span class="hljs-comment">// longitude</span>
+      x: <span class="hljs-number">-101</span>,            <span class="hljs-comment">// longitude</span>
       y: <span class="hljs-number">39.5</span> + <span class="hljs-number">4.5</span> * i,  <span class="hljs-comment">// latitude</span>
       c: svgColor,        <span class="hljs-comment">// fill color</span>
       opacity: <span class="hljs-number">0.1</span>        <span class="hljs-comment">// fill opacity</span>

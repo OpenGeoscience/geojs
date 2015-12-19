@@ -4,7 +4,7 @@
 <head>
   <title>main.js</title>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
   <link rel="stylesheet" media="all" href="docco.css" />
 </head>
 <body>
@@ -32,7 +32,7 @@
             </div>
             
             <div class="content"><div class='highlight'><pre>$(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
-<span class="hljs-pi">  'use strict'</span>;</pre></div></div>
+<span class="hljs-meta">  'use strict'</span>;</pre></div></div>
             
         </li>
         
@@ -235,10 +235,10 @@ in the css.</p>
     }
     <span class="hljs-keyword">var</span> alpha = <span class="hljs-number">0.1</span>;
     <span class="hljs-keyword">var</span> xScale = d3.scale.linear()
-      .domain([-<span class="hljs-number">6</span>, <span class="hljs-number">6</span>])
+      .domain([<span class="hljs-number">-6</span>, <span class="hljs-number">6</span>])
       .range([width * <span class="hljs-number">3.3</span>, width * <span class="hljs-number">4</span>]);
     <span class="hljs-keyword">var</span> yScale = d3.scale.linear()
-      .domain([-<span class="hljs-number">6</span>, <span class="hljs-number">6</span>])
+      .domain([<span class="hljs-number">-6</span>, <span class="hljs-number">6</span>])
       .range([width * <span class="hljs-number">0.7</span>, <span class="hljs-number">0</span>]);
     <span class="hljs-keyword">var</span> spiral = d3.svg.line()
       .x(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{
@@ -334,7 +334,7 @@ widths and point radii.</p>
             <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> map = geo.map({
     node: <span class="hljs-string">'#map'</span>,
     center: {
-      x: -<span class="hljs-number">98.0</span>,
+      x: <span class="hljs-number">-98.0</span>,
       y: <span class="hljs-number">39.5</span>
     },
     zoom: <span class="hljs-number">4</span>

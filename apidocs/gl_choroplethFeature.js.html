@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: gl/choroplethFeature.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: gl/choroplethFeature.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>//////////////////////////////////////////////////////////////////////////////
+/**
+ * Create a new instance of choroplethFeature
+ *
+ * @class
+ * @extends geo.choroplethFeature
+ * @returns {geo.gl.choroplethFeature}
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.gl.choroplethFeature = function (arg) {
+  'use strict';
+
+  if (!(this instanceof geo.gl.choroplethFeature)) {
+    return new geo.gl.choroplethFeature(arg);
+  }
+  arg = arg || {};
+  geo.choroplethFeature.call(this, arg);
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  var m_this = this,
+      m_gl_polygons = null,
+      s_exit = this._exit,
+      s_init = this._init,
+      s_update = this._update;
+
+  /* Create the choropleth.  This calls the base class to generate the contours,
+   * into the various gl uniforms and buffers.
+   */
+  function createGLChoropleth() {
+    return m_this.createChoropleth();
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Initialize
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._init = function (arg) {
+    s_init.call(m_this, arg);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Build
+   *
+   * @override
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._build = function () {
+    m_this.buildTime().modified();
+    return (m_gl_polygons = createGLChoropleth());
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Update
+   *
+   * @override
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._update = function () {
+    s_update.call(m_this);
+    if (m_this.dataTime().getMTime() >= m_this.buildTime().getMTime() ||
+        m_this.updateTime().getMTime() &lt;= m_this.getMTime()) {
+      m_this._wipePolygons();
+      m_this._build();
+    }
+    m_this.updateTime().modified();
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Destroy Polygon Sub-Features
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._wipePolygons = function () {
+    if (m_gl_polygons) {
+      m_gl_polygons.map(function (polygon) {
+        return polygon._exit();
+      });
+    }
+    m_gl_polygons = null;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Destroy
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._exit = function () {
+    m_this._wipePolygons();
+    s_exit();
+  };
+
+  this._init(arg);
+  return this;
+};
+
+inherit(geo.gl.choroplethFeature, geo.choroplethFeature);
+
+// Now register it
+geo.registerFeature('vgl', 'choropleth', geo.gl.choroplethFeature);
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.camera.html">camera</a></li><li><a href="geo.choroplethFeature.html">choroplethFeature</a></li><li><a href="geo.clock.html">clock</a></li><li><a href="geo.contourFeature.html">contourFeature</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.choroplethFeature.html">choroplethFeature</a></li><li><a href="geo.gl.contourFeature.html">contourFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.svgWidget.html">svgWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.imageTile.html">imageTile</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.tile.html">tile</a></li><li><a href="geo.tileCache.html">tileCache</a></li><li><a href="geo.tileLayer.html">tileLayer</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.ClusterGroup.html">ClusterGroup</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.camera.html">camera</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Sat Dec 19 2015 14:27:22 GMT-0500 (EST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

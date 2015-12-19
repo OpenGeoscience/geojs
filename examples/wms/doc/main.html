@@ -4,7 +4,7 @@
 <head>
   <title>main.js</title>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
   <link rel="stylesheet" media="all" href="docco.css" />
 </head>
 <body>
@@ -32,7 +32,7 @@
             </div>
             
             <div class="content"><div class='highlight'><pre>$(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
-<span class="hljs-pi">  'use strict'</span>;</pre></div></div>
+<span class="hljs-meta">  'use strict'</span>;</pre></div></div>
             
         </li>
         
@@ -50,7 +50,7 @@
             <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> map = geo.map({
     node: <span class="hljs-string">'#map'</span>,
     zoom: <span class="hljs-number">4</span>,
-    center: {x: -<span class="hljs-number">98.0</span>, y: <span class="hljs-number">39.5</span>}
+    center: {x: <span class="hljs-number">-98.0</span>, y: <span class="hljs-number">39.5</span>}
   });</pre></div></div>
             
         </li>
@@ -66,7 +66,7 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> osm = map.createLayer(<span class="hljs-string">'osm'</span>,{
+            <div class="content"><div class='highlight'><pre>  map.createLayer(<span class="hljs-string">'osm'</span>, {
     baseUrl: <span class="hljs-string">'http://otile1.mqcdn.com/tiles/1.0.0/sat'</span>
   });</pre></div></div>
             
@@ -83,7 +83,12 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> wms = map.createLayer(<span class="hljs-string">'osm'</span>);</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> wms = map.createLayer(<span class="hljs-string">'osm'</span>, {keepLower: <span class="hljs-literal">false</span>, attribution: <span class="hljs-literal">null</span>});
+
+  <span class="hljs-keyword">var</span> projection = <span class="hljs-string">'EPSG:3857'</span>;
+
+  wms.url(
+    <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">x, y, zoom</span>) </span>{</pre></div></div>
             
         </li>
         
@@ -94,15 +99,12 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-5">&#182;</a>
               </div>
-              <p>Set the geographic coordinate system for the layer to web mercator (EPSG:3857)</p>
+              <p>Compute the bounding box</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> projection = <span class="hljs-string">'EPSG:3857'</span>;
-  wms.gcs(projection);
-
-  wms.tileUrl(
-    <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">zoom, x, y</span>) </span>{</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">var</span> bb = wms.gcsTileBounds({x: x, y: y, level: zoom}, projection);
+      <span class="hljs-keyword">var</span> bbox_mercator = bb.left + <span class="hljs-string">','</span> + bb.bottom + <span class="hljs-string">','</span> + bb.right + <span class="hljs-string">','</span> + bb.top;</pre></div></div>
             
         </li>
         
@@ -112,28 +114,6 @@
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-6">&#182;</a>
-              </div>
-              <p>Compute the bounding box</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">var</span> xLowerLeft = geo.mercator.tilex2long(x, zoom);
-      <span class="hljs-keyword">var</span> yLowerLeft = geo.mercator.tiley2lat(y + <span class="hljs-number">1</span>, zoom);
-      <span class="hljs-keyword">var</span> xUpperRight = geo.mercator.tilex2long(x + <span class="hljs-number">1</span>, zoom);
-      <span class="hljs-keyword">var</span> yUpperRight = geo.mercator.tiley2lat(y, zoom);
-
-      <span class="hljs-keyword">var</span> sw = geo.mercator.ll2m(xLowerLeft, yLowerLeft, <span class="hljs-literal">true</span>);
-      <span class="hljs-keyword">var</span> ne = geo.mercator.ll2m(xUpperRight, yUpperRight, <span class="hljs-literal">true</span>);
-      <span class="hljs-keyword">var</span> bbox_mercator = sw.x + <span class="hljs-string">','</span> + sw.y + <span class="hljs-string">','</span> + ne.x + <span class="hljs-string">','</span> + ne.y;</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-7">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-7">&#182;</a>
               </div>
               <p>Set the WMS server parameters</p>
 
@@ -152,9 +132,22 @@
         <span class="hljs-string">'TRANSPARENT'</span>: <span class="hljs-literal">true</span>,
         <span class="hljs-string">'SRS'</span>: projection,
         <span class="hljs-string">'TILED'</span>: <span class="hljs-literal">true</span>
-      };
+      };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>OpenGeo Demo Web Map Service</p>
 
-      <span class="hljs-keyword">var</span> baseUrl = <span class="hljs-string">'http://demo.boundlessgeo.com/geoserver/ows'</span>;  <span class="hljs-comment">// OpenGeo Demo Web Map Service</span>
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">var</span> baseUrl = <span class="hljs-string">'http://demo.boundlessgeo.com/geoserver/ows'</span>;
       <span class="hljs-keyword">return</span> baseUrl + <span class="hljs-string">'?'</span> + $.param(params);
     }
   );

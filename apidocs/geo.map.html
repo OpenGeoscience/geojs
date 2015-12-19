@@ -29,10 +29,7 @@
 <header>
     
         <h2>
-            <span class="ancestors"><a href="geo.html">geo</a>.</span>
-        
-        map
-        </h2>
+            <span class="ancestors"><a href="geo.html">geo</a>.</span>map</h2>
         
     
 </header>
@@ -44,36 +41,20 @@
 
     
 
-    <h4 class="name" id="map"><span class="type-signature"></span>new map<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="geo.map.html">geo.map</a>}</span></h4>
+    <h4 class="name" id="map"><span class="type-signature"></span>new map<span class="signature">(node, gcs<span class="signature-attributes">opt</span>, maxZoom<span class="signature-attributes">opt</span>, ingcs<span class="signature-attributes">opt</span>, unitsPerPixel<span class="signature-attributes">opt</span>, maxBounds<span class="signature-attributes">nullable</span>, zoom<span class="signature-attributes">opt</span>, center<span class="signature-attributes">nullable</span>, width<span class="signature-attributes">nullable</span>, height<span class="signature-attributes">nullable</span>, min<span class="signature-attributes">opt</span>, max<span class="signature-attributes">opt</span>, discreteZoom<span class="signature-attributes">opt</span>, camera<span class="signature-attributes">nullable</span>, interactor<span class="signature-attributes">nullable</span>, clock<span class="signature-attributes">nullable</span>, autoResize<span class="signature-attributes">opt</span>, clampBoundsX<span class="signature-attributes">opt</span>, clampBoundsY<span class="signature-attributes">opt</span>, clampZoom<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="geo.map.html">geo.map</a>}</span></h4>
 
     
 
 
 
 <div class="description">
-    Create a new instance of class map.
+    Creates a new map object
 
-Creation tags a dictionary of arguments, which can include:
- center: {x: (center x value), y: (center y value)}
- gcs:
- uigcs:
- node:
- layers:
- zoom: (number) - initial zoom level
- min: (number) - minimum zoom level
- max: (number) - maximum zoom level
- width:
- height:
- parallelProjection: (bool) - true to use parallel projection, false to use
-     perspective.
- discreteZoom: (bool) - true to only allow integer zoom levels, false to
-     allow any zoom level.
- autoResize:
- clampBounds:
- interactor:
- clock:
-
-Creates a new map inside of the given HTML layer (Typically DIV)
+Map coordinates for default world map, where c = half circumference at
+equator in meters, o = origin:
+  (-c, c) + o                   (c, c) + o
+           (center.x, center.y) + o            <-- center of viewport
+  (-c, -c) + o                  (c, -c) + o
 </div>
 
 
@@ -82,6 +63,1112 @@ Creates a new map inside of the given HTML layer (Typically DIV)
 
 
 
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>node</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">DOM selector for the map container
+
+*** Required when using a domain/CS different from OSM ***</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>gcs</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type"><a href="geo.transform.html">geo.transform</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    'EPSG:3857'
+                
+                </td>
+            
+
+            <td class="description last">The main coordinate system of the map</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>maxZoom</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    16
+                
+                </td>
+            
+
+            <td class="description last">The maximum zoom level</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ingcs</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type"><a href="geo.transform.html">geo.transform</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    'EPSG:4326'
+                
+                </td>
+            
+
+            <td class="description last">The default coordinate system of interface calls.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>unitsPerPixel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    156543
+                
+                </td>
+            
+
+            <td class="description last">GCS to pixel unit scaling at zoom 0
+  (i.e. meters per pixel or degrees per pixel).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>maxBounds</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">The maximum visable map bounds
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>left</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    -20037508
+                
+                </td>
+            
+
+            <td class="description last">The left bound</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>right</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    20037508
+                
+                </td>
+            
+
+            <td class="description last">The right bound</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>bottom</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    -20037508
+                
+                </td>
+            
+
+            <td class="description last">The bottom bound</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>top</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    20037508
+                
+                </td>
+            
+
+            <td class="description last">The top bound
+
+*** Initial view ***</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>zoom</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    4
+                
+                </td>
+            
+
+            <td class="description last">Initial zoom</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>center</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">Map center
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>x</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    0
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>y</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    0
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>width</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">The map width (default node width)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>height</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">The map height (default node height)
+
+*** Navigation ***</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>min</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    0
+                
+                </td>
+            
+
+            <td class="description last">Minimum zoom level (though fitting to the viewport
+  may make it so this is smaller than the smallest possible value)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>max</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    16
+                
+                </td>
+            
+
+            <td class="description last">Maximum zoom level</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>discreteZoom</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+
+            <td class="description last">True to only allow integer zoom
+  levels.  False for any zoom level.
+
+*** Advanced parameters ***</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>camera</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="geo.camera.html">geo.camera</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">The camera to control the view</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>interactor</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="geo.mapInteractor.html">geo.mapInteractor</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">The UI event handler</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>clock</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="geo.clock.html">geo.clock</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">The clock used to synchronize time events</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>autoResize</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    true
+                
+                </td>
+            
+
+            <td class="description last">Adjust map size on window resize</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>clampBoundsX</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+
+            <td class="description last">Prevent panning outside of the
+  maximum bounds in the horizontal direction.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>clampBoundsY</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    true
+                
+                </td>
+            
+
+            <td class="description last">Prevent panning outside of the
+  maximum bounds in the vertical direction.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>clampZoom</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    true
+                
+                </td>
+            
+
+            <td class="description last">Prevent zooming out so that the map area
+  is smaller than the window.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -117,7 +1204,7 @@ Creates a new map inside of the given HTML layer (Typically DIV)
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line31">line 31</a>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line61">line 61</a>
     </li></ul></dd>
     
 
@@ -185,6 +1272,73 @@ Creates a new map inside of the given HTML layer (Typically DIV)
 
     
 
+    
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+<h4 class="name" id="layers"><span class="type-signature"></span>layers<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Get the layers contained in the map.
+Alias of <code>geo.sceneObject.children</code>.
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line1152">line 1152</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
     
 
     
@@ -296,7 +1450,7 @@ of the map will result in returning null.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line1118">line 1118</a>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line1425">line 1425</a>
     </li></ul></dd>
     
 
@@ -486,7 +1640,7 @@ of the map will result in returning null.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line592">line 592</a>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line669">line 669</a>
     </li></ul></dd>
     
 
@@ -568,7 +1722,7 @@ of the map will result in returning null.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line617">line 617</a>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line684">line 684</a>
     </li></ul></dd>
     
 
@@ -686,14 +1840,14 @@ of the map will result in returning null.
 
     
 
-    <h4 class="name" id="addDeferred"><span class="type-signature"></span>addDeferred<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="addPromise"><span class="type-signature"></span>addPromise<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    Override object.addDeferred to propagate up the scene tree.
+    Override object.addPromise to propagate up the scene tree.
 </div>
 
 
@@ -717,7 +1871,7 @@ of the map will result in returning null.
     
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="geo.sceneObject.html#addDeferred">geo.sceneObject#addDeferred</a>
+        <a href="geo.sceneObject.html#addPromise">geo.sceneObject#addPromise</a>
     </li></ul></dd>
     
 
@@ -773,159 +1927,7 @@ of the map will result in returning null.
 
     
 
-    <h4 class="name" id="baseLayer"><span class="type-signature"></span>baseLayer<span class="signature">(baseLayer)</span><span class="type-signature"> &rarr; {<a href="geo.map.html">geo.map</a>|<a href="geo.layer.html">geo.layer</a>}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Sets or gets base layer for this map
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>baseLayer</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="geo.layer.html">geo.layer</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">optional</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line497">line 497</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="geo.map.html">geo.map</a></span>
-|
-
-<span class="param-type"><a href="geo.layer.html">geo.layer</a></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="bounds"><span class="type-signature"></span>bounds<span class="signature">(bds<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="geo.html#.geoBounds">geo.geoBounds</a>}</span></h4>
+    <h4 class="name" id="bounds"><span class="type-signature"></span>bounds<span class="signature">(bds<span class="signature-attributes">opt</span>, gcs<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="geo.html#.geoBounds">geo.geoBounds</a>}</span></h4>
 
     
 
@@ -1004,6 +2006,45 @@ case, the actual new bounds will be returned by this function.
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>gcs</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type"><a href="geo.transform.html">geo.transform</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">undefined to use the interface gcs,
+   null to use the map gcs, or any other transform.  If setting the
+   bounds, they are converted from this gcs to the map projection.  The
+   returned bounds are converted from the map projection to this gcs.</td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -1041,7 +2082,7 @@ case, the actual new bounds will be returned by this function.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line942">line 942</a>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line1007">line 1007</a>
     </li></ul></dd>
     
 
@@ -1094,15 +2135,17 @@ case, the actual new bounds will be returned by this function.
 
     
 
-    <h4 class="name" id="center"><span class="type-signature"></span>center<span class="signature">(coordinates)</span><span class="type-signature"> &rarr; {Object|<a href="geo.map.html">geo.map</a>}</span></h4>
+    <h4 class="name" id="boundsFromZoomAndCenter"><span class="type-signature"></span>boundsFromZoomAndCenter<span class="signature">(zoom, center, gcs<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="geo.html#.geoBounds">geo.geoBounds</a>}</span></h4>
 
     
 
 
 
 <div class="description">
-    Set center of the map to the given geographic coordinates, or get the
-current center.  Uses bare objects {x: 0, y: 0}.
+    Get the bounds that will be displayed with the given zoom and center.
+
+Note: the bounds may not have the requested zoom and center due to map
+restrictions.
 </div>
 
 
@@ -1126,6 +2169,8 @@ current center.  Uses bare objects {x: 0, y: 0}.
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
         
 
@@ -1138,23 +2183,99 @@ current center.  Uses bare objects {x: 0, y: 0}.
 
         <tr>
             
-                <td class="name"><code>coordinates</code></td>
+                <td class="name"><code>zoom</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Object</span>
+<span class="param-type">number</span>
 
 
             
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
 
             
 
-            <td class="description last"></td>
+            <td class="description last">The requested zoom level</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>center</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="geo.html#.geoPosition">geo.geoPosition</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The requested center</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>gcs</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type"><a href="geo.transform.html">geo.transform</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">undefined to use the interface gcs,
+   null to use the map gcs, or any other transform.</td>
         </tr>
 
     
@@ -1195,7 +2316,306 @@ current center.  Uses bare objects {x: 0, y: 0}.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line258">line 258</a>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line1096">line 1096</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="geo.html#.geoBounds">geo.geoBounds</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="camera"><span class="type-signature"></span>camera<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="geo.camera.html">geo.camera</a>}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Get the camera
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line181">line 181</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="geo.camera.html">geo.camera</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="center"><span class="type-signature"></span>center<span class="signature">(coordinates, gcs<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Object|<a href="geo.map.html">geo.map</a>}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Set center of the map to the given geographic coordinates, or get the
+current center.  Uses bare objects {x: 0, y: 0}.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>coordinates</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>gcs</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type"><a href="geo.transform.html">geo.transform</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">undefined to use the interface gcs,
+   null to use the map gcs, or any other transform.  If setting the
+   center, they are converted from this gcs to the map projection.  The
+   returned center are converted from the map projection to this gcs.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line328">line 328</a>
     </li></ul></dd>
     
 
@@ -1385,7 +2805,7 @@ current center.  Uses bare objects {x: 0, y: 0}.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line701">line 701</a>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line768">line 768</a>
     </li></ul></dd>
     
 
@@ -1516,7 +2936,7 @@ current center.  Uses bare objects {x: 0, y: 0}.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line316">line 316</a>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line359">line 359</a>
     </li></ul></dd>
     
 
@@ -1665,7 +3085,7 @@ current center.  Uses bare objects {x: 0, y: 0}.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line353">line 353</a>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line388">line 388</a>
     </li></ul></dd>
     
 
@@ -1814,7 +3234,7 @@ current center.  Uses bare objects {x: 0, y: 0}.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line1011">line 1011</a>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line1132">line 1132</a>
     </li></ul></dd>
     
 
@@ -1868,14 +3288,16 @@ current center.  Uses bare objects {x: 0, y: 0}.
 
     
 
-    <h4 class="name" id="displayToGcs"><span class="type-signature"></span>displayToGcs<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="displayToGcs"><span class="type-signature"></span>displayToGcs<span class="signature">(c, gcs<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {object}</span></h4>
 
     
 
 
 
 <div class="description">
-    Convert from display to latitude longitude coordinates
+    Convert from display to gcs coordinates
+
+   displayToWorld | worldToGcs
 </div>
 
 
@@ -1884,6 +3306,241 @@ current center.  Uses bare objects {x: 0, y: 0}.
 
 
 
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>c</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The input display coordinate to convert
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>x</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>y</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>z</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    0
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>gcs</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type"><a href="geo.transform.html">geo.transform</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">undefined to use the interface gcs,
+   null to use the map gcs, or any other transform.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -1919,7 +3576,7 @@ current center.  Uses bare objects {x: 0, y: 0}.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line466">line 466</a>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line590">line 590</a>
     </li></ul></dd>
     
 
@@ -1942,6 +3599,321 @@ current center.  Uses bare objects {x: 0, y: 0}.
 
 
 
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    GCS space coordinates
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="displayToWorld"><span class="type-signature"></span>displayToWorld<span class="signature">(c)</span><span class="type-signature"> &rarr; {object}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Convert from display coordinates to world coordinates using the attached
+camera.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>c</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The input coordinate to convert
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>x</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>y</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>z</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    0
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line606">line 606</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    World space coordinates
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">object</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 
@@ -2006,7 +3978,7 @@ current center.  Uses bare objects {x: 0, y: 0}.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line538">line 538</a>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line615">line 615</a>
     </li></ul></dd>
     
 
@@ -2088,7 +4060,7 @@ current center.  Uses bare objects {x: 0, y: 0}.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line630">line 630</a>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line697">line 697</a>
     </li></ul></dd>
     
 
@@ -2170,7 +4142,7 @@ current center.  Uses bare objects {x: 0, y: 0}.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line567">line 567</a>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line644">line 644</a>
     </li></ul></dd>
     
 
@@ -2252,7 +4224,7 @@ current center.  Uses bare objects {x: 0, y: 0}.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line79">line 79</a>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line192">line 192</a>
     </li></ul></dd>
     
 
@@ -2301,14 +4273,16 @@ current center.  Uses bare objects {x: 0, y: 0}.
 
     
 
-    <h4 class="name" id="gcsToDisplay"><span class="type-signature"></span>gcsToDisplay<span class="signature">(input)</span><span class="type-signature"> &rarr; {object}</span></h4>
+    <h4 class="name" id="gcsToDisplay"><span class="type-signature"></span>gcsToDisplay<span class="signature">(c, gcs<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {object}</span></h4>
 
     
 
 
 
 <div class="description">
-    Convert from gcs coordinates to display coordinates
+    Convert from gcs coordinates to display coordinates.
+
+   gcsToWorld | worldToDisplay
 </div>
 
 
@@ -2332,6 +4306,8 @@ current center.  Uses bare objects {x: 0, y: 0}.
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
         
 
@@ -2344,23 +4320,207 @@ current center.  Uses bare objects {x: 0, y: 0}.
 
         <tr>
             
-                <td class="name"><code>input</code></td>
+                <td class="name"><code>c</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">*</span>
+<span class="param-type">object</span>
 
 
             
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
 
             
 
-            <td class="description last">{[[{x:_x, y: _y}], [x1,y1, x2, y2]}</td>
+            <td class="description last">The input coordinate to convert
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>x</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>y</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>z</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    0
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>gcs</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type"><a href="geo.transform.html">geo.transform</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">undefined to use the interface gcs,
+   null to use the map gcs, or any other transform.</td>
         </tr>
 
     
@@ -2401,7 +4561,7 @@ current center.  Uses bare objects {x: 0, y: 0}.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line445">line 445</a>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line555">line 555</a>
     </li></ul></dd>
     
 
@@ -2427,6 +4587,345 @@ current center.  Uses bare objects {x: 0, y: 0}.
 <h5>Returns:</h5>
 
         
+<div class="param-desc">
+    Display space coordinates
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="gcsToWorld"><span class="type-signature"></span>gcsToWorld<span class="signature">(c, gcs<span class="signature-attributes">nullable</span>)</span><span class="type-signature"> &rarr; {object}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Convert from gcs coordinates to map world coordinates.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>c</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The input coordinate to convert
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>x</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>y</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>z</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    0
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>gcs</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The gcs of the input (map.gcs() by default)</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line505">line 505</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    World space coordinates
+</div>
+
 
 
 <dl>
@@ -2602,7 +5101,7 @@ current center.  Uses bare objects {x: 0, y: 0}.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_object.js.html">core/object.js</a>, <a href="core_object.js.html#line122">line 122</a>
+        <a href="core_object.js.html">core/object.js</a>, <a href="core_object.js.html#line130">line 130</a>
     </li></ul></dd>
     
 
@@ -2763,7 +5262,7 @@ current center.  Uses bare objects {x: 0, y: 0}.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_object.js.html">core/object.js</a>, <a href="core_object.js.html#line71">line 71</a>
+        <a href="core_object.js.html">core/object.js</a>, <a href="core_object.js.html#line75">line 75</a>
     </li></ul></dd>
     
 
@@ -2976,6 +5475,106 @@ current center.  Uses bare objects {x: 0, y: 0}.
 
     
 
+    <h4 class="name" id="ingcs"><span class="type-signature"></span>ingcs<span class="signature">()</span><span class="type-signature"> &rarr; {string}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Get map interface gcs
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line207">line 207</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
     <h4 class="name" id="interactor"><span class="type-signature"></span>interactor<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
@@ -3027,7 +5626,7 @@ current center.  Uses bare objects {x: 0, y: 0}.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line682">line 682</a>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line749">line 749</a>
     </li></ul></dd>
     
 
@@ -3109,7 +5708,7 @@ current center.  Uses bare objects {x: 0, y: 0}.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line105">line 105</a>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line222">line 222</a>
     </li></ul></dd>
     
 
@@ -3245,7 +5844,107 @@ current center.  Uses bare objects {x: 0, y: 0}.
 
     
 
-    <h4 class="name" id="pan"><span class="type-signature"></span>pan<span class="signature">(delta, force<span class="signature-attributes">nullable</span>)</span><span class="type-signature"> &rarr; {<a href="geo.map.html">geo.map</a>}</span></h4>
+    <h4 class="name" id="origin"><span class="type-signature"></span>origin<span class="signature">()</span><span class="type-signature"> &rarr; {object}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Get the map's world coordinate origin in gcs coordinates
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line159">line 159</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="pan"><span class="type-signature"></span>pan<span class="signature">(delta)</span><span class="type-signature"> &rarr; {<a href="geo.map.html">geo.map</a>}</span></h4>
 
     
 
@@ -3276,8 +5975,6 @@ current center.  Uses bare objects {x: 0, y: 0}.
         <th>Type</th>
 
         
-        <th>Attributes</th>
-        
 
         
 
@@ -3303,51 +6000,10 @@ current center.  Uses bare objects {x: 0, y: 0}.
             </td>
 
             
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
 
             
 
             <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>force</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">bool</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-                    &lt;nullable><br>
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Disable bounds clamping</td>
         </tr>
 
     
@@ -3388,7 +6044,7 @@ current center.  Uses bare objects {x: 0, y: 0}.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line185">line 185</a>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line278">line 278</a>
     </li></ul></dd>
     
 
@@ -3422,109 +6078,6 @@ current center.  Uses bare objects {x: 0, y: 0}.
     </dt>
     <dd>
         
-<span class="param-type"><a href="geo.map.html">geo.map</a></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="parallelProjection"><span class="type-signature"></span>parallelProjection<span class="signature">()</span><span class="type-signature"> &rarr; {Boolean|<a href="geo.map.html">geo.map</a>}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Get/Set parallel projection setting of the map
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line286">line 286</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Boolean</span>
-|
-
 <span class="param-type"><a href="geo.map.html">geo.map</a></span>
 
 
@@ -3688,88 +6241,6 @@ current center.  Uses bare objects {x: 0, y: 0}.
 
     
 
-    <h4 class="name" id="query"><span class="type-signature"></span>query<span class="signature">()</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-<div class="description">
-    Queries each layer for information at this location.
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line485">line 485</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
     <h4 class="name" id="removeChild"><span class="type-signature"></span>removeChild<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
@@ -3864,7 +6335,7 @@ current center.  Uses bare objects {x: 0, y: 0}.
 
 
 <div class="description">
-    Resize map
+    Resize map (deprecated)
 </div>
 
 
@@ -4026,7 +6497,7 @@ current center.  Uses bare objects {x: 0, y: 0}.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line407">line 407</a>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line463">line 463</a>
     </li></ul></dd>
     
 
@@ -4049,6 +6520,343 @@ current center.  Uses bare objects {x: 0, y: 0}.
 
 
 
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="scale"><span class="type-signature"></span>scale<span class="signature">()</span><span class="type-signature"> &rarr; {object}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Get the map's world coordinate scaling relative gcs units
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line170">line 170</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="size"><span class="type-signature"></span>size<span class="signature">(arg<span class="signature-attributes">nullable</span>)</span><span class="type-signature"> &rarr; {Object}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Get or set the size of the map.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>arg</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>width</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">width in pixels</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>height</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">height in pixels</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line442">line 442</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    An object containing width and height as keys
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 
@@ -4157,7 +6965,7 @@ current center.  Uses bare objects {x: 0, y: 0}.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line383">line 383</a>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line418">line 418</a>
     </li></ul></dd>
     
 
@@ -4206,7 +7014,7 @@ current center.  Uses bare objects {x: 0, y: 0}.
 
     
 
-    <h4 class="name" id="transition"><span class="type-signature"></span>transition<span class="signature">(opts<span class="signature-attributes">nullable</span>)</span><span class="type-signature"> &rarr; {<a href="geo.map.html">geo.map</a>}</span></h4>
+    <h4 class="name" id="transition"><span class="type-signature"></span>transition<span class="signature">(opts<span class="signature-attributes">nullable</span>, gcs<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="geo.map.html">geo.map</a>}</span></h4>
 
     
 
@@ -4293,6 +7101,45 @@ Call with no arguments to return the current transition information.
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>gcs</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type"><a href="geo.transform.html">geo.transform</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">undefined to use the interface gcs,
+   null to use the map gcs, or any other transform.  Applies only to the
+   center coordinate of the opts and to converting zoom values to height,
+   if specified.</td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -4330,7 +7177,7 @@ Call with no arguments to return the current transition information.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line750">line 750</a>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line829">line 829</a>
     </li></ul></dd>
     
 
@@ -4379,14 +7226,15 @@ Call with no arguments to return the current transition information.
 
     
 
-    <h4 class="name" id="uigcs"><span class="type-signature"></span>uigcs<span class="signature">()</span><span class="type-signature"> &rarr; {string}</span></h4>
+    <h4 class="name" id="unitsPerPixel"><span class="type-signature"></span>unitsPerPixel<span class="signature">(zoom<span class="signature-attributes">opt</span>, unit<span class="signature-attributes">nullable</span>)</span><span class="type-signature"> &rarr; {Number|this}</span></h4>
 
     
 
 
 
 <div class="description">
-    Get map user interface GCS
+    Get/set the number of world space units per display pixel at the given
+zoom level.
 </div>
 
 
@@ -4395,6 +7243,113 @@ Call with no arguments to return the current transition information.
 
 
 
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>zoom</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    0
+                
+                </td>
+            
+
+            <td class="description last">The target zoom level</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>unit</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">If present, set the unitsPerPixel otherwise return
+  the current value.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -4430,7 +7385,7 @@ Call with no arguments to return the current transition information.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line94">line 94</a>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line139">line 139</a>
     </li></ul></dd>
     
 
@@ -4464,7 +7419,10 @@ Call with no arguments to return the current transition information.
     </dt>
     <dd>
         
-<span class="param-type">string</span>
+<span class="param-type">Number</span>
+|
+
+<span class="param-type">this</span>
 
 
     </dd>
@@ -4540,7 +7498,7 @@ notices has changed.  Users, in general, should not need to call this.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line1041">line 1041</a>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line1170">line 1170</a>
     </li></ul></dd>
     
 
@@ -4579,6 +7537,638 @@ notices has changed.  Users, in general, should not need to call this.
     <dd>
         
 <span class="param-type">this</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="worldToDisplay"><span class="type-signature"></span>worldToDisplay<span class="signature">(c)</span><span class="type-signature"> &rarr; {object}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Convert from world coordinates to display coordinates using the attached
+camera.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>c</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The input coordinate to convert
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>x</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>y</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>z</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    0
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line571">line 571</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    Display space coordinates
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="worldToGcs"><span class="type-signature"></span>worldToGcs<span class="signature">(c, gcs<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {object}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Convert from map world coordinates to gcs coordinates.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>c</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The input coordinate to convert
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>x</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>y</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>z</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    0
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>gcs</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type"><a href="geo.transform.html">geo.transform</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">undefined to use the interface gcs,
+   null to use the map gcs, or any other transform.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line528">line 528</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    GCS space coordinates
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">object</span>
 
 
     </dd>
@@ -4644,7 +8234,7 @@ notices has changed.  Users, in general, should not need to call this.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line116">line 116</a>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line233">line 233</a>
     </li></ul></dd>
     
 
@@ -4696,7 +8286,7 @@ notices has changed.  Users, in general, should not need to call this.
 
     
 
-    <h4 class="name" id="zoomAndCenterFromBounds"><span class="type-signature"></span>zoomAndCenterFromBounds<span class="signature">(bds<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {object}</span></h4>
+    <h4 class="name" id="zoomAndCenterFromBounds"><span class="type-signature"></span>zoomAndCenterFromBounds<span class="signature">(bds<span class="signature-attributes">opt</span>, gcs<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {object}</span></h4>
 
     
 
@@ -4771,6 +8361,43 @@ notices has changed.  Users, in general, should not need to call this.
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>gcs</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type"><a href="geo.transform.html">geo.transform</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">undefined to use the interface gcs,
+   null to use the map gcs, or any other transform.</td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -4808,7 +8435,7 @@ notices has changed.  Users, in general, should not need to call this.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line963">line 963</a>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line1044">line 1044</a>
     </li></ul></dd>
     
 
@@ -4961,7 +8588,7 @@ notices has changed.  Users, in general, should not need to call this.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line721">line 721</a>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line788">line 788</a>
     </li></ul></dd>
     
 
@@ -5179,7 +8806,7 @@ apply to each feature if none exists</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line1102">line 1102</a>
+        <a href="core_map.js.html">core/map.js</a>, <a href="core_map.js.html#line1409">line 1409</a>
     </li></ul></dd>
     
 
@@ -5209,13 +8836,13 @@ apply to each feature if none exists</td>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.clock.html">clock</a></li><li><a href="geo.contourFeature.html">contourFeature</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.contourFeature.html">contourFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.renderer.html">renderer</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.util.ClusterGroup.html">ClusterGroup</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.mercator.html">mercator</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.camera.html">camera</a></li><li><a href="geo.choroplethFeature.html">choroplethFeature</a></li><li><a href="geo.clock.html">clock</a></li><li><a href="geo.contourFeature.html">contourFeature</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.choroplethFeature.html">choroplethFeature</a></li><li><a href="geo.gl.contourFeature.html">contourFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.svgWidget.html">svgWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.imageTile.html">imageTile</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.tile.html">tile</a></li><li><a href="geo.tileCache.html">tileCache</a></li><li><a href="geo.tileLayer.html">tileLayer</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.ClusterGroup.html">ClusterGroup</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.camera.html">camera</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.2</a> on Fri Aug 07 2015 10:52:03 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Sat Dec 19 2015 14:27:24 GMT-0500 (EST)
 </footer>
 
 <script> prettyPrint(); </script>
