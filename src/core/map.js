@@ -151,6 +151,67 @@ geo.map = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Get/set the clampBoundsX setting.  If changed, adjust the bounds of the
+   * map as needed.
+   *
+   * @param {boolean?} clamp The new clamp value.
+   * @returns {boolean|this}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.clampBoundsX = function (clamp) {
+    if (clamp === undefined) {
+      return m_clampBoundsX;
+    }
+    if (clamp !== m_clampBoundsX) {
+      m_clampBoundsX = !!clamp;
+      m_this.pan({x: 0, y: 0});
+    }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/set the clampBoundsY setting.  If changed, adjust the bounds of the
+   * map as needed.
+   *
+   * @param {boolean?} clamp The new clamp value.
+   * @returns {boolean|this}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.clampBoundsY = function (clamp) {
+    if (clamp === undefined) {
+      return m_clampBoundsY;
+    }
+    if (clamp !== m_clampBoundsY) {
+      m_clampBoundsY = !!clamp;
+      m_this.pan({x: 0, y: 0});
+    }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/set the clampZoom setting.  If changed, adjust the bounds of the map
+   * as needed.
+   *
+   * @param {boolean?} clamp The new clamp value.
+   * @returns {boolean|this}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.clampZoom = function (clamp) {
+    if (clamp === undefined) {
+      return m_clampZoom;
+    }
+    if (clamp !== m_clampZoom) {
+      m_clampZoom = !!clamp;
+      reset_minimum_zoom();
+      m_this.zoom(m_zoom);
+    }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Get the map's world coordinate origin in gcs coordinates
    *
    * @returns {object}
@@ -782,23 +843,25 @@ geo.map = function (arg) {
    * Get or set the min/max zoom range.
    *
    * @param {Object} arg {min: minimumzoom, max: maximumzom}
+   * @param {boolean} noRefresh if true, don't update the map if the zoom level
+   *                            has changed.
    * @returns {Object|geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.zoomRange = function (arg) {
+  this.zoomRange = function (arg, noRefresh) {
     if (arg === undefined) {
       return $.extend({}, m_validZoomRange);
     }
     if (arg.max !== undefined) {
       m_validZoomRange.max = arg.max;
     }
-
-    // don't allow the minimum zoom to go below what will
-    // fit in the view port
     if (arg.min !== undefined) {
-      m_validZoomRange.min = m_validZoomRange.origMin = fix_zoom(arg.min);
+      m_validZoomRange.min = m_validZoomRange.origMin = arg.min;
     }
     reset_minimum_zoom();
+    if (!noRefresh) {
+      m_this.zoom(m_zoom);
+    }
     return m_this;
   };
 
@@ -1381,7 +1444,7 @@ geo.map = function (arg) {
   m_origin = {x: 0, y: 0};
 
   // Fix the zoom level (minimum and initial)
-  this.zoomRange(arg);
+  this.zoomRange(arg, true);
   m_zoom = fix_zoom(m_zoom);
   // Now update to the correct center and zoom level
   this.center($.extend({}, arg.center || m_center), undefined);

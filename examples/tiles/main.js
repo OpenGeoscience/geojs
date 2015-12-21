@@ -1,9 +1,11 @@
 // This example should be tried with different query strings.
 
 /* Many parameters can be adjusted via url query parameters:
+ *  attribution: override the layer attribution text.
  *  clampBoundsX: 'true' to clamp movement in the horizontal direction.
  *  clampBoundsY: 'true' to clamp movement in the vertical direction.
  *  clampZoom: 'true' to clamp zooming out smaller than the window.
+ *  controls: 'false' to hide controls.
  *  debug: 'true' to show tile labels when using the html renderer.  'border'
  *      to draw borders on each tile when using the html renderer.  'all' to
  *      show both labels and borders.  These options just add a class to the
@@ -49,9 +51,26 @@ $(function () {
   var query = document.location.search.replace(/(^\?)/, '').split(
     '&').map(function (n) {
       n = n.split('=');
-      this[n[0]] = decodeURIComponent(n[1]);
+      if (n[0]) {
+        this[decodeURIComponent(n[0])] = decodeURIComponent(n[1]);
+      }
       return this;
     }.bind({}))[0];
+
+  // hide the controls if requested
+  $('#controls').toggleClass('no-controls', query.controls === 'false');
+  // populate the controls with the current settings
+  $.each(query, function (key, value) {
+    if (key.indexOf('"') < 0) {
+      var ctl = $('#controls [param-name="' + key + '"]');
+      if (ctl.is('[type="checkbox"]')) {
+        ctl.prop('checked', value === 'true');
+      } else {
+        ctl.val(value);
+      }
+    }
+  });
+  $('#controls').on('change', change_controls);
 
   // Set map defaults to use our named node and have a reasonable center and
   // zoom level
@@ -126,9 +145,13 @@ $(function () {
   }
   if (query.max !== undefined) {
     mapParams.max = parseFloat(query.max);
-    if (!layerParams.maxLevel) {
-      layerParams.maxLevel = mapParams.max;
-    }
+  }
+  // allow a generous max tile level so it is never the limit
+  if (!layerParams.maxLevel) {
+    layerParams.maxLevel = 25;
+  }
+  if (query.attribution !== undefined) {
+    layerParams.attribution = query.attribution;
   }
   if (query.round) {
     layerParams.tileRounding = Math[query.round];
@@ -146,7 +169,6 @@ $(function () {
     });
   // Populate boolean flags for the tile layer
   $.each({
-      clampBoundsX: 'clampBoundsX',
       lower: 'keepLower',
       wrapX: 'wrapX',
       wrapY: 'wrapY'
@@ -175,4 +197,100 @@ $(function () {
   tileDebug.mapParams = mapParams;
   tileDebug.layerParams = layerParams;
   tileDebug.osmLayer = osmLayer;
+
+  /**
+   * Handle changes to our controls.
+   * @param evt jquery evt that triggered this call.
+   */
+  function change_controls(evt) {
+    console.log(evt);  //DWM
+    var ctl = $(evt.target),
+        param = ctl.attr('param-name'),
+        value = ctl.val();
+    if (ctl.is('[type="checkbox"]')) {
+      value = ctl.is(':checked') ? 'true' : 'false';
+    }
+    if (value === '' && ctl.attr('placeholder')) {
+      value = ctl.attr('placeholder');
+    }
+    if (!param || value === query[param]) {
+      return;
+    }
+    var processedValue = (ctl.is('[type="checkbox"]') ?
+        (value === 'true') : value);
+    switch (param) {
+      case 'debug':
+        $('#map').toggleClass('debug-label', (
+            value === 'true' || value === 'all'))
+          .toggleClass('debug-border', (
+            value === 'border' || value === 'all'));
+        break;
+      case 'discrete':
+        mapParams.discreteZoom = processedValue;
+        map.discreteZoom(processedValue);
+        break;
+      case 'fade':
+        $('#map').toggleClass('fade-image', processedValue);
+        break;
+      case 'lower':
+        layerParams.keepLower = (value === 'true');
+        break;
+      case 'max': case 'min':
+        mapParams[param] = processedValue = parseFloat(value);
+        map.zoomRange(mapParams);
+        break;
+      case 'projection':
+        map.camera().projection = value;
+        break;
+      case 'renderer':
+        layerParams[param] = value;
+        if (layerParams.renderer === 'html') {
+          layerParams.renderer = null;
+        }
+        map.deleteLayer(osmLayer);
+        osmLayer = map.createLayer('osm', layerParams);
+        tileDebug.osmLayer = osmLayer;
+        break;
+      case 'round':
+        layerParams.tileRounding = Math[value];
+        break;
+      case 'x': case 'y':
+        var coord = map.center();
+        coord[param] = mapParams[param] = parseFloat(value);
+        map.center(coord);
+        break;
+      case 'zoom':
+        mapParams[param] = processedValue = parseFloat(value);
+        map.zoom(processedValue);
+        break;
+      default:
+        if (ctl.is('.layerparam')) {
+          layerParams[param] = processedValue;
+          if (osmLayer[param]) {
+            osmLayer[param](processedValue);
+          }
+        } else if (ctl.is('.mapparam')) {
+          mapParams[param] = processedValue;
+          if (map[param]) {
+            map[param](processedValue);
+          }
+        } else {
+          return;
+        }
+        break;
+    }
+    if (ctl.is('.layerparam') && ctl.attr('reload') === 'true') {
+      map.deleteLayer(osmLayer);
+      osmLayer = map.createLayer('osm', layerParams);
+    }
+    // update the url to reflect the changes
+    query[param] = value;
+    if (value === '' || (ctl.attr('placeholder') &&
+        value === ctl.attr('placeholder'))) {
+      delete query[param];
+    }
+    var newurl = window.location.protocol + '//' + window.location.host +
+        window.location.pathname + '?' + $.param(query);
+    window.history.replaceState(query, '', newurl);
+  }
 });

@@ -1153,6 +1153,32 @@
     };
 
     /**
+     * Get or set the subdomains used for templating.
+     *
+     * @param {string|list} [subdomains] A comma-separated list, a string of
+     *      single character subdomains, or a list.
+     * @returns {string|list|this}
+     */
+    this.subdomains = function (subdomains) {
+      if (subdomains === undefined) {
+        return this._options.subdomains;
+      }
+      if (subdomains) {
+        if ($.type(subdomains) === 'string') {
+          if (subdomains.indexOf(',') >= 0) {
+            subdomains = subdomains.split(',');
+          } else {
+            subdomains = subdomains.split('');
+          }
+        }
+        this._options.subdomains = subdomains;
+        this.reset();
+        this.map().draw();
+      }
+      return this;
+    };
+
+    /**
      * Initialize after the layer is added to the map.
      */
     this._init = function () {
