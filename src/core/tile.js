@@ -72,9 +72,20 @@
      */
     this.fetch = function () {
       if (!this._fetched) {
-        $.get(this._url).promise(this);
+        $.get(this._url).then(function () {
+          this._fetched = true;
+        }.bind(this)).promise(this);
       }
       return this;
+    };
+
+    /**
+     * Return whether this tile has been fetched already.
+     *
+     * @returns {boolean} True if the tile has been fetched.
+     */
+    this.fetched = function () {
+      return this._fetched;
     };
 
     /**
