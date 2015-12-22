@@ -203,7 +203,6 @@ $(function () {
    * @param evt jquery evt that triggered this call.
    */
   function change_controls(evt) {
-    console.log(evt);  //DWM
     var ctl = $(evt.target),
         param = ctl.attr('param-name'),
         value = ctl.val();
@@ -266,6 +265,9 @@ $(function () {
       default:
         if (ctl.is('.layerparam')) {
           layerParams[param] = processedValue;
+          if (param === 'url' && layerParams.baseUrl) {
+            delete layerParams.baseUrl;
+          }
           if (osmLayer[param]) {
             osmLayer[param](processedValue);
           }
