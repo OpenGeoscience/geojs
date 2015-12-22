@@ -75,7 +75,9 @@
         this._image.src = this._url;
 
         // attach a promise interface to `this`
-        defer.promise(this);
+        defer.then(function () {
+          this._fetched = true;
+        }.bind(this)).promise(this);
       }
       return this;
     };
