@@ -71,6 +71,18 @@ $(function () {
     }
   });
   $('#controls').on('change', change_controls);
+  // When a text input is altered, wait a short time then process the change.
+  // This allows the web page to be responsive without showing too many partial
+  // values.
+  var throttledInputEventTimer = null;
+  $('#controls').on('input', function (evt) {
+    if (throttledInputEventTimer) {
+      window.clearTimeout(throttledInputEventTimer);
+    }
+    throttledInputEventTimer = window.setTimeout(function () {
+      change_controls(evt);
+    }, 1000);
+  });
 
   // Set map defaults to use our named node and have a reasonable center and
   // zoom level
