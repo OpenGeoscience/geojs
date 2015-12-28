@@ -97,7 +97,10 @@ $(function () {
   // Set the tile layer defaults to use the specified renderer and opacity
   var layerParams = {
     renderer: query.renderer || 'vgl',
-    opacity: query.opacity || '1'
+    opacity: query.opacity || '1',
+    /* Always use a larger cache so if keepLower is changed, we still have a
+     * big enough cache. */
+    cacheSize: 600
   };
   if (layerParams.renderer === 'null' || layerParams.renderer === 'html') {
     layerParams.renderer = null;
