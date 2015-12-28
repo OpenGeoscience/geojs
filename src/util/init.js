@@ -214,6 +214,33 @@
       a.y = (a.y || 0) * Math.pow(b.y || 1, pow);
       a.z = (a.z || 0) * Math.pow(b.z || 1, pow);
       return a;
+    },
+
+    /**
+     * Create a vec3 that is always an array.  This should only be used if it
+     * will not be used in a WebGL context.  Plain arrays usually use 64-bit
+     * float values, whereas vec3 defaults to 32-bit floats.
+     *
+     * @returns {Array} zeroed-out vec3 compatible array.
+     */
+    vec3AsArray: function () {
+      return [0, 0, 0];
+    },
+
+    /**
+     * Create a mat4 that is always an array.  This should only be used if it
+     * will not be used in a WebGL context.  Plain arrays usually use 64-bit
+     * float values, whereas mat4 defaults to 32-bit floats.
+     *
+     * @returns {Array} identity mat4 compatible array.
+     */
+    mat4AsArray: function () {
+      return [
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+      ];
     }
   };
 
