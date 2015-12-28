@@ -6,12 +6,14 @@ geo.d3.tileLayer = function () {
 
   this._drawTile = function (tile) {
     var bounds = m_this._tileBounds(tile),
-        parentNode = m_this._getSubLayer(tile.index.level);
+        parentNode = m_this._getSubLayer(tile.index.level),
+        offsetx = parseInt(parentNode.attr('offsetx') || 0),
+        offsety = parseInt(parentNode.attr('offsety') || 0);
     tile.feature = m_this.createFeature(
       'plane', {drawOnAsyncResourceLoad: true})
-      .origin([bounds.left, bounds.top])
-      .upperLeft([bounds.left, bounds.top])
-      .lowerRight([bounds.right, bounds.bottom])
+      .origin([bounds.left - offsetx, bounds.top - offsety])
+      .upperLeft([bounds.left - offsetx, bounds.top - offsety])
+      .lowerRight([bounds.right - offsetx, bounds.bottom - offsety])
       .style({
         image: tile._url,
         opacity: 1,
@@ -23,7 +25,7 @@ geo.d3.tileLayer = function () {
   };
 
   /**
-   * Return the DOM eleement containing a level specific
+   * Return the DOM element containing a level specific
    * layer.  This will create the element if it doesn't
    * already exist.
    * @param {number} level The zoom level of the layer to fetch
@@ -46,14 +48,45 @@ geo.d3.tileLayer = function () {
   /**
    * Set sublayer transforms to align them with the given zoom level.
    * @param {number} level The target zoom level
+   * @param {object} view The view bounds.  The top and left are used to
+   *                      adjust the offset of tile layers.
+   * @return {object} the x and y offsets for the current level.
    */
-  this._updateSubLayers = function (level) {
-    $.each(m_this.canvas().selectAll('.geo-tile-layer')[0], function (idx, el) {
-      var layer = parseInt($(el).attr('data-tile-layer'));
+  this._updateSubLayers = function (level, view) {
+    var canvas = m_this.canvas(),
+        lastlevel = parseInt(canvas.attr('lastlevel')),
+        lastx = parseInt(canvas.attr('lastoffsetx') || 0),
+        lasty = parseInt(canvas.attr('lastoffsety') || 0);
+    if (lastlevel === level && Math.abs(lastx - view.left) < 65536 &&
+        Math.abs(lasty - view.top) < 65536) {
+      return {x: lastx, y: lasty};
+    }
+    var x = parseInt(view.left), y = parseInt(view.top);
+    var tileCache = m_this.cache._cache;
+    $.each(canvas.selectAll('.geo-tile-layer')[0], function (idx, el) {
+      var layer = parseInt($(el).attr('data-tile-layer')),
+          scale = Math.pow(2, level - layer);
       el = m_this._getSubLayer(layer);
-      var scale = Math.pow(2, level - layer);
       el.attr('transform', 'matrix(' + [scale, 0, 0, scale, 0, 0].join() + ')');
+      var layerx = parseInt(x / Math.pow(2, level - layer)),
+          layery = parseInt(y / Math.pow(2, level - layer)),
+          dx = layerx - parseInt(el.attr('offsetx') || 0),
+          dy = layery - parseInt(el.attr('offsety') || 0);
+      el.attr({offsetx: layerx, offsety: layery});
+      /* We have to update the values stored in the tile features, too. */
+      $.each(tileCache, function (idx, tile) {
+        if (tile._index.level === layer && tile.feature) {
+          var f = tile.feature,
+              o = f.origin(), ul = f.upperLeft(), lr = f.lowerRight();
+          f.origin([o[0] - dx, o[1] - dy, o[2]]);
+          f.upperLeft([ul[0] - dx, ul[1] - dy, ul[2]]);
+          f.lowerRight([lr[0] - dx, lr[1] - dy, lr[2]]);
+          f._update();
+        }
+      });
     });
+    canvas.attr({lastoffsetx: x, lastoffsety: y, lastlevel: level});
+    return {x: x, y: y};
   };
 
   /* Initialize the tile layer.  This creates a series of sublayers so that

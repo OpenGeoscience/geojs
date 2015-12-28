@@ -885,7 +885,7 @@
       );
 
       // Update the transform for the local layer coordinates
-      var offset = this._updateSubLayers(zoom, view);
+      var offset = this._updateSubLayers(zoom, view) || {x: 0, y: 0};
 
       var to = this._options.tileOffset(zoom);
       if (this.renderer() === null) {
@@ -910,7 +910,9 @@
       this.canvas().attr({
         scale: Math.pow(2, mapZoom - zoom),
         dx: -to.x + -(view.left + view.right) / 2,
-        dy: -to.y + -(view.bottom + view.top) / 2
+        dy: -to.y + -(view.bottom + view.top) / 2,
+        offsetx: offset.x,
+        offsety: offset.y
       });
 
       lastZoom = mapZoom;
