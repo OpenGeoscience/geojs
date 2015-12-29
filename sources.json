@@ -24,6 +24,7 @@
         "imageTile.js",
         "tileCache.js",
         "tileLayer.js",
+        "fetchQueue.js",
         "fileReader.js",
         "jsonReader.js",
         "map.js",

@@ -822,9 +822,9 @@ describe('geo.tileLayer', function () {
         });
 
         m = l._loadMetric({x: 0, y: 0, level: 0});
-        expect(m({x: 1, y: 1, level: 2}, {x: 2, y: 2, level: 2})).toBeLessThan(0);
-        expect(m({x: 1, y: 1, level: 1}, {x: 2, y: 2, level: 2})).toBeGreaterThan(0);
-        expect(m({x: 1, y: 1, level: 2}, {x: 0.5, y: 1.01, level: 2})).toBeGreaterThan(0);
+        expect(m({x: 1, y: 1, level: 2}, {x: 3, y: 3, level: 2})).toBeLessThan(0);
+        expect(m({x: 1, y: 1, level: 1}, {x: 3, y: 3, level: 2})).toBeLessThan(0);
+        expect(m({x: 2, y: 2, level: 2}, {x: 1.5, y: 2.01, level: 2})).toBeGreaterThan(0);
       });
 
       it('center (1, 1, 1)', function () {
@@ -833,9 +833,21 @@ describe('geo.tileLayer', function () {
         });
 
         m = l._loadMetric({x: 1, y: 1, level: 1});
-        expect(m({x: 1, y: 1, level: 2}, {x: 2, y: 2, level: 2})).toBeGreaterThan(0);
-        expect(m({x: 1, y: 1, level: 1}, {x: 2, y: 2, level: 2})).toBeGreaterThan(0);
-        expect(m({x: 1, y: 1, level: 2}, {x: 0.5, y: 1.01, level: 2})).toBeLessThan(0);
+        expect(m({x: 1, y: 1, level: 2}, {x: 3, y: 3, level: 2})).toBeGreaterThan(0);
+        expect(m({x: 1, y: 1, level: 1}, {x: 3, y: 3, level: 2})).toBeLessThan(0);
+        expect(m({x: 2, y: 2, level: 2}, {x: 1.5, y: 2.01, level: 2})).toBeLessThan(0);
+      });
+
+      it('center (1.5, 1.5, 2, 1)', function () {
+        var m, l = geo.tileLayer({
+          map: map()
+        });
+
+        m = l._loadMetric({x: 1.5, y: 1.5, level: 2, bottomLevel: 1});
+        expect(m({x: 1, y: 1, level: 2}, {x: 3, y: 3, level: 2})).toBeLessThan(0);
+        expect(m({x: 1, y: 1, level: 1}, {x: 3, y: 3, level: 2})).toBeLessThan(0);
+        expect(m({x: 1, y: 1, level: 0}, {x: 3, y: 3, level: 2})).toBeGreaterThan(0);
+        expect(m({x: 2, y: 2, level: 2}, {x: 1.5, y: 2.01, level: 2})).toBeGreaterThan(0);
       });
     });
 

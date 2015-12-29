@@ -176,6 +176,19 @@
     // initialize the in memory tile cache
     this._cache = geo.tileCache({size: options.cacheSize});
 
+    // initialize the tile fetch queue
+    this._queue = geo.fetchQueue({
+      // this should probably be 6 * subdomains.length if subdomains are used
+      size: 6,
+      // if track is the same as the cache size, then neither processing time
+      // nor memory will be wasted.  Larger values will use more memory,
+      // smaller values will do needless computations.
+      track: options.cacheSize,
+      needed: function (tile) {
+        return tile === this.cache.get(tile.toString());
+      }.bind(this)
+    });
+
     /**
      * Readonly accessor to the options object
      */
@@ -361,6 +374,7 @@
       return geo.tile({
         index: index,
         size: {x: this._options.tileWidth, y: this._options.tileHeight},
+        queue: this._queue,
         url: this._options.url(urlParams.x, urlParams.y, urlParams.level || 0,
                                this._options.subdomains)
       });
@@ -442,6 +456,9 @@
           start, end, indexRange, source, center,
           level, minLevel = this._options.keepLower ? 0 : maxLevel;
 
+      /* Generate a list of the tiles that we want to create.  This is done
+       * before sorting, because we want to actually generate the tiles in
+       * the sort order. */
       for (level = minLevel; level <= maxLevel; level += 1) {
         // get the tile range to fetch
         indexRange = this._getTileRange(level, bounds);
@@ -470,7 +487,7 @@
             }
 
             if (this.isValid(source)) {
-              tiles.push(this._getTileCached($.extend({}, index), source));
+              tiles.push({index: $.extend({}, index), soure: source});
             }
           }
         }
@@ -479,9 +496,23 @@
       if (sorted) {
         center = {
           x: (start.x + end.x) / 2,
-          y: (start.y + end.y) / 2
+          y: (start.y + end.y) / 2,
+          level: maxLevel,
+          bottomLevel: maxLevel
         };
+        var numTiles = Math.max(end.x - start.x, end.y - start.y) + 1;
+        for (; numTiles >= 1; numTiles /= 2) {
+          center.bottomLevel -= 1;
+        }
         tiles.sort(this._loadMetric(center));
+        /* If we are using a fetch queue, start a new batch */
+        if (this._queue) {
+          this._queue.batch(true);
+        }
+      }
+      /* Actually get the tiles. */
+      for (i = 0; i < tiles.length; i += 1) {
+        tiles[i] = this._getTileCached(tiles[i].index, tiles[i].source);
       }
       return tiles;
     };
@@ -517,15 +548,22 @@
       return function (a, b) {
         var a0, b0, dx, dy, cx, cy, scale;
 
+        a = a.index || a;
+        b = b.index || b;
         // shortcut if zoom level differs
         if (a.level !== b.level) {
-          return b.level - a.level;
+          if (center.bottomLevel && ((a.level >= center.bottomLevel) !==
+                                     (b.level >= center.bottomLevel))) {
+            return a.level >= center.bottomLevel ? -1 : 1;
+          }
+          return a.level - b.level;
         }
 
-        // compute the center coordinates relative to a.level
+        /* compute the center coordinates relative to a.level.  Since we really
+         * care about the center of the tiles, use an offset */
         scale = Math.pow(2, a.level - center.level);
-        cx = center.x * scale;
-        cy = center.y * scale;
+        cx = (center.x + 0.5) * scale - 0.5;
+        cy = (center.y + 0.5) * scale - 0.5;
 
         // calculate distances to the center squared
         dx = a.x - cx;
