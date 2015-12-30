@@ -68,12 +68,18 @@ geo.d3.tileLayer = function () {
           scale = Math.pow(2, level - layer);
       el = m_this._getSubLayer(layer);
       el.attr('transform', 'matrix(' + [scale, 0, 0, scale, 0, 0].join() + ')');
+      /* x and y are the upper left of our view.  This is the zero-point for
+       * offsets at the current level.  Other tile layers' offsets are scaled
+       * by appropriate factors of 2.  We need to shift the tiles of each
+       * layer by the appropriate amount (computed as dx and dy). */
       var layerx = parseInt(x / Math.pow(2, level - layer)),
           layery = parseInt(y / Math.pow(2, level - layer)),
           dx = layerx - parseInt(el.attr('offsetx') || 0),
           dy = layery - parseInt(el.attr('offsety') || 0);
       el.attr({offsetx: layerx, offsety: layery});
-      /* We have to update the values stored in the tile features, too. */
+      /* We have to update the values stored in the tile features, too,
+       * otherwise when d3 regenerates these features, the offsets will be
+       * wrong. */
       $.each(tileCache, function (idx, tile) {
         if (tile._index.level === layer && tile.feature) {
           var f = tile.feature,
