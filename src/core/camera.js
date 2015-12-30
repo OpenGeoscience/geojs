@@ -54,13 +54,13 @@
      * The view matrix
      * @protected
      */
-    this._view = mat4.create();
+    this._view = geo.util.mat4AsArray();
 
     /**
      * The projection matrix
      * @protected
      */
-    this._proj = mat4.create();
+    this._proj = geo.util.mat4AsArray();
 
     /**
      * The projection type (one of `this.constructor.projection`)
@@ -72,13 +72,13 @@
      * The transform matrix (view * proj)
      * @protected
      */
-    this._transform = mat4.create();
+    this._transform = geo.util.mat4AsArray();
 
     /**
      * The inverse transform matrix (view * proj)^-1
      * @protected
      */
-    this._inverse = mat4.create();
+    this._inverse = geo.util.mat4AsArray();
 
     /**
      * Cached bounds object recomputed on demand.
@@ -229,7 +229,7 @@
       get: function () {
         if (this._world === null) {
           this._world = mat4.invert(
-            mat4.create(),
+            geo.util.mat4AsArray(),
             this.display
           );
         }
@@ -310,22 +310,18 @@
         // apply scaling to the view matrix to account for the new aspect ratio
         // without changing the apparent zoom level
         if (this._viewport.width && this._viewport.height) {
-          this._scale(
-            vec3.fromValues(
+          this._scale([
               this._viewport.width / viewport.width,
               this._viewport.height / viewport.height,
               1
-            )
-          );
+          ]);
 
           // translate by half the difference to keep the center the same
-          this._translate(
-            vec3.fromValues(
+          this._translate([
               (viewport.width - this._viewport.width) / 2,
               (viewport.height - this._viewport.height) / 2,
               0
-            )
-          );
+          ]);
         }
 
         this._viewport = {width: viewport.width, height: viewport.height};
@@ -350,7 +346,7 @@
     /**
      * Uses `mat4.translate` to translate the camera by the given vector amount.
      * @protected
-     * @param {vec3} offset The camera translation vector
+     * @param {vec3|Array} offset The camera translation vector
      * @returns {this} Chainable
      */
     this._translate = function (offset) {
@@ -360,7 +356,7 @@
     /**
      * Uses `mat4.scale` to scale the camera by the given vector amount.
      * @protected
-     * @param {vec3} scale The scaling vector
+     * @param {vec3|Array} scale The scaling vector
      * @returns {this} Chainable
      */
     this._scale = function (scale) {
@@ -563,8 +559,8 @@
      */
     this._setBounds = function (bounds) {
 
-      var translate = vec3.create(),
-          scale = vec3.create(),
+      var translate = geo.util.vec3AsArray(),
+          scale = geo.util.vec3AsArray(),
           c_ar, v_ar, w, h;
 
       bounds.near = bounds.near || 0;
@@ -611,11 +607,14 @@
      * @param {number} [offset.z=0]
      */
     this.pan = function (offset) {
-      this._translate(vec3.fromValues(
+      if (!offset.x && !offset.y && !offset.z) {
+        return;
+      }
+      this._translate([
         offset.x,
         offset.y,
         offset.z || 0
-      ));
+      ]);
       this._update();
     };
 
@@ -625,13 +624,11 @@
      * @param {number} zoom The zoom scale to apply
      */
     this.zoom = function (zoom) {
-      mat4.scale(this._view, this._view,
-        vec3.fromValues(
+      mat4.scale(this._view, this._view, [
           zoom,
           zoom,
           zoom
-        )
-      );
+      ]);
       this._update();
     };
 
@@ -805,7 +802,7 @@
    * @returns {mat4} The new transform matrix
    */
   geo.camera.affine = function (pre, scale, post) {
-    var mat = mat4.create();
+    var mat = geo.util.mat4AsArray();
 
     // Note: mat4 operations are applied to the right side of the current
     // transform, so the first applied here is the last applied to the
@@ -841,7 +838,7 @@
    * @returns {mat4} A * B
    */
   geo.camera.combine = function (A, B) {
-    return mat4.mul(mat4.create(), A, B);
+    return mat4.mul(geo.util.mat4AsArray(), A, B);
   };
 
   inherit(geo.camera, geo.object);

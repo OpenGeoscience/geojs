@@ -28,9 +28,8 @@ geo.ellipsoid = function (x, y, z) {
   }
 
   var m_this = this,
-      m_radii = new vec3.fromValues(x, y, z),
-      m_radiiSquared = new vec3.fromValues(
-        x * x, y * y, z * z),
+      m_radii = [x, y, z],
+      m_radiiSquared = [x * x, y * y, z * z],
       m_minimumRadius = Math.min(x, y, z),
       m_maximumRadius = Math.max(x, y, z);
 
@@ -95,7 +94,7 @@ geo.ellipsoid = function (x, y, z) {
     }
 
     var cosLatitude = Math.cos(lat),
-        result = vec3.create();
+        result = geo.util.vec3AsArray();
 
     result[0] = cosLatitude * Math.cos(lon);
     result[1] = cosLatitude * Math.sin(lon);
@@ -121,9 +120,9 @@ geo.ellipsoid = function (x, y, z) {
     lon = lon * (Math.PI / 180.0);
 
     var n = m_this.computeGeodeticSurfaceNormal(lat, lon),
-        k = vec3.create(),
+        k = geo.util.vec3AsArray(),
         gamma  = Math.sqrt(vec3.dot(n, k)),
-        result = vec3.create();
+        result = geo.util.vec3AsArray();
 
     vec3.multiply(k, m_radiiSquared, n);
     vec3.scale(k, k, 1 / gamma);
@@ -160,8 +159,8 @@ geo.ellipsoid = function (x, y, z) {
         gamma = null,
         n = null,
         j = 0,
-        k = vec3.create(),
-        result = vec3.create();
+        k = geo.util.vec3AsArray(),
+        result = geo.util.vec3AsArray();
 
     stride /= sizeOfDataType;
     offset /= sizeOfDataType;

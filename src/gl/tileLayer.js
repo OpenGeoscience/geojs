@@ -19,6 +19,7 @@ geo.gl.tileLayer = function () {
       .upperLeft([ul.x, ul.y, level * 1e-7])
       .lowerRight([lr.x, lr.y, level * 1e-7])
       .style({image: tile._image});
+    tile.feature.gcs(m_this.map().gcs());
     tile.feature._update();
     m_this.draw();
   };

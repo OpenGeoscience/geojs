@@ -136,7 +136,7 @@
     options = $.extend(true, {}, this.constructor.defaults, options || {});
     if (!options.cacheSize) {
       // this size should be sufficient for a 4k display
-      options.cacheSize = options.keepLower ? 400 : 200;
+      options.cacheSize = options.keepLower ? 600 : 200;
     }
     if ($.type(options.subdomains) === 'string') {
       options.subdomains = options.subdomains.split('');
@@ -900,18 +900,10 @@
       this._tileTree = {};
 
       tiles.forEach(function (tile) {
-        tile.then(function () {
-          if (tile !== this.cache.get(tile.toString())) {
-            /* If the tile has fallen out of the cache, don't draw it -- it is
-             * untracked.  This may be an indication that a larger cache should
-             * have been used. */
-            return;
-          }
-          /* Check if a tile is still desired.  Don't draw it if it isn't. */
-          var mapZoom = map.zoom(),
-              zoom = this._options.tileRounding(mapZoom),
-              bounds = this._getViewBounds();
-          if (this._canPurge(tile, bounds, zoom)) {
+        if (tile.fetched()) {
+          /* if we have already fetched the tile, don't recompute the map zoom
+           *  and view bounds, as we can use what we currently have. */
+          if (this._canPurge(tile, view, zoom)) {
             this.remove(tile);
             return;
           }
@@ -920,9 +912,31 @@
 
           // mark the tile as covered
           this._setTileTree(tile);
-        }.bind(this));
+        } else {
+          tile.then(function () {
+            if (tile !== this.cache.get(tile.toString())) {
+              /* If the tile has fallen out of the cache, don't draw it -- it
+               * is untracked.  This may be an indication that a larger cache
+               * should have been used. */
+              return;
+            }
+            /* Check if a tile is still desired.  Don't draw it if it isn't. */
+            var mapZoom = map.zoom(),
+                zoom = this._options.tileRounding(mapZoom),
+                view = this._getViewBounds();
+            if (this._canPurge(tile, view, zoom)) {
+              this.remove(tile);
+              return;
+            }
 
-        this.addPromise(tile);
+            this.drawTile(tile);
+
+            // mark the tile as covered
+            this._setTileTree(tile);
+          }.bind(this));
+
+          this.addPromise(tile);
+        }
       }.bind(this));
 
       // purge all old tiles when the new tiles are loaded (successfully or not)
