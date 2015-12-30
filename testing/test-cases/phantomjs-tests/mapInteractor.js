@@ -246,7 +246,7 @@ describe('mapInteractor', function () {
 
     // check the zoom event was called
     expect(map.info.zoom).toBe(1);
-    expect(map.info.zoomArgs).toBe(2 + 10 / zoomFactor / 3);
+    expect(map.info.zoomArgs).toBe(2 + 10 / zoomFactor);
 
     z = map.zoom();
 
@@ -261,7 +261,7 @@ describe('mapInteractor', function () {
 
     // check the zoom event was called
     expect(map.info.zoom).toBe(2);
-    expect(map.info.zoomArgs).toBe(z - 15 / zoomFactor / 3);
+    expect(map.info.zoomArgs).toBe(z - 15 / zoomFactor);
   });
 
   describe('pause state', function () {
