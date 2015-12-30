@@ -5,6 +5,7 @@ window.geo = geo; // jshint ignore: line
 geo.renderers = {};
 geo.features = {};
 geo.fileReaders = {};
+geo.rendererLayerAdjustments = {};
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -12,7 +13,7 @@ geo.fileReaders = {};
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.inherit = function (C, P) { // jshint ignore: line
-  "use strict";
+  'use strict';
 
   var F = inherit.func();
   F.prototype = P.prototype;
@@ -20,7 +21,7 @@ geo.inherit = function (C, P) { // jshint ignore: line
   C.prototype.constructor = C;
 };
 geo.inherit.func = function () {
-  "use strict";
+  'use strict';
   return function () {};
 };
 
@@ -29,11 +30,31 @@ window.inherit = geo.inherit;
 
 //////////////////////////////////////////////////////////////////////////////
 /**
+ * This is a helper method for generating new-style subclasses as an
+ * alternative to the older `inherit` classes.  Note: these classes
+ * intentionally don't support constructors for the moment.  We may
+ * consider alternate semantics such as ES6 classes or stampit
+ * (https://github.com/stampit-org/stampit) as an alternative to handling
+ * private variables.
+ *
+ * @param {object?} props Instance methods and properties to add/override
+ * @returns {object} The inherited object
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.extend = function (props) {
+  'use strict';
+  var child = Object.create(this.prototype);
+  $.extend(child.prototype, props || {});
+  return child;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+/**
  * Register a new file reader type
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.registerFileReader = function (name, func) {
-  "use strict";
+  'use strict';
 
   if (geo.fileReaders === undefined) {
     geo.fileReaders = {};
@@ -48,7 +69,7 @@ geo.registerFileReader = function (name, func) {
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.createFileReader = function (name, opts) {
-  "use strict";
+  'use strict';
 
   if (geo.fileReaders.hasOwnProperty(name)) {
     return geo.fileReaders[name](opts);
@@ -62,7 +83,7 @@ geo.createFileReader = function (name, opts) {
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.registerRenderer = function (name, func) {
-  "use strict";
+  'use strict';
 
   if (geo.renderers === undefined) {
     geo.renderers = {};
@@ -77,7 +98,7 @@ geo.registerRenderer = function (name, func) {
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.createRenderer  = function (name, layer, canvas, options) {
-  "use strict";
+  'use strict';
 
   if (geo.renderers.hasOwnProperty(name)) {
     var ren = geo.renderers[name](
@@ -95,7 +116,7 @@ geo.createRenderer  = function (name, layer, canvas, options) {
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.registerFeature = function (category, name, func) {
-  "use strict";
+  'use strict';
 
   if (geo.features === undefined) {
     geo.features = {};
@@ -115,17 +136,62 @@ geo.registerFeature = function (category, name, func) {
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.createFeature  = function (name, layer, renderer, arg) {
-  "use strict";
+  'use strict';
 
   var category = renderer.api(),
-      options = {"layer": layer, "renderer": renderer};
+      options = {'layer': layer, 'renderer': renderer};
   if (category in geo.features && name in geo.features[category]) {
     if (arg !== undefined) {
       $.extend(true, options, arg);
     }
-    return geo.features[category][name](options);
+    var feature = geo.features[category][name](options);
+    layer.gcs = function () {
+      return layer.map().gcs();
+    };
+    return feature;
   }
   return null;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Register a layer adjustment.
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.registerLayerAdjustment = function (category, name, func) {
+  'use strict';
+
+  if (geo.rendererLayerAdjustments === undefined) {
+    geo.rendererLayerAdjustments = {};
+  }
+
+  if (!(category in geo.rendererLayerAdjustments)) {
+    geo.rendererLayerAdjustments[category] = {};
+  }
+
+  // TODO Add warning if the name already exists
+  geo.rendererLayerAdjustments[category][name] = func;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * If a layer needs to be adjusted based on the renderer, call the function
+ * that adjusts it.
+ *
+ * @param {string} name Name of the layer.
+ * @param {object} layer Instantiated layer object.
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.adjustLayerForRenderer = function (name, layer) {
+  'use strict';
+  var rendererName = layer.rendererName();
+  if (rendererName) {
+    if (geo.rendererLayerAdjustments &&
+        geo.rendererLayerAdjustments[rendererName] &&
+        geo.rendererLayerAdjustments[rendererName][name]) {
+      geo.rendererLayerAdjustments[rendererName][name].apply(layer);
+    }
+  }
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -134,7 +200,7 @@ geo.createFeature  = function (name, layer, renderer, arg) {
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.registerLayer = function (name, func) {
-  "use strict";
+  'use strict';
 
   if (geo.layers === undefined) {
     geo.layers = {};
@@ -149,10 +215,10 @@ geo.registerLayer = function (name, func) {
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.createLayer = function (name, map, arg) {
-  "use strict";
+  'use strict';
 
   /// Default renderer is vgl
-  var options = {"map": map, "renderer": "vgl"},
+  var options = {'map': map, 'renderer': 'vgl'},
       layer = null;
 
   if (name in geo.layers) {
@@ -173,7 +239,7 @@ geo.createLayer = function (name, map, arg) {
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.registerWidget = function (category, name, func) {
-  "use strict";
+  'use strict';
 
   if (geo.widgets === undefined) {
     geo.widgets = {};
@@ -192,24 +258,28 @@ geo.registerWidget = function (category, name, func) {
  * Create new instance of the widget
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.createWidget  = function (name, layer, renderer, arg) {
-  "use strict";
+geo.createWidget  = function (name, layer, arg) {
+  'use strict';
 
-  var category = renderer.api(),
-      options = {"layer": layer, "renderer": renderer};
-  if (category in geo.widgets && name in geo.widgets[category]) {
+  var options = {
+    layer: layer
+  };
+
+  if (name in geo.widgets.dom) {
     if (arg !== undefined) {
       $.extend(true, options, arg);
     }
-    return geo.widgets[category][name](options);
+
+    return geo.widgets.dom[name](options);
   }
-  return null;
+
+  throw new Error('Cannot create unknown widget ' + name);
 };
 
 // Add a polyfill for window.requestAnimationFrame.
 if (!window.requestAnimationFrame) {
   window.requestAnimationFrame = function (func) {
-    "use strict";
+    'use strict';
 
     window.setTimeout(func, 15);
   };
@@ -218,15 +288,22 @@ if (!window.requestAnimationFrame) {
 // Add a polyfill for Math.log2
 if (!Math.log2) {
   Math.log2 = function () {
-    "use strict";
+    'use strict';
 
     return Math.log.apply(Math, arguments) / Math.LN2;
   };
 }
 
+// Add a polyfill for Math.sinh
+Math.sinh = Math.sinh || function (x) {
+  'use strict';
+  var y = Math.exp(x);
+  return (y - 1 / y) / 2;
+};
+
 /*global geo*/
 
-geo.version = "0.5.0";
+geo.version = "0.6.0-rc.1";
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -6295,6 +6372,19 @@ vgl.camera = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Set the view-matrix for the camera and mark that it is up to date so that
+   * it won't be recomputed unless something else changes.
+   *
+   * @param {mat4} view: new view matrix.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.setViewMatrix = function (view) {
+    mat4.copy(m_viewMatrix, view);
+    m_computeModelViewMatrixTime.modified();
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Return camera projection matrix This method does not compute the
    * projection-matrix for the camera. It is assumed that a call to
    * computeProjectionMatrix has been made earlier.
@@ -6304,6 +6394,19 @@ vgl.camera = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.projectionMatrix = function () {
     return this.computeProjectionMatrix();
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set the projection-matrix for the camera and mark that it is up to date so
+   * that it won't be recomputed unless something else changes.
+   *
+   * @param {mat4} proj: new projection matrix.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.setProjectionMatrix = function (proj) {
+    mat4.copy(m_projectionMatrix, proj);
+    m_computeProjectMatrixTime.modified();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -6554,7 +6657,7 @@ vgl.camera = function (arg) {
         parseFloat(m_parallelExtents.zoom.toFixed(0))) {
       return null;
     }
-    var align = {round: unitsPerPixel, dx: 0, dy: 0};
+    var align = {roundx: unitsPerPixel, roundy: unitsPerPixel, dx: 0, dy: 0};
     /* If the screen is an odd number of pixels, shift the view center to the
      * center of a pixel so that the pixels fit discretely across the screen.
      * If an even number of pixels, align the view center between pixels for
@@ -9122,8 +9225,8 @@ vgl.modelViewOriginUniform = function (name, origin) {
        * units-per-pixel, and align.dx and .dy are either 0 or half the size of
        * a unit-per-pixel.  The alignment guarantees that the texels are
        * aligned with screen pixels. */
-      view[12] = Math.round(view[12] / align.round) * align.round + align.dx;
-      view[13] = Math.round(view[13] / align.round) * align.round + align.dy;
+      view[12] = Math.round(view[12] / align.roundx) * align.roundx + align.dx;
+      view[13] = Math.round(view[13] / align.roundy) * align.roundy + align.dy;
     }
     this.set(view);
   };
@@ -12788,6 +12891,62 @@ vgl.DataBuffers = function (initialSize) {
           0
         )
       };
+    },
+
+    /**
+     * Radius of the earth in meters, from the equatorial radius of SRID 4326.
+     */
+    radiusEarth: 6378137,
+
+    /**
+     * Linearly combine two "coordinate-like" objects in a uniform way.
+     * Coordinate like objects have ``x``, ``y``, and optionally a ``z``
+     * key.  The first object is mutated.
+     *
+     *   a <= ca * a + cb * b
+     *
+     * @param {number} ca
+     * @param {object} a
+     * @param {number} [a.x=0]
+     * @param {number} [a.y=0]
+     * @param {number} [a.z=0]
+     * @param {number} cb
+     * @param {object} b
+     * @param {number} [b.x=0]
+     * @param {number} [b.y=0]
+     * @param {number} [b.z=0]
+     * @returns {object} ca * a + cb * b
+     */
+    lincomb: function (ca, a, cb, b) {
+      a.x = ca * (a.x || 0) + cb * (b.x || 0);
+      a.y = ca * (a.y || 0) + cb * (b.y || 0);
+      a.z = ca * (a.x || 0) + cb * (b.x || 0);
+      return a;
+    },
+
+    /**
+     * Element-wise product of two coordinate-like object.  Mutates
+     * the first object.  Note the default values for ``b``, which
+     * are intended to used as a anisotropic scaling factors.
+     *
+     *   a <= a * b^pow
+     *
+     * @param {object} a
+     * @param {number} [a.x=0]
+     * @param {number} [a.y=0]
+     * @param {number} [a.z=0]
+     * @param {object} b
+     * @param {number} [b.x=1]
+     * @param {number} [b.y=1]
+     * @param {number} [b.z=1]
+     * @param {number} [pow=1]
+     * @returns {object} a * b^pow
+     */
+    scale: function (a, b, pow) {
+      a.x = (a.x || 0) * Math.pow(b.x || 1, pow);
+      a.y = (a.y || 0) * Math.pow(b.y || 1, pow);
+      a.z = (a.z || 0) * Math.pow(b.z || 1, pow);
+      return a;
     }
   };
 
@@ -13817,6 +13976,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   geo.util.ClusterGroup = C;
 })();
 
+(function () {
+  'use strict';
+
+  geo.util.scale = {
+    d3: d3.scale
+  };
+})();
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class object
@@ -13835,18 +14002,19 @@ geo.object = function () {
   var m_this = this,
       m_eventHandlers = {},
       m_idleHandlers = [],
-      m_deferredCount = 0;
+      m_promiseCount = 0;
 
   //////////////////////////////////////////////////////////////////////////////
   /**
-   *  Bind a handler that will be called once when all deferreds are resolved.
+   *  Bind a handler that will be called once when all internal promises are
+   *  resolved.
    *
    *  @param {function} handler A function taking no arguments
    *  @returns {geo.object[]|geo.object} this
    */
   //////////////////////////////////////////////////////////////////////////////
   this.onIdle = function (handler) {
-    if (m_deferredCount) {
+    if (m_promiseCount) {
       m_idleHandlers.push(handler);
     } else {
       handler();
@@ -13856,22 +14024,25 @@ geo.object = function () {
 
   //////////////////////////////////////////////////////////////////////////////
   /**
-   *  Add a new deferred object preventing idle event handlers from being called.
+   *  Add a new promise object preventing idle event handlers from being called
+   *  until it is resolved.
    *
-   *  @param {$.defer} defer A jquery defered object
+   *  @param {Promise} promise A promise object
    */
   //////////////////////////////////////////////////////////////////////////////
-  this.addDeferred = function (defer) {
-    m_deferredCount += 1;
-    defer.done(function () {
-      m_deferredCount -= 1;
-      if (!m_deferredCount) {
+  this.addPromise = function (promise) {
+    // called on any resolution of the promise
+    function onDone() {
+      m_promiseCount -= 1;
+      if (!m_promiseCount) {
         m_idleHandlers.splice(0, m_idleHandlers.length)
           .forEach(function (handler) {
             handler();
           });
       }
-    });
+    }
+    m_promiseCount += 1;
+    promise.then(onDone, onDone);
     return m_this;
   };
 
@@ -13905,7 +14076,7 @@ geo.object = function () {
   /**
    *  Trigger an event (or events) on this object and call all handlers
    *
-   *  @param {String} event An event from {geo.events}
+   *  @param {String} event An event from {geo.event}
    *  @param {Object} args An optional argument to pass to handlers
    */
   //////////////////////////////////////////////////////////////////////////////
@@ -13918,6 +14089,10 @@ geo.object = function () {
       });
       return m_this;
     }
+
+    // append the event type to the argument object
+    args = args || {};
+    args.event = event;
 
     if (m_eventHandlers.hasOwnProperty(event)) {
       m_eventHandlers[event].forEach(function (handler) {
@@ -13942,7 +14117,7 @@ geo.object = function () {
     if (event === undefined) {
       m_eventHandlers = {};
       m_idleHandlers = [];
-      m_deferredCount = 0;
+      m_promiseCount = 0;
     }
     if (Array.isArray(event)) {
       event.forEach(function (e) {
@@ -14007,19 +14182,19 @@ geo.sceneObject = function (arg) {
       m_children = [],
       s_exit = this._exit,
       s_trigger = this.geoTrigger,
-      s_addDeferred = this.addDeferred,
+      s_addPromise = this.addPromise,
       s_onIdle = this.onIdle;
 
   //////////////////////////////////////////////////////////////////////////////
   /**
-   *  Override object.addDeferred to propagate up the scene tree.
+   *  Override object.addPromise to propagate up the scene tree.
    */
   //////////////////////////////////////////////////////////////////////////////
-  this.addDeferred = function (defer) {
+  this.addPromise = function (promise) {
     if (m_parent) {
-      m_parent.addDeferred(defer);
+      m_parent.addPromise(promise);
     } else {
-      s_addDeferred(defer);
+      s_addPromise(promise);
     }
   };
 
@@ -14183,491 +14358,1263 @@ inherit(geo.timestamp, vgl.timestamp);
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Create an instance of quadratic surface generator
- * in Cartesian coordinates by the equation
- * <code>(x / a)^2 + (y / b)^2 + (z / c)^2 = 1</code>. Used
- * primarily to create planetary bodies
+ * This purpose of this class is to provide a generic interface for computing
+ * coordinate transformationss.  The interface is taken from the proj4js,
+ * which also provides the geospatial projection implementation.  The
+ * interface is intentionally simple to allow for custom, non-geospatial use
+ * cases. For further details, see http://proj4js.org/
+ *
+ * The default transforms lat/long coordinates into web mercator
+ * for use with standard tile sets.
+ *
+ * This class is intended to be extended in the future to support 2.5 and 3
+ * dimensional transformations.  The forward/inverse methods take optional
+ * z values that are ignored in current mapping context, but will in the
+ * future perform more general 3D transformations.
  *
  * @class
- * @param {Number} [x=0]  Radius in X direction
- * @param {Number} [y=0]  Radius in Y direction
- * @param {Number} [z=0]  Radius in Z direction
- *
- * @returns {geo.ellipsoid}
+ * @extends geo.object
+ * @param {object} options Constructor options
+ * @param {string} options.source A proj4 string for the source projection
+ * @param {string} options.target A proj4 string for the target projection
+ * @returns {geo.transform}
  */
- //////////////////////////////////////////////////////////////////////////////
-geo.ellipsoid = function (x, y, z) {
+//////////////////////////////////////////////////////////////////////////////
+
+geo.transform = function (options) {
   'use strict';
-  if (!(this instanceof geo.ellipsoid)) {
-    return new geo.ellipsoid(x, y, z);
-  }
-
-  x = vgl.defaultValue(x, 0.0);
-  y = vgl.defaultValue(y, 0.0);
-  z = vgl.defaultValue(z, 0.0);
-
-  if (x < 0.0 || y < 0.0 || z < 0.0) {
-    return console.log('[error] Al radii components must be greater than zero');
+  if (!(this instanceof geo.transform)) {
+    return new geo.transform(options);
   }
 
   var m_this = this,
-      m_radii = new vec3.fromValues(x, y, z),
-      m_radiiSquared = new vec3.fromValues(
-        x * x, y * y, z * z),
-      m_minimumRadius = Math.min(x, y, z),
-      m_maximumRadius = Math.max(x, y, z);
+      m_proj,   // The raw proj4js object
+      m_source, // The source projection
+      m_target; // The target projection
 
-  ////////////////////////////////////////////////////////////////////////////
   /**
-   * Return radii of ellipsoid
+   * Generate the internal proj4 object.
+   * @private
    */
-  ////////////////////////////////////////////////////////////////////////////
-  this.radii = function () {
-    return m_radii;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Return squared radii of the ellipsoid
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.radiiSquared = function () {
-    return m_radiiSquared;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Return maximum radius of the ellipsoid
-   *
-   * @return {Number} The maximum radius of the ellipsoid
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.maximumRadius = function () {
-    return m_maximumRadius;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Return minimum radius of the ellipsoid
-   *
-   * @return {Number} The maximum radius of the ellipsoid
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.minimumRadius = function () {
-    return m_minimumRadius;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Computes the normal of the plane tangent to the surface of
-   * the ellipsoid at the provided position
-   *
-   * @param {Number} lat The cartographic latitude for which
-   *  to to determine the geodetic normal
-   * @param {Number} lon The cartographic longitude for which
-   *  to to determine the geodetic normal
-   *
-   * @return {vec3}
-   *
-   * @exception {DeveloperError} cartographic is required.
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.computeGeodeticSurfaceNormal = function (lat, lon) {
-    if (typeof lat === 'undefined' || typeof lon === 'undefined') {
-      throw '[error] Valid latitude and longitude is required';
-    }
-
-    var cosLatitude = Math.cos(lat),
-        result = vec3.create();
-
-    result[0] = cosLatitude * Math.cos(lon);
-    result[1] = cosLatitude * Math.sin(lon);
-    result[2] = Math.sin(lat);
-
-    vec3.normalize(result, result);
-    return result;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Converts the provided geographic latitude, longitude,
-   * and height to WGS84 coordinate system
-   *
-   * @param {Number} lat Latitude in radians
-   * @param {Number} lon Longitude in radians
-   * @param {Number} elev Elevation
-   * @return {vec3} Position in the WGS84 coordinate system
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.transformPoint = function (lat, lon, elev) {
-    lat = lat *  (Math.PI / 180.0);
-    lon = lon * (Math.PI / 180.0);
-
-    var n = m_this.computeGeodeticSurfaceNormal(lat, lon),
-        k = vec3.create(),
-        gamma  = Math.sqrt(vec3.dot(n, k)),
-        result = vec3.create();
-
-    vec3.multiply(k, m_radiiSquared, n);
-    vec3.scale(k, k, 1 / gamma);
-    vec3.scale(n, n, elev);
-    vec3.add(result, n, k);
-    return result;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Converts the provided geographic latitude, longitude,
-   * and height to WGS84 coordinate system
-   *
-   * @param {vgl.geometryData} geom
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.transformGeometry = function (geom) {
-    if (!geom) {
-      throw '[error] Failed to transform to cartesian. Invalid geometry.';
-    }
-
-    var sourceData = geom.sourceData(vgl.vertexAttributeKeys.Position),
-        sourceDataArray = sourceData.data(),
-        noOfComponents =  sourceData.attributeNumberOfComponents(
-          vgl.vertexAttributeKeys.Position),
-        stride = sourceData.attributeStride(
-          vgl.vertexAttributeKeys.Position),
-        offset = sourceData.attributeOffset(
-          vgl.vertexAttributeKeys.Position),
-        sizeOfDataType = sourceData.sizeOfAttributeDataType(
-          vgl.vertexAttributeKeys.Position),
-        index = null,
-        count = sourceDataArray.length * (1.0 / noOfComponents),
-        gamma = null,
-        n = null,
-        j = 0,
-        k = vec3.create(),
-        result = vec3.create();
-
-    stride /= sizeOfDataType;
-    offset /= sizeOfDataType;
-
-    if (noOfComponents !== 3) {
-      throw ('[error] Requires positions with three components');
-    }
-
-    for (j = 0; j < count; j += 1) {
-      index = j * stride + offset;
-
-      sourceDataArray[index] = sourceDataArray[index] * (Math.PI / 180.0);
-      sourceDataArray[index + 1] = sourceDataArray[index + 1] * (Math.PI / 180.0);
-
-      n = m_this.computeGeodeticSurfaceNormal(sourceDataArray[index + 1],
-                                            sourceDataArray[index]);
-      vec3.multiply(k, m_radiiSquared, n);
-      gamma = Math.sqrt(vec3.dot(n, k));
-      vec3.scale(k, k, 1 / gamma);
-      vec3.scale(n, n, sourceDataArray[index + 2]);
-      vec3.add(result, n, k);
-
-      sourceDataArray[index] = result[0];
-      sourceDataArray[index + 1] = result[1];
-      sourceDataArray[index + 2] = result[2];
-    }
-  };
-
-  return m_this;
-};
-
-////////////////////////////////////////////////////////////////////////////
-/**
- * An Ellipsoid instance initialized to the WGS84 standard.
- * @memberof ellipsoid
- *
- */
-////////////////////////////////////////////////////////////////////////////
-geo.ellipsoid.WGS84 = vgl.freezeObject(
-  geo.ellipsoid(6378137.0, 6378137.0, 6356752.3142451793));
-
-////////////////////////////////////////////////////////////////////////////
-/**
- * An Ellipsoid instance initialized to radii of (1.0, 1.0, 1.0).
- * @memberof ellipsoid
- */
-////////////////////////////////////////////////////////////////////////////
-geo.ellipsoid.UNIT_SPHERE = vgl.freezeObject(
-  geo.ellipsoid(1.0, 1.0, 1.0));
-
-/** @namespace */
-geo.mercator = {
-  r_major: 6378137.0  //Equatorial Radius, WGS84
-};
-
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Returns the polar radius based on the projection.
- *
- * @param {Boolean} sperical
- * @returns {Number}
- */
-//////////////////////////////////////////////////////////////////////////////
-geo.mercator.r_minor = function (spherical) {
-  'use strict';
-
-  var r_minor;
-
-  spherical = spherical !== undefined ? spherical : false;
-
-  if (spherical) {
-    r_minor = 6378137.0;
-  } else {
-    r_minor = 6356752.314245179;
+  function generate_proj4() {
+    m_proj = new proj4(
+      m_this.source(),
+      m_this.target()
+    );
   }
 
-  return r_minor;
+  /**
+   * Get/Set the source projection
+   */
+  this.source = function (arg) {
+    if (arg === undefined) {
+      return m_source || 'EPSG:4326';
+    }
+    m_source = arg;
+    generate_proj4();
+    return m_this;
+  };
+
+  /**
+   * Get/Set the target projection
+   */
+  this.target = function (arg) {
+    if (arg === undefined) {
+      return m_target || 'EPSG:3857';
+    }
+    m_target = arg;
+    generate_proj4();
+    return m_this;
+  };
+
+  /**
+   * Perform a forward transformation (source -> target)
+   * @protected
+   *
+   * @param {object}   point      The point coordinates
+   * @param {number}   point.x    The x-coordinate (i.e. longitude)
+   * @param {number}   point.y    The y-coordinate (i.e. latitude)
+   * @param {number}  [point.z=0] The z-coordinate (i.e. elevation)
+   *
+   * @returns {object} A point object in the target coordinates
+   */
+  this._forward = function (point) {
+    var pt = m_proj.forward(point);
+    pt.z = point.z || 0;
+    return pt;
+  };
+
+  /**
+   * Perform an inverse transformation (target -> source)
+   * @protected
+   *
+   * @param {object}   point     The point coordinates
+   * @param {number}   point.x   The x-coordinate (i.e. longitude)
+   * @param {number}   point.y   The y-coordinate (i.e. latitude)
+   * @param {number}  [point.z=0] The z-coordinate (i.e. elevation)
+   *
+   * @returns {object} A point object in the source coordinates
+   */
+  this._inverse = function (point) {
+    var pt = m_proj.inverse(point);
+    pt.z = point.z || 0;
+    return pt;
+  };
+
+  /**
+   * Perform a forward transformation (source -> target) in place
+   *
+   * @param {object[]} point      The point coordinates or array of points
+   * @param {number}   point.x    The x-coordinate (i.e. longitude)
+   * @param {number}   point.y    The y-coordinate (i.e. latitude)
+   * @param {number}  [point.z=0] The z-coordinate (i.e. elevation)
+   *
+   * @returns {object} A point object or array in the target coordinates
+   */
+  this.forward = function (point) {
+    if (Array.isArray(point)) {
+      return point.map(m_this._forward);
+    }
+    return m_this._forward(point);
+  };
+
+  /**
+   * Perform an inverse transformation (target -> source) in place
+   * @protected
+   *
+   * @param {object[]} point      The point coordinates or array of points
+   * @param {number}   point.x    The x-coordinate (i.e. longitude)
+   * @param {number}   point.y    The y-coordinate (i.e. latitude)
+   * @param {number}  [point.z=0] The z-coordinate (i.e. elevation)
+   *
+   * @returns {object} A point object in the source coordinates
+   */
+  this.inverse = function (point) {
+    if (Array.isArray(point)) {
+      return point.map(m_this._inverse);
+    }
+    return m_this._inverse(point);
+  };
+
+  // Set defaults given by the constructor
+  options = options || {};
+  this.source(options.source);
+  this.target(options.target);
+
+  geo.object.call(this);
+  return this;
 };
 
-//////////////////////////////////////////////////////////////////////////////
 /**
- * 1/f=(a-b)/a , a=r_major, b=r_minor
- */
-//////////////////////////////////////////////////////////////////////////////
-geo.mercator.f = function (spherical) {
-  'use strict';
-
-  return (geo.mercator.r_major - geo.mercator.r_minor(spherical)) / geo.mercator.r_major;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Convert longitude (Degree) to Tile X
+ * Transform an array of coordinates from one projection into another.  The
+ * transformation may occur in place (modifying the input coordinate array),
+ * depending on the input format.  The coordinates can be an object with x, y,
+ * and (optionally z) or an array of 2 or 3 values, or an array of either of
+ * those, or a single flat array with 2 or 3 components per coordinate.  Arrays
+ * are always modified in place.  Individual point objects are not altered; new
+ * point objects are returned unless no transform is needed.
  *
- *  @param {float} lon
- *  @param {integer} z
- *  @returns {integer}
- */
-//////////////////////////////////////////////////////////////////////////////
-geo.mercator.long2tilex = function (lon, z) {
-  'use strict';
-  var rad = (lon + 180.0) / 360.0,
-      f = Math.floor(rad * Math.pow(2.0, z));
-  return f;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Convert latitude (Degree) to Tile Y
+ * @param {string}        srcPrj The source projection
+ * @param {string}        tgtPrj The destination projection
+ * @param {geoPosition[]} coordinates An array of coordinate objects
+ * @param {number}        numberOfComponents for flat arrays, either 2 or 3.
  *
- *  @param {float} lat
- *  @param {integer} z
- *  @returns {integer}
+ * @returns {geoPosition[]} The transformed coordinates
  */
-//////////////////////////////////////////////////////////////////////////////
-geo.mercator.lat2tiley = function (lat, z) {
-  'use strict';
-  var rad = lat * Math.PI / 180.0;
-  return Math.floor((1.0 - rad / Math.PI) / 2.0 * Math.pow(2.0, z));
-};
-
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Convert Longitute (Degree) to Tile X and fraction.
- *
- *  @param {float} lon
- *  @param {integer} z
- *  @returns {number[]}
- */
-//////////////////////////////////////////////////////////////////////////////
-geo.mercator.long2tilex2 = function (lon, z) {
-  'use strict';
-  var rad = (lon + 180.0) / 360.0,
-      f = rad * Math.pow(2.0, z),
-      ret = Math.floor(f),
-      frac = f - ret;
-  return [ret, frac];
-};
-
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Convert Latitude (Degree) to Tile Y and fraction
- *
- *  @param {float} lat
- *  @param {integer} z
- *  @returns {number[]}
- */
-//////////////////////////////////////////////////////////////////////////////
-geo.mercator.lat2tiley2 = function (lat, z) {
-  'use strict';
-  var rad = lat * Math.PI / 180.0,
-      f = (1.0 - Math.log(Math.tan(rad) + 1.0 / Math.cos(rad)) /
-           Math.PI) / 2.0 * Math.pow(2.0, z),
-      ret = Math.floor(f),
-      frac = f - ret;
-  return [ret, frac];
-};
-
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Convert Tile X to Longitute (Degree)
- *
- *  @param {integer} x
- *  @param {integer} z
- *  @returns {float}
- */
-//////////////////////////////////////////////////////////////////////////////
-geo.mercator.tilex2long = function (x, z) {
-  'use strict';
-  return x / Math.pow(2.0, z) * 360.0 - 180.0;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Convert Tile Y to Latitute (Degree)
- *
- *  @param {integer} y
- *  @param {integer} z
- *  @returns {float}
- */
-//////////////////////////////////////////////////////////////////////////////
-geo.mercator.tiley2lat = function (y, z) {
-  'use strict';
-  var n = Math.PI - 2.0 * Math.PI * y / Math.pow(2.0, z);
-  return 180.0 / Math.PI * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
-};
-
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Convert spherical mercator Y to latitude
- *
- *  @param {float} a
- *  @returns {float}
- */
-//////////////////////////////////////////////////////////////////////////////
-geo.mercator.y2lat = function (a) {
-  'use strict';
-  return 180 / Math.PI * (2 * Math.atan(Math.exp(a * Math.PI / 180)) - Math.PI / 2);
-};
-
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Convert latitude into Y position in spherical mercator
- *
- *  @param {float} a
- *  @returns {float}
- */
-//////////////////////////////////////////////////////////////////////////////
-geo.mercator.lat2y = function (a) {
-  'use strict';
-  return 180 / Math.PI * Math.log(Math.tan(Math.PI / 4 + a * (Math.PI / 180) / 2));
-};
-
-//////////////////////////////////////////////////////////////////////////////
-/**
- *
- * @param {float} d
- * @returns {number}
- */
-//////////////////////////////////////////////////////////////////////////////
-geo.mercator.deg2rad = function (d) {
-  'use strict';
-  var r = d * (Math.PI / 180.0);
-  return r;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Convert radian to degree
- *
- * @param {float} r
- * @returns {number}
- */
-//////////////////////////////////////////////////////////////////////////////
-geo.mercator.rad2deg = function (r) {
-  'use strict';
-  var d = r / (Math.PI / 180.0);
-  return d;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Convert latlon to mercator
- *
- * @param {float} lon
- * @param {float} lat
- * @returns {object}
- */
-//////////////////////////////////////////////////////////////////////////////
-geo.mercator.ll2m = function (lon, lat, spherical) {
+geo.transform.transformCoordinates = function (
+        srcPrj, tgtPrj, coordinates, numberOfComponents) {
   'use strict';
 
-  if (lat > 89.5) {
-    lat = 89.5;
+  if (srcPrj === tgtPrj) {
+    return coordinates;
   }
 
-  if (lat < -89.5) {
-    lat = -89.5;
+  var i, count, offset, xAcc, yAcc, zAcc, writer, output, projPoint,
+      trans = geo.transform({source: srcPrj, target: tgtPrj});
+
+  /// Default Z accessor
+  zAcc = function () {
+    return 0.0;
+  };
+
+  /// Helper methods
+  function handleArrayCoordinates() {
+    if (coordinates[0] instanceof Array) {
+      if (coordinates[0].length === 2) {
+        xAcc = function (index) {
+          return coordinates[index][0];
+        };
+        yAcc = function (index) {
+          return coordinates[index][1];
+        };
+        writer = function (index, x, y) {
+          output[index] = [x, y];
+        };
+      } else if (coordinates[0].length === 3) {
+        xAcc = function (index) {
+          return coordinates[index][0];
+        };
+        yAcc = function (index) {
+          return coordinates[index][1];
+        };
+        zAcc = function (index) {
+          return coordinates[index][2];
+        };
+        writer = function (index, x, y, z) {
+          output[index] = [x, y, z];
+        };
+      } else {
+        throw 'Invalid coordinates. Requires two or three components per array';
+      }
+    } else {
+      if (coordinates.length === 2) {
+        offset = 2;
+
+        xAcc = function (index) {
+          return coordinates[index * offset];
+        };
+        yAcc = function (index) {
+          return coordinates[index * offset + 1];
+        };
+        writer = function (index, x, y) {
+          output[index] = x;
+          output[index + 1] = y;
+        };
+      } else if (coordinates.length === 3) {
+        offset = 3;
+
+        xAcc = function (index) {
+          return coordinates[index * offset];
+        };
+        yAcc = function (index) {
+          return coordinates[index * offset + 1];
+        };
+        zAcc = function (index) {
+          return coordinates[index * offset + 2];
+        };
+        writer = function (index, x, y, z) {
+          output[index] = x;
+          output[index + 1] = y;
+          output[index + 2] = z;
+        };
+      } else if (numberOfComponents) {
+        if (numberOfComponents === 2 || numberOfComponents === 3) {
+          offset = numberOfComponents;
+
+          xAcc = function (index) {
+            return coordinates[index];
+          };
+          yAcc = function (index) {
+            return coordinates[index + 1];
+          };
+          if (numberOfComponents === 2) {
+            writer = function (index, x, y) {
+              output[index] = x;
+              output[index + 1] = y;
+            };
+          } else {
+            zAcc = function (index) {
+              return coordinates[index + 2];
+            };
+            writer = function (index, x, y, z) {
+              output[index] = x;
+              output[index + 1] = y;
+              output[index + 2] = z;
+            };
+          }
+        } else {
+          throw 'Number of components should be two or three';
+        }
+      } else {
+        throw 'Invalid coordinates';
+      }
+    }
   }
 
-  var x = this.r_major * this.deg2rad(lon),
-      temp = this.r_minor(spherical) / this.r_major,
-      es = 1.0 - (temp * temp),
-      eccent = Math.sqrt(es),
-      phi = this.deg2rad(lat),
-      sinphi = Math.sin(phi),
-      con = eccent * sinphi,
-      com = 0.5 * eccent,
-      con2 = Math.pow((1.0 - con) / (1.0 + con), com),
-      ts = Math.tan(0.5 * (Math.PI * 0.5 - phi)) / con2,
-      y = -this.r_major * Math.log(ts),
-      ret = {'x': x, 'y': y};
+  /// Helper methods
+  function handleObjectCoordinates() {
+    if (coordinates[0] &&
+        'x' in coordinates[0] &&
+        'y' in coordinates[0]) {
+      xAcc = function (index) {
+        return coordinates[index].x;
+      };
+      yAcc = function (index) {
+        return coordinates[index].y;
+      };
 
-  return ret;
+      if ('z' in coordinates[0]) {
+        zAcc = function (index) {
+          return coordinates[index].z;
+        };
+        writer = function (index, x, y, z) {
+          output[i] = {x: x, y: y, z: z};
+        };
+      } else {
+        writer = function (index, x, y) {
+          output[index] = {x: x, y: y};
+        };
+      }
+    } else if (coordinates && 'x' in coordinates && 'y' in coordinates) {
+      xAcc = function () {
+        return coordinates.x;
+      };
+      yAcc = function () {
+        return coordinates.y;
+      };
+
+      if ('z' in coordinates) {
+        zAcc = function () {
+          return coordinates.z;
+        };
+        writer = function (index, x, y, z) {
+          output = {x: x, y: y, z: z};
+        };
+      } else {
+        writer = function (index, x, y) {
+          output = {x: x, y: y};
+        };
+      }
+    } else {
+      throw 'Invalid coordinates';
+    }
+  }
+
+  if (coordinates instanceof Array) {
+    output = [];
+    output.length = coordinates.length;
+    count = coordinates.length;
+
+    if (coordinates[0] instanceof Array ||
+        coordinates[0] instanceof Object) {
+      offset = 1;
+
+      if (coordinates[0] instanceof Array) {
+        handleArrayCoordinates();
+      } else if (coordinates[0] instanceof Object) {
+        handleObjectCoordinates();
+      }
+    } else {
+      handleArrayCoordinates();
+    }
+  } else if (coordinates && coordinates instanceof Object) {
+    count = 1;
+    offset = 1;
+    if (coordinates && 'x' in coordinates && 'y' in coordinates) {
+      handleObjectCoordinates();
+    } else {
+      throw 'Coordinates are not valid';
+    }
+  }
+
+  for (i = 0; i < count; i += offset) {
+    projPoint = trans.forward({x: xAcc(i), y: yAcc(i), z: zAcc(i)});
+    writer(i, projPoint.x, projPoint.y, projPoint.z);
+  }
+  return output;
 };
 
-//////////////////////////////////////////////////////////////////////////////
 /**
- * Convert mercator to lat lon
+ * Apply an affine transformation consisting of a translation
+ * then a scaling to the given coordinate array.  Note, the
+ * transformation occurs in place so the input coordinate
+ * object are mutated.
  *
- * @param {float} x
- * @param {float} y
+ * (Possibly extend to support rotations as well)
+ *
+ * @param {object} def
+ * @param {object} def.origin The transformed origin
+ * @param {object} def.scale The transformed scale factor
+ * @param {object[]} coords An array of coordinate objects
+ *
+ * @returns {object[]} The transformed coordinates
  */
-//////////////////////////////////////////////////////////////////////////////
-geo.mercator.m2ll = function (x, y, spherical) {
+geo.transform.affineForward = function (def, coords) {
   'use strict';
-  var lon = this.rad2deg((x / this.r_major)),
-      temp = this.r_minor(spherical) / this.r_major,
-      e = Math.sqrt(1.0 - (temp * temp)),
-      lat = this.rad2deg(this.pjPhi2(Math.exp(-(y / this.r_major)), e)),
-      ret = {'lon': lon, 'lat': lat};
-
-  return ret;
+  var i, origin = def.origin, scale = def.scale || {x: 1, y: 1, z: 1};
+  for (i = 0; i < coords.length; i += 1) {
+    coords[i].x = (coords[i].x - origin.x) * scale.x;
+    coords[i].y = (coords[i].y - origin.y) * scale.y;
+    coords[i].z = ((coords[i].z || 0) - (origin.z || 0)) * scale.z;
+  }
+  return coords;
 };
 
-//////////////////////////////////////////////////////////////////////////////
 /**
- * pjPhi2
+ * Apply an inverse affine transformation which is the
+ * inverse to {@link geo.transform.affineForward}.  Note, the
+ * transformation occurs in place so the input coordinate
+ * object are mutated.
  *
- * @param {float} ts
- * @param {float} e
- * @returns {number}
+ * (Possibly extend to support rotations as well)
+ *
+ * @param {object} def
+ * @param {object} def.origin The transformed origin
+ * @param {object} def.scale The transformed scale factor
+ * @param {object[]} coords An array of coordinate objects
+ *
+ * @returns {object[]} The transformed coordinates
  */
-//////////////////////////////////////////////////////////////////////////////
-geo.mercator.pjPhi2 = function (ts, e) {
+geo.transform.affineInverse = function (def, coords) {
   'use strict';
-  var N_ITER = 15,
-      HALFPI = Math.PI / 2,
-      TOL = 0.0000000001,
-      con, dphi,
-      i = N_ITER,
-      eccnth = 0.5 * e,
-      Phi = HALFPI - 2.0 * Math.atan(ts);
-
-  do {
-    con = e * Math.sin(Phi);
-    dphi = HALFPI - 2.0 * Math.atan(ts * Math.pow(
-            (1.0 - con) / (1.0 + con), eccnth)) - Phi;
-    Phi += dphi;
-    i -= 1;
-  } while (Math.abs(dphi) > TOL && i);
-  return Phi;
+  var i, origin = def.origin, scale = def.scale || {x: 1, y: 1, z: 1};
+  for (i = 0; i < coords.length; i += 1) {
+    coords[i].x = coords[i].x / scale.x + origin.x;
+    coords[i].y = coords[i].y / scale.y + origin.y;
+    coords[i].z = (coords[i].z || 0) / scale.z + (origin.z || 0);
+  }
+  return coords;
 };
+inherit(geo.transform, geo.object);
+
+(function () {
+  'use strict';
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * This class defines the raw interface for a camera.  At a low level, the
+   * camera provides a methods for converting between a map's coordinate system
+   * to display pixel coordinates.
+   *
+   * For the moment, all camera trasforms are assumed to be expressible as
+   * 4x4 matrices.  More general cameras may follow that break this assumption.
+   *
+   * The interface for the camera is relatively stable for "map-like" views,
+   * i.e. when the camera is pointing in the direction [0, 0, -1], and placed
+   * above the z=0 plane.  More general view changes and events have not yet
+   * been defined.
+   *
+   * The camera emits the following events when the view changes:
+   *
+   *   * {@link geo.event.camera.pan} when the camera is translated in the
+   *       x/y plane
+   *   * {@link geo.event.camera.zoom} when the camera is changed in a way
+   *       that modifies the current zoom level
+   *   * {@link geo.event.camera.view} when the visible bounds change for
+   *       any reason
+   *   * {@link geo.event.camera.projection} when the projection type changes
+   *   * {@link geo.event.camera.viewport} when the viewport changes
+   *
+   * By convention, protected methods do not update the internal matrix state,
+   * public methods do.  For now, there are two primary methods that are
+   * inteded to be used by external classes to mutate the internal state:
+   *
+   *   * bounds: Set the visible bounds (for initialization and zooming)
+   *   * pan: Translate the camera in x/y by an offset (for panning)
+   *
+   * @class
+   * @extends geo.object
+   * @param {object?} spec Options argument
+   * @param {string} spec.projection One of the supported geo.camera.projection
+   * @param {object} spec.viewport The initial camera viewport
+   * @param {object} spec.viewport.width
+   * @param {object} spec.viewport.height
+   * @returns {geo.camera}
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  geo.camera = function (spec) {
+    if (!(this instanceof geo.camera)) {
+      return new geo.camera(spec);
+    }
+    spec = spec || {};
+    geo.object.call(this, spec);
+
+    /**
+     * The view matrix
+     * @protected
+     */
+    this._view = mat4.create();
+
+    /**
+     * The projection matrix
+     * @protected
+     */
+    this._proj = mat4.create();
+
+    /**
+     * The projection type (one of `this.constructor.projection`)
+     * @protected
+     */
+    this._projection = null;
+
+    /**
+     * The transform matrix (view * proj)
+     * @protected
+     */
+    this._transform = mat4.create();
+
+    /**
+     * The inverse transform matrix (view * proj)^-1
+     * @protected
+     */
+    this._inverse = mat4.create();
+
+    /**
+     * Cached bounds object recomputed on demand.
+     * @protected
+     */
+    this._bounds = null;
+
+    /**
+     * Cached "display" matrix recomputed on demand.
+     * @see {@link geo.camera.display}
+     * @protected
+     */
+    this._display = null;
+
+    /**
+     * Cached "world" matrix recomputed on demand.
+     * @see {@link geo.camera.world}
+     * @protected
+     */
+    this._world = null;
+
+    /**
+     * The viewport parameters size and offset.
+     * @property {number} height Viewport height in pixels
+     * @property {number} width Viewport width in pixels
+     * @protected
+     */
+    this._viewport = {width: 1, height: 1};
+
+    /**
+     * Set up the projection matrix for the current projection type.
+     * @protected
+     */
+    this._createProj = function () {
+      var s = this.constructor.bounds.near / this.constructor.bounds.far;
+
+      // call mat4.frustum or mat4.ortho here
+      if (this._projection === 'perspective') {
+        mat4.frustum(
+          this._proj,
+          this.constructor.bounds.left * s,
+          this.constructor.bounds.right * s,
+          this.constructor.bounds.bottom * s,
+          this.constructor.bounds.top * s,
+          -this.constructor.bounds.near,
+          -this.constructor.bounds.far
+        );
+      } else if (this._projection === 'parallel') {
+        mat4.ortho(
+          this._proj,
+          this.constructor.bounds.left,
+          this.constructor.bounds.right,
+          this.constructor.bounds.bottom,
+          this.constructor.bounds.top,
+          this.constructor.bounds.near,
+          this.constructor.bounds.far
+        );
+      }
+    };
+
+    /**
+     * Update the internal state of the camera on change to camera
+     * parameters.
+     * @protected
+     */
+    this._update = function () {
+      this._bounds = null;
+      this._display = null;
+      this._world = null;
+      this._transform = geo.camera.combine(this._proj, this._view);
+      mat4.invert(this._inverse, this._transform);
+      this.geoTrigger(geo.event.camera.view, {
+        camera: this
+      });
+    };
+
+    /**
+     * Getter/setter for the view matrix.
+     * @note copies the matrix value on set.
+     */
+    Object.defineProperty(this, 'view', {
+      get: function () {
+        return this._view;
+      },
+      set: function (view) {
+        mat4.copy(this._view, view);
+        this._update();
+      }
+    });
+
+    /**
+     * Getter/setter for the view bounds.
+     *
+     * If not provided, near and far bounds will be set to [-1, 1] by
+     * default.  We will probably want to change this to a unit specific
+     * value initialized by the map when drawing true 3D objects or
+     * tilting the camera.
+     *
+     * Returned near/far bounds are also -1, 1 for the moment.
+     */
+    Object.defineProperty(this, 'bounds', {
+      get: function () {
+        if (this._bounds === null) {
+          this._bounds = this._getBounds();
+        }
+        return this._bounds;
+      },
+      set: function (bounds) {
+        this._setBounds(bounds);
+        this._update();
+      }
+    });
+
+    /**
+     * Getter for the "display" matrix.  This matrix converts from
+     * world coordinates into display coordinates.  This matrix exists to
+     * generate matrix3d css transforms that can be used in layers that
+     * render on the DOM.
+     */
+    Object.defineProperty(this, 'display', {
+      get: function () {
+        var mat;
+        if (this._display === null) {
+          mat = geo.camera.affine(
+            {x: 1, y: 1}, // translate to: [0, 2] x [0, 2]
+            {
+              x: this.viewport.width / 2,
+              y: this.viewport.height / -2
+            }             // scale to: [0, width] x [-height, 0]
+          );
+
+          // applies mat to the transform (world -> normalized)
+          this._display = geo.camera.combine(
+            mat,
+            this._transform
+          );
+        }
+        return this._display;
+      }
+    });
+
+    /**
+     * Getter for the "world" matrix.  This matrix converts from
+     * display coordinates into world coordinates.  This is constructed
+     * by inverting the "display" matrix.
+     */
+    Object.defineProperty(this, 'world', {
+      get: function () {
+        if (this._world === null) {
+          this._world = mat4.invert(
+            mat4.create(),
+            this.display
+          );
+        }
+        return this._world;
+      }
+    });
+
+    /**
+     * Getter/setter for the projection type.
+     */
+    Object.defineProperty(this, 'projection', {
+      get: function () {
+        return this._projection;
+      },
+      set: function (type) {
+        if (!this.constructor.projection[type]) {
+          throw new Error('Unsupported projection type: ' + type);
+        }
+        if (type !== this._projection) {
+          this._projection = type;
+          this._createProj();
+          this._update();
+          this.geoTrigger(geo.event.camera.projection, {
+            camera: this,
+            projection: type
+          });
+        }
+      }
+    });
+
+    /**
+     * Getter for the projection matrix (when applicable).
+     * This generally shouldn't be modified directly because
+     * the rest of the code assumes that the clipping bounds
+     * are [-1, -1, -1] to [1, 1, 1] in camera coordinates.
+     */
+    Object.defineProperty(this, 'projectionMatrix', {
+      get: function () {
+        return this._proj;
+      }
+    });
+
+    /**
+     * Getter for the transform matrix.
+     */
+    Object.defineProperty(this, 'transform', {
+      get: function () {
+        return this._transform;
+      }
+    });
+
+    /**
+     * Getter for the inverse transform matrix.
+     */
+    Object.defineProperty(this, 'inverse', {
+      get: function () {
+        return this._inverse;
+      }
+    });
+
+    /**
+     * Getter/setter for the viewport.
+     */
+    Object.defineProperty(this, 'viewport', {
+      get: function () {
+        return {width: this._viewport.width, height: this._viewport.height};
+      },
+      set: function (viewport) {
+        if (!(viewport.width > 0 &&
+              viewport.height > 0)) {
+          throw new Error('Invalid viewport dimensions');
+        }
+        if (viewport.width === this._viewport.width &&
+            viewport.height === this._viewport.height) {
+          return;
+        }
+
+        // apply scaling to the view matrix to account for the new aspect ratio
+        // without changing the apparent zoom level
+        if (this._viewport.width && this._viewport.height) {
+          this._scale(
+            vec3.fromValues(
+              this._viewport.width / viewport.width,
+              this._viewport.height / viewport.height,
+              1
+            )
+          );
+
+          // translate by half the difference to keep the center the same
+          this._translate(
+            vec3.fromValues(
+              (viewport.width - this._viewport.width) / 2,
+              (viewport.height - this._viewport.height) / 2,
+              0
+            )
+          );
+        }
+
+        this._viewport = {width: viewport.width, height: viewport.height};
+        this._update();
+        this.geoTrigger(geo.event.camera.viewport, {
+          camera: this,
+          viewport: this.viewport
+        });
+      }
+    });
+
+    /**
+     * Reset the view matrix to its initial (identity) state.
+     * @protected
+     * @returns {this} Chainable
+     */
+    this._resetView = function () {
+      mat4.identity(this._view);
+      return this;
+    };
+
+    /**
+     * Uses `mat4.translate` to translate the camera by the given vector amount.
+     * @protected
+     * @param {vec3} offset The camera translation vector
+     * @returns {this} Chainable
+     */
+    this._translate = function (offset) {
+      mat4.translate(this._view, this._view, offset);
+    };
+
+    /**
+     * Uses `mat4.scale` to scale the camera by the given vector amount.
+     * @protected
+     * @param {vec3} scale The scaling vector
+     * @returns {this} Chainable
+     */
+    this._scale = function (scale) {
+      mat4.scale(this._view, this._view, scale);
+    };
+
+    /**
+     * Project a vec4 from world space into clipped space [-1, 1] in place
+     * @protected
+     * @param {vec4} point The point in world coordinates (mutated)
+     * @returns {vec4} The point in clip space coordinates
+     */
+    this._worldToClip4 = function (point) {
+      return geo.camera.applyTransform(this._transform, point);
+    };
+
+    /**
+     * Project a vec4 from clipped space into world space in place
+     * @protected
+     * @param {vec4} point The point in clipped coordinates (mutated)
+     * @returns {vec4} The point in world space coordinates
+     */
+    this._clipToWorld4 = function (point) {
+      return geo.camera.applyTransform(this._inverse, point);
+    };
+
+    /**
+     * Apply the camera's projection transform to the given point.
+     * @param {vec4} pt a point in clipped coordinates
+     * @returns {vec4} the point in normalized coordinates
+     */
+    this.applyProjection = function (pt) {
+      var w;
+      if (this._projection === 'perspective') {
+        w = 1 / (pt[3] || 1);
+        pt[0] = w * pt[0];
+        pt[1] = w * pt[1];
+        pt[2] = w * pt[2];
+        pt[3] = w;
+      } else {
+        pt[3] = 1;
+      }
+      return pt;
+    };
+
+    /**
+     * Unapply the camera's projection transform from the given point.
+     * @param {vec4} pt a point in normalized coordinates
+     * @returns {vec4} the point in clipped coordinates
+     */
+    this.unapplyProjection = function (pt) {
+      var w;
+      if (this._projection === 'perspective') {
+        w = pt[3] || 1;
+        pt[0] = w * pt[0];
+        pt[1] = w * pt[1];
+        pt[2] = w * pt[2];
+        pt[3] = w;
+      } else {
+        pt[3] = 1;
+      }
+      return pt;
+    };
+
+
+    /**
+     * Project a vec4 from world space into viewport space.
+     * @param {vec4} point The point in world coordinates (mutated)
+     * @returns {vec4} The point in display coordinates
+     *
+     * @note For the moment, this computation assumes the following:
+     *   * point[3] > 0
+     *   * depth range [0, 1]
+     *
+     * The clip space z and w coordinates are returned with the window
+     * x/y coordinates.
+     */
+    this.worldToDisplay4 = function (point) {
+      // This is because z = 0 is the far plane exposed to the user, but
+      // internally the far plane is at -2.
+      point[2] -= 2;
+
+      // convert to clip space
+      this._worldToClip4(point);
+
+      // apply projection specific transformation
+      point = this.applyProjection(point);
+
+      // convert to display space
+      point[0] = this._viewport.width * (1 + point[0]) / 2.0;
+      point[1] = this._viewport.height * (1 - point[1]) / 2.0;
+      point[2] = (1 + point[2]) / 2.0;
+      return point;
+    };
+
+    /**
+     * Project a vec4 from display space into world space in place.
+     * @param {vec4} point The point in display coordinates (mutated)
+     * @returns {vec4} The point in world space coordinates
+     *
+     * @note For the moment, this computation assumes the following:
+     *   * point[3] > 0
+     *   * depth range [0, 1]
+     */
+    this.displayToWorld4 = function (point) {
+      // convert to clip space
+      point[0] = 2 * point[0] / this._viewport.width - 1;
+      point[1] = -2 * point[1] / this._viewport.height + 1;
+      point[2] = 2 * point[2] - 1;
+
+      // invert projection transform
+      point = this.unapplyProjection(point);
+
+      // convert to world coordinates
+      this._clipToWorld4(point);
+
+      // move far surface to z = 0
+      point[2] += 2;
+      return point;
+    };
+
+    /**
+     * Project a point object from world space into viewport space.
+     * @param {object} point The point in world coordinates
+     * @param {number} point.x
+     * @param {number} point.y
+     * @returns {object} The point in display coordinates
+     */
+    this.worldToDisplay = function (point) {
+      // define some magic numbers:
+      var z = 0, // z coordinate of the surface in world coordinates
+          w = 1; // enables perspective divide (i.e. for point conversion)
+      point = this.worldToDisplay4(
+        [point.x, point.y, z, w]
+      );
+      return {x: point[0], y: point[1], z: point[2]};
+    };
+
+    /**
+     * Project a point object from viewport space into world space.
+     * @param {object} point The point in display coordinates
+     * @param {number} point.x
+     * @param {number} point.y
+     * @returns {object} The point in world coordinates
+     */
+    this.displayToWorld = function (point) {
+      // define some magic numbers:
+      var z = 1, // the z coordinate of the surface
+          w = 2; // perspective divide at z = 1
+      point = this.displayToWorld4(
+        [point.x, point.y, z, w]
+      );
+      return {x: point[0], y: point[1]};
+    };
+
+    /**
+     * Calculate the current bounds in world coordinates from the
+     * current view matrix.  This computes a matrix vector multiplication
+     * so the result is cached for public facing methods.
+     *
+     * @protected
+     * @returns {object} bounds object
+     */
+    this._getBounds = function () {
+      var pt, bds = {};
+
+
+      // get lower bounds
+      pt = this.displayToWorld({
+        x: 0, y: this._viewport.height
+      });
+      bds.left = pt.x;
+      bds.bottom = pt.y;
+
+      // get upper bounds
+      pt = this.displayToWorld({
+        x: this._viewport.width, y: 0
+      });
+      bds.right = pt.x;
+      bds.top = pt.y;
+
+      return bds;
+    };
+
+    /**
+     * Sets the view matrix so that the given world bounds
+     * are in view.  To account for the viewport aspect ratio,
+     * the resulting bounds may be larger in width or height than
+     * the requested bound, but should be centered in the frame.
+     *
+     * @protected
+     * @param {object} bounds
+     * @param {number} bounds.left
+     * @param {number} bounds.right
+     * @param {number} bounds.bottom
+     * @param {number} bounds.top
+     * @param {number?} bounds.near Currently ignored
+     * @param {number?} bounds.far Currently ignored
+     * @return {this} Chainable
+     */
+    this._setBounds = function (bounds) {
+
+      var translate = vec3.create(),
+          scale = vec3.create(),
+          c_ar, v_ar, w, h;
+
+      bounds.near = bounds.near || 0;
+      bounds.far = bounds.far || 1;
+
+      // reset view to the identity
+      this._resetView();
+
+      w = Math.abs(bounds.right - bounds.left);
+      h = Math.abs(bounds.top - bounds.bottom);
+      c_ar = w / h;
+      v_ar = this._viewport.width / this._viewport.height;
+
+      if (c_ar >= v_ar) {
+        // grow camera bounds vertically
+        h = w / v_ar;
+        scale[0] = 2 / w;
+        scale[1] = 2 / h;
+      } else {
+        // grow bounds horizontally
+        w = h * v_ar;
+        scale[0] = 2 / w;
+        scale[1] = 2 / h;
+      }
+
+      scale[2] = 1;
+      this._scale(scale);
+
+      // translate to the new center.
+      translate[0] = -(bounds.left + bounds.right) / 2;
+      translate[1] = -(bounds.bottom + bounds.top) / 2;
+      translate[2] = 0;
+
+      this._translate(translate);
+      return this;
+    };
+
+    /**
+     * Pans the view matrix by the given amount.
+     *
+     * @param {object} offset The delta in world space coordinates.
+     * @param {number} offset.x
+     * @param {number} offset.y
+     * @param {number} [offset.z=0]
+     */
+    this.pan = function (offset) {
+      this._translate(vec3.fromValues(
+        offset.x,
+        offset.y,
+        offset.z || 0
+      ));
+      this._update();
+    };
+
+    /**
+     * Zooms the view matrix by the given amount.
+     *
+     * @param {number} zoom The zoom scale to apply
+     */
+    this.zoom = function (zoom) {
+      mat4.scale(this._view, this._view,
+        vec3.fromValues(
+          zoom,
+          zoom,
+          zoom
+        )
+      );
+      this._update();
+    };
+
+    /**
+     * Returns a CSS transform that converts (by default) from world coordinates
+     * into display coordinates.  This allows users of this module to
+     * position elements using world coordinates directly inside DOM
+     * elements.
+     *
+     * @note This transform will not take into account projection specific
+     * transforms.  For perspective projections, one can use the properties
+     * `perspective` and `perspective-origin` to apply the projection
+     * in css directly.
+     *
+     * @param {string} transform The transform to return
+     *   * display
+     *   * world
+     * @returns {string} The css transform string
+     */
+    this.css = function (transform) {
+      var m;
+      switch ((transform || '').toLowerCase()) {
+        case 'display':
+        case '':
+          m = this.display;
+          break;
+        case 'world':
+          m = this.world;
+          break;
+        default:
+          throw new Error('Unknown transform ' + transform);
+      }
+      return geo.camera.css(m);
+    };
+
+    /**
+     * Represent a glmatrix as a pretty-printed string.
+     * @param {mat4} mat A 4 x 4 matrix
+     * @param {number} prec The number of decimal places
+     * @returns {string}
+     */
+    this.ppMatrix = function (mat, prec) {
+      var t = mat;
+      prec = prec || 2;
+      function f(i) {
+        var d = t[i], s = d.toExponential(prec);
+        if (d >= 0) {
+          s = ' ' + s;
+        }
+        return s;
+      }
+      return [
+        [f(0), f(4), f(8), f(12)].join(' '),
+        [f(1), f(5), f(9), f(13)].join(' '),
+        [f(2), f(6), f(10), f(14)].join(' '),
+        [f(3), f(7), f(11), f(15)].join(' ')
+      ].join('\n');
+    };
+
+    /**
+     * Pretty print the transform matrix.
+     */
+    this.toString = function () {
+      return this.ppMatrix(this._transform);
+    };
+
+    /**
+     * Return a debugging string of the current camera state.
+     */
+    this.debug = function () {
+      return [
+        'bounds',
+        JSON.stringify(this.bounds),
+        'view:',
+        this.ppMatrix(this._view),
+        'projection:',
+        this.ppMatrix(this._proj),
+        'transform:',
+        this.ppMatrix(this._transform)
+      ].join('\n');
+    };
+
+    /**
+     * Represent the value of the camera as its transform matrix.
+     */
+    this.valueOf = function () {
+      return this._transform;
+    };
+
+    // initialize the view matrix
+    this._resetView();
+
+    // set up the projection matrix
+    this.projection = spec.projection || 'parallel';
+
+    // initialize the viewport
+    if (spec.viewport) {
+      this.viewport = spec.viewport;
+    }
+
+    // trigger an initial update to set up the camera state
+    this._update();
+
+    return this;
+  };
+
+  /**
+   * Supported projection types.
+   */
+  geo.camera.projection = {
+    perspective: true,
+    parallel: true
+  };
+
+  /**
+   * Camera clipping bounds, probably shouldn't be modified.
+   */
+  geo.camera.bounds = {
+    left: -1,
+    right: 1,
+    top: 1,
+    bottom: -1,
+    far: -2,
+    near: -1
+  };
+
+  /**
+   * Output a mat4 as a css transform.
+   * @param {mat4} t A matrix transform
+   * @returns {string} A css transform string
+   */
+  geo.camera.css = function (t) {
+    return (
+      'matrix3d(' +
+      [
+        t[0].toFixed(20),
+        t[1].toFixed(20),
+        t[2].toFixed(20),
+        t[3].toFixed(20),
+        t[4].toFixed(20),
+        t[5].toFixed(20),
+        t[6].toFixed(20),
+        t[7].toFixed(20),
+        t[8].toFixed(20),
+        t[9].toFixed(20),
+        t[10].toFixed(20),
+        t[11].toFixed(20),
+        t[12].toFixed(20),
+        t[13].toFixed(20),
+        t[14].toFixed(20),
+        t[15].toFixed(20)
+      ].join(',') +
+      ')'
+    );
+  };
+
+  /**
+   * Generate a mat4 representing an affine coordinate transformation.
+   *
+   * For the following affine transform:
+   *
+   *    x |-> m * (x + a) + b
+   *
+   * applies the css transform:
+   *
+   *    translate(b) scale(m) translate(a)
+   *
+   * @param {object?} pre Coordinate offset **before** scaling
+   * @param {object?} scale Coordinate scaling
+   * @param {object?} post Coordinate offset **after** scaling
+   * @returns {mat4} The new transform matrix
+   */
+  geo.camera.affine = function (pre, scale, post) {
+    var mat = mat4.create();
+
+    // Note: mat4 operations are applied to the right side of the current
+    // transform, so the first applied here is the last applied to the
+    // coordinate.
+    if (post) {
+      mat4.translate(mat, mat, [post.x || 0, post.y || 0, post.z || 0]);
+    }
+    if (scale) {
+      mat4.scale(mat, mat, [scale.x || 1, scale.y || 1, scale.z || 1]);
+    }
+    if (pre) {
+      mat4.translate(mat, mat, [pre.x || 0, pre.y || 0, pre.z || 0]);
+    }
+    return mat;
+  };
+
+  /**
+   * Apply the given transform matrix to a point in place.
+   * @param {mat4} t
+   * @param {vec4} pt
+   * @returns {vec4}
+   */
+  geo.camera.applyTransform = function (t, pt) {
+    return vec4.transformMat4(pt, pt, t);
+  };
+
+  /**
+   * Combine two transforms by multiplying their matrix representations.
+   * @note The second transform provided will be the first applied in the
+   * coordinate transform.
+   * @param {mat4} A
+   * @param {mat4} B
+   * @returns {mat4} A * B
+   */
+  geo.camera.combine = function (A, B) {
+    return mat4.mul(mat4.create(), A, B);
+  };
+
+  inherit(geo.camera, geo.object);
+})();
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -14675,11 +15622,13 @@ geo.mercator.pjPhi2 = function (ts, e) {
  * @extends geo.sceneObject
  * @param {Object?} arg An options argument
  * @param {string} arg.attribution An attribution string to display
+ * @param {number} arg.zIndex The z-index to assign to the layer (defaults
+ *   to the index of the layer inside the map)
  * @returns {geo.layer}
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.layer = function (arg) {
-  "use strict";
+  'use strict';
 
   if (!(this instanceof geo.layer)) {
     return new geo.layer(arg);
@@ -14694,32 +15643,141 @@ geo.layer = function (arg) {
   //////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       s_exit = this._exit,
-      m_style = arg.style === undefined ? {"opacity": 0.5,
-                                           "color": [0.8, 0.8, 0.8],
-                                           "visible": true,
-                                           "bin": 100} : arg.style,
       m_id = arg.id === undefined ? geo.layer.newLayerId() : arg.id,
-      m_name = "",
-      m_gcs = "EPSG:4326",
-      m_timeRange = null,
-      m_source = arg.source || null,
+      m_name = '',
       m_map = arg.map === undefined ? null : arg.map,
-      m_isReference = false,
-      m_x = 0,
-      m_y = 0,
-      m_width = 0,
-      m_height = 0,
       m_node = null,
       m_canvas = null,
       m_renderer = null,
       m_initialized = false,
-      m_rendererName = arg.renderer === undefined ? "vgl" : arg.renderer,
+      m_rendererName = arg.renderer === undefined ? 'vgl' : arg.renderer,
       m_dataTime = geo.timestamp(),
       m_updateTime = geo.timestamp(),
-      m_drawTime = geo.timestamp(),
       m_sticky = arg.sticky === undefined ? true : arg.sticky,
       m_active = arg.active === undefined ? true : arg.active,
-      m_attribution = arg.attribution || null;
+      m_opacity = arg.opacity === undefined ? 1 : arg.opacity,
+      m_attribution = arg.attribution || null,
+      m_zIndex;
+
+  if (!m_map) {
+    throw new Error('Layers must be initialized on a map.');
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get the name of the renderer.
+   *
+   * @returns {string}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.rendererName = function () {
+    return m_rendererName;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get or set the z-index of the layer.  The z-index controls the display
+   * order of the layers in much the same way as the CSS z-index property.
+   *
+   * @param {number} [zIndex] The new z-index
+   * @returns {number|this}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.zIndex = function (zIndex) {
+    if (zIndex === undefined) {
+      return m_zIndex;
+    }
+    m_zIndex = zIndex;
+    m_node.css('z-index', m_zIndex);
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Bring the layer above the given number of layers.  This will rotate the
+   * current z-indices for this and the next `n` layers.
+   *
+   * @param {number} [n=1] The number of positions to move
+   * @returns {this}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.moveUp = function (n) {
+    var order, i, me = null, tmp, sign;
+
+    // set the default
+    if (n === undefined) {
+      n = 1;
+    }
+
+    // set the sort direction that controls if we are moving up
+    // or down the z-index
+    sign = 1;
+    if (n < 0) {
+      sign = -1;
+      n = -n;
+    }
+
+    // get a sorted list of layers
+    order = m_this.map().layers().sort(
+      function (a, b) { return sign * (a.zIndex() - b.zIndex()); }
+    );
+
+    for (i = 0; i < order.length; i += 1) {
+      if (me === null) {
+        // loop until we get to the current layer
+        if (order[i] === m_this) {
+          me = i;
+        }
+      } else if (i - me <= n) {
+        // swap the next n layers
+        tmp = m_this.zIndex();
+        m_this.zIndex(order[i].zIndex());
+        order[i].zIndex(tmp);
+      } else {
+        // all the swaps are done now
+        break;
+      }
+    }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Bring the layer below the given number of layers.  This will rotate the
+   * current z-indices for this and the previous `n` layers.
+   *
+   * @param {number} [n=1] The number of positions to move
+   * @returns {this}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.moveDown = function (n) {
+    if (n === undefined) {
+      n = 1;
+    }
+    return m_this.moveUp(-n);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Bring the layer to the top of the map layers.
+   *
+   * @returns {this}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.moveToTop = function () {
+    return m_this.moveUp(m_this.map().children().length - 1);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Bring the layer to the bottom of the map layers.
+   *
+   * @returns {this}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.moveToBottom = function () {
+    return m_this.moveDown(m_this.map().children().length - 1);
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -14790,115 +15848,11 @@ geo.layer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get/Set opacity of the layer
-   *
-   * @returns {Number}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.opacity = function (val) {
-    if (val === undefined) {
-      return m_style.opacity;
-    }
-    m_style.opacity = val;
-    m_this.modified();
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get/Set visibility of the layer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.visible = function (val) {
-    if (val === undefined) {
-      return m_style.visible;
-    }
-    m_style.visible = val;
-    m_this.modified();
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get/Set bin of the layer
-   *
-   * @returns {Number}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.bin = function (val) {
-    if (val === undefined) {
-      return m_style.bin;
-    }
-    m_style.bin = val;
-    m_this.modified();
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get/Set projection of the layer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.gcs = function (val) {
-    if (val === undefined) {
-      return m_gcs;
-    }
-    m_gcs = val;
-    m_this.modified();
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Transform layer to the reference layer gcs
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.transform = function (val) {
-    geo.transform.transformLayer(val, m_this, m_map.baseLayer());
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get/Set time range of the layer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.timeRange = function (val) {
-    if (val === undefined) {
-      return m_timeRange;
-    }
-    m_timeRange = val;
-    m_this.modified();
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get/Set source of the layer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.source = function (val) {
-    if (val === undefined) {
-      return m_source;
-    }
-    m_source = val;
-    m_this.modified();
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
    * Get/Set map of the layer
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.map = function (val) {
-    if (val === undefined) {
-      return m_map;
-    }
-    m_map = val;
-    m_map.node().append(m_node);
-    m_this.modified();
-    return m_this;
+  this.map = function () {
+    return m_map;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -14922,15 +15876,6 @@ geo.layer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get viewport of the layer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.viewport = function () {
-    return [m_x, m_y, m_width, m_height];
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
    * Return last time data got changed
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -14949,37 +15894,6 @@ geo.layer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Return the modified time for the last draw call that did something
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.drawTime = function () {
-    return m_drawTime;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Run query and return results for it
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.query = function () {
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get/Set layer as the reference layer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.referenceLayer = function (val) {
-    if (val !== undefined) {
-      m_isReference = val;
-      m_this.modified();
-      return m_this;
-    }
-    return m_isReference;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
    * Get/Set if the layer has been initialized
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -14993,21 +15907,29 @@ geo.layer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Transform a point or array of points in GCS space to
-   * local space of the layer
+   * Transform coordinates from world coordinates into a local coordinate
+   * system specific to the underlying renderer.  This method is exposed
+   * to allow direct access the rendering context, but otherwise should
+   * not be called directly.  The default implementation is the identity
+   * operator.
    */
   ////////////////////////////////////////////////////////////////////////////
   this.toLocal = function (input) {
+    if (m_this._toLocalMatrix) {
+      geo.camera.applyTransform(m_this._toLocalMatrix, input);
+    }
     return input;
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Transform a point or array of points in local space to
-   * latitude-longitude space
+   * Transform coordinates from a local coordinate system to world coordinates.
    */
   ////////////////////////////////////////////////////////////////////////////
   this.fromLocal = function (input) {
+    if (m_this._fromLocalMatrix) {
+      geo.camera.applyTransform(m_this._fromLocalMatrix, input);
+    }
     return input;
   };
 
@@ -15041,21 +15963,18 @@ geo.layer = function (arg) {
       return m_this;
     }
 
-    // Create top level div for the layer
-    m_node = $(document.createElement("div"));
-    m_node.attr("id", m_name);
-    m_node.css("position", "absolute");
-
-    if (m_map) {
-      m_map.node().append(m_node);
-
-    }
+    m_map.node().append(m_node);
 
     /* Pass along the arguments, but not the map reference */
     var options = $.extend({}, arg);
     delete options.map;
-    // Share context if have valid one
-    if (m_canvas) {
+
+    if (m_rendererName === null) {
+      // if given a "null" renderer, then pass the map element as the
+      // canvas
+      m_renderer = null;
+      m_canvas = m_node;
+    } else if (m_canvas) { // Share context if have valid one
       m_renderer = geo.createRenderer(m_rendererName, m_this, m_canvas,
                                       options);
     } else {
@@ -15065,10 +15984,23 @@ geo.layer = function (arg) {
     }
 
     if (!m_this.active()) {
-      m_node.css("pointerEvents", "none");
+      m_node.css('pointerEvents', 'none');
     }
 
     m_initialized = true;
+
+    /// Bind events to handlers
+    m_this.geoOn(geo.event.resize, function (event) {
+      m_this._update({event: event});
+    });
+
+    m_this.geoOn(geo.event.pan, function (event) {
+      m_this._update({event: event});
+    });
+
+    m_this.geoOn(geo.event.zoom, function (event) {
+      m_this._update({event: event});
+    });
 
     return m_this;
   };
@@ -15079,10 +16011,12 @@ geo.layer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
-    m_renderer._exit();
+    m_this.geoOff();
+    if (m_renderer) {
+      m_renderer._exit();
+    }
     m_node.off();
     m_node.remove();
-    m_node = null;
     arg = {};
     m_canvas = null;
     m_renderer = null;
@@ -15099,43 +16033,55 @@ geo.layer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Respond to resize event
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._resize = function (x, y, w, h) {
-    m_x = x;
-    m_y = y;
-    m_width = w;
-    m_height = h;
-    m_node.width(w);
-    m_node.height(h);
-
-    m_this.modified();
-    m_this.geoTrigger(geo.event.resize,
-      {x: x, y: y, width: m_width, height: m_height});
-
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Return the width of the layer in pixels
+   * Return the width of the layer in pixels.
+   * **DEPRECIATED: use map.size instead.
    */
   ////////////////////////////////////////////////////////////////////////////
   this.width = function () {
-    return m_width;
+    return m_this.map().size().width;
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Return the height of the layer in pixels
+   * **DEPRECIATED: use map.size instead.
    */
   ////////////////////////////////////////////////////////////////////////////
   this.height = function () {
-    return m_height;
+    return m_this.map().size().height;
   };
 
-  return this;
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get or set the current layer opacity.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.opacity = function (opac) {
+    if (opac !== undefined) {
+      m_opacity = opac;
+      m_node.css('opacity', m_opacity);
+      return m_this;
+    }
+    return m_opacity;
+  };
+
+  if (arg.zIndex === undefined) {
+    arg.zIndex = m_map.children().length;
+  }
+  m_zIndex = arg.zIndex;
+
+  // Create top level div for the layer
+  m_node = $(document.createElement('div'));
+  m_node.attr('id', m_name);
+  m_node.css('position', 'absolute');
+  m_node.css('width', '100%');
+  m_node.css('height', '100%');
+  m_this.opacity(m_opacity);
+
+  // set the z-index
+  m_this.zIndex(m_zIndex);
+
+  return m_this;
 };
 
 /**
@@ -15145,7 +16091,7 @@ geo.layer = function (arg) {
  * @returns {number}
  */
 geo.layer.newLayerId = (function () {
-    "use strict";
+    'use strict';
     var currentId = 1;
     return function () {
       var id = currentId;
@@ -15159,11 +16105,11 @@ geo.layer.newLayerId = (function () {
  * General object specification for feature types.
  * @typedef geo.layer.spec
  * @type {object}
- * @property {string} [type="feature"] For feature compatibility
+ * @property {string} [type='feature'] For feature compatibility
  * with more than one kind of creatable layer
  * @property {object[]} [data=[]] The default data array to
  * apply to each feature if none exists
- * @property {string} [renderer="vgl"] The renderer to use
+ * @property {string} [renderer='vgl'] The renderer to use
  * @property {geo.feature.spec[]} [features=[]] Features
  * to add to the layer
  */
@@ -15176,26 +16122,26 @@ geo.layer.newLayerId = (function () {
  * @returns {geo.layer|null}
  */
 geo.layer.create = function (map, spec) {
-  "use strict";
+  'use strict';
 
   spec = spec || {};
 
   // add osmLayer later
-  spec.type = "feature";
-  if (spec.type !== "feature") {
-    console.warn("Unsupported layer type");
+  spec.type = 'feature';
+  if (spec.type !== 'feature') {
+    console.warn('Unsupported layer type');
     return null;
   }
 
-  spec.renderer = spec.renderer || "vgl";
-  if (spec.renderer !== "d3" && spec.renderer !== "vgl") {
-    console.warn("Invalid renderer");
+  spec.renderer = spec.renderer || 'vgl';
+  if (spec.renderer !== 'd3' && spec.renderer !== 'vgl') {
+    console.warn('Invalid renderer');
     return null;
   }
 
   var layer = map.createLayer(spec.type, spec);
   if (!layer) {
-    console.warn("Unable to create a layer");
+    console.warn('Unable to create a layer');
     return null;
   }
 
@@ -15301,8 +16247,6 @@ geo.featureLayer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
-   *
-   * Do not call parent _init method as its already been executed
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function () {
@@ -15322,12 +16266,16 @@ geo.featureLayer = function (arg) {
 
     m_this.geoOn(geo.event.pan, function (event) {
       m_this._update({event: event});
-      m_this.renderer()._render();
+      if (m_this.renderer()) {
+        m_this.renderer()._render();
+      }
     });
 
     m_this.geoOn(geo.event.zoom, function (event) {
       m_this._update({event: event});
-      m_this.renderer()._render();
+      if (m_this.renderer()) {
+        m_this.renderer()._render();
+      }
     });
 
     return m_this;
@@ -15348,7 +16296,7 @@ geo.featureLayer = function (arg) {
     /// Call base class update
     s_update.call(m_this, request);
 
-    if (!m_this.source() && m_features && m_features.length === 0) {
+    if (m_features && m_features.length === 0) {
       console.log("[info] No valid data source found.");
       return;
     }
@@ -15389,7 +16337,9 @@ geo.featureLayer = function (arg) {
 
     // Now call render on the renderer. In certain cases it may not do
     // anything if the if the child objects are drawn on the screen already.
-    m_this.renderer()._render();
+    if (m_this.renderer()) {
+      m_this.renderer()._render();
+    }
     return m_this;
   };
 
@@ -15436,8 +16386,8 @@ geo.registerLayer("feature", geo.featureLayer);
  * The following properties are common to all event objects:
  *
  * @namespace
- * @property type {string} The event type that was triggered
- * @property geo {object} A universal event object for controlling propagation
+ * @property {string} type The event type that was triggered
+ * @property {object} geo A universal event object for controlling propagation
  *
  * @example
  * map.geoOn(geo.event.layerAdd, function (event) {
@@ -15457,33 +16407,32 @@ geo.event = {};
 // The following were not triggered nor used anywhere.  Removing until their
 // purpose is defined more clearly.
 //
-// geo.event.update = "geo_update";
-// geo.event.opacityUpdate = "geo_opacityUpdate";
-// geo.event.layerToggle = "geo_layerToggle";
-// geo.event.layerSelect = "geo_layerSelect";
-// geo.event.layerUnselect = "geo_layerUnselect";
-// geo.event.rotate = "geo_rotate";
-// geo.event.query = "geo_query";
+// geo.event.update = 'geo_update';
+// geo.event.opacityUpdate = 'geo_opacityUpdate';
+// geo.event.layerToggle = 'geo_layerToggle';
+// geo.event.layerSelect = 'geo_layerSelect';
+// geo.event.layerUnselect = 'geo_layerUnselect';
+// geo.event.query = 'geo_query';
 
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered when a layer is added to the map.
  *
- * @property target {geo.map} The current map
- * @property layer {geo.layer} The new layer
+ * @property {geo.map} target The current map
+ * @property {geo.layer} layer The new layer
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.event.layerAdd = "geo_layerAdd";
+geo.event.layerAdd = 'geo_layerAdd';
 
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered when a layer is removed from the map.
  *
- * @property target {geo.map} The current map
- * @property layer {geo.layer} The old layer
+ * @property {geo.map} target The current map
+ * @property {geo.layer} layer The old layer
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.event.layerRemove = "geo_layerRemove";
+geo.event.layerRemove = 'geo_layerRemove';
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -15491,77 +16440,122 @@ geo.event.layerRemove = "geo_layerRemove";
  * triggered on the map itself.  Instead it is triggered individually on
  * layers, starting with the base layer.
  *
- * @property zoomLevel {Number} New zoom level
- * @property screenPosition {object} The screen position of mouse pointer
+ * @property {number} zoomLevel New zoom level
+ * @property {object} screenPosition The screen position of mouse pointer
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.event.zoom = "geo_zoom";
+geo.event.zoom = 'geo_zoom';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered when the map is rotated around the map center (pointing downward
+ * so that positive angles are clockwise rotations).
+ *
+ * @property {number} angle The angle of the rotation in radians
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.event.rotate = 'geo_rotate';
 
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered when the map is panned either by user interaction or map
  * transition.
  *
- * @property screenDelta {object} The number of pixels to pan the map by
- * @property center {object} The new map center
+ * @property {object} screenDelta The number of pixels to pan the map by
+ * @property {object} center The new map center
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.event.pan = "geo_pan";
+geo.event.pan = 'geo_pan';
 
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered when the map's canvas is resized.
  *
- * @property width {Number} The new width in pixels
- * @property height {Number} The new height in pixels
+ * @property {number} width The new width in pixels
+ * @property {number} height The new height in pixels
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.event.resize = "geo_resize";
+geo.event.resize = 'geo_resize';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered when the world coordinate system changes.  Data in GCS
+ * coordinates can be transformed by the following formulas:
+ *
+ *   x <- (x - origin.x) * scale.x
+ *   y <- (y - origin.y) * scale.y
+ *   z <- (z - origin.z) * scale.z
+ *
+ * Data in world coordinates can be updated using the following formulas:
+ *
+ *   x <- (x * scaleChange.x - origin.x * (scale.x + scaleChange.x)
+ *          - scale.x * originChange.x) * scale.x / scaleChange.x
+ *   y <- (y * scaleChange.y - origin.y * (scale.y + scaleChange.y)
+ *          - scale.y * originChange.y) * scale.y / scaleChange.y
+ *   z <- (z * scaleChange.z - origin.z * (scale.z + scaleChange.z)
+ *          - scale.z * originChange.z) * scale.z / scaleChange.z
+ *
+ * @property {geo.map} map The map whose coordinates changed
+ * @property {object} origin The new origin in GCS coordinates
+ * @property {number} origin.x
+ * @property {number} origin.y
+ * @property {number} origin.z
+ * @property {object} scale The new scale factor
+ * @property {number} scale.x
+ * @property {number} scale.y
+ * @property {number} scale.z
+ * @property {object} originChange Relative change from the old origin defined
+ *   as `origin - oldorigin`.
+ * @property {object} scaleChange Relative change from the old scale defined
+ *   as `scale / oldscale`.
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.event.worldChanged = 'geo_worldChanged';
 
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered on every call to {@link geo.map#draw} before the map is rendered.
  *
- * @property target {geo.map} The current map
+ * @property {geo.map} target The current map
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.event.draw = "geo_draw";
+geo.event.draw = 'geo_draw';
 
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered on every call to {@link geo.map#draw} after the map is rendered.
  *
- * @property target {geo.map} The current map
+ * @property {geo.map} target The current map
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.event.drawEnd = "geo_drawEnd";
+geo.event.drawEnd = 'geo_drawEnd';
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Triggered on every "mousemove" over the map's DOM element.  The event
+ * Triggered on every 'mousemove' over the map's DOM element.  The event
  * object extends {@link geo.mouseState}.
  * @mixes geo.mouseState
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.event.mousemove = "geo_mousemove";
+geo.event.mousemove = 'geo_mousemove';
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Triggered on every "mousedown" over the map's DOM element.  The event
+ * Triggered on every 'mousedown' over the map's DOM element.  The event
  * object extends {@link geo.mouseState}.
  * @mixes geo.mouseState
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.event.mouseclick = "geo_mouseclick";
+geo.event.mouseclick = 'geo_mouseclick';
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Triggered on every "mousemove" during a brushing selection.
+ * Triggered on every 'mousemove' during a brushing selection.
  * The event object extends {@link geo.brushSelection}.
  * @mixes geo.brushSelection
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.event.brush = "geo_brush";
+geo.event.brush = 'geo_brush';
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -15570,7 +16564,7 @@ geo.event.brush = "geo_brush";
  * @mixes geo.brushSelection
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.event.brushend = "geo_brushend";
+geo.event.brushend = 'geo_brushend';
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -15579,7 +16573,7 @@ geo.event.brushend = "geo_brushend";
  * @mixes geo.brushSelection
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.event.brushstart = "geo_brushstart";
+geo.event.brushstart = 'geo_brushstart';
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -15592,24 +16586,24 @@ geo.event.brushstart = "geo_brushstart";
  * be modified in place.
  *
  * @property {geo.geoPosition} center The target center
- * @property {Number} zoom The target zoom level
- * @property {Number} duration The duration of the transition in milliseconds
+ * @property {number} zoom The target zoom level
+ * @property {number} duration The duration of the transition in milliseconds
  * @property {function} ease The easing function
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.event.transitionstart = "geo_transitionstart";
+geo.event.transitionstart = 'geo_transitionstart';
 
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered after a map navigation animation ends.
  *
  * @property {geo.geoPosition} center The target center
- * @property {Number} zoom The target zoom level
- * @property {Number} duration The duration of the transition in milliseconds
+ * @property {number} zoom The target zoom level
+ * @property {number} duration The duration of the transition in milliseconds
  * @property {function} ease The easing function
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.event.transitionend = "geo_transitionend";
+geo.event.transitionend = 'geo_transitionend';
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -15619,7 +16613,7 @@ geo.event.transitionend = "geo_transitionend";
  *                                        on.
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.event.parallelprojection = "geo_parallelprojection";
+geo.event.parallelprojection = 'geo_parallelprojection';
 
 ////////////////////////////////////////////////////////////////////////////
 /**
@@ -15627,10 +16621,10 @@ geo.event.parallelprojection = "geo_parallelprojection";
  */
 ////////////////////////////////////////////////////////////////////////////
 geo.event.clock = {
-  play: "geo_clock_play",
-  stop: "geo_clock_stop",
-  pause: "geo_clock_pause",
-  change: "geo_clock_change"
+  play: 'geo_clock_play',
+  stop: 'geo_clock_stop',
+  pause: 'geo_clock_pause',
+  change: 'geo_clock_change'
 };
 
 ////////////////////////////////////////////////////////////////////////////
@@ -15641,24 +16635,88 @@ geo.event.clock = {
  * can override this to provide custom events.
  *
  * These events will only be triggered on features which were instantiated
- * with the option "selectionAPI".
+ * with the option 'selectionAPI'.
  * @namespace
  */
 ////////////////////////////////////////////////////////////////////////////
 geo.event.feature = {
-  mousemove:  "geo_feature_mousemove",
-  mouseover:  "geo_feature_mouseover",
-  mouseout:   "geo_feature_mouseout",
-  mouseon:    "geo_feature_mouseon",
-  mouseoff:   "geo_feature_mouseoff",
-  mouseclick: "geo_feature_mouseclick",
-  brushend:   "geo_feature_brushend",
-  brush:      "geo_feature_brush"
+  mousemove:  'geo_feature_mousemove',
+  mouseover:  'geo_feature_mouseover',
+  mouseout:   'geo_feature_mouseout',
+  mouseon:    'geo_feature_mouseon',
+  mouseoff:   'geo_feature_mouseoff',
+  mouseclick: 'geo_feature_mouseclick',
+  brushend:   'geo_feature_brushend',
+  brush:      'geo_feature_brush'
 };
+
+////////////////////////////////////////////////////////////////////////////
+/**
+ * These events are triggered by the camera when it's internal state is
+ * mutated.
+ * @namespace
+ */
+////////////////////////////////////////////////////////////////////////////
+geo.event.camera = {};
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Create a new instance of mapInteractor
+ * Triggered after a general view matrix change (any change in the visible
+ * bounds).  This is equivalent to the union of pan and zoom.
+ *
+ * @property {geo.camera} camera The camera instance
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.event.camera.view = 'geo_camera_view';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered after a pan in the x/y plane (no zoom level change).
+ *
+ * @property {geo.camera} camera The camera instance
+ * @property {object} delta The translation delta in world coordinates.
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.event.camera.pan = 'geo_camera_pan';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered after a view matrix change that is not a simple pan.  This
+ * includes, but is not limited to, pure zooms.
+ *
+ * @property {geo.camera} camera The camera instance
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.event.camera.zoom = 'geo_camera_zoom';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered after a projection change.
+ *
+ * @property {geo.camera} camera The camera instance
+ * @property {string} type The projection type ('perspective'|'parallel')
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.event.camera.projection = 'geo_camera_projection';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered after a viewport change.
+ *
+ * @property {geo.camera} camera The camera instance
+ * @property {object} viewport The new viewport
+ * @property {number} viewport.width The new width
+ * @property {number} viewport.height The new height
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.event.camera.viewport = 'geo_camera_viewport';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * The mapInteractor class is responsible for handling raw events from the
+ * browser and interpreting them as map navigation interactions.  This class
+ * will call the navigation methods on the connected map, which will make
+ * modifications to the camera directly.
  *
  * @class
  * @extends geo.object
@@ -15683,7 +16741,9 @@ geo.mapInteractor = function (args) {
       m_wait = false,
       m_disableThrottle = true,
       m_selectionLayer = null,
-      m_selectionPlane = null;
+      m_selectionPlane = null,
+      m_paused = false,
+      m_clickMaybe = false;
 
   // Helper method to decide if the current button/modifiers match a set of
   // conditions.
@@ -15754,6 +16814,12 @@ geo.mapInteractor = function (args) {
       spring: {
         enabled: false,
         springConstant: 0.00005
+      },
+      click: {
+        enabled: true,
+        buttons: {left: true, right: true, middle: true},
+        duration: 0,
+        cancelOnMove: true
       }
     },
     m_options
@@ -15810,6 +16876,19 @@ geo.mapInteractor = function (args) {
   //   spring: {
   //     enabled: true | false,
   //     springConstant: number,
+  //   }
+  //
+  //   // enable the "click" event
+  //   // A click will be registered when a mouse down is followed
+  //   // by a mouse up in less than the given number of milliseconds
+  //   // and the standard handler will *not* be called
+  //   // If the duration is <= 0, then clicks will only be canceled by
+  //   // a mousemove.
+  //   click: {
+  //     enabled: true | false,
+  //     buttons: {'left': true, 'right': true, 'middle': true}
+  //     duration: 0,
+  //     cancelOnMove: true // cancels click if the mouse is moved before release
   //   }
   // }
 
@@ -15987,6 +17066,8 @@ geo.mapInteractor = function (args) {
     $node.on('mousedown.geojs', m_this._handleMouseDown);
     $node.on('mouseup.geojs', m_this._handleMouseUp);
     $node.on('wheel.geojs', m_this._handleMouseWheel);
+    // Disable dragging images and such
+    $node.on('dragstart', function () { return false; });
     if (m_options.panMoveButton === 'right' ||
         m_options.zoomMoveButton === 'right') {
       $node.on('contextmenu.geojs', function () { return false; });
@@ -16197,6 +17278,10 @@ geo.mapInteractor = function (args) {
   this._handleMouseDown = function (evt) {
     var action = null;
 
+    if (m_paused) {
+      return;
+    }
+
     if (m_state.action === 'momentum') {
       // cancel momentum on click
       m_state = {};
@@ -16206,6 +17291,17 @@ geo.mapInteractor = function (args) {
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
 
+    if (m_options.click.enabled &&
+        (!m_mouse.buttons.left || m_options.click.buttons.left) &&
+        (!m_mouse.buttons.right || m_options.click.buttons.right) &&
+        (!m_mouse.buttons.middle || m_options.click.buttons.middle)) {
+      m_clickMaybe = true;
+      if (m_options.click.duration > 0) {
+        window.setTimeout(function () {
+          m_clickMaybe = false;
+        }, m_options.click.duration);
+      }
+    }
     if (eventMatch(m_options.panMoveButton, m_options.panMoveModifiers)) {
       action = 'pan';
     } else if (eventMatch(m_options.zoomMoveButton, m_options.zoomMoveModifiers)) {
@@ -16257,11 +17353,24 @@ geo.mapInteractor = function (args) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._handleMouseMove = function (evt) {
+
+    if (m_paused) {
+      return;
+    }
+
     if (m_state.action) {
       // If currently performing a navigation action, the mouse
       // coordinates will be captured by the document handler.
       return;
     }
+
+    if (m_options.click.cancelOnMove) {
+      m_clickMaybe = false;
+    }
+    if (m_clickMaybe) {
+      return;
+    }
+
     m_this._getMousePosition(evt);
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
@@ -16275,9 +17384,21 @@ geo.mapInteractor = function (args) {
   ////////////////////////////////////////////////////////////////////////////
   this._handleMouseMoveDocument = function (evt) {
     var dx, dy, selectionObj;
+
+    if (m_paused) {
+      return;
+    }
+
     m_this._getMousePosition(evt);
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
+
+    if (m_options.click.cancelOnMove) {
+      m_clickMaybe = false;
+    }
+    if (m_clickMaybe) {
+      return;
+    }
 
     if (!m_state.action) {
       // This shouldn't happen
@@ -16301,7 +17422,8 @@ geo.mapInteractor = function (args) {
       m_this.map().pan({x: dx, y: dy});
     } else if (m_state.action === 'zoom') {
       m_this.map().zoom(
-        m_this.map().zoom() - dy * m_options.zoomScale / 120
+        m_this.map().zoom() - dy * m_options.zoomScale / 120,
+        m_state
       );
     } else if (m_state.action === 'select') {
       // Get the bounds of the current selection
@@ -16400,6 +17522,11 @@ geo.mapInteractor = function (args) {
   this._handleMouseUpDocument = function (evt) {
     var selectionObj, oldAction;
 
+    if (m_paused) {
+      return;
+    }
+
+    m_clickMaybe = false;
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
 
@@ -16437,10 +17564,39 @@ geo.mapInteractor = function (args) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._handleMouseUp = function (evt) {
+
+    if (m_paused) {
+      return;
+    }
+
+    if (m_clickMaybe) {
+      m_this._handleMouseClick(evt);
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Handle event when a mouse click is detected.  A mouse click is a simulated
+   * event that occurs when the time between a mouse down and mouse up
+   * is less than the configured duration and (optionally) if no mousemove
+   * events were triggered in the interim.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._handleMouseClick = function (evt) {
+
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
 
-    // fire a click event here
+    // cancel any ongoing pan action
+    m_this.cancel('pan');
+
+    // unbind temporary handlers on document
+    $(document).off('.geojs');
+
+    // reset click detector variable
+    m_clickMaybe = false;
+
+    // fire a click event
     m_this.map().geoTrigger(geo.event.mouseclick, m_this.mouse());
   };
 
@@ -16450,7 +17606,11 @@ geo.mapInteractor = function (args) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._handleMouseWheel = function (evt) {
-    var zoomFactor, direction;
+    var zoomFactor;
+
+    if (m_paused) {
+      return;
+    }
 
     // try to normalize deltas using the wheel event standard:
     //   https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent
@@ -16499,11 +17659,10 @@ geo.mapInteractor = function (args) {
                eventMatch('wheel', m_options.zoomWheelModifiers)) {
 
       zoomFactor = -evt.deltaY;
-      direction = m_mouse.map;
 
       m_this.map().zoom(
         m_this.map().zoom() + zoomFactor,
-        direction
+        m_mouse
       );
     }
   };
@@ -16627,6 +17786,24 @@ geo.mapInteractor = function (args) {
   ////////////////////////////////////////////////////////////////////////////
   this.state = function () {
     return $.extend(true, {}, m_state);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get or set the pause state of the interactor, which
+   * ignores all native mouse and keyboard events.
+   *
+   * @param {bool} [value] The pause state to set or undefined to return the
+   *                        current state.
+   * @returns {bool|this}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.pause = function (value) {
+    if (value === undefined) {
+      return m_paused;
+    }
+    m_paused = !!value;
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -16991,6 +18168,1637 @@ geo.clock = function (opts) {
 };
 inherit(geo.clock, geo.object);
 
+(function () {
+  'use strict';
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * This class defines the raw interface for a "tile" on a map.  A tile is
+   * defined as a rectangular section of a map.  The base implementation
+   * is independent of the actual content of the tile, but assumes that
+   * the content is loaded asynchronously via a url.  The tile object
+   * has a promise-like interface.  For example,
+   *
+   * tile.then(function (data) {...}).catch(function (data) {...});
+   *
+   * @class
+   * @param {Object} spec The tile specification object
+   *
+   * @param {Object} spec.index The global position of the tile
+   * @param {Number} spec.index.x The x-coordinate (usually the column number)
+   * @param {Number} spec.index.y The y-coordinate (usually the row number)
+   *
+   * @param {Object} spec.size The size of each tile
+   * @param {Number} spec.size.x Width (usually in pixels)
+   * @param {Number} spec.size.y Height (usually in pixels)
+   *
+   * @param {Object|String} spec.url A url or jQuery ajax config object
+   *
+   * @param {Object?} spec.overlap The size of overlap with neighboring tiles
+   * @param {Number} [spec.overlap.x=0]
+   * @param {Number} [spec.overlap.y=0]
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  geo.tile = function (spec) {
+    if (!(this instanceof geo.tile)) {
+      return new geo.tile(spec);
+    }
+
+    this._index = spec.index;
+    this._size = spec.size;
+    this._overlap = spec.overlap || {x: 0, y: 0};
+    this._wrap = spec.wrap || {x: 1, y: 1};
+    this._url = spec.url;
+    this._fetched = false;
+
+    /**
+     * Return the index coordinates.
+     */
+    Object.defineProperty(this, 'index', {
+      get:
+        function () { return this._index; }
+    });
+
+    /**
+     * Return the tile sizes.
+     */
+    Object.defineProperty(this, 'size', {
+      get: function () { return this._size; }
+    });
+
+    /**
+     * Return the tile overlap sizes.
+     */
+    Object.defineProperty(this, 'overlap', {
+      get: function () { return this._overlap; }
+    });
+
+    /**
+     * Initiate the ajax request and add a promise interface
+     * to the tile object.  This method exists to allow
+     * derived classes the ability to override how the tile
+     * is obtained.  For example, imageTile uses an Image
+     * element rather than $.get.
+     */
+    this.fetch = function () {
+      if (!this._fetched) {
+        $.get(this._url).promise(this);
+      }
+      return this;
+    };
+
+    /**
+     * Add a method to be called with the data when the ajax request is
+     * successfully resolved.
+     *
+     * @param {function?} onSuccess The success handler
+     * @param {function?} onFailure The failure handler
+     * @returns {this} Supports chained calling
+     *
+     */
+    this.then = function (onSuccess, onFailure) {
+      this.fetch(); // This will replace the current then method
+
+      // Call then on the new promise
+      this.then(onSuccess, onFailure);
+      return this;
+    };
+
+    /**
+     * Add a method to be called with the data when the ajax fails.
+     *
+     * @param {function} method The rejection handler
+     * @returns {this} Supports chained calling
+     *
+     */
+    this.catch = function (method) {
+      this.then(undefined, method);
+      return this;
+    };
+
+    /**
+     * Return a unique string representation of the given tile useable
+     * as a hash key.  Possibly extend later to include url information
+     * to make caches aware of the tile source.
+     * @returns {string}
+     */
+    this.toString = function () {
+      return [this._index.level || 0, this._index.y, this._index.x].join('_');
+    };
+
+    /**
+     * Return the bounds of the tile given an index offset and
+     * a translation.
+     *
+     * @param {object} index The tile index containing (0, 0)
+     * @param {object} shift The coordinates of (0, 0) inside the tile
+     */
+    this.bounds = function (index, shift) {
+      var left, right, bottom, top;
+      left = this.size.x * (this.index.x - index.x) - this.overlap.x - shift.x;
+      right = left + this.size.x + this.overlap.x * 2;
+      top = this.size.y * (this.index.y - index.y) - this.overlap.y - shift.y;
+      bottom = top + this.size.y + this.overlap.y * 2;
+      return {
+        left: left,
+        right: right,
+        bottom: bottom,
+        top: top
+      };
+    };
+
+    /**
+     * Computes the global coordinates of the bottom edge.
+     * @returns {number}
+     */
+    Object.defineProperty(this, 'bottom', {
+      get: function () {
+        return this.size.y * (this.index.y + 1) + this.overlap.y;
+      }
+    });
+
+    /**
+     * Computes the global coordinates of the top edge.
+     * @returns {number}
+     */
+    Object.defineProperty(this, 'top', {
+      get: function () {
+        return this.size.y * this.index.y - this.overlap.y;
+      }
+    });
+
+    /**
+     * Computes the global coordinates of the left edge.
+     * @returns {number}
+     */
+    Object.defineProperty(this, 'left', {
+      get: function () {
+        return this.size.x * this.index.x - this.overlap.x;
+      }
+    });
+
+    /**
+     * Computes the global coordinates of the right edge.
+     * @returns {number}
+     */
+    Object.defineProperty(this, 'right', {
+      get: function () {
+        return this.size.x * (this.index.x + 1) + this.overlap.x;
+      }
+    });
+
+    /**
+     * Returns the global image size at this level.
+     * @returns {number}
+     */
+    Object.defineProperty(this, 'levelSize', {
+      value: {
+        width: Math.pow(2, this.index.level || 0) * this.size.x,
+        height: Math.pow(2, this.index.level || 0) * this.size.y
+      }
+    });
+
+    /**
+     * Set the opacity of the tile to 0 and gradually fade in
+     * over the given number of milliseconds.  This will also
+     * resolve the embedded promise interface.
+     * @param {number} duration the duration of the animation in ms
+     * @returns {this} chainable
+     */
+    this.fadeIn = function (duration) {
+      $.noop(duration);
+      return this;
+    };
+  };
+})();
+
+(function () {
+  'use strict';
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * This class defines a tile that is part of a standard "image pyramid", such
+   * as an open street map tile set.  Every tile is uniquely indexed by a row,
+   * column, and zoom level.  The number of rows/columns at zoom level z is
+   * `2^z`, the number of pixels per tile is configurable.
+   *
+   * By default, this class assumes that images are fetch from the url, but
+   * subclasses may define additional rendering steps to produce the images
+   * before passing them off to the handlers.
+   *
+   * @class
+   * @param {Object} spec The tile specification object
+   *
+   * @param {Object} spec.index The global position of the tile
+   * @param {Number} spec.index.x The x-coordinate (usually the column number)
+   * @param {Number} spec.index.y The y-coordinate (usually the row number)
+   * @param {Number} spec.index.level The zoom level
+   *
+   * @param {Object?} spec.size The size of each tile
+   * @param {Number} [spec.size.x=256] Width in pixels
+   * @param {Number} [spec.size.y=256] Height in pixels
+   *
+   * @param {String} spec.url A url to the image
+   * @param {String} [spec.crossDomain='anonymous'] Image CORS attribute
+   *
+   * @param {Object} spec.overlap The size of overlap with neighboring tiles
+   * @param {Number} [spec.overlap.x=0]
+   * @param {Number} [spec.overlap.y=0]
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  geo.imageTile = function (spec) {
+    if (!(this instanceof geo.imageTile)) {
+      return new geo.imageTile(spec);
+    }
+
+    spec.size = spec.size || {x: 256, y: 256};
+    this._image = null;
+
+    // Cache the coordinate scaling
+    this._cors = spec.crossDomain || 'anonymous';
+
+    // Call superclass constructor
+    geo.tile.call(this, spec);
+
+    /**
+     * Read only accessor to the Image object used by the
+     * tile.  Note, this method does not gaurantee that the
+     * image data is available.  Use the promise interface
+     * to add asyncronous handlers.
+     * @returns {Image}
+     */
+    Object.defineProperty(this, 'image', {
+      get: function () { return this._image; }
+    });
+
+    /**
+     * Initiate the image request.
+     */
+    this.fetch = function () {
+      var defer;
+      if (!this._image) {
+        this._image = new Image(this.size.x, this.size.y);
+        // Only set the crossOrigin parameter if this is going across origins.
+        if (this._url.indexOf(':') >= 0 && this._url.indexOf('/') >= 0 &&
+            this._url.indexOf(':') < this._url.indexOf('/')) {
+          this._image.crossOrigin = this._cors;
+        }
+        defer = new $.Deferred();
+        this._image.onload = function () { defer.resolve(); };
+        this._image.onerror = function () { defer.reject(); };
+        this._image.src = this._url;
+
+        // attach a promise interface to `this`
+        defer.promise(this);
+      }
+      return this;
+    };
+
+    /**
+     * Set the opacity of the tile to 0 and gradually fade in
+     * over the given number of milliseconds.  This will also
+     * resolve the embedded promise interface.
+     * @param {number} duration the duration of the animation in ms
+     * @returns {this} chainable
+     */
+    this.fadeIn = function (duration) {
+      var promise = this.fetch(), defer = new $.Deferred();
+      $(this._image).css('display', 'none');
+      promise.then(function () {
+        $(this._image).fadeIn(duration, function () {
+          defer.resolve();
+        });
+      }.bind(this));
+      return defer.promise(this);
+    };
+
+    return this;
+  };
+
+  inherit(geo.imageTile, geo.tile);
+})();
+
+(function () {
+  'use strict';
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * This class implements a simple cache for tile objects.  Each tile is
+   * stored in cache object keyed by a configurable hashing function.  Another
+   * array keeps track of last access times for each tile to purge old tiles
+   * once the maximum cache size is reached.
+   *
+   * @class
+   *
+   * @param {Object?} [options] A configuratoin object for the cache
+   * @param {Number} [options.size=64] The maximum number of tiles to store
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  geo.tileCache = function (options) {
+    if (!(this instanceof geo.tileCache)) {
+      return new geo.tileCache(options);
+    }
+    options = options || {};
+    this._size = options.size || 64;
+
+    /**
+     * Get/set the maximum cache size.
+     */
+    Object.defineProperty(this, 'size', {
+      get: function () { return this._size; },
+      set: function (n) {
+        while (this._atime.length > n) {
+          this.remove(this._atime[this._atime.length - 1]);
+        }
+        this._size = n;
+      }
+    });
+
+    /**
+     * Get the current cache size.
+     */
+    Object.defineProperty(this, 'length', {
+      get: function () { return this._atime.length; }
+    });
+
+    /**
+     * Get the position of the tile in the access queue.
+     * @param {string} hash The tile's hash value
+     * @returns {number} The position in the queue or -1
+     */
+    this._access = function (hash) {
+      return this._atime.indexOf(hash);
+    };
+
+    /**
+     * Remove a tile from the cache.
+     * @param {string|geo.tile} tile The tile or its hash
+     * @returns {bool} true if a tile was removed
+     */
+    this.remove = function (tile) {
+      var hash = typeof tile === 'string' ? tile : tile.toString();
+
+      // if the tile is not in the cache
+      if (!(hash in this._cache)) {
+        return false;
+      }
+
+      // Remove the tile from the access queue
+      this._atime.splice(this._access(hash), 1);
+
+      // Remove the tile from the cache
+      delete this._cache[hash];
+      return true;
+    };
+
+    /**
+     * Remove all tiles from the cache.
+     */
+    this.clear = function () {
+      this._cache = {};  // The hash -> tile mapping
+      this._atime = [];  // The access queue (the hashes are stored)
+      return this;
+    };
+
+    /**
+     * Get a tile from the cache if it exists, otherwise
+     * return null.  This method also moves the tile to the
+     * front of the access queue.
+     *
+     * @param {string|geo.tile} hash The tile or the tile hash value
+     * @returns {geo.tile|null}
+     */
+    this.get = function (hash) {
+      hash = typeof hash === 'string' ? hash : hash.toString();
+      if (!(hash in this._cache)) {
+        return null;
+      }
+
+      this._atime.splice(this._access(hash), 1);
+      this._atime.unshift(hash);
+      return this._cache[hash];
+    };
+
+    /**
+     * Add a tile to the cache.
+     * @param {geo.tile} tile
+     */
+    this.add = function (tile) {
+      // remove any existing tiles with the same hash
+      this.remove(tile);
+      var hash = tile.toString();
+
+      // add the tile
+      this._cache[hash] = tile;
+      this._atime.unshift(hash);
+
+      // purge a tile from the cache if necessary
+      while (this._atime.length > this.size) {
+        hash = this._atime.pop();
+        delete this._cache[hash];
+      }
+    };
+
+    this.clear();
+    return this;
+  };
+})();
+
+(function () {
+  'use strict';
+
+  /**
+   * Standard modulo operator where the output is in [0, b) for all inputs.
+   * @private
+   */
+  function modulo(a, b) {
+    return ((a % b) + b) % b;
+  }
+
+  /**
+   * Pick a subdomain from a list of subdomains based on a the tile location.
+   *
+   * @param {number} x: the x tile coordinate.
+   * @param {number} y: the y tile coordinate.
+   * @param {list} subdomains: the list of known subdomains.
+   */
+  function m_getTileSubdomain(x, y, subdomains) {
+    return subdomains[modulo(x + y, subdomains.length)];
+  }
+
+  /**
+   * Returns an OSM tile server formatting function from a standard format
+   * string. Replaces {s}, {z}, {x}, and {y}.
+   *
+   * @param {string} base The tile format string
+   * @returns: a conversion function.
+   * @private.
+   */
+  function m_tileUrlFromTemplate(base) {
+    return function (x, y, z, subdomains) {
+      return base.replace('{s}', m_getTileSubdomain(x, y, subdomains))
+        .replace('{z}', z)
+        .replace('{x}', x)
+        .replace('{y}', y);
+    };
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * This method defines a tileLayer, which is an abstract class defining a
+   * layer divided into tiles of arbitrary data.  Notably, this class provides
+   * the core functionality of the osmLayer, but hooks exist to render tiles
+   * dynamically from vector data, or to display arbitrary grids of images
+   * in a custom coordinate system.  When multiple zoom levels are present
+   * in a given dataset, this class assumes that the space occupied by
+   * tile (i, j) at level z is covered by a 2x2 grid of tiles at zoom
+   * level z + 1:
+   *
+   *   (2i, 2j),     (2i, 2j + 1)
+   *   (2i + 1, 2j), (2i + 1, 2j + 1)
+   *
+   * The higher level tile set should represent a 2x increase in resolution.
+   *
+   * Although not currently supported, this class is intended to extend to
+   * 3D grids of tiles as well where 1 tile is covered by a 2x2x2 grid of
+   * tiles at the next level.  The tiles are assumed to be rectangular,
+   * identically sized, and aligned with x/y axis of the underlying
+   * coordinate system.  The local coordinate system is in pixels relative
+   * to the current zoom level and changes when the zoom level crosses an
+   * integer threshold.
+   *
+   * The constructor takes a number of optional parameters that customize
+   * the display of the tiles.  The default values of these options are
+   * stored as the `defaults` attribution on the constructor.  Supporting
+   * alternate tiling protocols often only requires adjusting these
+   * defaults.
+   *
+   * @class
+   * @extends geo.featureLayer
+   * @param {object?} options
+   * @param {number} [options.minLevel=0]    The minimum zoom level available
+   * @param {number} [options.maxLevel=18]   The maximum zoom level available
+   * @param {number} [options.tileOverlap=0]
+   *    Number of pixels of overlap between tiles
+   * @param {number} [options.tileWidth=256]
+   *    The tile width as displayed without overlap
+   * @param {number} [options.tileHeight=256]
+   *    The tile height as displayed without overlap
+   * @param {number} [options.cacheSize=400] The maximum number of tiles to
+   *    cache.  The default is 200 if keepLower is false.
+   * @param {bool}   [options.keepLower=true]
+   *    Keep lower zoom level tiles when showing high zoom level tiles.  This
+   *    uses more memory but results in smoother transitions.
+   * @param {bool}   [options.wrapX=true]    Wrap in the x-direction
+   * @param {bool}   [options.wrapY=false]   Wrap in the y-direction
+   * @param {number} [options.minX=0]        The minimum world coordinate in X
+   * @param {number} [options.maxX=255]      The maximum world coordinate in X
+   * @param {number} [options.minY=0]        The minimum world coordinate in Y
+   * @param {number} [options.maxY=255]      The maximum world coordinate in Y
+   * @param {function|string} [options.url=null]
+   *   A function taking the current tile indices and returning a URL or jquery
+   *   ajax config to be passed to the {geo.tile} constructor.
+   *   Example:
+   *     (x, y, z, subdomains) => "http://example.com/z/y/x.png"
+   *   If this is a string, a template url with {x}, {y}, {z}, and {s} as
+   *   template variables.  {s} picks one of the subdomains parameter.
+   * @param {string|list} [options.subdomain="abc"]  Subdomains to use in
+   *   template url strings.  If a string, this is converted to a list before
+   *   being passed to a url function.
+   * @param {string} [options.baseUrl=null]  If defined, use the old-style base
+   *   url instead of the options.url parameter.  This is functionally the same
+   *   as using a url of baseUrl/{z}/{x}/{y}.(options.imageFormat || png).  If
+   *   the specified string does not end in a slash, one is added.
+   * @param {string} [options.imageFormat='png']
+   *   This is only used if a baseUrl is specified, in which case it determines
+   *   the image name extension used in the url.
+   * @param {number} [options.animationDuration=0]
+   *   The number of milliseconds for the tile loading animation to occur.  **This
+   *   option is currently buggy because old tiles will purge before the animation
+   *   is complete.**
+   * @param {string} [options.attribution]
+   *   An attribution to display with the layer (accepts HTML)
+   * @param {function} [options.tileRounding=Math.round]
+   *   This function determines which tiles will be loaded when the map is at
+   *   a non-integer zoom.  For example, `Math.floor`, will use tile level 2
+   *   when the map is at zoom 2.9.
+   * @param {function} [options.tileOffset]
+   *   This function takes a zoom level argument and returns, in units of
+   *   pixels, the coordinates of the point (0, 0) at the given zoom level
+   *   relative to the bottom left corner of the domain.
+   * @param {bool}   [options.topDown=false]  True if the gcs is top-down,
+   *   false if bottom-up (the ingcs does not matter, only the gcs coordinate
+   *   system).  When false, this inverts the gcs y-coordinate when calculating
+   *   local coordinates.
+   * @returns {geo.tileLayer}
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  geo.tileLayer = function (options) {
+    if (!(this instanceof geo.tileLayer)) {
+      return new geo.tileLayer(options);
+    }
+    geo.featureLayer.call(this, options);
+
+    options = $.extend(true, {}, this.constructor.defaults, options || {});
+    if (!options.cacheSize) {
+      // this size should be sufficient for a 4k display
+      options.cacheSize = options.keepLower ? 400 : 200;
+    }
+    if ($.type(options.subdomains) === 'string') {
+      options.subdomains = options.subdomains.split('');
+    }
+    /* We used to call the url option baseUrl.  If a baseUrl is specified, use
+     * it instead of url, interpretting it as before. */
+    if (options.baseUrl) {
+      var url = options.baseUrl;
+      if (url && url.charAt(url.length - 1) !== '/') {
+        url += '/';
+      }
+      options.url = url + '{z}/{x}/{y}.' + (options.imageFormat || 'png');
+    }
+    /* Save the original url so that we can return it if asked */
+    options.originalUrl = options.url;
+    if ($.type(options.url) === 'string') {
+      options.url = m_tileUrlFromTemplate(options.url);
+    }
+
+    var lastZoom = null, lastX = null, lastY = null, s_init = this._init,
+        _deferredPurge = null;
+
+    // copy the options into a private variable
+    this._options = $.extend(true, {}, options);
+
+    // set the layer attribution text
+    this.attribution(options.attribution);
+
+    // initialize the object that keeps track of actively drawn tiles
+    this._activeTiles = {};
+
+    // initialize the object that stores active tile regions in a
+    // tree-like structure providing quick queries to determine
+    // if tiles are completely obscured or not.
+    this._tileTree = {};
+
+    // initialize the in memory tile cache
+    this._cache = geo.tileCache({size: options.cacheSize});
+
+    /**
+     * Readonly accessor to the options object
+     */
+    Object.defineProperty(this, 'options', {get: function () {
+      return $.extend({}, this._options);
+    }});
+
+    /**
+     * Readonly accessor to the tile cache object.
+     */
+    Object.defineProperty(this, 'cache', {get: function () {
+      return this._cache;
+    }});
+
+    /**
+     * Readonly accessor to the active tile mapping.  This is an object containing
+     * all currently drawn tiles (hash(tile) => tile).
+     */
+    Object.defineProperty(this, 'activeTiles', {get: function () {
+      return $.extend({}, this._activeTiles); // copy on output
+    }});
+
+    /**
+     * The number of tiles at the given zoom level
+     * The default implementation just returns `Math.pow(2, z)`.
+     * @param {number} level A zoom level
+     * @returns {{x: nx, y: ny}} The number of tiles in each axis
+     */
+    this.tilesAtZoom = function (level) {
+      var s = Math.pow(2, level);
+      return {x: s, y: s};
+    };
+
+    /**
+     * Returns true if the given tile index is valid:
+     *   * min level <= level <= max level
+     *   * 0 <= x <= 2^level - 1
+     *   * 0 <= y <= 2^level - 1
+     * @param {object} index The tile index
+     * @param {number} index.x
+     * @param {number} index.y
+     * @param {number} index.level
+     * @returns {geo.tile}
+     */
+    this.isValid = function (index) {
+      if (!(this._options.minLevel <= index.level &&
+           index.level <= this._options.maxLevel)) {
+        return false;
+      }
+      if (!(this._options.wrapX ||
+            0 <= index.x &&
+            index.x <= this.tilesAtZoom(index.level).x - 1)) {
+        return false;
+      }
+      if (!(this._options.wrapY ||
+            0 <= index.y &&
+            index.y <= this.tilesAtZoom(index.level).y - 1)) {
+        return false;
+      }
+      return true;
+    };
+
+    /**
+     * Returns the current origin tile and offset at the given zoom level.
+     * This is intended to be cached in the future to optimize coordinate
+     * transformations.
+     * @protected
+     * @param {number} level The target zoom level
+     * @returns {object} {index: {x, y}, offset: {x, y}}
+     */
+    this._origin = function (level) {
+      var origin = this.toLevel(this.toLocal(this.map().origin()), level),
+          o = this._options,
+          index, offset;
+
+      // get the tile index
+      index = {
+        x: Math.floor(origin.x / o.tileWidth),
+        y: Math.floor(origin.y / o.tileHeight)
+      };
+
+      // get the offset inside the tile (in pixels)
+      // This computation should contain the only numerically unstable
+      // subtraction in this class.  All other methods will assume
+      // coordinates are given relative to the map origin.
+      offset = {
+        x: origin.x - o.tileWidth * index.x,
+        y: origin.y - o.tileHeight * index.y
+      };
+      return {index: index, offset: offset};
+    };
+
+    /**
+     * Returns a tile's bounds in its level coordinates.
+     * @param {geo.tile} tile
+     * @returns {object} bounds
+     */
+    this._tileBounds = function (tile) {
+      var origin = this._origin(tile.index.level);
+      return tile.bounds(origin.index, origin.offset);
+    };
+
+    /**
+     * Returns the tile indices at the given point.
+     * @param {object} point The coordinates in pixels relative to the map origin.
+     * @param {number} point.x
+     * @param {number} point.y
+     * @param {number} level The target zoom level
+     * @returns {object} The tile indices
+     */
+    this.tileAtPoint = function (point, level) {
+      var o = this._origin(level);
+      var map = this.map();
+      point = this.displayToLevel(map.gcsToDisplay(point, null), level);
+      var to = this._options.tileOffset(level);
+      if (to) {
+        point.x += to.x;
+        point.y += to.y;
+      }
+      var tile = {
+        x: Math.floor(
+          o.index.x + (o.offset.x + point.x) / this._options.tileWidth
+        ),
+        y: Math.floor(
+          o.index.y + (o.offset.y + point.y) / this._options.tileHeight
+        )
+      };
+      return tile;
+    };
+
+    /**
+     * Returns a tile's bounds in a gcs.
+     * @param {object|tile} either a tile or an object with {x, y, level}
+     *                      specifying a tile.
+     * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
+     *    null to use the map gcs, or any other transform.
+     * @returns {object} The tile bounds in the specified gcs.
+     */
+    this.gcsTileBounds = function (indexOrTile, gcs) {
+      var tile = (indexOrTile.index ? indexOrTile : geo.tile({
+            index: indexOrTile,
+            size: {x: this._options.tileWidth, y: this._options.tileHeight},
+            url: ''
+          }));
+      var to = this._options.tileOffset(tile.index.level),
+          bounds = tile.bounds({x: 0, y: 0}, to),
+          map = this.map(),
+          unit = map.unitsPerPixel(tile.index.level);
+      var coord = [{
+            x: bounds.left * unit, y: this._topDown() * bounds.top * unit
+          }, {
+            x: bounds.right * unit, y: this._topDown() * bounds.bottom * unit
+          }];
+      gcs = (gcs === null ? map.gcs() : (
+          gcs === undefined ? map.ingcs() : gcs));
+      if (gcs !== map.gcs()) {
+        coord = geo.transform.transformCoordinates(gcs, map.gcs(), coord);
+      }
+      return {
+        left: coord[0].x,
+        top: coord[0].y,
+        right: coord[1].x,
+        bottom: coord[1].y
+      };
+    };
+
+    /**
+     * Returns an instantiated tile object with the given indices.  This
+     * method always returns a new tile object.  Use `_getTileCached`
+     * to use the caching layer.
+     * @param {object} index The tile index
+     * @param {number} index.x
+     * @param {number} index.y
+     * @param {number} index.level
+     * @param {object} source The tile index used for constructing the url
+     * @param {number} source.x
+     * @param {number} source.y
+     * @param {number} source.level
+     * @returns {geo.tile}
+     */
+    this._getTile = function (index, source) {
+      var urlParams = source || index;
+      return geo.tile({
+        index: index,
+        size: {x: this._options.tileWidth, y: this._options.tileHeight},
+        url: this._options.url(urlParams.x, urlParams.y, urlParams.level || 0,
+                               this._options.subdomains)
+      });
+    };
+
+    /**
+     * Returns an instantiated tile object with the given indices.  This
+     * method is similar to `_getTile`, but checks the cache before
+     * generating a new tile.
+     * @param {object} index The tile index
+     * @param {number} index.x
+     * @param {number} index.y
+     * @param {number} index.level
+     * @param {object} source The tile index used for constructing the url
+     * @param {number} source.x
+     * @param {number} source.y
+     * @param {number} source.level
+     * @returns {geo.tile}
+     */
+    this._getTileCached = function (index, source) {
+      var tile = this.cache.get(this._tileHash(index));
+      if (tile === null) {
+        tile = this._getTile(index, source);
+        this.cache.add(tile);
+      }
+      return tile;
+    };
+
+    /**
+     * Returns a string representation of the tile at the given index.
+     * This method is used as a hashing function for the caching layer.
+     *
+     * Note: This method _must_ return the same string as:
+     *
+     *   tile({index: index}).toString();
+     *
+     * @param {object} index The tile index
+     * @param {number} index.x
+     * @param {number} index.y
+     * @param {number} index.level
+     * @returns {string}
+     */
+    this._tileHash = function (index) {
+      return [index.level || 0, index.y, index.x].join('_');
+    };
+
+    /**
+     * Returns the optimal starting and ending tile indices
+     * (inclusive) necessary to fill the given viewport.
+     * @param {number} level The zoom level
+     * @param {object} bounds The map bounds in world coordinates
+     */
+    this._getTileRange = function (level, bounds) {
+      return {
+        start: this.tileAtPoint({
+          x: bounds.left,
+          y: bounds.top
+        }, level),
+        end: this.tileAtPoint({
+          x: bounds.right,
+          y: bounds.bottom
+        }, level)
+      };
+    };
+
+    /**
+     * Returns a list of tiles necessary to fill the screen at the given
+     * zoom level, center point, and viewport size.  The list is optionally
+     * ordered by loading priority (center tiles first).
+     *
+     * @protected
+     * @param {number} maxLevel The zoom level
+     * @param {object} bounds The map bounds
+     * @param {boolean} sorted Return a sorted list
+     * @returns {geo.tile[]} An array of tile objects
+     */
+    this._getTiles = function (maxLevel, bounds, sorted) {
+      var i, j, tiles = [], index, nTilesLevel,
+          start, end, indexRange, source, center,
+          level, minLevel = this._options.keepLower ? 0 : maxLevel;
+
+      for (level = minLevel; level <= maxLevel; level += 1) {
+        // get the tile range to fetch
+        indexRange = this._getTileRange(level, bounds);
+        start = indexRange.start;
+        end = indexRange.end;
+
+        // total number of tiles existing at this level
+        nTilesLevel = this.tilesAtZoom(level);
+
+        // loop over the tile range
+        index = {level: level};
+        index.nx = nTilesLevel.x;
+        index.ny = nTilesLevel.y;
+
+        for (i = start.x; i <= end.x; i += 1) {
+          index.x = i;
+          for (j = start.y; j <= end.y; j += 1) {
+            index.y = j;
+
+            source = $.extend({}, index);
+            if (this._options.wrapX) {
+              source.x = modulo(index.x, index.nx);
+            }
+            if (this._options.wrapY) {
+              source.y = modulo(index.y, index.ny);
+            }
+
+            if (this.isValid(source)) {
+              tiles.push(this._getTileCached($.extend({}, index), source));
+            }
+          }
+        }
+      }
+
+      if (sorted) {
+        center = {
+          x: (start.x + end.x) / 2,
+          y: (start.y + end.y) / 2
+        };
+        tiles.sort(this._loadMetric(center));
+      }
+      return tiles;
+    };
+
+    /**
+     * Prefetches tiles up to a given zoom level around a given bounding box.
+     *
+     * @param {number} level The zoom level
+     * @param {object} bounds The map bounds
+     * @returns {$.Deferred} resolves when all of the tiles are fetched
+     */
+    this.prefetch = function (level, bounds) {
+      var tiles;
+      tiles = this._getTiles(level, bounds, true);
+      return $.when.apply($,
+        tiles.map(function (tile) {
+          return tile.fetch();
+        })
+      );
+    };
+
+    /**
+     * This method returns a metric that determines tile loading order.  The
+     * default implementation prioritizes tiles that are closer to the center,
+     * or at a lower zoom level.
+     * @protected
+     * @param {index1} center   The center tile
+     * @param {number} center.x
+     * @param {number} center.y
+     * @returns {function} A function accepted by Array.prototype.sort
+     */
+    this._loadMetric = function (center) {
+      return function (a, b) {
+        var a0, b0, dx, dy, cx, cy, scale;
+
+        // shortcut if zoom level differs
+        if (a.level !== b.level) {
+          return b.level - a.level;
+        }
+
+        // compute the center coordinates relative to a.level
+        scale = Math.pow(2, a.level - center.level);
+        cx = center.x * scale;
+        cy = center.y * scale;
+
+        // calculate distances to the center squared
+        dx = a.x - cx;
+        dy = a.y - cy;
+        a0 = dx * dx + dy * dy;
+
+        dx = b.x - cx;
+        dy = b.y - cy;
+        b0 = dx * dx + dy * dy;
+
+        // return negative if a < b, or positive if a > b
+        return a0 - b0;
+      };
+    };
+
+    /**
+     * Convert a coordinate from pixel coordinates at the given zoom
+     * level to world coordinates.
+     * @param {object} coord
+     * @param {number} coord.x The offset in pixels (level 0) from the left edge
+     * @param {number} coord.y The offset in pixels (level 0) from the bottom edge
+     * @param {number} level   The zoom level of the source coordinates
+     */
+    this.fromLevel = function (coord, level) {
+      var s = Math.pow(2, -level);
+      return {
+        x: coord.x * s,
+        y: coord.y * s
+      };
+    };
+
+    /**
+     * Convert a coordinate from layer coordinates to pixel coordinates at the
+     * given zoom level.
+     * @param {object} coord
+     * @param {number} coord.x The offset in pixels (level 0) from the left edge
+     * @param {number} coord.y The offset in pixels (level 0) from the bottom edge
+     * @param {number} level   The zoom level of the new coordinates
+     */
+    this.toLevel = function (coord, level) {
+      var s = Math.pow(2, level);
+      return {
+        x: coord.x * s,
+        y: coord.y * s
+      };
+    };
+
+    /**
+     * Draw the given tile on the active canvas.
+     * @param {geo.tile} tile The tile to draw
+     */
+    this.drawTile = function (tile) {
+      var hash = tile.toString();
+
+      if (this._activeTiles.hasOwnProperty(hash)) {
+        // the tile is already drawn, move it to the top
+        this._moveToTop(tile);
+      } else {
+        // pass to the rendering implementation
+        this._drawTile(tile);
+      }
+
+      // add the tile to the active cache
+      this._activeTiles[hash] = tile;
+    };
+
+    /**
+     * Render the tile on the canvas.  This implementation draws the tiles directly
+     * on the DOM using <img> tags.  Derived classes should override this method
+     * to draw the tile on a renderer specific context.
+     * @protected
+     * @param {geo.tile} tile The tile to draw
+     */
+    this._drawTile = function (tile) {
+      // Make sure this method is not called when there is
+      // a renderer attached.
+      //
+      if (this.renderer() !== null) {
+        throw new Error('This draw method is not valid on renderer managed layers.');
+      }
+
+      // get the layer node
+      var div = $(this._getSubLayer(tile.index.level)),
+          bounds = this._tileBounds(tile),
+          duration = this._options.animationDuration,
+          container = $('<div class="geo-tile-container"/>').attr(
+            'tile-reference', tile.toString());
+
+      // apply a transform to place the image correctly
+      container.append(tile.image);
+      container.css({
+        'position': 'absolute',
+        'left': bounds.left + 'px',
+        'top': bounds.top + 'px'
+      });
+
+      // apply fade in animation
+      if (duration > 0) {
+        tile.fadeIn(duration);
+      }
+
+      // append the image element
+      div.append(container);
+
+      // add an error handler
+      tile.catch(function () {
+        // May want to do something special here later
+        console.warn('Could not load tile at ' + tile.index);
+        this._remove(tile);
+      }.bind(this));
+    };
+
+    /**
+     * Remove the given tile from the canvas and the active cache.
+     * @param {geo.tile|string} tile The tile (or hash) to remove
+     * @returns {geo.tile} the tile removed from the active layer
+     */
+    this.remove = function (tile) {
+      var hash = tile.toString();
+      var value = this._activeTiles[hash];
+
+      if (value instanceof geo.tile) {
+        this._remove(value);
+      }
+
+      delete this._activeTiles[hash];
+      return value;
+    };
+
+    /**
+     * Remove the given tile from the canvas.  This implementation just
+     * finds and removes the <img> element created for the tile.
+     * @param {geo.tile|string} tile The tile object to remove
+     */
+    this._remove = function (tile) {
+      if (tile.image) {
+        if (tile.image.parentElement) {
+          $(tile.image.parentElement).remove();
+        } else {
+          /* This shouldn't happen, but sometimes does.  Originally it happened
+           * when a tile was removed from the cache before it was finished
+           * being used; there is still some much rarer condition that can
+           * cause it.  Log that it happened until we can figure out how to fix
+           * the issue. */
+          console.log('No parent element to remove ' + tile.toString(), tile);
+        }
+        $(tile.image).remove();
+      }
+    };
+
+    /**
+     * Move the given tile to the top on the canvas.
+     * @param {geo.tile} tile The tile object to move
+     */
+    this._moveToTop = function (tile) {
+      $.noop(tile);
+    };
+
+    /**
+     * Query the attached map for the current bounds and return them
+     * as pixels at the current zoom level.
+     * @returns {object}
+     *  Bounds object with left, right, top, bottom keys
+     * @protected
+     */
+    this._getViewBounds = function () {
+      var map = this.map(),
+          mapZoom = map.zoom(),
+          zoom = this._options.tileRounding(mapZoom),
+          scale = Math.pow(2, mapZoom - zoom),
+          size = map.size();
+      var ul = this.displayToLevel({x: 0, y: 0});
+      var lr = this.displayToLevel({x: size.width, y: size.height});
+      return {
+        level: zoom,
+        scale: scale,
+        left: ul.x,
+        right: lr.x,
+        bottom: lr.y,
+        top: ul.y
+      };
+    };
+
+    /**
+     * Remove all inactive tiles from the display.  An inactive tile
+     * is one that is no longer visible either because it was panned
+     * out of the active view or the zoom has changed.
+     * @protected
+     * @param {number} zoom Tiles (in bounds) at this zoom level will be kept
+     * @param {boolean} doneLoading If true, allow purging additional tiles.
+     */
+    this._purge = function (zoom, doneLoading) {
+      var tile, hash, bounds = {};
+
+      // Don't purge tiles in an active update
+      if (this._updating) {
+        return;
+      }
+
+      // get the view bounds
+      bounds = this._getViewBounds();
+
+      for (hash in this._activeTiles) {// jshint ignore: line
+
+        tile = this._activeTiles[hash];
+        if (this._canPurge(tile, bounds, zoom, doneLoading)) {
+          this.remove(tile);
+        }
+      }
+      return this;
+    };
+
+    /**
+     * Remove all active tiles from the canvas.
+     * @returns {geo.tile[]} The array of tiles removed
+     */
+    this.clear = function () {
+      var tiles = [], tile;
+
+      // ignoring the warning here because this is a privately
+      // controlled object with simple keys
+      for (tile in this._activeTiles) {  // jshint ignore: line
+        tiles.push(this.remove(tile));
+      }
+
+      // clear out the tile coverage tree
+      this._tileTree = {};
+
+      return tiles;
+    };
+
+    /**
+     * Reset the layer to the initial state, clearing the canvas
+     * and resetting the tile cache.
+     * @returns {this} Chainable
+     */
+    this.reset = function () {
+      this.clear();
+      this._cache.clear();
+    };
+
+    /**
+     * Compute local coordinates from the given world coordinates.  The
+     * tile layer uses units of pixels relative to the world space
+     * coordinate origin.
+     * @param {object} pt A point in world space coordinates
+     * @param {number|undefined} zoom If unspecified, use the map zoom.
+     * @returns {object} Local coordinates
+     */
+    this.toLocal = function (pt, zoom) {
+      var map = this.map(),
+          unit = map.unitsPerPixel(zoom === undefined ? map.zoom() : zoom);
+      return {
+        x: pt.x / unit,
+        y: this._topDown() * pt.y / unit
+      };
+    };
+
+    /**
+     * Compute world coordinates from the given local coordinates.  The
+     * tile layer uses units of pixels relative to the world space
+     * coordinate origin.
+     * @param {object} pt A point in world space coordinates
+     * @param {number|undefined} zoom If unspecified, use the map zoom.
+     * @returns {object} Local coordinates
+     */
+    this.fromLocal = function (pt, zoom) {
+      var map = this.map(),
+          unit = map.unitsPerPixel(zoom === undefined ? map.zoom() : zoom);
+      return {
+        x: pt.x * unit,
+        y: this._topDown() * pt.y * unit
+      };
+    };
+
+    /**
+     * Return a factor for invertin the y units as appropriate.
+     * @return {number}
+     */
+    this._topDown = function () {
+      return this._options.topDown ? 1 : -1;
+    };
+
+    /**
+     * Return the DOM element containing a level specific layer.  This will
+     * create the element if it doesn't already exist.
+     * @param {number} level The zoom level of the layer to fetch
+     * @return {DOM}
+     */
+    this._getSubLayer = function (level) {
+      var node = this.canvas()
+        .find('div[data-tile-layer=' + level.toFixed() + ']').get(0);
+      if (!node) {
+        node = $(
+          '<div class=geo-tile-layer data-tile-layer="' + level.toFixed() + '"/>'
+        ).css('transform-origin', '0px').get(0);
+        this.canvas().append(node);
+      }
+      return node;
+    };
+
+    /**
+     * Set sublayer transforms to align them with the given zoom level.
+     * @param {number} level The target zoom level
+     */
+    this._updateSubLayers = function (level) {
+      this.canvas().find('.geo-tile-layer').each(function (idx, el) {
+        var $el = $(el),
+            layer = parseInt($el.data('tileLayer'));
+        $el.css(
+          'transform',
+          'scale(' + Math.pow(2, level - layer) + ')'
+        );
+      }.bind(this));
+    };
+
+    /**
+     * Update the view according to the map/camera.
+     * @returns {this} Chainable
+     */
+    this._update = function () {
+      var map = this.map(),
+          mapZoom = map.zoom(),
+          zoom = this._options.tileRounding(mapZoom),
+          center = this.displayToLevel(undefined, zoom),
+          bounds = map.bounds(undefined, null),
+          tiles, view = this._getViewBounds(), myPurge = {};
+
+      _deferredPurge = myPurge;
+      tiles = this._getTiles(
+        zoom, bounds, true
+      );
+
+      // Update the transform for the local layer coordinates
+      this._updateSubLayers(zoom);
+
+      var to = this._options.tileOffset(zoom);
+      if (this.renderer() === null) {
+        this.canvas().css(
+          'transform-origin',
+          'center center'
+        );
+        this.canvas().css(
+          'transform',
+          'scale(' + (Math.pow(2, mapZoom - zoom)) + ')' +
+          'translate(' +
+          (-to.x) + 'px' + ',' +
+          (-to.y) + 'px' + ')' +
+          'translate(' +
+          (map.size().width / 2) + 'px' + ',' +
+          (map.size().height / 2) + 'px' + ')' +
+          'translate(' +
+          (-(view.left + view.right) / 2) + 'px' + ',' +
+          (-(view.bottom + view.top) / 2) + 'px' + ')' +
+          ''
+        );
+      }
+      /* Set some attributes that can be used by non-css based viewers.  This
+       * doesn't include the map center, as that may need to be handled
+       * differently from the view center. */
+      this.canvas().attr({
+        scale: Math.pow(2, mapZoom - zoom),
+        dx: -to.x + -(view.left + view.right) / 2,
+        dy: -to.y + -(view.bottom + view.top) / 2
+      });
+
+      lastZoom = mapZoom;
+      lastX = center.x;
+      lastY = center.y;
+
+      // reset the tile coverage tree
+      this._tileTree = {};
+
+      tiles.forEach(function (tile) {
+        tile.then(function () {
+          if (tile !== this.cache.get(tile.toString())) {
+            /* If the tile has fallen out of the cache, don't draw it -- it is
+             * untracked.  This may be an indication that a larger cache should
+             * have been used. */
+            return;
+          }
+          /* Check if a tile is still desired.  Don't draw it if it isn't. */
+          var mapZoom = map.zoom(),
+              zoom = this._options.tileRounding(mapZoom),
+              bounds = this._getViewBounds();
+          if (this._canPurge(tile, bounds, zoom)) {
+            this.remove(tile);
+            return;
+          }
+
+          this.drawTile(tile);
+
+          // mark the tile as covered
+          this._setTileTree(tile);
+        }.bind(this));
+
+        this.addPromise(tile);
+      }.bind(this));
+
+      // purge all old tiles when the new tiles are loaded (successfully or not)
+      $.when.apply($, tiles)
+        .done(// called on success and failure
+          function () {
+            if (_deferredPurge === myPurge) {
+              this._purge(zoom, true);
+            }
+          }.bind(this)
+        );
+    };
+
+    /**
+     * Set a value in the tile tree object indicating that the given area of
+     * the canvas is covered by the tile.
+     * @protected
+     * @param {geo.tile} tile
+     */
+    this._setTileTree = function (tile) {
+      var index = tile.index;
+      this._tileTree[index.level] = this._tileTree[index.level] || {};
+      this._tileTree[index.level][index.x] = this._tileTree[index.level][index.x] || {};
+      this._tileTree[index.level][index.x][index.y] = tile;
+    };
+
+    /**
+     * Get a value in the tile tree object if it exists or return null.
+     * @protected
+     * @param {object} index A tile index object
+     * @param {object} index.level
+     * @param {object} index.x
+     * @param {object} index.y
+     * @returns {geo.tile|null}
+     */
+    this._getTileTree = function (index) {
+      return (
+          (
+            this._tileTree[index.level] || {}
+          )[index.x] || {}
+        )[index.y] || null;
+    };
+
+    /**
+     * Returns true if the tile is completely covered by other tiles on the canvas.
+     * Currently this method only checks layers +/- 1 away from `tile`.  If the
+     * zoom level is allowed to change by 2 or more in a single update step, this
+     * method will need to be refactored to make a more robust check.  Returns
+     * an array of tiles covering it or null if any part of the tile is exposed.
+     * @protected
+     * @param {geo.tile} tile
+     * @returns {geo.tile[]|null}
+     */
+    this._isCovered = function (tile) {
+      var level = tile.index.level,
+          x = tile.index.x,
+          y = tile.index.y,
+          tiles = [];
+
+      // Check one level up
+      tiles = this._getTileTree({
+        level: level - 1,
+        x: Math.floor(x / 2),
+        y: Math.floor(y / 2)
+      });
+      if (tiles) {
+        return [tiles];
+      }
+
+      // Check one level down
+      tiles = [
+        this._getTileTree({
+          level: level + 1,
+          x: 2 * x,
+          y: 2 * y
+        }),
+        this._getTileTree({
+          level: level + 1,
+          x: 2 * x + 1,
+          y: 2 * y
+        }),
+        this._getTileTree({
+          level: level + 1,
+          x: 2 * x,
+          y: 2 * y + 1
+        }),
+        this._getTileTree({
+          level: level + 1,
+          x: 2 * x + 1,
+          y: 2 * y + 1
+        })
+      ];
+      if (tiles.every(function (t) { return t !== null; })) {
+        return tiles;
+      }
+
+      return null;
+    };
+
+    /**
+     * Returns true if the provided tile is outside of the current view bounds
+     * and can be removed from the canvas.
+     * @protected
+     * @param {geo.tile} tile
+     * @param {object?} bounds The view bounds
+     * @param {object?} bounds.left
+     * @param {object?} bounds.right
+     * @param {object?} bounds.top
+     * @param {object?} bounds.bottom
+     * @returns {boolean}
+     */
+    this._outOfBounds = function (tile, bounds) {
+      /* We may want to add an (n) tile edge buffer so we appear more
+       * responsive */
+      var to = this._options.tileOffset(tile.index.level);
+      var scale = 1;
+      if (tile.index.level !== bounds.level) {
+        scale = Math.pow(2, (bounds.level || 0) - (tile.index.level || 0));
+      }
+      return (tile.bottom - to.y) * scale < bounds.top ||
+             (tile.left - to.x) * scale   > bounds.right ||
+             (tile.top - to.y) * scale    > bounds.bottom ||
+             (tile.right - to.x) * scale  < bounds.left;
+    };
+
+    /**
+     * Returns true if the provided tile can be purged from the canvas.  This method
+     * will return `true` if the tile is completely covered by one or more other tiles
+     * or it is outside of the active view bounds.  This method returns the logical and
+     * of `_isCovered` and `_outOfBounds`.
+     * @protected
+     * @param {geo.tile} tile
+     * @param {object?} bounds The view bounds (if empty, assume global bounds)
+     * @param {number} bounds.left
+     * @param {number} bounds.right
+     * @param {number} bounds.top
+     * @param {number} bounds.bottom
+     * @param {number} bounds.level The zoom level the bounds are given as
+     * @param {number} zoom Keep in bound tile at this zoom level
+     * @param {boolean} doneLoading If true, allow purging additional tiles.
+     * @returns {boolean}
+     */
+    this._canPurge = function (tile, bounds, zoom, doneLoading) {
+      if (this._options.keepLower) {
+        zoom = zoom || 0;
+        if (zoom < tile.index.level) {
+          return true;
+        }
+      } else {
+        /* For tile layers that should only keep one layer, if loading is
+         * finished, purge all but the current layer.  This is important for
+         * semi-transparanet layers. */
+        if ((doneLoading || this._isCovered(tile)) &&
+            zoom !== tile.index.level) {
+          return true;
+        }
+      }
+      if (bounds) {
+        return this._outOfBounds(tile, bounds);
+      }
+      return false;
+    };
+
+    /**
+     * Convert display pixel coordinates (where (0,0) is the upper left) to
+     * layer pixel coordinates (typically (0,0) is the center of the map and
+     * the upper-left has the most negative values).
+     * By default, this is done at the current base zoom level.
+     *
+     * @param pt: the point to convert.  If undefined, use the center of the
+     *            display.
+     * @param zoom: if specified, the zoom level to use.
+     * @returns: the point in level coordinates.
+     */
+    this.displayToLevel = function (pt, zoom) {
+      var map = this.map(),
+          mapzoom = map.zoom(),
+          roundzoom = this._options.tileRounding(mapzoom),
+          unit = map.unitsPerPixel(zoom === undefined ? roundzoom : zoom);
+      if (pt === undefined) {
+        var size = map.size();
+        pt = {x: size.width / 2, y: size.height / 2};
+      }
+      /* Reverse the y coordinate, since we expect the gcs coordinate system
+       * to be right-handed and the level coordinate system to be
+       * left-handed. */
+      var gcsPt = map.displayToGcs(pt, null),
+          lvlPt = {x: gcsPt.x / unit, y: this._topDown() * gcsPt.y / unit};
+      return lvlPt;
+    };
+
+    /**
+     * Get or set the tile url string or function.  If changed, load the new
+     * tiles.
+     *
+     * @param {string|function} [url] The new tile url.
+     * @returns {string|function|this}
+     */
+    this.url = function (url) {
+      if (url === undefined) {
+        return this._options.originalUrl;
+      }
+      if (url === this._options.originalUrl) {
+        return this;
+      }
+      this._options.originalUrl = url;
+      if ($.type(url) === 'string') {
+        url = m_tileUrlFromTemplate(url);
+      }
+      this._options.url = url;
+      this.reset();
+      this.map().draw();
+      return this;
+    };
+
+    /**
+     * Initialize after the layer is added to the map.
+     */
+    this._init = function () {
+      var sublayer;
+
+      // call super method
+      s_init.apply(this, arguments);
+
+      if (this.renderer() === null) {
+        // Initialize sublayers in the correct order
+        for (sublayer = 0; sublayer <= this._options.maxLevel; sublayer += 1) {
+          this._getSubLayer(sublayer);
+        }
+      }
+      return this;
+    };
+
+    geo.adjustLayerForRenderer('tile', this);
+
+    return this;
+  };
+
+  /**
+   * This object contains the default options used to initialize the tileLayer.
+   */
+  geo.tileLayer.defaults = {
+    minLevel: 0,
+    maxLevel: 18,
+    tileOverlap: 0,
+    tileWidth: 256,
+    tileHeight: 256,
+    wrapX: true,
+    wrapY: false,
+    url: null,
+    subdomains: 'abc',
+    minX: 0,
+    maxX: 255,
+    minY: 0,
+    maxY: 255,
+    tileOffset: function (level) {
+      void(level);
+      return {x: 0, y: 0};
+    },
+    topDown: false,
+    keepLower: true,
+    // cacheSize: 400,  // set depending on keepLower
+    tileRounding: Math.round,
+    attribution: '',
+    animationDuration: 0
+  };
+
+  inherit(geo.tileLayer, geo.featureLayer);
+})();
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class fileReader
@@ -17100,12 +19908,12 @@ inherit(geo.fileReader, geo.object);
 /*global File*/
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Create a new instance of class jsonReader
- *
- * @class
- * @extends geo.fileReader
- * @returns {geo.jsonReader}
- */
+* Create a new instance of class jsonReader
+*
+* @class
+* @extends geo.fileReader
+* @returns {geo.jsonReader}
+*/
 //////////////////////////////////////////////////////////////////////////////
 geo.jsonReader = function (arg) {
   'use strict';
@@ -17115,12 +19923,12 @@ geo.jsonReader = function (arg) {
 
   var m_this = this, m_style = arg.style || {};
   m_style = $.extend({
-      'strokeWidth': 2,
-      'strokeColor': {r: 0, g: 0, b: 0},
-      'strokeOpacity': 1,
-      'fillColor': {r: 1, g: 0, b: 0},
-      'fillOpacity': 1
-    }, m_style);
+    'strokeWidth': 2,
+    'strokeColor': {r: 0, g: 0, b: 0},
+    'strokeOpacity': 1,
+    'fillColor': {r: 1, g: 0, b: 0},
+    'fillOpacity': 1
+  }, m_style);
 
   geo.fileReader.call(this, arg);
 
@@ -17213,10 +20021,10 @@ geo.jsonReader = function (arg) {
 
   this._getCoordinates = function (spec) {
     var geometry = spec.geometry || {},
-        coordinates = geometry.coordinates || [], elv;
+    coordinates = geometry.coordinates || [], elv;
 
     if ((coordinates.length === 2 || coordinates.length === 3) &&
-        (isFinite(coordinates[0]) && isFinite(coordinates[1]))) {
+    (isFinite(coordinates[0]) && isFinite(coordinates[1]))) {
 
       // Do we have a elevation component
       if (isFinite(coordinates[2])) {
@@ -17256,8 +20064,8 @@ geo.jsonReader = function (arg) {
 
       features.forEach(function (feature) {
         var type = m_this._featureType(feature),
-            coordinates = m_this._getCoordinates(feature),
-            style = m_this._getStyle(feature);
+        coordinates = m_this._getCoordinates(feature),
+        style = m_this._getStyle(feature);
         if (type) {
           if (type === 'line') {
             style.fill = style.fill || false;
@@ -17282,8 +20090,8 @@ geo.jsonReader = function (arg) {
             );
             // polygons not yet supported
             allFeatures.push(m_this._addFeature(
-              'line',
-              [coordinates],
+              type,
+              [[coordinates]], //double wrap for the data method below
               style,
               feature.properties
             ));
@@ -17292,22 +20100,19 @@ geo.jsonReader = function (arg) {
             style.fillOpacity = (
               style.fillOpacity === undefined ? 0.25 : style.fillOpacity
             );
-
             coordinates = feature.geometry.coordinates.map(function (c) {
-              return c[0].map(function (el) {
-                return {
-                  x: el[0],
-                  y: el[1],
-                  z: el[2]
-                };
-              });
+              return [m_this._getCoordinates({
+                geometry: {
+                  type: 'Polygon',
+                  coordinates: c
+                }
+              })];
             });
-
             allFeatures.push(m_this._addFeature(
-                'line',
-                coordinates,
-                style,
-                feature.properties
+              'polygon', //there is no multipolygon feature class
+              coordinates,
+              style,
+              feature.properties
             ));
           }
         } else {
@@ -17326,15 +20131,15 @@ geo.jsonReader = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Build the data array for a feature given the coordinates and properties
-   * from the geojson.
-   *
-   * @private
-   * @param {Object[]} coordinates Coordinate data array
-   * @param {Object} properties Geojson properties object
-   * @param {Object} style Global style defaults
-   * @returns {Object[]}
-   */
+  * Build the data array for a feature given the coordinates and properties
+  * from the geojson.
+  *
+  * @private
+  * @param {Object[]} coordinates Coordinate data array
+  * @param {Object} properties Geojson properties object
+  * @param {Object} style Global style defaults
+  * @returns {Object[]}
+  */
   //////////////////////////////////////////////////////////////////////////////
   this._buildData = function (coordinates, properties, style) {
     return coordinates.map(function (coord) {
@@ -17349,13 +20154,28 @@ geo.jsonReader = function (arg) {
   this._addFeature = function (type, coordinates, style, properties) {
     var _style = $.extend({}, m_style, style);
     var feature = m_this.layer().createFeature(type)
-      .data(m_this._buildData(coordinates, properties, style))
-      .style(_style);
+    .data(m_this._buildData(coordinates, properties, style))
+    .style(_style);
 
     if (type === 'line') {
       feature.line(function (d) { return d.coordinates; });
+    } else if (type === 'polygon') {
+      feature.position(function (d) {
+        return {
+          x: d.x,
+          y: d.y,
+          z: d.z
+        };
+      }).polygon(function (d) {
+        return {
+          'outer': d.coordinates[0],
+          'inner': d.coordinates[1]
+        };
+      });
     } else {
-      feature.position(function (d) { return d.coordinates; });
+      feature.position(function (d) {
+        return d.coordinates;
+      });
     }
     return feature;
   };
@@ -17368,31 +20188,61 @@ geo.registerFileReader('jsonReader', geo.jsonReader);
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Create a new instance of class map.
+ * Creates a new map object
  *
- * Creation tags a dictionary of arguments, which can include:
- *  center: {x: (center x value), y: (center y value)}
- *  gcs:
- *  uigcs:
- *  node:
- *  layers:
- *  zoom: (number) - initial zoom level
- *  min: (number) - minimum zoom level
- *  max: (number) - maximum zoom level
- *  width:
- *  height:
- *  parallelProjection: (bool) - true to use parallel projection, false to use
- *      perspective.
- *  discreteZoom: (bool) - true to only allow integer zoom levels, false to
- *      allow any zoom level.
- *  autoResize:
- *  clampBounds:
- *  interactor:
- *  clock:
+ * Map coordinates for default world map, where c = half circumference at
+ * equator in meters, o = origin:
+ *   (-c, c) + o                   (c, c) + o
+ *            (center.x, center.y) + o            <-- center of viewport
+ *   (-c, -c) + o                  (c, -c) + o
  *
- * Creates a new map inside of the given HTML layer (Typically DIV)
  * @class
  * @extends geo.sceneObject
+ *
+ * *** Always required ***
+ * @param {string} node DOM selector for the map container
+ *
+ * *** Required when using a domain/CS different from OSM ***
+ * @param {string|geo.transform} [gcs='EPSG:3857']
+ *   The main coordinate system of the map
+ * @param {number} [maxZoom=16] The maximum zoom level
+ * @param {string|geo.transform} [ingcs='EPSG:4326']
+ *   The default coordinate system of interface calls.
+ * @param {number} [unitsPerPixel=156543] GCS to pixel unit scaling at zoom 0
+ *   (i.e. meters per pixel or degrees per pixel).
+ * @param {object?} maxBounds The maximum visable map bounds
+ * @param {number} [maxBounds.left=-20037508] The left bound
+ * @param {number} [maxBounds.right=20037508] The right bound
+ * @param {number} [maxBounds.bottom=-20037508] The bottom bound
+ * @param {number} [maxBounds.top=20037508] The top bound
+ *
+ * *** Initial view ***
+ * @param {number} [zoom=4] Initial zoom
+ * @param {object?} center Map center
+ * @param {number} [center.x=0]
+ * @param {number} [center.y=0]
+ * @param {number?} width The map width (default node width)
+ * @param {number?} height The map height (default node height)
+ *
+ * *** Navigation ***
+ * @param {number} [min=0]  Minimum zoom level (though fitting to the viewport
+ *   may make it so this is smaller than the smallest possible value)
+ * @param {number} [max=16]  Maximum zoom level
+ * @param {boolean} [discreteZoom=false]  True to only allow integer zoom
+ *   levels.  False for any zoom level.
+ *
+ * *** Advanced parameters ***
+ * @param {geo.camera?} camera The camera to control the view
+ * @param {geo.mapInteractor?} interactor The UI event handler
+ * @param {geo.clock?} clock The clock used to synchronize time events
+ * @param {boolean} [autoResize=true] Adjust map size on window resize
+ * @param {boolean} [clampBoundsX=false] Prevent panning outside of the
+ *   maximum bounds in the horizontal direction.
+ * @param {boolean} [clampBoundsY=true] Prevent panning outside of the
+ *   maximum bounds in the vertical direction.
+ * @param {boolean} [clampZoom=true] Prevent zooming out so that the map area
+ *   is smaller than the window.
+ *
  * @returns {geo.map}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -17403,7 +20253,6 @@ geo.map = function (arg) {
   }
   arg = arg || {};
   geo.sceneObject.call(this, arg);
-  arg.layers = arg.layers === undefined ? [] : arg.layers;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -17413,29 +20262,113 @@ geo.map = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       s_exit = this._exit,
+      // See https://en.wikipedia.org/wiki/Web_Mercator
+      // phiMax = 180 / Math.PI * (2 * Math.atan(Math.exp(Math.PI)) - Math.PI / 2),
       m_x = 0,
       m_y = 0,
       m_node = $(arg.node),
-      m_width = arg.width || m_node.width(),
-      m_height = arg.height || m_node.height(),
-      m_gcs = arg.gcs === undefined ? 'EPSG:4326' : arg.gcs,
-      m_uigcs = arg.uigcs === undefined ? 'EPSG:4326' : arg.uigcs,
-      m_center = { x: 0, y: 0 },
+      m_width = arg.width || m_node.width() || 512,
+      m_height = arg.height || m_node.height() || 512,
+      m_gcs = arg.gcs === undefined ? 'EPSG:3857' : arg.gcs,
+      m_ingcs = arg.ingcs === undefined ? 'EPSG:4326' : arg.ingcs,
+      m_center = {x: 0, y: 0},
       m_zoom = arg.zoom === undefined ? 4 : arg.zoom,
-      m_baseLayer = null,
       m_fileReader = null,
       m_interactor = null,
-      m_validZoomRange = { min: 0, max: 16 },
+      m_validZoomRange = {min: 0, max: 16, origMin: 0},
       m_transition = null,
       m_queuedTransition = null,
       m_clock = null,
-      m_parallelProjection = arg.parallelProjection ? true : false,
       m_discreteZoom = arg.discreteZoom ? true : false,
-      m_bounds = {};
+      m_maxBounds = arg.maxBounds || {},
+      m_camera = arg.camera || geo.camera(),
+      m_unitsPerPixel,
+      m_clampBoundsX,
+      m_clampBoundsY,
+      m_clampZoom,
+      m_origin,
+      m_scale = {x: 1, y: 1, z: 1}; // constant for the moment
 
+  /* Compute the maximum bounds on our map projection.  By default, x ranges
+   * from [-180, 180] in the interface projection, and y matches the x range in
+   * the map (not the interface) projection.  For images, this might be
+   * [0, width] and [0, height] instead. */
+  m_maxBounds.left = geo.transform.transformCoordinates(m_ingcs, m_gcs, [{
+    x: m_maxBounds.left !== undefined ? m_maxBounds.left : -180, y: 0}])[0].x;
+  m_maxBounds.right = geo.transform.transformCoordinates(m_ingcs, m_gcs, [{
+    x: m_maxBounds.right !== undefined ? m_maxBounds.right : 180, y: 0}])[0].x;
+  m_maxBounds.top = (m_maxBounds.top !== undefined ?
+    geo.transform.transformCoordinates(m_ingcs, m_gcs, [{
+    x: 0, y: m_maxBounds.top}])[0].y : m_maxBounds.right);
+  m_maxBounds.bottom = (m_maxBounds.bottom !== undefined ?
+    geo.transform.transformCoordinates(m_ingcs, m_gcs, [{
+    x: 0, y: m_maxBounds.bottom}])[0].y : m_maxBounds.left);
+  m_unitsPerPixel = (arg.unitsPerPixel || (
+    m_maxBounds.right - m_maxBounds.left) / 256);
+
+  m_camera.viewport = {width: m_width, height: m_height};
   arg.center = geo.util.normalizeCoordinates(arg.center);
   arg.autoResize = arg.autoResize === undefined ? true : arg.autoResize;
-  arg.clampBounds = arg.clampBounds === undefined ? true : arg.clampBounds;
+  m_clampBoundsX = arg.clampBoundsX === undefined ? false : arg.clampBoundsX;
+  m_clampBoundsY = arg.clampBoundsY === undefined ? true : arg.clampBoundsY;
+  m_clampZoom = arg.clampZoom === undefined ? true : arg.clampZoom;
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/set the number of world space units per display pixel at the given
+   * zoom level.
+   *
+   * @param {Number} [zoom=0] The target zoom level
+   * @param {Number?} unit If present, set the unitsPerPixel otherwise return
+   *   the current value.
+   * @returns {Number|this}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.unitsPerPixel = function (zoom, unit) {
+    zoom = zoom || 0;
+    if (unit) {
+      // get the units at level 0
+      m_unitsPerPixel = Math.pow(2, zoom) * unit;
+
+      // redraw all the things
+      m_this.draw();
+      return m_this;
+    }
+    return Math.pow(2, -zoom) * m_unitsPerPixel;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get the map's world coordinate origin in gcs coordinates
+   *
+   * @returns {object}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.origin = function () {
+    return $.extend({}, m_origin);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get the map's world coordinate scaling relative gcs units
+   *
+   * @returns {object}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.scale = function () {
+    return $.extend({}, m_scale);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get the camera
+   *
+   * @returns {geo.camera}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.camera = function () {
+    return m_camera;
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -17454,13 +20387,17 @@ geo.map = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get map user interface GCS
+   * Get map interface gcs
    *
    * @returns {string}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.uigcs = function () {
-    return m_uigcs;
+  this.ingcs = function (arg) {
+    if (arg === undefined) {
+      return m_ingcs;
+    }
+    m_ingcs = arg;
+    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -17481,60 +20418,37 @@ geo.map = function (arg) {
    * @returns {Number|geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.zoom = function (val, direction, ignoreDiscreteZoom) {
-    var base, evt, recenter = false;
+  this.zoom = function (val, origin, ignoreDiscreteZoom) {
+    var evt, oldZoom, bounds;
     if (val === undefined) {
       return m_zoom;
     }
 
+    oldZoom = m_zoom;
     /* The ignoreDiscreteZoom flag is intended to allow non-integer zoom values
      * during animation. */
-    if (m_discreteZoom && val !== Math.round(val) && !ignoreDiscreteZoom) {
-      /* If we are using discrete zoom levels and the value we were given is
-       * not an integer, then try to detect if we are enlarging or shrinking
-       * and perform the expected behavior.  Otherwise, make sure we are at an
-       * integer level.  We may need to revisit for touch zoom events. */
-      if (m_zoom !== Math.round(m_zoom) || Math.abs(val - m_zoom) < 0.01) {
-        val = Math.round(m_zoom);
-      } else if (val < m_zoom) {
-        val = Math.min(Math.round(val), m_zoom - 1);
-      } else if (val > m_zoom) {
-        val = Math.max(Math.round(val), m_zoom + 1);
-      }
-    }
-    val = Math.min(m_validZoomRange.max, Math.max(val, m_validZoomRange.min));
+    val = fix_zoom(val, ignoreDiscreteZoom);
     if (val === m_zoom) {
       return m_this;
     }
 
-    base = m_this.baseLayer();
+    m_zoom = val;
 
+    bounds = m_this.boundsFromZoomAndCenter(val, m_center, null);
+    m_this.modified();
+
+    camera_bounds(bounds);
     evt = {
       geo: {},
-      zoomLevel: val,
-      screenPosition: direction,
+      zoomLevel: m_zoom,
+      screenPosition: origin ? origin.map : undefined,
       eventType: geo.event.zoom
     };
+    m_this.geoTrigger(geo.event.zoom, evt);
 
-    if (base) {
-      base.geoTrigger(geo.event.zoom, evt, true);
-    }
-
-    recenter = evt.center;
-    if (!evt.geo.preventDefault) {
-
-      m_zoom = val;
-      m_this._updateBounds();
-
-      m_this.children().forEach(function (child) {
-        child.geoTrigger(geo.event.zoom, evt, true);
-      });
-
-      m_this.modified();
-    }
-
-    if (evt.center) {
-      m_this.center(recenter);
+    if (origin && origin.geo && origin.map) {
+      var shifted = m_this.gcsToDisplay(origin.geo);
+      m_this.pan({x: origin.map.x - shifted.x, y: origin.map.y - shifted.y});
     } else {
       m_this.pan({x: 0, y: 0});
     }
@@ -17546,69 +20460,41 @@ geo.map = function (arg) {
    * Pan the map by (x: dx, y: dy) pixels.
    *
    * @param {Object} delta
-   * @param {bool?} force Disable bounds clamping
    * @returns {geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.pan = function (delta, force) {
-
-    var base = m_this.baseLayer(),
-        evt, pt, corner1, corner2;
-
-    if (arg.clampBounds && !force && m_width && m_height) {
-      pt = m_this.displayToGcs({
-        x: delta.x,
-        y: delta.y
-      });
-
-      corner1 = m_this.gcsToDisplay({
-        x: -180,
-        y: 82
-      });
-      corner2 = m_this.gcsToDisplay({
-        x: 180,
-        y: -82
-      });
-
-      if (corner1.x > 0 && corner2.x < m_width) {
-        // if the map is too small horizontally
-        delta.x = (-corner1.x + m_width - corner2.x) / 2;
-      } else {
-        delta.x = Math.max(Math.min(delta.x, -corner1.x), m_width - corner2.x);
-      }
-      if (corner1.y > 0 && corner2.y < m_height) {
-        // if the map is too small horizontally
-        delta.y = (-corner1.y + m_height - corner2.y) / 2;
-      } else {
-        delta.y = Math.max(Math.min(delta.y, -corner1.y), m_height - corner2.y);
-      }
-    }
-
+  this.pan = function (delta) {
+    var evt, unit;
     evt = {
       geo: {},
       screenDelta: delta,
       eventType: geo.event.pan
     };
-    // first pan the base layer
-    if (base) {
-      base.geoTrigger(geo.event.pan, evt, true);
+
+    unit = m_this.unitsPerPixel(m_zoom);
+
+    m_camera.pan({
+      x: delta.x * unit,
+      y: -delta.y * unit
+    });
+    /* If m_clampBounds* is true, clamp the pan */
+    var bounds = fix_bounds(m_camera.bounds);
+    if (bounds !== m_camera.bounds) {
+      var panPos = m_this.gcsToDisplay({
+            x: m_camera.bounds.left, y: m_camera.bounds.top}, null);
+      camera_bounds(bounds);
+      var clampPos = m_this.gcsToDisplay({
+            x: m_camera.bounds.left, y: m_camera.bounds.top}, null);
+      evt.screenDelta.x += clampPos.x - panPos.x;
+      evt.screenDelta.y += clampPos.y - panPos.y;
     }
 
-    // If the base renderer says the pan is invalid, then cancel the action.
-    if (evt.geo.preventDefault) {
-      return;
-    }
-    m_center = m_this.displayToGcs({
+    m_center = m_camera.displayToWorld({
       x: m_width / 2,
       y: m_height / 2
     });
-    m_this._updateBounds();
 
-    m_this.children().forEach(function (child) {
-      if (child !== base) {
-        child.geoTrigger(geo.event.pan, evt, true);
-      }
-    });
+    m_this.geoTrigger(geo.event.pan, evt);
 
     m_this.modified();
     return m_this;
@@ -17620,56 +20506,33 @@ geo.map = function (arg) {
    * current center.  Uses bare objects {x: 0, y: 0}.
    *
    * @param {Object} coordinates
+   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
+   *    null to use the map gcs, or any other transform.  If setting the
+   *    center, they are converted from this gcs to the map projection.  The
+   *    returned center are converted from the map projection to this gcs.
    * @returns {Object|geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.center = function (coordinates, force) {
-    var newCenter, currentCenter;
-
+  this.center = function (coordinates, gcs) {
+    var center;
     if (coordinates === undefined) {
-      return m_center;
+      center = $.extend({}, m_this.worldToGcs(m_center, gcs));
+      return center;
     }
 
     // get the screen coordinates of the new center
-    coordinates = geo.util.normalizeCoordinates(coordinates);
-    newCenter = m_this.gcsToDisplay(coordinates);
-    currentCenter = m_this.gcsToDisplay(m_center);
+    m_center = $.extend({}, m_this.gcsToWorld(coordinates, gcs));
 
-    // call the pan method
-    m_this.pan({
-      x: currentCenter.x - newCenter.x,
-      y: currentCenter.y - newCenter.y
-    }, force);
-
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get/Set parallel projection setting of the map
-   *
-   * @returns {Boolean|geo.map}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.parallelProjection = function (val) {
-    if (val === undefined) {
-      return m_parallelProjection;
-    }
-    val = val ? true : false;
-    if (m_parallelProjection !== val) {
-      var base, evt = {
-        eventType: geo.event.parallelprojection,
-        parallelProjection: val
-      };
-
-      m_parallelProjection = val;
-      base = m_this.baseLayer();
-      base.geoTrigger(geo.event.parallelprojection, evt, true);
-      m_this.children().forEach(function (child) {
-        child.geoTrigger(geo.event.parallelprojection, evt, true);
-      });
-      m_this.modified();
-    }
+    camera_bounds(m_this.boundsFromZoomAndCenter(m_zoom, m_center, null));
+    // trigger a pan event
+    m_this.geoTrigger(
+      geo.event.pan,
+      {
+        geo: coordinates,
+        screenDelta: null,
+        eventType: geo.event.pan
+      }
+    );
     return m_this;
   };
 
@@ -17683,29 +20546,21 @@ geo.map = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.createLayer = function (layerName, arg) {
     arg = arg || {};
-    arg.parallelProjection = m_parallelProjection;
     var newLayer = geo.createLayer(
       layerName, m_this, arg);
 
     if (newLayer) {
-      newLayer._resize(m_x, m_y, m_width, m_height);
-    } else {
-      return null;
+
+      m_this.addChild(newLayer);
+      newLayer._update();
+      m_this.modified();
+
+      m_this.geoTrigger(geo.event.layerAdd, {
+        type: geo.event.layerAdd,
+        target: m_this,
+        layer: newLayer
+      });
     }
-
-    if (newLayer.referenceLayer() || m_this.children().length === 0) {
-      m_this.baseLayer(newLayer);
-    }
-
-    newLayer._resize(m_x, m_y, m_width, m_height); // this call initializes the camera
-    m_this.addChild(newLayer);
-    m_this.modified();
-
-    m_this.geoTrigger(geo.event.layerAdd, {
-      type: geo.event.layerAdd,
-      target: m_this,
-      layer: newLayer
-    });
 
     return newLayer;
   };
@@ -17764,7 +20619,28 @@ geo.map = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Resize map
+   * Get or set the size of the map.
+   *
+   * @param {Object?} arg
+   * @param {Number} arg.width width in pixels
+   * @param {Number} arg.height height in pixels
+   * @returns {Object} An object containing width and height as keys
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.size = function (arg) {
+    if (arg === undefined) {
+      return {
+        width: m_width,
+        height: m_height
+      };
+    }
+    m_this.resize(0, 0, arg.width, arg.height);
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Resize map (deprecated)
    *
    * @param {Number} x x-offset in display space
    * @param {Number} y y-offset in display space
@@ -17773,15 +20649,20 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.resize = function (x, y, w, h) {
-    var i, layers = m_this.children();
 
+    // store the original center and restore it after the resize
+    var oldCenter = m_this.center();
     m_x = x;
-    m_y  = y;
+    m_y = y;
     m_width = w;
     m_height = h;
 
-    for (i = 0; i < layers.length; i += 1) {
-      layers[i]._resize(x, y, w, h);
+    m_this.camera().viewport = {width: w, height: h};
+
+    reset_minimum_zoom();
+    var newZoom = fix_zoom(m_zoom);
+    if (newZoom !== m_zoom) {
+      m_this.zoom(newZoom);
     }
 
     m_this.geoTrigger(geo.event.resize, {
@@ -17793,109 +20674,125 @@ geo.map = function (arg) {
       height: h
     });
 
-    m_this._updateBounds();
-    m_this.pan({x: 0, y: 0});
+    m_this.center(oldCenter);
     m_this.modified();
-
     return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Convert from gcs coordinates to display coordinates
-   *
-   * @param {*} input {[[{x:_x, y: _y}], [x1,y1, x2, y2]}
-   * @return {object}
-   *
-   * @note Currently only lat-lon inputs are supported
+   * Convert from gcs coordinates to map world coordinates.
+   * @param {object} c The input coordinate to convert
+   * @param {object} c.x
+   * @param {object} c.y
+   * @param {object} [c.z=0]
+   * @param {string?} gcs The gcs of the input (map.gcs() by default)
+   * @return {object} World space coordinates
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.gcsToDisplay = function (input) {
-    var world, output;
-
-    /// Now handle different data types
-    if ((input instanceof Array &&
-         input.length > 0) || input instanceof Object) {
-      world = m_baseLayer.toLocal(input);
-      output = m_baseLayer.renderer().worldToDisplay(world);
-    } else {
-      /// Everything else
-      throw 'Conversion method latLonToDisplay does not handle ' + input;
+  this.gcsToWorld = function (c, gcs) {
+    gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
+    if (gcs !== m_gcs) {
+      c = geo.transform.transformCoordinates(gcs, m_gcs, [c])[0];
     }
-
-    return output;
+    return geo.transform.affineForward(
+      {origin: m_origin},
+      [c]
+    )[0];
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Convert from display to latitude longitude coordinates
+   * Convert from map world coordinates to gcs coordinates.
+   * @param {object} c The input coordinate to convert
+   * @param {object} c.x
+   * @param {object} c.y
+   * @param {object} [c.z=0]
+   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
+   *    null to use the map gcs, or any other transform.
+   * @return {object} GCS space coordinates
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.displayToGcs = function (input) {
-    var output;
-
-    /// Now handle different data types
-    if ((input instanceof Array && input.length > 0) ||
-         input instanceof Object) {
-      output = m_baseLayer.renderer().displayToWorld(input);
-      output = m_baseLayer.fromLocal(output);
-    } else {
-      throw 'Conversion method displayToGcs does not handle ' + input;
+  this.worldToGcs = function (c, gcs) {
+    c = geo.transform.affineInverse(
+      {origin: m_origin},
+      [c]
+    )[0];
+    gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
+    if (gcs !== m_gcs) {
+      c = geo.transform.transformCoordinates(m_gcs, gcs, [c])[0];
     }
-    return output;
+    return c;
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Queries each layer for information at this location.
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.query = function () {
-    // TODO Implement this
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Sets or gets base layer for this map
+   * Convert from gcs coordinates to display coordinates.
    *
-   * @param {geo.layer} baseLayer optional
-   * @returns {geo.map|geo.layer}
+   *    gcsToWorld | worldToDisplay
+   *
+   * @param {object} c The input coordinate to convert
+   * @param {object} c.x
+   * @param {object} c.y
+   * @param {object} [c.z=0]
+   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
+   *    null to use the map gcs, or any other transform.
+   * @return {object} Display space coordinates
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.baseLayer = function (baseLayer) {
-    var save;
-    if (baseLayer !== undefined) {
+  this.gcsToDisplay = function (c, gcs) {
+    c = m_this.gcsToWorld(c, gcs);
+    return m_this.worldToDisplay(c);
+  };
 
-      // The GCS of the layer must match the map
-      if (m_gcs !== baseLayer.gcs()) {
-        m_this.gcs(baseLayer.gcs());
-      }
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Convert from world coordinates to display coordinates using the attached
+   * camera.
+   * @param {object} c The input coordinate to convert
+   * @param {object} c.x
+   * @param {object} c.y
+   * @param {object} [c.z=0]
+   * @return {object} Display space coordinates
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.worldToDisplay = function (c) {
+    return m_camera.worldToDisplay(c);
+  };
 
-      m_baseLayer = baseLayer;
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Convert from display to gcs coordinates
+   *
+   *    displayToWorld | worldToGcs
+   *
+   * @param {object} c The input display coordinate to convert
+   * @param {object} c.x
+   * @param {object} c.y
+   * @param {object} [c.z=0]
+   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
+   *    null to use the map gcs, or any other transform.
+   * @return {object} GCS space coordinates
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.displayToGcs = function (c, gcs) {
+    c = m_this.displayToWorld(c); // done via camera
+    return m_this.worldToGcs(c, gcs);
+  };
 
-      // Set the layer as the reference layer
-      m_baseLayer.referenceLayer(true);
-
-      if (arg.center) {
-        // This assumes that the base layer is initially centered at
-        // (0, 0).  May want to add an explicit call to the base layer
-        // to set a given center.
-        m_this.center(arg.center, true);
-      }
-      save = m_zoom;
-      m_zoom = null;
-      m_this.zoom(save);
-
-      m_this._updateBounds();
-
-      // This forces the map into a state with valid bounds
-      // when clamping is on.  The original call to center
-      // is forced to initialize the camera position in the
-      // base layer so no adjustment is done there.
-      m_this.pan({x: 0, y: 0});
-      return m_this;
-    }
-    return m_baseLayer;
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Convert from display coordinates to world coordinates using the attached
+   * camera.
+   * @param {object} c The input coordinate to convert
+   * @param {object} c.x
+   * @param {object} c.y
+   * @param {object} [c.z=0]
+   * @return {object} World space coordinates
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.displayToWorld = function (c) {
+    return m_camera.displayToWorld(c);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -17957,23 +20854,13 @@ geo.map = function (arg) {
    * Initialize the map
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._init = function (arg) {
-    var i;
+  this._init = function () {
 
     if (m_node === undefined || m_node === null) {
       throw 'Map require DIV node';
     }
 
     m_node.css('position', 'relative');
-    if (arg !== undefined && arg.layers !== undefined) {
-      for (i = 0; i < arg.layers.length; i += 1) {
-        if (i === 0) {
-          m_this.baseLayer(arg.layers[i]);
-        }
-
-        m_this.addLayer(arg.layers[i]);
-      }
-    }
     return m_this;
   };
 
@@ -18090,8 +20977,16 @@ geo.map = function (arg) {
     if (arg === undefined) {
       return $.extend({}, m_validZoomRange);
     }
-    m_validZoomRange.min = arg.min;
-    m_validZoomRange.max = arg.max;
+    if (arg.max !== undefined) {
+      m_validZoomRange.max = arg.max;
+    }
+
+    // don't allow the minimum zoom to go below what will
+    // fit in the view port
+    if (arg.min !== undefined) {
+      m_validZoomRange.min = m_validZoomRange.origMin = fix_zoom(arg.min);
+    }
+    reset_minimum_zoom();
     return m_this;
   };
 
@@ -18112,10 +21007,14 @@ geo.map = function (arg) {
    * Call with no arguments to return the current transition information.
    *
    * @param {object?} opts
+   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
+   *    null to use the map gcs, or any other transform.  Applies only to the
+   *    center coordinate of the opts and to converting zoom values to height,
+   *    if specified.
    * @returns {geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.transition = function (opts) {
+  this.transition = function (opts, gcs) {
 
     if (opts === undefined) {
       return m_transition;
@@ -18139,16 +21038,18 @@ geo.map = function (arg) {
       };
     }
 
+    var units = m_this.unitsPerPixel(0);
+
     // Transform zoom level into z-coordinate and inverse
     function zoom2z(z) {
-      return vgl.zoomToHeight(z + 1, m_width, m_height);
+      return vgl.zoomToHeight(z + 1, m_width, m_height) * units;
     }
     function z2zoom(z) {
-      return vgl.heightToZoom(z, m_width, m_height) - 1;
+      return vgl.heightToZoom(z / units, m_width, m_height) - 1;
     }
 
     var defaultOpts = {
-      center: m_this.center(),
+      center: m_this.center(undefined, null),
       zoom: m_this.zoom(),
       duration: 1000,
       ease: function (t) {
@@ -18160,18 +21061,23 @@ geo.map = function (arg) {
     };
 
     if (opts.center) {
+      gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
       opts.center = geo.util.normalizeCoordinates(opts.center);
+      if (gcs !== m_gcs) {
+        opts.center = geo.transform.transformCoordinates(gcs, m_gcs, [
+            opts.center])[0];
+      }
     }
     $.extend(defaultOpts, opts);
 
     m_transition = {
       start: {
-        center: m_this.center(),
+        center: m_this.center(undefined, null),
         zoom: m_this.zoom()
       },
       end: {
         center: defaultOpts.center,
-        zoom: m_discreteZoom ? Math.round(defaultOpts.zoom) : defaultOpts.zoom
+        zoom: fix_zoom(defaultOpts.zoom)
       },
       ease: defaultOpts.ease,
       zCoord: defaultOpts.zCoord,
@@ -18218,7 +21124,7 @@ geo.map = function (arg) {
       m_transition.time = time - m_transition.start.time;
       if (time >= m_transition.end.time || next) {
         if (!next) {
-          m_this.center(m_transition.end.center);
+          m_this.center(m_transition.end.center, null);
           m_this.zoom(m_transition.end.zoom);
         }
 
@@ -18249,7 +21155,7 @@ geo.map = function (arg) {
       m_this.center({
         x: p[0],
         y: p[1]
-      });
+      }, null);
       m_this.zoom(p[2], undefined, true);
 
       window.requestAnimationFrame(anim);
@@ -18272,31 +21178,6 @@ geo.map = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Update the internally cached map bounds.
-   * @private
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._updateBounds = function () {
-    m_bounds.lowerLeft = m_this.displayToGcs({
-      x: 0,
-      y: m_height
-    });
-    m_bounds.lowerRight = m_this.displayToGcs({
-      x: m_width,
-      y: m_height
-    });
-    m_bounds.upperLeft = m_this.displayToGcs({
-      x: 0,
-      y: 0
-    });
-    m_bounds.upperRight = m_this.displayToGcs({
-      x: m_width,
-      y: 0
-    });
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
    * Get/set the locations of the current map corners as latitudes/longitudes.
    * When provided the argument should be an object containing the keys
    * lowerLeft and upperRight declaring the desired new map bounds.  The
@@ -18304,20 +21185,38 @@ geo.map = function (arg) {
    * case, the actual new bounds will be returned by this function.
    *
    * @param {geo.geoBounds} [bds] The requested map bounds
+   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
+   *    null to use the map gcs, or any other transform.  If setting the
+   *    bounds, they are converted from this gcs to the map projection.  The
+   *    returned bounds are converted from the map projection to this gcs.
    * @return {geo.geoBounds} The actual new map bounds
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.bounds = function (bds) {
+  this.bounds = function (bds, gcs) {
     var nav;
 
-    if (bds === undefined) {
-      return m_bounds;
+    gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
+    if (bds !== undefined) {
+      if (gcs !== m_gcs) {
+        var trans = geo.transform.transformCoordinates(gcs, m_gcs, [{
+            x: bds.left, y: bds.top}, {x: bds.right, y: bds.bottom}]);
+        bds = {
+          left: trans[0].x,
+          top: trans[0].y,
+          right: trans[1].x,
+          bottom: trans[1].y
+        };
+      }
+      bds = fix_bounds(bds);
+      nav = m_this.zoomAndCenterFromBounds(bds, null);
+
+      // This might have concequences in terms of bounds/zoom clamping.
+      // What behavior do we expect from this method in that case?
+      m_this.zoom(nav.zoom);
+      m_this.center(nav.center, null);
     }
 
-    nav = m_this.zoomAndCenterFromBounds(bds);
-    m_this.zoom(nav.zoom);
-    m_this.center(nav.center);
-    return m_bounds;
+    return m_this.boundsFromZoomAndCenter(m_zoom, m_center, gcs);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -18325,46 +21224,88 @@ geo.map = function (arg) {
    * Get the center zoom level necessary to display the given lat/lon bounds.
    *
    * @param {geo.geoBounds} [bds] The requested map bounds
+   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
+   *    null to use the map gcs, or any other transform.
    * @return {object} Object containing keys 'center' and 'zoom'
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.zoomAndCenterFromBounds = function (bds) {
-    var ll, ur, dx, dy, zx, zy, center, zoom;
+  this.zoomAndCenterFromBounds = function (bounds, gcs) {
+    var center, zoom;
 
-    // Caveat:
-    // Much of the following is invalid for alternative map projections.  These
-    // computations should really be defered to the base layer, but there is
-    // no clear path for doing that with the current base layer api.
-
-    // extract bounds info and check for validity
-    ll = geo.util.normalizeCoordinates(bds.lowerLeft || {});
-    ur = geo.util.normalizeCoordinates(bds.upperRight || {});
-
-    if (ll.x >= ur.x || ll.y >= ur.y) {
+    gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
+    if (gcs !== m_gcs) {
+      var trans = geo.transform.transformCoordinates(gcs, m_gcs, [{
+          x: bounds.left, y: bounds.top}, {x: bounds.right, y: bounds.bottom}]);
+      bounds = {
+        left: trans[0].x,
+        top: trans[0].y,
+        right: trans[1].x,
+        bottom: trans[1].y
+      };
+    }
+    if (bounds.left >= bounds.right || bounds.bottom >= bounds.top) {
       throw new Error('Invalid bounds provided');
     }
 
+    // calculate the zoom to fit the bounds
+    zoom = fix_zoom(calculate_zoom(bounds));
+
+    // clamp bounds if necessary
+    bounds = fix_bounds(bounds);
+
+    /* This relies on having the map projection coordinates be uniform
+     * regardless of location.  If not, the center will not be correct. */
+    // calculate new center
     center = {
-      x: (ll.x + ur.x) / 2,
-      y: (ll.y + ur.y) / 2
+      x: (bounds.left + bounds.right) / 2 - m_origin.x,
+      y: (bounds.top + bounds.bottom) / 2 - m_origin.y
     };
-
-    // calculate the current extend
-    dx = m_bounds.upperRight.x - m_bounds.lowerLeft.x;
-    dy = m_bounds.upperRight.y - m_bounds.lowerLeft.y;
-
-    // calculate the zoom levels necessary to fit x and y bounds
-    zx = m_zoom - Math.log2((ur.x - ll.x) / dx);
-    zy = m_zoom - Math.log2((ur.y - ll.y) / dy);
-    zoom = Math.min(zx, zy);
-    if (m_discreteZoom) {
-      zoom = Math.floor(zoom);
-    }
 
     return {
       zoom: zoom,
       center: center
     };
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get the bounds that will be displayed with the given zoom and center.
+   *
+   * Note: the bounds may not have the requested zoom and center due to map
+   * restrictions.
+   *
+   * @param {number} zoom The requested zoom level
+   * @param {geo.geoPosition} center The requested center
+   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
+   *    null to use the map gcs, or any other transform.
+   * @return {geo.geoBounds}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.boundsFromZoomAndCenter = function (zoom, center, gcs) {
+    var width, height, bounds, units;
+
+    gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
+    // preprocess the arguments
+    zoom = fix_zoom(zoom);
+    units = m_this.unitsPerPixel(zoom);
+    center = m_this.gcsToWorld(center, gcs);
+
+    // get half the width and height in world coordinates
+    width = m_width * units / 2;
+    height = m_height * units / 2;
+
+    // calculate the bounds.  This is only valid if the map projection has
+    // uniform units in each direction.  If not, then worldToGcs should be
+    // used.
+    bounds = {
+      left: center.x - width + m_origin.x,
+      right: center.x + width + m_origin.x,
+      bottom: center.y - height + m_origin.y,
+      top: center.y + height + m_origin.y
+    };
+
+    // correct the bounds when clamping is enabled
+    return fix_bounds(bounds);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -18389,6 +21330,14 @@ geo.map = function (arg) {
     }
     return m_this;
   };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get the layers contained in the map.
+   * Alias of {@linkcode geo.sceneObject.children}.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.layers = this.children;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -18446,6 +21395,184 @@ geo.map = function (arg) {
     $a.appendTo(m_this.node());
     return m_this;
   };
+
+  ////////////////////////////////////////////////////////////////////////////
+  //
+  // The following are some private methods for interacting with the camera.
+  // In order to hide the complexity of dealing with map aspect ratios,
+  // clamping behavior, reseting zoom levels on resize, etc. from the
+  // layers, the map handles camera movements directly.  This requires
+  // passing all camera movement events through the map initially.  The
+  // map uses these methods to fix up the events according to the constraints
+  // of the display and passes the event to the layers.
+  //
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Calculate the scaling factor to fit the given map bounds
+   * into the viewport with the correct aspect ratio.
+   * @param {object} bounds A desired bounds
+   * @return {object} Multiplicative aspect ratio correction
+   * @private
+   */
+  function camera_scaling(bounds) {
+    var width = bounds.right - bounds.left,
+        height = bounds.top - bounds.bottom,
+        ar_bds = Math.abs(width / height),
+        ar_vp = m_width / m_height,
+        sclx, scly;
+
+    if (ar_bds > ar_vp) {
+      // fit left and right
+      sclx = 1;
+
+      // grow top and bottom
+      scly = ar_bds / ar_vp;
+    } else {
+      // fit top and bottom
+      scly = 1;
+
+      // grow left and right
+      sclx = ar_vp / ar_bds;
+    }
+    return {x: sclx, y: scly};
+  }
+
+  /**
+   * Calculate the minimum zoom level to fit the given
+   * bounds inside the view port using the view port size,
+   * the given bounds, and the number of units per
+   * pixel.  The method sets the valid zoom bounds as well
+   * as the current zoom level to be within that range.
+   * @private
+   */
+  function calculate_zoom(bounds) {
+    // compare the aspect ratios of the viewport and bounds
+    var scl = camera_scaling(bounds), z;
+
+    if (scl.y > scl.x) {
+      // left to right matches exactly
+      // center map vertically and have blank borders on the
+      // top and bottom (or repeat tiles)
+      z = -Math.log2(
+        Math.abs(bounds.right - bounds.left) * scl.x /
+        (m_width * m_unitsPerPixel)
+      );
+    } else {
+      // top to bottom matches exactly, blank border on the
+      // left and right (or repeat tiles)
+      z = -Math.log2(
+        Math.abs(bounds.top - bounds.bottom) * scl.y /
+        (m_height * m_unitsPerPixel)
+      );
+    }
+    return z;
+  }
+
+  /**
+   * Reset the minimum zoom level given the current window size.
+   * @private
+   */
+  function reset_minimum_zoom() {
+    if (m_clampZoom) {
+      m_validZoomRange.min = Math.max(
+          m_validZoomRange.origMin, calculate_zoom(m_maxBounds));
+    } else {
+      m_validZoomRange.min = m_validZoomRange.origMin;
+    }
+  }
+
+  /**
+   * Return the nearest valid zoom level to the requested zoom.
+   * @private
+   */
+  function fix_zoom(zoom, ignoreDiscreteZoom) {
+    zoom = Math.max(
+      Math.min(
+        m_validZoomRange.max,
+        zoom
+      ),
+      m_validZoomRange.min
+    );
+    if (m_discreteZoom && !ignoreDiscreteZoom) {
+      zoom = Math.round(zoom);
+      if (zoom < m_validZoomRange.min) {
+        zoom = Math.ceil(m_validZoomRange.min);
+      }
+    }
+    return zoom;
+  }
+
+  /**
+   * Return the nearest valid bounds maintaining the
+   * width and height. Does nothing if m_clampBounds* is
+   * false.
+   * @private
+   */
+  function fix_bounds(bounds) {
+    var dx, dy;
+    if (m_clampBoundsX) {
+      if (bounds.right - bounds.left > m_maxBounds.right - m_maxBounds.left) {
+        dx = m_maxBounds.left - ((bounds.right - bounds.left - (
+          m_maxBounds.right - m_maxBounds.left)) / 2) - bounds.left;
+      } else if (bounds.left < m_maxBounds.left) {
+        dx = m_maxBounds.left - bounds.left;
+      } else if (bounds.right > m_maxBounds.right) {
+        dx = m_maxBounds.right - bounds.right;
+      }
+      if (dx) {
+        bounds = {
+          left: bounds.left += dx,
+          right: bounds.right += dx,
+          top: bounds.top,
+          bottom: bounds.bottom
+        };
+      }
+    }
+    if (m_clampBoundsY) {
+      if (bounds.top - bounds.bottom > m_maxBounds.top - m_maxBounds.bottom) {
+        dy = m_maxBounds.bottom - ((bounds.top - bounds.bottom - (
+          m_maxBounds.top - m_maxBounds.bottom)) / 2) - bounds.bottom;
+      } else if (bounds.top > m_maxBounds.top) {
+        dy = m_maxBounds.top - bounds.top;
+      } else if (bounds.bottom < m_maxBounds.bottom) {
+        dy = m_maxBounds.bottom - bounds.bottom;
+      }
+      if (dy) {
+        bounds = {
+          top: bounds.top += dy,
+          bottom: bounds.bottom += dy,
+          left: bounds.left,
+          right: bounds.right
+        };
+      }
+    }
+    return bounds;
+  }
+
+  /**
+   * Call the camera bounds method with the given bounds, but
+   * correct for the viewport aspect ratio.
+   * @private
+   */
+  function camera_bounds(bounds) {
+    m_camera.bounds = bounds;
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  //
+  // All the methods are now defined.  From here, we are initializing all
+  // internal variables and event handlers.
+  //
+  ////////////////////////////////////////////////////////////////////////////
+
+  // Set the world origin
+  m_origin = {x: 0, y: 0};
+
+  // Fix the zoom level (minimum and initial)
+  this.zoomRange(arg);
+  m_zoom = fix_zoom(m_zoom);
+  // Now update to the correct center and zoom level
+  this.center($.extend({}, arg.center || m_center), undefined);
 
   this.interactor(arg.interactor || geo.mapInteractor());
   this.clock(arg.clock || geo.clock());
@@ -18534,7 +21661,7 @@ geo.feature = function (arg) {
       m_selectionAPI = arg.selectionAPI === undefined ? false : arg.selectionAPI,
       m_style = {},
       m_layer = arg.layer === undefined ? null : arg.layer,
-      m_gcs = arg.gcs === undefined ? "EPSG:4326" : arg.gcs,
+      m_gcs = arg.gcs,
       m_visible = arg.visible === undefined ? true : arg.visible,
       m_bin = arg.bin === undefined ? 0 : arg.bin,
       m_renderer = arg.renderer === undefined ? null : arg.renderer,
@@ -18853,26 +21980,40 @@ geo.feature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get list of drawables or nodes that are context/api specific.
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.drawables = function () {
-    return m_this._drawables();
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
    * Get/Set projection of the feature
    */
   ////////////////////////////////////////////////////////////////////////////
   this.gcs = function (val) {
     if (val === undefined) {
+      if (m_gcs === undefined && m_renderer) {
+        return m_renderer.layer().map().ingcs();
+      }
       return m_gcs;
     } else {
       m_gcs = val;
       m_this.modified();
       return m_this;
     }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Convert from the renderer's input gcs coordinates to display coordinates.
+   *
+   * @param {object} c The input coordinate to convert
+   * @param {object} c.x
+   * @param {object} c.y
+   * @param {object} [c.z=0]
+   * @return {object} Display space coordinates
+   */
+  this.featureGcsToDisplay = function (c) {
+    var map = m_renderer.layer().map();
+    c = map.gcsToWorld(c, map.ingcs());
+    c = map.worldToDisplay(c);
+    if (m_renderer.baseToLocal) {
+      c = m_renderer.baseToLocal(c);
+    }
+    return c;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -18962,9 +22103,9 @@ geo.feature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get/Set data
+   * Get/Set the data array for the feature.
    *
-   * @returns {Array}
+   * @returns {Array|this}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.data = function (data) {
@@ -19013,16 +22154,6 @@ geo.feature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get context specific drawables
-   *
-   * Derived class should implement this
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._drawables = function () {
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -19088,7 +22219,7 @@ geo.feature.create = function (layer, spec) {
   var type = spec.type;
 
   // Check arguments
-  if (!layer instanceof geo.layer) {
+  if (!(layer instanceof geo.layer)) {
     console.warn("Invalid layer");
     return null;
   }
@@ -19188,7 +22319,7 @@ geo.pointFeature = function (arg) {
     // generate the cluster tree from the raw data
     var position = m_this.position();
     m_clusterTree = new geo.util.ClusterGroup(
-        opts, this.layer().width(), this.layer().height());
+        opts, m_this.layer().width(), m_this.layer().height());
 
     m_allData.forEach(function (d, i) {
 
@@ -19614,7 +22745,7 @@ geo.lineFeature = function (arg) {
     line = m_this.line();
     width = m_this.style.get("strokeWidth");
     pos = m_this.position();
-    pt = map.gcsToDisplay(p);
+    pt = m_this.featureGcsToDisplay(p);
 
     // minimum l2 distance squared from
     // q -> line(u, v)
@@ -19654,7 +22785,7 @@ geo.lineFeature = function (arg) {
 
           // get the screen coordinates of the current point
           var p = pos(current, j, d, index);
-          var s = map.gcsToDisplay(p);
+          var s = m_this.featureGcsToDisplay(p);
           var r = Math.ceil(width(p, j, d, index) / 2) + 2;
           r = r * r;
 
@@ -20978,476 +24109,6 @@ Notes:
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Transform geometric data of a feature from source projection to destination
- * projection.
- *
- * @namespace
- */
-//////////////////////////////////////////////////////////////////////////////
-geo.transform = {};
-
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Custom transform for a feature used for OpenStreetMap
- */
-//////////////////////////////////////////////////////////////////////////////
-geo.transform.osmTransformFeature = function (destGcs, feature, inplace) {
-  /// TODO
-  /// Currently we make assumption that incoming feature is in 4326
-  /// which may not be true.
-
-  "use strict";
-
-  if (!feature) {
-    console.log("[warning] Invalid (null) feature");
-    return;
-  }
-
-  if (feature.gcs() === destGcs) {
-    return;
-  }
-
-  if (!(feature instanceof geo.pointFeature ||
-        feature instanceof geo.lineFeature)) {
-    throw "Supports only point or line feature";
-  }
-
-  var noOfComponents = null,
-      pointOffset = 0,
-      count = null,
-      inPos = null,
-      outPos = null,
-      srcGcs = feature.gcs(),
-      i,
-      yCoord;
-
-  inplace = !!inplace;
-  if (feature instanceof geo.pointFeature ||
-      feature instanceof geo.lineFeature) {
-
-    ///  If source GCS is not in 4326, transform it first into 4326
-    /// before we transform it for OSM.
-    if (srcGcs !== "EPSG:4326") {
-      geo.transform.transformFeature("EPSG:4326", feature, true);
-    }
-
-    inPos = feature.positions();
-    count = inPos.length;
-
-    if (!(inPos instanceof Array)) {
-      throw "Supports Array of 2D and 3D points";
-    }
-
-    noOfComponents = (count % 2 === 0 ? 2 :
-                     (count % 3 === 0 ? 3 : null));
-    pointOffset = noOfComponents;
-
-    if (noOfComponents !== 2 && noOfComponents !== 3) {
-      throw "Transform points require points in 2D or 3D";
-    }
-
-    if (inplace) {
-      outPos = inPos;
-    } else {
-      outPos = inPos.slice(0);
-    }
-
-    for (i = 0; i < count; i += pointOffset) {
-
-      /// Y goes from 0 (top edge is 85.0511 °N) to 2zoom − 1
-      /// (bottom edge is 85.0511 °S) in a Mercator projection.
-      yCoord = inPos[i + 1];
-
-      if (yCoord > 85.0511) {
-        yCoord = 85.0511;
-      }
-      if (yCoord < -85.0511) {
-        yCoord = -85.0511;
-      }
-      outPos[i + 1] = geo.mercator.lat2y(yCoord);
-    }
-
-    if (inplace) {
-      feature.positions(outPos);
-      feature.gcs(destGcs);
-    }
-    return outPos;
-  }
-
-  return null;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Transform a feature to destination GCS
- */
-//////////////////////////////////////////////////////////////////////////////
-geo.transform.transformFeature = function (destGcs, feature, inplace) {
-  "use strict";
-
-  if (!feature) {
-    throw "Invalid (null) feature";
-  }
-
-  if (!(feature instanceof geo.pointFeature ||
-        feature instanceof geo.lineFeature)) {
-    throw "Supports only point or line feature";
-  }
-
-  if (feature.gcs() === destGcs) {
-    return feature.positions();
-  }
-
-  if (destGcs === "EPSG:3857") {
-    return geo.transform.osmTransformFeature(destGcs, feature, inplace);
-  }
-
-  var noOfComponents = null,
-      pointOffset = 0,
-      count = null,
-      inPos = null,
-      outPos = null,
-      projPoint = null,
-      srcGcs = feature.gcs(),
-      i,
-      projSrcGcs = new proj4.Proj(srcGcs),
-      projDestGcs = new proj4.Proj(destGcs);
-
-  inplace = !!inplace;
-  if (feature instanceof geo.pointFeature ||
-      feature instanceof geo.lineFeature) {
-    inPos = feature.positions();
-    count = inPos.length;
-
-    if (!(inPos instanceof Array)) {
-      throw "Supports Array of 2D and 3D points";
-    }
-
-    noOfComponents = (count % 2 === 0 ? 2 :
-                     (count % 3 === 0 ? 3 : null));
-    pointOffset = noOfComponents;
-
-    if (noOfComponents !== 2 && noOfComponents !== 3) {
-      throw "Transform points require points in 2D or 3D";
-    }
-
-    if (inplace) {
-      outPos = inPos;
-    } else {
-      outPos = [];
-      outPos.length = inPos.length;
-    }
-
-    for (i = 0; i < count; i += pointOffset) {
-      if (noOfComponents === 2) {
-        projPoint = new proj4.Point(inPos[i], inPos[i + 1], 0.0);
-      } else {
-        projPoint = new proj4.Point(inPos[i], inPos[i + 1], inPos[i + 2]);
-      }
-
-      proj4.transform(projSrcGcs, projDestGcs, projPoint);
-
-      if (noOfComponents === 2) {
-        outPos[i] =  projPoint.x;
-        outPos[i + 1] = projPoint.y;
-      } else {
-        outPos[i] = projPoint.x;
-        outPos[i + 1] = projPoint.y;
-        outPos[i + 2] = projPoint.z;
-      }
-    }
-
-    if (inplace) {
-      feature.positions(outPos);
-      feature.gcs(destGcs);
-    }
-
-    return outPos;
-  }
-
-  return null;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Transform geometric data of a layer from source projection to destination
- * projection.
- */
-//////////////////////////////////////////////////////////////////////////////
-geo.transform.transformLayer = function (destGcs, layer, baseLayer) {
-  "use strict";
-
-  var features, count, i;
-
-  if (!layer) {
-    throw "Requires valid layer for tranformation";
-  }
-
-  if (!baseLayer) {
-    throw "Requires baseLayer used by the map";
-  }
-
-  if (layer === baseLayer) {
-    return;
-  }
-
-  if (layer instanceof geo.featureLayer) {
-    features = layer.features();
-    count = features.length;
-    i = 0;
-
-    for (i = 0; i < count; i += 1) {
-      if (destGcs === "EPSG:3857" && baseLayer instanceof geo.osmLayer) {
-        geo.transform.osmTransformFeature(
-          destGcs, features[i], true);
-      } else {
-        geo.transform.transformFeature(
-          destGcs, features[i], true);
-      }
-    }
-
-    layer.gcs(destGcs);
-  } else {
-    throw "Only feature layer transformation is supported";
-  }
-};
-
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Transform position coordinates from source projection to destination
- * projection.
- *
- * @param {string} srcGcs GCS of the coordinates
- * @param {string} destGcs Desired GCS of the transformed coordinates
- * @param {object} coordinates
- * @return {object|object[]} Transformed coordinates
- */
-//////////////////////////////////////////////////////////////////////////////
-geo.transform.transformCoordinates = function (srcGcs, destGcs, coordinates,
-                                               numberOfComponents) {
-  "use strict";
-
-  var i, count, offset, xCoord, yCoord, zCoord, xAcc,
-      yAcc, zAcc, writer, output, projPoint,
-      projSrcGcs = new proj4.Proj(srcGcs),
-      projDestGcs = new proj4.Proj(destGcs);
-
-  /// Default Z accessor
-  zAcc = function () {
-    return 0.0;
-  };
-
-  if (destGcs === srcGcs) {
-    return coordinates;
-  }
-
-  /// TODO: Can we check for EPSG code?
-  if (!destGcs || !srcGcs) {
-    throw "Invalid source or destination GCS";
-  }
-
-  /// Helper methods
-  function handleArrayCoordinates() {
-    if (coordinates[0] instanceof Array) {
-      if (coordinates[0].length === 2) {
-        xAcc = function (index) {
-          return coordinates[index][0];
-        };
-        yAcc = function (index) {
-          return coordinates[index][1];
-        };
-        writer = function (index, x, y) {
-          output[index] = [x, y];
-        };
-      } else if (coordinates[0].length === 3) {
-        xAcc = function (index) {
-          return coordinates[index][0];
-        };
-        yAcc = function (index) {
-          return coordinates[index][1];
-        };
-        zAcc = function (index) {
-          return coordinates[index][2];
-        };
-        writer = function (index, x, y, z) {
-          output[index] = [x, y, z];
-        };
-      } else {
-        throw "Invalid coordinates. Requires two or three components per array";
-      }
-    } else {
-      if (coordinates.length === 2) {
-        offset = 2;
-
-        xAcc = function (index) {
-          return coordinates[index * offset];
-        };
-        yAcc = function (index) {
-          return coordinates[index * offset + 1];
-        };
-        writer = function (index, x, y) {
-          output[index] = x;
-          output[index + 1] = y;
-        };
-      } else if (coordinates.length === 3) {
-        offset = 3;
-
-        xAcc = function (index) {
-          return coordinates[index * offset];
-        };
-        yAcc = function (index) {
-          return coordinates[index * offset + 1];
-        };
-        zAcc = function (index) {
-          return coordinates[index * offset + 2];
-        };
-        writer = function (index, x, y, z) {
-          output[index] = x;
-          output[index + 1] = y;
-          output[index + 2] = z;
-        };
-      } else if (numberOfComponents) {
-        if (numberOfComponents === 2 || numberOfComponents || 3) {
-          offset = numberOfComponents;
-
-          xAcc = function (index) {
-            return coordinates[index];
-          };
-          yAcc = function (index) {
-            return coordinates[index + 1];
-          };
-          if (numberOfComponents === 2) {
-            writer = function (index, x, y) {
-              output[index] = x;
-              output[index + 1] = y;
-            };
-          } else {
-            zAcc = function (index) {
-              return coordinates[index + 2];
-            };
-            writer = function (index, x, y, z) {
-              output[index] = x;
-              output[index + 1] = y;
-              output[index + 2] = z;
-            };
-          }
-        } else {
-          throw "Number of components should be two or three";
-        }
-      } else {
-        throw "Invalid coordinates";
-      }
-    }
-  }
-
-  /// Helper methods
-  function handleObjectCoordinates() {
-    if (coordinates[0] &&
-        "x" in coordinates[0] &&
-        "y" in coordinates[0]) {
-      xAcc = function (index) {
-        return coordinates[index].x;
-      };
-      yAcc = function (index) {
-        return coordinates[index].y;
-      };
-
-      if ("z" in coordinates[0]) {
-        zAcc = function (index) {
-          return coordinates[index].z;
-        };
-        writer = function (index, x, y, z) {
-          output[i] = {x: x, y: y, z: z};
-        };
-      } else {
-        writer = function (index, x, y) {
-          output[index] = {x: x, y: y};
-        };
-      }
-    } else if (coordinates &&
-        "x" in coordinates && "y" in coordinates) {
-      xAcc = function () {
-        return coordinates.x;
-      };
-      yAcc = function () {
-        return coordinates.y;
-      };
-
-      if ("z" in coordinates) {
-        zAcc = function () {
-          return coordinates.z;
-        };
-        writer = function (index, x, y, z) {
-          output = {x: x, y: y, z: z};
-        };
-      } else {
-        writer = function (index, x, y) {
-          output = {x: x, y: y};
-        };
-      }
-    } else {
-      throw "Invalid coordinates";
-    }
-  }
-
-  if (coordinates instanceof Array) {
-    output = [];
-    output.length = coordinates.length;
-    count = coordinates.length;
-
-    if (coordinates[0] instanceof Array ||
-        coordinates[0] instanceof Object) {
-      offset = 1;
-
-      if (coordinates[0] instanceof Array) {
-        handleArrayCoordinates();
-      } else if (coordinates[0] instanceof Object) {
-        handleObjectCoordinates();
-      }
-    } else {
-      handleArrayCoordinates();
-    }
-  } else if (coordinates && coordinates instanceof Object) {
-    count = 1;
-    offset = 1;
-    if (coordinates && "x" in coordinates && "y" in coordinates) {
-      handleObjectCoordinates();
-    } else {
-      throw "Coordinates are not valid";
-    }
-  }
-
-  if (destGcs === "EPSG:3857" && srcGcs === "EPSG:4326") {
-    for (i = 0; i < count; i += offset) {
-      /// Y goes from 0 (top edge is 85.0511 °N) to 2zoom − 1
-      /// (bottom edge is 85.0511 °S) in a Mercator projection.
-      xCoord = xAcc(i);
-      yCoord = yAcc(i);
-      zCoord = zAcc(i);
-
-      if (yCoord > 85.0511) {
-        yCoord = 85.0511;
-      }
-      if (yCoord < -85.0511) {
-        yCoord = -85.0511;
-      }
-
-      writer(i, xCoord, geo.mercator.lat2y(yCoord), zCoord);
-    }
-
-    return output;
-  } else {
-    for (i = 0; i < count; i += offset) {
-      projPoint = new proj4.Point(xAcc(i), yAcc(i), zAcc(i));
-      proj4.transform(projSrcGcs, projDestGcs, projPoint);
-      writer(i, projPoint.x, projPoint.y, projPoint.z);
-      return output;
-    }
-  }
-};
-
-//////////////////////////////////////////////////////////////////////////////
-/**
  * Create a new instance of class renderer
  *
  * @class
@@ -21552,81 +24213,6 @@ geo.renderer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Convert array of points from world to GCS coordinate space
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.worldToGcs = function () {
-    throw "Should be implemented by derivied classes";
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Convert array of points from display to GCS space
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.displayToGcs = function () {
-    throw "Should be implemented by derivied classes";
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Convert array of points from display to GCS space
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.gcsToDisplay = function () {
-    throw "Should be implemented by derivied classes";
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Convert array of points from world to display space
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.worldToDisplay = function () {
-    throw "Should be implemented by derivied classes";
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Convert array of points from display to world space
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.displayToWorld = function () {
-    throw "Should be implemented by derivied classes";
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get mouse coodinates related to canvas
-   *
-   * @param {object} event
-   * @returns {object}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.relMouseCoords = function (event) {
-    var totalOffsetX = 0,
-        totalOffsetY = 0,
-        canvasX = 0,
-        canvasY = 0,
-        currentElement = m_this.canvas();
-
-    do {
-      totalOffsetX += currentElement.offsetLeft - currentElement.scrollLeft;
-      totalOffsetY += currentElement.offsetTop - currentElement.scrollTop;
-      currentElement = currentElement.offsetParent;
-    } while (currentElement);
-
-    canvasX = event.pageX - totalOffsetX;
-    canvasY = event.pageY - totalOffsetY;
-
-    return {
-      x: canvasX,
-      y: canvasY
-    };
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
    * Initialize
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -21654,179 +24240,249 @@ geo.renderer = function (arg) {
 
 inherit(geo.renderer, geo.object);
 
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Create a new instance of osmLayer
- *
- * @class
- * @extends geo.featureLayer
- *
- * @param {Object} arg - arg can contain following keys: baseUrl,
- *        imageFormat (such as png or jpeg), and displayLast
- *        (to decide whether or not render tiles from last zoom level).
- */
-//////////////////////////////////////////////////////////////////////////////
-geo.osmLayer = function (arg) {
+(function () {
   'use strict';
 
-  if (!(this instanceof geo.osmLayer)) {
-    return new geo.osmLayer(arg);
-  }
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * Create a new instance of osmLayer
+   *
+   * @class
+   * @extends geo.featureLayer
+   *
+   * @param {Object} arg - arg can contain following keys: baseUrl,
+   *        imageFormat (such as png or jpeg), and displayLast
+   *        (to decide whether or not render tiles from last zoom level).
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  geo.osmLayer = function (arg) {
 
-  // set a default attribution if no other is provided
-  arg = arg || {};
-  if (arg && arg.attribution === undefined) {
-    arg.attribution =
-      '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors';
+    if (!(this instanceof geo.osmLayer)) {
+      return new geo.osmLayer(arg);
+    }
+    if (arg.mapOpacity !== undefined && arg.opacity === undefined) {
+      arg.opacity = arg.mapOpacity;
+    }
+    geo.tileLayer.call(this, arg);
+
+    /* mapOpacity is just another name for the layer opacity. */
+    this.mapOpacity = this.opacity;
+
+    /**
+     * Returns an instantiated imageTile object with the given indices.  This
+     * method always returns a new tile object.  Use `_getTileCached`
+     * to use the caching layer.
+     * @param {Object} index The tile index
+     * @param {Number} index.x
+     * @param {Number} index.y
+     * @param {Number} index.level
+     * @param {Object} source The tile index used for constructing the url
+     * @param {Number} source.x
+     * @param {Number} source.y
+     * @param {Number} source.level
+     * @returns {geo.tile}
+     */
+    this._getTile = function (index, source) {
+      var urlParams = source || index;
+      return geo.imageTile({
+        index: index,
+        size: {x: this._options.tileWidth, y: this._options.tileHeight},
+        url: this._options.url(urlParams.x, urlParams.y, urlParams.level || 0,
+                               this._options.subdomains)
+      });
+    }.bind(this);
+  };
+
+  // Compute the circumference of the earth / 2 in meters for osm layer image bounds
+  var cEarth = Math.PI * geo.util.radiusEarth;
+
+  /**
+   * This object contains the default options used to initialize the osmLayer.
+   */
+  geo.osmLayer.defaults = $.extend({}, geo.tileLayer.defaults, {
+    minX: -cEarth,
+    maxX: cEarth,
+    minY: -cEarth,
+    maxY: cEarth,
+    minLevel: 0,
+    maxLevel: 18,
+    tileOverlap: 0,
+    tileWidth: 256,
+    tileHeight: 256,
+    tileOffset : function (level) {
+      var s = Math.pow(2, level - 1) * 256;
+      return {x: s, y: s};
+    },
+    wrapX: true,
+    wrapY: false,
+    url: 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    attribution: 'Tile data &copy; <a href="http://osm.org/copyright">' +
+      'OpenStreetMap</a> contributors'
+  });
+
+  inherit(geo.osmLayer, geo.tileLayer);
+
+  geo.registerLayer('osm', geo.osmLayer);
+})();
+
+geo.domRenderer = function (arg) {
+  'use strict';
+
+  if (!(this instanceof geo.domRenderer)) {
+    return new geo.domRenderer(arg);
   }
-  geo.featureLayer.call(this, arg);
+  geo.renderer.call(this, arg);
+
+  arg = arg || {};
+
+  var m_this = this;
+
+  this.api = function () {
+    return 'dom';
+  };
+
+  this._init = function () {
+    var layer = m_this.layer().node();
+
+    if (!m_this.canvas() && layer && layer.length) {
+      // The renderer and the UI Layer share the same canvas
+      // at least for now. This renderer is essentially a noop renderer
+      // designed for backwards compatibility
+      m_this.canvas(layer[0]);
+    }
+  };
+
+  this._init(arg);
+  return this;
+};
+
+inherit(geo.domRenderer, geo.renderer);
+
+geo.registerRenderer('dom', geo.domRenderer);
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Create a new instance of class choroplethFeature
+ *
+ * @class
+ * @extends geo.feature
+ * @returns {geo.choroplethFeature}
+ *
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.choroplethFeature = function (arg) {
+  'use strict';
+  if (!(this instanceof geo.choroplethFeature)) {
+    return new geo.choroplethFeature(arg);
+  }
+  arg = arg || {};
+  geo.feature.call(this, arg);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Private member variables
-   *
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
-    s_exit = this._exit,
-    m_tiles = {},
-    m_hiddenBinNumber = -1,
-    m_lastVisibleBinNumber = -1,
-    m_visibleBinNumber = 1000,
-    m_pendingNewTiles = [],
-    m_pendingInactiveTiles = [],
-    m_numberOfCachedTiles = 0,
-    m_tileCacheSize = 100,
-    m_baseUrl = 'http://tile.openstreetmap.org/',
-    m_mapOpacity = 1.0,
-    m_imageFormat = 'png',
-    m_updateTimerId = null,
-    m_lastVisibleZoom = null,
-    m_visibleTilesRange = {},
-    s_init = this._init,
-    m_pendingNewTilesStat = {},
-    s_update = this._update,
-    m_updateDefer = null,
-    m_zoom = null,
-    m_tileUrl,
-    m_tileUrlFromTemplate,
-    m_crossOrigin = 'anonymous';
+      s_init = this._init,
+      m_choropleth = $
+      .extend({},
+              {
+                /* 9-step based on paraview bwr colortable */
+                colorRange: [
+                  {r: 0.07514311, g: 0.468049805, b: 1},
+                  {r: 0.468487184, g: 0.588057293, b: 1},
+                  {r: 0.656658579, g: 0.707001303, b: 1},
+                  {r: 0.821573924, g: 0.837809045, b: 1},
+                  {r: 0.943467973, g: 0.943498599, b: 0.943398095},
+                  {r: 1, g: 0.788626485, b: 0.750707739},
+                  {r: 1, g: 0.6289553, b: 0.568237474},
+                  {r: 1, g: 0.472800903, b: 0.404551679},
+                  {r: 0.916482116, g: 0.236630659, b: 0.209939162}
+                ],
+                scale: d3.scale.quantize(),
+                accessors: {
+                  //accessor for ID on geodata feature
+                  geoId: function (geoFeature) {
+                    return geoFeature.properties.GEO_ID;
+                  },
+                  //accessor for ID on scalar element
+                  scalarId: function (scalarElement) {
+                    return scalarElement.id;
+                  },
+                  //accessor for value on scalar element
+                  scalarValue: function (scalarElement) {
+                    return scalarElement.value;
+                  }
+                }
+              },
+              arg.choropleth);
 
-  if (arg && arg.baseUrl !== undefined) {
-    m_baseUrl = arg.baseUrl;
-  }
-
-  if (m_baseUrl.charAt(m_baseUrl.length - 1) !== '/') {
-    m_baseUrl += '/';
-  }
-
-  if (arg && arg.mapOpacity !== undefined) {
-    m_mapOpacity = arg.mapOpacity;
-  }
-  if (arg && arg.imageFormat !== undefined) {
-    m_imageFormat = arg.imageFormat;
-  }
-
-  if (arg && arg.displayLast !== undefined && arg.displayLast) {
-    m_lastVisibleBinNumber = 999;
-  }
-
-  if (arg && arg.useCredentials !== undefined && arg.useCredentials) {
-    m_crossOrigin = 'use-credentials';
-  }
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Returns a url string containing the requested tile.  This default
-   * version uses the open street map standard, but the user can
-   * change the default behavior.
+   * Get/Set choropleth scalar data
    *
-   * @param {integer} zoom The zoom level
-   * @param {integer} x The tile from the xth row
-   * @param {integer} y The tile from the yth column
-   * @private
+   * @returns {geo.feature.choropleth}
    */
   ////////////////////////////////////////////////////////////////////////////
-  m_tileUrl = function (zoom, x, y) {
-    return m_baseUrl + zoom + '/' + x +
-      '/' + y + '.' + m_imageFormat;
-  };
+  this.scalar = function (data, aggregator) {
+    var scalarId, scalarValue;
 
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Returns an OSM tile server formatting function from a standard format
-   * string: replaces <zoom>, <x>, and <y>.
-   *
-   * @param {string} base The tile format string
-   * @private
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  m_tileUrlFromTemplate = function (base) {
-    return function (zoom, x, y) {
-      return base.replace('<zoom>', zoom)
-        .replace('<x>', x)
-        .replace('<y>', y);
-    };
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Check if a tile is visible in current view
-   *
-   * @private
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  function isTileVisible(tile) {
-    if (tile.zoom in m_visibleTilesRange) {
-      if (tile.index_x >= m_visibleTilesRange[tile.zoom].startX &&
-          tile.index_x <= m_visibleTilesRange[tile.zoom].endX &&
-          tile.index_y >= m_visibleTilesRange[tile.zoom].startY &&
-          tile.index_y <= m_visibleTilesRange[tile.zoom].endY) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Draw new tiles and remove the old ones
-   *
-   * @private
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  function drawTiles() {
-    m_this._removeTiles();
-    m_this.draw();
-    delete m_pendingNewTilesStat[m_updateTimerId];
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get/Set tile cache size
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.tileCacheSize = function (val) {
-    if (val === undefined) {
-      return m_tileCacheSize;
-    }
-    m_tileCacheSize = val;
-    m_this.modified();
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get/Set the tile url formatting function.
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.tileUrl = function (val) {
-    if (val === undefined) {
-      return m_tileUrl;
-    } else if (typeof val === 'string') {
-      m_tileUrl = m_tileUrlFromTemplate(val);
+    if (data === undefined) {
+      return m_this.choropleth.get('scalar')();
     } else {
-      m_tileUrl = val;
+      scalarId = m_this.choropleth.get('accessors')().scalarId;
+      scalarValue = m_this.choropleth.get('accessors')().scalarValue;
+      m_choropleth.scalar = data;
+      m_choropleth.scalarAggregator = aggregator || d3.mean;
+      // we make internal dictionary from array for faster lookup
+      // when matching geojson features to scalar values,
+      // note that we also allow for multiple scalar elements
+      // for the same geo feature
+      m_choropleth.scalar._dictionary = data
+        .reduce(function (accumeDictionary, scalarElement) {
+          var id, value;
+
+          id = scalarId(scalarElement);
+          value = scalarValue(scalarElement);
+
+          accumeDictionary[id] =
+            accumeDictionary[id] ?
+            accumeDictionary[id].push(value) : [value];
+
+          return accumeDictionary;
+        }, {});
+      m_this.dataTime().modified();
+    }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set choropleth accessor
+   *
+   * @returns {geo.feature.choropleth}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.choropleth = function (arg1, arg2) {
+    var choropleth;
+
+    if (arg1 === undefined) {
+      return m_choropleth;
+    }
+    if (typeof arg1 === 'string' && arg2 === undefined) {
+      return m_choropleth[arg1];
+    }
+    if (arg2 === undefined) {
+      choropleth = $.extend(
+        {},
+        m_choropleth,
+        arg1
+      );
+      m_choropleth = choropleth;
+    } else {
+      m_choropleth[arg1] = arg2; //if you pass in accessor for prop
     }
     m_this.modified();
     return m_this;
@@ -21834,522 +24490,138 @@ geo.osmLayer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Transform a point or array of points in latitude-longitude-altitude
-   * space to local space of the layer
+   * A uniform getter that always returns a function even for constant values.
+   * If undefined input, return all the choropleth values as an object.
    *
-   * @param {*} input
-   * Input can be of following types:
-   *
-   *   3. [x1,y1, x2, y2]
-   *   4. [[x,y]]
-   *   5. {x:val: y:val, z:val},
-   *   6. [{x:val: y:val}]
-   *
-   * returns {x:lon, y:lat}, [{x:lon, y:lat}], [x1,y1, x2, y2], [[x,y]]
+   * @param {string|undefined} key
+   * @return {function}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.toLocal = function (input) {
-    var i, output, delta;
-
-    /// Now handle different data types
-    if (input instanceof Array && input.length > 0) {
-      output = [];
-      output.length = input.length;
-
-      if (input[0] instanceof Array) {
-        delta = input % 3 === 0 ? 3 : 2;
-
-        if (delta === 2) {
-          for (i = 0; i < input.length; i += delta) {
-            output[i] = input[i];
-            output[i + 1] = geo.mercator.lat2y(input[i + 1]);
-          }
-        } else {
-          for (i = 0; i < input.length; i += delta) {
-            output[i] = input[i];
-            output[i + 1] = geo.mercator.lat2y(input[i + 1]);
-            output[i + 2] = input[i + 2];
-          }
+  this.choropleth.get = function (key) {
+    var all = {}, k;
+    if (key === undefined) {
+      for (k in m_choropleth) {
+        if (m_choropleth.hasOwnProperty(k)) {
+          all[k] = m_this.choropleth.get(k);
         }
-      } else if (input[0] instanceof Object &&
-                 'x' in input[0] && 'y' in input[0] && 'z' in input[0]) {
-        /// Input is array of object
-        output[i] = { x: input[i].x, y: geo.mercator.lat2y(input[i].y),
-                      z: input[i].z };
-      } else if (input[0] instanceof Object &&
-                 'x' in input[0] && 'y' in input[0] && 'z' in input[0]) {
-        /// Input is array of object
-        output[i] = { x: input[i].x, y: geo.mercator.lat2y(input[i].y)};
-      } else if (input.length >= 2) {
-        output = input.slice(0);
-        output[1] = geo.mercator.lat2y(input[1]);
       }
-    } else {
-      output = {};
-      output.x = input.x;
-      output.y = geo.mercator.lat2y(input.y);
+      return all;
     }
-
-    return output;
+    return geo.util.ensureFunction(m_choropleth[key]);
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Transform a point or array of points in local space to
-   * latitude-longitude space
+   * A method that adds a polygon feature to the current layer.
    *
-   * @input Input An object, array, of array of objects/array representing 2D
-   * point in space. [x,y], [[x,y]], [{x:val: y:val}], {x:val, y:val}
+   * @param {array} coordinateArray
+   * @param {geo.color} fillColor
+   * @return {geo.feature}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.fromLocal = function (input) {
-    var i, output;
+  this._addPolygonFeature = function (feature, fillColor) {
+    var newFeature = m_this.layer()
+        .createFeature('polygon', {});
 
-    if (input instanceof Array && input.length > 0) {
-      output = [];
-      output.length = input.length;
-
-      if (input[0] instanceof Object) {
-        for (i = 0; i < input.length; i += 1) {
-          output[i] = {};
-          output[i].x = input[i].x;
-          output[i].y = geo.mercator.y2lat(input[i].y);
-        }
-      } else if (input[0] instanceof Array) {
-        for (i = 0; i < input.length; i += 1) {
-          output[i] = input[i];
-          output[i][1] = geo.mercator.y2lat(input[i][1]);
-        }
-      } else {
-        for (i = 0; i < input.length; i += 1) {
-          output[i] = input[i];
-          output[i + 1] = geo.mercator.y2lat(input[i + 1]);
-        }
-      }
-    } else {
-      output = {};
-      output.x = input.x;
-      output.y = geo.mercator.y2lat(input.y);
+    if (feature.geometry.type === 'Polygon') {
+      newFeature.data([{
+        type: 'Polygon',
+        coordinates: feature.geometry.coordinates
+      }]);
+    } else if (feature.geometry.type === 'MultiPolygon') {
+      newFeature.data(feature.geometry.coordinates.map(function (coordinateMap) {
+        return {
+          type: 'Polygon',
+          coordinates: coordinateMap
+        };
+      }));
     }
 
-    return output;
+    newFeature
+      .polygon(function (d) {
+        return {
+          'outer': d.coordinates[0],
+          'inner': d.coordinates[1] // undefined but ok
+        };
+      })
+      .position(function (d) {
+        return {
+          x: d[0],
+          y: d[1]
+        };
+      })
+      .style({
+        'fillColor': fillColor
+      });
+
+    return newFeature;
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Check if a tile exists in the cache
+   * A method that adds polygons from a given feature to the current layer.
    *
-   * @param {number} zoom The zoom value for the map [1-17]
-   * @param {number} x X axis tile index
-   * @param {number} y Y axis tile index
+   * @param {} geoJsonFeature
+   * @param geo.color
+   * @return [{geo.feature}]
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._hasTile = function (zoom, x, y) {
-    if (!m_tiles[zoom]) {
-      return false;
-    }
-    if (!m_tiles[zoom][x]) {
-      return false;
-    }
-    if (!m_tiles[zoom][x][y]) {
-      return false;
-    }
-    return true;
+  this._featureToPolygons = function (feature, fillValue) {
+    return m_this
+      ._addPolygonFeature(feature, fillValue);
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Create a new tile
-   * @param {number} x X axis tile index
-   * @param {number} y Y axis tile index
+   * A method that sets a choropleth scale's domain and range.
+   *
+   * @param {undefined | function({})} valueAccessor
+   * @return {geo.feature.choropleth}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._addTile = function (request, zoom, x, y) {
-    if (!m_tiles[zoom]) {
-      m_tiles[zoom] = {};
-    }
-    if (!m_tiles[zoom][x]) {
-      m_tiles[zoom][x] = {};
-    }
-    if (m_tiles[zoom][x][y]) {
-      return;
-    }
+  this._generateScale = function (valueAccessor) {
+    var extent =
+        d3.extent(m_this.scalar(), valueAccessor || undefined);
 
-    /// Compute corner points
-    var noOfTilesX = Math.max(1, Math.pow(2, zoom)),
-        noOfTilesY = Math.max(1, Math.pow(2, zoom)),
-        /// Convert into mercator
-        totalLatDegrees = 360.0,
-        lonPerTile = 360.0 / noOfTilesX,
-        latPerTile = totalLatDegrees / noOfTilesY,
-        llx = -180.0 + x * lonPerTile,
-        lly = -totalLatDegrees * 0.5 + y * latPerTile,
-        urx = -180.0 + (x + 1) * lonPerTile,
-        ury = -totalLatDegrees * 0.5 + (y + 1) * latPerTile,
-        tile = new Image();
-
-    tile.LOADING = true;
-    tile.LOADED = false;
-    tile.REMOVED = false;
-    tile.REMOVING = false;
-    tile.INVALID = false;
-
-    tile.crossOrigin = m_crossOrigin;
-    tile.zoom = zoom;
-    tile.index_x = x;
-    tile.index_y = y;
-    tile.llx = llx;
-    tile.lly = lly;
-    tile.urx = urx;
-    tile.ury = ury;
-    tile.lastused = new Date();
-
-    tile.src = m_tileUrl(zoom, x, Math.pow(2, zoom) - 1 - y);
-
-    m_tiles[zoom][x][y] = tile;
-    m_pendingNewTiles.push(tile);
-    m_numberOfCachedTiles += 1;
-    return tile;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Clear tiles that are no longer required
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  /* jshint -W089 */
-  this._removeTiles = function () {
-    var i, x, y, tile, zoom, currZoom = m_zoom,
-        lastZoom = m_lastVisibleZoom;
-
-    if (!m_tiles) {
-      return m_this;
-    }
-
-    for (zoom in m_tiles) {
-      for (x in m_tiles[zoom]) {
-        for (y in m_tiles[zoom][x]) {
-          tile = m_tiles[zoom][x][y];
-          if (tile) {
-            tile.REMOVING = true;
-            m_pendingInactiveTiles.push(tile);
-          }
-        }
-      }
-    }
-
-    /// First remove the tiles if we have cached more than max cached limit
-    m_pendingInactiveTiles.sort(function (a, b) {
-      return a.lastused - b.lastused;
-    });
-
-    i = 0;
-
-    /// Get rid of tiles if we have reached our threshold. However,
-    /// If the tile is required for current zoom, then do nothing.
-    /// Also do not delete the tile if it is from the previous zoom
-    while (m_numberOfCachedTiles > m_tileCacheSize &&
-      i < m_pendingInactiveTiles.length) {
-      tile = m_pendingInactiveTiles[i];
-
-      if (isTileVisible(tile)) {
-        i += 1;
-      } else {
-        m_this.deleteFeature(tile.feature);
-        delete m_tiles[tile.zoom][tile.index_x][tile.index_y];
-        m_pendingInactiveTiles.splice(i, 1);
-        m_numberOfCachedTiles -= 1;
-      }
-    }
-
-    for (i = 0; i < m_pendingInactiveTiles.length; i += 1) {
-      tile = m_pendingInactiveTiles[i];
-      tile.REMOVING = false;
-      tile.REMOVED = false;
-      if (tile.zoom !== currZoom && tile.zoom === lastZoom) {
-        tile.feature.bin(m_lastVisibleBinNumber);
-      } else if (tile.zoom !== currZoom) {
-        tile.feature.bin(m_hiddenBinNumber);
-      } else {
-        tile.lastused = new Date();
-        tile.feature.bin(m_visibleBinNumber);
-      }
-      tile.feature._update();
-    }
-    m_pendingInactiveTiles = [];
+    m_this.choropleth()
+      .scale
+      .domain(extent)
+      .range(m_this.choropleth().colorRange);
 
     return m_this;
   };
-  /* jshint +W089 */
 
   ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Create / delete tiles as necessary
+  /**sr
+   * Generate scale for choropleth.data(), make polygons from features.
+   * @returns: [ [geo.feature.polygon, ...] , ... ]
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._addTiles = function (request) {
-    var feature, ren = m_this.renderer(),
-        /// First get corner points
-        /// In display coordinates the origin is on top left corner (0, 0)
-        llx = 0.0, lly = m_this.height(), urx = m_this.width(), ury = 0.0,
-        temp = null, tile = null, tile1x = null, tile1y = null, tile2x = null,
-        tile2y = null, invJ = null, i = 0, j = 0, lastStartX, lastStartY,
-        lastEndX, lastEndY, currStartX, currStartY, currEndX, currEndY,
-        worldPt1 = ren.displayToWorld([llx, lly]),
-        worldPt2 = ren.displayToWorld([urx, ury]),
-        worldDeltaY = null, displayDeltaY = null,
-        worldDelta = null, displayDelta = null,
-        noOfTilesRequired = null, worldDeltaPerTile = null,
-        minDistWorldDeltaPerTile = null, distWorldDeltaPerTile;
+  this.createChoropleth = function () {
+    var choropleth = m_this.choropleth,
+        data = m_this.data(),
+        scalars = m_this.scalar(),
+        valueFunc = choropleth.get('accessors')().scalarValue,
+        getFeatureId = choropleth.get('accessors')().geoId;
 
-    worldPt1[0] = Math.max(worldPt1[0], -180.0);
-    worldPt1[0] = Math.min(worldPt1[0], 180.0);
-    worldPt1[1] = Math.max(worldPt1[1], -180.0);
-    worldPt1[1] = Math.min(worldPt1[1], 180.0);
+    m_this._generateScale(valueFunc);
 
-    worldPt2[0] = Math.max(worldPt2[0], -180.0);
-    worldPt2[0] = Math.min(worldPt2[0], 180.0);
-    worldPt2[1] = Math.max(worldPt2[1], -180.0);
-    worldPt2[1] = Math.min(worldPt2[1], 180.0);
+    return data
+      .map(function (feature) {
+        var id = getFeatureId(feature);
+        var valueArray = scalars._dictionary[id];
+        var accumulatedScalarValue = choropleth().scalarAggregator(valueArray);
+        // take average of this array of values
+        // which allows for non-bijective correspondance
+        // between geo data and scalar data
+        var fillColor =
+            m_this
+            .choropleth()
+            .scale(accumulatedScalarValue);
 
-    /// Compute tile zoom
-    worldDelta = Math.abs(worldPt2[0] - worldPt1[0]);
-    worldDeltaY = Math.abs(worldPt2[1] - worldPt1[1]);
-
-    displayDelta = urx - llx;
-    displayDeltaY = lly - ury;
-
-    /// Reuse variables
-    if (displayDeltaY > displayDelta) {
-      displayDelta = displayDeltaY;
-      worldDelta = worldDeltaY;
-    }
-
-    noOfTilesRequired = Math.round(displayDelta / 256.0);
-    worldDeltaPerTile = worldDelta / noOfTilesRequired;
-
-    /// Minimize per pixel distortion
-    minDistWorldDeltaPerTile = Number.POSITIVE_INFINITY;
-    for (i = 20; i >= 2; i = i - 1) {
-      distWorldDeltaPerTile = Math.abs(360.0 / Math.pow(2, i) - worldDeltaPerTile);
-      if (distWorldDeltaPerTile < minDistWorldDeltaPerTile) {
-        minDistWorldDeltaPerTile = distWorldDeltaPerTile;
-        m_zoom = i;
-      }
-    }
-
-    /// Compute tilex and tiley
-    tile1x = geo.mercator.long2tilex(worldPt1[0], m_zoom);
-    tile1y = geo.mercator.lat2tiley(worldPt1[1], m_zoom);
-
-    tile2x = geo.mercator.long2tilex(worldPt2[0], m_zoom);
-    tile2y = geo.mercator.lat2tiley(worldPt2[1], m_zoom);
-
-    /// Clamp tilex and tiley
-    tile1x = Math.max(tile1x, 0);
-    tile1x = Math.min(Math.pow(2, m_zoom) - 1, tile1x);
-    tile1y = Math.max(tile1y, 0);
-    tile1y = Math.min(Math.pow(2, m_zoom) - 1, tile1y);
-
-    tile2x = Math.max(tile2x, 0);
-    tile2x = Math.min(Math.pow(2, m_zoom) - 1, tile2x);
-    tile2y = Math.max(tile2y, 0);
-    tile2y = Math.min(Math.pow(2, m_zoom) - 1, tile2y);
-
-    /// Check and update variables appropriately if view
-    /// direction is flipped. This should not happen but
-    /// just in case.
-    if (tile1x > tile2x) {
-      temp = tile1x;
-      tile1x = tile2x;
-      tile2x = temp;
-    }
-    if (tile2y > tile1y) {
-      temp = tile1y;
-      tile1y = tile2y;
-      tile2y = temp;
-    }
-
-    /// Compute current tile indices
-    currStartX = tile1x;
-    currEndX = tile2x;
-    currStartY = (Math.pow(2, m_zoom) - 1 - tile1y);
-    currEndY = (Math.pow(2, m_zoom) - 1 - tile2y);
-    if (currEndY < currStartY) {
-      temp = currStartY;
-      currStartY = currEndY;
-      currEndY = temp;
-    }
-
-    /// Compute last tile indices
-    lastStartX = geo.mercator.long2tilex(worldPt1[0],
-                   m_lastVisibleZoom);
-    lastStartY = geo.mercator.lat2tiley(worldPt1[1],
-                   m_lastVisibleZoom);
-    lastEndX = geo.mercator.long2tilex(worldPt2[0],
-                   m_lastVisibleZoom);
-    lastEndY = geo.mercator.lat2tiley(worldPt2[1],
-                   m_lastVisibleZoom);
-    lastStartY = Math.pow(2, m_lastVisibleZoom) - 1 - lastStartY;
-    lastEndY   = Math.pow(2, m_lastVisibleZoom) - 1 - lastEndY;
-
-    if (lastEndY < lastStartY) {
-      temp = lastStartY;
-      lastStartY = lastEndY;
-      lastEndY = temp;
-    }
-
-    m_visibleTilesRange = {};
-    m_visibleTilesRange[m_zoom] = { startX: currStartX, endX: currEndX,
-                                    startY: currStartY, endY: currEndY };
-
-    m_visibleTilesRange[m_lastVisibleZoom] =
-                                { startX: lastStartX, endX: lastEndX,
-                                  startY: lastStartY, endY: lastEndY };
-    m_pendingNewTilesStat[m_updateTimerId] = { total:
-      ((tile2x - tile1x + 1) * (tile1y - tile2y + 1)), count: 0 };
-
-    for (i = tile1x; i <= tile2x; i += 1) {
-      for (j = tile2y; j <= tile1y; j += 1) {
-        invJ = (Math.pow(2, m_zoom) - 1 - j);
-        if (!m_this._hasTile(m_zoom, i, invJ)) {
-          tile = m_this._addTile(request, m_zoom, i, invJ);
-        } else {
-          tile = m_tiles[m_zoom][i][invJ];
-          tile.feature.bin(m_visibleBinNumber);
-          if (tile.LOADED && m_updateTimerId in m_pendingNewTilesStat) {
-            m_pendingNewTilesStat[m_updateTimerId].count += 1;
-          }
-          tile.feature._update();
-        }
-        tile.lastused = new Date();
-        tile.updateTimerId = m_updateTimerId;
-      }
-    }
-
-    // define a function here to set tile properties after it is loaded
-    function tileOnLoad(tile) {
-      var defer = $.Deferred();
-      m_this.addDeferred(defer);
-
-      return function () {
-        if (tile.INVALID) {
-          return;
-        }
-        tile.LOADING = false;
-        tile.LOADED = true;
-        if ((tile.REMOVING || tile.REMOVED) &&
-          tile.feature &&
-          tile.zoom !== m_zoom) {
-          tile.feature.bin(m_hiddenBinNumber);
-          tile.REMOVING = false;
-          tile.REMOVED = true;
-        } else {
-          tile.REMOVED = false;
-          tile.lastused = new Date();
-          tile.feature.bin(m_visibleBinNumber);
-        }
-
-        if (tile.updateTimerId === m_updateTimerId &&
-            m_updateTimerId in m_pendingNewTilesStat) {
-          tile.feature.bin(m_visibleBinNumber);
-          m_pendingNewTilesStat[m_updateTimerId].count += 1;
-        } else {
-          tile.REMOVED = true;
-          tile.feature.bin(m_hiddenBinNumber);
-        }
-        tile.feature._update();
-
-        if (m_updateTimerId in m_pendingNewTilesStat &&
-            m_pendingNewTilesStat[m_updateTimerId].count >=
-            m_pendingNewTilesStat[m_updateTimerId].total) {
-          drawTiles();
-        }
-        defer.resolve();
-      };
-    }
-
-    /// And now finally add them
-    for (i = 0; i < m_pendingNewTiles.length; i += 1) {
-      tile = m_pendingNewTiles[i];
-      feature = m_this.createFeature(
-        'plane', {drawOnAsyncResourceLoad: false, onload: tileOnLoad(tile)})
-        .origin([tile.llx, tile.lly])
-        .upperLeft([tile.llx, tile.ury])
-        .lowerRight([tile.urx, tile.lly])
-        .gcs('EPSG:3857')
-        .style({image: tile, opacity: m_mapOpacity});
-      tile.feature = feature;
-      tile.feature._update();
-    }
-    m_pendingNewTiles = [];
-
-    if (m_updateTimerId in m_pendingNewTilesStat &&
-        m_pendingNewTilesStat[m_updateTimerId].count >=
-        m_pendingNewTilesStat[m_updateTimerId].total) {
-      drawTiles();
-    }
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Update OSM tiles as needed
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  function updateOSMTiles(request) {
-    if (request === undefined) {
-      request = {};
-    }
-
-    if (!m_zoom) {
-      m_zoom = m_this.map().zoom();
-    }
-
-    if (!m_lastVisibleZoom) {
-      m_lastVisibleZoom = m_zoom;
-    }
-
-    /// Add tiles that are currently visible
-    m_this._addTiles(request);
-
-    /// Update the zoom
-    if (m_lastVisibleZoom !== m_zoom) {
-      m_lastVisibleZoom = m_zoom;
-    }
-
-    m_this.updateTime().modified();
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Create / delete tiles as necessary
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._updateTiles = function (request) {
-    var defer = $.Deferred();
-    m_this.addDeferred(defer);
-
-    if (m_updateTimerId !== null) {
-      clearTimeout(m_updateTimerId);
-      m_updateDefer.resolve();
-      m_updateDefer = defer;
-      if (m_updateTimerId in m_pendingNewTilesStat) {
-        delete m_pendingNewTilesStat[m_updateTimerId];
-      }
-      /// Set timeout for 60 ms. 60 ms seems to playing well
-      /// with the events. Also, 60ms corresponds to 15 FPS.
-      m_updateTimerId = setTimeout(function () {
-        updateOSMTiles(request);
-        m_updateDefer.resolve();
-      }, 100);
-    } else {
-      m_updateDefer = defer;
-      m_updateTimerId = setTimeout(function () {
-        updateOSMTiles(request);
-        m_updateDefer.resolve();
-      }, 0);
-    }
-    return m_this;
+        return m_this
+          ._featureToPolygons(feature, fillColor);
+      });
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -22357,163 +24629,27 @@ geo.osmLayer = function (arg) {
    * Initialize
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._init = function () {
-    s_init.call(m_this);
-    m_this.gcs('EPSG:3857');
-    m_this.map().zoomRange({
-      min: 0,
-      max: 18
-    });
-    return m_this;
-  };
+  this._init = function (arg) {
+    s_init.call(m_this, arg);
 
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Update layer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._update = function (request) {
-    /// Update tiles (create new / delete old etc...)
-    m_this._updateTiles(request);
-
-    /// Now call base class update
-    s_update.call(m_this, request);
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Update baseUrl for map tiles.  Map all tiles as needing to be refreshed.
-   * If no argument is given the tiles will be forced refreshed.
-   *
-   * @param baseUrl: the new baseUrl for the map.
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  /* jshint -W089 */
-  this.updateBaseUrl = function (baseUrl) {
-    if (baseUrl && baseUrl.charAt(m_baseUrl.length - 1) !== '/') {
-      baseUrl += '/';
-    }
-    if (baseUrl !== m_baseUrl) {
-
-      if (baseUrl !== undefined) {
-        m_baseUrl = baseUrl;
-      }
-
-      var tile, x, y, zoom;
-      for (zoom in m_tiles) {
-        for (x in m_tiles[zoom]) {
-          for (y in m_tiles[zoom][x]) {
-            tile = m_tiles[zoom][x][y];
-            tile.INVALID = true;
-            m_this.deleteFeature(tile.feature);
-          }
-        }
-      }
-      m_tiles = {};
-      m_pendingNewTiles = [];
-      m_pendingInactiveTiles = [];
-      m_numberOfCachedTiles = 0;
-      m_visibleTilesRange = {};
-      m_pendingNewTilesStat = {};
-
-      if (m_updateTimerId !== null) {
-        clearTimeout(m_updateTimerId);
-        m_updateTimerId = null;
-      }
-      this._update();
+    if (m_choropleth) {
+      m_this.dataTime().modified();
     }
   };
 
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get/Set map opacity
-   *
-   * @returns {geo.osmLayer}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.mapOpacity = function (val) {
-    if (val === undefined) {
-      return m_mapOpacity;
-    } else if (val !== m_mapOpacity) {
-      m_mapOpacity = val;
-      var zoom, x, y, tile;
-      for (zoom in m_tiles) {
-        for (x in m_tiles[zoom]) {
-          for (y in m_tiles[zoom][x]) {
-            tile = m_tiles[zoom][x][y];
-            tile.feature.style().opacity = val;
-            tile.feature._update();
-          }
-        }
-      }
-      m_this.modified();
-    }
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Exit
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._exit = function () {
-    m_tiles = {};
-    m_pendingNewTiles = [];
-    m_pendingInactiveTiles = [];
-    m_numberOfCachedTiles = 0;
-    m_visibleTilesRange = {};
-    m_pendingNewTilesStat = {};
-    s_exit();
-  };
-
-  if (arg && arg.tileUrl !== undefined) {
-    this.tileUrl(arg.tileUrl);
-  }
-
-
+  this._init(arg);
   return this;
 };
 
-inherit(geo.osmLayer, geo.featureLayer);
+inherit(geo.choroplethFeature, geo.feature);
 
-geo.registerLayer('osm', geo.osmLayer);
+/* Example:
+ */
 
 /**
  * @namespace
  */
 geo.gl = {};
-
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Create a new instance of class vglRenderer
- *
- * @class
- * @extends geo.renderer
- * @param canvas
- * @returns {geo.gl.renderer}
- */
-//////////////////////////////////////////////////////////////////////////////
-geo.gl.renderer = function (arg) {
-  'use strict';
-
-  if (!(this instanceof geo.gl.renderer)) {
-    return new geo.gl.renderer(arg);
-  }
-  geo.renderer.call(this, arg);
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get context specific renderer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.contextRenderer = function () {
-    throw 'Should be implemented by derived classes';
-  };
-
-  return this;
-};
-
-inherit(geo.gl.renderer, geo.renderer);
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -22771,7 +24907,7 @@ geo.gl.lineFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.verticesPerFeature = function () {
-    return this.featureVertices().length;
+    return m_this.featureVertices().length;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -23521,7 +25657,7 @@ geo.gl.geomFeature = function (arg) {
       m_mapper.setGeometryData(m_geom);
     }
 
-    this.setMapper(m_mapper);
+    m_this.setMapper(m_mapper);
 
     if (style.point_sprites !== undefined && style.point_sprites &&
         style.point_sprites_image !== undefined &&
@@ -23642,8 +25778,11 @@ geo.gl.planeFeature = function (arg) {
         image = null,
         texture = null;
 
+    //DWM:: we are expecting the features to be in the same coordinate system
+    //DWM:: as the camera -- should it be otherwise?
     /// TODO If for some reason base layer changes its gcs at run time
     /// then we need to trigger an event to rebuild every feature
+    /*
     or = geo.transform.transformCoordinates(m_this.gcs(),
                                             m_this.layer().map().gcs(),
                                             or);
@@ -23653,6 +25792,7 @@ geo.gl.planeFeature = function (arg) {
     lr = geo.transform.transformCoordinates(m_this.gcs(),
                                             m_this.layer().map().gcs(),
                                             lr);
+    */
 
     m_this.buildTime().modified();
 
@@ -24406,7 +26546,7 @@ geo.registerFeature('vgl', 'contour', geo.gl.contourFeature);
  * Create a new instance of class vglRenderer
  *
  * @class
- * @extends geo.gl.renderer
+ * @extends geo.renderer
  * @param canvas
  * @returns {geo.gl.vglRenderer}
  */
@@ -24418,14 +26558,14 @@ geo.gl.vglRenderer = function (arg) {
     return new geo.gl.vglRenderer(arg);
   }
   arg = arg || {};
-  geo.gl.renderer.call(this, arg);
+  geo.renderer.call(this, arg);
 
   var m_this = this,
       m_contextRenderer = null,
       m_viewer = null,
       m_width = 0,
       m_height = 0,
-      m_initialized = false,
+      m_renderAnimFrameRef = null,
       s_init = this._init;
 
   /// TODO: Move this API to the base class
@@ -24445,160 +26585,6 @@ geo.gl.vglRenderer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.height = function () {
     return m_height;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Convert input data in display space to world space
-   *
-   * @param {object} input {x:val, y:val}, [{x:val, y:val}],
-   * [{x:val, y:val}], [x1,y1], [[x,y]]
-   *
-   * @returns {object} {x:val, y:val, z:val, w:val}, [{x:val, y:val, z:val, w:val}],
-              [[x, y, z, w]], [x1,y1,z1,w]
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.displayToWorld = function (input) {
-    var i,
-        delta,
-        ren = m_this.contextRenderer(),
-        cam = ren.camera(),
-        fdp = ren.focusDisplayPoint(),
-        output,
-        temp,
-        point;
-
-    /// Handle if the input is an array [...]
-    if (input instanceof Array && input.length > 0) {
-      output = [];
-      /// Input is array of object {x:val, y:val}
-      if (input[0] instanceof Object) {
-        delta = 1;
-        for (i = 0; i < input.length; i += delta) {
-          point = input[i];
-          temp = ren.displayToWorld(vec4.fromValues(
-                   point.x, point.y, fdp[2], 1.0),
-                   cam.viewMatrix(), cam.projectionMatrix(),
-                   m_width, m_height);
-          output.push({x: temp[0], y: temp[1], z: temp[2], w: temp[3]});
-        }
-    /// Input is array of 2d array [[x,y], [x,y]]
-      } else if (input[0] instanceof Array) {
-        delta = 1;
-        for (i = 0; i < input.length; i += delta) {
-          point = input[i];
-          temp = ren.displayToWorld(vec4.fromValues(
-                   point[0], point[1], fdp[2], 1.0),
-                   cam.viewMatrix(), cam.projectionMatrix(),
-                   m_width, m_height);
-          output.push(temp);
-        }
-    /// Input is flat array [x1,y1,x2,y2]
-      } else {
-        delta = input.length % 3 === 0 ? 3 : 2;
-        for (i = 0; i < input.length; i += delta) {
-          temp = ren.displayToWorld(vec4.fromValues(
-            input[i],
-            input[i + 1],
-            fdp[2],
-            1.0), cam.viewMatrix(), cam.projectionMatrix(),
-            m_width, m_height);
-          output.push(temp[0]);
-          output.push(temp[1]);
-          output.push(temp[2]);
-          output.push(temp[3]);
-        }
-      }
-    /// Input is object {x:val, y:val}
-    } else if (input instanceof Object) {
-      output = {};
-      temp = ren.displayToWorld(vec4.fromValues(
-               input.x, input.y, fdp[2], 1.0),
-               cam.viewMatrix(), cam.projectionMatrix(),
-               m_width, m_height);
-      output = {x: temp[0], y: temp[1], z: temp[2], w: temp[3]};
-    } else {
-      throw 'Display to world conversion requires array of 2D/3D points';
-    }
-    return output;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Convert input data in world space to display space
-   *
-   * @param {object} input {x:val, y:val} or {x:val, y:val, z:val} or [{x:val, y:val}]
-   * [{x:val, y:val, z:val}] or [[x,y]] or  [[x,y,z]] or [x1,y1,z1, x2, y2, z2]
-   *
-   * @returns {object} {x:val, y:val} or [{x:val, y:val}] or [[x,y]] or
-   * [x1,y1, x2, y2]
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.worldToDisplay = function (input) {
-    var i, temp, delta,
-        ren = m_this.contextRenderer(), cam = ren.camera(),
-        fp = cam.focalPoint(), output = [];
-
-    /// Input is an array
-    if (input instanceof Array && input.length > 0) {
-      output = [];
-
-      /// Input is an array of objects
-      if (input[0] instanceof Object) {
-        delta = 1;
-        for (i = 0; i < input.length; i += delta) {
-          temp = ren.worldToDisplay(vec4.fromValues(
-                   input[i].x, input[i].y, fp[2], 1.0), cam.viewMatrix(),
-                   cam.projectionMatrix(),
-                   m_width, m_height);
-          output[i] = { x: temp[0], y: temp[1], z: temp[2] };
-        }
-      } else if (input[0] instanceof Array) {
-        /// Input is an array of array
-        delta = 1;
-        for (i = 0; i < input.length; i += delta) {
-          temp = ren.worldToDisplay(
-                   vec4.fromValues(input[i][0], input[i][1], fp[2], 1.0),
-                   cam.viewMatrix(), cam.projectionMatrix(), m_width, m_height);
-          output[i].push(temp);
-        }
-      } else {
-        /// Input is a flat array of 2 or 3 dimension
-        delta = input.length % 3 === 0 ? 3 : 2;
-        if (delta === 2) {
-          for (i = 0; i < input.length; i += delta) {
-            temp = ren.worldToDisplay(vec4.fromValues(
-                     input[i], input[i + 1], fp[2], 1.0), cam.viewMatrix(),
-                     cam.projectionMatrix(),
-                     m_width, m_height);
-            output.push(temp[0]);
-            output.push(temp[1]);
-            output.push(temp[2]);
-          }
-        } else {
-          for (i = 0; i < input.length; i += delta) {
-            temp = ren.worldToDisplay(vec4.fromValues(
-                         input[i], input[i + 1], input[i + 2], 1.0), cam.viewMatrix(),
-                         cam.projectionMatrix(),
-                         m_width, m_height);
-            output.push(temp[0]);
-            output.push(temp[1]);
-            output.push(temp[2]);
-          }
-        }
-      }
-    } else if (input instanceof Object) {
-      temp = ren.worldToDisplay(vec4.fromValues(
-               input.x, input.y, fp[2], 1.0), cam.viewMatrix(),
-               cam.projectionMatrix(),
-               m_width, m_height);
-
-      output = {x: temp[0], y: temp[1], z: temp[2]};
-    } else {
-      throw 'World to display conversion requires array of 2D/3D points';
-    }
-
-    return output;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -24633,7 +26619,6 @@ geo.gl.vglRenderer = function (arg) {
 
     var canvas = $(document.createElement('canvas'));
     canvas.attr('class', 'webgl-canvas');
-    m_this.canvas(canvas);
     $(m_this.layer().node().get(0)).append(canvas);
     m_viewer = vgl.viewer(canvas.get(0), arg.options);
     m_viewer.init();
@@ -24643,6 +26628,11 @@ geo.gl.vglRenderer = function (arg) {
     if (m_viewer.renderWindow().renderers().length > 0) {
       m_contextRenderer.setLayer(m_viewer.renderWindow().renderers().length);
     }
+    m_this.canvas(canvas);
+    /* Initialize the size of the renderer */
+    var map = m_this.layer().map(),
+        mapSize = map.size();
+    m_this._resize(0, 0, mapSize.width, mapSize.height);
 
     return m_this;
   };
@@ -24653,59 +26643,16 @@ geo.gl.vglRenderer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._resize = function (x, y, w, h) {
-    var vglRenderer = m_this.contextRenderer(),
-        map = m_this.layer().map(),
-        camera = vglRenderer.camera(),
-        baseContextRenderer,
-        baseCamera,
-        renderWindow = m_viewer.renderWindow(),
-        layer = m_this.layer(),
-        baseLayer = layer.map().baseLayer(),
-        focalPoint,
-        position,
-        zoom,
-        newZ,
-        mapCenter;
+    var renderWindow = m_viewer.renderWindow();
 
     m_width = w;
     m_height = h;
     m_this.canvas().attr('width', w);
     m_this.canvas().attr('height', h);
     renderWindow.positionAndResize(x, y, w, h);
-    m_this._render();
-
-    // Ignore if the base layer is not set yet
-    if (!baseLayer || m_initialized) {
-      return;
-    }
-    m_initialized = true;
-
-    // skip handling if the renderer is unconnected
-    if (!vglRenderer || !vglRenderer.camera()) {
-      console.log('Zoom event triggered on unconnected vgl renderer.');
-    }
-
-    position = camera.position();
-    zoom = map.zoom();
-    newZ = camera.zoomToHeight(zoom, w, h);
-
-    // Assuming that baselayer will be a GL layer
-    if (layer !== baseLayer) {
-      baseContextRenderer = baseLayer.renderer().contextRenderer();
-      baseCamera = baseContextRenderer.camera();
-      position = baseCamera.position();
-      focalPoint = baseCamera.focalPoint();
-      camera.setPosition(position[0], position[1], position[2]);
-      camera.setFocalPoint(focalPoint[0], focalPoint[1], focalPoint[2]);
-    } else {
-      mapCenter = layer.toLocal(layer.map().center());
-      focalPoint = camera.focalPoint();
-      camera.setPosition(mapCenter.x, mapCenter.y, newZ);
-      camera.setFocalPoint(mapCenter.x, mapCenter.y, focalPoint[2]);
-    }
-    camera.setParallelExtents({zoom: zoom});
 
     m_this._updateRendererCamera();
+    m_this._render();
 
     return m_this;
   };
@@ -24716,30 +26663,55 @@ geo.gl.vglRenderer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._render = function () {
-    m_viewer.render();
+    if (m_renderAnimFrameRef === null) {
+      m_renderAnimFrameRef = window.requestAnimationFrame(function () {
+        m_viewer.render();
+        m_renderAnimFrameRef = null;
+      });
+    }
     return m_this;
   };
 
   this._updateRendererCamera = function () {
-    var vglRenderer = m_this.contextRenderer(),
-        renderWindow = m_viewer.renderWindow(),
-        camera = vglRenderer.camera(),
-        pos, fp, cr, pe;
+    var renderWindow = m_viewer.renderWindow(),
+        map = m_this.layer().map(),
+        camera = map.camera(),
+        view = camera.view,
+        proj = camera.projectionMatrix;
+    if (proj[15]) {
+      /* we want positive z to be closer to the camera, but webGL does the
+       * converse, so reverse the z coordinates. */
+      proj = mat4.scale(mat4.create(), proj, [1, 1, -1]);
+    }
+    /* A similar kluge as in the base camera class worldToDisplay4.  With this,
+     * we can show z values from 0 to 1. */
+    proj = mat4.translate(mat4.create(), proj,
+                          [0, 0, camera.constructor.bounds.far]);
 
-    vglRenderer.resetCameraClippingRange();
-    pos = camera.position();
-    fp = camera.focalPoint();
-    cr = camera.clippingRange();
-    pe = camera.parallelExtents();
     renderWindow.renderers().forEach(function (renderer) {
       var cam = renderer.camera();
-
-      if (cam !== camera) {
-        cam.setPosition(pos[0], pos[1], pos[2]);
-        cam.setFocalPoint(fp[0], fp[1], fp[2]);
-        cam.setClippingRange(cr[0], cr[1]);
-        cam.setParallelExtents(pe);
-        renderer.render();
+      cam.setViewMatrix(view);
+      cam.setProjectionMatrix(proj);
+      if (proj[1] || proj[2] || proj[3] || proj[4] || proj[6] || proj[7] ||
+          proj[8] || proj[9] || proj[11] || proj[15] !== 1 ||
+          (parseFloat(map.zoom().toFixed(6)) !==
+           parseFloat(map.zoom().toFixed(0)))) {
+        /* Don't align texels */
+        cam.viewAlignment = function () {
+          return null;
+        };
+      } else {
+        /* Set information for texel alignment.  The rounding factors should
+         * probably be divided by window.devicePixelRatio. */
+        cam.viewAlignment = function () {
+          var align = {
+            roundx: 2.0 / camera.viewport.width,
+            roundy: 2.0 / camera.viewport.height
+          };
+          align.dx = (camera.viewport.width % 2) ? align.roundx * 0.5 : 0;
+          align.dy = (camera.viewport.height % 2) ? align.roundy * 0.5 : 0;
+          return align;
+        };
       }
     });
   };
@@ -24747,110 +26719,14 @@ geo.gl.vglRenderer = function (arg) {
   // Connect to interactor events
   // Connect to pan event
   m_this.layer().geoOn(geo.event.pan, function (evt) {
-    var vglRenderer = m_this.contextRenderer(),
-        camera,
-        focusPoint,
-        centerDisplay,
-        centerGeo,
-        newCenterDisplay,
-        newCenterGeo,
-        renderWindow,
-        layer = m_this.layer();
-
-    if (evt.geo && evt.geo._triggeredBy !== layer) {
-      // skip handling if the renderer is unconnected
-      if (!vglRenderer || !vglRenderer.camera()) {
-        console.log('Pan event triggered on unconnected VGL renderer.');
-      }
-
-      renderWindow = m_viewer.renderWindow();
-      camera = vglRenderer.camera();
-      focusPoint = renderWindow.focusDisplayPoint();
-
-      // Calculate the center in display coordinates
-      centerDisplay = [m_width / 2, m_height / 2, 0];
-
-      // Calculate the center in world coordinates
-      centerGeo = renderWindow.displayToWorld(
-        centerDisplay[0],
-        centerDisplay[1],
-        focusPoint,
-        vglRenderer
-      );
-
-      newCenterDisplay = [
-        centerDisplay[0] + evt.screenDelta.x,
-        centerDisplay[1] + evt.screenDelta.y
-      ];
-
-      newCenterGeo = renderWindow.displayToWorld(
-        newCenterDisplay[0],
-        newCenterDisplay[1],
-        focusPoint,
-        vglRenderer
-      );
-
-      camera.pan(
-        centerGeo[0] - newCenterGeo[0],
-        centerGeo[1] - newCenterGeo[1],
-        centerGeo[2] - newCenterGeo[2]
-      );
-
-      evt.center = {
-        x: newCenterGeo[0],
-        y: newCenterGeo[1],
-        z: newCenterGeo[2]
-      };
-
-      m_this._updateRendererCamera();
-    }
+    void(evt);
+    m_this._updateRendererCamera();
   });
 
   // Connect to zoom event
   m_this.layer().geoOn(geo.event.zoom, function (evt) {
-    var vglRenderer = m_this.contextRenderer(),
-      camera,
-      renderWindow,
-      layer = m_this.layer(),
-      center,
-      dir,
-      focusPoint,
-      position,
-      newZ;
-
-    if (evt.geo && evt.geo._triggeredBy !== layer) {
-      // skip handling if the renderer is unconnected
-      if (!vglRenderer || !vglRenderer.camera()) {
-        console.log('Zoom event triggered on unconnected vgl renderer.');
-      }
-
-      renderWindow = m_viewer.renderWindow();
-      camera = vglRenderer.camera();
-      focusPoint = camera.focalPoint();
-      position = camera.position();
-      var windowSize = renderWindow.windowSize();
-      newZ = camera.zoomToHeight(evt.zoomLevel, windowSize[0], windowSize[1]);
-
-      evt.pan = null;
-      if (evt.screenPosition) {
-        center = renderWindow.displayToWorld(
-          evt.screenPosition.x,
-          evt.screenPosition.y,
-          focusPoint,
-          vglRenderer
-        );
-        dir = [center[0] - position[0], center[1] - position[1], center[2] - position[2]];
-        evt.center = layer.fromLocal({
-          x: position[0] + dir[0] * (1 - newZ / position[2]),
-          y: position[1] + dir[1] * (1 - newZ / position[2])
-        });
-      }
-
-      camera.setPosition(position[0], position[1], newZ);
-      camera.setParallelExtents({zoom: evt.zoomLevel});
-
-      m_this._updateRendererCamera();
-    }
+    void(evt);
+    m_this._updateRendererCamera();
   });
 
   // Connect to parallelprojection event
@@ -24873,9 +26749,157 @@ geo.gl.vglRenderer = function (arg) {
   return this;
 };
 
-inherit(geo.gl.vglRenderer, geo.gl.renderer);
+inherit(geo.gl.vglRenderer, geo.renderer);
 
 geo.registerRenderer('vgl', geo.gl.vglRenderer);
+
+geo.gl.tileLayer = function () {
+  'use strict';
+  var m_this = this;
+
+  this._drawTile = function (tile) {
+    var bounds = this._tileBounds(tile),
+        level = tile.index.level || 0,
+        to = this._options.tileOffset(level);
+    var ul = this.fromLocal(this.fromLevel({
+      x: bounds.left - to.x, y: bounds.top - to.y
+    }, level), 0);
+    var lr = this.fromLocal(this.fromLevel({
+      x: bounds.right - to.x, y: bounds.bottom - to.y
+    }, level), 0);
+    /* Use a small z-value for layering the tile levels. */
+    tile.feature = m_this.createFeature(
+      'plane', {drawOnAsyncResourceLoad: true})
+      .origin([ul.x, lr.y, level * 1e-7])
+      .upperLeft([ul.x, ul.y, level * 1e-7])
+      .lowerRight([lr.x, lr.y, level * 1e-7])
+      .style({image: tile._image});
+    tile.feature._update();
+    m_this.draw();
+  };
+
+  /* Remove the tile feature. */
+  this._remove = function (tile) {
+    if (tile.feature) {
+      m_this.deleteFeature(tile.feature);
+      tile.feature = null;
+      m_this.draw();
+    }
+  };
+
+  /* These functions don't need to do anything. */
+  this._getSubLayer = function () {};
+  this._updateSubLayer = function () {};
+};
+
+geo.registerLayerAdjustment('vgl', 'tile', geo.gl.tileLayer);
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Create a new instance of choroplethFeature
+ *
+ * @class
+ * @extends geo.choroplethFeature
+ * @returns {geo.gl.choroplethFeature}
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.gl.choroplethFeature = function (arg) {
+  'use strict';
+
+  if (!(this instanceof geo.gl.choroplethFeature)) {
+    return new geo.gl.choroplethFeature(arg);
+  }
+  arg = arg || {};
+  geo.choroplethFeature.call(this, arg);
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  var m_this = this,
+      m_gl_polygons = null,
+      s_exit = this._exit,
+      s_init = this._init,
+      s_update = this._update;
+
+  /* Create the choropleth.  This calls the base class to generate the contours,
+   * into the various gl uniforms and buffers.
+   */
+  function createGLChoropleth() {
+    return m_this.createChoropleth();
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Initialize
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._init = function (arg) {
+    s_init.call(m_this, arg);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Build
+   *
+   * @override
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._build = function () {
+    m_this.buildTime().modified();
+    return (m_gl_polygons = createGLChoropleth());
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Update
+   *
+   * @override
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._update = function () {
+    s_update.call(m_this);
+    if (m_this.dataTime().getMTime() >= m_this.buildTime().getMTime() ||
+        m_this.updateTime().getMTime() <= m_this.getMTime()) {
+      m_this._wipePolygons();
+      m_this._build();
+    }
+    m_this.updateTime().modified();
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Destroy Polygon Sub-Features
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._wipePolygons = function () {
+    if (m_gl_polygons) {
+      m_gl_polygons.map(function (polygon) {
+        return polygon._exit();
+      });
+    }
+    m_gl_polygons = null;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Destroy
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._exit = function () {
+    m_this._wipePolygons();
+    s_exit();
+  };
+
+  this._init(arg);
+  return this;
+};
+
+inherit(geo.gl.choroplethFeature, geo.choroplethFeature);
+
+// Now register it
+geo.registerFeature('vgl', 'choropleth', geo.gl.choroplethFeature);
 
 /** @namespace */
 geo.d3 = {};
@@ -24970,6 +26994,613 @@ inherit(geo.d3.object, geo.sceneObject);
 
 //////////////////////////////////////////////////////////////////////////////
 /**
+ * Create a new instance of class d3Renderer
+ *
+ * @class
+ * @extends geo.renderer
+ * @returns {geo.d3.d3Renderer}
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.d3.d3Renderer = function (arg) {
+  'use strict';
+
+  if (!(this instanceof geo.d3.d3Renderer)) {
+    return new geo.d3.d3Renderer(arg);
+  }
+  geo.renderer.call(this, arg);
+
+  var s_exit = this._exit;
+
+  geo.d3.object.call(this, arg);
+
+  arg = arg || {};
+
+  var m_this = this,
+      m_sticky = null,
+      m_features = {},
+      m_corners = null,
+      m_width = null,
+      m_height = null,
+      m_scale = 1,
+      m_dx = 0,
+      m_dy = 0,
+      m_svg = null,
+      m_defs = null;
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set attributes to a d3 selection.
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  function setAttrs(select, attrs) {
+    var key;
+    for (key in attrs) {
+      if (attrs.hasOwnProperty(key)) {
+        select.attr(key, attrs[key]);
+      }
+    }
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Meta functions for converting from geojs styles to d3.
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._convertColor = function (f, g) {
+    f = geo.util.ensureFunction(f);
+    g = g || function () { return true; };
+    return function () {
+      var c = 'none';
+      if (g.apply(m_this, arguments)) {
+        c = f.apply(m_this, arguments);
+        if (c.hasOwnProperty('r') &&
+            c.hasOwnProperty('g') &&
+            c.hasOwnProperty('b')) {
+          c = d3.rgb(255 * c.r, 255 * c.g, 255 * c.b);
+        }
+      }
+      return c;
+    };
+  };
+
+  this._convertPosition = function (f) {
+    f = geo.util.ensureFunction(f);
+    return function () {
+      return m_this.layer().map().worldToDisplay(f.apply(m_this, arguments));
+    };
+  };
+
+  this._convertScale = function (f) {
+    f = geo.util.ensureFunction(f);
+    return function () {
+      return f.apply(m_this, arguments) / m_scale;
+    };
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set styles to a d3 selection. Ignores unkown style keys.
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  function setStyles(select, styles) {
+    /* jshint validthis:true */
+    var key, k, f;
+    function fillFunc() {
+      if (styles.fill.apply(m_this, arguments)) {
+        return null;
+      } else {
+        return 'none';
+      }
+    }
+    function strokeFunc() {
+      if (styles.stroke.apply(m_this, arguments)) {
+        return null;
+      } else {
+        return 'none';
+      }
+    }
+    for (key in styles) {
+      if (styles.hasOwnProperty(key)) {
+        f = null;
+        k = null;
+        if (key === 'strokeColor') {
+          k = 'stroke';
+          f = m_this._convertColor(styles[key], styles.stroke);
+        } else if (key === 'stroke' && styles[key]) {
+          k = 'stroke';
+          f = strokeFunc;
+        } else if (key === 'strokeWidth') {
+          k = 'stroke-width';
+          f = m_this._convertScale(styles[key]);
+        } else if (key === 'strokeOpacity') {
+          k = 'stroke-opacity';
+          f = styles[key];
+        } else if (key === 'fillColor') {
+          k = 'fill';
+          f = m_this._convertColor(styles[key], styles.fill);
+        } else if (key === 'fill' && !styles.hasOwnProperty('fillColor')) {
+          k = 'fill';
+          f = fillFunc;
+        } else if (key === 'fillOpacity') {
+          k = 'fill-opacity';
+          f = styles[key];
+        }
+        if (k) {
+          select.style(k, f);
+        }
+      }
+    }
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get the svg group element associated with this renderer instance, or of a
+   * group within the render instance.
+   *
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  function getGroup(parentId) {
+    if (parentId) {
+      return m_svg.select('.group-' + parentId);
+    }
+    return m_svg.select('.group-' + m_this._d3id());
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set the initial lat-lon coordinates of the map view.
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  function initCorners() {
+    var layer = m_this.layer(),
+        map = layer.map(),
+        width = m_this.layer().map().size().width,
+        height = m_this.layer().map().size().height;
+
+    m_width = width;
+    m_height = height;
+    if (!m_width || !m_height) {
+      throw 'Map layer has size 0';
+    }
+    m_corners = {
+      upperLeft: map.displayToGcs({'x': 0, 'y': 0}, null),
+      lowerRight: map.displayToGcs({'x': width, 'y': height}, null)
+    };
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Set the translation, scale, and zoom for the current view.
+   * @note rotation not yet supported
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._setTransform = function () {
+    if (!m_corners) {
+      initCorners();
+    }
+
+    if (!m_sticky) {
+      return;
+    }
+
+    var layer = m_this.layer(),
+        map = layer.map(),
+        upperLeft = map.gcsToDisplay(m_corners.upperLeft, null),
+        lowerRight = map.gcsToDisplay(m_corners.lowerRight, null),
+        group = getGroup(),
+        canvas = m_this.canvas(),
+        dx, dy, scale;
+
+    if (canvas.attr('scale') !== null) {
+      scale = canvas.attr('scale') || 1;
+      dx = (canvas.attr('dx') || 0) * scale;
+      dy = (canvas.attr('dy') || 0) * scale;
+      dx += map.size().width / 2;
+      dy += map.size().height / 2;
+    } else {
+      // calculate the translation
+      dx = upperLeft.x;
+      dy = upperLeft.y;
+      scale = (lowerRight.y - upperLeft.y) / m_height;
+    }
+
+    // set the group transform property
+    group.attr('transform', 'matrix(' + [scale, 0, 0, scale, dx, dy].join() + ')');
+
+    // set internal variables
+    m_scale = scale;
+    m_dx = dx;
+    m_dy = dy;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Convert from screen pixel coordinates to the local coordinate system
+   * in the SVG group element taking into account the transform.
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.baseToLocal = function (pt) {
+    return {
+      x: (pt.x - m_dx) / m_scale,
+      y: (pt.y - m_dy) / m_scale
+    };
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Convert from the local coordinate system in the SVG group element
+   * to screen pixel coordinates.
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.localToBase = function (pt) {
+    return {
+      x: pt.x * m_scale + m_dx,
+      y: pt.y * m_scale + m_dy
+    };
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Initialize
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._init = function (arg) {
+    if (!m_this.canvas()) {
+      var canvas;
+      arg.widget = arg.widget || false;
+
+      if ('d3Parent' in arg) {
+        m_svg = d3.select(arg.d3Parent).append('svg');
+      } else {
+        m_svg = d3.select(m_this.layer().node().get(0)).append('svg');
+      }
+
+      // create a global svg definitions element
+      m_defs = m_svg.append('defs');
+
+      var shadow = m_defs
+        .append('filter')
+          .attr('id', 'geo-highlight')
+          .attr('x', '-100%')
+          .attr('y', '-100%')
+          .attr('width', '300%')
+          .attr('height', '300%');
+      shadow
+        .append('feMorphology')
+          .attr('operator', 'dilate')
+          .attr('radius', 2)
+          .attr('in', 'SourceAlpha')
+          .attr('result', 'dilateOut');
+      shadow
+        .append('feGaussianBlur')
+          .attr('stdDeviation', 5)
+          .attr('in', 'dilateOut')
+          .attr('result', 'blurOut');
+      shadow
+        .append('feColorMatrix')
+          .attr('type', 'matrix')
+          .attr('values', '-1 0 0 0 1  0 -1 0 0 1  0 0 -1 0 1  0 0 0 1 0')
+          .attr('in', 'blurOut')
+          .attr('result', 'invertOut');
+      shadow
+        .append('feBlend')
+          .attr('in', 'SourceGraphic')
+          .attr('in2', 'invertOut')
+          .attr('mode', 'normal');
+
+      if (!arg.widget) {
+        canvas = m_svg.append('g');
+      }
+
+      shadow = m_defs.append('filter')
+          .attr('id', 'geo-blur')
+          .attr('x', '-100%')
+          .attr('y', '-100%')
+          .attr('width', '300%')
+          .attr('height', '300%');
+
+      shadow
+        .append('feGaussianBlur')
+          .attr('stdDeviation', 20)
+          .attr('in', 'SourceGraphic');
+
+      m_sticky = m_this.layer().sticky();
+      m_svg.attr('class', m_this._d3id());
+      m_svg.attr('width', m_this.layer().node().width());
+      m_svg.attr('height', m_this.layer().node().height());
+
+      if (!arg.widget) {
+        canvas.attr('class', 'group-' + m_this._d3id());
+
+        m_this.canvas(canvas);
+      } else {
+        m_this.canvas(m_svg);
+      }
+    }
+    m_this._setTransform();
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get API used by the renderer
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.api = function () {
+    return 'd3';
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return the current scaling factor to build features that shouldn't
+   * change size during zooms.  For example:
+   *
+   *  selection.append('circle')
+   *    .attr('r', r0 / renderer.scaleFactor());
+   *
+   * This will create a circle element with radius r0 independent of the
+   * current zoom level.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.scaleFactor = function () {
+    return m_scale;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Handle resize event
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._resize = function (x, y, w, h) {
+    if (!m_corners) {
+      initCorners();
+    }
+    m_svg.attr('width', w);
+    m_svg.attr('height', h);
+    m_this._setTransform();
+    m_this.layer().geoTrigger(geo.event.d3Rescale, { scale: m_scale }, true);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Update noop for geo.d3.object api.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._update = function () {
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Exit
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._exit = function () {
+    m_features = {};
+    m_this.canvas().remove();
+    s_exit();
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get the definitions dom element for the layer
+   * @protected
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._definitions = function () {
+    return m_defs;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Create a new feature element from an object that describes the feature
+   * attributes.  To be called from feature classes only.
+   *
+   * Input:
+   *  {
+   *    id:         A unique string identifying the feature.
+   *    data:       Array of data objects used in a d3 data method.
+   *    index:      A function that returns a unique id for each data element.
+   *    style:      An object containing element CSS styles.
+   *    attributes: An object containing element attributes.
+   *    classes:    An array of classes to add to the elements.
+   *    append:     The element type as used in d3 append methods.
+   *    parentId:   If set, the group ID of the parent element.
+   *  }
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._drawFeatures = function (arg) {
+    m_features[arg.id] = {
+      data: arg.data,
+      index: arg.dataIndex,
+      style: arg.style,
+      attributes: arg.attributes,
+      classes: arg.classes,
+      append: arg.append,
+      parentId: arg.parentId
+    };
+    return m_this.__render(arg.id, arg.parentId);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+  *  Updates a feature by performing a d3 data join.  If no input id is
+  *  provided then this method will update all features.
+  */
+  ////////////////////////////////////////////////////////////////////////////
+  this.__render = function (id, parentId) {
+    var key;
+    if (id === undefined) {
+      for (key in m_features) {
+        if (m_features.hasOwnProperty(key)) {
+          m_this.__render(key);
+        }
+      }
+      return m_this;
+    }
+    var data = m_features[id].data,
+        index = m_features[id].index,
+        style = m_features[id].style,
+        attributes = m_features[id].attributes,
+        classes = m_features[id].classes,
+        append = m_features[id].append,
+        selection = m_this.select(id, parentId).data(data, index);
+    selection.enter().append(append);
+    selection.exit().remove();
+    setAttrs(selection, attributes);
+    selection.attr('class', classes.concat([id]).join(' '));
+    setStyles(selection, style);
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+  *  Returns a d3 selection for the given feature id.
+  */
+  ////////////////////////////////////////////////////////////////////////////
+  this.select = function (id, parentId) {
+    return getGroup(parentId).selectAll('.' + id);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+  *  Removes a feature from the layer.
+  */
+  ////////////////////////////////////////////////////////////////////////////
+  this._removeFeature = function (id) {
+    m_this.select(id).remove();
+    delete m_features[id];
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+  *  Override draw method to do nothing.
+  */
+  ////////////////////////////////////////////////////////////////////////////
+  this.draw = function () {
+  };
+
+  // connect to pan event
+  this.layer().geoOn(geo.event.pan, m_this._setTransform);
+
+  // connect to zoom event
+  this.layer().geoOn(geo.event.zoom, function () {
+    m_this._setTransform();
+    m_this.__render();
+    m_this.layer().geoTrigger(geo.event.d3Rescale, { scale: m_scale }, true);
+  });
+
+  this.layer().geoOn(geo.event.resize, function (event) {
+    m_this._resize(event.x, event.y, event.width, event.height);
+  });
+
+  this._init(arg);
+  return this;
+};
+
+inherit(geo.d3.d3Renderer, geo.renderer);
+
+geo.registerRenderer('d3', geo.d3.d3Renderer);
+
+geo.d3.tileLayer = function () {
+  'use strict';
+  var m_this = this,
+      s_update = this._update,
+      s_init = this._init;
+
+  this._drawTile = function (tile) {
+    var bounds = m_this._tileBounds(tile),
+        parentNode = m_this._getSubLayer(tile.index.level);
+    tile.feature = m_this.createFeature(
+      'plane', {drawOnAsyncResourceLoad: true})
+      .origin([bounds.left, bounds.top])
+      .upperLeft([bounds.left, bounds.top])
+      .lowerRight([bounds.right, bounds.bottom])
+      .style({
+        image: tile._url,
+        opacity: 1,
+        reference: tile.toString(),
+        parentId: parentNode.attr('data-tile-layer-id')
+      });
+    tile.feature._update();
+    m_this.draw();
+  };
+
+  /**
+   * Return the DOM eleement containing a level specific
+   * layer.  This will create the element if it doesn't
+   * already exist.
+   * @param {number} level The zoom level of the layer to fetch
+   * @return {DOM}
+   */
+  this._getSubLayer = function (level) {
+    var node = m_this.canvas().select(
+        'g[data-tile-layer="' + level.toFixed() + '"]');
+    if (node.empty()) {
+      node = m_this.canvas().append('g');
+      var id = geo.d3.uniqueID();
+      node.classed('group-' + id, true);
+      node.classed('geo-tile-layer', true);
+      node.attr('data-tile-layer', level.toFixed());
+      node.attr('data-tile-layer-id', id);
+    }
+    return node;
+  };
+
+  /**
+   * Set sublayer transforms to align them with the given zoom level.
+   * @param {number} level The target zoom level
+   */
+  this._updateSubLayers = function (level) {
+    $.each(m_this.canvas().selectAll('.geo-tile-layer')[0], function (idx, el) {
+      var layer = parseInt($(el).attr('data-tile-layer'));
+      el = m_this._getSubLayer(layer);
+      var scale = Math.pow(2, level - layer);
+      el.attr('transform', 'matrix(' + [scale, 0, 0, scale, 0, 0].join() + ')');
+    });
+  };
+
+  /* Initialize the tile layer.  This creates a series of sublayers so that
+   * the different layers will stack in the proper order.
+   */
+  this._init = function () {
+    var sublayer;
+
+    s_init.apply(m_this, arguments);
+    for (sublayer = 0; sublayer <= m_this._options.maxLevel; sublayer += 1) {
+      m_this._getSubLayer(sublayer);
+    }
+  };
+
+  /* When update is called, apply the transform to our renderer. */
+  this._update = function () {
+    s_update.apply(m_this, arguments);
+    m_this.renderer()._setTransform();
+  };
+
+  /* Remove both the tile feature and an internal image element. */
+  this._remove = function (tile) {
+    if (tile.feature) {
+      m_this.deleteFeature(tile.feature);
+      tile.feature = null;
+    }
+    if (tile.image) {
+      $(tile.image).remove();
+    }
+  };
+};
+
+geo.registerLayerAdjustment('d3', 'tile', geo.d3.tileLayer);
+
+//////////////////////////////////////////////////////////////////////////////
+/**
  * Create a new instance of pointFeature
  *
  * @class
@@ -25036,10 +27667,10 @@ geo.d3.pointFeature = function (arg) {
     m_style.attributes = {
       r: m_renderer._convertScale(s_style.radius),
       cx: function (d) {
-        return m_renderer.worldToDisplay(pos_func(d)).x;
+        return m_this.featureGcsToDisplay(pos_func(d)).x;
       },
       cy: function (d) {
-        return m_renderer.worldToDisplay(pos_func(d)).y;
+        return m_this.featureGcsToDisplay(pos_func(d)).y;
       }
     };
     m_style.style = s_style;
@@ -25132,8 +27763,8 @@ geo.d3.lineFeature = function (arg) {
         m_renderer = m_this.renderer(),
         pos_func = m_this.position(),
         line = d3.svg.line()
-                .x(function (d) { return m_renderer.worldToDisplay(d).x; })
-                .y(function (d) { return m_renderer.worldToDisplay(d).y; });
+                .x(function (d) { return m_this.featureGcsToDisplay(d).x; })
+                .y(function (d) { return m_this.featureGcsToDisplay(d).y; });
 
     s_update.call(m_this);
     s_style.fill = function () { return false; };
@@ -25256,7 +27887,6 @@ geo.d3.pathFeature = function (arg) {
   this._build = function () {
     var data = m_this.data() || [],
         s_style = m_this.style(),
-        m_renderer = m_this.renderer(),
         tmp, diag;
     s_update.call(m_this);
 
@@ -25274,8 +27904,8 @@ geo.d3.pathFeature = function (arg) {
         src = d;
         trg = data[i + 1];
         tmp.push({
-          source: m_renderer.worldToDisplay(src),
-          target: m_renderer.worldToDisplay(trg)
+          source: m_this.featureGcsToDisplay(src),
+          target: m_this.featureGcsToDisplay(trg)
         });
       }
     });
@@ -25367,8 +27997,6 @@ geo.registerFeature('d3', 'graph', geo.d3.graphFeature);
  * Create a plane feature given a lower left corner point
  * and and upper right corner point
  *
- * *CURRENTLY BROKEN*
- *
  * @class
  * @extends geo.planeFeature
  * @param lowerleft
@@ -25417,8 +28045,7 @@ geo.d3.planeFeature = function (arg) {
    */
   //////////////////////////////////////////////////////////////////////////////
   this._build = function () {
-    var origin = normalize(m_this.origin()),
-        ul = normalize(m_this.upperLeft()),
+    var ul = normalize(m_this.upperLeft()),
         lr = normalize(m_this.lowerRight()),
         renderer = m_this.renderer(),
         s = m_this.style();
@@ -25426,22 +28053,33 @@ geo.d3.planeFeature = function (arg) {
     delete s.fill_color;
     delete s.color;
     delete s.opacity;
+    /*
     if (!s.screenCoordinates) {
-      origin = renderer.worldToDisplay(origin);
-      ul = renderer.worldToDisplay(ul);
-      lr = renderer.worldToDisplay(lr);
+      origin = renderer.layer().map().worldToDisplay(origin);
+      ul = renderer.layer().map().worldToDisplay(ul);
+      lr = renderer.layer().map().worldToDisplay(lr);
     }
+    */
     m_style.id = m_this._d3id();
     m_style.style = s;
     m_style.attributes = {
       x: ul.x,
       y: ul.y,
-      width: lr.x - origin.x,
-      height: origin.y - ul.y
+      width: Math.abs(lr.x - ul.x),
+      height: Math.abs(lr.y - ul.y),
+      reference: s.reference
     };
-    m_style.append = 'rect';
+    if (s.image) {
+      m_style.append = 'image';
+      m_style.attributes['xlink:href'] = s.image;
+    } else {
+      m_style.append = 'rect';
+    }
     m_style.data = [0];
     m_style.classes = ['d3PlaneFeature'];
+    if (s.parentId) {
+      m_style.parentId = s.parentId;
+    }
 
     renderer._drawFeatures(m_style);
     m_buildTime.modified();
@@ -25607,7 +28245,7 @@ geo.d3.vectorFeature = function (arg) {
 
     // cache the georeferencing
     cache = data.map(function (d, i) {
-      var origin = m_renderer.worldToDisplay(orig_func(d, i)),
+      var origin = m_this.featureGcsToDisplay(orig_func(d, i)),
           delta = size_func(d, i);
       max = Math.max(max, delta.x * delta.x + delta.y * delta.y);
       return {
@@ -25713,553 +28351,6 @@ geo.registerFeature('d3', 'vector', geo.d3.vectorFeature);
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Create a new instance of class d3Renderer
- *
- * @class
- * @extends geo.renderer
- * @returns {geo.d3.d3Renderer}
- */
-//////////////////////////////////////////////////////////////////////////////
-geo.d3.d3Renderer = function (arg) {
-  'use strict';
-
-  if (!(this instanceof geo.d3.d3Renderer)) {
-    return new geo.d3.d3Renderer(arg);
-  }
-  geo.renderer.call(this, arg);
-
-  var s_exit = this._exit;
-
-  geo.d3.object.call(this, arg);
-
-  arg = arg || {};
-
-  var m_this = this,
-      m_sticky = null,
-      m_features = {},
-      m_corners = null,
-      m_width = null,
-      m_height = null,
-      m_scale = 1,
-      m_dx = 0,
-      m_dy = 0,
-      m_svg = null,
-      m_defs = null;
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Set attributes to a d3 selection.
-   * @private
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  function setAttrs(select, attrs) {
-    var key;
-    for (key in attrs) {
-      if (attrs.hasOwnProperty(key)) {
-        select.attr(key, attrs[key]);
-      }
-    }
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Meta functions for converting from geojs styles to d3.
-   * @private
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._convertColor = function (f, g) {
-    f = geo.util.ensureFunction(f);
-    g = g || function () { return true; };
-    return function () {
-      var c = 'none';
-      if (g.apply(this, arguments)) {
-        c = f.apply(this, arguments);
-        if (c.hasOwnProperty('r') &&
-            c.hasOwnProperty('g') &&
-            c.hasOwnProperty('b')) {
-          c = d3.rgb(255 * c.r, 255 * c.g, 255 * c.b);
-        }
-      }
-      return c;
-    };
-  };
-
-  this._convertPosition = function (f) {
-    f = geo.util.ensureFunction(f);
-    return function () {
-      return m_this.worldToDisplay(f.apply(this, arguments));
-    };
-  };
-
-  this._convertScale = function (f) {
-    f = geo.util.ensureFunction(f);
-    return function () {
-      return f.apply(this, arguments) / m_scale;
-    };
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Set styles to a d3 selection. Ignores unkown style keys.
-   * @private
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  function setStyles(select, styles) {
-    /* jshint validthis:true */
-    var key, k, f;
-    function fillFunc() {
-      if (styles.fill.apply(this, arguments)) {
-        return null;
-      } else {
-        return 'none';
-      }
-    }
-    function strokeFunc() {
-      if (styles.stroke.apply(this, arguments)) {
-        return null;
-      } else {
-        return 'none';
-      }
-    }
-    for (key in styles) {
-      if (styles.hasOwnProperty(key)) {
-        f = null;
-        k = null;
-        if (key === 'strokeColor') {
-          k = 'stroke';
-          f = m_this._convertColor(styles[key], styles.stroke);
-        } else if (key === 'stroke' && styles[key]) {
-          k = 'stroke';
-          f = strokeFunc;
-        } else if (key === 'strokeWidth') {
-          k = 'stroke-width';
-          f = m_this._convertScale(styles[key]);
-        } else if (key === 'strokeOpacity') {
-          k = 'stroke-opacity';
-          f = styles[key];
-        } else if (key === 'fillColor') {
-          k = 'fill';
-          f = m_this._convertColor(styles[key], styles.fill);
-        } else if (key === 'fill' && !styles.hasOwnProperty('fillColor')) {
-          k = 'fill';
-          f = fillFunc;
-        } else if (key === 'fillOpacity') {
-          k = 'fill-opacity';
-          f = styles[key];
-        }
-        if (k) {
-          select.style(k, f);
-        }
-      }
-    }
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get the map instance or return null if not connected to a map.
-   * @private
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  function getMap() {
-    var layer = m_this.layer();
-    if (!layer) {
-      return null;
-    }
-    return layer.map();
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get the svg group element associated with this renderer instance.
-   * @private
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  function getGroup() {
-    return m_svg.select('.group-' + m_this._d3id());
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Set the initial lat-lon coordinates of the map view.
-   * @private
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  function initCorners() {
-    var layer = m_this.layer(),
-        map = layer.map(),
-        width = m_this.layer().width(),
-        height = m_this.layer().height();
-
-    m_width = width;
-    m_height = height;
-    if (!m_width || !m_height) {
-      throw 'Map layer has size 0';
-    }
-    m_corners = {
-      'upperLeft': map.displayToGcs({'x': 0, 'y': 0}),
-      'lowerRight': map.displayToGcs({'x': width, 'y': height})
-    };
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Set the translation, scale, and zoom for the current view.
-   * @note rotation not yet supported
-   * @private
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  function setTransform() {
-
-    if (!m_corners) {
-      initCorners();
-    }
-
-    if (!m_sticky) {
-      return;
-    }
-
-    var layer = m_this.layer(),
-        map = layer.map(),
-        upperLeft = map.gcsToDisplay(m_corners.upperLeft),
-        lowerRight = map.gcsToDisplay(m_corners.lowerRight),
-        group = getGroup(),
-        dx, dy, scale;
-
-    // calculate the translation
-    dx = upperLeft.x;
-    dy = upperLeft.y;
-
-    // calculate the scale
-    scale = (lowerRight.y - upperLeft.y) / m_height;
-
-    // set the group transform property
-    group.attr('transform', 'matrix(' + [scale, 0, 0, scale, dx, dy].join() + ')');
-
-    // set internal variables
-    m_scale = scale;
-    m_dx = dx;
-    m_dy = dy;
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Convert from screen pixel coordinates to the local coordinate system
-   * in the SVG group element taking into account the transform.
-   * @private
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  function baseToLocal(pt) {
-    return {
-      x: (pt.x - m_dx) / m_scale,
-      y: (pt.y - m_dy) / m_scale
-    };
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Convert from the local coordinate system in the SVG group element
-   * to screen pixel coordinates.
-   * @private
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  function localToBase(pt) {
-    return {
-      x: pt.x * m_scale + m_dx,
-      y: pt.y * m_scale + m_dy
-    };
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Initialize
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._init = function () {
-    if (!m_this.canvas()) {
-      var canvas;
-      m_svg = d3.select(m_this.layer().node().get(0)).append('svg');
-
-      // create a global svg definitions element
-      m_defs = m_svg.append('defs');
-
-      var shadow = m_defs
-        .append('filter')
-          .attr('id', 'geo-highlight')
-          .attr('x', '-100%')
-          .attr('y', '-100%')
-          .attr('width', '300%')
-          .attr('height', '300%');
-      shadow
-        .append('feMorphology')
-          .attr('operator', 'dilate')
-          .attr('radius', 2)
-          .attr('in', 'SourceAlpha')
-          .attr('result', 'dilateOut');
-      shadow
-        .append('feGaussianBlur')
-          .attr('stdDeviation', 5)
-          .attr('in', 'dilateOut')
-          .attr('result', 'blurOut');
-      shadow
-        .append('feColorMatrix')
-          .attr('type', 'matrix')
-          .attr('values', '-1 0 0 0 1  0 -1 0 0 1  0 0 -1 0 1  0 0 0 1 0')
-          .attr('in', 'blurOut')
-          .attr('result', 'invertOut');
-      shadow
-        .append('feBlend')
-          .attr('in', 'SourceGraphic')
-          .attr('in2', 'invertOut')
-          .attr('mode', 'normal');
-      canvas = m_svg.append('g');
-
-      shadow = m_defs.append('filter')
-          .attr('id', 'geo-blur')
-          .attr('x', '-100%')
-          .attr('y', '-100%')
-          .attr('width', '300%')
-          .attr('height', '300%');
-
-      shadow
-        .append('feGaussianBlur')
-          .attr('stdDeviation', 20)
-          .attr('in', 'SourceGraphic');
-
-      m_sticky = m_this.layer().sticky();
-      m_svg.attr('class', m_this._d3id());
-      m_svg.attr('width', m_this.layer().node().width());
-      m_svg.attr('height', m_this.layer().node().height());
-
-      canvas.attr('class', 'group-' + m_this._d3id());
-
-      m_this.canvas(canvas);
-    }
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Convert from coordinates in the svg group element to lat/lon.
-   * Supports objects or arrays of objects.
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.displayToWorld = function (pt) {
-    var map = getMap();
-    if (!map) {
-      throw 'Cannot project until this layer is connected to a map.';
-    }
-    if (Array.isArray(pt)) {
-      pt = pt.map(function (x) {
-        return map.displayToGcs(localToBase(x));
-      });
-    } else {
-      pt = map.displayToGcs(localToBase(pt));
-    }
-    return pt;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Convert from lat/lon to pixel coordinates in the svg group element.
-   * Supports objects or arrays of objects.
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.worldToDisplay = function (pt) {
-    var map = getMap();
-    if (!map) {
-      throw 'Cannot project until this layer is connected to a map.';
-    }
-    var v;
-    if (Array.isArray(pt)) {
-      v = pt.map(function (x) {
-        return baseToLocal(map.gcsToDisplay(x));
-      });
-    } else {
-      v = baseToLocal(map.gcsToDisplay(pt));
-    }
-    return v;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get API used by the renderer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.api = function () {
-    return 'd3';
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Return the current scaling factor to build features that shouldn't
-   * change size during zooms.  For example:
-   *
-   *  selection.append('circle')
-   *    .attr('r', r0 / renderer.scaleFactor());
-   *
-   * This will create a circle element with radius r0 independent of the
-   * current zoom level.
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.scaleFactor = function () {
-    return m_scale;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Handle resize event
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._resize = function (x, y, w, h) {
-    if (!m_corners) {
-      initCorners();
-    }
-    m_svg.attr('width', w);
-    m_svg.attr('height', h);
-    setTransform();
-    m_this.layer().geoTrigger(geo.event.d3Rescale, { scale: m_scale }, true);
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Update noop for geo.d3.object api.
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._update = function () {
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Exit
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._exit = function () {
-    m_features = {};
-    m_this.canvas().remove();
-    s_exit();
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get the definitions dom element for the layer
-   * @protected
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._definitions = function () {
-    return m_defs;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Create a new feature element from an object that describes the feature
-   * attributes.  To be called from feature classes only.
-   *
-   * Input:
-   *  {
-   *    id:         A unique string identifying the feature.
-   *    data:       Array of data objects used in a d3 data method.
-   *    index:      A function that returns a unique id for each data element.
-   *    style:      An object containing element CSS styles.
-   *    attributes: An object containing element attributes.
-   *    classes:    An array of classes to add to the elements.
-   *    append:     The element type as used in d3 append methods.
-   *  }
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._drawFeatures = function (arg) {
-    m_features[arg.id] = {
-      data: arg.data,
-      index: arg.dataIndex,
-      style: arg.style,
-      attributes: arg.attributes,
-      classes: arg.classes,
-      append: arg.append
-    };
-    return m_this.__render(arg.id);
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-  *  Updates a feature by performing a d3 data join.  If no input id is
-  *  provided then this method will update all features.
-  */
-  ////////////////////////////////////////////////////////////////////////////
-  this.__render = function (id) {
-    var key;
-    if (id === undefined) {
-      for (key in m_features) {
-        if (m_features.hasOwnProperty(key)) {
-          m_this.__render(key);
-        }
-      }
-      return m_this;
-    }
-    var data = m_features[id].data,
-        index = m_features[id].index,
-        style = m_features[id].style,
-        attributes = m_features[id].attributes,
-        classes = m_features[id].classes,
-        append = m_features[id].append,
-        selection = m_this.select(id).data(data, index);
-    selection.enter().append(append);
-    selection.exit().remove();
-    setAttrs(selection, attributes);
-    selection.attr('class', classes.concat([id]).join(' '));
-    setStyles(selection, style);
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-  *  Returns a d3 selection for the given feature id.
-  */
-  ////////////////////////////////////////////////////////////////////////////
-  this.select = function (id) {
-    return getGroup().selectAll('.' + id);
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-  *  Removes a feature from the layer.
-  */
-  ////////////////////////////////////////////////////////////////////////////
-  this._removeFeature = function (id) {
-    m_this.select(id).remove();
-    delete m_features[id];
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-  *  Override draw method to do nothing.
-  */
-  ////////////////////////////////////////////////////////////////////////////
-  this.draw = function () {
-  };
-
-  // connect to pan event
-  this.layer().geoOn(geo.event.pan, setTransform);
-
-  // connect to zoom event
-  this.layer().geoOn(geo.event.zoom, function () {
-    setTransform();
-    m_this.__render();
-    m_this.layer().geoTrigger(geo.event.d3Rescale, { scale: m_scale }, true);
-  });
-
-  this.layer().geoOn(geo.event.resize, function (event) {
-    m_this._resize(event.x, event.y, event.width, event.height);
-  });
-
-  this._init(arg);
-  return this;
-};
-
-inherit(geo.d3.d3Renderer, geo.renderer);
-
-geo.registerRenderer('d3', geo.d3.d3Renderer);
-
-//////////////////////////////////////////////////////////////////////////////
-/**
  * @namespace
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -26277,8 +28368,8 @@ geo.gui = {};
 geo.gui.uiLayer = function (arg) {
   'use strict';
 
-  // The widget stays fixed on the screen.  (only available in d3 at the moment)
-  arg.renderer = 'd3';
+  // The widget stays fixed on the screen.
+  arg.renderer = 'dom';
   arg.sticky = false;
 
   if (!(this instanceof geo.gui.uiLayer)) {
@@ -26297,12 +28388,14 @@ geo.gui.uiLayer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.createWidget = function (widgetName, arg) {
+    var newWidget = geo.createWidget(widgetName, m_this, arg);
 
-    var newWidget = geo.createWidget(
-      widgetName, m_this, m_this.renderer(), arg);
+    // We only want top level widgets to be a child of the uiLayer
+    if (!(arg && 'parent' in arg)) {
+      m_this.addChild(newWidget);
+    }
 
-    m_this.addChild(newWidget);
-    newWidget._init();
+    newWidget._init(arg);
     m_this.modified();
     return newWidget;
   };
@@ -26354,7 +28447,14 @@ geo.gui.widget = function (arg) {
 
   var m_this = this,
       s_exit = this._exit,
-      m_layer = arg.layer;
+      m_layer = arg.layer,
+      m_canvas = null;
+
+  arg.position = arg.position === undefined ? { left: 0, top: 0 } : arg.position;
+
+  if (arg.parent !== undefined && !(arg.parent instanceof geo.gui.widget)) {
+    throw 'Parent must be of type geo.gui.widget';
+  }
 
   this._init = function () {
     m_this.modified();
@@ -26364,6 +28464,9 @@ geo.gui.widget = function (arg) {
     m_this.children().forEach(function (child) {
       m_this._deleteFeature(child);
     });
+
+    m_this.layer().geoOff(geo.event.pan, m_this.repositionEvent);
+    m_this.parentCanvas().removeChild(m_this.canvas());
     s_exit();
   };
 
@@ -26403,15 +28506,255 @@ geo.gui.widget = function (arg) {
   this.layer = function () {
     return m_layer;
   };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Create the canvas this widget will operate on.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._createCanvas = function () {
+    throw 'Must be defined in derived classes';
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set the canvas for the widget
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.canvas = function (val) {
+    if (val === undefined) {
+      return m_canvas;
+    } else {
+      m_canvas = val;
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Appends a child to the widget
+   * The widget determines how to append itself to a parent, the parent can either
+   * be another widget, or the UI Layer.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._appendChild = function () {
+    m_this.parentCanvas().appendChild(m_this.canvas());
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get the parent canvas (top level widgets define their layer as their parent canvas)
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.parentCanvas = function () {
+    if (m_this.parent === undefined) {
+      return m_this.layer().canvas();
+    } else {
+      return m_this.parent().canvas();
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Gets the CSS positioning that a widget should be placed at.
+   * { top: 0, left: 0 } by default.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.position = function () {
+    var position;
+
+    if (arg &&
+        arg.hasOwnProperty('position') &&
+        arg.position.hasOwnProperty('x') &&
+        arg.position.hasOwnProperty('y')) {
+
+      position = m_this.layer().map().gcsToDisplay(arg.position);
+
+      return {
+        left: position.x,
+        top: position.y
+      };
+    }
+
+    return arg.position;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Repositions a widget based on the argument passed, or calling position on
+   * the widget itself.
+   * @param {object} position A position with the form:
+   * { top: m, left: n }
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.reposition = function (position) {
+    position = position || m_this.position();
+    m_this.canvas().style.position = 'absolute';
+
+    for (var cssAttr in position) {
+      if (position.hasOwnProperty(cssAttr)) {
+        m_this.canvas().style[cssAttr] = position[cssAttr] + 'px';
+      }
+    }
+  };
+
+  this.repositionEvent = function () {
+    return m_this.reposition();
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Determines whether or not the widget is completely within the viewport.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.isInViewport = function () {
+    var position = m_this.position();
+    var layer = m_this.layer();
+
+    return ((position.left >= 0 && position.top >= 0) &&
+            (position.left <= layer.width() && position.top <= layer.height()));
+  };
+
+  if (arg &&
+      arg.hasOwnProperty('position') &&
+      arg.position.hasOwnProperty('x') &&
+      arg.position.hasOwnProperty('y')) {
+    this.layer().geoOn(geo.event.pan, m_this.repositionEvent);
+  }
 };
 inherit(geo.gui.widget, geo.sceneObject);
+
+geo.gui.domWidget = function (arg) {
+  'use strict';
+  if (!(this instanceof geo.gui.domWidget)) {
+    return new geo.gui.domWidget(arg);
+  }
+
+  geo.gui.widget.call(this, arg);
+
+  var m_this = this,
+      m_default_canvas = 'div';
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Initializes DOM Widget.
+   * Sets the canvas for the widget, does parent/child relationship management,
+   * appends it to it's parent and handles any positioning logic.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._init = function () {
+    if (arg.hasOwnProperty('parent')) {
+      arg.parent.addChild(m_this);
+    }
+
+    m_this._createCanvas();
+    m_this._appendChild();
+
+    m_this.canvas().addEventListener('mousedown', function (e) {
+      e.stopPropagation();
+    });
+
+    m_this.reposition();
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Creates the widget canvas.
+   * This is just a simple DOM element (based on args.el, or defaults to a div)
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._createCanvas = function () {
+    m_this.canvas(document.createElement(arg.el || m_default_canvas));
+  };
+
+  return this;
+};
+
+inherit(geo.gui.domWidget, geo.gui.widget);
+
+geo.registerWidget('dom', 'dom', geo.gui.domWidget);
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Create a new instance of class geo.gui.svgWidget
+ *
+ * Due to the nature of d3 creating DOM elements as it inserts them, calls to appendChild
+ * don't appear in this widget.
+ *
+ * The canvas of an svgWidget always refers to the actual svg element.
+ * The parentCanvas can refer to another widgets svg element, dom element, or the
+ * UI layers dom element.
+ * See {@link geo.gui.widget#parentCanvas}.
+ *
+ * @class
+ * @extends geo.gui.domWidget
+ * @returns {geo.gui.svgWidget}
+ *
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.gui.svgWidget = function (arg) {
+  'use strict';
+  if (!(this instanceof geo.gui.svgWidget)) {
+    return new geo.gui.svgWidget(arg);
+  }
+
+  geo.gui.domWidget.call(this, arg);
+
+  var m_this = this,
+      m_renderer = null;
+
+  this._init = function (arg) {
+    var d3Parent;
+    if (arg.hasOwnProperty('parent')) {
+      arg.parent.addChild(m_this);
+
+      // Tell the renderer there is an SVG element as a parent
+      d3Parent = arg.parent.canvas();
+    }
+
+    m_this._createCanvas(d3Parent);
+
+    m_this.canvas().addEventListener('mousedown', function (e) {
+      e.stopPropagation();
+    });
+
+    m_this.reposition();
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Creates the canvas for the svg widget.
+   * This directly uses the {@link geo.d3.d3Renderer} as a helper to do all of the heavy
+   * lifting.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._createCanvas = function (d3Parent) {
+    var rendererOpts = {
+      layer: m_this.layer(),
+      widget: true
+    };
+
+    if (d3Parent) {
+      rendererOpts.d3Parent = d3Parent;
+    }
+
+    m_renderer = geo.d3.d3Renderer(rendererOpts);
+
+    m_this.canvas(m_renderer.canvas()[0][0]);
+  };
+
+  return this;
+};
+
+inherit(geo.gui.svgWidget, geo.gui.domWidget);
+
+geo.registerWidget('dom', 'svg', geo.gui.svgWidget);
 
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class sliderWidget
  *
  * @class
- * @extends {geo.gui.widget}
+ * @extends {geo.gui.svgWidget}
  * @returns {geo.gui.sliderWidget}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -26420,10 +28763,12 @@ geo.gui.sliderWidget = function (arg) {
   if (!(this instanceof geo.gui.sliderWidget)) {
     return new geo.gui.sliderWidget(arg);
   }
-  geo.gui.widget.call(this, arg);
+  geo.gui.svgWidget.call(this, arg);
 
   var m_this = this,
       s_exit = this._exit,
+      s_createCanvas = this._createCanvas,
+      s_appendChild = this._appendChild,
       m_xscale,
       m_yscale,
       m_plus,
@@ -26452,20 +28797,20 @@ geo.gui.sliderWidget = function (arg) {
     black: '#505050'
   };
 
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Add an icon from a path string.  Returns a d3 group element.
- *
- * @function
- * @argument {String} icon svg path string
- * @argument {Array} base where to append the element (d3 selection)
- * @argument {Number} cx Center x-coordinate
- * @argument {Number} cy Center y-coordinate
- * @argument {Number} size Icon size in pixels
- * @returns {object}
- * @private
- */
-//////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * Add an icon from a path string.  Returns a d3 group element.
+   *
+   * @function
+   * @argument {String} icon svg path string
+   * @argument {Array} base where to append the element (d3 selection)
+   * @argument {Number} cx Center x-coordinate
+   * @argument {Number} cy Center y-coordinate
+   * @argument {Number} size Icon size in pixels
+   * @returns {object}
+   * @private
+   */
+  //////////////////////////////////////////////////////////////////////////////
   function put_icon(icon, base, cx, cy, size) {
     var g = base.append('g');
 
@@ -26485,17 +28830,22 @@ geo.gui.sliderWidget = function (arg) {
     return g;
   }
 
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Initialize the slider widget in the map.
- *
- * @function
- * @returns {geo.gui.sliderWidget}
- * @private
- */
-//////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * Initialize the slider widget in the map.
+   *
+   * @function
+   * @returns {geo.gui.sliderWidget}
+   * @private
+   */
+  //////////////////////////////////////////////////////////////////////////////
   this._init = function () {
-    var svg = m_this.layer().renderer().canvas(),
+    s_createCanvas();
+    s_appendChild();
+
+    m_this.reposition();
+
+    var svg = d3.select(m_this.canvas()),
         x0 = 40,
         y0 = 40 + m_width,
         map = m_this.layer().map();
@@ -26693,31 +29043,31 @@ geo.gui.sliderWidget = function (arg) {
     m_this._update();
   };
 
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Removes the slider element from the map and unbinds all handlers.
- *
- * @function
- * @returns {geo.gui.sliderWidget}
- * @private
- */
-//////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * Removes the slider element from the map and unbinds all handlers.
+   *
+   * @function
+   * @returns {geo.gui.sliderWidget}
+   * @private
+   */
+  //////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
     m_group.remove();
     m_this.layer().geoOff(geo.event.zoom);
     s_exit();
   };
 
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Update the slider widget state in reponse to map changes.  I.e. zoom
- * range changes.
- *
- * @function
- * @returns {geo.gui.sliderWidget}
- * @private
- */
-//////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * Update the slider widget state in reponse to map changes.  I.e. zoom
+   * range changes.
+   *
+   * @function
+   * @returns {geo.gui.sliderWidget}
+   * @private
+   */
+  //////////////////////////////////////////////////////////////////////////////
   this._update = function (obj) {
     var map = m_this.layer().map(),
         zoomRange = map.zoomRange(),
@@ -26734,16 +29084,16 @@ geo.gui.sliderWidget = function (arg) {
   };
 };
 
-inherit(geo.gui.sliderWidget, geo.gui.widget);
+inherit(geo.gui.sliderWidget, geo.gui.svgWidget);
 
-geo.registerWidget('d3', 'slider', geo.gui.sliderWidget);
+geo.registerWidget('dom', 'slider', geo.gui.sliderWidget);
 
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class legendWidget
  *
  * @class
- * @extends geo.gui.widget
+ * @extends geo.gui.svgWidget
  * @returns {geo.gui.legendWidget}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -26752,7 +29102,7 @@ geo.gui.legendWidget = function (arg) {
   if (!(this instanceof geo.gui.legendWidget)) {
     return new geo.gui.legendWidget(arg);
   }
-  geo.gui.widget.call(this, arg);
+  geo.gui.svgWidget.call(this, arg);
 
   /** @private */
   var m_this = this,
@@ -26761,7 +29111,9 @@ geo.gui.legendWidget = function (arg) {
       m_group = null,
       m_border = null,
       m_spacing = 20, // distance in pixels between lines
-      m_padding = 12; // padding in pixels inside the border
+      m_padding = 12, // padding in pixels inside the border
+      s_createCanvas = this._createCanvas,
+      s_appendChild = this._appendChild;
 
   //////////////////////////////////////////////////////////////////////////////
   /**
@@ -26813,8 +29165,8 @@ geo.gui.legendWidget = function (arg) {
   //////////////////////////////////////////////////////////////////////////////
   this.size = function () {
     var width = 1, height;
-    var test =  m_this.layer().renderer().canvas().append('text')
-      .style('opacity', 1e-6);
+    var test =  d3.select(m_this.canvas()).append('text')
+          .style('opacity', 1e-6);
 
     m_categories.forEach(function (d) {
       test.text(d.name);
@@ -26839,12 +29191,12 @@ geo.gui.legendWidget = function (arg) {
     m_this._init();
     function applyColor(selection) {
       selection.style('fill', function (d) {
-          if (d.style.fill || d.style.fill === undefined) {
-            return d.style.fillColor;
-          } else {
-            return 'none';
-          }
-        })
+        if (d.style.fill || d.style.fill === undefined) {
+          return d.style.fillColor;
+        } else {
+          return 'none';
+        }
+      })
         .style('fill-opacity', function (d) {
           if (d.style.fillOpacity === undefined) {
             return 1;
@@ -26878,41 +29230,41 @@ geo.gui.legendWidget = function (arg) {
     var scale = m_this._scale();
 
     var labels = m_group.selectAll('g.geo-label')
-      .data(m_categories, function (d) { return d.name; });
+          .data(m_categories, function (d) { return d.name; });
 
     var g = labels.enter().append('g')
-      .attr('class', 'geo-label')
-      .attr('transform', function (d, i) {
-        return 'translate(0,' + scale.y(i) + ')';
-      });
+          .attr('class', 'geo-label')
+          .attr('transform', function (d, i) {
+            return 'translate(0,' + scale.y(i) + ')';
+          });
 
     applyColor(g.filter(function (d) {
-        return d.type !== 'point' && d.type !== 'line';
-      }).append('rect')
-        .attr('x', 0)
-        .attr('y', -6)
-        .attr('rx', 5)
-        .attr('ry', 5)
-        .attr('width', 40)
-        .attr('height', 12)
-    );
+      return d.type !== 'point' && d.type !== 'line';
+    }).append('rect')
+               .attr('x', 0)
+               .attr('y', -6)
+               .attr('rx', 5)
+               .attr('ry', 5)
+               .attr('width', 40)
+               .attr('height', 12)
+              );
 
     applyColor(g.filter(function (d) {
-        return d.type === 'point';
-      }).append('circle')
-        .attr('cx', 20)
-        .attr('cy', 0)
-        .attr('r', 6)
-    );
+      return d.type === 'point';
+    }).append('circle')
+               .attr('cx', 20)
+               .attr('cy', 0)
+               .attr('r', 6)
+              );
 
     applyColor(g.filter(function (d) {
-        return d.type === 'line';
-      }).append('line')
-        .attr('x1', 0)
-        .attr('y1', 0)
-        .attr('x2', 40)
-        .attr('y2', 0)
-    );
+      return d.type === 'line';
+    }).append('line')
+               .attr('x1', 0)
+               .attr('y1', 0)
+               .attr('x2', 40)
+               .attr('y2', 0)
+              );
 
     g.append('text')
       .attr('x', '50px')
@@ -26921,6 +29273,8 @@ geo.gui.legendWidget = function (arg) {
       .text(function (d) {
         return d.name;
       });
+
+    m_this.reposition();
 
     return m_this;
   };
@@ -26950,23 +29304,33 @@ geo.gui.legendWidget = function (arg) {
    */
   //////////////////////////////////////////////////////////////////////////////
   this._init = function () {
-    var w = m_this.size().width + 2 * m_padding,
-        h = m_this.size().height + 2 * m_padding,
-        nw = m_this.layer().map().node().width(),
-        margin = 20;
+    // adding categories redraws the entire thing by calling _init, see
+    // the m_top.remove() line below
+    if (!m_top) {
+      s_createCanvas();
+      s_appendChild();
+    }
+
+    // total size = interior size + 2 * padding + 2 * width of the border
+    var w = m_this.size().width + 2 * m_padding + 4,
+        h = m_this.size().height + 2 * m_padding + 4;
+
+    // @todo - removing after creating to maintain the appendChild structure
     if (m_top) {
       m_top.remove();
     }
-    m_top = m_this.layer().renderer().canvas().append('g')
-        .attr('transform', 'translate(' + (nw - w - margin) + ',' + margin + ')');
+
+    d3.select(m_this.canvas()).attr('width', w).attr('height', h);
+
+    m_top = d3.select(m_this.canvas()).append('g');
     m_group = m_top
       .append('g')
-        .attr('transform', 'translate(' + [m_padding - 1.5, m_padding] + ')');
+      .attr('transform', 'translate(' + [m_padding + 2, m_padding + 2] + ')');
     m_border = m_group.append('rect')
       .attr('x', -m_padding)
       .attr('y', -m_padding)
-      .attr('width', w)
-      .attr('height', h)
+      .attr('width', w - 4)
+      .attr('height', h - 4)
       .attr('rx', 3)
       .attr('ry', 3)
       .style({
@@ -26989,17 +29353,19 @@ geo.gui.legendWidget = function (arg) {
         .duration(250)
         .style('fill-opacity', 0.75);
     });
+
+    m_this.reposition();
   };
 
   this.geoOn(geo.event.resize, function () {
-    this.draw();
+    m_this.draw();
   });
 
 };
 
-inherit(geo.gui.legendWidget, geo.gui.widget);
+inherit(geo.gui.legendWidget, geo.gui.svgWidget);
 
-geo.registerWidget('d3', 'legend', geo.gui.legendWidget);
+geo.registerWidget('dom', 'legend', geo.gui.legendWidget);
 
 /*jscs:disable validateIndentation*/
 (function ($, geo, d3) {
@@ -27259,7 +29625,7 @@ geo.registerWidget('d3', 'legend', geo.gui.legendWidget);
      *   Describes layers added to the map
      * @property {boolean} [autoresize=true]
      *   Resize the map on <code>window.resize</code> (initialization only)
-     * @property {string} [tileUrl]
+     * @property {string} [url]
      *   The open street map tile server spec default:
      *   <code>http://tile.openstreetmap.org/&lt;zoom>/&lt;x>/&lt;y>.png</code>
      */
@@ -27270,7 +29636,7 @@ geo.registerWidget('d3', 'legend', geo.gui.legendWidget);
       height: null,
       layers: [],
       data: [],
-      tileUrl: 'http://tile.openstreetmap.org/<zoom>/<x>/<y>.png',
+      url: 'http://tile.openstreetmap.org/{z}/{x}/{y}.png',
       attribution: undefined,
 
       // These options are for future use, but shouldn't
@@ -27304,7 +29670,7 @@ geo.registerWidget('d3', 'legend', geo.gui.legendWidget);
         this.options.baseLayer,
         {
           renderer: this.options.baseRenderer,
-          tileUrl: this.options.tileUrl,
+          url: this.options.url,
           attribution: this.options.attribution
         }
       );
@@ -27401,9 +29767,8 @@ geo.registerWidget('d3', 'legend', geo.gui.legendWidget);
      * @instance
      * @param {string} url The url format string of an OSM tile server.
      */
-    tileUrl: function (url) {
-      this._baseLayer.tileUrl(url);
-      this._baseLayer.updateBaseUrl();
+    url: function (url) {
+      this._baseLayer.url(url);
       return this;
     },
 

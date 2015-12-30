@@ -136,7 +136,7 @@
     options = $.extend(true, {}, this.constructor.defaults, options || {});
     if (!options.cacheSize) {
       // this size should be sufficient for a 4k display
-      options.cacheSize = options.keepLower ? 400 : 200;
+      options.cacheSize = options.keepLower ? 600 : 200;
     }
     if ($.type(options.subdomains) === 'string') {
       options.subdomains = options.subdomains.split('');
