@@ -149,16 +149,16 @@ geo.gl.vglRenderer = function (arg) {
     if (proj[15]) {
       /* we want positive z to be closer to the camera, but webGL does the
        * converse, so reverse the z coordinates. */
-      proj = mat4.scale(mat4.create(), proj, [1, 1, -1]);
+      proj = mat4.scale(geo.util.mat4AsArray(), proj, [1, 1, -1]);
     }
     /* A similar kluge as in the base camera class worldToDisplay4.  With this,
      * we can show z values from 0 to 1. */
-    proj = mat4.translate(mat4.create(), proj,
+    proj = mat4.translate(geo.util.mat4AsArray(), proj,
                           [0, 0, camera.constructor.bounds.far]);
 
     renderWindow.renderers().forEach(function (renderer) {
       var cam = renderer.camera();
-      cam.setViewMatrix(view);
+      cam.setViewMatrix(view, true);
       cam.setProjectionMatrix(proj);
       if (proj[1] || proj[2] || proj[3] || proj[4] || proj[6] || proj[7] ||
           proj[8] || proj[9] || proj[11] || proj[15] !== 1 ||
