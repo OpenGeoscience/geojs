@@ -981,7 +981,7 @@ describe('geo.tileLayer', function () {
           url: function () {return '/data/white.jpg';}
         });
 
-        tiles = l._getTiles(1, {left: 50, right: 500, bottom: 500, top: 50});
+        tiles = l._getTiles(1, {left: 50, right: 500, bottom: 500, top: 50}, true);
         expect(tiles.length).toBe(5);
         tiles.forEach(function (tile) {
           expect(l.isValid(tile.index)).toBe(true);
@@ -1047,6 +1047,40 @@ describe('geo.tileLayer', function () {
         expect(tiles.length).toBe(4);
         tiles.forEach(function (tile) {
           expect(tile.index.level).toBe(0);
+        });
+      });
+      it('url templating', function () {
+        var tiles, l = geo.tileLayer({
+          map: map({unitsPerPixel: 1}),
+          wrapX: false,
+          wrapY: false,
+          topDown: true,
+          url: '/data/white.jpg?s={s}&x={x}&y={y}&z={z}'
+        });
+
+        tiles = l._getTiles(1, {left: 50, right: 500, bottom: 500, top: 50});
+        expect(tiles.length).toBe(5);
+        tiles.forEach(function (tile) {
+          expect($.inArray(tile._url.split('?s=')[1].split('&')[0],
+                           ['a', 'b', 'c'])).toBeGreaterThan(-1);
+          expect(tile._url.split('&x')[1]).toBe('=' + tile.index.x + '&y=' +
+              tile.index.y + '&z=' + tile.index.level);
+        });
+      });
+      it('baseUrl', function () {
+        var tiles, l = geo.tileLayer({
+          map: map({unitsPerPixel: 1}),
+          wrapX: false,
+          wrapY: false,
+          topDown: true,
+          baseUrl: '/data/white.jpg?test='
+        });
+
+        tiles = l._getTiles(1, {left: 50, right: 500, bottom: 500, top: 50});
+        expect(tiles.length).toBe(5);
+        tiles.forEach(function (tile) {
+          expect(tile._url.split('?test=')[1]).toBe('/' + tile.index.level +
+              '/' + tile.index.x + '/' + tile.index.y + '.png');
         });
       });
     });
