@@ -71,6 +71,11 @@ configure_file(
   COPYONLY
 )
 configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/testing/js/testUtils.js
+  ${GEOJS_DEPLOY_DIR}/test/lib/testUtils.js
+  COPYONLY
+)
+configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/aggregate-json-reporter.js.in
   ${GEOJS_DEPLOY_DIR}/test/lib//aggregate-json-reporter.js
 )
