@@ -1,7 +1,7 @@
-// Test geo.tileLayer
+// Test geo.core.map
 
 /*global describe, it, expect, geo*/
-describe('geo.map', function () {
+describe('geo.core.map', function () {
   'use strict';
 
   function create_map(opts) {

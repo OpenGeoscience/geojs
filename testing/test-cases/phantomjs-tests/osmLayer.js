@@ -1,4 +1,4 @@
-// Test geo.tileLayer
+// Test geo.core.osmLayer
 /*global describe, it, expect, geo, waitForIt*/
 
 describe('geo.core.osmLayer', function () {
