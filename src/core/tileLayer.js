@@ -617,9 +617,9 @@
       // apply a transform to place the image correctly
       container.append(tile.image);
       container.css({
-        'position': 'absolute',
-        'left': bounds.left + 'px',
-        'top': bounds.top + 'px'
+        position: 'absolute',
+        left: (bounds.left - parseInt(div.attr('offsetx') || 0)) + 'px',
+        top: (bounds.top - parseInt(div.attr('offsety') || 0)) + 'px'
       });
 
       // apply fade in animation
@@ -830,16 +830,41 @@
     /**
      * Set sublayer transforms to align them with the given zoom level.
      * @param {number} level The target zoom level
+     * @param {object} view The view bounds.  The top and left are used to
+     *                      adjust the offset of tile layers.
+     * @return {object} the x and y offsets for the current level.
      */
-    this._updateSubLayers = function (level) {
-      this.canvas().find('.geo-tile-layer').each(function (idx, el) {
+    this._updateSubLayers = function (level, view) {
+      var canvas = this.canvas(),
+          lastlevel = parseInt(canvas.attr('lastlevel')),
+          lastx = parseInt(canvas.attr('lastoffsetx') || 0),
+          lasty = parseInt(canvas.attr('lastoffsety') || 0);
+      if (lastlevel === level && Math.abs(lastx - view.left) < 65536 &&
+          Math.abs(lasty - view.top) < 65536) {
+        return {x: lastx, y: lasty};
+      }
+      var x = parseInt(view.left), y = parseInt(view.top);
+      canvas.find('.geo-tile-layer').each(function (idx, el) {
         var $el = $(el),
             layer = parseInt($el.data('tileLayer'));
         $el.css(
           'transform',
           'scale(' + Math.pow(2, level - layer) + ')'
         );
+        var layerx = parseInt(x / Math.pow(2, level - layer)),
+            layery = parseInt(y / Math.pow(2, level - layer)),
+            dx = layerx - parseInt($el.attr('offsetx') || 0),
+            dy = layery - parseInt($el.attr('offsety') || 0);
+        $el.attr({offsetx: layerx, offsety: layery});
+        $el.find('.geo-tile-container').each(function (tileidx, tileel) {
+          $(tileel).css({
+            left: (parseInt($(tileel).css('left')) - dx) + 'px',
+            top: (parseInt($(tileel).css('top')) - dy) + 'px'
+          });
+        }.bind(this));
       }.bind(this));
+      canvas.attr({lastoffsetx: x, lastoffsety: y, lastlevel: level});
+      return {x: x, y: y};
     };
 
     /**
@@ -860,7 +885,7 @@
       );
 
       // Update the transform for the local layer coordinates
-      this._updateSubLayers(zoom);
+      var offset = this._updateSubLayers(zoom, view) || {x: 0, y: 0};
 
       var to = this._options.tileOffset(zoom);
       if (this.renderer() === null) {
@@ -872,14 +897,10 @@
           'transform',
           'scale(' + (Math.pow(2, mapZoom - zoom)) + ')' +
           'translate(' +
-          (-to.x) + 'px' + ',' +
-          (-to.y) + 'px' + ')' +
-          'translate(' +
-          (map.size().width / 2) + 'px' + ',' +
-          (map.size().height / 2) + 'px' + ')' +
-          'translate(' +
-          (-(view.left + view.right) / 2) + 'px' + ',' +
-          (-(view.bottom + view.top) / 2) + 'px' + ')' +
+          (-to.x + -(view.left + view.right) / 2 + map.size().width / 2 +
+           offset.x) + 'px' + ',' +
+          (-to.y + -(view.bottom + view.top) / 2 + map.size().height / 2 +
+           offset.y) + 'px' + ')' +
           ''
         );
       }
@@ -889,7 +910,9 @@
       this.canvas().attr({
         scale: Math.pow(2, mapZoom - zoom),
         dx: -to.x + -(view.left + view.right) / 2,
-        dy: -to.y + -(view.bottom + view.top) / 2
+        dy: -to.y + -(view.bottom + view.top) / 2,
+        offsetx: offset.x,
+        offsety: offset.y
       });
 
       lastZoom = mapZoom;

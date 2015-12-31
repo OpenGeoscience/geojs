@@ -25,6 +25,7 @@
 <script src=/test/lib/jasmine-blanket.js></script>
 @SOURCES_INCLUDE@
 <script src=/test/lib/aggregate-json-reporter.js></script>
+<script src=/test/lib/testUtils.js></script>
 </head>
 <body>
 <div id=map-container><div id=map></div></div>

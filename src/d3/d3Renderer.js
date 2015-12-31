@@ -205,8 +205,10 @@ geo.d3.d3Renderer = function (arg) {
 
     if (canvas.attr('scale') !== null) {
       scale = canvas.attr('scale') || 1;
-      dx = (canvas.attr('dx') || 0) * scale;
-      dy = (canvas.attr('dy') || 0) * scale;
+      dx = (parseFloat(canvas.attr('dx') || 0) +
+            parseFloat(canvas.attr('offsetx') || 0)) * scale;
+      dy = (parseFloat(canvas.attr('dy') || 0) +
+            parseFloat(canvas.attr('offsety') || 0)) * scale;
       dx += map.size().width / 2;
       dy += map.size().height / 2;
     } else {
