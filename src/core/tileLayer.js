@@ -816,6 +816,9 @@
      * @return {DOM}
      */
     this._getSubLayer = function (level) {
+      if (!this.canvas()) {
+        return;
+      }
       var node = this.canvas()
         .find('div[data-tile-layer=' + level.toFixed() + ']').get(0);
       if (!node) {
