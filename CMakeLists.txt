@@ -125,6 +125,12 @@ if(PHANTOMJS_TESTS)
     COPYONLY
   )
 
+  configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/node_modules/phantomjs-polyfill/bind-polyfill.js
+    ${GEOJS_DEPLOY_DIR}/test/lib/bind-polyfill.js
+    COPYONLY
+  )
+
   file(GLOB JS_UNIT_TEST_CASES
     ${CMAKE_CURRENT_SOURCE_DIR}/testing/test-cases/phantomjs-tests/*.js
   )

@@ -1139,6 +1139,7 @@ geo.map = function (arg) {
       if (m_discreteZoom) {
         m_this.zoom(Math.round(m_this.zoom()));
       }
+      m_this.interactor().options({discreteZoom: m_discreteZoom});
     }
     return m_this;
   };
@@ -1386,7 +1387,7 @@ geo.map = function (arg) {
   // Now update to the correct center and zoom level
   this.center($.extend({}, arg.center || m_center), undefined);
 
-  this.interactor(arg.interactor || geo.mapInteractor());
+  this.interactor(arg.interactor || geo.mapInteractor({discreteZoom: m_discreteZoom}));
   this.clock(arg.clock || geo.clock());
 
   function resizeSelf() {

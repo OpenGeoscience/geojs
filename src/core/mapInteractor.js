@@ -22,15 +22,13 @@ geo.mapInteractor = function (args) {
       m_mouse,
       m_keyboard,
       m_state,
+      m_queue,
       $node,
-      m_wheelQueue = { x: 0, y: 0 },
-      m_throttleTime = 10,
-      m_wait = false,
-      m_disableThrottle = true,
       m_selectionLayer = null,
       m_selectionPlane = null,
       m_paused = false,
-      m_clickMaybe = false;
+      m_clickMaybe = false,
+      m_callZoom = function () {};
 
   // Helper method to decide if the current button/modifiers match a set of
   // conditions.
@@ -52,33 +50,12 @@ geo.mapInteractor = function (args) {
     return Math.sqrt(x * x + y * y);
   }
 
-  // For throttling mouse events this is a function that
-  // returns true if no actions are in progress and starts
-  // a timer to block events for the next `m_throttleTime` ms.
-  // If it returns false, the caller should ignore the
-  // event.
-  function doRespond() {
-    if (m_disableThrottle) {
-      return true;
-    }
-    if (m_wait) {
-      return false;
-    }
-    m_wait = true;
-    window.setTimeout(function () {
-      m_wait = false;
-      m_wheelQueue = {
-        x: 0,
-        y: 0
-      };
-    }, m_throttleTime);
-    return true;
-  }
-
   // copy the options object with defaults
   m_options = $.extend(
     true,
     {
+      throttle: 30,
+      discreteZoom: false,
       panMoveButton: 'left',
       panMoveModifiers: {},
       zoomMoveButton: 'right',
@@ -114,6 +91,14 @@ geo.mapInteractor = function (args) {
 
   // options supported:
   // {
+  //   // throttle mouse events to at most this many milliseconds each (default 30)
+  //   throttle: number
+  //
+  //   // Clamp zoom events to discrete (integer) zoom levels.  If a number is
+  //   // provided then zoom events will be debounced (and accumulated)
+  //   // with the given delay.  The default debounce interval is 400 ms.
+  //   discreteZoom: boolean | number > 0
+  //
   //   // button that must be pressed to initiate a pan on mousedown
   //   panMoveButton: 'right' | 'left' | 'middle'
   //
@@ -330,6 +315,16 @@ geo.mapInteractor = function (args) {
   //  }
   m_state = {};
 
+  /**
+   * Store queued map navigation commands (due to throttling) here
+   * {
+   *   kind: 'move' | 'wheel',  // what kind of mouse action triggered this
+   *   method: function () {},  // the throttled method
+   *   scroll: {x: ..., y: ...} // accumulated scroll wheel deltas
+   * }
+   */
+  m_queue = {};
+
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Connects events to a map.  If the map is not set, then this does nothing.
@@ -347,12 +342,15 @@ geo.mapInteractor = function (args) {
     // store the connected element
     $node = $(m_options.map.node());
 
+    // set methods related to asyncronous event handling
+    m_this._handleMouseWheel = throttled_wheel();
+    m_callZoom = debounced_zoom();
 
     // add event handlers
+    $node.on('wheel.geojs', m_this._handleMouseWheel);
     $node.on('mousemove.geojs', m_this._handleMouseMove);
     $node.on('mousedown.geojs', m_this._handleMouseDown);
     $node.on('mouseup.geojs', m_this._handleMouseUp);
-    $node.on('wheel.geojs', m_this._handleMouseWheel);
     // Disable dragging images and such
     $node.on('dragstart', function () { return false; });
     if (m_options.panMoveButton === 'right' ||
@@ -373,6 +371,8 @@ geo.mapInteractor = function (args) {
       $node.off('.geojs');
       $node = null;
     }
+    m_this._handleMouseWheel = function () {};
+    m_callZoom = function () {};
     return m_this;
   };
 
@@ -406,6 +406,9 @@ geo.mapInteractor = function (args) {
       return $.extend({}, m_options);
     }
     $.extend(m_options, opts);
+
+    // reset event handlers for new options
+    this._connectEvents();
     return m_this;
   };
 
@@ -552,6 +555,8 @@ geo.mapInteractor = function (args) {
       out = m_state.action === action;
     }
     if (out) {
+      // cancel any queued interaction events
+      m_queue = {};
       m_state = {};
     }
     return out;
@@ -569,10 +574,8 @@ geo.mapInteractor = function (args) {
       return;
     }
 
-    if (m_state.action === 'momentum') {
-      // cancel momentum on click
-      m_state = {};
-    }
+    // cancel momentum on click
+    m_this.cancel('momentum');
 
     m_this._getMousePosition(evt);
     m_this._getMouseButton(evt);
@@ -603,6 +606,11 @@ geo.mapInteractor = function (args) {
     };
 
     if (action) {
+      // cancel any ongoing interaction queue
+      m_queue = {
+        kind: 'move'
+      };
+
       // store the state object
       m_state = {
         action: action,
@@ -628,7 +636,17 @@ geo.mapInteractor = function (args) {
       }
 
       // bind temporary handlers to document
-      $(document).on('mousemove.geojs', m_this._handleMouseMoveDocument);
+      if (m_options.throttle > 0) {
+        $(document).on(
+          'mousemove.geojs',
+          geo.util.throttle(
+            m_options.throttle,
+            m_this._handleMouseMoveDocument
+          )
+        );
+      } else {
+        $(document).on('mousemove.geojs', m_this._handleMouseMoveDocument);
+      }
       $(document).on('mouseup.geojs', m_this._handleMouseUpDocument);
     }
 
@@ -654,13 +672,15 @@ geo.mapInteractor = function (args) {
     if (m_options.click.cancelOnMove) {
       m_clickMaybe = false;
     }
-    if (m_clickMaybe) {
-      return;
-    }
 
     m_this._getMousePosition(evt);
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
+
+    if (m_clickMaybe) {
+      return;
+    }
+
     m_this.map().geoTrigger(geo.event.mousemove, m_this.mouse());
   };
 
@@ -672,13 +692,14 @@ geo.mapInteractor = function (args) {
   this._handleMouseMoveDocument = function (evt) {
     var dx, dy, selectionObj;
 
-    if (m_paused) {
+    if (m_paused || m_queue.kind !== 'move') {
       return;
     }
 
     m_this._getMousePosition(evt);
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
+
 
     if (m_options.click.cancelOnMove) {
       m_clickMaybe = false;
@@ -693,11 +714,6 @@ geo.mapInteractor = function (args) {
       return;
     }
 
-    // when throttled, do nothing
-    if (!doRespond()) {
-      return;
-    }
-
     // calculate the delta from the origin point to avoid
     // accumulation of floating point errors
     dx = m_mouse.map.x - m_state.origin.map.x - m_state.delta.x;
@@ -708,10 +724,7 @@ geo.mapInteractor = function (args) {
     if (m_state.action === 'pan') {
       m_this.map().pan({x: dx, y: dy});
     } else if (m_state.action === 'zoom') {
-      m_this.map().zoom(
-        m_this.map().zoom() - dy * m_options.zoomScale / 120,
-        m_state
-      );
+      m_callZoom(-dy * m_options.zoomScale / 120, m_state);
     } else if (m_state.action === 'select') {
       // Get the bounds of the current selection
       selectionObj = m_this._getSelection();
@@ -813,6 +826,9 @@ geo.mapInteractor = function (args) {
       return;
     }
 
+    // cancel queued interactions
+    m_queue = {};
+
     m_clickMaybe = false;
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
@@ -889,71 +905,160 @@ geo.mapInteractor = function (args) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Handle mouse wheel event
+   * Private wrapper around the map zoom method that is debounced to support
+   * discrete zoom interactions.
+   * @param {number} deltaZ The zoom increment
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._handleMouseWheel = function (evt) {
-    var zoomFactor;
+  function debounced_zoom() {
+    var deltaZ = 0, delay = 400, direction;
 
-    if (m_paused) {
-      return;
+    function accum(dz, dir) {
+      var map = m_this.map(), zoom;
+
+      direction = dir;
+      deltaZ += dz;
+
+      // Respond to debounced events when they add up to a change in the
+      // discrete zoom level.
+      if (map && Math.abs(deltaZ) >= 1 && m_options.discreteZoom) {
+
+        zoom = Math.round(deltaZ + map.zoom());
+
+        // delta is what is left over from the zoom delta after the new zoom value
+        deltaZ = deltaZ + map.zoom() - zoom;
+
+        map.zoom(zoom, direction);
+      }
     }
 
-    // try to normalize deltas using the wheel event standard:
-    //   https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent
-    evt.deltaFactor = 1;
-    if (evt.originalEvent.deltaMode === 1) {
-      // DOM_DELTA_LINE -- estimate line height
-      evt.deltaFactor = 12;
-    } else if (evt.originalEvent.deltaMode === 2) {
-      // DOM_DELTA_PAGE -- get window height
-      evt.deltaFactor = $(window).height();
+    function apply() {
+      var map = m_this.map(), zoom;
+      if (map) {
+
+        zoom = deltaZ + map.zoom();
+
+        if (m_options.discreteZoom) {
+          // round off the zoom to an integer and throw away the rest
+          zoom = Math.round(zoom);
+        }
+        map.zoom(zoom, direction);
+      }
+
+      deltaZ = 0;
     }
 
-    // If the browser doesn't support the standard then
-    // just set the delta's to zero.
-    evt.deltaX = evt.originalEvent.deltaX || 0;
-    evt.deltaY = evt.originalEvent.deltaY || 0;
 
-    m_this._getMouseModifiers(evt);
-    evt.deltaX = evt.deltaX * m_options.wheelScaleX * evt.deltaFactor / 120;
-    evt.deltaY = evt.deltaY * m_options.wheelScaleY * evt.deltaFactor / 120;
+    if (m_options.discreteZoom !== true && m_options.discreteZoom > 0) {
+      delay = m_options.discreteZoom;
+    }
+    if (m_options.discreteZoom === true || m_options.discreteZoom > 0) {
+      return geo.util.debounce(delay, false, apply, accum);
+    } else {
+      return function (dz, dir) {
+        accum(dz, dir);
+        apply(dz, dir);
+      };
+    }
+  }
 
-    evt.preventDefault();
-    if (!doRespond()) {
-      m_wheelQueue.x += evt.deltaX;
-      m_wheelQueue.y += evt.deltaY;
-      return;
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Attaches wrapped methods for accumulating fast mouse wheel events and
+   * throttling map interactions.
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  function throttled_wheel() {
+    var my_queue = {};
+
+    function accum(evt) {
+      var dx, dy;
+
+      if (m_paused) {
+        return;
+      }
+
+      if (my_queue !== m_queue) {
+        my_queue = {
+          kind: 'wheel',
+          scroll: {x: 0, y: 0}
+        };
+        m_queue = my_queue;
+      }
+
+      evt.preventDefault();
+
+      // try to normalize deltas using the wheel event standard:
+      //   https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent
+      evt.deltaFactor = 1;
+      if (evt.originalEvent.deltaMode === 1) {
+        // DOM_DELTA_LINE -- estimate line height
+        evt.deltaFactor = 40;
+      } else if (evt.originalEvent.deltaMode === 2) {
+        // DOM_DELTA_PAGE -- get window height
+        evt.deltaFactor = $(window).height();
+      }
+
+      // prevent NaN's on legacy browsers
+      dx = evt.originalEvent.deltaX || 0;
+      dy = evt.originalEvent.deltaY || 0;
+
+      // scale according to the options
+      dx = dx * m_options.wheelScaleX * evt.deltaFactor / 120;
+      dy = dy * m_options.wheelScaleY * evt.deltaFactor / 120;
+
+      my_queue.scroll.x += dx;
+      my_queue.scroll.y += dy;
     }
 
-    evt.deltaX += m_wheelQueue.x;
-    evt.deltaY += m_wheelQueue.y;
+    function wheel(evt) {
+      var zoomFactor;
 
-    m_wheelQueue = {
-      x: 0,
-      y: 0
-    };
+      // If the current queue doesn't match the queue passed in as an argument,
+      // assume it was cancelled and do nothing.
+      if (my_queue !== m_queue) {
+        return;
+      }
 
-    if (m_options.panWheelEnabled &&
-        eventMatch('wheel', m_options.panWheelModifiers)) {
+      // perform the map navigation event
+      m_this._getMouseModifiers(evt);
+      if (m_options.panWheelEnabled &&
+          eventMatch('wheel', m_options.panWheelModifiers)) {
 
-      m_this.map().pan({
-        x: evt.deltaX,
-        y: -evt.deltaY
-      });
+        m_this.map().pan({
+          x: m_queue.scroll.x,
+          y: m_queue.scroll.y
+        });
 
-    } else if (m_options.zoomWheelEnabled &&
-               eventMatch('wheel', m_options.zoomWheelModifiers)) {
+      } else if (m_options.zoomWheelEnabled &&
+                 eventMatch('wheel', m_options.zoomWheelModifiers)) {
 
-      zoomFactor = -evt.deltaY;
+        zoomFactor = -m_queue.scroll.y;
 
-      m_this.map().zoom(
-        m_this.map().zoom() + zoomFactor,
-        m_mouse
-      );
+        m_callZoom(zoomFactor, m_mouse);
+      }
+
+      // reset the queue
+      m_queue = {};
     }
-  };
 
+    if (m_options.throttle > 0) {
+      return geo.util.throttle(m_options.throttle, false, wheel, accum);
+    } else {
+      return function (evt) {
+        accum(evt);
+        wheel(evt);
+      };
+    }
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Handle mouse wheel event.  (Defined inside _connectEvents).
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._handleMouseWheel = function () {};
 
   ////////////////////////////////////////////////////////////////////////////
   /**
