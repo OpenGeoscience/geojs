@@ -123,8 +123,8 @@ geo.gl.vglRenderer = function (arg) {
   this._render = function () {
     if (m_renderAnimFrameRef === null) {
       m_renderAnimFrameRef = window.requestAnimationFrame(function () {
-        m_viewer.render();
         m_renderAnimFrameRef = null;
+        m_viewer.render();
       });
     }
     return m_this;

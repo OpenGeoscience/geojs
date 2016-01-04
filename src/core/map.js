@@ -1027,11 +1027,15 @@ geo.map = function (arg) {
       if (m_transition.zCoord) {
         p[2] = z2zoom(p[2]);
       }
-      m_this.center({
-        x: p[0],
-        y: p[1]
-      }, null);
-      m_this.zoom(p[2], undefined, true);
+      if (fix_zoom(p[2], true) === m_zoom) {
+        m_this.center({
+          x: p[0],
+          y: p[1]
+        }, null);
+      } else {
+        m_center = m_this.gcsToWorld({x: p[0], y: p[1]}, null);
+        m_this.zoom(p[2], undefined, true);
+      }
 
       window.requestAnimationFrame(anim);
     }
