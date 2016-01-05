@@ -46,7 +46,8 @@ window.geoTests = {
     map.createLayer('osm', osmDefaults);
 
     map.interactor().options({
-      momentum: false
+      momentum: false,
+      throttle: 0
     });
 
     if (osmDefaults.m_baseUrl) {

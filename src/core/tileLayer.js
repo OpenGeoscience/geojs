@@ -846,7 +846,9 @@
           Math.abs(lasty - view.top) < 65536) {
         return {x: lastx, y: lasty};
       }
-      var x = parseInt(view.left), y = parseInt(view.top);
+      var to = this._options.tileOffset(level),
+          x = parseInt(view.left) + to.x,
+          y = parseInt(view.top) + to.y;
       canvas.find('.geo-tile-layer').each(function (idx, el) {
         var $el = $(el),
             layer = parseInt($el.data('tileLayer'));

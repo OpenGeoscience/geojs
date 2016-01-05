@@ -35,6 +35,7 @@
     "jsdoc": "^3.4",
     "jshint": "~2.8",
     "phantomjs": "~1.9",
+    "phantomjs-polyfill": "0.0.1",
     "xmlbuilder": "^4.1.0"
   },
   "scripts": {
