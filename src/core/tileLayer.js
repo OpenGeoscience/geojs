@@ -487,7 +487,7 @@
             }
 
             if (this.isValid(source)) {
-              tiles.push({index: $.extend({}, index), soure: source});
+              tiles.push({index: $.extend({}, index), source: source});
             }
           }
         }
