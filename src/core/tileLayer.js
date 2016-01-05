@@ -882,7 +882,11 @@
      * Update the view according to the map/camera.
      * @returns {this} Chainable
      */
-    this._update = function () {
+    this._update = function (evt) {
+      /* Ignore zoom events, as they are ALWAYS followed by a pan event */
+      if (evt && evt.event && evt.event.event === geo.event.zoom) {
+        return;
+      }
       var map = this.map(),
           mapZoom = map.zoom(),
           zoom = this._options.tileRounding(mapZoom),
@@ -978,6 +982,9 @@
       $.when.apply($, tiles)
         .done(// called on success and failure
           function () {
+            var map = this.map(),
+                mapZoom = map.zoom(),
+                zoom = this._options.tileRounding(mapZoom);
             this._purge(zoom, true);
           }.bind(this)
         );

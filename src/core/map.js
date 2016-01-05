@@ -314,8 +314,7 @@ geo.map = function (arg) {
     evt = {
       geo: {},
       zoomLevel: m_zoom,
-      screenPosition: origin ? origin.map : undefined,
-      eventType: geo.event.zoom
+      screenPosition: origin ? origin.map : undefined
     };
     m_this.geoTrigger(geo.event.zoom, evt);
 
@@ -340,8 +339,7 @@ geo.map = function (arg) {
     var evt, unit;
     evt = {
       geo: {},
-      screenDelta: delta,
-      eventType: geo.event.pan
+      screenDelta: delta
     };
 
     unit = m_this.unitsPerPixel(m_zoom);
@@ -402,8 +400,7 @@ geo.map = function (arg) {
       geo.event.pan,
       {
         geo: coordinates,
-        screenDelta: null,
-        eventType: geo.event.pan
+        screenDelta: null
       }
     );
     return m_this;

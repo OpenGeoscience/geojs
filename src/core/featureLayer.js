@@ -97,12 +97,12 @@ geo.featureLayer = function (arg) {
     }
 
     /// Call super class init
-    s_init.call(m_this);
+    s_init.call(m_this, true);
 
     /// Bind events to handlers
     m_this.geoOn(geo.event.resize, function (event) {
       m_this.renderer()._resize(event.x, event.y, event.width, event.height);
-      m_this._update({});
+      m_this._update({event: event});
       m_this.renderer()._render();
     });
 
