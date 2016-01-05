@@ -51,7 +51,8 @@
         "wigglemaps.js",
         "leaflet.js",
         "clustering.js",
-        "scales.js"
+        "scales.js",
+        "throttle.js"
       ]
     },
     "geo.gl": {

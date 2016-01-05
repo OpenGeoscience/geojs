@@ -61,7 +61,9 @@ geo.d3.tileLayer = function () {
         Math.abs(lasty - view.top) < 65536) {
       return {x: lastx, y: lasty};
     }
-    var x = parseInt(view.left), y = parseInt(view.top);
+    var to = this._options.tileOffset(level),
+        x = parseInt(view.left) + to.x,
+        y = parseInt(view.top) + to.y;
     var tileCache = m_this.cache._cache;
     $.each(canvas.selectAll('.geo-tile-layer')[0], function (idx, el) {
       var layer = parseInt($(el).attr('data-tile-layer')),
