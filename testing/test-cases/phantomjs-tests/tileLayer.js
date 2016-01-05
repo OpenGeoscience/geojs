@@ -73,6 +73,10 @@ describe('geo.tileLayer', function () {
       node: get_set('node'),
       children: function () {
         return [];
+      },
+      timesDrawn: 0,
+      draw: function () {
+        this.timesDrawn += 1;
       }
     };
   };
@@ -343,6 +347,38 @@ describe('geo.tileLayer', function () {
       opts.map = m;
       l = geo.tileLayer(opts);
       expect(l.activeTiles).toEqual({});
+    });
+    it('url', function () {
+      var m = map(), l, mtime, url = '/data/white.jpg';
+      opts.map = m;
+      l = geo.tileLayer(opts);
+      expect(l.url() instanceof Function).toBe(true);
+      mtime = l.map().timesDrawn;
+      l.url(url);
+      expect(l.url()).toBe(url);
+      expect(l.map().timesDrawn).toBeGreaterThan(mtime);
+      mtime = l.map().timesDrawn;
+      /* Setting it to the same value shouldn't update the map. */
+      l.url(url);
+      expect(l.url()).toBe(url);
+      expect(l.map().timesDrawn).toEqual(mtime);
+      /* But a different url should */
+      url += '?param=true';
+      l.url(url);
+      expect(l.url()).toBe(url);
+      expect(l.map().timesDrawn).toBeGreaterThan(mtime);
+    });
+    it('subdomains', function () {
+      var m = map(), l;
+      opts.map = m;
+      l = geo.tileLayer(opts);
+      expect(l.subdomains()).toEqual(['1', '2', '3']);
+      l.subdomains('abc');
+      expect(l.subdomains()).toEqual(['a', 'b', 'c']);
+      l.subdomains('12,3');
+      expect(l.subdomains()).toEqual(['12', '3']);
+      l.subdomains(['ab', 'c']);
+      expect(l.subdomains()).toEqual(['ab', 'c']);
     });
   });
   describe('Public utility methods', function () {

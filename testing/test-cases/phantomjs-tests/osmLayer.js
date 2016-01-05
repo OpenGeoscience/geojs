@@ -1,4 +1,4 @@
-// Test geo.tileLayer
+// Test geo.core.osmLayer
 /*global describe, it, expect, geo, waitForIt*/
 
 describe('geo.core.osmLayer', function () {
@@ -71,6 +71,38 @@ describe('geo.core.osmLayer', function () {
       it('creation', function () {
         var map = create_map();
         map.createLayer('osm', {renderer: 'vgl'});
+        expect(map.node().find('.webgl-canvas').length).toBe(1);
+      });
+    });
+    describe('switch renderer', function () {
+      var map, layer;
+      it('vgl to null', function () {
+        map = create_map();
+        layer = map.createLayer('osm', {renderer: 'vgl'});
+        expect(map.node().find('.webgl-canvas').length).toBe(1);
+        map.deleteLayer(layer);
+        layer = map.createLayer('osm', {renderer: null});
+        expect(map.node().find('.webgl-canvas').length).toBe(0);
+        expect(map.node().find('[data-tile-layer="0"]').length).toBe(1);
+      });
+      waitForIt('.geo-tile-container', function () {
+        return map.node().find('.geo-tile-container').length > 0;
+      });
+      it('null to d3', function () {
+        expect(map.node().find('[data-tile-layer="0"]').is('div')).toBe(true);
+        map.deleteLayer(layer);
+        layer = map.createLayer('osm', {renderer: 'd3'});
+        expect(map.node().find('[data-tile-layer="0"]').is('div')).toBe(false);
+        expect(map.node().find('[data-tile-layer="0"]').length).toBe(1);
+      });
+      waitForIt('.d3PlaneFeature', function () {
+        return map.node().find('.d3PlaneFeature').length > 0;
+      });
+      it('d3 to vgl', function () {
+        expect(map.node().find('[data-tile-layer="0"]').is('g')).toBe(true);
+        map.deleteLayer(layer);
+        layer = map.createLayer('osm', {renderer: 'vgl'});
+        expect(map.node().find('[data-tile-layer="0"]').is('g')).toBe(false);
         expect(map.node().find('.webgl-canvas').length).toBe(1);
       });
     });
