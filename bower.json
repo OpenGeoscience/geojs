@@ -18,7 +18,7 @@
     "proj4": "=2.3.3",
     "bootstrap": "~3.3.0",
     "bootswatch": "~3.3",
-    "vgl": "0.3.0"
+    "vgl": "0.3.4"
   },
   "devDependencies": {
     "codemirror": "~4.7.0",
