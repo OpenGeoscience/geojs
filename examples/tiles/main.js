@@ -1,9 +1,11 @@
 // This example should be tried with different query strings.
 
 /* Many parameters can be adjusted via url query parameters:
+ *  attribution: override the layer attribution text.
  *  clampBoundsX: 'true' to clamp movement in the horizontal direction.
  *  clampBoundsY: 'true' to clamp movement in the vertical direction.
  *  clampZoom: 'true' to clamp zooming out smaller than the window.
+ *  controls: 'false' to hide controls.
  *  debug: 'true' to show tile labels when using the html renderer.  'border'
  *      to draw borders on each tile when using the html renderer.  'all' to
  *      show both labels and borders.  These options just add a class to the
@@ -49,9 +51,38 @@ $(function () {
   var query = document.location.search.replace(/(^\?)/, '').split(
     '&').map(function (n) {
       n = n.split('=');
-      this[n[0]] = decodeURIComponent(n[1]);
+      if (n[0]) {
+        this[decodeURIComponent(n[0])] = decodeURIComponent(n[1]);
+      }
       return this;
     }.bind({}))[0];
+
+  // hide the controls if requested
+  $('#controls').toggleClass('no-controls', query.controls === 'false');
+  // populate the controls with the current settings
+  $.each(query, function (key, value) {
+    if (key.indexOf('"') < 0) {
+      var ctl = $('#controls [param-name="' + key + '"]');
+      if (ctl.is('[type="checkbox"]')) {
+        ctl.prop('checked', value === 'true');
+      } else {
+        ctl.val(value);
+      }
+    }
+  });
+  $('#controls').on('change', change_controls);
+  // When a text input is altered, wait a short time then process the change.
+  // This allows the web page to be responsive without showing too many partial
+  // values.
+  var throttledInputEventTimer = null;
+  $('#controls').on('input', function (evt) {
+    if (throttledInputEventTimer) {
+      window.clearTimeout(throttledInputEventTimer);
+    }
+    throttledInputEventTimer = window.setTimeout(function () {
+      change_controls(evt);
+    }, 1000);
+  });
 
   // Set map defaults to use our named node and have a reasonable center and
   // zoom level
@@ -66,7 +97,10 @@ $(function () {
   // Set the tile layer defaults to use the specified renderer and opacity
   var layerParams = {
     renderer: query.renderer || 'vgl',
-    opacity: query.opacity || '1'
+    opacity: query.opacity || '1',
+    /* Always use a larger cache so if keepLower is changed, we still have a
+     * big enough cache. */
+    cacheSize: 600
   };
   if (layerParams.renderer === 'null' || layerParams.renderer === 'html') {
     layerParams.renderer = null;
@@ -86,8 +120,10 @@ $(function () {
   }
   // For image tile servers, where we know the maximum width and height, use
   // a pixel coordinate system.
+  var w, h;
   if (query.w && query.h) {
-    var w = parseInt(query.w), h = parseInt(query.h);
+    w = parseInt(query.w);
+    h = parseInt(query.h);
     // Set a pixel coordinate system where 0, 0 is the upper left and w, h is
     // the lower-right.
     /* If both ingcs and gcs are set to an empty string '', the coordinates
@@ -103,9 +139,6 @@ $(function () {
     mapParams.center = {x: w / 2, y: h / 2};
     mapParams.max = Math.ceil(Math.log(Math.max(w, h) / 256) / Math.log(2));
     mapParams.clampBoundsX = mapParams.clampBoundsY = true;
-    // unitsPerPixel is at zoom level 0.  We want each pixel to be 1 at the
-    // maximum zoom
-    mapParams.unitsPerPixel = Math.pow(2, mapParams.max);
     layerParams.maxLevel = mapParams.max;
     layerParams.wrapX = layerParams.wrapY = false;
     layerParams.tileOffset = function () {
@@ -124,14 +157,35 @@ $(function () {
   if (query.min !== undefined) {
     mapParams.min = parseFloat(query.min);
   }
-  if (query.max !== undefined) {
-    mapParams.max = parseFloat(query.max);
-    if (!layerParams.maxLevel) {
-      layerParams.maxLevel = mapParams.max;
-    }
+  if (query.attribution !== undefined) {
+    layerParams.attribution = query.attribution;
   }
   if (query.round) {
     layerParams.tileRounding = Math[query.round];
+  }
+  if (query.tileWidth) {
+    layerParams.tileWidth = parseInt(query.tileWidth);
+  }
+  if (query.tileHeight) {
+    layerParams.tileHeight = parseInt(query.tileHeight);
+  }
+  if (w && h) {
+    mapParams.max = Math.ceil(Math.log(Math.max(
+        w / (layerParams.tileWidth || 256),
+        h / (layerParams.tileHeight || 256))) / Math.log(2));
+    layerParams.maxLevel = mapParams.max;
+  }
+  if (query.max !== undefined) {
+    mapParams.max = parseFloat(query.max);
+  }
+  // allow a generous max tile level so it is never the limit
+  if (!layerParams.maxLevel) {
+    layerParams.maxLevel = 25;
+  }
+  if (w && h) {
+    // unitsPerPixel is at zoom level 0.  We want each pixel to be 1 at the
+    // maximum zoom
+    mapParams.unitsPerPixel = Math.pow(2, mapParams.max);
   }
   // Populate boolean flags for the map
   $.each({
@@ -146,7 +200,6 @@ $(function () {
     });
   // Populate boolean flags for the tile layer
   $.each({
-      clampBoundsX: 'clampBoundsX',
       lower: 'keepLower',
       wrapX: 'wrapX',
       wrapY: 'wrapY'
@@ -175,4 +228,102 @@ $(function () {
   tileDebug.mapParams = mapParams;
   tileDebug.layerParams = layerParams;
   tileDebug.osmLayer = osmLayer;
+
+  /**
+   * Handle changes to our controls.
+   * @param evt jquery evt that triggered this call.
+   */
+  function change_controls(evt) {
+    var ctl = $(evt.target),
+        param = ctl.attr('param-name'),
+        value = ctl.val();
+    if (ctl.is('[type="checkbox"]')) {
+      value = ctl.is(':checked') ? 'true' : 'false';
+    }
+    if (value === '' && ctl.attr('placeholder')) {
+      value = ctl.attr('placeholder');
+    }
+    if (!param || value === query[param]) {
+      return;
+    }
+    var processedValue = (ctl.is('[type="checkbox"]') ?
+        (value === 'true') : value);
+    switch (param) {
+      case 'debug':
+        $('#map').toggleClass('debug-label', (
+            value === 'true' || value === 'all'))
+          .toggleClass('debug-border', (
+            value === 'border' || value === 'all'));
+        break;
+      case 'discrete':
+        mapParams.discreteZoom = processedValue;
+        map.discreteZoom(processedValue);
+        break;
+      case 'fade':
+        $('#map').toggleClass('fade-image', processedValue);
+        break;
+      case 'lower':
+        layerParams.keepLower = (value === 'true');
+        break;
+      case 'max': case 'min':
+        mapParams[param] = processedValue = parseFloat(value);
+        map.zoomRange(mapParams);
+        break;
+      case 'projection':
+        map.camera().projection = value;
+        break;
+      case 'renderer':
+        layerParams[param] = value;
+        if (layerParams.renderer === 'html') {
+          layerParams.renderer = null;
+        }
+        map.deleteLayer(osmLayer);
+        osmLayer = map.createLayer('osm', layerParams);
+        tileDebug.osmLayer = osmLayer;
+        break;
+      case 'round':
+        layerParams.tileRounding = Math[value];
+        break;
+      case 'x': case 'y':
+        var coord = map.center();
+        coord[param] = mapParams[param] = parseFloat(value);
+        map.center(coord);
+        break;
+      case 'zoom':
+        mapParams[param] = processedValue = parseFloat(value);
+        map.zoom(processedValue);
+        break;
+      default:
+        if (ctl.is('.layerparam')) {
+          layerParams[param] = processedValue;
+          if (param === 'url' && layerParams.baseUrl) {
+            delete layerParams.baseUrl;
+          }
+          if (osmLayer[param]) {
+            osmLayer[param](processedValue);
+          }
+        } else if (ctl.is('.mapparam')) {
+          mapParams[param] = processedValue;
+          if (map[param]) {
+            map[param](processedValue);
+          }
+        } else {
+          return;
+        }
+        break;
+    }
+    if (ctl.is('.layerparam') && ctl.attr('reload') === 'true') {
+      map.deleteLayer(osmLayer);
+      osmLayer = map.createLayer('osm', layerParams);
+    }
+    // update the url to reflect the changes
+    query[param] = value;
+    if (value === '' || (ctl.attr('placeholder') &&
+        value === ctl.attr('placeholder'))) {
+      delete query[param];
+    }
+    var newurl = window.location.protocol + '//' + window.location.host +
+        window.location.pathname + '?' + $.param(query);
+    window.history.replaceState(query, '', newurl);
+  }
 });

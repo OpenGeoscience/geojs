@@ -34,24 +34,28 @@
 
   this._drawTile = function (tile) {
     var bounds = m_this._tileBounds(tile),
-        parentNode = m_this._getSubLayer(tile.index.level);
+        parentNode = m_this._getSubLayer(tile.index.level),
+        offsetx = parseInt(parentNode.attr('offsetx') || 0),
+        offsety = parseInt(parentNode.attr('offsety') || 0);
     tile.feature = m_this.createFeature(
       'plane', {drawOnAsyncResourceLoad: true})
-      .origin([bounds.left, bounds.top])
-      .upperLeft([bounds.left, bounds.top])
-      .lowerRight([bounds.right, bounds.bottom])
+      .origin([bounds.left - offsetx, bounds.top - offsety])
+      .upperLeft([bounds.left - offsetx, bounds.top - offsety])
+      .lowerRight([bounds.right - offsetx, bounds.bottom - offsety])
       .style({
         image: tile._url,
         opacity: 1,
         reference: tile.toString(),
         parentId: parentNode.attr('data-tile-layer-id')
       });
+    /* Don't respond to geo events */
+    tile.feature.geoTrigger = undefined;
     tile.feature._update();
     m_this.draw();
   };
 
   /**
-   * Return the DOM eleement containing a level specific
+   * Return the DOM element containing a level specific
    * layer.  This will create the element if it doesn't
    * already exist.
    * @param {number} level The zoom level of the layer to fetch
@@ -74,14 +78,53 @@
   /**
    * Set sublayer transforms to align them with the given zoom level.
    * @param {number} level The target zoom level
+   * @param {object} view The view bounds.  The top and left are used to
+   *                      adjust the offset of tile layers.
+   * @return {object} the x and y offsets for the current level.
    */
-  this._updateSubLayers = function (level) {
-    $.each(m_this.canvas().selectAll('.geo-tile-layer')[0], function (idx, el) {
-      var layer = parseInt($(el).attr('data-tile-layer'));
+  this._updateSubLayers = function (level, view) {
+    var canvas = m_this.canvas(),
+        lastlevel = parseInt(canvas.attr('lastlevel')),
+        lastx = parseInt(canvas.attr('lastoffsetx') || 0),
+        lasty = parseInt(canvas.attr('lastoffsety') || 0);
+    if (lastlevel === level &amp;&amp; Math.abs(lastx - view.left) &lt; 65536 &amp;&amp;
+        Math.abs(lasty - view.top) &lt; 65536) {
+      return {x: lastx, y: lasty};
+    }
+    var to = this._tileOffset(level),
+        x = parseInt(view.left) + to.x,
+        y = parseInt(view.top) + to.y;
+    var tileCache = m_this.cache._cache;
+    $.each(canvas.selectAll('.geo-tile-layer')[0], function (idx, el) {
+      var layer = parseInt($(el).attr('data-tile-layer')),
+          scale = Math.pow(2, level - layer);
       el = m_this._getSubLayer(layer);
-      var scale = Math.pow(2, level - layer);
       el.attr('transform', 'matrix(' + [scale, 0, 0, scale, 0, 0].join() + ')');
+      /* x and y are the upper left of our view.  This is the zero-point for
+       * offsets at the current level.  Other tile layers' offsets are scaled
+       * by appropriate factors of 2.  We need to shift the tiles of each
+       * layer by the appropriate amount (computed as dx and dy). */
+      var layerx = parseInt(x / Math.pow(2, level - layer)),
+          layery = parseInt(y / Math.pow(2, level - layer)),
+          dx = layerx - parseInt(el.attr('offsetx') || 0),
+          dy = layery - parseInt(el.attr('offsety') || 0);
+      el.attr({offsetx: layerx, offsety: layery});
+      /* We have to update the values stored in the tile features, too,
+       * otherwise when d3 regenerates these features, the offsets will be
+       * wrong. */
+      $.each(tileCache, function (idx, tile) {
+        if (tile._index.level === layer &amp;&amp; tile.feature) {
+          var f = tile.feature,
+              o = f.origin(), ul = f.upperLeft(), lr = f.lowerRight();
+          f.origin([o[0] - dx, o[1] - dy, o[2]]);
+          f.upperLeft([ul[0] - dx, ul[1] - dy, ul[2]]);
+          f.lowerRight([lr[0] - dx, lr[1] - dy, lr[2]]);
+          f._update();
+        }
+      });
     });
+    canvas.attr({lastoffsetx: x, lastoffsety: y, lastlevel: level});
+    return {x: x, y: y};
   };
 
   /* Initialize the tile layer.  This creates a series of sublayers so that
@@ -125,13 +168,13 @@ geo.registerLayerAdjustment('d3', 'tile', geo.d3.tileLayer);
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.camera.html">camera</a></li><li><a href="geo.choroplethFeature.html">choroplethFeature</a></li><li><a href="geo.clock.html">clock</a></li><li><a href="geo.contourFeature.html">contourFeature</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.choroplethFeature.html">choroplethFeature</a></li><li><a href="geo.gl.contourFeature.html">contourFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.svgWidget.html">svgWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.imageTile.html">imageTile</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.tile.html">tile</a></li><li><a href="geo.tileCache.html">tileCache</a></li><li><a href="geo.tileLayer.html">tileLayer</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.ClusterGroup.html">ClusterGroup</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.camera.html">camera</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.camera.html">camera</a></li><li><a href="geo.choroplethFeature.html">choroplethFeature</a></li><li><a href="geo.clock.html">clock</a></li><li><a href="geo.contourFeature.html">contourFeature</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fetchQueue.html">fetchQueue</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.choroplethFeature.html">choroplethFeature</a></li><li><a href="geo.gl.contourFeature.html">contourFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.svgWidget.html">svgWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.imageTile.html">imageTile</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.tile.html">tile</a></li><li><a href="geo.tileCache.html">tileCache</a></li><li><a href="geo.tileLayer.html">tileLayer</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.ClusterGroup.html">ClusterGroup</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.camera.html">camera</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Sat Dec 19 2015 14:27:22 GMT-0500 (EST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Thu Jan 07 2016 16:46:08 GMT-0500 (EST)
 </footer>
 
 <script> prettyPrint(); </script>

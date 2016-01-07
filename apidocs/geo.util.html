@@ -264,6 +264,321 @@
 
     
 
+    <h4 class="name" id=".debounce"><span class="type-signature">(static) </span>debounce<span class="signature">(delay, at_begin<span class="signature-attributes">opt</span>, callback, accumulator<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {function}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Debounce execution of a function. Debouncing, unlike throttling,
+guarantees that a function is only executed a single time, either at the
+very beginning of a series of calls, or at the very end. If you want to
+simply rate-limit execution of a function, see the <jQuery.throttle>
+method.
+
+In this visualization, | is a debounced-function call and X is the actual
+callback execution:
+
+::
+
+  Debounced with `at_begin` specified as false or unspecified:
+  ||||||||||||||||||||||||| (pause) |||||||||||||||||||||||||
+                           X                                 X
+
+  Debounced with `at_begin` specified as true:
+  ||||||||||||||||||||||||| (pause) |||||||||||||||||||||||||
+  X                                 X
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>delay</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">A zero-or-greater delay in milliseconds. For event
+   callbacks, values around 100 or 250 (or even higher) are most useful.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>at_begin</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+
+            <td class="description last">If at_begin is false or
+   unspecified, callback will only be executed `delay` milliseconds after
+   the last debounced-function call. If at_begin is true, callback will be
+   executed only at the first debounced-function call. (After the
+   throttled-function has not been called for `delay` milliseconds, the
+   internal counter is reset)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">A function to be executed after delay milliseconds.
+   The `this` context and all arguments are passed through, as-is, to
+   `callback` when the debounced-function is executed.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>accumulator</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">A function to be executed (synchronously)
+   during **each** call to the wrapped function.  Typically, this
+   this method is used to accumulate values that the callback uses
+   when it finally executes.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="util_throttle.js.html">util/throttle.js</a>, <a href="util_throttle.js.html#line201">line 201</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    A new, debounced, function.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">function</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>var debounced = geo.util.debounce( delay, [ at_begin, ] callback );
+$('selector').bind( 'someevent', debounced );
+$('selector').unbind( 'someevent', debounced );</code></pre>
+
+
+
+        
+            
+
+    
+
     <h4 class="name" id=".ensureFunction"><span class="type-signature">(static) </span>ensureFunction<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
@@ -935,6 +1250,112 @@ key.  The first object is mutated.
     <dd>
         
 <span class="param-type">object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".mat4AsArray"><span class="type-signature">(static) </span>mat4AsArray<span class="signature">()</span><span class="type-signature"> &rarr; {Array}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Create a mat4 that is always an array.  This should only be used if it
+will not be used in a WebGL context.  Plain arrays usually use 64-bit
+float values, whereas mat4 defaults to 32-bit floats.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="util_init.js.html">util/init.js</a>, <a href="util_init.js.html#line237">line 237</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    identity mat4 compatible array.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Array</span>
 
 
     </dd>
@@ -1860,6 +2281,425 @@ are intended to used as a anisotropic scaling factors.
 
 
         
+            
+
+    
+
+    <h4 class="name" id=".throttle"><span class="type-signature">(static) </span>throttle<span class="signature">(delay, no_trailing<span class="signature-attributes">opt</span>, callback, accumulator<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {function}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Throttle execution of a function. Especially useful for rate limiting
+execution of handlers on events like resize and scroll. If you want to
+rate-limit execution of a function to a single time see
+<a href="geo.util.html#.debounce">geo.util.debounce</a>.
+
+In this visualization, | is a throttled-function call and X is the actual
+callback execution:
+
+::
+  Throttled with `no_trailing` specified as false or unspecified:
+  ||||||||||||||||||||||||| (pause) |||||||||||||||||||||||||
+  X    X    X    X    X    X        X    X    X    X    X    X
+
+  Throttled with `no_trailing` specified as true:
+  ||||||||||||||||||||||||| (pause) |||||||||||||||||||||||||
+  X    X    X    X    X             X    X    X    X    X
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>delay</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">A zero-or-greater delay in milliseconds. For event
+   callbacks, values around 100 or 250 (or even higher) are most useful.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>no_trailing</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+
+            <td class="description last">If no_trailing is
+   true, callback will only execute every `delay` milliseconds while the
+   throttled-function is being called. If no_trailing is false or
+   unspecified, callback will be executed one final time after the last
+   throttled-function call. (After the throttled-function has not been
+   called for `delay` milliseconds, the internal counter is reset)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">A function to be executed after `delay`
+   milliseconds. The `this` context and all arguments are passed through,
+   as-is, to `callback` when the throttled-function is executed.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>accumulator</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">A function to be executed (synchronously)
+   during **each** call to the wrapped function.  Typically, this
+   this method is used to accumulate values that the callback uses
+   when it finally executes.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="util_throttle.js.html">util/throttle.js</a>, <a href="util_throttle.js.html#line23">line 23</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The throttled version of `callback`
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">function</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>var throttled = geo.util.throttle( delay, [ no_trailing, ] callback );
+$('selector').bind( 'someevent', throttled );
+$('selector').unbind( 'someevent', throttled );</code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".vec3AsArray"><span class="type-signature">(static) </span>vec3AsArray<span class="signature">()</span><span class="type-signature"> &rarr; {Array}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Create a vec3 that is always an array.  This should only be used if it
+will not be used in a WebGL context.  Plain arrays usually use 64-bit
+float values, whereas vec3 defaults to 32-bit floats.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="util_init.js.html">util/init.js</a>, <a href="util_init.js.html#line226">line 226</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    zeroed-out vec3 compatible array.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Array</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
     
 
     
@@ -1875,13 +2715,13 @@ are intended to used as a anisotropic scaling factors.
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.camera.html">camera</a></li><li><a href="geo.choroplethFeature.html">choroplethFeature</a></li><li><a href="geo.clock.html">clock</a></li><li><a href="geo.contourFeature.html">contourFeature</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.choroplethFeature.html">choroplethFeature</a></li><li><a href="geo.gl.contourFeature.html">contourFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.svgWidget.html">svgWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.imageTile.html">imageTile</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.tile.html">tile</a></li><li><a href="geo.tileCache.html">tileCache</a></li><li><a href="geo.tileLayer.html">tileLayer</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.ClusterGroup.html">ClusterGroup</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.camera.html">camera</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.camera.html">camera</a></li><li><a href="geo.choroplethFeature.html">choroplethFeature</a></li><li><a href="geo.clock.html">clock</a></li><li><a href="geo.contourFeature.html">contourFeature</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fetchQueue.html">fetchQueue</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.choroplethFeature.html">choroplethFeature</a></li><li><a href="geo.gl.contourFeature.html">contourFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.svgWidget.html">svgWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.imageTile.html">imageTile</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.tile.html">tile</a></li><li><a href="geo.tileCache.html">tileCache</a></li><li><a href="geo.tileLayer.html">tileLayer</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.ClusterGroup.html">ClusterGroup</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.camera.html">camera</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Sat Dec 19 2015 14:27:25 GMT-0500 (EST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Thu Jan 07 2016 16:46:09 GMT-0500 (EST)
 </footer>
 
 <script> prettyPrint(); </script>

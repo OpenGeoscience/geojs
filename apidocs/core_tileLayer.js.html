@@ -164,7 +164,7 @@
     options = $.extend(true, {}, this.constructor.defaults, options || {});
     if (!options.cacheSize) {
       // this size should be sufficient for a 4k display
-      options.cacheSize = options.keepLower ? 400 : 200;
+      options.cacheSize = options.keepLower ? 600 : 200;
     }
     if ($.type(options.subdomains) === 'string') {
       options.subdomains = options.subdomains.split('');
@@ -184,8 +184,12 @@
       options.url = m_tileUrlFromTemplate(options.url);
     }
 
-    var lastZoom = null, lastX = null, lastY = null, s_init = this._init,
-        _deferredPurge = null;
+    var lastZoom = null,
+        lastX = null,
+        lastY = null,
+        s_init = this._init,
+        s_exit = this._exit,
+        m_exited;
 
     // copy the options into a private variable
     this._options = $.extend(true, {}, options);
@@ -203,6 +207,21 @@
 
     // initialize the in memory tile cache
     this._cache = geo.tileCache({size: options.cacheSize});
+
+    // initialize the tile fetch queue
+    this._queue = geo.fetchQueue({
+      // this should probably be 6 * subdomains.length if subdomains are used
+      size: 6,
+      // if track is the same as the cache size, then neither processing time
+      // nor memory will be wasted.  Larger values will use more memory,
+      // smaller values will do needless computations.
+      track: options.cacheSize,
+      needed: function (tile) {
+        return tile === this.cache.get(tile.toString());
+      }.bind(this)
+    });
+
+    var m_tileOffsetValues = {};
 
     /**
      * Readonly accessor to the options object
@@ -318,7 +337,7 @@
       var o = this._origin(level);
       var map = this.map();
       point = this.displayToLevel(map.gcsToDisplay(point, null), level);
-      var to = this._options.tileOffset(level);
+      var to = this._tileOffset(level);
       if (to) {
         point.x += to.x;
         point.y += to.y;
@@ -348,7 +367,7 @@
             size: {x: this._options.tileWidth, y: this._options.tileHeight},
             url: ''
           }));
-      var to = this._options.tileOffset(tile.index.level),
+      var to = this._tileOffset(tile.index.level),
           bounds = tile.bounds({x: 0, y: 0}, to),
           map = this.map(),
           unit = map.unitsPerPixel(tile.index.level);
@@ -389,6 +408,7 @@
       return geo.tile({
         index: index,
         size: {x: this._options.tileWidth, y: this._options.tileHeight},
+        queue: this._queue,
         url: this._options.url(urlParams.x, urlParams.y, urlParams.level || 0,
                                this._options.subdomains)
       });
@@ -470,6 +490,9 @@
           start, end, indexRange, source, center,
           level, minLevel = this._options.keepLower ? 0 : maxLevel;
 
+      /* Generate a list of the tiles that we want to create.  This is done
+       * before sorting, because we want to actually generate the tiles in
+       * the sort order. */
       for (level = minLevel; level &lt;= maxLevel; level += 1) {
         // get the tile range to fetch
         indexRange = this._getTileRange(level, bounds);
@@ -498,7 +521,7 @@
             }
 
             if (this.isValid(source)) {
-              tiles.push(this._getTileCached($.extend({}, index), source));
+              tiles.push({index: $.extend({}, index), source: source});
             }
           }
         }
@@ -507,9 +530,23 @@
       if (sorted) {
         center = {
           x: (start.x + end.x) / 2,
-          y: (start.y + end.y) / 2
+          y: (start.y + end.y) / 2,
+          level: maxLevel,
+          bottomLevel: maxLevel
         };
+        var numTiles = Math.max(end.x - start.x, end.y - start.y) + 1;
+        for (; numTiles >= 1; numTiles /= 2) {
+          center.bottomLevel -= 1;
+        }
         tiles.sort(this._loadMetric(center));
+        /* If we are using a fetch queue, start a new batch */
+        if (this._queue) {
+          this._queue.batch(true);
+        }
+      }
+      /* Actually get the tiles. */
+      for (i = 0; i &lt; tiles.length; i += 1) {
+        tiles[i] = this._getTileCached(tiles[i].index, tiles[i].source);
       }
       return tiles;
     };
@@ -545,15 +582,22 @@
       return function (a, b) {
         var a0, b0, dx, dy, cx, cy, scale;
 
+        a = a.index || a;
+        b = b.index || b;
         // shortcut if zoom level differs
         if (a.level !== b.level) {
-          return b.level - a.level;
+          if (center.bottomLevel &amp;&amp; ((a.level >= center.bottomLevel) !==
+                                     (b.level >= center.bottomLevel))) {
+            return a.level >= center.bottomLevel ? -1 : 1;
+          }
+          return a.level - b.level;
         }
 
-        // compute the center coordinates relative to a.level
+        /* compute the center coordinates relative to a.level.  Since we really
+         * care about the center of the tiles, use an offset */
         scale = Math.pow(2, a.level - center.level);
-        cx = center.x * scale;
-        cy = center.y * scale;
+        cx = (center.x + 0.5) * scale - 0.5;
+        cy = (center.y + 0.5) * scale - 0.5;
 
         // calculate distances to the center squared
         dx = a.x - cx;
@@ -645,9 +689,9 @@
       // apply a transform to place the image correctly
       container.append(tile.image);
       container.css({
-        'position': 'absolute',
-        'left': bounds.left + 'px',
-        'top': bounds.top + 'px'
+        position: 'absolute',
+        left: (bounds.left - parseInt(div.attr('offsetx') || 0)) + 'px',
+        top: (bounds.top - parseInt(div.attr('offsety') || 0)) + 'px'
       });
 
       // apply fade in animation
@@ -844,6 +888,9 @@
      * @return {DOM}
      */
     this._getSubLayer = function (level) {
+      if (!this.canvas()) {
+        return;
+      }
       var node = this.canvas()
         .find('div[data-tile-layer=' + level.toFixed() + ']').get(0);
       if (!node) {
@@ -858,67 +905,97 @@
     /**
      * Set sublayer transforms to align them with the given zoom level.
      * @param {number} level The target zoom level
+     * @param {object} view The view bounds.  The top and left are used to
+     *                      adjust the offset of tile layers.
+     * @return {object} the x and y offsets for the current level.
      */
-    this._updateSubLayers = function (level) {
-      this.canvas().find('.geo-tile-layer').each(function (idx, el) {
+    this._updateSubLayers = function (level, view) {
+      var canvas = this.canvas(),
+          lastlevel = parseInt(canvas.attr('lastlevel')),
+          lastx = parseInt(canvas.attr('lastoffsetx') || 0),
+          lasty = parseInt(canvas.attr('lastoffsety') || 0);
+      if (lastlevel === level &amp;&amp; Math.abs(lastx - view.left) &lt; 65536 &amp;&amp;
+          Math.abs(lasty - view.top) &lt; 65536) {
+        return {x: lastx, y: lasty};
+      }
+      var to = this._tileOffset(level),
+          x = parseInt(view.left) + to.x,
+          y = parseInt(view.top) + to.y;
+      canvas.find('.geo-tile-layer').each(function (idx, el) {
         var $el = $(el),
             layer = parseInt($el.data('tileLayer'));
         $el.css(
           'transform',
           'scale(' + Math.pow(2, level - layer) + ')'
         );
+        var layerx = parseInt(x / Math.pow(2, level - layer)),
+            layery = parseInt(y / Math.pow(2, level - layer)),
+            dx = layerx - parseInt($el.attr('offsetx') || 0),
+            dy = layery - parseInt($el.attr('offsety') || 0);
+        $el.attr({offsetx: layerx, offsety: layery});
+        $el.find('.geo-tile-container').each(function (tileidx, tileel) {
+          $(tileel).css({
+            left: (parseInt($(tileel).css('left')) - dx) + 'px',
+            top: (parseInt($(tileel).css('top')) - dy) + 'px'
+          });
+        }.bind(this));
       }.bind(this));
+      canvas.attr({lastoffsetx: x, lastoffsety: y, lastlevel: level});
+      return {x: x, y: y};
     };
 
     /**
      * Update the view according to the map/camera.
      * @returns {this} Chainable
      */
-    this._update = function () {
+    this._update = function (evt) {
+      /* Ignore zoom events, as they are ALWAYS followed by a pan event */
+      if (evt &amp;&amp; evt.event &amp;&amp; evt.event.event === geo.event.zoom) {
+        return;
+      }
       var map = this.map(),
           mapZoom = map.zoom(),
           zoom = this._options.tileRounding(mapZoom),
           center = this.displayToLevel(undefined, zoom),
           bounds = map.bounds(undefined, null),
-          tiles, view = this._getViewBounds(), myPurge = {};
+          tiles, view = this._getViewBounds();
 
-      _deferredPurge = myPurge;
       tiles = this._getTiles(
         zoom, bounds, true
       );
 
-      // Update the transform for the local layer coordinates
-      this._updateSubLayers(zoom);
+      if (this._updateSubLayers) {
+        // Update the transform for the local layer coordinates
+        var offset = this._updateSubLayers(zoom, view) || {x: 0, y: 0};
 
-      var to = this._options.tileOffset(zoom);
-      if (this.renderer() === null) {
-        this.canvas().css(
-          'transform-origin',
-          'center center'
-        );
-        this.canvas().css(
-          'transform',
-          'scale(' + (Math.pow(2, mapZoom - zoom)) + ')' +
-          'translate(' +
-          (-to.x) + 'px' + ',' +
-          (-to.y) + 'px' + ')' +
-          'translate(' +
-          (map.size().width / 2) + 'px' + ',' +
-          (map.size().height / 2) + 'px' + ')' +
-          'translate(' +
-          (-(view.left + view.right) / 2) + 'px' + ',' +
-          (-(view.bottom + view.top) / 2) + 'px' + ')' +
-          ''
-        );
+        var to = this._tileOffset(zoom);
+        if (this.renderer() === null) {
+          this.canvas().css(
+            'transform-origin',
+            'center center'
+          );
+          this.canvas().css(
+            'transform',
+            'scale(' + (Math.pow(2, mapZoom - zoom)) + ')' +
+            'translate(' +
+            (-to.x + -(view.left + view.right) / 2 + map.size().width / 2 +
+             offset.x) + 'px' + ',' +
+            (-to.y + -(view.bottom + view.top) / 2 + map.size().height / 2 +
+             offset.y) + 'px' + ')' +
+            ''
+          );
+        }
+        /* Set some attributes that can be used by non-css based viewers.  This
+         * doesn't include the map center, as that may need to be handled
+         * differently from the view center. */
+        this.canvas().attr({
+          scale: Math.pow(2, mapZoom - zoom),
+          dx: -to.x + -(view.left + view.right) / 2,
+          dy: -to.y + -(view.bottom + view.top) / 2,
+          offsetx: offset.x,
+          offsety: offset.y
+        });
       }
-      /* Set some attributes that can be used by non-css based viewers.  This
-       * doesn't include the map center, as that may need to be handled
-       * differently from the view center. */
-      this.canvas().attr({
-        scale: Math.pow(2, mapZoom - zoom),
-        dx: -to.x + -(view.left + view.right) / 2,
-        dy: -to.y + -(view.bottom + view.top) / 2
-      });
 
       lastZoom = mapZoom;
       lastX = center.x;
@@ -928,38 +1005,53 @@
       this._tileTree = {};
 
       tiles.forEach(function (tile) {
-        tile.then(function () {
-          if (tile !== this.cache.get(tile.toString())) {
-            /* If the tile has fallen out of the cache, don't draw it -- it is
-             * untracked.  This may be an indication that a larger cache should
-             * have been used. */
-            return;
-          }
-          /* Check if a tile is still desired.  Don't draw it if it isn't. */
-          var mapZoom = map.zoom(),
-              zoom = this._options.tileRounding(mapZoom),
-              bounds = this._getViewBounds();
-          if (this._canPurge(tile, bounds, zoom)) {
-            this.remove(tile);
-            return;
-          }
-
+        if (tile.fetched()) {
+          /* if we have already fetched the tile, we know we can just draw it,
+           * as the bounds won't have changed since the call to _getTiles. */
           this.drawTile(tile);
 
           // mark the tile as covered
           this._setTileTree(tile);
-        }.bind(this));
+        } else {
+          tile.then(function () {
+            if (m_exited) {
+              /* If we have disconnected the renderer, do nothing.  This
+               * happens when the layer is being deleted. */
+              return;
+            }
+            if (tile !== this.cache.get(tile.toString())) {
+              /* If the tile has fallen out of the cache, don't draw it -- it
+               * is untracked.  This may be an indication that a larger cache
+               * should have been used. */
+              return;
+            }
+            /* Check if a tile is still desired.  Don't draw it if it isn't. */
+            var mapZoom = map.zoom(),
+                zoom = this._options.tileRounding(mapZoom),
+                view = this._getViewBounds();
+            if (this._canPurge(tile, view, zoom)) {
+              this.remove(tile);
+              return;
+            }
 
-        this.addPromise(tile);
+            this.drawTile(tile);
+
+            // mark the tile as covered
+            this._setTileTree(tile);
+          }.bind(this));
+
+          this.addPromise(tile);
+        }
       }.bind(this));
 
       // purge all old tiles when the new tiles are loaded (successfully or not)
       $.when.apply($, tiles)
         .done(// called on success and failure
           function () {
-            if (_deferredPurge === myPurge) {
-              this._purge(zoom, true);
-            }
+            var map = this.map(),
+                mapZoom = map.zoom(),
+                zoom = this._options.tileRounding(mapZoom);
+            this._purge(zoom, true);
           }.bind(this)
         );
     };
@@ -1065,7 +1157,7 @@
     this._outOfBounds = function (tile, bounds) {
       /* We may want to add an (n) tile edge buffer so we appear more
        * responsive */
-      var to = this._options.tileOffset(tile.index.level);
+      var to = this._tileOffset(tile.index.level);
       var scale = 1;
       if (tile.index.level !== bounds.level) {
         scale = Math.pow(2, (bounds.level || 0) - (tile.index.level || 0));
@@ -1167,6 +1259,46 @@
     };
 
     /**
+     * Get or set the subdomains used for templating.
+     *
+     * @param {string|list} [subdomains] A comma-separated list, a string of
+     *      single character subdomains, or a list.
+     * @returns {string|list|this}
+     */
+    this.subdomains = function (subdomains) {
+      if (subdomains === undefined) {
+        return this._options.subdomains;
+      }
+      if (subdomains) {
+        if ($.type(subdomains) === 'string') {
+          if (subdomains.indexOf(',') >= 0) {
+            subdomains = subdomains.split(',');
+          } else {
+            subdomains = subdomains.split('');
+          }
+        }
+        this._options.subdomains = subdomains;
+        this.reset();
+        this.map().draw();
+      }
+      return this;
+    };
+
+    /**
+     * Return a value from the tileOffset function, caching it for different
+     * levels.
+     *
+     * @param {Number} level the level to pass to the tileOffset function.
+     * @returns {Object} a tile offset object with x and y properties.
+     */
+    this._tileOffset = function (level) {
+      if (m_tileOffsetValues[level] === undefined) {
+        m_tileOffsetValues[level] = this._options.tileOffset(level);
+      }
+      return m_tileOffsetValues[level];
+    };
+
+    /**
      * Initialize after the layer is added to the map.
      */
     this._init = function () {
@@ -1181,6 +1313,16 @@
           this._getSubLayer(sublayer);
         }
       }
+      return this;
+    };
+
+    /**
+     * Clean up the layer.
+     */
+    this._exit = function () {
+      // call super method
+      s_exit.apply(this, arguments);
+      m_exited = true;
       return this;
     };
 
@@ -1230,13 +1372,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.camera.html">camera</a></li><li><a href="geo.choroplethFeature.html">choroplethFeature</a></li><li><a href="geo.clock.html">clock</a></li><li><a href="geo.contourFeature.html">contourFeature</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.choroplethFeature.html">choroplethFeature</a></li><li><a href="geo.gl.contourFeature.html">contourFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.svgWidget.html">svgWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.imageTile.html">imageTile</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.tile.html">tile</a></li><li><a href="geo.tileCache.html">tileCache</a></li><li><a href="geo.tileLayer.html">tileLayer</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.ClusterGroup.html">ClusterGroup</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.camera.html">camera</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.camera.html">camera</a></li><li><a href="geo.choroplethFeature.html">choroplethFeature</a></li><li><a href="geo.clock.html">clock</a></li><li><a href="geo.contourFeature.html">contourFeature</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fetchQueue.html">fetchQueue</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.choroplethFeature.html">choroplethFeature</a></li><li><a href="geo.gl.contourFeature.html">contourFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.svgWidget.html">svgWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.imageTile.html">imageTile</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.tile.html">tile</a></li><li><a href="geo.tileCache.html">tileCache</a></li><li><a href="geo.tileLayer.html">tileLayer</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.ClusterGroup.html">ClusterGroup</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.camera.html">camera</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Sat Dec 19 2015 14:27:22 GMT-0500 (EST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Thu Jan 07 2016 16:46:08 GMT-0500 (EST)
 </footer>
 
 <script> prettyPrint(); </script>
