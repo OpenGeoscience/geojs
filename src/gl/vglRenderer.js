@@ -23,7 +23,8 @@ geo.gl.vglRenderer = function (arg) {
       m_width = 0,
       m_height = 0,
       m_renderAnimFrameRef = null,
-      s_init = this._init;
+      s_init = this._init,
+      s_exit = this._exit;
 
   /// TODO: Move this API to the base class
   ////////////////////////////////////////////////////////////////////////////
@@ -127,6 +128,16 @@ geo.gl.vglRenderer = function (arg) {
       });
     }
     return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Exit
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._exit = function () {
+    m_viewer.exit();
+    s_exit();
   };
 
   this._updateRendererCamera = function () {
