@@ -5,7 +5,7 @@ geo.gl.tileLayer = function () {
   this._drawTile = function (tile) {
     var bounds = this._tileBounds(tile),
         level = tile.index.level || 0,
-        to = this._options.tileOffset(level);
+        to = this._tileOffset(level);
     var ul = this.fromLocal(this.fromLevel({
       x: bounds.left - to.x, y: bounds.top - to.y
     }, level), 0);
@@ -19,6 +19,8 @@ geo.gl.tileLayer = function () {
       .upperLeft([ul.x, ul.y, level * 1e-7])
       .lowerRight([lr.x, lr.y, level * 1e-7])
       .style({image: tile._image});
+    /* Don't respond to geo events */
+    tile.feature.geoTrigger = undefined;
     tile.feature.gcs(m_this.map().gcs());
     tile.feature._update();
     m_this.draw();
@@ -35,7 +37,7 @@ geo.gl.tileLayer = function () {
 
   /* These functions don't need to do anything. */
   this._getSubLayer = function () {};
-  this._updateSubLayer = function () {};
+  this._updateSubLayer = undefined;
 };
 
 geo.registerLayerAdjustment('vgl', 'tile', geo.gl.tileLayer);

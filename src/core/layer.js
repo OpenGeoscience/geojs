@@ -338,9 +338,13 @@ geo.layer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Init layer
+   *
+   * @param {boolean} noEvents if a subclass of this intends to bind the
+   *    resize, pan, and zoom events itself, set this flag to true to avoid
+   *    binding them here.
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._init = function () {
+  this._init = function (noEvents) {
     if (m_initialized) {
       return m_this;
     }
@@ -371,18 +375,20 @@ geo.layer = function (arg) {
 
     m_initialized = true;
 
-    /// Bind events to handlers
-    m_this.geoOn(geo.event.resize, function (event) {
-      m_this._update({event: event});
-    });
+    if (!noEvents) {
+      /// Bind events to handlers
+      m_this.geoOn(geo.event.resize, function (event) {
+        m_this._update({event: event});
+      });
 
-    m_this.geoOn(geo.event.pan, function (event) {
-      m_this._update({event: event});
-    });
+      m_this.geoOn(geo.event.pan, function (event) {
+        m_this._update({event: event});
+      });
 
-    m_this.geoOn(geo.event.zoom, function (event) {
-      m_this._update({event: event});
-    });
+      m_this.geoOn(geo.event.zoom, function (event) {
+        m_this._update({event: event});
+      });
+    }
 
     return m_this;
   };
