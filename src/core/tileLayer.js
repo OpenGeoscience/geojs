@@ -156,7 +156,12 @@
       options.url = m_tileUrlFromTemplate(options.url);
     }
 
-    var lastZoom = null, lastX = null, lastY = null, s_init = this._init,
+    var lastZoom = null,
+        lastX = null,
+        lastY = null,
+        s_init = this._init,
+        s_exit = this._exit,
+        m_exited,
         _deferredPurge = null;
 
     // copy the options into a private variable
@@ -980,6 +985,11 @@
           this._setTileTree(tile);
         } else {
           tile.then(function () {
+            if (m_exited) {
+              /* If we have disconnected the renderer, do nothing.  This
+               * happens when the layer is being deleted. */
+              return;
+            }
             if (tile !== this.cache.get(tile.toString())) {
               /* If the tile has fallen out of the cache, don't draw it -- it
                * is untracked.  This may be an indication that a larger cache
@@ -1259,6 +1269,16 @@
           this._getSubLayer(sublayer);
         }
       }
+      return this;
+    };
+
+    /**
+     * Clean up the layer.
+     */
+    this._exit = function () {
+      // call super method
+      s_exit.apply(this, arguments);
+      m_exited = true;
       return this;
     };
 

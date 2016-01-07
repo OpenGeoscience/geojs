@@ -1,5 +1,5 @@
 // Test geo.core.osmLayer
-/*global describe, it, expect, geo, waitForIt*/
+/*global describe, it, expect, geo, waitForIt, mockVGLRenderer*/
 
 describe('geo.core.osmLayer', function () {
   'use strict';
@@ -69,6 +69,7 @@ describe('geo.core.osmLayer', function () {
     });
     describe('vgl', function () {
       it('creation', function () {
+        mockVGLRenderer();
         var map = create_map();
         map.createLayer('osm', {renderer: 'vgl'});
         expect(map.node().find('.webgl-canvas').length).toBe(1);
@@ -77,6 +78,7 @@ describe('geo.core.osmLayer', function () {
     describe('switch renderer', function () {
       var map, layer;
       it('vgl to null', function () {
+        mockVGLRenderer();
         map = create_map();
         layer = map.createLayer('osm', {renderer: 'vgl'});
         expect(map.node().find('.webgl-canvas').length).toBe(1);
