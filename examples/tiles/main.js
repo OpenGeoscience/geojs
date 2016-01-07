@@ -120,8 +120,10 @@ $(function () {
   }
   // For image tile servers, where we know the maximum width and height, use
   // a pixel coordinate system.
+  var w, h;
   if (query.w && query.h) {
-    var w = parseInt(query.w), h = parseInt(query.h);
+    w = parseInt(query.w);
+    h = parseInt(query.h);
     // Set a pixel coordinate system where 0, 0 is the upper left and w, h is
     // the lower-right.
     /* If both ingcs and gcs are set to an empty string '', the coordinates
@@ -137,9 +139,6 @@ $(function () {
     mapParams.center = {x: w / 2, y: h / 2};
     mapParams.max = Math.ceil(Math.log(Math.max(w, h) / 256) / Math.log(2));
     mapParams.clampBoundsX = mapParams.clampBoundsY = true;
-    // unitsPerPixel is at zoom level 0.  We want each pixel to be 1 at the
-    // maximum zoom
-    mapParams.unitsPerPixel = Math.pow(2, mapParams.max);
     layerParams.maxLevel = mapParams.max;
     layerParams.wrapX = layerParams.wrapY = false;
     layerParams.tileOffset = function () {
@@ -158,6 +157,24 @@ $(function () {
   if (query.min !== undefined) {
     mapParams.min = parseFloat(query.min);
   }
+  if (query.attribution !== undefined) {
+    layerParams.attribution = query.attribution;
+  }
+  if (query.round) {
+    layerParams.tileRounding = Math[query.round];
+  }
+  if (query.tileWidth) {
+    layerParams.tileWidth = parseInt(query.tileWidth);
+  }
+  if (query.tileHeight) {
+    layerParams.tileHeight = parseInt(query.tileHeight);
+  }
+  if (w && h) {
+    mapParams.max = Math.ceil(Math.log(Math.max(
+        w / (layerParams.tileWidth || 256),
+        h / (layerParams.tileHeight || 256))) / Math.log(2));
+    layerParams.maxLevel = mapParams.max;
+  }
   if (query.max !== undefined) {
     mapParams.max = parseFloat(query.max);
   }
@@ -165,11 +182,10 @@ $(function () {
   if (!layerParams.maxLevel) {
     layerParams.maxLevel = 25;
   }
-  if (query.attribution !== undefined) {
-    layerParams.attribution = query.attribution;
-  }
-  if (query.round) {
-    layerParams.tileRounding = Math[query.round];
+  if (w && h) {
+    // unitsPerPixel is at zoom level 0.  We want each pixel to be 1 at the
+    // maximum zoom
+    mapParams.unitsPerPixel = Math.pow(2, mapParams.max);
   }
   // Populate boolean flags for the map
   $.each({
