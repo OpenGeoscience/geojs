@@ -40,6 +40,7 @@
     this._wrap = spec.wrap || {x: 1, y: 1};
     this._url = spec.url;
     this._fetched = false;
+    this._queue = spec.queue || null;
 
     /**
      * Return the index coordinates.
@@ -98,8 +99,13 @@
      *
      */
     this.then = function (onSuccess, onFailure) {
-      this.fetch(); // This will replace the current then method
-
+      // both fetch and _queueAdd can replace the current then method
+      if (!this.fetched() && this._queue && this._queue.add && (!this.state ||
+          this.state() === 'pending')) {
+        this._queue.add(this, this.fetch);
+      } else {
+        this.fetch();
+      }
       // Call then on the new promise
       this.then(onSuccess, onFailure);
       return this;

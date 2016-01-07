@@ -45,6 +45,7 @@
       return geo.imageTile({
         index: index,
         size: {x: this._options.tileWidth, y: this._options.tileHeight},
+        queue: this._queue,
         url: this._options.url(urlParams.x, urlParams.y, urlParams.level || 0,
                                this._options.subdomains)
       });
