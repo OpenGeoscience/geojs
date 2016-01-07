@@ -6,6 +6,7 @@
 /node_modules/*
 /bower_components/*
 .vimrc
+/geo.min.js
 *.py[ocd]
 /docs/_*
 /docs/*.py

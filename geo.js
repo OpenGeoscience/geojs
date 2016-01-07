@@ -303,7 +303,7 @@ Math.sinh = Math.sinh || function (x) {
 
 /*global geo*/
 
-geo.version = "0.6.0-rc.1";
+geo.version = "0.6.0";
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -3826,21 +3826,26 @@ vgl.mapper = function (arg) {
       m_bufferVertexAttributeMap = {},
       m_dynamicDraw = arg.dynamicDraw === undefined ? false : arg.dynamicDraw,
       m_glCompileTimestamp = vgl.timestamp(),
-      m_context = null;
+      m_context = null,
+      m_this = this;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Delete cached VBO if any
-   *
-   * @private
    */
   ////////////////////////////////////////////////////////////////////////////
-  function deleteVertexBufferObjects(renderState) {
+  this.deleteVertexBufferObjects = function (renderState) {
     var i;
-    for (i = 0; i < m_buffers.length; i += 1) {
-      renderState.m_context.deleteBuffer(m_buffers[i]);
+    var context = m_context;
+    if (renderState) {
+      context = renderState.m_context;
     }
-  }
+    if (context) {
+      for (i = 0; i < m_buffers.length; i += 1) {
+        context.deleteBuffer(m_buffers[i]);
+      }
+    }
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -3915,7 +3920,7 @@ vgl.mapper = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   function setupDrawObjects(renderState) {
     // Delete buffer objects from past if any.
-    deleteVertexBufferObjects(renderState);
+    m_this.deleteVertexBufferObjects(renderState);
 
     // Clear any cache related to buffers
     cleanUpDrawObjects(renderState);
@@ -5007,7 +5012,9 @@ vgl.renderer = function (arg) {
     renSt = new vgl.renderState();
     renSt.m_renderer = m_this;
     renSt.m_context = m_this.renderWindow().context();
-    m_this.m_depthBits = renSt.m_context.getParameter(vgl.GL.DEPTH_BITS);
+    if (!m_this.m_depthBits || m_this.m_contextChanged) {
+      m_this.m_depthBits = renSt.m_context.getParameter(vgl.GL.DEPTH_BITS);
+    }
     renSt.m_contextChanged = m_this.m_contextChanged;
 
     if (m_this.m_renderPasses) {
@@ -5070,8 +5077,14 @@ vgl.renderer = function (arg) {
       actor = sortedActors[i][1];
       if (actor.referenceFrame() ===
           vgl.boundingObject.ReferenceFrame.Relative) {
-        mat4.multiply(renSt.m_modelViewMatrix, m_this.m_camera.viewMatrix(),
-          actor.matrix());
+        var view = m_this.m_camera.viewMatrix();
+        /* If the view matrix is a plain array, keep it as such.  This is
+         * intended to preserve precision, and will only be the case if the
+         * view matrix was created by delibrately setting it as an array. */
+        if (view instanceof Array) {
+          renSt.m_modelViewMatrix = new Array(16);
+        }
+        mat4.multiply(renSt.m_modelViewMatrix, view, actor.matrix());
         renSt.m_projectionMatrix = m_this.m_camera.projectionMatrix();
         renSt.m_modelViewAlignment = m_this.m_camera.viewAlignment();
       } else {
@@ -5356,6 +5369,12 @@ vgl.renderer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.removeActor = function (actor) {
     if (m_this.m_sceneRoot.children().indexOf(actor) !== -1) {
+      /* When we remove an actor, free the VBOs of the mapper and mark the
+       * mapper as modified; it will reallocate VBOs as necessary. */
+      if (actor.mapper()) {
+        actor.mapper().deleteVertexBufferObjects();
+        actor.mapper().modified();
+      }
       m_this.m_sceneRoot.removeChild(actor);
       m_this.modified();
       return true;
@@ -5880,6 +5899,7 @@ vgl.renderWindow = function (canvas) {
     for (i = 0; i < m_renderers.length; i += 1) {
       m_renderers[i]._cleanup(renderState);
     }
+    vgl.clearCachedShaders(renderState ? renderState.m_context : null);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -6376,10 +6396,16 @@ vgl.camera = function (arg) {
    * it won't be recomputed unless something else changes.
    *
    * @param {mat4} view: new view matrix.
+   * @param {boolean} preserveType: if true, clone the input using slice.  This
+   *    can be used to ensure the array is a specific precision.
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.setViewMatrix = function (view) {
-    mat4.copy(m_viewMatrix, view);
+  this.setViewMatrix = function (view, preserveType) {
+    if (!preserveType) {
+      mat4.copy(m_viewMatrix, view);
+    } else {
+      m_viewMatrix = view.slice();
+    }
     m_computeModelViewMatrixTime.modified();
   };
 
@@ -7741,18 +7767,59 @@ vgl.shader = function (type) {
   }
   vgl.object.call(this);
 
-  var m_shaderHandle = null,
-      m_compileTimestamp = vgl.timestamp(),
+  var m_shaderContexts = [],
       m_shaderType = type,
       m_shaderSource = '';
+
+  /**
+   * A shader can be associated with multiple contexts.  Each context needs to
+   * be compiled and attached separately.  These are tracked in the
+   * m_shaderContexts array.
+   *
+   * @param renderState a renderState that includes a m_context value.
+   * @return an object with context, compileTimestamp, and, if compiled, a
+   *    shaderHandle entry.
+   */
+  this._getContextEntry = function (renderState) {
+    var context = renderState.m_context, i, entry;
+    for (i = 0; i < m_shaderContexts.length; i += 1) {
+      if (m_shaderContexts[i].context === context) {
+        return m_shaderContexts[i];
+      }
+    }
+    entry = {
+      context: context,
+      compileTimestamp: vgl.timestamp()
+    };
+    m_shaderContexts.push(entry);
+    return entry;
+  };
+
+  /**
+   * Remove the context from the list of tracked contexts.  This allows the
+   * associated shader handle to be GCed.  Does nothing if the context is not
+   * in the list of tracked contexts.
+   *
+   * @param renderState a renderState that includes a m_context value.
+   */
+  this.removeContext = function (renderState) {
+    var context = renderState.m_context, i;
+    for (i = 0; i < m_shaderContexts.length; i += 1) {
+      if (m_shaderContexts[i].context === context) {
+        m_shaderContexts.splice(i, 1);
+        return;
+      }
+    }
+  };
 
   /////////////////////////////////////////////////////////////////////////////
   /**
    * Get shader handle
    */
   /////////////////////////////////////////////////////////////////////////////
-  this.shaderHandle = function () {
-    return m_shaderHandle;
+  this.shaderHandle = function (renderState) {
+    var entry = this._getContextEntry(renderState);
+    return entry.shaderHandle;
   };
 
   /////////////////////////////////////////////////////////////////////////////
@@ -7797,28 +7864,29 @@ vgl.shader = function (type) {
    */
   /////////////////////////////////////////////////////////////////////////////
   this.compile = function (renderState) {
-    if (this.getMTime() < m_compileTimestamp.getMTime()) {
-      return m_shaderHandle;
+    var entry = this._getContextEntry(renderState);
+    if (this.getMTime() < entry.compileTimestamp.getMTime()) {
+      return entry.shaderHandle;
     }
 
-    renderState.m_context.deleteShader(m_shaderHandle);
-    m_shaderHandle = renderState.m_context.createShader(m_shaderType);
-    renderState.m_context.shaderSource(m_shaderHandle, m_shaderSource);
-    renderState.m_context.compileShader(m_shaderHandle);
+    renderState.m_context.deleteShader(entry.shaderHandle);
+    entry.shaderHandle = renderState.m_context.createShader(m_shaderType);
+    renderState.m_context.shaderSource(entry.shaderHandle, m_shaderSource);
+    renderState.m_context.compileShader(entry.shaderHandle);
 
     // See if it compiled successfully
-    if (!renderState.m_context.getShaderParameter(m_shaderHandle,
+    if (!renderState.m_context.getShaderParameter(entry.shaderHandle,
         vgl.GL.COMPILE_STATUS)) {
       console.log('[ERROR] An error occurred compiling the shaders: ' +
-                  renderState.m_context.getShaderInfoLog(m_shaderHandle));
+                  renderState.m_context.getShaderInfoLog(entry.shaderHandle));
       console.log(m_shaderSource);
-      renderState.m_context.deleteShader(m_shaderHandle);
+      renderState.m_context.deleteShader(entry.shaderHandle);
       return null;
     }
 
-    m_compileTimestamp.modified();
+    entry.compileTimestamp.modified();
 
-    return m_shaderHandle;
+    return entry.shaderHandle;
   };
 
   /////////////////////////////////////////////////////////////////////////////
@@ -7829,11 +7897,77 @@ vgl.shader = function (type) {
    */
   /////////////////////////////////////////////////////////////////////////////
   this.attachShader = function (renderState, programHandle) {
-    renderState.m_context.attachShader(programHandle, m_shaderHandle);
+    renderState.m_context.attachShader(
+        programHandle, this.shaderHandle(renderState));
   };
 };
 
 inherit(vgl.shader, vgl.object);
+
+
+/* We can use the same shader multiple times if it is identical.  This caches
+ * the last N shaders and will reuse them when possible.  The cache keeps the
+ * most recently requested shader at the front.  If you are doing anything more
+ * to a shader then creating it and setting its source once, do not use this
+ * cache.
+ */
+(function () {
+  'use strict';
+  var m_shaderCache = [],
+      m_shaderCacheMaxSize = 10;
+
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get a shader from the cache.  Create a new shader if necessary using a
+   * specific source.
+   *
+   * @param type One of vgl.GL.*_SHADER
+   * @param context the GL context for the shader.
+   * @param {string} source the source code of the shader.
+   */
+  /////////////////////////////////////////////////////////////////////////////
+  vgl.getCachedShader = function (type, context, source) {
+    for (var i = 0; i < m_shaderCache.length; i += 1) {
+      if (m_shaderCache[i].type === type &&
+          m_shaderCache[i].context === context &&
+          m_shaderCache[i].source === source) {
+        if (i) {
+          m_shaderCache.splice(0, 0, m_shaderCache.splice(i, 1)[0]);
+        }
+        return m_shaderCache[0].shader;
+      }
+    }
+    var shader = new vgl.shader(type);
+    shader.setShaderSource(source);
+    m_shaderCache.unshift({
+      type: type,
+      context: context,
+      source: source,
+      shader: shader
+    });
+    if (m_shaderCache.length >= m_shaderCacheMaxSize) {
+      m_shaderCache.splice(m_shaderCacheMaxSize,
+                           m_shaderCache.length - m_shaderCacheMaxSize);
+    }
+    return shader;
+  };
+
+  /////////////////////////////////////////////////////////////////////////////
+  /**
+   * Clear the shader cache.
+   *
+   * @param context the GL context to clear, or null for clear all.
+   */
+  /////////////////////////////////////////////////////////////////////////////
+  vgl.clearCachedShaders = function (context) {
+    for (var i = m_shaderCache.length - 1; i >= 0; i -= 1) {
+      if (context === null || context === undefined ||
+          m_shaderCache[i].context === context) {
+        m_shaderCache.splice(i, 1);
+      }
+    }
+  };
+})();
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -7854,12 +7988,16 @@ inherit(vgl.shader, vgl.object);
 
 var getBaseUrl = (function () {
   'use strict';
+  var baseUrl = '.';
   var scripts = document.getElementsByTagName('script');
-  var index = scripts.length - 1;
-  var vglScript = scripts[index];
-  index = vglScript.src.lastIndexOf('/');
-  var baseUrl = vglScript.src.substring(0, index);
-
+  /* When run in certain environments, there may be no scripts loaded.  For
+   * instance, jQuery's $.getScript won't add it to a script tag. */
+  if (scripts.length > 0) {
+    var index = scripts.length - 1;
+    var vglScript = scripts[index];
+    index = vglScript.src.lastIndexOf('/');
+    baseUrl = vglScript.src.substring(0, index);
+  }
   return function () { return baseUrl; };
 })();
 
@@ -8125,8 +8263,9 @@ vgl.shaderProgram = function () {
   this.deleteVertexAndFragment = function (renderState) {
     var i;
     for (i = 0; i < m_shaders.length; i += 1) {
-      renderState.m_context.detachShader(m_shaders[i].shaderHandle());
-      renderState.m_context.deleteShader(m_shaders[i].shaderHandle());
+      renderState.m_context.detachShader(m_shaders[i].shaderHandle(renderState));
+      renderState.m_context.deleteShader(m_shaders[i].shaderHandle(renderState));
+      m_shaders[i].removeContext(renderState);
     }
   };
 
@@ -8953,7 +9092,7 @@ inherit(vgl.lookupTable, vgl.texture);
  * @module vgl
  */
 
-/*global vgl, mat4, vec3, inherit*/
+/*global vgl, mat4, inherit*/
 //////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -9198,7 +9337,7 @@ vgl.modelViewOriginUniform = function (name, origin) {
     name = 'modelViewMatrix';
   }
 
-  var m_origin = vec3.fromValues(origin[0], origin[1], origin[2]);
+  var m_origin = [origin[0], origin[1], origin[2] || 0];
 
   vgl.uniform.call(this, vgl.GL.FLOAT_MAT4, name);
 
@@ -10057,7 +10196,6 @@ vgl.utils.computePowerOfTwo = function (value, pow) {
 //////////////////////////////////////////////////////////////////////////////
 vgl.utils.createTextureVertexShader = function (context) {
   'use strict';
-  context = context; /* unused parameter */
   var vertexShaderSource = [
         'attribute vec3 vertexPosition;',
         'attribute vec3 textureCoord;',
@@ -10069,10 +10207,9 @@ vgl.utils.createTextureVertexShader = function (context) {
         '{',
         'gl_PointSize = pointSize;',
         'gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
-        ' iTextureCoord = textureCoord;', '}'].join('\n'),
-      shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
-  shader.setShaderSource(vertexShaderSource);
-  return shader;
+        ' iTextureCoord = textureCoord;', '}'].join('\n');
+  return vgl.getCachedShader(vgl.GL.VERTEX_SHADER, context,
+                             vertexShaderSource);
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -10087,7 +10224,6 @@ vgl.utils.createTextureVertexShader = function (context) {
 //////////////////////////////////////////////////////////////////////////////
 vgl.utils.createTextureFragmentShader = function (context) {
   'use strict';
-  context = context; /* unused parameter */
   var fragmentShaderSource = [
         'varying highp vec3 iTextureCoord;',
         'uniform sampler2D sampler2d;',
@@ -10095,11 +10231,9 @@ vgl.utils.createTextureFragmentShader = function (context) {
         'void main(void) {',
         'gl_FragColor = vec4(texture2D(sampler2d, vec2(iTextureCoord.s, ' +
                         'iTextureCoord.t)).xyz, opacity);',
-        '}'].join('\n'),
-      shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
-
-  shader.setShaderSource(fragmentShaderSource);
-  return shader;
+        '}'].join('\n');
+  return vgl.getCachedShader(vgl.GL.FRAGMENT_SHADER, context,
+                             fragmentShaderSource);
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -10114,7 +10248,6 @@ vgl.utils.createTextureFragmentShader = function (context) {
 //////////////////////////////////////////////////////////////////////////////
 vgl.utils.createRgbaTextureFragmentShader = function (context) {
   'use strict';
-  context = context; /* unused parameter */
   var fragmentShaderSource = [
         'varying highp vec3 iTextureCoord;',
         'uniform sampler2D sampler2d;',
@@ -10125,11 +10258,9 @@ vgl.utils.createRgbaTextureFragmentShader = function (context) {
         '  color.w *= opacity;',
         '  gl_FragColor = color;',
         '}'
-      ].join('\n'),
-      shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
-
-  shader.setShaderSource(fragmentShaderSource);
-  return shader;
+      ].join('\n');
+  return vgl.getCachedShader(vgl.GL.FRAGMENT_SHADER, context,
+                             fragmentShaderSource);
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -10144,7 +10275,6 @@ vgl.utils.createRgbaTextureFragmentShader = function (context) {
 //////////////////////////////////////////////////////////////////////////////
 vgl.utils.createVertexShader = function (context) {
   'use strict';
-  context = context; /* unused parameter */
   var vertexShaderSource = [
         'attribute vec3 vertexPosition;',
         'attribute vec3 vertexColor;',
@@ -10157,11 +10287,9 @@ vgl.utils.createVertexShader = function (context) {
         '{',
         'gl_PointSize = pointSize;',
         'gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
-        ' iVertexColor = vertexColor;', '}'].join('\n'),
-      shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
-
-  shader.setShaderSource(vertexShaderSource);
-  return shader;
+        ' iVertexColor = vertexColor;', '}'].join('\n');
+  return vgl.getCachedShader(vgl.GL.VERTEX_SHADER, context,
+                             vertexShaderSource);
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -10176,7 +10304,6 @@ vgl.utils.createVertexShader = function (context) {
 //////////////////////////////////////////////////////////////////////////////
 vgl.utils.createPointVertexShader = function (context) {
   'use strict';
-  context = context; /* unused parameter */
   var vertexShaderSource = [
         'attribute vec3 vertexPosition;',
         'attribute vec3 vertexColor;',
@@ -10189,11 +10316,9 @@ vgl.utils.createPointVertexShader = function (context) {
         '{',
         'gl_PointSize =  vertexSize;',
         'gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
-        ' iVertexColor = vertexColor;', '}'].join('\n'),
-      shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
-
-  shader.setShaderSource(vertexShaderSource);
-  return shader;
+        ' iVertexColor = vertexColor;', '}'].join('\n');
+  return vgl.getCachedShader(vgl.GL.VERTEX_SHADER, context,
+                             vertexShaderSource);
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -10208,7 +10333,6 @@ vgl.utils.createPointVertexShader = function (context) {
 //////////////////////////////////////////////////////////////////////////////
 vgl.utils.createVertexShaderSolidColor = function (context) {
   'use strict';
-  context = context; /* unused parameter */
   var vertexShaderSource = [
         'attribute vec3 vertexPosition;',
         'uniform mediump float pointSize;',
@@ -10218,11 +10342,9 @@ vgl.utils.createVertexShaderSolidColor = function (context) {
         '{',
         'gl_PointSize = pointSize;',
         'gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
-        '}'].join('\n'),
-    shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
-
-  shader.setShaderSource(vertexShaderSource);
-  return shader;
+        '}'].join('\n');
+  return vgl.getCachedShader(vgl.GL.VERTEX_SHADER, context,
+                             vertexShaderSource);
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -10238,7 +10360,6 @@ vgl.utils.createVertexShaderSolidColor = function (context) {
 //////////////////////////////////////////////////////////////////////////////
 vgl.utils.createVertexShaderColorMap = function (context, min, max) {
   'use strict';
-  context = context; /* unused parameter */
   min = min; /* unused parameter */
   max = max; /* unused parameter */
   var vertexShaderSource = [
@@ -10255,11 +10376,9 @@ vgl.utils.createVertexShaderColorMap = function (context, min, max) {
         'gl_PointSize = pointSize;',
         'gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
         'iVertexScalar = (vertexScalar-lutMin)/(lutMax-lutMin);',
-        '}'].join('\n'),
-      shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
-
-  shader.setShaderSource(vertexShaderSource);
-  return shader;
+        '}'].join('\n');
+  return vgl.getCachedShader(vgl.GL.VERTEX_SHADER, context,
+                             vertexShaderSource);
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -10274,16 +10393,13 @@ vgl.utils.createVertexShaderColorMap = function (context, min, max) {
 //////////////////////////////////////////////////////////////////////////////
 vgl.utils.createFragmentShader = function (context) {
   'use strict';
-  context = context; /* unused parameter */
   var fragmentShaderSource = ['varying mediump vec3 iVertexColor;',
                               'uniform mediump float opacity;',
                               'void main(void) {',
                               'gl_FragColor = vec4(iVertexColor, opacity);',
-                              '}'].join('\n'),
-      shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
-
-  shader.setShaderSource(fragmentShaderSource);
-  return shader;
+                              '}'].join('\n');
+  return vgl.getCachedShader(vgl.GL.FRAGMENT_SHADER, context,
+                             fragmentShaderSource);
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -10298,8 +10414,6 @@ vgl.utils.createFragmentShader = function (context) {
 //////////////////////////////////////////////////////////////////////////////
 vgl.utils.createPhongVertexShader = function (context) {
   'use strict';
-  context = context; /* unused parameter */
-
   var vertexShaderSource = [
       'attribute highp vec3 vertexPosition;',
       'attribute mediump vec3 vertexNormal;',
@@ -10319,13 +10433,9 @@ vgl.utils.createPhongVertexShader = function (context) {
       'gl_Position = projectionMatrix * varPosition;',
       'varNormal = vec3(normalMatrix * vec4(vertexNormal, 0.0));',
       'varVertexColor = vertexColor;',
-      '}'].join('\n'),
-
-      shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
-
-  shader.setShaderSource(vertexShaderSource);
-
-  return shader;
+      '}'].join('\n');
+  return vgl.getCachedShader(vgl.GL.VERTEX_SHADER, context,
+                             vertexShaderSource);
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -10342,7 +10452,6 @@ vgl.utils.createPhongVertexShader = function (context) {
 //////////////////////////////////////////////////////////////////////////////
 vgl.utils.createPhongFragmentShader = function (context) {
   'use strict';
-  context = context; /* unused parameter */
   var fragmentShaderSource = [
     'uniform mediump float opacity;',
     'precision mediump float;',
@@ -10365,11 +10474,9 @@ vgl.utils.createPhongFragmentShader = function (context) {
     '  color = lambertian * varVertexColor;',
     '}',
     'gl_FragColor = vec4(color * opacity, 1.0 - opacity);',
-    '}'].join('\n'),
-    shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
-
-  shader.setShaderSource(fragmentShaderSource);
-  return shader;
+    '}'].join('\n');
+  return vgl.getCachedShader(vgl.GL.FRAGMENT_SHADER, context,
+                             fragmentShaderSource);
 };
 
 
@@ -10389,11 +10496,9 @@ vgl.utils.createFragmentShaderSolidColor = function (context, color) {
       'uniform mediump float opacity;',
       'void main(void) {',
       'gl_FragColor = vec4(' + color[0] + ',' + color[1] + ',' + color[2] + ', opacity);',
-      '}'].join('\n'),
-    shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
-
-  shader.setShaderSource(fragmentShaderSource);
-  return shader;
+      '}'].join('\n');
+  return vgl.getCachedShader(vgl.GL.FRAGMENT_SHADER, context,
+                             fragmentShaderSource);
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -10408,7 +10513,6 @@ vgl.utils.createFragmentShaderSolidColor = function (context, color) {
 //////////////////////////////////////////////////////////////////////////////
 vgl.utils.createFragmentShaderColorMap = function (context) {
   'use strict';
-  context = context; /* unused parameter */
   var fragmentShaderSource = [
         'varying mediump float iVertexScalar;',
         'uniform sampler2D sampler2d;',
@@ -10416,11 +10520,9 @@ vgl.utils.createFragmentShaderColorMap = function (context) {
         'void main(void) {',
         'gl_FragColor = vec4(texture2D(sampler2d, vec2(iVertexScalar, ' +
             '0.0)).xyz, opacity);',
-        '}'].join('\n'),
-      shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
-
-  shader.setShaderSource(fragmentShaderSource);
-  return shader;
+        '}'].join('\n');
+  return vgl.getCachedShader(vgl.GL.FRAGMENT_SHADER, context,
+                             fragmentShaderSource);
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -10435,7 +10537,6 @@ vgl.utils.createFragmentShaderColorMap = function (context) {
 //////////////////////////////////////////////////////////////////////////////
 vgl.utils.createPointSpritesVertexShader = function (context) {
   'use strict';
-  context = context; /* unused parameter */
   var vertexShaderSource = [
         'attribute vec3 vertexPosition;',
         'attribute vec3 vertexColor;',
@@ -10454,10 +10555,9 @@ vgl.utils.createPointSpritesVertexShader = function (context) {
         'iVertexScalar = vertexPosition.z;',
         'gl_Position = projectionMatrix * modelViewMatrix * ' +
             'vec4(vertexPosition.xy, height, 1.0);',
-        ' iVertexColor = vertexColor;', '}'].join('\n'),
-      shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
-  shader.setShaderSource(vertexShaderSource);
-  return shader;
+        ' iVertexColor = vertexColor;', '}'].join('\n');
+  return vgl.getCachedShader(vgl.GL.VERTEX_SHADER, context,
+                             vertexShaderSource);
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -10472,7 +10572,6 @@ vgl.utils.createPointSpritesVertexShader = function (context) {
 //////////////////////////////////////////////////////////////////////////////
 vgl.utils.createPointSpritesFragmentShader = function (context) {
   'use strict';
-  context = context; /* unused parameter */
   var fragmentShaderSource = [
         'varying mediump vec3 iVertexColor;',
         'varying highp float iVertexScalar;',
@@ -10501,11 +10600,9 @@ vgl.utils.createPointSpritesFragmentShader = function (context) {
         '} else {',
         '  gl_FragColor = vec4(texture2D(opacityLookup, realTexCoord).xyz, texOpacity);',
         '}}'
-    ].join('\n'),
-    shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
-
-  shader.setShaderSource(fragmentShaderSource);
-  return shader;
+    ].join('\n');
+  return vgl.getCachedShader(vgl.GL.FRAGMENT_SHADER, context,
+                             fragmentShaderSource);
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -12947,6 +13044,33 @@ vgl.DataBuffers = function (initialSize) {
       a.y = (a.y || 0) * Math.pow(b.y || 1, pow);
       a.z = (a.z || 0) * Math.pow(b.z || 1, pow);
       return a;
+    },
+
+    /**
+     * Create a vec3 that is always an array.  This should only be used if it
+     * will not be used in a WebGL context.  Plain arrays usually use 64-bit
+     * float values, whereas vec3 defaults to 32-bit floats.
+     *
+     * @returns {Array} zeroed-out vec3 compatible array.
+     */
+    vec3AsArray: function () {
+      return [0, 0, 0];
+    },
+
+    /**
+     * Create a mat4 that is always an array.  This should only be used if it
+     * will not be used in a WebGL context.  Plain arrays usually use 64-bit
+     * float values, whereas mat4 defaults to 32-bit floats.
+     *
+     * @returns {Array} identity mat4 compatible array.
+     */
+    mat4AsArray: function () {
+      return [
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+      ];
     }
   };
 
@@ -13984,6 +14108,218 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   };
 })();
 
+/**
+ * @file
+ * Based on the following jquery throttle / debounce plugin:
+ *
+ * jQuery throttle / debounce - v1.1 - 3/7/2010
+ * http://benalman.com/projects/jquery-throttle-debounce-plugin/
+ *
+ * @copyright 2010 "Cowboy" Ben Alman
+ * Dual licensed under the MIT and GPL licenses.
+ * http://benalman.com/about/license/
+ *
+ * The implementation included here is modified to support a callback
+ * method that can accumulate values between actual invocations of
+ * the throttled method.
+ */
+
+(function (window, undefined) {
+  'use strict';
+
+  // Internal method reference.
+  var _throttle;
+
+  /**
+   * Throttle execution of a function. Especially useful for rate limiting
+   * execution of handlers on events like resize and scroll. If you want to
+   * rate-limit execution of a function to a single time see
+   * {@link geo.util.debounce}.
+   *
+   * In this visualization, | is a throttled-function call and X is the actual
+   * callback execution:
+   *
+   * ::
+   *   Throttled with `no_trailing` specified as false or unspecified:
+   *   ||||||||||||||||||||||||| (pause) |||||||||||||||||||||||||
+   *   X    X    X    X    X    X        X    X    X    X    X    X
+   *
+   *   Throttled with `no_trailing` specified as true:
+   *   ||||||||||||||||||||||||| (pause) |||||||||||||||||||||||||
+   *   X    X    X    X    X             X    X    X    X    X
+   *
+   * @function geo.util.throttle
+   * @param {number} delay A zero-or-greater delay in milliseconds. For event
+   *    callbacks, values around 100 or 250 (or even higher) are most useful.
+   * @param {boolean} [no_trailing=false] If no_trailing is
+   *    true, callback will only execute every `delay` milliseconds while the
+   *    throttled-function is being called. If no_trailing is false or
+   *    unspecified, callback will be executed one final time after the last
+   *    throttled-function call. (After the throttled-function has not been
+   *    called for `delay` milliseconds, the internal counter is reset)
+   * @param {function} callback A function to be executed after `delay`
+   *    milliseconds. The `this` context and all arguments are passed through,
+   *    as-is, to `callback` when the throttled-function is executed.
+   * @param {function} [accumulator] A function to be executed (synchronously)
+   *    during **each** call to the wrapped function.  Typically, this
+   *    this method is used to accumulate values that the callback uses
+   *    when it finally executes.
+   *
+   * @returns {function} The throttled version of `callback`
+   *
+   * @example
+   * var throttled = geo.util.throttle( delay, [ no_trailing, ] callback );
+   * $('selector').bind( 'someevent', throttled );
+   * $('selector').unbind( 'someevent', throttled );
+   */
+  geo.util.throttle = function (delay, no_trailing,
+                                callback, accumulator, debounce_mode) {
+    // After wrapper has stopped being called, this timeout ensures that
+    // `callback` is executed at the proper times in `throttle` and `end`
+    // debounce modes.
+    var timeout_id,
+
+      // Keep track of the last time `callback` was executed.
+      last_exec = 0;
+
+    // `no_trailing` defaults to falsy.
+    if (typeof no_trailing !== 'boolean') {
+      debounce_mode = accumulator;
+      accumulator = callback;
+      callback = no_trailing;
+      no_trailing = undefined;
+    }
+
+    // accumulator defaults to no-op
+    if (typeof accumulator !== 'function') {
+      debounce_mode = accumulator;
+      accumulator = function () {};
+    }
+
+    // The `wrapper` function encapsulates all of the throttling / debouncing
+    // functionality and when executed will limit the rate at which `callback`
+    // is executed.
+    function wrapper() {
+      var that = this, // jshint ignore: line
+        elapsed = +new Date() - last_exec,
+        args = arguments;
+
+      // Execute `callback` and update the `last_exec` timestamp.
+      function exec() {
+        last_exec = +new Date();
+        callback.apply(that, args);
+      }
+
+      // If `debounce_mode` is true (at_begin) this is used to clear the flag
+      // to allow future `callback` executions.
+      function clear() {
+        timeout_id = undefined;
+      }
+
+      // always call the accumulator first
+      accumulator.apply(that, args);
+
+      if (debounce_mode && !timeout_id) {
+        // Since `wrapper` is being called for the first time and
+        // `debounce_mode` is true (at_begin), execute `callback`.
+        exec();
+      }
+
+      // Clear any existing timeout.
+      void(
+        timeout_id && clearTimeout(timeout_id)
+      );
+
+      if (debounce_mode === undefined && elapsed > delay) {
+        // In throttle mode, if `delay` time has been exceeded, execute
+        // `callback`.
+        exec();
+
+      } else if (no_trailing !== true) {
+        // In trailing throttle mode, since `delay` time has not been
+        // exceeded, schedule `callback` to execute `delay` ms after most
+        // recent execution.
+        //
+        // If `debounce_mode` is true (at_begin), schedule `clear` to execute
+        // after `delay` ms.
+        //
+        // If `debounce_mode` is false (at end), schedule `callback` to
+        // execute after `delay` ms.
+        timeout_id = setTimeout(
+          debounce_mode ?
+            clear :
+            exec,
+          debounce_mode === undefined ?
+            delay - elapsed :
+            delay
+        );
+      }
+    }
+
+    // Return the wrapper function.
+    return wrapper;
+  };
+
+  _throttle = geo.util.throttle;
+
+  /**
+   * Debounce execution of a function. Debouncing, unlike throttling,
+   * guarantees that a function is only executed a single time, either at the
+   * very beginning of a series of calls, or at the very end. If you want to
+   * simply rate-limit execution of a function, see the <jQuery.throttle>
+   * method.
+   *
+   * In this visualization, | is a debounced-function call and X is the actual
+   * callback execution:
+   *
+   * ::
+   *
+   *   Debounced with `at_begin` specified as false or unspecified:
+   *   ||||||||||||||||||||||||| (pause) |||||||||||||||||||||||||
+   *                            X                                 X
+   *
+   *   Debounced with `at_begin` specified as true:
+   *   ||||||||||||||||||||||||| (pause) |||||||||||||||||||||||||
+   *   X                                 X
+   *
+   *
+   * @param {number} delay A zero-or-greater delay in milliseconds. For event
+   *    callbacks, values around 100 or 250 (or even higher) are most useful.
+   * @param {boolean} [at_begin=false] If at_begin is false or
+   *    unspecified, callback will only be executed `delay` milliseconds after
+   *    the last debounced-function call. If at_begin is true, callback will be
+   *    executed only at the first debounced-function call. (After the
+   *    throttled-function has not been called for `delay` milliseconds, the
+   *    internal counter is reset)
+   * @param {function} callback A function to be executed after delay milliseconds.
+   *    The `this` context and all arguments are passed through, as-is, to
+   *    `callback` when the debounced-function is executed.
+   * @param {function} [accumulator] A function to be executed (synchronously)
+   *    during **each** call to the wrapped function.  Typically, this
+   *    this method is used to accumulate values that the callback uses
+   *    when it finally executes.
+   *
+   * @returns {function} A new, debounced, function.
+   *
+   * @example
+   * var debounced = geo.util.debounce( delay, [ at_begin, ] callback );
+   * $('selector').bind( 'someevent', debounced );
+   * $('selector').unbind( 'someevent', debounced );
+   *
+   */
+
+  geo.util.debounce = function (delay, at_begin, callback, accumulator) {
+    if (typeof at_begin !== 'boolean') {
+      accumulator = callback;
+      callback = at_begin;
+      at_begin = false;
+    }
+    accumulator = accumulator || function () {};
+    return _throttle(delay, false, callback, accumulator, !!at_begin);
+  };
+
+})(this);
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class object
@@ -14314,8 +14650,10 @@ geo.sceneObject = function (arg) {
 
     // trigger the event on the children
     m_children.forEach(function (child) {
-      geoArgs._triggeredBy = m_this;
-      child.geoTrigger(event, args);
+      if (child.geoTrigger) {
+        geoArgs._triggeredBy = m_this;
+        child.geoTrigger(event, args);
+      }
     });
 
     return m_this;
@@ -14823,13 +15161,13 @@ inherit(geo.transform, geo.object);
      * The view matrix
      * @protected
      */
-    this._view = mat4.create();
+    this._view = geo.util.mat4AsArray();
 
     /**
      * The projection matrix
      * @protected
      */
-    this._proj = mat4.create();
+    this._proj = geo.util.mat4AsArray();
 
     /**
      * The projection type (one of `this.constructor.projection`)
@@ -14841,13 +15179,13 @@ inherit(geo.transform, geo.object);
      * The transform matrix (view * proj)
      * @protected
      */
-    this._transform = mat4.create();
+    this._transform = geo.util.mat4AsArray();
 
     /**
      * The inverse transform matrix (view * proj)^-1
      * @protected
      */
-    this._inverse = mat4.create();
+    this._inverse = geo.util.mat4AsArray();
 
     /**
      * Cached bounds object recomputed on demand.
@@ -14998,7 +15336,7 @@ inherit(geo.transform, geo.object);
       get: function () {
         if (this._world === null) {
           this._world = mat4.invert(
-            mat4.create(),
+            geo.util.mat4AsArray(),
             this.display
           );
         }
@@ -15079,22 +15417,18 @@ inherit(geo.transform, geo.object);
         // apply scaling to the view matrix to account for the new aspect ratio
         // without changing the apparent zoom level
         if (this._viewport.width && this._viewport.height) {
-          this._scale(
-            vec3.fromValues(
+          this._scale([
               this._viewport.width / viewport.width,
               this._viewport.height / viewport.height,
               1
-            )
-          );
+          ]);
 
           // translate by half the difference to keep the center the same
-          this._translate(
-            vec3.fromValues(
+          this._translate([
               (viewport.width - this._viewport.width) / 2,
               (viewport.height - this._viewport.height) / 2,
               0
-            )
-          );
+          ]);
         }
 
         this._viewport = {width: viewport.width, height: viewport.height};
@@ -15119,7 +15453,7 @@ inherit(geo.transform, geo.object);
     /**
      * Uses `mat4.translate` to translate the camera by the given vector amount.
      * @protected
-     * @param {vec3} offset The camera translation vector
+     * @param {vec3|Array} offset The camera translation vector
      * @returns {this} Chainable
      */
     this._translate = function (offset) {
@@ -15129,7 +15463,7 @@ inherit(geo.transform, geo.object);
     /**
      * Uses `mat4.scale` to scale the camera by the given vector amount.
      * @protected
-     * @param {vec3} scale The scaling vector
+     * @param {vec3|Array} scale The scaling vector
      * @returns {this} Chainable
      */
     this._scale = function (scale) {
@@ -15332,8 +15666,8 @@ inherit(geo.transform, geo.object);
      */
     this._setBounds = function (bounds) {
 
-      var translate = vec3.create(),
-          scale = vec3.create(),
+      var translate = geo.util.vec3AsArray(),
+          scale = geo.util.vec3AsArray(),
           c_ar, v_ar, w, h;
 
       bounds.near = bounds.near || 0;
@@ -15380,11 +15714,14 @@ inherit(geo.transform, geo.object);
      * @param {number} [offset.z=0]
      */
     this.pan = function (offset) {
-      this._translate(vec3.fromValues(
+      if (!offset.x && !offset.y && !offset.z) {
+        return;
+      }
+      this._translate([
         offset.x,
         offset.y,
         offset.z || 0
-      ));
+      ]);
       this._update();
     };
 
@@ -15394,13 +15731,11 @@ inherit(geo.transform, geo.object);
      * @param {number} zoom The zoom scale to apply
      */
     this.zoom = function (zoom) {
-      mat4.scale(this._view, this._view,
-        vec3.fromValues(
+      mat4.scale(this._view, this._view, [
           zoom,
           zoom,
           zoom
-        )
-      );
+      ]);
       this._update();
     };
 
@@ -15574,7 +15909,7 @@ inherit(geo.transform, geo.object);
    * @returns {mat4} The new transform matrix
    */
   geo.camera.affine = function (pre, scale, post) {
-    var mat = mat4.create();
+    var mat = geo.util.mat4AsArray();
 
     // Note: mat4 operations are applied to the right side of the current
     // transform, so the first applied here is the last applied to the
@@ -15610,7 +15945,7 @@ inherit(geo.transform, geo.object);
    * @returns {mat4} A * B
    */
   geo.camera.combine = function (A, B) {
-    return mat4.mul(mat4.create(), A, B);
+    return mat4.mul(geo.util.mat4AsArray(), A, B);
   };
 
   inherit(geo.camera, geo.object);
@@ -15956,9 +16291,13 @@ geo.layer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Init layer
+   *
+   * @param {boolean} noEvents if a subclass of this intends to bind the
+   *    resize, pan, and zoom events itself, set this flag to true to avoid
+   *    binding them here.
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._init = function () {
+  this._init = function (noEvents) {
     if (m_initialized) {
       return m_this;
     }
@@ -15989,18 +16328,20 @@ geo.layer = function (arg) {
 
     m_initialized = true;
 
-    /// Bind events to handlers
-    m_this.geoOn(geo.event.resize, function (event) {
-      m_this._update({event: event});
-    });
+    if (!noEvents) {
+      /// Bind events to handlers
+      m_this.geoOn(geo.event.resize, function (event) {
+        m_this._update({event: event});
+      });
 
-    m_this.geoOn(geo.event.pan, function (event) {
-      m_this._update({event: event});
-    });
+      m_this.geoOn(geo.event.pan, function (event) {
+        m_this._update({event: event});
+      });
 
-    m_this.geoOn(geo.event.zoom, function (event) {
-      m_this._update({event: event});
-    });
+      m_this.geoOn(geo.event.zoom, function (event) {
+        m_this._update({event: event});
+      });
+    }
 
     return m_this;
   };
@@ -16255,12 +16596,12 @@ geo.featureLayer = function (arg) {
     }
 
     /// Call super class init
-    s_init.call(m_this);
+    s_init.call(m_this, true);
 
     /// Bind events to handlers
     m_this.geoOn(geo.event.resize, function (event) {
       m_this.renderer()._resize(event.x, event.y, event.width, event.height);
-      m_this._update({});
+      m_this._update({event: event});
       m_this.renderer()._render();
     });
 
@@ -16735,15 +17076,13 @@ geo.mapInteractor = function (args) {
       m_mouse,
       m_keyboard,
       m_state,
+      m_queue,
       $node,
-      m_wheelQueue = { x: 0, y: 0 },
-      m_throttleTime = 10,
-      m_wait = false,
-      m_disableThrottle = true,
       m_selectionLayer = null,
       m_selectionPlane = null,
       m_paused = false,
-      m_clickMaybe = false;
+      m_clickMaybe = false,
+      m_callZoom = function () {};
 
   // Helper method to decide if the current button/modifiers match a set of
   // conditions.
@@ -16765,33 +17104,12 @@ geo.mapInteractor = function (args) {
     return Math.sqrt(x * x + y * y);
   }
 
-  // For throttling mouse events this is a function that
-  // returns true if no actions are in progress and starts
-  // a timer to block events for the next `m_throttleTime` ms.
-  // If it returns false, the caller should ignore the
-  // event.
-  function doRespond() {
-    if (m_disableThrottle) {
-      return true;
-    }
-    if (m_wait) {
-      return false;
-    }
-    m_wait = true;
-    window.setTimeout(function () {
-      m_wait = false;
-      m_wheelQueue = {
-        x: 0,
-        y: 0
-      };
-    }, m_throttleTime);
-    return true;
-  }
-
   // copy the options object with defaults
   m_options = $.extend(
     true,
     {
+      throttle: 30,
+      discreteZoom: false,
       panMoveButton: 'left',
       panMoveModifiers: {},
       zoomMoveButton: 'right',
@@ -16827,6 +17145,14 @@ geo.mapInteractor = function (args) {
 
   // options supported:
   // {
+  //   // throttle mouse events to at most this many milliseconds each (default 30)
+  //   throttle: number
+  //
+  //   // Clamp zoom events to discrete (integer) zoom levels.  If a number is
+  //   // provided then zoom events will be debounced (and accumulated)
+  //   // with the given delay.  The default debounce interval is 400 ms.
+  //   discreteZoom: boolean | number > 0
+  //
   //   // button that must be pressed to initiate a pan on mousedown
   //   panMoveButton: 'right' | 'left' | 'middle'
   //
@@ -17043,6 +17369,16 @@ geo.mapInteractor = function (args) {
   //  }
   m_state = {};
 
+  /**
+   * Store queued map navigation commands (due to throttling) here
+   * {
+   *   kind: 'move' | 'wheel',  // what kind of mouse action triggered this
+   *   method: function () {},  // the throttled method
+   *   scroll: {x: ..., y: ...} // accumulated scroll wheel deltas
+   * }
+   */
+  m_queue = {};
+
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Connects events to a map.  If the map is not set, then this does nothing.
@@ -17060,12 +17396,15 @@ geo.mapInteractor = function (args) {
     // store the connected element
     $node = $(m_options.map.node());
 
+    // set methods related to asyncronous event handling
+    m_this._handleMouseWheel = throttled_wheel();
+    m_callZoom = debounced_zoom();
 
     // add event handlers
+    $node.on('wheel.geojs', m_this._handleMouseWheel);
     $node.on('mousemove.geojs', m_this._handleMouseMove);
     $node.on('mousedown.geojs', m_this._handleMouseDown);
     $node.on('mouseup.geojs', m_this._handleMouseUp);
-    $node.on('wheel.geojs', m_this._handleMouseWheel);
     // Disable dragging images and such
     $node.on('dragstart', function () { return false; });
     if (m_options.panMoveButton === 'right' ||
@@ -17086,6 +17425,8 @@ geo.mapInteractor = function (args) {
       $node.off('.geojs');
       $node = null;
     }
+    m_this._handleMouseWheel = function () {};
+    m_callZoom = function () {};
     return m_this;
   };
 
@@ -17119,6 +17460,9 @@ geo.mapInteractor = function (args) {
       return $.extend({}, m_options);
     }
     $.extend(m_options, opts);
+
+    // reset event handlers for new options
+    this._connectEvents();
     return m_this;
   };
 
@@ -17265,6 +17609,8 @@ geo.mapInteractor = function (args) {
       out = m_state.action === action;
     }
     if (out) {
+      // cancel any queued interaction events
+      m_queue = {};
       m_state = {};
     }
     return out;
@@ -17282,10 +17628,8 @@ geo.mapInteractor = function (args) {
       return;
     }
 
-    if (m_state.action === 'momentum') {
-      // cancel momentum on click
-      m_state = {};
-    }
+    // cancel momentum on click
+    m_this.cancel('momentum');
 
     m_this._getMousePosition(evt);
     m_this._getMouseButton(evt);
@@ -17316,6 +17660,11 @@ geo.mapInteractor = function (args) {
     };
 
     if (action) {
+      // cancel any ongoing interaction queue
+      m_queue = {
+        kind: 'move'
+      };
+
       // store the state object
       m_state = {
         action: action,
@@ -17341,7 +17690,17 @@ geo.mapInteractor = function (args) {
       }
 
       // bind temporary handlers to document
-      $(document).on('mousemove.geojs', m_this._handleMouseMoveDocument);
+      if (m_options.throttle > 0) {
+        $(document).on(
+          'mousemove.geojs',
+          geo.util.throttle(
+            m_options.throttle,
+            m_this._handleMouseMoveDocument
+          )
+        );
+      } else {
+        $(document).on('mousemove.geojs', m_this._handleMouseMoveDocument);
+      }
       $(document).on('mouseup.geojs', m_this._handleMouseUpDocument);
     }
 
@@ -17367,13 +17726,15 @@ geo.mapInteractor = function (args) {
     if (m_options.click.cancelOnMove) {
       m_clickMaybe = false;
     }
-    if (m_clickMaybe) {
-      return;
-    }
 
     m_this._getMousePosition(evt);
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
+
+    if (m_clickMaybe) {
+      return;
+    }
+
     m_this.map().geoTrigger(geo.event.mousemove, m_this.mouse());
   };
 
@@ -17385,13 +17746,14 @@ geo.mapInteractor = function (args) {
   this._handleMouseMoveDocument = function (evt) {
     var dx, dy, selectionObj;
 
-    if (m_paused) {
+    if (m_paused || m_queue.kind !== 'move') {
       return;
     }
 
     m_this._getMousePosition(evt);
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
+
 
     if (m_options.click.cancelOnMove) {
       m_clickMaybe = false;
@@ -17406,11 +17768,6 @@ geo.mapInteractor = function (args) {
       return;
     }
 
-    // when throttled, do nothing
-    if (!doRespond()) {
-      return;
-    }
-
     // calculate the delta from the origin point to avoid
     // accumulation of floating point errors
     dx = m_mouse.map.x - m_state.origin.map.x - m_state.delta.x;
@@ -17421,10 +17778,7 @@ geo.mapInteractor = function (args) {
     if (m_state.action === 'pan') {
       m_this.map().pan({x: dx, y: dy});
     } else if (m_state.action === 'zoom') {
-      m_this.map().zoom(
-        m_this.map().zoom() - dy * m_options.zoomScale / 120,
-        m_state
-      );
+      m_callZoom(-dy * m_options.zoomScale / 120, m_state);
     } else if (m_state.action === 'select') {
       // Get the bounds of the current selection
       selectionObj = m_this._getSelection();
@@ -17526,6 +17880,9 @@ geo.mapInteractor = function (args) {
       return;
     }
 
+    // cancel queued interactions
+    m_queue = {};
+
     m_clickMaybe = false;
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
@@ -17602,71 +17959,160 @@ geo.mapInteractor = function (args) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Handle mouse wheel event
+   * Private wrapper around the map zoom method that is debounced to support
+   * discrete zoom interactions.
+   * @param {number} deltaZ The zoom increment
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._handleMouseWheel = function (evt) {
-    var zoomFactor;
+  function debounced_zoom() {
+    var deltaZ = 0, delay = 400, direction;
 
-    if (m_paused) {
-      return;
+    function accum(dz, dir) {
+      var map = m_this.map(), zoom;
+
+      direction = dir;
+      deltaZ += dz;
+
+      // Respond to debounced events when they add up to a change in the
+      // discrete zoom level.
+      if (map && Math.abs(deltaZ) >= 1 && m_options.discreteZoom) {
+
+        zoom = Math.round(deltaZ + map.zoom());
+
+        // delta is what is left over from the zoom delta after the new zoom value
+        deltaZ = deltaZ + map.zoom() - zoom;
+
+        map.zoom(zoom, direction);
+      }
     }
 
-    // try to normalize deltas using the wheel event standard:
-    //   https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent
-    evt.deltaFactor = 1;
-    if (evt.originalEvent.deltaMode === 1) {
-      // DOM_DELTA_LINE -- estimate line height
-      evt.deltaFactor = 12;
-    } else if (evt.originalEvent.deltaMode === 2) {
-      // DOM_DELTA_PAGE -- get window height
-      evt.deltaFactor = $(window).height();
+    function apply() {
+      var map = m_this.map(), zoom;
+      if (map) {
+
+        zoom = deltaZ + map.zoom();
+
+        if (m_options.discreteZoom) {
+          // round off the zoom to an integer and throw away the rest
+          zoom = Math.round(zoom);
+        }
+        map.zoom(zoom, direction);
+      }
+
+      deltaZ = 0;
     }
 
-    // If the browser doesn't support the standard then
-    // just set the delta's to zero.
-    evt.deltaX = evt.originalEvent.deltaX || 0;
-    evt.deltaY = evt.originalEvent.deltaY || 0;
 
-    m_this._getMouseModifiers(evt);
-    evt.deltaX = evt.deltaX * m_options.wheelScaleX * evt.deltaFactor / 120;
-    evt.deltaY = evt.deltaY * m_options.wheelScaleY * evt.deltaFactor / 120;
+    if (m_options.discreteZoom !== true && m_options.discreteZoom > 0) {
+      delay = m_options.discreteZoom;
+    }
+    if (m_options.discreteZoom === true || m_options.discreteZoom > 0) {
+      return geo.util.debounce(delay, false, apply, accum);
+    } else {
+      return function (dz, dir) {
+        accum(dz, dir);
+        apply(dz, dir);
+      };
+    }
+  }
 
-    evt.preventDefault();
-    if (!doRespond()) {
-      m_wheelQueue.x += evt.deltaX;
-      m_wheelQueue.y += evt.deltaY;
-      return;
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Attaches wrapped methods for accumulating fast mouse wheel events and
+   * throttling map interactions.
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  function throttled_wheel() {
+    var my_queue = {};
+
+    function accum(evt) {
+      var dx, dy;
+
+      if (m_paused) {
+        return;
+      }
+
+      if (my_queue !== m_queue) {
+        my_queue = {
+          kind: 'wheel',
+          scroll: {x: 0, y: 0}
+        };
+        m_queue = my_queue;
+      }
+
+      evt.preventDefault();
+
+      // try to normalize deltas using the wheel event standard:
+      //   https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent
+      evt.deltaFactor = 1;
+      if (evt.originalEvent.deltaMode === 1) {
+        // DOM_DELTA_LINE -- estimate line height
+        evt.deltaFactor = 40;
+      } else if (evt.originalEvent.deltaMode === 2) {
+        // DOM_DELTA_PAGE -- get window height
+        evt.deltaFactor = $(window).height();
+      }
+
+      // prevent NaN's on legacy browsers
+      dx = evt.originalEvent.deltaX || 0;
+      dy = evt.originalEvent.deltaY || 0;
+
+      // scale according to the options
+      dx = dx * m_options.wheelScaleX * evt.deltaFactor / 120;
+      dy = dy * m_options.wheelScaleY * evt.deltaFactor / 120;
+
+      my_queue.scroll.x += dx;
+      my_queue.scroll.y += dy;
     }
 
-    evt.deltaX += m_wheelQueue.x;
-    evt.deltaY += m_wheelQueue.y;
+    function wheel(evt) {
+      var zoomFactor;
 
-    m_wheelQueue = {
-      x: 0,
-      y: 0
-    };
+      // If the current queue doesn't match the queue passed in as an argument,
+      // assume it was cancelled and do nothing.
+      if (my_queue !== m_queue) {
+        return;
+      }
 
-    if (m_options.panWheelEnabled &&
-        eventMatch('wheel', m_options.panWheelModifiers)) {
+      // perform the map navigation event
+      m_this._getMouseModifiers(evt);
+      if (m_options.panWheelEnabled &&
+          eventMatch('wheel', m_options.panWheelModifiers)) {
 
-      m_this.map().pan({
-        x: evt.deltaX,
-        y: -evt.deltaY
-      });
+        m_this.map().pan({
+          x: m_queue.scroll.x,
+          y: m_queue.scroll.y
+        });
 
-    } else if (m_options.zoomWheelEnabled &&
-               eventMatch('wheel', m_options.zoomWheelModifiers)) {
+      } else if (m_options.zoomWheelEnabled &&
+                 eventMatch('wheel', m_options.zoomWheelModifiers)) {
 
-      zoomFactor = -evt.deltaY;
+        zoomFactor = -m_queue.scroll.y;
 
-      m_this.map().zoom(
-        m_this.map().zoom() + zoomFactor,
-        m_mouse
-      );
+        m_callZoom(zoomFactor, m_mouse);
+      }
+
+      // reset the queue
+      m_queue = {};
     }
-  };
 
+    if (m_options.throttle > 0) {
+      return geo.util.throttle(m_options.throttle, false, wheel, accum);
+    } else {
+      return function (evt) {
+        accum(evt);
+        wheel(evt);
+      };
+    }
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Handle mouse wheel event.  (Defined inside _connectEvents).
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._handleMouseWheel = function () {};
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -18210,6 +18656,7 @@ inherit(geo.clock, geo.object);
     this._wrap = spec.wrap || {x: 1, y: 1};
     this._url = spec.url;
     this._fetched = false;
+    this._queue = spec.queue || null;
 
     /**
      * Return the index coordinates.
@@ -18242,9 +18689,20 @@ inherit(geo.clock, geo.object);
      */
     this.fetch = function () {
       if (!this._fetched) {
-        $.get(this._url).promise(this);
+        $.get(this._url).then(function () {
+          this._fetched = true;
+        }.bind(this)).promise(this);
       }
       return this;
+    };
+
+    /**
+     * Return whether this tile has been fetched already.
+     *
+     * @returns {boolean} True if the tile has been fetched.
+     */
+    this.fetched = function () {
+      return this._fetched;
     };
 
     /**
@@ -18257,8 +18715,13 @@ inherit(geo.clock, geo.object);
      *
      */
     this.then = function (onSuccess, onFailure) {
-      this.fetch(); // This will replace the current then method
-
+      // both fetch and _queueAdd can replace the current then method
+      if (!this.fetched() && this._queue && this._queue.add && (!this.state ||
+          this.state() === 'pending')) {
+        this._queue.add(this, this.fetch);
+      } else {
+        this.fetch();
+      }
       // Call then on the new promise
       this.then(onSuccess, onFailure);
       return this;
@@ -18449,7 +18912,9 @@ inherit(geo.clock, geo.object);
         this._image.src = this._url;
 
         // attach a promise interface to `this`
-        defer.promise(this);
+        defer.then(function () {
+          this._fetched = true;
+        }.bind(this)).promise(this);
       }
       return this;
     };
@@ -18742,7 +19207,7 @@ inherit(geo.clock, geo.object);
     options = $.extend(true, {}, this.constructor.defaults, options || {});
     if (!options.cacheSize) {
       // this size should be sufficient for a 4k display
-      options.cacheSize = options.keepLower ? 400 : 200;
+      options.cacheSize = options.keepLower ? 600 : 200;
     }
     if ($.type(options.subdomains) === 'string') {
       options.subdomains = options.subdomains.split('');
@@ -18762,8 +19227,12 @@ inherit(geo.clock, geo.object);
       options.url = m_tileUrlFromTemplate(options.url);
     }
 
-    var lastZoom = null, lastX = null, lastY = null, s_init = this._init,
-        _deferredPurge = null;
+    var lastZoom = null,
+        lastX = null,
+        lastY = null,
+        s_init = this._init,
+        s_exit = this._exit,
+        m_exited;
 
     // copy the options into a private variable
     this._options = $.extend(true, {}, options);
@@ -18781,6 +19250,21 @@ inherit(geo.clock, geo.object);
 
     // initialize the in memory tile cache
     this._cache = geo.tileCache({size: options.cacheSize});
+
+    // initialize the tile fetch queue
+    this._queue = geo.fetchQueue({
+      // this should probably be 6 * subdomains.length if subdomains are used
+      size: 6,
+      // if track is the same as the cache size, then neither processing time
+      // nor memory will be wasted.  Larger values will use more memory,
+      // smaller values will do needless computations.
+      track: options.cacheSize,
+      needed: function (tile) {
+        return tile === this.cache.get(tile.toString());
+      }.bind(this)
+    });
+
+    var m_tileOffsetValues = {};
 
     /**
      * Readonly accessor to the options object
@@ -18896,7 +19380,7 @@ inherit(geo.clock, geo.object);
       var o = this._origin(level);
       var map = this.map();
       point = this.displayToLevel(map.gcsToDisplay(point, null), level);
-      var to = this._options.tileOffset(level);
+      var to = this._tileOffset(level);
       if (to) {
         point.x += to.x;
         point.y += to.y;
@@ -18926,7 +19410,7 @@ inherit(geo.clock, geo.object);
             size: {x: this._options.tileWidth, y: this._options.tileHeight},
             url: ''
           }));
-      var to = this._options.tileOffset(tile.index.level),
+      var to = this._tileOffset(tile.index.level),
           bounds = tile.bounds({x: 0, y: 0}, to),
           map = this.map(),
           unit = map.unitsPerPixel(tile.index.level);
@@ -18967,6 +19451,7 @@ inherit(geo.clock, geo.object);
       return geo.tile({
         index: index,
         size: {x: this._options.tileWidth, y: this._options.tileHeight},
+        queue: this._queue,
         url: this._options.url(urlParams.x, urlParams.y, urlParams.level || 0,
                                this._options.subdomains)
       });
@@ -19048,6 +19533,9 @@ inherit(geo.clock, geo.object);
           start, end, indexRange, source, center,
           level, minLevel = this._options.keepLower ? 0 : maxLevel;
 
+      /* Generate a list of the tiles that we want to create.  This is done
+       * before sorting, because we want to actually generate the tiles in
+       * the sort order. */
       for (level = minLevel; level <= maxLevel; level += 1) {
         // get the tile range to fetch
         indexRange = this._getTileRange(level, bounds);
@@ -19076,7 +19564,7 @@ inherit(geo.clock, geo.object);
             }
 
             if (this.isValid(source)) {
-              tiles.push(this._getTileCached($.extend({}, index), source));
+              tiles.push({index: $.extend({}, index), source: source});
             }
           }
         }
@@ -19085,9 +19573,23 @@ inherit(geo.clock, geo.object);
       if (sorted) {
         center = {
           x: (start.x + end.x) / 2,
-          y: (start.y + end.y) / 2
+          y: (start.y + end.y) / 2,
+          level: maxLevel,
+          bottomLevel: maxLevel
         };
+        var numTiles = Math.max(end.x - start.x, end.y - start.y) + 1;
+        for (; numTiles >= 1; numTiles /= 2) {
+          center.bottomLevel -= 1;
+        }
         tiles.sort(this._loadMetric(center));
+        /* If we are using a fetch queue, start a new batch */
+        if (this._queue) {
+          this._queue.batch(true);
+        }
+      }
+      /* Actually get the tiles. */
+      for (i = 0; i < tiles.length; i += 1) {
+        tiles[i] = this._getTileCached(tiles[i].index, tiles[i].source);
       }
       return tiles;
     };
@@ -19123,15 +19625,22 @@ inherit(geo.clock, geo.object);
       return function (a, b) {
         var a0, b0, dx, dy, cx, cy, scale;
 
+        a = a.index || a;
+        b = b.index || b;
         // shortcut if zoom level differs
         if (a.level !== b.level) {
-          return b.level - a.level;
+          if (center.bottomLevel && ((a.level >= center.bottomLevel) !==
+                                     (b.level >= center.bottomLevel))) {
+            return a.level >= center.bottomLevel ? -1 : 1;
+          }
+          return a.level - b.level;
         }
 
-        // compute the center coordinates relative to a.level
+        /* compute the center coordinates relative to a.level.  Since we really
+         * care about the center of the tiles, use an offset */
         scale = Math.pow(2, a.level - center.level);
-        cx = center.x * scale;
-        cy = center.y * scale;
+        cx = (center.x + 0.5) * scale - 0.5;
+        cy = (center.y + 0.5) * scale - 0.5;
 
         // calculate distances to the center squared
         dx = a.x - cx;
@@ -19223,9 +19732,9 @@ inherit(geo.clock, geo.object);
       // apply a transform to place the image correctly
       container.append(tile.image);
       container.css({
-        'position': 'absolute',
-        'left': bounds.left + 'px',
-        'top': bounds.top + 'px'
+        position: 'absolute',
+        left: (bounds.left - parseInt(div.attr('offsetx') || 0)) + 'px',
+        top: (bounds.top - parseInt(div.attr('offsety') || 0)) + 'px'
       });
 
       // apply fade in animation
@@ -19422,6 +19931,9 @@ inherit(geo.clock, geo.object);
      * @return {DOM}
      */
     this._getSubLayer = function (level) {
+      if (!this.canvas()) {
+        return;
+      }
       var node = this.canvas()
         .find('div[data-tile-layer=' + level.toFixed() + ']').get(0);
       if (!node) {
@@ -19436,67 +19948,97 @@ inherit(geo.clock, geo.object);
     /**
      * Set sublayer transforms to align them with the given zoom level.
      * @param {number} level The target zoom level
+     * @param {object} view The view bounds.  The top and left are used to
+     *                      adjust the offset of tile layers.
+     * @return {object} the x and y offsets for the current level.
      */
-    this._updateSubLayers = function (level) {
-      this.canvas().find('.geo-tile-layer').each(function (idx, el) {
+    this._updateSubLayers = function (level, view) {
+      var canvas = this.canvas(),
+          lastlevel = parseInt(canvas.attr('lastlevel')),
+          lastx = parseInt(canvas.attr('lastoffsetx') || 0),
+          lasty = parseInt(canvas.attr('lastoffsety') || 0);
+      if (lastlevel === level && Math.abs(lastx - view.left) < 65536 &&
+          Math.abs(lasty - view.top) < 65536) {
+        return {x: lastx, y: lasty};
+      }
+      var to = this._tileOffset(level),
+          x = parseInt(view.left) + to.x,
+          y = parseInt(view.top) + to.y;
+      canvas.find('.geo-tile-layer').each(function (idx, el) {
         var $el = $(el),
             layer = parseInt($el.data('tileLayer'));
         $el.css(
           'transform',
           'scale(' + Math.pow(2, level - layer) + ')'
         );
+        var layerx = parseInt(x / Math.pow(2, level - layer)),
+            layery = parseInt(y / Math.pow(2, level - layer)),
+            dx = layerx - parseInt($el.attr('offsetx') || 0),
+            dy = layery - parseInt($el.attr('offsety') || 0);
+        $el.attr({offsetx: layerx, offsety: layery});
+        $el.find('.geo-tile-container').each(function (tileidx, tileel) {
+          $(tileel).css({
+            left: (parseInt($(tileel).css('left')) - dx) + 'px',
+            top: (parseInt($(tileel).css('top')) - dy) + 'px'
+          });
+        }.bind(this));
       }.bind(this));
+      canvas.attr({lastoffsetx: x, lastoffsety: y, lastlevel: level});
+      return {x: x, y: y};
     };
 
     /**
      * Update the view according to the map/camera.
      * @returns {this} Chainable
      */
-    this._update = function () {
+    this._update = function (evt) {
+      /* Ignore zoom events, as they are ALWAYS followed by a pan event */
+      if (evt && evt.event && evt.event.event === geo.event.zoom) {
+        return;
+      }
       var map = this.map(),
           mapZoom = map.zoom(),
           zoom = this._options.tileRounding(mapZoom),
           center = this.displayToLevel(undefined, zoom),
           bounds = map.bounds(undefined, null),
-          tiles, view = this._getViewBounds(), myPurge = {};
+          tiles, view = this._getViewBounds();
 
-      _deferredPurge = myPurge;
       tiles = this._getTiles(
         zoom, bounds, true
       );
 
-      // Update the transform for the local layer coordinates
-      this._updateSubLayers(zoom);
+      if (this._updateSubLayers) {
+        // Update the transform for the local layer coordinates
+        var offset = this._updateSubLayers(zoom, view) || {x: 0, y: 0};
 
-      var to = this._options.tileOffset(zoom);
-      if (this.renderer() === null) {
-        this.canvas().css(
-          'transform-origin',
-          'center center'
-        );
-        this.canvas().css(
-          'transform',
-          'scale(' + (Math.pow(2, mapZoom - zoom)) + ')' +
-          'translate(' +
-          (-to.x) + 'px' + ',' +
-          (-to.y) + 'px' + ')' +
-          'translate(' +
-          (map.size().width / 2) + 'px' + ',' +
-          (map.size().height / 2) + 'px' + ')' +
-          'translate(' +
-          (-(view.left + view.right) / 2) + 'px' + ',' +
-          (-(view.bottom + view.top) / 2) + 'px' + ')' +
-          ''
-        );
+        var to = this._tileOffset(zoom);
+        if (this.renderer() === null) {
+          this.canvas().css(
+            'transform-origin',
+            'center center'
+          );
+          this.canvas().css(
+            'transform',
+            'scale(' + (Math.pow(2, mapZoom - zoom)) + ')' +
+            'translate(' +
+            (-to.x + -(view.left + view.right) / 2 + map.size().width / 2 +
+             offset.x) + 'px' + ',' +
+            (-to.y + -(view.bottom + view.top) / 2 + map.size().height / 2 +
+             offset.y) + 'px' + ')' +
+            ''
+          );
+        }
+        /* Set some attributes that can be used by non-css based viewers.  This
+         * doesn't include the map center, as that may need to be handled
+         * differently from the view center. */
+        this.canvas().attr({
+          scale: Math.pow(2, mapZoom - zoom),
+          dx: -to.x + -(view.left + view.right) / 2,
+          dy: -to.y + -(view.bottom + view.top) / 2,
+          offsetx: offset.x,
+          offsety: offset.y
+        });
       }
-      /* Set some attributes that can be used by non-css based viewers.  This
-       * doesn't include the map center, as that may need to be handled
-       * differently from the view center. */
-      this.canvas().attr({
-        scale: Math.pow(2, mapZoom - zoom),
-        dx: -to.x + -(view.left + view.right) / 2,
-        dy: -to.y + -(view.bottom + view.top) / 2
-      });
 
       lastZoom = mapZoom;
       lastX = center.x;
@@ -19506,38 +20048,53 @@ inherit(geo.clock, geo.object);
       this._tileTree = {};
 
       tiles.forEach(function (tile) {
-        tile.then(function () {
-          if (tile !== this.cache.get(tile.toString())) {
-            /* If the tile has fallen out of the cache, don't draw it -- it is
-             * untracked.  This may be an indication that a larger cache should
-             * have been used. */
-            return;
-          }
-          /* Check if a tile is still desired.  Don't draw it if it isn't. */
-          var mapZoom = map.zoom(),
-              zoom = this._options.tileRounding(mapZoom),
-              bounds = this._getViewBounds();
-          if (this._canPurge(tile, bounds, zoom)) {
-            this.remove(tile);
-            return;
-          }
-
+        if (tile.fetched()) {
+          /* if we have already fetched the tile, we know we can just draw it,
+           * as the bounds won't have changed since the call to _getTiles. */
           this.drawTile(tile);
 
           // mark the tile as covered
           this._setTileTree(tile);
-        }.bind(this));
+        } else {
+          tile.then(function () {
+            if (m_exited) {
+              /* If we have disconnected the renderer, do nothing.  This
+               * happens when the layer is being deleted. */
+              return;
+            }
+            if (tile !== this.cache.get(tile.toString())) {
+              /* If the tile has fallen out of the cache, don't draw it -- it
+               * is untracked.  This may be an indication that a larger cache
+               * should have been used. */
+              return;
+            }
+            /* Check if a tile is still desired.  Don't draw it if it isn't. */
+            var mapZoom = map.zoom(),
+                zoom = this._options.tileRounding(mapZoom),
+                view = this._getViewBounds();
+            if (this._canPurge(tile, view, zoom)) {
+              this.remove(tile);
+              return;
+            }
 
-        this.addPromise(tile);
+            this.drawTile(tile);
+
+            // mark the tile as covered
+            this._setTileTree(tile);
+          }.bind(this));
+
+          this.addPromise(tile);
+        }
       }.bind(this));
 
       // purge all old tiles when the new tiles are loaded (successfully or not)
       $.when.apply($, tiles)
         .done(// called on success and failure
           function () {
-            if (_deferredPurge === myPurge) {
-              this._purge(zoom, true);
-            }
+            var map = this.map(),
+                mapZoom = map.zoom(),
+                zoom = this._options.tileRounding(mapZoom);
+            this._purge(zoom, true);
           }.bind(this)
         );
     };
@@ -19643,7 +20200,7 @@ inherit(geo.clock, geo.object);
     this._outOfBounds = function (tile, bounds) {
       /* We may want to add an (n) tile edge buffer so we appear more
        * responsive */
-      var to = this._options.tileOffset(tile.index.level);
+      var to = this._tileOffset(tile.index.level);
       var scale = 1;
       if (tile.index.level !== bounds.level) {
         scale = Math.pow(2, (bounds.level || 0) - (tile.index.level || 0));
@@ -19745,6 +20302,46 @@ inherit(geo.clock, geo.object);
     };
 
     /**
+     * Get or set the subdomains used for templating.
+     *
+     * @param {string|list} [subdomains] A comma-separated list, a string of
+     *      single character subdomains, or a list.
+     * @returns {string|list|this}
+     */
+    this.subdomains = function (subdomains) {
+      if (subdomains === undefined) {
+        return this._options.subdomains;
+      }
+      if (subdomains) {
+        if ($.type(subdomains) === 'string') {
+          if (subdomains.indexOf(',') >= 0) {
+            subdomains = subdomains.split(',');
+          } else {
+            subdomains = subdomains.split('');
+          }
+        }
+        this._options.subdomains = subdomains;
+        this.reset();
+        this.map().draw();
+      }
+      return this;
+    };
+
+    /**
+     * Return a value from the tileOffset function, caching it for different
+     * levels.
+     *
+     * @param {Number} level the level to pass to the tileOffset function.
+     * @returns {Object} a tile offset object with x and y properties.
+     */
+    this._tileOffset = function (level) {
+      if (m_tileOffsetValues[level] === undefined) {
+        m_tileOffsetValues[level] = this._options.tileOffset(level);
+      }
+      return m_tileOffsetValues[level];
+    };
+
+    /**
      * Initialize after the layer is added to the map.
      */
     this._init = function () {
@@ -19759,6 +20356,16 @@ inherit(geo.clock, geo.object);
           this._getSubLayer(sublayer);
         }
       }
+      return this;
+    };
+
+    /**
+     * Clean up the layer.
+     */
+    this._exit = function () {
+      // call super method
+      s_exit.apply(this, arguments);
+      m_exited = true;
       return this;
     };
 
@@ -19797,6 +20404,218 @@ inherit(geo.clock, geo.object);
   };
 
   inherit(geo.tileLayer, geo.featureLayer);
+})();
+
+(function () {
+  'use strict';
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * This class implements a queue for Deferred objects.  Whenever one of the
+   * objects in the queue completes (resolved or rejected), another item in the
+   * queue is processed.  The number of concurrently processing items can be
+   * adjusted.  At this time (2015-12-29) most major browsers support 6
+   * concurrent requests from any given server, so, when using the queue for
+   * tile images, thie number of concurrent requests should be 6 * (number of
+   * subdomains serving tiles).
+   *
+   * @class
+   *
+   * @param {Object?} [options] A configuration object for the queue
+   * @param {Number} [options.size=6] The maximum number of concurrent deferred
+   *    objects.
+   * @param {Number} [options.track=600] The number of objects that are tracked
+   *    that trigger checking if any of them have been abandoned.  The fetch
+   *    queue can grow to the greater of this size and the number of items that
+   *    are still needed.  Setting this to a low number will increase
+   *    processing time, to a high number can increase memory.  Ideally, it
+   *    should reflect the number of items that are kept in memory elsewhere.
+   *    If needed is null, this is ignored.
+   * @param {function} [options.needed=null] If set, this function is passed a
+   *    Deferred object and must return a truthy value if the object is still
+   *    needed.
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  geo.fetchQueue = function (options) {
+    if (!(this instanceof geo.fetchQueue)) {
+      return new geo.fetchQueue(options);
+    }
+    options = options || {};
+    this._size = options.size || 6;
+    this._track = options.track || 600;
+    this._needed = options.needed || null;
+    this._batch = false;
+
+    var m_this = this,
+        m_next_batch = 1;
+
+    /**
+     * Get/set the maximum concurrent deferred object size.
+     */
+    Object.defineProperty(this, 'size', {
+      get: function () { return this._size; },
+      set: function (n) {
+        this._size = n;
+        this.next_item();
+      }
+    });
+
+    /**
+     * Get the current queue size.
+     */
+    Object.defineProperty(this, 'length', {
+      get: function () { return this._queue.length; }
+    });
+
+    /**
+     * Get the current number of processing items.
+     */
+    Object.defineProperty(this, 'processing', {
+      get: function () { return this._processing; }
+    });
+
+    /**
+     * Remove all items from the queue.
+     */
+    this.clear = function () {
+      this._queue = [];
+      this._processing = 0;
+      return this;
+    };
+
+    /**
+     * Add a Deferred object to the queue.
+     * @param {Deferred} defer Deferred object to add to the queue.
+     * @param {function} callback a function to call when the item's turn is
+     *  granted.
+     * @param {boolean} atEnd if false, add the item to the front of the queue
+     *  if batching is turned off or at the end of the current batch if it is
+     *  turned on.  If true, always add the item to the end of the queue.
+     */
+    this.add = function (defer, callback, atEnd) {
+      if (defer.__fetchQueue) {
+        var pos = $.inArray(defer, this._queue);
+        if (pos >= 0) {
+          this._queue.splice(pos, 1);
+          this._addToQueue(defer, atEnd);
+          return defer;
+        }
+      }
+      var wait = new $.Deferred();
+      var process = new $.Deferred();
+      wait.then(function () {
+        $.when(callback.call(defer)).always(process.resolve);
+      }, process.resolve);
+      defer.__fetchQueue = wait;
+      this._addToQueue(defer, atEnd);
+      $.when(wait, process).always(function () {
+        if (m_this._processing > 0) {
+          m_this._processing -= 1;
+        }
+        m_this.next_item();
+      }).promise(defer);
+      m_this.next_item();
+      return defer;
+    };
+
+    /**
+     * Add an item to the queue.  If batches are being used, add it at after
+     * other items in the same batch.
+     * @param {Deferred} defer Deferred object to add to the queue.
+     * @param {boolean} atEnd if false, add the item to the front of the queue
+     *  if batching is turned off or at the end of the current batch if it is
+     *  turned on.  If true, always add the item to the end of the queue.
+     */
+    this._addToQueue = function (defer, atEnd) {
+      defer.__fetchQueue._batch = this._batch;
+      if (atEnd) {
+        this._queue.push(defer);
+      } else if (!this._batch) {
+        this._queue.unshift(defer);
+      } else {
+        for (var i = 0; i < this._queue.length; i += 1) {
+          if (this._queue[i].__fetchQueue._batch !== this._batch) {
+            break;
+          }
+        }
+        this._queue.splice(i, 0, defer);
+      }
+    };
+
+    /**
+     * Remove a Deferred object from the queue.
+     * @param {Deferred} defer Deferred object to add to the queue.
+     * @returns {bool} true if the object was removed
+     */
+    this.remove = function (defer) {
+      var pos = $.inArray(defer, this._queue);
+      if (pos >= 0) {
+        this._queue.splice(pos, 1);
+        return true;
+      }
+      return false;
+    };
+
+    /**
+     * Start a new batch or clear using batches.
+     * @param {boolean} start true to start a new batch, false to turn off
+     *                        using batches.  Undefined to return the current
+     *                        state of batches.
+     * @return {Number|boolean|Object} the current batch state or this object.
+     */
+    this.batch = function (start) {
+      if (start === undefined) {
+        return this._batch;
+      }
+      if (!start) {
+        this._batch = false;
+      } else {
+        this._batch = m_next_batch;
+        m_next_batch += 1;
+      }
+      return this;
+    };
+
+    /**
+     * Check if any items are queued and if there if there are not too many
+     * deferred objects being processed.  If so, process more items.
+     */
+    this.next_item = function () {
+      if (m_this._innextitem) {
+        return;
+      }
+      m_this._innextitem = true;
+      /* if the queue is greater than the track size, check each item to see
+       * if it is still needed. */
+      if (m_this._queue.length > m_this._track && this._needed) {
+        for (var i = m_this._queue.length - 1; i >= 0; i -= 1) {
+          if (!m_this._needed(m_this._queue[i])) {
+            var discard = m_this._queue.splice(i, 1)[0];
+            m_this._processing += 1;
+            discard.__fetchQueue.reject();
+            delete discard.__fetchQueue;
+          }
+        }
+      }
+      while (m_this._processing < m_this._size && m_this._queue.length) {
+        var defer = m_this._queue.shift();
+        if (defer.__fetchQueue) {
+          m_this._processing += 1;
+          var needed = m_this._needed ? m_this._needed(defer) : true;
+          if (needed) {
+            defer.__fetchQueue.resolve();
+          } else {
+            defer.__fetchQueue.reject();
+          }
+          delete defer.__fetchQueue;
+        }
+      }
+      m_this._innextitem = false;
+    };
+
+    this.clear();
+    return this;
+  };
 })();
 
 //////////////////////////////////////////////////////////////////////////////
@@ -20339,6 +21158,67 @@ geo.map = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Get/set the clampBoundsX setting.  If changed, adjust the bounds of the
+   * map as needed.
+   *
+   * @param {boolean?} clamp The new clamp value.
+   * @returns {boolean|this}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.clampBoundsX = function (clamp) {
+    if (clamp === undefined) {
+      return m_clampBoundsX;
+    }
+    if (clamp !== m_clampBoundsX) {
+      m_clampBoundsX = !!clamp;
+      m_this.pan({x: 0, y: 0});
+    }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/set the clampBoundsY setting.  If changed, adjust the bounds of the
+   * map as needed.
+   *
+   * @param {boolean?} clamp The new clamp value.
+   * @returns {boolean|this}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.clampBoundsY = function (clamp) {
+    if (clamp === undefined) {
+      return m_clampBoundsY;
+    }
+    if (clamp !== m_clampBoundsY) {
+      m_clampBoundsY = !!clamp;
+      m_this.pan({x: 0, y: 0});
+    }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/set the clampZoom setting.  If changed, adjust the bounds of the map
+   * as needed.
+   *
+   * @param {boolean?} clamp The new clamp value.
+   * @returns {boolean|this}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.clampZoom = function (clamp) {
+    if (clamp === undefined) {
+      return m_clampZoom;
+    }
+    if (clamp !== m_clampZoom) {
+      m_clampZoom = !!clamp;
+      reset_minimum_zoom();
+      m_this.zoom(m_zoom);
+    }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Get the map's world coordinate origin in gcs coordinates
    *
    * @returns {object}
@@ -20441,8 +21321,7 @@ geo.map = function (arg) {
     evt = {
       geo: {},
       zoomLevel: m_zoom,
-      screenPosition: origin ? origin.map : undefined,
-      eventType: geo.event.zoom
+      screenPosition: origin ? origin.map : undefined
     };
     m_this.geoTrigger(geo.event.zoom, evt);
 
@@ -20467,8 +21346,7 @@ geo.map = function (arg) {
     var evt, unit;
     evt = {
       geo: {},
-      screenDelta: delta,
-      eventType: geo.event.pan
+      screenDelta: delta
     };
 
     unit = m_this.unitsPerPixel(m_zoom);
@@ -20529,8 +21407,7 @@ geo.map = function (arg) {
       geo.event.pan,
       {
         geo: coordinates,
-        screenDelta: null,
-        eventType: geo.event.pan
+        screenDelta: null
       }
     );
     return m_this;
@@ -20970,23 +21847,25 @@ geo.map = function (arg) {
    * Get or set the min/max zoom range.
    *
    * @param {Object} arg {min: minimumzoom, max: maximumzom}
+   * @param {boolean} noRefresh if true, don't update the map if the zoom level
+   *                            has changed.
    * @returns {Object|geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.zoomRange = function (arg) {
+  this.zoomRange = function (arg, noRefresh) {
     if (arg === undefined) {
       return $.extend({}, m_validZoomRange);
     }
     if (arg.max !== undefined) {
       m_validZoomRange.max = arg.max;
     }
-
-    // don't allow the minimum zoom to go below what will
-    // fit in the view port
     if (arg.min !== undefined) {
-      m_validZoomRange.min = m_validZoomRange.origMin = fix_zoom(arg.min);
+      m_validZoomRange.min = m_validZoomRange.origMin = arg.min;
     }
     reset_minimum_zoom();
+    if (!noRefresh) {
+      m_this.zoom(m_zoom);
+    }
     return m_this;
   };
 
@@ -21152,11 +22031,15 @@ geo.map = function (arg) {
       if (m_transition.zCoord) {
         p[2] = z2zoom(p[2]);
       }
-      m_this.center({
-        x: p[0],
-        y: p[1]
-      }, null);
-      m_this.zoom(p[2], undefined, true);
+      if (fix_zoom(p[2], true) === m_zoom) {
+        m_this.center({
+          x: p[0],
+          y: p[1]
+        }, null);
+      } else {
+        m_center = m_this.gcsToWorld({x: p[0], y: p[1]}, null);
+        m_this.zoom(p[2], undefined, true);
+      }
 
       window.requestAnimationFrame(anim);
     }
@@ -21327,6 +22210,7 @@ geo.map = function (arg) {
       if (m_discreteZoom) {
         m_this.zoom(Math.round(m_this.zoom()));
       }
+      m_this.interactor().options({discreteZoom: m_discreteZoom});
     }
     return m_this;
   };
@@ -21569,12 +22453,12 @@ geo.map = function (arg) {
   m_origin = {x: 0, y: 0};
 
   // Fix the zoom level (minimum and initial)
-  this.zoomRange(arg);
+  this.zoomRange(arg, true);
   m_zoom = fix_zoom(m_zoom);
   // Now update to the correct center and zoom level
   this.center($.extend({}, arg.center || m_center), undefined);
 
-  this.interactor(arg.interactor || geo.mapInteractor());
+  this.interactor(arg.interactor || geo.mapInteractor({discreteZoom: m_discreteZoom}));
   this.clock(arg.clock || geo.clock());
 
   function resizeSelf() {
@@ -24287,6 +25171,7 @@ inherit(geo.renderer, geo.object);
       return geo.imageTile({
         index: index,
         size: {x: this._options.tileWidth, y: this._options.tileHeight},
+        queue: this._queue,
         url: this._options.url(urlParams.x, urlParams.y, urlParams.level || 0,
                                this._options.subdomains)
       });
@@ -25776,23 +26661,15 @@ geo.gl.planeFeature = function (arg) {
         /// img could be a source or an Image
         img = m_this.style().image,
         image = null,
-        texture = null;
+        texture = null,
+        gcs = m_this.gcs(),
+        map_gcs = m_this.layer().map().gcs();
 
-    //DWM:: we are expecting the features to be in the same coordinate system
-    //DWM:: as the camera -- should it be otherwise?
-    /// TODO If for some reason base layer changes its gcs at run time
-    /// then we need to trigger an event to rebuild every feature
-    /*
-    or = geo.transform.transformCoordinates(m_this.gcs(),
-                                            m_this.layer().map().gcs(),
-                                            or);
-    ul = geo.transform.transformCoordinates(m_this.gcs(),
-                                            m_this.layer().map().gcs(),
-                                            ul);
-    lr = geo.transform.transformCoordinates(m_this.gcs(),
-                                            m_this.layer().map().gcs(),
-                                            lr);
-    */
+    if (gcs !== map_gcs) {
+      or = geo.transform.transformCoordinates(gcs, map_gcs, or);
+      ul = geo.transform.transformCoordinates(gcs, map_gcs, ul);
+      lr = geo.transform.transformCoordinates(gcs, map_gcs, lr);
+    }
 
     m_this.buildTime().modified();
 
@@ -26566,7 +27443,8 @@ geo.gl.vglRenderer = function (arg) {
       m_width = 0,
       m_height = 0,
       m_renderAnimFrameRef = null,
-      s_init = this._init;
+      s_init = this._init,
+      s_exit = this._exit;
 
   /// TODO: Move this API to the base class
   ////////////////////////////////////////////////////////////////////////////
@@ -26665,11 +27543,21 @@ geo.gl.vglRenderer = function (arg) {
   this._render = function () {
     if (m_renderAnimFrameRef === null) {
       m_renderAnimFrameRef = window.requestAnimationFrame(function () {
-        m_viewer.render();
         m_renderAnimFrameRef = null;
+        m_viewer.render();
       });
     }
     return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Exit
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._exit = function () {
+    m_viewer.exit();
+    s_exit();
   };
 
   this._updateRendererCamera = function () {
@@ -26681,16 +27569,16 @@ geo.gl.vglRenderer = function (arg) {
     if (proj[15]) {
       /* we want positive z to be closer to the camera, but webGL does the
        * converse, so reverse the z coordinates. */
-      proj = mat4.scale(mat4.create(), proj, [1, 1, -1]);
+      proj = mat4.scale(geo.util.mat4AsArray(), proj, [1, 1, -1]);
     }
     /* A similar kluge as in the base camera class worldToDisplay4.  With this,
      * we can show z values from 0 to 1. */
-    proj = mat4.translate(mat4.create(), proj,
+    proj = mat4.translate(geo.util.mat4AsArray(), proj,
                           [0, 0, camera.constructor.bounds.far]);
 
     renderWindow.renderers().forEach(function (renderer) {
       var cam = renderer.camera();
-      cam.setViewMatrix(view);
+      cam.setViewMatrix(view, true);
       cam.setProjectionMatrix(proj);
       if (proj[1] || proj[2] || proj[3] || proj[4] || proj[6] || proj[7] ||
           proj[8] || proj[9] || proj[11] || proj[15] !== 1 ||
@@ -26760,7 +27648,7 @@ geo.gl.tileLayer = function () {
   this._drawTile = function (tile) {
     var bounds = this._tileBounds(tile),
         level = tile.index.level || 0,
-        to = this._options.tileOffset(level);
+        to = this._tileOffset(level);
     var ul = this.fromLocal(this.fromLevel({
       x: bounds.left - to.x, y: bounds.top - to.y
     }, level), 0);
@@ -26774,6 +27662,9 @@ geo.gl.tileLayer = function () {
       .upperLeft([ul.x, ul.y, level * 1e-7])
       .lowerRight([lr.x, lr.y, level * 1e-7])
       .style({image: tile._image});
+    /* Don't respond to geo events */
+    tile.feature.geoTrigger = undefined;
+    tile.feature.gcs(m_this.map().gcs());
     tile.feature._update();
     m_this.draw();
   };
@@ -26789,7 +27680,7 @@ geo.gl.tileLayer = function () {
 
   /* These functions don't need to do anything. */
   this._getSubLayer = function () {};
-  this._updateSubLayer = function () {};
+  this._updateSubLayer = undefined;
 };
 
 geo.registerLayerAdjustment('vgl', 'tile', geo.gl.tileLayer);
@@ -27199,8 +28090,10 @@ geo.d3.d3Renderer = function (arg) {
 
     if (canvas.attr('scale') !== null) {
       scale = canvas.attr('scale') || 1;
-      dx = (canvas.attr('dx') || 0) * scale;
-      dy = (canvas.attr('dy') || 0) * scale;
+      dx = (parseFloat(canvas.attr('dx') || 0) +
+            parseFloat(canvas.attr('offsetx') || 0)) * scale;
+      dy = (parseFloat(canvas.attr('dy') || 0) +
+            parseFloat(canvas.attr('offsety') || 0)) * scale;
       dx += map.size().width / 2;
       dy += map.size().height / 2;
     } else {
@@ -27517,24 +28410,28 @@ geo.d3.tileLayer = function () {
 
   this._drawTile = function (tile) {
     var bounds = m_this._tileBounds(tile),
-        parentNode = m_this._getSubLayer(tile.index.level);
+        parentNode = m_this._getSubLayer(tile.index.level),
+        offsetx = parseInt(parentNode.attr('offsetx') || 0),
+        offsety = parseInt(parentNode.attr('offsety') || 0);
     tile.feature = m_this.createFeature(
       'plane', {drawOnAsyncResourceLoad: true})
-      .origin([bounds.left, bounds.top])
-      .upperLeft([bounds.left, bounds.top])
-      .lowerRight([bounds.right, bounds.bottom])
+      .origin([bounds.left - offsetx, bounds.top - offsety])
+      .upperLeft([bounds.left - offsetx, bounds.top - offsety])
+      .lowerRight([bounds.right - offsetx, bounds.bottom - offsety])
       .style({
         image: tile._url,
         opacity: 1,
         reference: tile.toString(),
         parentId: parentNode.attr('data-tile-layer-id')
       });
+    /* Don't respond to geo events */
+    tile.feature.geoTrigger = undefined;
     tile.feature._update();
     m_this.draw();
   };
 
   /**
-   * Return the DOM eleement containing a level specific
+   * Return the DOM element containing a level specific
    * layer.  This will create the element if it doesn't
    * already exist.
    * @param {number} level The zoom level of the layer to fetch
@@ -27557,14 +28454,53 @@ geo.d3.tileLayer = function () {
   /**
    * Set sublayer transforms to align them with the given zoom level.
    * @param {number} level The target zoom level
+   * @param {object} view The view bounds.  The top and left are used to
+   *                      adjust the offset of tile layers.
+   * @return {object} the x and y offsets for the current level.
    */
-  this._updateSubLayers = function (level) {
-    $.each(m_this.canvas().selectAll('.geo-tile-layer')[0], function (idx, el) {
-      var layer = parseInt($(el).attr('data-tile-layer'));
+  this._updateSubLayers = function (level, view) {
+    var canvas = m_this.canvas(),
+        lastlevel = parseInt(canvas.attr('lastlevel')),
+        lastx = parseInt(canvas.attr('lastoffsetx') || 0),
+        lasty = parseInt(canvas.attr('lastoffsety') || 0);
+    if (lastlevel === level && Math.abs(lastx - view.left) < 65536 &&
+        Math.abs(lasty - view.top) < 65536) {
+      return {x: lastx, y: lasty};
+    }
+    var to = this._tileOffset(level),
+        x = parseInt(view.left) + to.x,
+        y = parseInt(view.top) + to.y;
+    var tileCache = m_this.cache._cache;
+    $.each(canvas.selectAll('.geo-tile-layer')[0], function (idx, el) {
+      var layer = parseInt($(el).attr('data-tile-layer')),
+          scale = Math.pow(2, level - layer);
       el = m_this._getSubLayer(layer);
-      var scale = Math.pow(2, level - layer);
       el.attr('transform', 'matrix(' + [scale, 0, 0, scale, 0, 0].join() + ')');
+      /* x and y are the upper left of our view.  This is the zero-point for
+       * offsets at the current level.  Other tile layers' offsets are scaled
+       * by appropriate factors of 2.  We need to shift the tiles of each
+       * layer by the appropriate amount (computed as dx and dy). */
+      var layerx = parseInt(x / Math.pow(2, level - layer)),
+          layery = parseInt(y / Math.pow(2, level - layer)),
+          dx = layerx - parseInt(el.attr('offsetx') || 0),
+          dy = layery - parseInt(el.attr('offsety') || 0);
+      el.attr({offsetx: layerx, offsety: layery});
+      /* We have to update the values stored in the tile features, too,
+       * otherwise when d3 regenerates these features, the offsets will be
+       * wrong. */
+      $.each(tileCache, function (idx, tile) {
+        if (tile._index.level === layer && tile.feature) {
+          var f = tile.feature,
+              o = f.origin(), ul = f.upperLeft(), lr = f.lowerRight();
+          f.origin([o[0] - dx, o[1] - dy, o[2]]);
+          f.upperLeft([ul[0] - dx, ul[1] - dy, ul[2]]);
+          f.lowerRight([lr[0] - dx, lr[1] - dy, lr[2]]);
+          f._update();
+        }
+      });
     });
+    canvas.attr({lastoffsetx: x, lastoffsety: y, lastlevel: level});
+    return {x: x, y: y};
   };
 
   /* Initialize the tile layer.  This creates a series of sublayers so that
