@@ -314,8 +314,7 @@ geo.map = function (arg) {
     evt = {
       geo: {},
       zoomLevel: m_zoom,
-      screenPosition: origin ? origin.map : undefined,
-      eventType: geo.event.zoom
+      screenPosition: origin ? origin.map : undefined
     };
     m_this.geoTrigger(geo.event.zoom, evt);
 
@@ -340,8 +339,7 @@ geo.map = function (arg) {
     var evt, unit;
     evt = {
       geo: {},
-      screenDelta: delta,
-      eventType: geo.event.pan
+      screenDelta: delta
     };
 
     unit = m_this.unitsPerPixel(m_zoom);
@@ -402,8 +400,7 @@ geo.map = function (arg) {
       geo.event.pan,
       {
         geo: coordinates,
-        screenDelta: null,
-        eventType: geo.event.pan
+        screenDelta: null
       }
     );
     return m_this;
@@ -1027,11 +1024,15 @@ geo.map = function (arg) {
       if (m_transition.zCoord) {
         p[2] = z2zoom(p[2]);
       }
-      m_this.center({
-        x: p[0],
-        y: p[1]
-      }, null);
-      m_this.zoom(p[2], undefined, true);
+      if (fix_zoom(p[2], true) === m_zoom) {
+        m_this.center({
+          x: p[0],
+          y: p[1]
+        }, null);
+      } else {
+        m_center = m_this.gcsToWorld({x: p[0], y: p[1]}, null);
+        m_this.zoom(p[2], undefined, true);
+      }
 
       window.requestAnimationFrame(anim);
     }

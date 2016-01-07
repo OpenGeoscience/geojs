@@ -152,8 +152,10 @@ geo.sceneObject = function (arg) {
 
     // trigger the event on the children
     m_children.forEach(function (child) {
-      geoArgs._triggeredBy = m_this;
-      child.geoTrigger(event, args);
+      if (child.geoTrigger) {
+        geoArgs._triggeredBy = m_this;
+        child.geoTrigger(event, args);
+      }
     });
 
     return m_this;

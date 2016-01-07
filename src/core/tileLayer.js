@@ -161,8 +161,7 @@
         lastY = null,
         s_init = this._init,
         s_exit = this._exit,
-        m_exited,
-        _deferredPurge = null;
+        m_exited;
 
     // copy the options into a private variable
     this._options = $.extend(true, {}, options);
@@ -193,6 +192,8 @@
         return tile === this.cache.get(tile.toString());
       }.bind(this)
     });
+
+    var m_tileOffsetValues = {};
 
     /**
      * Readonly accessor to the options object
@@ -308,7 +309,7 @@
       var o = this._origin(level);
       var map = this.map();
       point = this.displayToLevel(map.gcsToDisplay(point, null), level);
-      var to = this._options.tileOffset(level);
+      var to = this._tileOffset(level);
       if (to) {
         point.x += to.x;
         point.y += to.y;
@@ -338,7 +339,7 @@
             size: {x: this._options.tileWidth, y: this._options.tileHeight},
             url: ''
           }));
-      var to = this._options.tileOffset(tile.index.level),
+      var to = this._tileOffset(tile.index.level),
           bounds = tile.bounds({x: 0, y: 0}, to),
           map = this.map(),
           unit = map.unitsPerPixel(tile.index.level);
@@ -889,7 +890,7 @@
           Math.abs(lasty - view.top) < 65536) {
         return {x: lastx, y: lasty};
       }
-      var to = this._options.tileOffset(level),
+      var to = this._tileOffset(level),
           x = parseInt(view.left) + to.x,
           y = parseInt(view.top) + to.y;
       canvas.find('.geo-tile-layer').each(function (idx, el) {
@@ -919,49 +920,54 @@
      * Update the view according to the map/camera.
      * @returns {this} Chainable
      */
-    this._update = function () {
+    this._update = function (evt) {
+      /* Ignore zoom events, as they are ALWAYS followed by a pan event */
+      if (evt && evt.event && evt.event.event === geo.event.zoom) {
+        return;
+      }
       var map = this.map(),
           mapZoom = map.zoom(),
           zoom = this._options.tileRounding(mapZoom),
           center = this.displayToLevel(undefined, zoom),
           bounds = map.bounds(undefined, null),
-          tiles, view = this._getViewBounds(), myPurge = {};
+          tiles, view = this._getViewBounds();
 
-      _deferredPurge = myPurge;
       tiles = this._getTiles(
         zoom, bounds, true
       );
 
-      // Update the transform for the local layer coordinates
-      var offset = this._updateSubLayers(zoom, view) || {x: 0, y: 0};
+      if (this._updateSubLayers) {
+        // Update the transform for the local layer coordinates
+        var offset = this._updateSubLayers(zoom, view) || {x: 0, y: 0};
 
-      var to = this._options.tileOffset(zoom);
-      if (this.renderer() === null) {
-        this.canvas().css(
-          'transform-origin',
-          'center center'
-        );
-        this.canvas().css(
-          'transform',
-          'scale(' + (Math.pow(2, mapZoom - zoom)) + ')' +
-          'translate(' +
-          (-to.x + -(view.left + view.right) / 2 + map.size().width / 2 +
-           offset.x) + 'px' + ',' +
-          (-to.y + -(view.bottom + view.top) / 2 + map.size().height / 2 +
-           offset.y) + 'px' + ')' +
-          ''
-        );
+        var to = this._tileOffset(zoom);
+        if (this.renderer() === null) {
+          this.canvas().css(
+            'transform-origin',
+            'center center'
+          );
+          this.canvas().css(
+            'transform',
+            'scale(' + (Math.pow(2, mapZoom - zoom)) + ')' +
+            'translate(' +
+            (-to.x + -(view.left + view.right) / 2 + map.size().width / 2 +
+             offset.x) + 'px' + ',' +
+            (-to.y + -(view.bottom + view.top) / 2 + map.size().height / 2 +
+             offset.y) + 'px' + ')' +
+            ''
+          );
+        }
+        /* Set some attributes that can be used by non-css based viewers.  This
+         * doesn't include the map center, as that may need to be handled
+         * differently from the view center. */
+        this.canvas().attr({
+          scale: Math.pow(2, mapZoom - zoom),
+          dx: -to.x + -(view.left + view.right) / 2,
+          dy: -to.y + -(view.bottom + view.top) / 2,
+          offsetx: offset.x,
+          offsety: offset.y
+        });
       }
-      /* Set some attributes that can be used by non-css based viewers.  This
-       * doesn't include the map center, as that may need to be handled
-       * differently from the view center. */
-      this.canvas().attr({
-        scale: Math.pow(2, mapZoom - zoom),
-        dx: -to.x + -(view.left + view.right) / 2,
-        dy: -to.y + -(view.bottom + view.top) / 2,
-        offsetx: offset.x,
-        offsety: offset.y
-      });
 
       lastZoom = mapZoom;
       lastX = center.x;
@@ -972,13 +978,8 @@
 
       tiles.forEach(function (tile) {
         if (tile.fetched()) {
-          /* if we have already fetched the tile, don't recompute the map zoom
-           *  and view bounds, as we can use what we currently have. */
-          if (this._canPurge(tile, view, zoom)) {
-            this.remove(tile);
-            return;
-          }
-
+          /* if we have already fetched the tile, we know we can just draw it,
+           * as the bounds won't have changed since the call to _getTiles. */
           this.drawTile(tile);
 
           // mark the tile as covered
@@ -1019,9 +1020,10 @@
       $.when.apply($, tiles)
         .done(// called on success and failure
           function () {
-            if (_deferredPurge === myPurge) {
-              this._purge(zoom, true);
-            }
+            var map = this.map(),
+                mapZoom = map.zoom(),
+                zoom = this._options.tileRounding(mapZoom);
+            this._purge(zoom, true);
           }.bind(this)
         );
     };
@@ -1127,7 +1129,7 @@
     this._outOfBounds = function (tile, bounds) {
       /* We may want to add an (n) tile edge buffer so we appear more
        * responsive */
-      var to = this._options.tileOffset(tile.index.level);
+      var to = this._tileOffset(tile.index.level);
       var scale = 1;
       if (tile.index.level !== bounds.level) {
         scale = Math.pow(2, (bounds.level || 0) - (tile.index.level || 0));
@@ -1252,6 +1254,20 @@
         this.map().draw();
       }
       return this;
+    };
+
+    /**
+     * Return a value from the tileOffset function, caching it for different
+     * levels.
+     *
+     * @param {Number} level the level to pass to the tileOffset function.
+     * @returns {Object} a tile offset object with x and y properties.
+     */
+    this._tileOffset = function (level) {
+      if (m_tileOffsetValues[level] === undefined) {
+        m_tileOffsetValues[level] = this._options.tileOffset(level);
+      }
+      return m_tileOffsetValues[level];
     };
 
     /**

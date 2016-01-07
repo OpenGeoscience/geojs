@@ -20,6 +20,8 @@ geo.d3.tileLayer = function () {
         reference: tile.toString(),
         parentId: parentNode.attr('data-tile-layer-id')
       });
+    /* Don't respond to geo events */
+    tile.feature.geoTrigger = undefined;
     tile.feature._update();
     m_this.draw();
   };
@@ -61,7 +63,7 @@ geo.d3.tileLayer = function () {
         Math.abs(lasty - view.top) < 65536) {
       return {x: lastx, y: lasty};
     }
-    var to = this._options.tileOffset(level),
+    var to = this._tileOffset(level),
         x = parseInt(view.left) + to.x,
         y = parseInt(view.top) + to.y;
     var tileCache = m_this.cache._cache;
