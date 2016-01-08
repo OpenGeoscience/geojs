@@ -1,6 +1,6 @@
 // Test geo.tileLayer
 
-/*global describe, it, expect, geo*/
+/*global describe, it, expect, geo, mockVGLRenderer*/
 describe('geo.tileLayer', function () {
   'use strict';
 
@@ -97,6 +97,7 @@ describe('geo.tileLayer', function () {
 
     describe('center: (0, 0)', function () {
       it('origin: (0, 0), zoom level: 0', function () {
+        mockVGLRenderer();
         var l = get_layer({x: 0, y: 0}),
             s = l.map().unitsPerPixel();
         expect(l.tileAtPoint({x: 128 * s, y: 128 * s}, 0)).toEqual({x: 0, y: 0});
@@ -282,7 +283,7 @@ describe('geo.tileLayer', function () {
   describe('toLocal/fromLocal', function () {
     var opts = {},
         m = map(opts),
-        l = geo.tileLayer({map: m});
+        l = geo.tileLayer({map: m, renderer: null});
 
     it('Should not depend on map origin', function () {
       function check(p) {
