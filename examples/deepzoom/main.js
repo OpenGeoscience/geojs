@@ -46,6 +46,6 @@ $(function () {
   // Add the osm layer with a custom tile url
   map.createLayer(
     'tiledFish',
-    {renderer: null}
+    {renderer: 'vgl'}
   );
 });
