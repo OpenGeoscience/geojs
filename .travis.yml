@@ -15,6 +15,7 @@ script:
     - npm install
     - npm run build
     - ./node_modules/.bin/grunt docs
+    - ./node_modules/.bin/grunt copy:jqueryui
     - ./node_modules/.bin/grunt serve-test &
     - sleep 1
     - mkdir _build

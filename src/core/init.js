@@ -97,7 +97,7 @@ geo.registerRenderer = function (name, func) {
  * Create new instance of the renderer
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.createRenderer  = function (name, layer, canvas, options) {
+geo.createRenderer = function (name, layer, canvas, options) {
   'use strict';
 
   if (geo.renderers.hasOwnProperty(name)) {
@@ -108,6 +108,42 @@ geo.createRenderer  = function (name, layer, canvas, options) {
     return ren;
   }
   return null;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Check if the named renderer is supported.  If not, display a warning and get
+ * the name of a fallback renderer.  Ideally, we would pass a list of desired
+ * features, and, if the renderer is unavailable, this would choose a fallback
+ * that would support those features.
+ *
+ * @params {string|null} name name of the desired renderer
+ * @params {boolean} noFallack if true, don't recommend a fallback
+ * @return {string|null|false} the name of the renderer that should be used
+ *      of false if no valid renderer can be determined.
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.checkRenderer = function (name, noFallback) {
+  'use strict';
+  if (name === null) {
+    return name;
+  }
+  if (geo.renderers.hasOwnProperty(name)) {
+    var ren = geo.renderers[name];
+    if (!ren.supported || ren.supported()) {
+      return name;
+    }
+    if (!ren.fallback || noFallback) {
+      return false;
+    }
+    var fallback = geo.checkRenderer(ren.fallback(), true);
+    if (fallback !== false) {
+      console.warn(name + ' renderer is unavailable, using ' + fallback +
+                   ' renderer instead');
+    }
+    return fallback;
+  }
+  return false;
 };
 
 //////////////////////////////////////////////////////////////////////////////
