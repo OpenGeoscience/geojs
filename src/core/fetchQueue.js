@@ -135,6 +135,15 @@
     };
 
     /**
+     * Get the position of a deferred object in the queue.
+     * @param {Deferred} defer Deferred object to get the position of.
+     * @returns {number} -1 if not in the queue, or the position in the queue.
+     */
+    this.get = function (defer) {
+      return $.inArray(defer, this._queue);
+    };
+
+    /**
      * Remove a Deferred object from the queue.
      * @param {Deferred} defer Deferred object to add to the queue.
      * @returns {bool} true if the object was removed

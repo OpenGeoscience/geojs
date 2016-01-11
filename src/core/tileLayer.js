@@ -398,13 +398,14 @@
      * @param {number} source.x
      * @param {number} source.y
      * @param {number} source.level
+     * @param {boolean} delayPurge If true, don't purge tiles from the cache
      * @returns {geo.tile}
      */
-    this._getTileCached = function (index, source) {
+    this._getTileCached = function (index, source, delayPurge) {
       var tile = this.cache.get(this._tileHash(index));
       if (tile === null) {
         tile = this._getTile(index, source);
-        this.cache.add(tile);
+        this.cache.add(tile, this.remove.bind(this), delayPurge);
       }
       return tile;
     };
@@ -516,10 +517,15 @@
           this._queue.batch(true);
         }
       }
+      if (this.cache.size < tiles.length) {
+        console.log('Increasing cache size to ' + tiles.length);
+        this.cache.size = tiles.length;
+      }
       /* Actually get the tiles. */
       for (i = 0; i < tiles.length; i += 1) {
-        tiles[i] = this._getTileCached(tiles[i].index, tiles[i].source);
+        tiles[i] = this._getTileCached(tiles[i].index, tiles[i].source, true);
       }
+      this.cache.purge(this.remove.bind(this));
       return tiles;
     };
 
@@ -760,9 +766,11 @@
      * @protected
      * @param {number} zoom Tiles (in bounds) at this zoom level will be kept
      * @param {boolean} doneLoading If true, allow purging additional tiles.
+     * @param {object} bounds view bounds.  If not specified, this is
+     *   obtained from _getViewBounds().
      */
-    this._purge = function (zoom, doneLoading) {
-      var tile, hash, bounds = {};
+    this._purge = function (zoom, doneLoading, bounds) {
+      var tile, hash;
 
       // Don't purge tiles in an active update
       if (this._updating) {
@@ -770,7 +778,9 @@
       }
 
       // get the view bounds
-      bounds = this._getViewBounds();
+      if (!bounds) {
+        bounds = this._getViewBounds();
+      }
 
       for (hash in this._activeTiles) {// jshint ignore: line
 
@@ -985,34 +995,44 @@
           // mark the tile as covered
           this._setTileTree(tile);
         } else {
-          tile.then(function () {
-            if (m_exited) {
-              /* If we have disconnected the renderer, do nothing.  This
-               * happens when the layer is being deleted. */
-              return;
-            }
-            if (tile !== this.cache.get(tile.toString())) {
-              /* If the tile has fallen out of the cache, don't draw it -- it
-               * is untracked.  This may be an indication that a larger cache
-               * should have been used. */
-              return;
-            }
-            /* Check if a tile is still desired.  Don't draw it if it isn't. */
-            var mapZoom = map.zoom(),
-                zoom = this._options.tileRounding(mapZoom),
-                view = this._getViewBounds();
-            if (this._canPurge(tile, view, zoom)) {
-              this.remove(tile);
-              return;
-            }
+          if (!tile._queued) {
+            tile.then(function () {
+              if (m_exited) {
+                /* If we have disconnected the renderer, do nothing.  This
+                 * happens when the layer is being deleted. */
+                return;
+              }
+              if (tile !== this.cache.get(tile.toString())) {
+                /* If the tile has fallen out of the cache, don't draw it -- it
+                 * is untracked.  This may be an indication that a larger cache
+                 * should have been used. */
+                return;
+              }
+              /* Check if a tile is still desired.  Don't draw it if it isn't. */
+              var mapZoom = map.zoom(),
+                  zoom = this._options.tileRounding(mapZoom),
+                  view = this._getViewBounds();
+              if (this._canPurge(tile, view, zoom)) {
+                this.remove(tile);
+                return;
+              }
 
-            this.drawTile(tile);
+              this.drawTile(tile);
 
-            // mark the tile as covered
-            this._setTileTree(tile);
-          }.bind(this));
+              // mark the tile as covered
+              this._setTileTree(tile);
+            }.bind(this));
 
-          this.addPromise(tile);
+            this.addPromise(tile);
+            tile._queued = true;
+          } else {
+            /* If we are using a fetch queue, tell the queue so this tile can
+             * be reprioritized. */
+            var pos = this._queue ? this._queue.get(tile) : -1;
+            if (pos >= 0) {
+              this._queue.add(tile);
+            }
+          }
         }
       }.bind(this));
 
