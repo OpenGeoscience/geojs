@@ -516,3 +516,27 @@ geo.d3.d3Renderer = function (arg) {
 inherit(geo.d3.d3Renderer, geo.renderer);
 
 geo.registerRenderer('d3', geo.d3.d3Renderer);
+
+(function () {
+  'use strict';
+
+  /**
+   * Report if the d3 renderer is supported.  This is just a check if d3 is
+   * available.
+   *
+   * @returns {boolean} true if available.
+   */
+  geo.d3.d3Renderer.supported = function () {
+    return (typeof d3 !== 'undefined');
+  };
+
+  /**
+   * If the d3 renderer is not supported, supply the name of a renderer that
+   * should be used instead.  This asks for the null renderer.
+   *
+   * @returns null for the null renderer.
+   */
+  geo.d3.d3Renderer.fallback = function () {
+    return null;
+  };
+})();

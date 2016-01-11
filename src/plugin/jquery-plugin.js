@@ -452,5 +452,11 @@
 
   };
 
+  /* Provide a method to reload the plugin in case jquery-ui is loaded after
+   * the plugin. */
+  geo.jqueryPlugin = {reload: load};
+
   $(load);
-})($ || window.$, geo || window.geo, d3 || window.d3);
+})(typeof $ !== 'undefined' ? $ : window.$,
+   typeof geo !== 'undefined' ? geo : window.geo,
+   typeof d3 !== 'undefined' ? d3 : window.d3);

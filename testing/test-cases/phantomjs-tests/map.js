@@ -5,7 +5,7 @@ describe('geo.core.map', function () {
   'use strict';
 
   function create_map(opts) {
-    var node = $('<div class="#map"/>').css({width: '500px', height: '500px'});
+    var node = $('<div id="map"/>').css({width: '500px', height: '500px'});
     $('#map').remove();
     $('body').append(node);
     opts = $.extend({}, opts);

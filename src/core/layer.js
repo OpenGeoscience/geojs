@@ -41,6 +41,8 @@ geo.layer = function (arg) {
       m_attribution = arg.attribution || null,
       m_zIndex;
 
+  m_rendererName = geo.checkRenderer(m_rendererName);
+
   if (!m_map) {
     throw new Error('Layers must be initialized on a map.');
   }
@@ -522,7 +524,9 @@ geo.layer.create = function (map, spec) {
   }
 
   spec.renderer = spec.renderer || 'vgl';
-  if (spec.renderer !== 'd3' && spec.renderer !== 'vgl') {
+  spec.renderer = geo.checkRenderer(spec.renderer);
+
+  if (!spec.renderer) {
     console.warn('Invalid renderer');
     return null;
   }

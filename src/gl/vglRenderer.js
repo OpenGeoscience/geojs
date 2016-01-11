@@ -220,3 +220,46 @@ geo.gl.vglRenderer = function (arg) {
 inherit(geo.gl.vglRenderer, geo.renderer);
 
 geo.registerRenderer('vgl', geo.gl.vglRenderer);
+
+(function () {
+  'use strict';
+
+  var checkedWebGL;
+
+  /**
+   * Report if the vgl renderer is supported.  This is just a check if webGL is
+   * supported and available.
+   *
+   * @returns {boolean} true if available.
+   */
+  geo.gl.vglRenderer.supported = function () {
+    if (checkedWebGL === undefined) {
+      /* This is extracted from what Modernizr uses. */
+      var canvas, ctx, exts;
+      try {
+        canvas = document.createElement('canvas');
+        ctx = (canvas.getContext('webgl') ||
+               canvas.getContext('experimental-webgl'));
+        exts = ctx.getSupportedExtensions();
+        checkedWebGL = true;
+      } catch (e) {
+        console.error('No webGL support');
+        checkedWebGL = false;
+      }
+      canvas = undefined;
+      ctx = undefined;
+      exts = undefined;
+    }
+    return checkedWebGL;
+  };
+
+  /**
+   * If the vgl renderer is not supported, supply the name of a renderer that
+   * should be used instead.  This asks for the null renderer.
+   *
+   * @returns null for the null renderer.
+   */
+  geo.gl.vglRenderer.fallback = function () {
+    return null;
+  };
+})();

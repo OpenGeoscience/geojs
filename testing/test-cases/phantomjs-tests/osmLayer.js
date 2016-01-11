@@ -4,7 +4,7 @@
 describe('geo.core.osmLayer', function () {
   'use strict';
   function create_map(opts) {
-    var node = $('<div class="#map"/>');
+    var node = $('<div id="map"/>');
     $('#map').remove();
     $('body').append(node);
     opts = $.extend({}, opts);
