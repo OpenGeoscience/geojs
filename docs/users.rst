@@ -27,17 +27,21 @@ list of libraries used by GeoJS.
     +---------------------------+------------+---------------------------+
     | `proj4`_                  | 2.2        | Core                      |
     +---------------------------+------------+---------------------------+
-    | `GL matrix`_              | 2.1        | GL renderer               |
+    | `GL matrix`_              | 2.1        | Core, GL renderer         |
     +---------------------------+------------+---------------------------+
-    | `pnltri`_                 | 2.1        | GL renderer               |
+    | `pnltri`_                 | 2.1        | GL polygon feature        |
     +---------------------------+------------+---------------------------+
     | `d3`_                     | 3.3        | D3 renderer, UI widgets   |
     +---------------------------+------------+---------------------------+
 
 .. note::
 
-    The versions listed are what is provided in the bundle,
-    but other versions may work as well.
+    The versions listed are what is provided in the bundle, but other versions
+    may work as well.
+
+.. note::
+    Components used in the core code are strictly required.  Other components
+    can be excluded, though some functions will not work without them.
 
 .. _jQuery: http://jquery.com/
 .. _proj4: http://proj4js.org/
@@ -142,15 +146,17 @@ documentation for each of the classes.
 
 `geo.renderer <http://opengeoscience.github.io/geojs/apidocs/geo.renderer.html>`_
     A renderer is responsible for drawing geometries and images on the map.  This is an
-    abstract class which serves to define the minimal interface for a renderer.  Renderers
-    can provide an extended interface so that they can be used as a *base renderer*.  The
-    base renderer provides support methods for conversion between world and screen coordinates
-    and must respond to the map's request for navigation commands. Every map must have exactly
-    one layer attached to a base renderer.  Currently,
+    abstract class which serves to define the minimal interface for a renderer.
+    Not all features are available in all renderers, and an appropriate
+    renderer must be selected for a layer based on the features that will be
+    used.
+    If a renderer is requested when creating a layer, and that renderer is not
+    supported by the current installation, a fallback renderer may be used
+    instead and a warning sent to the console.
     `geo.gl.vglRenderer <http://opengeoscience.github.io/geojs/apidocs/geo.gl.vglRenderer.html>`_
-    is the only available base renderer.
+    requires webGL support.
     `geo.d3.d3Renderer <http://opengeoscience.github.io/geojs/apidocs/geo.d3.d3Renderer.html>`_
-    is also availabe for renderering features as SVG elements.
+    requires the d3 library to be present.
 
 `geo.layer <http://opengeoscience.github.io/geojs/apidocs/geo.layer.html>`_
     Layer objects are created by the map's ``createLayer`` method.  This is an abstract
@@ -159,7 +165,7 @@ documentation for each of the classes.
 
     `geo.featureLayer <http://opengeoscience.github.io/geojs/apidocs/geo.featureLayer.html>`_
         This is the primary container for features such as lines, points, etc.
-    
+
     `geo.osmLayer <http://opengeoscience.github.io/geojs/apidocs/geo.osmLayer.html>`_
         This layer displays tiled imagery from an openstreetmaps compatible tile server.
 
