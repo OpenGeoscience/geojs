@@ -322,10 +322,6 @@ describe('geo.tileLayer', function () {
       animationDuration: 10,
       tileRounding: function () {},
       attribution: 'My awesome layer',
-      minX: -10,
-      maxX: 5,
-      minY: 100,
-      maxY: 1000,
       tileOffset: function () {},
       topDown: true
     };

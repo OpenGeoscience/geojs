@@ -208,6 +208,7 @@ geo.pointFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.pointSearch = function (p) {
     var min, max, data, idx = [], box, found = [], ifound = [], map, pt,
+        corners,
         stroke = m_this.style.get("stroke"),
         strokeWidth = m_this.style.get("strokeWidth"),
         radius = m_this.style.get("radius");
@@ -226,18 +227,21 @@ geo.pointFeature = function (arg) {
 
     map = m_this.layer().map();
     pt = map.gcsToDisplay(p);
-
-    // Get the upper right corner in geo coordinates
-    min = map.displayToGcs({
-      x: pt.x - m_maxRadius,
-      y: pt.y + m_maxRadius   // GCS coordinates are bottom to top
-    });
-
-    // Get the lower left corner in geo coordinates
-    max = map.displayToGcs({
-      x: pt.x + m_maxRadius,
-      y: pt.y - m_maxRadius
-    });
+    // check all corners to make sure we handle rotations
+    corners = [
+      map.displayToGcs({x: pt.x - m_maxRadius, y: pt.y - m_maxRadius}),
+      map.displayToGcs({x: pt.x + m_maxRadius, y: pt.y - m_maxRadius}),
+      map.displayToGcs({x: pt.x - m_maxRadius, y: pt.y + m_maxRadius}),
+      map.displayToGcs({x: pt.x + m_maxRadius, y: pt.y + m_maxRadius})
+    ];
+    min = {
+      x: Math.min(corners[0].x, corners[1].x, corners[2].x, corners[3].x),
+      y: Math.min(corners[0].y, corners[1].y, corners[2].y, corners[3].y)
+    };
+    max = {
+      x: Math.max(corners[0].x, corners[1].x, corners[2].x, corners[3].x),
+      y: Math.max(corners[0].y, corners[1].y, corners[2].y, corners[3].y)
+    };
 
     // Find points inside the bounding box
     box = new geo.util.Box(geo.util.vect(min.x, min.y), geo.util.vect(max.x, max.y));
@@ -250,14 +254,15 @@ geo.pointFeature = function (arg) {
     idx.forEach(function (i) {
       var d = data[i],
           p = m_this.position()(d, i),
-          dx, dy, rad;
+          dx, dy, rad, rad2;
 
       rad = radius(data[i], i);
       rad += stroke(data[i], i) ? strokeWidth(data[i], i) : 0;
+      rad2 = rad * rad;
       p = map.gcsToDisplay(p);
       dx = p.x - pt.x;
       dy = p.y - pt.y;
-      if (Math.sqrt(dx * dx + dy * dy) <= rad) {
+      if (dx * dx + dy * dy <= rad2) {
         found.push(d);
         ifound.push(i);
       }

@@ -27,9 +27,9 @@ geo.d3.d3Renderer = function (arg) {
       m_corners = null,
       m_width = null,
       m_height = null,
+      m_diagonal = null,
       m_scale = 1,
-      m_dx = 0,
-      m_dy = 0,
+      m_transform = {dx: 0, dy: 0, rx: 0, ry: 0, rotation: 0},
       m_svg = null,
       m_defs = null;
 
@@ -165,17 +165,19 @@ geo.d3.d3Renderer = function (arg) {
   function initCorners() {
     var layer = m_this.layer(),
         map = layer.map(),
-        width = m_this.layer().map().size().width,
-        height = m_this.layer().map().size().height;
+        width = map.size().width,
+        height = map.size().height;
 
     m_width = width;
     m_height = height;
     if (!m_width || !m_height) {
       throw 'Map layer has size 0';
     }
+    m_diagonal = Math.pow(width * width + height * height, 0.5);
     m_corners = {
       upperLeft: map.displayToGcs({'x': 0, 'y': 0}, null),
-      lowerRight: map.displayToGcs({'x': width, 'y': height}, null)
+      lowerRight: map.displayToGcs({'x': width, 'y': height}, null),
+      center: map.displayToGcs({'x': width / 2, 'y': height / 2}, null)
     };
   }
 
@@ -199,32 +201,47 @@ geo.d3.d3Renderer = function (arg) {
         map = layer.map(),
         upperLeft = map.gcsToDisplay(m_corners.upperLeft, null),
         lowerRight = map.gcsToDisplay(m_corners.lowerRight, null),
+        center = map.gcsToDisplay(m_corners.center, null),
         group = getGroup(),
         canvas = m_this.canvas(),
-        dx, dy, scale;
+        dx, dy, scale, rotation, rx, ry;
 
     if (canvas.attr('scale') !== null) {
-      scale = canvas.attr('scale') || 1;
-      dx = (parseFloat(canvas.attr('dx') || 0) +
-            parseFloat(canvas.attr('offsetx') || 0)) * scale;
-      dy = (parseFloat(canvas.attr('dy') || 0) +
-            parseFloat(canvas.attr('offsety') || 0)) * scale;
-      dx += map.size().width / 2;
-      dy += map.size().height / 2;
+      scale = parseFloat(canvas.attr('scale') || 1);
+      rx = (parseFloat(canvas.attr('dx') || 0) +
+            parseFloat(canvas.attr('offsetx') || 0));
+      ry = (parseFloat(canvas.attr('dy') || 0) +
+            parseFloat(canvas.attr('offsety') || 0));
+      rotation = parseFloat(canvas.attr('rotation') || 0);
+      dx = scale * rx + map.size().width / 2;
+      dy = scale * ry + map.size().height / 2;
     } else {
+      scale = Math.sqrt(
+        Math.pow(lowerRight.y - upperLeft.y, 2) +
+        Math.pow(lowerRight.x - upperLeft.x, 2)) / m_diagonal;
       // calculate the translation
-      dx = upperLeft.x;
-      dy = upperLeft.y;
-      scale = (lowerRight.y - upperLeft.y) / m_height;
+      rotation = map.rotation();
+      rx = -m_width / 2;
+      ry = -m_height / 2;
+      dx = scale * rx + center.x;
+      dy = scale * ry + center.y;
     }
 
     // set the group transform property
-    group.attr('transform', 'matrix(' + [scale, 0, 0, scale, dx, dy].join() + ')');
+    var transform = 'matrix(' + [scale, 0, 0, scale, dx, dy].join() + ')';
+    if (rotation) {
+      transform += ' rotate(' + [
+        rotation * 180 / Math.PI, -rx, -ry].join() + ')';
+    }
+    group.attr('transform', transform);
 
     // set internal variables
     m_scale = scale;
-    m_dx = dx;
-    m_dy = dy;
+    m_transform.dx = dx;
+    m_transform.dy = dy;
+    m_transform.rx = rx;
+    m_transform.ry = ry;
+    m_transform.rotation = rotation;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -235,10 +252,20 @@ geo.d3.d3Renderer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.baseToLocal = function (pt) {
-    return {
-      x: (pt.x - m_dx) / m_scale,
-      y: (pt.y - m_dy) / m_scale
+    pt = {
+      x: (pt.x - m_transform.dx) / m_scale,
+      y: (pt.y - m_transform.dy) / m_scale
     };
+    if (m_transform.rotation) {
+      var sinr = Math.sin(-m_transform.rotation),
+          cosr = Math.cos(-m_transform.rotation);
+      var x = pt.x + m_transform.rx, y = pt.y + m_transform.ry;
+      pt = {
+        x: x * cosr - y * sinr - m_transform.rx,
+        y: x * sinr + y * cosr - m_transform.ry
+      };
+    }
+    return pt;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -249,10 +276,20 @@ geo.d3.d3Renderer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.localToBase = function (pt) {
-    return {
-      x: pt.x * m_scale + m_dx,
-      y: pt.y * m_scale + m_dy
+    if (m_transform.rotation) {
+      var sinr = Math.sin(m_transform.rotation),
+          cosr = Math.cos(m_transform.rotation);
+      var x = pt.x + m_transform.rx, y = pt.y + m_transform.ry;
+      pt = {
+        x: x * cosr - y * sinr - m_transform.rx,
+        y: x * sinr + y * cosr - m_transform.ry
+      };
+    }
+    pt = {
+      x: pt.x * m_scale + m_transform.dx,
+      y: pt.y * m_scale + m_transform.dy
     };
+    return pt;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -497,6 +534,9 @@ geo.d3.d3Renderer = function (arg) {
 
   // connect to pan event
   this.layer().geoOn(geo.event.pan, m_this._setTransform);
+
+  // connect to rotate event
+  this.layer().geoOn(geo.event.rotate, m_this._setTransform);
 
   // connect to zoom event
   this.layer().geoOn(geo.event.zoom, function () {

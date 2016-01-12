@@ -41,7 +41,7 @@ describe('geo.core.osmLayer', function () {
         var transform = layer.canvas().css('transform');
         layer._update();
         expect(layer.canvas().css('transform')).toBe(transform);
-        map.zoom(1);
+        map.zoom(1.5);
         expect(layer.canvas().css('transform')).not.toBe(transform);
       });
     });

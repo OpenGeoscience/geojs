@@ -217,6 +217,18 @@
     },
 
     /**
+     * Compare two arrays and return if their contents are equal.
+     * @param {array} a1 first array to compare
+     * @param {array} a2 second array to compare
+     * @returns {boolean} true if the contents of the arrays are equal.
+     */
+    compareArrays: function (a1, a2) {
+      return (a1.length === a2.length && a1.every(function (el, idx) {
+        return el === a2[idx];
+      }));
+    },
+
+    /**
      * Create a vec3 that is always an array.  This should only be used if it
      * will not be used in a WebGL context.  Plain arrays usually use 64-bit
      * float values, whereas vec3 defaults to 32-bit floats.

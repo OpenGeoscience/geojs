@@ -387,6 +387,10 @@ geo.layer = function (arg) {
         m_this._update({event: event});
       });
 
+      m_this.geoOn(geo.event.rotate, function (event) {
+        m_this._update({event: event});
+      });
+
       m_this.geoOn(geo.event.zoom, function (event) {
         m_this._update({event: event});
       });

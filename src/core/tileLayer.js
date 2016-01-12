@@ -85,10 +85,6 @@
    *    uses more memory but results in smoother transitions.
    * @param {bool}   [options.wrapX=true]    Wrap in the x-direction
    * @param {bool}   [options.wrapY=false]   Wrap in the y-direction
-   * @param {number} [options.minX=0]        The minimum world coordinate in X
-   * @param {number} [options.maxX=255]      The maximum world coordinate in X
-   * @param {number} [options.minY=0]        The minimum world coordinate in Y
-   * @param {number} [options.maxY=255]      The maximum world coordinate in Y
    * @param {function|string} [options.url=null]
    *   A function taking the current tile indices and returning a URL or jquery
    *   ajax config to be passed to the {geo.tile} constructor.
@@ -747,15 +743,17 @@
           zoom = this._options.tileRounding(mapZoom),
           scale = Math.pow(2, mapZoom - zoom),
           size = map.size();
-      var ul = this.displayToLevel({x: 0, y: 0});
-      var lr = this.displayToLevel({x: size.width, y: size.height});
+      var ul = this.displayToLevel({x: 0, y: 0}),
+          ur = this.displayToLevel({x: size.width, y: 0}),
+          ll = this.displayToLevel({x: 0, y: size.height}),
+          lr = this.displayToLevel({x: size.width, y: size.height});
       return {
         level: zoom,
         scale: scale,
-        left: ul.x,
-        right: lr.x,
-        bottom: lr.y,
-        top: ul.y
+        left: Math.min(ul.x, ur.x, ll.x, lr.x),
+        right: Math.max(ul.x, ur.x, ll.x, lr.x),
+        top: Math.min(ul.y, ur.y, ll.y, lr.y),
+        bottom: Math.max(ul.y, ur.y, ll.y, lr.y)
       };
     };
 
@@ -900,9 +898,10 @@
           Math.abs(lasty - view.top) < 65536) {
         return {x: lastx, y: lasty};
       }
-      var to = this._tileOffset(level),
-          x = parseInt(view.left) + to.x,
-          y = parseInt(view.top) + to.y;
+      var map = this.map(),
+          to = this._tileOffset(level),
+          x = parseInt((view.left + view.right - map.size().width) / 2 + to.x),
+          y = parseInt((view.top + view.bottom - map.size().height) / 2 + to.y);
       canvas.find('.geo-tile-layer').each(function (idx, el) {
         var $el = $(el),
             layer = parseInt($el.data('tileLayer'));
@@ -931,8 +930,10 @@
      * @returns {this} Chainable
      */
     this._update = function (evt) {
-      /* Ignore zoom events, as they are ALWAYS followed by a pan event */
-      if (evt && evt.event && evt.event.event === geo.event.zoom) {
+      /* Ignore zoom and rotate events, as they are ALWAYS followed by a pan
+       * event */
+      if (evt && evt.event && (evt.event.event === geo.event.zoom ||
+          evt.event.event === geo.event.rotate)) {
         return;
       }
       var map = this.map(),
@@ -952,20 +953,24 @@
 
         var to = this._tileOffset(zoom);
         if (this.renderer() === null) {
-          this.canvas().css(
-            'transform-origin',
-            'center center'
-          );
-          this.canvas().css(
-            'transform',
-            'scale(' + (Math.pow(2, mapZoom - zoom)) + ')' +
-            'translate(' +
-            (-to.x + -(view.left + view.right) / 2 + map.size().width / 2 +
-             offset.x) + 'px' + ',' +
-            (-to.y + -(view.bottom + view.top) / 2 + map.size().height / 2 +
-             offset.y) + 'px' + ')' +
-            ''
-          );
+          var scale = Math.pow(2, mapZoom - zoom),
+              rotation = map.rotation(),
+              rx = -to.x + -(view.left + view.right) / 2 + offset.x,
+              ry = -to.y + -(view.bottom + view.top) / 2 + offset.y,
+              dx = (rx + map.size().width / 2) * scale,
+              dy = (ry + map.size().height / 2) * scale;
+
+          this.canvas().css({
+            'transform-origin': '' +
+                -rx + 'px ' +
+                -ry + 'px'
+          });
+          var transform = 'translate(' + dx + 'px' + ',' + dy + 'px' + ')' +
+              'scale(' + scale + ')';
+          if (rotation) {
+            transform += 'rotate(' + (rotation * 180 / Math.PI) + 'deg)';
+          }
+          this.canvas().css('transform', transform);
         }
         /* Set some attributes that can be used by non-css based viewers.  This
          * doesn't include the map center, as that may need to be handled
@@ -975,7 +980,8 @@
           dx: -to.x + -(view.left + view.right) / 2,
           dy: -to.y + -(view.bottom + view.top) / 2,
           offsetx: offset.x,
-          offsety: offset.y
+          offsety: offset.y,
+          rotation: map.rotation()
         });
       }
 
@@ -1336,10 +1342,6 @@
     wrapY: false,
     url: null,
     subdomains: 'abc',
-    minX: 0,
-    maxX: 255,
-    minY: 0,
-    maxY: 255,
     tileOffset: function (level) {
       void(level);
       return {x: 0, y: 0};
