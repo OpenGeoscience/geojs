@@ -50,12 +50,14 @@ describe('geo.core.fetchQueue', function () {
       expect(q.length).toBe(2);
       expect(q.processing).toBe(2);
       expect(q._queue[0]).toBe(dlist[3]);
+      expect(q.get(dlist[3])).toBe(0);
 
       // adding an existing item should move it to the front
       q.add(dlist[2], dlist[2].process);
       expect(q.length).toBe(2);
       expect(q.processing).toBe(2);
       expect(q._queue[0]).toBe(dlist[2]);
+      expect(q.get(dlist[2])).toBe(0);
 
       expect(q.remove(dlist[2])).toBe(true);
       expect(q.length).toBe(1);
@@ -136,14 +138,18 @@ describe('geo.core.fetchQueue', function () {
         [13, 11, 9, 7, 5],
         [13, 11, 9, 7, 5]
       ];
-      var dlist = [], i, reportOrder = [1, 3, 11, 13, 7, 9, 5];
+      var dlist = [], i, j, reportOrder = [1, 3, 11, 13, 7, 9, 5];
 
       for (i = 0; i < 14; i += 1) {
         dlist.push(make_deferred());
         q.add(dlist[i], dlist[i].process);
         expect(q.length).toBe(qrefs[i].length);
-        for (var j = 0; j < q.length; j += 1) {
+        for (j = 0; j < q.length; j += 1) {
           expect(q._queue[j].ref).toBe(qrefs[i][j]);
+          expect(q.get(dlist[qrefs[i][j] - 1])).toBe(j);
+        }
+        for (j = 0; j < dlist.length; j += 1) {
+          expect(q.get(dlist[j])).toBe($.inArray(dlist[j].ref, qrefs[i]));
         }
       }
 

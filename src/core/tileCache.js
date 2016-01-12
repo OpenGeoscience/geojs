@@ -102,8 +102,11 @@
     /**
      * Add a tile to the cache.
      * @param {geo.tile} tile
+     * @param {function} removeFunc if specified and tiles must be purged from
+     *      the cache, call this function on each tile before purging.
+     * @param {boolean} noPurge if true, don't purge tiles.
      */
-    this.add = function (tile) {
+    this.add = function (tile, removeFunc, noPurge) {
       // remove any existing tiles with the same hash
       this.remove(tile);
       var hash = tile.toString();
@@ -112,9 +115,24 @@
       this._cache[hash] = tile;
       this._atime.unshift(hash);
 
-      // purge a tile from the cache if necessary
+      if (!noPurge) {
+        this.purge(removeFunc);
+      }
+    };
+
+    /**
+     * Purge tiles from the cache if it is full.
+     * @param {function} removeFunc if specified and tiles must be purged from
+     *      the cache, call this function on each tile before purging.
+     */
+    this.purge = function (removeFunc) {
+      var hash;
       while (this._atime.length > this.size) {
         hash = this._atime.pop();
+        var tile = this._cache[hash];
+        if (removeFunc) {
+          removeFunc(tile);
+        }
         delete this._cache[hash];
       }
     };

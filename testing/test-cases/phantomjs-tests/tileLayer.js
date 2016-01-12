@@ -551,6 +551,27 @@ describe('geo.tileLayer', function () {
         expect(l.tilesAtZoom(10)).toEqual({x: 1024, y: 1024});
       });
     });
+    describe('cacheSize', function () {
+      it('auto increase', function () {
+        var l = geo.tileLayer({
+          cacheSize: 2,
+          map: map({unitsPerPixel: 1}),
+          topDown: true,
+          wrapX: false,
+          wrapY: false,
+          url: function () {return '/data/white.jpg';}
+        });
+        expect(l.cache.size).toBe(2);
+
+        l._getTiles(0, {left: 0, top: 0, right: 512, bottom: 512}, true);
+        expect(l.cache.size).toBe(2);
+        l._getTiles(1, {left: 0, top: 0, right: 512, bottom: 512}, true);
+        expect(l.cache.size).toBe(5);
+        l._getTiles(0, {left: 0, top: 0, right: 512, bottom: 512}, true);
+        expect(l.cache.size).toBe(5);
+
+      });
+    });
     it('prefetch', function (done) {
       var l = geo.tileLayer({map: map()}),
           d1 = new $.Deferred(),
@@ -975,6 +996,29 @@ describe('geo.tileLayer', function () {
         l._isCovered = function () {return false;};
         l._outOfBounds = function () {return false;};
         expect(l._canPurge({}, {})).toBe(false);
+      });
+      it('upper tile', function () {
+        var l = geo.tileLayer({map: map(), keepLower: true});
+        l._outOfBounds = function () {return false;};
+        expect(l._canPurge({index: {level: 2}}, {}, 1)).toBe(true);
+        expect(l._canPurge({index: {level: 0}}, {}, 1)).toBe(false);
+      });
+      it('no bounds', function () {
+        var l = geo.tileLayer({map: map(), keepLower: false});
+        l._isCovered = function () {return false;};
+        l._outOfBounds = function () {return true;};
+        expect(l._canPurge({})).toBe(false);
+      });
+      it('doneLoading', function () {
+        var l = geo.tileLayer({map: map(), keepLower: false});
+        l._isCovered = function () {return false;};
+        l._outOfBounds = function () {return false;};
+        expect(l._canPurge({index: {level: 0}}, {}, 1, false)).toBe(false);
+        expect(l._canPurge({index: {level: 0}}, {}, 1, true)).toBe(true);
+        expect(l._canPurge({index: {level: 1}}, {}, 1, false)).toBe(false);
+        expect(l._canPurge({index: {level: 1}}, {}, 1, true)).toBe(false);
+        expect(l._canPurge({index: {level: 2}}, {}, 1, true)).toBe(true);
+        expect(l._canPurge({index: {level: 2}}, {}, 1, false)).toBe(false);
       });
     });
 
