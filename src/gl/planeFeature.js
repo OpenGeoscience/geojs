@@ -90,10 +90,12 @@ geo.gl.planeFeature = function (arg) {
       texture = vgl.texture();
       m_this.visible(false);
 
-      /// TODO: Is there a reliable way to make sure that image is loaded already?
       m_this.renderer().contextRenderer().addActor(m_actor);
 
-      if (image.complete) {
+      /* An image is already loaded if .complete is true and .naturalWidth
+       * and .naturalHeight are defined and non-zero (not falsy seems to be
+       * sufficient). */
+      if (image.complete && image.naturalWidth && image.naturalHeight) {
         texture.setImage(image);
         m_actor.material().addAttribute(texture);
         /// NOTE Currently we assume that we want to show the feature as
@@ -105,7 +107,6 @@ geo.gl.planeFeature = function (arg) {
         if (m_onloadCallback) {
           m_onloadCallback.call(m_this);
         }
-        //}
       } else {
         image.onload = function () {
           texture.setImage(image);
