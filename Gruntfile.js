@@ -463,12 +463,12 @@ module.exports = function (grunt) {
 
   grunt.registerTask(
     'serve-test',
-    'Serve the content for testing.  This starts on port 50100 by ' +
+    'Serve the content for testing.  This starts on port 30100 by ' +
     'default and does not rebuild sources automatically.',
     function () {
       grunt.config.set('express.server.options.hostname', '0.0.0.0');
       if (!grunt.option('port')) {
-        grunt.config.set('express.server.options.port', 50100);
+        grunt.config.set('express.server.options.port', 30100);
       }
       // make sure express doesn't change the port
       var test_port = grunt.config.get('express.server.options.port');

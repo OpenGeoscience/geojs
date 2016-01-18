@@ -13,7 +13,7 @@ server, just run ::
 
     grunt default serve-test
 
-This will start a server on the default port of ``50100``.  The port
+This will start a server on the default port of ``30100``.  The port
 and selenium host names are configurable with cmake.  For example inside
 the Kitware firewall, you can run the following to test on the selenium
 node on ``garant`` ::
@@ -71,7 +71,7 @@ starting up a test server ::
 
 and navigating to a test case in your browser.  For example, the test defined at
 ``testing/test-cases/phantomjs-tests/object.js`` can be run by browsing to
-`<http://localhost:50100/test/phantomjs/object.html>`_.
+`<http://localhost:30100/test/phantomjs/object.html>`_.
 
 For tests that require webgl, there is a similar framework for running
 Jasmine unittests inside selenium.  For these cases, you can add your
@@ -120,7 +120,7 @@ tests are placed inside the deployment root so the users can manually see the te
 results.  The path to each test is derived from the relative path inside
 ``testing/test-cases/selenium-tests/``.  For example, the test page in
 ``testing/test-cases/selenium-tests/osmLayer/`` is available at
-`<http://localhost:50100/test/selenium/osmLayer/>`_ after starting the test web server.
+`<http://localhost:30100/test/selenium/osmLayer/>`_ after starting the test web server.
 
 The unit tests themselves are derived from Python's 
 `unittest <https://docs.python.org/2/library/unittest.html>`_ module via a customized
