@@ -876,7 +876,11 @@
       if (!node) {
         node = $(
           '<div class=geo-tile-layer data-tile-layer="' + level.toFixed() + '"/>'
-        ).css('transform-origin', '0px').get(0);
+        ).css({
+          'transform-origin': '0px 0px',
+          'line-height': 0,
+          'font-size': 0
+        }).get(0);
         this.canvas().append(node);
       }
       return node;

@@ -531,7 +531,6 @@ geo.map = function (arg) {
 
     if (layer !== null && layer !== undefined) {
       layer._exit();
-
       m_this.removeChild(layer);
 
       m_this.modified();

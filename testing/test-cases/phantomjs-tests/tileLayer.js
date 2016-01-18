@@ -1,6 +1,6 @@
 // Test geo.tileLayer
 
-/*global describe, it, expect, geo, mockVGLRenderer*/
+/*global describe, it, expect, geo, mockVGLRenderer, closeToEqual*/
 describe('geo.tileLayer', function () {
   'use strict';
 
@@ -67,6 +67,12 @@ describe('geo.tileLayer', function () {
           x: p.x,
           y: p.y
         };
+      },
+      gcs: function () {
+        return '+proj=longlat +axis=esu';
+      },
+      ingcs: function () {
+        return '+proj=longlat +axis=enu';
       },
       updateAttribution: function () {
       },
@@ -591,6 +597,31 @@ describe('geo.tileLayer', function () {
       };
 
       l.prefetch(1, {left: 0, right: 1, bottom: 0, top: 1}).then(done);
+    });
+    describe('gcsTileBounds', function () {
+      it('level 0 tile is the world', function () {
+        var m = map(), l;
+        l = geo.tileLayer({map: m});
+        expect(l.gcsTileBounds({level: 0, x: 0, y: 0})).toEqual({
+            left: 0, top: 0, right: 2560000, bottom: 2560000});
+        expect(closeToEqual(l.gcsTileBounds({level: 0, x: 0, y: 0}, null), {
+            left: 0, top: 0, right: 2560000, bottom: -2560000})).toBe(true);
+        expect(closeToEqual(l.gcsTileBounds(
+            {level: 0, x: 0, y: 0}, '+proj=longlat +axis=wnu'), {
+            left: 0, top: 0, right: -2560000, bottom: 2560000})).toBe(true);
+      });
+      it('level 3 tiles', function () {
+        var m = map(), l;
+        l = geo.tileLayer({map: m});
+        expect(l.gcsTileBounds({level: 3, x: 0, y: 0})).toEqual({
+            left: 0, top: 0, right: 320000, bottom: 320000});
+        expect(l.gcsTileBounds({level: 3, x: 7, y: 0})).toEqual({
+            left: 2240000, top: 0, right: 2560000, bottom: 320000});
+        expect(l.gcsTileBounds({level: 3, x: 7, y: 7})).toEqual({
+            left: 2240000, top: 2240000, right: 2560000, bottom: 2560000});
+        expect(l.gcsTileBounds({level: 3, x: 3, y: 4})).toEqual({
+            left: 960000, top: 1280000, right: 1280000, bottom: 1600000});
+      });
     });
   });
   describe('Protected utility methods', function () {

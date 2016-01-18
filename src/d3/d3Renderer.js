@@ -429,6 +429,10 @@ geo.d3.d3Renderer = function (arg) {
   this._exit = function () {
     m_features = {};
     m_this.canvas().remove();
+    m_svg.remove();
+    m_svg = undefined;
+    m_defs.remove();
+    m_defs = undefined;
     s_exit();
   };
 

@@ -1,6 +1,6 @@
 /* These are functions we want available to jasmine tests. */
 /* global it */
-/* exported waitForIt, mockVGLRenderer */
+/* exported waitForIt, mockVGLRenderer, closeToArray, closeToEqual */
 
 /**
  * Create a pair of it functions.  The first one waits for a function to return
@@ -25,6 +25,58 @@ function waitForIt(desc, testFunc) {
   });
   it('done waiting for ' + desc, function () {
   });
+}
+
+/**
+ * Compare two arrays with a precision tolerance.
+ * @param {array} a1 first array to compare
+ * @param {array} a2 second array to compare
+ * @param {number} precision precision used in jasmine's toBeCloseTo function
+ * @return {boolean} true if the arrays are close.
+ */
+function closeToArray(a1, a2, precision) {
+  'use strict';
+  var i;
+  if (a1.length !== a2.length) {
+    return false;
+  }
+  precision = (precision !== 0) ? (precision || 2) : precision;
+  precision = Math.pow(10, -precision) / 2;
+  for (i = 0; i < a1.length; i += 1) {
+    if (Math.abs(a1[i] - a2[i]) >= precision) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * Compare two objects containing numbers with a precision tolerance.
+ * @param {array} a1 first object to compare
+ * @param {array} a2 second object to compare
+ * @param {number} precision precision used in jasmine's toBeCloseTo function
+ * @return {boolean} true if the objects are close.
+ */
+function closeToEqual(o1, o2, precision) {
+  'use strict';
+  var key;
+
+  precision = (precision !== 0) ? (precision || 2) : precision;
+  precision = Math.pow(10, -precision) / 2;
+  for (key in o1) {
+    if (o1.hasOwnProperty(key)) {
+      if (o2[key] === undefined ||
+          Math.abs(o1[key] - o2[key]) >= precision) {
+        return false;
+      }
+    }
+  }
+  for (key in o2) {
+    if (o2.hasOwnProperty(key) && o1[key] === undefined) {
+      return false;
+    }
+  }
+  return true;
 }
 
 /**

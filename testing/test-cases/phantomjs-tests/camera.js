@@ -1,4 +1,4 @@
-/*global describe, it, expect, geo*/
+/*global describe, it, expect, geo, closeToArray*/
 
 /**
  * Testing for the core camera class.
@@ -388,6 +388,17 @@ describe('geo.camera', function () {
       expect(actual).toEqual(position);
     }
 
+    it('Display and world parameters', function () {
+      var camera = geo.camera(), calc;
+
+      camera.viewport = {width: 100, height: 100};
+      calc = mat4.invert(geo.util.mat4AsArray(), camera.world);
+      expect(closeToArray(calc, camera.display, 4)).toBe(true);
+      camera.pan({x: 10, y: 0});
+      calc = mat4.invert(geo.util.mat4AsArray(), camera.world);
+      expect(closeToArray(calc, camera.display, 4)).toBe(true);
+      expect(camera.css('world')).toBe(geo.camera.css(camera.world));
+    });
     it('Simple panning', function () {
       var node = make_node(),
           camera = geo.camera();
@@ -414,10 +425,15 @@ describe('geo.camera', function () {
     });
     it('Simple zooming', function () {
       var node = make_node(),
-          camera = geo.camera();
+          camera = geo.camera(),
+          view;
 
       camera.viewport = {width: 100, height: 100};
       camera.bounds = geo.camera.bounds;
+
+      view = camera.view;
+      camera.zoom(1);
+      expect(camera.view).toBe(view);
 
       camera.zoom(0.5);
 
@@ -457,6 +473,33 @@ describe('geo.camera', function () {
       node.css('transform', geo.camera.css(camera.view));
       expect(node.position().left).toBe(0);
       expect(node.position().top).toBe(0);
+    });
+    it('Simple rotation', function () {
+      var node = make_node(),
+          camera = geo.camera(),
+          view;
+
+      camera.viewport = {width: 100, height: 100};
+      camera.bounds = geo.camera.bounds;
+
+      view = camera.view;
+      camera._rotate(0);
+      expect(camera.view).toBe(view);
+
+      camera._rotate(30 * Math.PI / 180);
+      node.css('transform', geo.camera.css(camera.view));
+      expect(node.position().left).toBeLessThan(-18);
+      expect(node.position().top).toBeLessThan(-18);
+
+      camera._rotate(-30 * Math.PI / 180);
+      node.css('transform', geo.camera.css(camera.view));
+      expect(node.position().left).toBeCloseTo(0, 4);
+      expect(node.position().top).toBeCloseTo(0, 4);
+
+      camera._rotate(-30 * Math.PI / 180, {x: 50, y: 0});
+      node.css('transform', geo.camera.css(camera.view));
+      expect(node.position().left).toBeLessThan(-10);
+      expect(node.position().top).toBeLessThan(-40);
     });
 
     describe('World to display', function () {
@@ -554,6 +597,44 @@ describe('geo.camera', function () {
         });
       });
     });
+  });
+
+  it('viewFromCenterSizeRotation', function () {
+    var c = geo.camera();
+
+    c.viewFromCenterSizeRotation({x: 0, y: 0}, {width: 100, height: 100});
+    expect(c.view).toEqual([0.02,0,0,0, 0,0.02,0,0, 0,0,1,0, 0,0,0,1]);
+
+    c.viewFromCenterSizeRotation({x: 10, y: 22}, {width: 100, height: 100});
+    expect(c.view).toEqual([0.02,0,0,0, 0,0.02,0,0, 0,0,1,0, -0.2,-0.44,0,1]);
+
+    c.viewFromCenterSizeRotation({x: 10, y: 22}, {width: 50, height: 50});
+    expect(c.view).toEqual([0.04,0,0,0, 0,0.04,0,0, 0,0,1,0, -0.4,-0.88,0,1]);
+
+    c.viewFromCenterSizeRotation({x: 0, y: 0}, {width: 100, height: 50});
+    expect(c.view).toEqual([0.02,0,0,0, 0,0.02,0,0, 0,0,1,0, 0,0,0,1]);
+
+    c.viewFromCenterSizeRotation(
+        {x: 0, y: 0}, {width: 100, height: 100}, 90 * Math.PI / 180);
+    expect(closeToArray(
+        c.view, [0,-0.02,0,0, 0.02,0,0,0, 0,0,1,0, 0,0,0,1], 3)).toBe(true);
+
+    c.viewFromCenterSizeRotation(
+        {x: 0, y: 0}, {width: 100, height: 100}, -90 * Math.PI / 180);
+    expect(closeToArray(
+        c.view, [0,0.02,0,0, -0.02,0,0,0, 0,0,1,0, 0,0,0,1], 3)).toBe(true);
+
+    c.viewFromCenterSizeRotation(
+        {x: 0, y: 0}, {width: 2, height: 1}, 30 * Math.PI / 180);
+    expect(closeToArray(
+        c.view, [0.866,-0.5,0,0, 0.5,0.866,0,0, 0,0,1,0, 0,0,0,1], 3)).toBe(
+        true);
+
+    c.viewFromCenterSizeRotation(
+        {x: 0.10, y: 0.22}, {width: 2, height: 1}, 30 * Math.PI / 180);
+    expect(closeToArray(
+        c.view, [0.866,-0.5,0,0, 0.5,0.866,0,0, 0,0,1,0, -0.1966,-0.1405,0,1],
+        3)).toBe(true);
   });
 
   it('View getter/setter', function (done) {

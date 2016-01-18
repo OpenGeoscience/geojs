@@ -53,6 +53,7 @@ geo.mapInteractor = function (args) {
   // copy the options object with defaults
   m_options = $.extend(
     true,
+    {},
     {
       throttle: 30,
       discreteZoom: false,
