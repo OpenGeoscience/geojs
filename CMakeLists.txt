@@ -25,7 +25,7 @@ find_package(PythonInterp REQUIRED)
 site_name(HOSTNAME)
 
 set(TESTING_HOST "${HOSTNAME}" CACHE STRING "The host to connect to for unit tests")
-set(TESTING_PORT 50100 CACHE STRING "The port number to use for the testing web server")
+set(TESTING_PORT 30100 CACHE STRING "The port number to use for the testing web server")
 mark_as_advanced(TESTING_PORT)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")

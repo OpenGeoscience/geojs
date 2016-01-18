@@ -426,11 +426,11 @@ class BaseTest(TestCase):
 
         >>> test.loadURL('index.html')
 
-        will load `<http://localhost:50100/index.html>`_, and
+        will load `<http://localhost:30100/index.html>`_, and
 
         >>> test.loadURL('/index.html', False)
 
-        will load `<http://localhost:50100/path/to/test/index.html>`_
+        will load `<http://localhost:30100/path/to/test/index.html>`_
         using the currently configured test path.
         '''
         if relative:
