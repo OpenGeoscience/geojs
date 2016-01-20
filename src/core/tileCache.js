@@ -1,4 +1,4 @@
-(function () {
+module.exports = (function () {
   'use strict';
 
   //////////////////////////////////////////////////////////////////////////////
@@ -8,15 +8,15 @@
    * array keeps track of last access times for each tile to purge old tiles
    * once the maximum cache size is reached.
    *
-   * @class
+   * @class geo.tileCache
    *
-   * @param {Object?} [options] A configuratoin object for the cache
-   * @param {Number} [options.size=64] The maximum number of tiles to store
+   * @param {object?} [options] A configuratoin object for the cache
+   * @param {number} [options.size=64] The maximum number of tiles to store
    */
   //////////////////////////////////////////////////////////////////////////////
-  geo.tileCache = function (options) {
-    if (!(this instanceof geo.tileCache)) {
-      return new geo.tileCache(options);
+  var tileCache = function (options) {
+    if (!(this instanceof tileCache)) {
+      return new tileCache(options);
     }
     options = options || {};
     this._size = options.size || 64;
@@ -144,4 +144,5 @@
     this.clear();
     return this;
   };
+  return tileCache;
 })();

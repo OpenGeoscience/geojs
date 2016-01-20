@@ -14,8 +14,7 @@
  * z values that are ignored in current mapping context, but will in the
  * future perform more general 3D transformations.
  *
- * @class
- * @extends geo.object
+ * @class geo.transform
  * @param {object} options Constructor options
  * @param {string} options.source A proj4 string for the source projection
  * @param {string} options.target A proj4 string for the target projection
@@ -23,11 +22,13 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 
-geo.transform = function (options) {
+var transform = function (options) {
   'use strict';
-  if (!(this instanceof geo.transform)) {
-    return new geo.transform(options);
+  if (!(this instanceof transform)) {
+    return new transform(options);
   }
+
+  var proj4 = require('proj4');
 
   var m_this = this,
       m_proj,   // The raw proj4js object
@@ -153,7 +154,6 @@ geo.transform = function (options) {
     this.target('EPSG:3857');
   }
 
-  geo.object.call(this);
   return this;
 };
 
@@ -173,7 +173,7 @@ geo.transform = function (options) {
  *
  * @returns {geoPosition[]} The transformed coordinates
  */
-geo.transform.transformCoordinates = function (
+transform.transformCoordinates = function (
         srcPrj, tgtPrj, coordinates, numberOfComponents) {
   'use strict';
 
@@ -182,7 +182,7 @@ geo.transform.transformCoordinates = function (
   }
 
   var i, count, offset, xAcc, yAcc, zAcc, writer, output, projPoint,
-      trans = geo.transform({source: srcPrj, target: tgtPrj});
+      trans = transform({source: srcPrj, target: tgtPrj});
 
   /// Default Z accessor
   zAcc = function () {
@@ -381,7 +381,7 @@ geo.transform.transformCoordinates = function (
  *
  * @returns {object[]} The transformed coordinates
  */
-geo.transform.affineForward = function (def, coords) {
+transform.affineForward = function (def, coords) {
   'use strict';
   var i, origin = def.origin, scale = def.scale || {x: 1, y: 1, z: 1};
   for (i = 0; i < coords.length; i += 1) {
@@ -407,7 +407,7 @@ geo.transform.affineForward = function (def, coords) {
  *
  * @returns {object[]} The transformed coordinates
  */
-geo.transform.affineInverse = function (def, coords) {
+transform.affineInverse = function (def, coords) {
   'use strict';
   var i, origin = def.origin, scale = def.scale || {x: 1, y: 1, z: 1};
   for (i = 0; i < coords.length; i += 1) {
@@ -417,4 +417,5 @@ geo.transform.affineInverse = function (def, coords) {
   }
   return coords;
 };
-inherit(geo.transform, geo.object);
+
+module.exports = transform;

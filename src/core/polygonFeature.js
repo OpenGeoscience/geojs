@@ -1,19 +1,24 @@
+var inherit = require('../util');
+var feature = require('./feature');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class polygonFeature
  *
- * @class
+ * @class geo.polygonFeature
  * @extends geo.feature
  * @returns {geo.polygonFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.polygonFeature = function (arg) {
+var polygonFeature = function (arg) {
   'use strict';
-  if (!(this instanceof geo.polygonFeature)) {
-    return new geo.polygonFeature(arg);
+  if (!(this instanceof polygonFeature)) {
+    return new polygonFeature(arg);
   }
   arg = arg || {};
-  geo.feature.call(this, arg);
+  feature.call(this, arg);
+
+  var util = require('../util');
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -130,14 +135,14 @@ geo.polygonFeature = function (arg) {
   /**
    * Point searce method for selection api.  Returns markers containing the
    * given point.
-   * @argument {Object} coordinate
-   * @returns {Object}
+   * @argument {object} coordinate
+   * @returns {object}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.pointSearch = function (coordinate) {
     var found = [], indices = [], data = m_this.data();
     m_coordinates.forEach(function (coord, i) {
-      var inside = geo.util.pointInPolygon(
+      var inside = util.pointInPolygon(
         coordinate,
         coord.outer,
         coord.inner
@@ -164,10 +169,10 @@ geo.polygonFeature = function (arg) {
     var defaultStyle = $.extend(
         {},
         {
-          'fillColor': { r: 0.0, g: 0.5, b: 0.5 },
+          'fillColor': { r: 0.0,  g: 0.5, b: 0.5 },
           'fillOpacity': 1.0
         },
-      arg.style === undefined ? {} : arg.style
+        arg.style === undefined ? {} : arg.style
     );
 
     m_this.style(defaultStyle);
@@ -181,4 +186,5 @@ geo.polygonFeature = function (arg) {
   return this;
 };
 
-inherit(geo.polygonFeature, geo.feature);
+inherit(polygonFeature, feature);
+module.exports = polygonFeature;

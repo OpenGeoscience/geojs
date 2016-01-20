@@ -1,21 +1,30 @@
+var inherit = require('../util').inherit;
+var feature = require('./feature');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class pointFeature
  *
- * @class
+ * @class geo.pointFeature
  * @param {object} arg Options object
  * @param {boolean} arg.clustering Enable point clustering
  * @extends geo.feature
  * @returns {geo.pointFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.pointFeature = function (arg) {
+var pointFeature = function (arg) {
   'use strict';
-  if (!(this instanceof geo.pointFeature)) {
-    return new geo.pointFeature(arg);
+  if (!(this instanceof pointFeature)) {
+    return new pointFeature(arg);
   }
   arg = arg || {};
-  geo.feature.call(this, arg);
+  feature.call(this, arg);
+
+  var timestamp = require('./timestamp');
+  var clustering = require('../util/clustering');
+  var geo_event = require('./event');
+  var util = require('../util');
+  var wigglemaps = require('../util/wigglemaps');
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -25,7 +34,7 @@ geo.pointFeature = function (arg) {
   var m_this = this,
       s_init = this._init,
       m_rangeTree = null,
-      m_rangeTreeTime = geo.timestamp(),
+      m_rangeTreeTime = timestamp(),
       s_data = this.data,
       m_maxRadius = 0,
       m_clustering = arg.clustering,
@@ -76,14 +85,14 @@ geo.pointFeature = function (arg) {
 
     // generate the cluster tree from the raw data
     var position = m_this.position();
-    m_clusterTree = new geo.util.ClusterGroup(
+    m_clusterTree = new clustering.ClusterGroup(
         opts, m_this.layer().width(), m_this.layer().height());
 
     m_allData.forEach(function (d, i) {
 
       // for each point in the data set normalize the coordinate
       // representation and add the point to the cluster treee
-      var pt = geo.util.normalizeCoordinates(position(d, i));
+      var pt = util.normalizeCoordinates(position(d, i));
       pt.index = i;
       m_clusterTree.addPoint(pt);
     });
@@ -147,7 +156,7 @@ geo.pointFeature = function (arg) {
     if (val === undefined) {
       return m_this.style('position');
     } else {
-      val = geo.util.ensureFunction(val);
+      val = util.ensureFunction(val);
       m_this.style('position', function (d, i) {
         if (d.__cluster) {
           return d;
@@ -194,7 +203,7 @@ geo.pointFeature = function (arg) {
       return pt;
     });
 
-    m_rangeTree = new geo.util.RangeTree(pts);
+    m_rangeTree = new wigglemaps.RangeTree(pts);
     m_rangeTreeTime.modified();
   };
 
@@ -244,7 +253,10 @@ geo.pointFeature = function (arg) {
     };
 
     // Find points inside the bounding box
-    box = new geo.util.Box(geo.util.vect(min.x, min.y), geo.util.vect(max.x, max.y));
+    box = new wigglemaps.Box(
+      wigglemaps.vect(min.x, min.y),
+      wigglemaps.vect(max.x, max.y)
+    );
     m_this._updateRangeTree();
     m_rangeTree.search(box).forEach(function (q) {
       idx.push(q.idx);
@@ -392,15 +404,13 @@ geo.pointFeature = function (arg) {
     m_this.dataTime().modified();
 
     // bind to the zoom handler for point clustering
-    m_this.geoOn(geo.event.zoom, function (evt) {
+    m_this.geoOn(geo_event.zoom, function (evt) {
       m_this._handleZoom(evt.zoomLevel);
     });
   };
 
   return m_this;
 };
-
-geo.event.pointFeature = $.extend({}, geo.event.feature);
 
 /**
  * Object specification for a point feature.
@@ -417,11 +427,12 @@ geo.event.pointFeature = $.extend({}, geo.event.feature);
  * @param {geo.pointFeature.spec} spec The object specification
  * @returns {geo.pointFeature|null}
  */
-geo.pointFeature.create = function (layer, renderer, spec) {
+pointFeature.create = function (layer, renderer, spec) {
   'use strict';
 
   spec.type = 'point';
-  return geo.feature.create(layer, spec);
+  return feature.create(layer, spec);
 };
 
-inherit(geo.pointFeature, geo.feature);
+inherit(pointFeature, feature);
+module.exports = pointFeature;

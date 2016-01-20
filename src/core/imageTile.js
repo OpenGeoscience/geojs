@@ -1,4 +1,7 @@
-(function () {
+var inherit = require('../util').inherit;
+var tile = require('./tile');
+
+module.exports = (function () {
   'use strict';
 
   //////////////////////////////////////////////////////////////////////////////
@@ -12,29 +15,29 @@
    * subclasses may define additional rendering steps to produce the images
    * before passing them off to the handlers.
    *
-   * @class
-   * @param {Object} spec The tile specification object
+   * @class geo.imageTile
+   * @param {object} spec The tile specification object
    *
-   * @param {Object} spec.index The global position of the tile
-   * @param {Number} spec.index.x The x-coordinate (usually the column number)
-   * @param {Number} spec.index.y The y-coordinate (usually the row number)
-   * @param {Number} spec.index.level The zoom level
+   * @param {object} spec.index The global position of the tile
+   * @param {number} spec.index.x The x-coordinate (usually the column number)
+   * @param {number} spec.index.y The y-coordinate (usually the row number)
+   * @param {number} spec.index.level The zoom level
    *
-   * @param {Object?} spec.size The size of each tile
-   * @param {Number} [spec.size.x=256] Width in pixels
-   * @param {Number} [spec.size.y=256] Height in pixels
+   * @param {object?} spec.size The size of each tile
+   * @param {number} [spec.size.x=256] Width in pixels
+   * @param {number} [spec.size.y=256] Height in pixels
    *
-   * @param {String} spec.url A url to the image
-   * @param {String} [spec.crossDomain='anonymous'] Image CORS attribute
+   * @param {string} spec.url A url to the image
+   * @param {string} [spec.crossDomain='anonymous'] Image CORS attribute
    *
-   * @param {Object} spec.overlap The size of overlap with neighboring tiles
-   * @param {Number} [spec.overlap.x=0]
-   * @param {Number} [spec.overlap.y=0]
+   * @param {object} spec.overlap The size of overlap with neighboring tiles
+   * @param {number} [spec.overlap.x=0]
+   * @param {number} [spec.overlap.y=0]
    */
   //////////////////////////////////////////////////////////////////////////////
-  geo.imageTile = function (spec) {
-    if (!(this instanceof geo.imageTile)) {
-      return new geo.imageTile(spec);
+  var imageTile = function (spec) {
+    if (!(this instanceof imageTile)) {
+      return new imageTile(spec);
     }
 
     spec.size = spec.size || {x: 256, y: 256};
@@ -44,7 +47,7 @@
     this._cors = spec.crossDomain || 'anonymous';
 
     // Call superclass constructor
-    geo.tile.call(this, spec);
+    tile.call(this, spec);
 
     /**
      * Read only accessor to the Image object used by the
@@ -103,5 +106,5 @@
     return this;
   };
 
-  inherit(geo.imageTile, geo.tile);
+  inherit(imageTile, tile);
 })();

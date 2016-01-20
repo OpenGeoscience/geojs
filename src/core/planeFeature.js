@@ -1,16 +1,19 @@
+var inherit = require('../util').inherit;
+var polygonFeature = require('./polygonFeature');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class planeFeature
  *
- * @class
+ * @class geo.planeFeature
  * @extends geo.polygonFeature
  * @returns {geo.planeFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.planeFeature = function (arg) {
+var planeFeature = function (arg) {
   'use strict';
-  if (!(this instanceof geo.planeFeature)) {
-    return new geo.planeFeature(arg);
+  if (!(this instanceof planeFeature)) {
+    return new planeFeature(arg);
   }
   arg = arg || {};
 
@@ -19,7 +22,7 @@ geo.planeFeature = function (arg) {
   arg.lr = arg.lr === undefined ? [1.0, 0.0, 0.0] : arg.lr;
   arg.depth = arg.depth === undefined ? 0.0 : arg.depth;
 
-  geo.polygonFeature.call(this, arg);
+  polygonFeature.call(this, arg);
 
   var m_this = this,
       m_origin = [arg.ul.x, arg.lr.y, arg.depth],
@@ -136,4 +139,5 @@ geo.planeFeature = function (arg) {
   return this;
 };
 
-inherit(geo.planeFeature, geo.polygonFeature);
+inherit(planeFeature, polygonFeature);
+module.exports = planeFeature;

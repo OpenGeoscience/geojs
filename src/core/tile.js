@@ -1,4 +1,4 @@
-(function () {
+module.exports = (function () {
   'use strict';
 
   //////////////////////////////////////////////////////////////////////////////
@@ -11,7 +11,7 @@
    *
    * tile.then(function (data) {...}).catch(function (data) {...});
    *
-   * @class
+   * @class geo.tile
    * @param {Object} spec The tile specification object
    *
    * @param {Object} spec.index The global position of the tile
@@ -29,9 +29,9 @@
    * @param {Number} [spec.overlap.y=0]
    */
   //////////////////////////////////////////////////////////////////////////////
-  geo.tile = function (spec) {
-    if (!(this instanceof geo.tile)) {
-      return new geo.tile(spec);
+  var tile = function (spec) {
+    if (!(this instanceof tile)) {
+      return new tile(spec);
     }
 
     this._index = spec.index;
@@ -217,4 +217,5 @@
       return this;
     };
   };
+  return tile;
 })();

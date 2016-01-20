@@ -1,27 +1,33 @@
-(function () {
+module.exports = (function () {
   'use strict';
+
+  var inherit = require('../util').inherit;
+  var tileLayer = require('./tileLayer');
+  var util = require('../util');
 
   //////////////////////////////////////////////////////////////////////////////
   /**
    * Create a new instance of osmLayer
    *
-   * @class
+   * @class geo.osmLayer
    * @extends geo.featureLayer
    *
-   * @param {Object} arg - arg can contain following keys: baseUrl,
+   * @param {object} arg - arg can contain following keys: baseUrl,
    *        imageFormat (such as png or jpeg), and displayLast
    *        (to decide whether or not render tiles from last zoom level).
    */
   //////////////////////////////////////////////////////////////////////////////
-  geo.osmLayer = function (arg) {
+  var osmLayer = function (arg) {
 
-    if (!(this instanceof geo.osmLayer)) {
-      return new geo.osmLayer(arg);
+    var imageTile = require('./imageTile');
+
+    if (!(this instanceof osmLayer)) {
+      return new osmLayer(arg);
     }
     if (arg.mapOpacity !== undefined && arg.opacity === undefined) {
       arg.opacity = arg.mapOpacity;
     }
-    geo.tileLayer.call(this, arg);
+    tileLayer.call(this, arg);
 
     /* mapOpacity is just another name for the layer opacity. */
     this.mapOpacity = this.opacity;
@@ -30,19 +36,19 @@
      * Returns an instantiated imageTile object with the given indices.  This
      * method always returns a new tile object.  Use `_getTileCached`
      * to use the caching layer.
-     * @param {Object} index The tile index
-     * @param {Number} index.x
-     * @param {Number} index.y
-     * @param {Number} index.level
-     * @param {Object} source The tile index used for constructing the url
-     * @param {Number} source.x
-     * @param {Number} source.y
-     * @param {Number} source.level
+     * @param {object} index The tile index
+     * @param {number} index.x
+     * @param {number} index.y
+     * @param {number} index.level
+     * @param {object} source The tile index used for constructing the url
+     * @param {number} source.x
+     * @param {number} source.y
+     * @param {number} source.level
      * @returns {geo.tile}
      */
     this._getTile = function (index, source) {
       var urlParams = source || index;
-      return geo.imageTile({
+      return imageTile({
         index: index,
         size: {x: this._options.tileWidth, y: this._options.tileHeight},
         queue: this._queue,
@@ -55,7 +61,7 @@
   /**
    * This object contains the default options used to initialize the osmLayer.
    */
-  geo.osmLayer.defaults = $.extend({}, geo.tileLayer.defaults, {
+  osmLayer.defaults = $.extend({}, tileLayer.defaults, {
     minLevel: 0,
     maxLevel: 18,
     tileOverlap: 0,
@@ -72,7 +78,7 @@
       'OpenStreetMap</a> contributors'
   });
 
-  inherit(geo.osmLayer, geo.tileLayer);
-
-  geo.registerLayer('osm', geo.osmLayer);
+  inherit(osmLayer, tileLayer);
+  util.registerLayer('osm', osmLayer);
+  return osmLayer;
 })();

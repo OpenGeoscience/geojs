@@ -1,20 +1,25 @@
+var inherit = require('../util').inherit;
+var feature = require('./feature');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class graphFeature
  *
- * @class
+ * @class geo.greaphFeature
  * @extends geo.feature
  * @returns {geo.graphFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.graphFeature = function (arg) {
+var graphFeature = function (arg) {
   'use strict';
 
-  if (!(this instanceof geo.graphFeature)) {
-    return new geo.graphFeature(arg);
+  if (!(this instanceof graphFeature)) {
+    return new graphFeature(arg);
   }
   arg = arg || {};
-  geo.feature.call(this, arg);
+  feature.call(this, arg);
+
+  var util = require('../util');
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -127,7 +132,7 @@ geo.graphFeature = function (arg) {
       return m_children;
     }
 
-    m_children = geo.util.ensureFunction(arg);
+    m_children = util.ensureFunction(arg);
     return m_this;
   };
 
@@ -188,7 +193,7 @@ geo.graphFeature = function (arg) {
         var link;
         nLinks += 1;
         if (m_links.length < nLinks) {
-          link = geo.createFeature(
+          link = util.createFeature(
             style.linkType, layer, layer.renderer()
           ).style(style.links);
           m_this.addChild(link);
@@ -207,7 +212,7 @@ geo.graphFeature = function (arg) {
     return m_this;
   };
 
-  m_points = geo.createFeature(
+  m_points = util.createFeature(
     'point',
     this.layer(),
     this.layer().renderer()
@@ -222,4 +227,5 @@ geo.graphFeature = function (arg) {
   return this;
 };
 
-inherit(geo.graphFeature, geo.feature);
+inherit(graphFeature, feature);
+module.exports = graphFeature;

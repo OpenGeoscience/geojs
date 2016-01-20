@@ -1,3 +1,6 @@
+var inherit = require('../util').inherit;
+var feature = require('./feature');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class vectorFeature
@@ -7,13 +10,13 @@
  * @returns {geo.vectorFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.vectorFeature = function (arg) {
+var vectorFeature = function (arg) {
   'use strict';
-  if (!(this instanceof geo.vectorFeature)) {
-    return new geo.vectorFeature(arg);
+  if (!(this instanceof vectorFeature)) {
+    return new vectorFeature(arg);
   }
   arg = arg || {};
-  geo.feature.call(this, arg);
+  feature.call(this, arg);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -92,4 +95,5 @@ geo.vectorFeature = function (arg) {
   };
 };
 
-inherit(geo.vectorFeature, geo.feature);
+inherit(vectorFeature, feature);
+module.exports = vectorFeature;

@@ -1,27 +1,33 @@
+var inherit = require('../util').inherit;
+var feature = require('./feature');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class choroplethFeature
  *
- * @class
+ * @class geo.choroplethFeature
  * @extends geo.feature
  * @returns {geo.choroplethFeature}
  *
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.choroplethFeature = function (arg) {
+var choroplethFeature = function (arg) {
   'use strict';
-  if (!(this instanceof geo.choroplethFeature)) {
-    return new geo.choroplethFeature(arg);
+  if (!(this instanceof choroplethFeature)) {
+    return new choroplethFeature(arg);
   }
   arg = arg || {};
-  geo.feature.call(this, arg);
+  feature.call(this, arg);
+
+  var ensureFunction = require('../util').ensureFunction;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
-  var m_this = this,
+  var d3 = require('d3'),
+      m_this = this,
       s_init = this._init,
       m_choropleth = $
       .extend({},
@@ -144,7 +150,7 @@ geo.choroplethFeature = function (arg) {
       }
       return all;
     }
-    return geo.util.ensureFunction(m_choropleth[key]);
+    return ensureFunction(m_choropleth[key]);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -278,7 +284,5 @@ geo.choroplethFeature = function (arg) {
   return this;
 };
 
-inherit(geo.choroplethFeature, geo.feature);
-
-/* Example:
- */
+inherit(choroplethFeature, feature);
+module.exports = choroplethFeature;

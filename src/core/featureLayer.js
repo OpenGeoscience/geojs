@@ -1,19 +1,24 @@
+var inherit = require('../util').inherit;
+var layer = require('./layer');
+var geo_event = require('./event');
+var util = require('../util');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Layer to draw points, lines, and polygons on the map The polydata layer
  * provide mechanisms to create and draw geometrical shapes such as points,
  * lines, and polygons.
- * @class
+ * @class geo.featureLayer
  * @extends geo.layer
  * @returns {geo.featureLayer}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.featureLayer = function (arg) {
+var featureLayer = function (arg) {
   'use strict';
-  if (!(this instanceof geo.featureLayer)) {
-    return new geo.featureLayer(arg);
+  if (!(this instanceof featureLayer)) {
+    return new featureLayer(arg);
   }
-  geo.layer.call(this, arg);
+  layer.call(this, arg);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -36,7 +41,7 @@ geo.featureLayer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.createFeature = function (featureName, arg) {
 
-    var newFeature = geo.createFeature(
+    var newFeature = util.createFeature(
       featureName, m_this, m_this.renderer(), arg);
 
     m_this.addChild(newFeature);
@@ -100,7 +105,7 @@ geo.featureLayer = function (arg) {
     s_init.call(m_this, true);
 
     /// Bind events to handlers
-    m_this.geoOn(geo.event.resize, function (event) {
+    m_this.geoOn(geo_event.resize, function (event) {
       if (m_this.renderer()) {
         m_this.renderer()._resize(event.x, event.y, event.width, event.height);
         m_this._update({event: event});
@@ -110,21 +115,21 @@ geo.featureLayer = function (arg) {
       }
     });
 
-    m_this.geoOn(geo.event.pan, function (event) {
+    m_this.geoOn(geo_event.pan, function (event) {
       m_this._update({event: event});
       if (m_this.renderer()) {
         m_this.renderer()._render();
       }
     });
 
-    m_this.geoOn(geo.event.rotate, function (event) {
+    m_this.geoOn(geo_event.rotate, function (event) {
       m_this._update({event: event});
       if (m_this.renderer()) {
         m_this.renderer()._render();
       }
     });
 
-    m_this.geoOn(geo.event.zoom, function (event) {
+    m_this.geoOn(geo_event.zoom, function (event) {
       m_this._update({event: event});
       if (m_this.renderer()) {
         m_this.renderer()._render();
@@ -223,7 +228,6 @@ geo.featureLayer = function (arg) {
   return m_this;
 };
 
-inherit(geo.featureLayer, geo.layer);
-
-// Now register it
-geo.registerLayer('feature', geo.featureLayer);
+inherit(featureLayer, layer);
+util.registerLayer('feature', featureLayer);
+module.exports = featureLayer;

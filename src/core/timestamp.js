@@ -1,18 +1,22 @@
+var vgl = require('vgl');
+var inherit = require('../util').inherit;
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class timestamp
  *
- * @class
+ * @class geo.timestamp
  * @extends vgl.timestamp
  * @returns {geo.timestamp}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.timestamp = function () {
+var timestamp = function () {
   'use strict';
-  if (!(this instanceof geo.timestamp)) {
-    return new geo.timestamp();
+  if (!(this instanceof timestamp)) {
+    return new timestamp();
   }
   vgl.timestamp.call(this);
 };
 
-inherit(geo.timestamp, vgl.timestamp);
+inherit(timestamp, vgl.timestamp);
+module.exports = timestamp;

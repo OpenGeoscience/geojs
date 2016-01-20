@@ -1,18 +1,22 @@
+var inherit = require('../util').inherit;
+var featureLayer = require('./featureLayer');
+var object = require('./object');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class fileReader
  *
- * @class
+ * @class geo.fileReader
  * @extends geo.object
  * @returns {geo.fileReader}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.fileReader = function (arg) {
+var fileReader = function (arg) {
   'use strict';
-  if (!(this instanceof geo.fileReader)) {
-    return new geo.fileReader(arg);
+  if (!(this instanceof fileReader)) {
+    return new fileReader(arg);
   }
-  geo.object.call(this);
+  object.call(this);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -21,7 +25,7 @@ geo.fileReader = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   arg = arg || {};
 
-  if (!(arg.layer instanceof geo.featureLayer)) {
+  if (!(arg.layer instanceof featureLayer)) {
     throw 'fileReader must be given a feature layer';
   }
 
@@ -102,4 +106,5 @@ geo.fileReader = function (arg) {
   return this;
 };
 
-inherit(geo.fileReader, geo.object);
+inherit(fileReader, object);
+module.exports = fileReader;

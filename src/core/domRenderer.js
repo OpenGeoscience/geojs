@@ -1,10 +1,18 @@
-geo.domRenderer = function (arg) {
+var inherit = require('../util').inherit;
+var renderer = require('./renderer');
+var registerRenderer = require('../util').registerRenderer;
+
+/**
+ * @class geo.domRenderer
+ * @extends geo.renderer
+ */
+var domRenderer = function (arg) {
   'use strict';
 
-  if (!(this instanceof geo.domRenderer)) {
-    return new geo.domRenderer(arg);
+  if (!(this instanceof domRenderer)) {
+    return new domRenderer(arg);
   }
-  geo.renderer.call(this, arg);
+  renderer.call(this, arg);
 
   arg = arg || {};
 
@@ -29,6 +37,6 @@ geo.domRenderer = function (arg) {
   return this;
 };
 
-inherit(geo.domRenderer, geo.renderer);
-
-geo.registerRenderer('dom', geo.domRenderer);
+inherit(domRenderer, renderer);
+registerRenderer('dom', domRenderer);
+module.exports = domRenderer;

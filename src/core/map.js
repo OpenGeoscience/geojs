@@ -1,3 +1,7 @@
+var vgl = require('vgl');
+var inherit = require('../util').inherit;
+var sceneObject = require('./sceneObject');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Creates a new map object
@@ -8,7 +12,7 @@
  *            (center.x, center.y) + o            <-- center of viewport
  *   (-c, -c) + o                  (c, -c) + o
  *
- * @class
+ * @class geo.map
  * @extends geo.sceneObject
  *
  * *** Always required ***
@@ -63,10 +67,10 @@
  * @returns {geo.map}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.map = function (arg) {
+var map = function (arg) {
   'use strict';
-  if (!(this instanceof geo.map)) {
-    return new geo.map(arg);
+  if (!(this instanceof map)) {
+    return new map(arg);
   }
   arg = arg || {};
 
@@ -75,7 +79,15 @@ geo.map = function (arg) {
     return this;
   }
 
-  geo.sceneObject.call(this, arg);
+  sceneObject.call(this, arg);
+
+  var camera = require('./camera');
+  var transform = require('./transform');
+  var util = require('../util');
+  var geo_event = require('./event');
+  var mapInteractor = require('./mapInteractor');
+  var clock = require('./clock');
+
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -108,7 +120,7 @@ geo.map = function (arg) {
                          arg.allowRotation : (arg.allowRotation === undefined ?
                          true : !!arg.allowRotation)),
       m_maxBounds = arg.maxBounds || {},
-      m_camera = arg.camera || geo.camera(),
+      m_camera = arg.camera || camera(),
       m_unitsPerPixel,
       m_clampBoundsX,
       m_clampBoundsY,
@@ -122,23 +134,23 @@ geo.map = function (arg) {
    * [0, width] and [0, height] instead. */
   var mcx = ((m_maxBounds.left || 0) + (m_maxBounds.right || 0)) / 2,
       mcy = ((m_maxBounds.bottom || 0) + (m_maxBounds.top || 0)) / 2;
-  m_maxBounds.left = geo.transform.transformCoordinates(m_ingcs, m_gcs, [{
+  m_maxBounds.left = transform.transformCoordinates(m_ingcs, m_gcs, [{
     x: m_maxBounds.left !== undefined ? m_maxBounds.left : -180, y: mcy
   }])[0].x;
-  m_maxBounds.right = geo.transform.transformCoordinates(m_ingcs, m_gcs, [{
+  m_maxBounds.right = transform.transformCoordinates(m_ingcs, m_gcs, [{
     x: m_maxBounds.right !== undefined ? m_maxBounds.right : 180, y: mcy
   }])[0].x;
   m_maxBounds.top = (m_maxBounds.top !== undefined ?
-    geo.transform.transformCoordinates(m_ingcs, m_gcs, [{
+    transform.transformCoordinates(m_ingcs, m_gcs, [{
       x: mcx, y: m_maxBounds.top}])[0].y : m_maxBounds.right);
   m_maxBounds.bottom = (m_maxBounds.bottom !== undefined ?
-    geo.transform.transformCoordinates(m_ingcs, m_gcs, [{
+    transform.transformCoordinates(m_ingcs, m_gcs, [{
       x: mcx, y: m_maxBounds.bottom}])[0].y : m_maxBounds.left);
   m_unitsPerPixel = (arg.unitsPerPixel || (
     m_maxBounds.right - m_maxBounds.left) / 256);
 
   m_camera.viewport = {width: m_width, height: m_height};
-  arg.center = geo.util.normalizeCoordinates(arg.center);
+  arg.center = util.normalizeCoordinates(arg.center);
   arg.autoResize = arg.autoResize === undefined ? true : arg.autoResize;
   m_clampBoundsX = arg.clampBoundsX === undefined ? false : arg.clampBoundsX;
   m_clampBoundsY = arg.clampBoundsY === undefined ? true : arg.clampBoundsY;
@@ -373,7 +385,7 @@ geo.map = function (arg) {
       zoomLevel: m_zoom,
       screenPosition: origin ? origin.map : undefined
     };
-    m_this.geoTrigger(geo.event.zoom, evt);
+    m_this.geoTrigger(geo_event.zoom, evt);
 
     if (origin && origin.geo && origin.map) {
       var shifted = m_this.gcsToDisplay(origin.geo);
@@ -430,7 +442,7 @@ geo.map = function (arg) {
       y: m_height / 2
     });
 
-    m_this.geoTrigger(geo.event.pan, evt);
+    m_this.geoTrigger(geo_event.pan, evt);
 
     m_this.modified();
     return m_this;
@@ -513,7 +525,7 @@ geo.map = function (arg) {
     m_this.modified();
     // trigger a pan event
     m_this.geoTrigger(
-      geo.event.pan,
+      geo_event.pan,
       {
         geo: coordinates,
         screenDelta: null
@@ -532,7 +544,7 @@ geo.map = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.createLayer = function (layerName, arg) {
     arg = arg || {};
-    var newLayer = geo.createLayer(
+    var newLayer = util.createLayer(
       layerName, m_this, arg);
 
     if (newLayer) {
@@ -545,8 +557,8 @@ geo.map = function (arg) {
       newLayer._update();
       m_this.modified();
 
-      m_this.geoTrigger(geo.event.layerAdd, {
-        type: geo.event.layerAdd,
+      m_this.geoTrigger(geo_event.layerAdd, {
+        type: geo_event.layerAdd,
         target: m_this,
         layer: newLayer
       });
@@ -571,8 +583,8 @@ geo.map = function (arg) {
 
       m_this.modified();
 
-      m_this.geoTrigger(geo.event.layerRemove, {
-        type: geo.event.layerRemove,
+      m_this.geoTrigger(geo_event.layerRemove, {
+        type: geo_event.layerRemove,
         target: m_this,
         layer: layer
       });
@@ -655,8 +667,8 @@ geo.map = function (arg) {
     m_this.camera().viewport = {width: w, height: h};
     m_this.center(oldCenter);
 
-    m_this.geoTrigger(geo.event.resize, {
-      type: geo.event.resize,
+    m_this.geoTrigger(geo_event.resize, {
+      type: geo_event.resize,
       target: m_this,
       x: m_x,
       y: m_y,
@@ -682,9 +694,9 @@ geo.map = function (arg) {
   this.gcsToWorld = function (c, gcs) {
     gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
     if (gcs !== m_gcs) {
-      c = geo.transform.transformCoordinates(gcs, m_gcs, [c])[0];
+      c = transform.transformCoordinates(gcs, m_gcs, [c])[0];
     }
-    return geo.transform.affineForward(
+    return transform.affineForward(
       {origin: m_origin},
       [c]
     )[0];
@@ -703,13 +715,13 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.worldToGcs = function (c, gcs) {
-    c = geo.transform.affineInverse(
+    c = transform.affineInverse(
       {origin: m_origin},
       [c]
     )[0];
     gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
     if (gcs !== m_gcs) {
-      c = geo.transform.transformCoordinates(m_gcs, gcs, [c])[0];
+      c = transform.transformCoordinates(m_gcs, gcs, [c])[0];
     }
     return c;
   };
@@ -792,10 +804,10 @@ geo.map = function (arg) {
   this.draw = function () {
     var i, layers = m_this.children();
 
-    m_this.geoTrigger(geo.event.draw, {
-      type: geo.event.draw,
+    m_this.geoTrigger(geo_event.draw, {
+      type: geo_event.draw,
       target: m_this
-    }
+      }
     );
 
     m_this._update();
@@ -804,10 +816,10 @@ geo.map = function (arg) {
       layers[i].draw();
     }
 
-    m_this.geoTrigger(geo.event.drawEnd, {
-      type: geo.event.drawEnd,
+    m_this.geoTrigger(geo_event.drawEnd, {
+      type: geo_event.drawEnd,
       target: m_this
-    }
+      }
     );
 
     return m_this;
@@ -834,7 +846,7 @@ geo.map = function (arg) {
     }
     opts.layer = layer;
     opts.renderer = renderer;
-    m_fileReader = geo.createFileReader(readerType, opts);
+    m_fileReader = util.createFileReader(readerType, opts);
     return m_this;
   };
 
@@ -1072,9 +1084,9 @@ geo.map = function (arg) {
     if (opts.center) {
       gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
       opts = $.extend(true, {}, opts);
-      opts.center = geo.util.normalizeCoordinates(opts.center);
+      opts.center = util.normalizeCoordinates(opts.center);
       if (gcs !== m_gcs) {
-        opts.center = geo.transform.transformCoordinates(gcs, m_gcs, [
+        opts.center = transform.transformCoordinates(gcs, m_gcs, [
           opts.center])[0];
       }
     }
@@ -1166,7 +1178,7 @@ geo.map = function (arg) {
           m_this.rotation(fix_rotation(m_transition.end.rotation));
         }
 
-        m_this.geoTrigger(geo.event.transitionend, opts);
+        m_this.geoTrigger(geo_event.transitionend, opts);
 
         if (done) {
           done({next: !!next});
@@ -1204,11 +1216,11 @@ geo.map = function (arg) {
       window.requestAnimationFrame(anim);
     }
 
-    m_this.geoTrigger(geo.event.transitionstart, opts);
+    m_this.geoTrigger(geo_event.transitionstart, opts);
 
-    if (geo.event.cancelNavigation) {
+    if (geo_event.cancelNavigation) {
       m_transition = null;
-      m_this.geoTrigger(geo.event.transitionend, opts);
+      m_this.geoTrigger(geo_event.transitionend, opts);
       return m_this;
     } else if (geo.event.cancelAnimation) {
       // run the navigation synchronously
@@ -1265,7 +1277,7 @@ geo.map = function (arg) {
     gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
     if (bds !== undefined) {
       if (gcs !== m_gcs) {
-        var trans = geo.transform.transformCoordinates(gcs, m_gcs, [{
+        var trans = transform.transformCoordinates(gcs, m_gcs, [{
           x: bds.left, y: bds.top}, {x: bds.right, y: bds.bottom}]);
         bds = {
           left: trans[0].x,
@@ -1341,7 +1353,7 @@ geo.map = function (arg) {
 
     gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
     if (gcs !== m_gcs) {
-      var trans = geo.transform.transformCoordinates(gcs, m_gcs, [{
+      var trans = transform.transformCoordinates(gcs, m_gcs, [{
         x: bounds.left, y: bounds.top}, {x: bounds.right, y: bounds.bottom}]);
       bounds = {
         left: trans[0].x,
@@ -1850,8 +1862,8 @@ geo.map = function (arg) {
   // Now update to the correct center and zoom level
   this.center($.extend({}, arg.center || m_center), undefined);
 
-  this.interactor(arg.interactor || geo.mapInteractor({discreteZoom: m_discreteZoom}));
-  this.clock(arg.clock || geo.clock());
+  this.interactor(arg.interactor || mapInteractor({discreteZoom: m_discreteZoom}));
+  this.clock(arg.clock || clock());
 
   function resizeSelf() {
     m_this.resize(0, 0, m_node.width(), m_node.height());
@@ -1863,8 +1875,8 @@ geo.map = function (arg) {
 
   // attach attribution updates to layer events
   m_this.geoOn([
-    geo.event.layerAdd,
-    geo.event.layerRemove
+    geo_event.layerAdd,
+    geo_event.layerRemove
   ], m_this.updateAttribution);
 
   return this;
@@ -1886,14 +1898,15 @@ geo.map = function (arg) {
  * @param {geo.map.spec} spec The object specification
  * @returns {geo.map|null}
  */
-geo.map.create = function (spec) {
+map.create = function (spec) {
   'use strict';
 
-  var map = geo.map(spec);
+  var _map = map(spec),
+      layer = require('./layer');
 
   /* If the spec is bad, we still end up with an object, but it won't have a
    * zoom function */
-  if (!map || !map.zoom) {
+  if (!_map || !_map.zoom) {
     console.warn('Could not create map.');
     return null;
   }
@@ -1903,10 +1916,11 @@ geo.map.create = function (spec) {
 
   spec.layers.forEach(function (l) {
     l.data = l.data || spec.data;
-    l.layer = geo.layer.create(map, l);
+    l.layer = layer.create(_map, l);
   });
 
-  return map;
+  return _map;
 };
 
-inherit(geo.map, geo.sceneObject);
+inherit(map, sceneObject);
+module.exports = map;

@@ -1,4 +1,4 @@
-(function () {
+module.exports = (function () {
   'use strict';
 
   //////////////////////////////////////////////////////////////////////////////
@@ -11,7 +11,7 @@
    * tile images, thie number of concurrent requests should be 6 * (number of
    * subdomains serving tiles).
    *
-   * @class
+   * @class geo.fetchQueue
    *
    * @param {Object?} [options] A configuration object for the queue
    * @param {Number} [options.size=6] The maximum number of concurrent deferred
@@ -28,9 +28,9 @@
    *    needed.
    */
   //////////////////////////////////////////////////////////////////////////////
-  geo.fetchQueue = function (options) {
-    if (!(this instanceof geo.fetchQueue)) {
-      return new geo.fetchQueue(options);
+  var fetchQueue = function (options) {
+    if (!(this instanceof fetchQueue)) {
+      return new fetchQueue(options);
     }
     options = options || {};
     this._size = options.size || 6;
@@ -217,4 +217,6 @@
     this.clear();
     return this;
   };
+
+  return fetchQueue;
 })();

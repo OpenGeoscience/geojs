@@ -1,19 +1,22 @@
+var inherit = require('../util').inherit;
+var feature = require('./feature');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class lineFeature
  *
- * @class
+ * @class geo.lineFeature
  * @extends geo.feature
  * @returns {geo.lineFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.lineFeature = function (arg) {
+var lineFeature = function (arg) {
   'use strict';
-  if (!(this instanceof geo.lineFeature)) {
-    return new geo.lineFeature(arg);
+  if (!(this instanceof lineFeature)) {
+    return new lineFeature(arg);
   }
   arg = arg || {};
-  geo.feature.call(this, arg);
+  feature.call(this, arg);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -231,11 +234,12 @@ geo.lineFeature = function (arg) {
  * @param {geo.lineFeature.spec} spec The object specification
  * @returns {geo.lineFeature|null}
  */
-geo.lineFeature.create = function (layer, spec) {
+lineFeature.create = function (layer, spec) {
   'use strict';
 
   spec.type = 'line';
-  return geo.feature.create(layer, spec);
+  return feature.create(layer, spec);
 };
 
-inherit(geo.lineFeature, geo.feature);
+inherit(lineFeature, feature);
+module.exports = lineFeature;

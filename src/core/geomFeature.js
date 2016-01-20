@@ -1,19 +1,22 @@
+var inherit = require('../util').inherit;
+var feature = require('./feature');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class geomFeature
  *
- * @class
+ * @class geo.geomFeature
  * @extends geo.feature
  * @returns {geo.geomFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.geomFeature = function (arg) {
+var geomFeature = function (arg) {
   'use strict';
-  if (!(this instanceof geo.geomFeature)) {
-    return new geo.geomFeature(arg);
+  if (!(this instanceof geomFeature)) {
+    return new geomFeature(arg);
   }
   arg = arg || {};
-  geo.feature.call(this, arg);
+  feature.call(this, arg);
 
   arg.style = arg.style === undefined ? $.extend({}, {
     'color': [1.0, 1.0, 1.0],
@@ -27,4 +30,5 @@ geo.geomFeature = function (arg) {
   return this;
 };
 
-inherit(geo.geomFeature, geo.feature);
+inherit(geomFeature, feature);
+module.exports = geomFeature;

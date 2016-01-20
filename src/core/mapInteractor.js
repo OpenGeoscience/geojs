@@ -1,3 +1,6 @@
+var inherit = require('../util').inherit;
+var object = require('./object');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * The mapInteractor class is responsible for handling raw events from the
@@ -5,17 +8,21 @@
  * will call the navigation methods on the connected map, which will make
  * modifications to the camera directly.
  *
- * @class
+ * @class geo.mapInteractor
  * @extends geo.object
  * @returns {geo.mapInteractor}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.mapInteractor = function (args) {
+var mapInteractor = function (args) {
   'use strict';
-  if (!(this instanceof geo.mapInteractor)) {
-    return new geo.mapInteractor(args);
+  if (!(this instanceof mapInteractor)) {
+    return new mapInteractor(args);
   }
-  geo.object.call(this);
+  object.call(this);
+
+  var geo_event = require('event');
+  var throttle = require('../util').throttle;
+  var debounce = require('../util').debounce;
 
   var m_options = args || {},
       m_this = this,
@@ -441,8 +448,8 @@ geo.mapInteractor = function (args) {
   /**
    * Gets/sets the options object for the interactor.
    *
-   * @param {Object} opts optional
-   * @returns {geo.interactorStyle|Object}
+   * @param {object} opts optional
+   * @returns {geo.interactorStyle|object}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.options = function (opts) {
@@ -521,7 +528,7 @@ geo.mapInteractor = function (args) {
   /**
    * Compute a selection information object.
    * @private
-   * @returns {Object}
+   * @returns {object}
    */
   ////////////////////////////////////////////////////////////////////////////
   this._getSelection = function () {
@@ -683,14 +690,14 @@ geo.mapInteractor = function (args) {
           screenCoordinates: true,
           fillOpacity: function () { return 0.25; }
         });
-        m_this.map().geoTrigger(geo.event.brushstart, m_this._getSelection());
+        m_this.map().geoTrigger(geo_event.brushstart, m_this._getSelection());
       }
 
       // bind temporary handlers to document
       if (m_options.throttle > 0) {
         $(document).on(
           'mousemove.geojs',
-          geo.util.throttle(
+          throttle(
             m_options.throttle,
             m_this._handleMouseMoveDocument
           )
@@ -732,7 +739,7 @@ geo.mapInteractor = function (args) {
       return;
     }
 
-    m_this.map().geoTrigger(geo.event.mousemove, m_this.mouse());
+    m_this.map().geoTrigger(geo_event.mousemove, m_this.mouse());
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -788,7 +795,7 @@ geo.mapInteractor = function (args) {
     } else if (m_state.action === 'select') {
       // Get the bounds of the current selection
       selectionObj = m_this._getSelection();
-      m_this.map().geoTrigger(geo.event.brush, selectionObj);
+      m_this.map().geoTrigger(geo_event.brush, selectionObj);
     }
 
     // Prevent default to stop text selection in particular
@@ -907,7 +914,7 @@ geo.mapInteractor = function (args) {
       m_selectionLayer = null;
       m_selectionPlane = null;
 
-      m_this.map().geoTrigger(geo.event.brushend, selectionObj);
+      m_this.map().geoTrigger(geo_event.brushend, selectionObj);
     }
 
     // reset the interactor state
@@ -970,7 +977,7 @@ geo.mapInteractor = function (args) {
     m_clickMaybe = false;
 
     // fire a click event
-    m_this.map().geoTrigger(geo.event.mouseclick, m_this.mouse());
+    m_this.map().geoTrigger(geo_event.mouseclick, m_this.mouse());
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -1061,7 +1068,7 @@ geo.mapInteractor = function (args) {
     }
     if ((m_options.discreteZoom === true || m_options.discreteZoom > 0) &&
             !m_options.zoomAnimation.enabled) {
-      return geo.util.debounce(delay, false, apply, accum);
+      return debounce(delay, false, apply, accum);
     } else {
       return function (dz, dir) {
         if (!dz && targetZoom === undefined) {
@@ -1177,7 +1184,7 @@ geo.mapInteractor = function (args) {
     }
 
     if (m_options.throttle > 0) {
-      return geo.util.throttle(m_options.throttle, false, wheel, accum);
+      return throttle(m_options.throttle, false, wheel, accum);
     } else {
       return function (evt) {
         accum(evt);
@@ -1409,4 +1416,5 @@ geo.mapInteractor = function (args) {
   return this;
 };
 
-inherit(geo.mapInteractor, geo.object);
+inherit(mapInteractor, object);
+module.exports = mapInteractor;

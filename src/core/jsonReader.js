@@ -1,17 +1,22 @@
 /*global File*/
+
+var inherit = require('../util').inherit;
+var registerFileReader = require('../util').registerFileReader;
+var fileReader = require('./fileReader');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
 * Create a new instance of class jsonReader
 *
-* @class
+* @class geo.jsonReader
 * @extends geo.fileReader
 * @returns {geo.jsonReader}
 */
 //////////////////////////////////////////////////////////////////////////////
-geo.jsonReader = function (arg) {
+var jsonReader = function (arg) {
   'use strict';
-  if (!(this instanceof geo.jsonReader)) {
-    return new geo.jsonReader(arg);
+  if (!(this instanceof jsonReader)) {
+    return new jsonReader(arg);
   }
 
   var m_this = this, m_style = arg.style || {};
@@ -23,7 +28,7 @@ geo.jsonReader = function (arg) {
     'fillOpacity': 1
   }, m_style);
 
-  geo.fileReader.call(this, arg);
+  fileReader.call(this, arg);
 
   this.canRead = function (file) {
     if (file instanceof File) {
@@ -274,6 +279,6 @@ geo.jsonReader = function (arg) {
 
 };
 
-inherit(geo.jsonReader, geo.fileReader);
-
-geo.registerFileReader('jsonReader', geo.jsonReader);
+inherit(jsonReader, fileReader);
+registerFileReader('jsonReader', jsonReader);
+module.exports = jsonReader;

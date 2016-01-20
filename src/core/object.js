@@ -1,16 +1,19 @@
+var vgl = require('vgl');
+var inherit = require('../util').inherit;
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class object
  *
- * @class
+ * @class geo.object
  * @extends vgl.object
  * @returns {geo.object}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.object = function () {
+var object = function () {
   'use strict';
-  if (!(this instanceof geo.object)) {
-    return new geo.object();
+  if (!(this instanceof object)) {
+    return new object();
   }
 
   var m_this = this,
@@ -172,4 +175,5 @@ geo.object = function () {
   return this;
 };
 
-inherit(geo.object, vgl.object);
+inherit(object, vgl.object);
+module.exports = object;

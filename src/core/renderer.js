@@ -1,19 +1,22 @@
+var inherit = require('../util').inherit;
+var object = require('./object');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class renderer
  *
- * @class
+ * @class geo.renderer
  * @extends geo.object
  * @returns {geo.renderer}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.renderer = function (arg) {
+var renderer = function (arg) {
   'use strict';
 
-  if (!(this instanceof geo.renderer)) {
-    return new geo.renderer(arg);
+  if (!(this instanceof renderer)) {
+    return new renderer(arg);
   }
-  geo.object.call(this);
+  object.call(this);
 
   arg = arg || {};
   var m_this = this,
@@ -129,4 +132,5 @@ geo.renderer = function (arg) {
   return this;
 };
 
-inherit(geo.renderer, geo.object);
+inherit(renderer, object);
+module.exports = renderer;

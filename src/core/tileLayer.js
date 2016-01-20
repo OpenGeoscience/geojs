@@ -1,5 +1,8 @@
-(function () {
+module.exports = (function () {
   'use strict';
+
+  var inherit = require('../util').inherit;
+  var featureLayer = require('./featureLayer');
 
   /**
    * Standard modulo operator where the output is in [0, b) for all inputs.
@@ -67,7 +70,7 @@
    * alternate tiling protocols often only requires adjusting these
    * defaults.
    *
-   * @class
+   * @class geo.tileLayer
    * @extends geo.featureLayer
    * @param {object?} options
    * @param {number} [options.minLevel=0]    The minimum zoom level available
@@ -123,11 +126,19 @@
    * @returns {geo.tileLayer}
    */
   //////////////////////////////////////////////////////////////////////////////
-  geo.tileLayer = function (options) {
-    if (!(this instanceof geo.tileLayer)) {
-      return new geo.tileLayer(options);
+  var tileLayer = function (options) {
+
+    var geo_event = require('./event');
+    var transform = require('./transform');
+    var tileCache = require('./tileCache');
+    var fetchQueue = require('./fetchQueue');
+    var adjustLayerForRenderer = require('../util').adjustLayerForRenderer;
+    var Tile = require('./tile');
+
+    if (!(this instanceof tileLayer)) {
+      return new tileLayer(options);
     }
-    geo.featureLayer.call(this, options);
+    featureLayer.call(this, options);
 
     options = $.extend(true, {}, this.constructor.defaults, options || {});
     if (!options.cacheSize) {
@@ -172,10 +183,10 @@
     this._tileTree = {};
 
     // initialize the in memory tile cache
-    this._cache = geo.tileCache({size: options.cacheSize});
+    this._cache = tileCache({size: options.cacheSize});
 
     // initialize the tile fetch queue
-    this._queue = geo.fetchQueue({
+    this._queue = fetchQueue({
       // this should probably be 6 * subdomains.length if subdomains are used
       size: 6,
       // if track is the same as the cache size, then neither processing time
@@ -330,7 +341,7 @@
      * @returns {object} The tile bounds in the specified gcs.
      */
     this.gcsTileBounds = function (indexOrTile, gcs) {
-      var tile = (indexOrTile.index ? indexOrTile : geo.tile({
+      var tile = (indexOrTile.index ? indexOrTile : Tile({
         index: indexOrTile,
         size: {x: this._options.tileWidth, y: this._options.tileHeight},
         url: ''
@@ -347,7 +358,7 @@
       gcs = (gcs === null ? map.gcs() : (
           gcs === undefined ? map.ingcs() : gcs));
       if (gcs !== map.gcs()) {
-        coord = geo.transform.transformCoordinates(gcs, map.gcs(), coord);
+        coord = transform.transformCoordinates(gcs, map.gcs(), coord);
       }
       return {
         left: coord[0].x,
@@ -373,7 +384,7 @@
      */
     this._getTile = function (index, source) {
       var urlParams = source || index;
-      return geo.tile({
+      return Tile({
         index: index,
         size: {x: this._options.tileWidth, y: this._options.tileHeight},
         queue: this._queue,
@@ -739,7 +750,7 @@
       var hash = tile.toString();
       var value = this._activeTiles[hash];
 
-      if (value instanceof geo.tile) {
+      if (value instanceof Tile) {
         this._remove(value);
       }
 
@@ -986,8 +997,8 @@
     this._update = function (evt) {
       /* Ignore zoom and rotate events, as they are ALWAYS followed by a pan
        * event */
-      if (evt && evt.event && (evt.event.event === geo.event.zoom ||
-          evt.event.event === geo.event.rotate)) {
+      if (evt && evt.event && (evt.event.event === geo_event.zoom ||
+          evt.event.event === geo_event.rotate)) {
         return;
       }
       var map = this.map(),
@@ -1387,7 +1398,7 @@
       return this;
     };
 
-    geo.adjustLayerForRenderer('tile', this);
+    adjustLayerForRenderer('tile', this);
 
     return this;
   };
@@ -1395,7 +1406,7 @@
   /**
    * This object contains the default options used to initialize the tileLayer.
    */
-  geo.tileLayer.defaults = {
+  tileLayer.defaults = {
     minLevel: 0,
     maxLevel: 18,
     tileOverlap: 0,
@@ -1417,5 +1428,6 @@
     animationDuration: 0
   };
 
-  inherit(geo.tileLayer, geo.featureLayer);
+  inherit(tileLayer, featureLayer);
+  return tileLayer;
 })();

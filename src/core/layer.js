@@ -1,6 +1,11 @@
+var inherit = require('../util').inherit;
+var sceneObject = require('./sceneObject');
+var feature = require('./feature');
+var checkRenderer = require('../util').checkRenderer;
+
 //////////////////////////////////////////////////////////////////////////////
 /**
- * @class
+ * @class geo.layer
  * @extends geo.sceneObject
  * @param {Object?} arg An options argument
  * @param {string} arg.attribution An attribution string to display
@@ -9,14 +14,20 @@
  * @returns {geo.layer}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.layer = function (arg) {
+var layer = function (arg) {
   'use strict';
 
-  if (!(this instanceof geo.layer)) {
-    return new geo.layer(arg);
+  if (!(this instanceof layer)) {
+    return new layer(arg);
   }
   arg = arg || {};
-  geo.sceneObject.call(this, arg);
+  sceneObject.call(this, arg);
+
+  var timestamp = require('./timestamp');
+  var createRenderer = require('../util').createRenderer;
+  var newLayerId = require('../util').newLayerId;
+  var geo_event = require('./event');
+  var camera = require('./camera');
 
   //////////////////////////////////////////////////////////////////////////////
   /**
@@ -25,7 +36,7 @@ geo.layer = function (arg) {
   //////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       s_exit = this._exit,
-      m_id = arg.id === undefined ? geo.layer.newLayerId() : arg.id,
+      m_id = arg.id === undefined ? layer.newLayerId() : arg.id,
       m_name = '',
       m_map = arg.map === undefined ? null : arg.map,
       m_node = null,
@@ -33,15 +44,15 @@ geo.layer = function (arg) {
       m_renderer = null,
       m_initialized = false,
       m_rendererName = arg.renderer === undefined ? 'vgl' : arg.renderer,
-      m_dataTime = geo.timestamp(),
-      m_updateTime = geo.timestamp(),
+      m_dataTime = timestamp(),
+      m_updateTime = timestamp(),
       m_sticky = arg.sticky === undefined ? true : arg.sticky,
       m_active = arg.active === undefined ? true : arg.active,
       m_opacity = arg.opacity === undefined ? 1 : arg.opacity,
       m_attribution = arg.attribution || null,
       m_zIndex;
 
-  m_rendererName = geo.checkRenderer(m_rendererName);
+  m_rendererName = checkRenderer(m_rendererName);
 
   if (!m_map) {
     throw new Error('Layers must be initialized on a map.');
@@ -209,7 +220,7 @@ geo.layer = function (arg) {
     if (val === undefined) {
       return m_id;
     }
-    m_id = geo.newLayerId();
+    m_id = newLayerId();
     m_this.modified();
     return m_this;
   };
@@ -300,7 +311,7 @@ geo.layer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.toLocal = function (input) {
     if (m_this._toLocalMatrix) {
-      geo.camera.applyTransform(m_this._toLocalMatrix, input);
+      camera.applyTransform(m_this._toLocalMatrix, input);
     }
     return input;
   };
@@ -312,7 +323,7 @@ geo.layer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.fromLocal = function (input) {
     if (m_this._fromLocalMatrix) {
-      geo.camera.applyTransform(m_this._fromLocalMatrix, input);
+      camera.applyTransform(m_this._fromLocalMatrix, input);
     }
     return input;
   };
@@ -362,10 +373,10 @@ geo.layer = function (arg) {
       m_renderer = null;
       m_canvas = m_node;
     } else if (m_canvas) { // Share context if have valid one
-      m_renderer = geo.createRenderer(m_rendererName, m_this, m_canvas,
+      m_renderer = createRenderer(m_rendererName, m_this, m_canvas,
                                       options);
     } else {
-      m_renderer = geo.createRenderer(m_rendererName, m_this, undefined,
+      m_renderer = createRenderer(m_rendererName, m_this, undefined,
                                       options);
       m_canvas = m_renderer.canvas();
     }
@@ -378,19 +389,19 @@ geo.layer = function (arg) {
 
     if (!noEvents) {
       /// Bind events to handlers
-      m_this.geoOn(geo.event.resize, function (event) {
+      m_this.geoOn(geo_event.resize, function (event) {
         m_this._update({event: event});
       });
 
-      m_this.geoOn(geo.event.pan, function (event) {
+      m_this.geoOn(geo_event.pan, function (event) {
         m_this._update({event: event});
       });
 
-      m_this.geoOn(geo.event.rotate, function (event) {
+      m_this.geoOn(geo_event.rotate, function (event) {
         m_this._update({event: event});
       });
 
-      m_this.geoOn(geo.event.zoom, function (event) {
+      m_this.geoOn(geo_event.zoom, function (event) {
         m_this._update({event: event});
       });
     }
@@ -483,15 +494,15 @@ geo.layer = function (arg) {
  * @instance
  * @returns {number}
  */
-geo.layer.newLayerId = (function () {
-  'use strict';
-  var currentId = 1;
-  return function () {
-    var id = currentId;
-    currentId += 1;
-    return id;
-  };
-}()
+layer.newLayerId = (function () {
+    'use strict';
+    var currentId = 1;
+    return function () {
+      var id = currentId;
+      currentId += 1;
+      return id;
+    };
+  }()
 );
 
 /**
@@ -514,7 +525,7 @@ geo.layer.newLayerId = (function () {
  * @param {geo.layer.spec} spec The object specification
  * @returns {geo.layer|null}
  */
-geo.layer.create = function (map, spec) {
+layer.create = function (map, spec) {
   'use strict';
 
   spec = spec || {};
@@ -527,7 +538,7 @@ geo.layer.create = function (map, spec) {
   }
 
   spec.renderer = spec.renderer || 'vgl';
-  spec.renderer = geo.checkRenderer(spec.renderer);
+  spec.renderer = checkRenderer(spec.renderer);
 
   if (!spec.renderer) {
     console.warn('Invalid renderer');
@@ -543,10 +554,11 @@ geo.layer.create = function (map, spec) {
   // probably move this down to featureLayer eventually
   spec.features.forEach(function (f) {
     f.data = f.data || spec.data;
-    f.feature = geo.feature.create(layer, f);
+    f.feature = feature.create(layer, f);
   });
 
   return layer;
 };
 
-inherit(geo.layer, geo.sceneObject);
+inherit(layer, sceneObject);
+module.exports = layer;

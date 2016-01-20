@@ -1,18 +1,25 @@
+var inherit = require('../util').inherit;
+var sceneObject = require('./sceneObject');
+var timestamp = require('./timestamp');
+var geo_event = require('./event');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class feature
  *
- * @class
+ * @class geo.feature
  * @extends geo.sceneObject
  * @returns {geo.feature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.feature = function (arg) {
+var feature = function (arg) {
   'use strict';
-  if (!(this instanceof geo.feature)) {
-    return new geo.feature(arg);
+  if (!(this instanceof feature)) {
+    return new feature(arg);
   }
-  geo.sceneObject.call(this);
+  sceneObject.call(this);
+
+  var util = require('../util');
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -30,9 +37,9 @@ geo.feature = function (arg) {
       m_visible = arg.visible === undefined ? true : arg.visible,
       m_bin = arg.bin === undefined ? 0 : arg.bin,
       m_renderer = arg.renderer === undefined ? null : arg.renderer,
-      m_dataTime = geo.timestamp(),
-      m_buildTime = geo.timestamp(),
-      m_updateTime = geo.timestamp(),
+      m_dataTime = timestamp(),
+      m_buildTime = timestamp(),
+      m_updateTime = timestamp(),
       m_selectedFeatures = [];
 
   ////////////////////////////////////////////////////////////////////////////
@@ -51,10 +58,10 @@ geo.feature = function (arg) {
     // First unbind to be sure that the handlers aren't bound twice.
     m_this._unbindMouseHandlers();
 
-    m_this.geoOn(geo.event.mousemove, m_this._handleMousemove);
-    m_this.geoOn(geo.event.mouseclick, m_this._handleMouseclick);
-    m_this.geoOn(geo.event.brushend, m_this._handleBrushend);
-    m_this.geoOn(geo.event.brush, m_this._handleBrush);
+    m_this.geoOn(geo_event.mousemove, m_this._handleMousemove);
+    m_this.geoOn(geo_event.mouseclick, m_this._handleMouseclick);
+    m_this.geoOn(geo_event.brushend, m_this._handleBrushend);
+    m_this.geoOn(geo_event.brush, m_this._handleBrush);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -63,10 +70,10 @@ geo.feature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._unbindMouseHandlers = function () {
-    m_this.geoOff(geo.event.mousemove, m_this._handleMousemove);
-    m_this.geoOff(geo.event.mouseclick, m_this._handleMouseclick);
-    m_this.geoOff(geo.event.brushend, m_this._handleBrushend);
-    m_this.geoOff(geo.event.brush, m_this._handleBrush);
+    m_this.geoOff(geo_event.mousemove, m_this._handleMousemove);
+    m_this.geoOff(geo_event.mouseclick, m_this._handleMouseclick);
+    m_this.geoOff(geo_event.brushend, m_this._handleBrushend);
+    m_this.geoOff(geo_event.brush, m_this._handleBrush);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -135,38 +142,38 @@ geo.feature = function (arg) {
       return over.index.indexOf(i) < 0;
     });
 
-    geo.feature.eventID += 1;
+    feature.eventID += 1;
     // Fire events for mouse in first.
     newFeatures.forEach(function (i, idx) {
-      m_this.geoTrigger(geo.event.feature.mouseover, {
+      m_this.geoTrigger(geo_event.feature.mouseover, {
         data: data[i],
         index: i,
         mouse: mouse,
-        eventID: geo.feature.eventID,
+        eventID: feature.eventID,
         top: idx === newFeatures.length - 1
       }, true);
     });
 
-    geo.feature.eventID += 1;
+    feature.eventID += 1;
     // Fire events for mouse out next
     oldFeatures.forEach(function (i, idx) {
-      m_this.geoTrigger(geo.event.feature.mouseout, {
+      m_this.geoTrigger(geo_event.feature.mouseout, {
         data: data[i],
         index: i,
         mouse: mouse,
-        eventID: geo.feature.eventID,
+        eventID: feature.eventID,
         top: idx === oldFeatures.length - 1
       }, true);
     });
 
-    geo.feature.eventID += 1;
+    feature.eventID += 1;
     // Fire events for mouse move last
     over.index.forEach(function (i, idx) {
-      m_this.geoTrigger(geo.event.feature.mousemove, {
+      m_this.geoTrigger(geo_event.feature.mousemove, {
         data: data[i],
         index: i,
         mouse: mouse,
-        eventID: geo.feature.eventID,
+        eventID: feature.eventID,
         top: idx === over.index.length - 1
       }, true);
     });
@@ -182,7 +189,7 @@ geo.feature = function (arg) {
     if (lastTop !== top) {
       // The element on top changed so we need to fire mouseon/mouseoff
       if (lastTop !== -1) {
-        m_this.geoTrigger(geo.event.feature.mouseoff, {
+        m_this.geoTrigger(geo_event.feature.mouseoff, {
           data: data[lastTop],
           index: lastTop,
           mouse: mouse
@@ -190,7 +197,7 @@ geo.feature = function (arg) {
       }
 
       if (top !== -1) {
-        m_this.geoTrigger(geo.event.feature.mouseon, {
+        m_this.geoTrigger(geo_event.feature.mouseon, {
           data: data[top],
           index: top,
           mouse: mouse
@@ -209,13 +216,13 @@ geo.feature = function (arg) {
         data = m_this.data(),
         over = m_this.pointSearch(mouse.geo);
 
-    geo.feature.eventID += 1;
+    feature.eventID += 1;
     over.index.forEach(function (i, idx) {
-      m_this.geoTrigger(geo.event.feature.mouseclick, {
+      m_this.geoTrigger(geo_event.feature.mouseclick, {
         data: data[i],
         index: i,
         mouse: mouse,
-        eventID: geo.feature.eventID,
+        eventID: feature.eventID,
         top: idx === over.index.length - 1
       }, true);
     });
@@ -230,14 +237,14 @@ geo.feature = function (arg) {
     var idx = m_this.boxSearch(brush.gcs.lowerLeft, brush.gcs.upperRight),
         data = m_this.data();
 
-    geo.feature.eventID += 1;
+    feature.eventID += 1;
     idx.forEach(function (i, idx) {
-      m_this.geoTrigger(geo.event.feature.brush, {
+      m_this.geoTrigger(geo_event.feature.brush, {
         data: data[i],
         index: i,
         mouse: brush.mouse,
         brush: brush,
-        eventID: geo.feature.eventID,
+        eventID: feature.eventID,
         top: idx === idx.length - 1
       }, true);
     });
@@ -252,14 +259,14 @@ geo.feature = function (arg) {
     var idx = m_this.boxSearch(brush.gcs.lowerLeft, brush.gcs.upperRight),
         data = m_this.data();
 
-    geo.feature.eventID += 1;
+    feature.eventID += 1;
     idx.forEach(function (i, idx) {
-      m_this.geoTrigger(geo.event.feature.brushend, {
+      m_this.geoTrigger(geo_event.feature.brushend, {
         data: data[i],
         index: i,
         mouse: brush.mouse,
         brush: brush,
-        eventID: geo.feature.eventID,
+        eventID: feature.eventID,
         top: idx === idx.length - 1
       }, true);
     });
@@ -308,19 +315,19 @@ geo.feature = function (arg) {
       return all;
     }
     if (key.toLowerCase().match(/color$/)) {
-      if (geo.util.isFunction(m_style[key])) {
-        tmp = geo.util.ensureFunction(m_style[key]);
+      if (util.isFunction(m_style[key])) {
+        tmp = util.ensureFunction(m_style[key]);
         out = function () {
-          return geo.util.convertColor(
+          return util.convertColor(
             tmp.apply(this, arguments)
           );
         };
       } else {
         // if the color is not a function, only convert it once
-        out = geo.util.ensureFunction(geo.util.convertColor(m_style[key]));
+        out = util.ensureFunction(util.convertColor(m_style[key]));
       }
     } else {
-      out = geo.util.ensureFunction(m_style[key]);
+      out = util.ensureFunction(m_style[key]);
     }
     return out;
   };
@@ -554,7 +561,7 @@ geo.feature = function (arg) {
  * The most recent feature event triggered.
  * @type {number}
  */
-geo.feature.eventID = 0;
+feature.eventID = 0;
 
 /**
  * General object specification for feature types.
@@ -565,7 +572,7 @@ geo.feature.eventID = 0;
  * construct the feature.  These objects (and their associated
  * indices in the array) will be passed back to style and attribute
  * accessors provided by the user.  In general the number of
- * "markers" drawn will be equal to the length of this array.
+ * 'markers' drawn will be equal to the length of this array.
  */
 
 /**
@@ -578,13 +585,13 @@ geo.feature.eventID = 0;
  * @param {geo.feature.spec} [spec={}] The object specification
  * @returns {geo.feature|null}
  */
-geo.feature.create = function (layer, spec) {
+feature.create = function (layer, spec) {
   'use strict';
 
   var type = spec.type;
 
   // Check arguments
-  if (!(layer instanceof geo.layer)) {
+  if (!(layer instanceof require('./layer'))) {
     console.warn('Invalid layer');
     return null;
   }
@@ -594,7 +601,7 @@ geo.feature.create = function (layer, spec) {
   }
   var feature = layer.createFeature(type);
   if (!feature) {
-    console.warn("Could not create feature type '" + type + "'");
+    console.warn('Could not create feature type "' + type + '"');
     return null;
   }
 
@@ -603,4 +610,5 @@ geo.feature.create = function (layer, spec) {
   return feature.style(spec);
 };
 
-inherit(geo.feature, geo.sceneObject);
+inherit(feature, sceneObject);
+module.exports = feature;

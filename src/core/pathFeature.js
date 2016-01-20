@@ -1,19 +1,22 @@
+var inherit = require('../util');
+var feature = require('./feature');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class pathFeature
  *
- * @class
+ * @class geo.pathFeature
  * @extends geo.feature
  * @returns {geo.pathFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.pathFeature = function (arg) {
+var pathFeature = function (arg) {
   'use strict';
-  if (!(this instanceof geo.pathFeature)) {
-    return new geo.pathFeature(arg);
+  if (!(this instanceof pathFeature)) {
+    return new pathFeature(arg);
   }
   arg = arg || {};
-  geo.feature.call(this, arg);
+  feature.call(this, arg);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -70,4 +73,5 @@ geo.pathFeature = function (arg) {
   return this;
 };
 
-inherit(geo.pathFeature, geo.feature);
+inherit(pathFeature, feature);
+module.exports = pathFeature;

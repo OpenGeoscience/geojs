@@ -1,19 +1,22 @@
+var inherit = require('../util').inherit;
+var object = require('./object');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class sceneObject, which extends the object's
  * event handling with a tree-based event propagation.
  *
- * @class
+ * @class geo.sceneObject
  * @extends geo.object
  * @returns {geo.sceneObject}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.sceneObject = function (arg) {
+var sceneObject = function (arg) {
   'use strict';
-  if (!(this instanceof geo.sceneObject)) {
-    return new geo.sceneObject();
+  if (!(this instanceof sceneObject)) {
+    return new sceneObject();
   }
-  geo.object.call(this, arg);
+  object.call(this, arg);
 
   var m_this = this,
       m_parent = null,
@@ -175,4 +178,5 @@ geo.sceneObject = function (arg) {
   return this;
 };
 
-inherit(geo.sceneObject, geo.object);
+inherit(sceneObject, object);
+module.exports = sceneObject;
