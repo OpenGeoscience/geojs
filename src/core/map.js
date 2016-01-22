@@ -69,6 +69,12 @@ geo.map = function (arg) {
     return new geo.map(arg);
   }
   arg = arg || {};
+
+  if (arg.node === undefined || arg.node === null) {
+    console.warn('map creation requires a node');
+    return this;
+  }
+
   geo.sceneObject.call(this, arg);
 
   ////////////////////////////////////////////////////////////////////////////
@@ -550,28 +556,6 @@ geo.map = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Toggle visibility of a layer
-   *
-   *  @param {geo.layer} layer
-   *  @returns {Boolean}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.toggle = function (layer) {
-    if (layer !== null && layer !== undefined) {
-      layer.visible(!layer.visible());
-      m_this.modified();
-
-      m_this.geoTrigger(geo.event.layerToggle, {
-        type: geo.event.layerToggle,
-        target: m_this,
-        layer: layer
-      });
-    }
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
    * Get or set the size of the map.
    *
    * @param {Object?} arg
@@ -970,7 +954,11 @@ geo.map = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Start an animated zoom/pan/rotate.
+   * Start an animated zoom/pan/rotate.  If a second transition is requested
+   * while a transition is already in progress, a new transition is created
+   * that is functionally from whereever the map has moved to (possibly partway
+   * through the first transition) going to the end point of the new
+   * transition.
    *
    * Options:
    * <pre>
@@ -1042,13 +1030,14 @@ geo.map = function (arg) {
 
     if (opts.center) {
       gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
+      opts = $.extend(true, {}, opts);
       opts.center = geo.util.normalizeCoordinates(opts.center);
       if (gcs !== m_gcs) {
         opts.center = geo.transform.transformCoordinates(gcs, m_gcs, [
             opts.center])[0];
       }
     }
-    $.extend(defaultOpts, opts);
+    opts = $.extend(true, {}, defaultOpts, opts);
 
     m_transition = {
       start: {
@@ -1057,18 +1046,18 @@ geo.map = function (arg) {
         rotation: m_this.rotation()
       },
       end: {
-        center: defaultOpts.center,
-        zoom: fix_zoom(defaultOpts.zoom),
-        rotation: fix_rotation(defaultOpts.rotation, undefined, true)
+        center: opts.center,
+        zoom: fix_zoom(opts.zoom),
+        rotation: fix_rotation(opts.rotation, undefined, true)
       },
-      ease: defaultOpts.ease,
-      zCoord: defaultOpts.zCoord,
-      done: defaultOpts.done,
-      duration: defaultOpts.duration
+      ease: opts.ease,
+      zCoord: opts.zCoord,
+      done: opts.done,
+      duration: opts.duration
     };
 
-    if (defaultOpts.zCoord) {
-      m_transition.interp = defaultOpts.interp(
+    if (opts.zCoord) {
+      m_transition.interp = opts.interp(
         [
           m_transition.start.center.x,
           m_transition.start.center.y,
@@ -1083,7 +1072,7 @@ geo.map = function (arg) {
         ]
       );
     } else {
-      m_transition.interp = defaultOpts.interp(
+      m_transition.interp = opts.interp(
         [
           m_transition.start.center.x,
           m_transition.start.center.y,
@@ -1105,7 +1094,7 @@ geo.map = function (arg) {
 
       if (!m_transition.start.time) {
         m_transition.start.time = time;
-        m_transition.end.time = time + defaultOpts.duration;
+        m_transition.end.time = time + opts.duration;
       }
       m_transition.time = time - m_transition.start.time;
       if (time >= m_transition.end.time || next) {
@@ -1117,7 +1106,7 @@ geo.map = function (arg) {
 
         m_transition = null;
 
-        m_this.geoTrigger(geo.event.transitionend, defaultOpts);
+        m_this.geoTrigger(geo.event.transitionend, opts);
 
         if (done) {
           done();
@@ -1132,7 +1121,7 @@ geo.map = function (arg) {
       }
 
       var z = m_transition.ease(
-        (time - m_transition.start.time) / defaultOpts.duration
+        (time - m_transition.start.time) / opts.duration
       );
 
       var p = m_transition.interp(z);
@@ -1153,14 +1142,15 @@ geo.map = function (arg) {
       window.requestAnimationFrame(anim);
     }
 
-    m_this.geoTrigger(geo.event.transitionstart, defaultOpts);
+    m_this.geoTrigger(geo.event.transitionstart, opts);
 
-    if (defaultOpts.cancelNavigation) {
-      m_this.geoTrigger(geo.event.transitionend, defaultOpts);
+    if (geo.event.cancelNavigation) {
+      m_transition = null;
+      m_this.geoTrigger(geo.event.transitionend, opts);
       return m_this;
-    } else if (defaultOpts.cancelAnimation) {
+    } else if (geo.event.cancelAnimation) {
       // run the navigation synchronously
-      defaultOpts.duration = 0;
+      opts.duration = 0;
       anim(0);
     } else {
       window.requestAnimationFrame(anim);
@@ -1242,10 +1232,10 @@ geo.map = function (arg) {
     }
 
     // calculate the zoom to fit the bounds
-    zoom = fix_zoom(calculate_zoom(bounds));
+    zoom = fix_zoom(calculate_zoom(bounds, rotation));
 
     // clamp bounds if necessary
-    bounds = fix_bounds(bounds, m_rotation);
+    bounds = fix_bounds(bounds, rotation);
 
     /* This relies on having the map projection coordinates be uniform
      * regardless of location.  If not, the center will not be correct. */
@@ -1513,8 +1503,11 @@ geo.map = function (arg) {
    * as the current zoom level to be within that range.
    * @private
    */
-  function calculate_zoom(bounds) {
-    bounds = rotate_bounds(bounds, m_rotation);
+  function calculate_zoom(bounds, rotation) {
+    if (rotation === undefined) {
+      rotation = m_rotation;
+    }
+    bounds = rotate_bounds(bounds, rotation);
     // compare the aspect ratios of the viewport and bounds
     var scl = camera_scaling(bounds), z;
 
@@ -1767,7 +1760,9 @@ geo.map.create = function (spec) {
 
   var map = geo.map(spec);
 
-  if (!map) {
+  /* If the spec is bad, we still end up with an object, but it won't have a
+   * zoom function */
+  if (!map || !map.zoom) {
     console.warn('Could not create map.');
     return null;
   }

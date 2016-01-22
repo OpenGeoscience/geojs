@@ -32,7 +32,6 @@ geo.event = {};
 //
 // geo.event.update = 'geo_update';
 // geo.event.opacityUpdate = 'geo_opacityUpdate';
-// geo.event.layerToggle = 'geo_layerToggle';
 // geo.event.layerSelect = 'geo_layerSelect';
 // geo.event.layerUnselect = 'geo_layerUnselect';
 // geo.event.query = 'geo_query';

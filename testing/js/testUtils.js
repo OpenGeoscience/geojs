@@ -67,6 +67,8 @@ function closeToEqual(o1, o2, precision) {
     if (o1.hasOwnProperty(key)) {
       if (o2[key] === undefined ||
           Math.abs(o1[key] - o2[key]) >= precision) {
+        console.log('not closeToEqual: ' + key + ' ' + o1[key] + ' !~= ' +
+                    o2[key]);
         return false;
       }
     }
