@@ -37,7 +37,7 @@ class osmBase(object):
         self.loadPage()
         self.drag('#map', (50, 100), (100, 200), True)
         self.waitForIdle()
-        self.screenshotTest(testName)
+        self.screenshotTest(testName, revision=1)
 
 
 class FirefoxOSM(osmBase, FirefoxTest):
