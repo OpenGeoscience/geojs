@@ -32,7 +32,6 @@ geo.event = {};
 //
 // geo.event.update = 'geo_update';
 // geo.event.opacityUpdate = 'geo_opacityUpdate';
-// geo.event.layerToggle = 'geo_layerToggle';
 // geo.event.layerSelect = 'geo_layerSelect';
 // geo.event.layerUnselect = 'geo_layerUnselect';
 // geo.event.query = 'geo_query';
@@ -71,8 +70,8 @@ geo.event.zoom = 'geo_zoom';
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Triggered when the map is rotated around the map center (pointing downward
- * so that positive angles are clockwise rotations).
+ * Triggered when the map is rotated around the current map center (pointing
+ * downward so that positive angles are clockwise rotations).
  *
  * @property {number} angle The angle of the rotation in radians
  */

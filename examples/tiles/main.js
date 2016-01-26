@@ -1,6 +1,8 @@
 // This example should be tried with different query strings.
 
 /* Many parameters can be adjusted via url query parameters:
+ *  allowRotation: 'true' to allow map rotation, 'false' to prevent it, or
+ *      allowable rotations in degrees.
  *  attribution: override the layer attribution text.
  *  clampBoundsX: 'true' to clamp movement in the horizontal direction.
  *  clampBoundsY: 'true' to clamp movement in the vertical direction.
@@ -19,6 +21,10 @@
  *  min: minimum zoom level (default is 0).
  *  max: maximum zoom level (default is 16 for maps, or the entire image for
  *      images).
+ *  maxBoundsBottom: maximum bounds bottom value.
+ *  maxBoundsLeft: maximum bounds left value.
+ *  maxBoundsRight: maximum bounds right value.
+ *  maxBoundsTop: maximum bounds top value.
  *  opacity: a css opacity value (typically a float from 0 to 1).
  *  projection: 'parallel' or 'projection' for the camera projection.
  *  renderer: 'vgl' (default), 'd3', 'null', or 'html'.  This picks the
@@ -27,6 +33,7 @@
  *  subdomains: a comma-separated string of subdomains to use in the {s} part
  *      of the url parameter.  If there are no commas in the string, each letter
  *      is used by itself (e.g., 'abc' is the same as 'a,b,c').
+ *  unitsPerPixel: set the units per pixel at zoom level 0.
  *  url: url to use for the map files.  Placeholders are allowed.  Default is
  *      http://otile1.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.png .  Other useful
  *      urls are are: /data/tilefancy.png
@@ -92,6 +99,7 @@ $(function () {
       x: -98.0,
       y: 39.5
     },
+    maxBounds: {},
     zoom: query.zoom !== undefined ? parseFloat(query.zoom) : 3
   };
   // Set the tile layer defaults to use the specified renderer and opacity
@@ -157,6 +165,21 @@ $(function () {
   if (query.min !== undefined) {
     mapParams.min = parseFloat(query.min);
   }
+  if (query.maxBoundsLeft !== undefined) {
+    mapParams.maxBounds.left = parseFloat(query.maxBoundsLeft);
+  }
+  if (query.maxBoundsRight !== undefined) {
+    mapParams.maxBounds.right = parseFloat(query.maxBoundsRight);
+  }
+  if (query.maxBoundsTop !== undefined) {
+    mapParams.maxBounds.top = parseFloat(query.maxBoundsTop);
+  }
+  if (query.maxBoundsBottom !== undefined) {
+    mapParams.maxBounds.bottom = parseFloat(query.maxBoundsBottom);
+  }
+  if (query.allowRotation) {
+    mapParams.allowRotation = get_allow_rotation(query.allowRotation);
+  }
   if (query.attribution !== undefined) {
     layerParams.attribution = query.attribution;
   }
@@ -186,6 +209,9 @@ $(function () {
     // unitsPerPixel is at zoom level 0.  We want each pixel to be 1 at the
     // maximum zoom
     mapParams.unitsPerPixel = Math.pow(2, mapParams.max);
+  }
+  if (query.unitsPerPixel !== undefined) {
+    mapParams.unitsPerPixel = parseFloat(query.unitsPerPixel);
   }
   // Populate boolean flags for the map
   $.each({
@@ -249,6 +275,10 @@ $(function () {
     var processedValue = (ctl.is('[type="checkbox"]') ?
         (value === 'true') : value);
     switch (param) {
+      case 'allowRotation':
+        mapParams.allowRotation = get_allow_rotation(value);
+        map.allowRotation(mapParams.allowRotation);
+        break;
       case 'debug':
         $('#map').toggleClass('debug-label', (
             value === 'true' || value === 'all'))
@@ -325,5 +355,19 @@ $(function () {
     var newurl = window.location.protocol + '//' + window.location.host +
         window.location.pathname + '?' + $.param(query);
     window.history.replaceState(query, '', newurl);
+  }
+
+  /* Return the value to set for the allowRotation parameter.
+   * @param value the value in the query string.
+   * @returns true, false, or a function.
+   */
+  function get_allow_rotation(value) {
+    if (!parseFloat(value)) {
+      return value !== 'false';
+    }
+    return function (rotation) {
+      var factor = 180 / Math.PI / parseFloat(value);
+      return Math.round(rotation * factor) / factor;
+    };
   }
 });

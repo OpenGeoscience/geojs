@@ -23,6 +23,7 @@ describe('mapInteractor', function () {
   };
 
   var zoomFactor = 120;
+  var rotationFactor = 120;
 
   function mockedMap(node) {
 
@@ -31,6 +32,8 @@ describe('mapInteractor', function () {
     var info = {
       pan: 0,
       zoom: 0,
+      rotation: 0,
+      rotationArgs: {},
       panArgs: {},
       zoomArgs: {}
     };
@@ -46,6 +49,14 @@ describe('mapInteractor', function () {
       info.zoomArgs = arg;
     };
     map.zoom.nCalls = 0;
+    map.rotation = function (arg) {
+      if (arg === undefined) {
+        return 0.1;
+      }
+      info.rotation += 1;
+      info.rotationArgs = arg;
+    };
+    map.rotation.nCalls = 0;
     map.pan = function (arg) {
       info.pan += 1;
       info.panArgs = arg;
@@ -53,9 +64,11 @@ describe('mapInteractor', function () {
     map.center = function () {
       return {x: 0, y: 0};
     };
+    map.size = function () {
+      return {width: 100, height: 100};
+    };
     map.displayToGcs = base.displayToGcs;
     map.info = info;
-    map._zoomCallback = function () {};
     map.transition = function () {};
     return map;
   }
@@ -110,6 +123,8 @@ describe('mapInteractor', function () {
       panWheelEnabled: false,
       zoomMoveButton: null,
       zoomWheelEnabled: false,
+      rotateMoveButton: null,
+      rotateWheelEnabled: false,
       throttle: false
     });
 
@@ -189,6 +204,8 @@ describe('mapInteractor', function () {
       panWheelEnabled: false,
       zoomMoveButton: null,
       zoomWheelEnabled: true,
+      rotateMoveButton: null,
+      rotateWheelEnabled: false,
       throttle: false
     });
 
@@ -223,6 +240,8 @@ describe('mapInteractor', function () {
       panWheelEnabled: false,
       zoomMoveButton: 'right',
       zoomWheelEnabled: false,
+      rotateMoveButton: null,
+      rotateWheelEnabled: false,
       throttle: false
     });
 
@@ -262,6 +281,98 @@ describe('mapInteractor', function () {
     // check the zoom event was called
     expect(map.info.zoom).toBe(2);
     expect(map.info.zoomArgs).toBe(z - 15 / zoomFactor);
+  });
+
+  it('Test rotation wheel event propagation', function () {
+    var map = mockedMap('#mapNode1');
+
+    var interactor = geo.mapInteractor({
+      map: map,
+      momentum: {enabled: false},
+      panMoveButton: null,
+      panWheelEnabled: false,
+      zoomMoveButton: null,
+      zoomWheelEnabled: false,
+      rotateMoveButton: null,
+      rotateWheelEnabled: true,
+      rotateWheelModifiers: {ctrl: false},
+      rotateWheelScale: 1,
+      throttle: false
+    });
+
+    // initialize the mouse position
+    interactor.simulateEvent(
+      'mousemove',
+      {
+        map: {x: 20, y: 20}
+      }
+    );
+
+    // trigger a rotation
+    interactor.simulateEvent(
+      'wheel',
+      {
+        wheelDelta: {x: 20, y: 10},
+        wheelMode: 0
+      }
+    );
+
+    // check the rotation event was called
+    expect(map.info.rotation).toBe(1);
+    expect(map.info.rotationArgs).toBe(0.1 + 10 / rotationFactor);
+  });
+
+  it('Test rotation left click event propagation', function () {
+    var map = mockedMap('#mapNode1');
+
+    var interactor = geo.mapInteractor({
+      map: map,
+      panMoveButton: null,
+      panWheelEnabled: false,
+      zoomMoveButton: null,
+      zoomWheelEnabled: false,
+      rotateMoveButton: 'left',
+      rotateMoveModifiers: {'ctrl': false},
+      rotateWheelEnabled: false,
+      throttle: false
+    });
+
+    // initialize the rotation
+    interactor.simulateEvent(
+      'mousedown',
+      {
+        map: {x: 20, y: 20},
+        button: 'left'
+      }
+    );
+
+    // create a rotation event
+    interactor.simulateEvent(
+      'mousemove',
+      {
+        map: {x: 20, y: 10},
+        button: 'left'
+      }
+    );
+
+    // check the rotation event was called
+    expect(map.info.rotation).toBe(1);
+    expect(map.info.rotationArgs).toBeCloseTo(
+        0.1 - Math.atan2(20 - 50, 20 - 50) + Math.atan2(10 - 50, 20 - 50));
+
+    // create a rotation event
+    interactor.simulateEvent(
+      'mousemove',
+      {
+        map: {x: 30, y: 25},
+        button: 'left'
+      }
+    );
+
+    // check the rotation event was called
+    expect(map.info.rotation).toBe(2);
+    expect(map.info.rotationArgs).toBeCloseTo(
+        0.1 - Math.atan2(20 - 50, 20 - 50) + Math.atan2(25 - 50, 30 - 50));
   });
 
   describe('pause state', function () {
@@ -390,6 +501,7 @@ describe('mapInteractor', function () {
         }
       );
       expect(map.info.zoom).toBe(0);
+      expect(map.info.rotation).toBe(0);
     });
   });
 

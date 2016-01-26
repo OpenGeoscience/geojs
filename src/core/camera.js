@@ -7,11 +7,11 @@
    * camera provides a methods for converting between a map's coordinate system
    * to display pixel coordinates.
    *
-   * For the moment, all camera trasforms are assumed to be expressible as
+   * For the moment, all camera transforms are assumed to be expressible as
    * 4x4 matrices.  More general cameras may follow that break this assumption.
    *
    * The interface for the camera is relatively stable for "map-like" views,
-   * i.e. when the camera is pointing in the direction [0, 0, -1], and placed
+   * e.g. when the camera is pointing in the direction [0, 0, -1], and placed
    * above the z=0 plane.  More general view changes and events have not yet
    * been defined.
    *
@@ -27,11 +27,13 @@
    *   * {@link geo.event.camera.viewport} when the viewport changes
    *
    * By convention, protected methods do not update the internal matrix state,
-   * public methods do.  For now, there are two primary methods that are
-   * inteded to be used by external classes to mutate the internal state:
+   * public methods do.  There are a few primary methods that are intended to
+   * be used by external classes to mutate the internal state:
    *
    *   * bounds: Set the visible bounds (for initialization and zooming)
    *   * pan: Translate the camera in x/y by an offset (for panning)
+   *   * viewFromCenterSizeRotation: set the camera view based on a center
+   *        point, boundary size, and rotation angle.
    *
    * @class
    * @extends geo.object
@@ -521,22 +523,21 @@
      * @returns {object} bounds object
      */
     this._getBounds = function () {
-      var pt, bds = {};
+      var ul, ur, ll, lr, bds = {};
 
-
-      // get lower bounds
-      pt = this.displayToWorld({
-        x: 0, y: this._viewport.height
+      // get corners
+      ul = this.displayToWorld({x: 0, y: 0});
+      ur = this.displayToWorld({x: this._viewport.width, y: 0});
+      ll = this.displayToWorld({x: 0, y: this._viewport.height});
+      lr = this.displayToWorld({
+        x: this._viewport.width,
+        y: this._viewport.height
       });
-      bds.left = pt.x;
-      bds.bottom = pt.y;
 
-      // get upper bounds
-      pt = this.displayToWorld({
-        x: this._viewport.width, y: 0
-      });
-      bds.right = pt.x;
-      bds.top = pt.y;
+      bds.left = Math.min(ul.x, ur.x, ll.x, lr.x);
+      bds.bottom = Math.min(ul.y, ur.y, ll.y, lr.y);
+      bds.right = Math.max(ul.x, ur.x, ll.x, lr.x);
+      bds.top = Math.max(ul.y, ur.y, ll.y, lr.y);
 
       return bds;
     };
@@ -558,19 +559,45 @@
      * @return {this} Chainable
      */
     this._setBounds = function (bounds) {
+      var size = {
+        width: bounds.right - bounds.left,
+        height: bounds.top - bounds.bottom
+      };
+      var center = {
+        x: (bounds.left + bounds.right) / 2,
+        y: (bounds.bottom + bounds.top) / 2
+      };
 
+      this._viewFromCenterSizeRotation(center, size, 0);
+      return this;
+    };
+
+    /**
+     * Sets the view matrix so that the given world center is centered, at
+     * least a certain width and height are visible, and a rotation is applied.
+     * The resulting bounds may be larger in width or height than the values if
+     * the viewport is a different aspect ratio.
+     *
+     * @protected
+     * @param {object} center
+     * @param {number} center.x
+     * @param {number} center.y
+     * @param {object} size
+     * @param {number} size.width
+     * @param {number} size.height
+     * @param {number} rotation in clockwise radians.  Optional
+     * @return {this} Chainable
+     */
+    this._viewFromCenterSizeRotation = function (center, size, rotation) {
       var translate = geo.util.vec3AsArray(),
           scale = geo.util.vec3AsArray(),
           c_ar, v_ar, w, h;
 
-      bounds.near = bounds.near || 0;
-      bounds.far = bounds.far || 1;
-
       // reset view to the identity
       this._resetView();
 
-      w = Math.abs(bounds.right - bounds.left);
-      h = Math.abs(bounds.top - bounds.bottom);
+      w = Math.abs(size.width);
+      h = Math.abs(size.height);
       c_ar = w / h;
       v_ar = this._viewport.width / this._viewport.height;
 
@@ -589,12 +616,26 @@
       scale[2] = 1;
       this._scale(scale);
 
+      if (rotation) {
+        this._rotate(rotation);
+      }
+
       // translate to the new center.
-      translate[0] = -(bounds.left + bounds.right) / 2;
-      translate[1] = -(bounds.bottom + bounds.top) / 2;
+      translate[0] = -center.x;
+      translate[1] = -center.y;
       translate[2] = 0;
 
       this._translate(translate);
+
+      return this;
+    };
+
+    /**
+     * Public exposure of the viewFromCenterSizeRotation function.
+     */
+    this.viewFromCenterSizeRotation = function (center, size, rotation) {
+      this._viewFromCenterSizeRotation(center, size, rotation);
+      this._update();
       return this;
     };
 
@@ -624,12 +665,38 @@
      * @param {number} zoom The zoom scale to apply
      */
     this.zoom = function (zoom) {
+      if (zoom === 1) {
+        return;
+      }
       mat4.scale(this._view, this._view, [
           zoom,
           zoom,
           zoom
       ]);
       this._update();
+    };
+
+    /**
+     * Rotate the view matrix by the given amount.
+     *
+     * @param {number} rotation Counter-clockwise rotation angle in radians.
+     * @param {object} center Center of rotation in world space coordinates.
+     * @param {vec3} axis acis of rotation.  Defaults to [0, 0, -1]
+     */
+    this._rotate = function (rotation, center, axis) {
+      if (!rotation) {
+        return;
+      }
+      axis = axis || [0, 0, -1];
+      if (!center) {
+        center = [0, 0, 0];
+      } else if (center.x !== undefined) {
+        center = [center.x || 0, center.y || 0, center.z || 0];
+      }
+      var invcenter = [-center[0], -center[1], -center[2]];
+      mat4.translate(this._view, this._view, center);
+      mat4.rotate(this._view, this._view, rotation, axis);
+      mat4.translate(this._view, this._view, invcenter);
     };
 
     /**

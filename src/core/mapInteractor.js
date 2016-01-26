@@ -53,6 +53,7 @@ geo.mapInteractor = function (args) {
   // copy the options object with defaults
   m_options = $.extend(
     true,
+    {},
     {
       throttle: 30,
       discreteZoom: false,
@@ -60,13 +61,18 @@ geo.mapInteractor = function (args) {
       panMoveModifiers: {},
       zoomMoveButton: 'right',
       zoomMoveModifiers: {},
+      rotateMoveButton: 'left',
+      rotateMoveModifiers: {'ctrl': true},
       panWheelEnabled: false,
       panWheelModifiers: {},
       zoomWheelEnabled: true,
       zoomWheelModifiers: {},
+      rotateWheelEnabled: true,
+      rotateWheelModifiers: {'ctrl': true},
       wheelScaleX: 1,
       wheelScaleY: 1,
       zoomScale: 1,
+      rotateWheelScale: 6 * Math.PI / 180,
       selectionButton: 'left',
       selectionModifiers: {'shift': true},
       momentum: {
@@ -111,6 +117,12 @@ geo.mapInteractor = function (args) {
   //   // modifier keys that must be pressed to initiate a zoom on mousemove
   //   zoomMoveModifiers: { 'ctrl' | 'alt' | 'meta' | 'shift' }
   //
+  //   // button that must be pressed to initiate a rotate on mousedown
+  //   rotateMoveButton: 'right' | 'left' | 'middle'
+  //
+  //   // modifier keys that must be pressed to initiate a rotate on mousemove
+  //   rotateMoveModifiers: { 'ctrl' | 'alt' | 'meta' | 'shift' }
+  //
   //   // enable or disable panning with the mouse wheel
   //   panWheelEnabled: true | false
   //
@@ -123,12 +135,21 @@ geo.mapInteractor = function (args) {
   //   // modifier keys that must be pressed to trigger a zoom on wheel
   //   zoomWheelModifiers: {...}
   //
+  //   // enable or disable rotation with the mouse wheel
+  //   rotateWheelEnabled: true | false
+  //
+  //   // modifier keys that must be pressed to trigger a rotate on wheel
+  //   rotateWheelModifiers: {...}
+  //
   //   // wheel scale factor to change the magnitude of wheel interactions
   //   wheelScaleX: 1
   //   wheelScaleY: 1
   //
   //   // zoom scale factor to change the magnitude of zoom move interactions
   //   zoomScale: 1
+  //
+  //   // scale factor to change the magnitude of wheel rotation interactions
+  //   rotateWheelScale: 1
   //
   //   // button that must be pressed to enable drag selection
   //    selectionButton: 'right' | 'left' | 'middle'
@@ -289,7 +310,7 @@ geo.mapInteractor = function (args) {
   // core browser events.
   //
   // i.e.
-  // {
+  //  {
   //    'action': 'pan',      // an ongoing pan event
   //    'origin': {...},      // mouse object at the start of the action
   //    'delta': {x: *, y: *} // mouse movement since action start
@@ -299,6 +320,13 @@ geo.mapInteractor = function (args) {
   //  {
   //    'action': 'zoom',  // an ongoing zoom event
   //    ...
+  //  }
+  //
+  //  {
+  //    'action': 'rotate',   // an ongoing rotate event
+  //    'origin': {...},      // mouse object at the start of the action
+  //    'delta': {x: *, y: *} // mouse movement since action start
+  //                          // not including the current event
   //  }
   //
   //  {
@@ -354,7 +382,9 @@ geo.mapInteractor = function (args) {
     // Disable dragging images and such
     $node.on('dragstart', function () { return false; });
     if (m_options.panMoveButton === 'right' ||
-        m_options.zoomMoveButton === 'right') {
+        m_options.zoomMoveButton === 'right' ||
+        m_options.rotateMoveButton === 'right' ||
+        m_options.selectionButton === 'right') {
       $node.on('contextmenu.geojs', function () { return false; });
     }
     return m_this;
@@ -596,6 +626,8 @@ geo.mapInteractor = function (args) {
       action = 'pan';
     } else if (eventMatch(m_options.zoomMoveButton, m_options.zoomMoveModifiers)) {
       action = 'zoom';
+    } else if (eventMatch(m_options.rotateMoveButton, m_options.rotateMoveModifiers)) {
+      action = 'rotate';
     } else if (eventMatch(m_options.selectionButton, m_options.selectionModifiers)) {
       action = 'select';
     }
@@ -725,6 +757,16 @@ geo.mapInteractor = function (args) {
       m_this.map().pan({x: dx, y: dy});
     } else if (m_state.action === 'zoom') {
       m_callZoom(-dy * m_options.zoomScale / 120, m_state);
+    } else if (m_state.action === 'rotate') {
+      var cx, cy;
+      if (m_state.origin.rotation === undefined) {
+        cx = m_state.origin.map.x - m_this.map().size().width / 2;
+        cy = m_state.origin.map.y - m_this.map().size().height / 2;
+        m_state.origin.rotation = m_this.map().rotation() - Math.atan2(cy, cx);
+      }
+      cx = m_mouse.map.x - m_this.map().size().width / 2;
+      cy = m_mouse.map.y - m_this.map().size().height / 2;
+      m_this.map().rotation(m_state.origin.rotation + Math.atan2(cy, cx));
     } else if (m_state.action === 'select') {
       // Get the bounds of the current selection
       selectionObj = m_this._getSelection();
@@ -1037,6 +1079,12 @@ geo.mapInteractor = function (args) {
         zoomFactor = -m_queue.scroll.y;
 
         m_callZoom(zoomFactor, m_mouse);
+      } else if (m_options.rotateWheelEnabled &&
+                 eventMatch('wheel', m_options.rotateWheelModifiers)) {
+        m_this.map().rotation(
+            m_this.map().rotation() +
+            m_queue.scroll.y * m_options.rotateWheelScale,
+            m_mouse);
       }
 
       // reset the queue

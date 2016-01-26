@@ -32,6 +32,13 @@ class osmBase(object):
         self.waitForIdle()
         self.screenshotTest(testName)
 
+    def test_osm_rotate(self):
+        testName = 'osmRotate'
+        self.loadPage()
+        self.drag('#map', (50, 100), (100, 200), True)
+        self.waitForIdle()
+        self.screenshotTest(testName, revision=1)
+
 
 class FirefoxOSM(osmBase, FirefoxTest):
     testCase = osmBase.testCase + ('firefox',)

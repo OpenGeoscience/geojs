@@ -27,7 +27,7 @@ else:
 
 from selenium import webdriver
 from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.action_chains import ActionChains, Keys
 from PIL import Image, ImageStat, ImageChops
 
 from midas_handler import MidasHandler
@@ -443,7 +443,7 @@ class BaseTest(TestCase):
             url = self.testBaseURL + url
         return self.driver.get(url)
 
-    def drag(self, element, delta, offset=(0, 0)):
+    def drag(self, element, delta, offset=(0, 0), ctrlDown=False):
         '''
         Drag the element given (by a CSS selector) starting
         at ``offset`` relative to the center of the element by
@@ -454,6 +454,7 @@ class BaseTest(TestCase):
         :type delta: [x, y]
         :param offset:  The offset from the element center to start the drag.
         :type offset: [x, y]
+        :param ctrlDown: if True, hold down control key during the drag.
 
         For example,
 
@@ -464,11 +465,15 @@ class BaseTest(TestCase):
         '''
         el = self.getElement(element)
         action = ActionChains(self.driver)
+        if ctrlDown:
+            action.key_down(Keys.CONTROL)
 
         action.move_to_element_with_offset(el, offset[0], offset[1])
         action.click_and_hold()
         action.move_by_offset(delta[0], delta[1])
         action.release()
+        if ctrlDown:
+            action.key_up(Keys.CONTROL)
         action.perform()
 
     def hover(self, element, offset=(0, 0)):

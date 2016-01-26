@@ -144,6 +144,7 @@ geo.gl.vglRenderer = function (arg) {
     var renderWindow = m_viewer.renderWindow(),
         map = m_this.layer().map(),
         camera = map.camera(),
+        rotation = map.rotation() || 0,
         view = camera.view,
         proj = camera.projectionMatrix;
     if (proj[15]) {
@@ -155,13 +156,20 @@ geo.gl.vglRenderer = function (arg) {
      * we can show z values from 0 to 1. */
     proj = mat4.translate(geo.util.mat4AsArray(), proj,
                           [0, 0, camera.constructor.bounds.far]);
-
+    /* Check if the rotation is a multiple of 90 */
+    var basis = Math.PI / 2,
+        angle = rotation % basis,  // move to range (-pi/2, pi/2)
+        ortho = (Math.min(Math.abs(angle), Math.abs(angle - basis)) < 0.00001);
     renderWindow.renderers().forEach(function (renderer) {
       var cam = renderer.camera();
+      if (geo.util.compareArrays(view, cam.viewMatrix()) &&
+          geo.util.compareArrays(proj, cam.projectionMatrix())) {
+        return;
+      }
       cam.setViewMatrix(view, true);
       cam.setProjectionMatrix(proj);
       if (proj[1] || proj[2] || proj[3] || proj[4] || proj[6] || proj[7] ||
-          proj[8] || proj[9] || proj[11] || proj[15] !== 1 ||
+          proj[8] || proj[9] || proj[11] || proj[15] !== 1 || !ortho ||
           (parseFloat(map.zoom().toFixed(6)) !==
            parseFloat(map.zoom().toFixed(0)))) {
         /* Don't align texels */
@@ -193,6 +201,12 @@ geo.gl.vglRenderer = function (arg) {
 
   // Connect to zoom event
   m_this.layer().geoOn(geo.event.zoom, function (evt) {
+    void(evt);
+    m_this._updateRendererCamera();
+  });
+
+  // Connect to rotation event
+  m_this.layer().geoOn(geo.event.rotate, function (evt) {
     void(evt);
     m_this._updateRendererCamera();
   });

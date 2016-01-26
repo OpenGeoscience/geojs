@@ -10,7 +10,7 @@ $(function () {
   });
 
   // Add an OSM layer
-  var osm = map.createLayer('osm',{
+  var osm = map.createLayer('osm', {
     baseUrl: 'http://otile1.mqcdn.com/tiles/1.0.0/map'
   });
 
@@ -61,6 +61,14 @@ $(function () {
       center: {x: 7.4500, y: 46.9500},
       duration: 2000,
       interp: d3.interpolateZoom
+    });
+  });
+
+  $('#spin-to-budapest').click(function () {
+    map.transition({
+      center: {x: 19.0514, y: 47.4925},
+      rotation: Math.PI * 2,
+      duration: 2000
     });
   });
 });
