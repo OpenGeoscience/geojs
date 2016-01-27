@@ -251,6 +251,28 @@
         0, 0, 1, 0,
         0, 0, 0, 1
       ];
+    },
+
+    /**
+     * Get a buffer for a vgl geometry source.  If a buffer already exists and
+     * is the correct size, return it.  Otherwise, allocate a new buffer; any
+     * data in an old buffer is discarded.
+     *
+     * @param geom: the geometry to reference and modify.
+     * @param srcName: the name of the source.
+     * @param len: the number of elements for the array.
+     * @returns {Float32Array}
+     */
+    getGeomBuffer: function (geom, srcName, len) {
+      var src = geom.sourceByName(srcName), data;
+
+      data = src.data();
+      if (data instanceof Float32Array && data.length === len) {
+        return data;
+      }
+      data = new Float32Array(len);
+      src.setData(data);
+      return data;
     }
   };
 

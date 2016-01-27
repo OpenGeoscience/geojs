@@ -154,6 +154,7 @@
 
     var s_init = this._init,
         s_exit = this._exit,
+        m_lastTileSet = [],
         m_exited;
 
     // copy the options into a private variable
@@ -449,11 +450,14 @@
      * @param {number} maxLevel The zoom level
      * @param {object} bounds The map bounds
      * @param {boolean} sorted Return a sorted list
+     * @param {boolean} onlyIfChanged If the set of tiles have not changed
+     *     (even if their desired order has), return undefined instead of an
+     *     array of tiles.
      * @returns {geo.tile[]} An array of tile objects
      */
-    this._getTiles = function (maxLevel, bounds, sorted) {
+    this._getTiles = function (maxLevel, bounds, sorted, onlyIfChanged) {
       var i, j, tiles = [], index, nTilesLevel,
-          start, end, indexRange, source, center,
+          start, end, indexRange, source, center, changed = false, old,
           level, minLevel = this._options.keepLower ? 0 : maxLevel;
 
       /* Generate a list of the tiles that we want to create.  This is done
@@ -469,28 +473,36 @@
         nTilesLevel = this.tilesAtZoom(level);
 
         // loop over the tile range
-        index = {level: level};
-        index.nx = nTilesLevel.x;
-        index.ny = nTilesLevel.y;
-
         for (i = start.x; i <= end.x; i += 1) {
-          index.x = i;
           for (j = start.y; j <= end.y; j += 1) {
-            index.y = j;
-
-            source = $.extend({}, index);
+            index = {level: level, x: i, y: j};
+            source = {level: level, x: i, y: j};
             if (this._options.wrapX) {
-              source.x = modulo(index.x, index.nx);
+              source.x = modulo(source.x, nTilesLevel.x);
             }
             if (this._options.wrapY) {
-              source.y = modulo(index.y, index.ny);
+              source.y = modulo(source.y, nTilesLevel.y);
             }
-
             if (this.isValid(source)) {
-              tiles.push({index: $.extend({}, index), source: source});
+              if (onlyIfChanged && tiles.length < m_lastTileSet.length) {
+                old = m_lastTileSet[tiles.length];
+                changed = changed || (index.level !== old.level ||
+                    index.x !== old.x || index.y !== old.y);
+              }
+              tiles.push({index: index, source: source});
             }
           }
         }
+      }
+
+      if (onlyIfChanged) {
+        if (!changed && tiles.length === m_lastTileSet.length) {
+          return;
+        }
+        m_lastTileSet.splice(0, m_lastTileSet.length);
+        $.each(tiles, function (idx, tile) {
+          m_lastTileSet.push(tile.index);
+        });
       }
 
       if (sorted) {
@@ -938,16 +950,13 @@
         return;
       }
       var map = this.map(),
-          mapZoom = map.zoom(),
-          zoom = this._options.tileRounding(mapZoom),
           bounds = map.bounds(undefined, null),
-          tiles, view = this._getViewBounds();
-
-      tiles = this._getTiles(
-        zoom, bounds, true
-      );
+          tiles;
 
       if (this._updateSubLayers) {
+        var mapZoom = map.zoom(),
+            zoom = this._options.tileRounding(mapZoom),
+            view = this._getViewBounds();
         // Update the transform for the local layer coordinates
         var offset = this._updateSubLayers(zoom, view) || {x: 0, y: 0};
 
@@ -985,6 +994,14 @@
         });
       }
 
+      tiles = this._getTiles(
+        zoom, bounds, true, true
+      );
+
+      if (tiles === undefined) {
+        return;
+      }
+
       // reset the tile coverage tree
       this._tileTree = {};
 
@@ -1010,7 +1027,8 @@
                  * should have been used. */
                 return;
               }
-              /* Check if a tile is still desired.  Don't draw it if it isn't. */
+              /* Check if a tile is still desired.  Don't draw it if it
+               * isn't. */
               var mapZoom = map.zoom(),
                   zoom = this._options.tileRounding(mapZoom),
                   view = this._getViewBounds();
@@ -1037,7 +1055,6 @@
           }
         }
       }.bind(this));
-
       // purge all old tiles when the new tiles are loaded (successfully or not)
       $.when.apply($, tiles)
         .done(// called on success and failure
@@ -1057,6 +1074,9 @@
      * @param {geo.tile} tile
      */
     this._setTileTree = function (tile) {
+      if (this._options.keepLower) {
+        return;
+      }
       var index = tile.index;
       this._tileTree[index.level] = this._tileTree[index.level] || {};
       this._tileTree[index.level][index.x] = this._tileTree[index.level][index.x] || {};

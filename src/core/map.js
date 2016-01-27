@@ -484,6 +484,7 @@ geo.map = function (arg) {
 
     camera_bounds(m_this.boundsFromZoomAndCenter(
         m_zoom, m_center, m_rotation, null), m_rotation);
+    m_this.modified();
     // trigger a pan event
     m_this.geoTrigger(
       geo.event.pan,
