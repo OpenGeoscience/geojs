@@ -22,7 +22,6 @@ geo.gui.sliderWidget = function (arg) {
       m_yscale,
       m_plus,
       m_minus,
-      m_track,
       m_nub,
       m_width = 20, // Approximate size of the widget in pixels
       m_height = 100,
@@ -35,10 +34,8 @@ geo.gui.sliderWidget = function (arg) {
 
   /* http://icomoon.io */
   /* CC BY 3.0 http://creativecommons.org/licenses/by/3.0/ */
-  /* jshint -W101 */
   m_plusIcon = 'M512 81.92c-237.568 0-430.080 192.614-430.080 430.080 0 237.568 192.563 430.080 430.080 430.080s430.080-192.563 430.080-430.080c0-237.517-192.563-430.080-430.080-430.080zM564.326 564.326v206.182h-104.653v-206.182h-206.234v-104.653h206.182v-206.234h104.704v206.182h206.182v104.704h-206.182z';
   m_minusIcon = 'M512 81.92c-237.568 0-430.080 192.614-430.080 430.080 0 237.568 192.563 430.080 430.080 430.080s430.080-192.563 430.080-430.080c0-237.517-192.563-430.080-430.080-430.080zM770.56 459.674v104.704h-517.12v-104.704h517.12z';
-  /* jshint +W101 */
 
   // Define off-white gray colors for low contrast ui (unselected).
   m_lowContrast = {
@@ -208,7 +205,7 @@ geo.gui.sliderWidget = function (arg) {
     }
 
     // Create the track
-    m_track = svg.append('rect')
+    svg.append('rect')
       .datum({
         fill: 'white',
         stroke: 'black'

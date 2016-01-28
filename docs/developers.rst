@@ -42,11 +42,12 @@ Code quality tests
 ------------------
 
 All javascript source files included in the library for deployment are
-checked against `jshint <http://www.jshint.com/>`_ for uniform styling
+checked against `ESLint <http://eslint.org/>`_ for uniform styling
 and strict for common errors patterns.  The style rules for geojs are
-located in the ``.jshintrc`` file in the root of the repository.  These
+located in the ``.eslintrc`` file in the root of the repository.  These
 tests are preformed automatically for every file added to the build; no
-additional configuration is required.
+additional configuration is required.  You can run a quick check of the
+code style outside of CMake by running ``npm run lint``.
 
 Headless browser testing
 ------------------------

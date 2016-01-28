@@ -9,3 +9,4 @@ built/
 .git/
 bower_components/
 dist/
+.eslintcache

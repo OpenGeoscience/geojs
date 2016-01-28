@@ -195,19 +195,19 @@ geo.gl.vglRenderer = function (arg) {
   // Connect to interactor events
   // Connect to pan event
   m_this.layer().geoOn(geo.event.pan, function (evt) {
-    void(evt);
+    void (evt);
     m_this._updateRendererCamera();
   });
 
   // Connect to zoom event
   m_this.layer().geoOn(geo.event.zoom, function (evt) {
-    void(evt);
+    void (evt);
     m_this._updateRendererCamera();
   });
 
   // Connect to rotation event
   m_this.layer().geoOn(geo.event.rotate, function (evt) {
-    void(evt);
+    void (evt);
     m_this._updateRendererCamera();
   });
 
@@ -249,7 +249,7 @@ geo.registerRenderer('vgl', geo.gl.vglRenderer);
   geo.gl.vglRenderer.supported = function () {
     if (checkedWebGL === undefined) {
       /* This is extracted from what Modernizr uses. */
-      var canvas, ctx, exts;
+      var canvas, ctx, exts; // eslint-disable-line no-unused-vars
       try {
         canvas = document.createElement('canvas');
         ctx = (canvas.getContext('webgl') ||

@@ -10,9 +10,7 @@ describe('renderers', function () {
   function create_simple_renderer() {
     var simpleRenderer = function (arg) {
       if (!(this instanceof simpleRenderer)) {
-        /* jshint newcap: false */
         return new simpleRenderer(arg);
-        /* jshint newcap: true */
       }
       geo.renderer.call(this, arg);
       this._init(arg);

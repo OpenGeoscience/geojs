@@ -29,6 +29,7 @@
     ".git",
     ".gitignore",
     ".travis.yml",
+    ".eslintcache",
     "dist",
     "test",
     "cmake",

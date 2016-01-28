@@ -56,9 +56,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * @copyright 2012, David Leaver
  */
 
-/* jshint -W016 */
-/* jshint -W089 */
-// jscs:disable validateIndentation
 (function () {
     "use strict";
 
@@ -197,4 +194,3 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         }
     };
 })();
-// jscs:enable validateIndentation

@@ -1,5 +1,5 @@
 /* global require, module */
-'use strict'; // jshint ignore: line
+'use strict';
 
 var express = require('express'),
     bodyParser = require('body-parser'),

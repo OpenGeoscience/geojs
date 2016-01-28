@@ -14,3 +14,4 @@
 !/docs/parse.py
 /src/core/version.js
 /dist
+.eslintcache

@@ -5,7 +5,7 @@ geo.d3 = {};
   'use strict';
 
   var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz',
-    strLength = 8;
+      strLength = 8;
 
   //////////////////////////////////////////////////////////////////////////////
   /**

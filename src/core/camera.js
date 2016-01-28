@@ -313,16 +313,16 @@
         // without changing the apparent zoom level
         if (this._viewport.width && this._viewport.height) {
           this._scale([
-              this._viewport.width / viewport.width,
-              this._viewport.height / viewport.height,
-              1
+            this._viewport.width / viewport.width,
+            this._viewport.height / viewport.height,
+            1
           ]);
 
           // translate by half the difference to keep the center the same
           this._translate([
-              (viewport.width - this._viewport.width) / 2,
-              (viewport.height - this._viewport.height) / 2,
-              0
+            (viewport.width - this._viewport.width) / 2,
+            (viewport.height - this._viewport.height) / 2,
+            0
           ]);
         }
 
@@ -422,7 +422,6 @@
       }
       return pt;
     };
-
 
     /**
      * Project a vec4 from world space into viewport space.
@@ -669,9 +668,9 @@
         return;
       }
       mat4.scale(this._view, this._view, [
-          zoom,
-          zoom,
-          zoom
+        zoom,
+        zoom,
+        zoom
       ]);
       this._update();
     };
@@ -830,24 +829,24 @@
   geo.camera.css = function (t) {
     return (
       'matrix3d(' +
-      [
-        t[0].toFixed(20),
-        t[1].toFixed(20),
-        t[2].toFixed(20),
-        t[3].toFixed(20),
-        t[4].toFixed(20),
-        t[5].toFixed(20),
-        t[6].toFixed(20),
-        t[7].toFixed(20),
-        t[8].toFixed(20),
-        t[9].toFixed(20),
-        t[10].toFixed(20),
-        t[11].toFixed(20),
-        t[12].toFixed(20),
-        t[13].toFixed(20),
-        t[14].toFixed(20),
-        t[15].toFixed(20)
-      ].join(',') +
+        [
+          t[0].toFixed(20),
+          t[1].toFixed(20),
+          t[2].toFixed(20),
+          t[3].toFixed(20),
+          t[4].toFixed(20),
+          t[5].toFixed(20),
+          t[6].toFixed(20),
+          t[7].toFixed(20),
+          t[8].toFixed(20),
+          t[9].toFixed(20),
+          t[10].toFixed(20),
+          t[11].toFixed(20),
+          t[12].toFixed(20),
+          t[13].toFixed(20),
+          t[14].toFixed(20),
+          t[15].toFixed(20)
+        ].join(',') +
       ')'
     );
   };

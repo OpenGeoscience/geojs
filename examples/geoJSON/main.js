@@ -58,8 +58,8 @@ $(function () {
         mode: 'application/json',
         matchBrackets: true,
         gutters: ['CodeMirror-lint-markers', 'CodeMirror-foldgutter'],
-        foldGutter: CodeMirror.fold.brace, // jsint ignore: line
-        lint: CodeMirror.lint.json // jshint ignore: line
+        foldGutter: CodeMirror.fold.brace,
+        lint: CodeMirror.lint.json
       };
       text = new CodeMirror(document.body, config);
 

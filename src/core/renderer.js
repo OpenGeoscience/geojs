@@ -8,7 +8,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.renderer = function (arg) {
-  "use strict";
+  'use strict';
 
   if (!(this instanceof geo.renderer)) {
     return new geo.renderer(arg);
@@ -90,7 +90,7 @@ geo.renderer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.api = function () {
-    throw "Should be implemented by derivied classes";
+    throw 'Should be implemented by derivied classes';
   };
 
   ////////////////////////////////////////////////////////////////////////////

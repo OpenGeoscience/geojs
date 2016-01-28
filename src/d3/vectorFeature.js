@@ -27,8 +27,7 @@ geo.d3.vectorFeature = function (arg) {
       s_exit = this._exit,
       s_update = this._update,
       m_buildTime = geo.timestamp(),
-      m_style = {},
-      m_sticky;
+      m_style = {};
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -85,7 +84,6 @@ geo.d3.vectorFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
     s_init.call(m_this, arg);
-    m_sticky = m_this.layer().sticky();
     return m_this;
   };
 

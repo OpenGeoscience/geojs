@@ -20,7 +20,6 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 
-/* jshint ignore: start */
 (function () {
     'use strict';
 
@@ -401,4 +400,3 @@
     geo.util.Box = Box;
     geo.util.vect = vect;
 }());
-/* jshint ignore: end */

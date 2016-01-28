@@ -8,7 +8,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.feature = function (arg) {
-  "use strict";
+  'use strict';
   if (!(this instanceof geo.feature)) {
     return new geo.feature(arg);
   }
@@ -273,7 +273,7 @@ geo.feature = function (arg) {
   this.style = function (arg1, arg2) {
     if (arg1 === undefined) {
       return m_style;
-    } else if (typeof arg1 === "string" && arg2 === undefined) {
+    } else if (typeof arg1 === 'string' && arg2 === undefined) {
       return m_style[arg1];
     } else if (arg2 === undefined) {
       m_style = $.extend({}, m_style, arg1);
@@ -475,9 +475,9 @@ geo.feature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.data = function (data) {
     if (data === undefined) {
-      return m_this.style("data") || [];
+      return m_this.style('data') || [];
     } else {
-      m_this.style("data", data);
+      m_this.style('data', data);
       m_this.dataTime().modified();
       m_this.modified();
       return m_this;
@@ -503,10 +503,10 @@ geo.feature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
     if (!m_layer) {
-      throw "Feature requires a valid layer";
+      throw 'Feature requires a valid layer';
     }
     m_style = $.extend({},
-                {"opacity": 1.0}, arg.style === undefined ? {} :
+                {'opacity': 1.0}, arg.style === undefined ? {} :
                 arg.style);
     m_this._bindMouseHandlers();
   };
@@ -579,17 +579,17 @@ geo.feature.eventID = 0;
  * @returns {geo.feature|null}
  */
 geo.feature.create = function (layer, spec) {
-  "use strict";
+  'use strict';
 
   var type = spec.type;
 
   // Check arguments
   if (!(layer instanceof geo.layer)) {
-    console.warn("Invalid layer");
+    console.warn('Invalid layer');
     return null;
   }
-  if (typeof spec !== "object") {
-    console.warn("Invalid spec");
+  if (typeof spec !== 'object') {
+    console.warn('Invalid spec');
     return null;
   }
   var feature = layer.createFeature(type);

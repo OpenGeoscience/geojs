@@ -38,68 +38,68 @@ geo.gl.contourFeature = function (arg) {
 
   function createVertexShader() {
     var vertexShaderSource = [
-      '#ifdef GL_ES',
-      '  precision highp float;',
-      '#endif',
-      'attribute vec3 pos;',
-      'attribute float value;',
-      'attribute float opacity;',
-      'uniform mat4 modelViewMatrix;',
-      'uniform mat4 projectionMatrix;',
-      'varying float valueVar;',
-      'varying float opacityVar;',
+          '#ifdef GL_ES',
+          '  precision highp float;',
+          '#endif',
+          'attribute vec3 pos;',
+          'attribute float value;',
+          'attribute float opacity;',
+          'uniform mat4 modelViewMatrix;',
+          'uniform mat4 projectionMatrix;',
+          'varying float valueVar;',
+          'varying float opacityVar;',
 
-      'void main(void)',
-      '{',
+          'void main(void)',
+          '{',
       /* Don't use z values; something is rotten in one of our matrices */
-      '  vec4 scrPos = projectionMatrix * modelViewMatrix * vec4(pos.xy, 0, 1);',
-      '  if (scrPos.w != 0.0) {',
-      '    scrPos = scrPos / scrPos.w;',
-      '  }',
-      '  valueVar = value;',
-      '  opacityVar = opacity;',
-      '  gl_Position = scrPos;',
-      '}'
-    ].join('\n'),
-    shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
+          '  vec4 scrPos = projectionMatrix * modelViewMatrix * vec4(pos.xy, 0, 1);',
+          '  if (scrPos.w != 0.0) {',
+          '    scrPos = scrPos / scrPos.w;',
+          '  }',
+          '  valueVar = value;',
+          '  opacityVar = opacity;',
+          '  gl_Position = scrPos;',
+          '}'
+        ].join('\n'),
+        shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
     shader.setShaderSource(vertexShaderSource);
     return shader;
   }
 
   function createFragmentShader() {
     var fragmentShaderSource = [
-      '#ifdef GL_ES',
-      '  precision highp float;',
-      '#endif',
-      'uniform vec4 minColor;',
-      'uniform vec4 maxColor;',
-      'uniform float steps;',
-      'uniform bool stepped;',
-      'uniform sampler2D sampler2d;',
-      'varying float valueVar;',
-      'varying float opacityVar;',
-      'void main () {',
-      '  vec4 clr;',
-      '  if (valueVar < 0.0) {',
-      '    clr = minColor;',
-      '  } else if (valueVar > steps) {',
-      '    clr = maxColor;',
-      '  } else {',
-      '    float step;',
-      '    if (stepped) {',
-      '      step = floor(valueVar) + 0.5;',
-      '      if (step > steps) {',
-      '        step = steps - 0.5;',
-      '      }',
-      '    } else {',
-      '      step = valueVar;',
-      '    }',
-      '    clr = texture2D(sampler2d, vec2(step / steps, 0.0));',
-      '  }',
-      '  gl_FragColor = vec4(clr.rgb, clr.a * opacityVar);',
-      '}'
-    ].join('\n'),
-    shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
+          '#ifdef GL_ES',
+          '  precision highp float;',
+          '#endif',
+          'uniform vec4 minColor;',
+          'uniform vec4 maxColor;',
+          'uniform float steps;',
+          'uniform bool stepped;',
+          'uniform sampler2D sampler2d;',
+          'varying float valueVar;',
+          'varying float opacityVar;',
+          'void main () {',
+          '  vec4 clr;',
+          '  if (valueVar < 0.0) {',
+          '    clr = minColor;',
+          '  } else if (valueVar > steps) {',
+          '    clr = maxColor;',
+          '  } else {',
+          '    float step;',
+          '    if (stepped) {',
+          '      step = floor(valueVar) + 0.5;',
+          '      if (step > steps) {',
+          '        step = steps - 0.5;',
+          '      }',
+          '    } else {',
+          '      step = valueVar;',
+          '    }',
+          '    clr = texture2D(sampler2d, vec2(step / steps, 0.0));',
+          '  }',
+          '  gl_FragColor = vec4(clr.rgb, clr.a * opacityVar);',
+          '}'
+        ].join('\n'),
+        shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
     shader.setShaderSource(fragmentShaderSource);
     return shader;
   }
@@ -131,17 +131,17 @@ geo.gl.contourFeature = function (arg) {
     m_texture.setColorTable(colorTable);
     contour.pos = geo.transform.transformCoordinates(
         m_this.gcs(), m_this.layer().map().gcs(), contour.pos, 3);
-    posBuf     = getBuffer(geom, 'pos',     numPts * 3);
+    posBuf = getBuffer(geom, 'pos', numPts * 3);
     opacityBuf = getBuffer(geom, 'opacity', numPts);
-    valueBuf   = getBuffer(geom, 'value',   numPts);
+    valueBuf = getBuffer(geom, 'value', numPts);
     for (i = i3 = 0; i < numPts; i += 1, i3 += 3) {
       j = contour.elements[i];
       j3 = j * 3;
-      posBuf[i3]     = contour.pos[j3];
+      posBuf[i3] = contour.pos[j3];
       posBuf[i3 + 1] = contour.pos[j3 + 1];
       posBuf[i3 + 2] = contour.pos[j3 + 2];
-      opacityBuf[i]  = contour.opacity[j];
-      valueBuf[i]    = contour.value[j];
+      opacityBuf[i] = contour.opacity[j];
+      valueBuf[i] = contour.value[j];
     }
     indicesBuf = geom.primitive(0).indices();
     if (!(indicesBuf instanceof Uint16Array) || indicesBuf.length !== numPts) {
