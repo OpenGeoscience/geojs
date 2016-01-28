@@ -52,11 +52,11 @@
 camera provides a methods for converting between a map's coordinate system
 to display pixel coordinates.
 
-For the moment, all camera trasforms are assumed to be expressible as
+For the moment, all camera transforms are assumed to be expressible as
 4x4 matrices.  More general cameras may follow that break this assumption.
 
 The interface for the camera is relatively stable for "map-like" views,
-i.e. when the camera is pointing in the direction [0, 0, -1], and placed
+e.g. when the camera is pointing in the direction [0, 0, -1], and placed
 above the z=0 plane.  More general view changes and events have not yet
 been defined.
 
@@ -72,11 +72,13 @@ The camera emits the following events when the view changes:
   * <a href="geo.event.camera.html#.viewport">geo.event.camera.viewport</a> when the viewport changes
 
 By convention, protected methods do not update the internal matrix state,
-public methods do.  For now, there are two primary methods that are
-inteded to be used by external classes to mutate the internal state:
+public methods do.  There are a few primary methods that are intended to
+be used by external classes to mutate the internal state:
 
   * bounds: Set the visible bounds (for initialization and zooming)
   * pan: Translate the camera in x/y by an offset (for panning)
+  * viewFromCenterSizeRotation: set the camera view based on a center
+       point, boundary size, and rotation angle.
 </div>
 
 
@@ -325,7 +327,7 @@ inteded to be used by external classes to mutate the internal state:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line46">line 46</a>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line48">line 48</a>
     </li></ul></dd>
     
 
@@ -442,7 +444,7 @@ inteded to be used by external classes to mutate the internal state:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line749">line 749</a>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line816">line 816</a>
     </li></ul></dd>
     
 
@@ -504,7 +506,7 @@ inteded to be used by external classes to mutate the internal state:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line741">line 741</a>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line808">line 808</a>
     </li></ul></dd>
     
 
@@ -566,7 +568,7 @@ inteded to be used by external classes to mutate the internal state:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line87">line 87</a>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line89">line 89</a>
     </li></ul></dd>
     
 
@@ -628,7 +630,7 @@ inteded to be used by external classes to mutate the internal state:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line94">line 94</a>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line96">line 96</a>
     </li></ul></dd>
     
 
@@ -697,7 +699,7 @@ inteded to be used by external classes to mutate the internal state:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line81">line 81</a>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line83">line 83</a>
     </li></ul></dd>
     
 
@@ -759,7 +761,7 @@ inteded to be used by external classes to mutate the internal state:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line63">line 63</a>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line65">line 65</a>
     </li></ul></dd>
     
 
@@ -821,7 +823,7 @@ inteded to be used by external classes to mutate the internal state:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line69">line 69</a>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line71">line 71</a>
     </li></ul></dd>
     
 
@@ -883,7 +885,7 @@ inteded to be used by external classes to mutate the internal state:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line75">line 75</a>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line77">line 77</a>
     </li></ul></dd>
     
 
@@ -945,7 +947,7 @@ inteded to be used by external classes to mutate the internal state:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line57">line 57</a>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line59">line 59</a>
     </li></ul></dd>
     
 
@@ -1082,7 +1084,7 @@ inteded to be used by external classes to mutate the internal state:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line109">line 109</a>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line111">line 111</a>
     </li></ul></dd>
     
 
@@ -1144,7 +1146,7 @@ inteded to be used by external classes to mutate the internal state:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line101">line 101</a>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line103">line 103</a>
     </li></ul></dd>
     
 
@@ -1364,7 +1366,7 @@ applies the css transform:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line804">line 804</a>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line871">line 871</a>
     </li></ul></dd>
     
 
@@ -1540,7 +1542,7 @@ applies the css transform:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line828">line 828</a>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line895">line 895</a>
     </li></ul></dd>
     
 
@@ -1712,7 +1714,7 @@ applies the css transform:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line840">line 840</a>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line907">line 907</a>
     </li></ul></dd>
     
 
@@ -1865,7 +1867,7 @@ applies the css transform:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line763">line 763</a>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line830">line 830</a>
     </li></ul></dd>
     
 
@@ -2018,7 +2020,7 @@ applies the css transform:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line382">line 382</a>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line384">line 384</a>
     </li></ul></dd>
     
 
@@ -2122,7 +2124,7 @@ applies the css transform:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line115">line 115</a>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line117">line 117</a>
     </li></ul></dd>
     
 
@@ -2293,7 +2295,7 @@ so the result is cached for public facing methods.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line523">line 523</a>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line525">line 525</a>
     </li></ul></dd>
     
 
@@ -2397,7 +2399,7 @@ so the result is cached for public facing methods.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line341">line 341</a>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line343">line 343</a>
     </li></ul></dd>
     
 
@@ -2442,6 +2444,183 @@ so the result is cached for public facing methods.
 </dl>
 
     
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="_rotate"><span class="type-signature"></span>_rotate<span class="signature">(rotation, center, axis)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Rotate the view matrix by the given amount.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>rotation</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Counter-clockwise rotation angle in radians.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>center</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Center of rotation in world space coordinates.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>axis</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">vec3</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">acis of rotation.  Defaults to [0, 0, -1]</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line686">line 686</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2553,7 +2732,7 @@ so the result is cached for public facing methods.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line362">line 362</a>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line364">line 364</a>
     </li></ul></dd>
     
 
@@ -2927,7 +3106,7 @@ the requested bound, but should be centered in the frame.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line560">line 560</a>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line561">line 561</a>
     </li></ul></dd>
     
 
@@ -3083,7 +3262,7 @@ the requested bound, but should be centered in the frame.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line352">line 352</a>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line354">line 354</a>
     </li></ul></dd>
     
 
@@ -3188,7 +3367,7 @@ parameters.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line147">line 147</a>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line149">line 149</a>
     </li></ul></dd>
     
 
@@ -3211,6 +3390,352 @@ parameters.
 
 
 
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="_viewFromCenterSizeRotation"><span class="type-signature">(protected) </span>_viewFromCenterSizeRotation<span class="signature">(center, size, rotation)</span><span class="type-signature"> &rarr; {this}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Sets the view matrix so that the given world center is centered, at
+least a certain width and height are visible, and a rotation is applied.
+The resulting bounds may be larger in width or height than the values if
+the viewport is a different aspect ratio.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>center</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>x</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>y</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>size</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>width</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>height</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>rotation</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">in clockwise radians.  Optional</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line591">line 591</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    Chainable
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">this</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 
@@ -3319,7 +3844,7 @@ parameters.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line372">line 372</a>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line374">line 374</a>
     </li></ul></dd>
     
 
@@ -3609,7 +4134,7 @@ parameters.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line391">line 391</a>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line393">line 393</a>
     </li></ul></dd>
     
 
@@ -3767,7 +4292,7 @@ elements.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line651">line 651</a>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line718">line 718</a>
     </li></ul></dd>
     
 
@@ -3871,7 +4396,7 @@ elements.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line701">line 701</a>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line768">line 768</a>
     </li></ul></dd>
     
 
@@ -4074,7 +4599,7 @@ elements.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line505">line 505</a>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line507">line 507</a>
     </li></ul></dd>
     
 
@@ -4227,7 +4752,7 @@ elements.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line464">line 464</a>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line466">line 466</a>
     </li></ul></dd>
     
 
@@ -5184,7 +5709,7 @@ elements.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line609">line 609</a>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line650">line 650</a>
     </li></ul></dd>
     
 
@@ -5338,7 +5863,7 @@ elements.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line673">line 673</a>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line740">line 740</a>
     </li></ul></dd>
     
 
@@ -5438,7 +5963,7 @@ elements.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line694">line 694</a>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line761">line 761</a>
     </li></ul></dd>
     
 
@@ -5569,7 +6094,7 @@ elements.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line410">line 410</a>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line412">line 412</a>
     </li></ul></dd>
     
 
@@ -5673,7 +6198,89 @@ elements.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line717">line 717</a>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line784">line 784</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="viewFromCenterSizeRotation"><span class="type-signature"></span>viewFromCenterSizeRotation<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Public exposure of the viewFromCenterSizeRotation function.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line636">line 636</a>
     </li></ul></dd>
     
 
@@ -5876,7 +6483,7 @@ elements.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line488">line 488</a>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line490">line 490</a>
     </li></ul></dd>
     
 
@@ -6029,7 +6636,7 @@ elements.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line437">line 437</a>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line439">line 439</a>
     </li></ul></dd>
     
 
@@ -6182,7 +6789,7 @@ elements.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line626">line 626</a>
+        <a href="core_camera.js.html">core/camera.js</a>, <a href="core_camera.js.html#line667">line 667</a>
     </li></ul></dd>
     
 
@@ -6230,7 +6837,7 @@ elements.
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Thu Jan 07 2016 16:46:08 GMT-0500 (EST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Thu Jan 28 2016 16:54:27 GMT-0500 (EST)
 </footer>
 
 <script> prettyPrint(); </script>

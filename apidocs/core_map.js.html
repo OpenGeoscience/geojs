@@ -61,6 +61,7 @@
  * @param {object?} center Map center
  * @param {number} [center.x=0]
  * @param {number} [center.y=0]
+ * @param {number} [rotation=0] Clockwise rotation in radians
  * @param {number?} width The map width (default node width)
  * @param {number?} height The map height (default node height)
  *
@@ -70,6 +71,10 @@
  * @param {number} [max=16]  Maximum zoom level
  * @param {boolean} [discreteZoom=false]  True to only allow integer zoom
  *   levels.  False for any zoom level.
+ * @param {boolean} [allowRotation=true]  False prevents rotation, true allows
+ *   any rotation.  If a function, the function is called with a rotation
+ *   (angle in radians) and returns a valid rotation (this can be used to
+ *   constrain the rotation to a range or specific values).
  *
  * *** Advanced parameters ***
  * @param {geo.camera?} camera The camera to control the view
@@ -92,6 +97,12 @@ geo.map = function (arg) {
     return new geo.map(arg);
   }
   arg = arg || {};
+
+  if (arg.node === undefined || arg.node === null) {
+    console.warn('map creation requires a node');
+    return this;
+  }
+
   geo.sceneObject.call(this, arg);
 
   ////////////////////////////////////////////////////////////////////////////
@@ -113,6 +124,7 @@ geo.map = function (arg) {
       m_ingcs = arg.ingcs === undefined ? 'EPSG:4326' : arg.ingcs,
       m_center = {x: 0, y: 0},
       m_zoom = arg.zoom === undefined ? 4 : arg.zoom,
+      m_rotation = 0,
       m_fileReader = null,
       m_interactor = null,
       m_validZoomRange = {min: 0, max: 16, origMin: 0},
@@ -120,6 +132,9 @@ geo.map = function (arg) {
       m_queuedTransition = null,
       m_clock = null,
       m_discreteZoom = arg.discreteZoom ? true : false,
+      m_allowRotation = (typeof arg.allowRotation === 'function' ?
+                         arg.allowRotation : (arg.allowRotation === undefined ?
+                         true : !!arg.allowRotation)),
       m_maxBounds = arg.maxBounds || {},
       m_camera = arg.camera || geo.camera(),
       m_unitsPerPixel,
@@ -127,7 +142,7 @@ geo.map = function (arg) {
       m_clampBoundsY,
       m_clampZoom,
       m_origin,
-      m_scale = {x: 1, y: 1, z: 1}; // constant for the moment
+      m_scale = {x: 1, y: 1, z: 1}; // constant and ignored for the moment
 
   /* Compute the maximum bounds on our map projection.  By default, x ranges
    * from [-180, 180] in the interface projection, and y matches the x range in
@@ -240,6 +255,28 @@ geo.map = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Get/set the allowRotation setting.  If changed, adjust the map as needed.
+   *
+   * @param {boolean|function} allowRotation the new allowRotation value.
+   * @returns {boolean|function|this}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.allowRotation = function (allowRotation) {
+    if (allowRotation === undefined) {
+      return m_allowRotation;
+    }
+    if (typeof allowRotation !== 'function') {
+      allowRotation = !!allowRotation;
+    }
+    if (allowRotation !== m_allowRotation) {
+      m_allowRotation = allowRotation;
+      m_this.rotation(m_rotation);
+    }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Get the map's world coordinate origin in gcs coordinates
    *
    * @returns {object}
@@ -335,10 +372,10 @@ geo.map = function (arg) {
 
     m_zoom = val;
 
-    bounds = m_this.boundsFromZoomAndCenter(val, m_center, null);
+    bounds = m_this.boundsFromZoomAndCenter(val, m_center, m_rotation, null);
     m_this.modified();
 
-    camera_bounds(bounds);
+    camera_bounds(bounds, m_rotation);
     evt = {
       geo: {},
       zoomLevel: m_zoom,
@@ -372,16 +409,21 @@ geo.map = function (arg) {
 
     unit = m_this.unitsPerPixel(m_zoom);
 
+    var sinr = Math.sin(m_rotation), cosr = Math.cos(m_rotation);
     m_camera.pan({
-      x: delta.x * unit,
-      y: -delta.y * unit
+      x: (delta.x * cosr - (-delta.y) * sinr) * unit,
+      y: (delta.x * sinr + (-delta.y) * cosr) * unit
     });
     /* If m_clampBounds* is true, clamp the pan */
-    var bounds = fix_bounds(m_camera.bounds);
+    var bounds = fix_bounds(m_camera.bounds, m_rotation);
     if (bounds !== m_camera.bounds) {
       var panPos = m_this.gcsToDisplay({
             x: m_camera.bounds.left, y: m_camera.bounds.top}, null);
-      camera_bounds(bounds);
+      bounds = m_this.boundsFromZoomAndCenter(m_zoom, {
+        x: (bounds.left + bounds.right) / 2,
+        y: (bounds.top + bounds.bottom) / 2
+      }, m_rotation, null);
+      camera_bounds(bounds, m_rotation);
       var clampPos = m_this.gcsToDisplay({
             x: m_camera.bounds.left, y: m_camera.bounds.top}, null);
       evt.screenDelta.x += clampPos.x - panPos.x;
@@ -396,6 +438,53 @@ geo.map = function (arg) {
     m_this.geoTrigger(geo.event.pan, evt);
 
     m_this.modified();
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/set the map rotation.  The rotation is performed around the current
+   * view center.
+   *
+   * @param {Object} rotation angle in radians (positive is clockwise)
+   * @param {Object} origin is specified, rotate about this origin
+   * @param {boolean} ignoreRotationFunc if true, don't constrain the rotation.
+   * @returns {geo.map}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.rotation = function (rotation, origin, ignoreRotationFunc) {
+    if (rotation === undefined) {
+      return m_rotation;
+    }
+    rotation = fix_rotation(rotation, ignoreRotationFunc);
+    if (rotation === m_rotation) {
+      return m_this;
+    }
+    m_rotation = rotation;
+
+    var bounds = m_this.boundsFromZoomAndCenter(
+        m_zoom, m_center, m_rotation, null);
+    m_this.modified();
+
+    camera_bounds(bounds, m_rotation);
+
+    var evt = {
+      geo: {},
+      rotation: m_rotation,
+      screenPosition: origin ? origin.map : undefined
+    };
+
+    m_this.geoTrigger(geo.event.rotate, evt);
+
+    if (origin &amp;&amp; origin.geo &amp;&amp; origin.map) {
+      var shifted = m_this.gcsToDisplay(origin.geo);
+      m_this.pan({x: origin.map.x - shifted.x, y: origin.map.y - shifted.y});
+    } else {
+      m_this.pan({x: 0, y: 0});
+    }
+    /* Changing the rotation can change our minimum zoom */
+    reset_minimum_zoom();
+    m_this.zoom(m_zoom);
     return m_this;
   };
 
@@ -422,7 +511,8 @@ geo.map = function (arg) {
     // get the screen coordinates of the new center
     m_center = $.extend({}, m_this.gcsToWorld(coordinates, gcs));
 
-    camera_bounds(m_this.boundsFromZoomAndCenter(m_zoom, m_center, null));
+    camera_bounds(m_this.boundsFromZoomAndCenter(
+        m_zoom, m_center, m_rotation, null), m_rotation);
     // trigger a pan event
     m_this.geoTrigger(
       geo.event.pan,
@@ -475,7 +565,6 @@ geo.map = function (arg) {
 
     if (layer !== null &amp;&amp; layer !== undefined) {
       layer._exit();
-
       m_this.removeChild(layer);
 
       m_this.modified();
@@ -491,28 +580,6 @@ geo.map = function (arg) {
     /// we may provide extension of this method to support deletion of
     /// layer using id or some sort.
     return layer;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Toggle visibility of a layer
-   *
-   *  @param {geo.layer} layer
-   *  @returns {Boolean}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.toggle = function (layer) {
-    if (layer !== null &amp;&amp; layer !== undefined) {
-      layer.visible(!layer.visible());
-      m_this.modified();
-
-      m_this.geoTrigger(geo.event.layerToggle, {
-        type: geo.event.layerToggle,
-        target: m_this,
-        layer: layer
-      });
-    }
-    return m_this;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -534,6 +601,29 @@ geo.map = function (arg) {
     }
     m_this.resize(0, 0, arg.width, arg.height);
     return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get the rotated size of the map.  This is the width and height of the
+   * non-rotated area necessary to enclose the rotated area in pixels.
+   *
+   * @returns {Object} An object containing width and height as keys
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.rotatedSize = function () {
+    if (!this.rotation()) {
+      return {
+        width: m_width,
+        height: m_height
+      };
+    }
+    var bds = rotate_bounds_center(
+        {x: 0, y: 0}, {width: m_width, height: m_height}, this.rotation());
+    return {
+      width: Math.abs(bds.right - bds.left),
+      height: Math.abs(bds.top - bds.bottom)
+    };
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -892,13 +982,18 @@ geo.map = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Start an animated zoom/pan.
+   * Start an animated zoom/pan/rotate.  If a second transition is requested
+   * while a transition is already in progress, a new transition is created
+   * that is functionally from whereever the map has moved to (possibly partway
+   * through the first transition) going to the end point of the new
+   * transition.
    *
    * Options:
    * &lt;pre>
    *   opts = {
    *     center: { x: ... , y: ... } // the new center
    *     zoom: ... // the new zoom level
+   *     rotation: ... // the new rotation angle
    *     duration: ... // the duration (in ms) of the transition
    *     ease: ... // an easing function [0, 1] -> [0, 1]
    *   }
@@ -930,11 +1025,11 @@ geo.map = function (arg) {
     }
     function defaultInterp(p0, p1) {
       return function (t) {
-        return [
-          interp1(p0[0], p1[0], t),
-          interp1(p0[1], p1[1], t),
-          interp1(p0[2], p1[2], t)
-        ];
+        var result = [];
+        $.each(p0, function (idx) {
+          result.push(interp1(p0[idx], p1[idx], t));
+        });
+        return result;
       };
     }
 
@@ -951,6 +1046,7 @@ geo.map = function (arg) {
     var defaultOpts = {
       center: m_this.center(undefined, null),
       zoom: m_this.zoom(),
+      rotation: m_this.rotation(),
       duration: 1000,
       ease: function (t) {
         return t;
@@ -962,53 +1058,60 @@ geo.map = function (arg) {
 
     if (opts.center) {
       gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
+      opts = $.extend(true, {}, opts);
       opts.center = geo.util.normalizeCoordinates(opts.center);
       if (gcs !== m_gcs) {
         opts.center = geo.transform.transformCoordinates(gcs, m_gcs, [
             opts.center])[0];
       }
     }
-    $.extend(defaultOpts, opts);
+    opts = $.extend(true, {}, defaultOpts, opts);
 
     m_transition = {
       start: {
         center: m_this.center(undefined, null),
-        zoom: m_this.zoom()
+        zoom: m_this.zoom(),
+        rotation: m_this.rotation()
       },
       end: {
-        center: defaultOpts.center,
-        zoom: fix_zoom(defaultOpts.zoom)
+        center: opts.center,
+        zoom: fix_zoom(opts.zoom),
+        rotation: fix_rotation(opts.rotation, undefined, true)
       },
-      ease: defaultOpts.ease,
-      zCoord: defaultOpts.zCoord,
-      done: defaultOpts.done,
-      duration: defaultOpts.duration
+      ease: opts.ease,
+      zCoord: opts.zCoord,
+      done: opts.done,
+      duration: opts.duration
     };
 
-    if (defaultOpts.zCoord) {
-      m_transition.interp = defaultOpts.interp(
+    if (opts.zCoord) {
+      m_transition.interp = opts.interp(
         [
           m_transition.start.center.x,
           m_transition.start.center.y,
-          zoom2z(m_transition.start.zoom)
+          zoom2z(m_transition.start.zoom),
+          m_transition.start.rotation
         ],
         [
           m_transition.end.center.x,
           m_transition.end.center.y,
-          zoom2z(m_transition.end.zoom)
+          zoom2z(m_transition.end.zoom),
+          m_transition.end.rotation
         ]
       );
     } else {
-      m_transition.interp = defaultOpts.interp(
+      m_transition.interp = opts.interp(
         [
           m_transition.start.center.x,
           m_transition.start.center.y,
-          m_transition.start.zoom
+          m_transition.start.zoom,
+          m_transition.start.rotation
         ],
         [
           m_transition.end.center.x,
           m_transition.end.center.y,
-          m_transition.end.zoom
+          m_transition.end.zoom,
+          m_transition.end.rotation
         ]
       );
     }
@@ -1019,18 +1122,19 @@ geo.map = function (arg) {
 
       if (!m_transition.start.time) {
         m_transition.start.time = time;
-        m_transition.end.time = time + defaultOpts.duration;
+        m_transition.end.time = time + opts.duration;
       }
       m_transition.time = time - m_transition.start.time;
       if (time >= m_transition.end.time || next) {
         if (!next) {
           m_this.center(m_transition.end.center, null);
           m_this.zoom(m_transition.end.zoom);
+          m_this.rotation(fix_rotation(m_transition.end.rotation));
         }
 
         m_transition = null;
 
-        m_this.geoTrigger(geo.event.transitionend, defaultOpts);
+        m_this.geoTrigger(geo.event.transitionend, opts);
 
         if (done) {
           done();
@@ -1045,7 +1149,7 @@ geo.map = function (arg) {
       }
 
       var z = m_transition.ease(
-        (time - m_transition.start.time) / defaultOpts.duration
+        (time - m_transition.start.time) / opts.duration
       );
 
       var p = m_transition.interp(z);
@@ -1061,18 +1165,20 @@ geo.map = function (arg) {
         m_center = m_this.gcsToWorld({x: p[0], y: p[1]}, null);
         m_this.zoom(p[2], undefined, true);
       }
+      m_this.rotation(p[3], undefined, true);
 
       window.requestAnimationFrame(anim);
     }
 
-    m_this.geoTrigger(geo.event.transitionstart, defaultOpts);
+    m_this.geoTrigger(geo.event.transitionstart, opts);
 
-    if (defaultOpts.cancelNavigation) {
-      m_this.geoTrigger(geo.event.transitionend, defaultOpts);
+    if (geo.event.cancelNavigation) {
+      m_transition = null;
+      m_this.geoTrigger(geo.event.transitionend, opts);
       return m_this;
-    } else if (defaultOpts.cancelAnimation) {
+    } else if (geo.event.cancelAnimation) {
       // run the navigation synchronously
-      defaultOpts.duration = 0;
+      opts.duration = 0;
       anim(0);
     } else {
       window.requestAnimationFrame(anim);
@@ -1083,10 +1189,11 @@ geo.map = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/set the locations of the current map corners as latitudes/longitudes.
-   * When provided the argument should be an object containing the keys
-   * lowerLeft and upperRight declaring the desired new map bounds.  The
-   * new bounds will contain at least the min/max lat/lngs provided.  In any
-   * case, the actual new bounds will be returned by this function.
+   * When provided the argument should be an object containing the keys left,
+   * top, right, bottom declaring the desired new map bounds.  The new bounds
+   * will contain at least the min/max lat/lngs provided modified by clamp
+   * settings.  In any case, the actual new bounds will be returned by this
+   * function.
    *
    * @param {geo.geoBounds} [bds] The requested map bounds
    * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
@@ -1111,16 +1218,16 @@ geo.map = function (arg) {
           bottom: trans[1].y
         };
       }
-      bds = fix_bounds(bds);
-      nav = m_this.zoomAndCenterFromBounds(bds, null);
+      bds = fix_bounds(bds, m_rotation);
+      nav = m_this.zoomAndCenterFromBounds(bds, m_rotation, null);
 
-      // This might have concequences in terms of bounds/zoom clamping.
+      // This might have consequences in terms of bounds/zoom clamping.
       // What behavior do we expect from this method in that case?
       m_this.zoom(nav.zoom);
       m_this.center(nav.center, null);
     }
 
-    return m_this.boundsFromZoomAndCenter(m_zoom, m_center, gcs);
+    return m_this.boundsFromZoomAndCenter(m_zoom, m_center, m_rotation, gcs);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -1128,12 +1235,13 @@ geo.map = function (arg) {
    * Get the center zoom level necessary to display the given lat/lon bounds.
    *
    * @param {geo.geoBounds} [bds] The requested map bounds
+   * @param {number} rotation Rotation in clockwise radians.
    * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
    *    null to use the map gcs, or any other transform.
    * @return {object} Object containing keys 'center' and 'zoom'
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.zoomAndCenterFromBounds = function (bounds, gcs) {
+  this.zoomAndCenterFromBounds = function (bounds, rotation, gcs) {
     var center, zoom;
 
     gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
@@ -1152,10 +1260,10 @@ geo.map = function (arg) {
     }
 
     // calculate the zoom to fit the bounds
-    zoom = fix_zoom(calculate_zoom(bounds));
+    zoom = fix_zoom(calculate_zoom(bounds, rotation));
 
     // clamp bounds if necessary
-    bounds = fix_bounds(bounds);
+    bounds = fix_bounds(bounds, rotation);
 
     /* This relies on having the map projection coordinates be uniform
      * regardless of location.  If not, the center will not be correct. */
@@ -1164,7 +1272,9 @@ geo.map = function (arg) {
       x: (bounds.left + bounds.right) / 2 - m_origin.x,
       y: (bounds.top + bounds.bottom) / 2 - m_origin.y
     };
-
+    if (gcs !== m_gcs) {
+      center = geo.transform.transformCoordinates(m_gcs, gcs, [center])[0];
+    }
     return {
       zoom: zoom,
       center: center
@@ -1180,13 +1290,14 @@ geo.map = function (arg) {
    *
    * @param {number} zoom The requested zoom level
    * @param {geo.geoPosition} center The requested center
+   * @param {number} rotation The requested rotation
    * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
    *    null to use the map gcs, or any other transform.
    * @return {geo.geoBounds}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.boundsFromZoomAndCenter = function (zoom, center, gcs) {
-    var width, height, bounds, units;
+  this.boundsFromZoomAndCenter = function (zoom, center, rotation, gcs) {
+    var width, height, halfw, halfh, bounds, units;
 
     gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
     // preprocess the arguments
@@ -1195,21 +1306,46 @@ geo.map = function (arg) {
     center = m_this.gcsToWorld(center, gcs);
 
     // get half the width and height in world coordinates
-    width = m_width * units / 2;
-    height = m_height * units / 2;
+    width = m_width * units;
+    height = m_height * units;
+    halfw = width / 2;
+    halfh = height / 2;
 
     // calculate the bounds.  This is only valid if the map projection has
     // uniform units in each direction.  If not, then worldToGcs should be
     // used.
-    bounds = {
-      left: center.x - width + m_origin.x,
-      right: center.x + width + m_origin.x,
-      bottom: center.y - height + m_origin.y,
-      top: center.y + height + m_origin.y
-    };
 
-    // correct the bounds when clamping is enabled
-    return fix_bounds(bounds);
+    if (rotation) {
+      center.x += m_origin.x;
+      center.y += m_origin.y;
+      bounds = rotate_bounds_center(
+        center, {width: width, height: height}, rotation);
+      // correct the bounds when clamping is enabled
+      bounds.width = width;
+      bounds.height = height;
+      bounds = fix_bounds(bounds, rotation);
+    } else {
+      bounds = {
+        left: center.x - halfw + m_origin.x,
+        right: center.x + halfw + m_origin.x,
+        bottom: center.y - halfh + m_origin.y,
+        top: center.y + halfh + m_origin.y
+      };
+      // correct the bounds when clamping is enabled
+      bounds = fix_bounds(bounds, 0);
+    }
+    if (gcs !== m_gcs) {
+      var bds = geo.transform.transformCoordinates(
+        m_gcs, gcs,
+        [[bounds.left, bounds.top], [bounds.right, bounds.bottom]]);
+      bounds = {
+        left: bds[0][0], top: bds[0][1], right: bds[1][0], bottom: bds[1][1]
+      };
+    }
+    /* Add the original width and height of the viewport before rotation. */
+    bounds.width = width;
+    bounds.height = height;
+    return bounds;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -1343,6 +1479,51 @@ geo.map = function (arg) {
   }
 
   /**
+   * Adjust a set of bounds based on a rotation.
+   * @private.
+   */
+  function rotate_bounds(bounds, rotation) {
+    if (rotation) {
+      var center = {
+        x: (bounds.left + bounds.right) / 2,
+        y: (bounds.top + bounds.bottom) / 2
+      };
+      var size = {
+        width: Math.abs(bounds.left - bounds.right),
+        height: Math.abs(bounds.top - bounds.bottom)
+      };
+      bounds = rotate_bounds_center(center, size, rotation);
+    }
+    return bounds;
+  }
+
+  /**
+   * Generate a set of bounds based on a center point, a width and height, and
+   * a rotation.
+   * @private.
+   */
+  function rotate_bounds_center(center, size, rotation) {
+    // calculate the half width and height
+    var width = size.width / 2, height = size.height / 2;
+    var sinr = Math.sin(rotation), cosr = Math.cos(rotation);
+    var ul = {}, ur = {}, ll = {}, lr = {};
+    ul.x = center.x + (-width) * cosr - (-height) * sinr;
+    ul.y = center.y + (-width) * sinr + (-height) * cosr;
+    ur.x = center.x +   width  * cosr - (-height) * sinr;
+    ur.y = center.y +   width  * sinr + (-height) * cosr;
+    ll.x = center.x + (-width) * cosr -   height  * sinr;
+    ll.y = center.y + (-width) * sinr +   height  * cosr;
+    lr.x = center.x +   width  * cosr -   height  * sinr;
+    lr.y = center.y +   width  * sinr +   height  * cosr;
+    return {
+      left: Math.min(ul.x, ur.x, ll.x, lr.x),
+      right: Math.max(ul.x, ur.x, ll.x, lr.x),
+      bottom: Math.min(ul.y, ur.y, ll.y, lr.y),
+      top: Math.max(ul.y, ur.y, ll.y, lr.y)
+    };
+  }
+
+  /**
    * Calculate the minimum zoom level to fit the given
    * bounds inside the view port using the view port size,
    * the given bounds, and the number of units per
@@ -1350,7 +1531,11 @@ geo.map = function (arg) {
    * as the current zoom level to be within that range.
    * @private
    */
-  function calculate_zoom(bounds) {
+  function calculate_zoom(bounds, rotation) {
+    if (rotation === undefined) {
+      rotation = m_rotation;
+    }
+    bounds = rotate_bounds(bounds, rotation);
     // compare the aspect ratios of the viewport and bounds
     var scl = camera_scaling(bounds), z;
 
@@ -1408,21 +1593,94 @@ geo.map = function (arg) {
   }
 
   /**
+   * Return a valid rotation angle.
+   * @private
+   */
+  function fix_rotation(rotation, ignoreRotationFunc, noRangeLimit) {
+    if (!m_allowRotation) {
+      return 0;
+    }
+    if (!ignoreRotationFunc &amp;&amp; typeof m_allowRotation === 'function') {
+      rotation = m_allowRotation(rotation);
+    }
+    /* Ensure that the rotation is in the range [0, 2pi) */
+    if (!noRangeLimit) {
+      var range = Math.PI * 2;
+      rotation = (rotation % range) + (rotation >= 0 ? 0 : range);
+      if (Math.min(Math.abs(rotation), Math.abs(rotation - range)) &lt; 0.00001) {
+        rotation = 0;
+      }
+    }
+    return rotation;
+  }
+
+  /**
    * Return the nearest valid bounds maintaining the
    * width and height. Does nothing if m_clampBounds* is
    * false.
    * @private
    */
-  function fix_bounds(bounds) {
-    var dx, dy;
+  function fix_bounds(bounds, rotation) {
+    if (!m_clampBoundsX &amp;&amp; !m_clampBoundsY) {
+      return bounds;
+    }
+    var dx, dy, maxBounds = m_maxBounds;
+    if (rotation) {
+      maxBounds = $.extend({}, m_maxBounds);
+      /* When rotated, expand the maximum bounds so that they will allow the
+       * corners to be visible.  We know the rotated bounding box, plus the
+       * original maximum bounds.  To fit the corners of the maximum bounds, we
+       * can expand the total bounds by the same factor that the rotated
+       * bounding box is expanded from the non-rotated bounding box (for a
+       * small rotation, this is sin(rotation) * (original bounding box height)
+       * in the width).  This feels like appropriate behaviour with one of the
+       * two bounds clamped.  With both, it seems mildly peculiar. */
+      var bw = Math.abs(bounds.right - bounds.left),
+          bh = Math.abs(bounds.top - bounds.bottom),
+          absinr = Math.abs(Math.sin(rotation)),
+          abcosr = Math.abs(Math.cos(rotation)),
+          ow, oh;
+      if (bounds.width &amp;&amp; bounds.height) {
+        ow = bounds.width;
+        oh = bounds.height;
+      } else if (Math.abs(absinr - abcosr) &lt; 0.0005) {
+        /* If we are close to a 45 degree rotation, it is ill-determined to
+         * compute the original (pre-rotation) bounds width and height.  In
+         * this case, assume that we are using the map's aspect ratio. */
+        if (m_width &amp;&amp; m_height) {
+          var aspect = Math.abs(m_width / m_height);
+          var fac = Math.pow(1 + Math.pow(aspect, 2), 0.5);
+          ow = Math.max(bw, bh) / fac;
+          oh = ow * aspect;
+        } else {
+          /* Fallback if we don't have width or height */
+          ow = bw * abcosr;
+          oh = bh * absinr;
+        }
+      } else {
+        /* Compute the pre-rotation (original) bounds width and height */
+        ow = (abcosr * bw - absinr * bh) / (abcosr * abcosr - absinr * absinr);
+        oh = (abcosr * bh - absinr * bw) / (abcosr * abcosr - absinr * absinr);
+      }
+      /* Our maximum bounds are expanded based on the projected length of a
+       * tilted side of the original bounding box in the rotated bounding box.
+       * To handle all rotations, take the minimum difference in width or
+       * height. */
+      var bdx = bw - Math.max(abcosr * ow, absinr * oh),
+          bdy = bh - Math.max(abcosr * oh, absinr * ow);
+      maxBounds.left -= bdx;
+      maxBounds.right += bdx;
+      maxBounds.top += bdy;
+      maxBounds.bottom -= bdy;
+    }
     if (m_clampBoundsX) {
-      if (bounds.right - bounds.left > m_maxBounds.right - m_maxBounds.left) {
-        dx = m_maxBounds.left - ((bounds.right - bounds.left - (
-          m_maxBounds.right - m_maxBounds.left)) / 2) - bounds.left;
-      } else if (bounds.left &lt; m_maxBounds.left) {
-        dx = m_maxBounds.left - bounds.left;
-      } else if (bounds.right > m_maxBounds.right) {
-        dx = m_maxBounds.right - bounds.right;
+      if (bounds.right - bounds.left > maxBounds.right - maxBounds.left) {
+        dx = maxBounds.left - ((bounds.right - bounds.left - (
+          maxBounds.right - maxBounds.left)) / 2) - bounds.left;
+      } else if (bounds.left &lt; maxBounds.left) {
+        dx = maxBounds.left - bounds.left;
+      } else if (bounds.right > maxBounds.right) {
+        dx = maxBounds.right - bounds.right;
       }
       if (dx) {
         bounds = {
@@ -1434,13 +1692,13 @@ geo.map = function (arg) {
       }
     }
     if (m_clampBoundsY) {
-      if (bounds.top - bounds.bottom > m_maxBounds.top - m_maxBounds.bottom) {
-        dy = m_maxBounds.bottom - ((bounds.top - bounds.bottom - (
-          m_maxBounds.top - m_maxBounds.bottom)) / 2) - bounds.bottom;
-      } else if (bounds.top > m_maxBounds.top) {
-        dy = m_maxBounds.top - bounds.top;
-      } else if (bounds.bottom &lt; m_maxBounds.bottom) {
-        dy = m_maxBounds.bottom - bounds.bottom;
+      if (bounds.top - bounds.bottom > maxBounds.top - maxBounds.bottom) {
+        dy = maxBounds.bottom - ((bounds.top - bounds.bottom - (
+          maxBounds.top - maxBounds.bottom)) / 2) - bounds.bottom;
+      } else if (bounds.top > maxBounds.top) {
+        dy = maxBounds.top - bounds.top;
+      } else if (bounds.bottom &lt; maxBounds.bottom) {
+        dy = maxBounds.bottom - bounds.bottom;
       }
       if (dy) {
         bounds = {
@@ -1459,8 +1717,17 @@ geo.map = function (arg) {
    * correct for the viewport aspect ratio.
    * @private
    */
-  function camera_bounds(bounds) {
-    m_camera.bounds = bounds;
+  function camera_bounds(bounds, rotation) {
+    m_camera.rotation = rotation || 0;
+    /* When dealing with rotation, use the original width and height of the
+     * bounds, as the rotation will have expanded them. */
+    if (bounds.width &amp;&amp; bounds.height &amp;&amp; rotation) {
+      var cx = (bounds.left + bounds.right) / 2,
+          cy = (bounds.top + bounds.bottom) / 2;
+      m_camera.viewFromCenterSizeRotation({x: cx, y: cy}, bounds, rotation);
+    } else {
+      m_camera.bounds = bounds;
+    }
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -1476,6 +1743,7 @@ geo.map = function (arg) {
   // Fix the zoom level (minimum and initial)
   this.zoomRange(arg, true);
   m_zoom = fix_zoom(m_zoom);
+  m_rotation = fix_rotation(m_rotation);
   // Now update to the correct center and zoom level
   this.center($.extend({}, arg.center || m_center), undefined);
 
@@ -1520,7 +1788,9 @@ geo.map.create = function (spec) {
 
   var map = geo.map(spec);
 
-  if (!map) {
+  /* If the spec is bad, we still end up with an object, but it won't have a
+   * zoom function */
+  if (!map || !map.zoom) {
     console.warn('Could not create map.');
     return null;
   }
@@ -1553,7 +1823,7 @@ inherit(geo.map, geo.sceneObject);
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Thu Jan 07 2016 16:46:08 GMT-0500 (EST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Thu Jan 28 2016 16:54:27 GMT-0500 (EST)
 </footer>
 
 <script> prettyPrint(); </script>

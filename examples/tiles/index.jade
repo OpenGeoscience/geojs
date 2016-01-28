@@ -35,6 +35,16 @@ block append mainContent
     .form-group(title="The starting zoom level.  Changing this will also change the current zoom level.")
       label(for="map-zoom") Starting Zoom
       input#map-zoom.mapparam(param-name="zoom", placeholder="3")
+    .form-group(title="Allow the map to be rotated.")
+      label(for="map-allowRotation") Allow Rotation
+      select#map-allowRotation.mapparam(param-name="allowRotation", placeholder="true")
+        option(value="true") Yes
+        option(value="false") No
+        option(value="90") 90&deg; increments
+        option(value="30") 30&deg; increments
+        option(value="15") 15&deg; increments
+        option(value="5") 5&deg; increments
+        option(value="1") 1&deg; increments
 
     .form-group(title="The url used to fetch tiles.  Use {x}, {y}, {z}, and {s} for templating.")
       label(for="layer-url") Tile URL

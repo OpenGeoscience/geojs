@@ -33,6 +33,8 @@
             
             <div class="content"><div class='highlight'><pre>
 <span class="hljs-comment">/* Many parameters can be adjusted via url query parameters:
+ *  allowRotation: 'true' to allow map rotation, 'false' to prevent it, or
+ *      allowable rotations in degrees.
  *  attribution: override the layer attribution text.
  *  clampBoundsX: 'true' to clamp movement in the horizontal direction.
  *  clampBoundsY: 'true' to clamp movement in the vertical direction.
@@ -51,6 +53,10 @@
  *  min: minimum zoom level (default is 0).
  *  max: maximum zoom level (default is 16 for maps, or the entire image for
  *      images).
+ *  maxBoundsBottom: maximum bounds bottom value.
+ *  maxBoundsLeft: maximum bounds left value.
+ *  maxBoundsRight: maximum bounds right value.
+ *  maxBoundsTop: maximum bounds top value.
  *  opacity: a css opacity value (typically a float from 0 to 1).
  *  projection: 'parallel' or 'projection' for the camera projection.
  *  renderer: 'vgl' (default), 'd3', 'null', or 'html'.  This picks the
@@ -59,6 +65,7 @@
  *  subdomains: a comma-separated string of subdomains to use in the {s} part
  *      of the url parameter.  If there are no commas in the string, each letter
  *      is used by itself (e.g., 'abc' is the same as 'a,b,c').
+ *  unitsPerPixel: set the units per pixel at zoom level 0.
  *  url: url to use for the map files.  Placeholders are allowed.  Default is
  *      http://otile1.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.png .  Other useful
  *      urls are are: /data/tilefancy.png
@@ -198,6 +205,7 @@ zoom level</p>
       x: <span class="hljs-number">-98.0</span>,
       y: <span class="hljs-number">39.5</span>
     },
+    maxBounds: {},
     zoom: query.zoom !== <span class="hljs-literal">undefined</span> ? <span class="hljs-built_in">parseFloat</span>(query.zoom) : <span class="hljs-number">3</span>
   };</pre></div></div>
             
@@ -328,6 +336,21 @@ the lower-right.</p>
   <span class="hljs-keyword">if</span> (query.min !== <span class="hljs-literal">undefined</span>) {
     mapParams.min = <span class="hljs-built_in">parseFloat</span>(query.min);
   }
+  <span class="hljs-keyword">if</span> (query.maxBoundsLeft !== <span class="hljs-literal">undefined</span>) {
+    mapParams.maxBounds.left = <span class="hljs-built_in">parseFloat</span>(query.maxBoundsLeft);
+  }
+  <span class="hljs-keyword">if</span> (query.maxBoundsRight !== <span class="hljs-literal">undefined</span>) {
+    mapParams.maxBounds.right = <span class="hljs-built_in">parseFloat</span>(query.maxBoundsRight);
+  }
+  <span class="hljs-keyword">if</span> (query.maxBoundsTop !== <span class="hljs-literal">undefined</span>) {
+    mapParams.maxBounds.top = <span class="hljs-built_in">parseFloat</span>(query.maxBoundsTop);
+  }
+  <span class="hljs-keyword">if</span> (query.maxBoundsBottom !== <span class="hljs-literal">undefined</span>) {
+    mapParams.maxBounds.bottom = <span class="hljs-built_in">parseFloat</span>(query.maxBoundsBottom);
+  }
+  <span class="hljs-keyword">if</span> (query.allowRotation) {
+    mapParams.allowRotation = get_allow_rotation(query.allowRotation);
+  }
   <span class="hljs-keyword">if</span> (query.attribution !== <span class="hljs-literal">undefined</span>) {
     layerParams.attribution = query.attribution;
   }
@@ -383,6 +406,9 @@ maximum zoom</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>    mapParams.unitsPerPixel = <span class="hljs-built_in">Math</span>.pow(<span class="hljs-number">2</span>, mapParams.max);
+  }
+  <span class="hljs-keyword">if</span> (query.unitsPerPixel !== <span class="hljs-literal">undefined</span>) {
+    mapParams.unitsPerPixel = <span class="hljs-built_in">parseFloat</span>(query.unitsPerPixel);
   }</pre></div></div>
             
         </li>
@@ -537,6 +563,10 @@ parameters</p>
     <span class="hljs-keyword">var</span> processedValue = (ctl.is(<span class="hljs-string">'[type="checkbox"]'</span>) ?
         (value === <span class="hljs-string">'true'</span>) : value);
     <span class="hljs-keyword">switch</span> (param) {
+      <span class="hljs-keyword">case</span> <span class="hljs-string">'allowRotation'</span>:
+        mapParams.allowRotation = get_allow_rotation(value);
+        map.allowRotation(mapParams.allowRotation);
+        <span class="hljs-keyword">break</span>;
       <span class="hljs-keyword">case</span> <span class="hljs-string">'debug'</span>:
         $(<span class="hljs-string">'#map'</span>).toggleClass(<span class="hljs-string">'debug-label'</span>, (
             value === <span class="hljs-string">'true'</span> || value === <span class="hljs-string">'all'</span>))
@@ -626,6 +656,20 @@ parameters</p>
     <span class="hljs-keyword">var</span> newurl = <span class="hljs-built_in">window</span>.location.protocol + <span class="hljs-string">'//'</span> + <span class="hljs-built_in">window</span>.location.host +
         <span class="hljs-built_in">window</span>.location.pathname + <span class="hljs-string">'?'</span> + $.param(query);
     <span class="hljs-built_in">window</span>.history.replaceState(query, <span class="hljs-string">''</span>, newurl);
+  }
+
+  <span class="hljs-comment">/* Return the value to set for the allowRotation parameter.
+   * @param value the value in the query string.
+   * @returns true, false, or a function.
+   */</span>
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">get_allow_rotation</span>(<span class="hljs-params">value</span>) </span>{
+    <span class="hljs-keyword">if</span> (!<span class="hljs-built_in">parseFloat</span>(value)) {
+      <span class="hljs-keyword">return</span> value !== <span class="hljs-string">'false'</span>;
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">rotation</span>) </span>{
+      <span class="hljs-keyword">var</span> factor = <span class="hljs-number">180</span> / <span class="hljs-built_in">Math</span>.PI / <span class="hljs-built_in">parseFloat</span>(value);
+      <span class="hljs-keyword">return</span> <span class="hljs-built_in">Math</span>.round(rotation * factor) / factor;
+    };
   }
 });</pre></div></div>
             

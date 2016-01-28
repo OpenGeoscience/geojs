@@ -66,7 +66,7 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> osm = map.createLayer(<span class="hljs-string">'osm'</span>,{
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> osm = map.createLayer(<span class="hljs-string">'osm'</span>, {
     baseUrl: <span class="hljs-string">'http://otile1.mqcdn.com/tiles/1.0.0/map'</span>
   });</pre></div></div>
             
@@ -129,6 +129,14 @@
       center: {x: <span class="hljs-number">7.4500</span>, y: <span class="hljs-number">46.9500</span>},
       duration: <span class="hljs-number">2000</span>,
       interp: d3.interpolateZoom
+    });
+  });
+
+  $(<span class="hljs-string">'#spin-to-budapest'</span>).click(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    map.transition({
+      center: {x: <span class="hljs-number">19.0514</span>, y: <span class="hljs-number">47.4925</span>},
+      rotation: <span class="hljs-built_in">Math</span>.PI * <span class="hljs-number">2</span>,
+      duration: <span class="hljs-number">2000</span>
     });
   });
 });</pre></div></div>

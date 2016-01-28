@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
+    <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
     <title>Tile layer with controllable options</title>
     <!-- Include common files-->
     <link rel="stylesheet" href="../common/css/bootstrap.min.css">
@@ -92,6 +93,18 @@
       <div title="The starting zoom level.  Changing this will also change the current zoom level." class="form-group">
         <label for="map-zoom">Starting Zoom</label>
         <input id="map-zoom" param-name="zoom" placeholder="3" class="mapparam">
+      </div>
+      <div title="Allow the map to be rotated." class="form-group">
+        <label for="map-allowRotation">Allow Rotation</label>
+        <select id="map-allowRotation" param-name="allowRotation" placeholder="true" class="mapparam">
+          <option value="true">Yes</option>
+          <option value="false">No</option>
+          <option value="90">90&deg; increments</option>
+          <option value="30">30&deg; increments</option>
+          <option value="15">15&deg; increments</option>
+          <option value="5">5&deg; increments</option>
+          <option value="1">1&deg; increments</option>
+        </select>
       </div>
       <div title="The url used to fetch tiles.  Use {x}, {y}, {z}, and {s} for templating." class="form-group">
         <label for="layer-url">Tile URL</label>

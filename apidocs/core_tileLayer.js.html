@@ -113,10 +113,6 @@
    *    uses more memory but results in smoother transitions.
    * @param {bool}   [options.wrapX=true]    Wrap in the x-direction
    * @param {bool}   [options.wrapY=false]   Wrap in the y-direction
-   * @param {number} [options.minX=0]        The minimum world coordinate in X
-   * @param {number} [options.maxX=255]      The maximum world coordinate in X
-   * @param {number} [options.minY=0]        The minimum world coordinate in Y
-   * @param {number} [options.maxY=255]      The maximum world coordinate in Y
    * @param {function|string} [options.url=null]
    *   A function taking the current tile indices and returning a URL or jquery
    *   ajax config to be passed to the {geo.tile} constructor.
@@ -426,13 +422,14 @@
      * @param {number} source.x
      * @param {number} source.y
      * @param {number} source.level
+     * @param {boolean} delayPurge If true, don't purge tiles from the cache
      * @returns {geo.tile}
      */
-    this._getTileCached = function (index, source) {
+    this._getTileCached = function (index, source, delayPurge) {
       var tile = this.cache.get(this._tileHash(index));
       if (tile === null) {
         tile = this._getTile(index, source);
-        this.cache.add(tile);
+        this.cache.add(tile, this.remove.bind(this), delayPurge);
       }
       return tile;
     };
@@ -544,10 +541,15 @@
           this._queue.batch(true);
         }
       }
+      if (this.cache.size &lt; tiles.length) {
+        console.log('Increasing cache size to ' + tiles.length);
+        this.cache.size = tiles.length;
+      }
       /* Actually get the tiles. */
       for (i = 0; i &lt; tiles.length; i += 1) {
-        tiles[i] = this._getTileCached(tiles[i].index, tiles[i].source);
+        tiles[i] = this._getTileCached(tiles[i].index, tiles[i].source, true);
       }
+      this.cache.purge(this.remove.bind(this));
       return tiles;
     };
 
@@ -769,15 +771,17 @@
           zoom = this._options.tileRounding(mapZoom),
           scale = Math.pow(2, mapZoom - zoom),
           size = map.size();
-      var ul = this.displayToLevel({x: 0, y: 0});
-      var lr = this.displayToLevel({x: size.width, y: size.height});
+      var ul = this.displayToLevel({x: 0, y: 0}),
+          ur = this.displayToLevel({x: size.width, y: 0}),
+          ll = this.displayToLevel({x: 0, y: size.height}),
+          lr = this.displayToLevel({x: size.width, y: size.height});
       return {
         level: zoom,
         scale: scale,
-        left: ul.x,
-        right: lr.x,
-        bottom: lr.y,
-        top: ul.y
+        left: Math.min(ul.x, ur.x, ll.x, lr.x),
+        right: Math.max(ul.x, ur.x, ll.x, lr.x),
+        top: Math.min(ul.y, ur.y, ll.y, lr.y),
+        bottom: Math.max(ul.y, ur.y, ll.y, lr.y)
       };
     };
 
@@ -788,9 +792,11 @@
      * @protected
      * @param {number} zoom Tiles (in bounds) at this zoom level will be kept
      * @param {boolean} doneLoading If true, allow purging additional tiles.
+     * @param {object} bounds view bounds.  If not specified, this is
+     *   obtained from _getViewBounds().
      */
-    this._purge = function (zoom, doneLoading) {
-      var tile, hash, bounds = {};
+    this._purge = function (zoom, doneLoading, bounds) {
+      var tile, hash;
 
       // Don't purge tiles in an active update
       if (this._updating) {
@@ -798,7 +804,9 @@
       }
 
       // get the view bounds
-      bounds = this._getViewBounds();
+      if (!bounds) {
+        bounds = this._getViewBounds();
+      }
 
       for (hash in this._activeTiles) {// jshint ignore: line
 
@@ -896,7 +904,11 @@
       if (!node) {
         node = $(
           '&lt;div class=geo-tile-layer data-tile-layer="' + level.toFixed() + '"/>'
-        ).css('transform-origin', '0px').get(0);
+        ).css({
+          'transform-origin': '0px 0px',
+          'line-height': 0,
+          'font-size': 0
+        }).get(0);
         this.canvas().append(node);
       }
       return node;
@@ -918,9 +930,10 @@
           Math.abs(lasty - view.top) &lt; 65536) {
         return {x: lastx, y: lasty};
       }
-      var to = this._tileOffset(level),
-          x = parseInt(view.left) + to.x,
-          y = parseInt(view.top) + to.y;
+      var map = this.map(),
+          to = this._tileOffset(level),
+          x = parseInt((view.left + view.right - map.size().width) / 2 + to.x),
+          y = parseInt((view.top + view.bottom - map.size().height) / 2 + to.y);
       canvas.find('.geo-tile-layer').each(function (idx, el) {
         var $el = $(el),
             layer = parseInt($el.data('tileLayer'));
@@ -949,8 +962,10 @@
      * @returns {this} Chainable
      */
     this._update = function (evt) {
-      /* Ignore zoom events, as they are ALWAYS followed by a pan event */
-      if (evt &amp;&amp; evt.event &amp;&amp; evt.event.event === geo.event.zoom) {
+      /* Ignore zoom and rotate events, as they are ALWAYS followed by a pan
+       * event */
+      if (evt &amp;&amp; evt.event &amp;&amp; (evt.event.event === geo.event.zoom ||
+          evt.event.event === geo.event.rotate)) {
         return;
       }
       var map = this.map(),
@@ -970,20 +985,24 @@
 
         var to = this._tileOffset(zoom);
         if (this.renderer() === null) {
-          this.canvas().css(
-            'transform-origin',
-            'center center'
-          );
-          this.canvas().css(
-            'transform',
-            'scale(' + (Math.pow(2, mapZoom - zoom)) + ')' +
-            'translate(' +
-            (-to.x + -(view.left + view.right) / 2 + map.size().width / 2 +
-             offset.x) + 'px' + ',' +
-            (-to.y + -(view.bottom + view.top) / 2 + map.size().height / 2 +
-             offset.y) + 'px' + ')' +
-            ''
-          );
+          var scale = Math.pow(2, mapZoom - zoom),
+              rotation = map.rotation(),
+              rx = -to.x + -(view.left + view.right) / 2 + offset.x,
+              ry = -to.y + -(view.bottom + view.top) / 2 + offset.y,
+              dx = (rx + map.size().width / 2) * scale,
+              dy = (ry + map.size().height / 2) * scale;
+
+          this.canvas().css({
+            'transform-origin': '' +
+                -rx + 'px ' +
+                -ry + 'px'
+          });
+          var transform = 'translate(' + dx + 'px' + ',' + dy + 'px' + ')' +
+              'scale(' + scale + ')';
+          if (rotation) {
+            transform += 'rotate(' + (rotation * 180 / Math.PI) + 'deg)';
+          }
+          this.canvas().css('transform', transform);
         }
         /* Set some attributes that can be used by non-css based viewers.  This
          * doesn't include the map center, as that may need to be handled
@@ -993,7 +1012,8 @@
           dx: -to.x + -(view.left + view.right) / 2,
           dy: -to.y + -(view.bottom + view.top) / 2,
           offsetx: offset.x,
-          offsety: offset.y
+          offsety: offset.y,
+          rotation: map.rotation()
         });
       }
 
@@ -1013,34 +1033,44 @@
           // mark the tile as covered
           this._setTileTree(tile);
         } else {
-          tile.then(function () {
-            if (m_exited) {
-              /* If we have disconnected the renderer, do nothing.  This
-               * happens when the layer is being deleted. */
-              return;
-            }
-            if (tile !== this.cache.get(tile.toString())) {
-              /* If the tile has fallen out of the cache, don't draw it -- it
-               * is untracked.  This may be an indication that a larger cache
-               * should have been used. */
-              return;
-            }
-            /* Check if a tile is still desired.  Don't draw it if it isn't. */
-            var mapZoom = map.zoom(),
-                zoom = this._options.tileRounding(mapZoom),
-                view = this._getViewBounds();
-            if (this._canPurge(tile, view, zoom)) {
-              this.remove(tile);
-              return;
-            }
+          if (!tile._queued) {
+            tile.then(function () {
+              if (m_exited) {
+                /* If we have disconnected the renderer, do nothing.  This
+                 * happens when the layer is being deleted. */
+                return;
+              }
+              if (tile !== this.cache.get(tile.toString())) {
+                /* If the tile has fallen out of the cache, don't draw it -- it
+                 * is untracked.  This may be an indication that a larger cache
+                 * should have been used. */
+                return;
+              }
+              /* Check if a tile is still desired.  Don't draw it if it isn't. */
+              var mapZoom = map.zoom(),
+                  zoom = this._options.tileRounding(mapZoom),
+                  view = this._getViewBounds();
+              if (this._canPurge(tile, view, zoom)) {
+                this.remove(tile);
+                return;
+              }
 
-            this.drawTile(tile);
+              this.drawTile(tile);
 
-            // mark the tile as covered
-            this._setTileTree(tile);
-          }.bind(this));
+              // mark the tile as covered
+              this._setTileTree(tile);
+            }.bind(this));
 
-          this.addPromise(tile);
+            this.addPromise(tile);
+            tile._queued = true;
+          } else {
+            /* If we are using a fetch queue, tell the queue so this tile can
+             * be reprioritized. */
+            var pos = this._queue ? this._queue.get(tile) : -1;
+            if (pos >= 0) {
+              this._queue.add(tile);
+            }
+          }
         }
       }.bind(this));
 
@@ -1344,10 +1374,6 @@
     wrapY: false,
     url: null,
     subdomains: 'abc',
-    minX: 0,
-    maxX: 255,
-    minY: 0,
-    maxY: 255,
     tileOffset: function (level) {
       void(level);
       return {x: 0, y: 0};
@@ -1378,7 +1404,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Thu Jan 07 2016 16:46:08 GMT-0500 (EST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Thu Jan 28 2016 16:54:27 GMT-0500 (EST)
 </footer>
 
 <script> prettyPrint(); </script>
