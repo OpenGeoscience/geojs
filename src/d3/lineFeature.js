@@ -79,7 +79,7 @@ geo.d3.lineFeature = function (arg) {
       // item is an object representing a single line
       // m_this.line()(item) is an array of coordinates
       m_style = {
-        data: [ln.map(function (d, i) { return pos_func(d, i, item, idx);})],
+        data: [ln.map(function (d, i) { return pos_func(d, i, item, idx); })],
         append: 'path',
         attributes: {
           d: line

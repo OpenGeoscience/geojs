@@ -14,7 +14,7 @@
  * the throttled method.
  */
 
-(function (window, undefined) {
+(function (window) {
   'use strict';
 
   // Internal method reference.
@@ -70,7 +70,7 @@
     var timeout_id,
 
       // Keep track of the last time `callback` was executed.
-      last_exec = 0;
+        last_exec = 0;
 
     // `no_trailing` defaults to falsy.
     if (typeof no_trailing !== 'boolean') {
@@ -90,9 +90,9 @@
     // functionality and when executed will limit the rate at which `callback`
     // is executed.
     function wrapper() {
-      var that = this, // jshint ignore: line
-        elapsed = +new Date() - last_exec,
-        args = arguments;
+      var that = this,
+          elapsed = +new Date() - last_exec,
+          args = arguments;
 
       // Execute `callback` and update the `last_exec` timestamp.
       function exec() {
@@ -116,7 +116,7 @@
       }
 
       // Clear any existing timeout.
-      void(
+      void (
         timeout_id && clearTimeout(timeout_id)
       );
 

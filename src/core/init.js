@@ -1,6 +1,6 @@
 /** @namespace */
-var geo = {};     // jshint ignore: line
-window.geo = geo; // jshint ignore: line
+var geo = {};
+window.geo = geo;
 
 geo.renderers = {};
 geo.features = {};
@@ -12,7 +12,7 @@ geo.rendererLayerAdjustments = {};
  * Convenient function to define JS inheritance
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.inherit = function (C, P) { // jshint ignore: line
+geo.inherit = function (C, P) {
   'use strict';
 
   var F = inherit.func();
@@ -171,7 +171,7 @@ geo.registerFeature = function (category, name, func) {
  * Create new instance of the renderer
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.createFeature  = function (name, layer, renderer, arg) {
+geo.createFeature = function (name, layer, renderer, arg) {
   'use strict';
 
   var category = renderer.api(),
@@ -294,7 +294,7 @@ geo.registerWidget = function (category, name, func) {
  * Create new instance of the widget
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.createWidget  = function (name, layer, arg) {
+geo.createWidget = function (name, layer, arg) {
   'use strict';
 
   var options = {

@@ -30,43 +30,43 @@ geo.gl.polygonFeature = function (arg) {
 
   function createVertexShader() {
     var vertexShaderSource = [
-      'attribute vec3 pos;',
-      'attribute vec3 fillColor;',
-      'attribute float fillOpacity;',
-      'uniform mat4 modelViewMatrix;',
-      'uniform mat4 projectionMatrix;',
-      'uniform float pixelWidth;',
-      'varying vec3 fillColorVar;',
-      'varying float fillOpacityVar;',
+          'attribute vec3 pos;',
+          'attribute vec3 fillColor;',
+          'attribute float fillOpacity;',
+          'uniform mat4 modelViewMatrix;',
+          'uniform mat4 projectionMatrix;',
+          'uniform float pixelWidth;',
+          'varying vec3 fillColorVar;',
+          'varying float fillOpacityVar;',
 
-      'void main(void)',
-      '{',
-      '  vec4 clipPos = projectionMatrix * modelViewMatrix * vec4(pos.xyz, 1);',
-      '  if (clipPos.w != 0.0) {',
-      '    clipPos = clipPos/clipPos.w;',
-      '  }',
-      '  fillColorVar = fillColor;',
-      '  fillOpacityVar = fillOpacity;',
-      '  gl_Position = clipPos;',
-      '}'
-    ].join('\n'),
-    shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
+          'void main(void)',
+          '{',
+          '  vec4 clipPos = projectionMatrix * modelViewMatrix * vec4(pos.xyz, 1);',
+          '  if (clipPos.w != 0.0) {',
+          '    clipPos = clipPos/clipPos.w;',
+          '  }',
+          '  fillColorVar = fillColor;',
+          '  fillOpacityVar = fillOpacity;',
+          '  gl_Position = clipPos;',
+          '}'
+        ].join('\n'),
+        shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
     shader.setShaderSource(vertexShaderSource);
     return shader;
   }
 
   function createFragmentShader() {
     var fragmentShaderSource = [
-      '#ifdef GL_ES',
-      '  precision highp float;',
-      '#endif',
-      'varying vec3 fillColorVar;',
-      'varying float fillOpacityVar;',
-      'void main () {',
-      '  gl_FragColor = vec4 (fillColorVar, fillOpacityVar);',
-      '}'
-    ].join('\n'),
-    shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
+          '#ifdef GL_ES',
+          '  precision highp float;',
+          '#endif',
+          'varying vec3 fillColorVar;',
+          'varying float fillOpacityVar;',
+          'void main () {',
+          '  gl_FragColor = vec4 (fillColorVar, fillOpacityVar);',
+          '}'
+        ].join('\n'),
+        shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
     shader.setShaderSource(fragmentShaderSource);
     return shader;
   }
@@ -104,8 +104,7 @@ geo.gl.polygonFeature = function (arg) {
         triangulator = new PNLTRI.Triangulator(),
         triangList = null,
         newTriangList = null,
-        fillColorInstance = null,
-        currentIndex = null;
+        fillColorInstance = null;
 
     posFunc = m_this.position();
     fillColorFunc = m_this.style.get('fillColor');
@@ -207,7 +206,6 @@ geo.gl.polygonFeature = function (arg) {
     numPts = position.length;
 
     start = buffers.alloc(numPts);
-    currentIndex = start;
 
     //console.log("numPts ", numPts);
     for (i = 0; i < numPts; i += 1) {

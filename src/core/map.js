@@ -126,10 +126,10 @@ geo.map = function (arg) {
     x: m_maxBounds.right !== undefined ? m_maxBounds.right : 180, y: 0}])[0].x;
   m_maxBounds.top = (m_maxBounds.top !== undefined ?
     geo.transform.transformCoordinates(m_ingcs, m_gcs, [{
-    x: 0, y: m_maxBounds.top}])[0].y : m_maxBounds.right);
+      x: 0, y: m_maxBounds.top}])[0].y : m_maxBounds.right);
   m_maxBounds.bottom = (m_maxBounds.bottom !== undefined ?
     geo.transform.transformCoordinates(m_ingcs, m_gcs, [{
-    x: 0, y: m_maxBounds.bottom}])[0].y : m_maxBounds.left);
+      x: 0, y: m_maxBounds.bottom}])[0].y : m_maxBounds.left);
   m_unitsPerPixel = (arg.unitsPerPixel || (
     m_maxBounds.right - m_maxBounds.left) / 256);
 
@@ -329,12 +329,11 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.zoom = function (val, origin, ignoreDiscreteZoom) {
-    var evt, oldZoom, bounds;
+    var evt, bounds;
     if (val === undefined) {
       return m_zoom;
     }
 
-    oldZoom = m_zoom;
     /* The ignoreDiscreteZoom flag is intended to allow non-integer zoom values
      * during animation. */
     val = fix_zoom(val, ignoreDiscreteZoom);
@@ -390,14 +389,14 @@ geo.map = function (arg) {
     var bounds = fix_bounds(m_camera.bounds, m_rotation);
     if (bounds !== m_camera.bounds) {
       var panPos = m_this.gcsToDisplay({
-            x: m_camera.bounds.left, y: m_camera.bounds.top}, null);
+        x: m_camera.bounds.left, y: m_camera.bounds.top}, null);
       bounds = m_this.boundsFromZoomAndCenter(m_zoom, {
         x: (bounds.left + bounds.right) / 2,
         y: (bounds.top + bounds.bottom) / 2
       }, m_rotation, null);
       camera_bounds(bounds, m_rotation);
       var clampPos = m_this.gcsToDisplay({
-            x: m_camera.bounds.left, y: m_camera.bounds.top}, null);
+        x: m_camera.bounds.left, y: m_camera.bounds.top}, null);
       evt.screenDelta.x += clampPos.x - panPos.x;
       evt.screenDelta.y += clampPos.y - panPos.y;
     }
@@ -764,9 +763,9 @@ geo.map = function (arg) {
     var i, layers = m_this.children();
 
     m_this.geoTrigger(geo.event.draw, {
-        type: geo.event.draw,
-        target: m_this
-      }
+      type: geo.event.draw,
+      target: m_this
+    }
     );
 
     m_this._update();
@@ -776,9 +775,9 @@ geo.map = function (arg) {
     }
 
     m_this.geoTrigger(geo.event.drawEnd, {
-        type: geo.event.drawEnd,
-        target: m_this
-      }
+      type: geo.event.drawEnd,
+      target: m_this
+    }
     );
 
     return m_this;
@@ -1034,7 +1033,7 @@ geo.map = function (arg) {
       opts.center = geo.util.normalizeCoordinates(opts.center);
       if (gcs !== m_gcs) {
         opts.center = geo.transform.transformCoordinates(gcs, m_gcs, [
-            opts.center])[0];
+          opts.center])[0];
       }
     }
     opts = $.extend(true, {}, defaultOpts, opts);
@@ -1182,7 +1181,7 @@ geo.map = function (arg) {
     if (bds !== undefined) {
       if (gcs !== m_gcs) {
         var trans = geo.transform.transformCoordinates(gcs, m_gcs, [{
-            x: bds.left, y: bds.top}, {x: bds.right, y: bds.bottom}]);
+          x: bds.left, y: bds.top}, {x: bds.right, y: bds.bottom}]);
         bds = {
           left: trans[0].x,
           top: trans[0].y,
@@ -1219,7 +1218,7 @@ geo.map = function (arg) {
     gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
     if (gcs !== m_gcs) {
       var trans = geo.transform.transformCoordinates(gcs, m_gcs, [{
-          x: bounds.left, y: bounds.top}, {x: bounds.right, y: bounds.bottom}]);
+        x: bounds.left, y: bounds.top}, {x: bounds.right, y: bounds.bottom}]);
       bounds = {
         left: trans[0].x,
         top: trans[0].y,
@@ -1481,12 +1480,12 @@ geo.map = function (arg) {
     var ul = {}, ur = {}, ll = {}, lr = {};
     ul.x = center.x + (-width) * cosr - (-height) * sinr;
     ul.y = center.y + (-width) * sinr + (-height) * cosr;
-    ur.x = center.x +   width  * cosr - (-height) * sinr;
-    ur.y = center.y +   width  * sinr + (-height) * cosr;
-    ll.x = center.x + (-width) * cosr -   height  * sinr;
-    ll.y = center.y + (-width) * sinr +   height  * cosr;
-    lr.x = center.x +   width  * cosr -   height  * sinr;
-    lr.y = center.y +   width  * sinr +   height  * cosr;
+    ur.x = center.x + width * cosr - (-height) * sinr;
+    ur.y = center.y + width * sinr + (-height) * cosr;
+    ll.x = center.x + (-width) * cosr - height * sinr;
+    ll.y = center.y + (-width) * sinr + height * cosr;
+    lr.x = center.x + width * cosr - height * sinr;
+    lr.y = center.y + width * sinr + height * cosr;
     return {
       left: Math.min(ul.x, ur.x, ll.x, lr.x),
       right: Math.max(ul.x, ur.x, ll.x, lr.x),

@@ -1,4 +1,3 @@
-/*jslint browser: true */
 /*globals phantom */
 
 // This PhantomJS script drives Jasmine testing by accepting a URL containing a

@@ -8,7 +8,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.geomFeature = function (arg) {
-  "use strict";
+  'use strict';
   if (!(this instanceof geo.geomFeature)) {
     return new geo.geomFeature(arg);
   }
@@ -16,9 +16,9 @@ geo.geomFeature = function (arg) {
   geo.feature.call(this, arg);
 
   arg.style = arg.style === undefined ? $.extend({}, {
-    "color": [1.0, 1.0, 1.0],
-    "point_sprites": false,
-    "point_sprites_image": null
+    'color': [1.0, 1.0, 1.0],
+    'point_sprites': false,
+    'point_sprites_image': null
   }, arg.style) : arg.style;
 
   // Update style

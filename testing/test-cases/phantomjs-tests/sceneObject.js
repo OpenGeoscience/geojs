@@ -1,5 +1,4 @@
 /*global describe, it, expect, geo*/
-// jshint -W016
 describe('geo.sceneObject', function () {
   'use strict';
 

@@ -9,7 +9,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.gl.geomFeature = function (arg) {
-  "use strict";
+  'use strict';
   if (!(this instanceof geo.gl.geomFeature)) {
     return new geo.gl.geomFeature(arg);
   }

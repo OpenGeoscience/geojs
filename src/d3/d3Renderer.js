@@ -92,7 +92,6 @@ geo.d3.d3Renderer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   function setStyles(select, styles) {
-    /* jshint validthis:true */
     var key, k, f;
     function fillFunc() {
       if (styles.fill.apply(m_this, arguments)) {

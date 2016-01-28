@@ -9,7 +9,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.featureLayer = function (arg) {
-  "use strict";
+  'use strict';
   if (!(this instanceof geo.featureLayer)) {
     return new geo.featureLayer(arg);
   }
@@ -150,7 +150,7 @@ geo.featureLayer = function (arg) {
     s_update.call(m_this, request);
 
     if (m_features && m_features.length === 0) {
-      console.log("[info] No valid data source found.");
+      console.log('[info] No valid data source found.');
       return;
     }
 
@@ -226,4 +226,4 @@ geo.featureLayer = function (arg) {
 inherit(geo.featureLayer, geo.layer);
 
 // Now register it
-geo.registerLayer("feature", geo.featureLayer);
+geo.registerLayer('feature', geo.featureLayer);

@@ -8,7 +8,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.fileReader = function (arg) {
-  "use strict";
+  'use strict';
   if (!(this instanceof geo.fileReader)) {
     return new geo.fileReader(arg);
   }
@@ -22,7 +22,7 @@ geo.fileReader = function (arg) {
   arg = arg || {};
 
   if (!(arg.layer instanceof geo.featureLayer)) {
-    throw "fileReader must be given a feature layer";
+    throw 'fileReader must be given a feature layer';
   }
 
   var m_layer = arg.layer;

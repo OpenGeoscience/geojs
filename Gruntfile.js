@@ -299,7 +299,6 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-concat');
-  grunt.loadNpmTasks('grunt-parallel');
   grunt.loadNpmTasks('grunt-express');
   grunt.loadNpmTasks('grunt-docco');
 
@@ -326,13 +325,13 @@ module.exports = function (grunt) {
       }
       var target = {
         files: [
-          {
-            src: [
-              path.join(dir, 'index.jade')
-            ],
-            dest: path.join('dist', dir, 'index.html'),
-            expand: false
-          }
+            {
+              src: [
+                path.join(dir, 'index.jade')
+              ],
+              dest: path.join('dist', dir, 'index.html'),
+              expand: false
+            }
         ],
         options: {
           data: function () {
@@ -341,11 +340,11 @@ module.exports = function (grunt) {
               '../common/css/examples.css'
             ];
             data.defaultJs = [
-              {
-                src: '../../built/geo.ext.min.js',
-                charset: 'UTF-8',
-                type: 'text/javascript'
-              },
+                {
+                  src: '../../built/geo.ext.min.js',
+                  charset: 'UTF-8',
+                  type: 'text/javascript'
+                },
               geolib,
               '../common/js/bootstrap.min.js',
               '../common/js/examples.js'
@@ -374,10 +373,10 @@ module.exports = function (grunt) {
     // configure the main examples page
     grunt.config(['jade', 'examples'], {
       files: [
-        {
-          src: ['examples/index.jade'],
-          dest: 'dist/examples/index.html'
-        }
+          {
+            src: ['examples/index.jade'],
+            dest: 'dist/examples/index.html'
+          }
       ],
       options: {
         data: {

@@ -10,7 +10,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.pointFeature = function (arg) {
-  "use strict";
+  'use strict';
   if (!(this instanceof geo.pointFeature)) {
     return new geo.pointFeature(arg);
   }
@@ -145,10 +145,10 @@ geo.pointFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.position = function (val) {
     if (val === undefined) {
-      return m_this.style("position");
+      return m_this.style('position');
     } else {
       val = geo.util.ensureFunction(val);
-      m_this.style("position", function (d, i) {
+      m_this.style('position', function (d, i) {
         if (d.__cluster) {
           return d;
         } else {
@@ -172,9 +172,9 @@ geo.pointFeature = function (arg) {
       return;
     }
     var pts, position,
-        radius = m_this.style.get("radius"),
-        stroke = m_this.style.get("stroke"),
-        strokeWidth = m_this.style.get("strokeWidth");
+        radius = m_this.style.get('radius'),
+        stroke = m_this.style.get('stroke'),
+        strokeWidth = m_this.style.get('strokeWidth');
 
     position = m_this.position();
 
@@ -209,9 +209,9 @@ geo.pointFeature = function (arg) {
   this.pointSearch = function (p) {
     var min, max, data, idx = [], box, found = [], ifound = [], map, pt,
         corners,
-        stroke = m_this.style.get("stroke"),
-        strokeWidth = m_this.style.get("strokeWidth"),
-        radius = m_this.style.get("radius");
+        stroke = m_this.style.get('stroke'),
+        strokeWidth = m_this.style.get('strokeWidth'),
+        radius = m_this.style.get('radius');
 
     if (!m_this.selectionAPI()) {
       return [];
@@ -367,20 +367,20 @@ geo.pointFeature = function (arg) {
     s_init.call(m_this, arg);
 
     var defaultStyle = $.extend(
-      {},
-      {
-        radius: 5.0,
-        stroke: true,
-        strokeColor: { r: 0.851, g: 0.604, b: 0.0 },
-        strokeWidth: 1.25,
-        strokeOpacity: 1.0,
-        fillColor: { r: 1.0, g: 0.839, b: 0.439 },
-        fill: true,
-        fillOpacity: 0.8,
-        sprites: false,
-        sprites_image: null,
-        position: function (d) { return d; }
-      },
+        {},
+        {
+          radius: 5.0,
+          stroke: true,
+          strokeColor: { r: 0.851, g: 0.604, b: 0.0 },
+          strokeWidth: 1.25,
+          strokeOpacity: 1.0,
+          fillColor: { r: 1.0, g: 0.839, b: 0.439 },
+          fill: true,
+          fillOpacity: 0.8,
+          sprites: false,
+          sprites_image: null,
+          position: function (d) { return d; }
+        },
       arg.style === undefined ? {} : arg.style
     );
 
@@ -418,9 +418,9 @@ geo.event.pointFeature = $.extend({}, geo.event.feature);
  * @returns {geo.pointFeature|null}
  */
 geo.pointFeature.create = function (layer, renderer, spec) {
-  "use strict";
+  'use strict';
 
-  spec.type = "point";
+  spec.type = 'point';
   return geo.feature.create(layer, spec);
 };
 
