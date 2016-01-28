@@ -38,8 +38,10 @@ block mainContent
     - var iExample = 0;
     while iExample < examples.length
       .row
-        - for (var i = 0 ; i < 3; i += 1)
-          if iExample < examples.length
+        - var i = 0
+        while i < 3 && iExample < examples.length
+          if !examples[iExample].disabled
+            - i += 1
             +thumbnail(examples[iExample])
-            - iExample += 1
+          - iExample += 1
 
