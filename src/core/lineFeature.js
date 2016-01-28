@@ -194,7 +194,7 @@ geo.lineFeature = function (arg) {
     s_init.call(m_this, arg);
 
     var defaultStyle = $.extend(
-      {},
+        {},
         {
           'strokeWidth': 1.0,
         // Default to gold color for lines

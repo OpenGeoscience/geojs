@@ -61,7 +61,7 @@ geo.contourFeature = function (arg) {
     }
     if (arg2 === undefined) {
       var contour = $.extend(
-        {},
+          {},
           {
             gridWidth: function () {
               if (arg1.gridHeight) {
@@ -359,7 +359,7 @@ geo.contourFeature = function (arg) {
     s_init.call(m_this, arg);
 
     var defaultStyle = $.extend(
-      {},
+        {},
         {
           opacity: 1.0,
           position: function (d) {

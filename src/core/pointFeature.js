@@ -367,7 +367,7 @@ geo.pointFeature = function (arg) {
     s_init.call(m_this, arg);
 
     var defaultStyle = $.extend(
-      {},
+        {},
         {
           radius: 5.0,
           stroke: true,

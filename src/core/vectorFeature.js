@@ -69,7 +69,7 @@ geo.vectorFeature = function (arg) {
     s_init.call(m_this, arg);
 
     var defaultStyle = $.extend(
-      {},
+        {},
         {
           strokeColor: 'black',
           strokeWidth: 2.0,
