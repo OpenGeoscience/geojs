@@ -336,7 +336,6 @@ geo.layer = function (arg) {
     return m_attribution;
   };
 
-
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Init layer
@@ -485,14 +484,14 @@ geo.layer = function (arg) {
  * @returns {number}
  */
 geo.layer.newLayerId = (function () {
-    'use strict';
-    var currentId = 1;
-    return function () {
-      var id = currentId;
-      currentId += 1;
-      return id;
-    };
-  }()
+  'use strict';
+  var currentId = 1;
+  return function () {
+    var id = currentId;
+    currentId += 1;
+    return id;
+  };
+}()
 );
 
 /**

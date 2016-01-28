@@ -75,7 +75,7 @@ geo.gui.legendWidget = function (arg) {
   //////////////////////////////////////////////////////////////////////////////
   this.size = function () {
     var width = 1, height;
-    var test =  d3.select(m_this.canvas()).append('text')
+    var test = d3.select(m_this.canvas()).append('text')
           .style('opacity', 1e-6);
 
     m_categories.forEach(function (d) {

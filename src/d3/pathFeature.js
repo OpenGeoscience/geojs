@@ -54,12 +54,12 @@ geo.d3.pathFeature = function (arg) {
     s_update.call(m_this);
 
     diag = function (d) {
-        var p = {
-          source: d.source,
-          target: d.target
-        };
-        return d3.svg.diagonal()(p);
+      var p = {
+        source: d.source,
+        target: d.target
       };
+      return d3.svg.diagonal()(p);
+    };
     tmp = [];
     data.forEach(function (d, i) {
       var src, trg;

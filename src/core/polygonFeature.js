@@ -8,7 +8,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.polygonFeature = function (arg) {
-  "use strict";
+  'use strict';
   if (!(this instanceof geo.polygonFeature)) {
     return new geo.polygonFeature(arg);
   }
@@ -163,10 +163,10 @@ geo.polygonFeature = function (arg) {
 
     var defaultStyle = $.extend(
       {},
-      {
-        "fillColor": { r: 0.0,  g: 0.5, b: 0.5 },
-        "fillOpacity": 1.0
-      },
+        {
+          'fillColor': { r: 0.0, g: 0.5, b: 0.5 },
+          'fillOpacity': 1.0
+        },
       arg.style === undefined ? {} : arg.style
     );
 

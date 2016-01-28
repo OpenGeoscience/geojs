@@ -1,0 +1,7 @@
+src/vgl/**
+src/core/version.js
+src/util/wigglemaps.js
+src/util/pnltri.js
+src/util/leaflet.js
+geo.js
+**/*.min.js

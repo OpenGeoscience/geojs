@@ -8,7 +8,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.lineFeature = function (arg) {
-  "use strict";
+  'use strict';
   if (!(this instanceof geo.lineFeature)) {
     return new geo.lineFeature(arg);
   }
@@ -32,9 +32,9 @@ geo.lineFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.line = function (val) {
     if (val === undefined) {
-      return m_this.style("line");
+      return m_this.style('line');
     } else {
-      m_this.style("line", val);
+      m_this.style('line', val);
       m_this.dataTime().modified();
       m_this.modified();
     }
@@ -50,9 +50,9 @@ geo.lineFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.position = function (val) {
     if (val === undefined) {
-      return m_this.style("position");
+      return m_this.style('position');
     } else {
-      m_this.style("position", val);
+      m_this.style('position', val);
       m_this.dataTime().modified();
       m_this.modified();
     }
@@ -67,7 +67,7 @@ geo.lineFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.pointSearch = function (p) {
-    var data, pt, map, line, width, indices = [], found = [], pos;
+    var data, pt, line, width, indices = [], found = [], pos;
     data = m_this.data();
     if (!data || !data.length) {
       return {
@@ -76,9 +76,8 @@ geo.lineFeature = function (arg) {
       };
     }
 
-    map = m_this.layer().map();
     line = m_this.line();
-    width = m_this.style.get("strokeWidth");
+    width = m_this.style.get('strokeWidth');
     pos = m_this.position();
     pt = m_this.featureGcsToDisplay(p);
 
@@ -129,14 +128,14 @@ geo.lineFeature = function (arg) {
             if (lineDist2(pt, s, last) <= r) {
 
               // short circuit the loop here
-              throw "found";
+              throw 'found';
             }
           }
 
           last = s;
         });
       } catch (err) {
-        if (err !== "found") {
+        if (err !== 'found') {
           throw err;
         }
         found.push(d);
@@ -163,7 +162,7 @@ geo.lineFeature = function (arg) {
     opts = opts || {};
     opts.partial = opts.partial || false;
     if (opts.partial) {
-      throw "Unimplemented query method.";
+      throw 'Unimplemented query method.';
     }
 
     m_this.data().forEach(function (d, i) {
@@ -171,9 +170,9 @@ geo.lineFeature = function (arg) {
       line(d, i).forEach(function (e, j) {
         if (!inside) { return; }
         var p = pos(e, j, d, i);
-        if (!(p.x >= lowerLeft.x  &&
+        if (!(p.x >= lowerLeft.x &&
               p.x <= upperRight.x &&
-              p.y >= lowerLeft.y  &&
+              p.y >= lowerLeft.y &&
               p.y <= upperRight.y)
         ) {
           inside = false;
@@ -196,15 +195,15 @@ geo.lineFeature = function (arg) {
 
     var defaultStyle = $.extend(
       {},
-      {
-        "strokeWidth": 1.0,
+        {
+          'strokeWidth': 1.0,
         // Default to gold color for lines
-        "strokeColor": { r: 1.0, g: 0.8431372549, b: 0.0 },
-        "strokeStyle": "solid",
-        "strokeOpacity": 1.0,
-        "line": function (d) { return d; },
-        "position": function (d) { return d; }
-      },
+          'strokeColor': { r: 1.0, g: 0.8431372549, b: 0.0 },
+          'strokeStyle': 'solid',
+          'strokeOpacity': 1.0,
+          'line': function (d) { return d; },
+          'position': function (d) { return d; }
+        },
       arg.style === undefined ? {} : arg.style
     );
 
@@ -215,7 +214,6 @@ geo.lineFeature = function (arg) {
     if (arg.position !== undefined) {
       defaultStyle.position = arg.position;
     }
-
 
     m_this.style(defaultStyle);
 
@@ -234,9 +232,9 @@ geo.lineFeature = function (arg) {
  * @returns {geo.lineFeature|null}
  */
 geo.lineFeature.create = function (layer, spec) {
-  "use strict";
+  'use strict';
 
-  spec.type = "line";
+  spec.type = 'line';
   return geo.feature.create(layer, spec);
 };
 

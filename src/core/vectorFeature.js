@@ -70,17 +70,17 @@ geo.vectorFeature = function (arg) {
 
     var defaultStyle = $.extend(
       {},
-      {
-        strokeColor: 'black',
-        strokeWidth: 2.0,
-        strokeOpacity: 1.0,
+        {
+          strokeColor: 'black',
+          strokeWidth: 2.0,
+          strokeOpacity: 1.0,
         // TODO: define styles for the end markers
         // originStyle: 'none',
         // endStyle: 'arrow',
-        origin: {x: 0, y: 0, z: 0},
-        delta: function (d) { return d; },
-        scale: null // size scaling factor (null -> renderer decides)
-      },
+          origin: {x: 0, y: 0, z: 0},
+          delta: function (d) { return d; },
+          scale: null // size scaling factor (null -> renderer decides)
+        },
       arg.style === undefined ? {} : arg.style
     );
 

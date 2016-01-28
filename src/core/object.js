@@ -8,7 +8,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.object = function () {
-  "use strict";
+  'use strict';
   if (!(this instanceof geo.object)) {
     return new geo.object();
   }
@@ -151,8 +151,8 @@ geo.object = function () {
     //   ignoring for now...
     if (m_eventHandlers.hasOwnProperty(event)) {
       m_eventHandlers[event] = m_eventHandlers[event].filter(function (f) {
-          return f !== arg;
-        }
+        return f !== arg;
+      }
       );
     }
     return m_this;

@@ -10,7 +10,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.pointSpritesGeomFeature = function (image, positions, colors) {
-  "use strict";
+  'use strict';
   if (!(this instanceof geo.pointSpritesGeomFeature)) {
     return new geo.pointSpritesGeomFeature(image, positions, colors);
   }
@@ -33,7 +33,7 @@ geo.pointSpritesGeomFeature = function (image, positions, colors) {
   ////////////////////////////////////////////////////////////////////////////
   this.updateColorMapping = function () {
     if (!m_lookupTable) {
-      console.log("[warning] Invalid lookup table");
+      console.log('[warning] Invalid lookup table');
       return;
     }
 

@@ -25,9 +25,9 @@ geo.choroplethFeature = function (arg) {
       s_init = this._init,
       m_choropleth = $
       .extend({},
-              {
+          {
                 /* 9-step based on paraview bwr colortable */
-                colorRange: [
+            colorRange: [
                   {r: 0.07514311, g: 0.468049805, b: 1},
                   {r: 0.468487184, g: 0.588057293, b: 1},
                   {r: 0.656658579, g: 0.707001303, b: 1},
@@ -37,25 +37,24 @@ geo.choroplethFeature = function (arg) {
                   {r: 1, g: 0.6289553, b: 0.568237474},
                   {r: 1, g: 0.472800903, b: 0.404551679},
                   {r: 0.916482116, g: 0.236630659, b: 0.209939162}
-                ],
-                scale: d3.scale.quantize(),
-                accessors: {
+            ],
+            scale: d3.scale.quantize(),
+            accessors: {
                   //accessor for ID on geodata feature
-                  geoId: function (geoFeature) {
-                    return geoFeature.properties.GEO_ID;
-                  },
-                  //accessor for ID on scalar element
-                  scalarId: function (scalarElement) {
-                    return scalarElement.id;
-                  },
-                  //accessor for value on scalar element
-                  scalarValue: function (scalarElement) {
-                    return scalarElement.value;
-                  }
-                }
+              geoId: function (geoFeature) {
+                return geoFeature.properties.GEO_ID;
               },
+                  //accessor for ID on scalar element
+              scalarId: function (scalarElement) {
+                return scalarElement.id;
+              },
+                  //accessor for value on scalar element
+              scalarValue: function (scalarElement) {
+                return scalarElement.value;
+              }
+            }
+          },
               arg.choropleth);
-
 
   ////////////////////////////////////////////////////////////////////////////
   /**

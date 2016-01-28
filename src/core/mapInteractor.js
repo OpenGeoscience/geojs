@@ -35,13 +35,11 @@ geo.mapInteractor = function (args) {
   // button: 'left' | 'right' | 'middle'
   // modifiers: [ 'alt' | 'meta' | 'ctrl' | 'shift' ]
   function eventMatch(button, modifiers) {
-    /* jshint -W018 */
     return (button === 'wheel' || m_mouse.buttons[button]) &&
-      (!!m_mouse.modifiers.alt)   === (!!modifiers.alt)   &&
-      (!!m_mouse.modifiers.meta)  === (!!modifiers.meta)  &&
+      (!!m_mouse.modifiers.alt) === (!!modifiers.alt) &&
+      (!!m_mouse.modifiers.meta) === (!!modifiers.meta) &&
       (!!m_mouse.modifiers.shift) === (!!modifiers.shift) &&
-      (!!m_mouse.modifiers.ctrl)  === (!!modifiers.ctrl);
-    /* jshint +W018 */
+      (!!m_mouse.modifiers.ctrl) === (!!modifiers.ctrl);
   }
 
   // Helper method to calculate the speed from a velocity
@@ -265,7 +263,6 @@ geo.mapInteractor = function (args) {
    * @property {geo.mouseState} origin The mouse state at the start of the
    * brush action
    */
-
 
   // default mouse object
   m_mouse = {
@@ -732,7 +729,6 @@ geo.mapInteractor = function (args) {
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
 
-
     if (m_options.click.cancelOnMove) {
       m_clickMaybe = false;
     }
@@ -989,7 +985,6 @@ geo.mapInteractor = function (args) {
 
       deltaZ = 0;
     }
-
 
     if (m_options.discreteZoom !== true && m_options.discreteZoom > 0) {
       delay = m_options.discreteZoom;

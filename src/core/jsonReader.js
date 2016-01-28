@@ -114,7 +114,7 @@ geo.jsonReader = function (arg) {
 
   this._getCoordinates = function (spec) {
     var geometry = spec.geometry || {},
-    coordinates = geometry.coordinates || [], elv;
+        coordinates = geometry.coordinates || [], elv;
 
     if ((coordinates.length === 2 || coordinates.length === 3) &&
     (isFinite(coordinates[0]) && isFinite(coordinates[1]))) {
@@ -157,8 +157,8 @@ geo.jsonReader = function (arg) {
 
       features.forEach(function (feature) {
         var type = m_this._featureType(feature),
-        coordinates = m_this._getCoordinates(feature),
-        style = m_this._getStyle(feature);
+            coordinates = m_this._getCoordinates(feature),
+            style = m_this._getStyle(feature);
         if (type) {
           if (type === 'line') {
             style.fill = style.fill || false;
@@ -220,7 +220,6 @@ geo.jsonReader = function (arg) {
 
     m_this._readObject(file, _done, progress);
   };
-
 
   ////////////////////////////////////////////////////////////////////////////
   /**

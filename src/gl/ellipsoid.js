@@ -116,12 +116,12 @@ geo.ellipsoid = function (x, y, z) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.transformPoint = function (lat, lon, elev) {
-    lat = lat *  (Math.PI / 180.0);
+    lat = lat * (Math.PI / 180.0);
     lon = lon * (Math.PI / 180.0);
 
     var n = m_this.computeGeodeticSurfaceNormal(lat, lon),
         k = geo.util.vec3AsArray(),
-        gamma  = Math.sqrt(vec3.dot(n, k)),
+        gamma = Math.sqrt(vec3.dot(n, k)),
         result = geo.util.vec3AsArray();
 
     vec3.multiply(k, m_radiiSquared, n);
@@ -146,7 +146,7 @@ geo.ellipsoid = function (x, y, z) {
 
     var sourceData = geom.sourceData(vgl.vertexAttributeKeys.Position),
         sourceDataArray = sourceData.data(),
-        noOfComponents =  sourceData.attributeNumberOfComponents(
+        noOfComponents = sourceData.attributeNumberOfComponents(
           vgl.vertexAttributeKeys.Position),
         stride = sourceData.attributeStride(
           vgl.vertexAttributeKeys.Position),

@@ -1,4 +1,3 @@
-/*jscs:disable validateIndentation*/
 (function ($, geo, d3) {
   'use strict';
 
@@ -8,24 +7,24 @@
   // hard requirement, so bail out here if the widget factory
   // is not available and throw a helpful message when the
   // tries to use it.
-  if (!$.widget) {
-    $.fn.geojsMap = function () {
-      throw new Error(
+    if (!$.widget) {
+      $.fn.geojsMap = function () {
+        throw new Error(
         'The geojs jquery plugin requires jquery ui to be available.'
       );
-    };
-    return;
-  }
+      };
+      return;
+    }
 
   /**
    * Takes an option key and returns true if it should
    * return a color accessor.
    * @private
    */
-  function isColorKey(key) {
-    return key.slice(key.length - 5, key.length)
+    function isColorKey(key) {
+      return key.slice(key.length - 5, key.length)
       .toLowerCase() === 'color';
-  }
+    }
 
   /**
    * Take an array of data and an accessor for a color property
@@ -40,71 +39,71 @@
    * @param {(string|number|function)} acc A color accessor
    * @return {function}
    */
-  function makeColorScale(data, acc) {
-    if (!d3) {
-      console.warn('d3 is unavailable, cannot apply color scales.');
-      return acc;
-    }
-    var domain;
-    var cannotHandle = false;
-    var doNotHandle = true;
-    var categorical = false;
-    var min = Number.POSITIVE_INFINITY;
-    var max = Number.NEGATIVE_INFINITY;
-
-    function wrap(func) {
-      if (geo.util.isFunction(func)) {
-        return function () {
-          return func(acc.apply(this, arguments));
-        };
-      } else {
-        return func(acc);
+    function makeColorScale(data, acc) {
+      if (!d3) {
+        console.warn('d3 is unavailable, cannot apply color scales.');
+        return acc;
       }
-    }
+      var domain;
+      var cannotHandle = false;
+      var doNotHandle = true;
+      var categorical = false;
+      var min = Number.POSITIVE_INFINITY;
+      var max = Number.NEGATIVE_INFINITY;
 
-    if (geo.util.isFunction(acc)) {
-      domain = d3.set(data.map(acc)).values();
-    } else {
-      domain = [acc];
-    }
-    domain.forEach(function (v) {
-      if (!(typeof v === 'string' &&
+      function wrap(func) {
+        if (geo.util.isFunction(func)) {
+          return function () {
+            return func(acc.apply(this, arguments));
+          };
+        } else {
+          return func(acc);
+        }
+      }
+
+      if (geo.util.isFunction(acc)) {
+        domain = d3.set(data.map(acc)).values();
+      } else {
+        domain = [acc];
+      }
+      domain.forEach(function (v) {
+        if (!(typeof v === 'string' &&
             typeof geo.util.convertColor(v) === 'object')) {
         // This is to handle cases when values are css names or
         // hex strings.  We don't want to apply a categorical
         // scale.
-        doNotHandle = false;
-      }
-      if (typeof v === 'string') {
-        categorical = true;
-      } else if (!isFinite(v)) {
-        cannotHandle = true;
-      } else if (+v > max) {
-        max = +v;
-      } else if (+v < min) {
-        min = +v;
-      }
-    });
-    if (cannotHandle) {
+          doNotHandle = false;
+        }
+        if (typeof v === 'string') {
+          categorical = true;
+        } else if (!isFinite(v)) {
+          cannotHandle = true;
+        } else if (+v > max) {
+          max = +v;
+        } else if (+v < min) {
+          min = +v;
+        }
+      });
+      if (cannotHandle) {
       // At least one value is not a string or a numeric value.
       // Pass the bare accessor back to geojs to handle it.
-      return acc;
-    }
-    if (doNotHandle) {
-      return acc;
-    }
-    if (categorical) {
-      if (domain.length <= 10) {
-        return wrap(d3.scale.category10().domain(domain));
-      } else if (domain.length <= 20) {
-        return wrap(d3.scale.category20().domain(domain));
-      } else {
-        // TODO: sort domain by most used and make an "other" category
-        return wrap(d3.scale.category20().domain(domain));
+        return acc;
       }
-    }
+      if (doNotHandle) {
+        return acc;
+      }
+      if (categorical) {
+        if (domain.length <= 10) {
+          return wrap(d3.scale.category10().domain(domain));
+        } else if (domain.length <= 20) {
+          return wrap(d3.scale.category20().domain(domain));
+        } else {
+        // TODO: sort domain by most used and make an "other" category
+          return wrap(d3.scale.category20().domain(domain));
+        }
+      }
     // http://colorbrewer2.org/?type=diverging&scheme=RdYlBu&n=3
-    return wrap(d3.scale.linear()
+      return wrap(d3.scale.linear()
       .range([
         'rgb(252,141,89)',
         'rgb(255,255,191)',
@@ -115,7 +114,7 @@
         (min + max) / 2,
         max
       ]));
-  }
+    }
 
   /**
    * @class geojsMap
@@ -180,9 +179,7 @@
    *   }]
    * };
    */
-  // jscs:disable requireSpaceBetweenArguments
-  $.widget('geojs.geojsMap', /** @lends jQuery.fn.geojsMap */{
-  // jscs:enable requireSpaceBetweenArguments
+    $.widget('geojs.geojsMap', /** @lends jQuery.fn.geojsMap */{
     /**
      * A coordinate object as accepted by geojs to express positions in an
      * arbitrary coordinate system (geographic, screen, etc).  Coordinates returned by
@@ -260,60 +257,60 @@
      *   The open street map tile server spec default:
      *   <code>http://tile.openstreetmap.org/&lt;zoom>/&lt;x>/&lt;y>.png</code>
      */
-    options: {
-      center: {latitude: 0, longitude: 0},
-      zoom: 0,
-      width: null,
-      height: null,
-      layers: [],
-      data: [],
-      url: 'http://tile.openstreetmap.org/{z}/{x}/{y}.png',
-      attribution: undefined,
+      options: {
+        center: {latitude: 0, longitude: 0},
+        zoom: 0,
+        width: null,
+        height: null,
+        layers: [],
+        data: [],
+        url: 'http://tile.openstreetmap.org/{z}/{x}/{y}.png',
+        attribution: undefined,
 
       // These options are for future use, but shouldn't
       // be changed at the moment, so they aren't documented.
-      baseLayer: 'osm',
-      baseRenderer: 'vgl'
-    },
+        baseLayer: 'osm',
+        baseRenderer: 'vgl'
+      },
 
     /**
      * Internal constructor
      * @instance
      * @protected
      */
-    _create: function () {
-      if (this._map || !this.element.length) {
+      _create: function () {
+        if (this._map || !this.element.length) {
         // when called multiple times on a single element, do nothing
-        return;
-      }
+          return;
+        }
 
       // create the map
-      this._map = geo.map({
-        width: this.options.width,
-        height: this.options.height,
-        zoom: this.options.zoom,
-        center: this.options.center,
-        node: this.element.get(0)
-      });
+        this._map = geo.map({
+          width: this.options.width,
+          height: this.options.height,
+          zoom: this.options.zoom,
+          center: this.options.center,
+          node: this.element.get(0)
+        });
 
       // create the base layer
-      this._baseLayer = this._map.createLayer(
+        this._baseLayer = this._map.createLayer(
         this.options.baseLayer,
-        {
-          renderer: this.options.baseRenderer,
-          url: this.options.url,
-          attribution: this.options.attribution
-        }
+            {
+              renderer: this.options.baseRenderer,
+              url: this.options.url,
+              attribution: this.options.attribution
+            }
       );
 
       // Trigger a resize to a valid size before adding
       // the feature layer to handle some of the bugs that
       // occur when initializing onto a node of size 0.
-      this._resize({width: 800, height: 600});
+        this._resize({width: 800, height: 600});
 
-      this._layers = [];
-      this.update();
-    },
+        this._layers = [];
+        this.update();
+      },
 
     /**
      * Update the layers and features using a new array of
@@ -327,81 +324,81 @@
      * @example <caption>Remove all existing feature layers.</caption>
      * $("#map").geojsMap("update", []);
      */
-    update: function (layers) {
-      var m_this = this;
-      this.options.layers = layers || this.options.layers || [];
+      update: function (layers) {
+        var m_this = this;
+        this.options.layers = layers || this.options.layers || [];
 
       // delete existing layers
-      this._layers.forEach(function (layer) {
-        layer.clear();
-        m_this._map.deleteLayer(layer);
-      });
+        this._layers.forEach(function (layer) {
+          layer.clear();
+          m_this._map.deleteLayer(layer);
+        });
 
       // create new layers
-      this._layers = this.options.layers.map(function (layer) {
-        layer.data = layer.data || m_this.options.data;
+        this._layers = this.options.layers.map(function (layer) {
+          layer.data = layer.data || m_this.options.data;
 
         // Until auto color scaling gets moved into geojs core, we will
         // mutate the spec and replace the color and radius options.
-        (layer.features || []).forEach(function (feature) {
-          var data = feature.data || layer.data || [];
-          var scl;
-          if (feature.type === 'point') {
-            if (feature.size) {
-              feature._size = geo.util.ensureFunction(feature.size);
-            } else if (feature.size === null) {
-              delete feature._size;
-            }
+          (layer.features || []).forEach(function (feature) {
+            var data = feature.data || layer.data || [];
+            var scl;
+            if (feature.type === 'point') {
+              if (feature.size) {
+                feature._size = geo.util.ensureFunction(feature.size);
+              } else if (feature.size === null) {
+                delete feature._size;
+              }
 
-            if (data.length && feature._size) {
-              scl = d3.scale.linear()
+              if (data.length && feature._size) {
+                scl = d3.scale.linear()
                 .domain(
                   d3.extent(data, feature._size)
                 )
                 .range([5, 20]);
-              feature.radius = function () {
+                feature.radius = function () {
                 // TODO: wrong `this` (wait for style refactor)
-                return scl(feature._size.apply(this, arguments));
-              };
+                  return scl(feature._size.apply(this, arguments));
+                };
+              }
+              delete feature.size;
             }
-            delete feature.size;
-          }
 
-          var key;
-          for (key in feature) {
-            if (feature.hasOwnProperty(key) &&
+            var key;
+            for (key in feature) {
+              if (feature.hasOwnProperty(key) &&
                 isColorKey(key)) {
-              feature[key] = makeColorScale(data, feature[key]);
+                feature[key] = makeColorScale(data, feature[key]);
+              }
             }
-          }
+          });
+          return geo.layer.create(m_this._map, layer);
         });
-        return geo.layer.create(m_this._map, layer);
-      });
 
       // trigger an initial draw
-      this.redraw();
+        this.redraw();
 
-      return this;
-    },
+        return this;
+      },
 
     /**
      * Return the geojs map object.
      * @instance
      * @returns {geo.map}
      */
-    map: function () {
-      return this._map;
-    },
+      map: function () {
+        return this._map;
+      },
 
     /**
      * Set the tile server URL.
      * @instance
      * @param {string} url The url format string of an OSM tile server.
      */
-    url: function (url) {
-      this._baseLayer.url(url);
-      return this;
-    },
+      url: function (url) {
+        this._baseLayer.url(url);
+        return this;
+      },
 
     /**
      * Resize the map canvas.
@@ -409,21 +406,21 @@
      * @protected
      * @param {object?} size Explicit size or use this.options.
      */
-    _resize: function (size) {
-      var width = this.options.width,
-          height = this.options.height;
-      if (size) {
-        width = size.width;
-        height = size.height;
-      }
-      if (!width) {
-        width = this.element.width();
-      }
-      if (!height) {
-        height = this.element.height();
-      }
-      this._map.resize(0, 0, width, height);
-    },
+      _resize: function (size) {
+        var width = this.options.width,
+            height = this.options.height;
+        if (size) {
+          width = size.width;
+          height = size.height;
+        }
+        if (!width) {
+          width = this.element.width();
+        }
+        if (!height) {
+          height = this.element.height();
+        }
+        this._map.resize(0, 0, width, height);
+      },
 
     /**
      * Do a full redraw of the map.  In general, users shouldn't need to
@@ -433,11 +430,11 @@
      * {@link geo.feature#modified} to properly update.
      * @instance
      */
-    redraw: function () {
-      this._resize();
-      return this;
-    }
-  });
+      redraw: function () {
+        this._resize();
+        return this;
+      }
+    });
 
   // Some argument type definitions used only by this plugin:
   /**

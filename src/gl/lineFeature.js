@@ -33,87 +33,87 @@ geo.gl.lineFeature = function (arg) {
 
   function createVertexShader() {
     var vertexShaderSource = [
-      '#ifdef GL_ES',
-      '  precision highp float;',
-      '#endif',
-      'attribute vec3 pos;',
-      'attribute vec3 prev;',
-      'attribute vec3 next;',
-      'attribute float offset;',
+          '#ifdef GL_ES',
+          '  precision highp float;',
+          '#endif',
+          'attribute vec3 pos;',
+          'attribute vec3 prev;',
+          'attribute vec3 next;',
+          'attribute float offset;',
 
-      'attribute vec3 strokeColor;',
-      'attribute float strokeOpacity;',
-      'attribute float strokeWidth;',
+          'attribute vec3 strokeColor;',
+          'attribute float strokeOpacity;',
+          'attribute float strokeWidth;',
 
-      'uniform mat4 modelViewMatrix;',
-      'uniform mat4 projectionMatrix;',
-      'uniform float pixelWidth;',
-      'uniform float aspect;',
+          'uniform mat4 modelViewMatrix;',
+          'uniform mat4 projectionMatrix;',
+          'uniform float pixelWidth;',
+          'uniform float aspect;',
 
-      'varying vec3 strokeColorVar;',
-      'varying float strokeWidthVar;',
-      'varying float strokeOpacityVar;',
+          'varying vec3 strokeColorVar;',
+          'varying float strokeWidthVar;',
+          'varying float strokeOpacityVar;',
 
-      'void main(void)',
-      '{',
+          'void main(void)',
+          '{',
       /* If any vertex has been deliberately set to a negative opacity,
        * skip doing computations on it. */
-      '  if (strokeOpacity < 0.0) {',
-      '    gl_Position = vec4(2, 2, 0, 1);',
-      '    return;',
-      '  }',
-      '  const float PI = 3.14159265358979323846264;',
-      '  vec4 worldPos = projectionMatrix * modelViewMatrix * vec4(pos.xyz, 1);',
-      '  if (worldPos.w != 0.0) {',
-      '    worldPos = worldPos/worldPos.w;',
-      '  }',
-      '  vec4 worldNext = projectionMatrix * modelViewMatrix * vec4(next.xyz, 1);',
-      '  if (worldNext.w != 0.0) {',
-      '    worldNext = worldNext/worldNext.w;',
-      '  }',
-      '  vec4 worldPrev = projectionMatrix* modelViewMatrix * vec4(prev.xyz, 1);',
-      '  if (worldPrev.w != 0.0) {',
-      '    worldPrev = worldPrev/worldPrev.w;',
-      '  }',
-      '  strokeColorVar = strokeColor;',
-      '  strokeWidthVar = strokeWidth;',
-      '  strokeOpacityVar = strokeOpacity;',
-      '  vec2 deltaNext = worldNext.xy - worldPos.xy;',
-      '  vec2 deltaPrev = worldPos.xy - worldPrev.xy;',
-      '  float angleNext = 0.0, anglePrev = 0.0;',
-      '  if (deltaNext.xy != vec2(0.0, 0.0))',
-      '    angleNext = atan(deltaNext.y / aspect, deltaNext.x);',
-      '  if (deltaPrev.xy == vec2(0.0, 0.0)) anglePrev = angleNext;',
-      '  else  anglePrev = atan(deltaPrev.y / aspect, deltaPrev.x);',
-      '  if (deltaNext.xy == vec2(0.0, 0.0)) angleNext = anglePrev;',
-      '  float angle = (anglePrev + angleNext) / 2.0;',
-      '  float cosAngle = cos(anglePrev - angle);',
-      '  if (cosAngle < 0.1) { cosAngle = sign(cosAngle) * 1.0; angle = 0.0; }',
-      '  float distance = (offset * strokeWidth * pixelWidth) /',
-      '                    cosAngle;',
-      '  worldPos.x += distance * sin(angle);',
-      '  worldPos.y -= distance * cos(angle) * aspect;',
-      '  gl_Position = worldPos;',
-      '}'
-    ].join('\n'),
-    shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
+          '  if (strokeOpacity < 0.0) {',
+          '    gl_Position = vec4(2, 2, 0, 1);',
+          '    return;',
+          '  }',
+          '  const float PI = 3.14159265358979323846264;',
+          '  vec4 worldPos = projectionMatrix * modelViewMatrix * vec4(pos.xyz, 1);',
+          '  if (worldPos.w != 0.0) {',
+          '    worldPos = worldPos/worldPos.w;',
+          '  }',
+          '  vec4 worldNext = projectionMatrix * modelViewMatrix * vec4(next.xyz, 1);',
+          '  if (worldNext.w != 0.0) {',
+          '    worldNext = worldNext/worldNext.w;',
+          '  }',
+          '  vec4 worldPrev = projectionMatrix* modelViewMatrix * vec4(prev.xyz, 1);',
+          '  if (worldPrev.w != 0.0) {',
+          '    worldPrev = worldPrev/worldPrev.w;',
+          '  }',
+          '  strokeColorVar = strokeColor;',
+          '  strokeWidthVar = strokeWidth;',
+          '  strokeOpacityVar = strokeOpacity;',
+          '  vec2 deltaNext = worldNext.xy - worldPos.xy;',
+          '  vec2 deltaPrev = worldPos.xy - worldPrev.xy;',
+          '  float angleNext = 0.0, anglePrev = 0.0;',
+          '  if (deltaNext.xy != vec2(0.0, 0.0))',
+          '    angleNext = atan(deltaNext.y / aspect, deltaNext.x);',
+          '  if (deltaPrev.xy == vec2(0.0, 0.0)) anglePrev = angleNext;',
+          '  else  anglePrev = atan(deltaPrev.y / aspect, deltaPrev.x);',
+          '  if (deltaNext.xy == vec2(0.0, 0.0)) angleNext = anglePrev;',
+          '  float angle = (anglePrev + angleNext) / 2.0;',
+          '  float cosAngle = cos(anglePrev - angle);',
+          '  if (cosAngle < 0.1) { cosAngle = sign(cosAngle) * 1.0; angle = 0.0; }',
+          '  float distance = (offset * strokeWidth * pixelWidth) /',
+          '                    cosAngle;',
+          '  worldPos.x += distance * sin(angle);',
+          '  worldPos.y -= distance * cos(angle) * aspect;',
+          '  gl_Position = worldPos;',
+          '}'
+        ].join('\n'),
+        shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
     shader.setShaderSource(vertexShaderSource);
     return shader;
   }
 
   function createFragmentShader() {
     var fragmentShaderSource = [
-      '#ifdef GL_ES',
-      '  precision highp float;',
-      '#endif',
-      'varying vec3 strokeColorVar;',
-      'varying float strokeWidthVar;',
-      'varying float strokeOpacityVar;',
-      'void main () {',
-      '  gl_FragColor = vec4 (strokeColorVar, strokeOpacityVar);',
-      '}'
-    ].join('\n'),
-    shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
+          '#ifdef GL_ES',
+          '  precision highp float;',
+          '#endif',
+          'varying vec3 strokeColorVar;',
+          'varying float strokeWidthVar;',
+          'varying float strokeOpacityVar;',
+          'void main () {',
+          '  gl_FragColor = vec4 (strokeColorVar, strokeOpacityVar);',
+          '}'
+        ].join('\n'),
+        shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
     shader.setShaderSource(fragmentShaderSource);
     return shader;
   }
@@ -152,12 +152,12 @@ geo.gl.lineFeature = function (arg) {
                  position, 3);
 
     len = numSegments * order.length;
-    posBuf           = getBuffer(geom, 'pos', len * 3);
-    nextBuf          = getBuffer(geom, 'next', len * 3);
-    prevBuf          = getBuffer(geom, 'prev', len * 3);
-    offsetBuf        = getBuffer(geom, 'offset', len * 1);
-    strokeWidthBuf   = getBuffer(geom, 'strokeWidth', len * 1);
-    strokeColorBuf   = getBuffer(geom, 'strokeColor', len * 3);
+    posBuf = getBuffer(geom, 'pos', len * 3);
+    nextBuf = getBuffer(geom, 'next', len * 3);
+    prevBuf = getBuffer(geom, 'prev', len * 3);
+    offsetBuf = getBuffer(geom, 'offset', len * 1);
+    strokeWidthBuf = getBuffer(geom, 'strokeWidth', len * 1);
+    strokeColorBuf = getBuffer(geom, 'strokeColor', len * 3);
     strokeOpacityBuf = getBuffer(geom, 'strokeOpacity', len * 1);
     indicesBuf = geom.primitive(0).indices();
     if (!(indicesBuf instanceof Uint16Array) || indicesBuf.length !== len) {
@@ -185,19 +185,19 @@ geo.gl.lineFeature = function (arg) {
         if (j) {
           for (k = 0; k < order.length; k += 1, dest += 1, dest3 += 3) {
             v = vert[order[k][0]];
-            posBuf[dest3]     = position[v.pos];
+            posBuf[dest3] = position[v.pos];
             posBuf[dest3 + 1] = position[v.pos + 1];
             posBuf[dest3 + 2] = position[v.pos + 2];
-            prevBuf[dest3]     = position[v.prev];
+            prevBuf[dest3] = position[v.prev];
             prevBuf[dest3 + 1] = position[v.prev + 1];
             prevBuf[dest3 + 2] = position[v.prev + 2];
-            nextBuf[dest3]     = position[v.next];
+            nextBuf[dest3] = position[v.next];
             nextBuf[dest3 + 1] = position[v.next + 1];
             nextBuf[dest3 + 2] = position[v.next + 2];
             offsetBuf[dest] = order[k][1];
             /* We can ignore the indicies (they will all be zero) */
             strokeWidthBuf[dest] = v.strokeWidth;
-            strokeColorBuf[dest3]     = v.strokeColor.r;
+            strokeColorBuf[dest3] = v.strokeColor.r;
             strokeColorBuf[dest3 + 1] = v.strokeColor.g;
             strokeColorBuf[dest3 + 2] = v.strokeColor.b;
             strokeOpacityBuf[dest] = v.strokeOpacity;
@@ -296,7 +296,7 @@ geo.gl.lineFeature = function (arg) {
         // Primitive indices
         triangles = vgl.triangles();
 
-    m_pixelWidthUnif =  new vgl.floatUniform('pixelWidth',
+    m_pixelWidthUnif = new vgl.floatUniform('pixelWidth',
                           1.0 / m_this.renderer().width());
     m_aspectUniform = new vgl.floatUniform('aspect',
         m_this.renderer().width() / m_this.renderer().height());

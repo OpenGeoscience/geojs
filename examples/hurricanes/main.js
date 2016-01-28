@@ -113,7 +113,7 @@ $(function () {
       .style('font', '20px');
 
     function makePlot(d) {
-      var group = d3.select(this); // jshint ignore:line
+      var group = d3.select(this);
       var t, f, i;
 
       if (d === 0) {

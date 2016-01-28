@@ -152,10 +152,7 @@
       options.url = m_tileUrlFromTemplate(options.url);
     }
 
-    var lastZoom = null,
-        lastX = null,
-        lastY = null,
-        s_init = this._init,
+    var s_init = this._init,
         s_exit = this._exit,
         m_exited;
 
@@ -331,19 +328,19 @@
      */
     this.gcsTileBounds = function (indexOrTile, gcs) {
       var tile = (indexOrTile.index ? indexOrTile : geo.tile({
-            index: indexOrTile,
-            size: {x: this._options.tileWidth, y: this._options.tileHeight},
-            url: ''
-          }));
+        index: indexOrTile,
+        size: {x: this._options.tileWidth, y: this._options.tileHeight},
+        url: ''
+      }));
       var to = this._tileOffset(tile.index.level),
           bounds = tile.bounds({x: 0, y: 0}, to),
           map = this.map(),
           unit = map.unitsPerPixel(tile.index.level);
       var coord = [{
-            x: bounds.left * unit, y: this._topDown() * bounds.top * unit
-          }, {
-            x: bounds.right * unit, y: this._topDown() * bounds.bottom * unit
-          }];
+        x: bounds.left * unit, y: this._topDown() * bounds.top * unit
+      }, {
+        x: bounds.right * unit, y: this._topDown() * bounds.bottom * unit
+      }];
       gcs = (gcs === null ? map.gcs() : (
           gcs === undefined ? map.ingcs() : gcs));
       if (gcs !== map.gcs()) {
@@ -664,8 +661,8 @@
       container.append(tile.image);
       container.css({
         position: 'absolute',
-        left: (bounds.left - parseInt(div.attr('offsetx') || 0)) + 'px',
-        top: (bounds.top - parseInt(div.attr('offsety') || 0)) + 'px'
+        left: (bounds.left - parseInt(div.attr('offsetx') || 0, 10)) + 'px',
+        top: (bounds.top - parseInt(div.attr('offsety') || 0, 10)) + 'px'
       });
 
       // apply fade in animation
@@ -780,7 +777,7 @@
         bounds = this._getViewBounds();
       }
 
-      for (hash in this._activeTiles) {// jshint ignore: line
+      for (hash in this._activeTiles) {
 
         tile = this._activeTiles[hash];
         if (this._canPurge(tile, bounds, zoom, doneLoading)) {
@@ -799,7 +796,7 @@
 
       // ignoring the warning here because this is a privately
       // controlled object with simple keys
-      for (tile in this._activeTiles) {  // jshint ignore: line
+      for (tile in this._activeTiles) {
         tiles.push(this.remove(tile));
       }
 
@@ -895,36 +892,36 @@
      */
     this._updateSubLayers = function (level, view) {
       var canvas = this.canvas(),
-          lastlevel = parseInt(canvas.attr('lastlevel')),
-          lastx = parseInt(canvas.attr('lastoffsetx') || 0),
-          lasty = parseInt(canvas.attr('lastoffsety') || 0);
+          lastlevel = parseInt(canvas.attr('lastlevel'), 10),
+          lastx = parseInt(canvas.attr('lastoffsetx') || 0, 10),
+          lasty = parseInt(canvas.attr('lastoffsety') || 0, 10);
       if (lastlevel === level && Math.abs(lastx - view.left) < 65536 &&
           Math.abs(lasty - view.top) < 65536) {
         return {x: lastx, y: lasty};
       }
       var map = this.map(),
           to = this._tileOffset(level),
-          x = parseInt((view.left + view.right - map.size().width) / 2 + to.x),
-          y = parseInt((view.top + view.bottom - map.size().height) / 2 + to.y);
+          x = parseInt((view.left + view.right - map.size().width) / 2 + to.x, 10),
+          y = parseInt((view.top + view.bottom - map.size().height) / 2 + to.y, 10);
       canvas.find('.geo-tile-layer').each(function (idx, el) {
         var $el = $(el),
-            layer = parseInt($el.data('tileLayer'));
+            layer = parseInt($el.data('tileLayer'), 10);
         $el.css(
           'transform',
           'scale(' + Math.pow(2, level - layer) + ')'
         );
-        var layerx = parseInt(x / Math.pow(2, level - layer)),
-            layery = parseInt(y / Math.pow(2, level - layer)),
-            dx = layerx - parseInt($el.attr('offsetx') || 0),
-            dy = layery - parseInt($el.attr('offsety') || 0);
+        var layerx = parseInt(x / Math.pow(2, level - layer), 10),
+            layery = parseInt(y / Math.pow(2, level - layer), 10),
+            dx = layerx - parseInt($el.attr('offsetx') || 0, 10),
+            dy = layery - parseInt($el.attr('offsety') || 0, 10);
         $el.attr({offsetx: layerx, offsety: layery});
         $el.find('.geo-tile-container').each(function (tileidx, tileel) {
           $(tileel).css({
-            left: (parseInt($(tileel).css('left')) - dx) + 'px',
-            top: (parseInt($(tileel).css('top')) - dy) + 'px'
+            left: (parseInt($(tileel).css('left'), 10) - dx) + 'px',
+            top: (parseInt($(tileel).css('top'), 10) - dy) + 'px'
           });
-        }.bind(this));
-      }.bind(this));
+        });
+      });
       canvas.attr({lastoffsetx: x, lastoffsety: y, lastlevel: level});
       return {x: x, y: y};
     };
@@ -943,7 +940,6 @@
       var map = this.map(),
           mapZoom = map.zoom(),
           zoom = this._options.tileRounding(mapZoom),
-          center = this.displayToLevel(undefined, zoom),
           bounds = map.bounds(undefined, null),
           tiles, view = this._getViewBounds();
 
@@ -988,10 +984,6 @@
           rotation: map.rotation()
         });
       }
-
-      lastZoom = mapZoom;
-      lastX = center.x;
-      lastY = center.y;
 
       // reset the tile coverage tree
       this._tileTree = {};
@@ -1165,9 +1157,9 @@
         scale = Math.pow(2, (bounds.level || 0) - (tile.index.level || 0));
       }
       return (tile.bottom - to.y) * scale < bounds.top ||
-             (tile.left - to.x) * scale   > bounds.right ||
-             (tile.top - to.y) * scale    > bounds.bottom ||
-             (tile.right - to.x) * scale  < bounds.left;
+             (tile.left - to.x) * scale > bounds.right ||
+             (tile.top - to.y) * scale > bounds.bottom ||
+             (tile.right - to.x) * scale < bounds.left;
     };
 
     /**
@@ -1347,7 +1339,7 @@
     url: null,
     subdomains: 'abc',
     tileOffset: function (level) {
-      void(level);
+      void (level);
       return {x: 0, y: 0};
     },
     topDown: false,

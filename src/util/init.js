@@ -1,8 +1,8 @@
 
 (function () {
-  "use strict";
+  'use strict';
 
-  var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
   /**
    * Takes a variable number of arguments and returns the first numeric value
@@ -65,7 +65,7 @@
      * Returns true if the argument is a function.
      */
     isFunction: function (f) {
-      return typeof f === "function";
+      return typeof f === 'function';
     },
 
     /**
@@ -86,7 +86,7 @@
     randomString: function (n) {
       var s, i, r;
       n = n || 8;
-      s = "";
+      s = '';
       for (i = 0; i < n; i += 1) {
         r = Math.floor(Math.random() * chars.length);
         s += chars.substring(r, r + 1);
@@ -102,14 +102,13 @@
           color.b !== undefined) {
         return color;
       }
-      if (typeof color === "string") {
+      if (typeof color === 'string') {
         if (geo.util.cssColors.hasOwnProperty(color)) {
           color = geo.util.cssColors[color];
-        } else if (color.charAt(0) === "#") {
+        } else if (color.charAt(0) === '#') {
           color = parseInt(color.slice(1), 16);
         }
       }
-      // jshint -W016
       if (isFinite(color)) {
         color = {
           r: ((color & 0xff0000) >> 16) / 255,
@@ -117,7 +116,6 @@
           b: ((color & 0xff)) / 255
         };
       }
-      // jshint +W016
       return color;
     },
 

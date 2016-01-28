@@ -1,4 +1,3 @@
-/* jshint -W101 */
 window.startTest = function (done) {
   "use strict";
 

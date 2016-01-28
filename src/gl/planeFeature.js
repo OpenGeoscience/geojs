@@ -10,7 +10,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.gl.planeFeature = function (arg) {
-  "use strict";
+  'use strict';
   if (!(this instanceof geo.gl.planeFeature)) {
     return new geo.gl.planeFeature(arg);
   }
@@ -74,7 +74,7 @@ geo.gl.planeFeature = function (arg) {
         ul[0], ul[1], ul[2],
         lr[0], lr[1], lr[2]);
 
-      m_actor.material().shaderProgram().uniform("opacity").set(
+      m_actor.material().shaderProgram().uniform('opacity').set(
         m_this.style().opacity !== undefined ? m_this.style().opacity : 1);
 
       m_this.renderer().contextRenderer().addActor(m_actor);
@@ -84,7 +84,7 @@ geo.gl.planeFeature = function (arg) {
         lr[0], lr[1], lr[2],
         ul[0], ul[1], ul[2], true);
 
-      m_actor.material().shaderProgram().uniform("opacity").set(
+      m_actor.material().shaderProgram().uniform('opacity').set(
         m_this.style().opacity !== undefined ? m_this.style().opacity : 1);
 
       texture = vgl.texture();
@@ -145,7 +145,7 @@ geo.gl.planeFeature = function (arg) {
     if (m_this.updateTime().getMTime() <= m_this.getMTime()) {
       m_actor.setVisible(m_this.visible());
       m_actor.material().setBinNumber(m_this.bin());
-      m_actor.material().shaderProgram().uniform("opacity").set(
+      m_actor.material().shaderProgram().uniform('opacity').set(
         m_this.style().opacity !== undefined ? m_this.style().opacity : 1);
     }
 
@@ -168,4 +168,4 @@ geo.gl.planeFeature = function (arg) {
 inherit(geo.gl.planeFeature, geo.planeFeature);
 
 // Now register it
-geo.registerFeature("vgl", "plane", geo.gl.planeFeature);
+geo.registerFeature('vgl', 'plane', geo.gl.planeFeature);
