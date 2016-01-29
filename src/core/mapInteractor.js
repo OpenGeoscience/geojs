@@ -20,7 +20,7 @@ var mapInteractor = function (args) {
   }
   object.call(this);
 
-  var geo_event = require('event');
+  var geo_event = require('./event');
   var throttle = require('../util').throttle;
   var debounce = require('../util').debounce;
 

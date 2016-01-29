@@ -23,6 +23,7 @@
     "pnltri": "^2.1.1"
   },
   "devDependencies": {
+    "webpack": "^1.12.12",
     "blanket": "~1.2",
     "body-parser": "^1.14.1",
     "eslint": "^1.10.3",
