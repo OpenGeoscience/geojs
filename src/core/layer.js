@@ -495,15 +495,14 @@ var layer = function (arg) {
  * @returns {number}
  */
 layer.newLayerId = (function () {
-    'use strict';
-    var currentId = 1;
-    return function () {
-      var id = currentId;
-      currentId += 1;
-      return id;
-    };
-  }()
-);
+  'use strict';
+  var currentId = 1;
+  return function () {
+    var id = currentId;
+    currentId += 1;
+    return id;
+  };
+}());
 
 /**
  * General object specification for feature types.

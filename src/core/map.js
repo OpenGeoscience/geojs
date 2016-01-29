@@ -88,7 +88,6 @@ var map = function (arg) {
   var mapInteractor = require('./mapInteractor');
   var clock = require('./clock');
 
-
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Private member variables
@@ -481,7 +480,7 @@ var map = function (arg) {
       screenPosition: origin ? origin.map : undefined
     };
 
-    m_this.geoTrigger(geo.event.rotate, evt);
+    m_this.geoTrigger(geo_event.rotate, evt);
 
     if (origin && origin.geo && origin.map) {
       var shifted = m_this.gcsToDisplay(origin.geo);
@@ -525,11 +524,11 @@ var map = function (arg) {
     m_this.modified();
     // trigger a pan event
     m_this.geoTrigger(
-      geo_event.pan,
-      {
-        geo: coordinates,
-        screenDelta: null
-      }
+        geo_event.pan,
+        {
+          geo: coordinates,
+          screenDelta: null
+        }
     );
     return m_this;
   };
@@ -807,8 +806,7 @@ var map = function (arg) {
     m_this.geoTrigger(geo_event.draw, {
       type: geo_event.draw,
       target: m_this
-      }
-    );
+    });
 
     m_this._update();
 
@@ -819,8 +817,7 @@ var map = function (arg) {
     m_this.geoTrigger(geo_event.drawEnd, {
       type: geo_event.drawEnd,
       target: m_this
-      }
-    );
+    });
 
     return m_this;
   };
@@ -1112,33 +1109,33 @@ var map = function (arg) {
 
     if (opts.zCoord) {
       m_transition.interp = opts.interp(
-        [
-          m_transition.start.center.x,
-          m_transition.start.center.y,
-          zoom2z(m_transition.start.zoom),
-          m_transition.start.rotation
-        ],
-        [
-          m_transition.end.center.x,
-          m_transition.end.center.y,
-          zoom2z(m_transition.end.zoom),
-          m_transition.end.rotation
-        ]
+          [
+            m_transition.start.center.x,
+            m_transition.start.center.y,
+            zoom2z(m_transition.start.zoom),
+            m_transition.start.rotation
+          ],
+          [
+            m_transition.end.center.x,
+            m_transition.end.center.y,
+            zoom2z(m_transition.end.zoom),
+            m_transition.end.rotation
+          ]
       );
     } else {
       m_transition.interp = opts.interp(
-        [
-          m_transition.start.center.x,
-          m_transition.start.center.y,
-          m_transition.start.zoom,
-          m_transition.start.rotation
-        ],
-        [
-          m_transition.end.center.x,
-          m_transition.end.center.y,
-          m_transition.end.zoom,
-          m_transition.end.rotation
-        ]
+          [
+            m_transition.start.center.x,
+            m_transition.start.center.y,
+            m_transition.start.zoom,
+            m_transition.start.rotation
+          ],
+          [
+            m_transition.end.center.x,
+            m_transition.end.center.y,
+            m_transition.end.zoom,
+            m_transition.end.rotation
+          ]
       );
     }
 
@@ -1222,7 +1219,7 @@ var map = function (arg) {
       m_transition = null;
       m_this.geoTrigger(geo_event.transitionend, opts);
       return m_this;
-    } else if (geo.event.cancelAnimation) {
+    } else if (geo_event.cancelAnimation) {
       // run the navigation synchronously
       opts.duration = 0;
       anim(0);
@@ -1380,7 +1377,7 @@ var map = function (arg) {
       y: (bounds.top + bounds.bottom) / 2 - m_origin.y
     };
     if (gcs !== m_gcs) {
-      center = geo.transform.transformCoordinates(m_gcs, gcs, [center])[0];
+      center = transform.transformCoordinates(m_gcs, gcs, [center])[0];
     }
     return {
       zoom: zoom,
@@ -1445,7 +1442,7 @@ var map = function (arg) {
       bounds = fix_bounds(bounds, 0);
     }
     if (gcs !== m_gcs) {
-      var bds = geo.transform.transformCoordinates(
+      var bds = transform.transformCoordinates(
         m_gcs, gcs,
         [[bounds.left, bounds.top], [bounds.right, bounds.bottom]]);
       bounds = {

@@ -98,11 +98,11 @@ var lineFeature = function (arg) {
       if (t < 0) { return dist2(q, u); }
       if (t > 1) { return dist2(q, v); }
       return dist2(
-        q,
-        {
-          x: u.x + t * (v.x - u.x),
-          y: u.y + t * (v.y - u.y)
-        }
+          q,
+          {
+            x: u.x + t * (v.x - u.x),
+            y: u.y + t * (v.y - u.y)
+          }
       );
     }
 

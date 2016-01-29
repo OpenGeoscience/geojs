@@ -1,20 +1,26 @@
+var inherit = require('../util').inherit;
+var feature = require('./feature');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class contourFeature
  *
- * @class
+ * @class geo.contourFeature
  * @extends geo.feature
  * @returns {geo.contourFeature}
  *
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.contourFeature = function (arg) {
+var contourFeature = function (arg) {
   'use strict';
-  if (!(this instanceof geo.contourFeature)) {
-    return new geo.contourFeature(arg);
+  if (!(this instanceof contourFeature)) {
+    return new contourFeature(arg);
   }
+
+  var util = require('../util');
+
   arg = arg || {};
-  geo.feature.call(this, arg);
+  feature.call(this, arg);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -122,7 +128,7 @@ geo.contourFeature = function (arg) {
       }
       return all;
     }
-    return geo.util.ensureFunction(m_contour[key]);
+    return util.ensureFunction(m_contour[key]);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -186,13 +192,13 @@ geo.contourFeature = function (arg) {
         };
     /* Create the min/max colors and the color array */
     result.minColor = $.extend({a: contour.get('minOpacity')() || 0},
-        geo.util.convertColor(contour.get('minColor')()));
+        util.convertColor(contour.get('minColor')()));
     result.maxColor = $.extend({a: contour.get('maxOpacity')() || 0},
-        geo.util.convertColor(contour.get('maxColor')()));
+        util.convertColor(contour.get('maxColor')()));
     contour.get('colorRange')().forEach(function (clr, idx) {
       result.colorMap.push($.extend(
           {a: opacityRange && opacityRange[idx] !== undefined ?
-          opacityRange[idx] : 1}, geo.util.convertColor(clr)));
+          opacityRange[idx] : 1}, util.convertColor(clr)));
     });
     /* Determine which values are usable */
     if (gridW * gridH > data.length) {
@@ -383,7 +389,7 @@ geo.contourFeature = function (arg) {
   return this;
 };
 
-inherit(geo.contourFeature, geo.feature);
+inherit(contourFeature, feature);
 
 /* Example:
 

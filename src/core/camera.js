@@ -1,6 +1,12 @@
 (function () {
   'use strict';
 
+  var inherit = require('../util').inherit;
+  var object = require('./object');
+  var util = require('../util');
+  var mat4 = require('mat4');
+  var vec4 = require('vec4');
+
   //////////////////////////////////////////////////////////////////////////////
   /**
    * This class defines the raw interface for a camera.  At a low level, the
@@ -35,7 +41,7 @@
    *   * viewFromCenterSizeRotation: set the camera view based on a center
    *        point, boundary size, and rotation angle.
    *
-   * @class
+   * @class geo.camera
    * @extends geo.object
    * @param {object?} spec Options argument
    * @param {string} spec.projection One of the supported geo.camera.projection
@@ -45,24 +51,27 @@
    * @returns {geo.camera}
    */
   //////////////////////////////////////////////////////////////////////////////
-  geo.camera = function (spec) {
-    if (!(this instanceof geo.camera)) {
-      return new geo.camera(spec);
+  var camera = function (spec) {
+    if (!(this instanceof camera)) {
+      return new camera(spec);
     }
+
+    var geo_event = require('./event');
+
     spec = spec || {};
-    geo.object.call(this, spec);
+    object.call(this, spec);
 
     /**
      * The view matrix
      * @protected
      */
-    this._view = geo.util.mat4AsArray();
+    this._view = util.mat4AsArray();
 
     /**
      * The projection matrix
      * @protected
      */
-    this._proj = geo.util.mat4AsArray();
+    this._proj = util.mat4AsArray();
 
     /**
      * The projection type (one of `this.constructor.projection`)
@@ -74,13 +83,13 @@
      * The transform matrix (view * proj)
      * @protected
      */
-    this._transform = geo.util.mat4AsArray();
+    this._transform = util.mat4AsArray();
 
     /**
      * The inverse transform matrix (view * proj)^-1
      * @protected
      */
-    this._inverse = geo.util.mat4AsArray();
+    this._inverse = util.mat4AsArray();
 
     /**
      * Cached bounds object recomputed on demand.
@@ -150,9 +159,9 @@
       this._bounds = null;
       this._display = null;
       this._world = null;
-      this._transform = geo.camera.combine(this._proj, this._view);
+      this._transform = camera.combine(this._proj, this._view);
       mat4.invert(this._inverse, this._transform);
-      this.geoTrigger(geo.event.camera.view, {
+      this.geoTrigger(geo_event.camera.view, {
         camera: this
       });
     };
@@ -204,16 +213,16 @@
       get: function () {
         var mat;
         if (this._display === null) {
-          mat = geo.camera.affine(
-            {x: 1, y: 1}, // translate to: [0, 2] x [0, 2]
-            {
-              x: this.viewport.width / 2,
-              y: this.viewport.height / -2
-            }             // scale to: [0, width] x [-height, 0]
+          mat = camera.affine(
+              {x: 1, y: 1}, // translate to: [0, 2] x [0, 2]
+              {
+                x: this.viewport.width / 2,
+                y: this.viewport.height / -2
+              }             // scale to: [0, width] x [-height, 0]
           );
 
           // applies mat to the transform (world -> normalized)
-          this._display = geo.camera.combine(
+          this._display = camera.combine(
             mat,
             this._transform
           );
@@ -231,7 +240,7 @@
       get: function () {
         if (this._world === null) {
           this._world = mat4.invert(
-            geo.util.mat4AsArray(),
+            util.mat4AsArray(),
             this.display
           );
         }
@@ -254,7 +263,7 @@
           this._projection = type;
           this._createProj();
           this._update();
-          this.geoTrigger(geo.event.camera.projection, {
+          this.geoTrigger(geo_event.camera.projection, {
             camera: this,
             projection: type
           });
@@ -328,7 +337,7 @@
 
         this._viewport = {width: viewport.width, height: viewport.height};
         this._update();
-        this.geoTrigger(geo.event.camera.viewport, {
+        this.geoTrigger(geo_event.camera.viewport, {
           camera: this,
           viewport: this.viewport
         });
@@ -372,7 +381,7 @@
      * @returns {vec4} The point in clip space coordinates
      */
     this._worldToClip4 = function (point) {
-      return geo.camera.applyTransform(this._transform, point);
+      return camera.applyTransform(this._transform, point);
     };
 
     /**
@@ -382,7 +391,7 @@
      * @returns {vec4} The point in world space coordinates
      */
     this._clipToWorld4 = function (point) {
-      return geo.camera.applyTransform(this._inverse, point);
+      return camera.applyTransform(this._inverse, point);
     };
 
     /**
@@ -588,8 +597,8 @@
      * @return {this} Chainable
      */
     this._viewFromCenterSizeRotation = function (center, size, rotation) {
-      var translate = geo.util.vec3AsArray(),
-          scale = geo.util.vec3AsArray(),
+      var translate = util.vec3AsArray(),
+          scale = util.vec3AsArray(),
           c_ar, v_ar, w, h;
 
       // reset view to the identity
@@ -727,7 +736,7 @@
         default:
           throw new Error('Unknown transform ' + transform);
       }
-      return geo.camera.css(m);
+      return camera.css(m);
     };
 
     /**
@@ -804,7 +813,7 @@
   /**
    * Supported projection types.
    */
-  geo.camera.projection = {
+  camera.projection = {
     perspective: true,
     parallel: true
   };
@@ -812,7 +821,7 @@
   /**
    * Camera clipping bounds, probably shouldn't be modified.
    */
-  geo.camera.bounds = {
+  camera.bounds = {
     left: -1,
     right: 1,
     top: 1,
@@ -826,7 +835,7 @@
    * @param {mat4} t A matrix transform
    * @returns {string} A css transform string
    */
-  geo.camera.css = function (t) {
+  camera.css = function (t) {
     return (
       'matrix3d(' +
         [
@@ -867,8 +876,8 @@
    * @param {object?} post Coordinate offset **after** scaling
    * @returns {mat4} The new transform matrix
    */
-  geo.camera.affine = function (pre, scale, post) {
-    var mat = geo.util.mat4AsArray();
+  camera.affine = function (pre, scale, post) {
+    var mat = util.mat3AsArray();
 
     // Note: mat4 operations are applied to the right side of the current
     // transform, so the first applied here is the last applied to the
@@ -891,7 +900,7 @@
    * @param {vec4} pt
    * @returns {vec4}
    */
-  geo.camera.applyTransform = function (t, pt) {
+  camera.applyTransform = function (t, pt) {
     return vec4.transformMat4(pt, pt, t);
   };
 
@@ -903,9 +912,9 @@
    * @param {mat4} B
    * @returns {mat4} A * B
    */
-  geo.camera.combine = function (A, B) {
-    return mat4.mul(geo.util.mat4AsArray(), A, B);
+  camera.combine = function (A, B) {
+    return mat4.mul(util.mat4AsArray(), A, B);
   };
 
-  inherit(geo.camera, geo.object);
+  inherit(camera, object);
 })();
