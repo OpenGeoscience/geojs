@@ -18,16 +18,5 @@
         "browser": true,
         "jquery": true
     },
-    "globals": {
-        "proj4": true,
-        "gl": true,
-        "d3": true,
-        "mat4": true,
-        "vec4": true,
-        "vec3": true,
-        "geo": true,
-        "vgl": true,
-        "inherit": true,
-        "PNLTRI": true
-    }
+    "globals": {}
 }
