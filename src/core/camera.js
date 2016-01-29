@@ -4,8 +4,8 @@
   var inherit = require('../util').inherit;
   var object = require('./object');
   var util = require('../util');
-  var mat4 = require('mat4');
-  var vec4 = require('vec4');
+  var mat4 = require('gl-mat4');
+  var vec4 = require('gl-vec4');
 
   //////////////////////////////////////////////////////////////////////////////
   /**

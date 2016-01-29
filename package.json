@@ -13,6 +13,13 @@
   },
   "dependencies": {
     "bower": "~1.7",
+    "d3": "~3.3",
+    "gl-mat3": "^1.0.0",
+    "gl-mat4": "^1.1.4",
+    "gl-matrix": "~2.1",
+    "gl-vec2": "^1.0.0",
+    "gl-vec3": "^1.0.3",
+    "gl-vec4": "^1.0.1",
     "grunt": "~0.4",
     "grunt-cli": "~0.1",
     "grunt-contrib-clean": "~0.7",
@@ -20,7 +27,11 @@
     "grunt-contrib-copy": "~0.8",
     "grunt-contrib-uglify": "~0.11",
     "grunt-template": "~0.2",
-    "pnltri": "^2.1.1"
+    "imports-loader": "^0.6.5",
+    "jquery": "~2.1",
+    "pnltri": "^2.1.1",
+    "proj4": "=2.3.3",
+    "vgl": "0.3.5"
   },
   "devDependencies": {
     "webpack": "^1.12.12",
