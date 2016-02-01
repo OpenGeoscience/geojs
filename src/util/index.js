@@ -1,8 +1,8 @@
-'use strict'; // jshint ignore: line
+'use strict';
 
 /**
  * @module geo.util
- * */
+ */
 var util = {};
 
 var widgets = {
@@ -152,7 +152,7 @@ util.registerFeature = function (category, name, func) {
  * Create new instance of the renderer
  */
 //////////////////////////////////////////////////////////////////////////////
-util.createFeature  = function (name, layer, renderer, arg) {
+util.createFeature = function (name, layer, renderer, arg) {
   var category = renderer.api(),
       options = {'layer': layer, 'renderer': renderer};
   if (category in features && name in features[category]) {
@@ -256,7 +256,7 @@ util.registerWidget = function (category, name, func) {
  * Create new instance of the widget
  */
 //////////////////////////////////////////////////////////////////////////////
-util.createWidget  = function (name, layer, arg) {
+util.createWidget = function (name, layer, arg) {
   var options = {
     layer: layer
   };

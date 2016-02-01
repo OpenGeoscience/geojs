@@ -19,6 +19,7 @@ module.exports = {
   },
   output: {
     path: path.join(__dirname, 'dist', 'built'),
+    publicPath: 'dist/built',
     filename: '[name].js',
     library: 'geo',
     libraryTarget: 'umd'
@@ -26,7 +27,7 @@ module.exports = {
   resolve: {
     alias: {
       jquery: 'jquery/dist/jquery',
-      proj4: 'proj4/dist/proj4-src.js',
+      proj4: 'proj4/lib',
       vgl: 'vgl/vgl.js'
     }
   },
@@ -40,5 +41,14 @@ module.exports = {
       include: /\.min\.js$/,
       minimize: true
     })
-  ]
+  ],
+  module: {
+    loaders: [{
+      test: /\.json$/,
+      loader: 'json-loader'
+    }, {
+      test: /^vgl$/,
+      loader: 'exports?vgl!./vgl/vgl.js'
+    }]
+  }
 };
