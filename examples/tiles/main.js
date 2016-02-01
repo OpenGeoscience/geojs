@@ -54,6 +54,17 @@ var tileDebug = {};
 $(function () {
   'use strict';
 
+  // Most map tile servers use EPSG:3857 (Web Mercator).  Using a tile server
+  // with a different projection works correctly in all renderers.  Using a
+  // different projection for the tiles and the map can work in the vgl
+  // renderer, but may have problems as the tile density is not uniform or
+  // regular.
+  var gcsTable = {
+    'EPSG:3857': 'EPSG:3857',
+    'SR-ORG:6865': '+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs',
+    'ESRI:54028': '+proj=cass +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs'
+  };
+
   // Parse query parameters into an object for ease of access
   var query = document.location.search.replace(/(^\?)/, '').split(
     '&').map(function (n) {
@@ -100,7 +111,8 @@ $(function () {
       y: 39.5
     },
     maxBounds: {},
-    zoom: query.zoom !== undefined ? parseFloat(query.zoom) : 3
+    zoom: query.zoom !== undefined ? parseFloat(query.zoom) : 3,
+    gcs: gcsTable[query.gcs]
   };
   // Set the tile layer defaults to use the specified renderer and opacity
   var layerParams = {
@@ -108,7 +120,10 @@ $(function () {
     opacity: query.opacity || '1',
     /* Always use a larger cache so if keepLower is changed, we still have a
      * big enough cache. */
-    cacheSize: 600
+    cacheSize: 600,
+    /* Most map sources are in Web Mercator, so specify it here if the map's
+     * gcs has been specified. */
+    gcs: query.gcs ? 'EPSG:3857' : undefined
   };
   if (layerParams.renderer === 'null' || layerParams.renderer === 'html') {
     layerParams.renderer = null;
@@ -130,8 +145,8 @@ $(function () {
   // a pixel coordinate system.
   var w, h;
   if (query.w && query.h) {
-    w = parseInt(query.w);
-    h = parseInt(query.h);
+    w = parseInt(query.w, 10);
+    h = parseInt(query.h, 10);
     // Set a pixel coordinate system where 0, 0 is the upper left and w, h is
     // the lower-right.
     /* If both ingcs and gcs are set to an empty string '', the coordinates
@@ -142,6 +157,7 @@ $(function () {
      * The 'longlat' projection functionally is a no-op in this case. */
     mapParams.ingcs = '+proj=longlat +axis=esu';
     mapParams.gcs = '+proj=longlat +axis=enu';
+    layerParams.gcs = undefined;  /* use the map gcs */
     /* mapParams.ingcs = mapParams.gcs = ''; */
     mapParams.maxBounds = {left: 0, top: 0, right: w, bottom: h};
     mapParams.center = {x: w / 2, y: h / 2};
@@ -187,10 +203,10 @@ $(function () {
     layerParams.tileRounding = Math[query.round];
   }
   if (query.tileWidth) {
-    layerParams.tileWidth = parseInt(query.tileWidth);
+    layerParams.tileWidth = parseInt(query.tileWidth, 10);
   }
   if (query.tileHeight) {
-    layerParams.tileHeight = parseInt(query.tileHeight);
+    layerParams.tileHeight = parseInt(query.tileHeight, 10);
   }
   if (w && h) {
     mapParams.max = Math.ceil(Math.log(Math.max(
@@ -215,25 +231,25 @@ $(function () {
   }
   // Populate boolean flags for the map
   $.each({
-      clampBoundsX: 'clampBoundsX',
-      clampBoundsY: 'clampBoundsY',
-      clampZoom: 'clampZoom',
-      discrete: 'discreteZoom'
-    }, function (qkey, mkey) {
-      if (query[qkey] !== undefined) {
-        mapParams[mkey] = query[qkey] === 'true';
-      }
-    });
+    clampBoundsX: 'clampBoundsX',
+    clampBoundsY: 'clampBoundsY',
+    clampZoom: 'clampZoom',
+    discrete: 'discreteZoom'
+  }, function (qkey, mkey) {
+    if (query[qkey] !== undefined) {
+      mapParams[mkey] = query[qkey] === 'true';
+    }
+  });
   // Populate boolean flags for the tile layer
   $.each({
-      lower: 'keepLower',
-      wrapX: 'wrapX',
-      wrapY: 'wrapY'
-    }, function (qkey, lkey) {
-      if (query[qkey] !== undefined) {
-        layerParams[lkey] = query[qkey] === 'true';
-      }
-    });
+    lower: 'keepLower',
+    wrapX: 'wrapX',
+    wrapY: 'wrapY'
+  }, function (qkey, lkey) {
+    if (query[qkey] !== undefined) {
+      layerParams[lkey] = query[qkey] === 'true';
+    }
+  });
   // Create a map object
   var map = geo.map(mapParams);
   // Set the projection.  This has to be set on the camera, not in the map
@@ -292,6 +308,13 @@ $(function () {
       case 'fade':
         $('#map').toggleClass('fade-image', processedValue);
         break;
+      case 'gcs':
+        mapParams.gcs = gcsTable[processedValue] || 'EPSG:3857';
+        map.gcs(mapParams.gcs);
+        map.deleteLayer(osmLayer);
+        osmLayer = map.createLayer('osm', layerParams);
+        tileDebug.osmLayer = osmLayer;
+        break;
       case 'lower':
         layerParams.keepLower = (value === 'true');
         break;
@@ -345,6 +368,7 @@ $(function () {
     if (ctl.is('.layerparam') && ctl.attr('reload') === 'true') {
       map.deleteLayer(osmLayer);
       osmLayer = map.createLayer('osm', layerParams);
+      tileDebug.osmLayer = osmLayer;
     }
     // update the url to reflect the changes
     query[param] = value;

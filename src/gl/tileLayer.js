@@ -41,7 +41,7 @@ geo.gl.tileLayer = function () {
 
   /* Remove the tile feature. */
   this._remove = function (tile) {
-    if (tile.quadId !== undefined) {
+    if (tile.quadId !== undefined && m_quadFeature) {
       for (var i = 0; i < m_tiles.length; i += 1) {
         if (m_tiles[i].id === tile.quadId) {
           m_tiles.splice(i, 1);
@@ -60,6 +60,7 @@ geo.gl.tileLayer = function () {
   this._exit = function () {
     m_this.deleteFeature(m_quadFeature);
     m_quadFeature = null;
+    m_tiles = [];
     s_exit.apply(m_this, arguments);
   };
 
@@ -73,7 +74,7 @@ geo.gl.tileLayer = function () {
       previewImage: m_this._options.previewImage
     });
     m_quadFeature.geoTrigger = undefined;
-    m_quadFeature.gcs(m_this.map().gcs());
+    m_quadFeature.gcs(m_this._options.gcs || m_this.map().gcs());
     m_quadFeature.data(m_tiles);
     m_quadFeature._update();
   };

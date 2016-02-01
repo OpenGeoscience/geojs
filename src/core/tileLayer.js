@@ -183,7 +183,7 @@
       // smaller values will do needless computations.
       track: options.cacheSize,
       needed: function (tile) {
-        return tile === this.cache.get(tile.toString());
+        return tile === this.cache.get(tile.toString(), true);
       }.bind(this)
     });
 
@@ -429,15 +429,21 @@
      * @param {object} bounds The map bounds in world coordinates
      */
     this._getTileRange = function (level, bounds) {
+      var corners = [
+        this.tileAtPoint({x: bounds.left, y: bounds.top}, level),
+        this.tileAtPoint({x: bounds.right, y: bounds.top}, level),
+        this.tileAtPoint({x: bounds.left, y: bounds.bottom}, level),
+        this.tileAtPoint({x: bounds.right, y: bounds.bottom}, level)
+      ];
       return {
-        start: this.tileAtPoint({
-          x: bounds.left,
-          y: bounds.top
-        }, level),
-        end: this.tileAtPoint({
-          x: bounds.right,
-          y: bounds.bottom
-        }, level)
+        start: {
+          x: Math.min(corners[0].x, corners[1].x, corners[2].x, corners[3].x),
+          y: Math.min(corners[0].y, corners[1].y, corners[2].y, corners[3].y)
+        },
+        end: {
+          x: Math.max(corners[0].x, corners[1].x, corners[2].x, corners[3].x),
+          y: Math.max(corners[0].y, corners[1].y, corners[2].y, corners[3].y)
+        }
       };
     };
 
@@ -1243,7 +1249,7 @@
       /* Reverse the y coordinate, since we expect the gcs coordinate system
        * to be right-handed and the level coordinate system to be
        * left-handed. */
-      var gcsPt = map.displayToGcs(pt, null),
+      var gcsPt = map.displayToGcs(pt, this._options.gcs || null),
           lvlPt = {x: gcsPt.x / unit, y: this._topDown() * gcsPt.y / unit};
       return lvlPt;
     };
