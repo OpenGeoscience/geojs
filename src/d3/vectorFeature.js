@@ -53,26 +53,26 @@ geo.d3.vectorFeature = function (arg) {
   function updateMarkers(data, stroke, opacity, originStyle, endStyle, featureID) {
 
     var markers = [
-      {
-        type: 'arrow',
-        attrs: {'class': 'geo-vector', 'viewBox': '0 0 10 10', 'refX': '1', 'refY': '5', 'markerHeight': '5', 'markerWidth': '5', 'orient': 'auto'},
-        path: 'M 0 0 L 10 5 L 0 10 z'
-      },
-      {
-        type: 'point',
-        attrs: {'class': 'geo-vector', 'viewBox': '0 0 12 12', 'refX': '6', 'refY': '6', 'markerHeight': '8', 'markerWidth': '8', 'orient': 'auto'},
-        path: 'M 6 3 A 3 3 0 1 1 5.99999 3 Z'
-      },
-      {
-        type: 'bar',
-        attrs: {'class': 'geo-vector', 'viewBox': '0 0 10 10', 'refX': '0', 'refY': '5', 'markerHeight': '6', 'markerWidth': '6', 'orient': 'auto'},
-        path: 'M 0 0 L 2 0 L 2 10 L 0 10 z'
-      },
-      {
-        type: 'wedge',
-        attrs: {'class': 'geovector', 'viewBox': '0 0 10 10', 'refX': '10', 'refY': '5', 'markerHeight': '5', 'markerWidth': '5', 'orient': 'auto'},
-        path: 'M 0 0 L 1 0 L 10 5 L 1 10 L 0 10 L 9 5 L 0 0'
-      },
+        {
+          type: 'arrow',
+          attrs: {'class': 'geo-vector', 'viewBox': '0 0 10 10', 'refX': '1', 'refY': '5', 'markerHeight': '5', 'markerWidth': '5', 'orient': 'auto'},
+          path: 'M 0 0 L 10 5 L 0 10 z'
+        },
+        {
+          type: 'point',
+          attrs: {'class': 'geo-vector', 'viewBox': '0 0 12 12', 'refX': '6', 'refY': '6', 'markerHeight': '8', 'markerWidth': '8', 'orient': 'auto'},
+          path: 'M 6 3 A 3 3 0 1 1 5.99999 3 Z'
+        },
+        {
+          type: 'bar',
+          attrs: {'class': 'geo-vector', 'viewBox': '0 0 10 10', 'refX': '0', 'refY': '5', 'markerHeight': '6', 'markerWidth': '6', 'orient': 'auto'},
+          path: 'M 0 0 L 2 0 L 2 10 L 0 10 z'
+        },
+        {
+          type: 'wedge',
+          attrs: {'class': 'geovector', 'viewBox': '0 0 10 10', 'refX': '10', 'refY': '5', 'markerHeight': '5', 'markerWidth': '5', 'orient': 'auto'},
+          path: 'M 0 0 L 1 0 L 10 5 L 1 10 L 0 10 L 9 5 L 0 0'
+        }
     ];
 
     var renderer = m_this.renderer();
@@ -80,7 +80,7 @@ geo.d3.vectorFeature = function (arg) {
     //markers don't correspond 1:1 to the data array,
     // there should be <=2 markers for each vector feature (which may be a set of vectors)
     // however, when the data array is empty, we want to remove any associated markers from the DOM
-    var markerSet = markers.filter(function(m){
+    var markerSet = markers.filter(function (m) {
       return (m.type === originStyle() || m.type === endStyle()) && data.length; //return [] if there is no data to render
     });
 
@@ -90,9 +90,9 @@ geo.d3.vectorFeature = function (arg) {
 
     sel.enter()
       .append('marker')
-      .each(function(marker, i){
+      .each(function (marker, i) {
         var domMarker = d3.select(this);
-        Object.keys(marker.attrs).map(function(attrName){
+        Object.keys(marker.attrs).map(function (attrName) {
           domMarker.attr(attrName, marker.attrs[attrName]);
         });
         domMarker.attr('id', markerID(marker, i));
@@ -183,14 +183,14 @@ geo.d3.vectorFeature = function (arg) {
         return cache[i].y1 + getScale() * cache[i].dy;
       },
       'marker-end': function (d, i) {
-        var marker = m_style.markers.filter(function(m){
+        var marker = m_style.markers.filter(function (m) {
           return m.type === s_style.endStyle();
         });
         var url = marker.size() ? 'url(#' + marker.attr('id') + ')' : null;
         return url;
       },
       'marker-start': function (d, i) {
-        var marker = m_style.markers.filter(function(m){
+        var marker = m_style.markers.filter(function (m) {
           return m.type === s_style.originStyle();
         });
         var url = marker.size() ? 'url(#' + marker.attr('id') + ')' : null;
