@@ -186,13 +186,15 @@ geo.d3.vectorFeature = function (arg) {
         var marker = m_style.markers.filter(function(m){
           return m.type === s_style.endStyle();
         });
-        return 'url(#' + marker.attr('id') + ')';
+        var url = marker.size() ? 'url(#' + marker.attr('id') + ')' : null;
+        return url;
       },
       'marker-start': function (d, i) {
         var marker = m_style.markers.filter(function(m){
           return m.type === s_style.originStyle();
         });
-        return 'url(#' + marker.attr('id') + ')';
+        var url = marker.size() ? 'url(#' + marker.attr('id') + ')' : null;
+        return url;
       }
     };
     m_style.style = {
