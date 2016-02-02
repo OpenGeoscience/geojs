@@ -48,6 +48,9 @@ geo.d3.vectorFeature = function (arg) {
    * @param {object[]} data The vector data array
    * @param {function} stroke The stroke accessor
    * @param {function} opacity The opacity accessor
+   * @param {function} originStyle The marker style to use at the vector tail
+   * @param {function} endStyle The marker style to use at the vector tail
+   * @param {string} featureId The id of the vector feature
    */
   ////////////////////////////////////////////////////////////////////////////
   function updateMarkers(data, stroke, opacity, originStyle, endStyle, featureID) {
