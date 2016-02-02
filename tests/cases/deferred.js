@@ -1,7 +1,8 @@
-/*global describe, it, expect, geo*/
-
 describe('Testing onIdle event handling', function () {
   'use strict';
+
+  var $ = require('jquery');
+  var geo = require('../test-utils').geo;
 
   describe('immediate callback', function () {
     it('no deferred', function () {

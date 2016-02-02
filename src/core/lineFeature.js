@@ -15,6 +15,9 @@ var lineFeature = function (arg) {
   if (!(this instanceof lineFeature)) {
     return new lineFeature(arg);
   }
+
+  var $ = require('jquery');
+
   arg = arg || {};
   feature.call(this, arg);
 

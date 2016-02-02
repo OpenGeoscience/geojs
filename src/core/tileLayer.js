@@ -128,6 +128,7 @@ module.exports = (function () {
   //////////////////////////////////////////////////////////////////////////////
   var tileLayer = function (options) {
 
+    var $ = require('jquery');
     var geo_event = require('./event');
     var transform = require('./transform');
     var tileCache = require('./tileCache');

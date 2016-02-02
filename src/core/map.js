@@ -1,3 +1,4 @@
+var $ = require('jquery');
 var vgl = require('vgl');
 var inherit = require('../util').inherit;
 var sceneObject = require('./sceneObject');

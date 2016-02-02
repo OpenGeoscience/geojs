@@ -19,6 +19,8 @@ var jsonReader = function (arg) {
     return new jsonReader(arg);
   }
 
+  var $ = require('jquery');
+
   var m_this = this, m_style = arg.style || {};
   m_style = $.extend({
     'strokeWidth': 2,

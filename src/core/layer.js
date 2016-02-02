@@ -23,6 +23,7 @@ var layer = function (arg) {
   arg = arg || {};
   sceneObject.call(this, arg);
 
+  var $ = require('jquery');
   var timestamp = require('./timestamp');
   var createRenderer = require('../util').createRenderer;
   var newLayerId = require('../util').newLayerId;

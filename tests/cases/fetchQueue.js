@@ -1,8 +1,10 @@
 // Test geo.core.fetchQueue
 
-/*global describe, it, beforeEach, expect, geo*/
 describe('geo.core.fetchQueue', function () {
   'use strict';
+
+  var $ = require('jquery');
+  var geo = require('../test-utils').geo;
   var report = [],
       reference = 1;
 
@@ -185,7 +187,7 @@ describe('geo.core.fetchQueue', function () {
           expect(q.batch()).toBe(false);
         } else if ((i % 4) === 0) {
           q.batch(true);
-          expect(q.batch()).toBe(parseInt(i / 8) + 1);
+          expect(q.batch()).toBe(parseInt(i / 8, 10) + 1);
         }
         dlist.push(make_deferred());
         q.add(dlist[i], dlist[i].process, (i % 3) === 2);

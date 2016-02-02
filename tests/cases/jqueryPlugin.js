@@ -1,8 +1,12 @@
 // Test plugin.jquery-plugin
-/*global describe, it, expect, beforeEach, mockVGLRenderer*/
 
-describe('plugin.jquery-plugin', function () {
+xdescribe('plugin.jquery-plugin', function () {
   'use strict';
+
+  var $ = require('jquery');
+  var mockVGLRenderer = require('../test-utils').mockVGLRenderer;
+  var geo = require('../test-utils').geo;
+
   function create_map() {
     var node = $('<div id="map"/>').css({width: '500px', height: '500px'});
     $('#map').remove();

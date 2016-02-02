@@ -20,6 +20,7 @@ var pointFeature = function (arg) {
   arg = arg || {};
   feature.call(this, arg);
 
+  var $ = require('jquery');
   var timestamp = require('./timestamp');
   var clustering = require('../util/clustering');
   var geo_event = require('./event');

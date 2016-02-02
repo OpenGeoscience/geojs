@@ -4,6 +4,8 @@
 describe('geo.core.map', function () {
   'use strict';
 
+  var $ = require('jquery');
+
   function create_map(opts) {
     var node = $('<div id="map"/>').css({width: '500px', height: '500px'});
     $('#map').remove();
@@ -354,8 +356,10 @@ describe('geo.core.map', function () {
         left: -250, top: -250, right: 250, bottom: 250});
       expect(zc.zoom).toBeCloseTo(4);
       expect(closeToEqual(zc.center, {x: 0, y: 0})).toBe(true);
-      expect(function () { m.zoomAndCenterFromBounds({
-        left: -250, top: 250, right: 250, bottom: -250}); }).toThrow(
+      expect(function () {
+        m.zoomAndCenterFromBounds({
+          left: -250, top: 250, right: 250, bottom: -250});
+      }).toThrow(
         new Error('Invalid bounds provided'));
       zc = m.zoomAndCenterFromBounds({
         left: 0, top: -500, right: 10, bottom: 500});

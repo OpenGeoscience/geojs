@@ -1,6 +1,7 @@
-/*global describe, it, expect, geo, jasmine, beforeEach, afterEach*/
 describe('geo.util.clustering', function () {
   'use strict';
+
+  var geo = require('../test-utils').geo;
 
   var ClusterGroup = geo.util.ClusterGroup;
   it('single point with defaults', function () {
@@ -107,51 +108,5 @@ describe('geo.util.clustering', function () {
     expect(cl.points(10).length).toBe(4);
     expect(cl.clusters(15).length).toBe(0);
     expect(cl.points(15).length).toBe(6);
-  });
-  var timeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-  beforeEach(function () {
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000; // 10 s
-  });
-  afterEach(function () {
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = timeout;
-  });
-  it('clustering cities data set', function (done) {
-
-    var cl = new ClusterGroup();
-    $.ajax('/data/cities.csv').then(function (data) {
-      function processCSVData(csvdata) {
-        var table = [];
-        var lines = csvdata.split(/\r\n|\n/);
-
-        lines.forEach(function (line) {
-          if (line.length) {
-            table.push(line.split(','));
-          }
-        });
-        return table;
-      }
-
-      var table = processCSVData(data);
-      var start = new Date();
-      var i;
-      // only parse the first 10000 entries
-      for (i = 0; i < 10000; i += 1) {
-        if (table[i][2] !== undefined) {
-          var lat = table[i][2];
-          lat = lat.replace(/(^\s+|\s+$|^\"|\"$)/g, '');
-          lat = parseFloat(lat);
-
-          var lon = table[i][3];
-          lon = lon.replace(/(^\s+|\s+$|^\"|\"$)/g, '');
-          lon = parseFloat(lon);
-
-          cl.addPoint({x: lon, y: lat});
-        }
-      }
-
-      // a basic performance test, should log somewhere
-      expect(new Date() - start).toBeLessThan(10000);
-      done();
-    });
   });
 });

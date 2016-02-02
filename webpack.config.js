@@ -46,9 +46,6 @@ module.exports = {
     loaders: [{
       test: /\.json$/,
       loader: 'json-loader'
-    }, {
-      test: /^vgl$/,
-      loader: 'exports?vgl!./vgl/vgl.js'
     }]
   }
 };

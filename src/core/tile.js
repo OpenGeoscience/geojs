@@ -1,6 +1,8 @@
 module.exports = (function () {
   'use strict';
 
+  var $ = require('jquery');
+
   //////////////////////////////////////////////////////////////////////////////
   /**
    * This class defines the raw interface for a "tile" on a map.  A tile is

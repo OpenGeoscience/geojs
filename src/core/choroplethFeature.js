@@ -19,6 +19,7 @@ var choroplethFeature = function (arg) {
   arg = arg || {};
   feature.call(this, arg);
 
+  var $ = require('jquery');
   var ensureFunction = require('../util').ensureFunction;
 
   ////////////////////////////////////////////////////////////////////////////
@@ -29,8 +30,7 @@ var choroplethFeature = function (arg) {
   var d3 = require('d3'),
       m_this = this,
       s_init = this._init,
-      m_choropleth = $
-      .extend({},
+      m_choropleth = $.extend({},
           {
                 /* 9-step based on paraview bwr colortable */
             colorRange: [

@@ -17,6 +17,7 @@ var contourFeature = function (arg) {
     return new contourFeature(arg);
   }
 
+  var $ = require('jquery');
   var util = require('../util');
 
   arg = arg || {};

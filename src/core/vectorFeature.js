@@ -15,6 +15,9 @@ var vectorFeature = function (arg) {
   if (!(this instanceof vectorFeature)) {
     return new vectorFeature(arg);
   }
+
+  var $ = require('jquery');
+
   arg = arg || {};
   feature.call(this, arg);
 

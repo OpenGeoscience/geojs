@@ -1,3 +1,4 @@
+var $ = require('jquery');
 var inherit = require('../util').inherit;
 var sceneObject = require('./sceneObject');
 var timestamp = require('./timestamp');

@@ -15,6 +15,9 @@ var geomFeature = function (arg) {
   if (!(this instanceof geomFeature)) {
     return new geomFeature(arg);
   }
+
+  var $ = require('jquery');
+
   arg = arg || {};
   feature.call(this, arg);
 

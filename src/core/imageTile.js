@@ -40,6 +40,8 @@ module.exports = (function () {
       return new imageTile(spec);
     }
 
+    var $ = require('jquery');
+
     spec.size = spec.size || {x: 256, y: 256};
     this._image = null;
 

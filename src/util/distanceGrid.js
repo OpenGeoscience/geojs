@@ -59,6 +59,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 (function () {
     "use strict";
 
+    var $ = require('jquery');
     var L = {};
     L.Util = {
         // return unique ID of an object
@@ -69,14 +70,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         lastId: 0
     };
 
-    geo.util.DistanceGrid = function (cellSize) {
+    var DistanceGrid = function (cellSize) {
         this._cellSize = cellSize;
         this._sqCellSize = cellSize * cellSize;
         this._grid = {};
         this._objectPoint = {};
     };
 
-    geo.util.DistanceGrid.prototype = {
+    DistanceGrid.prototype = {
 
         addObject: function (obj, point) {
             var x = this._getCoord(point.x),
@@ -193,4 +194,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             return dx * dx + dy * dy;
         }
     };
+
+    module.exports = DistanceGrid;
 })();

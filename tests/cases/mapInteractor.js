@@ -1,7 +1,9 @@
-/* global describe, it, beforeEach, afterEach, expect, $, geo */
 
 describe('mapInteractor', function () {
   'use strict';
+
+  var $ = require('jquery');
+  var geo = require('../test-utils').geo;
 
   // An event object template that will work with the interactor
   // handlers.

@@ -19,6 +19,7 @@ var graphFeature = function (arg) {
   arg = arg || {};
   feature.call(this, arg);
 
+  var $ = require('jquery');
   var util = require('../util');
 
   ////////////////////////////////////////////////////////////////////////////

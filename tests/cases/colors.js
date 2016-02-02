@@ -1,6 +1,7 @@
-/*global describe, it, expect, geo*/
 describe('geo.util.convertColor', function () {
   'use strict';
+
+  var geo = require('../test-utils').geo;
 
   describe('From hex string', function () {
     it('#000000', function () {

@@ -1,4 +1,4 @@
-/*global describe, it, expect, geo*/
+var geo = require('../test-utils').geo;
 
 // Generate a new empty map
 function createMap() {
@@ -29,7 +29,7 @@ describe('Test the zIndex property of layers', function () {
    * Return the z-index of the layer's node
    */
   function getZIndex(layer) {
-    return parseInt(layer.node().css('z-index'));
+    return parseInt(layer.node().css('z-index'), 10);
   }
 
   it('defaults', function () {
@@ -114,13 +114,13 @@ describe('Test reordering layers', function () {
   function doActions(actions, layers) {
     var original;
     layers = layers || setup();
-    original = layers.map(function (l) {return l.zIndex();});
+    original = layers.map(function (l) { return l.zIndex(); });
     actions.forEach(function (action) {
       doAction(layers[action.layer], action);
     });
     return {
       original: original,
-      result: layers.map(function (l) {return l.zIndex();}),
+      result: layers.map(function (l) { return l.zIndex(); }),
       layers: layers
     };
   }
@@ -203,14 +203,14 @@ describe('Test reordering layers', function () {
   it('move the bottom layer to the top', function () {
     var layers = setup();
     layers[2].moveToTop();
-    expect(layers.map(function (l) {return l.zIndex();}))
+    expect(layers.map(function (l) { return l.zIndex(); }))
       .toEqual([5, 15, 100, 0, 10, 11]);
   });
 
   it('move the top layer to the bottom', function () {
     var layers = setup();
     layers[1].moveToBottom();
-    expect(layers.map(function (l) {return l.zIndex();}))
+    expect(layers.map(function (l) { return l.zIndex(); }))
       .toEqual([11, 0, 5, 10, 15, 100]);
   });
 });

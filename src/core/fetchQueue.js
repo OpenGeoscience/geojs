@@ -1,6 +1,8 @@
 module.exports = (function () {
   'use strict';
 
+  var $ = require('jquery');
+
   //////////////////////////////////////////////////////////////////////////////
   /**
    * This class implements a queue for Deferred objects.  Whenever one of the
@@ -32,6 +34,7 @@ module.exports = (function () {
     if (!(this instanceof fetchQueue)) {
       return new fetchQueue(options);
     }
+
     options = options || {};
     this._size = options.size || 6;
     this._track = options.track || 600;

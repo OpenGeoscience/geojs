@@ -17,9 +17,6 @@
 (function (window) {
   'use strict';
 
-  // Internal method reference.
-  var _throttle;
-
   /**
    * Throttle execution of a function. Especially useful for rate limiting
    * execution of handlers on events like resize and scroll. If you want to
@@ -62,7 +59,7 @@
    * $('selector').bind( 'someevent', throttled );
    * $('selector').unbind( 'someevent', throttled );
    */
-  geo.util.throttle = function (delay, no_trailing,
+  var throttle = function (delay, no_trailing,
                                 callback, accumulator, debounce_mode) {
     // After wrapper has stopped being called, this timeout ensures that
     // `callback` is executed at the proper times in `throttle` and `end`
@@ -150,8 +147,6 @@
     return wrapper;
   };
 
-  _throttle = geo.util.throttle;
-
   /**
    * Debounce execution of a function. Debouncing, unlike throttling,
    * guarantees that a function is only executed a single time, either at the
@@ -198,14 +193,18 @@
    *
    */
 
-  geo.util.debounce = function (delay, at_begin, callback, accumulator) {
+  var debounce = function (delay, at_begin, callback, accumulator) {
     if (typeof at_begin !== 'boolean') {
       accumulator = callback;
       callback = at_begin;
       at_begin = false;
     }
     accumulator = accumulator || function () {};
-    return _throttle(delay, false, callback, accumulator, !!at_begin);
+    return throttle(delay, false, callback, accumulator, !!at_begin);
   };
 
+  module.exports = {
+    throttle: throttle,
+    debounce: debounce
+  };
 })(this);
