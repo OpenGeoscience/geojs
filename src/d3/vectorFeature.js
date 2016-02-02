@@ -73,7 +73,7 @@ geo.d3.vectorFeature = function (arg) {
         attrs: {'class': 'geovector', 'viewBox': '0 0 10 10', 'refX': '10', 'refY': '5', 'markerHeight': '5', 'markerWidth': '5', 'orient': 'auto'},
         path: 'M 0 0 L 1 0 L 10 5 L 1 10 L 0 10 L 9 5 L 0 0'
       },
-    ]
+    ];
 
     var renderer = m_this.renderer();
 
@@ -98,8 +98,8 @@ geo.d3.vectorFeature = function (arg) {
         domMarker.attr('id', markerID(marker, i));
         domMarker.attr('data-feature-id', featureID);
         domMarker.append('path')
-          .attr('d', marker.path);
-      })
+        .attr('d', marker.path);
+      });
 
     sel.exit().remove();
 

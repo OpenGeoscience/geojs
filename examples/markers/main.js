@@ -6,9 +6,9 @@ $(function(){
     node: '#map',
     center: {
       x: -75.965,
-      y: 39.482
+      y: 39.482,
     },
-    zoom: 4
+    zoom: 4,
   });
 
   // Add the osm layer
@@ -20,13 +20,13 @@ $(function(){
   var layer = map.createLayer(
     'feature',
     {
-      renderer: 'd3'
+      renderer: 'd3',
     }
   );
 
   var domesticRoutes = [
     [[-74.0059, 40.7127], [-118.25, 34.05]],
-    [[-98, 38.5], [-87.6847, 41.8369]]
+    [[-98, 38.5], [-87.6847, 41.8369]],
   ];
 
   var intlRoutes = [
@@ -46,8 +46,8 @@ $(function(){
       var dy = destination[1] - origin[1];
       return {
         x: dx,
-        y: dy
-      }
+        y: dy,
+      };
     })
     .style({
       strokeColor: 'red',
