@@ -7,7 +7,7 @@ var webpack_config = require('./webpack.config');
 module.exports = function (config) {
   config.set({
     files: [
-      'tests/cases/camera.js'
+      'tests/cases/**/*.js'
     ],
     browsers: [
       'PhantomJS'
@@ -46,13 +46,6 @@ module.exports = function (config) {
         loaders: webpack_config.module.loaders
       },
       resolve: webpack_config.resolve
-    },
-    plugins: [
-      require('karma-webpack'),
-      require('karma-coverage'),
-      require('karma-jasmine'),
-      require('karma-sourcemap-loader'),
-      require('karma-phantomjs-launcher')
-    ]
+    }
   });
 };
