@@ -2,6 +2,7 @@
  * Testing for the core camera class.
  */
 
+var $ = require('jquery');
 var mat4 = require('gl-mat4');
 var vec3 = require('gl-vec3');
 var vec4 = require('gl-vec4');

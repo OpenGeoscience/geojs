@@ -1,6 +1,7 @@
 module.exports = (function () {
   'use strict';
 
+  var $ = require('jquery');
   var inherit = require('../util').inherit;
   var tileLayer = require('./tileLayer');
   var util = require('../util');

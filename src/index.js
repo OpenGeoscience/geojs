@@ -31,5 +31,6 @@ module.exports = {
   timestamp: require('./core/timestamp'),
   transform: require('./core/transform'),
   vectorFeature: require('./core/vectorFeature'),
-  version: require('./core/version')
+  version: require('./core/version'),
+  util: require('./util')
 };

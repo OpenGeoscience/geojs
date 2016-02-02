@@ -32,7 +32,7 @@
     "json-loader": "^0.5.4",
     "pnltri": "^2.1.1",
     "proj4": "=2.3.3",
-    "vgl": "0.3.5"
+    "vgl": "0.3.6"
   },
   "devDependencies": {
     "blanket": "~1.2",

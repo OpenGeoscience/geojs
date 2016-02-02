@@ -15,8 +15,7 @@
         "no-useless-call": 0
     },
     "env": {
-        "browser": true,
-        "jquery": true
+        "browser": true
     },
     "globals": {}
 }

@@ -1,9 +1,11 @@
 'use strict';
 
+var $ = require('jquery');
+
 /**
  * @module geo.util
  */
-var util = {};
+var util = require('./init');
 
 var widgets = {
   dom: {}

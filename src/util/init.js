@@ -2,6 +2,7 @@
 (function () {
   'use strict';
 
+  var geo = {util: {}};
   var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
   var m_timingData = {},
@@ -568,4 +569,6 @@
     yellow: 0xffff00,
     yellowgreen: 0x9acd32
   };
+
+  module.exports = geo.util;
 }());

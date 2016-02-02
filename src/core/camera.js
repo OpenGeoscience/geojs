@@ -877,7 +877,7 @@
    * @returns {mat4} The new transform matrix
    */
   camera.affine = function (pre, scale, post) {
-    var mat = util.mat3AsArray();
+    var mat = util.mat4AsArray();
 
     // Note: mat4 operations are applied to the right side of the current
     // transform, so the first applied here is the last applied to the
@@ -913,8 +913,9 @@
    * @returns {mat4} A * B
    */
   camera.combine = function (A, B) {
-    return mat4.mul(util.mat4AsArray(), A, B);
+    return mat4.multiply(util.mat4AsArray(), A, B);
   };
 
   inherit(camera, object);
+  module.exports = camera;
 })();
