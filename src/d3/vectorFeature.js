@@ -77,9 +77,6 @@ geo.d3.vectorFeature = function (arg) {
 
     var renderer = m_this.renderer();
 
-    //markers don't correspond 1:1 to the data array,
-    // there should be <=2 markers for each vector feature (which may be a set of vectors)
-    // however, when the data array is empty, we want to remove any associated markers from the DOM
     var markerSet = markers.filter(function (m) {
       return (m.type === originStyle() || m.type === endStyle()) && data.length; //return [] if there is no data to render
     });
