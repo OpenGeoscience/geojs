@@ -73,7 +73,8 @@ $(function () {
       strokeColor: 'blue',
       strokeWidth: 2.0,
       originStyle: 'bar',
-      endStyle: 'wedge'
+      endStyle: 'wedge',
+      scale: 1
     });
 
   international.draw();
