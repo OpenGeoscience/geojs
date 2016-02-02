@@ -24,31 +24,62 @@ $(function(){
     }
   );
 
-  var data = [{origin: [-74.0059, 40.7127]}, {origin: [-118.25, 34.05]}];
+  var domesticRoutes = [
+    [[-74.0059, 40.7127], [-118.25, 34.05]],
+    [[-98, 38.5], [-87.6847, 41.8369]]
+  ];
 
-  var vector = layer.createFeature('vector')
-    .data(data)
-    .origin(function(d){
-      return {x: d.origin[0], y: d.origin[1]};
-    });
-  var i = 0;
-  var r = 5;
+  var intlRoutes = [
+    [[-84.6847, 41], [2.3508, 48.8567]],
+  ];
 
-  function tick(){
-    var theta = -6*i % 360 * (Math.PI/180) + Math.PI/2;
-    var y2 = Math.sin(theta) * r;
-    var x2 = Math.cos(theta) * r;
-    vector.delta(function(d){
+  var domestic = layer.createFeature('vector')
+    .data(domesticRoutes)
+    .origin(function(cities){
+      var origin = cities[0];
+      return {x: origin[0], y: origin[1]};
+    })
+    .delta(function(cities){
+      var origin = cities[0];
+      var destination = cities[1];
+      var dx = destination[0] - origin[0];
+      var dy = destination[1] - origin[1];
       return {
-        x: x2,
-        y: y2
+        x: dx,
+        y: dy
       }
+    })
+    .style({
+      strokeColor: 'red',
+      strokeWidth: 2.0,
+      originStyle: 'point',
+      endStyle: 'arrow'
     });
-    i++;
-    vector.draw();
-  }
-  tick();
-  //setInterval(tick, 1000);
 
+  var international = layer.createFeature('vector')
+    .data(intlRoutes)
+    .origin(function(cities){
+      var origin = cities[0];
+      return {x: origin[0], y: origin[1]};
+    })
+    .delta(function(cities){
+      var origin = cities[0];
+      var destination = cities[1];
+      var dx = destination[0] - origin[0];
+      var dy = destination[1] - origin[1];
+      return {
+        x: dx,
+        y: dy
+      }
+    })
+    .style({
+      strokeColor: 'blue',
+      strokeWidth: 2.0,
+      originStyle: 'bar',
+      endStyle: 'arrow'
+    });
+
+  international.draw();
+  domestic.draw();
   map.draw();
 });

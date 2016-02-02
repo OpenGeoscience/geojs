@@ -8,6 +8,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.vectorFeature = function (arg) {
+  console.log(arg);
   'use strict';
   if (!(this instanceof geo.vectorFeature)) {
     return new geo.vectorFeature(arg);
