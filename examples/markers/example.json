@@ -1,9 +1,0 @@
-{
-  "path": "markers",
-  "title": "Vector Markers",
-  "exampleCss": ["main.css"],
-  "exampleJs": ["main.js"],
-  "about": {
-    "text": "Basic map rendering vector markers."
-  }
-}
