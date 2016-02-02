@@ -76,7 +76,7 @@ $(function(){
       strokeColor: 'blue',
       strokeWidth: 2.0,
       originStyle: 'bar',
-      endStyle: 'arrow'
+      endStyle: 'wedge',
     });
 
   international.draw();
