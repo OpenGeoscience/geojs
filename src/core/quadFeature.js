@@ -27,8 +27,11 @@
  *   corner is unspecified, it will use the x coordinate from one adjacent
  *   corner, the y coordinate from the other adjacent corner, and the average
  *   z value of those two corners.  For instance, if ul is unspecified, it is
- *   {x: ll.x, y: ur.y}.
- * @param {boolean} [cacheQuads=true] If true, a set of internal inforamtion is
+ *   {x: ll.x, y: ur.y}.  Note that each quad is rendered as a pair of
+ *   triangles: (ll, lr, ul) and (ur, ul, lr).  Nothing special is done for
+ *   quads that are no convex or quads that have substantially different
+ *   transformations for those two triangles.
+ * @param {boolean} [cacheQuads=true] If true, a set of internal information is
  *   stored on each data item in the _cachedQuad attribute.  If this is false,
  *   the data item is not altered.  If the data (positions, opacity, etc,) of
  *   individual quads will change, set this to false or delete the _cachedQuad
@@ -52,16 +55,17 @@ geo.quadFeature = function (arg) {
   var m_this = this,
       s_init = this._init,
       m_cacheQuads,
-      m_images = [];
+      m_images = [],
+      m_quads;
 
   /**
    * Track a list of object->object mappings.  The mappings are kept in a list.
    * This marks all known mappings as unused.  If they are not marked used
-   * before object_list_end is called, that function will remove them.
+   * before _object_list_end is called, that function will remove them.
    *
    * @param {array} list the list of mappings.
    */
-  this.object_list_start = function (list) {
+  this._object_list_start = function (list) {
     $.each(list, function (idx, item) {
       item.used = false;
     });
@@ -76,7 +80,7 @@ geo.quadFeature = function (arg) {
    * @param {object} entry the key to search for.
    * @returns {object} the associated object or undefined.
    */
-  this.object_list_get = function (list, entry) {
+  this._object_list_get = function (list, entry) {
     for (var i = 0; i < list.length; i += 1) {
       if (list[i].entry === entry) {
         list[i].used = true;
@@ -95,7 +99,7 @@ geo.quadFeature = function (arg) {
    * @param {object} entry the key to add.
    * @param {object} value the value to store with the entry.
    */
-  this.object_list_add = function (list, entry, value) {
+  this._object_list_add = function (list, entry, value) {
     list.push({entry: entry, value: value, used: true});
   };
 
@@ -104,7 +108,7 @@ geo.quadFeature = function (arg) {
    *
    * @param {array} list the list of mappings.
    */
-  this.object_list_end = function (list) {
+  this._object_list_end = function (list) {
     for (var i = list.length - 1; i >= 0; i -= 1) {
       if (!list[i].used) {
         list.splice(i, 1);
@@ -121,21 +125,31 @@ geo.quadFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.pointSearch = function (coordinate) {
-    var found = [], indices = [], data = m_this.data();
-    void (coordinate); void (data); //DWM::
-    /* //DWM::
-    m_coordinates.forEach(function (coord, i) {
-      var inside = geo.util.pointInPolygon(
-        coordinate,
-        coord.outer,
-        coord.inner
-      );
-      if (inside) {
-        indices.push(i);
-        found.push(data[i]);
-      }
-    });
-    */
+    var found = [], indices = [], data = m_this.data(), i,
+        poly1 = [{}, {}, {}, {}], poly2 = [{}, {}, {}, {}],
+        map = m_this.layer().map(),
+        order1 = [0, 1, 2, 0], order2 = [1, 2, 3, 1];
+    coordinate = geo.transform.transformCoordinates(
+        map.ingcs(), map.gcs(), [coordinate])[0];
+    if (m_quads) {
+      $.each([m_quads.clrQuads, m_quads.imgQuads], function (idx, quadList) {
+        quadList.forEach(function (quad, idx) {
+          for (i = 0; i < order1.length; i += 1) {
+            poly1[i].x = quad.pos[order1[i] * 3];
+            poly1[i].y = quad.pos[order1[i] * 3 + 1];
+            poly1[i].z = quad.pos[order1[i] * 3 + 2];
+            poly2[i].x = quad.pos[order2[i] * 3];
+            poly2[i].y = quad.pos[order2[i] * 3 + 1];
+            poly2[i].z = quad.pos[order2[i] * 3 + 2];
+          }
+          if (geo.util.pointInPolygon(coordinate, poly1) ||
+              geo.util.pointInPolygon(coordinate, poly2)) {
+            indices.push(quad.idx);
+            found.push(data[quad.idx]);
+          }
+        });
+      });
+    }
     return {
       index: indices,
       found: found
@@ -245,7 +259,7 @@ geo.quadFeature = function (arg) {
         origin = [0, 0, 0], origindiag2, diag2;
     /* Keep track of images that we are using.  This prevents creating
      * additional Image elemnts for repeated urls. */
-    m_this.object_list_start(m_images);
+    m_this._object_list_start(m_images);
     $.each(data, function (i, d) {
       if (d._cachedQuad) {
         diag2 = d._cachedQuad.diag2;
@@ -287,6 +301,7 @@ geo.quadFeature = function (arg) {
       img = imgFunc.call(m_this, d, i);
       if (!img) {
         quad = {
+          idx: i,
           pos: pos,
           opacity: opacity,
           color: geo.util.convertColor(colorFunc.call(m_this, d, i))
@@ -294,7 +309,7 @@ geo.quadFeature = function (arg) {
         clrQuads.push(quad);
         quadinfo.clrquad = quad;
       } else {
-        image = m_this.object_list_get(m_images, img);
+        image = m_this._object_list_get(m_images, img);
         if (image === undefined) {
           if (img instanceof Image) {
             image = img;
@@ -302,9 +317,10 @@ geo.quadFeature = function (arg) {
             image = new Image();
             image.src = img;
           }
-          m_this.object_list_add(m_images, img, image);
+          m_this._object_list_add(m_images, img, image);
         }
         quad = {
+          idx: i,
           pos: pos,
           opacity: opacity
         };
@@ -357,8 +373,9 @@ geo.quadFeature = function (arg) {
         d._cachedQuad = quadinfo;
       }
     });
-    m_this.object_list_end(m_images);
-    return {clrQuads: clrQuads, imgQuads: imgQuads, origin: origin};
+    m_this._object_list_end(m_images);
+    m_quads = {clrQuads: clrQuads, imgQuads: imgQuads, origin: origin};
+    return m_quads;
   };
 
   ////////////////////////////////////////////////////////////////////////////

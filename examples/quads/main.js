@@ -107,6 +107,26 @@ $(function () {
           return d.previewImage !== undefined ? d.previewImage : previewImage;
         }
       })
+      .geoOn(geo.event.feature.mouseover, function (evt) {
+        if (evt.data.orig_opacity === undefined) {
+          evt.data.orig_opacity = (evt.data.opacity || null);
+        }
+        evt.data.opacity = 0.5;
+        // we either have to clear the internal cache on the item, or have
+        // asked for it not to have been cached to begin with.
+        delete evt.data._cachedQuad;
+        this.modified();
+        layer.map().draw();
+      })
+      .geoOn(geo.event.feature.mouseout, function (evt) {
+        if (evt.data.orig_opacity === undefined) {
+          evt.data.orig_opacity = (evt.data.opacity || null);
+        }
+        evt.data.opacity = evt.data.orig_opacity || undefined;
+        delete evt.data._cachedQuad;
+        this.modified();
+        layer.map().draw();
+      })
       .draw();
 
     map.draw();

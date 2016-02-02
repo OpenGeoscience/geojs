@@ -303,6 +303,8 @@
       var o = this._origin(level);
       var map = this.map();
       point = this.displayToLevel(map.gcsToDisplay(point, null), level);
+      if (isNaN(point.x)) { point.x = 0; }
+      if (isNaN(point.y)) { point.y = 0; }
       var to = this._tileOffset(level);
       if (to) {
         point.x += to.x;
@@ -474,6 +476,14 @@
         indexRange = this._getTileRange(level, bounds);
         start = indexRange.start;
         end = indexRange.end;
+        /* If we are reprojecting tiles, we need a check to not use all levels
+         * if the number of tiles is excessive. */
+        if (this._options.gcs && this._options.gcs !== this.map().gcs() &&
+            level !== minLevel && (end.x - start.x) * (end.y - start.y) >
+            (this.map().size().width * this.map().size().height /
+            this._options.tileWidth / this._options.tileHeight) * 16) {
+          break;
+        }
 
         // total number of tiles existing at this level
         nTilesLevel = this.tilesAtZoom(level);
