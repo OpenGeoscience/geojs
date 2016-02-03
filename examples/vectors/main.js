@@ -21,17 +21,13 @@ $(function () {
     'feature', { renderer: 'd3' }
   );
 
-  var domesticRoutes = [
+  var routes = [
     [[-74.0059, 40.7127], [-118.25, 34.05]],
     [[-98, 38.5], [-87.6847, 41.8369]]
   ];
 
-  var intlRoutes = [
-    [[-84.6847, 41], [2.3508, 48.8567]]
-  ];
-
-  var domestic = layer.createFeature('vector')
-    .data(domesticRoutes)
+  var routesVectors = layer.createFeature('vector')
+    .data(routes)
     .origin(function (cities) {
       var origin = cities[0];
       return {x: origin[0], y: origin[1]};
@@ -47,14 +43,25 @@ $(function () {
       };
     })
     .style({
-      strokeColor: 'red',
+      strokeColor: function (cities, i) {
+        return i % 2 ? 'red' : 'blue';
+      },
       strokeWidth: 2.0,
-      originStyle: 'point',
-      endStyle: 'arrow'
+      originStyle: function (cities, i) {
+        return 'point';
+      },
+      endStyle: function (cities, i) {
+        return i % 2 ? 'bar' : 'arrow';
+      }
     });
 
-  var international = layer.createFeature('vector')
-    .data(intlRoutes)
+    var secondaryRoutes = [
+      [[-65.0059, 39.7127], [-100.25, 35.05]],
+      [[-90, 38.5], [-87.6847, 25.8369]]
+    ];
+
+    var secondaryFeature = layer.createFeature('vector')
+    .data(secondaryRoutes)
     .origin(function (cities) {
       var origin = cities[0];
       return {x: origin[0], y: origin[1]};
@@ -70,14 +77,20 @@ $(function () {
       };
     })
     .style({
-      strokeColor: 'blue',
+      strokeColor: function (cities, i) {
+        return i % 2 ? 'orange' : 'purple';
+      },
       strokeWidth: 2.0,
-      originStyle: 'bar',
-      endStyle: 'wedge',
-      scale: 1
+      originStyle: function (cities, i) {
+        return 'bar';
+      },
+      endStyle: function (cities, i) {
+        return i % 2 ? 'wedge' : 'arrow';
+      }
     });
 
-  international.draw();
-  domestic.draw();
+
+  // international.draw();
+  routesVectors.draw();
   map.draw();
 });
