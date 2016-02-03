@@ -5,17 +5,32 @@ describe("d3 vector feature", function () {
 
   var map, width = 800, height = 600, layer, feature1;
 
-  it("Setup map", function () {
-    map = geo.map({node: "#map", center: [0, 0], zoom: 3});
-    map.createLayer("osm");
-    layer = map.createLayer("feature", {"renderer": "d3"});
-
-    map.resize(0, 0, width, height);
+  map = geo.map({node: "#map",
+    center: [0, 0],
+    zoom: 3,
+    width: 100,
+    height: 100
   });
+
+  var cl = map.createLayer;
+  map.createLayer = function (type, opts) {
+    opts = opts || {};
+    opts.renderer = 'd3';
+    return cl.call(map, type, opts);
+  };
+
+  map.displayToGcs = function (pt) {
+    return pt;
+  };
+  map.gcsToDisplay = function (pt) {
+    return pt;
+  };
+
+  layer = map.createLayer("feature", {"renderer": "d3"});
 
   it("Add features to a layer", function () {
     var vectorLines, featureGroup, markers;
-    feature1 = layer.createFeature("feature", {"renderer": "d3"})
+    feature1 = layer.createFeature("vector")
     .data([{y: 0, x: 0}, {y: 10, x: 0}, {y: 0, x: 10}])
     .origin(function (d) {
       return {
@@ -37,7 +52,7 @@ describe("d3 vector feature", function () {
     .draw();
 
     vectorLines = d3.select("#map svg").selectAll('line');
-    expect(selection.size()).toBe(3);
+    expect(vectorLines.size()).toBe(3);
 
     featureGroup = d3.selectAll('g#' + feature1._d3id());
     expect(featureGroup.size()).toBe(1);
@@ -47,17 +62,14 @@ describe("d3 vector feature", function () {
   });
 
   it("Remove a feature from a layer", function () {
-    var selection, featureGroup, markers;
+    var selection, markers;
 
     layer.deleteFeature(feature1).draw();
 
     selection = d3.select("#map svg").selectAll('line');
     expect(selection.size()).toBe(0);
 
-    featureGroup = d3.selectAll('g#' + feature1._d3id());
-    expect(featureGroup.size()).toBe(0);
-
     markers = d3.selectAll('markers');
-    expect(markers.size()).toBe(1);
+    expect(markers.size()).toBe(0);
   });
 });
