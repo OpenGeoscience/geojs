@@ -4,7 +4,7 @@ describe("d3 vector feature", function () {
   "use strict";
 
   var map, width = 800, height = 600, layer, feature1;
-  var test
+
   it("Setup map", function () {
     map = geo.map({node: "#map", center: [0, 0], zoom: 3});
     map.createLayer("osm");
@@ -19,7 +19,8 @@ describe("d3 vector feature", function () {
     .data([{y: 0, x: 0}, {y: 10, x: 0}, {y: 0, x: 10}])
     .origin(function (d) {
       return {
-        {x: d.x, y: d.y};
+        x: d.x,
+        y: d.y
       };
     })
     .delta(function (d) {
@@ -57,6 +58,6 @@ describe("d3 vector feature", function () {
     expect(featureGroup.size()).toBe(0);
 
     markers = d3.selectAll('markers');
-    expect(markers.size()).toBe(0);
+    expect(markers.size()).toBe(1);
   });
 });
