@@ -55,22 +55,22 @@ geo.d3.vectorFeature = function (arg) {
   function updateMarkers(data, stroke, opacity, originStyle, endStyle) {
 
     var markerConfigs = {
-        'arrow': {
-          attrs: {'class': 'geo-vector', 'viewBox': '0 0 10 10', 'refX': '1', 'refY': '5', 'markerHeight': '5', 'markerWidth': '5', 'orient': 'auto'},
-          path: 'M 0 0 L 10 5 L 0 10 z'
-        },
-        'point': {
-          attrs: {'class': 'geo-vector', 'viewBox': '0 0 12 12', 'refX': '6', 'refY': '6', 'markerHeight': '8', 'markerWidth': '8', 'orient': 'auto'},
-          path: 'M 6 3 A 3 3 0 1 1 5.99999 3 Z'
-        },
-        'bar': {
-          attrs: {'class': 'geo-vector', 'viewBox': '0 0 10 10', 'refX': '0', 'refY': '5', 'markerHeight': '6', 'markerWidth': '6', 'orient': 'auto'},
-          path: 'M 0 0 L 2 0 L 2 10 L 0 10 z'
-        },
-        'wedge': {
-          attrs: {'class': 'geo-vector', 'viewBox': '0 0 10 10', 'refX': '10', 'refY': '5', 'markerHeight': '5', 'markerWidth': '5', 'orient': 'auto'},
-          path: 'M 0 0 L 1 0 L 10 5 L 1 10 L 0 10 L 9 5 L 0 0'
-        }
+      'arrow': {
+        attrs: {'class': 'geo-vector', 'viewBox': '0 0 10 10', 'refX': '1', 'refY': '5', 'markerHeight': '5', 'markerWidth': '5', 'orient': 'auto'},
+        path: 'M 0 0 L 10 5 L 0 10 z'
+      },
+      'point': {
+        attrs: {'class': 'geo-vector', 'viewBox': '0 0 12 12', 'refX': '6', 'refY': '6', 'markerHeight': '8', 'markerWidth': '8', 'orient': 'auto'},
+        path: 'M 6 3 A 3 3 0 1 1 5.99999 3 Z'
+      },
+      'bar': {
+        attrs: {'class': 'geo-vector', 'viewBox': '0 0 10 10', 'refX': '0', 'refY': '5', 'markerHeight': '6', 'markerWidth': '6', 'orient': 'auto'},
+        path: 'M 0 0 L 2 0 L 2 10 L 0 10 z'
+      },
+      'wedge': {
+        attrs: {'class': 'geo-vector', 'viewBox': '0 0 10 10', 'refX': '10', 'refY': '5', 'markerHeight': '5', 'markerWidth': '5', 'orient': 'auto'},
+        path: 'M 0 0 L 1 0 L 10 5 L 1 10 L 0 10 L 9 5 L 0 0'
+      }
     };
 
     //this allows for multiple VectorFeatures in a layer
@@ -93,14 +93,14 @@ geo.d3.vectorFeature = function (arg) {
           data: d,
           dataIndex: i,
           head: true
-        })
+        });
       }
       if (tail) {
         markers.push({
           data: d,
           dataIndex: i,
           head: false
-        })
+        });
       }
       return markers;
     }, []);
@@ -133,11 +133,11 @@ geo.d3.vectorFeature = function (arg) {
       .style('fill', function (d) {
         return renderer._convertColor(stroke)(d.data, d.dataIndex);
       })
-      .style('opacity', function (d){
-        return opacity(d.data, d.dataIndex)
+      .style('opacity', function (d) {
+        return opacity(d.data, d.dataIndex);
       })
       .select('path')
-      .attr('d', function(d) {
+      .attr('d', function (d) {
         return d.head ? markerConfigs[endStyle(d.data, d.dataIndex)].path : markerConfigs[originStyle(d.data, d.dataIndex)].path;
       });
 

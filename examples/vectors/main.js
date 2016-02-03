@@ -28,7 +28,7 @@ $(function () {
     [[-80, 33.5], [-27.6847, 25.8369]]
   ];
 
-  var routesVectors = layer.createFeature('vector')
+  layer.createFeature('vector')
     .data(routes)
     .origin(function (cities) {
       var origin = cities[0];
@@ -57,12 +57,12 @@ $(function () {
       }
     });
 
-    var secondaryRoutes = [
-      [[-65.0059, 39.7127], [-100.25, 35.05]],
-      [[-90, 38.5], [-87.6847, 25.8369]]
-    ];
+  var secondaryRoutes = [
+    [[-65.0059, 39.7127], [-100.25, 35.05]],
+    [[-90, 38.5], [-87.6847, 25.8369]]
+  ];
 
-    var secondaryFeature = layer.createFeature('vector')
+  layer.createFeature('vector')
     .data(secondaryRoutes)
     .origin(function (cities) {
       var origin = cities[0];
@@ -91,8 +91,5 @@ $(function () {
       }
     });
 
-
-  // international.draw();
-  routesVectors.draw();
   map.draw();
 });
