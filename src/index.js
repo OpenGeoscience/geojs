@@ -32,5 +32,6 @@ module.exports = {
   transform: require('./core/transform'),
   vectorFeature: require('./core/vectorFeature'),
   version: require('./core/version'),
-  util: require('./util')
+  util: require('./util'),
+  d3: require('./d3')
 };

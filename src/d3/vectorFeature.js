@@ -1,21 +1,29 @@
+var inherit = require('../util').inherit;
+var registerFeature = require('../util').registerFeature;
+var vectorFeature = require('../core/vectorFeature');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of vectorFeature
  *
- * @class
+ * @class geo.d3.vectorFeature
  * @extends geo.vectorFeature
  * @extends geo.d3.object
  * @returns {geo.d3.vectorFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.d3.vectorFeature = function (arg) {
+var d3_vectorFeature = function (arg) {
   'use strict';
-  if (!(this instanceof geo.d3.vectorFeature)) {
-    return new geo.d3.vectorFeature(arg);
+  if (!(this instanceof d3_vectorFeature)) {
+    return new d3_vectorFeature(arg);
   }
+
+  var object = require('./object');
+  var timestamp = require('../core/timestamp');
+
   arg = arg || {};
-  geo.vectorFeature.call(this, arg);
-  geo.d3.object.call(this);
+  vectorFeature.call(this, arg);
+  object.call(this);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -26,7 +34,7 @@ geo.d3.vectorFeature = function (arg) {
       s_init = this._init,
       s_exit = this._exit,
       s_update = this._update,
-      m_buildTime = geo.timestamp(),
+      m_buildTime = timestamp(),
       m_style = {};
 
   ////////////////////////////////////////////////////////////////////////////
@@ -286,7 +294,7 @@ geo.d3.vectorFeature = function (arg) {
   return this;
 };
 
-inherit(geo.d3.vectorFeature, geo.vectorFeature);
+inherit(d3_vectorFeature, vectorFeature);
 
 // Now register it
-geo.registerFeature('d3', 'vector', geo.d3.vectorFeature);
+registerFeature('d3', 'vector', d3_vectorFeature);

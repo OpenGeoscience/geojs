@@ -1,21 +1,31 @@
+var inherit = require('../util').inherit;
+var registerFeature = require('../util').registerFeature;
+var pathFeature = require('../core/pathFeature');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class pathFeature
  *
- * @class
+ * @class geo.d3.pathFeature
  * @extends geo.pathFeature
  * @extends geo.d3.object
  * @returns {geo.d3.pathFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.d3.pathFeature = function (arg) {
+var d3_pathFeature = function (arg) {
   'use strict';
-  if (!(this instanceof geo.d3.pathFeature)) {
-    return new geo.d3.pathFeature(arg);
+  if (!(this instanceof d3_pathFeature)) {
+    return new d3_pathFeature(arg);
   }
+
+  var $ = require('jquery');
+  var d3 = require('d3');
+  var object = require('./object');
+  var timestamp = require('../core/timestamp');
+
   arg = arg || {};
-  geo.pathFeature.call(this, arg);
-  geo.d3.object.call(this);
+  pathFeature.call(this, arg);
+  object.call(this);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -24,7 +34,7 @@ geo.d3.pathFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       s_init = this._init,
-      m_buildTime = geo.timestamp(),
+      m_buildTime = timestamp(),
       s_update = this._update,
       m_style = {};
 
@@ -113,6 +123,8 @@ geo.d3.pathFeature = function (arg) {
   return this;
 };
 
-inherit(geo.d3.pathFeature, geo.pathFeature);
+inherit(d3_pathFeature, pathFeature);
 
-geo.registerFeature('d3', 'path', geo.d3.pathFeature);
+registerFeature('d3', 'path', d3_pathFeature);
+
+module.exports = d3_pathFeature;

@@ -1,28 +1,36 @@
+var inherit = require('../util').inherit;
+var registerFeature = require('../util').registerFeature;
+var planeFeature = require('../core/planeFeature');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a plane feature given a lower left corner point
  * and and upper right corner point
  *
- * @class
+ * @class geo.d3.planeFeature
  * @extends geo.planeFeature
- * @param lowerleft
+* @param lowerleft
  * @param upperright
  * @returns {geo.d3.planeFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.d3.planeFeature = function (arg) {
+var d3_planeFeature = function (arg) {
   'use strict';
-  if (!(this instanceof geo.d3.planeFeature)) {
-    return new geo.d3.planeFeature(arg);
+  if (!(this instanceof d3_planeFeature)) {
+    return new d3_planeFeature(arg);
   }
-  geo.planeFeature.call(this, arg);
-  geo.d3.object.call(this);
+
+  var object = require('./object');
+  var timestamp = require('../core/timestamp');
+
+  planeFeature.call(this, arg);
+  object.call(this);
 
   var m_this = this,
       m_style = {},
       s_update = this._update,
       s_init = this._init,
-      m_buildTime = geo.timestamp();
+      m_buildTime = timestamp();
 
   //////////////////////////////////////////////////////////////////////////////
   /**
@@ -132,6 +140,6 @@ geo.d3.planeFeature = function (arg) {
   return this;
 };
 
-inherit(geo.d3.planeFeature, geo.planeFeature);
+inherit(d3_planeFeature, planeFeature);
 
-geo.registerFeature('d3', 'plane', geo.d3.planeFeature);
+registerFeature('d3', 'plane', d3_planeFeature);

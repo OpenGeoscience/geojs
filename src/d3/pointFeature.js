@@ -1,22 +1,30 @@
+var inherit = require('../util').inherit;
+var registerFeature = require('../util').registerFeature;
+var pointFeature = require('../core/pointFeature');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  *
  * Create a new instance of pointFeature
  *
- * @class
+ * @class geo.d3.pointFeature
  * @extends geo.pointFeature
  * @extends geo.d3.object
  * @returns {geo.d3.pointFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.d3.pointFeature = function (arg) {
+var d3_pointFeature = function (arg) {
   'use strict';
-  if (!(this instanceof geo.d3.pointFeature)) {
-    return new geo.d3.pointFeature(arg);
+  if (!(this instanceof d3_pointFeature)) {
+    return new d3_pointFeature(arg);
   }
+
+  var d3_object = require('./object');
+  var timestamp = require('../core/timestamp');
+
   arg = arg || {};
-  geo.pointFeature.call(this, arg);
-  geo.d3.object.call(this);
+  pointFeature.call(this, arg);
+  d3_object.call(this);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -26,7 +34,7 @@ geo.d3.pointFeature = function (arg) {
   var m_this = this,
       s_init = this._init,
       s_update = this._update,
-      m_buildTime = geo.timestamp(),
+      m_buildTime = timestamp(),
       m_style = {};
 
   ////////////////////////////////////////////////////////////////////////////
@@ -104,7 +112,9 @@ geo.d3.pointFeature = function (arg) {
   return this;
 };
 
-inherit(geo.d3.pointFeature, geo.pointFeature);
+inherit(d3_pointFeature, pointFeature);
 
 // Now register it
-geo.registerFeature('d3', 'point', geo.d3.pointFeature);
+registerFeature('d3', 'point', d3_pointFeature);
+
+module.exports = d3_pointFeature;

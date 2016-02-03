@@ -1,22 +1,29 @@
+var inherit = require('../util').inherit;
+var sceneObject = require('../core/sceneObject');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * D3 specific subclass of object which adds an id property for d3 selections
  * on groups of objects by class id.
- * @class
+ * @class geo.d3.object
  * @extends geo.sceneObject
  */
 //////////////////////////////////////////////////////////////////////////////
 
-geo.d3.object = function (arg) {
+var d3_object = function (arg) {
   'use strict';
+
+  var object = require('../core/object');
+  var uniqueID = require('./uniqueID');
+
   // this is used to extend other geojs classes, so only generate
   // a new object when that is not the case... like if this === window
-  if (!(this instanceof geo.object)) {
-    return new geo.d3.object(arg);
+  if (!(this instanceof object)) {
+    return new d3_object(arg);
   }
-  geo.sceneObject.call(this);
+  sceneObject.call(this);
 
-  var m_id = 'd3-' + geo.d3.uniqueID(),
+  var m_id = 'd3-' + uniqueID(),
       s_exit = this._exit,
       m_this = this,
       s_draw = this.draw;
@@ -58,4 +65,5 @@ geo.d3.object = function (arg) {
   return this;
 };
 
-inherit(geo.d3.object, geo.sceneObject);
+inherit(d3_object, sceneObject);
+module.exports = d3_object;
