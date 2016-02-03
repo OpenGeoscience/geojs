@@ -131,25 +131,26 @@ geo.quadFeature = function (arg) {
         order1 = [0, 1, 2, 0], order2 = [1, 2, 3, 1];
     coordinate = geo.transform.transformCoordinates(
         map.ingcs(), map.gcs(), [coordinate])[0];
-    if (m_quads) {
-      $.each([m_quads.clrQuads, m_quads.imgQuads], function (idx, quadList) {
-        quadList.forEach(function (quad, idx) {
-          for (i = 0; i < order1.length; i += 1) {
-            poly1[i].x = quad.pos[order1[i] * 3];
-            poly1[i].y = quad.pos[order1[i] * 3 + 1];
-            poly1[i].z = quad.pos[order1[i] * 3 + 2];
-            poly2[i].x = quad.pos[order2[i] * 3];
-            poly2[i].y = quad.pos[order2[i] * 3 + 1];
-            poly2[i].z = quad.pos[order2[i] * 3 + 2];
-          }
-          if (geo.util.pointInPolygon(coordinate, poly1) ||
-              geo.util.pointInPolygon(coordinate, poly2)) {
-            indices.push(quad.idx);
-            found.push(data[quad.idx]);
-          }
-        });
-      });
+    if (!m_quads) {
+      this._generateQuads();
     }
+    $.each([m_quads.clrQuads, m_quads.imgQuads], function (idx, quadList) {
+      quadList.forEach(function (quad, idx) {
+        for (i = 0; i < order1.length; i += 1) {
+          poly1[i].x = quad.pos[order1[i] * 3];
+          poly1[i].y = quad.pos[order1[i] * 3 + 1];
+          poly1[i].z = quad.pos[order1[i] * 3 + 2];
+          poly2[i].x = quad.pos[order2[i] * 3];
+          poly2[i].y = quad.pos[order2[i] * 3 + 1];
+          poly2[i].z = quad.pos[order2[i] * 3 + 2];
+        }
+        if (geo.util.pointInPolygon(coordinate, poly1) ||
+            geo.util.pointInPolygon(coordinate, poly2)) {
+          indices.push(quad.idx);
+          found.push(data[quad.idx]);
+        }
+      });
+    });
     return {
       index: indices,
       found: found
@@ -384,6 +385,7 @@ geo.quadFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
+    arg = arg || {};
     s_init.call(m_this, arg);
 
     m_cacheQuads = (arg.cacheQuads !== false);
@@ -404,7 +406,7 @@ geo.quadFeature = function (arg) {
     );
 
     if (arg.position !== undefined) {
-      style.position = arg.position;
+      style.position = geo.util.ensureFunction(arg.position);
     }
     m_this.style(style);
     m_this.dataTime().modified();
@@ -430,9 +432,10 @@ geo.event.quadFeature = $.extend({}, geo.event.feature);
  * @param {geo.quadFeature.spec} spec The object specification
  * @returns {geo.quadFeature|null}
  */
-geo.quadFeature.create = function (layer, renderer, spec) {
+geo.quadFeature.create = function (layer, spec) {
   'use strict';
 
+  spec = spec || {};
   spec.type = 'quad';
   return geo.feature.create(layer, spec);
 };

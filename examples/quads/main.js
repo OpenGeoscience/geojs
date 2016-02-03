@@ -82,6 +82,9 @@ $(function () {
         ur: {x: -138, y: 39},
         opacity: 0.25,
         color: '#0000FF'
+      /* You can specify quads so that the corners are 'twisted' and the quad
+       * would be non-convex.  In this case, the quads are each rendered as a
+       * pair of triangles, but they probably aren't what is desired.
       }, {
         ll: {x: -108, y: 49},
         lr: {x: -88, y: 49},
@@ -94,6 +97,7 @@ $(function () {
         ul: {x: -88, y: 59},
         lr: {x: -68, y: 59},
         image: '/data/tilefancy.png'
+      */
       }])
       .style({
         opacity: function (d) {
