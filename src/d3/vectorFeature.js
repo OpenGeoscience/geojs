@@ -87,14 +87,14 @@ geo.d3.vectorFeature = function (arg) {
 
     var headMarkers = data
     .map(function (d, i) {
-      return markerConfigs[originStyle(d, i)] ? d : null;
+      return markerConfigs[endStyle(d, i)] ? {data: d, dataIndex: i} : null;
     }).filter(function (m) {
       return m;
     });
 
     var tailMarkers = data
     .map(function(d, i) {
-      return markerConfigs[endStyle(d, i)] ? d : null;
+      return markerConfigs[originStyle(d, i)] ? {data: d, dataIndex: i} : null;
     }).filter(function (m) {
       return m;
     });
@@ -116,22 +116,28 @@ geo.d3.vectorFeature = function (arg) {
         .append('path');
 
       selection
-        .each(function (d, i) {
+        .each(function (d) {
           var marker = d3.select(this);
-          var markerData = !selType ? markerConfigs[originStyle(d, i)] : markerConfigs[endStyle(d, i)];
+          var markerData = !selType ? markerConfigs[endStyle(d.data, d.dataIndex)] : markerConfigs[originStyle(d.data, d.dataIndex)];
           Object.keys(markerData.attrs).map(function (attrName) {
             marker.attr(attrName, markerData.attrs[attrName]);
           });
         })
-        .attr('id', function(d, i) {
-          return markerID(d, i, !selType ? 'head' : 'tail');
+        .attr('id', function (d) {
+          return markerID(d.data, d.dataIndex, !selType ? 'head' : 'tail');
         })
-        .style('stroke', renderer._convertColor(stroke))
-        .style('fill', renderer._convertColor(stroke))
-        .style('opacity', opacity)
+        .style('stroke', function (d) {
+          return renderer._convertColor(stroke)(d.data, d.dataIndex);
+        })
+        .style('fill', function (d) {
+          return renderer._convertColor(stroke)(d.data, d.dataIndex);
+        })
+        .style('opacity', function (d){
+          return opacity(d.data, d.dataIndex)
+        })
         .select('path')
-        .attr('d', function(d, i) {
-          return !selType ? markerConfigs[originStyle(d, i)].path : markerConfigs[endStyle(d, i)].path;
+        .attr('d', function(d) {
+          return !selType ? markerConfigs[endStyle(d.data, d.dataIndex)].path : markerConfigs[originStyle(d.data, d.dataIndex)].path;
         });
 
       selection.exit().remove();
@@ -211,10 +217,10 @@ geo.d3.vectorFeature = function (arg) {
         return cache[i].y1 + getScale() * cache[i].dy;
       },
       'marker-start': function (d, i) {
-        return 'url(#' + markerID(d, i, 'head') + ')';
+        return 'url(#' + markerID(d, i, 'tail') + ')';
       },
       'marker-end': function (d, i) {
-        return 'url(#' + markerID(d, i, 'tail') + ')';
+        return 'url(#' + markerID(d, i, 'head') + ')';
       }
     };
     m_style.style = {

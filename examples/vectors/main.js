@@ -23,7 +23,9 @@ $(function () {
 
   var routes = [
     [[-74.0059, 40.7127], [-118.25, 34.05]],
-    [[-98, 38.5], [-87.6847, 41.8369]]
+    [[-98, 38.5], [-87.6847, 41.8369]],
+    [[-60.0059, 39.7127], [-58.25, 35.05]],
+    [[-80, 33.5], [-27.6847, 25.8369]]
   ];
 
   var routesVectors = layer.createFeature('vector')
@@ -48,7 +50,7 @@ $(function () {
       },
       strokeWidth: 2.0,
       originStyle: function (cities, i) {
-        return 'point';
+        return i % 2 ? 'point' : 'none';
       },
       endStyle: function (cities, i) {
         return i % 2 ? 'bar' : 'arrow';
