@@ -16,12 +16,6 @@ script:
     - npm run build
     - ./node_modules/.bin/grunt docs
     - ./node_modules/.bin/grunt copy:jqueryui
-    - ./node_modules/.bin/grunt serve-test &
-    - sleep 1
-    - mkdir _build
-    - cd _build
-    - cmake -DCOVERAGE_TESTS=ON ..
-    - ctest -VV -S ../cmake/travis_build.cmake || true
-    - if [ -f test_failed ] ; then false ; fi
+    - npm test
 
 sudo: False

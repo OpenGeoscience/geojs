@@ -1,6 +1,8 @@
-/*global describe, it, expect, geo*/
 describe('geo.sceneObject', function () {
   'use strict';
+
+  var geo = require('../test-utils').geo;
+  var $ = require('jquery');
 
   function CallCounter(extraData) {
     var m_this = this;

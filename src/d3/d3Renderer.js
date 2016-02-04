@@ -581,7 +581,7 @@ registerRenderer('d3', d3Renderer);
    * @returns {boolean} true if available.
    */
   d3Renderer.supported = function () {
-    return (typeof d3 !== 'undefined');
+    return !!__webpack_modules__[require.resolveWeak('d3')]; // eslint-disable-line
   };
 
   /**

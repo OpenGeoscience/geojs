@@ -1,8 +1,12 @@
 // Test geo.tileLayer
 
-/*global describe, it, expect, geo, mockVGLRenderer, closeToEqual*/
 describe('geo.tileLayer', function () {
   'use strict';
+
+  var $ = require('jquery');
+  var geo = require('../test-utils').geo;
+  var mockVGLRenderer = require('../test-utils').mockVGLRenderer;
+  var closeToEqual = require('../test-utils').closeToEqual;
 
   // create a map-like object suitable for testing the tileLayer
   var map = function (o) {
@@ -561,7 +565,7 @@ describe('geo.tileLayer', function () {
           topDown: true,
           wrapX: false,
           wrapY: false,
-          url: function () {return '/data/white.jpg';}
+          url: function () { return '/data/white.jpg'; }
         });
         expect(l.cache.size).toBe(2);
 
@@ -588,11 +592,13 @@ describe('geo.tileLayer', function () {
         });
         return [
           {fetch: function () {
-            window.setTimeout(function () {d1.resolve();}, 10); return d1;}
-          },
+            window.setTimeout(function () { d1.resolve(); }, 10);
+            return d1;
+          }},
           {fetch: function () {
-            window.setTimeout(function () {d2.resolve();}, 5); return d2;}
-          }
+            window.setTimeout(function () { d2.resolve(); }, 5);
+            return d2;
+          }}
         ];
       };
 
@@ -603,24 +609,24 @@ describe('geo.tileLayer', function () {
         var m = map(), l;
         l = geo.tileLayer({map: m});
         expect(l.gcsTileBounds({level: 0, x: 0, y: 0})).toEqual({
-            left: 0, top: 0, right: 2560000, bottom: 2560000});
+          left: 0, top: 0, right: 2560000, bottom: 2560000});
         expect(closeToEqual(l.gcsTileBounds({level: 0, x: 0, y: 0}, null), {
-            left: 0, top: 0, right: 2560000, bottom: -2560000})).toBe(true);
+          left: 0, top: 0, right: 2560000, bottom: -2560000})).toBe(true);
         expect(closeToEqual(l.gcsTileBounds(
-            {level: 0, x: 0, y: 0}, '+proj=longlat +axis=wnu'), {
-            left: 0, top: 0, right: -2560000, bottom: 2560000})).toBe(true);
+           {level: 0, x: 0, y: 0}, '+proj=longlat +axis=wnu'), {
+             left: 0, top: 0, right: -2560000, bottom: 2560000})).toBe(true);
       });
       it('level 3 tiles', function () {
         var m = map(), l;
         l = geo.tileLayer({map: m});
         expect(l.gcsTileBounds({level: 3, x: 0, y: 0})).toEqual({
-            left: 0, top: 0, right: 320000, bottom: 320000});
+          left: 0, top: 0, right: 320000, bottom: 320000});
         expect(l.gcsTileBounds({level: 3, x: 7, y: 0})).toEqual({
-            left: 2240000, top: 0, right: 2560000, bottom: 320000});
+          left: 2240000, top: 0, right: 2560000, bottom: 320000});
         expect(l.gcsTileBounds({level: 3, x: 7, y: 7})).toEqual({
-            left: 2240000, top: 2240000, right: 2560000, bottom: 2560000});
+          left: 2240000, top: 2240000, right: 2560000, bottom: 2560000});
         expect(l.gcsTileBounds({level: 3, x: 3, y: 4})).toEqual({
-            left: 960000, top: 1280000, right: 1280000, bottom: 1600000});
+          left: 960000, top: 1280000, right: 1280000, bottom: 1600000});
       });
     });
   });
@@ -673,7 +679,7 @@ describe('geo.tileLayer', function () {
       opts = {
         tileWidth: 200,
         tileHeight: 200,
-        tileOffset: function (l) {return 200 * Math.pow(2, l - 1);}
+        tileOffset: function (l) { return 200 * Math.pow(2, l - 1); }
       };
       describe('default origin', function () {
         origin = {x: 0, y: 0};
@@ -807,11 +813,11 @@ describe('geo.tileLayer', function () {
 
     it('_getTile', function () {
       var t, l = geo.tileLayer({
-        map: map(),
-        tileWidth: 110,
-        tileHeight: 120,
-        url: function (x, y, z) {return {x: x, y: y, level: z};}
-      });
+            map: map(),
+            tileWidth: 110,
+            tileHeight: 120,
+            url: function (x, y, z) { return {x: x, y: y, level: z}; }
+          });
 
       t = l._getTile({x: 1, y: 1, level: 0}, {x: 0, y: 0, level: 0});
       expect(t._url).toEqual({x: 0, y: 0, level: 0});
@@ -821,11 +827,11 @@ describe('geo.tileLayer', function () {
 
     it('_getTileCached', function () {
       var t0, t1, t2, l = geo.tileLayer({
-        map: map(),
-        tileWidth: 110,
-        tileHeight: 120,
-        url: function (i) {return i;}
-      });
+            map: map(),
+            tileWidth: 110,
+            tileHeight: 120,
+            url: function (i) { return i; }
+          });
 
       t0 = l._getTile({x: 1, y: 1, level: 0}, {x: 0, y: 0, level: 0});
       t1 = l._getTileCached({x: 1, y: 1, level: 0}, {x: 0, y: 0, level: 0});
@@ -844,11 +850,11 @@ describe('geo.tileLayer', function () {
 
     it('_tileHash', function () {
       var t, l = geo.tileLayer({
-        map: map(),
-        tileWidth: 110,
-        tileHeight: 120,
-        url: function (i) {return i;}
-      });
+            map: map(),
+            tileWidth: 110,
+            tileHeight: 120,
+            url: function (i) { return i; }
+          });
 
       t = l._getTile({x: 1, y: 1, level: 0}, {x: 0, y: 0, level: 0});
       expect(
@@ -859,11 +865,11 @@ describe('geo.tileLayer', function () {
     describe('_getTileRange', function () {
       it('level 0', function () {
         var l = geo.tileLayer({
-          map: map({unitsPerPixel: 1}),
-          tileWidth: 256,
-          tileHeight: 128,
-          topDown: true
-        }), b;
+              map: map({unitsPerPixel: 1}),
+              tileWidth: 256,
+              tileHeight: 128,
+              topDown: true
+            }), b;
 
         b = l._getTileRange(0, {left: 0, right: 255, bottom: 127, top: 0});
         expect(b.start).toEqual({x: 0, y: 0});
@@ -880,11 +886,11 @@ describe('geo.tileLayer', function () {
 
       it('level 1', function () {
         var l = geo.tileLayer({
-          map: map({unitsPerPixel: 1}),
-          tileWidth: 256,
-          tileHeight: 128,
-          topDown: true
-        }), b;
+              map: map({unitsPerPixel: 1}),
+              tileWidth: 256,
+              tileHeight: 128,
+              topDown: true
+            }), b;
 
         b = l._getTileRange(1, {left: 0, right: 255, bottom: 127, top: 0});
         expect(b.start).toEqual({x: 0, y: 0});
@@ -903,8 +909,8 @@ describe('geo.tileLayer', function () {
     describe('_loadMetric', function () {
       it('center (0, 0, 0)', function () {
         var m, l = geo.tileLayer({
-          map: map()
-        });
+              map: map()
+            });
 
         m = l._loadMetric({x: 0, y: 0, level: 0});
         expect(m({x: 1, y: 1, level: 2}, {x: 3, y: 3, level: 2})).toBeLessThan(0);
@@ -914,8 +920,8 @@ describe('geo.tileLayer', function () {
 
       it('center (1, 1, 1)', function () {
         var m, l = geo.tileLayer({
-          map: map()
-        });
+              map: map()
+            });
 
         m = l._loadMetric({x: 1, y: 1, level: 1});
         expect(m({x: 1, y: 1, level: 2}, {x: 3, y: 3, level: 2})).toBeGreaterThan(0);
@@ -925,8 +931,8 @@ describe('geo.tileLayer', function () {
 
       it('center (1.5, 1.5, 2, 1)', function () {
         var m, l = geo.tileLayer({
-          map: map()
-        });
+              map: map()
+            });
 
         m = l._loadMetric({x: 1.5, y: 1.5, level: 2, bottomLevel: 1});
         expect(m({x: 1, y: 1, level: 2}, {x: 3, y: 3, level: 2})).toBeLessThan(0);
@@ -938,7 +944,7 @@ describe('geo.tileLayer', function () {
 
     describe('_isCovered', function () {
       function layer() {
-        return geo.tileLayer({map: map(), url: function () {return '';}});
+        return geo.tileLayer({map: map(), url: function () { return ''; }});
       }
       it('a tile does not cover itself', function () {
         var l = layer(), t;
@@ -1002,44 +1008,44 @@ describe('geo.tileLayer', function () {
     describe('_canPurge', function () {
       it('covered tile', function () {
         var l = geo.tileLayer({map: map(), keepLower: false});
-        l._isCovered = function () {return true;};
-        l._outOfBounds = function () {return false;};
+        l._isCovered = function () { return true; };
+        l._outOfBounds = function () { return false; };
         expect(l._canPurge({index: {level: 0}}, {}, 1)).toBe(true);
       });
       it('covered tile at current zoom', function () {
         var l = geo.tileLayer({map: map()});
-        l._isCovered = function () {return true;};
-        l._outOfBounds = function () {return false;};
+        l._isCovered = function () { return true; };
+        l._outOfBounds = function () { return false; };
         expect(l._canPurge({index: {level: 1}}, {}, 1)).toBe(false);
       });
       it('out of bounds tile', function () {
         var l = geo.tileLayer({map: map(), keepLower: false});
-        l._isCovered = function () {return false;};
-        l._outOfBounds = function () {return true;};
+        l._isCovered = function () { return false; };
+        l._outOfBounds = function () { return true; };
         expect(l._canPurge({}, {})).toBe(true);
       });
       it('non-purgeable tile', function () {
         var l = geo.tileLayer({map: map(), keepLower: false});
-        l._isCovered = function () {return false;};
-        l._outOfBounds = function () {return false;};
+        l._isCovered = function () { return false; };
+        l._outOfBounds = function () { return false; };
         expect(l._canPurge({}, {})).toBe(false);
       });
       it('upper tile', function () {
         var l = geo.tileLayer({map: map(), keepLower: true});
-        l._outOfBounds = function () {return false;};
+        l._outOfBounds = function () { return false; };
         expect(l._canPurge({index: {level: 2}}, {}, 1)).toBe(true);
         expect(l._canPurge({index: {level: 0}}, {}, 1)).toBe(false);
       });
       it('no bounds', function () {
         var l = geo.tileLayer({map: map(), keepLower: false});
-        l._isCovered = function () {return false;};
-        l._outOfBounds = function () {return true;};
+        l._isCovered = function () { return false; };
+        l._outOfBounds = function () { return true; };
         expect(l._canPurge({})).toBe(false);
       });
       it('doneLoading', function () {
         var l = geo.tileLayer({map: map(), keepLower: false});
-        l._isCovered = function () {return false;};
-        l._outOfBounds = function () {return false;};
+        l._isCovered = function () { return false; };
+        l._outOfBounds = function () { return false; };
         expect(l._canPurge({index: {level: 0}}, {}, 1, false)).toBe(false);
         expect(l._canPurge({index: {level: 0}}, {}, 1, true)).toBe(true);
         expect(l._canPurge({index: {level: 1}}, {}, 1, false)).toBe(false);
@@ -1051,7 +1057,7 @@ describe('geo.tileLayer', function () {
 
     describe('_outOfBounds', function () {
       function layer() {
-        return geo.tileLayer({map: map(), url: function () {return '';}});
+        return geo.tileLayer({map: map(), url: function () { return ''; }});
       }
       var bounds = {
         left: 384,
@@ -1094,12 +1100,12 @@ describe('geo.tileLayer', function () {
     describe('_getTiles', function () {
       it('basic range query', function () {
         var tiles, l = geo.tileLayer({
-          map: map({unitsPerPixel: 1}),
-          wrapX: false,
-          wrapY: false,
-          topDown: true,
-          url: function () {return '/data/white.jpg';}
-        });
+              map: map({unitsPerPixel: 1}),
+              wrapX: false,
+              wrapY: false,
+              topDown: true,
+              url: function () { return '/data/white.jpg'; }
+            });
 
         tiles = l._getTiles(1, {left: 50, right: 500, bottom: 500, top: 50}, true);
         expect(tiles.length).toBe(5);
@@ -1109,12 +1115,12 @@ describe('geo.tileLayer', function () {
       });
       it('basic range query with invalid tiles', function () {
         var tiles, l = geo.tileLayer({
-          map: map({unitsPerPixel: 1}),
-          wrapX: false,
-          wrapY: false,
-          topDown: true,
-          url: function () {return '/data/white.jpg';}
-        });
+              map: map({unitsPerPixel: 1}),
+              wrapX: false,
+              wrapY: false,
+              topDown: true,
+              url: function () { return '/data/white.jpg'; }
+            });
 
         tiles = l._getTiles(0, {left: 50, right: 500, bottom: 500, top: 50});
         expect(tiles.length).toBe(1);
@@ -1124,12 +1130,12 @@ describe('geo.tileLayer', function () {
       });
       it('basic range query with wrapping in X', function () {
         var tiles, l = geo.tileLayer({
-          map: map({unitsPerPixel: 1}),
-          wrapX: true,
-          wrapY: false,
-          topDown: true,
-          url: function () {return '/data/white.jpg';}
-        });
+              map: map({unitsPerPixel: 1}),
+              wrapX: true,
+              wrapY: false,
+              topDown: true,
+              url: function () { return '/data/white.jpg'; }
+            });
 
         tiles = l._getTiles(0, {left: 50, right: 500, bottom: 500, top: 50});
         expect(tiles.length).toBe(2);
@@ -1140,12 +1146,12 @@ describe('geo.tileLayer', function () {
       });
       it('basic range query with wrapping in Y', function () {
         var tiles, l = geo.tileLayer({
-          map: map({unitsPerPixel: 1}),
-          wrapX: false,
-          wrapY: true,
-          topDown: true,
-          url: function () {return '/data/white.jpg';}
-        });
+              map: map({unitsPerPixel: 1}),
+              wrapX: false,
+              wrapY: true,
+              topDown: true,
+              url: function () { return '/data/white.jpg'; }
+            });
 
         tiles = l._getTiles(0, {left: 50, right: 500, bottom: 500, top: 50});
         expect(tiles.length).toBe(2);
@@ -1156,12 +1162,12 @@ describe('geo.tileLayer', function () {
       });
       it('basic range query with wrapping in X and Y', function () {
         var tiles, l = geo.tileLayer({
-          map: map({unitsPerPixel: 1}),
-          wrapX: true,
-          wrapY: true,
-          topDown: true,
-          url: function () {return '/data/white.jpg';}
-        });
+              map: map({unitsPerPixel: 1}),
+              wrapX: true,
+              wrapY: true,
+              topDown: true,
+              url: function () { return '/data/white.jpg'; }
+            });
 
         tiles = l._getTiles(0, {left: 50, right: 500, bottom: 500, top: 50});
         expect(tiles.length).toBe(4);
@@ -1171,12 +1177,12 @@ describe('geo.tileLayer', function () {
       });
       it('url templating', function () {
         var tiles, l = geo.tileLayer({
-          map: map({unitsPerPixel: 1}),
-          wrapX: false,
-          wrapY: false,
-          topDown: true,
-          url: '/data/white.jpg?s={s}&x={x}&y={y}&z={z}'
-        });
+              map: map({unitsPerPixel: 1}),
+              wrapX: false,
+              wrapY: false,
+              topDown: true,
+              url: '/data/white.jpg?s={s}&x={x}&y={y}&z={z}'
+            });
 
         tiles = l._getTiles(1, {left: 50, right: 500, bottom: 500, top: 50});
         expect(tiles.length).toBe(5);
@@ -1189,12 +1195,12 @@ describe('geo.tileLayer', function () {
       });
       it('baseUrl', function () {
         var tiles, l = geo.tileLayer({
-          map: map({unitsPerPixel: 1}),
-          wrapX: false,
-          wrapY: false,
-          topDown: true,
-          baseUrl: '/data/white.jpg?test='
-        });
+              map: map({unitsPerPixel: 1}),
+              wrapX: false,
+              wrapY: false,
+              topDown: true,
+              baseUrl: '/data/white.jpg?test='
+            });
 
         tiles = l._getTiles(1, {left: 50, right: 500, bottom: 500, top: 50});
         expect(tiles.length).toBe(5);
@@ -1240,7 +1246,7 @@ describe('geo.tileLayer', function () {
 
     describe('drawTile', function () {
       function test_draw(tile) {
-        var l = layer_html({url: function () {return '/data/white.jpg';}});
+        var l = layer_html({url: function () { return '/data/white.jpg'; }});
         l.drawTile(l._getTileCached(tile));
         l.drawTile(l._getTileCached(tile)); // draw it twice, but should only add one
         return l;
@@ -1296,7 +1302,7 @@ describe('geo.tileLayer', function () {
       });
 
       it('invalid tile url', function (done) {
-        var l = layer_html({url: function () {return 'not a valid url';}}), t;
+        var l = layer_html({url: function () { return 'not a valid url'; }}), t;
         t = l._getTileCached({x: 0, y: 0, level: 0});
         t.image = $('<img src="/data/white.jpg"/>').get(0);
         l.drawTile(t);
@@ -1310,7 +1316,7 @@ describe('geo.tileLayer', function () {
     describe('purging inactive tiles', function () {
       function setup(bds, opts) {
         var l = layer_html($.extend(
-            true, {url: function () {return '/data/white.jpg';}}, opts || {}));
+            true, {url: function () { return '/data/white.jpg'; }}, opts || {}));
         l._getViewBounds = function () {
           return bds || {
             left: -50,
@@ -1337,9 +1343,9 @@ describe('geo.tileLayer', function () {
         expect(l.activeTiles).toEqual(active);
       });
       it('out of bounds', function () {
-        var l = setup(), active;
+        var l = setup();
         l.drawTile(l._getTile({x: 2, y: 0, level: 1}));
-        active = $.extend(true, {}, l.activeTiles);
+        $.extend(true, {}, l.activeTiles);
         l._purge();
         expect(l.activeTiles).toEqual({});
       });
@@ -1376,7 +1382,7 @@ describe('geo.tileLayer', function () {
       });
     });
     it('clear all tiles', function () {
-      var l = layer_html({url: function () {return '/data/white.jpg';}}), tiles;
+      var l = layer_html({url: function () { return '/data/white.jpg'; }}), tiles;
 
       tiles = [
         l._getTileCached({x: 0, y: 0, level: 0}),
@@ -1395,7 +1401,7 @@ describe('geo.tileLayer', function () {
       expect(l.cache.length).toBe(5);
     });
     it('reset the layer', function () {
-      var l = layer_html({url: function () {return '/data/white.jpg';}}), tiles;
+      var l = layer_html({url: function () { return '/data/white.jpg'; }}), tiles;
 
       tiles = [
         l._getTileCached({x: 0, y: 0, level: 0}),
@@ -1416,9 +1422,9 @@ describe('geo.tileLayer', function () {
   });
 
   it('Overloading draw method', function () {
-    var l = geo.tileLayer({map: map(), url: function () {return '/data/white.jpg';}}),
+    var l = geo.tileLayer({map: map(), url: function () { return '/data/white.jpg'; }}),
         called = 0;
-    l._drawTile = function () {called += 1;};
+    l._drawTile = function () { called += 1; };
     l.drawTile(l._getTile({x: 0, y: 0, level: 0}));
     expect(called).toBe(1);
   });

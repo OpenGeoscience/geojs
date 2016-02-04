@@ -1,10 +1,11 @@
 // Test geo.core.map
 
-/*global describe, it, expect, geo, closeToEqual*/
 describe('geo.core.map', function () {
   'use strict';
 
   var $ = require('jquery');
+  var geo = require('../test-utils').geo;
+  var closeToEqual = require('../test-utils').closeToEqual;
 
   function create_map(opts) {
     var node = $('<div id="map"/>').css({width: '500px', height: '500px'});

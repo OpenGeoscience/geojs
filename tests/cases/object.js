@@ -1,8 +1,9 @@
-/*global describe, it, expect, geo*/
-describe('geo.object', function() {
+describe('geo.object', function () {
+
+  var geo = require('../test-utils').geo;
 
   describe('Basic functionality', function () {
-    
+
     function CallCounter(extraData) {
       var m_this = this;
       this.ncalls = 0;
@@ -57,7 +58,7 @@ describe('geo.object', function() {
       obj.geoOn('event', foo.handler2.call);
       obj.geoOn('event', foo.handler3.call);
       obj.geoOn('event', foo.handler4.call);
-      
+
       checkAll(0);
 
       obj.geoTrigger('event', evtData);
@@ -68,10 +69,10 @@ describe('geo.object', function() {
 
       obj.geoTrigger('event', evtData);
       checkAll(2);
-      
+
       obj.geoTrigger('event', evtData);
       checkAll(3);
-      
+
       obj.geoTrigger('another event', evtData);
       checkAll(3);
 
@@ -130,22 +131,22 @@ describe('geo.object', function() {
 
       obj.geoTrigger('event3', foo.evt3.data);
       checkAll(0, 0, 2, 0);
-      
+
       obj.geoTrigger('event5');
       checkAll(0, 0, 2, 0);
-      
+
       obj.geoTrigger('event1', foo.evt1.data);
       checkAll(1, 1, 2, 0);
-      
+
       obj.geoTrigger('event4', foo.evt4.data);
       checkAll(1, 2, 2, 1);
-      
+
       obj.geoTrigger('event4', foo.evt4.data);
       checkAll(1, 3, 2, 2);
-      
+
       obj.geoTrigger('event3', foo.evt3.data);
       checkAll(1, 3, 3, 2);
-      
+
       obj.geoTrigger('event2');
       checkAll(1, 4, 3, 2);
 
@@ -158,19 +159,19 @@ describe('geo.object', function() {
 
       obj.geoTrigger('event5');
       checkAll(1, 4, 3, 2);
-      
+
       obj.geoTrigger('event1', foo.evt1.data);
       checkAll(1, 5, 3, 2);
-      
+
       obj.geoTrigger('event4', foo.evt4.data);
       checkAll(1, 5, 3, 3);
-      
+
       obj.geoTrigger('event4', foo.evt4.data);
       checkAll(1, 5, 3, 4);
-      
+
       obj.geoTrigger('event3', foo.evt3.data);
       checkAll(1, 5, 3, 4);
-      
+
       obj.geoTrigger('event2');
       checkAll(1, 6, 3, 4);
 
@@ -180,12 +181,12 @@ describe('geo.object', function() {
       var obj = new geo.object(),
           data = {},
           foo = new CallCounter(data);
-      
+
       obj.geoOn(['event1', 'event2', 'event3'], foo.call);
 
       obj.geoTrigger('event1', data);
       expect(foo.ncalls).toBe(1);
-      
+
       obj.geoTrigger('event2', data);
       expect(foo.ncalls).toBe(2);
 
@@ -193,7 +194,7 @@ describe('geo.object', function() {
 
       obj.geoTrigger('event1', data);
       expect(foo.ncalls).toBe(2);
-      
+
       obj.geoTrigger('event3', data);
       expect(foo.ncalls).toBe(3);
     });

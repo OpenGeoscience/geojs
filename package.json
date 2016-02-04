@@ -66,7 +66,9 @@
   "scripts": {
     "postinstall": "bower --quiet --allow-root install",
     "build": "grunt init library",
-    "lint": "eslint --cache src Gruntfile.js"
+    "lint": "eslint --cache src Gruntfile.js tests",
+    "test": "karma start karma-cov.conf.js --single-run",
+    "start": "karma start karma.conf.js"
   },
   "keywords": [
     "map",

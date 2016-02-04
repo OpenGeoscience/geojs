@@ -1,8 +1,9 @@
 // Test geo.tileCache
 
-/*global describe, it, expect, geo*/
 describe('geo.tileCache', function () {
   'use strict';
+
+  var geo = require('../test-utils').geo;
 
   // test cache size settings
   describe('cache size', function () {

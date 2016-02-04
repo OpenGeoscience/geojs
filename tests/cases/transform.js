@@ -1,8 +1,10 @@
 // Test geo.transform
 
-/*global describe, it, expect, geo*/
 describe('geo.transform', function () {
   'use strict';
+
+  var $ = require('jquery');
+  var geo = require('../test-utils').geo;
 
   function r2(pt1, pt2) {
     // euclidean norm

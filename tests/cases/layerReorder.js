@@ -4,6 +4,14 @@ var geo = require('../test-utils').geo;
 function createMap() {
   'use strict';
 
+  var $ = require('jquery');
+  var node = $('<div id=map/>').css({
+    width: '100px',
+    height: '100px'
+  });
+
+  $('#map').remove();
+  $('body').append(node);
   var map = geo.map({node: '#map', width: 100, height: 100}),
       cl = map.createLayer;
   // inject d3 renderer to let this work in phantom

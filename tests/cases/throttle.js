@@ -1,4 +1,6 @@
-/*global describe, it, expect, geo*/
+
+var $ = require('jquery');
+var geo = require('../test-utils').geo;
 
 /**
  * @class

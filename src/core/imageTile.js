@@ -109,4 +109,5 @@ module.exports = (function () {
   };
 
   inherit(imageTile, tile);
+  return imageTile;
 })();

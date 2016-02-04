@@ -1,8 +1,9 @@
 // Test geo.tile
 
-/*global describe, it, expect, geo*/
 describe('geo.tile', function () {
   'use strict';
+
+  var geo = require('../test-utils').geo;
 
   // test tile hash values
   it('hashing', function () {
