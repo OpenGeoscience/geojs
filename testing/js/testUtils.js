@@ -1,6 +1,6 @@
 /* These are functions we want available to jasmine tests. */
 /* global it */
-/* exported waitForIt, mockVGLRenderer, closeToArray, closeToEqual */
+/* exported waitForIt, mockVGLRenderer, closeToArray, closeToEqual, logCanvas2D, submitNote */
 
 /**
  * Create a pair of it functions.  The first one waits for a function to return
@@ -242,4 +242,20 @@ function logCanvas2D(enable) {
   });
 
   window._canvasLog = log;
+}
+
+/**
+ * Send data to be reported as part of the a build note.
+ *
+ * @param key: the key that this will be reported under.  This should be the
+ *             name of the test.
+ * @param note: the data to send.  This will be converted to JSON.
+ */
+function submitNote(key, note) {
+  $.ajax({
+    url: '/notes?key=' + encodeURIComponent(key),
+    data: JSON.stringify(note),
+    method: 'PUT',
+    contentType: 'application/json'
+  });
 }

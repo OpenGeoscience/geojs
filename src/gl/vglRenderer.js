@@ -117,17 +117,22 @@ geo.gl.vglRenderer = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Render
+   * Render.  This actually schedules rendering for the next animation frame.
    */
   ////////////////////////////////////////////////////////////////////////////
   this._render = function () {
     if (m_renderAnimFrameRef === null) {
-      m_renderAnimFrameRef = window.requestAnimationFrame(function () {
-        m_renderAnimFrameRef = null;
-        m_viewer.render();
-      });
+      m_renderAnimFrameRef = window.requestAnimationFrame(this._renderFrame);
     }
     return m_this;
+  };
+
+  /**
+   * This clears the render timer and actually renders.
+   */
+  this._renderFrame = function () {
+    m_renderAnimFrameRef = null;
+    m_viewer.render();
   };
 
   ////////////////////////////////////////////////////////////////////////////

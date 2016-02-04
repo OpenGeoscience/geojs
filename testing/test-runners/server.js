@@ -6,7 +6,8 @@ var express = require('express'),
     xml = require('xmlbuilder'),
     fs = require('fs'),
     app = express(),
-    cov = {};
+    cov = {},
+    notes = {};
 
 /**
  * Combine coverage results.
@@ -64,7 +65,6 @@ function calc_stats() {
   }
   return stats;
 }
-
 
 /**
  * Convert to cobertura xml format
@@ -149,6 +149,23 @@ app.get('/coverage', function (req, res, next) {
 app.post('/coverage', function (req, res, next) {
   fs.writeFile(req.query.path, cobertura());
   res.send('{}');
+  next();
+});
+
+app.delete('/notes', function (req, res, next) {
+  notes = {};
+  res.send('{}');
+  next();
+});
+
+app.put('/notes', function (req, res, next) {
+  notes[req.query.key] = req.body;
+  res.send('{}');
+  next();
+});
+
+app.post('/notes', function (req, res, next) {
+  fs.writeFile(req.query.path, JSON.stringify(notes));
   next();
 });
 
