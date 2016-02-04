@@ -85,10 +85,6 @@ describe('Test the zIndex property of layers', function () {
   });
 });
 
-describe('UI Layer Z Index', function () {
-  'use strict'
-});
-
 describe('Test reordering layers', function () {
   'use strict';
 
