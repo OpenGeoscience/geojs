@@ -37,6 +37,7 @@
   "devDependencies": {
     "blanket": "~1.2",
     "body-parser": "^1.14.1",
+    "codecov.io": "^0.1.6",
     "eslint": "^1.10.3",
     "eslint-config-semistandard": "^5.0.0",
     "eslint-config-standard": "^4.4.0",
@@ -68,7 +69,9 @@
     "build": "grunt init library",
     "lint": "eslint --cache src Gruntfile.js tests",
     "test": "karma start karma-cov.conf.js --single-run",
-    "start": "karma start karma.conf.js"
+    "start": "karma start karma.conf.js",
+    "ci": "karma start karma-cov.conf.js --single-run --browsers PhantomJS",
+    "codecov": "cat lcov/*/lcov.info | codecov"
   },
   "keywords": [
     "map",

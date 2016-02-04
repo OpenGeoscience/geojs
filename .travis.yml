@@ -1,21 +1,14 @@
 language: node_js
-
+sudo: False
 node_js:
     - "0.12"
-
-before_install:
-  - pushd "${HOME}"
-  - curl -L "https://cmake.org/files/v3.3/cmake-3.3.2-Linux-x86_64.tar.gz" | gunzip -c | tar x
-  - cd cmake-*/bin && export PATH="${PWD}:${PATH}"
-  - popd
-  - cmake --version
-  - env
 
 script:
     - npm install
     - npm run build
     - ./node_modules/.bin/grunt docs
     - ./node_modules/.bin/grunt copy:jqueryui
-    - npm test
+    - npm run ci
 
-sudo: False
+after_success:
+  - npm run codecov

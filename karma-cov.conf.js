@@ -16,6 +16,7 @@ karma_config.coverageReporter = {
   reporters: [
     {type: 'html', dir: 'dist/coverage/', subdir: browser},
     {type: 'cobertura', dir: 'dist/cobertura/', file: 'coverage.xml', subdir: browser},
+    {type: 'lcovonly', dir: 'lcov', subdir: browser},
     {type: 'text'}
   ]
 };
