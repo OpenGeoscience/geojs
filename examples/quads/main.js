@@ -25,7 +25,7 @@ $(function () {
       }, {
         ll: {x: -88, y: 29},
         ur: {x: -58, y: 49},
-        image: '../tiles/thumb.jpg',
+        image: 'flower1.jpg',
         opacity: 0.75
       }, {
         ul: {x: -108, y: 29},
@@ -33,13 +33,13 @@ $(function () {
         ll: {x: -98, y: 9},
         lr: {x: -68, y: 9},
         previewImage: null,
-        image: '../deepzoom/thumb.jpg'
+        image: 'flower3.jpg'
       }, {
         lr: {x: -58, y: 29},
         ur: {x: -58, y: 49},
         ul: {x: -38, y: 54},
         ll: {x: -33, y: 34},
-        image: '../choropleth/thumb.jpg',
+        image: 'flower2.jpg',
         opacity: 0.15
       }, {
         ll: {x: -33, y: 34},
