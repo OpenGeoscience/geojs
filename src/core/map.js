@@ -617,13 +617,13 @@ geo.map = function (arg) {
     m_width = w;
     m_height = h;
 
-    m_this.camera().viewport = {width: w, height: h};
-
     reset_minimum_zoom();
     var newZoom = fix_zoom(m_zoom);
     if (newZoom !== m_zoom) {
       m_this.zoom(newZoom);
     }
+    m_this.camera().viewport = {width: w, height: h};
+    m_this.center(oldCenter);
 
     m_this.geoTrigger(geo.event.resize, {
       type: geo.event.resize,
@@ -634,7 +634,6 @@ geo.map = function (arg) {
       height: h
     });
 
-    m_this.center(oldCenter);
     m_this.modified();
     return m_this;
   };

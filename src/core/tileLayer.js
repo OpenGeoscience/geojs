@@ -468,8 +468,8 @@
           start, end, indexRange, source, center, changed = false, old, level,
           minLevel = (this._options.keepLower ? this._options.minLevel :
                       maxLevel);
-      if (maxLevel < this._options.minLevel) {
-        maxLevel = this._options.minLevel;
+      if (maxLevel < minLevel) {
+        maxLevel = minLevel;
       }
 
       /* Generate a list of the tiles that we want to create.  This is done
