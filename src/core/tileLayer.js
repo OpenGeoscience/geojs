@@ -465,8 +465,12 @@
      */
     this._getTiles = function (maxLevel, bounds, sorted, onlyIfChanged) {
       var i, j, tiles = [], index, nTilesLevel,
-          start, end, indexRange, source, center, changed = false, old,
-          level, minLevel = this._options.keepLower ? 0 : maxLevel;
+          start, end, indexRange, source, center, changed = false, old, level,
+          minLevel = (this._options.keepLower ? this._options.minLevel :
+                      maxLevel);
+      if (maxLevel < this._options.minLevel) {
+        maxLevel = this._options.minLevel;
+      }
 
       /* Generate a list of the tiles that we want to create.  This is done
        * before sorting, because we want to actually generate the tiles in
@@ -476,17 +480,26 @@
         indexRange = this._getTileRange(level, bounds);
         start = indexRange.start;
         end = indexRange.end;
+        // total number of tiles existing at this level
+        nTilesLevel = this.tilesAtZoom(level);
+
+        if (!this._options.wrapX) {
+          start.x = Math.min(Math.max(start.x, 0), nTilesLevel.x - 1);
+          end.x = Math.min(Math.max(end.x, 0), nTilesLevel.x - 1);
+        }
+        if (!this._options.wrapY) {
+          start.y = Math.min(Math.max(start.y, 0), nTilesLevel.y - 1);
+          end.y = Math.min(Math.max(end.y, 0), nTilesLevel.y - 1);
+        }
         /* If we are reprojecting tiles, we need a check to not use all levels
          * if the number of tiles is excessive. */
         if (this._options.gcs && this._options.gcs !== this.map().gcs() &&
-            level !== minLevel && (end.x - start.x) * (end.y - start.y) >
+            level !== minLevel &&
+            (end.x + 1 - start.x) * (end.y + 1 - start.y) >
             (this.map().size().width * this.map().size().height /
             this._options.tileWidth / this._options.tileHeight) * 16) {
           break;
         }
-
-        // total number of tiles existing at this level
-        nTilesLevel = this.tilesAtZoom(level);
 
         // loop over the tile range
         for (i = start.x; i <= end.x; i += 1) {
@@ -1218,7 +1231,8 @@
     this._canPurge = function (tile, bounds, zoom, doneLoading) {
       if (this._options.keepLower) {
         zoom = zoom || 0;
-        if (zoom < tile.index.level) {
+        if (zoom < tile.index.level &&
+            tile.index.level !== this._options.minLevel) {
           return true;
         }
       } else {

@@ -112,7 +112,7 @@ $(function () {
     },
     maxBounds: {},
     zoom: query.zoom !== undefined ? parseFloat(query.zoom) : 3,
-    gcs: gcsTable[query.gcs]
+    gcs: gcsTable[query.gcs] || query.gcs
   };
   // Set the tile layer defaults to use the specified renderer and opacity
   var layerParams = {
@@ -216,6 +216,12 @@ $(function () {
   }
   if (query.max !== undefined) {
     mapParams.max = parseFloat(query.max);
+  }
+  if (query.minLevel !== undefined) {
+    layerParams.minLevel = parseInt(query.minLevel, 10);
+  }
+  if (query.maxLevel !== undefined) {
+    layerParams.maxLevel = parseInt(query.maxLevel, 10);
   }
   // allow a generous max tile level so it is never the limit
   if (!layerParams.maxLevel) {
