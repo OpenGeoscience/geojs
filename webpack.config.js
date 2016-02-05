@@ -9,16 +9,7 @@ module.exports = {
   entry: {
     geo: './index.js',
     'geo.min': './index.js',
-    vendor: [
-      'jquery',
-      'gl-mat4',
-      'gl-vec2',
-      'gl-vec3',
-      'gl-vec4',
-      'proj4',
-      'd3',
-      'pnltri'
-    ]
+    vendor: './vendor.js'
   },
   output: {
     path: path.join(__dirname, 'dist', 'built'),
@@ -31,7 +22,8 @@ module.exports = {
     alias: {
       jquery: 'jquery/dist/jquery',
       proj4: 'proj4/lib',
-      vgl: 'vgl/vgl.js'
+      vgl: 'vgl/vgl.js',
+      d3: 'd3/d3.js'
     }
   },
   plugins: [
@@ -50,6 +42,8 @@ module.exports = {
     loaders: [{
       test: /\.json$/,
       loader: 'json-loader'
+    }, {
+      test: require.resolve('d3'), loader: 'exports?d3'
     }]
   },
 

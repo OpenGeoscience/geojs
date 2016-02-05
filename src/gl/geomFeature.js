@@ -1,5 +1,5 @@
 var inherit = require('../util').inherit;
-var geomFeature = require('./geomFeature');
+var geomFeature = require('../core/geomFeature');
 
 //////////////////////////////////////////////////////////////////////////////
 /**

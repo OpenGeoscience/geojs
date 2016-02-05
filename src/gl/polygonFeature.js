@@ -1,6 +1,6 @@
 var inherit = require('../util').inherit;
 var registerFeature = require('../util').registerFeature;
-var polygonFeature = require('./polygonFeature');
+var polygonFeature = require('../core/polygonFeature');
 
 //////////////////////////////////////////////////////////////////////////////
 /**

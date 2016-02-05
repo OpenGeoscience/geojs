@@ -1,6 +1,6 @@
 var inherit = require('../util').inherit;
 var registerFeature = require('../util').registerFeature;
-var contourFeature = require('./contourFeature');
+var contourFeature = require('../core/contourFeature');
 
 //////////////////////////////////////////////////////////////////////////////
 /**

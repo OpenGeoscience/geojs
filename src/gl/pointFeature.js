@@ -1,6 +1,6 @@
 var inherit = require('../util').inherit;
 var registerFeature = require('../util').registerFeature;
-var pointFeature = require('./pointFeature');
+var pointFeature = require('../core/pointFeature');
 
 //////////////////////////////////////////////////////////////////////////////
 /**

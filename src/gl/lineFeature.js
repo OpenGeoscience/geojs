@@ -1,6 +1,6 @@
 var inherit = require('../util').inherit;
 var registerFeature = require('../util').registerFeature;
-var lineFeature = require('./lineFeature');
+var lineFeature = require('../core/lineFeature');
 
 //////////////////////////////////////////////////////////////////////////////
 /**

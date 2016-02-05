@@ -1,6 +1,6 @@
 var inherit = require('../util').inherit;
 var registerFeature = require('../util').registerFeature;
-var choroplethFeature = require('./choroplethFeature');
+var choroplethFeature = require('../core/choroplethFeature');
 
 //////////////////////////////////////////////////////////////////////////////
 /**

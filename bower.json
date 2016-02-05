@@ -12,10 +12,6 @@
     "url": "https://github.com/OpenGeoscience/geojs"
   },
   "dependencies": {
-    "d3": "~3.3",
-    "gl-matrix": "~2.1",
-    "jquery": "~2.1",
-    "proj4": "=2.3.3",
     "bootstrap": "~3.3.0",
     "bootswatch": "~3.3",
     "vgl": "0.3.6"

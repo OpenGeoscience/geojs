@@ -177,20 +177,6 @@ module.exports = function (grunt) {
       }
     },
 
-    concat: {
-      geojs: {
-        options: {
-          seperator: '',
-          sourceMap: environment === 'dev'
-        },
-        files: {
-          'dist/built/geo.js': sourceList.map(function (f) {
-            return 'dist/' + f;
-          })
-        }
-      }
-    },
-
     uglify: {
       options: {
         sourceMap: environment === 'dev',
@@ -201,26 +187,6 @@ module.exports = function (grunt) {
           beautify: false
         },
         mangle: false
-      },
-
-      geojs: {
-        files: {
-          'dist/built/geo.min.js': sourceList.map(function (f) {
-            return 'dist/' + f;
-          })
-        }
-      },
-
-      ext: {
-        files: {
-          'dist/built/geo.ext.min.js': [
-            'bower_components/jquery/dist/jquery.js',
-            'bower_components/gl-matrix/dist/gl-matrix.js',
-            'bower_components/proj4/dist/proj4-src.js',
-            'bower_components/d3/d3.js',
-            'node_modules/pnltri/pnltri.js'
-          ]
-        }
       },
 
       codemirror: {
@@ -251,9 +217,7 @@ module.exports = function (grunt) {
         tasks: [
           'clean:source',
           'template',
-          'copy',
-          'concat:geojs',
-          'uglify:geojs'
+          'copy'
         ]
       },
       examples: {
@@ -287,7 +251,6 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-clean');
-  grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-express');
   grunt.loadNpmTasks('grunt-docco');
 
@@ -427,14 +390,10 @@ module.exports = function (grunt) {
   grunt.registerTask('library', [
     'template',
     'copy:geo',
-    'copy:vgl',
-    'concat:geojs',
-    'uglify:geojs'
+    'copy:vgl'
   ]);
 
-  grunt.registerTask('init', [
-    'uglify:ext'
-  ]);
+  grunt.registerTask('init', []);
 
   grunt.registerTask('default', [
     'init',
