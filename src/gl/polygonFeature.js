@@ -1,19 +1,27 @@
+var inherit = require('../util').inherit;
+var registerFeature = require('../util').registerFeature;
+var polygonFeature = require('./polygonFeature');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of polygonFeature
  *
- * @class
+ * @class geo.gl.polygonFeature
  * @extends geo.polygonFeature
  * @returns {geo.gl.polygonFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.gl.polygonFeature = function (arg) {
+var gl_polygonFeature = function (arg) {
   'use strict';
-  if (!(this instanceof geo.gl.polygonFeature)) {
-    return new geo.gl.polygonFeature(arg);
+  if (!(this instanceof gl_polygonFeature)) {
+    return new gl_polygonFeature(arg);
   }
   arg = arg || {};
-  geo.polygonFeature.call(this, arg);
+  polygonFeature.call(this, arg);
+
+  var vgl = require('vgl');
+  var Triangulator = require('pnltri').Triangulator;
+  var transform = require('../core/transform');
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -101,7 +109,7 @@ geo.gl.polygonFeature = function (arg) {
         extLength = null,
         intIndex = 0,
         posInstance = null,
-        triangulator = new PNLTRI.Triangulator(),
+        triangulator = new Triangulator(),
         triangList = null,
         newTriangList = null,
         fillColorInstance = null;
@@ -194,7 +202,7 @@ geo.gl.polygonFeature = function (arg) {
       itemIndex += 1;
     });
 
-    position = geo.transform.transformCoordinates(
+    position = transform.transformCoordinates(
                  m_this.gcs(), m_this.layer().map().gcs(),
                  position, 3);
 
@@ -319,7 +327,8 @@ geo.gl.polygonFeature = function (arg) {
   return this;
 };
 
-inherit(geo.gl.polygonFeature, geo.polygonFeature);
+inherit(gl_polygonFeature, polygonFeature);
 
 // Now register it
-geo.registerFeature('vgl', 'polygon', geo.gl.polygonFeature);
+registerFeature('vgl', 'polygon', gl_polygonFeature);
+module.exports = gl_polygonFeature;

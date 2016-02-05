@@ -1,19 +1,26 @@
+var inherit = require('../util').inherit;
+var registerFeature = require('../util').registerFeature;
+var pointFeature = require('./pointFeature');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of pointFeature
  *
- * @class
+ * @class geo.gl.pointFeature
  * @extends geo.pointFeature
  * @returns {geo.gl.pointFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.gl.pointFeature = function (arg) {
+var gl_pointFeature = function (arg) {
   'use strict';
-  if (!(this instanceof geo.gl.pointFeature)) {
-    return new geo.gl.pointFeature(arg);
+  if (!(this instanceof gl_pointFeature)) {
+    return new gl_pointFeature(arg);
   }
   arg = arg || {};
-  geo.pointFeature.call(this, arg);
+  pointFeature.call(this, arg);
+
+  var vgl = require('vgl');
+  var transform = require('../core/transform');
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -263,7 +270,7 @@ geo.gl.pointFeature = function (arg) {
       position[i3 + 2] = posVal.z || 0;
       nonzeroZ = nonzeroZ || position[i3 + 2];
     }
-    position = geo.transform.transformCoordinates(
+    position = transform.transformCoordinates(
                   m_this.gcs(), m_this.layer().map().gcs(),
                   position, 3);
     /* Some transforms modify the z-coordinate.  If we started with all zero z
@@ -525,7 +532,9 @@ geo.gl.pointFeature = function (arg) {
   return this;
 };
 
-inherit(geo.gl.pointFeature, geo.pointFeature);
+inherit(gl_pointFeature, pointFeature);
 
 // Now register it
-geo.registerFeature('vgl', 'point', geo.gl.pointFeature);
+registerFeature('vgl', 'point', gl_pointFeature);
+
+module.exports = gl_pointFeature;

@@ -33,5 +33,6 @@ module.exports = {
   vectorFeature: require('./core/vectorFeature'),
   version: require('./core/version'),
   util: require('./util'),
-  d3: require('./d3')
+  d3: require('./d3'),
+  gl: require('./gl')
 };

@@ -1,21 +1,31 @@
+var inherit = require('../util').inherit;
+var registerRenderer = require('../util').registerRenderer;
+var renderer = require('../core/renderer');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class vglRenderer
  *
- * @class
+ * @class geo.gl.vglRenderer
  * @extends geo.renderer
  * @param canvas
  * @returns {geo.gl.vglRenderer}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.gl.vglRenderer = function (arg) {
+var vglRenderer = function (arg) {
   'use strict';
 
-  if (!(this instanceof geo.gl.vglRenderer)) {
-    return new geo.gl.vglRenderer(arg);
+  if (!(this instanceof vglRenderer)) {
+    return new vglRenderer(arg);
   }
   arg = arg || {};
-  geo.renderer.call(this, arg);
+  renderer.call(this, arg);
+
+  var $ = require('jquery');
+  var vgl = require('vgl');
+  var mat4 = require('gl-mat4');
+  var util = require('../util');
+  var geo_event = require('../core/event');
 
   var m_this = this,
       m_contextRenderer = null,
@@ -157,11 +167,11 @@ geo.gl.vglRenderer = function (arg) {
     if (proj[15]) {
       /* we want positive z to be closer to the camera, but webGL does the
        * converse, so reverse the z coordinates. */
-      proj = mat4.scale(geo.util.mat4AsArray(), proj, [1, 1, -1]);
+      proj = mat4.scale(util.mat4AsArray(), proj, [1, 1, -1]);
     }
     /* A similar kluge as in the base camera class worldToDisplay4.  With this,
      * we can show z values from 0 to 1. */
-    proj = mat4.translate(geo.util.mat4AsArray(), proj,
+    proj = mat4.translate(util.mat4AsArray(), proj,
                           [0, 0, camera.constructor.bounds.far]);
     /* Check if the rotation is a multiple of 90 */
     var basis = Math.PI / 2,
@@ -169,8 +179,8 @@ geo.gl.vglRenderer = function (arg) {
         ortho = (Math.min(Math.abs(angle), Math.abs(angle - basis)) < 0.00001);
     renderWindow.renderers().forEach(function (renderer) {
       var cam = renderer.camera();
-      if (geo.util.compareArrays(view, cam.viewMatrix()) &&
-          geo.util.compareArrays(proj, cam.projectionMatrix()) &&
+      if (util.compareArrays(view, cam.viewMatrix()) &&
+          util.compareArrays(proj, cam.projectionMatrix()) &&
           m_lastZoom === map.zoom()) {
         return;
       }
@@ -203,25 +213,25 @@ geo.gl.vglRenderer = function (arg) {
 
   // Connect to interactor events
   // Connect to pan event
-  m_this.layer().geoOn(geo.event.pan, function (evt) {
+  m_this.layer().geoOn(geo_event.pan, function (evt) {
     void (evt);
     m_this._updateRendererCamera();
   });
 
   // Connect to zoom event
-  m_this.layer().geoOn(geo.event.zoom, function (evt) {
+  m_this.layer().geoOn(geo_event.zoom, function (evt) {
     void (evt);
     m_this._updateRendererCamera();
   });
 
   // Connect to rotation event
-  m_this.layer().geoOn(geo.event.rotate, function (evt) {
+  m_this.layer().geoOn(geo_event.rotate, function (evt) {
     void (evt);
     m_this._updateRendererCamera();
   });
 
   // Connect to parallelprojection event
-  m_this.layer().geoOn(geo.event.parallelprojection, function (evt) {
+  m_this.layer().geoOn(geo_event.parallelprojection, function (evt) {
     var vglRenderer = m_this.contextRenderer(),
         camera,
         layer = m_this.layer();
@@ -240,9 +250,9 @@ geo.gl.vglRenderer = function (arg) {
   return this;
 };
 
-inherit(geo.gl.vglRenderer, geo.renderer);
+inherit(vglRenderer, renderer);
 
-geo.registerRenderer('vgl', geo.gl.vglRenderer);
+registerRenderer('vgl', vglRenderer);
 
 (function () {
   'use strict';
@@ -255,7 +265,7 @@ geo.registerRenderer('vgl', geo.gl.vglRenderer);
    *
    * @returns {boolean} true if available.
    */
-  geo.gl.vglRenderer.supported = function () {
+  vglRenderer.supported = function () {
     if (checkedWebGL === undefined) {
       /* This is extracted from what Modernizr uses. */
       var canvas, ctx, exts; // eslint-disable-line no-unused-vars
@@ -282,7 +292,9 @@ geo.registerRenderer('vgl', geo.gl.vglRenderer);
    *
    * @returns null for the null renderer.
    */
-  geo.gl.vglRenderer.fallback = function () {
+  vglRenderer.fallback = function () {
     return null;
   };
+
+  module.exports = vglRenderer;
 })();

@@ -1,21 +1,26 @@
+var inherit = require('../util').inherit;
+var feature = require('../core/feature');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of pointSpritesGeomFeature
  *
- * @class
+ * @class geo.gl.pointSpritesGeomFeature
  * @extends geo.feature
  * @param positions
  * @param colors
- * @returns {geo.pointFeature}
+ * @returns {geo.gl.pointSpritesGeomFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.pointSpritesGeomFeature = function (image, positions, colors) {
+var pointSpritesGeomFeature = function (image, positions, colors) {
   'use strict';
-  if (!(this instanceof geo.pointSpritesGeomFeature)) {
-    return new geo.pointSpritesGeomFeature(image, positions, colors);
+  if (!(this instanceof pointSpritesGeomFeature)) {
+    return new pointSpritesGeomFeature(image, positions, colors);
   }
 
-  geo.feature.call(this);
+  feature.call(this);
+
+  var vgl = require('vgl');
 
   // Initialize
   var actor = vgl.utils.createPointSprites(image, positions, colors),
@@ -44,4 +49,5 @@ geo.pointSpritesGeomFeature = function (image, positions, colors) {
   return this;
 };
 
-inherit(geo.pointSpritesGeomFeature, geo.feature);
+inherit(pointSpritesGeomFeature, feature);
+module.exports = pointSpritesGeomFeature;

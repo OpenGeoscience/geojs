@@ -1,19 +1,26 @@
+var inherit = require('../util').inherit;
+var registerFeature = require('../util').registerFeature;
+var lineFeature = require('./lineFeature');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of lineFeature
  *
- * @class
+ * @class geo.gl.lineFeature
  * @extends geo.lineFeature
  * @returns {geo.gl.lineFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.gl.lineFeature = function (arg) {
+var gl_lineFeature = function (arg) {
   'use strict';
-  if (!(this instanceof geo.gl.lineFeature)) {
-    return new geo.gl.lineFeature(arg);
+  if (!(this instanceof gl_lineFeature)) {
+    return new gl_lineFeature(arg);
   }
   arg = arg || {};
-  geo.lineFeature.call(this, arg);
+  lineFeature.call(this, arg);
+
+  var vgl = require('vgl');
+  var transform = require('../core/transform');
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -147,7 +154,7 @@ geo.gl.lineFeature = function (arg) {
       }
     }
 
-    position = geo.transform.transformCoordinates(
+    position = transform.transformCoordinates(
                  m_this.gcs(), m_this.layer().map().gcs(),
                  position, 3);
 
@@ -384,7 +391,9 @@ geo.gl.lineFeature = function (arg) {
   return this;
 };
 
-inherit(geo.gl.lineFeature, geo.lineFeature);
+inherit(gl_lineFeature, lineFeature);
 
 // Now register it
-geo.registerFeature('vgl', 'line', geo.gl.lineFeature);
+registerFeature('vgl', 'line', gl_lineFeature);
+
+module.exports = gl_lineFeature;

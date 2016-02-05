@@ -5,19 +5,23 @@
  * <code>(x / a)^2 + (y / b)^2 + (z / c)^2 = 1</code>. Used
  * primarily to create planetary bodies
  *
- * @class
+ * @class geo.gl.ellipsoid
  * @param {Number} [x=0]  Radius in X direction
  * @param {Number} [y=0]  Radius in Y direction
  * @param {Number} [z=0]  Radius in Z direction
  *
- * @returns {geo.ellipsoid}
+ * @returns {geo.gl.ellipsoid}
  */
  //////////////////////////////////////////////////////////////////////////////
-geo.ellipsoid = function (x, y, z) {
+var ellipsoid = function (x, y, z) {
   'use strict';
-  if (!(this instanceof geo.ellipsoid)) {
-    return new geo.ellipsoid(x, y, z);
+  if (!(this instanceof ellipsoid)) {
+    return new ellipsoid(x, y, z);
   }
+
+  var vgl = require('vgl');
+  var util = require('../util');
+  var vec3 = require('gl-vec3');
 
   x = vgl.defaultValue(x, 0.0);
   y = vgl.defaultValue(y, 0.0);
@@ -94,7 +98,7 @@ geo.ellipsoid = function (x, y, z) {
     }
 
     var cosLatitude = Math.cos(lat),
-        result = geo.util.vec3AsArray();
+        result = util.vec3AsArray();
 
     result[0] = cosLatitude * Math.cos(lon);
     result[1] = cosLatitude * Math.sin(lon);
@@ -120,9 +124,9 @@ geo.ellipsoid = function (x, y, z) {
     lon = lon * (Math.PI / 180.0);
 
     var n = m_this.computeGeodeticSurfaceNormal(lat, lon),
-        k = geo.util.vec3AsArray(),
+        k = util.vec3AsArray(),
         gamma = Math.sqrt(vec3.dot(n, k)),
-        result = geo.util.vec3AsArray();
+        result = util.vec3AsArray();
 
     vec3.multiply(k, m_radiiSquared, n);
     vec3.scale(k, k, 1 / gamma);
@@ -159,8 +163,8 @@ geo.ellipsoid = function (x, y, z) {
         gamma = null,
         n = null,
         j = 0,
-        k = geo.util.vec3AsArray(),
-        result = geo.util.vec3AsArray();
+        k = util.vec3AsArray(),
+        result = util.vec3AsArray();
 
     stride /= sizeOfDataType;
     offset /= sizeOfDataType;
@@ -192,21 +196,4 @@ geo.ellipsoid = function (x, y, z) {
   return m_this;
 };
 
-////////////////////////////////////////////////////////////////////////////
-/**
- * An Ellipsoid instance initialized to the WGS84 standard.
- * @memberof ellipsoid
- *
- */
-////////////////////////////////////////////////////////////////////////////
-geo.ellipsoid.WGS84 = vgl.freezeObject(
-  geo.ellipsoid(6378137.0, 6378137.0, 6356752.3142451793));
-
-////////////////////////////////////////////////////////////////////////////
-/**
- * An Ellipsoid instance initialized to radii of (1.0, 1.0, 1.0).
- * @memberof ellipsoid
- */
-////////////////////////////////////////////////////////////////////////////
-geo.ellipsoid.UNIT_SPHERE = vgl.freezeObject(
-  geo.ellipsoid(1.0, 1.0, 1.0));
+module.exports = ellipsoid;

@@ -1,20 +1,27 @@
+var inherit = require('../util').inherit;
+var registerFeature = require('../util').registerFeature;
+var contourFeature = require('./contourFeature');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of contourFeature
  *
- * @class
+ * @class geo.gl.contourFeature
  * @extends geo.contourFeature
  * @returns {geo.gl.contourFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.gl.contourFeature = function (arg) {
+var gl_contourFeature = function (arg) {
   'use strict';
 
-  if (!(this instanceof geo.gl.contourFeature)) {
-    return new geo.gl.contourFeature(arg);
+  if (!(this instanceof gl_contourFeature)) {
+    return new gl_contourFeature(arg);
   }
   arg = arg || {};
-  geo.contourFeature.call(this, arg);
+  contourFeature.call(this, arg);
+
+  var vgl = require('vgl');
+  var transform = require('../core/transform');
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -129,7 +136,7 @@ geo.gl.contourFeature = function (arg) {
       colorTable.push(contour.colorMap[i].a * 255);
     }
     m_texture.setColorTable(colorTable);
-    contour.pos = geo.transform.transformCoordinates(
+    contour.pos = transform.transformCoordinates(
         m_this.gcs(), m_this.layer().map().gcs(), contour.pos, 3);
     posBuf = geo.util.getGeomBuffer(geom, 'pos', numPts * 3);
     opacityBuf = geo.util.getGeomBuffer(geom, 'opacity', numPts);
@@ -275,7 +282,9 @@ geo.gl.contourFeature = function (arg) {
   return this;
 };
 
-inherit(geo.gl.contourFeature, geo.contourFeature);
+inherit(gl_contourFeature, contourFeature);
 
 // Now register it
-geo.registerFeature('vgl', 'contour', geo.gl.contourFeature);
+registerFeature('vgl', 'contour', gl_contourFeature);
+
+module.exports = gl_contourFeature;

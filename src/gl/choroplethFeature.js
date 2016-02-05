@@ -1,20 +1,24 @@
+var inherit = require('../util').inherit;
+var registerFeature = require('../util').registerFeature;
+var choroplethFeature = require('./choroplethFeature');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of choroplethFeature
  *
- * @class
+ * @class geo.gl.choroplethFeature
  * @extends geo.choroplethFeature
  * @returns {geo.gl.choroplethFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.gl.choroplethFeature = function (arg) {
+var gl_choroplethFeature = function (arg) {
   'use strict';
 
-  if (!(this instanceof geo.gl.choroplethFeature)) {
-    return new geo.gl.choroplethFeature(arg);
+  if (!(this instanceof gl_choroplethFeature)) {
+    return new gl_choroplethFeature(arg);
   }
   arg = arg || {};
-  geo.choroplethFeature.call(this, arg);
+  choroplethFeature.call(this, arg);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -100,7 +104,9 @@ geo.gl.choroplethFeature = function (arg) {
   return this;
 };
 
-inherit(geo.gl.choroplethFeature, geo.choroplethFeature);
+inherit(gl_choroplethFeature, choroplethFeature);
 
 // Now register it
-geo.registerFeature('vgl', 'choropleth', geo.gl.choroplethFeature);
+registerFeature('vgl', 'choropleth', gl_choroplethFeature);
+
+module.exports = gl_choroplethFeature;
