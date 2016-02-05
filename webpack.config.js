@@ -1,5 +1,8 @@
 var path = require('path');
 var webpack = require('webpack');
+var define_plugin = new webpack.DefinePlugin({
+  VERSION: JSON.stringify(require('./package.json').version)
+});
 
 module.exports = {
   context: path.join(__dirname, 'src'),
@@ -32,6 +35,7 @@ module.exports = {
     }
   },
   plugins: [
+    define_plugin,
     new webpack.optimize.CommonsChunkPlugin({
       name: 'vendor',
       filename: 'geo.ext.js',
@@ -47,5 +51,10 @@ module.exports = {
       test: /\.json$/,
       loader: 'json-loader'
     }]
-  }
+  },
+
+  // These are plugins that we want to run in Karma as well
+  exposed_plugins: [
+    define_plugin
+  ]
 };

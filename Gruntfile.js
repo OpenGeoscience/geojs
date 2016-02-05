@@ -3,10 +3,9 @@
 module.exports = function (grunt) {
   'use strict';
 
-  var sources, geojsVersion, geo, port, sourceList, templateData, pkg;
+  var sources, geo, port, sourceList, templateData, pkg;
 
   pkg = grunt.file.readJSON('package.json');
-  geojsVersion = pkg.version;
   sources = grunt.file.readJSON('sources.json');
   port = Number(grunt.option('port') || '8082');
 
@@ -53,7 +52,6 @@ module.exports = function (grunt) {
   );
 
   templateData = {
-    GEOJS_VERSION: geojsVersion,
     SOURCES_JSON: JSON.stringify(sourceList),
     SOURCES_ROOT: '/',
     BUNDLE_EXT: 'built/geo.ext.min.js',
@@ -66,12 +64,6 @@ module.exports = function (grunt) {
     pkg: pkg,
 
     template: {
-      version: {
-        options: {
-          data: templateData
-        },
-        files: { 'src/core/version.js': 'src/core/version.js.in' }
-      },
       loadDev: {
         options: {
           data: templateData
@@ -253,7 +245,6 @@ module.exports = function (grunt) {
       uglify: {
         files: [
           'src/**/*.js',
-          'src/core/version.js.in',
           'Gruntfile.js',
           'sources.json'
         ],
@@ -271,11 +262,6 @@ module.exports = function (grunt) {
         ],
         tasks: ['examples']
       }
-    },
-
-    clean: {
-      source: ['dist/src', 'src/core/version.js'],
-      all: ['dist', 'src/core/version.js']
     },
 
     express: {

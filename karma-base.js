@@ -27,6 +27,7 @@ module.exports = {
     module: {
       loaders: webpack_config.module.loaders
     },
-    resolve: webpack_config.resolve
+    resolve: webpack_config.resolve,
+    plugins: webpack_config.exposed_plugins
   }
 };
