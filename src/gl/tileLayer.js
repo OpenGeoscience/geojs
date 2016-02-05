@@ -28,7 +28,7 @@ geo.gl.tileLayer = function () {
     quad.lr = this.fromLocal(this.fromLevel({
       x: bounds.right - to.x, y: bounds.bottom - to.y
     }, level), 0);
-    quad.ul.z = quad.ll.z = quad.ur.z = quad.lr.z = level * 1e-7;
+    quad.ul.z = quad.ll.z = quad.ur.z = quad.lr.z = level * 1e-5;
     m_nextTileId += 1;
     quad.id = m_nextTileId;
     tile.quadId = quad.id;
