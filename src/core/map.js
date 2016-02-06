@@ -509,8 +509,12 @@ geo.map = function (arg) {
       layerName, m_this, arg);
 
     if (newLayer) {
-
       m_this.addChild(newLayer);
+      m_this.children().forEach(function (c) {
+        if (c instanceof geo.gui.uiLayer) {
+          c.moveToTop();
+        }
+      });
       newLayer._update();
       m_this.modified();
 
