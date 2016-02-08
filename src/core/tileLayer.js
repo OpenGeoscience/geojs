@@ -844,6 +844,8 @@
       // clear out the tile coverage tree
       this._tileTree = {};
 
+      m_lastTileSet = [];
+
       return tiles;
     };
 
