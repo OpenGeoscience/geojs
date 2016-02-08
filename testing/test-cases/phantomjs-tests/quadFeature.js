@@ -207,44 +207,44 @@ describe('geo.quadFeature', function () {
   describe('Private utility methods', function () {
     describe('_object_list methods', function () {
       var map, layer, quad, olist = [];
-      it('_object_list_start', function () {
+      it('_objectListStart', function () {
         map = create_map();
         layer = map.createLayer('feature', {renderer: null});
         quad = geo.quadFeature({layer: layer});
-        quad._object_list_start(olist);
+        quad._objectListStart(olist);
         expect(olist).toEqual([]);
         olist.push({entry: 1, value: 'a'});
-        quad._object_list_start(olist);
+        quad._objectListStart(olist);
         expect(olist).toEqual([{entry: 1, value: 'a', used: false}]);
         olist[0].used = true;
-        quad._object_list_start(olist);
+        quad._objectListStart(olist);
         expect(olist).toEqual([{entry: 1, value: 'a', used: false}]);
       });
-      it('_object_list_get', function () {
-        quad._object_list_start(olist);
-        expect(quad._object_list_get(olist, 1)).toEqual('a');
+      it('_objectListGet', function () {
+        quad._objectListStart(olist);
+        expect(quad._objectListGet(olist, 1)).toEqual('a');
         expect(olist).toEqual([{entry: 1, value: 'a', used: true}]);
-        expect(quad._object_list_get(olist, 2)).toBe(undefined);
+        expect(quad._objectListGet(olist, 2)).toBe(undefined);
       });
-      it('_object_list_add', function () {
-        expect(quad._object_list_get(olist, 2)).toBe(undefined);
-        quad._object_list_add(olist, 2, 'b');
+      it('_objectListAdd', function () {
+        expect(quad._objectListGet(olist, 2)).toBe(undefined);
+        quad._objectListAdd(olist, 2, 'b');
         expect(olist).toEqual([
             {entry: 1, value: 'a', used: true},
             {entry: 2, value: 'b', used: true}]);
-        expect(quad._object_list_get(olist, 2)).toEqual('b');
+        expect(quad._objectListGet(olist, 2)).toEqual('b');
       });
-      it('_object_list_end', function () {
-        quad._object_list_end(olist);
+      it('_objectListEnd', function () {
+        quad._objectListEnd(olist);
         expect(olist).toEqual([
             {entry: 1, value: 'a', used: true},
             {entry: 2, value: 'b', used: true}]);
-        quad._object_list_start(olist);
-        expect(quad._object_list_get(olist, 1)).toEqual('a');
+        quad._objectListStart(olist);
+        expect(quad._objectListGet(olist, 1)).toEqual('a');
         expect(olist).toEqual([
             {entry: 1, value: 'a', used: true},
             {entry: 2, value: 'b', used: false}]);
-        quad._object_list_end(olist);
+        quad._objectListEnd(olist);
         expect(olist).toEqual([{entry: 1, value: 'a', used: true}]);
       });
     });

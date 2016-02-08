@@ -29,7 +29,7 @@
  *   z value of those two corners.  For instance, if ul is unspecified, it is
  *   {x: ll.x, y: ur.y}.  Note that each quad is rendered as a pair of
  *   triangles: (ll, lr, ul) and (ur, ul, lr).  Nothing special is done for
- *   quads that are no convex or quads that have substantially different
+ *   quads that are not convex or quads that have substantially different
  *   transformations for those two triangles.
  * @param {boolean} [cacheQuads=true] If true, a set of internal information is
  *   stored on each data item in the _cachedQuad attribute.  If this is false,
@@ -61,11 +61,11 @@ geo.quadFeature = function (arg) {
   /**
    * Track a list of object->object mappings.  The mappings are kept in a list.
    * This marks all known mappings as unused.  If they are not marked used
-   * before _object_list_end is called, that function will remove them.
+   * before _objectListEnd is called, that function will remove them.
    *
    * @param {array} list the list of mappings.
    */
-  this._object_list_start = function (list) {
+  this._objectListStart = function (list) {
     $.each(list, function (idx, item) {
       item.used = false;
     });
@@ -80,7 +80,7 @@ geo.quadFeature = function (arg) {
    * @param {object} entry the key to search for.
    * @returns {object} the associated object or undefined.
    */
-  this._object_list_get = function (list, entry) {
+  this._objectListGet = function (list, entry) {
     for (var i = 0; i < list.length; i += 1) {
       if (list[i].entry === entry) {
         list[i].used = true;
@@ -99,7 +99,7 @@ geo.quadFeature = function (arg) {
    * @param {object} entry the key to add.
    * @param {object} value the value to store with the entry.
    */
-  this._object_list_add = function (list, entry, value) {
+  this._objectListAdd = function (list, entry, value) {
     list.push({entry: entry, value: value, used: true});
   };
 
@@ -108,7 +108,7 @@ geo.quadFeature = function (arg) {
    *
    * @param {array} list the list of mappings.
    */
-  this._object_list_end = function (list) {
+  this._objectListEnd = function (list) {
     for (var i = list.length - 1; i >= 0; i -= 1) {
       if (!list[i].used) {
         list.splice(i, 1);
@@ -260,7 +260,7 @@ geo.quadFeature = function (arg) {
         origin = [0, 0, 0], origindiag2, diag2;
     /* Keep track of images that we are using.  This prevents creating
      * additional Image elemnts for repeated urls. */
-    m_this._object_list_start(m_images);
+    m_this._objectListStart(m_images);
     $.each(data, function (i, d) {
       if (d._cachedQuad) {
         diag2 = d._cachedQuad.diag2;
@@ -310,7 +310,7 @@ geo.quadFeature = function (arg) {
         clrQuads.push(quad);
         quadinfo.clrquad = quad;
       } else {
-        image = m_this._object_list_get(m_images, img);
+        image = m_this._objectListGet(m_images, img);
         if (image === undefined) {
           if (img instanceof Image) {
             image = img;
@@ -318,7 +318,7 @@ geo.quadFeature = function (arg) {
             image = new Image();
             image.src = img;
           }
-          m_this._object_list_add(m_images, img, image);
+          m_this._objectListAdd(m_images, img, image);
         }
         quad = {
           idx: i,
@@ -374,7 +374,7 @@ geo.quadFeature = function (arg) {
         d._cachedQuad = quadinfo;
       }
     });
-    m_this._object_list_end(m_images);
+    m_this._objectListEnd(m_images);
     m_quads = {clrQuads: clrQuads, imgQuads: imgQuads, origin: origin};
     return m_quads;
   };

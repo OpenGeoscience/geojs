@@ -167,7 +167,7 @@ geo.gl.quadFeature = function (arg) {
       m_actor_image.setMaterial(mat);
 
       mapper.s_render = mapper.render;
-      mapper.render = m_this._render_image_quads;
+      mapper.render = m_this._renderImageQuads;
       m_this.renderer().contextRenderer().addActor(m_actor_image);
       m_this.visible(true);
     }
@@ -203,7 +203,7 @@ geo.gl.quadFeature = function (arg) {
       m_actor_color.setMaterial(mat);
 
       mapper.s_render = mapper.render;
-      mapper.render = m_this._render_color_quads;
+      mapper.render = m_this._renderColorQuads;
       m_this.renderer().contextRenderer().addActor(m_actor_color);
       m_this.visible(true);
     }
@@ -241,7 +241,7 @@ geo.gl.quadFeature = function (arg) {
    *
    * @param renderState: the render state used for the render.
    */
-  this._render_color_quads = function (renderState) {
+  this._renderColorQuads = function (renderState) {
     if (!m_quads.clrQuads.length) {
       return;
     }
@@ -286,7 +286,7 @@ geo.gl.quadFeature = function (arg) {
    *
    * @param renderState: the render state used for the render.
    */
-  this._render_image_quads = function (renderState) {
+  this._renderImageQuads = function (renderState) {
     if (!m_quads.imgQuads.length) {
       return;
     }
