@@ -486,10 +486,18 @@
         if (!this._options.wrapX) {
           start.x = Math.min(Math.max(start.x, 0), nTilesLevel.x - 1);
           end.x = Math.min(Math.max(end.x, 0), nTilesLevel.x - 1);
+          if (level === minLevel) {
+            start.x = 0;
+            end.x = nTilesLevel.x - 1;
+          }
         }
         if (!this._options.wrapY) {
           start.y = Math.min(Math.max(start.y, 0), nTilesLevel.y - 1);
           end.y = Math.min(Math.max(end.y, 0), nTilesLevel.y - 1);
+          if (level === minLevel) {
+            start.y = 0;
+            end.y = nTilesLevel.y - 1;
+          }
         }
         /* If we are reprojecting tiles, we need a check to not use all levels
          * if the number of tiles is excessive. */
@@ -1237,6 +1245,10 @@
             tile.index.level !== this._options.minLevel) {
           return true;
         }
+        if (tile.index.level === this._options.minLevel &&
+            !this._options.wrapX && !this._options.wrapY) {
+          return false;
+        }
       } else {
         /* For tile layers that should only keep one layer, if loading is
          * finished, purge all but the current layer.  This is important for
@@ -1366,6 +1378,7 @@
      * Clean up the layer.
      */
     this._exit = function () {
+      this.reset();
       // call super method
       s_exit.apply(this, arguments);
       m_exited = true;

@@ -136,6 +136,7 @@ geo.gl.vglRenderer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
+    m_this.canvas().remove();
     m_viewer.exit();
     s_exit();
   };
