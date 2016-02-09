@@ -99,6 +99,7 @@ module.exports.mockVGLRenderer = function mockVGLRenderer() {
     return;
   }
 
+  console.log('Mocking vgl renderer');
   var noop = function () { };
   var _id = 0,
       incID = function () {
@@ -195,10 +196,8 @@ module.exports.mockVGLRenderer = function mockVGLRenderer() {
   vgl.renderWindow = function () {
     return m_renderWindow;
   };
-  /*
   geo.gl.vglRenderer.supported = function () {
     return true;
   };
-  */
   vgl._mocked = true;
 };

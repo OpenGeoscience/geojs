@@ -74,7 +74,7 @@ describe('geo.core.osmLayer', function () {
         expect(layer.canvas().attr('lastlevel')).not.toBe(lastlevel);
       });
     });
-    xdescribe('vgl', function () {
+    describe('vgl', function () {
       it('creation', function () {
         mockVGLRenderer();
         var map = create_map();
@@ -82,7 +82,7 @@ describe('geo.core.osmLayer', function () {
         expect(map.node().find('.webgl-canvas').length).toBe(1);
       });
     });
-    xdescribe('switch renderer', function () {
+    describe('switch renderer', function () {
       var map, layer;
       it('vgl to null', function () {
         mockVGLRenderer();
@@ -100,7 +100,7 @@ describe('geo.core.osmLayer', function () {
       it('null to d3', function () {
         expect(map.node().find('[data-tile-layer="0"]').is('div')).toBe(true);
         map.deleteLayer(layer);
-        layer = map.createLayer('osm', {renderer: 'd3', url: '/data/white/jpg'});
+        layer = map.createLayer('osm', {renderer: 'd3', url: '/data/white.jpg'});
         expect(map.node().find('[data-tile-layer="0"]').is('div')).toBe(false);
         expect(map.node().find('[data-tile-layer="0"]').length).toBe(1);
       });

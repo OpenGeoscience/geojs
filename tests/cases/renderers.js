@@ -36,8 +36,7 @@ describe('renderers', function () {
       expect(geo.util.createRenderer('simple')).not.toBe(null);
       expect(geo.util.createRenderer('unknown')).toBe(null);
     });
-    // re-enable when vgl namespace is fixed
-    xit('geo.checkRenderer', function () {
+    it('geo.checkRenderer', function () {
       expect(geo.util.checkRenderer('simple')).toBe('simple');
       expect(geo.util.checkRenderer('simple', true)).toBe('simple');
       supported = false;
@@ -51,15 +50,17 @@ describe('renderers', function () {
       expect(geo.util.checkRenderer(null)).toBe(null);
 
       expect(geo.util.checkRenderer('d3')).toBe('d3');
-      /** This won't work in a webpack build:
+
+      /* This won't work in a webpack build:
       var oldd3 = window.d3;
       window.d3 = undefined;
       expect(geo.util.checkRenderer('d3')).toBe(null);
       window.d3 = oldd3;
       expect(geo.util.checkRenderer('d3')).toBe('d3');
-      */
 
       expect(geo.util.checkRenderer('vgl')).toBe(null);
+      */
+
       mockVGLRenderer();
       expect(geo.util.checkRenderer('vgl')).toBe('vgl');
 

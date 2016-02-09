@@ -43,6 +43,9 @@ module.exports = {
       test: /\.json$/,
       loader: 'json-loader'
     }, {
+      test: /vgl\.js$/,
+      loader: 'imports?mat4=gl-mat4,vec4=gl-vec4,vec3=gl-vec3,vec2=gl-vec2,$=jquery'
+    }, {
       test: require.resolve('d3'), loader: 'exports?d3'
     }]
   },
