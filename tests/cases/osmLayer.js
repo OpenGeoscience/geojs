@@ -24,7 +24,7 @@ describe('geo.core.osmLayer', function () {
       var map, layer;
       it('creation', function () {
         map = create_map();
-        layer = map.createLayer('osm', {renderer: null});
+        layer = map.createLayer('osm', {renderer: null, url: '/data/white.jpg'});
         expect(map.node().find('[data-tile-layer="0"]').length).toBe(1);
       });
       waitForIt('.geo-tile-container', function () {
@@ -35,7 +35,7 @@ describe('geo.core.osmLayer', function () {
       });
       it('mapOpacity', function () {
         map.deleteLayer(layer);
-        layer = map.createLayer('osm', {renderer: null, mapOpacity: 0.5});
+        layer = map.createLayer('osm', {renderer: null, mapOpacity: 0.5, url: '/data/white.jpg'});
         expect(layer.canvas().css('opacity')).toBe('0.5');
       });
       waitForIt('.geo-tile-container', function () {
@@ -56,7 +56,7 @@ describe('geo.core.osmLayer', function () {
       var map, layer, lastlevel;
       it('creation', function () {
         map = create_map();
-        layer = map.createLayer('osm', {renderer: 'd3'});
+        layer = map.createLayer('osm', {renderer: 'd3', url: '/data/white.jpg'});
         expect(map.node().find('[data-tile-layer="0"]').length).toBe(1);
       });
       waitForIt('.d3PlaneFeature', function () {
@@ -78,7 +78,7 @@ describe('geo.core.osmLayer', function () {
       it('creation', function () {
         mockVGLRenderer();
         var map = create_map();
-        map.createLayer('osm', {renderer: 'vgl'});
+        map.createLayer('osm', {renderer: 'vgl', url: '/data/white.jpg'});
         expect(map.node().find('.webgl-canvas').length).toBe(1);
       });
     });
@@ -87,10 +87,10 @@ describe('geo.core.osmLayer', function () {
       it('vgl to null', function () {
         mockVGLRenderer();
         map = create_map();
-        layer = map.createLayer('osm', {renderer: 'vgl'});
+        layer = map.createLayer('osm', {renderer: 'vgl', url: '/data/white.jpg'});
         expect(map.node().find('.webgl-canvas').length).toBe(1);
         map.deleteLayer(layer);
-        layer = map.createLayer('osm', {renderer: null});
+        layer = map.createLayer('osm', {renderer: null, url: '/data/white.jpg'});
         expect(map.node().find('.webgl-canvas').length).toBe(0);
         expect(map.node().find('[data-tile-layer="0"]').length).toBe(1);
       });
@@ -100,7 +100,7 @@ describe('geo.core.osmLayer', function () {
       it('null to d3', function () {
         expect(map.node().find('[data-tile-layer="0"]').is('div')).toBe(true);
         map.deleteLayer(layer);
-        layer = map.createLayer('osm', {renderer: 'd3'});
+        layer = map.createLayer('osm', {renderer: 'd3', url: '/data/white/jpg'});
         expect(map.node().find('[data-tile-layer="0"]').is('div')).toBe(false);
         expect(map.node().find('[data-tile-layer="0"]').length).toBe(1);
       });
@@ -110,7 +110,7 @@ describe('geo.core.osmLayer', function () {
       it('d3 to vgl', function () {
         expect(map.node().find('[data-tile-layer="0"]').is('g')).toBe(true);
         map.deleteLayer(layer);
-        layer = map.createLayer('osm', {renderer: 'vgl'});
+        layer = map.createLayer('osm', {renderer: 'vgl', url: '/data/white.jpg'});
         expect(map.node().find('[data-tile-layer="0"]').is('g')).toBe(false);
         expect(map.node().find('.webgl-canvas').length).toBe(1);
       });
@@ -132,7 +132,7 @@ describe('geo.core.osmLayer', function () {
           if (angle) {
             map.rotation(parseFloat(angle) * Math.PI / 180);
           }
-          layer = map.createLayer('osm', {renderer: null});
+          layer = map.createLayer('osm', {renderer: null, url: '/data/white.jpg'});
           expect(map.node().find('[data-tile-layer="0"]').length).toBe(1);
         });
         waitForIt('null tiles to load', function () {
@@ -145,7 +145,7 @@ describe('geo.core.osmLayer', function () {
             positions[ref] = $(this)[0].getBoundingClientRect();
           });
           map.deleteLayer(layer);
-          layer = map.createLayer('osm', {renderer: 'd3'});
+          layer = map.createLayer('osm', {renderer: 'd3', url: '/data/white.jpg'});
           expect(map.node().find('[data-tile-layer="0"]').is('div')).toBe(false);
           expect(map.node().find('[data-tile-layer="0"]').length).toBe(1);
         });
