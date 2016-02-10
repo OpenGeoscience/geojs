@@ -56,3 +56,6 @@
 #controls label {
     min-width: 120px;
 }
+#map-gcs {
+    max-width: 200px;
+}

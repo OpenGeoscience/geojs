@@ -114,7 +114,8 @@ geo.d3.d3Renderer = function (arg) {
         if (key === 'strokeColor') {
           k = 'stroke';
           f = m_this._convertColor(styles[key], styles.stroke);
-        } else if (key === 'stroke' && styles[key]) {
+        } else if (key === 'stroke' && styles[key] &&
+                   !styles.hasOwnProperty('strokeColor')) {
           k = 'stroke';
           f = strokeFunc;
         } else if (key === 'strokeWidth') {

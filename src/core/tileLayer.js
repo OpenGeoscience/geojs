@@ -893,6 +893,8 @@
      * @returns {object} Local coordinates
      */
     this.fromLocal = function (pt, zoom) {
+      //DWM:: these need to alawys use the *layer* unitsPerPixel, or possibly
+      //DWM:: convert tile space using a transform
       var map = this.map(),
           unit = map.unitsPerPixel(zoom === undefined ? map.zoom() : zoom);
       return {
