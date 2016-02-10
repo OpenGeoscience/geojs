@@ -70,8 +70,8 @@
           this._image.crossOrigin = this._cors;
         }
         defer = new $.Deferred();
-        this._image.onload = function () { defer.resolve(); };
-        this._image.onerror = function () { defer.reject(); };
+        this._image.onload = defer.resolve;
+        this._image.onerror = defer.reject;
         this._image.src = this._url;
 
         // attach a promise interface to `this`

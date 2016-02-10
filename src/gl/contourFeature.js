@@ -131,9 +131,9 @@ geo.gl.contourFeature = function (arg) {
     m_texture.setColorTable(colorTable);
     contour.pos = geo.transform.transformCoordinates(
         m_this.gcs(), m_this.layer().map().gcs(), contour.pos, 3);
-    posBuf = getBuffer(geom, 'pos', numPts * 3);
-    opacityBuf = getBuffer(geom, 'opacity', numPts);
-    valueBuf = getBuffer(geom, 'value', numPts);
+    posBuf = geo.util.getGeomBuffer(geom, 'pos', numPts * 3);
+    opacityBuf = geo.util.getGeomBuffer(geom, 'opacity', numPts);
+    valueBuf = geo.util.getGeomBuffer(geom, 'value', numPts);
     for (i = i3 = 0; i < numPts; i += 1, i3 += 3) {
       j = contour.elements[i];
       j3 = j * 3;
@@ -151,30 +151,6 @@ geo.gl.contourFeature = function (arg) {
     geom.boundsDirty(true);
     m_mapper.modified();
     m_mapper.boundsDirtyTimestamp().modified();
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get a buffer for a geometry source.  If a buffer already exists and is
-   * the correct size, return it.  Otherwise, allocate a new buffer; any data
-   * in an old buffer is discarded.
-   *
-   * @param geom: the geometry to reference and modify.
-   * @param srcName: the name of the source.
-   * @param len: the number of elements for the array.
-   * @returns {Float32Array}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  function getBuffer(geom, srcName, len) {
-    var src = geom.sourceByName(srcName), data;
-
-    data = src.data();
-    if (data instanceof Float32Array && data.length === len) {
-      return data;
-    }
-    data = new Float32Array(len);
-    src.setData(data);
-    return data;
   }
 
   ////////////////////////////////////////////////////////////////////////////

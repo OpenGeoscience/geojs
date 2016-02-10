@@ -14,7 +14,6 @@ describe('geo.core.osmLayer', function () {
     return geo.map(opts);
   }
 
-
   describe('default osmLayer', function () {
     describe('html', function () {
       var map, layer;
@@ -158,6 +157,25 @@ describe('geo.core.osmLayer', function () {
           map.exit();
         });
       });
+    });
+  });
+
+  describe('geo.gl.tileLayer', function () {
+    var map, layer;
+    it('test that tiles are create', function () {
+      mockVGLRenderer();
+      map = create_map();
+      layer = map.createLayer('osm', {renderer: 'vgl'});
+    });
+    waitForIt('tiles to load', function () {
+      return Object.keys(layer.activeTiles).length === 21;
+    });
+    it('zoom out', function () {
+      map.zoom(3);
+    });
+    /* This checks to make sure tiles are removed */
+    waitForIt('tiles to load', function () {
+      return Object.keys(layer.activeTiles).length === 17;
     });
   });
 });

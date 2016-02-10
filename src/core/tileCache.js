@@ -86,16 +86,20 @@
      * front of the access queue.
      *
      * @param {string|geo.tile} hash The tile or the tile hash value
+     * @param {boolean} noMove if true, don't move the tile to the front of the
+     *     access queue.
      * @returns {geo.tile|null}
      */
-    this.get = function (hash) {
+    this.get = function (hash, noMove) {
       hash = typeof hash === 'string' ? hash : hash.toString();
       if (!(hash in this._cache)) {
         return null;
       }
 
-      this._atime.splice(this._access(hash), 1);
-      this._atime.unshift(hash);
+      if (!noMove) {
+        this._atime.splice(this._access(hash), 1);
+        this._atime.unshift(hash);
+      }
       return this._cache[hash];
     };
 

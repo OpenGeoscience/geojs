@@ -938,7 +938,8 @@ describe('geo.tileLayer', function () {
 
     describe('_isCovered', function () {
       function layer() {
-        return geo.tileLayer({map: map(), url: function () {return '';}});
+        return geo.tileLayer({
+          map: map(), keepLower: false, url: function () { return ''; }});
       }
       it('a tile does not cover itself', function () {
         var l = layer(), t;

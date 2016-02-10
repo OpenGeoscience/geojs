@@ -152,13 +152,13 @@ geo.gl.lineFeature = function (arg) {
                  position, 3);
 
     len = numSegments * order.length;
-    posBuf = getBuffer(geom, 'pos', len * 3);
-    nextBuf = getBuffer(geom, 'next', len * 3);
-    prevBuf = getBuffer(geom, 'prev', len * 3);
-    offsetBuf = getBuffer(geom, 'offset', len * 1);
-    strokeWidthBuf = getBuffer(geom, 'strokeWidth', len * 1);
-    strokeColorBuf = getBuffer(geom, 'strokeColor', len * 3);
-    strokeOpacityBuf = getBuffer(geom, 'strokeOpacity', len * 1);
+    posBuf = geo.util.getGeomBuffer(geom, 'pos', len * 3);
+    nextBuf = geo.util.getGeomBuffer(geom, 'next', len * 3);
+    prevBuf = geo.util.getGeomBuffer(geom, 'prev', len * 3);
+    offsetBuf = geo.util.getGeomBuffer(geom, 'offset', len);
+    strokeWidthBuf = geo.util.getGeomBuffer(geom, 'strokeWidth', len);
+    strokeColorBuf = geo.util.getGeomBuffer(geom, 'strokeColor', len * 3);
+    strokeOpacityBuf = geo.util.getGeomBuffer(geom, 'strokeOpacity', len);
     indicesBuf = geom.primitive(0).indices();
     if (!(indicesBuf instanceof Uint16Array) || indicesBuf.length !== len) {
       indicesBuf = new Uint16Array(len);
@@ -209,30 +209,6 @@ geo.gl.lineFeature = function (arg) {
     geom.boundsDirty(true);
     m_mapper.modified();
     m_mapper.boundsDirtyTimestamp().modified();
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get a buffer for a geometry source.  If a buffer already exists and is
-   * the correct size, return it.  Otherwise, allocate a new buffer; any data
-   * in an old buffer is discarded.
-   *
-   * @param geom: the geometry to reference and modify.
-   * @param srcName: the name of the source.
-   * @param len: the number of elements for the array.
-   * @returns {Float32Array}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  function getBuffer(geom, srcName, len) {
-    var src = geom.sourceByName(srcName), data;
-
-    data = src.data();
-    if (data instanceof Float32Array && data.length === len) {
-      return data;
-    }
-    data = new Float32Array(len);
-    src.setData(data);
-    return data;
   }
 
   ////////////////////////////////////////////////////////////////////////////
