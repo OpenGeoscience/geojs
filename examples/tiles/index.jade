@@ -78,6 +78,20 @@ block append mainContent
       label(for="layer-opacity") Opacity
       input#layer-opacity.layerparam(param-name="opacity", placeholder="1.0")
 
+    //- Although the projection can be changed, this currently has odd 
+      repercussions when using a standard EPSG:3857 tile set.  If wrapping is
+      turned on, an infinite number of tiles may be requested, and, in general,
+      the number of tiles for a particular zoom level can be significantly
+      wrong.  Using a projection that differs from the tile set could be useful
+      for localized data, but probably won't work as expected for the entire
+      world map.
+    //- form-group(title="Web maps are most often rendered using a Mercator geographic coordinate system, but other projections can be used.  Many projections will only work with the VGL renderer.")
+      label(for="map-gcs") Map GCS
+      select#map-gcs.mapparam(param-name="gcs", placeholder="EPSG:3857 - Web Mercator", reload="true")
+        option(value="EPSG:3857") Web Mercator
+        option(value="SR-ORG:6865") MODIS Sinusoidal
+        option(value="ESRI:54028") Cassini
+
     .form-group(title="The camera can use a parallel or perspective projection.  The difference is subtly unless the data has non-zero z-values.")
       label(for="camera-projection") Camera Projection
       select#camera-projection.cameraparam(param-name="projection", placeholder="parallel")

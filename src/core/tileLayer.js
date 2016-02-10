@@ -154,6 +154,7 @@
 
     var s_init = this._init,
         s_exit = this._exit,
+        m_lastTileSet = [],
         m_exited;
 
     // copy the options into a private variable
@@ -182,7 +183,7 @@
       // smaller values will do needless computations.
       track: options.cacheSize,
       needed: function (tile) {
-        return tile === this.cache.get(tile.toString());
+        return tile === this.cache.get(tile.toString(), true);
       }.bind(this)
     });
 
@@ -302,6 +303,8 @@
       var o = this._origin(level);
       var map = this.map();
       point = this.displayToLevel(map.gcsToDisplay(point, null), level);
+      if (isNaN(point.x)) { point.x = 0; }
+      if (isNaN(point.y)) { point.y = 0; }
       var to = this._tileOffset(level);
       if (to) {
         point.x += to.x;
@@ -428,15 +431,21 @@
      * @param {object} bounds The map bounds in world coordinates
      */
     this._getTileRange = function (level, bounds) {
+      var corners = [
+        this.tileAtPoint({x: bounds.left, y: bounds.top}, level),
+        this.tileAtPoint({x: bounds.right, y: bounds.top}, level),
+        this.tileAtPoint({x: bounds.left, y: bounds.bottom}, level),
+        this.tileAtPoint({x: bounds.right, y: bounds.bottom}, level)
+      ];
       return {
-        start: this.tileAtPoint({
-          x: bounds.left,
-          y: bounds.top
-        }, level),
-        end: this.tileAtPoint({
-          x: bounds.right,
-          y: bounds.bottom
-        }, level)
+        start: {
+          x: Math.min(corners[0].x, corners[1].x, corners[2].x, corners[3].x),
+          y: Math.min(corners[0].y, corners[1].y, corners[2].y, corners[3].y)
+        },
+        end: {
+          x: Math.max(corners[0].x, corners[1].x, corners[2].x, corners[3].x),
+          y: Math.max(corners[0].y, corners[1].y, corners[2].y, corners[3].y)
+        }
       };
     };
 
@@ -449,12 +458,19 @@
      * @param {number} maxLevel The zoom level
      * @param {object} bounds The map bounds
      * @param {boolean} sorted Return a sorted list
+     * @param {boolean} onlyIfChanged If the set of tiles have not changed
+     *     (even if their desired order has), return undefined instead of an
+     *     array of tiles.
      * @returns {geo.tile[]} An array of tile objects
      */
-    this._getTiles = function (maxLevel, bounds, sorted) {
+    this._getTiles = function (maxLevel, bounds, sorted, onlyIfChanged) {
       var i, j, tiles = [], index, nTilesLevel,
-          start, end, indexRange, source, center,
-          level, minLevel = this._options.keepLower ? 0 : maxLevel;
+          start, end, indexRange, source, center, changed = false, old, level,
+          minLevel = (this._options.keepLower ? this._options.minLevel :
+                      maxLevel);
+      if (maxLevel < minLevel) {
+        maxLevel = minLevel;
+      }
 
       /* Generate a list of the tiles that we want to create.  This is done
        * before sorting, because we want to actually generate the tiles in
@@ -464,33 +480,58 @@
         indexRange = this._getTileRange(level, bounds);
         start = indexRange.start;
         end = indexRange.end;
-
         // total number of tiles existing at this level
         nTilesLevel = this.tilesAtZoom(level);
 
+        if (!this._options.wrapX) {
+          start.x = Math.min(Math.max(start.x, 0), nTilesLevel.x - 1);
+          end.x = Math.min(Math.max(end.x, 0), nTilesLevel.x - 1);
+        }
+        if (!this._options.wrapY) {
+          start.y = Math.min(Math.max(start.y, 0), nTilesLevel.y - 1);
+          end.y = Math.min(Math.max(end.y, 0), nTilesLevel.y - 1);
+        }
+        /* If we are reprojecting tiles, we need a check to not use all levels
+         * if the number of tiles is excessive. */
+        if (this._options.gcs && this._options.gcs !== this.map().gcs() &&
+            level !== minLevel &&
+            (end.x + 1 - start.x) * (end.y + 1 - start.y) >
+            (this.map().size().width * this.map().size().height /
+            this._options.tileWidth / this._options.tileHeight) * 16) {
+          break;
+        }
+
         // loop over the tile range
-        index = {level: level};
-        index.nx = nTilesLevel.x;
-        index.ny = nTilesLevel.y;
-
         for (i = start.x; i <= end.x; i += 1) {
-          index.x = i;
           for (j = start.y; j <= end.y; j += 1) {
-            index.y = j;
-
-            source = $.extend({}, index);
+            index = {level: level, x: i, y: j};
+            source = {level: level, x: i, y: j};
             if (this._options.wrapX) {
-              source.x = modulo(index.x, index.nx);
+              source.x = modulo(source.x, nTilesLevel.x);
             }
             if (this._options.wrapY) {
-              source.y = modulo(index.y, index.ny);
+              source.y = modulo(source.y, nTilesLevel.y);
             }
-
             if (this.isValid(source)) {
-              tiles.push({index: $.extend({}, index), source: source});
+              if (onlyIfChanged && tiles.length < m_lastTileSet.length) {
+                old = m_lastTileSet[tiles.length];
+                changed = changed || (index.level !== old.level ||
+                    index.x !== old.x || index.y !== old.y);
+              }
+              tiles.push({index: index, source: source});
             }
           }
         }
+      }
+
+      if (onlyIfChanged) {
+        if (!changed && tiles.length === m_lastTileSet.length) {
+          return;
+        }
+        m_lastTileSet.splice(0, m_lastTileSet.length);
+        $.each(tiles, function (idx, tile) {
+          m_lastTileSet.push(tile.index);
+        });
       }
 
       if (sorted) {
@@ -803,6 +844,8 @@
       // clear out the tile coverage tree
       this._tileTree = {};
 
+      m_lastTileSet = [];
+
       return tiles;
     };
 
@@ -938,16 +981,13 @@
         return;
       }
       var map = this.map(),
-          mapZoom = map.zoom(),
-          zoom = this._options.tileRounding(mapZoom),
           bounds = map.bounds(undefined, null),
-          tiles, view = this._getViewBounds();
-
-      tiles = this._getTiles(
-        zoom, bounds, true
-      );
+          tiles;
 
       if (this._updateSubLayers) {
+        var mapZoom = map.zoom(),
+            zoom = this._options.tileRounding(mapZoom),
+            view = this._getViewBounds();
         // Update the transform for the local layer coordinates
         var offset = this._updateSubLayers(zoom, view) || {x: 0, y: 0};
 
@@ -985,6 +1025,14 @@
         });
       }
 
+      tiles = this._getTiles(
+        zoom, bounds, true, true
+      );
+
+      if (tiles === undefined) {
+        return;
+      }
+
       // reset the tile coverage tree
       this._tileTree = {};
 
@@ -1010,7 +1058,8 @@
                  * should have been used. */
                 return;
               }
-              /* Check if a tile is still desired.  Don't draw it if it isn't. */
+              /* Check if a tile is still desired.  Don't draw it if it
+               * isn't. */
               var mapZoom = map.zoom(),
                   zoom = this._options.tileRounding(mapZoom),
                   view = this._getViewBounds();
@@ -1037,7 +1086,6 @@
           }
         }
       }.bind(this));
-
       // purge all old tiles when the new tiles are loaded (successfully or not)
       $.when.apply($, tiles)
         .done(// called on success and failure
@@ -1057,6 +1105,9 @@
      * @param {geo.tile} tile
      */
     this._setTileTree = function (tile) {
+      if (this._options.keepLower) {
+        return;
+      }
       var index = tile.index;
       this._tileTree[index.level] = this._tileTree[index.level] || {};
       this._tileTree[index.level][index.x] = this._tileTree[index.level][index.x] || {};
@@ -1182,7 +1233,8 @@
     this._canPurge = function (tile, bounds, zoom, doneLoading) {
       if (this._options.keepLower) {
         zoom = zoom || 0;
-        if (zoom < tile.index.level) {
+        if (zoom < tile.index.level &&
+            tile.index.level !== this._options.minLevel) {
           return true;
         }
       } else {
@@ -1223,7 +1275,7 @@
       /* Reverse the y coordinate, since we expect the gcs coordinate system
        * to be right-handed and the level coordinate system to be
        * left-handed. */
-      var gcsPt = map.displayToGcs(pt, null),
+      var gcsPt = map.displayToGcs(pt, this._options.gcs || null),
           lvlPt = {x: gcsPt.x / unit, y: this._topDown() * gcsPt.y / unit};
       return lvlPt;
     };

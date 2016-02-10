@@ -6,7 +6,7 @@
  * @extends geo.planeFeature
  * @param lowerleft
  * @param upperright
- * @returns {geo.planeFeature}
+ * @returns {geo.gl.planeFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.gl.planeFeature = function (arg) {

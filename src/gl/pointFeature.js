@@ -266,20 +266,20 @@ geo.gl.pointFeature = function (arg) {
                   m_this.gcs(), m_this.layer().map().gcs(),
                   position, 3);
 
-    posBuf = getBuffer(geom, 'pos', vpf * numPts * 3);
+    posBuf = geo.util.getGeomBuffer(geom, 'pos', vpf * numPts * 3);
 
     if (m_primitiveShape !== 'sprite') {
-      unitBuf = getBuffer(geom, 'unit', vpf * numPts * 2);
+      unitBuf = geo.util.getGeomBuffer(geom, 'unit', vpf * numPts * 2);
     }
 
-    radius = getBuffer(geom, 'rad', vpf * numPts * 1);
-    stroke = getBuffer(geom, 'stroke', vpf * numPts * 1);
-    strokeWidth = getBuffer(geom, 'strokeWidth', vpf * numPts * 1);
-    strokeOpacity = getBuffer(geom, 'strokeOpacity', vpf * numPts * 1);
-    strokeColor = getBuffer(geom, 'strokeColor', vpf * numPts * 3);
-    fill = getBuffer(geom, 'fill', vpf * numPts * 1);
-    fillOpacity = getBuffer(geom, 'fillOpacity', vpf * numPts * 1);
-    fillColor = getBuffer(geom, 'fillColor', vpf * numPts * 3);
+    radius = geo.util.getGeomBuffer(geom, 'rad', vpf * numPts);
+    stroke = geo.util.getGeomBuffer(geom, 'stroke', vpf * numPts);
+    strokeWidth = geo.util.getGeomBuffer(geom, 'strokeWidth', vpf * numPts);
+    strokeOpacity = geo.util.getGeomBuffer(geom, 'strokeOpacity', vpf * numPts);
+    strokeColor = geo.util.getGeomBuffer(geom, 'strokeColor', vpf * numPts * 3);
+    fill = geo.util.getGeomBuffer(geom, 'fill', vpf * numPts);
+    fillOpacity = geo.util.getGeomBuffer(geom, 'fillOpacity', vpf * numPts);
+    fillColor = geo.util.getGeomBuffer(geom, 'fillColor', vpf * numPts * 3);
     indices = geom.primitive(0).indices();
     if (!(indices instanceof Uint16Array) || indices.length !== vpf * numPts) {
       indices = new Uint16Array(vpf * numPts);
@@ -324,30 +324,6 @@ geo.gl.pointFeature = function (arg) {
     geom.boundsDirty(true);
     m_mapper.modified();
     m_mapper.boundsDirtyTimestamp().modified();
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get a buffer for a geometry source.  If a buffer already exists and is
-   * the correct size, return it.  Otherwise, allocate a new buffer; any data
-   * in an old buffer is discarded.
-   *
-   * @param geom: the geometry to reference and modify.
-   * @param srcName: the name of the source.
-   * @param len: the number of elements for the array.
-   * @returns {Float32Array}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  function getBuffer(geom, srcName, len) {
-    var src = geom.sourceByName(srcName), data;
-
-    data = src.data();
-    if (data instanceof Float32Array && data.length === len) {
-      return data;
-    }
-    data = new Float32Array(len);
-    src.setData(data);
-    return data;
   }
 
   ////////////////////////////////////////////////////////////////////////////
