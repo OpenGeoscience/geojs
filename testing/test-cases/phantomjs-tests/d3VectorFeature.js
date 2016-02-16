@@ -59,6 +59,14 @@ describe("d3 vector feature", function () {
 
     markers = d3.selectAll('marker');
     expect(markers.size()).toBe(3);
+
+    markers.each(function (m) {
+      var m = d3.select(this);
+      var markerClass = m.attr('class');
+      var match = markerClass.match(/geo-vector-arrow/);
+      expect(match).not.toBeNull();
+    });
+
   });
 
   it("Remove a feature from a layer", function () {
