@@ -1,0 +1,19 @@
+extends ../common/templates/index.jade
+
+block append mainContent
+  div#controls
+    .form-group(title="The url used to fetch tiles.  Use {x}, {y}, {z}, and {s} for templating.")
+      label(for="layer-url") Tile URL
+      select#layer-url.layerparam(param-name="url", list="url-list", placeholder="http://otile1.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.png")
+        option(value="http://otile1.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.png", credit='Tiles Courtesy of <a href="http://www.mapquest.com/">MapQuest</a>') MapQuest
+        option(value="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", credit="© OpenStreetMap contributors") OpenStreetMap
+        option(value="/data/tilefancy.png", credit="") Fancy Test Tile
+        option(value="http://otile1.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.png", credit='Tiles Courtesy of <a href="http://www.mapquest.com/">MapQuest</a>') MapQuest Satellite
+        option(value="http://tile.stamen.com/toner-lite/{z}/{x}/{y}.png", credit='Map tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. Data by <a href="http://openstreetmap.org">OpenStreetMap</a>, under <a href="http://www.openstreetmap.org/copyright">ODbL</a>.') Toner Lite
+    .form-group(title="Web maps are most often rendered using a Mercator geographic coordinate system, but other projections can be used.  See spatialreference.org for more information on projections.")
+      label(for="map-gcs") Map GCS
+      select#map-gcs.mapparam(param-name="gcs", placeholder="EPSG:3857 - Web Mercator", reload="true")
+        option(value="EPSG:3857") EPSG:3857 - Web Mercator
+    .form-group(title="Show capital cities of the world.  Click on a city to center it.")
+      label(for="capitals") Show Capitals
+      input#capitals.mapparam(param-name="capitals", type="checkbox", placeholder="true", checked="checked")

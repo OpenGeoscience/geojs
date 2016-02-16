@@ -128,7 +128,12 @@ geo.gui.widget = function (arg) {
    * { top: 0, left: 0 } by default.
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.position = function () {
+  this.position = function (pos) {
+    if (pos !== undefined) {
+      arg.position = pos;
+      this.reposition();
+      return this;
+    }
     var position;
 
     if (arg &&

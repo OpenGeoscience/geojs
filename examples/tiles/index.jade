@@ -50,9 +50,11 @@ block append mainContent
       label(for="layer-url") Tile URL
       input#layer-url.layerparam(param-name="url", list="url-list", placeholder="http://otile1.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.png")
       datalist#url-list
-        option(value="http://otile1.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.png") MapQuest
-        option(value="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png") OSM
-        option(value="/data/tilefancy.png") Fancy Test Tile
+        option(value="http://otile1.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.png", credit='Tiles Courtesy of <a href="http://www.mapquest.com/">MapQuest</a>') MapQuest
+        option(value="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", credit="© OpenStreetMap contributors") OSM
+        option(value="/data/tilefancy.png", credit="") Fancy Test Tile
+        option(value="http://otile1.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.png", credit='Tiles Courtesy of <a href="http://www.mapquest.com/">MapQuest</a>') MapQuest Satellite
+        option(value="http://tile.stamen.com/toner-lite/{z}/{x}/{y}.png", credit='Map tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. Data by <a href="http://openstreetmap.org">OpenStreetMap</a>, under <a href="http://www.openstreetmap.org/copyright">ODbL</a>.') Toner Lite
     .form-group(title="The subdomains used to fetch tiles.  This can be a comma-separated list or a string of single-letter subdomains.")
       label(for="layer-subdomains") URL Subdomains
       input#layer-subdomains.layerparam(param-name="subdomains" placeholder="abc")
@@ -77,20 +79,6 @@ block append mainContent
     .form-group(title="Adjust the opacity of the entire tile layer [0.0-1.0].")
       label(for="layer-opacity") Opacity
       input#layer-opacity.layerparam(param-name="opacity", placeholder="1.0")
-
-    //- Although the projection can be changed, this currently has odd 
-      repercussions when using a standard EPSG:3857 tile set.  If wrapping is
-      turned on, an infinite number of tiles may be requested, and, in general,
-      the number of tiles for a particular zoom level can be significantly
-      wrong.  Using a projection that differs from the tile set could be useful
-      for localized data, but probably won't work as expected for the entire
-      world map.
-    //- form-group(title="Web maps are most often rendered using a Mercator geographic coordinate system, but other projections can be used.  Many projections will only work with the VGL renderer.")
-      label(for="map-gcs") Map GCS
-      select#map-gcs.mapparam(param-name="gcs", placeholder="EPSG:3857 - Web Mercator", reload="true")
-        option(value="EPSG:3857") Web Mercator
-        option(value="SR-ORG:6865") MODIS Sinusoidal
-        option(value="ESRI:54028") Cassini
 
     .form-group(title="The camera can use a parallel or perspective projection.  The difference is subtly unless the data has non-zero z-values.")
       label(for="camera-projection") Camera Projection

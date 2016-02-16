@@ -140,8 +140,18 @@ geo.transform = function (options) {
 
   // Set defaults given by the constructor
   options = options || {};
-  this.source(options.source);
-  this.target(options.target);
+  try {
+    this.source(options.source);
+  } catch (err) {
+    console.error('Can\'t use transform source: ' + options.source);
+    this.source('EPSG:4326');
+  }
+  try {
+    this.target(options.target);
+  } catch (err) {
+    console.error('Can\'t use transform target: ' + options.target);
+    this.target('EPSG:3857');
+  }
 
   geo.object.call(this);
   return this;

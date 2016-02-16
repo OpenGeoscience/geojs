@@ -234,7 +234,7 @@ geo.gl.pointFeature = function (arg) {
         radius, radiusVal, radFunc,
         stroke, strokeVal, strokeFunc,
         strokeWidth, strokeWidthVal, strokeWidthFunc,
-        strokeOpacity, strokeOpacityVal, strokeOpactityFunc,
+        strokeOpacity, strokeOpacityVal, strokeOpacityFunc,
         strokeColor, strokeColorVal, strokeColorFunc,
         fill, fillVal, fillFunc,
         fillOpacity, fillOpacityVal, fillOpacityFunc,
@@ -242,13 +242,13 @@ geo.gl.pointFeature = function (arg) {
         vpf = m_this.verticesPerFeature(),
         data = m_this.data(),
         item, ivpf, ivpf3, iunit, i3,
-        geom = m_mapper.geometryData();
+        geom = m_mapper.geometryData(), nonzeroZ;
 
     posFunc = m_this.position();
     radFunc = m_this.style.get('radius');
     strokeFunc = m_this.style.get('stroke');
     strokeWidthFunc = m_this.style.get('strokeWidth');
-    strokeOpactityFunc = m_this.style.get('strokeOpacity');
+    strokeOpacityFunc = m_this.style.get('strokeOpacity');
     strokeColorFunc = m_this.style.get('strokeColor');
     fillFunc = m_this.style.get('fill');
     fillOpacityFunc = m_this.style.get('fillOpacity');
@@ -261,10 +261,19 @@ geo.gl.pointFeature = function (arg) {
       position[i3] = posVal.x;
       position[i3 + 1] = posVal.y;
       position[i3 + 2] = posVal.z || 0;
+      nonzeroZ = nonzeroZ || position[i3 + 2];
     }
     position = geo.transform.transformCoordinates(
                   m_this.gcs(), m_this.layer().map().gcs(),
                   position, 3);
+    /* Some transforms modify the z-coordinate.  If we started with all zero z
+     * coordinates, don't modify them.  This could be changed if the
+     * z-coordinate space of the gl cube is scaled appropriately. */
+    if (!nonzeroZ && m_this.gcs() !== m_this.layer().map().gcs()) {
+      for (i = i3 = 0; i < numPts; i += 1, i3 += 3) {
+        position[i3 + 2] = 0;
+      }
+    }
 
     posBuf = geo.util.getGeomBuffer(geom, 'pos', vpf * numPts * 3);
 
@@ -297,7 +306,7 @@ geo.gl.pointFeature = function (arg) {
       radiusVal = radFunc(item);
       strokeVal = strokeFunc(item) ? 1.0 : 0.0;
       strokeWidthVal = strokeWidthFunc(item);
-      strokeOpacityVal = strokeOpactityFunc(item);
+      strokeOpacityVal = strokeOpacityFunc(item);
       strokeColorVal = strokeColorFunc(item);
       fillVal = fillFunc(item) ? 1.0 : 0.0;
       fillOpacityVal = fillOpacityFunc(item);
