@@ -82,7 +82,8 @@ geo.d3.vectorFeature = function (arg) {
     markerGroup
       .enter()
       .append('g')
-      .attr('id', m_this._d3id);
+      .attr('id', m_this._d3id)
+      .attr('class', 'marker-group');
 
     markerGroup.exit().remove();
 
