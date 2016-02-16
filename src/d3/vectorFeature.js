@@ -57,19 +57,19 @@ geo.d3.vectorFeature = function (arg) {
 
     var markerConfigs = {
       'arrow': {
-        attrs: {'class': 'geo-vector', 'viewBox': '0 0 10 10', 'refX': '1', 'refY': '5', 'markerHeight': '5', 'markerWidth': '5', 'orient': 'auto'},
+        attrs: {'class': 'geo-vector-arrow', 'viewBox': '0 0 10 10', 'refX': '1', 'refY': '5', 'markerHeight': '5', 'markerWidth': '5', 'orient': 'auto'},
         path: 'M 0 0 L 10 5 L 0 10 z'
       },
       'point': {
-        attrs: {'class': 'geo-vector', 'viewBox': '0 0 12 12', 'refX': '6', 'refY': '6', 'markerHeight': '8', 'markerWidth': '8', 'orient': 'auto'},
+        attrs: {'class': 'geo-vector-point', 'viewBox': '0 0 12 12', 'refX': '6', 'refY': '6', 'markerHeight': '8', 'markerWidth': '8', 'orient': 'auto'},
         path: 'M 6 3 A 3 3 0 1 1 5.99999 3 Z'
       },
       'bar': {
-        attrs: {'class': 'geo-vector', 'viewBox': '0 0 10 10', 'refX': '0', 'refY': '5', 'markerHeight': '6', 'markerWidth': '6', 'orient': 'auto'},
+        attrs: {'class': 'geo-vector-bar', 'viewBox': '0 0 10 10', 'refX': '0', 'refY': '5', 'markerHeight': '6', 'markerWidth': '6', 'orient': 'auto'},
         path: 'M 0 0 L 2 0 L 2 10 L 0 10 z'
       },
       'wedge': {
-        attrs: {'class': 'geo-vector', 'viewBox': '0 0 10 10', 'refX': '10', 'refY': '5', 'markerHeight': '5', 'markerWidth': '5', 'orient': 'auto'},
+        attrs: {'class': 'geo-vector-wedge', 'viewBox': '0 0 10 10', 'refX': '10', 'refY': '5', 'markerHeight': '5', 'markerWidth': '5', 'orient': 'auto'},
         path: 'M 0 0 L 1 0 L 10 5 L 1 10 L 0 10 L 9 5 L 0 0'
       }
     };
