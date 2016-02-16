@@ -35,6 +35,7 @@ geo.d3.vectorFeature = function (arg) {
    * @private
    * @param {object} d Unused datum (for d3 compat)
    * @param {number} i The marker index
+   * @param {string} position The marker's vector position (head or tail)
    */
   ////////////////////////////////////////////////////////////////////////////
   function markerID(d, i, position) {
