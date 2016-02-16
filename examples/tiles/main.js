@@ -54,17 +54,6 @@ var tileDebug = {};
 $(function () {
   'use strict';
 
-  // Most map tile servers use EPSG:3857 (Web Mercator).  Using a tile server
-  // with a different projection works correctly in all renderers.  Using a
-  // different projection for the tiles and the map can work in the vgl
-  // renderer, but may have problems as the tile density is not uniform or
-  // regular.
-  var gcsTable = {
-    'EPSG:3857': 'EPSG:3857',
-    'SR-ORG:6865': '+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs',
-    'ESRI:54028': '+proj=cass +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs'
-  };
-
   // Parse query parameters into an object for ease of access
   var query = document.location.search.replace(/(^\?)/, '').split(
     '&').map(function (n) {
@@ -102,6 +91,8 @@ $(function () {
     }, 1000);
   });
 
+  var range = geo.transform.transformCoordinates(
+      'EPSG:4326', 'EPSG:3857', [{x: -180, y: 0}, {x: 180, y: 0}]);
   // Set map defaults to use our named node and have a reasonable center and
   // zoom level
   var mapParams = {
@@ -112,7 +103,6 @@ $(function () {
     },
     maxBounds: {},
     zoom: query.zoom !== undefined ? parseFloat(query.zoom) : 3,
-    gcs: gcsTable[query.gcs] || query.gcs
   };
   // Set the tile layer defaults to use the specified renderer and opacity
   var layerParams = {
@@ -121,9 +111,8 @@ $(function () {
     /* Always use a larger cache so if keepLower is changed, we still have a
      * big enough cache. */
     cacheSize: 600,
-    /* Most map sources are in Web Mercator, so specify it here if the map's
-     * gcs has been specified. */
-    gcs: query.gcs ? 'EPSG:3857' : undefined
+    attribution: $('#url-list [value="' + $('#layer-url').val() + '"]').attr(
+        'credit')
   };
   if (layerParams.renderer === 'null' || layerParams.renderer === 'html') {
     layerParams.renderer = null;
@@ -157,7 +146,6 @@ $(function () {
      * The 'longlat' projection functionally is a no-op in this case. */
     mapParams.ingcs = '+proj=longlat +axis=esu';
     mapParams.gcs = '+proj=longlat +axis=enu';
-    layerParams.gcs = undefined;  /* use the map gcs */
     /* mapParams.ingcs = mapParams.gcs = ''; */
     mapParams.maxBounds = {left: 0, top: 0, right: w, bottom: h};
     mapParams.center = {x: w / 2, y: h / 2};
@@ -314,13 +302,6 @@ $(function () {
       case 'fade':
         $('#map').toggleClass('fade-image', processedValue);
         break;
-      case 'gcs':
-        mapParams.gcs = gcsTable[processedValue] || 'EPSG:3857';
-        map.gcs(mapParams.gcs);
-        map.deleteLayer(osmLayer);
-        osmLayer = map.createLayer('osm', layerParams);
-        tileDebug.osmLayer = osmLayer;
-        break;
       case 'lower':
         layerParams.keepLower = (value === 'true');
         break;
@@ -342,6 +323,16 @@ $(function () {
         break;
       case 'round':
         layerParams.tileRounding = Math[value];
+        break;
+      case 'url':
+        var url = processedValue;
+        if (layerParams.baseUrl) {
+          delete layerParams.baseUrl;
+        }
+        layerParams[param] = processedValue;
+        osmLayer.url(url);
+        osmLayer.attribution($('#url-list [value="' + value + '"]').attr(
+            'credit'));
         break;
       case 'x': case 'y':
         var coord = map.center();

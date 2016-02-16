@@ -120,16 +120,20 @@ geo.map = function (arg) {
    * from [-180, 180] in the interface projection, and y matches the x range in
    * the map (not the interface) projection.  For images, this might be
    * [0, width] and [0, height] instead. */
+  var mcx = ((m_maxBounds.left || 0) + (m_maxBounds.right || 0)) / 2,
+      mcy = ((m_maxBounds.bottom || 0) + (m_maxBounds.top || 0)) / 2;
   m_maxBounds.left = geo.transform.transformCoordinates(m_ingcs, m_gcs, [{
-    x: m_maxBounds.left !== undefined ? m_maxBounds.left : -180, y: 0}])[0].x;
+    x: m_maxBounds.left !== undefined ? m_maxBounds.left : -180, y: mcy
+  }])[0].x;
   m_maxBounds.right = geo.transform.transformCoordinates(m_ingcs, m_gcs, [{
-    x: m_maxBounds.right !== undefined ? m_maxBounds.right : 180, y: 0}])[0].x;
+    x: m_maxBounds.right !== undefined ? m_maxBounds.right : 180, y: mcy
+  }])[0].x;
   m_maxBounds.top = (m_maxBounds.top !== undefined ?
     geo.transform.transformCoordinates(m_ingcs, m_gcs, [{
-      x: 0, y: m_maxBounds.top}])[0].y : m_maxBounds.right);
+      x: mcx, y: m_maxBounds.top}])[0].y : m_maxBounds.right);
   m_maxBounds.bottom = (m_maxBounds.bottom !== undefined ?
     geo.transform.transformCoordinates(m_ingcs, m_gcs, [{
-      x: 0, y: m_maxBounds.bottom}])[0].y : m_maxBounds.left);
+      x: mcx, y: m_maxBounds.bottom}])[0].y : m_maxBounds.left);
   m_unitsPerPixel = (arg.unitsPerPixel || (
     m_maxBounds.right - m_maxBounds.left) / 256);
 
@@ -291,7 +295,16 @@ geo.map = function (arg) {
     if (arg === undefined) {
       return m_gcs;
     }
-    m_gcs = arg;
+    if (arg !== m_gcs) {
+      var oldCenter = m_this.center(undefined, undefined);
+      m_gcs = arg;
+      reset_minimum_zoom();
+      var newZoom = fix_zoom(m_zoom);
+      if (newZoom !== m_zoom) {
+        m_this.zoom(newZoom);
+      }
+      m_this.center(oldCenter, undefined);
+    }
     return m_this;
   };
 
@@ -1203,6 +1216,44 @@ geo.map = function (arg) {
     }
 
     return m_this.boundsFromZoomAndCenter(m_zoom, m_center, m_rotation, gcs);
+  };
+
+  this.maxBounds = function (bounds, gcs) {
+    gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
+    if (bounds === undefined) {
+      return {
+        left: geo.transform.transformCoordinates(m_gcs, gcs, [{
+          x: m_maxBounds.left, y: 0}])[0].x,
+        right: geo.transform.transformCoordinates(m_gcs, gcs, [{
+          x: m_maxBounds.right, y: 0}])[0].x,
+        bottom: geo.transform.transformCoordinates(m_gcs, gcs, [{
+          x: 0, y: m_maxBounds.bottom}])[0].y,
+        top: geo.transform.transformCoordinates(m_gcs, gcs, [{
+          x: 0, y: m_maxBounds.top}])[0].y
+      };
+    }
+    var cx = ((bounds.left || 0) + (bounds.right || 0)) / 2,
+        cy = ((bounds.bottom || 0) + (bounds.top || 0)) / 2;
+    if (bounds.left !== undefined) {
+      m_maxBounds.left = geo.transform.transformCoordinates(gcs, m_gcs, [{
+        x: bounds.left, y: cy}])[0].x;
+    }
+    if (bounds.right !== undefined) {
+      m_maxBounds.right = geo.transform.transformCoordinates(gcs, m_gcs, [{
+        x: bounds.right, y: cy}])[0].x;
+    }
+    if (bounds.bottom !== undefined) {
+      m_maxBounds.bottom = geo.transform.transformCoordinates(gcs, m_gcs, [{
+        x: cx, y: bounds.bottom}])[0].y;
+    }
+    if (bounds.top !== undefined) {
+      m_maxBounds.top = geo.transform.transformCoordinates(gcs, m_gcs, [{
+        x: cx, y: bounds.top}])[0].y;
+    }
+    reset_minimum_zoom();
+    m_this.zoom(m_zoom);
+    m_this.pan({x: 0, y: 0});
+    return this;
   };
 
   ////////////////////////////////////////////////////////////////////////////

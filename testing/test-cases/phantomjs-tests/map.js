@@ -161,6 +161,23 @@ describe('geo.core.map', function () {
       expect(closeToEqual(m.bounds(undefined, null), {
         left: -128, top: 128, right: 128, bottom: -128,
         width: 256, height: 256})).toBe(true);
+      /* when an invalid transform is set, we shouldn't throw any exceptions,
+       * even if the computations become strange. */
+      m.gcs('invalid');
+      expect(m.gcs()).toBe('invalid');
+      m.ingcs('invalid2');
+      expect(m.ingcs()).toBe('invalid2');
+      expect(m.bounds({left: -180, top: 5, right: 180, bottom: -5})).not.toBe(
+        undefined);
+      expect(m.bounds()).not.toBe(undefined);
+    });
+    it('maxBounds', function () {
+      var m = create_map();
+      expect(closeToEqual(m.maxBounds(), {
+        left: -180, top: 85.05, right: 180, bottom: -85.05})).toBe(true);
+      m.maxBounds({left: -90, right: 20, top: 40, bottom: -60});
+      expect(closeToEqual(m.maxBounds(), {
+        left: -90, right: 20, top: 40, bottom: -60})).toBe(true);
     });
     it('zoom and discreteZoom', function () {
       var m = create_map();
