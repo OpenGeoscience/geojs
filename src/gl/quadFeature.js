@@ -287,6 +287,8 @@ geo.gl.quadFeature = function (arg) {
    * @param renderState: the render state used for the render.
    */
   this._renderImageQuads = function (renderState) {
+    console.log("geo.gl.quadFeature._renderImageQuads");
+
     if (!m_quads.imgQuads.length) {
       return;
     }

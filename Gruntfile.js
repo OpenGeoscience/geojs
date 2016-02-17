@@ -34,6 +34,7 @@ module.exports = function (grunt) {
     util: moduleFiles('geo.util'),
     core: moduleFiles('geo.core'),
     gl: moduleFiles('geo.gl'),
+    canvas: moduleFiles('geo.canvas'),
     d3: moduleFiles('geo.d3'),
     ui: moduleFiles('geo.ui'),
     plugin: moduleFiles('geo.plugin')
@@ -45,6 +46,7 @@ module.exports = function (grunt) {
     geo.util,
     geo.core,
     geo.gl,
+    geo.canvas,
     geo.d3,
     geo.ui,
     geo.plugin
@@ -93,6 +95,7 @@ module.exports = function (grunt) {
               geo.util,
               geo.core,
               geo.gl,
+              geo.canvas,
               geo.d3,
               geo.ui,
               geo.plugin

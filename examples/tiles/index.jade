@@ -2,10 +2,11 @@ extends ../common/templates/index.jade
 
 block append mainContent
   div#controls
-    .form-group(title="Tiles can be drawn using WebGL, HTML, or SVG.  WebGL is generally the fastest and HTML the most compatible.")
+    .form-group(title="Tiles can be drawn using WebGL, Canvas, HTML, or SVG.  WebGL is generally the fastest and HTML the most compatible.")
       label(for="map-renderer") Renderer
       select#map-renderer.mapparam(param-name="renderer", placeholder="vgl")
         option(value="vgl") VGL (WebGL)
+        option(value="canvas") Canvas
         option(value="d3") SVG (d3)
         option(value="html") HTML
     .form-group(title="Clamp horizontal panning to the extent of the tiles.")
