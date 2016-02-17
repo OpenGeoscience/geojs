@@ -28,8 +28,6 @@ geo.canvas.quadFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
-    var mapper, mat, prog, srctex, geom;
-
     if (!m_this.position()) {
       return;
     }
@@ -65,11 +63,11 @@ geo.canvas.quadFeature = function (arg) {
       // Tiles should be rendered from low res to high res.  Except for
       // computing their size, I see no way of finding out the level of
       // these quads.
-      var p0 = map.gcsToDisplay({x:quad.pos[0], y:quad.pos[1]},null),
-          p3 = map.gcsToDisplay({x:quad.pos[9], y:quad.pos[10]},null),
-          p2 = map.gcsToDisplay({x:quad.pos[6], y:quad.pos[7]},null);
-      context2d.setTransform((p3.x-p2.x)/w, (p3.y-p2.y)/h,
-                             (p0.x-p2.x)/w, (p0.y-p2.y)/h,
+      var p0 = map.gcsToDisplay({x:quad.pos[0], y:quad.pos[1]}, null),
+          p3 = map.gcsToDisplay({x:quad.pos[9], y:quad.pos[10]}, null),
+          p2 = map.gcsToDisplay({x:quad.pos[6], y:quad.pos[7]}, null);
+      context2d.setTransform((p3.x - p2.x) / w, (p3.y - p2.y) / h,
+                             (p0.x - p2.x) / w, (p0.y - p2.y) / h,
                              p2.x, p2.y);
 
       context2d.drawImage(quad.image, 0, 0);

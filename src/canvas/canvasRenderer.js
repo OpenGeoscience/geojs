@@ -17,7 +17,6 @@ geo.canvas.canvasRenderer = function (arg) {
   arg = arg || {};
   geo.renderer.call(this, arg);
 
-
   var m_this = this,
       m_width = 0,
       m_height = 0,
@@ -69,7 +68,7 @@ geo.canvas.canvasRenderer = function (arg) {
     s_init.call(m_this);
 
     var canvas = $(document.createElement('canvas'));
-    m_this.context2d = canvas[0].getContext("2d");
+    m_this.context2d = canvas[0].getContext('2d');
 
     canvas.attr('class', 'canvas-canvas');
     $(m_this.layer().node().get(0)).append(canvas);
@@ -107,17 +106,16 @@ geo.canvas.canvasRenderer = function (arg) {
     if (m_renderAnimFrameRef === null) {
       m_renderAnimFrameRef = window.requestAnimationFrame(function () {
         m_renderAnimFrameRef = null;
-        m_this.context2d.fillStyle = "#33FFFF"
-        m_this.context2d.fillRect(300,200, 450,175);
+        m_this.context2d.fillStyle = '#33FFFF';
+        m_this.context2d.fillRect(300, 200, 450, 175);
 
         var layer = m_this.layer(),
             map = layer.map(),
             camera = map.camera(),
-            viewport = camera._viewport,
-            rotation = map.rotation() || 0;
+            viewport = camera._viewport;
         // Clear the canvas.
         m_this.context2d.setTransform(1, 0, 0, 1, 0, 0);
-        m_this.context2d.clearRect(0,0,viewport.width,viewport.height);
+        m_this.context2d.clearRect(0, 0, viewport.width, viewport.height);
 
         var features = layer.features();
         // loop ?
