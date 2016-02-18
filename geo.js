@@ -1,6 +1,6 @@
 /** @namespace */
-var geo = {};     // jshint ignore: line
-window.geo = geo; // jshint ignore: line
+var geo = {};
+window.geo = geo;
 
 geo.renderers = {};
 geo.features = {};
@@ -12,7 +12,7 @@ geo.rendererLayerAdjustments = {};
  * Convenient function to define JS inheritance
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.inherit = function (C, P) { // jshint ignore: line
+geo.inherit = function (C, P) {
   'use strict';
 
   var F = inherit.func();
@@ -171,7 +171,7 @@ geo.registerFeature = function (category, name, func) {
  * Create new instance of the renderer
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.createFeature  = function (name, layer, renderer, arg) {
+geo.createFeature = function (name, layer, renderer, arg) {
   'use strict';
 
   var category = renderer.api(),
@@ -294,7 +294,7 @@ geo.registerWidget = function (category, name, func) {
  * Create new instance of the widget
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.createWidget  = function (name, layer, arg) {
+geo.createWidget = function (name, layer, arg) {
   'use strict';
 
   var options = {
@@ -339,7 +339,23 @@ Math.sinh = Math.sinh || function (x) {
 
 /*global geo*/
 
-geo.version = "0.7.0";
+geo.version = '0.8.0';
+
+(function (root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    // AMD. Register as an anonymous module unless amdModuleId is set
+    define('vgl', [], function () {
+      return (root['vgl'] = factory());
+    });
+  } else if (typeof exports === 'object') {
+    // Node. Does not work with strict CommonJS, but
+    // only CommonJS-like environments that support module.exports,
+    // like Node.
+    module.exports = factory();
+  } else {
+    root['vgl'] = factory();
+  }
+}(this, function () {
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -9358,7 +9374,7 @@ inherit(vgl.modelViewUniform, vgl.uniform);
  * Create new instance of class modelViewOriginUniform.
  *
  * @param name
- * @param uniform: a triplet of floats.
+ * @param {array} origin a triplet of floats.
  * @returns {vgl.modelViewUniform}
  */
 ///////////////////////////////////////////////////////////////////////////////
@@ -9372,12 +9388,23 @@ vgl.modelViewOriginUniform = function (name, origin) {
   if (name.length === 0) {
     name = 'modelViewMatrix';
   }
+  origin = origin || [0, 0, 0];
 
   var m_origin = [origin[0], origin[1], origin[2] || 0];
 
   vgl.uniform.call(this, vgl.GL.FLOAT_MAT4, name);
 
   this.set(mat4.create());
+
+  /**
+   * Change the origin used by the uniform view matrix.
+   *
+   * @param {array} origin a triplet of floats.
+   */
+  this.setOrigin = function (origin) {
+    origin = origin || [0, 0, 0];
+    m_origin = [origin[0], origin[1], origin[2] || 0];
+  };
 
   /////////////////////////////////////////////////////////////////////////////
   /**
@@ -9480,7 +9507,6 @@ vgl.floatUniform = function (name, value) {
 };
 
 inherit(vgl.floatUniform, vgl.uniform);
-
 
 ///////////////////////////////////////////////////////////////////////////////
 /**
@@ -12864,11 +12890,15 @@ vgl.DataBuffers = function (initialSize) {
   };
 };
 
+return vgl;
+
+}));
+
 
 (function () {
-  "use strict";
+  'use strict';
 
-  var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
   /**
    * Takes a variable number of arguments and returns the first numeric value
@@ -12931,7 +12961,7 @@ vgl.DataBuffers = function (initialSize) {
      * Returns true if the argument is a function.
      */
     isFunction: function (f) {
-      return typeof f === "function";
+      return typeof f === 'function';
     },
 
     /**
@@ -12952,7 +12982,7 @@ vgl.DataBuffers = function (initialSize) {
     randomString: function (n) {
       var s, i, r;
       n = n || 8;
-      s = "";
+      s = '';
       for (i = 0; i < n; i += 1) {
         r = Math.floor(Math.random() * chars.length);
         s += chars.substring(r, r + 1);
@@ -12968,14 +12998,13 @@ vgl.DataBuffers = function (initialSize) {
           color.b !== undefined) {
         return color;
       }
-      if (typeof color === "string") {
+      if (typeof color === 'string') {
         if (geo.util.cssColors.hasOwnProperty(color)) {
           color = geo.util.cssColors[color];
-        } else if (color.charAt(0) === "#") {
+        } else if (color.charAt(0) === '#') {
           color = parseInt(color.slice(1), 16);
         }
       }
-      // jshint -W016
       if (isFinite(color)) {
         color = {
           r: ((color & 0xff0000) >> 16) / 255,
@@ -12983,7 +13012,6 @@ vgl.DataBuffers = function (initialSize) {
           b: ((color & 0xff)) / 255
         };
       }
-      // jshint +W016
       return color;
     },
 
@@ -13119,6 +13147,28 @@ vgl.DataBuffers = function (initialSize) {
         0, 0, 1, 0,
         0, 0, 0, 1
       ];
+    },
+
+    /**
+     * Get a buffer for a vgl geometry source.  If a buffer already exists and
+     * is the correct size, return it.  Otherwise, allocate a new buffer; any
+     * data in an old buffer is discarded.
+     *
+     * @param geom: the geometry to reference and modify.
+     * @param srcName: the name of the source.
+     * @param len: the number of elements for the array.
+     * @returns {Float32Array}
+     */
+    getGeomBuffer: function (geom, srcName, len) {
+      var src = geom.sourceByName(srcName), data;
+
+      data = src.data();
+      if (data instanceof Float32Array && data.length === len) {
+        return data;
+      }
+      data = new Float32Array(len);
+      src.setData(data);
+      return data;
     }
   };
 
@@ -13295,7 +13345,6 @@ vgl.DataBuffers = function (initialSize) {
  */
 //////////////////////////////////////////////////////////////////////////////
 
-/* jshint ignore: start */
 (function () {
     'use strict';
 
@@ -13676,7 +13725,6 @@ vgl.DataBuffers = function (initialSize) {
     geo.util.Box = Box;
     geo.util.vect = vect;
 }());
-/* jshint ignore: end */
 
 /*
 markercluster plugin:
@@ -13736,9 +13784,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * @copyright 2012, David Leaver
  */
 
-/* jshint -W016 */
-/* jshint -W089 */
-// jscs:disable validateIndentation
 (function () {
     "use strict";
 
@@ -13877,7 +13922,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         }
     };
 })();
-// jscs:enable validateIndentation
 
 /**
  * @file
@@ -14172,7 +14216,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * the throttled method.
  */
 
-(function (window, undefined) {
+(function (window) {
   'use strict';
 
   // Internal method reference.
@@ -14228,7 +14272,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     var timeout_id,
 
       // Keep track of the last time `callback` was executed.
-      last_exec = 0;
+        last_exec = 0;
 
     // `no_trailing` defaults to falsy.
     if (typeof no_trailing !== 'boolean') {
@@ -14248,9 +14292,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     // functionality and when executed will limit the rate at which `callback`
     // is executed.
     function wrapper() {
-      var that = this, // jshint ignore: line
-        elapsed = +new Date() - last_exec,
-        args = arguments;
+      var that = this,
+          elapsed = +new Date() - last_exec,
+          args = arguments;
 
       // Execute `callback` and update the `last_exec` timestamp.
       function exec() {
@@ -14274,7 +14318,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       }
 
       // Clear any existing timeout.
-      void(
+      void (
         timeout_id && clearTimeout(timeout_id)
       );
 
@@ -14378,7 +14422,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.object = function () {
-  "use strict";
+  'use strict';
   if (!(this instanceof geo.object)) {
     return new geo.object();
   }
@@ -14521,8 +14565,8 @@ geo.object = function () {
     //   ignoring for now...
     if (m_eventHandlers.hasOwnProperty(event)) {
       m_eventHandlers[event] = m_eventHandlers[event].filter(function (f) {
-          return f !== arg;
-        }
+        return f !== arg;
+      }
       );
     }
     return m_this;
@@ -14555,7 +14599,7 @@ inherit(geo.object, vgl.object);
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.sceneObject = function (arg) {
-  "use strict";
+  'use strict';
   if (!(this instanceof geo.sceneObject)) {
     return new geo.sceneObject();
   }
@@ -14884,8 +14928,18 @@ geo.transform = function (options) {
 
   // Set defaults given by the constructor
   options = options || {};
-  this.source(options.source);
-  this.target(options.target);
+  try {
+    this.source(options.source);
+  } catch (err) {
+    console.error('Can\'t use transform source: ' + options.source);
+    this.source('EPSG:4326');
+  }
+  try {
+    this.target(options.target);
+  } catch (err) {
+    console.error('Can\'t use transform target: ' + options.target);
+    this.target('EPSG:3857');
+  }
 
   geo.object.call(this);
   return this;
@@ -15468,16 +15522,16 @@ inherit(geo.transform, geo.object);
         // without changing the apparent zoom level
         if (this._viewport.width && this._viewport.height) {
           this._scale([
-              this._viewport.width / viewport.width,
-              this._viewport.height / viewport.height,
-              1
+            this._viewport.width / viewport.width,
+            this._viewport.height / viewport.height,
+            1
           ]);
 
           // translate by half the difference to keep the center the same
           this._translate([
-              (viewport.width - this._viewport.width) / 2,
-              (viewport.height - this._viewport.height) / 2,
-              0
+            (viewport.width - this._viewport.width) / 2,
+            (viewport.height - this._viewport.height) / 2,
+            0
           ]);
         }
 
@@ -15577,7 +15631,6 @@ inherit(geo.transform, geo.object);
       }
       return pt;
     };
-
 
     /**
      * Project a vec4 from world space into viewport space.
@@ -15824,9 +15877,9 @@ inherit(geo.transform, geo.object);
         return;
       }
       mat4.scale(this._view, this._view, [
-          zoom,
-          zoom,
-          zoom
+        zoom,
+        zoom,
+        zoom
       ]);
       this._update();
     };
@@ -15985,24 +16038,24 @@ inherit(geo.transform, geo.object);
   geo.camera.css = function (t) {
     return (
       'matrix3d(' +
-      [
-        t[0].toFixed(20),
-        t[1].toFixed(20),
-        t[2].toFixed(20),
-        t[3].toFixed(20),
-        t[4].toFixed(20),
-        t[5].toFixed(20),
-        t[6].toFixed(20),
-        t[7].toFixed(20),
-        t[8].toFixed(20),
-        t[9].toFixed(20),
-        t[10].toFixed(20),
-        t[11].toFixed(20),
-        t[12].toFixed(20),
-        t[13].toFixed(20),
-        t[14].toFixed(20),
-        t[15].toFixed(20)
-      ].join(',') +
+        [
+          t[0].toFixed(20),
+          t[1].toFixed(20),
+          t[2].toFixed(20),
+          t[3].toFixed(20),
+          t[4].toFixed(20),
+          t[5].toFixed(20),
+          t[6].toFixed(20),
+          t[7].toFixed(20),
+          t[8].toFixed(20),
+          t[9].toFixed(20),
+          t[10].toFixed(20),
+          t[11].toFixed(20),
+          t[12].toFixed(20),
+          t[13].toFixed(20),
+          t[14].toFixed(20),
+          t[15].toFixed(20)
+        ].join(',') +
       ')'
     );
   };
@@ -16404,7 +16457,6 @@ geo.layer = function (arg) {
     return m_attribution;
   };
 
-
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Init layer
@@ -16553,14 +16605,14 @@ geo.layer = function (arg) {
  * @returns {number}
  */
 geo.layer.newLayerId = (function () {
-    'use strict';
-    var currentId = 1;
-    return function () {
-      var id = currentId;
-      currentId += 1;
-      return id;
-    };
-  }()
+  'use strict';
+  var currentId = 1;
+  return function () {
+    var id = currentId;
+    currentId += 1;
+    return id;
+  };
+}()
 );
 
 /**
@@ -16631,7 +16683,7 @@ inherit(geo.layer, geo.sceneObject);
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.featureLayer = function (arg) {
-  "use strict";
+  'use strict';
   if (!(this instanceof geo.featureLayer)) {
     return new geo.featureLayer(arg);
   }
@@ -16772,7 +16824,7 @@ geo.featureLayer = function (arg) {
     s_update.call(m_this, request);
 
     if (m_features && m_features.length === 0) {
-      console.log("[info] No valid data source found.");
+      console.log('[info] No valid data source found.');
       return;
     }
 
@@ -16848,7 +16900,7 @@ geo.featureLayer = function (arg) {
 inherit(geo.featureLayer, geo.layer);
 
 // Now register it
-geo.registerLayer("feature", geo.featureLayer);
+geo.registerLayer('feature', geo.featureLayer);
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -17049,7 +17101,6 @@ geo.event.brushend = 'geo_brushend';
 //////////////////////////////////////////////////////////////////////////////
 geo.event.brushstart = 'geo_brushstart';
 
-
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Triggered before a map navigation animation begins.  Set
@@ -17222,13 +17273,11 @@ geo.mapInteractor = function (args) {
   // button: 'left' | 'right' | 'middle'
   // modifiers: [ 'alt' | 'meta' | 'ctrl' | 'shift' ]
   function eventMatch(button, modifiers) {
-    /* jshint -W018 */
     return (button === 'wheel' || m_mouse.buttons[button]) &&
-      (!!m_mouse.modifiers.alt)   === (!!modifiers.alt)   &&
-      (!!m_mouse.modifiers.meta)  === (!!modifiers.meta)  &&
+      (!!m_mouse.modifiers.alt) === (!!modifiers.alt) &&
+      (!!m_mouse.modifiers.meta) === (!!modifiers.meta) &&
       (!!m_mouse.modifiers.shift) === (!!modifiers.shift) &&
-      (!!m_mouse.modifiers.ctrl)  === (!!modifiers.ctrl);
-    /* jshint +W018 */
+      (!!m_mouse.modifiers.ctrl) === (!!modifiers.ctrl);
   }
 
   // Helper method to calculate the speed from a velocity
@@ -17452,7 +17501,6 @@ geo.mapInteractor = function (args) {
    * @property {geo.mouseState} origin The mouse state at the start of the
    * brush action
    */
-
 
   // default mouse object
   m_mouse = {
@@ -17919,7 +17967,6 @@ geo.mapInteractor = function (args) {
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
 
-
     if (m_options.click.cancelOnMove) {
       m_clickMaybe = false;
     }
@@ -18176,7 +18223,6 @@ geo.mapInteractor = function (args) {
 
       deltaZ = 0;
     }
-
 
     if (m_options.discreteZoom !== true && m_options.discreteZoom > 0) {
       delay = m_options.discreteZoom;
@@ -19088,8 +19134,8 @@ inherit(geo.clock, geo.object);
           this._image.crossOrigin = this._cors;
         }
         defer = new $.Deferred();
-        this._image.onload = function () { defer.resolve(); };
-        this._image.onerror = function () { defer.reject(); };
+        this._image.onload = defer.resolve;
+        this._image.onerror = defer.reject;
         this._image.src = this._url;
 
         // attach a promise interface to `this`
@@ -19212,16 +19258,20 @@ inherit(geo.clock, geo.object);
      * front of the access queue.
      *
      * @param {string|geo.tile} hash The tile or the tile hash value
+     * @param {boolean} noMove if true, don't move the tile to the front of the
+     *     access queue.
      * @returns {geo.tile|null}
      */
-    this.get = function (hash) {
+    this.get = function (hash, noMove) {
       hash = typeof hash === 'string' ? hash : hash.toString();
       if (!(hash in this._cache)) {
         return null;
       }
 
-      this._atime.splice(this._access(hash), 1);
-      this._atime.unshift(hash);
+      if (!noMove) {
+        this._atime.splice(this._access(hash), 1);
+        this._atime.unshift(hash);
+      }
       return this._cache[hash];
     };
 
@@ -19422,11 +19472,9 @@ inherit(geo.clock, geo.object);
       options.url = m_tileUrlFromTemplate(options.url);
     }
 
-    var lastZoom = null,
-        lastX = null,
-        lastY = null,
-        s_init = this._init,
+    var s_init = this._init,
         s_exit = this._exit,
+        m_lastTileSet = [],
         m_exited;
 
     // copy the options into a private variable
@@ -19455,7 +19503,7 @@ inherit(geo.clock, geo.object);
       // smaller values will do needless computations.
       track: options.cacheSize,
       needed: function (tile) {
-        return tile === this.cache.get(tile.toString());
+        return tile === this.cache.get(tile.toString(), true);
       }.bind(this)
     });
 
@@ -19575,6 +19623,8 @@ inherit(geo.clock, geo.object);
       var o = this._origin(level);
       var map = this.map();
       point = this.displayToLevel(map.gcsToDisplay(point, null), level);
+      if (isNaN(point.x)) { point.x = 0; }
+      if (isNaN(point.y)) { point.y = 0; }
       var to = this._tileOffset(level);
       if (to) {
         point.x += to.x;
@@ -19601,19 +19651,19 @@ inherit(geo.clock, geo.object);
      */
     this.gcsTileBounds = function (indexOrTile, gcs) {
       var tile = (indexOrTile.index ? indexOrTile : geo.tile({
-            index: indexOrTile,
-            size: {x: this._options.tileWidth, y: this._options.tileHeight},
-            url: ''
-          }));
+        index: indexOrTile,
+        size: {x: this._options.tileWidth, y: this._options.tileHeight},
+        url: ''
+      }));
       var to = this._tileOffset(tile.index.level),
           bounds = tile.bounds({x: 0, y: 0}, to),
           map = this.map(),
           unit = map.unitsPerPixel(tile.index.level);
       var coord = [{
-            x: bounds.left * unit, y: this._topDown() * bounds.top * unit
-          }, {
-            x: bounds.right * unit, y: this._topDown() * bounds.bottom * unit
-          }];
+        x: bounds.left * unit, y: this._topDown() * bounds.top * unit
+      }, {
+        x: bounds.right * unit, y: this._topDown() * bounds.bottom * unit
+      }];
       gcs = (gcs === null ? map.gcs() : (
           gcs === undefined ? map.ingcs() : gcs));
       if (gcs !== map.gcs()) {
@@ -19701,15 +19751,21 @@ inherit(geo.clock, geo.object);
      * @param {object} bounds The map bounds in world coordinates
      */
     this._getTileRange = function (level, bounds) {
+      var corners = [
+        this.tileAtPoint({x: bounds.left, y: bounds.top}, level),
+        this.tileAtPoint({x: bounds.right, y: bounds.top}, level),
+        this.tileAtPoint({x: bounds.left, y: bounds.bottom}, level),
+        this.tileAtPoint({x: bounds.right, y: bounds.bottom}, level)
+      ];
       return {
-        start: this.tileAtPoint({
-          x: bounds.left,
-          y: bounds.top
-        }, level),
-        end: this.tileAtPoint({
-          x: bounds.right,
-          y: bounds.bottom
-        }, level)
+        start: {
+          x: Math.min(corners[0].x, corners[1].x, corners[2].x, corners[3].x),
+          y: Math.min(corners[0].y, corners[1].y, corners[2].y, corners[3].y)
+        },
+        end: {
+          x: Math.max(corners[0].x, corners[1].x, corners[2].x, corners[3].x),
+          y: Math.max(corners[0].y, corners[1].y, corners[2].y, corners[3].y)
+        }
       };
     };
 
@@ -19722,12 +19778,19 @@ inherit(geo.clock, geo.object);
      * @param {number} maxLevel The zoom level
      * @param {object} bounds The map bounds
      * @param {boolean} sorted Return a sorted list
+     * @param {boolean} onlyIfChanged If the set of tiles have not changed
+     *     (even if their desired order has), return undefined instead of an
+     *     array of tiles.
      * @returns {geo.tile[]} An array of tile objects
      */
-    this._getTiles = function (maxLevel, bounds, sorted) {
+    this._getTiles = function (maxLevel, bounds, sorted, onlyIfChanged) {
       var i, j, tiles = [], index, nTilesLevel,
-          start, end, indexRange, source, center,
-          level, minLevel = this._options.keepLower ? 0 : maxLevel;
+          start, end, indexRange, source, center, changed = false, old, level,
+          minLevel = (this._options.keepLower ? this._options.minLevel :
+                      maxLevel);
+      if (maxLevel < minLevel) {
+        maxLevel = minLevel;
+      }
 
       /* Generate a list of the tiles that we want to create.  This is done
        * before sorting, because we want to actually generate the tiles in
@@ -19737,33 +19800,66 @@ inherit(geo.clock, geo.object);
         indexRange = this._getTileRange(level, bounds);
         start = indexRange.start;
         end = indexRange.end;
-
         // total number of tiles existing at this level
         nTilesLevel = this.tilesAtZoom(level);
 
+        if (!this._options.wrapX) {
+          start.x = Math.min(Math.max(start.x, 0), nTilesLevel.x - 1);
+          end.x = Math.min(Math.max(end.x, 0), nTilesLevel.x - 1);
+          if (level === minLevel) {
+            start.x = 0;
+            end.x = nTilesLevel.x - 1;
+          }
+        }
+        if (!this._options.wrapY) {
+          start.y = Math.min(Math.max(start.y, 0), nTilesLevel.y - 1);
+          end.y = Math.min(Math.max(end.y, 0), nTilesLevel.y - 1);
+          if (level === minLevel) {
+            start.y = 0;
+            end.y = nTilesLevel.y - 1;
+          }
+        }
+        /* If we are reprojecting tiles, we need a check to not use all levels
+         * if the number of tiles is excessive. */
+        if (this._options.gcs && this._options.gcs !== this.map().gcs() &&
+            level !== minLevel &&
+            (end.x + 1 - start.x) * (end.y + 1 - start.y) >
+            (this.map().size().width * this.map().size().height /
+            this._options.tileWidth / this._options.tileHeight) * 16) {
+          break;
+        }
+
         // loop over the tile range
-        index = {level: level};
-        index.nx = nTilesLevel.x;
-        index.ny = nTilesLevel.y;
-
         for (i = start.x; i <= end.x; i += 1) {
-          index.x = i;
           for (j = start.y; j <= end.y; j += 1) {
-            index.y = j;
-
-            source = $.extend({}, index);
+            index = {level: level, x: i, y: j};
+            source = {level: level, x: i, y: j};
             if (this._options.wrapX) {
-              source.x = modulo(index.x, index.nx);
+              source.x = modulo(source.x, nTilesLevel.x);
             }
             if (this._options.wrapY) {
-              source.y = modulo(index.y, index.ny);
+              source.y = modulo(source.y, nTilesLevel.y);
             }
-
             if (this.isValid(source)) {
-              tiles.push({index: $.extend({}, index), source: source});
+              if (onlyIfChanged && tiles.length < m_lastTileSet.length) {
+                old = m_lastTileSet[tiles.length];
+                changed = changed || (index.level !== old.level ||
+                    index.x !== old.x || index.y !== old.y);
+              }
+              tiles.push({index: index, source: source});
             }
           }
         }
+      }
+
+      if (onlyIfChanged) {
+        if (!changed && tiles.length === m_lastTileSet.length) {
+          return;
+        }
+        m_lastTileSet.splice(0, m_lastTileSet.length);
+        $.each(tiles, function (idx, tile) {
+          m_lastTileSet.push(tile.index);
+        });
       }
 
       if (sorted) {
@@ -19934,8 +20030,8 @@ inherit(geo.clock, geo.object);
       container.append(tile.image);
       container.css({
         position: 'absolute',
-        left: (bounds.left - parseInt(div.attr('offsetx') || 0)) + 'px',
-        top: (bounds.top - parseInt(div.attr('offsety') || 0)) + 'px'
+        left: (bounds.left - parseInt(div.attr('offsetx') || 0, 10)) + 'px',
+        top: (bounds.top - parseInt(div.attr('offsety') || 0, 10)) + 'px'
       });
 
       // apply fade in animation
@@ -20050,7 +20146,7 @@ inherit(geo.clock, geo.object);
         bounds = this._getViewBounds();
       }
 
-      for (hash in this._activeTiles) {// jshint ignore: line
+      for (hash in this._activeTiles) {
 
         tile = this._activeTiles[hash];
         if (this._canPurge(tile, bounds, zoom, doneLoading)) {
@@ -20069,12 +20165,14 @@ inherit(geo.clock, geo.object);
 
       // ignoring the warning here because this is a privately
       // controlled object with simple keys
-      for (tile in this._activeTiles) {  // jshint ignore: line
+      for (tile in this._activeTiles) {
         tiles.push(this.remove(tile));
       }
 
       // clear out the tile coverage tree
       this._tileTree = {};
+
+      m_lastTileSet = [];
 
       return tiles;
     };
@@ -20115,6 +20213,8 @@ inherit(geo.clock, geo.object);
      * @returns {object} Local coordinates
      */
     this.fromLocal = function (pt, zoom) {
+      //DWM:: these need to alawys use the *layer* unitsPerPixel, or possibly
+      //DWM:: convert tile space using a transform
       var map = this.map(),
           unit = map.unitsPerPixel(zoom === undefined ? map.zoom() : zoom);
       return {
@@ -20165,36 +20265,36 @@ inherit(geo.clock, geo.object);
      */
     this._updateSubLayers = function (level, view) {
       var canvas = this.canvas(),
-          lastlevel = parseInt(canvas.attr('lastlevel')),
-          lastx = parseInt(canvas.attr('lastoffsetx') || 0),
-          lasty = parseInt(canvas.attr('lastoffsety') || 0);
+          lastlevel = parseInt(canvas.attr('lastlevel'), 10),
+          lastx = parseInt(canvas.attr('lastoffsetx') || 0, 10),
+          lasty = parseInt(canvas.attr('lastoffsety') || 0, 10);
       if (lastlevel === level && Math.abs(lastx - view.left) < 65536 &&
           Math.abs(lasty - view.top) < 65536) {
         return {x: lastx, y: lasty};
       }
       var map = this.map(),
           to = this._tileOffset(level),
-          x = parseInt((view.left + view.right - map.size().width) / 2 + to.x),
-          y = parseInt((view.top + view.bottom - map.size().height) / 2 + to.y);
+          x = parseInt((view.left + view.right - map.size().width) / 2 + to.x, 10),
+          y = parseInt((view.top + view.bottom - map.size().height) / 2 + to.y, 10);
       canvas.find('.geo-tile-layer').each(function (idx, el) {
         var $el = $(el),
-            layer = parseInt($el.data('tileLayer'));
+            layer = parseInt($el.data('tileLayer'), 10);
         $el.css(
           'transform',
           'scale(' + Math.pow(2, level - layer) + ')'
         );
-        var layerx = parseInt(x / Math.pow(2, level - layer)),
-            layery = parseInt(y / Math.pow(2, level - layer)),
-            dx = layerx - parseInt($el.attr('offsetx') || 0),
-            dy = layery - parseInt($el.attr('offsety') || 0);
+        var layerx = parseInt(x / Math.pow(2, level - layer), 10),
+            layery = parseInt(y / Math.pow(2, level - layer), 10),
+            dx = layerx - parseInt($el.attr('offsetx') || 0, 10),
+            dy = layery - parseInt($el.attr('offsety') || 0, 10);
         $el.attr({offsetx: layerx, offsety: layery});
         $el.find('.geo-tile-container').each(function (tileidx, tileel) {
           $(tileel).css({
-            left: (parseInt($(tileel).css('left')) - dx) + 'px',
-            top: (parseInt($(tileel).css('top')) - dy) + 'px'
+            left: (parseInt($(tileel).css('left'), 10) - dx) + 'px',
+            top: (parseInt($(tileel).css('top'), 10) - dy) + 'px'
           });
-        }.bind(this));
-      }.bind(this));
+        });
+      });
       canvas.attr({lastoffsetx: x, lastoffsety: y, lastlevel: level});
       return {x: x, y: y};
     };
@@ -20211,17 +20311,13 @@ inherit(geo.clock, geo.object);
         return;
       }
       var map = this.map(),
-          mapZoom = map.zoom(),
-          zoom = this._options.tileRounding(mapZoom),
-          center = this.displayToLevel(undefined, zoom),
           bounds = map.bounds(undefined, null),
-          tiles, view = this._getViewBounds();
-
-      tiles = this._getTiles(
-        zoom, bounds, true
-      );
+          tiles;
 
       if (this._updateSubLayers) {
+        var mapZoom = map.zoom(),
+            zoom = this._options.tileRounding(mapZoom),
+            view = this._getViewBounds();
         // Update the transform for the local layer coordinates
         var offset = this._updateSubLayers(zoom, view) || {x: 0, y: 0};
 
@@ -20259,9 +20355,13 @@ inherit(geo.clock, geo.object);
         });
       }
 
-      lastZoom = mapZoom;
-      lastX = center.x;
-      lastY = center.y;
+      tiles = this._getTiles(
+        zoom, bounds, true, true
+      );
+
+      if (tiles === undefined) {
+        return;
+      }
 
       // reset the tile coverage tree
       this._tileTree = {};
@@ -20288,7 +20388,8 @@ inherit(geo.clock, geo.object);
                  * should have been used. */
                 return;
               }
-              /* Check if a tile is still desired.  Don't draw it if it isn't. */
+              /* Check if a tile is still desired.  Don't draw it if it
+               * isn't. */
               var mapZoom = map.zoom(),
                   zoom = this._options.tileRounding(mapZoom),
                   view = this._getViewBounds();
@@ -20315,7 +20416,6 @@ inherit(geo.clock, geo.object);
           }
         }
       }.bind(this));
-
       // purge all old tiles when the new tiles are loaded (successfully or not)
       $.when.apply($, tiles)
         .done(// called on success and failure
@@ -20335,6 +20435,9 @@ inherit(geo.clock, geo.object);
      * @param {geo.tile} tile
      */
     this._setTileTree = function (tile) {
+      if (this._options.keepLower) {
+        return;
+      }
       var index = tile.index;
       this._tileTree[index.level] = this._tileTree[index.level] || {};
       this._tileTree[index.level][index.x] = this._tileTree[index.level][index.x] || {};
@@ -20435,9 +20538,9 @@ inherit(geo.clock, geo.object);
         scale = Math.pow(2, (bounds.level || 0) - (tile.index.level || 0));
       }
       return (tile.bottom - to.y) * scale < bounds.top ||
-             (tile.left - to.x) * scale   > bounds.right ||
-             (tile.top - to.y) * scale    > bounds.bottom ||
-             (tile.right - to.x) * scale  < bounds.left;
+             (tile.left - to.x) * scale > bounds.right ||
+             (tile.top - to.y) * scale > bounds.bottom ||
+             (tile.right - to.x) * scale < bounds.left;
     };
 
     /**
@@ -20460,8 +20563,13 @@ inherit(geo.clock, geo.object);
     this._canPurge = function (tile, bounds, zoom, doneLoading) {
       if (this._options.keepLower) {
         zoom = zoom || 0;
-        if (zoom < tile.index.level) {
+        if (zoom < tile.index.level &&
+            tile.index.level !== this._options.minLevel) {
           return true;
+        }
+        if (tile.index.level === this._options.minLevel &&
+            !this._options.wrapX && !this._options.wrapY) {
+          return false;
         }
       } else {
         /* For tile layers that should only keep one layer, if loading is
@@ -20501,7 +20609,7 @@ inherit(geo.clock, geo.object);
       /* Reverse the y coordinate, since we expect the gcs coordinate system
        * to be right-handed and the level coordinate system to be
        * left-handed. */
-      var gcsPt = map.displayToGcs(pt, null),
+      var gcsPt = map.displayToGcs(pt, this._options.gcs || null),
           lvlPt = {x: gcsPt.x / unit, y: this._topDown() * gcsPt.y / unit};
       return lvlPt;
     };
@@ -20592,6 +20700,7 @@ inherit(geo.clock, geo.object);
      * Clean up the layer.
      */
     this._exit = function () {
+      this.reset();
       // call super method
       s_exit.apply(this, arguments);
       m_exited = true;
@@ -20617,7 +20726,7 @@ inherit(geo.clock, geo.object);
     url: null,
     subdomains: 'abc',
     tileOffset: function (level) {
-      void(level);
+      void (level);
       return {x: 0, y: 0};
     },
     topDown: false,
@@ -20862,7 +20971,7 @@ inherit(geo.clock, geo.object);
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.fileReader = function (arg) {
-  "use strict";
+  'use strict';
   if (!(this instanceof geo.fileReader)) {
     return new geo.fileReader(arg);
   }
@@ -20876,7 +20985,7 @@ geo.fileReader = function (arg) {
   arg = arg || {};
 
   if (!(arg.layer instanceof geo.featureLayer)) {
-    throw "fileReader must be given a feature layer";
+    throw 'fileReader must be given a feature layer';
   }
 
   var m_layer = arg.layer;
@@ -21074,7 +21183,7 @@ geo.jsonReader = function (arg) {
 
   this._getCoordinates = function (spec) {
     var geometry = spec.geometry || {},
-    coordinates = geometry.coordinates || [], elv;
+        coordinates = geometry.coordinates || [], elv;
 
     if ((coordinates.length === 2 || coordinates.length === 3) &&
     (isFinite(coordinates[0]) && isFinite(coordinates[1]))) {
@@ -21117,8 +21226,8 @@ geo.jsonReader = function (arg) {
 
       features.forEach(function (feature) {
         var type = m_this._featureType(feature),
-        coordinates = m_this._getCoordinates(feature),
-        style = m_this._getStyle(feature);
+            coordinates = m_this._getCoordinates(feature),
+            style = m_this._getStyle(feature);
         if (type) {
           if (type === 'line') {
             style.fill = style.fill || false;
@@ -21180,7 +21289,6 @@ geo.jsonReader = function (arg) {
 
     m_this._readObject(file, _done, progress);
   };
-
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -21361,16 +21469,20 @@ geo.map = function (arg) {
    * from [-180, 180] in the interface projection, and y matches the x range in
    * the map (not the interface) projection.  For images, this might be
    * [0, width] and [0, height] instead. */
+  var mcx = ((m_maxBounds.left || 0) + (m_maxBounds.right || 0)) / 2,
+      mcy = ((m_maxBounds.bottom || 0) + (m_maxBounds.top || 0)) / 2;
   m_maxBounds.left = geo.transform.transformCoordinates(m_ingcs, m_gcs, [{
-    x: m_maxBounds.left !== undefined ? m_maxBounds.left : -180, y: 0}])[0].x;
+    x: m_maxBounds.left !== undefined ? m_maxBounds.left : -180, y: mcy
+  }])[0].x;
   m_maxBounds.right = geo.transform.transformCoordinates(m_ingcs, m_gcs, [{
-    x: m_maxBounds.right !== undefined ? m_maxBounds.right : 180, y: 0}])[0].x;
+    x: m_maxBounds.right !== undefined ? m_maxBounds.right : 180, y: mcy
+  }])[0].x;
   m_maxBounds.top = (m_maxBounds.top !== undefined ?
     geo.transform.transformCoordinates(m_ingcs, m_gcs, [{
-    x: 0, y: m_maxBounds.top}])[0].y : m_maxBounds.right);
+      x: mcx, y: m_maxBounds.top}])[0].y : m_maxBounds.right);
   m_maxBounds.bottom = (m_maxBounds.bottom !== undefined ?
     geo.transform.transformCoordinates(m_ingcs, m_gcs, [{
-    x: 0, y: m_maxBounds.bottom}])[0].y : m_maxBounds.left);
+      x: mcx, y: m_maxBounds.bottom}])[0].y : m_maxBounds.left);
   m_unitsPerPixel = (arg.unitsPerPixel || (
     m_maxBounds.right - m_maxBounds.left) / 256);
 
@@ -21532,7 +21644,16 @@ geo.map = function (arg) {
     if (arg === undefined) {
       return m_gcs;
     }
-    m_gcs = arg;
+    if (arg !== m_gcs) {
+      var oldCenter = m_this.center(undefined, undefined);
+      m_gcs = arg;
+      reset_minimum_zoom();
+      var newZoom = fix_zoom(m_zoom);
+      if (newZoom !== m_zoom) {
+        m_this.zoom(newZoom);
+      }
+      m_this.center(oldCenter, undefined);
+    }
     return m_this;
   };
 
@@ -21570,12 +21691,11 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.zoom = function (val, origin, ignoreDiscreteZoom) {
-    var evt, oldZoom, bounds;
+    var evt, bounds;
     if (val === undefined) {
       return m_zoom;
     }
 
-    oldZoom = m_zoom;
     /* The ignoreDiscreteZoom flag is intended to allow non-integer zoom values
      * during animation. */
     val = fix_zoom(val, ignoreDiscreteZoom);
@@ -21631,14 +21751,14 @@ geo.map = function (arg) {
     var bounds = fix_bounds(m_camera.bounds, m_rotation);
     if (bounds !== m_camera.bounds) {
       var panPos = m_this.gcsToDisplay({
-            x: m_camera.bounds.left, y: m_camera.bounds.top}, null);
+        x: m_camera.bounds.left, y: m_camera.bounds.top}, null);
       bounds = m_this.boundsFromZoomAndCenter(m_zoom, {
         x: (bounds.left + bounds.right) / 2,
         y: (bounds.top + bounds.bottom) / 2
       }, m_rotation, null);
       camera_bounds(bounds, m_rotation);
       var clampPos = m_this.gcsToDisplay({
-            x: m_camera.bounds.left, y: m_camera.bounds.top}, null);
+        x: m_camera.bounds.left, y: m_camera.bounds.top}, null);
       evt.screenDelta.x += clampPos.x - panPos.x;
       evt.screenDelta.y += clampPos.y - panPos.y;
     }
@@ -21726,6 +21846,7 @@ geo.map = function (arg) {
 
     camera_bounds(m_this.boundsFromZoomAndCenter(
         m_zoom, m_center, m_rotation, null), m_rotation);
+    m_this.modified();
     // trigger a pan event
     m_this.geoTrigger(
       geo.event.pan,
@@ -21751,8 +21872,12 @@ geo.map = function (arg) {
       layerName, m_this, arg);
 
     if (newLayer) {
-
       m_this.addChild(newLayer);
+      m_this.children().forEach(function (c) {
+        if (c instanceof geo.gui.uiLayer) {
+          c.moveToTop();
+        }
+      });
       newLayer._update();
       m_this.modified();
 
@@ -21858,13 +21983,13 @@ geo.map = function (arg) {
     m_width = w;
     m_height = h;
 
-    m_this.camera().viewport = {width: w, height: h};
-
     reset_minimum_zoom();
     var newZoom = fix_zoom(m_zoom);
     if (newZoom !== m_zoom) {
       m_this.zoom(newZoom);
     }
+    m_this.camera().viewport = {width: w, height: h};
+    m_this.center(oldCenter);
 
     m_this.geoTrigger(geo.event.resize, {
       type: geo.event.resize,
@@ -21875,7 +22000,6 @@ geo.map = function (arg) {
       height: h
     });
 
-    m_this.center(oldCenter);
     m_this.modified();
     return m_this;
   };
@@ -22005,9 +22129,9 @@ geo.map = function (arg) {
     var i, layers = m_this.children();
 
     m_this.geoTrigger(geo.event.draw, {
-        type: geo.event.draw,
-        target: m_this
-      }
+      type: geo.event.draw,
+      target: m_this
+    }
     );
 
     m_this._update();
@@ -22017,9 +22141,9 @@ geo.map = function (arg) {
     }
 
     m_this.geoTrigger(geo.event.drawEnd, {
-        type: geo.event.drawEnd,
-        target: m_this
-      }
+      type: geo.event.drawEnd,
+      target: m_this
+    }
     );
 
     return m_this;
@@ -22275,7 +22399,7 @@ geo.map = function (arg) {
       opts.center = geo.util.normalizeCoordinates(opts.center);
       if (gcs !== m_gcs) {
         opts.center = geo.transform.transformCoordinates(gcs, m_gcs, [
-            opts.center])[0];
+          opts.center])[0];
       }
     }
     opts = $.extend(true, {}, defaultOpts, opts);
@@ -22423,7 +22547,7 @@ geo.map = function (arg) {
     if (bds !== undefined) {
       if (gcs !== m_gcs) {
         var trans = geo.transform.transformCoordinates(gcs, m_gcs, [{
-            x: bds.left, y: bds.top}, {x: bds.right, y: bds.bottom}]);
+          x: bds.left, y: bds.top}, {x: bds.right, y: bds.bottom}]);
         bds = {
           left: trans[0].x,
           top: trans[0].y,
@@ -22443,6 +22567,44 @@ geo.map = function (arg) {
     return m_this.boundsFromZoomAndCenter(m_zoom, m_center, m_rotation, gcs);
   };
 
+  this.maxBounds = function (bounds, gcs) {
+    gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
+    if (bounds === undefined) {
+      return {
+        left: geo.transform.transformCoordinates(m_gcs, gcs, [{
+          x: m_maxBounds.left, y: 0}])[0].x,
+        right: geo.transform.transformCoordinates(m_gcs, gcs, [{
+          x: m_maxBounds.right, y: 0}])[0].x,
+        bottom: geo.transform.transformCoordinates(m_gcs, gcs, [{
+          x: 0, y: m_maxBounds.bottom}])[0].y,
+        top: geo.transform.transformCoordinates(m_gcs, gcs, [{
+          x: 0, y: m_maxBounds.top}])[0].y
+      };
+    }
+    var cx = ((bounds.left || 0) + (bounds.right || 0)) / 2,
+        cy = ((bounds.bottom || 0) + (bounds.top || 0)) / 2;
+    if (bounds.left !== undefined) {
+      m_maxBounds.left = geo.transform.transformCoordinates(gcs, m_gcs, [{
+        x: bounds.left, y: cy}])[0].x;
+    }
+    if (bounds.right !== undefined) {
+      m_maxBounds.right = geo.transform.transformCoordinates(gcs, m_gcs, [{
+        x: bounds.right, y: cy}])[0].x;
+    }
+    if (bounds.bottom !== undefined) {
+      m_maxBounds.bottom = geo.transform.transformCoordinates(gcs, m_gcs, [{
+        x: cx, y: bounds.bottom}])[0].y;
+    }
+    if (bounds.top !== undefined) {
+      m_maxBounds.top = geo.transform.transformCoordinates(gcs, m_gcs, [{
+        x: cx, y: bounds.top}])[0].y;
+    }
+    reset_minimum_zoom();
+    m_this.zoom(m_zoom);
+    m_this.pan({x: 0, y: 0});
+    return this;
+  };
+
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Get the center zoom level necessary to display the given lat/lon bounds.
@@ -22460,7 +22622,7 @@ geo.map = function (arg) {
     gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
     if (gcs !== m_gcs) {
       var trans = geo.transform.transformCoordinates(gcs, m_gcs, [{
-          x: bounds.left, y: bounds.top}, {x: bounds.right, y: bounds.bottom}]);
+        x: bounds.left, y: bounds.top}, {x: bounds.right, y: bounds.bottom}]);
       bounds = {
         left: trans[0].x,
         top: trans[0].y,
@@ -22722,12 +22884,12 @@ geo.map = function (arg) {
     var ul = {}, ur = {}, ll = {}, lr = {};
     ul.x = center.x + (-width) * cosr - (-height) * sinr;
     ul.y = center.y + (-width) * sinr + (-height) * cosr;
-    ur.x = center.x +   width  * cosr - (-height) * sinr;
-    ur.y = center.y +   width  * sinr + (-height) * cosr;
-    ll.x = center.x + (-width) * cosr -   height  * sinr;
-    ll.y = center.y + (-width) * sinr +   height  * cosr;
-    lr.x = center.x +   width  * cosr -   height  * sinr;
-    lr.y = center.y +   width  * sinr +   height  * cosr;
+    ur.x = center.x + width * cosr - (-height) * sinr;
+    ur.y = center.y + width * sinr + (-height) * cosr;
+    ll.x = center.x + (-width) * cosr - height * sinr;
+    ll.y = center.y + (-width) * sinr + height * cosr;
+    lr.x = center.x + width * cosr - height * sinr;
+    lr.y = center.y + width * sinr + height * cosr;
     return {
       left: Math.min(ul.x, ur.x, ll.x, lr.x),
       right: Math.max(ul.x, ur.x, ll.x, lr.x),
@@ -23031,7 +23193,7 @@ inherit(geo.map, geo.sceneObject);
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.feature = function (arg) {
-  "use strict";
+  'use strict';
   if (!(this instanceof geo.feature)) {
     return new geo.feature(arg);
   }
@@ -23296,7 +23458,7 @@ geo.feature = function (arg) {
   this.style = function (arg1, arg2) {
     if (arg1 === undefined) {
       return m_style;
-    } else if (typeof arg1 === "string" && arg2 === undefined) {
+    } else if (typeof arg1 === 'string' && arg2 === undefined) {
       return m_style[arg1];
     } else if (arg2 === undefined) {
       m_style = $.extend({}, m_style, arg1);
@@ -23498,9 +23660,9 @@ geo.feature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.data = function (data) {
     if (data === undefined) {
-      return m_this.style("data") || [];
+      return m_this.style('data') || [];
     } else {
-      m_this.style("data", data);
+      m_this.style('data', data);
       m_this.dataTime().modified();
       m_this.modified();
       return m_this;
@@ -23526,10 +23688,10 @@ geo.feature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
     if (!m_layer) {
-      throw "Feature requires a valid layer";
+      throw 'Feature requires a valid layer';
     }
     m_style = $.extend({},
-                {"opacity": 1.0}, arg.style === undefined ? {} :
+                {'opacity': 1.0}, arg.style === undefined ? {} :
                 arg.style);
     m_this._bindMouseHandlers();
   };
@@ -23602,17 +23764,17 @@ geo.feature.eventID = 0;
  * @returns {geo.feature|null}
  */
 geo.feature.create = function (layer, spec) {
-  "use strict";
+  'use strict';
 
   var type = spec.type;
 
   // Check arguments
   if (!(layer instanceof geo.layer)) {
-    console.warn("Invalid layer");
+    console.warn('Invalid layer');
     return null;
   }
-  if (typeof spec !== "object") {
-    console.warn("Invalid spec");
+  if (typeof spec !== 'object') {
+    console.warn('Invalid spec');
     return null;
   }
   var feature = layer.createFeature(type);
@@ -23640,7 +23802,7 @@ inherit(geo.feature, geo.sceneObject);
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.pointFeature = function (arg) {
-  "use strict";
+  'use strict';
   if (!(this instanceof geo.pointFeature)) {
     return new geo.pointFeature(arg);
   }
@@ -23775,10 +23937,10 @@ geo.pointFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.position = function (val) {
     if (val === undefined) {
-      return m_this.style("position");
+      return m_this.style('position');
     } else {
       val = geo.util.ensureFunction(val);
-      m_this.style("position", function (d, i) {
+      m_this.style('position', function (d, i) {
         if (d.__cluster) {
           return d;
         } else {
@@ -23802,9 +23964,9 @@ geo.pointFeature = function (arg) {
       return;
     }
     var pts, position,
-        radius = m_this.style.get("radius"),
-        stroke = m_this.style.get("stroke"),
-        strokeWidth = m_this.style.get("strokeWidth");
+        radius = m_this.style.get('radius'),
+        stroke = m_this.style.get('stroke'),
+        strokeWidth = m_this.style.get('strokeWidth');
 
     position = m_this.position();
 
@@ -23839,9 +24001,9 @@ geo.pointFeature = function (arg) {
   this.pointSearch = function (p) {
     var min, max, data, idx = [], box, found = [], ifound = [], map, pt,
         corners,
-        stroke = m_this.style.get("stroke"),
-        strokeWidth = m_this.style.get("strokeWidth"),
-        radius = m_this.style.get("radius");
+        stroke = m_this.style.get('stroke'),
+        strokeWidth = m_this.style.get('strokeWidth'),
+        radius = m_this.style.get('radius');
 
     if (!m_this.selectionAPI()) {
       return [];
@@ -23997,20 +24159,20 @@ geo.pointFeature = function (arg) {
     s_init.call(m_this, arg);
 
     var defaultStyle = $.extend(
-      {},
-      {
-        radius: 5.0,
-        stroke: true,
-        strokeColor: { r: 0.851, g: 0.604, b: 0.0 },
-        strokeWidth: 1.25,
-        strokeOpacity: 1.0,
-        fillColor: { r: 1.0, g: 0.839, b: 0.439 },
-        fill: true,
-        fillOpacity: 0.8,
-        sprites: false,
-        sprites_image: null,
-        position: function (d) { return d; }
-      },
+        {},
+        {
+          radius: 5.0,
+          stroke: true,
+          strokeColor: { r: 0.851, g: 0.604, b: 0.0 },
+          strokeWidth: 1.25,
+          strokeOpacity: 1.0,
+          fillColor: { r: 1.0, g: 0.839, b: 0.439 },
+          fill: true,
+          fillOpacity: 0.8,
+          sprites: false,
+          sprites_image: null,
+          position: function (d) { return d; }
+        },
       arg.style === undefined ? {} : arg.style
     );
 
@@ -24048,9 +24210,9 @@ geo.event.pointFeature = $.extend({}, geo.event.feature);
  * @returns {geo.pointFeature|null}
  */
 geo.pointFeature.create = function (layer, renderer, spec) {
-  "use strict";
+  'use strict';
 
-  spec.type = "point";
+  spec.type = 'point';
   return geo.feature.create(layer, spec);
 };
 
@@ -24066,7 +24228,7 @@ inherit(geo.pointFeature, geo.feature);
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.lineFeature = function (arg) {
-  "use strict";
+  'use strict';
   if (!(this instanceof geo.lineFeature)) {
     return new geo.lineFeature(arg);
   }
@@ -24090,9 +24252,9 @@ geo.lineFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.line = function (val) {
     if (val === undefined) {
-      return m_this.style("line");
+      return m_this.style('line');
     } else {
-      m_this.style("line", val);
+      m_this.style('line', val);
       m_this.dataTime().modified();
       m_this.modified();
     }
@@ -24108,9 +24270,9 @@ geo.lineFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.position = function (val) {
     if (val === undefined) {
-      return m_this.style("position");
+      return m_this.style('position');
     } else {
-      m_this.style("position", val);
+      m_this.style('position', val);
       m_this.dataTime().modified();
       m_this.modified();
     }
@@ -24125,7 +24287,7 @@ geo.lineFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.pointSearch = function (p) {
-    var data, pt, map, line, width, indices = [], found = [], pos;
+    var data, pt, line, width, indices = [], found = [], pos;
     data = m_this.data();
     if (!data || !data.length) {
       return {
@@ -24134,9 +24296,8 @@ geo.lineFeature = function (arg) {
       };
     }
 
-    map = m_this.layer().map();
     line = m_this.line();
-    width = m_this.style.get("strokeWidth");
+    width = m_this.style.get('strokeWidth');
     pos = m_this.position();
     pt = m_this.featureGcsToDisplay(p);
 
@@ -24187,14 +24348,14 @@ geo.lineFeature = function (arg) {
             if (lineDist2(pt, s, last) <= r) {
 
               // short circuit the loop here
-              throw "found";
+              throw 'found';
             }
           }
 
           last = s;
         });
       } catch (err) {
-        if (err !== "found") {
+        if (err !== 'found') {
           throw err;
         }
         found.push(d);
@@ -24221,7 +24382,7 @@ geo.lineFeature = function (arg) {
     opts = opts || {};
     opts.partial = opts.partial || false;
     if (opts.partial) {
-      throw "Unimplemented query method.";
+      throw 'Unimplemented query method.';
     }
 
     m_this.data().forEach(function (d, i) {
@@ -24229,9 +24390,9 @@ geo.lineFeature = function (arg) {
       line(d, i).forEach(function (e, j) {
         if (!inside) { return; }
         var p = pos(e, j, d, i);
-        if (!(p.x >= lowerLeft.x  &&
+        if (!(p.x >= lowerLeft.x &&
               p.x <= upperRight.x &&
-              p.y >= lowerLeft.y  &&
+              p.y >= lowerLeft.y &&
               p.y <= upperRight.y)
         ) {
           inside = false;
@@ -24253,16 +24414,16 @@ geo.lineFeature = function (arg) {
     s_init.call(m_this, arg);
 
     var defaultStyle = $.extend(
-      {},
-      {
-        "strokeWidth": 1.0,
+        {},
+        {
+          'strokeWidth': 1.0,
         // Default to gold color for lines
-        "strokeColor": { r: 1.0, g: 0.8431372549, b: 0.0 },
-        "strokeStyle": "solid",
-        "strokeOpacity": 1.0,
-        "line": function (d) { return d; },
-        "position": function (d) { return d; }
-      },
+          'strokeColor': { r: 1.0, g: 0.8431372549, b: 0.0 },
+          'strokeStyle': 'solid',
+          'strokeOpacity': 1.0,
+          'line': function (d) { return d; },
+          'position': function (d) { return d; }
+        },
       arg.style === undefined ? {} : arg.style
     );
 
@@ -24273,7 +24434,6 @@ geo.lineFeature = function (arg) {
     if (arg.position !== undefined) {
       defaultStyle.position = arg.position;
     }
-
 
     m_this.style(defaultStyle);
 
@@ -24292,9 +24452,9 @@ geo.lineFeature = function (arg) {
  * @returns {geo.lineFeature|null}
  */
 geo.lineFeature.create = function (layer, spec) {
-  "use strict";
+  'use strict';
 
-  spec.type = "line";
+  spec.type = 'line';
   return geo.feature.create(layer, spec);
 };
 
@@ -24310,7 +24470,7 @@ inherit(geo.lineFeature, geo.feature);
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.pathFeature = function (arg) {
-  "use strict";
+  'use strict';
   if (!(this instanceof geo.pathFeature)) {
     return new geo.pathFeature(arg);
   }
@@ -24353,11 +24513,11 @@ geo.pathFeature = function (arg) {
     s_init.call(m_this, arg);
 
     var defaultStyle = $.extend(
-      {},
-      {
-        "strokeWidth": function () { return 1; },
-        "strokeColor": function () { return { r: 1.0, g: 1.0, b: 1.0 }; }
-      },
+        {},
+        {
+          'strokeWidth': function () { return 1; },
+          'strokeColor': function () { return { r: 1.0, g: 1.0, b: 1.0 }; }
+        },
       arg.style === undefined ? {} : arg.style
     );
 
@@ -24384,7 +24544,7 @@ inherit(geo.pathFeature, geo.feature);
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.polygonFeature = function (arg) {
-  "use strict";
+  'use strict';
   if (!(this instanceof geo.polygonFeature)) {
     return new geo.polygonFeature(arg);
   }
@@ -24538,11 +24698,11 @@ geo.polygonFeature = function (arg) {
     s_init.call(m_this, arg);
 
     var defaultStyle = $.extend(
-      {},
-      {
-        "fillColor": { r: 0.0,  g: 0.5, b: 0.5 },
-        "fillOpacity": 1.0
-      },
+        {},
+        {
+          'fillColor': { r: 0.0, g: 0.5, b: 0.5 },
+          'fillOpacity': 1.0
+        },
       arg.style === undefined ? {} : arg.style
     );
 
@@ -24569,7 +24729,7 @@ inherit(geo.polygonFeature, geo.feature);
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.planeFeature = function (arg) {
-  "use strict";
+  'use strict';
   if (!(this instanceof geo.planeFeature)) {
     return new geo.planeFeature(arg);
   }
@@ -24603,7 +24763,7 @@ geo.planeFeature = function (arg) {
       return m_origin;
     } else if (val instanceof Array) {
       if (val.length > 3 || val.length < 2) {
-        throw "Origin point requires point in 2 or 3 dimension";
+        throw 'Origin point requires point in 2 or 3 dimension';
       }
       m_origin = val.slice(0);
       if (m_origin.length === 2) {
@@ -24627,7 +24787,7 @@ geo.planeFeature = function (arg) {
       return m_upperLeft;
     } else if (val instanceof Array) {
       if (val.length > 3 || val.length < 2) {
-        throw "Upper left point requires point in 2 or 3 dimension";
+        throw 'Upper left point requires point in 2 or 3 dimension';
       }
       m_upperLeft = val.slice(0);
       if (m_upperLeft.length === 2) {
@@ -24651,7 +24811,7 @@ geo.planeFeature = function (arg) {
       return m_lowerRight;
     } else if (val instanceof Array) {
       if (val.length > 3 || val.length < 2) {
-        throw "Lower right point requires point in 2 or 3 dimension";
+        throw 'Lower right point requires point in 2 or 3 dimension';
       }
       m_lowerRight = val.slice(0);
       if (m_lowerRight.length === 2) {
@@ -24698,6 +24858,450 @@ geo.planeFeature = function (arg) {
 };
 
 inherit(geo.planeFeature, geo.polygonFeature);
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Create a new instance of class quadFeature
+ *
+ * @class
+ * @param {Object} arg Options object
+ * @extends geo.feature
+ * @param {Object|string|Function} [color] Color for quads without images.
+ *   Default is white ({r: 1, g: 1, b: 1}).
+ * @param {number|Function} [opacity=1] Opacity for quad
+ * @param {number|Function} [depth=0] Default z-coordinate for positions that
+ *   don't explicitly specify one.
+ * @param {boolean|Function} [drawOnAsyncResourceLoaded=true] Redraw quads
+ *   when images are loaded after initial render.
+ * @param {Image|string|Function} [image] Image for each data item.  If
+ *   undefined or null, the quad is a solid color.  Default is (data).image.
+ * @param {Object|string|Function} [previewColor=null] If specified, a color to
+ *   show on image quads while waiting for the image to load.
+ * @param {Image|string|Function} [previewImage=null] If specified, an image to
+ *   show on image quads while waiting for the quad-specific image to load.
+ *   This will only be shown if it is already loaded.
+ * @param {Object|Function} [position] Position of the quad.  Default is
+ *   (data).  The position is an Object which specifies the corners of the
+ *   quad: ll, lr, ur, ul.  At least two opposite corners must be specified.
+ *   The corners do not have to physically correspond to the order specified,
+ *   but rather correspond to that part of an image (if there is one).  If a
+ *   corner is unspecified, it will use the x coordinate from one adjacent
+ *   corner, the y coordinate from the other adjacent corner, and the average
+ *   z value of those two corners.  For instance, if ul is unspecified, it is
+ *   {x: ll.x, y: ur.y}.  Note that each quad is rendered as a pair of
+ *   triangles: (ll, lr, ul) and (ur, ul, lr).  Nothing special is done for
+ *   quads that are not convex or quads that have substantially different
+ *   transformations for those two triangles.
+ * @param {boolean} [cacheQuads=true] If true, a set of internal information is
+ *   stored on each data item in the _cachedQuad attribute.  If this is false,
+ *   the data item is not altered.  If the data (positions, opacity, etc,) of
+ *   individual quads will change, set this to false or delete the _cachedQuad
+ *   attribute of the data item.
+ * @returns {geo.quadFeature}
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.quadFeature = function (arg) {
+  'use strict';
+  if (!(this instanceof geo.quadFeature)) {
+    return new geo.quadFeature(arg);
+  }
+  arg = arg || {};
+  geo.feature.call(this, arg);
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * @private
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  var m_this = this,
+      s_init = this._init,
+      m_cacheQuads,
+      m_images = [],
+      m_quads;
+
+  /**
+   * Track a list of object->object mappings.  The mappings are kept in a list.
+   * This marks all known mappings as unused.  If they are not marked used
+   * before _objectListEnd is called, that function will remove them.
+   *
+   * @param {array} list the list of mappings.
+   */
+  this._objectListStart = function (list) {
+    $.each(list, function (idx, item) {
+      item.used = false;
+    });
+  };
+
+  /**
+   * Get the value from a list of object->object mappings.  If the key object
+   * is not present, return undefined.  If found, the entry is marked as being
+   * in use.
+   *
+   * @param {array} list the list of mappings.
+   * @param {object} entry the key to search for.
+   * @returns {object} the associated object or undefined.
+   */
+  this._objectListGet = function (list, entry) {
+    for (var i = 0; i < list.length; i += 1) {
+      if (list[i].entry === entry) {
+        list[i].used = true;
+        return list[i].value;
+      }
+    }
+    return undefined;
+  };
+
+  /**
+   * Add a new object to a list of object->object mappings.  The key object
+   * should not exist, or this will create a duplicated.  The new entry is
+   * marked as being in use.
+   *
+   * @param {array} list the list of mappings.
+   * @param {object} entry the key to add.
+   * @param {object} value the value to store with the entry.
+   */
+  this._objectListAdd = function (list, entry, value) {
+    list.push({entry: entry, value: value, used: true});
+  };
+
+  /**
+   * Remove all unused entries from a list of object->object mappings.
+   *
+   * @param {array} list the list of mappings.
+   */
+  this._objectListEnd = function (list) {
+    for (var i = list.length - 1; i >= 0; i -= 1) {
+      if (!list[i].used) {
+        list.splice(i, 1);
+      }
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Point search method for selection api.  Returns markers containing the
+   * given point.
+   * @argument {Object} coordinate
+   * @returns {Object}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.pointSearch = function (coordinate) {
+    var found = [], indices = [], data = m_this.data(), i,
+        poly1 = [{}, {}, {}, {}], poly2 = [{}, {}, {}, {}],
+        map = m_this.layer().map(),
+        order1 = [0, 1, 2, 0], order2 = [1, 2, 3, 1];
+    coordinate = geo.transform.transformCoordinates(
+        map.ingcs(), map.gcs(), [coordinate])[0];
+    if (!m_quads) {
+      this._generateQuads();
+    }
+    $.each([m_quads.clrQuads, m_quads.imgQuads], function (idx, quadList) {
+      quadList.forEach(function (quad, idx) {
+        for (i = 0; i < order1.length; i += 1) {
+          poly1[i].x = quad.pos[order1[i] * 3];
+          poly1[i].y = quad.pos[order1[i] * 3 + 1];
+          poly1[i].z = quad.pos[order1[i] * 3 + 2];
+          poly2[i].x = quad.pos[order2[i] * 3];
+          poly2[i].y = quad.pos[order2[i] * 3 + 1];
+          poly2[i].z = quad.pos[order2[i] * 3 + 2];
+        }
+        if (geo.util.pointInPolygon(coordinate, poly1) ||
+            geo.util.pointInPolygon(coordinate, poly2)) {
+          indices.push(quad.idx);
+          found.push(data[quad.idx]);
+        }
+      });
+    });
+    return {
+      index: indices,
+      found: found
+    };
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set position
+   *
+   * @returns {geo.quadFeature}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.position = function (val) {
+    if (val === undefined) {
+      return m_this.style('position');
+    } else {
+      m_this.style('position', geo.util.ensureFunction(val));
+      m_this.dataTime().modified();
+      m_this.modified();
+    }
+    return m_this;
+  };
+
+  /**
+   * Given a data item and its index, fetch its position and ensure we have
+   * compelte information for the quad.  This generates missing corners and z
+   * values.
+   *
+   * @param {function} posFunc a function to call to get the position of a data
+   *   item.  It is passed (d, i).
+   * @param {function} depthFunc a function to call to get the z-value of a
+   *   data item.  It is passed (d, i).
+   * @param d a data item.  Used to fetch position and possibly depth.
+   * @param i the index within the data.  Used to fetch position and possibly
+   *   depth.
+   * @returns {Object|undefined} either an object with all four corners, or
+   *   undefined if no such object can be generated.  The coordinates have been
+   *   converted to map coordinates.
+   */
+  this._positionToQuad = function (posFunc, depthFunc, d, i) {
+    var initPos = posFunc.call(m_this, d, i);
+    if ((!initPos.ll || !initPos.ur) && (!initPos.ul || !initPos.lr)) {
+      return;
+    }
+    var gcs = m_this.gcs(),
+        map_gcs = m_this.layer().map().gcs(),
+        pos = {};
+    $.each(['ll', 'lr', 'ul', 'ur'], function (idx, key) {
+      if (initPos[key] !== undefined) {
+        pos[key] = {};
+        if (initPos[key].x === undefined) {
+          pos[key] = [initPos[key][0], initPos[key][1], initPos[key][2]];
+        } else {
+          pos[key] = [initPos[key].x, initPos[key].y, initPos[key].z];
+        }
+        if (pos[key][2] === undefined) {
+          pos[key][2] = depthFunc.call(m_this, d, i);
+        }
+        if (gcs !== map_gcs) {
+          pos[key] = geo.transform.transformCoordinates(
+              gcs, map_gcs, pos[key]);
+        }
+      }
+    });
+    pos.ll = pos.ll || [pos.ul[0], pos.lr[1], (pos.ul[2] + pos.lr[2]) / 2];
+    pos.lr = pos.lr || [pos.ur[0], pos.ll[1], (pos.ur[2] + pos.ll[2]) / 2];
+    pos.ur = pos.ur || [pos.lr[0], pos.ul[1], (pos.lr[2] + pos.ul[2]) / 2];
+    pos.ul = pos.ul || [pos.ll[0], pos.ur[1], (pos.ll[2] + pos.ur[2]) / 2];
+    return pos;
+  };
+
+  /**
+   * Convert the current data set to a pair of arrays, one of quads that are
+   * solid color and one of qudas that have an image.  All quads are objects
+   * with pos (a 12 value array containing 4 three-dimensional position
+   * coordinates), and opacity.  Color quads also have a color.  Image quads
+   * may have an image element, if the image is loaded.  If it isn't, this
+   * element will be missing.  For preview images, the image quad will have a
+   * reference to the preview element that may later be removed.  If a preview
+   * color is used, the quad will be in both lists, but may be removed from the
+   * color quad list once the image is loaded.
+   *
+   * The value for origin is one of an ll corner from one of the quads with the
+   * smallest sum of diagonals.  The assumption is that, if using the origin to
+   * improve precision, the smallest quads are the ones most in need of this
+   * benefit.
+   *
+   * @returns {Object} An object with clrQuads and imgQuads, each of which is
+   *   an array, and origin, which is a triplet that is guaranteed to be one of
+   *   the quads corners for a quad with the smallest sum of diagonal lengths.
+   */
+  this._generateQuads = function () {
+    var posFunc = m_this.position(),
+        imgFunc = geo.util.ensureFunction(m_this.style('image')),
+        colorFunc = geo.util.ensureFunction(m_this.style('color')),
+        depthFunc = geo.util.ensureFunction(m_this.style('depth')),
+        opacityFunc = geo.util.ensureFunction(m_this.style('opacity')),
+        loadedFunc = geo.util.ensureFunction(m_this.style(
+            'drawOnAsyncResourceLoaded')),
+        previewColorFunc = geo.util.ensureFunction(m_this.style(
+            'previewColor')),
+        previewImageFunc = geo.util.ensureFunction(m_this.style(
+            'previewImage')),
+        data = m_this.data(),
+        clrQuads = [], imgQuads = [],
+        origin = [0, 0, 0], origindiag2, diag2;
+    /* Keep track of images that we are using.  This prevents creating
+     * additional Image elemnts for repeated urls. */
+    m_this._objectListStart(m_images);
+    $.each(data, function (i, d) {
+      if (d._cachedQuad) {
+        diag2 = d._cachedQuad.diag2;
+        if (origindiag2 === undefined || (d._cachedQuad.diag2 &&
+            d._cachedQuad.diag2 < origindiag2)) {
+          origin = d._cachedQuad.ll;
+          origindiag2 = d._cachedQuad.diag2;
+        }
+        if (d._cachedQuad.clrquad) {
+          clrQuads.push(d._cachedQuad.clrquad);
+        }
+        if (d._cachedQuad.imgquad) {
+          imgQuads.push(d._cachedQuad.imgquad);
+        }
+        return;
+      }
+      var quad, reload, image, prev_onload,
+          pos, img, opacity, previewColor, previewImage, quadinfo = {};
+
+      pos = m_this._positionToQuad(posFunc, depthFunc, d, i);
+      opacity = opacityFunc.call(m_this, d, i);
+      if (pos === undefined || !opacity) {
+        return;
+      }
+      diag2 = Math.pow(pos.ll[0] - pos.ur[0], 2) + Math.pow(pos.ll[1] -
+          pos.ur[1], 2) + Math.pow(pos.ll[2] - pos.ur[0], 2) + Math.pow(
+          pos.lr[0] - pos.ur[0], 2) + Math.pow(pos.lr[1] - pos.ur[1], 2) +
+          Math.pow(pos.lr[2] - pos.ur[0], 2);
+      quadinfo.diag2 = diag2;
+      quadinfo.ll = pos.ll;
+      if (origindiag2 === undefined || (diag2 && diag2 < origindiag2)) {
+        origin = pos.ll;
+        origindiag2 = diag2;
+      }
+      pos = [pos.ll[0], pos.ll[1], pos.ll[2],
+             pos.lr[0], pos.lr[1], pos.lr[2],
+             pos.ul[0], pos.ul[1], pos.ul[2],
+             pos.ur[0], pos.ur[1], pos.ur[2]];
+      img = imgFunc.call(m_this, d, i);
+      if (!img) {
+        quad = {
+          idx: i,
+          pos: pos,
+          opacity: opacity,
+          color: geo.util.convertColor(colorFunc.call(m_this, d, i))
+        };
+        clrQuads.push(quad);
+        quadinfo.clrquad = quad;
+      } else {
+        image = m_this._objectListGet(m_images, img);
+        if (image === undefined) {
+          if (img instanceof Image) {
+            image = img;
+          } else {
+            image = new Image();
+            image.src = img;
+          }
+          m_this._objectListAdd(m_images, img, image);
+        }
+        quad = {
+          idx: i,
+          pos: pos,
+          opacity: opacity
+        };
+        if (image.complete && image.naturalWidth && image.naturalHeight) {
+          quad.image = image;
+        } else {
+          previewColor = undefined;
+          previewImage = previewImageFunc.call(m_this, d, i);
+          if (previewImage && previewImage instanceof Image &&
+              previewImage.complete && previewImage.naturalWidth &&
+              previewImage.naturalHeight) {
+            quad.image = previewImage;
+          } else {
+            previewColor = previewColorFunc.call(m_this, d, i);
+            if (previewColor === null) {
+              previewColor = undefined;
+            }
+            if (previewColor !== undefined) {
+              quad.color = geo.util.convertColor(previewColor);
+              clrQuads.push(quad);
+              quadinfo.keep = false;
+            }
+          }
+          reload = loadedFunc.call(m_this, d, i);
+          if (reload) {
+            prev_onload = image.onload;
+            image.onload = function () {
+              if (previewColor !== undefined) {
+                if ($.inArray(quad, clrQuads) >= 0) {
+                  clrQuads.splice($.inArray(quad, clrQuads), 1);
+                }
+              }
+              quad.image = image;
+              m_this.dataTime().modified();
+              m_this.modified();
+              m_this._update();
+              m_this.layer().draw();
+              if (prev_onload) {
+                return prev_onload.apply(this, arguments);
+              }
+            };
+          } else if (previewColor === undefined && !quad.image) {
+            return;
+          }
+        }
+        imgQuads.push(quad);
+        quadinfo.imgquad = quad;
+      }
+      if (m_cacheQuads !== false && quadinfo.keep !== false) {
+        d._cachedQuad = quadinfo;
+      }
+    });
+    m_this._objectListEnd(m_images);
+    m_quads = {clrQuads: clrQuads, imgQuads: imgQuads, origin: origin};
+    return m_quads;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Initialize
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._init = function (arg) {
+    arg = arg || {};
+    s_init.call(m_this, arg);
+
+    m_cacheQuads = (arg.cacheQuads !== false);
+
+    var style = $.extend(
+        {},
+        {
+          color: { r: 1.0, g: 1, b: 1 },
+          opacity: 1,
+          depth: 0,
+          drawOnAsyncResourceLoaded: true,
+          previewColor: null,
+          previewImage: null,
+          image: function (d) { return d.image; },
+          position: function (d) { return d; }
+        },
+        arg.style === undefined ? {} : arg.style
+    );
+
+    if (arg.position !== undefined) {
+      style.position = geo.util.ensureFunction(arg.position);
+    }
+    m_this.style(style);
+    m_this.dataTime().modified();
+  };
+
+  return m_this;
+};
+
+geo.event.quadFeature = $.extend({}, geo.event.feature);
+
+/**
+ * Object specification for a quad feature.
+ *
+ * @extends geo.feature.spec // need to make a jsdoc plugin for this to work
+ * @typedef geo.quadFeature.spec
+ * @type {object}
+ */
+
+/**
+ * Create a quadFeature from an object.
+ * @see {@link geo.feature.create}
+ * @param {geo.layer} layer The layer to add the feature to
+ * @param {geo.quadFeature.spec} spec The object specification
+ * @returns {geo.quadFeature|null}
+ */
+geo.quadFeature.create = function (layer, spec) {
+  'use strict';
+
+  spec = spec || {};
+  spec.type = 'quad';
+  return geo.feature.create(layer, spec);
+};
+
+inherit(geo.quadFeature, geo.feature);
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -24770,18 +25374,18 @@ geo.vectorFeature = function (arg) {
     s_init.call(m_this, arg);
 
     var defaultStyle = $.extend(
-      {},
-      {
-        strokeColor: 'black',
-        strokeWidth: 2.0,
-        strokeOpacity: 1.0,
+        {},
+        {
+          strokeColor: 'black',
+          strokeWidth: 2.0,
+          strokeOpacity: 1.0,
         // TODO: define styles for the end markers
         // originStyle: 'none',
         // endStyle: 'arrow',
-        origin: {x: 0, y: 0, z: 0},
-        delta: function (d) { return d; },
-        scale: null // size scaling factor (null -> renderer decides)
-      },
+          origin: {x: 0, y: 0, z: 0},
+          delta: function (d) { return d; },
+          scale: null // size scaling factor (null -> renderer decides)
+        },
       arg.style === undefined ? {} : arg.style
     );
 
@@ -24806,7 +25410,7 @@ inherit(geo.vectorFeature, geo.feature);
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.geomFeature = function (arg) {
-  "use strict";
+  'use strict';
   if (!(this instanceof geo.geomFeature)) {
     return new geo.geomFeature(arg);
   }
@@ -24814,9 +25418,9 @@ geo.geomFeature = function (arg) {
   geo.feature.call(this, arg);
 
   arg.style = arg.style === undefined ? $.extend({}, {
-    "color": [1.0, 1.0, 1.0],
-    "point_sprites": false,
-    "point_sprites_image": null
+    'color': [1.0, 1.0, 1.0],
+    'point_sprites': false,
+    'point_sprites_image': null
   }, arg.style) : arg.style;
 
   // Update style
@@ -24837,7 +25441,7 @@ inherit(geo.geomFeature, geo.feature);
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.graphFeature = function (arg) {
-  "use strict";
+  'use strict';
 
   if (!(this instanceof geo.graphFeature)) {
     return new geo.graphFeature(arg);
@@ -24869,18 +25473,18 @@ geo.graphFeature = function (arg) {
     s_init.call(m_this, arg);
 
     var defaultStyle = $.extend(true, {},
-      {
-        nodes: {
-          radius: 5.0,
-          fill: true,
-          fillColor: { r: 1.0, g: 0.0, b: 0.0 },
-          strokeColor: { r: 0, g: 0, b: 0 }
+        {
+          nodes: {
+            radius: 5.0,
+            fill: true,
+            fillColor: { r: 1.0, g: 0.0, b: 0.0 },
+            strokeColor: { r: 0, g: 0, b: 0 }
+          },
+          links: {
+            strokeColor: { r: 0.0, g: 0.0, b: 0.0 }
+          },
+          linkType: 'path' /* 'path' || 'line' */
         },
-        links: {
-          strokeColor: { r: 0.0, g: 0.0, b: 0.0 }
-        },
-        linkType: "path" /* 'path' || 'line' */
-      },
       arg.style === undefined ? {} : arg.style
     );
 
@@ -25037,7 +25641,7 @@ geo.graphFeature = function (arg) {
   };
 
   m_points = geo.createFeature(
-    "point",
+    'point',
     this.layer(),
     this.layer().renderer()
   );
@@ -25116,26 +25720,26 @@ geo.contourFeature = function (arg) {
     }
     if (arg2 === undefined) {
       var contour = $.extend(
-        {},
-        {
-          gridWidth: function () {
-            if (arg1.gridHeight) {
-              return Math.floor(m_this.data().length / arg1.gridHeight);
-            }
-            return Math.floor(Math.sqrt(m_this.data().length));
-          },
-          gridHeight: function () {
-            if (arg1.gridWidth) {
-              return Math.floor(m_this.data().length / arg1.gridWidth);
-            }
-            return Math.floor(Math.sqrt(m_this.data().length));
-          },
-          minColor: 'black',
-          minOpacity: 0,
-          maxColor: 'black',
-          maxOpacity: 0,
+          {},
+          {
+            gridWidth: function () {
+              if (arg1.gridHeight) {
+                return Math.floor(m_this.data().length / arg1.gridHeight);
+              }
+              return Math.floor(Math.sqrt(m_this.data().length));
+            },
+            gridHeight: function () {
+              if (arg1.gridWidth) {
+                return Math.floor(m_this.data().length / arg1.gridWidth);
+              }
+              return Math.floor(Math.sqrt(m_this.data().length));
+            },
+            minColor: 'black',
+            minOpacity: 0,
+            maxColor: 'black',
+            maxOpacity: 0,
           /* 9-step based on paraview bwr colortable */
-          colorRange: [
+            colorRange: [
             {r: 0.07514311, g: 0.468049805, b: 1},
             {r: 0.468487184, g: 0.588057293, b: 1},
             {r: 0.656658579, g: 0.707001303, b: 1},
@@ -25145,8 +25749,8 @@ geo.contourFeature = function (arg) {
             {r: 1, g: 0.6289553, b: 0.568237474},
             {r: 1, g: 0.472800903, b: 0.404551679},
             {r: 0.916482116, g: 0.236630659, b: 0.209939162}
-          ]
-        },
+            ]
+          },
         m_contour,
         arg1
       );
@@ -25374,14 +25978,14 @@ geo.contourFeature = function (arg) {
         item = data[j];
         if (usePos) {
           posVal = posFunc(item);
-          result.pos[i3]     = posVal.x;
+          result.pos[i3] = posVal.x;
           result.pos[i3 + 1] = posVal.y;
           result.pos[i3 + 2] = posVal.z || 0;
         } else {
           if (skipColumn === undefined) {
-            result.pos[i3]   = x0 + dx * (j % gridW);
+            result.pos[i3] = x0 + dx * (j % gridW);
           } else {
-            result.pos[i3]   = calcX[j % gridW];
+            result.pos[i3] = calcX[j % gridW];
           }
           result.pos[i3 + 1] = y0 + dy * Math.floor(j / gridW);
           result.pos[i3 + 2] = 0;
@@ -25414,16 +26018,16 @@ geo.contourFeature = function (arg) {
     s_init.call(m_this, arg);
 
     var defaultStyle = $.extend(
-      {},
-      {
-        opacity: 1.0,
-        position: function (d) {
-          return {x: d.x, y: d.y, z: d.z};
+        {},
+        {
+          opacity: 1.0,
+          position: function (d) {
+            return {x: d.x, y: d.y, z: d.z};
+          },
+          value: function (d) {
+            return m_this.position()(d).z;
+          }
         },
-        value: function (d) {
-          return m_this.position()(d).z;
-        }
-      },
       arg.style === undefined ? {} : arg.style
     );
 
@@ -25510,7 +26114,7 @@ Notes:
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.renderer = function (arg) {
-  "use strict";
+  'use strict';
 
   if (!(this instanceof geo.renderer)) {
     return new geo.renderer(arg);
@@ -25592,7 +26196,7 @@ geo.renderer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.api = function () {
-    throw "Should be implemented by derivied classes";
+    throw 'Should be implemented by derivied classes';
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -25774,9 +26378,9 @@ geo.choroplethFeature = function (arg) {
       s_init = this._init,
       m_choropleth = $
       .extend({},
-              {
+          {
                 /* 9-step based on paraview bwr colortable */
-                colorRange: [
+            colorRange: [
                   {r: 0.07514311, g: 0.468049805, b: 1},
                   {r: 0.468487184, g: 0.588057293, b: 1},
                   {r: 0.656658579, g: 0.707001303, b: 1},
@@ -25786,25 +26390,24 @@ geo.choroplethFeature = function (arg) {
                   {r: 1, g: 0.6289553, b: 0.568237474},
                   {r: 1, g: 0.472800903, b: 0.404551679},
                   {r: 0.916482116, g: 0.236630659, b: 0.209939162}
-                ],
-                scale: d3.scale.quantize(),
-                accessors: {
+            ],
+            scale: d3.scale.quantize(),
+            accessors: {
                   //accessor for ID on geodata feature
-                  geoId: function (geoFeature) {
-                    return geoFeature.properties.GEO_ID;
-                  },
-                  //accessor for ID on scalar element
-                  scalarId: function (scalarElement) {
-                    return scalarElement.id;
-                  },
-                  //accessor for value on scalar element
-                  scalarValue: function (scalarElement) {
-                    return scalarElement.value;
-                  }
-                }
+              geoId: function (geoFeature) {
+                return geoFeature.properties.GEO_ID;
               },
+                  //accessor for ID on scalar element
+              scalarId: function (scalarElement) {
+                return scalarElement.id;
+              },
+                  //accessor for value on scalar element
+              scalarValue: function (scalarElement) {
+                return scalarElement.value;
+              }
+            }
+          },
               arg.choropleth);
-
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -26073,87 +26676,87 @@ geo.gl.lineFeature = function (arg) {
 
   function createVertexShader() {
     var vertexShaderSource = [
-      '#ifdef GL_ES',
-      '  precision highp float;',
-      '#endif',
-      'attribute vec3 pos;',
-      'attribute vec3 prev;',
-      'attribute vec3 next;',
-      'attribute float offset;',
+          '#ifdef GL_ES',
+          '  precision highp float;',
+          '#endif',
+          'attribute vec3 pos;',
+          'attribute vec3 prev;',
+          'attribute vec3 next;',
+          'attribute float offset;',
 
-      'attribute vec3 strokeColor;',
-      'attribute float strokeOpacity;',
-      'attribute float strokeWidth;',
+          'attribute vec3 strokeColor;',
+          'attribute float strokeOpacity;',
+          'attribute float strokeWidth;',
 
-      'uniform mat4 modelViewMatrix;',
-      'uniform mat4 projectionMatrix;',
-      'uniform float pixelWidth;',
-      'uniform float aspect;',
+          'uniform mat4 modelViewMatrix;',
+          'uniform mat4 projectionMatrix;',
+          'uniform float pixelWidth;',
+          'uniform float aspect;',
 
-      'varying vec3 strokeColorVar;',
-      'varying float strokeWidthVar;',
-      'varying float strokeOpacityVar;',
+          'varying vec3 strokeColorVar;',
+          'varying float strokeWidthVar;',
+          'varying float strokeOpacityVar;',
 
-      'void main(void)',
-      '{',
+          'void main(void)',
+          '{',
       /* If any vertex has been deliberately set to a negative opacity,
        * skip doing computations on it. */
-      '  if (strokeOpacity < 0.0) {',
-      '    gl_Position = vec4(2, 2, 0, 1);',
-      '    return;',
-      '  }',
-      '  const float PI = 3.14159265358979323846264;',
-      '  vec4 worldPos = projectionMatrix * modelViewMatrix * vec4(pos.xyz, 1);',
-      '  if (worldPos.w != 0.0) {',
-      '    worldPos = worldPos/worldPos.w;',
-      '  }',
-      '  vec4 worldNext = projectionMatrix * modelViewMatrix * vec4(next.xyz, 1);',
-      '  if (worldNext.w != 0.0) {',
-      '    worldNext = worldNext/worldNext.w;',
-      '  }',
-      '  vec4 worldPrev = projectionMatrix* modelViewMatrix * vec4(prev.xyz, 1);',
-      '  if (worldPrev.w != 0.0) {',
-      '    worldPrev = worldPrev/worldPrev.w;',
-      '  }',
-      '  strokeColorVar = strokeColor;',
-      '  strokeWidthVar = strokeWidth;',
-      '  strokeOpacityVar = strokeOpacity;',
-      '  vec2 deltaNext = worldNext.xy - worldPos.xy;',
-      '  vec2 deltaPrev = worldPos.xy - worldPrev.xy;',
-      '  float angleNext = 0.0, anglePrev = 0.0;',
-      '  if (deltaNext.xy != vec2(0.0, 0.0))',
-      '    angleNext = atan(deltaNext.y / aspect, deltaNext.x);',
-      '  if (deltaPrev.xy == vec2(0.0, 0.0)) anglePrev = angleNext;',
-      '  else  anglePrev = atan(deltaPrev.y / aspect, deltaPrev.x);',
-      '  if (deltaNext.xy == vec2(0.0, 0.0)) angleNext = anglePrev;',
-      '  float angle = (anglePrev + angleNext) / 2.0;',
-      '  float cosAngle = cos(anglePrev - angle);',
-      '  if (cosAngle < 0.1) { cosAngle = sign(cosAngle) * 1.0; angle = 0.0; }',
-      '  float distance = (offset * strokeWidth * pixelWidth) /',
-      '                    cosAngle;',
-      '  worldPos.x += distance * sin(angle);',
-      '  worldPos.y -= distance * cos(angle) * aspect;',
-      '  gl_Position = worldPos;',
-      '}'
-    ].join('\n'),
-    shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
+          '  if (strokeOpacity < 0.0) {',
+          '    gl_Position = vec4(2, 2, 0, 1);',
+          '    return;',
+          '  }',
+          '  const float PI = 3.14159265358979323846264;',
+          '  vec4 worldPos = projectionMatrix * modelViewMatrix * vec4(pos.xyz, 1);',
+          '  if (worldPos.w != 0.0) {',
+          '    worldPos = worldPos/worldPos.w;',
+          '  }',
+          '  vec4 worldNext = projectionMatrix * modelViewMatrix * vec4(next.xyz, 1);',
+          '  if (worldNext.w != 0.0) {',
+          '    worldNext = worldNext/worldNext.w;',
+          '  }',
+          '  vec4 worldPrev = projectionMatrix* modelViewMatrix * vec4(prev.xyz, 1);',
+          '  if (worldPrev.w != 0.0) {',
+          '    worldPrev = worldPrev/worldPrev.w;',
+          '  }',
+          '  strokeColorVar = strokeColor;',
+          '  strokeWidthVar = strokeWidth;',
+          '  strokeOpacityVar = strokeOpacity;',
+          '  vec2 deltaNext = worldNext.xy - worldPos.xy;',
+          '  vec2 deltaPrev = worldPos.xy - worldPrev.xy;',
+          '  float angleNext = 0.0, anglePrev = 0.0;',
+          '  if (deltaNext.xy != vec2(0.0, 0.0))',
+          '    angleNext = atan(deltaNext.y / aspect, deltaNext.x);',
+          '  if (deltaPrev.xy == vec2(0.0, 0.0)) anglePrev = angleNext;',
+          '  else  anglePrev = atan(deltaPrev.y / aspect, deltaPrev.x);',
+          '  if (deltaNext.xy == vec2(0.0, 0.0)) angleNext = anglePrev;',
+          '  float angle = (anglePrev + angleNext) / 2.0;',
+          '  float cosAngle = cos(anglePrev - angle);',
+          '  if (cosAngle < 0.1) { cosAngle = sign(cosAngle) * 1.0; angle = 0.0; }',
+          '  float distance = (offset * strokeWidth * pixelWidth) /',
+          '                    cosAngle;',
+          '  worldPos.x += distance * sin(angle);',
+          '  worldPos.y -= distance * cos(angle) * aspect;',
+          '  gl_Position = worldPos;',
+          '}'
+        ].join('\n'),
+        shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
     shader.setShaderSource(vertexShaderSource);
     return shader;
   }
 
   function createFragmentShader() {
     var fragmentShaderSource = [
-      '#ifdef GL_ES',
-      '  precision highp float;',
-      '#endif',
-      'varying vec3 strokeColorVar;',
-      'varying float strokeWidthVar;',
-      'varying float strokeOpacityVar;',
-      'void main () {',
-      '  gl_FragColor = vec4 (strokeColorVar, strokeOpacityVar);',
-      '}'
-    ].join('\n'),
-    shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
+          '#ifdef GL_ES',
+          '  precision highp float;',
+          '#endif',
+          'varying vec3 strokeColorVar;',
+          'varying float strokeWidthVar;',
+          'varying float strokeOpacityVar;',
+          'void main () {',
+          '  gl_FragColor = vec4 (strokeColorVar, strokeOpacityVar);',
+          '}'
+        ].join('\n'),
+        shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
     shader.setShaderSource(fragmentShaderSource);
     return shader;
   }
@@ -26192,13 +26795,13 @@ geo.gl.lineFeature = function (arg) {
                  position, 3);
 
     len = numSegments * order.length;
-    posBuf           = getBuffer(geom, 'pos', len * 3);
-    nextBuf          = getBuffer(geom, 'next', len * 3);
-    prevBuf          = getBuffer(geom, 'prev', len * 3);
-    offsetBuf        = getBuffer(geom, 'offset', len * 1);
-    strokeWidthBuf   = getBuffer(geom, 'strokeWidth', len * 1);
-    strokeColorBuf   = getBuffer(geom, 'strokeColor', len * 3);
-    strokeOpacityBuf = getBuffer(geom, 'strokeOpacity', len * 1);
+    posBuf = geo.util.getGeomBuffer(geom, 'pos', len * 3);
+    nextBuf = geo.util.getGeomBuffer(geom, 'next', len * 3);
+    prevBuf = geo.util.getGeomBuffer(geom, 'prev', len * 3);
+    offsetBuf = geo.util.getGeomBuffer(geom, 'offset', len);
+    strokeWidthBuf = geo.util.getGeomBuffer(geom, 'strokeWidth', len);
+    strokeColorBuf = geo.util.getGeomBuffer(geom, 'strokeColor', len * 3);
+    strokeOpacityBuf = geo.util.getGeomBuffer(geom, 'strokeOpacity', len);
     indicesBuf = geom.primitive(0).indices();
     if (!(indicesBuf instanceof Uint16Array) || indicesBuf.length !== len) {
       indicesBuf = new Uint16Array(len);
@@ -26225,19 +26828,19 @@ geo.gl.lineFeature = function (arg) {
         if (j) {
           for (k = 0; k < order.length; k += 1, dest += 1, dest3 += 3) {
             v = vert[order[k][0]];
-            posBuf[dest3]     = position[v.pos];
+            posBuf[dest3] = position[v.pos];
             posBuf[dest3 + 1] = position[v.pos + 1];
             posBuf[dest3 + 2] = position[v.pos + 2];
-            prevBuf[dest3]     = position[v.prev];
+            prevBuf[dest3] = position[v.prev];
             prevBuf[dest3 + 1] = position[v.prev + 1];
             prevBuf[dest3 + 2] = position[v.prev + 2];
-            nextBuf[dest3]     = position[v.next];
+            nextBuf[dest3] = position[v.next];
             nextBuf[dest3 + 1] = position[v.next + 1];
             nextBuf[dest3 + 2] = position[v.next + 2];
             offsetBuf[dest] = order[k][1];
             /* We can ignore the indicies (they will all be zero) */
             strokeWidthBuf[dest] = v.strokeWidth;
-            strokeColorBuf[dest3]     = v.strokeColor.r;
+            strokeColorBuf[dest3] = v.strokeColor.r;
             strokeColorBuf[dest3 + 1] = v.strokeColor.g;
             strokeColorBuf[dest3 + 2] = v.strokeColor.b;
             strokeOpacityBuf[dest] = v.strokeOpacity;
@@ -26249,30 +26852,6 @@ geo.gl.lineFeature = function (arg) {
     geom.boundsDirty(true);
     m_mapper.modified();
     m_mapper.boundsDirtyTimestamp().modified();
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get a buffer for a geometry source.  If a buffer already exists and is
-   * the correct size, return it.  Otherwise, allocate a new buffer; any data
-   * in an old buffer is discarded.
-   *
-   * @param geom: the geometry to reference and modify.
-   * @param srcName: the name of the source.
-   * @param len: the number of elements for the array.
-   * @returns {Float32Array}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  function getBuffer(geom, srcName, len) {
-    var src = geom.sourceByName(srcName), data;
-
-    data = src.data();
-    if (data instanceof Float32Array && data.length === len) {
-      return data;
-    }
-    data = new Float32Array(len);
-    src.setData(data);
-    return data;
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -26336,7 +26915,7 @@ geo.gl.lineFeature = function (arg) {
         // Primitive indices
         triangles = vgl.triangles();
 
-    m_pixelWidthUnif =  new vgl.floatUniform('pixelWidth',
+    m_pixelWidthUnif = new vgl.floatUniform('pixelWidth',
                           1.0 / m_this.renderer().width());
     m_aspectUniform = new vgl.floatUniform('aspect',
         m_this.renderer().width() / m_this.renderer().height());
@@ -26463,7 +27042,7 @@ geo.registerFeature('vgl', 'line', geo.gl.lineFeature);
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.gl.pointFeature = function (arg) {
-  "use strict";
+  'use strict';
   if (!(this instanceof geo.gl.pointFeature)) {
     return new geo.gl.pointFeature(arg);
   }
@@ -26482,159 +27061,159 @@ geo.gl.pointFeature = function (arg) {
       m_pixelWidthUniform = null,
       m_aspectUniform = null,
       m_dynamicDraw = arg.dynamicDraw === undefined ? false : arg.dynamicDraw,
-      m_primitiveShape = "sprite", // arg can change this, below
+      m_primitiveShape = 'sprite', // arg can change this, below
       s_init = this._init,
       s_update = this._update,
       vertexShaderSource = null,
       fragmentShaderSource = null;
 
-  if (arg.primitiveShape === "triangle" ||
-      arg.primitiveShape === "square" ||
-      arg.primitiveShape === "sprite") {
+  if (arg.primitiveShape === 'triangle' ||
+      arg.primitiveShape === 'square' ||
+      arg.primitiveShape === 'sprite') {
     m_primitiveShape = arg.primitiveShape;
   }
 
   vertexShaderSource = [
-    "#ifdef GL_ES",
-    "  precision highp float;",
-    "#endif",
-    "attribute vec3 pos;",
-    "attribute float rad;",
-    "attribute vec3 fillColor;",
-    "attribute vec3 strokeColor;",
-    "attribute float fillOpacity;",
-    "attribute float strokeWidth;",
-    "attribute float strokeOpacity;",
-    "attribute float fill;",
-    "attribute float stroke;",
-    "uniform float pixelWidth;",
-    "uniform float aspect;",
-    "uniform mat4 modelViewMatrix;",
-    "uniform mat4 projectionMatrix;",
-    "varying vec4 fillColorVar;",
-    "varying vec4 strokeColorVar;",
-    "varying float radiusVar;",
-    "varying float strokeWidthVar;",
-    "varying float fillVar;",
-    "varying float strokeVar;"
+    '#ifdef GL_ES',
+    '  precision highp float;',
+    '#endif',
+    'attribute vec3 pos;',
+    'attribute float rad;',
+    'attribute vec3 fillColor;',
+    'attribute vec3 strokeColor;',
+    'attribute float fillOpacity;',
+    'attribute float strokeWidth;',
+    'attribute float strokeOpacity;',
+    'attribute float fill;',
+    'attribute float stroke;',
+    'uniform float pixelWidth;',
+    'uniform float aspect;',
+    'uniform mat4 modelViewMatrix;',
+    'uniform mat4 projectionMatrix;',
+    'varying vec4 fillColorVar;',
+    'varying vec4 strokeColorVar;',
+    'varying float radiusVar;',
+    'varying float strokeWidthVar;',
+    'varying float fillVar;',
+    'varying float strokeVar;'
   ];
 
-  if (m_primitiveShape !== "sprite") {
+  if (m_primitiveShape !== 'sprite') {
     vertexShaderSource = vertexShaderSource.concat([
-      "attribute vec2 unit;",
-      "varying vec3 unitVar;"
+      'attribute vec2 unit;',
+      'varying vec3 unitVar;'
     ]);
   }
 
   vertexShaderSource.push.apply(vertexShaderSource, [
-    "void main(void)",
-    "{",
-    "  strokeWidthVar = strokeWidth;",
-    "  // No stroke or fill implies nothing to draw",
-    "  if (stroke < 1.0 || strokeWidth <= 0.0 || strokeOpacity <= 0.0) {",
-    "    strokeVar = 0.0;",
-    "    strokeWidthVar = 0.0;",
-    "  }",
-    "  else",
-    "    strokeVar = 1.0;",
-    "  if (fill < 1.0 || rad <= 0.0 || fillOpacity <= 0.0)",
-    "    fillVar = 0.0;",
-    "  else",
-    "    fillVar = 1.0;",
+    'void main(void)',
+    '{',
+    '  strokeWidthVar = strokeWidth;',
+    '  // No stroke or fill implies nothing to draw',
+    '  if (stroke < 1.0 || strokeWidth <= 0.0 || strokeOpacity <= 0.0) {',
+    '    strokeVar = 0.0;',
+    '    strokeWidthVar = 0.0;',
+    '  }',
+    '  else',
+    '    strokeVar = 1.0;',
+    '  if (fill < 1.0 || rad <= 0.0 || fillOpacity <= 0.0)',
+    '    fillVar = 0.0;',
+    '  else',
+    '    fillVar = 1.0;',
     /* If the point has no visible pixels, skip doing computations on it. */
-    "  if (fillVar == 0.0 && strokeVar == 0.0) {",
-    "    gl_Position = vec4(2, 2, 0, 1);",
-    "    return;",
-    "  }",
-    "  fillColorVar = vec4 (fillColor, fillOpacity);",
-    "  strokeColorVar = vec4 (strokeColor, strokeOpacity);",
-    "  radiusVar = rad;"
+    '  if (fillVar == 0.0 && strokeVar == 0.0) {',
+    '    gl_Position = vec4(2, 2, 0, 1);',
+    '    return;',
+    '  }',
+    '  fillColorVar = vec4 (fillColor, fillOpacity);',
+    '  strokeColorVar = vec4 (strokeColor, strokeOpacity);',
+    '  radiusVar = rad;'
   ]);
 
-  if (m_primitiveShape === "sprite") {
+  if (m_primitiveShape === 'sprite') {
     vertexShaderSource.push.apply(vertexShaderSource, [
-      "  gl_Position = (projectionMatrix * modelViewMatrix * vec4(pos, 1.0)).xyzw;",
-      "  gl_PointSize = 2.0 * (rad + strokeWidthVar); ",
-      "}"
+      '  gl_Position = (projectionMatrix * modelViewMatrix * vec4(pos, 1.0)).xyzw;',
+      '  gl_PointSize = 2.0 * (rad + strokeWidthVar); ',
+      '}'
     ]);
   } else {
     vertexShaderSource.push.apply(vertexShaderSource, [
-        "  unitVar = vec3 (unit, 1.0);",
-        "  vec4 p = (projectionMatrix * modelViewMatrix * vec4(pos, 1.0)).xyzw;",
-        "  if (p.w != 0.0) {",
-        "    p = p / p.w;",
-        "  }",
-        "  p += (rad + strokeWidthVar) * ",
-        "       vec4 (unit.x * pixelWidth, unit.y * pixelWidth * aspect, 0.0, 1.0);",
-        "  gl_Position = vec4(p.xyz, 1.0);",
-        "}"
-      ]);
+      '  unitVar = vec3 (unit, 1.0);',
+      '  vec4 p = (projectionMatrix * modelViewMatrix * vec4(pos, 1.0)).xyzw;',
+      '  if (p.w != 0.0) {',
+      '    p = p / p.w;',
+      '  }',
+      '  p += (rad + strokeWidthVar) * ',
+      '       vec4 (unit.x * pixelWidth, unit.y * pixelWidth * aspect, 0.0, 1.0);',
+      '  gl_Position = vec4(p.xyz, 1.0);',
+      '}'
+    ]);
   }
-  vertexShaderSource = vertexShaderSource.join("\n");
+  vertexShaderSource = vertexShaderSource.join('\n');
 
   fragmentShaderSource = [
-    "#ifdef GL_ES",
-    "  precision highp float;",
-    "#endif",
-    "uniform float aspect;",
-    "varying vec4 fillColorVar;",
-    "varying vec4 strokeColorVar;",
-    "varying float radiusVar;",
-    "varying float strokeWidthVar;",
-    "varying float fillVar;",
-    "varying float strokeVar;"
+    '#ifdef GL_ES',
+    '  precision highp float;',
+    '#endif',
+    'uniform float aspect;',
+    'varying vec4 fillColorVar;',
+    'varying vec4 strokeColorVar;',
+    'varying float radiusVar;',
+    'varying float strokeWidthVar;',
+    'varying float fillVar;',
+    'varying float strokeVar;'
   ];
 
-  if (m_primitiveShape !== "sprite") {
-    fragmentShaderSource.push("varying vec3 unitVar;");
+  if (m_primitiveShape !== 'sprite') {
+    fragmentShaderSource.push('varying vec3 unitVar;');
   }
 
   fragmentShaderSource.push.apply(fragmentShaderSource, [
-    "void main () {",
-    "  vec4 strokeColor, fillColor;",
-    "  float endStep;",
-    "  // No stroke or fill implies nothing to draw",
-    "  if (fillVar == 0.0 && strokeVar == 0.0)",
-    "    discard;"
+    'void main () {',
+    '  vec4 strokeColor, fillColor;',
+    '  float endStep;',
+    '  // No stroke or fill implies nothing to draw',
+    '  if (fillVar == 0.0 && strokeVar == 0.0)',
+    '    discard;'
   ]);
 
-  if (m_primitiveShape === "sprite") {
+  if (m_primitiveShape === 'sprite') {
     fragmentShaderSource.push(
-      "  float rad = 2.0 * length (gl_PointCoord - vec2(0.5));");
+      '  float rad = 2.0 * length (gl_PointCoord - vec2(0.5));');
   } else {
     fragmentShaderSource.push(
-      "  float rad = length (unitVar.xy);");
+      '  float rad = length (unitVar.xy);');
   }
 
   fragmentShaderSource.push.apply(fragmentShaderSource, [
-    "  if (rad > 1.0)",
-    "    discard;",
-    "  // If there is no stroke, the fill region should transition to nothing",
-    "  if (strokeVar == 0.0) {",
-    "    strokeColor = vec4 (fillColorVar.rgb, 0.0);",
-    "    endStep = 1.0;",
-    "  } else {",
-    "    strokeColor = strokeColorVar;",
-    "    endStep = radiusVar / (radiusVar + strokeWidthVar);",
-    "  }",
-    "  // Likewise, if there is no fill, the stroke should transition to nothing",
-    "  if (fillVar == 0.0)",
-    "    fillColor = vec4 (strokeColor.rgb, 0.0);",
-    "  else",
-    "    fillColor = fillColorVar;",
-    "  // Distance to antialias over",
-    "  float antialiasDist = 3.0 / (2.0 * radiusVar);",
-    "  if (rad < endStep) {",
-    "    float step = smoothstep (endStep - antialiasDist, endStep, rad);",
-    "    gl_FragColor = mix (fillColor, strokeColor, step);",
-    "  } else {",
-    "    float step = smoothstep (1.0 - antialiasDist, 1.0, rad);",
-    "    gl_FragColor = mix (strokeColor, vec4 (strokeColor.rgb, 0.0), step);",
-    "  }",
-    "}"
+    '  if (rad > 1.0)',
+    '    discard;',
+    '  // If there is no stroke, the fill region should transition to nothing',
+    '  if (strokeVar == 0.0) {',
+    '    strokeColor = vec4 (fillColorVar.rgb, 0.0);',
+    '    endStep = 1.0;',
+    '  } else {',
+    '    strokeColor = strokeColorVar;',
+    '    endStep = radiusVar / (radiusVar + strokeWidthVar);',
+    '  }',
+    '  // Likewise, if there is no fill, the stroke should transition to nothing',
+    '  if (fillVar == 0.0)',
+    '    fillColor = vec4 (strokeColor.rgb, 0.0);',
+    '  else',
+    '    fillColor = fillColorVar;',
+    '  // Distance to antialias over',
+    '  float antialiasDist = 3.0 / (2.0 * radiusVar);',
+    '  if (rad < endStep) {',
+    '    float step = smoothstep (endStep - antialiasDist, endStep, rad);',
+    '    gl_FragColor = mix (fillColor, strokeColor, step);',
+    '  } else {',
+    '    float step = smoothstep (1.0 - antialiasDist, 1.0, rad);',
+    '    gl_FragColor = mix (strokeColor, vec4 (strokeColor.rgb, 0.0), step);',
+    '  }',
+    '}'
   ]);
 
-  fragmentShaderSource = fragmentShaderSource.join("\n");
+  fragmentShaderSource = fragmentShaderSource.join('\n');
 
   function createVertexShader() {
     var shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
@@ -26651,7 +27230,7 @@ geo.gl.pointFeature = function (arg) {
   function pointPolygon(x, y, w, h) {
     var verts;
     switch (m_primitiveShape) {
-      case "triangle":
+      case 'triangle':
         /* Use an equilateral triangle.  While this has 30% more area than a
          * square, the reduction in vertices should help more than the
          * processing the additional fragments. */
@@ -26661,7 +27240,7 @@ geo.gl.pointFeature = function (arg) {
           x + w * Math.sqrt(3.0), y + h
         ];
         break;
-      case "sprite":
+      case 'sprite':
         /* Point sprite uses only one vertex per point. */
         verts = [x, y];
         break;
@@ -26689,7 +27268,7 @@ geo.gl.pointFeature = function (arg) {
         radius, radiusVal, radFunc,
         stroke, strokeVal, strokeFunc,
         strokeWidth, strokeWidthVal, strokeWidthFunc,
-        strokeOpacity, strokeOpacityVal, strokeOpactityFunc,
+        strokeOpacity, strokeOpacityVal, strokeOpacityFunc,
         strokeColor, strokeColorVal, strokeColorFunc,
         fill, fillVal, fillFunc,
         fillOpacity, fillOpacityVal, fillOpacityFunc,
@@ -26697,44 +27276,53 @@ geo.gl.pointFeature = function (arg) {
         vpf = m_this.verticesPerFeature(),
         data = m_this.data(),
         item, ivpf, ivpf3, iunit, i3,
-        geom = m_mapper.geometryData();
+        geom = m_mapper.geometryData(), nonzeroZ;
 
     posFunc = m_this.position();
-    radFunc = m_this.style.get("radius");
-    strokeFunc = m_this.style.get("stroke");
-    strokeWidthFunc = m_this.style.get("strokeWidth");
-    strokeOpactityFunc = m_this.style.get("strokeOpacity");
-    strokeColorFunc = m_this.style.get("strokeColor");
-    fillFunc = m_this.style.get("fill");
-    fillOpacityFunc = m_this.style.get("fillOpacity");
-    fillColorFunc = m_this.style.get("fillColor");
+    radFunc = m_this.style.get('radius');
+    strokeFunc = m_this.style.get('stroke');
+    strokeWidthFunc = m_this.style.get('strokeWidth');
+    strokeOpacityFunc = m_this.style.get('strokeOpacity');
+    strokeColorFunc = m_this.style.get('strokeColor');
+    fillFunc = m_this.style.get('fill');
+    fillOpacityFunc = m_this.style.get('fillOpacity');
+    fillColorFunc = m_this.style.get('fillColor');
 
     /* It is more efficient to do a transform on a single array rather than on
      * an array of arrays or an array of objects. */
     for (i = i3 = 0; i < numPts; i += 1, i3 += 3) {
       posVal = posFunc(data[i]);
-      position[i3]     = posVal.x;
+      position[i3] = posVal.x;
       position[i3 + 1] = posVal.y;
       position[i3 + 2] = posVal.z || 0;
+      nonzeroZ = nonzeroZ || position[i3 + 2];
     }
     position = geo.transform.transformCoordinates(
                   m_this.gcs(), m_this.layer().map().gcs(),
                   position, 3);
-
-    posBuf        = getBuffer(geom, "pos", vpf * numPts * 3);
-
-    if (m_primitiveShape !== "sprite") {
-      unitBuf       = getBuffer(geom, "unit", vpf * numPts * 2);
+    /* Some transforms modify the z-coordinate.  If we started with all zero z
+     * coordinates, don't modify them.  This could be changed if the
+     * z-coordinate space of the gl cube is scaled appropriately. */
+    if (!nonzeroZ && m_this.gcs() !== m_this.layer().map().gcs()) {
+      for (i = i3 = 0; i < numPts; i += 1, i3 += 3) {
+        position[i3 + 2] = 0;
+      }
     }
 
-    radius        = getBuffer(geom, "rad", vpf * numPts * 1);
-    stroke        = getBuffer(geom, "stroke", vpf * numPts * 1);
-    strokeWidth   = getBuffer(geom, "strokeWidth", vpf * numPts * 1);
-    strokeOpacity = getBuffer(geom, "strokeOpacity", vpf * numPts * 1);
-    strokeColor   = getBuffer(geom, "strokeColor", vpf * numPts * 3);
-    fill          = getBuffer(geom, "fill", vpf * numPts * 1);
-    fillOpacity   = getBuffer(geom, "fillOpacity", vpf * numPts * 1);
-    fillColor     = getBuffer(geom, "fillColor", vpf * numPts * 3);
+    posBuf = geo.util.getGeomBuffer(geom, 'pos', vpf * numPts * 3);
+
+    if (m_primitiveShape !== 'sprite') {
+      unitBuf = geo.util.getGeomBuffer(geom, 'unit', vpf * numPts * 2);
+    }
+
+    radius = geo.util.getGeomBuffer(geom, 'rad', vpf * numPts);
+    stroke = geo.util.getGeomBuffer(geom, 'stroke', vpf * numPts);
+    strokeWidth = geo.util.getGeomBuffer(geom, 'strokeWidth', vpf * numPts);
+    strokeOpacity = geo.util.getGeomBuffer(geom, 'strokeOpacity', vpf * numPts);
+    strokeColor = geo.util.getGeomBuffer(geom, 'strokeColor', vpf * numPts * 3);
+    fill = geo.util.getGeomBuffer(geom, 'fill', vpf * numPts);
+    fillOpacity = geo.util.getGeomBuffer(geom, 'fillOpacity', vpf * numPts);
+    fillColor = geo.util.getGeomBuffer(geom, 'fillColor', vpf * numPts * 3);
     indices = geom.primitive(0).indices();
     if (!(indices instanceof Uint16Array) || indices.length !== vpf * numPts) {
       indices = new Uint16Array(vpf * numPts);
@@ -26743,7 +27331,7 @@ geo.gl.pointFeature = function (arg) {
 
     for (i = ivpf = ivpf3 = iunit = i3 = 0; i < numPts; i += 1, i3 += 3) {
       item = data[i];
-      if (m_primitiveShape !== "sprite") {
+      if (m_primitiveShape !== 'sprite') {
         for (j = 0; j < unit.length; j += 1, iunit += 1) {
           unitBuf[iunit] = unit[j];
         }
@@ -26752,25 +27340,25 @@ geo.gl.pointFeature = function (arg) {
       radiusVal = radFunc(item);
       strokeVal = strokeFunc(item) ? 1.0 : 0.0;
       strokeWidthVal = strokeWidthFunc(item);
-      strokeOpacityVal = strokeOpactityFunc(item);
+      strokeOpacityVal = strokeOpacityFunc(item);
       strokeColorVal = strokeColorFunc(item);
       fillVal = fillFunc(item) ? 1.0 : 0.0;
       fillOpacityVal = fillOpacityFunc(item);
       fillColorVal = fillColorFunc(item);
       for (j = 0; j < vpf; j += 1, ivpf += 1, ivpf3 += 3) {
-        posBuf[ivpf3]     = position[i3];
+        posBuf[ivpf3] = position[i3];
         posBuf[ivpf3 + 1] = position[i3 + 1];
         posBuf[ivpf3 + 2] = position[i3 + 2];
         radius[ivpf] = radiusVal;
         stroke[ivpf] = strokeVal;
         strokeWidth[ivpf] = strokeWidthVal;
         strokeOpacity[ivpf] = strokeOpacityVal;
-        strokeColor[ivpf3]     = strokeColorVal.r;
+        strokeColor[ivpf3] = strokeColorVal.r;
         strokeColor[ivpf3 + 1] = strokeColorVal.g;
         strokeColor[ivpf3 + 2] = strokeColorVal.b;
         fill[ivpf] = fillVal;
         fillOpacity[ivpf] = fillOpacityVal;
-        fillColor[ivpf3]     = fillColorVal.r;
+        fillColor[ivpf3] = fillColorVal.r;
         fillColor[ivpf3 + 1] = fillColorVal.g;
         fillColor[ivpf3 + 2] = fillColorVal.b;
       }
@@ -26779,30 +27367,6 @@ geo.gl.pointFeature = function (arg) {
     geom.boundsDirty(true);
     m_mapper.modified();
     m_mapper.boundsDirtyTimestamp().modified();
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get a buffer for a geometry source.  If a buffer already exists and is
-   * the correct size, return it.  Otherwise, allocate a new buffer; any data
-   * in an old buffer is discarded.
-   *
-   * @param geom: the geometry to reference and modify.
-   * @param srcName: the name of the source.
-   * @param len: the number of elements for the array.
-   * @returns {Float32Array}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  function getBuffer(geom, srcName, len) {
-    var src = geom.sourceByName(srcName), data;
-
-    data = src.data();
-    if (data instanceof Float32Array && data.length === len) {
-      return data;
-    }
-    data = new Float32Array(len);
-    src.setData(data);
-    return data;
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -26840,49 +27404,49 @@ geo.gl.pointFeature = function (arg) {
     var prog = vgl.shaderProgram(),
         vertexShader = createVertexShader(),
         fragmentShader = createFragmentShader(),
-        posAttr = vgl.vertexAttribute("pos"),
-        unitAttr = vgl.vertexAttribute("unit"),
-        radAttr = vgl.vertexAttribute("rad"),
-        strokeWidthAttr = vgl.vertexAttribute("strokeWidth"),
-        fillColorAttr = vgl.vertexAttribute("fillColor"),
-        fillAttr = vgl.vertexAttribute("fill"),
-        strokeColorAttr = vgl.vertexAttribute("strokeColor"),
-        strokeAttr = vgl.vertexAttribute("stroke"),
-        fillOpacityAttr = vgl.vertexAttribute("fillOpacity"),
-        strokeOpacityAttr = vgl.vertexAttribute("strokeOpacity"),
-        modelViewUniform = new vgl.modelViewUniform("modelViewMatrix"),
-        projectionUniform = new vgl.projectionUniform("projectionMatrix"),
+        posAttr = vgl.vertexAttribute('pos'),
+        unitAttr = vgl.vertexAttribute('unit'),
+        radAttr = vgl.vertexAttribute('rad'),
+        strokeWidthAttr = vgl.vertexAttribute('strokeWidth'),
+        fillColorAttr = vgl.vertexAttribute('fillColor'),
+        fillAttr = vgl.vertexAttribute('fill'),
+        strokeColorAttr = vgl.vertexAttribute('strokeColor'),
+        strokeAttr = vgl.vertexAttribute('stroke'),
+        fillOpacityAttr = vgl.vertexAttribute('fillOpacity'),
+        strokeOpacityAttr = vgl.vertexAttribute('strokeOpacity'),
+        modelViewUniform = new vgl.modelViewUniform('modelViewMatrix'),
+        projectionUniform = new vgl.projectionUniform('projectionMatrix'),
         mat = vgl.material(),
         blend = vgl.blend(),
         geom = vgl.geometryData(),
-        sourcePositions = vgl.sourceDataP3fv({"name": "pos"}),
+        sourcePositions = vgl.sourceDataP3fv({'name': 'pos'}),
         sourceUnits = vgl.sourceDataAnyfv(
-            2, vgl.vertexAttributeKeysIndexed.One, {"name": "unit"}),
+            2, vgl.vertexAttributeKeysIndexed.One, {'name': 'unit'}),
         sourceRadius = vgl.sourceDataAnyfv(
-            1, vgl.vertexAttributeKeysIndexed.Two, {"name": "rad"}),
+            1, vgl.vertexAttributeKeysIndexed.Two, {'name': 'rad'}),
         sourceStrokeWidth = vgl.sourceDataAnyfv(
-            1, vgl.vertexAttributeKeysIndexed.Three, {"name": "strokeWidth"}),
+            1, vgl.vertexAttributeKeysIndexed.Three, {'name': 'strokeWidth'}),
         sourceFillColor = vgl.sourceDataAnyfv(
-            3, vgl.vertexAttributeKeysIndexed.Four, {"name": "fillColor"}),
+            3, vgl.vertexAttributeKeysIndexed.Four, {'name': 'fillColor'}),
         sourceFill = vgl.sourceDataAnyfv(
-            1, vgl.vertexAttributeKeysIndexed.Five, {"name": "fill"}),
+            1, vgl.vertexAttributeKeysIndexed.Five, {'name': 'fill'}),
         sourceStrokeColor = vgl.sourceDataAnyfv(
-            3, vgl.vertexAttributeKeysIndexed.Six, {"name": "strokeColor"}),
+            3, vgl.vertexAttributeKeysIndexed.Six, {'name': 'strokeColor'}),
         sourceStroke = vgl.sourceDataAnyfv(
-            1, vgl.vertexAttributeKeysIndexed.Seven, {"name": "stroke"}),
+            1, vgl.vertexAttributeKeysIndexed.Seven, {'name': 'stroke'}),
         sourceAlpha = vgl.sourceDataAnyfv(
-            1, vgl.vertexAttributeKeysIndexed.Eight, {"name": "fillOpacity"}),
+            1, vgl.vertexAttributeKeysIndexed.Eight, {'name': 'fillOpacity'}),
         sourceStrokeOpacity = vgl.sourceDataAnyfv(
-            1, vgl.vertexAttributeKeysIndexed.Nine, {"name": "strokeOpacity"}),
+            1, vgl.vertexAttributeKeysIndexed.Nine, {'name': 'strokeOpacity'}),
         primitive = new vgl.triangles();
 
-    if (m_primitiveShape === "sprite") {
+    if (m_primitiveShape === 'sprite') {
       primitive = new vgl.points();
     }
 
-    m_pixelWidthUniform = new vgl.floatUniform("pixelWidth",
+    m_pixelWidthUniform = new vgl.floatUniform('pixelWidth',
                             2.0 / m_this.renderer().width());
-    m_aspectUniform = new vgl.floatUniform("aspect",
+    m_aspectUniform = new vgl.floatUniform('aspect',
                         m_this.renderer().width() / m_this.renderer().height());
 
     s_init.call(m_this, arg);
@@ -26890,7 +27454,7 @@ geo.gl.pointFeature = function (arg) {
 
     // TODO: Right now this is ugly but we will fix it.
     prog.addVertexAttribute(posAttr, vgl.vertexAttributeKeys.Position);
-    if (m_primitiveShape !== "sprite") {
+    if (m_primitiveShape !== 'sprite') {
       prog.addVertexAttribute(unitAttr, vgl.vertexAttributeKeysIndexed.One);
     }
 
@@ -26998,7 +27562,7 @@ geo.gl.pointFeature = function (arg) {
 inherit(geo.gl.pointFeature, geo.pointFeature);
 
 // Now register it
-geo.registerFeature("vgl", "point", geo.gl.pointFeature);
+geo.registerFeature('vgl', 'point', geo.gl.pointFeature);
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -27011,7 +27575,7 @@ geo.registerFeature("vgl", "point", geo.gl.pointFeature);
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.gl.geomFeature = function (arg) {
-  "use strict";
+  'use strict';
   if (!(this instanceof geo.gl.geomFeature)) {
     return new geo.gl.geomFeature(arg);
   }
@@ -27123,11 +27687,11 @@ inherit(geo.gl.geomFeature, geo.geomFeature);
  * @extends geo.planeFeature
  * @param lowerleft
  * @param upperright
- * @returns {geo.planeFeature}
+ * @returns {geo.gl.planeFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.gl.planeFeature = function (arg) {
-  "use strict";
+  'use strict';
   if (!(this instanceof geo.gl.planeFeature)) {
     return new geo.gl.planeFeature(arg);
   }
@@ -27191,7 +27755,7 @@ geo.gl.planeFeature = function (arg) {
         ul[0], ul[1], ul[2],
         lr[0], lr[1], lr[2]);
 
-      m_actor.material().shaderProgram().uniform("opacity").set(
+      m_actor.material().shaderProgram().uniform('opacity').set(
         m_this.style().opacity !== undefined ? m_this.style().opacity : 1);
 
       m_this.renderer().contextRenderer().addActor(m_actor);
@@ -27201,7 +27765,7 @@ geo.gl.planeFeature = function (arg) {
         lr[0], lr[1], lr[2],
         ul[0], ul[1], ul[2], true);
 
-      m_actor.material().shaderProgram().uniform("opacity").set(
+      m_actor.material().shaderProgram().uniform('opacity').set(
         m_this.style().opacity !== undefined ? m_this.style().opacity : 1);
 
       texture = vgl.texture();
@@ -27262,7 +27826,7 @@ geo.gl.planeFeature = function (arg) {
     if (m_this.updateTime().getMTime() <= m_this.getMTime()) {
       m_actor.setVisible(m_this.visible());
       m_actor.material().setBinNumber(m_this.bin());
-      m_actor.material().shaderProgram().uniform("opacity").set(
+      m_actor.material().shaderProgram().uniform('opacity').set(
         m_this.style().opacity !== undefined ? m_this.style().opacity : 1);
     }
 
@@ -27285,7 +27849,393 @@ geo.gl.planeFeature = function (arg) {
 inherit(geo.gl.planeFeature, geo.planeFeature);
 
 // Now register it
-geo.registerFeature("vgl", "plane", geo.gl.planeFeature);
+geo.registerFeature('vgl', 'plane', geo.gl.planeFeature);
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Create a new instance of class quadFeature
+ *
+ * @class
+ * @param {Object} arg Options object
+ * @extends geo.quadFeature
+ * @returns {geo.gl.quadFeature}
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.gl.quadFeature = function (arg) {
+  'use strict';
+  if (!(this instanceof geo.gl.quadFeature)) {
+    return new geo.gl.quadFeature(arg);
+  }
+  geo.quadFeature.call(this, arg);
+
+  var m_this = this,
+      s_exit = this._exit,
+      s_init = this._init,
+      s_update = this._update,
+      m_modelViewUniform,
+      m_actor_image, m_actor_color, m_glBuffers = {}, m_imgposbuf,
+      m_clrposbuf, m_clrModelViewUniform,
+      m_glCompileTimestamp = vgl.timestamp(),
+      m_glColorCompileTimestamp = vgl.timestamp(),
+      m_quads;
+  var vertexShaderImageSource = [
+    'attribute vec3 vertexPosition;',
+    'attribute vec3 textureCoord;',
+    'uniform mat4 modelViewMatrix;',
+    'uniform mat4 projectionMatrix;',
+    'varying highp vec3 iTextureCoord;',
+    'void main(void) {',
+    '  gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
+    '  iTextureCoord = textureCoord;',
+    '}'].join('\n');
+  var vertexShaderColorSource = [
+    'attribute vec3 vertexPosition;',
+    'uniform vec3 vertexColor;',
+    'uniform mat4 modelViewMatrix;',
+    'uniform mat4 projectionMatrix;',
+    'varying mediump vec3 iVertexColor;',
+    'varying highp vec3 iTextureCoord;',
+    'void main(void) {',
+    '  gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
+    '  iVertexColor = vertexColor;',
+    '}'].join('\n');
+
+  /**
+   * Allocate buffers that we need to control for image quads.  This mimics
+   * the actions from vgl.mapper to some degree.
+   *
+   * @private
+   */
+  function setupDrawObjects(renderState) {
+    var context = renderState.m_context,
+        newbuf = false;
+
+    if (m_quads.imgQuads.length) {
+      if (!m_imgposbuf || m_imgposbuf.length < m_quads.imgQuads.length * 12 ||
+          !m_glBuffers.imgQuadsPosition) {
+        if (m_glBuffers.imgQuadsPosition) {
+          context.deleteBuffer(m_glBuffers.imgQuadsPosition);
+        }
+        m_glBuffers.imgQuadsPosition = context.createBuffer();
+        m_imgposbuf = new Float32Array(Math.max(
+            128, m_quads.imgQuads.length * 2) * 12);
+        newbuf = true;
+      }
+      $.each(m_quads.imgQuads, function (idx, quad) {
+        for (var i = 0; i < 12; i += 1) {
+          m_imgposbuf[idx * 12 + i] = quad.pos[i] - m_quads.origin[i % 3];
+        }
+      });
+      context.bindBuffer(vgl.GL.ARRAY_BUFFER, m_glBuffers.imgQuadsPosition);
+      if (newbuf) {
+        context.bufferData(vgl.GL.ARRAY_BUFFER, m_imgposbuf, vgl.GL.DYNAMIC_DRAW);
+      } else {
+        context.bufferSubData(vgl.GL.ARRAY_BUFFER, 0, m_imgposbuf);
+      }
+    }
+    m_glCompileTimestamp.modified();
+  }
+
+  /**
+   * Allocate buffers that we need to control for color quads.  This mimics
+   * the actions from vgl.mapper to some degree.
+   *
+   * @private
+   */
+  function setupColorDrawObjects(renderState) {
+    var context = renderState.m_context,
+        newbuf = false;
+
+    if (m_quads.clrQuads.length) {
+      if (!m_clrposbuf || m_clrposbuf.length < m_quads.clrQuads.length * 12 ||
+          !m_glBuffers.clrQuadsPosition) {
+        if (m_glBuffers.imgQuadsPosition) {
+          context.deleteBuffer(m_glBuffers.clrQuadsPosition);
+        }
+        m_glBuffers.clrQuadsPosition = context.createBuffer();
+        m_clrposbuf = new Float32Array(Math.max(
+            128, m_quads.clrQuads.length * 2) * 12);
+        newbuf = true;
+      }
+      $.each(m_quads.clrQuads, function (idx, quad) {
+        for (var i = 0; i < 12; i += 1) {
+          m_clrposbuf[idx * 12 + i] = quad.pos[i] - m_quads.origin[i % 3];
+        }
+      });
+      context.bindBuffer(vgl.GL.ARRAY_BUFFER, m_glBuffers.clrQuadsPosition);
+      if (newbuf) {
+        context.bufferData(vgl.GL.ARRAY_BUFFER, m_clrposbuf, vgl.GL.DYNAMIC_DRAW);
+      } else {
+        context.bufferSubData(vgl.GL.ARRAY_BUFFER, 0, m_clrposbuf);
+      }
+    }
+    m_glColorCompileTimestamp.modified();
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Build this feature
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._build = function () {
+    var mapper, mat, prog, srctex, geom;
+
+    if (!m_this.position()) {
+      return;
+    }
+    m_quads = this._generateQuads();
+    /* Create an actor to render image quads */
+    if (m_quads.imgQuads.length && !m_actor_image) {
+      m_this.visible(false);
+      mapper = new vgl.mapper({dynamicDraw: true});
+      m_actor_image = new vgl.actor();
+      /* This is similar to vgl.utils.createTextureMaterial */
+      m_actor_image.setMapper(mapper);
+      mat = new vgl.material();
+      prog = new vgl.shaderProgram();
+      prog.addVertexAttribute(new vgl.vertexAttribute('vertexPosition'),
+                              vgl.vertexAttributeKeys.Position);
+      prog.addVertexAttribute(new vgl.vertexAttribute('textureCoord'),
+                              vgl.vertexAttributeKeys.TextureCoordinate);
+      m_modelViewUniform = new vgl.modelViewOriginUniform('modelViewMatrix',
+        m_quads.origin);
+      prog.addUniform(m_modelViewUniform);
+      prog.addUniform(new vgl.projectionUniform('projectionMatrix'));
+      prog.addUniform(new vgl.floatUniform('opacity', 1.0));
+      prog.addShader(vgl.getCachedShader(
+          vgl.GL.VERTEX_SHADER, vgl.GL, vertexShaderImageSource));
+      prog.addShader(vgl.utils.createRgbaTextureFragmentShader(vgl.GL));
+      mat.addAttribute(prog);
+      mat.addAttribute(new vgl.blend());
+      /* This is similar to vgl.planeSource */
+      geom = new vgl.geometryData();
+      m_imgposbuf = undefined;
+      srctex = new vgl.sourceDataT2fv();
+      srctex.pushBack([0, 0, 1, 0, 0, 1, 1, 1]);
+      geom.addSource(srctex);
+      /* We deliberately do not add a primitive to our geometry -- we take care
+       * of that ourselves. */
+
+      mapper.setGeometryData(geom);
+      m_actor_image.setMaterial(mat);
+
+      mapper.s_render = mapper.render;
+      mapper.render = m_this._renderImageQuads;
+      m_this.renderer().contextRenderer().addActor(m_actor_image);
+      m_this.visible(true);
+    }
+    /* Create an actor to render color quads */
+    if (m_quads.clrQuads.length && !m_actor_color) {
+      m_this.visible(false);
+      mapper = new vgl.mapper({dynamicDraw: true});
+      m_actor_color = new vgl.actor();
+      /* This is similar to vgl.utils.createTextureMaterial */
+      m_actor_color.setMapper(mapper);
+      mat = new vgl.material();
+      prog = new vgl.shaderProgram();
+      prog.addVertexAttribute(new vgl.vertexAttribute('vertexPosition'),
+                              vgl.vertexAttributeKeys.Position);
+      m_clrModelViewUniform = new vgl.modelViewOriginUniform('modelViewMatrix',
+        m_quads.origin);
+      prog.addUniform(m_clrModelViewUniform);
+      prog.addUniform(new vgl.projectionUniform('projectionMatrix'));
+      prog.addUniform(new vgl.floatUniform('opacity', 1.0));
+      prog.addUniform(new vgl.uniform(vgl.GL.FLOAT_VEC3, 'vertexColor'));
+      prog.addShader(vgl.getCachedShader(
+          vgl.GL.VERTEX_SHADER, vgl.GL, vertexShaderColorSource));
+      prog.addShader(vgl.utils.createFragmentShader(vgl.GL));
+      mat.addAttribute(prog);
+      mat.addAttribute(new vgl.blend());
+      /* This is similar to vgl.planeSource */
+      geom = new vgl.geometryData();
+      m_clrposbuf = undefined;
+      /* We deliberately do not add a primitive to our geometry -- we take care
+       * of that ourselves. */
+
+      mapper.setGeometryData(geom);
+      m_actor_color.setMaterial(mat);
+
+      mapper.s_render = mapper.render;
+      mapper.render = m_this._renderColorQuads;
+      m_this.renderer().contextRenderer().addActor(m_actor_color);
+      m_this.visible(true);
+    }
+    if (m_modelViewUniform) {
+      m_modelViewUniform.setOrigin(m_quads.origin);
+    }
+    if (m_clrModelViewUniform) {
+      m_clrModelViewUniform.setOrigin(m_quads.origin);
+    }
+    m_this.buildTime().modified();
+  };
+
+  /**
+   * Check all of the image quads.  If any do not have the correct texture,
+   * update them. */
+  this._updateTextures = function () {
+    var texture;
+
+    $.each(m_quads.imgQuads, function (idx, quad) {
+      if (!quad.image) {
+        return;
+      }
+      if (quad.image._texture) {
+        quad.texture = quad.image._texture;
+      } else {
+        texture = new vgl.texture();
+        texture.setImage(quad.image);
+        quad.texture = quad.image._texture = texture;
+      }
+    });
+  };
+
+  /**
+   * Render all of the color quads using a single mapper.
+   *
+   * @param renderState: the render state used for the render.
+   */
+  this._renderColorQuads = function (renderState) {
+    if (!m_quads.clrQuads.length) {
+      return;
+    }
+    var mapper = this;
+    if (mapper.getMTime() > m_glColorCompileTimestamp.getMTime() ||
+        m_this.dataTime().getMTime() > m_glColorCompileTimestamp.getMTime() ||
+        renderState.m_contextChanged || !m_clrposbuf ||
+        m_quads.clrQuads.length * 12 > m_clrposbuf.length) {
+      setupColorDrawObjects(renderState);
+    }
+    mapper.s_render(renderState);
+
+    var context = renderState.m_context, opacity = 1, color;
+
+    context.bindBuffer(vgl.GL.ARRAY_BUFFER, m_glBuffers.clrQuadsPosition);
+    $.each(m_quads.clrQuads, function (idx, quad) {
+      if (quad.opacity !== opacity) {
+        opacity = quad.opacity;
+        context.uniform1fv(renderState.m_material.shaderProgram(
+            ).uniformLocation('opacity'), new Float32Array([opacity]));
+      }
+      if (!color || color.r !== quad.color.r || color.g !== quad.color.g ||
+          color.b !== quad.color.b) {
+        color = quad.color;
+        context.uniform3fv(renderState.m_material.shaderProgram(
+            ).uniformLocation('vertexColor'), new Float32Array([
+              color.r, color.g, color.b]));
+      }
+
+      context.bindBuffer(vgl.GL.ARRAY_BUFFER, m_glBuffers.clrQuadsPosition);
+      context.vertexAttribPointer(vgl.vertexAttributeKeys.Position, 3,
+                                  vgl.GL.FLOAT, false, 12, idx * 12 * 4);
+      context.enableVertexAttribArray(vgl.vertexAttributeKeys.Position);
+
+      context.drawArrays(vgl.GL.TRIANGLE_STRIP, 0, 4);
+    });
+    context.bindBuffer(vgl.GL.ARRAY_BUFFER, null);
+  };
+
+  /**
+   * Render all of the image quads using a single mapper.
+   *
+   * @param renderState: the render state used for the render.
+   */
+  this._renderImageQuads = function (renderState) {
+    if (!m_quads.imgQuads.length) {
+      return;
+    }
+    var mapper = this;
+    if (mapper.getMTime() > m_glCompileTimestamp.getMTime() ||
+        m_this.dataTime().getMTime() > m_glCompileTimestamp.getMTime() ||
+        renderState.m_contextChanged || !m_imgposbuf ||
+        m_quads.imgQuads.length * 12 > m_imgposbuf.length) {
+      setupDrawObjects(renderState);
+    }
+    mapper.s_render(renderState);
+
+    var context = renderState.m_context, opacity = 1;
+
+    m_this._updateTextures();
+
+    context.bindBuffer(vgl.GL.ARRAY_BUFFER, m_glBuffers.imgQuadsPosition);
+    $.each(m_quads.imgQuads, function (idx, quad) {
+      if (!quad.image) {
+        return;
+      }
+      quad.texture.bind(renderState);
+
+      if (quad.opacity !== opacity) {
+        opacity = quad.opacity;
+        context.uniform1fv(renderState.m_material.shaderProgram(
+            ).uniformLocation('opacity'), new Float32Array([opacity]));
+      }
+
+      context.bindBuffer(vgl.GL.ARRAY_BUFFER, m_glBuffers.imgQuadsPosition);
+      context.vertexAttribPointer(vgl.vertexAttributeKeys.Position, 3,
+                                  vgl.GL.FLOAT, false, 12, idx * 12 * 4);
+      context.enableVertexAttribArray(vgl.vertexAttributeKeys.Position);
+
+      context.drawArrays(vgl.GL.TRIANGLE_STRIP, 0, 4);
+      quad.texture.undoBind(renderState);
+    });
+    context.bindBuffer(vgl.GL.ARRAY_BUFFER, null);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Update
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._update = function () {
+    s_update.call(m_this);
+    if (m_this.buildTime().getMTime() <= m_this.dataTime().getMTime() ||
+        m_this.updateTime().getMTime() < m_this.getMTime()) {
+      m_this._build();
+    }
+    if (m_actor_color) {
+      m_actor_color.setVisible(m_this.visible());
+      m_actor_color.material().setBinNumber(m_this.bin());
+    }
+    if (m_actor_image) {
+      m_actor_image.setVisible(m_this.visible());
+      m_actor_image.material().setBinNumber(m_this.bin());
+    }
+    m_this.updateTime().modified();
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Initialize
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._init = function () {
+    s_init.call(m_this, arg);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Destroy
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._exit = function () {
+    if (m_actor_image) {
+      m_this.renderer().contextRenderer().removeActor(m_actor_image);
+      m_actor_image = null;
+    }
+    if (m_actor_color) {
+      m_this.renderer().contextRenderer().removeActor(m_actor_color);
+      m_actor_color = null;
+    }
+    s_exit.call(m_this);
+  };
+
+  m_this._init(arg);
+  return this;
+};
+
+inherit(geo.gl.quadFeature, geo.quadFeature);
+
+// Now register it
+geo.registerFeature('vgl', 'quad', geo.gl.quadFeature);
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -27319,43 +28269,43 @@ geo.gl.polygonFeature = function (arg) {
 
   function createVertexShader() {
     var vertexShaderSource = [
-      'attribute vec3 pos;',
-      'attribute vec3 fillColor;',
-      'attribute float fillOpacity;',
-      'uniform mat4 modelViewMatrix;',
-      'uniform mat4 projectionMatrix;',
-      'uniform float pixelWidth;',
-      'varying vec3 fillColorVar;',
-      'varying float fillOpacityVar;',
+          'attribute vec3 pos;',
+          'attribute vec3 fillColor;',
+          'attribute float fillOpacity;',
+          'uniform mat4 modelViewMatrix;',
+          'uniform mat4 projectionMatrix;',
+          'uniform float pixelWidth;',
+          'varying vec3 fillColorVar;',
+          'varying float fillOpacityVar;',
 
-      'void main(void)',
-      '{',
-      '  vec4 clipPos = projectionMatrix * modelViewMatrix * vec4(pos.xyz, 1);',
-      '  if (clipPos.w != 0.0) {',
-      '    clipPos = clipPos/clipPos.w;',
-      '  }',
-      '  fillColorVar = fillColor;',
-      '  fillOpacityVar = fillOpacity;',
-      '  gl_Position = clipPos;',
-      '}'
-    ].join('\n'),
-    shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
+          'void main(void)',
+          '{',
+          '  vec4 clipPos = projectionMatrix * modelViewMatrix * vec4(pos.xyz, 1);',
+          '  if (clipPos.w != 0.0) {',
+          '    clipPos = clipPos/clipPos.w;',
+          '  }',
+          '  fillColorVar = fillColor;',
+          '  fillOpacityVar = fillOpacity;',
+          '  gl_Position = clipPos;',
+          '}'
+        ].join('\n'),
+        shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
     shader.setShaderSource(vertexShaderSource);
     return shader;
   }
 
   function createFragmentShader() {
     var fragmentShaderSource = [
-      '#ifdef GL_ES',
-      '  precision highp float;',
-      '#endif',
-      'varying vec3 fillColorVar;',
-      'varying float fillOpacityVar;',
-      'void main () {',
-      '  gl_FragColor = vec4 (fillColorVar, fillOpacityVar);',
-      '}'
-    ].join('\n'),
-    shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
+          '#ifdef GL_ES',
+          '  precision highp float;',
+          '#endif',
+          'varying vec3 fillColorVar;',
+          'varying float fillOpacityVar;',
+          'void main () {',
+          '  gl_FragColor = vec4 (fillColorVar, fillOpacityVar);',
+          '}'
+        ].join('\n'),
+        shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
     shader.setShaderSource(fragmentShaderSource);
     return shader;
   }
@@ -27393,8 +28343,7 @@ geo.gl.polygonFeature = function (arg) {
         triangulator = new PNLTRI.Triangulator(),
         triangList = null,
         newTriangList = null,
-        fillColorInstance = null,
-        currentIndex = null;
+        fillColorInstance = null;
 
     posFunc = m_this.position();
     fillColorFunc = m_this.style.get('fillColor');
@@ -27496,7 +28445,6 @@ geo.gl.polygonFeature = function (arg) {
     numPts = position.length;
 
     start = buffers.alloc(numPts);
-    currentIndex = start;
 
     //console.log("numPts ", numPts);
     for (i = 0; i < numPts; i += 1) {
@@ -27655,68 +28603,68 @@ geo.gl.contourFeature = function (arg) {
 
   function createVertexShader() {
     var vertexShaderSource = [
-      '#ifdef GL_ES',
-      '  precision highp float;',
-      '#endif',
-      'attribute vec3 pos;',
-      'attribute float value;',
-      'attribute float opacity;',
-      'uniform mat4 modelViewMatrix;',
-      'uniform mat4 projectionMatrix;',
-      'varying float valueVar;',
-      'varying float opacityVar;',
+          '#ifdef GL_ES',
+          '  precision highp float;',
+          '#endif',
+          'attribute vec3 pos;',
+          'attribute float value;',
+          'attribute float opacity;',
+          'uniform mat4 modelViewMatrix;',
+          'uniform mat4 projectionMatrix;',
+          'varying float valueVar;',
+          'varying float opacityVar;',
 
-      'void main(void)',
-      '{',
+          'void main(void)',
+          '{',
       /* Don't use z values; something is rotten in one of our matrices */
-      '  vec4 scrPos = projectionMatrix * modelViewMatrix * vec4(pos.xy, 0, 1);',
-      '  if (scrPos.w != 0.0) {',
-      '    scrPos = scrPos / scrPos.w;',
-      '  }',
-      '  valueVar = value;',
-      '  opacityVar = opacity;',
-      '  gl_Position = scrPos;',
-      '}'
-    ].join('\n'),
-    shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
+          '  vec4 scrPos = projectionMatrix * modelViewMatrix * vec4(pos.xy, 0, 1);',
+          '  if (scrPos.w != 0.0) {',
+          '    scrPos = scrPos / scrPos.w;',
+          '  }',
+          '  valueVar = value;',
+          '  opacityVar = opacity;',
+          '  gl_Position = scrPos;',
+          '}'
+        ].join('\n'),
+        shader = new vgl.shader(vgl.GL.VERTEX_SHADER);
     shader.setShaderSource(vertexShaderSource);
     return shader;
   }
 
   function createFragmentShader() {
     var fragmentShaderSource = [
-      '#ifdef GL_ES',
-      '  precision highp float;',
-      '#endif',
-      'uniform vec4 minColor;',
-      'uniform vec4 maxColor;',
-      'uniform float steps;',
-      'uniform bool stepped;',
-      'uniform sampler2D sampler2d;',
-      'varying float valueVar;',
-      'varying float opacityVar;',
-      'void main () {',
-      '  vec4 clr;',
-      '  if (valueVar < 0.0) {',
-      '    clr = minColor;',
-      '  } else if (valueVar > steps) {',
-      '    clr = maxColor;',
-      '  } else {',
-      '    float step;',
-      '    if (stepped) {',
-      '      step = floor(valueVar) + 0.5;',
-      '      if (step > steps) {',
-      '        step = steps - 0.5;',
-      '      }',
-      '    } else {',
-      '      step = valueVar;',
-      '    }',
-      '    clr = texture2D(sampler2d, vec2(step / steps, 0.0));',
-      '  }',
-      '  gl_FragColor = vec4(clr.rgb, clr.a * opacityVar);',
-      '}'
-    ].join('\n'),
-    shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
+          '#ifdef GL_ES',
+          '  precision highp float;',
+          '#endif',
+          'uniform vec4 minColor;',
+          'uniform vec4 maxColor;',
+          'uniform float steps;',
+          'uniform bool stepped;',
+          'uniform sampler2D sampler2d;',
+          'varying float valueVar;',
+          'varying float opacityVar;',
+          'void main () {',
+          '  vec4 clr;',
+          '  if (valueVar < 0.0) {',
+          '    clr = minColor;',
+          '  } else if (valueVar > steps) {',
+          '    clr = maxColor;',
+          '  } else {',
+          '    float step;',
+          '    if (stepped) {',
+          '      step = floor(valueVar) + 0.5;',
+          '      if (step > steps) {',
+          '        step = steps - 0.5;',
+          '      }',
+          '    } else {',
+          '      step = valueVar;',
+          '    }',
+          '    clr = texture2D(sampler2d, vec2(step / steps, 0.0));',
+          '  }',
+          '  gl_FragColor = vec4(clr.rgb, clr.a * opacityVar);',
+          '}'
+        ].join('\n'),
+        shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
     shader.setShaderSource(fragmentShaderSource);
     return shader;
   }
@@ -27748,17 +28696,17 @@ geo.gl.contourFeature = function (arg) {
     m_texture.setColorTable(colorTable);
     contour.pos = geo.transform.transformCoordinates(
         m_this.gcs(), m_this.layer().map().gcs(), contour.pos, 3);
-    posBuf     = getBuffer(geom, 'pos',     numPts * 3);
-    opacityBuf = getBuffer(geom, 'opacity', numPts);
-    valueBuf   = getBuffer(geom, 'value',   numPts);
+    posBuf = geo.util.getGeomBuffer(geom, 'pos', numPts * 3);
+    opacityBuf = geo.util.getGeomBuffer(geom, 'opacity', numPts);
+    valueBuf = geo.util.getGeomBuffer(geom, 'value', numPts);
     for (i = i3 = 0; i < numPts; i += 1, i3 += 3) {
       j = contour.elements[i];
       j3 = j * 3;
-      posBuf[i3]     = contour.pos[j3];
+      posBuf[i3] = contour.pos[j3];
       posBuf[i3 + 1] = contour.pos[j3 + 1];
       posBuf[i3 + 2] = contour.pos[j3 + 2];
-      opacityBuf[i]  = contour.opacity[j];
-      valueBuf[i]    = contour.value[j];
+      opacityBuf[i] = contour.opacity[j];
+      valueBuf[i] = contour.value[j];
     }
     indicesBuf = geom.primitive(0).indices();
     if (!(indicesBuf instanceof Uint16Array) || indicesBuf.length !== numPts) {
@@ -27768,30 +28716,6 @@ geo.gl.contourFeature = function (arg) {
     geom.boundsDirty(true);
     m_mapper.modified();
     m_mapper.boundsDirtyTimestamp().modified();
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get a buffer for a geometry source.  If a buffer already exists and is
-   * the correct size, return it.  Otherwise, allocate a new buffer; any data
-   * in an old buffer is discarded.
-   *
-   * @param geom: the geometry to reference and modify.
-   * @param srcName: the name of the source.
-   * @param len: the number of elements for the array.
-   * @returns {Float32Array}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  function getBuffer(geom, srcName, len) {
-    var src = geom.sourceByName(srcName), data;
-
-    data = src.data();
-    if (data instanceof Float32Array && data.length === len) {
-      return data;
-    }
-    data = new Float32Array(len);
-    src.setData(data);
-    return data;
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -28059,6 +28983,7 @@ geo.gl.vglRenderer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
+    m_this.canvas().remove();
     m_viewer.exit();
     s_exit();
   };
@@ -28118,19 +29043,19 @@ geo.gl.vglRenderer = function (arg) {
   // Connect to interactor events
   // Connect to pan event
   m_this.layer().geoOn(geo.event.pan, function (evt) {
-    void(evt);
+    void (evt);
     m_this._updateRendererCamera();
   });
 
   // Connect to zoom event
   m_this.layer().geoOn(geo.event.zoom, function (evt) {
-    void(evt);
+    void (evt);
     m_this._updateRendererCamera();
   });
 
   // Connect to rotation event
   m_this.layer().geoOn(geo.event.rotate, function (evt) {
-    void(evt);
+    void (evt);
     m_this._updateRendererCamera();
   });
 
@@ -28172,7 +29097,7 @@ geo.registerRenderer('vgl', geo.gl.vglRenderer);
   geo.gl.vglRenderer.supported = function () {
     if (checkedWebGL === undefined) {
       /* This is extracted from what Modernizr uses. */
-      var canvas, ctx, exts;
+      var canvas, ctx, exts; // eslint-disable-line no-unused-vars
       try {
         canvas = document.createElement('canvas');
         ctx = (canvas.getContext('webgl') ||
@@ -28203,39 +29128,83 @@ geo.registerRenderer('vgl', geo.gl.vglRenderer);
 
 geo.gl.tileLayer = function () {
   'use strict';
-  var m_this = this;
+  var m_this = this,
+      s_init = this._init,
+      s_exit = this._exit,
+      m_quadFeature,
+      m_nextTileId = 0,
+      m_tiles = [];
 
+  /* Add a tile to the list of quads */
   this._drawTile = function (tile) {
+    if (!m_quadFeature) {
+      return;
+    }
     var bounds = this._tileBounds(tile),
         level = tile.index.level || 0,
-        to = this._tileOffset(level);
-    var ul = this.fromLocal(this.fromLevel({
+        to = this._tileOffset(level),
+        quad = {};
+    quad.ul = this.fromLocal(this.fromLevel({
       x: bounds.left - to.x, y: bounds.top - to.y
     }, level), 0);
-    var lr = this.fromLocal(this.fromLevel({
+    quad.ll = this.fromLocal(this.fromLevel({
+      x: bounds.left - to.x, y: bounds.bottom - to.y
+    }, level), 0);
+    quad.ur = this.fromLocal(this.fromLevel({
+      x: bounds.right - to.x, y: bounds.top - to.y
+    }, level), 0);
+    quad.lr = this.fromLocal(this.fromLevel({
       x: bounds.right - to.x, y: bounds.bottom - to.y
     }, level), 0);
-    /* Use a small z-value for layering the tile levels. */
-    tile.feature = m_this.createFeature(
-      'plane', {drawOnAsyncResourceLoad: true})
-      .origin([ul.x, lr.y, level * 1e-7])
-      .upperLeft([ul.x, ul.y, level * 1e-7])
-      .lowerRight([lr.x, lr.y, level * 1e-7])
-      .style({image: tile._image});
-    /* Don't respond to geo events */
-    tile.feature.geoTrigger = undefined;
-    tile.feature.gcs(m_this.map().gcs());
-    tile.feature._update();
+    quad.ul.z = quad.ll.z = quad.ur.z = quad.lr.z = level * 1e-5;
+    m_nextTileId += 1;
+    quad.id = m_nextTileId;
+    tile.quadId = quad.id;
+    quad.image = tile.image;
+    m_tiles.push(quad);
+    m_quadFeature.data(m_tiles);
+    m_quadFeature._update();
     m_this.draw();
   };
 
   /* Remove the tile feature. */
   this._remove = function (tile) {
-    if (tile.feature) {
-      m_this.deleteFeature(tile.feature);
-      tile.feature = null;
+    if (tile.quadId !== undefined && m_quadFeature) {
+      for (var i = 0; i < m_tiles.length; i += 1) {
+        if (m_tiles[i].id === tile.quadId) {
+          m_tiles.splice(i, 1);
+          break;
+        }
+      }
+      m_quadFeature.data(m_tiles);
+      m_quadFeature._update();
       m_this.draw();
     }
+  };
+
+  /**
+   * Clean up the layer.
+   */
+  this._exit = function () {
+    m_this.deleteFeature(m_quadFeature);
+    m_quadFeature = null;
+    m_tiles = [];
+    s_exit.apply(m_this, arguments);
+  };
+
+  /**
+   * Initialize after the layer is added to the map.
+   */
+  this._init = function () {
+    s_init.apply(m_this, arguments);
+    m_quadFeature = this.createFeature('quad', {
+      previewColor: m_this._options.previewColor,
+      previewImage: m_this._options.previewImage
+    });
+    m_quadFeature.geoTrigger = undefined;
+    m_quadFeature.gcs(m_this._options.gcs || m_this.map().gcs());
+    m_quadFeature.data(m_tiles);
+    m_quadFeature._update();
   };
 
   /* These functions don't need to do anything. */
@@ -28359,7 +29328,7 @@ geo.d3 = {};
   'use strict';
 
   var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz',
-    strLength = 8;
+      strLength = 8;
 
   //////////////////////////////////////////////////////////////////////////////
   /**
@@ -28537,7 +29506,6 @@ geo.d3.d3Renderer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   function setStyles(select, styles) {
-    /* jshint validthis:true */
     var key, k, f;
     function fillFunc() {
       if (styles.fill.apply(m_this, arguments)) {
@@ -28560,7 +29528,8 @@ geo.d3.d3Renderer = function (arg) {
         if (key === 'strokeColor') {
           k = 'stroke';
           f = m_this._convertColor(styles[key], styles.stroke);
-        } else if (key === 'stroke' && styles[key]) {
+        } else if (key === 'stroke' && styles[key] &&
+                   !styles.hasOwnProperty('strokeColor')) {
           k = 'stroke';
           f = strokeFunc;
         } else if (key === 'strokeWidth') {
@@ -29039,8 +30008,8 @@ geo.d3.tileLayer = function () {
   this._drawTile = function (tile) {
     var bounds = m_this._tileBounds(tile),
         parentNode = m_this._getSubLayer(tile.index.level),
-        offsetx = parseInt(parentNode.attr('offsetx') || 0),
-        offsety = parseInt(parentNode.attr('offsety') || 0);
+        offsetx = parseInt(parentNode.attr('offsetx') || 0, 10),
+        offsety = parseInt(parentNode.attr('offsety') || 0, 10);
     tile.feature = m_this.createFeature(
       'plane', {drawOnAsyncResourceLoad: true})
       .origin([bounds.left - offsetx, bounds.top - offsety])
@@ -29088,19 +30057,19 @@ geo.d3.tileLayer = function () {
    */
   this._updateSubLayers = function (level, view) {
     var canvas = m_this.canvas(),
-        lastlevel = parseInt(canvas.attr('lastlevel')),
-        lastx = parseInt(canvas.attr('lastoffsetx') || 0),
-        lasty = parseInt(canvas.attr('lastoffsety') || 0);
+        lastlevel = parseInt(canvas.attr('lastlevel'), 10),
+        lastx = parseInt(canvas.attr('lastoffsetx') || 0, 10),
+        lasty = parseInt(canvas.attr('lastoffsety') || 0, 10);
     if (lastlevel === level && Math.abs(lastx - view.left) < 65536 &&
         Math.abs(lasty - view.top) < 65536) {
       return {x: lastx, y: lasty};
     }
     var to = this._tileOffset(level),
-        x = parseInt(view.left) + to.x,
-        y = parseInt(view.top) + to.y;
+        x = parseInt(view.left, 10) + to.x,
+        y = parseInt(view.top, 10) + to.y;
     var tileCache = m_this.cache._cache;
     $.each(canvas.selectAll('.geo-tile-layer')[0], function (idx, el) {
-      var layer = parseInt($(el).attr('data-tile-layer')),
+      var layer = parseInt($(el).attr('data-tile-layer'), 10),
           scale = Math.pow(2, level - layer);
       el = m_this._getSubLayer(layer);
       el.attr('transform', 'matrix(' + [scale, 0, 0, scale, 0, 0].join() + ')');
@@ -29108,10 +30077,10 @@ geo.d3.tileLayer = function () {
        * offsets at the current level.  Other tile layers' offsets are scaled
        * by appropriate factors of 2.  We need to shift the tiles of each
        * layer by the appropriate amount (computed as dx and dy). */
-      var layerx = parseInt(x / Math.pow(2, level - layer)),
-          layery = parseInt(y / Math.pow(2, level - layer)),
-          dx = layerx - parseInt(el.attr('offsetx') || 0),
-          dy = layery - parseInt(el.attr('offsety') || 0);
+      var layerx = parseInt(x / Math.pow(2, level - layer), 10),
+          layery = parseInt(y / Math.pow(2, level - layer), 10),
+          dx = layerx - parseInt(el.attr('offsetx') || 0, 10),
+          dy = layery - parseInt(el.attr('offsety') || 0, 10);
       el.attr({offsetx: layerx, offsety: layery});
       /* We have to update the values stored in the tile features, too,
        * otherwise when d3 regenerates these features, the offsets will be
@@ -29165,6 +30134,7 @@ geo.registerLayerAdjustment('d3', 'tile', geo.d3.tileLayer);
 
 //////////////////////////////////////////////////////////////////////////////
 /**
+ *
  * Create a new instance of pointFeature
  *
  * @class
@@ -29191,8 +30161,7 @@ geo.d3.pointFeature = function (arg) {
       s_init = this._init,
       s_update = this._update,
       m_buildTime = geo.timestamp(),
-      m_style = {},
-      m_sticky;
+      m_style = {};
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -29201,7 +30170,6 @@ geo.d3.pointFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
     s_init.call(m_this, arg);
-    m_sticky = m_this.layer().sticky();
     return m_this;
   };
 
@@ -29356,7 +30324,7 @@ geo.d3.lineFeature = function (arg) {
       // item is an object representing a single line
       // m_this.line()(item) is an array of coordinates
       m_style = {
-        data: [ln.map(function (d, i) { return pos_func(d, i, item, idx);})],
+        data: [ln.map(function (d, i) { return pos_func(d, i, item, idx); })],
         append: 'path',
         attributes: {
           d: line
@@ -29455,12 +30423,12 @@ geo.d3.pathFeature = function (arg) {
     s_update.call(m_this);
 
     diag = function (d) {
-        var p = {
-          source: d.source,
-          target: d.target
-        };
-        return d3.svg.diagonal()(p);
+      var p = {
+        source: d.source,
+        target: d.target
       };
+      return d3.svg.diagonal()(p);
+    };
     tmp = [];
     data.forEach(function (d, i) {
       var src, trg;
@@ -29723,8 +30691,7 @@ geo.d3.vectorFeature = function (arg) {
       s_exit = this._exit,
       s_update = this._update,
       m_buildTime = geo.timestamp(),
-      m_style = {},
-      m_sticky;
+      m_style = {};
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -29781,7 +30748,6 @@ geo.d3.vectorFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
     s_init.call(m_this, arg);
-    m_sticky = m_this.layer().sticky();
     return m_this;
   };
 
@@ -30123,7 +31089,12 @@ geo.gui.widget = function (arg) {
    * { top: 0, left: 0 } by default.
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.position = function () {
+  this.position = function (pos) {
+    if (pos !== undefined) {
+      arg.position = pos;
+      this.reposition();
+      return this;
+    }
     var position;
 
     if (arg &&
@@ -30337,7 +31308,6 @@ geo.gui.sliderWidget = function (arg) {
       m_yscale,
       m_plus,
       m_minus,
-      m_track,
       m_nub,
       m_width = 20, // Approximate size of the widget in pixels
       m_height = 100,
@@ -30350,10 +31320,8 @@ geo.gui.sliderWidget = function (arg) {
 
   /* http://icomoon.io */
   /* CC BY 3.0 http://creativecommons.org/licenses/by/3.0/ */
-  /* jshint -W101 */
   m_plusIcon = 'M512 81.92c-237.568 0-430.080 192.614-430.080 430.080 0 237.568 192.563 430.080 430.080 430.080s430.080-192.563 430.080-430.080c0-237.517-192.563-430.080-430.080-430.080zM564.326 564.326v206.182h-104.653v-206.182h-206.234v-104.653h206.182v-206.234h104.704v206.182h206.182v104.704h-206.182z';
   m_minusIcon = 'M512 81.92c-237.568 0-430.080 192.614-430.080 430.080 0 237.568 192.563 430.080 430.080 430.080s430.080-192.563 430.080-430.080c0-237.517-192.563-430.080-430.080-430.080zM770.56 459.674v104.704h-517.12v-104.704h517.12z';
-  /* jshint +W101 */
 
   // Define off-white gray colors for low contrast ui (unselected).
   m_lowContrast = {
@@ -30523,7 +31491,7 @@ geo.gui.sliderWidget = function (arg) {
     }
 
     // Create the track
-    m_track = svg.append('rect')
+    svg.append('rect')
       .datum({
         fill: 'white',
         stroke: 'black'
@@ -30729,7 +31697,7 @@ geo.gui.legendWidget = function (arg) {
   //////////////////////////////////////////////////////////////////////////////
   this.size = function () {
     var width = 1, height;
-    var test =  d3.select(m_this.canvas()).append('text')
+    var test = d3.select(m_this.canvas()).append('text')
           .style('opacity', 1e-6);
 
     m_categories.forEach(function (d) {
@@ -30931,113 +31899,112 @@ inherit(geo.gui.legendWidget, geo.gui.svgWidget);
 
 geo.registerWidget('dom', 'legend', geo.gui.legendWidget);
 
-/*jscs:disable validateIndentation*/
 (function ($, geo, d3) {
   'use strict';
 
   var load = function () {
 
-  // This requires jquery ui, which we don't want to make a
-  // hard requirement, so bail out here if the widget factory
-  // is not available and throw a helpful message when the
-  // tries to use it.
-  if (!$.widget) {
-    $.fn.geojsMap = function () {
-      throw new Error(
+    // This requires jquery ui, which we don't want to make a
+    // hard requirement, so bail out here if the widget factory
+    // is not available and throw a helpful message when the
+    // tries to use it.
+    if (!$.widget) {
+      $.fn.geojsMap = function () {
+        throw new Error(
         'The geojs jquery plugin requires jquery ui to be available.'
       );
-    };
-    return;
-  }
+      };
+      return;
+    }
 
-  /**
-   * Takes an option key and returns true if it should
-   * return a color accessor.
-   * @private
-   */
-  function isColorKey(key) {
-    return key.slice(key.length - 5, key.length)
+    /**
+     * Takes an option key and returns true if it should
+     * return a color accessor.
+     * @private
+     */
+    function isColorKey(key) {
+      return key.slice(key.length - 5, key.length)
       .toLowerCase() === 'color';
-  }
-
-  /**
-   * Take an array of data and an accessor for a color property
-   * and return a wrapped accessor mapping to actual color
-   * values.  This allows users to pass arbitrary strings
-   * or numbers as any color property and this will wrap
-   * a categorical scale or linear scale.
-   *
-   * Requires d3
-   * @private
-   * @param {Object[]} data A data array
-   * @param {(string|number|function)} acc A color accessor
-   * @return {function}
-   */
-  function makeColorScale(data, acc) {
-    if (!d3) {
-      console.warn('d3 is unavailable, cannot apply color scales.');
-      return acc;
     }
-    var domain;
-    var cannotHandle = false;
-    var doNotHandle = true;
-    var categorical = false;
-    var min = Number.POSITIVE_INFINITY;
-    var max = Number.NEGATIVE_INFINITY;
 
-    function wrap(func) {
-      if (geo.util.isFunction(func)) {
-        return function () {
-          return func(acc.apply(this, arguments));
-        };
-      } else {
-        return func(acc);
+    /**
+     * Take an array of data and an accessor for a color property
+     * and return a wrapped accessor mapping to actual color
+     * values.  This allows users to pass arbitrary strings
+     * or numbers as any color property and this will wrap
+     * a categorical scale or linear scale.
+     *
+     * Requires d3
+     * @private
+     * @param {Object[]} data A data array
+     * @param {(string|number|function)} acc A color accessor
+     * @return {function}
+     */
+    function makeColorScale(data, acc) {
+      if (!d3) {
+        console.warn('d3 is unavailable, cannot apply color scales.');
+        return acc;
       }
-    }
+      var domain;
+      var cannotHandle = false;
+      var doNotHandle = true;
+      var categorical = false;
+      var min = Number.POSITIVE_INFINITY;
+      var max = Number.NEGATIVE_INFINITY;
 
-    if (geo.util.isFunction(acc)) {
-      domain = d3.set(data.map(acc)).values();
-    } else {
-      domain = [acc];
-    }
-    domain.forEach(function (v) {
-      if (!(typeof v === 'string' &&
+      function wrap(func) {
+        if (geo.util.isFunction(func)) {
+          return function () {
+            return func(acc.apply(this, arguments));
+          };
+        } else {
+          return func(acc);
+        }
+      }
+
+      if (geo.util.isFunction(acc)) {
+        domain = d3.set(data.map(acc)).values();
+      } else {
+        domain = [acc];
+      }
+      domain.forEach(function (v) {
+        if (!(typeof v === 'string' &&
             typeof geo.util.convertColor(v) === 'object')) {
-        // This is to handle cases when values are css names or
-        // hex strings.  We don't want to apply a categorical
-        // scale.
-        doNotHandle = false;
+          // This is to handle cases when values are css names or
+          // hex strings.  We don't want to apply a categorical
+          // scale.
+          doNotHandle = false;
+        }
+        if (typeof v === 'string') {
+          categorical = true;
+        } else if (!isFinite(v)) {
+          cannotHandle = true;
+        } else if (+v > max) {
+          max = +v;
+        } else if (+v < min) {
+          min = +v;
+        }
+      });
+      if (cannotHandle) {
+        // At least one value is not a string or a numeric value.
+        // Pass the bare accessor back to geojs to handle it.
+        return acc;
       }
-      if (typeof v === 'string') {
-        categorical = true;
-      } else if (!isFinite(v)) {
-        cannotHandle = true;
-      } else if (+v > max) {
-        max = +v;
-      } else if (+v < min) {
-        min = +v;
+      if (doNotHandle) {
+        return acc;
       }
-    });
-    if (cannotHandle) {
-      // At least one value is not a string or a numeric value.
-      // Pass the bare accessor back to geojs to handle it.
-      return acc;
-    }
-    if (doNotHandle) {
-      return acc;
-    }
-    if (categorical) {
-      if (domain.length <= 10) {
-        return wrap(d3.scale.category10().domain(domain));
-      } else if (domain.length <= 20) {
-        return wrap(d3.scale.category20().domain(domain));
-      } else {
-        // TODO: sort domain by most used and make an "other" category
-        return wrap(d3.scale.category20().domain(domain));
+      if (categorical) {
+        if (domain.length <= 10) {
+          return wrap(d3.scale.category10().domain(domain));
+        } else if (domain.length <= 20) {
+          return wrap(d3.scale.category20().domain(domain));
+        } else {
+          // TODO: sort domain by most used and make an "other" category
+          return wrap(d3.scale.category20().domain(domain));
+        }
       }
-    }
-    // http://colorbrewer2.org/?type=diverging&scheme=RdYlBu&n=3
-    return wrap(d3.scale.linear()
+      // http://colorbrewer2.org/?type=diverging&scheme=RdYlBu&n=3
+      return wrap(d3.scale.linear()
       .range([
         'rgb(252,141,89)',
         'rgb(255,255,191)',
@@ -31048,340 +32015,338 @@ geo.registerWidget('dom', 'legend', geo.gui.legendWidget);
         (min + max) / 2,
         max
       ]));
-  }
-
-  /**
-   * @class geojsMap
-   * @memberOf jQuery.fn
-   *
-   * @description Generates a geojs map inside an element.
-   *
-   *
-   * Due to current limitations in geojs, only a single map can be instantiated
-   * on a page.  Trying to create a second map will throw an error
-   * (see issue
-   * <a href="https://github.com/OpenGeoscience/geojs/issues/154">#154</a>).
-   *
-   * @example <caption>Create a map with the default options.</caption>
-   * $("#map").geojsMap();
-   * @example <caption>Create a map with a given initial center and zoom</caption>
-   * $("#map").geojsMap({
-   *    longitude: -125,
-   *    latitude: 35,
-   *    zoom: 5
-   * });
-   * @example <caption>Create a map with points</caption>
-   * $("#map").geojsMap({
-   *   data: [...],
-   *   layers: [{
-   *     renderer: 'vgl',
-   *     features: [{
-   *       type: 'point',
-   *       radius: 5,
-   *       position: function (d) { return {x: d.geometry.x, y: d.geometry.y} },
-   *       fillColor: function (d, i) { return i < 5 ? 'red' : 'blue' },
-   *       stroke: false
-   *     }]
-   *   }]
-   * };
-   * @example <caption>Create a map with points, lines and multiple layers</caption>
-   * $("#map").geojsMap({
-   *   center: { x: -130, y: 40 },
-   *   zoom: 3,
-   *   layers: [{
-   *     renderer: 'vgl',
-   *     features: [{
-   *       data: [...],
-   *       type: 'point',
-   *       radius: 5,
-   *       position: function (d) { return {x: d.geometry.x, y: d.geometry.y} },
-   *       fillColor: function (d, i) { return i < 5 ? 'red' : 'blue' },
-   *       stroke: false
-   *     }]
-   *   },
-   *   {
-   *      renderer: 'd3',
-   *      features[{
-   *        data: [...],
-   *        type: 'line',
-   *        position: function (d) { return { x: d[0], y: d[1] } },
-   *        line: function (d) { return d.coordinates; },
-   *        strokeWidth: 3,
-   *        strokeColor: 'black',
-   *        strokeOpacity: 0.5
-   *      }]
-   *   }]
-   * };
-   */
-  // jscs:disable requireSpaceBetweenArguments
-  $.widget('geojs.geojsMap', /** @lends jQuery.fn.geojsMap */{
-  // jscs:enable requireSpaceBetweenArguments
-    /**
-     * A coordinate object as accepted by geojs to express positions in an
-     * arbitrary coordinate system (geographic, screen, etc).  Coordinates returned by
-     * geojs methods are always expressed with "x" and "y" properties, but
-     * it will accept any of the aliased properties.
-     * @typedef coordinate
-     * @type {object}
-     * @property {number} longitude Alias: "x", "lng", or "lon"
-     * @property {number} latitude Alias: "y" or "lat"
-     * @property {number} [elevation=0] Alias: "z", "elev", or "height"
-     */
+    }
 
     /**
-     * Colors can be expressed in multiple ways:
-     * <ul>
-     *   <li>css name (<code>"steelblue"</code>)</li>
-     *   <li>24 bit hex value (<code>0xff0051</code>)</li>
-     *   <li>25 bit hex string (<code>"#ff0051"</code>)</li>
-     *   <li>rgb object (values from 0-1, <code>{r: 1, g: 0.5, b: 0}</code>)</li>
-     * </ul>
-     * @typedef color
-     * @type {*}
+     * @class geojsMap
+     * @memberOf jQuery.fn
+     *
+     * @description Generates a geojs map inside an element.
+     *
+     *
+     * Due to current limitations in geojs, only a single map can be instantiated
+     * on a page.  Trying to create a second map will throw an error
+     * (see issue
+     * <a href="https://github.com/OpenGeoscience/geojs/issues/154">#154</a>).
+     *
+     * @example <caption>Create a map with the default options.</caption>
+     * $("#map").geojsMap();
+     * @example <caption>Create a map with a given initial center and zoom</caption>
+     * $("#map").geojsMap({
+     *    longitude: -125,
+     *    latitude: 35,
+     *    zoom: 5
+     * });
+     * @example <caption>Create a map with points</caption>
+     * $("#map").geojsMap({
+     *   data: [...],
+     *   layers: [{
+     *     renderer: 'vgl',
+     *     features: [{
+     *       type: 'point',
+     *       radius: 5,
+     *       position: function (d) { return {x: d.geometry.x, y: d.geometry.y} },
+     *       fillColor: function (d, i) { return i < 5 ? 'red' : 'blue' },
+     *       stroke: false
+     *     }]
+     *   }]
+     * };
+     * @example <caption>Create a map with points, lines and multiple layers</caption>
+     * $("#map").geojsMap({
+     *   center: { x: -130, y: 40 },
+     *   zoom: 3,
+     *   layers: [{
+     *     renderer: 'vgl',
+     *     features: [{
+     *       data: [...],
+     *       type: 'point',
+     *       radius: 5,
+     *       position: function (d) { return {x: d.geometry.x, y: d.geometry.y} },
+     *       fillColor: function (d, i) { return i < 5 ? 'red' : 'blue' },
+     *       stroke: false
+     *     }]
+     *   },
+     *   {
+     *      renderer: 'd3',
+     *      features[{
+     *        data: [...],
+     *        type: 'line',
+     *        position: function (d) { return { x: d[0], y: d[1] } },
+     *        line: function (d) { return d.coordinates; },
+     *        strokeWidth: 3,
+     *        strokeColor: 'black',
+     *        strokeOpacity: 0.5
+     *      }]
+     *   }]
+     * };
      */
+    $.widget('geojs.geojsMap', /** @lends jQuery.fn.geojsMap */{
+      /**
+       * A coordinate object as accepted by geojs to express positions in an
+       * arbitrary coordinate system (geographic, screen, etc).  Coordinates returned by
+       * geojs methods are always expressed with "x" and "y" properties, but
+       * it will accept any of the aliased properties.
+       * @typedef coordinate
+       * @type {object}
+       * @property {number} longitude Alias: "x", "lng", or "lon"
+       * @property {number} latitude Alias: "y" or "lat"
+       * @property {number} [elevation=0] Alias: "z", "elev", or "height"
+       */
 
-    /**
-     * Point feature options object.  All styles can be
-     * given as accessor functions or constants.  Accessor
-     * functions are called with the following signature:
-     * <pre>
-     *     function func(d, i) {
-     *         // d    - data object
-     *         // i    - index of d in the data array
-     *         // this - geo.pointFeature
-     *     }
-     * </pre>
-     * Pass null to remove saved options from previous calls.
-     * @typedef pointOptions
-     * @type {Object}
-     * @property {Object[]} data Data array
-     * @property {coordinate} position Location of the point center
-     * @property {number} radius
-     *  Radius of the circle in pixels (ignored when <code>size</code>
-     *  is present)
-     * @property {function} size
-     *   A function returning a numerical value
-     * @property {boolean} fill Presence or absence of the fill
-     * @property {color} fillColor Interior color
-     * @property {float} fillOpacity Opacity of the interior <code>[0,1]</code>
-     * @property {boolean} stroke Presence or absence of the stroke
-     * @property {color} strokeColor Stroke color
-     * @property {float} strokeOpacity Opacity of the stroke <code>[0,1]</code>
-     */
+      /**
+       * Colors can be expressed in multiple ways:
+       * <ul>
+       *   <li>css name (<code>"steelblue"</code>)</li>
+       *   <li>24 bit hex value (<code>0xff0051</code>)</li>
+       *   <li>25 bit hex string (<code>"#ff0051"</code>)</li>
+       *   <li>rgb object (values from 0-1, <code>{r: 1, g: 0.5, b: 0}</code>)</li>
+       * </ul>
+       * @typedef color
+       * @type {*}
+       */
 
-    /**
-     * @instance
-     * @description
-     * Map options (not fully implemented).
-     * @example <caption>Get the current map center</caption>
-     * var center=$("#map").geojsMap("center");
-     * @example <caption>Pan the map to a new center</caption>
-     * $("#map").geojsMap("center", {lat: 10, lng: -100});
-     * @property {object[]} [data=[]] The default data array used for
-     * features/layers not already containing data.
-     * @property {coordinate} [center={lat: 0, lng: 0}] The map center
-     * @property {number} [zoom=0] The zoom level (floating point >= 0)
-     * @property {(number|null)} [width=null]
-     *   The width of the map in pixels or null for 100%
-     * @property {(number|null)} [height=null]
-     *   The height of the map in pixels or null for 100%
-     * @property {geo.layer.spec[]} [layers=[]]
-     *   Describes layers added to the map
-     * @property {boolean} [autoresize=true]
-     *   Resize the map on <code>window.resize</code> (initialization only)
-     * @property {string} [url]
-     *   The open street map tile server spec default:
-     *   <code>http://tile.openstreetmap.org/&lt;zoom>/&lt;x>/&lt;y>.png</code>
-     */
-    options: {
-      center: {latitude: 0, longitude: 0},
-      zoom: 0,
-      width: null,
-      height: null,
-      layers: [],
-      data: [],
-      url: 'http://tile.openstreetmap.org/{z}/{x}/{y}.png',
-      attribution: undefined,
+      /**
+       * Point feature options object.  All styles can be
+       * given as accessor functions or constants.  Accessor
+       * functions are called with the following signature:
+       * <pre>
+       *     function func(d, i) {
+       *         // d    - data object
+       *         // i    - index of d in the data array
+       *         // this - geo.pointFeature
+       *     }
+       * </pre>
+       * Pass null to remove saved options from previous calls.
+       * @typedef pointOptions
+       * @type {Object}
+       * @property {Object[]} data Data array
+       * @property {coordinate} position Location of the point center
+       * @property {number} radius
+       *  Radius of the circle in pixels (ignored when <code>size</code>
+       *  is present)
+       * @property {function} size
+       *   A function returning a numerical value
+       * @property {boolean} fill Presence or absence of the fill
+       * @property {color} fillColor Interior color
+       * @property {float} fillOpacity Opacity of the interior <code>[0,1]</code>
+       * @property {boolean} stroke Presence or absence of the stroke
+       * @property {color} strokeColor Stroke color
+       * @property {float} strokeOpacity Opacity of the stroke <code>[0,1]</code>
+       */
 
-      // These options are for future use, but shouldn't
-      // be changed at the moment, so they aren't documented.
-      baseLayer: 'osm',
-      baseRenderer: 'vgl'
-    },
+      /**
+       * @instance
+       * @description
+       * Map options (not fully implemented).
+       * @example <caption>Get the current map center</caption>
+       * var center=$("#map").geojsMap("center");
+       * @example <caption>Pan the map to a new center</caption>
+       * $("#map").geojsMap("center", {lat: 10, lng: -100});
+       * @property {object[]} [data=[]] The default data array used for
+       * features/layers not already containing data.
+       * @property {coordinate} [center={lat: 0, lng: 0}] The map center
+       * @property {number} [zoom=0] The zoom level (floating point >= 0)
+       * @property {(number|null)} [width=null]
+       *   The width of the map in pixels or null for 100%
+       * @property {(number|null)} [height=null]
+       *   The height of the map in pixels or null for 100%
+       * @property {geo.layer.spec[]} [layers=[]]
+       *   Describes layers added to the map
+       * @property {boolean} [autoresize=true]
+       *   Resize the map on <code>window.resize</code> (initialization only)
+       * @property {string} [url]
+       *   The open street map tile server spec default:
+       *   <code>http://tile.openstreetmap.org/&lt;zoom>/&lt;x>/&lt;y>.png</code>
+       */
+      options: {
+        center: {latitude: 0, longitude: 0},
+        zoom: 0,
+        width: null,
+        height: null,
+        layers: [],
+        data: [],
+        url: 'http://tile.openstreetmap.org/{z}/{x}/{y}.png',
+        attribution: undefined,
 
-    /**
-     * Internal constructor
-     * @instance
-     * @protected
-     */
-    _create: function () {
-      if (this._map || !this.element.length) {
-        // when called multiple times on a single element, do nothing
-        return;
-      }
+        // These options are for future use, but shouldn't
+        // be changed at the moment, so they aren't documented.
+        baseLayer: 'osm',
+        baseRenderer: 'vgl'
+      },
 
-      // create the map
-      this._map = geo.map({
-        width: this.options.width,
-        height: this.options.height,
-        zoom: this.options.zoom,
-        center: this.options.center,
-        node: this.element.get(0)
-      });
-
-      // create the base layer
-      this._baseLayer = this._map.createLayer(
-        this.options.baseLayer,
-        {
-          renderer: this.options.baseRenderer,
-          url: this.options.url,
-          attribution: this.options.attribution
+      /**
+       * Internal constructor
+       * @instance
+       * @protected
+       */
+      _create: function () {
+        if (this._map || !this.element.length) {
+          // when called multiple times on a single element, do nothing
+          return;
         }
+
+        // create the map
+        this._map = geo.map({
+          width: this.options.width,
+          height: this.options.height,
+          zoom: this.options.zoom,
+          center: this.options.center,
+          node: this.element.get(0)
+        });
+
+        // create the base layer
+        this._baseLayer = this._map.createLayer(
+        this.options.baseLayer,
+            {
+              renderer: this.options.baseRenderer,
+              url: this.options.url,
+              attribution: this.options.attribution
+            }
       );
 
-      // Trigger a resize to a valid size before adding
-      // the feature layer to handle some of the bugs that
-      // occur when initializing onto a node of size 0.
-      this._resize({width: 800, height: 600});
+        // Trigger a resize to a valid size before adding
+        // the feature layer to handle some of the bugs that
+        // occur when initializing onto a node of size 0.
+        this._resize({width: 800, height: 600});
 
-      this._layers = [];
-      this.update();
-    },
+        this._layers = [];
+        this.update();
+      },
 
-    /**
-     * Update the layers and features using a new array of
-     * {@link geo.layer.spec} objects.  All existing layers
-     * and features are deleted.  If only the data has changed,
-     * you can usually just call {@link jQuery.fn.geojsMap#redraw redraw}.
-     * @instance
-     * @param {geo.layer.spec[]} [layers] New map layers
-     * @example <caption>Delete and recreate all existing layers</caption>
-     * $("#map").geojsMap("update");
-     * @example <caption>Remove all existing feature layers.</caption>
-     * $("#map").geojsMap("update", []);
-     */
-    update: function (layers) {
-      var m_this = this;
-      this.options.layers = layers || this.options.layers || [];
+      /**
+       * Update the layers and features using a new array of
+       * {@link geo.layer.spec} objects.  All existing layers
+       * and features are deleted.  If only the data has changed,
+       * you can usually just call {@link jQuery.fn.geojsMap#redraw redraw}.
+       * @instance
+       * @param {geo.layer.spec[]} [layers] New map layers
+       * @example <caption>Delete and recreate all existing layers</caption>
+       * $("#map").geojsMap("update");
+       * @example <caption>Remove all existing feature layers.</caption>
+       * $("#map").geojsMap("update", []);
+       */
+      update: function (layers) {
+        var m_this = this;
+        this.options.layers = layers || this.options.layers || [];
 
-      // delete existing layers
-      this._layers.forEach(function (layer) {
-        layer.clear();
-        m_this._map.deleteLayer(layer);
-      });
+        // delete existing layers
+        this._layers.forEach(function (layer) {
+          layer.clear();
+          m_this._map.deleteLayer(layer);
+        });
 
-      // create new layers
-      this._layers = this.options.layers.map(function (layer) {
-        layer.data = layer.data || m_this.options.data;
+        // create new layers
+        this._layers = this.options.layers.map(function (layer) {
+          layer.data = layer.data || m_this.options.data;
 
-        // Until auto color scaling gets moved into geojs core, we will
-        // mutate the spec and replace the color and radius options.
-        (layer.features || []).forEach(function (feature) {
-          var data = feature.data || layer.data || [];
-          var scl;
-          if (feature.type === 'point') {
-            if (feature.size) {
-              feature._size = geo.util.ensureFunction(feature.size);
-            } else if (feature.size === null) {
-              delete feature._size;
-            }
+          // Until auto color scaling gets moved into geojs core, we will
+          // mutate the spec and replace the color and radius options.
+          (layer.features || []).forEach(function (feature) {
+            var data = feature.data || layer.data || [];
+            var scl;
+            if (feature.type === 'point') {
+              if (feature.size) {
+                feature._size = geo.util.ensureFunction(feature.size);
+              } else if (feature.size === null) {
+                delete feature._size;
+              }
 
-            if (data.length && feature._size) {
-              scl = d3.scale.linear()
+              if (data.length && feature._size) {
+                scl = d3.scale.linear()
                 .domain(
                   d3.extent(data, feature._size)
                 )
                 .range([5, 20]);
-              feature.radius = function () {
-                // TODO: wrong `this` (wait for style refactor)
-                return scl(feature._size.apply(this, arguments));
-              };
+                feature.radius = function () {
+                  // TODO: wrong `this` (wait for style refactor)
+                  return scl(feature._size.apply(this, arguments));
+                };
+              }
+              delete feature.size;
             }
-            delete feature.size;
-          }
 
-          var key;
-          for (key in feature) {
-            if (feature.hasOwnProperty(key) &&
+            var key;
+            for (key in feature) {
+              if (feature.hasOwnProperty(key) &&
                 isColorKey(key)) {
-              feature[key] = makeColorScale(data, feature[key]);
+                feature[key] = makeColorScale(data, feature[key]);
+              }
             }
-          }
+          });
+          return geo.layer.create(m_this._map, layer);
         });
-        return geo.layer.create(m_this._map, layer);
-      });
 
-      // trigger an initial draw
-      this.redraw();
+        // trigger an initial draw
+        this.redraw();
 
-      return this;
-    },
+        return this;
+      },
 
-    /**
-     * Return the geojs map object.
-     * @instance
-     * @returns {geo.map}
-     */
-    map: function () {
-      return this._map;
-    },
+      /**
+       * Return the geojs map object.
+       * @instance
+       * @returns {geo.map}
+       */
+      map: function () {
+        return this._map;
+      },
 
-    /**
-     * Set the tile server URL.
-     * @instance
-     * @param {string} url The url format string of an OSM tile server.
-     */
-    url: function (url) {
-      this._baseLayer.url(url);
-      return this;
-    },
+      /**
+       * Set the tile server URL.
+       * @instance
+       * @param {string} url The url format string of an OSM tile server.
+       */
+      url: function (url) {
+        this._baseLayer.url(url);
+        return this;
+      },
 
-    /**
-     * Resize the map canvas.
-     * @instance
-     * @protected
-     * @param {object?} size Explicit size or use this.options.
-     */
-    _resize: function (size) {
-      var width = this.options.width,
-          height = this.options.height;
-      if (size) {
-        width = size.width;
-        height = size.height;
+      /**
+       * Resize the map canvas.
+       * @instance
+       * @protected
+       * @param {object?} size Explicit size or use this.options.
+       */
+      _resize: function (size) {
+        var width = this.options.width,
+            height = this.options.height;
+        if (size) {
+          width = size.width;
+          height = size.height;
+        }
+        if (!width) {
+          width = this.element.width();
+        }
+        if (!height) {
+          height = this.element.height();
+        }
+        this._map.resize(0, 0, width, height);
+      },
+
+      /**
+       * Do a full redraw of the map.  In general, users shouldn't need to
+       * call this method, but it could be useful when accessing lower
+       * level features of the mapping api.
+       * @todo This function may need to go through each feature and call
+       * {@link geo.feature#modified} to properly update.
+       * @instance
+       */
+      redraw: function () {
+        this._resize();
+        return this;
       }
-      if (!width) {
-        width = this.element.width();
-      }
-      if (!height) {
-        height = this.element.height();
-      }
-      this._map.resize(0, 0, width, height);
-    },
+    });
 
+    // Some argument type definitions used only by this plugin:
     /**
-     * Do a full redraw of the map.  In general, users shouldn't need to
-     * call this method, but it could be useful when accessing lower
-     * level features of the mapping api.
-     * @todo This function may need to go through each feature and call
-     * {@link geo.feature#modified} to properly update.
-     * @instance
+     * A geojs renderer is one of the following:
+     * <ul>
+     *   <li><code>"vgl"</code>: Uses webGL</li>
+     *   <li><code>"d3"</code>: Uses svg</li>
+     * </ul>
+     * @typedef renderer
+     * @type {string}
      */
-    redraw: function () {
-      this._resize();
-      return this;
-    }
-  });
-
-  // Some argument type definitions used only by this plugin:
-  /**
-   * A geojs renderer is one of the following:
-   * <ul>
-   *   <li><code>"vgl"</code>: Uses webGL</li>
-   *   <li><code>"d3"</code>: Uses svg</li>
-   * </ul>
-   * @typedef renderer
-   * @type {string}
-   */
 
   };
 
