@@ -49,5 +49,6 @@
     "gis",
     "webgl",
     "svg"
-  ]
+  ],
+  "main": "geo.js"
 }
