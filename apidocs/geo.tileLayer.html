@@ -1052,7 +1052,7 @@ defaults.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line1339">line 1339</a>
+        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line1398">line 1398</a>
     </li></ul></dd>
     
 
@@ -1428,7 +1428,7 @@ of `_isCovered` and `_outOfBounds`.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line1190">line 1190</a>
+        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line1243">line 1243</a>
     </li></ul></dd>
     
 
@@ -1579,7 +1579,7 @@ to draw the tile on a renderer specific context.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line648">line 648</a>
+        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line694">line 694</a>
     </li></ul></dd>
     
 
@@ -1666,7 +1666,7 @@ to draw the tile on a renderer specific context.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line1324">line 1324</a>
+        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line1382">line 1382</a>
     </li></ul></dd>
     
 
@@ -1798,7 +1798,7 @@ create the element if it doesn't already exist.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line870">line 870</a>
+        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line920">line 920</a>
     </li></ul></dd>
     
 
@@ -2753,7 +2753,7 @@ generating a new tile.
 
     
 
-    <h4 class="name" id="_getTiles"><span class="type-signature">(protected) </span>_getTiles<span class="signature">(maxLevel, bounds, sorted)</span><span class="type-signature"> &rarr; {Array.&lt;<a href="geo.tile.html">geo.tile</a>>}</span></h4>
+    <h4 class="name" id="_getTiles"><span class="type-signature">(protected) </span>_getTiles<span class="signature">(maxLevel, bounds, sorted, onlyIfChanged)</span><span class="type-signature"> &rarr; {Array.&lt;<a href="geo.tile.html">geo.tile</a>>}</span></h4>
 
     
 
@@ -2864,6 +2864,31 @@ ordered by loading priority (center tiles first).
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>onlyIfChanged</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">If the set of tiles have not changed
+    (even if their desired order has), return undefined instead of an
+    array of tiles.</td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -2901,7 +2926,7 @@ ordered by loading priority (center tiles first).
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line457">line 457</a>
+        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line466">line 466</a>
     </li></ul></dd>
     
 
@@ -3149,7 +3174,7 @@ ordered by loading priority (center tiles first).
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line1083">line 1083</a>
+        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line1136">line 1136</a>
     </li></ul></dd>
     
 
@@ -3253,7 +3278,7 @@ as pixels at the current zoom level.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line740">line 740</a>
+        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line786">line 786</a>
     </li></ul></dd>
     
 
@@ -3362,7 +3387,7 @@ as pixels at the current zoom level.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line1306">line 1306</a>
+        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line1364">line 1364</a>
     </li></ul></dd>
     
 
@@ -3497,7 +3522,7 @@ an array of tiles covering it or null if any part of the tile is exposed.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line1101">line 1101</a>
+        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line1154">line 1154</a>
     </li></ul></dd>
     
 
@@ -3723,7 +3748,7 @@ or at a lower zoom level.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line555">line 555</a>
+        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line601">line 601</a>
     </li></ul></dd>
     
 
@@ -3876,7 +3901,7 @@ or at a lower zoom level.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line729">line 729</a>
+        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line775">line 775</a>
     </li></ul></dd>
     
 
@@ -4009,7 +4034,7 @@ transformations.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line264">line 264</a>
+        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line262">line 262</a>
     </li></ul></dd>
     
 
@@ -4366,7 +4391,7 @@ and can be removed from the canvas.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line1159">line 1159</a>
+        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line1212">line 1212</a>
     </li></ul></dd>
     
 
@@ -4564,7 +4589,7 @@ out of the active view or the zoom has changed.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line770">line 770</a>
+        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line816">line 816</a>
     </li></ul></dd>
     
 
@@ -4699,7 +4724,7 @@ finds and removes the <img> element created for the tile.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line709">line 709</a>
+        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line755">line 755</a>
     </li></ul></dd>
     
 
@@ -4831,7 +4856,7 @@ the canvas is covered by the tile.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line1067">line 1067</a>
+        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line1117">line 1117</a>
     </li></ul></dd>
     
 
@@ -4962,7 +4987,7 @@ the canvas is covered by the tile.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line291">line 291</a>
+        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line289">line 289</a>
     </li></ul></dd>
     
 
@@ -5365,7 +5390,7 @@ levels.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line1296">line 1296</a>
+        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line1354">line 1354</a>
     </li></ul></dd>
     
 
@@ -5469,7 +5494,7 @@ levels.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line860">line 860</a>
+        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line910">line 910</a>
     </li></ul></dd>
     
 
@@ -5574,7 +5599,7 @@ levels.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line936">line 936</a>
+        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line986">line 986</a>
     </li></ul></dd>
     
 
@@ -5751,7 +5776,7 @@ levels.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line896">line 896</a>
+        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line946">line 946</a>
     </li></ul></dd>
     
 
@@ -6491,7 +6516,7 @@ user provided content.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line797">line 797</a>
+        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line843">line 843</a>
     </li></ul></dd>
     
 
@@ -6944,7 +6969,7 @@ By default, this is done at the current base zoom level.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line1222">line 1222</a>
+        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line1280">line 1280</a>
     </li></ul></dd>
     
 
@@ -7162,7 +7187,7 @@ By default, this is done at the current base zoom level.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line626">line 626</a>
+        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line672">line 672</a>
     </li></ul></dd>
     
 
@@ -7494,7 +7519,7 @@ level to world coordinates.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line598">line 598</a>
+        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line644">line 644</a>
     </li></ul></dd>
     
 
@@ -7658,7 +7683,7 @@ coordinate origin.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line847">line 847</a>
+        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line895">line 895</a>
     </li></ul></dd>
     
 
@@ -8498,7 +8523,7 @@ coordinate origin.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_layer.js.html">core/layer.js</a>, <a href="core_layer.js.html#line444">line 444</a>
+        <a href="core_layer.js.html">core/layer.js</a>, <a href="core_layer.js.html#line443">line 443</a>
     </li></ul></dd>
     
 
@@ -8919,7 +8944,7 @@ coordinate origin.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line238">line 238</a>
+        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line236">line 236</a>
     </li></ul></dd>
     
 
@@ -9968,7 +9993,7 @@ current z-indices for this and the next `n` layers.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_layer.js.html">core/layer.js</a>, <a href="core_layer.js.html#line453">line 453</a>
+        <a href="core_layer.js.html">core/layer.js</a>, <a href="core_layer.js.html#line452">line 452</a>
     </li></ul></dd>
     
 
@@ -10270,7 +10295,7 @@ current z-indices for this and the next `n` layers.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line535">line 535</a>
+        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line581">line 581</a>
     </li></ul></dd>
     
 
@@ -10426,7 +10451,7 @@ current z-indices for this and the next `n` layers.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line692">line 692</a>
+        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line738">line 738</a>
     </li></ul></dd>
     
 
@@ -10810,7 +10835,7 @@ and resetting the tile cache.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line817">line 817</a>
+        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line865">line 865</a>
     </li></ul></dd>
     
 
@@ -11084,7 +11109,7 @@ and resetting the tile cache.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line1270">line 1270</a>
+        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line1328">line 1328</a>
     </li></ul></dd>
     
 
@@ -11334,7 +11359,7 @@ and resetting the tile cache.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line304">line 304</a>
+        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line302">line 302</a>
     </li></ul></dd>
     
 
@@ -11488,7 +11513,7 @@ The default implementation just returns `Math.pow(2, z)`.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line222">line 222</a>
+        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line220">line 220</a>
     </li></ul></dd>
     
 
@@ -11737,7 +11762,7 @@ given zoom level.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line614">line 614</a>
+        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line660">line 660</a>
     </li></ul></dd>
     
 
@@ -11901,7 +11926,7 @@ coordinate origin.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line830">line 830</a>
+        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line878">line 878</a>
     </li></ul></dd>
     
 
@@ -12157,7 +12182,7 @@ tiles.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line1246">line 1246</a>
+        <a href="core_tileLayer.js.html">core/tileLayer.js</a>, <a href="core_tileLayer.js.html#line1304">line 1304</a>
     </li></ul></dd>
     
 
@@ -12269,7 +12294,7 @@ tiles.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_layer.js.html">core/layer.js</a>, <a href="core_layer.js.html#line434">line 434</a>
+        <a href="core_layer.js.html">core/layer.js</a>, <a href="core_layer.js.html#line433">line 433</a>
     </li></ul></dd>
     
 
@@ -12481,13 +12506,13 @@ order of the layers in much the same way as the CSS z-index property.
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.camera.html">camera</a></li><li><a href="geo.choroplethFeature.html">choroplethFeature</a></li><li><a href="geo.clock.html">clock</a></li><li><a href="geo.contourFeature.html">contourFeature</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fetchQueue.html">fetchQueue</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.choroplethFeature.html">choroplethFeature</a></li><li><a href="geo.gl.contourFeature.html">contourFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.svgWidget.html">svgWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.imageTile.html">imageTile</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.tile.html">tile</a></li><li><a href="geo.tileCache.html">tileCache</a></li><li><a href="geo.tileLayer.html">tileLayer</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.ClusterGroup.html">ClusterGroup</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.camera.html">camera</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.camera.html">camera</a></li><li><a href="geo.choroplethFeature.html">choroplethFeature</a></li><li><a href="geo.clock.html">clock</a></li><li><a href="geo.contourFeature.html">contourFeature</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fetchQueue.html">fetchQueue</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.choroplethFeature.html">choroplethFeature</a></li><li><a href="geo.gl.contourFeature.html">contourFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.quadFeature.html">quadFeature</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.svgWidget.html">svgWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.imageTile.html">imageTile</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.quadFeature.html">quadFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.tile.html">tile</a></li><li><a href="geo.tileCache.html">tileCache</a></li><li><a href="geo.tileLayer.html">tileLayer</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.ClusterGroup.html">ClusterGroup</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.camera.html">camera</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Thu Jan 28 2016 16:54:28 GMT-0500 (EST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Thu Feb 18 2016 10:07:43 GMT-0500 (EST)
 </footer>
 
 <script> prettyPrint(); </script>

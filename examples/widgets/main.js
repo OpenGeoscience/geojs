@@ -62,8 +62,8 @@ $(function () {
   // Create a time series plot widget
   var widget = ui.createWidget('dom', {
     position: {
-      x: 20,
-      y: map.node().height() - 410 - 20
+      left: 20,
+      bottom: 20
     }
   });
   var $widget = $(widget.canvas());

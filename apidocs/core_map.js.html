@@ -148,16 +148,20 @@ geo.map = function (arg) {
    * from [-180, 180] in the interface projection, and y matches the x range in
    * the map (not the interface) projection.  For images, this might be
    * [0, width] and [0, height] instead. */
+  var mcx = ((m_maxBounds.left || 0) + (m_maxBounds.right || 0)) / 2,
+      mcy = ((m_maxBounds.bottom || 0) + (m_maxBounds.top || 0)) / 2;
   m_maxBounds.left = geo.transform.transformCoordinates(m_ingcs, m_gcs, [{
-    x: m_maxBounds.left !== undefined ? m_maxBounds.left : -180, y: 0}])[0].x;
+    x: m_maxBounds.left !== undefined ? m_maxBounds.left : -180, y: mcy
+  }])[0].x;
   m_maxBounds.right = geo.transform.transformCoordinates(m_ingcs, m_gcs, [{
-    x: m_maxBounds.right !== undefined ? m_maxBounds.right : 180, y: 0}])[0].x;
+    x: m_maxBounds.right !== undefined ? m_maxBounds.right : 180, y: mcy
+  }])[0].x;
   m_maxBounds.top = (m_maxBounds.top !== undefined ?
     geo.transform.transformCoordinates(m_ingcs, m_gcs, [{
-    x: 0, y: m_maxBounds.top}])[0].y : m_maxBounds.right);
+      x: mcx, y: m_maxBounds.top}])[0].y : m_maxBounds.right);
   m_maxBounds.bottom = (m_maxBounds.bottom !== undefined ?
     geo.transform.transformCoordinates(m_ingcs, m_gcs, [{
-    x: 0, y: m_maxBounds.bottom}])[0].y : m_maxBounds.left);
+      x: mcx, y: m_maxBounds.bottom}])[0].y : m_maxBounds.left);
   m_unitsPerPixel = (arg.unitsPerPixel || (
     m_maxBounds.right - m_maxBounds.left) / 256);
 
@@ -319,7 +323,16 @@ geo.map = function (arg) {
     if (arg === undefined) {
       return m_gcs;
     }
-    m_gcs = arg;
+    if (arg !== m_gcs) {
+      var oldCenter = m_this.center(undefined, undefined);
+      m_gcs = arg;
+      reset_minimum_zoom();
+      var newZoom = fix_zoom(m_zoom);
+      if (newZoom !== m_zoom) {
+        m_this.zoom(newZoom);
+      }
+      m_this.center(oldCenter, undefined);
+    }
     return m_this;
   };
 
@@ -357,12 +370,11 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.zoom = function (val, origin, ignoreDiscreteZoom) {
-    var evt, oldZoom, bounds;
+    var evt, bounds;
     if (val === undefined) {
       return m_zoom;
     }
 
-    oldZoom = m_zoom;
     /* The ignoreDiscreteZoom flag is intended to allow non-integer zoom values
      * during animation. */
     val = fix_zoom(val, ignoreDiscreteZoom);
@@ -418,14 +430,14 @@ geo.map = function (arg) {
     var bounds = fix_bounds(m_camera.bounds, m_rotation);
     if (bounds !== m_camera.bounds) {
       var panPos = m_this.gcsToDisplay({
-            x: m_camera.bounds.left, y: m_camera.bounds.top}, null);
+        x: m_camera.bounds.left, y: m_camera.bounds.top}, null);
       bounds = m_this.boundsFromZoomAndCenter(m_zoom, {
         x: (bounds.left + bounds.right) / 2,
         y: (bounds.top + bounds.bottom) / 2
       }, m_rotation, null);
       camera_bounds(bounds, m_rotation);
       var clampPos = m_this.gcsToDisplay({
-            x: m_camera.bounds.left, y: m_camera.bounds.top}, null);
+        x: m_camera.bounds.left, y: m_camera.bounds.top}, null);
       evt.screenDelta.x += clampPos.x - panPos.x;
       evt.screenDelta.y += clampPos.y - panPos.y;
     }
@@ -513,6 +525,7 @@ geo.map = function (arg) {
 
     camera_bounds(m_this.boundsFromZoomAndCenter(
         m_zoom, m_center, m_rotation, null), m_rotation);
+    m_this.modified();
     // trigger a pan event
     m_this.geoTrigger(
       geo.event.pan,
@@ -538,8 +551,12 @@ geo.map = function (arg) {
       layerName, m_this, arg);
 
     if (newLayer) {
-
       m_this.addChild(newLayer);
+      m_this.children().forEach(function (c) {
+        if (c instanceof geo.gui.uiLayer) {
+          c.moveToTop();
+        }
+      });
       newLayer._update();
       m_this.modified();
 
@@ -645,13 +662,13 @@ geo.map = function (arg) {
     m_width = w;
     m_height = h;
 
-    m_this.camera().viewport = {width: w, height: h};
-
     reset_minimum_zoom();
     var newZoom = fix_zoom(m_zoom);
     if (newZoom !== m_zoom) {
       m_this.zoom(newZoom);
     }
+    m_this.camera().viewport = {width: w, height: h};
+    m_this.center(oldCenter);
 
     m_this.geoTrigger(geo.event.resize, {
       type: geo.event.resize,
@@ -662,7 +679,6 @@ geo.map = function (arg) {
       height: h
     });
 
-    m_this.center(oldCenter);
     m_this.modified();
     return m_this;
   };
@@ -792,9 +808,9 @@ geo.map = function (arg) {
     var i, layers = m_this.children();
 
     m_this.geoTrigger(geo.event.draw, {
-        type: geo.event.draw,
-        target: m_this
-      }
+      type: geo.event.draw,
+      target: m_this
+    }
     );
 
     m_this._update();
@@ -804,9 +820,9 @@ geo.map = function (arg) {
     }
 
     m_this.geoTrigger(geo.event.drawEnd, {
-        type: geo.event.drawEnd,
-        target: m_this
-      }
+      type: geo.event.drawEnd,
+      target: m_this
+    }
     );
 
     return m_this;
@@ -1062,7 +1078,7 @@ geo.map = function (arg) {
       opts.center = geo.util.normalizeCoordinates(opts.center);
       if (gcs !== m_gcs) {
         opts.center = geo.transform.transformCoordinates(gcs, m_gcs, [
-            opts.center])[0];
+          opts.center])[0];
       }
     }
     opts = $.extend(true, {}, defaultOpts, opts);
@@ -1210,7 +1226,7 @@ geo.map = function (arg) {
     if (bds !== undefined) {
       if (gcs !== m_gcs) {
         var trans = geo.transform.transformCoordinates(gcs, m_gcs, [{
-            x: bds.left, y: bds.top}, {x: bds.right, y: bds.bottom}]);
+          x: bds.left, y: bds.top}, {x: bds.right, y: bds.bottom}]);
         bds = {
           left: trans[0].x,
           top: trans[0].y,
@@ -1230,6 +1246,44 @@ geo.map = function (arg) {
     return m_this.boundsFromZoomAndCenter(m_zoom, m_center, m_rotation, gcs);
   };
 
+  this.maxBounds = function (bounds, gcs) {
+    gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
+    if (bounds === undefined) {
+      return {
+        left: geo.transform.transformCoordinates(m_gcs, gcs, [{
+          x: m_maxBounds.left, y: 0}])[0].x,
+        right: geo.transform.transformCoordinates(m_gcs, gcs, [{
+          x: m_maxBounds.right, y: 0}])[0].x,
+        bottom: geo.transform.transformCoordinates(m_gcs, gcs, [{
+          x: 0, y: m_maxBounds.bottom}])[0].y,
+        top: geo.transform.transformCoordinates(m_gcs, gcs, [{
+          x: 0, y: m_maxBounds.top}])[0].y
+      };
+    }
+    var cx = ((bounds.left || 0) + (bounds.right || 0)) / 2,
+        cy = ((bounds.bottom || 0) + (bounds.top || 0)) / 2;
+    if (bounds.left !== undefined) {
+      m_maxBounds.left = geo.transform.transformCoordinates(gcs, m_gcs, [{
+        x: bounds.left, y: cy}])[0].x;
+    }
+    if (bounds.right !== undefined) {
+      m_maxBounds.right = geo.transform.transformCoordinates(gcs, m_gcs, [{
+        x: bounds.right, y: cy}])[0].x;
+    }
+    if (bounds.bottom !== undefined) {
+      m_maxBounds.bottom = geo.transform.transformCoordinates(gcs, m_gcs, [{
+        x: cx, y: bounds.bottom}])[0].y;
+    }
+    if (bounds.top !== undefined) {
+      m_maxBounds.top = geo.transform.transformCoordinates(gcs, m_gcs, [{
+        x: cx, y: bounds.top}])[0].y;
+    }
+    reset_minimum_zoom();
+    m_this.zoom(m_zoom);
+    m_this.pan({x: 0, y: 0});
+    return this;
+  };
+
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Get the center zoom level necessary to display the given lat/lon bounds.
@@ -1247,7 +1301,7 @@ geo.map = function (arg) {
     gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
     if (gcs !== m_gcs) {
       var trans = geo.transform.transformCoordinates(gcs, m_gcs, [{
-          x: bounds.left, y: bounds.top}, {x: bounds.right, y: bounds.bottom}]);
+        x: bounds.left, y: bounds.top}, {x: bounds.right, y: bounds.bottom}]);
       bounds = {
         left: trans[0].x,
         top: trans[0].y,
@@ -1509,12 +1563,12 @@ geo.map = function (arg) {
     var ul = {}, ur = {}, ll = {}, lr = {};
     ul.x = center.x + (-width) * cosr - (-height) * sinr;
     ul.y = center.y + (-width) * sinr + (-height) * cosr;
-    ur.x = center.x +   width  * cosr - (-height) * sinr;
-    ur.y = center.y +   width  * sinr + (-height) * cosr;
-    ll.x = center.x + (-width) * cosr -   height  * sinr;
-    ll.y = center.y + (-width) * sinr +   height  * cosr;
-    lr.x = center.x +   width  * cosr -   height  * sinr;
-    lr.y = center.y +   width  * sinr +   height  * cosr;
+    ur.x = center.x + width * cosr - (-height) * sinr;
+    ur.y = center.y + width * sinr + (-height) * cosr;
+    ll.x = center.x + (-width) * cosr - height * sinr;
+    ll.y = center.y + (-width) * sinr + height * cosr;
+    lr.x = center.x + width * cosr - height * sinr;
+    lr.y = center.y + width * sinr + height * cosr;
     return {
       left: Math.min(ul.x, ur.x, ll.x, lr.x),
       right: Math.max(ul.x, ur.x, ll.x, lr.x),
@@ -1817,13 +1871,13 @@ inherit(geo.map, geo.sceneObject);
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.camera.html">camera</a></li><li><a href="geo.choroplethFeature.html">choroplethFeature</a></li><li><a href="geo.clock.html">clock</a></li><li><a href="geo.contourFeature.html">contourFeature</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fetchQueue.html">fetchQueue</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.choroplethFeature.html">choroplethFeature</a></li><li><a href="geo.gl.contourFeature.html">contourFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.svgWidget.html">svgWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.imageTile.html">imageTile</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.tile.html">tile</a></li><li><a href="geo.tileCache.html">tileCache</a></li><li><a href="geo.tileLayer.html">tileLayer</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.ClusterGroup.html">ClusterGroup</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.camera.html">camera</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="geo.camera.html">camera</a></li><li><a href="geo.choroplethFeature.html">choroplethFeature</a></li><li><a href="geo.clock.html">clock</a></li><li><a href="geo.contourFeature.html">contourFeature</a></li><li><a href="geo.d3.d3Renderer.html">d3Renderer</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.ellipsoid.html">ellipsoid</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fetchQueue.html">fetchQueue</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.choroplethFeature.html">choroplethFeature</a></li><li><a href="geo.gl.contourFeature.html">contourFeature</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.quadFeature.html">quadFeature</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.graphFeature.html">graphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.svgWidget.html">svgWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.imageTile.html">imageTile</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.pointSpritesGeomFeature.html">pointSpritesGeomFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.quadFeature.html">quadFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.tile.html">tile</a></li><li><a href="geo.tileCache.html">tileCache</a></li><li><a href="geo.tileLayer.html">tileLayer</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.ClusterGroup.html">ClusterGroup</a></li><li><a href="geo.vectorFeature.html">vectorFeature</a></li><li><a href="jQuery.fn.geojsMap.html">geojsMap</a></li></ul><h3>Namespaces</h3><ul><li><a href="geo.html">geo</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.camera.html">camera</a></li><li><a href="geo.event.clock.html">clock</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo.util.html">util</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Thu Jan 28 2016 16:54:27 GMT-0500 (EST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Thu Feb 18 2016 10:07:42 GMT-0500 (EST)
 </footer>
 
 <script> prettyPrint(); </script>

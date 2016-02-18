@@ -1,6 +1,6 @@
 {
   "path": "contour",
-  "title": "Countour plot",
+  "title": "Contour plot",
   "exampleCss": ["main.css"],
   "exampleJs": ["main.js"],
   "about": {

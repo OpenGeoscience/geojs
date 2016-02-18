@@ -1,3 +1,7 @@
+html, body {
+  overflow: auto;
+}
+
 .thumbnail {
   position: relative;
   overflow: hidden;

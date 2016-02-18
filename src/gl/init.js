@@ -1,0 +1,4 @@
+/**
+ * @namespace
+ */
+geo.gl = {};

@@ -50,9 +50,11 @@ block append mainContent
       label(for="layer-url") Tile URL
       input#layer-url.layerparam(param-name="url", list="url-list", placeholder="http://otile1.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.png")
       datalist#url-list
-        option(value="http://otile1.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.png") MapQuest
-        option(value="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png") OSM
-        option(value="/data/tilefancy.png") Fancy Test Tile
+        option(value="http://otile1.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.png", credit='Tiles Courtesy of <a href="http://www.mapquest.com/">MapQuest</a>') MapQuest
+        option(value="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", credit="© OpenStreetMap contributors") OSM
+        option(value="/data/tilefancy.png", credit="") Fancy Test Tile
+        option(value="http://otile1.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.png", credit='Tiles Courtesy of <a href="http://www.mapquest.com/">MapQuest</a>') MapQuest Satellite
+        option(value="http://tile.stamen.com/toner-lite/{z}/{x}/{y}.png", credit='Map tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. Data by <a href="http://openstreetmap.org">OpenStreetMap</a>, under <a href="http://www.openstreetmap.org/copyright">ODbL</a>.') Toner Lite
     .form-group(title="The subdomains used to fetch tiles.  This can be a comma-separated list or a string of single-letter subdomains.")
       label(for="layer-subdomains") URL Subdomains
       input#layer-subdomains.layerparam(param-name="subdomains" placeholder="abc")

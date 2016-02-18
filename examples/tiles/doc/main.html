@@ -183,7 +183,10 @@ values.</p>
     throttledInputEventTimer = <span class="hljs-built_in">window</span>.setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
       change_controls(evt);
     }, <span class="hljs-number">1000</span>);
-  });</pre></div></div>
+  });
+
+  <span class="hljs-keyword">var</span> range = geo.transform.transformCoordinates(
+      <span class="hljs-string">'EPSG:4326'</span>, <span class="hljs-string">'EPSG:3857'</span>, [{x: <span class="hljs-number">-180</span>, y: <span class="hljs-number">0</span>}, {x: <span class="hljs-number">180</span>, y: <span class="hljs-number">0</span>}]);</pre></div></div>
             
         </li>
         
@@ -206,7 +209,7 @@ zoom level</p>
       y: <span class="hljs-number">39.5</span>
     },
     maxBounds: {},
-    zoom: query.zoom !== <span class="hljs-literal">undefined</span> ? <span class="hljs-built_in">parseFloat</span>(query.zoom) : <span class="hljs-number">3</span>
+    zoom: query.zoom !== <span class="hljs-literal">undefined</span> ? <span class="hljs-built_in">parseFloat</span>(query.zoom) : <span class="hljs-number">3</span>,
   };</pre></div></div>
             
         </li>
@@ -227,7 +230,9 @@ zoom level</p>
     opacity: query.opacity || <span class="hljs-string">'1'</span>,
     <span class="hljs-comment">/* Always use a larger cache so if keepLower is changed, we still have a
      * big enough cache. */</span>
-    cacheSize: <span class="hljs-number">600</span>
+    cacheSize: <span class="hljs-number">600</span>,
+    attribution: $(<span class="hljs-string">'#url-list [value="'</span> + $(<span class="hljs-string">'#layer-url'</span>).val() + <span class="hljs-string">'"]'</span>).attr(
+        <span class="hljs-string">'credit'</span>)
   };
   <span class="hljs-keyword">if</span> (layerParams.renderer === <span class="hljs-string">'null'</span> || layerParams.renderer === <span class="hljs-string">'html'</span>) {
     layerParams.renderer = <span class="hljs-literal">null</span>;
@@ -275,8 +280,8 @@ a pixel coordinate system.</p>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> w, h;
   <span class="hljs-keyword">if</span> (query.w &amp;&amp; query.h) {
-    w = <span class="hljs-built_in">parseInt</span>(query.w);
-    h = <span class="hljs-built_in">parseInt</span>(query.h);</pre></div></div>
+    w = <span class="hljs-built_in">parseInt</span>(query.w, <span class="hljs-number">10</span>);
+    h = <span class="hljs-built_in">parseInt</span>(query.h, <span class="hljs-number">10</span>);</pre></div></div>
             
         </li>
         
@@ -358,10 +363,10 @@ the lower-right.</p>
     layerParams.tileRounding = <span class="hljs-built_in">Math</span>[query.round];
   }
   <span class="hljs-keyword">if</span> (query.tileWidth) {
-    layerParams.tileWidth = <span class="hljs-built_in">parseInt</span>(query.tileWidth);
+    layerParams.tileWidth = <span class="hljs-built_in">parseInt</span>(query.tileWidth, <span class="hljs-number">10</span>);
   }
   <span class="hljs-keyword">if</span> (query.tileHeight) {
-    layerParams.tileHeight = <span class="hljs-built_in">parseInt</span>(query.tileHeight);
+    layerParams.tileHeight = <span class="hljs-built_in">parseInt</span>(query.tileHeight, <span class="hljs-number">10</span>);
   }
   <span class="hljs-keyword">if</span> (w &amp;&amp; h) {
     mapParams.max = <span class="hljs-built_in">Math</span>.ceil(<span class="hljs-built_in">Math</span>.log(<span class="hljs-built_in">Math</span>.max(
@@ -371,6 +376,12 @@ the lower-right.</p>
   }
   <span class="hljs-keyword">if</span> (query.max !== <span class="hljs-literal">undefined</span>) {
     mapParams.max = <span class="hljs-built_in">parseFloat</span>(query.max);
+  }
+  <span class="hljs-keyword">if</span> (query.minLevel !== <span class="hljs-literal">undefined</span>) {
+    layerParams.minLevel = <span class="hljs-built_in">parseInt</span>(query.minLevel, <span class="hljs-number">10</span>);
+  }
+  <span class="hljs-keyword">if</span> (query.maxLevel !== <span class="hljs-literal">undefined</span>) {
+    layerParams.maxLevel = <span class="hljs-built_in">parseInt</span>(query.maxLevel, <span class="hljs-number">10</span>);
   }</pre></div></div>
             
         </li>
@@ -425,15 +436,15 @@ maximum zoom</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>  $.each({
-      clampBoundsX: <span class="hljs-string">'clampBoundsX'</span>,
-      clampBoundsY: <span class="hljs-string">'clampBoundsY'</span>,
-      clampZoom: <span class="hljs-string">'clampZoom'</span>,
-      discrete: <span class="hljs-string">'discreteZoom'</span>
-    }, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">qkey, mkey</span>) </span>{
-      <span class="hljs-keyword">if</span> (query[qkey] !== <span class="hljs-literal">undefined</span>) {
-        mapParams[mkey] = query[qkey] === <span class="hljs-string">'true'</span>;
-      }
-    });</pre></div></div>
+    clampBoundsX: <span class="hljs-string">'clampBoundsX'</span>,
+    clampBoundsY: <span class="hljs-string">'clampBoundsY'</span>,
+    clampZoom: <span class="hljs-string">'clampZoom'</span>,
+    discrete: <span class="hljs-string">'discreteZoom'</span>
+  }, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">qkey, mkey</span>) </span>{
+    <span class="hljs-keyword">if</span> (query[qkey] !== <span class="hljs-literal">undefined</span>) {
+      mapParams[mkey] = query[qkey] === <span class="hljs-string">'true'</span>;
+    }
+  });</pre></div></div>
             
         </li>
         
@@ -449,14 +460,14 @@ maximum zoom</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>  $.each({
-      lower: <span class="hljs-string">'keepLower'</span>,
-      wrapX: <span class="hljs-string">'wrapX'</span>,
-      wrapY: <span class="hljs-string">'wrapY'</span>
-    }, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">qkey, lkey</span>) </span>{
-      <span class="hljs-keyword">if</span> (query[qkey] !== <span class="hljs-literal">undefined</span>) {
-        layerParams[lkey] = query[qkey] === <span class="hljs-string">'true'</span>;
-      }
-    });</pre></div></div>
+    lower: <span class="hljs-string">'keepLower'</span>,
+    wrapX: <span class="hljs-string">'wrapX'</span>,
+    wrapY: <span class="hljs-string">'wrapY'</span>
+  }, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">qkey, lkey</span>) </span>{
+    <span class="hljs-keyword">if</span> (query[qkey] !== <span class="hljs-literal">undefined</span>) {
+      layerParams[lkey] = query[qkey] === <span class="hljs-string">'true'</span>;
+    }
+  });</pre></div></div>
             
         </li>
         
@@ -602,6 +613,16 @@ parameters</p>
       <span class="hljs-keyword">case</span> <span class="hljs-string">'round'</span>:
         layerParams.tileRounding = <span class="hljs-built_in">Math</span>[value];
         <span class="hljs-keyword">break</span>;
+      <span class="hljs-keyword">case</span> <span class="hljs-string">'url'</span>:
+        <span class="hljs-keyword">var</span> url = processedValue;
+        <span class="hljs-keyword">if</span> (layerParams.baseUrl) {
+          <span class="hljs-keyword">delete</span> layerParams.baseUrl;
+        }
+        layerParams[param] = processedValue;
+        osmLayer.url(url);
+        osmLayer.attribution($(<span class="hljs-string">'#url-list [value="'</span> + value + <span class="hljs-string">'"]'</span>).attr(
+            <span class="hljs-string">'credit'</span>));
+        <span class="hljs-keyword">break</span>;
       <span class="hljs-keyword">case</span> <span class="hljs-string">'x'</span>: <span class="hljs-keyword">case</span> <span class="hljs-string">'y'</span>:
         <span class="hljs-keyword">var</span> coord = map.center();
         coord[param] = mapParams[param] = <span class="hljs-built_in">parseFloat</span>(value);
@@ -633,6 +654,7 @@ parameters</p>
     <span class="hljs-keyword">if</span> (ctl.is(<span class="hljs-string">'.layerparam'</span>) &amp;&amp; ctl.attr(<span class="hljs-string">'reload'</span>) === <span class="hljs-string">'true'</span>) {
       map.deleteLayer(osmLayer);
       osmLayer = map.createLayer(<span class="hljs-string">'osm'</span>, layerParams);
+      tileDebug.osmLayer = osmLayer;
     }</pre></div></div>
             
         </li>

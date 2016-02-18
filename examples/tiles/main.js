@@ -91,6 +91,8 @@ $(function () {
     }, 1000);
   });
 
+  var range = geo.transform.transformCoordinates(
+      'EPSG:4326', 'EPSG:3857', [{x: -180, y: 0}, {x: 180, y: 0}]);
   // Set map defaults to use our named node and have a reasonable center and
   // zoom level
   var mapParams = {
@@ -100,7 +102,7 @@ $(function () {
       y: 39.5
     },
     maxBounds: {},
-    zoom: query.zoom !== undefined ? parseFloat(query.zoom) : 3
+    zoom: query.zoom !== undefined ? parseFloat(query.zoom) : 3,
   };
   // Set the tile layer defaults to use the specified renderer and opacity
   var layerParams = {
@@ -108,7 +110,9 @@ $(function () {
     opacity: query.opacity || '1',
     /* Always use a larger cache so if keepLower is changed, we still have a
      * big enough cache. */
-    cacheSize: 600
+    cacheSize: 600,
+    attribution: $('#url-list [value="' + $('#layer-url').val() + '"]').attr(
+        'credit')
   };
   if (layerParams.renderer === 'null' || layerParams.renderer === 'html') {
     layerParams.renderer = null;
@@ -130,8 +134,8 @@ $(function () {
   // a pixel coordinate system.
   var w, h;
   if (query.w && query.h) {
-    w = parseInt(query.w);
-    h = parseInt(query.h);
+    w = parseInt(query.w, 10);
+    h = parseInt(query.h, 10);
     // Set a pixel coordinate system where 0, 0 is the upper left and w, h is
     // the lower-right.
     /* If both ingcs and gcs are set to an empty string '', the coordinates
@@ -187,10 +191,10 @@ $(function () {
     layerParams.tileRounding = Math[query.round];
   }
   if (query.tileWidth) {
-    layerParams.tileWidth = parseInt(query.tileWidth);
+    layerParams.tileWidth = parseInt(query.tileWidth, 10);
   }
   if (query.tileHeight) {
-    layerParams.tileHeight = parseInt(query.tileHeight);
+    layerParams.tileHeight = parseInt(query.tileHeight, 10);
   }
   if (w && h) {
     mapParams.max = Math.ceil(Math.log(Math.max(
@@ -200,6 +204,12 @@ $(function () {
   }
   if (query.max !== undefined) {
     mapParams.max = parseFloat(query.max);
+  }
+  if (query.minLevel !== undefined) {
+    layerParams.minLevel = parseInt(query.minLevel, 10);
+  }
+  if (query.maxLevel !== undefined) {
+    layerParams.maxLevel = parseInt(query.maxLevel, 10);
   }
   // allow a generous max tile level so it is never the limit
   if (!layerParams.maxLevel) {
@@ -215,25 +225,25 @@ $(function () {
   }
   // Populate boolean flags for the map
   $.each({
-      clampBoundsX: 'clampBoundsX',
-      clampBoundsY: 'clampBoundsY',
-      clampZoom: 'clampZoom',
-      discrete: 'discreteZoom'
-    }, function (qkey, mkey) {
-      if (query[qkey] !== undefined) {
-        mapParams[mkey] = query[qkey] === 'true';
-      }
-    });
+    clampBoundsX: 'clampBoundsX',
+    clampBoundsY: 'clampBoundsY',
+    clampZoom: 'clampZoom',
+    discrete: 'discreteZoom'
+  }, function (qkey, mkey) {
+    if (query[qkey] !== undefined) {
+      mapParams[mkey] = query[qkey] === 'true';
+    }
+  });
   // Populate boolean flags for the tile layer
   $.each({
-      lower: 'keepLower',
-      wrapX: 'wrapX',
-      wrapY: 'wrapY'
-    }, function (qkey, lkey) {
-      if (query[qkey] !== undefined) {
-        layerParams[lkey] = query[qkey] === 'true';
-      }
-    });
+    lower: 'keepLower',
+    wrapX: 'wrapX',
+    wrapY: 'wrapY'
+  }, function (qkey, lkey) {
+    if (query[qkey] !== undefined) {
+      layerParams[lkey] = query[qkey] === 'true';
+    }
+  });
   // Create a map object
   var map = geo.map(mapParams);
   // Set the projection.  This has to be set on the camera, not in the map
@@ -314,6 +324,16 @@ $(function () {
       case 'round':
         layerParams.tileRounding = Math[value];
         break;
+      case 'url':
+        var url = processedValue;
+        if (layerParams.baseUrl) {
+          delete layerParams.baseUrl;
+        }
+        layerParams[param] = processedValue;
+        osmLayer.url(url);
+        osmLayer.attribution($('#url-list [value="' + value + '"]').attr(
+            'credit'));
+        break;
       case 'x': case 'y':
         var coord = map.center();
         coord[param] = mapParams[param] = parseFloat(value);
@@ -345,6 +365,7 @@ $(function () {
     if (ctl.is('.layerparam') && ctl.attr('reload') === 'true') {
       map.deleteLayer(osmLayer);
       osmLayer = map.createLayer('osm', layerParams);
+      tileDebug.osmLayer = osmLayer;
     }
     // update the url to reflect the changes
     query[param] = value;
