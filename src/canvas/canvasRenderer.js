@@ -5,7 +5,7 @@
  * @class
  * @extends geo.renderer
  * @param canvas
- * @returns {geo.gl.canvasRenderer}
+ * @returns {geo.canvas.canvasRenderer}
  */
 //////////////////////////////////////////////////////////////////////////////
 geo.canvas.canvasRenderer = function (arg) {
@@ -23,9 +23,6 @@ geo.canvas.canvasRenderer = function (arg) {
       m_renderAnimFrameRef = null,
       s_init = this._init,
       s_exit = this._exit;
-
-  // ccl: is there a batter way of gettign the layer in render?
-  m_this.ccl_layer = arg.layer;
 
   /// TODO: Move this API to the base class
   ////////////////////////////////////////////////////////////////////////////
@@ -106,8 +103,6 @@ geo.canvas.canvasRenderer = function (arg) {
     if (m_renderAnimFrameRef === null) {
       m_renderAnimFrameRef = window.requestAnimationFrame(function () {
         m_renderAnimFrameRef = null;
-        m_this.context2d.fillStyle = '#33FFFF';
-        m_this.context2d.fillRect(300, 200, 450, 175);
 
         var layer = m_this.layer(),
             map = layer.map(),
