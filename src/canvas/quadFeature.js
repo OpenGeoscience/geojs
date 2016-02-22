@@ -32,6 +32,12 @@ geo.canvas.quadFeature = function (arg) {
       return;
     }
     m_quads = this._generateQuads();
+
+    if (m_quads.imgQuads) {
+      m_quads.imgQuads.sort(function (a, b) {
+        return a.pos[2] - b.pos[2];
+      });
+    }
   };
 
   /**
