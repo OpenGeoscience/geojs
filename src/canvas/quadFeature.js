@@ -60,29 +60,36 @@ geo.canvas.quadFeature = function (arg) {
       return;
     }
 
+    var oldAlpha = context2d.globalAlpha;
+    var opacity = oldAlpha;
     $.each(m_quads.imgQuads, function (idx, quad) {
+      if (!quad.image) {
+        return;
+      }
       var w = quad.image.width,
           h = quad.image.height;
       // Canvas transform is affine, so quad has to be a parallelogram
       // Also, canvas has no way to render z.
-
-      // Tiles should be rendered from low res to high res.  Except for
-      // computing their size, I see no way of finding out the level of
-      // these quads.
       var p0 = map.gcsToDisplay({x:quad.pos[0], y:quad.pos[1]}, null),
           p3 = map.gcsToDisplay({x:quad.pos[9], y:quad.pos[10]}, null),
           p2 = map.gcsToDisplay({x:quad.pos[6], y:quad.pos[7]}, null);
       context2d.setTransform((p3.x - p2.x) / w, (p3.y - p2.y) / h,
                              (p0.x - p2.x) / w, (p0.y - p2.y) / h,
                              p2.x, p2.y);
-
-      context2d.drawImage(quad.image, 0, 0);
-      /*
       if (quad.opacity !== opacity) {
         opacity = quad.opacity;
+        context2d.globalAlpha = opacity;
       }
-      */
+      context2d.drawImage(quad.image, 0, 0);
     });
+    if (opacity !== oldAlpha) {
+      context2d.globalAlpha = oldAlpha;
+    }
+  };
+
+  this._renderOnCanvas = function (context, map) {
+    this._renderImageQuads(context, map);
+    this._renderColorQuads(context, map);
   };
 
   ////////////////////////////////////////////////////////////////////////////

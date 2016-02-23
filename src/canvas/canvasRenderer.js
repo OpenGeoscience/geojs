@@ -113,8 +113,9 @@ geo.canvas.canvasRenderer = function (arg) {
         m_this.context2d.clearRect(0, 0, viewport.width, viewport.height);
 
         var features = layer.features();
-        // loop ?
-        features[0]._renderImageQuads(m_this.context2d, map);
+        for (var i = 0; i < features.length; i += 1) {
+          features[i]._renderOnCanvas(m_this.context2d, map);
+        }
       });
     }
     return m_this;
