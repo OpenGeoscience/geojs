@@ -18,30 +18,9 @@ geo.canvas.canvasRenderer = function (arg) {
   geo.renderer.call(this, arg);
 
   var m_this = this,
-      m_width = 0,
-      m_height = 0,
       m_renderAnimFrameRef = null,
       s_init = this._init,
       s_exit = this._exit;
-
-  /// TODO: Move this API to the base class
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Return width of the renderer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.width = function () {
-    return m_width;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Return height of the renderer
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.height = function () {
-    return m_height;
-  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -85,8 +64,6 @@ geo.canvas.canvasRenderer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._resize = function (x, y, w, h) {
-    m_width = w;
-    m_height = h;
     m_this.canvas().attr('width', w);
     m_this.canvas().attr('height', h);
     m_this._render();
@@ -140,14 +117,27 @@ geo.registerRenderer('canvas', geo.canvas.canvasRenderer);
 
 (function () {
   'use strict';
+
+  var checkedCanvas;
+
   /**
    * Report if the canvas renderer is supported.
    *
    * @returns {boolean} true if available.
    */
   geo.canvas.canvasRenderer.supported = function () {
-    // ccl: can we get rid of this.
-    return true;
+    if (checkedCanvas === undefined) {
+      /* This is extracted from what Modernizr uses. */
+      var canvas; // eslint-disable-line no-unused-vars
+      try {
+        canvas = document.createElement('canvas');
+        checkedCanvas = !!(canvas.getContext && canvas.getContext('2d'));
+      } catch (e) {
+        checkedCanvas = false;
+      }
+      canvas = undefined;
+    }
+    return checkedCanvas;
   };
 
   /**

@@ -38,6 +38,7 @@ geo.canvas.quadFeature = function (arg) {
         return a.pos[2] - b.pos[2];
       });
     }
+    m_this.buildTime().modified();
   };
 
   /**
