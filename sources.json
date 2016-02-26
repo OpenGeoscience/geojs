@@ -72,6 +72,15 @@
         "choroplethFeature.js"
       ]
     },
+    "geo.canvas": {
+      "prefix": "src/canvas",
+      "files": [
+        "init.js",
+        "quadFeature.js",
+        "canvasRenderer.js",
+        "tileLayer.js"
+      ]
+    },
     "geo.d3": {
       "prefix": "src/d3",
       "files": [

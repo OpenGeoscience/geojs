@@ -1,0 +1,137 @@
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Create a new instance of class quadFeature
+ *
+ * @class
+ * @param {Object} arg Options object
+ * @extends geo.quadFeature
+ * @returns {geo.canvas.quadFeature}
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.canvas.quadFeature = function (arg) {
+  'use strict';
+
+  if (!(this instanceof geo.canvas.quadFeature)) {
+    return new geo.canvas.quadFeature(arg);
+  }
+  geo.quadFeature.call(this, arg);
+
+  var m_this = this,
+      s_exit = this._exit,
+      s_init = this._init,
+      s_update = this._update,
+      m_quads;
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Build this feature
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._build = function () {
+    if (!m_this.position()) {
+      return;
+    }
+    m_quads = this._generateQuads();
+
+    if (m_quads.imgQuads) {
+      m_quads.imgQuads.sort(function (a, b) {
+        return a.pos[2] - b.pos[2];
+      });
+    }
+    m_this.buildTime().modified();
+  };
+
+  /**
+   * Render all of the color quads using a single mapper.
+   *
+   * @param renderState: the render state used for the render.
+   */
+  this._renderColorQuads = function (renderState) {
+      // ....
+      // Not implemented yet.
+  };
+
+  /**
+   * Render all of the image quads using a single mapper.
+   *
+   * @param renderState: the render state used for the render.
+   */
+  this._renderImageQuads = function (context2d, map) {
+    if (!m_quads.imgQuads.length) {
+      return;
+    }
+
+    var oldAlpha = context2d.globalAlpha;
+    var opacity = oldAlpha;
+    $.each(m_quads.imgQuads, function (idx, quad) {
+      if (!quad.image) {
+        return;
+      }
+      var w = quad.image.width,
+          h = quad.image.height;
+      // Canvas transform is affine, so quad has to be a parallelogram
+      // Also, canvas has no way to render z.
+      var p0 = map.gcsToDisplay({x:quad.pos[0], y:quad.pos[1]}, null),
+          p3 = map.gcsToDisplay({x:quad.pos[9], y:quad.pos[10]}, null),
+          p2 = map.gcsToDisplay({x:quad.pos[6], y:quad.pos[7]}, null);
+      context2d.setTransform((p3.x - p2.x) / w, (p3.y - p2.y) / h,
+                             (p0.x - p2.x) / w, (p0.y - p2.y) / h,
+                             p2.x, p2.y);
+      if (quad.opacity !== opacity) {
+        opacity = quad.opacity;
+        context2d.globalAlpha = opacity;
+      }
+      context2d.drawImage(quad.image, 0, 0);
+    });
+    if (opacity !== oldAlpha) {
+      context2d.globalAlpha = oldAlpha;
+    }
+  };
+
+  this._renderOnCanvas = function (context, map) {
+    this._renderImageQuads(context, map);
+    this._renderColorQuads(context, map);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Update
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._update = function () {
+    s_update.call(m_this);
+    if (m_this.buildTime().getMTime() <= m_this.dataTime().getMTime() ||
+        m_this.updateTime().getMTime() < m_this.getMTime()) {
+      m_this._build();
+    }
+
+    m_this.updateTime().modified();
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Initialize
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._init = function () {
+    s_init.call(m_this, arg);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Destroy
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._exit = function () {
+
+    s_exit.call(m_this);
+  };
+
+  m_this._init(arg);
+  return this;
+};
+
+inherit(geo.canvas.quadFeature, geo.quadFeature);
+
+// Now register it
+geo.registerFeature('canvas', 'quad', geo.canvas.quadFeature);

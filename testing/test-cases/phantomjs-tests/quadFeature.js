@@ -1,6 +1,6 @@
 // Test geo.quadFeature and geo.gl.quadFeature
 
-/* global describe, it, expect, geo, mockVGLRenderer, closeToArray, waitForIt */
+/* global describe, it, expect, geo, mockVGLRenderer, closeToArray, waitForIt, logCanvas2D */
 describe('geo.quadFeature', function () {
   'use strict';
 
@@ -487,6 +487,62 @@ describe('geo.quadFeature', function () {
       return vgl.mockCounts().deleteBuffer === (glCounts.deleteBuffer || 0) + 2 &&
              vgl.mockCounts().uniform3fv === glCounts.uniform3fv + 2 &&
              vgl.mockCounts().bufferSubData === glCounts.bufferSubData;
+    });
+    it('_exit', function () {
+      var buildTime = quads.buildTime().getMTime();
+      layer.deleteFeature(quads);
+      quads.data(testQuads);
+      map.draw();
+      expect(buildTime).toEqual(quads.buildTime().getMTime());
+    });
+  });
+
+  /* This is a basic integration test of geo.canvas.quadFeature. */
+  describe('geo.canvas.quadFeature', function () {
+    var map, layer, quads, counts;
+    it('load preview image', load_preview_image);
+    it('basic usage', function () {
+      var buildTime;
+
+      logCanvas2D();
+      map = create_map();
+      layer = map.createLayer('feature', {renderer: 'canvas'});
+      quads = layer.createFeature('quad', {style: testStyle, data: testQuads});
+      buildTime = quads.buildTime().getMTime();
+      /* Trigger rerendering */
+      quads.data(testQuads);
+      map.draw();
+      expect(buildTime).not.toEqual(quads.buildTime().getMTime());
+      counts = $.extend({}, window._canvasLog.counts);
+    });
+    waitForIt('next render', function () {
+      return window._canvasLog.counts.clearRect === (counts.clearRect || 0) + 1;
+    });
+    it('only img quad', function () {
+      counts = $.extend({}, window._canvasLog.counts);
+      var buildTime = quads.buildTime().getMTime();
+      quads.data([testQuads[0], testQuads[1]]);
+      map.draw();
+      expect(buildTime).not.toEqual(quads.buildTime().getMTime());
+    });
+    waitForIt('next render', function () {
+      return window._canvasLog.counts.drawImage === counts.drawImage + 2 &&
+             window._canvasLog.counts.clearRect === counts.clearRect + 1;
+    });
+    /* Add a test for color quads here when they are implemented */
+    it('many quads', function () {
+      counts = $.extend({}, window._canvasLog.counts);
+      var data = [];
+      for (var i = 0; i < 200; i += 1) {
+        /* Add color quads when implemented */
+        data.push({ll: [10, i - 100], ur: [10, i - 99], image: preloadImage});
+      }
+      quads.data(data);
+      map.draw();
+    });
+    waitForIt('next render', function () {
+      return window._canvasLog.counts.drawImage === counts.drawImage + 200 &&
+             window._canvasLog.counts.clearRect === counts.clearRect + 1;
     });
     it('_exit', function () {
       var buildTime = quads.buildTime().getMTime();

@@ -1,5 +1,5 @@
 // Test geo.core.osmLayer
-/*global describe, it, expect, geo, waitForIt, mockVGLRenderer, closeToEqual*/
+/* global describe, it, expect, geo, waitForIt, mockVGLRenderer, closeToEqual, logCanvas2D */
 
 describe('geo.core.osmLayer', function () {
   'use strict';
@@ -60,7 +60,7 @@ describe('geo.core.osmLayer', function () {
       it('check for tiles', function () {
         expect(map.node().find('.d3PlaneFeature').length).toBeGreaterThan(0);
       });
-      /* The follow is a test of d3.tileLayer as attached to a map. */
+      /* The following is a test of d3.tileLayer as attached to a map. */
       it('_update', function () {
         lastlevel = layer.canvas().attr('lastlevel');
         layer._update();
@@ -102,11 +102,18 @@ describe('geo.core.osmLayer', function () {
       waitForIt('.d3PlaneFeature', function () {
         return map.node().find('.d3PlaneFeature').length > 0;
       });
-      it('d3 to vgl', function () {
+      it('d3 to canvas', function () {
         expect(map.node().find('[data-tile-layer="0"]').is('g')).toBe(true);
         map.deleteLayer(layer);
-        layer = map.createLayer('osm', {renderer: 'vgl'});
+        layer = map.createLayer('osm', {renderer: 'canvas'});
         expect(map.node().find('[data-tile-layer="0"]').is('g')).toBe(false);
+        expect(map.node().find('.canvas-canvas').length).toBe(1);
+      });
+      it('canvas to vgl', function () {
+        expect(map.node().find('.canvas-canvas').length).toBe(1);
+        map.deleteLayer(layer);
+        layer = map.createLayer('osm', {renderer: 'vgl'});
+        expect(map.node().find('.canvas-canvas').length).toBe(0);
         expect(map.node().find('.webgl-canvas').length).toBe(1);
       });
     });
@@ -160,9 +167,31 @@ describe('geo.core.osmLayer', function () {
     });
   });
 
-  describe('geo.gl.tileLayer', function () {
+  describe('geo.canvas.osmLayer', function () {
     var map, layer;
-    it('test that tiles are create', function () {
+    it('test that tiles are created', function () {
+      logCanvas2D();
+      map = create_map();
+      layer = map.createLayer('osm', {renderer: 'canvas'});
+    });
+    waitForIt('tiles to load', function () {
+      return Object.keys(layer.activeTiles).length === 21;
+    });
+    waitForIt('tiles to draw', function () {
+      return window._canvasLog.counts['drawImage'] >= 21;
+    });
+    it('zoom out', function () {
+      map.zoom(3);
+    });
+    /* This checks to make sure tiles are removed */
+    waitForIt('tiles to load', function () {
+      return Object.keys(layer.activeTiles).length === 17;
+    });
+  });
+
+  describe('geo.gl.osmLayer', function () {
+    var map, layer;
+    it('test that tiles are created', function () {
       mockVGLRenderer();
       map = create_map();
       layer = map.createLayer('osm', {renderer: 'vgl'});
