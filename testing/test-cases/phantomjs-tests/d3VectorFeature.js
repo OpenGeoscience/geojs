@@ -29,7 +29,7 @@ describe("d3 vector feature", function () {
   layer = map.createLayer("feature", {"renderer": "d3"});
 
   it("Add features to a layer", function () {
-    var vectorLines, featureGroup, markers;
+    var vectorLines, featureGroup, markers, lines;
     feature1 = layer.createFeature("vector")
     .data([{y: 0, x: 0}, {y: 10, x: 0}, {y: 0, x: 10}])
     .origin(function (d) {
@@ -79,5 +79,52 @@ describe("d3 vector feature", function () {
 
     markers = d3.selectAll('markers');
     expect(markers.size()).toBe(0);
+  });
+
+  it("Correctly sets the marker references of the specified style for each vector", function() {
+    var vectorLines, featureGroup, markers, lines;
+    var options = ['arrow', 'wedge', 'bar'];
+    var correspondingClasses = ['geo-vector-arrow', 'geo-vector-wedge', 'geo-vector-bar'];
+    feature1 = layer.createFeature("vector")
+    .data([{y: 0, x: 0}, {y: 10, x: 0}, {y: 0, x: 10}])
+    .origin(function (d) {
+      return {
+        x: d.x,
+        y: d.y
+      };
+    })
+    .delta(function (d) {
+      var target = {x: 5, y: 5};
+      return {
+        x: target.x - d.x,
+        y: target.y - d.y
+      };
+    })
+    .style({
+      originStyle: function (d, i) {
+        return options[i];
+      },
+      endStyle: 'arrow'
+    })
+    .draw();
+
+    vectorLines = d3.select("#map svg").selectAll('line');
+    expect(vectorLines.size()).toBe(3);
+
+
+    vectorLines.each(function (v, i) {
+      v = d3.select(this);
+      var startId = v.attr('marker-start');
+      var endId = v.attr('marker-end');
+      //sanity test to make sure head and tail markers get correct prefix in id's.
+      expect(startId.search(/tail/)).not.toBe(-1);
+      expect(endId.search(/head/)).not.toBe(-1);
+
+      var startMarker = d3.select(startId.match(/url\((.*)\)/)[1]);
+      var endMarker = d3.select(endId.match(/url\((.*)\)/)[1]);
+      expect(endMarker.classed('geo-vector-arrow')).toBe(true);
+      expect(startMarker.classed(correspondingClasses[i])).toBe(true);
+    });
+
   });
 });
