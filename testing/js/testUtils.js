@@ -213,3 +213,33 @@ function mockVGLRenderer() {
     return mockCounts;
   };
 }
+
+/**
+ * Add counters for various canvas calls so we can tell if they have been used.
+ */
+function logCanvas2D(enable) {
+  'use strict';
+
+  if (window._canvasLog) {
+    window._canvasLog.enable = enable;
+    return;
+  }
+
+  var log = {enable: enable, counts: {}, log: []};
+
+  var proto = CanvasRenderingContext2D.prototype;
+  $.each(proto, function (key) {
+    var orig = proto[key];
+    if (orig && orig.constructor && orig.call && orig.apply) {
+      proto[key] = function () {
+        log.counts[key] = (log.counts[key] || 0) + 1;
+        if (log.enable) {
+          log.log.push({func: key, arg: arguments});
+        }
+        return orig.apply(this, arguments);
+      };
+    }
+  });
+
+  window._canvasLog = log;
+}

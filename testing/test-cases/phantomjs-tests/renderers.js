@@ -55,6 +55,10 @@ describe('renderers', function () {
       window.d3 = oldd3;
       expect(geo.checkRenderer('d3')).toBe('d3');
 
+      expect(geo.checkRenderer('canvas')).toBe('canvas');
+      /* There isn't a good way to mock disabling the canvas */
+      expect(geo.canvas.canvasRenderer.fallback()).toBe(null);
+
       expect(geo.checkRenderer('vgl')).toBe(null);
       mockVGLRenderer();
       expect(geo.checkRenderer('vgl')).toBe('vgl');
