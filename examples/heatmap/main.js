@@ -10,7 +10,7 @@ $(function () {
       x: -122.0,
       y: 37
     },
-    zoom: 4
+    zoom: 10
   });
 
   var data = [
@@ -516,6 +516,7 @@ $(function () {
     [37.751266, -122.403355]
   ];
 
+  var base = map.createLayer('osm');
   var layer = map.createLayer('feature', {renderer: 'canvas'});
   var heatmap = layer.createFeature('heatmap')
     .position(function (d) {
@@ -530,5 +531,4 @@ $(function () {
   heatmapDebug.map = map;
   heatmapDebug.layer = layer;
   heatmapDebug.heatmap = heatmap;
-  console.log(heatmapDebug);
 });

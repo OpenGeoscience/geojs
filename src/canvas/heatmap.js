@@ -100,9 +100,6 @@ geo.canvas.heatmap = function (arg) {
     for (var i = 0; i < pixels.length; i+=4) {
     var j = pixels[i + 3] * 4;
       if (j) {
-        console.log(pixels[i+3], gradient, gradient[i+3]);
-      }
-      if (j) {
         pixels[i] = gradient[j];
         pixels[i+1] = gradient[j+1];
         pixels[i+2] = gradient[j+2];
@@ -116,9 +113,9 @@ geo.canvas.heatmap = function (arg) {
     m_this._gradient();
     var radius = m_this.style('radius');
     data.map(m_this.position()).map(function (p) {
-      var p = m_this.layer().map().gcsToDisplay(p, null);
+      var pF = m_this.layer().map().gcsToDisplay(p);
       context2d.globalAlpha = Math.max(.05)
-      context2d.drawImage(m_this._circle, p.x - radius, p.y - radius);
+      context2d.drawImage(m_this._circle, pF.x - radius, pF.y - radius);
     });
 
     var pixelArray = context2d.getImageData(0, 0, 1000, 1000);
