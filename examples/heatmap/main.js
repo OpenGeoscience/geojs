@@ -7,8 +7,8 @@ $(function () {
   var map = geo.map({
     node: '#map',
     center: {
-      x: -122.0,
-      y: 37
+      x: -122.445,
+      y: 37.8
     },
     zoom: 10
   });
