@@ -1,6 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class heatmap
+ * The rendering borrows from https://github.com/mourner/simpleheat/blob/gh-pages/simpleheat.js
  *
  * @class
  * @param {Object} arg Options object
@@ -97,7 +98,7 @@ geo.canvas.heatmap = function (arg) {
 
   this._colorize = function (pixels, gradient) {
     for (var i = 0; i < pixels.length; i+=4) {
-      var j = pixels[i + 3] * 4;
+    var j = pixels[i + 3] * 4;
       if (j) {
         console.log(pixels[i+3], gradient, gradient[i+3]);
       }
