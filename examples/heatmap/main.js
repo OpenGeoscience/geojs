@@ -519,6 +519,9 @@ $(function () {
   var base = map.createLayer('osm');
   var layer = map.createLayer('feature', {renderer: 'canvas'});
   var heatmap = layer.createFeature('heatmap')
+    .intensity(function (d) {
+      return .5;
+    })
     .position(function (d) {
       return {
         x: d[1],

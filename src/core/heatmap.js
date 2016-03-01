@@ -24,11 +24,31 @@ geo.heatmap = function (arg) {
   var m_this = this,
       m_position,
       m_intensity,
+      m_maxIntensity,
       s_init = this._init,
       s_data = this.data;
 
   m_position = arg.position || function (d) { return d; };
   m_intensity = arg.intensity || function (d) { return 1; };
+  m_maxIntensity = arg.maxIntensity || 1;
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set maxIntensity
+   *
+   * @returns {geo.heatmap}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.maxIntensity = function (val) {
+    if (val === undefined) {
+      return m_maxIntensity;
+    } else {
+      m_maxIntensity = val;
+      m_this.dataTime().modified();
+      m_this.modified();
+    }
+    return m_this;
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -81,8 +101,7 @@ geo.heatmap = function (arg) {
         radius: 10,
         blurRadius: 10,
         blur: 'Gaussian',
-        color: {.25: {r: 0, g: 0, b: 1}, .5: {r: 0, g: 1, b: 1}, .75: {r: 1, g: 1, b: 0}, 1: {r: 1, g: 0, b: 0}},
-        maxIntensity: 1
+        color: {.25: {r: 0, g: 0, b: 1}, .5: {r: 0, g: 1, b: 1}, .75: {r: 1, g: 1, b: 0}, 1: {r: 1, g: 0, b: 0}}
       },
       arg.style === undefined ? {} : arg.style
     );

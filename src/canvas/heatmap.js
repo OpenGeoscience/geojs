@@ -55,10 +55,11 @@ geo.canvas.heatmap = function (arg) {
   };
 
   this._gradient = function () {
-    var canvas = document.createElement('canvas'),
-      context = canvas.getContext('2d'),
-      gradient = context.createLinearGradient(0, 0, 0, 256),
-      colors = m_this.style('color');
+    if (!m_this._grad) {
+      var canvas = document.createElement('canvas'),
+        context = canvas.getContext('2d'),
+        gradient = context.createLinearGradient(0, 0, 0, 256),
+        colors = m_this.style('color');
 
       canvas.width = 1;
       canvas.height = 256;
@@ -69,36 +70,40 @@ geo.canvas.heatmap = function (arg) {
 
       context.fillStyle = gradient;
       context.fillRect(0, 0, 1, 256);
-
       m_this._grad = context.getImageData(0, 0, 1, 256).data;
+    }
 
-      return m_this;
+    return m_this;
   };
 
   this._radius = function () {
-    var circle = m_this._circle = document.createElement('canvas'),
-      ctx = circle.getContext('2d'),
-      r = m_this.style('radius'),
-      blur = m_this.style('blurRadius');
+    if (!m_this._circle) {
+      var circle = m_this._circle = document.createElement('canvas'),
+        ctx = circle.getContext('2d'),
+        r = m_this.style('radius'),
+        blur = m_this.style('blurRadius');
 
-    var r2 = blur + r;
 
-    circle.width = circle.height = r2 * 2;
-    ctx.shadowOffsetX = ctx.shadowOffsetY = r2 * 2;
-    ctx.shadowBlur = blur;
-    ctx.shadowColor = 'black';
+      var r2 = blur + r;
 
-    ctx.beginPath();
-    ctx.arc(-r2, -r2, r, 0, Math.PI * 2, true);
-    ctx.closePath();
-    ctx.fill();
+      circle.width = circle.height = r2 * 2;
+      ctx.shadowOffsetX = ctx.shadowOffsetY = r2 * 2;
+      ctx.shadowBlur = blur;
+      ctx.shadowColor = 'black';
 
+      ctx.beginPath();
+      ctx.arc(-r2, -r2, r, 0, Math.PI * 2, true);
+      ctx.closePath();
+      ctx.fill();
+      m_this._circle = circle;
+    }
     return m_this;
   };
 
   this._colorize = function (pixels, gradient) {
     for (var i = 0; i < pixels.length; i+=4) {
-    var j = pixels[i + 3] * 4;
+    var j = pixels[i + 3] * 4; // get opacity from the temporary canvas image,
+                              // then multiply by 4 to get the color index on linear gradient
       if (j) {
         pixels[i] = gradient[j];
         pixels[i+1] = gradient[j+1];
@@ -112,13 +117,14 @@ geo.canvas.heatmap = function (arg) {
     m_this._radius();
     m_this._gradient();
     var radius = m_this.style('radius');
-    data.map(m_this.position()).map(function (p) {
-      var pF = m_this.layer().map().gcsToDisplay(p);
-      context2d.globalAlpha = Math.max(.05)
-      context2d.drawImage(m_this._circle, pF.x - radius, pF.y - radius);
+    data.forEach(function (d) {
+      var p = m_this.layer().map().gcsToDisplay(m_this.position()(d));
+      var intensity = m_this.intensity()(d) / m_this.maxIntensity();
+      context2d.globalAlpha = Math.max(intensity, .05);
+      context2d.drawImage(m_this._circle, p.x - radius, p.y - radius);
     });
-
-    var pixelArray = context2d.getImageData(0, 0, 1000, 1000);
+    var canvas = m_this.layer().canvas()[0];
+    var pixelArray = context2d.getImageData(0, 0, canvas.width, canvas.height);
     m_this._colorize(pixelArray.data, m_this._grad);
     context2d.putImageData(pixelArray, 0, 0)
     return m_this;
