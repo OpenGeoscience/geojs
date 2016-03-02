@@ -35,10 +35,11 @@ geo.d3.vectorFeature = function (arg) {
    * @private
    * @param {object} d Unused datum (for d3 compat)
    * @param {number} i The marker index
+   * @param {string} position The marker's vector position (head or tail)
    */
   ////////////////////////////////////////////////////////////////////////////
-  function markerID(d, i) {
-    return m_this._d3id() + '_marker_' + i;
+  function markerID(d, i, position) {
+    return m_this._d3id() + '_marker_' + i + '_' + position;
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -48,32 +49,100 @@ geo.d3.vectorFeature = function (arg) {
    * @param {object[]} data The vector data array
    * @param {function} stroke The stroke accessor
    * @param {function} opacity The opacity accessor
+   * @param {function} originStyle The marker style for the vector head
+   * @param {function} endStyle The marker style for the vector tail
    */
   ////////////////////////////////////////////////////////////////////////////
-  function updateMarkers(data, stroke, opacity) {
+  function updateMarkers(data, stroke, opacity, originStyle, endStyle) {
 
-    var renderer = m_this.renderer();
-    var sel = m_this.renderer()._definitions()
-      .selectAll('marker.geo-vector')
-        .data(data);
+    var markerConfigs = {
+      'arrow': {
+        attrs: {'class': 'geo-vector-arrow geo-vector-marker', 'viewBox': '0 0 10 10', 'refX': '1', 'refY': '5', 'markerHeight': '5', 'markerWidth': '5', 'orient': 'auto'},
+        path: 'M 0 0 L 10 5 L 0 10 z'
+      },
+      'point': {
+        attrs: {'class': 'geo-vector-point geo-vector-marker', 'viewBox': '0 0 12 12', 'refX': '6', 'refY': '6', 'markerHeight': '8', 'markerWidth': '8', 'orient': 'auto'},
+        path: 'M 6 3 A 3 3 0 1 1 5.99999 3 Z'
+      },
+      'bar': {
+        attrs: {'class': 'geo-vector-bar geo-vector-marker', 'viewBox': '0 0 10 10', 'refX': '0', 'refY': '5', 'markerHeight': '6', 'markerWidth': '6', 'orient': 'auto'},
+        path: 'M 0 0 L 2 0 L 2 10 L 0 10 z'
+      },
+      'wedge': {
+        attrs: {'class': 'geo-vector-wedge geo-vector-marker', 'viewBox': '0 0 10 10', 'refX': '10', 'refY': '5', 'markerHeight': '5', 'markerWidth': '5', 'orient': 'auto'},
+        path: 'M 0 0 L 1 0 L 10 5 L 1 10 L 0 10 L 9 5 L 0 0'
+      }
+    };
+
+    //this allows for multiple VectorFeatures in a layer
+    var markerGroup = m_this.renderer()._definitions()
+      .selectAll('g.marker-group#' + m_this._d3id())
+      .data(data.length ? [1] : []);
+
+    markerGroup
+      .enter()
+      .append('g')
+      .attr('id', m_this._d3id)
+      .attr('class', 'marker-group');
+
+    markerGroup.exit().remove();
+
+    var markers = data.reduce(function (markers, d, i) {
+      var head = markerConfigs[endStyle(d, i)];
+      var tail = markerConfigs[originStyle(d, i)];
+      if (head) {
+        markers.push({
+          data: d,
+          dataIndex: i,
+          head: true
+        });
+      }
+      if (tail) {
+        markers.push({
+          data: d,
+          dataIndex: i,
+          head: false
+        });
+      }
+      return markers;
+    }, []);
+
+    var sel = markerGroup
+      .selectAll('marker.geo-vector-marker')
+      .data(markers);
+
     sel.enter()
       .append('marker')
-        .attr('id', markerID)
-        .attr('class', 'geo-vector')
-        .attr('viewBox', '0 0 10 10')
-        .attr('refX', '1')
-        .attr('refY', '5')
-        .attr('markerWidth', '5')
-        .attr('markerHeight', '5')
-        .attr('orient', 'auto')
-        .append('path')
-          .attr('d', 'M 0 0 L 10 5 L 0 10 z');
+      .append('path');
+
+    var renderer = m_this.renderer();
+
+    sel
+      .each(function (d) {
+        var marker = d3.select(this);
+        var markerData = d.head ? markerConfigs[endStyle(d.data, d.dataIndex)] : markerConfigs[originStyle(d.data, d.dataIndex)];
+        Object.keys(markerData.attrs).map(function (attrName) {
+          marker.attr(attrName, markerData.attrs[attrName]);
+        });
+      })
+      .attr('id', function (d) {
+        return markerID(d.data, d.dataIndex, d.head ? 'head' : 'tail');
+      })
+      .style('stroke', function (d) {
+        return renderer._convertColor(stroke)(d.data, d.dataIndex);
+      })
+      .style('fill', function (d) {
+        return renderer._convertColor(stroke)(d.data, d.dataIndex);
+      })
+      .style('opacity', function (d) {
+        return opacity(d.data, d.dataIndex);
+      })
+      .select('path')
+      .attr('d', function (d) {
+        return d.head ? markerConfigs[endStyle(d.data, d.dataIndex)].path : markerConfigs[originStyle(d.data, d.dataIndex)].path;
+      });
 
     sel.exit().remove();
-
-    sel.style('stroke', renderer._convertColor(stroke))
-      .style('fill', renderer._convertColor(stroke))
-      .style('opacity', opacity);
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -148,20 +217,25 @@ geo.d3.vectorFeature = function (arg) {
       y2: function (d, i) {
         return cache[i].y1 + getScale() * cache[i].dy;
       },
+      'marker-start': function (d, i) {
+        return 'url(#' + markerID(d, i, 'tail') + ')';
+      },
       'marker-end': function (d, i) {
-        return 'url(#' + markerID(d, i) + ')';
+        return 'url(#' + markerID(d, i, 'head') + ')';
       }
     };
     m_style.style = {
       stroke: function () { return true; },
       strokeColor: s_style.strokeColor,
       strokeWidth: s_style.strokeWidth,
-      strokeOpacity: s_style.strokeOpacity
+      strokeOpacity: s_style.strokeOpacity,
+      originStyle: s_style.originStyle,
+      endStyle: s_style.endStyle
     };
     m_style.classes = ['d3VectorFeature'];
 
     // Add markers to the defition list
-    updateMarkers(data, s_style.strokeColor, s_style.strokeOpacity);
+    updateMarkers(data, s_style.strokeColor, s_style.strokeOpacity, s_style.originStyle, s_style.endStyle);
 
     // pass to renderer to draw
     m_this.renderer()._drawFeatures(m_style);
@@ -187,7 +261,9 @@ geo.d3.vectorFeature = function (arg) {
       updateMarkers(
         m_style.data,
         m_style.style.strokeColor,
-        m_style.style.strokeOpacity
+        m_style.style.strokeOpacity,
+        m_style.style.originStyle,
+        m_style.style.endStyle
       );
     }
 
@@ -203,7 +279,7 @@ geo.d3.vectorFeature = function (arg) {
   this._exit = function () {
     s_exit.call(m_this);
     m_style = {};
-    updateMarkers([], null, null);
+    updateMarkers([], null, null, null, null);
   };
 
   this._init(arg);
