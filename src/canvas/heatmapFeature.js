@@ -1,3 +1,7 @@
+var inherit = require('../inherit');
+var registerFeature = require('../registry').registerFeature;
+var heatmapFeature = require('../heatmapFeature');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class heatmapFeature
@@ -7,16 +11,16 @@
  * @class
  * @param {Object} arg Options object
  * @extends geo.heatmapFeature
- * @returns {geo.canvas.heatmapFeature}
+ * @returns {canvas_heatmapFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.canvas.heatmapFeature = function (arg) {
+canvas_heatmapFeature = function (arg) {
   'use strict';
 
-  if (!(this instanceof geo.canvas.heatmapFeature)) {
-    return new geo.canvas.heatmapFeature(arg);
+  if (!(this instanceof canvas_heatmapFeature)) {
+    return new canvas_heatmapFeature(arg);
   }
-  geo.heatmapFeature.call(this, arg);
+  heatmapFeature.call(this, arg);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -51,7 +55,7 @@ geo.canvas.heatmapFeature = function (arg) {
         c.hasOwnProperty('g') &&
         c.hasOwnProperty('b') &&
         c.hasOwnProperty('a')) {
-      color = 'rgba('+255 * c.r+','+255 * c.g+','+255 * c.b+','+255 * c.a+')';
+          color = 'rgba('+255 * c.r+','+255 * c.g+','+255 * c.b+','+ c.a+')';
     }
     return color;
   };
@@ -96,10 +100,9 @@ geo.canvas.heatmapFeature = function (arg) {
     var circle, ctx, r, r2;
     if (!m_this._circle) {
       circle = m_this._circle = document.createElement('canvas'),
-        ctx = circle.getContext('2d'),
-        r = m_this.style('radius'),
-        blur = m_this.style('blurRadius');
-
+      ctx = circle.getContext('2d'),
+      r = m_this.style('radius'),
+      blur = m_this.style('blurRadius');
 
       r2 = blur + r;
 
@@ -151,7 +154,8 @@ geo.canvas.heatmapFeature = function (arg) {
     m_this._computeGradient();
     data.forEach(function (d) {
       pos = m_this.layer().map().gcsToDisplay(m_this.position()(d));
-      intensity = m_this.intensity()(d) / m_this.maxIntensity();
+      intensity = (m_this.intensity()(d) - m_this.minIntensity()) /
+                  (m_this.maxIntensity() - m_this.minIntensity());
       // Small values are not visible because globalAlpha < .01
       // cannot be read from imageData
       context2d.globalAlpha = intensity < 0.01 ? 0.01 : intensity;
@@ -171,7 +175,7 @@ geo.canvas.heatmapFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function () {
-    s_init.call(m_this, arg); //doesn't this get called implicitly by geo.heatmapFeature.call TODO ?
+    s_init.call(m_this, arg);
     return m_this;
   };
 
@@ -205,7 +209,8 @@ geo.canvas.heatmapFeature = function (arg) {
   return this;
 };
 
-inherit(geo.canvas.heatmapFeature, geo.heatmapFeature);
+inherit(canvas_heatmapFeature, heatmapFeature);
 
 // Now register it
-geo.registerFeature('canvas', 'heatmap', geo.canvas.heatmapFeature);
+registerFeature('canvas', 'heatmap', canvas_heatmapFeature);
+module.exports = canvas_heatmapFeature;

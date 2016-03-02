@@ -1,12 +1,6 @@
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Create a new instance of class heatmapFeature
- *
- * @class
- * @extends geo.feature
- * @returns {geo.heatmapFeature}
- *
- */
+var $ = require('jquery');
+var inherit = require('./inherit');
+var feature = require('./feature');
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -35,13 +29,13 @@
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
-geo.heatmapFeature = function (arg) {
+var heatmapFeature = function (arg) {
   'use strict';
-  if (!(this instanceof geo.heatmapFeature)){
-    return new geo.heatmapFeature(arg);
+  if (!(this instanceof heatmapFeature)){
+    return new heatmapFeature(arg);
   }
   arg = arg || {};
-  geo.feature.call(this, arg);
+  feature.call(this, arg);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -52,12 +46,14 @@ geo.heatmapFeature = function (arg) {
       m_position,
       m_intensity,
       m_maxIntensity,
+      m_minIntensity,
       s_init = this._init,
       s_data = this.data;
 
   m_position = arg.position || function (d) { return d; };
   m_intensity = arg.intensity || function (d) { return 1; };
   m_maxIntensity = arg.maxIntensity || 1;
+  m_minIntensity = arg.minIntensity ? arg.minIntensity : 0;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -71,6 +67,24 @@ geo.heatmapFeature = function (arg) {
       return m_maxIntensity;
     } else {
       m_maxIntensity = val;
+      m_this.dataTime().modified();
+      m_this.modified();
+    }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set maxIntensity
+   *
+   * @returns {geo.heatmap}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.minIntensity = function (val) {
+    if (val === undefined) {
+      return m_minIntensity;
+    } else {
+      m_minIntensity = val;
       m_this.dataTime().modified();
       m_this.modified();
     }
@@ -127,12 +141,11 @@ geo.heatmapFeature = function (arg) {
         opacity: 0.1,
         radius: 10,
         blurRadius: 10,
-        blur: 'Gaussian',
         color: {0: {r: 0, g: 0, b: 0.0, a: 0.0},
-                .25: {r: 0, g: 0, b: 1, a: 1.0},
-                .5: {r: 0, g: 1, b: 1, a: 1.0},
-                .75: {r: 1, g: 1, b: 0, a: 1.0},
-                1: {r: 1, g: 0, b: 0, a: 1.0}}
+                .25: {r: 0, g: 0, b: 1, a: 0.5},
+                .5: {r: 0, g: 1, b: 1, a: 0.6},
+                .75: {r: 1, g: 1, b: 0, a: 0.7},
+                1: {r: 1, g: 0, b: 0, a: 0.8}}
       },
       arg.style === undefined ? {} : arg.style
     );
@@ -149,4 +162,5 @@ geo.heatmapFeature = function (arg) {
 
 };
 
-inherit(geo.heatmapFeature, geo.feature)
+inherit(heatmapFeature, feature)
+module.exports = heatmapFeature;
