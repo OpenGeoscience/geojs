@@ -34,7 +34,7 @@ $(function () {
         .data(rows)
         .style('radius', 5)
         .style('blurRadius', 15)
-        .style('opacity', 0.1);
+        .style('opacity', 0.05);
 
       map.draw();
     }

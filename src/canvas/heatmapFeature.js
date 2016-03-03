@@ -1,7 +1,8 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class heatmapFeature
- * The rendering borrows from https://github.com/mourner/simpleheat/blob/gh-pages/simpleheat.js
+ * The rendering borrows from
+ *    https://github.com/mourner/simpleheat/blob/gh-pages/simpleheat.js
  *
  * @class
  * @param {Object} arg Options object
@@ -54,37 +55,52 @@ geo.canvas.heatmapFeature = function (arg) {
     return rgb;
   };
 
-  this._gradient = function () {
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Compute gradient (color lookup table)
+   * @protected
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._computeGradient = function () {
+    var canvas, stop, context2d, gradient, colors;
+
     if (!m_this._grad) {
-      var canvas = document.createElement('canvas'),
-        context = canvas.getContext('2d'),
-        gradient = context.createLinearGradient(0, 0, 0, 256),
+      canvas = document.createElement('canvas'),
+        context2d = canvas.getContext('2d'),
+        gradient = context2d.createLinearGradient(0, 0, 0, 256),
         colors = m_this.style('color');
 
       canvas.width = 1;
       canvas.height = 256;
 
-      for (var stop in colors) {
+      for (stop in colors) {
         gradient.addColorStop(stop, m_this._convertColor(colors[stop]));
       }
 
-      context.fillStyle = gradient;
-      context.fillRect(0, 0, 1, 256);
-      m_this._grad = context.getImageData(0, 0, 1, 256).data;
+      context2d.fillStyle = gradient;
+      context2d.fillRect(0, 0, 1, 256);
+      m_this._grad = context2d.getImageData(0, 0, 1, 256).data;
     }
 
     return m_this;
   };
 
-  this._radius = function () {
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Create circle for each data point
+   * @protected
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._createCircle = function () {
+    var circle, ctx, r, r2;
     if (!m_this._circle) {
-      var circle = m_this._circle = document.createElement('canvas'),
+      circle = m_this._circle = document.createElement('canvas'),
         ctx = circle.getContext('2d'),
         r = m_this.style('radius'),
         blur = m_this.style('blurRadius');
 
 
-      var r2 = blur + r;
+      r2 = blur + r;
 
       circle.width = circle.height = r2 * 2;
       ctx.shadowOffsetX = ctx.shadowOffsetY = r2 * 2;
@@ -100,10 +116,17 @@ geo.canvas.heatmapFeature = function (arg) {
     return m_this;
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Compute color for each pixel on the screen
+   * @protected
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this._colorize = function (pixels, gradient) {
-    for (var i = 0; i < pixels.length; i+=4) {
-    var j = pixels[i + 3] * 4; // get opacity from the temporary canvas image,
-                              // then multiply by 4 to get the color index on linear gradient
+    var i, j;
+    for (i = 0; i < pixels.length; i+=4) {
+      j = pixels[i + 3] * 4; // get opacity from the temporary canvas image,
+                             // then multiply by 4 to get the color index on linear gradient
       if (j) {
         pixels[i] = gradient[j];
         pixels[i+1] = gradient[j+1];
@@ -112,19 +135,26 @@ geo.canvas.heatmapFeature = function (arg) {
     }
   };
 
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Render each data point on canvas
+   * @protected
+   */
+  ////////////////////////////////////////////////////////////////////////////
   this._renderOnCanvas = function (context2d, map) {
-    var data = m_this.data() || [];
-    m_this._radius();
-    m_this._gradient();
-    var radius = m_this.style('radius');
+    var data = m_this.data() || [],
+        radius = m_this.style('radius'),
+        pos, intensity, canvas, pixelArray;
+    m_this._createCircle();
+    m_this._computeGradient();
     data.forEach(function (d) {
-      var p = m_this.layer().map().gcsToDisplay(m_this.position()(d));
-      var intensity = m_this.intensity()(d) / m_this.maxIntensity();
+      pos = m_this.layer().map().gcsToDisplay(m_this.position()(d));
+      intensity = m_this.intensity()(d) / m_this.maxIntensity();
       context2d.globalAlpha = intensity * m_this.style('opacity');
-      context2d.drawImage(m_this._circle, p.x - radius, p.y - radius);
+      context2d.drawImage(m_this._circle, pos.x - radius, pos.y - radius);
     });
-    var canvas = m_this.layer().canvas()[0];
-    var pixelArray = context2d.getImageData(0, 0, canvas.width, canvas.height);
+    canvas = m_this.layer().canvas()[0];
+    pixelArray = context2d.getImageData(0, 0, canvas.width, canvas.height);
     m_this._colorize(pixelArray.data, m_this._grad);
     context2d.putImageData(pixelArray, 0, 0)
     return m_this;
