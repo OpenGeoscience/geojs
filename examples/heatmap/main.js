@@ -35,7 +35,7 @@ $(function () {
                       .maxIntensity(20)
                       .style('radius', 5)
                       .style('blurRadius', 15)
-                      .style('opacity', 0.5);
+                      .style('opacity', 1.0);
       map.draw();
     }
   });
