@@ -14,4 +14,6 @@ set(CTEST_DROP_SITE "my.cdash.org")
 set(CTEST_DROP_LOCATION "/submit.php?project=geojs")
 set(CTEST_DROP_SITE_CDASH TRUE)
 
-set(CTEST_NOTES_FILES "${CTEST_BINARY_DIRECTORY}/build_notes.json")
+if(EXISTS "${CTEST_BINARY_DIRECTORY}/build_notes.json")
+    set(CTEST_NOTES_FILES "${CTEST_BINARY_DIRECTORY}/build_notes.json")
+endif()
