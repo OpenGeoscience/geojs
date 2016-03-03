@@ -46,13 +46,14 @@ geo.canvas.heatmapFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._convertColor = function (c) {
-    var rgb;
+    var color;
     if (c.hasOwnProperty('r') &&
         c.hasOwnProperty('g') &&
-        c.hasOwnProperty('b')) {
-      rgb = d3.rgb(255 * c.r, 255 * c.g, 255 * c.b).toString();
+        c.hasOwnProperty('b') &&
+        c.hasOwnProperty('a')) {
+      color = 'rgba('+255 * c.r+','+255 * c.g+','+255 * c.b+','+255 * c.a+')';
     }
-    return rgb;
+    return color;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -128,9 +129,10 @@ geo.canvas.heatmapFeature = function (arg) {
       j = pixels[i + 3] * 4; // get opacity from the temporary canvas image,
                              // then multiply by 4 to get the color index on linear gradient
       if (j) {
-        pixels[i] = gradient[j];
+        pixels[i]   = gradient[j];
         pixels[i+1] = gradient[j+1];
         pixels[i+2] = gradient[j+2];
+        pixels[i+3] = m_this.style('opacity') * gradient[j+3];
       }
     }
   };
@@ -150,7 +152,9 @@ geo.canvas.heatmapFeature = function (arg) {
     data.forEach(function (d) {
       pos = m_this.layer().map().gcsToDisplay(m_this.position()(d));
       intensity = m_this.intensity()(d) / m_this.maxIntensity();
-      context2d.globalAlpha = intensity * m_this.style('opacity');
+      // Small values are not visible because globalAlpha < .01
+      // cannot be read from imageData
+      context2d.globalAlpha = intensity < 0.01 ? 0.01 : intensity;
       context2d.drawImage(m_this._circle, pos.x - radius, pos.y - radius);
     });
     canvas = m_this.layer().canvas()[0];

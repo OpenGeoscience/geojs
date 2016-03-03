@@ -22,20 +22,20 @@ $(function () {
 
       var layer = map.createLayer('feature', {renderer: 'canvas'});
       var heatmap = layer.createFeature('heatmap')
-        .intensity(function (d) {
-          return d[0];
-        })
-        .position(function (d) {
-          return {
-            x: d[2],
-            y: d[1]
-          };
-        })
-        .data(rows)
-        .style('radius', 5)
-        .style('blurRadius', 15)
-        .style('opacity', 0.05);
-
+                      .data(rows)
+                      .intensity(function (d) {
+                        return d[0];
+                      })
+                      .position(function (d) {
+                        return {
+                          x: d[2],
+                          y: d[1]
+                        };
+                      })
+                      .maxIntensity(20)
+                      .style('radius', 5)
+                      .style('blurRadius', 15)
+                      .style('opacity', 0.5);
       map.draw();
     }
   });

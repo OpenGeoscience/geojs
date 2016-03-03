@@ -128,11 +128,11 @@ geo.heatmapFeature = function (arg) {
         radius: 10,
         blurRadius: 10,
         blur: 'Gaussian',
-        color: {.25: {r: 0, g: 0, b: 1},
-                .5: {r: 0, g: 1, b: 1},
-                .75: {r: 1, g: 1, b: 0},
-                1: {r: 1, g: 0, b: 0}},
-        maxIntensity: 1
+        color: {0: {r: 0, g: 0, b: 0.0, a: 0.0},
+                .25: {r: 0, g: 0, b: 1, a: 1.0},
+                .5: {r: 0, g: 1, b: 1, a: 1.0},
+                .75: {r: 1, g: 1, b: 0, a: 1.0},
+                1: {r: 1, g: 0, b: 0, a: 1.0}}
       },
       arg.style === undefined ? {} : arg.style
     );
