@@ -1,5 +1,3 @@
-var heatmapDebug = {};
-
 // Run after the DOM loads
 $(function () {
   'use strict';
@@ -34,7 +32,9 @@ $(function () {
           };
         })
         .data(rows)
-        .style('radius', 5);
+        .style('radius', 5)
+        .style('blurRadius', 15)
+        .style('opacity', 0.1);
 
       map.draw();
     }
@@ -42,7 +42,4 @@ $(function () {
 
   var base = map.createLayer('osm');
   map.draw();
-  heatmapDebug.map = map;
-  heatmapDebug.layer = layer;
-  heatmapDebug.heatmap = heatmap;
 });

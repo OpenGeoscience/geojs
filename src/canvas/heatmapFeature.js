@@ -120,7 +120,7 @@ geo.canvas.heatmapFeature = function (arg) {
     data.forEach(function (d) {
       var p = m_this.layer().map().gcsToDisplay(m_this.position()(d));
       var intensity = m_this.intensity()(d) / m_this.maxIntensity();
-      context2d.globalAlpha = Math.max(intensity, .05);
+      context2d.globalAlpha = intensity * m_this.style('opacity');
       context2d.drawImage(m_this._circle, p.x - radius, p.y - radius);
     });
     var canvas = m_this.layer().canvas()[0];

@@ -124,7 +124,7 @@ geo.heatmapFeature = function (arg) {
     var defaultStyle = $.extend(
       {},
       {
-        opacity: 1,
+        opacity: 0.1,
         radius: 10,
         blurRadius: 10,
         blur: 'Gaussian',
