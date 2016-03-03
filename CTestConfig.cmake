@@ -13,3 +13,8 @@ set(CTEST_DROP_METHOD "http")
 set(CTEST_DROP_SITE "my.cdash.org")
 set(CTEST_DROP_LOCATION "/submit.php?project=geojs")
 set(CTEST_DROP_SITE_CDASH TRUE)
+
+if(DEFINED CTEST_BINARY_DIRECTORY AND NOT EXISTS "${CTEST_BINARY_DIRECTORY}/build_notes.json")
+  file(WRITE "${CTEST_BINARY_DIRECTORY}/build_notes.json" "")
+endif()
+set(CTEST_NOTES_FILES "${CTEST_BINARY_DIRECTORY}/build_notes.json")

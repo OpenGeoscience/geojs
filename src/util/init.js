@@ -4,6 +4,11 @@
 
   var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
+  var m_timingData = {},
+      m_timingKeepRecent = 200,
+      m_threshold = 15,
+      m_originalRequestAnimationFrame;
+
   /**
    * Takes a variable number of arguments and returns the first numeric value
    * it finds.
@@ -273,6 +278,144 @@
       data = new Float32Array(len);
       src.setData(data);
       return data;
+    },
+
+    /**
+     * Report on one or all of the tracked timings.
+     *
+     * @param {string} name name to report on, or undefined to report all.
+     */
+    timeReport: function (name) {
+      $.each(m_timingData, function (key, item) {
+        /* calculate the standard deviation of each item. */
+        if (item.count) {
+          item.stddev = Math.sqrt(Math.abs((
+            item.sum2 - item.sum * item.sum / item.count) / item.count));
+          item.average = item.sum / item.count;
+        } else {
+          item.stddev = 0;
+          item.average = 0;
+        }
+      });
+      if (name) {
+        return m_timingData[name];
+      }
+      return m_timingData;
+    },
+
+    /**
+     * Note the start time of a function (or any other section of code).  This
+     * should be paired with timeFunctionStop, which will collect statistics on
+     * the amount of time spent in a function.
+     *
+     * @param {string} name name to use for tracking the timing.
+     * @param {boolean} reset if true, clear old tracking data.
+     */
+    timeFunctionStart: function (name, reset) {
+      if (!m_timingData[name] || reset) {
+        m_timingData[name] = {
+          count: 0, sum: 0, sum2: 0, max: 0, recent: []
+        };
+      }
+      m_timingData[name].start = window.performance.now();
+    },
+
+    /**
+     * Note the stop time of a function (or any other section of code).  This
+     * should be paired with timeFunctionStart.
+     *
+     * @param {string} name name to use for tracking the timing.
+     */
+    timeFunctionStop: function (name) {
+      if (!m_timingData[name] || !m_timingData[name].start) {
+        return;
+      }
+      var duration = window.performance.now() - m_timingData[name].start;
+      m_timingData[name].start = null;
+      m_timingData[name].sum += duration;
+      m_timingData[name].sum2 += duration * duration;
+      m_timingData[name].count += 1;
+      m_timingData[name].max = Math.max(
+        m_timingData[name].max, duration);
+      m_timingData[name].recent.push(duration);
+      if (m_timingData[name].recent.length > m_timingKeepRecent) {
+        m_timingData[name].recent.splice(
+            0, m_timingData[name].recent.length - m_timingKeepRecent);
+      }
+    },
+
+    /**
+     * Start or stop tracking the time spent in requestAnimationFrame.  If
+     * tracked, the results can be fetched via
+     * timeFunctionReport('requestAnimationFrame').
+     *
+     * @param {boolean} stop falsy to start tracking, truthy to start tracking.
+     * @param {boolean} reset if true, reset the statistics.
+     * @param {number} threshold if present, set the threshold used in tracking
+     *   slow callbacks.
+     * @param {number} keep if present, set the number of recent frame times
+     *   to track.
+     */
+    timeRequestAnimationFrame: function (stop, reset, threshold, keep) {
+      if (!m_timingData.requestAnimationFrame || reset) {
+        m_timingData.requestAnimationFrame = {
+          count: 0, sum: 0, sum2: 0, max: 0, above_threshold: 0,
+          recent: [], recentsub: []
+        };
+      }
+      if (threshold) {
+        m_threshold = threshold;
+      }
+      if (keep) {
+        m_timingKeepRecent = keep;
+      }
+      if (stop && m_originalRequestAnimationFrame) {
+        window.requestAnimationFrame = m_originalRequestAnimationFrame;
+        m_originalRequestAnimationFrame = null;
+      } else if (!stop && !m_originalRequestAnimationFrame) {
+        m_originalRequestAnimationFrame = window.requestAnimationFrame;
+        window.requestAnimationFrame = function (callback) {
+          m_originalRequestAnimationFrame.call(window, function (timestamp) {
+            var track = m_timingData.requestAnimationFrame, recent;
+            if (track.timestamp !== timestamp) {
+              track.timestamp = timestamp;
+              track.subcalls = track.subcalls || 0;
+              track.start = {
+                sum: track.sum,
+                sum2: track.sum2,
+                count: track.count,
+                max: track.max,
+                above_threshold: track.above_threshold
+              };
+              track.recent.push([0]);
+              track.recentsub.push([]);
+              if (track.recent.length > m_timingKeepRecent) {
+                track.recent.splice(
+                    0, track.recent.length - m_timingKeepRecent);
+                track.recentsub.splice(
+                    0, track.recentsub.length - m_timingKeepRecent);
+              }
+            }
+            track.subcalls += 1;
+            callback.apply(this, arguments);
+            var duration = window.performance.now() - timestamp;
+            track.sum = track.start.sum + duration;
+            track.sum2 = track.start.sum2 + duration * duration;
+            track.count = track.start.count + 1;
+            track.max = Math.max(track.max, duration);
+            track.above_threshold = track.start.above_threshold + (
+              duration >= m_threshold ? 1 : 0);
+            track.recent[track.recent.length - 1] = duration;
+            recent = track.recentsub[track.recent.length - 1];
+            recent.push({
+              total_duration: duration,
+              duration: duration - (recent.length ?
+                recent[recent.length - 1].total_duration : 0),
+              callback: callback.name || callback
+            });
+          });
+        };
+      }
     }
   };
 

@@ -27,6 +27,8 @@ mark_as_advanced(TESTING_PORT)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
+set(NOTES_PATH "${CMAKE_CURRENT_BINARY_DIR}/build_notes.json")
+
 # set the path where grunt builds the sources
 set(GEOJS_DEPLOY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dist")
 
@@ -42,6 +44,8 @@ function(add_geojs_test test_name)
     set_property(TEST "${test_name}" APPEND PROPERTY DEPENDS "coverage-reset")
     set_property(TEST "coverage-report" APPEND PROPERTY DEPENDS "${test_name}")
   endif()
+  set_property(TEST "${test_name}" APPEND PROPERTY DEPENDS "notes-reset")
+  set_property(TEST "notes-report" APPEND PROPERTY DEPENDS "${test_name}")
 endfunction()
 
 set(MIDAS_BASE_URL "http://midas3.kitware.com/midas" CACHE STRING "MIDAS data store URL.")
@@ -111,6 +115,22 @@ else()
   set(BLANKET_INCLUDE "")
 
 endif()
+
+# Generate notes to send along with the test reports
+find_program(CURL_EXECUTABLE curl)
+add_test(
+  NAME "notes-reset"
+  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+  COMMAND "${CURL_EXECUTABLE}" -X DELETE "http://${TESTING_HOST}:${TESTING_PORT}/notes"
+)
+
+add_test(
+  NAME "notes-report"
+  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+  COMMAND "${CURL_EXECUTABLE}" -X POST "http://${TESTING_HOST}:${TESTING_PORT}/notes"
+    --data "path=${NOTES_PATH}" -G
+)
+set_property(TEST "notes-report" APPEND PROPERTY DEPENDS "notes-reset")
 
 if(PHANTOMJS_TESTS)
   set(PHANTOMJS_REL_DIR "test/phantomjs")
@@ -233,6 +253,8 @@ if(SELENIUM_TESTS)
         set_property(TEST "selenium:${f}" APPEND PROPERTY DEPENDS "coverage-reset")
         set_property(TEST "coverage-report" APPEND PROPERTY DEPENDS "selenium:${f}")
       endif()
+      set_property(TEST "selenium:${f}" APPEND PROPERTY DEPENDS "notes-reset")
+      set_property(TEST "notes-report" APPEND PROPERTY DEPENDS "selenium:${f}")
       set_property(TEST "selenium:${f}" APPEND PROPERTY ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/test")
       set_property(TEST "selenium:${f}" APPEND PROPERTY ENVIRONMENT "FIREFOX_TESTS=${FIREFOX_TESTS}")
       set_property(TEST "selenium:${f}" APPEND PROPERTY ENVIRONMENT "CHROME_TESTS=${CHROME_TESTS}")
@@ -241,7 +263,7 @@ if(SELENIUM_TESTS)
 
   set_property(TEST "selenium:glPointsSpeed" APPEND PROPERTY ENVIRONMENT "LOAD_SPEED_THRESHOLD=1000")
   set_property(TEST "selenium:glPointsSpeed" APPEND PROPERTY ENVIRONMENT "FRAMERATE_THRESHOLD=5")
-  
+
   set_property(TEST "selenium:glLinesSpeed" APPEND PROPERTY ENVIRONMENT "LOAD_SPEED_THRESHOLD=1000")
   set_property(TEST "selenium:glLinesSpeed" APPEND PROPERTY ENVIRONMENT "FRAMERATE_THRESHOLD=2")
 

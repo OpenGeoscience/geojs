@@ -20,7 +20,7 @@ var page = require('webpage').create();
 var url = system.args[1];
 
 // Set a timeout (in milliseconds).
-var timeout = 5000;
+var timeout = 15000;
 
 // Route "console.log()" calls from within the Page context to the main Phantom
 // context (i.e.  current "this")
