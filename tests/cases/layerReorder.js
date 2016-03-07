@@ -80,6 +80,17 @@ describe('Test the zIndex property of layers', function () {
     expect(getZIndex(l2)).toBe(12);
     expect(getZIndex(l3)).toBe(10);
   });
+
+  it('implicitly moves UI layer to top', function () {
+    var map = createMap(),
+        ui = map.createLayer('ui'),
+        l2 = map.createLayer('feature'),
+        l3 = map.createLayer('feature', {zIndex: 10});
+
+    expect(l2.zIndex()).toBeLessThan(l3.zIndex());
+    expect(ui.zIndex()).toBeGreaterThan(l2.zIndex());
+    expect(ui.zIndex()).toBeGreaterThan(l3.zIndex());
+  });
 });
 
 describe('Test reordering layers', function () {

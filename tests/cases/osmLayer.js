@@ -5,6 +5,8 @@ describe('geo.core.osmLayer', function () {
   var geo = require('../test-utils').geo;
   var $ = require('jquery');
   var waitForIt = require('../test-utils').waitForIt;
+  var submitNote = require('../test-utils').submitNote;
+  var logCanvas2D = require('../test-utils').logCanvas2D;
   var mockVGLRenderer = require('../test-utils').mockVGLRenderer;
   var closeToEqual = require('../test-utils').closeToEqual;
 
@@ -17,6 +19,88 @@ describe('geo.core.osmLayer', function () {
     opts = $.extend({}, opts);
     opts.node = node;
     return geo.map(opts);
+  }
+
+  /* Run some performance tests and submit them as a build note.
+   *
+   * @param mapinfo: an object that includes the map to test.
+   * @param notekey: the key to use for the build note.
+   */
+  function measure_performance(mapinfo, notekey) {
+    var map;
+    describe('measure performance ' + notekey, function () {
+      it('measure performance', function (done) {
+        map = mapinfo.map;
+        geo.util.timeRequestAnimationFrame(undefined, true);
+        map.zoom(5);
+        map.center({x: 28.9550, y: 41.0136});
+        map.transition({
+          center: {x: -0.1275, y: 51.5072},
+          duration: 500,
+          done: done
+        });
+      });
+      it('next animation', function (done) {
+        map.transition({
+          center: {x: 37.6167, y: 55.7500},
+          duration: 500,
+          ease: function (t) {
+            return Math.pow(2.0, -10.0 * t) * Math.sin((t - 0.075) * (2.0 * Math.PI) / 0.3) + 1.0;
+          },
+          done: done
+        });
+      });
+      it('next animation', function (done) {
+        map.transition({
+          center: {x: 28.9550, y: 41.0136},
+          duration: 500,
+          ease: function (t) {
+            var r = 2.75;
+            var s = 7.5625;
+            if (t < 1.0 / r) {
+              return s * t * t;
+            }
+            if (t < 2.0 / r) {
+              t -= 1.5 / r;
+              return s * t * t + 0.75;
+            }
+            if (t < 2.5 / r) {
+              t -= 2.25 / r;
+              return s * t * t + 0.9375;
+            }
+            t -= 2.625 / r;
+            return s * t * t + 0.984375;
+          },
+          done: done
+        });
+      });
+      it('next animation', function (done) {
+        map.transition({
+          center: {x: 37.6167, y: 55.7500},
+          duration: 500,
+          ease: function (t) {
+            return Math.pow(2.0, -10.0 * t) * Math.sin((t - 0.075) * (2.0 * Math.PI) / 0.3) + 1.0;
+          },
+          done: done
+        });
+      });
+      it('next animation', function (done) {
+        map.transition({
+          center: {x: 19.0514, y: 47.4925},
+          rotation: Math.PI * 2,
+          duration: 500,
+          done: done
+        });
+      });
+      it('report findings', function () {
+        var timings = geo.util.timeReport('requestAnimationFrame');
+        expect(timings.count).toBeGreaterThan(100);
+        timings = $.extend({}, timings);
+        delete timings.recentsub;
+        submitNote(notekey, timings);
+        geo.util.timeRequestAnimationFrame(true);
+      });
+    });
   }
 
   describe('default osmLayer', function () {
@@ -65,7 +149,7 @@ describe('geo.core.osmLayer', function () {
       it('check for tiles', function () {
         expect(map.node().find('.d3PlaneFeature').length).toBeGreaterThan(0);
       });
-      /* The follow is a test of d3.tileLayer as attached to a map. */
+      /* The following is a test of d3.tileLayer as attached to a map. */
       it('_update', function () {
         lastlevel = layer.canvas().attr('lastlevel');
         layer._update();
@@ -107,11 +191,18 @@ describe('geo.core.osmLayer', function () {
       waitForIt('.d3PlaneFeature', function () {
         return map.node().find('.d3PlaneFeature').length > 0;
       });
-      it('d3 to vgl', function () {
+      it('d3 to canvas', function () {
         expect(map.node().find('[data-tile-layer="0"]').is('g')).toBe(true);
         map.deleteLayer(layer);
-        layer = map.createLayer('osm', {renderer: 'vgl', url: '/data/white.jpg'});
+        layer = map.createLayer('osm', {renderer: 'canvas', url: '/data/white.jpg'});
         expect(map.node().find('[data-tile-layer="0"]').is('g')).toBe(false);
+        expect(map.node().find('.canvas-canvas').length).toBe(1);
+      });
+      it('canvas to vgl', function () {
+        expect(map.node().find('.canvas-canvas').length).toBe(1);
+        map.deleteLayer(layer);
+        layer = map.createLayer('osm', {renderer: 'vgl', url: '/data/white.jpg'});
+        expect(map.node().find('.canvas-canvas').length).toBe(0);
         expect(map.node().find('.webgl-canvas').length).toBe(1);
       });
     });
@@ -163,5 +254,60 @@ describe('geo.core.osmLayer', function () {
         });
       });
     });
+  });
+
+  describe('geo.canvas.osmLayer', function () {
+    var map, layer, mapinfo = {};
+    it('test that tiles are created', function () {
+      logCanvas2D();
+      map = create_map();
+      mapinfo.map = map;
+      layer = map.createLayer('osm', {
+        renderer: 'canvas',
+        baseUrl: '/data/tiles/'
+      });
+    });
+    waitForIt('tiles to load', function () {
+      return Object.keys(layer.activeTiles).length === 21;
+    });
+    waitForIt('tiles to draw', function () {
+      return window._canvasLog.counts['drawImage'] >= 21;
+    });
+    it('zoom out', function () {
+      map.zoom(3);
+    });
+    /* This checks to make sure tiles are removed */
+    waitForIt('tiles to load', function () {
+      return Object.keys(layer.activeTiles).length === 17;
+    });
+    /* It seems that the canvas is too slow in phantomjs for this test to make
+     * sense, so disable it until we can figure a better way.
+    measure_performance(mapinfo, 'osmLayer-canvas-performance');
+     */
+  });
+
+  describe('geo.gl.osmLayer', function () {
+    var map, layer, mapinfo = {};
+
+    it('test that tiles are created', function () {
+      mockVGLRenderer();
+      map = create_map();
+      mapinfo.map = map;
+      layer = map.createLayer('osm', {
+        renderer: 'vgl',
+        baseUrl: '/data/tiles/'
+      });
+    });
+    waitForIt('tiles to load', function () {
+      return Object.keys(layer.activeTiles).length === 21;
+    });
+    it('zoom out', function () {
+      map.zoom(3);
+    });
+    /* This checks to make sure tiles are removed */
+    waitForIt('tiles to load', function () {
+      return Object.keys(layer.activeTiles).length === 17;
+    });
+    measure_performance(mapinfo, 'osmLayer-vgl-performance');
   });
 });

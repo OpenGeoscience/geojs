@@ -1,6 +1,7 @@
 /* These are functions we want available to jasmine tests. */
-/* exported waitForIt, mockVGLRenderer, closeToArray, closeToEqual */
+/* exported waitForIt, mockVGLRenderer, closeToArray, closeToEqual, logCanvas2D, submitNote */
 
+var $ = require('jquery');
 var geo = require('../src');
 module.exports = {};
 
@@ -8,7 +9,6 @@ module.exports = {};
  * Provides a uniform entry point into the geojs library.
  */
 module.exports.geo = geo;
-
 /**
  * Create a pair of it functions.  The first one waits for a function to return
  * a truthy value, and the second one runs after the first has assured its
@@ -99,90 +99,106 @@ module.exports.mockVGLRenderer = function mockVGLRenderer() {
     return;
   }
 
-  console.log('Mocking vgl renderer');
-  var noop = function () { };
+  var mockCounts = {};
+  var count = function (name) {
+    mockCounts[name] = (mockCounts[name] || 0) + 1;
+  };
+  var noop = function (name) {
+    return function () {
+      count(name);
+    };
+  };
   var _id = 0,
-      incID = function () {
-        _id += 1;
-        return _id;
+      incID = function (name) {
+        return function () {
+          count(name);
+          _id += 1;
+          return _id;
+        };
       };
   /* The context largely does nothing. */
   var m_context = {
-    activeTexture: noop,
-    attachShader: noop,
-    bindAttribLocation: noop,
-    bindBuffer: noop,
-    bindFramebuffer: noop,
-    bindTexture: noop,
-    blendFuncSeparate: noop,
-    bufferData: noop,
-    bufferSubData: noop,
+    activeTexture: noop('activeTexture'),
+    attachShader: noop('attachShader'),
+    bindAttribLocation: noop('bindAttribLocation'),
+    bindBuffer: noop('bindBuffer'),
+    bindFramebuffer: noop('bindFramebuffer'),
+    bindTexture: noop('bindTexture'),
+    blendFuncSeparate: noop('blendFuncSeparate'),
+    bufferData: noop('bufferData'),
+    bufferSubData: noop('bufferSubData'),
     checkFramebufferStatus: function (key) {
+      count('checkFramebufferStatus');
       if (key === vgl.GL.FRAMEBUFFER) {
         return vgl.GL.FRAMEBUFFER_COMPLETE;
       }
     },
-    clear: noop,
-    clearColor: noop,
-    clearDepth: noop,
-    compileShader: noop,
-    createBuffer: incID,
-    createFramebuffer: noop,
-    createProgram: incID,
-    createShader: incID,
-    createTexture: incID,
-    deleteBuffer: noop,
-    deleteProgram: noop,
-    deleteShader: noop,
-    deleteTexture: noop,
-    depthFunc: noop,
-    disable: noop,
-    disableVertexAttribArray: noop,
-    drawArrays: noop,
-    enable: noop,
-    enableVertexAttribArray: noop,
-    finish: noop,
-    getExtension: incID,
+    clear: noop('clear'),
+    clearColor: noop('clearColor'),
+    clearDepth: noop('clearDepth'),
+    compileShader: noop('compileShader'),
+    createBuffer: incID('createBuffer'),
+    createFramebuffer: noop('createFramebuffer'),
+    createProgram: incID('createProgram'),
+    createShader: incID('createShader'),
+    createTexture: incID('createTexture'),
+    deleteBuffer: noop('deleteBuffer'),
+    deleteProgram: noop('deleteProgram'),
+    deleteShader: noop('deleteShader'),
+    deleteTexture: noop('deleteTexture'),
+    depthFunc: noop('depthFunc'),
+    disable: noop('disable'),
+    disableVertexAttribArray: noop('disableVertexAttribArray'),
+    drawArrays: noop('drawArrays'),
+    enable: noop('enable'),
+    enableVertexAttribArray: noop('enableVertexAttribArray'),
+    finish: noop('finish'),
+    getExtension: incID('getExtension'),
     getParameter: function (key) {
+      count('getParameter');
       if (key === vgl.GL.DEPTH_BITS) {
         return 16;
       }
     },
     getProgramParameter: function (id, key) {
+      count('getProgramParameter');
       if (key === vgl.GL.LINK_STATUS) {
         return true;
       }
     },
     getShaderInfoLog: function () {
+      count('getShaderInfoLog');
       return 'log';
     },
     getShaderParameter: function (id, key) {
+      count('getShaderParameter');
       if (key === vgl.GL.COMPILE_STATUS) {
         return true;
       }
     },
-    getUniformLocation: incID,
+    getUniformLocation: incID('getUniformLocation'),
     isEnabled: function (key) {
+      count('isEnabled');
       if (key === vgl.GL.BLEND) {
         return true;
       }
     },
-    linkProgram: noop,
-    pixelStorei: noop,
-    shaderSource: noop,
-    texImage2D: noop,
-    texParameteri: noop,
-    uniform1iv: noop,
-    uniform1fv: noop,
-    uniform2fv: noop,
-    uniform3fv: noop,
-    uniform4fv: noop,
-    uniformMatrix3fv: noop,
-    uniformMatrix4fv: noop,
-    useProgram: noop,
-    vertexAttribPointer: noop,
-    vertexAttrib3fv: noop,
-    viewport: noop
+    linkProgram: noop('linkProgram'),
+    pixelStorei: noop('pixelStorei'),
+    shaderSource: noop('shaderSource'),
+    texImage2D: noop('texImage2D'),
+    texParameteri: noop('texParameteri'),
+    uniform1iv: noop('uniform1iv'),
+    uniform1fv: noop('uniform1fv'),
+    uniform2fv: noop('uniform2fv'),
+    uniform3fv: noop('uniform3fv'),
+    uniform4fv: noop('uniform4fv'),
+    uniformMatrix3fv: noop('uniformMatrix3fv'),
+    uniformMatrix4fv: noop('uniformMatrix4fv'),
+    useProgram: noop('useProgram'),
+    vertexAttribPointer: noop('vertexAttribPointer'),
+    vertexAttrib3fv: noop('vertexAttrib3fv'),
+    viewport: noop('viewport')
   };
 
   /* Our mock has only a single renderWindow */
@@ -199,5 +215,55 @@ module.exports.mockVGLRenderer = function mockVGLRenderer() {
   geo.gl.vglRenderer.supported = function () {
     return true;
   };
+
   vgl._mocked = true;
+  vgl.mockCounts = function () {
+    return mockCounts;
+  };
+};
+
+/**
+ * Add counters for various canvas calls so we can tell if they have been used.
+ */
+module.exports.logCanvas2D = function logCanvas2D(enable) {
+  'use strict';
+
+  if (window._canvasLog) {
+    window._canvasLog.enable = enable;
+    return;
+  }
+
+  var log = {enable: enable, counts: {}, log: []};
+
+  var proto = CanvasRenderingContext2D.prototype;
+  $.each(proto, function (key) {
+    var orig = proto[key];
+    if (orig && orig.constructor && orig.call && orig.apply) {
+      proto[key] = function () {
+        log.counts[key] = (log.counts[key] || 0) + 1;
+        if (log.enable) {
+          log.log.push({func: key, arg: arguments});
+        }
+        return orig.apply(this, arguments);
+      };
+    }
+  });
+
+  window._canvasLog = log;
+};
+
+/**
+ * Send data to be reported as part of the a build note.
+ *
+ * @param key: the key that this will be reported under.  This should be the
+ *             name of the test.
+ * @param note: the data to send.  This will be converted to JSON.
+ */
+module.exports.submitNote = function submitNote(key, note) {
+  $.ajax({
+    url: '/notes?key=' + encodeURIComponent(key),
+    data: JSON.stringify(note),
+    method: 'PUT',
+    contentType: 'application/json'
+  });
 };
