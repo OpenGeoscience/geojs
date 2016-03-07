@@ -23,6 +23,7 @@ module.exports = {
   planeFeature: require('./core/planeFeature'),
   pointFeature: require('./core/pointFeature'),
   polygonFeature: require('./core/polygonFeature'),
+  quadFeature: require('./core/quadFeature'),
   renderer: require('./core/renderer'),
   sceneObject: require('./core/sceneObject'),
   tile: require('./core/tile'),
@@ -34,5 +35,6 @@ module.exports = {
   version: require('./core/version'),
   util: require('./util'),
   d3: require('./d3'),
-  gl: require('./gl')
+  gl: require('./gl'),
+  canvas: require('./canvas')
 };

@@ -11,6 +11,7 @@ module.exports = {
   pointFeature: require('./pointFeature'),
   pointSpriteFeature: require('./pointSpriteFeature'),
   polygonFeature: require('./polygonFeature'),
+  quadFeature: require('./quadFeature'),
   tileLayer: require('./tileLayer'),
   vglRenderer: require('./vglRenderer')
 };
