@@ -88,6 +88,7 @@ var map = function (arg) {
   var geo_event = require('./event');
   var mapInteractor = require('./mapInteractor');
   var clock = require('./clock');
+  var uiLayer = require('../ui/uiLayer');
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -550,7 +551,7 @@ var map = function (arg) {
     if (newLayer) {
       m_this.addChild(newLayer);
       m_this.children().forEach(function (c) {
-        if (c instanceof geo.gui.uiLayer) {
+        if (c instanceof uiLayer) {
           c.moveToTop();
         }
       });
@@ -1301,32 +1302,32 @@ var map = function (arg) {
     gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
     if (bounds === undefined) {
       return {
-        left: geo.transform.transformCoordinates(m_gcs, gcs, [{
+        left: transform.transformCoordinates(m_gcs, gcs, [{
           x: m_maxBounds.left, y: 0}])[0].x,
-        right: geo.transform.transformCoordinates(m_gcs, gcs, [{
+        right: transform.transformCoordinates(m_gcs, gcs, [{
           x: m_maxBounds.right, y: 0}])[0].x,
-        bottom: geo.transform.transformCoordinates(m_gcs, gcs, [{
+        bottom: transform.transformCoordinates(m_gcs, gcs, [{
           x: 0, y: m_maxBounds.bottom}])[0].y,
-        top: geo.transform.transformCoordinates(m_gcs, gcs, [{
+        top: transform.transformCoordinates(m_gcs, gcs, [{
           x: 0, y: m_maxBounds.top}])[0].y
       };
     }
     var cx = ((bounds.left || 0) + (bounds.right || 0)) / 2,
         cy = ((bounds.bottom || 0) + (bounds.top || 0)) / 2;
     if (bounds.left !== undefined) {
-      m_maxBounds.left = geo.transform.transformCoordinates(gcs, m_gcs, [{
+      m_maxBounds.left = transform.transformCoordinates(gcs, m_gcs, [{
         x: bounds.left, y: cy}])[0].x;
     }
     if (bounds.right !== undefined) {
-      m_maxBounds.right = geo.transform.transformCoordinates(gcs, m_gcs, [{
+      m_maxBounds.right = transform.transformCoordinates(gcs, m_gcs, [{
         x: bounds.right, y: cy}])[0].x;
     }
     if (bounds.bottom !== undefined) {
-      m_maxBounds.bottom = geo.transform.transformCoordinates(gcs, m_gcs, [{
+      m_maxBounds.bottom = transform.transformCoordinates(gcs, m_gcs, [{
         x: cx, y: bounds.bottom}])[0].y;
     }
     if (bounds.top !== undefined) {
-      m_maxBounds.top = geo.transform.transformCoordinates(gcs, m_gcs, [{
+      m_maxBounds.top = transform.transformCoordinates(gcs, m_gcs, [{
         x: cx, y: bounds.top}])[0].y;
     }
     reset_minimum_zoom();

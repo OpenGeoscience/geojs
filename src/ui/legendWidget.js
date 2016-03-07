@@ -1,18 +1,25 @@
+var svgWidget = require('./svgWidget');
+var inherit = require('../util').inherit;
+var registerWidget = require('../util').registerWidget;
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class legendWidget
  *
- * @class
+ * @class geo.gui.legendWidget
  * @extends geo.gui.svgWidget
  * @returns {geo.gui.legendWidget}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.gui.legendWidget = function (arg) {
+var legendWidget = function (arg) {
   'use strict';
-  if (!(this instanceof geo.gui.legendWidget)) {
-    return new geo.gui.legendWidget(arg);
+  if (!(this instanceof legendWidget)) {
+    return new legendWidget(arg);
   }
-  geo.gui.svgWidget.call(this, arg);
+  svgWidget.call(this, arg);
+
+  var d3 = require('d3');
+  var geo_event = require('../core/event');
 
   /** @private */
   var m_this = this,
@@ -267,12 +274,12 @@ geo.gui.legendWidget = function (arg) {
     m_this.reposition();
   };
 
-  this.geoOn(geo.event.resize, function () {
+  this.geoOn(geo_event.resize, function () {
     m_this.draw();
   });
 
 };
 
-inherit(geo.gui.legendWidget, geo.gui.svgWidget);
+inherit(legendWidget, svgWidget);
 
-geo.registerWidget('dom', 'legend', geo.gui.legendWidget);
+registerWidget('dom', 'legend', legendWidget);

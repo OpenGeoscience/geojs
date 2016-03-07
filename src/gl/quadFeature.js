@@ -1,19 +1,26 @@
+var inherit = require('../util').inherit;
+var registerFeature = require('../util').registerFeature;
+var quadFeature = require('../core/quadFeature');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class quadFeature
  *
- * @class
+ * @class geo.gl.quadFeature
  * @param {Object} arg Options object
  * @extends geo.quadFeature
  * @returns {geo.gl.quadFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.gl.quadFeature = function (arg) {
+var gl_quadFeature = function (arg) {
   'use strict';
-  if (!(this instanceof geo.gl.quadFeature)) {
-    return new geo.gl.quadFeature(arg);
+  if (!(this instanceof gl_quadFeature)) {
+    return new gl_quadFeature(arg);
   }
-  geo.quadFeature.call(this, arg);
+  quadFeature.call(this, arg);
+
+  var $ = require('jquery');
+  var vgl = require('vgl');
 
   var m_this = this,
       s_exit = this._exit,
@@ -379,7 +386,7 @@ geo.gl.quadFeature = function (arg) {
   return this;
 };
 
-inherit(geo.gl.quadFeature, geo.quadFeature);
+inherit(gl_quadFeature, quadFeature);
 
 // Now register it
-geo.registerFeature('vgl', 'quad', geo.gl.quadFeature);
+registerFeature('vgl', 'quad', gl_quadFeature);

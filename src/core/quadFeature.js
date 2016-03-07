@@ -1,8 +1,12 @@
+var $ = require('jquery');
+var inherit = require('../util').inherit;
+var feature = require('./feature');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class quadFeature
  *
- * @class
+ * @class geo.quadFeature
  * @param {Object} arg Options object
  * @extends geo.feature
  * @param {Object|string|Function} [color] Color for quads without images.
@@ -39,13 +43,17 @@
  * @returns {geo.quadFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.quadFeature = function (arg) {
+var quadFeature = function (arg) {
   'use strict';
-  if (!(this instanceof geo.quadFeature)) {
-    return new geo.quadFeature(arg);
+
+  var transform = require('./transform');
+  var util = require('../util');
+
+  if (!(this instanceof quadFeature)) {
+    return new quadFeature(arg);
   }
   arg = arg || {};
-  geo.feature.call(this, arg);
+  feature.call(this, arg);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -129,7 +137,7 @@ geo.quadFeature = function (arg) {
         poly1 = [{}, {}, {}, {}], poly2 = [{}, {}, {}, {}],
         map = m_this.layer().map(),
         order1 = [0, 1, 2, 0], order2 = [1, 2, 3, 1];
-    coordinate = geo.transform.transformCoordinates(
+    coordinate = transform.transformCoordinates(
         map.ingcs(), map.gcs(), [coordinate])[0];
     if (!m_quads) {
       this._generateQuads();
@@ -144,8 +152,8 @@ geo.quadFeature = function (arg) {
           poly2[i].y = quad.pos[order2[i] * 3 + 1];
           poly2[i].z = quad.pos[order2[i] * 3 + 2];
         }
-        if (geo.util.pointInPolygon(coordinate, poly1) ||
-            geo.util.pointInPolygon(coordinate, poly2)) {
+        if (util.pointInPolygon(coordinate, poly1) ||
+            util.pointInPolygon(coordinate, poly2)) {
           indices.push(quad.idx);
           found.push(data[quad.idx]);
         }
@@ -168,7 +176,7 @@ geo.quadFeature = function (arg) {
     if (val === undefined) {
       return m_this.style('position');
     } else {
-      m_this.style('position', geo.util.ensureFunction(val));
+      m_this.style('position', util.ensureFunction(val));
       m_this.dataTime().modified();
       m_this.modified();
     }
@@ -211,7 +219,7 @@ geo.quadFeature = function (arg) {
           pos[key][2] = depthFunc.call(m_this, d, i);
         }
         if (gcs !== map_gcs) {
-          pos[key] = geo.transform.transformCoordinates(
+          pos[key] = transform.transformCoordinates(
               gcs, map_gcs, pos[key]);
         }
       }
@@ -245,15 +253,15 @@ geo.quadFeature = function (arg) {
    */
   this._generateQuads = function () {
     var posFunc = m_this.position(),
-        imgFunc = geo.util.ensureFunction(m_this.style('image')),
-        colorFunc = geo.util.ensureFunction(m_this.style('color')),
-        depthFunc = geo.util.ensureFunction(m_this.style('depth')),
-        opacityFunc = geo.util.ensureFunction(m_this.style('opacity')),
-        loadedFunc = geo.util.ensureFunction(m_this.style(
+        imgFunc = util.ensureFunction(m_this.style('image')),
+        colorFunc = util.ensureFunction(m_this.style('color')),
+        depthFunc = util.ensureFunction(m_this.style('depth')),
+        opacityFunc = util.ensureFunction(m_this.style('opacity')),
+        loadedFunc = util.ensureFunction(m_this.style(
             'drawOnAsyncResourceLoaded')),
-        previewColorFunc = geo.util.ensureFunction(m_this.style(
+        previewColorFunc = util.ensureFunction(m_this.style(
             'previewColor')),
-        previewImageFunc = geo.util.ensureFunction(m_this.style(
+        previewImageFunc = util.ensureFunction(m_this.style(
             'previewImage')),
         data = m_this.data(),
         clrQuads = [], imgQuads = [],
@@ -305,7 +313,7 @@ geo.quadFeature = function (arg) {
           idx: i,
           pos: pos,
           opacity: opacity,
-          color: geo.util.convertColor(colorFunc.call(m_this, d, i))
+          color: util.convertColor(colorFunc.call(m_this, d, i))
         };
         clrQuads.push(quad);
         quadinfo.clrquad = quad;
@@ -340,7 +348,7 @@ geo.quadFeature = function (arg) {
               previewColor = undefined;
             }
             if (previewColor !== undefined) {
-              quad.color = geo.util.convertColor(previewColor);
+              quad.color = util.convertColor(previewColor);
               clrQuads.push(quad);
               quadinfo.keep = false;
             }
@@ -406,7 +414,7 @@ geo.quadFeature = function (arg) {
     );
 
     if (arg.position !== undefined) {
-      style.position = geo.util.ensureFunction(arg.position);
+      style.position = util.ensureFunction(arg.position);
     }
     m_this.style(style);
     m_this.dataTime().modified();
@@ -414,8 +422,6 @@ geo.quadFeature = function (arg) {
 
   return m_this;
 };
-
-geo.event.quadFeature = $.extend({}, geo.event.feature);
 
 /**
  * Object specification for a quad feature.
@@ -432,12 +438,12 @@ geo.event.quadFeature = $.extend({}, geo.event.feature);
  * @param {geo.quadFeature.spec} spec The object specification
  * @returns {geo.quadFeature|null}
  */
-geo.quadFeature.create = function (layer, spec) {
+quadFeature.create = function (layer, spec) {
   'use strict';
 
   spec = spec || {};
   spec.type = 'quad';
-  return geo.feature.create(layer, spec);
+  return feature.create(layer, spec);
 };
 
-inherit(geo.quadFeature, geo.feature);
+inherit(quadFeature, feature);

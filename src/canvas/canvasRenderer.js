@@ -1,21 +1,27 @@
+var inherit = require('../util').inherit;
+var registerRenderer = require('../util').registerRenderer;
+var renderer = require('../core/renderer');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class canvasRenderer
  *
- * @class
+ * @class geo.canvas.renderer
  * @extends geo.renderer
  * @param canvas
  * @returns {geo.canvas.canvasRenderer}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.canvas.canvasRenderer = function (arg) {
+var canvasRenderer = function (arg) {
   'use strict';
 
-  if (!(this instanceof geo.canvas.canvasRenderer)) {
-    return new geo.canvas.canvasRenderer(arg);
+  var $ = require('jquery');
+
+  if (!(this instanceof canvasRenderer)) {
+    return new canvasRenderer(arg);
   }
   arg = arg || {};
-  geo.renderer.call(this, arg);
+  renderer.call(this, arg);
 
   var m_this = this,
       m_renderAnimFrameRef = null,
@@ -111,9 +117,9 @@ geo.canvas.canvasRenderer = function (arg) {
   return this;
 };
 
-inherit(geo.canvas.canvasRenderer, geo.renderer);
+inherit(canvasRenderer, renderer);
 
-geo.registerRenderer('canvas', geo.canvas.canvasRenderer);
+registerRenderer('canvas', canvasRenderer);
 
 (function () {
   'use strict';
@@ -125,7 +131,7 @@ geo.registerRenderer('canvas', geo.canvas.canvasRenderer);
    *
    * @returns {boolean} true if available.
    */
-  geo.canvas.canvasRenderer.supported = function () {
+  canvasRenderer.supported = function () {
     if (checkedCanvas === undefined) {
       /* This is extracted from what Modernizr uses. */
       var canvas; // eslint-disable-line no-unused-vars
@@ -146,7 +152,7 @@ geo.registerRenderer('canvas', geo.canvas.canvasRenderer);
    *
    * @returns null for the null renderer.
    */
-  geo.canvas.canvasRenderer.fallback = function () {
+  canvasRenderer.fallback = function () {
     return null;
   };
 })();

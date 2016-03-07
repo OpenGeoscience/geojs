@@ -20,6 +20,7 @@ var d3_vectorFeature = function (arg) {
 
   var object = require('./object');
   var timestamp = require('../core/timestamp');
+  var d3 = require('d3');
 
   arg = arg || {};
   vectorFeature.call(this, arg);

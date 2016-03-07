@@ -1,18 +1,24 @@
+var inherit = require('../util').inherit;
+var sceneObject = require('./sceneObject');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class widget
  *
- * @class
+ * @class geo.gui.widget
  * @extends {geo.sceneObject}
  * @returns {geo.gui.widget}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.gui.widget = function (arg) {
+var widget = function (arg) {
   'use strict';
-  if (!(this instanceof geo.gui.widget)) {
-    return new geo.gui.widget(arg);
+  if (!(this instanceof widget)) {
+    return new widget(arg);
   }
-  geo.sceneObject.call(this, arg);
+  sceneObject.call(this, arg);
+
+  var geo_event = require('../core/event');
+  var createFeature = require('../util').createFeature;
 
   var m_this = this,
       s_exit = this._exit,
@@ -21,7 +27,7 @@ geo.gui.widget = function (arg) {
 
   arg.position = arg.position === undefined ? { left: 0, top: 0 } : arg.position;
 
-  if (arg.parent !== undefined && !(arg.parent instanceof geo.gui.widget)) {
+  if (arg.parent !== undefined && !(arg.parent instanceof widget)) {
     throw 'Parent must be of type geo.gui.widget';
   }
 
@@ -34,7 +40,7 @@ geo.gui.widget = function (arg) {
       m_this._deleteFeature(child);
     });
 
-    m_this.layer().geoOff(geo.event.pan, m_this.repositionEvent);
+    m_this.layer().geoOff(geo_event.pan, m_this.repositionEvent);
     m_this.parentCanvas().removeChild(m_this.canvas());
     s_exit();
   };
@@ -48,7 +54,7 @@ geo.gui.widget = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._createFeature = function (featureName, arg) {
 
-    var newFeature = geo.createFeature(
+    var newFeature = createFeature(
       featureName, m_this, m_this.renderer(), arg);
 
     m_this.addChild(newFeature);
@@ -192,7 +198,7 @@ geo.gui.widget = function (arg) {
       arg.hasOwnProperty('position') &&
       arg.position.hasOwnProperty('x') &&
       arg.position.hasOwnProperty('y')) {
-    this.layer().geoOn(geo.event.pan, m_this.repositionEvent);
+    this.layer().geoOn(geo_event.pan, m_this.repositionEvent);
   }
 };
-inherit(geo.gui.widget, geo.sceneObject);
+inherit(widget, sceneObject);

@@ -21,6 +21,7 @@ var gl_pointFeature = function (arg) {
 
   var vgl = require('vgl');
   var transform = require('../core/transform');
+  var util = require('../util');
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -282,20 +283,20 @@ var gl_pointFeature = function (arg) {
       }
     }
 
-    posBuf = geo.util.getGeomBuffer(geom, 'pos', vpf * numPts * 3);
+    posBuf = util.getGeomBuffer(geom, 'pos', vpf * numPts * 3);
 
     if (m_primitiveShape !== 'sprite') {
-      unitBuf = geo.util.getGeomBuffer(geom, 'unit', vpf * numPts * 2);
+      unitBuf = util.getGeomBuffer(geom, 'unit', vpf * numPts * 2);
     }
 
-    radius = geo.util.getGeomBuffer(geom, 'rad', vpf * numPts);
-    stroke = geo.util.getGeomBuffer(geom, 'stroke', vpf * numPts);
-    strokeWidth = geo.util.getGeomBuffer(geom, 'strokeWidth', vpf * numPts);
-    strokeOpacity = geo.util.getGeomBuffer(geom, 'strokeOpacity', vpf * numPts);
-    strokeColor = geo.util.getGeomBuffer(geom, 'strokeColor', vpf * numPts * 3);
-    fill = geo.util.getGeomBuffer(geom, 'fill', vpf * numPts);
-    fillOpacity = geo.util.getGeomBuffer(geom, 'fillOpacity', vpf * numPts);
-    fillColor = geo.util.getGeomBuffer(geom, 'fillColor', vpf * numPts * 3);
+    radius = util.getGeomBuffer(geom, 'rad', vpf * numPts);
+    stroke = util.getGeomBuffer(geom, 'stroke', vpf * numPts);
+    strokeWidth = util.getGeomBuffer(geom, 'strokeWidth', vpf * numPts);
+    strokeOpacity = util.getGeomBuffer(geom, 'strokeOpacity', vpf * numPts);
+    strokeColor = util.getGeomBuffer(geom, 'strokeColor', vpf * numPts * 3);
+    fill = util.getGeomBuffer(geom, 'fill', vpf * numPts);
+    fillOpacity = util.getGeomBuffer(geom, 'fillOpacity', vpf * numPts);
+    fillColor = util.getGeomBuffer(geom, 'fillColor', vpf * numPts * 3);
     indices = geom.primitive(0).indices();
     if (!(indices instanceof Uint16Array) || indices.length !== vpf * numPts) {
       indices = new Uint16Array(vpf * numPts);

@@ -1,3 +1,7 @@
+var domWidget = require('./domWidget');
+var inherit = require('../util').inherit;
+var registerWidget = require('../util').registerWidget;
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class geo.gui.svgWidget
@@ -10,19 +14,21 @@
  * UI layers dom element.
  * See {@link geo.gui.widget#parentCanvas}.
  *
- * @class
+ * @class geo.gui.svgWidget
  * @extends geo.gui.domWidget
  * @returns {geo.gui.svgWidget}
  *
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.gui.svgWidget = function (arg) {
+var svgWidget = function (arg) {
   'use strict';
-  if (!(this instanceof geo.gui.svgWidget)) {
-    return new geo.gui.svgWidget(arg);
+  if (!(this instanceof svgWidget)) {
+    return new svgWidget(arg);
   }
 
-  geo.gui.domWidget.call(this, arg);
+  domWidget.call(this, arg);
+
+  var d3Renderer = require('../d3/d3Renderer');
 
   var m_this = this,
       m_renderer = null;
@@ -62,7 +68,7 @@ geo.gui.svgWidget = function (arg) {
       rendererOpts.d3Parent = d3Parent;
     }
 
-    m_renderer = geo.d3.d3Renderer(rendererOpts);
+    m_renderer = d3Renderer(rendererOpts);
 
     m_this.canvas(m_renderer.canvas()[0][0]);
   };
@@ -70,6 +76,6 @@ geo.gui.svgWidget = function (arg) {
   return this;
 };
 
-inherit(geo.gui.svgWidget, geo.gui.domWidget);
+inherit(svgWidget, domWidget);
 
-geo.registerWidget('dom', 'svg', geo.gui.svgWidget);
+registerWidget('dom', 'svg', svgWidget);

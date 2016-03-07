@@ -1,23 +1,29 @@
+var inherit = require('../util').inherit;
+var registerLayer = require('../util').registerLayer;
+var layer = require('./layer');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class uiLayer
  *
- * @class
+ * @class geo.gui.uiLayer
  * @extends {geo.layer}
  * @returns {geo.gui.uiLayer}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.gui.uiLayer = function (arg) {
+var uiLayer = function (arg) {
   'use strict';
+
+  var createWidget = require('../util').createWidget;
 
   // The widget stays fixed on the screen.
   arg.renderer = 'dom';
   arg.sticky = false;
 
-  if (!(this instanceof geo.gui.uiLayer)) {
-    return new geo.gui.uiLayer(arg);
+  if (!(this instanceof uiLayer)) {
+    return new uiLayer(arg);
   }
-  geo.layer.call(this, arg);
+  layer.call(this, arg);
 
   var m_this = this,
       s_exit = this._exit;
@@ -30,7 +36,7 @@ geo.gui.uiLayer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.createWidget = function (widgetName, arg) {
-    var newWidget = geo.createWidget(widgetName, m_this, arg);
+    var newWidget = createWidget(widgetName, m_this, arg);
 
     // We only want top level widgets to be a child of the uiLayer
     if (!(arg && 'parent' in arg)) {
@@ -67,6 +73,6 @@ geo.gui.uiLayer = function (arg) {
   };
 };
 
-inherit(geo.gui.uiLayer, geo.layer);
+inherit(uiLayer, layer);
 
-geo.registerLayer('ui', geo.gui.uiLayer);
+registerLayer('ui', uiLayer);

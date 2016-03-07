@@ -1,10 +1,14 @@
-geo.gui.domWidget = function (arg) {
+var widget = require('./widget');
+var inherit = require('../util').inherit;
+var registerWidget = require('../util').registerWidget;
+
+var domWidget = function (arg) {
   'use strict';
-  if (!(this instanceof geo.gui.domWidget)) {
-    return new geo.gui.domWidget(arg);
+  if (!(this instanceof domWidget)) {
+    return new domWidget(arg);
   }
 
-  geo.gui.widget.call(this, arg);
+  widget.call(this, arg);
 
   var m_this = this,
       m_default_canvas = 'div';
@@ -44,6 +48,6 @@ geo.gui.domWidget = function (arg) {
   return this;
 };
 
-inherit(geo.gui.domWidget, geo.gui.widget);
+inherit(domWidget, widget);
 
-geo.registerWidget('dom', 'dom', geo.gui.domWidget);
+registerWidget('dom', 'dom', domWidget);

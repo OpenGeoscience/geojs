@@ -21,6 +21,7 @@ var gl_lineFeature = function (arg) {
 
   var vgl = require('vgl');
   var transform = require('../core/transform');
+  var util = require('../util');
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -159,13 +160,13 @@ var gl_lineFeature = function (arg) {
                  position, 3);
 
     len = numSegments * order.length;
-    posBuf = geo.util.getGeomBuffer(geom, 'pos', len * 3);
-    nextBuf = geo.util.getGeomBuffer(geom, 'next', len * 3);
-    prevBuf = geo.util.getGeomBuffer(geom, 'prev', len * 3);
-    offsetBuf = geo.util.getGeomBuffer(geom, 'offset', len);
-    strokeWidthBuf = geo.util.getGeomBuffer(geom, 'strokeWidth', len);
-    strokeColorBuf = geo.util.getGeomBuffer(geom, 'strokeColor', len * 3);
-    strokeOpacityBuf = geo.util.getGeomBuffer(geom, 'strokeOpacity', len);
+    posBuf = util.getGeomBuffer(geom, 'pos', len * 3);
+    nextBuf = util.getGeomBuffer(geom, 'next', len * 3);
+    prevBuf = util.getGeomBuffer(geom, 'prev', len * 3);
+    offsetBuf = util.getGeomBuffer(geom, 'offset', len);
+    strokeWidthBuf = util.getGeomBuffer(geom, 'strokeWidth', len);
+    strokeColorBuf = util.getGeomBuffer(geom, 'strokeColor', len * 3);
+    strokeOpacityBuf = util.getGeomBuffer(geom, 'strokeOpacity', len);
     indicesBuf = geom.primitive(0).indices();
     if (!(indicesBuf instanceof Uint16Array) || indicesBuf.length !== len) {
       indicesBuf = new Uint16Array(len);

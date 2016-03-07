@@ -22,6 +22,7 @@ var gl_contourFeature = function (arg) {
 
   var vgl = require('vgl');
   var transform = require('../core/transform');
+  var util = require('../util');
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -138,9 +139,9 @@ var gl_contourFeature = function (arg) {
     m_texture.setColorTable(colorTable);
     contour.pos = transform.transformCoordinates(
         m_this.gcs(), m_this.layer().map().gcs(), contour.pos, 3);
-    posBuf = geo.util.getGeomBuffer(geom, 'pos', numPts * 3);
-    opacityBuf = geo.util.getGeomBuffer(geom, 'opacity', numPts);
-    valueBuf = geo.util.getGeomBuffer(geom, 'value', numPts);
+    posBuf = util.getGeomBuffer(geom, 'pos', numPts * 3);
+    opacityBuf = util.getGeomBuffer(geom, 'opacity', numPts);
+    valueBuf = util.getGeomBuffer(geom, 'value', numPts);
     for (i = i3 = 0; i < numPts; i += 1, i3 += 3) {
       j = contour.elements[i];
       j3 = j * 3;

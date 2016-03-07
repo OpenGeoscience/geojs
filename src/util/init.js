@@ -2,6 +2,7 @@
 (function () {
   'use strict';
 
+  var $ = require('jquery');
   var geo = {util: {}};
   var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
