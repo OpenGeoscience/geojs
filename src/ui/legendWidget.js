@@ -283,3 +283,4 @@ var legendWidget = function (arg) {
 inherit(legendWidget, svgWidget);
 
 registerWidget('dom', 'legend', legendWidget);
+module.exports = legendWidget;

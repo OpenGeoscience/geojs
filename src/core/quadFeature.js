@@ -447,3 +447,4 @@ quadFeature.create = function (layer, spec) {
 };
 
 inherit(quadFeature, feature);
+module.exports = quadFeature;

@@ -202,3 +202,4 @@ var widget = function (arg) {
   }
 };
 inherit(widget, sceneObject);
+module.exports = sceneObject;

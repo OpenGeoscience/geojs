@@ -143,3 +143,4 @@ var d3_planeFeature = function (arg) {
 inherit(d3_planeFeature, planeFeature);
 
 registerFeature('d3', 'plane', d3_planeFeature);
+module.exports = d3_planeFeature;

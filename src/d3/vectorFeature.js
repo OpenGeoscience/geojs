@@ -299,3 +299,4 @@ inherit(d3_vectorFeature, vectorFeature);
 
 // Now register it
 registerFeature('d3', 'vector', d3_vectorFeature);
+module.exports = d3_vectorFeature;

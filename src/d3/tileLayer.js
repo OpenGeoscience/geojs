@@ -134,3 +134,4 @@ var d3_tileLayer = function () {
 };
 
 registerLayerAdjustment('d3', 'tile', d3_tileLayer);
+module.exports = d3_tileLayer;

@@ -296,5 +296,6 @@ registerRenderer('vgl', vglRenderer);
     return null;
   };
 
-  module.exports = vglRenderer;
 })();
+
+module.exports = vglRenderer;

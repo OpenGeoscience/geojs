@@ -141,3 +141,4 @@ inherit(canvas_quadFeature, quadFeature);
 
 // Now register it
 registerFeature('canvas', 'quad', canvas_quadFeature);
+module.exports = canvas_quadFeature;

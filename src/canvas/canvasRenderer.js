@@ -156,3 +156,5 @@ registerRenderer('canvas', canvasRenderer);
     return null;
   };
 })();
+
+module.exports = canvasRenderer;

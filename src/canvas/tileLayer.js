@@ -87,3 +87,4 @@ var canvas_tileLayer = function () {
 };
 
 registerLayerAdjustment('canvas', 'tile', canvas_tileLayer);
+module.exports = canvas_tileLayer;

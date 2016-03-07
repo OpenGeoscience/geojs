@@ -340,3 +340,4 @@ var sliderWidget = function (arg) {
 inherit(sliderWidget, svgWidget);
 
 registerWidget('dom', 'slider', sliderWidget);
+module.exports = sliderWidget;

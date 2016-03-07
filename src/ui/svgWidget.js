@@ -79,3 +79,4 @@ var svgWidget = function (arg) {
 inherit(svgWidget, domWidget);
 
 registerWidget('dom', 'svg', svgWidget);
+module.exports = svgWidget;

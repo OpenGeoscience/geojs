@@ -391,6 +391,7 @@ var contourFeature = function (arg) {
 };
 
 inherit(contourFeature, feature);
+module.exports = contourFeature;
 
 /* Example:
 

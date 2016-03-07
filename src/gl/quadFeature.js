@@ -390,3 +390,4 @@ inherit(gl_quadFeature, quadFeature);
 
 // Now register it
 registerFeature('vgl', 'quad', gl_quadFeature);
+module.exports = gl_quadFeature;

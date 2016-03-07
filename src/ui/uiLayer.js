@@ -1,6 +1,6 @@
 var inherit = require('../util').inherit;
 var registerLayer = require('../util').registerLayer;
-var layer = require('./layer');
+var layer = require('../core/layer');
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -76,3 +76,4 @@ var uiLayer = function (arg) {
 inherit(uiLayer, layer);
 
 registerLayer('ui', uiLayer);
+module.exports = uiLayer;

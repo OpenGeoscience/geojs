@@ -51,3 +51,4 @@ var domWidget = function (arg) {
 inherit(domWidget, widget);
 
 registerWidget('dom', 'dom', domWidget);
+module.exports = domWidget;
