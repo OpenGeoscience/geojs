@@ -5,8 +5,8 @@ describe('geo.core.osmLayer', function () {
   var geo = require('../test-utils').geo;
   var $ = require('jquery');
   var waitForIt = require('../test-utils').waitForIt;
-  var submitNote = require('../test-utils').submitNote;
-  var logCanvas2D = require('../test-utils').logCanvas2D;
+  // var submitNote = require('../test-utils').submitNote;
+  // var logCanvas2D = require('../test-utils').logCanvas2D;
   var mockVGLRenderer = require('../test-utils').mockVGLRenderer;
   var closeToEqual = require('../test-utils').closeToEqual;
 
@@ -97,7 +97,7 @@ describe('geo.core.osmLayer', function () {
         expect(timings.count).toBeGreaterThan(100);
         timings = $.extend({}, timings);
         delete timings.recentsub;
-        submitNote(notekey, timings);
+        // submitNote(notekey, timings);
         geo.util.timeRequestAnimationFrame(true);
       });
     });
@@ -259,7 +259,7 @@ describe('geo.core.osmLayer', function () {
   describe('geo.canvas.osmLayer', function () {
     var map, layer, mapinfo = {};
     it('test that tiles are created', function () {
-      logCanvas2D();
+      // logCanvas2D();
       map = create_map();
       mapinfo.map = map;
       layer = map.createLayer('osm', {

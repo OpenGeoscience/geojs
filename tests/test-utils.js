@@ -28,7 +28,7 @@ module.exports.waitForIt = function waitForIt(desc, testFunc) {
         clearInterval(interval);
         done();
       }
-    }, 1);
+    }, 10);
   });
   it('done waiting for ' + desc, function () {
   });
