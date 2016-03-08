@@ -30,7 +30,7 @@ module.exports = {
     define_plugin,
     new webpack.optimize.CommonsChunkPlugin({
       name: 'vendor',
-      filename: 'geo.ext.js',
+      filename: 'geo.ext.min.js',
       minChunks: Infinity
     }),
     new webpack.optimize.UglifyJsPlugin({

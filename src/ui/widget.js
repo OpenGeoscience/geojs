@@ -1,5 +1,5 @@
 var inherit = require('../util').inherit;
-var sceneObject = require('./sceneObject');
+var sceneObject = require('../core/sceneObject');
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -202,4 +202,4 @@ var widget = function (arg) {
   }
 };
 inherit(widget, sceneObject);
-module.exports = sceneObject;
+module.exports = widget;

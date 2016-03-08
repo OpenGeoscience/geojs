@@ -270,9 +270,11 @@ describe('geo.core.osmLayer', function () {
     waitForIt('tiles to load', function () {
       return Object.keys(layer.activeTiles).length === 21;
     });
+    /*
     waitForIt('tiles to draw', function () {
       return window._canvasLog.counts['drawImage'] >= 21;
     });
+    */
     it('zoom out', function () {
       map.zoom(3);
     });

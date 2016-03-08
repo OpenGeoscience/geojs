@@ -1,3 +1,5 @@
+var util = require('./util');
+
 module.exports = {
   camera: require('./core/camera'),
   choroplethFeature: require('./core/choroplethFeature'),
@@ -33,8 +35,22 @@ module.exports = {
   transform: require('./core/transform'),
   vectorFeature: require('./core/vectorFeature'),
   version: require('./core/version'),
-  util: require('./util'),
+  util: util,
   d3: require('./d3'),
   gl: require('./gl'),
-  canvas: require('./canvas')
+  canvas: require('./canvas'),
+  gui: require('./ui'),
+
+  checkRenderer: util.checkRenderer,
+  registerFeature: util.registerFeature,
+  createFeature: util.createFeature,
+  registerLayerAdjustment: util.registerLayerAdjustment,
+  adjustLayerForRenderer: util.adjustLayerForRenderer,
+  registerLayer: util.registerLayer,
+  createLayer: util.createLayer,
+  registerWidget: util.registerWidget,
+  createWidget: util.createWidget,
+  registerFileReader: util.registerFileReader,
+  createFileReader: util.createFileReader,
+  inherit: util.inherit
 };
