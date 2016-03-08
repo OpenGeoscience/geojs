@@ -1,27 +1,8 @@
 var webpack_config = require('./webpack.config');
-var fs = require('fs');
 
 // karma middleware the mimics a normal tile server.
 var MockTileServer = function () {
-  var cache = null;
   return function (request, response, next) {
-    if (request.originalUrl.startsWith('/base/tests/data/tiles')) {
-      // request.url = '/base/tests/data/white.jpg';
-      response.setHeader('Content-Type', 'image/jpeg');
-      if (cache) {
-        response.writeHead(200);
-        return response.end(cache);
-      } else {
-        return fs.readFile(__dirname + '/tests/data/white.jpg', function (err, data) {
-          if (err) {
-            console.log('Could not read default tile.');
-          }
-          cache = data.toString();
-          response.writeHead(200);
-          return response.end(cache);
-        });
-      }
-    }
     next();
   };
 };

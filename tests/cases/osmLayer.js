@@ -264,7 +264,7 @@ describe('geo.core.osmLayer', function () {
       mapinfo.map = map;
       layer = map.createLayer('osm', {
         renderer: 'canvas',
-        baseUrl: '/data/tiles/'
+        url: '/data/white.jpg'
       });
     });
     waitForIt('tiles to load', function () {
@@ -297,7 +297,7 @@ describe('geo.core.osmLayer', function () {
       mapinfo.map = map;
       layer = map.createLayer('osm', {
         renderer: 'vgl',
-        baseUrl: '/data/tiles/'
+        url: '/data/white.jpg'
       });
     });
     waitForIt('tiles to load', function () {
