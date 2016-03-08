@@ -13,8 +13,7 @@
   },
   "dependencies": {
     "bootstrap": "~3.3.0",
-    "bootswatch": "~3.3",
-    "vgl": "0.3.6"
+    "bootswatch": "~3.3"
   },
   "devDependencies": {
     "codemirror": "~4.7.0",
