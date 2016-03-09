@@ -3,112 +3,18 @@
 module.exports = function (grunt) {
   'use strict';
 
-  var sources, geo, port, sourceList, templateData, pkg;
+  var port;
 
-  pkg = grunt.file.readJSON('package.json');
-  sources = grunt.file.readJSON('sources.json');
   port = Number(grunt.option('port') || '8082');
 
   /* Pass a "--env=<value>" argument to grunt. Default value is "production"
    * --env=dev enables making source maps. */
   var environment = grunt.option('env') || 'production';
 
-  function moduleFiles(module) {
-    var obj, files;
-
-    obj = sources.modules[module];
-
-    files = (obj.files || []).map(function (f) {
-      if (obj.prefix) {
-        f = obj.prefix + '/' + f;
-      }
-      return f;
-    });
-
-    return files;
-  }
-
-  geo = {
-    init: moduleFiles('geo.init'),
-    util: moduleFiles('geo.util'),
-    core: moduleFiles('geo.core'),
-    gl: moduleFiles('geo.gl'),
-    canvas: moduleFiles('geo.canvas'),
-    d3: moduleFiles('geo.d3'),
-    ui: moduleFiles('geo.ui'),
-    plugin: moduleFiles('geo.plugin')
-  };
-
-  sourceList = Array.prototype.concat(
-    geo.init,
-    ['src/vgl/vgl.js'],
-    geo.util,
-    geo.core,
-    geo.gl,
-    geo.canvas,
-    geo.d3,
-    geo.ui,
-    geo.plugin
-  );
-
-  templateData = {
-    SOURCES_JSON: JSON.stringify(sourceList),
-    SOURCES_ROOT: '/',
-    BUNDLE_EXT: 'built/geo.ext.min.js',
-    BUNDLE_GEO: 'built/geo.min.js'
-  };
-
   grunt.config.init({
     env: grunt.option('env') || process.env.GRUNT_ENV || 'development',
 
-    pkg: pkg,
-
-    template: {
-      loadDev: {
-        options: {
-          data: templateData
-        },
-        files: { 'dist/built/geo.all.dev.js': 'src/geo.all.dev.js.in' }
-      },
-      loadAll: {
-        options: {
-          data: templateData
-        },
-        files: { 'dist/built/geo.all.js': 'src/geo.all.js.in' }
-      }
-    },
-
     copy: {
-      geo: {
-        files: [
-          {
-            src: Array.prototype.concat(
-              geo.init,
-              geo.util,
-              geo.core,
-              geo.gl,
-              geo.canvas,
-              geo.d3,
-              geo.ui,
-              geo.plugin
-            ),
-            dest: 'dist/',
-            filter: 'isFile',
-            flatten: false
-          }
-        ]
-      },
-      vgl: {
-        files: [
-          {
-            src: 'vgl.js',
-            dest: 'dist/src/vgl/',
-            filter: 'isFile',
-            cwd: 'bower_components/vgl',
-            expand: true
-          }
-        ]
-      },
       examples: {
         files: [
           {
@@ -207,27 +113,6 @@ module.exports = function (grunt) {
       }
     },
 
-    watch: {
-      uglify: {
-        files: [
-          'src/**/*.js',
-          'Gruntfile.js',
-          'sources.json'
-        ],
-        tasks: [
-          'clean:source',
-          'template',
-          'copy'
-        ]
-      },
-      examples: {
-        files: [
-          'examples/**/*'
-        ],
-        tasks: ['examples']
-      }
-    },
-
     express: {
       server: {
         options: {
@@ -246,11 +131,8 @@ module.exports = function (grunt) {
   });
 
   grunt.loadNpmTasks('grunt-contrib-jade');
-  grunt.loadNpmTasks('grunt-template');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-uglify');
-  grunt.loadNpmTasks('grunt-contrib-watch');
-  grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-express');
   grunt.loadNpmTasks('grunt-docco');
 
@@ -387,17 +269,7 @@ module.exports = function (grunt) {
     'docco'
   ]);
 
-  grunt.registerTask('library', [
-    'template',
-    'copy:geo',
-    'copy:vgl'
-  ]);
-
-  grunt.registerTask('init', []);
-
   grunt.registerTask('default', [
-    'init',
-    'library',
     'examples'
   ]);
 
@@ -405,7 +277,7 @@ module.exports = function (grunt) {
     'serve',
     'Serve the content at http://localhost:8082, ' +
     'use the --port option to override the default port',
-    ['express', 'watch']
+    ['express', 'express-keepalive']
   );
 
   grunt.registerTask(

@@ -8,8 +8,7 @@ module.exports = {
   context: path.join(__dirname, 'src'),
   entry: {
     geo: './index.js',
-    'geo.min': './index.js',
-    vendor: './vendor.js'
+    'geo.min': './index.js'
   },
   output: {
     path: path.join(__dirname, 'dist', 'built'),
@@ -26,13 +25,12 @@ module.exports = {
       d3: 'd3/d3.js'
     }
   },
+  externals: {
+    jquery: 'jQuery',
+    d3: 'd3'
+  },
   plugins: [
     define_plugin,
-    new webpack.optimize.CommonsChunkPlugin({
-      name: 'vendor',
-      filename: 'geo.ext.min.js',
-      minChunks: Infinity
-    }),
     new webpack.optimize.UglifyJsPlugin({
       include: /\.min\.js$/,
       minimize: true

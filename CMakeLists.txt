@@ -10,12 +10,9 @@ set(BUILD_DOCUMENTATION OFF CACHE BOOL "Build documentation")
 
 # set up targets for node programs
 set(NODE_MODULES_PATH "${CMAKE_CURRENT_SOURCE_DIR}/node_modules")
-set(PHANTOMJS_EXECUTABLE "${NODE_MODULES_PATH}/.bin/phantomjs")
 set(GRUNT_EXECUTABLE "${NODE_MODULES_PATH}/.bin/grunt")
 
 set(ESLINT_TESTS ON CACHE BOOL "Generate eslint style tests for JS source files.")
-set(PHANTOMJS_TESTS ON CACHE BOOL "Generate phantomjs unit tests.")
-set(COVERAGE_TESTS OFF CACHE BOOL "Generate coverage reports.")
 set(SELENIUM_TESTS OFF CACHE BOOL "Generate selenium unit tests.")
 
 find_package(PythonInterp REQUIRED)
@@ -40,10 +37,6 @@ function(add_geojs_test test_name)
             ${CMAKE_CURRENT_BINARY_DIR}/test/geojs_test_runner.py
             ${ARGN}
   )
-  if (COVERAGE_TESTS)
-    set_property(TEST "${test_name}" APPEND PROPERTY DEPENDS "coverage-reset")
-    set_property(TEST "coverage-report" APPEND PROPERTY DEPENDS "${test_name}")
-  endif()
   set_property(TEST "${test_name}" APPEND PROPERTY DEPENDS "notes-reset")
   set_property(TEST "notes-report" APPEND PROPERTY DEPENDS "${test_name}")
 endfunction()
@@ -60,26 +53,6 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/girder.cmake)
 
 add_download_target()
 
-# copy blanket JS files
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/testing/js/blanket.min.js
-  ${GEOJS_DEPLOY_DIR}/test/lib/blanket.min.js
-  COPYONLY
-)
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/testing/js/jasmine-boot.js
-  ${GEOJS_DEPLOY_DIR}/test/lib/jasmine-boot.js
-  COPYONLY
-)
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/testing/js/testUtils.js
-  ${GEOJS_DEPLOY_DIR}/test/lib/testUtils.js
-  COPYONLY
-)
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/aggregate-json-reporter.js.in
-  ${GEOJS_DEPLOY_DIR}/test/lib//aggregate-json-reporter.js
-)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/geojs_test_runner.py.in
                ${CMAKE_CURRENT_BINARY_DIR}/test/geojs_test_runner.py
 )
@@ -88,33 +61,6 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/selenium-test-ut
                ${GEOJS_DEPLOY_DIR}/test/lib/selenium-test-utils.js
                COPYONLY
 )
-
-if (COVERAGE_TESTS)
-  set(SOURCES_INCLUDE <script src=/built/geo.all.dev.js data-cover></script>)
-  set(BLANKET_INCLUDE <script src=/test/lib/blanket.min.js></script>)
-  find_program(CURL_EXECUTABLE curl)
-  add_test(
-    NAME "coverage-reset"
-    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-    COMMAND "${CURL_EXECUTABLE}" -X DELETE "http://${TESTING_HOST}:${TESTING_PORT}/coverage"
-  )
-
-  add_test(
-    NAME "coverage-report"
-    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-    COMMAND "${CURL_EXECUTABLE}" -X POST "http://${TESTING_HOST}:${TESTING_PORT}/coverage"
-      --data "path=${CMAKE_CURRENT_BINARY_DIR}/coverage.xml" -G
-  )
-  set_property(TEST "coverage-report" APPEND PROPERTY DEPENDS "coverage-reset")
-
-  # We need to put sources under the build path for ctest to pick them up
-  file(COPY "${GEOJS_DEPLOY_DIR}/src" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
-else()
-
-  set(SOURCES_INCLUDE <script src=/built/geo.all.dev.js></script>)
-  set(BLANKET_INCLUDE "")
-
-endif()
 
 # Generate notes to send along with the test reports
 find_program(CURL_EXECUTABLE curl)
@@ -131,60 +77,6 @@ add_test(
     --data "path=${NOTES_PATH}" -G
 )
 set_property(TEST "notes-report" APPEND PROPERTY DEPENDS "notes-reset")
-
-if(PHANTOMJS_TESTS)
-  set(PHANTOMJS_REL_DIR "test/phantomjs")
-  set(PHANTOMJS_ABS_DIR "${GEOJS_DEPLOY_DIR}/${PHANTOMJS_REL_DIR}")
-
-  configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/testing/js/jasmine-blanket.js
-    ${GEOJS_DEPLOY_DIR}/test/lib/jasmine-blanket.js
-    COPYONLY
-  )
-
-  configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/node_modules/phantomjs-polyfill/bind-polyfill.js
-    ${GEOJS_DEPLOY_DIR}/test/lib/bind-polyfill.js
-    COPYONLY
-  )
-
-  file(GLOB JS_UNIT_TEST_CASES
-    ${CMAKE_CURRENT_SOURCE_DIR}/testing/test-cases/phantomjs-tests/*.js
-  )
-
-  list(APPEND TESTING_DEPENDENCIES ${_min_js_file})
-
-  # add phantomjs unit tests
-  foreach(js ${JS_UNIT_TEST_CASES})
-    get_filename_component(f "${js}" NAME_WE)
-    set(html "${PHANTOMJS_ABS_DIR}/${f}.html")
-
-    add_custom_command(OUTPUT ${html}
-      COMMAND ${CMAKE_COMMAND} -DTEST_HTML="${html}"
-                               -DSOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
-                               -DSOURCE_FILE="${js}"
-                               -DSOURCES_INCLUDE="${SOURCES_INCLUDE}"
-                               -DBLANKET_INCLUDE="${BLANKET_INCLUDE}"
-                               -P ${CMAKE_SOURCE_DIR}/cmake/configure-js-unit-test.cmake
-      COMMAND ${CMAKE_COMMAND} -E touch ${html}
-      DEPENDS ${js} ${Girder_DOWNLOAD_FILES} ${CMAKE_SOURCE_DIR}/testing/test-runners/jasmine-runner.html.in
-      COMMENT "Generating phantomjs unit test ${f}"
-    )
-    list(APPEND JS_UNIT_TEST_FILES ${html})
-
-    add_geojs_test(phantomjs:${f}
-      ${PHANTOMJS_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/run-jasmine.js
-              http://${TESTING_HOST}:${TESTING_PORT}/${PHANTOMJS_REL_DIR}/${f}.html
-    )
-  endforeach()
-
-  add_custom_target(
-    phantomjs_tests
-    ALL
-    DEPENDS ${PHANTOMJS_EXECUTABLE} ${JS_UNIT_TEST_FILES} ${Girder_DOWNLOAD_FILES}
-  )
-
-endif() # PHANTOMJS_TESTS
 
 if(SELENIUM_TESTS)
 
@@ -249,10 +141,6 @@ if(SELENIUM_TESTS)
         COMMAND ${PYTHON_EXECUTABLE} -m unittest discover -v -s "${dir}"
       )
 
-      if (COVERAGE_TESTS)
-        set_property(TEST "selenium:${f}" APPEND PROPERTY DEPENDS "coverage-reset")
-        set_property(TEST "coverage-report" APPEND PROPERTY DEPENDS "selenium:${f}")
-      endif()
       set_property(TEST "selenium:${f}" APPEND PROPERTY DEPENDS "notes-reset")
       set_property(TEST "notes-report" APPEND PROPERTY DEPENDS "selenium:${f}")
       set_property(TEST "selenium:${f}" APPEND PROPERTY ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/test")
@@ -267,54 +155,10 @@ if(SELENIUM_TESTS)
   set_property(TEST "selenium:glLinesSpeed" APPEND PROPERTY ENVIRONMENT "LOAD_SPEED_THRESHOLD=1000")
   set_property(TEST "selenium:glLinesSpeed" APPEND PROPERTY ENVIRONMENT "FRAMERATE_THRESHOLD=2")
 
-  set(jasmine_runner ${CMAKE_CURRENT_BINARY_DIR}/test/selenium_jasmine_runner.py)
-  set(JASMINE_DEPLOY_URL /test/jasmine)
-
-  configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/selenium_jasmine_runner.py.in
-    ${jasmine_runner}
-  )
-
-  list(APPEND JAMINE_TEST_FILES ${jasmine_runner})
-
-  set(JASMINE_TEST_DIR "${GEOJS_DEPLOY_DIR}/test/jasmine")
-  file(GLOB JASMINE_TEST_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/testing/test-cases/jasmine-tests/*.js
-  )
-  foreach(f ${JASMINE_TEST_SOURCES})
-    get_filename_component(base "${f}" NAME_WE)
-    set(html "${JASMINE_TEST_DIR}/${base}.html")
-
-    add_custom_command(OUTPUT ${html}
-      COMMAND ${CMAKE_COMMAND} -DTEST_HTML="${html}"
-                               -DSOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
-                               -DSOURCE_FILE="${f}"
-                               -DSOURCES_INCLUDE="${SOURCES_INCLUDE}"
-                               -DBLANKET_INCLUDE="${BLANKET_INCLUDE}"
-                               -P ${CMAKE_SOURCE_DIR}/cmake/configure-js-unit-test.cmake
-      COMMAND ${CMAKE_COMMAND} -E touch ${html}
-      DEPENDS ${f} ${CMAKE_SOURCE_DIR}/testing/test-runners/jasmine-runner.html.in
-      COMMENT "Generating jasmine unit test ${base}"
-    )
-    list(APPEND JASMINE_TEST_FILES ${html})
-
-    add_test(
-      NAME "selenium:jasmine:${base}"
-      COMMAND ${PYTHON_EXECUTABLE} ${jasmine_runner} ${base}
-    )
-    if(COVERAGE_TESTS)
-      set_property(TEST "selenium:jasmine:${base}" APPEND PROPERTY DEPENDS "coverage-reset")
-      set_property(TEST "coverage-report" APPEND PROPERTY DEPENDS "selenium:jasmine:${base}")
-    endif()
-    set_property(TEST "selenium:jasmine:${base}" APPEND PROPERTY ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/test")
-    set_property(TEST "selenium:jasmine:${base}" APPEND PROPERTY ENVIRONMENT "FIREFOX_TESTS=${FIREFOX_TESTS}")
-    set_property(TEST "selenium:jasmine:${base}" APPEND PROPERTY ENVIRONMENT "CHROME_TESTS=${CHROME_TESTS}")
-  endforeach()
-
   add_custom_target(
     selenium_tests
     ALL
-    DEPENDS ${SELENIUM_TEST_FILES} ${Girder_DOWNLOAD_FILES} ${JASMINE_TEST_FILES}
+    DEPENDS ${SELENIUM_TEST_FILES} ${Girder_DOWNLOAD_FILES}
   )
 
 endif()
