@@ -486,7 +486,7 @@
         if (!this._options.wrapX) {
           start.x = Math.min(Math.max(start.x, 0), nTilesLevel.x - 1);
           end.x = Math.min(Math.max(end.x, 0), nTilesLevel.x - 1);
-          if (level === minLevel) {
+          if (level === minLevel && this._options.keepLower) {
             start.x = 0;
             end.x = nTilesLevel.x - 1;
           }
@@ -494,7 +494,7 @@
         if (!this._options.wrapY) {
           start.y = Math.min(Math.max(start.y, 0), nTilesLevel.y - 1);
           end.y = Math.min(Math.max(end.y, 0), nTilesLevel.y - 1);
-          if (level === minLevel) {
+          if (level === minLevel && this._options.keepLower) {
             start.y = 0;
             end.y = nTilesLevel.y - 1;
           }
