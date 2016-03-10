@@ -1,6 +1,6 @@
 /* These are functions we want available to jasmine tests. */
 /* global it */
-/* exported waitForIt, mockVGLRenderer, closeToArray, closeToEqual, logCanvas2D, submitNote */
+/* exported waitForIt, mockVGLRenderer, closeToArray, closeToEqual, logCanvas2D, submitNote, mockAnimationFrame, mockDate */
 
 /**
  * Create a pair of it functions.  The first one waits for a function to return
@@ -258,4 +258,104 @@ function submitNote(key, note) {
     method: 'PUT',
     contentType: 'application/json'
   });
+}
+
+/**
+ * Allow stepping through animation frames.  Call unmockAnimationFrame to
+ * retore the original animation frame behavior.
+ */
+function mockAnimationFrame(mockDate) {
+
+  if (window.unmockAnimationFrame) {
+    return;
+  }
+
+  var origRequestAnimationFrame = window.requestAnimationFrame,
+      origCancelAnimationFrame = window.cancelAnimationFrame,
+      animFrameCallbacks = [], animFrameIndex = 0;
+
+  /* Stop mocking. */
+  window.unmockAnimationFrame = function () {
+    window.requestAnimationFrame = origRequestAnimationFrame;
+    window.cancelAnimationFrame = origCancelAnimationFrame;
+    window.unmockAnimationFrame = undefined;
+    window.stepAnimationFrame = undefined;
+  };
+
+  /* Replace window.requestAnimationFrame with this function, then call
+   * stepAnimationFrame with a delta from when this was supposed to start to
+   * test asynchronous animations.
+   *
+   * @param {function} callback the function to call on an animation frame
+   *                            interval.
+   */
+  function mockedRequestAnimationFrame(callback) {
+    animFrameIndex += 1;
+    var id = animFrameIndex;
+    animFrameCallbacks.push({id: id, callback: callback});
+  }
+
+  /* Replace window.cancelAnimationFrame with this function.
+   *
+   * @param {number} id id of the callback to cancel.
+   */
+  function mockedCancelAnimationFrame(id) {
+    for (var i = 0; i < animFrameCallbacks.length; i += 1) {
+      if (animFrameCallbacks[i].id === id) {
+        animFrameCallbacks.splice(i, 1);
+        return;
+      }
+    }
+  }
+
+  /* Call all animation frame functions that have been captured.
+   *
+   * @param {float} time float milliseconds.
+   */
+  window.stepAnimationFrame = function (time) {
+    var callbacks = animFrameCallbacks, action;
+    animFrameCallbacks = [];
+    while (callbacks.length > 0) {
+      action = callbacks.shift();
+      action.callback.call(window, time);
+    }
+  };
+
+  window.requestAnimationFrame = mockedRequestAnimationFrame;
+  window.cancelAnimationFrame = mockedCancelAnimationFrame;
+}
+
+/**
+ * Allow mocking calls to Date so that each new object is slightly after the
+ * previous one.
+ *
+ * @param {number} delta number of milliseconds added to each call.
+ */
+function mockDate(delta) {
+  if (window.unmockDate) {
+    return;
+  }
+
+  var origDate = window.Date, mockDelta = delta === undefined ? 15 : delta,
+      startDate = (new Date()).getTime();
+
+  /* Stop mocking. */
+  window.unmockDate = function () {
+    window.Date = origDate;
+    window.unmockDate = undefined;
+  };
+
+  /**
+   * Override window.Date so that every fetch increments the date by a few
+   * milliseconds.
+   */
+  geo.mockedDate = function (args) {
+    if (!(this instanceof geo.mockedDate)) {
+      return new geo.mockedDate(args);
+    }
+    startDate += mockDelta;
+    return new origDate(startDate);
+  };
+
+  window.Date = geo.mockedDate;
 }

@@ -571,10 +571,12 @@ geo.mapInteractor = function (args) {
    * Immediately cancel an ongoing action.
    *
    * @param {string?} action The action type, if null cancel any action
+   * @param {bool} keepQueue If truthy, keep the queue event if an action is
+   *                         canceled.
    * @returns {bool} If an action was canceled
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.cancel = function (action) {
+  this.cancel = function (action, keepQueue) {
     var out;
     if (!action) {
       out = !!m_state.action;
@@ -583,7 +585,9 @@ geo.mapInteractor = function (args) {
     }
     if (out) {
       // cancel any queued interaction events
-      m_queue = {};
+      if (!keepQueue) {
+        m_queue = {};
+      }
       m_state = {};
     }
     return out;
@@ -601,7 +605,8 @@ geo.mapInteractor = function (args) {
       return;
     }
 
-    // cancel momentum on click
+    // cancel transitions and momentum on click
+    m_this.map().transitionCancel();
     m_this.cancel('momentum');
 
     m_this._getMousePosition(evt);
@@ -811,8 +816,6 @@ geo.mapInteractor = function (args) {
 
   /**
    * Get the spring force for the current map bounds
-   * (This method might need to move elsewhere to deal
-   * with different projections)
    * @private
    * @returns {object} The spring force
    */
@@ -826,14 +829,15 @@ geo.mapInteractor = function (args) {
       return {x: 0, y: 0};
     }
     // get screen coordinates of corners
+    var maxBounds = m_this.map().maxBounds(undefined, null);
     var ul = m_this.map().gcsToDisplay({
-      x: -180,
-      y: 82
-    });
+      x: maxBounds.left,
+      y: maxBounds.top
+    }, null);
     var lr = m_this.map().gcsToDisplay({
-      x: 180,
-      y: -82
-    });
+      x: maxBounds.right,
+      y: maxBounds.bottom
+    }, null);
 
     var c = m_options.spring.springConstant;
     // Arg... map needs to expose the canvas size
@@ -1056,6 +1060,14 @@ geo.mapInteractor = function (args) {
       // assume it was cancelled and do nothing.
       if (my_queue !== m_queue) {
         return;
+      }
+
+      // if we were moving because of momentum or a transition, cancel it and
+      // recompute where the mouse action is occuring.
+      var recompute = m_this.map().transitionCancel();
+      recompute |= m_this.cancel('momentum', true);
+      if (recompute) {
+        m_mouse.geo = m_this.map().displayToGcs(m_mouse.map);
       }
 
       // perform the map navigation event

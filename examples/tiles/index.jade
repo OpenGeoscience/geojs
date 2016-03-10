@@ -15,6 +15,9 @@ block append mainContent
     .form-group(title="Clamp vertical panning to the extent of the tiles.")
       label(for="map-clampBoundsY") Clamp Y Bounds
       input#map-clampBoundsY.mapparam(param-name="clampBoundsY", type="checkbox", placeholder="true", checked="checked")
+    .form-group(title="If clamping is turned off, spring back when the tiles are panned too far.")
+      label(for="mapinteractor-spring") Spring to Bounds
+      input#map-spring.mapparam(param-name="spring", type="checkbox", placeholder="false")
     .form-group(title="The starting x coordinate.  Changing this will also pan the current view.")
       label(for="map-x") Starting X
       input#map-x.mapparam(param-name="x", placeholder="-98")

@@ -91,8 +91,6 @@ $(function () {
     }, 1000);
   });
 
-  var range = geo.transform.transformCoordinates(
-      'EPSG:4326', 'EPSG:3857', [{x: -180, y: 0}, {x: 180, y: 0}]);
   // Set map defaults to use our named node and have a reasonable center and
   // zoom level
   var mapParams = {
@@ -102,7 +100,7 @@ $(function () {
       y: 39.5
     },
     maxBounds: {},
-    zoom: query.zoom !== undefined ? parseFloat(query.zoom) : 3,
+    zoom: query.zoom !== undefined ? parseFloat(query.zoom) : 3
   };
   // Set the tile layer defaults to use the specified renderer and opacity
   var layerParams = {
@@ -117,6 +115,9 @@ $(function () {
   if (layerParams.renderer === 'null' || layerParams.renderer === 'html') {
     layerParams.renderer = null;
   }
+  // Default values for spring-back
+  var springEnabled = {spring: {enabled: true, springConstant: 0.00005}},
+      springDisabled = {spring: {enabled: false}};
   // Allow a custom tile url, including subdomains.
   if (query.url) {
     layerParams.url = query.url;
@@ -251,6 +252,10 @@ $(function () {
   if (query.projection) {
     map.camera().projection = query.projection;
   }
+  // Set the spring back.  This is set on the map interactor.
+  if (query.spring) {
+    map.interactor().options(springEnabled);
+  }
   // Enable debug classes, if requested.
   $('#map').toggleClass('debug-label', (
       query.debug === 'true' || query.debug === 'all'))
@@ -323,6 +328,10 @@ $(function () {
         break;
       case 'round':
         layerParams.tileRounding = Math[value];
+        break;
+      case 'spring':
+        map.interactor().options(
+            value === 'true' ? springEnabled : springDisabled);
         break;
       case 'url':
         var url = processedValue;

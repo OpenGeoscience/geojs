@@ -228,6 +228,18 @@ geo.event.transitionend = 'geo_transitionend';
 
 //////////////////////////////////////////////////////////////////////////////
 /**
+ * Triggered if a map navigation animation is cancelled.
+ *
+ * @property {geo.geoPosition} center The target center
+ * @property {number} zoom The target zoom level
+ * @property {number} duration The duration of the transition in milliseconds
+ * @property {function} ease The easing function
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo.event.transitioncancel = 'geo_transitioncancel';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
  * Triggered when the parallel projection mode is changes.
  *
  * @property paralellProjection {boolean} True if parallel projection is turned
