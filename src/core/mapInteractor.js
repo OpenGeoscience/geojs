@@ -77,7 +77,9 @@ geo.mapInteractor = function (args) {
         enabled: true,
         maxSpeed: 2.5,
         minSpeed: 0.01,
-        drag: 0.01
+        stopTime: 250,
+        drag: 0.01,
+        actions: ['pan', 'zoom']
       },
       spring: {
         enabled: false,
@@ -158,9 +160,12 @@ geo.mapInteractor = function (args) {
   //   // enable momentum when panning
   //   momentum: {
   //     enabled: true | false,
-  //     drag: number, // drag coefficient
   //     maxSpeed: number, // don't allow animation to pan faster than this
-  //     minSpeed: number  // stop animations if the speed is less than this
+  //     minSpeed: number, // stop animations if the speed is less than this
+  //     stopTime: number, // if the mouse hasn't moved for this many
+  //                       // milliseconds, don't apply momentum
+  //     drag: number, // drag coefficient
+  //     actions: ['pan', 'zoom']  // actions on which to apply momentum
   //   }
   //
   //   // enable spring clamping to screen edges to enforce clamping
@@ -898,8 +903,19 @@ geo.mapInteractor = function (args) {
     m_state = {};
 
     // if momentum is enabled, start the action here
-    if (m_options.momentum.enabled && oldAction === 'pan') {
-      m_this.springBack(true);
+    if (m_options.momentum.enabled &&
+            $.inArray(oldAction, m_options.momentum.actions) >= 0) {
+
+      var t = (new Date()).valueOf();
+      var dt = t - m_mouse.time + m_mouse.deltaTime;
+      if (t - m_mouse.time < m_options.momentum.stopTime) {
+        m_mouse.velocity.x = m_mouse.velocity.x * m_mouse.deltaTime / dt;
+        m_mouse.velocity.y = m_mouse.velocity.y * m_mouse.deltaTime / dt;
+        m_mouse.deltaTime = dt;
+      } else {
+        m_mouse.velocity.x = m_mouse.velocity.y = 0;
+      }
+      m_this.springBack(true, oldAction);
     }
   };
 
@@ -1124,7 +1140,7 @@ geo.mapInteractor = function (args) {
    *
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.springBack = function (initialVelocity) {
+  this.springBack = function (initialVelocity, origAction) {
     if (m_state.action === 'momentum') {
       return;
     }
@@ -1134,6 +1150,7 @@ geo.mapInteractor = function (args) {
         y: 0
       };
     }
+    m_state.origAction = origAction;
     m_state.action = 'momentum';
     m_state.origin = m_this.mouse();
     m_state.start = new Date();
@@ -1176,10 +1193,18 @@ geo.mapInteractor = function (args) {
       m_mouse.velocity.x = v.x;
       m_mouse.velocity.y = v.y;
 
-      m_this.map().pan({
-        x: m_mouse.velocity.x * dt,
-        y: m_mouse.velocity.y * dt
-      });
+      switch (m_state.origAction) {
+        case 'zoom':
+          var dy = m_mouse.velocity.y * dt;
+          m_callZoom(-dy * m_options.zoomScale / 120, m_state);
+          break;
+        default:
+          m_this.map().pan({
+            x: m_mouse.velocity.x * dt,
+            y: m_mouse.velocity.y * dt
+          });
+          break;
+      }
 
       if (m_state.handler) {
         window.requestAnimationFrame(m_state.handler);

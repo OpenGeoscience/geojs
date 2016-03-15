@@ -327,7 +327,8 @@ function mockAnimationFrame(mockDate) {
 
 /**
  * Allow mocking calls to Date so that each new object is slightly after the
- * previous one.
+ * previous one.  Use a delta of 0 and calls to advanceDate() for complete
+ * controls.
  *
  * @param {number} delta number of milliseconds added to each call.
  */
@@ -343,6 +344,16 @@ function mockDate(delta) {
   window.unmockDate = function () {
     window.Date = origDate;
     window.unmockDate = undefined;
+    window.advanceDate = undefined;
+  };
+
+  /**
+   * Change the date that will be reported by new Date().
+   *
+   * @param {number} delta milliseconds to advance the date.
+   */
+  window.advanceDate = function (delta) {
+    startDate += delta;
   };
 
   /**
