@@ -1,3 +1,28 @@
+// License headers that will be preserved in distributed bundles.
+/**
+ * GeoJS
+ * @copyright 2013-2016, Kitware, Inc.
+ * @license Apache-2.0
+ *
+ * Bundled with the following libraries:
+ *
+ * vgl
+ * @copyright 2014-2016, Kitware, Inc.
+ * @license Apache-2.0
+ *
+ * Proj4js
+ * @copyright 2014, Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf
+ * @license MIT
+ *
+ * gl-matrix
+ * @copyright 2015, Brandon Jones, Colin MacKenzie IV
+ * @license MIT
+ *
+ * pnltri
+ * @copyright 2014, Jurgen Ahting
+ * @license MIT
+ */
+
 var util = require('./util');
 
 module.exports = {

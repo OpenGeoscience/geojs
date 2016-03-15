@@ -8,6 +8,7 @@ var MockTileServer = function () {
 };
 
 module.exports = {
+  autoWatch: false,
   files: [
     'tests/cases/**/*.js',
     {pattern: 'tests/data/**/*', included: false}

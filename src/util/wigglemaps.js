@@ -1,5 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
-/*
+/**
+ * @license
  * Includes several support classes adapted from wigglemaps.
  *
  * https://github.com/dotskapes/wigglemaps

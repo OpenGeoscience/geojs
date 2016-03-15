@@ -14,7 +14,6 @@ module.exports = {
     path: path.join(__dirname, 'dist', 'built'),
     publicPath: 'dist/built',
     filename: '[name].js',
-    library: 'geo',
     libraryTarget: 'umd'
   },
   resolve: {
@@ -33,7 +32,8 @@ module.exports = {
     define_plugin,
     new webpack.optimize.UglifyJsPlugin({
       include: /\.min\.js$/,
-      minimize: true
+      minimize: true,
+      comments: /@(license|copyright)/
     })
   ],
   module: {
