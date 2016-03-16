@@ -14,6 +14,7 @@ module.exports = {
     path: path.join(__dirname, 'dist', 'built'),
     publicPath: 'dist/built',
     filename: '[name].js',
+    library: 'geo',
     libraryTarget: 'umd'
   },
   resolve: {
@@ -43,8 +44,6 @@ module.exports = {
     }, {
       test: /vgl\.js$/,
       loader: 'imports?mat4=gl-mat4,vec4=gl-vec4,vec3=gl-vec3,vec2=gl-vec2,$=jquery'
-    }, {
-      test: require.resolve('d3'), loader: 'exports?d3'
     }]
   },
 

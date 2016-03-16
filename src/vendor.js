@@ -1,20 +1,17 @@
+// License headers that will be preserved in distributed bundles.
+/**
+ * JQuery
+ * @copyright jQuery Foundation and other contributors
+ * @license MIT
+ */
+/**
+ * d3
+ * @copyright 2010-2016, Michael Bostock
+ * @license BSD-3-Clause
+ */
 var globals = {
   d3: require('d3'),
-  $: require('jquery'),
-  jQuery: require('jquery'),
-  mat4: require('gl-mat4'),
-  vec2: require('gl-vec2'),
-  vec3: require('gl-vec3'),
-  vec4: require('gl-vec4'),
-  proj4: require('proj4'),
-  PNLTRI: require('pnltri')
+  $: require('jquery')
 };
-
-var symbol;
-
-// inject global variables
-for (symbol in globals) {
-  window[symbol] = globals[symbol];
-}
 
 module.exports = globals;
