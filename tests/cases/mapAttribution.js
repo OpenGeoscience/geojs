@@ -27,7 +27,8 @@ describe('Test adding and remove attribution via layers', function () {
     var map = createMap();
 
     map.createLayer('feature', {
-      attribution: '<div id="test-constructor"/>'
+      attribution: '<div id="test-constructor"/>',
+      renderer: 'd3'
     });
 
     var $a = getAttribution();
@@ -38,7 +39,7 @@ describe('Test adding and remove attribution via layers', function () {
   it('Modifying an attribution after creation', function () {
     var map = createMap();
 
-    var layer = map.createLayer('feature');
+    var layer = map.createLayer('feature', {renderer: 'd3'});
 
     layer.attribution('<div id="test-setter"/>');
 
@@ -50,13 +51,13 @@ describe('Test adding and remove attribution via layers', function () {
   it('Multiple attributions', function () {
     var map = createMap();
 
-    var layer = map.createLayer('feature');
+    var layer = map.createLayer('feature', {renderer: 'd3'});
     layer.attribution('<div id="test-1"/>');
 
-    layer = map.createLayer('feature');
+    layer = map.createLayer('feature', {renderer: 'd3'});
     layer.attribution('<div id="test-2"/>');
 
-    layer = map.createLayer('feature');
+    layer = map.createLayer('feature', {renderer: 'd3'});
     layer.attribution('<div id="test-3"/>');
 
     var $a = getAttribution();
@@ -69,7 +70,7 @@ describe('Test adding and remove attribution via layers', function () {
   it('Remove attribution on remove layer', function () {
     var map = createMap();
 
-    var layer = map.createLayer('feature');
+    var layer = map.createLayer('feature', {renderer: 'd3'});
     layer.attribution('<div id="test"/>');
 
     var $a = getAttribution();

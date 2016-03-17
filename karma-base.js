@@ -10,8 +10,9 @@ var MockTileServer = function () {
 module.exports = {
   autoWatch: false,
   files: [
-    'tests/cases/**/*.js',
-    {pattern: 'tests/data/**/*', included: false}
+    'tests/all.js',
+    {pattern: 'tests/data/**/*', included: false},
+    {pattern: 'tests/cases/**/*.js', included: false, served: false, watched: true}
   ],
   proxies: {
     '/data/': '/base/tests/data/'
@@ -29,7 +30,7 @@ module.exports = {
     {'middleware:mock-tile-server': ['factory', MockTileServer]}
   ],
   preprocessors: {
-    'tests/cases/**/*.js': ['webpack', 'sourcemap']
+    'tests/all.js': ['webpack', 'sourcemap']
   },
   frameworks: [
     'jasmine'

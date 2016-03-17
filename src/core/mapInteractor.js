@@ -1418,7 +1418,10 @@ var mapInteractor = function (args) {
           originalEvent: {
             deltaX: options.wheelDelta.x,
             deltaY: options.wheelDelta.y,
-            deltaMode: options.wheelMode
+            deltaMode: options.wheelMode,
+            preventDefault: function () {},
+            stopPropagation: function () {},
+            stopImmediatePropagation: function () {}
           }
         }
     );

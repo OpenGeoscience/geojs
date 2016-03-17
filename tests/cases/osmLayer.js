@@ -166,7 +166,7 @@ describe('geo.core.osmLayer', function () {
         expect(map.node().find('.webgl-canvas').length).toBe(1);
       });
     });
-    describe('switch renderer', function () {
+    xdescribe('switch renderer', function () {
       var map, layer;
       it('vgl to null', function () {
         mockVGLRenderer();
