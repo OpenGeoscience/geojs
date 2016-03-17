@@ -233,6 +233,7 @@ describe('mapInteractor', function () {
     var interactor = geo.mapInteractor({
       map: map,
       momentum: {enabled: false},
+      zoomAnimation: {enabled: false},
       panMoveButton: null,
       panWheelEnabled: false,
       zoomMoveButton: null,
@@ -273,6 +274,7 @@ describe('mapInteractor', function () {
 
     var interactor = geo.mapInteractor({
       map: map,
+      zoomAnimation: {enabled: false},
       panMoveButton: null,
       panWheelEnabled: false,
       zoomMoveButton: 'right',
@@ -867,6 +869,7 @@ describe('mapInteractor', function () {
       var map = mockedMap('#mapNode1'),
           interactor = geo.mapInteractor({
             map: map,
+            zoomAnimation: {enabled: false},
             throttle: 100,
             momentum: {
               enabled: false

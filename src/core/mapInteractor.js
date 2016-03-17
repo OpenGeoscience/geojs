@@ -85,6 +85,11 @@ geo.mapInteractor = function (args) {
         enabled: false,
         springConstant: 0.00005
       },
+      zoomAnimation: {
+        enabled: true,
+        duration: 500,
+        ease: function (t) { return (2 - t) * t; }
+      },
       click: {
         enabled: true,
         buttons: {left: true, right: true, middle: true},
@@ -172,6 +177,13 @@ geo.mapInteractor = function (args) {
   //   spring: {
   //     enabled: true | false,
   //     springConstant: number,
+  //   }
+  //
+  //   // enable animation for both discrete and continuous zoom
+  //   zoomAnimation: {
+  //     enabled: true | false,
+  //     duration: number,  // milliseconds
+  //     ease: function     // easing function
   //   }
   //
   //   // enable the "click" event
@@ -610,10 +622,6 @@ geo.mapInteractor = function (args) {
       return;
     }
 
-    // cancel transitions and momentum on click
-    m_this.map().transitionCancel();
-    m_this.cancel('momentum');
-
     m_this._getMousePosition(evt);
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
@@ -638,6 +646,10 @@ geo.mapInteractor = function (args) {
     } else if (eventMatch(m_options.selectionButton, m_options.selectionModifiers)) {
       action = 'select';
     }
+
+    // cancel transitions and momentum on click
+    m_this.map().transitionCancel('_handleMouseDown.' + action);
+    m_this.cancel('momentum');
 
     m_mouse.velocity = {
       x: 0,
@@ -969,50 +981,92 @@ geo.mapInteractor = function (args) {
    */
   ////////////////////////////////////////////////////////////////////////////
   function debounced_zoom() {
-    var deltaZ = 0, delay = 400, direction;
+    var deltaZ = 0, delay = 400, direction, startZoom, targetZoom;
 
     function accum(dz, dir) {
       var map = m_this.map(), zoom;
 
       direction = dir;
       deltaZ += dz;
+      if (targetZoom === undefined) {
+        startZoom = targetZoom = map.zoom();
+      }
+      targetZoom += dz;
 
       // Respond to debounced events when they add up to a change in the
       // discrete zoom level.
-      if (map && Math.abs(deltaZ) >= 1 && m_options.discreteZoom) {
+      if (map && Math.abs(deltaZ) >= 1 && m_options.discreteZoom &&
+            !m_options.zoomAnimation.enabled) {
 
         zoom = Math.round(deltaZ + map.zoom());
 
-        // delta is what is left over from the zoom delta after the new zoom value
+        // delta is what is left over from the zoom delta after the new zoom
+        // value
         deltaZ = deltaZ + map.zoom() - zoom;
 
         map.zoom(zoom, direction);
       }
+
     }
 
     function apply() {
       var map = m_this.map(), zoom;
       if (map) {
-
-        zoom = deltaZ + map.zoom();
-
-        if (m_options.discreteZoom) {
-          // round off the zoom to an integer and throw away the rest
-          zoom = Math.round(zoom);
+        if (m_options.zoomAnimation.enabled) {
+          zoom = targetZoom;
+          if (m_options.discreteZoom) {
+            zoom = Math.round(zoom);
+            if (zoom === startZoom && targetZoom !== startZoom) {
+              zoom = startZoom + (targetZoom > startZoom ? 1 : -1);
+            }
+          }
+          map.transitionCancel('debounced_zoom.zoom');
+          map.transition({
+            zoom: zoom,
+            zoomOrigin: direction,
+            duration: m_options.zoomAnimation.duration,
+            ease: m_options.zoomAnimation.ease,
+            done: function (status) {
+              status = status || {};
+              if (!status.next && (!status.cancel ||
+                  status.source !== 'debounced_zoom.zoom')) {
+                targetZoom = undefined;
+              }
+              /* If we were animating the zoom, if the zoom is continuous, just
+               * stop where we are.  If using discrete zoom, we need to make
+               * sure we end up discrete.  However, we don't want to do that if
+               * the next action is further zooming. */
+              if (m_options.discreteZoom && status.cancel &&
+                  status.transition && status.transition.end &&
+                  ('' + status.source).search(/\.zoom$/) < 0) {
+                map.zoom(status.transition.end.zoom,
+                         status.transition.end.zoomOrigin);
+              }
+            }
+          });
+        } else {
+          zoom = deltaZ + map.zoom();
+          if (m_options.discreteZoom) {
+            // round off the zoom to an integer and throw away the rest
+            zoom = Math.round(zoom);
+          }
+          map.zoom(zoom, direction);
         }
-        map.zoom(zoom, direction);
       }
-
       deltaZ = 0;
     }
 
     if (m_options.discreteZoom !== true && m_options.discreteZoom > 0) {
       delay = m_options.discreteZoom;
     }
-    if (m_options.discreteZoom === true || m_options.discreteZoom > 0) {
+    if ((m_options.discreteZoom === true || m_options.discreteZoom > 0) &&
+            !m_options.zoomAnimation.enabled) {
       return geo.util.debounce(delay, false, apply, accum);
     } else {
       return function (dz, dir) {
+        if (!dz) {
+          return;
+        }
         accum(dz, dir);
         apply(dz, dir);
       };
@@ -1070,7 +1124,7 @@ geo.mapInteractor = function (args) {
     }
 
     function wheel(evt) {
-      var zoomFactor;
+      var zoomFactor, action;
 
       // If the current queue doesn't match the queue passed in as an argument,
       // assume it was cancelled and do nothing.
@@ -1078,36 +1132,44 @@ geo.mapInteractor = function (args) {
         return;
       }
 
-      // if we were moving because of momentum or a transition, cancel it and
-      // recompute where the mouse action is occuring.
-      var recompute = m_this.map().transitionCancel();
-      recompute |= m_this.cancel('momentum', true);
-      if (recompute) {
-        m_mouse.geo = m_this.map().displayToGcs(m_mouse.map);
-      }
-
       // perform the map navigation event
       m_this._getMouseModifiers(evt);
       if (m_options.panWheelEnabled &&
           eventMatch('wheel', m_options.panWheelModifiers)) {
-
-        m_this.map().pan({
-          x: m_queue.scroll.x,
-          y: m_queue.scroll.y
-        });
-
+        action = 'pan';
       } else if (m_options.zoomWheelEnabled &&
                  eventMatch('wheel', m_options.zoomWheelModifiers)) {
-
-        zoomFactor = -m_queue.scroll.y;
-
-        m_callZoom(zoomFactor, m_mouse);
+        action = 'zoom';
       } else if (m_options.rotateWheelEnabled &&
                  eventMatch('wheel', m_options.rotateWheelModifiers)) {
-        m_this.map().rotation(
-            m_this.map().rotation() +
-            m_queue.scroll.y * m_options.rotateWheelScale,
-            m_mouse);
+        action = 'rotate';
+      }
+      if (action) {
+        // if we were moving because of momentum or a transition, cancel it and
+        // recompute where the mouse action is occuring.
+        var recompute = m_this.map().transitionCancel('wheel.' + action);
+        recompute |= m_this.cancel('momentum', true);
+        if (recompute) {
+          m_mouse.geo = m_this.map().displayToGcs(m_mouse.map);
+        }
+        switch (action) {
+          case 'pan':
+            m_this.map().pan({
+              x: m_queue.scroll.x,
+              y: m_queue.scroll.y
+            });
+            break;
+          case 'zoom':
+            zoomFactor = -m_queue.scroll.y;
+            m_callZoom(zoomFactor, m_mouse);
+            break;
+          case 'rotate':
+            m_this.map().rotation(
+                m_this.map().rotation() +
+                m_queue.scroll.y * m_options.rotateWheelScale,
+                m_mouse);
+            break;
+        }
       }
 
       // reset the queue

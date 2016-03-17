@@ -256,6 +256,13 @@ $(function () {
   if (query.spring) {
     map.interactor().options(springEnabled);
   }
+  // Compute default values for zoom animation, then set the map interactor
+  var zoomAnimationDefault = map.interactor().options().zoomAnimation,
+      zoomAnimationEnabled = {zoomAnimation: $.extend(
+        {}, zoomAnimationDefault, {enabled: true})},
+      zoomAnimationDisabled = {zoomAnimation: {enabled: false}};
+  map.interactor().options(query.animateZoom !== 'false' ?
+    zoomAnimationEnabled : zoomAnimationDisabled);
   // Enable debug classes, if requested.
   $('#map').toggleClass('debug-label', (
       query.debug === 'true' || query.debug === 'all'))
@@ -293,6 +300,10 @@ $(function () {
       case 'allowRotation':
         mapParams.allowRotation = get_allow_rotation(value);
         map.allowRotation(mapParams.allowRotation);
+        break;
+      case 'animateZoom':
+        map.interactor().options(
+            value === 'true' ? zoomAnimationEnabled : zoomAnimationDisabled);
         break;
       case 'debug':
         $('#map').toggleClass('debug-label', (

@@ -338,14 +338,21 @@ geo.map = function (arg) {
   /**
    * Get/Set zoom level of the map
    *
+   * @param {number} val if undefined, return the current zoom level.
+   *    Otherwise, the new zoom level to set.
+   * @param {object} origin if present, an object with 'geo' containing the
+   *    gcs coordinates where the action started and 'map' containing the
+   *    display coordinates of the same location before the zoom is applied.
+   * @param {boolean} ignoreDiscreteZoom if true, ignore the discreteZoom
+   *    option when determining the new view.
    * @returns {Number|geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.zoom = function (val, origin, ignoreDiscreteZoom) {
-    var evt, bounds;
     if (val === undefined) {
       return m_zoom;
     }
+    var evt, bounds;
 
     /* The ignoreDiscreteZoom flag is intended to allow non-integer zoom values
      * during animation. */
@@ -356,7 +363,8 @@ geo.map = function (arg) {
 
     m_zoom = val;
 
-    bounds = m_this.boundsFromZoomAndCenter(val, m_center, m_rotation, null);
+    bounds = m_this.boundsFromZoomAndCenter(val, m_center, m_rotation, null,
+                                            ignoreDiscreteZoom);
     m_this.modified();
 
     camera_bounds(bounds, m_rotation);
@@ -369,9 +377,10 @@ geo.map = function (arg) {
 
     if (origin && origin.geo && origin.map) {
       var shifted = m_this.gcsToDisplay(origin.geo);
-      m_this.pan({x: origin.map.x - shifted.x, y: origin.map.y - shifted.y});
+      m_this.pan({x: origin.map.x - shifted.x, y: origin.map.y - shifted.y},
+                 ignoreDiscreteZoom);
     } else {
-      m_this.pan({x: 0, y: 0});
+      m_this.pan({x: 0, y: 0}, ignoreDiscreteZoom);
     }
     return m_this;
   };
@@ -380,11 +389,13 @@ geo.map = function (arg) {
   /**
    * Pan the map by (x: dx, y: dy) pixels.
    *
-   * @param {Object} delta
+   * @param {Object} delta x and y delta in display pixels
+   * @param {boolean} ignoreDiscreteZoom if true, ignore the discreteZoom
+   *    option when determining the new view.
    * @returns {geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.pan = function (delta) {
+  this.pan = function (delta, ignoreDiscreteZoom) {
     var evt, unit;
     evt = {
       geo: {},
@@ -406,7 +417,7 @@ geo.map = function (arg) {
       bounds = m_this.boundsFromZoomAndCenter(m_zoom, {
         x: (bounds.left + bounds.right) / 2,
         y: (bounds.top + bounds.bottom) / 2
-      }, m_rotation, null);
+      }, m_rotation, null, ignoreDiscreteZoom);
       camera_bounds(bounds, m_rotation);
       var clampPos = m_this.gcsToDisplay({
         x: m_camera.bounds.left, y: m_camera.bounds.top}, null);
@@ -447,7 +458,7 @@ geo.map = function (arg) {
     m_rotation = rotation;
 
     var bounds = m_this.boundsFromZoomAndCenter(
-        m_zoom, m_center, m_rotation, null);
+        m_zoom, m_center, m_rotation, null, ignoreRotationFunc);
     m_this.modified();
 
     camera_bounds(bounds, m_rotation);
@@ -468,7 +479,7 @@ geo.map = function (arg) {
     }
     /* Changing the rotation can change our minimum zoom */
     reset_minimum_zoom();
-    m_this.zoom(m_zoom);
+    m_this.zoom(m_zoom, ignoreRotationFunc);
     return m_this;
   };
 
@@ -482,10 +493,12 @@ geo.map = function (arg) {
    *    null to use the map gcs, or any other transform.  If setting the
    *    center, they are converted from this gcs to the map projection.  The
    *    returned center are converted from the map projection to this gcs.
+   * @param {boolean} ignoreDiscreteZoom if true, ignore the discreteZoom
+   *    option when determining the new view.
    * @returns {Object|geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.center = function (coordinates, gcs) {
+  this.center = function (coordinates, gcs, ignoreDiscreteZoom) {
     var center;
     if (coordinates === undefined) {
       center = $.extend({}, m_this.worldToGcs(m_center, gcs));
@@ -496,7 +509,7 @@ geo.map = function (arg) {
     m_center = $.extend({}, m_this.gcsToWorld(coordinates, gcs));
 
     camera_bounds(m_this.boundsFromZoomAndCenter(
-        m_zoom, m_center, m_rotation, null), m_rotation);
+        m_zoom, m_center, m_rotation, null, ignoreDiscreteZoom), m_rotation);
     m_this.modified();
     // trigger a pan event
     m_this.geoTrigger(
@@ -983,6 +996,7 @@ geo.map = function (arg) {
    *   opts = {
    *     center: { x: ... , y: ... } // the new center
    *     zoom: ... // the new zoom level
+   *     zoomOrigin: ... // an origin to use when zooming.  Optional.
    *     rotation: ... // the new rotation angle
    *     duration: ... // the duration (in ms) of the transition
    *     ease: ... // an easing function [0, 1] -> [0, 1]
@@ -999,7 +1013,7 @@ geo.map = function (arg) {
    * @returns {geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.transition = function (opts, gcs) {
+  this.transition = function (opts, gcs, animTime) {
 
     if (opts === undefined) {
       return m_transition;
@@ -1009,8 +1023,13 @@ geo.map = function (arg) {
       /* The queued transition needs to combine the current transition's
        * endpoint, any other queued transition, and the new transition to be
        * complete. */
+      var transitionEnd = $.extend(true, {}, m_transition.end);
+      if (transitionEnd.center && m_gcs !== m_ingcs) {
+        transitionEnd.center = geo.transform.transformCoordinates(
+          m_gcs, m_ingcs, [transitionEnd.center])[0];
+      }
       m_queuedTransition = $.extend(
-        {}, m_transition.end || {}, m_queuedTransition || {}, opts);
+        {}, transitionEnd || {}, m_queuedTransition || {}, opts);
       return m_this;
     }
 
@@ -1075,7 +1094,8 @@ geo.map = function (arg) {
       ease: opts.ease,
       zCoord: opts.zCoord,
       done: opts.done,
-      duration: opts.duration
+      duration: opts.duration,
+      zoomOrigin: opts.zoomOrigin
     };
 
     if (opts.zCoord) {
@@ -1111,18 +1131,28 @@ geo.map = function (arg) {
     }
 
     function anim(time) {
-      var done = m_transition.done, next;
+      var done = m_transition.done,
+          next = m_queuedTransition;
       if (m_transition.cancel === true) {
         /* Finish cancelling a transition. */
-        m_transition = null;
-        m_queuedTransition = null;
         m_this.geoTrigger(geo.event.transitioncancel, opts);
         if (done) {
-          done();
+          done({
+            cancel: true,
+            source: m_transition.cancelSource,
+            transition: m_transition
+          });
+        }
+        m_transition = null;
+        /* There will only be a queuedTransition if it was created after this
+         * transition was cancelled */
+        if (m_queuedTransition) {
+          next = m_queuedTransition;
+          m_queuedTransition = null;
+          m_this.transition(next, undefined, time);
         }
         return;
       }
-      next = m_queuedTransition;
 
       if (!m_transition.start.time) {
         m_transition.start.time = time;
@@ -1132,21 +1162,21 @@ geo.map = function (arg) {
       if (time >= m_transition.end.time || next) {
         if (!next) {
           m_this.center(m_transition.end.center, null);
-          m_this.zoom(m_transition.end.zoom);
+          m_this.zoom(m_transition.end.zoom, m_transition.zoomOrigin);
           m_this.rotation(fix_rotation(m_transition.end.rotation));
         }
-
-        m_transition = null;
 
         m_this.geoTrigger(geo.event.transitionend, opts);
 
         if (done) {
-          done();
+          done({next: !!next});
         }
 
-        if (next) {
+        m_transition = null;
+        if (m_queuedTransition) {
+          next = m_queuedTransition;
           m_queuedTransition = null;
-          m_this.transition(next);
+          m_this.transition(next, undefined, time);
         }
 
         return;
@@ -1164,10 +1194,10 @@ geo.map = function (arg) {
         m_this.center({
           x: p[0],
           y: p[1]
-        }, null);
+        }, null, true);
       } else {
         m_center = m_this.gcsToWorld({x: p[0], y: p[1]}, null);
-        m_this.zoom(p[2], undefined, true);
+        m_this.zoom(p[2], m_transition.zoomOrigin, true);
       }
       m_this.rotation(p[3], undefined, true);
 
@@ -1184,6 +1214,8 @@ geo.map = function (arg) {
       // run the navigation synchronously
       opts.duration = 0;
       anim(0);
+    } else if (animTime) {
+      anim(animTime);
     } else {
       window.requestAnimationFrame(anim);
     }
@@ -1194,11 +1226,14 @@ geo.map = function (arg) {
    * Cancel any existing transition.  The transition will send a cancel event
    * at the next animation frame, but no further activity occurs.
    *
+   * @param {string} source option cause of the cancel.
    * @returns {bool} true if a transition was in progress.
    */
-  this.transitionCancel = function () {
-    if (m_transition && m_transition.cancel !== true) {
+  this.transitionCancel = function (source) {
+    if (m_transition && (m_transition.cancel !== true || m_queuedTransition)) {
       m_transition.cancel = true;
+      m_transition.cancelSource = source || m_transition.cancelSource || '';
+      m_queuedTransition = null;
       return true;
     }
     return false;
@@ -1245,7 +1280,8 @@ geo.map = function (arg) {
       m_this.center(nav.center, null);
     }
 
-    return m_this.boundsFromZoomAndCenter(m_zoom, m_center, m_rotation, gcs);
+    return m_this.boundsFromZoomAndCenter(m_zoom, m_center, m_rotation, gcs,
+                                          true);
   };
 
   this.maxBounds = function (bounds, gcs) {
@@ -1349,15 +1385,18 @@ geo.map = function (arg) {
    * @param {number} rotation The requested rotation
    * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
    *    null to use the map gcs, or any other transform.
+   * @param {boolean} ignoreDiscreteZoom if true, ignore the discreteZoom
+   *    option when determining the new view.
    * @return {geo.geoBounds}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.boundsFromZoomAndCenter = function (zoom, center, rotation, gcs) {
+  this.boundsFromZoomAndCenter = function (zoom, center, rotation, gcs,
+                                           ignoreDiscreteZoom) {
     var width, height, halfw, halfh, bounds, units;
 
     gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
     // preprocess the arguments
-    zoom = fix_zoom(zoom);
+    zoom = fix_zoom(zoom, ignoreDiscreteZoom);
     units = m_this.unitsPerPixel(zoom);
     center = m_this.gcsToWorld(center, gcs);
 
@@ -1630,6 +1669,11 @@ geo.map = function (arg) {
   /**
    * Return the nearest valid zoom level to the requested zoom.
    * @private
+   * @param {number} zoom a zoom level to adjust to current settings
+   * @param {boolean} ignoreDiscreteZoom if true, ignore the discreteZoom
+   *    option when determining the new view.
+   * @returns {number} the zoom level clamped to the allowed zoom range and
+   *    with other settings applied.
    */
   function fix_zoom(zoom, ignoreDiscreteZoom) {
     zoom = Math.max(
