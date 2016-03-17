@@ -15,6 +15,16 @@ module.exports = function (grunt) {
     env: grunt.option('env') || process.env.GRUNT_ENV || 'development',
 
     copy: {
+      plugins: {
+        files: [
+          {
+            cwd: 'src/',
+            src: ['plugin/*.js'],
+            dest: 'dist/',
+            expand: true
+          }
+        ]
+      },
       examples: {
         files: [
           {
@@ -270,6 +280,7 @@ module.exports = function (grunt) {
   ]);
 
   grunt.registerTask('default', [
+    'copy:plugins',
     'examples'
   ]);
 
