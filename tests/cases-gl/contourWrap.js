@@ -1,4 +1,4 @@
-/*global describe, it, expect, geo*/
+var geo = require('../test-utils').geo;
 
 describe('Contour Feature', function () {
   'use strict';
@@ -25,7 +25,7 @@ describe('Contour Feature', function () {
     };
     var contour = layer.createFeature('contour').data(
         contour1.values).contour(contour1).style({
-        value: function (d) { return d; }});
+          value: function (d) { return d; }});
     var result = contour.createContours();
     expect(result.minValue).toBe(0);
     expect(result.maxValue).toBe(13);
@@ -40,7 +40,7 @@ describe('Contour Feature', function () {
     };
     var contour = layer.createFeature('contour').data(
         contour1.values).contour(contour1).style({
-        value: function (d) { return d; }});
+          value: function (d) { return d; }});
     var result = contour.createContours();
     console.log(contour, result);
     expect(result.elements.length).toBe(42); /* 5 + 2 sq. * 2 tri. * 3 pts. */
@@ -57,7 +57,7 @@ describe('Contour Feature', function () {
     };
     var contour = layer.createFeature('contour').data(
         contour1.values).contour(contour1).style({
-        value: function (d) { return d; }});
+          value: function (d) { return d; }});
     var result = contour.createContours();
     expect(result.elements.length).toBe(30); /* 5 sq. * 2 tri. * 3 pts. */
     expect(result.pos.length).toBe(36); /* 12 distinct points * 3 coor. */
@@ -71,7 +71,7 @@ describe('Contour Feature', function () {
     };
     var contour = layer.createFeature('contour').data(
         contour1.values).contour(contour1).style({
-        value: function (d) { return d; }});
+          value: function (d) { return d; }});
     var result = contour.createContours();
     expect(result.elements.length).toBe(36); /* 5 + 1 sq. * 2 tri. * 3 pts. */
     expect(result.pos.length).toBe(48); /* 12 + 4 distinct points * 3 coor. */

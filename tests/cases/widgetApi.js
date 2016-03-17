@@ -1,17 +1,23 @@
-/*global describe, it, expect, geo, jasmine*/
+var geo = require('../test-utils').geo;
+var $ = require('jquery');
 
 describe('widget api', function () {
   'use strict';
 
-  function makeMap() {
-    var map, width = 800, height = 800, parent;
+  beforeEach(function () {
+    $('<div id="map-widget-api"/>').appendTo('body')
+      .css({width: '500px', height: '400px'});
+  });
 
-    parent = $('#map').parent();
-    $('#map').remove();
-    parent.append('<div id=map/>');
+  afterEach(function () {
+    $('#map-widget-api').remove();
+  });
+
+  function makeMap() {
+    var map;
 
     map = geo.map({
-      node: '#map',
+      node: '#map-widget-api',
       center: {
         x: -98.0,
         y: 39.5
@@ -19,8 +25,6 @@ describe('widget api', function () {
       zoom: 5
     });
 
-    map.createLayer('osm');
-    map.resize(0, 0, width, height);
     map.createLayer('ui');
     map.draw();
 
@@ -36,25 +40,29 @@ describe('widget api', function () {
   });
 
   it('a widget stuck to albany shouldn\'t be in the viewport ' +
-     'if we pan to moscow', function () {
-       var o = makeMap(), widget = o.uiLayer.createWidget('dom', {
-         position: {
-           x: -73.7572,
-           y: 42.6525
+     'if we pan to moscow',
+     function () {
+       var o = makeMap(), widget = o.uiLayer.createWidget(
+         'dom', {
+           position: {
+             x: -73.7572,
+             y: 42.6525
+           }
          }
-       });
+       );
 
        o.map.center({x: 37.6167, y: 55.7500});
        expect(widget.isInViewport()).toBe(false);
      });
 
   it('a widget stuck to albany should be in the viewport if albany is', function () {
-    var o = makeMap(), widget = o.uiLayer.createWidget('dom', {
-      position: {
-        x: -73.7572,
-        y: 42.6525
-      }
-    });
+    var o = makeMap(),
+        widget = o.uiLayer.createWidget('dom', {
+          position: {
+            x: -73.7572,
+            y: 42.6525
+          }
+        });
 
     o.map.center({x: -73.7572, y: 42.6525});
     expect(widget.isInViewport()).toBe(true);

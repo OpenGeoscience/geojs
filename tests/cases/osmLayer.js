@@ -1,9 +1,9 @@
 // Test geo.core.osmLayer
+var geo = require('../test-utils').geo;
+var $ = require('jquery');
 
 describe('geo.core.osmLayer', function () {
   'use strict';
-  var geo = require('../test-utils').geo;
-  var $ = require('jquery');
   var waitForIt = require('../test-utils').waitForIt;
   // var submitNote = require('../test-utils').submitNote;
   // var logCanvas2D = require('../test-utils').logCanvas2D;
@@ -11,8 +11,8 @@ describe('geo.core.osmLayer', function () {
   var closeToEqual = require('../test-utils').closeToEqual;
 
   function create_map(opts) {
-    var node = $('<div id="map"/>').css({width: '640px', height: '360px'});
-    $('#map,#map-container').remove();
+    var node = $('<div id="map-osm-layer"/>').css({width: '640px', height: '360px'});
+    $('#map-osm-layer').remove();
     /* Prepend because we want the map to be the first item so that its
      * position doesn't change when data is added to the html reporter div. */
     $('body').prepend(node);
@@ -26,7 +26,7 @@ describe('geo.core.osmLayer', function () {
    * @param mapinfo: an object that includes the map to test.
    * @param notekey: the key to use for the build note.
    */
-  function measure_performance(mapinfo, notekey) {
+  function measure_performance(mapinfo, notekey) { // eslint-disable-line no-unused-vars
     var map;
     describe('measure performance ' + notekey, function () {
       it('measure performance', function (done) {
@@ -310,6 +310,6 @@ describe('geo.core.osmLayer', function () {
     waitForIt('tiles to load', function () {
       return Object.keys(layer.activeTiles).length === 17;
     });
-    measure_performance(mapinfo, 'osmLayer-vgl-performance');
+    // measure_performance(mapinfo, 'osmLayer-vgl-performance');
   });
 });

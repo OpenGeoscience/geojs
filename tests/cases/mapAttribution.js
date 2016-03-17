@@ -1,16 +1,26 @@
-/*global describe, it, expect, geo*/
-
 describe('Test adding and remove attribution via layers', function () {
   'use strict';
 
+  var $ = require('jquery');
+  var geo = require('../test-utils').geo;
+
+  beforeEach(function () {
+    $('<div id="map-attribution"/>').appendTo('body')
+      .css({width: '500px', height: '400px'});
+  });
+
+  afterEach(function () {
+    $('#map-attribution').remove();
+  });
+
   // Generate a new empty map
   function createMap() {
-    return geo.map({node: '#map'});
+    return geo.map({node: '#map-attribution'});
   }
 
   // Return all attribution nodes
   function getAttribution() {
-    return $('#map > .geo-attribution > .geo-attribution-layer');
+    return $('#map-attribution > .geo-attribution > .geo-attribution-layer');
   }
 
   it('Attribution added via constructor argument', function () {
@@ -24,12 +34,11 @@ describe('Test adding and remove attribution via layers', function () {
     expect($a.length).toBe(1);
     expect($a.find('#test-constructor').length).toBe(1);
   });
-  
+
   it('Modifying an attribution after creation', function () {
     var map = createMap();
 
     var layer = map.createLayer('feature');
-
 
     layer.attribution('<div id="test-setter"/>');
 
@@ -56,7 +65,7 @@ describe('Test adding and remove attribution via layers', function () {
     expect($a.find('#test-2').length).toBe(1);
     expect($a.find('#test-3').length).toBe(1);
   });
-  
+
   it('Remove attribution on remove layer', function () {
     var map = createMap();
 
@@ -68,7 +77,7 @@ describe('Test adding and remove attribution via layers', function () {
 
     map.deleteLayer(layer);
 
-    var $a = getAttribution();
+    $a = getAttribution();
     expect($a.length).toBe(0);
   });
 });

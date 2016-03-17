@@ -8,15 +8,22 @@ describe('geo.core.map', function () {
   var closeToEqual = require('../test-utils').closeToEqual;
 
   function create_map(opts) {
-    var node = $('<div id="map"/>').css({width: '500px', height: '500px'});
-    $('#map').remove();
+    var node = $('<div id="map-create-map"/>').css({width: '500px', height: '500px'});
+    $('#map-create-map').remove();
     $('body').append(node);
     opts = $.extend({}, opts);
     opts.node = node;
     return geo.map(opts);
   }
 
+  afterEach(function () {
+    $('#map-create-map').remove();
+  });
+
   describe('Check class accessors', function () {
+    afterEach(function () {
+      $('#map-create-map').remove();
+    });
     it('clampBounds', function () {
       var m = create_map();
       var axes = {'X': false, 'Y': true};
@@ -30,6 +37,7 @@ describe('geo.core.map', function () {
         func('truthy');
         expect(func()).toBe(true);
       });
+      m.exit();
     });
     it('clampZoom and zoomRange', function () {
       var m = create_map(), zr;
@@ -54,6 +62,7 @@ describe('geo.core.map', function () {
       expect(zr.min).toBeCloseTo(Math.log2(500 / 256), 2);
       expect(zr.origMin).toBe(0);
       expect(zr.max).toBe(2);
+      m.exit();
     });
     it('allowRotation', function () {
       var m = create_map();
@@ -86,6 +95,7 @@ describe('geo.core.map', function () {
       expect(m.rotation()).toBeCloseTo(15 * Math.PI / 180);
       m.rotation(17 * Math.PI / 180);
       expect(m.rotation()).toBeCloseTo(17 * Math.PI / 180);
+      m.exit();
     });
     it('size and rotatedSize', function () {
       var m = create_map();
@@ -116,6 +126,7 @@ describe('geo.core.map', function () {
         width: 300 * Math.cos(Math.PI / 12) + 400 * Math.sin(Math.PI / 12),
         height: 300 * Math.sin(Math.PI / 12) + 400 * Math.cos(Math.PI / 12)
       })).toBe(true);
+      m.exit();
     });
     it('unitsPerPixel', function () {
       var m = create_map(), circEarth = 6378137 * Math.PI * 2;
@@ -130,13 +141,16 @@ describe('geo.core.map', function () {
       m.unitsPerPixel(4, 200000);
       expect(m.unitsPerPixel()).toBeCloseTo(200000 * 16);
       expect(m.unitsPerPixel(4)).toBeCloseTo(200000);
+      m.exit();
     });
     it('scale', function () {
       var m = create_map();
       expect(m.scale()).toEqual({x: 1, y: 1, z: 1});
+      m.exit();
     });
     it('gcs and ingcs', function () {
       var m = create_map(), units = m.unitsPerPixel();
+      var error = console.error;
       expect(m.gcs()).toBe('EPSG:3857');
       expect(m.ingcs()).toBe('EPSG:4326');
       m.bounds({left: -180, top: 5, right: 180, bottom: -5});
@@ -166,13 +180,21 @@ describe('geo.core.map', function () {
         width: 256, height: 256})).toBe(true);
       /* when an invalid transform is set, we shouldn't throw any exceptions,
        * even if the computations become strange. */
+
+      // silence errors
+      console.error = function () {};
       m.gcs('invalid');
       expect(m.gcs()).toBe('invalid');
       m.ingcs('invalid2');
       expect(m.ingcs()).toBe('invalid2');
+
       expect(m.bounds({left: -180, top: 5, right: 180, bottom: -5})).not.toBe(
         undefined);
       expect(m.bounds()).not.toBe(undefined);
+      m.exit();
+
+      // restore errors
+      console.error = error;
     });
     it('maxBounds', function () {
       var m = create_map();
@@ -181,6 +203,7 @@ describe('geo.core.map', function () {
       m.maxBounds({left: -90, right: 20, top: 40, bottom: -60});
       expect(closeToEqual(m.maxBounds(), {
         left: -90, right: 20, top: 40, bottom: -60})).toBe(true);
+      m.exit();
     });
     it('zoom and discreteZoom', function () {
       var m = create_map();
@@ -215,6 +238,7 @@ describe('geo.core.map', function () {
       expect(m.zoom()).toBe(3);
       m.zoom(0);
       expect(m.zoom()).toBe(2);
+      m.exit();
     });
     it('rotation', function () {
       var m = create_map();
@@ -231,6 +255,7 @@ describe('geo.core.map', function () {
       expect(m.rotation()).toBeCloseTo(Math.PI * 2 - 1);
       m.rotation(17);
       expect(m.rotation()).toBeCloseTo(17 - Math.PI * 4);
+      m.exit();
     });
   });
 
@@ -360,6 +385,7 @@ describe('geo.core.map', function () {
       expect(closeToEqual(m.center(), {x: 0, y: -1048, z: 0})).toBe(true);
       m.pan({x: 0, y: -1000});
       expect(closeToEqual(m.center(), {x: 0, y: 1048, z: 0})).toBe(true);
+      m.exit();
     });
     it('zoomAndCenterFromBounds', function () {
       var zc;
@@ -396,6 +422,7 @@ describe('geo.core.map', function () {
         3 - Math.log(Math.cos(Math.PI / 6) + Math.sin(Math.PI / 6)) /
         Math.log(2));
       expect(closeToEqual(zc.center, {x: 0, y: 0})).toBe(true);
+      m.exit();
     });
     it('transition', function () {
       var m = create_map(), start, wasCalled;
@@ -517,17 +544,22 @@ describe('geo.core.map', function () {
       expect(m.center().y).toBeCloseTo(0);
       window.requestAnimationFrame = origRequestAnimationFrame;
       window.cancelAnimationFrame = origCancelAnimationFrame;
+      m.exit();
     });
   });
 
   describe('Public non-class methods', function () {
     it('geo.map.create', function () {
       var layerSpec = {type: 'feature', renderer: 'd3', features: []};
-      var node = $('<div id="map"/>').css({width: '500px', height: '500px'});
-      $('#map').remove();
+      var node = $('<div id="map-non-class-methods"/>').css({width: '500px', height: '500px'});
+      $('#map-non-class-methods').remove();
       $('body').append(node);
       var m = geo.map.create({node: node, layers: [layerSpec]});
       expect(m.layers().length).toBe(1);
+
+      m.exit();
+      node.remove();
+
       expect(geo.map.create({})).toBe(null);
     });
   });
@@ -536,10 +568,11 @@ describe('geo.core.map', function () {
     it('resizeSelf', function () {
       var m = create_map();
       expect(m.size()).toEqual({width: 500, height: 500});
-      $('#map').css({width: '400px', height: '400px'});
+      $('#map-create-map').css({width: '400px', height: '400px'});
       expect(m.size()).toEqual({width: 500, height: 500});
       $(window).trigger('resize');
       expect(m.size()).toEqual({width: 400, height: 400});
+      m.exit();
     });
   });
 });

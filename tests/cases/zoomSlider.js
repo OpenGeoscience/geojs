@@ -1,23 +1,31 @@
-/*global describe, it, expect, geo*/
+var geo = require('../test-utils').geo;
 
 describe('zoom slider', function () {
   'use strict';
 
-  var map, width = 800, height = 800;
+  var d3 = require('d3');
+  var $ = require('jquery');
+  var map;
 
-  // create an osm map layer
-  map = geo.map({
-    'node': '#map',
-    'center': [0, 0],
-    'zoom': 2,
-    'clampZoom': false,
-    'clampBoundsX': false,
-    'clampBoundsY': false
+  beforeEach(function () {
+    $('<div id="map-zoom-slider"/>').appendTo('body')
+      .css({width: '500px', height: '400px'});
+    map = geo.map({
+      'node': '#map-zoom-slider',
+      'center': [0, 0],
+      'zoom': 2,
+      'clampZoom': false,
+      'clampBoundsX': false,
+      'clampBoundsY': false
+    });
+    map.createLayer('ui').createWidget('slider');
+    map.draw();
   });
-  // map.createLayer('osm');
-  map.resize(0, 0, width, height);
-  map.createLayer('ui').createWidget('slider');
-  map.draw();
+
+  afterEach(function () {
+    map.exit();
+    $('#map-zoom-slider').remove();
+  });
 
   it('Zoom in button', function (done) {
     var eps;
