@@ -22,7 +22,7 @@ var pointFeature = function (arg) {
 
   var $ = require('jquery');
   var timestamp = require('./timestamp');
-  var clustering = require('../util/clustering');
+  var ClusterGroup = require('../util/clustering');
   var geo_event = require('./event');
   var util = require('../util');
   var wigglemaps = require('../util/wigglemaps');
@@ -86,7 +86,7 @@ var pointFeature = function (arg) {
 
     // generate the cluster tree from the raw data
     var position = m_this.position();
-    m_clusterTree = new clustering.ClusterGroup(
+    m_clusterTree = new ClusterGroup(
         opts, m_this.layer().width(), m_this.layer().height());
 
     m_allData.forEach(function (d, i) {
