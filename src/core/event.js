@@ -236,7 +236,7 @@ geo_event.transitionend = 'geo_transitionend';
  * @property {function} ease The easing function
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.event.transitioncancel = 'geo_transitioncancel';
+geo_event.transitioncancel = 'geo_transitioncancel';
 
 //////////////////////////////////////////////////////////////////////////////
 /**

@@ -1146,7 +1146,7 @@ var map = function (arg) {
           next = m_queuedTransition;
       if (m_transition.cancel === true) {
         /* Finish cancelling a transition. */
-        m_this.geoTrigger(geo.event.transitioncancel, opts);
+        m_this.geoTrigger(geo_event.transitioncancel, opts);
         if (done) {
           done({
             cancel: true,

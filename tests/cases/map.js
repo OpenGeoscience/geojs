@@ -6,6 +6,9 @@ describe('geo.core.map', function () {
   var $ = require('jquery');
   var geo = require('../test-utils').geo;
   var closeToEqual = require('../test-utils').closeToEqual;
+  var mockAnimationFrame = require('../test-utils').mockAnimationFrame;
+  var stepAnimationFrame = require('../test-utils').stepAnimationFrame;
+  var unmockAnimationFrame = require('../test-utils').unmockAnimationFrame;
 
   function create_map(opts) {
     var node = $('<div id="map-create-map"/>').css({width: '500px', height: '500px'});
@@ -18,12 +21,10 @@ describe('geo.core.map', function () {
 
   afterEach(function () {
     $('#map-create-map').remove();
+    $(window).off('resize');
   });
 
   describe('Check class accessors', function () {
-    afterEach(function () {
-      $('#map-create-map').remove();
-    });
     it('clampBounds', function () {
       var m = create_map();
       var axes = {'X': false, 'Y': true};
@@ -37,7 +38,6 @@ describe('geo.core.map', function () {
         func('truthy');
         expect(func()).toBe(true);
       });
-      m.exit();
     });
     it('clampZoom and zoomRange', function () {
       var m = create_map(), zr;
@@ -62,7 +62,6 @@ describe('geo.core.map', function () {
       expect(zr.min).toBeCloseTo(Math.log2(500 / 256), 2);
       expect(zr.origMin).toBe(0);
       expect(zr.max).toBe(2);
-      m.exit();
     });
     it('allowRotation', function () {
       var m = create_map();
@@ -95,7 +94,6 @@ describe('geo.core.map', function () {
       expect(m.rotation()).toBeCloseTo(15 * Math.PI / 180);
       m.rotation(17 * Math.PI / 180);
       expect(m.rotation()).toBeCloseTo(17 * Math.PI / 180);
-      m.exit();
     });
     it('size and rotatedSize', function () {
       var m = create_map();
@@ -126,7 +124,6 @@ describe('geo.core.map', function () {
         width: 300 * Math.cos(Math.PI / 12) + 400 * Math.sin(Math.PI / 12),
         height: 300 * Math.sin(Math.PI / 12) + 400 * Math.cos(Math.PI / 12)
       })).toBe(true);
-      m.exit();
     });
     it('unitsPerPixel', function () {
       var m = create_map(), circEarth = 6378137 * Math.PI * 2;
@@ -141,12 +138,10 @@ describe('geo.core.map', function () {
       m.unitsPerPixel(4, 200000);
       expect(m.unitsPerPixel()).toBeCloseTo(200000 * 16);
       expect(m.unitsPerPixel(4)).toBeCloseTo(200000);
-      m.exit();
     });
     it('scale', function () {
       var m = create_map();
       expect(m.scale()).toEqual({x: 1, y: 1, z: 1});
-      m.exit();
     });
     it('gcs and ingcs', function () {
       var m = create_map(), units = m.unitsPerPixel();
@@ -187,13 +182,9 @@ describe('geo.core.map', function () {
       expect(m.gcs()).toBe('invalid');
       m.ingcs('invalid2');
       expect(m.ingcs()).toBe('invalid2');
-
       expect(m.bounds({left: -180, top: 5, right: 180, bottom: -5})).not.toBe(
         undefined);
       expect(m.bounds()).not.toBe(undefined);
-      m.exit();
-
-      // restore errors
       console.error = error;
     });
     it('maxBounds', function () {
@@ -203,7 +194,6 @@ describe('geo.core.map', function () {
       m.maxBounds({left: -90, right: 20, top: 40, bottom: -60});
       expect(closeToEqual(m.maxBounds(), {
         left: -90, right: 20, top: 40, bottom: -60})).toBe(true);
-      m.exit();
     });
     it('zoom and discreteZoom', function () {
       var m = create_map();
@@ -238,7 +228,6 @@ describe('geo.core.map', function () {
       expect(m.zoom()).toBe(3);
       m.zoom(0);
       expect(m.zoom()).toBe(2);
-      m.exit();
     });
     it('rotation', function () {
       var m = create_map();
@@ -255,52 +244,10 @@ describe('geo.core.map', function () {
       expect(m.rotation()).toBeCloseTo(Math.PI * 2 - 1);
       m.rotation(17);
       expect(m.rotation()).toBeCloseTo(17 - Math.PI * 4);
-      m.exit();
     });
   });
 
   describe('Public utility methods', function () {
-    var animFrameCallbacks = [], animFrameIndex = 0;
-
-    /* Replace window.requestAnimationFrame with this function, then call
-     * stepAnimationFrame with a delta from when this was supposed to start to
-     * test asynchronous animations.
-     *
-     * @param {function} callback the function to call on an animation frame
-     *                            interval.
-     */
-    function mockRequestAnimationFrame(callback) {
-      animFrameIndex += 1;
-      var id = animFrameIndex;
-      animFrameCallbacks.push({id: id, callback: callback});
-    }
-
-    /* Replace window.cancelAnimationFrame with this function.
-     *
-     * @param {number} id id of the callback to cancel.
-     */
-    function mockCancelAnimationFrame(id) {
-      for (var i = 0; i < animFrameCallbacks.length; i += 1) {
-        if (animFrameCallbacks[i].id === id) {
-          animFrameCallbacks.splice(i, 1);
-          return;
-        }
-      }
-    }
-
-    /* Call all animation frame functions that have been captured.
-     *
-     * @param {float} time float milliseconds.
-     */
-    function stepAnimationFrame(time) {
-      var callbacks = animFrameCallbacks, action;
-      animFrameCallbacks = [];
-      while (callbacks.length > 0) {
-        action = callbacks.shift();
-        action.callback.call(window, time);
-      }
-    }
-
     /* Count the number of jquery events bounds to an element using a
      * particular namespace.
      *
@@ -323,9 +270,11 @@ describe('geo.core.map', function () {
 
     it('exit', function () {
       var m = create_map();
+      m.updateAttribution('Sample');
       expect(count_events(m.node(), 'geo')).toBeGreaterThan(0);
       m.exit();
       expect(count_events(m.node(), 'geo')).toBe(0);
+      expect($('#map-create-map').children().length).toBe(0);
     });
     it('pan, clampBoundsX, and clampBoundsY', function () {
       var m = create_map({
@@ -385,7 +334,6 @@ describe('geo.core.map', function () {
       expect(closeToEqual(m.center(), {x: 0, y: -1048, z: 0})).toBe(true);
       m.pan({x: 0, y: -1000});
       expect(closeToEqual(m.center(), {x: 0, y: 1048, z: 0})).toBe(true);
-      m.exit();
     });
     it('zoomAndCenterFromBounds', function () {
       var zc;
@@ -403,9 +351,7 @@ describe('geo.core.map', function () {
       expect(function () {
         m.zoomAndCenterFromBounds({
           left: -250, top: 250, right: 250, bottom: -250});
-      }).toThrow(
-        new Error('Invalid bounds provided')
-      );
+      }).toThrow(new Error('Invalid bounds provided'));
       zc = m.zoomAndCenterFromBounds({
         left: 0, top: -500, right: 10, bottom: 500});
       expect(zc.zoom).toBeCloseTo(3);
@@ -422,14 +368,10 @@ describe('geo.core.map', function () {
         3 - Math.log(Math.cos(Math.PI / 6) + Math.sin(Math.PI / 6)) /
         Math.log(2));
       expect(closeToEqual(zc.center, {x: 0, y: 0})).toBe(true);
-      m.exit();
     });
     it('transition', function () {
       var m = create_map(), start, wasCalled;
-      var origRequestAnimationFrame = window.requestAnimationFrame,
-          origCancelAnimationFrame = window.cancelAnimationFrame;
-      window.requestAnimationFrame = mockRequestAnimationFrame;
-      window.cancelAnimationFrame = mockCancelAnimationFrame;
+      mockAnimationFrame();
       expect(m.transition()).toBe(null);
       start = new Date().getTime();
       m.transition({
@@ -468,19 +410,15 @@ describe('geo.core.map', function () {
       stepAnimationFrame(start);
       // the first transition gets cancelled, as the second transition will
       // perform the entire action.
-      expect(m.transition().start.time).toBe(undefined);
-      expect(m.center().x).toBeCloseTo(10);
-      expect(m.center().y).toBeCloseTo(0);
-      stepAnimationFrame(start + 1);
-      expect(m.transition().start.time).toBe(start + 1);
+      expect(m.transition().start.time).toBe(start);
       expect(m.transition().time).toBe(0);
       expect(m.center().x).toBeCloseTo(10);
       expect(m.center().y).toBeCloseTo(0);
-      stepAnimationFrame(start + 501);
+      stepAnimationFrame(start + 500);
       expect(m.transition().time).toBeCloseTo(500);
       expect(m.center().x).toBeCloseTo(15);
       expect(m.center().y).toBeCloseTo(5, 1);
-      stepAnimationFrame(start + 1001);
+      stepAnimationFrame(start + 1000);
       expect(m.transition()).toBe(null);
       expect(m.center().x).toBeCloseTo(20);
       expect(m.center().y).toBeCloseTo(10);
@@ -542,9 +480,57 @@ describe('geo.core.map', function () {
       stepAnimationFrame(start + 1000);
       expect(m.center().x).toBeCloseTo(0);
       expect(m.center().y).toBeCloseTo(0);
-      window.requestAnimationFrame = origRequestAnimationFrame;
-      window.cancelAnimationFrame = origCancelAnimationFrame;
-      m.exit();
+      // test cancel
+      start = new Date().getTime();
+      wasCalled = undefined;
+      m.transition({
+        center: {x: 10, y: 0},
+        duration: 1000,
+        done: function () {
+          wasCalled = true;
+        }
+      });
+      expect(m.transition().start.time).toBe(undefined);
+      stepAnimationFrame(start);
+      expect(m.transition().start.time).toBe(start);
+      expect(m.transition().time).toBe(0);
+      expect(m.transitionCancel()).toBe(true);
+      expect(m.transition()).not.toBe(null);
+      expect(m.transition().cancel).toBe(true);
+      expect(m.transitionCancel()).toBe(false);
+      expect(wasCalled).toBe(undefined);
+      stepAnimationFrame(start + 500);
+      expect(m.transition()).toBe(null);
+      expect(wasCalled).toBe(true);
+      // test cancel with another transition added before the next render
+      wasCalled = false;
+      m.transition({
+        center: {x: -10, y: 0},
+        duration: 1000,
+        done: function () {
+          wasCalled = true;
+        }
+      });
+      stepAnimationFrame(start);
+      expect(m.transitionCancel()).toBe(true);
+      /* This should never be started or finished */
+      m.transition({
+        center: {x: 0, y: 0},
+        duration: 1000,
+        done: function () {
+          wasCalled = 'never';
+        }
+      });
+      expect(m.transitionCancel()).toBe(true);
+      m.transition({
+        center: {x: 10, y: 0},
+        duration: 1000
+      });
+      expect(wasCalled).toBe(false);
+      stepAnimationFrame(start + 500);
+      expect(m.transition()).not.toBe(null);
+      expect(wasCalled).toBe(true);
+      unmockAnimationFrame();
     });
   });
 
@@ -556,11 +542,8 @@ describe('geo.core.map', function () {
       $('body').append(node);
       var m = geo.map.create({node: node, layers: [layerSpec]});
       expect(m.layers().length).toBe(1);
-
-      m.exit();
-      node.remove();
-
       expect(geo.map.create({})).toBe(null);
+      node.remove();
     });
   });
 
@@ -572,7 +555,6 @@ describe('geo.core.map', function () {
       expect(m.size()).toEqual({width: 500, height: 500});
       $(window).trigger('resize');
       expect(m.size()).toEqual({width: 400, height: 400});
-      m.exit();
     });
   });
 });

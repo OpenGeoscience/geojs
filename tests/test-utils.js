@@ -267,3 +267,111 @@ module.exports.submitNote = function submitNote(key, note) {
     contentType: 'application/json'
   });
 };
+
+var origRequestAnimationFrame = window.requestAnimationFrame,
+    origCancelAnimationFrame = window.cancelAnimationFrame,
+    animFrameCallbacks = [];
+
+module.exports.unmockAnimationFrame = function () {
+  window.requestAnimationFrame = origRequestAnimationFrame;
+  window.cancelAnimationFrame = origCancelAnimationFrame;
+  window.stepAnimationFrame = undefined;
+};
+
+/* Call all animation frame functions that have been captured.
+ *
+ * @param {float} time float milliseconds.
+ */
+module.exports.stepAnimationFrame = function (time) {
+  var callbacks = animFrameCallbacks, action;
+  animFrameCallbacks = [];
+  while (callbacks.length > 0) {
+    action = callbacks.shift();
+    action.callback.call(window, time);
+  }
+};
+
+/**
+ * Allow stepping through animation frames.  Call unmockAnimationFrame to
+ * retore the original animation frame behavior.
+ */
+module.exports.mockAnimationFrame = function (mockDate) {
+
+  var animFrameIndex = 0;
+
+  /* Replace window.requestAnimationFrame with this function, then call
+   * stepAnimationFrame with a delta from when this was supposed to start to
+   * test asynchronous animations.
+   *
+   * @param {function} callback the function to call on an animation frame
+   *                            interval.
+   */
+  function mockedRequestAnimationFrame(callback) {
+    animFrameIndex += 1;
+    var id = animFrameIndex;
+    animFrameCallbacks.push({id: id, callback: callback});
+  }
+
+  /* Replace window.cancelAnimationFrame with this function.
+   *
+   * @param {number} id id of the callback to cancel.
+   */
+  function mockedCancelAnimationFrame(id) {
+    for (var i = 0; i < animFrameCallbacks.length; i += 1) {
+      if (animFrameCallbacks[i].id === id) {
+        animFrameCallbacks.splice(i, 1);
+        return;
+      }
+    }
+  }
+
+  window.requestAnimationFrame = mockedRequestAnimationFrame;
+  window.cancelAnimationFrame = mockedCancelAnimationFrame;
+};
+
+var origDate = window.Date,
+    startDate = (new Date()).getTime();
+
+/**
+ * Allow mocking calls to Date so that each new object is slightly after the
+ * previous one.  Use a delta of 0 and calls to advanceDate() for complete
+ * controls.
+ *
+ * @param {number} delta number of milliseconds added to each call.
+ */
+module.exports.mockDate = function (delta) {
+  if (window.unmockDate) {
+    return;
+  }
+  var mockDelta = delta === undefined ? 15 : delta;
+
+  /**
+   * Override window.Date so that every fetch increments the date by a few
+   * milliseconds.
+   */
+  geo.mockedDate = function (args) {
+    if (!(this instanceof geo.mockedDate)) {
+      return new geo.mockedDate(args);
+    }
+    startDate += mockDelta;
+    return new origDate(startDate);
+  };
+
+  window.Date = geo.mockedDate;
+};
+
+/* Stop mocking. */
+module.exports.unmockDate = function () {
+  window.Date = origDate;
+  window.unmockDate = undefined;
+  window.advanceDate = undefined;
+};
+
+/**
+ * Change the date that will be reported by new Date().
+ *
+ * @param {number} delta milliseconds to advance the date.
+ */
+module.exports.advanceDate = function (delta) {
+  startDate += delta;
+};
