@@ -43,7 +43,7 @@ module.exports = {
       loader: 'json-loader'
     }, {
       test: /vgl\.js$/,
-      loader: 'imports?mat4=gl-mat4,vec4=gl-vec4,vec3=gl-vec3,vec2=gl-vec2,$=jquery'
+      loader: 'expose?vgl!imports?mat4=gl-mat4,vec4=gl-vec4,vec3=gl-vec3,vec2=gl-vec2,$=jquery'
     }]
   },
 
