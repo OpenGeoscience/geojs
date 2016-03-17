@@ -1,12 +1,5 @@
 var webpack_config = require('./webpack.config');
 
-// karma middleware the mimics a normal tile server.
-var MockTileServer = function () {
-  return function (request, response, next) {
-    next();
-  };
-};
-
 module.exports = {
   autoWatch: false,
   files: [
@@ -24,10 +17,8 @@ module.exports = {
     'progress',
     'kjhtml'
   ],
-  middleware: ['mock-tile-server'],
   plugins: [
-    'karma-*',
-    {'middleware:mock-tile-server': ['factory', MockTileServer]}
+    'karma-*'
   ],
   preprocessors: {
     'tests/all.js': ['webpack', 'sourcemap']
