@@ -128,7 +128,7 @@ describe('geo.core.osmLayer', function () {
       /* The follow is a test of tileLayer as attached to a map.  We don't
        * currently expose the tileLayer class directly to the createLayer
        * function, so some testing is done here */
-      it('_update', function () {
+      xit('_update', function () {
         var transform = layer.canvas().css('transform');
         layer._update();
         expect(layer.canvas().css('transform')).toBe(transform);
