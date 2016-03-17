@@ -124,10 +124,8 @@ if(SELENIUM_TESTS)
         COMMAND ${CMAKE_COMMAND} -DHTML_INCLUDE="${html}"
                                  -DJS_INCLUDE="${js}"
                                  -DCSS_INCLUDE="${css}"
-                                 -DSOURCES_INCLUDE="${SOURCES_INCLUDE}"
                                  -DOUTPUT_HTML="${output_html}"
                                  -DTEMPLATE_HTML="${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/selenium-template.html.in"
-                                 -DBLANKET_INCLUDE="${BLANKET_INCLUDE}"
                                  -P ${CMAKE_SOURCE_DIR}/cmake/configure-js-selenium-test.cmake
         COMMAND ${CMAKE_COMMAND} -E touch "${output_html}"
         DEPENDS "${html}" "${js}" "${css}" "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/selenium-template.html.in"
