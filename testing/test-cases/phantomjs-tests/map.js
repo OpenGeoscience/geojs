@@ -488,6 +488,34 @@ describe('geo.core.map', function () {
       stepAnimationFrame(start + 500);
       expect(m.transition()).toBe(null);
       expect(wasCalled).toBe(true);
+      // test cancel with another transition added before the next render
+      wasCalled = false;
+      m.transition({
+        center: {x: -10, y: 0},
+        duration: 1000,
+        done: function () {
+          wasCalled = true;
+        }
+      });
+      stepAnimationFrame(start);
+      expect(m.transitionCancel()).toBe(true);
+      /* This should never be started or finished */
+      m.transition({
+        center: {x: 0, y: 0},
+        duration: 1000,
+        done: function () {
+          wasCalled = 'never';
+        }
+      });
+      expect(m.transitionCancel()).toBe(true);
+      m.transition({
+        center: {x: 10, y: 0},
+        duration: 1000
+      });
+      expect(wasCalled).toBe(false);
+      stepAnimationFrame(start + 500);
+      expect(m.transition()).not.toBe(null);
+      expect(wasCalled).toBe(true);
       unmockAnimationFrame();
     });
   });

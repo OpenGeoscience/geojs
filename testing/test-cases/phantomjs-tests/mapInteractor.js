@@ -24,6 +24,7 @@ describe('mapInteractor', function () {
     return new $.Event(type, args);
   };
 
+  var panFactor = 120;
   var zoomFactor = 120;
   var rotationFactor = 120;
 
@@ -106,6 +107,16 @@ describe('mapInteractor', function () {
     return map;
   }
 
+  /* Create an instance of the actual map */
+  function create_map(opts) {
+    var node = $('<div id="map"/>').css({width: '500px', height: '500px'});
+    $('#map').remove();
+    $('body').append(node);
+    opts = $.extend({}, opts);
+    opts.node = node;
+    return geo.map(opts);
+  }
+
   beforeEach(function () {
     // create a new div
     $('body').append('<div id="mapNode1" class="mapNode testNode"></div>');
@@ -144,6 +155,48 @@ describe('mapInteractor', function () {
 
     interactor.map(map);
     expect(interactor.map()).toBe(map);
+  });
+
+  it('Test pan wheel event propagation', function () {
+    var map = mockedMap('#mapNode1');
+
+    var interactor = geo.mapInteractor({
+      map: map,
+      momentum: {enabled: false},
+      zoomAnimation: {enabled: false},
+      panMoveButton: null,
+      panWheelEnabled: true,
+      zoomMoveButton: null,
+      zoomWheelEnabled: false,
+      rotateMoveButton: null,
+      rotateWheelEnabled: false,
+      throttle: false
+    });
+
+    // initialize the mouse position
+    interactor.simulateEvent(
+      'mousemove',
+      {
+        map: {x: 20, y: 20}
+      }
+    );
+    // mark that we are in a transition and make sure we called
+    // transitionCancel
+    map.inTransition = true;
+    // trigger a pan
+    interactor.simulateEvent(
+      'wheel',
+      {
+        wheelDelta: {x: 20, y: -10},
+        wheelMode: 0
+      }
+    );
+
+    // check the zoom event was called
+    expect(map.info.pan).toBe(1);
+    expect(map.info.panArgs.x).toBeCloseTo(20 / panFactor);
+    expect(map.info.panArgs.y).toBeCloseTo(-10 / panFactor);
+    expect(map.info.cancelCount).toBe(1);
   });
 
   it('Test pan event propagation', function () {
@@ -1020,5 +1073,131 @@ describe('mapInteractor', function () {
     expect(map.info.panArgs.x).toBeLessThan(0);
     unmockDate();
     unmockAnimationFrame();
+  });
+
+  describe('Zoom Animation', function () {
+    var map, interactor;
+    it('zoom once', function () {
+      mockAnimationFrame();
+      /* we use the actual map as we want to check that the transitions behave
+       * as expected, too. */
+      map = create_map({discreteZoom: false, zoom: 2});
+      interactor = geo.mapInteractor({
+        map: map,
+        momentum: {enabled: false},
+        throttle: false
+      });
+      map.interactor(interactor);
+
+      var lastZoom, start;
+      interactor.simulateEvent(
+        'wheel',
+        {wheelDelta: {x: 0, y: -20}, wheelMode: 0}
+      );
+      start = new Date().getTime();
+      stepAnimationFrame(start);
+      expect(map.zoom()).toBe(2);
+      stepAnimationFrame(start + 50);
+      expect(map.zoom()).toBeGreaterThan(2);
+      expect(map.zoom()).toBeLessThan(2 + 20 / zoomFactor);
+      lastZoom = map.zoom();
+      stepAnimationFrame(start + 100);
+      expect(map.zoom()).toBeGreaterThan(lastZoom);
+      expect(map.zoom()).toBeLessThan(2 + 20 / zoomFactor);
+      stepAnimationFrame(start + 500);
+      expect(map.zoom()).toBeCloseTo(2 + 20 / zoomFactor);
+    });
+    it('zoom multiple', function () {
+      var lastZoom, start;
+      map.zoom(2);
+      interactor.simulateEvent(
+        'wheel',
+        {wheelDelta: {x: 0, y: -20}, wheelMode: 0}
+      );
+      start = new Date().getTime();
+      stepAnimationFrame(start);
+      expect(map.zoom()).toBe(2);
+      stepAnimationFrame(start + 50);
+      expect(map.zoom()).toBeGreaterThan(2);
+      expect(map.zoom()).toBeLessThan(2 + 20 / zoomFactor);
+      lastZoom = map.zoom();
+      stepAnimationFrame(start + 100);
+      expect(map.zoom()).toBeGreaterThan(lastZoom);
+      expect(map.zoom()).toBeLessThan(2 + 20 / zoomFactor);
+      lastZoom = map.zoom();
+      interactor.simulateEvent(
+        'wheel',
+        {wheelDelta: {x: 0, y: -20}, wheelMode: 0}
+      );
+      stepAnimationFrame(start + 150);
+      stepAnimationFrame(start + 200);
+      expect(map.zoom()).toBeGreaterThan(lastZoom);
+      expect(map.zoom()).toBeLessThan(2 + 40 / zoomFactor);
+      stepAnimationFrame(start + 500);
+      expect(map.zoom()).toBeLessThan(2 + 40 / zoomFactor);
+      stepAnimationFrame(start + 650);
+      expect(map.zoom()).toBeCloseTo(2 + 40 / zoomFactor);
+    });
+    it('discrete zoom', function () {
+      var lastZoom, start;
+      map.zoom(2);
+      map.discreteZoom(true);
+      interactor.simulateEvent(
+        'wheel',
+        {wheelDelta: {x: 0, y: -20}, wheelMode: 0}
+      );
+      start = new Date().getTime();
+      stepAnimationFrame(start);
+      expect(map.zoom()).toBe(2);
+      stepAnimationFrame(start + 50);
+      expect(map.zoom()).toBeGreaterThan(2);
+      expect(map.zoom()).toBeLessThan(3);
+      lastZoom = map.zoom();
+      stepAnimationFrame(start + 100);
+      expect(map.zoom()).toBeGreaterThan(lastZoom);
+      expect(map.zoom()).toBeLessThan(3);
+      lastZoom = map.zoom();
+      /* This wheel event is essentially ignored as the resulting zoom won't
+       * change. */
+      interactor.simulateEvent(
+        'wheel',
+        {wheelDelta: {x: 0, y: -20}, wheelMode: 0}
+      );
+      stepAnimationFrame(start + 150);
+      stepAnimationFrame(start + 200);
+      expect(map.zoom()).toBeGreaterThan(lastZoom);
+      expect(map.zoom()).toBeLessThan(3);
+      stepAnimationFrame(start + 500);
+      expect(map.zoom()).toBeLessThan(3);
+      stepAnimationFrame(start + 650);
+      expect(map.zoom()).toBe(3);
+    });
+    it('interrupted discrete zoom', function () {
+      var lastZoom, start;
+      map.zoom(2);
+      interactor.simulateEvent(
+        'wheel',
+        {wheelDelta: {x: 0, y: -20}, wheelMode: 0}
+      );
+      start = new Date().getTime();
+      stepAnimationFrame(start);
+      expect(map.zoom()).toBe(2);
+      stepAnimationFrame(start + 50);
+      expect(map.zoom()).toBeGreaterThan(2);
+      expect(map.zoom()).toBeLessThan(3);
+      lastZoom = map.zoom();
+      stepAnimationFrame(start + 100);
+      expect(map.zoom()).toBeGreaterThan(lastZoom);
+      expect(map.zoom()).toBeLessThan(3);
+      lastZoom = map.zoom();
+      /* A click will finish the zoom immediately. */
+      interactor.simulateEvent(
+        'mousedown',
+        {map: {x: 0, y: 0}, button: 'left'}
+      );
+      stepAnimationFrame(start + 150);
+      expect(map.zoom()).toBe(3);
+      unmockAnimationFrame();
+    });
   });
 });
