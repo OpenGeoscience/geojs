@@ -1,22 +1,29 @@
 var geo = require('../test-utils').geo;
+var $ = require('jquery');
 
 describe('Contour Feature', function () {
   'use strict';
 
-  var map, width = 800, height = 800, layer;
+  var map, layer;
+  var mockVGLRenderer = require('../test-utils').mockVGLRenderer;
 
-  // create an osm map layer
-  map = geo.map({
-    'node': '#map',
-    'center': [0, 0],
-    'zoom': 3
+  beforeEach(function () {
+    $('<div id="map-contour-wrap"/>').appendTo('body')
+      .css({width: '500px', height: '300px'});
+
+    mockVGLRenderer();
+    map = geo.map({
+      'node': '#map-contour-wrap',
+      'center': [0, 0],
+      'zoom': 3
+    });
+    layer = map.createLayer('feature', {'renderer': 'vgl'});
   });
-  map.createLayer('osm', {'url': function () {
-    return '/data/white.jpg';
-  }});
-  layer = map.createLayer('feature', {'renderer': 'vgl'});
-  map.resize(0, 0, width, height);
-  map.draw();
+
+  afterEach(function () {
+    map.exit();
+    $('#map-contour-wrap').remove();
+  });
 
   it('Create a contour', function () {
     var contour1 = {
@@ -42,7 +49,6 @@ describe('Contour Feature', function () {
         contour1.values).contour(contour1).style({
           value: function (d) { return d; }});
     var result = contour.createContours();
-    console.log(contour, result);
     expect(result.elements.length).toBe(42); /* 5 + 2 sq. * 2 tri. * 3 pts. */
     expect(result.pos.length).toBe(54); /* 12 + 6 distinct points * 3 coor. */
     expect(result.pos[48]).toBe(-30);  /* wrapped coordinate */

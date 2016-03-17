@@ -1,28 +1,28 @@
-/*global describe, it, expect, geo*/
+var geo = require('../test-utils').geo;
+var $ = require('jquery');
 
 describe('DiscreteZoom and ParallelProjection', function () {
   'use strict';
 
   function makeMap() {
-    var map, width = 800, height = 800;
-    var parent;
-
-    parent = $('#map').parent();
-    $('#map').remove();
-    parent.append('<div id=map/>');
-
-    // create an osm map layer
-    map = geo.map({
-      'node': '#map',
+    var map = geo.map({
+      'node': '#map-discrete-zoom',
       'center': [0, 0],
       'zoom': 3,
       discreteZoom: true
     });
-    map.createLayer('osm');
-    map.resize(0, 0, width, height);
     map.draw();
     return map;
   }
+
+  beforeEach(function () {
+    $('<div id="map-discrete-zoom"/>').appendTo('body')
+      .css({width: '800px', height: '800px'});
+  });
+
+  afterEach(function () {
+    $('#map-discrete-zoom').remove();
+  });
 
   it('Zoom to a non-integer value', function () {
     var map = makeMap();
