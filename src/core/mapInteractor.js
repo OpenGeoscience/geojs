@@ -1029,7 +1029,7 @@ geo.mapInteractor = function (args) {
             done: function (status) {
               status = status || {};
               if (!status.next && (!status.cancel ||
-                  status.source !== 'debounced_zoom.zoom')) {
+                  ('' + status.source).search(/\.zoom$/) < 0)) {
                 targetZoom = undefined;
               }
               /* If we were animating the zoom, if the zoom is continuous, just
