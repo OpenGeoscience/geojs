@@ -17,5 +17,7 @@
     "env": {
         "browser": true
     },
-    "globals": {}
+    "globals": {
+        "sinon": true
+    }
 }

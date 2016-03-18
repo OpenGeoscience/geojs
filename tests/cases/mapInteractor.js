@@ -852,7 +852,17 @@ describe('mapInteractor', function () {
     });
   });
   describe('throttled map interactions', function () {
-    it('pan', function (done) {
+    var clock;
+
+    // Instrument setTimeout and friends using sinon
+    beforeEach(function () {
+      clock = sinon.useFakeTimers();
+    });
+    afterEach(function () {
+      clock.restore();
+    });
+
+    it('pan', function () {
       var map = mockedMap('#mapNode1'),
           interactor = geo.mapInteractor({
             map: map,
@@ -872,6 +882,11 @@ describe('mapInteractor', function () {
           button: 'left'
         }
       );
+
+      clock.tick(100);
+      expect(map.info.pan).toBe(1);
+      expect(map.info.panArgs).toEqual({x: 5, y: 5});
+
       interactor.simulateEvent(
         'mousemove',
         {
@@ -887,43 +902,35 @@ describe('mapInteractor', function () {
         }
       );
 
-      window.setTimeout(function () {
-        interactor.simulateEvent(
-          'mousemove',
-          {
-            map: {x: 100, y: 100},
-            button: 'left'
-          }
-        );
-        interactor.simulateEvent(
-          'mousemove',
-          {
-            map: {x: 25, y: 25},
-            button: 'left'
-          }
-        );
+      clock.tick(50);
+      interactor.simulateEvent(
+        'mousemove',
+        {
+          map: {x: 100, y: 100},
+          button: 'left'
+        }
+      );
+      interactor.simulateEvent(
+        'mousemove',
+        {
+          map: {x: 25, y: 25},
+          button: 'left'
+        }
+      );
 
-        window.setTimeout(function () {
-          expect(map.info.pan).toBe(2);
-          expect(map.info.panArgs).toEqual({x: 0, y: 0});
+      clock.tick(100);
+      expect(map.info.pan).toBe(2);
+      expect(map.info.panArgs).toEqual({x: 0, y: 0});
 
-          interactor.simulateEvent(
-            'mouseup',
-            {
-              map: {x: 25, y: 25},
-              button: 'left'
-            }
-          );
-
-          done();
-        }, 100);
-      }, 50);
-
-      // the first event is syncronous all others will be async
-      expect(map.info.pan).toBe(1);
-      expect(map.info.panArgs).toEqual({x: 5, y: 5});
+      interactor.simulateEvent(
+        'mouseup',
+        {
+          map: {x: 25, y: 25},
+          button: 'left'
+        }
+      );
     });
-    it('zoom', function (done) {
+    it('zoom', function () {
       var map = mockedMap('#mapNode1'),
           interactor = geo.mapInteractor({
             map: map,
@@ -941,6 +948,11 @@ describe('mapInteractor', function () {
           wheelMode: 0
         }
       );
+
+      clock.tick(100);
+      expect(map.info.zoom).toBe(1);
+      expect(map.info.zoomArgs).toBe(2 + 10 / zoomFactor);
+
       interactor.simulateEvent(
         'wheel',
         {
@@ -949,33 +961,25 @@ describe('mapInteractor', function () {
         }
       );
 
-      window.setTimeout(function () {
-        interactor.simulateEvent(
-          'wheel',
-          {
-            wheelDelta: {x: 20, y: -10},
-            wheelMode: 0
-          }
-        );
-        interactor.simulateEvent(
-          'wheel',
-          {
-            wheelDelta: {x: 20, y: -10},
-            wheelMode: 0
-          }
-        );
+      clock.tick(50);
+      interactor.simulateEvent(
+        'wheel',
+        {
+          wheelDelta: {x: 20, y: -10},
+          wheelMode: 0
+        }
+      );
+      interactor.simulateEvent(
+        'wheel',
+        {
+          wheelDelta: {x: 20, y: -10},
+          wheelMode: 0
+        }
+      );
 
-        window.setTimeout(function () {
-          expect(map.info.zoom).toBe(2);
-          expect(map.info.zoomArgs).toBe(2 + 30 / zoomFactor);
-
-          done();
-        }, 100);
-      }, 50);
-
-      // the first event is syncronous all others will be async
-      expect(map.info.zoom).toBe(1);
-      expect(map.info.zoomArgs).toBe(2 + 10 / zoomFactor);
+      clock.tick(100);
+      expect(map.info.zoom).toBe(2);
+      expect(map.info.zoomArgs).toBe(2 + 30 / zoomFactor);
     });
   });
 

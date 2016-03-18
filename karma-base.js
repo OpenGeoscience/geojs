@@ -24,7 +24,7 @@ module.exports = {
     'tests/all.js': ['webpack', 'sourcemap']
   },
   frameworks: [
-    'jasmine'
+    'jasmine', 'sinon'
   ],
   webpack: {
     cache: true,

@@ -52,9 +52,9 @@
     "karma-jasmine": "^0.3.8",
     "karma-jasmine-html-reporter": "^0.2.0",
     "karma-phantomjs-launcher": "^1.0.0",
+    "karma-sinon": "^1.0.4",
     "karma-sourcemap-loader": "^0.3.7",
     "karma-webpack": "^1.7.0",
-    "phantomjs-polyfill": "0.0.2",
     "phantomjs-prebuilt": "^2.1.5",
     "webpack": "^1.12.14",
     "xmlbuilder": "^5.0.1"
