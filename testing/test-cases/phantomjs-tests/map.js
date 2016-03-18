@@ -295,9 +295,11 @@ describe('geo.core.map', function () {
 
     it('exit', function () {
       var m = create_map();
+      m.updateAttribution('Sample');
       expect(count_events(m.node(), 'geo')).toBeGreaterThan(0);
       m.exit();
       expect(count_events(m.node(), 'geo')).toBe(0);
+      expect($('#map').children().length).toBe(0);
     });
     it('pan, clampBoundsX, and clampBoundsY', function () {
       var m = create_map({

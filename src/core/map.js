@@ -859,7 +859,6 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.exit = function () {
-    m_this.node().find('.geo-attribution').remove();
     var i, layers = m_this.children();
     for (i = 0; i < layers.length; i += 1) {
       layers[i]._exit();
@@ -869,6 +868,8 @@ geo.map = function (arg) {
       m_this.interactor(null);
     }
     m_this.node().off('.geo');
+    /* make sure the map node has nothing left in it */
+    m_this.node().empty();
     $(window).off('resize', resizeSelf);
     s_exit();
   };
