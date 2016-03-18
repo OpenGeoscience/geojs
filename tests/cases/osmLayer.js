@@ -8,6 +8,7 @@ describe('geo.core.osmLayer', function () {
   // var submitNote = require('../test-utils').submitNote;
   // var logCanvas2D = require('../test-utils').logCanvas2D;
   var mockVGLRenderer = require('../test-utils').mockVGLRenderer;
+  var restoreVGLRenderer = require('../test-utils').restoreVGLRenderer;
   var closeToEqual = require('../test-utils').closeToEqual;
 
   function create_map(opts) {
@@ -103,7 +104,11 @@ describe('geo.core.osmLayer', function () {
     });
   }
 
-  describe('default osmLayer', function () {
+  xdescribe('default osmLayer', function () {
+
+    beforeEach(mockVGLRenderer);
+    afterEach(restoreVGLRenderer);
+
     describe('html', function () {
       var map, layer;
       it('creation', function () {
@@ -160,16 +165,14 @@ describe('geo.core.osmLayer', function () {
     });
     describe('vgl', function () {
       it('creation', function () {
-        mockVGLRenderer();
         var map = create_map();
         map.createLayer('osm', {renderer: 'vgl', url: '/data/white.jpg'});
         expect(map.node().find('.webgl-canvas').length).toBe(1);
       });
     });
-    xdescribe('switch renderer', function () {
+    describe('switch renderer', function () {
       var map, layer;
       it('vgl to null', function () {
-        mockVGLRenderer();
         map = create_map();
         layer = map.createLayer('osm', {renderer: 'vgl', url: '/data/white.jpg'});
         expect(map.node().find('.webgl-canvas').length).toBe(1);
@@ -292,7 +295,6 @@ describe('geo.core.osmLayer', function () {
     var map, layer, mapinfo = {};
 
     it('test that tiles are created', function () {
-      mockVGLRenderer();
       map = create_map();
       mapinfo.map = map;
       layer = map.createLayer('osm', {

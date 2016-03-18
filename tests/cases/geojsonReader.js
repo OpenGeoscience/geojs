@@ -17,7 +17,7 @@ describe('geojsonReader', function () {
 
   it('Setup map', function () {
     map = geo.map({node: '#map-geojson-reader', center: [0, 0], zoom: 3});
-    layer = map.createLayer('feature');
+    layer = map.createLayer('feature', {renderer: 'd3'});
 
     obj = {
       'features': [

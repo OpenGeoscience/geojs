@@ -6,6 +6,7 @@ describe('Contour Feature', function () {
 
   var map, layer;
   var mockVGLRenderer = require('../test-utils').mockVGLRenderer;
+  var restoreVGLRenderer = require('../test-utils').restoreVGLRenderer;
 
   beforeEach(function () {
     $('<div id="map-contour-wrap"/>').appendTo('body')
@@ -23,6 +24,7 @@ describe('Contour Feature', function () {
   afterEach(function () {
     map.exit();
     $('#map-contour-wrap').remove();
+    restoreVGLRenderer();
   });
 
   it('Create a contour', function () {

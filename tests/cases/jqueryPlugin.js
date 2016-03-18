@@ -5,6 +5,7 @@ xdescribe('plugin.jquery-plugin', function () {
 
   var $ = require('jquery');
   var mockVGLRenderer = require('../test-utils').mockVGLRenderer;
+  var restoreVGLRenderer = require('../test-utils').restoreVGLRenderer;
   var geo = require('../test-utils').geo;
 
   function create_map() {
@@ -65,9 +66,11 @@ xdescribe('plugin.jquery-plugin', function () {
     });
   }
 
+  beforeEach(mockVGLRenderer);
+  afterEach(restoreVGLRenderer);
+
   describe('without jquery-ui', function () {
     it('geojsMap', function () {
-      mockVGLRenderer();
       expect(function () { create_map(); }).toThrow(new Error(
         'The geojs jquery plugin requires jquery ui to be available.'
       ));
@@ -78,7 +81,6 @@ xdescribe('plugin.jquery-plugin', function () {
     beforeEach(function (done) {
       $.getScript(['/examples/common/js/jquery-ui.min.js'], function () {
         $(geo.jqueryPlugin.reload);
-        mockVGLRenderer();
         done();
       });
     });

@@ -1,8 +1,14 @@
 /* These are functions we want available to jasmine tests. */
 /* exported waitForIt, mockVGLRenderer, closeToArray, closeToEqual, logCanvas2D, submitNote */
 
+var vgl = require('vgl');
+var _renderWindow = vgl.renderWindow;
+
 var $ = require('jquery');
+
 var geo = require('../src');
+var _supported = geo.gl.vglRenderer.supported;
+
 module.exports = {};
 
 /**
@@ -90,13 +96,22 @@ module.exports.closeToEqual = function closeToEqual(o1, o2, precision) {
 
 /**
  * Replace vgl.renderer with a mocked version for phantom tests.
+ * Returns a function that, when called, will restore vgl to its
+ * default state.
+ *
+ * @param {boolean} [supported=true] If false, then the vgl renderer
+ * will indicate that this is an unsupported browser environement.
  */
-module.exports.mockVGLRenderer = function mockVGLRenderer() {
+module.exports.mockVGLRenderer = function mockVGLRenderer(supported) {
   'use strict';
   var vgl = require('vgl');
 
+  if (supported === undefined) {
+    supported = true;
+  }
+
   if (vgl._mocked) {
-    return;
+    throw new Error('VGL renderer already mocked');
   }
 
   var mockCounts = {};
@@ -213,13 +228,23 @@ module.exports.mockVGLRenderer = function mockVGLRenderer() {
     return m_renderWindow;
   };
   geo.gl.vglRenderer.supported = function () {
-    return true;
+    return !!supported;
   };
 
   vgl._mocked = true;
   vgl.mockCounts = function () {
     return mockCounts;
   };
+};
+
+/**
+ * Restore the vgl renderer to a pristine state.
+ */
+module.exports.restoreVGLRenderer = function () {
+  vgl.renderWidow = _renderWindow;
+  geo.gl.vglRenderer.supported = _supported;
+  delete vgl._mocked;
+  delete vgl.mockCounts;
 };
 
 /**

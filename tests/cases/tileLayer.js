@@ -5,7 +5,6 @@ describe('geo.tileLayer', function () {
 
   var $ = require('jquery');
   var geo = require('../test-utils').geo;
-  var mockVGLRenderer = require('../test-utils').mockVGLRenderer;
   var closeToEqual = require('../test-utils').closeToEqual;
 
   // create a map-like object suitable for testing the tileLayer
@@ -107,7 +106,6 @@ describe('geo.tileLayer', function () {
 
     describe('center: (0, 0)', function () {
       it('origin: (0, 0), zoom level: 0', function () {
-        mockVGLRenderer();
         var l = get_layer({x: 0, y: 0}),
             s = l.map().unitsPerPixel();
         expect(l.tileAtPoint({x: 128 * s, y: 128 * s}, 0)).toEqual({x: 0, y: 0});
