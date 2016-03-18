@@ -859,6 +859,7 @@ geo.map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.exit = function () {
+    m_this.node().find('.geo-attribution').remove();
     var i, layers = m_this.children();
     for (i = 0; i < layers.length; i += 1) {
       layers[i]._exit();
