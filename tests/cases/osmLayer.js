@@ -4,6 +4,8 @@ var $ = require('jquery');
 
 describe('geo.core.osmLayer', function () {
   'use strict';
+
+  var map;
   var waitForIt = require('../test-utils').waitForIt;
   // var submitNote = require('../test-utils').submitNote;
   // var logCanvas2D = require('../test-utils').logCanvas2D;
@@ -12,6 +14,7 @@ describe('geo.core.osmLayer', function () {
   var closeToEqual = require('../test-utils').closeToEqual;
 
   function create_map(opts) {
+    mockVGLRenderer();
     var node = $('<div id="map-osm-layer"/>').css({width: '640px', height: '360px'});
     $('#map-osm-layer').remove();
     /* Prepend because we want the map to be the first item so that its
@@ -22,13 +25,20 @@ describe('geo.core.osmLayer', function () {
     return geo.map(opts);
   }
 
+  function destroy_map() {
+    if (map) {
+      map.exit();
+    }
+    $('#map-osm-layer').remove();
+    restoreVGLRenderer();
+  }
+
   /* Run some performance tests and submit them as a build note.
    *
    * @param mapinfo: an object that includes the map to test.
    * @param notekey: the key to use for the build note.
    */
   function measure_performance(mapinfo, notekey) { // eslint-disable-line no-unused-vars
-    var map;
     describe('measure performance ' + notekey, function () {
       it('measure performance', function (done) {
         map = mapinfo.map;
@@ -104,13 +114,10 @@ describe('geo.core.osmLayer', function () {
     });
   }
 
-  xdescribe('default osmLayer', function () {
-
-    beforeEach(mockVGLRenderer);
-    afterEach(restoreVGLRenderer);
+  describe('default osmLayer', function () {
 
     describe('html', function () {
-      var map, layer;
+      var layer;
       it('creation', function () {
         map = create_map();
         layer = map.createLayer('osm', {renderer: null, url: '/data/white.jpg'});
@@ -133,16 +140,17 @@ describe('geo.core.osmLayer', function () {
       /* The follow is a test of tileLayer as attached to a map.  We don't
        * currently expose the tileLayer class directly to the createLayer
        * function, so some testing is done here */
-      xit('_update', function () {
+      it('_update', function () {
         var transform = layer.canvas().css('transform');
         layer._update();
         expect(layer.canvas().css('transform')).toBe(transform);
         map.zoom(1.5);
         expect(layer.canvas().css('transform')).not.toBe(transform);
       });
+      it('destroy', destroy_map);
     });
     describe('d3', function () {
-      var map, layer, lastlevel;
+      var layer, lastlevel;
       it('creation', function () {
         map = create_map();
         layer = map.createLayer('osm', {renderer: 'd3', url: '/data/white.jpg'});
@@ -162,16 +170,18 @@ describe('geo.core.osmLayer', function () {
         map.zoom(1);
         expect(layer.canvas().attr('lastlevel')).not.toBe(lastlevel);
       });
+      it('destroy', destroy_map);
     });
     describe('vgl', function () {
       it('creation', function () {
-        var map = create_map();
+        map = create_map();
         map.createLayer('osm', {renderer: 'vgl', url: '/data/white.jpg'});
         expect(map.node().find('.webgl-canvas').length).toBe(1);
       });
+      it('destruction', destroy_map);
     });
     describe('switch renderer', function () {
-      var map, layer;
+      var layer;
       it('vgl to null', function () {
         map = create_map();
         layer = map.createLayer('osm', {renderer: 'vgl', url: '/data/white.jpg'});
@@ -208,11 +218,12 @@ describe('geo.core.osmLayer', function () {
         expect(map.node().find('.canvas-canvas').length).toBe(0);
         expect(map.node().find('.webgl-canvas').length).toBe(1);
       });
+      it('destroy', destroy_map);
     });
 
     describe('html and d3 alignment', function () {
       var positions = {};
-      var map, layer;
+      var layer;
       /* A set of angles to test with the number of tiles we expect at each
        * angle.  This could be extended to test many more angles, but phantom
        * does odd things with the offsets, so the test looks like it fails.
@@ -253,14 +264,14 @@ describe('geo.core.osmLayer', function () {
             /* Allow around 1 pixel of difference */
             expect(closeToEqual(offset, positions[ref], -0.4)).toBe(true);
           });
-          map.exit();
         });
+        it('destroy', destroy_map);
       });
     });
   });
 
   describe('geo.canvas.osmLayer', function () {
-    var map, layer, mapinfo = {};
+    var layer, mapinfo = {};
     it('test that tiles are created', function () {
       // logCanvas2D();
       map = create_map();
@@ -289,10 +300,11 @@ describe('geo.core.osmLayer', function () {
      * sense, so disable it until we can figure a better way.
     measure_performance(mapinfo, 'osmLayer-canvas-performance');
      */
+    it('destroy', destroy_map);
   });
 
   describe('geo.gl.osmLayer', function () {
-    var map, layer, mapinfo = {};
+    var layer, mapinfo = {};
 
     it('test that tiles are created', function () {
       map = create_map();
@@ -313,5 +325,6 @@ describe('geo.core.osmLayer', function () {
       return Object.keys(layer.activeTiles).length === 17;
     });
     // measure_performance(mapinfo, 'osmLayer-vgl-performance');
+    it('destroy', destroy_map);
   });
 });
