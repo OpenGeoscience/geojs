@@ -737,7 +737,7 @@ module.exports = (function () {
       // add an error handler
       tile.catch(function () {
         // May want to do something special here later
-        console.warn('Could not load tile at ' + tile.index);
+        console.warn('Could not load tile at ' + tile.toString());
         this._remove(tile);
       }.bind(this));
     };

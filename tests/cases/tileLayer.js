@@ -6,6 +6,23 @@ describe('geo.tileLayer', function () {
   var $ = require('jquery');
   var geo = require('../test-utils').geo;
   var closeToEqual = require('../test-utils').closeToEqual;
+  var _tileLayer = geo.tileLayer;
+
+  /*
+   * Use html rendering for all of these tests.  That is what is occuring
+   * in phantomjs in any case.  This also reduces the console pollution.
+   * Renderer specific tests currently are handled in osmLayer.js.
+   */
+  beforeEach(function () {
+    geo.tileLayer = function (opts) {
+      opts = opts || {};
+      opts.renderer = null;
+      return _tileLayer(opts);
+    };
+  });
+  afterEach(function () {
+    geo.tileLayer = _tileLayer;
+  });
 
   // create a map-like object suitable for testing the tileLayer
   var map = function (o) {
@@ -289,13 +306,12 @@ describe('geo.tileLayer', function () {
   });
 
   describe('toLocal/fromLocal', function () {
-    var opts = {},
-        m = map(opts),
-        l = geo.tileLayer({map: m, renderer: null});
 
     it('Should not depend on map origin', function () {
       function check(p) {
         var p1, p2, q1, q2;
+        var m = map();
+        var l = geo.tileLayer({map: m});
         m.origin({x: 0, y: 0});
         p1 = l.toLocal(p);
         q1 = l.fromLocal(p);
@@ -556,6 +572,12 @@ describe('geo.tileLayer', function () {
       });
     });
     describe('cacheSize', function () {
+      beforeEach(function () {
+        sinon.stub(console, 'log', function () {});
+      });
+      afterEach(function () {
+        console.log.restore();
+      });
       it('auto increase', function () {
         var l = geo.tileLayer({
           cacheSize: 2,
@@ -573,11 +595,13 @@ describe('geo.tileLayer', function () {
         expect(l.cache.size).toBe(5);
         l._getTiles(0, {left: 0, top: 0, right: 512, bottom: 512}, true);
         expect(l.cache.size).toBe(5);
+        expect(console.log.calledOnce).toBe(true);
+        expect(console.log.calledWith('Increasing cache size to 5')).toBe(true);
 
       });
     });
     it('prefetch', function (done) {
-      var l = geo.tileLayer({map: map()}),
+      var l = geo.tileLayer({map: map(), url: function () { return '/data/white.jpg'; }}),
           d1 = new $.Deferred(),
           d2 = new $.Deferred();
 
@@ -1299,19 +1323,29 @@ describe('geo.tileLayer', function () {
         expect(Object.keys(l.activeTiles).length).toBe(0);
       });
 
-      it('invalid tile url', function (done) {
+      it('invalid tile url', function () {
+        var server = sinon.fakeServer.create();
+        var spy = sinon.spy();
+        sinon.stub(console, 'warn', function () {});
+
         var l = layer_html({url: function () { return 'not a valid url'; }}), t;
         t = l._getTileCached({x: 0, y: 0, level: 0});
         t.image = $('<img src="/data/white.jpg"/>').get(0);
         l.drawTile(t);
-        t.catch(function () {
-          expect(l.canvas().find('.geo-tile-container').length).toBe(0);
-          done();
-        });
+        t.catch(spy);
+
+        server.respond();
+        expect(console.warn.calledOnce);
+        expect(spy.calledOnce).toBe(true);
+        expect(l.canvas().find('.geo-tile-container').length).toBe(0);
+        server.restore();
+        console.warn.restore();
       });
     });
 
     describe('purging inactive tiles', function () {
+      var server;
+
       function setup(bds, opts) {
         var l = layer_html($.extend(
             true, {url: function () { return '/data/white.jpg'; }}, opts || {}));
@@ -1325,6 +1359,15 @@ describe('geo.tileLayer', function () {
         };
         return l;
       }
+
+      beforeEach(function () {
+        server = sinon.fakeServer.create({respondImmediately: true});
+        sinon.stub(console, 'warn');
+      });
+      afterEach(function () {
+        console.warn.restore();
+        server.restore();
+      });
       it('noop', function () {
         var l = setup(), active;
         l.drawTile(l._getTile({x: 0, y: 0, level: 0}));

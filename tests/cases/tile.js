@@ -147,7 +147,10 @@ describe('geo.tile', function () {
       });
     });
 
-    it('failure', function (done) {
+    it('failure', function () {
+      // create a mocked sinon server instance that always responds with 404.
+      var server = sinon.fakeServer.create();
+
       var t = geo.tile({
         index: {x: 0, y: 0},
         size: {x: 10, y: 10},
@@ -159,10 +162,11 @@ describe('geo.tile', function () {
         expect('The fetch should not succeed').toBe(null);
       }).catch(function () {
         called = true;
-      }).catch(function () {
-        expect(called).toBe(true);
-        done();
       });
+
+      server.respond();
+      expect(called).toBe(true);
+      server.restore();
     });
   });
 

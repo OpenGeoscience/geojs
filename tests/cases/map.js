@@ -542,8 +542,16 @@ describe('geo.core.map', function () {
       $('body').append(node);
       var m = geo.map.create({node: node, layers: [layerSpec]});
       expect(m.layers().length).toBe(1);
-      expect(geo.map.create({})).toBe(null);
+
+      m.exit();
       node.remove();
+
+      var warn = sinon.stub(console, 'warn', function () {});
+      expect(geo.map.create({})).toBe(null);
+      expect(warn.calledTwice).toBe(true);
+      expect(warn.calledWith('map creation requires a node')).toBe(true);
+      expect(warn.calledWith('Could not create map.')).toBe(true);
+      console.warn.restore();
     });
   });
 
