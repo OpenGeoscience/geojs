@@ -32,16 +32,29 @@ describe('renderers', function () {
   }
 
   describe('basic functions', function () {
+    beforeEach(function () {
+      sinon.stub(console, 'warn', function () {});
+    });
+    afterEach(function () {
+      console.warn.restore();
+    });
     it('geo.createRenderer', function () {
       create_simple_renderer();
       expect(geo.util.createRenderer('simple')).not.toBe(null);
       expect(geo.util.createRenderer('unknown')).toBe(null);
     });
-    xit('geo.checkRenderer', function () {
+    it('geo.checkRenderer', function () {
       expect(geo.util.checkRenderer('simple')).toBe('simple');
       expect(geo.util.checkRenderer('simple', true)).toBe('simple');
+
       supported = false;
       expect(geo.util.checkRenderer('simple')).toBe('d3');
+      expect(console.warn.calledOnce).toBe(true);
+      expect(console.warn.calledWith(
+        'simple renderer is unavailable, using d3 renderer instead'
+      )).toBe(true);
+      console.warn.reset();
+
       expect(geo.util.checkRenderer('simple', true)).toBe(false);
       fallback = 'unknown';
       expect(geo.util.checkRenderer('simple')).toBe(false);
@@ -52,19 +65,21 @@ describe('renderers', function () {
 
       expect(geo.util.checkRenderer('d3')).toBe('d3');
 
-      var oldd3 = window.d3;
-      window.d3 = undefined;
+      sinon.stub(geo.d3.renderer, 'supported').returns(false);
       expect(geo.util.checkRenderer('d3')).toBe(null);
-      window.d3 = oldd3;
+      geo.d3.renderer.supported.restore();
+
       expect(geo.util.checkRenderer('d3')).toBe('d3');
 
+      mockVGLRenderer(false);
       expect(geo.util.checkRenderer('vgl')).toBe(null);
+      restoreVGLRenderer();
 
       mockVGLRenderer();
       expect(geo.util.checkRenderer('vgl')).toBe('vgl');
+      restoreVGLRenderer();
 
       expect(geo.util.checkRenderer('unknown')).toBe(false);
-      restoreVGLRenderer();
     });
   });
 });
