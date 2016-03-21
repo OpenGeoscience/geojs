@@ -6,16 +6,10 @@ include(CTest)
 enable_testing()
 
 set(BUILD_TESTING ON CACHE BOOL "Enable geojs testing")
-set(BUILD_DOCUMENTATION OFF CACHE BOOL "Build documentation")
-
-# set up targets for node programs
-set(NODE_MODULES_PATH "${CMAKE_CURRENT_SOURCE_DIR}/node_modules")
-set(GRUNT_EXECUTABLE "${NODE_MODULES_PATH}/.bin/grunt")
-
+set(PHANTOMJS_TESTS ON CACHE BOOL "Generate phantomjs unit tests.")
 set(ESLINT_TESTS ON CACHE BOOL "Generate eslint style tests for JS source files.")
 set(SELENIUM_TESTS OFF CACHE BOOL "Generate selenium unit tests.")
 
-find_package(PythonInterp REQUIRED)
 site_name(HOSTNAME)
 
 set(TESTING_HOST "${HOSTNAME}" CACHE STRING "The host to connect to for unit tests")
@@ -63,22 +57,34 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/selenium-test-ut
 )
 
 # Generate notes to send along with the test reports
-find_program(CURL_EXECUTABLE curl)
 add_test(
   NAME "notes-reset"
   WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-  COMMAND "./tests/notes.js" "reset" "${CMAKE_CURRENT_BINARY_DIR}" "${NOTES_PATH}"
+  COMMAND "./tests/notes.js" "reset" "${CMAKE_CURRENT_BINARY_DIR}/notes" "${NOTES_PATH}"
 )
 
 add_test(
   NAME "notes-report"
   WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-  COMMAND "./tests/notes.js" "combine" "${CMAKE_CURRENT_BINARY_DIR}" "${NOTES_PATH}"
+  COMMAND "./tests/notes.js" "combine" "${CMAKE_CURRENT_BINARY_DIR}/notes" "${NOTES_PATH}"
 )
 set_property(TEST "notes-report" APPEND PROPERTY DEPENDS "notes-reset")
 
+if(PHANTOMJS_TESTS)
+  find_program(NPM_EXECUTABLE npm)
+  add_test(
+    NAME "phantomjs"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    COMMAND npm run ci
+  )
+  set_property(TEST "phantomjs" APPEND PROPERTY ENVIRONMENT "CTEST_NOTES_PATH=${CMAKE_CURRENT_BINARY_DIR}")
+  set_property(TEST "phantomjs" APPEND PROPERTY DEPENDS "notes-reset")
+  set_property(TEST "notes-report" APPEND PROPERTY DEPENDS "phantomjs")
+endif()
+
 if(SELENIUM_TESTS)
 
+  find_package(PythonInterp REQUIRED)
   set(FIREFOX_TESTS ON CACHE BOOL "Turn on Firefox selenium tests.")
   set(CHROME_TESTS OFF CACHE BOOL "Turn on Chrome selenium tests.")
   set(DATA_REPO_PATH "" CACHE PATH "Local path to the geojs data repository (optional).")
@@ -173,35 +179,3 @@ if(${ESLINT_TESTS})
   )
 
 endif() # ESLINT_TESTS
-
-if(BUILD_DOCUMENTATION)
-  find_program(SPHINX_EXECUTABLE sphinx-build)
-  if("${SPHINX_EXECUTABLE}" STREQUAL "SPHINX_EXECUTABLE-NOTFOUND")
-    message(FATAL_ERROR "Could not find sphinx-build for BUILD_DOCUMENTATION")
-  endif()
-
-  set(docs_sources
-    "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/geojs_test_runner.py.in"
-    "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/midas_handler.py"
-    "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/selenium_test.py.in"
-    "${CMAKE_CURRENT_SOURCE_DIR}/testing/test-runners/upload_test_cases.py"
-    "${CMAKE_CURRENT_SOURCE_DIR}/docs/conf.py"
-    "${CMAKE_CURRENT_SOURCE_DIR}/docs/index.rst"
-    "${CMAKE_CURRENT_SOURCE_DIR}/docs/quickstart.rst"
-    "${CMAKE_CURRENT_SOURCE_DIR}/docs/testingutils.rst"
-  )
-
-
-  add_custom_command(
-    OUTPUT "${GEOJS_DEPLOY_DIR}/docs/index.html"
-    DEPENDS ${docs_sources}
-    COMMAND "${CMAKE_COMMAND}" -E make_directory "${GEOJS_DEPLOY_DIR}/docs"
-    COMMAND "${SPHINX_EXECUTABLE}" -c "${CMAKE_CURRENT_SOURCE_DIR}/docs" -b html "${CMAKE_CURRENT_SOURCE_DIR}/docs" "${GEOJS_DEPLOY_DIR}/docs"
-    COMMENT "Building documentation"
-  )
-  add_custom_target(
-    docs
-    ALL
-    DEPENDS "${GEOJS_DEPLOY_DIR}/docs/index.html"
-  )
-endif()

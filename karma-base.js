@@ -26,7 +26,7 @@ var notes_middleware = function (config) {
       if (request.method === 'PUT') {
         body = request.read() || '';
         key = query.key || 'default';
-        body = body.toString();
+        body = body.toString() || '{}';
         notes[key] = JSON.parse(body);
         fs.writeFile(path.resolve(notes_path, key) + '.json', body);
         response.writeHead(200);

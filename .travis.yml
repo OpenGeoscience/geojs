@@ -6,13 +6,19 @@ node_js:
 cache:
     directories:
         - node_modules
+        - $HOME/cache
+
+before_install:
+    - CACHE="${HOME}/cache" CMAKE_VERSION=3.5.0 CMAKE_SHORT_VERSION=3.5 source ./scripts/install_cmake.sh
+    - npm prune
+    - npm install
 
 script:
-    - npm prune
     - npm run build
     - ./node_modules/.bin/grunt docs
     - ./node_modules/.bin/grunt copy:jqueryui
-    - npm run ci
+    - mkdir _build
+    - ctest -S cmake/travis_build.cmake -VV
 
 after_success:
   - npm run codecov
