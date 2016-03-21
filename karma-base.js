@@ -3,6 +3,7 @@ var url = require('url');
 var fs = require('fs');
 var path = require('path');
 var notes_path = process.env.CTEST_NOTES_PATH || path.resolve('notes');
+var test_case = process.env.GEOJS_TEST_CASE || 'tests/all.js';
 
 // Create the notes directory, if it doesn't exist.
 if (!fs.existsSync(notes_path)) {
@@ -50,7 +51,7 @@ var notes_middleware = function (config) {
 module.exports = {
   autoWatch: false,
   files: [
-    'tests/all.js',
+    test_case,
     {pattern: 'tests/data/**/*', included: false},
     {pattern: 'tests/cases/**/*.js', included: false, served: false, watched: true}
   ],
@@ -71,9 +72,7 @@ module.exports = {
     {'middleware:notes': ['factory', notes_middleware]},
     'karma-*'
   ],
-  preprocessors: {
-    'tests/all.js': ['webpack', 'sourcemap']
-  },
+  preprocessors: {},
   frameworks: [
     'jasmine', 'sinon'
   ],
@@ -87,3 +86,5 @@ module.exports = {
     plugins: webpack_config.exposed_plugins
   }
 };
+
+module.exports.preprocessors[test_case] = ['webpack', 'sourcemap'];
