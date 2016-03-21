@@ -4,6 +4,7 @@ var fs = require('fs');
 var path = require('path');
 var notes_path = process.env.CTEST_NOTES_PATH || path.resolve('notes');
 var test_case = process.env.GEOJS_TEST_CASE || 'tests/all.js';
+var getRawBody = require('raw-body');
 
 // Create the notes directory, if it doesn't exist.
 if (!fs.existsSync(notes_path)) {
@@ -20,19 +21,21 @@ var notes_middleware = function (config) {
   return function (request, response, next) {
     var parsed = url.parse(request.url, true);
     var query = (parsed.query || {});
-    var body, key;
-
+    var key = query.key || 'default';
     if (parsed.pathname === '/notes') {
       if (request.method === 'PUT') {
-        body = request.read() || '';
-        key = query.key || 'default';
-        body = body.toString() || '{}';
-        notes[key] = JSON.parse(body);
-        fs.writeFile(path.resolve(notes_path, key) + '.json', body);
-        response.writeHead(200);
-        return response.end('{}');
+        return getRawBody(request, {encoding: 'utf-8'}).then(function (body) {
+          body = body.toString() || '{}';
+          notes[key] = JSON.parse(body);
+          fs.writeFileSync(path.resolve(notes_path, key) + '.json', body);
+          response.writeHead(200);
+          return response.end('{}');
+        }).catch(function (err) {
+          response.writeHead(500);
+          response.end(err.message);
+        });
       } else if (request.method === 'POST' && query.length) {
-        fs.writeFile(query.path || 'notes.txt', JSON.stringify(notes));
+        fs.writeFileSync(query.path || 'notes.txt', JSON.stringify(notes));
         response.writeHead(200);
         return response.end('{}');
       } else if (request.method === 'DELETE') {

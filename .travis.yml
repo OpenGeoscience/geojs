@@ -11,14 +11,14 @@ cache:
 before_install:
     - CACHE="${HOME}/cache" CMAKE_VERSION=3.5.0 CMAKE_SHORT_VERSION=3.5 source ./scripts/install_cmake.sh
     - npm prune
-    - npm install
 
 script:
     - npm run build
     - ./node_modules/.bin/grunt docs
     - ./node_modules/.bin/grunt copy:jqueryui
     - mkdir _build
-    - ctest -S cmake/travis_build.cmake -VV
+    - ctest -S cmake/travis_build.cmake -VV || true
+    - if [ -f test_failed ] ; then false ; fi
 
 after_success:
   - npm run codecov

@@ -285,7 +285,7 @@ module.exports.logCanvas2D = function logCanvas2D(enable) {
  * @param note: the data to send.  This will be converted to JSON.
  */
 module.exports.submitNote = function submitNote(key, note) {
-  $.ajax({
+  return $.ajax({
     url: '/notes?key=' + encodeURIComponent(key),
     data: JSON.stringify(note),
     method: 'PUT',

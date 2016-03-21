@@ -77,7 +77,7 @@ if(PHANTOMJS_TESTS)
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     COMMAND npm run ci
   )
-  set_property(TEST "phantomjs" APPEND PROPERTY ENVIRONMENT "CTEST_NOTES_PATH=${CMAKE_CURRENT_BINARY_DIR}")
+  set_property(TEST "phantomjs" APPEND PROPERTY ENVIRONMENT "CTEST_NOTES_PATH=${CMAKE_CURRENT_BINARY_DIR}/notes")
   set_property(TEST "phantomjs" APPEND PROPERTY DEPENDS "notes-reset")
   set_property(TEST "notes-report" APPEND PROPERTY DEPENDS "phantomjs")
 endif()

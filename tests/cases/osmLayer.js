@@ -103,13 +103,15 @@ describe('geo.core.osmLayer', function () {
           done: done
         });
       });
-      it('report findings', function () {
+      it('report findings', function (done) {
         var timings = geo.util.timeReport('requestAnimationFrame');
         expect(timings.count).toBeGreaterThan(100);
         timings = $.extend({}, timings);
         delete timings.recentsub;
-        submitNote(notekey, timings);
-        geo.util.timeRequestAnimationFrame(true);
+        submitNote(notekey, timings).then(function () {
+          geo.util.timeRequestAnimationFrame(true);
+          done();
+        });
       });
     });
   }
