@@ -7,7 +7,7 @@ describe('geo.core.osmLayer', function () {
 
   var map;
   var waitForIt = require('../test-utils').waitForIt;
-  // var submitNote = require('../test-utils').submitNote;
+  var submitNote = require('../test-utils').submitNote;
   // var logCanvas2D = require('../test-utils').logCanvas2D;
   var mockVGLRenderer = require('../test-utils').mockVGLRenderer;
   var restoreVGLRenderer = require('../test-utils').restoreVGLRenderer;
@@ -108,7 +108,7 @@ describe('geo.core.osmLayer', function () {
         expect(timings.count).toBeGreaterThan(100);
         timings = $.extend({}, timings);
         delete timings.recentsub;
-        // submitNote(notekey, timings);
+        submitNote(notekey, timings);
         geo.util.timeRequestAnimationFrame(true);
       });
     });
@@ -324,7 +324,7 @@ describe('geo.core.osmLayer', function () {
     waitForIt('tiles to load', function () {
       return Object.keys(layer.activeTiles).length === 17;
     });
-    // measure_performance(mapinfo, 'osmLayer-vgl-performance');
+    measure_performance(mapinfo, 'osmLayer-vgl-performance');
     it('destroy', destroy_map);
   });
 });

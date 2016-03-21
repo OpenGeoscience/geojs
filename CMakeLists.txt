@@ -67,14 +67,13 @@ find_program(CURL_EXECUTABLE curl)
 add_test(
   NAME "notes-reset"
   WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-  COMMAND "${CURL_EXECUTABLE}" -X DELETE "http://${TESTING_HOST}:${TESTING_PORT}/notes"
+  COMMAND "./tests/notes.js" "reset" "${CMAKE_CURRENT_BINARY_DIR}" "${NOTES_PATH}"
 )
 
 add_test(
   NAME "notes-report"
   WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-  COMMAND "${CURL_EXECUTABLE}" -X POST "http://${TESTING_HOST}:${TESTING_PORT}/notes"
-    --data "path=${NOTES_PATH}" -G
+  COMMAND "./tests/notes.js" "combine" "${CMAKE_CURRENT_BINARY_DIR}" "${NOTES_PATH}"
 )
 set_property(TEST "notes-report" APPEND PROPERTY DEPENDS "notes-reset")
 
