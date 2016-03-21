@@ -57,6 +57,7 @@
     "karma-webpack": "^1.7.0",
     "phantomjs-prebuilt": "^2.1.5",
     "raw-body": "^2.1.6",
+    "sinon": "^1.17.3",
     "webpack": "^1.12.14",
     "xmlbuilder": "^5.0.1"
   },
