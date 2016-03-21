@@ -868,6 +868,8 @@ geo.map = function (arg) {
       m_this.interactor(null);
     }
     m_this.node().off('.geo');
+    /* make sure the map node has nothing left in it */
+    m_this.node().empty();
     $(window).off('resize', resizeSelf);
     s_exit();
   };
