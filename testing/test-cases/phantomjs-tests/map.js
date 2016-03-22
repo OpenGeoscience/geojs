@@ -1,6 +1,8 @@
 // Test geo.core.map
 
-/*global describe, it, expect, geo, closeToEqual*/
+/* global describe, it, expect, geo, closeToEqual, mockAnimationFrame,
+   unmockAnimationFrame, stepAnimationFrame */
+
 describe('geo.core.map', function () {
   'use strict';
 
@@ -232,47 +234,6 @@ describe('geo.core.map', function () {
   });
 
   describe('Public utility methods', function () {
-    var animFrameCallbacks = [], animFrameIndex = 0;
-
-    /* Replace window.requestAnimationFrame with this function, then call
-     * stepAnimationFrame with a delta from when this was supposed to start to
-     * test asynchronous animations.
-     *
-     * @param {function} callback the function to call on an animation frame
-     *                            interval.
-     */
-    function mockRequestAnimationFrame(callback) {
-      animFrameIndex += 1;
-      var id = animFrameIndex;
-      animFrameCallbacks.push({id: id, callback: callback});
-    }
-
-    /* Replace window.cancelAnimationFrame with this function.
-     *
-     * @param {number} id id of the callback to cancel.
-     */
-    function mockCancelAnimationFrame(id) {
-      for (var i = 0; i < animFrameCallbacks.length; i += 1) {
-        if (animFrameCallbacks[i].id === id) {
-          animFrameCallbacks.splice(i, 1);
-          return;
-        }
-      }
-    }
-
-    /* Call all animation frame functions that have been captured.
-     *
-     * @param {float} time float milliseconds.
-     */
-    function stepAnimationFrame(time) {
-      var callbacks = animFrameCallbacks, action;
-      animFrameCallbacks = [];
-      while (callbacks.length > 0) {
-        action = callbacks.shift();
-        action.callback.call(window, time);
-      }
-    }
-
     /* Count the number of jquery events bounds to an element using a
      * particular namespace.
      *
@@ -373,9 +334,10 @@ describe('geo.core.map', function () {
         left: -250, top: -250, right: 250, bottom: 250});
       expect(zc.zoom).toBeCloseTo(4);
       expect(closeToEqual(zc.center, {x: 0, y: 0})).toBe(true);
-      expect(function () { m.zoomAndCenterFromBounds({
-        left: -250, top: 250, right: 250, bottom: -250}); }).toThrow(
-        new Error('Invalid bounds provided'));
+      expect(function () {
+        m.zoomAndCenterFromBounds({
+          left: -250, top: 250, right: 250, bottom: -250});
+      }).toThrow(new Error('Invalid bounds provided'));
       zc = m.zoomAndCenterFromBounds({
         left: 0, top: -500, right: 10, bottom: 500});
       expect(zc.zoom).toBeCloseTo(3);
@@ -395,10 +357,7 @@ describe('geo.core.map', function () {
     });
     it('transition', function () {
       var m = create_map(), start, wasCalled;
-      var origRequestAnimationFrame = window.requestAnimationFrame,
-          origCancelAnimationFrame = window.cancelAnimationFrame;
-      window.requestAnimationFrame = mockRequestAnimationFrame;
-      window.cancelAnimationFrame = mockCancelAnimationFrame;
+      mockAnimationFrame();
       expect(m.transition()).toBe(null);
       start = new Date().getTime();
       m.transition({
@@ -511,8 +470,29 @@ describe('geo.core.map', function () {
       stepAnimationFrame(start + 1000);
       expect(m.center().x).toBeCloseTo(0);
       expect(m.center().y).toBeCloseTo(0);
-      window.requestAnimationFrame = origRequestAnimationFrame;
-      window.cancelAnimationFrame = origCancelAnimationFrame;
+      // test cancel
+      start = new Date().getTime();
+      wasCalled = undefined;
+      m.transition({
+        center: {x: 10, y: 0},
+        duration: 1000,
+        done: function () {
+          wasCalled = true;
+        }
+      });
+      expect(m.transition().start.time).toBe(undefined);
+      stepAnimationFrame(start);
+      expect(m.transition().start.time).toBe(start);
+      expect(m.transition().time).toBe(0);
+      expect(m.transitionCancel()).toBe(true);
+      expect(m.transition()).not.toBe(null);
+      expect(m.transition().cancel).toBe(true);
+      expect(m.transitionCancel()).toBe(false);
+      expect(wasCalled).toBe(undefined);
+      stepAnimationFrame(start + 500);
+      expect(m.transition()).toBe(null);
+      expect(wasCalled).toBe(true);
+      unmockAnimationFrame();
     });
   });
 

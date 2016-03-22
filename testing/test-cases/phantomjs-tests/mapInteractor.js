@@ -1,4 +1,6 @@
-/* global describe, it, beforeEach, afterEach, expect, $, geo */
+/* global describe, it, beforeEach, afterEach, expect, $, geo,
+   mockAnimationFrame, unmockAnimationFrame, stepAnimationFrame,
+   mockDate, unmockDate */
 
 describe('mapInteractor', function () {
   'use strict';
@@ -35,11 +37,23 @@ describe('mapInteractor', function () {
       rotation: 0,
       rotationArgs: {},
       panArgs: {},
-      zoomArgs: {}
+      zoomArgs: {},
+      center: $.extend({}, {x: 0, y: 0})
     };
 
     map.node = function () { return $(node); };
-    base.displayToGcs = function (x) { return x; };
+    base.displayToGcs = function (val) {
+      return {
+        x: val.x - info.center.x - $(node).width() / 2,
+        y: val.y - info.center.y - $(node).height() / 2
+      };
+    };
+    base.gcsToDisplay = function (val) {
+      return {
+        x: val.x + info.center.x + $(node).width() / 2,
+        y: val.y + info.center.y + $(node).height() / 2
+      };
+    };
     map.baseLayer = function () { return base; };
     map.zoom = function (arg) {
       if (arg === undefined) {
@@ -60,16 +74,35 @@ describe('mapInteractor', function () {
     map.pan = function (arg) {
       info.pan += 1;
       info.panArgs = arg;
+      info.center.x += info.panArgs.x || 0;
+      info.center.y += info.panArgs.y || 0;
     };
     map.center = function () {
-      return {x: 0, y: 0};
+      return {x: info.center.x, y: info.center.y};
     };
     map.size = function () {
       return {width: 100, height: 100};
     };
+    map.transition = function (arg) {
+      if (arg === undefined) {
+        return map.inTransition;
+      }
+      map.inTransition = arg;
+    };
+    map.transitionCancel = function () {
+      if (map.inTransition) {
+        map.inTransition = null;
+        info.cancelCount = (info.cancelCount || 0) + 1;
+        return true;
+      }
+      return false;
+    };
+    map.maxBounds = function () {
+      return {left: -200, top: 200, right: 200, bottom: -200};
+    };
     map.displayToGcs = base.displayToGcs;
+    map.gcsToDisplay = base.gcsToDisplay;
     map.info = info;
-    map.transition = function () {};
     return map;
   }
 
@@ -216,6 +249,9 @@ describe('mapInteractor', function () {
         map: {x: 20, y: 20}
       }
     );
+    // mark that we are in a transition and make sure we called
+    // transitionCancel
+    map.inTransition = true;
 
     // trigger a zoom
     interactor.simulateEvent(
@@ -229,6 +265,7 @@ describe('mapInteractor', function () {
     // check the zoom event was called
     expect(map.info.zoom).toBe(1);
     expect(map.info.zoomArgs).toBe(2 + 10 / zoomFactor);
+    expect(map.info.cancelCount).toBe(1);
   });
 
   it('Test zoom right click event propagation', function () {
@@ -879,5 +916,80 @@ describe('mapInteractor', function () {
       expect(map.info.zoom).toBe(1);
       expect(map.info.zoomArgs).toBe(2 + 10 / zoomFactor);
     });
+  });
+  it('Test momentum', function () {
+    var map = mockedMap('#mapNode1'), start;
+
+    var interactor = geo.mapInteractor({
+      map: map,
+      momentum: {enabled: true},
+      panMoveButton: 'left',
+      panWheelEnabled: false,
+      throttle: false
+    });
+    mockAnimationFrame();
+    mockDate();
+    // initiate a pan and release
+    interactor.simulateEvent(
+      'mousedown', {map: {x: 0, y: 0}, button: 'left'});
+    interactor.simulateEvent(
+      'mousemove', {map: {x: 10, y: 0}, button: 'left'});
+    // check the pan event was called
+    expect(map.info.pan).toBe(1);
+    expect(map.info.panArgs.x).toBe(10);
+    expect(map.info.panArgs.y).toBe(0);
+    interactor.simulateEvent(
+      'mouseup', {map: {x: 10.25, y: 0}, button: 'left'});
+    start = new Date().getTime();
+    stepAnimationFrame(start);
+    expect(map.info.pan).toBe(2);
+    expect(map.info.panArgs.x).toBeGreaterThan(0.25);
+    expect(map.info.panArgs.y).toBe(0);
+    stepAnimationFrame(start + 0.25);
+    expect(map.info.pan).toBe(3);
+    expect(map.info.panArgs.x).toBeGreaterThan(0);
+    expect(map.info.panArgs.y).toBe(0);
+    unmockDate();
+    unmockAnimationFrame();
+  });
+  it('Test springback', function () {
+    $('#mapNode1').css({width: '400px', height: '400px'});
+    var map = mockedMap('#mapNode1'), start;
+
+    var interactor = geo.mapInteractor({
+      map: map,
+      momentum: {enabled: true},  // you must have momentum to have springback
+      spring: {enabled: true, springConstant: 0.00005},
+      panMoveButton: 'left',
+      panWheelEnabled: false,
+      throttle: false
+    });
+    mockAnimationFrame();
+    mockDate();
+    // pan past the max bounds
+    interactor.simulateEvent(
+      'mousedown', {map: {x: 0, y: 0}, button: 'left'});
+    interactor.simulateEvent(
+      'mousemove', {map: {x: 199, y: 0}, button: 'left'});
+    expect(map.info.pan).toBe(1);
+    expect(map.info.panArgs.x).toBe(199);
+    expect(map.info.panArgs.y).toBe(0);
+    interactor.simulateEvent(
+      'mousemove', {map: {x: 201, y: 0}, button: 'left'});
+    interactor.simulateEvent(
+      'mousemove', {map: {x: 202, y: 0}, button: 'left'});
+    expect(map.info.pan).toBe(3);
+    expect(map.info.panArgs.x).toBeCloseTo(1);
+    interactor.simulateEvent(
+      'mouseup', {map: {x: 200.1, y: 0}, button: 'left'});
+    start = new Date().getTime();
+    stepAnimationFrame(start);
+    expect(map.info.pan).toBe(4);
+    expect(map.info.panArgs.x).toBeLessThan(0);
+    stepAnimationFrame(start + 0.25);
+    expect(map.info.pan).toBe(5);
+    expect(map.info.panArgs.x).toBeLessThan(0);
+    unmockDate();
+    unmockAnimationFrame();
   });
 });

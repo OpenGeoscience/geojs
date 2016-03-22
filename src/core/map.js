@@ -1006,7 +1006,11 @@ geo.map = function (arg) {
     }
 
     if (m_transition) {
-      m_queuedTransition = opts;
+      /* The queued transition needs to combine the current transition's
+       * endpoint, any other queued transition, and the new transition to be
+       * complete. */
+      m_queuedTransition = $.extend(
+        {}, m_transition.end || {}, m_queuedTransition || {}, opts);
       return m_this;
     }
 
@@ -1108,6 +1112,16 @@ geo.map = function (arg) {
 
     function anim(time) {
       var done = m_transition.done, next;
+      if (m_transition.cancel === true) {
+        /* Finish cancelling a transition. */
+        m_transition = null;
+        m_queuedTransition = null;
+        m_this.geoTrigger(geo.event.transitioncancel, opts);
+        if (done) {
+          done();
+        }
+        return;
+      }
       next = m_queuedTransition;
 
       if (!m_transition.start.time) {
@@ -1174,6 +1188,20 @@ geo.map = function (arg) {
       window.requestAnimationFrame(anim);
     }
     return m_this;
+  };
+
+  /**
+   * Cancel any existing transition.  The transition will send a cancel event
+   * at the next animation frame, but no further activity occurs.
+   *
+   * @returns {bool} true if a transition was in progress.
+   */
+  this.transitionCancel = function () {
+    if (m_transition && m_transition.cancel !== true) {
+      m_transition.cancel = true;
+      return true;
+    }
+    return false;
   };
 
   ////////////////////////////////////////////////////////////////////////////
