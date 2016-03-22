@@ -1,6 +1,6 @@
 /* global describe, it, beforeEach, afterEach, expect, $, geo,
    mockAnimationFrame, unmockAnimationFrame, stepAnimationFrame,
-   mockDate, unmockDate */
+   mockDate, unmockDate, advanceDate */
 
 describe('mapInteractor', function () {
   'use strict';
@@ -917,6 +917,16 @@ describe('mapInteractor', function () {
       expect(map.info.zoomArgs).toBe(2 + 10 / zoomFactor);
     });
   });
+
+  describe('Public utility methods', function () {
+    it('options', function () {
+      var interactor = geo.mapInteractor();
+      expect(interactor.options().panMoveButton).toBe('left');
+      interactor.options({panMoveButton: 'middle'});
+      expect(interactor.options().panMoveButton).toBe('middle');
+    });
+  });
+
   it('Test momentum', function () {
     var map = mockedMap('#mapNode1'), start;
 
@@ -939,7 +949,7 @@ describe('mapInteractor', function () {
     expect(map.info.panArgs.x).toBe(10);
     expect(map.info.panArgs.y).toBe(0);
     interactor.simulateEvent(
-      'mouseup', {map: {x: 10.25, y: 0}, button: 'left'});
+      'mouseup', {map: {x: 10, y: 0}, button: 'left'});
     start = new Date().getTime();
     stepAnimationFrame(start);
     expect(map.info.pan).toBe(2);
@@ -949,9 +959,25 @@ describe('mapInteractor', function () {
     expect(map.info.pan).toBe(3);
     expect(map.info.panArgs.x).toBeGreaterThan(0);
     expect(map.info.panArgs.y).toBe(0);
+    // now pan, then release with a long delay and make sure no momentum occurs
+    interactor.simulateEvent(
+      'mousedown', {map: {x: 0, y: 0}, button: 'left'});
+    var lastPan = $.extend(true, {}, map.info);
+    interactor.simulateEvent(
+      'mousemove', {map: {x: 10, y: 0}, button: 'left'});
+    expect(map.info.pan).toBe(lastPan.pan + 1);
+    expect(map.info.panArgs.x).toBe(10);
+    advanceDate(1000);  // wait to release
+    interactor.simulateEvent(
+      'mouseup', {map: {x: 10, y: 0}, button: 'left'});
+    stepAnimationFrame(start);
+    stepAnimationFrame(start + 0.25);
+    expect(map.info.pan).toBe(lastPan.pan + 1);
+    expect(map.info.panArgs.x).toBe(10);
     unmockDate();
     unmockAnimationFrame();
   });
+
   it('Test springback', function () {
     $('#mapNode1').css({width: '400px', height: '400px'});
     var map = mockedMap('#mapNode1'), start;
