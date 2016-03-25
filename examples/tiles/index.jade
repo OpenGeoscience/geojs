@@ -30,6 +30,9 @@ block append mainContent
     .form-group(title="Only allow integer zoom levels.")
       label(for="map-discrete") Discrete Zoom
       input#map-discrete.mapparam(param-name="discrete", type="checkbox", placeholder="false")
+    .form-group(title="Animate zoom transitions.")
+      label(for="mapinteractor-clampZoom") Animate Zoom
+      input#map-animateZoom.mapparam(param-name="animateZoom", type="checkbox", placeholder="true", checked="checked")
     .form-group(title="The lowest zoom level allowed.")
       label(for="map-min") Minimum Zoom
       input#map-min.mapparam(param-name="min", placeholder="0")

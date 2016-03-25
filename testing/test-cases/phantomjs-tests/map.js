@@ -396,19 +396,15 @@ describe('geo.core.map', function () {
       stepAnimationFrame(start);
       // the first transition gets cancelled, as the second transition will
       // perform the entire action.
-      expect(m.transition().start.time).toBe(undefined);
-      expect(m.center().x).toBeCloseTo(10);
-      expect(m.center().y).toBeCloseTo(0);
-      stepAnimationFrame(start + 1);
-      expect(m.transition().start.time).toBe(start + 1);
+      expect(m.transition().start.time).toBe(start);
       expect(m.transition().time).toBe(0);
       expect(m.center().x).toBeCloseTo(10);
       expect(m.center().y).toBeCloseTo(0);
-      stepAnimationFrame(start + 501);
+      stepAnimationFrame(start + 500);
       expect(m.transition().time).toBeCloseTo(500);
       expect(m.center().x).toBeCloseTo(15);
       expect(m.center().y).toBeCloseTo(5, 1);
-      stepAnimationFrame(start + 1001);
+      stepAnimationFrame(start + 1000);
       expect(m.transition()).toBe(null);
       expect(m.center().x).toBeCloseTo(20);
       expect(m.center().y).toBeCloseTo(10);
@@ -491,6 +487,34 @@ describe('geo.core.map', function () {
       expect(wasCalled).toBe(undefined);
       stepAnimationFrame(start + 500);
       expect(m.transition()).toBe(null);
+      expect(wasCalled).toBe(true);
+      // test cancel with another transition added before the next render
+      wasCalled = false;
+      m.transition({
+        center: {x: -10, y: 0},
+        duration: 1000,
+        done: function () {
+          wasCalled = true;
+        }
+      });
+      stepAnimationFrame(start);
+      expect(m.transitionCancel()).toBe(true);
+      /* This should never be started or finished */
+      m.transition({
+        center: {x: 0, y: 0},
+        duration: 1000,
+        done: function () {
+          wasCalled = 'never';
+        }
+      });
+      expect(m.transitionCancel()).toBe(true);
+      m.transition({
+        center: {x: 10, y: 0},
+        duration: 1000
+      });
+      expect(wasCalled).toBe(false);
+      stepAnimationFrame(start + 500);
+      expect(m.transition()).not.toBe(null);
       expect(wasCalled).toBe(true);
       unmockAnimationFrame();
     });
