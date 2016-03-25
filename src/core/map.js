@@ -1226,7 +1226,10 @@ geo.map = function (arg) {
    * Cancel any existing transition.  The transition will send a cancel event
    * at the next animation frame, but no further activity occurs.
    *
-   * @param {string} source option cause of the cancel.
+   * @param {string} [source] optional cause of the cancel.  This can be any
+   *                 value, but something like <method name>.<action> is
+   *                 recommended to allow other functions to determine the
+   *                 source and cause of the transition being canceled.
    * @returns {bool} true if a transition was in progress.
    */
   this.transitionCancel = function (source) {

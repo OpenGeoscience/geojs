@@ -1064,7 +1064,7 @@ geo.mapInteractor = function (args) {
       return geo.util.debounce(delay, false, apply, accum);
     } else {
       return function (dz, dir) {
-        if (!dz) {
+        if (!dz && targetZoom === undefined) {
           return;
         }
         accum(dz, dir);
