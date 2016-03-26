@@ -46,7 +46,7 @@ module.exports = function (grunt) {
             src: ['**'],
             dest: 'dist/examples/common/',
             expand: true,
-            cwd: 'bower_components/bootstrap/dist/',
+            cwd: 'node_modules/bootstrap/dist/',
             filter: function (src) {
               return !src.match(/.*\.css$/);
             }
@@ -55,7 +55,7 @@ module.exports = function (grunt) {
             src: ['*'],
             dest: 'dist/examples/common/css/',
             expand: true,
-            cwd: 'bower_components/bootswatch/flatly'
+            cwd: 'node_modules/bootswatch/flatly'
           }
         ]
       },
@@ -64,29 +64,19 @@ module.exports = function (grunt) {
           {
             src: ['codemirror.css'],
             dest: 'dist/examples/common/css/',
-            cwd: 'bower_components/codemirror/lib/',
+            cwd: 'node_modules/codemirror/lib/',
             expand: true
           },
           {
             src: ['lint.css'],
             dest: 'dist/examples/common/css/',
-            cwd: 'bower_components/codemirror/addon/lint/',
+            cwd: 'node_modules/codemirror/addon/lint/',
             expand: true
           },
           {
             src: ['foldgutter.css'],
             dest: 'dist/examples/common/css/',
-            cwd: 'bower_components/codemirror/addon/fold/',
-            expand: true
-          }
-        ]
-      },
-      jqueryui: {
-        files: [
-          {
-            src: ['jquery-ui.min.js'],
-            dest: 'dist/examples/common/js',
-            cwd: 'bower_components/jquery-ui/',
+            cwd: 'node_modules/codemirror/addon/fold/',
             expand: true
           }
         ]
@@ -108,16 +98,16 @@ module.exports = function (grunt) {
       codemirror: {
         files: {
           'dist/examples/common/js/codemirror.js': [
-            'bower_components/jsonlint/lib/jsonlint.js',
-            'bower_components/codemirror/lib/codemirror.js',
-            'bower_components/codemirror/mode/javascript/javascript.js',
-            'bower_components/codemirror/mode/javascript/javascript.js',
-            'bower_components/codemirror/addon/lint/lint.js',
-            'bower_components/codemirror/addon/lint/json-lint.js',
-            'bower_components/codemirror/addon/fold/brace-fold.js',
-            'bower_components/codemirror/addon/fold/foldcode.js',
-            'bower_components/codemirror/addon/fold/foldgutter.js',
-            'bower_components/codemirror/addon/edit/matchbrackets.js'
+            'node_modules/jsonlint/lib/jsonlint.js',
+            'node_modules/codemirror/lib/codemirror.js',
+            'node_modules/codemirror/mode/javascript/javascript.js',
+            'node_modules/codemirror/mode/javascript/javascript.js',
+            'node_modules/codemirror/addon/lint/lint.js',
+            'node_modules/codemirror/addon/lint/json-lint.js',
+            'node_modules/codemirror/addon/fold/brace-fold.js',
+            'node_modules/codemirror/addon/fold/foldcode.js',
+            'node_modules/codemirror/addon/fold/foldgutter.js',
+            'node_modules/codemirror/addon/edit/matchbrackets.js'
           ]
         }
       }
@@ -273,7 +263,6 @@ module.exports = function (grunt) {
     'copy:bootstrap',
     'copy:codemirror',
     'copy:examples',
-    'copy:jqueryui',
     'uglify:codemirror',
     'jade',
     'docco'

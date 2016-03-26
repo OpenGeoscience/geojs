@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <script src=/built/geo.ext.js></script>
     <script src=/built/geo.js></script>
-    <script src=/examples/common/js/jquery-ui.min.js></script>
     <script src=/test/lib/aggregate-json-reporter.js></script>
     <script src=/test/lib/selenium-test-utils.js></script>
     <style>
