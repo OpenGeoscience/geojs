@@ -1036,7 +1036,7 @@ var map = function (arg) {
        * complete. */
       var transitionEnd = $.extend(true, {}, m_transition.end);
       if (transitionEnd.center && m_gcs !== m_ingcs) {
-        transitionEnd.center = geo.transform.transformCoordinates(
+        transitionEnd.center = transform.transformCoordinates(
           m_gcs, m_ingcs, [transitionEnd.center])[0];
       }
       m_queuedTransition = $.extend(

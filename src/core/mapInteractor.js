@@ -98,25 +98,14 @@ var mapInteractor = function (args) {
           buttons: {left: true, right: true, middle: true},
           duration: 0,
           cancelOnMove: true
+        },
+        zoomAnimation: {
+          enabled: true,
+          duration: 500,
+          ease: function (t) { return (2 - t) * t; }
         }
       },
-      spring: {
-        enabled: false,
-        springConstant: 0.00005
-      },
-      zoomAnimation: {
-        enabled: true,
-        duration: 500,
-        ease: function (t) { return (2 - t) * t; }
-      },
-      click: {
-        enabled: true,
-        buttons: {left: true, right: true, middle: true},
-        duration: 0,
-        cancelOnMove: true
-      }
-    },
-    m_options
+      m_options
   );
 
   // options supported:
