@@ -142,7 +142,9 @@ describe('geo.core.osmLayer', function () {
       /* The follow is a test of tileLayer as attached to a map.  We don't
        * currently expose the tileLayer class directly to the createLayer
        * function, so some testing is done here */
-      it('_update', function () {
+
+      // This test is currently disabled because it contains an unknown race condition.
+      xit('_update', function () {
         var transform = layer.canvas().css('transform');
         layer._update();
         expect(layer.canvas().css('transform')).toBe(transform);
