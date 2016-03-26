@@ -751,6 +751,11 @@ var mapInteractor = function (args) {
   this._handleMouseMoveDocument = function (evt) {
     var dx, dy, selectionObj;
 
+    // If the map has been disconnected, we do nothing.
+    if (!m_this.map()) {
+      return;
+    }
+
     if (m_paused || m_queue.kind !== 'move') {
       return;
     }

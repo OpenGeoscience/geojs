@@ -114,11 +114,8 @@ describe('mapInteractor', function () {
 
   /* Create an instance of the actual map */
   function create_map(opts) {
-    var node = $('<div id="map"/>').css({width: '500px', height: '500px'});
-    $('#map').remove();
-    $('body').append(node);
-    opts = $.extend({}, opts);
-    opts.node = node;
+    opts = $.extend({width: 500, height: 500, autoResize: false}, opts);
+    opts.node = '#mapNode1';
     return geo.map(opts);
   }
 
@@ -872,6 +869,9 @@ describe('mapInteractor', function () {
             },
             momentum: {
               enabled: false
+            },
+            zoomAnimation: {
+              enabled: false
             }
           });
 
@@ -882,10 +882,24 @@ describe('mapInteractor', function () {
           button: 'left'
         }
       );
+      interactor.simulateEvent(
+        'mousemove',
+        {
+          map: {x: 25, y: 25},
+          button: 'left'
+        }
+      );
+      interactor.simulateEvent(
+        'mousemove',
+        {
+          map: {x: 20, y: 20},
+          button: 'left'
+        }
+      );
 
       clock.tick(100);
       expect(map.info.pan).toBe(1);
-      expect(map.info.panArgs).toEqual({x: 5, y: 5});
+      expect(map.info.panArgs).toEqual({x: 0, y: 0});
 
       interactor.simulateEvent(
         'mousemove',
@@ -920,7 +934,7 @@ describe('mapInteractor', function () {
 
       clock.tick(100);
       expect(map.info.pan).toBe(2);
-      expect(map.info.panArgs).toEqual({x: 0, y: 0});
+      expect(map.info.panArgs).toEqual({x: 5, y: 5});
 
       interactor.simulateEvent(
         'mouseup',
@@ -1086,8 +1100,9 @@ describe('mapInteractor', function () {
 
   describe('Zoom Animation', function () {
     var map, interactor;
-    it('zoom once', function () {
+    beforeEach(function () {
       mockAnimationFrame();
+
       /* we use the actual map as we want to check that the transitions behave
        * as expected, too. */
       map = create_map({discreteZoom: false, zoom: 2});
@@ -1097,6 +1112,12 @@ describe('mapInteractor', function () {
         throttle: false
       });
       map.interactor(interactor);
+    });
+    afterEach(function () {
+      map.exit();
+      unmockAnimationFrame();
+    });
+    it('zoom once', function () {
 
       var lastZoom, start;
       interactor.simulateEvent(
@@ -1184,6 +1205,7 @@ describe('mapInteractor', function () {
     it('interrupted discrete zoom', function () {
       var lastZoom, start;
       map.zoom(2);
+      map.discreteZoom(true);
       interactor.simulateEvent(
         'wheel',
         {wheelDelta: {x: 0, y: -20}, wheelMode: 0}
@@ -1206,7 +1228,6 @@ describe('mapInteractor', function () {
       );
       stepAnimationFrame(start + 150);
       expect(map.zoom()).toBe(3);
-      unmockAnimationFrame();
     });
   });
 });
