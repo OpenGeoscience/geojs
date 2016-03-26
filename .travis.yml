@@ -17,7 +17,7 @@ script:
     - ./node_modules/.bin/grunt docs
     - mkdir _build
     - ctest -S cmake/travis_build.cmake -VV || true
-    - if [ -f test_failed ] ; then false ; fi
+    - if [ -f _build/test_failed ] ; then false ; fi
 
 after_success:
   - npm run codecov
