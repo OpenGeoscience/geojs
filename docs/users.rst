@@ -18,20 +18,26 @@ bundled applications.  In this case, you may need to include the
 sources manually or bundle them yourself.  The following is a
 list of libraries used by GeoJS.
 
-.. table:: GeoJS dependencies
+.. table:: Internally bundled GeoJS dependencies
 
     +---------------------------+------------+---------------------------+
     | Library                   | Version    | Component                 |
     +===========================+============+===========================+
-    | `jQuery`_                 | 2.1        | Core                      |
-    +---------------------------+------------+---------------------------+
-    | `proj4`_                  | 2.2        | Core                      |
+    | `proj4`_                  | 2.3        | Core                      |
     +---------------------------+------------+---------------------------+
     | `GL matrix`_              | 2.1        | Core, GL renderer         |
     +---------------------------+------------+---------------------------+
     | `pnltri`_                 | 2.1        | GL polygon feature        |
     +---------------------------+------------+---------------------------+
-    | `d3`_                     | 3.3        | D3 renderer, UI widgets   |
+
+.. table:: External GeoJS dependencies
+
+    +---------------------------+------------+---------------------------+
+    | Library                   | Version    | Component                 |
+    +===========================+============+===========================+
+    | `jQuery`_                 | 2.2        | Core                      |
+    +---------------------------+------------+---------------------------+
+    | `d3`_                     | 3.5        | D3 renderer, UI widgets   |
     +---------------------------+------------+---------------------------+
 
 .. note::
