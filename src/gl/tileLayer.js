@@ -1,4 +1,4 @@
-var registerLayerAdjustment = require('../util').registerLayerAdjustment;
+var registerLayerAdjustment = require('../registry').registerLayerAdjustment;
 
 var gl_tileLayer = function () {
   'use strict';

@@ -18,9 +18,9 @@ describe('renderers', function () {
       this._init(arg);
       return this;
     };
-    geo.util.inherit(simpleRenderer, geo.renderer);
+    geo.inherit(simpleRenderer, geo.renderer);
 
-    geo.util.registerRenderer('simple', simpleRenderer);
+    geo.registerRenderer('simple', simpleRenderer);
 
     simpleRenderer.supported = function () {
       return supported;
@@ -40,46 +40,46 @@ describe('renderers', function () {
     });
     it('geo.createRenderer', function () {
       create_simple_renderer();
-      expect(geo.util.createRenderer('simple')).not.toBe(null);
-      expect(geo.util.createRenderer('unknown')).toBe(null);
+      expect(geo.createRenderer('simple')).not.toBe(null);
+      expect(geo.createRenderer('unknown')).toBe(null);
     });
     it('geo.checkRenderer', function () {
-      expect(geo.util.checkRenderer('simple')).toBe('simple');
-      expect(geo.util.checkRenderer('simple', true)).toBe('simple');
+      expect(geo.checkRenderer('simple')).toBe('simple');
+      expect(geo.checkRenderer('simple', true)).toBe('simple');
 
       supported = false;
-      expect(geo.util.checkRenderer('simple')).toBe('d3');
+      expect(geo.checkRenderer('simple')).toBe('d3');
       expect(console.warn.calledOnce).toBe(true);
       expect(console.warn.calledWith(
         'simple renderer is unavailable, using d3 renderer instead'
       )).toBe(true);
       console.warn.reset();
 
-      expect(geo.util.checkRenderer('simple', true)).toBe(false);
+      expect(geo.checkRenderer('simple', true)).toBe(false);
       fallback = 'unknown';
-      expect(geo.util.checkRenderer('simple')).toBe(false);
+      expect(geo.checkRenderer('simple')).toBe(false);
       supported = true;
-      expect(geo.util.checkRenderer('simple')).toBe('simple');
+      expect(geo.checkRenderer('simple')).toBe('simple');
 
-      expect(geo.util.checkRenderer(null)).toBe(null);
+      expect(geo.checkRenderer(null)).toBe(null);
 
-      expect(geo.util.checkRenderer('d3')).toBe('d3');
+      expect(geo.checkRenderer('d3')).toBe('d3');
 
       sinon.stub(geo.d3.renderer, 'supported').returns(false);
-      expect(geo.util.checkRenderer('d3')).toBe(null);
+      expect(geo.checkRenderer('d3')).toBe(null);
       geo.d3.renderer.supported.restore();
 
-      expect(geo.util.checkRenderer('d3')).toBe('d3');
+      expect(geo.checkRenderer('d3')).toBe('d3');
 
       mockVGLRenderer(false);
-      expect(geo.util.checkRenderer('vgl')).toBe(null);
+      expect(geo.checkRenderer('vgl')).toBe(null);
       restoreVGLRenderer();
 
       mockVGLRenderer();
-      expect(geo.util.checkRenderer('vgl')).toBe('vgl');
+      expect(geo.checkRenderer('vgl')).toBe('vgl');
       restoreVGLRenderer();
 
-      expect(geo.util.checkRenderer('unknown')).toBe(false);
+      expect(geo.checkRenderer('unknown')).toBe(false);
     });
   });
 });

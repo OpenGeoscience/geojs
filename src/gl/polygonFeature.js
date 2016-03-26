@@ -1,6 +1,6 @@
-var inherit = require('../util').inherit;
-var registerFeature = require('../util').registerFeature;
-var polygonFeature = require('../core/polygonFeature');
+var inherit = require('../inherit');
+var registerFeature = require('../registry').registerFeature;
+var polygonFeature = require('../polygonFeature');
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -21,7 +21,7 @@ var gl_polygonFeature = function (arg) {
 
   var vgl = require('vgl');
   var Triangulator = require('pnltri').Triangulator;
-  var transform = require('../core/transform');
+  var transform = require('../transform');
 
   ////////////////////////////////////////////////////////////////////////////
   /**

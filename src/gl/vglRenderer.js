@@ -1,6 +1,6 @@
-var inherit = require('../util').inherit;
-var registerRenderer = require('../util').registerRenderer;
-var renderer = require('../core/renderer');
+var inherit = require('../inherit');
+var registerRenderer = require('../registry').registerRenderer;
+var renderer = require('../renderer');
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -25,7 +25,7 @@ var vglRenderer = function (arg) {
   var vgl = require('vgl');
   var mat4 = require('gl-mat4');
   var util = require('../util');
-  var geo_event = require('../core/event');
+  var geo_event = require('../event');
 
   var m_this = this,
       m_contextRenderer = null,

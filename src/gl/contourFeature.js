@@ -1,6 +1,6 @@
-var inherit = require('../util').inherit;
-var registerFeature = require('../util').registerFeature;
-var contourFeature = require('../core/contourFeature');
+var inherit = require('../inherit');
+var registerFeature = require('../registry').registerFeature;
+var contourFeature = require('../contourFeature');
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -21,7 +21,7 @@ var gl_contourFeature = function (arg) {
   contourFeature.call(this, arg);
 
   var vgl = require('vgl');
-  var transform = require('../core/transform');
+  var transform = require('../transform');
   var util = require('../util');
 
   ////////////////////////////////////////////////////////////////////////////

@@ -1,6 +1,6 @@
-var inherit = require('../util').inherit;
-var registerRenderer = require('../util').registerRenderer;
-var renderer = require('../core/renderer');
+var inherit = require('../inherit');
+var registerRenderer = require('../registry').registerRenderer;
+var renderer = require('../renderer');
 
 //////////////////////////////////////////////////////////////////////////////
 /**

@@ -1,4 +1,4 @@
-var inherit = require('../util').inherit;
+var inherit = require('./inherit');
 var object = require('./object');
 
 //////////////////////////////////////////////////////////////////////////////

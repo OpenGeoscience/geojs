@@ -1,4 +1,4 @@
-var inherit = require('../util').inherit;
+var inherit = require('./inherit');
 var feature = require('./feature');
 
 //////////////////////////////////////////////////////////////////////////////
@@ -20,7 +20,8 @@ var graphFeature = function (arg) {
   feature.call(this, arg);
 
   var $ = require('jquery');
-  var util = require('../util');
+  var util = require('./util');
+  var registry = require('./registry');
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -194,7 +195,7 @@ var graphFeature = function (arg) {
         var link;
         nLinks += 1;
         if (m_links.length < nLinks) {
-          link = util.createFeature(
+          link = registry.createFeature(
             style.linkType, layer, layer.renderer()
           ).style(style.links);
           m_this.addChild(link);
@@ -213,7 +214,7 @@ var graphFeature = function (arg) {
     return m_this;
   };
 
-  m_points = util.createFeature(
+  m_points = registry.createFeature(
     'point',
     this.layer(),
     this.layer().renderer()

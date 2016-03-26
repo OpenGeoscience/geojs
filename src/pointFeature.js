@@ -1,4 +1,4 @@
-var inherit = require('../util').inherit;
+var inherit = require('./inherit');
 var feature = require('./feature');
 
 //////////////////////////////////////////////////////////////////////////////
@@ -22,10 +22,10 @@ var pointFeature = function (arg) {
 
   var $ = require('jquery');
   var timestamp = require('./timestamp');
-  var ClusterGroup = require('../util/clustering');
+  var ClusterGroup = require('./util/clustering');
   var geo_event = require('./event');
-  var util = require('../util');
-  var wigglemaps = require('../util/wigglemaps');
+  var util = require('./util');
+  var wigglemaps = require('./util/wigglemaps');
 
   ////////////////////////////////////////////////////////////////////////////
   /**

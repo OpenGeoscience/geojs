@@ -1,5 +1,5 @@
 var $ = require('jquery');
-var inherit = require('../util').inherit;
+var inherit = require('./inherit');
 var feature = require('./feature');
 
 //////////////////////////////////////////////////////////////////////////////

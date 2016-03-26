@@ -1,5 +1,5 @@
 var vgl = require('vgl');
-var inherit = require('../util').inherit;
+var inherit = require('./inherit');
 
 //////////////////////////////////////////////////////////////////////////////
 /**

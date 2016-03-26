@@ -1,5 +1,5 @@
-var inherit = require('../util').inherit;
-var sceneObject = require('../core/sceneObject');
+var inherit = require('../inherit');
+var sceneObject = require('../sceneObject');
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -17,8 +17,8 @@ var widget = function (arg) {
   }
   sceneObject.call(this, arg);
 
-  var geo_event = require('../core/event');
-  var createFeature = require('../util').createFeature;
+  var geo_event = require('../event');
+  var createFeature = require('../registry').createFeature;
 
   var m_this = this,
       s_exit = this._exit,

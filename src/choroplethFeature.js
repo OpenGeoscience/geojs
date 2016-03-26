@@ -1,4 +1,4 @@
-var inherit = require('../util').inherit;
+var inherit = require('./inherit');
 var feature = require('./feature');
 
 //////////////////////////////////////////////////////////////////////////////
@@ -20,7 +20,7 @@ var choroplethFeature = function (arg) {
   feature.call(this, arg);
 
   var $ = require('jquery');
-  var ensureFunction = require('../util').ensureFunction;
+  var ensureFunction = require('./util').ensureFunction;
 
   ////////////////////////////////////////////////////////////////////////////
   /**

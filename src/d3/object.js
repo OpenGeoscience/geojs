@@ -1,5 +1,5 @@
-var inherit = require('../util').inherit;
-var sceneObject = require('../core/sceneObject');
+var inherit = require('../inherit');
+var sceneObject = require('../sceneObject');
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -13,7 +13,7 @@ var sceneObject = require('../core/sceneObject');
 var d3_object = function (arg) {
   'use strict';
 
-  var object = require('../core/object');
+  var object = require('../object');
   var uniqueID = require('./uniqueID');
 
   // this is used to extend other geojs classes, so only generate

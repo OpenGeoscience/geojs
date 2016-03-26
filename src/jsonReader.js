@@ -1,7 +1,5 @@
-/*global File*/
-
-var inherit = require('../util').inherit;
-var registerFileReader = require('../util').registerFileReader;
+var inherit = require('./inherit');
+var registerFileReader = require('./registry').registerFileReader;
 var fileReader = require('./fileReader');
 
 //////////////////////////////////////////////////////////////////////////////

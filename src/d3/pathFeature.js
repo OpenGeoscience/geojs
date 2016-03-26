@@ -1,6 +1,6 @@
-var inherit = require('../util').inherit;
-var registerFeature = require('../util').registerFeature;
-var pathFeature = require('../core/pathFeature');
+var inherit = require('../inherit');
+var registerFeature = require('../registry').registerFeature;
+var pathFeature = require('../pathFeature');
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -21,7 +21,7 @@ var d3_pathFeature = function (arg) {
   var $ = require('jquery');
   var d3 = require('d3');
   var object = require('./object');
-  var timestamp = require('../core/timestamp');
+  var timestamp = require('../timestamp');
 
   arg = arg || {};
   pathFeature.call(this, arg);

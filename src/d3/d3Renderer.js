@@ -1,6 +1,6 @@
-var inherit = require('../util').inherit;
-var registerRenderer = require('../util').registerRenderer;
-var renderer = require('../core/renderer');
+var inherit = require('../inherit');
+var registerRenderer = require('../registry').registerRenderer;
+var renderer = require('../renderer');
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -17,7 +17,7 @@ var d3Renderer = function (arg) {
   var d3 = require('d3');
   var object = require('./object');
   var util = require('../util');
-  var geo_event = require('../core/event');
+  var geo_event = require('../event');
   var d3Rescale = require('./rescale');
 
   if (!(this instanceof d3Renderer)) {

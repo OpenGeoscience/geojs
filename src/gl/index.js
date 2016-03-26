@@ -9,7 +9,6 @@ module.exports = {
   lineFeature: require('./lineFeature'),
   planeFeature: require('./planeFeature'),
   pointFeature: require('./pointFeature'),
-  pointSpriteFeature: require('./pointSpriteFeature'),
   polygonFeature: require('./polygonFeature'),
   quadFeature: require('./quadFeature'),
   tileLayer: require('./tileLayer'),

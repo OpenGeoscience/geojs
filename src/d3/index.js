@@ -1,4 +1,4 @@
-var geo_event = require('../core/event.js');
+var geo_event = require('../event.js');
 geo_event.d3 = {
   rescale: require('./rescale')
 };

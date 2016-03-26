@@ -1,6 +1,6 @@
 var svgWidget = require('./svgWidget');
-var inherit = require('../util').inherit;
-var registerWidget = require('../util').registerWidget;
+var inherit = require('../inherit');
+var registerWidget = require('../registry').registerWidget;
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -19,7 +19,7 @@ var legendWidget = function (arg) {
   svgWidget.call(this, arg);
 
   var d3 = require('d3');
-  var geo_event = require('../core/event');
+  var geo_event = require('../event');
 
   /** @private */
   var m_this = this,

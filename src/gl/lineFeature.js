@@ -1,6 +1,6 @@
-var inherit = require('../util').inherit;
-var registerFeature = require('../util').registerFeature;
-var lineFeature = require('../core/lineFeature');
+var inherit = require('../inherit');
+var registerFeature = require('../registry').registerFeature;
+var lineFeature = require('../lineFeature');
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -20,7 +20,7 @@ var gl_lineFeature = function (arg) {
   lineFeature.call(this, arg);
 
   var vgl = require('vgl');
-  var transform = require('../core/transform');
+  var transform = require('../transform');
   var util = require('../util');
 
   ////////////////////////////////////////////////////////////////////////////

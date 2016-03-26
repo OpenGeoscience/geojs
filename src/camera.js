@@ -1,9 +1,9 @@
 (function () {
   'use strict';
 
-  var inherit = require('../util').inherit;
+  var inherit = require('./inherit');
   var object = require('./object');
-  var util = require('../util');
+  var util = require('./util');
   var mat4 = require('gl-mat4');
   var vec4 = require('gl-vec4');
 

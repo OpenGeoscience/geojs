@@ -1,5 +1,5 @@
 var $ = require('jquery');
-var inherit = require('../util').inherit;
+var inherit = require('./inherit');
 var sceneObject = require('./sceneObject');
 var timestamp = require('./timestamp');
 var geo_event = require('./event');
@@ -20,7 +20,7 @@ var feature = function (arg) {
   }
   sceneObject.call(this);
 
-  var util = require('../util');
+  var util = require('./util');
 
   ////////////////////////////////////////////////////////////////////////////
   /**

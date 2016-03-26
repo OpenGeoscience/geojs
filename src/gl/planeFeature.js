@@ -1,6 +1,6 @@
-var inherit = require('../util').inherit;
-var registerFeature = require('../util').registerFeature;
-var planeFeature = require('../core/planeFeature');
+var inherit = require('../inherit');
+var registerFeature = require('../registry').registerFeature;
+var planeFeature = require('../planeFeature');
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -20,7 +20,7 @@ var gl_planeFeature = function (arg) {
   }
   planeFeature.call(this, arg);
 
-  var transform = require('../core/transform');
+  var transform = require('../transform');
   var vgl = require('vgl');
 
   var m_this = this,

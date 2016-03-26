@@ -1,6 +1,6 @@
-var inherit = require('../util').inherit;
+var inherit = require('./inherit');
 var renderer = require('./renderer');
-var registerRenderer = require('../util').registerRenderer;
+var registerRenderer = require('./registry').registerRenderer;
 
 /**
  * @class geo.domRenderer

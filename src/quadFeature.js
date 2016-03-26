@@ -1,5 +1,5 @@
 var $ = require('jquery');
-var inherit = require('../util').inherit;
+var inherit = require('./inherit');
 var feature = require('./feature');
 
 //////////////////////////////////////////////////////////////////////////////
@@ -47,7 +47,7 @@ var quadFeature = function (arg) {
   'use strict';
 
   var transform = require('./transform');
-  var util = require('../util');
+  var util = require('./util');
 
   if (!(this instanceof quadFeature)) {
     return new quadFeature(arg);

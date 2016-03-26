@@ -1,6 +1,6 @@
-var inherit = require('../util').inherit;
-var registerFeature = require('../util').registerFeature;
-var vectorFeature = require('../core/vectorFeature');
+var inherit = require('../inherit');
+var registerFeature = require('../registry').registerFeature;
+var vectorFeature = require('../vectorFeature');
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -19,7 +19,7 @@ var d3_vectorFeature = function (arg) {
   }
 
   var object = require('./object');
-  var timestamp = require('../core/timestamp');
+  var timestamp = require('../timestamp');
   var d3 = require('d3');
 
   arg = arg || {};

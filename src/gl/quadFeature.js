@@ -1,6 +1,6 @@
-var inherit = require('../util').inherit;
-var registerFeature = require('../util').registerFeature;
-var quadFeature = require('../core/quadFeature');
+var inherit = require('../inherit');
+var registerFeature = require('../registry').registerFeature;
+var quadFeature = require('../quadFeature');
 
 //////////////////////////////////////////////////////////////////////////////
 /**

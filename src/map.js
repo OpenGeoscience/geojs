@@ -1,6 +1,6 @@
 var $ = require('jquery');
 var vgl = require('vgl');
-var inherit = require('../util').inherit;
+var inherit = require('./inherit');
 var sceneObject = require('./sceneObject');
 
 //////////////////////////////////////////////////////////////////////////////
@@ -84,11 +84,12 @@ var map = function (arg) {
 
   var camera = require('./camera');
   var transform = require('./transform');
-  var util = require('../util');
+  var util = require('./util');
+  var registry = require('./registry');
   var geo_event = require('./event');
   var mapInteractor = require('./mapInteractor');
   var clock = require('./clock');
-  var uiLayer = require('../ui/uiLayer');
+  var uiLayer = require('./ui/uiLayer');
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -545,7 +546,7 @@ var map = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.createLayer = function (layerName, arg) {
     arg = arg || {};
-    var newLayer = util.createLayer(
+    var newLayer = registry.createLayer(
       layerName, m_this, arg);
 
     if (newLayer) {
@@ -845,7 +846,7 @@ var map = function (arg) {
     }
     opts.layer = layer;
     opts.renderer = renderer;
-    m_fileReader = util.createFileReader(readerType, opts);
+    m_fileReader = registry.createFileReader(readerType, opts);
     return m_this;
   };
 

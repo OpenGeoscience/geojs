@@ -1,4 +1,4 @@
-var inherit = require('../util').inherit;
+var inherit = require('./inherit');
 var object = require('./object');
 
 //////////////////////////////////////////////////////////////////////////////
@@ -22,8 +22,8 @@ var mapInteractor = function (args) {
 
   var $ = require('jquery');
   var geo_event = require('./event');
-  var throttle = require('../util').throttle;
-  var debounce = require('../util').debounce;
+  var throttle = require('./util').throttle;
+  var debounce = require('./util').debounce;
 
   var m_options = args || {},
       m_this = this,

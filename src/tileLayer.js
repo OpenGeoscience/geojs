@@ -1,7 +1,7 @@
 module.exports = (function () {
   'use strict';
 
-  var inherit = require('../util').inherit;
+  var inherit = require('./inherit');
   var featureLayer = require('./featureLayer');
 
   /**
@@ -133,7 +133,7 @@ module.exports = (function () {
     var transform = require('./transform');
     var tileCache = require('./tileCache');
     var fetchQueue = require('./fetchQueue');
-    var adjustLayerForRenderer = require('../util').adjustLayerForRenderer;
+    var adjustLayerForRenderer = require('./registry').adjustLayerForRenderer;
     var Tile = require('./tile');
 
     if (!(this instanceof tileLayer)) {

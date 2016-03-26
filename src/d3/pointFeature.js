@@ -1,6 +1,6 @@
-var inherit = require('../util').inherit;
-var registerFeature = require('../util').registerFeature;
-var pointFeature = require('../core/pointFeature');
+var inherit = require('../inherit');
+var registerFeature = require('../registry').registerFeature;
+var pointFeature = require('../pointFeature');
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -20,7 +20,7 @@ var d3_pointFeature = function (arg) {
   }
 
   var d3_object = require('./object');
-  var timestamp = require('../core/timestamp');
+  var timestamp = require('../timestamp');
 
   arg = arg || {};
   pointFeature.call(this, arg);

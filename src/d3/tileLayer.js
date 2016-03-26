@@ -1,4 +1,4 @@
-var registerLayerAdjustment = require('../util').registerLayerAdjustment;
+var registerLayerAdjustment = require('../registry').registerLayerAdjustment;
 
 var d3_tileLayer = function () {
   'use strict';

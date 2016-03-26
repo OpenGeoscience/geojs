@@ -1,6 +1,6 @@
-var inherit = require('../util').inherit;
-var registerFeature = require('../util').registerFeature;
-var graphFeature = require('../core/graphFeature');
+var inherit = require('../inherit');
+var registerFeature = require('../registry').registerFeature;
+var graphFeature = require('../graphFeature');
 
 /**
  * @class geo.d3.graphFeature

@@ -1,7 +1,7 @@
-var inherit = require('../util').inherit;
+var inherit = require('./inherit');
 var sceneObject = require('./sceneObject');
 var feature = require('./feature');
-var checkRenderer = require('../util').checkRenderer;
+var checkRenderer = require('./registry').checkRenderer;
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -25,8 +25,8 @@ var layer = function (arg) {
 
   var $ = require('jquery');
   var timestamp = require('./timestamp');
-  var createRenderer = require('../util').createRenderer;
-  var newLayerId = require('../util').newLayerId;
+  var createRenderer = require('./registry').createRenderer;
+  var newLayerId = require('./util').newLayerId;
   var geo_event = require('./event');
   var camera = require('./camera');
 

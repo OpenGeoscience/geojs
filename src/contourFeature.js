@@ -1,4 +1,4 @@
-var inherit = require('../util').inherit;
+var inherit = require('./inherit');
 var feature = require('./feature');
 
 //////////////////////////////////////////////////////////////////////////////
@@ -18,7 +18,7 @@ var contourFeature = function (arg) {
   }
 
   var $ = require('jquery');
-  var util = require('../util');
+  var util = require('./util');
 
   arg = arg || {};
   feature.call(this, arg);

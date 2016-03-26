@@ -1,7 +1,7 @@
-var inherit = require('../util').inherit;
+var inherit = require('./inherit');
 var layer = require('./layer');
 var geo_event = require('./event');
-var util = require('../util');
+var registry = require('./registry');
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -41,7 +41,7 @@ var featureLayer = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this.createFeature = function (featureName, arg) {
 
-    var newFeature = util.createFeature(
+    var newFeature = registry.createFeature(
       featureName, m_this, m_this.renderer(), arg);
 
     m_this.addChild(newFeature);
@@ -229,5 +229,5 @@ var featureLayer = function (arg) {
 };
 
 inherit(featureLayer, layer);
-util.registerLayer('feature', featureLayer);
+registry.registerLayer('feature', featureLayer);
 module.exports = featureLayer;

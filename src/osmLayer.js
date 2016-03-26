@@ -2,9 +2,9 @@ module.exports = (function () {
   'use strict';
 
   var $ = require('jquery');
-  var inherit = require('../util').inherit;
+  var inherit = require('./inherit');
   var tileLayer = require('./tileLayer');
-  var util = require('../util');
+  var registry = require('./registry');
 
   //////////////////////////////////////////////////////////////////////////////
   /**
@@ -80,6 +80,6 @@ module.exports = (function () {
   });
 
   inherit(osmLayer, tileLayer);
-  util.registerLayer('osm', osmLayer);
+  registry.registerLayer('osm', osmLayer);
   return osmLayer;
 })();

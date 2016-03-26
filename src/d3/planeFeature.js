@@ -1,6 +1,6 @@
-var inherit = require('../util').inherit;
-var registerFeature = require('../util').registerFeature;
-var planeFeature = require('../core/planeFeature');
+var inherit = require('../inherit');
+var registerFeature = require('../registry').registerFeature;
+var planeFeature = require('../planeFeature');
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -21,7 +21,7 @@ var d3_planeFeature = function (arg) {
   }
 
   var object = require('./object');
-  var timestamp = require('../core/timestamp');
+  var timestamp = require('../timestamp');
 
   planeFeature.call(this, arg);
   object.call(this);

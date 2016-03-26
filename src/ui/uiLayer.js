@@ -1,6 +1,6 @@
-var inherit = require('../util').inherit;
-var registerLayer = require('../util').registerLayer;
-var layer = require('../core/layer');
+var inherit = require('../inherit');
+var registerLayer = require('../registry').registerLayer;
+var layer = require('../layer');
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -14,7 +14,7 @@ var layer = require('../core/layer');
 var uiLayer = function (arg) {
   'use strict';
 
-  var createWidget = require('../util').createWidget;
+  var createWidget = require('../registry').createWidget;
 
   // The widget stays fixed on the screen.
   arg.renderer = 'dom';

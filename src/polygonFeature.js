@@ -1,5 +1,5 @@
 var $ = require('jquery');
-var inherit = require('../util').inherit;
+var inherit = require('./inherit');
 var feature = require('./feature');
 
 //////////////////////////////////////////////////////////////////////////////
@@ -19,7 +19,7 @@ var polygonFeature = function (arg) {
   arg = arg || {};
   feature.call(this, arg);
 
-  var util = require('../util');
+  var util = require('./util');
 
   ////////////////////////////////////////////////////////////////////////////
   /**

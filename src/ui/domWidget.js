@@ -1,6 +1,6 @@
 var widget = require('./widget');
-var inherit = require('../util').inherit;
-var registerWidget = require('../util').registerWidget;
+var inherit = require('../inherit');
+var registerWidget = require('../registry').registerWidget;
 
 var domWidget = function (arg) {
   'use strict';
