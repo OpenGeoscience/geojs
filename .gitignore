@@ -12,6 +12,7 @@
 /docs/*.py
 !/docs/conf.py
 !/docs/parse.py
-/src/core/version.js
 /dist
 .eslintcache
+/lcov
+/notes

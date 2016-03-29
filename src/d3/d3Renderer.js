@@ -1,23 +1,33 @@
+var inherit = require('../inherit');
+var registerRenderer = require('../registry').registerRenderer;
+var renderer = require('../renderer');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class d3Renderer
  *
- * @class
+ * @class geo.d3.renderer
  * @extends geo.renderer
  * @returns {geo.d3.d3Renderer}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.d3.d3Renderer = function (arg) {
+var d3Renderer = function (arg) {
   'use strict';
 
-  if (!(this instanceof geo.d3.d3Renderer)) {
-    return new geo.d3.d3Renderer(arg);
+  var d3 = require('d3');
+  var object = require('./object');
+  var util = require('../util');
+  var geo_event = require('../event');
+  var d3Rescale = require('./rescale');
+
+  if (!(this instanceof d3Renderer)) {
+    return new d3Renderer(arg);
   }
-  geo.renderer.call(this, arg);
+  renderer.call(this, arg);
 
   var s_exit = this._exit;
 
-  geo.d3.object.call(this, arg);
+  object.call(this, arg);
 
   arg = arg || {};
 
@@ -55,7 +65,7 @@ geo.d3.d3Renderer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._convertColor = function (f, g) {
-    f = geo.util.ensureFunction(f);
+    f = util.ensureFunction(f);
     g = g || function () { return true; };
     return function () {
       var c = 'none';
@@ -72,14 +82,14 @@ geo.d3.d3Renderer = function (arg) {
   };
 
   this._convertPosition = function (f) {
-    f = geo.util.ensureFunction(f);
+    f = util.ensureFunction(f);
     return function () {
       return m_this.layer().map().worldToDisplay(f.apply(m_this, arguments));
     };
   };
 
   this._convertScale = function (f) {
-    f = geo.util.ensureFunction(f);
+    f = util.ensureFunction(f);
     return function () {
       return f.apply(m_this, arguments) / m_scale;
     };
@@ -410,7 +420,7 @@ geo.d3.d3Renderer = function (arg) {
     m_svg.attr('width', w);
     m_svg.attr('height', h);
     m_this._setTransform();
-    m_this.layer().geoTrigger(geo.event.d3Rescale, { scale: m_scale }, true);
+    m_this.layer().geoTrigger(geo_event.d3Rescale, { scale: m_scale }, true);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -537,19 +547,19 @@ geo.d3.d3Renderer = function (arg) {
   };
 
   // connect to pan event
-  this.layer().geoOn(geo.event.pan, m_this._setTransform);
+  this.layer().geoOn(geo_event.pan, m_this._setTransform);
 
   // connect to rotate event
-  this.layer().geoOn(geo.event.rotate, m_this._setTransform);
+  this.layer().geoOn(geo_event.rotate, m_this._setTransform);
 
   // connect to zoom event
-  this.layer().geoOn(geo.event.zoom, function () {
+  this.layer().geoOn(geo_event.zoom, function () {
     m_this._setTransform();
     m_this.__render();
-    m_this.layer().geoTrigger(geo.event.d3Rescale, { scale: m_scale }, true);
+    m_this.layer().geoTrigger(d3Rescale, { scale: m_scale }, true);
   });
 
-  this.layer().geoOn(geo.event.resize, function (event) {
+  this.layer().geoOn(geo_event.resize, function (event) {
     m_this._resize(event.x, event.y, event.width, event.height);
   });
 
@@ -557,9 +567,9 @@ geo.d3.d3Renderer = function (arg) {
   return this;
 };
 
-inherit(geo.d3.d3Renderer, geo.renderer);
+inherit(d3Renderer, renderer);
 
-geo.registerRenderer('d3', geo.d3.d3Renderer);
+registerRenderer('d3', d3Renderer);
 
 (function () {
   'use strict';
@@ -570,8 +580,8 @@ geo.registerRenderer('d3', geo.d3.d3Renderer);
    *
    * @returns {boolean} true if available.
    */
-  geo.d3.d3Renderer.supported = function () {
-    return (typeof d3 !== 'undefined');
+  d3Renderer.supported = function () {
+    return !!__webpack_modules__[require.resolveWeak('d3')]; // eslint-disable-line
   };
 
   /**
@@ -580,7 +590,9 @@ geo.registerRenderer('d3', geo.d3.d3Renderer);
    *
    * @returns null for the null renderer.
    */
-  geo.d3.d3Renderer.fallback = function () {
+  d3Renderer.fallback = function () {
     return null;
   };
 })();
+
+module.exports = d3Renderer;

@@ -1,20 +1,26 @@
+var inherit = require('../inherit');
+var geomFeature = require('../geomFeature');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of geomFeature
  *
- * @class
+ * @class geo.gl.geomFeature
  * @extends geo.geomFeature
  * @param {vgl.geometryData} arg
  * @returns {geo.gl.geomFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.gl.geomFeature = function (arg) {
+var gl_geomFeature = function (arg) {
   'use strict';
-  if (!(this instanceof geo.gl.geomFeature)) {
-    return new geo.gl.geomFeature(arg);
+  if (!(this instanceof gl_geomFeature)) {
+    return new gl_geomFeature(arg);
   }
+
+  var vgl = require('vgl');
+
   arg = arg || {};
-  geo.geomFeature.call(this, arg);
+  geomFeature.call(this, arg);
 
   // Initialize
   var m_this = this,
@@ -48,7 +54,7 @@ geo.gl.geomFeature = function (arg) {
         style.point_sprites_image !== undefined &&
         style.point_sprites_image !== null &&
         m_noOfPrimitives === 1 &&
-        m_geom.primitive(0).primitiveType() === gl.POINTS) {
+        m_geom.primitive(0).primitiveType() === vgl.GL.POINTS) {
       m_material = vgl.utils.createPointSpritesMaterial(
                      style.point_sprites_image);
     } else if (m_scalar) {
@@ -111,4 +117,5 @@ geo.gl.geomFeature = function (arg) {
   return this;
 };
 
-inherit(geo.gl.geomFeature, geo.geomFeature);
+inherit(gl_geomFeature, geomFeature);
+module.exports = gl_geomFeature;

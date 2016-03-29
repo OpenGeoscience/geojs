@@ -5,5 +5,6 @@
   "exampleJs": ["main.js"],
   "about": {
     "text": "Basic map rendering different sets of vectors with different marker styles."
-  }
+  },
+  "disabled": true
 }

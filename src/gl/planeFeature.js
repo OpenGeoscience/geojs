@@ -1,20 +1,27 @@
+var inherit = require('../inherit');
+var registerFeature = require('../registry').registerFeature;
+var planeFeature = require('../planeFeature');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a plane feature given a lower left corner point
  * and and upper right corner point
- * @class
+ * @class geo.gl.planeFeature
  * @extends geo.planeFeature
  * @param lowerleft
  * @param upperright
  * @returns {geo.gl.planeFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.gl.planeFeature = function (arg) {
+var gl_planeFeature = function (arg) {
   'use strict';
-  if (!(this instanceof geo.gl.planeFeature)) {
-    return new geo.gl.planeFeature(arg);
+  if (!(this instanceof gl_planeFeature)) {
+    return new gl_planeFeature(arg);
   }
-  geo.planeFeature.call(this, arg);
+  planeFeature.call(this, arg);
+
+  var transform = require('../transform');
+  var vgl = require('vgl');
 
   var m_this = this,
       s_exit = this._exit,
@@ -51,9 +58,9 @@ geo.gl.planeFeature = function (arg) {
         map_gcs = m_this.layer().map().gcs();
 
     if (gcs !== map_gcs) {
-      or = geo.transform.transformCoordinates(gcs, map_gcs, or);
-      ul = geo.transform.transformCoordinates(gcs, map_gcs, ul);
-      lr = geo.transform.transformCoordinates(gcs, map_gcs, lr);
+      or = transform.transformCoordinates(gcs, map_gcs, or);
+      ul = transform.transformCoordinates(gcs, map_gcs, ul);
+      lr = transform.transformCoordinates(gcs, map_gcs, lr);
     }
 
     m_this.buildTime().modified();
@@ -165,7 +172,9 @@ geo.gl.planeFeature = function (arg) {
   return this;
 };
 
-inherit(geo.gl.planeFeature, geo.planeFeature);
+inherit(gl_planeFeature, planeFeature);
 
 // Now register it
-geo.registerFeature('vgl', 'plane', geo.gl.planeFeature);
+registerFeature('vgl', 'plane', gl_planeFeature);
+
+module.exports = gl_planeFeature;

@@ -1,8 +1,12 @@
-geo.d3.tileLayer = function () {
+var registerLayerAdjustment = require('../registry').registerLayerAdjustment;
+
+var d3_tileLayer = function () {
   'use strict';
   var m_this = this,
       s_update = this._update,
-      s_init = this._init;
+      s_init = this._init,
+      $ = require('jquery'),
+      uniqueID = require('./uniqueID');
 
   this._drawTile = function (tile) {
     var bounds = m_this._tileBounds(tile),
@@ -38,7 +42,7 @@ geo.d3.tileLayer = function () {
         'g[data-tile-layer="' + level.toFixed() + '"]');
     if (node.empty()) {
       node = m_this.canvas().append('g');
-      var id = geo.d3.uniqueID();
+      var id = uniqueID();
       node.classed('group-' + id, true);
       node.classed('geo-tile-layer', true);
       node.attr('data-tile-layer', level.toFixed());
@@ -129,4 +133,5 @@ geo.d3.tileLayer = function () {
   };
 };
 
-geo.registerLayerAdjustment('d3', 'tile', geo.d3.tileLayer);
+registerLayerAdjustment('d3', 'tile', d3_tileLayer);
+module.exports = d3_tileLayer;

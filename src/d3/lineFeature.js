@@ -1,21 +1,31 @@
+var inherit = require('../inherit');
+var registerFeature = require('../registry').registerFeature;
+var lineFeature = require('../lineFeature');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class lineFeature
  *
- * @class
+ * @class geo.d3.lineFeature
  * @extends geo.lineFeature
  * @extends geo.d3.object
  * @returns {geo.d3.lineFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.d3.lineFeature = function (arg) {
+var d3_lineFeature = function (arg) {
   'use strict';
-  if (!(this instanceof geo.d3.lineFeature)) {
-    return new geo.d3.lineFeature(arg);
+  if (!(this instanceof d3_lineFeature)) {
+    return new d3_lineFeature(arg);
   }
+
+  var d3 = require('d3');
+  var object = require('./object');
+  var timestamp = require('../timestamp');
+  var util = require('../util');
+
   arg = arg || {};
-  geo.lineFeature.call(this, arg);
-  geo.d3.object.call(this);
+  lineFeature.call(this, arg);
+  object.call(this);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -24,7 +34,7 @@ geo.d3.lineFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       s_init = this._init,
-      m_buildTime = geo.timestamp(),
+      m_buildTime = timestamp(),
       s_update = this._update;
 
   ////////////////////////////////////////////////////////////////////////////
@@ -62,7 +72,7 @@ geo.d3.lineFeature = function (arg) {
 
       var style = {}, key;
       function wrapStyle(func) {
-        if (geo.util.isFunction(func)) {
+        if (util.isFunction(func)) {
           return function () {
             return func(ln[0], 0, item, idx);
           };
@@ -118,6 +128,8 @@ geo.d3.lineFeature = function (arg) {
   return this;
 };
 
-inherit(geo.d3.lineFeature, geo.lineFeature);
+inherit(d3_lineFeature, lineFeature);
 
-geo.registerFeature('d3', 'line', geo.d3.lineFeature);
+registerFeature('d3', 'line', d3_lineFeature);
+
+module.exports = d3_lineFeature;

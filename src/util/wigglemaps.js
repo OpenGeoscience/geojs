@@ -1,5 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
-/*
+/**
+ * @license
  * Includes several support classes adapted from wigglemaps.
  *
  * https://github.com/dotskapes/wigglemaps
@@ -395,8 +396,9 @@
         return v.clone ().normalize ();
     };
 
-    // Export to geo.util module
-    geo.util.RangeTree = RangeTree;
-    geo.util.Box = Box;
-    geo.util.vect = vect;
+    module.exports = {
+        Box: Box,
+        vect: vect,
+        RangeTree: RangeTree
+    };
 }());

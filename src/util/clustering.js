@@ -7,6 +7,9 @@
 (function () {
   'use strict';
 
+  var $ = require('jquery');
+  var vgl = require('vgl');
+
   /**
    * This class manages a group of nearby points that are clustered as a
    * single object for display purposes.  The class constructor is private
@@ -140,6 +143,8 @@
    */
   function C(opts, width, height) {
 
+    var DistanceGrid = require('./distanceGrid');
+
     // store the options
     this._opts = $.extend({
       maxZoom: 18,
@@ -155,8 +160,8 @@
     var zoom, scl;
     for (zoom = this._opts.maxZoom; zoom >= 0; zoom -= 1) {
       scl = this._scaleAtLevel(zoom, this._opts.width, this._opts.height);
-      this._clusters[zoom] = new geo.util.DistanceGrid(scl);
-      this._points[zoom] = new geo.util.DistanceGrid(scl);
+      this._clusters[zoom] = new DistanceGrid(scl);
+      this._points[zoom] = new DistanceGrid(scl);
     }
     this._topClusterLevel = new ClusterTree(this, -1);
   }
@@ -264,5 +269,5 @@
     return this._clusters[Math.floor(zoom)].contents();
   };
 
-  geo.util.ClusterGroup = C;
+  module.exports = C;
 })();

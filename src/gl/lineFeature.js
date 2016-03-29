@@ -1,19 +1,27 @@
+var inherit = require('../inherit');
+var registerFeature = require('../registry').registerFeature;
+var lineFeature = require('../lineFeature');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of lineFeature
  *
- * @class
+ * @class geo.gl.lineFeature
  * @extends geo.lineFeature
  * @returns {geo.gl.lineFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.gl.lineFeature = function (arg) {
+var gl_lineFeature = function (arg) {
   'use strict';
-  if (!(this instanceof geo.gl.lineFeature)) {
-    return new geo.gl.lineFeature(arg);
+  if (!(this instanceof gl_lineFeature)) {
+    return new gl_lineFeature(arg);
   }
   arg = arg || {};
-  geo.lineFeature.call(this, arg);
+  lineFeature.call(this, arg);
+
+  var vgl = require('vgl');
+  var transform = require('../transform');
+  var util = require('../util');
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -147,18 +155,18 @@ geo.gl.lineFeature = function (arg) {
       }
     }
 
-    position = geo.transform.transformCoordinates(
+    position = transform.transformCoordinates(
                  m_this.gcs(), m_this.layer().map().gcs(),
                  position, 3);
 
     len = numSegments * order.length;
-    posBuf = geo.util.getGeomBuffer(geom, 'pos', len * 3);
-    nextBuf = geo.util.getGeomBuffer(geom, 'next', len * 3);
-    prevBuf = geo.util.getGeomBuffer(geom, 'prev', len * 3);
-    offsetBuf = geo.util.getGeomBuffer(geom, 'offset', len);
-    strokeWidthBuf = geo.util.getGeomBuffer(geom, 'strokeWidth', len);
-    strokeColorBuf = geo.util.getGeomBuffer(geom, 'strokeColor', len * 3);
-    strokeOpacityBuf = geo.util.getGeomBuffer(geom, 'strokeOpacity', len);
+    posBuf = util.getGeomBuffer(geom, 'pos', len * 3);
+    nextBuf = util.getGeomBuffer(geom, 'next', len * 3);
+    prevBuf = util.getGeomBuffer(geom, 'prev', len * 3);
+    offsetBuf = util.getGeomBuffer(geom, 'offset', len);
+    strokeWidthBuf = util.getGeomBuffer(geom, 'strokeWidth', len);
+    strokeColorBuf = util.getGeomBuffer(geom, 'strokeColor', len * 3);
+    strokeOpacityBuf = util.getGeomBuffer(geom, 'strokeOpacity', len);
     indicesBuf = geom.primitive(0).indices();
     if (!(indicesBuf instanceof Uint16Array) || indicesBuf.length !== len) {
       indicesBuf = new Uint16Array(len);
@@ -384,7 +392,9 @@ geo.gl.lineFeature = function (arg) {
   return this;
 };
 
-inherit(geo.gl.lineFeature, geo.lineFeature);
+inherit(gl_lineFeature, lineFeature);
 
 // Now register it
-geo.registerFeature('vgl', 'line', geo.gl.lineFeature);
+registerFeature('vgl', 'line', gl_lineFeature);
+
+module.exports = gl_lineFeature;

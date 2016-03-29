@@ -36,7 +36,7 @@ $(function () {
       return {x: s, y: s};
     }
   });
-  inherit(DeepZoom, geo.tileLayer);
+  geo.inherit(DeepZoom, geo.tileLayer);
   geo.registerLayer('tiledFish', DeepZoom);
   // Create a map object
   var map = geo.map({

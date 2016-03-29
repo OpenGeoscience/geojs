@@ -1,16 +1,20 @@
+var inherit = require('../inherit');
+var registerFeature = require('../registry').registerFeature;
+var graphFeature = require('../graphFeature');
+
 /**
- * @class
+ * @class geo.d3.graphFeature
  * @extends geo.graphFeature
  */
-geo.d3.graphFeature = function (arg) {
+var d3_graphFeature = function (arg) {
   'use strict';
 
   var m_this = this;
 
-  if (!(this instanceof geo.d3.graphFeature)) {
-    return new geo.d3.graphFeature(arg);
+  if (!(this instanceof d3_graphFeature)) {
+    return new d3_graphFeature(arg);
   }
-  geo.graphFeature.call(this, arg);
+  graphFeature.call(this, arg);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -32,6 +36,8 @@ geo.d3.graphFeature = function (arg) {
   return this;
 };
 
-inherit(geo.d3.graphFeature, geo.graphFeature);
+inherit(d3_graphFeature, graphFeature);
 
-geo.registerFeature('d3', 'graph', geo.d3.graphFeature);
+registerFeature('d3', 'graph', d3_graphFeature);
+
+module.exports = d3_graphFeature;

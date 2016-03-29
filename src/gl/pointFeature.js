@@ -1,19 +1,27 @@
+var inherit = require('../inherit');
+var registerFeature = require('../registry').registerFeature;
+var pointFeature = require('../pointFeature');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of pointFeature
  *
- * @class
+ * @class geo.gl.pointFeature
  * @extends geo.pointFeature
  * @returns {geo.gl.pointFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.gl.pointFeature = function (arg) {
+var gl_pointFeature = function (arg) {
   'use strict';
-  if (!(this instanceof geo.gl.pointFeature)) {
-    return new geo.gl.pointFeature(arg);
+  if (!(this instanceof gl_pointFeature)) {
+    return new gl_pointFeature(arg);
   }
   arg = arg || {};
-  geo.pointFeature.call(this, arg);
+  pointFeature.call(this, arg);
+
+  var vgl = require('vgl');
+  var transform = require('../transform');
+  var util = require('../util');
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -263,7 +271,7 @@ geo.gl.pointFeature = function (arg) {
       position[i3 + 2] = posVal.z || 0;
       nonzeroZ = nonzeroZ || position[i3 + 2];
     }
-    position = geo.transform.transformCoordinates(
+    position = transform.transformCoordinates(
                   m_this.gcs(), m_this.layer().map().gcs(),
                   position, 3);
     /* Some transforms modify the z-coordinate.  If we started with all zero z
@@ -275,20 +283,20 @@ geo.gl.pointFeature = function (arg) {
       }
     }
 
-    posBuf = geo.util.getGeomBuffer(geom, 'pos', vpf * numPts * 3);
+    posBuf = util.getGeomBuffer(geom, 'pos', vpf * numPts * 3);
 
     if (m_primitiveShape !== 'sprite') {
-      unitBuf = geo.util.getGeomBuffer(geom, 'unit', vpf * numPts * 2);
+      unitBuf = util.getGeomBuffer(geom, 'unit', vpf * numPts * 2);
     }
 
-    radius = geo.util.getGeomBuffer(geom, 'rad', vpf * numPts);
-    stroke = geo.util.getGeomBuffer(geom, 'stroke', vpf * numPts);
-    strokeWidth = geo.util.getGeomBuffer(geom, 'strokeWidth', vpf * numPts);
-    strokeOpacity = geo.util.getGeomBuffer(geom, 'strokeOpacity', vpf * numPts);
-    strokeColor = geo.util.getGeomBuffer(geom, 'strokeColor', vpf * numPts * 3);
-    fill = geo.util.getGeomBuffer(geom, 'fill', vpf * numPts);
-    fillOpacity = geo.util.getGeomBuffer(geom, 'fillOpacity', vpf * numPts);
-    fillColor = geo.util.getGeomBuffer(geom, 'fillColor', vpf * numPts * 3);
+    radius = util.getGeomBuffer(geom, 'rad', vpf * numPts);
+    stroke = util.getGeomBuffer(geom, 'stroke', vpf * numPts);
+    strokeWidth = util.getGeomBuffer(geom, 'strokeWidth', vpf * numPts);
+    strokeOpacity = util.getGeomBuffer(geom, 'strokeOpacity', vpf * numPts);
+    strokeColor = util.getGeomBuffer(geom, 'strokeColor', vpf * numPts * 3);
+    fill = util.getGeomBuffer(geom, 'fill', vpf * numPts);
+    fillOpacity = util.getGeomBuffer(geom, 'fillOpacity', vpf * numPts);
+    fillColor = util.getGeomBuffer(geom, 'fillColor', vpf * numPts * 3);
     indices = geom.primitive(0).indices();
     if (!(indices instanceof Uint16Array) || indices.length !== vpf * numPts) {
       indices = new Uint16Array(vpf * numPts);
@@ -525,7 +533,9 @@ geo.gl.pointFeature = function (arg) {
   return this;
 };
 
-inherit(geo.gl.pointFeature, geo.pointFeature);
+inherit(gl_pointFeature, pointFeature);
 
 // Now register it
-geo.registerFeature('vgl', 'point', geo.gl.pointFeature);
+registerFeature('vgl', 'point', gl_pointFeature);
+
+module.exports = gl_pointFeature;

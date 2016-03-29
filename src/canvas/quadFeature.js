@@ -1,20 +1,26 @@
+var inherit = require('../inherit');
+var registerFeature = require('../registry').registerFeature;
+var quadFeature = require('../quadFeature');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class quadFeature
  *
- * @class
+ * @class geo.canvas.quadFeature
  * @param {Object} arg Options object
  * @extends geo.quadFeature
  * @returns {geo.canvas.quadFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.canvas.quadFeature = function (arg) {
+var canvas_quadFeature = function (arg) {
   'use strict';
 
-  if (!(this instanceof geo.canvas.quadFeature)) {
-    return new geo.canvas.quadFeature(arg);
+  if (!(this instanceof canvas_quadFeature)) {
+    return new canvas_quadFeature(arg);
   }
-  geo.quadFeature.call(this, arg);
+  quadFeature.call(this, arg);
+
+  var $ = require('jquery');
 
   var m_this = this,
       s_exit = this._exit,
@@ -131,7 +137,8 @@ geo.canvas.quadFeature = function (arg) {
   return this;
 };
 
-inherit(geo.canvas.quadFeature, geo.quadFeature);
+inherit(canvas_quadFeature, quadFeature);
 
 // Now register it
-geo.registerFeature('canvas', 'quad', geo.canvas.quadFeature);
+registerFeature('canvas', 'quad', canvas_quadFeature);
+module.exports = canvas_quadFeature;

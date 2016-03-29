@@ -1,27 +1,23 @@
 language: node_js
-
+sudo: False
 node_js:
     - "0.12"
 
+cache:
+    directories:
+        - node_modules
+        - $HOME/cache
+
 before_install:
-  - pushd "${HOME}"
-  - curl -L "https://cmake.org/files/v3.3/cmake-3.3.2-Linux-x86_64.tar.gz" | gunzip -c | tar x
-  - cd cmake-*/bin && export PATH="${PWD}:${PATH}"
-  - popd
-  - cmake --version
-  - env
+    - CACHE="${HOME}/cache" CMAKE_VERSION=3.5.0 CMAKE_SHORT_VERSION=3.5 source ./scripts/install_cmake.sh
+    - npm prune
 
 script:
-    - npm install
     - npm run build
     - ./node_modules/.bin/grunt docs
-    - ./node_modules/.bin/grunt copy:jqueryui
-    - ./node_modules/.bin/grunt serve-test &
-    - sleep 1
     - mkdir _build
-    - cd _build
-    - cmake -DCOVERAGE_TESTS=ON ..
-    - ctest -VV -S ../cmake/travis_build.cmake || true
-    - if [ -f test_failed ] ; then false ; fi
+    - ctest -S cmake/travis_build.cmake -VV || true
+    - if [ -f _build/test_failed ] ; then false ; fi
 
-sudo: False
+after_success:
+  - npm run codecov

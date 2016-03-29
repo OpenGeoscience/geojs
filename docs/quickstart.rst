@@ -38,7 +38,7 @@ by issue this command in your terminal. ::
 This will put all of the source code in a new directory called
 ``geojs``.  The GeoJS library is packaged together with another
 library `vgl`_.  Formally, this library was included as a git
-submodule.  Currently, vgl is downloaded from bower to integrate
+submodule.  Currently, vgl is downloaded from npm to integrate
 better with workflows used by web projects.
 
 .. _GitHub repository: https://github.com/OpenGeoscience/geojs
@@ -52,12 +52,11 @@ install all dependent javascript libraries and bundle together everything that
 is needed. ::
 
     npm install
-    grunt
+    npm run build
 
 Compiled javascript libraries will be named ``geo.min.js`` and ``geo.ext.min.js`` in ``dist/built``.
-The first file contains geojs and vgl bundled together.  The second file contains all
-of the dependent libraries.  The bundled libraries are minified, but source maps
-are provided
+The first file contains geojs and vgl bundled together with a number of dependent libraries.
+The second file contains jquery and d3.  The bundled libraries are minified, but source maps are provided
 
 .. _quick-start-guide:
 
@@ -70,7 +69,7 @@ and creating a basic full map using the `osmLayer` class.
 .. code-block:: html
 
     <head>
-        <script src="/built/geo.ext.min.js"></script>
+        <script charset="UTF-8" src="/built/geo.ext.min.js"></script>
         <script src="/built/geo.min.js"></script>
 
         <style>
@@ -104,4 +103,4 @@ browser, you should see a map like the following:
     :align: center
 
 Additionally, you will be able to see all of the built-in examples at
-`<http://localhost:8082/examples>`_.
+`<http://localhost:8082/examples>`_ after building them by running ``grunt``.

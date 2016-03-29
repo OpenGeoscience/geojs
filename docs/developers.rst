@@ -7,7 +7,7 @@ Developer's guide
     This guide assumes you have cloned and built the geojs repository
     according to the :ref:`Quick start guide <project-setup-guide>`.
 
-The testing infrastructure of Geojs is run via CTest, it assumes
+The selenium testing infrastructure of Geojs is run via CTest, it assumes
 that the testing "server" is started prior to execution.  To start the
 server, just run ::
 
@@ -54,31 +54,29 @@ Headless browser testing
 
 Geojs uses `PhantomJS <http://phantomjs.org/>`_ for headless browser
 testing of core utilities.  Unfortunately because PhantomJS does not
-support webgl at this time, it is not possible to do headless testing
-for any code that requires instantiating the ``geo.map`` class.  These
-tests are run automatically on `Travis <http://travis-ci.org/>`_ for
-every pull request so they should be used whenever possible.
+support webgl at this time, so code paths requiring gl must be either
+mocked or run via selenium.
 
-The headless unit tests should be placed in the ``testing/test-cases/phantomjs-tests``
-directory.  All javascript files in this directory are automatically
-added as test cases by CMake.  They are run in PhantomJS using
-the `Jasmine <http://jasmine.github.io/1.3/introduction.html>`_ test
-framework.  The output from Jasmine is automatically detected by the
-test runner, which sets it's return status to ``0`` if (and only if)
-all tests passed.  You can run these tests manually in the browser by
-starting up a test server ::
+The headless unit tests should be placed in the ``tests/cases/``
+directory.  All javascript files in this directory will be detected
+by the `Karma <http://karma-runner.github.io/0.13/index.html>`_ test
+runner and executed automatically when you run ``npm run test``.  It
+is possible to debug these tests in a normal browser as well.  Just run
+``npm run start`` and browse to `<http://localhost:9876/debug.html>`_.  The
+test runner will automatically rebuild the tests as you modify files
+so there is no need to rerun this command unless you add a new file.
 
-    grunt serve-test
-
-and navigating to a test case in your browser.  For example, the test defined at
-``testing/test-cases/phantomjs-tests/object.js`` can be run by browsing to
-`<http://localhost:30100/test/phantomjs/object.html>`_.
-
-For tests that require webgl, there is a similar framework for running
-Jasmine unittests inside selenium.  For these cases, you can add your
-tests inside the ``testing/test-cases/jasmine-tests``.  CMake will
-automatically pick up the scripts in the directory and generate a test
-case for them.
+There are a number of utilities present in the file ``tests/test-utils.js``
+that developers can use to make better unit tests.  For example, a mocked
+vgl renderer can be used to hit code paths within gl rendered layers.  There
+are also methods for mocking global methods like ``requestAnimationFrame``
+to test complex, asynchronous code paths in a stable and repeatable manner.
+The `Sinon <http://sinonjs.org/>`_ testing library is also available to
+generate stubs, spies, and mocked methods.  Because all tests share
+a global scope, they should be careful to clean up all mocking and
+instrumentation after running.  Ideally, each test should be runnable
+independently and use jasmines ``beforeEach`` and ``afterEach`` methods
+for setup and tear down.
 
 Selenium testing
 ----------------
@@ -123,7 +121,7 @@ results.  The path to each test is derived from the relative path inside
 ``testing/test-cases/selenium-tests/osmLayer/`` is available at
 `<http://localhost:30100/test/selenium/osmLayer/>`_ after starting the test web server.
 
-The unit tests themselves are derived from Python's 
+The unit tests themselves are derived from Python's
 `unittest <https://docs.python.org/2/library/unittest.html>`_ module via a customized
 subclass :py:class:`selenium_test.BaseTest`.  Detailed documentation of the methods
 this class provides is given in the next section.  Developers should feel free to
@@ -164,7 +162,7 @@ in the source.
 
 .. code-block:: python
 
-    # Importing setupModule and tearDownModule will start up and 
+    # Importing setupModule and tearDownModule will start up and
     # shut down the web server automatically.
     from selenium_test import FirefoxTest, setupModule, tearDownModule
 
@@ -213,9 +211,8 @@ for an invitation.
 Code coverage
 -------------
 
-Code coverage information is accumulated automatically through custom
-`blanketjs <http://blanketjs.org/>`_ instrumentation when ``COVERAGE_TESTS``
-are enabled in CMake.  As long as the recommendations in this guide have
-been followed, all phantomjs and selenium unit tests will be instrumented
-for coverage reporting.
-
+Code coverage information is generated automatically for all headless unit tests
+by Karma's test runner when running ``npm run test``.  The coverage information is
+submitted to `codecov <https://codecov.io/github/OpenGeoscience/geojs>`_ and
+`cdash <http://my.cdash.org/index.php?project=geojs>`_ after every
+successful Travis run.

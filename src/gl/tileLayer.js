@@ -1,4 +1,6 @@
-geo.gl.tileLayer = function () {
+var registerLayerAdjustment = require('../registry').registerLayerAdjustment;
+
+var gl_tileLayer = function () {
   'use strict';
   var m_this = this,
       s_init = this._init,
@@ -84,4 +86,6 @@ geo.gl.tileLayer = function () {
   this._updateSubLayer = undefined;
 };
 
-geo.registerLayerAdjustment('vgl', 'tile', geo.gl.tileLayer);
+registerLayerAdjustment('vgl', 'tile', gl_tileLayer);
+
+module.exports = gl_tileLayer;

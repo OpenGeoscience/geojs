@@ -3,116 +3,24 @@
 module.exports = function (grunt) {
   'use strict';
 
-  var sources, geojsVersion, geo, port, sourceList, templateData, pkg;
+  var port;
 
-  pkg = grunt.file.readJSON('package.json');
-  geojsVersion = pkg.version;
-  sources = grunt.file.readJSON('sources.json');
   port = Number(grunt.option('port') || '8082');
 
   /* Pass a "--env=<value>" argument to grunt. Default value is "production"
    * --env=dev enables making source maps. */
   var environment = grunt.option('env') || 'production';
 
-  function moduleFiles(module) {
-    var obj, files;
-
-    obj = sources.modules[module];
-
-    files = (obj.files || []).map(function (f) {
-      if (obj.prefix) {
-        f = obj.prefix + '/' + f;
-      }
-      return f;
-    });
-
-    return files;
-  }
-
-  geo = {
-    init: moduleFiles('geo.init'),
-    util: moduleFiles('geo.util'),
-    core: moduleFiles('geo.core'),
-    gl: moduleFiles('geo.gl'),
-    canvas: moduleFiles('geo.canvas'),
-    d3: moduleFiles('geo.d3'),
-    ui: moduleFiles('geo.ui'),
-    plugin: moduleFiles('geo.plugin')
-  };
-
-  sourceList = Array.prototype.concat(
-    geo.init,
-    ['src/vgl/vgl.js'],
-    geo.util,
-    geo.core,
-    geo.gl,
-    geo.canvas,
-    geo.d3,
-    geo.ui,
-    geo.plugin
-  );
-
-  templateData = {
-    GEOJS_VERSION: geojsVersion,
-    SOURCES_JSON: JSON.stringify(sourceList),
-    SOURCES_ROOT: '/',
-    BUNDLE_EXT: 'built/geo.ext.min.js',
-    BUNDLE_GEO: 'built/geo.min.js'
-  };
-
   grunt.config.init({
     env: grunt.option('env') || process.env.GRUNT_ENV || 'development',
 
-    pkg: pkg,
-
-    template: {
-      version: {
-        options: {
-          data: templateData
-        },
-        files: { 'src/core/version.js': 'src/core/version.js.in' }
-      },
-      loadDev: {
-        options: {
-          data: templateData
-        },
-        files: { 'dist/built/geo.all.dev.js': 'src/geo.all.dev.js.in' }
-      },
-      loadAll: {
-        options: {
-          data: templateData
-        },
-        files: { 'dist/built/geo.all.js': 'src/geo.all.js.in' }
-      }
-    },
-
     copy: {
-      geo: {
+      plugins: {
         files: [
           {
-            src: Array.prototype.concat(
-              geo.init,
-              geo.util,
-              geo.core,
-              geo.gl,
-              geo.canvas,
-              geo.d3,
-              geo.ui,
-              geo.plugin
-            ),
+            cwd: 'src/',
+            src: ['plugin/*.js'],
             dest: 'dist/',
-            filter: 'isFile',
-            flatten: false
-          }
-        ]
-      },
-      vgl: {
-        files: [
-          {
-            src: 'vgl.js',
-            dest: 'dist/src/vgl/',
-            filter: 'isFile',
-            cwd: 'bower_components/vgl',
             expand: true
           }
         ]
@@ -138,7 +46,7 @@ module.exports = function (grunt) {
             src: ['**'],
             dest: 'dist/examples/common/',
             expand: true,
-            cwd: 'bower_components/bootstrap/dist/',
+            cwd: 'node_modules/bootstrap/dist/',
             filter: function (src) {
               return !src.match(/.*\.css$/);
             }
@@ -147,7 +55,7 @@ module.exports = function (grunt) {
             src: ['*'],
             dest: 'dist/examples/common/css/',
             expand: true,
-            cwd: 'bower_components/bootswatch/flatly'
+            cwd: 'node_modules/bootswatch/flatly'
           }
         ]
       },
@@ -156,46 +64,22 @@ module.exports = function (grunt) {
           {
             src: ['codemirror.css'],
             dest: 'dist/examples/common/css/',
-            cwd: 'bower_components/codemirror/lib/',
+            cwd: 'node_modules/codemirror/lib/',
             expand: true
           },
           {
             src: ['lint.css'],
             dest: 'dist/examples/common/css/',
-            cwd: 'bower_components/codemirror/addon/lint/',
+            cwd: 'node_modules/codemirror/addon/lint/',
             expand: true
           },
           {
             src: ['foldgutter.css'],
             dest: 'dist/examples/common/css/',
-            cwd: 'bower_components/codemirror/addon/fold/',
+            cwd: 'node_modules/codemirror/addon/fold/',
             expand: true
           }
         ]
-      },
-      jqueryui: {
-        files: [
-          {
-            src: ['jquery-ui.min.js'],
-            dest: 'dist/examples/common/js',
-            cwd: 'bower_components/jquery-ui/',
-            expand: true
-          }
-        ]
-      }
-    },
-
-    concat: {
-      geojs: {
-        options: {
-          seperator: '',
-          sourceMap: environment === 'dev'
-        },
-        files: {
-          'dist/built/geo.js': sourceList.map(function (f) {
-            return 'dist/' + f;
-          })
-        }
       }
     },
 
@@ -211,71 +95,22 @@ module.exports = function (grunt) {
         mangle: false
       },
 
-      geojs: {
-        files: {
-          'dist/built/geo.min.js': sourceList.map(function (f) {
-            return 'dist/' + f;
-          })
-        }
-      },
-
-      ext: {
-        files: {
-          'dist/built/geo.ext.min.js': [
-            'bower_components/jquery/dist/jquery.js',
-            'bower_components/gl-matrix/dist/gl-matrix.js',
-            'bower_components/proj4/dist/proj4-src.js',
-            'bower_components/d3/d3.js',
-            'node_modules/pnltri/pnltri.js'
-          ]
-        }
-      },
-
       codemirror: {
         files: {
           'dist/examples/common/js/codemirror.js': [
-            'bower_components/jsonlint/lib/jsonlint.js',
-            'bower_components/codemirror/lib/codemirror.js',
-            'bower_components/codemirror/mode/javascript/javascript.js',
-            'bower_components/codemirror/mode/javascript/javascript.js',
-            'bower_components/codemirror/addon/lint/lint.js',
-            'bower_components/codemirror/addon/lint/json-lint.js',
-            'bower_components/codemirror/addon/fold/brace-fold.js',
-            'bower_components/codemirror/addon/fold/foldcode.js',
-            'bower_components/codemirror/addon/fold/foldgutter.js',
-            'bower_components/codemirror/addon/edit/matchbrackets.js'
+            'node_modules/jsonlint/lib/jsonlint.js',
+            'node_modules/codemirror/lib/codemirror.js',
+            'node_modules/codemirror/mode/javascript/javascript.js',
+            'node_modules/codemirror/mode/javascript/javascript.js',
+            'node_modules/codemirror/addon/lint/lint.js',
+            'node_modules/codemirror/addon/lint/json-lint.js',
+            'node_modules/codemirror/addon/fold/brace-fold.js',
+            'node_modules/codemirror/addon/fold/foldcode.js',
+            'node_modules/codemirror/addon/fold/foldgutter.js',
+            'node_modules/codemirror/addon/edit/matchbrackets.js'
           ]
         }
       }
-    },
-
-    watch: {
-      uglify: {
-        files: [
-          'src/**/*.js',
-          'src/core/version.js.in',
-          'Gruntfile.js',
-          'sources.json'
-        ],
-        tasks: [
-          'clean:source',
-          'template',
-          'copy',
-          'concat:geojs',
-          'uglify:geojs'
-        ]
-      },
-      examples: {
-        files: [
-          'examples/**/*'
-        ],
-        tasks: ['examples']
-      }
-    },
-
-    clean: {
-      source: ['dist/src', 'src/core/version.js'],
-      all: ['dist', 'src/core/version.js']
     },
 
     express: {
@@ -296,12 +131,8 @@ module.exports = function (grunt) {
   });
 
   grunt.loadNpmTasks('grunt-contrib-jade');
-  grunt.loadNpmTasks('grunt-template');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-uglify');
-  grunt.loadNpmTasks('grunt-contrib-watch');
-  grunt.loadNpmTasks('grunt-contrib-clean');
-  grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-express');
   grunt.loadNpmTasks('grunt-docco');
 
@@ -432,27 +263,13 @@ module.exports = function (grunt) {
     'copy:bootstrap',
     'copy:codemirror',
     'copy:examples',
-    'copy:jqueryui',
     'uglify:codemirror',
     'jade',
     'docco'
   ]);
 
-  grunt.registerTask('library', [
-    'template',
-    'copy:geo',
-    'copy:vgl',
-    'concat:geojs',
-    'uglify:geojs'
-  ]);
-
-  grunt.registerTask('init', [
-    'uglify:ext'
-  ]);
-
   grunt.registerTask('default', [
-    'init',
-    'library',
+    'copy:plugins',
     'examples'
   ]);
 
@@ -460,7 +277,7 @@ module.exports = function (grunt) {
     'serve',
     'Serve the content at http://localhost:8082, ' +
     'use the --port option to override the default port',
-    ['express', 'watch']
+    ['express', 'express-keepalive']
   );
 
   grunt.registerTask(

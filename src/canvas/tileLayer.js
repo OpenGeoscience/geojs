@@ -1,4 +1,6 @@
-geo.canvas.tileLayer = function () {
+var registerLayerAdjustment = require('../registry').registerLayerAdjustment;
+
+var canvas_tileLayer = function () {
   'use strict';
   var m_this = this,
       s_init = this._init,
@@ -84,4 +86,5 @@ geo.canvas.tileLayer = function () {
   this._updateSubLayer = undefined;
 };
 
-geo.registerLayerAdjustment('canvas', 'tile', geo.canvas.tileLayer);
+registerLayerAdjustment('canvas', 'tile', canvas_tileLayer);
+module.exports = canvas_tileLayer;

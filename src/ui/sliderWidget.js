@@ -1,18 +1,25 @@
+var svgWidget = require('./svgWidget');
+var inherit = require('../inherit');
+var registerWidget = require('../registry').registerWidget;
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class sliderWidget
  *
- * @class
+ * @class geo.gui.sliderWidget
  * @extends {geo.gui.svgWidget}
  * @returns {geo.gui.sliderWidget}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.gui.sliderWidget = function (arg) {
+var sliderWidget = function (arg) {
   'use strict';
-  if (!(this instanceof geo.gui.sliderWidget)) {
-    return new geo.gui.sliderWidget(arg);
+  if (!(this instanceof sliderWidget)) {
+    return new sliderWidget(arg);
   }
-  geo.gui.svgWidget.call(this, arg);
+  svgWidget.call(this, arg);
+
+  var d3 = require('d3');
+  var geo_event = require('../event');
 
   var m_this = this,
       s_exit = this._exit,
@@ -281,7 +288,7 @@ geo.gui.sliderWidget = function (arg) {
       .on('mouseout', mouseOut);
 
     // Update the nub position on zoom
-    m_this.layer().geoOn(geo.event.zoom, function () {
+    m_this.layer().geoOn(geo_event.zoom, function () {
       m_this._update();
     });
 
@@ -300,7 +307,7 @@ geo.gui.sliderWidget = function (arg) {
   //////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
     m_group.remove();
-    m_this.layer().geoOff(geo.event.zoom);
+    m_this.layer().geoOff(geo_event.zoom);
     s_exit();
   };
 
@@ -330,6 +337,7 @@ geo.gui.sliderWidget = function (arg) {
   };
 };
 
-inherit(geo.gui.sliderWidget, geo.gui.svgWidget);
+inherit(sliderWidget, svgWidget);
 
-geo.registerWidget('dom', 'slider', geo.gui.sliderWidget);
+registerWidget('dom', 'slider', sliderWidget);
+module.exports = sliderWidget;

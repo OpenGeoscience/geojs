@@ -3,8 +3,7 @@
     "geo.init": {
       "prefix": "src/core",
       "files": [
-        "init.js",
-        "version.js"
+        "init.js"
       ]
     },
     "geo.core": {
