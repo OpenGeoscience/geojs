@@ -62,13 +62,22 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-3">&#182;</a>
               </div>
-              <p>Add an OSM layer</p>
+              <p>Parse query parameters into an object for ease of access</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> osm = map.createLayer(<span class="hljs-string">'osm'</span>, {
-    baseUrl: <span class="hljs-string">'http://otile1.mqcdn.com/tiles/1.0.0/map'</span>
-  });</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> query = <span class="hljs-built_in">document</span>.location.search.replace(<span class="hljs-regexp">/(^\?)/</span>, <span class="hljs-string">''</span>).split(
+    <span class="hljs-string">'&amp;'</span>).map(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">n</span>) </span>{
+      n = n.split(<span class="hljs-string">'='</span>);
+      <span class="hljs-keyword">if</span> (n[<span class="hljs-number">0</span>]) {
+        <span class="hljs-keyword">this</span>[<span class="hljs-built_in">decodeURIComponent</span>(n[<span class="hljs-number">0</span>])] = <span class="hljs-built_in">decodeURIComponent</span>(n[<span class="hljs-number">1</span>]);
+      }
+      <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+    }.bind({}))[<span class="hljs-number">0</span>];
+
+  <span class="hljs-keyword">if</span> (query.test) {
+    $(<span class="hljs-string">'#test'</span>).removeClass(<span class="hljs-string">'hidden'</span>);
+  }</pre></div></div>
             
         </li>
         
@@ -78,6 +87,24 @@
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>Add an OSM layer</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  map.createLayer(<span class="hljs-string">'osm'</span>, {
+    baseUrl: <span class="hljs-string">'http://otile1.mqcdn.com/tiles/1.0.0/map'</span>,
+    renderer: query.renderer ? (query.renderer === <span class="hljs-string">'html'</span> ? <span class="hljs-literal">null</span> : query.renderer) : <span class="hljs-string">'vgl'</span>
+  });</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
               </div>
               <p>Bind button clicks to map transitions</p>
 
@@ -138,6 +165,40 @@
       rotation: <span class="hljs-built_in">Math</span>.PI * <span class="hljs-number">2</span>,
       duration: <span class="hljs-number">2000</span>
     });
+  });
+
+  $(<span class="hljs-string">'#test'</span>).click(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    geo.util.timeRequestAnimationFrame(<span class="hljs-literal">undefined</span>, <span class="hljs-literal">undefined</span>, <span class="hljs-literal">undefined</span>, <span class="hljs-number">10000</span>);
+    <span class="hljs-keyword">var</span> list = [<span class="hljs-string">'pan-to-london'</span>, <span class="hljs-string">'elastic-to-moscow'</span>, <span class="hljs-string">'bounce-to-istanbul'</span>,
+                <span class="hljs-string">'fly-to-bern'</span>, <span class="hljs-string">'spin-to-budapest'</span>];
+    <span class="hljs-keyword">var</span> maxrepeat = <span class="hljs-number">3</span>, repeat, i, l;
+    <span class="hljs-keyword">for</span> (repeat = <span class="hljs-number">0</span>, i = <span class="hljs-number">0</span>; repeat &lt; maxrepeat; repeat += <span class="hljs-number">1</span>) {
+      <span class="hljs-keyword">for</span> (l = <span class="hljs-number">0</span>; l &lt; list.length; l += <span class="hljs-number">1</span>, i += <span class="hljs-number">1</span>) {
+        <span class="hljs-built_in">window</span>.setTimeout((<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">id</span>) </span>{
+          <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+            $(id).click();
+          };
+        })(<span class="hljs-string">'#'</span> + list[l]), i * <span class="hljs-number">2250</span>);
+      }
+    }
+    <span class="hljs-built_in">window</span>.setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+      <span class="hljs-keyword">var</span> res = geo.util.timeReport(<span class="hljs-string">'requestAnimationFrame'</span>);
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">JSON</span>.stringify(res));
+      <span class="hljs-keyword">var</span> modal = $(
+        <span class="hljs-string">'&lt;div class="modal fade"&gt;&lt;div class="modal-dialog"&gt;'</span> +
+        <span class="hljs-string">'&lt;div class="modal-content"&gt;&lt;div class="modal-header"&gt;'</span> +
+        <span class="hljs-string">'&lt;button type="button" class="close" data-dismiss="modal"&gt;&amp;times;'</span> +
+        <span class="hljs-string">'&lt;/button&gt;&lt;h4 class="modal-title"&gt;Test Results&lt;/h4&gt;&lt;/div&gt;'</span> +
+        <span class="hljs-string">'&lt;div class="modal-body"/&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;'</span>
+      );
+      <span class="hljs-keyword">var</span> report = {
+        count: res.count, max: res.max, above_threshold: res.above_threshold,
+        subcalls: res.subcalls, stddev: res.stddev, average: res.average
+      };
+      $(<span class="hljs-string">'.modal-body'</span>, modal).append($(<span class="hljs-string">'&lt;div/&gt;'</span>).text(
+        <span class="hljs-built_in">JSON</span>.stringify(report, <span class="hljs-literal">undefined</span>, <span class="hljs-number">2</span>)));
+      modal.modal();
+    }, maxrepeat * list.length * <span class="hljs-number">2250</span>);
   });
 });</pre></div></div>
             

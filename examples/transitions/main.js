@@ -9,9 +9,24 @@ $(function () {
     center: {x: 28.9550, y: 41.0136}
   });
 
+  // Parse query parameters into an object for ease of access
+  var query = document.location.search.replace(/(^\?)/, '').split(
+    '&').map(function (n) {
+      n = n.split('=');
+      if (n[0]) {
+        this[decodeURIComponent(n[0])] = decodeURIComponent(n[1]);
+      }
+      return this;
+    }.bind({}))[0];
+
+  if (query.test) {
+    $('#test').removeClass('hidden');
+  }
+
   // Add an OSM layer
-  var osm = map.createLayer('osm', {
-    baseUrl: 'http://otile1.mqcdn.com/tiles/1.0.0/map'
+  map.createLayer('osm', {
+    baseUrl: 'http://otile1.mqcdn.com/tiles/1.0.0/map',
+    renderer: query.renderer ? (query.renderer === 'html' ? null : query.renderer) : 'vgl'
   });
 
   // Bind button clicks to map transitions
@@ -70,5 +85,39 @@ $(function () {
       rotation: Math.PI * 2,
       duration: 2000
     });
+  });
+
+  $('#test').click(function () {
+    geo.util.timeRequestAnimationFrame(undefined, undefined, undefined, 10000);
+    var list = ['pan-to-london', 'elastic-to-moscow', 'bounce-to-istanbul',
+                'fly-to-bern', 'spin-to-budapest'];
+    var maxrepeat = 3, repeat, i, l;
+    for (repeat = 0, i = 0; repeat < maxrepeat; repeat += 1) {
+      for (l = 0; l < list.length; l += 1, i += 1) {
+        window.setTimeout((function (id) {
+          return function () {
+            $(id).click();
+          };
+        })('#' + list[l]), i * 2250);
+      }
+    }
+    window.setTimeout(function () {
+      var res = geo.util.timeReport('requestAnimationFrame');
+      console.log(JSON.stringify(res));
+      var modal = $(
+        '<div class="modal fade"><div class="modal-dialog">' +
+        '<div class="modal-content"><div class="modal-header">' +
+        '<button type="button" class="close" data-dismiss="modal">&times;' +
+        '</button><h4 class="modal-title">Test Results</h4></div>' +
+        '<div class="modal-body"/></div></div></div>'
+      );
+      var report = {
+        count: res.count, max: res.max, above_threshold: res.above_threshold,
+        subcalls: res.subcalls, stddev: res.stddev, average: res.average
+      };
+      $('.modal-body', modal).append($('<div/>').text(
+        JSON.stringify(report, undefined, 2)));
+      modal.modal();
+    }, maxrepeat * list.length * 2250);
   });
 });

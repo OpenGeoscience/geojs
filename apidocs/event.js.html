@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: event.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: event.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>//////////////////////////////////////////////////////////////////////////////
+/**
+ * Common object containing all event types that are provided by the GeoJS
+ * API.  Each property contained here is a valid target for event handling
+ * via {@link geo.object#geoOn}.  The event object provided to handlers is
+ * different for each event type.  Each handler will generally be called
+ * with a the &lt;code>this&lt;/code> context being the class that caused the event.&lt;br>
+ * &lt;br>
+ * The following properties are common to all event objects:
+ *
+ * @namespace geo.event
+ * @property {string} type The event type that was triggered
+ * @property {object} geo A universal event object for controlling propagation
+ *
+ * @example
+ * map.geoOn(geo.event.layerAdd, function (event) {
+ *   // event is an object with type: {@link geo.event.layerAdd}
+ * });
+ *
+ */
+//////////////////////////////////////////////////////////////////////////////
+var geo_event = {};
+
+//////////////////////////////////////////////////////////////////////////////
+/*
+ * Event types
+ */
+//////////////////////////////////////////////////////////////////////////////
+
+// The following were not triggered nor used anywhere.  Removing until their
+// purpose is defined more clearly.
+//
+// geo.event.update = 'geo_update';
+// geo.event.opacityUpdate = 'geo_opacityUpdate';
+// geo.event.layerSelect = 'geo_layerSelect';
+// geo.event.layerUnselect = 'geo_layerUnselect';
+// geo.event.query = 'geo_query';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered when a layer is added to the map.
+ *
+ * @property {geo.map} target The current map
+ * @property {geo.layer} layer The new layer
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.layerAdd = 'geo_layerAdd';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered when a layer is removed from the map.
+ *
+ * @property {geo.map} target The current map
+ * @property {geo.layer} layer The old layer
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.layerRemove = 'geo_layerRemove';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered when the map's zoom level is changed.  Note that zoom is never
+ * triggered on the map itself.  Instead it is triggered individually on
+ * layers, starting with the base layer.
+ *
+ * @property {number} zoomLevel New zoom level
+ * @property {object} screenPosition The screen position of mouse pointer
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.zoom = 'geo_zoom';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered when the map is rotated around the current map center (pointing
+ * downward so that positive angles are clockwise rotations).
+ *
+ * @property {number} angle The angle of the rotation in radians
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.rotate = 'geo_rotate';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered when the map is panned either by user interaction or map
+ * transition.
+ *
+ * @property {object} screenDelta The number of pixels to pan the map by
+ * @property {object} center The new map center
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.pan = 'geo_pan';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered when the map's canvas is resized.
+ *
+ * @property {number} width The new width in pixels
+ * @property {number} height The new height in pixels
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.resize = 'geo_resize';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered when the world coordinate system changes.  Data in GCS
+ * coordinates can be transformed by the following formulas:
+ *
+ *   x &lt;- (x - origin.x) * scale.x
+ *   y &lt;- (y - origin.y) * scale.y
+ *   z &lt;- (z - origin.z) * scale.z
+ *
+ * Data in world coordinates can be updated using the following formulas:
+ *
+ *   x &lt;- (x * scaleChange.x - origin.x * (scale.x + scaleChange.x)
+ *          - scale.x * originChange.x) * scale.x / scaleChange.x
+ *   y &lt;- (y * scaleChange.y - origin.y * (scale.y + scaleChange.y)
+ *          - scale.y * originChange.y) * scale.y / scaleChange.y
+ *   z &lt;- (z * scaleChange.z - origin.z * (scale.z + scaleChange.z)
+ *          - scale.z * originChange.z) * scale.z / scaleChange.z
+ *
+ * @property {geo.map} map The map whose coordinates changed
+ * @property {object} origin The new origin in GCS coordinates
+ * @property {number} origin.x
+ * @property {number} origin.y
+ * @property {number} origin.z
+ * @property {object} scale The new scale factor
+ * @property {number} scale.x
+ * @property {number} scale.y
+ * @property {number} scale.z
+ * @property {object} originChange Relative change from the old origin defined
+ *   as `origin - oldorigin`.
+ * @property {object} scaleChange Relative change from the old scale defined
+ *   as `scale / oldscale`.
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.worldChanged = 'geo_worldChanged';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered on every call to {@link geo.map#draw} before the map is rendered.
+ *
+ * @property {geo.map} target The current map
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.draw = 'geo_draw';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered on every call to {@link geo.map#draw} after the map is rendered.
+ *
+ * @property {geo.map} target The current map
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.drawEnd = 'geo_drawEnd';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered on every 'mousemove' over the map's DOM element.  The event
+ * object extends {@link geo.mouseState}.
+ * @mixes geo.mouseState
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.mousemove = 'geo_mousemove';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered on every 'mousedown' over the map's DOM element.  The event
+ * object extends {@link geo.mouseState}.
+ * @mixes geo.mouseState
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.mouseclick = 'geo_mouseclick';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered on every 'mousemove' during a brushing selection.
+ * The event object extends {@link geo.brushSelection}.
+ * @mixes geo.brushSelection
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.brush = 'geo_brush';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered after a brush selection ends.
+ * The event object extends {@link geo.brushSelection}.
+ * @mixes geo.brushSelection
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.brushend = 'geo_brushend';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered when a brush selection starts.
+ * The event object extends {@link geo.brushSelection}.
+ * @mixes geo.brushSelection
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.brushstart = 'geo_brushstart';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered before a map navigation animation begins.  Set
+ * &lt;code>event.geo.cancelAnimation&lt;/code> to cancel the animation
+ * of the navigation.  This will cause the map to navigate to the
+ * target location immediately.  Set &lt;code>event.geo.cancelNavigation&lt;/code>
+ * to cancel the navigation completely.  The transition options can
+ * be modified in place.
+ *
+ * @property {geo.geoPosition} center The target center
+ * @property {number} zoom The target zoom level
+ * @property {number} duration The duration of the transition in milliseconds
+ * @property {function} ease The easing function
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.transitionstart = 'geo_transitionstart';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered after a map navigation animation ends.
+ *
+ * @property {geo.geoPosition} center The target center
+ * @property {number} zoom The target zoom level
+ * @property {number} duration The duration of the transition in milliseconds
+ * @property {function} ease The easing function
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.transitionend = 'geo_transitionend';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered if a map navigation animation is cancelled.
+ *
+ * @property {geo.geoPosition} center The target center
+ * @property {number} zoom The target zoom level
+ * @property {number} duration The duration of the transition in milliseconds
+ * @property {function} ease The easing function
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.transitioncancel = 'geo_transitioncancel';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered when the parallel projection mode is changes.
+ *
+ * @property paralellProjection {boolean} True if parallel projection is turned
+ *                                        on.
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.parallelprojection = 'geo_parallelprojection';
+
+////////////////////////////////////////////////////////////////////////////
+/**
+ * @namespace
+ */
+////////////////////////////////////////////////////////////////////////////
+geo_event.clock = {
+  play: 'geo_clock_play',
+  stop: 'geo_clock_stop',
+  pause: 'geo_clock_pause',
+  change: 'geo_clock_change'
+};
+
+////////////////////////////////////////////////////////////////////////////
+/**
+ * This event object provides mouse/keyboard events that can be handled
+ * by the features.  This provides a similar interface as core events,
+ * but with different names so the events don't interfere.  Subclasses
+ * can override this to provide custom events.
+ *
+ * These events will only be triggered on features which were instantiated
+ * with the option 'selectionAPI'.
+ * @namespace geo.event.feature
+ */
+////////////////////////////////////////////////////////////////////////////
+geo_event.feature = {
+  mousemove:  'geo_feature_mousemove',
+  mouseover:  'geo_feature_mouseover',
+  mouseout:   'geo_feature_mouseout',
+  mouseon:    'geo_feature_mouseon',
+  mouseoff:   'geo_feature_mouseoff',
+  mouseclick: 'geo_feature_mouseclick',
+  brushend:   'geo_feature_brushend',
+  brush:      'geo_feature_brush'
+};
+
+////////////////////////////////////////////////////////////////////////////
+/**
+ * These events are triggered by the camera when it's internal state is
+ * mutated.
+ * @namespace geo.event.camera
+ */
+////////////////////////////////////////////////////////////////////////////
+geo_event.camera = {};
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered after a general view matrix change (any change in the visible
+ * bounds).  This is equivalent to the union of pan and zoom.
+ *
+ * @property {geo.camera} camera The camera instance
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.camera.view = 'geo_camera_view';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered after a pan in the x/y plane (no zoom level change).
+ *
+ * @property {geo.camera} camera The camera instance
+ * @property {object} delta The translation delta in world coordinates.
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.camera.pan = 'geo_camera_pan';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered after a view matrix change that is not a simple pan.  This
+ * includes, but is not limited to, pure zooms.
+ *
+ * @property {geo.camera} camera The camera instance
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.camera.zoom = 'geo_camera_zoom';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered after a projection change.
+ *
+ * @property {geo.camera} camera The camera instance
+ * @property {string} type The projection type ('perspective'|'parallel')
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.camera.projection = 'geo_camera_projection';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered after a viewport change.
+ *
+ * @property {geo.camera} camera The camera instance
+ * @property {object} viewport The new viewport
+ * @property {number} viewport.width The new width
+ * @property {number} viewport.height The new height
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.camera.viewport = 'geo_camera_viewport';
+
+module.exports = geo_event;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="geo.module_util.html">util</a></li></ul><h3>Classes</h3><ul><li><a href="geo.camera.html">camera</a></li><li><a href="geo.canvas.quadFeature.html">quadFeature</a></li><li><a href="geo.canvas.renderer.html">renderer</a></li><li><a href="geo.choroplethFeature.html">choroplethFeature</a></li><li><a href="geo.clock.html">clock</a></li><li><a href="geo.contourFeature.html">contourFeature</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.renderer.html">renderer</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.domRenderer.html">domRenderer</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fetchQueue.html">fetchQueue</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.choroplethFeature.html">choroplethFeature</a></li><li><a href="geo.gl.contourFeature.html">contourFeature</a></li><li><a href="geo.gl.ellipsoid.html">ellipsoid</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.quadFeature.html">quadFeature</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.greaphFeature.html">greaphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.svgWidget.html">svgWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.imageTile.html">imageTile</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.quadFeature.html">quadFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.tile.html">tile</a></li><li><a href="geo.tileCache.html">tileCache</a></li><li><a href="geo.tileLayer.html">tileLayer</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.ClusterGroup.html">ClusterGroup</a></li><li><a href="vectorFeature.html">vectorFeature</a></li></ul><h3>Namespaces</h3><ul><li><a href="-_anonymous_-geo.util.html">util</a></li><li><a href="geo.canvas.html">canvas</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.camera.html">camera</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo_event.clock.html">clock</a></li></ul><h3>Global</h3><ul><li><a href="global.html#$">$</a></li><li><a href="global.html#__render">__render</a></li><li><a href="global.html#_addPolygonFeature">_addPolygonFeature</a></li><li><a href="global.html#_appendChild">_appendChild</a></li><li><a href="global.html#_bindMouseHandlers">_bindMouseHandlers</a></li><li><a href="global.html#_boundingBox">_boundingBox</a></li><li><a href="global.html#_build">_build</a></li><li><a href="global.html#_clusterData">_clusterData</a></li><li><a href="global.html#_connectEvents">_connectEvents</a></li><li><a href="global.html#_createCanvas">_createCanvas</a></li><li><a href="global.html#_createFeature">_createFeature</a></li><li><a href="global.html#_definitions">_definitions</a></li><li><a href="global.html#_deleteFeature">_deleteFeature</a></li><li><a href="global.html#_disconnectEvents">_disconnectEvents</a></li><li><a href="global.html#_drawFeatures">_drawFeatures</a></li><li><a href="global.html#_exit">_exit</a></li><li><a href="global.html#_featureToPolygons">_featureToPolygons</a></li><li><a href="global.html#_forward">_forward</a></li><li><a href="global.html#_generateQuads">_generateQuads</a></li><li><a href="global.html#_generateScale">_generateScale</a></li><li><a href="global.html#_getArrayBuffer">_getArrayBuffer</a></li><li><a href="global.html#_getMouseButton">_getMouseButton</a></li><li><a href="global.html#_getMouseModifiers">_getMouseModifiers</a></li><li><a href="global.html#_getMousePosition">_getMousePosition</a></li><li><a href="global.html#_getString">_getString</a></li><li><a href="global.html#_getSubLayer">_getSubLayer</a></li><li><a href="global.html#_handleBrush">_handleBrush</a></li><li><a href="global.html#_handleBrushend">_handleBrushend</a></li><li><a href="global.html#_handleDoubleClick">_handleDoubleClick</a></li><li><a href="global.html#_handleMouseclick">_handleMouseclick</a></li><li><a href="global.html#_handleMouseClick">_handleMouseClick</a></li><li><a href="global.html#_handleMouseDown">_handleMouseDown</a></li><li><a href="global.html#_handleMouseMove">_handleMouseMove</a></li><li><a href="global.html#_handleMousemove">_handleMousemove</a></li><li><a href="global.html#_handleMouseMoveDocument">_handleMouseMoveDocument</a></li><li><a href="global.html#_handleMouseUp">_handleMouseUp</a></li><li><a href="global.html#_handleMouseUpDocument">_handleMouseUpDocument</a></li><li><a href="global.html#_handleMouseWheel">_handleMouseWheel</a></li><li><a href="global.html#_handleZoom">_handleZoom</a></li><li><a href="global.html#_init">_init</a></li><li><a href="global.html#_inverse">_inverse</a></li><li><a href="global.html#_objectListAdd">_objectListAdd</a></li><li><a href="global.html#_objectListEnd">_objectListEnd</a></li><li><a href="global.html#_objectListGet">_objectListGet</a></li><li><a href="global.html#_objectListStart">_objectListStart</a></li><li><a href="global.html#_positionToQuad">_positionToQuad</a></li><li><a href="global.html#_removeFeature">_removeFeature</a></li><li><a href="global.html#_render">_render</a></li><li><a href="global.html#_renderColorQuads">_renderColorQuads</a></li><li><a href="global.html#_renderFrame">_renderFrame</a></li><li><a href="global.html#_renderImageQuads">_renderImageQuads</a></li><li><a href="global.html#_resize">_resize</a></li><li><a href="global.html#_unbindMouseHandlers">_unbindMouseHandlers</a></li><li><a href="global.html#_update">_update</a></li><li><a href="global.html#_updateRangeTree">_updateRangeTree</a></li><li><a href="global.html#_updateSubLayers">_updateSubLayers</a></li><li><a href="global.html#_updateTextures">_updateTextures</a></li><li><a href="global.html#_wipePolygons">_wipePolygons</a></li><li><a href="global.html#active">active</a></li><li><a href="global.html#actors">actors</a></li><li><a href="global.html#addChild">addChild</a></li><li><a href="global.html#addPromise">addPromise</a></li><li><a href="global.html#allowRotation">allowRotation</a></li><li><a href="global.html#api">api</a></li><li><a href="global.html#attribution">attribution</a></li><li><a href="global.html#baseLayer">baseLayer</a></li><li><a href="global.html#bin">bin</a></li><li><a href="global.html#bounds">bounds</a></li><li><a href="global.html#boundsFromZoomAndCenter">boundsFromZoomAndCenter</a></li><li><a href="global.html#boxSearch">boxSearch</a></li><li><a href="global.html#buildTime">buildTime</a></li><li><a href="global.html#camera">camera</a></li><li><a href="global.html#cancel">cancel</a></li><li><a href="global.html#canRead">canRead</a></li><li><a href="global.html#canvas">canvas</a></li><li><a href="global.html#categories">categories</a></li><li><a href="global.html#center">center</a></li><li><a href="global.html#children">children</a></li><li><a href="global.html#choropleth">choropleth</a></li><li><a href="global.html#clampBoundsX">clampBoundsX</a></li><li><a href="global.html#clampBoundsY">clampBoundsY</a></li><li><a href="global.html#clampZoom">clampZoom</a></li><li><a href="global.html#clear">clear</a></li><li><a href="global.html#clock">clock</a></li><li><a href="global.html#clustering">clustering</a></li><li><a href="global.html#computeGeodeticSurfaceNormal">computeGeodeticSurfaceNormal</a></li><li><a href="global.html#contextRenderer">contextRenderer</a></li><li><a href="global.html#contour">contour</a></li><li><a href="global.html#coords">coords</a></li><li><a href="global.html#createChoropleth">createChoropleth</a></li><li><a href="global.html#createContours">createContours</a></li><li><a href="global.html#createFeature">createFeature</a></li><li><a href="global.html#createLayer">createLayer</a></li><li><a href="global.html#createWidget">createWidget</a></li><li><a href="global.html#data">data</a></li><li><a href="global.html#dataTime">dataTime</a></li><li><a href="global.html#deleteFeature">deleteFeature</a></li><li><a href="global.html#deleteLayer">deleteLayer</a></li><li><a href="global.html#deleteWidget">deleteWidget</a></li><li><a href="global.html#destroy">destroy</a></li><li><a href="global.html#discreteZoom">discreteZoom</a></li><li><a href="global.html#displayToGcs">displayToGcs</a></li><li><a href="global.html#displayToWorld">displayToWorld</a></li><li><a href="global.html#draw">draw</a></li><li><a href="global.html#drawOnAsyncResourceLoad">drawOnAsyncResourceLoad</a></li><li><a href="global.html#end">end</a></li><li><a href="global.html#exit">exit</a></li><li><a href="global.html#featureGcsToDisplay">featureGcsToDisplay</a></li><li><a href="global.html#features">features</a></li><li><a href="global.html#featureVertices">featureVertices</a></li><li><a href="global.html#fileReader">fileReader</a></li><li><a href="global.html#forward">forward</a></li><li><a href="global.html#framerate">framerate</a></li><li><a href="global.html#fromLocal">fromLocal</a></li><li><a href="global.html#gcs">gcs</a></li><li><a href="global.html#gcsToDisplay">gcsToDisplay</a></li><li><a href="global.html#gcsToWorld">gcsToWorld</a></li><li><a href="global.html#geometry">geometry</a></li><li><a href="global.html#geoOff">geoOff</a></li><li><a href="global.html#geoOn">geoOn</a></li><li><a href="global.html#geoTrigger">geoTrigger</a></li><li><a href="global.html#globals">globals</a></li><li><a href="global.html#height">height</a></li><li><a href="global.html#id">id</a></li><li><a href="global.html#ingcs">ingcs</a></li><li><a href="global.html#initialized">initialized</a></li><li><a href="global.html#interactor">interactor</a></li><li><a href="global.html#inverse">inverse</a></li><li><a href="global.html#isInViewport">isInViewport</a></li><li><a href="global.html#keyboard">keyboard</a></li><li><a href="global.html#layer">layer</a></li><li><a href="global.html#layers">layers</a></li><li><a href="global.html#line">line</a></li><li><a href="global.html#linkFeatures">linkFeatures</a></li><li><a href="global.html#links">links</a></li><li><a href="global.html#loop">loop</a></li><li><a href="global.html#lowerRight">lowerRight</a></li><li><a href="global.html#map">map</a></li><li><a href="global.html#maximumRadius">maximumRadius</a></li><li><a href="global.html#minimumRadius">minimumRadius</a></li><li><a href="global.html#mouse">mouse</a></li><li><a href="global.html#moveDown">moveDown</a></li><li><a href="global.html#moveToBottom">moveToBottom</a></li><li><a href="global.html#moveToTop">moveToTop</a></li><li><a href="global.html#moveUp">moveUp</a></li><li><a href="global.html#name">name</a></li><li><a href="global.html#node">node</a></li><li><a href="global.html#nodeFeature">nodeFeature</a></li><li><a href="global.html#nodes">nodes</a></li><li><a href="global.html#now">now</a></li><li><a href="global.html#object">object</a></li><li><a href="global.html#onIdle">onIdle</a></li><li><a href="global.html#opacity">opacity</a></li><li><a href="global.html#options">options</a></li><li><a href="global.html#origin">origin</a></li><li><a href="global.html#pan">pan</a></li><li><a href="global.html#parent">parent</a></li><li><a href="global.html#parentCanvas">parentCanvas</a></li><li><a href="global.html#pause">pause</a></li><li><a href="global.html#pointSearch">pointSearch</a></li><li><a href="global.html#polygon">polygon</a></li><li><a href="global.html#position">position</a></li><li><a href="global.html#radii">radii</a></li><li><a href="global.html#radiiSquared">radiiSquared</a></li><li><a href="global.html#read">read</a></li><li><a href="global.html#removeChild">removeChild</a></li><li><a href="global.html#renderer">renderer</a></li><li><a href="global.html#rendererName">rendererName</a></li><li><a href="global.html#reposition">reposition</a></li><li><a href="global.html#reset">reset</a></li><li><a href="global.html#resize">resize</a></li><li><a href="global.html#rotatedSize">rotatedSize</a></li><li><a href="global.html#rotation">rotation</a></li><li><a href="global.html#scalar">scalar</a></li><li><a href="global.html#scale">scale</a></li><li><a href="global.html#scaleFactor">scaleFactor</a></li><li><a href="global.html#select">select</a></li><li><a href="global.html#selectionAPI">selectionAPI</a></li><li><a href="global.html#simulateEvent">simulateEvent</a></li><li><a href="global.html#size">size</a></li><li><a href="global.html#source">source</a></li><li><a href="global.html#springBack">springBack</a></li><li><a href="global.html#start">start</a></li><li><a href="global.html#state">state</a></li><li><a href="global.html#step">step</a></li><li><a href="global.html#stepBackward">stepBackward</a></li><li><a href="global.html#stepForward">stepForward</a></li><li><a href="global.html#sticky">sticky</a></li><li><a href="global.html#style">style</a></li><li><a href="global.html#target">target</a></li><li><a href="global.html#toLocal">toLocal</a></li><li><a href="global.html#transformGeometry">transformGeometry</a></li><li><a href="global.html#transformPoint">transformPoint</a></li><li><a href="global.html#transition">transition</a></li><li><a href="global.html#transitionCancel">transitionCancel</a></li><li><a href="global.html#unitsPerPixel">unitsPerPixel</a></li><li><a href="global.html#updateAttribution">updateAttribution</a></li><li><a href="global.html#updateTime">updateTime</a></li><li><a href="global.html#upperLeft">upperLeft</a></li><li><a href="global.html#verticesPerFeature">verticesPerFeature</a></li><li><a href="global.html#visible">visible</a></li><li><a href="global.html#width">width</a></li><li><a href="global.html#worldToDisplay">worldToDisplay</a></li><li><a href="global.html#worldToGcs">worldToGcs</a></li><li><a href="global.html#zIndex">zIndex</a></li><li><a href="global.html#zoom">zoom</a></li><li><a href="global.html#zoomAndCenterFromBounds">zoomAndCenterFromBounds</a></li><li><a href="global.html#zoomRange">zoomRange</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Thu Mar 31 2016 17:23:32 GMT-0400 (EDT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

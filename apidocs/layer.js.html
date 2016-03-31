@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: layer.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: layer.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>var inherit = require('./inherit');
+var sceneObject = require('./sceneObject');
+var feature = require('./feature');
+var checkRenderer = require('./registry').checkRenderer;
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * @class geo.layer
+ * @extends geo.sceneObject
+ * @param {Object?} arg An options argument
+ * @param {string} arg.attribution An attribution string to display
+ * @param {number} arg.zIndex The z-index to assign to the layer (defaults
+ *   to the index of the layer inside the map)
+ * @returns {geo.layer}
+ */
+//////////////////////////////////////////////////////////////////////////////
+var layer = function (arg) {
+  'use strict';
+
+  if (!(this instanceof layer)) {
+    return new layer(arg);
+  }
+  arg = arg || {};
+  sceneObject.call(this, arg);
+
+  var $ = require('jquery');
+  var timestamp = require('./timestamp');
+  var createRenderer = require('./registry').createRenderer;
+  var newLayerId = require('./util').newLayerId;
+  var geo_event = require('./event');
+  var camera = require('./camera');
+
+  //////////////////////////////////////////////////////////////////////////////
+  /**
+   * @private
+   */
+  //////////////////////////////////////////////////////////////////////////////
+  var m_this = this,
+      s_exit = this._exit,
+      m_id = arg.id === undefined ? layer.newLayerId() : arg.id,
+      m_name = '',
+      m_map = arg.map === undefined ? null : arg.map,
+      m_node = null,
+      m_canvas = null,
+      m_renderer = null,
+      m_initialized = false,
+      m_rendererName = arg.renderer === undefined ? 'vgl' : arg.renderer,
+      m_dataTime = timestamp(),
+      m_updateTime = timestamp(),
+      m_sticky = arg.sticky === undefined ? true : arg.sticky,
+      m_active = arg.active === undefined ? true : arg.active,
+      m_opacity = arg.opacity === undefined ? 1 : arg.opacity,
+      m_attribution = arg.attribution || null,
+      m_zIndex;
+
+  m_rendererName = checkRenderer(m_rendererName);
+
+  if (!m_map) {
+    throw new Error('Layers must be initialized on a map.');
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get the name of the renderer.
+   *
+   * @returns {string}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.rendererName = function () {
+    return m_rendererName;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get or set the z-index of the layer.  The z-index controls the display
+   * order of the layers in much the same way as the CSS z-index property.
+   *
+   * @param {number} [zIndex] The new z-index
+   * @returns {number|this}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.zIndex = function (zIndex) {
+    if (zIndex === undefined) {
+      return m_zIndex;
+    }
+    m_zIndex = zIndex;
+    m_node.css('z-index', m_zIndex);
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Bring the layer above the given number of layers.  This will rotate the
+   * current z-indices for this and the next `n` layers.
+   *
+   * @param {number} [n=1] The number of positions to move
+   * @returns {this}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.moveUp = function (n) {
+    var order, i, me = null, tmp, sign;
+
+    // set the default
+    if (n === undefined) {
+      n = 1;
+    }
+
+    // set the sort direction that controls if we are moving up
+    // or down the z-index
+    sign = 1;
+    if (n &lt; 0) {
+      sign = -1;
+      n = -n;
+    }
+
+    // get a sorted list of layers
+    order = m_this.map().layers().sort(
+      function (a, b) { return sign * (a.zIndex() - b.zIndex()); }
+    );
+
+    for (i = 0; i &lt; order.length; i += 1) {
+      if (me === null) {
+        // loop until we get to the current layer
+        if (order[i] === m_this) {
+          me = i;
+        }
+      } else if (i - me &lt;= n) {
+        // swap the next n layers
+        tmp = m_this.zIndex();
+        m_this.zIndex(order[i].zIndex());
+        order[i].zIndex(tmp);
+      } else {
+        // all the swaps are done now
+        break;
+      }
+    }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Bring the layer below the given number of layers.  This will rotate the
+   * current z-indices for this and the previous `n` layers.
+   *
+   * @param {number} [n=1] The number of positions to move
+   * @returns {this}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.moveDown = function (n) {
+    if (n === undefined) {
+      n = 1;
+    }
+    return m_this.moveUp(-n);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Bring the layer to the top of the map layers.
+   *
+   * @returns {this}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.moveToTop = function () {
+    return m_this.moveUp(m_this.map().children().length - 1);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Bring the layer to the bottom of the map layers.
+   *
+   * @returns {this}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.moveToBottom = function () {
+    return m_this.moveDown(m_this.map().children().length - 1);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get whether or not the layer is sticky (navigates with the map).
+   *
+   * @returns {Boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.sticky = function () {
+    return m_sticky;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get whether or not the layer is active.  An active layer will receive
+   * native mouse when the layer is on top.  Non-active layers will never
+   * receive native mouse events.
+   *
+   * @returns {Boolean}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.active = function () {
+    return m_active;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set root node of the layer
+   *
+   * @returns {div}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.node = function () {
+    return m_node;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set id of the layer
+   *
+   * @returns {String}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.id = function (val) {
+    if (val === undefined) {
+      return m_id;
+    }
+    m_id = newLayerId();
+    m_this.modified();
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set name of the layer
+   *
+   * @returns {String}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.name = function (val) {
+    if (val === undefined) {
+      return m_name;
+    }
+    m_name = val;
+    m_this.modified();
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set map of the layer
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.map = function () {
+    return m_map;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get renderer for the layer if any
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.renderer = function () {
+    return m_renderer;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get canvas of the layer
+   *
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.canvas = function () {
+    return m_canvas;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return last time data got changed
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.dataTime = function () {
+    return m_dataTime;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return the modified time for the last update that did something
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.updateTime = function () {
+    return m_updateTime;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set if the layer has been initialized
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.initialized = function (val) {
+    if (val !== undefined) {
+      m_initialized = val;
+      return m_this;
+    }
+    return m_initialized;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Transform coordinates from world coordinates into a local coordinate
+   * system specific to the underlying renderer.  This method is exposed
+   * to allow direct access the rendering context, but otherwise should
+   * not be called directly.  The default implementation is the identity
+   * operator.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.toLocal = function (input) {
+    if (m_this._toLocalMatrix) {
+      camera.applyTransform(m_this._toLocalMatrix, input);
+    }
+    return input;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Transform coordinates from a local coordinate system to world coordinates.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.fromLocal = function (input) {
+    if (m_this._fromLocalMatrix) {
+      camera.applyTransform(m_this._fromLocalMatrix, input);
+    }
+    return input;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get or set the attribution html content that will displayed with the
+   * layer.  By default, nothing will be displayed.  Note, this content
+   * is **not** html escaped, so care should be taken when renderering
+   * user provided content.
+   * @param {string?} arg An html fragment
+   * @returns {string|this} Chainable as a setter
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.attribution = function (arg) {
+    if (arg !== undefined) {
+      m_attribution = arg;
+      m_this.map().updateAttribution();
+      return m_this;
+    }
+    return m_attribution;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Init layer
+   *
+   * @param {boolean} noEvents if a subclass of this intends to bind the
+   *    resize, pan, and zoom events itself, set this flag to true to avoid
+   *    binding them here.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._init = function (noEvents) {
+    if (m_initialized) {
+      return m_this;
+    }
+
+    m_map.node().append(m_node);
+
+    /* Pass along the arguments, but not the map reference */
+    var options = $.extend({}, arg);
+    delete options.map;
+
+    if (m_rendererName === null) {
+      // if given a "null" renderer, then pass the map element as the
+      // canvas
+      m_renderer = null;
+      m_canvas = m_node;
+    } else if (m_canvas) { // Share context if have valid one
+      m_renderer = createRenderer(m_rendererName, m_this, m_canvas,
+                                      options);
+    } else {
+      m_renderer = createRenderer(m_rendererName, m_this, undefined,
+                                      options);
+      m_canvas = m_renderer.canvas();
+    }
+
+    if (!m_this.active()) {
+      m_node.css('pointerEvents', 'none');
+    }
+
+    m_initialized = true;
+
+    if (!noEvents) {
+      /// Bind events to handlers
+      m_this.geoOn(geo_event.resize, function (event) {
+        m_this._update({event: event});
+      });
+
+      m_this.geoOn(geo_event.pan, function (event) {
+        m_this._update({event: event});
+      });
+
+      m_this.geoOn(geo_event.rotate, function (event) {
+        m_this._update({event: event});
+      });
+
+      m_this.geoOn(geo_event.zoom, function (event) {
+        m_this._update({event: event});
+      });
+    }
+
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Clean up resouces
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._exit = function () {
+    m_this.geoOff();
+    if (m_renderer) {
+      m_renderer._exit();
+    }
+    m_node.off();
+    m_node.remove();
+    arg = {};
+    m_canvas = null;
+    m_renderer = null;
+    s_exit();
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Update layer
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._update = function () {
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return the width of the layer in pixels.
+   * **DEPRECIATED: use map.size instead.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.width = function () {
+    return m_this.map().size().width;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Return the height of the layer in pixels
+   * **DEPRECIATED: use map.size instead.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.height = function () {
+    return m_this.map().size().height;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get or set the current layer opacity.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.opacity = function (opac) {
+    if (opac !== undefined) {
+      m_opacity = opac;
+      m_node.css('opacity', m_opacity);
+      return m_this;
+    }
+    return m_opacity;
+  };
+
+  if (arg.zIndex === undefined) {
+    arg.zIndex = m_map.children().length;
+  }
+  m_zIndex = arg.zIndex;
+
+  // Create top level div for the layer
+  m_node = $(document.createElement('div'));
+  m_node.attr('id', m_name);
+  m_node.css('position', 'absolute');
+  m_node.css('width', '100%');
+  m_node.css('height', '100%');
+  m_this.opacity(m_opacity);
+
+  // set the z-index
+  m_this.zIndex(m_zIndex);
+
+  return m_this;
+};
+
+/**
+ * Gets a new id number for a layer.
+ * @protected
+ * @instance
+ * @returns {number}
+ */
+layer.newLayerId = (function () {
+  'use strict';
+  var currentId = 1;
+  return function () {
+    var id = currentId;
+    currentId += 1;
+    return id;
+  };
+}());
+
+/**
+ * General object specification for feature types.
+ * @typedef geo.layer.spec
+ * @type {object}
+ * @property {string} [type='feature'] For feature compatibility
+ * with more than one kind of creatable layer
+ * @property {object[]} [data=[]] The default data array to
+ * apply to each feature if none exists
+ * @property {string} [renderer='vgl'] The renderer to use
+ * @property {geo.feature.spec[]} [features=[]] Features
+ * to add to the layer
+ */
+
+/**
+ * Create a layer from an object.  Any errors in the creation
+ * of the layer will result in returning null.
+ * @param {geo.map} map The map to add the layer to
+ * @param {geo.layer.spec} spec The object specification
+ * @returns {geo.layer|null}
+ */
+layer.create = function (map, spec) {
+  'use strict';
+
+  spec = spec || {};
+
+  // add osmLayer later
+  spec.type = 'feature';
+  if (spec.type !== 'feature') {
+    console.warn('Unsupported layer type');
+    return null;
+  }
+
+  spec.renderer = spec.renderer || 'vgl';
+  spec.renderer = checkRenderer(spec.renderer);
+
+  if (!spec.renderer) {
+    console.warn('Invalid renderer');
+    return null;
+  }
+
+  var layer = map.createLayer(spec.type, spec);
+  if (!layer) {
+    console.warn('Unable to create a layer');
+    return null;
+  }
+
+  // probably move this down to featureLayer eventually
+  spec.features.forEach(function (f) {
+    f.data = f.data || spec.data;
+    f.feature = feature.create(layer, f);
+  });
+
+  return layer;
+};
+
+inherit(layer, sceneObject);
+module.exports = layer;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="geo.module_util.html">util</a></li></ul><h3>Classes</h3><ul><li><a href="geo.camera.html">camera</a></li><li><a href="geo.canvas.quadFeature.html">quadFeature</a></li><li><a href="geo.canvas.renderer.html">renderer</a></li><li><a href="geo.choroplethFeature.html">choroplethFeature</a></li><li><a href="geo.clock.html">clock</a></li><li><a href="geo.contourFeature.html">contourFeature</a></li><li><a href="geo.d3.graphFeature.html">graphFeature</a></li><li><a href="geo.d3.lineFeature.html">lineFeature</a></li><li><a href="geo.d3.object.html">object</a></li><li><a href="geo.d3.pathFeature.html">pathFeature</a></li><li><a href="geo.d3.planeFeature.html">planeFeature</a></li><li><a href="geo.d3.pointFeature.html">pointFeature</a></li><li><a href="geo.d3.renderer.html">renderer</a></li><li><a href="geo.d3.vectorFeature.html">vectorFeature</a></li><li><a href="geo.domRenderer.html">domRenderer</a></li><li><a href="geo.feature.html">feature</a></li><li><a href="geo.featureLayer.html">featureLayer</a></li><li><a href="geo.fetchQueue.html">fetchQueue</a></li><li><a href="geo.fileReader.html">fileReader</a></li><li><a href="geo.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.choroplethFeature.html">choroplethFeature</a></li><li><a href="geo.gl.contourFeature.html">contourFeature</a></li><li><a href="geo.gl.ellipsoid.html">ellipsoid</a></li><li><a href="geo.gl.geomFeature.html">geomFeature</a></li><li><a href="geo.gl.lineFeature.html">lineFeature</a></li><li><a href="geo.gl.planeFeature.html">planeFeature</a></li><li><a href="geo.gl.pointFeature.html">pointFeature</a></li><li><a href="geo.gl.polygonFeature.html">polygonFeature</a></li><li><a href="geo.gl.quadFeature.html">quadFeature</a></li><li><a href="geo.gl.vglRenderer.html">vglRenderer</a></li><li><a href="geo.greaphFeature.html">greaphFeature</a></li><li><a href="geo.gui.legendWidget.html">legendWidget</a></li><li><a href="geo.gui.sliderWidget.html">sliderWidget</a></li><li><a href="geo.gui.svgWidget.html">svgWidget</a></li><li><a href="geo.gui.uiLayer.html">uiLayer</a></li><li><a href="geo.gui.widget.html">widget</a></li><li><a href="geo.imageTile.html">imageTile</a></li><li><a href="geo.jsonReader.html">jsonReader</a></li><li><a href="geo.layer.html">layer</a></li><li><a href="geo.lineFeature.html">lineFeature</a></li><li><a href="geo.map.html">map</a></li><li><a href="geo.mapInteractor.html">mapInteractor</a></li><li><a href="geo.object.html">object</a></li><li><a href="geo.osmLayer.html">osmLayer</a></li><li><a href="geo.pathFeature.html">pathFeature</a></li><li><a href="geo.planeFeature.html">planeFeature</a></li><li><a href="geo.pointFeature.html">pointFeature</a></li><li><a href="geo.polygonFeature.html">polygonFeature</a></li><li><a href="geo.quadFeature.html">quadFeature</a></li><li><a href="geo.renderer.html">renderer</a></li><li><a href="geo.sceneObject.html">sceneObject</a></li><li><a href="geo.tile.html">tile</a></li><li><a href="geo.tileCache.html">tileCache</a></li><li><a href="geo.tileLayer.html">tileLayer</a></li><li><a href="geo.timestamp.html">timestamp</a></li><li><a href="geo.transform.html">transform</a></li><li><a href="geo.util.ClusterGroup.html">ClusterGroup</a></li><li><a href="vectorFeature.html">vectorFeature</a></li></ul><h3>Namespaces</h3><ul><li><a href="-_anonymous_-geo.util.html">util</a></li><li><a href="geo.canvas.html">canvas</a></li><li><a href="geo.d3.html">d3</a></li><li><a href="geo.event.html">event</a></li><li><a href="geo.event.camera.html">camera</a></li><li><a href="geo.event.feature.html">feature</a></li><li><a href="geo.gl.html">gl</a></li><li><a href="geo.gui.html">gui</a></li><li><a href="geo_event.clock.html">clock</a></li></ul><h3>Global</h3><ul><li><a href="global.html#$">$</a></li><li><a href="global.html#__render">__render</a></li><li><a href="global.html#_addPolygonFeature">_addPolygonFeature</a></li><li><a href="global.html#_appendChild">_appendChild</a></li><li><a href="global.html#_bindMouseHandlers">_bindMouseHandlers</a></li><li><a href="global.html#_boundingBox">_boundingBox</a></li><li><a href="global.html#_build">_build</a></li><li><a href="global.html#_clusterData">_clusterData</a></li><li><a href="global.html#_connectEvents">_connectEvents</a></li><li><a href="global.html#_createCanvas">_createCanvas</a></li><li><a href="global.html#_createFeature">_createFeature</a></li><li><a href="global.html#_definitions">_definitions</a></li><li><a href="global.html#_deleteFeature">_deleteFeature</a></li><li><a href="global.html#_disconnectEvents">_disconnectEvents</a></li><li><a href="global.html#_drawFeatures">_drawFeatures</a></li><li><a href="global.html#_exit">_exit</a></li><li><a href="global.html#_featureToPolygons">_featureToPolygons</a></li><li><a href="global.html#_forward">_forward</a></li><li><a href="global.html#_generateQuads">_generateQuads</a></li><li><a href="global.html#_generateScale">_generateScale</a></li><li><a href="global.html#_getArrayBuffer">_getArrayBuffer</a></li><li><a href="global.html#_getMouseButton">_getMouseButton</a></li><li><a href="global.html#_getMouseModifiers">_getMouseModifiers</a></li><li><a href="global.html#_getMousePosition">_getMousePosition</a></li><li><a href="global.html#_getString">_getString</a></li><li><a href="global.html#_getSubLayer">_getSubLayer</a></li><li><a href="global.html#_handleBrush">_handleBrush</a></li><li><a href="global.html#_handleBrushend">_handleBrushend</a></li><li><a href="global.html#_handleDoubleClick">_handleDoubleClick</a></li><li><a href="global.html#_handleMouseclick">_handleMouseclick</a></li><li><a href="global.html#_handleMouseClick">_handleMouseClick</a></li><li><a href="global.html#_handleMouseDown">_handleMouseDown</a></li><li><a href="global.html#_handleMouseMove">_handleMouseMove</a></li><li><a href="global.html#_handleMousemove">_handleMousemove</a></li><li><a href="global.html#_handleMouseMoveDocument">_handleMouseMoveDocument</a></li><li><a href="global.html#_handleMouseUp">_handleMouseUp</a></li><li><a href="global.html#_handleMouseUpDocument">_handleMouseUpDocument</a></li><li><a href="global.html#_handleMouseWheel">_handleMouseWheel</a></li><li><a href="global.html#_handleZoom">_handleZoom</a></li><li><a href="global.html#_init">_init</a></li><li><a href="global.html#_inverse">_inverse</a></li><li><a href="global.html#_objectListAdd">_objectListAdd</a></li><li><a href="global.html#_objectListEnd">_objectListEnd</a></li><li><a href="global.html#_objectListGet">_objectListGet</a></li><li><a href="global.html#_objectListStart">_objectListStart</a></li><li><a href="global.html#_positionToQuad">_positionToQuad</a></li><li><a href="global.html#_removeFeature">_removeFeature</a></li><li><a href="global.html#_render">_render</a></li><li><a href="global.html#_renderColorQuads">_renderColorQuads</a></li><li><a href="global.html#_renderFrame">_renderFrame</a></li><li><a href="global.html#_renderImageQuads">_renderImageQuads</a></li><li><a href="global.html#_resize">_resize</a></li><li><a href="global.html#_unbindMouseHandlers">_unbindMouseHandlers</a></li><li><a href="global.html#_update">_update</a></li><li><a href="global.html#_updateRangeTree">_updateRangeTree</a></li><li><a href="global.html#_updateSubLayers">_updateSubLayers</a></li><li><a href="global.html#_updateTextures">_updateTextures</a></li><li><a href="global.html#_wipePolygons">_wipePolygons</a></li><li><a href="global.html#active">active</a></li><li><a href="global.html#actors">actors</a></li><li><a href="global.html#addChild">addChild</a></li><li><a href="global.html#addPromise">addPromise</a></li><li><a href="global.html#allowRotation">allowRotation</a></li><li><a href="global.html#api">api</a></li><li><a href="global.html#attribution">attribution</a></li><li><a href="global.html#baseLayer">baseLayer</a></li><li><a href="global.html#bin">bin</a></li><li><a href="global.html#bounds">bounds</a></li><li><a href="global.html#boundsFromZoomAndCenter">boundsFromZoomAndCenter</a></li><li><a href="global.html#boxSearch">boxSearch</a></li><li><a href="global.html#buildTime">buildTime</a></li><li><a href="global.html#camera">camera</a></li><li><a href="global.html#cancel">cancel</a></li><li><a href="global.html#canRead">canRead</a></li><li><a href="global.html#canvas">canvas</a></li><li><a href="global.html#categories">categories</a></li><li><a href="global.html#center">center</a></li><li><a href="global.html#children">children</a></li><li><a href="global.html#choropleth">choropleth</a></li><li><a href="global.html#clampBoundsX">clampBoundsX</a></li><li><a href="global.html#clampBoundsY">clampBoundsY</a></li><li><a href="global.html#clampZoom">clampZoom</a></li><li><a href="global.html#clear">clear</a></li><li><a href="global.html#clock">clock</a></li><li><a href="global.html#clustering">clustering</a></li><li><a href="global.html#computeGeodeticSurfaceNormal">computeGeodeticSurfaceNormal</a></li><li><a href="global.html#contextRenderer">contextRenderer</a></li><li><a href="global.html#contour">contour</a></li><li><a href="global.html#coords">coords</a></li><li><a href="global.html#createChoropleth">createChoropleth</a></li><li><a href="global.html#createContours">createContours</a></li><li><a href="global.html#createFeature">createFeature</a></li><li><a href="global.html#createLayer">createLayer</a></li><li><a href="global.html#createWidget">createWidget</a></li><li><a href="global.html#data">data</a></li><li><a href="global.html#dataTime">dataTime</a></li><li><a href="global.html#deleteFeature">deleteFeature</a></li><li><a href="global.html#deleteLayer">deleteLayer</a></li><li><a href="global.html#deleteWidget">deleteWidget</a></li><li><a href="global.html#destroy">destroy</a></li><li><a href="global.html#discreteZoom">discreteZoom</a></li><li><a href="global.html#displayToGcs">displayToGcs</a></li><li><a href="global.html#displayToWorld">displayToWorld</a></li><li><a href="global.html#draw">draw</a></li><li><a href="global.html#drawOnAsyncResourceLoad">drawOnAsyncResourceLoad</a></li><li><a href="global.html#end">end</a></li><li><a href="global.html#exit">exit</a></li><li><a href="global.html#featureGcsToDisplay">featureGcsToDisplay</a></li><li><a href="global.html#features">features</a></li><li><a href="global.html#featureVertices">featureVertices</a></li><li><a href="global.html#fileReader">fileReader</a></li><li><a href="global.html#forward">forward</a></li><li><a href="global.html#framerate">framerate</a></li><li><a href="global.html#fromLocal">fromLocal</a></li><li><a href="global.html#gcs">gcs</a></li><li><a href="global.html#gcsToDisplay">gcsToDisplay</a></li><li><a href="global.html#gcsToWorld">gcsToWorld</a></li><li><a href="global.html#geometry">geometry</a></li><li><a href="global.html#geoOff">geoOff</a></li><li><a href="global.html#geoOn">geoOn</a></li><li><a href="global.html#geoTrigger">geoTrigger</a></li><li><a href="global.html#globals">globals</a></li><li><a href="global.html#height">height</a></li><li><a href="global.html#id">id</a></li><li><a href="global.html#ingcs">ingcs</a></li><li><a href="global.html#initialized">initialized</a></li><li><a href="global.html#interactor">interactor</a></li><li><a href="global.html#inverse">inverse</a></li><li><a href="global.html#isInViewport">isInViewport</a></li><li><a href="global.html#keyboard">keyboard</a></li><li><a href="global.html#layer">layer</a></li><li><a href="global.html#layers">layers</a></li><li><a href="global.html#line">line</a></li><li><a href="global.html#linkFeatures">linkFeatures</a></li><li><a href="global.html#links">links</a></li><li><a href="global.html#loop">loop</a></li><li><a href="global.html#lowerRight">lowerRight</a></li><li><a href="global.html#map">map</a></li><li><a href="global.html#maximumRadius">maximumRadius</a></li><li><a href="global.html#minimumRadius">minimumRadius</a></li><li><a href="global.html#mouse">mouse</a></li><li><a href="global.html#moveDown">moveDown</a></li><li><a href="global.html#moveToBottom">moveToBottom</a></li><li><a href="global.html#moveToTop">moveToTop</a></li><li><a href="global.html#moveUp">moveUp</a></li><li><a href="global.html#name">name</a></li><li><a href="global.html#node">node</a></li><li><a href="global.html#nodeFeature">nodeFeature</a></li><li><a href="global.html#nodes">nodes</a></li><li><a href="global.html#now">now</a></li><li><a href="global.html#object">object</a></li><li><a href="global.html#onIdle">onIdle</a></li><li><a href="global.html#opacity">opacity</a></li><li><a href="global.html#options">options</a></li><li><a href="global.html#origin">origin</a></li><li><a href="global.html#pan">pan</a></li><li><a href="global.html#parent">parent</a></li><li><a href="global.html#parentCanvas">parentCanvas</a></li><li><a href="global.html#pause">pause</a></li><li><a href="global.html#pointSearch">pointSearch</a></li><li><a href="global.html#polygon">polygon</a></li><li><a href="global.html#position">position</a></li><li><a href="global.html#radii">radii</a></li><li><a href="global.html#radiiSquared">radiiSquared</a></li><li><a href="global.html#read">read</a></li><li><a href="global.html#removeChild">removeChild</a></li><li><a href="global.html#renderer">renderer</a></li><li><a href="global.html#rendererName">rendererName</a></li><li><a href="global.html#reposition">reposition</a></li><li><a href="global.html#reset">reset</a></li><li><a href="global.html#resize">resize</a></li><li><a href="global.html#rotatedSize">rotatedSize</a></li><li><a href="global.html#rotation">rotation</a></li><li><a href="global.html#scalar">scalar</a></li><li><a href="global.html#scale">scale</a></li><li><a href="global.html#scaleFactor">scaleFactor</a></li><li><a href="global.html#select">select</a></li><li><a href="global.html#selectionAPI">selectionAPI</a></li><li><a href="global.html#simulateEvent">simulateEvent</a></li><li><a href="global.html#size">size</a></li><li><a href="global.html#source">source</a></li><li><a href="global.html#springBack">springBack</a></li><li><a href="global.html#start">start</a></li><li><a href="global.html#state">state</a></li><li><a href="global.html#step">step</a></li><li><a href="global.html#stepBackward">stepBackward</a></li><li><a href="global.html#stepForward">stepForward</a></li><li><a href="global.html#sticky">sticky</a></li><li><a href="global.html#style">style</a></li><li><a href="global.html#target">target</a></li><li><a href="global.html#toLocal">toLocal</a></li><li><a href="global.html#transformGeometry">transformGeometry</a></li><li><a href="global.html#transformPoint">transformPoint</a></li><li><a href="global.html#transition">transition</a></li><li><a href="global.html#transitionCancel">transitionCancel</a></li><li><a href="global.html#unitsPerPixel">unitsPerPixel</a></li><li><a href="global.html#updateAttribution">updateAttribution</a></li><li><a href="global.html#updateTime">updateTime</a></li><li><a href="global.html#upperLeft">upperLeft</a></li><li><a href="global.html#verticesPerFeature">verticesPerFeature</a></li><li><a href="global.html#visible">visible</a></li><li><a href="global.html#width">width</a></li><li><a href="global.html#worldToDisplay">worldToDisplay</a></li><li><a href="global.html#worldToGcs">worldToGcs</a></li><li><a href="global.html#zIndex">zIndex</a></li><li><a href="global.html#zoom">zoom</a></li><li><a href="global.html#zoomAndCenterFromBounds">zoomAndCenterFromBounds</a></li><li><a href="global.html#zoomRange">zoomRange</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Thu Mar 31 2016 17:23:32 GMT-0400 (EDT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

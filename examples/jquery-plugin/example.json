@@ -1,9 +1,0 @@
-{
-  "path": "jquery-plugin",
-  "title": "GeoJS jquery plugin",
-  "exampleCss": ["main.css"],
-  "exampleJs": ["main.js"],
-  "about": {
-    "text": "Gives an example of basic usage of the GeoJS jquery plugin."
-  }
-}

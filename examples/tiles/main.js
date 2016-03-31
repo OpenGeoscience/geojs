@@ -27,7 +27,7 @@
  *  maxBoundsTop: maximum bounds top value.
  *  opacity: a css opacity value (typically a float from 0 to 1).
  *  projection: 'parallel' or 'projection' for the camera projection.
- *  renderer: 'vgl' (default), 'd3', 'null', or 'html'.  This picks the
+ *  renderer: 'vgl' (default), 'canvas', 'd3', 'null', or 'html'.  This picks the
  *      renderer for map tiles.  null or html uses the html renderer.
  *  round: 'round' (default), 'floor', 'ceil'.
  *  subdomains: a comma-separated string of subdomains to use in the {s} part
@@ -91,8 +91,6 @@ $(function () {
     }, 1000);
   });
 
-  var range = geo.transform.transformCoordinates(
-      'EPSG:4326', 'EPSG:3857', [{x: -180, y: 0}, {x: 180, y: 0}]);
   // Set map defaults to use our named node and have a reasonable center and
   // zoom level
   var mapParams = {
@@ -102,7 +100,7 @@ $(function () {
       y: 39.5
     },
     maxBounds: {},
-    zoom: query.zoom !== undefined ? parseFloat(query.zoom) : 3,
+    zoom: query.zoom !== undefined ? parseFloat(query.zoom) : 3
   };
   // Set the tile layer defaults to use the specified renderer and opacity
   var layerParams = {
@@ -117,6 +115,9 @@ $(function () {
   if (layerParams.renderer === 'null' || layerParams.renderer === 'html') {
     layerParams.renderer = null;
   }
+  // Default values for spring-back
+  var springEnabled = {spring: {enabled: true, springConstant: 0.00005}},
+      springDisabled = {spring: {enabled: false}};
   // Allow a custom tile url, including subdomains.
   if (query.url) {
     layerParams.url = query.url;
@@ -251,6 +252,17 @@ $(function () {
   if (query.projection) {
     map.camera().projection = query.projection;
   }
+  // Set the spring back.  This is set on the map interactor.
+  if (query.spring) {
+    map.interactor().options(springEnabled);
+  }
+  // Compute default values for zoom animation, then set the map interactor
+  var zoomAnimationDefault = map.interactor().options().zoomAnimation,
+      zoomAnimationEnabled = {zoomAnimation: $.extend(
+        {}, zoomAnimationDefault, {enabled: true})},
+      zoomAnimationDisabled = {zoomAnimation: {enabled: false}};
+  map.interactor().options(query.animateZoom !== 'false' ?
+    zoomAnimationEnabled : zoomAnimationDisabled);
   // Enable debug classes, if requested.
   $('#map').toggleClass('debug-label', (
       query.debug === 'true' || query.debug === 'all'))
@@ -289,6 +301,10 @@ $(function () {
         mapParams.allowRotation = get_allow_rotation(value);
         map.allowRotation(mapParams.allowRotation);
         break;
+      case 'animateZoom':
+        map.interactor().options(
+            value === 'true' ? zoomAnimationEnabled : zoomAnimationDisabled);
+        break;
       case 'debug':
         $('#map').toggleClass('debug-label', (
             value === 'true' || value === 'all'))
@@ -323,6 +339,10 @@ $(function () {
         break;
       case 'round':
         layerParams.tileRounding = Math[value];
+        break;
+      case 'spring':
+        map.interactor().options(
+            value === 'true' ? springEnabled : springDisabled);
         break;
       case 'url':
         var url = processedValue;

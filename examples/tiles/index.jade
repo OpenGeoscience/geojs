@@ -2,10 +2,11 @@ extends ../common/templates/index.jade
 
 block append mainContent
   div#controls
-    .form-group(title="Tiles can be drawn using WebGL, HTML, or SVG.  WebGL is generally the fastest and HTML the most compatible.")
+    .form-group(title="Tiles can be drawn using WebGL, Canvas, HTML, or SVG.  WebGL is generally the fastest and HTML the most compatible.")
       label(for="map-renderer") Renderer
       select#map-renderer.mapparam(param-name="renderer", placeholder="vgl")
         option(value="vgl") VGL (WebGL)
+        option(value="canvas") Canvas
         option(value="d3") SVG (d3)
         option(value="html") HTML
     .form-group(title="Clamp horizontal panning to the extent of the tiles.")
@@ -14,6 +15,9 @@ block append mainContent
     .form-group(title="Clamp vertical panning to the extent of the tiles.")
       label(for="map-clampBoundsY") Clamp Y Bounds
       input#map-clampBoundsY.mapparam(param-name="clampBoundsY", type="checkbox", placeholder="true", checked="checked")
+    .form-group(title="If clamping is turned off, spring back when the tiles are panned too far.")
+      label(for="mapinteractor-spring") Spring to Bounds
+      input#map-spring.mapparam(param-name="spring", type="checkbox", placeholder="false")
     .form-group(title="The starting x coordinate.  Changing this will also pan the current view.")
       label(for="map-x") Starting X
       input#map-x.mapparam(param-name="x", placeholder="-98")
@@ -26,6 +30,9 @@ block append mainContent
     .form-group(title="Only allow integer zoom levels.")
       label(for="map-discrete") Discrete Zoom
       input#map-discrete.mapparam(param-name="discrete", type="checkbox", placeholder="false")
+    .form-group(title="Animate zoom transitions.")
+      label(for="mapinteractor-clampZoom") Animate Zoom
+      input#map-animateZoom.mapparam(param-name="animateZoom", type="checkbox", placeholder="true", checked="checked")
     .form-group(title="The lowest zoom level allowed.")
       label(for="map-min") Minimum Zoom
       input#map-min.mapparam(param-name="min", placeholder="0")

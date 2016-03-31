@@ -59,7 +59,7 @@
  *  maxBoundsTop: maximum bounds top value.
  *  opacity: a css opacity value (typically a float from 0 to 1).
  *  projection: 'parallel' or 'projection' for the camera projection.
- *  renderer: 'vgl' (default), 'd3', 'null', or 'html'.  This picks the
+ *  renderer: 'vgl' (default), 'canvas', 'd3', 'null', or 'html'.  This picks the
  *      renderer for map tiles.  null or html uses the html renderer.
  *  round: 'round' (default), 'floor', 'ceil'.
  *  subdomains: a comma-separated string of subdomains to use in the {s} part
@@ -183,10 +183,7 @@ values.</p>
     throttledInputEventTimer = <span class="hljs-built_in">window</span>.setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
       change_controls(evt);
     }, <span class="hljs-number">1000</span>);
-  });
-
-  <span class="hljs-keyword">var</span> range = geo.transform.transformCoordinates(
-      <span class="hljs-string">'EPSG:4326'</span>, <span class="hljs-string">'EPSG:3857'</span>, [{x: <span class="hljs-number">-180</span>, y: <span class="hljs-number">0</span>}, {x: <span class="hljs-number">180</span>, y: <span class="hljs-number">0</span>}]);</pre></div></div>
+  });</pre></div></div>
             
         </li>
         
@@ -209,7 +206,7 @@ zoom level</p>
       y: <span class="hljs-number">39.5</span>
     },
     maxBounds: {},
-    zoom: query.zoom !== <span class="hljs-literal">undefined</span> ? <span class="hljs-built_in">parseFloat</span>(query.zoom) : <span class="hljs-number">3</span>,
+    zoom: query.zoom !== <span class="hljs-literal">undefined</span> ? <span class="hljs-built_in">parseFloat</span>(query.zoom) : <span class="hljs-number">3</span>
   };</pre></div></div>
             
         </li>
@@ -247,6 +244,22 @@ zoom level</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-9">&#182;</a>
               </div>
+              <p>Default values for spring-back</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> springEnabled = {spring: {enabled: <span class="hljs-literal">true</span>, springConstant: <span class="hljs-number">0.00005</span>}},
+      springDisabled = {spring: {enabled: <span class="hljs-literal">false</span>}};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
               <p>Allow a custom tile url, including subdomains.</p>
 
             </div>
@@ -267,11 +280,11 @@ zoom level</p>
         </li>
         
         
-        <li id="section-10">
+        <li id="section-11">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-10">&#182;</a>
+                <a class="pilcrow" href="#section-11">&#182;</a>
               </div>
               <p>For image tile servers, where we know the maximum width and height, use
 a pixel coordinate system.</p>
@@ -286,11 +299,11 @@ a pixel coordinate system.</p>
         </li>
         
         
-        <li id="section-11">
+        <li id="section-12">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-11">&#182;</a>
+                <a class="pilcrow" href="#section-12">&#182;</a>
               </div>
               <p>Set a pixel coordinate system where 0, 0 is the upper left and w, h is
 the lower-right.</p>
@@ -322,11 +335,11 @@ the lower-right.</p>
         </li>
         
         
-        <li id="section-12">
+        <li id="section-13">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-12">&#182;</a>
+                <a class="pilcrow" href="#section-13">&#182;</a>
               </div>
               <p>Parse additional query options</p>
 
@@ -387,11 +400,11 @@ the lower-right.</p>
         </li>
         
         
-        <li id="section-13">
+        <li id="section-14">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-13">&#182;</a>
+                <a class="pilcrow" href="#section-14">&#182;</a>
               </div>
               <p>allow a generous max tile level so it is never the limit</p>
 
@@ -405,11 +418,11 @@ the lower-right.</p>
         </li>
         
         
-        <li id="section-14">
+        <li id="section-15">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-14">&#182;</a>
+                <a class="pilcrow" href="#section-15">&#182;</a>
               </div>
               <p>unitsPerPixel is at zoom level 0.  We want each pixel to be 1 at the
 maximum zoom</p>
@@ -425,11 +438,11 @@ maximum zoom</p>
         </li>
         
         
-        <li id="section-15">
+        <li id="section-16">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-15">&#182;</a>
+                <a class="pilcrow" href="#section-16">&#182;</a>
               </div>
               <p>Populate boolean flags for the map</p>
 
@@ -449,11 +462,11 @@ maximum zoom</p>
         </li>
         
         
-        <li id="section-16">
+        <li id="section-17">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-16">&#182;</a>
+                <a class="pilcrow" href="#section-17">&#182;</a>
               </div>
               <p>Populate boolean flags for the tile layer</p>
 
@@ -472,11 +485,11 @@ maximum zoom</p>
         </li>
         
         
-        <li id="section-17">
+        <li id="section-18">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-17">&#182;</a>
+                <a class="pilcrow" href="#section-18">&#182;</a>
               </div>
               <p>Create a map object</p>
 
@@ -487,11 +500,11 @@ maximum zoom</p>
         </li>
         
         
-        <li id="section-18">
+        <li id="section-19">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-18">&#182;</a>
+                <a class="pilcrow" href="#section-19">&#182;</a>
               </div>
               <p>Set the projection.  This has to be set on the camera, not in the map
 parameters</p>
@@ -505,11 +518,48 @@ parameters</p>
         </li>
         
         
-        <li id="section-19">
+        <li id="section-20">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-19">&#182;</a>
+                <a class="pilcrow" href="#section-20">&#182;</a>
+              </div>
+              <p>Set the spring back.  This is set on the map interactor.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">if</span> (query.spring) {
+    map.interactor().options(springEnabled);
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-21">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-21">&#182;</a>
+              </div>
+              <p>Compute default values for zoom animation, then set the map interactor</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> zoomAnimationDefault = map.interactor().options().zoomAnimation,
+      zoomAnimationEnabled = {zoomAnimation: $.extend(
+        {}, zoomAnimationDefault, {enabled: <span class="hljs-literal">true</span>})},
+      zoomAnimationDisabled = {zoomAnimation: {enabled: <span class="hljs-literal">false</span>}};
+  map.interactor().options(query.animateZoom !== <span class="hljs-string">'false'</span> ?
+    zoomAnimationEnabled : zoomAnimationDisabled);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-22">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-22">&#182;</a>
               </div>
               <p>Enable debug classes, if requested.</p>
 
@@ -524,11 +574,11 @@ parameters</p>
         </li>
         
         
-        <li id="section-20">
+        <li id="section-23">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-20">&#182;</a>
+                <a class="pilcrow" href="#section-23">&#182;</a>
               </div>
               <p>Add the tile layer with the specified parameters</p>
 
@@ -539,11 +589,11 @@ parameters</p>
         </li>
         
         
-        <li id="section-21">
+        <li id="section-24">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-21">&#182;</a>
+                <a class="pilcrow" href="#section-24">&#182;</a>
               </div>
               <p>Make variables available as a global for easier debug</p>
 
@@ -577,6 +627,10 @@ parameters</p>
       <span class="hljs-keyword">case</span> <span class="hljs-string">'allowRotation'</span>:
         mapParams.allowRotation = get_allow_rotation(value);
         map.allowRotation(mapParams.allowRotation);
+        <span class="hljs-keyword">break</span>;
+      <span class="hljs-keyword">case</span> <span class="hljs-string">'animateZoom'</span>:
+        map.interactor().options(
+            value === <span class="hljs-string">'true'</span> ? zoomAnimationEnabled : zoomAnimationDisabled);
         <span class="hljs-keyword">break</span>;
       <span class="hljs-keyword">case</span> <span class="hljs-string">'debug'</span>:
         $(<span class="hljs-string">'#map'</span>).toggleClass(<span class="hljs-string">'debug-label'</span>, (
@@ -612,6 +666,10 @@ parameters</p>
         <span class="hljs-keyword">break</span>;
       <span class="hljs-keyword">case</span> <span class="hljs-string">'round'</span>:
         layerParams.tileRounding = <span class="hljs-built_in">Math</span>[value];
+        <span class="hljs-keyword">break</span>;
+      <span class="hljs-keyword">case</span> <span class="hljs-string">'spring'</span>:
+        map.interactor().options(
+            value === <span class="hljs-string">'true'</span> ? springEnabled : springDisabled);
         <span class="hljs-keyword">break</span>;
       <span class="hljs-keyword">case</span> <span class="hljs-string">'url'</span>:
         <span class="hljs-keyword">var</span> url = processedValue;
@@ -660,11 +718,11 @@ parameters</p>
         </li>
         
         
-        <li id="section-22">
+        <li id="section-25">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-22">&#182;</a>
+                <a class="pilcrow" href="#section-25">&#182;</a>
               </div>
               <p>update the url to reflect the changes</p>
 
