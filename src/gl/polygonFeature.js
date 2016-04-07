@@ -110,7 +110,6 @@ var gl_polygonFeature = function (arg) {
 
       function position(d, i) {
         var c = posFunc(d, i, item, itemIndex);
-        c = transform.transformCoordinates(target_gcs, map_gcs, c);
         return [c.x, c.y, c.z || 0];
       }
 
@@ -126,6 +125,14 @@ var gl_polygonFeature = function (arg) {
 
       // convert to an earcut geometry
       geometry = earcut.flatten(geometry);
+
+      // tranform to map gcs
+      geometry.vertices = transform.transformCoordinates(
+        target_gcs,
+        map_gcs,
+        geometry.vertices,
+        geometry.dimensions
+      );
 
       // triangulate
       triangles = earcut(geometry.vertices, geometry.holes, geometry.dimensions);
