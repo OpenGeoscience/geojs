@@ -20,7 +20,7 @@ var gl_polygonFeature = function (arg) {
   polygonFeature.call(this, arg);
 
   var vgl = require('vgl');
-  var Triangulator = require('pnltri').Triangulator;
+  var earcut = require('earcut');
   var transform = require('../transform');
 
   ////////////////////////////////////////////////////////////////////////////
@@ -80,19 +80,8 @@ var gl_polygonFeature = function (arg) {
   }
 
   function createGLPolygons() {
-    var i = null,
-        numPts = null,
-        start = null,
-        itemIndex = 0,
-        polygonItemCoordIndex = 0,
-        position = [],
-        fillColor = [],
-        fillOpacity = [],
-        fillColorNew = [],
-        fillOpacityNew = [],
-        posFunc = null,
+    var posFunc = null,
         fillColorFunc = null,
-        polygonItem = null,
         fillOpacityFunc = null,
         buffers = vgl.DataBuffers(1024),
         sourcePositions = vgl.sourceDataP3fv(),
@@ -102,128 +91,71 @@ var gl_polygonFeature = function (arg) {
           vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Three),
         trianglePrimitive = vgl.triangles(),
         geom = vgl.geometryData(),
-        polygon = null,
-        holes = null,
-        extRing = null,
-        extIndex = 0,
-        extLength = null,
-        intIndex = 0,
-        posInstance = null,
-        triangulator = new Triangulator(),
-        triangList = null,
-        newTriangList = null,
-        fillColorInstance = null;
+        triangles = [],
+        target_gcs = m_this.gcs(),
+        map_gcs = m_this.layer().map().gcs(),
+        color;
 
     posFunc = m_this.position();
     fillColorFunc = m_this.style.get('fillColor');
     fillOpacityFunc = m_this.style.get('fillOpacity');
-
-    m_this.data().forEach(function (item) {
-      polygon = m_this.polygon()(item, itemIndex);
-      polygonItem = polygon.outer || [];
-      holes = polygon.inner || [];
-      polygonItemCoordIndex = 0;
-      extRing = [];
-      extIndex = 0;
-      extLength = polygonItem.length - 1;
-      extRing[0] = [];
-      intIndex = 0;
-
-      polygonItem.forEach(function (extRingCoords) {
-        if (extIndex !== extLength) {
-          //extRing = extRing.concat(extRingCoords);
-          posInstance = posFunc(extRingCoords,
-                                polygonItemCoordIndex,
-                                item, itemIndex);
-          extRing[0].push({
-            x: posInstance.x, y: posInstance.y, i: fillColor.length
-          });
-
-          fillColorInstance = fillColorFunc(extRingCoords,
-                                            polygonItemCoordIndex,
-                                            item, itemIndex);
-          fillColor.push([fillColorInstance.r,
-                          fillColorInstance.g,
-                          fillColorInstance.b]);
-          fillOpacity.push(fillOpacityFunc(extRingCoords,
-                                           polygonItemCoordIndex,
-                                           item,
-                                           itemIndex));
-          polygonItemCoordIndex += 1;
-        }
-        extIndex += 1;
-      });
-
-      polygonItemCoordIndex = 0;
-      holes.forEach(function (hole) {
-        extRing[intIndex + 1] = [];
-        hole.forEach(function (intRingCoords) {
-          posInstance = posFunc(intRingCoords, polygonItemCoordIndex,
-                                item, itemIndex);
-          extRing[intIndex + 1].push({
-            x: posInstance.x, y: posInstance.y, i: fillColor.length
-          });
-          fillColorInstance = fillColorFunc(intRingCoords,
-                                            polygonItemCoordIndex,
-                                            item, itemIndex);
-          fillColor.push([fillColorInstance.r,
-                          fillColorInstance.g,
-                          fillColorInstance.b]);
-          fillOpacity.push(fillOpacityFunc(intRingCoords,
-                                           polygonItemCoordIndex,
-                                           item, itemIndex));
-          polygonItemCoordIndex += 1;
-        });
-        intIndex += 1;
-      });
-
-      //console.log("extRing ", extRing);
-      //console.log("result", PolyK.Triangulate(extRing));
-      triangList = triangulator.triangulate_polygon(extRing);
-      newTriangList = [];
-
-      triangList.forEach(function (newIndices) {
-        Array.prototype.push.apply(newTriangList, newIndices);
-      });
-
-      for (i = 1; i < extRing.length; i += 1) {
-        extRing[0] = extRing[0].concat(extRing[i]);
-      }
-
-      newTriangList.forEach(function (polygonIndex) {
-        var polygonItemCoords = extRing[0][polygonIndex];
-        position.push([polygonItemCoords.x,
-                       polygonItemCoords.y,
-                       polygonItemCoords.z || 0.0]);
-        fillColorNew.push(fillColor[polygonItemCoords.i]);
-        fillOpacityNew.push(fillOpacity[polygonItemCoords.i]);
-      });
-
-      itemIndex += 1;
-    });
-
-    position = transform.transformCoordinates(
-                 m_this.gcs(), m_this.layer().map().gcs(),
-                 position, 3);
 
     buffers.create('pos', 3);
     buffers.create('indices', 1);
     buffers.create('fillColor', 3);
     buffers.create('fillOpacity', 1);
 
-    numPts = position.length;
+    m_this.data().forEach(function (item, itemIndex) {
+      var polygon, geometry, numPts, start, i, vertex, j;
 
-    start = buffers.alloc(numPts);
+      function position(d, i) {
+        var c = posFunc(d, i, item, itemIndex);
+        c = transform.transformCoordinates(target_gcs, map_gcs, c);
+        return [c.x, c.y, c.z || 0];
+      }
 
-    //console.log("numPts ", numPts);
-    for (i = 0; i < numPts; i += 1) {
-      buffers.write('pos', position[i], start + i, 1);
-      buffers.write('indices', [i], start + i, 1);
-      buffers.write('fillColor', fillColorNew[i], start + i, 1);
-      buffers.write('fillOpacity', [fillOpacityNew[i]], start + i, 1);
-    }
+      polygon = m_this.polygon()(item, itemIndex);
+      polygon.outer = polygon.outer || [];
+      polygon.inner = polygon.inner || [];
 
-    //console.log(buffers.get('fillColor'));
+      // expand to a geojson polygon geometry
+      geometry = [(polygon.outer || []).map(position)];
+      (polygon.inner || []).forEach(function (hole) {
+        geometry.push(hole.map(position));
+      });
+
+      // convert to an earcut geometry
+      geometry = earcut.flatten(geometry);
+
+      // triangulate
+      triangles = earcut(geometry.vertices, geometry.holes, geometry.dimensions);
+
+      // append to buffers
+      numPts = triangles.length;
+      start = buffers.alloc(triangles.length);
+
+      for (i = 0; i < numPts; i += 1) {
+        j = triangles[i] * 3;
+        vertex = geometry.vertices.slice(triangles[i] * 3, j + 3);
+        buffers.write('pos', vertex, start + i, 1);
+        buffers.write('indices', [i], start + i, 1);
+        color = fillColorFunc(vertex, i, item, itemIndex);
+
+        buffers.write(
+          'fillColor',
+          [color.r, color.g, color.b],
+          start + i,
+          1
+        );
+        buffers.write(
+          'fillOpacity',
+          [fillOpacityFunc(vertex, i, item, itemIndex)],
+          start + i,
+          1
+        );
+      }
+    });
+
     sourcePositions.pushBack(buffers.get('pos'));
     geom.addSource(sourcePositions);
 
@@ -233,7 +165,6 @@ var gl_polygonFeature = function (arg) {
     sourceFillOpacity.pushBack(buffers.get('fillOpacity'));
     geom.addSource(sourceFillOpacity);
 
-    //console.log(buffers.get('indices'));
     trianglePrimitive.setIndices(buffers.get('indices'));
     geom.addPrimitive(trianglePrimitive);
 

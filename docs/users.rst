@@ -27,7 +27,7 @@ list of libraries used by GeoJS.
     +---------------------------+------------+---------------------------+
     | `GL matrix`_              | 2.1        | Core, GL renderer         |
     +---------------------------+------------+---------------------------+
-    | `pnltri`_                 | 2.1        | GL polygon feature        |
+    | `earcut`_                 | 2.1        | GL polygon feature        |
     +---------------------------+------------+---------------------------+
 
 .. table:: External GeoJS dependencies
@@ -52,7 +52,7 @@ list of libraries used by GeoJS.
 .. _jQuery: http://jquery.com/
 .. _proj4: http://proj4js.org/
 .. _GL matrix: http://glmatrix.net/
-.. _pnltri: https://github.com/jahting/pnltri.js/
+.. _earcut: https://github.com/mapbox/earcut/
 .. _d3: http://d3js.org/
 
 

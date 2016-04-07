@@ -18,9 +18,9 @@
  * @copyright 2015, Brandon Jones, Colin MacKenzie IV
  * @license MIT
  *
- * pnltri
- * @copyright 2014, Jurgen Ahting
- * @license MIT
+ * earcut
+ * @copyright 2016, Mapbox
+ * @license ISC
  */
 
 var $ = require('jquery');
