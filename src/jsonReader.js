@@ -170,10 +170,6 @@ var jsonReader = function (arg) {
     }
   };
 
-  this._getStyle = function (spec) {
-    return spec.properties;
-  };
-
   /**
    * Convert from a geojson position array into a geojs position object.
    */
@@ -196,7 +192,6 @@ var jsonReader = function (arg) {
    * @param {function} [convert] An optional conversion function
    */
   this._style = function (prop, _default, spec, convert) {
-    arg = arg || 0;
     convert = convert || function (d) { return d; };
     _default = convert(_default);
     return function (d, i, e, j) {
