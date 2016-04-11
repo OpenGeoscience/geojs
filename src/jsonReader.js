@@ -18,15 +18,9 @@ var jsonReader = function (arg) {
   }
 
   var $ = require('jquery');
+  var convertColor = require('./util').convertColor;
 
-  var m_this = this, m_style = arg.style || {};
-  m_style = $.extend({
-    'strokeWidth': 2,
-    'strokeColor': {r: 0, g: 0, b: 0},
-    'strokeOpacity': 1,
-    'fillColor': {r: 1, g: 0, b: 0},
-    'fillOpacity': 1
-  }, m_style);
+  var m_this = this;
 
   fileReader.call(this, arg);
 
@@ -87,137 +81,209 @@ var jsonReader = function (arg) {
     }
   };
 
+  /**
+   * Return an array of normalized geojson features.  This
+   * will do the following:
+   *
+   * 1. Turn bare geometries into features
+   * 2. Turn multi-geometry features into single geometry features
+   *
+   * Returns an array of Point, LineString, or Polygon features.
+   * @protected
+   */
   this._featureArray = function (spec) {
-    if (spec.type === 'FeatureCollection') {
-      return spec.features || [];
-    }
-    if (spec.type === 'GeometryCollection') {
-      throw 'GeometryCollection not yet implemented.';
-    }
-    if (Array.isArray(spec.coordinates)) {
-      return spec;
-    }
-    throw 'Unsupported collection type: ' + spec.type;
-  };
+    var features, normalized = [];
+    switch (spec.type) {
+      case 'FeatureCollection':
+        features = spec.features;
+        break;
 
-  this._featureType = function (spec) {
-    var geometry = spec.geometry || {};
-    if (geometry.type === 'Point' || geometry.type === 'MultiPoint') {
-      return 'point';
-    }
-    if (geometry.type === 'LineString') {
-      return 'line';
-    }
-    if (geometry.type === 'Polygon') {
-      return 'polygon';
-    }
-    if (geometry.type === 'MultiPolygon') {
-      return 'multipolygon';
-    }
-    return null;
-  };
+      case 'Feature':
+        features = [spec];
+        break;
 
-  this._getCoordinates = function (spec) {
-    var geometry = spec.geometry || {},
-        coordinates = geometry.coordinates || [], elv;
+      case 'GeometryCollection':
+        features = spec.geometries.map(function (g) {
+          return {
+            type: 'Feature',
+            geometry: g,
+            properties: {}
+          };
+        });
+        break;
 
-    if ((coordinates.length === 2 || coordinates.length === 3) &&
-    (isFinite(coordinates[0]) && isFinite(coordinates[1]))) {
+      case 'Point':
+      case 'LineString':
+      case 'Polygon':
+      case 'MultiPoint':
+      case 'MultiLineString':
+      case 'MultiPolygon':
+        features = [{
+          type: 'Feature',
+          geometry: spec,
+          properties: {}
+        }];
+        break;
 
-      // Do we have a elevation component
-      if (isFinite(coordinates[2])) {
-        elv = coordinates[2];
-      }
-
-      // special handling for single point coordinates
-      return [{x: coordinates[0], y: coordinates[1], z: elv}];
+      default:
+        throw new Error('Invalid json type');
     }
 
-    // need better handling here, but we can plot simple polygons
-    // by taking just the outer linearring
-    if (Array.isArray(coordinates[0][0])) {
-      coordinates = coordinates[0];
-    }
-
-    // return an array of points for LineString, MultiPoint, etc...
-    return coordinates.map(function (c) {
-      return {
-        x: c[0],
-        y: c[1],
-        z: c[2]
-      };
+    // flatten multi features
+    features.forEach(function (feature) {
+      Array.prototype.push.apply(normalized, m_this._feature(feature));
     });
+    return normalized;
+  };
+
+  /**
+   * Normalize a feature object turning multi geometry features
+   * into an array of features, and single geometry features into
+   * an array containing one feature.
+   */
+  this._feature = function (spec) {
+    if (spec.type !== 'Feature') {
+      throw new Error('Invalid feature object');
+    }
+    switch (spec.geometry.type) {
+      case 'Point':
+      case 'LineString':
+      case 'Polygon':
+        return [spec];
+
+      case 'MultiPoint':
+      case 'MultiLineString':
+      case 'MultiPolygon':
+        return spec.geometry.coordinates.map(function (c) {
+          return {
+            type: 'Feature',
+            geometry: {
+              type: spec.geometry.type.replace('Multi', ''),
+              coordinates: c
+            },
+            properties: spec.properties
+          };
+        });
+
+      default:
+        throw new Error('Invalid geometry type');
+    }
   };
 
   this._getStyle = function (spec) {
     return spec.properties;
   };
 
+  /**
+   * Convert from a geojson position array into a geojs position object.
+   */
+  this._position = function (p) {
+    return {
+      x: p[0],
+      y: p[1],
+      z: p[2] || 0
+    };
+  };
+
+  /**
+   * Defines a style accessor the returns the given
+   * value of the property object, or a default value.
+   *
+   * @protected
+   * @param {string} prop The property name
+   * @param {object} default The default value
+   * @param {object} [spec] The argument containing the main property object
+   * @param {function} [convert] An optional conversion function
+   */
+  this._style = function (prop, _default, spec, convert) {
+    arg = arg || 0;
+    convert = convert || function (d) { return d; };
+    _default = convert(_default);
+    return function (d, i, e, j) {
+      var p;
+      if (spec) {
+        p = spec[j].properties;
+      } else {
+        p = d.properties;
+      }
+      if (p.hasOwnProperty(prop)) {
+        return convert(p[prop]);
+      }
+      return _default;
+    };
+  };
+
   this.read = function (file, done, progress) {
 
     function _done(object) {
-      var features, allFeatures = [];
+      var features, allFeatures = [], points, lines, polygons;
 
       features = m_this._featureArray(object);
 
-      features.forEach(function (feature) {
-        var type = m_this._featureType(feature),
-            coordinates = m_this._getCoordinates(feature),
-            style = m_this._getStyle(feature);
-        if (type) {
-          if (type === 'line') {
-            style.fill = style.fill || false;
-            allFeatures.push(m_this._addFeature(
-              type,
-              [coordinates],
-              style,
-              feature.properties
-            ));
-          } else if (type === 'point') {
-            style.stroke = style.stroke || false;
-            allFeatures.push(m_this._addFeature(
-              type,
-              coordinates,
-              style,
-              feature.properties
-            ));
-          } else if (type === 'polygon') {
-            style.fill = style.fill === undefined ? true : style.fill;
-            style.fillOpacity = (
-              style.fillOpacity === undefined ? 0.25 : style.fillOpacity
-            );
-            // polygons not yet supported
-            allFeatures.push(m_this._addFeature(
-              type,
-              [[coordinates]], //double wrap for the data method below
-              style,
-              feature.properties
-            ));
-          } else if (type === 'multipolygon') {
-            style.fill = style.fill === undefined ? true : style.fill;
-            style.fillOpacity = (
-              style.fillOpacity === undefined ? 0.25 : style.fillOpacity
-            );
-            coordinates = feature.geometry.coordinates.map(function (c) {
-              return [m_this._getCoordinates({
-                geometry: {
-                  type: 'Polygon',
-                  coordinates: c
-                }
-              })];
-            });
-            allFeatures.push(m_this._addFeature(
-              'polygon', //there is no multipolygon feature class
-              coordinates,
-              style,
-              feature.properties
-            ));
-          }
-        } else {
-          console.log('unsupported feature type: ' + feature.geometry.type);
-        }
-      });
+      // process points
+      points = features.filter(function (f) { return f.geometry.type === 'Point'; });
+      if (points.length) {
+        allFeatures.push(
+          m_this.layer().createFeature('point')
+            .data(points)
+            .position(function (d) {
+              return m_this._position(d.geometry.coordinates);
+            })
+            .style({
+              fill: m_this._style('fill', true),
+              fillColor: m_this._style('fillColor', '#ff7800', null, convertColor),
+              fillOpacity: m_this._style('fillOpacity', 0.8),
+              stroke: m_this._style('stroke', true),
+              strokeColor: m_this._style('strokeColor', '#000000', null, convertColor),
+              strokeWidth: m_this._style('strokeWidth', 1),
+              strokeOpacity: m_this._style('strokeOpacity', 1),
+              radius: m_this._style('radius', 8)
+            })
+        );
+      }
 
+      // process lines
+      lines = features.filter(function (f) { return f.geometry.type === 'LineString'; });
+      if (lines.length) {
+        allFeatures.push(
+          m_this.layer().createFeature('line')
+            .data(lines)
+            .line(function (d) {
+              return d.geometry.coordinates;
+            })
+            .position(m_this._position)
+            .style({
+              strokeColor: m_this._style('strokeColor', '#ff7800', lines, convertColor),
+              strokeWidth: m_this._style('strokeWidth', 4, lines),
+              strokeOpacity: m_this._style('strokeOpacity', 0.5, lines)
+            })
+        );
+      }
+
+      // process polygons
+      polygons = features.filter(function (f) { return f.geometry.type === 'Polygon'; });
+      if (polygons.length) {
+        allFeatures.push(
+          m_this.layer().createFeature('polygon')
+            .data(polygons)
+            .polygon(function (d, i) {
+              return {
+                outer: d.geometry.coordinates[0],
+                inner: d.geometry.coordinates.slice(1)
+              };
+            })
+            .position(m_this._position)
+            .style({
+              fill: m_this._style('fill', true, polygons),
+              fillColor: m_this._style('fillColor', '#b0de5c', polygons, convertColor),
+              fillOpacity: m_this._style('fillOpacity', 0.8, polygons),
+              stroke: m_this._style('stroke', true, polygons),
+              strokeColor: m_this._style('strokeColor', '#999999', polygons, convertColor),
+              strokeWidth: m_this._style('strokeWidth', 2, polygons),
+              strokeOpacity: m_this._style('strokeOpacity', 1, polygons)
+            })
+        );
+      }
       if (done) {
         done(allFeatures);
       }
@@ -225,58 +291,6 @@ var jsonReader = function (arg) {
 
     m_this._readObject(file, _done, progress);
   };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-  * Build the data array for a feature given the coordinates and properties
-  * from the geojson.
-  *
-  * @private
-  * @param {Object[]} coordinates Coordinate data array
-  * @param {Object} properties Geojson properties object
-  * @param {Object} style Global style defaults
-  * @returns {Object[]}
-  */
-  //////////////////////////////////////////////////////////////////////////////
-  this._buildData = function (coordinates, properties, style) {
-    return coordinates.map(function (coord) {
-      return {
-        coordinates: coord,
-        properties: properties,
-        style: style
-      };
-    });
-  };
-
-  this._addFeature = function (type, coordinates, style, properties) {
-    var _style = $.extend({}, m_style, style);
-    var feature = m_this.layer().createFeature(type)
-    .data(m_this._buildData(coordinates, properties, style))
-    .style(_style);
-
-    if (type === 'line') {
-      feature.line(function (d) { return d.coordinates; });
-    } else if (type === 'polygon') {
-      feature.position(function (d) {
-        return {
-          x: d.x,
-          y: d.y,
-          z: d.z
-        };
-      }).polygon(function (d) {
-        return {
-          'outer': d.coordinates[0],
-          'inner': d.coordinates[1]
-        };
-      });
-    } else {
-      feature.position(function (d) {
-        return d.coordinates;
-      });
-    }
-    return feature;
-  };
-
 };
 
 inherit(jsonReader, fileReader);

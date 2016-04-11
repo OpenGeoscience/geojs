@@ -97,7 +97,7 @@ describe('geojsonReader', function () {
 
     expect(reader.canRead(obj)).toBe(true);
     reader.read(obj, function (features) {
-      expect(features.length).toEqual(3);
+      expect(features.length).toEqual(2);
 
       // Validate that we are getting the correct Z values
       data = features[1].data()[0];
