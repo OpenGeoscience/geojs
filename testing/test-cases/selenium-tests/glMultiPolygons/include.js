@@ -6,7 +6,8 @@ window.startTest = function (done) {
     "features": [{
       "type": "Feature",
       "properties": {
-        "strokeColor": {"r": 1, "g": 0, "b": 0}
+        "fillColor": {"r": 1, "g": 0, "b": 0},
+        "fillOpacity": 0.25
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -25,9 +26,6 @@ window.startTest = function (done) {
   });
 
   var layer = myMap.createLayer("feature");
-
-  data.features[0].properties.strokeColor = "#d62728";
-  data.features[0].properties.strokeWidth = 4;
 
   geo.createFileReader("jsonReader", {
       layer: layer
