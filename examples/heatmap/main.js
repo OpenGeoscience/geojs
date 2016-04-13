@@ -33,8 +33,8 @@ $(function () {
                         };
                       })
                       .maxIntensity(20)
-                      .style('radius', 5)
-                      .style('blurRadius', 15)
+                      .style('radius', 15)
+                      .style('blurRadius', 30)
                       .style('opacity', 1.0);
       map.draw();
     }

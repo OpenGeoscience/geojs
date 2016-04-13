@@ -5,7 +5,7 @@ var heatmapFeature = require('../heatmapFeature');
 //////////////////////////////////////////////////////////////////////////////
 /**
  * Create a new instance of class heatmapFeature
- * The rendering borrows from
+ * Inspired from
  *    https://github.com/mourner/simpleheat/blob/gh-pages/simpleheat.js
  *
  * @class
@@ -14,7 +14,7 @@ var heatmapFeature = require('../heatmapFeature');
  * @returns {canvas_heatmapFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-canvas_heatmapFeature = function (arg) {
+var canvas_heatmapFeature = function (arg) {
   'use strict';
 
   if (!(this instanceof canvas_heatmapFeature)) {
@@ -34,17 +34,6 @@ canvas_heatmapFeature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Build
-   * @override
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this._build = function () {
-    s_update.call(m_this);
-    return m_this;
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
    * Meta functions for converting from geojs styles to canvas.
    * @private
    */
@@ -52,10 +41,11 @@ canvas_heatmapFeature = function (arg) {
   this._convertColor = function (c) {
     var color;
     if (c.hasOwnProperty('r') &&
-        c.hasOwnProperty('g') &&
-        c.hasOwnProperty('b') &&
-        c.hasOwnProperty('a')) {
-          color = 'rgba('+255 * c.r+','+255 * c.g+','+255 * c.b+','+ c.a+')';
+      c.hasOwnProperty('g') &&
+      c.hasOwnProperty('b') &&
+      c.hasOwnProperty('a')) {
+      color = 'rgba(' + 255 * c.r + ',' + 255 * c.g + ','
+                    + 255 * c.b + ',' + c.a + ')';
     }
     return color;
   };
@@ -70,10 +60,10 @@ canvas_heatmapFeature = function (arg) {
     var canvas, stop, context2d, gradient, colors;
 
     if (!m_this._grad) {
-      canvas = document.createElement('canvas'),
-        context2d = canvas.getContext('2d'),
-        gradient = context2d.createLinearGradient(0, 0, 0, 256),
-        colors = m_this.style('color');
+      canvas = document.createElement('canvas');
+      context2d = canvas.getContext('2d');
+      gradient = context2d.createLinearGradient(0, 0, 0, 256);
+      colors = m_this.style('color');
 
       canvas.width = 1;
       canvas.height = 256;
@@ -97,11 +87,11 @@ canvas_heatmapFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._createCircle = function () {
-    var circle, ctx, r, r2;
+    var circle, ctx, r, r2, blur;
     if (!m_this._circle) {
-      circle = m_this._circle = document.createElement('canvas'),
-      ctx = circle.getContext('2d'),
-      r = m_this.style('radius'),
+      circle = m_this._circle = document.createElement('canvas');
+      ctx = circle.getContext('2d');
+      r = m_this.style('radius');
       blur = m_this.style('blurRadius');
 
       r2 = blur + r;
@@ -128,14 +118,15 @@ canvas_heatmapFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._colorize = function (pixels, gradient) {
     var i, j;
-    for (i = 0; i < pixels.length; i+=4) {
-      j = pixels[i + 3] * 4; // get opacity from the temporary canvas image,
-                             // then multiply by 4 to get the color index on linear gradient
+    for (i = 0; i < pixels.length; i += 4) {
+      // Get opacity from the temporary canvas image,
+      // then multiply by 4 to get the color index on linear gradient
+      j = pixels[i + 3] * 4;
       if (j) {
-        pixels[i]   = gradient[j];
-        pixels[i+1] = gradient[j+1];
-        pixels[i+2] = gradient[j+2];
-        pixels[i+3] = m_this.style('opacity') * gradient[j+3];
+        pixels[i] = gradient[j];
+        pixels[i + 1] = gradient[j + 1];
+        pixels[i + 2] = gradient[j + 2];
+        pixels[i + 3] = m_this.style('opacity') * gradient[j + 3];
       }
     }
   };
@@ -164,7 +155,7 @@ canvas_heatmapFeature = function (arg) {
     canvas = m_this.layer().canvas()[0];
     pixelArray = context2d.getImageData(0, 0, canvas.width, canvas.height);
     m_this._colorize(pixelArray.data, m_this._grad);
-    context2d.putImageData(pixelArray, 0, 0)
+    context2d.putImageData(pixelArray, 0, 0);
     return m_this;
   };
 

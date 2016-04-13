@@ -18,17 +18,10 @@ describe('canvas heatmap feature', function () {
   var stepAnimationFrame = require('../test-utils').stepAnimationFrame;
   var unmockAnimationFrame = require('../test-utils').unmockAnimationFrame;
 
-  var map, width = 800, height = 600, layer, feature1, feature2,
-      testData = "Strength, Lat,Lon\
-                  0.6,42.8584,-70.9301\
-                  0.233,42.2776,-83.7409\
-                  0.2,42.2776,-83.7409,";
-      testData = testData.split(/\r\n|\n|\r/);
-      testData = testData.map( function (r) {
-        var fields = r.split(',');
-        return [fields[12], fields[24], fields[25]].map(parseFloat);
-      });
-      testData.splice(0, 1);
+  var map, width = 800, height = 600, layer, feature1,
+      testData = [[0.6, 42.8584, -70.9301],
+                  [0.233, 42.2776, -83.7409],
+                  [0.2, 42.2776, -83.7409]];
 
   it('Setup map', function () {
     map = geo.map({node: '#map-canvas-heatmap-feature', center: [0, 0], zoom: 3});
@@ -38,24 +31,24 @@ describe('canvas heatmap feature', function () {
 
   it('Add features to a layer', function () {
     feature1 = layer.createFeature('heatmap')
-                .data(testData)
-                .intensity(function (d) {
-                  return d[0];
-                })
-                .position(function (d) {
-                  return {
-                  x: d[2],
-                  y: d[1]
-                  };
-                })
-                .style('radius', 5)
-                .style('blurRadius', 15)
-                .style('opacity', 1.0);
+      .data(testData)
+      .intensity(function (d) {
+        return d[0];
+      })
+      .position(function (d) {
+        return {
+          x: d[2],
+          y: d[1]
+        };
+      })
+      .style('radius', 5)
+      .style('blurRadius', 15)
+      .style('opacity', 1.0);
 
     mockAnimationFrame();
     map.draw();
     stepAnimationFrame(new Date().getTime());
-    expect(layer.children().length).toBe(1)
+    expect(layer.children().length).toBe(1);
     unmockAnimationFrame();
   });
 
@@ -69,11 +62,11 @@ describe('canvas heatmap feature', function () {
   });
 
   it('Validate maximum intensity', function () {
-    expect(feature1.maxIntensity()).toBe(1);
+    expect(feature1.maxIntensity()).toBe(0.6);
   });
 
   it('Validate minimum intensity', function () {
-    expect(feature1.minIntensity()).toBe(0);
+    expect(feature1.minIntensity()).toBe(0.2);
   });
 
   it('Remove a feature from a layer', function () {
@@ -82,13 +75,13 @@ describe('canvas heatmap feature', function () {
   });
 
   it('Compute gradient', function () {
-    feature1.style("color", {0:    {r: 0, g: 0, b: 0.0, a: 0.0},
+    feature1.style('color', {0:    {r: 0, g: 0, b: 0.0, a: 0.0},
                              0.25: {r: 0, g: 0, b: 1, a: 0.5},
                              0.5:  {r: 0, g: 1, b: 1, a: 0.6},
                              0.75: {r: 1, g: 1, b: 0, a: 0.7},
                              1:    {r: 1, g: 0, b: 0, a: 0.1}});
     feature1._computeGradient();
-    expect(layer.node()[0].children[0].getContext('2d').
-      getImageData(1, 0, 1, 1).data.length).toBe(4)
+    expect(layer.node()[0].children[0].getContext('2d')
+      .getImageData(1, 0, 1, 1).data.length).toBe(4);
   });
 });
