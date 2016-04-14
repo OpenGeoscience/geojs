@@ -1,21 +1,21 @@
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Create a new instance of class heatmap
+ * Create a new instance of class heatmapFeature
  * The rendering borrows from https://github.com/mourner/simpleheat/blob/gh-pages/simpleheat.js
  *
  * @class
  * @param {Object} arg Options object
- * @extends geo.heatmap
- * @returns {geo.canvas.heatmap}
+ * @extends geo.heatmapFeature
+ * @returns {geo.canvas.heatmapFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
-geo.canvas.heatmap = function (arg) {
+geo.canvas.heatmapFeature = function (arg) {
   'use strict';
 
-  if (!(this instanceof geo.canvas.heatmap)) {
-    return new geo.canvas.heatmap(arg);
+  if (!(this instanceof geo.canvas.heatmapFeature)) {
+    return new geo.canvas.heatmapFeature(arg);
   }
-  geo.heatmap.call(this, arg);
+  geo.heatmapFeature.call(this, arg);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -137,7 +137,7 @@ geo.canvas.heatmap = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function () {
-    s_init.call(m_this, arg); //doesn't this get called implicitly by geo.heatmap.call TODO ?
+    s_init.call(m_this, arg); //doesn't this get called implicitly by geo.heatmapFeature.call TODO ?
     return m_this;
   };
 
@@ -171,7 +171,7 @@ geo.canvas.heatmap = function (arg) {
   return this;
 };
 
-inherit(geo.canvas.heatmap, geo.heatmap);
+inherit(geo.canvas.heatmapFeature, geo.heatmapFeature);
 
 // Now register it
-geo.registerFeature('canvas', 'heatmap', geo.canvas.heatmap);
+geo.registerFeature('canvas', 'heatmap', geo.canvas.heatmapFeature);
