@@ -5,10 +5,10 @@ $(function () {
   var map = geo.map({
     node: '#map',
     center: {
-      x: -122.445,
-      y: 37.8
+      x: -98,
+      y: 39
     },
-    zoom: 6
+    zoom: 3
   });
 
   $.ajax('https://s3.amazonaws.com/uploads.hipchat.com/446632/3114847/4dZfl0YfZpTfYzq/AdderallCities2015.csv', {
@@ -32,10 +32,14 @@ $(function () {
                           y: d[1]
                         };
                       })
-                      .maxIntensity(20)
-                      .style('radius', 15)
+                      .style('radius', 10)
                       .style('blurRadius', 30)
-                      .style('opacity', 1.0);
+                      .style('opacity', 1.0)
+                      .style('color',
+                        {0:    {r: 0, g: 0, b: 0, a: 0.0},
+                         0.25: {r: 0, g: 1, b: 0, a: 0.5},
+                         0.5:  {r: 1, g: 1, b: 0, a: 0.8},
+                         1:    {r: 1, g: 0, b: 0, a: 1.0}});
       map.draw();
     }
   });

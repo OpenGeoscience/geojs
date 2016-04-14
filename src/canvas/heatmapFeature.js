@@ -139,7 +139,7 @@ var canvas_heatmapFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._renderOnCanvas = function (context2d, map) {
     var data = m_this.data() || [],
-        radius = m_this.style('radius'),
+        radius = m_this.style('radius') + m_this.style('blurRadius'),
         pos, intensity, canvas, pixelArray;
     m_this._createCircle();
     m_this._computeGradient();
