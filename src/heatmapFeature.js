@@ -31,7 +31,7 @@ var feature = require('./feature');
  *   intensity must be a positive real number will be used to normalize all
  *   intensities with a dataset. If no value is given, then a it will
  *   be computed.
- * @returns {geo.heatmapFetures}
+ * @returns {geo.heatmapFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
 

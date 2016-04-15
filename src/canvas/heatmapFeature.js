@@ -8,7 +8,7 @@ var heatmapFeature = require('../heatmapFeature');
  * Inspired from
  *    https://github.com/mourner/simpleheat/blob/gh-pages/simpleheat.js
  *
- * @class
+ * @class geo.canvas.heatmapFeature
  * @param {Object} arg Options object
  * @extends geo.heatmapFeature
  * @returns {canvas_heatmapFeature}
