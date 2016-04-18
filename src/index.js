@@ -52,6 +52,7 @@ module.exports = $.extend({
   pointFeature: require('./pointFeature'),
   polygonFeature: require('./polygonFeature'),
   quadFeature: require('./quadFeature'),
+  heatmapFeature: require('./heatmapFeature'),
   renderer: require('./renderer'),
   sceneObject: require('./sceneObject'),
   tile: require('./tile'),

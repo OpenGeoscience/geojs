@@ -41,7 +41,8 @@
         "renderer.js",
         "osmLayer.js",
         "domRenderer.js",
-        "choroplethFeature.js"
+        "choroplethFeature.js",
+        "heatmapFeature.js"
       ]
     },
     "geo.util": {
@@ -77,7 +78,8 @@
         "init.js",
         "quadFeature.js",
         "canvasRenderer.js",
-        "tileLayer.js"
+        "tileLayer.js",
+        "heatmapFeature.js"
       ]
     },
     "geo.d3": {
