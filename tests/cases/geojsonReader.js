@@ -15,6 +15,241 @@ describe('geojsonReader', function () {
 
   var obj, map, layer;
 
+  describe('Feature normalization', function () {
+    var reader;
+
+    beforeEach(function () {
+      map = geo.map({node: '#map-geojson-reader', center: [0, 0], zoom: 3});
+      layer = map.createLayer('feature', {renderer: 'd3'});
+      sinon.stub(layer, 'createFeature');
+      reader = geo.createFileReader('jsonReader', {'layer': layer});
+    });
+    afterEach(function () {
+      layer.createFeature.restore();
+      map.exit();
+    });
+
+    describe('bare geometry', function () {
+      it('Point', function () {
+        expect(reader._featureArray({
+          type: 'Point',
+          coordinates: [1, 2]
+        })).toEqual([{
+          type: 'Feature',
+          properties: {},
+          geometry: {
+            type: 'Point',
+            coordinates: [1, 2]
+          }
+        }]);
+      });
+      it('LineString', function () {
+        expect(reader._featureArray({
+          type: 'LineString',
+          coordinates: [[1, 2], [3, 4]]
+        })).toEqual([{
+          type: 'Feature',
+          properties: {},
+          geometry: {
+            type: 'LineString',
+            coordinates: [[1, 2], [3, 4]]
+          }
+        }]);
+      });
+      it('Polygon', function () {
+        expect(reader._featureArray({
+          type: 'Polygon',
+          coordinates: [[[1, 2], [3, 4], [5, 6]]]
+        })).toEqual([{
+          type: 'Feature',
+          properties: {},
+          geometry: {
+            type: 'Polygon',
+            coordinates: [[[1, 2], [3, 4], [5, 6]]]
+          }
+        }]);
+      });
+      it('MultiPoint', function () {
+        expect(reader._featureArray({
+          type: 'MultiPoint',
+          coordinates: [[1, 2], [3, 4]]
+        })).toEqual([{
+          type: 'Feature',
+          properties: {},
+          geometry: {
+            type: 'Point',
+            coordinates: [1, 2]
+          }
+        }, {
+          type: 'Feature',
+          properties: {},
+          geometry: {
+            type: 'Point',
+            coordinates: [3, 4]
+          }
+        }]);
+      });
+      it('MultiLineString', function () {
+        expect(reader._featureArray({
+          type: 'MultiLineString',
+          coordinates: [[[1, 2], [3, 4]]]
+        })).toEqual([{
+          type: 'Feature',
+          properties: {},
+          geometry: {
+            type: 'LineString',
+            coordinates: [[1, 2], [3, 4]]
+          }
+        }]);
+      });
+      it('MultiPolygon', function () {
+        expect(reader._featureArray({
+          type: 'MultiPolygon',
+          coordinates: [[[[1, 2], [3, 4], [5, 6]]]]
+        })).toEqual([{
+          type: 'Feature',
+          properties: {},
+          geometry: {
+            type: 'Polygon',
+            coordinates: [[[1, 2], [3, 4], [5, 6]]]
+          }
+        }]);
+      });
+    });
+
+    it('GeometryCollection', function () {
+      expect(reader._featureArray({
+        type: 'GeometryCollection',
+        geometries: [
+          {
+            type: 'Point',
+            coordinates: [0, 0]
+          }, {
+            type: 'MultiPoint',
+            coordinates: [[0, 1], [2, 3]]
+          }
+        ]
+      })).toEqual([
+        {
+          type: 'Feature',
+          properties: {},
+          geometry: {
+            type: 'Point',
+            coordinates: [0, 0]
+          }
+        }, {
+          type: 'Feature',
+          properties: {},
+          geometry: {
+            type: 'Point',
+            coordinates: [0, 1]
+          }
+        }, {
+          type: 'Feature',
+          properties: {},
+          geometry: {
+            type: 'Point',
+            coordinates: [2, 3]
+          }
+        }
+      ]);
+    });
+
+    it('Feature', function () {
+      expect(reader._featureArray({
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [1, 2]
+        },
+        properties: {a: 1}
+      })).toEqual([{
+        type: 'Feature',
+        properties: {a: 1},
+        geometry: {
+          type: 'Point',
+          coordinates: [1, 2]
+        }
+      }]);
+    });
+
+    it('FeatureCollection', function () {
+      expect(reader._featureArray({
+        type: 'FeatureCollection',
+        features: [{
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [1, 2]
+          },
+          properties: {a: 1}
+        }, {
+          type: 'Feature',
+          geometry: {
+            type: 'MultiPoint',
+            coordinates: [[0, 0], [1, 1]]
+          },
+          properties: {b: 2}
+        }]
+      })).toEqual([{
+        type: 'Feature',
+        properties: {a: 1},
+        geometry: {
+          type: 'Point',
+          coordinates: [1, 2]
+        }
+      }, {
+        type: 'Feature',
+        properties: {b: 2},
+        geometry: {
+          type: 'Point',
+          coordinates: [0, 0]
+        }
+      }, {
+        type: 'Feature',
+        properties: {b: 2},
+        geometry: {
+          type: 'Point',
+          coordinates: [1, 1]
+        }
+      }]);
+    });
+
+    describe('Errors', function () {
+      it('Invalid geometry', function () {
+        expect(function () {
+          reader._feature({
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'pt',
+              coordinates: [0, 0]
+            }
+          });
+        }).toThrow();
+      });
+
+      it('Invalid feature', function () {
+        expect(function () {
+          reader._feature({
+            properties: {},
+            geometry: {
+              type: 'Point',
+              coordinates: [0, 0]
+            }
+          });
+        }).toThrow();
+      });
+      it('Invalid JSON', function () {
+        expect(function () {
+          reader._featureArray({
+            features: []
+          });
+        }).toThrow();
+      });
+    });
+  });
+
   it('Setup map', function () {
     map = geo.map({node: '#map-geojson-reader', center: [0, 0], zoom: 3});
     layer = map.createLayer('feature', {renderer: 'd3'});
@@ -82,8 +317,8 @@ describe('geojsonReader', function () {
             'type': 'MultiPoint'
           },
           'properties': {
-            'color': [0, 0, 1],
-            'size': [7]
+            'fillColor': '#0000ff',
+            'radius': 7
           },
           'type': 'Feature'
         }
@@ -97,7 +332,7 @@ describe('geojsonReader', function () {
 
     expect(reader.canRead(obj)).toBe(true);
     reader.read(obj, function (features) {
-      expect(features.length).toEqual(3);
+      expect(features.length).toEqual(2);
 
       // Validate that we are getting the correct Z values
       data = features[1].data()[0];
