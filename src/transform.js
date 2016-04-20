@@ -1,3 +1,5 @@
+var proj4 = require('proj4');
+
 //////////////////////////////////////////////////////////////////////////////
 /**
  * This purpose of this class is to provide a generic interface for computing
@@ -27,8 +29,6 @@ var transform = function (options) {
   if (!(this instanceof transform)) {
     return new transform(options);
   }
-
-  var proj4 = require('proj4');
 
   var m_this = this,
       m_proj,   // The raw proj4js object
@@ -155,6 +155,52 @@ var transform = function (options) {
   }
 
   return this;
+};
+
+/**
+ * Contains a reference to `proj4.defs`.  The functions serves two
+ * purposes.
+ *
+ *   1. It is a key value mapping of all loaded projection definitions
+ *   2. It is a function that will add additional definitions.
+ *
+ * See:
+ *   http://proj4js.org/
+ */
+transform.defs = proj4.defs;
+
+/**
+ * Look up a projection definition from epsg.io
+ * For the moment, we only handle `EPSG` codes.
+ *
+ * @param {string} projection A projection alias (e.g. EPSG:4326)
+ * @returns {promise} Resolves with the proj4 definition
+ */
+transform.lookup = function (projection) {
+  var $ = require('jquery');
+  var code, defer = new $.Deferred(), parts;
+
+  if (proj4.defs.hasOwnProperty(projection)) {
+    return defer.resolve(proj4.defs[projection]);
+  }
+
+  parts = projection.split(':');
+  if (parts.length !== 2 || parts[0].toUpperCase() !== 'EPSG') {
+    return defer.reject('Invalid projection code').promise();
+  }
+  code = parts[1];
+
+  return $.ajax({
+    url: 'http://epsg.io/?q=' + code + '&format=json'
+  }).then(function (data) {
+    var result = (data.results || [])[0];
+    if (!result || !result.proj4) {
+      return defer.reject(data).promise();
+    }
+
+    proj4.defs(projection, result.proj4);
+    return $.when(proj4.defs[projection]);
+  });
 };
 
 /**
