@@ -1,7 +1,17 @@
 var path = require('path');
 var webpack = require('webpack');
+var exec = require('child_process').execSync;
+var sha = '';
+
+try {
+  sha = exec('git rev-parse HEAD', {cwd: __dirname}).toString().trim();
+} catch (e) {
+  console.warn('Could not determine git hash.');
+}
+
 var define_plugin = new webpack.DefinePlugin({
-  VERSION: JSON.stringify(require('./package.json').version)
+  GEO_SHA: JSON.stringify(sha),
+  GEO_VERSION: JSON.stringify(require('./package.json').version)
 });
 
 module.exports = {
