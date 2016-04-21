@@ -1,6 +1,7 @@
 var inherit = require('../inherit');
 var registerFeature = require('../registry').registerFeature;
 var heatmapFeature = require('../heatmapFeature');
+var timestamp = require('../timestamp');
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -27,13 +28,22 @@ var canvas_heatmapFeature = function (arg) {
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
+  var geo_event = require('../event');
+
   var m_this = this,
       m_typedBuffer = null,
       m_typedClampedBuffer = null,
       m_typedBufferData = null,
+      m_heatMapZoom,
+      m_lastZoom,
+      m_lastScale = 0,
       s_exit = this._exit,
       s_init = this._init,
-      s_update = this._update;
+      s_update = this._update,
+      m_currentX = 0,
+      m_currentY = 0,
+      m_renderTime = timestamp(),
+      m_translate;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -75,7 +85,7 @@ var canvas_heatmapFeature = function (arg) {
         gradient.addColorStop(stop, m_this._convertColor(colors[stop]));
       }
 
-      context2d.fillStyle = gradient;
+      context2d.fillStyle  = gradient;
       context2d.fillRect(0, 0, 1, 256);
       m_this._grad = context2d.getImageData(0, 0, 1, 256).data;
     }
@@ -181,20 +191,32 @@ var canvas_heatmapFeature = function (arg) {
         radius = m_this.style('radius') + m_this.style('blurRadius'),
         pos, intensity, canvas, pixelArray;
 
-    m_this._createCircle();
-    m_this._computeGradient();
-    data.forEach(function (d) {
-      pos = m_this.layer().map().gcsToDisplay(m_this.position()(d));
-      intensity = (m_this.intensity()(d) - m_this.minIntensity()) /
-                  (m_this.maxIntensity() - m_this.minIntensity());
-      // Small values are not visible because globalAlpha < .01
-      // cannot be read from imageData
-      context2d.globalAlpha = intensity < 0.01 ? 0.01 : intensity;
-      context2d.drawImage(m_this._circle, pos.x - radius, pos.y - radius);
-    });
-    canvas = m_this.layer().canvas()[0];
-    pixelArray = context2d.getImageData(0, 0, canvas.width, canvas.height);
-    m_this._colorize(context2d, canvas.width, canvas.height, pixelArray, m_this._grad);
+    if (m_renderTime.getMTime() < m_this.buildTime().getMTime()) {
+      m_this._createCircle();
+      m_this._computeGradient();
+      data.forEach(function (d) {
+        pos = m_this.layer().map().gcsToDisplay(m_this.position()(d));
+        intensity = (m_this.intensity()(d) - m_this.minIntensity()) /
+                    (m_this.maxIntensity() - m_this.minIntensity());
+        // Small values are not visible because globalAlpha < .01
+        // cannot be read from imageData
+        context2d.globalAlpha = intensity < 0.01 ? 0.01 : intensity;
+        context2d.drawImage(m_this._circle, pos.x - radius, pos.y - radius);
+      });
+      canvas = m_this.layer().canvas()[0];
+      pixelArray = context2d.getImageData(0, 0, canvas.width, canvas.height);
+      m_this._colorize(context2d, canvas.width, canvas.height, pixelArray, m_this._grad);
+
+      m_heatMapZoom = m_this.layer().map().zoom();
+      m_translate = {x: 0, y: 0};
+      m_lastZoom = null;
+    }
+
+
+    m_renderTime.modified();
+
+    m_this.layer().renderer().clearCanvas(false);
+
     return m_this;
   };
 
@@ -206,6 +228,9 @@ var canvas_heatmapFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._init = function () {
     s_init.call(m_this, arg);
+
+    m_this.geoOn(geo_event.pan, m_this._animatePan);
+
     return m_this;
   };
 
@@ -223,6 +248,48 @@ var canvas_heatmapFeature = function (arg) {
     }
     m_this.updateTime().modified();
     return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Animate pan (and zoom)
+   * @protected
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._animatePan = function (e) {
+
+    var zoom = m_this.layer().map().zoom(),
+        scale = Math.pow(2, (zoom - m_heatMapZoom));
+
+    if (!e.screenDelta) {
+      return
+    }
+
+    var translate = {x: e.screenDelta.x,
+                     y: e.screenDelta.y};
+
+    console.log(e);
+    console.log(e.screenDelta);
+
+    if (zoom !== m_lastZoom && translate.x !== m_translate.x &&
+        translate.y !== m_translate.y) {
+      var transform = 'translate(' + translate.x + 'px' + ',' +
+                       translate.y + 'px' + ')' + 'scale(' + scale + ')';
+
+      m_this.layer().canvas().css('transform-origin', '50% 50%');
+      m_this.layer().canvas().css('transform', transform);
+
+      m_translate = translate;
+      m_lastZoom = zoom;
+    }
+
+    // if (zoom !== m_heatMapZoom) {
+    //   if (m_prevRequest) {
+    //     // Cancel it
+    //   } else {
+    //     id = setTimeout(_renderOnCanvas, 1000);
+    //   }
+    // }
   };
 
   ////////////////////////////////////////////////////////////////////////////

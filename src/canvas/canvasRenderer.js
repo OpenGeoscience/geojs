@@ -25,8 +25,14 @@ var canvasRenderer = function (arg) {
 
   var m_this = this,
       m_renderAnimFrameRef = null,
+      m_clearCanvas = true,
       s_init = this._init,
       s_exit = this._exit;
+
+
+  this.clearCanvas = function(arg) {
+    m_clearCanvas = arg;
+  }
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -91,9 +97,12 @@ var canvasRenderer = function (arg) {
             map = layer.map(),
             camera = map.camera(),
             viewport = camera._viewport;
+
         // Clear the canvas.
-        m_this.context2d.setTransform(1, 0, 0, 1, 0, 0);
-        m_this.context2d.clearRect(0, 0, viewport.width, viewport.height);
+        if (m_clearCanvas) {
+          m_this.context2d.setTransform(1, 0, 0, 1, 0, 0);
+          m_this.context2d.clearRect(0, 0, viewport.width, viewport.height);
+        }
 
         var features = layer.features();
         for (var i = 0; i < features.length; i += 1) {
