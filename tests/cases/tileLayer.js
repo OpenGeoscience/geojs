@@ -347,7 +347,11 @@ describe('geo.tileLayer', function () {
       tileRounding: function () {},
       attribution: 'My awesome layer',
       tileOffset: function () {},
-      topDown: true
+      topDown: true,
+      tilesAtZoom: function (level) {
+        var s = Math.pow(2, level);
+        return {x: s, y: Math.ceil(s * 3 / 4)};
+      }
     };
     opts.originalUrl = opts.url;
     it('Check tileLayer options', function () {
@@ -400,6 +404,15 @@ describe('geo.tileLayer', function () {
       expect(l.subdomains()).toEqual(['12', '3']);
       l.subdomains(['ab', 'c']);
       expect(l.subdomains()).toEqual(['ab', 'c']);
+    });
+    it('tilesAtZoom', function () {
+      var m = map(), l;
+      opts.map = m;
+      l = geo.tileLayer(opts);
+      expect(l.tilesAtZoom(0)).toEqual({x: 1, y: 1});
+      expect(l.tilesAtZoom(1)).toEqual({x: 2, y: 2});
+      expect(l.tilesAtZoom(2)).toEqual({x: 4, y: 3});
+      expect(l.tilesAtZoom(3)).toEqual({x: 8, y: 6});
     });
   });
   describe('Public utility methods', function () {

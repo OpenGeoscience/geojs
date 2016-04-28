@@ -1,3 +1,4 @@
+/* globals $, geo */
 // This example should be tried with different query strings.
 
 /* Many parameters can be adjusted via url query parameters:
@@ -27,8 +28,8 @@
  *  maxBoundsTop: maximum bounds top value.
  *  opacity: a css opacity value (typically a float from 0 to 1).
  *  projection: 'parallel' or 'projection' for the camera projection.
- *  renderer: 'vgl' (default), 'canvas', 'd3', 'null', or 'html'.  This picks the
- *      renderer for map tiles.  null or html uses the html renderer.
+ *  renderer: 'vgl' (default), 'canvas', 'd3', 'null', or 'html'.  This picks
+ *      the renderer for map tiles.  null or html uses the html renderer.
  *  round: 'round' (default), 'floor', 'ceil'.
  *  subdomains: a comma-separated string of subdomains to use in the {s} part
  *      of the url parameter.  If there are no commas in the string, each letter
@@ -159,6 +160,13 @@ $(function () {
     };
     layerParams.attribution = '';
     layerParams.tileRounding = Math.ceil;
+    layerParams.tilesAtZoom = function (level) {
+      var scale = Math.pow(2, layerParams.maxLevel - level);
+      return {
+        x: Math.ceil(w / (layerParams.tileWidth || 256) / scale),
+        y: Math.ceil(h / (layerParams.tileHeight || 256) / scale)
+      };
+    };
   }
   // Parse additional query options
   if (query.x !== undefined) {
