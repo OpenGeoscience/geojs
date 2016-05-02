@@ -92,4 +92,87 @@ describe('geo.transform', function () {
       [{x: 1669792, y: -19971868}, {x: 1669792, y: -19971868}]
     ]
   );
+
+  describe('defs', function () {
+    var server;
+
+    beforeEach(function () {
+      server = sinon.fakeServer.create();
+    });
+
+    afterEach(function () {
+      server.restore();
+    });
+
+    it('predefined definitions', function () {
+      expect(geo.transform.defs.hasOwnProperty('EPSG:4326')).toBe(true);
+      expect(geo.transform.defs.hasOwnProperty('EPSG:3857')).toBe(true);
+    });
+
+    it('custom definition', function () {
+      geo.transform.defs('my projection', '+proj=longlat +datum=WGS84 +no_defs');
+      expect(geo.transform.defs.hasOwnProperty('my projection')).toBe(true);
+      var p = geo.transform({source: 'EPSG:4326', target: 'my projection'});
+
+      expect(p.forward({x: 10, y: -10, z: 0})).toEqual({x: 10, y: -10, z: 0});
+    });
+
+    it('lookup', function () {
+      var spy = sinon.spy(), request;
+      geo.transform.lookup('EPSG:5000').then(spy);
+
+      request = server.requests[0];
+      expect(request.url).toMatch(/\?q=5000/);
+      request.respond(200, {'Content-Type': 'application/json'}, JSON.stringify({
+        status: 'ok',
+        number_result: 1,
+        results: [{
+          code: '5000',
+          kind: 'CRS-PROJCRS',
+          bbox: [
+            85.06,
+            180.0,
+            85.06,
+            180.0
+          ],
+          unit: 'degree',
+          proj4: '+proj=longlat +datum=WGS84 +no_defs',
+          name: 'WGS 84',
+          area: 'World',
+          default_trans: 0,
+          trans: [],
+          accuracy: ''
+        }]
+      }));
+
+      expect(spy.calledOnce).toBe(true);
+      expect(geo.transform.defs.hasOwnProperty('EPSG:5000')).toBe(true);
+
+      geo.transform.lookup('EPSG:5000');
+      expect(server.requests.length).toBe(1);
+    });
+
+    it('invalid projection code', function () {
+      var spy = sinon.spy(), request;
+      geo.transform.lookup('EPSG:5001').fail(spy);
+
+      request = server.requests[0];
+      request.respond(200, {'Content-Type': 'application/json'}, JSON.stringify({
+        status: 'ok',
+        number_result: 0,
+        results: []
+      }));
+
+      expect(spy.calledOnce).toBe(true);
+      expect(geo.transform.defs.hasOwnProperty('EPSG:5001')).toBe(false);
+    });
+
+    it('unknown projection type', function () {
+      var spy = sinon.spy();
+      geo.transform.lookup('unknown:5002').fail(spy);
+
+      expect(spy.calledOnce).toBe(true);
+      expect(geo.transform.defs.hasOwnProperty('unknown:5002')).toBe(false);
+    });
+  });
 });
