@@ -81,6 +81,9 @@ module.exports = (function () {
    *    The tile width as displayed without overlap
    * @param {number} [options.tileHeight=256]
    *    The tile height as displayed without overlap
+   * @param {function} [options.tilesAtZoom=null]
+   *    A function that is given a zoom level and returns {x: (num), y: (num)}
+   *    with the number of tiles at that zoom level.
    * @param {number} [options.cacheSize=400] The maximum number of tiles to
    *    cache.  The default is 200 if keepLower is false.
    * @param {bool}   [options.keepLower=true]
@@ -230,6 +233,9 @@ module.exports = (function () {
      * @returns {{x: nx, y: ny}} The number of tiles in each axis
      */
     this.tilesAtZoom = function (level) {
+      if (this._options.tilesAtZoom) {
+        return this._options.tilesAtZoom.call(this, level);
+      }
       var s = Math.pow(2, level);
       return {x: s, y: s};
     };
