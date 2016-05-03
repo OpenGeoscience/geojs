@@ -34,16 +34,11 @@ var canvas_heatmapFeature = function (arg) {
       m_typedBuffer = null,
       m_typedClampedBuffer = null,
       m_typedBufferData = null,
-      m_heatMapZoom,
-      m_lastZoom,
-      m_lastScale = 0,
+      m_heatMapPosition,
       s_exit = this._exit,
       s_init = this._init,
       s_update = this._update,
-      m_currentX = 0,
-      m_currentY = 0,
-      m_renderTime = timestamp(),
-      m_translate;
+      m_renderTime = timestamp();
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -85,7 +80,7 @@ var canvas_heatmapFeature = function (arg) {
         gradient.addColorStop(stop, m_this._convertColor(colors[stop]));
       }
 
-      context2d.fillStyle  = gradient;
+      context2d.fillStyle = gradient;
       context2d.fillRect(0, 0, 1, 256);
       m_this._grad = context2d.getImageData(0, 0, 1, 256).data;
     }
@@ -133,9 +128,9 @@ var canvas_heatmapFeature = function (arg) {
     var isLittleEndian = true, i, j, index;
 
     // Determine whether Uint32 is little- or big-endian.
-    if (!m_typedBuffer || (m_typedBuffer.length != imageData.data.length)) {
-      m_typedBuffer = new ArrayBuffer(imageData.data.length),
-      m_typedClampedBuffer = new Uint8ClampedArray(m_typedBuffer),
+    if (!m_typedBuffer || (m_typedBuffer.length !== imageData.data.length)) {
+      m_typedBuffer = new ArrayBuffer(imageData.data.length);
+      m_typedClampedBuffer = new Uint8ClampedArray(m_typedBuffer);
       m_typedBufferData = new Uint32Array(m_typedBuffer);
     }
 
@@ -146,7 +141,7 @@ var canvas_heatmapFeature = function (arg) {
         m_typedBuffer[5] === 0x0b &&
         m_typedBuffer[6] === 0x0c &&
         m_typedBuffer[7] === 0x0d) {
-        isLittleEndian = false;
+      isLittleEndian = false;
     }
 
     if (isLittleEndian) {
@@ -157,10 +152,10 @@ var canvas_heatmapFeature = function (arg) {
           m_typedBufferData[i] =
             (gradient[index + 3] << 24) |
             (gradient[index + 2] << 16) |
-            (gradient[index + 1] <<  8) |
+            (gradient[index + 1] << 8) |
              gradient[index];
-         }
-         i += 1;
+        }
+        i += 1;
       }
     } else {
       i = 0;
@@ -168,9 +163,9 @@ var canvas_heatmapFeature = function (arg) {
         index = imageData.data[j + 3] * 4;
         if (index) {
           m_typedBufferData[i] =
-            (gradient[index]     << 24) |
+            (gradient[index] << 24) |
             (gradient[index + 1] << 16) |
-            (gradient[index + 2] <<  8) |
+            (gradient[index + 2] << 8) |
              gradient[index + 3];
         }
       }
@@ -187,15 +182,22 @@ var canvas_heatmapFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._renderOnCanvas = function (context2d, map) {
-    var data = m_this.data() || [],
-        radius = m_this.style('radius') + m_this.style('blurRadius'),
-        pos, intensity, canvas, pixelArray;
 
     if (m_renderTime.getMTime() < m_this.buildTime().getMTime()) {
+      var data = m_this.data() || [],
+          radius = m_this.style('radius') + m_this.style('blurRadius'),
+          pos, intensity, canvas, pixelArray,
+          layer = m_this.layer(),
+          viewport = map.camera()._viewport;
+
+      context2d.setTransform(1, 0, 0, 1, 0, 0);
+      context2d.clearRect(0, 0, viewport.width, viewport.height);
+      layer.canvas().css('transform', '');
+
       m_this._createCircle();
       m_this._computeGradient();
       data.forEach(function (d) {
-        pos = m_this.layer().map().gcsToDisplay(m_this.position()(d));
+        pos = map.gcsToDisplay(m_this.position()(d));
         intensity = (m_this.intensity()(d) - m_this.minIntensity()) /
                     (m_this.maxIntensity() - m_this.minIntensity());
         // Small values are not visible because globalAlpha < .01
@@ -203,19 +205,21 @@ var canvas_heatmapFeature = function (arg) {
         context2d.globalAlpha = intensity < 0.01 ? 0.01 : intensity;
         context2d.drawImage(m_this._circle, pos.x - radius, pos.y - radius);
       });
-      canvas = m_this.layer().canvas()[0];
+      canvas = layer.canvas()[0];
       pixelArray = context2d.getImageData(0, 0, canvas.width, canvas.height);
       m_this._colorize(context2d, canvas.width, canvas.height, pixelArray, m_this._grad);
 
-      m_heatMapZoom = m_this.layer().map().zoom();
-      m_translate = {x: 0, y: 0};
-      m_lastZoom = null;
+      m_heatMapPosition = {
+        zoom: map.zoom(),
+        origin: map.displayToGcs({x: 0, y: 0}, null),
+        rotation: map.rotation(),
+        lastScale: undefined,
+        lastOrigin: {x: 0, y: 0},
+        lastRotation: undefined
+      };
+      m_renderTime.modified();
+      layer.renderer().clearCanvas(false);
     }
-
-
-    m_renderTime.modified();
-
-    m_this.layer().renderer().clearCanvas(false);
 
     return m_this;
   };
@@ -258,38 +262,50 @@ var canvas_heatmapFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._animatePan = function (e) {
 
-    var zoom = m_this.layer().map().zoom(),
-        scale = Math.pow(2, (zoom - m_heatMapZoom));
+    var map = m_this.layer().map(),
+        zoom = map.zoom(),
+        scale = Math.pow(2, (zoom - m_heatMapPosition.zoom)),
+        origin = map.gcsToDisplay(m_heatMapPosition.origin, null),
+        rotation = map.rotation();
 
-    if (!e.screenDelta) {
-      return
+    if (m_heatMapPosition.lastScale === scale &&
+        m_heatMapPosition.lastOrigin.x === origin.x &&
+        m_heatMapPosition.lastOrigin.y === origin.y &&
+        m_heatMapPosition.lastRotation === rotation) {
+      return;
     }
 
-    var translate = {x: e.screenDelta.x,
-                     y: e.screenDelta.y};
+    var transform = '' +
+        ' translate(' + origin.x + 'px' + ',' + origin.y + 'px' + ')' +
+        ' scale(' + scale + ')' +
+        ' rotate(' + ((rotation - m_heatMapPosition.rotation) * 180 / Math.PI) + 'deg)';
 
-    console.log(e);
-    console.log(e.screenDelta);
+    m_this.layer().canvas().css('transform-origin', '0px 0px');
+    m_this.layer().canvas().css('transform', transform);
 
-    if (zoom !== m_lastZoom && translate.x !== m_translate.x &&
-        translate.y !== m_translate.y) {
-      var transform = 'translate(' + translate.x + 'px' + ',' +
-                       translate.y + 'px' + ')' + 'scale(' + scale + ')';
+    m_heatMapPosition.lastScale = scale;
+    m_heatMapPosition.lastOrigin.x = origin.x;
+    m_heatMapPosition.lastOrigin.y = origin.y;
+    m_heatMapPosition.lastRotation = rotation;
 
-      m_this.layer().canvas().css('transform-origin', '50% 50%');
-      m_this.layer().canvas().css('transform', transform);
-
-      m_translate = translate;
-      m_lastZoom = zoom;
+    if (m_heatMapPosition.timeout) {
+      window.clearTimeout(m_heatMapPosition.timeout);
+      m_heatMapPosition.timeout = undefined;
     }
-
-    // if (zoom !== m_heatMapZoom) {
-    //   if (m_prevRequest) {
-    //     // Cancel it
-    //   } else {
-    //     id = setTimeout(_renderOnCanvas, 1000);
-    //   }
-    // }
+    /* This conditional can change if we compute the heatmap beyond the visable
+     * viewport so that we don't have to update on pans as often.  If we are
+     * close to where the heatmap was originally computed, don't bother
+     * updating it. */
+    if (parseFloat(scale.toFixed(4)) !== 1 ||
+        parseFloat((rotation - m_heatMapPosition.rotation).toFixed(4)) !== 0 ||
+        parseFloat(origin.x.toFixed(1)) !== 0 ||
+        parseFloat(origin.y.toFixed(1)) !== 0) {
+      m_heatMapPosition.timeout = window.setTimeout(function () {
+        m_heatMapPosition.timeout = undefined;
+        m_this.buildTime().modified();
+        m_this.layer().draw();
+      }, m_this.updateDelay());
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////

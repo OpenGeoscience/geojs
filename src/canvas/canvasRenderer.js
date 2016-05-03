@@ -29,10 +29,9 @@ var canvasRenderer = function (arg) {
       s_init = this._init,
       s_exit = this._exit;
 
-
-  this.clearCanvas = function(arg) {
+  this.clearCanvas = function (arg) {
     m_clearCanvas = arg;
-  }
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**

@@ -31,6 +31,8 @@ var feature = require('./feature');
  *   intensity must be a positive real number will be used to normalize all
  *   intensities with a dataset. If no value is given, then a it will
  *   be computed.
+ * @param {number} [updateDelay=1000] Delay in milliseconds after a zoom,
+ *   rotate, or pan event before recomputing the heatmap.
  * @returns {geo.heatmapFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -54,12 +56,14 @@ var heatmapFeature = function (arg) {
       m_intensity,
       m_maxIntensity,
       m_minIntensity,
+      m_updateDelay,
       s_init = this._init;
 
   m_position = arg.position || function (d) { return d; };
   m_intensity = arg.intensity || function (d) { return 1; };
   m_maxIntensity = arg.maxIntensity || null;
   m_minIntensity = arg.minIntensity ? arg.minIntensity : null;
+  m_updateDelay = arg.updateDelay ? parseInt(arg.updateDelay, 10) : 1000;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -93,6 +97,22 @@ var heatmapFeature = function (arg) {
       m_minIntensity = val;
       m_this.dataTime().modified();
       m_this.modified();
+    }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set updateDelay
+   *
+   * @returns {geo.heatmap}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.updateDelay = function (val) {
+    if (val === undefined) {
+      return m_updateDelay;
+    } else {
+      m_updateDelay = parseInt(val, 10);
     }
     return m_this;
   };
