@@ -196,10 +196,14 @@ var canvas_heatmapFeature = function (arg) {
 
       m_this._createCircle();
       m_this._computeGradient();
-      data.forEach(function (d) {
-        pos = map.gcsToDisplay(m_this.position()(d));
-        intensity = (m_this.intensity()(d) - m_this.minIntensity()) /
-                    (m_this.maxIntensity() - m_this.minIntensity());
+      var position = m_this.position(),
+          intensityFunc = m_this.intensity(),
+          minIntensity = m_this.minIntensity(),
+          maxIntensity = m_this.maxIntensity();
+      data.forEach(function (d, idx) {
+        pos = m_this.featureGcsToDisplay(position(d));
+        intensity = (intensityFunc(d) - minIntensity) /
+                    (maxIntensity - minIntensity);
         // Small values are not visible because globalAlpha < .01
         // cannot be read from imageData
         context2d.globalAlpha = intensity < 0.01 ? 0.01 : intensity;
