@@ -211,7 +211,7 @@ var canvas_heatmapFeature = function (arg) {
 
       m_heatMapPosition = {
         zoom: map.zoom(),
-        origin: map.displayToGcs({x: 0, y: 0}, null),
+        gcsOrigin: map.displayToGcs({x: 0, y: 0}, null),
         rotation: map.rotation(),
         lastScale: undefined,
         lastOrigin: {x: 0, y: 0},
@@ -265,7 +265,7 @@ var canvas_heatmapFeature = function (arg) {
     var map = m_this.layer().map(),
         zoom = map.zoom(),
         scale = Math.pow(2, (zoom - m_heatMapPosition.zoom)),
-        origin = map.gcsToDisplay(m_heatMapPosition.origin, null),
+        origin = map.gcsToDisplay(m_heatMapPosition.gcsOrigin, null),
         rotation = map.rotation();
 
     if (m_heatMapPosition.lastScale === scale &&
