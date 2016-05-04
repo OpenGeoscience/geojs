@@ -138,7 +138,7 @@ var quadFeature = function (arg) {
         map = m_this.layer().map(),
         order1 = [0, 1, 2, 0], order2 = [1, 2, 3, 1];
     coordinate = transform.transformCoordinates(
-        map.ingcs(), map.gcs(), [coordinate])[0];
+        map.ingcs(), map.gcs(), coordinate);
     if (!m_quads) {
       this._generateQuads();
     }

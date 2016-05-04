@@ -24,10 +24,30 @@ var proj4 = require('proj4');
  */
 //////////////////////////////////////////////////////////////////////////////
 
+var transformCache = {};
+/* Up to maxTransformCacheSize squared might be cached.  When the maximum cache
+ * size is reached, the cache is completely emptied.  Since we probably won't
+ * be rapidly switching between a large number of transforms, this is adequate
+ * simple behavior. */
+var maxTransformCacheSize = 10;
+
 var transform = function (options) {
   'use strict';
   if (!(this instanceof transform)) {
-    return new transform(options);
+    options = options || {};
+    if (!(options.source in transformCache)) {
+      if (Object.size(transformCache) >= maxTransformCacheSize) {
+        transformCache = {};
+      }
+      transformCache[options.source] = {};
+    }
+    if (!(options.target in transformCache[options.source])) {
+      if (Object.size(transformCache[options.source]) >= maxTransformCacheSize) {
+        options.source = {};
+      }
+      transformCache[options.source][options.target] = new transform(options);
+    }
+    return transformCache[options.source][options.target];
   }
 
   var m_this = this,
@@ -227,8 +247,26 @@ transform.transformCoordinates = function (
     return coordinates;
   }
 
-  var i, count, offset, xAcc, yAcc, zAcc, writer, output, projPoint,
-      trans = transform({source: srcPrj, target: tgtPrj});
+  var trans = transform({source: srcPrj, target: tgtPrj}), output;
+  if (coordinates instanceof Object && coordinates.x !== undefined) {
+    output = trans.forward({x: coordinates.x, y: coordinates.y, z: coordinates.z || 0});
+    if ('z' in coordinates) {
+      return output;
+    }
+    return {x: output.x, y: output.y};
+  }
+  if (coordinates instanceof Array && coordinates.length === 1 && coordinates[0] instanceof Object) {
+    output = trans.forward({x: coordinates[0].x, y: coordinates[0].y, z: coordinates[0].z || 0});
+    if ('z' in coordinates) {
+      return [output];
+    }
+    return [{x: output.x, y: output.y}];
+  }
+  return transform.transformCoordinatesGeneral(trans, coordinates, numberOfComponents);
+};
+
+transform.transformCoordinatesGeneral = function (trans, coordinates, numberOfComponents) {
+  var i, count, offset, xAcc, yAcc, zAcc, writer, output, projPoint;
 
   /// Default Z accessor
   zAcc = function () {
