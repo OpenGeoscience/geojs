@@ -1,6 +1,7 @@
 var $ = require('jquery');
 var inherit = require('./inherit');
 var feature = require('./feature');
+var transform = require('./transform');
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -57,6 +58,7 @@ var heatmapFeature = function (arg) {
       m_maxIntensity,
       m_minIntensity,
       m_updateDelay,
+      m_gcsPosition,
       s_init = this._init;
 
   m_position = arg.position || function (d) { return d; };
@@ -137,6 +139,18 @@ var heatmapFeature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Get pre-computed gcs position accessor
+   *
+   * @returns {geo.heatmap}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.gcsPosition = function () {
+    this._update();
+    return m_gcsPosition;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Get/Set intensity
    *
    * @returns {geo.heatmap}
@@ -191,10 +205,12 @@ var heatmapFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
     var data = m_this.data(),
-        intensity = null;
+        intensity = null,
+        position = [];
 
     if (!m_maxIntensity || !m_minIntensity) {
       data.forEach(function (d) {
+        position.push(m_this.position()(d));
         intensity = m_this.intensity()(d);
         if (!m_maxIntensity && !m_minIntensity) {
           m_maxIntensity = m_minIntensity = intensity;
@@ -208,6 +224,8 @@ var heatmapFeature = function (arg) {
         }
       });
     }
+    m_gcsPosition = transform.transformCoordinates(
+        m_this.gcs(), m_this.layer().map().gcs(), position);
 
     m_this.buildTime().modified();
     return m_this;
