@@ -199,16 +199,15 @@ var canvas_heatmapFeature = function (arg) {
       var position = m_this.gcsPosition(),
           intensityFunc = m_this.intensity(),
           minIntensity = m_this.minIntensity(),
-          maxIntensity = m_this.maxIntensity();
-      data.forEach(function (d, idx) {
+          rangeIntensity = (m_this.maxIntensity() - minIntensity) || 1;
+      for (var idx = data.length - 1; idx >= 0; idx -= 1) {
         pos = map.worldToDisplay(position[idx]);
-        intensity = (intensityFunc(d) - minIntensity) /
-                    (maxIntensity - minIntensity);
+        intensity = (intensityFunc(data[idx]) - minIntensity) / rangeIntensity;
         // Small values are not visible because globalAlpha < .01
         // cannot be read from imageData
         context2d.globalAlpha = intensity < 0.01 ? 0.01 : intensity;
         context2d.drawImage(m_this._circle, pos.x - radius, pos.y - radius);
-      });
+      }
       canvas = layer.canvas()[0];
       pixelArray = context2d.getImageData(0, 0, canvas.width, canvas.height);
       m_this._colorize(context2d, canvas.width, canvas.height, pixelArray, m_this._grad);
