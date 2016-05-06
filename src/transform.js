@@ -43,7 +43,7 @@ var transform = function (options) {
     }
     if (!(options.target in transformCache[options.source])) {
       if (Object.size(transformCache[options.source]) >= maxTransformCacheSize) {
-        options.source = {};
+        transformCache[options.source] = {};
       }
       transformCache[options.source][options.target] = new transform(options);
     }
@@ -248,24 +248,37 @@ transform.transformCoordinates = function (
   }
 
   var trans = transform({source: srcPrj, target: tgtPrj}), output;
-  if (coordinates instanceof Object && coordinates.x !== undefined) {
+  if (coordinates instanceof Object && 'x' in coordinates && 'y' in coordinates) {
     output = trans.forward({x: coordinates.x, y: coordinates.y, z: coordinates.z || 0});
     if ('z' in coordinates) {
       return output;
     }
     return {x: output.x, y: output.y};
   }
-  if (coordinates instanceof Array && coordinates.length === 1 && coordinates[0] instanceof Object) {
+  if (coordinates instanceof Array && coordinates.length === 1 && coordinates[0] instanceof Object && 'x' in coordinates[0] && 'y' in coordinates[0]) {
     output = trans.forward({x: coordinates[0].x, y: coordinates[0].y, z: coordinates[0].z || 0});
-    if ('z' in coordinates) {
+    if ('z' in coordinates[0]) {
       return [output];
     }
     return [{x: output.x, y: output.y}];
   }
-  return transform.transformCoordinatesGeneral(trans, coordinates, numberOfComponents);
+  return transform.transformCoordinatesArray(trans, coordinates, numberOfComponents);
 };
 
-transform.transformCoordinatesGeneral = function (trans, coordinates, numberOfComponents) {
+/**
+ * Transform an array of coordinates from one projection into another.  The
+ * transformation may occur in place (modifying the input coordinate array),
+ * depending on the input format.  The coordinates can be an array of 2 or 3
+ * values, or an array of either of those, or a single flat array with 2 or 3
+ * components per coordinate.  The array is modified in place.
+ *
+ * @param {object} trans The transformation object.
+ * @param {geoPosition[]} coordinates An array of coordinate objects
+ * @param {number} numberOfComponents for flat arrays, either 2 or 3.
+ *
+ * @returns {geoPosition[]} The transformed coordinates
+ */
+transform.transformCoordinatesArray = function (trans, coordinates, numberOfComponents) {
   var i, count, offset, xAcc, yAcc, zAcc, writer, output, projPoint;
 
   /// Default Z accessor
@@ -300,7 +313,7 @@ transform.transformCoordinatesGeneral = function (trans, coordinates, numberOfCo
           output[index] = [x, y, z];
         };
       } else {
-        throw 'Invalid coordinates. Requires two or three components per array';
+        throw new Error('Invalid coordinates. Requires two or three components per array');
       }
     } else {
       if (coordinates.length === 2) {
@@ -359,10 +372,10 @@ transform.transformCoordinatesGeneral = function (trans, coordinates, numberOfCo
             };
           }
         } else {
-          throw 'Number of components should be two or three';
+          throw new Error('Number of components should be two or three');
         }
       } else {
-        throw 'Invalid coordinates';
+        throw new Error('Invalid coordinates');
       }
     }
   }
@@ -391,28 +404,8 @@ transform.transformCoordinatesGeneral = function (trans, coordinates, numberOfCo
           output[index] = {x: x, y: y};
         };
       }
-    } else if (coordinates && 'x' in coordinates && 'y' in coordinates) {
-      xAcc = function () {
-        return coordinates.x;
-      };
-      yAcc = function () {
-        return coordinates.y;
-      };
-
-      if ('z' in coordinates) {
-        zAcc = function () {
-          return coordinates.z;
-        };
-        writer = function (index, x, y, z) {
-          output = {x: x, y: y, z: z};
-        };
-      } else {
-        writer = function (index, x, y) {
-          output = {x: x, y: y};
-        };
-      }
     } else {
-      throw 'Invalid coordinates';
+      throw new Error('Invalid coordinates');
     }
   }
 
@@ -433,14 +426,8 @@ transform.transformCoordinatesGeneral = function (trans, coordinates, numberOfCo
     } else {
       handleArrayCoordinates();
     }
-  } else if (coordinates && coordinates instanceof Object) {
-    count = 1;
-    offset = 1;
-    if (coordinates && 'x' in coordinates && 'y' in coordinates) {
-      handleObjectCoordinates();
-    } else {
-      throw 'Coordinates are not valid';
-    }
+  } else {
+    throw new Error('Coordinates are not valid');
   }
 
   for (i = 0; i < count; i += offset) {
