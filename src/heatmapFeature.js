@@ -63,8 +63,8 @@ var heatmapFeature = function (arg) {
 
   m_position = arg.position || function (d) { return d; };
   m_intensity = arg.intensity || function (d) { return 1; };
-  m_maxIntensity = arg.maxIntensity || null;
-  m_minIntensity = arg.minIntensity ? arg.minIntensity : null;
+  m_maxIntensity = arg.maxIntensity !== undefined ? arg.maxIntensity : null;
+  m_minIntensity = arg.minIntensity !== undefined ? arg.minIntensity : null;
   m_updateDelay = arg.updateDelay ? parseInt(arg.updateDelay, 10) : 1000;
 
   ////////////////////////////////////////////////////////////////////////////
@@ -206,23 +206,31 @@ var heatmapFeature = function (arg) {
   this._build = function () {
     var data = m_this.data(),
         intensity = null,
-        position = [];
+        position = [],
+        setMax = (m_maxIntensity === null || m_maxIntensity === undefined),
+        setMin = (m_minIntensity === null || m_minIntensity === undefined);
 
-    if (!m_maxIntensity || !m_minIntensity) {
-      data.forEach(function (d) {
-        position.push(m_this.position()(d));
+    data.forEach(function (d) {
+      position.push(m_this.position()(d));
+      if (setMax || setMin) {
         intensity = m_this.intensity()(d);
-        if (!m_maxIntensity && !m_minIntensity) {
-          m_maxIntensity = m_minIntensity = intensity;
-        } else {
-          if (intensity > m_maxIntensity) {
-            m_maxIntensity = intensity;
-          }
-          if (intensity < m_minIntensity) {
-            m_minIntensity = intensity;
-          }
+        if (m_maxIntensity === null || m_maxIntensity === undefined) {
+          m_maxIntensity = intensity;
         }
-      });
+        if (m_minIntensity === null || m_minIntensity === undefined) {
+          m_minIntensity = intensity;
+        }
+        if (setMax && intensity > m_maxIntensity) {
+          m_maxIntensity = intensity;
+        }
+        if (setMin && intensity < m_minIntensity) {
+          m_minIntensity = intensity;
+        }
+
+      }
+    });
+    if (setMin && setMax && m_minIntensity === m_maxIntensity) {
+      m_minIntensity -= 1;
     }
     m_gcsPosition = transform.transformCoordinates(
         m_this.gcs(), m_this.layer().map().gcs(), position);
