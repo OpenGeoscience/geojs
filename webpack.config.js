@@ -26,7 +26,6 @@ module.exports = {
     }
   },
   externals: {
-    jquery: 'jQuery',
     d3: 'd3'
   },
   plugins: [

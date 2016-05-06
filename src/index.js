@@ -65,8 +65,13 @@ module.exports = $.extend({
   version: require('./version'),
 
   util: require('./util'),
+  jQuery: $,
   d3: require('./d3'),
   gl: require('./gl'),
   canvas: require('./canvas'),
   gui: require('./ui')
 }, require('./registry'));
+
+if (!window.$) {
+  window.$ = $;
+}
