@@ -76,6 +76,6 @@ module.exports = $.extend({
   gui: require('./ui')
 }, require('./registry'));
 
-if (!window.$) {
+if (window && !window.$) {
   window.$ = $;
 }
