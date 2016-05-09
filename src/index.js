@@ -18,6 +18,10 @@
  * @copyright 2015, Brandon Jones, Colin MacKenzie IV
  * @license MIT
  *
+ * JQuery
+ * @copyright jQuery Foundation and other contributors
+ * @license MIT
+ *
  * earcut
  * @copyright 2016, Mapbox
  * @license ISC
