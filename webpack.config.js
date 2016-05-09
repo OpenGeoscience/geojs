@@ -3,6 +3,10 @@ var webpack = require('webpack');
 var exec = require('child_process').execSync;
 var sha = '';
 
+if (!exec) {
+  console.warn('Node 0.12 or greater is required for detecting the git hash.');
+}
+
 try {
   sha = exec('git rev-parse HEAD', {cwd: __dirname}).toString().trim();
 } catch (e) {
