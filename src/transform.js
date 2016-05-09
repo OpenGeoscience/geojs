@@ -24,10 +24,30 @@ var proj4 = require('proj4');
  */
 //////////////////////////////////////////////////////////////////////////////
 
+var transformCache = {};
+/* Up to maxTransformCacheSize squared might be cached.  When the maximum cache
+ * size is reached, the cache is completely emptied.  Since we probably won't
+ * be rapidly switching between a large number of transforms, this is adequate
+ * simple behavior. */
+var maxTransformCacheSize = 10;
+
 var transform = function (options) {
   'use strict';
   if (!(this instanceof transform)) {
-    return new transform(options);
+    options = options || {};
+    if (!(options.source in transformCache)) {
+      if (Object.size(transformCache) >= maxTransformCacheSize) {
+        transformCache = {};
+      }
+      transformCache[options.source] = {};
+    }
+    if (!(options.target in transformCache[options.source])) {
+      if (Object.size(transformCache[options.source]) >= maxTransformCacheSize) {
+        transformCache[options.source] = {};
+      }
+      transformCache[options.source][options.target] = new transform(options);
+    }
+    return transformCache[options.source][options.target];
   }
 
   var m_this = this,
@@ -227,8 +247,39 @@ transform.transformCoordinates = function (
     return coordinates;
   }
 
-  var i, count, offset, xAcc, yAcc, zAcc, writer, output, projPoint,
-      trans = transform({source: srcPrj, target: tgtPrj});
+  var trans = transform({source: srcPrj, target: tgtPrj}), output;
+  if (coordinates instanceof Object && 'x' in coordinates && 'y' in coordinates) {
+    output = trans.forward({x: coordinates.x, y: coordinates.y, z: coordinates.z || 0});
+    if ('z' in coordinates) {
+      return output;
+    }
+    return {x: output.x, y: output.y};
+  }
+  if (coordinates instanceof Array && coordinates.length === 1 && coordinates[0] instanceof Object && 'x' in coordinates[0] && 'y' in coordinates[0]) {
+    output = trans.forward({x: coordinates[0].x, y: coordinates[0].y, z: coordinates[0].z || 0});
+    if ('z' in coordinates[0]) {
+      return [output];
+    }
+    return [{x: output.x, y: output.y}];
+  }
+  return transform.transformCoordinatesArray(trans, coordinates, numberOfComponents);
+};
+
+/**
+ * Transform an array of coordinates from one projection into another.  The
+ * transformation may occur in place (modifying the input coordinate array),
+ * depending on the input format.  The coordinates can be an array of 2 or 3
+ * values, or an array of either of those, or a single flat array with 2 or 3
+ * components per coordinate.  The array is modified in place.
+ *
+ * @param {object} trans The transformation object.
+ * @param {geoPosition[]} coordinates An array of coordinate objects
+ * @param {number} numberOfComponents for flat arrays, either 2 or 3.
+ *
+ * @returns {geoPosition[]} The transformed coordinates
+ */
+transform.transformCoordinatesArray = function (trans, coordinates, numberOfComponents) {
+  var i, count, offset, xAcc, yAcc, zAcc, writer, output, projPoint;
 
   /// Default Z accessor
   zAcc = function () {
@@ -262,7 +313,7 @@ transform.transformCoordinates = function (
           output[index] = [x, y, z];
         };
       } else {
-        throw 'Invalid coordinates. Requires two or three components per array';
+        throw new Error('Invalid coordinates. Requires two or three components per array');
       }
     } else {
       if (coordinates.length === 2) {
@@ -321,10 +372,10 @@ transform.transformCoordinates = function (
             };
           }
         } else {
-          throw 'Number of components should be two or three';
+          throw new Error('Number of components should be two or three');
         }
       } else {
-        throw 'Invalid coordinates';
+        throw new Error('Invalid coordinates');
       }
     }
   }
@@ -353,28 +404,8 @@ transform.transformCoordinates = function (
           output[index] = {x: x, y: y};
         };
       }
-    } else if (coordinates && 'x' in coordinates && 'y' in coordinates) {
-      xAcc = function () {
-        return coordinates.x;
-      };
-      yAcc = function () {
-        return coordinates.y;
-      };
-
-      if ('z' in coordinates) {
-        zAcc = function () {
-          return coordinates.z;
-        };
-        writer = function (index, x, y, z) {
-          output = {x: x, y: y, z: z};
-        };
-      } else {
-        writer = function (index, x, y) {
-          output = {x: x, y: y};
-        };
-      }
     } else {
-      throw 'Invalid coordinates';
+      throw new Error('Invalid coordinates');
     }
   }
 
@@ -395,14 +426,8 @@ transform.transformCoordinates = function (
     } else {
       handleArrayCoordinates();
     }
-  } else if (coordinates && coordinates instanceof Object) {
-    count = 1;
-    offset = 1;
-    if (coordinates && 'x' in coordinates && 'y' in coordinates) {
-      handleObjectCoordinates();
-    } else {
-      throw 'Coordinates are not valid';
-    }
+  } else {
+    throw new Error('Coordinates are not valid');
   }
 
   for (i = 0; i < count; i += offset) {
