@@ -18,6 +18,10 @@
  * @copyright 2015, Brandon Jones, Colin MacKenzie IV
  * @license MIT
  *
+ * JQuery
+ * @copyright jQuery Foundation and other contributors
+ * @license MIT
+ *
  * earcut
  * @copyright 2016, Mapbox
  * @license ISC
@@ -66,8 +70,13 @@ module.exports = $.extend({
   sha: require('./sha'),
 
   util: require('./util'),
+  jQuery: $,
   d3: require('./d3'),
   gl: require('./gl'),
   canvas: require('./canvas'),
   gui: require('./ui')
 }, require('./registry'));
+
+if (window && !window.$) {
+  window.$ = $;
+}
