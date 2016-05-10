@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>main.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>main.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              <p>Run after the DOM loads</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>$(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+<span class="hljs-meta">  'use strict'</span>;
+
+  <span class="hljs-keyword">var</span> map = geo.map({
+    node: <span class="hljs-string">'#map'</span>,
+    center: {
+      x: <span class="hljs-number">-98</span>,
+      y: <span class="hljs-number">39</span>
+    },
+    zoom: <span class="hljs-number">3</span>
+  });
+
+  $.ajax(<span class="hljs-string">'https://s3.amazonaws.com/uploads.hipchat.com/446632/3114847/4dZfl0YfZpTfYzq/AdderallCities2015.csv'</span>, {
+    success: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">resp</span>) </span>{
+      <span class="hljs-keyword">var</span> rows = resp.split(<span class="hljs-regexp">/\r\n|\n|\r/</span>);
+      rows = rows.map( <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">r</span>) </span>{
+        <span class="hljs-keyword">var</span> fields = r.split(<span class="hljs-string">','</span>);
+        <span class="hljs-keyword">return</span> [fields[<span class="hljs-number">12</span>], fields[<span class="hljs-number">24</span>], fields[<span class="hljs-number">25</span>]].map(<span class="hljs-built_in">parseFloat</span>);
+      });
+      rows.splice(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>);
+
+      <span class="hljs-keyword">var</span> layer = map.createLayer(<span class="hljs-string">'feature'</span>, {renderer: <span class="hljs-string">'canvas'</span>});
+      <span class="hljs-keyword">var</span> heatmap = layer.createFeature(<span class="hljs-string">'heatmap'</span>)
+                      .data(rows)
+                      .intensity(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{
+                        <span class="hljs-keyword">return</span> d[<span class="hljs-number">0</span>];
+                      })
+                      .position(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d</span>) </span>{
+                        <span class="hljs-keyword">return</span> {
+                          x: d[<span class="hljs-number">2</span>],
+                          y: d[<span class="hljs-number">1</span>]
+                        };
+                      })
+                      .style(<span class="hljs-string">'radius'</span>, <span class="hljs-number">10</span>)
+                      .style(<span class="hljs-string">'blurRadius'</span>, <span class="hljs-number">30</span>)
+                      .style(<span class="hljs-string">'opacity'</span>, <span class="hljs-number">1.0</span>)
+                      .style(<span class="hljs-string">'color'</span>,
+                        {<span class="hljs-number">0</span>:    {r: <span class="hljs-number">0</span>, g: <span class="hljs-number">0</span>, b: <span class="hljs-number">0</span>, a: <span class="hljs-number">0.0</span>},
+                         <span class="hljs-number">0.25</span>: {r: <span class="hljs-number">0</span>, g: <span class="hljs-number">1</span>, b: <span class="hljs-number">0</span>, a: <span class="hljs-number">0.5</span>},
+                         <span class="hljs-number">0.5</span>:  {r: <span class="hljs-number">1</span>, g: <span class="hljs-number">1</span>, b: <span class="hljs-number">0</span>, a: <span class="hljs-number">0.8</span>},
+                         <span class="hljs-number">1</span>:    {r: <span class="hljs-number">1</span>, g: <span class="hljs-number">0</span>, b: <span class="hljs-number">0</span>, a: <span class="hljs-number">1.0</span>}});
+      map.draw();
+    }
+  });
+
+  <span class="hljs-keyword">var</span> base = map.createLayer(<span class="hljs-string">'osm'</span>);
+  map.draw();
+});</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>
