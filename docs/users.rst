@@ -29,25 +29,23 @@ list of libraries used by GeoJS.
     +---------------------------+------------+---------------------------+
     | `earcut`_                 | 2.1        | GL polygon feature        |
     +---------------------------+------------+---------------------------+
+    | `jQuery`_                 | 2.2        | Core                      |
+    +---------------------------+------------+---------------------------+
 
 .. table:: External GeoJS dependencies
 
     +---------------------------+------------+---------------------------+
     | Library                   | Version    | Component                 |
     +===========================+============+===========================+
-    | `jQuery`_                 | 2.2        | Core                      |
-    +---------------------------+------------+---------------------------+
     | `d3`_                     | 3.5        | D3 renderer, UI widgets   |
     +---------------------------+------------+---------------------------+
 
 .. note::
 
-    The versions listed are what is provided in the bundle, but other versions
-    may work as well.
-
-.. note::
-    Components used in the core code are strictly required.  Other components
-    can be excluded, though some functions will not work without them.
+    JQuery is now included in the distributed bundle.  Internally, this
+    version will always be used and exposed as ``geo.jQuery``.  GeoJS
+    will also set the global variable ``window.$`` if no other version
+    is detected.
 
 .. _jQuery: http://jquery.com/
 .. _proj4: http://proj4js.org/

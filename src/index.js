@@ -80,3 +80,6 @@ module.exports = $.extend({
 if (window && !window.$) {
   window.$ = $;
 }
+if (window && !window.jQuery) {
+  window.jQuery = $;
+}

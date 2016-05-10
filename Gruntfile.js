@@ -220,7 +220,7 @@ module.exports = function (grunt) {
             'common/css/examples.css'
           ],
           defaultJs: [
-            {src: '../built/geo.ext.min.js', charset: 'UTF-8', type: 'text/javascript'},
+            {src: '../built/geo.min.js', charset: 'UTF-8', type: 'text/javascript'}, // for jquery
             'common/js/bootstrap.min.js',
             'common/js/examples.js'
           ],

@@ -56,7 +56,7 @@ is needed. ::
 
 Compiled javascript libraries will be named ``geo.min.js`` and ``geo.ext.min.js`` in ``dist/built``.
 The first file contains geojs and vgl bundled together with a number of dependent libraries.
-The second file contains jquery and d3.  The bundled libraries are minified, but source maps are provided
+The second file contains d3.  The bundled libraries are minified, but source maps are provided
 
 .. _quick-start-guide:
 
