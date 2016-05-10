@@ -63,6 +63,7 @@ module.exports = $.extend({
   vectorFeature: require('./vectorFeature'),
   inherit: require('./inherit'),
   version: require('./version'),
+  sha: require('./sha'),
 
   util: require('./util'),
   d3: require('./d3'),
