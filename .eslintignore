@@ -1,5 +1,6 @@
 src/vgl/**
 src/version.js
+src/sha.js
 src/util/wigglemaps.js
 src/util/distanceGrid.js
 geo.js

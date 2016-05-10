@@ -136,18 +136,18 @@ var map = function (arg) {
    * [0, width] and [0, height] instead. */
   var mcx = ((m_maxBounds.left || 0) + (m_maxBounds.right || 0)) / 2,
       mcy = ((m_maxBounds.bottom || 0) + (m_maxBounds.top || 0)) / 2;
-  m_maxBounds.left = transform.transformCoordinates(m_ingcs, m_gcs, [{
+  m_maxBounds.left = transform.transformCoordinates(m_ingcs, m_gcs, {
     x: m_maxBounds.left !== undefined ? m_maxBounds.left : -180, y: mcy
-  }])[0].x;
-  m_maxBounds.right = transform.transformCoordinates(m_ingcs, m_gcs, [{
+  }).x;
+  m_maxBounds.right = transform.transformCoordinates(m_ingcs, m_gcs, {
     x: m_maxBounds.right !== undefined ? m_maxBounds.right : 180, y: mcy
-  }])[0].x;
+  }).x;
   m_maxBounds.top = (m_maxBounds.top !== undefined ?
-    transform.transformCoordinates(m_ingcs, m_gcs, [{
-      x: mcx, y: m_maxBounds.top}])[0].y : m_maxBounds.right);
+    transform.transformCoordinates(m_ingcs, m_gcs, {
+      x: mcx, y: m_maxBounds.top}).y : m_maxBounds.right);
   m_maxBounds.bottom = (m_maxBounds.bottom !== undefined ?
-    transform.transformCoordinates(m_ingcs, m_gcs, [{
-      x: mcx, y: m_maxBounds.bottom}])[0].y : m_maxBounds.left);
+    transform.transformCoordinates(m_ingcs, m_gcs, {
+      x: mcx, y: m_maxBounds.bottom}).y : m_maxBounds.left);
   m_unitsPerPixel = (arg.unitsPerPixel || (
     m_maxBounds.right - m_maxBounds.left) / 256);
 
@@ -410,19 +410,20 @@ var map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.pan = function (delta, ignoreDiscreteZoom) {
-    var evt, unit;
-    evt = {
+    var evt = {
       geo: {},
       screenDelta: delta
     };
 
-    unit = m_this.unitsPerPixel(m_zoom);
+    if (delta.x || delta.y) {
+      var unit = m_this.unitsPerPixel(m_zoom);
 
-    var sinr = Math.sin(m_rotation), cosr = Math.cos(m_rotation);
-    m_camera.pan({
-      x: (delta.x * cosr - (-delta.y) * sinr) * unit,
-      y: (delta.x * sinr + (-delta.y) * cosr) * unit
-    });
+      var sinr = Math.sin(m_rotation), cosr = Math.cos(m_rotation);
+      m_camera.pan({
+        x: (delta.x * cosr - (-delta.y) * sinr) * unit,
+        y: (delta.x * sinr + (-delta.y) * cosr) * unit
+      });
+    }
     /* If m_clampBounds* is true, clamp the pan */
     var bounds = fix_bounds(m_camera.bounds, m_rotation);
     if (bounds !== m_camera.bounds) {
@@ -526,13 +527,10 @@ var map = function (arg) {
         m_zoom, m_center, m_rotation, null, ignoreDiscreteZoom), m_rotation);
     m_this.modified();
     // trigger a pan event
-    m_this.geoTrigger(
-        geo_event.pan,
-        {
-          geo: coordinates,
-          screenDelta: null
-        }
-    );
+    m_this.geoTrigger(geo_event.pan, {
+      geo: coordinates,
+      screenDelta: null
+    });
     return m_this;
   };
 
@@ -696,12 +694,17 @@ var map = function (arg) {
   this.gcsToWorld = function (c, gcs) {
     gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
     if (gcs !== m_gcs) {
-      c = transform.transformCoordinates(gcs, m_gcs, [c])[0];
+      c = transform.transformCoordinates(gcs, m_gcs, c);
     }
-    return transform.affineForward(
-      {origin: m_origin},
-      [c]
-    )[0];
+    if (m_origin.x || m_origin.y || m_origin.z) {
+      c = transform.affineForward(
+        {origin: m_origin},
+        [c]
+      )[0];
+    } else if (!('z' in c)) {
+      c = {x: c.x, y: c.y, z: 0};
+    }
+    return c;
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -717,13 +720,17 @@ var map = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.worldToGcs = function (c, gcs) {
-    c = transform.affineInverse(
-      {origin: m_origin},
-      [c]
-    )[0];
+    if (m_origin.x || m_origin.y || m_origin.z) {
+      c = transform.affineInverse(
+        {origin: m_origin},
+        [c]
+      )[0];
+    } else if (!('z' in c)) {
+      c = {x: c.x, y: c.y, z: 0};
+    }
     gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
     if (gcs !== m_gcs) {
-      c = transform.transformCoordinates(m_gcs, gcs, [c])[0];
+      c = transform.transformCoordinates(m_gcs, gcs, c);
     }
     return c;
   };
@@ -1038,7 +1045,7 @@ var map = function (arg) {
       var transitionEnd = $.extend(true, {}, m_transition.end);
       if (transitionEnd.center && m_gcs !== m_ingcs) {
         transitionEnd.center = transform.transformCoordinates(
-          m_gcs, m_ingcs, [transitionEnd.center])[0];
+          m_gcs, m_ingcs, transitionEnd.center);
       }
       m_queuedTransition = $.extend(
         {}, transitionEnd || {}, m_queuedTransition || {}, opts);
@@ -1086,8 +1093,7 @@ var map = function (arg) {
       opts = $.extend(true, {}, opts);
       opts.center = util.normalizeCoordinates(opts.center);
       if (gcs !== m_gcs) {
-        opts.center = transform.transformCoordinates(gcs, m_gcs, [
-          opts.center])[0];
+        opts.center = transform.transformCoordinates(gcs, m_gcs, opts.center);
       }
     }
     opts = $.extend(true, {}, defaultOpts, opts);
@@ -1110,37 +1116,17 @@ var map = function (arg) {
       zoomOrigin: opts.zoomOrigin
     };
 
-    if (opts.zCoord) {
-      m_transition.interp = opts.interp(
-          [
-            m_transition.start.center.x,
-            m_transition.start.center.y,
-            zoom2z(m_transition.start.zoom),
-            m_transition.start.rotation
-          ],
-          [
-            m_transition.end.center.x,
-            m_transition.end.center.y,
-            zoom2z(m_transition.end.zoom),
-            m_transition.end.rotation
-          ]
-      );
-    } else {
-      m_transition.interp = opts.interp(
-          [
-            m_transition.start.center.x,
-            m_transition.start.center.y,
-            m_transition.start.zoom,
-            m_transition.start.rotation
-          ],
-          [
-            m_transition.end.center.x,
-            m_transition.end.center.y,
-            m_transition.end.zoom,
-            m_transition.end.rotation
-          ]
-      );
-    }
+    m_transition.interp = opts.interp([
+      m_transition.start.center.x,
+      m_transition.start.center.y,
+      opts.zCoord ? zoom2z(m_transition.start.zoom) : m_transition.start.zoom,
+      m_transition.start.rotation
+    ], [
+      m_transition.end.center.x,
+      m_transition.end.center.y,
+      opts.zCoord ? zoom2z(m_transition.end.zoom) : m_transition.end.zoom,
+      m_transition.end.rotation
+    ]);
 
     function anim(time) {
       var done = m_transition.done,
@@ -1303,33 +1289,33 @@ var map = function (arg) {
     gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
     if (bounds === undefined) {
       return {
-        left: transform.transformCoordinates(m_gcs, gcs, [{
-          x: m_maxBounds.left, y: 0}])[0].x,
-        right: transform.transformCoordinates(m_gcs, gcs, [{
-          x: m_maxBounds.right, y: 0}])[0].x,
-        bottom: transform.transformCoordinates(m_gcs, gcs, [{
-          x: 0, y: m_maxBounds.bottom}])[0].y,
-        top: transform.transformCoordinates(m_gcs, gcs, [{
-          x: 0, y: m_maxBounds.top}])[0].y
+        left: transform.transformCoordinates(m_gcs, gcs, {
+          x: m_maxBounds.left, y: 0}).x,
+        right: transform.transformCoordinates(m_gcs, gcs, {
+          x: m_maxBounds.right, y: 0}).x,
+        bottom: transform.transformCoordinates(m_gcs, gcs, {
+          x: 0, y: m_maxBounds.bottom}).y,
+        top: transform.transformCoordinates(m_gcs, gcs, {
+          x: 0, y: m_maxBounds.top}).y
       };
     }
     var cx = ((bounds.left || 0) + (bounds.right || 0)) / 2,
         cy = ((bounds.bottom || 0) + (bounds.top || 0)) / 2;
     if (bounds.left !== undefined) {
-      m_maxBounds.left = transform.transformCoordinates(gcs, m_gcs, [{
-        x: bounds.left, y: cy}])[0].x;
+      m_maxBounds.left = transform.transformCoordinates(gcs, m_gcs, {
+        x: bounds.left, y: cy}).x;
     }
     if (bounds.right !== undefined) {
-      m_maxBounds.right = transform.transformCoordinates(gcs, m_gcs, [{
-        x: bounds.right, y: cy}])[0].x;
+      m_maxBounds.right = transform.transformCoordinates(gcs, m_gcs, {
+        x: bounds.right, y: cy}).x;
     }
     if (bounds.bottom !== undefined) {
-      m_maxBounds.bottom = transform.transformCoordinates(gcs, m_gcs, [{
-        x: cx, y: bounds.bottom}])[0].y;
+      m_maxBounds.bottom = transform.transformCoordinates(gcs, m_gcs, {
+        x: cx, y: bounds.bottom}).y;
     }
     if (bounds.top !== undefined) {
-      m_maxBounds.top = transform.transformCoordinates(gcs, m_gcs, [{
-        x: cx, y: bounds.top}])[0].y;
+      m_maxBounds.top = transform.transformCoordinates(gcs, m_gcs, {
+        x: cx, y: bounds.top}).y;
     }
     reset_minimum_zoom();
     m_this.zoom(m_zoom);
@@ -1380,7 +1366,7 @@ var map = function (arg) {
       y: (bounds.top + bounds.bottom) / 2 - m_origin.y
     };
     if (gcs !== m_gcs) {
-      center = transform.transformCoordinates(m_gcs, gcs, [center])[0];
+      center = transform.transformCoordinates(m_gcs, gcs, center);
     }
     return {
       zoom: zoom,
