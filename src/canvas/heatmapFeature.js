@@ -137,10 +137,10 @@ var canvas_heatmapFeature = function (arg) {
     m_typedBufferData[1] = 0x0a0b0c0d;
 
     isLittleEndian = true;
-    if (m_typedBuffer[4] === 0x0a &&
-        m_typedBuffer[5] === 0x0b &&
-        m_typedBuffer[6] === 0x0c &&
-        m_typedBuffer[7] === 0x0d) {
+    if (m_typedClampedBuffer[4] === 0x0a &&
+        m_typedClampedBuffer[5] === 0x0b &&
+        m_typedClampedBuffer[6] === 0x0c &&
+        m_typedClampedBuffer[7] === 0x0d) {
       isLittleEndian = false;
     }
 
