@@ -22,6 +22,13 @@ describe('canvas heatmap feature', function () {
       testData = [[0.6, 42.8584, -70.9301],
                   [0.233, 42.2776, -83.7409],
                   [0.2, 42.2776, -83.7409]];
+  var clock;
+  beforeEach(function () {
+    clock = sinon.useFakeTimers();
+  });
+  afterEach(function () {
+    clock.restore();
+  });
 
   it('Setup map', function () {
     map = geo.map({node: '#map-canvas-heatmap-feature', center: [0, 0], zoom: 3});
@@ -68,11 +75,6 @@ describe('canvas heatmap feature', function () {
     expect(feature1.minIntensity()).toBe(0.2);
   });
 
-  it('Remove a feature from a layer', function () {
-    layer.deleteFeature(feature1).draw();
-    expect(layer.children().length).toBe(0);
-  });
-
   it('Compute gradient', function () {
     feature1.style('color', {0:    {r: 0, g: 0, b: 0.0, a: 0.0},
                              0.25: {r: 0, g: 0, b: 1, a: 0.5},
@@ -83,6 +85,29 @@ describe('canvas heatmap feature', function () {
     expect(layer.node()[0].children[0].getContext('2d')
       .getImageData(1, 0, 1, 1).data.length).toBe(4);
   });
+  it('_animatePan', function () {
+    map.draw();
+    var buildTime = feature1.buildTime().getMTime();
+    map.pan({x: 10, y: 0});
+    expect(feature1.buildTime().getMTime()).toBe(buildTime);
+    clock.tick(800);
+    map.pan({x: 10, y: 0});
+    expect(feature1.buildTime().getMTime()).toBe(buildTime);
+    clock.tick(800);
+    expect(feature1.buildTime().getMTime()).toBe(buildTime);
+    clock.tick(800);
+    expect(feature1.buildTime().getMTime()).not.toBe(buildTime);
+    buildTime = feature1.buildTime().getMTime();
+    map.pan({x: 0, y: 0});
+    expect(feature1.buildTime().getMTime()).toBe(buildTime);
+    clock.tick(2000);
+    expect(feature1.buildTime().getMTime()).toBe(buildTime);
+  });
+  it('Remove a feature from a layer', function () {
+    layer.deleteFeature(feature1).draw();
+    expect(layer.children().length).toBe(0);
+  });
+
 });
 
 describe('core.heatmapFeature', function () {
