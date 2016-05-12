@@ -13,7 +13,6 @@ var transform = require('./transform');
  * @param {Object|string|Function} [color] Color transfer function that.
  *   will be used to evaluate color of each pixel using normalized intensity
  *   as the look up value.
- * @param {number|Function} [opacity=1] Homogeneous opacity for each pixel.
  * @param {Object|Function} [radius=10] Radius of a point in terms of number
  *   of pixels.
  * @param {Object|Function} [blurRadius=10] Gaussian blur radius for each
@@ -178,7 +177,6 @@ var heatmapFeature = function (arg) {
     var defaultStyle = $.extend(
       {},
         {
-          opacity: 0.1,
           radius: 10,
           blurRadius: 10,
           color: {0:    {r: 0, g: 0, b: 0.0, a: 0.0},

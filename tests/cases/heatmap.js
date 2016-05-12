@@ -42,8 +42,7 @@ describe('canvas heatmap feature', function () {
         };
       })
       .style('radius', 5)
-      .style('blurRadius', 15)
-      .style('opacity', 1.0);
+      .style('blurRadius', 15);
 
     mockAnimationFrame();
     map.draw();
