@@ -31,9 +31,9 @@ var canvas_heatmapFeature = function (arg) {
   var geo_event = require('../event');
 
   var m_this = this,
-      m_typedBuffer = null,
-      m_typedClampedBuffer = null,
-      m_typedBufferData = null,
+      m_typedBuffer,
+      m_typedClampedBuffer,
+      m_typedBufferData,
       m_heatMapPosition,
       s_exit = this._exit,
       s_init = this._init,
@@ -124,54 +124,23 @@ var canvas_heatmapFeature = function (arg) {
    * @protected
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._colorize = function (context2d, width, height, imageData, gradient) {
-    var isLittleEndian = true, i, j, index, pixels;
-
-    // Determine whether Uint32 is little- or big-endian.
-    if (!m_typedBuffer || (m_typedBuffer.length !== imageData.data.length)) {
-      m_typedBuffer = new ArrayBuffer(imageData.data.length);
+  this._colorize = function (pixels, gradient) {
+    var grad = new Uint32Array(gradient.buffer);
+    var i, j, k, pixlen = pixels.length;
+    if (!m_typedBuffer || m_typedBuffer.length !== pixlen) {
+      m_typedBuffer = new ArrayBuffer(pixlen);
       m_typedClampedBuffer = new Uint8ClampedArray(m_typedBuffer);
       m_typedBufferData = new Uint32Array(m_typedBuffer);
     }
-
-    m_typedBufferData[1] = 0x0a0b0c0d;
-
-    isLittleEndian = true;
-    if (m_typedClampedBuffer[4] === 0x0a &&
-        m_typedClampedBuffer[5] === 0x0b &&
-        m_typedClampedBuffer[6] === 0x0c &&
-        m_typedClampedBuffer[7] === 0x0d) {
-      isLittleEndian = false;
-    }
-
-    if (isLittleEndian) {
-      i = 0;
-      for (j = 0; j < (width * height * 4); j += 4) {
-        index = imageData.data[j + 3] * 4;
-        if (index) {
-          m_typedBufferData[i] =
-            (gradient[index + 3] << 24) |
-            (gradient[index + 2] << 16) |
-            (gradient[index + 1] << 8) |
-             gradient[index];
-        }
-        i += 1;
-      }
-      imageData.data.set(m_typedClampedBuffer);
-    } else {
-      pixels = imageData.data;
-      for (i = 0; i < pixels.length; i += 4) {
-        j = pixels[i + 3] * 4;
-        if (j) {
-          pixels[i] = gradient[j];
-          pixels[i + 1] = gradient[j + 1];
-          pixels[i + 2] = gradient[j + 2];
-          pixels[i + 3] = gradient[j + 3]
-        }
+    for (i = 3, k = 0; i < pixlen; i += 4, k += 1) {
+      // Get opacity from the temporary canvas image and look up the final
+      // value from gradient
+      j = pixels[i];
+      if (j) {
+        m_typedBufferData[k] = grad[j];
       }
     }
-
-    context2d.putImageData(imageData, 0, 0);
+    pixels.set(m_typedClampedBuffer);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -212,7 +181,8 @@ var canvas_heatmapFeature = function (arg) {
       }
       canvas = layer.canvas()[0];
       pixelArray = context2d.getImageData(0, 0, canvas.width, canvas.height);
-      m_this._colorize(context2d, canvas.width, canvas.height, pixelArray, m_this._grad);
+      m_this._colorize(pixelArray.data, m_this._grad);
+      context2d.putImageData(pixelArray, 0, 0);
 
       m_heatMapPosition = {
         zoom: map.zoom(),
