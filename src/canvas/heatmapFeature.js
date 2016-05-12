@@ -125,7 +125,7 @@ var canvas_heatmapFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._colorize = function (context2d, width, height, imageData, gradient) {
-    var isLittleEndian = true, i, j, index;
+    var isLittleEndian = true, i, j, index, pixels;
 
     // Determine whether Uint32 is little- or big-endian.
     if (!m_typedBuffer || (m_typedBuffer.length !== imageData.data.length)) {
@@ -157,21 +157,20 @@ var canvas_heatmapFeature = function (arg) {
         }
         i += 1;
       }
+      imageData.data.set(m_typedClampedBuffer);
     } else {
-      i = 0;
-      for (j = 0; j < (width * height * 4); j += 4) {
-        index = imageData.data[j + 3] * 4;
-        if (index) {
-          m_typedBufferData[i] =
-            (gradient[index] << 24) |
-            (gradient[index + 1] << 16) |
-            (gradient[index + 2] << 8) |
-             gradient[index + 3];
+      pixels = imageData.data;
+      for (i = 0; i < pixels.length; i += 4) {
+        j = pixels[i + 3] * 4;
+        if (j) {
+          pixels[i] = gradient[j];
+          pixels[i + 1] = gradient[j + 1];
+          pixels[i + 2] = gradient[j + 2];
+          pixels[i + 3] = gradient[j + 3]
         }
       }
     }
 
-    imageData.data.set(m_typedClampedBuffer);
     context2d.putImageData(imageData, 0, 0);
   };
 
