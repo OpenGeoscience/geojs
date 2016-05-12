@@ -125,8 +125,9 @@ var canvas_heatmapFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._colorize = function (pixels, gradient) {
-    var grad = new Uint32Array(gradient.buffer);
-    var i, j, k, pixlen = pixels.length;
+    var grad = new Uint32Array(gradient.buffer),
+        pixlen = pixels.length,
+        i, j, k;
     if (!m_typedBuffer || m_typedBuffer.length !== pixlen) {
       m_typedBuffer = new ArrayBuffer(pixlen);
       m_typedClampedBuffer = new Uint8ClampedArray(m_typedBuffer);
