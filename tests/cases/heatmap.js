@@ -84,3 +84,102 @@ describe('canvas heatmap feature', function () {
       .getImageData(1, 0, 1, 1).data.length).toBe(4);
   });
 });
+
+describe('core.heatmapFeature', function () {
+  var map, layer;
+  var heatmapFeature = require('../../src/heatmapFeature');
+  var data = [];
+
+  it('Setup map', function () {
+    map = geo.map({node: '#map-canvas-heatmap-feature', center: [0, 0], zoom: 3});
+    layer = map.createLayer('feature', {'renderer': 'canvas'});
+    for (var i = 0; i < 100; i += 1) {
+      data.push({a: i % 10, b: i % 9, c: i % 8});
+    }
+  });
+
+  describe('class accessors', function () {
+    it('maxIntensity', function () {
+      var heatmap = heatmapFeature({layer: layer});
+      expect(heatmap.maxIntensity()).toBe(null);
+      expect(heatmap.maxIntensity(7)).toBe(heatmap);
+      expect(heatmap.maxIntensity()).toBe(7);
+      heatmap = heatmapFeature({layer: layer, maxIntensity: 8});
+      expect(heatmap.maxIntensity()).toBe(8);
+    });
+    it('minIntensity', function () {
+      var heatmap = heatmapFeature({layer: layer});
+      expect(heatmap.minIntensity()).toBe(null);
+      expect(heatmap.minIntensity(2)).toBe(heatmap);
+      expect(heatmap.minIntensity()).toBe(2);
+      heatmap = heatmapFeature({layer: layer, minIntensity: 3});
+      expect(heatmap.minIntensity()).toBe(3);
+    });
+    it('updateDelay', function () {
+      var heatmap = heatmapFeature({layer: layer});
+      expect(heatmap.updateDelay()).toBe(1000);
+      expect(heatmap.updateDelay(40)).toBe(heatmap);
+      expect(heatmap.updateDelay()).toBe(40);
+      heatmap = heatmapFeature({layer: layer, updateDelay: 50});
+      expect(heatmap.updateDelay()).toBe(50);
+    });
+    it('position', function () {
+      var heatmap = heatmapFeature({layer: layer});
+      expect(heatmap.position()('abc')).toBe('abc');
+      expect(heatmap.position(function (d) {
+        return {x: d.a, y: d.b};
+      })).toBe(heatmap);
+      expect(heatmap.position()(data[0])).toEqual({x: 0, y: 0});
+      expect(heatmap.position()(data[84])).toEqual({x: 4, y: 3});
+      heatmap = heatmapFeature({layer: layer, position: function (d) {
+        return {x: d.b, y: d.c};
+      }});
+      expect(heatmap.position()(data[0])).toEqual({x: 0, y: 0});
+      expect(heatmap.position()(data[87])).toEqual({x: 6, y: 7});
+    });
+    it('intensity', function () {
+      var heatmap = heatmapFeature({layer: layer});
+      expect(heatmap.intensity()('abc')).toBe(1);
+      expect(heatmap.intensity(function (d) {
+        return d.c;
+      })).toBe(heatmap);
+      expect(heatmap.intensity()(data[0])).toEqual(0);
+      expect(heatmap.intensity()(data[67])).toEqual(3);
+      heatmap = heatmapFeature({layer: layer, intensity: function (d) {
+        return d.a;
+      }});
+      expect(heatmap.intensity()(data[0])).toEqual(0);
+      expect(heatmap.intensity()(data[67])).toEqual(7);
+    });
+  });
+  describe('_build', function () {
+    it('intensity ranges', function () {
+      var heatmap = heatmapFeature({layer: layer, position: function (d) {
+        return {x: d.a, y: d.b};
+      }, intensity: function (d) {
+        return d.c;
+      }}).data(data);
+      heatmap.gcs('EPSG:3857');
+      heatmap._build();
+      expect(heatmap.minIntensity()).toBe(0);
+      expect(heatmap.maxIntensity()).toBe(7);
+      heatmap.intensity(function () { return 2; });
+      heatmap.maxIntensity(null).minIntensity(null);
+      heatmap._build();
+      expect(heatmap.minIntensity()).toBe(1);
+      expect(heatmap.maxIntensity()).toBe(2);
+    });
+    it('gcsPosition', function () {
+      var heatmap = heatmapFeature({layer: layer, position: function (d) {
+        return {x: d.a, y: d.b};
+      }}).data(data);
+      heatmap.gcs('EPSG:3857');
+      // we have to call build since we didn't attach this to the layer in the
+      // normal way
+      heatmap._build();
+      var pos = heatmap.gcsPosition();
+      expect(pos[0]).toEqual({x: 0, y: 0});
+      expect(pos[84]).toEqual({x: 4, y: 3});
+    });
+  });
+});

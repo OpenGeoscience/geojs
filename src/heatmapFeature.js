@@ -20,14 +20,14 @@ var transform = require('./transform');
  * @param {Object|Function} [position] Position of the data.  Default is
  *   (data). The position is an Object which specifies the location of the
  *   data in geo-spatial context.
- * @param {boolean} [intensity] Scalar value of each data point. Scalar
+ * @param {Object|Function} [intensity] Scalar value of each data point. Scalar
  *   value must be a positive real number and will be used to compute
  *   the weight for each data point.
- * @param {boolean} [maxIntensity=null] Maximum intensity of the data. Maximum
+ * @param {number} [maxIntensity=null] Maximum intensity of the data. Maximum
  *   intensity must be a positive real number and will be used to normalize all
  *   intensities with a dataset. If no value is given, then a it will
  *   be computed.
- * @param {boolean} [minIntensity=null] Minimum intensity of the data. Minimum
+ * @param {number} [minIntensity=null] Minimum intensity of the data. Minimum
  *   intensity must be a positive real number will be used to normalize all
  *   intensities with a dataset. If no value is given, then a it will
  *   be computed.
