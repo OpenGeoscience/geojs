@@ -1,1 +1,109 @@
 extends ../common/templates/index.jade
+
+block append mainContent
+  div#controls
+    .form-group(title="The data set to plot.")
+      label(for="dataset") Data Set
+      select#dataset(param-name="dataset", placeholder="Activity")
+        option(value="adderall", url="AdderallCities2015.csv" title="9555 points") Adderall
+        option(value="cities", url="cities.csv" title="30101 points") U.S. Cities
+        option(value="earthquakes", url="earthquakes.json" title="1.3 million points") Earthquakes
+      span#points-loaded
+    .form-group(title="Number of points.  Leave blank for the entire original data set.  If a smaller number, only a subset of points will be shown.  If a larger number, some of the data will be duplicated with random offsets.")
+      label(for="points") Number of Points
+      input#points(type="number")
+      span#points-shown
+    .form-group(title="Delay between movement and heatmap recalculation in milliseconds.")
+      label(for="updateDelay") Update Delay (ms)
+      input#updateDelay(type="number" placeholder="50")
+    .form-group(title="Opacity of heatmap layer (0 to 1).")
+      label(for="opacity") Opacity
+      input#opacity(type="number" placeholder="0.75")
+    .form-group(title="Value to map to minimum intensity.  Leave blank to auto calculate.")
+      label(for="minIntensity") Min. Intensity
+      input#minIntensity(type="number")
+    .form-group(title="Value to map to maximum intensity.  Leave blank to auto calculate.")
+      label(for="maxIntensity") Max. Intensity
+      input#maxIntensity(type="number")
+    .form-group(title="Radius of center of points in pixels.")
+      label(for="radius") Radius
+      input#radius(type="number" placeholder="25")
+    .form-group(title="Radius of blur around points in pixels.")
+      label(for="blurRadius") Blur Radius
+      input#blurRadius(type="number" placeholder="15")
+    .form-group(title="Color Gradient.  Entries with intensities of 0 and 1 are needed to form a valid color gradient.")
+      label Color Gradient
+      table.gradient
+        tr
+          th(title="Intensity.  0 is minimum, 1 is maximum") I
+          th(title="Red channel, 0 to 255") R
+          th(title="Green channel, 0 to 255") G
+          th(title="Blue channel, 0 to 255") B
+          th(title="Alpha channel, 0 to 1") A
+        tr
+          td
+            input#gradI1(type="number")
+          td
+            input#gradR1(type="number")
+          td
+            input#gradG1(type="number")
+          td
+            input#gradB1(type="number")
+          td
+            input#gradA1(type="number")
+        tr
+          td
+            input#gradI2(type="number")
+          td
+            input#gradR2(type="number")
+          td
+            input#gradG2(type="number")
+          td
+            input#gradB2(type="number")
+          td
+            input#gradA2(type="number")
+        tr
+          td
+            input#gradI3(type="number")
+          td
+            input#gradR3(type="number")
+          td
+            input#gradG3(type="number")
+          td
+            input#gradB3(type="number")
+          td
+            input#gradA3(type="number")
+        tr
+          td
+            input#gradI4(type="number")
+          td
+            input#gradR4(type="number")
+          td
+            input#gradG4(type="number")
+          td
+            input#gradB4(type="number")
+          td
+            input#gradA4(type="number")
+        tr
+          td
+            input#gradI5(type="number")
+          td
+            input#gradR5(type="number")
+          td
+            input#gradG5(type="number")
+          td
+            input#gradB5(type="number")
+          td
+            input#gradA5(type="number")
+        tr
+          td
+            input#gradI6(type="number")
+          td
+            input#gradR6(type="number")
+          td
+            input#gradG6(type="number")
+          td
+            input#gradB6(type="number")
+          td
+            input#gradA6(type="number")
+
