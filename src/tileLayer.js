@@ -1025,8 +1025,8 @@ module.exports = (function () {
               rotation = map.rotation(),
               rx = -to.x + -(view.left + view.right) / 2 + offset.x,
               ry = -to.y + -(view.bottom + view.top) / 2 + offset.y,
-              dx = (rx + map.size().width / 2) * scale,
-              dy = (ry + map.size().height / 2) * scale;
+              dx = (rx + map.size().width / 2),
+              dy = (ry + map.size().height / 2);
 
           this.canvas().css({
             'transform-origin': '' +
