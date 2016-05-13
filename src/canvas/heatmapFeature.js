@@ -1,6 +1,7 @@
 var inherit = require('../inherit');
 var registerFeature = require('../registry').registerFeature;
 var heatmapFeature = require('../heatmapFeature');
+var timestamp = require('../timestamp');
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -27,10 +28,17 @@ var canvas_heatmapFeature = function (arg) {
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
+  var geo_event = require('../event');
+
   var m_this = this,
+      m_typedBuffer,
+      m_typedClampedBuffer,
+      m_typedBufferData,
+      m_heatMapPosition,
       s_exit = this._exit,
       s_init = this._init,
-      s_update = this._update;
+      s_update = this._update,
+      m_renderTime = timestamp();
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -117,18 +125,23 @@ var canvas_heatmapFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._colorize = function (pixels, gradient) {
-    var i, j;
-    for (i = 0; i < pixels.length; i += 4) {
-      // Get opacity from the temporary canvas image,
-      // then multiply by 4 to get the color index on linear gradient
-      j = pixels[i + 3] * 4;
+    var grad = new Uint32Array(gradient.buffer),
+        pixlen = pixels.length,
+        i, j, k;
+    if (!m_typedBuffer || m_typedBuffer.length !== pixlen) {
+      m_typedBuffer = new ArrayBuffer(pixlen);
+      m_typedClampedBuffer = new Uint8ClampedArray(m_typedBuffer);
+      m_typedBufferData = new Uint32Array(m_typedBuffer);
+    }
+    for (i = 3, k = 0; i < pixlen; i += 4, k += 1) {
+      // Get opacity from the temporary canvas image and look up the final
+      // value from gradient
+      j = pixels[i];
       if (j) {
-        pixels[i] = gradient[j];
-        pixels[i + 1] = gradient[j + 1];
-        pixels[i + 2] = gradient[j + 2];
-        pixels[i + 3] = m_this.style('opacity') * gradient[j + 3];
+        m_typedBufferData[k] = grad[j];
       }
     }
+    pixels.set(m_typedClampedBuffer);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -138,24 +151,52 @@ var canvas_heatmapFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._renderOnCanvas = function (context2d, map) {
-    var data = m_this.data() || [],
-        radius = m_this.style('radius') + m_this.style('blurRadius'),
-        pos, intensity, canvas, pixelArray;
-    m_this._createCircle();
-    m_this._computeGradient();
-    data.forEach(function (d) {
-      pos = m_this.layer().map().gcsToDisplay(m_this.position()(d));
-      intensity = (m_this.intensity()(d) - m_this.minIntensity()) /
-                  (m_this.maxIntensity() - m_this.minIntensity());
-      // Small values are not visible because globalAlpha < .01
-      // cannot be read from imageData
-      context2d.globalAlpha = intensity < 0.01 ? 0.01 : intensity;
-      context2d.drawImage(m_this._circle, pos.x - radius, pos.y - radius);
-    });
-    canvas = m_this.layer().canvas()[0];
-    pixelArray = context2d.getImageData(0, 0, canvas.width, canvas.height);
-    m_this._colorize(pixelArray.data, m_this._grad);
-    context2d.putImageData(pixelArray, 0, 0);
+
+    if (m_renderTime.getMTime() < m_this.buildTime().getMTime()) {
+      var data = m_this.data() || [],
+          radius = m_this.style('radius') + m_this.style('blurRadius'),
+          pos, intensity, canvas, pixelArray,
+          layer = m_this.layer(),
+          viewport = map.camera()._viewport;
+
+      context2d.setTransform(1, 0, 0, 1, 0, 0);
+      context2d.clearRect(0, 0, viewport.width, viewport.height);
+      layer.canvas().css({transform: '', 'transform-origin': '0px 0px'});
+
+      m_this._createCircle();
+      m_this._computeGradient();
+      var position = m_this.gcsPosition(),
+          intensityFunc = m_this.intensity(),
+          minIntensity = m_this.minIntensity(),
+          rangeIntensity = (m_this.maxIntensity() - minIntensity) || 1;
+      for (var idx = data.length - 1; idx >= 0; idx -= 1) {
+        pos = map.worldToDisplay(position[idx]);
+        intensity = (intensityFunc(data[idx]) - minIntensity) / rangeIntensity;
+        if (intensity <= 0) {
+          continue;
+        }
+        // Small values are not visible because globalAlpha < .01
+        // cannot be read from imageData
+        context2d.globalAlpha = intensity < 0.01 ? 0.01 : (intensity > 1 ? 1 : intensity);
+        context2d.drawImage(m_this._circle, pos.x - radius, pos.y - radius);
+      }
+      canvas = layer.canvas()[0];
+      pixelArray = context2d.getImageData(0, 0, canvas.width, canvas.height);
+      m_this._colorize(pixelArray.data, m_this._grad);
+      context2d.putImageData(pixelArray, 0, 0);
+
+      m_heatMapPosition = {
+        zoom: map.zoom(),
+        gcsOrigin: map.displayToGcs({x: 0, y: 0}, null),
+        rotation: map.rotation(),
+        lastScale: undefined,
+        lastOrigin: {x: 0, y: 0},
+        lastRotation: undefined
+      };
+      m_renderTime.modified();
+      layer.renderer().clearCanvas(false);
+    }
+
     return m_this;
   };
 
@@ -167,6 +208,9 @@ var canvas_heatmapFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._init = function () {
     s_init.call(m_this, arg);
+
+    m_this.geoOn(geo_event.pan, m_this._animatePan);
+
     return m_this;
   };
 
@@ -184,6 +228,59 @@ var canvas_heatmapFeature = function (arg) {
     }
     m_this.updateTime().modified();
     return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Animate pan (and zoom)
+   * @protected
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._animatePan = function (e) {
+
+    var map = m_this.layer().map(),
+        zoom = map.zoom(),
+        scale = Math.pow(2, (zoom - m_heatMapPosition.zoom)),
+        origin = map.gcsToDisplay(m_heatMapPosition.gcsOrigin, null),
+        rotation = map.rotation();
+
+    if (m_heatMapPosition.lastScale === scale &&
+        m_heatMapPosition.lastOrigin.x === origin.x &&
+        m_heatMapPosition.lastOrigin.y === origin.y &&
+        m_heatMapPosition.lastRotation === rotation) {
+      return;
+    }
+
+    var transform = '' +
+        ' translate(' + origin.x + 'px' + ',' + origin.y + 'px' + ')' +
+        ' scale(' + scale + ')' +
+        ' rotate(' + ((rotation - m_heatMapPosition.rotation) * 180 / Math.PI) + 'deg)';
+
+    m_this.layer().canvas()[0].style.transform = transform;
+
+    m_heatMapPosition.lastScale = scale;
+    m_heatMapPosition.lastOrigin.x = origin.x;
+    m_heatMapPosition.lastOrigin.y = origin.y;
+    m_heatMapPosition.lastRotation = rotation;
+
+    if (m_heatMapPosition.timeout) {
+      window.clearTimeout(m_heatMapPosition.timeout);
+      m_heatMapPosition.timeout = undefined;
+    }
+    /* This conditional can change if we compute the heatmap beyond the visable
+     * viewport so that we don't have to update on pans as often.  If we are
+     * close to where the heatmap was originally computed, don't bother
+     * updating it. */
+    if (parseFloat(scale.toFixed(4)) !== 1 ||
+        parseFloat((rotation - m_heatMapPosition.rotation).toFixed(4)) !== 0 ||
+        parseFloat(origin.x.toFixed(1)) !== 0 ||
+        parseFloat(origin.y.toFixed(1)) !== 0) {
+      m_heatMapPosition.timeout = window.setTimeout(function () {
+        m_heatMapPosition.timeout = undefined;
+        m_this.buildTime().modified();
+        m_this.layer().draw();
+      }, m_this.updateDelay());
+    }
   };
 
   ////////////////////////////////////////////////////////////////////////////

@@ -414,6 +414,9 @@ transform.transformCoordinatesArray = function (trans, coordinates, numberOfComp
     output.length = coordinates.length;
     count = coordinates.length;
 
+    if (!coordinates.length) {
+      return output;
+    }
     if (coordinates[0] instanceof Array ||
         coordinates[0] instanceof Object) {
       offset = 1;

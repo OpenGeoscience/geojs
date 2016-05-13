@@ -230,6 +230,11 @@ describe('geo.transform', function () {
       expect(closeToEqual(geo.transform.transformCoordinates(source, target, {x: 1, y: 2}), {x: 1, y: -2})).toBe(true);
       expect(closeToEqual(geo.transform.transformCoordinates(source, target, {x: 3, y: 4, z: 5}), {x: 3, y: -4, z: 5})).toBe(true);
     });
+    it('empty array', function () {
+      var res = geo.transform.transformCoordinates(source, target, []);
+      expect(res instanceof Array).toBe(true);
+      expect(res.length).toBe(0);
+    });
     it('coordinate format - array with single object', function () {
       var res;
       res = geo.transform.transformCoordinates(source, target, [{x: 1, y: 2}]);

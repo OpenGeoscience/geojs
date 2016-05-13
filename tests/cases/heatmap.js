@@ -22,6 +22,13 @@ describe('canvas heatmap feature', function () {
       testData = [[0.6, 42.8584, -70.9301],
                   [0.233, 42.2776, -83.7409],
                   [0.2, 42.2776, -83.7409]];
+  var clock;
+  beforeEach(function () {
+    clock = sinon.useFakeTimers();
+  });
+  afterEach(function () {
+    clock.restore();
+  });
 
   it('Setup map', function () {
     map = geo.map({node: '#map-canvas-heatmap-feature', center: [0, 0], zoom: 3});
@@ -42,8 +49,7 @@ describe('canvas heatmap feature', function () {
         };
       })
       .style('radius', 5)
-      .style('blurRadius', 15)
-      .style('opacity', 1.0);
+      .style('blurRadius', 15);
 
     mockAnimationFrame();
     map.draw();
@@ -69,11 +75,6 @@ describe('canvas heatmap feature', function () {
     expect(feature1.minIntensity()).toBe(0.2);
   });
 
-  it('Remove a feature from a layer', function () {
-    layer.deleteFeature(feature1).draw();
-    expect(layer.children().length).toBe(0);
-  });
-
   it('Compute gradient', function () {
     feature1.style('color', {0:    {r: 0, g: 0, b: 0.0, a: 0.0},
                              0.25: {r: 0, g: 0, b: 1, a: 0.5},
@@ -83,5 +84,127 @@ describe('canvas heatmap feature', function () {
     feature1._computeGradient();
     expect(layer.node()[0].children[0].getContext('2d')
       .getImageData(1, 0, 1, 1).data.length).toBe(4);
+  });
+  it('_animatePan', function () {
+    map.draw();
+    var buildTime = feature1.buildTime().getMTime();
+    map.pan({x: 10, y: 0});
+    expect(feature1.buildTime().getMTime()).toBe(buildTime);
+    clock.tick(800);
+    map.pan({x: 10, y: 0});
+    expect(feature1.buildTime().getMTime()).toBe(buildTime);
+    clock.tick(800);
+    expect(feature1.buildTime().getMTime()).toBe(buildTime);
+    clock.tick(800);
+    expect(feature1.buildTime().getMTime()).not.toBe(buildTime);
+    buildTime = feature1.buildTime().getMTime();
+    map.pan({x: 0, y: 0});
+    expect(feature1.buildTime().getMTime()).toBe(buildTime);
+    clock.tick(2000);
+    expect(feature1.buildTime().getMTime()).toBe(buildTime);
+  });
+  it('Remove a feature from a layer', function () {
+    layer.deleteFeature(feature1).draw();
+    expect(layer.children().length).toBe(0);
+  });
+
+});
+
+describe('core.heatmapFeature', function () {
+  var map, layer;
+  var heatmapFeature = require('../../src/heatmapFeature');
+  var data = [];
+
+  it('Setup map', function () {
+    map = geo.map({node: '#map-canvas-heatmap-feature', center: [0, 0], zoom: 3});
+    layer = map.createLayer('feature', {'renderer': 'canvas'});
+    for (var i = 0; i < 100; i += 1) {
+      data.push({a: i % 10, b: i % 9, c: i % 8});
+    }
+  });
+
+  describe('class accessors', function () {
+    it('maxIntensity', function () {
+      var heatmap = heatmapFeature({layer: layer});
+      expect(heatmap.maxIntensity()).toBe(null);
+      expect(heatmap.maxIntensity(7)).toBe(heatmap);
+      expect(heatmap.maxIntensity()).toBe(7);
+      heatmap = heatmapFeature({layer: layer, maxIntensity: 8});
+      expect(heatmap.maxIntensity()).toBe(8);
+    });
+    it('minIntensity', function () {
+      var heatmap = heatmapFeature({layer: layer});
+      expect(heatmap.minIntensity()).toBe(null);
+      expect(heatmap.minIntensity(2)).toBe(heatmap);
+      expect(heatmap.minIntensity()).toBe(2);
+      heatmap = heatmapFeature({layer: layer, minIntensity: 3});
+      expect(heatmap.minIntensity()).toBe(3);
+    });
+    it('updateDelay', function () {
+      var heatmap = heatmapFeature({layer: layer});
+      expect(heatmap.updateDelay()).toBe(1000);
+      expect(heatmap.updateDelay(40)).toBe(heatmap);
+      expect(heatmap.updateDelay()).toBe(40);
+      heatmap = heatmapFeature({layer: layer, updateDelay: 50});
+      expect(heatmap.updateDelay()).toBe(50);
+    });
+    it('position', function () {
+      var heatmap = heatmapFeature({layer: layer});
+      expect(heatmap.position()('abc')).toBe('abc');
+      expect(heatmap.position(function (d) {
+        return {x: d.a, y: d.b};
+      })).toBe(heatmap);
+      expect(heatmap.position()(data[0])).toEqual({x: 0, y: 0});
+      expect(heatmap.position()(data[84])).toEqual({x: 4, y: 3});
+      heatmap = heatmapFeature({layer: layer, position: function (d) {
+        return {x: d.b, y: d.c};
+      }});
+      expect(heatmap.position()(data[0])).toEqual({x: 0, y: 0});
+      expect(heatmap.position()(data[87])).toEqual({x: 6, y: 7});
+    });
+    it('intensity', function () {
+      var heatmap = heatmapFeature({layer: layer});
+      expect(heatmap.intensity()('abc')).toBe(1);
+      expect(heatmap.intensity(function (d) {
+        return d.c;
+      })).toBe(heatmap);
+      expect(heatmap.intensity()(data[0])).toEqual(0);
+      expect(heatmap.intensity()(data[67])).toEqual(3);
+      heatmap = heatmapFeature({layer: layer, intensity: function (d) {
+        return d.a;
+      }});
+      expect(heatmap.intensity()(data[0])).toEqual(0);
+      expect(heatmap.intensity()(data[67])).toEqual(7);
+    });
+  });
+  describe('_build', function () {
+    it('intensity ranges', function () {
+      var heatmap = heatmapFeature({layer: layer, position: function (d) {
+        return {x: d.a, y: d.b};
+      }, intensity: function (d) {
+        return d.c;
+      }}).data(data);
+      heatmap.gcs('EPSG:3857');
+      heatmap._build();
+      expect(heatmap.minIntensity()).toBe(0);
+      expect(heatmap.maxIntensity()).toBe(7);
+      heatmap.intensity(function () { return 2; });
+      heatmap.maxIntensity(null).minIntensity(null);
+      heatmap._build();
+      expect(heatmap.minIntensity()).toBe(1);
+      expect(heatmap.maxIntensity()).toBe(2);
+    });
+    it('gcsPosition', function () {
+      var heatmap = heatmapFeature({layer: layer, position: function (d) {
+        return {x: d.a, y: d.b};
+      }}).data(data);
+      heatmap.gcs('EPSG:3857');
+      // we have to call build since we didn't attach this to the layer in the
+      // normal way
+      heatmap._build();
+      var pos = heatmap.gcsPosition();
+      expect(pos[0]).toEqual({x: 0, y: 0});
+      expect(pos[84]).toEqual({x: 4, y: 3});
+    });
   });
 });
