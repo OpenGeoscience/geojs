@@ -11,14 +11,14 @@ block append mainContent
       span#points-loaded
     .form-group(title="Number of points.  Leave blank for the entire original data set.  If a smaller number, only a subset of points will be shown.  If a larger number, some of the data will be duplicated with random offsets.")
       label(for="points") Number of Points
-      input#points(type="number")
+      input#points(type="number" min="1" step="100")
       span#points-shown
     .form-group(title="Delay between movement and heatmap recalculation in milliseconds.")
       label(for="updateDelay") Update Delay (ms)
-      input#updateDelay(type="number" placeholder="50")
+      input#updateDelay(type="number" placeholder="50" min=0)
     .form-group(title="Opacity of heatmap layer (0 to 1).")
       label(for="opacity") Opacity
-      input#opacity(type="number" placeholder="0.75")
+      input#opacity(type="number" placeholder="0.75" min=0 max=1 step=0.05)
     .form-group(title="Value to map to minimum intensity.  Leave blank to auto calculate.")
       label(for="minIntensity") Min. Intensity
       input#minIntensity(type="number")
@@ -27,10 +27,10 @@ block append mainContent
       input#maxIntensity(type="number")
     .form-group(title="Radius of center of points in pixels.")
       label(for="radius") Radius
-      input#radius(type="number" placeholder="25")
+      input#radius(type="number" placeholder="25" min=1)
     .form-group(title="Radius of blur around points in pixels.")
       label(for="blurRadius") Blur Radius
-      input#blurRadius(type="number" placeholder="15")
+      input#blurRadius(type="number" placeholder="15" min=0)
     .form-group(title="Color Gradient.  Entries with intensities of 0 and 1 are needed to form a valid color gradient.")
       label Color Gradient
       table.gradient
@@ -42,68 +42,68 @@ block append mainContent
           th(title="Alpha channel, 0 to 1") A
         tr
           td
-            input#gradI1(type="number")
+            input#gradI1(type="number" min=0 max=1 step=0.01)
           td
-            input#gradR1(type="number")
+            input#gradR1(type="number" min=0 max=255 step=1)
           td
-            input#gradG1(type="number")
+            input#gradG1(type="number" min=0 max=255 step=1)
           td
-            input#gradB1(type="number")
+            input#gradB1(type="number" min=0 max=255 step=1)
           td
-            input#gradA1(type="number")
+            input#gradA1(type="number" min=0 max=1 step=0.01)
         tr
           td
-            input#gradI2(type="number")
+            input#gradI2(type="number" min=0 max=1 step=0.01)
           td
-            input#gradR2(type="number")
+            input#gradR2(type="number" min=0 max=255 step=1)
           td
-            input#gradG2(type="number")
+            input#gradG2(type="number" min=0 max=255 step=1)
           td
-            input#gradB2(type="number")
+            input#gradB2(type="number" min=0 max=255 step=1)
           td
-            input#gradA2(type="number")
+            input#gradA2(type="number" min=0 max=1 step=0.01)
         tr
           td
-            input#gradI3(type="number")
+            input#gradI3(type="number" min=0 max=1 step=0.01)
           td
-            input#gradR3(type="number")
+            input#gradR3(type="number" min=0 max=255 step=1)
           td
-            input#gradG3(type="number")
+            input#gradG3(type="number" min=0 max=255 step=1)
           td
-            input#gradB3(type="number")
+            input#gradB3(type="number" min=0 max=255 step=1)
           td
-            input#gradA3(type="number")
+            input#gradA3(type="number" min=0 max=1 step=0.01)
         tr
           td
-            input#gradI4(type="number")
+            input#gradI4(type="number" min=0 max=1 step=0.01)
           td
-            input#gradR4(type="number")
+            input#gradR4(type="number" min=0 max=255 step=1)
           td
-            input#gradG4(type="number")
+            input#gradG4(type="number" min=0 max=255 step=1)
           td
-            input#gradB4(type="number")
+            input#gradB4(type="number" min=0 max=255 step=1)
           td
-            input#gradA4(type="number")
+            input#gradA4(type="number" min=0 max=1 step=0.01)
         tr
           td
-            input#gradI5(type="number")
+            input#gradI5(type="number" min=0 max=1 step=0.01)
           td
-            input#gradR5(type="number")
+            input#gradR5(type="number" min=0 max=255 step=1)
           td
-            input#gradG5(type="number")
+            input#gradG5(type="number" min=0 max=255 step=1)
           td
-            input#gradB5(type="number")
+            input#gradB5(type="number" min=0 max=255 step=1)
           td
-            input#gradA5(type="number")
+            input#gradA5(type="number" min=0 max=1 step=0.01)
         tr
           td
-            input#gradI6(type="number")
+            input#gradI6(type="number" min=0 max=1 step=0.01)
           td
-            input#gradR6(type="number")
+            input#gradR6(type="number" min=0 max=255 step=1)
           td
-            input#gradG6(type="number")
+            input#gradG6(type="number" min=0 max=255 step=1)
           td
-            input#gradB6(type="number")
+            input#gradB6(type="number" min=0 max=255 step=1)
           td
-            input#gradA6(type="number")
+            input#gradA6(type="number" min=0 max=1 step=0.01)
 
