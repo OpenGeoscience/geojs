@@ -50,6 +50,10 @@ $(function () {
       case 'dataset':
         ctlvalue = value ? value : 'adderall';
         break;
+      case 'gaussian':
+        ctlvalue = value === 'true';
+        heatmapOptions.style[key] = value;
+        break;
       case 'gradient':
         var parts = value.split(',').map(parseFloat);
         if (parts.length >= 5) {
@@ -82,17 +86,17 @@ $(function () {
           points = ctlvalue = parseInt(value, 10);
         }
         break;
-      case 'updateDelay':
-        if (value.length) {
-          heatmapOptions[key] = ctlvalue = parseInt(value, 10);
-        }
-        break;
       case 'radius': case 'blurRadius':
         if (value.length) {
           value = parseFloat(value);
           if (!isNaN(value)) {
             heatmapOptions.style[key] = ctlvalue = value;
           }
+        }
+        break;
+      case 'updateDelay':
+        if (value.length) {
+          heatmapOptions[key] = ctlvalue = parseInt(value, 10);
         }
         break;
       // add gaussian and binning when they are added as features
@@ -215,6 +219,11 @@ $(function () {
         break;
       case 'dataset':
         fetch_data();
+        break;
+      case 'gaussian':
+        heatmapOptions.style[param] = processedValue;
+        heatmap.style(param, processedValue);
+        map.draw();
         break;
       case 'gradient':
         var gradient = {};
