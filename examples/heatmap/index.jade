@@ -16,6 +16,18 @@ block append mainContent
     .form-group(title="Delay between movement and heatmap recalculation in milliseconds.")
       label(for="updateDelay") Update Delay (ms)
       input#updateDelay(type="number" placeholder="50" min=0)
+    .form-group(title="Binning the data is faster for large sets and slower for small ones.  Binning tends to make dense data look somewhat sparser.  Smaller bins are closer in appearance to unbinned data but take longer to compute.")
+      label(for="binned") Bin Data
+      select#binned(placeholder="auto")
+        option(value="auto" title="Bin data if there are more points than the number of bins that would be used by default") Auto
+        option(value="false" title="Do not bin data.") Never
+        option(value="true" title="Always bin data using the default bin size (1/8th of the total radius).") Always
+        option(value="3" title="Always bin data using a 3 pixel bin size.") 3 pixel bin size
+        option(value="5" title="Always bin data using a 5 pixel bin size.") 5 pixel bin size
+        option(value="10" title="Always bin data using a 10 pixel bin size.") 10 pixel bin size
+        option(value="15" title="Always bin data using a 15 pixel bin size.") 15 pixel bin size
+        option(value="20" title="Always bin data using a 20 pixel bin size.") 20 pixel bin size
+        option(value="25" title="Always bin data using a 25 pixel bin size.") 25 pixel bin size
     .form-group(title="Opacity of heatmap layer (0 to 1).")
       label(for="opacity") Opacity
       input#opacity(type="number" placeholder="0.75" min=0 max=1 step=0.05)
