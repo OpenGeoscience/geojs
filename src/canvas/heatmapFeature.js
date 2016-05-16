@@ -67,11 +67,11 @@ var canvas_heatmapFeature = function (arg) {
   this._computeGradient = function () {
     var canvas, stop, context2d, gradient, colors;
 
-    if (!m_this._grad) {
+    colors = m_this.style('color');
+    if (!m_this._grad || m_this._gradColors !== colors) {
       canvas = document.createElement('canvas');
       context2d = canvas.getContext('2d');
       gradient = context2d.createLinearGradient(0, 0, 0, 256);
-      colors = m_this.style('color');
 
       canvas.width = 1;
       canvas.height = 256;
@@ -83,6 +83,7 @@ var canvas_heatmapFeature = function (arg) {
       context2d.fillStyle = gradient;
       context2d.fillRect(0, 0, 1, 256);
       m_this._grad = context2d.getImageData(0, 0, 1, 256).data;
+      m_this._gradColors = colors;
     }
 
     return m_this;
@@ -96,11 +97,12 @@ var canvas_heatmapFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._createCircle = function () {
     var circle, ctx, r, r2, blur;
-    if (!m_this._circle) {
+    r = m_this.style('radius');
+    blur = m_this.style('blurRadius');
+    if (!m_this._circle || m_this._circle.radius !== r ||
+        m_this._circle.blurRadius !== blur) {
       circle = m_this._circle = document.createElement('canvas');
       ctx = circle.getContext('2d');
-      r = m_this.style('radius');
-      blur = m_this.style('blurRadius');
 
       r2 = blur + r;
 
@@ -113,6 +115,8 @@ var canvas_heatmapFeature = function (arg) {
       ctx.arc(-r2, -r2, r, 0, Math.PI * 2, true);
       ctx.closePath();
       ctx.fill();
+      circle.radius = r;
+      circle.blurRadius = blur;
       m_this._circle = circle;
     }
     return m_this;
