@@ -131,9 +131,11 @@ describe('canvas heatmap feature', function () {
   it('binned', function () {
     // animation frames are already mocked
     // ensure there is some data that will be off the map when we zoom in
+    var viewport = map.camera()._viewport;
     var r = 80,
         data = [[1, 80, 0], [1, 0, 180]],
-        numpoints = (800 + r * 2) / (r / 8) * (600 + r * 2) / (r / 8),
+        numpoints = ((viewport.width + r * 2) / (r / 8) *
+                     (viewport.height + r * 2) / (r / 8)),
         idx;
     feature1.style({radius: r, blurRadius: 0});
     map.draw();
