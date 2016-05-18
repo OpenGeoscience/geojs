@@ -217,23 +217,23 @@ var canvas_heatmapFeature = function (arg) {
    * @param {object} map the parent map object.
    * @param {Array} data the main data array.
    * @param {number} radius the sum of radius and blurRadius.
-   * @param {number} binned size of the bins in pixels.
+   * @param {number} binSize size of the bins in pixels.
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._renderBinnedData = function (context2d, map, data, radius, binned) {
+  this._renderBinnedData = function (context2d, map, data, radius, binSize) {
     var position = m_this.gcsPosition(),
         intensityFunc = m_this.intensity(),
         minIntensity = m_this.minIntensity(),
         rangeIntensity = (m_this.maxIntensity() - minIntensity) || 1,
         viewport = map.camera()._viewport,
         bins = [],
-        rw = Math.ceil(radius / binned),
-        maxx = Math.ceil(viewport.width / binned) + rw * 2 + 2,
-        maxy = Math.ceil(viewport.height / binned) + rw * 2 + 2,
+        rw = Math.ceil(radius / binSize),
+        maxx = Math.ceil(viewport.width / binSize) + rw * 2 + 2,
+        maxy = Math.ceil(viewport.height / binSize) + rw * 2 + 2,
         datalen = data.length,
         idx, pos, intensity, x, y, binrow, offsetx, offsety;
 
-    /* We create bins of size (binned) pixels on a side.  We only track bins
+    /* We create bins of size (binSize) pixels on a side.  We only track bins
      * that are on the viewport or within the radius of it, plus one extra bin
      * width. */
     for (idx = 0; idx < datalen; idx += 1) {
@@ -246,17 +246,17 @@ var canvas_heatmapFeature = function (arg) {
         continue;
       }
       if (offsetx === undefined) {
-        offsetx = ((pos.x % binned) + binned) % binned;
-        offsety = ((pos.y % binned) + binned) % binned;
+        offsetx = ((pos.x % binSize) + binSize) % binSize;
+        offsety = ((pos.y % binSize) + binSize) % binSize;
       }
       /* We handle points that are in the viewport, plus the radius on either
        * side, as they will add into the visual effect, plus one additional bin
        * to account for the offset alignment. */
-      x = Math.floor((pos.x - offsetx) / binned) + rw + 1;
+      x = Math.floor((pos.x - offsetx) / binSize) + rw + 1;
       if (x < 0 || x >= maxx) {
         continue;
       }
-      y = Math.floor((pos.y - offsety) / binned) + rw + 1;
+      y = Math.floor((pos.y - offsety) / binSize) + rw + 1;
       if (y < 0 || y >= maxy) {
         continue;
       }

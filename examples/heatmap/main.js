@@ -19,7 +19,7 @@ $(function () {
     opacity: 0.75
   };
   var heatmapOptions = {
-    // binned: 'auto',
+    binned: 'auto',
     minIntensity: null,
     maxIntensity: null,
     style: {
