@@ -36,7 +36,7 @@ describe('canvas heatmap feature', function () {
     map.resize(0, 0, width, height);
   });
 
-  it('Add features to a layer', function () {
+  it('Add feature to a layer', function () {
     feature1 = layer.createFeature('heatmap')
       .data(testData)
       .intensity(function (d) {
@@ -55,7 +55,7 @@ describe('canvas heatmap feature', function () {
     map.draw();
     stepAnimationFrame(new Date().getTime());
     expect(layer.children().length).toBe(1);
-    unmockAnimationFrame();
+    // leave animation frames mocked for later tests.
   });
 
   it('Validate selection API option', function () {
@@ -103,11 +103,36 @@ describe('canvas heatmap feature', function () {
     clock.tick(2000);
     expect(feature1.buildTime().getMTime()).toBe(buildTime);
   });
+  it('radius, blurRadius, and gaussian', function () {
+    // animation frames are already mocked
+    expect(feature1._circle.radius).toBe(5);
+    expect(feature1._circle.blurRadius).toBe(15);
+    expect(feature1._circle.gaussian).toBe(true);
+    expect(feature1._circle.width).toBe(40);
+    expect(feature1._circle.height).toBe(40);
+    feature1.style('gaussian', false);
+    map.draw();
+    stepAnimationFrame(new Date().getTime());
+    expect(feature1._circle.gaussian).toBe(false);
+    feature1.style('radius', 10);
+    expect(feature1._circle.radius).toBe(5);
+    map.draw();
+    stepAnimationFrame(new Date().getTime());
+    expect(feature1._circle.radius).toBe(10);
+    expect(feature1._circle.width).toBe(50);
+    expect(feature1._circle.height).toBe(50);
+    feature1.style('blurRadius', 0);
+    map.draw();
+    stepAnimationFrame(new Date().getTime());
+    expect(feature1._circle.blurRadius).toBe(0);
+    expect(feature1._circle.width).toBe(20);
+    expect(feature1._circle.height).toBe(20);
+    unmockAnimationFrame();
+  });
   it('Remove a feature from a layer', function () {
     layer.deleteFeature(feature1).draw();
     expect(layer.children().length).toBe(0);
   });
-
 });
 
 describe('core.heatmapFeature', function () {

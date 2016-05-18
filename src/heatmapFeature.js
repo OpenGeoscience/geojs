@@ -10,13 +10,6 @@ var transform = require('./transform');
  * @class
  * @param {Object} arg Options object
  * @extends geo.feature
- * @param {Object|string|Function} [color] Color transfer function that.
- *   will be used to evaluate color of each pixel using normalized intensity
- *   as the look up value.
- * @param {Object|Function} [radius=10] Radius of a point in terms of number
- *   of pixels.
- * @param {Object|Function} [blurRadius=10] Gaussian blur radius for each
- *   point in terms of number of pixels.
  * @param {Object|Function} [position] Position of the data.  Default is
  *   (data). The position is an Object which specifies the location of the
  *   data in geo-spatial context.
@@ -33,6 +26,18 @@ var transform = require('./transform');
  *   be computed.
  * @param {number} [updateDelay=1000] Delay in milliseconds after a zoom,
  *   rotate, or pan event before recomputing the heatmap.
+ * @param {Object|string|Function} [style.color] Color transfer function that.
+ *   will be used to evaluate color of each pixel using normalized intensity
+ *   as the look up value.
+ * @param {Object|Function} [style.radius=10] Radius of a point in terms of
+ *   number of pixels.
+ * @param {Object|Function} [style.blurRadius=10] Blur radius for each point in
+ *  terms of number of pixels.
+ * @param {boolean} [style.gaussian=true] If true, appoximate a gaussian
+ *   distribution for each point using a multi-segment linear radial
+ *   appoximation.  The total weight of the gaussian area is approximately the
+ *   9/16 r^2.  The sum of radius + blurRadius is used as the radius for the
+ *   gaussian distribution.
  * @returns {geo.heatmapFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -179,6 +184,7 @@ var heatmapFeature = function (arg) {
         {
           radius: 10,
           blurRadius: 10,
+          gaussian: true,
           color: {0:    {r: 0, g: 0, b: 0.0, a: 0.0},
                   0.25: {r: 0, g: 0, b: 1, a: 0.5},
                   0.5:  {r: 0, g: 1, b: 1, a: 0.6},
