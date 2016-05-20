@@ -478,7 +478,6 @@ var d3Renderer = function (arg) {
     m_features[arg.id] = {
       data: arg.data,
       index: arg.dataIndex,
-      defs: arg.defs,
       style: arg.style,
       attributes: arg.attributes,
       classes: arg.classes,
@@ -510,24 +509,12 @@ var d3Renderer = function (arg) {
         attributes = m_features[id].attributes,
         classes = m_features[id].classes,
         append = m_features[id].append,
-        defs = m_features[id].defs,
         selection = m_this.select(id, parentId).data(data, index);
     selection.enter().append(append);
     selection.exit().remove();
     setAttrs(selection, attributes);
     selection.attr('class', classes.concat([id]).join(' '));
     setStyles(selection, style);
-    if (defs) {
-      selection = m_defs.selectAll('.' + id).data(defs.data, index);
-      var entries = selection.enter().append(defs.append);
-      if (defs.enter) {
-        defs.enter(entries);
-      }
-      selection.exit().remove();
-      setAttrs(selection, defs.attributes);
-      selection.attr('class', (defs.classes || []).concat([id]).join(' '));
-      setStyles(selection, defs.style);
-    }
     return m_this;
   };
 

@@ -63,9 +63,9 @@ var d3_quadFeature = function (arg) {
       d.points = points[0] + ' ' + points[1] + ' ' + points[3] + ' ' + points[2];
       /* We can only fit three corners of the quad to the image, but we get to
        * pick which three.  We choose to always include the largest of the
-       * triangles formed by a set of three vertices.  This can result in some
-       * of the image not being visible, or, in twisted or concave quads, some
-       * of the image being duplicated. */
+       * triangles formed by a set of three vertices.  The image is always
+       * rendered as a parallelogram, so it may be larger than desired, and,
+       * for convex quads, miss some of the intended area. */
       for (i = 0; i < 4; i += 1) {
         area = Math.abs(
           pos[(i + 1) % 4].x * (pos[(i + 2) % 4].y - pos[(i + 3) % 4].y) +
@@ -76,7 +76,7 @@ var d3_quadFeature = function (arg) {
           maxv = i;
         }
       }
-      d.quad.svgTransform = [
+      d.svgTransform = [
         maxv === 3 || maxv === 2 ? pos[1].x - pos[0].x : pos[3].x - pos[2].x,
         maxv === 3 || maxv === 2 ? pos[1].y - pos[0].y : pos[3].y - pos[2].y,
         maxv === 0 || maxv === 2 ? pos[1].x - pos[3].x : pos[0].x - pos[2].x,
@@ -89,65 +89,57 @@ var d3_quadFeature = function (arg) {
     var feature = {
       id: id,
       data: data,
-      append: 'polygon',
+      dataIndex: function (d) {
+        return d.quad.quadId;
+      },
+      append: function (d) {
+        var ns = this.namespaceURI,
+            element = d.type === 'clr' ? 'polygon' : 'image';
+        return (ns ? document.createElementNS(ns, element) :
+                document.createElement(element));
+      },
       attributes: {
-        points: function (d) {
-          return d.points;
-        },
         fill: function (d) {
           if (d.type === 'clr') {
-            return d3.rgb(255 * d.quad.color.r, 255 * d.quad.color.g, 255 * d.quad.color.b);
+            return d3.rgb(255 * d.quad.color.r, 255 * d.quad.color.g,
+                          255 * d.quad.color.b);
           }
-          if (!d.quad.image) {
-            return 'none';
-          }
-          /* Our method for setting style for fill prevents doing this in the
-           * style object, so do it here. */
-          d3.select(this).style('fill', 'url(#' + id + '-img-' + d.quad.idx + ')');
+          d3.select(this).style('opacity', d.quad.opacity);
         },
-        stroke: false
+        height: function (d) {
+          return d.type === 'clr' ? undefined : 1;
+        },
+        points: function (d) {
+          return d.type === 'clr' ? d.points : undefined;
+        },
+        preserveAspectRatio: function (d) {
+          return d.type === 'clr' ? undefined : 'none';
+        },
+        stroke: false,
+        transform: function (d) {
+          return ((d.type === 'clr' || !d.quad.image) ? undefined :
+                  'matrix(' + d.svgTransform.join(' ') + ')');
+        },
+        width: function (d) {
+          return d.type === 'clr' ? undefined : 1;
+        },
+        x: function (d) {
+          return d.type === 'clr' ? undefined : 0;
+        },
+        'xlink:href': function (d) {
+          return ((d.type === 'clr' || !d.quad.image) ? undefined :
+                  d.quad.image.src);
+        },
+        y: function (d) {
+          return d.type === 'clr' ? undefined : 0;
+        }
       },
       style: {
         fillOpacity: function (d) {
-          return d.quad.opacity;
+          return d.type === 'clr' ? d.quad.opacity : undefined;
         }
       },
-      classes: ['d3QuadFeature'],
-      defs: {
-        data: m_quads.imgQuads,
-        append: 'pattern',
-        attributes: {
-          id: function (d) {
-            return id + '-img-' + d.idx;
-          },
-          x: 0,
-          y: 0,
-          patternTransform: function (d) {
-            return 'matrix(' + d.svgTransform.join(' ') + ')';
-          },
-          patternUnits: 'userSpaceOnUse',
-          width: 1,
-          height: 1,
-          enter: function (d) {
-            var node = d3.select(this),
-                imageElem = node.selectAll('.d3QuadFeatureImage');
-            if (d.image && d.image.src) {
-              if (!imageElem.size()) {
-                imageElem = node.append('image').attr({
-                  'class': 'd3QuadFeatureImage', x: 0, y: 0});
-              }
-              imageElem.attr({
-                width: 1,
-                height: 1,
-                preserveAspectRatio: 'none',
-                'xlink:href': d.image.src
-              });
-            } else {
-              imageElem.remove();
-            }
-          }
-        }
-      }
+      classes: ['d3QuadFeature']
     };
     renderer._drawFeatures(feature);
 

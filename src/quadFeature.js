@@ -63,6 +63,7 @@ var quadFeature = function (arg) {
   var m_this = this,
       s_init = this._init,
       m_cacheQuads,
+      m_nextQuadId = 0,
       m_images = [],
       m_quads;
 
@@ -185,7 +186,7 @@ var quadFeature = function (arg) {
 
   /**
    * Given a data item and its index, fetch its position and ensure we have
-   * compelte information for the quad.  This generates missing corners and z
+   * complete information for the quad.  This generates missing corners and z
    * values.
    *
    * @param {function} posFunc a function to call to get the position of a data
@@ -379,6 +380,14 @@ var quadFeature = function (arg) {
         quadinfo.imgquad = quad;
       }
       if (m_cacheQuads !== false && quadinfo.keep !== false) {
+        if (quadinfo.clrquad) {
+          m_nextQuadId += 1;
+          quadinfo.clrquad.quadId = m_nextQuadId;
+        }
+        if (quadinfo.imgquad) {
+          m_nextQuadId += 1;
+          quadinfo.imgquad.quadId = m_nextQuadId;
+        }
         d._cachedQuad = quadinfo;
       }
     });
