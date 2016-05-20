@@ -1,3 +1,5 @@
+/* globals $, d3, geo, utils */
+
 // Run after the DOM loads
 $(function () {
   'use strict';
@@ -9,15 +11,7 @@ $(function () {
     center: {x: 28.9550, y: 41.0136}
   });
 
-  // Parse query parameters into an object for ease of access
-  var query = document.location.search.replace(/(^\?)/, '').split(
-    '&').map(function (n) {
-      n = n.split('=');
-      if (n[0]) {
-        this[decodeURIComponent(n[0])] = decodeURIComponent(n[1]);
-      }
-      return this;
-    }.bind({}))[0];
+  var query = utils.getQuery();
 
   if (query.test) {
     $('#test').removeClass('hidden');

@@ -219,7 +219,7 @@ var quadFeature = function (arg) {
         if (pos[key][2] === undefined) {
           pos[key][2] = depthFunc.call(m_this, d, i);
         }
-        if (gcs !== map_gcs) {
+        if (gcs !== map_gcs && gcs !== false) {
           pos[key] = transform.transformCoordinates(
               gcs, map_gcs, pos[key]);
         }

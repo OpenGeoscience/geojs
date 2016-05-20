@@ -83,7 +83,7 @@ var gl_tileLayer = function () {
 
   /* These functions don't need to do anything. */
   this._getSubLayer = function () {};
-  this._updateSubLayer = undefined;
+  this._updateSubLayers = undefined;
 };
 
 registerLayerAdjustment('vgl', 'tile', gl_tileLayer);

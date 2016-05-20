@@ -44,6 +44,7 @@ var d3_quadFeature = function (arg) {
         map = renderer.layer().map();
 
     m_quads = this._generateQuads();
+
     var data = [];
     $.each(m_quads.clrQuads, function (idx, quad) {
       data.push({type: 'clr', quad: quad});
@@ -54,40 +55,12 @@ var d3_quadFeature = function (arg) {
       }
     });
     $.each(data, function (idx, d) {
-      var points = [], pos = [], area, maxarea = -1, maxv, i;
-      for (i = 0; i < d.quad.pos.length; i += 3) {
-        var p = map.gcsToDisplay({x: d.quad.pos[i], y: d.quad.pos[i + 1], z: d.quad.pos[i + 2]}, null);
-        pos.push(p);
-        points.push('' + p.x + ',' + p.y);
-      }
-      d.points = points[0] + ' ' + points[1] + ' ' + points[3] + ' ' + points[2];
-      /* We can only fit three corners of the quad to the image, but we get to
-       * pick which three.  We choose to always include the largest of the
-       * triangles formed by a set of three vertices.  The image is always
-       * rendered as a parallelogram, so it may be larger than desired, and,
-       * for convex quads, miss some of the intended area. */
-      for (i = 0; i < 4; i += 1) {
-        area = Math.abs(
-          pos[(i + 1) % 4].x * (pos[(i + 2) % 4].y - pos[(i + 3) % 4].y) +
-          pos[(i + 2) % 4].x * (pos[(i + 3) % 4].y - pos[(i + 1) % 4].y) +
-          pos[(i + 3) % 4].x * (pos[(i + 1) % 4].y - pos[(i + 2) % 4].y)) / 2;
-        if (area > maxarea) {
-          maxarea = area;
-          maxv = i;
-        }
-      }
-      d.svgTransform = [
-        maxv === 3 || maxv === 2 ? pos[1].x - pos[0].x : pos[3].x - pos[2].x,
-        maxv === 3 || maxv === 2 ? pos[1].y - pos[0].y : pos[3].y - pos[2].y,
-        maxv === 0 || maxv === 2 ? pos[1].x - pos[3].x : pos[0].x - pos[2].x,
-        maxv === 0 || maxv === 2 ? pos[1].y - pos[3].y : pos[0].y - pos[2].y,
-        maxv === 2 ? pos[3].x + pos[0].x - pos[1].x : pos[2].x,
-        maxv === 2 ? pos[3].y + pos[0].y - pos[1].y : pos[2].y
-      ];
+      d.points = d.svgTransform = null;
+      d.zIndex = d.quad.pos[2];
     });
-    var id = this._d3id();
+
     var feature = {
-      id: id,
+      id: this._d3id(),
       data: data,
       dataIndex: function (d) {
         return d.quad.quadId;
@@ -104,12 +77,33 @@ var d3_quadFeature = function (arg) {
             return d3.rgb(255 * d.quad.color.r, 255 * d.quad.color.g,
                           255 * d.quad.color.b);
           }
-          d3.select(this).style('opacity', d.quad.opacity);
+          /* set some styles here */
+          if (d.quad.opacity !== 1) {
+            d3.select(this).style('opacity', d.quad.opacity);
+          }
         },
         height: function (d) {
           return d.type === 'clr' ? undefined : 1;
         },
         points: function (d) {
+          if (d.type === 'clr' && !d.points) {
+            var points = [], i;
+            for (i = 0; i < d.quad.pos.length; i += 3) {
+              var p = {
+                x: d.quad.pos[i],
+                y: d.quad.pos[i + 1],
+                z: d.quad.pos[i + 2]
+              };
+              /* We don't use 'p = m_this.featureGcsToDisplay(p);' because the
+               * quads have already been converted to the map's gcs (no longer
+               * the feature's gcs or map's ingcs). */
+              p = map.gcsToDisplay(p, null);
+              p = renderer.baseToLocal(p);
+              points.push('' + p.x + ',' + p.y);
+            }
+            d.points = (points[0] + ' ' + points[1] + ' ' + points[3] + ' ' +
+                        points[2]);
+          }
           return d.type === 'clr' ? d.points : undefined;
         },
         preserveAspectRatio: function (d) {
@@ -117,7 +111,47 @@ var d3_quadFeature = function (arg) {
         },
         stroke: false,
         transform: function (d) {
-          return ((d.type === 'clr' || !d.quad.image) ? undefined :
+          if (d.type === 'img' && d.quad.image && !d.svgTransform) {
+            var pos = [], area, maxarea = -1, maxv, i;
+            for (i = 0; i < d.quad.pos.length; i += 3) {
+              var p = {
+                x: d.quad.pos[i],
+                y: d.quad.pos[i + 1],
+                z: d.quad.pos[i + 2]
+              };
+              /* We don't use 'p = m_this.featureGcsToDisplay(p);' because the
+               * quads have already been converted to the map's gcs (no longer
+               * the feature's gcs or map's ingcs). */
+              p = map.gcsToDisplay(p, null);
+              p = renderer.baseToLocal(p);
+              pos.push(p);
+            }
+            /* We can only fit three corners of the quad to the image, but we
+             * get to pick which three.  We choose to always include the
+             * largest of the triangles formed by a set of three vertices.  The
+             * image is always rendered as a parallelogram, so it may be larger
+             * than desired, and, for convex quads, miss some of the intended
+             * area. */
+            for (i = 0; i < 4; i += 1) {
+              area = Math.abs(
+                pos[(i + 1) % 4].x * (pos[(i + 2) % 4].y - pos[(i + 3) % 4].y) +
+                pos[(i + 2) % 4].x * (pos[(i + 3) % 4].y - pos[(i + 1) % 4].y) +
+                pos[(i + 3) % 4].x * (pos[(i + 1) % 4].y - pos[(i + 2) % 4].y)) / 2;
+              if (area > maxarea) {
+                maxarea = area;
+                maxv = i;
+              }
+            }
+            d.svgTransform = [
+              maxv === 3 || maxv === 2 ? pos[1].x - pos[0].x : pos[3].x - pos[2].x,
+              maxv === 3 || maxv === 2 ? pos[1].y - pos[0].y : pos[3].y - pos[2].y,
+              maxv === 0 || maxv === 2 ? pos[1].x - pos[3].x : pos[0].x - pos[2].x,
+              maxv === 0 || maxv === 2 ? pos[1].y - pos[3].y : pos[0].y - pos[2].y,
+              maxv === 2 ? pos[3].x + pos[0].x - pos[1].x : pos[2].x,
+              maxv === 2 ? pos[3].y + pos[0].y - pos[1].y : pos[2].y
+            ];
+          }
+          return ((d.type !== 'img' || !d.quad.image) ? undefined :
                   'matrix(' + d.svgTransform.join(' ') + ')');
         },
         width: function (d) {
@@ -139,6 +173,8 @@ var d3_quadFeature = function (arg) {
           return d.type === 'clr' ? d.quad.opacity : undefined;
         }
       },
+      onlyRenderNew: !this.style('previewColor') && !this.style('previewImage'),
+      sortByZ: true,
       classes: ['d3QuadFeature']
     };
     renderer._drawFeatures(feature);
@@ -155,6 +191,8 @@ var d3_quadFeature = function (arg) {
     s_update.call(m_this);
     if (m_this.buildTime().getMTime() <= m_this.dataTime().getMTime() ||
         m_this.buildTime().getMTime() < m_this.getMTime()) {
+      m_this.buildCount = (m_this.buildCount || 0) + 1;  // DWM::
+      window.buildCount = m_this.buildCount;  // DWM::
       m_this._build();
     }
     return m_this;

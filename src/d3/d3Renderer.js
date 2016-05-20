@@ -40,6 +40,8 @@ var d3Renderer = function (arg) {
       m_diagonal = null,
       m_scale = 1,
       m_transform = {dx: 0, dy: 0, rx: 0, ry: 0, rotation: 0},
+      m_renderAnimFrameRef = null,
+      m_renderIds = {},
       m_svg = null,
       m_defs = null;
 
@@ -207,8 +209,9 @@ var d3Renderer = function (arg) {
       return;
     }
 
-    var layer = m_this.layer(),
-        map = layer.map(),
+    var layer = m_this.layer();
+
+    var map = layer.map(),
         upperLeft = map.gcsToDisplay(m_corners.upperLeft, null),
         lowerRight = map.gcsToDisplay(m_corners.lowerRight, null),
         center = map.gcsToDisplay(m_corners.center, null),
@@ -466,10 +469,18 @@ var d3Renderer = function (arg) {
    *    id:         A unique string identifying the feature.
    *    data:       Array of data objects used in a d3 data method.
    *    dataIndex:  A function that returns a unique id for each data element.
+   *    defs:       If set, a dictionary with values to render in the defs
+   *                section.  This can contain data, index, append, attributes,
+   *                classes, style, and enter.  enter is a function that is
+   *                called on new elements.
    *    style:      An object containing element CSS styles.
    *    attributes: An object containing element attributes.
    *    classes:    An array of classes to add to the elements.
    *    append:     The element type as used in d3 append methods.
+   *    onlyRenderNew: a boolean.  If true, features only get attributes and
+   *                styles set when new.  If false, features always have
+   *                attributes and styles updated.
+   *    sortByZ:    a boolean.  If true, sort features by the d.zIndex.
    *    parentId:   If set, the group ID of the parent element.
    *  }
    */
@@ -482,6 +493,8 @@ var d3Renderer = function (arg) {
       attributes: arg.attributes,
       classes: arg.classes,
       append: arg.append,
+      onlyRenderNew: arg.onlyRenderNew,
+      sortByZ: arg.sortByZ,
       parentId: arg.parentId
     };
     return m_this.__render(arg.id, arg.parentId);
@@ -503,18 +516,50 @@ var d3Renderer = function (arg) {
       }
       return m_this;
     }
+    if (parentId) {
+      m_this._renderFeature(id, parentId);
+    } else {
+      m_renderIds[id] = true;
+      if (m_renderAnimFrameRef === null) {
+        m_renderAnimFrameRef = window.requestAnimationFrame(m_this._renderFrame);
+      }
+    }
+  };
+
+  this._renderFrame = function () {
+    var ids = m_renderIds;
+    m_renderIds = {};
+    m_renderAnimFrameRef = null;
+    for (var id in ids) {
+      if (ids.hasOwnProperty(id)) {
+        m_this._renderFeature(id);
+      }
+    }
+  };
+
+  this._renderFeature = function (id, parentId) {
+    if (!m_features[id]) {
+      return;
+    }
     var data = m_features[id].data,
         index = m_features[id].index,
         style = m_features[id].style,
         attributes = m_features[id].attributes,
         classes = m_features[id].classes,
         append = m_features[id].append,
-        selection = m_this.select(id, parentId).data(data, index);
-    selection.enter().append(append);
+        selection = m_this.select(id, parentId).data(data, index),
+        entries, rendersel;
+    entries = selection.enter().append(append);
     selection.exit().remove();
-    setAttrs(selection, attributes);
-    selection.attr('class', classes.concat([id]).join(' '));
-    setStyles(selection, style);
+    rendersel = m_features[id].onlyRenderNew ? entries : selection;
+    setAttrs(rendersel, attributes);
+    rendersel.attr('class', classes.concat([id]).join(' '));
+    setStyles(rendersel, style);
+    if (entries.size() && m_features[id].sortByZ) {
+      selection.sort(function (a, b) {
+        return (a.zIndex || 0) - (b.zIndex || 0);
+      });
+    }
     return m_this;
   };
 
@@ -536,6 +581,9 @@ var d3Renderer = function (arg) {
     m_this.select(id).remove();
     m_defs.selectAll('.' + id).remove();
     delete m_features[id];
+    if (m_renderIds[id]) {
+      delete m_renderIds[id];
+    }
     return m_this;
   };
 
