@@ -19,7 +19,7 @@ $(function () {
     opacity: 0.75
   };
   var heatmapOptions = {
-    // binned: 'auto',
+    binned: 'auto',
     minIntensity: null,
     maxIntensity: null,
     style: {
@@ -47,6 +47,9 @@ $(function () {
   $.each(query, function (key, value) {
     var ctlvalue, ctlkey = key;
     switch (key) {
+      case 'binned':
+        ctlvalue = value ? value : 'auto';
+        break;
       case 'dataset':
         ctlvalue = value ? value : 'adderall';
         break;
@@ -207,6 +210,11 @@ $(function () {
       param = 'gradient';
     }
     switch (param) {
+      case 'binned':
+        heatmapOptions[param] = value;
+        heatmap[param](value);
+        map.draw();
+        break;
       case 'blurRadius': case 'radius':
         processedValue = value.length ? parseFloat(value) : undefined;
         if (isNaN(processedValue) || processedValue === undefined ||

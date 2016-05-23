@@ -127,11 +127,56 @@ describe('canvas heatmap feature', function () {
     expect(feature1._circle.blurRadius).toBe(0);
     expect(feature1._circle.width).toBe(20);
     expect(feature1._circle.height).toBe(20);
-    unmockAnimationFrame();
+  });
+  it('binned', function () {
+    // animation frames are already mocked
+    // ensure there is some data that will be off the map when we zoom in
+    var viewport = map.camera()._viewport;
+    var r = 80,
+        data = [[1, 80, 0], [1, 0, 180]],
+        numpoints = ((viewport.width + r * 2) / (r / 8) *
+                     (viewport.height + r * 2) / (r / 8)),
+        idx;
+    feature1.style({radius: r, blurRadius: 0});
+    map.draw();
+    stepAnimationFrame(new Date().getTime());
+    expect(feature1._binned).toBe(false);
+    feature1.binned(true);
+    map.draw();
+    stepAnimationFrame(new Date().getTime());
+    expect(feature1._binned).toBe(r / 8);
+    feature1.binned(2);
+    map.draw();
+    stepAnimationFrame(new Date().getTime());
+    expect(feature1._binned).toBe(2);
+    feature1.binned(20);
+    map.draw();
+    stepAnimationFrame(new Date().getTime());
+    expect(feature1._binned).toBe(20);
+    for (idx = data.length; idx < numpoints + 1; idx += 1) {
+      data.push([Math.random(), (Math.random() - 0.5) * 190, (
+                 Math.random() - 0.5) * 360]);
+    }
+    feature1.data(data);
+    feature1.binned('auto');
+    map.draw();
+    stepAnimationFrame(new Date().getTime());
+    expect(feature1._binned).toBe(r / 8);
+    data.splice(numpoints);
+    feature1.data(data);
+    map.draw();
+    stepAnimationFrame(new Date().getTime());
+    expect(feature1._binned).toBe(false);
+    feature1.binned(true);
+    map.zoom(10);
+    stepAnimationFrame(new Date().getTime());
+    expect(feature1._binned).toBe(r / 8);
   });
   it('Remove a feature from a layer', function () {
     layer.deleteFeature(feature1).draw();
     expect(layer.children().length).toBe(0);
+    // stop mocking animation frames
+    unmockAnimationFrame();
   });
 });
 
@@ -172,6 +217,26 @@ describe('core.heatmapFeature', function () {
       expect(heatmap.updateDelay()).toBe(40);
       heatmap = heatmapFeature({layer: layer, updateDelay: 50});
       expect(heatmap.updateDelay()).toBe(50);
+    });
+    it('binned', function () {
+      var heatmap = heatmapFeature({layer: layer});
+      expect(heatmap.binned()).toBe('auto');
+      expect(heatmap.binned(true)).toBe(heatmap);
+      expect(heatmap.binned()).toBe(true);
+      heatmap = heatmapFeature({layer: layer, binned: 5});
+      expect(heatmap.binned()).toBe(5);
+      heatmap.binned('true');
+      expect(heatmap.binned()).toBe(true);
+      heatmap.binned('false');
+      expect(heatmap.binned()).toBe(false);
+      heatmap.binned('auto');
+      expect(heatmap.binned()).toBe('auto');
+      heatmap.binned(5.3);
+      expect(heatmap.binned()).toBe(5);
+      heatmap.binned(-3);
+      expect(heatmap.binned()).toBe(false);
+      heatmap.binned('not a number');
+      expect(heatmap.binned()).toBe(false);
     });
     it('position', function () {
       var heatmap = heatmapFeature({layer: layer});

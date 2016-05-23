@@ -26,6 +26,11 @@ var transform = require('./transform');
  *   be computed.
  * @param {number} [updateDelay=1000] Delay in milliseconds after a zoom,
  *   rotate, or pan event before recomputing the heatmap.
+ * @param {boolean|number|'auto'} [binned='auto'] If true or a number,
+ *   spatially bin data as part of producing the heatpmap.  If false, each
+ *   datapoint stands on its own.  If 'auto', bin data if there are more data
+ *   points than there would be bins.  Using true or auto uses bins that are
+ *   max(Math.floor((radius + blurRadius) / 8), 3).
  * @param {Object|string|Function} [style.color] Color transfer function that.
  *   will be used to evaluate color of each pixel using normalized intensity
  *   as the look up value.
@@ -62,6 +67,7 @@ var heatmapFeature = function (arg) {
       m_maxIntensity,
       m_minIntensity,
       m_updateDelay,
+      m_binned,
       m_gcsPosition,
       s_init = this._init;
 
@@ -69,6 +75,7 @@ var heatmapFeature = function (arg) {
   m_intensity = arg.intensity || function (d) { return 1; };
   m_maxIntensity = arg.maxIntensity !== undefined ? arg.maxIntensity : null;
   m_minIntensity = arg.minIntensity !== undefined ? arg.minIntensity : null;
+  m_binned = arg.binned !== undefined ? arg.binned : 'auto';
   m_updateDelay = arg.updateDelay ? parseInt(arg.updateDelay, 10) : 1000;
 
   ////////////////////////////////////////////////////////////////////////////
@@ -119,6 +126,34 @@ var heatmapFeature = function (arg) {
       return m_updateDelay;
     } else {
       m_updateDelay = parseInt(val, 10);
+    }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set binned
+   *
+   * @returns {geo.heatmap}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.binned = function (val) {
+    if (val === undefined) {
+      return m_binned;
+    } else {
+      if (val === 'true') {
+        val = true;
+      } else if (val === 'false') {
+        val = false;
+      } else if (val !== 'auto' && val !== true && val !== false) {
+        val = parseInt(val, 10);
+        if (val <= 0 || isNaN(val)) {
+          val = false;
+        }
+      }
+      m_binned = val;
+      m_this.dataTime().modified();
+      m_this.modified();
     }
     return m_this;
   };

@@ -181,8 +181,140 @@ var canvas_heatmapFeature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Render each data point on canvas
+   * Render individual data points on the canvas.
    * @protected
+   * @param {object} context2d the canvas context to draw in.
+   * @param {object} map the parent map object.
+   * @param {Array} data the main data array.
+   * @param {number} radius the sum of radius and blurRadius.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._renderPoints = function (context2d, map, data, radius) {
+    var position = m_this.gcsPosition(),
+        intensityFunc = m_this.intensity(),
+        minIntensity = m_this.minIntensity(),
+        rangeIntensity = (m_this.maxIntensity() - minIntensity) || 1,
+        idx, pos, intensity;
+
+    for (idx = data.length - 1; idx >= 0; idx -= 1) {
+      pos = map.worldToDisplay(position[idx]);
+      intensity = (intensityFunc(data[idx]) - minIntensity) / rangeIntensity;
+      if (intensity <= 0) {
+        continue;
+      }
+      // Small values are not visible because globalAlpha < .01
+      // cannot be read from imageData
+      context2d.globalAlpha = intensity < 0.01 ? 0.01 : (intensity > 1 ? 1 : intensity);
+      context2d.drawImage(m_this._circle, pos.x - radius, pos.y - radius);
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Render data points on the canvas by binning.
+   * @protected
+   * @param {object} context2d the canvas context to draw in.
+   * @param {object} map the parent map object.
+   * @param {Array} data the main data array.
+   * @param {number} radius the sum of radius and blurRadius.
+   * @param {number} binSize size of the bins in pixels.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._renderBinnedData = function (context2d, map, data, radius, binSize) {
+    var position = m_this.gcsPosition(),
+        intensityFunc = m_this.intensity(),
+        minIntensity = m_this.minIntensity(),
+        rangeIntensity = (m_this.maxIntensity() - minIntensity) || 1,
+        viewport = map.camera()._viewport,
+        bins = [],
+        rw = Math.ceil(radius / binSize),
+        maxx = Math.ceil(viewport.width / binSize) + rw * 2 + 2,
+        maxy = Math.ceil(viewport.height / binSize) + rw * 2 + 2,
+        datalen = data.length,
+        idx, pos, intensity, x, y, binrow, offsetx, offsety;
+
+    /* We create bins of size (binSize) pixels on a side.  We only track bins
+     * that are on the viewport or within the radius of it, plus one extra bin
+     * width. */
+    for (idx = 0; idx < datalen; idx += 1) {
+      pos = map.worldToDisplay(position[idx]);
+      /* To make the results look more stable, we use the first data point as a
+       * hard-reference to where the bins should line up.  Otherwise, as we pan
+       * points would shift which bin they are in and the display would ripple
+       * oddly. */
+      if (isNaN(pos.x) || isNaN(pos.y)) {
+        continue;
+      }
+      if (offsetx === undefined) {
+        offsetx = ((pos.x % binSize) + binSize) % binSize;
+        offsety = ((pos.y % binSize) + binSize) % binSize;
+      }
+      /* We handle points that are in the viewport, plus the radius on either
+       * side, as they will add into the visual effect, plus one additional bin
+       * to account for the offset alignment. */
+      x = Math.floor((pos.x - offsetx) / binSize) + rw + 1;
+      if (x < 0 || x >= maxx) {
+        continue;
+      }
+      y = Math.floor((pos.y - offsety) / binSize) + rw + 1;
+      if (y < 0 || y >= maxy) {
+        continue;
+      }
+      intensity = (intensityFunc(data[idx]) - minIntensity) / rangeIntensity;
+      if (intensity <= 0) {
+        continue;
+      }
+      if (intensity > 1) {
+        intensity = 1;
+      }
+      /* bins is an array of arrays.  The subarrays would be conceptually
+       * better represented as an array of dicts, but having a sparse array is
+       * uses much less memory and is faster.  Each bin uses four array entries
+       * that are (weight, intensity, x, y).  The weight is the sum of the
+       * intensities for all points in the bin.  The intensity is the geometric
+       * sum of the intensities to approximate what happens to the unbinned
+       * data on the alpha channel of the canvas.  The x and y coordinates are
+       * weighted by the intensity of each point. */
+      bins[y] = bins[y] || [];
+      x *= 4;
+      binrow = bins[y];
+      if (!binrow[x]) {
+        binrow[x] = binrow[x + 1] = intensity;
+        binrow[x + 2] = pos.x * intensity;
+        binrow[x + 3] = pos.y * intensity;
+      } else {
+        binrow[x] += intensity;  // weight
+        binrow[x + 1] += (1 - binrow[x + 1]) * intensity;
+        binrow[x + 2] += pos.x * intensity;
+        binrow[x + 3] += pos.y * intensity;
+      }
+    }
+    /* For each bin, render a point on the canvas. */
+    for (y = bins.length - 1; y >= 0; y -= 1) {
+      binrow = bins[y];
+      if (binrow) {
+        for (x = binrow.length - 4; x >= 0; x -= 4) {
+          if (binrow[x]) {
+            intensity = binrow[x + 1];
+            context2d.globalAlpha = intensity < 0.01 ? 0.01 : (intensity > 1 ? 1 : intensity);
+            /* The position is eighted by the intensities, so we have to divide
+             * it to get the necessary position */
+            context2d.drawImage(
+              m_this._circle,
+              binrow[x + 2] / binrow[x] - radius,
+              binrow[x + 3] / binrow[x] - radius);
+          }
+        }
+      }
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Render the data on the canvas, then colorize the resulting opacity map.
+   * @protected
+   * @param {object} context2d the canvas context to draw in.
+   * @param {object} map the parent map object.
    */
   ////////////////////////////////////////////////////////////////////////////
   this._renderOnCanvas = function (context2d, map) {
@@ -190,9 +322,27 @@ var canvas_heatmapFeature = function (arg) {
     if (m_renderTime.getMTime() < m_this.buildTime().getMTime()) {
       var data = m_this.data() || [],
           radius = m_this.style('radius') + m_this.style('blurRadius'),
-          pos, intensity, canvas, pixelArray,
+          binned = m_this.binned(),
+          canvas, pixelArray,
           layer = m_this.layer(),
           viewport = map.camera()._viewport;
+
+      /* Determine if we should bin the data */
+      if (binned === true || binned === 'auto') {
+        binned = Math.max(Math.floor(radius / 8), 3);
+        if (m_this.binned() === 'auto') {
+          var numbins = (Math.ceil((viewport.width + radius * 2) / binned) *
+                         Math.ceil((viewport.height + radius * 2) / binned));
+          if (numbins >= data.length) {
+            binned = 0;
+          }
+        }
+      }
+      if (binned < 1 || isNaN(binned)) {
+        binned = false;
+      }
+      /* Store what we did, in case this is ever useful elsewhere */
+      m_this._binned = binned;
 
       context2d.setTransform(1, 0, 0, 1, 0, 0);
       context2d.clearRect(0, 0, viewport.width, viewport.height);
@@ -200,20 +350,10 @@ var canvas_heatmapFeature = function (arg) {
 
       m_this._createCircle();
       m_this._computeGradient();
-      var position = m_this.gcsPosition(),
-          intensityFunc = m_this.intensity(),
-          minIntensity = m_this.minIntensity(),
-          rangeIntensity = (m_this.maxIntensity() - minIntensity) || 1;
-      for (var idx = data.length - 1; idx >= 0; idx -= 1) {
-        pos = map.worldToDisplay(position[idx]);
-        intensity = (intensityFunc(data[idx]) - minIntensity) / rangeIntensity;
-        if (intensity <= 0) {
-          continue;
-        }
-        // Small values are not visible because globalAlpha < .01
-        // cannot be read from imageData
-        context2d.globalAlpha = intensity < 0.01 ? 0.01 : (intensity > 1 ? 1 : intensity);
-        context2d.drawImage(m_this._circle, pos.x - radius, pos.y - radius);
+      if (!binned) {
+        m_this._renderPoints(context2d, map, data, radius);
+      } else {
+        m_this._renderBinnedData(context2d, map, data, radius, binned);
       }
       canvas = layer.canvas()[0];
       pixelArray = context2d.getImageData(0, 0, canvas.width, canvas.height);
