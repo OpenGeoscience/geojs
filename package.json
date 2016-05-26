@@ -66,7 +66,7 @@
   },
   "scripts": {
     "build": "webpack --config webpack.config.js && webpack --config external.config.js",
-    "lint": "eslint --cache src tests",
+    "lint": "eslint --cache .",
     "test": "karma start karma-cov.conf.js --single-run",
     "start": "karma start karma.conf.js",
     "ci": "karma start karma-cov.conf.js --single-run --browsers PhantomJS",
