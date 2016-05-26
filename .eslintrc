@@ -12,7 +12,8 @@
         "key-spacing": 0,
         "no-unneeded-ternary": 0,
         "yoda": 0,
-        "no-useless-call": 0
+        "no-useless-call": 0,
+        "camelcase": 0
     },
     "env": {
         "browser": true

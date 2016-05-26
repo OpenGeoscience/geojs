@@ -75,17 +75,17 @@ var vectorFeature = function (arg) {
     s_init.call(m_this, arg);
 
     var defaultStyle = $.extend(
-        {},
-        {
-          strokeColor: 'black',
-          strokeWidth: 2.0,
-          strokeOpacity: 1.0,
-          originStyle: 'none',
-          endStyle: 'arrow',
-          origin: {x: 0, y: 0, z: 0},
-          delta: function (d) { return d; },
-          scale: null // size scaling factor (null -> renderer decides)
-        },
+      {},
+      {
+        strokeColor: 'black',
+        strokeWidth: 2.0,
+        strokeOpacity: 1.0,
+        originStyle: 'none',
+        endStyle: 'arrow',
+        origin: {x: 0, y: 0, z: 0},
+        delta: function (d) { return d; },
+        scale: null // size scaling factor (null -> renderer decides)
+      },
       arg.style === undefined ? {} : arg.style
     );
 

@@ -1,5 +1,6 @@
 /* These are functions we want available to jasmine tests. */
 /* exported waitForIt, mockVGLRenderer, closeToArray, closeToEqual, logCanvas2D, submitNote */
+/* global CanvasRenderingContext2D */
 
 var vgl = require('vgl');
 var _renderWindow = vgl.renderWindow;

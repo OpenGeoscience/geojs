@@ -68,26 +68,26 @@ var contourFeature = function (arg) {
     }
     if (arg2 === undefined) {
       var contour = $.extend(
-          {},
-          {
-            gridWidth: function () {
-              if (arg1.gridHeight) {
-                return Math.floor(m_this.data().length / arg1.gridHeight);
-              }
-              return Math.floor(Math.sqrt(m_this.data().length));
-            },
-            gridHeight: function () {
-              if (arg1.gridWidth) {
-                return Math.floor(m_this.data().length / arg1.gridWidth);
-              }
-              return Math.floor(Math.sqrt(m_this.data().length));
-            },
-            minColor: 'black',
-            minOpacity: 0,
-            maxColor: 'black',
-            maxOpacity: 0,
-          /* 9-step based on paraview bwr colortable */
-            colorRange: [
+        {},
+        {
+          gridWidth: function () {
+            if (arg1.gridHeight) {
+              return Math.floor(m_this.data().length / arg1.gridHeight);
+            }
+            return Math.floor(Math.sqrt(m_this.data().length));
+          },
+          gridHeight: function () {
+            if (arg1.gridWidth) {
+              return Math.floor(m_this.data().length / arg1.gridWidth);
+            }
+            return Math.floor(Math.sqrt(m_this.data().length));
+          },
+          minColor: 'black',
+          minOpacity: 0,
+          maxColor: 'black',
+          maxOpacity: 0,
+        /* 9-step based on paraview bwr colortable */
+          colorRange: [
             {r: 0.07514311, g: 0.468049805, b: 1},
             {r: 0.468487184, g: 0.588057293, b: 1},
             {r: 0.656658579, g: 0.707001303, b: 1},
@@ -97,8 +97,8 @@ var contourFeature = function (arg) {
             {r: 1, g: 0.6289553, b: 0.568237474},
             {r: 1, g: 0.472800903, b: 0.404551679},
             {r: 0.916482116, g: 0.236630659, b: 0.209939162}
-            ]
-          },
+          ]
+        },
         m_contour,
         arg1
       );
@@ -366,16 +366,16 @@ var contourFeature = function (arg) {
     s_init.call(m_this, arg);
 
     var defaultStyle = $.extend(
-        {},
-        {
-          opacity: 1.0,
-          position: function (d) {
-            return {x: d.x, y: d.y, z: d.z};
-          },
-          value: function (d) {
-            return m_this.position()(d).z;
-          }
+      {},
+      {
+        opacity: 1.0,
+        position: function (d) {
+          return {x: d.x, y: d.y, z: d.z};
         },
+        value: function (d) {
+          return m_this.position()(d).z;
+        }
+      },
       arg.style === undefined ? {} : arg.style
     );
 

@@ -31,36 +31,36 @@ var choroplethFeature = function (arg) {
       m_this = this,
       s_init = this._init,
       m_choropleth = $.extend({},
-          {
-                /* 9-step based on paraview bwr colortable */
-            colorRange: [
-                  {r: 0.07514311, g: 0.468049805, b: 1},
-                  {r: 0.468487184, g: 0.588057293, b: 1},
-                  {r: 0.656658579, g: 0.707001303, b: 1},
-                  {r: 0.821573924, g: 0.837809045, b: 1},
-                  {r: 0.943467973, g: 0.943498599, b: 0.943398095},
-                  {r: 1, g: 0.788626485, b: 0.750707739},
-                  {r: 1, g: 0.6289553, b: 0.568237474},
-                  {r: 1, g: 0.472800903, b: 0.404551679},
-                  {r: 0.916482116, g: 0.236630659, b: 0.209939162}
-            ],
-            scale: d3.scale.quantize(),
-            accessors: {
-                  //accessor for ID on geodata feature
-              geoId: function (geoFeature) {
-                return geoFeature.properties.GEO_ID;
-              },
-                  //accessor for ID on scalar element
-              scalarId: function (scalarElement) {
-                return scalarElement.id;
-              },
-                  //accessor for value on scalar element
-              scalarValue: function (scalarElement) {
-                return scalarElement.value;
-              }
+        {
+              /* 9-step based on paraview bwr colortable */
+          colorRange: [
+                {r: 0.07514311, g: 0.468049805, b: 1},
+                {r: 0.468487184, g: 0.588057293, b: 1},
+                {r: 0.656658579, g: 0.707001303, b: 1},
+                {r: 0.821573924, g: 0.837809045, b: 1},
+                {r: 0.943467973, g: 0.943498599, b: 0.943398095},
+                {r: 1, g: 0.788626485, b: 0.750707739},
+                {r: 1, g: 0.6289553, b: 0.568237474},
+                {r: 1, g: 0.472800903, b: 0.404551679},
+                {r: 0.916482116, g: 0.236630659, b: 0.209939162}
+          ],
+          scale: d3.scale.quantize(),
+          accessors: {
+                //accessor for ID on geodata feature
+            geoId: function (geoFeature) {
+              return geoFeature.properties.GEO_ID;
+            },
+                //accessor for ID on scalar element
+            scalarId: function (scalarElement) {
+              return scalarElement.id;
+            },
+                //accessor for value on scalar element
+            scalarValue: function (scalarElement) {
+              return scalarElement.value;
             }
-          },
-              arg.choropleth);
+          }
+        },
+        arg.choropleth);
 
   ////////////////////////////////////////////////////////////////////////////
   /**

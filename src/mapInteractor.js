@@ -58,54 +58,54 @@ var mapInteractor = function (args) {
 
   // copy the options object with defaults
   m_options = $.extend(
-      true,
-      {},
-      {
-        throttle: 30,
-        discreteZoom: false,
-        panMoveButton: 'left',
-        panMoveModifiers: {},
-        zoomMoveButton: 'right',
-        zoomMoveModifiers: {},
-        rotateMoveButton: 'left',
-        rotateMoveModifiers: {'ctrl': true},
-        panWheelEnabled: false,
-        panWheelModifiers: {},
-        zoomWheelEnabled: true,
-        zoomWheelModifiers: {},
-        rotateWheelEnabled: true,
-        rotateWheelModifiers: {'ctrl': true},
-        wheelScaleX: 1,
-        wheelScaleY: 1,
-        zoomScale: 1,
-        rotateWheelScale: 6 * Math.PI / 180,
-        selectionButton: 'left',
-        selectionModifiers: {'shift': true},
-        momentum: {
-          enabled: true,
-          maxSpeed: 2.5,
-          minSpeed: 0.01,
-          stopTime: 250,
-          drag: 0.01,
-          actions: ['pan', 'zoom']
-        },
-        spring: {
-          enabled: false,
-          springConstant: 0.00005
-        },
-        click: {
-          enabled: true,
-          buttons: {left: true, right: true, middle: true},
-          duration: 0,
-          cancelOnMove: true
-        },
-        zoomAnimation: {
-          enabled: true,
-          duration: 500,
-          ease: function (t) { return (2 - t) * t; }
-        }
+    true,
+    {},
+    {
+      throttle: 30,
+      discreteZoom: false,
+      panMoveButton: 'left',
+      panMoveModifiers: {},
+      zoomMoveButton: 'right',
+      zoomMoveModifiers: {},
+      rotateMoveButton: 'left',
+      rotateMoveModifiers: {'ctrl': true},
+      panWheelEnabled: false,
+      panWheelModifiers: {},
+      zoomWheelEnabled: true,
+      zoomWheelModifiers: {},
+      rotateWheelEnabled: true,
+      rotateWheelModifiers: {'ctrl': true},
+      wheelScaleX: 1,
+      wheelScaleY: 1,
+      zoomScale: 1,
+      rotateWheelScale: 6 * Math.PI / 180,
+      selectionButton: 'left',
+      selectionModifiers: {'shift': true},
+      momentum: {
+        enabled: true,
+        maxSpeed: 2.5,
+        minSpeed: 0.01,
+        stopTime: 250,
+        drag: 0.01,
+        actions: ['pan', 'zoom']
       },
-      m_options
+      spring: {
+        enabled: false,
+        springConstant: 0.00005
+      },
+      click: {
+        enabled: true,
+        buttons: {left: true, right: true, middle: true},
+        duration: 0,
+        cancelOnMove: true
+      },
+      zoomAnimation: {
+        enabled: true,
+        duration: 500,
+        ease: function (t) { return (2 - t) * t; }
+      }
+    },
+    m_options
   );
 
   // options supported:
@@ -1400,24 +1400,24 @@ var mapInteractor = function (args) {
     options.wheelDelta = options.wheelDelta || {};
 
     evt = $.Event(
-        type,
-        {
-          pageX: page.x,
-          pageY: page.y,
-          which: which,
-          altKey: options.modifiers.indexOf('alt') >= 0,
-          ctrlKey: options.modifiers.indexOf('ctrl') >= 0,
-          metaKey: options.modifiers.indexOf('meta') >= 0,
-          shiftKey: options.modifiers.indexOf('shift') >= 0,
-          originalEvent: {
-            deltaX: options.wheelDelta.x,
-            deltaY: options.wheelDelta.y,
-            deltaMode: options.wheelMode,
-            preventDefault: function () {},
-            stopPropagation: function () {},
-            stopImmediatePropagation: function () {}
-          }
+      type,
+      {
+        pageX: page.x,
+        pageY: page.y,
+        which: which,
+        altKey: options.modifiers.indexOf('alt') >= 0,
+        ctrlKey: options.modifiers.indexOf('ctrl') >= 0,
+        metaKey: options.modifiers.indexOf('meta') >= 0,
+        shiftKey: options.modifiers.indexOf('shift') >= 0,
+        originalEvent: {
+          deltaX: options.wheelDelta.x,
+          deltaY: options.wheelDelta.y,
+          deltaMode: options.wheelMode,
+          preventDefault: function () {},
+          stopPropagation: function () {},
+          stopImmediatePropagation: function () {}
         }
+      }
     );
     $node.trigger(evt);
   };

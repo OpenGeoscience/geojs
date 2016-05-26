@@ -168,12 +168,12 @@ var polygonFeature = function (arg) {
     s_init.call(m_this, arg);
 
     var defaultStyle = $.extend(
-        {},
-        {
-          'fillColor': { r: 0.0, g: 0.5, b: 0.5 },
-          'fillOpacity': 1.0
-        },
-        arg.style === undefined ? {} : arg.style
+      {},
+      {
+        'fillColor': { r: 0.0, g: 0.5, b: 0.5 },
+        'fillOpacity': 1.0
+      },
+      arg.style === undefined ? {} : arg.style
     );
 
     m_this.style(defaultStyle);
