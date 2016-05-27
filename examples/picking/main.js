@@ -4,14 +4,14 @@ $(function () {
 
   // Create a map object with the OpenStreetMaps base layer.
   var map = geo.map({
-    node: '#map',
-    center: {
-      x: -98.0,
-      y: 39.5
-    },
-    zoom: 4
-  }),
-  over = 0;
+        node: '#map',
+        center: {
+          x: -98.0,
+          y: 39.5
+        },
+        zoom: 4
+      }),
+      over = 0;
 
   // Create an osm layer
   map.createLayer('osm');

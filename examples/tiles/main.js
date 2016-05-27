@@ -1,4 +1,3 @@
-/* globals $, geo */
 // This example should be tried with different query strings.
 
 /* Many parameters can be adjusted via url query parameters:

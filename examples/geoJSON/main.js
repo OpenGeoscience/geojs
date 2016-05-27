@@ -1,4 +1,3 @@
-/* global CodeMirror, jsonlint */
 // Run after the DOM loads
 $(function () {
   'use strict';
