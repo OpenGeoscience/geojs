@@ -33,6 +33,7 @@
     "expose-loader": "^0.7.1",
     "express": "^4.13.4",
     "file-loader": "^0.8.5",
+    "forever": "^0.15.2",
     "gl-mat3": "^1.0.0",
     "gl-mat4": "^1.1.4",
     "gl-vec2": "^1.0.0",
@@ -75,7 +76,8 @@
     "ci": "karma start karma-cov.conf.js --single-run --browsers PhantomJS",
     "codecov": "cat lcov/*/lcov.info | codecov",
     "examples": "webpack-dev-server --config webpack-examples.config.js --port 8082 --content-base dist/",
-    "serve-test": "node  ./testing/test-runners/server.js",
+    "start-test": "forever start ./testing/test-runners/server.js",
+    "stop-test": "forever stop ./testing/test-runners/server.js",
     "docs": "jsdoc --pedantic -d dist/apidocs -r src"
   },
   "keywords": [
