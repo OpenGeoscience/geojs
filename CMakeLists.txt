@@ -8,7 +8,7 @@ enable_testing()
 set(BUILD_TESTING ON CACHE BOOL "Enable geojs testing")
 set(PHANTOMJS_TESTS ON CACHE BOOL "Generate phantomjs unit tests.")
 set(ESLINT_TESTS ON CACHE BOOL "Generate eslint style tests for JS source files.")
-set(SELENIUM_TESTS OFF CACHE BOOL "Generate selenium unit tests.")
+set(SELENIUM_TESTS ON CACHE BOOL "Generate selenium unit tests.")
 
 site_name(HOSTNAME)
 
