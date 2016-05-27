@@ -59,7 +59,7 @@
     "phantomjs-prebuilt": "^2.1.5",
     "proj4": "^2.3.14",
     "raw-body": "^2.1.6",
-    "sinon": "^1.17.3",
+    "sinon": "1.17.3",
     "style-loader": "^0.13.1",
     "url-loader": "^0.5.7",
     "vgl": "0.3.6",
