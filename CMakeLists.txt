@@ -20,7 +20,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 set(NOTES_PATH "${CMAKE_CURRENT_BINARY_DIR}/build_notes.json")
 
-# set the path where grunt builds the sources
+# set the path where webpack builds the sources
 set(GEOJS_DEPLOY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dist")
 
 function(add_geojs_test test_name)
