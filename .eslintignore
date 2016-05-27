@@ -7,3 +7,4 @@ dist/**
 testing/**
 geo.js
 **/*.min.js
+examples/common/js/jsonlint.js

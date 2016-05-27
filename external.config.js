@@ -14,7 +14,6 @@ module.exports = {
   },
   resolve: {
     alias: {
-      jquery: 'jquery/dist/jquery',
       d3: 'd3/d3.js'
     }
   },
