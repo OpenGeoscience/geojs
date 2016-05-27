@@ -1,31 +1,26 @@
-import 'babel-polyfill';
-
-import '../src/vendor';
-import geo from '../src/index';
-
-// export the geo symbol for examples not using modules
-window.geo = geo;
+require('../src/vendor');
+window.geo = require('../src/index');
 
 // bootstrap and themes
-import 'bootstrap/dist/css/bootstrap.css';
-import 'bootswatch/flatly/bootstrap.css';
-import 'bootstrap';
+require('bootstrap/dist/css/bootstrap.css');
+require('bootswatch/flatly/bootstrap.css');
+require('bootstrap');
 
 // codemirror and plugins
-import 'codemirror/lib/codemirror.css';
-import 'codemirror/addon/lint/lint.css';
-import 'codemirror/addon/fold/foldgutter.css';
+require('codemirror/lib/codemirror.css');
+require('codemirror/addon/lint/lint.css');
+require('codemirror/addon/fold/foldgutter.css');
 
-import './common/js/jsonlint';
-import 'codemirror';
-import 'codemirror/mode/javascript/javascript';
-import 'codemirror/addon/lint/lint';
-import 'codemirror/addon/lint/json-lint';
-import 'codemirror/addon/fold/brace-fold';
-import 'codemirror/addon/fold/foldcode';
-import 'codemirror/addon/fold/foldgutter';
-import 'codemirror/addon/edit/matchbrackets';
+require('./common/js/jsonlint');
+require('codemirror');
+require('codemirror/mode/javascript/javascript');
+require('codemirror/addon/lint/lint');
+require('codemirror/addon/lint/json-lint');
+require('codemirror/addon/fold/brace-fold');
+require('codemirror/addon/fold/foldcode');
+require('codemirror/addon/fold/foldgutter');
+require('codemirror/addon/edit/matchbrackets');
 
 // common example code
-import './common/css/examples.css';
-import './common/js/examples';
+require('./common/css/examples.css');
+require('./common/js/examples');
