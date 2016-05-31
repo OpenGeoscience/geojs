@@ -31,6 +31,7 @@ var d3_tileLayer = function () {
     quad.id = m_nextTileId;
     tile.quadId = quad.id;
     quad.image = tile.image;
+    quad.reference = tile.toString();
     m_tiles.push(quad);
     m_quadFeature.data(m_tiles);
     m_quadFeature._update();

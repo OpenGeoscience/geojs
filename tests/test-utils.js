@@ -309,6 +309,9 @@ module.exports.unmockAnimationFrame = function () {
  * @param {float} time float milliseconds.
  */
 module.exports.stepAnimationFrame = function (time) {
+  if (time === undefined) {
+    time = new Date().getTime();
+  }
   var callbacks = animFrameCallbacks, action;
   animFrameCallbacks = [];
   while (callbacks.length > 0) {

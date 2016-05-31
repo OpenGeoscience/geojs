@@ -109,6 +109,9 @@ var d3_quadFeature = function (arg) {
         preserveAspectRatio: function (d) {
           return d.type === 'clr' ? undefined : 'none';
         },
+        reference: function (d) {
+          return d.quad.reference;
+        },
         stroke: false,
         transform: function (d) {
           if (d.type === 'img' && d.quad.image && !d.svgTransform) {

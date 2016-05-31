@@ -314,7 +314,8 @@ var quadFeature = function (arg) {
           idx: i,
           pos: pos,
           opacity: opacity,
-          color: util.convertColor(colorFunc.call(m_this, d, i))
+          color: util.convertColor(colorFunc.call(m_this, d, i)),
+          reference: d.reference
         };
         clrQuads.push(quad);
         quadinfo.clrquad = quad;
@@ -332,7 +333,8 @@ var quadFeature = function (arg) {
         quad = {
           idx: i,
           pos: pos,
-          opacity: opacity
+          opacity: opacity,
+          reference: d.reference
         };
         if (image.complete && image.naturalWidth && image.naturalHeight) {
           quad.image = image;

@@ -728,8 +728,8 @@ module.exports = (function () {
       container.append(tile.image);
       container.css({
         position: 'absolute',
-        left: (bounds.left - parseInt(div.attr('offsetx') || 0, 10)) + 'px',
-        top: (bounds.top - parseInt(div.attr('offsety') || 0, 10)) + 'px'
+        left: (bounds.left - parseFloat(div.attr('offsetx') || 0)) + 'px',
+        top: (bounds.top - parseFloat(div.attr('offsety') || 0)) + 'px'
       });
 
       // apply fade in animation
@@ -964,8 +964,8 @@ module.exports = (function () {
     this._updateSubLayers = function (level, view) {
       var canvas = this.canvas(),
           lastlevel = parseInt(canvas.attr('lastlevel'), 10),
-          lastx = parseInt(canvas.attr('lastoffsetx') || 0, 10),
-          lasty = parseInt(canvas.attr('lastoffsety') || 0, 10);
+          lastx = parseFloat(canvas.attr('lastoffsetx') || 0),
+          lasty = parseFloat(canvas.attr('lastoffsety') || 0);
       if (lastlevel === level && Math.abs(lastx - view.left) < 65536 &&
           Math.abs(lasty - view.top) < 65536) {
         return {x: lastx, y: lasty};
@@ -981,15 +981,15 @@ module.exports = (function () {
           'transform',
           'scale(' + Math.pow(2, level - layer) + ')'
         );
-        var layerx = parseInt(x / Math.pow(2, level - layer), 10),
-            layery = parseInt(y / Math.pow(2, level - layer), 10),
-            dx = layerx - parseInt($el.attr('offsetx') || 0, 10),
-            dy = layery - parseInt($el.attr('offsety') || 0, 10);
+        var layerx = parseFloat(x / Math.pow(2, level - layer)),
+            layery = parseFloat(y / Math.pow(2, level - layer)),
+            dx = layerx - parseFloat($el.attr('offsetx') || 0),
+            dy = layery - parseFloat($el.attr('offsety') || 0);
         $el.attr({offsetx: layerx, offsety: layery});
         $el.find('.geo-tile-container').each(function (tileidx, tileel) {
           $(tileel).css({
-            left: (parseInt($(tileel).css('left'), 10) - dx) + 'px',
-            top: (parseInt($(tileel).css('top'), 10) - dy) + 'px'
+            left: (parseFloat($(tileel).css('left')) - dx) + 'px',
+            top: (parseFloat($(tileel).css('top')) - dy) + 'px'
           });
         });
       });
