@@ -399,18 +399,18 @@ var quadFeature = function (arg) {
     m_cacheQuads = (arg.cacheQuads !== false);
 
     var style = $.extend(
-        {},
-        {
-          color: { r: 1.0, g: 1, b: 1 },
-          opacity: 1,
-          depth: 0,
-          drawOnAsyncResourceLoaded: true,
-          previewColor: null,
-          previewImage: null,
-          image: function (d) { return d.image; },
-          position: function (d) { return d; }
-        },
-        arg.style === undefined ? {} : arg.style
+      {},
+      {
+        color: { r: 1.0, g: 1, b: 1 },
+        opacity: 1,
+        depth: 0,
+        drawOnAsyncResourceLoaded: true,
+        previewColor: null,
+        previewImage: null,
+        image: function (d) { return d.image; },
+        position: function (d) { return d; }
+      },
+      arg.style === undefined ? {} : arg.style
     );
 
     if (arg.position !== undefined) {

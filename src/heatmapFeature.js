@@ -216,16 +216,16 @@ var heatmapFeature = function (arg) {
 
     var defaultStyle = $.extend(
       {},
-        {
-          radius: 10,
-          blurRadius: 10,
-          gaussian: true,
-          color: {0:    {r: 0, g: 0, b: 0.0, a: 0.0},
-                  0.25: {r: 0, g: 0, b: 1, a: 0.5},
-                  0.5:  {r: 0, g: 1, b: 1, a: 0.6},
-                  0.75: {r: 1, g: 1, b: 0, a: 0.7},
-                  1:    {r: 1, g: 0, b: 0, a: 0.8}}
-        },
+      {
+        radius: 10,
+        blurRadius: 10,
+        gaussian: true,
+        color: {0:    {r: 0, g: 0, b: 0.0, a: 0.0},
+                0.25: {r: 0, g: 0, b: 1, a: 0.5},
+                0.5:  {r: 0, g: 1, b: 1, a: 0.6},
+                0.75: {r: 1, g: 1, b: 0, a: 0.7},
+                1:    {r: 1, g: 0, b: 0, a: 0.8}}
+      },
       arg.style === undefined ? {} : arg.style
     );
 

@@ -380,20 +380,20 @@ var pointFeature = function (arg) {
     s_init.call(m_this, arg);
 
     var defaultStyle = $.extend(
-        {},
-        {
-          radius: 5.0,
-          stroke: true,
-          strokeColor: { r: 0.851, g: 0.604, b: 0.0 },
-          strokeWidth: 1.25,
-          strokeOpacity: 1.0,
-          fillColor: { r: 1.0, g: 0.839, b: 0.439 },
-          fill: true,
-          fillOpacity: 0.8,
-          sprites: false,
-          sprites_image: null,
-          position: function (d) { return d; }
-        },
+      {},
+      {
+        radius: 5.0,
+        stroke: true,
+        strokeColor: { r: 0.851, g: 0.604, b: 0.0 },
+        strokeWidth: 1.25,
+        strokeOpacity: 1.0,
+        fillColor: { r: 1.0, g: 0.839, b: 0.439 },
+        fill: true,
+        fillOpacity: 0.8,
+        sprites: false,
+        sprites_image: null,
+        position: function (d) { return d; }
+      },
       arg.style === undefined ? {} : arg.style
     );
 

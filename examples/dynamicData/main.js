@@ -15,7 +15,7 @@ $(function () {
     .state('play');
 
   // Add an OSM layer with MapQuest satellite image tiles
-  var osm = map.createLayer('osm', {
+  map.createLayer('osm', {
     baseUrl: 'http://otile1.mqcdn.com/tiles/1.0.0/sat'
   });
 

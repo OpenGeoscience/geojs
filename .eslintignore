@@ -3,5 +3,8 @@ src/version.js
 src/sha.js
 src/util/wigglemaps.js
 src/util/distanceGrid.js
+dist/**
+testing/**
 geo.js
 **/*.min.js
+examples/common/js/jsonlint.js

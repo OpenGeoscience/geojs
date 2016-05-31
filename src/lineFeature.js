@@ -101,11 +101,11 @@ var lineFeature = function (arg) {
       if (t < 0) { return dist2(q, u); }
       if (t > 1) { return dist2(q, v); }
       return dist2(
-          q,
-          {
-            x: u.x + t * (v.x - u.x),
-            y: u.y + t * (v.y - u.y)
-          }
+        q,
+        {
+          x: u.x + t * (v.x - u.x),
+          y: u.y + t * (v.y - u.y)
+        }
       );
     }
 
@@ -200,16 +200,16 @@ var lineFeature = function (arg) {
     s_init.call(m_this, arg);
 
     var defaultStyle = $.extend(
-        {},
-        {
-          'strokeWidth': 1.0,
-        // Default to gold color for lines
-          'strokeColor': { r: 1.0, g: 0.8431372549, b: 0.0 },
-          'strokeStyle': 'solid',
-          'strokeOpacity': 1.0,
-          'line': function (d) { return d; },
-          'position': function (d) { return d; }
-        },
+      {},
+      {
+        'strokeWidth': 1.0,
+      // Default to gold color for lines
+        'strokeColor': { r: 1.0, g: 0.8431372549, b: 0.0 },
+        'strokeStyle': 'solid',
+        'strokeOpacity': 1.0,
+        'line': function (d) { return d; },
+        'position': function (d) { return d; }
+      },
       arg.style === undefined ? {} : arg.style
     );
 

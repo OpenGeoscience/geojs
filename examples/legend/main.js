@@ -27,7 +27,6 @@ $(function () {
     }
   });
 
-
   // Add rows to the legend
   //
   // The categories are displayed in the order passed as
@@ -112,7 +111,6 @@ $(function () {
       }
     }
   ]);
-
 
   // Draw the map
   map.draw();

@@ -128,6 +128,7 @@ function cobertura() {
 }
 
 app.use(bodyParser.json());
+app.use(express.static('dist'));
 
 app.put('/coverage', function (req, res, next) {
   combine(req.body.files);
@@ -167,6 +168,10 @@ app.put('/notes', function (req, res, next) {
 app.post('/notes', function (req, res, next) {
   fs.writeFile(req.query.path, JSON.stringify(notes));
   next();
+});
+
+app.listen(30100, function () {
+  console.log('Server listening on 30100');
 });
 
 module.exports = app;

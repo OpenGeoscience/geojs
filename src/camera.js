@@ -214,11 +214,11 @@
         var mat;
         if (this._display === null) {
           mat = camera.affine(
-              {x: 1, y: 1}, // translate to: [0, 2] x [0, 2]
-              {
-                x: this.viewport.width / 2,
-                y: this.viewport.height / -2
-              }             // scale to: [0, width] x [-height, 0]
+            {x: 1, y: 1}, // translate to: [0, 2] x [0, 2]
+            {
+              x: this.viewport.width / 2,
+              y: this.viewport.height / -2
+            }             // scale to: [0, width] x [-height, 0]
           );
 
           // applies mat to the transform (world -> normalized)

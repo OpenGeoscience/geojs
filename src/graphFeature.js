@@ -47,18 +47,18 @@ var graphFeature = function (arg) {
     s_init.call(m_this, arg);
 
     var defaultStyle = $.extend(true, {},
-        {
-          nodes: {
-            radius: 5.0,
-            fill: true,
-            fillColor: { r: 1.0, g: 0.0, b: 0.0 },
-            strokeColor: { r: 0, g: 0, b: 0 }
-          },
-          links: {
-            strokeColor: { r: 0.0, g: 0.0, b: 0.0 }
-          },
-          linkType: 'path' /* 'path' || 'line' */
+      {
+        nodes: {
+          radius: 5.0,
+          fill: true,
+          fillColor: { r: 1.0, g: 0.0, b: 0.0 },
+          strokeColor: { r: 0, g: 0, b: 0 }
         },
+        links: {
+          strokeColor: { r: 0.0, g: 0.0, b: 0.0 }
+        },
+        linkType: 'path' /* 'path' || 'line' */
+      },
       arg.style === undefined ? {} : arg.style
     );
 

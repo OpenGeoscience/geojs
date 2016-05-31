@@ -5,15 +5,10 @@ html(lang="en")
     link(rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon")
     title= title
 
-    // Include common files
-    each css in defaultCss
-      link(rel="stylesheet" href="#{css}")
-    each src in defaultJs
-      if(typeof src == "string")
-        script(type="text/javascript" src="#{src}")
-      else
-        script&attributes(src)
+    // include the main bundle
+    script(type='text/javascript' src='#{bundle}' charset='UTF-8')
 
+    // include example sources
     block exampleHeader
       // Include example specific files
       each css in exampleCss

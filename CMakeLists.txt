@@ -8,7 +8,7 @@ enable_testing()
 set(BUILD_TESTING ON CACHE BOOL "Enable geojs testing")
 set(PHANTOMJS_TESTS ON CACHE BOOL "Generate phantomjs unit tests.")
 set(ESLINT_TESTS ON CACHE BOOL "Generate eslint style tests for JS source files.")
-set(SELENIUM_TESTS OFF CACHE BOOL "Generate selenium unit tests.")
+set(SELENIUM_TESTS ON CACHE BOOL "Generate selenium unit tests.")
 
 site_name(HOSTNAME)
 
@@ -20,7 +20,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 set(NOTES_PATH "${CMAKE_CURRENT_BINARY_DIR}/build_notes.json")
 
-# set the path where grunt builds the sources
+# set the path where webpack builds the sources
 set(GEOJS_DEPLOY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dist")
 
 function(add_geojs_test test_name)

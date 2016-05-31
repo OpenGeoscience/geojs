@@ -14,7 +14,6 @@ module.exports = {
   },
   resolve: {
     alias: {
-      jquery: 'jquery/dist/jquery',
       d3: 'd3/d3.js'
     }
   },
@@ -28,8 +27,6 @@ module.exports = {
   module: {
     loaders: [{
       test: require.resolve('d3'), loader: 'expose?d3'
-    }, {
-      test: require.resolve('jquery'), loader: 'expose?$!expose?jQuery'
     }]
   }
 };

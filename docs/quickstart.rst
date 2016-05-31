@@ -22,11 +22,6 @@ and testing of geojs.
 * `Requests <http://docs.python-requests.org/en/latest/>`_
 * `Selenium <http://docs.seleniumhq.org/>`_
 
-These docs assume that the `Grunt <http://gruntjs.com/>`_ command line interface
-has been installed globally, which can be done with the following command: ::
-
-    npm install -g grunt-cli
-
 Getting the source code
 -----------------------
 
@@ -94,7 +89,7 @@ and creating a basic full map using the `osmLayer` class.
 You can save this page into a new file at ``dist/mymap.html``.  To view your new creation,
 start up a web server with the command ::
 
-    grunt serve
+    npm run examples
 
 Now, if you open up `<http://localhost:8082/mymap.html>`_ in your favorite webgl enabled
 browser, you should see a map like the following:
@@ -103,4 +98,4 @@ browser, you should see a map like the following:
     :align: center
 
 Additionally, you will be able to see all of the built-in examples at
-`<http://localhost:8082/examples>`_ after building them by running ``grunt``.
+`<http://localhost:8082/examples>`_ with the example server running.

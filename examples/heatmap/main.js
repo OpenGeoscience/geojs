@@ -1,5 +1,3 @@
-/* globals geo, $ */
-
 // Run after the DOM loads
 $(function () {
   'use strict';
@@ -142,7 +140,7 @@ $(function () {
             rows.splice(rows.length - 1, 1);
             rows = rows.map(function (r) {
               var fields = r.split('","');
-              return ['' + fields[0].replace(/(^\s+|\s+$|^\"|\"$)/g, '').length, fields[2].replace(/(^\s+|\s+$|^\"|\"$)/g, ''), fields[3].replace(/(^\s+|\s+$|^\"|\"$)/g, '')].map(parseFloat);
+              return ['' + fields[0].replace(/(^\s+|\s+$|^"|"$)/g, '').length, fields[2].replace(/(^\s+|\s+$|^"|"$)/g, ''), fields[3].replace(/(^\s+|\s+$|^"|"$)/g, '')].map(parseFloat);
             });
             break;
           case 'earthquakes':
