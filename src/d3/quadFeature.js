@@ -47,16 +47,12 @@ var d3_quadFeature = function (arg) {
 
     var data = [];
     $.each(m_quads.clrQuads, function (idx, quad) {
-      data.push({type: 'clr', quad: quad});
+      data.push({type: 'clr', quad: quad, zIndex: quad.pos[2]});
     });
     $.each(m_quads.imgQuads, function (idx, quad) {
       if (quad.image) {
-        data.push({type: 'img', quad: quad});
+        data.push({type: 'img', quad: quad, zIndex: quad.pos[2]});
       }
-    });
-    $.each(data, function (idx, d) {
-      d.points = d.svgTransform = null;
-      d.zIndex = d.quad.pos[2];
     });
 
     var feature = {
@@ -194,8 +190,6 @@ var d3_quadFeature = function (arg) {
     s_update.call(m_this);
     if (m_this.buildTime().getMTime() <= m_this.dataTime().getMTime() ||
         m_this.buildTime().getMTime() < m_this.getMTime()) {
-      m_this.buildCount = (m_this.buildCount || 0) + 1;  // DWM::
-      window.buildCount = m_this.buildCount;  // DWM::
       m_this._build();
     }
     return m_this;

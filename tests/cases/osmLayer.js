@@ -276,6 +276,29 @@ describe('geo.core.osmLayer', function () {
     });
   });
 
+  describe('geo.d3.osmLayer', function () {
+    var layer, mapinfo = {};
+    it('test that tiles are created', function () {
+      map = create_map();
+      mapinfo.map = map;
+      layer = map.createLayer('osm', {
+        renderer: 'd3',
+        url: '/data/white.jpg'
+      });
+    });
+    waitForIt('tiles to load', function () {
+      return Object.keys(layer.activeTiles).length === 21;
+    });
+    it('zoom out', function () {
+      map.zoom(3);
+    });
+    /* This checks to make sure tiles are removed */
+    waitForIt('tiles to load', function () {
+      return Object.keys(layer.activeTiles).length === 17;
+    });
+    it('destroy', destroy_map);
+  });
+
   describe('geo.canvas.osmLayer', function () {
     var layer, mapinfo = {};
     it('test that tiles are created', function () {

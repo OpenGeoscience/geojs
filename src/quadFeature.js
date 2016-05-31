@@ -101,7 +101,7 @@ var quadFeature = function (arg) {
 
   /**
    * Add a new object to a list of object->object mappings.  The key object
-   * should not exist, or this will create a duplicated.  The new entry is
+   * should not exist, or this will create a duplicate.  The new entry is
    * marked as being in use.
    *
    * @param {array} list the list of mappings.

@@ -83,13 +83,6 @@ var d3Renderer = function (arg) {
     };
   };
 
-  this._convertPosition = function (f) {
-    f = util.ensureFunction(f);
-    return function () {
-      return m_this.layer().map().worldToDisplay(f.apply(m_this, arguments));
-    };
-  };
-
   this._convertScale = function (f) {
     f = util.ensureFunction(f);
     return function () {
@@ -216,29 +209,17 @@ var d3Renderer = function (arg) {
         lowerRight = map.gcsToDisplay(m_corners.lowerRight, null),
         center = map.gcsToDisplay(m_corners.center, null),
         group = getGroup(),
-        canvas = m_this.canvas(),
         dx, dy, scale, rotation, rx, ry;
 
-    if (canvas.attr('scale') !== null) {
-      scale = parseFloat(canvas.attr('scale') || 1);
-      rx = (parseFloat(canvas.attr('dx') || 0) +
-            parseFloat(canvas.attr('offsetx') || 0));
-      ry = (parseFloat(canvas.attr('dy') || 0) +
-            parseFloat(canvas.attr('offsety') || 0));
-      rotation = parseFloat(canvas.attr('rotation') || 0);
-      dx = scale * rx + map.size().width / 2;
-      dy = scale * ry + map.size().height / 2;
-    } else {
-      scale = Math.sqrt(
-        Math.pow(lowerRight.y - upperLeft.y, 2) +
-        Math.pow(lowerRight.x - upperLeft.x, 2)) / m_diagonal;
-      // calculate the translation
-      rotation = map.rotation();
-      rx = -m_width / 2;
-      ry = -m_height / 2;
-      dx = scale * rx + center.x;
-      dy = scale * ry + center.y;
-    }
+    scale = Math.sqrt(
+      Math.pow(lowerRight.y - upperLeft.y, 2) +
+      Math.pow(lowerRight.x - upperLeft.x, 2)) / m_diagonal;
+    // calculate the translation
+    rotation = map.rotation();
+    rx = -m_width / 2;
+    ry = -m_height / 2;
+    dx = scale * rx + center.x;
+    dy = scale * ry + center.y;
 
     // set the group transform property
     var transform = 'matrix(' + [scale, 0, 0, scale, dx, dy].join() + ')';

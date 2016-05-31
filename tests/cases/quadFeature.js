@@ -446,6 +446,9 @@ describe('geo.quadFeature', function () {
     it('basic usage', function () {
       var buildTime;
 
+      $.each(testQuads, function (idx, quad) {
+        delete quad._cachedQuad;
+      });
       mockVGLRenderer();
       map = create_map();
       layer = map.createLayer('feature');
@@ -488,8 +491,8 @@ describe('geo.quadFeature', function () {
       glCounts = $.extend({}, vgl.mockCounts());
       var data = [];
       for (var i = 0; i < 200; i += 1) {
-        data.push({ll: [0, i - 100], ur: [10, i - 99], color: '#0000FF'});
-        data.push({ll: [10, i - 100], ur: [10, i - 99], image: preloadImage});
+        data.push({ll: [i - 100, 0], ur: [i - 99, 10], color: '#0000FF'});
+        data.push({ll: [i - 100, 10], ur: [i - 99, 20], image: preloadImage});
       }
       quads.data(data);
       map.draw();
@@ -516,6 +519,9 @@ describe('geo.quadFeature', function () {
     it('basic usage', function () {
       var buildTime;
 
+      $.each(testQuads, function (idx, quad) {
+        delete quad._cachedQuad;
+      });
       logCanvas2D();
       map = create_map();
       layer = map.createLayer('feature', {renderer: 'canvas'});
@@ -547,7 +553,7 @@ describe('geo.quadFeature', function () {
       var data = [];
       for (var i = 0; i < 200; i += 1) {
         /* Add color quads when implemented */
-        data.push({ll: [10, i - 100], ur: [10, i - 99], image: preloadImage});
+        data.push({ll: [i - 100, 10], ur: [i - 99, 20], image: preloadImage});
       }
       quads.data(data);
       map.draw();
@@ -555,6 +561,72 @@ describe('geo.quadFeature', function () {
     waitForIt('next render', function () {
       return window._canvasLog.counts.drawImage === counts.drawImage + 200 &&
              window._canvasLog.counts.clearRect === counts.clearRect + 1;
+    });
+    it('_exit', function () {
+      var buildTime = quads.buildTime().getMTime();
+      layer.deleteFeature(quads);
+      quads.data(testQuads);
+      map.draw();
+      expect(buildTime).toEqual(quads.buildTime().getMTime());
+    });
+  });
+
+  /* This is a basic integration test of geo.d3.quadFeature. */
+  describe('geo.d3.quadFeature', function () {
+    var map, layer, quads;
+    it('load preview image', load_preview_image);
+    it('basic usage', function () {
+      var buildTime;
+
+      $.each(testQuads, function (idx, quad) {
+        delete quad._cachedQuad;
+      });
+      logCanvas2D();
+      map = create_map();
+      layer = map.createLayer('feature', {renderer: 'd3'});
+      quads = layer.createFeature('quad', {style: testStyle, data: testQuads});
+      buildTime = quads.buildTime().getMTime();
+      /* Trigger rerendering */
+      quads.data(testQuads);
+      map.draw();
+      expect(buildTime).not.toEqual(quads.buildTime().getMTime());
+      /* Force the quads to render synchronously. */
+      layer.renderer()._renderFrame();
+      expect($('svg image').length).toBe(11);
+      expect($('svg polygon').length).toBe(5);
+    });
+    it('only img quad', function () {
+      var buildTime = quads.buildTime().getMTime();
+      quads.data([testQuads[0], testQuads[1]]);
+      map.draw();
+      expect(buildTime).not.toEqual(quads.buildTime().getMTime());
+      /* Force the quads to render synchronously. */
+      layer.renderer()._renderFrame();
+      expect($('svg image').length).toBe(2);
+      expect($('svg polygon').length).toBe(0);
+    });
+    it('only clr quad', function () {
+      var buildTime = quads.buildTime().getMTime();
+      quads.data([testQuads[8], testQuads[9]]);
+      map.draw();
+      expect(buildTime).not.toEqual(quads.buildTime().getMTime());
+      /* Force the quads to render synchronously. */
+      layer.renderer()._renderFrame();
+      expect($('svg image').length).toBe(0);
+      expect($('svg polygon').length).toBe(2);
+    });
+    it('many quads', function () {
+      var data = [];
+      for (var i = 0; i < 200; i += 1) {
+        data.push({ll: [i - 100, 0], ur: [i - 99, 10], color: '#0000FF', reference: 'clr' + i});
+        data.push({ll: [i - 100, 10], ur: [i - 99, 20], image: preloadImage, reference: 'img' + i});
+      }
+      quads.data(data);
+      map.draw();
+      /* Force the quads to render synchronously. */
+      layer.renderer()._renderFrame();
+      expect($('svg image').length).toBe(200);
+      expect($('svg polygon').length).toBe(200);
     });
     it('_exit', function () {
       var buildTime = quads.buildTime().getMTime();
