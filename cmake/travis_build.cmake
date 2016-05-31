@@ -9,7 +9,7 @@ set(coverage_file "${CTEST_SOURCE_DIRECTORY}/dist/cobertura/phantomjs/coverage.x
 
 ctest_start("Continuous")
 ctest_configure(
-  "-DSELENIUM_TESTS=OFF"
+  OPTIONS "-DSELENIUM_TESTS=OFF"
 )
 ctest_build()
 ctest_test(PARALLEL_LEVEL 1 RETURN_VALUE res)
