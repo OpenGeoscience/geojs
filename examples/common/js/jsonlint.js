@@ -1,4 +1,9 @@
 /* Jison generated parser */
+/**
+ * https://github.com/zaach/jsonlint
+ * @license MIT
+ * @copyright 2012 Zachary Carter
+ */
 var jsonlint = (function(){
 var parser = {trace: function trace() { },
 yy: {},
