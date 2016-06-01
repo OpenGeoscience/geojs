@@ -129,8 +129,12 @@ var quadFeature = function (arg) {
   /**
    * Point search method for selection api.  Returns markers containing the
    * given point.
-   * @argument {Object} coordinate
-   * @returns {Object}
+   *
+   * @memberof geo.quadFeature
+   * @param {Object} coordinate coordinate in input gcs to check if it is
+   *    located in any quad.
+   * @returns {Object} an object with 'index': a list of quad indices, and
+   *    'found': a list of quads that contain the specified coordinate.
    */
   ////////////////////////////////////////////////////////////////////////////
   this.pointSearch = function (coordinate) {
@@ -170,6 +174,9 @@ var quadFeature = function (arg) {
   /**
    * Get/Set position
    *
+   * @memberof geo.quadFeature
+   * @param {object|function} [position] object or function that returns the
+   *    position of each quad.
    * @returns {geo.quadFeature}
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -444,6 +451,7 @@ var quadFeature = function (arg) {
 
 /**
  * Create a quadFeature from an object.
+ *
  * @see {@link geo.feature.create}
  * @param {geo.layer} layer The layer to add the feature to
  * @param {geo.quadFeature.spec} spec The object specification

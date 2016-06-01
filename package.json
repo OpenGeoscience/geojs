@@ -70,6 +70,7 @@
   },
   "scripts": {
     "build": "webpack --config webpack.config.js && webpack --config external.config.js",
+    "build-examples": "webpack --config webpack-examples.config.js",
     "lint": "eslint --cache .",
     "test": "karma start karma-cov.conf.js --single-run",
     "start": "karma start karma.conf.js",
@@ -78,7 +79,7 @@
     "examples": "webpack-dev-server --config webpack-examples.config.js --port 8082 --content-base dist/",
     "start-test": "node examples/build.js; forever start ./testing/test-runners/server.js",
     "stop-test": "forever stop ./testing/test-runners/server.js",
-    "docs": "jsdoc --pedantic -d dist/apidocs -r src"
+    "docs": "jsdoc --pedantic -d dist/apidocs -r src -c jsdoc.conf.json"
   },
   "keywords": [
     "map",
