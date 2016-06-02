@@ -199,6 +199,33 @@ geo_event.brushstart = 'geo_brushstart';
 
 //////////////////////////////////////////////////////////////////////////////
 /**
+ * Triggered after a selection ends.
+ * The event object extends {@link geo.brushSelection}.
+ * @mixes geo.brushSelection
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.select = 'geo_select';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered after a zoom selection ends.
+ * The event object extends {@link geo.brushSelection}.
+ * @mixes geo.brushSelection
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.zoomselect = 'geo_zoomselect';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered after an unzoom selection ends.
+ * The event object extends {@link geo.brushSelection}.
+ * @mixes geo.brushSelection
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.unzoomselect = 'geo_unzoomselect';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
  * Triggered before a map navigation animation begins.  Set
  * <code>event.geo.cancelAnimation</code> to cancel the animation
  * of the navigation.  This will cause the map to navigate to the

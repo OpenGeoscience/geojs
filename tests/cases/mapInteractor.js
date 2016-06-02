@@ -36,11 +36,12 @@ describe('mapInteractor', function () {
   function mockedMap(node) {
 
     var map = geo.object();
-    var base = geo.object();
+    var voidfunc = function () {};
     var info = {
       pan: 0,
       zoom: 0,
       rotation: 0,
+      centerCalls: 0,
       rotationArgs: {},
       panArgs: {},
       zoomArgs: {},
@@ -48,19 +49,18 @@ describe('mapInteractor', function () {
     };
 
     map.node = function () { return $(node); };
-    base.displayToGcs = function (val) {
+    map.displayToGcs = function (val) {
       return {
         x: val.x - info.center.x - $(node).width() / 2,
         y: val.y - info.center.y - $(node).height() / 2
       };
     };
-    base.gcsToDisplay = function (val) {
+    map.gcsToDisplay = function (val) {
       return {
         x: val.x + info.center.x + $(node).width() / 2,
         y: val.y + info.center.y + $(node).height() / 2
       };
     };
-    map.baseLayer = function () { return base; };
     map.zoom = function (arg) {
       if (arg === undefined) {
         return 2;
@@ -83,8 +83,14 @@ describe('mapInteractor', function () {
       info.center.x += info.panArgs.x || 0;
       info.center.y += info.panArgs.y || 0;
     };
-    map.center = function () {
-      return {x: info.center.x, y: info.center.y};
+    map.center = function (arg) {
+      if (arg === undefined) {
+        return {x: info.center.x, y: info.center.y};
+      }
+      info.center.x = arg.x;
+      info.center.y = arg.y;
+      info.centerCalls += 1;
+      info.centerArgs = arg;
     };
     map.size = function () {
       return {width: 100, height: 100};
@@ -106,9 +112,27 @@ describe('mapInteractor', function () {
     map.maxBounds = function () {
       return {left: -200, top: 200, right: 200, bottom: -200};
     };
-    map.displayToGcs = base.displayToGcs;
-    map.gcsToDisplay = base.gcsToDisplay;
     map.info = info;
+
+    map.createLayer = function () {
+      var layer = geo.object();
+      layer.createFeature = function () {
+        var feature = geo.object();
+        feature.style = voidfunc;
+        feature.data = voidfunc;
+        feature.draw = voidfunc;
+        return feature;
+      };
+      layer.clear = voidfunc;
+      return layer;
+    };
+    map.deleteLayer = voidfunc;
+    map.discreteZoom = function (arg) {
+      if (arg === undefined) {
+        return map.info.discreteZoom;
+      }
+      map.info.discreteZoom = arg;
+    };
     return map;
   }
 
@@ -426,7 +450,7 @@ describe('mapInteractor', function () {
       zoomMoveButton: null,
       zoomWheelEnabled: false,
       rotateMoveButton: 'left',
-      rotateMoveModifiers: {'ctrl': false},
+      rotateMoveModifiers: {ctrl: false},
       rotateWheelEnabled: false,
       throttle: false
     });
@@ -467,6 +491,146 @@ describe('mapInteractor', function () {
     expect(map.info.rotation).toBe(2);
     expect(map.info.rotationArgs).toBeCloseTo(
         0.1 - Math.atan2(20 - 50, 20 - 50) + Math.atan2(25 - 50, 30 - 50));
+  });
+
+  it('Test zoom selection event propagation', function () {
+    var map = mockedMap('#mapNode1');
+
+    var interactor = geo.mapInteractor({
+      map: map,
+      panMoveButton: null,
+      panWheelEnabled: false,
+      zoomMoveButton: null,
+      zoomWheelEnabled: false,
+      rotateMoveButton: null,
+      rotateWheelEnabled: false,
+      zoomSelectionButton: 'left',
+      zoomSelectionModifiers: {shift: false},
+      unzoomSelectionButton: 'middle',
+      unzoomSelectionModifiers: {shift: false},
+      throttle: false
+    });
+
+    // initialize the selection
+    interactor.simulateEvent(
+      'mousedown', {map: {x: 20, y: 20}, button: 'left'}
+    );
+    interactor.simulateEvent(
+      'mousemove', {map: {x: 30, y: 20}, button: 'left'}
+    );
+    interactor.simulateEvent(
+      'mouseup.geojs', {map: {x: 40, y: 50}, button: 'left'}
+    );
+
+    // check the selection event was called
+    expect(map.info.zoom).toBe(1);
+    expect(map.info.zoomArgs).toBeCloseTo(3.75, 1);
+    expect(map.info.centerCalls).toBe(1);
+    expect(map.info.centerArgs.x).toBeCloseTo(-370);
+    expect(map.info.centerArgs.y).toBeCloseTo(35);
+
+    map.discreteZoom(true);
+
+    // start with an unzoom, but switch to a zoom
+    interactor.simulateEvent(
+      'mousedown', {map: {x: 20, y: 20}, button: 'middle'}
+    );
+    interactor.simulateEvent(
+      'mousedown', {map: {x: 20, y: 20}, button: 'left'}
+    );
+    interactor.simulateEvent(
+      'mouseup.geojs', {map: {x: 0, y: -30}, button: 'left'}
+    );
+    expect(map.info.zoom).toBe(2);
+    expect(map.info.zoomArgs).toBe(3);
+    expect(map.info.centerCalls).toBe(2);
+    expect(map.info.centerArgs.x).toBeCloseTo(-20);
+    expect(map.info.centerArgs.y).toBeCloseTo(-40);
+
+    /* If tehre is no movement, nothing should happen */
+    interactor.simulateEvent(
+      'mousedown', {map: {x: 20, y: 20}, button: 'left'}
+    );
+    interactor.simulateEvent(
+      'mouseup.geojs', {map: {x: 20, y: 20}, button: 'left'}
+    );
+    expect(map.info.zoom).toBe(2);
+  });
+
+  it('Test unzoom selection event propagation', function () {
+    var map = mockedMap('#mapNode1');
+
+    var interactor = geo.mapInteractor({
+      map: map,
+      panMoveButton: null,
+      panWheelEnabled: false,
+      zoomMoveButton: null,
+      zoomWheelEnabled: false,
+      rotateMoveButton: null,
+      rotateWheelEnabled: false,
+      zoomSelectionButton: 'left',
+      zoomSelectionModifiers: {shift: false},
+      unzoomSelectionButton: 'middle',
+      unzoomSelectionModifiers: {shift: false},
+      throttle: false
+    });
+
+    // initialize the selection
+    interactor.simulateEvent(
+      'mousedown', {map: {x: 20, y: 20}, button: 'middle'}
+    );
+    interactor.simulateEvent(
+      'mousemove', {map: {x: 30, y: 20}, button: 'middle'}
+    );
+    interactor.simulateEvent(
+      'mouseup.geojs', {map: {x: 40, y: 50}, button: 'middle'}
+    );
+
+    // check the selection event was called
+    expect(map.info.zoom).toBe(1);
+    expect(map.info.zoomArgs).toBeCloseTo(0.25, 1);
+    expect(map.info.centerCalls).toBe(0);
+    expect(map.info.pan).toBe(1);
+    expect(map.info.panArgs.x).toBeCloseTo(-370);
+    expect(map.info.panArgs.y).toBeCloseTo(35);
+  });
+
+  it('Test selection event propagation', function () {
+    var map = mockedMap('#mapNode1'),
+        triggered = 0;
+
+    var interactor = geo.mapInteractor({
+      map: map,
+      panMoveButton: null,
+      panWheelEnabled: false,
+      zoomMoveButton: null,
+      zoomWheelEnabled: false,
+      rotateMoveButton: null,
+      rotateWheelEnabled: false,
+      selectionButton: 'left',
+      selectionModifiers: {shift: false, ctrl: false},
+      throttle: false
+    });
+    map.geoOn(geo.event.select, function () {
+      triggered += 1;
+    });
+
+    // initialize the selection
+    interactor.simulateEvent(
+      'mousedown', {map: {x: 20, y: 20}, button: 'left'}
+    );
+    interactor.simulateEvent(
+      'mousemove', {map: {x: 30, y: 20}, button: 'left'}
+    );
+    interactor.simulateEvent(
+      'mouseup.geojs', {map: {x: 40, y: 50}, button: 'left'}
+    );
+
+    // check the selection event was called
+    expect(map.info.zoom).toBe(0);
+    expect(map.info.centerCalls).toBe(0);
+    expect(map.info.pan).toBe(0);
+    expect(triggered).toBe(1);
   });
 
   describe('pause state', function () {
