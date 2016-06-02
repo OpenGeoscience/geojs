@@ -28,12 +28,12 @@ $(function () {
         .geoOn(geo.event.feature.mouseover, function (evt) {
           evt.data.opacity = 0.5;
           this.modified();        // mark the feature as modified
-          layer.map().draw();     // we must redraw as necessary
+          this.draw();            // we must redraw as necessary
         })
         .geoOn(geo.event.feature.mouseout, function (evt) {
           evt.data.opacity = 0.1;
           this.modified();
-          layer.map().draw();
+          this.draw();
         })
 
         // You must call the draw method after setting all feature
@@ -102,7 +102,4 @@ $(function () {
     };
   });
   makePoints(data, svgLayer, svgColor);
-
-  // Draw the map
-  map.draw();
 });

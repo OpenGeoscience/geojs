@@ -20,6 +20,9 @@ var canvas_quadFeature = function (arg) {
   }
   quadFeature.call(this, arg);
 
+  var object = require('./object');
+  object.call(this);
+
   var $ = require('jquery');
 
   var m_this = this,

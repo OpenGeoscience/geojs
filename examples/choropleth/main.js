@@ -71,10 +71,9 @@ $(function () {
 
         choropleth
           .scalar(mockScalarData2);
-
+        choropleth.draw();
       }, 5000);
-      // Draw the map
-      map.draw();
+      choropleth.draw();
     }
   });
 });

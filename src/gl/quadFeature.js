@@ -21,6 +21,9 @@ var gl_quadFeature = function (arg) {
 
   var $ = require('jquery');
   var vgl = require('vgl');
+  var object = require('./object');
+
+  object.call(this);
 
   var m_this = this,
       s_exit = this._exit,

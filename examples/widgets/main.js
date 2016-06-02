@@ -54,7 +54,8 @@ $(function () {
     .data(coordinates)
     .style('radius', 5)
     .style('fillColor', function () { return 'red'; })
-    .position(function (d) { return d; });
+    .position(function (d) { return d; })
+    .draw();
 
   // Create a ui layer
   var ui = map.createLayer('ui');
@@ -83,7 +84,4 @@ $(function () {
 
   // Create a zoom slider widget
   ui.createWidget('slider');
-
-  // Draw the map
-  map.draw();
 });
