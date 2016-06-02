@@ -33,7 +33,7 @@ var mapInteractor = function (args) {
       m_queue,
       $node,
       m_selectionLayer = null,
-      m_selectionPlane = null,
+      m_selectionQuad,
       m_paused = false,
       m_clickMaybe = false,
       m_callZoom = function () {};
@@ -566,22 +566,13 @@ var mapInteractor = function (args) {
     gcs.upperRight = map.displayToGcs(display.upperRight);
     gcs.lowerLeft = map.displayToGcs(display.lowerLeft);
 
-    m_selectionPlane.origin([
-      display.lowerLeft.x,
-      display.lowerLeft.y,
-      0
-    ]);
-    m_selectionPlane.upperLeft([
-      display.upperLeft.x,
-      display.upperLeft.y,
-      0
-    ]);
-    m_selectionPlane.lowerRight([
-      display.lowerRight.x,
-      display.lowerRight.y,
-      0
-    ]);
-    m_selectionPlane.draw();
+    m_selectionQuad.data([{
+      ul: gcs.upperLeft,
+      ur: gcs.upperRight,
+      ll: gcs.lowerLeft,
+      lr: gcs.lowerRight
+    }]);
+    m_selectionQuad.draw();
 
     return {
       display: display,
@@ -686,10 +677,10 @@ var mapInteractor = function (args) {
         }
         // Create a feature layer and plane feature to show the selection bounds
         m_selectionLayer = m_this.map().createLayer('feature', {renderer: 'd3'});
-        m_selectionPlane = m_selectionLayer.createFeature('plane');
-        m_selectionPlane.style({
-          screenCoordinates: true,
-          fillOpacity: function () { return 0.25; }
+        m_selectionQuad = m_selectionLayer.createFeature('quad');
+        m_selectionQuad.style({
+          opacity: 0.25,
+          color: {r: 0.3, g: 0.3, b: 0.3}
         });
         m_this.map().geoTrigger(geo_event.brushstart, m_this._getSelection());
       }
@@ -918,7 +909,7 @@ var mapInteractor = function (args) {
       m_selectionLayer.clear();
       m_this.map().deleteLayer(m_selectionLayer);
       m_selectionLayer = null;
-      m_selectionPlane = null;
+      m_selectionQuad = null;
 
       m_this.map().geoTrigger(geo_event.brushend, selectionObj);
     }
