@@ -223,8 +223,8 @@ var d3Renderer = function (arg) {
 
     // set the group transform property
     if (!rotation) {
-      dx = parseInt(dx, 10);
-      dy = parseInt(dy, 10);
+      dx = Math.round(dx);
+      dy = Math.round(dy);
     }
     var transform = 'matrix(' + [scale, 0, 0, scale, dx, dy].join() + ')';
     if (rotation) {

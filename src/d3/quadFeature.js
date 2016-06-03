@@ -153,9 +153,9 @@ var d3_quadFeature = function (arg) {
             if (Math.abs(d.svgTransform[1] / imgw) < 1e-6 &&
                 Math.abs(d.svgTransform[2] / imgh) < 1e-6) {
               imgscale = d.svgTransform[0] / imgw;
-              d.svgTransform[4] = parseInt(d.svgTransform[4] / imgscale) * imgscale;
+              d.svgTransform[4] = Math.round(d.svgTransform[4] / imgscale) * imgscale;
               imgscale = d.svgTransform[3] / imgh;
-              d.svgTransform[5] = parseInt(d.svgTransform[5] / imgscale) * imgscale;
+              d.svgTransform[5] = Math.round(d.svgTransform[5] / imgscale) * imgscale;
             }
           }
           return ((d.type !== 'img' || !d.quad.image) ? undefined :
