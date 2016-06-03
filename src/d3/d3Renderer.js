@@ -222,6 +222,10 @@ var d3Renderer = function (arg) {
     dy = scale * ry + center.y;
 
     // set the group transform property
+    if (!rotation) {
+      dx = parseInt(dx, 10);
+      dy = parseInt(dy, 10);
+    }
     var transform = 'matrix(' + [scale, 0, 0, scale, dx, dy].join() + ')';
     if (rotation) {
       transform += ' rotate(' + [

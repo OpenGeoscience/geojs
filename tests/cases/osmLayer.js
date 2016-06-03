@@ -266,9 +266,12 @@ describe('geo.core.osmLayer', function () {
         it('compare tile offsets at angle ' + angle, function () {
           $.each($('image[reference]'), function () {
             var ref = $(this).attr('reference');
-            var offset = $(this)[0].getBoundingClientRect();
-            /* Allow around 1 pixel of difference */
-            expect(closeToEqual(offset, positions[ref], -0.4)).toBe(true);
+            /* Only check the top level */
+            if (ref.indexOf('4_') === 0) {
+              var offset = $(this)[0].getBoundingClientRect();
+              /* Allow around 1 pixel of difference */
+              expect(closeToEqual(offset, positions[ref], -0.4)).toBe(true);
+            }
           });
         });
         it('destroy', destroy_map);

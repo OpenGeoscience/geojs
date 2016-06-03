@@ -111,7 +111,8 @@ var d3_quadFeature = function (arg) {
         stroke: false,
         transform: function (d) {
           if (d.type === 'img' && d.quad.image && !d.svgTransform) {
-            var pos = [], area, maxarea = -1, maxv, i;
+            var pos = [], area, maxarea = -1, maxv, i, imgscale,
+                imgw = d.quad.image.width, imgh = d.quad.image.height;
             for (i = 0; i < d.quad.pos.length; i += 3) {
               var p = {
                 x: d.quad.pos[i],
@@ -149,6 +150,13 @@ var d3_quadFeature = function (arg) {
               maxv === 2 ? pos[3].x + pos[0].x - pos[1].x : pos[2].x,
               maxv === 2 ? pos[3].y + pos[0].y - pos[1].y : pos[2].y
             ];
+            if (Math.abs(d.svgTransform[1] / imgw) < 1e-6 &&
+                Math.abs(d.svgTransform[2] / imgh) < 1e-6) {
+              imgscale = d.svgTransform[0] / imgw;
+              d.svgTransform[4] = parseInt(d.svgTransform[4] / imgscale) * imgscale;
+              imgscale = d.svgTransform[3] / imgh;
+              d.svgTransform[5] = parseInt(d.svgTransform[5] / imgscale) * imgscale;
+            }
           }
           return ((d.type !== 'img' || !d.quad.image) ? undefined :
                   'matrix(' + d.svgTransform.join(' ') + ')');
