@@ -7,7 +7,6 @@ module.exports = {
   ellipsoid: require('./ellipsoid'),
   geomFeature: require('./geomFeature'),
   lineFeature: require('./lineFeature'),
-  planeFeature: require('./planeFeature'),
   pointFeature: require('./pointFeature'),
   polygonFeature: require('./polygonFeature'),
   quadFeature: require('./quadFeature'),
