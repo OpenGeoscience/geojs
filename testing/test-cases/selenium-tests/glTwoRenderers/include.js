@@ -4,11 +4,12 @@ window.startTest = function (done) {
   var myMap = geo.map({node: '#map', clampBounds: false, gcs: 'EPSG:4326'});
   window.gjsmap = myMap;
   var layer2 = myMap.createLayer('feature');
-  layer2.createFeature('plane')
-    .origin([-180, -90])
-    .upperLeft([-180, 90])
-    .lowerRight([180, -90])
-    .style('image', '/data/land_shallow_topo_2048.png');
+  layer2.createFeature('quad')
+    .data([{
+      ul: {x: -180, y: 90},
+      lr: {x: 180, y: -90},
+      image: '/data/land_shallow_topo_2048.png'
+    }])
   layer2.name = 'layer2';
   myMap.center({x: -40, y: 0});
   myMap.zoom(3.5);
