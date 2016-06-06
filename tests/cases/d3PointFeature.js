@@ -62,6 +62,7 @@ describe('d3 point feature', function () {
     var selection;
 
     layer.deleteFeature(feature2).draw();
+    stepAnimationFrame();
 
     selection = layer.node().find('circle');
     expect(selection.length).toBe(4);
@@ -71,6 +72,7 @@ describe('d3 point feature', function () {
 
     layer.clear().draw();
     map.draw();
+    stepAnimationFrame();
 
     selection = layer.node().find('circle');
     expect(selection.length).toBe(0);

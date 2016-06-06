@@ -42,6 +42,7 @@ var d3Renderer = function (arg) {
       m_transform = {dx: 0, dy: 0, rx: 0, ry: 0, rotation: 0},
       m_renderAnimFrameRef = null,
       m_renderIds = {},
+      m_removeIds = {},
       m_svg = null,
       m_defs = null;
 
@@ -431,6 +432,8 @@ var d3Renderer = function (arg) {
     m_svg = undefined;
     m_defs.remove();
     m_defs = undefined;
+    m_renderIds = {};
+    m_removeIds = {};
     s_exit();
   };
 
@@ -512,10 +515,16 @@ var d3Renderer = function (arg) {
   };
 
   this._renderFrame = function () {
+    var id;
+    for (id in m_removeIds) {
+      m_this.select(id).remove();
+      m_defs.selectAll('.' + id).remove();
+    }
+    m_removeIds = {};
     var ids = m_renderIds;
     m_renderIds = {};
     m_renderAnimFrameRef = null;
-    for (var id in ids) {
+    for (id in ids) {
       if (ids.hasOwnProperty(id)) {
         m_this._renderFeature(id);
       }
@@ -563,8 +572,10 @@ var d3Renderer = function (arg) {
   */
   ////////////////////////////////////////////////////////////////////////////
   this._removeFeature = function (id) {
-    m_this.select(id).remove();
-    m_defs.selectAll('.' + id).remove();
+    m_removeIds[id] = true;
+    if (m_renderAnimFrameRef === null) {
+      m_renderAnimFrameRef = window.requestAnimationFrame(m_this._renderFrame);
+    }
     delete m_features[id];
     if (m_renderIds[id]) {
       delete m_renderIds[id];
