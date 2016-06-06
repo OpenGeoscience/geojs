@@ -80,6 +80,8 @@ module.exports = (function () {
   });
 
   inherit(osmLayer, tileLayer);
-  registry.registerLayer('osm', osmLayer);
+  /* By default, ask to support image quads.  If the user needs full
+   * reprojection, they will need to require the quad.img-full feature */
+  registry.registerLayer('osm', osmLayer, ['quad.img']);
   return osmLayer;
 })();

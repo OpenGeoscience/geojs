@@ -143,5 +143,5 @@ var canvas_quadFeature = function (arg) {
 inherit(canvas_quadFeature, quadFeature);
 
 // Now register it
-registerFeature('canvas', 'quad', canvas_quadFeature);
+registerFeature('canvas', 'quad', canvas_quadFeature, {clr: false, img: true, 'img-full': false});
 module.exports = canvas_quadFeature;

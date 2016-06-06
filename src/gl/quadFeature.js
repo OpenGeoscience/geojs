@@ -392,5 +392,5 @@ var gl_quadFeature = function (arg) {
 inherit(gl_quadFeature, quadFeature);
 
 // Now register it
-registerFeature('vgl', 'quad', gl_quadFeature);
+registerFeature('vgl', 'quad', gl_quadFeature, {clr: true, img: true, 'img-full': true});
 module.exports = gl_quadFeature;

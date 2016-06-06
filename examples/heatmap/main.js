@@ -13,7 +13,7 @@ $(function () {
   var layer, heatmap, points, datapoints;
 
   var layerOptions = {
-    renderer: 'canvas',
+    features: ['heatmap'],
     opacity: 0.75
   };
   var heatmapOptions = {

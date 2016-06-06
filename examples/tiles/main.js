@@ -29,6 +29,7 @@
  *  projection: 'parallel' or 'projection' for the camera projection.
  *  renderer: 'vgl' (default), 'canvas', 'd3', 'null', or 'html'.  This picks
  *      the renderer for map tiles.  null or html uses the html renderer.
+ *      'default' uses the default renderer for the user's platform.
  *  round: 'round' (default), 'floor', 'ceil'.
  *  subdomains: a comma-separated string of subdomains to use in the {s} part
  *      of the url parameter.  If there are no commas in the string, each letter
@@ -104,7 +105,7 @@ $(function () {
   };
   // Set the tile layer defaults to use the specified renderer and opacity
   var layerParams = {
-    renderer: query.renderer || 'vgl',
+    renderer: query.renderer && query.renderer !== 'default' ? query.renderer : undefined,
     opacity: query.opacity || '1',
     /* Always use a larger cache so if keepLower is changed, we still have a
      * big enough cache. */
@@ -339,6 +340,9 @@ $(function () {
         layerParams[param] = value;
         if (layerParams.renderer === 'html') {
           layerParams.renderer = null;
+        }
+        if (layerParams.renderer === 'default') {
+          layerParams.renderer = undefined;
         }
         map.deleteLayer(osmLayer);
         osmLayer = map.createLayer('osm', layerParams);
