@@ -44,7 +44,7 @@ function combine() {
 if (command === 'report') {
   console.log(JSON.stringify(combine(), null, 2));
 } else if (command === 'combine') {
-  fs.writeFileSync(output_file, JSON.stringify(combine()));
+  fs.writeFileSync(output_file, JSON.stringify(combine(), null, 2));
 } else if (command === 'reset') {
   reset();
 } else if (command === 'help') {

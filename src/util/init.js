@@ -379,7 +379,15 @@
         window.requestAnimationFrame = function (callback) {
           m_originalRequestAnimationFrame.call(window, function (timestamp) {
             var track = m_timingData.requestAnimationFrame, recent;
+            /* Some environments have unsynchronized performance and time
+             * counters.  The nowDelta factor compensates for this.  For
+             * instance, our test enviornment has performance.now() values on
+             * the order of ~3000 and timestamps approximating epoch. */
             if (track.timestamp !== timestamp) {
+              track.nowDelta = window.performance.now() - timestamp;
+              if (Math.abs(track.nowDelta) < 1000) {
+                track.nowDelta = 0;
+              }
               track.timestamp = timestamp;
               track.subcalls = track.subcalls || 0;
               track.start = {
@@ -401,6 +409,7 @@
             track.subcalls += 1;
             callback.apply(this, arguments);
             var duration = window.performance.now() - timestamp;
+            duration -= track.nowDelta;
             track.sum = track.start.sum + duration;
             track.sum2 = track.start.sum2 + duration * duration;
             track.count = track.start.count + 1;

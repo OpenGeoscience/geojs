@@ -299,6 +299,7 @@ describe('geo.core.osmLayer', function () {
     waitForIt('tiles to load', function () {
       return Object.keys(layer.activeTiles).length === 17;
     });
+    measure_performance(mapinfo, 'osmLayer-d3-performance');
     it('destroy', destroy_map);
   });
 
@@ -328,10 +329,7 @@ describe('geo.core.osmLayer', function () {
     waitForIt('tiles to load', function () {
       return Object.keys(layer.activeTiles).length === 17;
     });
-    /* It seems that the canvas is too slow in phantomjs for this test to make
-     * sense, so disable it until we can figure a better way.
     measure_performance(mapinfo, 'osmLayer-canvas-performance');
-     */
     it('destroy', destroy_map);
   });
 
