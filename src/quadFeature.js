@@ -63,6 +63,7 @@ var quadFeature = function (arg) {
   var m_this = this,
       s_init = this._init,
       m_cacheQuads,
+      m_nextQuadId = 0,
       m_images = [],
       m_quads;
 
@@ -100,7 +101,7 @@ var quadFeature = function (arg) {
 
   /**
    * Add a new object to a list of object->object mappings.  The key object
-   * should not exist, or this will create a duplicated.  The new entry is
+   * should not exist, or this will create a duplicate.  The new entry is
    * marked as being in use.
    *
    * @param {array} list the list of mappings.
@@ -128,8 +129,12 @@ var quadFeature = function (arg) {
   /**
    * Point search method for selection api.  Returns markers containing the
    * given point.
-   * @argument {Object} coordinate
-   * @returns {Object}
+   *
+   * @memberof geo.quadFeature
+   * @param {Object} coordinate coordinate in input gcs to check if it is
+   *    located in any quad.
+   * @returns {Object} an object with 'index': a list of quad indices, and
+   *    'found': a list of quads that contain the specified coordinate.
    */
   ////////////////////////////////////////////////////////////////////////////
   this.pointSearch = function (coordinate) {
@@ -169,6 +174,9 @@ var quadFeature = function (arg) {
   /**
    * Get/Set position
    *
+   * @memberof geo.quadFeature
+   * @param {object|function} [position] object or function that returns the
+   *    position of each quad.
    * @returns {geo.quadFeature}
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -185,7 +193,7 @@ var quadFeature = function (arg) {
 
   /**
    * Given a data item and its index, fetch its position and ensure we have
-   * compelte information for the quad.  This generates missing corners and z
+   * complete information for the quad.  This generates missing corners and z
    * values.
    *
    * @param {function} posFunc a function to call to get the position of a data
@@ -218,7 +226,7 @@ var quadFeature = function (arg) {
         if (pos[key][2] === undefined) {
           pos[key][2] = depthFunc.call(m_this, d, i);
         }
-        if (gcs !== map_gcs) {
+        if (gcs !== map_gcs && gcs !== false) {
           pos[key] = transform.transformCoordinates(
               gcs, map_gcs, pos[key]);
         }
@@ -313,7 +321,8 @@ var quadFeature = function (arg) {
           idx: i,
           pos: pos,
           opacity: opacity,
-          color: util.convertColor(colorFunc.call(m_this, d, i))
+          color: util.convertColor(colorFunc.call(m_this, d, i)),
+          reference: d.reference
         };
         clrQuads.push(quad);
         quadinfo.clrquad = quad;
@@ -331,7 +340,8 @@ var quadFeature = function (arg) {
         quad = {
           idx: i,
           pos: pos,
-          opacity: opacity
+          opacity: opacity,
+          reference: d.reference
         };
         if (image.complete && image.naturalWidth && image.naturalHeight) {
           quad.image = image;
@@ -379,6 +389,14 @@ var quadFeature = function (arg) {
         quadinfo.imgquad = quad;
       }
       if (m_cacheQuads !== false && quadinfo.keep !== false) {
+        if (quadinfo.clrquad) {
+          m_nextQuadId += 1;
+          quadinfo.clrquad.quadId = m_nextQuadId;
+        }
+        if (quadinfo.imgquad) {
+          m_nextQuadId += 1;
+          quadinfo.imgquad.quadId = m_nextQuadId;
+        }
         d._cachedQuad = quadinfo;
       }
     });
@@ -433,6 +451,7 @@ var quadFeature = function (arg) {
 
 /**
  * Create a quadFeature from an object.
+ *
  * @see {@link geo.feature.create}
  * @param {geo.layer} layer The layer to add the feature to
  * @param {geo.quadFeature.spec} spec The object specification

@@ -1010,12 +1010,11 @@ module.exports = (function () {
       }
       var map = this.map(),
           bounds = map.bounds(undefined, null),
+          mapZoom = map.zoom(),
+          zoom = this._options.tileRounding(mapZoom),
           tiles;
-
       if (this._updateSubLayers) {
-        var mapZoom = map.zoom(),
-            zoom = this._options.tileRounding(mapZoom),
-            view = this._getViewBounds();
+        var view = this._getViewBounds();
         // Update the transform for the local layer coordinates
         var offset = this._updateSubLayers(zoom, view) || {x: 0, y: 0};
 

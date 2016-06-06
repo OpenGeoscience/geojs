@@ -7,7 +7,7 @@ var transform = require('./transform');
 /**
  * Create a new instance of class heatmapFeature
  *
- * @class
+ * @class geo.heatmapFeature
  * @param {Object} arg Options object
  * @extends geo.feature
  * @param {Object|Function} [position] Position of the data.  Default is

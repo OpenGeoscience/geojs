@@ -1,5 +1,8 @@
 var geo = require('../test-utils').geo;
 var $ = require('jquery');
+var mockAnimationFrame = require('../test-utils').mockAnimationFrame;
+var stepAnimationFrame = require('../test-utils').stepAnimationFrame;
+var unmockAnimationFrame = require('../test-utils').unmockAnimationFrame;
 
 beforeEach(function () {
   $('<div id="map-d3-graph-feature"/>').appendTo('body')
@@ -21,6 +24,7 @@ describe('d3 graph feature', function () {
   });
 
   it('Add features to a layer', function () {
+    mockAnimationFrame();
     var selection, nodes;
 
     nodes = [
@@ -36,6 +40,7 @@ describe('d3 graph feature', function () {
     feature = layer.createFeature('graph')
       .data(nodes)
       .draw();
+    stepAnimationFrame();
 
     selection = layer.canvas().selectAll('circle');
     expect(selection[0].length).toBe(4);
@@ -48,11 +53,13 @@ describe('d3 graph feature', function () {
     var selection;
 
     layer.deleteFeature(feature).draw();
+    stepAnimationFrame();
 
     selection = layer.canvas().selectAll('circle');
     expect(selection[0].length).toBe(0);
 
     selection = layer.canvas().selectAll('path');
     expect(selection[0].length).toBe(0);
+    unmockAnimationFrame();
   });
 });

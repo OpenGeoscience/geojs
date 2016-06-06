@@ -61,5 +61,4 @@ $(function () {
       .draw();
   });
 
-  map.draw();
 });

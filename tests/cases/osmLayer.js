@@ -1,6 +1,9 @@
 // Test geo.core.osmLayer
 var geo = require('../test-utils').geo;
 var $ = require('jquery');
+var mockAnimationFrame = require('../test-utils').mockAnimationFrame;
+var stepAnimationFrame = require('../test-utils').stepAnimationFrame;
+var unmockAnimationFrame = require('../test-utils').unmockAnimationFrame;
 
 describe('geo.core.osmLayer', function () {
   'use strict';
@@ -142,37 +145,39 @@ describe('geo.core.osmLayer', function () {
       /* The follow is a test of tileLayer as attached to a map.  We don't
        * currently expose the tileLayer class directly to the createLayer
        * function, so some testing is done here */
-
-      // This test is currently disabled because it contains an unknown race condition.
-      xit('_update', function () {
-        var transform = layer.canvas().css('transform');
+      it('_update', function () {
+        var lastlevel = layer.canvas().attr('lastlevel');
         layer._update();
-        expect(layer.canvas().css('transform')).toBe(transform);
+        expect(layer.canvas().attr('lastlevel')).toBe(lastlevel);
         map.zoom(1.5);
-        expect(layer.canvas().css('transform')).not.toBe(transform);
+        expect(layer.canvas().attr('lastlevel')).not.toBe(lastlevel);
       });
       it('destroy', destroy_map);
     });
     describe('d3', function () {
-      var layer, lastlevel;
+      var layer;
       it('creation', function () {
         map = create_map();
         layer = map.createLayer('osm', {renderer: 'd3', url: '/data/white.jpg'});
-        expect(map.node().find('[data-tile-layer="0"]').length).toBe(1);
       });
-      waitForIt('.d3PlaneFeature', function () {
-        return map.node().find('.d3PlaneFeature').length > 0;
+      waitForIt('.d3QuadFeature', function () {
+        return map.node().find('.d3QuadFeature').length > 0;
       });
       it('check for tiles', function () {
-        expect(map.node().find('.d3PlaneFeature').length).toBeGreaterThan(0);
+        expect(map.node().find('.d3QuadFeature').length).toBeGreaterThan(0);
       });
       /* The following is a test of d3.tileLayer as attached to a map. */
       it('_update', function () {
-        lastlevel = layer.canvas().attr('lastlevel');
+        var elem = $('.d3QuadFeature').closest('g');
+        var transform = elem.attr('transform');
+        mockAnimationFrame();
         layer._update();
-        expect(layer.canvas().attr('lastlevel')).toBe(lastlevel);
+        stepAnimationFrame();
+        expect(elem.attr('transform')).toBe(transform);
         map.zoom(1);
-        expect(layer.canvas().attr('lastlevel')).not.toBe(lastlevel);
+        stepAnimationFrame();
+        expect(elem.attr('transform')).not.toBe(transform);
+        unmockAnimationFrame();
       });
       it('destroy', destroy_map);
     });
@@ -202,17 +207,15 @@ describe('geo.core.osmLayer', function () {
         expect(map.node().find('[data-tile-layer="0"]').is('div')).toBe(true);
         map.deleteLayer(layer);
         layer = map.createLayer('osm', {renderer: 'd3', url: '/data/white.jpg'});
-        expect(map.node().find('[data-tile-layer="0"]').is('div')).toBe(false);
-        expect(map.node().find('[data-tile-layer="0"]').length).toBe(1);
+        expect(map.node().find('[data-tile-layer="0"]').length).toBe(0);
       });
-      waitForIt('.d3PlaneFeature', function () {
-        return map.node().find('.d3PlaneFeature').length > 0;
+      waitForIt('.d3QuadFeature', function () {
+        return map.node().find('.d3QuadFeature').length > 0;
       });
       it('d3 to canvas', function () {
-        expect(map.node().find('[data-tile-layer="0"]').is('g')).toBe(true);
         map.deleteLayer(layer);
         layer = map.createLayer('osm', {renderer: 'canvas', url: '/data/white.jpg'});
-        expect(map.node().find('[data-tile-layer="0"]').is('g')).toBe(false);
+        expect(map.node().find('.d3QuadFature').length).toBe(0);
         expect(map.node().find('.canvas-canvas').length).toBe(1);
       });
       it('canvas to vgl', function () {
@@ -255,8 +258,7 @@ describe('geo.core.osmLayer', function () {
           });
           map.deleteLayer(layer);
           layer = map.createLayer('osm', {renderer: 'd3', url: '/data/white.jpg'});
-          expect(map.node().find('[data-tile-layer="0"]').is('div')).toBe(false);
-          expect(map.node().find('[data-tile-layer="0"]').length).toBe(1);
+          expect(map.node().find('[data-tile-layer="0"]').length).toBe(0);
         });
         waitForIt('d3 tiles to load', function () {
           return $('image[reference]').length === numTiles;
@@ -264,14 +266,40 @@ describe('geo.core.osmLayer', function () {
         it('compare tile offsets at angle ' + angle, function () {
           $.each($('image[reference]'), function () {
             var ref = $(this).attr('reference');
-            var offset = $(this)[0].getBoundingClientRect();
-            /* Allow around 1 pixel of difference */
-            expect(closeToEqual(offset, positions[ref], -0.4)).toBe(true);
+            /* Only check the top level */
+            if (ref.indexOf('4_') === 0) {
+              var offset = $(this)[0].getBoundingClientRect();
+              /* Allow around 1 pixel of difference */
+              expect(closeToEqual(offset, positions[ref], -0.4)).toBe(true);
+            }
           });
         });
         it('destroy', destroy_map);
       });
     });
+  });
+
+  describe('geo.d3.osmLayer', function () {
+    var layer, mapinfo = {};
+    it('test that tiles are created', function () {
+      map = create_map();
+      mapinfo.map = map;
+      layer = map.createLayer('osm', {
+        renderer: 'd3',
+        url: '/data/white.jpg'
+      });
+    });
+    waitForIt('tiles to load', function () {
+      return Object.keys(layer.activeTiles).length === 21;
+    });
+    it('zoom out', function () {
+      map.zoom(3);
+    });
+    /* This checks to make sure tiles are removed */
+    waitForIt('tiles to load', function () {
+      return Object.keys(layer.activeTiles).length === 17;
+    });
+    it('destroy', destroy_map);
   });
 
   describe('geo.canvas.osmLayer', function () {

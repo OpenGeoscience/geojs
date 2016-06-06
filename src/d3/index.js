@@ -13,6 +13,7 @@ module.exports = {
   pathFeature: require('./pathFeature'),
   planeFeature: require('./planeFeature'),
   pointFeature: require('./pointFeature'),
+  quadFeature: require('./quadFeature'),
   renderer: require('./d3Renderer'),
   tileLayer: require('./tileLayer'),
   uniqueID: require('./uniqueID'),

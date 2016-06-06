@@ -1,5 +1,8 @@
 var geo = require('../test-utils').geo;
 var $ = require('jquery');
+var mockAnimationFrame = require('../test-utils').mockAnimationFrame;
+var stepAnimationFrame = require('../test-utils').stepAnimationFrame;
+var unmockAnimationFrame = require('../test-utils').unmockAnimationFrame;
 
 beforeEach(function () {
   $('<div id="map-d3-point-feature"/>').appendTo('body')
@@ -23,10 +26,12 @@ describe('d3 point feature', function () {
   });
 
   it('Add features to a layer', function () {
+    mockAnimationFrame();
     var selection;
     feature1 = layer.createFeature('point', {selectionAPI: true})
       .data([{y: 0, x: 0}, {y: 10, x: 0}, {y: 0, x: 10}])
       .draw();
+    stepAnimationFrame();
 
     selection = layer.node().find('circle');
     expect(selection.length).toBe(3);
@@ -34,6 +39,7 @@ describe('d3 point feature', function () {
     feature2 = layer.createFeature('point')
       .data([{y: -10, x: -10}, {y: 10, x: -10}])
       .draw();
+    stepAnimationFrame();
 
     selection = layer.node().find('circle');
     expect(selection.length).toBe(5);
@@ -41,6 +47,7 @@ describe('d3 point feature', function () {
     layer.createFeature('point')
       .data([{y: -10, x: 10}])
       .draw();
+    stepAnimationFrame();
 
     selection = layer.node().find('circle');
     expect(selection.length).toBe(6);
@@ -55,6 +62,7 @@ describe('d3 point feature', function () {
     var selection;
 
     layer.deleteFeature(feature2).draw();
+    stepAnimationFrame();
 
     selection = layer.node().find('circle');
     expect(selection.length).toBe(4);
@@ -64,8 +72,10 @@ describe('d3 point feature', function () {
 
     layer.clear().draw();
     map.draw();
+    stepAnimationFrame();
 
     selection = layer.node().find('circle');
     expect(selection.length).toBe(0);
+    unmockAnimationFrame();
   });
 });

@@ -1,5 +1,8 @@
 var geo = require('../test-utils').geo;
 var d3 = require('d3');
+var mockAnimationFrame = require('../test-utils').mockAnimationFrame;
+var stepAnimationFrame = require('../test-utils').stepAnimationFrame;
+var unmockAnimationFrame = require('../test-utils').unmockAnimationFrame;
 
 describe('d3 vector feature', function () {
   'use strict';
@@ -33,6 +36,7 @@ describe('d3 vector feature', function () {
   });
 
   it('Add features to a layer', function () {
+    mockAnimationFrame();
     var vectorLines, featureGroup, markers;
     feature1 = layer.createFeature('vector')
     .data([{y: 0, x: 0}, {y: 10, x: 0}, {y: 0, x: 10}])
@@ -54,6 +58,7 @@ describe('d3 vector feature', function () {
       endStyle: 'arrow'
     })
     .draw();
+    stepAnimationFrame();
 
     vectorLines = d3.select('#map-d3-vector svg').selectAll('line');
     expect(vectorLines.size()).toBe(3);
@@ -77,6 +82,7 @@ describe('d3 vector feature', function () {
     var selection, markers;
 
     layer.deleteFeature(feature1).draw();
+    stepAnimationFrame();
 
     selection = d3.select('#map-d3-vector svg').selectAll('line');
     expect(selection.size()).toBe(0);
@@ -111,6 +117,7 @@ describe('d3 vector feature', function () {
       endStyle: 'arrow'
     })
     .draw();
+    stepAnimationFrame();
 
     vectorLines = d3.select('#map-d3-vector svg').selectAll('line');
     expect(vectorLines.size()).toBe(3);
@@ -134,5 +141,6 @@ describe('d3 vector feature', function () {
   it('Delete the map', function () {
     map.exit();
     d3.select('#map-d3-vector').remove();
+    unmockAnimationFrame();
   });
 });

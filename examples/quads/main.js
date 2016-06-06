@@ -1,9 +1,12 @@
+/* globals $, geo, utils */
+
 var quadDebug = {};
 
 // Run after the DOM loads
 $(function () {
   'use strict';
 
+  var query = utils.getQuery();
   var map = geo.map({
     node: '#map',
     center: {
@@ -12,7 +15,9 @@ $(function () {
     },
     zoom: 4
   });
-  var layer = map.createLayer('feature', {renderer: 'vgl'});
+  var layer = map.createLayer('feature', {
+    renderer: query.renderer ? (query.renderer === 'html' ? null : query.renderer) : 'vgl'
+  });
   var quads = layer.createFeature('quad', {selectionAPI: true});
   var previewImage = new Image();
   previewImage.onload = function () {
