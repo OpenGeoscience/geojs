@@ -567,10 +567,10 @@ var mapInteractor = function (args) {
     };
 
     // Get the gcs coordinates
-    gcs.upperLeft = map.displayToGcs(display.upperLeft);
-    gcs.lowerRight = map.displayToGcs(display.lowerRight);
-    gcs.upperRight = map.displayToGcs(display.upperRight);
-    gcs.lowerLeft = map.displayToGcs(display.lowerLeft);
+    gcs.upperLeft = map.displayToGcs(display.upperLeft, null);
+    gcs.lowerRight = map.displayToGcs(display.lowerRight, null);
+    gcs.upperRight = map.displayToGcs(display.upperRight, null);
+    gcs.lowerLeft = map.displayToGcs(display.lowerLeft, null);
 
     m_selectionQuad.data([{
       ul: gcs.upperLeft,
@@ -687,7 +687,9 @@ var mapInteractor = function (args) {
         }
         // Create a feature layer and plane feature to show the selection bounds
         m_selectionLayer = m_this.map().createLayer('feature', {renderer: 'd3'});
-        m_selectionQuad = m_selectionLayer.createFeature('quad');
+
+        m_selectionQuad = m_selectionLayer.createFeature(
+          'quad', {gcs: m_this.map().gcs()});
         m_selectionQuad.style({
           opacity: 0.25,
           color: {r: 0.3, g: 0.3, b: 0.3}
