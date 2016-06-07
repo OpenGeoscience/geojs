@@ -76,7 +76,7 @@
     "start": "karma start karma.conf.js",
     "ci": "karma start karma-cov.conf.js --single-run --browsers PhantomJS",
     "codecov": "cat lcov/*/lcov.info | codecov",
-    "examples": "webpack-dev-server --config webpack-examples.config.js --port 8082 --content-base dist/",
+    "examples": "webpack-dev-server --config webpack-examples.config.js --host ${HOST-127.0.0.1} --port ${PORT-8082} --content-base dist/",
     "start-test": "node examples/build.js; forever start ./testing/test-runners/server.js",
     "stop-test": "forever stop ./testing/test-runners/server.js",
     "docs": "jsdoc --pedantic -d dist/apidocs -r src -c jsdoc.conf.json"
