@@ -133,6 +133,9 @@ describe('mapInteractor', function () {
       }
       map.info.discreteZoom = arg;
     };
+    map.gcs = function (arg) {
+      return 'EPSG:3857';
+    };
     return map;
   }
 
