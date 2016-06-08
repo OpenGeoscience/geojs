@@ -237,7 +237,7 @@ class BaseTest(TestCase):
     testPath = ('test', 'selenium')
 
     #: A tuple representing the relative path to test data relative to the
-    #: `geojs MIDAS community <http://midas3.kitware.com/midas/community/40>`_.
+    #: `geojs MIDAS community <https://midas3.kitware.com/midas/community/40>`_.
     midasPath = ('Testing', ) + testPath
 
     #: A tuple representing the path to the selenium test
@@ -259,7 +259,7 @@ class BaseTest(TestCase):
 
     #: A :py:class:`midas_handler.MidasHandler` object providing methods for downloading and
     #: uploading data to the
-    #: `geojs MIDAS community <http://midas3.kitware.com/midas/community/40>`_.
+    #: `geojs MIDAS community <https://midas3.kitware.com/midas/community/40>`_.
     midas = MidasHandler(MIDAS_BASE_URL, MIDAS_COMMUNITY)
 
     #: The revision number of the test.  This value should be set by
