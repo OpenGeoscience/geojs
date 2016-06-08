@@ -20,7 +20,7 @@ class MidasHandler(object):
     '''
 
     def __init__(self,
-                 MIDAS_BASE_URL='http://midas3.kitware.com/midas',
+                 MIDAS_BASE_URL='https://midas3.kitware.com/midas',
                  MIDAS_COMMUNITY='geojs'):
         '''
         Initialize private variables.
@@ -343,7 +343,7 @@ if __name__ == '__main__':
         sys.exit(1)
 
     path = [p for p in sys.argv[1].split('/') if p]
-    handler = MidasHandler('http://midas3.kitware.com/midas', 'geojs')
+    handler = MidasHandler('https://midas3.kitware.com/midas', 'geojs')
     images = handler.getImages(path, int(sys.argv[2]))
 
     img_base, img_ext = os.path.splitext(path[-1])
