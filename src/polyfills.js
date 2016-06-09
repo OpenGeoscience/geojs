@@ -1,7 +1,7 @@
 // Add a polyfill for window.requestAnimationFrame.
 if (!window.requestAnimationFrame) {
   var _animationFrameFunc = [];
-  if (!window.performance) {
+  if (!window.performance || !window.performance.now) {
     window.performance = {now: function () { return new Date().getTime(); }};
   }
   window.requestAnimationFrame = function (func) {
