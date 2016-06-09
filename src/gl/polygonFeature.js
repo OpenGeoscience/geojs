@@ -22,6 +22,9 @@ var gl_polygonFeature = function (arg) {
   var vgl = require('vgl');
   var earcut = require('earcut');
   var transform = require('../transform');
+  var object = require('./object');
+
+  object.call(this);
 
   ////////////////////////////////////////////////////////////////////////////
   /**

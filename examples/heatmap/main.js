@@ -179,7 +179,7 @@ $(function () {
     }
     heatmap.data(rows);
     window.heatmap.rows = rows;
-    map.draw();
+    heatmap.draw();
     var text = 'Shown: ' + rows.length;
     $('#points-shown').text(text).attr('title', text);
   }
@@ -211,7 +211,7 @@ $(function () {
       case 'binned':
         heatmapOptions[param] = value;
         heatmap[param](value);
-        map.draw();
+        heatmap.draw();
         break;
       case 'blurRadius': case 'radius':
         processedValue = value.length ? parseFloat(value) : undefined;
@@ -221,7 +221,7 @@ $(function () {
         }
         heatmapOptions.style[param] = processedValue;
         heatmap.style(param, processedValue);
-        map.draw();
+        heatmap.draw();
         break;
       case 'dataset':
         fetch_data();
@@ -229,7 +229,7 @@ $(function () {
       case 'gaussian':
         heatmapOptions.style[param] = processedValue;
         heatmap.style(param, processedValue);
-        map.draw();
+        heatmap.draw();
         break;
       case 'gradient':
         var gradient = {};
@@ -251,7 +251,7 @@ $(function () {
         }
         heatmapOptions.style.color = gradient;
         heatmap.style('color', gradient);
-        map.draw();
+        heatmap.draw();
         var gradkeys = Object.keys(heatmapOptions.style.color).sort();
         value = gradkeys.map(function (key) {
           return [key, Math.round(gradient[key].r * 255), Math.round(gradient[key].g * 255), Math.round(gradient[key].b * 255), gradient[key].a].join(',');
@@ -264,7 +264,7 @@ $(function () {
         }
         heatmapOptions[param] = processedValue;
         heatmap[param](processedValue);
-        map.draw();
+        heatmap.draw();
         break;
       case 'opacity':
         processedValue = value.length ? parseFloat(value) : undefined;
@@ -296,7 +296,6 @@ $(function () {
   }
 
   map.createLayer('osm');
-  map.draw();
   layer = map.createLayer('feature', layerOptions);
   heatmap = layer.createFeature('heatmap', heatmapOptions)
     .intensity(function (d) {

@@ -112,6 +112,4 @@ $(function () {
     }
   ]);
 
-  // Draw the map
-  map.draw();
 });

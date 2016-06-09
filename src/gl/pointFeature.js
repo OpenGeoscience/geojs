@@ -22,6 +22,9 @@ var gl_pointFeature = function (arg) {
   var vgl = require('vgl');
   var transform = require('../transform');
   var util = require('../util');
+  var object = require('./object');
+
+  object.call(this);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
