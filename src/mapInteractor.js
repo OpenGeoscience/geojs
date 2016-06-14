@@ -33,7 +33,7 @@ var mapInteractor = function (args) {
       m_queue,
       $node,
       m_selectionLayer = null,
-      m_selectionPlane = null,
+      m_selectionQuad,
       m_paused = false,
       m_clickMaybe = false,
       m_callZoom = function () {};
@@ -68,19 +68,23 @@ var mapInteractor = function (args) {
       zoomMoveButton: 'right',
       zoomMoveModifiers: {},
       rotateMoveButton: 'left',
-      rotateMoveModifiers: {'ctrl': true},
+      rotateMoveModifiers: {ctrl: true},
       panWheelEnabled: false,
       panWheelModifiers: {},
       zoomWheelEnabled: true,
       zoomWheelModifiers: {},
       rotateWheelEnabled: true,
-      rotateWheelModifiers: {'ctrl': true},
+      rotateWheelModifiers: {ctrl: true},
       wheelScaleX: 1,
       wheelScaleY: 1,
       zoomScale: 1,
       rotateWheelScale: 6 * Math.PI / 180,
       selectionButton: 'left',
-      selectionModifiers: {'shift': true},
+      selectionModifiers: {shift: true, ctrl: true},
+      zoomSelectionButton: 'left',
+      zoomSelectionModifiers: {shift: true},
+      unzoomSelectionButton: 'right',
+      unzoomSelectionModifiers: {shift: true},
       momentum: {
         enabled: true,
         maxSpeed: 2.5,
@@ -202,7 +206,7 @@ var mapInteractor = function (args) {
   //   // a mousemove.
   //   click: {
   //     enabled: true | false,
-  //     buttons: {'left': true, 'right': true, 'middle': true}
+  //     buttons: {left: true, right: true, middle: true}
   //     duration: 0,
   //     cancelOnMove: true // cancels click if the mouse is moved before release
   //   }
@@ -406,7 +410,9 @@ var mapInteractor = function (args) {
     if (m_options.panMoveButton === 'right' ||
         m_options.zoomMoveButton === 'right' ||
         m_options.rotateMoveButton === 'right' ||
-        m_options.selectionButton === 'right') {
+        m_options.selectionButton === 'right' ||
+        m_options.zoomSelectionButton === 'right' ||
+        m_options.unzoomSelectionButton === 'right') {
       $node.on('contextmenu.geojs', function () { return false; });
     }
     return m_this;
@@ -561,27 +567,18 @@ var mapInteractor = function (args) {
     };
 
     // Get the gcs coordinates
-    gcs.upperLeft = map.displayToGcs(display.upperLeft);
-    gcs.lowerRight = map.displayToGcs(display.lowerRight);
-    gcs.upperRight = map.displayToGcs(display.upperRight);
-    gcs.lowerLeft = map.displayToGcs(display.lowerLeft);
+    gcs.upperLeft = map.displayToGcs(display.upperLeft, null);
+    gcs.lowerRight = map.displayToGcs(display.lowerRight, null);
+    gcs.upperRight = map.displayToGcs(display.upperRight, null);
+    gcs.lowerLeft = map.displayToGcs(display.lowerLeft, null);
 
-    m_selectionPlane.origin([
-      display.lowerLeft.x,
-      display.lowerLeft.y,
-      0
-    ]);
-    m_selectionPlane.upperLeft([
-      display.upperLeft.x,
-      display.upperLeft.y,
-      0
-    ]);
-    m_selectionPlane.lowerRight([
-      display.lowerRight.x,
-      display.lowerRight.y,
-      0
-    ]);
-    m_selectionPlane.draw();
+    m_selectionQuad.data([{
+      ul: gcs.upperLeft,
+      ur: gcs.upperRight,
+      ll: gcs.lowerLeft,
+      lr: gcs.lowerRight
+    }]);
+    m_selectionQuad.draw();
 
     return {
       display: display,
@@ -653,6 +650,10 @@ var mapInteractor = function (args) {
       action = 'rotate';
     } else if (eventMatch(m_options.selectionButton, m_options.selectionModifiers)) {
       action = 'select';
+    } else if (eventMatch(m_options.zoomSelectionButton, m_options.zoomSelectionModifiers)) {
+      action = 'zoomselect';
+    } else if (eventMatch(m_options.unzoomSelectionButton, m_options.unzoomSelectionModifiers)) {
+      action = 'unzoomselect';
     }
 
     // cancel transitions and momentum on click
@@ -677,7 +678,7 @@ var mapInteractor = function (args) {
         delta: {x: 0, y: 0}
       };
 
-      if (action === 'select') {
+      if (action === 'select' || action === 'zoomselect' || action === 'unzoomselect') {
         // Make sure the old selection layer is gone.
         if (m_selectionLayer) {
           m_selectionLayer.clear();
@@ -686,10 +687,12 @@ var mapInteractor = function (args) {
         }
         // Create a feature layer and plane feature to show the selection bounds
         m_selectionLayer = m_this.map().createLayer('feature', {renderer: 'd3'});
-        m_selectionPlane = m_selectionLayer.createFeature('plane');
-        m_selectionPlane.style({
-          screenCoordinates: true,
-          fillOpacity: function () { return 0.25; }
+
+        m_selectionQuad = m_selectionLayer.createFeature(
+          'quad', {gcs: m_this.map().gcs()});
+        m_selectionQuad.style({
+          opacity: 0.25,
+          color: {r: 0.3, g: 0.3, b: 0.3}
         });
         m_this.map().geoTrigger(geo_event.brushstart, m_this._getSelection());
       }
@@ -798,7 +801,7 @@ var mapInteractor = function (args) {
       cx = m_mouse.map.x - m_this.map().size().width / 2;
       cy = m_mouse.map.y - m_this.map().size().height / 2;
       m_this.map().rotation(m_state.origin.rotation + Math.atan2(cy, cx));
-    } else if (m_state.action === 'select') {
+    } else if (m_state.action === 'select' || m_state.action === 'zoomselect' || m_state.action === 'unzoomselect') {
       // Get the bounds of the current selection
       selectionObj = m_this._getSelection();
       m_this.map().geoTrigger(geo_event.brush, selectionObj);
@@ -887,6 +890,71 @@ var mapInteractor = function (args) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Based on the screen coodinates of a selection, zoom or unzoom and
+   * recenter.
+   *
+   * @private
+   * @param {string} action Either 'zoomselect' or 'unzoomselect'.
+   * @param {object} lowerLeft the x and y coordinates of the lower left corner
+   *    of the zoom rectangle.
+   * @param {object} upperRight the x and y coordinates of the upper right
+   *    corner of the zoom rectangle.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._zoomFromSelection = function (action, lowerLeft, upperRight) {
+    if (action !== 'zoomselect' && action !== 'unzoomselect') {
+      return;
+    }
+    if (lowerLeft.x === upperRight.x || lowerLeft.y === upperRight.y) {
+      return;
+    }
+    var zoom, center,
+        map = m_this.map(),
+        mapsize = map.size();
+    /* To arbitrarily handle rotation and projection, we center the map at the
+     * central coordinate of the selection and set the zoom level such that the
+     * four corners are just barely on the map.  When unzooming (zooming out),
+     * we ensure that the previous view is centered in the selection but use
+     * the maximal size for the zoom factor. */
+    var scaling = {
+      x: Math.abs((upperRight.x - lowerLeft.x) / mapsize.width),
+      y: Math.abs((upperRight.y - lowerLeft.y) / mapsize.height)
+    };
+    if (action === 'zoomselect') {
+      center = map.displayToGcs({
+        x: (lowerLeft.x + upperRight.x) / 2,
+        y: (lowerLeft.y + upperRight.y) / 2
+      }, null);
+      zoom = map.zoom() - Math.log2(Math.max(scaling.x, scaling.y));
+    } else {  /* unzoom */
+      /* To make the existing visible map entirely within the selection
+       * rectangle, this would be changed to Math.min instead of Math.max of
+       * the scaling factors.  This felt wrong, though. */
+      zoom = map.zoom() + Math.log2(Math.max(scaling.x, scaling.y));
+      /* Record the current center.  Later, this is panned to the center of the
+       * selection rectangle. */
+      center = map.center(undefined, null);
+    }
+    /* When discrete zoom is enable, always round down.  We have to do this
+     * explicitly, as otherwise we may zoom too far and the selection will not
+     * be completely visible. */
+    if (map.discreteZoom()) {
+      zoom = Math.floor(zoom);
+    }
+    map.zoom(zoom);
+    if (action === 'zoomselect') {
+      map.center(center, null);
+    } else {
+      var newcenter = map.gcsToDisplay(center, null);
+      map.pan({
+        x: (lowerLeft.x + upperRight.x) / 2 - newcenter.x,
+        y: (lowerLeft.y + upperRight.y) / 2 - newcenter.y
+      });
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Handle event when a mouse button is unpressed on the document.
    * Removes temporary bindings.
    */
@@ -912,15 +980,19 @@ var mapInteractor = function (args) {
       evt.preventDefault();
     }
 
-    if (m_state.action === 'select') {
+    if (m_state.action === 'select' || m_state.action === 'zoomselect' || m_state.action === 'unzoomselect') {
+      m_this._getMousePosition(evt);
       selectionObj = m_this._getSelection();
 
       m_selectionLayer.clear();
       m_this.map().deleteLayer(m_selectionLayer);
       m_selectionLayer = null;
-      m_selectionPlane = null;
+      m_selectionQuad = null;
 
       m_this.map().geoTrigger(geo_event.brushend, selectionObj);
+      m_this.map().geoTrigger(geo_event[m_state.action], selectionObj);
+      m_this._zoomFromSelection(m_state.action, selectionObj.display.lowerLeft,
+                                selectionObj.display.upperRight);
     }
 
     // reset the interactor state
@@ -1419,6 +1491,9 @@ var mapInteractor = function (args) {
         }
       }
     );
+    if (type.indexOf('.geojs') >= 0) {
+      $(document).trigger(evt);
+    }
     $node.trigger(evt);
   };
   this._connectEvents();
