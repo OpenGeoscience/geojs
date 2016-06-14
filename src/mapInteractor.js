@@ -685,17 +685,6 @@ var mapInteractor = function (args) {
           m_this.map().deleteLayer(m_selectionLayer);
           m_selectionLayer = null;
         }
-        /* This can be removed once selection quads are implemented */
-        // Create a feature layer and plane feature to show the selection bounds
-        m_selectionLayer = m_this.map().createLayer('feature', {renderer: 'd3'});
-
-        m_selectionQuad = m_selectionLayer.createFeature(
-          'quad', {gcs: m_this.map().gcs()});
-        m_selectionQuad.style({
-          opacity: 0.25,
-          color: {r: 0.3, g: 0.3, b: 0.3}
-        });
-        /* Use this once selection quads are implemented
         m_selectionLayer = m_this.map().createLayer(
           'feature', {features: ['quad.clr']});
         m_selectionQuad = m_selectionLayer.createFeature('quad');
@@ -703,7 +692,6 @@ var mapInteractor = function (args) {
           opacity: 0.25,
           color: {r: 0.3, g: 0.3, b: 0.3}
         });
-        */
         m_this.map().geoTrigger(geo_event.brushstart, m_this._getSelection());
       }
 
