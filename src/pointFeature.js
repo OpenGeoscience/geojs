@@ -143,7 +143,7 @@ var pointFeature = function (arg) {
     // prevent recomputing the clustering and set the new data array
     m_ignoreData = true;
     m_this.data(data);
-    m_this.layer().map().draw(); // replace with m_this.draw() when gl is fixed
+    m_this.draw();
   };
 
   ////////////////////////////////////////////////////////////////////////////

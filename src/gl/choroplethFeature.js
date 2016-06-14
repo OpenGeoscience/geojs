@@ -29,6 +29,7 @@ var gl_choroplethFeature = function (arg) {
       m_gl_polygons = null,
       s_exit = this._exit,
       s_init = this._init,
+      s_draw = this.draw,
       s_update = this._update;
 
   /* Create the choropleth.  This calls the base class to generate the contours,
@@ -37,6 +38,17 @@ var gl_choroplethFeature = function (arg) {
   function createGLChoropleth() {
     return m_this.createChoropleth();
   }
+
+  this.draw = function () {
+    m_this._update();
+    if (m_gl_polygons) {
+      for (var idx = 0; idx < m_gl_polygons.length; idx += 1) {
+        m_gl_polygons[idx].draw();
+      }
+    }
+    s_draw();
+    return m_this;
+  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**

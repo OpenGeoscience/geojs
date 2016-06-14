@@ -177,7 +177,7 @@ $(function () {
         evt.data.opacity = 0.5;
         evt.data.strokeOpacity = 1;
         this.modified();
-        pointLayer.map().draw();
+        this.draw();
         tooltip.position({x: evt.data.longitude, y: evt.data.latitude});
         tooltipElem.text(evt.data.city);
         tooltipElem.removeClass('hidden');
@@ -186,10 +186,10 @@ $(function () {
         evt.data.opacity = undefined;
         evt.data.strokeOpacity = undefined;
         this.modified();
-        pointLayer.map().draw();
+        this.draw();
         tooltipElem.addClass('hidden');
-      });
-    pointLayer.map().draw();
+      })
+      .draw();
 
     // Make variables available as a global for easier debug
     exampleDebug.map = map;
@@ -228,7 +228,7 @@ $(function () {
       switch (param) {
         case 'capitals':
           pointFeature.visible(processedValue);
-          map.draw();
+          pointFeature.draw();
           break;
         case 'gcs':
           mapParams.gcs = gcsTable[processedValue] || 'EPSG:3857';

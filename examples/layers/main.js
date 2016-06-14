@@ -136,6 +136,4 @@ $(function () {
   drawLayer(map, 'unscaled-moving', 'This is a moving layer without rescaling.', 1);
   drawLayer(map, 'scaled-moving', 'This is a moving layer with rescaling.', 2, true);
 
-  // Draw the map
-  map.draw();
 });

@@ -49,13 +49,13 @@ $(function () {
   function handleMouseClick(evt) {
     evt.data.clicked = !evt.data.clicked;
     this.modified();
-    map.draw();
+    this.draw();
   }
 
   function handleBrush(evt) {
     evt.data.clicked = true;
     this.modified();
-    map.draw();
+    this.draw();
   }
 
   var color = d3.scale.category10();
@@ -83,6 +83,6 @@ $(function () {
     .geoOn(geo.event.feature.mouseclick, handleMouseClick)
     .geoOn(geo.event.feature.brushend, handleBrush);
 
-  // Draw the map
-  map.draw();
+  vglLayer.draw();
+  svgLayer.draw();
 });
