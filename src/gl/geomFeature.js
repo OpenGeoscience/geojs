@@ -21,6 +21,9 @@ var gl_geomFeature = function (arg) {
 
   arg = arg || {};
   geomFeature.call(this, arg);
+  var object = require('./object');
+
+  object.call(this);
 
   // Initialize
   var m_this = this,

@@ -79,8 +79,7 @@ $(function () {
     url: '../../data/oahu.json',
     success: function (data) {
       var contour = makeContour(data, vglLayer);
-      // Draw the map
-      map.draw();
+      contour.draw();
       /* After 10 second, load a denser data set */
       window.setTimeout(function () {
         $.ajax({
@@ -88,7 +87,7 @@ $(function () {
           success: function (data) {
             vglLayer.deleteFeature(contour);
             contour = makeContour(data, vglLayer, contour);
-            map.draw();
+            contour.draw();
           }
         });
       }, 10000);

@@ -125,7 +125,7 @@ $(function () {
         // asked for it not to have been cached to begin with.
         delete evt.data._cachedQuad;
         this.modified();
-        layer.map().draw();
+        this.draw();
       })
       .geoOn(geo.event.feature.mouseout, function (evt) {
         if (evt.data.orig_opacity === undefined) {
@@ -134,11 +134,9 @@ $(function () {
         evt.data.opacity = evt.data.orig_opacity || undefined;
         delete evt.data._cachedQuad;
         this.modified();
-        layer.map().draw();
+        this.draw();
       })
       .draw();
-
-    map.draw();
 
     quadDebug.map = map;
     quadDebug.layer = layer;

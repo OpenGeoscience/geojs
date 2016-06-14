@@ -35,7 +35,7 @@ function(add_geojs_test test_name)
   set_property(TEST "notes-report" APPEND PROPERTY DEPENDS "${test_name}")
 endfunction()
 
-set(MIDAS_BASE_URL "http://midas3.kitware.com/midas" CACHE STRING "MIDAS data store URL.")
+set(MIDAS_BASE_URL "https://midas3.kitware.com/midas" CACHE STRING "MIDAS data store URL.")
 mark_as_advanced(MIDAS_BASE_URL)
 set(MIDAS_COMMUNITY "GeoJS" CACHE STRING "MIDAS community hosting test images.")
 mark_as_advanced(MIDAS_COMMUNITY)

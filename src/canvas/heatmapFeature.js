@@ -22,6 +22,9 @@ var canvas_heatmapFeature = function (arg) {
     return new canvas_heatmapFeature(arg);
   }
   heatmapFeature.call(this, arg);
+  var object = require('./object');
+
+  object.call(this);
 
   ////////////////////////////////////////////////////////////////////////////
   /**
