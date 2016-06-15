@@ -52,7 +52,6 @@ module.exports = $.extend({
   object: require('./object'),
   osmLayer: require('./osmLayer'),
   pathFeature: require('./pathFeature'),
-  planeFeature: require('./planeFeature'),
   pointFeature: require('./pointFeature'),
   polygonFeature: require('./polygonFeature'),
   quadFeature: require('./quadFeature'),
