@@ -41,29 +41,26 @@
      * @param {geo.screenPosition[][]?} inner Inner boundaries (holes)
      */
     pointInPolygon: function (point, outer, inner) {
-      var inside = false, n = outer.length;
+      var inside = false, n = outer.length, i, j;
 
       if (n < 3) {
         // we need 3 coordinates for this to make sense
         return false;
       }
 
-      outer.forEach(function (vert, i) {
-        var j = (n + i - 1) % n;
-        var intersect = (
-          ((outer[i].y > point.y) !== (outer[j].y > point.y)) &&
-          (point.x < (outer[j].x - outer[i].x) *
-                     (point.y - outer[i].y) /
-                     (outer[j].y - outer[i].y) + outer[i].x)
-        );
-        if (intersect) {
+      for (i = 0, j = n - 1; i < n; j = i, i += 1) {
+        if (((outer[i].y > point.y) !== (outer[j].y > point.y)) &&
+            (point.x < (outer[j].x - outer[i].x) *
+            (point.y - outer[i].y) / (outer[j].y - outer[i].y) + outer[i].x)) {
           inside = !inside;
         }
-      });
+      }
 
-      (inner || []).forEach(function (hole) {
-        inside = inside && !geo.util.pointInPolygon(point, hole);
-      });
+      if (inner && inside) {
+        (inner || []).forEach(function (hole) {
+          inside = inside && !geo.util.pointInPolygon(point, hole);
+        });
+      }
 
       return inside;
     },
