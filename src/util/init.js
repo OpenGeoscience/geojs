@@ -38,10 +38,21 @@
      *   http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
      * @param {geo.screenPosition} point The test point
      * @param {geo.screenPosition[]} outer The outer boundary of the polygon
-     * @param {geo.screenPosition[][]?} inner Inner boundaries (holes)
+     * @param {geo.screenPosition[][]} [inner] Inner boundaries (holes)
+     * @param {Object} [range] If specified, range.min.x, range.min.y,
+     *   range.max.x, and range.max.y specified the extents of the outer
+     *   polygon and are used for early detection.
+     * @returns {boolean} true if the point is inside the polygon.
      */
-    pointInPolygon: function (point, outer, inner) {
+    pointInPolygon: function (point, outer, inner, range) {
       var inside = false, n = outer.length, i, j;
+
+      if (range && range.min && range.max) {
+        if (point.x < range.min.x || point.y < range.min.y ||
+            point.x > range.max.x || point.y > range.max.y) {
+          return;
+        }
+      }
 
       if (n < 3) {
         // we need 3 coordinates for this to make sense

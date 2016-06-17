@@ -24,8 +24,11 @@ var feature = require('./feature');
  * @param {Object|Function} [arg.style.fillColor] Color to fill each polygon.
  *   The color can vary by vertex.  Colors can be css names or hex values, or
  *   an object with r, g, b on a [0-1] scale.
- * @param {Object|Function} [arg.style.fillOpacity] Opacity for each polygon.
+ * @param {number|Function} [arg.style.fillOpacity] Opacity for each polygon.
  *   The opacity can vary by vertex.  Opacity is on a [0-1] scale.
+ * @param {boolean|Function} [arg.style.uniformPolygon] Boolean indicating if
+ *   each polygon has a uniform style (uniform fill color and opacity).
+ *   Defaults to false.  Can vary by polygon.
  * @returns {geo.polygonFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -49,7 +52,7 @@ var polygonFeature = function (arg) {
       m_polygon,
       s_init = this._init,
       s_data = this.data,
-      m_coordinates = {outer: [], inner: []};
+      m_coordinates = [];
 
   if (arg.polygon === undefined) {
     m_polygon = function (d) {
@@ -89,7 +92,8 @@ var polygonFeature = function (arg) {
   /**
    * Get the internal coordinates whenever the data changes.  For now, we do
    * the computation in world coordinates, but we will need to work in GCS
-   * for other projections.
+   * for other projections.  Also compute the extents of the outside of each
+   * polygon for faster chcking if points are in the polygon.
    * @memberof geo.polygonFeature
    * @private
    */
@@ -99,20 +103,35 @@ var polygonFeature = function (arg) {
         polyFunc = m_this.polygon();
     m_coordinates = m_this.data().map(function (d, i) {
       var poly = polyFunc(d);
-      var outer, inner;
+      var outer, inner, range, coord, j, x, y;
 
-      outer = (poly.outer || (poly instanceof Array ? poly : [])).map(function (d0, j) {
-        return posFunc.call(m_this, d0, j, d, i);
-      });
-
+      coord = poly.outer || (poly instanceof Array ? poly : []);
+      outer = new Array(coord.length);
+      for (j = 0; j < coord.length; j += 1) {
+        outer[j] = posFunc.call(m_this, coord[j], j, d, i);
+        x = outer[j].x || outer[j][0] || 0;
+        y = outer[j].y || outer[j][1] || 0;
+        if (!j) {
+          range = {min: {x: x, y: y}, max: {x: x, y: y}};
+        } else {
+          if (x < range.min.x) { range.min.x = x; }
+          if (y < range.min.y) { range.min.y = y; }
+          if (x > range.max.x) { range.max.x = x; }
+          if (y > range.max.y) { range.max.y = y; }
+        }
+      }
       inner = (poly.inner || []).map(function (hole) {
-        return (hole || []).map(function (d0, k) {
-          return posFunc.call(m_this, d0, k, d, i);
-        });
+        coord = hole || [];
+        var trans = new Array(coord.length);
+        for (j = 0; j < coord.length; j += 1) {
+          trans[j] = posFunc.call(m_this, coord[j], j, d, i);
+        }
+        return trans;
       });
       return {
         outer: outer,
-        inner: inner
+        inner: inner,
+        range: range
       };
     });
   }
@@ -177,7 +196,8 @@ var polygonFeature = function (arg) {
       var inside = util.pointInPolygon(
         coordinate,
         coord.outer,
-        coord.inner
+        coord.inner,
+        coord.range
       );
       if (inside) {
         indices.push(i);

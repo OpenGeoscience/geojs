@@ -39,7 +39,8 @@ var gl_polygonFeature = function (arg) {
       m_material = vgl.material(),
       m_geometry,
       s_init = this._init,
-      s_update = this._update;
+      s_update = this._update,
+      m_updateAnimFrameRef;
 
   function createVertexShader() {
     var vertexShaderSource = [
@@ -87,25 +88,38 @@ var gl_polygonFeature = function (arg) {
   /**
    * Create and style the triangles need to render the polygons.
    *
+   * There are several optimizations to do less work when possible.  If only
+   * styles have changed, the triangulation is not recomputed, nor is the
+   * geometry re-transformed.  If styles use static values (rather than
+   * functions), they are only calculated once.  If a polygon reports that it
+   * has a uniform style, then styles are only calculated once for that polygon
+   * (the uniform property may be different per polygon or per update).
+   * Array.map is slower in Chrome that using a loop, so loops are used in
+   * places that would be conceptually served by maps.
+   *
    * @memberof geo.gl.polygonFeature
    * @param {boolean} onlyStyle if true, use the existing geoemtry and just
    *    recalculate the style.
    */
   function createGLPolygons(onlyStyle) {
-    var posBuf, posFunc = null,
-        fillColor, fillColorFunc = null,
-        fillOpacity, fillOpacityFunc = null,
+    var posBuf, posFunc,
+        fillColor, fillColorFunc, fillColorVal,
+        fillOpacity, fillOpacityFunc, fillOpacityVal,
+        uniformPolyFunc, uniform,
         indices,
         items = [],
         target_gcs = m_this.gcs(),
         map_gcs = m_this.layer().map().gcs(),
         numPts = 0,
         geom = m_mapper.geometryData(),
-        color, d, d3, vertices, i, j, k, n,
+        color, opacity, d, d3, vertices, i, j, k, n,
         record, item, itemIndex, original;
 
     fillColorFunc = m_this.style.get('fillColor');
+    fillColorVal = util.isFunction(m_this.style('fillColor')) ? undefined : fillColorFunc();
     fillOpacityFunc = m_this.style.get('fillOpacity');
+    fillOpacityVal = util.isFunction(m_this.style('fillOpacity')) ? undefined : fillOpacityFunc();
+    uniformPolyFunc = m_this.style.get('uniformPolygon');
 
     if (!onlyStyle) {
       posFunc = m_this.position();
@@ -174,25 +188,58 @@ var gl_polygonFeature = function (arg) {
     fillColor = util.getGeomBuffer(geom, 'fillColor', numPts * 3);
     fillOpacity = util.getGeomBuffer(geom, 'fillOpacity', numPts);
     d = d3 = 0;
+    color = fillColorVal;
+    opacity = fillOpacityVal;
     for (k = 0; k < items.length; k += 1) {
       n = items[k].triangles.length;
       vertices = items[k].vertices;
       item = items[k].item;
       itemIndex = items[k].itemIndex;
       original = items[k].original;
-      for (i = 0; i < n; i += 1, d += 1, d3 += 3) {
-        j = items[k].triangles[i] * 3;
-        if (!onlyStyle) {
-          posBuf[d3] = vertices[j];
-          posBuf[d3 + 1] = vertices[j + 1];
-          posBuf[d3 + 2] = vertices[j + 2];
-          indices[d] = i;
+      uniform = uniformPolyFunc(item, itemIndex);
+      if (uniform) {
+        if (fillColorVal === undefined) {
+          color = fillColorFunc(vertices[0], 0, item, itemIndex);
         }
-        color = fillColorFunc(original[j], j, item, itemIndex);
-        fillColor[d3] = color.r;
-        fillColor[d3 + 1] = color.g;
-        fillColor[d3 + 2] = color.b;
-        fillOpacity[d] = fillOpacityFunc(original[j], j, item, itemIndex);
+        if (fillOpacityVal === undefined) {
+          opacity = fillOpacityFunc(vertices[0], 0, item, itemIndex);
+        }
+      }
+      if (uniform && onlyStyle && items[k].uniform && items[k].color && color.r === items[k].color.r && color.g === items[k].color.g && color.b === items[k].color.b && opacity === items[k].opacity) {
+        d += n;
+        d3 += n * 3;
+        continue;
+      }
+      for (i = 0; i < n; i += 1, d += 1, d3 += 3) {
+        if (onlyStyle && uniform) {
+          fillColor[d3] = color.r;
+          fillColor[d3 + 1] = color.g;
+          fillColor[d3 + 2] = color.b;
+          fillOpacity[d] = opacity;
+        } else {
+          j = items[k].triangles[i] * 3;
+          if (!onlyStyle) {
+            posBuf[d3] = vertices[j];
+            posBuf[d3 + 1] = vertices[j + 1];
+            posBuf[d3 + 2] = vertices[j + 2];
+            indices[d] = i;
+          }
+          if (!uniform && fillColorVal === undefined) {
+            color = fillColorFunc(original[j], j, item, itemIndex);
+          }
+          fillColor[d3] = color.r;
+          fillColor[d3 + 1] = color.g;
+          fillColor[d3 + 2] = color.b;
+          if (!uniform && fillOpacityVal === undefined) {
+            opacity = fillOpacityFunc(original[j], j, item, itemIndex);
+          }
+          fillOpacity[d] = opacity;
+        }
+      }
+      if (uniform || items[k].uniform) {
+        items[k].uniform = uniform;
+        items[k].color = color;
+        items[k].opacity = opacity;
       }
     }
     m_mapper.modified();
@@ -260,13 +307,12 @@ var gl_polygonFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
-    if (m_actor) {
-      m_this.renderer().contextRenderer().removeActor(m_actor);
-    }
 
     createGLPolygons(m_this.dataTime().getMTime() < m_this.buildTime().getMTime() && m_geometry);
 
-    m_this.renderer().contextRenderer().addActor(m_actor);
+    if (!m_this.renderer().contextRenderer().hasActor(m_actor)) {
+      m_this.renderer().contextRenderer().addActor(m_actor);
+    }
     m_this.buildTime().modified();
   };
 
@@ -278,7 +324,15 @@ var gl_polygonFeature = function (arg) {
    * @override
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._update = function () {
+  this._update = function (opts) {
+    if (opts && opts.mayDelay) {
+      m_updateAnimFrameRef = window.requestAnimationFrame(this._update);
+      return;
+    }
+    if (m_updateAnimFrameRef) {
+      window.cancelAnimationFrame(m_updateAnimFrameRef);
+      m_updateAnimFrameRef = null;
+    }
     s_update.call(m_this);
 
     if (m_this.dataTime().getMTime() >= m_this.buildTime().getMTime() ||

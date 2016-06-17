@@ -33,6 +33,7 @@ $(function () {
       .position(function (d) {
         return {x: d[0], y: d[1]};
       })
+      .style('uniformPolygon', true)
       .style('fillOpacity', 0.5)
       .style('fillColor', function (d, idx, poly, polyidx) {
         return poly.hover ? 'blue' : {

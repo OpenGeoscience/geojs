@@ -305,7 +305,7 @@ var feature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.style.get = function (key) {
-    var tmp, out;
+    var out;
     if (key === undefined) {
       var all = {}, k;
       for (k in m_style) {
@@ -317,10 +317,9 @@ var feature = function (arg) {
     }
     if (key.toLowerCase().match(/color$/)) {
       if (util.isFunction(m_style[key])) {
-        tmp = util.ensureFunction(m_style[key]);
         out = function () {
           return util.convertColor(
-            tmp.apply(this, arguments)
+            m_style[key].apply(this, arguments)
           );
         };
       } else {
