@@ -217,6 +217,7 @@ var polygonFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
+    arg = arg || {};
     s_init.call(m_this, arg);
 
     var defaultStyle = $.extend(
@@ -237,6 +238,22 @@ var polygonFeature = function (arg) {
 
   this._init(arg);
   return this;
+};
+
+/**
+ * Create a polygonFeature from an object.
+ *
+ * @see {@link geo.feature.create}
+ * @param {geo.layer} layer The layer to add the feature to
+ * @param {geo.polygonFeature.spec} spec The object specification
+ * @returns {geo.polygonFeature|null}
+ */
+polygonFeature.create = function (layer, spec) {
+  'use strict';
+
+  spec = spec || {};
+  spec.type = 'polygon';
+  return feature.create(layer, spec);
 };
 
 inherit(polygonFeature, feature);

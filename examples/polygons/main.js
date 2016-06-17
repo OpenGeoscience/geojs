@@ -26,7 +26,7 @@ $(function () {
   var hoverColor = query.hover || 'blue';
   var polyColor = query.color ? geo.util.convertColor(query.color) : undefined;
   $.getJSON(query.url || '../../data/land_polygons.json').done(function (data) {
-    polygons.data(data)
+    polygons
       /* This is the default accessor, so we don't have to define it ourselves.
       .polygon(function (d) {
         return d;
@@ -35,6 +35,7 @@ $(function () {
       .position(function (d) {
         return {x: d[0], y: d[1]};
       })
+      .data(data)
       .style('uniformPolygon', true)
       .style('fillOpacity', query.opacity ? parseFloat(query.opacity) : 0.5)
       .style('fillColor', function (d, idx, poly, polyidx) {
