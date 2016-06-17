@@ -23,9 +23,11 @@ $(function () {
     features: query.renderer ? undefined : ['polygon']
   });
   var polygons = layer.createFeature('polygon', {selectionAPI: true});
-  $.getJSON('../../data/land_polygons.json').done(function (data) {
+  var hoverColor = query.hover || 'blue';
+  var polyColor = query.color ? geo.util.convertColor(query.color) : undefined;
+  $.getJSON(query.url || '../../data/land_polygons.json').done(function (data) {
     polygons.data(data)
-      /* This is the default accessor, so we don't have to define it outselves.
+      /* This is the default accessor, so we don't have to define it ourselves.
       .polygon(function (d) {
         return d;
       })
@@ -34,13 +36,13 @@ $(function () {
         return {x: d[0], y: d[1]};
       })
       .style('uniformPolygon', true)
-      .style('fillOpacity', 0.5)
+      .style('fillOpacity', query.opacity ? parseFloat(query.opacity) : 0.5)
       .style('fillColor', function (d, idx, poly, polyidx) {
-        return poly.hover ? 'blue' : {
+        return poly.hover ? hoverColor : (polyColor ? polyColor : {
           r: (polyidx % 256) / 255,
           g: polyidx / (data.length - 1),
           b: 0.25
-        };
+        });
       })
       .geoOn(geo.event.feature.mouseover, function (evt) {
         if (!evt.data.hover) {
