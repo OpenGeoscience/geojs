@@ -465,5 +465,14 @@ quadFeature.create = function (layer, spec) {
   return feature.create(layer, spec);
 };
 
+quadFeature.capabilities = {
+  /* support for solid-colored quads */
+  color: 'quad.color',
+  /* support for parallelogram images */
+  image: 'quad.image',
+  /* support for arbitrary quad images */
+  imageFull: 'quad.imageFull'
+};
+
 inherit(quadFeature, feature);
 module.exports = quadFeature;

@@ -126,7 +126,7 @@ $(function () {
     }
     // Set the tile layer defaults to use the specified renderer and opacity
     var layerParams = {
-      features: ['quad.img-full'],
+      features: [geo.quadFeature.capabilities.imageFull],
       zIndex: 0,
       gcs: 'EPSG:3857',
       attribution: $('#url-list [value="' + $('#layer-url').val() + '"]').attr(

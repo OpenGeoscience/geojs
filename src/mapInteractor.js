@@ -24,6 +24,7 @@ var mapInteractor = function (args) {
   var geo_event = require('./event');
   var throttle = require('./util').throttle;
   var debounce = require('./util').debounce;
+  var quadFeature = require('./quadFeature');
 
   var m_options = args || {},
       m_this = this,
@@ -686,8 +687,9 @@ var mapInteractor = function (args) {
           m_selectionLayer = null;
         }
         m_selectionLayer = m_this.map().createLayer(
-          'feature', {features: ['quad.clr']});
-        m_selectionQuad = m_selectionLayer.createFeature('quad');
+          'feature', {features: [quadFeature.capabilities.color]});
+        m_selectionQuad = m_selectionLayer.createFeature(
+          'quad', {gcs: m_this.map().gcs()});
         m_selectionQuad.style({
           opacity: 0.25,
           color: {r: 0.3, g: 0.3, b: 0.3}

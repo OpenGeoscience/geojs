@@ -244,5 +244,12 @@ lineFeature.create = function (layer, spec) {
   return feature.create(layer, spec);
 };
 
+lineFeature.capabilities = {
+  /* support for solid-colored, constant-width lines */
+  basic: 'line.basic',
+  /* support for lines that very in width and color */
+  multicolor: 'line.multicolor'
+};
+
 inherit(lineFeature, feature);
 module.exports = lineFeature;

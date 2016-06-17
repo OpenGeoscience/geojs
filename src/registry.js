@@ -101,11 +101,12 @@ util.checkRenderer = function (name, noFallback) {
  * @param {array|undefined} featureList A list of features that will be used
  *      with this renderer.  Features are the basic feature names (e.g.,
  *      'quad'), or the feature name followed by a required capability (e.g.,
- *      'quad.img').  If more than one feature or more than one capability of a
- *      feature is required, include each feature and capability combination in
- *      the list (e.g., ['quad.img', 'plane']).  If no capability is specified
- *      for a feature (or that feature was registered without a capability
- *      object), then the feature will match regardless of capabilities.
+ *      'quad.image').  If more than one feature or more than one capability of
+ *      a feature is required, include each feature and capability combination
+ *      in the list (e.g., ['quad.image', 'plane']).  If no capability is
+ *      specified for a feature (or that feature was registered without a
+ *      capability object), then the feature will match regardless of
+ *      capabilities.
  * @return {string|null|false} the name of the renderer that should be used
  *      or false if no valid renderer can be determined.
  */
@@ -130,7 +131,7 @@ util.rendererForFeatures = function (featureList) {
       feature = featureList[fidx];
       capability = null;
       if (feature.indexOf('.') >= 0) {
-        capability = feature.substr(feature.indexOf('.') + 1);
+        capability = feature;
         feature = feature.substr(0, feature.indexOf('.'));
       }
       if (features[renderer][feature] === undefined) {
@@ -165,7 +166,8 @@ util.rendererForFeatures = function (featureList) {
  *      should expose a simple dictionary of supported and unsupported
  *      features.  For instance, the quad feature has color quads, image quads,
  *      and image quads that support full transformations.  The capabailities
- *      might be {clr: true, img: true: 'img-full': false}.
+ *      should be defined in the base feature in a capabilities object so that
+ *      they can be referenced by that rather than an explicit string.
  */
 //////////////////////////////////////////////////////////////////////////////
 util.registerFeature = function (category, name, func, capabilities) {
