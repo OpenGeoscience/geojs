@@ -1,0 +1,61 @@
+extends ../common/templates/index.jade
+
+block append mainContent
+  div#controls
+
+    .form-group(title="Select a color palette.")
+      label(for="color-palette") Color Palette
+      select#color-palette.mapparam(param-name="palette", placeholder="YlGn")
+        option(value="YlGn") YlGn
+        option(value="YlGnBu") YlGnBu
+        option(value="GnBu") GnBu 
+        option(value="BuGn") BuGn
+        option(value="PuBuGn") PuBuGn
+        option(value="PuBu") PuBu
+        option(value="BuPu") BuPu 
+        option(value="RdPu") RdPu
+        option(value="PuRd") PuRd
+        option(value="OrRd") OrRd
+        option(value="YlOrRd") YlOrRd 
+        option(value="YlOrBr") YlOrBr
+        option(value="Purples") Purples
+        option(value="Blues") Blues
+        option(value="Greens") Greens 
+        option(value="Oranges") Oranges       
+        option(value="Reds") Reds
+        option(value="Greys") Greys
+        option(value="PuOr") PuOr 
+        option(value="BrBG") BrBG      
+        option(value="PRGn") PRGn
+        option(value="PiYG") PiYG
+        option(value="RdBu") RdBu
+        option(value="RdGy") RdGy     
+        option(value="RdYlBu") RdYlBu     
+        option(value="Spectral") Spectral     
+        option(value="RdYlGn") RdYlGn     
+        option(value="Accent") Accent     
+        option(value="Dark2") Dark2     
+        option(value="Paired") Paired     
+        option(value="Pastel1") Pastel1     
+        option(value="Pastel2") Pastel2     
+        option(value="Set1") Set1     
+        option(value="Set2") Set2    
+        option(value="Set2") Set2    
+
+    .form-group(title="Select number of colors.")
+      label(for="color-count") Number of colors
+      select#color-count.mapparam(param-name="count", placeholder="3")
+        option(value="3") 3
+        option(value="4") 4
+        option(value="5") 5
+        option(value="6") 6
+        option(value="7") 7
+        option(value="8") 8
+
+    .form-group(title="Minimum value for your data")
+      label(for="min") Minimum
+      input#min.mapparam(param-name="x", placeholder="0", value=0)
+
+    .form-group(title="Maximum value for your data.")
+      label(for="max") Maximum
+      input#max.mapparam(param-name="x", placeholder="300", value=300)
