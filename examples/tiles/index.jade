@@ -4,7 +4,8 @@ block append mainContent
   div#controls
     .form-group(title="Tiles can be drawn using WebGL, Canvas, HTML, or SVG.  WebGL is generally the fastest and HTML the most compatible.")
       label(for="map-renderer") Renderer
-      select#map-renderer.mapparam(param-name="renderer", placeholder="vgl")
+      select#map-renderer.mapparam(param-name="renderer", placeholder="default")
+        option(value="default") Default
         option(value="vgl") VGL (WebGL)
         option(value="canvas") Canvas
         option(value="d3") SVG (d3)

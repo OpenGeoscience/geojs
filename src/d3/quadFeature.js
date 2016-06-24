@@ -228,5 +228,10 @@ var d3_quadFeature = function (arg) {
 inherit(d3_quadFeature, quadFeature);
 
 // Now register it
-registerFeature('d3', 'quad', d3_quadFeature);
+var capabilities = {};
+capabilities[quadFeature.capabilities.color] = true;
+capabilities[quadFeature.capabilities.image] = true;
+capabilities[quadFeature.capabilities.imageFull] = false;
+
+registerFeature('d3', 'quad', d3_quadFeature, capabilities);
 module.exports = d3_quadFeature;

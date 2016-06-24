@@ -18,7 +18,7 @@ $(function () {
 
   // Create a gl feature layer
   var layer = map.createLayer(
-    'feature', { renderer: 'd3' }
+    'feature', {features: ['vector']}
   );
 
   var routes = [

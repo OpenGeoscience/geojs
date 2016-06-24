@@ -24,6 +24,7 @@ var mapInteractor = function (args) {
   var geo_event = require('./event');
   var throttle = require('./util').throttle;
   var debounce = require('./util').debounce;
+  var quadFeature = require('./quadFeature');
 
   var m_options = args || {},
       m_this = this,
@@ -685,9 +686,8 @@ var mapInteractor = function (args) {
           m_this.map().deleteLayer(m_selectionLayer);
           m_selectionLayer = null;
         }
-        // Create a feature layer and plane feature to show the selection bounds
-        m_selectionLayer = m_this.map().createLayer('feature', {renderer: 'd3'});
-
+        m_selectionLayer = m_this.map().createLayer(
+          'feature', {features: [quadFeature.capabilities.color]});
         m_selectionQuad = m_selectionLayer.createFeature(
           'quad', {gcs: m_this.map().gcs()});
         m_selectionQuad.style({
