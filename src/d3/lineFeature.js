@@ -130,6 +130,11 @@ var d3_lineFeature = function (arg) {
 
 inherit(d3_lineFeature, lineFeature);
 
-registerFeature('d3', 'line', d3_lineFeature, {basic: true, multicolor: false});
+// Now register it
+var capabilities = {};
+capabilities[lineFeature.capabilities.basic] = true;
+capabilities[lineFeature.capabilities.multicolor] = false;
+
+registerFeature('d3', 'line', d3_lineFeature, capabilities);
 
 module.exports = d3_lineFeature;

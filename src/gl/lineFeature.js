@@ -398,6 +398,11 @@ var gl_lineFeature = function (arg) {
 inherit(gl_lineFeature, lineFeature);
 
 // Now register it
-registerFeature('vgl', 'line', gl_lineFeature, {basic: true, multicolor: true});
+var capabilities = {};
+capabilities[lineFeature.capabilities.basic] = true;
+capabilities[lineFeature.capabilities.multicolor] = true;
+
+// Now register it
+registerFeature('vgl', 'line', gl_lineFeature, capabilities);
 
 module.exports = gl_lineFeature;

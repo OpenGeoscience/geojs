@@ -370,7 +370,7 @@ $(function () {
   );
 
   // Create a feature layer to draw on.
-  layer = map.createLayer('feature', {features: ['line.multicolor']});
+  layer = map.createLayer('feature', {features: [geo.lineFeature.capabilities.multicolor]});
 
   // Create a line feature
   feature = layer.createFeature('line', {selectionAPI: true});
