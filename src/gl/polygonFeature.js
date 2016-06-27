@@ -205,7 +205,9 @@ var gl_polygonFeature = function (arg) {
           opacity = fillOpacityFunc(vertices[0], 0, item, itemIndex);
         }
       }
-      if (uniform && onlyStyle && items[k].uniform && items[k].color && color.r === items[k].color.r && color.g === items[k].color.g && color.b === items[k].color.b && opacity === items[k].opacity) {
+      if (uniform && onlyStyle && items[k].uniform && items[k].color &&
+          color.r === items[k].color.r && color.g === items[k].color.g &&
+          color.b === items[k].color.b && opacity === items[k].opacity) {
         d += n;
         d3 += n * 3;
         continue;

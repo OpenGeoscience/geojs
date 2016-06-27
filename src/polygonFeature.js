@@ -10,8 +10,7 @@ var feature = require('./feature');
  * @extends geo.feature
  * @param {Object} arg Options object
  * @param {Object|Function} [arg.position] Position of the data.  Default is
- *   (data).  The position is an Object which specifies the location of the
- *   data in geo-spatial context.
+ *   (data).
  * @param {Object|Function} [arg.polygon] Polygons from the data.  Default is
  *   (data).  Typically, the data is an array of polygons, each of which is
  *   of the form {outer: [(coordinates)], inner: [[(coordinates of first
@@ -93,7 +92,7 @@ var polygonFeature = function (arg) {
    * Get the internal coordinates whenever the data changes.  For now, we do
    * the computation in world coordinates, but we will need to work in GCS
    * for other projections.  Also compute the extents of the outside of each
-   * polygon for faster chcking if points are in the polygon.
+   * polygon for faster checking if points are in the polygon.
    * @memberof geo.polygonFeature
    * @private
    */
@@ -141,7 +140,7 @@ var polygonFeature = function (arg) {
    * Get/set polygon accessor.
    *
    * @memberof geo.polygonFeature
-   * @param {Object} [polygon] if specified, use this for the polygon accesor
+   * @param {Object} [polygon] if specified, use this for the polygon accessor
    *    and return the feature.  If not specified, return the current polygon.
    * @returns {geo.polygonFeature|Object}
    */
@@ -163,8 +162,9 @@ var polygonFeature = function (arg) {
    * Get/Set position accessor.
    *
    * @memberof geo.polygonFeature
-   * @param {Object} [position] if specified, use this for the position accesor
-   *    and return the feature.  If not specified, return the current position.
+   * @param {Object} [position] if specified, use this for the position
+   *    accessor and return the feature.  If not specified, return the current
+   *    position.
    * @returns {geo.polygonFeature|Object}
    */
   ////////////////////////////////////////////////////////////////////////////
