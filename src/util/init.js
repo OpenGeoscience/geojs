@@ -38,32 +38,40 @@
      *   http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
      * @param {geo.screenPosition} point The test point
      * @param {geo.screenPosition[]} outer The outer boundary of the polygon
-     * @param {geo.screenPosition[][]?} inner Inner boundaries (holes)
+     * @param {geo.screenPosition[][]} [inner] Inner boundaries (holes)
+     * @param {Object} [range] If specified, range.min.x, range.min.y,
+     *   range.max.x, and range.max.y specified the extents of the outer
+     *   polygon and are used for early detection.
+     * @returns {boolean} true if the point is inside the polygon.
      */
-    pointInPolygon: function (point, outer, inner) {
-      var inside = false, n = outer.length;
+    pointInPolygon: function (point, outer, inner, range) {
+      var inside = false, n = outer.length, i, j;
+
+      if (range && range.min && range.max) {
+        if (point.x < range.min.x || point.y < range.min.y ||
+            point.x > range.max.x || point.y > range.max.y) {
+          return;
+        }
+      }
 
       if (n < 3) {
         // we need 3 coordinates for this to make sense
         return false;
       }
 
-      outer.forEach(function (vert, i) {
-        var j = (n + i - 1) % n;
-        var intersect = (
-          ((outer[i].y > point.y) !== (outer[j].y > point.y)) &&
-          (point.x < (outer[j].x - outer[i].x) *
-                     (point.y - outer[i].y) /
-                     (outer[j].y - outer[i].y) + outer[i].x)
-        );
-        if (intersect) {
+      for (i = 0, j = n - 1; i < n; j = i, i += 1) {
+        if (((outer[i].y > point.y) !== (outer[j].y > point.y)) &&
+            (point.x < (outer[j].x - outer[i].x) *
+            (point.y - outer[i].y) / (outer[j].y - outer[i].y) + outer[i].x)) {
           inside = !inside;
         }
-      });
+      }
 
-      (inner || []).forEach(function (hole) {
-        inside = inside && !geo.util.pointInPolygon(point, hole);
-      });
+      if (inner && inside) {
+        (inner || []).forEach(function (hole) {
+          inside = inside && !geo.util.pointInPolygon(point, hole);
+        });
+      }
 
       return inside;
     },

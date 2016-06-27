@@ -30,7 +30,7 @@ var gl_object = function (arg) {
   */
   ////////////////////////////////////////////////////////////////////////////
   this.draw = function () {
-    m_this._update();
+    m_this._update({mayDelay: true});
     m_this.renderer()._render();
     s_draw();
     return m_this;

@@ -8,6 +8,26 @@ var feature = require('./feature');
  *
  * @class geo.polygonFeature
  * @extends geo.feature
+ * @param {Object} arg Options object
+ * @param {Object|Function} [arg.position] Position of the data.  Default is
+ *   (data).
+ * @param {Object|Function} [arg.polygon] Polygons from the data.  Default is
+ *   (data).  Typically, the data is an array of polygons, each of which is
+ *   of the form {outer: [(coordinates)], inner: [[(coordinates of first
+ *   hole)], [(coordinates of second hole)], ...]}.  The inner record is
+ *   optional.  Alternately, if there are no holes, a polygon can just be an
+ *   array of coordinates.  Coordinates are in the form {x: (x), y: (y),
+ *   z: (z)}, with z being optional.  The first and last point of each polygon
+ *   must be the same.
+ * @param {Object} [arg.style] Style object with default style options.
+ * @param {Object|Function} [arg.style.fillColor] Color to fill each polygon.
+ *   The color can vary by vertex.  Colors can be css names or hex values, or
+ *   an object with r, g, b on a [0-1] scale.
+ * @param {number|Function} [arg.style.fillOpacity] Opacity for each polygon.
+ *   The opacity can vary by vertex.  Opacity is on a [0-1] scale.
+ * @param {boolean|Function} [arg.style.uniformPolygon] Boolean indicating if
+ *   each polygon has a uniform style (uniform fill color and opacity).
+ *   Defaults to false.  Can vary by polygon.
  * @returns {geo.polygonFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -31,7 +51,7 @@ var polygonFeature = function (arg) {
       m_polygon,
       s_init = this._init,
       s_data = this.data,
-      m_coordinates = {outer: [], inner: []};
+      m_coordinates = [];
 
   if (arg.polygon === undefined) {
     m_polygon = function (d) {
@@ -51,8 +71,12 @@ var polygonFeature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Override the parent data method to keep track of changes to the
-   * internal coordinates.
+   * Get/set data.
+   *
+   * @memberof geo.polygonFeature
+   * @param {Object} [data] if specified, use this for the data and return the
+   *    feature.  If not specified, return the current data.
+   * @returns {geo.polygonFeature|Object}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.data = function (arg) {
@@ -67,7 +91,9 @@ var polygonFeature = function (arg) {
   /**
    * Get the internal coordinates whenever the data changes.  For now, we do
    * the computation in world coordinates, but we will need to work in GCS
-   * for other projections.
+   * for other projections.  Also compute the extents of the outside of each
+   * polygon for faster checking if points are in the polygon.
+   * @memberof geo.polygonFeature
    * @private
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -76,29 +102,47 @@ var polygonFeature = function (arg) {
         polyFunc = m_this.polygon();
     m_coordinates = m_this.data().map(function (d, i) {
       var poly = polyFunc(d);
-      var outer, inner;
+      var outer, inner, range, coord, j, x, y;
 
-      outer = (poly.outer || []).map(function (d0, j) {
-        return posFunc.call(m_this, d0, j, d, i);
-      });
-
+      coord = poly.outer || (poly instanceof Array ? poly : []);
+      outer = new Array(coord.length);
+      for (j = 0; j < coord.length; j += 1) {
+        outer[j] = posFunc.call(m_this, coord[j], j, d, i);
+        x = outer[j].x || outer[j][0] || 0;
+        y = outer[j].y || outer[j][1] || 0;
+        if (!j) {
+          range = {min: {x: x, y: y}, max: {x: x, y: y}};
+        } else {
+          if (x < range.min.x) { range.min.x = x; }
+          if (y < range.min.y) { range.min.y = y; }
+          if (x > range.max.x) { range.max.x = x; }
+          if (y > range.max.y) { range.max.y = y; }
+        }
+      }
       inner = (poly.inner || []).map(function (hole) {
-        return (hole || []).map(function (d0, k) {
-          return posFunc.call(m_this, d0, k, d, i);
-        });
+        coord = hole || [];
+        var trans = new Array(coord.length);
+        for (j = 0; j < coord.length; j += 1) {
+          trans[j] = posFunc.call(m_this, coord[j], j, d, i);
+        }
+        return trans;
       });
       return {
         outer: outer,
-        inner: inner
+        inner: inner,
+        range: range
       };
     });
   }
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get/Set polygon accessor
+   * Get/set polygon accessor.
    *
-   * @returns {geo.pointFeature}
+   * @memberof geo.polygonFeature
+   * @param {Object} [polygon] if specified, use this for the polygon accessor
+   *    and return the feature.  If not specified, return the current polygon.
+   * @returns {geo.polygonFeature|Object}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.polygon = function (val) {
@@ -115,9 +159,13 @@ var polygonFeature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get/Set position accessor
+   * Get/Set position accessor.
    *
-   * @returns {geo.pointFeature}
+   * @memberof geo.polygonFeature
+   * @param {Object} [position] if specified, use this for the position
+   *    accessor and return the feature.  If not specified, return the current
+   *    position.
+   * @returns {geo.polygonFeature|Object}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.position = function (val) {
@@ -134,8 +182,10 @@ var polygonFeature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Point searce method for selection api.  Returns markers containing the
+   * Point search method for selection api.  Returns markers containing the
    * given point.
+   *
+   * @memberof geo.polygonFeature
    * @argument {object} coordinate
    * @returns {object}
    */
@@ -146,7 +196,8 @@ var polygonFeature = function (arg) {
       var inside = util.pointInPolygon(
         coordinate,
         coord.outer,
-        coord.inner
+        coord.inner,
+        coord.range
       );
       if (inside) {
         indices.push(i);
@@ -162,9 +213,11 @@ var polygonFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
+   * @memberof geo.polygonFeature
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
+    arg = arg || {};
     s_init.call(m_this, arg);
 
     var defaultStyle = $.extend(
@@ -185,6 +238,22 @@ var polygonFeature = function (arg) {
 
   this._init(arg);
   return this;
+};
+
+/**
+ * Create a polygonFeature from an object.
+ *
+ * @see {@link geo.feature.create}
+ * @param {geo.layer} layer The layer to add the feature to
+ * @param {geo.polygonFeature.spec} spec The object specification
+ * @returns {geo.polygonFeature|null}
+ */
+polygonFeature.create = function (layer, spec) {
+  'use strict';
+
+  spec = spec || {};
+  spec.type = 'polygon';
+  return feature.create(layer, spec);
 };
 
 inherit(polygonFeature, feature);

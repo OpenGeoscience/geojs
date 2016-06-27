@@ -132,9 +132,10 @@ var vglRenderer = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._render = function () {
-    if (m_renderAnimFrameRef === null) {
-      m_renderAnimFrameRef = window.requestAnimationFrame(this._renderFrame);
+    if (m_renderAnimFrameRef) {
+      window.cancelAnimationFrame(m_renderAnimFrameRef);
     }
+    m_renderAnimFrameRef = window.requestAnimationFrame(this._renderFrame);
     return m_this;
   };
 
