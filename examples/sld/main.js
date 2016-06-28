@@ -671,6 +671,8 @@ var colorbrewer = {
 };
 
 function generateSequence(start, stop, count) {
+    // Generates a sequence of numbers with the given start, 
+    // stop and count variables
     var sequence = [];
     var step = (stop - start) / (count - 1.0);
     for (var i = 0; i < count; i++) {
@@ -680,10 +682,12 @@ function generateSequence(start, stop, count) {
 }
 
 function getPalette(name, count) {
+    // Gets the palette array with the given name and count parameters
     return colorbrewer[name][count];
 }
 
 function createMapEntry(xml, color, value, opacity) {
+    // Adds a color-quantity-opacity entry to the sld  
     $(xml)
         .find("ColorMap")
         .append($('<ColorMapEntry>', xml)
@@ -694,7 +698,8 @@ function createMapEntry(xml, color, value, opacity) {
             }));
 }
 
-function generateXml(name, count, values, palette) {
+function generateXml(name, count, values, palette, type) {
+    // Generates the xml (sld) file with the given parameters
     var xml = $($.parseXML(
         '<?xml version="1.0" encoding="utf-8" ?><StyledLayerDescriptor />'
     ));
@@ -739,19 +744,30 @@ function generateXml(name, count, values, palette) {
         .find("RasterSymbolizer")
         .append($('<ColorMap>', xml));
 
+    if (type.val() === "discrete") {
+        $(xml)
+            .find("ColorMap")
+            .attr({
+                'type': 'intervals'
+            });
+    }
+
+
     for (var i = 0; i < count; i++) {
         createMapEntry(xml, palette[i], values[i], 1);
     }
     xmlString = (new XMLSerializer())
         .serializeToString(xml.context);
+    console.log(xmlString)
     return xmlString;
 }
 
-function generateSld(layer_name, palette_name, count, min, max) {
+function generateSld(layer_name, palette_name, count, min, max, type) {
+    // Orchestrates the sld generation
     var sequence = generateSequence(min, max, count);
     var palette_array = getPalette(palette_name, count);
     var xml = generateXml(layer_name, count, sequence,
-        palette_array);
+        palette_array, type);
     return xml;
 }
 
@@ -804,10 +820,10 @@ $(function() {
     // Create a map object
     var map = geo.map({
         node: '#map',
-        zoom: 5,
+        zoom: 8,
         center: {
-            x: -86.0,
-            y: 47
+            x: -76.0,
+            y: 39
         }
     });
     // Add an OSM layer
@@ -827,12 +843,15 @@ $(function() {
         .val();
     var layer_name = 'usgs:ned';
 
-    var sld = generateSld(layer_name, palette_name, count, min, max);
+    var type = $("#palette-type");
+
+    var sld = generateSld(layer_name, palette_name, count, min, max,
+        type);
 
     var wms = createWMSLayer(map, sld, projection, layer_name);
 
     // If any of the input boxes changes regenerate sld again
-    $("#color-palette, #color-count, #min, #max")
+    $("#color-palette, #color-count, #min, #max, #palette-type")
         .change(function() {
 
             palette_name = $('#color-palette')
@@ -845,7 +864,7 @@ $(function() {
                 .val();
 
             sld = generateSld(layer_name, palette_name, count, min,
-                max);
+                max, type);
 
             map.deleteLayer(wms);
 
