@@ -62,13 +62,12 @@ var gl_lineFeature = function (arg) {
           'uniform float aspect;',
 
           'varying vec3 strokeColorVar;',
-          'varying float strokeWidthVar;',
           'varying float strokeOpacityVar;',
 
           'void main(void)',
           '{',
-      /* If any vertex has been deliberately set to a negative opacity,
-       * skip doing computations on it. */
+          /* If any vertex has been deliberately set to a negative opacity,
+           * skip doing computations on it. */
           '  if (strokeOpacity < 0.0) {',
           '    gl_Position = vec4(2, 2, 0, 1);',
           '    return;',
@@ -87,7 +86,6 @@ var gl_lineFeature = function (arg) {
           '    worldPrev = worldPrev/worldPrev.w;',
           '  }',
           '  strokeColorVar = strokeColor;',
-          '  strokeWidthVar = strokeWidth;',
           '  strokeOpacityVar = strokeOpacity;',
           '  vec2 deltaNext = worldNext.xy - worldPos.xy;',
           '  vec2 deltaPrev = worldPos.xy - worldPrev.xy;',
@@ -118,7 +116,6 @@ var gl_lineFeature = function (arg) {
           '  precision highp float;',
           '#endif',
           'varying vec3 strokeColorVar;',
-          'varying float strokeWidthVar;',
           'varying float strokeOpacityVar;',
           'void main () {',
           '  gl_FragColor = vec4 (strokeColorVar, strokeOpacityVar);',
@@ -206,7 +203,7 @@ var gl_lineFeature = function (arg) {
             nextBuf[dest3 + 1] = position[v.next + 1];
             nextBuf[dest3 + 2] = position[v.next + 2];
             offsetBuf[dest] = order[k][1];
-            /* We can ignore the indicies (they will all be zero) */
+            /* We can ignore the indices (they will all be zero) */
             strokeWidthBuf[dest] = v.strokeWidth;
             strokeColorBuf[dest3] = v.strokeColor.r;
             strokeColorBuf[dest3 + 1] = v.strokeColor.g;
