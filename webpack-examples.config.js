@@ -29,6 +29,9 @@ var loaders = base.module.loaders.concat([{
 }, {
   test: /jsonlint\.js$/,
   loader: 'expose?jsonlint'
+}, {
+  test: require.resolve('colorbrewer'),
+  loader: 'expose?colorbrewer'
 }]);
 
 loaders = loaders.concat(external.module.loaders);
