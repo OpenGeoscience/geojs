@@ -16,7 +16,8 @@ $(function () {
     zoom: 4
   });
   var layer = map.createLayer('feature', {
-    renderer: query.renderer ? (query.renderer === 'html' ? null : query.renderer) : 'vgl'
+    renderer: query.renderer ? (query.renderer === 'html' ? null : query.renderer) : undefined,
+    features: query.renderer ? undefined : ['quad']
   });
   var quads = layer.createFeature('quad', {selectionAPI: true});
   var previewImage = new Image();

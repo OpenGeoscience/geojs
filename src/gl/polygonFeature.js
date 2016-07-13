@@ -22,6 +22,7 @@ var gl_polygonFeature = function (arg) {
   var vgl = require('vgl');
   var earcut = require('earcut');
   var transform = require('../transform');
+  var util = require('../util');
   var object = require('./object');
 
   object.call(this);
@@ -36,8 +37,10 @@ var gl_polygonFeature = function (arg) {
       m_actor = vgl.actor(),
       m_mapper = vgl.mapper(),
       m_material = vgl.material(),
+      m_geometry,
       s_init = this._init,
-      s_update = this._update;
+      s_update = this._update,
+      m_updateAnimFrameRef;
 
   function createVertexShader() {
     var vertexShaderSource = [
@@ -82,122 +85,195 @@ var gl_polygonFeature = function (arg) {
     return shader;
   }
 
-  function createGLPolygons() {
-    var posFunc = null,
-        fillColorFunc = null,
-        fillOpacityFunc = null,
-        buffers = vgl.DataBuffers(1024),
-        sourcePositions = vgl.sourceDataP3fv(),
-        sourceFillColor =
-          vgl.sourceDataAnyfv(3, vgl.vertexAttributeKeysIndexed.Two),
-        sourceFillOpacity =
-          vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Three),
-        trianglePrimitive = vgl.triangles(),
-        geom = vgl.geometryData(),
-        triangles = [],
+  /**
+   * Create and style the triangles need to render the polygons.
+   *
+   * There are several optimizations to do less work when possible.  If only
+   * styles have changed, the triangulation is not recomputed, nor is the
+   * geometry re-transformed.  If styles use static values (rather than
+   * functions), they are only calculated once.  If a polygon reports that it
+   * has a uniform style, then styles are only calculated once for that polygon
+   * (the uniform property may be different per polygon or per update).
+   * Array.map is slower in Chrome that using a loop, so loops are used in
+   * places that would be conceptually served by maps.
+   *
+   * @memberof geo.gl.polygonFeature
+   * @param {boolean} onlyStyle if true, use the existing geoemtry and just
+   *    recalculate the style.
+   */
+  function createGLPolygons(onlyStyle) {
+    var posBuf, posFunc,
+        fillColor, fillColorFunc, fillColorVal,
+        fillOpacity, fillOpacityFunc, fillOpacityVal,
+        uniformPolyFunc, uniform,
+        indices,
+        items = [],
         target_gcs = m_this.gcs(),
         map_gcs = m_this.layer().map().gcs(),
-        color;
+        numPts = 0,
+        geom = m_mapper.geometryData(),
+        color, opacity, d, d3, vertices, i, j, k, n,
+        record, item, itemIndex, original;
 
-    posFunc = m_this.position();
     fillColorFunc = m_this.style.get('fillColor');
+    fillColorVal = util.isFunction(m_this.style('fillColor')) ? undefined : fillColorFunc();
     fillOpacityFunc = m_this.style.get('fillOpacity');
+    fillOpacityVal = util.isFunction(m_this.style('fillOpacity')) ? undefined : fillOpacityFunc();
+    uniformPolyFunc = m_this.style.get('uniformPolygon');
 
-    buffers.create('pos', 3);
-    buffers.create('indices', 1);
-    buffers.create('fillColor', 3);
-    buffers.create('fillOpacity', 1);
+    if (!onlyStyle) {
+      posFunc = m_this.position();
+      m_this.data().forEach(function (item, itemIndex) {
+        var polygon, outer, geometry, c;
 
-    m_this.data().forEach(function (item, itemIndex) {
-      var polygon, geometry, numPts, start, i, vertex, j;
+        polygon = m_this.polygon()(item, itemIndex);
+        outer = polygon.outer || (polygon instanceof Array ? polygon : []);
 
-      function position(d, i) {
-        var c = posFunc(d, i, item, itemIndex);
-        return [c.x, c.y, c.z || 0];
-      }
+        /* expand to an earcut polygon geometry.  We had been using a map call,
+         * but using loops is much faster in Chrome (4 versus 33 ms for one
+         * test). */
+        geometry = new Array(outer.length * 3);
+        for (i = d3 = 0; i < outer.length; i += 1, d3 += 3) {
+          c = posFunc(outer[i], i, item, itemIndex);
+          geometry[d3] = c.x;
+          geometry[d3 + 1] = c.y;
+          geometry[d3 + 2] = c.z || 0;
+        }
+        geometry = {vertices: geometry, dimensions: 3, holes: []};
+        original = outer;
 
-      polygon = m_this.polygon()(item, itemIndex);
-      polygon.outer = polygon.outer || [];
-      polygon.inner = polygon.inner || [];
+        if (polygon.inner) {
+          polygon.inner.forEach(function (hole) {
+            original = original.concat(hole);
+            geometry.holes.push(d3 / 3);
+            for (i = 0; i < hole.length; i += 1, d3 += 3) {
+              c = posFunc(hole[i], i, item, itemIndex);
+              geometry.vertices[d3] = c.x;
+              geometry.vertices[d3 + 1] = c.y;
+              geometry.vertices[d3 + 2] = c.z || 0;
+            }
+          });
+        }
 
-      // expand to a geojson polygon geometry
-      geometry = [(polygon.outer || []).map(position)];
-      (polygon.inner || []).forEach(function (hole) {
-        geometry.push(hole.map(position));
+        // tranform to map gcs
+        geometry.vertices = transform.transformCoordinates(
+          target_gcs,
+          map_gcs,
+          geometry.vertices,
+          geometry.dimensions
+        );
+
+        record = {
+          // triangulate
+          triangles: earcut(geometry.vertices, geometry.holes, geometry.dimensions),
+          vertices: geometry.vertices,
+          original: original,
+          item: item,
+          itemIndex: itemIndex
+        };
+        items.push(record);
+        numPts += record.triangles.length;
       });
-
-      // convert to an earcut geometry
-      geometry = earcut.flatten(geometry);
-
-      // tranform to map gcs
-      geometry.vertices = transform.transformCoordinates(
-        target_gcs,
-        map_gcs,
-        geometry.vertices,
-        geometry.dimensions
-      );
-
-      // triangulate
-      triangles = earcut(geometry.vertices, geometry.holes, geometry.dimensions);
-
-      // append to buffers
-      numPts = triangles.length;
-      start = buffers.alloc(triangles.length);
-
-      for (i = 0; i < numPts; i += 1) {
-        j = triangles[i] * 3;
-        vertex = geometry.vertices.slice(triangles[i] * 3, j + 3);
-        buffers.write('pos', vertex, start + i, 1);
-        buffers.write('indices', [i], start + i, 1);
-        color = fillColorFunc(vertex, i, item, itemIndex);
-
-        buffers.write(
-          'fillColor',
-          [color.r, color.g, color.b],
-          start + i,
-          1
-        );
-        buffers.write(
-          'fillOpacity',
-          [fillOpacityFunc(vertex, i, item, itemIndex)],
-          start + i,
-          1
-        );
+      posBuf = util.getGeomBuffer(geom, 'pos', numPts * 3);
+      indices = geom.primitive(0).indices();
+      if (!(indices instanceof Uint16Array) || indices.length !== numPts) {
+        indices = new Uint16Array(numPts);
+        geom.primitive(0).setIndices(indices);
       }
-    });
-
-    sourcePositions.pushBack(buffers.get('pos'));
-    geom.addSource(sourcePositions);
-
-    sourceFillColor.pushBack(buffers.get('fillColor'));
-    geom.addSource(sourceFillColor);
-
-    sourceFillOpacity.pushBack(buffers.get('fillOpacity'));
-    geom.addSource(sourceFillOpacity);
-
-    trianglePrimitive.setIndices(buffers.get('indices'));
-    geom.addPrimitive(trianglePrimitive);
-
-    m_mapper.setGeometryData(geom);
+      m_geometry = {items: items, numPts: numPts};
+    } else {
+      items = m_geometry.items;
+      numPts = m_geometry.numPts;
+    }
+    fillColor = util.getGeomBuffer(geom, 'fillColor', numPts * 3);
+    fillOpacity = util.getGeomBuffer(geom, 'fillOpacity', numPts);
+    d = d3 = 0;
+    color = fillColorVal;
+    opacity = fillOpacityVal;
+    for (k = 0; k < items.length; k += 1) {
+      n = items[k].triangles.length;
+      vertices = items[k].vertices;
+      item = items[k].item;
+      itemIndex = items[k].itemIndex;
+      original = items[k].original;
+      uniform = uniformPolyFunc(item, itemIndex);
+      if (uniform) {
+        if (fillColorVal === undefined) {
+          color = fillColorFunc(vertices[0], 0, item, itemIndex);
+        }
+        if (fillOpacityVal === undefined) {
+          opacity = fillOpacityFunc(vertices[0], 0, item, itemIndex);
+        }
+      }
+      if (uniform && onlyStyle && items[k].uniform && items[k].color &&
+          color.r === items[k].color.r && color.g === items[k].color.g &&
+          color.b === items[k].color.b && opacity === items[k].opacity) {
+        d += n;
+        d3 += n * 3;
+        continue;
+      }
+      for (i = 0; i < n; i += 1, d += 1, d3 += 3) {
+        if (onlyStyle && uniform) {
+          fillColor[d3] = color.r;
+          fillColor[d3 + 1] = color.g;
+          fillColor[d3 + 2] = color.b;
+          fillOpacity[d] = opacity;
+        } else {
+          j = items[k].triangles[i] * 3;
+          if (!onlyStyle) {
+            posBuf[d3] = vertices[j];
+            posBuf[d3 + 1] = vertices[j + 1];
+            posBuf[d3 + 2] = vertices[j + 2];
+            indices[d] = i;
+          }
+          if (!uniform && fillColorVal === undefined) {
+            color = fillColorFunc(original[j], j, item, itemIndex);
+          }
+          fillColor[d3] = color.r;
+          fillColor[d3 + 1] = color.g;
+          fillColor[d3 + 2] = color.b;
+          if (!uniform && fillOpacityVal === undefined) {
+            opacity = fillOpacityFunc(original[j], j, item, itemIndex);
+          }
+          fillOpacity[d] = opacity;
+        }
+      }
+      if (uniform || items[k].uniform) {
+        items[k].uniform = uniform;
+        items[k].color = color;
+        items[k].opacity = opacity;
+      }
+    }
+    m_mapper.modified();
+    if (!onlyStyle) {
+      geom.boundsDirty(true);
+      m_mapper.boundsDirtyTimestamp().modified();
+    }
   }
 
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Initialize
+   * @memberof geo.gl.polygonFeature
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
-    var blend = vgl.blend(),
-        prog = vgl.shaderProgram(),
+    var prog = vgl.shaderProgram(),
         posAttr = vgl.vertexAttribute('pos'),
         fillColorAttr = vgl.vertexAttribute('fillColor'),
         fillOpacityAttr = vgl.vertexAttribute('fillOpacity'),
         modelViewUniform = new vgl.modelViewUniform('modelViewMatrix'),
         projectionUniform = new vgl.projectionUniform('projectionMatrix'),
         vertexShader = createVertexShader(),
-        fragmentShader = createFragmentShader();
-
-    s_init.call(m_this, arg);
+        fragmentShader = createFragmentShader(),
+        blend = vgl.blend(),
+        geom = vgl.geometryData(),
+        sourcePositions = vgl.sourceDataP3fv({'name': 'pos'}),
+        sourceFillColor = vgl.sourceDataAnyfv(
+            3, vgl.vertexAttributeKeysIndexed.Two, {'name': 'fillColor'}),
+        sourceFillOpacity = vgl.sourceDataAnyfv(
+            1, vgl.vertexAttributeKeysIndexed.Three, {'name': 'fillOpacity'}),
+        trianglePrimitive = vgl.triangles();
 
     prog.addVertexAttribute(posAttr, vgl.vertexAttributeKeys.Position);
     prog.addVertexAttribute(fillColorAttr, vgl.vertexAttributeKeysIndexed.Two);
@@ -212,25 +288,33 @@ var gl_polygonFeature = function (arg) {
     m_material.addAttribute(prog);
     m_material.addAttribute(blend);
 
-    m_actor.setMapper(m_mapper);
     m_actor.setMaterial(m_material);
+    m_actor.setMapper(m_mapper);
+
+    geom.addSource(sourcePositions);
+    geom.addSource(sourceFillColor);
+    geom.addSource(sourceFillOpacity);
+    geom.addPrimitive(trianglePrimitive);
+    m_mapper.setGeometryData(geom);
+
+    s_init.call(m_this, arg);
   };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Build
    *
+   * @memberof geo.gl.polygonFeature
    * @override
    */
   ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
-    if (m_actor) {
-      m_this.renderer().contextRenderer().removeActor(m_actor);
+
+    createGLPolygons(m_this.dataTime().getMTime() < m_this.buildTime().getMTime() && m_geometry);
+
+    if (!m_this.renderer().contextRenderer().hasActor(m_actor)) {
+      m_this.renderer().contextRenderer().addActor(m_actor);
     }
-
-    createGLPolygons();
-
-    m_this.renderer().contextRenderer().addActor(m_actor);
     m_this.buildTime().modified();
   };
 
@@ -238,10 +322,19 @@ var gl_polygonFeature = function (arg) {
   /**
    * Update
    *
+   * @memberof geo.gl.polygonFeature
    * @override
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._update = function () {
+  this._update = function (opts) {
+    if (opts && opts.mayDelay) {
+      m_updateAnimFrameRef = window.requestAnimationFrame(this._update);
+      return;
+    }
+    if (m_updateAnimFrameRef) {
+      window.cancelAnimationFrame(m_updateAnimFrameRef);
+      m_updateAnimFrameRef = null;
+    }
     s_update.call(m_this);
 
     if (m_this.dataTime().getMTime() >= m_this.buildTime().getMTime() ||
@@ -257,6 +350,7 @@ var gl_polygonFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Destroy
+   * @memberof geo.gl.polygonFeature
    */
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {

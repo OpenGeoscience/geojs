@@ -2,6 +2,7 @@ var inherit = require('./inherit');
 var sceneObject = require('./sceneObject');
 var feature = require('./feature');
 var checkRenderer = require('./registry').checkRenderer;
+var rendererForFeatures = require('./registry').rendererForFeatures;
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -30,11 +31,11 @@ var layer = function (arg) {
   var geo_event = require('./event');
   var camera = require('./camera');
 
-  //////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////
   /**
    * @private
    */
-  //////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
       s_exit = this._exit,
       m_id = arg.id === undefined ? layer.newLayerId() : arg.id,
@@ -44,7 +45,7 @@ var layer = function (arg) {
       m_canvas = null,
       m_renderer = null,
       m_initialized = false,
-      m_rendererName = arg.renderer === undefined ? 'vgl' : arg.renderer,
+      m_rendererName = arg.renderer === undefined ? rendererForFeatures(arg.features) : arg.renderer,
       m_dataTime = timestamp(),
       m_updateTime = timestamp(),
       m_sticky = arg.sticky === undefined ? true : arg.sticky,

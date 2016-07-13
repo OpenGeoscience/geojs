@@ -20,8 +20,9 @@ $(function () {
     }
   );
 
-  // Create a gl layer to put the features in
-  var layer = map.createLayer('feature');
+  // Create a layer to put the features in.  We could need point, line, and
+  // polygon features, so ask for a layer that supports all of them.
+  var layer = map.createLayer('feature', {features: ['point', 'line', 'polygon']});
   map.draw();
 
   // Initialize the json reader.

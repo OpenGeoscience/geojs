@@ -101,7 +101,7 @@ module.exports.closeToEqual = function closeToEqual(o1, o2, precision) {
  * default state.
  *
  * @param {boolean} [supported=true] If false, then the vgl renderer
- * will indicate that this is an unsupported browser environement.
+ * will indicate that this is an unsupported browser environment.
  */
 module.exports.mockVGLRenderer = function mockVGLRenderer(supported) {
   'use strict';

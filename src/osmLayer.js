@@ -5,6 +5,7 @@ module.exports = (function () {
   var inherit = require('./inherit');
   var tileLayer = require('./tileLayer');
   var registry = require('./registry');
+  var quadFeature = require('./quadFeature');
 
   //////////////////////////////////////////////////////////////////////////////
   /**
@@ -80,6 +81,9 @@ module.exports = (function () {
   });
 
   inherit(osmLayer, tileLayer);
-  registry.registerLayer('osm', osmLayer);
+  /* By default, ask to support image quads.  If the user needs full
+   * reprojection, they will need to require the
+   * quadFeature.capabilities.imageFull feature */
+  registry.registerLayer('osm', osmLayer, [quadFeature.capabilities.image]);
   return osmLayer;
 })();

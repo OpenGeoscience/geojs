@@ -11,8 +11,7 @@ var transform = require('./transform');
  * @param {Object} arg Options object
  * @extends geo.feature
  * @param {Object|Function} [position] Position of the data.  Default is
- *   (data). The position is an Object which specifies the location of the
- *   data in geo-spatial context.
+ *   (data).
  * @param {Object|Function} [intensity] Scalar value of each data point. Scalar
  *   value must be a positive real number and will be used to compute
  *   the weight for each data point.

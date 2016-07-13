@@ -19,7 +19,9 @@ $(function () {
     baseUrl: 'http://otile1.mqcdn.com/tiles/1.0.0/sat'
   });
 
-  // Add a feature layer with a D3 renderer
+  // Add a feature layer with a D3 renderer.  We could, instead, ask for any
+  // renderer that supports point features, like so:
+  //  var features = map.createLayer('feature', {features: ['point']});
   var features = map.createLayer('feature', {renderer: 'd3'});
 
   var numberOfFeatures = 200;

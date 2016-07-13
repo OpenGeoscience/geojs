@@ -31,11 +31,13 @@ $(function () {
     'osm'
   );
 
-  // Create a gl feature layer
-  var vglLayer = map.createLayer(
+  // Create a feature layer.  We could either ask for a layer via a specific
+  // render {renderer: 'vgl'} or for a layer that supports our feature
+  // {features: ['choropleth']}.
+  var choroplethLayer = map.createLayer(
     'feature',
     {
-      renderer: 'vgl'
+      features: ['choropleth']
     }
   );
 
@@ -57,7 +59,7 @@ $(function () {
           });
 
       var choropleth =
-          makeChoropleth(geoData.features, mockScalarData, vglLayer);
+          makeChoropleth(geoData.features, mockScalarData, choroplethLayer);
 
       setTimeout(function () {
         var mockScalarData2 = geoData

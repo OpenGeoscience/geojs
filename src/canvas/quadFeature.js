@@ -143,5 +143,10 @@ var canvas_quadFeature = function (arg) {
 inherit(canvas_quadFeature, quadFeature);
 
 // Now register it
-registerFeature('canvas', 'quad', canvas_quadFeature);
+var capabilities = {};
+capabilities[quadFeature.capabilities.color] = false;
+capabilities[quadFeature.capabilities.image] = true;
+capabilities[quadFeature.capabilities.imageFull] = false;
+
+registerFeature('canvas', 'quad', canvas_quadFeature, capabilities);
 module.exports = canvas_quadFeature;
