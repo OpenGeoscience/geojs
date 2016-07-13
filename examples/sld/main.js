@@ -9,7 +9,7 @@ var layer = {
   max: '300',
   name: 'usgs:ned',
   sld: '',
-  projection: 'EPSG:3857'
+  projection: 'EPSG:3785'
 };
 
 var layerViewer = {
