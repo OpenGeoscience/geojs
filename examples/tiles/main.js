@@ -36,9 +36,9 @@
  *      is used by itself (e.g., 'abc' is the same as 'a,b,c').
  *  unitsPerPixel: set the units per pixel at zoom level 0.
  *  url: url to use for the map files.  Placeholders are allowed.  Default is
- *      http://otile1.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.png .  Other useful
+ *      http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png .  Other useful
  *      urls are are: /data/tilefancy.png
- *      http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png
+ *      http://tile.stamen.com/toner-lite/{z}/{x}/{y}.png
  *  w: width of a tiled image (at max zoom).  If w and h are specified, a
  *      variety of other changes are made to make this served in image
  *      coordinates.
@@ -123,7 +123,7 @@ $(function () {
   if (query.url) {
     layerParams.url = query.url;
   } else {
-    layerParams.baseUrl = 'http://otile1.mqcdn.com/tiles/1.0.0/map/';
+    layerParams.url = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
   }
   if (query.subdomains) {
     if (query.subdomains.indexOf(',') >= 0) {
@@ -357,9 +357,6 @@ $(function () {
         break;
       case 'url':
         var url = processedValue;
-        if (layerParams.baseUrl) {
-          delete layerParams.baseUrl;
-        }
         layerParams[param] = processedValue;
         osmLayer.url(url);
         osmLayer.attribution($('#url-list [value="' + value + '"]').attr(
@@ -377,9 +374,6 @@ $(function () {
       default:
         if (ctl.is('.layerparam')) {
           layerParams[param] = processedValue;
-          if (param === 'url' && layerParams.baseUrl) {
-            delete layerParams.baseUrl;
-          }
           if (osmLayer[param]) {
             osmLayer[param](processedValue);
           }
