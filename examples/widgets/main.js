@@ -39,13 +39,8 @@ $(function () {
     zoom: 4
   });
 
-  // Add the osm layer with a custom tile url
-  map.createLayer(
-    'osm',
-    {
-      baseUrl: 'http://otile1.mqcdn.com/tiles/1.0.0/map/'
-    }
-  );
+  // Add the default osm layer
+  map.createLayer('osm');
 
   // Plot points for the 3 cities
   var layer = map.createLayer('feature', {'renderer' : 'd3'});

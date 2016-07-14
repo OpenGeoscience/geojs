@@ -14,10 +14,8 @@ $(function () {
     .end(omega)
     .state('play');
 
-  // Add an OSM layer with MapQuest satellite image tiles
-  map.createLayer('osm', {
-    baseUrl: 'http://otile1.mqcdn.com/tiles/1.0.0/sat'
-  });
+  // Add an OSM layer
+  map.createLayer('osm');
 
   // Add a feature layer with a D3 renderer.  We could, instead, ask for any
   // renderer that supports point features, like so:
