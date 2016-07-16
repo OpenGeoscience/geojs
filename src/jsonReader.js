@@ -269,10 +269,10 @@ var jsonReader = function (arg) {
             })
             .position(m_this._position)
             .style({
-              fill: m_this._style('fill', true, polygons),
+              fill: m_this._style('fill', true),
               fillColor: m_this._style('fillColor', '#b0de5c', polygons, convertColor),
               fillOpacity: m_this._style('fillOpacity', 0.8, polygons),
-              stroke: m_this._style('stroke', true, polygons),
+              stroke: m_this._style('stroke', true),
               strokeColor: m_this._style('strokeColor', '#999999', polygons, convertColor),
               strokeWidth: m_this._style('strokeWidth', 2, polygons),
               strokeOpacity: m_this._style('strokeOpacity', 1, polygons)
