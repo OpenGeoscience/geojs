@@ -19,7 +19,6 @@ $(function () {
 
   // Add an OSM layer
   map.createLayer('osm', {
-    baseUrl: 'http://otile1.mqcdn.com/tiles/1.0.0/map',
     renderer: query.renderer ? (query.renderer === 'html' ? null : query.renderer) : undefined
   });
 

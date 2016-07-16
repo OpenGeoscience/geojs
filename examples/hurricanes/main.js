@@ -361,13 +361,8 @@ $(function () {
     zoom: 3
   });
 
-  // Add the osm layer with a custom tile url
-  map.createLayer(
-    'osm',
-    {
-      baseUrl: 'http://otile1.mqcdn.com/tiles/1.0.0/map/'
-    }
-  );
+  // Add the default osm layer
+  map.createLayer('osm');
 
   // Create a feature layer to draw on.
   layer = map.createLayer('feature', {features: [geo.lineFeature.capabilities.multicolor]});

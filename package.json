@@ -21,6 +21,7 @@
     "bootswatch": "^3.3.6",
     "codecov.io": "^0.1.6",
     "codemirror": "^5.15.2",
+    "colorbrewer": "^1.0.0",
     "css-loader": "^0.23.1",
     "docco": "^0.7.0",
     "earcut": "^2.1.1",

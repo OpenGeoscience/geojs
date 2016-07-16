@@ -9,11 +9,6 @@ $(function () {
     center: {x: -98.0, y: 39.5}
   });
 
-  // Add an OSM layer
-  map.createLayer('osm', {
-    baseUrl: 'http://otile1.mqcdn.com/tiles/1.0.0/sat'
-  });
-
   // Add an OSM layer with a WMS server as the source of its titles
   var wms = map.createLayer('osm', {keepLower: false, attribution: null});
 

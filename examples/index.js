@@ -11,6 +11,9 @@ require('codemirror/lib/codemirror.css');
 require('codemirror/addon/lint/lint.css');
 require('codemirror/addon/fold/foldgutter.css');
 
+// Colorbrewer
+require('colorbrewer');
+
 require('./common/js/jsonlint');
 require('codemirror');
 require('codemirror/mode/javascript/javascript');
