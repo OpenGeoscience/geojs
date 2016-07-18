@@ -61,8 +61,7 @@ var gl_lineFeature = function (arg) {
           'uniform float pixelWidth;',
           'uniform float aspect;',
 
-          'varying vec3 strokeColorVar;',
-          'varying float strokeOpacityVar;',
+          'varying vec4 strokeColorVar;',
 
           'void main(void)',
           '{',
@@ -85,8 +84,7 @@ var gl_lineFeature = function (arg) {
           '  if (worldPrev.w != 0.0) {',
           '    worldPrev = worldPrev/worldPrev.w;',
           '  }',
-          '  strokeColorVar = strokeColor;',
-          '  strokeOpacityVar = strokeOpacity;',
+          '  strokeColorVar = vec4(strokeColor, strokeOpacity);',
           '  vec2 deltaNext = worldNext.xy - worldPos.xy;',
           '  vec2 deltaPrev = worldPos.xy - worldPrev.xy;',
           '  float angleNext = 0.0, anglePrev = 0.0;',
@@ -96,6 +94,8 @@ var gl_lineFeature = function (arg) {
           '  else  anglePrev = atan(deltaPrev.y / aspect, deltaPrev.x);',
           '  if (deltaNext.xy == vec2(0.0, 0.0)) angleNext = anglePrev;',
           '  float angle = (anglePrev + angleNext) / 2.0;',
+          '  if (abs(anglePrev - angleNext) >= PI)',
+          '    angle += PI;',
           '  float cosAngle = cos(anglePrev - angle);',
           '  if (cosAngle < 0.1) { cosAngle = sign(cosAngle) * 1.0; angle = 0.0; }',
           '  float distance = (offset * strokeWidth * pixelWidth) /',
@@ -115,10 +115,9 @@ var gl_lineFeature = function (arg) {
           '#ifdef GL_ES',
           '  precision highp float;',
           '#endif',
-          'varying vec3 strokeColorVar;',
-          'varying float strokeOpacityVar;',
+          'varying vec4 strokeColorVar;',
           'void main () {',
-          '  gl_FragColor = vec4 (strokeColorVar, strokeOpacityVar);',
+          '  gl_FragColor = strokeColorVar;',
           '}'
         ].join('\n'),
         shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
