@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from time import sleep
 from selenium_test import FirefoxTest, ChromeTest,\
     setUpModule, tearDownModule
 
@@ -13,6 +14,7 @@ class glPointsBase(object):
         self.loadURL('pointClustering/index.html')
         self.wait()
         self.resizeWindow(640, 480)
+        sleep(5)
 
     def testClustering0(self):
         self.loadPage()

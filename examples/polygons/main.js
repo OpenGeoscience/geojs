@@ -36,14 +36,21 @@ $(function () {
         return {x: d[0], y: d[1]};
       })
       .data(data)
-      .style('uniformPolygon', true)
-      .style('fillOpacity', query.opacity ? parseFloat(query.opacity) : 0.5)
-      .style('fillColor', function (d, idx, poly, polyidx) {
-        return poly.hover ? hoverColor : (polyColor ? polyColor : {
-          r: (polyidx % 256) / 255,
-          g: polyidx / (data.length - 1),
-          b: 0.25
-        });
+      .style({
+        uniformPolygon: true,
+        fillOpacity: query.opacity ? parseFloat(query.opacity) : 0.5,
+        fillColor: function (d, idx, poly, polyidx) {
+          return poly.hover ? hoverColor : (polyColor ? polyColor : {
+            r: (polyidx % 256) / 255,
+            g: polyidx / (data.length - 1),
+            b: 0.25
+          });
+        },
+        stroke: query.stroke !== 'false' ? function (poly, polyidx) {
+          return poly.hover;
+        } : false,
+        strokeWidth: query.strokeWidth ? parseFloat(query.strokeWidth) : 1,
+        strokeColor: {r: 0, g: 0, b: 0}
       })
       .geoOn(geo.event.feature.mouseover, function (evt) {
         if (!evt.data.hover) {

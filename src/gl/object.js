@@ -1,6 +1,3 @@
-var inherit = require('../inherit');
-var sceneObject = require('../sceneObject');
-
 //////////////////////////////////////////////////////////////////////////////
 /**
  * VGL specific subclass of object which rerenders when the object is drawn.
@@ -19,7 +16,6 @@ var gl_object = function (arg) {
   if (!(this instanceof object)) {
     return new gl_object(arg);
   }
-  sceneObject.call(this);
 
   var m_this = this,
       s_draw = this.draw;
@@ -39,6 +35,5 @@ var gl_object = function (arg) {
   return this;
 };
 
-inherit(gl_object, sceneObject);
 module.exports = gl_object;
 

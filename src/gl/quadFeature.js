@@ -262,7 +262,7 @@ var gl_quadFeature = function (arg) {
         m_quads.clrQuads.length * 12 > m_clrposbuf.length) {
       setupColorDrawObjects(renderState);
     }
-    mapper.s_render(renderState);
+    mapper.s_render(renderState, true);
 
     var context = renderState.m_context, opacity = 1, color;
 
@@ -289,6 +289,7 @@ var gl_quadFeature = function (arg) {
       context.drawArrays(vgl.GL.TRIANGLE_STRIP, 0, 4);
     });
     context.bindBuffer(vgl.GL.ARRAY_BUFFER, null);
+    mapper.undoBindVertexData(renderState);
   };
 
   /**
@@ -307,7 +308,7 @@ var gl_quadFeature = function (arg) {
         m_quads.imgQuads.length * 12 > m_imgposbuf.length) {
       setupDrawObjects(renderState);
     }
-    mapper.s_render(renderState);
+    mapper.s_render(renderState, true);
 
     var context = renderState.m_context, opacity = 1;
 
@@ -335,6 +336,7 @@ var gl_quadFeature = function (arg) {
       quad.texture.undoBind(renderState);
     });
     context.bindBuffer(vgl.GL.ARRAY_BUFFER, null);
+    mapper.undoBindVertexData(renderState);
   };
 
   ////////////////////////////////////////////////////////////////////////////

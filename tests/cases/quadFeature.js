@@ -461,7 +461,7 @@ describe('geo.quadFeature', function () {
       glCounts = $.extend({}, vgl.mockCounts());
     });
     waitForIt('next render gl A', function () {
-      return vgl.mockCounts().createProgram === (glCounts.createProgram || 0) + 2;
+      return vgl.mockCounts().createProgram >= (glCounts.createProgram || 0) + 2;
     });
     it('only img quad', function () {
       glCounts = $.extend({}, vgl.mockCounts());

@@ -203,7 +203,7 @@ var lineFeature = function (arg) {
       {},
       {
         'strokeWidth': 1.0,
-      // Default to gold color for lines
+        // Default to gold color for lines
         'strokeColor': { r: 1.0, g: 0.8431372549, b: 0.0 },
         'strokeStyle': 'solid',
         'strokeOpacity': 1.0,
@@ -247,7 +247,7 @@ lineFeature.create = function (layer, spec) {
 lineFeature.capabilities = {
   /* support for solid-colored, constant-width lines */
   basic: 'line.basic',
-  /* support for lines that very in width and color */
+  /* support for lines that vary in width and color */
   multicolor: 'line.multicolor'
 };
 

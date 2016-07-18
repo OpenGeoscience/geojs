@@ -49,9 +49,7 @@ var gl_polygonFeature = function (arg) {
           'attribute float fillOpacity;',
           'uniform mat4 modelViewMatrix;',
           'uniform mat4 projectionMatrix;',
-          'uniform float pixelWidth;',
-          'varying vec3 fillColorVar;',
-          'varying float fillOpacityVar;',
+          'varying vec4 fillColorVar;',
 
           'void main(void)',
           '{',
@@ -59,8 +57,7 @@ var gl_polygonFeature = function (arg) {
           '  if (clipPos.w != 0.0) {',
           '    clipPos = clipPos/clipPos.w;',
           '  }',
-          '  fillColorVar = fillColor;',
-          '  fillOpacityVar = fillOpacity;',
+          '  fillColorVar = vec4(fillColor, fillOpacity);',
           '  gl_Position = clipPos;',
           '}'
         ].join('\n'),
@@ -74,10 +71,9 @@ var gl_polygonFeature = function (arg) {
           '#ifdef GL_ES',
           '  precision highp float;',
           '#endif',
-          'varying vec3 fillColorVar;',
-          'varying float fillOpacityVar;',
+          'varying vec4 fillColorVar;',
           'void main () {',
-          '  gl_FragColor = vec4 (fillColorVar, fillOpacityVar);',
+          '  gl_FragColor = fillColorVar;',
           '}'
         ].join('\n'),
         shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
@@ -105,6 +101,7 @@ var gl_polygonFeature = function (arg) {
     var posBuf, posFunc,
         fillColor, fillColorFunc, fillColorVal,
         fillOpacity, fillOpacityFunc, fillOpacityVal,
+        fillFunc, fillVal,
         uniformPolyFunc, uniform,
         indices,
         items = [],
@@ -112,13 +109,15 @@ var gl_polygonFeature = function (arg) {
         map_gcs = m_this.layer().map().gcs(),
         numPts = 0,
         geom = m_mapper.geometryData(),
-        color, opacity, d, d3, vertices, i, j, k, n,
+        color, opacity, fill, d, d3, vertices, i, j, k, n,
         record, item, itemIndex, original;
 
     fillColorFunc = m_this.style.get('fillColor');
     fillColorVal = util.isFunction(m_this.style('fillColor')) ? undefined : fillColorFunc();
     fillOpacityFunc = m_this.style.get('fillOpacity');
     fillOpacityVal = util.isFunction(m_this.style('fillOpacity')) ? undefined : fillOpacityFunc();
+    fillFunc = m_this.style.get('fill');
+    fillVal = util.isFunction(m_this.style('fill')) ? undefined : fillFunc();
     uniformPolyFunc = m_this.style.get('uniformPolygon');
 
     if (!onlyStyle) {
@@ -190,6 +189,7 @@ var gl_polygonFeature = function (arg) {
     d = d3 = 0;
     color = fillColorVal;
     opacity = fillOpacityVal;
+    fill = fillVal;
     for (k = 0; k < items.length; k += 1) {
       n = items[k].triangles.length;
       vertices = items[k].vertices;
@@ -204,6 +204,12 @@ var gl_polygonFeature = function (arg) {
         if (fillOpacityVal === undefined) {
           opacity = fillOpacityFunc(vertices[0], 0, item, itemIndex);
         }
+      }
+      if (fillVal === undefined) {
+        fill = fillFunc(item, itemIndex);
+      }
+      if (!fill) {
+        opacity = 0;
       }
       if (uniform && onlyStyle && items[k].uniform && items[k].color &&
           color.r === items[k].color.r && color.g === items[k].color.g &&
