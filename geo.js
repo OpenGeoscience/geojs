@@ -106,30 +106,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	  map: __webpack_require__(146),
 	  mapInteractor: __webpack_require__(217),
 	  object: __webpack_require__(5),
-	  osmLayer: __webpack_require__(219),
-	  pathFeature: __webpack_require__(222),
-	  planeFeature: __webpack_require__(223),
-	  pointFeature: __webpack_require__(225),
-	  polygonFeature: __webpack_require__(224),
-	  quadFeature: __webpack_require__(227),
-	  heatmapFeature: __webpack_require__(228),
+	  osmLayer: __webpack_require__(220),
+	  pathFeature: __webpack_require__(223),
+	  pointFeature: __webpack_require__(224),
+	  polygonFeature: __webpack_require__(226),
+	  quadFeature: __webpack_require__(218),
+	  heatmapFeature: __webpack_require__(227),
 	  renderer: __webpack_require__(136),
 	  sceneObject: __webpack_require__(128),
 	  tile: __webpack_require__(143),
-	  tileCache: __webpack_require__(221),
-	  tileLayer: __webpack_require__(220),
+	  tileCache: __webpack_require__(222),
+	  tileLayer: __webpack_require__(221),
 	  timestamp: __webpack_require__(129),
 	  transform: __webpack_require__(147),
-	  vectorFeature: __webpack_require__(229),
+	  vectorFeature: __webpack_require__(228),
 	  inherit: __webpack_require__(4),
-	  version: __webpack_require__(230),
-	  sha: __webpack_require__(231),
+	  version: __webpack_require__(229),
+	  sha: __webpack_require__(230),
 
 	  util: __webpack_require__(120),
 	  jQuery: $,
-	  d3: __webpack_require__(232),
-	  gl: __webpack_require__(244),
-	  canvas: __webpack_require__(257),
+	  d3: __webpack_require__(231),
+	  gl: __webpack_require__(243),
+	  canvas: __webpack_require__(256),
 	  gui: __webpack_require__(262)
 	}, __webpack_require__(131));
 
@@ -146,7 +145,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
-	 * jQuery JavaScript Library v2.2.3
+	 * jQuery JavaScript Library v2.2.4
 	 * http://jquery.com/
 	 *
 	 * Includes Sizzle.js
@@ -156,7 +155,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Released under the MIT license
 	 * http://jquery.org/license
 	 *
-	 * Date: 2016-04-05T19:26Z
+	 * Date: 2016-05-20T17:23Z
 	 */
 
 	(function( global, factory ) {
@@ -212,7 +211,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 	var
-		version = "2.2.3",
+		version = "2.2.4",
 
 		// Define a local copy of jQuery
 		jQuery = function( selector, context ) {
@@ -5153,13 +5152,14 @@ return /******/ (function(modules) { // webpackBootstrap
 		isDefaultPrevented: returnFalse,
 		isPropagationStopped: returnFalse,
 		isImmediatePropagationStopped: returnFalse,
+		isSimulated: false,
 
 		preventDefault: function() {
 			var e = this.originalEvent;
 
 			this.isDefaultPrevented = returnTrue;
 
-			if ( e ) {
+			if ( e && !this.isSimulated ) {
 				e.preventDefault();
 			}
 		},
@@ -5168,7 +5168,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			this.isPropagationStopped = returnTrue;
 
-			if ( e ) {
+			if ( e && !this.isSimulated ) {
 				e.stopPropagation();
 			}
 		},
@@ -5177,7 +5177,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			this.isImmediatePropagationStopped = returnTrue;
 
-			if ( e ) {
+			if ( e && !this.isSimulated ) {
 				e.stopImmediatePropagation();
 			}
 
@@ -6107,19 +6107,6 @@ return /******/ (function(modules) { // webpackBootstrap
 			val = name === "width" ? elem.offsetWidth : elem.offsetHeight,
 			styles = getStyles( elem ),
 			isBorderBox = jQuery.css( elem, "boxSizing", false, styles ) === "border-box";
-
-		// Support: IE11 only
-		// In IE 11 fullscreen elements inside of an iframe have
-		// 100x too small dimensions (gh-1764).
-		if ( document.msFullscreenElement && window.top !== window ) {
-
-			// Support: IE11 only
-			// Running getBoundingClientRect on a disconnected node
-			// in IE throws an error.
-			if ( elem.getClientRects().length ) {
-				val = Math.round( elem.getBoundingClientRect()[ name ] * 100 );
-			}
-		}
 
 		// Some non-html elements return undefined for offsetWidth, so check for null/undefined
 		// svg - https://bugzilla.mozilla.org/show_bug.cgi?id=649285
@@ -8011,6 +7998,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		},
 
 		// Piggyback on a donor event to simulate a different one
+		// Used only for `focus(in | out)` events
 		simulate: function( type, elem, event ) {
 			var e = jQuery.extend(
 				new jQuery.Event(),
@@ -8018,27 +8006,10 @@ return /******/ (function(modules) { // webpackBootstrap
 				{
 					type: type,
 					isSimulated: true
-
-					// Previously, `originalEvent: {}` was set here, so stopPropagation call
-					// would not be triggered on donor event, since in our own
-					// jQuery.event.stopPropagation function we had a check for existence of
-					// originalEvent.stopPropagation method, so, consequently it would be a noop.
-					//
-					// But now, this "simulate" function is used only for events
-					// for which stopPropagation() is noop, so there is no need for that anymore.
-					//
-					// For the 1.x branch though, guard for "click" and "submit"
-					// events is still used, but was moved to jQuery.event.stopPropagation function
-					// because `originalEvent` should point to the original event for the constancy
-					// with other events and for more focused logic
 				}
 			);
 
 			jQuery.event.trigger( e, null, elem );
-
-			if ( e.isDefaultPrevented() ) {
-				event.preventDefault();
-			}
 		}
 
 	} );
@@ -9996,7 +9967,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	// Add a polyfill for window.requestAnimationFrame.
 	if (!window.requestAnimationFrame) {
 	  var _animationFrameFunc = [];
-	  if (!window.performance) {
+	  if (!window.performance || !window.performance.now) {
 	    window.performance = {now: function () { return new Date().getTime(); }};
 	  }
 	  window.requestAnimationFrame = function (func) {
@@ -10252,11 +10223,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var mat;
 	        if (this._display === null) {
 	          mat = camera.affine(
-	              {x: 1, y: 1}, // translate to: [0, 2] x [0, 2]
-	              {
-	                x: this.viewport.width / 2,
-	                y: this.viewport.height / -2
-	              }             // scale to: [0, width] x [-height, 0]
+	            {x: 1, y: 1}, // translate to: [0, 2] x [0, 2]
+	            {
+	              x: this.viewport.width / 2,
+	              y: this.viewport.height / -2
+	            }             // scale to: [0, width] x [-height, 0]
 	          );
 
 	          // applies mat to the transform (world -> normalized)
@@ -11204,8 +11175,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @module vgl
 	 */
 
-	/*global vgl: true, ogs: true, inherit*/
-	/*exported vgl, inherit*/
+	/* exported vgl, inherit */
 	//////////////////////////////////////////////////////////////////////////////
 
 	if (typeof ogs === 'undefined') {
@@ -11241,25 +11211,27 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/** vgl namespace */
 	var vgl = ogs.namespace('gl');
+	window.vgl = vgl;
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Convenient function to define JS inheritance
-	 *
-	 * @param C
-	 * @param P
 	 */
 	//////////////////////////////////////////////////////////////////////////////
-	function inherit(C, P) {
+	vgl.inherit = function (C, P) {
 	  'use strict';
 
-	  var F = function () {
-	  };
+	  var F = inherit.func();
 	  F.prototype = P.prototype;
 	  C.prototype = new F();
-	  C.uber = P.prototype;
 	  C.prototype.constructor = C;
-	}
+	};
+	vgl.inherit.func = function () {
+	  'use strict';
+	  return function () {};
+	};
+
+	window.inherit = vgl.inherit;
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -11272,7 +11244,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.size = function (obj) {
 	  'use strict';
 
-	  var size = 0, key = null;
+	  var size = 0, key;
 	  for (key in obj) {
 	    if (obj.hasOwnProperty(key)) {
 	      size += 1;
@@ -11280,6 +11252,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  return size;
 	};
+
+	/* Polyfill for Math.log2 */
+	if (!Math.log2) {
+	  Math.log2 = function (val) {
+	    return Math.log(val) / Math.log(2);
+	  };
+	}
+
+	vgl.version = '0.3.8';
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -12178,9 +12159,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.removeChild = function (childNode) {
 	    if (childNode.parent() === this) {
 	      var index = m_children.indexOf(childNode);
-	      m_children.splice(index, 1);
-	      this.boundsDirtyTimestamp().modified();
-	      return true;
+	      if (index >= 0) {
+	        m_children.splice(index, 1);
+	        childNode.setParent(null);
+	        this.boundsDirtyTimestamp().modified();
+	        return true;
+	      }
 	    }
 	  };
 
@@ -12190,9 +12174,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
 	  this.removeChildren = function () {
-	    var i;
-	    for (i = 0; i < m_children.length; i += 1) {
-	      this.removeChild(m_children[i]);
+	    while (m_children.length) {
+	      this.removeChild(m_children[0]);
 	    }
 
 	    this.modified();
@@ -12271,16 +12254,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.traverseChildrenAndUpdateBounds = function (visitor) {
 	    var i;
 
-	    if (this.m_parent && this.boundsDirtyTimestamp().getMTime() >
+	    if (this.parent() && this.boundsDirtyTimestamp().getMTime() >
 	      this.computeBoundsTimestamp().getMTime()) {
 	      // Flag parents bounds dirty.
-	      this.m_parent.boundsDirtyTimestamp.modified();
+	      this.parent().boundsDirtyTimestamp().modified();
 	    }
 
 	    this.computeBounds();
 
 	    if (visitor.mode() === visitor.TraverseAllChildren) {
-	      for (i = 0; i < m_children.length(); i += 1) {
+	      for (i = 0; i < m_children.length; i += 1) {
 	        m_children[i].accept(visitor);
 	        this.updateBounds(m_children[i]);
 	      }
@@ -12299,8 +12282,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.traverseChildren = function (visitor) {
 	    var i;
 
-	    if (visitor.mode() === vgl.vesVisitor.TraverseAllChildren) {
-	      for (i = 0; i < m_children.length(); i += 1) {
+	    if (visitor.mode() === visitor.TraverseAllChildren) {
+	      for (i = 0; i < m_children.length; i += 1) {
 	        m_children[i].accept(visitor);
 	      }
 	    }
@@ -12340,7 +12323,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return;
 	    }
 
-	    // Make sure that child bounds are upto date
+	    // Make sure that child bounds are up to date
 	    child.computeBounds();
 
 	    var bounds = this.bounds(),
@@ -12590,11 +12573,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	   *
 	   * @exports freezeObject
 	   */
-	  var freezedObject = Object.freeze(obj);
+	  var freezedObject = Object.freeze ? Object.freeze(obj) : undefined;
 	  if (typeof freezedObject === 'undefined') {
-	    freezedObject = function (o) {
-	      return o;
-	    };
+	    return obj;
 	  }
 
 	  return freezedObject;
@@ -12765,7 +12746,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.readScalars = function (coordinates, geom, size_estimate, idx) {
 	    var array = null,
 	        s = null,
-	        r  = null,
+	        r = null,
 	        g = null,
 	        b = null;
 
@@ -13017,13 +12998,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        vglcoords = new vgl.sourceDataP3fv(),
 	        x = null,
 	        y = null,
-	        z  = null,
+	        z = null,
 	        thisPolyLength = coordinates[0].length,
 	        vl = 1,
 	        i = null,
 	        indices = null,
 	        vgltriangle = null;
-
 
 	    for (i = 0; i < thisPolyLength; i += 1) {
 	      x = coordinates[0][i][0];
@@ -13075,14 +13055,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        j = null,
 	        x = null,
 	        y = null,
-	        z  = null,
+	        z = null,
 	        thisPolyLength = null,
 	        vf = null,
 	        vl = null,
 	        flip = null,
 	        flipped = false,
 	        tcount = 0;
-
 
 	    //var time1 = new Date().getTime()
 	    //var a = 0;
@@ -13328,8 +13307,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    var obj = JSON.parse(buffer),
-	      geom = this.readGJObject(obj),
-	      geoms = [];
+	        geom = this.readGJObject(obj),
+	        geoms = [];
 
 	    this.m_scalarFormat = 'none';
 	    this.m_scalarRange = null;
@@ -13421,7 +13400,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
 	  this.createIndices = function (type) {
-	    type = type; /* unused parameters */
+	    void type;
 	    // TODO Check for the type
 	    m_indices = new Uint16Array();
 	  };
@@ -13711,11 +13690,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_data = [],
 	      m_name = arg.name || 'Source ' + new Date().toISOString(),
 
-	      ////////////////////////////////////////////////////////////////////////////
+	      ////////////////////////////////////////////////////////////////////////
 	      /**
 	       * Attribute data for the source
 	       */
-	      ////////////////////////////////////////////////////////////////////////////
+	      ////////////////////////////////////////////////////////////////////////
 	      vglAttributeData = function () {
 	        // Number of components per group
 	        // Type of data type (GL_FLOAT etc)
@@ -13853,8 +13832,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var sizeInBytes = 0,
 	        keys = this.keys(), i;
 
-	    for (i = 0; i < keys.length(); i += 1) {
-	      sizeInBytes += this.numberOfComponents(keys[i]) *
+	    for (i = 0; i < keys.length; i += 1) {
+	      sizeInBytes += this.attributeNumberOfComponents(keys[i]) *
 	                     this.sizeOfAttributeDataType(keys[i]);
 	    }
 
@@ -13974,7 +13953,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
 	  this.pushBack = function (vertexData) {
-	    vertexData = vertexData; /* unused parameter */
+	    void vertexData;
 	    // Should be implemented by the base class
 	  };
 
@@ -14044,10 +14023,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_name = name;
 	  };
 
-
 	  return this;
 	};
-
 
 	vgl.sourceDataAnyfv = function (size, key, arg) {
 	  'use strict';
@@ -14572,13 +14549,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	            minv = value;
 	          }
 	        }
-	        m_bounds[ib] = minv;  m_bounds[jb] = maxv;
+	        m_bounds[ib] = minv; m_bounds[jb] = maxv;
 	      }
 
 	      m_computeBoundsTimestamp.modified();
 	    }
 	  };
-
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
@@ -14656,23 +14632,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.getScalar = function (index) {
 	    var attr = vgl.vertexAttributeKeys.Scalar,
 	        sourceData = this.sourceData(attr),
-	        numberOfComponents, sizeOfDataType, data, stride, offset;
+	        sizeOfDataType, data, stride, offset;
 
 	    if (!sourceData) {
 	      return null;
 	    }
 
-	    numberOfComponents = sourceData.attributeNumberOfComponents(attr);
 	    sizeOfDataType = sourceData.sizeOfAttributeDataType(attr);
 	    data = sourceData.data();
 	    stride = sourceData.attributeStride(attr) / sizeOfDataType;
 	    offset = sourceData.attributeOffset(attr) / sizeOfDataType;
-
-	    //console.log('index for scalar is ' + index);
-	    //console.log('offset for scalar is ' + offset);
-	    //console.log('stride for scalar is ' + stride);
-
-	    //console.log('have ' + data.length + ' scalars');
 
 	    if (index * stride + offset >= data.length) {
 	      console.log('access out of bounds in getScalar');
@@ -14713,8 +14682,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /** @private */
 	  arg = arg || {};
 
-	  var m_dirty = true,
-	      m_color = [0.0, 1.0, 1.0],
+	  var m_color = [0.0, 1.0, 1.0],
 	      m_geomData = null,
 	      m_buffers = [],
 	      m_bufferVertexAttributeMap = {},
@@ -14800,7 +14768,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
 	  function cleanUpDrawObjects(renderState) {
-	    renderState = renderState; /* avoid unused warning */
+	    void renderState;
 	    m_bufferVertexAttributeMap = {};
 	    m_buffers = [];
 	  }
@@ -14821,8 +14789,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    // Now construct the new ones.
 	    createVertexBufferObjects(renderState);
-
-	    m_dirty = false;
 	  }
 
 	  ////////////////////////////////////////////////////////////////////////////
@@ -14844,7 +14810,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      geomBounds = m_geomData.bounds();
 
 	      this.setBounds(geomBounds[0], geomBounds[1], geomBounds[2],
-	        geomBounds[3], geomBounds[4], geomBounds[5]) ;
+	        geomBounds[3], geomBounds[4], geomBounds[5]);
 
 	      computeBoundsTimestamp.modified();
 	    }
@@ -14960,9 +14926,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Render the mapper
+	   *
+	   * @param {object} renderState: the current renderering state object.
+	   * @param {boolean} noUndoBindVertexData: if true, do not unbind vertex data.
+	   *    This may be desirable if the render function is subclassed.
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
-	  this.render = function (renderState) {
+	  this.render = function (renderState, noUndoBindVertexData) {
 	    if (this.getMTime() > m_glCompileTimestamp.getMTime() ||
 	        renderState.m_contextChanged) {
 	      setupDrawObjects(renderState);
@@ -14979,7 +14949,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    for (i in m_bufferVertexAttributeMap) {
 	      if (m_bufferVertexAttributeMap.hasOwnProperty(i)) {
 	        m_context.bindBuffer(vgl.GL.ARRAY_BUFFER,
-	                                         m_buffers[bufferIndex]);
+	                             m_buffers[bufferIndex]);
 	        for (j = 0; j < m_bufferVertexAttributeMap[i].length; j += 1) {
 	          renderState.m_material
 	              .bindVertexData(renderState, m_bufferVertexAttributeMap[i][j]);
@@ -15010,7 +14980,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	          m_context.drawArrays(vgl.GL.TRIANGLE_STRIP, 0, primitive.numberOfIndices());
 	          break;
 	      }
-	      m_context.bindBuffer (vgl.GL.ARRAY_BUFFER, null);
+	      m_context.bindBuffer(vgl.GL.ARRAY_BUFFER, null);
+	    }
+
+	    /* If we are rendering multiple features in the same context, we must
+	     * unbind the vertex data to make sure the next feature has a known state.
+	     * This is optional.
+	     */
+	    if (!noUndoBindVertexData) {
+	      this.undoBindVertexData(renderState);
+	    }
+	  };
+
+	  /**
+	   * Unbind the vertex data,
+	   */
+	  this.undoBindVertexData = function (renderState) {
+	    var i, j;
+
+	    for (i in m_bufferVertexAttributeMap) {
+	      if (m_bufferVertexAttributeMap.hasOwnProperty(i)) {
+	        for (j = 0; j < m_bufferVertexAttributeMap[i].length; j += 1) {
+	          renderState.m_material
+	              .undoBindVertexData(renderState, m_bufferVertexAttributeMap[i][j]);
+	        }
+	      }
 	    }
 	  };
 
@@ -15213,7 +15207,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  'use strict';
 
 	  if (!(this instanceof vgl.materialAttribute)) {
-	    return new vgl.materialAttribute();
+	    return new vgl.materialAttribute(type);
 	  }
 	  vgl.graphicsObject.call(this);
 
@@ -15255,7 +15249,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  ////////////////////////////////////////////////////////////////////////////
 	  this.bindVertexData = function (renderState, key) {
 	    renderState = renderState; /* unused parameter */
-	    key = key /* unused parameter */;
+	    key = key; /* unused parameter */
 	    return false;
 	  };
 
@@ -15270,7 +15264,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  ////////////////////////////////////////////////////////////////////////////
 	  this.undoBindVertexData = function (renderState, key) {
 	    renderState = renderState; /* unused parameter */
-	    key = key /* unused parameter */;
+	    key = key; /* unused parameter */
 	    return false;
 	  };
 
@@ -15450,11 +15444,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
 	  this.exists = function (attr) {
-	    if (attr.type() === vgl.materialAttribute.Texture) {
-	      return m_textureAttributes.hasOwnProperty(attr);
+	    if (attr.type() === vgl.materialAttributeType.Texture) {
+	      return m_textureAttributes.hasOwnProperty(attr.textureUnit());
 	    }
-
-	    return m_attributes.hasOwnProperty(attr);
+	    return m_attributes.hasOwnProperty(attr.type());
 	  };
 
 	  ////////////////////////////////////////////////////////////////////////////
@@ -15466,28 +15459,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
 	  this.uniform = function (name) {
-	    if (m_shaderProgram) {
-	      return m_shaderProgram.uniform(name);
-	    }
-
-	    return null;
+	    return m_shaderProgram ? m_shaderProgram.uniform(name) : null;
 	  };
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Get material attribute
 
-	   * @param attr Attribute name
+	   * @param {number} type attribute type
+	   * @param {number} textureUnit attribute texture unit if type is Texture.
 	   * @returns {vgl.materialAttribute}
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
-	  this.attribute = function (name) {
-	    if (m_attributes.hasOwnProperty(name)) {
-	      return m_attributes[name];
+	  this.attribute = function (type, textureUnit) {
+	    if (m_attributes.hasOwnProperty(type)) {
+	      return m_attributes[type];
 	    }
 
-	    if (m_textureAttributes.hasOwnProperty(name)) {
-	      return m_textureAttributes[name];
+	    if (type === vgl.materialAttributeType.Texture && m_textureAttributes.hasOwnProperty(textureUnit)) {
+	      return m_textureAttributes[textureUnit];
 	    }
 
 	    return null;
@@ -15505,8 +15495,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
 	  this.setAttribute = function (attr) {
-	    if (attr.type() === vgl.materialAttributeType.Texture &&
-	        m_textureAttributes[attr.textureUnit()] !== attr) {
+	    if (attr.type() === vgl.materialAttributeType.Texture) {
+	      if (m_textureAttributes[attr.textureUnit()] === attr) {
+	        return false;
+	      }
 	      m_textureAttributes[attr.textureUnit()] = attr;
 	      m_this.modified();
 	      return true;
@@ -15577,7 +15569,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
 	  this._setup = function (renderState) {
-	    renderState = renderState; /* unused parameter */
+	    void renderState; /* unused parameter */
 	    return false;
 	  };
 
@@ -15683,7 +15675,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    for (i in m_attributes) {
 	      if (m_attributes.hasOwnProperty(i)) {
-	        m_attributes.undoBindVertexData(renderState, key);
+	        m_attributes[i].undoBindVertexData(renderState, key);
 	      }
 	    }
 	  };
@@ -15821,7 +15813,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.setResizable = function (r) {
 	    m_this.m_resizable = r;
 	  };
-
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
@@ -15965,7 +15956,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    // Now perform sorting
-	    sortedActors.sort(function (a, b) {return a[0] - b[0];});
+	    sortedActors.sort(function (a, b) { return a[0] - b[0]; });
 
 	    for (i = 0; i < sortedActors.length; i += 1) {
 	      actor = sortedActors[i][1];
@@ -16323,7 +16314,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        winW = null,
 	        clipPt = null;
 
-
 	    mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
 
 	    // Transform world to clipping coordinates
@@ -16389,7 +16379,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  ////////////////////////////////////////////////////////////////////////////
 	  this.focusDisplayPoint = function () {
 	    var focalPoint = m_this.m_camera.focalPoint(),
-	      focusWorldPt = vec4.fromValues(
+	        focusWorldPt = vec4.fromValues(
 	        focalPoint[0], focalPoint[1], focalPoint[2], 1);
 
 	    return m_this.worldToDisplay(
@@ -16762,8 +16752,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 
 	      return true;
-	    }
-	    catch (e) {
+	    } catch (e) {
 	    }
 
 	    // If we don't have a GL context, give up now
@@ -16803,7 +16792,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  ////////////////////////////////////////////////////////////////////////////
 	  this.render = function () {
 	    var i;
-	    m_renderers.sort(function (a, b) {return a.layer() - b.layer();});
+	    m_renderers.sort(function (a, b) { return a.layer() - b.layer(); });
 	    for (i = 0; i < m_renderers.length; i += 1) {
 	      m_renderers[i].render();
 	    }
@@ -16939,8 +16928,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
 	  this.setViewAngleDegrees = function (a) {
-	    m_viewAngle = (Math.PI * a) / 180.0;
-	    this.modified();
+	    this.setViewAngle(Math.PI * a / 180.0);
 	  };
 
 	  ////////////////////////////////////////////////////////////////////////////
@@ -17443,9 +17431,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_position[1] = m_focalPoint[1] - d * dir[1];
 	      m_position[2] = m_focalPoint[2] - d * dir[2];
 	    } else {
-	      m_position[0] = m_position[0]  + d * dir[0];
-	      m_position[1] = m_position[1]  + d * dir[1];
-	      m_position[2] = m_position[2]  + d * dir[2];
+	      m_position[0] = m_position[0] + d * dir[0];
+	      m_position[1] = m_position[1] + d * dir[1];
+	      m_position[2] = m_position[2] + d * dir[2];
 	    }
 
 	    this.modified();
@@ -17887,7 +17875,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_outsideCanvas,
 	      m_currPos = {x: 0, y: 0},
 	      m_lastPos = {x: 0, y: 0};
-
 
 	  /////////////////////////////////////////////////////////////////////////////
 	  /**
@@ -18798,7 +18785,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	inherit(vgl.shader, vgl.object);
 
-
 	/* We can use the same shader multiple times if it is identical.  This caches
 	 * the last N shaders and will reuse them when possible.  The cache keeps the
 	 * most recently requested shader at the front.  If you are doing anything more
@@ -18895,7 +18881,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return function () { return baseUrl; };
 	})();
 
-
 	vgl.shaderProgram = function () {
 	  'use strict';
 
@@ -18922,18 +18907,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  /////////////////////////////////////////////////////////////////////////////
 	  this.loadFromFile = function (type, sourceUrl) {
-	    var shader;
+	    var shader, success = false;
 	    $.ajax({
 	      url: sourceUrl,
 	      type: 'GET',
+	      dataType: 'text',
 	      async: false,
 	      success: function (result) {
 	        //console.log(result);
 	        shader = vgl.shader(type);
 	        shader.setShaderSource(result);
 	        m_this.addShader(shader);
+	        success = true;
 	      }
 	    });
+	    return success;
 	  };
 
 	  /////////////////////////////////////////////////////////////////////////////
@@ -18943,7 +18931,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  /////////////////////////////////////////////////////////////////////////////
 	  this.loadShader = function (type, file) {
-	    this.loadFromFile(type, getBaseUrl() + '/shaders/' + file);
+	    return this.loadFromFile(type, getBaseUrl() + '/shaders/' + file);
 	  };
 
 	  /////////////////////////////////////////////////////////////////////////////
@@ -18984,9 +18972,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    var i;
-	    for (i = 0; i < m_shaders.length; i += 1) {
+	    for (i = m_shaders.length - 2; i >= 0; i -= 1) {
 	      if (m_shaders[i].shaderType() === shader.shaderType()) {
-	        m_shaders.splice(m_shaders.indexOf(shader), 1);
+	        m_shaders.splice(i, 1);
 	      }
 	    }
 
@@ -19010,6 +18998,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    m_uniforms.push(uniform);
 	    m_this.modified();
+	    return true;
 	  };
 
 	  /////////////////////////////////////////////////////////////////////////////
@@ -19147,6 +19136,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /////////////////////////////////////////////////////////////////////////////
 	  this.deleteProgram = function (renderState) {
 	    renderState.m_context.deleteProgram(m_programHandle);
+	    m_programHandle = 0;
 	  };
 
 	  /////////////////////////////////////////////////////////////////////////////
@@ -19396,7 +19386,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        renderState.m_context.activeTexture(vgl.GL.TEXTURE15);
 	        break;
 	      default:
-	        throw '[error] Texture unit '  + m_that.m_textureUnit +
+	        throw '[error] Texture unit ' + m_that.m_textureUnit +
 	              ' is not supported';
 	    }
 	  }
@@ -19856,7 +19846,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	     1, 0.380759558, 0.320428137, 1,
 	     0.961891484, 0.313155629, 0.265499262, 1,
 	     0.916482116, 0.236630659, 0.209939162, 1].map(
-	             function (x) {return x * 255;});
+	             function (x) { return x * 255; });
 
 	  /////////////////////////////////////////////////////////////////////////////
 	  /**
@@ -20624,7 +20614,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_geom = new vgl.geometryData();
 
 	    var x = [], tc = [], v1 = [], v2 = [],
-	        pts = [], i, j, k, ii, numPts, numPolys,
+	        pts = [], i, j, ii, numPts,
 	        posIndex = 0, normIndex = 0, colorIndex = 0, texCoordIndex = 0,
 	        positions = [], normals = [], colors = [],
 	        texCoords = [], indices = [], tristrip = null,
@@ -20645,13 +20635,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // TODO Compute center and normal
 	    // Set things up; allocate memory
 	    numPts = (m_xresolution + 1) * (m_yresolution + 1);
-	    numPolys = m_xresolution * m_yresolution * 2;
 	    positions.length = 3 * numPts;
 	    normals.length = 3 * numPts;
 	    texCoords.length = 2 * numPts;
 	    indices.length = numPts;
 
-	    for (k = 0, i = 0; i < (m_yresolution + 1); i += 1) {
+	    for (i = 0; i < (m_yresolution + 1); i += 1) {
 	      tc[1] = i / m_yresolution;
 
 	      for (j = 0; j < (m_xresolution + 1); j += 1) {
@@ -20904,7 +20893,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	               'number of points');
 	    }
 
-
 	    m_geom.addPrimitive(pointsPrimitive);
 
 	    return m_geom;
@@ -21101,17 +21089,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	vgl.utils.createTextureVertexShader = function (context) {
 	  'use strict';
 	  var vertexShaderSource = [
-	        'attribute vec3 vertexPosition;',
-	        'attribute vec3 textureCoord;',
-	        'uniform mediump float pointSize;',
-	        'uniform mat4 modelViewMatrix;',
-	        'uniform mat4 projectionMatrix;',
-	        'varying highp vec3 iTextureCoord;',
-	        'void main(void)',
-	        '{',
-	        'gl_PointSize = pointSize;',
-	        'gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
-	        ' iTextureCoord = textureCoord;', '}'].join('\n');
+	    'attribute vec3 vertexPosition;',
+	    'attribute vec3 textureCoord;',
+	    'uniform mediump float pointSize;',
+	    'uniform mat4 modelViewMatrix;',
+	    'uniform mat4 projectionMatrix;',
+	    'varying highp vec3 iTextureCoord;',
+	    'void main(void)',
+	    '{',
+	    'gl_PointSize = pointSize;',
+	    'gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
+	    ' iTextureCoord = textureCoord;', '}'].join('\n');
 	  return vgl.getCachedShader(vgl.GL.VERTEX_SHADER, context,
 	                             vertexShaderSource);
 	};
@@ -21129,13 +21117,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	vgl.utils.createTextureFragmentShader = function (context) {
 	  'use strict';
 	  var fragmentShaderSource = [
-	        'varying highp vec3 iTextureCoord;',
-	        'uniform sampler2D sampler2d;',
-	        'uniform mediump float opacity;',
-	        'void main(void) {',
-	        'gl_FragColor = vec4(texture2D(sampler2d, vec2(iTextureCoord.s, ' +
+	    'varying highp vec3 iTextureCoord;',
+	    'uniform sampler2D sampler2d;',
+	    'uniform mediump float opacity;',
+	    'void main(void) {',
+	    'gl_FragColor = vec4(texture2D(sampler2d, vec2(iTextureCoord.s, ' +
 	                        'iTextureCoord.t)).xyz, opacity);',
-	        '}'].join('\n');
+	    '}'].join('\n');
 	  return vgl.getCachedShader(vgl.GL.FRAGMENT_SHADER, context,
 	                             fragmentShaderSource);
 	};
@@ -21153,16 +21141,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	vgl.utils.createRgbaTextureFragmentShader = function (context) {
 	  'use strict';
 	  var fragmentShaderSource = [
-	        'varying highp vec3 iTextureCoord;',
-	        'uniform sampler2D sampler2d;',
-	        'uniform mediump float opacity;',
-	        'void main(void) {',
-	        '  mediump vec4 color = vec4(texture2D(sampler2d, vec2(' +
+	    'varying highp vec3 iTextureCoord;',
+	    'uniform sampler2D sampler2d;',
+	    'uniform mediump float opacity;',
+	    'void main(void) {',
+	    '  mediump vec4 color = vec4(texture2D(sampler2d, vec2(' +
 	                                'iTextureCoord.s, iTextureCoord.t)).xyzw);',
-	        '  color.w *= opacity;',
-	        '  gl_FragColor = color;',
-	        '}'
-	      ].join('\n');
+	    '  color.w *= opacity;',
+	    '  gl_FragColor = color;',
+	    '}'
+	  ].join('\n');
 	  return vgl.getCachedShader(vgl.GL.FRAGMENT_SHADER, context,
 	                             fragmentShaderSource);
 	};
@@ -21180,18 +21168,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	vgl.utils.createVertexShader = function (context) {
 	  'use strict';
 	  var vertexShaderSource = [
-	        'attribute vec3 vertexPosition;',
-	        'attribute vec3 vertexColor;',
-	        'uniform mediump float pointSize;',
-	        'uniform mat4 modelViewMatrix;',
-	        'uniform mat4 projectionMatrix;',
-	        'varying mediump vec3 iVertexColor;',
-	        'varying highp vec3 iTextureCoord;',
-	        'void main(void)',
-	        '{',
-	        'gl_PointSize = pointSize;',
-	        'gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
-	        ' iVertexColor = vertexColor;', '}'].join('\n');
+	    'attribute vec3 vertexPosition;',
+	    'attribute vec3 vertexColor;',
+	    'uniform mediump float pointSize;',
+	    'uniform mat4 modelViewMatrix;',
+	    'uniform mat4 projectionMatrix;',
+	    'varying mediump vec3 iVertexColor;',
+	    'varying highp vec3 iTextureCoord;',
+	    'void main(void)',
+	    '{',
+	    'gl_PointSize = pointSize;',
+	    'gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
+	    ' iVertexColor = vertexColor;', '}'].join('\n');
 	  return vgl.getCachedShader(vgl.GL.VERTEX_SHADER, context,
 	                             vertexShaderSource);
 	};
@@ -21209,18 +21197,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	vgl.utils.createPointVertexShader = function (context) {
 	  'use strict';
 	  var vertexShaderSource = [
-	        'attribute vec3 vertexPosition;',
-	        'attribute vec3 vertexColor;',
-	        'attribute float vertexSize;',
-	        'uniform mat4 modelViewMatrix;',
-	        'uniform mat4 projectionMatrix;',
-	        'varying mediump vec3 iVertexColor;',
-	        'varying highp vec3 iTextureCoord;',
-	        'void main(void)',
-	        '{',
-	        'gl_PointSize =  vertexSize;',
-	        'gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
-	        ' iVertexColor = vertexColor;', '}'].join('\n');
+	    'attribute vec3 vertexPosition;',
+	    'attribute vec3 vertexColor;',
+	    'attribute float vertexSize;',
+	    'uniform mat4 modelViewMatrix;',
+	    'uniform mat4 projectionMatrix;',
+	    'varying mediump vec3 iVertexColor;',
+	    'varying highp vec3 iTextureCoord;',
+	    'void main(void)',
+	    '{',
+	    'gl_PointSize =  vertexSize;',
+	    'gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
+	    ' iVertexColor = vertexColor;', '}'].join('\n');
 	  return vgl.getCachedShader(vgl.GL.VERTEX_SHADER, context,
 	                             vertexShaderSource);
 	};
@@ -21238,15 +21226,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	vgl.utils.createVertexShaderSolidColor = function (context) {
 	  'use strict';
 	  var vertexShaderSource = [
-	        'attribute vec3 vertexPosition;',
-	        'uniform mediump float pointSize;',
-	        'uniform mat4 modelViewMatrix;',
-	        'uniform mat4 projectionMatrix;',
-	        'void main(void)',
-	        '{',
-	        'gl_PointSize = pointSize;',
-	        'gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
-	        '}'].join('\n');
+	    'attribute vec3 vertexPosition;',
+	    'uniform mediump float pointSize;',
+	    'uniform mat4 modelViewMatrix;',
+	    'uniform mat4 projectionMatrix;',
+	    'void main(void)',
+	    '{',
+	    'gl_PointSize = pointSize;',
+	    'gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
+	    '}'].join('\n');
 	  return vgl.getCachedShader(vgl.GL.VERTEX_SHADER, context,
 	                             vertexShaderSource);
 	};
@@ -21267,20 +21255,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	  min = min; /* unused parameter */
 	  max = max; /* unused parameter */
 	  var vertexShaderSource = [
-	        'attribute vec3 vertexPosition;',
-	        'attribute float vertexScalar;',
-	        'uniform mediump float pointSize;',
-	        'uniform mat4 modelViewMatrix;',
-	        'uniform mat4 projectionMatrix;',
-	        'uniform float lutMin;',
-	        'uniform float lutMax;',
-	        'varying mediump float iVertexScalar;',
-	        'void main(void)',
-	        '{',
-	        'gl_PointSize = pointSize;',
-	        'gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
-	        'iVertexScalar = (vertexScalar-lutMin)/(lutMax-lutMin);',
-	        '}'].join('\n');
+	    'attribute vec3 vertexPosition;',
+	    'attribute float vertexScalar;',
+	    'uniform mediump float pointSize;',
+	    'uniform mat4 modelViewMatrix;',
+	    'uniform mat4 projectionMatrix;',
+	    'uniform float lutMin;',
+	    'uniform float lutMax;',
+	    'varying mediump float iVertexScalar;',
+	    'void main(void)',
+	    '{',
+	    'gl_PointSize = pointSize;',
+	    'gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
+	    'iVertexScalar = (vertexScalar-lutMin)/(lutMax-lutMin);',
+	    '}'].join('\n');
 	  return vgl.getCachedShader(vgl.GL.VERTEX_SHADER, context,
 	                             vertexShaderSource);
 	};
@@ -21319,25 +21307,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	vgl.utils.createPhongVertexShader = function (context) {
 	  'use strict';
 	  var vertexShaderSource = [
-	      'attribute highp vec3 vertexPosition;',
-	      'attribute mediump vec3 vertexNormal;',
-	      'attribute mediump vec3 vertexColor;',
+	    'attribute highp vec3 vertexPosition;',
+	    'attribute mediump vec3 vertexNormal;',
+	    'attribute mediump vec3 vertexColor;',
 
-	      'uniform highp mat4 projectionMatrix;',
-	      'uniform mat4 modelViewMatrix;',
-	      'uniform mat4 normalMatrix;',
+	    'uniform highp mat4 projectionMatrix;',
+	    'uniform mat4 modelViewMatrix;',
+	    'uniform mat4 normalMatrix;',
 
-	      'varying highp vec4 varPosition;',
-	      'varying mediump vec3 varNormal;',
-	      'varying mediump vec3 varVertexColor;',
+	    'varying highp vec4 varPosition;',
+	    'varying mediump vec3 varNormal;',
+	    'varying mediump vec3 varVertexColor;',
 
-	      'void main(void)',
-	      '{',
-	      'varPosition = modelViewMatrix * vec4(vertexPosition, 1.0);',
-	      'gl_Position = projectionMatrix * varPosition;',
-	      'varNormal = vec3(normalMatrix * vec4(vertexNormal, 0.0));',
-	      'varVertexColor = vertexColor;',
-	      '}'].join('\n');
+	    'void main(void)',
+	    '{',
+	    'varPosition = modelViewMatrix * vec4(vertexPosition, 1.0);',
+	    'gl_Position = projectionMatrix * varPosition;',
+	    'varNormal = vec3(normalMatrix * vec4(vertexNormal, 0.0));',
+	    'varVertexColor = vertexColor;',
+	    '}'].join('\n');
 	  return vgl.getCachedShader(vgl.GL.VERTEX_SHADER, context,
 	                             vertexShaderSource);
 	};
@@ -21383,7 +21371,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	                             fragmentShaderSource);
 	};
 
-
 	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of fragment shader with an assigned constant color.
@@ -21397,10 +21384,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	vgl.utils.createFragmentShaderSolidColor = function (context, color) {
 	  'use strict';
 	  var fragmentShaderSource = [
-	      'uniform mediump float opacity;',
-	      'void main(void) {',
-	      'gl_FragColor = vec4(' + color[0] + ',' + color[1] + ',' + color[2] + ', opacity);',
-	      '}'].join('\n');
+	    'uniform mediump float opacity;',
+	    'void main(void) {',
+	    'gl_FragColor = vec4(' + color[0] + ',' + color[1] + ',' + color[2] + ', opacity);',
+	    '}'].join('\n');
 	  return vgl.getCachedShader(vgl.GL.FRAGMENT_SHADER, context,
 	                             fragmentShaderSource);
 	};
@@ -21418,13 +21405,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	vgl.utils.createFragmentShaderColorMap = function (context) {
 	  'use strict';
 	  var fragmentShaderSource = [
-	        'varying mediump float iVertexScalar;',
-	        'uniform sampler2D sampler2d;',
-	        'uniform mediump float opacity;',
-	        'void main(void) {',
-	        'gl_FragColor = vec4(texture2D(sampler2d, vec2(iVertexScalar, ' +
+	    'varying mediump float iVertexScalar;',
+	    'uniform sampler2D sampler2d;',
+	    'uniform mediump float opacity;',
+	    'void main(void) {',
+	    'gl_FragColor = vec4(texture2D(sampler2d, vec2(iVertexScalar, ' +
 	            '0.0)).xyz, opacity);',
-	        '}'].join('\n');
+	    '}'].join('\n');
 	  return vgl.getCachedShader(vgl.GL.FRAGMENT_SHADER, context,
 	                             fragmentShaderSource);
 	};
@@ -21442,24 +21429,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	vgl.utils.createPointSpritesVertexShader = function (context) {
 	  'use strict';
 	  var vertexShaderSource = [
-	        'attribute vec3 vertexPosition;',
-	        'attribute vec3 vertexColor;',
-	        'uniform mediump vec2 pointSize;',
-	        'uniform mat4 modelViewMatrix;',
-	        'uniform mat4 projectionMatrix;',
-	        'uniform float height;',
-	        'varying mediump vec3 iVertexColor;',
-	        'varying highp float iVertexScalar;',
-	        'void main(void)',
-	        '{',
-	        'mediump float realPointSize = pointSize.y;',
-	        'if (pointSize.x > pointSize.y) {',
-	        '  realPointSize = pointSize.x;}',
-	        'gl_PointSize = realPointSize ;',
-	        'iVertexScalar = vertexPosition.z;',
-	        'gl_Position = projectionMatrix * modelViewMatrix * ' +
+	    'attribute vec3 vertexPosition;',
+	    'attribute vec3 vertexColor;',
+	    'uniform mediump vec2 pointSize;',
+	    'uniform mat4 modelViewMatrix;',
+	    'uniform mat4 projectionMatrix;',
+	    'uniform float height;',
+	    'varying mediump vec3 iVertexColor;',
+	    'varying highp float iVertexScalar;',
+	    'void main(void)',
+	    '{',
+	    'mediump float realPointSize = pointSize.y;',
+	    'if (pointSize.x > pointSize.y) {',
+	    '  realPointSize = pointSize.x;}',
+	    'gl_PointSize = realPointSize ;',
+	    'iVertexScalar = vertexPosition.z;',
+	    'gl_Position = projectionMatrix * modelViewMatrix * ' +
 	            'vec4(vertexPosition.xy, height, 1.0);',
-	        ' iVertexColor = vertexColor;', '}'].join('\n');
+	    ' iVertexColor = vertexColor;', '}'].join('\n');
 	  return vgl.getCachedShader(vgl.GL.VERTEX_SHADER, context,
 	                             vertexShaderSource);
 	};
@@ -21477,34 +21464,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	vgl.utils.createPointSpritesFragmentShader = function (context) {
 	  'use strict';
 	  var fragmentShaderSource = [
-	        'varying mediump vec3 iVertexColor;',
-	        'varying highp float iVertexScalar;',
-	        'uniform sampler2D opacityLookup;',
-	        'uniform highp float lutMin;',
-	        'uniform highp float lutMax;',
-	        'uniform sampler2D scalarsToColors;',
-	        'uniform int useScalarsToColors;',
-	        'uniform int useVertexColors;',
-	        'uniform mediump vec2 pointSize;',
-	        'uniform mediump float vertexColorWeight;',
-	        'void main(void) {',
-	        'mediump vec2 realTexCoord;',
-	        'if (pointSize.x > pointSize.y) {',
-	        '  realTexCoord = vec2(1.0, pointSize.y/pointSize.x) * gl_PointCoord;',
-	        '} else {',
-	        '  realTexCoord = vec2(pointSize.x/pointSize.y, 1.0) * gl_PointCoord;',
-	        '}',
-	        'highp float texOpacity = texture2D(opacityLookup, realTexCoord).w;',
-	        'if (useScalarsToColors == 1) {',
-	        '  gl_FragColor = vec4(texture2D(scalarsToColors, vec2((' +
+	    'varying mediump vec3 iVertexColor;',
+	    'varying highp float iVertexScalar;',
+	    'uniform sampler2D opacityLookup;',
+	    'uniform highp float lutMin;',
+	    'uniform highp float lutMax;',
+	    'uniform sampler2D scalarsToColors;',
+	    'uniform int useScalarsToColors;',
+	    'uniform int useVertexColors;',
+	    'uniform mediump vec2 pointSize;',
+	    'uniform mediump float vertexColorWeight;',
+	    'void main(void) {',
+	    'mediump vec2 realTexCoord;',
+	    'if (pointSize.x > pointSize.y) {',
+	    '  realTexCoord = vec2(1.0, pointSize.y/pointSize.x) * gl_PointCoord;',
+	    '} else {',
+	    '  realTexCoord = vec2(pointSize.x/pointSize.y, 1.0) * gl_PointCoord;',
+	    '}',
+	    'highp float texOpacity = texture2D(opacityLookup, realTexCoord).w;',
+	    'if (useScalarsToColors == 1) {',
+	    '  gl_FragColor = vec4(texture2D(scalarsToColors, vec2((' +
 	            'iVertexScalar - lutMin)/(lutMax - lutMin), 0.0)).xyz, ' +
 	            'texOpacity);',
-	        '} else if (useVertexColors == 1) {',
-	        '  gl_FragColor = vec4(iVertexColor, texOpacity);',
-	        '} else {',
-	        '  gl_FragColor = vec4(texture2D(opacityLookup, realTexCoord).xyz, texOpacity);',
-	        '}}'
-	    ].join('\n');
+	    '} else if (useVertexColors == 1) {',
+	    '  gl_FragColor = vec4(iVertexColor, texOpacity);',
+	    '} else {',
+	    '  gl_FragColor = vec4(texture2D(opacityLookup, realTexCoord).xyz, texOpacity);',
+	    '}}'
+	  ].join('\n');
 	  return vgl.getCachedShader(vgl.GL.FRAGMENT_SHADER, context,
 	                             fragmentShaderSource);
 	};
@@ -21521,17 +21508,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	vgl.utils.createTextureMaterial = function (isRgba, origin) {
 	  'use strict';
 	  var mat = new vgl.material(),
-	    blend = new vgl.blend(),
-	    prog = new vgl.shaderProgram(),
-	    vertexShader = vgl.utils.createTextureVertexShader(vgl.GL),
-	    fragmentShader = null,
-	    posVertAttr = new vgl.vertexAttribute('vertexPosition'),
-	    texCoordVertAttr = new vgl.vertexAttribute('textureCoord'),
-	    pointsizeUniform = new vgl.floatUniform('pointSize', 5.0),
-	    modelViewUniform,
-	    projectionUniform = new vgl.projectionUniform('projectionMatrix'),
-	    samplerUniform = new vgl.uniform(vgl.GL.INT, 'sampler2d'),
-	    opacityUniform = null;
+	      blend = new vgl.blend(),
+	      prog = new vgl.shaderProgram(),
+	      vertexShader = vgl.utils.createTextureVertexShader(vgl.GL),
+	      fragmentShader = null,
+	      posVertAttr = new vgl.vertexAttribute('vertexPosition'),
+	      texCoordVertAttr = new vgl.vertexAttribute('textureCoord'),
+	      pointsizeUniform = new vgl.floatUniform('pointSize', 5.0),
+	      modelViewUniform,
+	      projectionUniform = new vgl.projectionUniform('projectionMatrix'),
+	      samplerUniform = new vgl.uniform(vgl.GL.INT, 'sampler2d'),
+	      opacityUniform = null;
 	  if (origin !== undefined) {
 	    modelViewUniform = new vgl.modelViewOriginUniform('modelViewMatrix',
 	                                                      origin);
@@ -21638,7 +21625,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  return mat;
 	};
-
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -21790,7 +21776,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    console.log('[warning] Invalid lookup table. Nothing to update.');
 	    return;
 	  }
-
 
 	  var lutMin = mat.shaderProgram().uniform('lutMin'),
 	      lutMax = mat.shaderProgram().uniform('lutMax');
@@ -22184,7 +22169,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    // Create axis label
-	    origin[0] = (positions[0] + positions[positions.length - 3]  - size) * 0.5;
+	    origin[0] = (positions[0] + positions[positions.length - 3] - size) * 0.5;
 	    origin[1] = positions[1] + axisLabelOffset;
 	    origin[2] = positions[2];
 
@@ -22473,7 +22458,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	          //jscs:enable disallowKeywords
 	        }
 
-
 	        if (tymin > tmin) {
 	          tmin = tymin;
 	        }
@@ -22543,51 +22527,51 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var SHP_POLYLINE = 3;
 
 	  this.int8 = function (data, offset) {
-	    return data.charCodeAt (offset);
+	    return data.charCodeAt(offset);
 	  };
 
 	  /*jshint bitwise: false */
 	  this.bint32 = function (data, offset) {
 	    return (
-	      ((data.charCodeAt (offset) & 0xff) << 24) +
-	        ((data.charCodeAt (offset + 1) & 0xff) << 16) +
-	        ((data.charCodeAt (offset + 2) & 0xff) << 8) +
-	        (data.charCodeAt (offset + 3) & 0xff)
+	      ((data.charCodeAt(offset) & 0xff) << 24) +
+	        ((data.charCodeAt(offset + 1) & 0xff) << 16) +
+	        ((data.charCodeAt(offset + 2) & 0xff) << 8) +
+	        (data.charCodeAt(offset + 3) & 0xff)
 	    );
 	  };
 
 	  this.lint32 = function (data, offset) {
 	    return (
-	      ((data.charCodeAt (offset + 3) & 0xff) << 24) +
-	        ((data.charCodeAt (offset + 2) & 0xff) << 16) +
-	        ((data.charCodeAt (offset + 1) & 0xff) << 8) +
-	        (data.charCodeAt (offset) & 0xff)
+	      ((data.charCodeAt(offset + 3) & 0xff) << 24) +
+	        ((data.charCodeAt(offset + 2) & 0xff) << 16) +
+	        ((data.charCodeAt(offset + 1) & 0xff) << 8) +
+	        (data.charCodeAt(offset) & 0xff)
 	    );
 	  };
 
 	  this.bint16 = function (data, offset) {
 	    return (
-	      ((data.charCodeAt (offset) & 0xff) << 8) +
-	        (data.charCodeAt (offset + 1) & 0xff)
+	      ((data.charCodeAt(offset) & 0xff) << 8) +
+	        (data.charCodeAt(offset + 1) & 0xff)
 	    );
 	  };
 
 	  this.lint16 = function (data, offset) {
 	    return (
-	      ((data.charCodeAt (offset + 1) & 0xff) << 8) +
-	        (data.charCodeAt (offset) & 0xff)
+	      ((data.charCodeAt(offset + 1) & 0xff) << 8) +
+	        (data.charCodeAt(offset) & 0xff)
 	    );
 	  };
 
 	  this.ldbl64 = function (data, offset) {
-	    var b0 = data.charCodeAt (offset) & 0xff;
-	    var b1 = data.charCodeAt (offset + 1) & 0xff;
-	    var b2 = data.charCodeAt (offset + 2) & 0xff;
-	    var b3 = data.charCodeAt (offset + 3) & 0xff;
-	    var b4 = data.charCodeAt (offset + 4) & 0xff;
-	    var b5 = data.charCodeAt (offset + 5) & 0xff;
-	    var b6 = data.charCodeAt (offset + 6) & 0xff;
-	    var b7 = data.charCodeAt (offset + 7) & 0xff;
+	    var b0 = data.charCodeAt(offset) & 0xff;
+	    var b1 = data.charCodeAt(offset + 1) & 0xff;
+	    var b2 = data.charCodeAt(offset + 2) & 0xff;
+	    var b3 = data.charCodeAt(offset + 3) & 0xff;
+	    var b4 = data.charCodeAt(offset + 4) & 0xff;
+	    var b5 = data.charCodeAt(offset + 5) & 0xff;
+	    var b6 = data.charCodeAt(offset + 6) & 0xff;
+	    var b7 = data.charCodeAt(offset + 7) & 0xff;
 
 	    var sign = 1 - 2 * (b7 >> 7);
 	    var exp = (((b7 & 0x7f) << 4) + ((b6 & 0xf0) >> 4)) - 1023;
@@ -22596,24 +22580,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // Math.pow (2, -44) + b0 * Math.pow (2, -52);
 
 	    //return sign * (1 + frac) * Math.pow (2, exp);
-	    var frac = (b6 & 0x0f) * Math.pow (2, 48) + b5 * Math.pow (2, 40) + b4 *
-	                 Math.pow (2, 32) + b3 * Math.pow (2, 24) + b2 *
-	                 Math.pow (2, 16) + b1 * Math.pow (2, 8) + b0;
+	    var frac = (b6 & 0x0f) * Math.pow(2, 48) + b5 * Math.pow(2, 40) + b4 *
+	                 Math.pow(2, 32) + b3 * Math.pow(2, 24) + b2 *
+	                 Math.pow(2, 16) + b1 * Math.pow(2, 8) + b0;
 
-	    return sign * (1 + frac * Math.pow (2, -52)) * Math.pow (2, exp);
+	    return sign * (1 + frac * Math.pow(2, -52)) * Math.pow(2, exp);
 	  };
 
 	  this.lfloat32 = function (data, offset) {
-	    var b0 = data.charCodeAt (offset) & 0xff;
-	    var b1 = data.charCodeAt (offset + 1) & 0xff;
-	    var b2 = data.charCodeAt (offset + 2) & 0xff;
-	    var b3 = data.charCodeAt (offset + 3) & 0xff;
+	    var b0 = data.charCodeAt(offset) & 0xff;
+	    var b1 = data.charCodeAt(offset + 1) & 0xff;
+	    var b2 = data.charCodeAt(offset + 2) & 0xff;
+	    var b3 = data.charCodeAt(offset + 3) & 0xff;
 
 	    var sign = 1 - 2 * (b3 >> 7);
 	    var exp = (((b3 & 0x7f) << 1) + ((b2 & 0xfe) >> 7)) - 127;
-	    var frac = (b2 & 0x7f) * Math.pow (2, 16) + b1 * Math.pow (2, 8) + b0;
+	    var frac = (b2 & 0x7f) * Math.pow(2, 16) + b1 * Math.pow(2, 8) + b0;
 
-	    return sign * (1 + frac * Math.pow (2, -23)) * Math.pow (2, exp);
+	    return sign * (1 + frac * Math.pow(2, -23)) * Math.pow(2, exp);
 	  };
 	  /*jshint bitwise: true */
 
@@ -22622,14 +22606,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var index = offset;
 	    while (index < offset + length) {
 	      var c = data[index];
-	      if (c.charCodeAt (0) !== 0) {
-	        chars.push (c);
+	      if (c.charCodeAt(0) !== 0) {
+	        chars.push(c);
 	      } else {
 	        break;
 	      }
 	      index += 1;
 	    }
-	    return chars.join ('');
+	    return chars.join('');
 	  };
 
 	  this.readHeader = function (data) {
@@ -22656,33 +22640,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.loadShx = function (data) {
 	    var indices = [];
 	    var appendIndex = function (offset) {
-	      indices.push (2 * m_that.bint32(data, offset));
+	      indices.push(2 * m_that.bint32(data, offset));
 	      return offset + 8;
 	    };
 	    var offset = 100;
 	    while (offset < data.length) {
-	      offset = appendIndex (offset);
+	      offset = appendIndex(offset);
 	    }
 	    return indices;
 	  };
 
 	  this.Shapefile = function (options) {
 	    var path = options.path;
-	    $.ajax ({
+	    $.ajax({
 	      url: path + '.shx',
 	      mimeType: 'text/plain; charset=x-user-defined',
 	      success: function (data) {
 	        var indices = this.loadShx(data);
-	        $.ajax ({
+	        $.ajax({
 	          url: path + '.shp',
 	          mimeType: 'text/plain; charset=x-user-defined',
 	          success: function (data) {
-	            $.ajax ({
+	            $.ajax({
 	              url: path + '.dbf',
 	              mimeType: 'text/plain; charset=x-user-defined',
 	              success: function (dbf_data) {
-	                var layer = this.loadShp (data, dbf_data, indices, options);
-	                options.success (layer);
+	                var layer = this.loadShp(data, dbf_data, indices, options);
+	                options.success(layer);
 	              }
 	            });
 	          }
@@ -22751,7 +22735,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var header_offset = FIELDS_START;
 	    var headers = [];
 	    while (header_offset < header_size - 1) {
-	      headers.push (readHeader(header_offset));
+	      headers.push(readHeader(header_offset));
 	      header_offset += HEADER_LENGTH;
 	    }
 
@@ -22766,13 +22750,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // Move offset to the start of the actual data
 	        record_offset += 1;
 	        var record = {};
-	        for (var i = 0; i < headers.length; i  += 1) {
+	        for (var i = 0; i < headers.length; i += 1) {
 	          var header = headers[i];
 	          var value;
 	          if (header.type === 'C') {
-	            value = m_that.str(data, record_offset, header.length).trim ();
+	            value = m_that.str(data, record_offset, header.length).trim();
 	          } else if (header.type === 'N') {
-	            value = parseFloat (m_that.str (data, record_offset, header.length));
+	            value = parseFloat(m_that.str(data, record_offset, header.length));
 	          }
 	          record_offset += header.length;
 	          record[header.name] = value;
@@ -22791,7 +22775,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      for (var i = end - 1; i >= start; i -= 1) {
 	        var x = m_that.ldbl64(data, offset + 16 * i);
 	        var y = m_that.ldbl64(data, offset + 16 * i + 8);
-	        ring.push ([x, y]);
+	        ring.push([x, y]);
 	      }
 	      //if (ring.length <= 3)
 	      // return [];
@@ -22807,13 +22791,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	          start, end, ring, rings;
 
 	      if (geom_type === SHP_NULL) {
-	        console.log ('NULL Shape');
+	        console.log('NULL Shape');
 	        //return offset + 12;
 	      } else if (geom_type === SHP_POINT) {
 	        var x = m_that.ldbl64(data, record_offset + 4);
 	        var y = m_that.ldbl64(data, record_offset + 12);
 
-	        features.push ({
+	        features.push({
 	          type: 'Point',
 	          attr: {},
 	          geom: [[x, y]]
@@ -22826,17 +22810,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	        points_start = offset + 52 + 4 * num_parts;
 
 	        rings = [];
-	        for (i = 0; i < num_parts; i  += 1) {
+	        for (i = 0; i < num_parts; i += 1) {
 	          start = m_that.lint32(data, parts_start + i * 4);
 	          if (i + 1 < num_parts) {
 	            end = m_that.lint32(data, parts_start + (i + 1) * 4);
 	          } else {
 	            end = num_points;
 	          }
-	          ring = readRing (points_start, start, end);
-	          rings.push (ring);
+	          ring = readRing(points_start, start, end);
+	          rings.push(ring);
 	        }
-	        features.push ({
+	        features.push({
 	          type: 'Polygon',
 	          attr: {},
 	          geom: [rings]
@@ -22849,17 +22833,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	        points_start = offset + 52 + 4 * num_parts;
 
 	        rings = [];
-	        for (i = 0; i < num_parts; i  += 1) {
+	        for (i = 0; i < num_parts; i += 1) {
 	          start = m_that.lint32(data, parts_start + i * 4);
 	          if (i + 1 < num_parts) {
 	            end = m_that.lint32(data, parts_start + (i + 1) * 4);
 	          } else {
 	            end = num_points;
 	          }
-	          ring = readRing (points_start, start, end);
-	          rings.push (ring);
+	          ring = readRing(points_start, start, end);
+	          rings.push(ring);
 	        }
-	        features.push ({
+	        features.push({
 	          type: 'Polyline',
 	          attr: {},
 	          geom: [rings]
@@ -22876,17 +22860,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    //while (offset < length * 2) {
 	    // offset = readRecord (offset);
 	    //}
-	    for (i = 0; i < indices.length; i  += 1) {
+	    for (i = 0; i < indices.length; i += 1) {
 	      var offset = indices[i];
-	      readRecord (offset);
+	      readRecord(offset);
 	    }
 
 	    var layer = []; //new Layer ();
 
-	    for (i = 0; i < features.length; i  += 1) {
+	    for (i = 0; i < features.length; i += 1) {
 	      var feature = features[i];
 	      feature.attr = attr[i];
-	      layer.push (feature);
+	      layer.push(feature);
 	    }
 	    return layer;
 	  };
@@ -22924,17 +22908,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	     'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
 	     'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
 	     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'],
-	  m_reverseBase64Chars = [],
-	  m_vtkRenderedList = {},
-	  m_vtkObjectCount = 0,
-	  m_vtkScene = null,
-	  m_node = null,
-	  END_OF_INPUT = -1,
-	  m_base64Str = '',
-	  m_base64Count = 0,
-	  m_pos = 0,
-	  m_viewer = null,
-	  i = 0;
+	      m_reverseBase64Chars = [],
+	      m_vtkRenderedList = {},
+	      m_vtkObjectCount = 0,
+	      m_vtkScene = null,
+	      m_node = null,
+	      END_OF_INPUT = -1,
+	      m_base64Str = '',
+	      m_base64Count = 0,
+	      m_pos = 0,
+	      m_viewer = null,
+	      i = 0;
 
 	  //initialize the array here if not already done.
 	  if (m_reverseBase64Chars.length === 0) {
@@ -22942,8 +22926,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_reverseBase64Chars[m_base64Chars[i]] = i;
 	    }
 	  }
-
-
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
@@ -23021,9 +23003,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      /*jshint bitwise: false */
 	      result += this.ntos((((inBuffer[0] << 2) & 0xff) | inBuffer[1] >> 4));
 	      if (inBuffer[2] !== END_OF_INPUT) {
-	        result +=  this.ntos((((inBuffer[1] << 4) & 0xff) | inBuffer[2] >> 2));
+	        result += this.ntos((((inBuffer[1] << 4) & 0xff) | inBuffer[2] >> 2));
 	        if (inBuffer[3] !== END_OF_INPUT) {
-	          result +=  this.ntos((((inBuffer[2] << 6) & 0xff) | inBuffer[3]));
+	          result += this.ntos((((inBuffer[2] << 6) & 0xff) | inBuffer[3]));
 	        } else {
 	          done = true;
 	        }
@@ -23217,9 +23199,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    //jshint plusplus: false
 	    for (i = 0; i < numberOfPoints; i += 1) {
-	      p[idx++] = points[i * 3/*+0*/];
+	      p[idx++] = points[i * 3];
 	      p[idx++] = points[i * 3 + 1];
-	      p[idx++] =  points[i * 3 + 2];
+	      p[idx++] = points[i * 3 + 2];
 	    }
 	    //jshint plusplus: true
 	    vglpoints.insert(p);
@@ -23271,7 +23253,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var vglpoints = null, vglcolors = null,
 	        normals = null, matrix = mat4.create(),
 	        vgltriangles = null, numberOfIndex, numberOfPoints,
-	        points, temp, index, size, m, i, tcoord,
+	        points, temp, index, size, m, i,
 	        pn = null, idx = 0;
 
 	    numberOfPoints = this.readNumber(ss);
@@ -23284,10 +23266,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    normals = this.readF3Array(numberOfPoints, ss);
 	    //jshint plusplus: false
 	    for (i = 0; i < numberOfPoints; i += 1) {
-	      pn[idx++] = points[i * 3/*+0*/];
+	      pn[idx++] = points[i * 3];
 	      pn[idx++] = points[i * 3 + 1];
 	      pn[idx++] = points[i * 3 + 2];
-	      pn[idx++] = normals[i * 3/*+0*/];
+	      pn[idx++] = normals[i * 3];
 	      pn[idx++] = normals[i * 3 + 1];
 	      pn[idx++] = normals[i * 3 + 2];
 	    }
@@ -23326,10 +23308,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m = new Float32Array(temp.buffer);
 	    mat4.copy(matrix, m);
 
-	    //Getting TCoord
-	    //TODO: renderer is not doing anything with this yet
-	    tcoord = null;
-
 	    return matrix;
 	  };
 
@@ -23359,7 +23337,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    //jshint plusplus: false
 	    for (i = 0; i < numberOfPoints; i += 1) {
 	      indices[i] = i;
-	      p[idx++] = points[i * 3/*+0*/];
+	      p[idx++] = points[i * 3];
 	      p[idx++] = points[i * 3 + 1];
 	      p[idx++] = points[i * 3 + 2];
 	    }
@@ -23648,7 +23626,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var copyArray = function (dst, src, start, count) {
 	    if (!dst) {
-	      console.log ('ack');
+	      throw 'No destination';
 	    }
 	    if (!start) {
 	      start = 0;
@@ -23675,20 +23653,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	    size = new_size;
 	    for (var name in data) {
 	      if (data.hasOwnProperty(name)) {
-	        var newArray = new Float32Array (new_size * data[name].len);
+	        var newArray = new Float32Array(new_size * data[name].len);
 	        var oldArray = data[name].array;
-	        copyArray (newArray, oldArray);
+	        copyArray(newArray, oldArray);
 	        data[name].array = newArray;
 	        data[name].dirty = true;
 	      }
 	    }
 	  };
 
+	  /**
+	   * Allocate a buffer with a name and a specific number of components per
+	   * entry.  If a buffer with the specified name already exists, it will be
+	   * overwritten.
+	   *
+	   * @param name: the name of the buffer to create or replace.
+	   * @param len: number of components per entry.  Most be a positive integer.
+	   */
 	  this.create = function (name, len) {
-	    if (!len) {
+	    if (!len || len < 0) {
 	      throw 'Length of buffer must be a positive integer';
 	    }
-	    var array = new Float32Array (size * len);
+	    var array = new Float32Array(size * len);
 	    data[name] = {
 	      array: array,
 	      len: len,
@@ -23699,7 +23685,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  this.alloc = function (num) {
 	    if ((current + num) >= size) {
-	      resize (current + num);
+	      resize(current + num);
 	    }
 	    var start = current;
 	    current += num;
@@ -23711,13 +23697,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 
 	  this.write = function (name, array, start, count) {
-	    copyArray (data[name].array, array, start * data[name].len, count * data[name].len);
+	    if (start + count > size) {
+	      throw 'Write would exceed buffer size';
+	    }
+	    copyArray(data[name].array, array, start * data[name].len, count * data[name].len);
 	    data[name].dirty = true;
 	  };
 
 	  this.repeat = function (name, elem, start, count) {
+	    if (start + count > size) {
+	      throw 'Repeat would exceed buffer size';
+	    }
 	    for (var i = 0; i < count; i += 1) {
-	      copyArray (data[name].array, elem,
+	      copyArray(data[name].array, elem,
 	                 (start + i) * data[name].len, data[name].len);
 	    }
 	    data[name].dirty = true;
@@ -23731,6 +23723,497 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return data[name].array;
 	  };
 	};
+
+	////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Create a new instance of class renderer *
+	 *
+	 * @returns {vgl.renderer}
+	 */
+	////////////////////////////////////////////////////////////////////////////
+
+	vgl.depthPeelRenderer = function () {
+	  'use strict';
+
+	  if (!(this instanceof vgl.depthPeelRenderer)) {
+	    return new vgl.depthPeelRenderer();
+	  }
+	  vgl.renderer.call(this);
+
+	  var m_this = this, fbo = [], texID = [], depthTexID = [],
+	      colorBlenderTexID, colorBlenderFBOID, setupTime = vgl.timestamp(),
+	      fpMaterial = vgl.material(), blMaterial = vgl.material(),
+	      fiMaterial = vgl.material(), frontPeelShader = null, blendShader = null,
+	      finalShader, NUM_PASSES = 6, m_quad = null, fpwidth, fpheight, blwidth, blheight,
+	      fiwidth, fiheight, fpopacity, fibackgroundColor;
+
+	  function drawFullScreenQuad(renderState, material) {
+	    m_quad.setMaterial(material);
+
+	    renderState.m_mapper = m_quad.mapper();
+	    renderState.m_material = material;
+
+	    renderState.m_material.bind(renderState);
+	    renderState.m_mapper.render(renderState);
+	    renderState.m_material.undoBind(renderState);
+
+	    m_quad.setMaterial(null);
+	  }
+
+	  function initScreenQuad(renderState, width, height) {
+	    console.log(width);
+	    console.log(height);
+	    m_quad = vgl.utils.createPlane(0.0, 0.0, 0.0,
+	                                   1.0, 0.0, 0.0,
+	                                   0.0, 1.0, 0.0);
+	  }
+
+	  function initShaders(renderState) {
+	    var fpmv, fpproj, fpvertex, fpcolor, fpdepthTex, fpnormal, fpnr,
+	        blvertex, blColorSamp, blPrevDepthSamp, blCurrDepthSamp,
+	        fivertex, fitempTex;
+
+	    // Load the front to back peeling shader
+	    fpvertex = new vgl.vertexAttribute('vertexPosition');
+	    fpnormal = new vgl.vertexAttribute('vertexNormal');
+	    fpcolor = new vgl.vertexAttribute('vertexColor');
+	    fpmv = new vgl.modelViewUniform('modelViewMatrix');
+	    fpnr = new vgl.modelViewUniform('normalMatrix');
+	    fpproj = new vgl.projectionUniform('projectionMatrix');
+	    fpwidth = new vgl.floatUniform('width');
+	    fpheight = new vgl.floatUniform('height');
+	    fpopacity = new vgl.floatUniform('opacity', 1.0);
+	    fpdepthTex = new vgl.uniform(vgl.GL.INT, 'depthTexture');
+	    fpdepthTex.set(0);
+
+	    frontPeelShader = new vgl.shaderProgram();
+	    frontPeelShader.loadShader(vgl.GL.VERTEX_SHADER, 'front_peel.vert');
+	    frontPeelShader.loadShader(vgl.GL.FRAGMENT_SHADER, 'front_peel.frag');
+
+	    frontPeelShader.addUniform(fpmv);
+	    frontPeelShader.addUniform(fpnr);
+	    frontPeelShader.addUniform(fpproj);
+	    frontPeelShader.addUniform(fpdepthTex);
+	    frontPeelShader.addUniform(fpwidth);
+	    frontPeelShader.addUniform(fpheight);
+	    frontPeelShader.addUniform(fpopacity);
+	    frontPeelShader.addVertexAttribute(fpvertex, vgl.vertexAttributeKeys.Position);
+	    frontPeelShader.addVertexAttribute(fpnormal, vgl.vertexAttributeKeys.Normal);
+	    frontPeelShader.addVertexAttribute(fpcolor, vgl.vertexAttributeKeys.Color);
+
+	    // Compile and link the shader
+	    frontPeelShader.compileAndLink(renderState);
+
+	    fpMaterial.addAttribute(frontPeelShader);
+
+	    //     //add attributes and uniforms
+	    //     frontPeelShader.AddAttribute('vVertex');
+	    //     frontPeelShader.AddUniform('MVP');
+	    //     frontPeelShader.AddUniform('vColor');
+	    //     frontPeelShader.AddUniform('depthTexture');
+	    //     //pass constant uniforms at initialization
+	    //     glUniform1i(frontPeelShader('depthTexture'), 0);
+	    // frontPeelShader.UnUse();
+
+	    // Load the blending shader
+	    blendShader = new vgl.shaderProgram();
+	    blendShader.loadShader(vgl.GL.VERTEX_SHADER, 'blend.vert');
+	    blendShader.loadShader(vgl.GL.FRAGMENT_SHADER, 'blend.frag');
+	    blColorSamp = new vgl.uniform(vgl.GL.INT, 'currColorTexture');
+	    blPrevDepthSamp = new vgl.uniform(vgl.GL.INT, 'prevDepthTexture');
+	    blCurrDepthSamp = new vgl.uniform(vgl.GL.INT, 'currDepthTexture');
+
+	    blwidth = new vgl.floatUniform('width');
+	    blheight = new vgl.floatUniform('height');
+	    blColorSamp.set(0);
+	    blPrevDepthSamp.set(1);
+	    blCurrDepthSamp.set(2);
+
+	    blvertex = new vgl.vertexAttribute('vertexPosition');
+
+	    blendShader.addUniform(blColorSamp);
+	    blendShader.addUniform(blPrevDepthSamp);
+	    blendShader.addUniform(blPrevDepthSamp);
+	    blendShader.addUniform(blwidth);
+	    blendShader.addUniform(blheight);
+	    blendShader.addVertexAttribute(blvertex,
+	      vgl.vertexAttributeKeys.Position);
+
+	    // Compile and link the shader
+	    blendShader.compileAndLink(renderState);
+	    blMaterial.addAttribute(blendShader);
+
+	    //     //add attributes and uniforms
+	    //     blendShader.AddAttribute('vVertex');
+	    //     blendShader.AddUniform('currColorTexture');
+	    //     //pass constant uniforms at initialization
+	    //     glUniform1i(blendShader('currColorTexture'), 0);
+	    // blendShader.UnUse();
+
+	    //Load the final shader
+	    finalShader = new vgl.shaderProgram();
+	    finalShader.loadShader(vgl.GL.VERTEX_SHADER, 'blend.vert');
+	    finalShader.loadShader(vgl.GL.FRAGMENT_SHADER, 'final.frag');
+
+	    //fimv = new vgl.modelViewUniform('modelViewMatrix');
+	    //fiproj = new vgl.projectionUniform('projectionMatrix');
+	    fitempTex = new vgl.uniform(vgl.GL.INT, 'colorTexture');
+	    fiwidth = new vgl.floatUniform('width');
+	    fiheight = new vgl.floatUniform('height');
+	    fibackgroundColor = new vgl.uniform(vgl.GL.FLOAT_VEC3, 'backgroundColor');
+	    fitempTex.set(0);
+	    fivertex = new vgl.vertexAttribute('vertexPosition');
+
+	    //finalShader.addUniform(fimv);
+	    //finalShader.addUniform(fiproj);
+	    finalShader.addUniform(fitempTex);
+	    finalShader.addUniform(fiwidth);
+	    finalShader.addUniform(fiheight);
+	    finalShader.addUniform(fibackgroundColor);
+	    finalShader.addVertexAttribute(fivertex, vgl.vertexAttributeKeys.Position);
+	    finalShader.compileAndLink(renderState);
+	    fiMaterial.addAttribute(finalShader);
+	  }
+
+	  function initFBO(renderState, WIDTH, HEIGHT) {
+	    var i, textureFloatExt, textureFloatLinearExt, depthTextureExt, filtering;
+
+	    // Or browser-appropriate prefix
+	    depthTextureExt = renderState.m_context.getExtension('WEBKIT_WEBGL_depth_texture');
+	    if (!depthTextureExt) {
+	      depthTextureExt = renderState.m_context.getExtension('WEBGL_depth_texture');
+
+	      if (!depthTextureExt) {
+	        console.log('Depth textures are not supported');
+	      }
+	    }
+
+	    var floatTextureExt = renderState.m_context.getExtension('OES_texture_float');
+	    if (!floatTextureExt) {
+	      console.log('float textures are not supported');
+	    }
+
+	    textureFloatExt = renderState.m_context.getExtension('OES_texture_float');
+	    if (!textureFloatExt) {
+	      console.log('Extension Texture Float is not working');
+	      window.alert(':( Sorry, Your browser doesn\'t support texture float extension.');
+	      return;
+	    }
+	    textureFloatLinearExt = renderState.m_context.getExtension(
+	        'OES_texture_float_linear');
+	    depthTextureExt = renderState.m_context.getExtension('WEBGL_depth_texture');
+
+	    if (!depthTextureExt) {
+	      console.log('Extension Depth texture is not working');
+	      window.alert(':( Sorry, Your browser doesn\'t support depth texture extension.');
+	      return;
+	    }
+
+	    filtering = textureFloatLinearExt ? vgl.GL.LINEAR : vgl.GL.NEAREST;
+
+	    //FBO initialization function
+	    // Generate 2 FBO
+	    fbo.push(renderState.m_context.createFramebuffer());
+	    fbo.push(renderState.m_context.createFramebuffer());
+
+	    // Create two textures
+	    texID.push(renderState.m_context.createTexture());
+	    texID.push(renderState.m_context.createTexture());
+
+	    //The FBO has two depth attachments
+	    depthTexID.push(renderState.m_context.createTexture());
+	    depthTexID.push(renderState.m_context.createTexture());
+
+	    // For each attachment
+	    for (i = 0; i < 2; i += 1) {
+	      // First initialize the depth texture
+	      renderState.m_context.bindTexture(vgl.GL.TEXTURE_2D, depthTexID[i]);
+	      renderState.m_context.texParameteri(vgl.GL.TEXTURE_2D,
+	        vgl.GL.TEXTURE_MAG_FILTER, vgl.GL.NEAREST);
+	      renderState.m_context.texParameteri(vgl.GL.TEXTURE_2D,
+	        vgl.GL.TEXTURE_MIN_FILTER, vgl.GL.NEAREST);
+	      renderState.m_context.texParameteri(vgl.GL.TEXTURE_2D,
+	        vgl.GL.TEXTURE_WRAP_S, vgl.GL.CLAMP_TO_EDGE);
+	      renderState.m_context.texParameteri(vgl.GL.TEXTURE_2D,
+	        vgl.GL.TEXTURE_WRAP_T, vgl.GL.CLAMP_TO_EDGE);
+	      renderState.m_context.texImage2D(vgl.GL.TEXTURE_2D, 0,
+	        vgl.GL.DEPTH_COMPONENT, WIDTH, HEIGHT, 0, vgl.GL.DEPTH_COMPONENT,
+	        vgl.GL.UNSIGNED_SHORT, null);
+
+	      // Second initialize the color attachment
+	      renderState.m_context.bindTexture(vgl.GL.TEXTURE_2D, texID[i]);
+	      renderState.m_context.texParameteri(vgl.GL.TEXTURE_2D,
+	        vgl.GL.TEXTURE_MAG_FILTER, filtering);
+	      renderState.m_context.texParameteri(vgl.GL.TEXTURE_2D,
+	        vgl.GL.TEXTURE_MIN_FILTER, filtering);
+	      renderState.m_context.texParameteri(vgl.GL.TEXTURE_2D,
+	        vgl.GL.TEXTURE_WRAP_S, vgl.GL.CLAMP_TO_EDGE);
+	      renderState.m_context.texParameteri(vgl.GL.TEXTURE_2D,
+	        vgl.GL.TEXTURE_WRAP_T, vgl.GL.CLAMP_TO_EDGE);
+	      renderState.m_context.texImage2D(vgl.GL.TEXTURE_2D, 0, vgl.GL.RGBA,
+	        WIDTH, HEIGHT, 0, vgl.GL.RGBA, vgl.GL.FLOAT, null);
+
+	      // Bind FBO and attach the depth and color attachments
+	      renderState.m_context.bindFramebuffer(vgl.GL.FRAMEBUFFER, fbo[i]);
+	      renderState.m_context.framebufferTexture2D(vgl.GL.FRAMEBUFFER,
+	        vgl.GL.DEPTH_ATTACHMENT, vgl.GL.TEXTURE_2D, depthTexID[i], 0);
+	      renderState.m_context.framebufferTexture2D(vgl.GL.FRAMEBUFFER,
+	        vgl.GL.COLOR_ATTACHMENT0, vgl.GL.TEXTURE_2D, texID[i], 0);
+	    }
+
+	    // Now setup the color attachment for color blend FBO
+	    colorBlenderTexID = renderState.m_context.createTexture();
+	    renderState.m_context.bindTexture(vgl.GL.TEXTURE_2D, colorBlenderTexID);
+	    renderState.m_context.texParameteri(vgl.GL.TEXTURE_2D,
+	        vgl.GL.TEXTURE_WRAP_S, vgl.GL.CLAMP_TO_EDGE);
+	    renderState.m_context.texParameteri(vgl.GL.TEXTURE_2D,
+	        vgl.GL.TEXTURE_WRAP_T, vgl.GL.CLAMP_TO_EDGE);
+	    renderState.m_context.texParameteri(vgl.GL.TEXTURE_2D,
+	        vgl.GL.TEXTURE_MIN_FILTER, vgl.GL.NEAREST);
+	    renderState.m_context.texParameteri(vgl.GL.TEXTURE_2D,
+	        vgl.GL.TEXTURE_MAG_FILTER, vgl.GL.NEAREST);
+	    renderState.m_context.texImage2D(vgl.GL.TEXTURE_2D, 0, vgl.GL.RGBA,
+	        WIDTH, HEIGHT, 0, vgl.GL.RGBA, vgl.GL.FLOAT, null);
+
+	    // Generate the color blend FBO ID
+	    colorBlenderFBOID = renderState.m_context.createFramebuffer();
+	    renderState.m_context.bindFramebuffer(vgl.GL.FRAMEBUFFER, colorBlenderFBOID);
+
+	    // Set the depth attachment of previous FBO as depth attachment for this FBO
+	    renderState.m_context.framebufferTexture2D(vgl.GL.FRAMEBUFFER,
+	        vgl.GL.DEPTH_ATTACHMENT, vgl.GL.TEXTURE_2D, depthTexID[0], 0);
+
+	    // Set the color blender texture as the FBO color attachment
+	    renderState.m_context.framebufferTexture2D(vgl.GL.FRAMEBUFFER,
+	        vgl.GL.COLOR_ATTACHMENT0, vgl.GL.TEXTURE_2D, colorBlenderTexID, 0);
+
+	    // Check the FBO completeness status
+	    var status = renderState.m_context.checkFramebufferStatus(
+	        vgl.GL.FRAMEBUFFER);
+	    if (status === vgl.GL.FRAMEBUFFER_COMPLETE) {
+	      console.log('FBO setup successful !!! \n');
+	    } else {
+	      console.log('Problem with FBO setup');
+	    }
+	    // Unbind FBO
+	    renderState.m_context.bindFramebuffer(vgl.GL.FRAMEBUFFER, null);
+	  }
+
+	  function setup(renderState) {
+	    if (setupTime.getMTime() < m_this.getMTime()) {
+	      initScreenQuad(renderState, m_this.width(), m_this.height());
+	      initShaders(renderState, m_this.width(), m_this.height());
+	      initFBO(renderState, m_this.width(), m_this.height());
+	      setupTime.modified();
+	    }
+	  }
+
+	  function drawScene(renderState, sortedActors, material) {
+
+	    var i, actor, mvMatrixInv = mat4.create();
+
+	    // // Enable alpha blending with over compositing
+	    // gl.enable(vgl.GL.BLEND);
+	    // gl.blendFunc(vgl.GL.SRC_ALPHA, vgl.GL.ONE_MINUS_SRC_ALPHA);
+
+	    for (i = 0; i < sortedActors.length; i += 1) {
+	      actor = sortedActors[i][2];
+
+	      if (actor.referenceFrame() ===
+	          vgl.boundingObject.ReferenceFrame.Relative) {
+	        mat4.multiply(renderState.m_modelViewMatrix, m_this.m_camera.viewMatrix(),
+	          actor.matrix());
+	        renderState.m_projectionMatrix = m_this.m_camera.projectionMatrix();
+	      } else {
+	        renderState.m_modelViewMatrix = actor.matrix();
+	        renderState.m_projectionMatrix = mat4.create();
+	        mat4.ortho(renderState.m_projectionMatrix, 0,
+	                   m_this.m_width, 0, m_this.m_height, -1, 1);
+	      }
+
+	      mat4.invert(mvMatrixInv, renderState.m_modelViewMatrix);
+	      mat4.transpose(renderState.m_normalMatrix, mvMatrixInv);
+	      renderState.m_mapper = actor.mapper();
+
+	      // TODO Fix this shortcut
+	      if (!material) {
+	        renderState.m_material = actor.material();
+	        renderState.m_material.bind(renderState);
+	        renderState.m_mapper.render(renderState);
+	        renderState.m_material.undoBind(renderState);
+	      } else {
+
+	        var ou = actor.material().shaderProgram().uniform('opacity');
+	        if (ou) {
+	          fpopacity.set(ou.get()[0]);
+	        } else {
+	          fpopacity.set(1.0);
+	        }
+	        renderState.m_material = material;
+	        renderState.m_material.bind(renderState);
+	        renderState.m_mapper.render(renderState);
+	        renderState.m_material.undoBind(renderState);
+	      }
+	    }
+	  }
+
+	  function depthPeelRender(renderState, actors) {
+	    var layer;
+
+	    fpwidth.set(m_this.width());
+	    fpheight.set(m_this.height());
+	    blwidth.set(m_this.width());
+	    blheight.set(m_this.height());
+	    fiwidth.set(m_this.width());
+	    fiheight.set(m_this.height());
+
+	    // Clear color and depth buffer
+	    renderState.m_context.clearColor(0.0, 0.0, 0.0, 0.0);
+	    /*jshint bitwise: false */
+	    renderState.m_context.clear(vgl.GL.OLOR_BUFFER_BIT | vgl.GL.DEPTH_BUFFER_BIT);
+	    /*jshint bitwise: true */
+
+	    // Bind the color blending FBO
+	    renderState.m_context.bindFramebuffer(vgl.GL.FRAMEBUFFER, colorBlenderFBOID);
+
+	    // 1. In the first pass, we render normally with depth test enabled to
+	    // get the nearest surface
+	    renderState.m_context.enable(vgl.GL.DEPTH_TEST);
+	    renderState.m_context.disable(vgl.GL.BLEND);
+
+	    var clearColor = m_this.m_camera.clearColor();
+	    renderState.m_context.clearColor(clearColor[0], clearColor[1], clearColor[2], 0.0);
+	    /*jshint bitwise: false */
+	    renderState.m_context.clear(vgl.GL.COLOR_BUFFER_BIT | vgl.GL.DEPTH_BUFFER_BIT);
+	    /*jshint bitwise: true */
+
+	    drawScene(renderState, actors);
+
+	    // 2. Depth peeling + blending pass
+	    var numLayers = (NUM_PASSES - 1) * 2;
+
+	    // For each pass
+	    for (layer = 1; layer < numLayers; layer += 1) {
+	      var currId = layer % 2;
+	      var prevId = 1 - currId;
+
+	      // Bind the current FBO
+	      renderState.m_context.bindFramebuffer(vgl.GL.FRAMEBUFFER, fbo[currId]);
+
+	      // Disbale blending and enable depth testing
+	      renderState.m_context.disable(vgl.GL.BLEND);
+	      renderState.m_context.enable(vgl.GL.DEPTH_TEST);
+
+	      // Bind the depth texture from the previous step
+	      renderState.m_context.bindTexture(vgl.GL.TEXTURE_2D, depthTexID[prevId]);
+
+	      // Set clear color to black
+	      renderState.m_context.clearColor(0.0, 0.0, 0.0, 0.0);
+
+	      // Clear the color and depth buffers
+	      /*jshint bitwise: false */
+	      renderState.m_context.clear(vgl.GL.COLOR_BUFFER_BIT | vgl.GL.DEPTH_BUFFER_BIT);
+	      /*jshint bitwise: true */
+
+	      // Render scene with the front to back peeling shader
+	      drawScene(renderState, actors, fpMaterial);
+
+	      // Bind the color blender FBO
+	      renderState.m_context.bindFramebuffer(vgl.GL.FRAMEBUFFER, colorBlenderFBOID);
+
+	      // Enable blending but disable depth testing
+	      renderState.m_context.disable(vgl.GL.DEPTH_TEST);
+	      renderState.m_context.enable(vgl.GL.BLEND);
+
+	      // Change the blending equation to add
+	      renderState.m_context.blendEquation(vgl.GL.FUNC_ADD);
+
+	      // Use separate blending function
+	      renderState.m_context.blendFuncSeparate(vgl.GL.DST_ALPHA, vgl.GL.ONE,
+	          vgl.GL.ZERO, vgl.GL.ONE_MINUS_SRC_ALPHA);
+
+	      // Bind the result from the previous iteration as texture
+	      renderState.m_context.activeTexture(vgl.GL.TEXTURE0);
+	      renderState.m_context.bindTexture(vgl.GL.TEXTURE_2D, texID[currId]);
+
+	      renderState.m_context.activeTexture(vgl.GL.TEXTURE1);
+	      renderState.m_context.bindTexture(vgl.GL.TEXTURE_2D, depthTexID[prevId]);
+
+	      renderState.m_context.activeTexture(vgl.GL.TEXTURE2);
+	      renderState.m_context.bindTexture(vgl.GL.TEXTURE_2D, depthTexID[currId]);
+
+	      drawFullScreenQuad(renderState, blMaterial);
+
+	      renderState.m_context.activeTexture(vgl.GL.TEXTURE0);
+
+	      // Disable blending
+	      renderState.m_context.disable(vgl.GL.BLEND);
+	    }
+
+	    // 3. Final render pass
+	    //remove the FBO
+	    renderState.m_context.bindFramebuffer(vgl.GL.FRAMEBUFFER, null);
+
+	    // Disable depth testing and blending
+	    renderState.m_context.disable(vgl.GL.DEPTH_TEST);
+	    renderState.m_context.disable(vgl.GL.BLEND);
+
+	    // Bind the color blender texture
+	    renderState.m_context.bindTexture(vgl.GL.TEXTURE_2D, colorBlenderTexID);
+
+	    fibackgroundColor.set(m_this.m_camera.clearColor());
+
+	    // Draw full screen quad
+	    drawFullScreenQuad(renderState, fiMaterial);
+
+	    renderState.m_context.bindTexture(vgl.GL.TEXTURE_2D, null);
+	  }
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Render the scene
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.render = function () {
+	    var i, renSt, children, actor = null, sortedActors = [];
+
+	    renSt = new vgl.renderState();
+	    renSt.m_renderer = m_this;
+	    renSt.m_context = m_this.renderWindow().context();
+	    renSt.m_contextChanged = m_this.m_contextChanged;
+
+	    // Set the viewport for this renderer
+	    renSt.m_context.viewport(m_this.m_x, m_this.m_y, m_this.m_width, m_this.m_height);
+
+	    // Check if we have initialized
+	    setup(renSt);
+
+	    children = m_this.m_sceneRoot.children();
+
+	    if (children.length > 0 && m_this.m_resetScene) {
+	      this.resetCamera();
+	      m_this.m_resetScene = false;
+	    }
+
+	    for (i = 0; i < children.length; i += 1) {
+	      actor = children[i];
+	      actor.computeBounds();
+	      if (actor.visible()) {
+	        sortedActors.push([actor.material().binNumber(),
+	          actor.material().shaderProgram().uniform('opacity').get()[0],
+	          actor]);
+	      }
+	    }
+
+	    // Now perform sorting
+	    sortedActors.sort(function (a, b) { return a[0] - b[0]; });
+	    sortedActors.sort(function (a, b) { return b[1] - a[1]; });
+
+	    depthPeelRender(renSt, sortedActors);
+	  };
+	};
+
+	inherit(vgl.depthPeelRenderer, vgl.renderer);
 
 	return vgl;
 
@@ -26949,32 +27432,40 @@ return /******/ (function(modules) { // webpackBootstrap
 	     *   http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
 	     * @param {geo.screenPosition} point The test point
 	     * @param {geo.screenPosition[]} outer The outer boundary of the polygon
-	     * @param {geo.screenPosition[][]?} inner Inner boundaries (holes)
+	     * @param {geo.screenPosition[][]} [inner] Inner boundaries (holes)
+	     * @param {Object} [range] If specified, range.min.x, range.min.y,
+	     *   range.max.x, and range.max.y specified the extents of the outer
+	     *   polygon and are used for early detection.
+	     * @returns {boolean} true if the point is inside the polygon.
 	     */
-	    pointInPolygon: function (point, outer, inner) {
-	      var inside = false, n = outer.length;
+	    pointInPolygon: function (point, outer, inner, range) {
+	      var inside = false, n = outer.length, i, j;
+
+	      if (range && range.min && range.max) {
+	        if (point.x < range.min.x || point.y < range.min.y ||
+	            point.x > range.max.x || point.y > range.max.y) {
+	          return;
+	        }
+	      }
 
 	      if (n < 3) {
 	        // we need 3 coordinates for this to make sense
 	        return false;
 	      }
 
-	      outer.forEach(function (vert, i) {
-	        var j = (n + i - 1) % n;
-	        var intersect = (
-	          ((outer[i].y > point.y) !== (outer[j].y > point.y)) &&
-	          (point.x < (outer[j].x - outer[i].x) *
-	                     (point.y - outer[i].y) /
-	                     (outer[j].y - outer[i].y) + outer[i].x)
-	        );
-	        if (intersect) {
+	      for (i = 0, j = n - 1; i < n; j = i, i += 1) {
+	        if (((outer[i].y > point.y) !== (outer[j].y > point.y)) &&
+	            (point.x < (outer[j].x - outer[i].x) *
+	            (point.y - outer[i].y) / (outer[j].y - outer[i].y) + outer[i].x)) {
 	          inside = !inside;
 	        }
-	      });
+	      }
 
-	      (inner || []).forEach(function (hole) {
-	        inside = inside && !geo.util.pointInPolygon(point, hole);
-	      });
+	      if (inner && inside) {
+	        (inner || []).forEach(function (hole) {
+	          inside = inside && !geo.util.pointInPolygon(point, hole);
+	        });
+	      }
 
 	      return inside;
 	    },
@@ -27290,7 +27781,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	        window.requestAnimationFrame = function (callback) {
 	          m_originalRequestAnimationFrame.call(window, function (timestamp) {
 	            var track = m_timingData.requestAnimationFrame, recent;
+	            /* Some environments have unsynchronized performance and time
+	             * counters.  The nowDelta factor compensates for this.  For
+	             * instance, our test enviornment has performance.now() values on
+	             * the order of ~3000 and timestamps approximating epoch. */
 	            if (track.timestamp !== timestamp) {
+	              track.nowDelta = window.performance.now() - timestamp;
+	              if (Math.abs(track.nowDelta) < 1000) {
+	                track.nowDelta = 0;
+	              }
 	              track.timestamp = timestamp;
 	              track.subcalls = track.subcalls || 0;
 	              track.start = {
@@ -27312,6 +27811,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            track.subcalls += 1;
 	            callback.apply(this, arguments);
 	            var duration = window.performance.now() - timestamp;
+	            duration -= track.nowDelta;
 	            track.sum = track.start.sum + duration;
 	            track.sum2 = track.start.sum2 + duration * duration;
 	            track.count = track.start.count + 1;
@@ -28391,6 +28891,33 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
+	 * Triggered after a selection ends.
+	 * The event object extends {@link geo.brushSelection}.
+	 * @mixes geo.brushSelection
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+	geo_event.select = 'geo_select';
+
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Triggered after a zoom selection ends.
+	 * The event object extends {@link geo.brushSelection}.
+	 * @mixes geo.brushSelection
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+	geo_event.zoomselect = 'geo_zoomselect';
+
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Triggered after an unzoom selection ends.
+	 * The event object extends {@link geo.brushSelection}.
+	 * @mixes geo.brushSelection
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+	geo_event.unzoomselect = 'geo_unzoomselect';
+
+	//////////////////////////////////////////////////////////////////////////////
+	/**
 	 * Triggered before a map navigation animation begins.  Set
 	 * <code>event.geo.cancelAnimation</code> to cancel the animation
 	 * of the navigation.  This will cause the map to navigate to the
@@ -28576,36 +29103,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_this = this,
 	      s_init = this._init,
 	      m_choropleth = $.extend({},
-	          {
-	                /* 9-step based on paraview bwr colortable */
-	            colorRange: [
-	                  {r: 0.07514311, g: 0.468049805, b: 1},
-	                  {r: 0.468487184, g: 0.588057293, b: 1},
-	                  {r: 0.656658579, g: 0.707001303, b: 1},
-	                  {r: 0.821573924, g: 0.837809045, b: 1},
-	                  {r: 0.943467973, g: 0.943498599, b: 0.943398095},
-	                  {r: 1, g: 0.788626485, b: 0.750707739},
-	                  {r: 1, g: 0.6289553, b: 0.568237474},
-	                  {r: 1, g: 0.472800903, b: 0.404551679},
-	                  {r: 0.916482116, g: 0.236630659, b: 0.209939162}
-	            ],
-	            scale: d3.scale.quantize(),
-	            accessors: {
-	                  //accessor for ID on geodata feature
-	              geoId: function (geoFeature) {
-	                return geoFeature.properties.GEO_ID;
-	              },
-	                  //accessor for ID on scalar element
-	              scalarId: function (scalarElement) {
-	                return scalarElement.id;
-	              },
-	                  //accessor for value on scalar element
-	              scalarValue: function (scalarElement) {
-	                return scalarElement.value;
-	              }
+	        {
+	              /* 9-step based on paraview bwr colortable */
+	          colorRange: [
+	                {r: 0.07514311, g: 0.468049805, b: 1},
+	                {r: 0.468487184, g: 0.588057293, b: 1},
+	                {r: 0.656658579, g: 0.707001303, b: 1},
+	                {r: 0.821573924, g: 0.837809045, b: 1},
+	                {r: 0.943467973, g: 0.943498599, b: 0.943398095},
+	                {r: 1, g: 0.788626485, b: 0.750707739},
+	                {r: 1, g: 0.6289553, b: 0.568237474},
+	                {r: 1, g: 0.472800903, b: 0.404551679},
+	                {r: 0.916482116, g: 0.236630659, b: 0.209939162}
+	          ],
+	          scale: d3.scale.quantize(),
+	          accessors: {
+	                //accessor for ID on geodata feature
+	            geoId: function (geoFeature) {
+	              return geoFeature.properties.GEO_ID;
+	            },
+	                //accessor for ID on scalar element
+	            scalarId: function (scalarElement) {
+	              return scalarElement.id;
+	            },
+	                //accessor for value on scalar element
+	            scalarValue: function (scalarElement) {
+	              return scalarElement.value;
 	            }
-	          },
-	              arg.choropleth);
+	          }
+	        },
+	        arg.choropleth);
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
@@ -29144,7 +29671,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
 	  this.style.get = function (key) {
-	    var tmp, out;
+	    var out;
 	    if (key === undefined) {
 	      var all = {}, k;
 	      for (k in m_style) {
@@ -29156,10 +29683,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    if (key.toLowerCase().match(/color$/)) {
 	      if (util.isFunction(m_style[key])) {
-	        tmp = util.ensureFunction(m_style[key]);
 	        out = function () {
 	          return util.convertColor(
-	            tmp.apply(this, arguments)
+	            m_style[key].apply(this, arguments)
 	          );
 	        };
 	      } else {
@@ -29678,6 +30204,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var sceneObject = __webpack_require__(128);
 	var feature = __webpack_require__(127);
 	var checkRenderer = __webpack_require__(131).checkRenderer;
+	var rendererForFeatures = __webpack_require__(131).rendererForFeatures;
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -29706,11 +30233,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var geo_event = __webpack_require__(125);
 	  var camera = __webpack_require__(3);
 
-	  //////////////////////////////////////////////////////////////////////////////
+	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * @private
 	   */
-	  //////////////////////////////////////////////////////////////////////////////
+	  ////////////////////////////////////////////////////////////////////////////
 	  var m_this = this,
 	      s_exit = this._exit,
 	      m_id = arg.id === undefined ? layer.newLayerId() : arg.id,
@@ -29720,7 +30247,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_canvas = null,
 	      m_renderer = null,
 	      m_initialized = false,
-	      m_rendererName = arg.renderer === undefined ? 'vgl' : arg.renderer,
+	      m_rendererName = arg.renderer === undefined ? rendererForFeatures(arg.features) : arg.renderer,
 	      m_dataTime = timestamp(),
 	      m_updateTime = timestamp(),
 	      m_sticky = arg.sticky === undefined ? true : arg.sticky,
@@ -30249,8 +30776,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  dom: {}
 	};
 	var layers = {};
+	var layerDefaultFeatures = {};
 	var renderers = {};
 	var features = {};
+	var featureCapabilities = {};
 	var fileReaders = {};
 	var rendererLayerAdjustments = {};
 	var util = {};
@@ -30311,7 +30840,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @params {string|null} name name of the desired renderer
 	 * @params {boolean} noFallack if true, don't recommend a fallback
 	 * @return {string|null|false} the name of the renderer that should be used
-	 *      of false if no valid renderer can be determined.
+	 *      or false if no valid renderer can be determined.
 	 */
 	//////////////////////////////////////////////////////////////////////////////
 	util.checkRenderer = function (name, noFallback) {
@@ -30338,25 +30867,96 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
-	 * Register a new feature type
+	 * Check if there is a renderer that is supported and supports a list of
+	 * features.  If not, display a warning.  This picks the first renderer that
+	 * supports all of the listed features.
+	 *
+	 * @param {array|undefined} featureList A list of features that will be used
+	 *      with this renderer.  Features are the basic feature names (e.g.,
+	 *      'quad'), or the feature name followed by a required capability (e.g.,
+	 *      'quad.image').  If more than one feature or more than one capability of
+	 *      a feature is required, include each feature and capability combination
+	 *      in the list (e.g., ['quad.image', 'plane']).  If no capability is
+	 *      specified for a feature (or that feature was registered without a
+	 *      capability object), then the feature will match regardless of
+	 *      capabilities.
+	 * @return {string|null|false} the name of the renderer that should be used
+	 *      or false if no valid renderer can be determined.
 	 */
 	//////////////////////////////////////////////////////////////////////////////
-	util.registerFeature = function (category, name, func) {
-	  if (features === undefined) {
-	    features = {};
-	  }
+	util.rendererForFeatures = function (featureList) {
+	  var preferredRenderers = ['vgl', 'canvas', 'd3', null];
 
-	  if (!(category in features)) {
-	    features[category] = {};
+	  var renderer, ridx, feature, fidx, capability, available;
+	  for (ridx = 0; ridx < preferredRenderers.length; ridx += 1) {
+	    renderer = preferredRenderers[ridx];
+	    if (util.checkRenderer(renderer, true) === false) {
+	      continue;
+	    }
+	    if (!featureList) {
+	      return renderer;
+	    }
+	    if (!features[renderer]) {
+	      continue;
+	    }
+	    available = true;
+	    for (fidx = 0; fidx < featureList.length; fidx += 1) {
+	      feature = featureList[fidx];
+	      capability = null;
+	      if (feature.indexOf('.') >= 0) {
+	        capability = feature;
+	        feature = feature.substr(0, feature.indexOf('.'));
+	      }
+	      if (features[renderer][feature] === undefined) {
+	        available = false;
+	        break;
+	      }
+	      if (capability && featureCapabilities[renderer][feature] &&
+	          !featureCapabilities[renderer][feature][capability]) {
+	        available = false;
+	        break;
+	      }
+	    }
+	    if (available) {
+	      return renderer;
+	    }
 	  }
-
-	  // TODO Add warning if the name already exists
-	  features[category][name] = func;
+	  console.warn('There is no renderer available for the feature list "' +
+	               (featureList || []).join(', ') + '".');
+	  return false;
 	};
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
-	 * Create new instance of the renderer
+	 * Register a new feature type
+	 *
+	 * @param {string} category The feature category -- this is the renderer name.
+	 * @param {string} name The feature name
+	 * @param {function} func A function to call to create the feature.
+	 * @param {object|undefined} capabilities A map of capabilities that this
+	 *      feature supports.  If the feature is implemented with different
+	 *      capabilities in multiple categories (renderers), then the feature
+	 *      should expose a simple dictionary of supported and unsupported
+	 *      features.  For instance, the quad feature has color quads, image quads,
+	 *      and image quads that support full transformations.  The capabailities
+	 *      should be defined in the base feature in a capabilities object so that
+	 *      they can be referenced by that rather than an explicit string.
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+	util.registerFeature = function (category, name, func, capabilities) {
+	  if (!(category in features)) {
+	    features[category] = {};
+	    featureCapabilities[category] = {};
+	  }
+
+	  // TODO Add warning if the name already exists
+	  features[category][name] = func;
+	  featureCapabilities[category][name] = capabilities;
+	};
+
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Create new instance of a feature
 	 */
 	//////////////////////////////////////////////////////////////////////////////
 	util.createFeature = function (name, layer, renderer, arg) {
@@ -30367,9 +30967,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      $.extend(true, options, arg);
 	    }
 	    var feature = features[category][name](options);
-	    layer.gcs = function () {
-	      return layer.map().gcs();
-	    };
+	    if (layer.gcs === undefined) {
+	      layer.gcs = function () {
+	        return layer.map().gcs();
+	      };
+	    }
 	    return feature;
 	  }
 	  return null;
@@ -30381,10 +30983,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	//////////////////////////////////////////////////////////////////////////////
 	util.registerLayerAdjustment = function (category, name, func) {
-	  if (rendererLayerAdjustments === undefined) {
-	    rendererLayerAdjustments = {};
-	  }
-
 	  if (!(category in rendererLayerAdjustments)) {
 	    rendererLayerAdjustments[category] = {};
 	  }
@@ -30418,8 +31016,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Register a new layer type
 	 */
 	//////////////////////////////////////////////////////////////////////////////
-	util.registerLayer = function (name, func) {
+	util.registerLayer = function (name, func, defaultFeatures) {
 	  layers[name] = func;
+	  layerDefaultFeatures[name] = defaultFeatures;
 	};
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -30429,10 +31028,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	//////////////////////////////////////////////////////////////////////////////
 	util.createLayer = function (name, map, arg) {
 	  /// Default renderer is vgl
-	  var options = {'map': map, 'renderer': 'vgl'},
+	  var options = {map: map},
 	      layer = null;
 
 	  if (name in layers) {
+	    if (!arg.renderer && !arg.features && layerDefaultFeatures) {
+	      options.features = layerDefaultFeatures[name];
+	    }
 	    if (arg !== undefined) {
 	      $.extend(true, options, arg);
 	    }
@@ -30865,26 +31467,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    if (arg2 === undefined) {
 	      var contour = $.extend(
-	          {},
-	          {
-	            gridWidth: function () {
-	              if (arg1.gridHeight) {
-	                return Math.floor(m_this.data().length / arg1.gridHeight);
-	              }
-	              return Math.floor(Math.sqrt(m_this.data().length));
-	            },
-	            gridHeight: function () {
-	              if (arg1.gridWidth) {
-	                return Math.floor(m_this.data().length / arg1.gridWidth);
-	              }
-	              return Math.floor(Math.sqrt(m_this.data().length));
-	            },
-	            minColor: 'black',
-	            minOpacity: 0,
-	            maxColor: 'black',
-	            maxOpacity: 0,
-	          /* 9-step based on paraview bwr colortable */
-	            colorRange: [
+	        {},
+	        {
+	          gridWidth: function () {
+	            if (arg1.gridHeight) {
+	              return Math.floor(m_this.data().length / arg1.gridHeight);
+	            }
+	            return Math.floor(Math.sqrt(m_this.data().length));
+	          },
+	          gridHeight: function () {
+	            if (arg1.gridWidth) {
+	              return Math.floor(m_this.data().length / arg1.gridWidth);
+	            }
+	            return Math.floor(Math.sqrt(m_this.data().length));
+	          },
+	          minColor: 'black',
+	          minOpacity: 0,
+	          maxColor: 'black',
+	          maxOpacity: 0,
+	        /* 9-step based on paraview bwr colortable */
+	          colorRange: [
 	            {r: 0.07514311, g: 0.468049805, b: 1},
 	            {r: 0.468487184, g: 0.588057293, b: 1},
 	            {r: 0.656658579, g: 0.707001303, b: 1},
@@ -30894,8 +31496,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            {r: 1, g: 0.6289553, b: 0.568237474},
 	            {r: 1, g: 0.472800903, b: 0.404551679},
 	            {r: 0.916482116, g: 0.236630659, b: 0.209939162}
-	            ]
-	          },
+	          ]
+	        },
 	        m_contour,
 	        arg1
 	      );
@@ -31163,16 +31765,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	    s_init.call(m_this, arg);
 
 	    var defaultStyle = $.extend(
-	        {},
-	        {
-	          opacity: 1.0,
-	          position: function (d) {
-	            return {x: d.x, y: d.y, z: d.z};
-	          },
-	          value: function (d) {
-	            return m_this.position()(d).z;
-	          }
+	      {},
+	      {
+	        opacity: 1.0,
+	        position: function (d) {
+	          return {x: d.x, y: d.y, z: d.z};
 	        },
+	        value: function (d) {
+	          return m_this.position()(d).z;
+	        }
+	      },
 	      arg.style === undefined ? {} : arg.style
 	    );
 
@@ -31364,17 +31966,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return m_layer.map();
 	    } else {
 	      return null;
-	    }
-	  };
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Get base layer that belongs to this renderer
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.baseLayer = function () {
-	    if (m_this.map()) {
-	      return m_this.map().baseLayer();
 	    }
 	  };
 
@@ -32123,18 +32714,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    s_init.call(m_this, arg);
 
 	    var defaultStyle = $.extend(true, {},
-	        {
-	          nodes: {
-	            radius: 5.0,
-	            fill: true,
-	            fillColor: { r: 1.0, g: 0.0, b: 0.0 },
-	            strokeColor: { r: 0, g: 0, b: 0 }
-	          },
-	          links: {
-	            strokeColor: { r: 0.0, g: 0.0, b: 0.0 }
-	          },
-	          linkType: 'path' /* 'path' || 'line' */
+	      {
+	        nodes: {
+	          radius: 5.0,
+	          fill: true,
+	          fillColor: { r: 1.0, g: 0.0, b: 0.0 },
+	          strokeColor: { r: 0, g: 0, b: 0 }
 	        },
+	        links: {
+	          strokeColor: { r: 0.0, g: 0.0, b: 0.0 }
+	        },
+	        linkType: 'path' /* 'path' || 'line' */
+	      },
 	      arg.style === undefined ? {} : arg.style
 	    );
 
@@ -32932,10 +33523,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	            })
 	            .position(m_this._position)
 	            .style({
-	              fill: m_this._style('fill', true, polygons),
+	              fill: m_this._style('fill', true),
 	              fillColor: m_this._style('fillColor', '#b0de5c', polygons, convertColor),
 	              fillOpacity: m_this._style('fillOpacity', 0.8, polygons),
-	              stroke: m_this._style('stroke', true, polygons),
+	              stroke: m_this._style('stroke', true),
 	              strokeColor: m_this._style('strokeColor', '#999999', polygons, convertColor),
 	              strokeWidth: m_this._style('strokeWidth', 2, polygons),
 	              strokeOpacity: m_this._style('strokeOpacity', 1, polygons)
@@ -33063,11 +33654,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (t < 0) { return dist2(q, u); }
 	      if (t > 1) { return dist2(q, v); }
 	      return dist2(
-	          q,
-	          {
-	            x: u.x + t * (v.x - u.x),
-	            y: u.y + t * (v.y - u.y)
-	          }
+	        q,
+	        {
+	          x: u.x + t * (v.x - u.x),
+	          y: u.y + t * (v.y - u.y)
+	        }
 	      );
 	    }
 
@@ -33162,16 +33753,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	    s_init.call(m_this, arg);
 
 	    var defaultStyle = $.extend(
-	        {},
-	        {
-	          'strokeWidth': 1.0,
+	      {},
+	      {
+	        'strokeWidth': 1.0,
 	        // Default to gold color for lines
-	          'strokeColor': { r: 1.0, g: 0.8431372549, b: 0.0 },
-	          'strokeStyle': 'solid',
-	          'strokeOpacity': 1.0,
-	          'line': function (d) { return d; },
-	          'position': function (d) { return d; }
-	        },
+	        'strokeColor': { r: 1.0, g: 0.8431372549, b: 0.0 },
+	        'strokeStyle': 'solid',
+	        'strokeOpacity': 1.0,
+	        'line': function (d) { return d; },
+	        'position': function (d) { return d; }
+	      },
 	      arg.style === undefined ? {} : arg.style
 	    );
 
@@ -33204,6 +33795,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  spec.type = 'line';
 	  return feature.create(layer, spec);
+	};
+
+	lineFeature.capabilities = {
+	  /* support for solid-colored, constant-width lines */
+	  basic: 'line.basic',
+	  /* support for lines that vary in width and color */
+	  multicolor: 'line.multicolor'
 	};
 
 	inherit(lineFeature, feature);
@@ -33305,7 +33903,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var geo_event = __webpack_require__(125);
 	  var mapInteractor = __webpack_require__(217);
 	  var clock = __webpack_require__(133);
-	  var uiLayer = __webpack_require__(218);
+	  var uiLayer = __webpack_require__(219);
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
@@ -35548,6 +36146,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    output.length = coordinates.length;
 	    count = coordinates.length;
 
+	    if (!coordinates.length) {
+	      return output;
+	    }
 	    if (coordinates[0] instanceof Array ||
 	        coordinates[0] instanceof Object) {
 	      offset = 1;
@@ -38338,7 +38939,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		"_args": [
 			[
 				"proj4@^2.3.14",
-				"/Users/jbeezley/git/geojs2"
+				"/Users/jbeezley/git/geojs"
 			]
 		],
 		"_from": "proj4@>=2.3.14 <3.0.0",
@@ -38372,7 +38973,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		"_shasum": "928906144388980c914c5a357fc493aba59a747a",
 		"_shrinkwrap": null,
 		"_spec": "proj4@^2.3.14",
-		"_where": "/Users/jbeezley/git/geojs2",
+		"_where": "/Users/jbeezley/git/geojs",
 		"author": "",
 		"bugs": {
 			"url": "https://github.com/proj4js/proj4js/issues"
@@ -41498,6 +42099,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var geo_event = __webpack_require__(125);
 	  var throttle = __webpack_require__(120).throttle;
 	  var debounce = __webpack_require__(120).debounce;
+	  var quadFeature = __webpack_require__(218);
 
 	  var m_options = args || {},
 	      m_this = this,
@@ -41507,7 +42109,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_queue,
 	      $node,
 	      m_selectionLayer = null,
-	      m_selectionPlane = null,
+	      m_selectionQuad,
 	      m_paused = false,
 	      m_clickMaybe = false,
 	      m_callZoom = function () {};
@@ -41532,54 +42134,58 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  // copy the options object with defaults
 	  m_options = $.extend(
-	      true,
-	      {},
-	      {
-	        throttle: 30,
-	        discreteZoom: false,
-	        panMoveButton: 'left',
-	        panMoveModifiers: {},
-	        zoomMoveButton: 'right',
-	        zoomMoveModifiers: {},
-	        rotateMoveButton: 'left',
-	        rotateMoveModifiers: {'ctrl': true},
-	        panWheelEnabled: false,
-	        panWheelModifiers: {},
-	        zoomWheelEnabled: true,
-	        zoomWheelModifiers: {},
-	        rotateWheelEnabled: true,
-	        rotateWheelModifiers: {'ctrl': true},
-	        wheelScaleX: 1,
-	        wheelScaleY: 1,
-	        zoomScale: 1,
-	        rotateWheelScale: 6 * Math.PI / 180,
-	        selectionButton: 'left',
-	        selectionModifiers: {'shift': true},
-	        momentum: {
-	          enabled: true,
-	          maxSpeed: 2.5,
-	          minSpeed: 0.01,
-	          stopTime: 250,
-	          drag: 0.01,
-	          actions: ['pan', 'zoom']
-	        },
-	        spring: {
-	          enabled: false,
-	          springConstant: 0.00005
-	        },
-	        click: {
-	          enabled: true,
-	          buttons: {left: true, right: true, middle: true},
-	          duration: 0,
-	          cancelOnMove: true
-	        },
-	        zoomAnimation: {
-	          enabled: true,
-	          duration: 500,
-	          ease: function (t) { return (2 - t) * t; }
-	        }
+	    true,
+	    {},
+	    {
+	      throttle: 30,
+	      discreteZoom: false,
+	      panMoveButton: 'left',
+	      panMoveModifiers: {},
+	      zoomMoveButton: 'right',
+	      zoomMoveModifiers: {},
+	      rotateMoveButton: 'left',
+	      rotateMoveModifiers: {ctrl: true},
+	      panWheelEnabled: false,
+	      panWheelModifiers: {},
+	      zoomWheelEnabled: true,
+	      zoomWheelModifiers: {},
+	      rotateWheelEnabled: true,
+	      rotateWheelModifiers: {ctrl: true},
+	      wheelScaleX: 1,
+	      wheelScaleY: 1,
+	      zoomScale: 1,
+	      rotateWheelScale: 6 * Math.PI / 180,
+	      selectionButton: 'left',
+	      selectionModifiers: {shift: true, ctrl: true},
+	      zoomSelectionButton: 'left',
+	      zoomSelectionModifiers: {shift: true},
+	      unzoomSelectionButton: 'right',
+	      unzoomSelectionModifiers: {shift: true},
+	      momentum: {
+	        enabled: true,
+	        maxSpeed: 2.5,
+	        minSpeed: 0.01,
+	        stopTime: 250,
+	        drag: 0.01,
+	        actions: ['pan', 'zoom']
 	      },
-	      m_options
+	      spring: {
+	        enabled: false,
+	        springConstant: 0.00005
+	      },
+	      click: {
+	        enabled: true,
+	        buttons: {left: true, right: true, middle: true},
+	        duration: 0,
+	        cancelOnMove: true
+	      },
+	      zoomAnimation: {
+	        enabled: true,
+	        duration: 500,
+	        ease: function (t) { return (2 - t) * t; }
+	      }
+	    },
+	    m_options
 	  );
 
 	  // options supported:
@@ -41676,7 +42282,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  //   // a mousemove.
 	  //   click: {
 	  //     enabled: true | false,
-	  //     buttons: {'left': true, 'right': true, 'middle': true}
+	  //     buttons: {left: true, right: true, middle: true}
 	  //     duration: 0,
 	  //     cancelOnMove: true // cancels click if the mouse is moved before release
 	  //   }
@@ -41880,7 +42486,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (m_options.panMoveButton === 'right' ||
 	        m_options.zoomMoveButton === 'right' ||
 	        m_options.rotateMoveButton === 'right' ||
-	        m_options.selectionButton === 'right') {
+	        m_options.selectionButton === 'right' ||
+	        m_options.zoomSelectionButton === 'right' ||
+	        m_options.unzoomSelectionButton === 'right') {
 	      $node.on('contextmenu.geojs', function () { return false; });
 	    }
 	    return m_this;
@@ -42035,27 +42643,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 
 	    // Get the gcs coordinates
-	    gcs.upperLeft = map.displayToGcs(display.upperLeft);
-	    gcs.lowerRight = map.displayToGcs(display.lowerRight);
-	    gcs.upperRight = map.displayToGcs(display.upperRight);
-	    gcs.lowerLeft = map.displayToGcs(display.lowerLeft);
+	    gcs.upperLeft = map.displayToGcs(display.upperLeft, null);
+	    gcs.lowerRight = map.displayToGcs(display.lowerRight, null);
+	    gcs.upperRight = map.displayToGcs(display.upperRight, null);
+	    gcs.lowerLeft = map.displayToGcs(display.lowerLeft, null);
 
-	    m_selectionPlane.origin([
-	      display.lowerLeft.x,
-	      display.lowerLeft.y,
-	      0
-	    ]);
-	    m_selectionPlane.upperLeft([
-	      display.upperLeft.x,
-	      display.upperLeft.y,
-	      0
-	    ]);
-	    m_selectionPlane.lowerRight([
-	      display.lowerRight.x,
-	      display.lowerRight.y,
-	      0
-	    ]);
-	    m_selectionPlane.draw();
+	    m_selectionQuad.data([{
+	      ul: gcs.upperLeft,
+	      ur: gcs.upperRight,
+	      ll: gcs.lowerLeft,
+	      lr: gcs.lowerRight
+	    }]);
+	    m_selectionQuad.draw();
 
 	    return {
 	      display: display,
@@ -42127,6 +42726,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      action = 'rotate';
 	    } else if (eventMatch(m_options.selectionButton, m_options.selectionModifiers)) {
 	      action = 'select';
+	    } else if (eventMatch(m_options.zoomSelectionButton, m_options.zoomSelectionModifiers)) {
+	      action = 'zoomselect';
+	    } else if (eventMatch(m_options.unzoomSelectionButton, m_options.unzoomSelectionModifiers)) {
+	      action = 'unzoomselect';
 	    }
 
 	    // cancel transitions and momentum on click
@@ -42151,19 +42754,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	        delta: {x: 0, y: 0}
 	      };
 
-	      if (action === 'select') {
+	      if (action === 'select' || action === 'zoomselect' || action === 'unzoomselect') {
 	        // Make sure the old selection layer is gone.
 	        if (m_selectionLayer) {
 	          m_selectionLayer.clear();
 	          m_this.map().deleteLayer(m_selectionLayer);
 	          m_selectionLayer = null;
 	        }
-	        // Create a feature layer and plane feature to show the selection bounds
-	        m_selectionLayer = m_this.map().createLayer('feature', {renderer: 'd3'});
-	        m_selectionPlane = m_selectionLayer.createFeature('plane');
-	        m_selectionPlane.style({
-	          screenCoordinates: true,
-	          fillOpacity: function () { return 0.25; }
+	        m_selectionLayer = m_this.map().createLayer(
+	          'feature', {features: [quadFeature.capabilities.color]});
+	        m_selectionQuad = m_selectionLayer.createFeature(
+	          'quad', {gcs: m_this.map().gcs()});
+	        m_selectionQuad.style({
+	          opacity: 0.25,
+	          color: {r: 0.3, g: 0.3, b: 0.3}
 	        });
 	        m_this.map().geoTrigger(geo_event.brushstart, m_this._getSelection());
 	      }
@@ -42272,7 +42876,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      cx = m_mouse.map.x - m_this.map().size().width / 2;
 	      cy = m_mouse.map.y - m_this.map().size().height / 2;
 	      m_this.map().rotation(m_state.origin.rotation + Math.atan2(cy, cx));
-	    } else if (m_state.action === 'select') {
+	    } else if (m_state.action === 'select' || m_state.action === 'zoomselect' || m_state.action === 'unzoomselect') {
 	      // Get the bounds of the current selection
 	      selectionObj = m_this._getSelection();
 	      m_this.map().geoTrigger(geo_event.brush, selectionObj);
@@ -42361,6 +42965,71 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
+	   * Based on the screen coodinates of a selection, zoom or unzoom and
+	   * recenter.
+	   *
+	   * @private
+	   * @param {string} action Either 'zoomselect' or 'unzoomselect'.
+	   * @param {object} lowerLeft the x and y coordinates of the lower left corner
+	   *    of the zoom rectangle.
+	   * @param {object} upperRight the x and y coordinates of the upper right
+	   *    corner of the zoom rectangle.
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this._zoomFromSelection = function (action, lowerLeft, upperRight) {
+	    if (action !== 'zoomselect' && action !== 'unzoomselect') {
+	      return;
+	    }
+	    if (lowerLeft.x === upperRight.x || lowerLeft.y === upperRight.y) {
+	      return;
+	    }
+	    var zoom, center,
+	        map = m_this.map(),
+	        mapsize = map.size();
+	    /* To arbitrarily handle rotation and projection, we center the map at the
+	     * central coordinate of the selection and set the zoom level such that the
+	     * four corners are just barely on the map.  When unzooming (zooming out),
+	     * we ensure that the previous view is centered in the selection but use
+	     * the maximal size for the zoom factor. */
+	    var scaling = {
+	      x: Math.abs((upperRight.x - lowerLeft.x) / mapsize.width),
+	      y: Math.abs((upperRight.y - lowerLeft.y) / mapsize.height)
+	    };
+	    if (action === 'zoomselect') {
+	      center = map.displayToGcs({
+	        x: (lowerLeft.x + upperRight.x) / 2,
+	        y: (lowerLeft.y + upperRight.y) / 2
+	      }, null);
+	      zoom = map.zoom() - Math.log2(Math.max(scaling.x, scaling.y));
+	    } else {  /* unzoom */
+	      /* To make the existing visible map entirely within the selection
+	       * rectangle, this would be changed to Math.min instead of Math.max of
+	       * the scaling factors.  This felt wrong, though. */
+	      zoom = map.zoom() + Math.log2(Math.max(scaling.x, scaling.y));
+	      /* Record the current center.  Later, this is panned to the center of the
+	       * selection rectangle. */
+	      center = map.center(undefined, null);
+	    }
+	    /* When discrete zoom is enable, always round down.  We have to do this
+	     * explicitly, as otherwise we may zoom too far and the selection will not
+	     * be completely visible. */
+	    if (map.discreteZoom()) {
+	      zoom = Math.floor(zoom);
+	    }
+	    map.zoom(zoom);
+	    if (action === 'zoomselect') {
+	      map.center(center, null);
+	    } else {
+	      var newcenter = map.gcsToDisplay(center, null);
+	      map.pan({
+	        x: (lowerLeft.x + upperRight.x) / 2 - newcenter.x,
+	        y: (lowerLeft.y + upperRight.y) / 2 - newcenter.y
+	      });
+	    }
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
 	   * Handle event when a mouse button is unpressed on the document.
 	   * Removes temporary bindings.
 	   */
@@ -42386,15 +43055,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	      evt.preventDefault();
 	    }
 
-	    if (m_state.action === 'select') {
+	    if (m_state.action === 'select' || m_state.action === 'zoomselect' || m_state.action === 'unzoomselect') {
+	      m_this._getMousePosition(evt);
 	      selectionObj = m_this._getSelection();
 
 	      m_selectionLayer.clear();
 	      m_this.map().deleteLayer(m_selectionLayer);
 	      m_selectionLayer = null;
-	      m_selectionPlane = null;
+	      m_selectionQuad = null;
 
 	      m_this.map().geoTrigger(geo_event.brushend, selectionObj);
+	      m_this.map().geoTrigger(geo_event[m_state.action], selectionObj);
+	      m_this._zoomFromSelection(m_state.action, selectionObj.display.lowerLeft,
+	                                selectionObj.display.upperRight);
 	    }
 
 	    // reset the interactor state
@@ -42874,25 +43547,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	    options.wheelDelta = options.wheelDelta || {};
 
 	    evt = $.Event(
-	        type,
-	        {
-	          pageX: page.x,
-	          pageY: page.y,
-	          which: which,
-	          altKey: options.modifiers.indexOf('alt') >= 0,
-	          ctrlKey: options.modifiers.indexOf('ctrl') >= 0,
-	          metaKey: options.modifiers.indexOf('meta') >= 0,
-	          shiftKey: options.modifiers.indexOf('shift') >= 0,
-	          originalEvent: {
-	            deltaX: options.wheelDelta.x,
-	            deltaY: options.wheelDelta.y,
-	            deltaMode: options.wheelMode,
-	            preventDefault: function () {},
-	            stopPropagation: function () {},
-	            stopImmediatePropagation: function () {}
-	          }
+	      type,
+	      {
+	        pageX: page.x,
+	        pageY: page.y,
+	        which: which,
+	        altKey: options.modifiers.indexOf('alt') >= 0,
+	        ctrlKey: options.modifiers.indexOf('ctrl') >= 0,
+	        metaKey: options.modifiers.indexOf('meta') >= 0,
+	        shiftKey: options.modifiers.indexOf('shift') >= 0,
+	        originalEvent: {
+	          deltaX: options.wheelDelta.x,
+	          deltaY: options.wheelDelta.y,
+	          deltaMode: options.wheelMode,
+	          preventDefault: function () {},
+	          stopPropagation: function () {},
+	          stopImmediatePropagation: function () {}
 	        }
+	      }
 	    );
+	    if (type.indexOf('.geojs') >= 0) {
+	      $(document).trigger(evt);
+	    }
 	    $node.trigger(evt);
 	  };
 	  this._connectEvents();
@@ -42905,6 +43581,490 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 218 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var $ = __webpack_require__(1);
+	var inherit = __webpack_require__(4);
+	var feature = __webpack_require__(127);
+
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Create a new instance of class quadFeature
+	 *
+	 * @class geo.quadFeature
+	 * @param {Object} arg Options object
+	 * @extends geo.feature
+	 * @param {Object|string|Function} [color] Color for quads without images.
+	 *   Default is white ({r: 1, g: 1, b: 1}).
+	 * @param {number|Function} [opacity=1] Opacity for quad
+	 * @param {number|Function} [depth=0] Default z-coordinate for positions that
+	 *   don't explicitly specify one.
+	 * @param {boolean|Function} [drawOnAsyncResourceLoaded=true] Redraw quads
+	 *   when images are loaded after initial render.
+	 * @param {Image|string|Function} [image] Image for each data item.  If
+	 *   undefined or null, the quad is a solid color.  Default is (data).image.
+	 * @param {Object|string|Function} [previewColor=null] If specified, a color to
+	 *   show on image quads while waiting for the image to load.
+	 * @param {Image|string|Function} [previewImage=null] If specified, an image to
+	 *   show on image quads while waiting for the quad-specific image to load.
+	 *   This will only be shown if it is already loaded.
+	 * @param {Object|Function} [position] Position of the quad.  Default is
+	 *   (data).  The position is an Object which specifies the corners of the
+	 *   quad: ll, lr, ur, ul.  At least two opposite corners must be specified.
+	 *   The corners do not have to physically correspond to the order specified,
+	 *   but rather correspond to that part of an image (if there is one).  If a
+	 *   corner is unspecified, it will use the x coordinate from one adjacent
+	 *   corner, the y coordinate from the other adjacent corner, and the average
+	 *   z value of those two corners.  For instance, if ul is unspecified, it is
+	 *   {x: ll.x, y: ur.y}.  Note that each quad is rendered as a pair of
+	 *   triangles: (ll, lr, ul) and (ur, ul, lr).  Nothing special is done for
+	 *   quads that are not convex or quads that have substantially different
+	 *   transformations for those two triangles.
+	 * @param {boolean} [cacheQuads=true] If true, a set of internal information is
+	 *   stored on each data item in the _cachedQuad attribute.  If this is false,
+	 *   the data item is not altered.  If the data (positions, opacity, etc,) of
+	 *   individual quads will change, set this to false or delete the _cachedQuad
+	 *   attribute of the data item.
+	 * @returns {geo.quadFeature}
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+	var quadFeature = function (arg) {
+	  'use strict';
+
+	  var transform = __webpack_require__(147);
+	  var util = __webpack_require__(120);
+
+	  if (!(this instanceof quadFeature)) {
+	    return new quadFeature(arg);
+	  }
+	  arg = arg || {};
+	  feature.call(this, arg);
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * @private
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  var m_this = this,
+	      s_init = this._init,
+	      m_cacheQuads,
+	      m_nextQuadId = 0,
+	      m_images = [],
+	      m_quads;
+
+	  /**
+	   * Track a list of object->object mappings.  The mappings are kept in a list.
+	   * This marks all known mappings as unused.  If they are not marked used
+	   * before _objectListEnd is called, that function will remove them.
+	   *
+	   * @param {array} list the list of mappings.
+	   */
+	  this._objectListStart = function (list) {
+	    $.each(list, function (idx, item) {
+	      item.used = false;
+	    });
+	  };
+
+	  /**
+	   * Get the value from a list of object->object mappings.  If the key object
+	   * is not present, return undefined.  If found, the entry is marked as being
+	   * in use.
+	   *
+	   * @param {array} list the list of mappings.
+	   * @param {object} entry the key to search for.
+	   * @returns {object} the associated object or undefined.
+	   */
+	  this._objectListGet = function (list, entry) {
+	    for (var i = 0; i < list.length; i += 1) {
+	      if (list[i].entry === entry) {
+	        list[i].used = true;
+	        return list[i].value;
+	      }
+	    }
+	    return undefined;
+	  };
+
+	  /**
+	   * Add a new object to a list of object->object mappings.  The key object
+	   * should not exist, or this will create a duplicate.  The new entry is
+	   * marked as being in use.
+	   *
+	   * @param {array} list the list of mappings.
+	   * @param {object} entry the key to add.
+	   * @param {object} value the value to store with the entry.
+	   */
+	  this._objectListAdd = function (list, entry, value) {
+	    list.push({entry: entry, value: value, used: true});
+	  };
+
+	  /**
+	   * Remove all unused entries from a list of object->object mappings.
+	   *
+	   * @param {array} list the list of mappings.
+	   */
+	  this._objectListEnd = function (list) {
+	    for (var i = list.length - 1; i >= 0; i -= 1) {
+	      if (!list[i].used) {
+	        list.splice(i, 1);
+	      }
+	    }
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Point search method for selection api.  Returns markers containing the
+	   * given point.
+	   *
+	   * @memberof geo.quadFeature
+	   * @param {Object} coordinate coordinate in input gcs to check if it is
+	   *    located in any quad.
+	   * @returns {Object} an object with 'index': a list of quad indices, and
+	   *    'found': a list of quads that contain the specified coordinate.
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.pointSearch = function (coordinate) {
+	    var found = [], indices = [], data = m_this.data(), i,
+	        poly1 = [{}, {}, {}, {}], poly2 = [{}, {}, {}, {}],
+	        map = m_this.layer().map(),
+	        order1 = [0, 1, 2, 0], order2 = [1, 2, 3, 1];
+	    coordinate = transform.transformCoordinates(
+	        map.ingcs(), map.gcs(), coordinate);
+	    if (!m_quads) {
+	      this._generateQuads();
+	    }
+	    $.each([m_quads.clrQuads, m_quads.imgQuads], function (idx, quadList) {
+	      quadList.forEach(function (quad, idx) {
+	        for (i = 0; i < order1.length; i += 1) {
+	          poly1[i].x = quad.pos[order1[i] * 3];
+	          poly1[i].y = quad.pos[order1[i] * 3 + 1];
+	          poly1[i].z = quad.pos[order1[i] * 3 + 2];
+	          poly2[i].x = quad.pos[order2[i] * 3];
+	          poly2[i].y = quad.pos[order2[i] * 3 + 1];
+	          poly2[i].z = quad.pos[order2[i] * 3 + 2];
+	        }
+	        if (util.pointInPolygon(coordinate, poly1) ||
+	            util.pointInPolygon(coordinate, poly2)) {
+	          indices.push(quad.idx);
+	          found.push(data[quad.idx]);
+	        }
+	      });
+	    });
+	    return {
+	      index: indices,
+	      found: found
+	    };
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Get/Set position
+	   *
+	   * @memberof geo.quadFeature
+	   * @param {object|function} [position] object or function that returns the
+	   *    position of each quad.
+	   * @returns {geo.quadFeature}
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.position = function (val) {
+	    if (val === undefined) {
+	      return m_this.style('position');
+	    } else {
+	      m_this.style('position', util.ensureFunction(val));
+	      m_this.dataTime().modified();
+	      m_this.modified();
+	    }
+	    return m_this;
+	  };
+
+	  /**
+	   * Given a data item and its index, fetch its position and ensure we have
+	   * complete information for the quad.  This generates missing corners and z
+	   * values.
+	   *
+	   * @param {function} posFunc a function to call to get the position of a data
+	   *   item.  It is passed (d, i).
+	   * @param {function} depthFunc a function to call to get the z-value of a
+	   *   data item.  It is passed (d, i).
+	   * @param d a data item.  Used to fetch position and possibly depth.
+	   * @param i the index within the data.  Used to fetch position and possibly
+	   *   depth.
+	   * @returns {Object|undefined} either an object with all four corners, or
+	   *   undefined if no such object can be generated.  The coordinates have been
+	   *   converted to map coordinates.
+	   */
+	  this._positionToQuad = function (posFunc, depthFunc, d, i) {
+	    var initPos = posFunc.call(m_this, d, i);
+	    if ((!initPos.ll || !initPos.ur) && (!initPos.ul || !initPos.lr)) {
+	      return;
+	    }
+	    var gcs = m_this.gcs(),
+	        map_gcs = m_this.layer().map().gcs(),
+	        pos = {};
+	    $.each(['ll', 'lr', 'ul', 'ur'], function (idx, key) {
+	      if (initPos[key] !== undefined) {
+	        pos[key] = {};
+	        if (initPos[key].x === undefined) {
+	          pos[key] = [initPos[key][0], initPos[key][1], initPos[key][2]];
+	        } else {
+	          pos[key] = [initPos[key].x, initPos[key].y, initPos[key].z];
+	        }
+	        if (pos[key][2] === undefined) {
+	          pos[key][2] = depthFunc.call(m_this, d, i);
+	        }
+	        if (gcs !== map_gcs && gcs !== false) {
+	          pos[key] = transform.transformCoordinates(
+	              gcs, map_gcs, pos[key]);
+	        }
+	      }
+	    });
+	    pos.ll = pos.ll || [pos.ul[0], pos.lr[1], (pos.ul[2] + pos.lr[2]) / 2];
+	    pos.lr = pos.lr || [pos.ur[0], pos.ll[1], (pos.ur[2] + pos.ll[2]) / 2];
+	    pos.ur = pos.ur || [pos.lr[0], pos.ul[1], (pos.lr[2] + pos.ul[2]) / 2];
+	    pos.ul = pos.ul || [pos.ll[0], pos.ur[1], (pos.ll[2] + pos.ur[2]) / 2];
+	    return pos;
+	  };
+
+	  /**
+	   * Convert the current data set to a pair of arrays, one of quads that are
+	   * solid color and one of qudas that have an image.  All quads are objects
+	   * with pos (a 12 value array containing 4 three-dimensional position
+	   * coordinates), and opacity.  Color quads also have a color.  Image quads
+	   * may have an image element, if the image is loaded.  If it isn't, this
+	   * element will be missing.  For preview images, the image quad will have a
+	   * reference to the preview element that may later be removed.  If a preview
+	   * color is used, the quad will be in both lists, but may be removed from the
+	   * color quad list once the image is loaded.
+	   *
+	   * The value for origin is one of an ll corner from one of the quads with the
+	   * smallest sum of diagonals.  The assumption is that, if using the origin to
+	   * improve precision, the smallest quads are the ones most in need of this
+	   * benefit.
+	   *
+	   * @returns {Object} An object with clrQuads and imgQuads, each of which is
+	   *   an array, and origin, which is a triplet that is guaranteed to be one of
+	   *   the quads corners for a quad with the smallest sum of diagonal lengths.
+	   */
+	  this._generateQuads = function () {
+	    var posFunc = m_this.position(),
+	        imgFunc = util.ensureFunction(m_this.style('image')),
+	        colorFunc = util.ensureFunction(m_this.style('color')),
+	        depthFunc = util.ensureFunction(m_this.style('depth')),
+	        opacityFunc = util.ensureFunction(m_this.style('opacity')),
+	        loadedFunc = util.ensureFunction(m_this.style(
+	            'drawOnAsyncResourceLoaded')),
+	        previewColorFunc = util.ensureFunction(m_this.style(
+	            'previewColor')),
+	        previewImageFunc = util.ensureFunction(m_this.style(
+	            'previewImage')),
+	        data = m_this.data(),
+	        clrQuads = [], imgQuads = [],
+	        origin = [0, 0, 0], origindiag2, diag2;
+	    /* Keep track of images that we are using.  This prevents creating
+	     * additional Image elemnts for repeated urls. */
+	    m_this._objectListStart(m_images);
+	    $.each(data, function (i, d) {
+	      if (d._cachedQuad) {
+	        diag2 = d._cachedQuad.diag2;
+	        if (origindiag2 === undefined || (d._cachedQuad.diag2 &&
+	            d._cachedQuad.diag2 < origindiag2)) {
+	          origin = d._cachedQuad.ll;
+	          origindiag2 = d._cachedQuad.diag2;
+	        }
+	        if (d._cachedQuad.clrquad) {
+	          clrQuads.push(d._cachedQuad.clrquad);
+	        }
+	        if (d._cachedQuad.imgquad) {
+	          imgQuads.push(d._cachedQuad.imgquad);
+	        }
+	        return;
+	      }
+	      var quad, reload, image, prev_onload,
+	          pos, img, opacity, previewColor, previewImage, quadinfo = {};
+
+	      pos = m_this._positionToQuad(posFunc, depthFunc, d, i);
+	      opacity = opacityFunc.call(m_this, d, i);
+	      if (pos === undefined || !opacity) {
+	        return;
+	      }
+	      diag2 = Math.pow(pos.ll[0] - pos.ur[0], 2) + Math.pow(pos.ll[1] -
+	          pos.ur[1], 2) + Math.pow(pos.ll[2] - pos.ur[0], 2) + Math.pow(
+	          pos.lr[0] - pos.ur[0], 2) + Math.pow(pos.lr[1] - pos.ur[1], 2) +
+	          Math.pow(pos.lr[2] - pos.ur[0], 2);
+	      quadinfo.diag2 = diag2;
+	      quadinfo.ll = pos.ll;
+	      if (origindiag2 === undefined || (diag2 && diag2 < origindiag2)) {
+	        origin = pos.ll;
+	        origindiag2 = diag2;
+	      }
+	      pos = [pos.ll[0], pos.ll[1], pos.ll[2],
+	             pos.lr[0], pos.lr[1], pos.lr[2],
+	             pos.ul[0], pos.ul[1], pos.ul[2],
+	             pos.ur[0], pos.ur[1], pos.ur[2]];
+	      img = imgFunc.call(m_this, d, i);
+	      if (!img) {
+	        quad = {
+	          idx: i,
+	          pos: pos,
+	          opacity: opacity,
+	          color: util.convertColor(colorFunc.call(m_this, d, i)),
+	          reference: d.reference
+	        };
+	        clrQuads.push(quad);
+	        quadinfo.clrquad = quad;
+	      } else {
+	        image = m_this._objectListGet(m_images, img);
+	        if (image === undefined) {
+	          if (img instanceof Image) {
+	            image = img;
+	          } else {
+	            image = new Image();
+	            image.src = img;
+	          }
+	          m_this._objectListAdd(m_images, img, image);
+	        }
+	        quad = {
+	          idx: i,
+	          pos: pos,
+	          opacity: opacity,
+	          reference: d.reference
+	        };
+	        if (image.complete && image.naturalWidth && image.naturalHeight) {
+	          quad.image = image;
+	        } else {
+	          previewColor = undefined;
+	          previewImage = previewImageFunc.call(m_this, d, i);
+	          if (previewImage && previewImage instanceof Image &&
+	              previewImage.complete && previewImage.naturalWidth &&
+	              previewImage.naturalHeight) {
+	            quad.image = previewImage;
+	          } else {
+	            previewColor = previewColorFunc.call(m_this, d, i);
+	            if (previewColor === null) {
+	              previewColor = undefined;
+	            }
+	            if (previewColor !== undefined) {
+	              quad.color = util.convertColor(previewColor);
+	              clrQuads.push(quad);
+	              quadinfo.keep = false;
+	            }
+	          }
+	          reload = loadedFunc.call(m_this, d, i);
+	          if (reload) {
+	            prev_onload = image.onload;
+	            image.onload = function () {
+	              if (previewColor !== undefined) {
+	                if ($.inArray(quad, clrQuads) >= 0) {
+	                  clrQuads.splice($.inArray(quad, clrQuads), 1);
+	                }
+	              }
+	              quad.image = image;
+	              m_this.dataTime().modified();
+	              m_this.modified();
+	              m_this._update();
+	              m_this.layer().draw();
+	              if (prev_onload) {
+	                return prev_onload.apply(this, arguments);
+	              }
+	            };
+	          } else if (previewColor === undefined && !quad.image) {
+	            return;
+	          }
+	        }
+	        imgQuads.push(quad);
+	        quadinfo.imgquad = quad;
+	      }
+	      if (m_cacheQuads !== false && quadinfo.keep !== false) {
+	        if (quadinfo.clrquad) {
+	          m_nextQuadId += 1;
+	          quadinfo.clrquad.quadId = m_nextQuadId;
+	        }
+	        if (quadinfo.imgquad) {
+	          m_nextQuadId += 1;
+	          quadinfo.imgquad.quadId = m_nextQuadId;
+	        }
+	        d._cachedQuad = quadinfo;
+	      }
+	    });
+	    m_this._objectListEnd(m_images);
+	    m_quads = {clrQuads: clrQuads, imgQuads: imgQuads, origin: origin};
+	    return m_quads;
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Initialize
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this._init = function (arg) {
+	    arg = arg || {};
+	    s_init.call(m_this, arg);
+
+	    m_cacheQuads = (arg.cacheQuads !== false);
+
+	    var style = $.extend(
+	      {},
+	      {
+	        color: { r: 1.0, g: 1, b: 1 },
+	        opacity: 1,
+	        depth: 0,
+	        drawOnAsyncResourceLoaded: true,
+	        previewColor: null,
+	        previewImage: null,
+	        image: function (d) { return d.image; },
+	        position: function (d) { return d; }
+	      },
+	      arg.style === undefined ? {} : arg.style
+	    );
+
+	    if (arg.position !== undefined) {
+	      style.position = util.ensureFunction(arg.position);
+	    }
+	    m_this.style(style);
+	    m_this.dataTime().modified();
+	  };
+
+	  return m_this;
+	};
+
+	/**
+	 * Object specification for a quad feature.
+	 *
+	 * @extends geo.feature.spec // need to make a jsdoc plugin for this to work
+	 * @typedef geo.quadFeature.spec
+	 * @type {object}
+	 */
+
+	/**
+	 * Create a quadFeature from an object.
+	 *
+	 * @see {@link geo.feature.create}
+	 * @param {geo.layer} layer The layer to add the feature to
+	 * @param {geo.quadFeature.spec} spec The object specification
+	 * @returns {geo.quadFeature|null}
+	 */
+	quadFeature.create = function (layer, spec) {
+	  'use strict';
+
+	  spec = spec || {};
+	  spec.type = 'quad';
+	  return feature.create(layer, spec);
+	};
+
+	quadFeature.capabilities = {
+	  /* support for solid-colored quads */
+	  color: 'quad.color',
+	  /* support for parallelogram images */
+	  image: 'quad.image',
+	  /* support for arbitrary quad images */
+	  imageFull: 'quad.imageFull'
+	};
+
+	inherit(quadFeature, feature);
+	module.exports = quadFeature;
+
+
+/***/ },
+/* 219 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
@@ -42989,7 +44149,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 219 */
+/* 220 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = (function () {
@@ -42997,8 +44157,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var $ = __webpack_require__(1);
 	  var inherit = __webpack_require__(4);
-	  var tileLayer = __webpack_require__(220);
+	  var tileLayer = __webpack_require__(221);
 	  var registry = __webpack_require__(131);
+	  var quadFeature = __webpack_require__(218);
 
 	  //////////////////////////////////////////////////////////////////////////////
 	  /**
@@ -43074,13 +44235,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 
 	  inherit(osmLayer, tileLayer);
-	  registry.registerLayer('osm', osmLayer);
+	  /* By default, ask to support image quads.  If the user needs full
+	   * reprojection, they will need to require the
+	   * quadFeature.capabilities.imageFull feature */
+	  registry.registerLayer('osm', osmLayer, [quadFeature.capabilities.image]);
 	  return osmLayer;
 	})();
 
 
 /***/ },
-/* 220 */
+/* 221 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = (function () {
@@ -43219,7 +44383,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var $ = __webpack_require__(1);
 	    var geo_event = __webpack_require__(125);
 	    var transform = __webpack_require__(147);
-	    var tileCache = __webpack_require__(221);
+	    var tileCache = __webpack_require__(222);
 	    var fetchQueue = __webpack_require__(138);
 	    var adjustLayerForRenderer = __webpack_require__(131).adjustLayerForRenderer;
 	    var Tile = __webpack_require__(143);
@@ -44095,12 +45259,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	      var map = this.map(),
 	          bounds = map.bounds(undefined, null),
+	          mapZoom = map.zoom(),
+	          zoom = this._options.tileRounding(mapZoom),
 	          tiles;
-
 	      if (this._updateSubLayers) {
-	        var mapZoom = map.zoom(),
-	            zoom = this._options.tileRounding(mapZoom),
-	            view = this._getViewBounds();
+	        var view = this._getViewBounds();
 	        // Update the transform for the local layer coordinates
 	        var offset = this._updateSubLayers(zoom, view) || {x: 0, y: 0};
 
@@ -44110,8 +45273,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	              rotation = map.rotation(),
 	              rx = -to.x + -(view.left + view.right) / 2 + offset.x,
 	              ry = -to.y + -(view.bottom + view.top) / 2 + offset.y,
-	              dx = (rx + map.size().width / 2) * scale,
-	              dy = (ry + map.size().height / 2) * scale;
+	              dx = (rx + map.size().width / 2),
+	              dy = (ry + map.size().height / 2);
 
 	          this.canvas().css({
 	            'transform-origin': '' +
@@ -44526,7 +45689,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 221 */
+/* 222 */
 /***/ function(module, exports) {
 
 	module.exports = (function () {
@@ -44680,7 +45843,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 222 */
+/* 223 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(1);
@@ -44740,11 +45903,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    s_init.call(m_this, arg);
 
 	    var defaultStyle = $.extend(
-	        {},
-	        {
-	          'strokeWidth': function () { return 1; },
-	          'strokeColor': function () { return { r: 1.0, g: 1.0, b: 1.0 }; }
-	        },
+	      {},
+	      {
+	        'strokeWidth': function () { return 1; },
+	        'strokeColor': function () { return { r: 1.0, g: 1.0, b: 1.0 }; }
+	      },
 	      arg.style === undefined ? {} : arg.style
 	    );
 
@@ -44764,353 +45927,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 223 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var inherit = __webpack_require__(4);
-	var polygonFeature = __webpack_require__(224);
-
-	//////////////////////////////////////////////////////////////////////////////
-	/**
-	 * Create a new instance of class planeFeature
-	 *
-	 * @class geo.planeFeature
-	 * @extends geo.polygonFeature
-	 * @returns {geo.planeFeature}
-	 */
-	//////////////////////////////////////////////////////////////////////////////
-	var planeFeature = function (arg) {
-	  'use strict';
-	  if (!(this instanceof planeFeature)) {
-	    return new planeFeature(arg);
-	  }
-	  arg = arg || {};
-
-	  // Defaults
-	  arg.ul = arg.ul === undefined ? [0.0, 1.0, 0.0] : arg.ul;
-	  arg.lr = arg.lr === undefined ? [1.0, 0.0, 0.0] : arg.lr;
-	  arg.depth = arg.depth === undefined ? 0.0 : arg.depth;
-
-	  polygonFeature.call(this, arg);
-
-	  var m_this = this,
-	      m_origin = [arg.ul.x, arg.lr.y, arg.depth],
-	      m_upperLeft = [arg.ul.x, arg.ul.y, arg.depth],
-	      m_lowerRight = [arg.lr.x, arg.lr.y, arg.depth],
-	      m_defaultDepth = arg.depth,
-	      m_drawOnAsyncResourceLoad = arg.drawOnAsyncResourceLoad === undefined ?
-	                                    true : false,
-	      s_init = this._init;
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Get/Set origin
-	   *
-	   * @returns {geo.planeFeature}
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.origin = function (val) {
-	    if (val === undefined) {
-	      return m_origin;
-	    } else if (val instanceof Array) {
-	      if (val.length > 3 || val.length < 2) {
-	        throw 'Origin point requires point in 2 or 3 dimension';
-	      }
-	      m_origin = val.slice(0);
-	      if (m_origin.length === 2) {
-	        m_origin[2] = m_defaultDepth;
-	      }
-	    }
-	    m_this.dataTime().modified();
-	    m_this.modified();
-	    return m_this;
-	  };
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Get/Set pt1
-	   *
-	   * @returns {geo.planeFeature}
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.upperLeft = function (val) {
-	    if (val === undefined) {
-	      return m_upperLeft;
-	    } else if (val instanceof Array) {
-	      if (val.length > 3 || val.length < 2) {
-	        throw 'Upper left point requires point in 2 or 3 dimension';
-	      }
-	      m_upperLeft = val.slice(0);
-	      if (m_upperLeft.length === 2) {
-	        m_upperLeft[2] = m_defaultDepth;
-	      }
-	    }
-	    m_this.dataTime().modified();
-	    m_this.modified();
-	    return m_this;
-	  };
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Get/Set origin
-	   *
-	   * @returns {geo.planeFeature}
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.lowerRight = function (val) {
-	    if (val === undefined) {
-	      return m_lowerRight;
-	    } else if (val instanceof Array) {
-	      if (val.length > 3 || val.length < 2) {
-	        throw 'Lower right point requires point in 2 or 3 dimension';
-	      }
-	      m_lowerRight = val.slice(0);
-	      if (m_lowerRight.length === 2) {
-	        m_lowerRight[2] = m_defaultDepth;
-	      }
-	      m_this.dataTime().modified();
-	    }
-	    m_this.dataTime().modified();
-	    m_this.modified();
-	    return m_this;
-	  };
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Get/Set if draw should happen as soon as a async resource is loaded
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.drawOnAsyncResourceLoad = function (val) {
-	    if (val === undefined) {
-	      return m_drawOnAsyncResourceLoad;
-	    } else {
-	      m_drawOnAsyncResourceLoad = val;
-	      return m_this;
-	    }
-	  };
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Initialize
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this._init = function (arg) {
-	    var style = null;
-	    s_init.call(m_this, arg);
-	    style = m_this.style();
-	    if (style.image === undefined) {
-	      style.image = null;
-	    }
-	    m_this.style(style);
-	  };
-
-	  this._init(arg);
-	  return this;
-	};
-
-	inherit(planeFeature, polygonFeature);
-	module.exports = planeFeature;
-
-
-/***/ },
 /* 224 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var $ = __webpack_require__(1);
-	var inherit = __webpack_require__(4);
-	var feature = __webpack_require__(127);
-
-	//////////////////////////////////////////////////////////////////////////////
-	/**
-	 * Create a new instance of class polygonFeature
-	 *
-	 * @class geo.polygonFeature
-	 * @extends geo.feature
-	 * @returns {geo.polygonFeature}
-	 */
-	//////////////////////////////////////////////////////////////////////////////
-	var polygonFeature = function (arg) {
-	  'use strict';
-	  if (!(this instanceof polygonFeature)) {
-	    return new polygonFeature(arg);
-	  }
-	  arg = arg || {};
-	  feature.call(this, arg);
-
-	  var util = __webpack_require__(120);
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * @private
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  var m_this = this,
-	      m_position,
-	      m_polygon,
-	      s_init = this._init,
-	      s_data = this.data,
-	      m_coordinates = {outer: [], inner: []};
-
-	  if (arg.polygon === undefined) {
-	    m_polygon = function (d) {
-	      return d;
-	    };
-	  } else {
-	    m_polygon = arg.polygon;
-	  }
-
-	  if (arg.position === undefined) {
-	    m_position = function (d) {
-	      return d;
-	    };
-	  } else {
-	    m_position = arg.position;
-	  }
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Override the parent data method to keep track of changes to the
-	   * internal coordinates.
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.data = function (arg) {
-	    var ret = s_data(arg);
-	    if (arg !== undefined) {
-	      getCoordinates();
-	    }
-	    return ret;
-	  };
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Get the internal coordinates whenever the data changes.  For now, we do
-	   * the computation in world coordinates, but we will need to work in GCS
-	   * for other projections.
-	   * @private
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  function getCoordinates() {
-	    var posFunc = m_this.position(),
-	        polyFunc = m_this.polygon();
-	    m_coordinates = m_this.data().map(function (d, i) {
-	      var poly = polyFunc(d);
-	      var outer, inner;
-
-	      outer = (poly.outer || []).map(function (d0, j) {
-	        return posFunc.call(m_this, d0, j, d, i);
-	      });
-
-	      inner = (poly.inner || []).map(function (hole) {
-	        return (hole || []).map(function (d0, k) {
-	          return posFunc.call(m_this, d0, k, d, i);
-	        });
-	      });
-	      return {
-	        outer: outer,
-	        inner: inner
-	      };
-	    });
-	  }
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Get/Set polygon accessor
-	   *
-	   * @returns {geo.pointFeature}
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.polygon = function (val) {
-	    if (val === undefined) {
-	      return m_polygon;
-	    } else {
-	      m_polygon = val;
-	      m_this.dataTime().modified();
-	      m_this.modified();
-	      getCoordinates();
-	    }
-	    return m_this;
-	  };
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Get/Set position accessor
-	   *
-	   * @returns {geo.pointFeature}
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.position = function (val) {
-	    if (val === undefined) {
-	      return m_position;
-	    } else {
-	      m_position = val;
-	      m_this.dataTime().modified();
-	      m_this.modified();
-	      getCoordinates();
-	    }
-	    return m_this;
-	  };
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Point searce method for selection api.  Returns markers containing the
-	   * given point.
-	   * @argument {object} coordinate
-	   * @returns {object}
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.pointSearch = function (coordinate) {
-	    var found = [], indices = [], data = m_this.data();
-	    m_coordinates.forEach(function (coord, i) {
-	      var inside = util.pointInPolygon(
-	        coordinate,
-	        coord.outer,
-	        coord.inner
-	      );
-	      if (inside) {
-	        indices.push(i);
-	        found.push(data[i]);
-	      }
-	    });
-	    return {
-	      index: indices,
-	      found: found
-	    };
-	  };
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Initialize
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this._init = function (arg) {
-	    s_init.call(m_this, arg);
-
-	    var defaultStyle = $.extend(
-	        {},
-	        {
-	          'fillColor': { r: 0.0, g: 0.5, b: 0.5 },
-	          'fillOpacity': 1.0
-	        },
-	        arg.style === undefined ? {} : arg.style
-	    );
-
-	    m_this.style(defaultStyle);
-
-	    if (m_position) {
-	      m_this.dataTime().modified();
-	    }
-	  };
-
-	  this._init(arg);
-	  return this;
-	};
-
-	inherit(polygonFeature, feature);
-	module.exports = polygonFeature;
-
-
-/***/ },
-/* 225 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
@@ -45140,7 +45957,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var ClusterGroup = __webpack_require__(124);
 	  var geo_event = __webpack_require__(125);
 	  var util = __webpack_require__(120);
-	  var wigglemaps = __webpack_require__(226);
+	  var wigglemaps = __webpack_require__(225);
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
@@ -45258,7 +46075,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // prevent recomputing the clustering and set the new data array
 	    m_ignoreData = true;
 	    m_this.data(data);
-	    m_this.layer().map().draw(); // replace with m_this.draw() when gl is fixed
+	    m_this.draw();
 	  };
 
 	  ////////////////////////////////////////////////////////////////////////////
@@ -45495,20 +46312,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	    s_init.call(m_this, arg);
 
 	    var defaultStyle = $.extend(
-	        {},
-	        {
-	          radius: 5.0,
-	          stroke: true,
-	          strokeColor: { r: 0.851, g: 0.604, b: 0.0 },
-	          strokeWidth: 1.25,
-	          strokeOpacity: 1.0,
-	          fillColor: { r: 1.0, g: 0.839, b: 0.439 },
-	          fill: true,
-	          fillOpacity: 0.8,
-	          sprites: false,
-	          sprites_image: null,
-	          position: function (d) { return d; }
-	        },
+	      {},
+	      {
+	        radius: 5.0,
+	        stroke: true,
+	        strokeColor: { r: 0.851, g: 0.604, b: 0.0 },
+	        strokeWidth: 1.25,
+	        strokeOpacity: 1.0,
+	        fillColor: { r: 1.0, g: 0.839, b: 0.439 },
+	        fill: true,
+	        fillOpacity: 0.8,
+	        sprites: false,
+	        sprites_image: null,
+	        position: function (d) { return d; }
+	      },
 	      arg.style === undefined ? {} : arg.style
 	    );
 
@@ -45555,7 +46372,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 226 */
+/* 225 */
 /***/ function(module, exports) {
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -45965,7 +46782,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 227 */
+/* 226 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(1);
@@ -45974,56 +46791,51 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
-	 * Create a new instance of class quadFeature
+	 * Create a new instance of class polygonFeature
 	 *
-	 * @class geo.quadFeature
-	 * @param {Object} arg Options object
+	 * @class geo.polygonFeature
 	 * @extends geo.feature
-	 * @param {Object|string|Function} [color] Color for quads without images.
-	 *   Default is white ({r: 1, g: 1, b: 1}).
-	 * @param {number|Function} [opacity=1] Opacity for quad
-	 * @param {number|Function} [depth=0] Default z-coordinate for positions that
-	 *   don't explicitly specify one.
-	 * @param {boolean|Function} [drawOnAsyncResourceLoaded=true] Redraw quads
-	 *   when images are loaded after initial render.
-	 * @param {Image|string|Function} [image] Image for each data item.  If
-	 *   undefined or null, the quad is a solid color.  Default is (data).image.
-	 * @param {Object|string|Function} [previewColor=null] If specified, a color to
-	 *   show on image quads while waiting for the image to load.
-	 * @param {Image|string|Function} [previewImage=null] If specified, an image to
-	 *   show on image quads while waiting for the quad-specific image to load.
-	 *   This will only be shown if it is already loaded.
-	 * @param {Object|Function} [position] Position of the quad.  Default is
-	 *   (data).  The position is an Object which specifies the corners of the
-	 *   quad: ll, lr, ur, ul.  At least two opposite corners must be specified.
-	 *   The corners do not have to physically correspond to the order specified,
-	 *   but rather correspond to that part of an image (if there is one).  If a
-	 *   corner is unspecified, it will use the x coordinate from one adjacent
-	 *   corner, the y coordinate from the other adjacent corner, and the average
-	 *   z value of those two corners.  For instance, if ul is unspecified, it is
-	 *   {x: ll.x, y: ur.y}.  Note that each quad is rendered as a pair of
-	 *   triangles: (ll, lr, ul) and (ur, ul, lr).  Nothing special is done for
-	 *   quads that are not convex or quads that have substantially different
-	 *   transformations for those two triangles.
-	 * @param {boolean} [cacheQuads=true] If true, a set of internal information is
-	 *   stored on each data item in the _cachedQuad attribute.  If this is false,
-	 *   the data item is not altered.  If the data (positions, opacity, etc,) of
-	 *   individual quads will change, set this to false or delete the _cachedQuad
-	 *   attribute of the data item.
-	 * @returns {geo.quadFeature}
+	 * @param {Object} arg Options object
+	 * @param {Object|Function} [arg.position] Position of the data.  Default is
+	 *   (data).
+	 * @param {Object|Function} [arg.polygon] Polygons from the data.  Default is
+	 *   (data).  Typically, the data is an array of polygons, each of which is
+	 *   of the form {outer: [(coordinates)], inner: [[(coordinates of first
+	 *   hole)], [(coordinates of second hole)], ...]}.  The inner record is
+	 *   optional.  Alternately, if there are no holes, a polygon can just be an
+	 *   array of coordinates.  Coordinates are in the form {x: (x), y: (y),
+	 *   z: (z)}, with z being optional.  The first and last point of each polygon
+	 *   must be the same.
+	 * @param {Object} [arg.style] Style object with default style options.
+	 * @param {boolean|Function} [arg.style.fill] True to fill polygon.  Defaults
+	 *   to true.
+	 * @param {Object|Function} [arg.style.fillColor] Color to fill each polygon.
+	 *   The color can vary by vertex.  Colors can be css names or hex values, or
+	 *   an object with r, g, b on a [0-1] scale.
+	 * @param {number|Function} [arg.style.fillOpacity] Opacity for each polygon.
+	 *   The opacity can vary by vertex.  Opacity is on a [0-1] scale.
+	 * @param {boolean|Function} [arg.style.stroke] True to stroke polygon.
+	 *   Defaults to false.
+	 * @param {Object|Function} [arg.style.strokeColor] Color to stroke each
+	 *   polygon.  The color can vary by vertex.  Colors can be css names or hex
+	 *   values, or an object with r, g, b on a [0-1] scale.
+	 * @param {number|Function} [arg.style.strokeOpacity] Opacity for each polygon
+	 *   stroke.  The opacity can vary by vertex.  Opacity is on a [0-1] scale.
+	 * @param {boolean|Function} [arg.style.uniformPolygon] Boolean indicating if
+	 *   each polygon has a uniform style (uniform fill color, fill opacity, stroke
+	 *   color, and stroke opacity).   Defaults to false.  Can vary by polygon.
+	 * @returns {geo.polygonFeature}
 	 */
 	//////////////////////////////////////////////////////////////////////////////
-	var quadFeature = function (arg) {
+	var polygonFeature = function (arg) {
 	  'use strict';
-
-	  var transform = __webpack_require__(147);
-	  var util = __webpack_require__(120);
-
-	  if (!(this instanceof quadFeature)) {
-	    return new quadFeature(arg);
+	  if (!(this instanceof polygonFeature)) {
+	    return new polygonFeature(arg);
 	  }
 	  arg = arg || {};
 	  feature.call(this, arg);
+
+	  var util = __webpack_require__(120);
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
@@ -46031,103 +46843,167 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
 	  var m_this = this,
+	      m_position,
+	      m_polygon,
+	      m_lineFeature,
 	      s_init = this._init,
-	      m_cacheQuads,
-	      m_images = [],
-	      m_quads;
+	      s_exit = this._exit,
+	      s_data = this.data,
+	      s_draw = this.draw,
+	      s_modified = this.modified,
+	      s_style = this.style,
+	      m_coordinates = [];
 
+	  if (arg.polygon === undefined) {
+	    m_polygon = function (d) {
+	      return d;
+	    };
+	  } else {
+	    m_polygon = arg.polygon;
+	  }
+
+	  if (arg.position === undefined) {
+	    m_position = function (d) {
+	      return d;
+	    };
+	  } else {
+	    m_position = arg.position;
+	  }
+
+	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Track a list of object->object mappings.  The mappings are kept in a list.
-	   * This marks all known mappings as unused.  If they are not marked used
-	   * before _objectListEnd is called, that function will remove them.
+	   * Get/set data.
 	   *
-	   * @param {array} list the list of mappings.
+	   * @memberof geo.polygonFeature
+	   * @param {Object} [data] if specified, use this for the data and return the
+	   *    feature.  If not specified, return the current data.
+	   * @returns {geo.polygonFeature|Object}
 	   */
-	  this._objectListStart = function (list) {
-	    $.each(list, function (idx, item) {
-	      item.used = false;
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.data = function (arg) {
+	    var ret = s_data(arg);
+	    if (arg !== undefined) {
+	      getCoordinates();
+	    }
+	    return ret;
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Get the internal coordinates whenever the data changes.  For now, we do
+	   * the computation in world coordinates, but we will need to work in GCS
+	   * for other projections.  Also compute the extents of the outside of each
+	   * polygon for faster checking if points are in the polygon.
+	   * @memberof geo.polygonFeature
+	   * @private
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  function getCoordinates() {
+	    var posFunc = m_this.position(),
+	        polyFunc = m_this.polygon();
+	    m_coordinates = m_this.data().map(function (d, i) {
+	      var poly = polyFunc(d);
+	      var outer, inner, range, coord, j, x, y;
+
+	      coord = poly.outer || (poly instanceof Array ? poly : []);
+	      outer = new Array(coord.length);
+	      for (j = 0; j < coord.length; j += 1) {
+	        outer[j] = posFunc.call(m_this, coord[j], j, d, i);
+	        x = outer[j].x || outer[j][0] || 0;
+	        y = outer[j].y || outer[j][1] || 0;
+	        if (!j) {
+	          range = {min: {x: x, y: y}, max: {x: x, y: y}};
+	        } else {
+	          if (x < range.min.x) { range.min.x = x; }
+	          if (y < range.min.y) { range.min.y = y; }
+	          if (x > range.max.x) { range.max.x = x; }
+	          if (y > range.max.y) { range.max.y = y; }
+	        }
+	      }
+	      inner = (poly.inner || []).map(function (hole) {
+	        coord = hole || [];
+	        var trans = new Array(coord.length);
+	        for (j = 0; j < coord.length; j += 1) {
+	          trans[j] = posFunc.call(m_this, coord[j], j, d, i);
+	        }
+	        return trans;
+	      });
+	      return {
+	        outer: outer,
+	        inner: inner,
+	        range: range
+	      };
 	    });
-	  };
+	  }
 
+	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Get the value from a list of object->object mappings.  If the key object
-	   * is not present, return undefined.  If found, the entry is marked as being
-	   * in use.
+	   * Get/set polygon accessor.
 	   *
-	   * @param {array} list the list of mappings.
-	   * @param {object} entry the key to search for.
-	   * @returns {object} the associated object or undefined.
+	   * @memberof geo.polygonFeature
+	   * @param {Object} [polygon] if specified, use this for the polygon accessor
+	   *    and return the feature.  If not specified, return the current polygon.
+	   * @returns {geo.polygonFeature|Object}
 	   */
-	  this._objectListGet = function (list, entry) {
-	    for (var i = 0; i < list.length; i += 1) {
-	      if (list[i].entry === entry) {
-	        list[i].used = true;
-	        return list[i].value;
-	      }
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.polygon = function (val) {
+	    if (val === undefined) {
+	      return m_polygon;
+	    } else {
+	      m_polygon = val;
+	      m_this.dataTime().modified();
+	      m_this.modified();
+	      getCoordinates();
 	    }
-	    return undefined;
+	    return m_this;
 	  };
 
+	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Add a new object to a list of object->object mappings.  The key object
-	   * should not exist, or this will create a duplicated.  The new entry is
-	   * marked as being in use.
+	   * Get/Set position accessor.
 	   *
-	   * @param {array} list the list of mappings.
-	   * @param {object} entry the key to add.
-	   * @param {object} value the value to store with the entry.
+	   * @memberof geo.polygonFeature
+	   * @param {Object} [position] if specified, use this for the position
+	   *    accessor and return the feature.  If not specified, return the current
+	   *    position.
+	   * @returns {geo.polygonFeature|Object}
 	   */
-	  this._objectListAdd = function (list, entry, value) {
-	    list.push({entry: entry, value: value, used: true});
-	  };
-
-	  /**
-	   * Remove all unused entries from a list of object->object mappings.
-	   *
-	   * @param {array} list the list of mappings.
-	   */
-	  this._objectListEnd = function (list) {
-	    for (var i = list.length - 1; i >= 0; i -= 1) {
-	      if (!list[i].used) {
-	        list.splice(i, 1);
-	      }
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.position = function (val) {
+	    if (val === undefined) {
+	      return m_position;
+	    } else {
+	      m_position = val;
+	      m_this.dataTime().modified();
+	      m_this.modified();
+	      getCoordinates();
 	    }
+	    return m_this;
 	  };
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Point search method for selection api.  Returns markers containing the
 	   * given point.
-	   * @argument {Object} coordinate
-	   * @returns {Object}
+	   *
+	   * @memberof geo.polygonFeature
+	   * @argument {object} coordinate
+	   * @returns {object}
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
 	  this.pointSearch = function (coordinate) {
-	    var found = [], indices = [], data = m_this.data(), i,
-	        poly1 = [{}, {}, {}, {}], poly2 = [{}, {}, {}, {}],
-	        map = m_this.layer().map(),
-	        order1 = [0, 1, 2, 0], order2 = [1, 2, 3, 1];
-	    coordinate = transform.transformCoordinates(
-	        map.ingcs(), map.gcs(), coordinate);
-	    if (!m_quads) {
-	      this._generateQuads();
-	    }
-	    $.each([m_quads.clrQuads, m_quads.imgQuads], function (idx, quadList) {
-	      quadList.forEach(function (quad, idx) {
-	        for (i = 0; i < order1.length; i += 1) {
-	          poly1[i].x = quad.pos[order1[i] * 3];
-	          poly1[i].y = quad.pos[order1[i] * 3 + 1];
-	          poly1[i].z = quad.pos[order1[i] * 3 + 2];
-	          poly2[i].x = quad.pos[order2[i] * 3];
-	          poly2[i].y = quad.pos[order2[i] * 3 + 1];
-	          poly2[i].z = quad.pos[order2[i] * 3 + 2];
-	        }
-	        if (util.pointInPolygon(coordinate, poly1) ||
-	            util.pointInPolygon(coordinate, poly2)) {
-	          indices.push(quad.idx);
-	          found.push(data[quad.idx]);
-	        }
-	      });
+	    var found = [], indices = [], data = m_this.data();
+	    m_coordinates.forEach(function (coord, i) {
+	      var inside = util.pointInPolygon(
+	        coordinate,
+	        coord.outer,
+	        coord.inner,
+	        coord.range
+	      );
+	      if (inside) {
+	        indices.push(i);
+	        found.push(data[i]);
+	      }
 	    });
 	    return {
 	      index: indices,
@@ -46137,326 +47013,248 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Get/Set position
-	   *
-	   * @returns {geo.quadFeature}
+	   * Get/Set style used by the feature.  This calls the super function, then
+	   * checks if strokes are required.
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
-	  this.position = function (val) {
-	    if (val === undefined) {
-	      return m_this.style('position');
-	    } else {
-	      m_this.style('position', util.ensureFunction(val));
-	      m_this.dataTime().modified();
-	      m_this.modified();
+	  this.style = function (arg1, arg2) {
+	    var result = s_style.apply(this, arguments);
+	    if (arg1 !== undefined && (typeof arg1 !== 'string' || arg2 !== undefined)) {
+	      this._checkForStroke();
 	    }
-	    return m_this;
+	    return result;
 	  };
 
+	  this.style.get = s_style.get;
+
 	  /**
-	   * Given a data item and its index, fetch its position and ensure we have
-	   * compelte information for the quad.  This generates missing corners and z
-	   * values.
+	   * Get an outer or inner loop of a polygon and return the necessary data to
+	   * use it for a closed polyline.
 	   *
-	   * @param {function} posFunc a function to call to get the position of a data
-	   *   item.  It is passed (d, i).
-	   * @param {function} depthFunc a function to call to get the z-value of a
-	   *   data item.  It is passed (d, i).
-	   * @param d a data item.  Used to fetch position and possibly depth.
-	   * @param i the index within the data.  Used to fetch position and possibly
-	   *   depth.
-	   * @returns {Object|undefined} either an object with all four corners, or
-	   *   undefined if no such object can be generated.  The coordinates have been
-	   *   converted to map coordinates.
+	   * @param {object} item: the polygon.
+	   * @param {number} itemIndex: the index of the polygon
+	   * @param {Array} loop: the inner or outer loop.
+	   * @param {function} posFunc: a function that gets the coordinates of a
+	   *    vertex.  Used to compare the first and last vertices of the polygon.
+	   *    If they do not match exactly, the first vertex is added at the end to
+	   *    close the polyline.
+	   * @returns {Array} the loop with the data necessary to send to the position
+	   *    function for each vertex.
 	   */
-	  this._positionToQuad = function (posFunc, depthFunc, d, i) {
-	    var initPos = posFunc.call(m_this, d, i);
-	    if ((!initPos.ll || !initPos.ur) && (!initPos.ul || !initPos.lr)) {
+	  this._getLoopData = function (item, itemIndex, loop, posFunc) {
+	    var line = [], i, startpos, endpos;
+
+	    for (i = 0; i < loop.length; i += 1) {
+	      line.push([loop[i], i, item, itemIndex]);
+	    }
+	    startpos = posFunc(loop[0], 0, item, itemIndex);
+	    endpos = posFunc(loop[loop.length - 1], loop.length - 1, item, itemIndex);
+	    if (startpos.x !== endpos.x || startpos.y !== endpos.y || startpos.z !== endpos.z) {
+	      line.push([loop[0], 0, item, itemIndex]);
+	    }
+	    return line;
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Check if we need to add a line feature to the layer, and update it as
+	   * necessary.
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this._checkForStroke = function () {
+	    if (s_style('stroke') === false) {
+	      if (m_lineFeature && m_this.layer()) {
+	        m_this.layer().removeFeature(m_lineFeature);
+	        m_lineFeature = null;
+	      }
 	      return;
 	    }
-	    var gcs = m_this.gcs(),
-	        map_gcs = m_this.layer().map().gcs(),
-	        pos = {};
-	    $.each(['ll', 'lr', 'ul', 'ur'], function (idx, key) {
-	      if (initPos[key] !== undefined) {
-	        pos[key] = {};
-	        if (initPos[key].x === undefined) {
-	          pos[key] = [initPos[key][0], initPos[key][1], initPos[key][2]];
-	        } else {
-	          pos[key] = [initPos[key].x, initPos[key].y, initPos[key].z];
-	        }
-	        if (pos[key][2] === undefined) {
-	          pos[key][2] = depthFunc.call(m_this, d, i);
-	        }
-	        if (gcs !== map_gcs) {
-	          pos[key] = transform.transformCoordinates(
-	              gcs, map_gcs, pos[key]);
-	        }
+	    if (!m_this.layer()) {
+	      return;
+	    }
+	    if (!m_lineFeature) {
+	      m_lineFeature = m_this.layer().createFeature(
+	        'line', {selectionAPI: false});
+	    }
+	    var polyStyle = m_this.style();
+	    m_lineFeature.style({
+	      strokeWidth: polyStyle.strokeWidth,
+	      strokeStyle: polyStyle.strokeStyle,
+	      strokeColor: polyStyle.strokeColor,
+	      strokeOpacity: function (d) {
+	        return m_this.style.get('stroke')(d[2], d[3]) ? m_this.style.get('strokeOpacity')(d[0], d[1], d[2], d[3]) : 0;
 	      }
 	    });
-	    pos.ll = pos.ll || [pos.ul[0], pos.lr[1], (pos.ul[2] + pos.lr[2]) / 2];
-	    pos.lr = pos.lr || [pos.ur[0], pos.ll[1], (pos.ur[2] + pos.ll[2]) / 2];
-	    pos.ur = pos.ur || [pos.lr[0], pos.ul[1], (pos.lr[2] + pos.ul[2]) / 2];
-	    pos.ul = pos.ul || [pos.ll[0], pos.ur[1], (pos.ll[2] + pos.ur[2]) / 2];
-	    return pos;
+	    var data = this.data(),
+	        posFunc = this.position();
+	    if (data !== m_lineFeature._lastData || posFunc !== m_lineFeature._posFunc) {
+	      var lineData = [], i, polygon, loop;
+
+	      for (i = 0; i < data.length; i += 1) {
+	        polygon = m_this.polygon()(data[i], i);
+	        loop = polygon.outer || (polygon instanceof Array ? polygon : []);
+	        lineData.push(m_this._getLoopData(data[i], i, loop, posFunc));
+	        if (polygon.inner) {
+	          polygon.inner.forEach(function (loop) {
+	            lineData.push(m_this._getLoopData(data[i], i, loop, posFunc));
+	          });
+	        }
+	      }
+	      m_lineFeature.position(function (d, i, item, itemIndex) {
+	        return posFunc(d[0], d[1], d[2], d[3]);
+	      });
+	      m_lineFeature.data(lineData);
+	      m_lineFeature._lastData = data;
+	      m_lineFeature._lastPosFunc = posFunc;
+	    }
 	  };
 
+	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Convert the current data set to a pair of arrays, one of quads that are
-	   * solid color and one of qudas that have an image.  All quads are objects
-	   * with pos (a 12 value array containing 4 three-dimensional position
-	   * coordinates), and opacity.  Color quads also have a color.  Image quads
-	   * may have an image element, if the image is loaded.  If it isn't, this
-	   * element will be missing.  For preview images, the image quad will have a
-	   * reference to the preview element that may later be removed.  If a preview
-	   * color is used, the quad will be in both lists, but may be removed from the
-	   * color quad list once the image is loaded.
-	   *
-	   * The value for origin is one of an ll corner from one of the quads with the
-	   * smallest sum of diagonals.  The assumption is that, if using the origin to
-	   * improve precision, the smallest quads are the ones most in need of this
-	   * benefit.
-	   *
-	   * @returns {Object} An object with clrQuads and imgQuads, each of which is
-	   *   an array, and origin, which is a triplet that is guaranteed to be one of
-	   *   the quads corners for a quad with the smallest sum of diagonal lengths.
-	   */
-	  this._generateQuads = function () {
-	    var posFunc = m_this.position(),
-	        imgFunc = util.ensureFunction(m_this.style('image')),
-	        colorFunc = util.ensureFunction(m_this.style('color')),
-	        depthFunc = util.ensureFunction(m_this.style('depth')),
-	        opacityFunc = util.ensureFunction(m_this.style('opacity')),
-	        loadedFunc = util.ensureFunction(m_this.style(
-	            'drawOnAsyncResourceLoaded')),
-	        previewColorFunc = util.ensureFunction(m_this.style(
-	            'previewColor')),
-	        previewImageFunc = util.ensureFunction(m_this.style(
-	            'previewImage')),
-	        data = m_this.data(),
-	        clrQuads = [], imgQuads = [],
-	        origin = [0, 0, 0], origindiag2, diag2;
-	    /* Keep track of images that we are using.  This prevents creating
-	     * additional Image elemnts for repeated urls. */
-	    m_this._objectListStart(m_images);
-	    $.each(data, function (i, d) {
-	      if (d._cachedQuad) {
-	        diag2 = d._cachedQuad.diag2;
-	        if (origindiag2 === undefined || (d._cachedQuad.diag2 &&
-	            d._cachedQuad.diag2 < origindiag2)) {
-	          origin = d._cachedQuad.ll;
-	          origindiag2 = d._cachedQuad.diag2;
-	        }
-	        if (d._cachedQuad.clrquad) {
-	          clrQuads.push(d._cachedQuad.clrquad);
-	        }
-	        if (d._cachedQuad.imgquad) {
-	          imgQuads.push(d._cachedQuad.imgquad);
-	        }
-	        return;
-	      }
-	      var quad, reload, image, prev_onload,
-	          pos, img, opacity, previewColor, previewImage, quadinfo = {};
+	  * Redraw the object.
+	  */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.draw = function () {
+	    var result = s_draw();
+	    if (m_lineFeature) {
+	      m_lineFeature.draw();
+	    }
+	    return result;
+	  };
 
-	      pos = m_this._positionToQuad(posFunc, depthFunc, d, i);
-	      opacity = opacityFunc.call(m_this, d, i);
-	      if (pos === undefined || !opacity) {
-	        return;
-	      }
-	      diag2 = Math.pow(pos.ll[0] - pos.ur[0], 2) + Math.pow(pos.ll[1] -
-	          pos.ur[1], 2) + Math.pow(pos.ll[2] - pos.ur[0], 2) + Math.pow(
-	          pos.lr[0] - pos.ur[0], 2) + Math.pow(pos.lr[1] - pos.ur[1], 2) +
-	          Math.pow(pos.lr[2] - pos.ur[0], 2);
-	      quadinfo.diag2 = diag2;
-	      quadinfo.ll = pos.ll;
-	      if (origindiag2 === undefined || (diag2 && diag2 < origindiag2)) {
-	        origin = pos.ll;
-	        origindiag2 = diag2;
-	      }
-	      pos = [pos.ll[0], pos.ll[1], pos.ll[2],
-	             pos.lr[0], pos.lr[1], pos.lr[2],
-	             pos.ul[0], pos.ul[1], pos.ul[2],
-	             pos.ur[0], pos.ur[1], pos.ur[2]];
-	      img = imgFunc.call(m_this, d, i);
-	      if (!img) {
-	        quad = {
-	          idx: i,
-	          pos: pos,
-	          opacity: opacity,
-	          color: util.convertColor(colorFunc.call(m_this, d, i))
-	        };
-	        clrQuads.push(quad);
-	        quadinfo.clrquad = quad;
-	      } else {
-	        image = m_this._objectListGet(m_images, img);
-	        if (image === undefined) {
-	          if (img instanceof Image) {
-	            image = img;
-	          } else {
-	            image = new Image();
-	            image.src = img;
-	          }
-	          m_this._objectListAdd(m_images, img, image);
-	        }
-	        quad = {
-	          idx: i,
-	          pos: pos,
-	          opacity: opacity
-	        };
-	        if (image.complete && image.naturalWidth && image.naturalHeight) {
-	          quad.image = image;
-	        } else {
-	          previewColor = undefined;
-	          previewImage = previewImageFunc.call(m_this, d, i);
-	          if (previewImage && previewImage instanceof Image &&
-	              previewImage.complete && previewImage.naturalWidth &&
-	              previewImage.naturalHeight) {
-	            quad.image = previewImage;
-	          } else {
-	            previewColor = previewColorFunc.call(m_this, d, i);
-	            if (previewColor === null) {
-	              previewColor = undefined;
-	            }
-	            if (previewColor !== undefined) {
-	              quad.color = util.convertColor(previewColor);
-	              clrQuads.push(quad);
-	              quadinfo.keep = false;
-	            }
-	          }
-	          reload = loadedFunc.call(m_this, d, i);
-	          if (reload) {
-	            prev_onload = image.onload;
-	            image.onload = function () {
-	              if (previewColor !== undefined) {
-	                if ($.inArray(quad, clrQuads) >= 0) {
-	                  clrQuads.splice($.inArray(quad, clrQuads), 1);
-	                }
-	              }
-	              quad.image = image;
-	              m_this.dataTime().modified();
-	              m_this.modified();
-	              m_this._update();
-	              m_this.layer().draw();
-	              if (prev_onload) {
-	                return prev_onload.apply(this, arguments);
-	              }
-	            };
-	          } else if (previewColor === undefined && !quad.image) {
-	            return;
-	          }
-	        }
-	        imgQuads.push(quad);
-	        quadinfo.imgquad = quad;
-	      }
-	      if (m_cacheQuads !== false && quadinfo.keep !== false) {
-	        d._cachedQuad = quadinfo;
-	      }
-	    });
-	    m_this._objectListEnd(m_images);
-	    m_quads = {clrQuads: clrQuads, imgQuads: imgQuads, origin: origin};
-	    return m_quads;
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	  * When the feature is marked as modified, mark our sub-feature as modified,
+	  * too.
+	  */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.modified = function () {
+	    var result = s_modified();
+	    if (m_lineFeature) {
+	      m_lineFeature.modified();
+	    }
+	    return result;
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Destroy
+	   * @memberof geo.polygonFeature
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this._exit = function () {
+	    if (m_lineFeature && m_this.layer()) {
+	      m_this.layer().removeFeature(m_lineFeature);
+	      m_lineFeature = null;
+	    }
+	    s_exit();
 	  };
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Initialize
+	   * @memberof geo.polygonFeature
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function (arg) {
 	    arg = arg || {};
 	    s_init.call(m_this, arg);
 
-	    m_cacheQuads = (arg.cacheQuads !== false);
-
-	    var style = $.extend(
-	        {},
-	        {
-	          color: { r: 1.0, g: 1, b: 1 },
-	          opacity: 1,
-	          depth: 0,
-	          drawOnAsyncResourceLoaded: true,
-	          previewColor: null,
-	          previewImage: null,
-	          image: function (d) { return d.image; },
-	          position: function (d) { return d; }
-	        },
-	        arg.style === undefined ? {} : arg.style
+	    var defaultStyle = $.extend(
+	      {},
+	      {
+	        fill: true,
+	        fillColor: {r: 0.0, g: 0.5, b: 0.5},
+	        fillOpacity: 1.0,
+	        stroke: false,
+	        strokeWidth: 1.0,
+	        strokeStyle: 'solid',
+	        strokeColor: {r: 0.0, g: 1.0, b: 1.0},
+	        strokeOpacity: 1.0
+	      },
+	      arg.style === undefined ? {} : arg.style
 	    );
 
-	    if (arg.position !== undefined) {
-	      style.position = util.ensureFunction(arg.position);
+	    m_this.style(defaultStyle);
+
+	    if (m_position) {
+	      m_this.dataTime().modified();
 	    }
-	    m_this.style(style);
-	    m_this.dataTime().modified();
+	    this._checkForStroke();
 	  };
 
-	  return m_this;
+	  /* Don't call _init here -- let subclasses call it */
+	  return this;
 	};
 
 	/**
-	 * Object specification for a quad feature.
+	 * Create a polygonFeature from an object.
 	 *
-	 * @extends geo.feature.spec // need to make a jsdoc plugin for this to work
-	 * @typedef geo.quadFeature.spec
-	 * @type {object}
-	 */
-
-	/**
-	 * Create a quadFeature from an object.
 	 * @see {@link geo.feature.create}
 	 * @param {geo.layer} layer The layer to add the feature to
-	 * @param {geo.quadFeature.spec} spec The object specification
-	 * @returns {geo.quadFeature|null}
+	 * @param {geo.polygonFeature.spec} spec The object specification
+	 * @returns {geo.polygonFeature|null}
 	 */
-	quadFeature.create = function (layer, spec) {
+	polygonFeature.create = function (layer, spec) {
 	  'use strict';
 
 	  spec = spec || {};
-	  spec.type = 'quad';
+	  spec.type = 'polygon';
 	  return feature.create(layer, spec);
 	};
 
-	inherit(quadFeature, feature);
-	module.exports = quadFeature;
+	inherit(polygonFeature, feature);
+	module.exports = polygonFeature;
 
 
 /***/ },
-/* 228 */
+/* 227 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(1);
 	var inherit = __webpack_require__(4);
 	var feature = __webpack_require__(127);
+	var transform = __webpack_require__(147);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Create a new instance of class heatmapFeature
 	 *
-	 * @class
+	 * @class geo.heatmapFeature
 	 * @param {Object} arg Options object
 	 * @extends geo.feature
-	 * @param {Object|string|Function} [color] Color transfer function that.
-	 *   will be used to evaluate color of each pixel using normalized intensity
-	 *   as the look up value.
-	 * @param {number|Function} [opacity=1] Homogeneous opacity for each pixel.
-	 * @param {Object|Function} [radius=10] Radius of a point in terms of number
-	 *   of pixels.
-	 * @param {Object|Function} [blurRadius=10] Gaussian blur radius for each
-	 *   point in terms of number of pixels.
 	 * @param {Object|Function} [position] Position of the data.  Default is
-	 *   (data). The position is an Object which specifies the location of the
-	 *   data in geo-spatial context.
-	 * @param {boolean} [intensity] Scalar value of each data point. Scalar
+	 *   (data).
+	 * @param {Object|Function} [intensity] Scalar value of each data point. Scalar
 	 *   value must be a positive real number and will be used to compute
 	 *   the weight for each data point.
-	 * @param {boolean} [maxIntensity=null] Maximum intensity of the data. Maximum
+	 * @param {number} [maxIntensity=null] Maximum intensity of the data. Maximum
 	 *   intensity must be a positive real number and will be used to normalize all
 	 *   intensities with a dataset. If no value is given, then a it will
 	 *   be computed.
-	 * @param {boolean} [minIntensity=null] Minimum intensity of the data. Minimum
+	 * @param {number} [minIntensity=null] Minimum intensity of the data. Minimum
 	 *   intensity must be a positive real number will be used to normalize all
 	 *   intensities with a dataset. If no value is given, then a it will
 	 *   be computed.
+	 * @param {number} [updateDelay=1000] Delay in milliseconds after a zoom,
+	 *   rotate, or pan event before recomputing the heatmap.
+	 * @param {boolean|number|'auto'} [binned='auto'] If true or a number,
+	 *   spatially bin data as part of producing the heatpmap.  If false, each
+	 *   datapoint stands on its own.  If 'auto', bin data if there are more data
+	 *   points than there would be bins.  Using true or auto uses bins that are
+	 *   max(Math.floor((radius + blurRadius) / 8), 3).
+	 * @param {Object|string|Function} [style.color] Color transfer function that.
+	 *   will be used to evaluate color of each pixel using normalized intensity
+	 *   as the look up value.
+	 * @param {Object|Function} [style.radius=10] Radius of a point in terms of
+	 *   number of pixels.
+	 * @param {Object|Function} [style.blurRadius=10] Blur radius for each point in
+	 *  terms of number of pixels.
+	 * @param {boolean} [style.gaussian=true] If true, appoximate a gaussian
+	 *   distribution for each point using a multi-segment linear radial
+	 *   appoximation.  The total weight of the gaussian area is approximately the
+	 *   9/16 r^2.  The sum of radius + blurRadius is used as the radius for the
+	 *   gaussian distribution.
 	 * @returns {geo.heatmapFeature}
 	 */
 	//////////////////////////////////////////////////////////////////////////////
@@ -46480,12 +47278,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_intensity,
 	      m_maxIntensity,
 	      m_minIntensity,
+	      m_updateDelay,
+	      m_binned,
+	      m_gcsPosition,
 	      s_init = this._init;
 
 	  m_position = arg.position || function (d) { return d; };
 	  m_intensity = arg.intensity || function (d) { return 1; };
-	  m_maxIntensity = arg.maxIntensity || null;
-	  m_minIntensity = arg.minIntensity ? arg.minIntensity : null;
+	  m_maxIntensity = arg.maxIntensity !== undefined ? arg.maxIntensity : null;
+	  m_minIntensity = arg.minIntensity !== undefined ? arg.minIntensity : null;
+	  m_binned = arg.binned !== undefined ? arg.binned : 'auto';
+	  m_updateDelay = arg.updateDelay ? parseInt(arg.updateDelay, 10) : 1000;
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
@@ -46525,6 +47328,50 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
+	   * Get/Set updateDelay
+	   *
+	   * @returns {geo.heatmap}
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.updateDelay = function (val) {
+	    if (val === undefined) {
+	      return m_updateDelay;
+	    } else {
+	      m_updateDelay = parseInt(val, 10);
+	    }
+	    return m_this;
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Get/Set binned
+	   *
+	   * @returns {geo.heatmap}
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.binned = function (val) {
+	    if (val === undefined) {
+	      return m_binned;
+	    } else {
+	      if (val === 'true') {
+	        val = true;
+	      } else if (val === 'false') {
+	        val = false;
+	      } else if (val !== 'auto' && val !== true && val !== false) {
+	        val = parseInt(val, 10);
+	        if (val <= 0 || isNaN(val)) {
+	          val = false;
+	        }
+	      }
+	      m_binned = val;
+	      m_this.dataTime().modified();
+	      m_this.modified();
+	    }
+	    return m_this;
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
 	   * Get/Set position accessor
 	   *
 	   * @returns {geo.heatmap}
@@ -46539,6 +47386,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_this.modified();
 	    }
 	    return m_this;
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Get pre-computed gcs position accessor
+	   *
+	   * @returns {geo.heatmap}
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.gcsPosition = function () {
+	    this._update();
+	    return m_gcsPosition;
 	  };
 
 	  ////////////////////////////////////////////////////////////////////////////
@@ -46569,16 +47428,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var defaultStyle = $.extend(
 	      {},
-	        {
-	          opacity: 0.1,
-	          radius: 10,
-	          blurRadius: 10,
-	          color: {0:    {r: 0, g: 0, b: 0.0, a: 0.0},
-	                  0.25: {r: 0, g: 0, b: 1, a: 0.5},
-	                  0.5:  {r: 0, g: 1, b: 1, a: 0.6},
-	                  0.75: {r: 1, g: 1, b: 0, a: 0.7},
-	                  1:    {r: 1, g: 0, b: 0, a: 0.8}}
-	        },
+	      {
+	        radius: 10,
+	        blurRadius: 10,
+	        gaussian: true,
+	        color: {0:    {r: 0, g: 0, b: 0.0, a: 0.0},
+	                0.25: {r: 0, g: 0, b: 1, a: 0.5},
+	                0.5:  {r: 0, g: 1, b: 1, a: 0.6},
+	                0.75: {r: 1, g: 1, b: 0, a: 0.7},
+	                1:    {r: 1, g: 0, b: 0, a: 0.8}}
+	      },
 	      arg.style === undefined ? {} : arg.style
 	    );
 
@@ -46597,23 +47456,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	  ////////////////////////////////////////////////////////////////////////////
 	  this._build = function () {
 	    var data = m_this.data(),
-	        intensity = null;
+	        intensity = null,
+	        position = [],
+	        setMax = (m_maxIntensity === null || m_maxIntensity === undefined),
+	        setMin = (m_minIntensity === null || m_minIntensity === undefined);
 
-	    if (!m_maxIntensity || !m_minIntensity) {
-	      data.forEach(function (d) {
+	    data.forEach(function (d) {
+	      position.push(m_this.position()(d));
+	      if (setMax || setMin) {
 	        intensity = m_this.intensity()(d);
-	        if (!m_maxIntensity && !m_minIntensity) {
-	          m_maxIntensity = m_minIntensity = intensity;
-	        } else {
-	          if (intensity > m_maxIntensity) {
-	            m_maxIntensity = intensity;
-	          }
-	          if (intensity < m_minIntensity) {
-	            m_minIntensity = intensity;
-	          }
+	        if (m_maxIntensity === null || m_maxIntensity === undefined) {
+	          m_maxIntensity = intensity;
 	        }
-	      });
+	        if (m_minIntensity === null || m_minIntensity === undefined) {
+	          m_minIntensity = intensity;
+	        }
+	        if (setMax && intensity > m_maxIntensity) {
+	          m_maxIntensity = intensity;
+	        }
+	        if (setMin && intensity < m_minIntensity) {
+	          m_minIntensity = intensity;
+	        }
+
+	      }
+	    });
+	    if (setMin && setMax && m_minIntensity === m_maxIntensity) {
+	      m_minIntensity -= 1;
 	    }
+	    m_gcsPosition = transform.transformCoordinates(
+	        m_this.gcs(), m_this.layer().map().gcs(), position);
 
 	    m_this.buildTime().modified();
 	    return m_this;
@@ -46628,7 +47499,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 229 */
+/* 228 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
@@ -46638,7 +47509,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Create a new instance of class vectorFeature
 	 *
-	 * @class
+	 * @class geo.vectorFeature
 	 * @extends geo.feature
 	 * @returns {geo.vectorFeature}
 	 */
@@ -46708,17 +47579,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    s_init.call(m_this, arg);
 
 	    var defaultStyle = $.extend(
-	        {},
-	        {
-	          strokeColor: 'black',
-	          strokeWidth: 2.0,
-	          strokeOpacity: 1.0,
-	          originStyle: 'none',
-	          endStyle: 'arrow',
-	          origin: {x: 0, y: 0, z: 0},
-	          delta: function (d) { return d; },
-	          scale: null // size scaling factor (null -> renderer decides)
-	        },
+	      {},
+	      {
+	        strokeColor: 'black',
+	        strokeWidth: 2.0,
+	        strokeOpacity: 1.0,
+	        originStyle: 'none',
+	        endStyle: 'arrow',
+	        origin: {x: 0, y: 0, z: 0},
+	        delta: function (d) { return d; },
+	        scale: null // size scaling factor (null -> renderer decides)
+	      },
 	      arg.style === undefined ? {} : arg.style
 	    );
 
@@ -46736,54 +47607,54 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
+/* 229 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = ("0.10.0");
+
+
+/***/ },
 /* 230 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = ("0.9.1");
+	module.exports = ("49720649e1585e43d139e7de6cb40ad2aed89c05");
 
 
 /***/ },
 /* 231 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = ("787d983116b809a7cff8eceba0a43a555c0581a9");
-
-
-/***/ },
-/* 232 */
-/***/ function(module, exports, __webpack_require__) {
-
 	var geo_event = __webpack_require__(125);
 	geo_event.d3 = {
-	  rescale: __webpack_require__(233)
+	  rescale: __webpack_require__(232)
 	};
 
 	/**
 	 * @namespace geo.d3
 	 */
 	module.exports = {
-	  graphFeature: __webpack_require__(234),
-	  lineFeature: __webpack_require__(235),
-	  object: __webpack_require__(236),
-	  pathFeature: __webpack_require__(238),
-	  planeFeature: __webpack_require__(239),
-	  pointFeature: __webpack_require__(240),
-	  renderer: __webpack_require__(241),
-	  tileLayer: __webpack_require__(242),
-	  uniqueID: __webpack_require__(237),
-	  vectorFeature: __webpack_require__(243)
+	  graphFeature: __webpack_require__(233),
+	  lineFeature: __webpack_require__(234),
+	  object: __webpack_require__(235),
+	  pathFeature: __webpack_require__(237),
+	  pointFeature: __webpack_require__(238),
+	  quadFeature: __webpack_require__(239),
+	  renderer: __webpack_require__(240),
+	  tileLayer: __webpack_require__(241),
+	  uniqueID: __webpack_require__(236),
+	  vectorFeature: __webpack_require__(242)
 	};
 
 
 /***/ },
-/* 233 */
+/* 232 */
 /***/ function(module, exports) {
 
 	module.exports = 'geo_d3_rescale';
 
 
 /***/ },
-/* 234 */
+/* 233 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
@@ -46832,7 +47703,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 235 */
+/* 234 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
@@ -46856,7 +47727,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  var d3 = __webpack_require__(132);
-	  var object = __webpack_require__(236);
+	  var object = __webpack_require__(235);
 	  var timestamp = __webpack_require__(129);
 	  var util = __webpack_require__(120);
 
@@ -46967,13 +47838,18 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	inherit(d3_lineFeature, lineFeature);
 
-	registerFeature('d3', 'line', d3_lineFeature);
+	// Now register it
+	var capabilities = {};
+	capabilities[lineFeature.capabilities.basic] = true;
+	capabilities[lineFeature.capabilities.multicolor] = false;
+
+	registerFeature('d3', 'line', d3_lineFeature, capabilities);
 
 	module.exports = d3_lineFeature;
 
 
 /***/ },
-/* 236 */
+/* 235 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
@@ -46992,7 +47868,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  'use strict';
 
 	  var object = __webpack_require__(5);
-	  var uniqueID = __webpack_require__(237);
+	  var uniqueID = __webpack_require__(236);
 
 	  // this is used to extend other geojs classes, so only generate
 	  // a new object when that is not the case... like if this === window
@@ -47048,7 +47924,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 237 */
+/* 236 */
 /***/ function(module, exports) {
 
 	var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz',
@@ -47075,12 +47951,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 238 */
+/* 237 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
 	var registerFeature = __webpack_require__(131).registerFeature;
-	var pathFeature = __webpack_require__(222);
+	var pathFeature = __webpack_require__(223);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -47100,7 +47976,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var $ = __webpack_require__(1);
 	  var d3 = __webpack_require__(132);
-	  var object = __webpack_require__(236);
+	  var object = __webpack_require__(235);
 	  var timestamp = __webpack_require__(129);
 
 	  arg = arg || {};
@@ -47211,164 +48087,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 239 */
+/* 238 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
 	var registerFeature = __webpack_require__(131).registerFeature;
-	var planeFeature = __webpack_require__(223);
-
-	//////////////////////////////////////////////////////////////////////////////
-	/**
-	 * Create a plane feature given a lower left corner point
-	 * and and upper right corner point
-	 *
-	 * @class geo.d3.planeFeature
-	 * @extends geo.planeFeature
-	* @param lowerleft
-	 * @param upperright
-	 * @returns {geo.d3.planeFeature}
-	 */
-	//////////////////////////////////////////////////////////////////////////////
-	var d3_planeFeature = function (arg) {
-	  'use strict';
-	  if (!(this instanceof d3_planeFeature)) {
-	    return new d3_planeFeature(arg);
-	  }
-
-	  var object = __webpack_require__(236);
-	  var timestamp = __webpack_require__(129);
-
-	  planeFeature.call(this, arg);
-	  object.call(this);
-
-	  var m_this = this,
-	      m_style = {},
-	      s_update = this._update,
-	      s_init = this._init,
-	      m_buildTime = timestamp();
-
-	  //////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Normalize a coordinate as an object {x: ..., y: ...}
-	   *
-	   * @private
-	   * @returns {Object}
-	   */
-	  //////////////////////////////////////////////////////////////////////////////
-	  function normalize(pt) {
-	    if (Array.isArray(pt)) {
-	      return {
-	        x: pt[0],
-	        y: pt[1]
-	      };
-	    }
-	    return pt;
-	  }
-
-	  //////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Build the feature object and pass to the renderer for drawing.
-	   *
-	   * @private
-	   * @returns {geo.d3.planeFeature}
-	   */
-	  //////////////////////////////////////////////////////////////////////////////
-	  this._build = function () {
-	    var ul = normalize(m_this.upperLeft()),
-	        lr = normalize(m_this.lowerRight()),
-	        renderer = m_this.renderer(),
-	        s = m_this.style();
-
-	    delete s.fill_color;
-	    delete s.color;
-	    delete s.opacity;
-	    /*
-	    if (!s.screenCoordinates) {
-	      origin = renderer.layer().map().worldToDisplay(origin);
-	      ul = renderer.layer().map().worldToDisplay(ul);
-	      lr = renderer.layer().map().worldToDisplay(lr);
-	    }
-	    */
-	    m_style.id = m_this._d3id();
-	    m_style.style = s;
-	    m_style.attributes = {
-	      x: ul.x,
-	      y: ul.y,
-	      width: Math.abs(lr.x - ul.x),
-	      height: Math.abs(lr.y - ul.y),
-	      reference: s.reference
-	    };
-	    if (s.image) {
-	      m_style.append = 'image';
-	      m_style.attributes['xlink:href'] = s.image;
-	    } else {
-	      m_style.append = 'rect';
-	    }
-	    m_style.data = [0];
-	    m_style.classes = ['d3PlaneFeature'];
-	    if (s.parentId) {
-	      m_style.parentId = s.parentId;
-	    }
-
-	    renderer._drawFeatures(m_style);
-	    m_buildTime.modified();
-	    return m_this;
-	  };
-
-	  //////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Redraw the plane feature if necessary.
-	   *
-	   * @private
-	   * @returns {geo.d3.planeFeature}
-	   */
-	  //////////////////////////////////////////////////////////////////////////////
-	  this._update = function () {
-	    s_update.call(m_this);
-
-	    if (m_this.dataTime().getMTime() >= m_buildTime.getMTime()) {
-	      m_this._build();
-	    }
-	    return m_this;
-	  };
-
-	  //////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Initializes the plane feature style (over-riding the parent default).
-	   *
-	   * @private
-	   * @returns {geo.d3.planeFeature}
-	   */
-	  //////////////////////////////////////////////////////////////////////////////
-	  this._init = function (arg) {
-	    s_init.call(m_this, arg || {});
-	    m_this.style({
-	      stroke: function () { return false; },
-	      fill: function () { return true; },
-	      fillColor: function () { return {r: 0.3, g: 0.3, b: 0.3}; },
-	      fillOpacity: function () { return 0.5; }
-	    });
-	    return m_this;
-	  };
-
-	  this._init();
-	  return this;
-	};
-
-	inherit(d3_planeFeature, planeFeature);
-
-	registerFeature('d3', 'plane', d3_planeFeature);
-	module.exports = d3_planeFeature;
-
-
-/***/ },
-/* 240 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var inherit = __webpack_require__(4);
-	var registerFeature = __webpack_require__(131).registerFeature;
-	var pointFeature = __webpack_require__(225);
+	var pointFeature = __webpack_require__(224);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -47387,7 +48111,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new d3_pointFeature(arg);
 	  }
 
-	  var d3_object = __webpack_require__(236);
+	  var d3_object = __webpack_require__(235);
 	  var timestamp = __webpack_require__(129);
 
 	  arg = arg || {};
@@ -47489,7 +48213,250 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 241 */
+/* 239 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var inherit = __webpack_require__(4);
+	var registerFeature = __webpack_require__(131).registerFeature;
+	var quadFeature = __webpack_require__(218);
+
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Create a new instance of class quadFeature
+	 *
+	 * @class geo.d3.quadFeature
+	 * @param {Object} arg Options object
+	 * @extends geo.quadFeature
+	 * @returns {geo.d3.quadFeature}
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+	var d3_quadFeature = function (arg) {
+	  'use strict';
+	  if (!(this instanceof d3_quadFeature)) {
+	    return new d3_quadFeature(arg);
+	  }
+
+	  var $ = __webpack_require__(1);
+	  var d3 = __webpack_require__(132);
+	  var object = __webpack_require__(235);
+
+	  quadFeature.call(this, arg);
+	  object.call(this);
+
+	  var m_this = this,
+	      s_exit = this._exit,
+	      s_init = this._init,
+	      s_update = this._update,
+	      m_quads;
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Build this feature
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this._build = function () {
+	    if (!this.position()) {
+	      return;
+	    }
+	    var renderer = this.renderer(),
+	        map = renderer.layer().map();
+
+	    m_quads = this._generateQuads();
+
+	    var data = [];
+	    $.each(m_quads.clrQuads, function (idx, quad) {
+	      data.push({type: 'clr', quad: quad, zIndex: quad.pos[2]});
+	    });
+	    $.each(m_quads.imgQuads, function (idx, quad) {
+	      if (quad.image) {
+	        data.push({type: 'img', quad: quad, zIndex: quad.pos[2]});
+	      }
+	    });
+
+	    var feature = {
+	      id: this._d3id(),
+	      data: data,
+	      dataIndex: function (d) {
+	        return d.quad.quadId;
+	      },
+	      append: function (d) {
+	        var ns = this.namespaceURI,
+	            element = d.type === 'clr' ? 'polygon' : 'image';
+	        return (ns ? document.createElementNS(ns, element) :
+	                document.createElement(element));
+	      },
+	      attributes: {
+	        fill: function (d) {
+	          if (d.type === 'clr') {
+	            return d3.rgb(255 * d.quad.color.r, 255 * d.quad.color.g,
+	                          255 * d.quad.color.b);
+	          }
+	          /* set some styles here */
+	          if (d.quad.opacity !== 1) {
+	            d3.select(this).style('opacity', d.quad.opacity);
+	          }
+	        },
+	        height: function (d) {
+	          return d.type === 'clr' ? undefined : 1;
+	        },
+	        points: function (d) {
+	          if (d.type === 'clr' && !d.points) {
+	            var points = [], i;
+	            for (i = 0; i < d.quad.pos.length; i += 3) {
+	              var p = {
+	                x: d.quad.pos[i],
+	                y: d.quad.pos[i + 1],
+	                z: d.quad.pos[i + 2]
+	              };
+	              /* We don't use 'p = m_this.featureGcsToDisplay(p);' because the
+	               * quads have already been converted to the map's gcs (no longer
+	               * the feature's gcs or map's ingcs). */
+	              p = map.gcsToDisplay(p, null);
+	              p = renderer.baseToLocal(p);
+	              points.push('' + p.x + ',' + p.y);
+	            }
+	            d.points = (points[0] + ' ' + points[1] + ' ' + points[3] + ' ' +
+	                        points[2]);
+	          }
+	          return d.type === 'clr' ? d.points : undefined;
+	        },
+	        preserveAspectRatio: function (d) {
+	          return d.type === 'clr' ? undefined : 'none';
+	        },
+	        reference: function (d) {
+	          return d.quad.reference;
+	        },
+	        stroke: false,
+	        transform: function (d) {
+	          if (d.type === 'img' && d.quad.image && !d.svgTransform) {
+	            var pos = [], area, maxarea = -1, maxv, i, imgscale,
+	                imgw = d.quad.image.width, imgh = d.quad.image.height;
+	            for (i = 0; i < d.quad.pos.length; i += 3) {
+	              var p = {
+	                x: d.quad.pos[i],
+	                y: d.quad.pos[i + 1],
+	                z: d.quad.pos[i + 2]
+	              };
+	              /* We don't use 'p = m_this.featureGcsToDisplay(p);' because the
+	               * quads have already been converted to the map's gcs (no longer
+	               * the feature's gcs or map's ingcs). */
+	              p = map.gcsToDisplay(p, null);
+	              p = renderer.baseToLocal(p);
+	              pos.push(p);
+	            }
+	            /* We can only fit three corners of the quad to the image, but we
+	             * get to pick which three.  We choose to always include the
+	             * largest of the triangles formed by a set of three vertices.  The
+	             * image is always rendered as a parallelogram, so it may be larger
+	             * than desired, and, for convex quads, miss some of the intended
+	             * area. */
+	            for (i = 0; i < 4; i += 1) {
+	              area = Math.abs(
+	                pos[(i + 1) % 4].x * (pos[(i + 2) % 4].y - pos[(i + 3) % 4].y) +
+	                pos[(i + 2) % 4].x * (pos[(i + 3) % 4].y - pos[(i + 1) % 4].y) +
+	                pos[(i + 3) % 4].x * (pos[(i + 1) % 4].y - pos[(i + 2) % 4].y)) / 2;
+	              if (area > maxarea) {
+	                maxarea = area;
+	                maxv = i;
+	              }
+	            }
+	            d.svgTransform = [
+	              maxv === 3 || maxv === 2 ? pos[1].x - pos[0].x : pos[3].x - pos[2].x,
+	              maxv === 3 || maxv === 2 ? pos[1].y - pos[0].y : pos[3].y - pos[2].y,
+	              maxv === 0 || maxv === 2 ? pos[1].x - pos[3].x : pos[0].x - pos[2].x,
+	              maxv === 0 || maxv === 2 ? pos[1].y - pos[3].y : pos[0].y - pos[2].y,
+	              maxv === 2 ? pos[3].x + pos[0].x - pos[1].x : pos[2].x,
+	              maxv === 2 ? pos[3].y + pos[0].y - pos[1].y : pos[2].y
+	            ];
+	            if (Math.abs(d.svgTransform[1] / imgw) < 1e-6 &&
+	                Math.abs(d.svgTransform[2] / imgh) < 1e-6) {
+	              imgscale = d.svgTransform[0] / imgw;
+	              d.svgTransform[4] = Math.round(d.svgTransform[4] / imgscale) * imgscale;
+	              imgscale = d.svgTransform[3] / imgh;
+	              d.svgTransform[5] = Math.round(d.svgTransform[5] / imgscale) * imgscale;
+	            }
+	          }
+	          return ((d.type !== 'img' || !d.quad.image) ? undefined :
+	                  'matrix(' + d.svgTransform.join(' ') + ')');
+	        },
+	        width: function (d) {
+	          return d.type === 'clr' ? undefined : 1;
+	        },
+	        x: function (d) {
+	          return d.type === 'clr' ? undefined : 0;
+	        },
+	        'xlink:href': function (d) {
+	          return ((d.type === 'clr' || !d.quad.image) ? undefined :
+	                  d.quad.image.src);
+	        },
+	        y: function (d) {
+	          return d.type === 'clr' ? undefined : 0;
+	        }
+	      },
+	      style: {
+	        fillOpacity: function (d) {
+	          return d.type === 'clr' ? d.quad.opacity : undefined;
+	        }
+	      },
+	      onlyRenderNew: !this.style('previewColor') && !this.style('previewImage'),
+	      sortByZ: true,
+	      classes: ['d3QuadFeature']
+	    };
+	    renderer._drawFeatures(feature);
+
+	    this.buildTime().modified();
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Update
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this._update = function () {
+	    s_update.call(m_this);
+	    if (m_this.buildTime().getMTime() <= m_this.dataTime().getMTime() ||
+	        m_this.buildTime().getMTime() < m_this.getMTime()) {
+	      m_this._build();
+	    }
+	    return m_this;
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Initialize
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this._init = function () {
+	    s_init.call(m_this, arg);
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Destroy
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this._exit = function () {
+	    s_exit.call(m_this);
+	  };
+
+	  m_this._init(arg);
+	  return this;
+	};
+
+	inherit(d3_quadFeature, quadFeature);
+
+	// Now register it
+	var capabilities = {};
+	capabilities[quadFeature.capabilities.color] = true;
+	capabilities[quadFeature.capabilities.image] = true;
+	capabilities[quadFeature.capabilities.imageFull] = false;
+
+	registerFeature('d3', 'quad', d3_quadFeature, capabilities);
+	module.exports = d3_quadFeature;
+
+
+/***/ },
+/* 240 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
@@ -47509,10 +48476,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  'use strict';
 
 	  var d3 = __webpack_require__(132);
-	  var object = __webpack_require__(236);
+	  var object = __webpack_require__(235);
 	  var util = __webpack_require__(120);
 	  var geo_event = __webpack_require__(125);
-	  var d3Rescale = __webpack_require__(233);
+	  var d3Rescale = __webpack_require__(232);
 
 	  if (!(this instanceof d3Renderer)) {
 	    return new d3Renderer(arg);
@@ -47534,6 +48501,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_diagonal = null,
 	      m_scale = 1,
 	      m_transform = {dx: 0, dy: 0, rx: 0, ry: 0, rotation: 0},
+	      m_renderAnimFrameRef = null,
+	      m_renderIds = {},
+	      m_removeIds = {},
 	      m_svg = null,
 	      m_defs = null;
 
@@ -47572,13 +48542,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	      }
 	      return c;
-	    };
-	  };
-
-	  this._convertPosition = function (f) {
-	    f = util.ensureFunction(f);
-	    return function () {
-	      return m_this.layer().map().worldToDisplay(f.apply(m_this, arguments));
 	    };
 	  };
 
@@ -47701,37 +48664,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return;
 	    }
 
-	    var layer = m_this.layer(),
-	        map = layer.map(),
+	    var layer = m_this.layer();
+
+	    var map = layer.map(),
 	        upperLeft = map.gcsToDisplay(m_corners.upperLeft, null),
 	        lowerRight = map.gcsToDisplay(m_corners.lowerRight, null),
 	        center = map.gcsToDisplay(m_corners.center, null),
 	        group = getGroup(),
-	        canvas = m_this.canvas(),
 	        dx, dy, scale, rotation, rx, ry;
 
-	    if (canvas.attr('scale') !== null) {
-	      scale = parseFloat(canvas.attr('scale') || 1);
-	      rx = (parseFloat(canvas.attr('dx') || 0) +
-	            parseFloat(canvas.attr('offsetx') || 0));
-	      ry = (parseFloat(canvas.attr('dy') || 0) +
-	            parseFloat(canvas.attr('offsety') || 0));
-	      rotation = parseFloat(canvas.attr('rotation') || 0);
-	      dx = scale * rx + map.size().width / 2;
-	      dy = scale * ry + map.size().height / 2;
-	    } else {
-	      scale = Math.sqrt(
-	        Math.pow(lowerRight.y - upperLeft.y, 2) +
-	        Math.pow(lowerRight.x - upperLeft.x, 2)) / m_diagonal;
-	      // calculate the translation
-	      rotation = map.rotation();
-	      rx = -m_width / 2;
-	      ry = -m_height / 2;
-	      dx = scale * rx + center.x;
-	      dy = scale * ry + center.y;
-	    }
+	    scale = Math.sqrt(
+	      Math.pow(lowerRight.y - upperLeft.y, 2) +
+	      Math.pow(lowerRight.x - upperLeft.x, 2)) / m_diagonal;
+	    // calculate the translation
+	    rotation = map.rotation();
+	    rx = -m_width / 2;
+	    ry = -m_height / 2;
+	    dx = scale * rx + center.x;
+	    dy = scale * ry + center.y;
 
 	    // set the group transform property
+	    if (!rotation) {
+	      dx = Math.round(dx);
+	      dy = Math.round(dy);
+	    }
 	    var transform = 'matrix(' + [scale, 0, 0, scale, dx, dy].join() + ')';
 	    if (rotation) {
 	      transform += ' rotate(' + [
@@ -47937,6 +48893,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_svg = undefined;
 	    m_defs.remove();
 	    m_defs = undefined;
+	    m_renderIds = {};
+	    m_removeIds = {};
 	    s_exit();
 	  };
 
@@ -47959,11 +48917,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	   *  {
 	   *    id:         A unique string identifying the feature.
 	   *    data:       Array of data objects used in a d3 data method.
-	   *    index:      A function that returns a unique id for each data element.
+	   *    dataIndex:  A function that returns a unique id for each data element.
+	   *    defs:       If set, a dictionary with values to render in the defs
+	   *                section.  This can contain data, index, append, attributes,
+	   *                classes, style, and enter.  enter is a function that is
+	   *                called on new elements.
 	   *    style:      An object containing element CSS styles.
 	   *    attributes: An object containing element attributes.
 	   *    classes:    An array of classes to add to the elements.
 	   *    append:     The element type as used in d3 append methods.
+	   *    onlyRenderNew: a boolean.  If true, features only get attributes and
+	   *                styles set when new.  If false, features always have
+	   *                attributes and styles updated.
+	   *    sortByZ:    a boolean.  If true, sort features by the d.zIndex.
 	   *    parentId:   If set, the group ID of the parent element.
 	   *  }
 	   */
@@ -47976,6 +48942,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      attributes: arg.attributes,
 	      classes: arg.classes,
 	      append: arg.append,
+	      onlyRenderNew: arg.onlyRenderNew,
+	      sortByZ: arg.sortByZ,
 	      parentId: arg.parentId
 	    };
 	    return m_this.__render(arg.id, arg.parentId);
@@ -47997,18 +48965,56 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	      return m_this;
 	    }
+	    if (parentId) {
+	      m_this._renderFeature(id, parentId);
+	    } else {
+	      m_renderIds[id] = true;
+	      if (m_renderAnimFrameRef === null) {
+	        m_renderAnimFrameRef = window.requestAnimationFrame(m_this._renderFrame);
+	      }
+	    }
+	  };
+
+	  this._renderFrame = function () {
+	    var id;
+	    for (id in m_removeIds) {
+	      m_this.select(id).remove();
+	      m_defs.selectAll('.' + id).remove();
+	    }
+	    m_removeIds = {};
+	    var ids = m_renderIds;
+	    m_renderIds = {};
+	    m_renderAnimFrameRef = null;
+	    for (id in ids) {
+	      if (ids.hasOwnProperty(id)) {
+	        m_this._renderFeature(id);
+	      }
+	    }
+	  };
+
+	  this._renderFeature = function (id, parentId) {
+	    if (!m_features[id]) {
+	      return;
+	    }
 	    var data = m_features[id].data,
 	        index = m_features[id].index,
 	        style = m_features[id].style,
 	        attributes = m_features[id].attributes,
 	        classes = m_features[id].classes,
 	        append = m_features[id].append,
-	        selection = m_this.select(id, parentId).data(data, index);
-	    selection.enter().append(append);
+	        selection = m_this.select(id, parentId).data(data, index),
+	        entries, rendersel;
+	    entries = selection.enter().append(append);
 	    selection.exit().remove();
-	    setAttrs(selection, attributes);
-	    selection.attr('class', classes.concat([id]).join(' '));
-	    setStyles(selection, style);
+	    rendersel = m_features[id].onlyRenderNew ? entries : selection;
+	    setAttrs(rendersel, attributes);
+	    rendersel.attr('class', classes.concat([id]).join(' '));
+	    setStyles(rendersel, style);
+	    if (entries.size() && m_features[id].sortByZ) {
+	      selection.sort(function (a, b) {
+	        return (a.zIndex || 0) - (b.zIndex || 0);
+	      });
+	    }
 	    return m_this;
 	  };
 
@@ -48027,8 +49033,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  */
 	  ////////////////////////////////////////////////////////////////////////////
 	  this._removeFeature = function (id) {
-	    m_this.select(id).remove();
+	    m_removeIds[id] = true;
+	    if (m_renderAnimFrameRef === null) {
+	      m_renderAnimFrameRef = window.requestAnimationFrame(m_this._renderFrame);
+	    }
 	    delete m_features[id];
+	    if (m_renderIds[id]) {
+	      delete m_renderIds[id];
+	    }
 	    return m_this;
 	  };
 
@@ -48093,7 +49105,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 242 */
+/* 241 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var registerLayerAdjustment = __webpack_require__(131).registerLayerAdjustment;
@@ -48101,134 +49113,83 @@ return /******/ (function(modules) { // webpackBootstrap
 	var d3_tileLayer = function () {
 	  'use strict';
 	  var m_this = this,
-	      s_update = this._update,
 	      s_init = this._init,
-	      $ = __webpack_require__(1),
-	      uniqueID = __webpack_require__(237);
+	      s_exit = this._exit,
+	      m_quadFeature,
+	      m_nextTileId = 0,
+	      m_tiles = [];
 
 	  this._drawTile = function (tile) {
 	    var bounds = m_this._tileBounds(tile),
-	        parentNode = m_this._getSubLayer(tile.index.level),
-	        offsetx = parseInt(parentNode.attr('offsetx') || 0, 10),
-	        offsety = parseInt(parentNode.attr('offsety') || 0, 10);
-	    tile.feature = m_this.createFeature(
-	      'plane', {drawOnAsyncResourceLoad: true})
-	      .origin([bounds.left - offsetx, bounds.top - offsety])
-	      .upperLeft([bounds.left - offsetx, bounds.top - offsety])
-	      .lowerRight([bounds.right - offsetx, bounds.bottom - offsety])
-	      .style({
-	        image: tile._url,
-	        opacity: 1,
-	        reference: tile.toString(),
-	        parentId: parentNode.attr('data-tile-layer-id')
-	      });
-	    /* Don't respond to geo events */
-	    tile.feature.geoTrigger = undefined;
-	    tile.feature._update();
+	        level = tile.index.level || 0,
+	        to = this._tileOffset(level),
+	        quad = {};
+	    quad.ul = this.fromLocal(this.fromLevel({
+	      x: bounds.left - to.x, y: bounds.top - to.y
+	    }, level), 0);
+	    quad.ll = this.fromLocal(this.fromLevel({
+	      x: bounds.left - to.x, y: bounds.bottom - to.y
+	    }, level), 0);
+	    quad.ur = this.fromLocal(this.fromLevel({
+	      x: bounds.right - to.x, y: bounds.top - to.y
+	    }, level), 0);
+	    quad.lr = this.fromLocal(this.fromLevel({
+	      x: bounds.right - to.x, y: bounds.bottom - to.y
+	    }, level), 0);
+	    quad.ul.z = quad.ll.z = quad.ur.z = quad.lr.z = level * 1e-5;
+	    m_nextTileId += 1;
+	    quad.id = m_nextTileId;
+	    tile.quadId = quad.id;
+	    quad.image = tile.image;
+	    quad.reference = tile.toString();
+	    m_tiles.push(quad);
+	    m_quadFeature.data(m_tiles);
+	    m_quadFeature._update();
 	    m_this.draw();
 	  };
 
-	  /**
-	   * Return the DOM element containing a level specific
-	   * layer.  This will create the element if it doesn't
-	   * already exist.
-	   * @param {number} level The zoom level of the layer to fetch
-	   * @return {DOM}
-	   */
-	  this._getSubLayer = function (level) {
-	    var node = m_this.canvas().select(
-	        'g[data-tile-layer="' + level.toFixed() + '"]');
-	    if (node.empty()) {
-	      node = m_this.canvas().append('g');
-	      var id = uniqueID();
-	      node.classed('group-' + id, true);
-	      node.classed('geo-tile-layer', true);
-	      node.attr('data-tile-layer', level.toFixed());
-	      node.attr('data-tile-layer-id', id);
+	  /* Remove the tile feature. */
+	  this._remove = function (tile) {
+	    if (tile.quadId !== undefined && m_quadFeature) {
+	      for (var i = 0; i < m_tiles.length; i += 1) {
+	        if (m_tiles[i].id === tile.quadId) {
+	          m_tiles.splice(i, 1);
+	          break;
+	        }
+	      }
+	      m_quadFeature.data(m_tiles);
+	      m_quadFeature._update();
+	      m_this.draw();
 	    }
-	    return node;
 	  };
 
 	  /**
-	   * Set sublayer transforms to align them with the given zoom level.
-	   * @param {number} level The target zoom level
-	   * @param {object} view The view bounds.  The top and left are used to
-	   *                      adjust the offset of tile layers.
-	   * @return {object} the x and y offsets for the current level.
+	   * Clean up the layer.
 	   */
-	  this._updateSubLayers = function (level, view) {
-	    var canvas = m_this.canvas(),
-	        lastlevel = parseInt(canvas.attr('lastlevel'), 10),
-	        lastx = parseInt(canvas.attr('lastoffsetx') || 0, 10),
-	        lasty = parseInt(canvas.attr('lastoffsety') || 0, 10);
-	    if (lastlevel === level && Math.abs(lastx - view.left) < 65536 &&
-	        Math.abs(lasty - view.top) < 65536) {
-	      return {x: lastx, y: lasty};
-	    }
-	    var to = this._tileOffset(level),
-	        x = parseInt(view.left, 10) + to.x,
-	        y = parseInt(view.top, 10) + to.y;
-	    var tileCache = m_this.cache._cache;
-	    $.each(canvas.selectAll('.geo-tile-layer')[0], function (idx, el) {
-	      var layer = parseInt($(el).attr('data-tile-layer'), 10),
-	          scale = Math.pow(2, level - layer);
-	      el = m_this._getSubLayer(layer);
-	      el.attr('transform', 'matrix(' + [scale, 0, 0, scale, 0, 0].join() + ')');
-	      /* x and y are the upper left of our view.  This is the zero-point for
-	       * offsets at the current level.  Other tile layers' offsets are scaled
-	       * by appropriate factors of 2.  We need to shift the tiles of each
-	       * layer by the appropriate amount (computed as dx and dy). */
-	      var layerx = parseInt(x / Math.pow(2, level - layer), 10),
-	          layery = parseInt(y / Math.pow(2, level - layer), 10),
-	          dx = layerx - parseInt(el.attr('offsetx') || 0, 10),
-	          dy = layery - parseInt(el.attr('offsety') || 0, 10);
-	      el.attr({offsetx: layerx, offsety: layery});
-	      /* We have to update the values stored in the tile features, too,
-	       * otherwise when d3 regenerates these features, the offsets will be
-	       * wrong. */
-	      $.each(tileCache, function (idx, tile) {
-	        if (tile._index.level === layer && tile.feature) {
-	          var f = tile.feature,
-	              o = f.origin(), ul = f.upperLeft(), lr = f.lowerRight();
-	          f.origin([o[0] - dx, o[1] - dy, o[2]]);
-	          f.upperLeft([ul[0] - dx, ul[1] - dy, ul[2]]);
-	          f.lowerRight([lr[0] - dx, lr[1] - dy, lr[2]]);
-	          f._update();
-	        }
-	      });
-	    });
-	    canvas.attr({lastoffsetx: x, lastoffsety: y, lastlevel: level});
-	    return {x: x, y: y};
+	  this._exit = function () {
+	    m_this.deleteFeature(m_quadFeature);
+	    m_quadFeature = null;
+	    m_tiles = [];
+	    s_exit.apply(m_this, arguments);
 	  };
 
 	  /* Initialize the tile layer.  This creates a series of sublayers so that
 	   * the different layers will stack in the proper order.
 	   */
 	  this._init = function () {
-	    var sublayer;
-
 	    s_init.apply(m_this, arguments);
-	    for (sublayer = 0; sublayer <= m_this._options.maxLevel; sublayer += 1) {
-	      m_this._getSubLayer(sublayer);
-	    }
+	    m_quadFeature = this.createFeature('quad', {
+	      previewColor: m_this._options.previewColor,
+	      previewImage: m_this._options.previewImage
+	    });
+	    m_quadFeature.geoTrigger = undefined;
+	    m_quadFeature.gcs(m_this._options.gcs || m_this.map().gcs());
+	    m_quadFeature.data(m_tiles);
+	    m_quadFeature._update();
 	  };
 
-	  /* When update is called, apply the transform to our renderer. */
-	  this._update = function () {
-	    s_update.apply(m_this, arguments);
-	    m_this.renderer()._setTransform();
-	  };
-
-	  /* Remove both the tile feature and an internal image element. */
-	  this._remove = function (tile) {
-	    if (tile.feature) {
-	      m_this.deleteFeature(tile.feature);
-	      tile.feature = null;
-	    }
-	    if (tile.image) {
-	      $(tile.image).remove();
-	    }
-	  };
+	  this._getSubLayer = function () {};
+	  this._updateSubLayers = undefined;
 	};
 
 	registerLayerAdjustment('d3', 'tile', d3_tileLayer);
@@ -48236,12 +49197,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 243 */
+/* 242 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
 	var registerFeature = __webpack_require__(131).registerFeature;
-	var vectorFeature = __webpack_require__(229);
+	var vectorFeature = __webpack_require__(228);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -48259,7 +49220,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new d3_vectorFeature(arg);
 	  }
 
-	  var object = __webpack_require__(236);
+	  var object = __webpack_require__(235);
 	  var timestamp = __webpack_require__(129);
 	  var d3 = __webpack_require__(132);
 
@@ -48544,29 +49505,28 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 244 */
+/* 243 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
 	 * @namespace geo.gl
 	 */
 	module.exports = {
-	  choroplethFeature: __webpack_require__(245),
-	  contourFeature: __webpack_require__(246),
+	  choroplethFeature: __webpack_require__(244),
+	  contourFeature: __webpack_require__(245),
 	  ellipsoid: __webpack_require__(247),
 	  geomFeature: __webpack_require__(248),
 	  lineFeature: __webpack_require__(249),
-	  planeFeature: __webpack_require__(250),
-	  pointFeature: __webpack_require__(251),
-	  polygonFeature: __webpack_require__(252),
-	  quadFeature: __webpack_require__(254),
-	  tileLayer: __webpack_require__(255),
-	  vglRenderer: __webpack_require__(256)
+	  pointFeature: __webpack_require__(250),
+	  polygonFeature: __webpack_require__(251),
+	  quadFeature: __webpack_require__(253),
+	  tileLayer: __webpack_require__(254),
+	  vglRenderer: __webpack_require__(255)
 	};
 
 
 /***/ },
-/* 245 */
+/* 244 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
@@ -48600,6 +49560,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_gl_polygons = null,
 	      s_exit = this._exit,
 	      s_init = this._init,
+	      s_draw = this.draw,
 	      s_update = this._update;
 
 	  /* Create the choropleth.  This calls the base class to generate the contours,
@@ -48608,6 +49569,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	  function createGLChoropleth() {
 	    return m_this.createChoropleth();
 	  }
+
+	  this.draw = function () {
+	    m_this._update();
+	    if (m_gl_polygons) {
+	      for (var idx = 0; idx < m_gl_polygons.length; idx += 1) {
+	        m_gl_polygons[idx].draw();
+	      }
+	    }
+	    s_draw();
+	    return m_this;
+	  };
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
@@ -48684,7 +49656,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 246 */
+/* 245 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
@@ -48712,6 +49684,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var vgl = __webpack_require__(6);
 	  var transform = __webpack_require__(147);
 	  var util = __webpack_require__(120);
+	  var object = __webpack_require__(246);
+
+	  object.call(this);
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
@@ -48981,6 +49956,51 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
+/* 246 */
+/***/ function(module, exports, __webpack_require__) {
+
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * VGL specific subclass of object which rerenders when the object is drawn.
+	 * @class geo.gl.object
+	 * @extends geo.sceneObject
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+
+	var gl_object = function (arg) {
+	  'use strict';
+
+	  var object = __webpack_require__(5);
+
+	  // this is used to extend other geojs classes, so only generate
+	  // a new object when that is not the case... like if this === window
+	  if (!(this instanceof object)) {
+	    return new gl_object(arg);
+	  }
+
+	  var m_this = this,
+	      s_draw = this.draw;
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	  *  Redraw the object.
+	  */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.draw = function () {
+	    m_this._update({mayDelay: true});
+	    m_this.renderer()._render();
+	    s_draw();
+	    return m_this;
+	  };
+
+	  return this;
+	};
+
+	module.exports = gl_object;
+
+
+
+/***/ },
 /* 247 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -49212,6 +50232,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  arg = arg || {};
 	  geomFeature.call(this, arg);
+	  var object = __webpack_require__(246);
+
+	  object.call(this);
 
 	  // Initialize
 	  var m_this = this,
@@ -49340,6 +50363,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var vgl = __webpack_require__(6);
 	  var transform = __webpack_require__(147);
 	  var util = __webpack_require__(120);
+	  var object = __webpack_require__(246);
+
+	  object.call(this);
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
@@ -49376,14 +50402,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	          'uniform float pixelWidth;',
 	          'uniform float aspect;',
 
-	          'varying vec3 strokeColorVar;',
-	          'varying float strokeWidthVar;',
-	          'varying float strokeOpacityVar;',
+	          'varying vec4 strokeColorVar;',
 
 	          'void main(void)',
 	          '{',
-	      /* If any vertex has been deliberately set to a negative opacity,
-	       * skip doing computations on it. */
+	          /* If any vertex has been deliberately set to a negative opacity,
+	           * skip doing computations on it. */
 	          '  if (strokeOpacity < 0.0) {',
 	          '    gl_Position = vec4(2, 2, 0, 1);',
 	          '    return;',
@@ -49401,9 +50425,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          '  if (worldPrev.w != 0.0) {',
 	          '    worldPrev = worldPrev/worldPrev.w;',
 	          '  }',
-	          '  strokeColorVar = strokeColor;',
-	          '  strokeWidthVar = strokeWidth;',
-	          '  strokeOpacityVar = strokeOpacity;',
+	          '  strokeColorVar = vec4(strokeColor, strokeOpacity);',
 	          '  vec2 deltaNext = worldNext.xy - worldPos.xy;',
 	          '  vec2 deltaPrev = worldPos.xy - worldPrev.xy;',
 	          '  float angleNext = 0.0, anglePrev = 0.0;',
@@ -49413,6 +50435,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	          '  else  anglePrev = atan(deltaPrev.y / aspect, deltaPrev.x);',
 	          '  if (deltaNext.xy == vec2(0.0, 0.0)) angleNext = anglePrev;',
 	          '  float angle = (anglePrev + angleNext) / 2.0;',
+	          '  if (abs(anglePrev - angleNext) >= PI)',
+	          '    angle += PI;',
 	          '  float cosAngle = cos(anglePrev - angle);',
 	          '  if (cosAngle < 0.1) { cosAngle = sign(cosAngle) * 1.0; angle = 0.0; }',
 	          '  float distance = (offset * strokeWidth * pixelWidth) /',
@@ -49432,11 +50456,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	          '#ifdef GL_ES',
 	          '  precision highp float;',
 	          '#endif',
-	          'varying vec3 strokeColorVar;',
-	          'varying float strokeWidthVar;',
-	          'varying float strokeOpacityVar;',
+	          'varying vec4 strokeColorVar;',
 	          'void main () {',
-	          '  gl_FragColor = vec4 (strokeColorVar, strokeOpacityVar);',
+	          '  gl_FragColor = strokeColorVar;',
 	          '}'
 	        ].join('\n'),
 	        shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
@@ -49521,7 +50543,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            nextBuf[dest3 + 1] = position[v.next + 1];
 	            nextBuf[dest3 + 2] = position[v.next + 2];
 	            offsetBuf[dest] = order[k][1];
-	            /* We can ignore the indicies (they will all be zero) */
+	            /* We can ignore the indices (they will all be zero) */
 	            strokeWidthBuf[dest] = v.strokeWidth;
 	            strokeColorBuf[dest3] = v.strokeColor.r;
 	            strokeColorBuf[dest3 + 1] = v.strokeColor.g;
@@ -49713,7 +50735,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	inherit(gl_lineFeature, lineFeature);
 
 	// Now register it
-	registerFeature('vgl', 'line', gl_lineFeature);
+	var capabilities = {};
+	capabilities[lineFeature.capabilities.basic] = true;
+	capabilities[lineFeature.capabilities.multicolor] = true;
+
+	// Now register it
+	registerFeature('vgl', 'line', gl_lineFeature, capabilities);
 
 	module.exports = gl_lineFeature;
 
@@ -49724,193 +50751,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var inherit = __webpack_require__(4);
 	var registerFeature = __webpack_require__(131).registerFeature;
-	var planeFeature = __webpack_require__(223);
-
-	//////////////////////////////////////////////////////////////////////////////
-	/**
-	 * Create a plane feature given a lower left corner point
-	 * and and upper right corner point
-	 * @class geo.gl.planeFeature
-	 * @extends geo.planeFeature
-	 * @param lowerleft
-	 * @param upperright
-	 * @returns {geo.gl.planeFeature}
-	 */
-	//////////////////////////////////////////////////////////////////////////////
-	var gl_planeFeature = function (arg) {
-	  'use strict';
-	  if (!(this instanceof gl_planeFeature)) {
-	    return new gl_planeFeature(arg);
-	  }
-	  planeFeature.call(this, arg);
-
-	  var transform = __webpack_require__(147);
-	  var vgl = __webpack_require__(6);
-
-	  var m_this = this,
-	      s_exit = this._exit,
-	      m_actor = null,
-	      m_onloadCallback = arg.onload === undefined ? null : arg.onload;
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Gets the coordinates for this plane
-	   *
-	   * @returns {Array} [[origin], [upper left] [lower right]]
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this.coords = function () {
-	    return [m_this.origin(), m_this.upperLeft(), m_this.lowerRight()];
-	  };
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Build this feature
-	   *
-	   * @override
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this._build = function () {
-	    var or = m_this.origin(),
-	        ul = m_this.upperLeft(),
-	        lr = m_this.lowerRight(),
-	        /// img could be a source or an Image
-	        img = m_this.style().image,
-	        image = null,
-	        texture = null,
-	        gcs = m_this.gcs(),
-	        map_gcs = m_this.layer().map().gcs();
-
-	    if (gcs !== map_gcs) {
-	      or = transform.transformCoordinates(gcs, map_gcs, or);
-	      ul = transform.transformCoordinates(gcs, map_gcs, ul);
-	      lr = transform.transformCoordinates(gcs, map_gcs, lr);
-	    }
-
-	    m_this.buildTime().modified();
-
-	    if (m_actor) {
-	      m_this.renderer().contextRenderer().removeActor(m_actor);
-	    }
-
-	    if (img && img instanceof Image) {
-	      image = img;
-	    } else if (img) {
-	      image = new Image();
-	      image.src = img;
-	    }
-
-	    if (!image) {
-	      m_actor = vgl.utils.createPlane(or[0], or[1], or[2],
-	        ul[0], ul[1], ul[2],
-	        lr[0], lr[1], lr[2]);
-
-	      m_actor.material().shaderProgram().uniform('opacity').set(
-	        m_this.style().opacity !== undefined ? m_this.style().opacity : 1);
-
-	      m_this.renderer().contextRenderer().addActor(m_actor);
-
-	    } else {
-	      m_actor = vgl.utils.createTexturePlane(or[0], or[1], or[2],
-	        lr[0], lr[1], lr[2],
-	        ul[0], ul[1], ul[2], true);
-
-	      m_actor.material().shaderProgram().uniform('opacity').set(
-	        m_this.style().opacity !== undefined ? m_this.style().opacity : 1);
-
-	      texture = vgl.texture();
-	      m_this.visible(false);
-
-	      m_this.renderer().contextRenderer().addActor(m_actor);
-
-	      /* An image is already loaded if .complete is true and .naturalWidth
-	       * and .naturalHeight are defined and non-zero (not falsy seems to be
-	       * sufficient). */
-	      if (image.complete && image.naturalWidth && image.naturalHeight) {
-	        texture.setImage(image);
-	        m_actor.material().addAttribute(texture);
-	        /// NOTE Currently we assume that we want to show the feature as
-	        /// soon as the image gets loaded. However, there might be a case
-	        /// where we want to lock down the visibility. We will deal with that
-	        /// later.
-	        m_this.visible(true);
-
-	        if (m_onloadCallback) {
-	          m_onloadCallback.call(m_this);
-	        }
-	      } else {
-	        image.onload = function () {
-	          texture.setImage(image);
-	          m_actor.material().addAttribute(texture);
-	          /// NOTE Currently we assume that we want to show the feature as
-	          /// soon as the image gets loaded. However, there might be a case
-	          /// where we want to lock down the visibility. We will deal with that
-	          /// later.
-	          m_this.visible(true);
-
-	          if (m_onloadCallback) {
-	            m_onloadCallback.call(m_this);
-	          }
-
-	          if (m_this.drawOnAsyncResourceLoad()) {
-	            m_this._update();
-	            m_this.layer().draw();
-	          }
-	        };
-	      }
-	    }
-	  };
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Update
-	   *
-	   * @override
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this._update = function () {
-	    if (m_this.buildTime().getMTime() <= m_this.dataTime().getMTime()) {
-	      m_this._build();
-	    }
-
-	    if (m_this.updateTime().getMTime() <= m_this.getMTime()) {
-	      m_actor.setVisible(m_this.visible());
-	      m_actor.material().setBinNumber(m_this.bin());
-	      m_actor.material().shaderProgram().uniform('opacity').set(
-	        m_this.style().opacity !== undefined ? m_this.style().opacity : 1);
-	    }
-
-	    m_this.updateTime().modified();
-	  };
-
-	  ////////////////////////////////////////////////////////////////////////////
-	  /**
-	   * Destroy
-	   */
-	  ////////////////////////////////////////////////////////////////////////////
-	  this._exit = function () {
-	    m_this.renderer().contextRenderer().removeActor(m_actor);
-	    s_exit();
-	  };
-
-	  return this;
-	};
-
-	inherit(gl_planeFeature, planeFeature);
-
-	// Now register it
-	registerFeature('vgl', 'plane', gl_planeFeature);
-
-	module.exports = gl_planeFeature;
-
-
-/***/ },
-/* 251 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var inherit = __webpack_require__(4);
-	var registerFeature = __webpack_require__(131).registerFeature;
-	var pointFeature = __webpack_require__(225);
+	var pointFeature = __webpack_require__(224);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -49932,6 +50773,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var vgl = __webpack_require__(6);
 	  var transform = __webpack_require__(147);
 	  var util = __webpack_require__(120);
+	  var object = __webpack_require__(246);
+
+	  object.call(this);
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
@@ -50452,12 +51296,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 252 */
+/* 251 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
 	var registerFeature = __webpack_require__(131).registerFeature;
-	var polygonFeature = __webpack_require__(224);
+	var polygonFeature = __webpack_require__(226);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -50477,8 +51321,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  polygonFeature.call(this, arg);
 
 	  var vgl = __webpack_require__(6);
-	  var earcut = __webpack_require__(253);
+	  var earcut = __webpack_require__(252);
 	  var transform = __webpack_require__(147);
+	  var util = __webpack_require__(120);
+	  var object = __webpack_require__(246);
+
+	  object.call(this);
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
@@ -50490,8 +51338,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      m_actor = vgl.actor(),
 	      m_mapper = vgl.mapper(),
 	      m_material = vgl.material(),
+	      m_geometry,
 	      s_init = this._init,
-	      s_update = this._update;
+	      s_update = this._update,
+	      m_updateAnimFrameRef;
 
 	  function createVertexShader() {
 	    var vertexShaderSource = [
@@ -50500,9 +51350,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          'attribute float fillOpacity;',
 	          'uniform mat4 modelViewMatrix;',
 	          'uniform mat4 projectionMatrix;',
-	          'uniform float pixelWidth;',
-	          'varying vec3 fillColorVar;',
-	          'varying float fillOpacityVar;',
+	          'varying vec4 fillColorVar;',
 
 	          'void main(void)',
 	          '{',
@@ -50510,8 +51358,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          '  if (clipPos.w != 0.0) {',
 	          '    clipPos = clipPos/clipPos.w;',
 	          '  }',
-	          '  fillColorVar = fillColor;',
-	          '  fillOpacityVar = fillOpacity;',
+	          '  fillColorVar = vec4(fillColor, fillOpacity);',
 	          '  gl_Position = clipPos;',
 	          '}'
 	        ].join('\n'),
@@ -50525,10 +51372,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	          '#ifdef GL_ES',
 	          '  precision highp float;',
 	          '#endif',
-	          'varying vec3 fillColorVar;',
-	          'varying float fillOpacityVar;',
+	          'varying vec4 fillColorVar;',
 	          'void main () {',
-	          '  gl_FragColor = vec4 (fillColorVar, fillOpacityVar);',
+	          '  gl_FragColor = fillColorVar;',
 	          '}'
 	        ].join('\n'),
 	        shader = new vgl.shader(vgl.GL.FRAGMENT_SHADER);
@@ -50536,122 +51382,205 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return shader;
 	  }
 
-	  function createGLPolygons() {
-	    var posFunc = null,
-	        fillColorFunc = null,
-	        fillOpacityFunc = null,
-	        buffers = vgl.DataBuffers(1024),
-	        sourcePositions = vgl.sourceDataP3fv(),
-	        sourceFillColor =
-	          vgl.sourceDataAnyfv(3, vgl.vertexAttributeKeysIndexed.Two),
-	        sourceFillOpacity =
-	          vgl.sourceDataAnyfv(1, vgl.vertexAttributeKeysIndexed.Three),
-	        trianglePrimitive = vgl.triangles(),
-	        geom = vgl.geometryData(),
-	        triangles = [],
+	  /**
+	   * Create and style the triangles need to render the polygons.
+	   *
+	   * There are several optimizations to do less work when possible.  If only
+	   * styles have changed, the triangulation is not recomputed, nor is the
+	   * geometry re-transformed.  If styles use static values (rather than
+	   * functions), they are only calculated once.  If a polygon reports that it
+	   * has a uniform style, then styles are only calculated once for that polygon
+	   * (the uniform property may be different per polygon or per update).
+	   * Array.map is slower in Chrome that using a loop, so loops are used in
+	   * places that would be conceptually served by maps.
+	   *
+	   * @memberof geo.gl.polygonFeature
+	   * @param {boolean} onlyStyle if true, use the existing geoemtry and just
+	   *    recalculate the style.
+	   */
+	  function createGLPolygons(onlyStyle) {
+	    var posBuf, posFunc,
+	        fillColor, fillColorFunc, fillColorVal,
+	        fillOpacity, fillOpacityFunc, fillOpacityVal,
+	        fillFunc, fillVal,
+	        uniformPolyFunc, uniform,
+	        indices,
+	        items = [],
 	        target_gcs = m_this.gcs(),
 	        map_gcs = m_this.layer().map().gcs(),
-	        color;
+	        numPts = 0,
+	        geom = m_mapper.geometryData(),
+	        color, opacity, fill, d, d3, vertices, i, j, k, n,
+	        record, item, itemIndex, original;
 
-	    posFunc = m_this.position();
 	    fillColorFunc = m_this.style.get('fillColor');
+	    fillColorVal = util.isFunction(m_this.style('fillColor')) ? undefined : fillColorFunc();
 	    fillOpacityFunc = m_this.style.get('fillOpacity');
+	    fillOpacityVal = util.isFunction(m_this.style('fillOpacity')) ? undefined : fillOpacityFunc();
+	    fillFunc = m_this.style.get('fill');
+	    fillVal = util.isFunction(m_this.style('fill')) ? undefined : fillFunc();
+	    uniformPolyFunc = m_this.style.get('uniformPolygon');
 
-	    buffers.create('pos', 3);
-	    buffers.create('indices', 1);
-	    buffers.create('fillColor', 3);
-	    buffers.create('fillOpacity', 1);
+	    if (!onlyStyle) {
+	      posFunc = m_this.position();
+	      m_this.data().forEach(function (item, itemIndex) {
+	        var polygon, outer, geometry, c;
 
-	    m_this.data().forEach(function (item, itemIndex) {
-	      var polygon, geometry, numPts, start, i, vertex, j;
+	        polygon = m_this.polygon()(item, itemIndex);
+	        outer = polygon.outer || (polygon instanceof Array ? polygon : []);
 
-	      function position(d, i) {
-	        var c = posFunc(d, i, item, itemIndex);
-	        return [c.x, c.y, c.z || 0];
-	      }
+	        /* expand to an earcut polygon geometry.  We had been using a map call,
+	         * but using loops is much faster in Chrome (4 versus 33 ms for one
+	         * test). */
+	        geometry = new Array(outer.length * 3);
+	        for (i = d3 = 0; i < outer.length; i += 1, d3 += 3) {
+	          c = posFunc(outer[i], i, item, itemIndex);
+	          geometry[d3] = c.x;
+	          geometry[d3 + 1] = c.y;
+	          geometry[d3 + 2] = c.z || 0;
+	        }
+	        geometry = {vertices: geometry, dimensions: 3, holes: []};
+	        original = outer;
 
-	      polygon = m_this.polygon()(item, itemIndex);
-	      polygon.outer = polygon.outer || [];
-	      polygon.inner = polygon.inner || [];
+	        if (polygon.inner) {
+	          polygon.inner.forEach(function (hole) {
+	            original = original.concat(hole);
+	            geometry.holes.push(d3 / 3);
+	            for (i = 0; i < hole.length; i += 1, d3 += 3) {
+	              c = posFunc(hole[i], i, item, itemIndex);
+	              geometry.vertices[d3] = c.x;
+	              geometry.vertices[d3 + 1] = c.y;
+	              geometry.vertices[d3 + 2] = c.z || 0;
+	            }
+	          });
+	        }
 
-	      // expand to a geojson polygon geometry
-	      geometry = [(polygon.outer || []).map(position)];
-	      (polygon.inner || []).forEach(function (hole) {
-	        geometry.push(hole.map(position));
+	        // tranform to map gcs
+	        geometry.vertices = transform.transformCoordinates(
+	          target_gcs,
+	          map_gcs,
+	          geometry.vertices,
+	          geometry.dimensions
+	        );
+
+	        record = {
+	          // triangulate
+	          triangles: earcut(geometry.vertices, geometry.holes, geometry.dimensions),
+	          vertices: geometry.vertices,
+	          original: original,
+	          item: item,
+	          itemIndex: itemIndex
+	        };
+	        items.push(record);
+	        numPts += record.triangles.length;
 	      });
-
-	      // convert to an earcut geometry
-	      geometry = earcut.flatten(geometry);
-
-	      // tranform to map gcs
-	      geometry.vertices = transform.transformCoordinates(
-	        target_gcs,
-	        map_gcs,
-	        geometry.vertices,
-	        geometry.dimensions
-	      );
-
-	      // triangulate
-	      triangles = earcut(geometry.vertices, geometry.holes, geometry.dimensions);
-
-	      // append to buffers
-	      numPts = triangles.length;
-	      start = buffers.alloc(triangles.length);
-
-	      for (i = 0; i < numPts; i += 1) {
-	        j = triangles[i] * 3;
-	        vertex = geometry.vertices.slice(triangles[i] * 3, j + 3);
-	        buffers.write('pos', vertex, start + i, 1);
-	        buffers.write('indices', [i], start + i, 1);
-	        color = fillColorFunc(vertex, i, item, itemIndex);
-
-	        buffers.write(
-	          'fillColor',
-	          [color.r, color.g, color.b],
-	          start + i,
-	          1
-	        );
-	        buffers.write(
-	          'fillOpacity',
-	          [fillOpacityFunc(vertex, i, item, itemIndex)],
-	          start + i,
-	          1
-	        );
+	      posBuf = util.getGeomBuffer(geom, 'pos', numPts * 3);
+	      indices = geom.primitive(0).indices();
+	      if (!(indices instanceof Uint16Array) || indices.length !== numPts) {
+	        indices = new Uint16Array(numPts);
+	        geom.primitive(0).setIndices(indices);
 	      }
-	    });
-
-	    sourcePositions.pushBack(buffers.get('pos'));
-	    geom.addSource(sourcePositions);
-
-	    sourceFillColor.pushBack(buffers.get('fillColor'));
-	    geom.addSource(sourceFillColor);
-
-	    sourceFillOpacity.pushBack(buffers.get('fillOpacity'));
-	    geom.addSource(sourceFillOpacity);
-
-	    trianglePrimitive.setIndices(buffers.get('indices'));
-	    geom.addPrimitive(trianglePrimitive);
-
-	    m_mapper.setGeometryData(geom);
+	      m_geometry = {items: items, numPts: numPts};
+	    } else {
+	      items = m_geometry.items;
+	      numPts = m_geometry.numPts;
+	    }
+	    fillColor = util.getGeomBuffer(geom, 'fillColor', numPts * 3);
+	    fillOpacity = util.getGeomBuffer(geom, 'fillOpacity', numPts);
+	    d = d3 = 0;
+	    color = fillColorVal;
+	    opacity = fillOpacityVal;
+	    fill = fillVal;
+	    for (k = 0; k < items.length; k += 1) {
+	      n = items[k].triangles.length;
+	      vertices = items[k].vertices;
+	      item = items[k].item;
+	      itemIndex = items[k].itemIndex;
+	      original = items[k].original;
+	      uniform = uniformPolyFunc(item, itemIndex);
+	      if (uniform) {
+	        if (fillColorVal === undefined) {
+	          color = fillColorFunc(vertices[0], 0, item, itemIndex);
+	        }
+	        if (fillOpacityVal === undefined) {
+	          opacity = fillOpacityFunc(vertices[0], 0, item, itemIndex);
+	        }
+	      }
+	      if (fillVal === undefined) {
+	        fill = fillFunc(item, itemIndex);
+	      }
+	      if (!fill) {
+	        opacity = 0;
+	      }
+	      if (uniform && onlyStyle && items[k].uniform && items[k].color &&
+	          color.r === items[k].color.r && color.g === items[k].color.g &&
+	          color.b === items[k].color.b && opacity === items[k].opacity) {
+	        d += n;
+	        d3 += n * 3;
+	        continue;
+	      }
+	      for (i = 0; i < n; i += 1, d += 1, d3 += 3) {
+	        if (onlyStyle && uniform) {
+	          fillColor[d3] = color.r;
+	          fillColor[d3 + 1] = color.g;
+	          fillColor[d3 + 2] = color.b;
+	          fillOpacity[d] = opacity;
+	        } else {
+	          j = items[k].triangles[i] * 3;
+	          if (!onlyStyle) {
+	            posBuf[d3] = vertices[j];
+	            posBuf[d3 + 1] = vertices[j + 1];
+	            posBuf[d3 + 2] = vertices[j + 2];
+	            indices[d] = i;
+	          }
+	          if (!uniform && fillColorVal === undefined) {
+	            color = fillColorFunc(original[j], j, item, itemIndex);
+	          }
+	          fillColor[d3] = color.r;
+	          fillColor[d3 + 1] = color.g;
+	          fillColor[d3 + 2] = color.b;
+	          if (!uniform && fillOpacityVal === undefined) {
+	            opacity = fillOpacityFunc(original[j], j, item, itemIndex);
+	          }
+	          fillOpacity[d] = opacity;
+	        }
+	      }
+	      if (uniform || items[k].uniform) {
+	        items[k].uniform = uniform;
+	        items[k].color = color;
+	        items[k].opacity = opacity;
+	      }
+	    }
+	    m_mapper.modified();
+	    if (!onlyStyle) {
+	      geom.boundsDirty(true);
+	      m_mapper.boundsDirtyTimestamp().modified();
+	    }
 	  }
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Initialize
+	   * @memberof geo.gl.polygonFeature
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function (arg) {
-	    var blend = vgl.blend(),
-	        prog = vgl.shaderProgram(),
+	    var prog = vgl.shaderProgram(),
 	        posAttr = vgl.vertexAttribute('pos'),
 	        fillColorAttr = vgl.vertexAttribute('fillColor'),
 	        fillOpacityAttr = vgl.vertexAttribute('fillOpacity'),
 	        modelViewUniform = new vgl.modelViewUniform('modelViewMatrix'),
 	        projectionUniform = new vgl.projectionUniform('projectionMatrix'),
 	        vertexShader = createVertexShader(),
-	        fragmentShader = createFragmentShader();
-
-	    s_init.call(m_this, arg);
+	        fragmentShader = createFragmentShader(),
+	        blend = vgl.blend(),
+	        geom = vgl.geometryData(),
+	        sourcePositions = vgl.sourceDataP3fv({'name': 'pos'}),
+	        sourceFillColor = vgl.sourceDataAnyfv(
+	            3, vgl.vertexAttributeKeysIndexed.Two, {'name': 'fillColor'}),
+	        sourceFillOpacity = vgl.sourceDataAnyfv(
+	            1, vgl.vertexAttributeKeysIndexed.Three, {'name': 'fillOpacity'}),
+	        trianglePrimitive = vgl.triangles();
 
 	    prog.addVertexAttribute(posAttr, vgl.vertexAttributeKeys.Position);
 	    prog.addVertexAttribute(fillColorAttr, vgl.vertexAttributeKeysIndexed.Two);
@@ -50666,25 +51595,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	    m_material.addAttribute(prog);
 	    m_material.addAttribute(blend);
 
-	    m_actor.setMapper(m_mapper);
 	    m_actor.setMaterial(m_material);
+	    m_actor.setMapper(m_mapper);
+
+	    geom.addSource(sourcePositions);
+	    geom.addSource(sourceFillColor);
+	    geom.addSource(sourceFillOpacity);
+	    geom.addPrimitive(trianglePrimitive);
+	    m_mapper.setGeometryData(geom);
+
+	    s_init.call(m_this, arg);
 	  };
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Build
 	   *
+	   * @memberof geo.gl.polygonFeature
 	   * @override
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
 	  this._build = function () {
-	    if (m_actor) {
-	      m_this.renderer().contextRenderer().removeActor(m_actor);
+
+	    createGLPolygons(m_this.dataTime().getMTime() < m_this.buildTime().getMTime() && m_geometry);
+
+	    if (!m_this.renderer().contextRenderer().hasActor(m_actor)) {
+	      m_this.renderer().contextRenderer().addActor(m_actor);
 	    }
-
-	    createGLPolygons();
-
-	    m_this.renderer().contextRenderer().addActor(m_actor);
 	    m_this.buildTime().modified();
 	  };
 
@@ -50692,10 +51629,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * Update
 	   *
+	   * @memberof geo.gl.polygonFeature
 	   * @override
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
-	  this._update = function () {
+	  this._update = function (opts) {
+	    if (opts && opts.mayDelay) {
+	      m_updateAnimFrameRef = window.requestAnimationFrame(this._update);
+	      return;
+	    }
+	    if (m_updateAnimFrameRef) {
+	      window.cancelAnimationFrame(m_updateAnimFrameRef);
+	      m_updateAnimFrameRef = null;
+	    }
 	    s_update.call(m_this);
 
 	    if (m_this.dataTime().getMTime() >= m_this.buildTime().getMTime() ||
@@ -50711,6 +51657,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * Destroy
+	   * @memberof geo.gl.polygonFeature
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
 	  this._exit = function () {
@@ -50730,7 +51677,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 253 */
+/* 252 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -51380,12 +52327,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 254 */
+/* 253 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
 	var registerFeature = __webpack_require__(131).registerFeature;
-	var quadFeature = __webpack_require__(227);
+	var quadFeature = __webpack_require__(218);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -51406,6 +52353,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var $ = __webpack_require__(1);
 	  var vgl = __webpack_require__(6);
+	  var object = __webpack_require__(246);
+
+	  object.call(this);
 
 	  var m_this = this,
 	      s_exit = this._exit,
@@ -51644,7 +52594,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        m_quads.clrQuads.length * 12 > m_clrposbuf.length) {
 	      setupColorDrawObjects(renderState);
 	    }
-	    mapper.s_render(renderState);
+	    mapper.s_render(renderState, true);
 
 	    var context = renderState.m_context, opacity = 1, color;
 
@@ -51671,6 +52621,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      context.drawArrays(vgl.GL.TRIANGLE_STRIP, 0, 4);
 	    });
 	    context.bindBuffer(vgl.GL.ARRAY_BUFFER, null);
+	    mapper.undoBindVertexData(renderState);
 	  };
 
 	  /**
@@ -51689,7 +52640,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        m_quads.imgQuads.length * 12 > m_imgposbuf.length) {
 	      setupDrawObjects(renderState);
 	    }
-	    mapper.s_render(renderState);
+	    mapper.s_render(renderState, true);
 
 	    var context = renderState.m_context, opacity = 1;
 
@@ -51717,6 +52668,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      quad.texture.undoBind(renderState);
 	    });
 	    context.bindBuffer(vgl.GL.ARRAY_BUFFER, null);
+	    mapper.undoBindVertexData(renderState);
 	  };
 
 	  ////////////////////////////////////////////////////////////////////////////
@@ -51774,12 +52726,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	inherit(gl_quadFeature, quadFeature);
 
 	// Now register it
-	registerFeature('vgl', 'quad', gl_quadFeature);
+	var capabilities = {};
+	capabilities[quadFeature.capabilities.color] = true;
+	capabilities[quadFeature.capabilities.image] = true;
+	capabilities[quadFeature.capabilities.imageFull] = true;
+
+	registerFeature('vgl', 'quad', gl_quadFeature, capabilities);
 	module.exports = gl_quadFeature;
 
 
 /***/ },
-/* 255 */
+/* 254 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var registerLayerAdjustment = __webpack_require__(131).registerLayerAdjustment;
@@ -51867,7 +52824,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  /* These functions don't need to do anything. */
 	  this._getSubLayer = function () {};
-	  this._updateSubLayer = undefined;
+	  this._updateSubLayers = undefined;
 	};
 
 	registerLayerAdjustment('vgl', 'tile', gl_tileLayer);
@@ -51876,7 +52833,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 256 */
+/* 255 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
@@ -52013,9 +52970,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
 	  this._render = function () {
-	    if (m_renderAnimFrameRef === null) {
-	      m_renderAnimFrameRef = window.requestAnimationFrame(this._renderFrame);
+	    if (m_renderAnimFrameRef) {
+	      window.cancelAnimationFrame(m_renderAnimFrameRef);
 	    }
+	    m_renderAnimFrameRef = window.requestAnimationFrame(this._renderFrame);
 	    return m_this;
 	  };
 
@@ -52183,22 +53141,22 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 257 */
+/* 256 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
 	 * @namespace geo.canvas
 	 */
 	module.exports = {
-	  canvasRenderer: __webpack_require__(258),
-	  quadFeature: __webpack_require__(259),
+	  canvasRenderer: __webpack_require__(257),
+	  quadFeature: __webpack_require__(258),
 	  heatmapFeature: __webpack_require__(260),
 	  tileLayer: __webpack_require__(261)
 	};
 
 
 /***/ },
-/* 258 */
+/* 257 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
@@ -52228,8 +53186,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var m_this = this,
 	      m_renderAnimFrameRef = null,
+	      m_clearCanvas = true,
 	      s_init = this._init,
 	      s_exit = this._exit;
+
+	  this.clearCanvas = function (arg) {
+	    m_clearCanvas = arg;
+	  };
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
@@ -52294,9 +53257,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	            map = layer.map(),
 	            camera = map.camera(),
 	            viewport = camera._viewport;
+
 	        // Clear the canvas.
-	        m_this.context2d.setTransform(1, 0, 0, 1, 0, 0);
-	        m_this.context2d.clearRect(0, 0, viewport.width, viewport.height);
+	        if (m_clearCanvas) {
+	          m_this.context2d.setTransform(1, 0, 0, 1, 0, 0);
+	          m_this.context2d.clearRect(0, 0, viewport.width, viewport.height);
+	        }
 
 	        var features = layer.features();
 	        for (var i = 0; i < features.length; i += 1) {
@@ -52364,12 +53330,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 259 */
+/* 258 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var inherit = __webpack_require__(4);
 	var registerFeature = __webpack_require__(131).registerFeature;
-	var quadFeature = __webpack_require__(227);
+	var quadFeature = __webpack_require__(218);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -52388,6 +53354,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new canvas_quadFeature(arg);
 	  }
 	  quadFeature.call(this, arg);
+
+	  var object = __webpack_require__(259);
+	  object.call(this);
 
 	  var $ = __webpack_require__(1);
 
@@ -52509,8 +53478,63 @@ return /******/ (function(modules) { // webpackBootstrap
 	inherit(canvas_quadFeature, quadFeature);
 
 	// Now register it
-	registerFeature('canvas', 'quad', canvas_quadFeature);
+	var capabilities = {};
+	capabilities[quadFeature.capabilities.color] = false;
+	capabilities[quadFeature.capabilities.image] = true;
+	capabilities[quadFeature.capabilities.imageFull] = false;
+
+	registerFeature('canvas', 'quad', canvas_quadFeature, capabilities);
 	module.exports = canvas_quadFeature;
+
+
+/***/ },
+/* 259 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var inherit = __webpack_require__(4);
+	var sceneObject = __webpack_require__(128);
+
+	//////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Canvas specific subclass of object which rerenders when the object is drawn.
+	 * @class geo.canvas.object
+	 * @extends geo.sceneObject
+	 */
+	//////////////////////////////////////////////////////////////////////////////
+
+	var canvas_object = function (arg) {
+	  'use strict';
+
+	  var object = __webpack_require__(5);
+
+	  // this is used to extend other geojs classes, so only generate
+	  // a new object when that is not the case... like if this === window
+	  if (!(this instanceof object)) {
+	    return new canvas_object(arg);
+	  }
+	  sceneObject.call(this);
+
+	  var m_this = this,
+	      s_draw = this.draw;
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	  *  Redraw the object.
+	  */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this.draw = function () {
+	    m_this._update();
+	    m_this.renderer()._render();
+	    s_draw();
+	    return m_this;
+	  };
+
+	  return this;
+	};
+
+	inherit(canvas_object, sceneObject);
+	module.exports = canvas_object;
+
 
 
 /***/ },
@@ -52519,7 +53543,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var inherit = __webpack_require__(4);
 	var registerFeature = __webpack_require__(131).registerFeature;
-	var heatmapFeature = __webpack_require__(228);
+	var heatmapFeature = __webpack_require__(227);
+	var timestamp = __webpack_require__(129);
 
 	//////////////////////////////////////////////////////////////////////////////
 	/**
@@ -52540,16 +53565,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new canvas_heatmapFeature(arg);
 	  }
 	  heatmapFeature.call(this, arg);
+	  var object = __webpack_require__(259);
+
+	  object.call(this);
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
 	   * @private
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
+	  var geo_event = __webpack_require__(125);
+
 	  var m_this = this,
+	      m_typedBuffer,
+	      m_typedClampedBuffer,
+	      m_typedBufferData,
+	      m_heatMapPosition,
 	      s_exit = this._exit,
 	      s_init = this._init,
-	      s_update = this._update;
+	      s_update = this._update,
+	      m_renderTime = timestamp();
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
@@ -52578,11 +53613,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this._computeGradient = function () {
 	    var canvas, stop, context2d, gradient, colors;
 
-	    if (!m_this._grad) {
+	    colors = m_this.style('color');
+	    if (!m_this._grad || m_this._gradColors !== colors) {
 	      canvas = document.createElement('canvas');
 	      context2d = canvas.getContext('2d');
 	      gradient = context2d.createLinearGradient(0, 0, 0, 256);
-	      colors = m_this.style('color');
 
 	      canvas.width = 1;
 	      canvas.height = 256;
@@ -52594,6 +53629,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      context2d.fillStyle = gradient;
 	      context2d.fillRect(0, 0, 1, 256);
 	      m_this._grad = context2d.getImageData(0, 0, 1, 256).data;
+	      m_this._gradColors = colors;
 	    }
 
 	    return m_this;
@@ -52606,24 +53642,58 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
 	  this._createCircle = function () {
-	    var circle, ctx, r, r2, blur;
-	    if (!m_this._circle) {
+	    var circle, ctx, r, r2, blur, gaussian;
+	    r = m_this.style('radius');
+	    blur = m_this.style('blurRadius');
+	    gaussian = m_this.style('gaussian');
+	    if (!m_this._circle || m_this._circle.gaussian !== gaussian ||
+	        m_this._circle.radius !== r || m_this._circle.blurRadius !== blur) {
 	      circle = m_this._circle = document.createElement('canvas');
 	      ctx = circle.getContext('2d');
-	      r = m_this.style('radius');
-	      blur = m_this.style('blurRadius');
-
 	      r2 = blur + r;
-
 	      circle.width = circle.height = r2 * 2;
-	      ctx.shadowOffsetX = ctx.shadowOffsetY = r2 * 2;
-	      ctx.shadowBlur = blur;
-	      ctx.shadowColor = 'black';
-
-	      ctx.beginPath();
-	      ctx.arc(-r2, -r2, r, 0, Math.PI * 2, true);
-	      ctx.closePath();
-	      ctx.fill();
+	      if (!gaussian) {
+	        ctx.shadowOffsetX = ctx.shadowOffsetY = r2 * 2;
+	        ctx.shadowBlur = blur;
+	        ctx.shadowColor = 'black';
+	        ctx.beginPath();
+	        ctx.arc(-r2, -r2, r, 0, Math.PI * 2, true);
+	        ctx.closePath();
+	        ctx.fill();
+	      } else {
+	        /* This approximates a gaussian distribution by using a 10-step
+	         * piecewise linear radial gradient.  Strictly, it should not stop at
+	         * the radius, but should be attenuated further.  The scale has been
+	         * selected such that the values at the radius are around 1/256th of
+	         * the maximum, and therefore would not be visible using an 8-bit alpha
+	         * channel for the summation.  The values for opacity were generated by
+	         * the python expression:
+	         *   from scipy.stats import norm
+	         *   for r in [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]:
+	         *     opacity = norm.pdf(r, scale=0.3) / norm.pdf(0, scale=0.3)
+	         * Usng a 10-interval approximation is accurate to within 0.5% of the
+	         * actual Gaussian magnitude.  Switching to a 20-interval approximation
+	         * would get within 0.1%, at which point there is more error from using
+	         * a Gaussian truncated at the radius than from the approximation.
+	         */
+	        var grad = ctx.createRadialGradient(r2, r2, 0, r2, r2, r2);
+	        grad.addColorStop(0.0, 'rgba(255,255,255,1)');
+	        grad.addColorStop(0.1, 'rgba(255,255,255,0.946)');
+	        grad.addColorStop(0.2, 'rgba(255,255,255,0.801)');
+	        grad.addColorStop(0.3, 'rgba(255,255,255,0.607)');
+	        grad.addColorStop(0.4, 'rgba(255,255,255,0.411)');
+	        grad.addColorStop(0.5, 'rgba(255,255,255,0.249)');
+	        grad.addColorStop(0.6, 'rgba(255,255,255,0.135)');
+	        grad.addColorStop(0.7, 'rgba(255,255,255,0.066)');
+	        grad.addColorStop(0.8, 'rgba(255,255,255,0.029)');
+	        grad.addColorStop(0.9, 'rgba(255,255,255,0.011)');
+	        grad.addColorStop(1.0, 'rgba(255,255,255,0)');
+	        ctx.fillStyle = grad;
+	        ctx.fillRect(0, 0, r2 * 2, r2 * 2);
+	      }
+	      circle.radius = r;
+	      circle.blurRadius = blur;
+	      circle.gaussian = gaussian;
 	      m_this._circle = circle;
 	    }
 	    return m_this;
@@ -52636,45 +53706,218 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
 	  this._colorize = function (pixels, gradient) {
-	    var i, j;
-	    for (i = 0; i < pixels.length; i += 4) {
-	      // Get opacity from the temporary canvas image,
-	      // then multiply by 4 to get the color index on linear gradient
-	      j = pixels[i + 3] * 4;
+	    var grad = new Uint32Array(gradient.buffer),
+	        pixlen = pixels.length,
+	        i, j, k;
+	    if (!m_typedBuffer || m_typedBuffer.length !== pixlen) {
+	      m_typedBuffer = new ArrayBuffer(pixlen);
+	      m_typedClampedBuffer = new Uint8ClampedArray(m_typedBuffer);
+	      m_typedBufferData = new Uint32Array(m_typedBuffer);
+	    }
+	    for (i = 3, k = 0; i < pixlen; i += 4, k += 1) {
+	      // Get opacity from the temporary canvas image and look up the final
+	      // value from gradient
+	      j = pixels[i];
 	      if (j) {
-	        pixels[i] = gradient[j];
-	        pixels[i + 1] = gradient[j + 1];
-	        pixels[i + 2] = gradient[j + 2];
-	        pixels[i + 3] = m_this.style('opacity') * gradient[j + 3];
+	        m_typedBufferData[k] = grad[j];
+	      }
+	    }
+	    pixels.set(m_typedClampedBuffer);
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Render individual data points on the canvas.
+	   * @protected
+	   * @param {object} context2d the canvas context to draw in.
+	   * @param {object} map the parent map object.
+	   * @param {Array} data the main data array.
+	   * @param {number} radius the sum of radius and blurRadius.
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this._renderPoints = function (context2d, map, data, radius) {
+	    var position = m_this.gcsPosition(),
+	        intensityFunc = m_this.intensity(),
+	        minIntensity = m_this.minIntensity(),
+	        rangeIntensity = (m_this.maxIntensity() - minIntensity) || 1,
+	        idx, pos, intensity;
+
+	    for (idx = data.length - 1; idx >= 0; idx -= 1) {
+	      pos = map.worldToDisplay(position[idx]);
+	      intensity = (intensityFunc(data[idx]) - minIntensity) / rangeIntensity;
+	      if (intensity <= 0) {
+	        continue;
+	      }
+	      // Small values are not visible because globalAlpha < .01
+	      // cannot be read from imageData
+	      context2d.globalAlpha = intensity < 0.01 ? 0.01 : (intensity > 1 ? 1 : intensity);
+	      context2d.drawImage(m_this._circle, pos.x - radius, pos.y - radius);
+	    }
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Render data points on the canvas by binning.
+	   * @protected
+	   * @param {object} context2d the canvas context to draw in.
+	   * @param {object} map the parent map object.
+	   * @param {Array} data the main data array.
+	   * @param {number} radius the sum of radius and blurRadius.
+	   * @param {number} binSize size of the bins in pixels.
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this._renderBinnedData = function (context2d, map, data, radius, binSize) {
+	    var position = m_this.gcsPosition(),
+	        intensityFunc = m_this.intensity(),
+	        minIntensity = m_this.minIntensity(),
+	        rangeIntensity = (m_this.maxIntensity() - minIntensity) || 1,
+	        viewport = map.camera()._viewport,
+	        bins = [],
+	        rw = Math.ceil(radius / binSize),
+	        maxx = Math.ceil(viewport.width / binSize) + rw * 2 + 2,
+	        maxy = Math.ceil(viewport.height / binSize) + rw * 2 + 2,
+	        datalen = data.length,
+	        idx, pos, intensity, x, y, binrow, offsetx, offsety;
+
+	    /* We create bins of size (binSize) pixels on a side.  We only track bins
+	     * that are on the viewport or within the radius of it, plus one extra bin
+	     * width. */
+	    for (idx = 0; idx < datalen; idx += 1) {
+	      pos = map.worldToDisplay(position[idx]);
+	      /* To make the results look more stable, we use the first data point as a
+	       * hard-reference to where the bins should line up.  Otherwise, as we pan
+	       * points would shift which bin they are in and the display would ripple
+	       * oddly. */
+	      if (isNaN(pos.x) || isNaN(pos.y)) {
+	        continue;
+	      }
+	      if (offsetx === undefined) {
+	        offsetx = ((pos.x % binSize) + binSize) % binSize;
+	        offsety = ((pos.y % binSize) + binSize) % binSize;
+	      }
+	      /* We handle points that are in the viewport, plus the radius on either
+	       * side, as they will add into the visual effect, plus one additional bin
+	       * to account for the offset alignment. */
+	      x = Math.floor((pos.x - offsetx) / binSize) + rw + 1;
+	      if (x < 0 || x >= maxx) {
+	        continue;
+	      }
+	      y = Math.floor((pos.y - offsety) / binSize) + rw + 1;
+	      if (y < 0 || y >= maxy) {
+	        continue;
+	      }
+	      intensity = (intensityFunc(data[idx]) - minIntensity) / rangeIntensity;
+	      if (intensity <= 0) {
+	        continue;
+	      }
+	      if (intensity > 1) {
+	        intensity = 1;
+	      }
+	      /* bins is an array of arrays.  The subarrays would be conceptually
+	       * better represented as an array of dicts, but having a sparse array is
+	       * uses much less memory and is faster.  Each bin uses four array entries
+	       * that are (weight, intensity, x, y).  The weight is the sum of the
+	       * intensities for all points in the bin.  The intensity is the geometric
+	       * sum of the intensities to approximate what happens to the unbinned
+	       * data on the alpha channel of the canvas.  The x and y coordinates are
+	       * weighted by the intensity of each point. */
+	      bins[y] = bins[y] || [];
+	      x *= 4;
+	      binrow = bins[y];
+	      if (!binrow[x]) {
+	        binrow[x] = binrow[x + 1] = intensity;
+	        binrow[x + 2] = pos.x * intensity;
+	        binrow[x + 3] = pos.y * intensity;
+	      } else {
+	        binrow[x] += intensity;  // weight
+	        binrow[x + 1] += (1 - binrow[x + 1]) * intensity;
+	        binrow[x + 2] += pos.x * intensity;
+	        binrow[x + 3] += pos.y * intensity;
+	      }
+	    }
+	    /* For each bin, render a point on the canvas. */
+	    for (y = bins.length - 1; y >= 0; y -= 1) {
+	      binrow = bins[y];
+	      if (binrow) {
+	        for (x = binrow.length - 4; x >= 0; x -= 4) {
+	          if (binrow[x]) {
+	            intensity = binrow[x + 1];
+	            context2d.globalAlpha = intensity < 0.01 ? 0.01 : (intensity > 1 ? 1 : intensity);
+	            /* The position is eighted by the intensities, so we have to divide
+	             * it to get the necessary position */
+	            context2d.drawImage(
+	              m_this._circle,
+	              binrow[x + 2] / binrow[x] - radius,
+	              binrow[x + 3] / binrow[x] - radius);
+	          }
+	        }
 	      }
 	    }
 	  };
 
 	  ////////////////////////////////////////////////////////////////////////////
 	  /**
-	   * Render each data point on canvas
+	   * Render the data on the canvas, then colorize the resulting opacity map.
 	   * @protected
+	   * @param {object} context2d the canvas context to draw in.
+	   * @param {object} map the parent map object.
 	   */
 	  ////////////////////////////////////////////////////////////////////////////
 	  this._renderOnCanvas = function (context2d, map) {
-	    var data = m_this.data() || [],
-	        radius = m_this.style('radius') + m_this.style('blurRadius'),
-	        pos, intensity, canvas, pixelArray;
-	    m_this._createCircle();
-	    m_this._computeGradient();
-	    data.forEach(function (d) {
-	      pos = m_this.layer().map().gcsToDisplay(m_this.position()(d));
-	      intensity = (m_this.intensity()(d) - m_this.minIntensity()) /
-	                  (m_this.maxIntensity() - m_this.minIntensity());
-	      // Small values are not visible because globalAlpha < .01
-	      // cannot be read from imageData
-	      context2d.globalAlpha = intensity < 0.01 ? 0.01 : intensity;
-	      context2d.drawImage(m_this._circle, pos.x - radius, pos.y - radius);
-	    });
-	    canvas = m_this.layer().canvas()[0];
-	    pixelArray = context2d.getImageData(0, 0, canvas.width, canvas.height);
-	    m_this._colorize(pixelArray.data, m_this._grad);
-	    context2d.putImageData(pixelArray, 0, 0);
+
+	    if (m_renderTime.getMTime() < m_this.buildTime().getMTime()) {
+	      var data = m_this.data() || [],
+	          radius = m_this.style('radius') + m_this.style('blurRadius'),
+	          binned = m_this.binned(),
+	          canvas, pixelArray,
+	          layer = m_this.layer(),
+	          viewport = map.camera()._viewport;
+
+	      /* Determine if we should bin the data */
+	      if (binned === true || binned === 'auto') {
+	        binned = Math.max(Math.floor(radius / 8), 3);
+	        if (m_this.binned() === 'auto') {
+	          var numbins = (Math.ceil((viewport.width + radius * 2) / binned) *
+	                         Math.ceil((viewport.height + radius * 2) / binned));
+	          if (numbins >= data.length) {
+	            binned = 0;
+	          }
+	        }
+	      }
+	      if (binned < 1 || isNaN(binned)) {
+	        binned = false;
+	      }
+	      /* Store what we did, in case this is ever useful elsewhere */
+	      m_this._binned = binned;
+
+	      context2d.setTransform(1, 0, 0, 1, 0, 0);
+	      context2d.clearRect(0, 0, viewport.width, viewport.height);
+	      layer.canvas().css({transform: '', 'transform-origin': '0px 0px'});
+
+	      m_this._createCircle();
+	      m_this._computeGradient();
+	      if (!binned) {
+	        m_this._renderPoints(context2d, map, data, radius);
+	      } else {
+	        m_this._renderBinnedData(context2d, map, data, radius, binned);
+	      }
+	      canvas = layer.canvas()[0];
+	      pixelArray = context2d.getImageData(0, 0, canvas.width, canvas.height);
+	      m_this._colorize(pixelArray.data, m_this._grad);
+	      context2d.putImageData(pixelArray, 0, 0);
+
+	      m_heatMapPosition = {
+	        zoom: map.zoom(),
+	        gcsOrigin: map.displayToGcs({x: 0, y: 0}, null),
+	        rotation: map.rotation(),
+	        lastScale: undefined,
+	        lastOrigin: {x: 0, y: 0},
+	        lastRotation: undefined
+	      };
+	      m_renderTime.modified();
+	      layer.renderer().clearCanvas(false);
+	    }
+
 	    return m_this;
 	  };
 
@@ -52686,6 +53929,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  ////////////////////////////////////////////////////////////////////////////
 	  this._init = function () {
 	    s_init.call(m_this, arg);
+
+	    m_this.geoOn(geo_event.pan, m_this._animatePan);
+
 	    return m_this;
 	  };
 
@@ -52703,6 +53949,59 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    m_this.updateTime().modified();
 	    return m_this;
+	  };
+
+	  ////////////////////////////////////////////////////////////////////////////
+	  /**
+	   * Animate pan (and zoom)
+	   * @protected
+	   */
+	  ////////////////////////////////////////////////////////////////////////////
+	  this._animatePan = function (e) {
+
+	    var map = m_this.layer().map(),
+	        zoom = map.zoom(),
+	        scale = Math.pow(2, (zoom - m_heatMapPosition.zoom)),
+	        origin = map.gcsToDisplay(m_heatMapPosition.gcsOrigin, null),
+	        rotation = map.rotation();
+
+	    if (m_heatMapPosition.lastScale === scale &&
+	        m_heatMapPosition.lastOrigin.x === origin.x &&
+	        m_heatMapPosition.lastOrigin.y === origin.y &&
+	        m_heatMapPosition.lastRotation === rotation) {
+	      return;
+	    }
+
+	    var transform = '' +
+	        ' translate(' + origin.x + 'px' + ',' + origin.y + 'px' + ')' +
+	        ' scale(' + scale + ')' +
+	        ' rotate(' + ((rotation - m_heatMapPosition.rotation) * 180 / Math.PI) + 'deg)';
+
+	    m_this.layer().canvas()[0].style.transform = transform;
+
+	    m_heatMapPosition.lastScale = scale;
+	    m_heatMapPosition.lastOrigin.x = origin.x;
+	    m_heatMapPosition.lastOrigin.y = origin.y;
+	    m_heatMapPosition.lastRotation = rotation;
+
+	    if (m_heatMapPosition.timeout) {
+	      window.clearTimeout(m_heatMapPosition.timeout);
+	      m_heatMapPosition.timeout = undefined;
+	    }
+	    /* This conditional can change if we compute the heatmap beyond the visable
+	     * viewport so that we don't have to update on pans as often.  If we are
+	     * close to where the heatmap was originally computed, don't bother
+	     * updating it. */
+	    if (parseFloat(scale.toFixed(4)) !== 1 ||
+	        parseFloat((rotation - m_heatMapPosition.rotation).toFixed(4)) !== 0 ||
+	        parseFloat(origin.x.toFixed(1)) !== 0 ||
+	        parseFloat(origin.y.toFixed(1)) !== 0) {
+	      m_heatMapPosition.timeout = window.setTimeout(function () {
+	        m_heatMapPosition.timeout = undefined;
+	        m_this.buildTime().modified();
+	        m_this.layer().draw();
+	      }, m_this.updateDelay());
+	    }
 	  };
 
 	  ////////////////////////////////////////////////////////////////////////////
@@ -52815,7 +54114,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  /* These functions don't need to do anything. */
 	  this._getSubLayer = function () {};
-	  this._updateSubLayer = undefined;
+	  this._updateSubLayers = undefined;
 	};
 
 	registerLayerAdjustment('canvas', 'tile', canvas_tileLayer);
@@ -52834,7 +54133,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  legendWidget: __webpack_require__(265),
 	  sliderWidget: __webpack_require__(267),
 	  svgWidget: __webpack_require__(266),
-	  uiLayer: __webpack_require__(218),
+	  uiLayer: __webpack_require__(219),
 	  widget: __webpack_require__(264)
 	};
 
@@ -53436,7 +54735,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  domWidget.call(this, arg);
 
-	  var d3Renderer = __webpack_require__(241);
+	  var d3Renderer = __webpack_require__(240);
 
 	  var m_this = this,
 	      m_renderer = null;
