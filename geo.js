@@ -32103,6 +32103,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	        m_features[i]._exit();
 	        m_this.dataTime().modified();
 	        m_this.modified();
+	      }
+	    }
+
+	    // Loop through a second to time actually remove
+	    // the given feature from the array because the
+	    // `_exit` call above may mutate it.
+	    for (i = 0; i < m_features.length; i += 1) {
+	      if (m_features[i] === feature) {
 	        m_features.splice(i, 1);
 	      }
 	    }
@@ -47064,7 +47072,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this._checkForStroke = function () {
 	    if (s_style('stroke') === false) {
 	      if (m_lineFeature && m_this.layer()) {
-	        m_this.layer().removeFeature(m_lineFeature);
+	        m_this.layer().deleteFeature(m_lineFeature);
 	        m_lineFeature = null;
 	      }
 	      return;
@@ -47144,7 +47152,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  ////////////////////////////////////////////////////////////////////////////
 	  this._exit = function () {
 	    if (m_lineFeature && m_this.layer()) {
-	      m_this.layer().removeFeature(m_lineFeature);
+	      m_this.layer().deleteFeature(m_lineFeature);
 	      m_lineFeature = null;
 	    }
 	    s_exit();
@@ -47610,14 +47618,14 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 229 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = ("0.10.0");
+	module.exports = ("0.10.1");
 
 
 /***/ },
 /* 230 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = ("49720649e1585e43d139e7de6cb40ad2aed89c05");
+	module.exports = ("f4a5a6af9b762c4261dd1e9cfeacd2df6e9b362d");
 
 
 /***/ },
