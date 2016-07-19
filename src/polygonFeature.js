@@ -277,7 +277,7 @@ var polygonFeature = function (arg) {
   this._checkForStroke = function () {
     if (s_style('stroke') === false) {
       if (m_lineFeature && m_this.layer()) {
-        m_this.layer().removeFeature(m_lineFeature);
+        m_this.layer().deleteFeature(m_lineFeature);
         m_lineFeature = null;
       }
       return;
@@ -357,7 +357,7 @@ var polygonFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
     if (m_lineFeature && m_this.layer()) {
-      m_this.layer().removeFeature(m_lineFeature);
+      m_this.layer().deleteFeature(m_lineFeature);
       m_lineFeature = null;
     }
     s_exit();

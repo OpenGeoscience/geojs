@@ -65,6 +65,14 @@ var featureLayer = function (arg) {
         m_features[i]._exit();
         m_this.dataTime().modified();
         m_this.modified();
+      }
+    }
+
+    // Loop through a second to time actually remove
+    // the given feature from the array because the
+    // `_exit` call above may mutate it.
+    for (i = 0; i < m_features.length; i += 1) {
+      if (m_features[i] === feature) {
         m_features.splice(i, 1);
       }
     }
