@@ -1,6 +1,36 @@
 window.startTest = function(done) {
   'use strict';
 
+  /* Get a URL parameter or return null if it doesn't exist.
+   *
+   * @param name: name of the parameter to fetch.
+   * @returns: the decoded parameter.
+   */
+  function getQueryParameter(name) {
+    var match = new RegExp('[?&]' + name + '=([^&]*)').exec(
+        window.location.search);
+    return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+  }
+
+  function getStyleParam(name, defaultValue, isString) {
+    var val = getQueryParameter(name);
+    if (val === undefined || val === null || val === '') {
+      return defaultValue;
+    }
+    val = val.split(',');
+    if (!isString) {
+      for (var i = 0; i < val.length; i += 1) {
+        val[i] = parseFloat(val[i]);
+      }
+    }
+    if (val.length === 1) {
+      return val[0];
+    }
+    return function (d, i) {
+      return val[i % val.length];
+    };
+  }
+
   var mapOptions = { center : { y: 31.87798, x: -85.44956 }, zoom : 10 };
 
   var myMap = window.geoTests.createOsmMap(mapOptions, {}, true);
@@ -39,13 +69,70 @@ window.startTest = function(done) {
     'strokeColor': { r: 1, g: 0.2, b: 0 },
     'strokeWidth': 2.0
   };
-  layer.createFeature('line')
-      .data(data)
-      .line(function (d) { return d.geometry.coordinates; })
-      .position(function (d, index, d2, index2) {
-        return {x: d[0],
-                y: d[1]} })
-      .style(style)
+
+  if (getQueryParameter('wide') !== 'true') {
+
+    layer.createFeature('line')
+        .data(data)
+        .line(function (d) { return d.geometry.coordinates; })
+        .position(function (d, index, d2, index2) {
+          return {x: d[0], y: d[1]};
+        })
+        .style(style);
+  } else {
+    var baseStyle = {
+      antialiasing: parseFloat(getQueryParameter('antialiasing') || 1),
+      debug: getQueryParameter('debug') === 'true',
+      miterLimit: parseFloat(getQueryParameter('miterLimit') || 10)
+    };
+    layer.createFeature('line', {style: baseStyle})
+        .data([
+          [[-86.00, 31.5], [-86.00, 32.3], [-86.00, 32.3], [-85.95, 32.3], [-85.95, 32.3], [-85.95, 31.5]],
+          [[-85.85, 31.5], [-85.80, 32.3], [-85.80, 32.3], [-85.75, 31.5], [-85.75, 31.5], [-85.70, 32.3]],
+          [[-85.65, 31.6], [-85.60, 32.0], [-85.60, 32.0], [-85.55, 31.6]],
+          [[-85.45, 31.6], [-85.45, 31.8], [-85.45, 31.8], [-85.40, 31.6], [-85.40, 31.6], [-85.40, 31.8]],
+          [[-85.30, 31.8], [-85.275, 32.0], [-85.275, 32.0], [-85.25, 31.8]],
+          [[-85.15, 31.5], [-85.15, 32.3]],
+          [[-85.00, 31.5], [-85.00, 31.9], [-85.00, 31.9], [-85.00, 32.3]],
+          [[-84.85, 31.5], [-84.75, 31.9], [-84.75, 31.9], [-84.85, 32.3]],
+        ])
+        .line(function (d) {
+          return d;
+        })
+        .position(function (d, index, item, itemIdx) {
+          return {x: d[0], y: d[1]};
+        })
+        .style($.extend({
+            strokeColor: 'blue',
+            strokeWidth: 20,
+            strokeOpacity: 1
+        }, baseStyle));
+    layer.createFeature('line', {style: baseStyle})
+        .data([
+          [[-86.00, 31.5], [-86.00, 32.3], [-85.95, 32.3], [-85.95, 31.5]],
+          [[-85.85, 31.5], [-85.80, 32.3], [-85.75, 31.5], [-85.70, 32.3]],
+          [[-85.65, 31.6], [-85.60, 32.0], [-85.55, 31.6]],
+          [[-85.45, 31.6], [-85.45, 31.8], [-85.40, 31.6], [-85.40, 31.8]],
+          [[-85.30, 31.8], [-85.275, 32.0], [-85.25, 31.8]],
+          [[-85.15, 31.5], [-85.15, 32.3]],
+          [[-85.00, 31.5], [-85.00, 31.9], [-85.00, 32.3]],
+          [[-84.85, 31.5], [-84.75, 31.9], [-84.85, 32.3]],
+        ])
+        .line(function (d) {
+          return d;
+        })
+        .position(function (d, index, item, itemIdx) {
+          return {x: d[0], y: d[1]};
+        })
+        .style($.extend({
+          lineCap: getStyleParam('lineCap', undefined, true),
+          lineJoin: getStyleParam('lineJoin', undefined, true),
+          strokeColor: getStyleParam('strokeColor', 'black', true),
+          strokeWidth: getStyleParam('strokeWidth', 50),
+          strokeOpacity: getStyleParam('strokeOpacity', 0.5),
+          strokeOffset: getStyleParam('strokeOffset', 0)
+        }, baseStyle));
+  }
 
   myMap.draw();
 

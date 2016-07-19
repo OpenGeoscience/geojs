@@ -21,6 +21,23 @@ class glLinesBase(object):
         self.screenshotTest(testName)
 
 
+class glLinesEdge(object):
+    testCase = ('glLinesWide',)
+    testRevision = 1
+
+    def loadPage(self):
+        self.resizeWindow(640, 480)
+        self.loadURL('glLines/index.html?wide=true')
+        self.wait()
+        self.resizeWindow(640, 480)
+
+    def testGlLines(self):
+        self.loadPage()
+
+        testName = 'drawGlLines'
+        self.screenshotTest(testName)
+
+
 class FirefoxOSM(glLinesBase, FirefoxTest):
     testCase = glLinesBase.testCase + ('firefox',)
 

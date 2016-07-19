@@ -43,7 +43,9 @@ window.geoTests = {
     }
 
     var map = geo.map(mapDefaults);
-    map.createLayer('osm', osmDefaults);
+    if (!notiles) {
+      map.createLayer('osm', osmDefaults);
+    }
 
     map.interactor().options({
       momentum: false,

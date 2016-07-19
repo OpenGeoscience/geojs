@@ -7,6 +7,41 @@ var feature = require('./feature');
  *
  * @class geo.lineFeature
  * @extends geo.feature
+ * @param {Object|Function} [arg.position] Position of the data.  Default is
+ *   (data).
+ * @param {Object|Function} [arg.line] Lines from the data.  Default is (data).
+ *   Typically, the data is an array of lines, each of which is an array of
+ *   points.  Only lines that have at least two points are rendered.  The
+ *   position function is called for each point as position(linePoint,
+*    pointIndex, lineEntry, lineEntryIndex).
+ * @param {Object} [arg.style] Style object with default style options.
+ * @param {Object|Function} [arg.style.strokeColor] Color to stroke each
+ *   line.  The color can vary by point.  Colors can be css names or hex
+ *   values, or an object with r, g, b on a [0-1] scale.
+ * @param {number|Function} [arg.style.strokeOpacity] Opacity for each line
+ *   stroke.  The opacity can vary by point.  Opacity is on a [0-1] scale.
+ * @param {number|Function} [arg.style.strokeWidth] The weight of the line
+ *   stroke in pixels.  The width can vary by point.
+ * @param {number|Function} [arg.style.strokeOffset] This is a value from -1
+ *   (left) to 1 (right), with 0 being centered.  This can vary by point.
+ * @param {string|Function} [arg.style.lineCap] One of 'butt' (default),
+ *   'square', or 'round'.  This can vary by point.
+ * @param {string|Function} [arg.style.lineJoin] One of 'miter' (default),
+ *   'bevel', 'round', or 'miter-clip'.  This can vary by point.
+ * @param {number|Function} [arg.style.closed] If true and the renderer
+ *   supports it, connect the first and last points of a line if the line has
+ *   more than two points.  This applies per line (if a function, it is called
+ *   with (lineEntry, lineEntryIndex).
+ * @param {number|Function} [arg.style.miterLimit] For lines of more than two
+ *   segments that are mitered, if the miter length exceeds the strokeWidth
+ *   divided by the sine of half the angle between segments, then a bevel join
+ *   is used instead.  This is a single value that applies to all lines.  If a
+ *   function, it is called with (data).
+ * @param {string|Function} [arg.style.antialiasing] Antialiasing distance in
+ *   pixels.  Values must be non-negative.  A value greater than 1 will produce
+ *   a visible gradient.  This is a single value that applies to all lines.
+ * @param {string|Function} [arg.style.debug] If 'debug', render lines in debug
+ *   mode.  This is a single value that applies to all lines.
  * @returns {geo.lineFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
