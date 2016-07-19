@@ -43,6 +43,7 @@ describe('geo.polygonFeature', function () {
     fillColor: function (d, idx, poly, polyidx) {
       return poly.fillColor !== undefined ? poly.fillColor : 'blue';
     },
+    stroke: true,
     uniformPolygon: function (d) {
       return d.uniformPolygon !== undefined ? d.uniformPolygon : false;
     }
