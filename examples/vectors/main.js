@@ -18,7 +18,7 @@ $(function () {
 
   // Create a gl feature layer
   var layer = map.createLayer(
-    'feature', { renderer: 'd3' }
+    'feature', {features: ['vector']}
   );
 
   var routes = [
@@ -91,5 +91,7 @@ $(function () {
       }
     });
 
+  /* We could draw the two features as we create them.  Instead, this ensures
+   * that all features get drawn. */
   map.draw();
 });

@@ -101,9 +101,6 @@ $(function () {
       d3.event.stopPropagation();
     });
 
-  // Draw the map
-  map.draw();
-
   // Connect the button that adds or removes the top layer.
   var top = null;
   $('.layer-toggle ').text('Add top layer')

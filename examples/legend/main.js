@@ -8,13 +8,8 @@ $(function () {
     zoom: 3
   });
 
-  // Add the osm layer with a custom tile url
-  map.createLayer(
-    'osm',
-    {
-      baseUrl: 'http://otile1.mqcdn.com/tiles/1.0.0/map/'
-    }
-  );
+  // Add the default osm layer
+  map.createLayer('osm');
 
   // Create a ui layer
   var ui = map.createLayer('ui');
@@ -26,7 +21,6 @@ $(function () {
       top: 10
     }
   });
-
 
   // Add rows to the legend
   //
@@ -113,7 +107,4 @@ $(function () {
     }
   ]);
 
-
-  // Draw the map
-  map.draw();
 });

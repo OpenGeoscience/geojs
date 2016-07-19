@@ -1,7 +1,7 @@
 // Run after the DOM loads
 $(function () {
   'use strict';
-  
+
   // Define a function we will use to generate contours.
   function makeChoropleth(geoData, scalarData, layer) {
     /* There are two example data sets.  One has a position array which
@@ -9,9 +9,9 @@ $(function () {
      * array which just has our contour values. */
     var choropleth = layer
         .createFeature('choropleth')
-	.data(geoData)
+  .data(geoData)
         .scalar(scalarData)
-	.choropleth({});
+  .choropleth({});
 
     return choropleth;
   }
@@ -31,11 +31,13 @@ $(function () {
     'osm'
   );
 
-  // Create a gl feature layer
-  var vglLayer = map.createLayer(
+  // Create a feature layer.  We could either ask for a layer via a specific
+  // render {renderer: 'vgl'} or for a layer that supports our feature
+  // {features: ['choropleth']}.
+  var choroplethLayer = map.createLayer(
     'feature',
     {
-      renderer: 'vgl'
+      features: ['choropleth']
     }
   );
 
@@ -47,33 +49,33 @@ $(function () {
 
       var mockScalarData = geoData
           .features
-          .map(function(feature){
-	    //create some mock value for each state
-	    return {
-              value: Math.random()*10,
+          .map(function (feature) {
+
+            //create some mock value for each state
+            return {
+              value: Math.random() * 10,
               id: feature.properties.GEO_ID
             };
           });
 
       var choropleth =
-          makeChoropleth(geoData.features, mockScalarData, vglLayer);
+          makeChoropleth(geoData.features, mockScalarData, choroplethLayer);
 
-      setTimeout(function(){
+      setTimeout(function () {
         var mockScalarData2 = geoData
             .features
-            .map(function(feature){
+            .map(function (feature) {
               return {
-                value: Math.random()*10,
+                value: Math.random() * 10,
                 id: feature.properties.GEO_ID
               };
             });
-        
+
         choropleth
           .scalar(mockScalarData2);
-
+        choropleth.draw();
       }, 5000);
-      // Draw the map
-      map.draw();
+      choropleth.draw();
     }
   });
 });

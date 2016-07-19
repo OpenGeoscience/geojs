@@ -1,4 +1,3 @@
-/* global CodeMirror, jsonlint */
 // Run after the DOM loads
 $(function () {
   'use strict';
@@ -17,12 +16,18 @@ $(function () {
   map.createLayer(
     'osm',
     {
-      baseUrl: 'http://otile1.mqcdn.com/tiles/1.0.0/map/'
+      url: 'http://tile.stamen.com/toner-lite/{z}/{x}/{y}.png',
+      attribution: ['Map tiles by <a href="http://stamen.com">Stamen Design</a>,',
+        'under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>.',
+        'Data by <a href="http://openstreetmap.org">OpenStreetMap</a>, under',
+        '<a href="http://www.openstreetmap.org/copyright">ODbL</a>.'
+      ].join(' ')
     }
   );
 
-  // Create a gl layer to put the features in
-  var layer = map.createLayer('feature');
+  // Create a layer to put the features in.  We could need point, line, and
+  // polygon features, so ask for a layer that supports all of them.
+  var layer = map.createLayer('feature', {features: ['point', 'line', 'polygon']});
   map.draw();
 
   // Initialize the json reader.

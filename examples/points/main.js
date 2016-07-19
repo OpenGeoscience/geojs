@@ -5,7 +5,6 @@ $(function () {
   // Define a function we will use to generate points.
   function makePoints(data, layer, color) {
 
-
     // The API for creating features is similar to d3's data API.
     // The data is an array of arbitrary objects.  Each object in
     // the array is assumed to be a "point".  You provide accessors
@@ -29,12 +28,12 @@ $(function () {
         .geoOn(geo.event.feature.mouseover, function (evt) {
           evt.data.opacity = 0.5;
           this.modified();        // mark the feature as modified
-          layer.map().draw();     // we must redraw as necessary
+          this.draw();            // we must redraw as necessary
         })
         .geoOn(geo.event.feature.mouseout, function (evt) {
           evt.data.opacity = 0.1;
           this.modified();
-          layer.map().draw();
+          this.draw();
         })
 
         // You must call the draw method after setting all feature
@@ -103,7 +102,4 @@ $(function () {
     };
   });
   makePoints(data, svgLayer, svgColor);
-
-  // Draw the map
-  map.draw();
 });

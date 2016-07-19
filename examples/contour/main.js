@@ -66,11 +66,11 @@ $(function () {
     'osm'
   );
 
-  // Create a gl feature layer
-  var vglLayer = map.createLayer(
+  // Create a feature layer that supports contours
+  var contourLayer = map.createLayer(
     'feature',
     {
-      renderer: 'vgl'
+      features: ['contour']
     }
   );
 
@@ -78,17 +78,16 @@ $(function () {
   $.ajax({
     url: '../../data/oahu.json',
     success: function (data) {
-      var contour = makeContour(data, vglLayer);
-      // Draw the map
-      map.draw();
+      var contour = makeContour(data, contourLayer);
+      contour.draw();
       /* After 10 second, load a denser data set */
       window.setTimeout(function () {
         $.ajax({
           url: '../../data/oahu-dense.json',
           success: function (data) {
-            vglLayer.deleteFeature(contour);
-            contour = makeContour(data, vglLayer, contour);
-            map.draw();
+            contourLayer.deleteFeature(contour);
+            contour = makeContour(data, contourLayer, contour);
+            contour.draw();
           }
         });
       }, 10000);

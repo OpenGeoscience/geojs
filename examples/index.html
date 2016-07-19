@@ -4,12 +4,9 @@
     <meta charset="UTF-8">
     <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
     <title>GeoJS</title>
-    <!-- Include common files-->
-    <link rel="stylesheet" href="common/css/bootstrap.min.css">
-    <link rel="stylesheet" href="common/css/examples.css">
-    <script src="../built/geo.min.js" charset="UTF-8" type="text/javascript"></script>
-    <script type="text/javascript" src="common/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="common/js/examples.js"></script>
+    <!-- include the main bundle-->
+    <script type="text/javascript" src="./bundle.js" charset="UTF-8"></script>
+    <!-- include example sources-->
     <!-- Include example specific files-->
     <link rel="stylesheet" href="main.css">
     <script type="text/javascript" src="main.js"></script>
@@ -117,6 +114,15 @@
               </div></a></div>
         </div>
         <div class="col-md-4">
+          <div class="thumbnail"><a href="polygons"><img src="polygons/thumb.jpg" onerror="this.src='osm/thumb.jpg';"/>
+              <div class="caption">
+                <h3>Polygon features</h3>
+                <div class="description">
+                  <p>This example shows how to add polygons to a map.</p>
+                </div>
+              </div></a></div>
+        </div>
+        <div class="col-md-4">
           <div class="thumbnail"><a href="quads"><img src="quads/thumb.jpg" onerror="this.src='osm/thumb.jpg';"/>
               <div class="caption">
                 <h3>Quad features</h3>
@@ -125,6 +131,8 @@
                 </div>
               </div></a></div>
         </div>
+      </div>
+      <div class="row">
         <div class="col-md-4">
           <div class="thumbnail"><a href="reprojection"><img src="reprojection/thumb.jpg" onerror="this.src='osm/thumb.jpg';"/>
               <div class="caption">
@@ -134,8 +142,15 @@
                 </div>
               </div></a></div>
         </div>
-      </div>
-      <div class="row">
+        <div class="col-md-4">
+          <div class="thumbnail"><a href="sld"><img src="sld/thumb.jpg" onerror="this.src='osm/thumb.jpg';"/>
+              <div class="caption">
+                <h3>Adding styles to WMS raster layers</h3>
+                <div class="description">
+                  <p>Rendering tiles from a WMS server by customizing the style.</p>
+                </div>
+              </div></a></div>
+        </div>
         <div class="col-md-4">
           <div class="thumbnail"><a href="tiles"><img src="tiles/thumb.jpg" onerror="this.src='osm/thumb.jpg';"/>
               <div class="caption">
@@ -145,6 +160,8 @@
                 </div>
               </div></a></div>
         </div>
+      </div>
+      <div class="row">
         <div class="col-md-4">
           <div class="thumbnail"><a href="transitions"><img src="transitions/thumb.jpg" onerror="this.src='osm/thumb.jpg';"/>
               <div class="caption">
@@ -163,8 +180,6 @@
                 </div>
               </div></a></div>
         </div>
-      </div>
-      <div class="row">
         <div class="col-md-4">
           <div class="thumbnail"><a href="wms"><img src="wms/thumb.jpg" onerror="this.src='osm/thumb.jpg';"/>
               <div class="caption">

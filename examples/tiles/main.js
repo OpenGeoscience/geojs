@@ -1,4 +1,3 @@
-/* globals $, geo */
 // This example should be tried with different query strings.
 
 /* Many parameters can be adjusted via url query parameters:
@@ -30,15 +29,16 @@
  *  projection: 'parallel' or 'projection' for the camera projection.
  *  renderer: 'vgl' (default), 'canvas', 'd3', 'null', or 'html'.  This picks
  *      the renderer for map tiles.  null or html uses the html renderer.
+ *      'default' uses the default renderer for the user's platform.
  *  round: 'round' (default), 'floor', 'ceil'.
  *  subdomains: a comma-separated string of subdomains to use in the {s} part
  *      of the url parameter.  If there are no commas in the string, each letter
  *      is used by itself (e.g., 'abc' is the same as 'a,b,c').
  *  unitsPerPixel: set the units per pixel at zoom level 0.
  *  url: url to use for the map files.  Placeholders are allowed.  Default is
- *      http://otile1.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.png .  Other useful
+ *      http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png .  Other useful
  *      urls are are: /data/tilefancy.png
- *      http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png
+ *      http://tile.stamen.com/toner-lite/{z}/{x}/{y}.png
  *  w: width of a tiled image (at max zoom).  If w and h are specified, a
  *      variety of other changes are made to make this served in image
  *      coordinates.
@@ -105,7 +105,7 @@ $(function () {
   };
   // Set the tile layer defaults to use the specified renderer and opacity
   var layerParams = {
-    renderer: query.renderer || 'vgl',
+    renderer: query.renderer && query.renderer !== 'default' ? query.renderer : undefined,
     opacity: query.opacity || '1',
     /* Always use a larger cache so if keepLower is changed, we still have a
      * big enough cache. */
@@ -123,7 +123,7 @@ $(function () {
   if (query.url) {
     layerParams.url = query.url;
   } else {
-    layerParams.baseUrl = 'http://otile1.mqcdn.com/tiles/1.0.0/map/';
+    layerParams.url = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
   }
   if (query.subdomains) {
     if (query.subdomains.indexOf(',') >= 0) {
@@ -341,6 +341,9 @@ $(function () {
         if (layerParams.renderer === 'html') {
           layerParams.renderer = null;
         }
+        if (layerParams.renderer === 'default') {
+          layerParams.renderer = undefined;
+        }
         map.deleteLayer(osmLayer);
         osmLayer = map.createLayer('osm', layerParams);
         tileDebug.osmLayer = osmLayer;
@@ -354,9 +357,6 @@ $(function () {
         break;
       case 'url':
         var url = processedValue;
-        if (layerParams.baseUrl) {
-          delete layerParams.baseUrl;
-        }
         layerParams[param] = processedValue;
         osmLayer.url(url);
         osmLayer.attribution($('#url-list [value="' + value + '"]').attr(
@@ -374,9 +374,6 @@ $(function () {
       default:
         if (ctl.is('.layerparam')) {
           layerParams[param] = processedValue;
-          if (param === 'url' && layerParams.baseUrl) {
-            delete layerParams.baseUrl;
-          }
           if (osmLayer[param]) {
             osmLayer[param](processedValue);
           }

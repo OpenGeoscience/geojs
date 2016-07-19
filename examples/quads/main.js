@@ -1,9 +1,12 @@
+/* globals $, geo, utils */
+
 var quadDebug = {};
 
 // Run after the DOM loads
 $(function () {
   'use strict';
 
+  var query = utils.getQuery();
   var map = geo.map({
     node: '#map',
     center: {
@@ -12,7 +15,10 @@ $(function () {
     },
     zoom: 4
   });
-  var layer = map.createLayer('feature', {renderer: 'vgl'});
+  var layer = map.createLayer('feature', {
+    renderer: query.renderer ? (query.renderer === 'html' ? null : query.renderer) : undefined,
+    features: query.renderer ? undefined : ['quad']
+  });
   var quads = layer.createFeature('quad', {selectionAPI: true});
   var previewImage = new Image();
   previewImage.onload = function () {
@@ -120,7 +126,7 @@ $(function () {
         // asked for it not to have been cached to begin with.
         delete evt.data._cachedQuad;
         this.modified();
-        layer.map().draw();
+        this.draw();
       })
       .geoOn(geo.event.feature.mouseout, function (evt) {
         if (evt.data.orig_opacity === undefined) {
@@ -129,11 +135,9 @@ $(function () {
         evt.data.opacity = evt.data.orig_opacity || undefined;
         delete evt.data._cachedQuad;
         this.modified();
-        layer.map().draw();
+        this.draw();
       })
       .draw();
-
-    map.draw();
 
     quadDebug.map = map;
     quadDebug.layer = layer;

@@ -12,26 +12,26 @@ $(function () {
   // renderer, but may have problems as the tile density is not uniform or
   // regular.
   var gcsTable = {
-    'EPSG:3857': 'EPSG:3857',
+    'EPSG:3857': 'EPSG:3857'
   };
   var gcsBounds = {};
   var gcsList = [
-      'EPSG:3857', 'EPSG:3031', 'EPSG:3032', 'EPSG:3033', 'EPSG:3294',
-      'EPSG:3408', 'EPSG:3409', 'EPSG:3410', 'EPSG:3411', 'EPSG:3412',
-      'EPSG:3413', 'EPSG:3571', 'EPSG:3572', 'EPSG:3573', 'EPSG:3574',
-      'EPSG:3575', 'EPSG:3576', 'EPSG:3786', 'EPSG:32661', 'EPSG:32662',
-      'ESRI:53002', 'ESRI:53003', 'ESRI:53008', 'ESRI:53009', 'ESRI:53021',
-      'ESRI:53027', 'ESRI:54002', 'ESRI:54003', 'ESRI:54009', 'ESRI:54021',
-      'ESRI:54026', 'ESRI:54027', 'ESRI:102005', 'ESRI:102010', 'ESRI:102011',
-      'ESRI:102016', 'ESRI:102017', 'ESRI:102018', 'ESRI:102019',
-      'ESRI:102020', 'ESRI:102021', 'ESRI:102023', 'ESRI:102026',
-      'ESRI:102029', 'ESRI:102031', 'ESRI:102032', 'IAU2000:39914',
-      'IAU2000:39918', 'IAU2000:39920', 'IAU2000:39962', 'IAU2000:39972',
-      'SR-ORG:7', 'SR-ORG:22', 'SR-ORG:4695', 'SR-ORG:6661', 'SR-ORG:6842',
-      'SR-ORG:6882', 'SR-ORG:6888', 'SR-ORG:6890', 'SR-ORG:6891',
-      'SR-ORG:6892', 'SR-ORG:6893', 'SR-ORG:6894', 'SR-ORG:6895',
-      'SR-ORG:6896', 'SR-ORG:6897', 'SR-ORG:6898', 'SR-ORG:7250',
-      'SR-ORG:8209', 'SR-ORG:8287'
+    'EPSG:3857', 'EPSG:3031', 'EPSG:3032', 'EPSG:3033', 'EPSG:3294',
+    'EPSG:3408', 'EPSG:3409', 'EPSG:3410', 'EPSG:3411', 'EPSG:3412',
+    'EPSG:3413', 'EPSG:3571', 'EPSG:3572', 'EPSG:3573', 'EPSG:3574',
+    'EPSG:3575', 'EPSG:3576', 'EPSG:3786', 'EPSG:32661', 'EPSG:32662',
+    'ESRI:53002', 'ESRI:53003', 'ESRI:53008', 'ESRI:53009', 'ESRI:53021',
+    'ESRI:53027', 'ESRI:54002', 'ESRI:54003', 'ESRI:54009', 'ESRI:54021',
+    'ESRI:54026', 'ESRI:54027', 'ESRI:102005', 'ESRI:102010', 'ESRI:102011',
+    'ESRI:102016', 'ESRI:102017', 'ESRI:102018', 'ESRI:102019',
+    'ESRI:102020', 'ESRI:102021', 'ESRI:102023', 'ESRI:102026',
+    'ESRI:102029', 'ESRI:102031', 'ESRI:102032', 'IAU2000:39914',
+    'IAU2000:39918', 'IAU2000:39920', 'IAU2000:39962', 'IAU2000:39972',
+    'SR-ORG:7', 'SR-ORG:22', 'SR-ORG:4695', 'SR-ORG:6661', 'SR-ORG:6842',
+    'SR-ORG:6882', 'SR-ORG:6888', 'SR-ORG:6890', 'SR-ORG:6891',
+    'SR-ORG:6892', 'SR-ORG:6893', 'SR-ORG:6894', 'SR-ORG:6895',
+    'SR-ORG:6896', 'SR-ORG:6897', 'SR-ORG:6898', 'SR-ORG:7250',
+    'SR-ORG:8209', 'SR-ORG:8287'
   ];
   var capitals;
 
@@ -126,7 +126,7 @@ $(function () {
     }
     // Set the tile layer defaults to use the specified renderer and opacity
     var layerParams = {
-      renderer: 'vgl',
+      features: [geo.quadFeature.capabilities.imageFull],
       zIndex: 0,
       gcs: 'EPSG:3857',
       attribution: $('#url-list [value="' + $('#layer-url').val() + '"]').attr(
@@ -140,7 +140,7 @@ $(function () {
     if (query.url) {
       layerParams.url = query.url;
     } else {
-      layerParams.baseUrl = 'http://otile1.mqcdn.com/tiles/1.0.0/map/';
+      layerParams.url = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
     }
     // Create a map object
     var map = geo.map(mapParams);
@@ -177,7 +177,7 @@ $(function () {
         evt.data.opacity = 0.5;
         evt.data.strokeOpacity = 1;
         this.modified();
-        pointLayer.map().draw();
+        this.draw();
         tooltip.position({x: evt.data.longitude, y: evt.data.latitude});
         tooltipElem.text(evt.data.city);
         tooltipElem.removeClass('hidden');
@@ -186,10 +186,10 @@ $(function () {
         evt.data.opacity = undefined;
         evt.data.strokeOpacity = undefined;
         this.modified();
-        pointLayer.map().draw();
+        this.draw();
         tooltipElem.addClass('hidden');
-      });
-    pointLayer.map().draw();
+      })
+      .draw();
 
     // Make variables available as a global for easier debug
     exampleDebug.map = map;
@@ -228,7 +228,7 @@ $(function () {
       switch (param) {
         case 'capitals':
           pointFeature.visible(processedValue);
-          map.draw();
+          pointFeature.draw();
           break;
         case 'gcs':
           mapParams.gcs = gcsTable[processedValue] || 'EPSG:3857';

@@ -4,14 +4,14 @@ $(function () {
 
   // Create a map object with the OpenStreetMaps base layer.
   var map = geo.map({
-    node: '#map',
-    center: {
-      x: -98.0,
-      y: 39.5
-    },
-    zoom: 4
-  }),
-  over = 0;
+        node: '#map',
+        center: {
+          x: -98.0,
+          y: 39.5
+        },
+        zoom: 4
+      }),
+      over = 0;
 
   // Create an osm layer
   map.createLayer('osm');
@@ -49,13 +49,13 @@ $(function () {
   function handleMouseClick(evt) {
     evt.data.clicked = !evt.data.clicked;
     this.modified();
-    map.draw();
+    this.draw();
   }
 
   function handleBrush(evt) {
     evt.data.clicked = true;
     this.modified();
-    map.draw();
+    this.draw();
   }
 
   var color = d3.scale.category10();
@@ -83,6 +83,6 @@ $(function () {
     .geoOn(geo.event.feature.mouseclick, handleMouseClick)
     .geoOn(geo.event.feature.brushend, handleBrush);
 
-  // Draw the map
-  map.draw();
+  vglLayer.draw();
+  svgLayer.draw();
 });

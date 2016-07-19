@@ -319,14 +319,14 @@ $(function () {
         'strokeColor': function (d) {
           return cscale(d.c);
         },
-        'strokeWidth': function (d, i, l) {
-          if (l.hover) {
+        'strokeWidth': function (d, i, l, pos) {
+          if (data[pos].hover) {
             return 5;
           }
           return 1.5;
         },
-        'strokeOpacity': function (d, i, l) {
-          if (l.hover) {
+        'strokeOpacity': function (d, i, l, pos) {
+          if (data[pos].hover) {
             return 1;
           }
           if (d.c === 0) {
@@ -346,9 +346,9 @@ $(function () {
         evt.data.hover = true;
         makeInfoBox(evt.data);
         this.modified();
-        map.draw();
+        feature.draw();
       });
-    map.draw();
+    feature.draw();
   }
 
   // Create a map object
@@ -361,19 +361,11 @@ $(function () {
     zoom: 3
   });
 
-  // Add the osm layer with a custom tile url
-  map.createLayer(
-    'osm',
-    {
-      baseUrl: 'http://otile1.mqcdn.com/tiles/1.0.0/map/'
-    }
-  );
+  // Add the default osm layer
+  map.createLayer('osm');
 
-  // Draw the map
-  map.draw();
-
-  // Create a feature layer to draw on
-  layer = map.createLayer('feature');
+  // Create a feature layer to draw on.
+  layer = map.createLayer('feature', {features: [geo.lineFeature.capabilities.multicolor]});
 
   // Create a line feature
   feature = layer.createFeature('line', {selectionAPI: true});

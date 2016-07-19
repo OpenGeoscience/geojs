@@ -1,3 +1,5 @@
+/* globals $, d3, geo, utils */
+
 // Run after the DOM loads
 $(function () {
   'use strict';
@@ -9,15 +11,7 @@ $(function () {
     center: {x: 28.9550, y: 41.0136}
   });
 
-  // Parse query parameters into an object for ease of access
-  var query = document.location.search.replace(/(^\?)/, '').split(
-    '&').map(function (n) {
-      n = n.split('=');
-      if (n[0]) {
-        this[decodeURIComponent(n[0])] = decodeURIComponent(n[1]);
-      }
-      return this;
-    }.bind({}))[0];
+  var query = utils.getQuery();
 
   if (query.test) {
     $('#test').removeClass('hidden');
@@ -25,8 +19,7 @@ $(function () {
 
   // Add an OSM layer
   map.createLayer('osm', {
-    baseUrl: 'http://otile1.mqcdn.com/tiles/1.0.0/map',
-    renderer: query.renderer ? (query.renderer === 'html' ? null : query.renderer) : 'vgl'
+    renderer: query.renderer ? (query.renderer === 'html' ? null : query.renderer) : undefined
   });
 
   // Bind button clicks to map transitions
