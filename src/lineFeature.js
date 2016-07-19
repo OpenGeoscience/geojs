@@ -118,7 +118,8 @@ var lineFeature = function (arg) {
 
     // for each line
     data.forEach(function (d, index) {
-      var last = null;
+      var closed = m_this.style.get('closed')(d, index),
+          last, first;
 
       try {
         line(d, index).forEach(function (current, j) {
@@ -132,14 +133,19 @@ var lineFeature = function (arg) {
           if (last) {
             // test the line segment s -> last
             if (lineDist2(pt, s, last) <= r) {
-
               // short circuit the loop here
               throw 'found';
             }
           }
 
           last = s;
+          if (!first && closed) {
+            first = {s: s, r: r};
+          }
         });
+        if (closed && lineDist2(pt, last, first.s) <= first.r) {
+          throw 'found';
+        }
       } catch (err) {
         if (err !== 'found') {
           throw err;
@@ -202,13 +208,14 @@ var lineFeature = function (arg) {
     var defaultStyle = $.extend(
       {},
       {
-        'strokeWidth': 1.0,
+        strokeWidth: 1.0,
         // Default to gold color for lines
-        'strokeColor': { r: 1.0, g: 0.8431372549, b: 0.0 },
-        'strokeStyle': 'solid',
-        'strokeOpacity': 1.0,
-        'line': function (d) { return d; },
-        'position': function (d) { return d; }
+        strokeColor: { r: 1.0, g: 0.8431372549, b: 0.0 },
+        strokeStyle: 'solid',
+        strokeOpacity: 1.0,
+        closed: false,
+        line: function (d) { return d; },
+        position: function (d) { return d; }
       },
       arg.style === undefined ? {} : arg.style
     );

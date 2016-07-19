@@ -191,7 +191,7 @@ describe('geo.polygonFeature', function () {
       glCounts = $.extend({}, vgl.mockCounts());
     });
     waitForIt('next render gl A', function () {
-      return vgl.mockCounts().createProgram === (glCounts.createProgram || 0) + 2;
+      return vgl.mockCounts().createProgram >= (glCounts.createProgram || 0) + 2;
     });
     it('update the style', function () {
       polygons.style('fillColor', function (d) {
