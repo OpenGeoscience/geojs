@@ -407,6 +407,7 @@ var gl_lineFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
     m_this.renderer().contextRenderer().removeActor(m_actor);
+    m_actor = null;
     s_exit();
   };
 

@@ -282,7 +282,7 @@ var pointFeature = function (arg) {
     });
 
     return {
-      data: found,
+      found: found,
       index: ifound
     };
   };
