@@ -291,6 +291,71 @@
     },
 
     /**
+     * Ensure that the event and modifiers properties of all actions are
+     * objects, not plain strings.
+     *
+     * @param {Array} actions: an array of actions to adjust as needed.
+     */
+    adjustEventActions: function (actions) {
+      var action, i;
+      for (i = 0; i < actions.length; i += 1) {
+        action = actions[i];
+        if ($.type(action.event) === 'string') {
+          var actionEvents = {};
+          actionEvents[action.event] = true;
+          action.event = actionEvents;
+        }
+        if (!action.modifiers) {
+          action.modifiers = {};
+        }
+        if ($.type(action.modifiers) === 'string') {
+          var actionModifiers = {};
+          actionModifiers[action.modifiers] = true;
+          action.modifiers = actionModifiers;
+        }
+      }
+    },
+
+    /**
+     * Determine if the current events and modifiers match a known action.
+     *
+     * @param {object} events: an object where each event that is currently
+     *    active is truthy.  Common events are left, right, middle, wheel.
+     & @param {object} modifiers: an object where each currently applied
+     *    modifier is truthy.  Common modifiers are shift, ctrl, alt, meta.
+     * @param {Array} actions: a list of actions to compare to the events and
+     *    modifiers.  The first action that matches will be returned.
+     * @returns action A matching action or undefined.
+     */
+    eventMatch: function (events, modifiers, actions) {
+      var matched;
+
+      /* actions must have already been processed by adjustActions */
+      if (actions.some(function (action) {
+        for (var event in action.event) {
+          if (action.event.hasOwnProperty(event)) {
+            if ((action.event[event] === false && events[event]) ||
+                (action.event[event] && !events[event])) {
+              return false;
+            }
+          }
+        }
+        for (var modifier in action.modifiers) {
+          if (action.modifiers.hasOwnProperty(modifier)) {
+            if ((action.modifiers[modifier] === false && modifiers[modifier]) ||
+                (action.modifiers[modifier] && !modifiers[modifier])) {
+              return false;
+            }
+          }
+        }
+        matched = action.action;
+        return true;
+      })) {
+        return matched;
+      }
+    },
+
+    /**
      * Report on one or all of the tracked timings.
      *
      * @param {string} name name to report on, or undefined to report all.

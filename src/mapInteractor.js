@@ -24,6 +24,8 @@ var mapInteractor = function (args) {
   var geo_event = require('./event');
   var throttle = require('./util').throttle;
   var debounce = require('./util').debounce;
+  var eventMatch = require('./util').eventMatch;
+  var adjustEventActions = require('./util').adjustEventActions;
   var quadFeature = require('./quadFeature');
 
   var m_options = args || {},
@@ -37,19 +39,8 @@ var mapInteractor = function (args) {
       m_selectionQuad,
       m_paused = false,
       m_clickMaybe = false,
+      m_clickMaybeTimeout,
       m_callZoom = function () {};
-
-  // Helper method to decide if the current button/modifiers match a set of
-  // conditions.
-  // button: 'left' | 'right' | 'middle'
-  // modifiers: [ 'alt' | 'meta' | 'ctrl' | 'shift' ]
-  function eventMatch(button, modifiers) {
-    return (button === 'wheel' || m_mouse.buttons[button]) &&
-      (!!m_mouse.modifiers.alt) === (!!modifiers.alt) &&
-      (!!m_mouse.modifiers.meta) === (!!modifiers.meta) &&
-      (!!m_mouse.modifiers.shift) === (!!modifiers.shift) &&
-      (!!m_mouse.modifiers.ctrl) === (!!modifiers.ctrl);
-  }
 
   // Helper method to calculate the speed from a velocity
   function calcSpeed(v) {
@@ -64,28 +55,66 @@ var mapInteractor = function (args) {
     {
       throttle: 30,
       discreteZoom: false,
-      panMoveButton: 'left',
-      panMoveModifiers: {},
-      zoomMoveButton: 'right',
-      zoomMoveModifiers: {},
-      rotateMoveButton: 'left',
-      rotateMoveModifiers: {ctrl: true},
-      panWheelEnabled: false,
-      panWheelModifiers: {},
-      zoomWheelEnabled: true,
-      zoomWheelModifiers: {},
-      rotateWheelEnabled: true,
-      rotateWheelModifiers: {ctrl: true},
+
+      /* There should only be one action with any specific combination of event
+       * and modifiers.  When that event and modifiers occur, the specified
+       * action is triggered.  The event and modifiers fields can either be a
+       * simple string or an object with multiple entries with each entry set
+       * to true, false, or undefined.  If an object, all values that are
+       * truthy must match, all values that are false must not match, and all
+       * other values that are falsy are ignored.
+       *   Available actions:
+       * pan, zoom, rotate, select, zoomselect, unzoomselect, click
+       *   Available events:
+       * left, right, middle, wheel
+       *   Available modifiers:
+       * shift, ctrl, alt, meta
+       */
+      actions: [{
+        action: 'pan',
+        event: 'left',
+        modifiers: {shift: false, ctrl: false}
+      }, {
+        action: 'zoom',
+        event: 'right',
+        modifiers: {shift: false, ctrl: false}
+      }, {
+        action: 'zoom',
+        event: 'wheel',
+        modifiers: {shift: false, ctrl: false}
+      }, {
+        action: 'rotate',
+        event: 'left',
+        modifiers: {shift: false, ctrl: true}
+      }, {
+        action: 'rotate',
+        event: 'wheel',
+        modifiers: {shift: false, ctrl: true}
+      }, {
+        action: 'select',
+        event: 'left',
+        modifiers: {shift: true, ctrl: true}
+      }, {
+        action: 'zoomselect',
+        event: 'left',
+        modifiers: {shift: true, ctrl: false}
+      }, {
+        action: 'unzoomselect',
+        event: 'right',
+        modifiers: {shift: true, ctrl: false}
+      }],
+
+      click: {
+        enabled: true,
+        buttons: {left: true, right: true, middle: true},
+        duration: 0,
+        cancelOnMove: true
+      },
+
       wheelScaleX: 1,
       wheelScaleY: 1,
       zoomScale: 1,
       rotateWheelScale: 6 * Math.PI / 180,
-      selectionButton: 'left',
-      selectionModifiers: {shift: true, ctrl: true},
-      zoomSelectionButton: 'left',
-      zoomSelectionModifiers: {shift: true},
-      unzoomSelectionButton: 'right',
-      unzoomSelectionModifiers: {shift: true},
       momentum: {
         enabled: true,
         maxSpeed: 2.5,
@@ -97,12 +126,6 @@ var mapInteractor = function (args) {
       spring: {
         enabled: false,
         springConstant: 0.00005
-      },
-      click: {
-        enabled: true,
-        buttons: {left: true, right: true, middle: true},
-        duration: 0,
-        cancelOnMove: true
       },
       zoomAnimation: {
         enabled: true,
@@ -123,41 +146,8 @@ var mapInteractor = function (args) {
   //   // with the given delay.  The default debounce interval is 400 ms.
   //   discreteZoom: boolean | number > 0
   //
-  //   // button that must be pressed to initiate a pan on mousedown
-  //   panMoveButton: 'right' | 'left' | 'middle'
-  //
-  //   // modifier keys that must be pressed to initiate a pan on mousemove
-  //   panMoveModifiers: { 'ctrl' | 'alt' | 'meta' | 'shift' }
-  //
-  //   // button that must be pressed to initiate a zoom on mousedown
-  //   zoomMoveButton: 'right' | 'left' | 'middle'
-  //
-  //   // modifier keys that must be pressed to initiate a zoom on mousemove
-  //   zoomMoveModifiers: { 'ctrl' | 'alt' | 'meta' | 'shift' }
-  //
-  //   // button that must be pressed to initiate a rotate on mousedown
-  //   rotateMoveButton: 'right' | 'left' | 'middle'
-  //
-  //   // modifier keys that must be pressed to initiate a rotate on mousemove
-  //   rotateMoveModifiers: { 'ctrl' | 'alt' | 'meta' | 'shift' }
-  //
-  //   // enable or disable panning with the mouse wheel
-  //   panWheelEnabled: true | false
-  //
-  //   // modifier keys that must be pressed to trigger a pan on wheel
-  //   panWheelModifiers: {...}
-  //
-  //   // enable or disable zooming with the mouse wheel
-  //   zoomWheelEnabled: true | false
-  //
-  //   // modifier keys that must be pressed to trigger a zoom on wheel
-  //   zoomWheelModifiers: {...}
-  //
-  //   // enable or disable rotation with the mouse wheel
-  //   rotateWheelEnabled: true | false
-  //
-  //   // modifier keys that must be pressed to trigger a rotate on wheel
-  //   rotateWheelModifiers: {...}
+  //   // A list of available actions.  See above
+  //   actions: []
   //
   //   // wheel scale factor to change the magnitude of wheel interactions
   //   wheelScaleX: 1
@@ -168,12 +158,6 @@ var mapInteractor = function (args) {
   //
   //   // scale factor to change the magnitude of wheel rotation interactions
   //   rotateWheelScale: 1
-  //
-  //   // button that must be pressed to enable drag selection
-  //    selectionButton: 'right' | 'left' | 'middle'
-  //
-  //   // keyboard modifiers that must be pressed to initiate a selection
-  //   selectionModifiers: {...}
   //
   //   // enable momentum when panning
   //   momentum: {
@@ -408,12 +392,10 @@ var mapInteractor = function (args) {
     $node.on('mouseup.geojs', m_this._handleMouseUp);
     // Disable dragging images and such
     $node.on('dragstart', function () { return false; });
-    if (m_options.panMoveButton === 'right' ||
-        m_options.zoomMoveButton === 'right' ||
-        m_options.rotateMoveButton === 'right' ||
-        m_options.selectionButton === 'right' ||
-        m_options.zoomSelectionButton === 'right' ||
-        m_options.unzoomSelectionButton === 'right') {
+    adjustEventActions(m_options.actions);
+    if (m_options.actions.some(function (action) {
+      return action.event.right && action.action !== 'click';
+    })) {
       $node.on('contextmenu.geojs', function () { return false; });
     }
     return m_this;
@@ -618,6 +600,20 @@ var mapInteractor = function (args) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Set the value of whether a click is possible.  Cancel any outstanding
+   * timer for this process.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._setClickMaybe = function (value) {
+    m_clickMaybe = value;
+    if (m_clickMaybeTimeout) {
+      window.clearTimeout(m_clickMaybeTimeout);
+      m_clickMaybeTimeout = null;
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Handle event when a mouse button is pressed
    */
   ////////////////////////////////////////////////////////////////////////////
@@ -636,29 +632,19 @@ var mapInteractor = function (args) {
         (!m_mouse.buttons.left || m_options.click.buttons.left) &&
         (!m_mouse.buttons.right || m_options.click.buttons.right) &&
         (!m_mouse.buttons.middle || m_options.click.buttons.middle)) {
-      m_clickMaybe = true;
+      m_this._setClickMaybe(true);
       if (m_options.click.duration > 0) {
-        window.setTimeout(function () {
+        m_clickMaybeTimeout = window.setTimeout(function () {
           m_clickMaybe = false;
+          m_clickMaybeTimeout = null;
         }, m_options.click.duration);
       }
     }
-    if (eventMatch(m_options.panMoveButton, m_options.panMoveModifiers)) {
-      action = 'pan';
-    } else if (eventMatch(m_options.zoomMoveButton, m_options.zoomMoveModifiers)) {
-      action = 'zoom';
-    } else if (eventMatch(m_options.rotateMoveButton, m_options.rotateMoveModifiers)) {
-      action = 'rotate';
-    } else if (eventMatch(m_options.selectionButton, m_options.selectionModifiers)) {
-      action = 'select';
-    } else if (eventMatch(m_options.zoomSelectionButton, m_options.zoomSelectionModifiers)) {
-      action = 'zoomselect';
-    } else if (eventMatch(m_options.unzoomSelectionButton, m_options.unzoomSelectionModifiers)) {
-      action = 'unzoomselect';
-    }
+    action = eventMatch(m_mouse.buttons, m_mouse.modifiers, m_options.actions);
 
     // cancel transitions and momentum on click
-    m_this.map().transitionCancel('_handleMouseDown.' + action);
+    m_this.map().transitionCancel(
+        '_handleMouseDown' + (action ? '.' + action : ''));
     m_this.cancel('momentum');
 
     m_mouse.velocity = {
@@ -732,7 +718,7 @@ var mapInteractor = function (args) {
     }
 
     if (m_options.click.cancelOnMove) {
-      m_clickMaybe = false;
+      m_this._setClickMaybe(false);
     }
 
     m_this._getMousePosition(evt);
@@ -768,7 +754,7 @@ var mapInteractor = function (args) {
     m_this._getMouseModifiers(evt);
 
     if (m_options.click.cancelOnMove) {
-      m_clickMaybe = false;
+      m_this._setClickMaybe(false);
     }
     if (m_clickMaybe) {
       return;
@@ -969,7 +955,7 @@ var mapInteractor = function (args) {
     // cancel queued interactions
     m_queue = {};
 
-    m_clickMaybe = false;
+    m_this._setClickMaybe(false);
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
 
@@ -1027,6 +1013,7 @@ var mapInteractor = function (args) {
       return;
     }
 
+    m_this._getMouseButton(evt);
     if (m_clickMaybe) {
       m_this._handleMouseClick(evt);
     }
@@ -1052,7 +1039,7 @@ var mapInteractor = function (args) {
     $(document).off('.geojs');
 
     // reset click detector variable
-    m_clickMaybe = false;
+    m_this._setClickMaybe(false);
 
     // fire a click event
     m_this.map().geoTrigger(geo_event.mouseclick, m_this.mouse());
@@ -1219,16 +1206,9 @@ var mapInteractor = function (args) {
 
       // perform the map navigation event
       m_this._getMouseModifiers(evt);
-      if (m_options.panWheelEnabled &&
-          eventMatch('wheel', m_options.panWheelModifiers)) {
-        action = 'pan';
-      } else if (m_options.zoomWheelEnabled &&
-                 eventMatch('wheel', m_options.zoomWheelModifiers)) {
-        action = 'zoom';
-      } else if (m_options.rotateWheelEnabled &&
-                 eventMatch('wheel', m_options.rotateWheelModifiers)) {
-        action = 'rotate';
-      }
+
+      action = eventMatch({wheel: true}, m_mouse.modifiers, m_options.actions);
+
       if (action) {
         // if we were moving because of momentum or a transition, cancel it and
         // recompute where the mouse action is occuring.

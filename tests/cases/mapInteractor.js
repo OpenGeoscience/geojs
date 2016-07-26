@@ -193,12 +193,10 @@ describe('mapInteractor', function () {
       map: map,
       momentum: {enabled: false},
       zoomAnimation: {enabled: false},
-      panMoveButton: null,
-      panWheelEnabled: true,
-      zoomMoveButton: null,
-      zoomWheelEnabled: false,
-      rotateMoveButton: null,
-      rotateWheelEnabled: false,
+      actions: [{
+        action: 'pan',
+        event: 'wheel'
+      }],
       throttle: false
     });
 
@@ -234,12 +232,10 @@ describe('mapInteractor', function () {
     var interactor = geo.mapInteractor({
       map: map,
       momentum: {enabled: false},
-      panMoveButton: 'left',
-      panWheelEnabled: false,
-      zoomMoveButton: null,
-      zoomWheelEnabled: false,
-      rotateMoveButton: null,
-      rotateWheelEnabled: false,
+      actions: [{
+        action: 'pan',
+        event: 'left'
+      }],
       throttle: false
     });
 
@@ -316,12 +312,10 @@ describe('mapInteractor', function () {
       map: map,
       momentum: {enabled: false},
       zoomAnimation: {enabled: false},
-      panMoveButton: null,
-      panWheelEnabled: false,
-      zoomMoveButton: null,
-      zoomWheelEnabled: true,
-      rotateMoveButton: null,
-      rotateWheelEnabled: false,
+      actions: [{
+        action: 'zoom',
+        event: 'wheel'
+      }],
       throttle: false
     });
 
@@ -357,12 +351,10 @@ describe('mapInteractor', function () {
     var interactor = geo.mapInteractor({
       map: map,
       zoomAnimation: {enabled: false},
-      panMoveButton: null,
-      panWheelEnabled: false,
-      zoomMoveButton: 'right',
-      zoomWheelEnabled: false,
-      rotateMoveButton: null,
-      rotateWheelEnabled: false,
+      actions: [{
+        action: 'zoom',
+        event: 'right'
+      }],
       throttle: false
     });
 
@@ -410,13 +402,10 @@ describe('mapInteractor', function () {
     var interactor = geo.mapInteractor({
       map: map,
       momentum: {enabled: false},
-      panMoveButton: null,
-      panWheelEnabled: false,
-      zoomMoveButton: null,
-      zoomWheelEnabled: false,
-      rotateMoveButton: null,
-      rotateWheelEnabled: true,
-      rotateWheelModifiers: {ctrl: false},
+      actions: [{
+        action: 'rotate',
+        event: 'wheel'
+      }],
       rotateWheelScale: 1,
       throttle: false
     });
@@ -448,13 +437,10 @@ describe('mapInteractor', function () {
 
     var interactor = geo.mapInteractor({
       map: map,
-      panMoveButton: null,
-      panWheelEnabled: false,
-      zoomMoveButton: null,
-      zoomWheelEnabled: false,
-      rotateMoveButton: 'left',
-      rotateMoveModifiers: {ctrl: false},
-      rotateWheelEnabled: false,
+      actions: [{
+        action: 'rotate',
+        event: 'left'
+      }],
       throttle: false
     });
 
@@ -501,16 +487,13 @@ describe('mapInteractor', function () {
 
     var interactor = geo.mapInteractor({
       map: map,
-      panMoveButton: null,
-      panWheelEnabled: false,
-      zoomMoveButton: null,
-      zoomWheelEnabled: false,
-      rotateMoveButton: null,
-      rotateWheelEnabled: false,
-      zoomSelectionButton: 'left',
-      zoomSelectionModifiers: {shift: false},
-      unzoomSelectionButton: 'middle',
-      unzoomSelectionModifiers: {shift: false},
+      actions: [{
+        action: 'zoomselect',
+        event: 'left'
+      }, {
+        action: 'unzoomselect',
+        event: 'middle'
+      }],
       throttle: false
     });
 
@@ -565,16 +548,13 @@ describe('mapInteractor', function () {
 
     var interactor = geo.mapInteractor({
       map: map,
-      panMoveButton: null,
-      panWheelEnabled: false,
-      zoomMoveButton: null,
-      zoomWheelEnabled: false,
-      rotateMoveButton: null,
-      rotateWheelEnabled: false,
-      zoomSelectionButton: 'left',
-      zoomSelectionModifiers: {shift: false},
-      unzoomSelectionButton: 'middle',
-      unzoomSelectionModifiers: {shift: false},
+      actions: [{
+        action: 'zoomselect',
+        event: 'left'
+      }, {
+        action: 'unzoomselect',
+        event: 'middle'
+      }],
       throttle: false
     });
 
@@ -604,14 +584,10 @@ describe('mapInteractor', function () {
 
     var interactor = geo.mapInteractor({
       map: map,
-      panMoveButton: null,
-      panWheelEnabled: false,
-      zoomMoveButton: null,
-      zoomWheelEnabled: false,
-      rotateMoveButton: null,
-      rotateWheelEnabled: false,
-      selectionButton: 'left',
-      selectionModifiers: {shift: false, ctrl: false},
+      actions: [{
+        action: 'select',
+        event: 'left'
+      }],
       throttle: false
     });
     map.geoOn(geo.event.select, function () {
@@ -1167,9 +1143,56 @@ describe('mapInteractor', function () {
   describe('Public utility methods', function () {
     it('options', function () {
       var interactor = geo.mapInteractor();
-      expect(interactor.options().panMoveButton).toBe('left');
-      interactor.options({panMoveButton: 'middle'});
-      expect(interactor.options().panMoveButton).toBe('middle');
+      expect(interactor.options().zoomScale).toBe(1);
+      interactor.options({zoomScale: 1.5});
+      expect(interactor.options().zoomScale).toBe(1.5);
+    });
+  });
+
+  describe('General public utility methods', function () {
+    it('eventMatch', function () {
+      var actions = [{
+        action: 'a',
+        event: 'left',
+        modifiers: 'ctrl'
+      }, {
+        action: 'b',  // unreachable, because a will always trigger
+        event: 'left',
+        modifiers: {ctrl: true, shift: true}
+      }, {
+        action: 'c',
+        event: 'right',
+        modifiers: {ctrl: true, shift: true}
+      }, {
+        action: 'd',
+        event: 'right',
+        modifiers: {ctrl: true, shift: false, alt: true}
+      }, {
+        action: 'e',
+        event: 'right',
+        modifiers: 'ctrl'
+      }, {
+        action: 'f',
+        event: {left: true, right: true}
+      }, {
+        action: 'g',
+        event: 'left'
+      }];
+      geo.util.adjustEventActions(actions);
+      expect(geo.util.eventMatch({wheel: true}, {}, actions)).toBe(undefined);
+      expect(geo.util.eventMatch({left: true}, {}, actions)).toBe('g');
+      expect(geo.util.eventMatch({left: true}, {ctrl: true}, actions)).toBe('a');
+      expect(geo.util.eventMatch({left: true}, {shift: true}, actions)).toBe('g');
+      expect(geo.util.eventMatch({left: true}, {ctrl: true, shift: true}, actions)).toBe('a');
+      expect(geo.util.eventMatch({right: true}, {}, actions)).toBe(undefined);
+      expect(geo.util.eventMatch({right: true}, {ctrl: true}, actions)).toBe('e');
+      expect(geo.util.eventMatch({right: true}, {shift: true}, actions)).toBe(undefined);
+      expect(geo.util.eventMatch({right: true}, {ctrl: true, shift: true}, actions)).toBe('c');
+      expect(geo.util.eventMatch({right: true}, {ctrl: true, shift: true, alt: true}, actions)).toBe('c');
+      expect(geo.util.eventMatch({right: true}, {ctrl: true, shift: false, alt: true}, actions)).toBe('d');
+      expect(geo.util.eventMatch({right: true}, {ctrl: true, shift: false}, actions)).toBe('e');
+      expect(geo.util.eventMatch({left: true, right: true}, {ctrl: true}, actions)).toBe('a');
+      expect(geo.util.eventMatch({left: true, right: true}, {}, actions)).toBe('f');
     });
   });
 
@@ -1179,8 +1202,10 @@ describe('mapInteractor', function () {
     var interactor = geo.mapInteractor({
       map: map,
       momentum: {enabled: true},
-      panMoveButton: 'left',
-      panWheelEnabled: false,
+      actions: [{
+        action: 'pan',
+        event: 'left'
+      }],
       throttle: false
     });
     mockAnimationFrame();
@@ -1232,8 +1257,10 @@ describe('mapInteractor', function () {
       map: map,
       momentum: {enabled: true},  // you must have momentum to have springback
       spring: {enabled: true, springConstant: 0.00005},
-      panMoveButton: 'left',
-      panWheelEnabled: false,
+      actions: [{
+        action: 'pan',
+        event: 'left'
+      }],
       throttle: false
     });
     mockAnimationFrame();
