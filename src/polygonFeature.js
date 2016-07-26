@@ -34,6 +34,8 @@ var feature = require('./feature');
  *   values, or an object with r, g, b on a [0-1] scale.
  * @param {number|Function} [arg.style.strokeOpacity] Opacity for each polygon
  *   stroke.  The opacity can vary by vertex.  Opacity is on a [0-1] scale.
+ * @param {number|Function} [arg.style.strokeWidth] The weight of the polygon
+ *   stroke in pixels.  The width can vary by vertex.
  * @param {boolean|Function} [arg.style.uniformPolygon] Boolean indicating if
  *   each polygon has a uniform style (uniform fill color, fill opacity, stroke
  *   color, and stroke opacity).   Defaults to false.  Can vary by polygon.
@@ -97,6 +99,7 @@ var polygonFeature = function (arg) {
     var ret = s_data(arg);
     if (arg !== undefined) {
       getCoordinates();
+      this._checkForStroke();
     }
     return ret;
   };
@@ -278,7 +281,7 @@ var polygonFeature = function (arg) {
     }
     if (!m_lineFeature) {
       m_lineFeature = m_this.layer().createFeature(
-        'line', {selectionAPI: false});
+        'line', {selectionAPI: false, gcs: this.gcs()});
     }
     var polyStyle = m_this.style();
     m_lineFeature.style({
