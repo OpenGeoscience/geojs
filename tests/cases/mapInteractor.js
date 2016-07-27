@@ -1397,4 +1397,46 @@ describe('mapInteractor', function () {
       expect(map.zoom()).toBe(3);
     });
   });
+  describe('Momemtum and mouse move interaction', function () {
+    var map, interactor;
+    beforeEach(function () {
+      /* we use the actual map as we need it to be a sceneobject */
+      map = create_map({discreteZoom: false, zoom: 2});
+      interactor = geo.mapInteractor({map: map});
+      map.interactor(interactor);
+    });
+    afterEach(function () {
+      map.exit();
+    });
+    it('Test mousemove after momementum', function () {
+      var lastmap;
+
+      function lastmove(evt) {
+        lastmap = evt.map;
+      }
+
+      map.geoOn(geo.event.mousemove, lastmove);
+      interactor.simulateEvent(
+        'mousemove', {map: {x: 4, y: 5}});
+      expect(lastmap).toEqual({x:4, y: 5});
+      interactor.simulateEvent(
+        'mousedown', {map: {x: 10, y: 10}, button: 'left'});
+      expect(lastmap).toEqual({x:4, y: 5});
+      interactor.simulateEvent(
+        'mouseup.geojs', {map: {x: 10, y: 10}, button: 'left'});
+      expect(lastmap).toEqual({x:4, y: 5});
+      interactor.simulateEvent(
+        'mousemove', {map: {x: 17, y: 27}});
+      expect(lastmap).toEqual({x:17, y: 27});
+      interactor.simulateEvent(
+        'mousedown', {map: {x: 30, y: 30}, button: 'right'});
+      expect(lastmap).toEqual({x:17, y: 27});
+      interactor.simulateEvent(
+        'mouseup.geojs', {map: {x: 30, y: 30}, button: 'right'});
+      expect(lastmap).toEqual({x:17, y: 27});
+      interactor.simulateEvent(
+        'mousemove', {map: {x: 47, y: 57}});
+      expect(lastmap).toEqual({x:47, y: 57});
+    });
+  });
 });

@@ -611,7 +611,7 @@ var mapInteractor = function (args) {
       if (!keepQueue) {
         m_queue = {};
       }
-      m_state = {};
+      clearState();
     }
     return out;
   };
@@ -710,6 +710,7 @@ var mapInteractor = function (args) {
         $(document).on('mousemove.geojs', m_this._handleMouseMoveDocument);
       }
       $(document).on('mouseup.geojs', m_this._handleMouseUpDocument);
+      m_state.boundDocumentHandlers = true;
     }
 
   };
@@ -725,7 +726,7 @@ var mapInteractor = function (args) {
       return;
     }
 
-    if (m_state.action) {
+    if (m_state.boundDocumentHandlers) {
       // If currently performing a navigation action, the mouse
       // coordinates will be captured by the document handler.
       return;
@@ -810,6 +811,14 @@ var mapInteractor = function (args) {
     // Prevent default to stop text selection in particular
     evt.preventDefault();
   };
+
+  /**
+   * Clear the action state, but remember if we have bound document handlers.
+   * @private
+   */
+  function clearState() {
+    m_state = {boundDocumentHandlers: m_state.boundDocumentHandlers};
+  }
 
   /**
    * Use interactor options to modify the mouse velocity by momentum
@@ -975,6 +984,7 @@ var mapInteractor = function (args) {
 
     // unbind temporary handlers on document
     $(document).off('.geojs');
+    m_state.boundDocumentHandlers = false;
 
     if (m_mouse.buttons.right) {
       evt.preventDefault();
@@ -997,7 +1007,7 @@ var mapInteractor = function (args) {
 
     // reset the interactor state
     oldAction = m_state.action;
-    m_state = {};
+    clearState();
 
     // if momentum is enabled, start the action here
     if (m_options.momentum.enabled &&
@@ -1050,6 +1060,7 @@ var mapInteractor = function (args) {
 
     // unbind temporary handlers on document
     $(document).off('.geojs');
+    m_state.boundDocumentHandlers = false;
 
     // reset click detector variable
     m_clickMaybe = false;
@@ -1322,7 +1333,7 @@ var mapInteractor = function (args) {
 
       // stop panning when the speed is below the threshold
       if (!v) {
-        m_state = {};
+        clearState();
         return;
       }
 
