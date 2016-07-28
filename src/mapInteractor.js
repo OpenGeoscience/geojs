@@ -719,7 +719,7 @@ var mapInteractor = function (args) {
       return;
     }
 
-    if (m_options.click.cancelOnMove) {
+    if (m_options.click.cancelOnMove && m_clickMaybe) {
       m_this._setClickMaybe(false);
     }
 
