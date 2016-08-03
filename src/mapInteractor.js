@@ -1016,8 +1016,8 @@ var mapInteractor = function (args) {
       var t = (new Date()).valueOf();
       var dt = t - m_mouse.time + m_mouse.deltaTime;
       if (t - m_mouse.time < m_options.momentum.stopTime) {
-        m_mouse.velocity.x = m_mouse.velocity.x * m_mouse.deltaTime / dt;
-        m_mouse.velocity.y = m_mouse.velocity.y * m_mouse.deltaTime / dt;
+        m_mouse.velocity.x *= m_mouse.deltaTime / dt;
+        m_mouse.velocity.y *= m_mouse.deltaTime / dt;
         m_mouse.deltaTime = dt;
       } else {
         m_mouse.velocity.x = m_mouse.velocity.y = 0;
@@ -1311,25 +1311,26 @@ var mapInteractor = function (args) {
     m_state.origAction = origAction;
     m_state.action = 'momentum';
     m_state.origin = m_this.mouse();
+    m_state.momentum = m_this.mouse();
     m_state.start = new Date();
     m_state.handler = function () {
       var v, s, last, dt;
 
-      // Not sure the correct way to do this.  We need the delta t for the
-      // next time step...  Maybe use a better interpolator and the time
-      // parameter from requestAnimationFrame.
-      dt = Math.min(m_mouse.deltaTime, 30);
       if (m_state.action !== 'momentum' ||
           !m_this.map() ||
           m_this.map().transition()) {
         // cancel if a new action was performed
         return;
       }
+      // Not sure the correct way to do this.  We need the delta t for the
+      // next time step...  Maybe use a better interpolator and the time
+      // parameter from requestAnimationFrame.
+      dt = Math.min(m_state.momentum.deltaTime, 30);
 
       last = m_state.start.valueOf();
       m_state.start = new Date();
 
-      v = modifyVelocity(m_mouse.velocity, m_state.start - last);
+      v = modifyVelocity(m_state.momentum.velocity, m_state.start - last);
 
       // stop panning when the speed is below the threshold
       if (!v) {
@@ -1348,18 +1349,18 @@ var mapInteractor = function (args) {
         v.x = 0;
         v.y = 0;
       }
-      m_mouse.velocity.x = v.x;
-      m_mouse.velocity.y = v.y;
+      m_state.momentum.velocity.x = v.x;
+      m_state.momentum.velocity.y = v.y;
 
       switch (m_state.origAction) {
         case 'zoom':
-          var dy = m_mouse.velocity.y * dt;
+          var dy = m_state.momentum.velocity.y * dt;
           m_callZoom(-dy * m_options.zoomScale / 120, m_state);
           break;
         default:
           m_this.map().pan({
-            x: m_mouse.velocity.x * dt,
-            y: m_mouse.velocity.y * dt
+            x: m_state.momentum.velocity.x * dt,
+            y: m_state.momentum.velocity.y * dt
           });
           break;
       }
