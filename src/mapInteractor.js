@@ -636,7 +636,7 @@ var mapInteractor = function (args) {
         (!m_mouse.buttons.left || m_options.click.buttons.left) &&
         (!m_mouse.buttons.right || m_options.click.buttons.right) &&
         (!m_mouse.buttons.middle || m_options.click.buttons.middle)) {
-      m_clickMaybe = true;
+      m_clickMaybe = {x: m_mouse.page.x, y: m_mouse.page.y};
       if (m_options.click.duration > 0) {
         window.setTimeout(function () {
           m_clickMaybe = false;
@@ -768,7 +768,10 @@ var mapInteractor = function (args) {
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
 
-    if (m_options.click.cancelOnMove) {
+    /* Only cancel possible clicks on move if we actually moved */
+    if (m_options.click.cancelOnMove && (m_clickMaybe.x === undefined ||
+        m_mouse.page.x !== m_clickMaybe.x ||
+        m_mouse.page.y !== m_clickMaybe.y)) {
       m_clickMaybe = false;
     }
     if (m_clickMaybe) {
