@@ -127,11 +127,11 @@ var gl_lineFeature = function (arg) {
 
   function createGLLines() {
     var data = m_this.data(),
-        i, j, k, v,
+        i, j, k, v, lidx,
         numSegments = 0, len,
         lineItem, lineItemData,
         vert = [{}, {}], vertTemp,
-        pos, posIdx3,
+        pos, posIdx3, firstpos, firstPosIdx3,
         position = [],
         posFunc = m_this.position(),
         strkWidthFunc = m_this.style.get('strokeWidth'),
@@ -141,7 +141,8 @@ var gl_lineFeature = function (arg) {
         posBuf, nextBuf, prevBuf, offsetBuf, indicesBuf,
         strokeWidthBuf, strokeColorBuf, strokeOpacityBuf,
         dest, dest3,
-        geom = m_mapper.geometryData();
+        geom = m_mapper.geometryData(),
+        closedFunc = m_this.style.get('closed'), closed = [];
 
     for (i = 0; i < data.length; i += 1) {
       lineItem = m_this.line()(data[i], i);
@@ -151,6 +152,19 @@ var gl_lineFeature = function (arg) {
         position.push(pos.x);
         position.push(pos.y);
         position.push(pos.z || 0.0);
+        if (!j) {
+          firstpos = pos;
+        }
+      }
+      if (lineItem.length > 2 && closedFunc(data[i], i)) {
+        /* line is closed */
+        if (pos.x !== firstpos.x || pos.y !== firstpos.y ||
+            pos.z !== firstpos.z) {
+          numSegments += 1;
+          closed[i] = 2;  /* first and last points are distinct */
+        } else {
+          closed[i] = 1;  /* first point is repeated as last point */
+        }
       }
     }
 
@@ -174,8 +188,14 @@ var gl_lineFeature = function (arg) {
 
     for (i = posIdx3 = dest = dest3 = 0; i < data.length; i += 1) {
       lineItem = m_this.line()(data[i], i);
-      for (j = 0; j < lineItem.length; j += 1, posIdx3 += 3) {
-        lineItemData = lineItem[j];
+      firstPosIdx3 = posIdx3;
+      for (j = 0; j < lineItem.length + (closed[i] === 2 ? 1 : 0); j += 1, posIdx3 += 3) {
+        lidx = j;
+        if (j === lineItem.length) {
+          lidx = 0;
+          posIdx3 -= 3;
+        }
+        lineItemData = lineItem[lidx];
         /* swap entries in vert so that vert[0] is the first vertex, and
          * vert[1] will be reused for the second vertex */
         if (j) {
@@ -183,12 +203,15 @@ var gl_lineFeature = function (arg) {
           vert[0] = vert[1];
           vert[1] = vertTemp;
         }
-        vert[1].pos = posIdx3;
-        vert[1].prev = posIdx3 - (j ? 3 : 0);
-        vert[1].next = posIdx3 + (j + 1 < lineItem.length ? 3 : 0);
-        vert[1].strokeWidth = strkWidthFunc(lineItemData, j, lineItem, i);
-        vert[1].strokeColor = strkColorFunc(lineItemData, j, lineItem, i);
-        vert[1].strokeOpacity = strkOpacityFunc(lineItemData, j, lineItem, i);
+        vert[1].pos = j === lidx ? posIdx3 : firstPosIdx3;
+        vert[1].prev = lidx ? posIdx3 - 3 : (closed[i] ?
+            firstPosIdx3 + (lineItem.length - 3 + closed[i]) * 3 : posIdx3);
+        vert[1].next = j + 1 < lineItem.length ? posIdx3 + 3 : (closed[i] ?
+            (j !== lidx ? firstPosIdx3 + 3 : firstPosIdx3 + 6 - closed[i] * 3) :
+            posIdx3);
+        vert[1].strokeWidth = strkWidthFunc(lineItemData, lidx, lineItem, i);
+        vert[1].strokeColor = strkColorFunc(lineItemData, lidx, lineItem, i);
+        vert[1].strokeOpacity = strkOpacityFunc(lineItemData, lidx, lineItem, i);
         if (j) {
           for (k = 0; k < order.length; k += 1, dest += 1, dest3 += 3) {
             v = vert[order[k][0]];
@@ -384,6 +407,7 @@ var gl_lineFeature = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   this._exit = function () {
     m_this.renderer().contextRenderer().removeActor(m_actor);
+    m_actor = null;
     s_exit();
   };
 

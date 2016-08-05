@@ -247,23 +247,14 @@ var polygonFeature = function (arg) {
    * @param {object} item: the polygon.
    * @param {number} itemIndex: the index of the polygon
    * @param {Array} loop: the inner or outer loop.
-   * @param {function} posFunc: a function that gets the coordinates of a
-   *    vertex.  Used to compare the first and last vertices of the polygon.
-   *    If they do not match exactly, the first vertex is added at the end to
-   *    close the polyline.
    * @returns {Array} the loop with the data necessary to send to the position
    *    function for each vertex.
    */
-  this._getLoopData = function (item, itemIndex, loop, posFunc) {
-    var line = [], i, startpos, endpos;
+  this._getLoopData = function (item, itemIndex, loop) {
+    var line = [], i;
 
     for (i = 0; i < loop.length; i += 1) {
       line.push([loop[i], i, item, itemIndex]);
-    }
-    startpos = posFunc(loop[0], 0, item, itemIndex);
-    endpos = posFunc(loop[loop.length - 1], loop.length - 1, item, itemIndex);
-    if (startpos.x !== endpos.x || startpos.y !== endpos.y || startpos.z !== endpos.z) {
-      line.push([loop[0], 0, item, itemIndex]);
     }
     return line;
   };
@@ -291,6 +282,7 @@ var polygonFeature = function (arg) {
     }
     var polyStyle = m_this.style();
     m_lineFeature.style({
+      closed: true,
       strokeWidth: polyStyle.strokeWidth,
       strokeStyle: polyStyle.strokeStyle,
       strokeColor: polyStyle.strokeColor,
@@ -306,10 +298,10 @@ var polygonFeature = function (arg) {
       for (i = 0; i < data.length; i += 1) {
         polygon = m_this.polygon()(data[i], i);
         loop = polygon.outer || (polygon instanceof Array ? polygon : []);
-        lineData.push(m_this._getLoopData(data[i], i, loop, posFunc));
+        lineData.push(m_this._getLoopData(data[i], i, loop));
         if (polygon.inner) {
           polygon.inner.forEach(function (loop) {
-            lineData.push(m_this._getLoopData(data[i], i, loop, posFunc));
+            lineData.push(m_this._getLoopData(data[i], i, loop));
           });
         }
       }
