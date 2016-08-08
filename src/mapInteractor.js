@@ -611,7 +611,7 @@ var mapInteractor = function (args) {
       if (!keepQueue) {
         m_queue = {};
       }
-      m_state = {};
+      clearState();
     }
     return out;
   };
@@ -636,7 +636,7 @@ var mapInteractor = function (args) {
         (!m_mouse.buttons.left || m_options.click.buttons.left) &&
         (!m_mouse.buttons.right || m_options.click.buttons.right) &&
         (!m_mouse.buttons.middle || m_options.click.buttons.middle)) {
-      m_clickMaybe = true;
+      m_clickMaybe = {x: m_mouse.page.x, y: m_mouse.page.y};
       if (m_options.click.duration > 0) {
         window.setTimeout(function () {
           m_clickMaybe = false;
@@ -710,6 +710,7 @@ var mapInteractor = function (args) {
         $(document).on('mousemove.geojs', m_this._handleMouseMoveDocument);
       }
       $(document).on('mouseup.geojs', m_this._handleMouseUpDocument);
+      m_state.boundDocumentHandlers = true;
     }
 
   };
@@ -725,7 +726,7 @@ var mapInteractor = function (args) {
       return;
     }
 
-    if (m_state.action) {
+    if (m_state.boundDocumentHandlers) {
       // If currently performing a navigation action, the mouse
       // coordinates will be captured by the document handler.
       return;
@@ -767,7 +768,10 @@ var mapInteractor = function (args) {
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
 
-    if (m_options.click.cancelOnMove) {
+    /* Only cancel possible clicks on move if we actually moved */
+    if (m_options.click.cancelOnMove && (m_clickMaybe.x === undefined ||
+        m_mouse.page.x !== m_clickMaybe.x ||
+        m_mouse.page.y !== m_clickMaybe.y)) {
       m_clickMaybe = false;
     }
     if (m_clickMaybe) {
@@ -810,6 +814,14 @@ var mapInteractor = function (args) {
     // Prevent default to stop text selection in particular
     evt.preventDefault();
   };
+
+  /**
+   * Clear the action state, but remember if we have bound document handlers.
+   * @private
+   */
+  function clearState() {
+    m_state = {boundDocumentHandlers: m_state.boundDocumentHandlers};
+  }
 
   /**
    * Use interactor options to modify the mouse velocity by momentum
@@ -975,6 +987,7 @@ var mapInteractor = function (args) {
 
     // unbind temporary handlers on document
     $(document).off('.geojs');
+    m_state.boundDocumentHandlers = false;
 
     if (m_mouse.buttons.right) {
       evt.preventDefault();
@@ -997,7 +1010,7 @@ var mapInteractor = function (args) {
 
     // reset the interactor state
     oldAction = m_state.action;
-    m_state = {};
+    clearState();
 
     // if momentum is enabled, start the action here
     if (m_options.momentum.enabled &&
@@ -1006,8 +1019,8 @@ var mapInteractor = function (args) {
       var t = (new Date()).valueOf();
       var dt = t - m_mouse.time + m_mouse.deltaTime;
       if (t - m_mouse.time < m_options.momentum.stopTime) {
-        m_mouse.velocity.x = m_mouse.velocity.x * m_mouse.deltaTime / dt;
-        m_mouse.velocity.y = m_mouse.velocity.y * m_mouse.deltaTime / dt;
+        m_mouse.velocity.x *= m_mouse.deltaTime / dt;
+        m_mouse.velocity.y *= m_mouse.deltaTime / dt;
         m_mouse.deltaTime = dt;
       } else {
         m_mouse.velocity.x = m_mouse.velocity.y = 0;
@@ -1050,6 +1063,7 @@ var mapInteractor = function (args) {
 
     // unbind temporary handlers on document
     $(document).off('.geojs');
+    m_state.boundDocumentHandlers = false;
 
     // reset click detector variable
     m_clickMaybe = false;
@@ -1300,29 +1314,30 @@ var mapInteractor = function (args) {
     m_state.origAction = origAction;
     m_state.action = 'momentum';
     m_state.origin = m_this.mouse();
+    m_state.momentum = m_this.mouse();
     m_state.start = new Date();
     m_state.handler = function () {
       var v, s, last, dt;
 
-      // Not sure the correct way to do this.  We need the delta t for the
-      // next time step...  Maybe use a better interpolator and the time
-      // parameter from requestAnimationFrame.
-      dt = Math.min(m_mouse.deltaTime, 30);
       if (m_state.action !== 'momentum' ||
           !m_this.map() ||
           m_this.map().transition()) {
         // cancel if a new action was performed
         return;
       }
+      // Not sure the correct way to do this.  We need the delta t for the
+      // next time step...  Maybe use a better interpolator and the time
+      // parameter from requestAnimationFrame.
+      dt = Math.min(m_state.momentum.deltaTime, 30);
 
       last = m_state.start.valueOf();
       m_state.start = new Date();
 
-      v = modifyVelocity(m_mouse.velocity, m_state.start - last);
+      v = modifyVelocity(m_state.momentum.velocity, m_state.start - last);
 
       // stop panning when the speed is below the threshold
       if (!v) {
-        m_state = {};
+        clearState();
         return;
       }
 
@@ -1337,18 +1352,18 @@ var mapInteractor = function (args) {
         v.x = 0;
         v.y = 0;
       }
-      m_mouse.velocity.x = v.x;
-      m_mouse.velocity.y = v.y;
+      m_state.momentum.velocity.x = v.x;
+      m_state.momentum.velocity.y = v.y;
 
       switch (m_state.origAction) {
         case 'zoom':
-          var dy = m_mouse.velocity.y * dt;
+          var dy = m_state.momentum.velocity.y * dt;
           m_callZoom(-dy * m_options.zoomScale / 120, m_state);
           break;
         default:
           m_this.map().pan({
-            x: m_mouse.velocity.x * dt,
-            y: m_mouse.velocity.y * dt
+            x: m_state.momentum.velocity.x * dt,
+            y: m_state.momentum.velocity.y * dt
           });
           break;
       }
