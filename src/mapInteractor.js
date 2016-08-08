@@ -497,11 +497,12 @@ var mapInteractor = function (args) {
     };
     try {
       m_mouse.geo = m_this.map().displayToGcs(m_mouse.map);
+      m_mouse.mapgcs = m_this.map().displayToGcs(m_mouse.map, null);
     } catch (e) {
       // catch georeferencing problems and move on
       // needed for handling the map before the base layer
       // is attached
-      m_mouse.geo = null;
+      m_mouse.geo = m_mouse.mapgcs = null;
     }
   };
 
@@ -792,7 +793,7 @@ var mapInteractor = function (args) {
     m_state.delta.y += dy;
 
     if (m_state.action === 'pan') {
-      m_this.map().pan({x: dx, y: dy});
+      m_this.map().pan({x: dx, y: dy}, undefined, 'limited');
     } else if (m_state.action === 'zoom') {
       m_callZoom(-dy * m_options.zoomScale / 120, m_state);
     } else if (m_state.action === 'rotate') {
@@ -1080,12 +1081,12 @@ var mapInteractor = function (args) {
    */
   ////////////////////////////////////////////////////////////////////////////
   function debounced_zoom() {
-    var deltaZ = 0, delay = 400, direction, startZoom, targetZoom;
+    var deltaZ = 0, delay = 400, origin, startZoom, targetZoom;
 
-    function accum(dz, dir) {
+    function accum(dz, org) {
       var map = m_this.map(), zoom;
 
-      direction = dir;
+      origin = $.extend(true, {}, org);
       deltaZ += dz;
       if (targetZoom === undefined) {
         startZoom = targetZoom = map.zoom();
@@ -1103,7 +1104,7 @@ var mapInteractor = function (args) {
         // value
         deltaZ = deltaZ + map.zoom() - zoom;
 
-        map.zoom(zoom, direction);
+        map.zoom(zoom, origin);
       }
 
     }
@@ -1122,7 +1123,7 @@ var mapInteractor = function (args) {
           map.transitionCancel('debounced_zoom.zoom');
           map.transition({
             zoom: zoom,
-            zoomOrigin: direction,
+            zoomOrigin: origin,
             duration: m_options.zoomAnimation.duration,
             ease: m_options.zoomAnimation.ease,
             done: function (status) {
@@ -1149,7 +1150,7 @@ var mapInteractor = function (args) {
             // round off the zoom to an integer and throw away the rest
             zoom = Math.round(zoom);
           }
-          map.zoom(zoom, direction);
+          map.zoom(zoom, origin);
         }
       }
       deltaZ = 0;
@@ -1162,12 +1163,12 @@ var mapInteractor = function (args) {
             !m_options.zoomAnimation.enabled) {
       return debounce(delay, false, apply, accum);
     } else {
-      return function (dz, dir) {
+      return function (dz, org) {
         if (!dz && targetZoom === undefined) {
           return;
         }
-        accum(dz, dir);
-        apply(dz, dir);
+        accum(dz, org);
+        apply(dz, org);
       };
     }
   }
@@ -1250,13 +1251,14 @@ var mapInteractor = function (args) {
         recompute |= m_this.cancel('momentum', true);
         if (recompute) {
           m_mouse.geo = m_this.map().displayToGcs(m_mouse.map);
+          m_mouse.mapgcs = m_this.map().displayToGcs(m_mouse.map, null);
         }
         switch (action) {
           case 'pan':
             m_this.map().pan({
               x: m_queue.scroll.x,
               y: m_queue.scroll.y
-            });
+            }, undefined, 'limited');
             break;
           case 'zoom':
             zoomFactor = -m_queue.scroll.y;
@@ -1364,7 +1366,7 @@ var mapInteractor = function (args) {
           m_this.map().pan({
             x: m_state.momentum.velocity.x * dt,
             y: m_state.momentum.velocity.y * dt
-          });
+          }, undefined, 'limited');
           break;
       }
 
