@@ -35,12 +35,25 @@ var gl_quadFeature = function (arg) {
       m_glCompileTimestamp = vgl.timestamp(),
       m_glColorCompileTimestamp = vgl.timestamp(),
       m_quads;
+  var fragmentShaderImageSource = [
+    'varying highp vec2 iTextureCoord;',
+    'uniform sampler2D sampler2d;',
+    'uniform mediump float opacity;',
+    'uniform highp vec2 crop;',
+    'void main(void) {',
+    '  mediump vec4 color = texture2D(sampler2d, iTextureCoord);',
+    '  if (iTextureCoord.s > crop.s || 1.0 - iTextureCoord.t > crop.t) {',
+    '    return;',
+    '  }',
+    '  color.w *= opacity;',
+    '  gl_FragColor = color;',
+    '}'].join('\n');
   var vertexShaderImageSource = [
     'attribute vec3 vertexPosition;',
-    'attribute vec3 textureCoord;',
+    'attribute vec2 textureCoord;',
     'uniform mat4 modelViewMatrix;',
     'uniform mat4 projectionMatrix;',
-    'varying highp vec3 iTextureCoord;',
+    'varying highp vec2 iTextureCoord;',
     'void main(void) {',
     '  gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
     '  iTextureCoord = textureCoord;',
@@ -51,7 +64,6 @@ var gl_quadFeature = function (arg) {
     'uniform mat4 modelViewMatrix;',
     'uniform mat4 projectionMatrix;',
     'varying mediump vec3 iVertexColor;',
-    'varying highp vec3 iTextureCoord;',
     'void main(void) {',
     '  gl_Position = projectionMatrix * modelViewMatrix * vec4(vertexPosition, 1.0);',
     '  iVertexColor = vertexColor;',
@@ -135,7 +147,7 @@ var gl_quadFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._build = function () {
-    var mapper, mat, prog, srctex, geom;
+    var mapper, mat, prog, srctex, unicrop, geom;
 
     if (!m_this.position()) {
       return;
@@ -159,9 +171,13 @@ var gl_quadFeature = function (arg) {
       prog.addUniform(m_modelViewUniform);
       prog.addUniform(new vgl.projectionUniform('projectionMatrix'));
       prog.addUniform(new vgl.floatUniform('opacity', 1.0));
+      unicrop = new vgl.uniform(vgl.GL.FLOAT_VEC2, 'crop');
+      unicrop.set([1.0, 1.0]);
+      prog.addUniform(unicrop);
       prog.addShader(vgl.getCachedShader(
           vgl.GL.VERTEX_SHADER, vgl.GL, vertexShaderImageSource));
-      prog.addShader(vgl.utils.createRgbaTextureFragmentShader(vgl.GL));
+      prog.addShader(vgl.getCachedShader(
+          vgl.GL.FRAGMENT_SHADER, vgl.GL, fragmentShaderImageSource));
       mat.addAttribute(prog);
       mat.addAttribute(new vgl.blend());
       /* This is similar to vgl.planeSource */
@@ -310,7 +326,9 @@ var gl_quadFeature = function (arg) {
     }
     mapper.s_render(renderState, true);
 
-    var context = renderState.m_context, opacity = 1;
+    var context = renderState.m_context,
+        opacity = 1,
+        crop = {x: 1, y: 1}, quadcrop;
 
     m_this._updateTextures();
 
@@ -326,7 +344,12 @@ var gl_quadFeature = function (arg) {
         context.uniform1fv(renderState.m_material.shaderProgram(
             ).uniformLocation('opacity'), new Float32Array([opacity]));
       }
-
+      quadcrop = quad.crop || {x: 1, y: 1};
+      if (!crop || quadcrop.x !== crop.x || quadcrop.y !== crop.y) {
+        crop = quadcrop;
+        context.uniform2fv(renderState.m_material.shaderProgram(
+            ).uniformLocation('crop'), new Float32Array([crop.x, crop.y]));
+      }
       context.bindBuffer(vgl.GL.ARRAY_BUFFER, m_glBuffers.imgQuadsPosition);
       context.vertexAttribPointer(vgl.vertexAttributeKeys.Position, 3,
                                   vgl.GL.FLOAT, false, 12, idx * 12 * 4);
@@ -397,6 +420,7 @@ inherit(gl_quadFeature, quadFeature);
 var capabilities = {};
 capabilities[quadFeature.capabilities.color] = true;
 capabilities[quadFeature.capabilities.image] = true;
+capabilities[quadFeature.capabilities.imageCrop] = true;
 capabilities[quadFeature.capabilities.imageFull] = true;
 
 registerFeature('vgl', 'quad', gl_quadFeature, capabilities);

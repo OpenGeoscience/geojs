@@ -351,7 +351,8 @@ describe('geo.tileLayer', function () {
       tilesAtZoom: function (level) {
         var s = Math.pow(2, level);
         return {x: s, y: Math.ceil(s * 3 / 4)};
-      }
+      },
+      tilesMaxBounds: function () {}
     };
     opts.originalUrl = opts.url;
     it('Check tileLayer options', function () {
