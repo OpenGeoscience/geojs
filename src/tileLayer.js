@@ -279,13 +279,13 @@ module.exports = (function () {
       var level = tile.index.level,
           bounds = this._tileBounds(tile);
       if (m_maxBounds[level] === undefined) {
-        m_maxBounds[level] = this.tilesMaxBounds(level);
+        m_maxBounds[level] = this.tilesMaxBounds(level) || null;
       }
       if (m_maxBounds[level] && (bounds.right > m_maxBounds[level].x ||
           bounds.bottom > m_maxBounds[level].y)) {
         return {
-          x: Math.min(m_maxBounds[level].x, bounds.right) - bounds.left,
-          y: Math.min(m_maxBounds[level].y, bounds.bottom) - bounds.top
+          x: Math.max(0, Math.min(m_maxBounds[level].x, bounds.right) - bounds.left),
+          y: Math.max(0, Math.min(m_maxBounds[level].y, bounds.bottom) - bounds.top)
         };
       }
     };

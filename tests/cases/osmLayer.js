@@ -1,6 +1,7 @@
 // Test geo.core.osmLayer
 var geo = require('../test-utils').geo;
 var $ = require('jquery');
+var vgl = require('vgl');
 var mockAnimationFrame = require('../test-utils').mockAnimationFrame;
 var stepAnimationFrame = require('../test-utils').stepAnimationFrame;
 var unmockAnimationFrame = require('../test-utils').unmockAnimationFrame;
@@ -301,10 +302,15 @@ describe('geo.core.osmLayer', function () {
     });
     measure_performance(mapinfo, 'osmLayer-d3-performance');
     it('destroy', destroy_map);
+    it('_drawTile after destruction', function () {
+      // this shouldn't raise an error
+      layer._drawTile('not a tile');
+    });
   });
 
   describe('geo.canvas.osmLayer', function () {
     var layer, mapinfo = {};
+
     it('test that tiles are created', function () {
       // logCanvas2D();
       map = create_map();
@@ -331,10 +337,32 @@ describe('geo.core.osmLayer', function () {
     });
     measure_performance(mapinfo, 'osmLayer-canvas-performance');
     it('destroy', destroy_map);
+    it('_drawTile after destruction', function () {
+      // this shouldn't raise an error
+      layer._drawTile('not a tile');
+    });
+    it('test that partial tiles are handled', function () {
+      map = create_map();
+      layer = map.createLayer('osm', {
+        renderer: 'canvas',
+        url: '/data/white.jpg',
+        tilesMaxBounds: function (level) {
+          var scale = Math.pow(2, 5 - level);
+          // pick some bounds that could be valid at level 5
+          return {x: Math.floor(5602 / scale), y: Math.floor(4148 / scale)};
+        }
+      });
+    });
+    waitForIt('tiles to load', function () {
+      // to truly test this, we would have to check if the canvas drawImage
+      // function is called with eight parameters in some instances
+      return Object.keys(layer.activeTiles).length === 21;
+    });
+    it('destroy', destroy_map);
   });
 
   describe('geo.gl.osmLayer', function () {
-    var layer, mapinfo = {};
+    var layer, mapinfo = {}, glCounts;
 
     it('test that tiles are created', function () {
       map = create_map();
@@ -355,6 +383,29 @@ describe('geo.core.osmLayer', function () {
       return Object.keys(layer.activeTiles).length === 17;
     });
     measure_performance(mapinfo, 'osmLayer-vgl-performance');
+    it('destroy', destroy_map);
+    it('_drawTile after destruction', function () {
+      // this shouldn't raise an error
+      layer._drawTile('not a tile');
+    });
+    it('test that partial tiles are handled', function () {
+      map = create_map();
+      layer = map.createLayer('osm', {
+        renderer: 'vgl',
+        url: '/data/white.jpg',
+        tilesMaxBounds: function (level) {
+          var scale = Math.pow(2, 5 - level);
+          // pick some bounds that could be valid at level 5
+          return {x: Math.floor(5602 / scale), y: Math.floor(4148 / scale)};
+        }
+      });
+      glCounts = $.extend({}, vgl.mockCounts());
+    });
+    waitForIt('tiles to load', function () {
+      return (Object.keys(layer.activeTiles).length === 21 &&
+              vgl.mockCounts().uniform2fv >= (glCounts.uniform2fv || 0) + 9);
+
+    });
     it('destroy', destroy_map);
   });
 });
