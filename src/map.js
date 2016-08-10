@@ -367,6 +367,9 @@ var map = function (arg) {
       return m_zoom;
     }
     var evt, bounds;
+    /* If we are zooming around a point, ignore the clamp bounds */
+    var aroundPoint = (origin && (origin.mapgcs || origin.geo) && origin.map);
+    var ignoreClampBounds = aroundPoint;
 
     /* The ignoreDiscreteZoom flag is intended to allow non-integer zoom values
      * during animation. */
@@ -377,8 +380,8 @@ var map = function (arg) {
 
     m_zoom = val;
 
-    bounds = m_this.boundsFromZoomAndCenter(val, m_center, m_rotation, null,
-                                            ignoreDiscreteZoom);
+    bounds = m_this.boundsFromZoomAndCenter(
+      val, m_center, m_rotation, null, ignoreDiscreteZoom, ignoreClampBounds);
     m_this.modified();
 
     camera_bounds(bounds, m_rotation);
@@ -389,10 +392,11 @@ var map = function (arg) {
     };
     m_this.geoTrigger(geo_event.zoom, evt);
 
-    if (origin && origin.geo && origin.map) {
-      var shifted = m_this.gcsToDisplay(origin.geo);
+    if (aroundPoint) {
+      var shifted = m_this.gcsToDisplay(origin.mapgcs || origin.geo,
+                                        origin.mapgcs ? null : undefined);
       m_this.pan({x: origin.map.x - shifted.x, y: origin.map.y - shifted.y},
-                 ignoreDiscreteZoom);
+                 ignoreDiscreteZoom, true);
     } else {
       m_this.pan({x: 0, y: 0}, ignoreDiscreteZoom);
     }
@@ -406,10 +410,13 @@ var map = function (arg) {
    * @param {Object} delta x and y delta in display pixels
    * @param {boolean} ignoreDiscreteZoom if true, ignore the discreteZoom
    *    option when determining the new view.
+   * @param {boolean} ignoreClampBounds if true or 'limited', ignore the
+   *    clampBoundsX options (up to a point, see fix_bounds) when determining
+   *    the new view.
    * @returns {geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.pan = function (delta, ignoreDiscreteZoom) {
+  this.pan = function (delta, ignoreDiscreteZoom, ignoreClampBounds) {
     var evt = {
       geo: {},
       screenDelta: delta
@@ -425,14 +432,17 @@ var map = function (arg) {
       });
     }
     /* If m_clampBounds* is true, clamp the pan */
-    var bounds = fix_bounds(m_camera.bounds, m_rotation);
+    var bounds = m_camera.bounds;
+    bounds = fix_bounds(bounds, m_rotation, ignoreClampBounds === 'limited' ? {
+      x: delta.x, y: delta.y, unit: unit} : undefined,
+      ignoreClampBounds === true);
     if (bounds !== m_camera.bounds) {
       var panPos = m_this.gcsToDisplay({
         x: m_camera.bounds.left, y: m_camera.bounds.top}, null);
       bounds = m_this.boundsFromZoomAndCenter(m_zoom, {
         x: (bounds.left + bounds.right) / 2,
         y: (bounds.top + bounds.bottom) / 2
-      }, m_rotation, null, ignoreDiscreteZoom);
+      }, m_rotation, null, ignoreDiscreteZoom, true);
       camera_bounds(bounds, m_rotation);
       var clampPos = m_this.gcsToDisplay({
         x: m_camera.bounds.left, y: m_camera.bounds.top}, null);
@@ -454,7 +464,8 @@ var map = function (arg) {
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/set the map rotation.  The rotation is performed around the current
-   * view center.
+   * view center.  Rotation mostly ignores clampBoundsX, as the behavior
+   * feels peculiar otherwise.
    *
    * @param {Object} rotation angle in radians (positive is clockwise)
    * @param {Object} origin is specified, rotate about this origin
@@ -466,6 +477,8 @@ var map = function (arg) {
     if (rotation === undefined) {
       return m_rotation;
     }
+    var aroundPoint = (origin && origin.geo && origin.map);
+
     rotation = fix_rotation(rotation, ignoreRotationFunc);
     if (rotation === m_rotation) {
       return m_this;
@@ -473,7 +486,7 @@ var map = function (arg) {
     m_rotation = rotation;
 
     var bounds = m_this.boundsFromZoomAndCenter(
-        m_zoom, m_center, m_rotation, null, ignoreRotationFunc);
+        m_zoom, m_center, m_rotation, null, ignoreRotationFunc, true);
     m_this.modified();
 
     camera_bounds(bounds, m_rotation);
@@ -486,15 +499,16 @@ var map = function (arg) {
 
     m_this.geoTrigger(geo_event.rotate, evt);
 
-    if (origin && origin.geo && origin.map) {
+    if (aroundPoint) {
       var shifted = m_this.gcsToDisplay(origin.geo);
-      m_this.pan({x: origin.map.x - shifted.x, y: origin.map.y - shifted.y});
+      m_this.pan({x: origin.map.x - shifted.x, y: origin.map.y - shifted.y},
+                 undefined, true);
     } else {
-      m_this.pan({x: 0, y: 0});
+      m_this.pan({x: 0, y: 0}, undefined, true);
     }
     /* Changing the rotation can change our minimum zoom */
     reset_minimum_zoom();
-    m_this.zoom(m_zoom, ignoreRotationFunc);
+    m_this.zoom(m_zoom, undefined, ignoreRotationFunc);
     return m_this;
   };
 
@@ -510,10 +524,14 @@ var map = function (arg) {
    *    returned center are converted from the map projection to this gcs.
    * @param {boolean} ignoreDiscreteZoom if true, ignore the discreteZoom
    *    option when determining the new view.
+   * @param {boolean} ignoreClampBounds if true or 'limited', ignore the
+   *    clampBoundsX options (up to a point, see fix_bounds) when determining
+   *    the new view.
    * @returns {Object|geo.map}
    */
   ////////////////////////////////////////////////////////////////////////////
-  this.center = function (coordinates, gcs, ignoreDiscreteZoom) {
+  this.center = function (coordinates, gcs, ignoreDiscreteZoom,
+                          ignoreClampBounds) {
     var center;
     if (coordinates === undefined) {
       center = $.extend({}, m_this.worldToGcs(m_center, gcs));
@@ -521,10 +539,11 @@ var map = function (arg) {
     }
 
     // get the screen coordinates of the new center
-    m_center = $.extend({}, m_this.gcsToWorld(coordinates, gcs));
+    center = m_this.gcsToWorld(coordinates, gcs);
 
     camera_bounds(m_this.boundsFromZoomAndCenter(
-        m_zoom, m_center, m_rotation, null, ignoreDiscreteZoom), m_rotation);
+        m_zoom, center, m_rotation, null, ignoreDiscreteZoom,
+        ignoreClampBounds), m_rotation);
     m_this.modified();
     // trigger a pan event
     m_this.geoTrigger(geo_event.pan, {
@@ -1159,7 +1178,8 @@ var map = function (arg) {
       m_transition.time = time - m_transition.start.time;
       if (time >= m_transition.end.time || next) {
         if (!next) {
-          m_this.center(m_transition.end.center, null);
+          var needZoom = m_zoom !== fix_zoom(m_transition.end.zoom);
+          m_this.center(m_transition.end.center, null, needZoom, needZoom);
           m_this.zoom(m_transition.end.zoom, m_transition.zoomOrigin);
           m_this.rotation(fix_rotation(m_transition.end.rotation));
         }
@@ -1192,9 +1212,9 @@ var map = function (arg) {
         m_this.center({
           x: p[0],
           y: p[1]
-        }, null, true);
+        }, null, true, true);
       } else {
-        m_center = m_this.gcsToWorld({x: p[0], y: p[1]}, null);
+        m_center = m_this.gcsToWorld({x: p[0], y: p[1]}, null, true, true);
         m_this.zoom(p[2], m_transition.zoomOrigin, true);
       }
       m_this.rotation(p[3], undefined, true);
@@ -1388,11 +1408,14 @@ var map = function (arg) {
    *    null to use the map gcs, or any other transform.
    * @param {boolean} ignoreDiscreteZoom if true, ignore the discreteZoom
    *    option when determining the new view.
+   * @param {boolean} ignoreClampBounds if true or 'limited', ignore the
+   *    clampBoundsX options (up to a point, see fix_bounds) when determining
+   *    the new view.
    * @return {geo.geoBounds}
    */
   ////////////////////////////////////////////////////////////////////////////
   this.boundsFromZoomAndCenter = function (zoom, center, rotation, gcs,
-                                           ignoreDiscreteZoom) {
+        ignoreDiscreteZoom, ignoreClampBounds) {
     var width, height, halfw, halfh, bounds, units;
 
     gcs = (gcs === null ? m_gcs : (gcs === undefined ? m_ingcs : gcs));
@@ -1419,7 +1442,7 @@ var map = function (arg) {
       // correct the bounds when clamping is enabled
       bounds.width = width;
       bounds.height = height;
-      bounds = fix_bounds(bounds, rotation);
+      bounds = fix_bounds(bounds, rotation, undefined, ignoreClampBounds);
     } else {
       bounds = {
         left: center.x - halfw + m_origin.x,
@@ -1428,7 +1451,7 @@ var map = function (arg) {
         top: center.y + halfh + m_origin.y
       };
       // correct the bounds when clamping is enabled
-      bounds = fix_bounds(bounds, 0);
+      bounds = fix_bounds(bounds, 0, undefined, ignoreClampBounds);
     }
     if (gcs !== m_gcs) {
       var bds = transform.transformCoordinates(
@@ -1716,12 +1739,24 @@ var map = function (arg) {
   }
 
   /**
-   * Return the nearest valid bounds maintaining the
-   * width and height. Does nothing if m_clampBounds* is
-   * false.
+   * Return the nearest valid bounds maintaining the width and height.  Does
+   * nothing if m_clampBounds* is false.  If a delta is specified, will only
+   * clamp if the out-of-bounds condition would be worse.  If ignoreClampBounds
+   * is true, clamping is applied only to prevent more than half the image from
+   * being off screen.
    * @private
+   * @param {object} bounds: the new bounds to apply in map gcs coordinates.
+   * @param {number} rotation: the angle of rotation in radians.  May be falsy
+   *    to have no rotation.
+   * @param {object} delta: if present, the shift in position in screen
+   *    coordinates.  Bounds will only be adjusted if the bounds would be
+   *    more out of position after the shift.
+   * @param {boolean} ignoreClampBounds: if true and clampBoundX is set, allow
+   *    the bounds to be less clamped.  Specifically, the map's maxBounds can
+   *    be shifted so that they lie no further than the center of the bounds
+   *    (rather than being forced to be at the edge).
    */
-  function fix_bounds(bounds, rotation) {
+  function fix_bounds(bounds, rotation, delta, ignoreClampBounds) {
     if (!m_clampBoundsX && !m_clampBoundsY) {
       return bounds;
     }
@@ -1774,6 +1809,14 @@ var map = function (arg) {
       maxBounds.top += bdy;
       maxBounds.bottom -= bdy;
     }
+    if (ignoreClampBounds) {
+      maxBounds = {
+        left: maxBounds.left - (bounds.right - bounds.left) / 2,
+        right: maxBounds.right + (bounds.right - bounds.left) / 2,
+        top: maxBounds.top - (bounds.bottom - bounds.top) / 2,
+        bottom: maxBounds.bottom + (bounds.bottom - bounds.top) / 2
+      };
+    }
     if (m_clampBoundsX) {
       if (bounds.right - bounds.left > maxBounds.right - maxBounds.left) {
         dx = maxBounds.left - ((bounds.right - bounds.left - (
@@ -1783,7 +1826,10 @@ var map = function (arg) {
       } else if (bounds.right > maxBounds.right) {
         dx = maxBounds.right - bounds.right;
       }
-      if (dx) {
+      if (dx && (!delta || delta.x * dx > 0)) {
+        if (delta && Math.abs(dx) > Math.abs(delta.x * delta.unit)) {
+          dx = Math.abs(delta.x * delta.unit) * dx / Math.abs(dx);
+        }
         bounds = {
           left: bounds.left += dx,
           right: bounds.right += dx,
@@ -1801,7 +1847,10 @@ var map = function (arg) {
       } else if (bounds.bottom < maxBounds.bottom) {
         dy = maxBounds.bottom - bounds.bottom;
       }
-      if (dy) {
+      if (dy && (!delta || -delta.y * dy > 0)) {
+        if (delta && Math.abs(dy) > Math.abs(delta.y * delta.unit)) {
+          dy = Math.abs(delta.y * delta.unit) * dy / Math.abs(dy);
+        }
         bounds = {
           top: bounds.top += dy,
           bottom: bounds.bottom += dy,
@@ -1829,6 +1878,11 @@ var map = function (arg) {
     } else {
       m_camera.bounds = bounds;
     }
+    /* Update the center to what was set. */
+    m_center = {
+      x: (m_camera.bounds.left + m_camera.bounds.right) / 2,
+      y: (m_camera.bounds.top + m_camera.bounds.bottom) / 2
+    };
   }
 
   ////////////////////////////////////////////////////////////////////////////

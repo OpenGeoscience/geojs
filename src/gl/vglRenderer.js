@@ -212,21 +212,9 @@ var vglRenderer = function (arg) {
     });
   };
 
-  // Connect to interactor events
-  // Connect to pan event
+  // Connect to pan event.  This is sufficient, as all zooms and rotations also
+  // produce a pan
   m_this.layer().geoOn(geo_event.pan, function (evt) {
-    void (evt);
-    m_this._updateRendererCamera();
-  });
-
-  // Connect to zoom event
-  m_this.layer().geoOn(geo_event.zoom, function (evt) {
-    void (evt);
-    m_this._updateRendererCamera();
-  });
-
-  // Connect to rotation event
-  m_this.layer().geoOn(geo_event.rotate, function (evt) {
     void (evt);
     m_this._updateRendererCamera();
   });
