@@ -43,7 +43,7 @@ var gl_quadFeature = function (arg) {
     'void main(void) {',
     '  mediump vec4 color = texture2D(sampler2d, iTextureCoord);',
     '  if (iTextureCoord.s > crop.s || 1.0 - iTextureCoord.t > crop.t) {',
-    '    return;',
+    '    discard;',
     '  }',
     '  color.w *= opacity;',
     '  gl_FragColor = color;',
