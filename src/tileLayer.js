@@ -254,8 +254,8 @@ module.exports = (function () {
      * tile bounds.
      *
      * @param {number} level A zoom level
-     * @returns {x: width, y: height} The maximum tile bounds in pixels for the
-     *      specified level, or null if none specified.
+     * @returns {object} {x: width, y: height} The maximum tile bounds in
+     *      pixels for the specified level, or null if none specified.
      */
     this.tilesMaxBounds = function (level) {
       if (this._options.tilesMaxBounds) {
