@@ -17,7 +17,14 @@ var gl_tileLayer = function () {
     var bounds = this._tileBounds(tile),
         level = tile.index.level || 0,
         to = this._tileOffset(level),
+        crop = this.tileCropFromBounds(tile),
         quad = {};
+    if (crop) {
+      quad.crop = {
+        x: crop.x / m_this._options.tileWidth,
+        y: crop.y / m_this._options.tileHeight
+      };
+    }
     quad.ul = this.fromLocal(this.fromLevel({
       x: bounds.left - to.x, y: bounds.top - to.y
     }, level), 0);

@@ -69,7 +69,12 @@ var lineFeature = function (arg) {
   /**
    * Returns an array of datum indices that contain the given point.
    * This is a slow implementation with runtime order of the number of
-   * vertices.
+   * vertices.  A point is considered on a line segment if it is close to the
+   * line or either end point.  Closeness is based on the maximum width of the
+   * line segement, and is ceil(maxwidth / 2) + 2 pixels.  This means that
+   * corner extensions due to mitering may be outside of the selection area and
+   * that variable width lines will have a greater selection region than their
+   * visual size at the narrow end.
    */
   ////////////////////////////////////////////////////////////////////////////
   this.pointSearch = function (p) {
@@ -118,7 +123,8 @@ var lineFeature = function (arg) {
 
     // for each line
     data.forEach(function (d, index) {
-      var last = null;
+      var closed = m_this.style.get('closed')(d, index),
+          last, lastr, first;
 
       try {
         line(d, index).forEach(function (current, j) {
@@ -127,19 +133,25 @@ var lineFeature = function (arg) {
           var p = pos(current, j, d, index);
           var s = m_this.featureGcsToDisplay(p);
           var r = Math.ceil(width(p, j, d, index) / 2) + 2;
-          r = r * r;
 
           if (last) {
+            var r2 = lastr > r ? lastr * lastr : r * r;
             // test the line segment s -> last
-            if (lineDist2(pt, s, last) <= r) {
-
+            if (lineDist2(pt, s, last) <= r2) {
               // short circuit the loop here
               throw 'found';
             }
           }
 
           last = s;
+          lastr = r;
+          if (!first && closed) {
+            first = {s: s, r: r};
+          }
         });
+        if (closed && lineDist2(pt, last, first.s) <= first.r) {
+          throw 'found';
+        }
       } catch (err) {
         if (err !== 'found') {
           throw err;
@@ -150,7 +162,7 @@ var lineFeature = function (arg) {
     });
 
     return {
-      data: found,
+      found: found,
       index: indices
     };
   };
@@ -168,7 +180,7 @@ var lineFeature = function (arg) {
     opts = opts || {};
     opts.partial = opts.partial || false;
     if (opts.partial) {
-      throw 'Unimplemented query method.';
+      throw new Error('Unimplemented query method.');
     }
 
     m_this.data().forEach(function (d, i) {
@@ -197,18 +209,20 @@ var lineFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._init = function (arg) {
+    arg = arg || {};
     s_init.call(m_this, arg);
 
     var defaultStyle = $.extend(
       {},
       {
-        'strokeWidth': 1.0,
+        strokeWidth: 1.0,
         // Default to gold color for lines
-        'strokeColor': { r: 1.0, g: 0.8431372549, b: 0.0 },
-        'strokeStyle': 'solid',
-        'strokeOpacity': 1.0,
-        'line': function (d) { return d; },
-        'position': function (d) { return d; }
+        strokeColor: { r: 1.0, g: 0.8431372549, b: 0.0 },
+        strokeStyle: 'solid',
+        strokeOpacity: 1.0,
+        closed: false,
+        line: function (d) { return d; },
+        position: function (d) { return d; }
       },
       arg.style === undefined ? {} : arg.style
     );
@@ -240,6 +254,7 @@ var lineFeature = function (arg) {
 lineFeature.create = function (layer, spec) {
   'use strict';
 
+  spec = spec || {};
   spec.type = 'line';
   return feature.create(layer, spec);
 };

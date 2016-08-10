@@ -351,7 +351,8 @@ describe('geo.tileLayer', function () {
       tilesAtZoom: function (level) {
         var s = Math.pow(2, level);
         return {x: s, y: Math.ceil(s * 3 / 4)};
-      }
+      },
+      tilesMaxBounds: function () {}
     };
     opts.originalUrl = opts.url;
     it('Check tileLayer options', function () {
@@ -662,6 +663,68 @@ describe('geo.tileLayer', function () {
           left: 2240000, top: 2240000, right: 2560000, bottom: 2560000});
         expect(l.gcsTileBounds({level: 3, x: 3, y: 4})).toEqual({
           left: 960000, top: 1280000, right: 1280000, bottom: 1600000});
+      });
+    });
+    describe('tileCropFromBounds and tilesMaxBounds', function () {
+      var w = 5602, h = 4148,
+          mapOpts = {
+            unitsPerPixel: Math.pow(2, 5),
+            ingcs: '+proj=longlat +axis=esu',
+            gcs: '+proj=longlat +axis=enu',
+            maxBounds: {left: 0, top: 0, right: w, bottom: h},
+            center: {x: w / 2, y: h / 2},
+            max: 5
+          },
+          layerOpts = {
+            url: 'ignored',
+            maxLevel: 5,
+            tileOffset: function () { return {x: 0, y: 0}; },
+            tilesAtZoom: function (level) {
+              var scale = Math.pow(2, 5 - level);
+              return {
+                x: Math.ceil(w / 256 / scale),
+                y: Math.ceil(h / 256 / scale)
+              };
+            }
+          };
+      it('default', function () {
+        var layer = geo.tileLayer($.extend({}, layerOpts, {
+          map: map(mapOpts)
+        }));
+        expect(layer.tilesMaxBounds(0)).toBe(null);
+
+        var tile = layer._getTileCached({x: 21, y: 16, level: 5});
+        expect(layer.tileCropFromBounds(tile)).toBe(undefined);
+      });
+      it('with bounds', function () {
+        var tile;
+        var layer = geo.tileLayer($.extend({}, layerOpts, {
+          map: map(mapOpts),
+          tilesMaxBounds: function (level) {
+            var scale = Math.pow(2, 5 - level);
+            return {
+              x: Math.floor(w / scale),
+              y: Math.floor(h / scale)
+            };
+          }
+        }));
+        expect(layer.tilesMaxBounds(0)).toEqual({x: 175, y: 129});
+        expect(layer.tilesMaxBounds(5)).toEqual({x: w, y: h});
+
+        tile = layer._getTileCached({x: 21, y: 16, level: 5});
+        expect(layer.tileCropFromBounds(tile)).toEqual({x: 226, y: 52});
+
+        tile = layer._getTileCached({x: 4, y: 16, level: 5});
+        expect(layer.tileCropFromBounds(tile)).toEqual({x: 256, y: 52});
+
+        tile = layer._getTileCached({x: 21, y: 6, level: 5});
+        expect(layer.tileCropFromBounds(tile)).toEqual({x: 226, y: 256});
+
+        tile = layer._getTileCached({x: 5, y: 4, level: 3});
+        expect(layer.tileCropFromBounds(tile)).toEqual({x: 120, y: 13});
+
+        tile = layer._getTileCached({x: 0, y: 0, level: 0});
+        expect(layer.tileCropFromBounds(tile)).toEqual({x: 175, y: 129});
       });
     });
   });
@@ -1353,6 +1416,24 @@ describe('geo.tileLayer', function () {
         expect(l.canvas().find('.geo-tile-container').length).toBe(0);
         server.restore();
         console.warn.restore();
+      });
+
+      it('cropped tile', function () {
+        var w = 5602, h = 4148;
+        var l = layer_html({
+          url: function () { return '/data/white.jpg'; },
+          tilesMaxBounds: function (level) {
+            var scale = Math.pow(2, 5 - level);
+            return {
+              x: Math.floor(w / scale),
+              y: Math.floor(h / scale)
+            };
+          }
+        });
+        l.drawTile(l._getTileCached({x: 21, y: 16, level: 5}));
+        var c = l.canvas().find('.geo-tile-container');
+        expect(c.css('width')).toBe('226px');
+        expect(c.css('height')).toBe('52px');
       });
     });
 

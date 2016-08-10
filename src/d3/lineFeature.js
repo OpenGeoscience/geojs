@@ -59,9 +59,7 @@ var d3_lineFeature = function (arg) {
         s_style = m_this.style(),
         m_renderer = m_this.renderer(),
         pos_func = m_this.position(),
-        line = d3.svg.line()
-                .x(function (d) { return m_this.featureGcsToDisplay(d).x; })
-                .y(function (d) { return m_this.featureGcsToDisplay(d).y; });
+        line;
 
     s_update.call(m_this);
     s_style.fill = function () { return false; };
@@ -86,6 +84,11 @@ var d3_lineFeature = function (arg) {
         }
       }
 
+      line = d3.svg.line()
+          .x(function (d) { return m_this.featureGcsToDisplay(d).x; })
+          .y(function (d) { return m_this.featureGcsToDisplay(d).y; })
+          .interpolate(m_this.style.get('closed')(item, idx) && ln.length > 2 ?
+                       'linear-closed' : 'linear');
       // item is an object representing a single line
       // m_this.line()(item) is an array of coordinates
       m_style = {
