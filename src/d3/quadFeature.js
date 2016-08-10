@@ -231,6 +231,7 @@ inherit(d3_quadFeature, quadFeature);
 var capabilities = {};
 capabilities[quadFeature.capabilities.color] = true;
 capabilities[quadFeature.capabilities.image] = true;
+capabilities[quadFeature.capabilities.imageCrop] = false;
 capabilities[quadFeature.capabilities.imageFull] = false;
 
 registerFeature('d3', 'quad', d3_quadFeature, capabilities);

@@ -167,6 +167,10 @@ $(function () {
         y: Math.ceil(h / (layerParams.tileHeight || 256) / scale)
       };
     };
+    layerParams.tilesMaxBounds = function (level) {
+      var scale = Math.pow(2, layerParams.maxLevel - level);
+      return {x: Math.floor(w / scale), y: Math.floor(h / scale)};
+    };
   }
   // Parse additional query options
   if (query.x !== undefined) {
