@@ -10,6 +10,9 @@ var d3_tileLayer = function () {
       m_tiles = [];
 
   this._drawTile = function (tile) {
+    if (!m_quadFeature) {
+      return;
+    }
     var bounds = m_this._tileBounds(tile),
         level = tile.index.level || 0,
         to = this._tileOffset(level),

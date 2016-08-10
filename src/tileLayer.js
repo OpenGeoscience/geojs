@@ -122,6 +122,14 @@ module.exports = (function () {
    *   This function takes a zoom level argument and returns, in units of
    *   pixels, the coordinates of the point (0, 0) at the given zoom level
    *   relative to the bottom left corner of the domain.
+   * @param {function} [options.tileMaxBounds=null]
+   *   This function takes a zoom level argument and returns, in units of
+   *   pixels, the top, left, right, and bottom maximum value for which tiles
+   *   should be drawn at the given zoom level relative to the bottom left
+   *   corner of the domain.  This can be used to crop tiles at the edges of
+   *   tile layer.  Note that if tiles wrap, only complete tiles in the
+   *   wrapping direction(s) are supported, and this max bounds will probably
+   *   not behave properly.
    * @param {bool}   [options.topDown=false]  True if the gcs is top-down,
    *   false if bottom-up (the ingcs does not matter, only the gcs coordinate
    *   system).  When false, this inverts the gcs y-coordinate when calculating
@@ -170,6 +178,7 @@ module.exports = (function () {
     var s_init = this._init,
         s_exit = this._exit,
         m_lastTileSet = [],
+        m_maxBounds = [],
         m_exited;
 
     // copy the options into a private variable
@@ -238,6 +247,47 @@ module.exports = (function () {
       }
       var s = Math.pow(2, level);
       return {x: s, y: s};
+    };
+
+    /**
+     * The maximum tile bounds at the given zoom level, or null if no special
+     * tile bounds.
+     *
+     * @param {number} level A zoom level
+     * @returns {object} {x: width, y: height} The maximum tile bounds in
+     *      pixels for the specified level, or null if none specified.
+     */
+    this.tilesMaxBounds = function (level) {
+      if (this._options.tilesMaxBounds) {
+        return this._options.tilesMaxBounds.call(this, level);
+      }
+      return null;
+    };
+
+    /**
+     * Get the crop values for a tile based on the tilesMaxBounds function.
+     * Returns undefined if the tile should not be cropped.
+     *
+     * @param {object} tile: the tile to compute crop values for.
+     * @returns {object} either undefined or an object with x and y values
+     *      which is the size in pixels for the tile.
+     */
+    this.tileCropFromBounds = function (tile) {
+      if (!this._options.tilesMaxBounds) {
+        return;
+      }
+      var level = tile.index.level,
+          bounds = this._tileBounds(tile);
+      if (m_maxBounds[level] === undefined) {
+        m_maxBounds[level] = this.tilesMaxBounds(level) || null;
+      }
+      if (m_maxBounds[level] && (bounds.right > m_maxBounds[level].x ||
+          bounds.bottom > m_maxBounds[level].y)) {
+        return {
+          x: Math.max(0, Math.min(m_maxBounds[level].x, bounds.right) - bounds.left),
+          y: Math.max(0, Math.min(m_maxBounds[level].y, bounds.bottom) - bounds.top)
+        };
+      }
     };
 
     /**
@@ -718,11 +768,13 @@ module.exports = (function () {
       }
 
       // get the layer node
-      var div = $(this._getSubLayer(tile.index.level)),
+      var level = tile.index.level,
+          div = $(this._getSubLayer(level)),
           bounds = this._tileBounds(tile),
           duration = this._options.animationDuration,
           container = $('<div class="geo-tile-container"/>').attr(
-            'tile-reference', tile.toString());
+            'tile-reference', tile.toString()),
+          crop;
 
       // apply a transform to place the image correctly
       container.append(tile.image);
@@ -731,6 +783,15 @@ module.exports = (function () {
         left: (bounds.left - parseInt(div.attr('offsetx') || 0, 10)) + 'px',
         top: (bounds.top - parseInt(div.attr('offsety') || 0, 10)) + 'px'
       });
+
+      crop = this.tileCropFromBounds(tile);
+      if (crop) {
+        container.css({
+          width: crop.x + 'px',
+          height: crop.y + 'px',
+          overflow: 'hidden'
+        });
+      }
 
       // apply fade in animation
       if (duration > 0) {
@@ -1423,9 +1484,10 @@ module.exports = (function () {
     url: null,
     subdomains: 'abc',
     tileOffset: function (level) {
-      void (level);
+      void level;
       return {x: 0, y: 0};
     },
+    tilesMaxBounds: null,
     topDown: false,
     keepLower: true,
     // cacheSize: 400,  // set depending on keepLower

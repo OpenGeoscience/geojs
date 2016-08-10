@@ -321,9 +321,11 @@ var quadFeature = function (arg) {
           idx: i,
           pos: pos,
           opacity: opacity,
-          color: util.convertColor(colorFunc.call(m_this, d, i)),
-          reference: d.reference
+          color: util.convertColor(colorFunc.call(m_this, d, i))
         };
+        if (d.reference) {
+          quad.reference = d.reference;
+        }
         clrQuads.push(quad);
         quadinfo.clrquad = quad;
       } else {
@@ -340,9 +342,14 @@ var quadFeature = function (arg) {
         quad = {
           idx: i,
           pos: pos,
-          opacity: opacity,
-          reference: d.reference
+          opacity: opacity
         };
+        if (d.reference) {
+          quad.reference = d.reference;
+        }
+        if (d.crop) {
+          quad.crop = d.crop;
+        }
         if (image.complete && image.naturalWidth && image.naturalHeight) {
           quad.image = image;
         } else {
@@ -470,6 +477,8 @@ quadFeature.capabilities = {
   color: 'quad.color',
   /* support for parallelogram images */
   image: 'quad.image',
+  /* support for cropping quad images */
+  imageCrop: 'quad.imageCrop',
   /* support for arbitrary quad images */
   imageFull: 'quad.imageFull'
 };

@@ -90,7 +90,12 @@ var canvas_quadFeature = function (arg) {
         opacity = quad.opacity;
         context2d.globalAlpha = opacity;
       }
-      context2d.drawImage(quad.image, 0, 0);
+      if (!quad.crop) {
+        context2d.drawImage(quad.image, 0, 0);
+      } else {
+        context2d.drawImage(quad.image, 0, 0, quad.crop.x, quad.crop.y, 0, 0,
+                            quad.crop.x, quad.crop.y);
+      }
     });
     if (opacity !== oldAlpha) {
       context2d.globalAlpha = oldAlpha;
@@ -146,6 +151,7 @@ inherit(canvas_quadFeature, quadFeature);
 var capabilities = {};
 capabilities[quadFeature.capabilities.color] = false;
 capabilities[quadFeature.capabilities.image] = true;
+capabilities[quadFeature.capabilities.imageCrop] = true;
 capabilities[quadFeature.capabilities.imageFull] = false;
 
 registerFeature('canvas', 'quad', canvas_quadFeature, capabilities);
