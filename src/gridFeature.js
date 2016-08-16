@@ -52,7 +52,9 @@ var gridFeature = function (arg) {
       m_maxIntensity,
       m_minIntensity,
       m_updateDelay,
-      m_gcsPosition,
+      m_upperLeft,
+      m_lowerRight,
+      m_cellSize, //measured in meters
       s_init = this._init;
 
   m_position = arg.position || function (d) { return d; };
@@ -60,6 +62,9 @@ var gridFeature = function (arg) {
   m_maxIntensity = arg.maxIntensity !== undefined ? arg.maxIntensity : null;
   m_minIntensity = arg.minIntensity !== undefined ? arg.minIntensity : null;
   m_updateDelay = arg.updateDelay ? parseInt(arg.updateDelay, 10) : 1000;
+  m_upperLeft = arg.upperLeft || [-90, -180]
+  m_lowerRight = arg.lowerRight || [90, 180]
+  m_cellSize = arg.cellSize || 1000
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -131,17 +136,6 @@ var gridFeature = function (arg) {
     return m_this;
   };
 
-  ////////////////////////////////////////////////////////////////////////////
-  /**
-   * Get pre-computed gcs position accessor
-   *
-   * @returns {geo.grid}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.gcsPosition = function () {
-    this._update();
-    return m_gcsPosition;
-  };
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -225,7 +219,7 @@ var gridFeature = function (arg) {
     if (setMin && setMax && m_minIntensity === m_maxIntensity) {
       m_minIntensity -= 1;
     }
-    m_gcsPosition = transform.transformCoordinates(
+    transform.transformCoordinates(
         m_this.gcs(), m_this.layer().map().gcs(), position);
 
     m_this.buildTime().modified();
