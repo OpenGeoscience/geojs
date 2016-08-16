@@ -47,7 +47,6 @@ var gridFeature = function (arg) {
    */
   ////////////////////////////////////////////////////////////////////////////
   var m_this = this,
-      m_position,
       m_intensity,
       m_maxIntensity,
       m_minIntensity,
@@ -57,7 +56,6 @@ var gridFeature = function (arg) {
       m_cellSize, //measured in meters
       s_init = this._init;
 
-  m_position = arg.position || function (d) { return d; };
   m_intensity = arg.intensity || function (d) { return 1; };
   m_maxIntensity = arg.maxIntensity !== undefined ? arg.maxIntensity : null;
   m_minIntensity = arg.minIntensity !== undefined ? arg.minIntensity : null;
@@ -120,25 +118,6 @@ var gridFeature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Get/Set position accessor
-   *
-   * @returns {geo.grid}
-   */
-  ////////////////////////////////////////////////////////////////////////////
-  this.position = function (val) {
-    if (val === undefined) {
-      return m_position;
-    } else {
-      m_position = val;
-      m_this.dataTime().modified();
-      m_this.modified();
-    }
-    return m_this;
-  };
-
-
-  ////////////////////////////////////////////////////////////////////////////
-  /**
    * Get/Set intensity
    *
    * @returns {geo.grid}
@@ -166,8 +145,6 @@ var gridFeature = function (arg) {
     var defaultStyle = $.extend(
       {},
       {
-        radius: 10,
-        blurRadius: 10,
         color: {0:    {r: 0, g: 0, b: 0.0, a: 0.0},
                 0.25: {r: 0, g: 0, b: 1, a: 0.5},
                 0.5:  {r: 0, g: 1, b: 1, a: 0.6},
@@ -179,9 +156,7 @@ var gridFeature = function (arg) {
 
     m_this.style(defaultStyle);
 
-    if (m_position) {
       m_this.dataTime().modified();
-    }
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -193,12 +168,10 @@ var gridFeature = function (arg) {
   this._build = function () {
     var data = m_this.data(),
         intensity = null,
-        position = [],
         setMax = (m_maxIntensity === null || m_maxIntensity === undefined),
         setMin = (m_minIntensity === null || m_minIntensity === undefined);
 
     data.forEach(function (d) {
-      position.push(m_this.position()(d));
       if (setMax || setMin) {
         intensity = m_this.intensity()(d);
         if (m_maxIntensity === null || m_maxIntensity === undefined) {

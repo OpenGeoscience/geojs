@@ -124,6 +124,7 @@ $(function () {
         url = '../../data/' + $('#dataset option:selected').attr('url');
     $.ajax(url, {
       success: function (resp) {
+        console.log(resp)
         window.heatmap.datapoints = null;
         var rows;
         switch (dataset) {
