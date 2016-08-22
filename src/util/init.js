@@ -422,12 +422,6 @@
             }
           }
         }
-        if (action.matchFunction) {
-          if (!action.matchFunction.call(this, events, modifiers, actions,
-                                         action)) {
-            return false;
-          }
-        }
         matched = action;
         return true;
       })) {

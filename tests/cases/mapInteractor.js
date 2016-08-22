@@ -1182,6 +1182,68 @@ describe('mapInteractor', function () {
       interactor.options({zoomScale: 1.5});
       expect(interactor.options().zoomScale).toBe(1.5);
     });
+    it('addAction, hasAction, and removeAction', function () {
+      var actions, lenactions;
+      var testActions = [{
+        action: 'action1',
+        name: 'nameA',
+        event: 'right',
+        modifiers: {meta: true}
+      }, {
+        action: 'action2',
+        name: 'nameA',
+        event: 'left',
+        modifiers: {meta: true}
+      }, {
+        action: 'action3',
+        name: 'nameB',
+        event: 'right',
+        modifiers: {meta: true}
+      }];
+      var map = mockedMap('#mapNode1');
+      var interactor = geo.mapInteractor({map: map});
+
+      lenactions = interactor.options().actions.length;
+      interactor.addAction({});
+      expect(interactor.options().actions.length).toBe(lenactions);
+
+      expect(interactor.hasAction(testActions[0])).toBe(null);
+      expect(interactor.hasAction('action1')).toBe(null);
+      expect(interactor.hasAction('action1', 'nameA')).toBe(null);
+      expect(interactor.hasAction(undefined, 'nameA')).toBe(null);
+      interactor.addAction(testActions[0], true);
+      actions = interactor.options().actions;
+      expect(actions.length).toBe(lenactions + 1);
+      expect(actions[actions.length - 1]).toBe(testActions[0]);
+      expect(interactor.hasAction(testActions[0])).toBe(testActions[0]);
+      expect(interactor.hasAction('action1')).toBe(testActions[0]);
+      expect(interactor.hasAction('action1', 'nameA')).toBe(testActions[0]);
+      expect(interactor.hasAction(undefined, 'nameA')).toBe(testActions[0]);
+
+      expect(interactor.hasAction(testActions[1])).toBe(null);
+      expect(interactor.hasAction('action2')).toBe(null);
+      expect(interactor.hasAction('action2', 'nameA')).toBe(null);
+      expect(interactor.hasAction(undefined, 'nameA')).toBe(testActions[0]);
+      interactor.addAction(testActions[1]);
+      actions = interactor.options().actions;
+      expect(actions[0]).toBe(testActions[1]);
+      expect(interactor.hasAction(testActions[1])).toBe(testActions[1]);
+      expect(interactor.hasAction('action2')).toBe(testActions[1]);
+      expect(interactor.hasAction('action2', 'nameA')).toBe(testActions[1]);
+      expect(interactor.hasAction(undefined, 'nameA')).toBe(testActions[1]);
+
+      interactor.addAction(testActions[2]);
+      expect(interactor.hasAction(testActions[2])).toBe(testActions[2]);
+      expect(interactor.removeAction('action3')).toBe(1);
+      expect(interactor.hasAction(testActions[2])).toBe(null);
+      expect(interactor.removeAction('action3')).toBe(0);
+
+      expect(interactor.removeAction(undefined, 'nameA')).toBe(2);
+      expect(interactor.hasAction('action1')).toBe(null);
+      expect(interactor.hasAction('action2')).toBe(null);
+      expect(interactor.hasAction(undefined, 'nameA')).toBe(null);
+      expect(interactor.removeAction(undefined, 'nameA')).toBe(0);
+    });
   });
 
   describe('General public utility methods', function () {

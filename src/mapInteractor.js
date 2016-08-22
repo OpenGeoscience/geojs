@@ -1473,7 +1473,7 @@ var mapInteractor = function (args) {
       return;
     }
     util.addEventAction(m_options.actions, action, toEnd);
-    if (m_options.actions.some(function (action) {
+    if (m_options.map && m_options.actions.some(function (action) {
       return action.event.right && action.action !== 'click';
     })) {
       $node.off('contextmenu.geojs');
@@ -1509,7 +1509,7 @@ var mapInteractor = function (args) {
   this.removeAction = function (action, name, owner) {
     var removed = util.removeEventAction(
         m_options.actions, action, name, owner);
-    if (!m_options.actions.some(function (action) {
+    if (m_options.map && !m_options.actions.some(function (action) {
       return action.event.right && action.action !== 'click';
     })) {
       $node.off('contextmenu.geojs');
