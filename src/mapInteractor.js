@@ -1,5 +1,6 @@
 var inherit = require('./inherit');
 var object = require('./object');
+var util = require('./util');
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -25,7 +26,6 @@ var mapInteractor = function (args) {
   var throttle = require('./util').throttle;
   var debounce = require('./util').debounce;
   var eventMatch = require('./util').eventMatch;
-  var adjustEventActions = require('./util').adjustEventActions;
   var quadFeature = require('./quadFeature');
 
   var m_options = args || {},
@@ -69,6 +69,19 @@ var mapInteractor = function (args) {
        * left, right, middle, wheel
        *   Available modifiers:
        * shift, ctrl, alt, meta
+       *   Useful fields:
+       * action: the name of the action.  Multiple events may trigger the same
+       *    action.
+       * event: the name of the event or an object with event names for keys
+       *    and boolean values that indicates the combination of events that
+       *    trigger this action.
+       * modifiers: the name of a modifier or an object with modifier names for
+       *    keys and boolean values that indicates the combination of modifiers
+       *    that trigger this action.
+       * selectionRectangle: true if a selection rectangle should be shown
+       *    during the action.
+       * name: a string that can be used to reference this action.
+       * owner: a string that can be used to reference this action.
        */
       actions: [{
         action: 'pan',
@@ -93,15 +106,18 @@ var mapInteractor = function (args) {
       }, {
         action: 'select',
         event: 'left',
-        modifiers: {shift: true, ctrl: true}
+        modifiers: {shift: true, ctrl: true},
+        selectionRectangle: true
       }, {
         action: 'zoomselect',
         event: 'left',
-        modifiers: {shift: true, ctrl: false}
+        modifiers: {shift: true, ctrl: false},
+        selectionRectangle: true
       }, {
         action: 'unzoomselect',
         event: 'right',
-        modifiers: {shift: true, ctrl: false}
+        modifiers: {shift: true, ctrl: false},
+        selectionRectangle: true
       }],
 
       click: {
@@ -392,7 +408,7 @@ var mapInteractor = function (args) {
     $node.on('mouseup.geojs', m_this._handleMouseUp);
     // Disable dragging images and such
     $node.on('dragstart', function () { return false; });
-    adjustEventActions(m_options.actions);
+    util.adjustEventActions(m_options.actions);
     if (m_options.actions.some(function (action) {
       return action.event.right && action.action !== 'click';
     })) {
@@ -619,7 +635,7 @@ var mapInteractor = function (args) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._handleMouseDown = function (evt) {
-    var action = null;
+    var action, actionRecord;
 
     if (m_paused) {
       return;
@@ -641,7 +657,9 @@ var mapInteractor = function (args) {
         }, m_options.click.duration);
       }
     }
-    action = eventMatch(m_mouse.buttons, m_mouse.modifiers, m_options.actions);
+    actionRecord = eventMatch(m_mouse.buttons, m_mouse.modifiers,
+                              m_options.actions);
+    action = (actionRecord || {}).action;
 
     // cancel transitions and momentum on click
     m_this.map().transitionCancel(
@@ -662,11 +680,12 @@ var mapInteractor = function (args) {
       // store the state object
       m_state = {
         action: action,
+        actionRecord: actionRecord,
         origin: $.extend(true, {}, m_mouse),
         delta: {x: 0, y: 0}
       };
 
-      if (action === 'select' || action === 'zoomselect' || action === 'unzoomselect') {
+      if (actionRecord.selectionRectangle) {
         // Make sure the old selection layer is gone.
         if (m_selectionLayer) {
           m_selectionLayer.clear();
@@ -683,6 +702,8 @@ var mapInteractor = function (args) {
         });
         m_this.map().geoTrigger(geo_event.brushstart, m_this._getSelection());
       }
+      m_this.map().geoTrigger(geo_event.actiondown, {
+        state: m_this.state(), mouse: m_this.mouse(), event: evt});
 
       // bind temporary handlers to document
       if (m_options.throttle > 0) {
@@ -792,11 +813,13 @@ var mapInteractor = function (args) {
       cx = m_mouse.map.x - m_this.map().size().width / 2;
       cy = m_mouse.map.y - m_this.map().size().height / 2;
       m_this.map().rotation(m_state.origin.rotation + Math.atan2(cy, cx));
-    } else if (m_state.action === 'select' || m_state.action === 'zoomselect' || m_state.action === 'unzoomselect') {
+    } else if (m_state.actionRecord.selectionRectangle) {
       // Get the bounds of the current selection
       selectionObj = m_this._getSelection();
       m_this.map().geoTrigger(geo_event.brush, selectionObj);
     }
+    m_this.map().geoTrigger(geo_event.actionmove, {
+      state: m_this.state(), mouse: m_this.mouse(), event: evt});
 
     // Prevent default to stop text selection in particular
     evt.preventDefault();
@@ -980,7 +1003,7 @@ var mapInteractor = function (args) {
       evt.preventDefault();
     }
 
-    if (m_state.action === 'select' || m_state.action === 'zoomselect' || m_state.action === 'unzoomselect') {
+    if (m_state.actionRecord && m_state.actionRecord.selectionRectangle) {
       m_this._getMousePosition(evt);
       selectionObj = m_this._getSelection();
 
@@ -990,10 +1013,18 @@ var mapInteractor = function (args) {
       m_selectionQuad = null;
 
       m_this.map().geoTrigger(geo_event.brushend, selectionObj);
-      m_this.map().geoTrigger(geo_event[m_state.action], selectionObj);
+      if (geo_event[m_state.action]) {
+        m_this.map().geoTrigger(geo_event[m_state.action], selectionObj);
+      }
       m_this._zoomFromSelection(m_state.action, selectionObj.display.lowerLeft,
                                 selectionObj.display.upperRight);
+      m_this.map().geoTrigger(geo_event.actionselection, {
+        state: m_this.state(), mouse: m_this.mouse(), event: evt,
+        lowerLeft: selectionObj.display.lowerLeft,
+        upperRight: selectionObj.display.upperRight});
     }
+    m_this.map().geoTrigger(geo_event.actionup, {
+      state: m_this.state(), mouse: m_this.mouse(), event: evt});
 
     // reset the interactor state
     oldAction = m_state.action;
@@ -1211,7 +1242,7 @@ var mapInteractor = function (args) {
     }
 
     function wheel(evt) {
-      var zoomFactor, action;
+      var zoomFactor, action, actionRecord;
 
       // If the current queue doesn't match the queue passed in as an argument,
       // assume it was cancelled and do nothing.
@@ -1222,7 +1253,9 @@ var mapInteractor = function (args) {
       // perform the map navigation event
       m_this._getMouseModifiers(evt);
 
-      action = eventMatch({wheel: true}, m_mouse.modifiers, m_options.actions);
+      actionRecord = eventMatch({wheel: true}, m_mouse.modifiers,
+                                m_options.actions);
+      action = (actionRecord || {}).action;
 
       if (action) {
         // if we were moving because of momentum or a transition, cancel it and
@@ -1251,6 +1284,8 @@ var mapInteractor = function (args) {
                 m_mouse);
             break;
         }
+        m_this.map().geoTrigger(geo_event.actionwheel, {
+          state: m_this.state(), mouse: m_this.mouse(), event: evt});
       }
 
       // reset the queue
@@ -1420,6 +1455,66 @@ var mapInteractor = function (args) {
     }
     m_paused = !!value;
     return m_this;
+  };
+
+  /**
+   * Add an action to the list of handled actions.
+   *
+   * @param {object} action: an object defining the action.  This must have
+   *    action and event properties, and may have modifiers, name, and owner.
+   *    Use action, name, and owner to make this entry distinct if it will need
+   *    to be removed later.
+   * @param {boolean} toEnd: the action is added at the beginning of the
+   *    actions list unless toEnd is true.  Earlier actions prevent later
+   *    actions with the similar event and modifiers.
+   */
+  this.addAction = function (action, toEnd) {
+    if (!action || !action.action || !action.event) {
+      return;
+    }
+    util.addEventAction(m_options.actions, action, toEnd);
+    if (m_options.actions.some(function (action) {
+      return action.event.right && action.action !== 'click';
+    })) {
+      $node.off('contextmenu.geojs');
+      $node.on('contextmenu.geojs', function () { return false; });
+    }
+  };
+
+  /**
+   * Check if an action is in the actions list.  An action matches if the
+   * action, name, and owner match.  A null or undefined value will match all
+   * actions.  If using an action object, this is the same as passing
+   * (action.action, action.name, action.owner).
+   *
+   * @param {object|string} action Either an action object or the name of an
+   *    action.
+   * @param {string} name Optional name associated with the action.
+   * @param {string} owner Optional owner associated with the action.
+   * @return action the first matching action or null.
+   */
+  this.hasAction = function (action, name, owner) {
+    return util.hasEventAction(m_options.actions, action, name, owner);
+  };
+
+  /**
+   * Remove all matching actions.  Actions are matched as with hasAction.
+   *
+   * @param {object|string} action Either an action object or the name of an
+   *    action.
+   * @param {string} name Optional name associated with the action.
+   * @param {string} owner Optional owner associated with the action.
+   * @return numRemoved the number of actions that were removed.
+   */
+  this.removeAction = function (action, name, owner) {
+    var removed = util.removeEventAction(
+        m_options.actions, action, name, owner);
+    if (!m_options.actions.some(function (action) {
+      return action.event.right && action.action !== 'click';
+    })) {
+      $node.off('contextmenu.geojs');
+    }
+    return removed;
   };
 
   ////////////////////////////////////////////////////////////////////////////

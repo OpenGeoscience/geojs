@@ -317,6 +317,80 @@
     },
 
     /**
+     * Add an event action to the list of handled actions.
+     *
+     * @param {Array} actions: an array of actions to adjust as needed.
+     * @param {object} action: an object defining the action.  This must have
+     *    action and event properties, and may have modifiers, name, and owner.
+     *    Use action, name, and owner to make this entry distinct if it will
+     *    need to be removed later.
+     * @param {boolean} toEnd: the action is added at the beginning of the
+     *    actions list unless toEnd is true.  Earlier actions prevent later
+     *    actions with the similar event and modifiers.
+     */
+    addEventAction: function (actions, action, toEnd) {
+      if (toEnd) {
+        actions.push(action);
+      } else {
+        actions.unshift(action);
+      }
+      geo.util.adjustEventActions(actions);
+    },
+
+    /**
+     * Check if an event action is in the actions list.  An action matches if
+     * the action, name, and owner match.  A null or undefined value will match
+     * all actions.  If using an action object, this is the same as passing
+     * (action.action, action.name, action.owner).
+     *
+     * @param {Array} actions: an array of actions to search.
+     * @param {object|string} action Either an action object or the name of an
+     *    action.
+     * @param {string} name Optional name associated with the action.
+     * @param {string} owner Optional owner associated with the action.
+     * @return action the first matching action or null.
+     */
+    hasEventAction: function (actions, action, name, owner) {
+      if (action && action.action) {
+        name = action.name;
+        owner = action.owner;
+        action = action.action;
+      }
+      for (var i = 0; i < actions.length; i += 1) {
+        if ((!action || actions[i].action === action) &&
+            (!name || actions[i].name === name) &&
+            (!owner || actions[i].owner === owner)) {
+          return actions[i];
+        }
+      }
+      return null;
+    },
+
+    /**
+     * Remove all matching event actions.  Actions are matched as with
+     * hasEventAction.
+     *
+     * @param {Array} actions: an array of actions to adjust as needed.
+     * @param {object|string} action Either an action object or the name of an
+     *    action.
+     * @param {string} name Optional name associated with the action.
+     * @param {string} owner Optional owner associated with the action.
+     * @return numRemoved the number of actions that were removed.
+     */
+    removeEventAction: function (actions, action, name, owner) {
+      var found, removed = 0;
+
+      do {
+        found = geo.util.hasEventAction(actions, action, name, owner);
+        if (found) {
+          actions.splice($.inArray(found, actions), 1);
+          removed += 1;
+        }
+      } while (found);
+      return removed;
+    },
+
+    /**
      * Determine if the current events and modifiers match a known action.
      *
      * @param {object} events: an object where each event that is currently
@@ -348,7 +422,13 @@
             }
           }
         }
-        matched = action.action;
+        if (action.matchFunction) {
+          if (!action.matchFunction.call(this, events, modifiers, actions,
+                                         action)) {
+            return false;
+          }
+        }
+        matched = action;
         return true;
       })) {
         return matched;

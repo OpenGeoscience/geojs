@@ -153,8 +153,9 @@ describe('mapInteractor', function () {
   });
 
   afterEach(function () {
-    // delete the div
+    // delete the div and clean up lingering event handlers
     $('.testNode').remove();
+    $(document).off('.geojs');
   });
 
   it('Test initialization with given node.', function () {
@@ -489,10 +490,12 @@ describe('mapInteractor', function () {
       map: map,
       actions: [{
         action: 'zoomselect',
-        event: 'left'
+        event: 'left',
+        selectionRectangle: true
       }, {
         action: 'unzoomselect',
-        event: 'middle'
+        event: 'middle',
+        selectionRectangle: true
       }],
       throttle: false
     });
@@ -550,10 +553,12 @@ describe('mapInteractor', function () {
       map: map,
       actions: [{
         action: 'zoomselect',
-        event: 'left'
+        event: 'left',
+        selectionRectangle: true
       }, {
         action: 'unzoomselect',
-        event: 'middle'
+        event: 'middle',
+        selectionRectangle: true
       }],
       throttle: false
     });
@@ -586,7 +591,8 @@ describe('mapInteractor', function () {
       map: map,
       actions: [{
         action: 'select',
-        event: 'left'
+        event: 'left',
+        selectionRectangle: true
       }],
       throttle: false
     });
@@ -1209,19 +1215,19 @@ describe('mapInteractor', function () {
       }];
       geo.util.adjustEventActions(actions);
       expect(geo.util.eventMatch({wheel: true}, {}, actions)).toBe(undefined);
-      expect(geo.util.eventMatch({left: true}, {}, actions)).toBe('g');
-      expect(geo.util.eventMatch({left: true}, {ctrl: true}, actions)).toBe('a');
-      expect(geo.util.eventMatch({left: true}, {shift: true}, actions)).toBe('g');
-      expect(geo.util.eventMatch({left: true}, {ctrl: true, shift: true}, actions)).toBe('a');
+      expect(geo.util.eventMatch({left: true}, {}, actions).action).toBe('g');
+      expect(geo.util.eventMatch({left: true}, {ctrl: true}, actions).action).toBe('a');
+      expect(geo.util.eventMatch({left: true}, {shift: true}, actions).action).toBe('g');
+      expect(geo.util.eventMatch({left: true}, {ctrl: true, shift: true}, actions).action).toBe('a');
       expect(geo.util.eventMatch({right: true}, {}, actions)).toBe(undefined);
-      expect(geo.util.eventMatch({right: true}, {ctrl: true}, actions)).toBe('e');
+      expect(geo.util.eventMatch({right: true}, {ctrl: true}, actions).action).toBe('e');
       expect(geo.util.eventMatch({right: true}, {shift: true}, actions)).toBe(undefined);
-      expect(geo.util.eventMatch({right: true}, {ctrl: true, shift: true}, actions)).toBe('c');
-      expect(geo.util.eventMatch({right: true}, {ctrl: true, shift: true, alt: true}, actions)).toBe('c');
-      expect(geo.util.eventMatch({right: true}, {ctrl: true, shift: false, alt: true}, actions)).toBe('d');
-      expect(geo.util.eventMatch({right: true}, {ctrl: true, shift: false}, actions)).toBe('e');
-      expect(geo.util.eventMatch({left: true, right: true}, {ctrl: true}, actions)).toBe('a');
-      expect(geo.util.eventMatch({left: true, right: true}, {}, actions)).toBe('f');
+      expect(geo.util.eventMatch({right: true}, {ctrl: true, shift: true}, actions).action).toBe('c');
+      expect(geo.util.eventMatch({right: true}, {ctrl: true, shift: true, alt: true}, actions).action).toBe('c');
+      expect(geo.util.eventMatch({right: true}, {ctrl: true, shift: false, alt: true}, actions).action).toBe('d');
+      expect(geo.util.eventMatch({right: true}, {ctrl: true, shift: false}, actions).action).toBe('e');
+      expect(geo.util.eventMatch({left: true, right: true}, {ctrl: true}, actions).action).toBe('a');
+      expect(geo.util.eventMatch({left: true, right: true}, {}, actions).action).toBe('f');
     });
   });
 
@@ -1451,6 +1457,10 @@ describe('mapInteractor', function () {
       );
       stepAnimationFrame(start + 150);
       expect(map.zoom()).toBe(3);
+      interactor.simulateEvent(
+        'mouseup',
+        {map: {x: 0, y: 0}, button: 'left'}
+      );
     });
   });
   describe('Momemtum and mouse move interaction', function () {
