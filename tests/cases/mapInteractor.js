@@ -196,7 +196,7 @@ describe('mapInteractor', function () {
       zoomAnimation: {enabled: false},
       actions: [{
         action: 'pan',
-        event: 'wheel'
+        input: 'wheel'
       }],
       throttle: false
     });
@@ -235,7 +235,7 @@ describe('mapInteractor', function () {
       momentum: {enabled: false},
       actions: [{
         action: 'pan',
-        event: 'left'
+        input: 'left'
       }],
       throttle: false
     });
@@ -315,7 +315,7 @@ describe('mapInteractor', function () {
       zoomAnimation: {enabled: false},
       actions: [{
         action: 'zoom',
-        event: 'wheel'
+        input: 'wheel'
       }],
       throttle: false
     });
@@ -354,7 +354,7 @@ describe('mapInteractor', function () {
       zoomAnimation: {enabled: false},
       actions: [{
         action: 'zoom',
-        event: 'right'
+        input: 'right'
       }],
       throttle: false
     });
@@ -405,7 +405,7 @@ describe('mapInteractor', function () {
       momentum: {enabled: false},
       actions: [{
         action: 'rotate',
-        event: 'wheel'
+        input: 'wheel'
       }],
       rotateWheelScale: 1,
       throttle: false
@@ -440,7 +440,7 @@ describe('mapInteractor', function () {
       map: map,
       actions: [{
         action: 'rotate',
-        event: 'left'
+        input: 'left'
       }],
       throttle: false
     });
@@ -490,11 +490,11 @@ describe('mapInteractor', function () {
       map: map,
       actions: [{
         action: 'zoomselect',
-        event: 'left',
+        input: 'left',
         selectionRectangle: true
       }, {
         action: 'unzoomselect',
-        event: 'middle',
+        input: 'middle',
         selectionRectangle: true
       }],
       throttle: false
@@ -553,11 +553,11 @@ describe('mapInteractor', function () {
       map: map,
       actions: [{
         action: 'zoomselect',
-        event: 'left',
+        input: 'left',
         selectionRectangle: true
       }, {
         action: 'unzoomselect',
-        event: 'middle',
+        input: 'middle',
         selectionRectangle: true
       }],
       throttle: false
@@ -591,7 +591,7 @@ describe('mapInteractor', function () {
       map: map,
       actions: [{
         action: 'select',
-        event: 'left',
+        input: 'left',
         selectionRectangle: true
       }],
       throttle: false
@@ -1187,17 +1187,17 @@ describe('mapInteractor', function () {
       var testActions = [{
         action: 'action1',
         name: 'nameA',
-        event: 'right',
+        input: 'right',
         modifiers: {meta: true}
       }, {
         action: 'action2',
         name: 'nameA',
-        event: 'left',
+        input: 'left',
         modifiers: {meta: true}
       }, {
         action: 'action3',
         name: 'nameB',
-        event: 'right',
+        input: 'right',
         modifiers: {meta: true}
       }];
       var map = mockedMap('#mapNode1');
@@ -1247,49 +1247,49 @@ describe('mapInteractor', function () {
   });
 
   describe('General public utility methods', function () {
-    it('eventMatch', function () {
+    it('actionMatch', function () {
       var actions = [{
         action: 'a',
-        event: 'left',
+        input: 'left',
         modifiers: 'ctrl'
       }, {
         action: 'b',  // unreachable, because a will always trigger
-        event: 'left',
+        input: 'left',
         modifiers: {ctrl: true, shift: true}
       }, {
         action: 'c',
-        event: 'right',
+        input: 'right',
         modifiers: {ctrl: true, shift: true}
       }, {
         action: 'd',
-        event: 'right',
+        input: 'right',
         modifiers: {ctrl: true, shift: false, alt: true}
       }, {
         action: 'e',
-        event: 'right',
+        input: 'right',
         modifiers: 'ctrl'
       }, {
         action: 'f',
-        event: {left: true, right: true}
+        input: {left: true, right: true}
       }, {
         action: 'g',
-        event: 'left'
+        input: 'left'
       }];
-      geo.util.adjustEventActions(actions);
-      expect(geo.util.eventMatch({wheel: true}, {}, actions)).toBe(undefined);
-      expect(geo.util.eventMatch({left: true}, {}, actions).action).toBe('g');
-      expect(geo.util.eventMatch({left: true}, {ctrl: true}, actions).action).toBe('a');
-      expect(geo.util.eventMatch({left: true}, {shift: true}, actions).action).toBe('g');
-      expect(geo.util.eventMatch({left: true}, {ctrl: true, shift: true}, actions).action).toBe('a');
-      expect(geo.util.eventMatch({right: true}, {}, actions)).toBe(undefined);
-      expect(geo.util.eventMatch({right: true}, {ctrl: true}, actions).action).toBe('e');
-      expect(geo.util.eventMatch({right: true}, {shift: true}, actions)).toBe(undefined);
-      expect(geo.util.eventMatch({right: true}, {ctrl: true, shift: true}, actions).action).toBe('c');
-      expect(geo.util.eventMatch({right: true}, {ctrl: true, shift: true, alt: true}, actions).action).toBe('c');
-      expect(geo.util.eventMatch({right: true}, {ctrl: true, shift: false, alt: true}, actions).action).toBe('d');
-      expect(geo.util.eventMatch({right: true}, {ctrl: true, shift: false}, actions).action).toBe('e');
-      expect(geo.util.eventMatch({left: true, right: true}, {ctrl: true}, actions).action).toBe('a');
-      expect(geo.util.eventMatch({left: true, right: true}, {}, actions).action).toBe('f');
+      geo.util.adjustActions(actions);
+      expect(geo.util.actionMatch({wheel: true}, {}, actions)).toBe(undefined);
+      expect(geo.util.actionMatch({left: true}, {}, actions).action).toBe('g');
+      expect(geo.util.actionMatch({left: true}, {ctrl: true}, actions).action).toBe('a');
+      expect(geo.util.actionMatch({left: true}, {shift: true}, actions).action).toBe('g');
+      expect(geo.util.actionMatch({left: true}, {ctrl: true, shift: true}, actions).action).toBe('a');
+      expect(geo.util.actionMatch({right: true}, {}, actions)).toBe(undefined);
+      expect(geo.util.actionMatch({right: true}, {ctrl: true}, actions).action).toBe('e');
+      expect(geo.util.actionMatch({right: true}, {shift: true}, actions)).toBe(undefined);
+      expect(geo.util.actionMatch({right: true}, {ctrl: true, shift: true}, actions).action).toBe('c');
+      expect(geo.util.actionMatch({right: true}, {ctrl: true, shift: true, alt: true}, actions).action).toBe('c');
+      expect(geo.util.actionMatch({right: true}, {ctrl: true, shift: false, alt: true}, actions).action).toBe('d');
+      expect(geo.util.actionMatch({right: true}, {ctrl: true, shift: false}, actions).action).toBe('e');
+      expect(geo.util.actionMatch({left: true, right: true}, {ctrl: true}, actions).action).toBe('a');
+      expect(geo.util.actionMatch({left: true, right: true}, {}, actions).action).toBe('f');
     });
   });
 
@@ -1301,7 +1301,7 @@ describe('mapInteractor', function () {
       momentum: {enabled: true},
       actions: [{
         action: 'pan',
-        event: 'left'
+        input: 'left'
       }],
       throttle: false
     });
@@ -1356,7 +1356,7 @@ describe('mapInteractor', function () {
       spring: {enabled: true, springConstant: 0.00005},
       actions: [{
         action: 'pan',
-        event: 'left'
+        input: 'left'
       }],
       throttle: false
     });
