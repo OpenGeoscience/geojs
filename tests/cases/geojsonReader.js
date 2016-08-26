@@ -213,6 +213,31 @@ describe('geojsonReader', function () {
           coordinates: [1, 1]
         }
       }]);
+
+      it('empty geometry', function () {
+        expect(reader._featureArray({
+          type: 'FeatureCollection',
+          features: [{
+            type: 'Feature',
+            geometry: {
+              type: 'Point',
+              coordinates: []
+            }
+          }, {
+            type: 'Feature',
+            geometry: {
+              type: 'LineString',
+              coordinates: []
+            }
+          }, {
+            type: 'Feature',
+            geometry: {
+              type: 'Polygon',
+              coordinates: []
+            }
+          }]
+        })).toEqual([]);
+      });
     });
 
     describe('Errors', function () {
