@@ -1038,7 +1038,6 @@ var mapInteractor = function (args) {
     // if momentum is enabled, start the action here
     if (m_options.momentum.enabled &&
             $.inArray(oldAction, m_options.momentum.actions) >= 0) {
-
       var t = (new Date()).valueOf();
       var dt = t - m_mouse.time + m_mouse.deltaTime;
       if (t - m_mouse.time < m_options.momentum.stopTime) {
@@ -1143,7 +1142,7 @@ var mapInteractor = function (args) {
               zoom = startZoom + (targetZoom > startZoom ? 1 : -1);
             }
           }
-          map.transitionCancel('debounced_zoom.zoom');
+          map.transitionCancel('debounced_zoom.' + geo_action.zoom);
           map.transition({
             zoom: zoom,
             zoomOrigin: origin,
@@ -1151,8 +1150,9 @@ var mapInteractor = function (args) {
             ease: m_options.zoomAnimation.ease,
             done: function (status) {
               status = status || {};
+              var zoomRE = new RegExp('\\.' + geo_action.zoom + '$');
               if (!status.next && (!status.cancel ||
-                  ('' + status.source).search(/\.zoom$/) < 0)) {
+                  ('' + status.source).search(zoomRE) < 0)) {
                 targetZoom = undefined;
               }
               /* If we were animating the zoom, if the zoom is continuous, just
@@ -1161,7 +1161,7 @@ var mapInteractor = function (args) {
                * the next action is further zooming. */
               if (m_options.discreteZoom && status.cancel &&
                   status.transition && status.transition.end &&
-                  ('' + status.source).search(/\.zoom$/) < 0) {
+                  ('' + status.source).search(zoomRE) < 0) {
                 map.zoom(status.transition.end.zoom,
                          status.transition.end.zoomOrigin);
               }
