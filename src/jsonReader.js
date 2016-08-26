@@ -133,6 +133,13 @@ var jsonReader = function (arg) {
     features.forEach(function (feature) {
       Array.prototype.push.apply(normalized, m_this._feature(feature));
     });
+
+    // remove features with empty geometries
+    normalized = normalized.filter(function (feature) {
+      return feature.geometry &&
+        feature.geometry.coordinates &&
+        feature.geometry.coordinates.length;
+    });
     return normalized;
   };
 
