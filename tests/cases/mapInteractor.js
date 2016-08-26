@@ -195,7 +195,7 @@ describe('mapInteractor', function () {
       momentum: {enabled: false},
       zoomAnimation: {enabled: false},
       actions: [{
-        action: 'pan',
+        action: geo.geo_action.pan,
         input: 'wheel'
       }],
       throttle: false
@@ -234,7 +234,7 @@ describe('mapInteractor', function () {
       map: map,
       momentum: {enabled: false},
       actions: [{
-        action: 'pan',
+        action: geo.geo_action.pan,
         input: 'left'
       }],
       throttle: false
@@ -314,7 +314,7 @@ describe('mapInteractor', function () {
       momentum: {enabled: false},
       zoomAnimation: {enabled: false},
       actions: [{
-        action: 'zoom',
+        action: geo.geo_action.zoom,
         input: 'wheel'
       }],
       throttle: false
@@ -353,7 +353,7 @@ describe('mapInteractor', function () {
       map: map,
       zoomAnimation: {enabled: false},
       actions: [{
-        action: 'zoom',
+        action: geo.geo_action.zoom,
         input: 'right'
       }],
       throttle: false
@@ -404,7 +404,7 @@ describe('mapInteractor', function () {
       map: map,
       momentum: {enabled: false},
       actions: [{
-        action: 'rotate',
+        action: geo.geo_action.rotate,
         input: 'wheel'
       }],
       rotateWheelScale: 1,
@@ -439,7 +439,7 @@ describe('mapInteractor', function () {
     var interactor = geo.mapInteractor({
       map: map,
       actions: [{
-        action: 'rotate',
+        action: geo.geo_action.rotate,
         input: 'left'
       }],
       throttle: false
@@ -489,13 +489,13 @@ describe('mapInteractor', function () {
     var interactor = geo.mapInteractor({
       map: map,
       actions: [{
-        action: 'zoomselect',
+        action: geo.geo_action.zoomselect,
         input: 'left',
-        selectionRectangle: true
+        selectionRectangle: geo.event.zoomselect
       }, {
-        action: 'unzoomselect',
+        action: geo.geo_action.unzoomselect,
         input: 'middle',
-        selectionRectangle: true
+        selectionRectangle: geo.event.unzoomselect
       }],
       throttle: false
     });
@@ -552,13 +552,13 @@ describe('mapInteractor', function () {
     var interactor = geo.mapInteractor({
       map: map,
       actions: [{
-        action: 'zoomselect',
+        action: geo.geo_action.zoomselect,
         input: 'left',
-        selectionRectangle: true
+        selectionRectangle: geo.event.zoomselect
       }, {
-        action: 'unzoomselect',
+        action: geo.geo_action.unzoomselect,
         input: 'middle',
-        selectionRectangle: true
+        selectionRectangle: geo.event.unzoomselect
       }],
       throttle: false
     });
@@ -590,9 +590,9 @@ describe('mapInteractor', function () {
     var interactor = geo.mapInteractor({
       map: map,
       actions: [{
-        action: 'select',
+        action: geo.geo_action.select,
         input: 'left',
-        selectionRectangle: true
+        selectionRectangle: geo.event.select
       }],
       throttle: false
     });
@@ -1300,7 +1300,7 @@ describe('mapInteractor', function () {
       map: map,
       momentum: {enabled: true},
       actions: [{
-        action: 'pan',
+        action: geo.geo_action.pan,
         input: 'left'
       }],
       throttle: false
@@ -1355,7 +1355,7 @@ describe('mapInteractor', function () {
       momentum: {enabled: true},  // you must have momentum to have springback
       spring: {enabled: true, springConstant: 0.00005},
       actions: [{
-        action: 'pan',
+        action: geo.geo_action.pan,
         input: 'left'
       }],
       throttle: false
