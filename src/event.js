@@ -226,6 +226,63 @@ geo_event.unzoomselect = 'geo_unzoomselect';
 
 //////////////////////////////////////////////////////////////////////////////
 /**
+ * Triggered when an action is initiated with mouse down
+ *
+ * @property {object} state The action state
+ * @property {geo.mouseState} mouse The mouse state
+ * @property {object} event The triggering event
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.actiondown = 'geo_actiondown';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered when an action is being processed during mouse movement.
+ *
+ * @property {object} state The action state
+ * @property {geo.mouseState} mouse The mouse state
+ * @property {object} event The triggering event
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.actionmove = 'geo_actionmove';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered when an action is ended with a mouse up.
+ *
+ * @property {object} state The action state
+ * @property {geo.mouseState} mouse The mouse state
+ * @property {object} event The triggering event
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.actionup = 'geo_actionup';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered when an action results in a selection.
+ *
+ * @property {object} state The action state
+ * @property {geo.mouseState} mouse The mouse state
+ * @property {object} event The triggering event
+ * @property {object} lowerLeft Lower left of selection in screen coordinates
+ * @property {object} upperRight Upper right of selection in screen coordinates
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.actionselection = 'geo_actionselection';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Triggered when an action is triggered with a mouse wheel event.
+ *
+ * @property {object} state The action state
+ * @property {geo.mouseState} mouse The mouse state
+ * @property {object} event The triggering event
+ */
+//////////////////////////////////////////////////////////////////////////////
+geo_event.actionwheel = 'geo_actionwheel';
+
+//////////////////////////////////////////////////////////////////////////////
+/**
  * Triggered before a map navigation animation begins.  Set
  * <code>event.geo.cancelAnimation</code> to cancel the animation
  * of the navigation.  This will cause the map to navigate to the

@@ -1,5 +1,6 @@
 var inherit = require('./inherit');
 var object = require('./object');
+var util = require('./util');
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -22,8 +23,10 @@ var mapInteractor = function (args) {
 
   var $ = require('jquery');
   var geo_event = require('./event');
+  var geo_action = require('./action');
   var throttle = require('./util').throttle;
   var debounce = require('./util').debounce;
+  var actionMatch = require('./util').actionMatch;
   var quadFeature = require('./quadFeature');
 
   var m_options = args || {},
@@ -37,19 +40,8 @@ var mapInteractor = function (args) {
       m_selectionQuad,
       m_paused = false,
       m_clickMaybe = false,
+      m_clickMaybeTimeout,
       m_callZoom = function () {};
-
-  // Helper method to decide if the current button/modifiers match a set of
-  // conditions.
-  // button: 'left' | 'right' | 'middle'
-  // modifiers: [ 'alt' | 'meta' | 'ctrl' | 'shift' ]
-  function eventMatch(button, modifiers) {
-    return (button === 'wheel' || m_mouse.buttons[button]) &&
-      (!!m_mouse.modifiers.alt) === (!!modifiers.alt) &&
-      (!!m_mouse.modifiers.meta) === (!!modifiers.meta) &&
-      (!!m_mouse.modifiers.shift) === (!!modifiers.shift) &&
-      (!!m_mouse.modifiers.ctrl) === (!!modifiers.ctrl);
-  }
 
   // Helper method to calculate the speed from a velocity
   function calcSpeed(v) {
@@ -64,45 +56,94 @@ var mapInteractor = function (args) {
     {
       throttle: 30,
       discreteZoom: false,
-      panMoveButton: 'left',
-      panMoveModifiers: {},
-      zoomMoveButton: 'right',
-      zoomMoveModifiers: {},
-      rotateMoveButton: 'left',
-      rotateMoveModifiers: {ctrl: true},
-      panWheelEnabled: false,
-      panWheelModifiers: {},
-      zoomWheelEnabled: true,
-      zoomWheelModifiers: {},
-      rotateWheelEnabled: true,
-      rotateWheelModifiers: {ctrl: true},
+
+      /* There should only be one action with any specific combination of event
+       * and modifiers.  When that event and modifiers occur, the specified
+       * action is triggered.  The event and modifiers fields can either be a
+       * simple string or an object with multiple entries with each entry set
+       * to true, false, or undefined.  If an object, all values that are
+       * truthy must match, all values that are false must not match, and all
+       * other values that are falsy are ignored.
+       *   Available actions:
+       * see geo_action list
+       *   Available events:
+       * left, right, middle, wheel
+       *   Available modifiers:
+       * shift, ctrl, alt, meta
+       *   Useful fields:
+       * action: the name of the action.  Multiple events may trigger the same
+       *    action.
+       * input: the name of the input or an object with input names for keys
+       *    and boolean values that indicates the combination of events that
+       *    trigger this action.
+       * modifiers: the name of a modifier or an object with modifier names for
+       *    keys and boolean values that indicates the combination of modifiers
+       *    that trigger this action.
+       * selectionRectangle: truthy if a selection rectangle should be shown
+       *    during the action.  This can be the name of an event that will be
+       *    triggered when the selection is complete.
+       * name: a string that can be used to reference this action.
+       * owner: a string that can be used to reference this action.
+       */
+      actions: [{
+        action: geo_action.pan,
+        input: 'left',
+        modifiers: {shift: false, ctrl: false}
+      }, {
+        action: geo_action.zoom,
+        input: 'right',
+        modifiers: {shift: false, ctrl: false}
+      }, {
+        action: geo_action.zoom,
+        input: 'wheel',
+        modifiers: {shift: false, ctrl: false}
+      }, {
+        action: geo_action.rotate,
+        input: 'left',
+        modifiers: {shift: false, ctrl: true}
+      }, {
+        action: geo_action.rotate,
+        input: 'wheel',
+        modifiers: {shift: false, ctrl: true}
+      }, {
+        action: geo_action.select,
+        input: 'left',
+        modifiers: {shift: true, ctrl: true},
+        selectionRectangle: geo_event.select
+      }, {
+        action: geo_action.zoomselect,
+        input: 'left',
+        modifiers: {shift: true, ctrl: false},
+        selectionRectangle: geo_event.zoomselect
+      }, {
+        action: geo_action.unzoomselect,
+        input: 'right',
+        modifiers: {shift: true, ctrl: false},
+        selectionRectangle: geo_event.unzoomselect
+      }],
+
+      click: {
+        enabled: true,
+        buttons: {left: true, right: true, middle: true},
+        duration: 0,
+        cancelOnMove: true
+      },
+
       wheelScaleX: 1,
       wheelScaleY: 1,
       zoomScale: 1,
       rotateWheelScale: 6 * Math.PI / 180,
-      selectionButton: 'left',
-      selectionModifiers: {shift: true, ctrl: true},
-      zoomSelectionButton: 'left',
-      zoomSelectionModifiers: {shift: true},
-      unzoomSelectionButton: 'right',
-      unzoomSelectionModifiers: {shift: true},
       momentum: {
         enabled: true,
         maxSpeed: 2.5,
         minSpeed: 0.01,
         stopTime: 250,
         drag: 0.01,
-        actions: ['pan', 'zoom']
+        actions: [geo_action.pan, geo_action.zoom]
       },
       spring: {
         enabled: false,
         springConstant: 0.00005
-      },
-      click: {
-        enabled: true,
-        buttons: {left: true, right: true, middle: true},
-        duration: 0,
-        cancelOnMove: true
       },
       zoomAnimation: {
         enabled: true,
@@ -123,41 +164,8 @@ var mapInteractor = function (args) {
   //   // with the given delay.  The default debounce interval is 400 ms.
   //   discreteZoom: boolean | number > 0
   //
-  //   // button that must be pressed to initiate a pan on mousedown
-  //   panMoveButton: 'right' | 'left' | 'middle'
-  //
-  //   // modifier keys that must be pressed to initiate a pan on mousemove
-  //   panMoveModifiers: { 'ctrl' | 'alt' | 'meta' | 'shift' }
-  //
-  //   // button that must be pressed to initiate a zoom on mousedown
-  //   zoomMoveButton: 'right' | 'left' | 'middle'
-  //
-  //   // modifier keys that must be pressed to initiate a zoom on mousemove
-  //   zoomMoveModifiers: { 'ctrl' | 'alt' | 'meta' | 'shift' }
-  //
-  //   // button that must be pressed to initiate a rotate on mousedown
-  //   rotateMoveButton: 'right' | 'left' | 'middle'
-  //
-  //   // modifier keys that must be pressed to initiate a rotate on mousemove
-  //   rotateMoveModifiers: { 'ctrl' | 'alt' | 'meta' | 'shift' }
-  //
-  //   // enable or disable panning with the mouse wheel
-  //   panWheelEnabled: true | false
-  //
-  //   // modifier keys that must be pressed to trigger a pan on wheel
-  //   panWheelModifiers: {...}
-  //
-  //   // enable or disable zooming with the mouse wheel
-  //   zoomWheelEnabled: true | false
-  //
-  //   // modifier keys that must be pressed to trigger a zoom on wheel
-  //   zoomWheelModifiers: {...}
-  //
-  //   // enable or disable rotation with the mouse wheel
-  //   rotateWheelEnabled: true | false
-  //
-  //   // modifier keys that must be pressed to trigger a rotate on wheel
-  //   rotateWheelModifiers: {...}
+  //   // A list of available actions.  See above
+  //   actions: []
   //
   //   // wheel scale factor to change the magnitude of wheel interactions
   //   wheelScaleX: 1
@@ -169,12 +177,6 @@ var mapInteractor = function (args) {
   //   // scale factor to change the magnitude of wheel rotation interactions
   //   rotateWheelScale: 1
   //
-  //   // button that must be pressed to enable drag selection
-  //    selectionButton: 'right' | 'left' | 'middle'
-  //
-  //   // keyboard modifiers that must be pressed to initiate a selection
-  //   selectionModifiers: {...}
-  //
   //   // enable momentum when panning
   //   momentum: {
   //     enabled: true | false,
@@ -183,7 +185,8 @@ var mapInteractor = function (args) {
   //     stopTime: number, // if the mouse hasn't moved for this many
   //                       // milliseconds, don't apply momentum
   //     drag: number, // drag coefficient
-  //     actions: ['pan', 'zoom']  // actions on which to apply momentum
+  //     actions: [geo_action.pan, geo_action.zoom]
+  //                                      // actions on which to apply momentum
   //   }
   //
   //   // enable spring clamping to screen edges to enforce clamping
@@ -338,32 +341,32 @@ var mapInteractor = function (args) {
   //
   // i.e.
   //  {
-  //    'action': 'pan',      // an ongoing pan event
+  //    'action': geo_action.pan,   // an ongoing pan event
   //    'origin': {...},      // mouse object at the start of the action
   //    'delta': {x: *, y: *} // mouse movement since action start
   //                          // not including the current event
   //  }
   //
   //  {
-  //    'action': 'zoom',  // an ongoing zoom event
+  //    'action': geo_action.zoom,  // an ongoing zoom event
   //    ...
   //  }
   //
   //  {
-  //    'action': 'rotate',   // an ongoing rotate event
+  //    'action': geo_action.rotate,  // an ongoing rotate event
   //    'origin': {...},      // mouse object at the start of the action
   //    'delta': {x: *, y: *} // mouse movement since action start
   //                          // not including the current event
   //  }
   //
   //  {
-  //    'acton': 'select',
+  //    'acton': geo_action.select,
   //    'origin': {...},
   //    'delta': {x: *, y: *}
   //  }
   //
   //  {
-  //    'action': 'momentum',
+  //    'action': geo_action.momentum,
   //    'origin': {...},
   //    'handler': function () { }, // called in animation loop
   //    'timer': animate loop timer
@@ -408,12 +411,10 @@ var mapInteractor = function (args) {
     $node.on('mouseup.geojs', m_this._handleMouseUp);
     // Disable dragging images and such
     $node.on('dragstart', function () { return false; });
-    if (m_options.panMoveButton === 'right' ||
-        m_options.zoomMoveButton === 'right' ||
-        m_options.rotateMoveButton === 'right' ||
-        m_options.selectionButton === 'right' ||
-        m_options.zoomSelectionButton === 'right' ||
-        m_options.unzoomSelectionButton === 'right') {
+    util.adjustActions(m_options.actions);
+    if (m_options.actions.some(function (action) {
+      return action.input.right;
+    })) {
       $node.on('contextmenu.geojs', function () { return false; });
     }
     return m_this;
@@ -619,11 +620,25 @@ var mapInteractor = function (args) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Set the value of whether a click is possible.  Cancel any outstanding
+   * timer for this process.
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this._setClickMaybe = function (value) {
+    m_clickMaybe = value;
+    if (m_clickMaybeTimeout) {
+      window.clearTimeout(m_clickMaybeTimeout);
+      m_clickMaybeTimeout = null;
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Handle event when a mouse button is pressed
    */
   ////////////////////////////////////////////////////////////////////////////
   this._handleMouseDown = function (evt) {
-    var action = null;
+    var action, actionRecord;
 
     if (m_paused) {
       return;
@@ -637,30 +652,22 @@ var mapInteractor = function (args) {
         (!m_mouse.buttons.left || m_options.click.buttons.left) &&
         (!m_mouse.buttons.right || m_options.click.buttons.right) &&
         (!m_mouse.buttons.middle || m_options.click.buttons.middle)) {
-      m_clickMaybe = {x: m_mouse.page.x, y: m_mouse.page.y};
+      m_this._setClickMaybe({x: m_mouse.page.x, y: m_mouse.page.y});
       if (m_options.click.duration > 0) {
-        window.setTimeout(function () {
+        m_clickMaybeTimeout = window.setTimeout(function () {
           m_clickMaybe = false;
+          m_clickMaybeTimeout = null;
         }, m_options.click.duration);
       }
     }
-    if (eventMatch(m_options.panMoveButton, m_options.panMoveModifiers)) {
-      action = 'pan';
-    } else if (eventMatch(m_options.zoomMoveButton, m_options.zoomMoveModifiers)) {
-      action = 'zoom';
-    } else if (eventMatch(m_options.rotateMoveButton, m_options.rotateMoveModifiers)) {
-      action = 'rotate';
-    } else if (eventMatch(m_options.selectionButton, m_options.selectionModifiers)) {
-      action = 'select';
-    } else if (eventMatch(m_options.zoomSelectionButton, m_options.zoomSelectionModifiers)) {
-      action = 'zoomselect';
-    } else if (eventMatch(m_options.unzoomSelectionButton, m_options.unzoomSelectionModifiers)) {
-      action = 'unzoomselect';
-    }
+    actionRecord = actionMatch(m_mouse.buttons, m_mouse.modifiers,
+                              m_options.actions);
+    action = (actionRecord || {}).action;
 
     // cancel transitions and momentum on click
-    m_this.map().transitionCancel('_handleMouseDown.' + action);
-    m_this.cancel('momentum');
+    m_this.map().transitionCancel(
+        '_handleMouseDown' + (action ? '.' + action : ''));
+    m_this.cancel(geo_action.momentum);
 
     m_mouse.velocity = {
       x: 0,
@@ -676,11 +683,12 @@ var mapInteractor = function (args) {
       // store the state object
       m_state = {
         action: action,
+        actionRecord: actionRecord,
         origin: $.extend(true, {}, m_mouse),
         delta: {x: 0, y: 0}
       };
 
-      if (action === 'select' || action === 'zoomselect' || action === 'unzoomselect') {
+      if (actionRecord.selectionRectangle) {
         // Make sure the old selection layer is gone.
         if (m_selectionLayer) {
           m_selectionLayer.clear();
@@ -697,6 +705,8 @@ var mapInteractor = function (args) {
         });
         m_this.map().geoTrigger(geo_event.brushstart, m_this._getSelection());
       }
+      m_this.map().geoTrigger(geo_event.actiondown, {
+        state: m_this.state(), mouse: m_this.mouse(), event: evt});
 
       // bind temporary handlers to document
       if (m_options.throttle > 0) {
@@ -733,8 +743,8 @@ var mapInteractor = function (args) {
       return;
     }
 
-    if (m_options.click.cancelOnMove) {
-      m_clickMaybe = false;
+    if (m_options.click.cancelOnMove && m_clickMaybe) {
+      m_this._setClickMaybe(false);
     }
 
     m_this._getMousePosition(evt);
@@ -773,7 +783,7 @@ var mapInteractor = function (args) {
     if (m_options.click.cancelOnMove && (m_clickMaybe.x === undefined ||
         m_mouse.page.x !== m_clickMaybe.x ||
         m_mouse.page.y !== m_clickMaybe.y)) {
-      m_clickMaybe = false;
+      m_this._setClickMaybe(false);
     }
     if (m_clickMaybe) {
       return;
@@ -792,11 +802,11 @@ var mapInteractor = function (args) {
     m_state.delta.x += dx;
     m_state.delta.y += dy;
 
-    if (m_state.action === 'pan') {
+    if (m_state.action === geo_action.pan) {
       m_this.map().pan({x: dx, y: dy}, undefined, 'limited');
-    } else if (m_state.action === 'zoom') {
+    } else if (m_state.action === geo_action.zoom) {
       m_callZoom(-dy * m_options.zoomScale / 120, m_state);
-    } else if (m_state.action === 'rotate') {
+    } else if (m_state.action === geo_action.rotate) {
       var cx, cy;
       if (m_state.origin.rotation === undefined) {
         cx = m_state.origin.map.x - m_this.map().size().width / 2;
@@ -806,11 +816,13 @@ var mapInteractor = function (args) {
       cx = m_mouse.map.x - m_this.map().size().width / 2;
       cy = m_mouse.map.y - m_this.map().size().height / 2;
       m_this.map().rotation(m_state.origin.rotation + Math.atan2(cy, cx));
-    } else if (m_state.action === 'select' || m_state.action === 'zoomselect' || m_state.action === 'unzoomselect') {
+    } else if (m_state.actionRecord.selectionRectangle) {
       // Get the bounds of the current selection
       selectionObj = m_this._getSelection();
       m_this.map().geoTrigger(geo_event.brush, selectionObj);
     }
+    m_this.map().geoTrigger(geo_event.actionmove, {
+      state: m_this.state(), mouse: m_this.mouse(), event: evt});
 
     // Prevent default to stop text selection in particular
     evt.preventDefault();
@@ -907,7 +919,8 @@ var mapInteractor = function (args) {
    * recenter.
    *
    * @private
-   * @param {string} action Either 'zoomselect' or 'unzoomselect'.
+   * @param {string} action Either geo_action.zoomselect or
+   *    geo_action.unzoomselect.
    * @param {object} lowerLeft the x and y coordinates of the lower left corner
    *    of the zoom rectangle.
    * @param {object} upperRight the x and y coordinates of the upper right
@@ -915,7 +928,7 @@ var mapInteractor = function (args) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._zoomFromSelection = function (action, lowerLeft, upperRight) {
-    if (action !== 'zoomselect' && action !== 'unzoomselect') {
+    if (action !== geo_action.zoomselect && action !== geo_action.unzoomselect) {
       return;
     }
     if (lowerLeft.x === upperRight.x || lowerLeft.y === upperRight.y) {
@@ -933,7 +946,7 @@ var mapInteractor = function (args) {
       x: Math.abs((upperRight.x - lowerLeft.x) / mapsize.width),
       y: Math.abs((upperRight.y - lowerLeft.y) / mapsize.height)
     };
-    if (action === 'zoomselect') {
+    if (action === geo_action.zoomselect) {
       center = map.displayToGcs({
         x: (lowerLeft.x + upperRight.x) / 2,
         y: (lowerLeft.y + upperRight.y) / 2
@@ -955,7 +968,7 @@ var mapInteractor = function (args) {
       zoom = Math.floor(zoom);
     }
     map.zoom(zoom);
-    if (action === 'zoomselect') {
+    if (action === geo_action.zoomselect) {
       map.center(center, null);
     } else {
       var newcenter = map.gcsToDisplay(center, null);
@@ -982,7 +995,7 @@ var mapInteractor = function (args) {
     // cancel queued interactions
     m_queue = {};
 
-    m_clickMaybe = false;
+    m_this._setClickMaybe(false);
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
 
@@ -994,7 +1007,7 @@ var mapInteractor = function (args) {
       evt.preventDefault();
     }
 
-    if (m_state.action === 'select' || m_state.action === 'zoomselect' || m_state.action === 'unzoomselect') {
+    if (m_state.actionRecord && m_state.actionRecord.selectionRectangle) {
       m_this._getMousePosition(evt);
       selectionObj = m_this._getSelection();
 
@@ -1004,10 +1017,19 @@ var mapInteractor = function (args) {
       m_selectionQuad = null;
 
       m_this.map().geoTrigger(geo_event.brushend, selectionObj);
-      m_this.map().geoTrigger(geo_event[m_state.action], selectionObj);
+      if (m_state.actionRecord.selectionRectangle !== true) {
+        m_this.map().geoTrigger(m_state.actionRecord.selectionRectangle,
+                                selectionObj);
+      }
       m_this._zoomFromSelection(m_state.action, selectionObj.display.lowerLeft,
                                 selectionObj.display.upperRight);
+      m_this.map().geoTrigger(geo_event.actionselection, {
+        state: m_this.state(), mouse: m_this.mouse(), event: evt,
+        lowerLeft: selectionObj.display.lowerLeft,
+        upperRight: selectionObj.display.upperRight});
     }
+    m_this.map().geoTrigger(geo_event.actionup, {
+      state: m_this.state(), mouse: m_this.mouse(), event: evt});
 
     // reset the interactor state
     oldAction = m_state.action;
@@ -1016,7 +1038,6 @@ var mapInteractor = function (args) {
     // if momentum is enabled, start the action here
     if (m_options.momentum.enabled &&
             $.inArray(oldAction, m_options.momentum.actions) >= 0) {
-
       var t = (new Date()).valueOf();
       var dt = t - m_mouse.time + m_mouse.deltaTime;
       if (t - m_mouse.time < m_options.momentum.stopTime) {
@@ -1041,6 +1062,7 @@ var mapInteractor = function (args) {
       return;
     }
 
+    m_this._getMouseButton(evt);
     if (m_clickMaybe) {
       m_this._handleMouseClick(evt);
     }
@@ -1060,14 +1082,14 @@ var mapInteractor = function (args) {
     m_this._getMouseModifiers(evt);
 
     // cancel any ongoing pan action
-    m_this.cancel('pan');
+    m_this.cancel(geo_action.pan);
 
     // unbind temporary handlers on document
     $(document).off('.geojs');
     m_state.boundDocumentHandlers = false;
 
     // reset click detector variable
-    m_clickMaybe = false;
+    m_this._setClickMaybe(false);
 
     // fire a click event
     m_this.map().geoTrigger(geo_event.mouseclick, m_this.mouse());
@@ -1120,7 +1142,7 @@ var mapInteractor = function (args) {
               zoom = startZoom + (targetZoom > startZoom ? 1 : -1);
             }
           }
-          map.transitionCancel('debounced_zoom.zoom');
+          map.transitionCancel('debounced_zoom.' + geo_action.zoom);
           map.transition({
             zoom: zoom,
             zoomOrigin: origin,
@@ -1128,8 +1150,9 @@ var mapInteractor = function (args) {
             ease: m_options.zoomAnimation.ease,
             done: function (status) {
               status = status || {};
+              var zoomRE = new RegExp('\\.' + geo_action.zoom + '$');
               if (!status.next && (!status.cancel ||
-                  ('' + status.source).search(/\.zoom$/) < 0)) {
+                  ('' + status.source).search(zoomRE) < 0)) {
                 targetZoom = undefined;
               }
               /* If we were animating the zoom, if the zoom is continuous, just
@@ -1138,7 +1161,7 @@ var mapInteractor = function (args) {
                * the next action is further zooming. */
               if (m_options.discreteZoom && status.cancel &&
                   status.transition && status.transition.end &&
-                  ('' + status.source).search(/\.zoom$/) < 0) {
+                  ('' + status.source).search(zoomRE) < 0) {
                 map.zoom(status.transition.end.zoom,
                          status.transition.end.zoomOrigin);
               }
@@ -1224,7 +1247,7 @@ var mapInteractor = function (args) {
     }
 
     function wheel(evt) {
-      var zoomFactor, action;
+      var zoomFactor, action, actionRecord;
 
       // If the current queue doesn't match the queue passed in as an argument,
       // assume it was cancelled and do nothing.
@@ -1234,43 +1257,40 @@ var mapInteractor = function (args) {
 
       // perform the map navigation event
       m_this._getMouseModifiers(evt);
-      if (m_options.panWheelEnabled &&
-          eventMatch('wheel', m_options.panWheelModifiers)) {
-        action = 'pan';
-      } else if (m_options.zoomWheelEnabled &&
-                 eventMatch('wheel', m_options.zoomWheelModifiers)) {
-        action = 'zoom';
-      } else if (m_options.rotateWheelEnabled &&
-                 eventMatch('wheel', m_options.rotateWheelModifiers)) {
-        action = 'rotate';
-      }
+
+      actionRecord = actionMatch({wheel: true}, m_mouse.modifiers,
+                                m_options.actions);
+      action = (actionRecord || {}).action;
+
       if (action) {
         // if we were moving because of momentum or a transition, cancel it and
         // recompute where the mouse action is occuring.
         var recompute = m_this.map().transitionCancel('wheel.' + action);
-        recompute |= m_this.cancel('momentum', true);
+        recompute |= m_this.cancel(geo_action.momentum, true);
         if (recompute) {
           m_mouse.geo = m_this.map().displayToGcs(m_mouse.map);
           m_mouse.mapgcs = m_this.map().displayToGcs(m_mouse.map, null);
         }
         switch (action) {
-          case 'pan':
+          case geo_action.pan:
             m_this.map().pan({
               x: m_queue.scroll.x,
               y: m_queue.scroll.y
             }, undefined, 'limited');
             break;
-          case 'zoom':
+          case geo_action.zoom:
             zoomFactor = -m_queue.scroll.y;
             m_callZoom(zoomFactor, m_mouse);
             break;
-          case 'rotate':
+          case geo_action.rotate:
             m_this.map().rotation(
                 m_this.map().rotation() +
                 m_queue.scroll.y * m_options.rotateWheelScale,
                 m_mouse);
             break;
         }
+        m_this.map().geoTrigger(geo_event.actionwheel, {
+          state: m_this.state(), mouse: m_this.mouse(), event: evt});
       }
 
       // reset the queue
@@ -1304,7 +1324,7 @@ var mapInteractor = function (args) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this.springBack = function (initialVelocity, origAction) {
-    if (m_state.action === 'momentum') {
+    if (m_state.action === geo_action.momentum) {
       return;
     }
     if (!initialVelocity) {
@@ -1314,14 +1334,14 @@ var mapInteractor = function (args) {
       };
     }
     m_state.origAction = origAction;
-    m_state.action = 'momentum';
+    m_state.action = geo_action.momentum;
     m_state.origin = m_this.mouse();
     m_state.momentum = m_this.mouse();
     m_state.start = new Date();
     m_state.handler = function () {
       var v, s, last, dt;
 
-      if (m_state.action !== 'momentum' ||
+      if (m_state.action !== geo_action.momentum ||
           !m_this.map() ||
           m_this.map().transition()) {
         // cancel if a new action was performed
@@ -1358,7 +1378,7 @@ var mapInteractor = function (args) {
       m_state.momentum.velocity.y = v.y;
 
       switch (m_state.origAction) {
-        case 'zoom':
+        case geo_action.zoom:
           var dy = m_state.momentum.velocity.y * dt;
           m_callZoom(-dy * m_options.zoomScale / 120, m_state);
           break;
@@ -1440,6 +1460,66 @@ var mapInteractor = function (args) {
     }
     m_paused = !!value;
     return m_this;
+  };
+
+  /**
+   * Add an action to the list of handled actions.
+   *
+   * @param {object} action: an object defining the action.  This must have
+   *    action and input properties, and may have modifiers, name, and owner.
+   *    Use action, name, and owner to make this entry distinct if it will need
+   *    to be removed later.
+   * @param {boolean} toEnd: the action is added at the beginning of the
+   *    actions list unless toEnd is true.  Earlier actions prevent later
+   *    actions with the similar input and modifiers.
+   */
+  this.addAction = function (action, toEnd) {
+    if (!action || !action.action || !action.input) {
+      return;
+    }
+    util.addAction(m_options.actions, action, toEnd);
+    if (m_options.map && m_options.actions.some(function (action) {
+      return action.input.right;
+    })) {
+      $node.off('contextmenu.geojs');
+      $node.on('contextmenu.geojs', function () { return false; });
+    }
+  };
+
+  /**
+   * Check if an action is in the actions list.  An action matches if the
+   * action, name, and owner match.  A null or undefined value will match all
+   * actions.  If using an action object, this is the same as passing
+   * (action.action, action.name, action.owner).
+   *
+   * @param {object|string} action Either an action object or the name of an
+   *    action.
+   * @param {string} name Optional name associated with the action.
+   * @param {string} owner Optional owner associated with the action.
+   * @return action the first matching action or null.
+   */
+  this.hasAction = function (action, name, owner) {
+    return util.hasAction(m_options.actions, action, name, owner);
+  };
+
+  /**
+   * Remove all matching actions.  Actions are matched as with hasAction.
+   *
+   * @param {object|string} action Either an action object or the name of an
+   *    action.
+   * @param {string} name Optional name associated with the action.
+   * @param {string} owner Optional owner associated with the action.
+   * @return numRemoved the number of actions that were removed.
+   */
+  this.removeAction = function (action, name, owner) {
+    var removed = util.removeAction(
+        m_options.actions, action, name, owner);
+    if (m_options.map && !m_options.actions.some(function (action) {
+      return action.input.right;
+    })) {
+      $node.off('contextmenu.geojs');
+    }
+    return removed;
   };
 
   ////////////////////////////////////////////////////////////////////////////
