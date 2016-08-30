@@ -34,10 +34,12 @@ var annotationLayer = function (args) {
       m_buildTime = timestamp(),
       m_options,
       m_actions,
+      m_mode,
       m_annotations = [],
       m_features = [];
 
   m_options = $.extend(true, {}, {
+    dblClickTime: 300,
     actions: [{
       action: 'annotationmenu',  // this will redirect to the appropriate menu
       input: 'right'
@@ -81,9 +83,8 @@ var annotationLayer = function (args) {
   }, args);
 
   this._processSelection = function (event) {
-    if (m_this.mode === 'rectangle') {
-      m_this.map().node().css('cursor', '');
-      m_this.map().interactor().removeAction(m_actions.rectangle);
+    if (m_this.mode() === 'rectangle') {
+      m_this.mode(null);
       if (event.state.action === geo_action.annotation_rectangle) {
         var map = m_this.map();
         var params = {
@@ -101,7 +102,10 @@ var annotationLayer = function (args) {
   };
 
   this._handleMouseMove = function (evt) {
-    switch (m_this.mode && m_this.currentAnnotation) {
+    if (!m_this.mode() || !m_this.currentAnnotation) {
+      return;
+    }
+    switch (m_this.mode()) {
       case 'polygon':
         var vertices = m_this.currentAnnotation.options().vertices;
         if (vertices.length) {
@@ -111,42 +115,70 @@ var annotationLayer = function (args) {
         m_this._update();
         m_this.draw();
         break;
-      default:
-        return;
     }
   };
 
   this._handleMouseClick = function (evt) {
-    console.log('event', evt, m_this.currentAnnotation);  //DWM::
+    switch (m_this.mode()) {
+      case 'polygon':
+        var end = !!evt.buttonsDown.right, skip;
+        if (!evt.buttonsDown.left && !evt.buttonsDown.right) {
+          break;
+        }
+        var vertices = m_this.currentAnnotation.options().vertices;
+        if (evt.buttonsDown.left) {
+          if (vertices.length) {
+            if (vertices.length >= 2 &&
+                vertices[vertices.length - 2].x === evt.mapgcs.x &&
+                vertices[vertices.length - 2].y === evt.mapgcs.y) {
+              skip = true;
+              if (m_this.currentAnnotation.lastClick &&
+                  evt.time - m_this.currentAnnotation.lastClick < m_options.dblClickTime) {
+                end = true;
+              }
+            } else if (vertices.length >= 2 && vertices[0].x === evt.mapgcs.x &&
+                       vertices[0].y === evt.mapgcs.y) {
+              end = true;
+            } else {
+              vertices[vertices.length - 1] = evt.mapgcs;
+            }
+          } else {
+            vertices.push(evt.mapgcs);
+          }
+          if (!end && !skip) {
+            vertices.push(evt.mapgcs);
+          }
+          m_this.currentAnnotation.lastClick = evt.time;
+        } else {
+          if (vertices.length > 1) {
+            vertices.pop();
+          }
+        }
+        if (end) {
+          if (vertices.length < 3) {
+            m_this.removeAnnotation(m_this.currentAnnotation, false);
+          } else {
+            m_this.currentAnnotation.state('done');
+          }
+          m_this.mode(null);
+        }
+        m_this.modified();
+        m_this._update();
+        m_this.draw();
+        evt.handled = true;
+        return;
+    }
+  };
 
-    if (m_this.mode !== 'polygon') {
-      console.log('--------START----------');  //DWM::
-      m_this.mode = 'polygon';
-      m_this.map().node().css('cursor', 'crosshair');
-      m_this.currentAnnotation = polygonAnnotation({state: 'create'});
-      this.addAnnotation(m_this.currentAnnotation);
+  this._mouseClickToStart = function (evt) {
+    if (evt.handled) {
       return;
     }
-    if (m_this.mode === 'polygon') {
-      // if right click or click near first point, end the polygon
-      var vertices = m_this.currentAnnotation.options().vertices;
-      if (vertices.length) {
-        vertices[vertices.length - 1] = evt.mapgcs;
-      }
-      vertices.push(evt.mapgcs);
-      m_this.modified();
-      m_this._update();
-      m_this.draw();
-
-      return;
+    if (!m_this.mode()) {
+      m_this.mode(evt.buttonsDown.left ? 'polygon' : 'rectangle');
+    } else {
+      m_this.mode(null);
     }
-
-    if (!m_this.map().interactor().removeAction(m_actions.rectangle)) {
-      m_this.mode = 'rectangle';
-      m_this.map().node().css('cursor', 'crosshair');
-      m_this.map().interactor().addAction(m_actions.rectangle);
-    }
-    m_this.mode = null;
   };
 
   this.addAnnotation = function (annotation) {
@@ -154,6 +186,42 @@ var annotationLayer = function (args) {
     this.modified();
     this._update();
     this.draw();
+  };
+
+  this.removeAnnotation = function (annotation, update) {
+    var pos = $.inArray(annotation, m_annotations);
+    if (pos >= 0) {
+      m_annotations.splice(pos, 1);
+      if (update !== false) {
+        this.modified();
+        this._update();
+        this.draw();
+      }
+    }
+    return pos >= 0;
+  };
+
+  this.mode = function (arg) {
+    if (arg === undefined) {
+      return m_mode;
+    }
+    if (arg !== m_mode) {
+      m_mode = arg;
+      m_this.map().node().css('cursor', m_mode ? 'crosshair' : '');
+      this.currentAnnotation = null;
+      switch (m_mode) {
+        case 'polygon':
+          this.currentAnnotation = polygonAnnotation({state: 'create'});
+          this.addAnnotation(m_this.currentAnnotation);
+          break;
+        case 'rectangle':
+          m_this.map().interactor().addAction(m_actions.rectangle);
+          break;
+      }
+      if (m_mode !== 'rectangle') {
+        m_this.map().interactor().removeAction(m_actions.rectangle);
+      }
+    }
   };
 
   ///////////////////////////////////////////////////////////////////////////
@@ -176,16 +244,25 @@ var annotationLayer = function (args) {
           }
           $.each(featureLevel, function (type, featureSpec) {
             if (!m_features[idx][type]) {
-              var feature = m_this.createFeature(type, {
-                gcs: m_this.map().gcs(),
-                polygon: function (d) {
-                  return d.polygon;
+              try {
+                var feature = m_this.createFeature(type, {
+                  gcs: m_this.map().gcs()
+                });
+              } catch (err) {
+                /* We can't create the desired feature, porbably because of the
+                 * selected renderer.  Issue one warning only. */
+                var key = 'error_feature_' + type;
+                if (!m_this[key]) {
+                  console.warning('Cannot create a ' + type + ' feature for ' +
+                                  'annotations.');
+                  m_this[key] = true;
                 }
-              });
+                return;
+              }
               var style = {};
-              $.each(['fill', 'fillColor', 'fillOpacity', 'stroke',
-                      'strokeColor', 'strokeOpacity', 'strokeWidth',
-                      'uniformPolygon'
+              $.each(['fill', 'fillColor', 'fillOpacity', 'line', 'polygon',
+                      'position', 'stroke', 'strokeColor', 'strokeOpacity',
+                      'strokeWidth', 'uniformPolygon'
                   ], function (keyidx, key) {
                 var origFunc;
                 if (feature.style()[key] !== undefined) {
@@ -195,7 +272,7 @@ var annotationLayer = function (args) {
                   var style = (
                     (d && d.style) ? d.style : (d && d[2] && d[2].style) ?
                     d[2].style : d2.style);
-                  var result = style[key];
+                  var result = style ? style[key] : d;
                   if (util.isFunction(result)) {
                     result = result(d, i, d2, i2);
                   }
@@ -212,7 +289,7 @@ var annotationLayer = function (args) {
                 data: []
               };
             }
-            m_features[idx][type].data.push(featureSpec);
+            m_features[idx][type].data.push(featureSpec.data || featureSpec);
           });
         });
       });
@@ -240,10 +317,10 @@ var annotationLayer = function (args) {
     }
     m_this.geoOn(geo_event.actionselection, m_this._processSelection);
 
-    console.log('get mouse click'); //DWM::
     m_this.geoOn(geo_event.mouseclick, m_this._handleMouseClick);
     m_this.geoOn(geo_event.mousemove, m_this._handleMouseMove);
 
+    m_this.geoOn(geo_event.mouseclick, m_this._mouseClickToStart);
     //DWM:: capture mouse actions on the layer and on child features.
     console.log(m_options); //DWM::
     return m_this;
@@ -335,7 +412,7 @@ var annotation = function (type, args) {
 
   this.geojson = function () {
     // return the annotation as a geojson object
-    //DWM:
+    //DWM::
   };
 };
 
@@ -360,6 +437,7 @@ var rectangleAnnotation = function (args) {
       fill: true,
       fillColor: {r: 0, g: 1, b: 0},
       fillOpacity: 0.25,
+      polygon: function (d) { return d.polygon; },
       stroke: true,
       strokeColor: {r: 0, g: 0, b: 0},
       strokeOpacity: 1,
@@ -391,6 +469,9 @@ var polygonAnnotation = function (args) {
   if (!(this instanceof polygonAnnotation)) {
     return new polygonAnnotation(args);
   }
+
+  var m_this = this;
+
   /* Must specify:
    *   vertices: a list of vertices {x: x, y: y} in map gcs coordinates.
    * May specify:
@@ -403,6 +484,7 @@ var polygonAnnotation = function (args) {
       fill: true,
       fillColor: {r: 0, g: 1, b: 0},
       fillOpacity: 0.25,
+      polygon: function (d) { return d.polygon; },
       stroke: true,
       strokeColor: {r: 0, g: 0, b: 0},
       strokeOpacity: 1,
@@ -414,8 +496,18 @@ var polygonAnnotation = function (args) {
       fill: true,
       fillColor: {r: 0.3, g: 0.3, b: 0.3},
       fillOpacity: 0.25,
+      line: function (d) {
+        /* Return an array that has the same number of items as we have
+         * vertices. */
+        return Array.apply(null, Array(m_this.options().vertices.length)).map(
+            function () { return d; });
+      },
+      polygon: function (d) { return d.polygon; },
+      position: function (d, i) {
+        return m_this.options().vertices[i];
+      },
       stroke: false,
-      strokeColor: {r: 0, g: 0.843, b: 0},
+      strokeColor: {r: 0, g: 0, b: 1},
       strokeOpacity: 1,
       strokeWidth: 3,
       uniformPolygon: true

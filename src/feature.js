@@ -380,7 +380,7 @@ var feature = function (arg) {
    */
   this.featureGcsToDisplay = function (c) {
     var map = m_renderer.layer().map();
-    c = map.gcsToWorld(c, map.ingcs());
+    c = map.gcsToWorld(c, m_this.gcs());
     c = map.worldToDisplay(c);
     if (m_renderer.baseToLocal) {
       c = m_renderer.baseToLocal(c);

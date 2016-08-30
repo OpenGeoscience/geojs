@@ -84,8 +84,8 @@ describe('geo.polygonFeature', function () {
       polygon.position(function () { return 'b'; });
       expect(polygon.position()('a')).toEqual('b');
 
-      polygon = geo.polygonFeature({layer: layer, position: pos});
-      polygon._init();
+      polygon = geo.polygonFeature({layer: layer});
+      polygon._init({position: pos});
       expect(polygon.position()).toEqual(pos);
     });
 
@@ -100,8 +100,8 @@ describe('geo.polygonFeature', function () {
       polygon.polygon(function () { return 'b'; });
       expect(polygon.polygon()('a')).toEqual('b');
 
-      polygon = geo.polygonFeature({layer: layer, polygon: pos});
-      polygon._init();
+      polygon = geo.polygonFeature({layer: layer});
+      polygon._init({polygon: pos});
       expect(polygon.polygon()).toEqual(pos);
     });
 
