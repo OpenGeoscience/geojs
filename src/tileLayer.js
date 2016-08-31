@@ -415,7 +415,7 @@ module.exports = (function () {
       gcs = (gcs === null ? map.gcs() : (
           gcs === undefined ? map.ingcs() : gcs));
       if (gcs !== map.gcs()) {
-        coord = transform.transformCoordinates(gcs, map.gcs(), coord);
+        coord = transform.transformCoordinates(map.gcs(), gcs, coord);
       }
       return {
         left: coord[0].x,
