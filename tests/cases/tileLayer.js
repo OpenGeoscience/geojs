@@ -89,10 +89,10 @@ describe('geo.tileLayer', function () {
         };
       },
       gcs: function () {
-        return '+proj=longlat +axis=esu';
+        return o.gcs ? o.gcs : '+proj=longlat +axis=esu';
       },
       ingcs: function () {
-        return '+proj=longlat +axis=enu';
+        return o.ingcs ? o.ingcs : '+proj=longlat +axis=enu';
       },
       updateAttribution: function () {
       },
@@ -663,6 +663,28 @@ describe('geo.tileLayer', function () {
           left: 2240000, top: 2240000, right: 2560000, bottom: 2560000});
         expect(l.gcsTileBounds({level: 3, x: 3, y: 4})).toEqual({
           left: 960000, top: 1280000, right: 1280000, bottom: 1600000});
+      });
+      it('transform', function () {
+        var mapOpts = {
+          unitsPerPixel: 156543,
+          ingcs: 'EPSG:4326',
+          gcs: 'EPSG:3857',
+          maxBounds: {
+            left: -20037508, top: 20037508, right: 20037508, bottom: -20037508},
+          center: {x: 0, y: 0},
+          max: 5
+        };
+        var m = map(mapOpts), l;
+        l = geo.tileLayer({map: m});
+        expect(closeToEqual(l.gcsTileBounds(
+           {level: 2, x: 0, y: 0}), {
+             left: 0, top: 0, right: 90, bottom: -66.51})).toBe(true);
+        expect(closeToEqual(l.gcsTileBounds(
+           {level: 2, x: 0, y: 0}, 'EPSG:4326'), {
+             left: 0, top: 0, right: 90, bottom: -66.51})).toBe(true);
+        expect(closeToEqual(l.gcsTileBounds(
+           {level: 2, x: 1, y: 1}, 'EPSG:4269'), {
+             left: 90, top: -66.51, right: 180, bottom: -85.05})).toBe(true);
       });
     });
     describe('tileCropFromBounds and tilesMaxBounds', function () {
