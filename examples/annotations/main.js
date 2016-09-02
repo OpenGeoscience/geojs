@@ -6,6 +6,19 @@ var annotationDebug = {};
 $(function () {
   'use strict';
 
+  var layer;
+
+  function _mouseClickToStart(evt) {
+    if (evt.handled) {
+      return;
+    }
+    if (!layer.mode()) {
+      layer.mode(evt.buttonsDown.left ? 'polygon' : 'rectangle');
+    } else {
+      layer.mode(null);
+    }
+  }
+
   var query = utils.getQuery();
   var map = geo.map({
     node: '#map',
@@ -23,10 +36,11 @@ $(function () {
       annotationDebug.satelliteLayer = map.createLayer('osm', {url: 'http://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}.png', opacity: query.map === 'dual' ? 0.25 : 1});
     }
   }
-  var layer = map.createLayer('annotation', {
+  layer = map.createLayer('annotation', {
     renderer: query.renderer ? (query.renderer === 'html' ? null : query.renderer) : undefined,
-    features: query.renderer ? undefined : ['polygon']
+    features: query.renderer ? undefined : ['polygon', 'line']
   });
+  layer.geoOn(geo.event.mouseclick, _mouseClickToStart);
 
   map.draw();
 

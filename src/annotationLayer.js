@@ -3,16 +3,30 @@ var featureLayer = require('./featureLayer');
 var geo_action = require('./action');
 var geo_event = require('./event');
 var registry = require('./registry');
+var transform = require('./transform');
 var $ = require('jquery');
 
 var annotationId = 0;
 
 /////////////////////////////////////////////////////////////////////////////
 /**
- * Layer to handle direct interactions with different features.
+ * Layer to handle direct interactions with different features.  Annotations
+ * (features) can be created by calling mode(<name of feature>) or cancelled
+ * with mode(null).
  *
  * @class geo.annotationLayer
  * @extends geo.featureLayer
+ * @param {object?} options
+ * @param {number} [options.dblClickTime=300]  The delay in milliseconds that
+ *    is treated as a double-click when working with annotations.
+ * @param {number} [options.adjacentPointProximity=5]  The minimum distance in
+ *    display coordinates (pixels) between two adjacent points when creating a
+ *    polygon.  A value of 0 requires an exact match.
+ * @param {number} [options.finalPointProximity=10]  The maximum distance in
+ *    display coordinates (pixels) between the starting point and the mouse
+ *    coordinates to signal closing a polygon.  A value of 0 requires an exact
+ *    match.  A negative value disables closing a polygon by clicking on the
+ *    start point.
  * @returns {geo.annotationLayer}
  */
 /////////////////////////////////////////////////////////////////////////////
@@ -40,154 +54,169 @@ var annotationLayer = function (args) {
 
   m_options = $.extend(true, {}, {
     dblClickTime: 300,
-    actions: [{
-      action: 'annotationmenu',  // this will redirect to the appropriate menu
-      input: 'right'
-    }],
-    generalMenuOptions: { // null on a menu entry prevents it from showing that item
-      default: 'rectangle',
-      metakeys: '',
-      togeojson: true,
-      fromgeojson: true,
-      deleteall: true,
-      showall: true,
-      hideall: true
-    },
-    generalMenuText: {  // override for different locales
-      default: 'Make %s',
-      metakeys: '',
-      togeojson: 'Copy to Clipboard',
-      fromgeojson: 'Copy from Clipboard',
-      deleteall: 'Delete Annotations',
-      showall: 'Show All',
-      hideall: 'Hide All'
-    },
-    annotationMenuOptions: {
-      name: true,
-      delete: true,
-      rename: true,
-      style: true,
-      move: true, // move to top, up, down, to bottom
-      hide: true
-    },
-    annotationMenuText: {
-      name: 'Name: %s',
-      delete: 'Delete',
-      rename: 'Rename',
-      style: 'Options Dialog',
-      movetotop: 'Move to Top',
-      moveup: 'Move Up',
-      movedown: 'Move Down',
-      movetobottom: 'Move to Bottom'
-    }
+    adjacentPointProximity: 5,  // in pixels, 0 is exact
+    finalPointProximity: 10  // in pixels, 0 is exact
   }, args);
 
-  this._processSelection = function (event) {
+  m_actions = {
+    rectangle: {
+      action: geo_action.annotation_rectangle,
+      owner: 'annotationLayer',
+      input: 'left',
+      modifiers: {shift: false, ctrl: false},
+      selectionRectangle: true
+    }
+  };
+
+  /**
+   * Process a selection event.  If we are in rectangle-creation mode, this
+   * creates a rectangle.
+   *
+   * @param {geo.event} evt the selection event.
+   */
+  this._processSelection = function (evt) {
     if (m_this.mode() === 'rectangle') {
       m_this.mode(null);
-      if (event.state.action === geo_action.annotation_rectangle) {
+      if (evt.state.action === geo_action.annotation_rectangle) {
         var map = m_this.map();
         var params = {
           corners: [
             /* Keep in map gcs, not interface gcs to avoid wrapping issues */
-            map.displayToGcs({x: event.lowerLeft.x, y: event.lowerLeft.y}, null),
-            map.displayToGcs({x: event.lowerLeft.x, y: event.upperRight.y}, null),
-            map.displayToGcs({x: event.upperRight.x, y: event.upperRight.y}, null),
-            map.displayToGcs({x: event.upperRight.x, y: event.lowerLeft.y}, null)
-          ]
+            map.displayToGcs({x: evt.lowerLeft.x, y: evt.lowerLeft.y}, null),
+            map.displayToGcs({x: evt.lowerLeft.x, y: evt.upperRight.y}, null),
+            map.displayToGcs({x: evt.upperRight.x, y: evt.upperRight.y}, null),
+            map.displayToGcs({x: evt.upperRight.x, y: evt.lowerLeft.y}, null)
+          ],
+          layer: this
         };
         this.addAnnotation(rectangleAnnotation(params));
       }
     }
   };
 
+  /**
+   * Handle mouse movement.  If there is a current annotation, the movement
+   * event is sent to it.
+   *
+   * @param {geo.event} evt the mouse move event.
+   */
   this._handleMouseMove = function (evt) {
-    if (!m_this.mode() || !m_this.currentAnnotation) {
-      return;
-    }
-    switch (m_this.mode()) {
-      case 'polygon':
-        var vertices = m_this.currentAnnotation.options().vertices;
-        if (vertices.length) {
-          vertices[vertices.length - 1] = evt.mapgcs;
-        }
+    if (this.mode() && this.currentAnnotation) {
+      var update = this.currentAnnotation.mouseMove(evt);
+      if (update) {
         m_this.modified();
         m_this._update();
         m_this.draw();
-        break;
+      }
     }
   };
 
+  /**
+   * Handle mouse clicks.  If there is a current annotation, the click event is
+   * sent to it.
+   *
+   * @param {geo.event} evt the mouse click event.
+   */
   this._handleMouseClick = function (evt) {
-    switch (m_this.mode()) {
-      case 'polygon':
-        var end = !!evt.buttonsDown.right, skip;
-        if (!evt.buttonsDown.left && !evt.buttonsDown.right) {
+    if (this.mode() && this.currentAnnotation) {
+      var update = this.currentAnnotation.mouseClick(evt);
+      switch (update) {
+        case 'remove':
+          m_this.removeAnnotation(m_this.currentAnnotation, false);
           break;
-        }
-        var vertices = m_this.currentAnnotation.options().vertices;
-        if (evt.buttonsDown.left) {
-          if (vertices.length) {
-            if (vertices.length >= 2 &&
-                vertices[vertices.length - 2].x === evt.mapgcs.x &&
-                vertices[vertices.length - 2].y === evt.mapgcs.y) {
-              skip = true;
-              if (m_this.currentAnnotation.lastClick &&
-                  evt.time - m_this.currentAnnotation.lastClick < m_options.dblClickTime) {
-                end = true;
-              }
-            } else if (vertices.length >= 2 && vertices[0].x === evt.mapgcs.x &&
-                       vertices[0].y === evt.mapgcs.y) {
-              end = true;
-            } else {
-              vertices[vertices.length - 1] = evt.mapgcs;
-            }
-          } else {
-            vertices.push(evt.mapgcs);
-          }
-          if (!end && !skip) {
-            vertices.push(evt.mapgcs);
-          }
-          m_this.currentAnnotation.lastClick = evt.time;
-        } else {
-          if (vertices.length > 1) {
-            vertices.pop();
-          }
-        }
-        if (end) {
-          if (vertices.length < 3) {
-            m_this.removeAnnotation(m_this.currentAnnotation, false);
-          } else {
-            m_this.currentAnnotation.state('done');
-          }
+        case 'done':
           m_this.mode(null);
-        }
+          break;
+      }
+      if (update) {
         m_this.modified();
         m_this._update();
         m_this.draw();
-        evt.handled = true;
-        return;
+      }
     }
   };
 
-  this._mouseClickToStart = function (evt) {
-    if (evt.handled) {
-      return;
+  /**
+   * Set or get options.
+   *
+   * @param {string|object} arg1 if undefined, return the options object.  If
+   *    a string, either set or return the option of that name.  If an object,
+   *    update the options with the object's values.
+   * @param {object} arg2 if arg1 is a string and this is defined, set the
+   *    option to this value.
+   * @returns {object|this} if options are set, return the layer, otherwise
+   *    return the requested option or the set of options.
+   */
+  this.options = function (arg1, arg2) {
+    if (arg1 === undefined) {
+      return m_options;
     }
-    if (!m_this.mode()) {
-      m_this.mode(evt.buttonsDown.left ? 'polygon' : 'rectangle');
+    if (typeof arg1 === 'string' && arg2 === undefined) {
+      return m_options[arg1];
+    }
+    if (arg2 === undefined) {
+      m_options = $.extend(m_options, arg1);
     } else {
-      m_this.mode(null);
+      m_options[arg1] = arg2;
     }
+    this.modified();
+    return this;
   };
 
+  /**
+   * Calculate the display distance for two coordinate in the current map.
+   *
+   * @param {object} coord1 the first coordinates.
+   * @param {string|geo.transform} [gcs1] undefined to use the interface gcs,
+   *    null to use the map gcs, 'display' if the coordinates are already in
+   *    display coordinates, or any other transform.
+   * @param {object} coord2 the second coordinates.
+   * @param {string|geo.transform} [gcs2] undefined to use the interface gcs,
+   *    null to use the map gcs, 'display' if the coordinates are already in
+   *    display coordinates, or any other transform.
+   * @returns {number} the Euclidian distance between the two coordinates.
+   */
+  this.displayDistance = function (coord1, gcs1, coord2, gcs2) {
+    var map = this.map();
+    if (gcs1 !== 'display') {
+      gcs1 = (gcs1 === null ? map.gcs() : (
+              gcs1 === undefined ? map.ingcs() : gcs1));
+      coord1 = map.gcsToDisplay(coord1, gcs1);
+    }
+    if (gcs2 !== 'display') {
+      gcs2 = (gcs2 === null ? map.gcs() : (
+              gcs2 === undefined ? map.ingcs() : gcs2));
+      coord2 = map.gcsToDisplay(coord2, gcs2);
+    }
+    var dist = Math.sqrt(Math.pow(coord1.x - coord2.x, 2) +
+                         Math.pow(coord1.y - coord2.y, 2));
+    return dist;
+  };
+
+  /**
+   * Add an annotation to the layer.  The annotation could be in any state.
+   *
+   * @param {object} annotation the annotation to add.
+   */
   this.addAnnotation = function (annotation) {
+    m_this.geoTrigger(geo_event.annotation.add, {
+      annotation: annotation
+    });
     m_annotations.push(annotation);
     this.modified();
     this._update();
     this.draw();
+    return this;
   };
 
+  /**
+   * Remove an annotation from the layer.
+   *
+   * @param {object} annotation the annotation to remove.
+   * @param {boolean} update if false, don't update the layer after removing
+   *    the annotation.
+   * @returns {boolean} true if an annotation was removed.
+   */
   this.removeAnnotation = function (annotation, update) {
     var pos = $.inArray(annotation, m_annotations);
     if (pos >= 0) {
@@ -197,10 +226,45 @@ var annotationLayer = function (args) {
         this._update();
         this.draw();
       }
+      m_this.geoTrigger(geo_event.annotation.remove, {
+        annotation: annotation
+      });
     }
     return pos >= 0;
   };
 
+  /**
+   * Remove all annotations from the layer.
+   *
+   * @returns {number} the number of annotations that were removed.
+   */
+  this.removeAllAnnotations = function () {
+    var removed = 0;
+    $.each(this.annotations, function (idx, annotation) {
+      if (this.removeAnnotation(annotation, false)) {
+        removed += 1;
+      }
+    });
+    return removed;
+  };
+
+  /**
+   * Get the list of annotations on the layer.
+   *
+   * @returns {array} An array of annotations.
+   */
+  this.annotations = function () {
+    return m_annotations.slice();
+  };
+
+  /**
+   * Get or set the current mode.  The mode is either null for nothing being
+   * created, or the name of the type of annotation that is being created.
+   *
+   * @param {string|null} arg the new mode or undefined to get the current
+   *    mode.
+   * @returns {string|null|this} The current mode or the layer.
+   */
   this.mode = function (arg) {
     if (arg === undefined) {
       return m_mode;
@@ -208,10 +272,20 @@ var annotationLayer = function (args) {
     if (arg !== m_mode) {
       m_mode = arg;
       m_this.map().node().css('cursor', m_mode ? 'crosshair' : '');
-      this.currentAnnotation = null;
+      if (this.currentAnnotation) {
+        switch (this.currentAnnotation.state()) {
+          case 'create':
+            this.removeAnnotation(this.currentAnnotation);
+            break;
+        }
+        this.currentAnnotation = null;
+      }
       switch (m_mode) {
         case 'polygon':
-          this.currentAnnotation = polygonAnnotation({state: 'create'});
+          this.currentAnnotation = polygonAnnotation({
+            state: 'create',
+            layer: this
+          });
           this.addAnnotation(m_this.currentAnnotation);
           break;
         case 'rectangle':
@@ -221,7 +295,9 @@ var annotationLayer = function (args) {
       if (m_mode !== 'rectangle') {
         m_this.map().interactor().removeAction(m_actions.rectangle);
       }
+      m_this.geoTrigger(geo_event.annotation.mode, {mode: m_mode});
     }
+    return this;
   };
 
   ///////////////////////////////////////////////////////////////////////////
@@ -231,6 +307,12 @@ var annotationLayer = function (args) {
   ///////////////////////////////////////////////////////////////////////////
   this._update = function (request) {
     if (m_this.getMTime() > m_buildTime.getMTime()) {
+      /* Interally, we have a set of feature levels (to provide z-index
+       * support), each of which can have data from multiple annotations.  We
+       * clear the data on each of these features, then build it up from each
+       * annotation.  Eventually, it may be necessary to optimize this and
+       * only update the features that are changed.
+       */
       $.each(m_features, function (idx, featureLevel) {
         $.each(featureLevel, function (type, feature) {
           feature.data = [];
@@ -243,6 +325,7 @@ var annotationLayer = function (args) {
             m_features[idx] = {};
           }
           $.each(featureLevel, function (type, featureSpec) {
+            /* Create features as needed */
             if (!m_features[idx][type]) {
               try {
                 var feature = m_this.createFeature(type, {
@@ -259,6 +342,12 @@ var annotationLayer = function (args) {
                 }
                 return;
               }
+              /* Since each annotation can have separate styles, the styles are
+               * combined together with a meta-style function.  Any style that
+               * could be used should be in this list.  Color styles may be
+               * restricted to {r, g, b} objects for efficiency, but this
+               * hasn't been tested.
+               */
               var style = {};
               $.each(['fill', 'fillColor', 'fillOpacity', 'line', 'polygon',
                       'position', 'stroke', 'strokeColor', 'strokeOpacity',
@@ -289,10 +378,12 @@ var annotationLayer = function (args) {
                 data: []
               };
             }
+            /* Collect the data for each feature */
             m_features[idx][type].data.push(featureSpec.data || featureSpec);
           });
         });
       });
+      /* Update the data for each feature */
       $.each(m_features, function (idx, featureLevel) {
         $.each(featureLevel, function (type, feature) {
           feature.feature.data(feature.data);
@@ -320,9 +411,6 @@ var annotationLayer = function (args) {
     m_this.geoOn(geo_event.mouseclick, m_this._handleMouseClick);
     m_this.geoOn(geo_event.mousemove, m_this._handleMouseMove);
 
-    m_this.geoOn(geo_event.mouseclick, m_this._mouseClickToStart);
-    //DWM:: capture mouse actions on the layer and on child features.
-    console.log(m_options); //DWM::
     return m_this;
   };
 
@@ -334,17 +422,9 @@ var annotationLayer = function (args) {
   this._exit = function () {
     /// Call super class exit
     s_exit.call(m_this);
+    m_annotations = [];
+    m_features = [];
     return m_this;
-  };
-
-  m_actions = {
-    rectangle: {
-      action: geo_action.annotation_rectangle,
-      owner: 'annotationLayer',
-      input: 'left',
-      modifiers: {shift: false, ctrl: false},
-      selectionRectangle: true
-    }
   };
 
   return m_this;
@@ -357,6 +437,17 @@ module.exports = annotationLayer;
 /////////////////////////////////////////////////////////////////////////////
 /**
  * Base annotation class
+ *
+ * @class geo.annotation
+ * @param {string} type the type of annotation.
+ * @param {object?} options Inidividual annotations have additional options.
+ * @param {string} [options.name] A name for the annotation.  This defaults to
+ *    the type with a unique ID suffixed to it.
+ * @param {geo.annotationLayer} [options.layer] a reference to the controlling
+ *    layer.  This is used for coordinate transforms.
+ * @param {string} [options.state] initial annotation state.  One of 'create',
+ *    'done', or 'edit'.
+ * @returns {geo.annotation}
  */
 /////////////////////////////////////////////////////////////////////////////
 var annotation = function (type, args) {
@@ -369,13 +460,26 @@ var annotation = function (type, args) {
       m_id = annotationId,
       m_name = args.name || (args.type + ' ' + annotationId),
       m_type = type,
+      m_layer = args.layer,
       m_state = args.state || 'done';  /* create, done, edit */
   annotationId += 1;
 
+  /**
+   * Get a unique annotation id.
+
+   * @returns {number} the annotation id.
+   */
   this.id = function () {
     return m_id;
   };
 
+  /**
+   * Get or set the name of this annotation.
+   *
+   * @param {string|undefined} arg if undefined, return the name, otherwise
+   *    change it.
+   * @returns {this|string} the current name or this annotation.
+   */
   this.name = function (arg) {
     if (arg === undefined) {
       return m_name;
@@ -384,6 +488,28 @@ var annotation = function (type, args) {
     return this;
   };
 
+  /**
+   * Get or set the annotation layer associated with this annotation.
+   *
+   * @param {geo.annotationLayer|undefined} arg if undefined, return the layer,
+   *    otherwise change it.
+   * @returns {this|geo.annotationLayer} the current layer or this annotation.
+   */
+  this.layer = function (arg) {
+    if (arg === undefined) {
+      return m_layer;
+    }
+    m_layer = arg;
+    return this;
+  };
+
+  /**
+   * Get or set the state of this annotation.
+   *
+   * @param {string|undefined} arg if undefined, return the state, otherwise
+   *    change it.
+   * @returns {this|string} the current state or this annotation.
+   */
   this.state = function (arg) {
     if (arg === undefined) {
       return m_state;
@@ -392,33 +518,109 @@ var annotation = function (type, args) {
     return this;
   };
 
+  /**
+   * Get the options for this annotation.
+   *
+   * @returns {object} the current options.
+   */
   this.options = function () {
     return m_options;
   };
 
+  /**
+   * Get the type of this annotation.
+   *
+   * @returns {string} the annotation type.
+   */
   this.type = function () {
     return m_type;
   };
 
-  // features //DWM::
-
-  this.dragControls = function () {
-    /* return a list of drag control structures.  This is the four corners, the
-     * four edges, the central region, and a rotation handle.  The drag
-     * controls should always use the adjustment styling, and could also
-     * specify the appropriate cursor to show over them. */
-    //DWM::
+  /**
+   * Get a list of renderable features for this annotation.  The list index is
+   * functionally a z-index for the feature.  Each entry is a dictionary with
+   * the key as the feature name (such as line, quad, or polygon), and the
+   * value a dictionary of values to pass to the feature constructor, such as
+   * style and coordinates.
+   *
+   * @returns {array} an array of features.
+   */
+  this.features = function () {
+    return [];
   };
 
+  /**
+   * Handle a mouse click on this annotation.  If the event is processed,
+   * evt.handled should be set to true to prevent further processing.
+   *
+   * @param {geo.event} evt the mouse click event.
+   * @returns {boolean|string} true to update the annotation, 'done' if the
+   *    annotation was completed (changed from create to done state), 'remove'
+   *    if the annotation should be removed, falsy to not update anything.
+   */
+  this.mouseClick = function (evt) {
+  };
+
+  /**
+   * Handle a mouse move on this annotation.
+   *
+   * @param {geo.event} evt the mouse move event.
+   * @returns {boolean|string} true to update the annotation, falsy to not
+   *    update anything.
+   */
+  this.mouseMove = function (evt) {
+  };
+
+  /**
+   * Get coordinates associated with this annotation in the map gcs coordinate
+   * system.
+   *
+   * @returns {array} an array of coordinates.
+   */
+  this._coordinates = function () {
+    return [];
+  };
+
+  /**
+   * Get coordinates associated with this annotation.
+   *
+   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
+   *    null to use the map gcs, or any other transform.
+   * @returns {array} an array of coordinates.
+   */
+  this.coordinates = function (gcs) {
+    var coord = this._coordinates();
+    var map = this.layer().map();
+    gcs = (gcs === null ? map.gcs() : (
+           gcs === undefined ? map.ingcs() : gcs));
+    if (gcs !== map.gcs()) {
+      coord = transform.transformCoordinates(map.gcs(), gcs, coord);
+    }
+    return coord;
+  };
+
+  /**
+   * TODO: return the annotation as a geojson object
+   */
   this.geojson = function () {
-    // return the annotation as a geojson object
-    //DWM::
+    return 'not implemented';
   };
 };
 
 /////////////////////////////////////////////////////////////////////////////
 /**
  * Rectangle annotation class
+ *
+ * Rectangles are always rendered as polygons.  This could be changed -- if no
+ * stroke is specified, the quad feature would be sufficient and work on more
+ * renderers.
+ *
+ * Must specify:
+ *   corners: a list of four corners {x: x, y: y} in map gcs coordinates.
+ * May specify:
+ *   style.
+ *     fill, fillColor, fillOpacity, stroke, strokeWidth, strokeColor,
+ *     strokeOpacity
  */
 /////////////////////////////////////////////////////////////////////////////
 var rectangleAnnotation = function (args) {
@@ -426,12 +628,6 @@ var rectangleAnnotation = function (args) {
   if (!(this instanceof rectangleAnnotation)) {
     return new rectangleAnnotation(args);
   }
-  /* Must specify:
-   *   corners: a list of four corners {x: x, y: y} in map gcs coordinates.
-   * May specify:
-   *   fill, fillColor, fillOpacity, stroke, strokeWidth, strokeColor,
-   *   strokeOpacity
-   */
   args = $.extend(true, {}, {
     style: {
       fill: true,
@@ -447,6 +643,11 @@ var rectangleAnnotation = function (args) {
   }, args || {});
   annotation.call(this, 'rectangle', args);
 
+  /**
+   * Get a list of renderable features for this annotation.
+   *
+   * @returns {array} an array of features.
+   */
   this.features = function () {
     var opt = this.options();
     return [{
@@ -456,12 +657,35 @@ var rectangleAnnotation = function (args) {
       }
     }];
   };
+
+  /**
+   * Get coordinates associated with this annotation in the map gcs coordinate
+   * system.
+   *
+   * @returns {array} an array of coordinates.
+   */
+  this._coordinates = function () {
+    return this.options().corners;
+  };
 };
 inherit(rectangleAnnotation, annotation);
 
 /////////////////////////////////////////////////////////////////////////////
 /**
  * Polygon annotation class
+ *
+ * When complete, polygons are rendered as polygons.  During creation they are
+ * rendered as lines and polygons.
+ *
+ * Must specify:
+ *   vertices: a list of vertices {x: x, y: y} in map gcs coordinates.
+ * May specify:
+ *   style.
+ *     fill, fillColor, fillOpacity, stroke, strokeWidth, strokeColor,
+ *     strokeOpacity
+ *   editstyle.
+ *     fill, fillColor, fillOpacity, stroke, strokeWidth, strokeColor,
+ *     strokeOpacity
  */
 /////////////////////////////////////////////////////////////////////////////
 var polygonAnnotation = function (args) {
@@ -472,12 +696,6 @@ var polygonAnnotation = function (args) {
 
   var m_this = this;
 
-  /* Must specify:
-   *   vertices: a list of vertices {x: x, y: y} in map gcs coordinates.
-   * May specify:
-   *   fill, fillColor, fillOpacity, stroke, strokeWidth, strokeColor,
-   *   strokeOpacity
-   */
   args = $.extend(true, {}, {
     vertices: [],
     style: {
@@ -515,6 +733,13 @@ var polygonAnnotation = function (args) {
   }, args || {});
   annotation.call(this, 'polygon', args);
 
+  /**
+   * Get a list of renderable features for this annotation.  When the polygon
+   * is done, this is just a single polygon.  During creation this can be a
+   * polygon and line at z-levels 1 and 2.
+   *
+   * @returns {array} an array of features.
+   */
   this.features = function () {
     var opt = this.options();
     var state = this.state();
@@ -523,7 +748,7 @@ var polygonAnnotation = function (args) {
       case 'create':
         features = [];
         if (opt.vertices && opt.vertices.length >= 3) {
-          features[0] = {
+          features[1] = {
             polygon: {
               polygon: opt.vertices,
               style: opt.editstyle
@@ -531,7 +756,7 @@ var polygonAnnotation = function (args) {
           };
         }
         if (opt.vertices && opt.vertices.length >= 2) {
-          features[1] = {
+          features[2] = {
             line: {
               line: opt.vertices,
               style: opt.editstyle
@@ -550,6 +775,86 @@ var polygonAnnotation = function (args) {
     }
     return features;
   };
+
+  /**
+   * Get coordinates associated with this annotation in the map gcs coordinate
+   * system.
+   *
+   * @returns {array} an array of coordinates.
+   */
+  this._coordinates = function () {
+    return this.options().vertices;
+  };
+
+  /**
+   * Handle a mouse move on this annotation.
+   *
+   * @param {geo.event} evt the mouse move event.
+   * @returns {boolean|string} true to update the annotation, falsy to not
+   *    update anything.
+   */
+  this.mouseMove = function (evt) {
+    var vertices = this.options().vertices;
+    if (vertices.length) {
+      vertices[vertices.length - 1] = evt.mapgcs;
+      return true;
+    }
+  };
+
+  /**
+   * Handle a mouse click on this annotation.  If the event is processed,
+   * evt.handled should be set to true to prevent further processing.
+   *
+   * @param {geo.event} evt the mouse click event.
+   * @returns {boolean|string} true to update the annotation, 'done' if the
+   *    annotation was completed (changed from create to done state), 'remove'
+   *    if the annotation should be removed, falsy to not update anything.
+   */
+  this.mouseClick = function (evt) {
+    if (this.state() !== 'create') {
+      return;
+    }
+    var end = !!evt.buttonsDown.right, skip;
+    if (!evt.buttonsDown.left && !evt.buttonsDown.right) {
+      return;
+    }
+    var layer = this.layer();
+    evt.handled = true;
+    var vertices = this.options().vertices;
+    if (evt.buttonsDown.left) {
+      if (vertices.length) {
+        if (vertices.length >= 2 && layer.displayDistance(
+            vertices[vertices.length - 2], null, evt.map, 'display') <=
+            layer.options('adjacentPointProximity')) {
+          skip = true;
+          if (this.lastClick &&
+              evt.time - this.lastClick < layer.options('dblClickTime')) {
+            end = true;
+          }
+        } else if (vertices.length >= 2 && layer.displayDistance(
+            vertices[0], null, evt.map, 'display') <=
+            layer.options('finalPointProximity')) {
+          end = true;
+        } else {
+          vertices[vertices.length - 1] = evt.mapgcs;
+        }
+      } else {
+        vertices.push(evt.mapgcs);
+      }
+      if (!end && !skip) {
+        vertices.push(evt.mapgcs);
+      }
+      this.lastClick = evt.time;
+    }
+    if (end) {
+      if (vertices.length < 3) {
+        return 'remove';
+      }
+      vertices.pop();
+      this.state('done');
+      return 'done';
+    }
+    return (end || !skip);
+  };
 };
 inherit(polygonAnnotation, annotation);
-
