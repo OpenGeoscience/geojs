@@ -10,8 +10,6 @@ var transform = require('./transform');
  * @class geo.gridFeature
  * @param {Object} arg Options object
  * @extends geo.feature
- * @param {Object|Function} [position] Position of the data.  Default is
- *   (data).
  * @param {Object|Function} [intensity] Scalar value of each data point. Scalar
  *   value must be a positive real number and will be used to compute
  *   the weight for each data point.
@@ -28,6 +26,9 @@ var transform = require('./transform');
  * @param {Object|string|Function} [style.color] Color transfer function that.
  *   will be used to evaluate color of each pixel using normalized intensity
  *   as the look up value.
+ * @param {Array} upperLeft Coordinates of the first intensity datum.
+ * @param {Number} cellSize The length of a cell side in meters.
+ * @param {Number} rowCount The number of rows used in the grid matrix.
  * @returns {geo.gridFeature}
  */
 //////////////////////////////////////////////////////////////////////////////
@@ -52,7 +53,7 @@ var gridFeature = function (arg) {
       m_minIntensity,
       m_updateDelay,
       m_upperLeft,
-      m_lowerRight,
+      m_rowCount,
       m_cellSize, //measured in meters
       s_init = this._init;
 
@@ -60,9 +61,9 @@ var gridFeature = function (arg) {
   m_maxIntensity = arg.maxIntensity !== undefined ? arg.maxIntensity : null;
   m_minIntensity = arg.minIntensity !== undefined ? arg.minIntensity : null;
   m_updateDelay = arg.updateDelay ? parseInt(arg.updateDelay, 10) : 1000;
-  m_upperLeft = arg.upperLeft || [-90, -180]
-  m_lowerRight = arg.lowerRight || [90, 180]
-  m_cellSize = arg.cellSize || 1000
+  m_upperLeft = arg.upperLeft || [-90, -180];
+  m_rowCount = arg.rowCount || 0;
+  m_cellSize = arg.cellSize || 1000;
 
   ////////////////////////////////////////////////////////////////////////////
   /**
@@ -112,6 +113,24 @@ var gridFeature = function (arg) {
       return m_updateDelay;
     } else {
       m_updateDelay = parseInt(val, 10);
+    }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set cellSize
+   *
+   * @returns {geo.grid}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.cellSize = function (val) {
+    if (val === undefined) {
+      return m_cellSize;
+    } else {
+      m_cellSize = val;
+      m_this.dataTime().modified();
+      m_this.modified();
     }
     return m_this;
   };
