@@ -1,0 +1,56 @@
+#controls {
+  overflow-x: hidden;
+  overflow-y: auto;
+  position: absolute;
+  left: 10px;
+  top: 80px;
+  z-index: 1;
+  border-radius: 5px;
+  border: 1px solid grey;
+  box-shadow: 1px 1px 3px black;
+  opacity: 0.5;
+  transition: opacity 250ms ease;
+  background: #CCC;
+  color: black;
+  padding: 4px;
+  font-size: 14px;
+  max-height: calc(100% - 100px);
+  min-width: 310px;
+}
+#controls:hover {
+  opacity: 1;
+}
+#controls .form-group {
+  margin-bottom: 0;
+}
+#controls label {
+  min-width: 160px;
+}
+.annotationtype button.lastused {
+  color: #373a3c;
+  background-color: #e6e6e6;
+  border-color: #adadad;
+}
+.annotationtype button.active {
+  color: white;
+  background-color: #025aa5;
+  border-color: #01549b;
+}
+.annotationtype .shortlabel {
+  margin-bottom: 5px;
+  font-weight: bold;
+  display: inline-block;
+}
+#instructions .annotation {
+  display: none;
+  max-width: 300px;
+  font-size: 12px;
+  line-height: 1.42857em;
+  min-height: 2.85714em;
+}
+#instructions[annotation="polygon"] .annotation.polygon,
+#instructions[annotation="rectangle"] .annotation.rectangle,
+#instructions[annotation="point"] .annotation.point,
+#instructions[annotation="none"] .annotation.none {
+  display: block;
+}

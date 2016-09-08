@@ -123,6 +123,7 @@ var annotationLayer = function (args) {
       switch (update) {
         case 'remove':
           m_this.removeAnnotation(m_this.currentAnnotation, false);
+          m_this.mode(null);
           break;
         case 'done':
           m_this.mode(null);
@@ -825,9 +826,12 @@ var polygonAnnotation = function (args) {
     if (!evt.buttonsDown.left && !evt.buttonsDown.right) {
       return;
     }
+    var vertices = this.options().vertices;
+    if (evt.buttonsDown.right && !vertices.length) {
+      return;
+    }
     var layer = this.layer();
     evt.handled = true;
-    var vertices = this.options().vertices;
     if (evt.buttonsDown.left) {
       if (vertices.length) {
         if (vertices.length >= 2 && layer.displayDistance(
@@ -854,7 +858,7 @@ var polygonAnnotation = function (args) {
       this.lastClick = evt.time;
     }
     if (end) {
-      if (vertices.length < 3) {
+      if (vertices.length < 4) {
         return 'remove';
       }
       vertices.pop();

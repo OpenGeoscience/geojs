@@ -1,1 +1,22 @@
 extends ../common/templates/index.jade
+
+block append mainContent
+  #controls
+    .form-group.annotationtype(title="Select the type of annotation to add.")
+      .shortlabel Add
+      button#rectangle.lastused(next='polygon') Rectangle
+      button#polygon(next='point') Polygon
+      button#point(next='rectangle') Point
+    .form-group
+      #instructions(annotation='none')
+        .annotation.none
+        .annotation.polygon Left-click points in the polygon.  Double click, right click, or click the starting point to close the polygon.
+        .annotation.rectangle Left click-and-drag to draw a rectangle.
+        .annotation.point Left click to create a point.
+    .form-group(title="If enabled, left-click to add another annotation, and right-click to switch annotation type.  Otherwise, you must click a button above.")
+      label(for="clickadd") Click to add annotation
+      input#clickadd(param-name="clickadd", type="checkbox", placeholder="true", checked="checked")
+    .form-group(title="If enabled, immediately after adding one annotation, you can add another without either left-clicking or selecting a button.")
+      label(for="keepadding") Keep adding annotations
+      input#keepadding(param-name="keepadding", type="checkbox", placeholder="false")
+
