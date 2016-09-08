@@ -19,4 +19,13 @@ block append mainContent
     .form-group(title="If enabled, immediately after adding one annotation, you can add another without either left-clicking or selecting a button.")
       label(for="keepadding") Keep adding annotations
       input#keepadding(param-name="keepadding", type="checkbox", placeholder="false")
-
+    .form-group#annotationheader
+      .shortlabel Created Annotations
+      a.entry-remove-all(action='remove-all', title='Delete all annotations') &#x2716;
+    .form-group
+      #annotationlist
+        .entry#sample
+          span.entry-name Sample
+          a.entry-edit(action='edit', title='Edit name and properties') &#x270e;
+          a.entry-remove(action='remove', title='Delete this annotation') &#x2716;
+    // add buttons to copy annotations as geojson and to paste geojson to annotations

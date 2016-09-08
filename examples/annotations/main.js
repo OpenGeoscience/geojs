@@ -18,6 +18,7 @@ $(function () {
   }
 
   $('#controls').on('change', change_controls);
+  $('#controls').on('click', 'a', select_control);
   $('.annotationtype button').on('click', select_annotation);
 
   var map = geo.map({
@@ -46,8 +47,21 @@ $(function () {
   // bind to the mouse click and annotation mode events
   layer.geoOn(geo.event.mouseclick, mouseClickToStart);
   layer.geoOn(geo.event.annotation.mode, handleModeChange);
+  layer.geoOn(geo.event.annotation.add, handleAnnotationChange);
+  layer.geoOn(geo.event.annotation.remove, handleAnnotationChange);
+  layer.geoOn(geo.event.annotation.state, handleAnnotationChange);
 
   map.draw();
+
+  // pick which button is initially highlighted based on query parameters.
+  if (query.lastused || query.active) {
+    if (query.active) {
+      layer.mode(query.active);
+    } else {
+      $('.annotationtype button').removeClass('lastused active');
+      $('.annotationtype button#' + query.lastused).addClass('lastused');
+    }
+  }
 
   // expose some internal parameters so you can examine them from the console
   annotationDebug.map = map;
@@ -103,9 +117,7 @@ $(function () {
         value === ctl.attr('placeholder'))) {
       delete query[param];
     }
-    var newurl = window.location.protocol + '//' + window.location.host +
-        window.location.pathname + '?' + $.param(query);
-    window.history.replaceState(query, '', newurl);
+    utils.setQuery(query);
   }
 
   /**
@@ -146,10 +158,85 @@ $(function () {
     }
     $('#instructions').attr(
       'annotation', $('.annotationtype button.active').attr('id') || 'none');
+    query.active = $('.annotationtype button.active').attr('id') || undefined;
+    query.lastused = query.active ? undefined : $('.annotationtype button.lastused').attr('id');
+    utils.setQuery(query);
     // if we are in keep-adding mode, and the mode changed to null, and that
-    // wasn't caused by clicking the button, reenabled the annotation mode.
+    // wasn't caused by clicking the button, reenable the annotation mode.
     if (!mode && !fromButtonSelect && query.keepadding === 'true') {
       layer.mode($('.annotationtype button.lastused').attr('id'));
+    }
+  }
+
+  /**
+   * When an annotation is created or removed, update our list of annotations.
+   *
+   * @param {geo.event} evt a geojs mode change event.
+   */
+  function handleAnnotationChange(evt) {
+    var annotations = layer.annotations();
+    var ids = annotations.map(function (annotation) {
+      return annotation.id();
+    });
+    var present = [];
+    $('#annotationlist .entry').each(function () {
+      var entry = $(this);
+      if (entry.attr('id') === 'sample') {
+        return;
+      }
+      var id = entry.attr('annotation-id');
+      // Remove deleted annotations
+      if ($.inArray(id, ids) < 0) {
+        entry.remove();
+        return;
+      }
+      present.push(id);
+      // update existing elements
+      entry.find('.entry-name').text(layer.annotationById(id).name());
+    });
+    // Add if new and fully created
+    $.each(ids, function (idx, id) {
+      if ($.inArray(id, present) >= 0) {
+        return;
+      }
+      var annotation = layer.annotationById(id);
+      if (annotation.state() === 'create') {
+        return;
+      }
+      var entry = $('#annotationlist .entry#sample').clone();
+      entry.attr({id: '', 'annotation-id': id});
+      entry.find('.entry-name').text(annotation.name());
+      $('#annotationlist').append(entry);
+    });
+    $('#annotationheader').css(
+        'display', $('#annotationlist .entry').length <= 1 ? 'none' : 'block');
+  }
+
+  /**
+   * Handle selecting a control.
+   *
+   * @param evt jquery evt that triggered this call.
+   */
+  function select_control(evt) {
+    var mode;
+    var ctl = $(evt.target),
+        action = ctl.attr('action'),
+        id = ctl.closest('.entry').attr('annotation-id');
+    switch (action) {
+      case 'edit':
+        // TODO: add edit controls
+        break;
+      case 'remove':
+        layer.removeAnnotation(layer.annotationById(id));
+        break;
+      case 'remove-all':
+        fromButtonSelect = true;
+        mode = layer.mode();
+        layer.mode(null);
+        layer.removeAllAnnotations();
+        layer.mode(mode);
+        fromButtonSelect = false;
+        break;
     }
   }
 });

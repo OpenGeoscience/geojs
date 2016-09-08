@@ -36,7 +36,7 @@
   background-color: #025aa5;
   border-color: #01549b;
 }
-.annotationtype .shortlabel {
+.shortlabel {
   margin-bottom: 5px;
   font-weight: bold;
   display: inline-block;
@@ -53,4 +53,29 @@
 #instructions[annotation="point"] .annotation.point,
 #instructions[annotation="none"] .annotation.none {
   display: block;
+}
+#controls a {
+  color: #333;
+  cursor: pointer;
+}
+.entry span, .entry a {
+  display: inline-block;
+}
+.entry .entry-name {
+  width: 86%;
+}
+.entry .entry-edit {
+  width: 7%;
+  text-align: right;
+  font-weight: bold;
+}
+.entry .entry-remove {
+  width: 7%;
+  text-align: right;
+}
+.entry-remove-all {
+  float: right;
+}
+#annotationheader, .entry#sample {
+  display: none;
 }

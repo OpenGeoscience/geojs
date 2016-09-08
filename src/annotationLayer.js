@@ -200,13 +200,16 @@ var annotationLayer = function (args) {
    * @param {object} annotation the annotation to add.
    */
   this.addAnnotation = function (annotation) {
-    m_this.geoTrigger(geo_event.annotation.add, {
+    m_this.geoTrigger(geo_event.annotation.add.before, {
       annotation: annotation
     });
     m_annotations.push(annotation);
     this.modified();
     this._update();
     this.draw();
+    m_this.geoTrigger(geo_event.annotation.add, {
+      annotation: annotation
+    });
     return this;
   };
 
@@ -221,6 +224,10 @@ var annotationLayer = function (args) {
   this.removeAnnotation = function (annotation, update) {
     var pos = $.inArray(annotation, m_annotations);
     if (pos >= 0) {
+      if (annotation === this.currentAnnotation) {
+        this.currentAnnotation = null;
+      }
+      annotation._exit();
       m_annotations.splice(pos, 1);
       if (update !== false) {
         this.modified();
@@ -237,15 +244,26 @@ var annotationLayer = function (args) {
   /**
    * Remove all annotations from the layer.
    *
+   * @param {boolean} skipCreating: if true, don't remove annotations that are
+   *    in the create state.
    * @returns {number} the number of annotations that were removed.
    */
-  this.removeAllAnnotations = function () {
-    var removed = 0;
-    $.each(this.annotations, function (idx, annotation) {
-      if (this.removeAnnotation(annotation, false)) {
-        removed += 1;
+  this.removeAllAnnotations = function (skipCreating) {
+    var removed = 0, annotation, pos = 0;
+    while (pos < m_annotations.length) {
+      annotation = m_annotations[0];
+      if (skipCreating && annotation.state() === 'create') {
+        pos += 1;
+        continue;
       }
-    });
+      this.removeAnnotation(annotation, false);
+      removed += 1;
+    }
+    if (removed) {
+      this.modified();
+      this._update();
+      this.draw();
+    }
     return removed;
   };
 
@@ -256,6 +274,23 @@ var annotationLayer = function (args) {
    */
   this.annotations = function () {
     return m_annotations.slice();
+  };
+
+  /**
+   * Get an annotation by its id.
+   *
+   * @returns {geo.annotation} The selected annotation or undefined.
+   */
+  this.annotationById = function (id) {
+    if (id !== undefined && id !== null) {
+      id = +id;  /* Cast to int */
+    }
+    var annotations = m_annotations.filter(function (annotation) {
+      return annotation.id() === id;
+    });
+    if (annotations.length) {
+      return annotations[0];
+    }
   };
 
   /**
@@ -464,17 +499,24 @@ var annotation = function (type, args) {
     return new annotation(type, args);
   }
 
+  annotationId += 1;
   var m_options = $.extend({}, args || {}),
       m_id = annotationId,
-      m_name = args.name || (args.type + ' ' + annotationId),
+      m_name = args.name || (
+        type.charAt(0).toUpperCase() + type.substr(1) + ' ' + annotationId),
       m_type = type,
       m_layer = args.layer,
       m_state = args.state || 'done';  /* create, done, edit */
-  annotationId += 1;
+
+  /**
+   * Clean up any resources that the annotation is using.
+   */
+  this._exit = function () {
+  };
 
   /**
    * Get a unique annotation id.
-
+   *
    * @returns {number} the annotation id.
    */
   this.id = function () {
@@ -522,7 +564,12 @@ var annotation = function (type, args) {
     if (arg === undefined) {
       return m_state;
     }
-    m_state = arg;
+    if (m_state !== arg) {
+      m_state = arg;
+      m_layer.geoTrigger(geo_event.annotation.state, {
+        annotation: this
+      });
+    }
     return this;
   };
 
