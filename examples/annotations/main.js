@@ -13,7 +13,8 @@ $(function () {
       return;
     }
     if (!layer.mode()) {
-      layer.mode(evt.buttonsDown.left ? 'polygon' : 'rectangle');
+      layer.mode(evt.buttonsDown.left ? 'polygon' : (
+        evt.buttonsDown.middle ? 'point' : 'rectangle'));
     } else {
       layer.mode(null);
     }

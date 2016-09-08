@@ -270,6 +270,7 @@ var annotationLayer = function (args) {
       return m_mode;
     }
     if (arg !== m_mode) {
+      var createAnnotation;
       m_mode = arg;
       m_this.map().node().css('cursor', m_mode ? 'crosshair' : '');
       if (this.currentAnnotation) {
@@ -281,16 +282,22 @@ var annotationLayer = function (args) {
         this.currentAnnotation = null;
       }
       switch (m_mode) {
+        case 'point':
+          createAnnotation = pointAnnotation;
+          break;
         case 'polygon':
-          this.currentAnnotation = polygonAnnotation({
-            state: 'create',
-            layer: this
-          });
-          this.addAnnotation(m_this.currentAnnotation);
+          createAnnotation = polygonAnnotation;
           break;
         case 'rectangle':
           m_this.map().interactor().addAction(m_actions.rectangle);
           break;
+      }
+      if (createAnnotation) {
+        this.currentAnnotation = createAnnotation({
+          state: 'create',
+          layer: this
+        });
+        this.addAnnotation(m_this.currentAnnotation);
       }
       if (m_mode !== 'rectangle') {
         m_this.map().interactor().removeAction(m_actions.rectangle);
@@ -350,8 +357,8 @@ var annotationLayer = function (args) {
                */
               var style = {};
               $.each(['fill', 'fillColor', 'fillOpacity', 'line', 'polygon',
-                      'position', 'stroke', 'strokeColor', 'strokeOpacity',
-                      'strokeWidth', 'uniformPolygon'
+                      'position', 'radius', 'stroke', 'strokeColor',
+                      'strokeOpacity', 'strokeWidth', 'uniformPolygon'
                   ], function (keyidx, key) {
                 var origFunc;
                 if (feature.style()[key] !== undefined) {
@@ -741,9 +748,9 @@ var polygonAnnotation = function (args) {
    * @returns {array} an array of features.
    */
   this.features = function () {
-    var opt = this.options();
-    var state = this.state();
-    var features;
+    var opt = this.options(),
+        state = this.state(),
+        features;
     switch (state) {
       case 'create':
         features = [];
@@ -858,3 +865,97 @@ var polygonAnnotation = function (args) {
   };
 };
 inherit(polygonAnnotation, annotation);
+
+/////////////////////////////////////////////////////////////////////////////
+/**
+ * Point annotation class
+ *
+ * Must specify:
+ *   position: {x: x, y: y} in map gcs coordinates.
+ * May specify:
+ *   style.
+ *     radius, fill, fillColor, fillOpacity, stroke, strokeWidth, strokeColor,
+ *     strokeOpacity
+ */
+/////////////////////////////////////////////////////////////////////////////
+var pointAnnotation = function (args) {
+  'use strict';
+  if (!(this instanceof pointAnnotation)) {
+    return new pointAnnotation(args);
+  }
+  args = $.extend(true, {}, {
+    style: {
+      fill: true,
+      fillColor: {r: 0, g: 1, b: 0},
+      fillOpacity: 0.25,
+      radius: 10,
+      stroke: true,
+      strokeColor: {r: 0, g: 0, b: 0},
+      strokeOpacity: 1,
+      strokeWidth: 3
+    }
+  }, args || {});
+  annotation.call(this, 'point', args);
+
+  /**
+   * Get a list of renderable features for this annotation.
+   *
+   * @returns {array} an array of features.
+   */
+  this.features = function () {
+    var opt = this.options(),
+        state = this.state(),
+        features;
+    switch (state) {
+      case 'create':
+        features = [];
+        break;
+      default:
+        features = [{
+          point: {
+            x: opt.position.x,
+            y: opt.position.y,
+            style: opt.style
+          }
+        }];
+        break;
+    }
+    return features;
+  };
+
+  /**
+   * Get coordinates associated with this annotation in the map gcs coordinate
+   * system.
+   *
+   * @returns {array} an array of coordinates.
+   */
+  this._coordinates = function () {
+    if (this.state() === 'create') {
+      return [];
+    }
+    return [this.options().position];
+  };
+
+  /**
+   * Handle a mouse click on this annotation.  If the event is processed,
+   * evt.handled should be set to true to prevent further processing.
+   *
+   * @param {geo.event} evt the mouse click event.
+   * @returns {boolean|string} true to update the annotation, 'done' if the
+   *    annotation was completed (changed from create to done state), 'remove'
+   *    if the annotation should be removed, falsy to not update anything.
+   */
+  this.mouseClick = function (evt) {
+    if (this.state() !== 'create') {
+      return;
+    }
+    if (!evt.buttonsDown.left) {
+      return;
+    }
+    evt.handled = true;
+    this.options().position = evt.mapgcs;
+    this.state('done');
+    return 'done';
+  };
+};
+inherit(pointAnnotation, annotation);
