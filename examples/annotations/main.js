@@ -20,14 +20,18 @@ $(function () {
   $('#controls').on('change', change_controls);
   $('#controls').on('click', 'a', select_control);
   $('.annotationtype button').on('click', select_annotation);
+  $('#editdialog').on('submit', edit_update);
+
+  $('#controls').toggleClass('no-controls', query.controls === 'false');
 
   var map = geo.map({
     node: '#map',
     center: {
-      x: -119.5420833,
-      y: 37.4958333
+      x: query.x ? +query.x : -119.5420833,
+      y: query.y ? +query.y : 37.4958333
     },
-    zoom: 8
+    zoom: query.zoom ? +query.zoom : 8,
+    rotation: query.rotation ? +query.rotation * Math.PI / 180 : 0
   });
   // allow some query parameters without controls to specify what map we will
   // show
@@ -218,16 +222,17 @@ $(function () {
    * @param evt jquery evt that triggered this call.
    */
   function select_control(evt) {
-    var mode;
-    var ctl = $(evt.target),
+    var mode,
+        ctl = $(evt.target),
         action = ctl.attr('action'),
-        id = ctl.closest('.entry').attr('annotation-id');
+        id = ctl.closest('.entry').attr('annotation-id'),
+        annotation = layer.annotationById(id);
     switch (action) {
       case 'edit':
-        // TODO: add edit controls
+        show_edit_dialog(id, annotation);
         break;
       case 'remove':
-        layer.removeAnnotation(layer.annotationById(id));
+        layer.removeAnnotation(annotation);
         break;
       case 'remove-all':
         fromButtonSelect = true;
@@ -238,5 +243,106 @@ $(function () {
         fromButtonSelect = false;
         break;
     }
+  }
+
+  /**
+   * Show the edit dialog for a particular annotation.
+   *
+   * @param {number} id the annotation id to edit.
+   */
+  function show_edit_dialog(id) {
+    var annotation = layer.annotationById(id),
+        type = annotation.type(),
+        typeMatch = new RegExp('(^| )' + type + '( |$)'),
+        opt = annotation.options(),
+        dlg = $('#editdialog');
+
+    $('#edit-validation-error', dlg).text('');
+    dlg.attr('annotation-id', id);
+    dlg.attr('annotation-type', type);
+    $('[option="name"]', dlg).val(annotation.name());
+    $('.form-group[annotation-types]').each(function () {
+      var ctl = $(this),
+          key = $('[option]', ctl).attr('option'),
+          format = $('[option]', ctl).attr('format'),
+          value;
+      if (!ctl.attr('annotation-types').match(typeMatch)) {
+        return;
+      }
+      value = opt.style[key];
+      switch (format) {
+        case 'color':
+          value = geo.util.convertColor(value);
+          if (!value.r && !value.g && !value.b) {
+            value = '#000000';
+          } else {
+            value = '#' + ((1 << 24) + (Math.round(value.r * 255) << 16) +
+                           (Math.round(value.g * 255) << 8) +
+                            Math.round(value.b * 255)).toString(16).slice(1);
+          }
+          break;
+      }
+      $('[option]', ctl).val('' + value);
+    });
+    dlg.one('shown.bs.modal', function () {
+      $('[option="name"]', dlg).focus();
+    });
+    dlg.modal();
+  }
+
+  /**
+   * Update an annotation from values in the edit dialog.
+   *
+   * @param evt jquery evt that triggered this call.
+   */
+  function edit_update(evt) {
+    evt.preventDefault();
+    var dlg = $('#editdialog'),
+        id = dlg.attr('annotation-id'),
+        annotation = layer.annotationById(id),
+        type = annotation.type(),
+        typeMatch = new RegExp('(^| )' + type + '( |$)'),
+        error,
+        newopt = {};
+
+    $('.form-group[annotation-types]').each(function () {
+      var ctl = $(this),
+          key = $('[option]', ctl).attr('option'),
+          value;
+      if (!ctl.attr('annotation-types').match(typeMatch)) {
+        return;
+      }
+      value = $('[option]', ctl).val();
+      switch ($('[option]', ctl).attr('format')) {
+        case 'boolean':
+          value = ('' + value).toLowerCase() === 'true';
+          break;
+        case 'color':
+          value = geo.util.convertColor(value);
+          break;
+        case 'opacity':
+          value = +value;
+          if (value < 0 || value > 1 || isNaN(value)) {
+            error = $('label', ctl).text() + ' must be a between 0 and 1, inclusive.';
+          }
+          break;
+        case 'positive':
+          value = +value;
+          if (value <= 0 || isNaN(value)) {
+            error = $('label', ctl).text() + ' must be a positive number.';
+          }
+          break;
+      }
+      newopt[key] = value;
+    });
+    if (error) {
+      $('#edit-validation-error', dlg).text(error);
+      return;
+    }
+    annotation.name($('[option="name"]', dlg).val());
+    annotation.options({style: newopt}).draw();
+
+    dlg.modal('hide');
+    handleAnnotationChange();
   }
 });

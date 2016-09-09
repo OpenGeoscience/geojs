@@ -26,6 +26,9 @@
 #controls label {
   min-width: 160px;
 }
+#controls.no-controls {
+  display: none;
+}
 .annotationtype button.lastused {
   color: #373a3c;
   background-color: #e6e6e6;
@@ -78,4 +81,21 @@
 }
 #annotationheader, .entry#sample {
   display: none;
+}
+#editdialog {
+  font-size: 14px;
+}
+#editdialog .form-group {
+  margin-bottom: 0px;
+}
+#editdialog #edit-update {
+  float: right;
+  margin-left: 10px;
+}
+#editdialog label {
+  min-width: 105px;
+}
+#editdialog #edit-validation-error {
+  color: red;
+  font-weight: bold;
 }

@@ -1063,12 +1063,12 @@ var mapInteractor = function (args) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._handleMouseUp = function (evt) {
-
     if (m_paused) {
       return;
     }
 
     m_this._getMouseButton(evt);
+
     if (m_clickMaybe) {
       m_this._handleMouseClick(evt);
     }
@@ -1084,6 +1084,14 @@ var mapInteractor = function (args) {
   ////////////////////////////////////////////////////////////////////////////
   this._handleMouseClick = function (evt) {
 
+    /* Cancel a selection if it is occurring */
+    if (m_state.actionRecord && m_state.actionRecord.selectionRectangle) {
+      m_selectionLayer.clear();
+      m_this.map().deleteLayer(m_selectionLayer);
+      m_selectionLayer = null;
+      m_selectionQuad = null;
+      m_state.action = m_state.actionRecord = null;
+    }
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
 

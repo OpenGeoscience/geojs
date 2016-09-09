@@ -48,7 +48,7 @@ var annotationLayer = function (args) {
       m_buildTime = timestamp(),
       m_options,
       m_actions,
-      m_mode,
+      m_mode = null,
       m_annotations = [],
       m_features = [];
 
@@ -156,7 +156,7 @@ var annotationLayer = function (args) {
       return m_options[arg1];
     }
     if (arg2 === undefined) {
-      m_options = $.extend(m_options, arg1);
+      m_options = $.extend(true, m_options, arg1);
     } else {
       m_options[arg1] = arg2;
     }
@@ -507,6 +507,9 @@ var annotation = function (type, args) {
       m_type = type,
       m_layer = args.layer,
       m_state = args.state || 'done';  /* create, done, edit */
+  delete m_options.state;
+  delete m_options.layer;
+  delete m_options.name;
 
   /**
    * Clean up any resources that the annotation is using.
@@ -534,7 +537,9 @@ var annotation = function (type, args) {
     if (arg === undefined) {
       return m_name;
     }
-    m_name = arg;
+    if (arg !== null && ('' + arg).trim()) {
+      m_name = ('' + arg).trim();
+    }
     return this;
   };
 
@@ -574,12 +579,30 @@ var annotation = function (type, args) {
   };
 
   /**
-   * Get the options for this annotation.
+   * Set or get options.
    *
-   * @returns {object} the current options.
+   * @param {string|object} arg1 if undefined, return the options object.  If
+   *    a string, either set or return the option of that name.  If an object,
+   *    update the options with the object's values.
+   * @param {object} arg2 if arg1 is a string and this is defined, set the
+   *    option to this value.
+   * @returns {object|this} if options are set, return the layer, otherwise
+   *    return the requested option or the set of options.
    */
-  this.options = function () {
-    return m_options;
+  this.options = function (arg1, arg2) {
+    if (arg1 === undefined) {
+      return m_options;
+    }
+    if (typeof arg1 === 'string' && arg2 === undefined) {
+      return m_options[arg1];
+    }
+    if (arg2 === undefined) {
+      m_options = $.extend(true, m_options, arg1);
+    } else {
+      m_options[arg1] = arg2;
+    }
+    this.modified();
+    return this;
   };
 
   /**
@@ -652,6 +675,24 @@ var annotation = function (type, args) {
       coord = transform.transformCoordinates(map.gcs(), gcs, coord);
     }
     return coord;
+  };
+
+  /**
+   * Mark this annotation as modified.  This just marks the parent layer as
+   * modified.
+   */
+  this.modified = function () {
+    this.layer().modified();
+    return this;
+  };
+
+  /**
+   * Draw this annotation.  This just updates and draws the parent layer.
+   */
+  this.draw = function () {
+    this.layer()._update();
+    this.layer().draw();
+    return this;
   };
 
   /**
