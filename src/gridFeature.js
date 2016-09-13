@@ -52,6 +52,7 @@ var gridFeature = function (arg) {
       m_maxIntensity,
       m_minIntensity,
       m_updateDelay,
+      m_gcsPosition,
       m_upperLeft,
       m_rowCount,
       m_cellSize, //measured in meters
@@ -215,6 +216,18 @@ var gridFeature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Get pre-computed gcs position accessor
+   *
+   * @returns {geo.gridFeature}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.gcsPosition = function () {
+    this._update();
+    return m_gcsPosition;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Build
    * @override
    */
@@ -246,9 +259,8 @@ var gridFeature = function (arg) {
     if (setMin && setMax && m_minIntensity === m_maxIntensity) {
       m_minIntensity -= 1;
     }
-    //TODO what is this
-    // transform.transformCoordinates(
-    //     m_this.gcs(), m_this.layer().map().gcs(), position);
+    m_gcsPosition = transform.transformCoordinates(
+        m_this.gcs(), m_this.layer().map().gcs(), m_upperLeft);
 
     m_this.buildTime().modified();
     return m_this;
