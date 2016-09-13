@@ -17,7 +17,6 @@ var timestamp = require('../timestamp');
 //////////////////////////////////////////////////////////////////////////////
 var canvas_gridFeature = function (arg) {
   'use strict';
-  console.log(arg);
   if (!(this instanceof canvas_gridFeature)) {
     return new canvas_gridFeature(arg);
   }
@@ -104,19 +103,22 @@ var canvas_gridFeature = function (arg) {
         minIntensity = m_this.minIntensity(),
         cellSize = m_this.cellSize(),
         rangeIntensity = (m_this.maxIntensity() - minIntensity) || 1,
-        idx, pos, intensity;
+        idx, pos, intensity, gradientIndex;
 
     for (idx = 0; idx <= data.length - 1; idx++) {
       pos = map.worldToDisplay({
-        x: idx * m_this.cellSize(),
-        y: idx * m_this.cellSize()
+        x: idx * cellSize,
+        y: idx * cellSize
       })
       intensity = (intensityFunc(data[idx]) - minIntensity) / rangeIntensity;
       if (intensity <= 0) {
         continue;
       }
-      context2d.fillStyle = '#FF0000';
+      gradientIndex = Math.floor(255 * intensity) << 2;
+      context2d.fillStyle = 'rgba(' + m_this._grad[gradientIndex] + ',' + m_this._grad[gradientIndex + 1] + ','  + m_this._grad[gradientIndex + 2] + ', 1)';
       context2d.fillRect(pos.x, pos.y, cellSize, cellSize);
+      context2d.closePath();
+      context2d.beginPath();
     }
   };
 
