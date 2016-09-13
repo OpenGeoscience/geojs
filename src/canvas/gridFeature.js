@@ -101,24 +101,32 @@ var canvas_gridFeature = function (arg) {
     var position = m_this.gcsPosition(),
         intensityFunc = m_this.intensity(),
         minIntensity = m_this.minIntensity(),
+        upperLeft = m_this.upperLeft(),
+        rowCount = m_this.rowCount(),
+        columnCount = Math.floor(m_this.data().length / rowCount),
         cellSize = m_this.cellSize(),
         rangeIntensity = (m_this.maxIntensity() - minIntensity) || 1,
-        idx, pos, intensity, gradientIndex;
+        i, j, pos, intensity, gradientIndex, cellPixelDelta;
 
-    for (idx = 0; idx <= data.length - 1; idx++) {
-      pos = map.worldToDisplay({
-        x: idx * cellSize,
-        y: idx * cellSize
-      })
-      intensity = (intensityFunc(data[idx]) - minIntensity) / rangeIntensity;
-      if (intensity <= 0) {
-        continue;
+    cellPixelDelta = map.gcsToDisplay({x: cellSize, y: 0}).x -
+      map.gcsToDisplay({x: 0, y: 0}).x
+
+    for (i = 0; i < rowCount; i++) {
+      for (j = 0; j < columnCount; j++) {
+        pos = map.worldToDisplay({
+          x: upperLeft.x + (j * cellSize),
+          y: upperLeft.y + (i * cellSize)
+        })
+        intensity = (intensityFunc(data[i * columnCount + j]) - minIntensity) / rangeIntensity;
+        if (intensity <= 0) {
+          continue;
+        }
+        gradientIndex = Math.floor(255 * intensity) << 2;
+        // context2d.fillStyle = 'rgba(' + m_this._grad[gradientIndex] + ',' + m_this._grad[gradientIndex + 1] + ','  + m_this._grad[gradientIndex + 2] + ', 1)';
+        context2d.fillRect(pos.x, pos.y, cellPixelDelta, cellPixelDelta);
+        context2d.closePath();
+        context2d.beginPath();
       }
-      gradientIndex = Math.floor(255 * intensity) << 2;
-      context2d.fillStyle = 'rgba(' + m_this._grad[gradientIndex] + ',' + m_this._grad[gradientIndex + 1] + ','  + m_this._grad[gradientIndex + 2] + ', 1)';
-      context2d.fillRect(pos.x, pos.y, cellSize, cellSize);
-      context2d.closePath();
-      context2d.beginPath();
     }
   };
 
