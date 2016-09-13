@@ -96,10 +96,9 @@ var canvas_gridFeature = function (arg) {
    * @param {object} context2d the canvas context to draw in.
    * @param {object} map the parent map object.
    * @param {Array} data the main data array.
-   * @param {number} radius the sum of radius and blurRadius.
    */
   ////////////////////////////////////////////////////////////////////////////
-  this._renderPoints = function (context2d, map, data, radius) {
+  this._renderPoints = function (context2d, map, data) {
     var position = m_this.gcsPosition(),
         intensityFunc = m_this.intensity(),
         minIntensity = m_this.minIntensity(),
@@ -107,14 +106,14 @@ var canvas_gridFeature = function (arg) {
         rangeIntensity = (m_this.maxIntensity() - minIntensity) || 1,
         idx, pos, intensity;
 
-    for (idx = data.length - 1; idx >= 0; idx -= 1) {
+    for (idx = 0; idx <= data.length - 1; idx++) {
       pos = map.worldToDisplay(position[idx]);
       intensity = (intensityFunc(data[idx]) - minIntensity) / rangeIntensity;
       if (intensity <= 0) {
         continue;
       }
-      context2d.fillStyle = "#FF0000";
-      context2d.fillRect(pos.x, pos.y, cellSize, cellSize)
+      context2d.fillStyle = '#FF0000';
+      context2d.fillRect(pos.x, pos.y, cellSize, cellSize);
       context2d.drawImage(m_this._cell, pos.x, pos.y);
     }
   };
@@ -141,7 +140,7 @@ var canvas_gridFeature = function (arg) {
 
       m_this._createCircle();
       m_this._computeGradient();
-      m_this._renderPoints(context2d, map, data, radius);
+      m_this._renderPoints(context2d, map, data);
       canvas = layer.canvas()[0];
       pixelArray = context2d.getImageData(0, 0, canvas.width, canvas.height);
       m_this._colorize(pixelArray.data, m_this._grad);

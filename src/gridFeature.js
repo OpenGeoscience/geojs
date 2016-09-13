@@ -119,6 +119,42 @@ var gridFeature = function (arg) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
+   * Get/Set upperLeft
+   *
+   * @returns {geo.grid}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.upperLeft = function (val) {
+    if (val === undefined) {
+      return m_upperLeft;
+    } else {
+      m_upperLeft = val;
+      m_this.dataTime().modified();
+      m_this.modified();
+    }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Get/Set rowCount
+   *
+   * @returns {geo.grid}
+   */
+  ////////////////////////////////////////////////////////////////////////////
+  this.rowCount = function (val) {
+    if (val === undefined) {
+      return m_rowCount;
+    } else {
+      m_rowCount = val;
+      m_this.dataTime().modified();
+      m_this.modified();
+    }
+    return m_this;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  /**
    * Get/Set cellSize
    *
    * @returns {geo.grid}
