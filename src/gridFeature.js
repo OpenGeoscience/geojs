@@ -58,7 +58,7 @@ var gridFeature = function (arg) {
       m_cellSize, //measured in meters
       s_init = this._init;
 
-  m_intensity = arg.intensity || function (d) { return 1; };
+  m_intensity = arg.intensity || function (d) { return d; };
   m_maxIntensity = arg.maxIntensity !== undefined ? arg.maxIntensity : null;
   m_minIntensity = arg.minIntensity !== undefined ? arg.minIntensity : null;
   m_updateDelay = arg.updateDelay ? parseInt(arg.updateDelay, 10) : 1000;
