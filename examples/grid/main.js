@@ -27,7 +27,11 @@ $(function () {
         1.00: {r: 1, g: 0, b: 0, a: 1.0}
       }
     },
-    upperLeft: [0, 0],
+    upperLeft: {
+      x: -75.965,
+      y: 39.482
+    },
+    cellSize: 1E-5,
     rowCount: 1E5,
     updateDelay: 50
   };

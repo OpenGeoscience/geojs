@@ -107,14 +107,16 @@ var canvas_gridFeature = function (arg) {
         idx, pos, intensity;
 
     for (idx = 0; idx <= data.length - 1; idx++) {
-      pos = map.worldToDisplay(position[idx]);
+      pos = map.worldToDisplay({
+        x: idx * m_this.cellSize(),
+        y: idx * m_this.cellSize()
+      })
       intensity = (intensityFunc(data[idx]) - minIntensity) / rangeIntensity;
       if (intensity <= 0) {
         continue;
       }
       context2d.fillStyle = '#FF0000';
       context2d.fillRect(pos.x, pos.y, cellSize, cellSize);
-      context2d.drawImage(m_this._cell, pos.x, pos.y);
     }
   };
 
@@ -141,9 +143,6 @@ var canvas_gridFeature = function (arg) {
       m_this._computeGradient();
       m_this._renderPoints(context2d, map, data);
       canvas = layer.canvas()[0];
-      pixelArray = context2d.getImageData(0, 0, canvas.width, canvas.height);
-      m_this._colorize(pixelArray.data, m_this._grad);
-      context2d.putImageData(pixelArray, 0, 0);
 
       m_gridMapPosition = {
         zoom: map.zoom(),
