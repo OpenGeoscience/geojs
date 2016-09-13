@@ -43,6 +43,7 @@ module.exports = $.extend({
   fileReader: require('./fileReader'),
   geomFeature: require('./geomFeature'),
   graphFeature: require('./graphFeature'),
+  gridFeature: require('./gridFeature'),
   imageTile: require('./imageTile'),
   jsonReader: require('./jsonReader'),
   layer: require('./layer'),

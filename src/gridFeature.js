@@ -210,8 +210,7 @@ var gridFeature = function (arg) {
     );
 
     m_this.style(defaultStyle);
-
-      m_this.dataTime().modified();
+    m_this.dataTime().modified();
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -247,8 +246,9 @@ var gridFeature = function (arg) {
     if (setMin && setMax && m_minIntensity === m_maxIntensity) {
       m_minIntensity -= 1;
     }
-    transform.transformCoordinates(
-        m_this.gcs(), m_this.layer().map().gcs(), position);
+    //TODO what is this
+    // transform.transformCoordinates(
+    //     m_this.gcs(), m_this.layer().map().gcs(), position);
 
     m_this.buildTime().modified();
     return m_this;

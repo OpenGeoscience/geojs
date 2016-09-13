@@ -17,7 +17,7 @@ var timestamp = require('../timestamp');
 //////////////////////////////////////////////////////////////////////////////
 var canvas_gridFeature = function (arg) {
   'use strict';
-
+  console.log(arg);
   if (!(this instanceof canvas_gridFeature)) {
     return new canvas_gridFeature(arg);
   }
