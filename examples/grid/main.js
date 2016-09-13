@@ -6,7 +6,7 @@ $(function () {
     node: '#map',
     center: {
       x: -98,
-      y: 39
+      y: 42
     },
     zoom: 3
   });
@@ -31,7 +31,7 @@ $(function () {
       x: 0,
       y: 0
     },
-    cellSize: 1E2, //degrees
+    cellSize: 1E-2, //degrees
     rowCount: 316,
     updateDelay: 50
   };
