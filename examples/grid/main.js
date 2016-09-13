@@ -32,12 +32,6 @@ $(function () {
   map.createLayer('osm');
   layer = map.createLayer('feature', layerOptions);
   grid = layer.createFeature('grid', gridOptions)
-    .intensity(function (d) {
-      return d;
-    })
-    .position(function (d) {
-      return {x: d[2], y: d[1]};
-    });
 
   /* Make some values available in the global context so curious people can
    * play with them. */

@@ -138,7 +138,6 @@ var canvas_gridFeature = function (arg) {
       context2d.clearRect(0, 0, viewport.width, viewport.height);
       layer.canvas().css({transform: '', 'transform-origin': '0px 0px'});
 
-      m_this._createCircle();
       m_this._computeGradient();
       m_this._renderPoints(context2d, map, data);
       canvas = layer.canvas()[0];
