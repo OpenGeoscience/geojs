@@ -28,17 +28,17 @@ $(function () {
       }
     },
     upperLeft: {
-      x: -75.965,
-      y: 39.482
+      x: 0,
+      y: 0
     },
-    cellSize: 1E-5,
-    rowCount: 1E5,
+    cellSize: 1E-2, //degrees
+    rowCount: 316,
     updateDelay: 50
   };
   map.createLayer('osm');
   layer = map.createLayer('feature', layerOptions);
   grid = layer.createFeature('grid', gridOptions)
-  grid.data(Array(1E6).fill(0).map(function () {
+  grid.data(Array(1E4).fill(0).map(function () {
     return Math.random()
   }))
   grid.draw()
