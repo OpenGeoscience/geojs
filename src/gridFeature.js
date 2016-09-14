@@ -238,8 +238,8 @@ var gridFeature = function (arg) {
         setMax = (m_maxIntensity === null || m_maxIntensity === undefined),
         setMin = (m_minIntensity === null || m_minIntensity === undefined);
 
-    data.forEach(function (d) {
-      if (setMax || setMin) {
+    if (setMax || setMin) {
+      data.forEach(function (d) {
         intensity = m_this.intensity()(d);
         if (m_maxIntensity === null || m_maxIntensity === undefined) {
           m_maxIntensity = intensity;
@@ -253,9 +253,8 @@ var gridFeature = function (arg) {
         if (setMin && intensity < m_minIntensity) {
           m_minIntensity = intensity;
         }
-
-      }
-    });
+      });
+    }
     if (setMin && setMax && m_minIntensity === m_maxIntensity) {
       m_minIntensity -= 1;
     }
