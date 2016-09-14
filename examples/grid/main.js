@@ -29,16 +29,16 @@ $(function () {
     },
     upperLeft: {
       x: -180,
-      y: 70
+      y: 30
     },
-    cellSize: 10 / 69, // in degrees, approximately 100 miles
-    rowCount: 50,
+    cellSize: 10 / 69, // in degrees, approximately 10 miles
+    rowCount: 1000,
     updateDelay: 50
   };
   map.createLayer('osm');
   layer = map.createLayer('feature', layerOptions);
   grid = layer.createFeature('grid', gridOptions);
-  grid.data(Array(9E4).fill(0).map(function () {
+  grid.data(Array(1E6).fill(0).map(function () {
     return Math.random();
   }));
   grid.draw();
