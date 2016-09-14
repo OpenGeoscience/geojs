@@ -108,24 +108,20 @@ var canvas_gridFeature = function (arg) {
         rangeIntensity = (m_this.maxIntensity() - minIntensity) || 1,
         i, j, pos, intensity, gradientIndex, cellDisplayLength;
 
-    cellDisplayLength = map.gcsToDisplay({x: cellSize, y: 0}).x -
+    cellDisplayLength =
+      map.gcsToDisplay({x: cellSize, y: 0}).x -
       map.gcsToDisplay({x: 0, y: 0}).x
 
-    // use this to prevent distorition near poles
     var upperLeftDisplay = map.gcsToDisplay({
       x: upperLeft.x,
       y: upperLeft.y
     })
 
-    if (cellDisplayLength < 1) {
-      cellDisplayLength = 1;
-    }
-
     for (i = 0; i < rowCount; i++) {
       for (j = 0; j < columnCount; j++) {
         pos = {
           x: upperLeftDisplay.x + (j * cellDisplayLength),
-          y: upperLeftDisplay.y - (i * cellDisplayLength)
+          y: upperLeftDisplay.y + (i * cellDisplayLength)
         };
         intensity = (intensityFunc(data[i * columnCount + j]) - minIntensity) / rangeIntensity;
         if (intensity <= 0) {
