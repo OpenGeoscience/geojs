@@ -121,7 +121,7 @@ var canvas_gridFeature = function (arg) {
         pos = map.gcsToDisplay({
           x: upperLeft.x + (j * cellSize),
           y: upperLeft.y - (i * cellSize)
-        })
+        });
         intensity = (intensityFunc(data[i * columnCount + j]) - minIntensity) / rangeIntensity;
         if (intensity <= 0) {
           continue;

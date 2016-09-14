@@ -255,6 +255,7 @@ var gridFeature = function (arg) {
         }
       });
     }
+
     if (setMin && setMax && m_minIntensity === m_maxIntensity) {
       m_minIntensity -= 1;
     }

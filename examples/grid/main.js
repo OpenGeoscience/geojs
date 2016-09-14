@@ -29,19 +29,19 @@ $(function () {
     },
     upperLeft: {
       x: -180,
-      y: 90
+      y: 70
     },
-    cellSize: 1 / 69, // in degrees, approximately 100 miles
+    cellSize: 10 / 69, // in degrees, approximately 100 miles
     rowCount: 316,
     updateDelay: 50
   };
   map.createLayer('osm');
   layer = map.createLayer('feature', layerOptions);
-  grid = layer.createFeature('grid', gridOptions)
-  grid.data(Array(9E6).fill(0).map(function () {
+  grid = layer.createFeature('grid', gridOptions);
+  grid.data(Array(9E4).fill(0).map(function () {
     return Math.random();
   }));
-  grid.draw()
+  window.setTimeout(1000, grid.draw);
   /* Make some values available in the global context so curious people can
    * play with them. */
   window.grid = {
