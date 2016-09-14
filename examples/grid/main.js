@@ -32,7 +32,7 @@ $(function () {
       y: 70
     },
     cellSize: 10 / 69, // in degrees, approximately 100 miles
-    rowCount: 316,
+    rowCount: 50,
     updateDelay: 50
   };
   map.createLayer('osm');
@@ -41,7 +41,7 @@ $(function () {
   grid.data(Array(9E4).fill(0).map(function () {
     return Math.random();
   }));
-  window.setTimeout(1000, grid.draw);
+  grid.draw();
   /* Make some values available in the global context so curious people can
    * play with them. */
   window.grid = {

@@ -111,17 +111,22 @@ var canvas_gridFeature = function (arg) {
     cellDisplayLength = map.gcsToDisplay({x: cellSize, y: 0}).x -
       map.gcsToDisplay({x: 0, y: 0}).x
 
-    console.log(cellDisplayLength)
+    // use this to prevent distorition near poles
+    var upperLeftDisplay = map.gcsToDisplay({
+      x: upperLeft.x,
+      y: upperLeft.y
+    })
+
     if (cellDisplayLength < 1) {
       cellDisplayLength = 1;
     }
 
     for (i = 0; i < rowCount; i++) {
       for (j = 0; j < columnCount; j++) {
-        pos = map.gcsToDisplay({
-          x: upperLeft.x + (j * cellSize),
-          y: upperLeft.y - (i * cellSize)
-        });
+        pos = {
+          x: upperLeftDisplay.x + (j * cellDisplayLength),
+          y: upperLeftDisplay.y - (i * cellDisplayLength)
+        };
         intensity = (intensityFunc(data[i * columnCount + j]) - minIntensity) / rangeIntensity;
         if (intensity <= 0) {
           continue;
