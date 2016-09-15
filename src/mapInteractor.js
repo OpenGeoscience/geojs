@@ -1604,10 +1604,10 @@ var mapInteractor = function (args) {
         }
       }
     );
+    $node.trigger(evt);
     if (type.indexOf('.geojs') >= 0) {
       $(document).trigger(evt);
     }
-    $node.trigger(evt);
   };
   this._connectEvents();
   return this;

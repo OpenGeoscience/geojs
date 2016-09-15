@@ -148,8 +148,10 @@ describe('mapInteractor', function () {
 
   beforeEach(function () {
     // create a new div
-    $('body').append('<div id="mapNode1" class="mapNode testNode"></div>');
-    $('body').append('<div id="mapNode2" class="mapNode testNode"></div>');
+    $('<div id="mapNode1" class="mapNode testNode"></div>')
+        .css({width: '800px', height: '600px'}).appendTo('body');
+    $('<div id="mapNode2" class="mapNode testNode"></div>')
+        .css({width: '800px', height: '600px'}).appendTo('body');
   });
 
   afterEach(function () {
@@ -516,7 +518,7 @@ describe('mapInteractor', function () {
     expect(map.info.zoomArgs).toBeCloseTo(3.75, 1);
     expect(map.info.centerCalls).toBe(1);
     expect(map.info.centerArgs.x).toBeCloseTo(-370);
-    expect(map.info.centerArgs.y).toBeCloseTo(35);
+    expect(map.info.centerArgs.y).toBeCloseTo(-265);
 
     map.discreteZoom(true);
 
@@ -526,6 +528,9 @@ describe('mapInteractor', function () {
     );
     interactor.simulateEvent(
       'mousedown', {map: {x: 20, y: 20}, button: 'left'}
+    );
+    interactor.simulateEvent(
+      'mousemove.geojs', {map: {x: 0, y: -30}, button: 'left'}
     );
     interactor.simulateEvent(
       'mouseup.geojs', {map: {x: 0, y: -30}, button: 'left'}
@@ -580,12 +585,13 @@ describe('mapInteractor', function () {
     expect(map.info.centerCalls).toBe(0);
     expect(map.info.pan).toBe(1);
     expect(map.info.panArgs.x).toBeCloseTo(-370);
-    expect(map.info.panArgs.y).toBeCloseTo(35);
+    expect(map.info.panArgs.y).toBeCloseTo(-265);
   });
 
   it('Test selection event propagation', function () {
     var map = mockedMap('#mapNode1'),
-        triggered = 0;
+        triggered = 0,
+        clickTriggered = 0;
 
     var interactor = geo.mapInteractor({
       map: map,
@@ -599,13 +605,16 @@ describe('mapInteractor', function () {
     map.geoOn(geo.event.select, function () {
       triggered += 1;
     });
+    map.geoOn(geo.event.mouseclick, function () {
+      clickTriggered += 1;
+    });
 
     // initialize the selection
     interactor.simulateEvent(
       'mousedown', {map: {x: 20, y: 20}, button: 'left'}
     );
     interactor.simulateEvent(
-      'mousemove', {map: {x: 30, y: 20}, button: 'left'}
+      'mousemove.geojs', {map: {x: 30, y: 20}, button: 'left'}
     );
     interactor.simulateEvent(
       'mouseup.geojs', {map: {x: 40, y: 50}, button: 'left'}
@@ -616,6 +625,19 @@ describe('mapInteractor', function () {
     expect(map.info.centerCalls).toBe(0);
     expect(map.info.pan).toBe(0);
     expect(triggered).toBe(1);
+
+    // click should still work
+    interactor.simulateEvent(
+      'mousedown', {map: {x: 20, y: 20}, button: 'left'}
+    );
+    interactor.simulateEvent(
+      'mousemove.geojs', {map: {x: 20, y: 20}, button: 'left'}
+    );
+    interactor.simulateEvent(
+      'mouseup.geojs', {map: {x: 20, y: 20}, button: 'left'}
+    );
+    expect(triggered).toBe(1);
+    expect(clickTriggered).toBe(1);
   });
 
   describe('pause state', function () {

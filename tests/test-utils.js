@@ -242,7 +242,7 @@ module.exports.mockVGLRenderer = function mockVGLRenderer(supported) {
  * Restore the vgl renderer to a pristine state.
  */
 module.exports.restoreVGLRenderer = function () {
-  vgl.renderWidow = _renderWindow;
+  vgl.renderWindow = _renderWindow;
   geo.gl.vglRenderer.supported = _supported;
   delete vgl._mocked;
   delete vgl.mockCounts;

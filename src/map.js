@@ -675,15 +675,15 @@ var map = function (arg) {
     var oldCenter = m_this.center();
     m_x = x;
     m_y = y;
-    m_width = w;
-    m_height = h;
+    m_width = w || m_width;
+    m_height = h || m_height;
 
     reset_minimum_zoom();
     var newZoom = fix_zoom(m_zoom);
     if (newZoom !== m_zoom) {
       m_this.zoom(newZoom);
     }
-    m_this.camera().viewport = {width: w, height: h};
+    m_this.camera().viewport = {width: m_width, height: m_height};
     m_this.center(oldCenter);
 
     m_this.geoTrigger(geo_event.resize, {
@@ -691,8 +691,8 @@ var map = function (arg) {
       target: m_this,
       x: m_x,
       y: m_y,
-      width: w,
-      height: h
+      width: m_width,
+      height: m_height
     });
 
     m_this.modified();
