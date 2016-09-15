@@ -972,6 +972,10 @@ var map = function (arg) {
     // this makes it possible to set a null interactor
     // i.e. map.interactor(null);
     if (m_interactor) {
+      /* If we set a map interactor, make sure we have a tabindex */
+      if (!m_node.attr('tabindex')) {
+        m_node.attr('tabindex', 0);
+      }
       m_interactor.map(m_this);
     }
     return m_this;
@@ -1902,7 +1906,9 @@ var map = function (arg) {
   // Now update to the correct center and zoom level
   this.center($.extend({}, arg.center || m_center), undefined);
 
-  this.interactor(arg.interactor || mapInteractor({discreteZoom: m_discreteZoom}));
+  if (arg.interactor !== null) {
+    this.interactor(arg.interactor || mapInteractor({discreteZoom: m_discreteZoom}));
+  }
   this.clock(arg.clock || clock());
 
   function resizeSelf() {

@@ -5,6 +5,7 @@ var geo_event = require('./event');
 var registry = require('./registry');
 var transform = require('./transform');
 var $ = require('jquery');
+var Mousetrap = require('mousetrap');
 
 var annotationId = 0;
 
@@ -306,9 +307,14 @@ var annotationLayer = function (args) {
       return m_mode;
     }
     if (arg !== m_mode) {
-      var createAnnotation;
+      var createAnnotation, mapNode = m_this.map().node();
       m_mode = arg;
-      m_this.map().node().css('cursor', m_mode ? 'crosshair' : '');
+      mapNode.css('cursor', m_mode ? 'crosshair' : '');
+      if (m_mode) {
+        Mousetrap(mapNode[0]).bind('esc', function () { m_this.mode(null); });
+      } else {
+        Mousetrap(mapNode[0]).unbind('esc');
+      }
       if (this.currentAnnotation) {
         switch (this.currentAnnotation.state()) {
           case 'create':
