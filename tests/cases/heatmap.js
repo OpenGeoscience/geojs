@@ -1,4 +1,4 @@
-// Test geo.core.osmLayer
+// Test geo.core.heatmap
 var geo = require('../test-utils').geo;
 var $ = require('jquery');
 
@@ -31,6 +31,7 @@ describe('canvas heatmap feature', function () {
   });
 
   it('Setup map', function () {
+    mockAnimationFrame();
     map = geo.map({node: '#map-canvas-heatmap-feature', center: [0, 0], zoom: 3});
     layer = map.createLayer('feature', {'renderer': 'canvas'});
     map.resize(0, 0, width, height);
@@ -51,7 +52,6 @@ describe('canvas heatmap feature', function () {
       .style('radius', 5)
       .style('blurRadius', 15);
 
-    mockAnimationFrame();
     map.draw();
     stepAnimationFrame(new Date().getTime());
     expect(layer.children().length).toBe(1);
