@@ -452,7 +452,7 @@ geo_event.annotation.add = 'geo_annotation_add';
  * @property {geo.annotation} annotation The annotation that will be added.
  */
 //////////////////////////////////////////////////////////////////////////////
-geo_event.annotation.add.before = 'geo_annotation_add_before';
+geo_event.annotation.add_before = 'geo_annotation_add_before';
 
 //////////////////////////////////////////////////////////////////////////////
 /**
