@@ -85,7 +85,7 @@ describe('geo.annotationLayer', function () {
     });
     it('annotations', function () {
       var poly = geo.annotation.polygonAnnotation({
-            state: 'create', layer: layer}),
+            state: geo.annotation.state.create, layer: layer}),
           rect = geo.annotation.rectangleAnnotation({
             layer: layer,
             corners: [{x: 0, y: 0}, {x: 1, y: 0}, {x: 1, y: 1}, {x: 0, y: 1}]});
@@ -108,16 +108,17 @@ describe('geo.annotationLayer', function () {
         addAnnotationEvent = 0, lastAddAnnotationEvent,
         addAnnotationBeforeEvent = 0,
         removeAnnotationEvent = 0, lastRemoveAnnotationEvent,
-        poly = geo.annotation.polygonAnnotation({
-          state: 'create', layer: layer}),
-        rect = geo.annotation.rectangleAnnotation({
-          layer: layer,
-          corners: [{x: 0, y: 0}, {x: 1, y: 0}, {x: 1, y: 1}, {x: 0, y: 1}]});
+        poly, rect;
     it('addAnnotation', function () {
       map = create_map();
       layer = map.createLayer('annotation', {
         features: ['polygon', 'line', 'point']
       });
+      poly = geo.annotation.polygonAnnotation({
+        state: geo.annotation.state.create, layer: layer});
+      rect = geo.annotation.rectangleAnnotation({
+        layer: layer,
+        corners: [{x: 0, y: 0}, {x: 1, y: 0}, {x: 1, y: 1}, {x: 0, y: 1}]});
       map.geoOn(geo.event.annotation.add_before, function () {
         addAnnotationBeforeEvent += 1;
       });
@@ -176,14 +177,143 @@ describe('geo.annotationLayer', function () {
       expect(removeAnnotationEvent).toBe(3);
       expect(layer.annotations().length).toBe(1);
     });
-    // displayDistance
+    it('displayDistance', function () {
+      var c1 = {x: 100, y: 80},
+          c2 = map.displayToGcs({x: 105, y: 84}),        /* ingcs */
+          c3 = map.displayToGcs({x: 107, y: 88}, null);  /* gcs */
+      expect(layer.displayDistance(c1, 'display', c2)).toBeCloseTo(6.40, 2);
+      expect(layer.displayDistance(c1, 'display', c2, 'EPSG:4326')).toBeCloseTo(6.40, 2);
+      expect(layer.displayDistance(c1, 'display', c3, null)).toBeCloseTo(10.63, 2);
+      expect(layer.displayDistance(c1, 'display', c3, 'EPSG:3857')).toBeCloseTo(10.63, 2);
+      expect(layer.displayDistance(c2, undefined, c1, 'display')).toBeCloseTo(6.40, 2);
+      expect(layer.displayDistance(c2, undefined, c3, null)).toBeCloseTo(4.47, 2);
+      expect(layer.displayDistance(c3, null, c1, 'display')).toBeCloseTo(10.63, 2);
+      expect(layer.displayDistance(c3, null, c2)).toBeCloseTo(4.47, 2);
+    });
   });
-  // private utility functions
-  //  _update
-  // interactions
-  //  _processSelection
-  //  _handleMouseMove
-  //  _handleMouseClick
+  describe('Private utility functions', function () {
+    var map, layer, point, rect, rect2;
+    it('_update', function () {
+      /* Most of update is covered as a side effect of other code.  This tests
+       * some edge conditions */
+      map = create_map();
+      layer = map.createLayer('annotation', {
+        renderer: 'd3'
+      });
+      point = geo.annotation.pointAnnotation({
+        layer: layer,
+        position: {x: 2, y: 3}});
+      rect = geo.annotation.rectangleAnnotation({
+        layer: layer,
+        corners: [{x: 0, y: 0}, {x: 1, y: 0}, {x: 1, y: 1}, {x: 0, y: 1}]});
+      rect2 = geo.annotation.rectangleAnnotation({
+        layer: layer,
+        corners: [{x: 3, y: 0}, {x: 4, y: 0}, {x: 4, y: 1}, {x: 3, y: 1}]});
+      layer.addAnnotation(point);
+      layer.addAnnotation(rect);
+      layer.addAnnotation(rect2);
+      expect(layer.features.length).toBe(1);
+    });
+    it('_handleMouseClick', function () {
+      layer.removeAllAnnotations();
+      layer.mode('polygon');
+      expect(layer.annotations().length).toBe(1);
+      expect(layer.annotations()[0].options('vertices').length).toBe(0);
+      var time = new Date().getTime();
+      layer._handleMouseClick({
+        buttonsDown: {left: true},
+        time: time,
+        map: {x: 10, y: 20},
+        mapgcs: map.displayToGcs({x: 10, y: 20}, null)
+      });
+      expect(layer.annotations().length).toBe(1);
+      expect(layer.annotations()[0].options('vertices').length).toBe(2);
+      layer._handleMouseClick({
+        buttonsDown: {left: true},
+        time: time,
+        map: {x: 30, y: 20},
+        mapgcs: map.displayToGcs({x: 30, y: 20}, null)
+      });
+      expect(layer.annotations()[0].options('vertices').length).toBe(3);
+      layer._handleMouseClick({
+        buttonsDown: {left: true},
+        time: time + 1000,
+        map: {x: 30, y: 20},
+        mapgcs: map.displayToGcs({x: 30, y: 20}, null)
+      });
+      expect(layer.annotations()[0].options('vertices').length).toBe(3);
+      layer._handleMouseClick({
+        buttonsDown: {left: true},
+        time: time + 1000,
+        map: {x: 20, y: 50},
+        mapgcs: map.displayToGcs({x: 20, y: 50}, null)
+      });
+      expect(layer.annotations()[0].options('vertices').length).toBe(4);
+      layer._handleMouseClick({
+        buttonsDown: {left: true},
+        time: time + 1000,
+        map: {x: 20, y: 50},
+        mapgcs: map.displayToGcs({x: 20, y: 50}, null)
+      });
+      expect(layer.annotations()[0].options('vertices').length).toBe(3);
+      expect(layer.annotations()[0].state()).toBe(geo.annotation.state.done);
+      layer.removeAllAnnotations();
+      layer.mode('polygon');
+      layer._handleMouseClick({
+        buttonsDown: {left: true},
+        time: time,
+        map: {x: 10, y: 20},
+        mapgcs: map.displayToGcs({x: 10, y: 20}, null)
+      });
+      layer._handleMouseClick({
+        buttonsDown: {right: true},
+        time: time,
+        map: {x: 30, y: 20},
+        mapgcs: map.displayToGcs({x: 30, y: 20}, null)
+      });
+      expect(layer.annotations().length).toBe(0);
+    });
+    it('_handleMouseMove', function () {
+      layer.removeAllAnnotations();
+      layer.mode('polygon');
+      var time = new Date().getTime();
+      layer._handleMouseClick({
+        buttonsDown: {left: true},
+        time: time,
+        map: {x: 10, y: 20},
+        mapgcs: map.displayToGcs({x: 10, y: 20}, null)
+      });
+      expect(layer.annotations()[0].options('vertices')[0]).toEqual(layer.annotations()[0].options('vertices')[1]);
+      layer._handleMouseMove({
+        buttonsDown: {},
+        time: time,
+        map: {x: 15, y: 22},
+        mapgcs: map.displayToGcs({x: 15, y: 22}, null)
+      });
+      expect(layer.annotations()[0].options('vertices')[0]).not.toEqual(layer.annotations()[0].options('vertices')[1]);
+    });
+    it('_processSelection', function () {
+      layer.removeAllAnnotations();
+      layer._processSelection({
+        state: {action: geo.geo_action.annotation_rectangle},
+        lowerLeft: {x: 10, y: 10},
+        lowerRight: {x: 20, y: 10},
+        upperLeft: {x: 10, y: 5},
+        upperRight: {x: 20, y: 5}
+      });
+      expect(layer.annotations().length).toBe(0);
+      layer.mode('rectangle');
+      layer._processSelection({
+        state: {action: geo.geo_action.annotation_rectangle},
+        lowerLeft: {x: 10, y: 10},
+        lowerRight: {x: 20, y: 10},
+        upperLeft: {x: 10, y: 5},
+        upperRight: {x: 20, y: 5}
+      });
+      expect(layer.annotations().length).toBe(1);
+      expect(layer.annotations()[0].type()).toBe('rectangle');
+    });
+  });
   it('Test destroy layer.', function () {
     var map = create_map();
     var layer = map.createLayer('annotation', {

@@ -5,6 +5,12 @@ var transform = require('./transform');
 
 var annotationId = 0;
 
+var annotationState = {
+  create: 'create',
+  done: 'done',
+  edit: 'edit'
+};
+
 /////////////////////////////////////////////////////////////////////////////
 /**
  * Base annotation class
@@ -16,8 +22,8 @@ var annotationId = 0;
  *    the type with a unique ID suffixed to it.
  * @param {geo.annotationLayer} [options.layer] a reference to the controlling
  *    layer.  This is used for coordinate transforms.
- * @param {string} [options.state] initial annotation state.  One of 'create',
- *    'done', or 'edit'.
+ * @param {string} [options.state] initial annotation state.  One of the
+ *    annotation.state values.
  * @returns {geo.annotation}
  */
 /////////////////////////////////////////////////////////////////////////////
@@ -30,11 +36,12 @@ var annotation = function (type, args) {
   annotationId += 1;
   var m_options = $.extend({}, args || {}),
       m_id = annotationId,
-      m_name = args.name || (
+      m_name = m_options.name || (
         type.charAt(0).toUpperCase() + type.substr(1) + ' ' + annotationId),
       m_type = type,
-      m_layer = args.layer,
-      m_state = args.state || 'done';  /* create, done, edit */
+      m_layer = m_options.layer,
+      /* one of annotationState.* */
+      m_state = m_options.state || annotationState.done;
   delete m_options.state;
   delete m_options.layer;
   delete m_options.name;
@@ -99,9 +106,11 @@ var annotation = function (type, args) {
     }
     if (m_state !== arg) {
       m_state = arg;
-      m_layer.geoTrigger(geo_event.annotation.state, {
-        annotation: this
-      });
+      if (this.layer()) {
+        this.layer().geoTrigger(geo_event.annotation.state, {
+          annotation: this
+        });
+      }
     }
     return this;
   };
@@ -196,13 +205,15 @@ var annotation = function (type, args) {
    */
   this.coordinates = function (gcs) {
     var coord = this._coordinates();
-    var map = this.layer().map();
-    gcs = (gcs === null ? map.gcs() : (
-           gcs === undefined ? map.ingcs() : gcs));
-    if (gcs !== map.gcs()) {
-      coord = transform.transformCoordinates(map.gcs(), gcs, coord);
+    if (this.layer()) {
+      var map = this.layer().map();
+      gcs = (gcs === null ? map.gcs() : (
+             gcs === undefined ? map.ingcs() : gcs));
+      if (gcs !== map.gcs()) {
+        coord = transform.transformCoordinates(map.gcs(), gcs, coord);
+      }
+      return coord;
     }
-    return coord;
   };
 
   /**
@@ -210,7 +221,9 @@ var annotation = function (type, args) {
    * modified.
    */
   this.modified = function () {
-    this.layer().modified();
+    if (this.layer()) {
+      this.layer().modified();
+    }
     return this;
   };
 
@@ -218,8 +231,10 @@ var annotation = function (type, args) {
    * Draw this annotation.  This just updates and draws the parent layer.
    */
   this.draw = function () {
-    this.layer()._update();
-    this.layer().draw();
+    if (this.layer()) {
+      this.layer()._update();
+      this.layer().draw();
+    }
     return this;
   };
 
@@ -289,7 +304,7 @@ var rectangleAnnotation = function (args) {
    * @returns {array} an array of coordinates.
    */
   this._coordinates = function () {
-    return this.options().corners;
+    return this.options('corners');
   };
 };
 inherit(rectangleAnnotation, annotation);
@@ -341,12 +356,12 @@ var polygonAnnotation = function (args) {
       line: function (d) {
         /* Return an array that has the same number of items as we have
          * vertices. */
-        return Array.apply(null, Array(m_this.options().vertices.length)).map(
+        return Array.apply(null, Array(m_this.options('vertices').length)).map(
             function () { return d; });
       },
       polygon: function (d) { return d.polygon; },
       position: function (d, i) {
-        return m_this.options().vertices[i];
+        return m_this.options('vertices')[i];
       },
       stroke: false,
       strokeColor: {r: 0, g: 0, b: 1},
@@ -369,7 +384,7 @@ var polygonAnnotation = function (args) {
         state = this.state(),
         features;
     switch (state) {
-      case 'create':
+      case annotationState.create:
         features = [];
         if (opt.vertices && opt.vertices.length >= 3) {
           features[1] = {
@@ -407,7 +422,7 @@ var polygonAnnotation = function (args) {
    * @returns {array} an array of coordinates.
    */
   this._coordinates = function () {
-    return this.options().vertices;
+    return this.options('vertices');
   };
 
   /**
@@ -418,7 +433,10 @@ var polygonAnnotation = function (args) {
    *    update anything.
    */
   this.mouseMove = function (evt) {
-    var vertices = this.options().vertices;
+    if (this.state() !== annotationState.create) {
+      return;
+    }
+    var vertices = this.options('vertices');
     if (vertices.length) {
       vertices[vertices.length - 1] = evt.mapgcs;
       return true;
@@ -435,18 +453,18 @@ var polygonAnnotation = function (args) {
    *    if the annotation should be removed, falsy to not update anything.
    */
   this.mouseClick = function (evt) {
-    if (this.state() !== 'create') {
+    var layer = this.layer();
+    if (this.state() !== annotationState.create || !layer) {
       return;
     }
     var end = !!evt.buttonsDown.right, skip;
     if (!evt.buttonsDown.left && !evt.buttonsDown.right) {
       return;
     }
-    var vertices = this.options().vertices;
+    var vertices = this.options('vertices');
     if (evt.buttonsDown.right && !vertices.length) {
       return;
     }
-    var layer = this.layer();
     evt.handled = true;
     if (evt.buttonsDown.left) {
       if (vertices.length) {
@@ -478,7 +496,7 @@ var polygonAnnotation = function (args) {
         return 'remove';
       }
       vertices.pop();
-      this.state('done');
+      this.state(annotationState.done);
       return 'done';
     }
     return (end || !skip);
@@ -527,7 +545,7 @@ var pointAnnotation = function (args) {
         state = this.state(),
         features;
     switch (state) {
-      case 'create':
+      case annotationState.create:
         features = [];
         break;
       default:
@@ -550,10 +568,10 @@ var pointAnnotation = function (args) {
    * @returns {array} an array of coordinates.
    */
   this._coordinates = function () {
-    if (this.state() === 'create') {
+    if (this.state() === annotationState.create) {
       return [];
     }
-    return [this.options().position];
+    return [this.options('position')];
   };
 
   /**
@@ -566,21 +584,22 @@ var pointAnnotation = function (args) {
    *    if the annotation should be removed, falsy to not update anything.
    */
   this.mouseClick = function (evt) {
-    if (this.state() !== 'create') {
+    if (this.state() !== annotationState.create) {
       return;
     }
     if (!evt.buttonsDown.left) {
       return;
     }
     evt.handled = true;
-    this.options().position = evt.mapgcs;
-    this.state('done');
+    this.options('position', evt.mapgcs);
+    this.state(annotationState.done);
     return 'done';
   };
 };
 inherit(pointAnnotation, annotation);
 
 module.exports = {
+  state: annotationState,
   annotation: annotation,
   pointAnnotation: pointAnnotation,
   polygonAnnotation: polygonAnnotation,

@@ -1,7 +1,7 @@
 var inherit = require('./inherit');
 var featureLayer = require('./featureLayer');
 var geo_action = require('./action');
-var annotation = require('./annotation');
+var geo_annotation = require('./annotation');
 var geo_event = require('./event');
 var registry = require('./registry');
 var $ = require('jquery');
@@ -88,7 +88,7 @@ var annotationLayer = function (args) {
           ],
           layer: this
         };
-        this.addAnnotation(annotation.rectangleAnnotation(params));
+        this.addAnnotation(geo_annotation.rectangleAnnotation(params));
       }
     }
   };
@@ -254,7 +254,7 @@ var annotationLayer = function (args) {
     var removed = 0, annotation, pos = 0;
     while (pos < m_annotations.length) {
       annotation = m_annotations[pos];
-      if (skipCreating && annotation.state() === 'create') {
+      if (skipCreating && annotation.state() === geo_annotation.state.create) {
         pos += 1;
         continue;
       }
@@ -318,7 +318,7 @@ var annotationLayer = function (args) {
       }
       if (this.currentAnnotation) {
         switch (this.currentAnnotation.state()) {
-          case 'create':
+          case geo_annotation.state.create:
             this.removeAnnotation(this.currentAnnotation);
             break;
         }
@@ -326,10 +326,10 @@ var annotationLayer = function (args) {
       }
       switch (m_mode) {
         case 'point':
-          createAnnotation = annotation.pointAnnotation;
+          createAnnotation = geo_annotation.pointAnnotation;
           break;
         case 'polygon':
-          createAnnotation = annotation.polygonAnnotation;
+          createAnnotation = geo_annotation.polygonAnnotation;
           break;
         case 'rectangle':
           m_this.map().interactor().addAction(m_actions.rectangle);
@@ -337,7 +337,7 @@ var annotationLayer = function (args) {
       }
       if (createAnnotation) {
         this.currentAnnotation = createAnnotation({
-          state: 'create',
+          state: geo_annotation.state.create,
           layer: this
         });
         this.addAnnotation(m_this.currentAnnotation);
@@ -387,8 +387,8 @@ var annotationLayer = function (args) {
                  * selected renderer.  Issue one warning only. */
                 var key = 'error_feature_' + type;
                 if (!m_this[key]) {
-                  console.warning('Cannot create a ' + type + ' feature for ' +
-                                  'annotations.');
+                  console.warn('Cannot create a ' + type + ' feature for ' +
+                               'annotations.');
                   m_this[key] = true;
                 }
                 return;

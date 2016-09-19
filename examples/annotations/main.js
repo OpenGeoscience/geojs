@@ -82,6 +82,9 @@ $(function () {
       return;
     }
     if (evt.buttonsDown.left) {
+      if ($('.annotationtype button.lastused').hasClass('active') && query.keepadding === 'true') {
+        return;
+      }
       select_button('.annotationtype button.lastused');
     } else if (evt.buttonsDown.right) {
       select_button('.annotationtype button#' +
@@ -107,15 +110,6 @@ $(function () {
     if (!param || value === query[param]) {
       return;
     }
-    /*
-    var processedValue = (ctl.is('[type="checkbox"]') ?
-        (value === 'true') : value);
-    switch (param) {
-      case 'clickadd':
-
-        break;
-    }
-    */
     query[param] = value;
     if (value === '' || (ctl.attr('placeholder') &&
         value === ctl.attr('placeholder'))) {
@@ -204,7 +198,7 @@ $(function () {
         return;
       }
       var annotation = layer.annotationById(id);
-      if (annotation.state() === 'create') {
+      if (annotation.state() === geo.annotation.state.create) {
         return;
       }
       var entry = $('#annotationlist .entry#sample').clone();
