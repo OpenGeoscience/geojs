@@ -2,6 +2,7 @@ var $ = require('jquery');
 var inherit = require('./inherit');
 var geo_event = require('./event');
 var transform = require('./transform');
+var registerAnnotation = require('./registry').registerAnnotation;
 
 var annotationId = 0;
 
@@ -16,7 +17,8 @@ var annotationState = {
  * Base annotation class
  *
  * @class geo.annotation
- * @param {string} type the type of annotation.
+ * @param {string} type the type of annotation.  These should be registered
+ *    with utils.registerAnnotation and can be listed with same function.
  * @param {object?} options Inidividual annotations have additional options.
  * @param {string} [options.name] A name for the annotation.  This defaults to
  *    the type with a unique ID suffixed to it.
@@ -309,6 +311,8 @@ var rectangleAnnotation = function (args) {
 };
 inherit(rectangleAnnotation, annotation);
 
+registerAnnotation('rectangle', rectangleAnnotation, {polygon: true});
+
 /////////////////////////////////////////////////////////////////////////////
 /**
  * Polygon annotation class
@@ -504,6 +508,9 @@ var polygonAnnotation = function (args) {
 };
 inherit(polygonAnnotation, annotation);
 
+registerAnnotation('polygon', polygonAnnotation, {
+  polygon: true, 'line.basic': [annotationState.create]});
+
 /////////////////////////////////////////////////////////////////////////////
 /**
  * Point annotation class
@@ -597,6 +604,8 @@ var pointAnnotation = function (args) {
   };
 };
 inherit(pointAnnotation, annotation);
+
+registerAnnotation('point', pointAnnotation, {point: true});
 
 module.exports = {
   state: annotationState,

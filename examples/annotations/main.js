@@ -46,7 +46,7 @@ $(function () {
   // create an annotation layer
   layer = map.createLayer('annotation', {
     renderer: query.renderer ? (query.renderer === 'html' ? null : query.renderer) : undefined,
-    features: query.renderer ? undefined : ['polygon', 'line', 'point']
+    annotations: query.renderer ? undefined : geo.listAnnotations()
   });
   // bind to the mouse click and annotation mode events
   layer.geoOn(geo.event.mouseclick, mouseClickToStart);

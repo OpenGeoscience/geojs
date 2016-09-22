@@ -3,6 +3,7 @@ var sceneObject = require('./sceneObject');
 var feature = require('./feature');
 var checkRenderer = require('./registry').checkRenderer;
 var rendererForFeatures = require('./registry').rendererForFeatures;
+var rendererForAnnotations = require('./registry').rendererForAnnotations;
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -45,7 +46,9 @@ var layer = function (arg) {
       m_canvas = null,
       m_renderer = null,
       m_initialized = false,
-      m_rendererName = arg.renderer === undefined ? rendererForFeatures(arg.features) : arg.renderer,
+      m_rendererName = arg.renderer !== undefined ? arg.renderer : (
+        arg.annotations ? rendererForAnnotations(arg.annotations) :
+        rendererForFeatures(arg.features)),
       m_dataTime = timestamp(),
       m_updateTime = timestamp(),
       m_sticky = arg.sticky === undefined ? true : arg.sticky,
