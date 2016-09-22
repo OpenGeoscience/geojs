@@ -559,7 +559,6 @@ describe('geo.quadFeature', function () {
       map.draw();
     });
     waitForIt('next render canvas C', function () {
-      console.log([window._canvasLog.counts.drawImage, counts.drawImage + 200, window._canvasLog.counts.clearRect, counts.clearRect + 1]);  //DWM:: debug this test to find out why travis fails.
       return window._canvasLog.counts.drawImage >= counts.drawImage + 200 &&
              window._canvasLog.counts.clearRect >= counts.clearRect + 1;
     });

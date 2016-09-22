@@ -39,6 +39,8 @@ var mapInteractor = function (args) {
       m_selectionLayer = null,
       m_selectionQuad,
       m_paused = false,
+      // if m_clickMaybe is not false, it contains the x, y, and buttons that
+      // were present when the mouse down event occurred.
       m_clickMaybe = false,
       m_clickMaybeTimeout,
       m_callZoom = function () {};
@@ -652,7 +654,11 @@ var mapInteractor = function (args) {
         (!m_mouse.buttons.left || m_options.click.buttons.left) &&
         (!m_mouse.buttons.right || m_options.click.buttons.right) &&
         (!m_mouse.buttons.middle || m_options.click.buttons.middle)) {
-      m_this._setClickMaybe({x: m_mouse.page.x, y: m_mouse.page.y});
+      m_this._setClickMaybe({
+        x: m_mouse.page.x,
+        y: m_mouse.page.y,
+        buttons: $.extend({}, m_mouse.buttons)
+      });
       if (m_options.click.duration > 0) {
         m_clickMaybeTimeout = window.setTimeout(function () {
           m_clickMaybe = false;
@@ -1057,12 +1063,12 @@ var mapInteractor = function (args) {
    */
   ////////////////////////////////////////////////////////////////////////////
   this._handleMouseUp = function (evt) {
-
     if (m_paused) {
       return;
     }
 
     m_this._getMouseButton(evt);
+
     if (m_clickMaybe) {
       m_this._handleMouseClick(evt);
     }
@@ -1078,6 +1084,14 @@ var mapInteractor = function (args) {
   ////////////////////////////////////////////////////////////////////////////
   this._handleMouseClick = function (evt) {
 
+    /* Cancel a selection if it is occurring */
+    if (m_state.actionRecord && m_state.actionRecord.selectionRectangle) {
+      m_selectionLayer.clear();
+      m_this.map().deleteLayer(m_selectionLayer);
+      m_selectionLayer = null;
+      m_selectionQuad = null;
+      m_state.action = m_state.actionRecord = null;
+    }
     m_this._getMouseButton(evt);
     m_this._getMouseModifiers(evt);
 
@@ -1087,12 +1101,14 @@ var mapInteractor = function (args) {
     // unbind temporary handlers on document
     $(document).off('.geojs');
     m_state.boundDocumentHandlers = false;
+    // add information about the button state to the event information
+    var details = m_this.mouse();
+    details.buttonsDown = m_clickMaybe.buttons;
 
     // reset click detector variable
     m_this._setClickMaybe(false);
-
     // fire a click event
-    m_this.map().geoTrigger(geo_event.mouseclick, m_this.mouse());
+    m_this.map().geoTrigger(geo_event.mouseclick, details);
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -1588,10 +1604,10 @@ var mapInteractor = function (args) {
         }
       }
     );
+    $node.trigger(evt);
     if (type.indexOf('.geojs') >= 0) {
       $(document).trigger(evt);
     }
-    $node.trigger(evt);
   };
   this._connectEvents();
   return this;

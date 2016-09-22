@@ -31,6 +31,8 @@ var $ = require('jquery');
 require('./polyfills');
 
 module.exports = $.extend({
+  annotation: require('./annotation'),
+  annotationLayer: require('./annotationLayer'),
   camera: require('./camera'),
   choroplethFeature: require('./choroplethFeature'),
   clock: require('./clock'),

@@ -121,7 +121,13 @@
         if (geo.util.cssColors.hasOwnProperty(color)) {
           color = geo.util.cssColors[color];
         } else if (color.charAt(0) === '#') {
-          color = parseInt(color.slice(1), 16);
+          if (color.length === 4) {
+            /* interpret values of the form #rgb as #rrggbb */
+            color = parseInt(color.slice(1), 16);
+            color = (color & 0xf00) * 0x1100 + (color & 0xf0) * 0x110 + (color & 0xf) * 0x11;
+          } else {
+            color = parseInt(color.slice(1), 16);
+          }
         }
       }
       if (isFinite(color)) {

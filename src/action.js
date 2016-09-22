@@ -11,7 +11,11 @@ var geo_action = {
   select: 'geo_action_select',
   unzoomselect: 'geo_action_unzoomselect',
   zoom: 'geo_action_zoom',
-  zoomselect: 'geo_action_zoomselect'
+  zoomselect: 'geo_action_zoomselect',
+
+  // annotation actions
+  annotation_polygon: 'geo_annotation_polygon',
+  annotation_rectangle: 'geo_annotation_rectangle'
 };
 
 module.exports = geo_action;

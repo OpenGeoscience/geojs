@@ -8,8 +8,8 @@ describe('zoom slider', function () {
   var map;
 
   beforeEach(function () {
-    $('<div id="map-zoom-slider"/>').appendTo('body')
-      .css({width: '500px', height: '400px'});
+    $('<div id="map-zoom-slider"/>')
+      .css({width: '500px', height: '400px'}).appendTo('body');
     map = geo.map({
       'node': '#map-zoom-slider',
       'center': [0, 0],

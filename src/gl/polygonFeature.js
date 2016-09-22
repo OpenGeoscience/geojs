@@ -98,7 +98,7 @@ var gl_polygonFeature = function (arg) {
    *    recalculate the style.
    */
   function createGLPolygons(onlyStyle) {
-    var posBuf, posFunc,
+    var posBuf, posFunc, polyFunc,
         fillColor, fillColorFunc, fillColorVal,
         fillOpacity, fillOpacityFunc, fillOpacityVal,
         fillFunc, fillVal,
@@ -121,11 +121,15 @@ var gl_polygonFeature = function (arg) {
     uniformPolyFunc = m_this.style.get('uniformPolygon');
 
     if (!onlyStyle) {
-      posFunc = m_this.position();
+      posFunc = m_this.style.get('position');
+      polyFunc = m_this.style.get('polygon');
       m_this.data().forEach(function (item, itemIndex) {
         var polygon, outer, geometry, c;
 
-        polygon = m_this.polygon()(item, itemIndex);
+        polygon = polyFunc(item, itemIndex);
+        if (!polygon) {
+          return;
+        }
         outer = polygon.outer || (polygon instanceof Array ? polygon : []);
 
         /* expand to an earcut polygon geometry.  We had been using a map call,
@@ -170,8 +174,10 @@ var gl_polygonFeature = function (arg) {
           item: item,
           itemIndex: itemIndex
         };
-        items.push(record);
-        numPts += record.triangles.length;
+        if (record.triangles.length) {
+          items.push(record);
+          numPts += record.triangles.length;
+        }
       });
       posBuf = util.getGeomBuffer(geom, 'pos', numPts * 3);
       indices = geom.primitive(0).indices();

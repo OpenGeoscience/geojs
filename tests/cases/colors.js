@@ -29,6 +29,32 @@ describe('geo.util.convertColor', function () {
       });
     });
   });
+  describe('From short hex string', function () {
+    it('#000', function () {
+      var c = geo.util.convertColor('#000');
+      expect(c).toEqual({
+        r: 0,
+        g: 0,
+        b: 0
+      });
+    });
+    it('#fff', function () {
+      var c = geo.util.convertColor('#fff');
+      expect(c).toEqual({
+        r: 1,
+        g: 1,
+        b: 1
+      });
+    });
+    it('#26b', function () {
+      var c = geo.util.convertColor('#26b');
+      expect(c).toEqual({
+        r: 2 / 15,
+        g: 6 / 15,
+        b: 11 / 15
+      });
+    });
+  });
   describe('From hex value', function () {
     it('#000000', function () {
       var c = geo.util.convertColor(0x000000);

@@ -57,6 +57,7 @@
     "karma-sinon": "^1.0.4",
     "karma-sourcemap-loader": "^0.3.7",
     "karma-webpack": "^1.7.0",
+    "mousetrap": "^1.6.0",
     "node-fs-extra": "^0.8.1",
     "phantomjs-prebuilt": "^2.1.5",
     "proj4": "^2.3.14",

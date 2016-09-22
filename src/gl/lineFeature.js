@@ -146,6 +146,9 @@ var gl_lineFeature = function (arg) {
 
     for (i = 0; i < data.length; i += 1) {
       lineItem = m_this.line()(data[i], i);
+      if (lineItem.length < 2) {
+        continue;
+      }
       numSegments += lineItem.length - 1;
       for (j = 0; j < lineItem.length; j += 1) {
         pos = posFunc(lineItem[j], j, lineItem, i);
@@ -188,6 +191,9 @@ var gl_lineFeature = function (arg) {
 
     for (i = posIdx3 = dest = dest3 = 0; i < data.length; i += 1) {
       lineItem = m_this.line()(data[i], i);
+      if (lineItem.length < 2) {
+        continue;
+      }
       firstPosIdx3 = posIdx3;
       for (j = 0; j < lineItem.length + (closed[i] === 2 ? 1 : 0); j += 1, posIdx3 += 3) {
         lidx = j;

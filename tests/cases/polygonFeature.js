@@ -84,8 +84,8 @@ describe('geo.polygonFeature', function () {
       polygon.position(function () { return 'b'; });
       expect(polygon.position()('a')).toEqual('b');
 
-      polygon = geo.polygonFeature({layer: layer, position: pos});
-      polygon._init();
+      polygon = geo.polygonFeature({layer: layer});
+      polygon._init({position: pos});
       expect(polygon.position()).toEqual(pos);
     });
 
@@ -100,8 +100,8 @@ describe('geo.polygonFeature', function () {
       polygon.polygon(function () { return 'b'; });
       expect(polygon.polygon()('a')).toEqual('b');
 
-      polygon = geo.polygonFeature({layer: layer, polygon: pos});
-      polygon._init();
+      polygon = geo.polygonFeature({layer: layer});
+      polygon._init({polygon: pos});
       expect(polygon.polygon()).toEqual(pos);
     });
 
@@ -205,7 +205,7 @@ describe('geo.polygonFeature', function () {
       return vgl.mockCounts().bufferData >= (glCounts.bufferData || 0) + 1 &&
              buildTime !== polygons.buildTime().getMTime();
     });
-    it('update the style', function () {
+    it('update the style B', function () {
       polygons.style('fillColor', function (d) {
         return '#ff0000';
       });
@@ -214,6 +214,29 @@ describe('geo.polygonFeature', function () {
       polygons.draw();
     });
     waitForIt('next render gl C', function () {
+      return vgl.mockCounts().bufferData >= (glCounts.bufferData || 0) + 1 &&
+             buildTime !== polygons.buildTime().getMTime();
+    });
+    it('update the style C', function () {
+      polygons.style('fill', function (d, i) {
+        return i % 2 > 0;
+      });
+      glCounts = $.extend({}, vgl.mockCounts());
+      buildTime = polygons.buildTime().getMTime();
+      polygons.draw();
+    });
+    waitForIt('next render gl D', function () {
+      return vgl.mockCounts().bufferData >= (glCounts.bufferData || 0) + 1 &&
+             buildTime !== polygons.buildTime().getMTime();
+    });
+    it('poor data', function () {
+      polygons.data([undefined, testPolygons[1]]);
+      polygons.style('fill', true);
+      glCounts = $.extend({}, vgl.mockCounts());
+      buildTime = polygons.buildTime().getMTime();
+      polygons.draw();
+    });
+    waitForIt('next render gl E', function () {
       return vgl.mockCounts().bufferData >= (glCounts.bufferData || 0) + 1 &&
              buildTime !== polygons.buildTime().getMTime();
     });

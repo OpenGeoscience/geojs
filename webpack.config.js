@@ -36,7 +36,8 @@ module.exports = {
       jquery: 'jquery/dist/jquery',
       proj4: 'proj4/lib',
       vgl: 'vgl/vgl.js',
-      d3: 'd3/d3.js'
+      d3: 'd3/d3.js',
+      mousetrap: 'mousetrap/mousetrap.js'
     }
   },
   externals: {
