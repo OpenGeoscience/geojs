@@ -266,14 +266,7 @@ $(function () {
       value = opt.style[key];
       switch (format) {
         case 'color':
-          value = geo.util.convertColor(value);
-          if (!value.r && !value.g && !value.b) {
-            value = '#000000';
-          } else {
-            value = '#' + ((1 << 24) + (Math.round(value.r * 255) << 16) +
-                           (Math.round(value.g * 255) << 8) +
-                            Math.round(value.b * 255)).toString(16).slice(1);
-          }
+          value = geo.util.convertColorToHex(value);
           break;
       }
       $('[option]', ctl).val('' + value);

@@ -351,6 +351,46 @@ var annotationLayer = function (args) {
     return this;
   };
 
+  /**
+   * Return the current set of annotations as a geojson object.  Alternately,
+   * add a set of annotations from a geojson object.
+   *
+   * @param {object} geojson: if present, add annotations based on the given
+   *    geojson object.  If undefined, return the current annotations as
+   *    geojson.  This may bei either a JSON string or a javascript object.
+   * @param {boolean} clear: if true, when adding objects, first remove all
+   *    existing objects.
+   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
+   *    null to use the map gcs, or any other transform.
+   * @param {boolean} includeCrs: if true, include the coordinate system in the
+   *    output.
+   * @return {object} the current annotations as a javascript object that
+   *    can be converted to geojson using JSON.stringify.
+   */
+  this.geojson = function (geojson, clear, gcs, includeCrs) {
+    if (geojson !== undefined) {
+      if (clear) {
+        this.removeAllAnnotations();
+      }
+      //DWM::
+    }
+    geojson = null;
+    var features = [];
+    $.each(m_annotations, function (annotation_idx, annotation) {
+      var obj = annotation.geojson(gcs, includeCrs);
+      if (obj) {
+        features.push(obj);
+      }
+    });
+    if (features.length) {
+      geojson = {
+        type: 'FeatureCollection',
+        features: features
+      };
+    }
+    return geojson;
+  };
+
   ///////////////////////////////////////////////////////////////////////////
   /**
    * Update layer

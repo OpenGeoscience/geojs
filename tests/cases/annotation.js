@@ -41,7 +41,7 @@ describe('geo.annotation', function () {
       expect(ann.mouseClick()).toBe(undefined);
       expect(ann.mouseMove()).toBe(undefined);
       expect(ann._coordinates()).toEqual([]);
-      expect(ann.geojson()).toBe('not implemented');
+      expect(ann.geojson()).toBe(undefined);
       map = create_map();
       layer = map.createLayer('annotation', {
         annotations: geo.listAnnotations()

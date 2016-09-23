@@ -2,6 +2,7 @@ var $ = require('jquery');
 var inherit = require('./inherit');
 var geo_event = require('./event');
 var transform = require('./transform');
+var util = require('./util');
 var registerAnnotation = require('./registry').registerAnnotation;
 
 var annotationId = 0;
@@ -241,10 +242,88 @@ var annotation = function (type, args) {
   };
 
   /**
-   * TODO: return the annotation as a geojson object
+   * Return a list of styles that should be preserved in a geojson
+   * representation of the annotation.
+   *
+   * @return {array} a list of style names to store.
    */
-  this.geojson = function () {
-    return 'not implemented';
+  this._geojsonStyles = function () {
+    return ['fill', 'fillColor', 'fillOpacity', 'stroke', 'strokeColor',
+            'strokeOpacity', 'strokeWidth'];
+  };
+
+  /**
+   * Return the coordinates to be stored in a geojson geometery object.
+   *
+   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
+   *    null to use the map gcs, or any other transform.
+   * @return {array} an array of flattened coordinates in the ingcs coordinate
+   *    system.  Undefined if this annotation is incompelte.
+   */
+  this._geojsonCoordinates = function (gcs) {
+  };
+
+  /**
+   * Return the geometry type that is used to store this annotation in geojson.
+   *
+   * @return {string} a geojson geometry type.
+   */
+  this._geojsonGeometryType = function () {
+  };
+
+  /**
+   * Return the annotation as a geojson object.
+   *
+   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
+   *    null to use the map gcs, or any other transform.
+   * @param {boolean} includeCrs: if true, include the coordinate system.
+   * @return {object} the annotation as a geojson object, or undefined if it
+   *    should not be represented (for instance, while it is being created).
+   */
+  this.geojson = function (gcs, includeCrs) {
+    var coor = this._geojsonCoordinates(gcs),
+        geotype = this._geojsonGeometryType(),
+        styles = this._geojsonStyles(),
+        objStyle = this.options('style'),
+        i, key, value;
+    if (!coor || !coor.length || !geotype) {
+      return;
+    }
+    var obj = {
+      type: 'Feature',
+      geometry: {
+        type: geotype,
+        coordinates: coor
+      },
+      properties: {
+        annotationType: m_type,
+        name: this.name(),
+        style: {}
+      }
+    };
+    for (i = 0; i < styles.length; i += 1) {
+      key = styles[i];
+      value = util.ensureFunction(objStyle[key])();
+      if (value !== undefined) {
+        if (key.toLowerCase().match(/color$/)) {
+          value = util.convertColorToHex(value);
+        }
+        obj.properties.style[key] = value;
+      }
+    }
+    if (includeCrs) {
+      var map = this.layer().map();
+      gcs = (gcs === null ? map.gcs() : (
+             gcs === undefined ? map.ingcs() : gcs));
+      obj.crs = {
+        type: 'name',
+        properties: {
+          type: 'proj4',
+          name: gcs
+        }
+      };
+    }
+    return obj;
   };
 };
 
@@ -307,6 +386,36 @@ var rectangleAnnotation = function (args) {
    */
   this._coordinates = function () {
     return this.options('corners');
+  };
+
+  /**
+   * Return the coordinates to be stored in a geojson geometery object.
+   *
+   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
+   *    null to use the map gcs, or any other transform.
+   * @return {array} an array of flattened coordinates in the ingcs coordinate
+   *    system.  Undefined if this annotation is incompelte.
+   */
+  this._geojsonCoordinates = function (gcs) {
+    var src = this.coordinates(gcs);
+    if (src.length < 4) {
+      return;
+    }
+    var coor = [];
+    for (var i = 0; i < 4; i += 1) {
+      coor.push([src[i].x, src[i].y]);
+    }
+    coor.push([src[0].x, src[0].y]);
+    return [coor];
+  };
+
+  /**
+   * Return the geometry type that is used to store this annotation in geojson.
+   *
+   * @return {string} a geojson geometry type.
+   */
+  this._geojsonGeometryType = function () {
+    return 'Polygon';
   };
 };
 inherit(rectangleAnnotation, annotation);
@@ -505,6 +614,36 @@ var polygonAnnotation = function (args) {
     }
     return (end || !skip);
   };
+
+  /**
+   * Return the coordinates to be stored in a geojson geometery object.
+   *
+   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
+   *    null to use the map gcs, or any other transform.
+   * @return {array} an array of flattened coordinates in the ingcs coordinate
+   *    system.  Undefined if this annotation is incompelte.
+   */
+  this._geojsonCoordinates = function (gcs) {
+    var src = this.coordinates(gcs);
+    if (src.length < 3 || this.state() === annotationState.create) {
+      return;
+    }
+    var coor = [];
+    for (var i = 0; i < src.length; i += 1) {
+      coor.push([src[i].x, src[i].y]);
+    }
+    coor.push([src[0].x, src[0].y]);
+    return [coor];
+  };
+
+  /**
+   * Return the geometry type that is used to store this annotation in geojson.
+   *
+   * @return {string} a geojson geometry type.
+   */
+  this._geojsonGeometryType = function () {
+    return 'Polygon';
+  };
 };
 inherit(polygonAnnotation, annotation);
 
@@ -601,6 +740,42 @@ var pointAnnotation = function (args) {
     this.options('position', evt.mapgcs);
     this.state(annotationState.done);
     return 'done';
+  };
+
+  /**
+   * Return a list of styles that should be preserved in a geojson
+   * representation of the annotation.
+   *
+   * @return {array} a list of style names to store.
+   */
+  this._geojsonStyles = function () {
+    return ['fill', 'fillColor', 'fillOpacity', 'radius', 'stroke',
+            'strokeColor', 'strokeOpacity', 'strokeWidth'];
+  };
+
+  /**
+   * Return the coordinates to be stored in a geojson geometery object.
+   *
+   * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
+   *    null to use the map gcs, or any other transform.
+   * @return {array} an array of flattened coordinates in the ingcs coordinate
+   *    system.  Undefined if this annotation is incompelte.
+   */
+  this._geojsonCoordinates = function (gcs) {
+    var src = this.coordinates(gcs);
+    if (this.state() === annotationState.create || src.length < 1) {
+      return;
+    }
+    return [src[0].x, src[0].y];
+  };
+
+  /**
+   * Return the geometry type that is used to store this annotation in geojson.
+   *
+   * @return {string} a geojson geometry type.
+   */
+  this._geojsonGeometryType = function () {
+    return 'Point';
   };
 };
 inherit(pointAnnotation, annotation);
