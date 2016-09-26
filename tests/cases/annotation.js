@@ -305,6 +305,7 @@ describe('geo.annotation', function () {
   });
 
   describe('annotation registry', function () {
+    var newshapeCount = 0;
     it('listAnnotations', function () {
       var list = geo.listAnnotations();
       expect($.inArray('rectangle', list) >= 0).toBe(true);
@@ -313,12 +314,18 @@ describe('geo.annotation', function () {
       expect($.inArray('unknown', list) >= 0).toBe(false);
     });
     it('registerAnnotation', function () {
-      var func = function () {};
+      var func = function () { newshapeCount += 1; return 'newshape return'; };
       expect($.inArray('newshape', geo.listAnnotations()) >= 0).toBe(false);
       expect(geo.registerAnnotation('newshape', func)).toBe(undefined);
       expect($.inArray('newshape', geo.listAnnotations()) >= 0).toBe(true);
       expect(geo.registerAnnotation('newshape', func).func).toBe(func);
       expect($.inArray('newshape', geo.listAnnotations()) >= 0).toBe(true);
+    });
+    it('createAnnotation', function () {
+      expect(geo.createAnnotation('unknown')).toBe(undefined);
+      expect(newshapeCount).toBe(0);
+      expect(geo.createAnnotation('newshape')).toBe('newshape return');
+      expect(newshapeCount).toBe(1);
     });
     it('featuresForAnnotations', function () {
       var features = geo.featuresForAnnotations(['polygon']);
