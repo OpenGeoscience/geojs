@@ -373,31 +373,52 @@ var annotationLayer = function (args) {
    *    geojson object.  If undefined, return the current annotations as
    *    geojson.  This may be a JSON string, a javascript object, or a File
    *    object.
-   * @param {boolean} clear: if true, when adding objects, first remove all
-   *    existing objects.
+   * @param {boolean} clear: if true, when adding annotations, first remove all
+   *    existing objects.  If 'update', update existing annotations and remove
+   *    annotations that no longer exit,  If false, update existing
+   *    annotations and leave unchanged annotations.
    * @param {string|geo.transform} [gcs] undefined to use the interface gcs,
    *    null to use the map gcs, or any other transform.
    * @param {boolean} includeCrs: if true, include the coordinate system in the
    *    output.
-   * @return {object} the current annotations as a javascript object that
-   *    can be converted to geojson using JSON.stringify.
+   * @return {object|number|undefined} if geojson was undefined, the current
+   *    annotations as a javascript object that can be converted to geojson
+   *    using JSON.stringify.  If geojson is specified, either the number of
+   *    annotations now present upon success, or undefined if the value in
+   *    geojson was not able to be parsed.
    */
   this.geojson = function (geojson, clear, gcs, includeCrs) {
     if (geojson !== undefined) {
-      if (clear) {
+      var reader = registry.createFileReader('jsonReader', {layer: this});
+      if (!reader.canRead(geojson)) {
+        return;
+      }
+      if (clear === true) {
         this.removeAllAnnotations(true, false);
       }
-      var reader = registry.createFileReader('jsonReader', {layer: this});
+      if (clear === 'update') {
+        $.each(this.annotations(), function (idx, annotation) {
+          annotation.options('updated', false);
+        });
+      }
       reader.read(geojson, function (features) {
         $.each(features.slice(), function (feature_idx, feature) {
           m_this._geojsonFeatureToAnnotation(feature, gcs);
           m_this.deleteFeature(feature);
         });
       });
+      if (clear === 'update') {
+        $.each(this.annotations(), function (idx, annotation) {
+          if (annotation.options('updated') === false &&
+              annotation.state() === geo_annotation.state.done) {
+            m_this.removeAnnotation(annotation, false);
+          }
+        });
+      }
       this.modified();
       this._update();
       this.draw();
-      return this;
+      return m_annotations.length;
     }
     geojson = null;
     var features = [];
@@ -521,9 +542,12 @@ var annotationLayer = function (args) {
         existing = m_this.annotationById(options.annotationId);
         delete options.annotationId;
       }
-      if (existing && existing.type() === type) {
+      if (existing && existing.type() === type && existing.state() === geo_annotation.state.done && existing.options('updated') === false) {
+        /* We could change the state of the existing annotation if it differs
+         * from done. */
         delete options.state;
         delete options.layer;
+        options.updated = true;
         existing.options(options);
         m_this.geoTrigger(geo_event.annotation.update, {
           annotation: existing
@@ -531,6 +555,7 @@ var annotationLayer = function (args) {
       } else {
         options.state = geo_annotation.state.done;
         options.layer = m_this;
+        options.updated = 'new';
         m_this.addAnnotation(registry.createAnnotation(type, options));
       }
     });

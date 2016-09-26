@@ -368,7 +368,6 @@ util.createAnnotation = function (name, options) {
     return;
   }
   var annotation = annotations[name].func(options);
-  console.log('create', name, options, annotation); //DWM::
   return annotation;
 };
 
