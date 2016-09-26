@@ -141,6 +141,16 @@ var annotation = function (type, args) {
     } else {
       m_options[arg1] = arg2;
     }
+    if (m_options.coordinates) {
+      var coor = m_options.coordinates;
+      delete m_options.coordinates;
+      this._coordinates(coor);
+    }
+    if (m_options.name !== undefined) {
+      var name = m_options.name;
+      delete m_options.name;
+      this.name(name);
+    }
     this.modified();
     return this;
   };
@@ -193,9 +203,10 @@ var annotation = function (type, args) {
    * Get coordinates associated with this annotation in the map gcs coordinate
    * system.
    *
+   * @param {array} coordinates: an optional array of coordinates to set.
    * @returns {array} an array of coordinates.
    */
-  this._coordinates = function () {
+  this._coordinates = function (coodinates) {
     return [];
   };
 
@@ -298,7 +309,7 @@ var annotation = function (type, args) {
       properties: {
         annotationType: m_type,
         name: this.name(),
-        style: {}
+        annotationId: this.id()
       }
     };
     for (i = 0; i < styles.length; i += 1) {
@@ -308,7 +319,7 @@ var annotation = function (type, args) {
         if (key.toLowerCase().match(/color$/)) {
           value = util.convertColorToHex(value);
         }
-        obj.properties.style[key] = value;
+        obj.properties[key] = value;
       }
     }
     if (includeCrs) {
@@ -361,6 +372,8 @@ var rectangleAnnotation = function (args) {
       uniformPolygon: true
     }
   }, args || {});
+  args.corners = args.corners || args.coordinates;
+  delete args.coordinates;
   annotation.call(this, 'rectangle', args);
 
   /**
@@ -382,9 +395,13 @@ var rectangleAnnotation = function (args) {
    * Get coordinates associated with this annotation in the map gcs coordinate
    * system.
    *
+   * @param {array} coordinates: an optional array of coordinates to set.
    * @returns {array} an array of coordinates.
    */
-  this._coordinates = function () {
+  this._coordinates = function (coordinates) {
+    if (coordinates && coordinates.length > 1) {
+      this.options('corners', coordinates[0]);
+    }
     return this.options('corners');
   };
 
@@ -449,7 +466,6 @@ var polygonAnnotation = function (args) {
   var m_this = this;
 
   args = $.extend(true, {}, {
-    vertices: [],
     style: {
       fill: true,
       fillColor: {r: 0, g: 1, b: 0},
@@ -483,6 +499,8 @@ var polygonAnnotation = function (args) {
       uniformPolygon: true
     }
   }, args || {});
+  args.vertices = args.vertices || args.coordinates || [];
+  delete args.coordinates;
   annotation.call(this, 'polygon', args);
 
   /**
@@ -532,9 +550,13 @@ var polygonAnnotation = function (args) {
    * Get coordinates associated with this annotation in the map gcs coordinate
    * system.
    *
+   * @param {array} coordinates: an optional array of coordinates to set.
    * @returns {array} an array of coordinates.
    */
-  this._coordinates = function () {
+  this._coordinates = function (coordinates) {
+    if (coordinates) {
+      this.options('vertices', coordinates);
+    }
     return this.options('vertices');
   };
 
@@ -679,6 +701,8 @@ var pointAnnotation = function (args) {
       strokeWidth: 3
     }
   }, args || {});
+  args.position = args.position || (args.coordinates ? args.coordinates[0] : undefined);
+  delete args.coordinates;
   annotation.call(this, 'point', args);
 
   /**
@@ -711,9 +735,13 @@ var pointAnnotation = function (args) {
    * Get coordinates associated with this annotation in the map gcs coordinate
    * system.
    *
+   * @param {array} coordinates: an optional array of coordinates to set.
    * @returns {array} an array of coordinates.
    */
-  this._coordinates = function () {
+  this._coordinates = function (coordinates) {
+    if (coordinates) {
+      this.options('vertices', coordinates);
+    }
     if (this.state() === annotationState.create) {
       return [];
     }

@@ -29,6 +29,8 @@ var lineFeature = function (arg) {
   var m_this = this,
       s_init = this._init;
 
+  this.featureType = 'line';
+
   ////////////////////////////////////////////////////////////////////////////
   /**
    * Get/Set line accessor

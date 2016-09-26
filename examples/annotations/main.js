@@ -52,6 +52,7 @@ $(function () {
   layer.geoOn(geo.event.mouseclick, mouseClickToStart);
   layer.geoOn(geo.event.annotation.mode, handleModeChange);
   layer.geoOn(geo.event.annotation.add, handleAnnotationChange);
+  layer.geoOn(geo.event.annotation.update, handleAnnotationChange);
   layer.geoOn(geo.event.annotation.remove, handleAnnotationChange);
   layer.geoOn(geo.event.annotation.state, handleAnnotationChange);
 
@@ -261,8 +262,10 @@ $(function () {
           format = $('[option]', ctl).attr('format'),
           value;
       if (!ctl.attr('annotation-types').match(typeMatch)) {
+        ctl.hide();
         return;
       }
+      ctl.show();
       value = opt.style[key];
       switch (format) {
         case 'color':
