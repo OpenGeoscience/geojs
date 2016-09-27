@@ -34,10 +34,10 @@ $(function () {
   var map = geo.map({
     node: '#map',
     center: {
-      x: query.x ? +query.x : -119.5420833,
-      y: query.y ? +query.y : 37.4958333
+      x: query.x ? +query.x : -119.150,
+      y: query.y ? +query.y : 36.712
     },
-    zoom: query.zoom ? +query.zoom : 8,
+    zoom: query.zoom ? +query.zoom : 10,
     rotation: query.rotation ? +query.rotation * Math.PI / 180 : 0
   });
   // allow some query parameters to specify what map we will show

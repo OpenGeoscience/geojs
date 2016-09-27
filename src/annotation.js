@@ -144,6 +144,7 @@ var annotation = function (type, args) {
     if (m_options.coordinates) {
       var coor = m_options.coordinates;
       delete m_options.coordinates;
+      console.log(coor); //DWM::
       this._coordinates(coor);
     }
     if (m_options.name !== undefined) {
@@ -399,8 +400,10 @@ var rectangleAnnotation = function (args) {
    * @returns {array} an array of coordinates.
    */
   this._coordinates = function (coordinates) {
-    if (coordinates && coordinates.length > 1) {
-      this.options('corners', coordinates[0]);
+    if (coordinates && coordinates.length >= 4) {
+      this.options('corners', coordinates.slice(0, 4));
+      /* Should we ensure that the four points form a rectangle in the current
+       * projection, though this might not be rectangular in another gcs? */
     }
     return this.options('corners');
   };
@@ -739,8 +742,8 @@ var pointAnnotation = function (args) {
    * @returns {array} an array of coordinates.
    */
   this._coordinates = function (coordinates) {
-    if (coordinates) {
-      this.options('vertices', coordinates);
+    if (coordinates && coordinates.length >= 1) {
+      this.options('position', coordinates[0]);
     }
     if (this.state() === annotationState.create) {
       return [];
