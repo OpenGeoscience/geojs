@@ -437,5 +437,10 @@ pointFeature.create = function (layer, renderer, spec) {
   return feature.create(layer, spec);
 };
 
+pointFeature.capabilities = {
+  /* core feature name -- support in any manner */
+  feature: 'point'
+};
+
 inherit(pointFeature, feature);
 module.exports = pointFeature;

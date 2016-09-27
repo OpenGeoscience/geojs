@@ -408,5 +408,10 @@ polygonFeature.create = function (layer, spec) {
   return feature.create(layer, spec);
 };
 
+polygonFeature.capabilities = {
+  /* core feature name -- support in any manner */
+  feature: 'polygon'
+};
+
 inherit(polygonFeature, feature);
 module.exports = polygonFeature;

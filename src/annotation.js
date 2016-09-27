@@ -4,6 +4,9 @@ var geo_event = require('./event');
 var transform = require('./transform');
 var util = require('./util');
 var registerAnnotation = require('./registry').registerAnnotation;
+var lineFeature = require('./lineFeature');
+var pointFeature = require('./pointFeature');
+var polygonFeature = require('./polygonFeature');
 
 var annotationId = 0;
 
@@ -440,7 +443,9 @@ var rectangleAnnotation = function (args) {
 };
 inherit(rectangleAnnotation, annotation);
 
-registerAnnotation('rectangle', rectangleAnnotation, {polygon: true});
+var rectangleRequiredFeatures = {};
+rectangleRequiredFeatures[polygonFeature.capabilities.feature] = true;
+registerAnnotation('rectangle', rectangleAnnotation, rectangleRequiredFeatures);
 
 /////////////////////////////////////////////////////////////////////////////
 /**
@@ -672,8 +677,10 @@ var polygonAnnotation = function (args) {
 };
 inherit(polygonAnnotation, annotation);
 
-registerAnnotation('polygon', polygonAnnotation, {
-  polygon: true, 'line.basic': [annotationState.create]});
+var polygonRequiredFeatures = {};
+polygonRequiredFeatures[polygonFeature.capabilities.feature] = true;
+polygonRequiredFeatures[lineFeature.capabilities.basic] = [annotationState.create];
+registerAnnotation('polygon', polygonAnnotation, polygonRequiredFeatures);
 
 /////////////////////////////////////////////////////////////////////////////
 /**
@@ -811,7 +818,9 @@ var pointAnnotation = function (args) {
 };
 inherit(pointAnnotation, annotation);
 
-registerAnnotation('point', pointAnnotation, {point: true});
+var pointRequiredFeatures = {};
+pointRequiredFeatures[pointFeature.capabilities.feature] = true;
+registerAnnotation('point', pointAnnotation, pointRequiredFeatures);
 
 module.exports = {
   state: annotationState,
