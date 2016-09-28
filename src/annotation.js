@@ -2,6 +2,10 @@ var $ = require('jquery');
 var inherit = require('./inherit');
 var geo_event = require('./event');
 var transform = require('./transform');
+var registerAnnotation = require('./registry').registerAnnotation;
+var lineFeature = require('./lineFeature');
+var pointFeature = require('./pointFeature');
+var polygonFeature = require('./polygonFeature');
 
 var annotationId = 0;
 
@@ -16,7 +20,8 @@ var annotationState = {
  * Base annotation class
  *
  * @class geo.annotation
- * @param {string} type the type of annotation.
+ * @param {string} type the type of annotation.  These should be registered
+ *    with utils.registerAnnotation and can be listed with same function.
  * @param {object?} options Inidividual annotations have additional options.
  * @param {string} [options.name] A name for the annotation.  This defaults to
  *    the type with a unique ID suffixed to it.
@@ -309,6 +314,10 @@ var rectangleAnnotation = function (args) {
 };
 inherit(rectangleAnnotation, annotation);
 
+var rectangleRequiredFeatures = {};
+rectangleRequiredFeatures[polygonFeature.capabilities.feature] = true;
+registerAnnotation('rectangle', rectangleAnnotation, rectangleRequiredFeatures);
+
 /////////////////////////////////////////////////////////////////////////////
 /**
  * Polygon annotation class
@@ -504,6 +513,11 @@ var polygonAnnotation = function (args) {
 };
 inherit(polygonAnnotation, annotation);
 
+var polygonRequiredFeatures = {};
+polygonRequiredFeatures[polygonFeature.capabilities.feature] = true;
+polygonRequiredFeatures[lineFeature.capabilities.basic] = [annotationState.create];
+registerAnnotation('polygon', polygonAnnotation, polygonRequiredFeatures);
+
 /////////////////////////////////////////////////////////////////////////////
 /**
  * Point annotation class
@@ -597,6 +611,10 @@ var pointAnnotation = function (args) {
   };
 };
 inherit(pointAnnotation, annotation);
+
+var pointRequiredFeatures = {};
+pointRequiredFeatures[pointFeature.capabilities.feature] = true;
+registerAnnotation('point', pointAnnotation, pointRequiredFeatures);
 
 module.exports = {
   state: annotationState,
