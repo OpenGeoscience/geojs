@@ -1704,6 +1704,7 @@ var map = function (arg) {
    *    with other settings applied.
    */
   function fix_zoom(zoom, ignoreDiscreteZoom) {
+    zoom = Math.round(zoom * 1e6) / 1e6;
     zoom = Math.max(
       Math.min(
         m_validZoomRange.max,
