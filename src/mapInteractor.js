@@ -921,7 +921,7 @@ var mapInteractor = function (args) {
 
   ////////////////////////////////////////////////////////////////////////////
   /**
-   * Based on the screen coodinates of a selection, zoom or unzoom and
+   * Based on the screen coordinates of a selection, zoom or unzoom and
    * recenter.
    *
    * @private

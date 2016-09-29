@@ -147,7 +147,6 @@ var annotation = function (type, args) {
     if (m_options.coordinates) {
       var coor = m_options.coordinates;
       delete m_options.coordinates;
-      console.log(coor); //DWM::
       this._coordinates(coor);
     }
     if (m_options.name !== undefined) {
@@ -210,7 +209,7 @@ var annotation = function (type, args) {
    * @param {array} coordinates: an optional array of coordinates to set.
    * @returns {array} an array of coordinates.
    */
-  this._coordinates = function (coodinates) {
+  this._coordinates = function (coordinates) {
     return [];
   };
 
@@ -230,8 +229,8 @@ var annotation = function (type, args) {
       if (gcs !== map.gcs()) {
         coord = transform.transformCoordinates(map.gcs(), gcs, coord);
       }
-      return coord;
     }
+    return coord;
   };
 
   /**
@@ -421,7 +420,7 @@ var rectangleAnnotation = function (args) {
    */
   this._geojsonCoordinates = function (gcs) {
     var src = this.coordinates(gcs);
-    if (src.length < 4) {
+    if (!src || src.length < 4) {
       return;
     }
     var coor = [];
@@ -655,7 +654,7 @@ var polygonAnnotation = function (args) {
    */
   this._geojsonCoordinates = function (gcs) {
     var src = this.coordinates(gcs);
-    if (src.length < 3 || this.state() === annotationState.create) {
+    if (!src || src.length < 3 || this.state() === annotationState.create) {
       return;
     }
     var coor = [];
@@ -801,7 +800,7 @@ var pointAnnotation = function (args) {
    */
   this._geojsonCoordinates = function (gcs) {
     var src = this.coordinates(gcs);
-    if (this.state() === annotationState.create || src.length < 1) {
+    if (!src || this.state() === annotationState.create || src.length < 1 || src[0] === undefined) {
       return;
     }
     return [src[0].x, src[0].y];
