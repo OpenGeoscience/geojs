@@ -208,7 +208,7 @@ var jsonReader = function (arg) {
       } else {
         p = d.properties;
       }
-      if (p.hasOwnProperty(prop)) {
+      if (p !== undefined && p.hasOwnProperty(prop)) {
         return convert(p[prop]);
       }
       return _default;

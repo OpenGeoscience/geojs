@@ -469,6 +469,9 @@ var annotationLayer = function (args) {
           if (position[position.length - 1][0] === position[0][0] &&
               position[position.length - 1][1] === position[0][1]) {
             position.splice(position.length - 1, 1);
+            if (position.length < 3) {
+              return;
+            }
           }
           break;
         case 'point':
@@ -493,40 +496,14 @@ var annotationLayer = function (args) {
       $.each(geojsonStyleProperties, function (key, prop) {
         var value;
         $.each(prop.keys, function (idx, altkey) {
-          if (value !== undefined) {
+          if (value === undefined) {
+            value = m_this.validateAttribute(options[altkey], prop.dataType);
             return;
-          }
-          value = options[altkey];
-          if (value === undefined || value === null) {
-            value = undefined;
-            return;
-          }
-          switch (prop.dataType) {
-            case 'color':
-              value = util.convertColor(value);
-              if (value === undefined || value.r === undefined) {
-                value = undefined;
-              }
-              break;
-            case 'positive':
-              value = +value;
-              if (isNaN(value) || value <= 0) {
-                value = undefined;
-              }
-              break;
-            case 'opacity':
-              value = +value;
-              if (isNaN(value) || value < 0 || value > 1) {
-                value = undefined;
-              }
-              break;
-            case 'boolean':
-              value = value && value !== 'false';
-              break;
           }
         });
         if (value === undefined) {
-          value = feature.style.get(key)(data, data_idx);
+          value = m_this.validateAttribute(
+            feature.style.get(key)(data, data_idx), prop.dataType);
         }
         if (value !== undefined) {
           options.style[key] = value;
@@ -559,6 +536,51 @@ var annotationLayer = function (args) {
         m_this.addAnnotation(registry.createAnnotation(type, options));
       }
     });
+  };
+
+  /**
+   * Validate a value for an attribute based on a specified data type.  This
+   * returns a sanitized value or undefined if the value was invalid.  Data
+   * types include:
+   *   color: a css string, #rrggbb hex string, #rgb hex string, number, or
+   *     object with r, g, b properties in the range of [0-1].
+   *   opacity: a floating point number in the range [0, 1].
+   *   positive: a floating point number greater than zero.
+   *   boolean: the string 'false' and falsy values are false, all else is
+   *     true.  null and undefined are still considered invalid values.
+   * @param {number|string|object|boolean} value: the value to validate.
+   * @param {string} dataType: the data type for validation.
+   * @returns {number|string|object|boolean|undefined} the sanitized value or
+   *    undefined.
+   */
+  this.validateAttribute = function (value, dataType) {
+    if (value === undefined || value === null) {
+      return;
+    }
+    switch (dataType) {
+      case 'boolean':
+        value = !!value && value !== 'false';
+        break;
+      case 'color':
+        value = util.convertColor(value);
+        if (value === undefined || value.r === undefined) {
+          return;
+        }
+        break;
+      case 'opacity':
+        value = +value;
+        if (isNaN(value) || value < 0 || value > 1) {
+          return;
+        }
+        break;
+      case 'positive':
+        value = +value;
+        if (isNaN(value) || value <= 0) {
+          return;
+        }
+        break;
+    }
+    return value;
   };
 
   ///////////////////////////////////////////////////////////////////////////

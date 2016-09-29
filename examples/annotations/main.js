@@ -350,28 +350,13 @@ $(function () {
       if (!ctl.attr('annotation-types').match(typeMatch)) {
         return;
       }
-      value = $('[option]', ctl).val();
-      switch ($('[option]', ctl).attr('format')) {
-        case 'boolean':
-          value = ('' + value).toLowerCase() === 'true';
-          break;
-        case 'color':
-          value = geo.util.convertColor(value);
-          break;
-        case 'opacity':
-          value = +value;
-          if (value < 0 || value > 1 || isNaN(value)) {
-            error = $('label', ctl).text() + ' must be a between 0 and 1, inclusive.';
-          }
-          break;
-        case 'positive':
-          value = +value;
-          if (value <= 0 || isNaN(value)) {
-            error = $('label', ctl).text() + ' must be a positive number.';
-          }
-          break;
+      value = layer.validateAttribute($('[option]', ctl).val(),
+                                      $('[option]', ctl).attr('format'));
+      if (value === undefined) {
+        error = $('label', ctl).text() + ' is not a valid value';
+      } else {
+        newopt[key] = value;
       }
-      newopt[key] = value;
     });
     if (error) {
       $('#edit-validation-error', dlg).text(error);
